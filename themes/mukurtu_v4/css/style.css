@@ -5131,6 +5131,9 @@ header {
     grid-column: 2/-2;
   }
 }
+.dictionary .dictionary-view-container .map {
+  margin-inline: calc(-1 * var(--layout-padding));
+}
 .dictionary .glossary {
   padding-block: var(--v-space-2xs);
   padding-inline: 0;
@@ -5175,13 +5178,13 @@ header {
 .dictionary .glossary li {
   list-style-type: none;
 }
-.dictionary .view-main-content {
+.dictionary .list .view-main-content {
   display: grid;
   grid-template-columns: auto;
   gap: var(--v-space-2xs);
 }
 @media (min-width: 60rem) {
-  .dictionary .view-main-content {
+  .dictionary .list .view-main-content {
     grid-template-columns: 1fr 1fr;
   }
 }

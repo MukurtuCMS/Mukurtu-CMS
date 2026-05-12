@@ -47,12 +47,16 @@
     }
   }
 
-  function init(container) {
-    listContent = container.querySelector(".list");
-    mapContent = container.querySelector(".map");
-    browseLinks = container.querySelector(".browse-links");
-    listLink = container.querySelector("[data-browse-mode=list]");
-    mapLink = container.querySelector("[data-browse-mode=map]");
+  function init() {
+    listContent = document.querySelector(".dictionary-view-container .list");
+    mapContent = document.querySelector(".dictionary-view-container .map");
+    browseLinks = document.querySelector(".dictionary .browse-links");
+    listLink = document.querySelector(".dictionary [data-browse-mode=list]");
+    mapLink = document.querySelector(".dictionary [data-browse-mode=map]");
+
+    if (!browseLinks || !listContent || !mapContent) {
+      return;
+    }
 
     browseLinks.addEventListener("click", handleToggleBrowseMode);
     toggleBrowseMode(getBrowseMode());

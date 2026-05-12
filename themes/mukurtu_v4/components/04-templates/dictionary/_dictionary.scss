@@ -204,6 +204,10 @@
 
   .dictionary-view-container {
     @include layout.layout--full-width-grid-item;
+
+    .map {
+      margin-inline: calc(-1 * var(--layout-padding));
+    }
   }
 
   .glossary {
@@ -237,7 +241,7 @@
   }
 
   // Dictionary results grid.
-  .view-main-content {
+  .list .view-main-content {
     display: grid;
     grid-template-columns: auto;
     gap: var(--v-space-2xs);

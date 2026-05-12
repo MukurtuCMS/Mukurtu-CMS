@@ -395,4 +395,19 @@ function mukurtu_browse_preprocess_block(&$variables) {
   $toggle = $toggle_plugin->build();
   $toggle['#weight'] = 100;
   $variables['content']['search_collapse_toggle'] = $toggle;
+
+  // On the dictionary page, inject the list/map view toggle after the display options toggle.
+  if ($variables['plugin_id'] === 'views_exposed_filter_block:mukurtu_dictionary-mukurtu_dictionary_block') {
+    $variables['content']['browse_links'] = [
+      '#type' => 'inline_template',
+      '#template' => '<div class="browse-links"><button data-browse-mode="list" aria-label="{{ list_label }}" class="active-toggle">{{ list_text }}</button><button data-browse-mode="map" aria-label="{{ map_label }}">{{ map_text }}</button></div>',
+      '#context' => [
+        'list_label' => t('Switch to list view'),
+        'list_text' => t('List'),
+        'map_label' => t('Switch to map view'),
+        'map_text' => t('Map'),
+      ],
+      '#weight' => 101,
+    ];
+  }
 }

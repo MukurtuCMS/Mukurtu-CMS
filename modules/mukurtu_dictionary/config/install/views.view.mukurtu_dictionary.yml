@@ -475,7 +475,7 @@ display:
             identifier: language
             required: false
             remember: false
-            multiple: true
+            multiple: false
             remember_roles:
               authenticated: authenticated
           is_grouped: false
@@ -485,7 +485,7 @@ display:
             identifier: ''
             optional: true
             widget: select
-            multiple: true
+            multiple: false
             remember: false
             default_group: All
             default_group_multiple: {  }
@@ -636,7 +636,7 @@ display:
             identifier: type
             required: false
             remember: false
-            multiple: true
+            multiple: false
             remember_roles:
               authenticated: authenticated
           is_grouped: false
@@ -646,7 +646,7 @@ display:
             identifier: ''
             optional: true
             widget: select
-            multiple: true
+            multiple: false
             remember: false
             default_group: All
             default_group_multiple: {  }
@@ -699,7 +699,7 @@ display:
             identifier: word_type
             required: false
             remember: false
-            multiple: true
+            multiple: false
             remember_roles:
               authenticated: authenticated
           is_grouped: false
@@ -709,7 +709,7 @@ display:
             identifier: ''
             optional: true
             widget: select
-            multiple: true
+            multiple: false
             remember: false
             default_group: All
             default_group_multiple: {  }
@@ -770,7 +770,7 @@ display:
             identifier: keyword
             required: false
             remember: false
-            multiple: true
+            multiple: false
             remember_roles:
               authenticated: authenticated
           is_grouped: false
@@ -780,7 +780,7 @@ display:
             identifier: ''
             optional: true
             widget: select
-            multiple: true
+            multiple: false
             remember: false
             default_group: All
             default_group_multiple: {  }
