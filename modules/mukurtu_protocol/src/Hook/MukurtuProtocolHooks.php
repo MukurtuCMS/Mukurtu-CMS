@@ -66,6 +66,14 @@ class MukurtuProtocolHooks {
       ];
     }
 
+    if ($state === OgMembershipInterface::STATE_BLOCKED) {
+      $operations['unblock'] = [
+        'title' => t('Unblock'),
+        'url' => Url::fromRoute('mukurtu_protocol.og_membership.unblock', ['og_membership' => $entity->id()]),
+        'weight' => 21,
+      ];
+    }
+
     if ($state === OgMembershipInterface::STATE_PENDING) {
       $operations['approve'] = [
         'title' => t('Approve'),

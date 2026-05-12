@@ -250,6 +250,19 @@ mukurtu_protocol.og_membership.approve:
       og_membership:
         type: entity:og_membership
 
+mukurtu_protocol.og_membership.unblock:
+  path: '/admin/members/{og_membership}/unblock'
+  defaults:
+    _form: '\Drupal\mukurtu_protocol\Form\MukurtuOgMembershipUnblockForm'
+    _title: 'Unblock membership'
+  requirements:
+    _entity_access: 'og_membership.update'
+  options:
+    _admin_route: TRUE
+    parameters:
+      og_membership:
+        type: entity:og_membership
+
 mukurtu_protocol.comment_settings:
   path: '/admin/config/mukurtu/commenting/settings'
   defaults:
