@@ -587,19 +587,27 @@ function mukurtu_core_update_40015(): void {
  */
 function mukurtu_core_update_40016(): void {
   $config_factory = \Drupal::configFactory();
+  $new_view_modes = ['small' => 'small', 'medium' => 'medium', 'large' => 'large'];
 
   foreach (['basic_html', 'full_html'] as $format) {
-    $config = $config_factory->getEditable('editor.editor.' . $format);
-    if ($config->isNew()) {
-      continue;
+    // Fix editor allowed_tags so CKEditor5 preserves data-view-mode.
+    $editor = $config_factory->getEditable('editor.editor.' . $format);
+    if (!$editor->isNew()) {
+      $allowed_tags = $editor->get('settings.plugins.ckeditor5_sourceEditing.allowed_tags') ?? [];
+      $key = array_search('<drupal-media title>', $allowed_tags);
+      if ($key !== FALSE) {
+        $allowed_tags[$key] = '<drupal-media title data-entity-type data-entity-uuid alt data-view-mode data-caption data-align>';
+        $editor->set('settings.plugins.ckeditor5_sourceEditing.allowed_tags', $allowed_tags);
+        $editor->save(TRUE);
+      }
     }
 
-    $allowed_tags = $config->get('settings.plugins.ckeditor5_sourceEditing.allowed_tags') ?? [];
-    $key = array_search('<drupal-media title>', $allowed_tags);
-    if ($key !== FALSE) {
-      $allowed_tags[$key] = '<drupal-media title data-entity-type data-entity-uuid alt data-view-mode data-caption data-align>';
-      $config->set('settings.plugins.ckeditor5_sourceEditing.allowed_tags', $allowed_tags);
-      $config->save(TRUE);
+    // Add new view modes to the media_embed filter's allowed_view_modes.
+    $filter = $config_factory->getEditable('filter.format.' . $format);
+    if (!$filter->isNew()) {
+      $allowed = $filter->get('filters.media_embed.settings.allowed_view_modes') ?? [];
+      $filter->set('filters.media_embed.settings.allowed_view_modes', array_merge($allowed, $new_view_modes));
+      $filter->save(TRUE);
     }
   }
 }
