@@ -3,6 +3,7 @@
 namespace Drupal\mukurtu_protocol\Plugin\Action;
 
 use Drupal\Core\Action\ActionBase;
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
@@ -84,7 +85,11 @@ class MukurtuDeleteOgMembershipAction extends ActionBase implements ContainerFac
       }
     }
 
+    $owner = $membership->getOwner();
     $membership->delete();
+    if ($owner) {
+      Cache::invalidateTags(["user:{$owner->id()}"]);
+    }
   }
 
   /**
