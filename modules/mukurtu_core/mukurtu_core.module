@@ -162,19 +162,6 @@ function mukurtu_core_entity_operation(EntityInterface $entity) {
           'attributes' => ['class' => ['use-ajax']],
         ];
       }
-      elseif ($is_site_admin || !$target_is_protected) {
-        // Community managers may only block users who share one of their
-        // managed communities; site admins can block anyone.
-        $can_block = $is_site_admin || !empty(array_intersect($cm_community_ids, $target_community_ids));
-        if ($can_block) {
-          $operations['block_user'] = [
-            'title' => t('Block User'),
-            'url' => Url::fromRoute('mukurtu_core.block_user', ['uid' => $entity->id()]),
-            'weight' => 100,
-            'attributes' => ['class' => ['use-ajax']],
-          ];
-        }
-      }
     }
   }
   return $operations;
@@ -417,17 +404,14 @@ function mukurtu_core_user_view(array &$build, EntityInterface $entity, EntityVi
   // Build an "approve" link to block/unblock users.
   // However, do not display link for users who view their own account page!
   // We don't want users blocking or approving themselves.
-  if ($view_mode == 'full' && \Drupal::currentUser()->id() != $entity->id()) {
-    $status = $entity->status->value;
-    $title = $status ? t('Block User') : t('Approve User');
-    $route = $status ? 'mukurtu_core.block_user' : 'mukurtu_core.approve_user';
+  if ($view_mode == 'full' && \Drupal::currentUser()->id() != $entity->id() && !$entity->status->value) {
     $build['mukurtu_toggle_user_approval'] = [
       '#theme' => 'links',
       '#weight' => -2,
       '#links' => [
         'mukurtu-toggle-user-approval' => [
-          'title' => $title,
-          'url' => Url::fromRoute($route, ['uid' => $entity->id()]),
+          'title' => t('Approve User'),
+          'url' => Url::fromRoute('mukurtu_core.approve_user', ['uid' => $entity->id()]),
           'attributes' => [
             'class' => ['use-ajax'],
           ],
@@ -446,6 +430,18 @@ function mukurtu_core_entity_presave(EntityInterface $entity) {
   if ($entity->getEntityTypeId() == 'node') {
     if ($entity->hasField('field_content_type')) {
       $entity->set('field_content_type', $entity->type->entity->label());
+    }
+  }
+
+  // Prevent any code path (bulk actions, direct edits) from blocking the
+  // currently logged-in user's own account.
+  if ($entity instanceof \Drupal\user\Entity\User && !$entity->isNew()) {
+    if ($entity->id() == \Drupal::currentUser()->id()
+        && isset($entity->original)
+        && $entity->original->isActive()
+        && $entity->isBlocked()) {
+      $entity->set('status', 1);
+      \Drupal::messenger()->addWarning(t('You cannot block your own account.'));
     }
   }
 }
