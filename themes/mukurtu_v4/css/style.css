@@ -4986,7 +4986,7 @@ header {
   -webkit-margin-after: var(--v-space-5xs);
           margin-block-end: var(--v-space-5xs);
 }
-.dictionary .browse-facets .search-collapse-toggle {
+.dictionary .search-collapse-toggle {
   background-color: var(--mukurtu-panel-pane-content-background-color);
   -webkit-margin-before: 1rem;
           margin-block-start: 1rem;
@@ -4996,7 +4996,7 @@ header {
   padding: 0;
   min-inline-size: 0;
 }
-.dictionary .browse-facets .search-collapse-toggle__header {
+.dictionary .search-collapse-toggle__header {
   display: block;
   width: 100%;
   background-color: var(--brand-primary-dark);
@@ -5006,7 +5006,7 @@ header {
   padding-inline: var(--v-space-4xxs);
   padding-block: var(--v-space-5xs);
 }
-.dictionary .browse-facets .search-collapse-toggle__content {
+.dictionary .search-collapse-toggle__content {
   padding: var(--v-space-4xxs);
   display: -webkit-box;
   display: -ms-flexbox;
@@ -5019,7 +5019,7 @@ header {
       flex-wrap: wrap;
   gap: var(--v-space-4xxs);
 }
-.dictionary .browse-facets .search-collapse-toggle__item {
+.dictionary .search-collapse-toggle__item {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -5029,7 +5029,7 @@ header {
   gap: var(--v-space-5xs);
   cursor: pointer;
 }
-.dictionary .browse-facets .search-collapse-toggle__input {
+.dictionary .search-collapse-toggle__input {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -5040,7 +5040,7 @@ header {
   white-space: nowrap;
   border: 0;
 }
-.dictionary .browse-facets .search-collapse-toggle__switch {
+.dictionary .search-collapse-toggle__switch {
   display: inline-block;
   -ms-flex-negative: 0;
       flex-shrink: 0;
@@ -5052,7 +5052,7 @@ header {
   -webkit-transition: background-color 0.2s;
   transition: background-color 0.2s;
 }
-.dictionary .browse-facets .search-collapse-toggle__switch::after {
+.dictionary .search-collapse-toggle__switch::after {
   content: "";
   position: absolute;
   inset-block-start: 2px;
@@ -5064,17 +5064,17 @@ header {
   -webkit-transition: inset-inline-start 0.2s;
   transition: inset-inline-start 0.2s;
 }
-.dictionary .browse-facets .search-collapse-toggle__input:checked + .search-collapse-toggle__switch {
+.dictionary .search-collapse-toggle__input:checked + .search-collapse-toggle__switch {
   background-color: var(--brand-primary);
 }
-.dictionary .browse-facets .search-collapse-toggle__input:checked + .search-collapse-toggle__switch::after {
+.dictionary .search-collapse-toggle__input:checked + .search-collapse-toggle__switch::after {
   inset-inline-start: 14px;
 }
-.dictionary .browse-facets .search-collapse-toggle__input:focus-visible + .search-collapse-toggle__switch {
+.dictionary .search-collapse-toggle__input:focus-visible + .search-collapse-toggle__switch {
   outline: 3px solid var(--brand-primary-dark);
   outline-offset: 2px;
 }
-.dictionary .browse-facets .search-collapse-toggle__label {
+.dictionary .search-collapse-toggle__label {
   font-size: var(--font-size-base);
   color: var(--text-color);
 }

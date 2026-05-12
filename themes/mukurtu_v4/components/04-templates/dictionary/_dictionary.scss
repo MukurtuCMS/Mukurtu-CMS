@@ -97,7 +97,8 @@
   }
 
   // Display options toggle — matches browse sidebar styling.
-  .browse-facets .search-collapse-toggle {
+  // The toggle renders as a sibling of .browse-facets, so scope from .dictionary.
+  .search-collapse-toggle {
     background-color: var(--mukurtu-panel-pane-content-background-color);
     margin-block-start: 1rem;
     margin-block-end: var(--v-space-4xs);
