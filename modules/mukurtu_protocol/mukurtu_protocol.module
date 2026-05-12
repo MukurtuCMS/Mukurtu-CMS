@@ -21,6 +21,7 @@ use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Url;
 use Drupal\og\Og;
 use Drupal\mukurtu_protocol\Plugin\Action\MukurtuDeleteOgMembershipAction;
+use Drupal\mukurtu_protocol\Plugin\Action\MukurtuUserSetRandomPasswordAction;
 
 /**
  * @file
@@ -880,6 +881,9 @@ function add_protocol_member_form_validate(&$form, FormStateInterface $form_stat
 function mukurtu_protocol_action_info_alter(array &$definitions): void {
   if (isset($definitions['og_membership_delete_action'])) {
     $definitions['og_membership_delete_action']['class'] = MukurtuDeleteOgMembershipAction::class;
+  }
+  if (isset($definitions['genpass_set_random_password'])) {
+    $definitions['genpass_set_random_password']['class'] = MukurtuUserSetRandomPasswordAction::class;
   }
 }
 
