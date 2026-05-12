@@ -538,6 +538,88 @@ function mukurtu_core_entity_presave(EntityInterface $entity) {
 }
 
 /**
+ * Implements hook_views_pre_build().
+ *
+ * When "Pending" is selected as the status filter, reset the exposed input to
+ * "All" so BooleanOperator does not write an invalid SQL condition, and set a
+ * flag for hook_views_query_alter. When "Blocked" is selected, set a flag so
+ * pending users are excluded.
+ */
+function mukurtu_core_views_pre_build(\Drupal\views\ViewExecutable $view) {
+  if (empty($view->filter['status'])) {
+    return;
+  }
+  $input = $view->getExposedInput();
+  $status = $input['status'] ?? NULL;
+
+  if ($status === 'pending') {
+    $input['status'] = 'All';
+    $view->setExposedInput($input);
+    $view->mukurtu_filter_pending = TRUE;
+  }
+  elseif ($status === '0') {
+    // Reset so BooleanOperator adds nothing; we own the full condition.
+    $input['status'] = 'All';
+    $view->setExposedInput($input);
+    $view->mukurtu_filter_blocked = TRUE;
+  }
+}
+
+/**
+ * Implements hook_views_query_alter().
+ *
+ * For pending: adds status=0 AND field_pending=1.
+ * For blocked: adds field_pending IS NULL OR field_pending=0.
+ */
+function mukurtu_core_views_query_alter(\Drupal\views\ViewExecutable $view, \Drupal\views\Plugin\views\query\QueryPluginBase $query) {
+  if (empty($view->mukurtu_filter_pending) && empty($view->mukurtu_filter_blocked)) {
+    return;
+  }
+  /** @var \Drupal\views\Plugin\views\query\Sql $query */
+  $configuration = [
+    'table' => 'user__field_pending',
+    'field' => 'entity_id',
+    'left_table' => 'users_field_data',
+    'left_field' => 'uid',
+    'operator' => '=',
+  ];
+  $join = \Drupal::service('plugin.manager.views.join')->createInstance('standard', $configuration);
+  $alias = $query->addTable('user__field_pending', NULL, $join);
+
+  if (!empty($view->mukurtu_filter_pending)) {
+    $query->addWhere(0, 'users_field_data.status', 0, '=');
+    $query->addWhere(0, "$alias.field_pending_value", 1, '=');
+  }
+  else {
+    // Blocked: status=0 AND not pending.
+    $query->addWhere(0, 'users_field_data.status', 0, '=');
+    $query->addWhereExpression(0, "($alias.field_pending_value IS NULL OR $alias.field_pending_value = 0)");
+  }
+}
+
+/**
+ * Implements hook_preprocess_views_view_field().
+ *
+ * Replaces "Blocked" with "Pending" in any Views status column for users
+ * who have field_pending=1, so that admin-approval registrations display
+ * correctly on /admin/people and similar views.
+ */
+function mukurtu_core_preprocess_views_view_field(&$variables) {
+  $field = $variables['field'];
+  if ($field->field !== 'status') {
+    return;
+  }
+  $row = $variables['row'];
+  if (empty($row->_entity) || !($row->_entity instanceof \Drupal\user\Entity\User)) {
+    return;
+  }
+  $user = $row->_entity;
+  if ($user->hasField('field_pending') && $user->get('field_pending')->value && !$user->isActive()) {
+    $variables['output'] = \Drupal\Core\Render\Markup::create(t('Pending'));
+  }
+}
+
+/**
  * Create the content type field.
  */
 function mukurtu_core_create_content_type_field($entity_type, $bundle) {

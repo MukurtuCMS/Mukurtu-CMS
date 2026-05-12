@@ -10,6 +10,7 @@ use Drupal\Core\Hook\Order\OrderAfter;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Url;
 use Drupal\og\Og;
+use Drupal\views\ViewExecutable;
 use Drupal\og\OgMembershipInterface;
 use Drupal\user\Entity\User;
 
@@ -191,6 +192,10 @@ class FormHooks
         // access; skip it for anonymous self-registration.
         $currentAccount = \Drupal::currentUser();
         if ($currentAccount->isAnonymous()) {
+            // When a visitor self-registers under admin-approval mode, Drupal
+            // core saves them with status=0. Mark them pending so they appear
+            // as "Pending" rather than "Blocked" in the user list.
+            $form["#submit"][] = [static::class, "visitorRegistrationPendingSubmit"];
             return;
         }
 
@@ -716,6 +721,21 @@ class FormHooks
     }
 
     /**
+     * Marks a visitor self-registration as pending after Drupal core saves it
+     * with status=0 under administrator-approval mode.
+     */
+    public static function visitorRegistrationPendingSubmit(
+        array $form,
+        FormStateInterface $form_state,
+    ): void {
+        $user = $form_state->getFormObject()->getEntity();
+        if ($user && $user->hasField("field_pending") && $user->isBlocked()) {
+            $user->set("field_pending", 1);
+            $user->save();
+        }
+    }
+
+    /**
      * Implements hook_form_FORM_ID_alter() for 'user_cancel_confirm_form'.
      *
      * Updates the single-user cancel confirm form title and submit button to
@@ -972,6 +992,41 @@ class FormHooks
                 ]["og_membership_delete_action"] = t("Remove from group");
             }
         }
+    }
+
+    /**
+     * Implements hook_form_FORM_ID_alter() for 'views_exposed_form'.
+     *
+     * Adds "Pending" as a status filter option on any Views page that lists
+     * users (user_admin_people, mukurtu_people, etc.).
+     */
+    #[Hook("form_views_exposed_form_alter")]
+    public function formViewsExposedFormAlter(
+        array &$form,
+        FormStateInterface $form_state,
+        string $form_id,
+    ): void {
+        if (!isset($form["status"])) {
+            return;
+        }
+        $storage = $form_state->getStorage();
+        $view = $storage["view"] ?? NULL;
+        if (!$view instanceof \Drupal\views\ViewExecutable) {
+            return;
+        }
+        if ($view->storage->get("base_table") !== "users_field_data") {
+            return;
+        }
+        // Insert "Pending" between Active (1) and Blocked (0).
+        // Use string keys throughout to avoid PHP integer-key coercion issues
+        // with the "0" option value.
+        $existing = $form["status"]["#options"];
+        $form["status"]["#options"] = [
+            "All" => $existing["All"] ?? t("- Any -"),
+            "1" => $existing[1] ?? t("Active"),
+            "pending" => t("Pending"),
+            "0" => $existing[0] ?? t("Blocked"),
+        ];
     }
 
     /**
