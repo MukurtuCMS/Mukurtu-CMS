@@ -119,8 +119,9 @@
     &__content {
       padding: var(--v-space-4xxs);
       display: flex;
-      flex-direction: column;
-      gap: var(--v-space-5xs);
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: var(--v-space-4xxs);
     }
 
     &__item {
