@@ -82,6 +82,7 @@ function mukurtu_protocol_entity_bundle_info_alter(array &$bundles)
 function mukurtu_protocol_views_pre_render(\Drupal\views\ViewExecutable $view): void {
   if ($view->id() === 'og_members_overview') {
     $view->element['#attached']['library'][] = 'mukurtu_protocol/protocol-list';
+    $view->element['#attached']['library'][] = 'core/drupal.ajax';
   }
 
   // Todo: fetch the display id programmatically instead of hardcoding it to page_1.

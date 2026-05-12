@@ -40,8 +40,9 @@ class MukurtuProtocolHooks {
   /**
    * Implements hook_entity_operation() for OG memberships.
    *
-   * Adds per-row Block and Approve links to OG membership rows on the community
-   * and protocol member list pages.
+   * Adds per-row Block, Approve (OG pending), and Approve User (inactive
+   * Drupal account) links to OG membership rows on the community and protocol
+   * member list pages.
    */
   #[Hook('entity_operation')]
   public function entityOperationOgMembership(EntityInterface $entity): array {
@@ -71,6 +72,22 @@ class MukurtuProtocolHooks {
         'url' => Url::fromRoute('mukurtu_protocol.og_membership.approve', ['og_membership' => $entity->id()]),
         'weight' => 25,
       ];
+    }
+
+    // If the member's Drupal user account is inactive (pending or blocked at
+    // the site level), offer a per-row Approve User link so community managers
+    // can activate the account directly from the members list.
+    $owner = $entity->getOwner();
+    if ($owner instanceof UserInterface && !$owner->isActive()) {
+      $approve_url = Url::fromRoute('mukurtu_core.approve_user', ['uid' => $owner->id()]);
+      if ($approve_url->access()) {
+        $operations['approve_user'] = [
+          'title' => t('Approve User'),
+          'url' => $approve_url,
+          'weight' => 26,
+          'attributes' => ['class' => ['use-ajax']],
+        ];
+      }
     }
 
     return $operations;
