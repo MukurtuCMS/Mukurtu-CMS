@@ -470,7 +470,8 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
     // Dictionary words require at least one language to be present on the site.
     $query = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->getQuery();
     $languages = $query->condition('vid', 'language')->accessCheck(TRUE)->execute();
-    return AccessResult::allowedIf(!empty($languages));
+    return AccessResult::allowedIf(!empty($languages))
+      ->addCacheTags(['taxonomy_term_list:language']);
   }
 
 }
