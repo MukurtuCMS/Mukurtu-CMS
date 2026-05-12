@@ -4967,6 +4967,17 @@ header {
 .dictionary .browse-facets .views-exposed-form form .js-form-type-select::after {
   inset-block-start: 52px;
 }
+.dictionary .browse-facets .views-exposed-form form .browse-facets__separator {
+  grid-column: 1/-1;
+  border: none;
+  -webkit-border-before: 1px solid var(--color-greys-alpha-border);
+          border-block-start: 1px solid var(--color-greys-alpha-border);
+  margin: 0;
+}
+.dictionary .browse-facets .views-exposed-form form .form-item-sort-by {
+  -ms-flex-item-align: start;
+      align-self: start;
+}
 .dictionary .browse-facets .views-exposed-form .form-actions {
   display: none;
 }
@@ -4980,10 +4991,6 @@ header {
 }
 .dictionary .search-collapse-toggle {
   background-color: var(--mukurtu-panel-pane-content-background-color);
-  -webkit-margin-before: 1rem;
-          margin-block-start: 1rem;
-  -webkit-margin-after: var(--v-space-4xs);
-          margin-block-end: var(--v-space-4xs);
   border: none;
   padding: 0;
   min-inline-size: 0;

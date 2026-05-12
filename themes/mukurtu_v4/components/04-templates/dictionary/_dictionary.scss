@@ -75,6 +75,19 @@
             inset-block-start: 52px;
           }
         }
+
+        // Full-width separator between facet group and sort/options group.
+        .browse-facets__separator {
+          grid-column: 1 / -1;
+          border: none;
+          border-block-start: 1px solid var(--color-greys-alpha-border);
+          margin: 0;
+        }
+
+        // Sort by is a grid item in the bottom group.
+        .form-item-sort-by {
+          align-self: start;
+        }
       }
 
       // Apply button — hidden by BEF auto-submit; collapse leftover whitespace.
@@ -92,12 +105,9 @@
     }
   }
 
-  // Display options toggle — matches browse sidebar styling.
-  // The toggle renders as a sibling of .browse-facets, so scope from .dictionary.
+  // Display options toggle — rendered inside the filter block form as a grid item.
   .search-collapse-toggle {
     background-color: var(--mukurtu-panel-pane-content-background-color);
-    margin-block-start: 1rem;
-    margin-block-end: var(--v-space-4xs);
     border: none;
     padding: 0;
     min-inline-size: 0;

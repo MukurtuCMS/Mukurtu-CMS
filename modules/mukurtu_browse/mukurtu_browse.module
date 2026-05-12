@@ -396,8 +396,12 @@ function mukurtu_browse_preprocess_block(&$variables) {
   $toggle['#weight'] = 100;
   $variables['content']['search_collapse_toggle'] = $toggle;
 
-  // On the dictionary page, inject the list/map view toggle after the display options toggle.
+  // On the dictionary page, inject a separator and the list/map view toggle.
   if ($variables['plugin_id'] === 'views_exposed_filter_block:mukurtu_dictionary-mukurtu_dictionary_block') {
+    $variables['content']['facets_group_separator'] = [
+      '#markup' => '<hr class="browse-facets__separator">',
+      '#weight' => 50,
+    ];
     $variables['content']['browse_links'] = [
       '#type' => 'inline_template',
       '#template' => '<div class="browse-links"><button data-browse-mode="list" aria-label="{{ list_label }}" class="active-toggle">{{ list_text }}</button><button data-browse-mode="map" aria-label="{{ map_label }}">{{ map_text }}</button></div>',
