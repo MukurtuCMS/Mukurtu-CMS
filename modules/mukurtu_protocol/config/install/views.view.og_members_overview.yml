@@ -156,6 +156,7 @@ display:
             - og_membership_add_multiple_roles_action
             - mukurtu_approve_user_from_membership_action
             - og_membership_block_action
+            - og_membership_unblock_action
             - og_membership_delete_action
           entity_type: og_membership
           plugin_id: og_membership_bulk_form
