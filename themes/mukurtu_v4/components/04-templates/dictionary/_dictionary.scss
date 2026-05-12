@@ -208,6 +208,12 @@
     }
   }
 
+  .filter-reset {
+    @include mixins.block-link;
+    align-self: center;
+    text-align: center;
+  }
+
   .browse-content__wrapper {
     @include layout.layout--full-width-grid;
   }

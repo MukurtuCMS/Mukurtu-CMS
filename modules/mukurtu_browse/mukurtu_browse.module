@@ -413,5 +413,11 @@ function mukurtu_browse_preprocess_block(&$variables) {
       ],
       '#weight' => 101,
     ];
+    $variables['content']['filter_reset'] = [
+      '#type' => 'inline_template',
+      '#template' => '<a href="/dictionary" class="filter-reset">{{ reset_text }}</a>',
+      '#context' => ['reset_text' => t('Reset')],
+      '#weight' => 102,
+    ];
   }
 }

@@ -5112,6 +5112,27 @@ header {
 .dictionary .browse-links .active-toggle:hover {
   background-color: var(--brand-primary-accent);
 }
+.dictionary .filter-reset {
+  background-color: var(--color-white);
+  border: 1px solid var(--brand-primary-dark);
+  color: var(--brand-primary-dark);
+  font-weight: var(--text-bold);
+  line-height: normal;
+  text-decoration: none;
+  padding-block: var(--v-space-6xs);
+  padding-inline: var(--v-space-5xs);
+  letter-spacing: normal;
+  -ms-flex-item-align: center;
+      align-self: center;
+  text-align: center;
+}
+.dictionary .filter-reset:hover {
+  background-color: var(--brand-primary-dark);
+  color: var(--color-white);
+}
+.dictionary .filter-reset:focus {
+  outline-offset: 1px;
+}
 .dictionary .browse-content__wrapper {
   display: grid;
   grid-template-columns: var(--grid-6col);
