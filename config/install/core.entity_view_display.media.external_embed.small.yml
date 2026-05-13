@@ -3,6 +3,7 @@ status: true
 dependencies:
   config:
     - core.entity_view_mode.media.small
+    - image.style.small_250px_w_
     - media.type.external_embed
   module:
     - image
@@ -29,7 +30,7 @@ content:
     label: hidden
     settings:
       image_link: ''
-      image_style: ''
+      image_style: small_250px_w_
       image_loading:
         attribute: lazy
     third_party_settings: {  }

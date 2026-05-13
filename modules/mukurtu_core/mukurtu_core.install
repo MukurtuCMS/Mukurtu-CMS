@@ -626,7 +626,10 @@ function mukurtu_core_update_40017(): void {
 
   foreach (['small', 'medium', 'large'] as $mode) {
     $name = 'core.entity_view_mode.media.' . $mode;
-    $config_storage->write($name, $module_source->read($name));
+    $data = $module_source->read($name);
+    if ($data !== FALSE) {
+      $config_storage->write($name, $data);
+    }
   }
 
   // Import view display configs from the profile.
@@ -637,7 +640,10 @@ function mukurtu_core_update_40017(): void {
   foreach (['small', 'medium', 'large'] as $mode) {
     foreach ($bundles as $bundle) {
       $name = 'core.entity_view_display.media.' . $bundle . '.' . $mode;
-      $config_storage->write($name, $profile_source->read($name));
+      $data = $profile_source->read($name);
+      if ($data !== FALSE) {
+        $config_storage->write($name, $data);
+      }
     }
   }
 }
@@ -689,6 +695,9 @@ function mukurtu_core_update_40019(): void {
 
   foreach (['digital_heritage_full', 'digital_heritage_sidebar', 'small_250px_'] as $mode) {
     $name = 'core.entity_view_mode.media.' . $mode;
-    $config_storage->write($name, $module_source->read($name));
+    $data = $module_source->read($name);
+    if ($data !== FALSE) {
+      $config_storage->write($name, $data);
+    }
   }
 }
