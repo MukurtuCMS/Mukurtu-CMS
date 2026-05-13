@@ -37,13 +37,16 @@
     gap: var(--v-space-4xxs);
     align-items: start;
 
-    > * {
-      flex: 1;
+    .field--name-field-recording {
+      flex: 2;
       min-inline-size: 0;
     }
   }
 
   &-thumbnail {
+    flex: 1;
+    min-inline-size: 0;
+
     img {
       block-size: auto;
       display: block;
