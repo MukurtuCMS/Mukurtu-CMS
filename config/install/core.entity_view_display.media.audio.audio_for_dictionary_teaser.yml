@@ -19,7 +19,7 @@ mode: audio_for_dictionary_teaser
 content:
   field_contributor:
     type: entity_reference_label
-    label: hidden
+    label: inline
     settings:
       link: true
     third_party_settings: {  }

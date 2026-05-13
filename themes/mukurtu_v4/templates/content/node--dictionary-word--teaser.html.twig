@@ -90,13 +90,15 @@
 
   {% if teaser_content %}
   <div{{ content_attributes.addClass('dictionary-word__teaser-content') }}>
-    <div class="dictionary-word__teaser-main">
-      {{ content.field_translation }}
+    {{ content.field_translation }}
+    {% if has_recording or has_thumbnail %}
+    <div class="dictionary-word__teaser-media">
       {{ content.field_recording }}
-    </div>
-    {% if has_thumbnail %}
-    <div class="dictionary-word__teaser-thumbnail">
-      {{ content.field_thumbnail }}
+      {% if has_thumbnail %}
+      <div class="dictionary-word__teaser-thumbnail">
+        {{ content.field_thumbnail }}
+      </div>
+      {% endif %}
     </div>
     {% endif %}
   </div>

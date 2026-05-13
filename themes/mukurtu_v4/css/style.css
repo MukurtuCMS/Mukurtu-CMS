@@ -5088,24 +5088,21 @@ header {
   background-color: var(--brand-light-accent);
   padding-block: var(--v-space-4xxs);
   padding-inline: var(--v-space-2xs);
-  display: grid;
-  grid-template-columns: 1fr;
+}
+.dictionary-word__teaser-media {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
   gap: var(--v-space-4xxs);
+  -webkit-box-align: start;
+      -ms-flex-align: start;
+          align-items: start;
 }
-@container (min-width: 28rem) {
-  .dictionary-word__teaser-content {
-    grid-template-columns: 1fr auto;
-  }
-}
-.dictionary-word__teaser-main {
+.dictionary-word__teaser-media > * {
+  -webkit-box-flex: 1;
+      -ms-flex: 1;
+          flex: 1;
   min-inline-size: 0;
-}
-.dictionary-word__teaser-thumbnail {
-  -ms-flex-item-align: start;
-      align-self: start;
-  max-inline-size: 120px;
-  -ms-flex-negative: 0;
-      flex-shrink: 0;
 }
 .dictionary-word__teaser-thumbnail img {
   block-size: auto;
@@ -5113,19 +5110,10 @@ header {
   inline-size: 100%;
 }
 .dictionary-word__teaser .field--name-field-translation {
+  font-size: var(--font-size-l);
   font-weight: var(--text-bold);
   line-height: var(--line-height-xs);
   margin-block: var(--v-space-5xs);
-  margin-inline: 0 var(--v-space-2xs);
-}
-.dictionary-word__teaser .field--name-field-translation .field__label {
-  font-size: var(--font-size-s);
-  font-weight: var(--text-normal);
-}
-.dictionary-word__teaser .field--name-field-translation .field__label::after {
-  content: ":";
-  -webkit-margin-end: var(--v-space-6xs);
-          margin-inline-end: var(--v-space-6xs);
 }
 .dictionary-word__teaser .field--name-field-media-audio-file {
   margin-block: 0 var(--v-space-4xxs);
@@ -5173,11 +5161,11 @@ header {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
-  gap: var(--v-space-5xs);
   -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
       -ms-flex-direction: column;
           flex-direction: column;
+  gap: var(--v-space-5xs);
 }
 
 .word-list__teaser-image img {

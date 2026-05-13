@@ -722,6 +722,23 @@ function mukurtu_dictionary_update_40018(): void {
 }
 
 /**
+ * Refine dictionary word teaser: remove translation label, inline contributor label.
+ */
+function mukurtu_dictionary_update_40019(): void {
+  $config_factory = \Drupal::configFactory();
+
+  $display = $config_factory->getEditable('core.entity_view_display.node.dictionary_word.teaser');
+  if (!$display->isNew()) {
+    $display->set('content.field_translation.label', 'hidden')->save();
+  }
+
+  $audio_display = $config_factory->getEditable('core.entity_view_display.media.audio.audio_for_dictionary_teaser');
+  if (!$audio_display->isNew()) {
+    $audio_display->set('content.field_contributor.label', 'inline')->save();
+  }
+}
+
+/**
  * Add field_coverage to the dictionary search index for map view support.
  */
 function mukurtu_dictionary_update_40017(): void {

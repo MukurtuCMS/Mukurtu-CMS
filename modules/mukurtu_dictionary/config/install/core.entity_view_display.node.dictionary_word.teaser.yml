@@ -37,7 +37,7 @@ content:
     region: content
   field_translation:
     type: string
-    label: inline
+    label: hidden
     settings:
       link_to_entity: false
     third_party_settings: {  }
