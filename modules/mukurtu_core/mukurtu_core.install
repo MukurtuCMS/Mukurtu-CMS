@@ -555,9 +555,69 @@ function mukurtu_core_update_40014(): void {
 }
 
 /**
- * Add field_pending to user entity to distinguish Pending from Blocked accounts.
+ * Update field_coverage widget: world-view fallback zoom and enable locate button.
  */
 function mukurtu_core_update_40015(): void {
+  $form_displays = [
+    'core.entity_form_display.node.collection.default',
+    'core.entity_form_display.node.dictionary_word.default',
+    'core.entity_form_display.node.word_list.default',
+    'core.entity_form_display.node.digital_heritage.default',
+    'core.entity_form_display.node.person.default',
+    'core.entity_form_display.node.place.default',
+  ];
+  foreach ($form_displays as $config_name) {
+    $config = \Drupal::configFactory()->getEditable($config_name);
+    if ($config->isNew()) {
+      continue;
+    }
+    $settings = $config->get('content.field_coverage.settings');
+    if (empty($settings)) {
+      continue;
+    }
+    $settings['map']['map_position']['zoom'] = '2';
+    $settings['map']['map_position']['minZoom'] = '1';
+    $settings['locate']['control'] = 1;
+    $locate_options = json_decode($settings['locate']['options'] ?? '{}', TRUE);
+    unset($locate_options['keepCurrentZoomLevel']);
+    $settings['locate']['options'] = json_encode($locate_options);
+    $config->set('content.field_coverage.settings', $settings)->save();
+  }
+}
+
+/**
+ * Fix field_coverage widget: set minZoom to 1 and remove keepCurrentZoomLevel.
+ */
+function mukurtu_core_update_40016(): void {
+  $form_displays = [
+    'core.entity_form_display.node.collection.default',
+    'core.entity_form_display.node.dictionary_word.default',
+    'core.entity_form_display.node.word_list.default',
+    'core.entity_form_display.node.digital_heritage.default',
+    'core.entity_form_display.node.person.default',
+    'core.entity_form_display.node.place.default',
+  ];
+  foreach ($form_displays as $config_name) {
+    $config = \Drupal::configFactory()->getEditable($config_name);
+    if ($config->isNew()) {
+      continue;
+    }
+    $settings = $config->get('content.field_coverage.settings');
+    if (empty($settings)) {
+      continue;
+    }
+    $settings['map']['map_position']['minZoom'] = '1';
+    $locate_options = json_decode($settings['locate']['options'] ?? '{}', TRUE);
+    unset($locate_options['keepCurrentZoomLevel']);
+    $settings['locate']['options'] = json_encode($locate_options);
+    $config->set('content.field_coverage.settings', $settings)->save();
+  }
+}
+
+/**
+ * Add field_pending to user entity to distinguish Pending from Blocked accounts.
+ */
+function mukurtu_core_update_40017(): void {
   $field_storage = \Drupal\field\Entity\FieldStorageConfig::loadByName('user', 'field_pending');
   if (!$field_storage) {
     \Drupal\field\Entity\FieldStorageConfig::create([
@@ -576,6 +636,4 @@ function mukurtu_core_update_40015(): void {
       'default_value' => [['value' => 1]],
     ])->save();
   }
-  // Existing active and blocked users get field_pending=0; new users with
-  // status=0 pick up the field default of 1 (pending).
 }

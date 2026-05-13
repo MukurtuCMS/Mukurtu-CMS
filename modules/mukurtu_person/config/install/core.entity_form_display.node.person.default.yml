@@ -195,8 +195,8 @@ content:
         auto_center: '1'
         scroll_zoom_enabled: '1'
         map_position:
-          zoom: '12'
-          minZoom: '3'
+          zoom: '2'
+          minZoom: '1'
           maxZoom: '18'
           zoomFiner: '0'
           force: 0
@@ -245,9 +245,9 @@ content:
         options: '{"position":"bottomright","maxWidth":100,"metric":true,"imperial":false,"updateWhenIdle":false}'
         control: 0
       locate:
-        options: '{"position":"topright","setView":"untilPanOrZoom","returnToPrevBounds":true,"keepCurrentZoomLevel":true,"strings":{"title":"Locate my position"}}'
+        options: '{"position":"topright","setView":"untilPanOrZoom","returnToPrevBounds":true,"strings":{"title":"Locate my position"}}'
         automatic: '1'
-        control: 0
+        control: 1
       feature_properties:
         values: ''
     third_party_settings: {  }

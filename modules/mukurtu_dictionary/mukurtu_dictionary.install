@@ -5,36 +5,12 @@
  * Install, update and uninstall functions for the mukurtu_dictionary module.
  */
 
-use Drupal\og\Og;
-use Drupal\og\Entity\OgRole;
 use Drupal\user\Entity\Role;
 
 /**
  * Implements hook_install().
  */
 function mukurtu_dictionary_install() {
-  // Language Communities are groups.
-  try {
-    Og::addGroup('language_community', 'language_community');
-  } catch (InvalidArgumentException $e) {
-    // Intentionally left blank, already a group.
-  }
-
-  // Create Language community roles.
-  $languageStewardRole = OgRole::create([
-    'name' => 'language steward',
-  ]);
-  $languageStewardRole->setGroupType('language_community');
-  $languageStewardRole->setGroupBundle('language_community');
-  $languageStewardRole->save();
-
-  $languageContributorRole = OgRole::create([
-    'name' => 'language contributor',
-  ]);
-  $languageContributorRole->setGroupType('language_community');
-  $languageContributorRole->setGroupBundle('language_community');
-  $languageContributorRole->save();
-
   // Grant dictionary glossary order permission to mukurtu_manager role.
   $role = Role::load('mukurtu_manager');
   if ($role) {
@@ -439,4 +415,40 @@ function mukurtu_dictionary_update_40010(): void {
  */
 function mukurtu_dictionary_update_40011(): void {
   mukurtu_dictionary_update_40010();
+}
+
+/**
+ * Remove the LanguageCommunity entity type (superseded by Community).
+ */
+function mukurtu_dictionary_update_40012(): void {
+  $db = \Drupal::database();
+  $schema = $db->schema();
+
+  // Remove OG memberships referencing language_community groups.
+  if ($schema->tableExists('og_membership')) {
+    $db->delete('og_membership')
+      ->condition('group_type', 'language_community')
+      ->execute();
+  }
+
+  // Drop language_community tables if they exist.
+  foreach (['language_community_field_revision', 'language_community_revision', 'language_community_field_data', 'language_community'] as $table) {
+    if ($schema->tableExists($table)) {
+      $schema->dropTable($table);
+    }
+  }
+
+  // Remove the language_community OG roles.
+  $og_role_ids = [
+    'language_community-language_community-language_steward',
+    'language_community-language_community-language_contributor',
+    'language_community-language_community-member',
+    'language_community-language_community-non-member',
+  ];
+  foreach ($og_role_ids as $role_id) {
+    $og_role = \Drupal\og\Entity\OgRole::load($role_id);
+    if ($og_role) {
+      $og_role->delete();
+    }
+  }
 }
