@@ -613,3 +613,27 @@ function mukurtu_core_update_40016(): void {
     $config->set('content.field_coverage.settings', $settings)->save();
   }
 }
+
+/**
+ * Add field_pending to user entity to distinguish Pending from Blocked accounts.
+ */
+function mukurtu_core_update_40017(): void {
+  $field_storage = \Drupal\field\Entity\FieldStorageConfig::loadByName('user', 'field_pending');
+  if (!$field_storage) {
+    \Drupal\field\Entity\FieldStorageConfig::create([
+      'field_name' => 'field_pending',
+      'entity_type' => 'user',
+      'type' => 'boolean',
+      'cardinality' => 1,
+    ])->save();
+  }
+  if (!\Drupal\field\Entity\FieldConfig::loadByName('user', 'user', 'field_pending')) {
+    \Drupal\field\Entity\FieldConfig::create([
+      'field_name' => 'field_pending',
+      'entity_type' => 'user',
+      'bundle' => 'user',
+      'label' => 'Pending',
+      'default_value' => [['value' => 1]],
+    ])->save();
+  }
+}
