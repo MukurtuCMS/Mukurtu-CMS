@@ -4995,7 +4995,7 @@ header {
   display: none;
 }
 .dictionary .browse-facets h2,
-.dictionary .browse-facets label {
+.dictionary .browse-facets label:not(.search-collapse-toggle__item) {
   display: block;
   background-color: var(--brand-primary-dark);
   color: var(--light-text-color);

@@ -113,7 +113,7 @@
     }
 
     h2,
-    label {
+    label:not(.search-collapse-toggle__item) {
       display: block;
       background-color: var(--brand-primary-dark);
       color: var(--light-text-color);
