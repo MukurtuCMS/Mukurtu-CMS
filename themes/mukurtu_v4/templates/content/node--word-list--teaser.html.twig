@@ -84,9 +84,10 @@
   </div>
   {{ title_suffix }}
 
-  {% if content.field_summary|render is not empty %}
   <div{{ content_attributes.addClass('word-list__teaser-content') }}>
-    {{ content.field_summary }}
+    <div class="word-list__teaser-type">{{ 'Word List'|t }}</div>
+    {% if content.field_summary|render is not empty %}
+      {{ content.field_summary }}
+    {% endif %}
   </div>
-  {% endif %}
 </article>

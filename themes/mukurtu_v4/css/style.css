@@ -5426,6 +5426,13 @@ header {
   padding-block: var(--v-space-4xxs);
   padding-inline: var(--v-space-2xs);
 }
+.word-list__teaser-type {
+  font-size: var(--font-size-s);
+  font-weight: var(--text-bold);
+  text-transform: uppercase;
+  -webkit-margin-after: var(--v-space-5xs);
+          margin-block-end: var(--v-space-5xs);
+}
 
 .page-node-type-dictionary-word .full-node__content .field--name-field-word-entry > .field__item:not(first-child) {
   -webkit-margin-before: var(--v-space-s);
