@@ -406,7 +406,7 @@ function mukurtu_browse_preprocess_block(&$variables) {
     ];
     $variables['content']['browse_links'] = [
       '#type' => 'inline_template',
-      '#template' => '<div class="browse-links"><button data-browse-mode="list" aria-label="{{ list_label }}" class="active-toggle">{{ list_text }}</button><button data-browse-mode="map" aria-label="{{ map_label }}">{{ map_text }}</button><a href="{{ reset_url }}" class="filter-reset">{{ reset_text }}</a></div>',
+      '#template' => '<div class="browse-links"><button data-browse-mode="list" aria-label="{{ list_label }}" class="active-toggle">{{ list_text }}</button><button data-browse-mode="map" aria-label="{{ map_label }}">{{ map_text }}</button><a href="{{ reset_url }}" class="filter-reset" style="align-content: center;">{{ reset_text }}</a></div>',
       '#context' => [
         'list_label' => t('Switch to list view'),
         'list_text' => t('List'),
