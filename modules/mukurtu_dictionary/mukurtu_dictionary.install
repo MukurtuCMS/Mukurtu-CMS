@@ -418,7 +418,7 @@ function mukurtu_dictionary_update_40011(): void {
 }
 
 /**
- * Remove LanguageCommunity entity data and OG roles.
+ * Remove the LanguageCommunity entity type (superseded by Community).
  */
 function mukurtu_dictionary_update_40012(): void {
   $db = \Drupal::database();
