@@ -654,9 +654,16 @@ function mukurtu_core_update_40018(): void {
     $editor = $config_factory->getEditable('editor.editor.' . $format);
     if (!$editor->isNew()) {
       $allowed_tags = $editor->get('settings.plugins.ckeditor5_sourceEditing.allowed_tags') ?? [];
-      $key = array_search('<drupal-media title>', $allowed_tags);
-      if ($key !== FALSE) {
-        $allowed_tags[$key] = '<drupal-media title data-entity-type data-entity-uuid alt data-view-mode data-caption data-align>';
+      $target = '<drupal-media title data-entity-type data-entity-uuid alt data-view-mode data-caption data-align>';
+      $key = NULL;
+      foreach ($allowed_tags as $k => $tag) {
+        if (str_starts_with(trim($tag), '<drupal-media')) {
+          $key = $k;
+          break;
+        }
+      }
+      if ($key !== NULL && trim($allowed_tags[$key]) !== $target) {
+        $allowed_tags[$key] = $target;
         $editor->set('settings.plugins.ckeditor5_sourceEditing.allowed_tags', $allowed_tags);
         $editor->save(TRUE);
       }
