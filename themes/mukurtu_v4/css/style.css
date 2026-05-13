@@ -5293,6 +5293,9 @@ header {
       -ms-flex-pack: justify;
           justify-content: space-between;
 }
+.dictionary-word__teaser-word:focus, .dictionary-word__teaser-word:focus-visible {
+  outline-color: var(--color-white);
+}
 .dictionary-word__teaser svg {
   fill: var(--color-white);
   block-size: var(--line-height-m);
@@ -5413,6 +5416,9 @@ header {
   -webkit-box-pack: justify;
       -ms-flex-pack: justify;
           justify-content: space-between;
+}
+.word-list__teaser-title:focus, .word-list__teaser-title:focus-visible {
+  outline-color: var(--color-white);
 }
 .word-list__teaser-title svg {
   fill: var(--color-white);

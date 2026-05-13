@@ -18,6 +18,11 @@
   &-word {
     display: flex;
     justify-content: space-between;
+
+    &:focus,
+    &:focus-visible {
+      outline-color: var(--color-white);
+    }
   }
 
   svg {
@@ -140,6 +145,11 @@
   &-title {
     display: flex;
     justify-content: space-between;
+
+    &:focus,
+    &:focus-visible {
+      outline-color: var(--color-white);
+    }
 
     svg {
       fill: var(--color-white);
