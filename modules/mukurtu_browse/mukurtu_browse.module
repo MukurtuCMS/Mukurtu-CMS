@@ -406,14 +406,14 @@ function mukurtu_browse_preprocess_block(&$variables) {
     ];
     $variables['content']['browse_links'] = [
       '#type' => 'inline_template',
-      '#template' => '<div class="browse-links"><button data-browse-mode="list" aria-label="{{ list_label }}" class="active-toggle">{{ list_text }}</button><button data-browse-mode="map" aria-label="{{ map_label }}">{{ map_text }}</button><a href="{{ reset_url }}" class="filter-reset">{{ reset_text }} style="align-content: center;"</a></div>',
+      '#template' => '<div class="browse-links"><button data-browse-mode="list" aria-label="{{ list_label }}" class="active-toggle">{{ list_text }}</button><button data-browse-mode="map" aria-label="{{ map_label }}">{{ map_text }}</button><a href="{{ reset_url }}" class="filter-reset">{{ reset_text }}</a></div>',
       '#context' => [
         'list_label' => t('Switch to list view'),
         'list_text' => t('List'),
         'map_label' => t('Switch to map view'),
         'map_text' => t('Map'),
         'reset_text' => t('Reset'),
-        'reset_url' => \Drupal::url('mukurtu_dictionary.dictionary_page'),
+        'reset_url' => \Drupal\Core\Url::fromRoute('mukurtu_dictionary.dictionary_page')->toString(),
       ],
       '#weight' => 101,
     ];
