@@ -5,7 +5,6 @@ namespace Drupal\mukurtu_dictionary\Hook;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\mukurtu_dictionary\Entity\WordList;
-use Drupal\search_api\Plugin\search_api\datasource\ContentEntity;
 
 /**
  * Hook implementations for mukurtu_dictionary node operations.
@@ -75,7 +74,7 @@ class NodeHooks
             ->loadMultiple($word_ids);
 
         foreach ($nodes as $word_node) {
-            ContentEntity::handleEntityChange($word_node, null);
+            \Drupal::service('search_api.entity_datasource.tracking_manager')->entityUpdate($word_node);
         }
     }
 }

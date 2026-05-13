@@ -286,6 +286,32 @@
     }
   }
 
+  .pager {
+    &__items {
+      display: flex;
+      gap: var(--v-space-4xxs);
+      padding: 0;
+      justify-content: center;
+    }
+
+    &__item {
+      list-style: none;
+      font-weight: var(--text-bold);
+
+      a {
+        padding: var(--v-space-5xs);
+      }
+    }
+
+    .is-active {
+      a {
+        color: var(--brand-text-color);
+        text-decoration: none;
+        border-block-end: 5px solid var(--brand-secondary);
+      }
+    }
+  }
+
   // Dictionary results grid.
   .list .view-main-content {
     display: grid;

@@ -5242,6 +5242,29 @@ header {
 .dictionary .glossary .facet-item__count {
   display: none;
 }
+.dictionary .pager__items {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  gap: var(--v-space-4xxs);
+  padding: 0;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+}
+.dictionary .pager__item {
+  list-style: none;
+  font-weight: var(--text-bold);
+}
+.dictionary .pager__item a {
+  padding: var(--v-space-5xs);
+}
+.dictionary .pager .is-active a {
+  color: var(--brand-text-color);
+  text-decoration: none;
+  -webkit-border-after: 5px solid var(--brand-secondary);
+          border-block-end: 5px solid var(--brand-secondary);
+}
 .dictionary .list .view-main-content {
   display: grid;
   grid-template-columns: auto;
