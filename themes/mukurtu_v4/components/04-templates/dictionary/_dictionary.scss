@@ -75,6 +75,7 @@
           display: grid;
           grid-template-columns: repeat(3, 1fr);
           gap: var(--gutter);
+          row-gap: 1rem;
         }
 
         @include include-media.media('>=lg') {
@@ -102,7 +103,7 @@
 
         // Sort by is a grid item in the bottom group.
         .form-item-sort-by {
-          align-self: start;
+          margin-block-start: 0;
         }
       }
 
@@ -132,24 +133,20 @@
     border: none;
     padding: 0;
     min-inline-size: 0;
+    margin-block-start: 0;
+    align-content: center;
 
     &__header {
-      display: block;
-      width: 100%;
-      background-color: var(--brand-primary-dark);
-      color: var(--light-text-color);
-      font-size: var(--font-size-m);
-      font-weight: var(--text-bold);
-      padding-inline: var(--v-space-4xxs);
-      padding-block: var(--v-space-5xs);
+      @include mixins.visually-hidden;
     }
 
     &__content {
-      padding: var(--v-space-4xxs);
+      padding-inline: var(--v-space-4xxs);
+      padding-block: var(--v-space-5xs);
       display: flex;
       flex-direction: row;
       flex-wrap: wrap;
-      gap: var(--v-space-4xxs);
+      gap: 0;
     }
 
     &__item {
@@ -208,7 +205,7 @@
     }
 
     &__label {
-      font-size: var(--font-size-base);
+      font-size: var(--font-size-s);
       color: var(--text-color);
     }
   }
@@ -222,6 +219,12 @@
     a,
     button {
       @include mixins.block-link;
+    }
+
+    [data-browse-mode] {
+      inline-size: 50%;
+      appearance: none;
+      padding: var(--v-space-6xs) var(--v-space-5xs);
     }
 
     .active-toggle {

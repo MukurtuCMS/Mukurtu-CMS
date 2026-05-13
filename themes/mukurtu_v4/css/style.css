@@ -4965,6 +4965,7 @@ header {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: var(--gutter);
+    row-gap: 1rem;
   }
 }
 @media (min-width: 60rem) {
@@ -4988,8 +4989,8 @@ header {
   margin: 0;
 }
 .dictionary .browse-facets .views-exposed-form form .form-item-sort-by {
-  -ms-flex-item-align: start;
-      align-self: start;
+  -webkit-margin-before: 0;
+          margin-block-start: 0;
 }
 .dictionary .browse-facets .views-exposed-form .form-actions {
   display: none;
@@ -5013,19 +5014,22 @@ header {
   border: none;
   padding: 0;
   min-inline-size: 0;
+  -webkit-margin-before: 0;
+          margin-block-start: 0;
+  -ms-flex-line-pack: center;
+      align-content: center;
 }
 .dictionary .search-collapse-toggle__header {
-  display: block;
-  width: 100%;
-  background-color: var(--brand-primary-dark);
-  color: var(--light-text-color);
-  font-size: var(--font-size-m);
-  font-weight: var(--text-bold);
-  padding-inline: var(--v-space-4xxs);
-  padding-block: var(--v-space-5xs);
+  position: absolute !important;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  inline-size: 0.063rem;
+  block-size: 0.063rem;
+  word-wrap: normal;
 }
 .dictionary .search-collapse-toggle__content {
-  padding: var(--v-space-4xxs);
+  padding-inline: var(--v-space-4xxs);
+  padding-block: var(--v-space-5xs);
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -5035,7 +5039,7 @@ header {
           flex-direction: row;
   -ms-flex-wrap: wrap;
       flex-wrap: wrap;
-  gap: var(--v-space-4xxs);
+  gap: 0;
 }
 .dictionary .search-collapse-toggle__item {
   display: -webkit-box;
@@ -5093,7 +5097,7 @@ header {
   outline-offset: 2px;
 }
 .dictionary .search-collapse-toggle__label {
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-s);
   color: var(--text-color);
 }
 .dictionary .browse-links {
@@ -5123,6 +5127,13 @@ header {
 .dictionary .browse-links a:focus,
 .dictionary .browse-links button:focus {
   outline-offset: 1px;
+}
+.dictionary .browse-links [data-browse-mode] {
+  inline-size: 50%;
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  padding: var(--v-space-6xs) var(--v-space-5xs);
 }
 .dictionary .browse-links .active-toggle {
   background-color: var(--brand-primary-dark);
