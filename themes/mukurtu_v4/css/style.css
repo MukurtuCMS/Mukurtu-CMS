@@ -5342,9 +5342,10 @@ header {
 .dictionary-word__teaser .field--name-field-media-audio-file audio {
   background-color: var(--color-white);
   border-radius: 4px;
+  -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
   display: block;
   inline-size: 100%;
-  outline: 1px solid color-mix(in srgb, var(--brand-primary-dark) 25%, transparent);
 }
 .dictionary-word__teaser .field--name-field-contributor {
   -webkit-box-align: baseline;
