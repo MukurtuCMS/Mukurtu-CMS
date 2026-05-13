@@ -251,8 +251,9 @@
   }
 
   .glossary {
-    padding-block: var(--v-space-2xs);
-    padding-inline: 0;
+    background-color: var(--brand-secondary-accent);
+    padding: 16px;
+    margin-block-end: 16px;
 
     @include layout.layout--full-width-grid;
 
@@ -265,6 +266,7 @@
 
       a {
         padding: var(--v-space-2xs);
+        font-weight: var(--text-bold);
       }
     }
 
@@ -277,6 +279,10 @@
 
     li {
       list-style-type: none;
+    }
+
+    .facet-item__count {
+      display: none;
     }
   }
 

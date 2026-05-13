@@ -5193,8 +5193,10 @@ header {
   margin-inline: calc(-1 * var(--layout-padding));
 }
 .dictionary .glossary {
-  padding-block: var(--v-space-2xs);
-  padding-inline: 0;
+  background-color: var(--brand-secondary-accent);
+  padding: 16px;
+  -webkit-margin-after: 16px;
+          margin-block-end: 16px;
   display: grid;
   grid-template-columns: var(--grid-6col);
   padding-inline: var(--layout-padding) var(--layout-padding);
@@ -5222,6 +5224,7 @@ header {
 }
 .dictionary .glossary .facets-widget-links a {
   padding: var(--v-space-2xs);
+  font-weight: var(--text-bold);
 }
 .dictionary .glossary ul {
   display: -webkit-box;
@@ -5235,6 +5238,9 @@ header {
 }
 .dictionary .glossary li {
   list-style-type: none;
+}
+.dictionary .glossary .facet-item__count {
+  display: none;
 }
 .dictionary .list .view-main-content {
   display: grid;
