@@ -210,7 +210,7 @@
     }
   }
 
-  // List/map view toggle buttons.
+  // List/map view toggle buttons and reset link.
   .browse-links {
     padding-block: var(--v-space-4xxs);
     display: flex;
@@ -219,10 +219,11 @@
     a,
     button {
       @include mixins.block-link;
+      flex: 1;
+      text-align: center;
     }
 
     [data-browse-mode] {
-      inline-size: 50%;
       appearance: none;
       padding: var(--v-space-6xs) var(--v-space-5xs);
     }
@@ -230,12 +231,6 @@
     .active-toggle {
       @include mixins.block-link-active;
     }
-  }
-
-  .filter-reset {
-    @include mixins.block-link;
-    align-self: center;
-    text-align: center;
   }
 
   .browse-content__wrapper {
