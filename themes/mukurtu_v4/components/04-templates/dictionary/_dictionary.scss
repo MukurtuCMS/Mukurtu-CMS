@@ -1,7 +1,12 @@
 @use "../../../external/include-media";
 @use "../../00-base/layout/layout";
+@use "../../00-base/mixins/mixins";
 
 // Main /dictionary page layout.
+.path-dictionary .layout-container .page__title {
+  margin-block-end: 0;
+}
+
 .dictionary {
   .browse__main-content {
     display: block;
@@ -42,6 +47,17 @@
       @include include-media.media('>=md') {
         margin-block-end: 0;
       }
+
+      .select-wrapper {
+        &::after {
+          inset-block-start: initial;
+          inset-block-end: 20px;
+        }
+
+        select {
+          margin-inline-start: 0;
+        }
+      }
     }
 
     // The search/sort/apply area.
@@ -59,6 +75,7 @@
           display: grid;
           grid-template-columns: repeat(3, 1fr);
           gap: var(--gutter);
+          row-gap: 1rem;
         }
 
         @include include-media.media('>=lg') {
@@ -67,42 +84,176 @@
 
         .js-form-type-select {
           &::after {
-            inset-block-start: 52px;
+            inset-block-start: initial;
+            inset-block-end: 20px;
           }
+
+          select {
+            margin-inline-start: 0;
+          }
+        }
+
+        // Full-width separator between facet group and sort/options group.
+        .browse-facets__separator {
+          grid-column: 1 / -1;
+          border: none;
+          border-block-start: 1px solid var(--color-greys-alpha-border);
+          margin: 0;
+        }
+
+        // Sort by is a grid item in the bottom group.
+        .form-item-sort-by {
+          margin-block-start: 0;
         }
       }
 
-      // Apply button.
+      // Apply button — hidden by BEF auto-submit; collapse leftover whitespace.
       .form-actions {
-        display: flex;
-        align-items: flex-end;
-
-        input {
-          block-size: 45px;
-        }
+        display: none;
       }
     }
 
     h2,
-    label {
-      color: var(--text-color);
+    label:not(.search-collapse-toggle__item) {
+      display: block;
+      background-color: var(--brand-primary-dark);
+      color: var(--light-text-color);
       font-size: var(--font-size-m);
       font-weight: var(--text-bold);
-      margin-block-end: var(--v-space-5xs);
+      margin-block-start: 0;
+      margin-block-end: 0;
+      padding-inline: var(--v-space-4xxs);
+      padding-block: var(--v-space-5xs);
     }
+  }
+
+  // Display options toggle — rendered inside the filter block form as a grid item.
+  .search-collapse-toggle {
+    background-color: var(--mukurtu-panel-pane-content-background-color);
+    border: none;
+    padding: 0;
+    min-inline-size: 0;
+    margin-block-start: 0;
+    align-content: center;
+
+    &__header {
+      @include mixins.visually-hidden;
+    }
+
+    &__content {
+      padding-inline: var(--v-space-4xxs);
+      padding-block: var(--v-space-5xs);
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 0;
+    }
+
+    &__item {
+      display: flex;
+      align-items: center;
+      gap: var(--v-space-5xs);
+      cursor: pointer;
+    }
+
+    &__input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      margin: -1px;
+      padding: 0;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    &__switch {
+      display: inline-block;
+      flex-shrink: 0;
+      width: 36px;
+      height: 24px;
+      border-radius: 12px;
+      background-color: var(--color-greys-alpha-border);
+      position: relative;
+      transition: background-color 0.2s;
+
+      &::after {
+        content: '';
+        position: absolute;
+        inset-block-start: 2px;
+        inset-inline-start: 2px;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background-color: var(--light-text-color);
+        transition: inset-inline-start 0.2s;
+      }
+    }
+
+    &__input:checked + .search-collapse-toggle__switch {
+      background-color: var(--brand-primary);
+
+      &::after {
+        inset-inline-start: 14px;
+      }
+    }
+
+    &__input:focus-visible + .search-collapse-toggle__switch {
+      outline: 3px solid var(--brand-primary-dark);
+      outline-offset: 2px;
+    }
+
+    &__label {
+      font-size: var(--font-size-s);
+      color: var(--text-color);
+    }
+  }
+
+  // List/map view toggle buttons.
+  .browse-links {
+    padding-block: var(--v-space-4xxs);
+    display: flex;
+    gap: var(--v-space-5xs);
+
+    a,
+    button {
+      @include mixins.block-link;
+    }
+
+    [data-browse-mode] {
+      inline-size: 50%;
+      appearance: none;
+      padding: var(--v-space-6xs) var(--v-space-5xs);
+    }
+
+    .active-toggle {
+      @include mixins.block-link-active;
+    }
+  }
+
+  .filter-reset {
+    @include mixins.block-link;
+    align-self: center;
+    text-align: center;
   }
 
   .browse-content__wrapper {
     @include layout.layout--full-width-grid;
   }
 
-  .browse-content {
+  .dictionary-view-container {
     @include layout.layout--full-width-grid-item;
+
+    .map {
+      margin-inline: calc(-1 * var(--layout-padding));
+    }
   }
 
   .glossary {
-    padding-block: var(--v-space-2xs);
-    padding-inline: 0;
+    background-color: var(--brand-secondary-accent);
+    padding: 16px;
+    margin-block-end: 16px;
 
     @include layout.layout--full-width-grid;
 
@@ -115,6 +266,7 @@
 
       a {
         padding: var(--v-space-2xs);
+        font-weight: var(--text-bold);
       }
     }
 
@@ -128,10 +280,40 @@
     li {
       list-style-type: none;
     }
+
+    .facet-item__count {
+      display: none;
+    }
+  }
+
+  .pager {
+    &__items {
+      display: flex;
+      gap: var(--v-space-4xxs);
+      padding: 0;
+      justify-content: center;
+    }
+
+    &__item {
+      list-style: none;
+      font-weight: var(--text-bold);
+
+      a {
+        padding: var(--v-space-5xs);
+      }
+    }
+
+    .is-active {
+      a {
+        color: var(--brand-text-color);
+        text-decoration: none;
+        border-block-end: 5px solid var(--brand-secondary);
+      }
+    }
   }
 
   // Dictionary results grid.
-  .view-main-content {
+  .list .view-main-content {
     display: grid;
     grid-template-columns: auto;
     gap: var(--v-space-2xs);
