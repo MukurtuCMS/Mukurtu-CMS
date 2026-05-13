@@ -1,0 +1,7 @@
+mukurtu-dictionary-view-switch:
+  version: 1.x
+  js:
+    js/mukurtu-dictionary-view-switch.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
