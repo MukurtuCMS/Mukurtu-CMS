@@ -221,6 +221,11 @@
       @include mixins.block-link;
       flex: 1;
       text-align: center;
+
+      &:focus-visible {
+        outline: 3px solid var(--brand-primary-dark);
+        outline-offset: 2px;
+      }
     }
 
     [data-browse-mode] {
@@ -262,6 +267,7 @@
       a {
         padding: var(--v-space-2xs);
         font-weight: var(--text-bold);
+        color: var(--brand-text-color);
       }
     }
 
@@ -302,7 +308,7 @@
       a {
         color: var(--brand-text-color);
         text-decoration: none;
-        border-block-end: 5px solid var(--brand-secondary);
+        border-block-end: 5px solid var(--brand-secondary-dark);
       }
     }
   }

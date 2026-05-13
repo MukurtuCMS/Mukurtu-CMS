@@ -5132,6 +5132,11 @@ header {
 .dictionary .browse-links button:focus {
   outline-offset: 1px;
 }
+.dictionary .browse-links a:focus-visible,
+.dictionary .browse-links button:focus-visible {
+  outline: 3px solid var(--brand-primary-dark);
+  outline-offset: 2px;
+}
 .dictionary .browse-links [data-browse-mode] {
   -webkit-appearance: none;
      -moz-appearance: none;
@@ -5207,6 +5212,7 @@ header {
 .dictionary .glossary .facets-widget-links a {
   padding: var(--v-space-2xs);
   font-weight: var(--text-bold);
+  color: var(--brand-text-color);
 }
 .dictionary .glossary ul {
   display: -webkit-box;
@@ -5244,8 +5250,8 @@ header {
 .dictionary .pager .is-active a {
   color: var(--brand-text-color);
   text-decoration: none;
-  -webkit-border-after: 5px solid var(--brand-secondary);
-          border-block-end: 5px solid var(--brand-secondary);
+  -webkit-border-after: 5px solid var(--brand-secondary-dark);
+          border-block-end: 5px solid var(--brand-secondary-dark);
 }
 .dictionary .list .view-main-content {
   display: grid;
