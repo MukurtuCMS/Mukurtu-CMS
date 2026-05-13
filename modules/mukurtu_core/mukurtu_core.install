@@ -678,3 +678,17 @@ function mukurtu_core_update_40018(): void {
     }
   }
 }
+
+/**
+ * Update legacy media view mode labels to avoid duplicates with new view modes.
+ */
+function mukurtu_core_update_40019(): void {
+  $config_storage = \Drupal::service('config.storage');
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core');
+  $module_source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+
+  foreach (['digital_heritage_full', 'digital_heritage_sidebar', 'small_250px_'] as $mode) {
+    $name = 'core.entity_view_mode.media.' . $mode;
+    $config_storage->write($name, $module_source->read($name));
+  }
+}
