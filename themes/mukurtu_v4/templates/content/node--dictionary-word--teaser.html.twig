@@ -69,10 +69,12 @@
  */
 #}
 
-{% if (node.field_thumbnail.value is not empty or
-  content.field_translation|render is not empty or
-  content.field_word_entry.0['#paragraph'].field_recording is not empty) or
-  content.field_recording is not empty %}
+{% set has_thumbnail = content.field_thumbnail|render is not empty %}
+{% set has_translation = content.field_translation|render is not empty %}
+{% set has_recording = content.field_recording|render is not empty %}
+{% set has_word_entry_recording = content.field_word_entry.0['#paragraph'].field_recording is not empty %}
+
+{% if has_thumbnail or has_translation or has_recording or has_word_entry_recording %}
   {% set teaser_content = true %}
 {% endif %}
 
@@ -88,12 +90,15 @@
 
   {% if teaser_content %}
   <div{{ content_attributes.addClass('dictionary-word__teaser-content') }}>
-    {{ content.field_translation }}
-
-    <div class="dictionary-word__media">
+    <div class="dictionary-word__teaser-main">
+      {{ content.field_translation }}
       {{ content.field_recording }}
+    </div>
+    {% if has_thumbnail %}
+    <div class="dictionary-word__teaser-thumbnail">
       {{ content.field_thumbnail }}
     </div>
+    {% endif %}
   </div>
   {% endif %}
 </article>

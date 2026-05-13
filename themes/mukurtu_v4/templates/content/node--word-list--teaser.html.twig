@@ -1,8 +1,7 @@
 {#
 /**
  * @file
- * Theme override to display a node as "Teaser", in the sidebar
- * under related content.
+ * Theme override to display a word list node as a teaser on /dictionary.
  *
  * Available variables:
  * - node: The node entity with limited access to object properties and methods.
@@ -68,18 +67,26 @@
  *
  */
 #}
-<article{{ attributes }}>
+
+<article{{ attributes.addClass('word-list__teaser') }}>
+  {% if content.field_representative_media|render is not empty %}
+  <div class="word-list__teaser-image">
+    {{ content.field_representative_media }}
+  </div>
+  {% endif %}
 
   {{ title_prefix }}
-  {% if label and not page %}
-    <div{{ title_attributes }}>
-      <a href="{{ url }}" rel="bookmark">{{ label }}</a>
-    </div>
-  {% endif %}
+  <div{{ title_attributes.addClass('word-list__teaser-heading') }}>
+    <a class="word-list__teaser-title" href="{{ url }}" rel="bookmark">
+      {{ label }}
+      {% include active_theme_path() ~ '/images/chevron_arrow_right.svg' %}
+    </a>
+  </div>
   {{ title_suffix }}
 
-  <div{{ content_attributes }}>
-    {{ content }}
+  {% if content.field_summary|render is not empty %}
+  <div{{ content_attributes.addClass('word-list__teaser-content') }}>
+    {{ content.field_summary }}
   </div>
-
+  {% endif %}
 </article>

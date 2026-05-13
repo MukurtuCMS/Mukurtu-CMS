@@ -1,0 +1,21 @@
+{#
+/**
+ * @file
+ * Theme override to display an audio media item in the dictionary word teaser.
+ *
+ * Renders the audio player followed by an optional Speaker attribution.
+ * The contributor field label is suppressed in the view display and replaced
+ * here with "Speaker" which is more contextually appropriate for a dictionary.
+ *
+ * @see template_preprocess_media()
+ */
+#}
+<div{{ attributes.addClass(['media', 'media--audio']) }}>
+  {{ content.field_media_audio_file }}
+  {% if content.field_contributor|render is not empty %}
+    <div class="field field--name-field-contributor">
+      <span class="field__label">Speaker</span>
+      <div class="field__items">{{ content.field_contributor }}</div>
+    </div>
+  {% endif %}
+</div>

@@ -4,7 +4,7 @@ dependencies:
   config:
     - core.entity_view_mode.node.teaser
     - field.field.node.word_list.comment
-    - image.style.large
+    - image.style.small_250px_w_
     - node.type.word_list
   module:
     - layout_builder
@@ -24,11 +24,19 @@ content:
     label: hidden
     settings:
       image_link: ''
-      image_style: large
+      image_style: small_250px_w_
       image_loading:
         attribute: lazy
     third_party_settings: {  }
     weight: 0
+    region: content
+  field_summary:
+    type: string
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 1
     region: content
 hidden:
   comment: true
@@ -51,7 +59,6 @@ hidden:
   field_related_content: true
   field_sequence_collection: true
   field_source: true
-  field_summary: true
   field_title: true
   field_word_list_image: true
   field_words: true
