@@ -452,3 +452,249 @@ function mukurtu_dictionary_update_40012(): void {
     }
   }
 }
+
+/**
+ * Add word_list to type filter, enable multi-select on facets, add community facet.
+ */
+function mukurtu_dictionary_update_40015(): void {
+  $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_dictionary');
+  if (!$config) {
+    return;
+  }
+
+  $base = 'display.default.display_options';
+
+  // 1. Include word_list in the hard type filter so word lists appear in results.
+  $value = $config->get("$base.filters.type.value") ?? [];
+  $value['word_list'] = 'word_list';
+  $config->set("$base.filters.type.value", $value);
+
+  // 2. Enable multiple selections on all exposed facet dropdown filters.
+  $multi_filters = [
+    'facets_type',
+    'facets_mukurtu_cultural_protocol_ids',
+    'facets_language',
+    'facets_keyword',
+    'facets_word_lists',
+    'facets_word_type',
+  ];
+  foreach ($multi_filters as $filter_id) {
+    $config->set("$base.filters.$filter_id.expose.multiple", TRUE);
+    $config->set("$base.filters.$filter_id.group_info.multiple", TRUE);
+  }
+
+  // 3. Add community facet filter.
+  $community_filter = [
+    'id' => 'facets_community_title',
+    'table' => 'search_api_index_mukurtu_dictionary_index',
+    'field' => 'facets_community_title',
+    'relationship' => 'none',
+    'group_type' => 'group',
+    'admin_label' => '',
+    'plugin_id' => 'facets_filter',
+    'operator' => '=',
+    'value' => '',
+    'group' => 1,
+    'exposed' => TRUE,
+    'expose' => [
+      'operator_id' => '',
+      'label' => 'Community',
+      'description' => '',
+      'use_operator' => FALSE,
+      'operator' => '',
+      'operator_limit_selection' => FALSE,
+      'operator_list' => [],
+      'identifier' => 'community',
+      'required' => FALSE,
+      'remember' => FALSE,
+      'multiple' => TRUE,
+      'remember_roles' => ['authenticated' => 'authenticated'],
+    ],
+    'is_grouped' => FALSE,
+    'group_info' => [
+      'label' => '',
+      'description' => '',
+      'identifier' => '',
+      'optional' => TRUE,
+      'widget' => 'select',
+      'multiple' => TRUE,
+      'remember' => FALSE,
+      'default_group' => 'All',
+      'default_group_multiple' => [],
+      'group_items' => [],
+    ],
+    'hierarchy' => FALSE,
+    'label_display' => 'visible',
+    'facet' => [
+      'query_operator' => 'or',
+      'hard_limit' => 0,
+      'min_count' => 1,
+      'show_numbers' => FALSE,
+      'processor_configs' => [
+        'display_value_widget_order' => [
+          'processor_id' => 'display_value_widget_order',
+          'weights' => ['sort' => 40],
+          'settings' => ['sort' => 'ASC'],
+        ],
+      ],
+    ],
+  ];
+  $config->set("$base.filters.facets_community_title", $community_filter);
+
+  // 4. Add community facet to BEF filter config.
+  $bef_entry = [
+    'plugin_id' => 'default',
+    'advanced' => [
+      'rewrite' => [
+        'filter_rewrite_values' => '',
+        'filter_rewrite_values_key' => FALSE,
+      ],
+      'collapsible' => FALSE,
+      'collapsible_disable_automatic_open' => FALSE,
+      'open_by_default' => FALSE,
+      'is_secondary' => FALSE,
+      'hide_label' => FALSE,
+      'field_classes' => '',
+      'sort_options_unsupported' => '',
+    ],
+  ];
+  $config->set("$base.exposed_form.options.bef.filter.facets_community_title", $bef_entry);
+
+  $config->save();
+}
+
+/**
+ * Fix word_type index field; set community facet to single-select; move before cultural protocol; reorder filters; use glossary custom order sort.
+ */
+function mukurtu_dictionary_update_40016(): void {
+  // Fix word_type index field to use the main node field.
+  $index_ids = ['mukurtu_dictionary_index', 'mukurtu_dictionary_solr_index'];
+  foreach ($index_ids as $index_id) {
+    $index = \Drupal\search_api\Entity\Index::load($index_id);
+    if (!$index) {
+      continue;
+    }
+    $field = $index->getField('word_type');
+    if (!$field) {
+      continue;
+    }
+    if ($field->getPropertyPath() !== 'field_word_type:entity:name') {
+      $field->setPropertyPath('field_word_type:entity:name');
+      $index->save();
+      $index->reindex();
+    }
+  }
+
+  // Set community facet to single-select and move it before cultural protocol.
+  $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_dictionary');
+  if (!$config) {
+    return;
+  }
+  $base = 'display.default.display_options';
+
+  $config->set("$base.filters.facets_community_title.expose.multiple", FALSE);
+  $config->set("$base.filters.facets_community_title.group_info.multiple", FALSE);
+
+  $filters = $config->get("$base.filters");
+  if (isset($filters['facets_community_title']) && isset($filters['facets_mukurtu_cultural_protocol_ids'])) {
+    $community = $filters['facets_community_title'];
+    unset($filters['facets_community_title']);
+    $new_filters = [];
+    foreach ($filters as $key => $value) {
+      if ($key === 'facets_mukurtu_cultural_protocol_ids') {
+        $new_filters['facets_community_title'] = $community;
+      }
+      $new_filters[$key] = $value;
+    }
+    $config->set("$base.filters", $new_filters);
+  }
+
+  // Reorder exposed filters: search > language > community > protocol > type > word_type > keyword.
+  $filters = $config->get("$base.filters");
+  $order = [
+    'type',
+    'search_api_language',
+    'search_api_fulltext',
+    'facets_language',
+    'facets_community_title',
+    'facets_mukurtu_cultural_protocol_ids',
+    'facets_type',
+    'facets_word_type',
+    'facets_keyword',
+    'facets_word_lists',
+    'facets_field_glossary_entry',
+  ];
+  $new_filters = [];
+  foreach ($order as $key) {
+    if (isset($filters[$key])) {
+      $new_filters[$key] = $filters[$key];
+    }
+  }
+  foreach ($filters as $key => $value) {
+    if (!isset($new_filters[$key])) {
+      $new_filters[$key] = $value;
+    }
+  }
+  $config->set("$base.filters", $new_filters);
+
+  // Use glossary custom order sort plugin for field_glossary_entry and expose it.
+  $config->set("$base.sorts.field_glossary_entry.plugin_id", 'glossary_custom_order');
+  $config->set("$base.sorts.field_glossary_entry.expose.label", 'Glossary order');
+  $config->set("$base.sorts.field_glossary_entry.expose.field_identifier", 'glossary_order');
+  $config->set("$base.sorts.field_glossary_entry.exposed", TRUE);
+
+  // Add search relevance sort option.
+  $config->set("$base.sorts.search_api_relevance", [
+    'id' => 'search_api_relevance',
+    'table' => 'search_api_index_mukurtu_dictionary_index',
+    'field' => 'search_api_relevance',
+    'relationship' => 'none',
+    'group_type' => 'group',
+    'admin_label' => '',
+    'plugin_id' => 'search_api',
+    'order' => 'DESC',
+    'expose' => [
+      'label' => 'Search relevance',
+      'field_identifier' => 'relevance',
+    ],
+    'exposed' => TRUE,
+  ]);
+
+  // Add BEF sort section.
+  $config->set("$base.exposed_form.options.bef.sort", [
+    'plugin_id' => 'default',
+    'advanced' => [
+      'combine' => FALSE,
+      'combine_rewrite' => '',
+      'combine_param' => 'sort_bef_combine',
+      'reset' => FALSE,
+      'reset_label' => '',
+      'collapsible' => FALSE,
+      'collapsible_label' => 'Sort options',
+      'is_secondary' => FALSE,
+    ],
+  ]);
+
+  $config->save();
+}
+
+/**
+ * Add field_coverage to the dictionary search index for map view support.
+ */
+function mukurtu_dictionary_update_40017(): void {
+  $index = \Drupal\search_api\Entity\Index::load('mukurtu_dictionary_index');
+  if (!$index) {
+    return;
+  }
+
+  if (!$index->getField('field_coverage')) {
+    $field = new \Drupal\search_api\Item\Field($index, 'field_coverage');
+    $field->setType('string');
+    $field->setPropertyPath('field_coverage');
+    $field->setDatasourceId('entity:node');
+    $field->setLabel('Map Points');
+    $index->addField($field);
+    $index->save();
+    $index->reindex();
+  }
+}
