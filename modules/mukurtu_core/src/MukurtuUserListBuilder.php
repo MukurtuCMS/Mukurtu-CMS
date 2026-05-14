@@ -124,7 +124,7 @@ class MukurtuUserListBuilder extends \Drupal\user\UserListBuilder {
       ];
     }
     $operations['memberships'] = [
-      'title' => $this->t('Memberships'),
+      'title' => $this->t('View memberships'),
       'url' => Url::fromRoute('mukurtu_protocol.user_memberships', ['user' => $entity->id()]),
       'weight' => 20,
     ];

@@ -423,3 +423,108 @@ function mukurtu_protocol_update_40015(): void {
   $view_data = \Symfony\Component\Yaml\Yaml::parseFile($view_file);
   \Drupal::configFactory()->getEditable('views.view.og_members_overview')->setData($view_data)->save(TRUE);
 }
+
+/**
+ * Add Approve/Unblock and Set Pending bulk actions to /admin/people;
+ * add Set Pending to /admin/people/list VBO form.
+ */
+function mukurtu_protocol_update_40016(): void {
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
+
+  // Install action config entities so they appear in the user_bulk_form.
+  foreach ([
+    'system.action.mukurtu_unblock_user_action',
+    'system.action.mukurtu_set_pending_user_action',
+  ] as $config_name) {
+    $file = $module_path . '/config/install/' . $config_name . '.yml';
+    $data = \Symfony\Component\Yaml\Yaml::parseFile($file);
+    \Drupal::configFactory()->getEditable($config_name)->setData($data)->save(TRUE);
+  }
+
+  // Re-import mukurtu_people view to add mukurtu_set_pending_user_action.
+  $view_file = $module_path . '/config/install/views.view.mukurtu_people.yml';
+  $view_data = \Symfony\Component\Yaml\Yaml::parseFile($view_file);
+  \Drupal::configFactory()->getEditable('views.view.mukurtu_people')->setData($view_data)->save(TRUE);
+}
+
+/**
+ * Superseded by mukurtu_protocol_update_40020().
+ */
+function mukurtu_protocol_update_40017(): void {
+}
+
+/**
+ * Superseded by mukurtu_protocol_update_40020().
+ */
+function mukurtu_protocol_update_40018(): void {
+}
+
+/**
+ * Superseded by mukurtu_protocol_update_40020().
+ */
+function mukurtu_protocol_update_40019(): void {
+}
+
+/**
+ * Update /admin/people view: filters, columns, last-access display, and bulk
+ * action labels (consolidates 40017-40019).
+ */
+function mukurtu_protocol_update_40020(): void {
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
+  $view_file = $module_path . '/config/install/views.view.user_admin_people.yml';
+  $view_data = \Symfony\Component\Yaml\Yaml::parseFile($view_file);
+  \Drupal::configFactory()->getEditable('views.view.user_admin_people')->setData($view_data)->save(TRUE);
+}
+
+/**
+ * Superseded by mukurtu_protocol_update_40028().
+ */
+function mukurtu_protocol_update_40021(): void {
+}
+
+/**
+ * Superseded by mukurtu_protocol_update_40028().
+ */
+function mukurtu_protocol_update_40022(): void {
+}
+
+/**
+ * Superseded by mukurtu_protocol_update_40028().
+ */
+function mukurtu_protocol_update_40023(): void {
+}
+
+/**
+ * Superseded by mukurtu_protocol_update_40020() (user_admin_people view).
+ */
+function mukurtu_protocol_update_40024(): void {
+}
+
+/**
+ * Superseded by mukurtu_protocol_update_40028().
+ */
+function mukurtu_protocol_update_40025(): void {
+}
+
+/**
+ * Superseded by mukurtu_protocol_update_40028().
+ */
+function mukurtu_protocol_update_40026(): void {
+}
+
+/**
+ * Superseded by mukurtu_protocol_update_40028().
+ */
+function mukurtu_protocol_update_40027(): void {
+}
+
+/**
+ * Update /admin/people/list view: filters, columns, last-access display, VBO
+ * label overrides, and hide multipage selection counter (consolidates 40021-40027).
+ */
+function mukurtu_protocol_update_40028(): void {
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
+  $view_file = $module_path . '/config/install/views.view.mukurtu_people.yml';
+  $view_data = \Symfony\Component\Yaml\Yaml::parseFile($view_file);
+  \Drupal::configFactory()->getEditable('views.view.mukurtu_people')->setData($view_data)->save(TRUE);
+}

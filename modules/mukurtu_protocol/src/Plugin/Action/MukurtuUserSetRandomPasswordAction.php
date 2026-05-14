@@ -3,14 +3,21 @@
 namespace Drupal\mukurtu_protocol\Plugin\Action;
 
 use Drupal\Core\Action\ActionBase;
+use Drupal\Core\Action\Attribute\Action;
 use Drupal\Core\Password\PasswordGeneratorInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Replaces genpass's UserSetRandomPassword to also send a one-time login email.
  */
+#[Action(
+  id: 'genpass_set_random_password',
+  label: new TranslatableMarkup('Set new random password'),
+  type: 'user'
+)]
 class MukurtuUserSetRandomPasswordAction extends ActionBase implements ContainerFactoryPluginInterface {
 
   public function __construct(

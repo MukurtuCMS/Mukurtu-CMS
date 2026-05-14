@@ -976,6 +976,14 @@ class FormHooks
             "og_membership_pending_action",
             "mukurtu_block_user_action",
             "user_block_user_action",
+            "user_add_role_action.administrator",
+            "user_add_role_action.mukurtu_manager",
+            "user_add_role_action.mukurtu_roundtrip_manager",
+            "user_remove_role_action.administrator",
+            "user_remove_role_action.mukurtu_manager",
+            "user_remove_role_action.mukurtu_roundtrip_manager",
+            "pathauto_update_alias_user",
+            "user_unblock_user_action",
         ];
 
         if (isset($form["header"]["user_bulk_form"]["action"]["#options"])) {
@@ -986,17 +994,36 @@ class FormHooks
                     ],
                 );
             }
-            if (
-                isset(
-                    $form["header"]["user_bulk_form"]["action"]["#options"][
-                        "user_cancel_user_action"
-                    ],
-                )
-            ) {
-                $form["header"]["user_bulk_form"]["action"]["#options"][
-                    "user_cancel_user_action"
-                ] = t("Block or delete the selected user account(s)");
+            $relabels = [
+                "user_cancel_user_action" => t("Block or delete"),
+                "genpass_set_random_password" => t("Set new random password(s)"),
+                "mukurtu_set_pending_user_action" => t("Set pending"),
+                "mukurtu_unblock_user_action" => t("Unblock or approve"),
+            ];
+            foreach ($relabels as $action_id => $label) {
+                if (isset($form["header"]["user_bulk_form"]["action"]["#options"][$action_id])) {
+                    $form["header"]["user_bulk_form"]["action"]["#options"][$action_id] = $label;
+                }
             }
+            if (isset($form["header"]["user_bulk_form"]["action"]["#title"])) {
+                $form["header"]["user_bulk_form"]["action"]["#title"] = t("Action for selected users");
+            }
+            if (isset($form["header"]["user_bulk_form"]["action"]["#empty_option"])) {
+                $form["header"]["user_bulk_form"]["action"]["#empty_option"] = t("-- Select action --");
+            }
+            if (isset($form["header"]["user_bulk_form"]["actions"]["submit"]["#value"])) {
+                $form["header"]["user_bulk_form"]["actions"]["submit"]["#value"] = t("Apply to selected users");
+            }
+        }
+
+        if (str_starts_with($form_id, "views_form_mukurtu_people_")) {
+            if (isset($form["header"]["views_bulk_operations_bulk_form"]["actions"]["submit"]["#value"])) {
+                $form["header"]["views_bulk_operations_bulk_form"]["actions"]["submit"]["#value"] = t("Apply to selected users");
+            }
+        }
+
+        if ($is_user_form) {
+            $form["#attached"]["library"][] = "mukurtu_core/vbo-user-labels";
         }
 
         if (

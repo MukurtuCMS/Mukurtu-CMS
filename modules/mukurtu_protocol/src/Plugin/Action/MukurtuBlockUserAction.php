@@ -15,7 +15,7 @@ use Drupal\views_bulk_operations\Action\ViewsBulkOperationsActionBase;
  *
  * @Action(
  *   id = "mukurtu_block_user_action",
- *   label = @Translation("Block user"),
+ *   label = @Translation("Block user(s)"),
  *   type = "user",
  *   confirm = TRUE,
  *   requirements = {

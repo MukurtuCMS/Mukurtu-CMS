@@ -15,7 +15,7 @@ use Drupal\views_bulk_operations\Action\ViewsBulkOperationsActionBase;
  *
  * @Action(
  *   id = "mukurtu_unblock_user_action",
- *   label = @Translation("Unblock user"),
+ *   label = @Translation("Unblock or approve user(s)"),
  *   type = "user",
  *   confirm = TRUE,
  *   requirements = {
