@@ -4,7 +4,6 @@ dependencies:
   config:
     - core.entity_view_mode.node.teaser
     - field.field.node.word_list.comment
-    - image.style.small_250px_w_
     - node.type.word_list
   module:
     - layout_builder
@@ -19,14 +18,12 @@ targetEntityType: node
 bundle: word_list
 mode: teaser
 content:
-  field_representative_media:
-    type: media_thumbnail
+  field_word_list_image:
+    type: entity_reference_entity_view
     label: hidden
     settings:
-      image_link: ''
-      image_style: small_250px_w_
-      image_loading:
-        attribute: lazy
+      view_mode: browse
+      link: false
     third_party_settings: {  }
     weight: 0
     region: content
@@ -58,9 +55,9 @@ hidden:
   field_protocol_control: true
   field_related_content: true
   field_sequence_collection: true
+  field_representative_media: true
   field_source: true
   field_title: true
-  field_word_list_image: true
   field_words: true
   flag_email_node: true
   flag_email_og: true

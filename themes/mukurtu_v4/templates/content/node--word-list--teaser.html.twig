@@ -69,9 +69,9 @@
 #}
 
 <article{{ attributes.addClass('word-list__teaser') }}>
-  {% if content.field_representative_media|render is not empty %}
+  {% if content.field_word_list_image|render is not empty %}
   <div class="word-list__teaser-image">
-    {{ content.field_representative_media }}
+    {{ content.field_word_list_image }}
   </div>
   {% endif %}
 
