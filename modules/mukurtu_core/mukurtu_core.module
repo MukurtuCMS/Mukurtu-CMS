@@ -105,32 +105,19 @@ function mukurtu_core_entity_operation(EntityInterface $entity) {
     if ($account->id() == $entity->id()) {
       return $operations;
     }
-    $can_manage = $account->hasPermission('administer users');
-    if (!$can_manage) {
-      $current_user = \Drupal\user\Entity\User::load($account->id());
-      foreach (\Drupal\og\Og::getMemberships($current_user) as $membership) {
-        if ($membership->getGroupBundle() === 'community' && $membership->hasPermission('manage members')) {
-          $can_manage = TRUE;
-          break;
-        }
+    $is_site_admin = $account->hasPermission('administer users');
+    $current_user = \Drupal\user\Entity\User::load($account->id());
+
+    // Build managed-community IDs in one pass; $can_manage follows from this.
+    $cm_community_ids = [];
+    foreach (\Drupal\og\Og::getMemberships($current_user) as $membership) {
+      if ($membership->getGroupBundle() === 'community' && $membership->hasPermission('manage members')) {
+        $cm_community_ids[] = $membership->getGroupId();
       }
     }
+    $can_manage = $is_site_admin || !empty($cm_community_ids);
+
     if ($can_manage) {
-      $is_site_admin = $account->hasPermission('administer users');
-
-      // Site admins bypass the OG membership check above, so $current_user
-      // may not be loaded yet.
-      if (!isset($current_user)) {
-        $current_user = \Drupal\user\Entity\User::load($account->id());
-      }
-
-      // Pre-compute community IDs for all users (reused below).
-      $cm_community_ids = [];
-      foreach (\Drupal\og\Og::getMemberships($current_user) as $m) {
-        if ($m->getGroupBundle() === 'community' && $m->hasPermission('manage members')) {
-          $cm_community_ids[] = $m->getGroupId();
-        }
-      }
       $target_community_ids = [];
       foreach (\Drupal\og\Og::getMemberships($entity) as $m) {
         if ($m->getGroupBundle() === 'community') {
@@ -155,7 +142,8 @@ function mukurtu_core_entity_operation(EntityInterface $entity) {
       ));
       $status = $entity->get('status')->value;
       $is_pending = $entity->hasField('field_pending') && (bool) $entity->get('field_pending')->value;
-      $can_manage_inactive = $is_site_admin || (!$target_is_protected && !empty(array_intersect($cm_community_ids, $target_community_ids)));
+      $shared_communities = array_intersect($cm_community_ids, $target_community_ids);
+      $can_manage_inactive = $is_site_admin || (!$target_is_protected && !empty($shared_communities));
 
       if ($status == 0 && $is_pending) {
         // Pending: offer Approve (activates) or Block (explicitly blocks).
@@ -194,8 +182,7 @@ function mukurtu_core_entity_operation(EntityInterface $entity) {
       else {
         // Active: offer Block or Set to Pending.
         if ($is_site_admin || !$target_is_protected) {
-          $can_block = $is_site_admin || !empty(array_intersect($cm_community_ids, $target_community_ids));
-          if ($can_block) {
+          if ($is_site_admin || !empty($shared_communities)) {
             $operations['block_user'] = [
               'title' => t('Block'),
               'url' => Url::fromRoute('mukurtu_core.block_user', ['uid' => $entity->id()]),
