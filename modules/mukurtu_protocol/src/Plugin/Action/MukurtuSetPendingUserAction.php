@@ -15,7 +15,7 @@ use Drupal\views_bulk_operations\Action\ViewsBulkOperationsActionBase;
  *
  * @Action(
  *   id = "mukurtu_set_pending_user_action",
- *   label = @Translation("Set user to pending"),
+ *   label = @Translation("Set user(s) pending"),
  *   type = "user",
  *   confirm = TRUE,
  *   requirements = {
