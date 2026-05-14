@@ -5289,8 +5289,9 @@ header {
       -ms-flex-pack: justify;
           justify-content: space-between;
 }
-.dictionary-word__teaser-word:focus, .dictionary-word__teaser-word:focus-visible {
-  outline-color: var(--color-white);
+.dictionary-word__teaser-word:focus-visible {
+  outline: 2px solid var(--color-white);
+  outline-offset: 2px;
 }
 .dictionary-word__teaser svg {
   fill: var(--color-white);
@@ -5400,11 +5401,13 @@ header {
   padding-block: var(--v-space-4xxs);
   padding-inline: var(--v-space-2xs);
 }
-.word-list__teaser-heading a {
-  color: var(--color-white);
-  font-size: var(--font-size-xl);
-}
 .word-list__teaser-title {
+  font-size: var(--font-size-xl);
+  font-weight: inherit;
+  margin-block: 0;
+}
+.word-list__teaser-title a {
+  color: var(--color-white);
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -5412,8 +5415,9 @@ header {
       -ms-flex-pack: justify;
           justify-content: space-between;
 }
-.word-list__teaser-title:focus, .word-list__teaser-title:focus-visible {
-  outline-color: var(--color-white);
+.word-list__teaser-title a:focus-visible {
+  outline: 2px solid var(--color-white);
+  outline-offset: 2px;
 }
 .word-list__teaser-title svg {
   fill: var(--color-white);

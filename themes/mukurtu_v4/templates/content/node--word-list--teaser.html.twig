@@ -71,10 +71,12 @@
 <article{{ attributes.addClass('word-list__teaser') }}>
   {{ title_prefix }}
   <div{{ title_attributes.addClass('word-list__teaser-heading') }}>
-    <a class="word-list__teaser-title" href="{{ url }}" rel="bookmark">
-      {{ label }}
-      {% include active_theme_path() ~ '/images/chevron_arrow_right.svg' %}
-    </a>
+    <h2 class="word-list__teaser-title">
+      <a href="{{ url }}" rel="bookmark">
+        {{ label }}
+        {% include active_theme_path() ~ '/images/chevron_arrow_right.svg' %}
+      </a>
+    </h2>
   </div>
   {{ title_suffix }}
 

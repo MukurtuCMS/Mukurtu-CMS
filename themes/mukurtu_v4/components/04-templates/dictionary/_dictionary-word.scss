@@ -19,9 +19,9 @@
     display: flex;
     justify-content: space-between;
 
-    &:focus,
     &:focus-visible {
-      outline-color: var(--color-white);
+      outline: 2px solid var(--color-white);
+      outline-offset: 2px;
     }
   }
 
@@ -134,20 +134,22 @@
     background-color: var(--brand-primary-dark);
     padding-block: var(--v-space-4xxs);
     padding-inline: var(--v-space-2xs);
-
-    a {
-      color: var(--color-white);
-      font-size: var(--font-size-xl);
-    }
   }
 
   &-title {
-    display: flex;
-    justify-content: space-between;
+    font-size: var(--font-size-xl);
+    font-weight: inherit;
+    margin-block: 0;
 
-    &:focus,
-    &:focus-visible {
-      outline-color: var(--color-white);
+    a {
+      color: var(--color-white);
+      display: flex;
+      justify-content: space-between;
+
+      &:focus-visible {
+        outline: 2px solid var(--color-white);
+        outline-offset: 2px;
+      }
     }
 
     svg {
