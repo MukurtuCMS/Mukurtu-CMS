@@ -106,7 +106,8 @@ class MukurtuUserSelection extends WidgetBase implements ContainerFactoryPluginI
   protected function buildUserLabel($user) {
     $name = $user->getAccountName();
     $email = $user->getEmail();
-    return "$name ($email)";
+    $status = $user->isActive() ? '' : ' [Blocked/Pending]';
+    return "$name ($email)$status";
   }
 
   /**
