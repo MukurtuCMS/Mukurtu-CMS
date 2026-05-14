@@ -5394,7 +5394,6 @@ header {
   inline-size: 100%;
   -o-object-fit: cover;
      object-fit: cover;
-  aspect-ratio: 16/9;
 }
 .word-list__teaser-heading {
   background-color: var(--brand-primary-dark);
