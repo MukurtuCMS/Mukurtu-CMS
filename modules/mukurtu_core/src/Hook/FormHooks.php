@@ -399,6 +399,7 @@ class FormHooks
             "community",
             "community",
         );
+        uasort($communityRolesRaw, fn($a, $b) => $a->getWeight() <=> $b->getWeight());
         $communityRoles = [];
         foreach ($communityRolesRaw as $roleValue) {
             if (
@@ -413,6 +414,7 @@ class FormHooks
             "protocol",
             "protocol",
         );
+        uasort($protocolRolesRaw, fn($a, $b) => $a->getWeight() <=> $b->getWeight());
         $protocolRoles = [];
         foreach ($protocolRolesRaw as $roleValue) {
             if (

@@ -51,21 +51,25 @@ class AddUserToCommunityForm extends FormBase {
    */
   protected function getCommunityRoles(): array {
     $role_manager = \Drupal::service('og.role_manager');
-    return array_filter(
+    $roles = array_filter(
       $role_manager->getRolesByBundle('community', 'community'),
       fn($r) => !in_array($r->id(), ['community-community-member', 'community-community-non-member'])
     );
+    uasort($roles, fn($a, $b) => $a->getWeight() <=> $b->getWeight());
+    return $roles;
   }
 
   /**
-   * Returns the protocol OG roles (excluding member / non-member).
+   * Returns the protocol OG roles (excluding member / non-member), sorted by weight.
    */
   protected function getProtocolRoles(): array {
     $role_manager = \Drupal::service('og.role_manager');
-    return array_filter(
+    $roles = array_filter(
       $role_manager->getRolesByBundle('protocol', 'protocol'),
       fn($r) => !in_array($r->id(), ['protocol-protocol-member', 'protocol-protocol-non-member'])
     );
+    uasort($roles, fn($a, $b) => $a->getWeight() <=> $b->getWeight());
+    return $roles;
   }
 
   /**
@@ -171,6 +175,68 @@ class AddUserToCommunityForm extends FormBase {
   }
 
   // ---------------------------------------------------------------------------
+  // Role description helpers
+  // ---------------------------------------------------------------------------
+
+  protected static function buildCommunityRoleDescriptions(): array {
+    $roles = [
+      'community_member'    => t('Community member'),
+      'community_affiliate' => t('Community affiliate'),
+      'community_manager'   => t('Community manager'),
+    ];
+    $descriptions = [
+      'community_member'    => t('View the community page and be added to protocols within the community'),
+      'community_affiliate' => t('View the community page and be added to protocols within the community. This is a designation for community partners.'),
+      'community_manager'   => t('Manage community membership and create new protocols. View the community page and be added to protocols within the community.'),
+    ];
+    $items = [];
+    foreach ($descriptions as $role_id => $description) {
+      $items[] = ['#markup' => '<strong>' . $roles[$role_id] . '</strong>: ' . $description];
+    }
+    return [
+      '#type' => 'details',
+      '#title' => t('Role descriptions'),
+      '#open' => FALSE,
+      '#attributes' => ['class' => ['role-descriptions']],
+      'list' => ['#theme' => 'item_list', '#items' => $items],
+    ];
+  }
+
+  protected static function buildProtocolRoleDescriptions(): array {
+    $roles = [
+      'protocol_member'          => t('Protocol member'),
+      'protocol_affiliate'       => t('Protocol affiliate'),
+      'contributor'              => t('Contributor'),
+      'curator'                  => t('Curator'),
+      'language_contributor'     => t('Language contributor'),
+      'language_steward'         => t('Language steward'),
+      'community_record_steward' => t('Community record steward'),
+      'protocol_steward'         => t('Protocol steward'),
+    ];
+    $descriptions = [
+      'protocol_member'          => t('View content but cannot create or edit.'),
+      'protocol_affiliate'       => t('View content but cannot create or edit. This is a designation for community partners that mirrors the community affiliate role.'),
+      'contributor'              => t('Create, edit, and delete their own digital heritage items, person records, place records, and media assets.'),
+      'curator'                  => t('Create, edit, and delete their own collections and media assets.'),
+      'language_contributor'     => t('Create, edit, and delete their own dictionary words and word lists.'),
+      'language_steward'         => t('Create, edit, and delete ALL dictionary words and word lists, and media assets.'),
+      'community_record_steward' => t('Add community records to content, as well as edit and delete their community records.'),
+      'protocol_steward'         => t('Manage protocol membership, create, edit, and delete ALL content and media assets, and manage Local Contexts projects.'),
+    ];
+    $items = [];
+    foreach ($descriptions as $role_id => $description) {
+      $items[] = ['#markup' => '<strong>' . $roles[$role_id] . '</strong>: ' . $description];
+    }
+    return [
+      '#type' => 'details',
+      '#title' => t('Role descriptions'),
+      '#open' => FALSE,
+      '#attributes' => ['class' => ['role-descriptions']],
+      'list' => ['#theme' => 'item_list', '#items' => $items],
+    ];
+  }
+
+  // ---------------------------------------------------------------------------
   // Form building
   // ---------------------------------------------------------------------------
 
@@ -220,6 +286,8 @@ class AddUserToCommunityForm extends FormBase {
       $header[] = ['data' => $role->getLabel(), 'scope' => 'col'];
     }
 
+    $form['community_role_descriptions'] = static::buildCommunityRoleDescriptions();
+
     $form['memberships'] = [
       '#type'    => 'table',
       '#caption' => $this->t('Select community roles for @user', ['@user' => $user->getDisplayName()]),
@@ -245,6 +313,8 @@ class AddUserToCommunityForm extends FormBase {
       }
     }
 
+    $form['#attached']['library'][] = 'mukurtu_protocol/membership-table';
+
     $form['actions'] = ['#type' => 'actions'];
     $form['actions']['submit'] = [
       '#type'   => 'submit',
@@ -269,6 +339,8 @@ class AddUserToCommunityForm extends FormBase {
     foreach ($roles as $role) {
       $header[] = ['data' => $role->getLabel(), 'scope' => 'col'];
     }
+
+    $form['protocol_role_descriptions'] = static::buildProtocolRoleDescriptions();
 
     $target_user = User::load($form_state->get('target_uid'));
     $form['protocol_memberships'] = [
@@ -297,6 +369,8 @@ class AddUserToCommunityForm extends FormBase {
         ];
       }
     }
+
+    $form['#attached']['library'][] = 'mukurtu_protocol/membership-table';
 
     $form['actions'] = ['#type' => 'actions'];
     $form['actions']['submit'] = [

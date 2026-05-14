@@ -5,7 +5,7 @@ dependencies:
     - mukurtu_protocol
 id: protocol-protocol-contributor
 label: Contributor
-weight: 12
+weight: 30
 is_admin: null
 group_type: protocol
 group_bundle: protocol

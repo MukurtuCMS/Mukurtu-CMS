@@ -831,6 +831,46 @@ function mukurtu_protocol_form_og_membership_form_alter(&$form, FormStateInterfa
   if (($group instanceof ProtocolInterface || $group instanceof CommunityInterface) && !empty($form['roles']['widget']['#options'])) {
     $form['roles']['widget']['#options'] = _mukurtu_protocol_sort_role_options($form['roles']['widget']['#options']);
   }
+
+  // Add a collapsible role description list below the checkboxes.
+  if ($group instanceof CommunityInterface) {
+    $role_info = [
+      t('Community member')    => t('View the community page and be added to protocols within the community'),
+      t('Community affiliate') => t('View the community page and be added to protocols within the community. This is a designation for community partners.'),
+      t('Community manager')   => t('Manage community membership and create new protocols. View the community page and be added to protocols within the community.'),
+    ];
+  }
+  elseif ($group instanceof ProtocolInterface) {
+    $role_info = [
+      t('Protocol member')          => t('View content but cannot create or edit.'),
+      t('Protocol affiliate')       => t('View content but cannot create or edit. This is a designation for community partners that mirrors the community affiliate role.'),
+      t('Contributor')              => t('Create, edit, and delete their own digital heritage items, person records, place records, and media assets.'),
+      t('Curator')                  => t('Create, edit, and delete their own collections and media assets.'),
+      t('Language contributor')     => t('Create, edit, and delete their own dictionary words and word lists.'),
+      t('Language steward')         => t('Create, edit, and delete ALL dictionary words and word lists, and media assets.'),
+      t('Community record steward') => t('Add community records to content, as well as edit and delete their community records.'),
+      t('Protocol steward')         => t('Manage protocol membership, create, edit, and delete ALL content and media assets, and manage Local Contexts projects.'),
+    ];
+  }
+  else {
+    $role_info = [];
+  }
+
+  if (!empty($role_info)) {
+    $items = [];
+    foreach ($role_info as $label => $description) {
+      $items[] = ['#markup' => '<strong>' . $label . '</strong>: ' . $description];
+    }
+    $form['role_descriptions'] = [
+      '#type'       => 'details',
+      '#title'      => t('Role descriptions'),
+      '#open'       => FALSE,
+      '#attributes' => ['class' => ['role-descriptions']],
+      '#weight'     => $form['roles']['#weight'] ?? 0,
+      'list'        => ['#theme' => 'item_list', '#items' => $items],
+    ];
+    $form['#attached']['library'][] = 'mukurtu_protocol/membership-table';
+  }
 }
 
 /**
