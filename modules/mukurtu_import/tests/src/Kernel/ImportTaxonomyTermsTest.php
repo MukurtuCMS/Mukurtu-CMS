@@ -92,13 +92,15 @@ class ImportTaxonomyTermsTest extends MukurtuImportTestBase {
 
     // Create a new node via import. Use some of the same terms created above.
     $data2 = [
-      ['title', 'keywords'],
-      ["Existing Term Test", 'Keyword 1;Keyword 3'],
+      ['title', 'keywords', 'sharing_setting', 'protocols'],
+      ["Existing Term Test", 'Keyword 1;Keyword 3', 'any', $this->protocol->id()],
     ];
     $import_file2 = $this->createCsvFile($data2);
     $mapping2 = [
       ['target' => 'title', 'source' => 'title'],
       ['target' => 'field_keywords', 'source' => 'keywords'],
+      ['target' => 'field_cultural_protocols/sharing_setting', 'source' => 'sharing_setting'],
+      ['target' => 'field_cultural_protocols/protocols', 'source' => 'protocols'],
     ];
 
     $result2 = $this->importCsvFile($import_file2, $mapping2);
