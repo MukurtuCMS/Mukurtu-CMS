@@ -5339,7 +5339,7 @@ header {
   margin-inline: 0;
 }
 .dictionary-word__teaser .field--name-field-media-audio-file audio {
-  background-color: var(--color-white);
+  background-color: #f1f3f4;
   border-radius: 4px;
   -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
           box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
