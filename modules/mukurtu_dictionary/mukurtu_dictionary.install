@@ -739,6 +739,22 @@ function mukurtu_dictionary_update_40019(): void {
 }
 
 /**
+ * Remove hide_1_result_facet processor from glossary_entry facet so the A-Z bar shows with only one letter.
+ */
+function mukurtu_dictionary_update_40020(): void {
+  $config = \Drupal::configFactory()->getEditable('facets.facet.glossary_entry');
+  if ($config->isNew()) {
+    return;
+  }
+  $processors = $config->get('processor_configs') ?? [];
+  if (isset($processors['hide_1_result_facet'])) {
+    unset($processors['hide_1_result_facet']);
+    $config->set('processor_configs', $processors);
+    $config->save();
+  }
+}
+
+/**
  * Add field_coverage to the dictionary search index for map view support.
  */
 function mukurtu_dictionary_update_40017(): void {
