@@ -162,6 +162,26 @@
     background-color: var(--brand-light-accent);
     padding-block: var(--v-space-4xxs);
     padding-inline: var(--v-space-2xs);
+    display: flex;
+    gap: var(--v-space-4xxs);
+    align-items: start;
+  }
+
+  &-text {
+    flex: 1;
+    min-inline-size: 0;
+  }
+
+  &-image {
+    flex: 0 0 auto;
+    inline-size: 33%;
+
+    img {
+      block-size: auto;
+      display: block;
+      inline-size: 100%;
+      object-fit: cover;
+    }
   }
 
   &-type {

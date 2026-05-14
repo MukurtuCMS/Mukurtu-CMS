@@ -5426,6 +5426,32 @@ header {
   background-color: var(--brand-light-accent);
   padding-block: var(--v-space-4xxs);
   padding-inline: var(--v-space-2xs);
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  gap: var(--v-space-4xxs);
+  -webkit-box-align: start;
+      -ms-flex-align: start;
+          align-items: start;
+}
+.word-list__teaser-text {
+  -webkit-box-flex: 1;
+      -ms-flex: 1;
+          flex: 1;
+  min-inline-size: 0;
+}
+.word-list__teaser-image {
+  -webkit-box-flex: 0;
+      -ms-flex: 0 0 auto;
+          flex: 0 0 auto;
+  inline-size: 33%;
+}
+.word-list__teaser-image img {
+  block-size: auto;
+  display: block;
+  inline-size: 100%;
+  -o-object-fit: cover;
+     object-fit: cover;
 }
 .word-list__teaser-type {
   font-size: var(--font-size-s);

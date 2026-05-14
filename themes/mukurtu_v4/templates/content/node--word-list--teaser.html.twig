@@ -79,14 +79,16 @@
   {{ title_suffix }}
 
   <div{{ content_attributes.addClass('word-list__teaser-content') }}>
-    <div class="word-list__teaser-type">{{ 'Word List'|t }}</div>
+    <div class="word-list__teaser-text">
+      <div class="word-list__teaser-type">{{ 'Word List'|t }}</div>
+      {% if content.field_summary|render is not empty %}
+        {{ content.field_summary }}
+      {% endif %}
+    </div>
     {% if content.field_word_list_image|render is not empty %}
       <div class="word-list__teaser-image">
         {{ content.field_word_list_image }}
       </div>
-    {% endif %}
-    {% if content.field_summary|render is not empty %}
-      {{ content.field_summary }}
     {% endif %}
   </div>
 </article>
