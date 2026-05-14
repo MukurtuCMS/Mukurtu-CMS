@@ -1011,6 +1011,12 @@ class FormHooks
             }
         }
 
+        if (str_starts_with($form_id, "views_form_mukurtu_people_")) {
+            if (isset($form["header"]["views_bulk_operations_bulk_form"]["actions"]["submit"]["#value"])) {
+                $form["header"]["views_bulk_operations_bulk_form"]["actions"]["submit"]["#value"] = t("Apply to selected users");
+            }
+        }
+
         if (
             isset(
                 $form["header"]["og_membership_bulk_form"]["action"]["#options"],
