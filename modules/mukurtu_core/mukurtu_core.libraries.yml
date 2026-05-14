@@ -43,3 +43,11 @@ form-disable-enter-submit:
   dependencies:
     - core/drupal
     - core/once
+
+vbo-user-labels:
+  version: 1.x
+  js:
+    js/vbo-user-labels.js: {}
+  dependencies:
+    - core/drupal
+    - core/once

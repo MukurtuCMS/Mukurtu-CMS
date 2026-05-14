@@ -1017,6 +1017,10 @@ class FormHooks
             }
         }
 
+        if ($is_user_form) {
+            $form["#attached"]["library"][] = "mukurtu_core/vbo-user-labels";
+        }
+
         if (
             isset(
                 $form["header"]["og_membership_bulk_form"]["action"]["#options"],
