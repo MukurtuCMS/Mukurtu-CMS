@@ -679,6 +679,7 @@ display:
             group_items: {  }
           fields:
             name: name
+            field_display_name: field_display_name
             mail: mail
         status:
           id: status
