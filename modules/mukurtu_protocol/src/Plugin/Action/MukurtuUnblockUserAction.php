@@ -37,6 +37,7 @@ class MukurtuUnblockUserAction extends ViewsBulkOperationsActionBase {
     }
     if ($entity->status->value != 1) {
       $entity->set('status', TRUE);
+      $entity->set('field_pending', 0);
       try {
         $entity->save();
       }

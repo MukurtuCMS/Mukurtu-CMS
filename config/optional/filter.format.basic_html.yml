@@ -78,6 +78,9 @@ filters:
         digital_heritage_full: digital_heritage_full
         digital_heritage_sidebar: digital_heritage_sidebar
         small_250px_: small_250px_
+        small: small
+        medium: medium
+        large: large
       allowed_media_types:
         audio: audio
         document: document

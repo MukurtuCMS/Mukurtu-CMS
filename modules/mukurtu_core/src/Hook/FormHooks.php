@@ -10,6 +10,7 @@ use Drupal\Core\Hook\Order\OrderAfter;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Url;
 use Drupal\og\Og;
+use Drupal\views\ViewExecutable;
 use Drupal\og\OgMembershipInterface;
 use Drupal\user\Entity\User;
 
@@ -184,8 +185,11 @@ class FormHooks
         if (isset($form["account"]["status"])) {
             $form["account"]["status"]["#options"] = [
                 1 => t("Active"),
+                "pending" => t("Pending"),
                 0 => t("Blocked"),
             ];
+            array_unshift($form["#submit"], [static::class, "userStatusPreSaveSubmit"]);
+            $form["#submit"][] = [static::class, "userStatusPostSaveSubmit"];
         }
         if (isset($form["account"]["roles"]["#options"])) {
             $desiredOrder = [
@@ -220,6 +224,7 @@ class FormHooks
             if (isset($form["account"]["field_display_name"])) {
                 unset($form["account"]["field_display_name"]);
             }
+            $form["#submit"][] = [static::class, "visitorRegistrationPendingSubmit"];
             return;
         }
 
@@ -680,10 +685,82 @@ class FormHooks
             unset($form["field_display_name"]);
         }
 
+        if (isset($form["account"]["status"])) {
+            $form["account"]["status"]["#options"] = [
+                1 => t("Active"),
+                "pending" => t("Pending"),
+                0 => t("Blocked"),
+            ];
+            // Pre-select "Pending" when editing a currently-pending user.
+            $entity = $form_state->getFormObject()->getEntity();
+            if (
+                !$entity->get("status")->value
+                && $entity->hasField("field_pending")
+                && $entity->get("field_pending")->value
+            ) {
+                $form["account"]["status"]["#default_value"] = "pending";
+            }
+            array_unshift($form["#submit"], [static::class, "userStatusPreSaveSubmit"]);
+            $form["#submit"][] = [static::class, "userStatusPostSaveSubmit"];
+        }
+
         if (isset($form["actions"]["delete"]["#title"])) {
             $form["actions"]["delete"]["#title"] = t(
                 "Block or delete account",
             );
+        }
+    }
+
+    /**
+     * Maps the "pending" radio value to status=0 before the entity is saved.
+     *
+     * Runs as the first submit handler so the entity builder sees status=0 for
+     * both Pending and Blocked selections.
+     */
+    public static function userStatusPreSaveSubmit(
+        array $form,
+        FormStateInterface &$form_state,
+    ): void {
+        $val = $form_state->getValue(["account", "status"]);
+        $form_state->set("mukurtu_status_selection", $val);
+        if ($val === "pending") {
+            // Map the virtual "pending" option to the underlying blocked status
+            // so the entity builder stores status=0. field_pending is set in
+            // the post-save handler below.
+            $form_state->setValue(["account", "status"], 0);
+        }
+    }
+
+    /**
+     * Sets field_pending=1 on the saved entity when "Pending" was selected.
+     *
+     * Runs after the entity save so the entity ID is available.
+     */
+    public static function userStatusPostSaveSubmit(
+        array $form,
+        FormStateInterface $form_state,
+    ): void {
+        if ($form_state->get("mukurtu_status_selection") === "pending") {
+            $entity = $form_state->getFormObject()->getEntity();
+            if ($entity && $entity->hasField("field_pending")) {
+                $entity->set("field_pending", 1);
+                $entity->save();
+            }
+        }
+    }
+
+    /**
+     * Marks a visitor self-registration as pending after Drupal core saves it
+     * with status=0 under administrator-approval mode.
+     */
+    public static function visitorRegistrationPendingSubmit(
+        array $form,
+        FormStateInterface $form_state,
+    ): void {
+        $user = $form_state->getFormObject()->getEntity();
+        if ($user && $user->hasField("field_pending") && $user->isBlocked()) {
+            $user->set("field_pending", 1);
+            $user->save();
         }
     }
 
@@ -944,6 +1021,41 @@ class FormHooks
                 ]["og_membership_delete_action"] = t("Remove from group");
             }
         }
+    }
+
+    /**
+     * Implements hook_form_FORM_ID_alter() for 'views_exposed_form'.
+     *
+     * Adds "Pending" as a status filter option on any Views page that lists
+     * users (user_admin_people, mukurtu_people, etc.).
+     */
+    #[Hook("form_views_exposed_form_alter")]
+    public function formViewsExposedFormAlter(
+        array &$form,
+        FormStateInterface $form_state,
+        string $form_id,
+    ): void {
+        if (!isset($form["status"])) {
+            return;
+        }
+        $storage = $form_state->getStorage();
+        $view = $storage["view"] ?? NULL;
+        if (!$view instanceof \Drupal\views\ViewExecutable) {
+            return;
+        }
+        if ($view->storage->get("base_table") !== "users_field_data") {
+            return;
+        }
+        // Insert "Pending" between Active (1) and Blocked (0).
+        // Use string keys throughout to avoid PHP integer-key coercion issues
+        // with the "0" option value.
+        $existing = $form["status"]["#options"];
+        $form["status"]["#options"] = [
+            "All" => $existing["All"] ?? t("- Any -"),
+            "1" => $existing[1] ?? t("Active"),
+            "pending" => t("Pending"),
+            "0" => $existing[0] ?? t("Blocked"),
+        ];
     }
 
     /**

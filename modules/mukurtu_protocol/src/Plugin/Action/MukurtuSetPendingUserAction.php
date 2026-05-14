@@ -11,11 +11,11 @@ use Drupal\views\ViewExecutable;
 use Drupal\views_bulk_operations\Action\ViewsBulkOperationsActionBase;
 
 /**
- * VBO for blocking a user, scoped to community manager permissions.
+ * VBO for setting a user to Pending status, scoped to community manager permissions.
  *
  * @Action(
- *   id = "mukurtu_block_user_action",
- *   label = @Translation("Block user"),
+ *   id = "mukurtu_set_pending_user_action",
+ *   label = @Translation("Set user to pending"),
  *   type = "user",
  *   confirm = TRUE,
  *   requirements = {
@@ -23,7 +23,7 @@ use Drupal\views_bulk_operations\Action\ViewsBulkOperationsActionBase;
  *   },
  * )
  */
-class MukurtuBlockUserAction extends ViewsBulkOperationsActionBase {
+class MukurtuSetPendingUserAction extends ViewsBulkOperationsActionBase {
 
   /**
    * {@inheritdoc}
@@ -35,16 +35,9 @@ class MukurtuBlockUserAction extends ViewsBulkOperationsActionBase {
     if (!$this->access($entity, \Drupal::currentUser())) {
       return;
     }
-    if ($entity->status->value != 0) {
-      $entity->set('status', FALSE);
-      $entity->set('field_pending', 0);
-      $entity->save();
-    }
-    elseif ($entity->hasField('field_pending') && $entity->get('field_pending')->value) {
-      // Already blocked but pending — explicitly mark as blocked.
-      $entity->set('field_pending', 0);
-      $entity->save();
-    }
+    $entity->set('status', FALSE);
+    $entity->set('field_pending', 1);
+    $entity->save();
   }
 
   /**
@@ -55,21 +48,16 @@ class MukurtuBlockUserAction extends ViewsBulkOperationsActionBase {
       return $return_as_object ? AccessResult::forbidden() : FALSE;
     }
 
-    // Users cannot block themselves.
-    if ($object->id() == $account->id()) {
-      return $return_as_object ? AccessResult::forbidden()->cachePerUser() : FALSE;
-    }
-
     if ($account->hasPermission('administer users')) {
       return $return_as_object ? AccessResult::allowed()->cachePerPermissions() : TRUE;
     }
 
-    // Community managers cannot block users with protected roles.
+    // Community managers cannot modify users with protected roles.
     if (array_intersect(MukurtuUserController::PROTECTED_ROLES, $object->getRoles())) {
       return $return_as_object ? AccessResult::forbidden()->cachePerUser() : FALSE;
     }
 
-    // Community managers may only block users who share a managed community.
+    // Community managers may only act on users who share a managed community.
     $current_user = User::load($account->id());
     $cm_community_ids = [];
     foreach (Og::getMemberships($current_user) as $m) {

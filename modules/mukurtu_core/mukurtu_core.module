@@ -154,13 +154,62 @@ function mukurtu_core_entity_operation(EntityInterface $entity) {
         $entity->getRoles()
       ));
       $status = $entity->get('status')->value;
-      if ($status == 0) {
+      $is_pending = $entity->hasField('field_pending') && (bool) $entity->get('field_pending')->value;
+      $can_manage_inactive = $is_site_admin || (!$target_is_protected && !empty(array_intersect($cm_community_ids, $target_community_ids)));
+
+      if ($status == 0 && $is_pending) {
+        // Pending: offer Approve (activates) or Block (explicitly blocks).
         $operations['approve_user'] = [
           'title' => t('Approve User'),
           'url' => Url::fromRoute('mukurtu_core.approve_user', ['uid' => $entity->id()]),
           'weight' => 100,
           'attributes' => ['class' => ['use-ajax']],
         ];
+        if ($can_manage_inactive) {
+          $operations['block_user'] = [
+            'title' => t('Block User'),
+            'url' => Url::fromRoute('mukurtu_core.block_user', ['uid' => $entity->id()]),
+            'weight' => 101,
+            'attributes' => ['class' => ['use-ajax']],
+          ];
+        }
+      }
+      elseif ($status == 0) {
+        // Explicitly blocked: offer Approve or revert to Pending.
+        $operations['approve_user'] = [
+          'title' => t('Approve User'),
+          'url' => Url::fromRoute('mukurtu_core.approve_user', ['uid' => $entity->id()]),
+          'weight' => 100,
+          'attributes' => ['class' => ['use-ajax']],
+        ];
+        if ($can_manage_inactive) {
+          $operations['set_pending_user'] = [
+            'title' => t('Set to Pending'),
+            'url' => Url::fromRoute('mukurtu_core.set_pending_user', ['uid' => $entity->id()]),
+            'weight' => 101,
+            'attributes' => ['class' => ['use-ajax']],
+          ];
+        }
+      }
+      else {
+        // Active: offer Block or Set to Pending.
+        if ($is_site_admin || !$target_is_protected) {
+          $can_block = $is_site_admin || !empty(array_intersect($cm_community_ids, $target_community_ids));
+          if ($can_block) {
+            $operations['block_user'] = [
+              'title' => t('Block User'),
+              'url' => Url::fromRoute('mukurtu_core.block_user', ['uid' => $entity->id()]),
+              'weight' => 100,
+              'attributes' => ['class' => ['use-ajax']],
+            ];
+            $operations['set_pending_user'] = [
+              'title' => t('Set to Pending'),
+              'url' => Url::fromRoute('mukurtu_core.set_pending_user', ['uid' => $entity->id()]),
+              'weight' => 101,
+              'attributes' => ['class' => ['use-ajax']],
+            ];
+          }
+        }
       }
     }
   }
@@ -401,22 +450,57 @@ function mukurtu_core_node_view(array &$build, EntityInterface $entity, EntityVi
  * Implements hook_ENTITY_TYPE_view().
  */
 function mukurtu_core_user_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
-  // Build an "approve" link to block/unblock users.
-  // However, do not display link for users who view their own account page!
-  // We don't want users blocking or approving themselves.
-  if ($view_mode == 'full' && \Drupal::currentUser()->id() != $entity->id() && !$entity->status->value) {
+  // Build status-action links on the full user profile page.
+  // Skip for users viewing their own account.
+  if ($view_mode == 'full' && \Drupal::currentUser()->id() != $entity->id()) {
+    $status = $entity->status->value;
+    $is_pending = $entity->hasField('field_pending') && (bool) $entity->get('field_pending')->value;
+    $links = [];
+
+    if ($status == 1) {
+      // Active: offer Block and Set to Pending.
+      $links['block'] = [
+        'title' => t('Block User'),
+        'url' => Url::fromRoute('mukurtu_core.block_user', ['uid' => $entity->id()]),
+        'attributes' => ['class' => ['use-ajax']],
+      ];
+      $links['set_pending'] = [
+        'title' => t('Set to Pending'),
+        'url' => Url::fromRoute('mukurtu_core.set_pending_user', ['uid' => $entity->id()]),
+        'attributes' => ['class' => ['use-ajax']],
+      ];
+    }
+    elseif ($is_pending) {
+      // Pending: offer Approve and Block.
+      $links['approve'] = [
+        'title' => t('Approve User'),
+        'url' => Url::fromRoute('mukurtu_core.approve_user', ['uid' => $entity->id()]),
+        'attributes' => ['class' => ['use-ajax']],
+      ];
+      $links['block'] = [
+        'title' => t('Block User'),
+        'url' => Url::fromRoute('mukurtu_core.block_user', ['uid' => $entity->id()]),
+        'attributes' => ['class' => ['use-ajax']],
+      ];
+    }
+    else {
+      // Blocked: offer Approve and Set to Pending.
+      $links['approve'] = [
+        'title' => t('Approve User'),
+        'url' => Url::fromRoute('mukurtu_core.approve_user', ['uid' => $entity->id()]),
+        'attributes' => ['class' => ['use-ajax']],
+      ];
+      $links['set_pending'] = [
+        'title' => t('Set to Pending'),
+        'url' => Url::fromRoute('mukurtu_core.set_pending_user', ['uid' => $entity->id()]),
+        'attributes' => ['class' => ['use-ajax']],
+      ];
+    }
+
     $build['mukurtu_toggle_user_approval'] = [
       '#theme' => 'links',
       '#weight' => -2,
-      '#links' => [
-        'mukurtu-toggle-user-approval' => [
-          'title' => t('Approve User'),
-          'url' => Url::fromRoute('mukurtu_core.approve_user', ['uid' => $entity->id()]),
-          'attributes' => [
-            'class' => ['use-ajax'],
-          ],
-        ],
-      ],
+      '#links' => $links,
       '#attached' => ['library' => ['core/drupal.ajax']],
     ];
   }
@@ -433,6 +517,13 @@ function mukurtu_core_entity_presave(EntityInterface $entity) {
     }
   }
 
+  // Active users are never pending; clear the flag whenever status=1.
+  if ($entity->getEntityTypeId() == 'user' && $entity->hasField('field_pending')) {
+    if ($entity->get('status')->value == 1) {
+      $entity->set('field_pending', 0);
+    }
+  }
+
   // Prevent any code path (bulk actions, direct edits) from blocking the
   // currently logged-in user's own account.
   if ($entity instanceof \Drupal\user\Entity\User && !$entity->isNew()) {
@@ -443,6 +534,88 @@ function mukurtu_core_entity_presave(EntityInterface $entity) {
       $entity->set('status', 1);
       \Drupal::messenger()->addWarning(t('You cannot block your own account.'));
     }
+  }
+}
+
+/**
+ * Implements hook_views_pre_build().
+ *
+ * When "Pending" is selected as the status filter, reset the exposed input to
+ * "All" so BooleanOperator does not write an invalid SQL condition, and set a
+ * flag for hook_views_query_alter. When "Blocked" is selected, set a flag so
+ * pending users are excluded.
+ */
+function mukurtu_core_views_pre_build(\Drupal\views\ViewExecutable $view) {
+  if (empty($view->filter['status'])) {
+    return;
+  }
+  $input = $view->getExposedInput();
+  $status = $input['status'] ?? NULL;
+
+  if ($status === 'pending') {
+    $input['status'] = 'All';
+    $view->setExposedInput($input);
+    $view->mukurtu_filter_pending = TRUE;
+  }
+  elseif ($status === '0') {
+    // Reset so BooleanOperator adds nothing; we own the full condition.
+    $input['status'] = 'All';
+    $view->setExposedInput($input);
+    $view->mukurtu_filter_blocked = TRUE;
+  }
+}
+
+/**
+ * Implements hook_views_query_alter().
+ *
+ * For pending: adds status=0 AND field_pending=1.
+ * For blocked: adds field_pending IS NULL OR field_pending=0.
+ */
+function mukurtu_core_views_query_alter(\Drupal\views\ViewExecutable $view, \Drupal\views\Plugin\views\query\QueryPluginBase $query) {
+  if (empty($view->mukurtu_filter_pending) && empty($view->mukurtu_filter_blocked)) {
+    return;
+  }
+  /** @var \Drupal\views\Plugin\views\query\Sql $query */
+  $configuration = [
+    'table' => 'user__field_pending',
+    'field' => 'entity_id',
+    'left_table' => 'users_field_data',
+    'left_field' => 'uid',
+    'operator' => '=',
+  ];
+  $join = \Drupal::service('plugin.manager.views.join')->createInstance('standard', $configuration);
+  $alias = $query->addTable('user__field_pending', NULL, $join);
+
+  if (!empty($view->mukurtu_filter_pending)) {
+    $query->addWhere(0, 'users_field_data.status', 0, '=');
+    $query->addWhere(0, "$alias.field_pending_value", 1, '=');
+  }
+  else {
+    // Blocked: status=0 AND not pending.
+    $query->addWhere(0, 'users_field_data.status', 0, '=');
+    $query->addWhereExpression(0, "($alias.field_pending_value IS NULL OR $alias.field_pending_value = 0)");
+  }
+}
+
+/**
+ * Implements hook_preprocess_views_view_field().
+ *
+ * Replaces "Blocked" with "Pending" in any Views status column for users
+ * who have field_pending=1, so that admin-approval registrations display
+ * correctly on /admin/people and similar views.
+ */
+function mukurtu_core_preprocess_views_view_field(&$variables) {
+  $field = $variables['field'];
+  if ($field->field !== 'status') {
+    return;
+  }
+  $row = $variables['row'];
+  if (empty($row->_entity) || !($row->_entity instanceof \Drupal\user\Entity\User)) {
+    return;
+  }
+  $user = $row->_entity;
+  if ($user->hasField('field_pending') && $user->get('field_pending')->value && !$user->isActive()) {
+    $variables['output'] = \Drupal\Core\Render\Markup::create(t('Pending'));
   }
 }
 
