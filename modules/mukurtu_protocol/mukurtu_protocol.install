@@ -436,3 +436,34 @@ function mukurtu_protocol_update_40017(): void {
   $view_data = \Symfony\Component\Yaml\Yaml::parseFile($view_file);
   \Drupal::configFactory()->getEditable('views.view.user_admin_people')->setData($view_data)->save(TRUE);
 }
+
+/**
+ * Update /admin/people table columns: show Email instead of Display Name,
+ * position Status after Communities, move Email column after Username.
+ */
+function mukurtu_protocol_update_40018(): void {
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
+  $view_file = $module_path . '/config/install/views.view.user_admin_people.yml';
+  $view_data = \Symfony\Component\Yaml\Yaml::parseFile($view_file);
+  \Drupal::configFactory()->getEditable('views.view.user_admin_people')->setData($view_data)->save(TRUE);
+}
+
+/**
+ * Move Email column immediately after Username on /admin/people.
+ */
+function mukurtu_protocol_update_40019(): void {
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
+  $view_file = $module_path . '/config/install/views.view.user_admin_people.yml';
+  $view_data = \Symfony\Component\Yaml\Yaml::parseFile($view_file);
+  \Drupal::configFactory()->getEditable('views.view.user_admin_people')->setData($view_data)->save(TRUE);
+}
+
+/**
+ * Move Site role filter before Communities filter on /admin/people.
+ */
+function mukurtu_protocol_update_40020(): void {
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
+  $view_file = $module_path . '/config/install/views.view.user_admin_people.yml';
+  $view_data = \Symfony\Component\Yaml\Yaml::parseFile($view_file);
+  \Drupal::configFactory()->getEditable('views.view.user_admin_people')->setData($view_data)->save(TRUE);
+}

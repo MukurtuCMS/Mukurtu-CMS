@@ -124,6 +124,70 @@ display:
           empty_zero: false
           hide_alter_empty: true
           type: user_name
+        mail:
+          id: mail
+          table: users_field_data
+          field: mail
+          relationship: none
+          group_type: group
+          admin_label: ''
+          entity_type: user
+          entity_field: mail
+          plugin_id: field
+          label: Email
+          exclude: false
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: true
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          click_sort_column: value
+          type: basic_string
+          settings: {  }
+          group_column: value
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
         field_display_name:
           id: field_display_name
           table: user__field_display_name
@@ -133,7 +197,7 @@ display:
           admin_label: ''
           plugin_id: field
           label: 'Display Name'
-          exclude: false
+          exclude: true
           alter:
             alter_text: false
             text: ''
@@ -507,70 +571,6 @@ display:
           empty_zero: false
           hide_alter_empty: true
           destination: true
-        mail:
-          id: mail
-          table: users_field_data
-          field: mail
-          relationship: none
-          group_type: group
-          admin_label: ''
-          entity_type: user
-          entity_field: mail
-          plugin_id: field
-          label: ''
-          exclude: true
-          alter:
-            alter_text: false
-            text: ''
-            make_link: false
-            path: ''
-            absolute: false
-            external: false
-            replace_spaces: false
-            path_case: none
-            trim_whitespace: false
-            alt: ''
-            rel: ''
-            link_class: ''
-            prefix: ''
-            suffix: ''
-            target: ''
-            nl2br: false
-            max_length: 0
-            word_boundary: true
-            ellipsis: true
-            more_link: false
-            more_link_text: ''
-            more_link_path: ''
-            strip_tags: false
-            trim: false
-            preserve_tags: ''
-            html: false
-          element_type: ''
-          element_class: ''
-          element_label_type: ''
-          element_label_class: ''
-          element_label_colon: false
-          element_wrapper_type: ''
-          element_wrapper_class: ''
-          element_default_classes: true
-          empty: ''
-          hide_empty: false
-          empty_zero: false
-          hide_alter_empty: true
-          click_sort_column: value
-          type: basic_string
-          settings: {  }
-          group_column: value
-          group_columns: {  }
-          group_rows: true
-          delta_limit: 0
-          delta_offset: 0
-          delta_reversed: false
-          delta_first_last: false
-          multi_type: separator
-          separator: ', '
-          field_api_classes: false
       pager:
         type: full
         options:
@@ -729,44 +729,6 @@ display:
                 title: Blocked
                 operator: '='
                 value: '0'
-        community_filter:
-          id: community_filter
-          table: users
-          field: communities
-          relationship: none
-          group_type: group
-          admin_label: ''
-          plugin_id: user_community_filter
-          operator: in
-          value: {  }
-          group: 1
-          exposed: true
-          expose:
-            operator_id: community_filter_op
-            label: Communities
-            description: ''
-            use_operator: false
-            operator: community_filter_op
-            operator_limit_selection: false
-            operator_list: {  }
-            identifier: community
-            required: false
-            remember: false
-            multiple: false
-            remember_roles:
-              authenticated: authenticated
-          is_grouped: false
-          group_info:
-            label: ''
-            description: ''
-            identifier: ''
-            optional: true
-            widget: select
-            multiple: false
-            remember: false
-            default_group: All
-            default_group_multiple: {  }
-            group_items: {  }
         roles_target_id:
           id: roles_target_id
           table: user__roles
@@ -807,6 +769,44 @@ display:
             default_group_multiple: {  }
             group_items: {  }
           reduce_duplicates: false
+        community_filter:
+          id: community_filter
+          table: users
+          field: communities
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: user_community_filter
+          operator: in
+          value: {  }
+          group: 1
+          exposed: true
+          expose:
+            operator_id: community_filter_op
+            label: Communities
+            description: ''
+            use_operator: false
+            operator: community_filter_op
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: community
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
         default_langcode:
           id: default_langcode
           table: users_field_data
@@ -902,14 +902,14 @@ display:
           columns:
             user_bulk_form: user_bulk_form
             name: name
-            field_display_name: field_display_name
+            mail: mail
             roles_target_id: roles_target_id
             communities: communities
             status: status
             created: created
             access: access
             operations: operations
-            mail: mail
+            field_display_name: field_display_name
           default: created
           info:
             user_bulk_form:
@@ -924,7 +924,7 @@ display:
               separator: ''
               empty_column: false
               responsive: ''
-            field_display_name:
+            mail:
               sortable: true
               default_sort_order: asc
               align: ''
@@ -971,7 +971,9 @@ display:
               separator: ''
               empty_column: false
               responsive: ''
-            mail:
+            field_display_name:
+              sortable: false
+              default_sort_order: asc
               align: ''
               separator: ''
               empty_column: false
