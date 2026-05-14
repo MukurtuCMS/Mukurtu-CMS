@@ -1006,6 +1006,9 @@ class FormHooks
             if (isset($form["header"]["user_bulk_form"]["action"]["#title"])) {
                 $form["header"]["user_bulk_form"]["action"]["#title"] = t("Action for selected users");
             }
+            if (isset($form["header"]["user_bulk_form"]["action"]["#empty_option"])) {
+                $form["header"]["user_bulk_form"]["action"]["#empty_option"] = t("-- Select action --");
+            }
             if (isset($form["header"]["user_bulk_form"]["actions"]["submit"]["#value"])) {
                 $form["header"]["user_bulk_form"]["actions"]["submit"]["#value"] = t("Apply to selected users");
             }
