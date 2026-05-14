@@ -55,7 +55,6 @@ class MukurtuUserSelection extends WidgetBase implements ContainerFactoryPluginI
     $query = $this->entityTypeManager->getStorage('user')->getQuery();
     $query->accessCheck(TRUE);
     $query->condition('uid', 0, '<>');
-    $query->condition('status', 1);
     $query->pager(20);
 
     if (isset($match)) {

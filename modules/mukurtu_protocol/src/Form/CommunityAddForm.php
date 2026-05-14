@@ -107,7 +107,6 @@ class CommunityAddForm extends ContentEntityForm {
     $already_added = array_keys($form_state->get('members') ?? []);
     $uids = $this->entityTypeManager->getStorage('user')->getQuery()
       ->accessCheck(TRUE)
-      ->condition('status', 1)
       ->condition('uid', 0, '<>')
       ->sort('name')
       ->execute();

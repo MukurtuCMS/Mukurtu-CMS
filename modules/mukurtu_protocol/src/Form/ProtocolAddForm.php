@@ -317,7 +317,6 @@ class ProtocolAddForm extends EntityForm {
     else {
       $uids = $this->entityTypeManager->getStorage('user')->getQuery()
         ->accessCheck(TRUE)
-        ->condition('status', 1)
         ->condition('uid', 0, '<>')
         ->sort('name')
         ->execute();
