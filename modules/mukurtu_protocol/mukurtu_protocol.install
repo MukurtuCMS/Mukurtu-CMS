@@ -426,40 +426,26 @@ function mukurtu_protocol_update_40016(): void {
 }
 
 /**
- * Update user_admin_people view filters to match mukurtu_people:
- * add Communities filter, relabel Role to Site role, remove Permission filter,
- * add display_name to the name/email combine search.
+ * Superseded by mukurtu_protocol_update_40020().
  */
 function mukurtu_protocol_update_40017(): void {
-  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
-  $view_file = $module_path . '/config/install/views.view.user_admin_people.yml';
-  $view_data = \Symfony\Component\Yaml\Yaml::parseFile($view_file);
-  \Drupal::configFactory()->getEditable('views.view.user_admin_people')->setData($view_data)->save(TRUE);
 }
 
 /**
- * Update /admin/people table columns: show Email instead of Display Name,
- * position Status after Communities, move Email column after Username.
+ * Superseded by mukurtu_protocol_update_40020().
  */
 function mukurtu_protocol_update_40018(): void {
-  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
-  $view_file = $module_path . '/config/install/views.view.user_admin_people.yml';
-  $view_data = \Symfony\Component\Yaml\Yaml::parseFile($view_file);
-  \Drupal::configFactory()->getEditable('views.view.user_admin_people')->setData($view_data)->save(TRUE);
 }
 
 /**
- * Move Email column immediately after Username on /admin/people.
+ * Superseded by mukurtu_protocol_update_40020().
  */
 function mukurtu_protocol_update_40019(): void {
-  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
-  $view_file = $module_path . '/config/install/views.view.user_admin_people.yml';
-  $view_data = \Symfony\Component\Yaml\Yaml::parseFile($view_file);
-  \Drupal::configFactory()->getEditable('views.view.user_admin_people')->setData($view_data)->save(TRUE);
 }
 
 /**
- * Move Site role filter before Communities filter on /admin/people.
+ * Update /admin/people view: filters, columns, last-access display, and bulk
+ * action labels (consolidates 40017-40019).
  */
 function mukurtu_protocol_update_40020(): void {
   $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
@@ -469,77 +455,50 @@ function mukurtu_protocol_update_40020(): void {
 }
 
 /**
- * Move Site role filter before Communities filter on /admin/people/list.
+ * Superseded by mukurtu_protocol_update_40028().
  */
 function mukurtu_protocol_update_40021(): void {
-  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
-  $view_file = $module_path . '/config/install/views.view.mukurtu_people.yml';
-  $view_data = \Symfony\Component\Yaml\Yaml::parseFile($view_file);
-  \Drupal::configFactory()->getEditable('views.view.mukurtu_people')->setData($view_data)->save(TRUE);
 }
 
 /**
- * Remove Display Name column and move Status before Site Roles on /admin/people/list.
+ * Superseded by mukurtu_protocol_update_40028().
  */
 function mukurtu_protocol_update_40022(): void {
-  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
-  $view_file = $module_path . '/config/install/views.view.mukurtu_people.yml';
-  $view_data = \Symfony\Component\Yaml\Yaml::parseFile($view_file);
-  \Drupal::configFactory()->getEditable('views.view.mukurtu_people')->setData($view_data)->save(TRUE);
 }
 
 /**
- * Add VBO label overrides and relabel apply button on /admin/people/list.
+ * Superseded by mukurtu_protocol_update_40028().
  */
 function mukurtu_protocol_update_40023(): void {
-  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
-  $view_file = $module_path . '/config/install/views.view.mukurtu_people.yml';
-  $view_data = \Symfony\Component\Yaml\Yaml::parseFile($view_file);
-  \Drupal::configFactory()->getEditable('views.view.mukurtu_people')->setData($view_data)->save(TRUE);
 }
 
 /**
- * Show "Never" for last access on users who have never logged in on /admin/people.
+ * Superseded by mukurtu_protocol_update_40020() (user_admin_people view).
  */
 function mukurtu_protocol_update_40024(): void {
-  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
-  $view_file = $module_path . '/config/install/views.view.user_admin_people.yml';
-  $view_data = \Symfony\Component\Yaml\Yaml::parseFile($view_file);
-  \Drupal::configFactory()->getEditable('views.view.user_admin_people')->setData($view_data)->save(TRUE);
 }
 
 /**
- * Show "Never" for last access on users who have never logged in on /admin/people/list.
+ * Superseded by mukurtu_protocol_update_40028().
  */
 function mukurtu_protocol_update_40025(): void {
-  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
-  $view_file = $module_path . '/config/install/views.view.mukurtu_people.yml';
-  $view_data = \Symfony\Component\Yaml\Yaml::parseFile($view_file);
-  \Drupal::configFactory()->getEditable('views.view.mukurtu_people')->setData($view_data)->save(TRUE);
 }
 
 /**
- * Switch last access field to timestamp_ago formatter so "never" shows for new users.
+ * Superseded by mukurtu_protocol_update_40028().
  */
 function mukurtu_protocol_update_40026(): void {
-  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
-  $view_file = $module_path . '/config/install/views.view.mukurtu_people.yml';
-  $view_data = \Symfony\Component\Yaml\Yaml::parseFile($view_file);
-  \Drupal::configFactory()->getEditable('views.view.mukurtu_people')->setData($view_data)->save(TRUE);
 }
 
 /**
- * Hide VBO multipage selection counter on /admin/people/list.
+ * Superseded by mukurtu_protocol_update_40028().
  */
 function mukurtu_protocol_update_40027(): void {
-  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
-  $view_file = $module_path . '/config/install/views.view.mukurtu_people.yml';
-  $view_data = \Symfony\Component\Yaml\Yaml::parseFile($view_file);
-  \Drupal::configFactory()->getEditable('views.view.mukurtu_people')->setData($view_data)->save(TRUE);
 }
 
 /**
- * Remove VBO multipage selection counter from /admin/people/list.
+ * Update /admin/people/list view: filters, columns, last-access display, VBO
+ * label overrides, and hide multipage selection counter (consolidates 40021-40027).
  */
 function mukurtu_protocol_update_40028(): void {
   $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');

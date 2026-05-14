@@ -106,13 +106,16 @@ function mukurtu_core_entity_operation(EntityInterface $entity) {
       return $operations;
     }
     $is_site_admin = $account->hasPermission('administer users');
-    $current_user = \Drupal\user\Entity\User::load($account->id());
 
-    // Build managed-community IDs in one pass; $can_manage follows from this.
+    // Build managed-community IDs in one pass; skip the OG query for site
+    // admins who don't need community scoping.
     $cm_community_ids = [];
-    foreach (\Drupal\og\Og::getMemberships($current_user) as $membership) {
-      if ($membership->getGroupBundle() === 'community' && $membership->hasPermission('manage members')) {
-        $cm_community_ids[] = $membership->getGroupId();
+    if (!$is_site_admin) {
+      $current_user = \Drupal\user\Entity\User::load($account->id());
+      foreach (\Drupal\og\Og::getMemberships($current_user) as $membership) {
+        if ($membership->getGroupBundle() === 'community' && $membership->hasPermission('manage members')) {
+          $cm_community_ids[] = $membership->getGroupId();
+        }
       }
     }
     $can_manage = $is_site_admin || !empty($cm_community_ids);

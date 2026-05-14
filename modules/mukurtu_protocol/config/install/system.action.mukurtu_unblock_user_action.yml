@@ -4,7 +4,7 @@ dependencies:
   module:
     - mukurtu_protocol
 id: mukurtu_unblock_user_action
-label: 'Approve or unblock user(s)'
+label: 'Unblock or approve user(s)'
 type: user
 plugin: mukurtu_unblock_user_action
 configuration: {  }
