@@ -36,3 +36,12 @@ function mukurtu_search_update_40002(): void {
   }
   $config->save();
 }
+
+/**
+ * Disable "Show all multipage item pages in search results" by default.
+ */
+function mukurtu_search_update_40003(): void {
+  $config = \Drupal::configFactory()->getEditable('mukurtu_search.settings');
+  $config->set('collapse_multipage_pages', TRUE);
+  $config->save();
+}

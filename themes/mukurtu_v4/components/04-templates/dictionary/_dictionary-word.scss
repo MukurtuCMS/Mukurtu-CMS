@@ -18,6 +18,11 @@
   &-word {
     display: flex;
     justify-content: space-between;
+
+    &:focus-visible {
+      outline: 2px solid var(--color-white);
+      outline-offset: 2px;
+    }
   }
 
   svg {
@@ -32,18 +37,33 @@
     padding-inline: var(--v-space-2xs);
   }
 
-  .field--name-field-translation,
-  .field--name-field-recording  {
-    .field__label {
-      display: none;
+  &-media {
+    display: flex;
+    gap: var(--v-space-4xxs);
+    align-items: start;
+
+    .field--name-field-recording {
+      flex: 2;
+      min-inline-size: 0;
     }
   }
 
-  .field--name-field-translation  {
+  &-thumbnail {
+    flex: 1;
+    min-inline-size: 0;
+
+    img {
+      block-size: auto;
+      display: block;
+      inline-size: 100%;
+    }
+  }
+
+  .field--name-field-translation {
+    font-size: var(--font-size-l);
     font-weight: var(--text-bold);
     line-height: var(--line-height-xs);
     margin-block: var(--v-space-5xs);
-    margin-inline: 0 var(--v-space-2xs);
   }
 
   // stylelint-disable-next-line no-descending-specificity
@@ -52,12 +72,17 @@
     margin-inline: 0;
 
     audio {
+      background-color: #f1f3f4;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgb(0 0 0 / 15%);
       display: block;
+      inline-size: 100%;
     }
   }
 
   // stylelint-disable-next-line no-descending-specificity
   .field--name-field-contributor {
+    align-items: baseline;
     display: flex;
     flex-wrap: wrap;
     gap: var(--v-space-6xs);
@@ -73,39 +98,99 @@
         margin-inline-end: var(--v-space-5xs);
       }
     }
+
+    .field__items {
+      font-size: var(--font-size-s);
+    }
   }
 
-  .dictionary-word__media {
+  .field--name-field-recording {
+    container-type: inline-size;
+
+    .field__item {
+      margin-block: 0;
+    }
+
+    .media--audio {
+      display: flex;
+      flex-direction: column;
+      gap: var(--v-space-5xs);
+    }
+  }
+}
+
+// The word list teaser display used on /dictionary.
+.word-list__teaser {
+  &-image {
+    img {
+      block-size: auto;
+      display: block;
+      inline-size: 100%;
+      object-fit: cover;
+    }
+  }
+
+  &-heading {
+    background-color: var(--brand-primary-dark);
+    padding-block: var(--v-space-4xxs);
+    padding-inline: var(--v-space-2xs);
+  }
+
+  &-title {
+    font-size: var(--font-size-xl);
+    font-weight: inherit;
+    margin-block: 0;
+
+    a {
+      color: var(--color-white);
+      display: flex;
+      justify-content: space-between;
+
+      &:focus-visible {
+        outline: 2px solid var(--color-white);
+        outline-offset: 2px;
+      }
+    }
+
+    svg {
+      fill: var(--color-white);
+      block-size: var(--line-height-m);
+      inline-size: var(--line-height-2xs);
+      flex-shrink: 0;
+    }
+  }
+
+  &-content {
+    background-color: var(--brand-light-accent);
+    padding-block: var(--v-space-4xxs);
+    padding-inline: var(--v-space-2xs);
     display: flex;
-    flex-direction: column;
-    gap: var(--v-space-5xs);
-    margin-block: var(--v-space-5xs);
+    gap: var(--v-space-4xxs);
+    align-items: start;
+  }
 
-    > div {
-      flex: 1;
+  &-text {
+    flex: 1;
+    min-inline-size: 0;
+  }
+
+  &-image {
+    flex: 0 0 auto;
+    inline-size: 33%;
+
+    img {
+      block-size: auto;
+      display: block;
+      inline-size: 100%;
+      object-fit: cover;
     }
+  }
 
-    @container (min-width: 34rem) {
-      flex-direction: row;
-    }
-
-    .field--name-field-recording {
-      container-type: inline-size;
-
-      .field__item {
-        margin-block: 0;
-      }
-
-      .media--audio {
-        display: flex;
-        gap: var(--v-space-5xs);
-        flex-direction: column;
-
-        @container (min-width: 34rem) {
-          flex-direction: row;
-        }
-      }
-    }
+  &-type {
+    font-size: var(--font-size-s);
+    font-weight: var(--text-bold);
+    text-transform: uppercase;
+    margin-block-end: var(--v-space-5xs);
   }
 }
 

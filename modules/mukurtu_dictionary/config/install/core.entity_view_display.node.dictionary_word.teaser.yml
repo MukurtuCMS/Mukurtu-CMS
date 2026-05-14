@@ -30,7 +30,7 @@ content:
     type: entity_reference_entity_view
     label: hidden
     settings:
-      view_mode: browse
+      view_mode: small_250px_
       link: false
     third_party_settings: {  }
     weight: 1
