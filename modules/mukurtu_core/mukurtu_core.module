@@ -160,14 +160,14 @@ function mukurtu_core_entity_operation(EntityInterface $entity) {
       if ($status == 0 && $is_pending) {
         // Pending: offer Approve (activates) or Block (explicitly blocks).
         $operations['approve_user'] = [
-          'title' => t('Approve User'),
+          'title' => t('Approve'),
           'url' => Url::fromRoute('mukurtu_core.approve_user', ['uid' => $entity->id()]),
           'weight' => 100,
           'attributes' => ['class' => ['use-ajax']],
         ];
         if ($can_manage_inactive) {
           $operations['block_user'] = [
-            'title' => t('Block User'),
+            'title' => t('Block'),
             'url' => Url::fromRoute('mukurtu_core.block_user', ['uid' => $entity->id()]),
             'weight' => 101,
             'attributes' => ['class' => ['use-ajax']],
@@ -177,14 +177,14 @@ function mukurtu_core_entity_operation(EntityInterface $entity) {
       elseif ($status == 0) {
         // Explicitly blocked: offer Approve or revert to Pending.
         $operations['approve_user'] = [
-          'title' => t('Approve User'),
+          'title' => t('Approve'),
           'url' => Url::fromRoute('mukurtu_core.approve_user', ['uid' => $entity->id()]),
           'weight' => 100,
           'attributes' => ['class' => ['use-ajax']],
         ];
         if ($can_manage_inactive) {
           $operations['set_pending_user'] = [
-            'title' => t('Set to Pending'),
+            'title' => t('Set pending'),
             'url' => Url::fromRoute('mukurtu_core.set_pending_user', ['uid' => $entity->id()]),
             'weight' => 101,
             'attributes' => ['class' => ['use-ajax']],
@@ -197,13 +197,13 @@ function mukurtu_core_entity_operation(EntityInterface $entity) {
           $can_block = $is_site_admin || !empty(array_intersect($cm_community_ids, $target_community_ids));
           if ($can_block) {
             $operations['block_user'] = [
-              'title' => t('Block User'),
+              'title' => t('Block'),
               'url' => Url::fromRoute('mukurtu_core.block_user', ['uid' => $entity->id()]),
               'weight' => 100,
               'attributes' => ['class' => ['use-ajax']],
             ];
             $operations['set_pending_user'] = [
-              'title' => t('Set to Pending'),
+              'title' => t('Set pending'),
               'url' => Url::fromRoute('mukurtu_core.set_pending_user', ['uid' => $entity->id()]),
               'weight' => 101,
               'attributes' => ['class' => ['use-ajax']],
@@ -460,12 +460,12 @@ function mukurtu_core_user_view(array &$build, EntityInterface $entity, EntityVi
     if ($status == 1) {
       // Active: offer Block and Set to Pending.
       $links['block'] = [
-        'title' => t('Block User'),
+        'title' => t('Block'),
         'url' => Url::fromRoute('mukurtu_core.block_user', ['uid' => $entity->id()]),
         'attributes' => ['class' => ['use-ajax']],
       ];
       $links['set_pending'] = [
-        'title' => t('Set to Pending'),
+        'title' => t('Set pending'),
         'url' => Url::fromRoute('mukurtu_core.set_pending_user', ['uid' => $entity->id()]),
         'attributes' => ['class' => ['use-ajax']],
       ];
@@ -473,12 +473,12 @@ function mukurtu_core_user_view(array &$build, EntityInterface $entity, EntityVi
     elseif ($is_pending) {
       // Pending: offer Approve and Block.
       $links['approve'] = [
-        'title' => t('Approve User'),
+        'title' => t('Approve'),
         'url' => Url::fromRoute('mukurtu_core.approve_user', ['uid' => $entity->id()]),
         'attributes' => ['class' => ['use-ajax']],
       ];
       $links['block'] = [
-        'title' => t('Block User'),
+        'title' => t('Block'),
         'url' => Url::fromRoute('mukurtu_core.block_user', ['uid' => $entity->id()]),
         'attributes' => ['class' => ['use-ajax']],
       ];
@@ -486,12 +486,12 @@ function mukurtu_core_user_view(array &$build, EntityInterface $entity, EntityVi
     else {
       // Blocked: offer Approve and Set to Pending.
       $links['approve'] = [
-        'title' => t('Approve User'),
+        'title' => t('Approve'),
         'url' => Url::fromRoute('mukurtu_core.approve_user', ['uid' => $entity->id()]),
         'attributes' => ['class' => ['use-ajax']],
       ];
       $links['set_pending'] = [
-        'title' => t('Set to Pending'),
+        'title' => t('Set pending'),
         'url' => Url::fromRoute('mukurtu_core.set_pending_user', ['uid' => $entity->id()]),
         'attributes' => ['class' => ['use-ajax']],
       ];
