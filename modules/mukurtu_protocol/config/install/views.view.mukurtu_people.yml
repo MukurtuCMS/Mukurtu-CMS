@@ -79,12 +79,20 @@ display:
           buttons: false
           action_title: 'Action for selected users'
           clear_on_exposed: true
-          force_selection_info: false
+          show_multipage_selection_box: always_hide
           selected_actions:
             0:
               action_id: mukurtu_block_user_action
+              preconfiguration:
+                label_override: 'Block or delete'
             1:
               action_id: mukurtu_unblock_user_action
+              preconfiguration:
+                label_override: 'Unblock or approve'
+            2:
+              action_id: mukurtu_set_pending_user_action
+              preconfiguration:
+                label_override: 'Set pending'
         name:
           id: name
           table: users_field_data
@@ -146,7 +154,7 @@ display:
           admin_label: ''
           plugin_id: field
           label: 'Display Name'
-          exclude: false
+          exclude: true
           alter:
             alter_text: false
             text: ''
@@ -190,6 +198,73 @@ display:
           type: string
           settings:
             link_to_entity: false
+          group_column: value
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
+        status:
+          id: status
+          table: users_field_data
+          field: status
+          relationship: none
+          group_type: group
+          admin_label: ''
+          entity_type: user
+          entity_field: status
+          plugin_id: field
+          label: Status
+          exclude: false
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: true
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          click_sort_column: value
+          type: boolean
+          settings:
+            format: custom
+            format_custom_false: Blocked
+            format_custom_true: Active
           group_column: value
           group_columns: {  }
           group_rows: true
@@ -299,73 +374,6 @@ display:
           hide_empty: false
           empty_zero: false
           hide_alter_empty: true
-        status:
-          id: status
-          table: users_field_data
-          field: status
-          relationship: none
-          group_type: group
-          admin_label: ''
-          entity_type: user
-          entity_field: status
-          plugin_id: field
-          label: Status
-          exclude: false
-          alter:
-            alter_text: false
-            text: ''
-            make_link: false
-            path: ''
-            absolute: false
-            external: false
-            replace_spaces: false
-            path_case: none
-            trim_whitespace: false
-            alt: ''
-            rel: ''
-            link_class: ''
-            prefix: ''
-            suffix: ''
-            target: ''
-            nl2br: false
-            max_length: 0
-            word_boundary: true
-            ellipsis: true
-            more_link: false
-            more_link_text: ''
-            more_link_path: ''
-            strip_tags: false
-            trim: false
-            preserve_tags: ''
-            html: false
-          element_type: ''
-          element_class: ''
-          element_label_type: ''
-          element_label_class: ''
-          element_label_colon: true
-          element_wrapper_type: ''
-          element_wrapper_class: ''
-          element_default_classes: true
-          empty: ''
-          hide_empty: false
-          empty_zero: false
-          hide_alter_empty: true
-          click_sort_column: value
-          type: boolean
-          settings:
-            format: custom
-            format_custom_false: Blocked
-            format_custom_true: Active
-          group_column: value
-          group_columns: {  }
-          group_rows: true
-          delta_limit: 0
-          delta_offset: 0
-          delta_reversed: false
-          delta_first_last: false
-          multi_type: separator
-          separator: ', '
-          field_api_classes: false
         created:
           id: created
           table: users_field_data
@@ -480,16 +488,16 @@ display:
           element_wrapper_type: ''
           element_wrapper_class: ''
           element_default_classes: true
-          empty: ''
+          empty: Never
           hide_empty: false
-          empty_zero: false
+          empty_zero: true
           hide_alter_empty: true
           click_sort_column: value
-          type: timestamp
+          type: timestamp_ago
           settings:
-            date_format: medium
-            custom_date_format: ''
-            timezone: ''
+            future_format: '@interval hence'
+            past_format: '@interval ago'
+            granularity: 2
           group_column: value
           group_columns: {  }
           group_rows: true
@@ -829,44 +837,6 @@ display:
                 title: Blocked
                 operator: '='
                 value: '0'
-        community_filter:
-          id: community_filter
-          table: users
-          field: communities
-          relationship: none
-          group_type: group
-          admin_label: ''
-          plugin_id: user_community_filter
-          operator: in
-          value: {  }
-          group: 1
-          exposed: true
-          expose:
-            operator_id: community_filter_op
-            label: Communities
-            description: ''
-            use_operator: false
-            operator: community_filter_op
-            operator_limit_selection: false
-            operator_list: {  }
-            identifier: community
-            required: false
-            remember: false
-            multiple: false
-            remember_roles:
-              authenticated: authenticated
-          is_grouped: false
-          group_info:
-            label: ''
-            description: ''
-            identifier: ''
-            optional: true
-            widget: select
-            multiple: false
-            remember: false
-            default_group: All
-            default_group_multiple: {  }
-            group_items: {  }
         roles_target_id:
           id: roles_target_id
           table: user__roles
@@ -907,6 +877,44 @@ display:
             default_group_multiple: {  }
             group_items: {  }
           reduce_duplicates: false
+        community_filter:
+          id: community_filter
+          table: users
+          field: communities
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: user_community_filter
+          operator: in
+          value: {  }
+          group: 1
+          exposed: true
+          expose:
+            operator_id: community_filter_op
+            label: Communities
+            description: ''
+            use_operator: false
+            operator: community_filter_op
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: community
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
         default_langcode:
           id: default_langcode
           table: users_field_data
@@ -1002,14 +1010,14 @@ display:
           columns:
             views_bulk_operations_bulk_form: views_bulk_operations_bulk_form
             name: name
-            field_display_name: field_display_name
+            status: status
             roles_plain: roles_plain
             communities: communities
-            status: status
             created: created
             access: access
             operations: operations
             mail: mail
+            field_display_name: field_display_name
           default: created
           info:
             views_bulk_operations_bulk_form:
@@ -1024,7 +1032,7 @@ display:
               separator: ''
               empty_column: false
               responsive: ''
-            field_display_name:
+            status:
               sortable: true
               default_sort_order: asc
               align: ''
@@ -1045,8 +1053,8 @@ display:
               separator: ''
               empty_column: false
               responsive: ''
-            status:
-              sortable: true
+            field_display_name:
+              sortable: false
               default_sort_order: asc
               align: ''
               separator: ''
