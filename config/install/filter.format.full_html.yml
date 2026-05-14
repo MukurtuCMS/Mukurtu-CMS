@@ -55,6 +55,9 @@ filters:
         default: default
         full: full
         media_library: media_library
+        small: small
+        medium: medium
+        large: large
       allowed_media_types:
         audio: audio
         document: document

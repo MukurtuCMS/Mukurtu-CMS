@@ -6,6 +6,7 @@ package: 'Mukurtu CMS'
 version: 4.x-dev
 libraries:
   - mukurtu_core/mukurtu-leaflet-widget
+  - mukurtu_core/form-disable-enter-submit
 dependencies:
   - 'blazy:blazy'
   - 'drupal:block'
