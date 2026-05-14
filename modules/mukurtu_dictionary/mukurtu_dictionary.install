@@ -427,7 +427,7 @@ function mukurtu_dictionary_update_40012(): void {
   // Remove OG memberships referencing language_community groups.
   if ($schema->tableExists('og_membership')) {
     $db->delete('og_membership')
-      ->condition('group_type', 'language_community')
+      ->condition('entity_type', 'language_community')
       ->execute();
   }
 
