@@ -85,6 +85,8 @@ display:
               action_id: mukurtu_block_user_action
             1:
               action_id: mukurtu_unblock_user_action
+            2:
+              action_id: mukurtu_set_pending_user_action
         name:
           id: name
           table: users_field_data

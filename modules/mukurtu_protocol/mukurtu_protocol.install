@@ -401,3 +401,26 @@ function mukurtu_protocol_update_40015(): void {
   $view_data = \Symfony\Component\Yaml\Yaml::parseFile($view_file);
   \Drupal::configFactory()->getEditable('views.view.og_members_overview')->setData($view_data)->save(TRUE);
 }
+
+/**
+ * Add Approve/Unblock and Set Pending bulk actions to /admin/people;
+ * add Set Pending to /admin/people/list VBO form.
+ */
+function mukurtu_protocol_update_40016(): void {
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
+
+  // Install action config entities so they appear in the user_bulk_form.
+  foreach ([
+    'system.action.mukurtu_unblock_user_action',
+    'system.action.mukurtu_set_pending_user_action',
+  ] as $config_name) {
+    $file = $module_path . '/config/install/' . $config_name . '.yml';
+    $data = \Symfony\Component\Yaml\Yaml::parseFile($file);
+    \Drupal::configFactory()->getEditable($config_name)->setData($data)->save(TRUE);
+  }
+
+  // Re-import mukurtu_people view to add mukurtu_set_pending_user_action.
+  $view_file = $module_path . '/config/install/views.view.mukurtu_people.yml';
+  $view_data = \Symfony\Component\Yaml\Yaml::parseFile($view_file);
+  \Drupal::configFactory()->getEditable('views.view.mukurtu_people')->setData($view_data)->save(TRUE);
+}
