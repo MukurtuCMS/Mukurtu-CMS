@@ -388,28 +388,6 @@ function mukurtu_protocol_update_40014(): void {
  * re-importing the view that references it, then updates the view to include
  * og_membership_unblock_action.
  */
-function mukurtu_protocol_update_40016(): void {
-  $weights = [
-    'community-community-community_member'         => 10,
-    'community-community-community_affiliate'      => 20,
-    'community-community-community_manager'        => 30,
-    'protocol-protocol-protocol_member'            => 10,
-    'protocol-protocol-protocol_affiliate'         => 20,
-    'protocol-protocol-contributor'                => 30,
-    'protocol-protocol-curator'                    => 40,
-    'protocol-protocol-language_contributor'       => 50,
-    'protocol-protocol-language_steward'           => 60,
-    'protocol-protocol-community_record_steward'   => 70,
-    'protocol-protocol-protocol_steward'           => 80,
-  ];
-  foreach ($weights as $role_id => $weight) {
-    $config = \Drupal::configFactory()->getEditable('og.og_role.' . $role_id);
-    if (!$config->isNew()) {
-      $config->set('weight', $weight)->save(TRUE);
-    }
-  }
-}
-
 function mukurtu_protocol_update_40015(): void {
   $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
 
@@ -527,4 +505,26 @@ function mukurtu_protocol_update_40028(): void {
   $view_file = $module_path . '/config/install/views.view.mukurtu_people.yml';
   $view_data = \Symfony\Component\Yaml\Yaml::parseFile($view_file);
   \Drupal::configFactory()->getEditable('views.view.mukurtu_people')->setData($view_data)->save(TRUE);
+}
+
+function mukurtu_protocol_update_40029(): void {
+  $weights = [
+    'community-community-community_member'         => 10,
+    'community-community-community_affiliate'      => 20,
+    'community-community-community_manager'        => 30,
+    'protocol-protocol-protocol_member'            => 10,
+    'protocol-protocol-protocol_affiliate'         => 20,
+    'protocol-protocol-contributor'                => 30,
+    'protocol-protocol-curator'                    => 40,
+    'protocol-protocol-language_contributor'       => 50,
+    'protocol-protocol-language_steward'           => 60,
+    'protocol-protocol-community_record_steward'   => 70,
+    'protocol-protocol-protocol_steward'           => 80,
+  ];
+  foreach ($weights as $role_id => $weight) {
+    $config = \Drupal::configFactory()->getEditable('og.og_role.' . $role_id);
+    if (!$config->isNew()) {
+      $config->set('weight', $weight)->save(TRUE);
+    }
+  }
 }

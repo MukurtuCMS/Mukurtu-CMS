@@ -125,7 +125,6 @@ class CommunityManagerUserCreationForm extends FormBase {
     $form['pass'] = [
       '#type' => 'password_confirm',
       '#title' => $this->t('Password'),
-      '#title_display' => 'invisible',
       '#description' => $this->t('Leave blank to allow the user to set their own password via a password reset email.'),
       '#required' => FALSE,
     ];

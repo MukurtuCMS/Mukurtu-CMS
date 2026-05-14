@@ -1031,7 +1031,7 @@ function mukurtu_protocol_preprocess_views_view_field(&$variables) {
   }
 
   if (CulturalProtocols::isUserBlockedFromProtocolViaCommunity($owner, $group)) {
-    $badge = '<span class="community-blocked-badge" aria-hidden="true">' . t('Community blocked') . '</span>';
+    $badge = '<span class="community-blocked-badge">' . t('Community blocked') . '</span>';
     $variables['output'] = Markup::create((string) $variables['output'] . ' ' . $badge);
   }
 }
