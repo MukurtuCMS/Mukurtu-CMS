@@ -52,20 +52,20 @@
       {{ content.field_word_entry_term }}
       <div class="word-entry-fields-pair">
         {{ content.field_translation }}
-        {{ content.field_alternate_spelling }}
-      </div>
-      {{ content.field_recording }}
-      <div class="word-entry-fields-pair">
-        {{ content.field_word_type }}
         {{ content.field_pronunciation }}
       </div>
-      {{ content.field_sample_sentences }}
+      <div class="word-entry-fields-pair">
+        {{ content.field_word_type }}
+        {{ content.field_alternate_spelling }}
+      </div>
       {{ content.field_definition }}
+      {{ content.field_recording }}
+      {{ content.field_sample_sentences }}
       <div class="word-entry-fields-pair">
         {{ content.field_source }}
         {{ content.field_word_origin }}
+        {{ content.field_contributor }}
       </div>
-      {{ content.field_contributor }}
     {% endblock %}
   </div>
 {% endblock paragraph %}

@@ -111,20 +111,20 @@
                   {{ content.group_primary_fields.group_base_word_entry.field_title }}
                   <div class="word-entry-fields-pair">
                     {{ content.group_primary_fields.group_base_word_entry.field_translation }}
-                    {{ content.group_primary_fields.group_base_word_entry.field_alternate_spelling }}
-                  </div>
-                  {{ content.group_primary_fields.group_base_word_entry.field_recording }}
-                  <div class="word-entry-fields-pair">
-                    {{ content.group_primary_fields.group_base_word_entry.field_word_type }}
                     {{ content.group_primary_fields.group_base_word_entry.field_pronunciation }}
                   </div>
-                  {{ content.group_primary_fields.group_base_word_entry.field_sample_sentences }}
+                  <div class="word-entry-fields-pair">
+                    {{ content.group_primary_fields.group_base_word_entry.field_word_type }}
+                    {{ content.group_primary_fields.group_base_word_entry.field_alternate_spelling }}
+                  </div>
                   {{ content.group_primary_fields.group_base_word_entry.field_definition }}
+                  {{ content.group_primary_fields.group_base_word_entry.field_recording }}
+                  {{ content.group_primary_fields.group_base_word_entry.field_sample_sentences }}
                   <div class="word-entry-fields-pair">
                     {{ content.group_primary_fields.group_base_word_entry.field_source }}
                     {{ content.group_primary_fields.group_base_word_entry.field_word_origin }}
+                    {{ content.group_primary_fields.group_base_word_entry.field_contributor }}
                   </div>
-                  {{ content.group_primary_fields.group_base_word_entry.field_contributor }}
                 </div>
                 {% for entry in node.field_additional_word_entries %}
                   <div id="tab-entry-{{ loop.index }}" class="horizontal-tabs-pane" role="tabpanel" hidden>
@@ -139,20 +139,20 @@
             {{ content.group_primary_fields.group_base_word_entry.field_title }}
             <div class="word-entry-fields-pair">
               {{ content.group_primary_fields.group_base_word_entry.field_translation }}
-              {{ content.group_primary_fields.group_base_word_entry.field_alternate_spelling }}
-            </div>
-            {{ content.group_primary_fields.group_base_word_entry.field_recording }}
-            <div class="word-entry-fields-pair">
-              {{ content.group_primary_fields.group_base_word_entry.field_word_type }}
               {{ content.group_primary_fields.group_base_word_entry.field_pronunciation }}
             </div>
-            {{ content.group_primary_fields.group_base_word_entry.field_sample_sentences }}
+            <div class="word-entry-fields-pair">
+              {{ content.group_primary_fields.group_base_word_entry.field_word_type }}
+              {{ content.group_primary_fields.group_base_word_entry.field_alternate_spelling }}
+            </div>
             {{ content.group_primary_fields.group_base_word_entry.field_definition }}
+            {{ content.group_primary_fields.group_base_word_entry.field_recording }}
+            {{ content.group_primary_fields.group_base_word_entry.field_sample_sentences }}
             <div class="word-entry-fields-pair">
               {{ content.group_primary_fields.group_base_word_entry.field_source }}
               {{ content.group_primary_fields.group_base_word_entry.field_word_origin }}
+              {{ content.group_primary_fields.group_base_word_entry.field_contributor }}
             </div>
-            {{ content.group_primary_fields.group_base_word_entry.field_contributor }}
 
           {% endif %}
 
