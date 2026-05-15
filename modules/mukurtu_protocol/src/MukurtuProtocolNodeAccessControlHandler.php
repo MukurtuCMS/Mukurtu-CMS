@@ -98,15 +98,26 @@ class MukurtuProtocolNodeAccessControlHandler extends NodeAccessControlHandler {
    * {@inheritdoc}
    */
   protected function checkCreateAccess(AccountInterface $account, array $context, $entity_bundle = NULL) {
+    $bundleClass = $this->entityTypeManager->getStorage('node')->getEntityClass($entity_bundle);
+    $interfaces = $bundleClass ? class_implements($bundleClass) : [];
+
+    // For bundles not under protocol control, use standard Drupal node access.
+    if (!isset($interfaces['Drupal\mukurtu_protocol\CulturalProtocolControlledInterface'])) {
+      return parent::checkCreateAccess($account, $context, $entity_bundle);
+    }
+
+    // For protocol-controlled bundles, also allow access via standard Drupal
+    // node permissions (e.g. Mukurtu Manager with 'create landing_page content').
+    $standardAccess = parent::checkCreateAccess($account, $context, $entity_bundle);
+    if ($standardAccess->isAllowed()) {
+      return $standardAccess;
+    }
+
     // If the bundle class has its own check create access, run that and we will
     // include that in the overall access check for the bundle.
-    $bundleClass = $this->entityTypeManager->getStorage('node')->getEntityClass($entity_bundle);
     $bundleCheckResult = AccessResult::allowed();
-    if ($bundleClass) {
-      $interfaces = class_implements($bundleClass);
-      if (isset($interfaces['Drupal\mukurtu_core\Entity\BundleSpecificCheckCreateAccessInterface'])) {
-        $bundleCheckResult = $bundleClass::bundleCheckCreateAccess($account, $context);
-      }
+    if ($bundleClass && isset($interfaces['Drupal\mukurtu_core\Entity\BundleSpecificCheckCreateAccessInterface'])) {
+      $bundleCheckResult = $bundleClass::bundleCheckCreateAccess($account, $context);
     }
 
     /*
