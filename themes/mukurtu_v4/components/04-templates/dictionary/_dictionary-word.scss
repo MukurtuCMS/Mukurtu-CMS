@@ -189,6 +189,14 @@
     color: var(--brand-text-color);
     background-color: var(--brand-secondary-accent);
   }
+
+  ul.horizontal-tabs-list li a {
+    font-weight: var(--text-bold);
+  }
+
+  ul.horizontal-tabs-list li a:focus:not(:focus-visible) {
+    outline: none;
+  }
 }
 
 // Full content display for dictionary word nodes.
