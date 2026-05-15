@@ -1,12 +1,14 @@
 <?php
 
 use Drupal\Core\Entity\ContentEntityFormInterface;
+use Drupal\Core\Render\Markup;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\mukurtu_core\Entity\FormattedTextWithTitle;
 use Drupal\mukurtu_person\Entity\Person;
 use Drupal\mukurtu_person\Entity\RelatedPerson;
+use Drupal\node\NodeInterface;
 use Drupal\views\ViewExecutable;
 use Drupal\views\Plugin\views\query\QueryPluginBase;
 
@@ -31,6 +33,46 @@ function mukurtu_person_entity_bundle_info_alter(array &$bundles)
   if (isset($bundles['paragraph']['related_person'])) {
     $bundles['paragraph']['related_person']['class'] = RelatedPerson::class;
   }
+}
+
+/**
+ * Implements hook_node_insert().
+ *
+ * Stores the new person's nid and title in private temp store so that
+ * hook_page_attachments() can attach the broadcast JS on the next page load.
+ */
+function mukurtu_person_node_insert(NodeInterface $node) {
+  if ($node->bundle() !== 'person') {
+    return;
+  }
+  \Drupal::service('tempstore.private')
+    ->get('mukurtu_person')
+    ->set('new_person_broadcast', [
+      'nid' => $node->id(),
+      'title' => $node->label(),
+    ]);
+}
+
+/**
+ * Implements hook_page_attachments().
+ *
+ * If a person was just created (flag set by hook_node_insert), attach the
+ * broadcast JS library with the person data in drupalSettings. The library
+ * fires a BroadcastChannel message that mukurtu-person-listener.js picks up
+ * in any other tab currently editing a related_person paragraph.
+ */
+function mukurtu_person_page_attachments(array &$attachments) {
+  $store = \Drupal::service('tempstore.private')->get('mukurtu_person');
+  $data = $store->get('new_person_broadcast');
+  if (!$data) {
+    return;
+  }
+  $store->delete('new_person_broadcast');
+  $attachments['#attached']['library'][] = 'mukurtu_person/person_broadcast';
+  $attachments['#attached']['drupalSettings']['mukurtuPerson']['newPerson'] = [
+    'nid' => $data['nid'],
+    'title' => $data['title'],
+  ];
 }
 
 /**
@@ -86,14 +128,21 @@ function mukurtu_person_field_widget_single_element_form_alter(&$element, FormSt
   if ($create_url->access()) {
     $element['create_person_link'] = [
       '#type' => 'link',
-      '#title' => t("Can't find the person? Create a new person record."),
+      '#title' => Markup::create(
+        (string) t("Can't find the person? Create a new person record.") .
+        '<span class="visually-hidden"> ' . (string) t('(opens in new tab)') . '</span>'
+      ),
       '#url' => $create_url,
       '#attributes' => [
-        'class' => ['button', 'button--small', 'button--extrasmall'],
+        // mukurtu-person-create-link is the JS hook for the listener behavior.
+        'class' => ['button', 'button--small', 'button--extrasmall', 'mukurtu-person-create-link'],
         'target' => '_blank',
         'rel' => 'noopener noreferrer',
       ],
       '#weight' => 10,
+      '#attached' => [
+        'library' => ['mukurtu_person/person_listener'],
+      ],
     ];
   }
 }
