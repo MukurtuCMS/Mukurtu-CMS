@@ -122,6 +122,25 @@
 
 .dictionary-word-tabs {
   margin-block-end: var(--v-space-s);
+
+  ul.horizontal-tabs-list {
+    padding-inline: 0;
+  }
+
+  ul.horizontal-tabs-list li:has(.selected)::after,
+  ul.horizontal-tabs-list li.selected::after {
+    content: none;
+  }
+
+  ul.horizontal-tabs-list li.selected {
+    background-color: var(--brand-secondary);
+  }
+
+  ul.horizontal-tabs-list li.selected a,
+  ul.horizontal-tabs-list li.selected a:hover,
+  ul.horizontal-tabs-list li.selected a:active {
+    background-color: var(--brand-secondary);
+  }
 }
 
 // Full content display for dictionary word nodes.

@@ -40,6 +40,7 @@
         .dictionary-word-subheading + div.field,
         .field--name-title,
         .dictionary-word__teaser .field,
+        .dictionary-word-tabs .field,
         .field--name-field-sections .field)) {
       @include mixins.divider;
     }
@@ -133,6 +134,10 @@
       &__label {
         font-size: var(--font-size-s);
         line-height: var(--line-height-xs);
+      }
+
+      &__items {
+        @include mixins.inline-list;
       }
 
       &__item {
