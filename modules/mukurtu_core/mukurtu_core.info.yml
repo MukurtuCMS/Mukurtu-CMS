@@ -4,9 +4,6 @@ description: 'Provides the base level functionality needed by more specific Muku
 core_version_requirement: '^10 || ^11'
 package: 'Mukurtu CMS'
 version: 4.x-dev
-libraries:
-  - mukurtu_core/mukurtu-leaflet-widget
-  - mukurtu_core/form-disable-enter-submit
 dependencies:
   - 'blazy:blazy'
   - 'drupal:block'
