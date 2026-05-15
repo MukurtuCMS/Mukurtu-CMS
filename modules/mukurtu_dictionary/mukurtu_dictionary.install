@@ -715,7 +715,7 @@ function mukurtu_dictionary_update_40018(): void {
     }
     $data = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($config_path));
     $config = $config_factory->getEditable($config_name);
-    // Preserve existing third_party_settings (field_group layout) and content weights.
+    // Replace config with install defaults to apply the new field ordering and tabbed layout.
     $config->setData($data);
     $config->save();
   }

@@ -94,20 +94,20 @@
             <div class="dictionary-word-tabs horizontal-tabs">
               <ul class="horizontal-tabs-list" role="tablist">
                 <li class="selected" role="presentation">
-                  <a href="#tab-base-entry" role="tab" aria-selected="true">
+                  <a href="#tab-base-entry" role="tab" id="tab-btn-base-entry" aria-selected="true" aria-controls="tab-base-entry">
                     <span class="div-title">{{ node.title.value }}</span>
                   </a>
                 </li>
                 {% for entry in node.field_additional_word_entries %}
                   <li role="presentation">
-                    <a href="#tab-entry-{{ loop.index }}" role="tab" aria-selected="false">
-                      <span class="div-title">{{ entry.entity.field_word_entry_term.value }}</span>
+                    <a href="#tab-entry-{{ loop.index }}" role="tab" id="tab-btn-entry-{{ loop.index }}" aria-selected="false" aria-controls="tab-entry-{{ loop.index }}">
+                      <span class="div-title">{{ entry.entity.field_word_entry_term.value ?: 'Entry ' ~ loop.index }}</span>
                     </a>
                   </li>
                 {% endfor %}
               </ul>
               <div class="horizontal-tabs-panes">
-                <div id="tab-base-entry" class="horizontal-tabs-pane" role="tabpanel">
+                <div id="tab-base-entry" class="horizontal-tabs-pane" role="tabpanel" aria-labelledby="tab-btn-base-entry">
                   {{ content.group_primary_fields.group_base_word_entry.field_title }}
                   <div class="word-entry-fields-pair">
                     {{ content.group_primary_fields.group_base_word_entry.field_translation }}
@@ -127,7 +127,7 @@
                   </div>
                 </div>
                 {% for entry in node.field_additional_word_entries %}
-                  <div id="tab-entry-{{ loop.index }}" class="horizontal-tabs-pane" role="tabpanel" hidden>
+                  <div id="tab-entry-{{ loop.index }}" class="horizontal-tabs-pane" role="tabpanel" hidden aria-labelledby="tab-btn-entry-{{ loop.index }}">
                     {{ content.group_primary_fields.group_additional_word_entries.field_additional_word_entries[loop.index0] }}
                   </div>
                 {% endfor %}

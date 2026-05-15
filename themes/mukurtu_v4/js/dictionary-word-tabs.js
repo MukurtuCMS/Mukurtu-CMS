@@ -7,20 +7,43 @@
   Drupal.behaviors.dictionaryWordTabs = {
     attach(context) {
       once('dictionary-word-tabs', '.dictionary-word-tabs', context).forEach(tabs => {
-        const tabLinks = tabs.querySelectorAll('.horizontal-tabs-list a');
-        const panes = tabs.querySelectorAll('.horizontal-tabs-pane');
+        const tabLinks = Array.from(tabs.querySelectorAll('.horizontal-tabs-list a'));
+
+        function activateTab(index) {
+          tabLinks.forEach((l, i) => {
+            l.closest('li').classList.toggle('selected', i === index);
+            l.setAttribute('aria-selected', i === index ? 'true' : 'false');
+            l.setAttribute('tabindex', i === index ? '0' : '-1');
+          });
+          // Use href-to-id matching so order in the DOM doesn't matter.
+          tabLinks.forEach(l => {
+            const pane = tabs.querySelector(l.getAttribute('href'));
+            if (pane) pane.hidden = true;
+          });
+          const activePane = tabs.querySelector(tabLinks[index].getAttribute('href'));
+          if (activePane) activePane.hidden = false;
+        }
+
+        // Set initial roving tabindex state.
+        tabLinks.forEach((link, i) => link.setAttribute('tabindex', i === 0 ? '0' : '-1'));
 
         tabLinks.forEach((link, index) => {
           link.addEventListener('click', e => {
             e.preventDefault();
-            tabLinks.forEach(l => {
-              l.closest('li').classList.remove('selected');
-              l.setAttribute('aria-selected', 'false');
-            });
-            panes.forEach(p => { p.hidden = true; });
-            link.closest('li').classList.add('selected');
-            link.setAttribute('aria-selected', 'true');
-            panes[index].hidden = false;
+            activateTab(index);
+          });
+
+          link.addEventListener('keydown', e => {
+            let newIndex = index;
+            if (e.key === 'ArrowRight') newIndex = (index + 1) % tabLinks.length;
+            else if (e.key === 'ArrowLeft') newIndex = (index - 1 + tabLinks.length) % tabLinks.length;
+            else if (e.key === 'Home') newIndex = 0;
+            else if (e.key === 'End') newIndex = tabLinks.length - 1;
+            else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activateTab(index); return; }
+            else return;
+            e.preventDefault();
+            activateTab(newIndex);
+            tabLinks[newIndex].focus();
           });
         });
       });
