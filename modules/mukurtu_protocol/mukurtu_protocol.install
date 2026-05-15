@@ -507,6 +507,9 @@ function mukurtu_protocol_update_40028(): void {
   \Drupal::configFactory()->getEditable('views.view.mukurtu_people')->setData($view_data)->save(TRUE);
 }
 
+/**
+ * Update OG role weights to match canonical ordering.
+ */
 function mukurtu_protocol_update_40029(): void {
   $weights = [
     'community-community-community_member'         => 10,

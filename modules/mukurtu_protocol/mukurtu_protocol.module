@@ -740,7 +740,7 @@ function mukurtu_protocol_field_widget_single_element_entity_browser_entity_refe
       $item['#attributes']['class'][] = 'inaccessible-reference';
 
       $item['display'] = [
-        '#markup' => "<div>" . Html::escape(t("#@id. This @entity_type_label is not available to you.", [
+        '#markup' => "<div role=\"alert\">" . Html::escape(t("#@id. This @entity_type_label is not available to you.", [
           '@id' => $id,
           '@entity_type_label' => lcfirst($entity->getEntityType()->getLabel()),
         ])) . "</div>"
@@ -856,7 +856,7 @@ function mukurtu_protocol_form_og_membership_form_alter(&$form, FormStateInterfa
   // Collapsible role description list, positioned between roles and state.
   if ($group instanceof CommunityInterface) {
     $role_info = [
-      ['label' => t('Community member'),    'desc' => t('View the community page and be added to protocols within the community')],
+      ['label' => t('Community member'),    'desc' => t('View the community page and be added to protocols within the community.')],
       ['label' => t('Community affiliate'), 'desc' => t('View the community page and be added to protocols within the community. This is a designation for community partners.')],
       ['label' => t('Community manager'),   'desc' => t('Manage community membership and create new protocols. View the community page and be added to protocols within the community.')],
     ];
@@ -878,11 +878,11 @@ function mukurtu_protocol_form_og_membership_form_alter(&$form, FormStateInterfa
   foreach ($role_info as $entry) {
     $items[] = ['#markup' => '<strong>' . $entry['label'] . '</strong>: ' . $entry['desc']];
   }
-  $form['roles']['role_descriptions'] = [
+  $form['role_descriptions'] = [
     '#type'       => 'details',
     '#title'      => t('Role descriptions'),
     '#open'       => FALSE,
-    '#weight'     => 100,
+    '#weight'     => 10,
     '#attributes' => ['class' => ['role-descriptions']],
     'list'        => ['#theme' => 'item_list', '#items' => $items],
   ];
@@ -1031,7 +1031,7 @@ function mukurtu_protocol_preprocess_views_view_field(&$variables) {
   }
 
   if (CulturalProtocols::isUserBlockedFromProtocolViaCommunity($owner, $group)) {
-    $badge = '<span class="community-blocked-badge">' . t('Community blocked') . '</span>';
+    $badge = '<span class="community-blocked-badge" role="status">' . t('Community blocked') . '</span>';
     $variables['output'] = Markup::create((string) $variables['output'] . ' ' . $badge);
   }
 }

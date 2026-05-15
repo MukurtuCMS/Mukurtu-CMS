@@ -185,7 +185,7 @@ class AddUserToCommunityForm extends FormBase {
       'community_manager'   => t('Community manager'),
     ];
     $descriptions = [
-      'community_member'    => t('View the community page and be added to protocols within the community'),
+      'community_member'    => t('View the community page and be added to protocols within the community.'),
       'community_affiliate' => t('View the community page and be added to protocols within the community. This is a designation for community partners.'),
       'community_manager'   => t('Manage community membership and create new protocols. View the community page and be added to protocols within the community.'),
     ];

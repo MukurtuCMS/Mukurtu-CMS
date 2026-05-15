@@ -550,12 +550,12 @@ class ProtocolAddForm extends EntityForm {
 
     if ($missing_names) {
       $form_state->set('membership_role_errors', $missing_uids);
-      $this->messenger()->addError(
+      $form_state->setError(
+        $form['membership_wrapper']['member_table'],
         $this->t('All members must be assigned at least one role. Missing roles for: @names.', [
           '@names' => implode(', ', $missing_names),
         ])
       );
-      $form_state->setError($form['membership_wrapper']['member_table'], '');
     }
 
     $has_steward = FALSE;
@@ -569,10 +569,10 @@ class ProtocolAddForm extends EntityForm {
     }
 
     if (!$has_steward) {
-      $this->messenger()->addError(
+      $form_state->setError(
+        $form['membership_wrapper']['member_table'],
         $this->t('At least one member must be assigned the Protocol steward role.')
       );
-      $form_state->setError($form['membership_wrapper']['member_table'], '');
     }
   }
 

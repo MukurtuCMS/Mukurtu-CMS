@@ -207,7 +207,7 @@ class CommunityManagerUserCreationForm extends FormBase {
         '#target_type' => 'user',
         // Numbered labels give screen reader users positional context when
         // multiple fields exist.
-        '#title' => $this->t('User @num', ['@num' => $i + 1]),
+        '#title' => $this->t('User to notify @num', ['@num' => $i + 1]),
         '#title_display' => 'invisible',
         '#selection_handler' => 'mukurtu_manager_users',
         '#required' => FALSE,
@@ -254,12 +254,10 @@ class CommunityManagerUserCreationForm extends FormBase {
           '#type' => 'container',
           '#tree' => TRUE,
           '#states' => ['visible' => $statesConditions],
-          '#prefix' => '<div aria-live="polite">',
-          '#suffix' => '</div>',
         ];
 
         $form['membership'][$communityId]['protocols']['hint'] = [
-          '#markup' => '<p>' . $this->t('Select one or more protocol roles below.') . '</p>',
+          '#markup' => '<p aria-live="polite">' . $this->t('Select one or more protocol roles below.') . '</p>',
         ];
 
         /** @var \Drupal\mukurtu_protocol\Entity\Protocol $protocol */
