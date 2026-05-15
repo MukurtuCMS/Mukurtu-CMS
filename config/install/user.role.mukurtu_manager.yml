@@ -3,6 +3,7 @@ status: true
 dependencies:
   config:
     - filter.format.full_html
+    - node.type.article
     - taxonomy.vocabulary.category
     - taxonomy.vocabulary.community_type
     - taxonomy.vocabulary.contributor
@@ -62,4 +63,9 @@ label: 'Mukurtu Manager'
 weight: 2
 is_admin: null
 permissions:
+  - 'create article content'
+  - 'delete any article content'
+  - 'delete own article content'
+  - 'edit any article content'
+  - 'edit own article content'
   - 'select account cancellation method'
