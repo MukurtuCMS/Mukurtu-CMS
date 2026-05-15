@@ -7,13 +7,10 @@
     attach: function (context, settings) {
       once(
         'eb-view-toggle',
-        '.field--name-field-items-in-collection',
+        '.field--name-field-items-in-collection .entities-list',
         context
-      ).forEach(function (fieldWrapper) {
-        var $list = $(fieldWrapper).find('.entities-list');
-        if (!$list.length) {
-          return;
-        }
+      ).forEach(function (list) {
+        var $list = $(list);
 
         var storageKey = 'mukurtu_eb_view_field_items_in_collection';
         var savedView = localStorage.getItem(storageKey) || 'list';
