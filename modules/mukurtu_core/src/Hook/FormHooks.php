@@ -732,18 +732,23 @@ class FormHooks
     }
 
     /**
-     * Sets field_pending=1 on the saved entity when "Pending" was selected.
+     * Normalizes field_pending after the entity is saved.
      *
+     * field_pending defaults to 1 for new users, so we must explicitly clear it
+     * when "Blocked" is selected to prevent blocked users appearing as pending.
      * Runs after the entity save so the entity ID is available.
      */
     public static function userStatusPostSaveSubmit(
         array $form,
         FormStateInterface $form_state,
     ): void {
-        if ($form_state->get("mukurtu_status_selection") === "pending") {
-            $entity = $form_state->getFormObject()->getEntity();
-            if ($entity && $entity->hasField("field_pending")) {
-                $entity->set("field_pending", 1);
+        $selection = $form_state->get("mukurtu_status_selection");
+        $isPending = ($selection === "pending");
+        $entity = $form_state->getFormObject()->getEntity();
+        if ($entity && $entity->hasField("field_pending")) {
+            $currentPending = (bool) $entity->get("field_pending")->value;
+            if ($currentPending !== $isPending) {
+                $entity->set("field_pending", $isPending ? 1 : 0);
                 $entity->save();
             }
         }
