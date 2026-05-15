@@ -8,7 +8,7 @@ mukurtu_collection.new_subcollection:
   title: 'New Sub-collection'
   route_name: mukurtu_collection.new_subcollection
   base_route: entity.node.canonical
-  weight: 51
+  weight: 12
 
 # Personal collection routing definition
 personal_collection.settings_tab:
@@ -47,4 +47,4 @@ mukurtu_collection.collection_organization:
   route_name: mukurtu_collection.collection_organization
   base_route: entity.node.canonical
   title: 'Manage Collection Organization'
-  weight: 50
+  weight: 11
