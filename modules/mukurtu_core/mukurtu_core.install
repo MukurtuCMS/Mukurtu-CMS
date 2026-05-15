@@ -740,3 +740,50 @@ function mukurtu_core_update_40021(): void {
     $config->save(TRUE);
   }
 }
+
+/**
+ * Create the form_selection node view mode for entity browser selected-items display.
+ */
+function mukurtu_core_update_40022(): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('entity_view_mode');
+  if (!$storage->load('node.form_selection')) {
+    $storage->create([
+      'id' => 'node.form_selection',
+      'label' => 'Form Selection',
+      'targetEntityType' => 'node',
+      'cache' => TRUE,
+    ])->save();
+  }
+}
+
+/**
+ * Install form_selection view display configs for each node bundle.
+ */
+function mukurtu_core_update_40023(): void {
+  $modules = [
+    'mukurtu_digital_heritage' => 'node.digital_heritage.form_selection',
+    'mukurtu_collection' => 'node.collection.form_selection',
+    'mukurtu_person' => 'node.person.form_selection',
+    'mukurtu_place' => 'node.place.form_selection',
+    'mukurtu_dictionary' => 'node.dictionary_word.form_selection',
+  ];
+  $module_handler = \Drupal::moduleHandler();
+  $config_factory = \Drupal::configFactory();
+  foreach ($modules as $module => $config_name) {
+    if (!$module_handler->moduleExists($module)) {
+      continue;
+    }
+    $existing = $config_factory->get("core.entity_view_display.$config_name");
+    if (!$existing->isNew()) {
+      continue;
+    }
+    $module_path = \Drupal::service('extension.list.module')->getPath($module);
+    $source = new \Drupal\Core\Config\FileStorage("$module_path/config/install");
+    $data = $source->read("core.entity_view_display.$config_name");
+    if ($data) {
+      $config_factory->getEditable("core.entity_view_display.$config_name")
+        ->setData($data)
+        ->save(TRUE);
+    }
+  }
+}

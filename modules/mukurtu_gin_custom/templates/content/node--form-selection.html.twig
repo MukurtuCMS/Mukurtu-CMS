@@ -1,0 +1,13 @@
+<article{{ attributes.addClass('eb-form-selection-card') }}>
+  {% if content.field_representative_media %}
+    <div class="eb-form-selection-card__media">
+      {{ content.field_representative_media }}
+    </div>
+  {% endif %}
+  <div class="eb-form-selection-card__body">
+    <div class="eb-form-selection-card__title">{{ label }}</div>
+    {% if content_type_label %}
+      <div class="eb-form-selection-card__type">{{ content_type_label }}</div>
+    {% endif %}
+  </div>
+</article>

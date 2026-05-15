@@ -26,3 +26,96 @@ counterpart, if one exists. */
     text-overflow: ellipsis;
     overflow: visible !important;
 }
+
+/* === Entity Browser Form Selection Widget === */
+
+/* Toggle button bar */
+.eb-view-toggle {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.eb-view-toggle__btn {
+  padding: 0.25rem 0.75rem;
+  border: 1px solid currentColor;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 3px;
+  font-size: 0.85rem;
+}
+
+.eb-view-toggle__btn[aria-pressed="true"] {
+  background: var(--color-gin-primary, #2e7d32);
+  color: #fff;
+  border-color: var(--color-gin-primary, #2e7d32);
+}
+
+/* Individual card - base styles (used in both views) */
+.eb-form-selection-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem;
+}
+
+.eb-form-selection-card__media {
+  flex: 0 0 60px;
+  width: 60px;
+  height: 60px;
+  overflow: hidden;
+}
+
+.eb-form-selection-card__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.eb-form-selection-card__title {
+  font-weight: bold;
+  font-size: 0.9rem;
+  line-height: 1.3;
+}
+
+.eb-form-selection-card__type {
+  font-size: 0.8rem;
+  color: #666;
+  margin-top: 0.2rem;
+}
+
+/* List view — display is set via JS inline style to beat gin's grid */
+.entities-list.eb-view-list > div {
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.entities-list.eb-view-list > div:last-child {
+  border-bottom: none;
+}
+
+/* Grid view — display/grid-template-columns set via JS inline style */
+.entities-list.eb-view-grid > div {
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.entities-list.eb-view-grid .eb-form-selection-card {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.5rem;
+}
+
+.entities-list.eb-view-grid .eb-form-selection-card__media {
+  width: 100%;
+  height: 100px;
+  flex: none;
+}
+
+/* Keep remove/edit buttons accessible in both views */
+.entities-list.eb-view-grid .field-multiple-drag,
+.entities-list.eb-view-list .field-multiple-drag {
+  cursor: grab;
+}

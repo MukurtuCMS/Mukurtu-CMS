@@ -85,3 +85,16 @@ function mukurtu_collection_update_40002(): void {
   $index->save();
   $index->reindex();
 }
+
+/**
+ * Switch field_items_in_collection widget to rendered_entity (form_selection view mode).
+ */
+function mukurtu_collection_update_40003(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.collection.default');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_items_in_collection.settings.field_widget_display', 'rendered_entity');
+  $config->set('content.field_items_in_collection.settings.field_widget_display_settings', ['view_mode' => 'form_selection']);
+  $config->save();
+}
