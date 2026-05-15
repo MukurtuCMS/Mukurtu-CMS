@@ -7,12 +7,14 @@
     attach: function (context, settings) {
       once(
         'eb-view-toggle',
-        '.field--name-field-items-in-collection .entities-list',
+        '.field--widget-entity-browser-entity-reference .entities-list',
         context
       ).forEach(function (list) {
         var $list = $(list);
 
-        var storageKey = 'mukurtu_eb_view_field_items_in_collection';
+        var fieldClass = $list.closest('[class*="field--name-"]').attr('class') || '';
+        var nameMatch = fieldClass.match(/field--name-([\w-]+)/);
+        var storageKey = 'mukurtu_eb_view_' + (nameMatch ? nameMatch[1] : 'default');
         var savedView = localStorage.getItem(storageKey) || 'list';
 
         function applyView(view) {

@@ -14,3 +14,16 @@ function mukurtu_person_update_40001() {
   $config->save();
   return t('Updated the weight of field_coverage in person record form display.');
 }
+
+/**
+ * Switch field_related_content widget to rendered_entity (form_selection view mode).
+ */
+function mukurtu_person_update_40002(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.person.default');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_related_content.settings.field_widget_display', 'rendered_entity');
+  $config->set('content.field_related_content.settings.field_widget_display_settings', ['view_mode' => 'form_selection']);
+  $config->save();
+}

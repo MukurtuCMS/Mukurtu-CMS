@@ -760,16 +760,17 @@ function mukurtu_core_update_40022(): void {
  * Install form_selection view display configs for each node bundle.
  */
 function mukurtu_core_update_40023(): void {
-  $modules = [
-    'mukurtu_digital_heritage' => 'node.digital_heritage.form_selection',
-    'mukurtu_collection' => 'node.collection.form_selection',
-    'mukurtu_person' => 'node.person.form_selection',
-    'mukurtu_place' => 'node.place.form_selection',
-    'mukurtu_dictionary' => 'node.dictionary_word.form_selection',
+  $configs = [
+    ['mukurtu_digital_heritage', 'node.digital_heritage.form_selection'],
+    ['mukurtu_collection', 'node.collection.form_selection'],
+    ['mukurtu_person', 'node.person.form_selection'],
+    ['mukurtu_place', 'node.place.form_selection'],
+    ['mukurtu_dictionary', 'node.dictionary_word.form_selection'],
+    ['mukurtu_dictionary', 'node.word_list.form_selection'],
   ];
   $module_handler = \Drupal::moduleHandler();
   $config_factory = \Drupal::configFactory();
-  foreach ($modules as $module => $config_name) {
+  foreach ($configs as [$module, $config_name]) {
     if (!$module_handler->moduleExists($module)) {
       continue;
     }
