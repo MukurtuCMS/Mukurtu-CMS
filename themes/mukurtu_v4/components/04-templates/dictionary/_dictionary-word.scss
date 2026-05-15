@@ -122,9 +122,56 @@
 
 .dictionary-word-tabs {
   margin-block-end: var(--v-space-s);
+}
+
+// Use the same specificity hack as _horizontal-tabs.scss to override its styles.
+:is(#extra-specificity-hack, .dictionary-word-tabs) {
+  border: none;
 
   ul.horizontal-tabs-list {
     padding-inline: 0;
+  }
+
+  .horizontal-tabs-panes .horizontal-tabs-pane {
+    padding-block-start: 16px;
+  }
+
+  .field--name-field-word-entry-term {
+    margin-block-start: 0;
+  }
+
+  .field--name-field-recording {
+    margin-block: var(--v-space-4xxs);
+
+    .field--name-field-contributor {
+      justify-content: flex-start;
+    }
+  }
+
+  // Field separators in the base entry pane (fields are direct children).
+  .horizontal-tabs-pane > .field:not(.field--name-title):has(.field__item),
+  .horizontal-tabs-pane > .word-entry-fields-pair:has(.field__item) {
+    padding-block-start: var(--v-space-2xs);
+    margin-block-start: var(--v-space-2xs);
+    border-block-start: 3px solid var(--brand-secondary-accent);
+  }
+
+  // Field separators in additional entry panes (fields are inside the paragraph).
+  .paragraph--type--dictionary-word-entry > .field:not(.field--name-field-word-entry-term):has(.field__item),
+  .paragraph--type--dictionary-word-entry > .word-entry-fields-pair:has(.field__item) {
+    padding-block-start: var(--v-space-2xs);
+    margin-block-start: var(--v-space-2xs);
+    border-block-start: 3px solid var(--brand-secondary-accent);
+  }
+
+  // Remove border from the first field after the heading in each pane.
+  .horizontal-tabs-pane > .field--name-title + .field,
+  .horizontal-tabs-pane > .field--name-title + .word-entry-fields-pair,
+  .paragraph--type--dictionary-word-entry > .field--name-field-word-entry-term + .field,
+  .paragraph--type--dictionary-word-entry > .field--name-field-word-entry-term + .word-entry-fields-pair {
+    border-block-start: none;
+    padding-block-start: 0;
+    margin-block-start: 0;
   }
 
   ul.horizontal-tabs-list li:has(.selected)::after,
@@ -133,13 +180,14 @@
   }
 
   ul.horizontal-tabs-list li.selected {
-    background-color: var(--brand-secondary);
+    background-color: var(--brand-secondary-accent);
   }
 
   ul.horizontal-tabs-list li.selected a,
   ul.horizontal-tabs-list li.selected a:hover,
   ul.horizontal-tabs-list li.selected a:active {
-    background-color: var(--brand-secondary);
+    color: var(--light-text-color);
+    background-color: var(--brand-secondary-accent);
   }
 }
 
@@ -195,8 +243,8 @@
     @include mixins.divider;
 
     border-width: var(--v-space-4xs);
-    margin-block-start: var(--v-space-l);
-    padding-block-start: var(--v-space-xs);
+    margin-block-start: var(--v-space-s);
+    padding-block-start: var(--v-space-2xs);
   }
 
   .dictionary-word-subheading {
