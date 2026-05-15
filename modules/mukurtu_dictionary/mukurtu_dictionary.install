@@ -439,16 +439,27 @@ function mukurtu_dictionary_update_40012(): void {
   }
 
   // Remove the language_community OG roles.
-  $og_role_ids = [
+  $non_default_role_ids = [
     'language_community-language_community-language_steward',
     'language_community-language_community-language_contributor',
-    'language_community-language_community-member',
-    'language_community-language_community-non-member',
   ];
-  foreach ($og_role_ids as $role_id) {
+  foreach ($non_default_role_ids as $role_id) {
     $og_role = \Drupal\og\Entity\OgRole::load($role_id);
     if ($og_role) {
       $og_role->delete();
+    }
+  }
+
+  // Delete default roles directly via config to bypass OG validation which
+  // blocks entity-API deletion of 'member' and 'non-member' role types.
+  $default_role_ids = [
+    'language_community-language_community-member',
+    'language_community-language_community-non-member',
+  ];
+  foreach ($default_role_ids as $role_id) {
+    $config = \Drupal::configFactory()->getEditable('og.role.' . $role_id);
+    if (!$config->isNew()) {
+      $config->delete();
     }
   }
 }
