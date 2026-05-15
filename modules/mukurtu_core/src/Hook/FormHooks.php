@@ -142,8 +142,10 @@ class FormHooks
      * Implements hook_menu_local_tasks_alter().
      *
      * Sets explicit weights on core node tabs so all content pages display tabs
-     * in the order: View, Edit, Delete, Add Community Record, Create Multi-page
-     * Item, Add to Personal Collection, Revisions, Devel.
+     * in the order: View, Edit, Delete, Manage Collection Organization,
+     * New Sub-collection, Add Community Record, Create Multi-page Item,
+     * Add to Personal Collection, Revisions, Devel. Collection-specific tabs
+     * only appear on collection content types.
      */
     #[Hook("menu_local_tasks_alter")]
     public function menuLocalTasksAlterNodeTabOrder(
@@ -155,6 +157,7 @@ class FormHooks
         }
         $weights = [
             "entity.node.edit_form" => 5,
+            "entity.node.delete_form" => 8,
             "entity.node.version_history" => 30,
         ];
         foreach ($weights as $task_id => $weight) {
