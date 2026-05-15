@@ -49,7 +49,23 @@
 {% block paragraph %}
   <div{{ attributes.addClass(classes) }}>
     {% block content %}
-      {{ content }}
+      {{ content.field_word_entry_term }}
+      <div class="word-entry-fields-pair">
+        {{ content.field_translation }}
+        {{ content.field_pronunciation }}
+      </div>
+      <div class="word-entry-fields-pair">
+        {{ content.field_word_type }}
+        {{ content.field_alternate_spelling }}
+      </div>
+      {{ content.field_definition }}
+      {{ content.field_recording }}
+      {{ content.field_sample_sentences }}
+      <div class="word-entry-fields-pair">
+        {{ content.field_source }}
+        {{ content.field_word_origin }}
+        {{ content.field_contributor }}
+      </div>
     {% endblock %}
   </div>
 {% endblock paragraph %}

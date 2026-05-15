@@ -79,6 +79,8 @@
   {% set carousels = null %}
 {% endif %}
 
+{% set num_entries = content.group_primary_fields.group_additional_word_entries.field_additional_word_entries['#items']|length %}
+
 <article{{ attributes }}>
   <div{{ content_attributes }} class="full-node">
     {{ title_prefix }}
@@ -86,8 +88,73 @@
     <div class="full-node__grid">
       <div class="full-node__main">
         <div class="full-node__content">
-          {{ content.group_primary_fields.group_base_word_entry }}
-          {{ content.group_primary_fields.group_additional_word_entries }}
+
+          {% if num_entries > 0 %}
+            {{ attach_library('mukurtu_v4/dictionary-word-tabs') }}
+            <div class="dictionary-word-tabs horizontal-tabs">
+              <ul class="horizontal-tabs-list" role="tablist">
+                <li class="selected" role="presentation">
+                  <a href="#tab-base-entry" role="tab" id="tab-btn-base-entry" aria-selected="true" aria-controls="tab-base-entry">
+                    <span class="div-title">{{ node.title.value }}</span>
+                  </a>
+                </li>
+                {% for entry in node.field_additional_word_entries %}
+                  <li role="presentation">
+                    <a href="#tab-entry-{{ loop.index }}" role="tab" id="tab-btn-entry-{{ loop.index }}" aria-selected="false" aria-controls="tab-entry-{{ loop.index }}">
+                      <span class="div-title">{{ entry.entity.field_word_entry_term.value ?: 'Entry ' ~ loop.index }}</span>
+                    </a>
+                  </li>
+                {% endfor %}
+              </ul>
+              <div class="horizontal-tabs-panes">
+                <div id="tab-base-entry" class="horizontal-tabs-pane" role="tabpanel" aria-labelledby="tab-btn-base-entry">
+                  {{ content.group_primary_fields.group_base_word_entry.field_title }}
+                  <div class="word-entry-fields-pair">
+                    {{ content.group_primary_fields.group_base_word_entry.field_translation }}
+                    {{ content.group_primary_fields.group_base_word_entry.field_pronunciation }}
+                  </div>
+                  <div class="word-entry-fields-pair">
+                    {{ content.group_primary_fields.group_base_word_entry.field_word_type }}
+                    {{ content.group_primary_fields.group_base_word_entry.field_alternate_spelling }}
+                  </div>
+                  {{ content.group_primary_fields.group_base_word_entry.field_definition }}
+                  {{ content.group_primary_fields.group_base_word_entry.field_recording }}
+                  {{ content.group_primary_fields.group_base_word_entry.field_sample_sentences }}
+                  <div class="word-entry-fields-pair">
+                    {{ content.group_primary_fields.group_base_word_entry.field_source }}
+                    {{ content.group_primary_fields.group_base_word_entry.field_word_origin }}
+                    {{ content.group_primary_fields.group_base_word_entry.field_contributor }}
+                  </div>
+                </div>
+                {% for entry in node.field_additional_word_entries %}
+                  <div id="tab-entry-{{ loop.index }}" class="horizontal-tabs-pane" role="tabpanel" hidden aria-labelledby="tab-btn-entry-{{ loop.index }}">
+                    {{ content.group_primary_fields.group_additional_word_entries.field_additional_word_entries[loop.index0] }}
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+
+          {% else %}
+
+            {{ content.group_primary_fields.group_base_word_entry.field_title }}
+            <div class="word-entry-fields-pair">
+              {{ content.group_primary_fields.group_base_word_entry.field_translation }}
+              {{ content.group_primary_fields.group_base_word_entry.field_pronunciation }}
+            </div>
+            <div class="word-entry-fields-pair">
+              {{ content.group_primary_fields.group_base_word_entry.field_word_type }}
+              {{ content.group_primary_fields.group_base_word_entry.field_alternate_spelling }}
+            </div>
+            {{ content.group_primary_fields.group_base_word_entry.field_definition }}
+            {{ content.group_primary_fields.group_base_word_entry.field_recording }}
+            {{ content.group_primary_fields.group_base_word_entry.field_sample_sentences }}
+            <div class="word-entry-fields-pair">
+              {{ content.group_primary_fields.group_base_word_entry.field_source }}
+              {{ content.group_primary_fields.group_base_word_entry.field_word_origin }}
+              {{ content.group_primary_fields.group_base_word_entry.field_contributor }}
+            </div>
+
+          {% endif %}
 
           {% if carousels %}
           <div class="additional-fields">
@@ -136,4 +203,3 @@
 
   </div>
 </article>
-

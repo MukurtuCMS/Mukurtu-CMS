@@ -698,3 +698,25 @@ function mukurtu_dictionary_update_40017(): void {
     $index->reindex();
   }
 }
+
+/**
+ * Update dictionary word display: new field order and tabbed word entry layout.
+ */
+function mukurtu_dictionary_update_40018(): void {
+  $config_factory = \Drupal::configFactory();
+
+  foreach ([
+    'core.entity_view_display.node.dictionary_word.full',
+    'core.entity_view_display.paragraph.dictionary_word_entry.default',
+  ] as $config_name) {
+    $config_path = \Drupal::service('extension.list.profile')->getPath('mukurtu') . '/modules/mukurtu_dictionary/config/install/' . $config_name . '.yml';
+    if (!file_exists($config_path)) {
+      continue;
+    }
+    $data = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($config_path));
+    $config = $config_factory->getEditable($config_name);
+    // Replace config with install defaults to apply the new field ordering and tabbed layout.
+    $config->setData($data);
+    $config->save();
+  }
+}

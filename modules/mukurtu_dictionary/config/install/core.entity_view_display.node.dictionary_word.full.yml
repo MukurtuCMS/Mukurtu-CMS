@@ -74,10 +74,10 @@ third_party_settings:
         - field_translation
         - field_alternate_spelling
         - field_recording
-        - field_definition
-        - field_sample_sentences
         - field_word_type
         - field_pronunciation
+        - field_sample_sentences
+        - field_definition
         - field_source
         - field_word_origin
         - field_contributor
@@ -305,7 +305,7 @@ content:
     label: above
     settings: {  }
     third_party_settings: {  }
-    weight: 4
+    weight: 7
     region: content
   field_dictionary_word_language:
     type: entity_reference_label
@@ -375,7 +375,7 @@ content:
     label: above
     settings: {  }
     third_party_settings: {  }
-    weight: 7
+    weight: 5
     region: content
   field_recording:
     type: entity_reference_entity_view
@@ -402,7 +402,7 @@ content:
       view_mode: default
       link: ''
     third_party_settings: {  }
-    weight: 5
+    weight: 6
     region: content
   field_source:
     type: string
@@ -448,7 +448,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-    weight: 6
+    weight: 4
     region: content
   flag_export_content:
     settings: {  }
