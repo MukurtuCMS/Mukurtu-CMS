@@ -107,7 +107,6 @@ class CommunityAddForm extends ContentEntityForm {
     $already_added = array_keys($form_state->get('members') ?? []);
     $uids = $this->entityTypeManager->getStorage('user')->getQuery()
       ->accessCheck(TRUE)
-      ->condition('status', 1)
       ->condition('uid', 0, '<>')
       ->sort('name')
       ->execute();
@@ -116,9 +115,10 @@ class CommunityAddForm extends ContentEntityForm {
       if (in_array($uid, $already_added)) {
         continue;
       }
+      $statusSuffix = $u->isActive() ? '' : ' [Blocked/Pending]';
       $suggestions[] = [
         'value' => $u->getDisplayName() . ' (' . $uid . ')',
-        'label' => $u->getDisplayName() . ' (' . $u->getEmail() . ')',
+        'label' => $u->getDisplayName() . ' (' . $u->getEmail() . ')' . $statusSuffix,
       ];
     }
     $form['#attached']['drupalSettings']['mukurtuMembership']['users'] = $suggestions;
@@ -202,8 +202,9 @@ class CommunityAddForm extends ContentEntityForm {
         $row['#attributes']['class'][] = 'error';
         $row['#attributes']['aria-invalid'] = 'true';
       }
+      $statusBadge = $member->isActive() ? '' : ' <span aria-label="' . t('blocked or pending') . '">[' . t('Blocked/Pending') . ']</span>';
       $row['user'] = [
-        '#markup' => $name . ' <small>(' . $member->getEmail() . ')</small>',
+        '#markup' => $name . ' <small>(' . $member->getEmail() . ')</small>' . $statusBadge,
       ];
 
       foreach ($roles as $role_id => $label) {

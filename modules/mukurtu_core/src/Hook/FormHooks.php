@@ -188,8 +188,14 @@ class FormHooks
                 "pending" => t("Pending"),
                 0 => t("Blocked"),
             ];
-            array_unshift($form["#submit"], [static::class, "userStatusPreSaveSubmit"]);
-            $form["#submit"][] = [static::class, "userStatusPostSaveSubmit"];
+            // EntityForm's submit button has its own #submit array
+            // (['::submitForm', '::save']), which Drupal uses exclusively —
+            // handlers on $form['#submit'] are ignored when the button has
+            // its own. Attach to the button so the pre-save handler runs
+            // before ::submitForm builds the entity, and the post-save
+            // handler runs after ::save writes it.
+            array_unshift($form["actions"]["submit"]["#submit"], [static::class, "userStatusPreSaveSubmit"]);
+            $form["actions"]["submit"]["#submit"][] = [static::class, "userStatusPostSaveSubmit"];
         }
         if (isset($form["account"]["roles"]["#options"])) {
             $desiredOrder = [
@@ -224,7 +230,7 @@ class FormHooks
             if (isset($form["account"]["field_display_name"])) {
                 unset($form["account"]["field_display_name"]);
             }
-            $form["#submit"][] = [static::class, "visitorRegistrationPendingSubmit"];
+            $form["actions"]["submit"]["#submit"][] = [static::class, "visitorRegistrationPendingSubmit"];
             return;
         }
 
@@ -700,8 +706,8 @@ class FormHooks
             ) {
                 $form["account"]["status"]["#default_value"] = "pending";
             }
-            array_unshift($form["#submit"], [static::class, "userStatusPreSaveSubmit"]);
-            $form["#submit"][] = [static::class, "userStatusPostSaveSubmit"];
+            array_unshift($form["actions"]["submit"]["#submit"], [static::class, "userStatusPreSaveSubmit"]);
+            $form["actions"]["submit"]["#submit"][] = [static::class, "userStatusPostSaveSubmit"];
         }
 
         if (isset($form["actions"]["delete"]["#title"])) {
@@ -732,18 +738,23 @@ class FormHooks
     }
 
     /**
-     * Sets field_pending=1 on the saved entity when "Pending" was selected.
+     * Normalizes field_pending after the entity is saved.
      *
+     * field_pending defaults to 1 for new users, so we must explicitly clear it
+     * when "Blocked" is selected to prevent blocked users appearing as pending.
      * Runs after the entity save so the entity ID is available.
      */
     public static function userStatusPostSaveSubmit(
         array $form,
         FormStateInterface $form_state,
     ): void {
-        if ($form_state->get("mukurtu_status_selection") === "pending") {
-            $entity = $form_state->getFormObject()->getEntity();
-            if ($entity && $entity->hasField("field_pending")) {
-                $entity->set("field_pending", 1);
+        $selection = $form_state->get("mukurtu_status_selection");
+        $isPending = ($selection === "pending");
+        $entity = $form_state->getFormObject()->getEntity();
+        if ($entity && $entity->hasField("field_pending")) {
+            $currentPending = (bool) $entity->get("field_pending")->value;
+            if ($currentPending !== $isPending) {
+                $entity->set("field_pending", $isPending ? 1 : 0);
                 $entity->save();
             }
         }
