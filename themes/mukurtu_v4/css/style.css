@@ -5376,6 +5376,26 @@ header {
   }
 }
 
+.word-entry-fields-pair {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  gap: var(--v-space-xs);
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+}
+.word-entry-fields-pair > .field {
+  -webkit-box-flex: 1;
+      -ms-flex: 1;
+          flex: 1;
+  min-inline-size: 10rem;
+}
+
+.dictionary-word-tabs {
+  -webkit-margin-after: var(--v-space-s);
+          margin-block-end: var(--v-space-s);
+}
+
 .page-node-type-dictionary-word .full-node__content .field--name-field-word-entry > .field__item:not(first-child) {
   -webkit-margin-before: var(--v-space-s);
           margin-block-start: var(--v-space-s);
