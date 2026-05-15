@@ -188,8 +188,14 @@ class FormHooks
                 "pending" => t("Pending"),
                 0 => t("Blocked"),
             ];
-            array_unshift($form["#submit"], [static::class, "userStatusPreSaveSubmit"]);
-            $form["#submit"][] = [static::class, "userStatusPostSaveSubmit"];
+            // EntityForm's submit button has its own #submit array
+            // (['::submitForm', '::save']), which Drupal uses exclusively —
+            // handlers on $form['#submit'] are ignored when the button has
+            // its own. Attach to the button so the pre-save handler runs
+            // before ::submitForm builds the entity, and the post-save
+            // handler runs after ::save writes it.
+            array_unshift($form["actions"]["submit"]["#submit"], [static::class, "userStatusPreSaveSubmit"]);
+            $form["actions"]["submit"]["#submit"][] = [static::class, "userStatusPostSaveSubmit"];
         }
         if (isset($form["account"]["roles"]["#options"])) {
             $desiredOrder = [
@@ -224,7 +230,7 @@ class FormHooks
             if (isset($form["account"]["field_display_name"])) {
                 unset($form["account"]["field_display_name"]);
             }
-            $form["#submit"][] = [static::class, "visitorRegistrationPendingSubmit"];
+            $form["actions"]["submit"]["#submit"][] = [static::class, "visitorRegistrationPendingSubmit"];
             return;
         }
 
@@ -700,8 +706,8 @@ class FormHooks
             ) {
                 $form["account"]["status"]["#default_value"] = "pending";
             }
-            array_unshift($form["#submit"], [static::class, "userStatusPreSaveSubmit"]);
-            $form["#submit"][] = [static::class, "userStatusPostSaveSubmit"];
+            array_unshift($form["actions"]["submit"]["#submit"], [static::class, "userStatusPreSaveSubmit"]);
+            $form["actions"]["submit"]["#submit"][] = [static::class, "userStatusPostSaveSubmit"];
         }
 
         if (isset($form["actions"]["delete"]["#title"])) {
