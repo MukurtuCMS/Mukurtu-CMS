@@ -43,7 +43,12 @@
 
         $toggle.find('.eb-view-toggle__btn--' + savedView).attr('aria-pressed', 'true');
 
-        $list.before($toggle);
+        var $openBtn = $list.closest('details, .field--widget-entity-browser-entity-reference').find('input[data-uuid]').first();
+        if ($openBtn.length) {
+          $openBtn.after($toggle);
+        } else {
+          $list.before($toggle);
+        }
 
         $toggle.on('click', '.eb-view-toggle__btn', function () {
           var view = $(this).hasClass('eb-view-toggle__btn--grid') ? 'grid' : 'list';

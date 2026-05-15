@@ -29,11 +29,11 @@ counterpart, if one exists. */
 
 /* === Entity Browser Form Selection Widget === */
 
-/* Toggle button bar */
 .eb-view-toggle {
-  display: flex;
+  display: inline-flex;
   gap: 0.5rem;
-  margin-bottom: 0.75rem;
+  vertical-align: middle;
+  margin-left: 0.75rem;
 }
 
 .eb-view-toggle__btn {
