@@ -108,6 +108,8 @@ class MukurtuProtocolNodeAccessControlHandler extends NodeAccessControlHandler {
 
     // For protocol-controlled bundles, also allow access via standard Drupal
     // node permissions (e.g. Mukurtu Manager with 'create landing_page content').
+    // Intentional: returning here skips bundleCheckCreateAccess and protocol
+    // membership checks — role-based permission is a sufficient grant on its own.
     $standardAccess = parent::checkCreateAccess($account, $context, $entity_bundle);
     if ($standardAccess->isAllowed()) {
       return $standardAccess;

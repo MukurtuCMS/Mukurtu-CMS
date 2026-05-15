@@ -4,6 +4,8 @@ dependencies:
   config:
     - filter.format.full_html
     - node.type.article
+    - node.type.landing_page
+    - node.type.page
     - taxonomy.vocabulary.category
     - taxonomy.vocabulary.community_type
     - taxonomy.vocabulary.contributor
@@ -64,8 +66,18 @@ weight: 2
 is_admin: null
 permissions:
   - 'create article content'
+  - 'create landing_page content'
+  - 'create page content'
   - 'delete any article content'
+  - 'delete any landing_page content'
+  - 'delete any page content'
   - 'delete own article content'
+  - 'delete own landing_page content'
+  - 'delete own page content'
   - 'edit any article content'
+  - 'edit any landing_page content'
+  - 'edit any page content'
   - 'edit own article content'
+  - 'edit own landing_page content'
+  - 'edit own page content'
   - 'select account cancellation method'
