@@ -369,7 +369,7 @@ class FormHooks
                 "#target_type" => "user",
                 // Numbered labels give screen reader users positional context when
                 // multiple fields exist.
-                "#title" => t("User @num", ["@num" => $i + 1]),
+                "#title" => t("User to notify @num", ["@num" => $i + 1]),
                 "#title_display" => "invisible",
                 "#selection_handler" => "mukurtu_manager_users",
                 "#required" => false,
@@ -399,6 +399,7 @@ class FormHooks
             "community",
             "community",
         );
+        uasort($communityRolesRaw, fn($a, $b) => $a->getWeight() <=> $b->getWeight());
         $communityRoles = [];
         foreach ($communityRolesRaw as $roleValue) {
             if (
@@ -413,6 +414,7 @@ class FormHooks
             "protocol",
             "protocol",
         );
+        uasort($protocolRolesRaw, fn($a, $b) => $a->getWeight() <=> $b->getWeight());
         $protocolRoles = [];
         foreach ($protocolRolesRaw as $roleValue) {
             if (
@@ -456,12 +458,10 @@ class FormHooks
                     "#type" => "container",
                     "#tree" => true,
                     "#states" => ["visible" => $statesConditions],
-                    "#prefix" => '<div aria-live="polite">',
-                    "#suffix" => "</div>",
                 ];
                 $form["membership"][$communityId]["protocols"]["hint"] = [
                     "#markup" =>
-                        "<p>" .
+                        '<p aria-live="polite">' .
                         t("Select one or more protocol roles below.") .
                         "</p>",
                 ];

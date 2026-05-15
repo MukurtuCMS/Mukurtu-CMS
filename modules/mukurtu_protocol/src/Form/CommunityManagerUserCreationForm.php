@@ -36,12 +36,13 @@ class CommunityManagerUserCreationForm extends FormBase {
     // Fetch the role manager.
     $roleManager = \Drupal::service("og.role_manager");
 
-    // Fetch community roles.
+    // Fetch community roles, sorted by weight.
     $rolesRaw = $roleManager->getRolesByBundle('community', 'community');
+    uasort($rolesRaw, fn($a, $b) => $a->getWeight() <=> $b->getWeight());
 
     $roles = [];
 
-    foreach ($rolesRaw as $roleKey => $roleValue) {
+    foreach ($rolesRaw as $roleValue) {
       // Do not include the 'non-member' and generic 'member' roles as options.
       // The correct 'member' role to include is the bundle-specific one,
       // 'community-member'.
@@ -50,8 +51,9 @@ class CommunityManagerUserCreationForm extends FormBase {
       }
     }
 
-    // Fetch protocol roles (same filter pattern as community roles).
+    // Fetch protocol roles (same filter pattern as community roles), sorted by weight.
     $protocolRolesRaw = $roleManager->getRolesByBundle('protocol', 'protocol');
+    uasort($protocolRolesRaw, fn($a, $b) => $a->getWeight() <=> $b->getWeight());
     $protocolRoles = [];
     foreach ($protocolRolesRaw as $roleValue) {
       if ($roleValue->getName() !== 'non-member' && $roleValue->getName() !== 'member') {
@@ -123,7 +125,6 @@ class CommunityManagerUserCreationForm extends FormBase {
     $form['pass'] = [
       '#type' => 'password_confirm',
       '#title' => $this->t('Password'),
-      '#title_display' => 'invisible',
       '#description' => $this->t('Leave blank to allow the user to set their own password via a password reset email.'),
       '#required' => FALSE,
     ];
@@ -206,7 +207,7 @@ class CommunityManagerUserCreationForm extends FormBase {
         '#target_type' => 'user',
         // Numbered labels give screen reader users positional context when
         // multiple fields exist.
-        '#title' => $this->t('User @num', ['@num' => $i + 1]),
+        '#title' => $this->t('User to notify @num', ['@num' => $i + 1]),
         '#title_display' => 'invisible',
         '#selection_handler' => 'mukurtu_manager_users',
         '#required' => FALSE,
@@ -253,12 +254,10 @@ class CommunityManagerUserCreationForm extends FormBase {
           '#type' => 'container',
           '#tree' => TRUE,
           '#states' => ['visible' => $statesConditions],
-          '#prefix' => '<div aria-live="polite">',
-          '#suffix' => '</div>',
         ];
 
         $form['membership'][$communityId]['protocols']['hint'] = [
-          '#markup' => '<p>' . $this->t('Select one or more protocol roles below.') . '</p>',
+          '#markup' => '<p aria-live="polite">' . $this->t('Select one or more protocol roles below.') . '</p>',
         ];
 
         /** @var \Drupal\mukurtu_protocol\Entity\Protocol $protocol */
