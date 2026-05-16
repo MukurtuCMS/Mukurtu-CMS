@@ -30,15 +30,18 @@
 
         applyView(savedView);
 
+        // 4.1.2 / 1.3.1: Wrap toggle buttons in a <fieldset> with a visually-hidden
+        // <legend> so screen readers announce the group purpose.
         var $toggle = $(
-          '<div class="eb-view-toggle">' +
+          '<fieldset class="eb-view-toggle">' +
+            '<legend class="visually-hidden">' + Drupal.t('Display selected items as') + '</legend>' +
             '<button type="button" class="eb-view-toggle__btn eb-view-toggle__btn--list" aria-pressed="false">' +
               Drupal.t('List') +
             '</button>' +
             '<button type="button" class="eb-view-toggle__btn eb-view-toggle__btn--grid" aria-pressed="false">' +
               Drupal.t('Grid') +
             '</button>' +
-          '</div>'
+          '</fieldset>'
         );
 
         $toggle.find('.eb-view-toggle__btn--' + savedView).attr('aria-pressed', 'true');

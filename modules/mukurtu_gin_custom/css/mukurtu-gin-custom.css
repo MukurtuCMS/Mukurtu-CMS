@@ -30,6 +30,12 @@ counterpart, if one exists. */
 /* === Entity Browser Form Selection Widget === */
 
 .eb-view-toggle {
+  /* The toggle is now a <fieldset>. Reset fieldset default styles so layout
+   * is not affected. The visually-hidden legend is preserved in the a11y tree
+   * but removed from the visual flow by Drupal's .visually-hidden utility. */
+  border: none;
+  margin: 0;
+  padding: 0;
   display: inline-flex;
   gap: 0.5rem;
   vertical-align: middle;
@@ -37,18 +43,29 @@ counterpart, if one exists. */
 }
 
 .eb-view-toggle__btn {
-  padding: 0.25rem 0.75rem;
-  border: 1px solid currentColor;
+  /* 2.5.8: minimum 24x24px target size. */
+  min-height: 24px;
+  padding: 0.35rem 0.75rem;
+  border: 2px solid currentColor;
   background: transparent;
   cursor: pointer;
   border-radius: 3px;
   font-size: 0.85rem;
+  line-height: 1.2;
+}
+
+/* 2.4.7: explicit focus indicator that survives Gin's focus reset. */
+.eb-view-toggle__btn:focus-visible {
+  outline: 3px solid var(--color-gin-primary, #2e7d32);
+  outline-offset: 2px;
 }
 
 .eb-view-toggle__btn[aria-pressed="true"] {
   background: var(--color-gin-primary, #2e7d32);
   color: #fff;
   border-color: var(--color-gin-primary, #2e7d32);
+  /* 1.4.1: non-color pressed indicator. */
+  font-weight: bold;
 }
 
 /* Individual card - base styles (used in both views) */
@@ -74,6 +91,9 @@ counterpart, if one exists. */
 }
 
 .eb-form-selection-card__title {
+  /* Reset heading defaults: the <h3> is used for semantics only; visually
+   * it should remain a compact label within the card. */
+  margin: 0;
   font-weight: bold;
   font-size: 0.9rem;
   line-height: 1.3;
@@ -81,13 +101,16 @@ counterpart, if one exists. */
 
 .eb-form-selection-card__type {
   font-size: 0.8rem;
-  color: #666;
+  /* 1.4.3: #595959 on white = 7.0:1, above the 4.5:1 AA requirement. */
+  color: #595959;
   margin-top: 0.2rem;
 }
 
 /* List view — display is set via JS inline style to beat gin's grid */
 .entities-list.eb-view-list > div {
-  border-bottom: 1px solid #e0e0e0;
+  /* 1.4.11: #767676 on white = 4.54:1, meeting the 3:1 UI component minimum.
+   * #e0e0e0 was 1.32:1, which failed. */
+  border-bottom: 1px solid #767676;
 }
 
 .entities-list.eb-view-list > div:last-child {
@@ -96,7 +119,8 @@ counterpart, if one exists. */
 
 /* Grid view — display/grid-template-columns set via JS inline style */
 .entities-list.eb-view-grid > div {
-  border: 1px solid #e0e0e0;
+  /* 1.4.11: same fix as list view divider above. */
+  border: 1px solid #767676;
   border-radius: 4px;
   overflow: hidden;
 }

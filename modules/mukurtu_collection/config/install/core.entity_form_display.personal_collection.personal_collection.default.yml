@@ -2,6 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
+    - core.entity_view_mode.node.form_selection
     - entity_browser.browser.mukurtu_content_browser
   module:
     - entity_browser
