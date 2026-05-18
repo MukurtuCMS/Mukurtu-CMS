@@ -126,3 +126,15 @@ function mukurtu_collection_update_40005(): void {
   $config->set('content.field_items_in_collection.settings.field_widget_display_settings', ['view_mode' => 'form_selection']);
   $config->save();
 }
+
+/**
+ * Switch field_child_collections to the collection-specific entity browser.
+ */
+function mukurtu_collection_update_40006(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.collection.default');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_child_collections.settings.entity_browser', 'mukurtu_collection_browser');
+  $config->save();
+}

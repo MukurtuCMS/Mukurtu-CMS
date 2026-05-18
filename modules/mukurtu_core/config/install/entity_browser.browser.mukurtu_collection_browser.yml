@@ -1,0 +1,30 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - views.view.mukurtu_content_browser
+  module:
+    - views
+name: mukurtu_collection_browser
+label: 'Select Sub-Collections'
+display: modal
+display_configuration:
+  width: '1200'
+  height: '800'
+  link_text: 'Select Content'
+  auto_open: false
+selection_display: no_display
+selection_display_configuration: {  }
+widget_selector: single
+widget_selector_configuration: {  }
+widgets:
+  540de208-ab97-463e-81d4-101302a25e39:
+    settings:
+      submit_text: 'Add Content'
+      auto_select: false
+      view: mukurtu_content_browser
+      view_display: entity_browser_collection
+    uuid: 540de208-ab97-463e-81d4-101302a25e39
+    weight: 1
+    label: 'Select Collection'
+    id: view
