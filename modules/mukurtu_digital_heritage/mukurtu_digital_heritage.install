@@ -111,3 +111,16 @@ function mukurtu_digital_heritage_update_40003(): void {
     ->set('content.field_representative_media.settings.view_mode', 'digital_heritage_sidebar')
     ->save();
 }
+
+/**
+ * Switch field_related_content widget to rendered_entity (form_selection view mode).
+ */
+function mukurtu_digital_heritage_update_40004(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.digital_heritage.default');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_related_content.settings.field_widget_display', 'rendered_entity');
+  $config->set('content.field_related_content.settings.field_widget_display_settings', ['view_mode' => 'form_selection']);
+  $config->save();
+}

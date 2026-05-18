@@ -698,3 +698,24 @@ function mukurtu_dictionary_update_40017(): void {
     $index->reindex();
   }
 }
+
+/**
+ * Switch entity browser fields to rendered_entity (form_selection view mode).
+ */
+function mukurtu_dictionary_update_40018(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.dictionary_word.default');
+  if (!$config->isNew()) {
+    $config->set('content.field_related_content.settings.field_widget_display', 'rendered_entity');
+    $config->set('content.field_related_content.settings.field_widget_display_settings', ['view_mode' => 'form_selection']);
+    $config->save();
+  }
+
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.word_list.default');
+  if (!$config->isNew()) {
+    foreach (['field_related_content', 'field_words'] as $field) {
+      $config->set("content.$field.settings.field_widget_display", 'rendered_entity');
+      $config->set("content.$field.settings.field_widget_display_settings", ['view_mode' => 'form_selection']);
+    }
+    $config->save();
+  }
+}

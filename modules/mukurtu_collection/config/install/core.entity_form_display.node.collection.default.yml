@@ -2,6 +2,8 @@ langcode: en
 status: true
 dependencies:
   config:
+    - core.entity_view_mode.node.form_selection
+    - entity_browser.browser.mukurtu_collection_browser
     - entity_browser.browser.mukurtu_content_browser
     - field.field.node.collection.comment
     - node.type.collection
@@ -147,13 +149,14 @@ content:
     weight: 8
     region: content
     settings:
-      entity_browser: mukurtu_content_browser
-      field_widget_display: label
+      entity_browser: mukurtu_collection_browser
+      field_widget_display: rendered_entity
       field_widget_edit: false
       field_widget_remove: true
       field_widget_replace: false
       open: true
-      field_widget_display_settings: {  }
+      field_widget_display_settings:
+        view_mode: form_selection
       selection_mode: selection_append
     third_party_settings: {  }
   field_collection_image:
@@ -267,12 +270,13 @@ content:
     region: content
     settings:
       entity_browser: mukurtu_content_browser
-      field_widget_display: label
+      field_widget_display: rendered_entity
       field_widget_edit: false
       field_widget_remove: true
       field_widget_replace: false
       open: true
-      field_widget_display_settings: {  }
+      field_widget_display_settings:
+        view_mode: form_selection
       selection_mode: selection_append
     third_party_settings: {  }
   field_keywords:
@@ -365,12 +369,13 @@ content:
     region: content
     settings:
       entity_browser: mukurtu_content_browser
-      field_widget_display: label
+      field_widget_display: rendered_entity
       field_widget_edit: false
       field_widget_remove: true
       field_widget_replace: false
       open: true
-      field_widget_display_settings: {  }
+      field_widget_display_settings:
+        view_mode: form_selection
       selection_mode: selection_append
     third_party_settings: {  }
   field_source:
