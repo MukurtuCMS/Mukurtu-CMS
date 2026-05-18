@@ -305,7 +305,7 @@ mukurtu_protocol.protocol_create:
     _form: '\Drupal\mukurtu_protocol\Form\ProtocolAddForm'
     _title: 'Add cultural protocol'
   requirements:
-    _permission: 'add protocol entities'
+    _entity_create_access: 'protocol'
   options:
     _admin_route: TRUE
 
