@@ -2,6 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
+    - entity_browser.browser.mukurtu_collection_browser
     - entity_browser.browser.mukurtu_content_browser
     - field.field.node.collection.comment
     - node.type.collection
@@ -147,7 +148,7 @@ content:
     weight: 8
     region: content
     settings:
-      entity_browser: mukurtu_content_browser
+      entity_browser: mukurtu_collection_browser
       field_widget_display: label
       field_widget_edit: false
       field_widget_remove: true

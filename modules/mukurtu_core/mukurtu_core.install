@@ -740,3 +740,83 @@ function mukurtu_core_update_40021(): void {
     $config->save(TRUE);
   }
 }
+
+/**
+ * Add collection-specific entity browser (no type filter) and view display.
+ */
+function mukurtu_core_update_40022(): void {
+  // Add the entity_browser_collection display to the content browser view.
+  $view = \Drupal::configFactory()->getEditable('views.view.mukurtu_content_browser');
+  if (!$view->isNew()) {
+    $displays = $view->get('display');
+    if (!isset($displays['entity_browser_collection'])) {
+      $displays['entity_browser_collection'] = [
+        'id' => 'entity_browser_collection',
+        'display_title' => 'Entity browser (Collection)',
+        'display_plugin' => 'entity_browser',
+        'position' => 2,
+        'display_options' => [
+          'filters' => [
+            'type' => [
+              'id' => 'type',
+              'table' => 'node_field_data',
+              'field' => 'type',
+              'relationship' => 'none',
+              'group_type' => 'group',
+              'admin_label' => '',
+              'entity_type' => 'node',
+              'entity_field' => 'type',
+              'plugin_id' => 'bundle',
+              'operator' => 'in',
+              'value' => ['collection' => 'collection'],
+              'group' => 1,
+              'exposed' => FALSE,
+              'is_grouped' => FALSE,
+              'group_info' => [
+                'label' => '',
+                'description' => '',
+                'identifier' => '',
+                'optional' => TRUE,
+                'widget' => 'select',
+                'multiple' => FALSE,
+                'remember' => FALSE,
+                'default_group' => 'All',
+                'default_group_multiple' => [],
+                'group_items' => [],
+              ],
+            ],
+          ],
+          'display_extenders' => [],
+        ],
+        'cache_metadata' => [
+          'max-age' => -1,
+          'contexts' => [
+            'languages:language_content',
+            'languages:language_interface',
+            'url',
+            'url.query_args',
+            'user.node_grants:view',
+            'user.permissions',
+          ],
+          'tags' => [],
+        ],
+      ];
+      $view->set('display', $displays);
+      $view->save(TRUE);
+    }
+  }
+
+  // Install the new mukurtu_collection_browser entity browser config.
+  // mukurtu_collection_update_40006 also installs this config first (since
+  // collection runs before core alphabetically), so this is a no-op on most
+  // sites — the exists() check makes it idempotent.
+  $name = 'entity_browser.browser.mukurtu_collection_browser';
+  if (!\Drupal::service('config.storage')->exists($name)) {
+    $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core');
+    $source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+    $data = $source->read($name);
+    if ($data !== FALSE) {
+      \Drupal::configFactory()->getEditable($name)->setData($data)->save(TRUE);
+    }
+  }
+}

@@ -393,6 +393,13 @@ class PersonalCollection extends EditorialContentEntityBase implements PersonalC
       ->setSetting('target_type', 'node')
       ->setSetting('handler', 'default:node')
       ->setSetting('handler_settings', [
+        'target_bundles' => [
+          'digital_heritage' => 'digital_heritage',
+          'dictionary_word' => 'dictionary_word',
+          'word_list' => 'word_list',
+          'person' => 'person',
+          'place' => 'place',
+        ],
         'auto_create' => FALSE,
       ])
       ->setRequired(FALSE)

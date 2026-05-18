@@ -85,3 +85,41 @@ function mukurtu_collection_update_40002(): void {
   $index->save();
   $index->reindex();
 }
+
+/**
+ * Restrict items_in_collection to allowed content types.
+ *
+ * The target_bundles restriction lives in PHP entity code (Collection.php and
+ * PersonalCollection.php), not in config. Clearing cached field definitions is
+ * sufficient to apply the change to running sites.
+ */
+function mukurtu_collection_update_40003(): void {
+  \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
+}
+
+/**
+ * Switch field_child_collections to the collection-specific entity browser.
+ *
+ * Install the mukurtu_collection_browser entity browser config here rather than
+ * waiting for mukurtu_core_update_40022, because Drupal runs update hooks
+ * alphabetically by module name (mukurtu_collection before mukurtu_core). The
+ * form display must not reference a browser that doesn't exist yet.
+ */
+function mukurtu_collection_update_40006(): void {
+  $name = 'entity_browser.browser.mukurtu_collection_browser';
+  if (!\Drupal::service('config.storage')->exists($name)) {
+    $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core');
+    $source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+    $data = $source->read($name);
+    if ($data !== FALSE) {
+      \Drupal::configFactory()->getEditable($name)->setData($data)->save(TRUE);
+    }
+  }
+
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.collection.default');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_child_collections.settings.entity_browser', 'mukurtu_collection_browser');
+  $config->save();
+}
