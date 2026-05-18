@@ -510,7 +510,7 @@ function mukurtu_protocol_update_40028(): void {
 /**
  * Add mukurtu_community_manager_select query tag to community select view.
  */
-function mukurtu_protocol_update_40029(): void {
+function mukurtu_protocol_update_40030(): void {
   $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
   $view_file = $module_path . '/config/install/views.view.mukurtu_community_select.yml';
   $view_data = \Symfony\Component\Yaml\Yaml::parseFile($view_file);
