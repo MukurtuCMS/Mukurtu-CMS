@@ -553,3 +553,190 @@ function mukurtu_core_update_40014(): void {
 
   $config->set('sections', $sections)->save();
 }
+
+/**
+ * Update field_coverage widget: world-view fallback zoom and enable locate button.
+ */
+function mukurtu_core_update_40015(): void {
+  $form_displays = [
+    'core.entity_form_display.node.collection.default',
+    'core.entity_form_display.node.dictionary_word.default',
+    'core.entity_form_display.node.word_list.default',
+    'core.entity_form_display.node.digital_heritage.default',
+    'core.entity_form_display.node.person.default',
+    'core.entity_form_display.node.place.default',
+  ];
+  foreach ($form_displays as $config_name) {
+    $config = \Drupal::configFactory()->getEditable($config_name);
+    if ($config->isNew()) {
+      continue;
+    }
+    $settings = $config->get('content.field_coverage.settings');
+    if (empty($settings)) {
+      continue;
+    }
+    $settings['map']['map_position']['zoom'] = '2';
+    $settings['map']['map_position']['minZoom'] = '1';
+    $settings['locate']['control'] = 1;
+    $locate_options = json_decode($settings['locate']['options'] ?? '{}', TRUE);
+    unset($locate_options['keepCurrentZoomLevel']);
+    $settings['locate']['options'] = json_encode($locate_options);
+    $config->set('content.field_coverage.settings', $settings)->save();
+  }
+}
+
+/**
+ * Fix field_coverage widget: set minZoom to 1 and remove keepCurrentZoomLevel.
+ */
+function mukurtu_core_update_40016(): void {
+  $form_displays = [
+    'core.entity_form_display.node.collection.default',
+    'core.entity_form_display.node.dictionary_word.default',
+    'core.entity_form_display.node.word_list.default',
+    'core.entity_form_display.node.digital_heritage.default',
+    'core.entity_form_display.node.person.default',
+    'core.entity_form_display.node.place.default',
+  ];
+  foreach ($form_displays as $config_name) {
+    $config = \Drupal::configFactory()->getEditable($config_name);
+    if ($config->isNew()) {
+      continue;
+    }
+    $settings = $config->get('content.field_coverage.settings');
+    if (empty($settings)) {
+      continue;
+    }
+    $settings['map']['map_position']['minZoom'] = '1';
+    $locate_options = json_decode($settings['locate']['options'] ?? '{}', TRUE);
+    unset($locate_options['keepCurrentZoomLevel']);
+    $settings['locate']['options'] = json_encode($locate_options);
+    $config->set('content.field_coverage.settings', $settings)->save();
+  }
+}
+
+/**
+ * Add small, medium, and large media view modes.
+ */
+function mukurtu_core_update_40017(): void {
+  $config_storage = \Drupal::service('config.storage');
+
+  // Import view mode definitions from mukurtu_core module.
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core');
+  $module_source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+
+  foreach (['small', 'medium', 'large'] as $mode) {
+    $name = 'core.entity_view_mode.media.' . $mode;
+    $data = $module_source->read($name);
+    if ($data !== FALSE) {
+      $config_storage->write($name, $data);
+    }
+  }
+
+  // Import view display configs from the profile.
+  $profile_path = \Drupal::service('extension.list.profile')->getPath(\Drupal::installProfile());
+  $profile_source = new \Drupal\Core\Config\FileStorage($profile_path . '/config/install');
+
+  $bundles = ['image', 'video', 'audio', 'document', 'external_embed', 'remote_video'];
+  foreach (['small', 'medium', 'large'] as $mode) {
+    foreach ($bundles as $bundle) {
+      $name = 'core.entity_view_display.media.' . $bundle . '.' . $mode;
+      $data = $profile_source->read($name);
+      if ($data !== FALSE) {
+        $config_storage->write($name, $data);
+      }
+    }
+  }
+}
+
+/**
+ * Fix drupal-media allowed attributes in CKEditor5 to preserve view modes on edit.
+ */
+function mukurtu_core_update_40018(): void {
+  $config_factory = \Drupal::configFactory();
+  $new_view_modes = ['small' => 'small', 'medium' => 'medium', 'large' => 'large'];
+
+  foreach (['basic_html', 'full_html'] as $format) {
+    // Fix editor allowed_tags so CKEditor5 preserves data-view-mode.
+    $editor = $config_factory->getEditable('editor.editor.' . $format);
+    if (!$editor->isNew()) {
+      $allowed_tags = $editor->get('settings.plugins.ckeditor5_sourceEditing.allowed_tags') ?? [];
+      $target = '<drupal-media title data-entity-type data-entity-uuid alt data-view-mode data-caption data-align>';
+      $key = NULL;
+      foreach ($allowed_tags as $k => $tag) {
+        if (str_starts_with(trim($tag), '<drupal-media')) {
+          $key = $k;
+          break;
+        }
+      }
+      if ($key !== NULL && trim($allowed_tags[$key]) !== $target) {
+        $allowed_tags[$key] = $target;
+        $editor->set('settings.plugins.ckeditor5_sourceEditing.allowed_tags', $allowed_tags);
+        $editor->save(TRUE);
+      }
+    }
+
+    // Add new view modes to the media_embed filter's allowed_view_modes.
+    $filter = $config_factory->getEditable('filter.format.' . $format);
+    if (!$filter->isNew()) {
+      $allowed = $filter->get('filters.media_embed.settings.allowed_view_modes') ?? [];
+      $filter->set('filters.media_embed.settings.allowed_view_modes', array_merge($allowed, $new_view_modes));
+      $filter->save(TRUE);
+    }
+  }
+}
+
+/**
+ * Update legacy media view mode labels to avoid duplicates with new view modes.
+ */
+function mukurtu_core_update_40019(): void {
+  $config_storage = \Drupal::service('config.storage');
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core');
+  $module_source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+
+  foreach (['digital_heritage_full', 'digital_heritage_sidebar', 'small_250px_'] as $mode) {
+    $name = 'core.entity_view_mode.media.' . $mode;
+    $data = $module_source->read($name);
+    if ($data !== FALSE) {
+      $config_storage->write($name, $data);
+    }
+  }
+}
+
+/**
+ * Add field_pending to user entity to distinguish Pending from Blocked accounts.
+ */
+function mukurtu_core_update_40020(): void {
+  $field_storage = \Drupal\field\Entity\FieldStorageConfig::loadByName('user', 'field_pending');
+  if (!$field_storage) {
+    \Drupal\field\Entity\FieldStorageConfig::create([
+      'field_name' => 'field_pending',
+      'entity_type' => 'user',
+      'type' => 'boolean',
+      'cardinality' => 1,
+    ])->save();
+  }
+  if (!\Drupal\field\Entity\FieldConfig::loadByName('user', 'user', 'field_pending')) {
+    \Drupal\field\Entity\FieldConfig::create([
+      'field_name' => 'field_pending',
+      'entity_type' => 'user',
+      'bundle' => 'user',
+      'label' => 'Pending',
+      'default_value' => [['value' => 1]],
+    ])->save();
+  }
+}
+
+/**
+ * Hide local actions block on /dictionary.
+ */
+function mukurtu_core_update_40021(): void {
+  $config = \Drupal::configFactory()->getEditable('block.block.mukurtu_v4_local_actions');
+  if (!$config) {
+    return;
+  }
+  $pages = $config->get('visibility.request_path.pages') ?? '';
+  if (!str_contains($pages, '/dictionary')) {
+    $config->set('visibility.request_path.pages', $pages . "\r\n/dictionary");
+    $config->save(TRUE);
+  }
+}

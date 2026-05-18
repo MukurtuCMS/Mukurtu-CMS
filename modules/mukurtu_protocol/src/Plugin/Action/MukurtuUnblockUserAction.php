@@ -15,7 +15,7 @@ use Drupal\views_bulk_operations\Action\ViewsBulkOperationsActionBase;
  *
  * @Action(
  *   id = "mukurtu_unblock_user_action",
- *   label = @Translation("Unblock user"),
+ *   label = @Translation("Unblock or approve user(s)"),
  *   type = "user",
  *   confirm = TRUE,
  *   requirements = {
@@ -37,6 +37,7 @@ class MukurtuUnblockUserAction extends ViewsBulkOperationsActionBase {
     }
     if ($entity->status->value != 1) {
       $entity->set('status', TRUE);
+      $entity->set('field_pending', 0);
       try {
         $entity->save();
       }
@@ -58,6 +59,12 @@ class MukurtuUnblockUserAction extends ViewsBulkOperationsActionBase {
   public function access($object, ?AccountInterface $account = NULL, $return_as_object = FALSE) {
     if (!$object instanceof User || !$account) {
       return $return_as_object ? AccessResult::forbidden() : FALSE;
+    }
+
+    // Defensive guard: a blocked user cannot be logged in, but prevent any
+    // edge-case code path from having an admin unblock themselves via bulk.
+    if ($object->id() == $account->id()) {
+      return $return_as_object ? AccessResult::forbidden()->cachePerUser() : FALSE;
     }
 
     if ($account->hasPermission('administer users')) {

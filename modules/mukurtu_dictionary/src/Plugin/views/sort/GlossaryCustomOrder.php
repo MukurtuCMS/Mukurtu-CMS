@@ -92,13 +92,43 @@ class GlossaryCustomOrder extends SortPluginBase {
       return;
     }
 
-    // Store the weights in the view for use in post_execute.
     $this->view->glossary_weights = $weights;
     $this->view->glossary_field = $this->realField;
     $this->view->glossary_order = $this->options['order'];
+  }
 
-    // We'll handle sorting in post_execute by reordering results.
-    // Don't add a sort to the query itself.
+  /**
+   * {@inheritdoc}
+   */
+  public function postExecute(&$values) {
+    if (empty($this->view->glossary_weights)) {
+      return;
+    }
+
+    $weights = $this->view->glossary_weights;
+    $field = $this->view->glossary_field;
+    $order = $this->view->glossary_order;
+
+    usort($values, function ($a, $b) use ($weights, $field, $order) {
+      $a_raw = $a->$field ?? [];
+      $b_raw = $b->$field ?? [];
+      $a_entry = is_array($a_raw) ? ($a_raw[0] ?? '') : ($a_raw ?? '');
+      $b_entry = is_array($b_raw) ? ($b_raw[0] ?? '') : ($b_raw ?? '');
+
+      $a_weight = $weights[$a_entry] ?? PHP_INT_MAX;
+      $b_weight = $weights[$b_entry] ?? PHP_INT_MAX;
+
+      if ($a_weight === $b_weight) {
+        return strnatcasecmp($a_entry, $b_entry);
+      }
+
+      $diff = $a_weight <=> $b_weight;
+      return $order === 'DESC' ? -$diff : $diff;
+    });
+
+    foreach ($values as $index => $row) {
+      $values[$index]->index = $index;
+    }
   }
 
   /**

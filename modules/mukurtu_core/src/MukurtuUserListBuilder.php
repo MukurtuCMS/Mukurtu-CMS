@@ -66,7 +66,15 @@ class MukurtuUserListBuilder extends \Drupal\user\UserListBuilder {
       '#account' => $entity,
     ];
     $row['field_display_name']['data']['#markup'] = $entity->get('field_display_name')->value ?? '—';
-    $row['status'] = $entity->isActive() ? $this->t('active') : $this->t('blocked');
+    if ($entity->isActive()) {
+      $row['status'] = $this->t('active');
+    }
+    elseif ($entity->hasField('field_pending') && $entity->get('field_pending')->value) {
+      $row['status'] = $this->t('pending');
+    }
+    else {
+      $row['status'] = $this->t('blocked');
+    }
 
     $roles = Role::loadMultiple($entity->getRoles());
     unset($roles[RoleInterface::ANONYMOUS_ID]);
@@ -105,8 +113,18 @@ class MukurtuUserListBuilder extends \Drupal\user\UserListBuilder {
    */
   public function getOperations(EntityInterface $entity) {
     $operations = parent::getOperations($entity);
+    if ($entity->access('cancel')) {
+      $operations['cancel'] = [
+        'title' => $this->t('Block or delete'),
+        'url' => $entity->toUrl('cancel-form'),
+        'weight' => 10,
+        'attributes' => [
+          'aria-label' => $this->t('Block or delete @name', ['@name' => $entity->getDisplayName()]),
+        ],
+      ];
+    }
     $operations['memberships'] = [
-      'title' => $this->t('Memberships'),
+      'title' => $this->t('View memberships'),
       'url' => Url::fromRoute('mukurtu_protocol.user_memberships', ['user' => $entity->id()]),
       'weight' => 20,
     ];

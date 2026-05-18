@@ -35,3 +35,19 @@ entity_browser_view_decoration:
   version: 1.x
   js:
     js/entity_browser_view_decoration.js: {}
+
+form-disable-enter-submit:
+  version: 1.x
+  js:
+    js/form-disable-enter-submit.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+
+vbo-user-labels:
+  version: 1.x
+  js:
+    js/vbo-user-labels.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
