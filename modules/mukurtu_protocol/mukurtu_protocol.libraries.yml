@@ -25,3 +25,12 @@ mukurtu-community-role-management:
     js/mukurtu-community-role-management.js: {}
   dependencies:
     - core/jquery
+
+protocol-community-browser:
+  version: 1.x
+  js:
+    js/protocol-community-browser.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/once

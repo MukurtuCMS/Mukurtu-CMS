@@ -125,10 +125,25 @@ class ProtocolAddForm extends EntityForm {
       $this->entity->setCommunities(array_values($stored_communities));
     }
 
-    // Pre-select the URL community for the community-bound route.
-    $default_entities = $community_param ? [$community_param] : [];
+    // Use stored communities as default value when available, otherwise fall
+    // back to the route community parameter.
+    if (!empty($stored_communities)) {
+      $default_entities = array_values($stored_communities);
+    }
+    elseif ($community_param) {
+      $default_entities = [$community_param];
+    }
+    else {
+      $default_entities = [];
+    }
 
-    $form['field_communities'] = [
+    $form['communities_and_members'] = [
+      '#type' => 'container',
+      '#attributes' => ['id' => 'communities-and-members-wrapper'],
+      '#weight' => 2,
+    ];
+
+    $form['communities_and_members']['field_communities'] = [
       '#type' => 'entity_browser',
       '#entity_browser' => 'mukurtu_community_select',
       '#cardinality' => EntityBrowserElement::CARDINALITY_UNLIMITED,
@@ -138,17 +153,40 @@ class ProtocolAddForm extends EntityForm {
       '#required' => TRUE,
     ];
 
-    $form['update_members'] = [
+    if (!empty($stored_communities)) {
+      $community_items = array_map(
+        fn($c) => ['#plain_text' => $c->getName()],
+        array_values($stored_communities)
+      );
+      $form['communities_and_members']['communities_selected'] = [
+        '#type' => 'container',
+        '#attributes' => ['class' => ['communities-selected']],
+        'label' => ['#markup' => '<strong>' . $this->t('Selected communities:') . '</strong>'],
+        'list' => [
+          '#theme' => 'item_list',
+          '#items' => $community_items,
+        ],
+      ];
+    }
+
+    // Hidden button — clicked automatically by JS after entity browser
+    // selection to refresh the communities display and member list.
+    $form['communities_and_members']['auto_update_trigger'] = [
       '#type' => 'submit',
-      '#value' => $this->t('Update member list'),
+      '#value' => $this->t('Update'),
+      '#name' => 'auto_update_trigger',
+      '#attributes' => [
+        'class' => ['js-hide', 'js-communities-auto-update'],
+        'tabindex' => '-1',
+      ],
       '#validate' => [[static::class, 'membershipNoValidate']],
       '#submit' => [[static::class, 'updateMemberListSubmit']],
       '#limit_validation_errors' => [],
       '#ajax' => [
-        'callback' => '::membershipWrapperCallback',
-        'wrapper' => 'membership-wrapper',
+        'callback' => '::communitiesAndMembersCallback',
+        'wrapper' => 'communities-and-members-wrapper',
+        'progress' => ['type' => 'throbber', 'message' => NULL],
       ],
-      '#attributes' => ['class' => ['button--secondary']],
     ];
 
     // Community name.
@@ -195,17 +233,15 @@ class ProtocolAddForm extends EntityForm {
 
     $form['name']['#weight'] = 0;
     $form['field_access_mode']['#weight'] = 1;
-    $form['field_communities']['#weight'] = 2;
-    $form['update_members']['#weight'] = 3;
-    $form['field_description']['#weight'] = 4;
-    $form['field_membership_display']['#weight'] = 5;
+    $form['communities_and_members']['#weight'] = 2;
+    $form['field_description']['#weight'] = 3;
+    $form['field_membership_display']['#weight'] = 4;
 
     // Remove entity form display fields not used on this custom form.
     $allowed_keys = [
       'name',
       'field_access_mode',
-      'field_communities',
-      'update_members',
+      'communities_and_members',
       'field_description',
       'field_membership_display',
       'actions',
@@ -223,22 +259,21 @@ class ProtocolAddForm extends EntityForm {
       ]);
     }
 
-    $form['membership_wrapper'] = [
+    $form['communities_and_members']['membership_wrapper'] = [
       '#type' => 'container',
       '#tree' => TRUE,
-      '#weight' => 6,
       '#attributes' => ['id' => 'membership-wrapper'],
     ];
 
-    $form['membership_wrapper']['membership_label'] = [
+    $form['communities_and_members']['membership_wrapper']['membership_label'] = [
       '#type' => 'item',
       '#title' => $this->t('Protocol members'),
       '#description' => $this->t('Add members of the parent community to this protocol. A member may hold multiple roles.'),
     ];
 
-    $form['membership_wrapper']['role_descriptions'] = static::buildRoleDescriptions();
+    $form['communities_and_members']['membership_wrapper']['role_descriptions'] = static::buildRoleDescriptions();
 
-    $form['membership_wrapper']['add_row'] = [
+    $form['communities_and_members']['membership_wrapper']['add_row'] = [
       '#type' => 'container',
       '#attributes' => ['class' => ['membership-add-row']],
     ];
@@ -251,7 +286,7 @@ class ProtocolAddForm extends EntityForm {
       $selection_settings['group'] = $this->entity;
     }
 
-    $form['membership_wrapper']['add_row']['user_search'] = [
+    $form['communities_and_members']['membership_wrapper']['add_row']['user_search'] = [
       '#type' => 'entity_autocomplete',
       '#target_type' => 'user',
       '#title' => $this->t('Add a member'),
@@ -261,7 +296,7 @@ class ProtocolAddForm extends EntityForm {
       '#autocreate' => FALSE,
     ];
 
-    $form['membership_wrapper']['add_row']['add_member'] = [
+    $form['communities_and_members']['membership_wrapper']['add_row']['add_member'] = [
       '#type' => 'submit',
       '#value' => $this->t('Add'),
       '#validate' => [[static::class, 'membershipNoValidate']],
@@ -269,7 +304,7 @@ class ProtocolAddForm extends EntityForm {
       '#limit_validation_errors' => [],
     ];
 
-    $form['membership_wrapper']['member_table'] = static::buildMembershipTable($form_state);
+    $form['communities_and_members']['membership_wrapper']['member_table'] = static::buildMembershipTable($form_state);
 
     $form['#attached']['library'][] = 'mukurtu_protocol/membership-table';
 
@@ -318,6 +353,7 @@ class ProtocolAddForm extends EntityForm {
         ];
       }
     }
+    $form['#attached']['library'][] = 'mukurtu_protocol/protocol-community-browser';
     $form['#attached']['drupalSettings']['mukurtuMembership']['users'] = $suggestions;
     $form['#attached']['drupalSettings']['mukurtuMembership']['scrollToTable'] = (bool) $form_state->get('membership_scroll');
     $form_state->set('membership_scroll', FALSE);
@@ -415,10 +451,10 @@ class ProtocolAddForm extends EntityForm {
   }
 
   /**
-   * AJAX callback: returns the rebuilt membership wrapper after community selection.
+   * AJAX callback: returns the full communities-and-members container.
    */
-  public function membershipWrapperCallback(array &$form, FormStateInterface $form_state): array {
-    return $form['membership_wrapper'];
+  public function communitiesAndMembersCallback(array &$form, FormStateInterface $form_state): array {
+    return $form['communities_and_members'];
   }
 
   /**
@@ -549,7 +585,7 @@ class ProtocolAddForm extends EntityForm {
     }
 
     if (empty($selected_communities)) {
-      $form_state->setError($form['field_communities'], $this->t('At least one community is required.'));
+      $form_state->setError($form['communities_and_members']['field_communities'], $this->t('At least one community is required.'));
     }
 
     $roles = array_keys(static::getRoles());
@@ -586,7 +622,7 @@ class ProtocolAddForm extends EntityForm {
           '@names' => implode(', ', $missing_names),
         ])
       );
-      $form_state->setError($form['membership_wrapper']['member_table'], '');
+      $form_state->setError($form['communities_and_members']['membership_wrapper']['member_table'], '');
     }
 
     $has_steward = FALSE;
@@ -603,7 +639,7 @@ class ProtocolAddForm extends EntityForm {
       $this->messenger()->addError(
         $this->t('At least one member must be assigned the Protocol steward role.')
       );
-      $form_state->setError($form['membership_wrapper']['member_table'], '');
+      $form_state->setError($form['communities_and_members']['membership_wrapper']['member_table'], '');
     }
   }
 
