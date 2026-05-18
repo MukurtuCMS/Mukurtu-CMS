@@ -710,6 +710,50 @@ function mukurtu_protocol_query_community_access_alter(AlterableInterface $query
 }
 
 /**
+ * Implements hook_query_TAG_alter().
+ *
+ * Filters the mukurtu_community_select entity browser view to only show
+ * communities where the current user holds the community_manager OG role.
+ */
+function mukurtu_protocol_query_mukurtu_community_manager_select_alter(AlterableInterface $query) {
+  $account = \Drupal::currentUser();
+
+  // UID 1 sees all communities.
+  if ($account->id() == 1) {
+    return;
+  }
+
+  $tables = $query->getTables();
+  $community_table = '';
+  foreach ($tables as $alias => $info) {
+    if ($info['table'] === 'community_field_data') {
+      $community_table = $alias;
+      break;
+    }
+  }
+
+  if (!$community_table) {
+    return;
+  }
+
+  // INNER JOIN og_membership to limit to communities where the user is an
+  // active member, then INNER JOIN og_membership__roles to require the
+  // community_manager role.
+  $og_alias = $query->innerJoin(
+    'og_membership',
+    'ogm_mgr',
+    "{$community_table}.id = ogm_mgr.entity_id AND ogm_mgr.entity_type = 'community' AND ogm_mgr.state = 'active'"
+  );
+  $query->condition("{$og_alias}.uid", $account->id());
+
+  $query->innerJoin(
+    'og_membership__roles',
+    'ogmr_mgr',
+    "{$og_alias}.id = ogmr_mgr.entity_id AND ogmr_mgr.roles_target_id = 'community-community-community_manager'"
+  );
+}
+
+/**
  * Implements hook_field_widget_single_element_WIDGET_TYPE_form_alter().
  */
 function mukurtu_protocol_field_widget_single_element_entity_browser_entity_reference_form_alter(array &$element, \Drupal\Core\Form\FormStateInterface $form_state, array $context)
