@@ -94,6 +94,13 @@ counterpart, if one exists. */
   display: block;
 }
 
+/* Suppress Gin's entity_browser.css hover border on the media thumbnail — the
+   .field__item div is not focusable so this is not a focus indicator. */
+.entities-list .item-container .eb-form-selection-card__media .field__item:hover {
+  border-color: transparent !important;
+  cursor: default;
+}
+
 .eb-form-selection-card__title {
   /* Reset heading defaults: the <h3> is used for semantics only; visually
    * it should remain a compact label within the card. */
