@@ -1086,6 +1086,56 @@ class FormHooks
     }
 
     /**
+     * Implements hook_form_views_exposed_form_alter().
+     *
+     * When the mukurtu_content_browser view is opened from an entity reference
+     * field that restricts target_bundles, the view argument already limits which
+     * rows appear. This hook keeps the exposed Type filter in sync by removing
+     * any bundle options that are not in the allowed set, so the dropdown only
+     * shows types the user can actually select.
+     */
+    #[Hook("form_views_exposed_form_alter")]
+    public function formViewsExposedFormAlterContentBrowser(
+        array &$form,
+        FormStateInterface $form_state,
+    ): void {
+        if (!isset($form["type"])) {
+            return;
+        }
+        $storage = $form_state->getStorage();
+        $view = $storage["view"] ?? NULL;
+        if (!$view instanceof ViewExecutable) {
+            return;
+        }
+        if ($view->storage->id() !== "mukurtu_content_browser") {
+            return;
+        }
+
+        // Mirror the EntityBrowserWidgetContext argument plugin: read the
+        // target_bundles from the entity browser selection storage via the
+        // UUID on the current request.
+        $uuid = \Drupal::request()->query->get("uuid");
+        if (empty($uuid)) {
+            return;
+        }
+        $eb_storage = \Drupal::service("entity_browser.selection_storage")->get($uuid);
+        $target_bundles = $eb_storage["widget_context"]["target_bundles"] ?? NULL;
+        if (empty($target_bundles)) {
+            return;
+        }
+
+        $allowed = is_array($target_bundles)
+            ? array_keys($target_bundles)
+            : array_filter(explode("+", (string) $target_bundles));
+
+        foreach ($form["type"]["#options"] as $key => $label) {
+            if ($key !== "All" && !in_array($key, $allowed, TRUE)) {
+                unset($form["type"]["#options"][$key]);
+            }
+        }
+    }
+
+    /**
      * Implements hook_form_FORM_ID_alter() for 'user_multiple_cancel_confirm'.
      *
      * Changes the bulk cancel confirmation form title and relabels "Disable"

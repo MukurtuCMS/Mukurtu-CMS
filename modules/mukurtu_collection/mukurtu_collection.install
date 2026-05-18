@@ -85,3 +85,10 @@ function mukurtu_collection_update_40002(): void {
   $index->save();
   $index->reindex();
 }
+
+/**
+ * Restrict items_in_collection to allowed content types.
+ */
+function mukurtu_collection_update_40003(): void {
+  \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
+}
