@@ -1133,6 +1133,16 @@ class FormHooks
                 unset($form["type"]["#options"][$key]);
             }
         }
+
+        // Hide the filter entirely when only one type is allowed — a
+        // single-option dropdown provides no meaningful choice.
+        $real_options = array_filter(
+            array_keys($form["type"]["#options"]),
+            fn($k) => $k !== "All",
+        );
+        if (count($real_options) <= 1) {
+            $form["type"]["#access"] = FALSE;
+        }
     }
 
     /**
