@@ -807,14 +807,16 @@ function mukurtu_core_update_40022(): void {
   }
 
   // Install the new mukurtu_collection_browser entity browser config.
-  $config_storage = \Drupal::service('config.storage');
+  // mukurtu_collection_update_40006 also installs this config first (since
+  // collection runs before core alphabetically), so this is a no-op on most
+  // sites — the exists() check makes it idempotent.
   $name = 'entity_browser.browser.mukurtu_collection_browser';
-  if (!$config_storage->exists($name)) {
+  if (!\Drupal::service('config.storage')->exists($name)) {
     $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core');
     $source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
     $data = $source->read($name);
     if ($data !== FALSE) {
-      $config_storage->write($name, $data);
+      \Drupal::configFactory()->getEditable($name)->setData($data)->save(TRUE);
     }
   }
 }
