@@ -570,6 +570,9 @@ function mukurtu_core_views_query_alter(\Drupal\views\ViewExecutable $view, \Dru
   // page (e.g. /node/42/edit).
   if ($view->id() === 'mukurtu_content_browser') {
     $original_path = \Drupal::request()->query->get('original_path');
+    // The trailing slash after the ID is intentional: it matches edit/revision
+    // paths (e.g. /node/42/edit) but not bare /node/42 view pages, which is
+    // correct since the browser is only opened from node edit forms.
     if ($original_path && preg_match('#^/?node/(\d+)/#', $original_path, $matches)) {
       $query->addWhere(0, 'node_field_data.nid', (int) $matches[1], '!=');
     }
