@@ -560,8 +560,24 @@ function mukurtu_core_views_pre_build(\Drupal\views\ViewExecutable $view) {
  *
  * For pending: adds status=0 AND field_pending=1.
  * For blocked: adds field_pending IS NULL OR field_pending=0.
+ * For mukurtu_content_browser: excludes the currently-edited node so it
+ * cannot be selected as a related item, child collection, etc. (issue #776).
  */
 function mukurtu_core_views_query_alter(\Drupal\views\ViewExecutable $view, \Drupal\views\Plugin\views\query\QueryPluginBase $query) {
+  // Exclude the currently-edited node from the content browser to prevent
+  // self-selection. original_path is added to the browser URL by the entity
+  // browser Modal display plugin and contains the internal path of the calling
+  // page (e.g. /node/42/edit).
+  if ($view->id() === 'mukurtu_content_browser') {
+    $original_path = \Drupal::request()->query->get('original_path');
+    // The trailing slash after the ID is intentional: it matches edit/revision
+    // paths (e.g. /node/42/edit) but not bare /node/42 view pages, which is
+    // correct since the browser is only opened from node edit forms.
+    if ($original_path && preg_match('#^/?node/(\d+)/#', $original_path, $matches)) {
+      $query->addWhere(0, 'node_field_data.nid', (int) $matches[1], '!=');
+    }
+  }
+
   if (empty($view->mukurtu_filter_pending) && empty($view->mukurtu_filter_blocked)) {
     return;
   }
