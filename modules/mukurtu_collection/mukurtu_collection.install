@@ -92,3 +92,15 @@ function mukurtu_collection_update_40002(): void {
 function mukurtu_collection_update_40003(): void {
   \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
 }
+
+/**
+ * Switch field_child_collections to the collection-specific entity browser.
+ */
+function mukurtu_collection_update_40006(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.collection.default');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_child_collections.settings.entity_browser', 'mukurtu_collection_browser');
+  $config->save();
+}
