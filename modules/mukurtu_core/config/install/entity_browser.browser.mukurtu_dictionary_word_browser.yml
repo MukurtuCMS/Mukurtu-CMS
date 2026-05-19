@@ -11,7 +11,7 @@ display: modal
 display_configuration:
   width: '1200'
   height: '800'
-  link_text: 'Select Content'
+  link_text: 'Select Dictionary Word'
   auto_open: false
 selection_display: no_display
 selection_display_configuration: {  }
