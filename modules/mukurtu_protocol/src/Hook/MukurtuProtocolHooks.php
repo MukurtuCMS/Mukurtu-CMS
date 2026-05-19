@@ -41,9 +41,8 @@ class MukurtuProtocolHooks {
   /**
    * Implements hook_entity_operation() for OG memberships.
    *
-   * Adds per-row Block, Approve (OG pending), and Approve User (inactive
-   * Drupal account) links to OG membership rows on the community and protocol
-   * member list pages.
+   * Adds a per-row Block link to OG membership rows on the community and
+   * protocol member list pages (only when the membership is not blocked).
    */
   #[Hook('entity_operation')]
   public function entityOperationOgMembership(EntityInterface $entity): array {
@@ -56,59 +55,22 @@ class MukurtuProtocolHooks {
       return [];
     }
 
-    $operations = [];
-    $state = $entity->getState();
-
-    if ($state !== OgMembershipInterface::STATE_BLOCKED) {
-      $block_url = Url::fromRoute('mukurtu_protocol.og_membership.block', ['og_membership' => $entity->id()]);
-      if ($block_url->access()) {
-        $operations['block'] = [
-          'title' => t('Block'),
-          'url' => $block_url,
-          'weight' => 20,
-        ];
-      }
+    if ($entity->getState() === OgMembershipInterface::STATE_BLOCKED) {
+      return [];
     }
 
-    if ($state === OgMembershipInterface::STATE_BLOCKED) {
-      $unblock_url = Url::fromRoute('mukurtu_protocol.og_membership.unblock', ['og_membership' => $entity->id()]);
-      if ($unblock_url->access()) {
-        $operations['unblock'] = [
-          'title' => t('Unblock'),
-          'url' => $unblock_url,
-          'weight' => 21,
-        ];
-      }
+    $block_url = Url::fromRoute('mukurtu_protocol.og_membership.block', ['og_membership' => $entity->id()]);
+    if (!$block_url->access()) {
+      return [];
     }
 
-    if ($state === OgMembershipInterface::STATE_PENDING) {
-      $approve_url = Url::fromRoute('mukurtu_protocol.og_membership.approve', ['og_membership' => $entity->id()]);
-      if ($approve_url->access()) {
-        $operations['approve'] = [
-          'title' => t('Approve'),
-          'url' => $approve_url,
-          'weight' => 25,
-        ];
-      }
-    }
-
-    // If the member's Drupal user account is inactive (pending or blocked at
-    // the site level), offer a per-row Approve User link so community managers
-    // can activate the account directly from the members list.
-    $owner = $entity->getOwner();
-    if ($owner instanceof UserInterface && !$owner->isActive()) {
-      $approve_url = Url::fromRoute('mukurtu_core.approve_user', ['uid' => $owner->id()]);
-      if ($approve_url->access()) {
-        $operations['approve_user'] = [
-          'title' => t('Approve User'),
-          'url' => $approve_url,
-          'weight' => 26,
-          'attributes' => ['class' => ['use-ajax']],
-        ];
-      }
-    }
-
-    return $operations;
+    return [
+      'block' => [
+        'title' => t('Block'),
+        'url' => $block_url,
+        'weight' => 20,
+      ],
+    ];
   }
 
   /**
@@ -129,12 +91,11 @@ class MukurtuProtocolHooks {
     }
 
     if (isset($operations['edit'])) {
-      $operations['edit']['title'] = t('Manage roles');
+      $operations['edit']['title'] = t('Manage');
     }
 
     if (isset($operations['delete'])) {
-      $label = $group_type === 'community' ? t('Remove from community') : t('Remove from protocol');
-      $operations['delete']['title'] = $label;
+      $operations['delete']['title'] = t('Remove');
     }
   }
 
