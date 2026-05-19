@@ -4,7 +4,7 @@ dependencies:
   module:
     - mukurtu_protocol
 id: mukurtu_manage_protocol_roles_action
-label: 'Manage roles'
+label: 'Manage user role(s) in protocol'
 type: og_membership
 plugin: mukurtu_manage_protocol_roles_action
 configuration: {  }

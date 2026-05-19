@@ -163,6 +163,11 @@ class MukurtuProtocolHooks {
     }
     elseif ($entity_type_id === 'protocol') {
       unset($actions['mukurtu_manage_community_roles_action']);
+      unset($actions['mukurtu_approve_user_from_membership_action']);
+      unset($actions['og_membership_approve_pending_action']);
+      $actions['og_membership_delete_action'] = (string) t('Remove user(s) from protocol');
+      $actions['og_membership_block_action'] = (string) t('Block user(s) in protocol');
+      $actions['og_membership_unblock_action'] = (string) t('Unblock user(s) in protocol');
     }
   }
 
