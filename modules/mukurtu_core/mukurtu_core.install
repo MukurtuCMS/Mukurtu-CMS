@@ -740,3 +740,31 @@ function mukurtu_core_update_40021(): void {
     $config->save(TRUE);
   }
 }
+
+/**
+ * Install dedicated single-type entity browsers and update the content browser
+ * view to exclude site-structure node types from results.
+ *
+ * - Adds entity_browser_dictionary_word and entity_browser_person display
+ *   variants to views.view.mukurtu_content_browser.
+ * - Installs entity_browser.browser.mukurtu_dictionary_word_browser and
+ *   entity_browser.browser.mukurtu_person_browser.
+ * - Adds an unexposed bundle filter that excludes article, page, and
+ *   landing_page from all mukurtu_content_browser results.
+ */
+function mukurtu_core_update_40024(): void {
+  $config_storage = \Drupal::service('config.storage');
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core');
+  $module_source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+
+  foreach ([
+    'views.view.mukurtu_content_browser',
+    'entity_browser.browser.mukurtu_dictionary_word_browser',
+    'entity_browser.browser.mukurtu_person_browser',
+  ] as $name) {
+    $data = $module_source->read($name);
+    if ($data !== FALSE) {
+      $config_storage->write($name, $data);
+    }
+  }
+}

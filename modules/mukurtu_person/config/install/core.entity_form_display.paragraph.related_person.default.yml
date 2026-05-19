@@ -2,7 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
-    - entity_browser.browser.mukurtu_content_browser
+    - entity_browser.browser.mukurtu_person_browser
     - paragraphs.paragraphs_type.related_person
   module:
     - entity_browser
@@ -17,7 +17,7 @@ content:
     weight: 0
     region: content
     settings:
-      entity_browser: mukurtu_content_browser
+      entity_browser: mukurtu_person_browser
       field_widget_display: label
       field_widget_edit: false
       field_widget_remove: true
