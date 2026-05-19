@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\mukurtu_protocol\Hook;
 
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\Core\Url;
 use Drupal\og\Entity\OgMembership;
@@ -40,9 +41,8 @@ class MukurtuProtocolHooks {
   /**
    * Implements hook_entity_operation() for OG memberships.
    *
-   * Adds per-row Block, Approve (OG pending), and Approve User (inactive
-   * Drupal account) links to OG membership rows on the community and protocol
-   * member list pages.
+   * Adds a per-row Block link to OG membership rows on the community and
+   * protocol member list pages (only when the membership is not blocked).
    */
   #[Hook('entity_operation')]
   public function entityOperationOgMembership(EntityInterface $entity): array {
@@ -58,11 +58,14 @@ class MukurtuProtocolHooks {
     $operations = [];
     $state = $entity->getState();
 
+    $owner = $entity->getOwner();
+    $name = ($owner instanceof UserInterface) ? $owner->getDisplayName() : t('member');
+
     if ($state !== OgMembershipInterface::STATE_BLOCKED) {
       $block_url = Url::fromRoute('mukurtu_protocol.og_membership.block', ['og_membership' => $entity->id()]);
       if ($block_url->access()) {
         $operations['block'] = [
-          'title' => t('Block'),
+          'title' => t('Block @name', ['@name' => $name]),
           'url' => $block_url,
           'weight' => 20,
         ];
@@ -73,36 +76,9 @@ class MukurtuProtocolHooks {
       $unblock_url = Url::fromRoute('mukurtu_protocol.og_membership.unblock', ['og_membership' => $entity->id()]);
       if ($unblock_url->access()) {
         $operations['unblock'] = [
-          'title' => t('Unblock'),
+          'title' => t('Unblock @name', ['@name' => $name]),
           'url' => $unblock_url,
-          'weight' => 21,
-        ];
-      }
-    }
-
-    if ($state === OgMembershipInterface::STATE_PENDING) {
-      $approve_url = Url::fromRoute('mukurtu_protocol.og_membership.approve', ['og_membership' => $entity->id()]);
-      if ($approve_url->access()) {
-        $operations['approve'] = [
-          'title' => t('Approve'),
-          'url' => $approve_url,
-          'weight' => 25,
-        ];
-      }
-    }
-
-    // If the member's Drupal user account is inactive (pending or blocked at
-    // the site level), offer a per-row Approve User link so community managers
-    // can activate the account directly from the members list.
-    $owner = $entity->getOwner();
-    if ($owner instanceof UserInterface && !$owner->isActive()) {
-      $approve_url = Url::fromRoute('mukurtu_core.approve_user', ['uid' => $owner->id()]);
-      if ($approve_url->access()) {
-        $operations['approve_user'] = [
-          'title' => t('Approve User'),
-          'url' => $approve_url,
-          'weight' => 26,
-          'attributes' => ['class' => ['use-ajax']],
+          'weight' => 20,
         ];
       }
     }
@@ -127,13 +103,50 @@ class MukurtuProtocolHooks {
       return;
     }
 
+    $owner = $entity->getOwner();
+    $name = ($owner instanceof UserInterface) ? $owner->getDisplayName() : t('member');
+
     if (isset($operations['edit'])) {
-      $operations['edit']['title'] = t('Manage roles');
+      $operations['edit']['title'] = t('Manage roles for @name', ['@name' => $name]);
     }
 
     if (isset($operations['delete'])) {
-      $label = $group_type === 'community' ? t('Remove from community') : t('Remove from protocol');
+      $label = $group_type === 'community'
+        ? t('Remove @name from community', ['@name' => $name])
+        : t('Remove @name from protocol', ['@name' => $name]);
       $operations['delete']['title'] = $label;
+    }
+  }
+
+  /**
+   * Implements hook_form_alter().
+   *
+   * Scopes the bulk action dropdown on the members overview to show only
+   * context-appropriate actions and community-friendly labels.
+   */
+  #[Hook('form_alter')]
+  public function formAlter(array &$form, FormStateInterface $form_state, string $form_id): void {
+    if (!str_starts_with($form_id, 'views_form_og_members_overview_default')) {
+      return;
+    }
+    $entity_type_id = \Drupal::routeMatch()
+      ->getRouteObject()
+      ?->getDefault('entity_type_id');
+    if (!isset($form['header']['og_membership_bulk_form']['action']['#options'])) {
+      return;
+    }
+    $actions = &$form['header']['og_membership_bulk_form']['action']['#options'];
+    if ($entity_type_id === 'community') {
+      unset($actions['mukurtu_manage_protocol_roles_action']);
+      $actions['og_membership_delete_action'] = (string) t('Remove user(s) from community');
+      $actions['og_membership_block_action'] = (string) t('Block user(s) in community');
+      $actions['og_membership_unblock_action'] = (string) t('Unblock user(s) in community');
+    }
+    elseif ($entity_type_id === 'protocol') {
+      unset($actions['mukurtu_manage_community_roles_action']);
+      $actions['og_membership_delete_action'] = (string) t('Remove user(s) from protocol');
+      $actions['og_membership_block_action'] = (string) t('Block user(s) in protocol');
+      $actions['og_membership_unblock_action'] = (string) t('Unblock user(s) in protocol');
     }
   }
 
