@@ -55,22 +55,31 @@ class MukurtuProtocolHooks {
       return [];
     }
 
-    if ($entity->getState() === OgMembershipInterface::STATE_BLOCKED) {
-      return [];
+    $operations = [];
+    $state = $entity->getState();
+
+    if ($state !== OgMembershipInterface::STATE_BLOCKED) {
+      $block_url = Url::fromRoute('mukurtu_protocol.og_membership.block', ['og_membership' => $entity->id()]);
+      if ($block_url->access()) {
+        $operations['block'] = [
+          'title' => t('Block'),
+          'url' => $block_url,
+          'weight' => 20,
+        ];
+      }
+    }
+    else {
+      $unblock_url = Url::fromRoute('mukurtu_protocol.og_membership.unblock', ['og_membership' => $entity->id()]);
+      if ($unblock_url->access()) {
+        $operations['unblock'] = [
+          'title' => t('Unblock'),
+          'url' => $unblock_url,
+          'weight' => 20,
+        ];
+      }
     }
 
-    $block_url = Url::fromRoute('mukurtu_protocol.og_membership.block', ['og_membership' => $entity->id()]);
-    if (!$block_url->access()) {
-      return [];
-    }
-
-    return [
-      'block' => [
-        'title' => t('Block'),
-        'url' => $block_url,
-        'weight' => 20,
-      ],
-    ];
+    return $operations;
   }
 
   /**
