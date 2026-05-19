@@ -122,7 +122,10 @@ class MukurtuProtocolHooks {
     $entity_type_id = \Drupal::routeMatch()
       ->getRouteObject()
       ?->getDefault('entity_type_id');
-    $actions = &$form['header']['og_membership_bulk_form']['action']['#options'] ?? [];
+    if (!isset($form['header']['og_membership_bulk_form']['action']['#options'])) {
+      return;
+    }
+    $actions = &$form['header']['og_membership_bulk_form']['action']['#options'];
     if ($entity_type_id === 'community') {
       unset($actions['mukurtu_manage_protocol_roles_action']);
       unset($actions['mukurtu_approve_user_from_membership_action']);
