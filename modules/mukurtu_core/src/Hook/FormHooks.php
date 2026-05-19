@@ -1051,6 +1051,69 @@ class FormHooks
     }
 
     /**
+     * Implements hook_form_views_exposed_form_alter().
+     *
+     * Filters the exposed Type dropdown in the mukurtu_content_browser view:
+     * - Always strips article, page, and landing_page (site-structure types that
+     *   should never appear as selectable content in entity browser modals).
+     * - When the opening field restricts target_bundles, further narrows the
+     *   dropdown to only those allowed types.
+     */
+    #[Hook("form_views_exposed_form_alter")]
+    public function formViewsExposedFormAlterContentBrowser(
+        array &$form,
+        FormStateInterface $form_state,
+    ): void {
+        if (!isset($form["type"])) {
+            return;
+        }
+        $storage = $form_state->getStorage();
+        $view = $storage["view"] ?? NULL;
+        if (!$view instanceof ViewExecutable) {
+            return;
+        }
+        if ($view->storage->id() !== "mukurtu_content_browser") {
+            return;
+        }
+
+        // Always exclude site-structure types from the type dropdown.
+        $excluded = ["article", "page", "landing_page"];
+        foreach ($excluded as $bundle) {
+            unset($form["type"]["#options"][$bundle]);
+        }
+
+        // If the field restricts target_bundles, further filter to only those types.
+        $uuid = \Drupal::request()->query->get("uuid");
+        if (empty($uuid)) {
+            return;
+        }
+        $eb_storage = \Drupal::service("entity_browser.selection_storage")->get(
+            $uuid,
+        );
+        $target_bundles =
+            $eb_storage["widget_context"]["target_bundles"] ?? NULL;
+        if (empty($target_bundles)) {
+            return;
+        }
+
+        $allowed = is_array($target_bundles)
+            ? array_keys($target_bundles)
+            : array_filter(explode("+", (string) $target_bundles));
+
+        // For single-type fields the filter serves no purpose — hide it entirely.
+        if (count($allowed) === 1) {
+            $form["type"]["#access"] = FALSE;
+            return;
+        }
+
+        foreach ($form["type"]["#options"] as $key => $label) {
+            if ($key !== "All" && !in_array($key, $allowed, TRUE)) {
+                unset($form["type"]["#options"][$key]);
+            }
+        }
+    }
+
+    /**
      * Implements hook_form_FORM_ID_alter() for 'views_exposed_form'.
      *
      * Adds "Pending" as a status filter option on any Views page that lists

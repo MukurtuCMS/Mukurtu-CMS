@@ -698,3 +698,26 @@ function mukurtu_dictionary_update_40017(): void {
     $index->reindex();
   }
 }
+
+/**
+ * Switch the field_words entity browser widget on the Word List form to use the
+ * dedicated dictionary-word-only browser (no Type filter shown).
+ */
+function mukurtu_dictionary_update_40018(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.word_list.default');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_words.settings.entity_browser', 'mukurtu_dictionary_word_browser');
+  $dependencies = $config->get('dependencies.config') ?? [];
+  $key = array_search('entity_browser.browser.mukurtu_content_browser', $dependencies);
+  if ($key !== FALSE) {
+    unset($dependencies[$key]);
+  }
+  if (!in_array('entity_browser.browser.mukurtu_dictionary_word_browser', $dependencies)) {
+    $dependencies[] = 'entity_browser.browser.mukurtu_dictionary_word_browser';
+    sort($dependencies);
+    $config->set('dependencies.config', $dependencies);
+  }
+  $config->save(TRUE);
+}
