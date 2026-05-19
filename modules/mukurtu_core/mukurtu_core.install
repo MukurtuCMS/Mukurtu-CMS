@@ -767,4 +767,11 @@ function mukurtu_core_update_40024(): void {
       $config_storage->write($name, $data);
     }
   }
+
+  $authenticated = \Drupal\user\Entity\Role::load('authenticated');
+  if ($authenticated) {
+    $authenticated->grantPermission('access mukurtu_dictionary_word_browser entity browser pages');
+    $authenticated->grantPermission('access mukurtu_person_browser entity browser pages');
+    $authenticated->save();
+  }
 }
