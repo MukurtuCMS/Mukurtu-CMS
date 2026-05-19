@@ -1100,6 +1100,12 @@ class FormHooks
             ? array_keys($target_bundles)
             : array_filter(explode("+", (string) $target_bundles));
 
+        // For single-type fields the filter serves no purpose — hide it entirely.
+        if (count($allowed) === 1) {
+            $form["type"]["#access"] = FALSE;
+            return;
+        }
+
         foreach ($form["type"]["#options"] as $key => $label) {
             if ($key !== "All" && !in_array($key, $allowed, TRUE)) {
                 unset($form["type"]["#options"][$key]);
