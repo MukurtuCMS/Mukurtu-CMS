@@ -531,4 +531,10 @@ function mukurtu_protocol_update_40029(): void {
     }
   }
   $config->set('display.default.display_options.fields.og_membership_bulk_form.selected_actions', $selected)->save(TRUE);
+
+  // Update the community manage-roles action label.
+  \Drupal::configFactory()
+    ->getEditable('system.action.mukurtu_manage_community_roles_action')
+    ->set('label', 'Manage user role(s) in community')
+    ->save(TRUE);
 }

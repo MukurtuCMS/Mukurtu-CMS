@@ -141,9 +141,8 @@ class MukurtuProtocolHooks {
   /**
    * Implements hook_form_alter().
    *
-   * On the community members page, removes the protocol manage-roles action
-   * from the bulk action dropdown (and vice versa), so each page shows only
-   * the one relevant "Manage roles" option.
+   * Scopes the bulk action dropdown on the members overview to show only
+   * context-appropriate actions and community-friendly labels.
    */
   #[Hook('form_alter')]
   public function formAlter(array &$form, FormStateInterface $form_state, string $form_id): void {
@@ -156,6 +155,11 @@ class MukurtuProtocolHooks {
     $actions = &$form['header']['og_membership_bulk_form']['action']['#options'] ?? [];
     if ($entity_type_id === 'community') {
       unset($actions['mukurtu_manage_protocol_roles_action']);
+      unset($actions['mukurtu_approve_user_from_membership_action']);
+      unset($actions['og_membership_approve_pending_action']);
+      $actions['og_membership_delete_action'] = (string) t('Remove user(s) from community');
+      $actions['og_membership_block_action'] = (string) t('Block user(s) in community');
+      $actions['og_membership_unblock_action'] = (string) t('Unblock user(s) in community');
     }
     elseif ($entity_type_id === 'protocol') {
       unset($actions['mukurtu_manage_community_roles_action']);
