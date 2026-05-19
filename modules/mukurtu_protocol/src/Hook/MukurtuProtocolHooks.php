@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\mukurtu_protocol\Hook;
 
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\Core\Url;
 use Drupal\og\Entity\OgMembership;
@@ -134,6 +135,30 @@ class MukurtuProtocolHooks {
     if (isset($operations['delete'])) {
       $label = $group_type === 'community' ? t('Remove from community') : t('Remove from protocol');
       $operations['delete']['title'] = $label;
+    }
+  }
+
+  /**
+   * Implements hook_form_alter().
+   *
+   * On the community members page, removes the protocol manage-roles action
+   * from the bulk action dropdown (and vice versa), so each page shows only
+   * the one relevant "Manage roles" option.
+   */
+  #[Hook('form_alter')]
+  public function formAlter(array &$form, FormStateInterface $form_state, string $form_id): void {
+    if ($form_id !== 'views-form-og-members-overview-default') {
+      return;
+    }
+    $entity_type_id = \Drupal::routeMatch()
+      ->getRouteObject()
+      ?->getDefault('entity_type_id');
+    $actions = &$form['header']['og_membership_bulk_form']['action']['#options'] ?? [];
+    if ($entity_type_id === 'community') {
+      unset($actions['mukurtu_manage_protocol_roles_action']);
+    }
+    elseif ($entity_type_id === 'protocol') {
+      unset($actions['mukurtu_manage_community_roles_action']);
     }
   }
 

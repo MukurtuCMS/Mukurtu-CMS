@@ -506,3 +506,29 @@ function mukurtu_protocol_update_40028(): void {
   $view_data = \Symfony\Component\Yaml\Yaml::parseFile($view_file);
   \Drupal::configFactory()->getEditable('views.view.mukurtu_people')->setData($view_data)->save(TRUE);
 }
+
+/**
+ * Replace og_membership_add_multiple_roles_action with Mukurtu manage-roles
+ * actions on the community/protocol members overview.
+ */
+function mukurtu_protocol_update_40029(): void {
+  $config = \Drupal::configFactory()->getEditable('views.view.og_members_overview');
+  $selected = $config->get('display.default.display_options.fields.og_membership_bulk_form.selected_actions') ?? [];
+  $key = array_search('og_membership_add_multiple_roles_action', $selected);
+  if ($key !== FALSE) {
+    array_splice($selected, $key, 1, [
+      'mukurtu_manage_community_roles_action',
+      'mukurtu_manage_protocol_roles_action',
+    ]);
+  }
+  else {
+    // Ensure both Mukurtu actions are present even if OG action was already removed.
+    if (!in_array('mukurtu_manage_community_roles_action', $selected)) {
+      array_unshift($selected, 'mukurtu_manage_community_roles_action');
+    }
+    if (!in_array('mukurtu_manage_protocol_roles_action', $selected)) {
+      array_splice($selected, 1, 0, ['mukurtu_manage_protocol_roles_action']);
+    }
+  }
+  $config->set('display.default.display_options.fields.og_membership_bulk_form.selected_actions', $selected)->save(TRUE);
+}
