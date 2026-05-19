@@ -1,0 +1,19 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the mukurtu_multipage_items module.
+ */
+
+/**
+ * Switch field_pages on Multipage Item to rendered_entity (form_selection view mode).
+ */
+function mukurtu_multipage_items_update_40001(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.multipage_item.multipage_item.default');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_pages.settings.field_widget_display', 'rendered_entity');
+  $config->set('content.field_pages.settings.field_widget_display_settings', ['view_mode' => 'form_selection']);
+  $config->save();
+}

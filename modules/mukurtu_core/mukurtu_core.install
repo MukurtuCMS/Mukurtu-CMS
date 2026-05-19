@@ -740,3 +740,58 @@ function mukurtu_core_update_40021(): void {
     $config->save(TRUE);
   }
 }
+
+/**
+ * Install dedicated single-type entity browsers and update the content browser
+ * view to exclude site-structure node types from results.
+ *
+ * - Adds entity_browser_dictionary_word and entity_browser_person display
+ *   variants to views.view.mukurtu_content_browser.
+ * - Installs entity_browser.browser.mukurtu_dictionary_word_browser and
+ *   entity_browser.browser.mukurtu_person_browser.
+ * - Adds an unexposed bundle filter that excludes article, page, and
+ *   landing_page from all mukurtu_content_browser results.
+ */
+function mukurtu_core_update_40024(): void {
+  $config_storage = \Drupal::service('config.storage');
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core');
+  $module_source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+
+  foreach ([
+    'views.view.mukurtu_content_browser',
+    'entity_browser.browser.mukurtu_dictionary_word_browser',
+    'entity_browser.browser.mukurtu_person_browser',
+  ] as $name) {
+    $data = $module_source->read($name);
+    if ($data !== FALSE) {
+      $config_storage->write($name, $data);
+    }
+  }
+}
+
+/**
+ * Create form_selection view displays for article and page node types and
+ * switch field_featured_content on the Featured Content block to rendered_entity.
+ */
+function mukurtu_core_update_40025(): void {
+  $config_storage = \Drupal::service('config.storage');
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core');
+  $module_source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+
+  foreach ([
+    'core.entity_view_display.node.article.form_selection',
+    'core.entity_view_display.node.page.form_selection',
+  ] as $name) {
+    $data = $module_source->read($name);
+    if ($data !== FALSE) {
+      $config_storage->write($name, $data);
+    }
+  }
+
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.block_content.featured_content.default');
+  if (!$config->isNew()) {
+    $config->set('content.field_featured_content.settings.field_widget_display', 'rendered_entity');
+    $config->set('content.field_featured_content.settings.field_widget_display_settings', ['view_mode' => 'form_selection']);
+    $config->save();
+  }
+}
