@@ -8,7 +8,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\mukurtu_protocol\Entity\Protocol;
-use Drupal\og\Og;
+use Drupal\entity_browser\Element\EntityBrowserElement;
 
 /**
  * Form controller for Protocol creation forms.
@@ -106,69 +106,89 @@ class ProtocolAddForm extends EntityForm {
     /** @var \Drupal\user\UserInterface $currentUser */
     $currentUser = $this->entityTypeManager->getStorage('user')->load($this->currentUser()->id());
 
-    // Preserve the original URL parameter to distinguish the two routes.
+    // Store the URL community for redirect and pre-selection purposes.
     $community_param = $community;
-
-    // Set the community relationship.
-    if ($community) {
-      $this->community = $community;
-      $this->entity->setCommunities([$community]);
+    if ($community_param) {
+      $this->community = $community_param;
+      $form_state->set('tethered_community', $community_param);
     }
 
     $form = parent::buildForm($form, $form_state);
 
-    if (!$community_param) {
-      // Build a list of communities where the current user is a manager.
-      $community_options = [];
-      foreach (Og::getMemberships($currentUser) as $membership) {
-        if ($membership->getGroupEntityType() === 'community' &&
-            $membership->hasRole('community-community-community_manager')) {
-          $group = $membership->getGroup();
-          if ($group) {
-            $community_options[$group->id()] = $group->label();
-          }
-        }
-      }
+    // Seed protocol_communities on first load of the community-bound route.
+    $stored_communities = $form_state->get('protocol_communities') ?? [];
+    if (empty($stored_communities) && $community_param) {
+      $stored_communities = [$community_param->id() => $community_param];
+      $form_state->set('protocol_communities', $stored_communities);
+    }
 
-      $form['field_communities'] = [
-        '#type' => 'select',
-        '#title' => $this->t('Community'),
-        '#options' => $community_options,
-        '#empty_option' => $this->t('- Select a community -'),
-        '#required' => TRUE,
-        '#ajax' => [
-          'callback' => '::membershipWrapperCallback',
-          'wrapper' => 'membership-wrapper',
-          'event' => 'change',
+    if ($stored_communities) {
+      $this->entity->setCommunities(array_values($stored_communities));
+    }
+
+    // Use stored communities as default value when available, otherwise fall
+    // back to the route community parameter.
+    if (!empty($stored_communities)) {
+      $default_entities = array_values($stored_communities);
+    }
+    elseif ($community_param) {
+      $default_entities = [$community_param];
+    }
+    else {
+      $default_entities = [];
+    }
+
+    $form['communities_and_members'] = [
+      '#type' => 'container',
+      '#attributes' => ['id' => 'communities-and-members-wrapper'],
+      '#weight' => 2,
+    ];
+
+    $form['communities_and_members']['field_communities'] = [
+      '#type' => 'entity_browser',
+      '#entity_browser' => 'mukurtu_community_select',
+      '#cardinality' => EntityBrowserElement::CARDINALITY_UNLIMITED,
+      '#default_value' => $default_entities,
+      '#selection_mode' => EntityBrowserElement::SELECTION_MODE_APPEND,
+      '#title' => $this->t('Communities'),
+      '#required' => TRUE,
+    ];
+
+    if (!empty($stored_communities)) {
+      $community_items = array_map(
+        fn($c) => ['#plain_text' => $c->getName()],
+        array_values($stored_communities)
+      );
+      $form['communities_and_members']['communities_selected'] = [
+        '#type' => 'container',
+        '#attributes' => ['class' => ['communities-selected']],
+        'label' => ['#markup' => '<strong>' . $this->t('Selected communities:') . '</strong>'],
+        'list' => [
+          '#theme' => 'item_list',
+          '#items' => $community_items,
         ],
       ];
-
-      // Resolve the effective community from the just-submitted select value or
-      // from form state (persists across rebuilds).
-      $cid = $form_state->getValue('field_communities');
-      $stored_community = $form_state->get('protocol_community');
-      $new_cid = $stored_community ? $stored_community->id() : NULL;
-
-      if ($cid && $cid != $new_cid) {
-        // Community changed — load the new one and reset the member list so
-        // carried-over members from the previous community are cleared.
-        $community = $this->entityTypeManager->getStorage('community')->load($cid);
-        if ($community) {
-          $form_state->set('protocol_community', $community);
-          // Reset members to just the current user when community changes.
-          $form_state->set('members', [
-            $currentUser->id() => ['entity' => $currentUser, 'roles' => ['protocol_steward']],
-          ]);
-        }
-      }
-      elseif ($stored_community) {
-        $community = $stored_community;
-      }
-
-      if ($community) {
-        $this->entity->setCommunities([$community]);
-      }
     }
+
+    // Hidden button — clicked automatically by JS after entity browser
+    // selection to refresh the communities display and member list.
+    $form['communities_and_members']['auto_update_trigger'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Update'),
+      '#name' => 'auto_update_trigger',
+      '#attributes' => [
+        'class' => ['js-hide', 'js-communities-auto-update'],
+        'tabindex' => '-1',
+      ],
+      '#validate' => [[static::class, 'membershipNoValidate']],
+      '#submit' => [[static::class, 'updateMemberListSubmit']],
+      '#limit_validation_errors' => [],
+      '#ajax' => [
+        'callback' => '::communitiesAndMembersCallback',
+        'wrapper' => 'communities-and-members-wrapper',
+        'progress' => ['type' => 'throbber', 'message' => NULL],
+      ],
+    ];
 
     // Community name.
     $form['name'] = [
@@ -212,27 +232,24 @@ class ProtocolAddForm extends EntityForm {
       '#default_value' => 'none',
     ];
 
-    // On the standalone form, set display order after all fields are defined.
-    if (!$community_param) {
-      $form['name']['#weight'] = 0;
-      $form['field_access_mode']['#weight'] = 1;
-      $form['field_communities']['#weight'] = 2;
-      $form['field_description']['#weight'] = 3;
-      $form['field_membership_display']['#weight'] = 4;
+    $form['name']['#weight'] = 0;
+    $form['field_access_mode']['#weight'] = 1;
+    $form['communities_and_members']['#weight'] = 2;
+    $form['field_description']['#weight'] = 3;
+    $form['field_membership_display']['#weight'] = 4;
 
-      // Remove all entity form display fields not needed on the standalone form.
-      $standalone_allowed = [
-        'name',
-        'field_access_mode',
-        'field_communities',
-        'field_description',
-        'field_membership_display',
-        'actions',
-      ];
-      foreach (Element::children($form) as $key) {
-        if (!in_array($key, $standalone_allowed)) {
-          unset($form[$key]);
-        }
+    // Remove entity form display fields not used on this custom form.
+    $allowed_keys = [
+      'name',
+      'field_access_mode',
+      'communities_and_members',
+      'field_description',
+      'field_membership_display',
+      'actions',
+    ];
+    foreach (Element::children($form) as $key) {
+      if (!in_array($key, $allowed_keys)) {
+        unset($form[$key]);
       }
     }
 
@@ -243,43 +260,44 @@ class ProtocolAddForm extends EntityForm {
       ]);
     }
 
-    $form['membership_wrapper'] = [
+    $form['communities_and_members']['membership_wrapper'] = [
       '#type' => 'container',
       '#tree' => TRUE,
-      '#weight' => 5,
       '#attributes' => ['id' => 'membership-wrapper'],
     ];
 
-    $form['membership_wrapper']['membership_label'] = [
+    $form['communities_and_members']['membership_wrapper']['membership_label'] = [
       '#type' => 'item',
       '#title' => $this->t('Protocol members'),
       '#description' => $this->t('Add members of the parent community to this protocol. A member may hold multiple roles.'),
     ];
 
-    $form['membership_wrapper']['role_descriptions'] = static::buildRoleDescriptions();
+    $form['communities_and_members']['membership_wrapper']['role_descriptions'] = static::buildRoleDescriptions();
 
-    $form['membership_wrapper']['add_row'] = [
+    $form['communities_and_members']['membership_wrapper']['add_row'] = [
       '#type' => 'container',
       '#attributes' => ['class' => ['membership-add-row']],
     ];
 
-    // Use the Mukurtu user selection handler to restrict to community members.
+    // Use the Mukurtu user selection handler to restrict to community members
+    // when at least one community is selected.
+    $has_communities = !empty($stored_communities);
     $selection_settings = ['include_anonymous' => FALSE];
-    if ($community) {
+    if ($has_communities) {
       $selection_settings['group'] = $this->entity;
     }
 
-    $form['membership_wrapper']['add_row']['user_search'] = [
+    $form['communities_and_members']['membership_wrapper']['add_row']['user_search'] = [
       '#type' => 'entity_autocomplete',
       '#target_type' => 'user',
       '#title' => $this->t('Add a member'),
       '#placeholder' => $this->t('Search by name or email…'),
-      '#selection_handler' => $community ? 'mukurtu_user_selection' : 'default:user',
+      '#selection_handler' => $has_communities ? 'mukurtu_user_selection' : 'default:user',
       '#selection_settings' => $selection_settings,
       '#autocreate' => FALSE,
     ];
 
-    $form['membership_wrapper']['add_row']['add_member'] = [
+    $form['communities_and_members']['membership_wrapper']['add_row']['add_member'] = [
       '#type' => 'submit',
       '#value' => $this->t('Add'),
       '#validate' => [[static::class, 'membershipNoValidate']],
@@ -287,30 +305,35 @@ class ProtocolAddForm extends EntityForm {
       '#limit_validation_errors' => [],
     ];
 
-    $form['membership_wrapper']['member_table'] = static::buildMembershipTable($form_state);
+    $form['communities_and_members']['membership_wrapper']['member_table'] = static::buildMembershipTable($form_state);
 
     $form['#attached']['library'][] = 'mukurtu_protocol/membership-table';
 
     // Pass users to JS for client-side autocomplete, excluding anyone already
-    // added to the membership table. When a community is set, restrict to its
-    // active members; otherwise fall back to all active users.
+    // added to the membership table. When communities are selected, restrict to
+    // their combined active membership; otherwise fall back to all active users.
     $already_added = array_keys($form_state->get('members') ?? []);
     $suggestions = [];
-    if ($community) {
-      $memberships = \Drupal::entityTypeManager()
-        ->getStorage('og_membership')
-        ->loadByProperties([
-          'entity_type' => $community->getEntityTypeId(),
-          'entity_id' => $community->id(),
+    if ($has_communities) {
+      $og_membership_storage = \Drupal::entityTypeManager()->getStorage('og_membership');
+      $seen_uids = [];
+      foreach ($stored_communities as $c) {
+        $memberships = $og_membership_storage->loadByProperties([
+          'entity_type' => $c->getEntityTypeId(),
+          'entity_id' => $c->id(),
           'state' => \Drupal\og\OgMembershipInterface::STATE_ACTIVE,
         ]);
-      foreach ($memberships as $membership) {
-        $member = $membership->getOwner();
-        if ($member && $member->id() > 0 && !in_array($member->id(), $already_added)) {
-          $suggestions[] = [
-            'value' => $member->getDisplayName() . ' (' . $member->id() . ')',
-            'label' => $member->getDisplayName() . ' (' . $member->getEmail() . ')',
-          ];
+        foreach ($memberships as $m) {
+          $member = $m->getOwner();
+          if ($member && $member->id() > 0
+              && !in_array($member->id(), $already_added)
+              && !isset($seen_uids[$member->id()])) {
+            $seen_uids[$member->id()] = TRUE;
+            $suggestions[] = [
+              'value' => $member->getDisplayName() . ' (' . $member->id() . ')',
+              'label' => $member->getDisplayName() . ' (' . $member->getEmail() . ')',
+            ];
+          }
         }
       }
     }
@@ -331,6 +354,7 @@ class ProtocolAddForm extends EntityForm {
         ];
       }
     }
+    $form['#attached']['library'][] = 'mukurtu_protocol/protocol-community-browser';
     $form['#attached']['drupalSettings']['mukurtuMembership']['users'] = $suggestions;
     $form['#attached']['drupalSettings']['mukurtuMembership']['scrollToTable'] = (bool) $form_state->get('membership_scroll');
     $form_state->set('membership_scroll', FALSE);
@@ -428,10 +452,10 @@ class ProtocolAddForm extends EntityForm {
   }
 
   /**
-   * AJAX callback: returns the rebuilt membership wrapper after community selection.
+   * AJAX callback: returns the full communities-and-members container.
    */
-  public function membershipWrapperCallback(array &$form, FormStateInterface $form_state): array {
-    return $form['membership_wrapper'];
+  public function communitiesAndMembersCallback(array &$form, FormStateInterface $form_state): array {
+    return $form['communities_and_members'];
   }
 
   /**
@@ -486,6 +510,41 @@ class ProtocolAddForm extends EntityForm {
   }
 
   /**
+   * Submit handler: sync protocol_communities from the entity browser selection
+   * and rebuild the membership wrapper.
+   */
+  public static function updateMemberListSubmit(array &$form, FormStateInterface $form_state): void {
+    $eb_value = $form_state->getValue('field_communities');
+    $communities = [];
+    if (isset($eb_value['entities'])) {
+      foreach (array_filter($eb_value['entities']) as $entity) {
+        $communities[$entity->id()] = $entity;
+      }
+    }
+    elseif (is_array($eb_value)) {
+      // First-load default_value format: array of entity objects.
+      foreach (array_filter($eb_value) as $entity) {
+        if ($entity instanceof \Drupal\Core\Entity\EntityInterface) {
+          $communities[$entity->id()] = $entity;
+        }
+      }
+    }
+
+    // Always preserve the tethered community for community-bound routes.
+    $tethered = $form_state->get('tethered_community');
+    if ($tethered && !isset($communities[$tethered->id()])) {
+      $communities[$tethered->id()] = $tethered;
+    }
+    $form_state->set('protocol_communities', $communities);
+    $currentUser = \Drupal::entityTypeManager()->getStorage('user')->load(\Drupal::currentUser()->id());
+    $form_state->set('members', $currentUser ? [
+      $currentUser->id() => ['entity' => $currentUser, 'roles' => ['protocol_steward']],
+    ] : []);
+    $form_state->set('membership_scroll', TRUE);
+    $form_state->setRebuild(TRUE);
+  }
+
+  /**
    * {@inheritdoc}
    */
   protected function actions(array $form, FormStateInterface $form_state) {
@@ -521,6 +580,32 @@ class ProtocolAddForm extends EntityForm {
   public function validateForm(array &$form, FormStateInterface $form_state): void {
     parent::validateForm($form, $form_state);
 
+    // Validate that at least one community has been selected.
+    $eb_value = $form_state->getValue('field_communities');
+    $selected_communities = [];
+    if (isset($eb_value['entities'])) {
+      $selected_communities = array_filter($eb_value['entities']);
+    }
+    elseif (is_array($eb_value)) {
+      $selected_communities = array_filter($eb_value, fn($v) => $v instanceof \Drupal\Core\Entity\EntityInterface);
+    }
+
+    // Fall back to form state when the entity browser value is absent (e.g.
+    // when the pre-populated default was never opened by the user).
+    if (empty($selected_communities)) {
+      $stored = $form_state->get('protocol_communities') ?? [];
+      $selected_communities = array_values($stored);
+    }
+    if (empty($selected_communities)) {
+      $tethered = $form_state->get('tethered_community');
+      if ($tethered) {
+        $selected_communities = [$tethered];
+      }
+    }
+    if (empty($selected_communities)) {
+      $form_state->setError($form['communities_and_members']['field_communities'], $this->t('At least one community is required.'));
+    }
+
     $roles = array_keys(static::getRoles());
     $stored_members = $form_state->get('members') ?? [];
     $table_values = $form_state->getValue(['membership_wrapper', 'member_table']) ?? [];
@@ -555,7 +640,7 @@ class ProtocolAddForm extends EntityForm {
           '@names' => implode(', ', $missing_names),
         ])
       );
-      $form_state->setError($form['membership_wrapper']['member_table'], '');
+      $form_state->setError($form['communities_and_members']['membership_wrapper']['member_table'], '');
     }
 
     $has_steward = FALSE;
@@ -572,7 +657,7 @@ class ProtocolAddForm extends EntityForm {
       $this->messenger()->addError(
         $this->t('At least one member must be assigned the Protocol steward role.')
       );
-      $form_state->setError($form['membership_wrapper']['member_table'], '');
+      $form_state->setError($form['communities_and_members']['membership_wrapper']['member_table'], '');
     }
   }
 
@@ -587,11 +672,22 @@ class ProtocolAddForm extends EntityForm {
     $entity->setSharingSetting($form_state->getValue('field_access_mode'));
     $entity->setMembershipDisplay($form_state->getValue('field_membership_display'));
 
-    // On the standalone form the community is selected via a custom element
-    // and stored in form state rather than pre-set via the URL.
-    $stored_community = $form_state->get('protocol_community');
-    if ($stored_community) {
-      $entity->setCommunities([$stored_community]);
+    // Read communities from the entity browser element value.
+    $eb_value = $form_state->getValue('field_communities');
+    $communities = [];
+    if (isset($eb_value['entities'])) {
+      $communities = array_values(array_filter($eb_value['entities']));
+    }
+    elseif (is_array($eb_value)) {
+      $communities = array_values(array_filter($eb_value, fn($v) => $v instanceof \Drupal\Core\Entity\EntityInterface));
+    }
+    // Fall back to form state (set by updateMemberListSubmit or route seeding).
+    if (empty($communities)) {
+      $stored = $form_state->get('protocol_communities') ?? [];
+      $communities = array_values($stored);
+    }
+    if ($communities) {
+      $entity->setCommunities($communities);
     }
 
     $role_keys = array_keys(static::getRoles());
@@ -640,7 +736,11 @@ class ProtocolAddForm extends EntityForm {
    * Redirect to the owning community after save.
    */
   public function redirectToCommunity(array $form, FormStateInterface $form_state) {
-    $community = $this->community ?? $form_state->get('protocol_community');
+    $community = $this->community;
+    if (!$community) {
+      $stored = $form_state->get('protocol_communities') ?? [];
+      $community = !empty($stored) ? reset($stored) : NULL;
+    }
     if ($community) {
       $form_state->setRedirect('mukurtu_protocol.manage_community', ['group' => $community->id()]);
     }
