@@ -134,14 +134,10 @@ class MultipageItemPageController extends ControllerBase {
   }
 
   public function newFromNode(NodeInterface $node) {
-    $build = [];
     $mpi = MultipageItem::create(['title' => $node->getTitle(), 'field_pages' => [$node->id()]]);
-    $form = $this->entityTypeManager()
-      ->getFormObject('multipage_item', 'add')
-      ->setEntity($mpi);
-    $build[] = $this->formBuilder()->getForm($form);
-
-    return $build;
+    $mpi->save();
+    $url = Url::fromRoute('entity.multipage_item.edit_form', ['multipage_item' => $mpi->id()]);
+    return new RedirectResponse($url->toString());
   }
 
   /**

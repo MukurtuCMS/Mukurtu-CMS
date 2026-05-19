@@ -698,3 +698,61 @@ function mukurtu_dictionary_update_40017(): void {
     $index->reindex();
   }
 }
+
+/**
+ * Switch the field_words entity browser widget on the Word List form to use the
+ * dedicated dictionary-word-only browser (no Type filter shown).
+ */
+function mukurtu_dictionary_update_40018(): void {
+  // Import the entity browser config if it doesn't exist yet.
+  $browser_config_name = 'entity_browser.browser.mukurtu_dictionary_word_browser';
+  if (\Drupal::config($browser_config_name)->isNew()) {
+    $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_dictionary');
+    $source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+    $data = $source->read('entity_browser.browser.mukurtu_dictionary_word_browser');
+    if ($data) {
+      \Drupal::configFactory()->getEditable($browser_config_name)->setData($data)->save(TRUE);
+    }
+  }
+
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.word_list.default');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_words.settings.entity_browser', 'mukurtu_dictionary_word_browser');
+  $dependencies = $config->get('dependencies.config') ?? [];
+  if (!in_array('entity_browser.browser.mukurtu_dictionary_word_browser', $dependencies)) {
+    $dependencies[] = 'entity_browser.browser.mukurtu_dictionary_word_browser';
+    sort($dependencies);
+    $config->set('dependencies.config', $dependencies);
+  }
+  $config->save(TRUE);
+}
+
+/**
+ * Switch field_related_content on Dictionary Word to rendered_entity (form_selection view mode).
+ */
+function mukurtu_dictionary_update_40019(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.dictionary_word.default');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_related_content.settings.field_widget_display', 'rendered_entity');
+  $config->set('content.field_related_content.settings.field_widget_display_settings', ['view_mode' => 'form_selection']);
+  $config->save();
+}
+
+/**
+ * Switch field_related_content and field_words on Word List to rendered_entity (form_selection view mode).
+ */
+function mukurtu_dictionary_update_40020(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.word_list.default');
+  if ($config->isNew()) {
+    return;
+  }
+  foreach (['field_related_content', 'field_words'] as $field) {
+    $config->set("content.$field.settings.field_widget_display", 'rendered_entity');
+    $config->set("content.$field.settings.field_widget_display_settings", ['view_mode' => 'form_selection']);
+  }
+  $config->save();
+}

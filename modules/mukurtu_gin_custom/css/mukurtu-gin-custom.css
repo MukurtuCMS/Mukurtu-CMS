@@ -26,3 +26,25 @@ counterpart, if one exists. */
     text-overflow: ellipsis;
     overflow: visible !important;
 }
+
+/* Content browser modal: thumbnail column */
+.view-mukurtu-content-browser .views-field-rendered-entity {
+  width: 60px;
+}
+
+.view-mukurtu-content-browser .views-field-rendered-entity img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  display: block;
+}
+
+/* Content browser modal: already-selected rows */
+.view-mukurtu-content-browser .views-table tr.eb-already-selected {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.view-mukurtu-content-browser .views-table tr.eb-already-selected td {
+  pointer-events: none;
+}

@@ -506,3 +506,39 @@ function mukurtu_protocol_update_40028(): void {
   $view_data = \Symfony\Component\Yaml\Yaml::parseFile($view_file);
   \Drupal::configFactory()->getEditable('views.view.mukurtu_people')->setData($view_data)->save(TRUE);
 }
+
+/**
+ * Add mukurtu_community_manager_select query tag to community select view.
+ */
+function mukurtu_protocol_update_40030(): void {
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
+  $view_file = $module_path . '/config/install/views.view.mukurtu_community_select.yml';
+  $view_data = \Symfony\Component\Yaml\Yaml::parseFile($view_file);
+  \Drupal::configFactory()->getEditable('views.view.mukurtu_community_select')->setData($view_data)->save(TRUE);
+}
+
+/**
+ * Switch field_featured_content on Community to rendered_entity (form_selection view mode).
+ */
+function mukurtu_protocol_update_40031(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.community.community.default');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_featured_content.settings.field_widget_display', 'rendered_entity');
+  $config->set('content.field_featured_content.settings.field_widget_display_settings', ['view_mode' => 'form_selection']);
+  $config->save();
+}
+
+/**
+ * Switch field_featured_content on Protocol to rendered_entity (form_selection view mode).
+ */
+function mukurtu_protocol_update_40032(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.protocol.protocol.default');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_featured_content.settings.field_widget_display', 'rendered_entity');
+  $config->set('content.field_featured_content.settings.field_widget_display_settings', ['view_mode' => 'form_selection']);
+  $config->save();
+}
