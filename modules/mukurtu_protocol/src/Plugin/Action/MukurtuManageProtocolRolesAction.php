@@ -18,7 +18,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *
  * @Action(
  *   id = "mukurtu_manage_protocol_roles_action",
- *   label = @Translation("Manage user role(s) in protocol"),
+ *   label = @Translation("Manage user roles in protocol"),
  *   type = "og_membership",
  *   confirm_form_route_name = "mukurtu_protocol.protocol_manage_roles_form",
  * )

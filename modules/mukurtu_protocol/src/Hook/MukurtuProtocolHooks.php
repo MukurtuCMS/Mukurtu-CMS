@@ -58,21 +58,25 @@ class MukurtuProtocolHooks {
     $operations = [];
     $state = $entity->getState();
 
+    $owner = $entity->getOwner();
+    $name = ($owner instanceof UserInterface) ? $owner->getDisplayName() : t('member');
+
     if ($state !== OgMembershipInterface::STATE_BLOCKED) {
       $block_url = Url::fromRoute('mukurtu_protocol.og_membership.block', ['og_membership' => $entity->id()]);
       if ($block_url->access()) {
         $operations['block'] = [
-          'title' => t('Block'),
+          'title' => t('Block @name', ['@name' => $name]),
           'url' => $block_url,
           'weight' => 20,
         ];
       }
     }
-    else {
+
+    if ($state === OgMembershipInterface::STATE_BLOCKED) {
       $unblock_url = Url::fromRoute('mukurtu_protocol.og_membership.unblock', ['og_membership' => $entity->id()]);
       if ($unblock_url->access()) {
         $operations['unblock'] = [
-          'title' => t('Unblock'),
+          'title' => t('Unblock @name', ['@name' => $name]),
           'url' => $unblock_url,
           'weight' => 20,
         ];
@@ -99,12 +103,18 @@ class MukurtuProtocolHooks {
       return;
     }
 
+    $owner = $entity->getOwner();
+    $name = ($owner instanceof UserInterface) ? $owner->getDisplayName() : t('member');
+
     if (isset($operations['edit'])) {
-      $operations['edit']['title'] = t('Manage');
+      $operations['edit']['title'] = t('Manage roles for @name', ['@name' => $name]);
     }
 
     if (isset($operations['delete'])) {
-      $operations['delete']['title'] = t('Remove');
+      $label = $group_type === 'community'
+        ? t('Remove @name from community', ['@name' => $name])
+        : t('Remove @name from protocol', ['@name' => $name]);
+      $operations['delete']['title'] = $label;
     }
   }
 
@@ -128,16 +138,12 @@ class MukurtuProtocolHooks {
     $actions = &$form['header']['og_membership_bulk_form']['action']['#options'];
     if ($entity_type_id === 'community') {
       unset($actions['mukurtu_manage_protocol_roles_action']);
-      unset($actions['mukurtu_approve_user_from_membership_action']);
-      unset($actions['og_membership_approve_pending_action']);
       $actions['og_membership_delete_action'] = (string) t('Remove user(s) from community');
       $actions['og_membership_block_action'] = (string) t('Block user(s) in community');
       $actions['og_membership_unblock_action'] = (string) t('Unblock user(s) in community');
     }
     elseif ($entity_type_id === 'protocol') {
       unset($actions['mukurtu_manage_community_roles_action']);
-      unset($actions['mukurtu_approve_user_from_membership_action']);
-      unset($actions['og_membership_approve_pending_action']);
       $actions['og_membership_delete_action'] = (string) t('Remove user(s) from protocol');
       $actions['og_membership_block_action'] = (string) t('Block user(s) in protocol');
       $actions['og_membership_unblock_action'] = (string) t('Unblock user(s) in protocol');

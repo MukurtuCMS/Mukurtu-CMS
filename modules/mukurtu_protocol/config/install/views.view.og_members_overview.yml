@@ -155,7 +155,6 @@ display:
           selected_actions:
             - mukurtu_manage_community_roles_action
             - mukurtu_manage_protocol_roles_action
-            - mukurtu_approve_user_from_membership_action
             - og_membership_block_action
             - og_membership_unblock_action
             - og_membership_delete_action
