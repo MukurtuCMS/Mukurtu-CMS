@@ -704,6 +704,17 @@ function mukurtu_dictionary_update_40017(): void {
  * dedicated dictionary-word-only browser (no Type filter shown).
  */
 function mukurtu_dictionary_update_40018(): void {
+  // Import the entity browser config if it doesn't exist yet.
+  $browser_config_name = 'entity_browser.browser.mukurtu_dictionary_word_browser';
+  if (\Drupal::config($browser_config_name)->isNew()) {
+    $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_dictionary');
+    $source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+    $data = $source->read('entity_browser.browser.mukurtu_dictionary_word_browser');
+    if ($data) {
+      \Drupal::configFactory()->getEditable($browser_config_name)->setData($data)->save(TRUE);
+    }
+  }
+
   $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.word_list.default');
   if ($config->isNew()) {
     return;
