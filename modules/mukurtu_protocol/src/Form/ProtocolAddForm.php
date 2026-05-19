@@ -110,6 +110,7 @@ class ProtocolAddForm extends EntityForm {
     $community_param = $community;
     if ($community_param) {
       $this->community = $community_param;
+      $form_state->set('tethered_community', $community_param);
     }
 
     $form = parent::buildForm($form, $form_state);
@@ -529,6 +530,11 @@ class ProtocolAddForm extends EntityForm {
       }
     }
 
+    // Always preserve the tethered community for community-bound routes.
+    $tethered = $form_state->get('tethered_community');
+    if ($tethered && !isset($communities[$tethered->id()])) {
+      $communities[$tethered->id()] = $tethered;
+    }
     $form_state->set('protocol_communities', $communities);
     $currentUser = \Drupal::entityTypeManager()->getStorage('user')->load(\Drupal::currentUser()->id());
     $form_state->set('members', $currentUser ? [
@@ -584,6 +590,18 @@ class ProtocolAddForm extends EntityForm {
       $selected_communities = array_filter($eb_value, fn($v) => $v instanceof \Drupal\Core\Entity\EntityInterface);
     }
 
+    // Fall back to form state when the entity browser value is absent (e.g.
+    // when the pre-populated default was never opened by the user).
+    if (empty($selected_communities)) {
+      $stored = $form_state->get('protocol_communities') ?? [];
+      $selected_communities = array_values($stored);
+    }
+    if (empty($selected_communities)) {
+      $tethered = $form_state->get('tethered_community');
+      if ($tethered) {
+        $selected_communities = [$tethered];
+      }
+    }
     if (empty($selected_communities)) {
       $form_state->setError($form['communities_and_members']['field_communities'], $this->t('At least one community is required.'));
     }

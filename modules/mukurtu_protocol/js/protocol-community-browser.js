@@ -11,12 +11,17 @@
 
   Drupal.behaviors.mukurtuProtocolCommunityBrowser = {
     attach: function (context) {
-      once('mukurtu-community-auto-update', '#communities-and-members-wrapper', context)
-        .forEach(function (wrapper) {
-          $(wrapper).on('entity_browser_value_updated', function () {
-            $(wrapper).find('.js-communities-auto-update').trigger('click');
-          });
+      // querySelectorAll only searches descendants, not the element itself.
+      // After AJAX, context IS the wrapper, so we must handle both cases.
+      const candidates = (context instanceof Element && context.id === 'communities-and-members-wrapper')
+        ? [context]
+        : Array.from(context.querySelectorAll('#communities-and-members-wrapper'));
+
+      once('mukurtu-community-auto-update', candidates).forEach(function (wrapper) {
+        $(wrapper).on('entity_browser_value_updated', function () {
+          $(wrapper).find('.js-communities-auto-update').trigger('click');
         });
+      });
     }
   };
 
