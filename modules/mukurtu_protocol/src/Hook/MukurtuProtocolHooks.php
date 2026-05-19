@@ -107,7 +107,7 @@ class MukurtuProtocolHooks {
    */
   #[Hook('form_alter')]
   public function formAlter(array &$form, FormStateInterface $form_state, string $form_id): void {
-    if ($form_id !== 'views-form-og-members-overview-default') {
+    if ($form_id !== 'views_form_og_members_overview_default') {
       return;
     }
     $entity_type_id = \Drupal::routeMatch()
