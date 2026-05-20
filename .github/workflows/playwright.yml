@@ -2,9 +2,6 @@ name: "Tugboat Playwright Tests"
 
 on:
   # Run on pull requests against the main branch, to match Tugboat builds.
-  push:
-    branches:
-      - main
   pull_request:
     types: [opened, synchronize, reopened]
 
