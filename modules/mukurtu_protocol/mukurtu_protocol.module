@@ -733,6 +733,7 @@ function mukurtu_protocol_query_mukurtu_community_manager_select_alter(Alterable
   }
 
   if (!$community_table) {
+    \Drupal::logger('mukurtu_protocol')->warning('mukurtu_community_manager_select query tag: community_field_data table not found; filter skipped.');
     return;
   }
 

@@ -18,9 +18,17 @@ counterpart, if one exists. */
     display: inline-flex;
 }
 
-/* Hide community browser checkbox column via CSS to prevent FOUC before JS runs. */
+/* Hide community browser checkbox column via CSS to prevent FOUC before JS runs.
+   Visually hidden (not display:none) so the checkbox remains in the accessibility
+   tree. The .views-row receives role="checkbox" from JS and is the primary
+   interactive element; the underlying input is a fallback. */
 .view-mukurtu-community-select .views-field-entity-browser-select {
-  display: none;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
 
 /* Entity browser modal iframe: space below the dialog title bar. */
@@ -30,6 +38,12 @@ counterpart, if one exists. */
 
 /* Community browser: card selected state. */
 .gin-entity-browser .entity-browser-form .views-row.is-selected {
+  outline: 3px solid var(--gin-color-primary, #0036b1);
+  outline-offset: -3px;
+}
+
+/* Community browser: focus ring for keyboard users on unselected cards (WCAG 2.4.7). */
+.gin-entity-browser .entity-browser-form .views-row:focus-visible {
   outline: 3px solid var(--gin-color-primary, #0036b1);
   outline-offset: -3px;
 }

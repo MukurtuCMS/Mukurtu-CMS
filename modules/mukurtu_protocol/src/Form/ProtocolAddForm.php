@@ -228,9 +228,15 @@ class ProtocolAddForm extends EntityForm {
     ];
 
     $form['membership_section']['membership_wrapper']['membership_label'] = [
-      '#type' => 'item',
-      '#title' => $this->t('Protocol members'),
-      '#description' => $this->t('Add members of the parent community to this protocol. A member may hold multiple roles.'),
+      '#type' => 'html_tag',
+      '#tag' => 'h3',
+      '#value' => $this->t('Protocol members'),
+      '#attributes' => ['id' => 'protocol-members-heading'],
+    ];
+    $form['membership_section']['membership_wrapper']['membership_description'] = [
+      '#type' => 'html_tag',
+      '#tag' => 'p',
+      '#value' => $this->t('Add members of the parent community to this protocol. A member may hold multiple roles.'),
     ];
 
     $form['membership_section']['membership_wrapper']['role_descriptions'] = static::buildRoleDescriptions();
@@ -263,24 +269,76 @@ class ProtocolAddForm extends EntityForm {
 
     $form['#attached']['library'][] = 'mukurtu_protocol/membership-table';
 
-    // Pass all active users to JS for the member autocomplete, excluding anyone
-    // already added to the membership table.
+    // Build the member autocomplete suggestions, scoped to users who are active
+    // members of the currently selected communities. Falls back to all active
+    // users when no communities are selected yet.
     $already_added = array_keys($form_state->get('members') ?? []);
     $suggestions = [];
-    $uids = $this->entityTypeManager->getStorage('user')->getQuery()
-      ->accessCheck(TRUE)
-      ->condition('status', 1)
-      ->condition('uid', 0, '<>')
-      ->sort('name')
-      ->execute();
-    foreach ($this->entityTypeManager->getStorage('user')->loadMultiple($uids) as $uid => $u) {
-      if (in_array($uid, $already_added)) {
-        continue;
+
+    // Resolve the currently selected community IDs. On AJAX rebuilds the widget
+    // value is in form state; on initial load use the pre-populated entity field.
+    $selected_community_ids = [];
+    $entity_ids_raw = trim((string) ($form_state->getValue(['field_communities', 'target_id']) ?? ''));
+    if (!empty($entity_ids_raw)) {
+      foreach (array_filter(explode(' ', $entity_ids_raw)) as $id_string) {
+        $parts = explode(':', $id_string, 2);
+        if (count($parts) === 2) {
+          $selected_community_ids[] = (int) $parts[1];
+        }
       }
-      $suggestions[] = [
-        'value' => $u->getDisplayName() . ' (' . $uid . ')',
-        'label' => $u->getDisplayName() . ' (' . $u->getEmail() . ')',
-      ];
+    }
+    elseif (!$this->entity->field_communities->isEmpty()) {
+      foreach ($this->entity->field_communities as $item) {
+        if ($item->target_id) {
+          $selected_community_ids[] = (int) $item->target_id;
+        }
+      }
+    }
+
+    if (!empty($selected_community_ids)) {
+      // Aggregate active members across all selected communities.
+      $seen_uids = [];
+      foreach ($selected_community_ids as $community_id) {
+        $memberships = $this->entityTypeManager->getStorage('og_membership')
+          ->loadByProperties([
+            'entity_type' => 'community',
+            'entity_id'   => $community_id,
+            'state'       => \Drupal\og\OgMembershipInterface::STATE_ACTIVE,
+          ]);
+        foreach ($memberships as $membership) {
+          $member = $membership->getOwner();
+          if (!$member || $member->id() == 0) {
+            continue;
+          }
+          $uid = $member->id();
+          if (in_array($uid, $already_added) || isset($seen_uids[$uid])) {
+            continue;
+          }
+          $seen_uids[$uid] = TRUE;
+          $suggestions[] = [
+            'value' => $member->getDisplayName() . ' (' . $uid . ')',
+            'label' => $member->getDisplayName() . ' (' . $member->getEmail() . ')',
+          ];
+        }
+      }
+    }
+    else {
+      // No communities selected yet — fall back to all active users.
+      $uids = $this->entityTypeManager->getStorage('user')->getQuery()
+        ->accessCheck(TRUE)
+        ->condition('status', 1)
+        ->condition('uid', 0, '<>')
+        ->sort('name')
+        ->execute();
+      foreach ($this->entityTypeManager->getStorage('user')->loadMultiple($uids) as $uid => $u) {
+        if (in_array($uid, $already_added)) {
+          continue;
+        }
+        $suggestions[] = [
+          'value' => $u->getDisplayName() . ' (' . $uid . ')',
+          'label' => $u->getDisplayName() . ' (' . $u->getEmail() . ')',
+        ];
+      }
     }
     $form['#attached']['drupalSettings']['mukurtuMembership']['users'] = $suggestions;
     $form['#attached']['drupalSettings']['mukurtuMembership']['scrollToTable'] = (bool) $form_state->get('membership_scroll');
@@ -368,7 +426,7 @@ class ProtocolAddForm extends EntityForm {
         '#limit_validation_errors' => [],
         '#attributes' => [
           'class' => ['button--danger', 'button--small'],
-          'aria-label' => t('Remove @name', ['@name' => $name]),
+          'aria-label' => t('Remove @name', ['@name' => $name ?: t('user #@uid', ['@uid' => $uid])]),
         ],
       ];
 

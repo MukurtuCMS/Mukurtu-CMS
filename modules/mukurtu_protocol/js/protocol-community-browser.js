@@ -29,6 +29,9 @@
           // the handler. entity_browser.modal.js fires it again via the
           // select_entities AJAX command — by then entity_ids is empty.
           // Skip the second fire to avoid wiping protocol_communities.
+          // eb-target is entity_browser's internal hidden input that holds the
+          // selected entity IDs after the first (real) selection event and is
+          // cleared by the second (AJAX command) event — intentional coupling.
           var entityIds = $btn.closest('form').find('input.eb-target').val();
           if (!entityIds || !entityIds.trim()) {
             return;

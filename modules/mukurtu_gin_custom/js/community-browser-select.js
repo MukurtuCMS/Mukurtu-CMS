@@ -15,10 +15,23 @@
       once('community-browser-select', '.view-mukurtu-community-select', context).forEach(function (view) {
         var $view = $(view);
 
-        // Make each row a clickable card that toggles selection.
-        // Note: .views-field-entity-browser-select is hidden via CSS to avoid
-        // a flash before this JS runs.
-        $view.on('click', '.views-row', function (e) {
+        // Make each row focusable and give it a checkbox role so keyboard users
+        // and screen readers can interact with it (WCAG 2.1.1, 4.1.2).
+        $view.find('.views-row').each(function () {
+          $(this).attr({ tabindex: '0', role: 'checkbox', 'aria-checked': 'false' });
+        });
+
+        // Handle both click and keyboard (Enter/Space) to toggle selection.
+        // The underlying checkbox is kept in the accessibility tree via
+        // visually-hidden CSS (aria-hidden is NOT set on it), but the .views-row
+        // is the primary interactive element exposed to assistive technology.
+        $view.on('click keydown', '.views-row', function (e) {
+          if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') {
+            return;
+          }
+          if (e.type === 'keydown') {
+            e.preventDefault();
+          }
           if ($(e.target).is('input')) {
             return;
           }
@@ -28,7 +41,7 @@
           }
           var checked = !$checkbox.prop('checked');
           $checkbox.prop('checked', checked);
-          $(this).toggleClass('is-selected', checked);
+          $(this).toggleClass('is-selected', checked).attr('aria-checked', String(checked));
         });
       });
     }
