@@ -27,6 +27,136 @@ counterpart, if one exists. */
     overflow: visible !important;
 }
 
+/* === Entity Browser Form Selection Widget === */
+
+.eb-view-toggle {
+  /* The toggle is now a <fieldset>. Reset fieldset default styles so layout
+   * is not affected. The visually-hidden legend is preserved in the a11y tree
+   * but removed from the visual flow by Drupal's .visually-hidden utility. */
+  border: none;
+  margin: 0;
+  padding: 0;
+  display: inline-flex;
+  gap: 0.5rem;
+  vertical-align: middle;
+  margin-left: 0.75rem;
+}
+
+.eb-view-toggle__btn {
+  /* 2.5.8: minimum 24x24px target size. */
+  min-height: 24px;
+  padding: 0.35rem 0.75rem;
+  border: 2px solid currentColor;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 3px;
+  font-size: 0.85rem;
+  line-height: 1.2;
+}
+
+/* 2.4.7: explicit focus indicator that survives Gin's focus reset. */
+.eb-view-toggle__btn:focus-visible {
+  outline: 3px solid var(--color-gin-primary, #2e7d32);
+  outline-offset: 2px;
+}
+
+.eb-view-toggle__btn[aria-pressed="true"] {
+  background: var(--color-gin-primary, #2e7d32);
+  color: #fff;
+  border-color: var(--color-gin-primary, #2e7d32);
+  /* 1.4.1: non-color pressed indicator. */
+  font-weight: bold;
+}
+
+/* Individual card - base styles (used in both views) */
+.eb-form-selection-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem;
+}
+
+.eb-form-selection-card .contextual {
+  display: none;
+}
+
+.eb-form-selection-card__media {
+  flex: 0 0 60px;
+  width: 60px;
+  height: 60px;
+  overflow: hidden;
+}
+
+.eb-form-selection-card__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Suppress Gin's entity_browser.css hover border on the media thumbnail — the
+   .field__item div is not focusable so this is not a focus indicator. */
+.entities-list .item-container .eb-form-selection-card__media .field__item:hover {
+  border-color: transparent !important;
+  cursor: default;
+}
+
+.eb-form-selection-card__title {
+  /* Reset heading defaults: the <h3> is used for semantics only; visually
+   * it should remain a compact label within the card. */
+  margin: 0;
+  font-weight: normal;
+  font-size: 0.9rem;
+  line-height: 1.3;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+.eb-form-selection-card__type {
+  font-size: 0.8rem;
+  /* 1.4.3: #595959 on white = 7.0:1, above the 4.5:1 AA requirement. */
+  color: #595959;
+  margin-top: 0.2rem;
+}
+
+/* List view — display is set via JS inline style to beat gin's grid */
+.entities-list.eb-view-list > div {
+  /* 1.4.11: #767676 on white = 4.54:1, meeting the 3:1 UI component minimum.
+   * #e0e0e0 was 1.32:1, which failed. */
+  border-bottom: 1px solid #767676;
+}
+
+.entities-list.eb-view-list > div:last-child {
+  border-bottom: none;
+}
+
+/* Grid view — display/grid-template-columns set via JS inline style */
+.entities-list.eb-view-grid > div {
+  /* 1.4.11: same fix as list view divider above. */
+  border: 1px solid #767676;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.entities-list.eb-view-grid .eb-form-selection-card {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.5rem;
+}
+
+.entities-list.eb-view-grid .eb-form-selection-card__media {
+  width: 100%;
+  height: 100px;
+  flex: none;
+}
+
+/* Keep remove/edit buttons accessible in both views */
+.entities-list.eb-view-grid .field-multiple-drag,
+.entities-list.eb-view-list .field-multiple-drag {
+  cursor: grab;
+}
+
 /* Content browser modal: thumbnail column */
 .view-mukurtu-content-browser .views-field-rendered-entity {
   width: 60px;
@@ -47,4 +177,9 @@ counterpart, if one exists. */
 
 .view-mukurtu-content-browser .views-table tr.eb-already-selected td {
   pointer-events: none;
+}
+
+/* Modal thumbnail column: hide card title/type — thumbnail only */
+.view-mukurtu-content-browser .views-field-rendered-entity .eb-form-selection-card__body {
+  display: none;
 }
