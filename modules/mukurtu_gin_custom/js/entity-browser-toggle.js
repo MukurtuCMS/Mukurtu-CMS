@@ -12,9 +12,20 @@
       ).forEach(function (list) {
         var $list = $(list);
 
+        if ($list.find('.item-container').length === 0) {
+          return;
+        }
+
         var fieldClass = $list.closest('[class*="field--name-"]').attr('class') || '';
         var nameMatch = fieldClass.match(/field--name-([\w-]+)/);
-        var storageKey = 'mukurtu_eb_view_' + (nameMatch ? nameMatch[1] : 'default');
+        var fieldName = nameMatch ? nameMatch[1] : '';
+
+        var excluded = ['field-related-person'];
+        if (excluded.indexOf(fieldName) !== -1) {
+          return;
+        }
+
+        var storageKey = 'mukurtu_eb_view_' + (fieldName || 'default');
         var savedView = localStorage.getItem(storageKey) || 'grid';
 
         function applyView(view) {
