@@ -264,7 +264,9 @@ function mukurtu_multipage_items_views_query_alter(ViewExecutable $view, QueryPl
     $bundles_config = \Drupal::config('mukurtu_multipage_items.settings')->get('bundles_config');
     $enabledBundles = array_keys(array_filter($bundles_config));
 
-    $query->addWhere('enabledBundles', 'type', $enabledBundles, 'IN');
+    if (!empty($enabledBundles)) {
+      $query->addWhere(0, 'node_field_data.type', $enabledBundles, 'IN');
+    }
 
     $connection = \Drupal::database();
 
