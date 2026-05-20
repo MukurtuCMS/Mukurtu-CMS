@@ -14,3 +14,52 @@ function mukurtu_person_update_40001() {
   $config->save();
   return t('Updated the weight of field_coverage in person record form display.');
 }
+
+/**
+ * Switch the field_related_person entity browser widget on the Related Person
+ * paragraph form to use the dedicated person-only browser (no Type filter shown).
+ */
+function mukurtu_person_update_40002(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.paragraph.related_person.default');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_related_person.settings.entity_browser', 'mukurtu_person_browser');
+  $dependencies = $config->get('dependencies.config') ?? [];
+  $key = array_search('entity_browser.browser.mukurtu_content_browser', $dependencies);
+  if ($key !== FALSE) {
+    unset($dependencies[$key]);
+  }
+  if (!in_array('entity_browser.browser.mukurtu_person_browser', $dependencies)) {
+    $dependencies[] = 'entity_browser.browser.mukurtu_person_browser';
+    sort($dependencies);
+    $config->set('dependencies.config', $dependencies);
+  }
+  $config->save(TRUE);
+}
+
+/**
+ * Switch field_related_content on Person to rendered_entity (form_selection view mode).
+ */
+function mukurtu_person_update_40003(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.person.default');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_related_content.settings.field_widget_display', 'rendered_entity');
+  $config->set('content.field_related_content.settings.field_widget_display_settings', ['view_mode' => 'form_selection']);
+  $config->save();
+}
+
+/**
+ * Switch field_related_person on Related Person paragraph to rendered_entity (form_selection view mode).
+ */
+function mukurtu_person_update_40004(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.paragraph.related_person.default');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_related_person.settings.field_widget_display', 'rendered_entity');
+  $config->set('content.field_related_person.settings.field_widget_display_settings', ['view_mode' => 'form_selection']);
+  $config->save();
+}
