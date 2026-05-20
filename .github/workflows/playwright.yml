@@ -5,10 +5,14 @@ on:
     branches:
       - main
     types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - main
 
 jobs:
   wait-for-tugboat:
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
     outputs:
       preview_url: ${{ steps.wait-for-preview.outputs.preview_url }}
     steps:
@@ -41,6 +45,7 @@ jobs:
 
   playwright-tests:
     needs: wait-for-tugboat
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -66,3 +71,31 @@ jobs:
         # as the baseURL in playwright.config.ts.
         env:
           PLAYWRIGHT_BASE_URL: ${{ needs.wait-for-tugboat.outputs.preview_url }}
+
+  playwright-tests-main:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Dependencies
+        working-directory: tests/playwright
+        run: npm ci
+
+      - name: Install Playwright Browsers
+        working-directory: tests/playwright
+        run: npx playwright install
+
+      - name: Run Playwright Tests
+        working-directory: tests/playwright
+        run: npx playwright test
+        # TUGBOAT_MAIN_URL is a GitHub Actions variable set to the stable
+        # Tugboat base preview URL for the main branch.
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ vars.TUGBOAT_MAIN_URL }}
