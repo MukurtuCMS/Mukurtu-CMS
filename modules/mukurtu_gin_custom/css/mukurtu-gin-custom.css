@@ -184,6 +184,23 @@ counterpart, if one exists. */
   display: none;
 }
 
+/* Audio cards: player spans the full card width instead of the 60px thumbnail slot. */
+.eb-form-selection-card:has(audio) {
+  flex-wrap: wrap;
+}
+
+.eb-form-selection-card:has(audio) .eb-form-selection-card__media {
+  flex: 1 1 100%;
+  width: 100%;
+  height: auto;
+}
+
+.eb-form-selection-card audio {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
 /* Canonical .ui-dialog positioning override (loaded on every page via
    hook_page_attachments, covering both front-end and Gin admin contexts).
    Gin sets .ui-dialog { position: absolute } which causes modal dialogs to

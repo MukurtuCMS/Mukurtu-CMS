@@ -85,3 +85,19 @@ function mukurtu_collection_update_40002(): void {
   $index->save();
   $index->reindex();
 }
+
+/**
+ * Switch collection entity browser fields to rendered_entity display.
+ */
+function mukurtu_collection_update_40007(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.collection.default');
+  foreach (['field_child_collections', 'field_items_in_collection', 'field_related_content'] as $field) {
+    $content = $config->get("content.{$field}");
+    if ($content && ($content['settings']['field_widget_display'] ?? '') === 'label') {
+      $content['settings']['field_widget_display'] = 'rendered_entity';
+      $content['settings']['field_widget_display_settings'] = ['view_mode' => 'form_selection'];
+      $config->set("content.{$field}", $content);
+    }
+  }
+  $config->save();
+}

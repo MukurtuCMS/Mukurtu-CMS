@@ -770,6 +770,57 @@ function mukurtu_core_update_40024(): void {
 }
 
 /**
+ * Install form_selection media view mode and displays; update node form_selection
+ * view displays to use the new media view mode.
+ */
+function mukurtu_core_update_40026(): void {
+  $config_storage = \Drupal::service('config.storage');
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core');
+  $module_source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+  $profile_path = \Drupal::service('extension.list.profile')->getPath('mukurtu');
+  $profile_source = new \Drupal\Core\Config\FileStorage($profile_path . '/config/install');
+
+  // Install the new media view mode.
+  $view_mode_name = 'core.entity_view_mode.media.form_selection';
+  $data = $module_source->read($view_mode_name);
+  if ($data !== FALSE) {
+    $config_storage->write($view_mode_name, $data);
+  }
+
+  // Install media view displays for each media type.
+  $media_displays = [
+    'core.entity_view_display.media.image.form_selection',
+    'core.entity_view_display.media.document.form_selection',
+    'core.entity_view_display.media.audio.form_selection',
+    'core.entity_view_display.media.video.form_selection',
+    'core.entity_view_display.media.external_embed.form_selection',
+    'core.entity_view_display.media.remote_video.form_selection',
+  ];
+  foreach ($media_displays as $name) {
+    $data = $profile_source->read($name);
+    if ($data !== FALSE) {
+      $config_storage->write($name, $data);
+    }
+  }
+
+  // Update all node form_selection view displays to use the new media view mode.
+  $node_bundles = [
+    'digital_heritage', 'collection', 'word_list', 'dictionary_word',
+    'person', 'landing_page', 'place', 'page', 'article',
+  ];
+  foreach ($node_bundles as $bundle) {
+    $config = \Drupal::configFactory()->getEditable("core.entity_view_display.node.{$bundle}.form_selection");
+    if ($config->isNew()) {
+      continue;
+    }
+    $current = $config->get('content.field_representative_media.settings.view_mode');
+    if (in_array($current, ['digital_heritage_sidebar', 'small'])) {
+      $config->set('content.field_representative_media.settings.view_mode', 'form_selection')->save();
+    }
+  }
+}
+
+/**
  * Create form_selection view displays for article and page node types and
  * switch field_featured_content on the Featured Content block to rendered_entity.
  */

@@ -15,7 +15,7 @@
         var fieldClass = $list.closest('[class*="field--name-"]').attr('class') || '';
         var nameMatch = fieldClass.match(/field--name-([\w-]+)/);
         var storageKey = 'mukurtu_eb_view_' + (nameMatch ? nameMatch[1] : 'default');
-        var savedView = localStorage.getItem(storageKey) || 'list';
+        var savedView = localStorage.getItem(storageKey) || 'grid';
 
         function applyView(view) {
           $list.removeClass('eb-view-grid eb-view-list').addClass('eb-view-' + view);
