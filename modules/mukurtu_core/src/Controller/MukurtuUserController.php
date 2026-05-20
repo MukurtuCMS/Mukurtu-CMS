@@ -10,7 +10,6 @@ use Drupal\Core\Link;
 use Drupal\Core\Render\Markup;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Url;
-use Drupal\Core\Ajax\MessageCommand;
 use Drupal\og\Og;
 use Drupal\user\Entity\User;
 
@@ -53,6 +52,7 @@ class MukurtuUserController extends ControllerBase {
 
     if ($user && $user->status->value == 0) {
       $user->set('status', TRUE);
+      $user->set('field_pending', 0);
       try {
         $user->save();
       }
@@ -122,6 +122,7 @@ class MukurtuUserController extends ControllerBase {
 
       if ($user->status->value != 0) {
         $user->set('status', FALSE);
+        $user->set('field_pending', 0);
         try {
           $user->save();
         }
@@ -131,6 +132,66 @@ class MukurtuUserController extends ControllerBase {
             '@message' => $e->getMessage(),
           ]);
         }
+      }
+      elseif ($user->hasField('field_pending') && $user->get('field_pending')->value) {
+        // Already blocked but was pending — explicitly mark as blocked.
+        $user->set('field_pending', 0);
+        $user->save();
+      }
+    }
+
+    $request = \Drupal::request();
+    $referer = $request->headers->get('referer');
+    $fallback = Url::fromRoute('view.' . self::PEOPLE_VIEW_ID . '.' . self::PEOPLE_DISPLAY_ID)->toString();
+    $redirect = ($referer && str_starts_with($referer, $request->getSchemeAndHttpHost()))
+      ? $referer
+      : $fallback;
+    $response->addCommand(new RedirectCommand($redirect));
+    return $response;
+  }
+
+  public function setPendingAjax($uid) {
+    $user = User::load($uid);
+    $response = new AjaxResponse();
+
+    if ($user) {
+      $account = $this->currentUser();
+      if (!$account->hasPermission('administer users')) {
+        $protected = array_intersect(self::PROTECTED_ROLES, $user->getRoles());
+        if (!empty($protected)) {
+          $response->addCommand(new MessageCommand('You do not have permission to modify this user.', NULL, ['type' => 'error']));
+          return $response;
+        }
+
+        $current_user = User::load($account->id());
+        $cm_community_ids = [];
+        foreach (Og::getMemberships($current_user) as $m) {
+          if ($m->getGroupBundle() === 'community' && $m->hasPermission('manage members')) {
+            $cm_community_ids[] = $m->getGroupId();
+          }
+        }
+        $target_community_ids = [];
+        foreach (Og::getMemberships($user) as $m) {
+          if ($m->getGroupBundle() === 'community') {
+            $target_community_ids[] = $m->getGroupId();
+          }
+        }
+        if (empty(array_intersect($cm_community_ids, $target_community_ids))) {
+          $response->addCommand(new MessageCommand('You do not have permission to modify this user.', NULL, ['type' => 'error']));
+          return $response;
+        }
+      }
+
+      $user->set('status', FALSE);
+      $user->set('field_pending', 1);
+      try {
+        $user->save();
+      }
+      catch (\Throwable $e) {
+        \Drupal::logger('mukurtu_core')->warning('Could not set user @uid to pending: @message', [
+          '@uid' => $uid,
+          '@message' => $e->getMessage(),
+        ]);
       }
     }
 
@@ -145,3 +206,4 @@ class MukurtuUserController extends ControllerBase {
   }
 
 }
+

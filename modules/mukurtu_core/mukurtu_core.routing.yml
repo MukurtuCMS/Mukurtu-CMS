@@ -49,6 +49,15 @@ mukurtu_core.block_user:
     _custom_access: '\Drupal\mukurtu_core\Controller\MukurtuUserController::access'
     uid: \d+
 
+mukurtu_core.set_pending_user:
+  path: '/user/{uid}/set-pending'
+  defaults:
+    _controller: '\Drupal\mukurtu_core\Controller\MukurtuUserController::setPendingAjax'
+    _title: 'Set to Pending'
+  requirements:
+    _custom_access: '\Drupal\mukurtu_core\Controller\MukurtuUserController::access'
+    uid: \d+
+
 mukurtu_core.content_found_in:
   path: '/node/{node}/found-in'
   defaults:

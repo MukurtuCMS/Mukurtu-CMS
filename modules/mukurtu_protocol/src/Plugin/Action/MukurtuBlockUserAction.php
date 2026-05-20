@@ -15,7 +15,7 @@ use Drupal\views_bulk_operations\Action\ViewsBulkOperationsActionBase;
  *
  * @Action(
  *   id = "mukurtu_block_user_action",
- *   label = @Translation("Block user"),
+ *   label = @Translation("Block user(s)"),
  *   type = "user",
  *   confirm = TRUE,
  *   requirements = {
@@ -37,6 +37,12 @@ class MukurtuBlockUserAction extends ViewsBulkOperationsActionBase {
     }
     if ($entity->status->value != 0) {
       $entity->set('status', FALSE);
+      $entity->set('field_pending', 0);
+      $entity->save();
+    }
+    elseif ($entity->hasField('field_pending') && $entity->get('field_pending')->value) {
+      // Already blocked but pending — explicitly mark as blocked.
+      $entity->set('field_pending', 0);
       $entity->save();
     }
   }
@@ -47,6 +53,11 @@ class MukurtuBlockUserAction extends ViewsBulkOperationsActionBase {
   public function access($object, ?AccountInterface $account = NULL, $return_as_object = FALSE) {
     if (!$object instanceof User || !$account) {
       return $return_as_object ? AccessResult::forbidden() : FALSE;
+    }
+
+    // Users cannot block themselves.
+    if ($object->id() == $account->id()) {
+      return $return_as_object ? AccessResult::forbidden()->cachePerUser() : FALSE;
     }
 
     if ($account->hasPermission('administer users')) {

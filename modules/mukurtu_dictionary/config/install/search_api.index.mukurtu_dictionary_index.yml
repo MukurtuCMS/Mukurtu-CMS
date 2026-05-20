@@ -22,6 +22,14 @@ field_settings:
     dependencies:
       module:
         - node
+  field_coverage:
+    label: 'Map Points'
+    datasource_id: 'entity:node'
+    property_path: field_coverage
+    type: string
+    dependencies:
+      module:
+        - node
   community_title:
     label: Community
     datasource_id: 'entity:node'
@@ -154,7 +162,7 @@ field_settings:
   word_type:
     label: 'Word Type'
     datasource_id: 'entity:node'
-    property_path: 'field_additional_word_entries:entity:field_word_type:entity:name'
+    property_path: 'field_word_type:entity:name'
     type: string
     dependencies:
       module:
