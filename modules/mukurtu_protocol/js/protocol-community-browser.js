@@ -11,15 +11,42 @@
 
   Drupal.behaviors.mukurtuProtocolCommunityBrowser = {
     attach: function (context) {
-      // querySelectorAll only searches descendants, not the element itself.
-      // After AJAX, context IS the wrapper, so we must handle both cases.
-      const candidates = (context instanceof Element && context.id === 'communities-and-members-wrapper')
-        ? [context]
-        : Array.from(context.querySelectorAll('#communities-and-members-wrapper'));
+      // Attach exactly one listener to the document.  Use document.body as
+      // the once() sentinel: it is stable across AJAX rebuilds, so repeated
+      // calls to attach() after the wrapper is replaced are no-ops.
+      once('mukurtu-community-auto-update', document.body).forEach(function () {
+        $(document).on('entities-selected', function (event) {
+          // Only react when the triggering entity browser button is inside
+          // our communities wrapper (guards against other browsers on page).
+          if (!$(event.target).closest('#communities-and-members-wrapper').length) {
+            return;
+          }
 
-      once('mukurtu-community-auto-update', candidates).forEach(function (wrapper) {
-        $(wrapper).on('entity_browser_value_updated', function () {
-          $(wrapper).find('.js-communities-auto-update').trigger('click');
+          var $btn = $('#communities-and-members-wrapper').find('.js-communities-auto-update');
+
+          // entity_browser.modal_selection.js fires entities-selected once
+          // (via selectionCompleted, which populates entity_ids), then unbinds
+          // the handler. entity_browser.modal.js fires it again via the
+          // select_entities AJAX command — by then entity_ids is empty.
+          // Skip the second fire to avoid wiping protocol_communities.
+          var entityIds = $btn.closest('form').find('input.eb-target').val();
+          if (!entityIds || !entityIds.trim()) {
+            return;
+          }
+
+          // The entities-selected event is triggered synchronously from within
+          // the entity browser iframe via parent.jQuery.trigger(). XHRs started
+          // inside a cross-frame synchronous event can be aborted by the browser.
+          // Defer to the next task so we're outside that frame context.
+          var btnId = $btn.attr('id');
+          setTimeout(function () {
+            var ajaxInstance = (Drupal.ajax.instances || []).find(function (inst) {
+              return inst && inst.element && inst.element.id === btnId;
+            });
+            if (ajaxInstance && !ajaxInstance.ajaxing) {
+              ajaxInstance.execute();
+            }
+          }, 0);
         });
       });
     }

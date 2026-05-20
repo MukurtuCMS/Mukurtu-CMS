@@ -18,6 +18,17 @@ counterpart, if one exists. */
     display: inline-flex;
 }
 
+/* Entity browser modal iframe: space below the dialog title bar. */
+.entity-browser-modal-iframe {
+  margin-top: 24px;
+}
+
+/* Community browser: card selected state. */
+.gin-entity-browser .entity-browser-form .views-row.is-selected {
+  outline: 3px solid var(--gin-color-primary, #0036b1);
+  outline-offset: -3px;
+}
+
 /* MW: fixes paragraph titles being cut off in forms. */
 .js .paragraph-type-title {
     flex-basis: 25%;

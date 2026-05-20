@@ -5,9 +5,49 @@
  * Provide Mukurtu Gin Custom.
  */
 
+use Drupal\node\NodeInterface;
+use Drupal\node\Entity\NodeType;
+
+/**
+ * Implements hook_theme().
+ */
+function mukurtu_gin_custom_theme(array $existing, string $type, string $theme, string $path): array {
+  // Register the form_selection node template so it's available to all themes,
+  // including the admin theme (gin), which cannot find templates in mukurtu_v4.
+  return [
+    'node__form_selection' => [
+      'base hook' => 'node',
+      'template' => 'content/node--form-selection',
+      'path' => $path . '/templates',
+    ],
+  ];
+}
+
 /**
  * Implements hook_page_attachments()
  */
 function mukurtu_gin_custom_page_attachments(array &$attachments) {
   $attachments['#attached']['library'][] = 'mukurtu_gin_custom/mukurtu-gin-custom';
+  $attachments['#attached']['library'][] = 'mukurtu_gin_custom/entity-browser-toggle';
+  $attachments['#attached']['library'][] = 'mukurtu_gin_custom/community-browser-select';
+}
+
+/**
+ * Implements hook_preprocess_node() for the form_selection view mode.
+ */
+function mukurtu_gin_custom_preprocess_node(&$variables) {
+  if ($variables['view_mode'] !== 'form_selection') {
+    return;
+  }
+  $node = $variables['node'];
+  if (!($node instanceof NodeInterface)) {
+    return;
+  }
+  // Remove the community/protocol list injected by hook_node_view_alter —
+  // it is not relevant in the compact form-selection card context.
+  unset($variables['content']['community_protocol_list']);
+  $node_type = $node->type->entity;
+  if ($node_type instanceof NodeType) {
+    $variables['content_type_label'] = $node_type->label();
+  }
 }
