@@ -15,10 +15,9 @@
       once('community-browser-select', '.view-mukurtu-community-select', context).forEach(function (view) {
         var $view = $(view);
 
-        // Hide the checkbox column (keep it in DOM for form submission).
-        $view.find('.views-field-entity-browser-select').hide();
-
         // Make each row a clickable card that toggles selection.
+        // Note: .views-field-entity-browser-select is hidden via CSS to avoid
+        // a flash before this JS runs.
         $view.on('click', '.views-row', function (e) {
           if ($(e.target).is('input')) {
             return;

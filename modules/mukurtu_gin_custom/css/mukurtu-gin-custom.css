@@ -18,6 +18,11 @@ counterpart, if one exists. */
     display: inline-flex;
 }
 
+/* Hide community browser checkbox column via CSS to prevent FOUC before JS runs. */
+.view-mukurtu-community-select .views-field-entity-browser-select {
+  display: none;
+}
+
 /* Entity browser modal iframe: space below the dialog title bar. */
 .entity-browser-modal-iframe {
   margin-top: 24px;
