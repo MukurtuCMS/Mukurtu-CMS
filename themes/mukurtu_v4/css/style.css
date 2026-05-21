@@ -5393,7 +5393,9 @@ header {
   -webkit-box-pack: center;
       -ms-flex-pack: center;
           justify-content: center;
-  padding: var(--v-space-6xs);
+  inline-size: 44px;
+  block-size: 44px;
+  padding: 0;
   -ms-flex-negative: 0;
       flex-shrink: 0;
   -webkit-margin-before: 0;

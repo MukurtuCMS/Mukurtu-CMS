@@ -113,7 +113,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: var(--v-space-6xs);
+  inline-size: 44px;
+  block-size: 44px;
+  padding: 0;
   flex-shrink: 0;
   margin-block-start: 0;
 
