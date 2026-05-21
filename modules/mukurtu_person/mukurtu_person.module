@@ -40,6 +40,7 @@ function mukurtu_person_entity_bundle_info_alter(array &$bundles)
  *
  * Stores the new person's nid and title in private temp store so that
  * hook_page_attachments() can attach the broadcast JS on the next page load.
+ * Also checks for missing reciprocal relationships on the new record.
  */
 function mukurtu_person_node_insert(NodeInterface $node) {
   if ($node->bundle() !== 'person') {
@@ -51,6 +52,65 @@ function mukurtu_person_node_insert(NodeInterface $node) {
       'nid' => $node->id(),
       'title' => $node->label(),
     ]);
+  _mukurtu_person_warn_missing_reciprocals($node);
+}
+
+/**
+ * Implements hook_node_update().
+ *
+ * Warns when a related person does not have a reciprocal relationship back.
+ */
+function mukurtu_person_node_update(NodeInterface $node): void {
+  _mukurtu_person_warn_missing_reciprocals($node);
+}
+
+/**
+ * Warns when a related person does not have a reciprocal relationship back.
+ *
+ * For each person in field_related_people, checks whether that person also
+ * lists this person in their own field_related_people. If not, adds a
+ * messenger warning with a link to the missing person's edit form.
+ */
+function _mukurtu_person_warn_missing_reciprocals(NodeInterface $node): void {
+  if ($node->bundle() !== 'person') {
+    return;
+  }
+
+  foreach ($node->get('field_related_people') as $item) {
+    $paragraph = $item->entity;
+    if (!$paragraph) {
+      continue;
+    }
+
+    /** @var \Drupal\node\NodeInterface|null $related */
+    $related = $paragraph->get('field_related_person')->entity;
+    if (!$related || $related->bundle() !== 'person') {
+      continue;
+    }
+
+    // Check whether the related person already links back to this person.
+    $has_reciprocal = FALSE;
+    foreach ($related->get('field_related_people') as $back_item) {
+      $back_paragraph = $back_item->entity;
+      if (!$back_paragraph) {
+        continue;
+      }
+      $back_ref = $back_paragraph->get('field_related_person')->entity;
+      if ($back_ref && $back_ref->id() === $node->id()) {
+        $has_reciprocal = TRUE;
+        break;
+      }
+    }
+
+    if (!$has_reciprocal) {
+      $edit_url = Url::fromRoute('entity.node.edit_form', ['node' => $related->id()])
+        ->toString();
+      \Drupal::messenger()->addWarning(t(
+        'Do you need to add a reciprocal relationship to: <a href=":url">@name</a>?',
+        [':url' => $edit_url, '@name' => $related->label()]
+      ));
+    }
+  }
 }
 
 /**
