@@ -241,6 +241,7 @@ function mukurtu_core_page_attachments(array &$attachments) {
   // Add our shared JS libraries. We could scope these better.
   $attachments['#attached']['library'][] = 'mukurtu_core/mukurtu-leaflet-widget';
   $attachments['#attached']['library'][] = 'mukurtu_core/tagify-override';
+  $attachments['#attached']['library'][] = 'mukurtu_core/form-disable-enter-submit';
 }
 
 /**
