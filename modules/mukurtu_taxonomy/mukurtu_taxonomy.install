@@ -59,6 +59,10 @@ function mukurtu_taxonomy_update_40001(): void {
 
 /**
  * Mark place_type vocabulary as flat and strip any existing parent relationships.
+ *
+ * WARNING: No rollback. Parent term IDs are discarded and cannot be recovered
+ * from this hook. Back up the taxonomy_term__parent table before running on
+ * production if preserving the existing hierarchy matters.
  */
 function mukurtu_taxonomy_update_40002(): void {
   $vocabulary_storage = \Drupal::entityTypeManager()->getStorage('taxonomy_vocabulary');
