@@ -740,3 +740,17 @@ function mukurtu_core_update_40021(): void {
     $config->save(TRUE);
   }
 }
+
+/**
+ * Add remote_video digital_heritage_sidebar entity view display.
+ */
+function mukurtu_core_update_40022(): void {
+  $config_path = \Drupal::service('extension.list.profile')->getPath('mukurtu') . '/config/install/core.entity_view_display.media.remote_video.digital_heritage_sidebar.yml';
+  if (!file_exists($config_path)) {
+    return;
+  }
+  $data = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($config_path));
+  \Drupal::configFactory()->getEditable('core.entity_view_display.media.remote_video.digital_heritage_sidebar')
+    ->setData($data)
+    ->save(TRUE);
+}
