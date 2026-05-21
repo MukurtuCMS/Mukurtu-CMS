@@ -1,0 +1,26 @@
+{#
+/**
+ * @file
+ * Theme override for audio in the sample sentence recording field.
+ *
+ * Available variables: see media.html.twig.
+ * Additional variables:
+ * - media_url: URL to the audio file.
+ * - media_download_enabled: Whether the download button should be shown.
+ */
+#}
+{%
+  set classes = [
+    'media',
+    'media--' ~ bundle
+  ]
+%}
+
+<div{{ attributes.addClass(classes) }}>
+  {{ title_suffix.contextual_links }}
+  {{ content.media_content_warnings }}
+  {{ content|without('media_content_warnings') }}
+  {% if media_download_enabled %}
+    <a href="{{ media_url }}" class="button" download>Download audio</a>
+  {% endif %}
+</div>
