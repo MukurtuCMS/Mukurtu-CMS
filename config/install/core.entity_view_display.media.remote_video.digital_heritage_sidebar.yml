@@ -20,7 +20,7 @@ content:
     type: oembed
     label: hidden
     settings:
-      max_width: 800
+      max_width: 0
       max_height: 0
       loading:
         attribute: eager
