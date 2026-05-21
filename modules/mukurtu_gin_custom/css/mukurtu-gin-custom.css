@@ -45,6 +45,7 @@ counterpart, if one exists. */
 .eb-view-toggle__btn {
   /* 2.5.8: minimum 24x24px target size. */
   min-height: 24px;
+  min-width: 44px;
   padding: 0.35rem 0.75rem;
   border: 2px solid currentColor;
   background: transparent;
@@ -56,14 +57,14 @@ counterpart, if one exists. */
 
 /* 2.4.7: explicit focus indicator that survives Gin's focus reset. */
 .eb-view-toggle__btn:focus-visible {
-  outline: 3px solid var(--color-gin-primary, #2e7d32);
+  outline: 3px solid var(--gin-color-primary, #0036b1);
   outline-offset: 2px;
 }
 
 .eb-view-toggle__btn[aria-pressed="true"] {
-  background: var(--color-gin-primary, #2e7d32);
+  background: var(--gin-color-primary, #0036b1);
   color: #fff;
-  border-color: var(--color-gin-primary, #2e7d32);
+  border-color: var(--gin-color-primary, #0036b1);
   /* 1.4.1: non-color pressed indicator. */
   font-weight: bold;
 }

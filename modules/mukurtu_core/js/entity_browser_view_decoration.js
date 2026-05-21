@@ -16,8 +16,8 @@
    * Returns entity IDs already selected in the field widget on the parent form.
    *
    * The widget renders each selected entity with a data-entity-id="node:NNN"
-   * attribute. We return the bare numeric IDs so they can be compared against
-   * the entity_browser_select checkbox values in the view.
+   * attribute. Values are returned in the same "entity_type:id" format used by
+   * entity_browser_select checkboxes so indexOf() comparisons match directly.
    */
   function getAlreadySelectedIds() {
     var ids = [];
@@ -54,6 +54,7 @@
       if ($input.length && alreadySelected.indexOf($input.val()) !== -1) {
         $input.prop('disabled', true);
         $row.addClass('eb-already-selected');
+        $row.attr('aria-disabled', 'true');
       }
     });
   }
