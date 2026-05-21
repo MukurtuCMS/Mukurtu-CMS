@@ -62,4 +62,5 @@ label: 'Mukurtu Manager'
 weight: 2
 is_admin: null
 permissions:
+  - 'administer mukurtu media download settings'
   - 'select account cancellation method'
