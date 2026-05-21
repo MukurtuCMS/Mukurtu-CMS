@@ -26,3 +26,34 @@ counterpart, if one exists. */
     text-overflow: ellipsis;
     overflow: visible !important;
 }
+
+/* Canonical .ui-dialog positioning override (loaded on every page via
+   hook_page_attachments, covering both front-end and Gin admin contexts).
+   Gin sets .ui-dialog { position: absolute } which causes modal dialogs to
+   drift down the page as the user scrolls. Override to fixed + viewport-center
+   so the dialog always appears in the center of the viewport regardless of
+   scroll position. Uses flexbox so long forms scroll internally rather than
+   extending beyond the viewport. */
+.ui-dialog {
+    position: fixed !important;
+    top: 50vh !important;
+    left: 50vw !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    max-height: 90vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.ui-dialog .ui-dialog-titlebar {
+    flex-shrink: 0;
+}
+
+.ui-dialog .ui-dialog-content {
+    flex: 1 1 auto !important;
+    overflow-y: auto !important;
+}
+
+.ui-dialog .ui-dialog-buttonpane {
+    flex-shrink: 0;
+}
