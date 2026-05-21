@@ -38,8 +38,6 @@ function mukurtu_multipage_items_theme() {
         'page_nav_attributes' => NULL,
         'current_page' => NULL,
         'current_page_attributes' => NULL,
-/*         'next_page' => NULL,
-        'previous_page' => NULL, */
       ],
     ],
   ];

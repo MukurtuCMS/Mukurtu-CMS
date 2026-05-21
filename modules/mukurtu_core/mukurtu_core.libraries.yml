@@ -31,6 +31,14 @@ notify-form:
     component:
       css/mukurtu-notify-form.css: {}
 
+dialog-aria-modal:
+  version: 1.x
+  js:
+    js/dialog-aria-modal.js: {}
+  dependencies:
+    - core/drupal
+    - core/jquery
+
 entity_browser_view_decoration:
   version: 1.x
   js:

@@ -7,6 +7,7 @@ version: 4.x-dev
 libraries:
   - mukurtu_core/mukurtu-leaflet-widget
   - mukurtu_core/form-disable-enter-submit
+  - mukurtu_core/dialog-aria-modal
 dependencies:
   - 'blazy:blazy'
   - 'drupal:block'

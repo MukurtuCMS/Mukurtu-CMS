@@ -238,7 +238,7 @@ class MultipageItemPageController extends ControllerBase {
    */
   public function title(NodeInterface $node) {
     $mpi = $this->multipageItemManager->getMultipageEntity($node);
-    return $mpi->label();
+    return $mpi ? $mpi->label() : $node->getTitle();
   }
 
   /**
@@ -289,6 +289,7 @@ class MultipageItemPageController extends ControllerBase {
       $url = Url::fromRoute('entity.multipage_item.edit_form', ['multipage_item' => $mpi->id()]);
       return new RedirectResponse($url->toString());
     }
+    throw new \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException();
   }
 
   public function addNewPageTitle($node_type, $page_node) {

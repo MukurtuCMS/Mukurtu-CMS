@@ -41,12 +41,20 @@ counterpart, if one exists. */
 
 /* Content browser modal: already-selected rows */
 .view-mukurtu-content-browser .views-table tr.eb-already-selected {
-  opacity: 0.5;
   cursor: not-allowed;
+  background-color: #f0f0f0;
 }
 
 .view-mukurtu-content-browser .views-table tr.eb-already-selected td {
   pointer-events: none;
+  color: #595959;
+}
+
+/* Content browser modal: keyboard focus ring for interactive rows/cols */
+.view-mukurtu-content-browser .views-table tr:focus-visible,
+.view-mukurtu-content-browser .views-col:focus-visible {
+  outline: 3px solid #0052cc;
+  outline-offset: -3px;
 }
 
 /* Canonical .ui-dialog positioning override (loaded on every page via

@@ -53,7 +53,8 @@
       var $input = $row.find('.views-field-entity-browser-select input');
       if ($input.length && alreadySelected.indexOf($input.val()) !== -1) {
         $input.prop('disabled', true);
-        $row.addClass('eb-already-selected');
+        $row.addClass('eb-already-selected').attr({'aria-disabled': 'true'}).removeAttr('tabindex');
+        $row.find('td:first').append('<span class="visually-hidden"> (already added)</span>');
       }
     });
   }
@@ -98,8 +99,16 @@
       // Disable rows for items already present in the field widget.
       disableAlreadySelected(context, getAlreadySelectedIds());
 
-      // Add a checked class when clicked.
-      $(once('viewsCol', '.views-col', context)).click(function () {
+      // Add a checked class when clicked or activated by keyboard.
+      var $cols = $(once('viewsCol', '.views-col', context));
+      $cols.not('.eb-already-selected').attr('tabindex', '0');
+      $cols.on('click keydown', function (e) {
+        if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') {
+          return;
+        }
+        if (e.type === 'keydown') {
+          e.preventDefault();
+        }
         var $col = $(this);
         var $input = $col.find('.views-field-entity-browser-select input');
         if ($input.prop('disabled')) {
@@ -109,16 +118,24 @@
         updateClasses($col, $input);
       });
 
-      // Select/unselect the row with a click anywhere inside the row.
-      $(once('viewsTable', '.view .views-table tr', context)).click(function (e) {
+      // Select/unselect the row with a click or keyboard activation anywhere inside the row.
+      var $rows = $(once('viewsTable', '.view .views-table tr', context));
+      $rows.not('.eb-already-selected').attr('tabindex', '0');
+      $rows.on('click keydown', function (e) {
+        if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') {
+          return;
+        }
+        if (e.type === 'keydown') {
+          e.preventDefault();
+        }
         var $row = $(this);
         var $input = $row.find('.views-field-entity-browser-select input');
         if ($input.prop('disabled')) {
           return;
         }
-        // But only if the click wasn't right on the input, in which case our
-        // code would make it unselected (after the browser selected it).
-        if (e.target.tagName !== 'INPUT') {
+        // For clicks, skip if the click was directly on the input to avoid
+        // double-toggling (browser already handled it).
+        if (e.type === 'keydown' || e.target.tagName !== 'INPUT') {
           if (!$input.is(':radio') || $input.is(':radio') && !$input.prop('checked')) {
             $input.prop('checked', !$input.prop('checked'));
           }
