@@ -47,5 +47,7 @@
     </span>
   </a>
 
-  <a href="{{ media_url }}" class="button" download>Download image</a>
+  {% if media_download_enabled %}
+    <a href="{{ media_url }}" class="button" download>Download image</a>
+  {% endif %}
 </div>

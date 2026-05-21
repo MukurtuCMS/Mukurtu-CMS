@@ -147,6 +147,9 @@ function mukurtu_v4_preprocess_media(array &$variables) {
     $url = $file->createFileUrl();
     $variables['media_url'] = $url;
   }
+
+  $config = \Drupal::config('mukurtu.settings');
+  $variables['media_download_enabled'] = $config->get('mukurtu_media_download_enabled') ?? TRUE;
 }
 
 /**

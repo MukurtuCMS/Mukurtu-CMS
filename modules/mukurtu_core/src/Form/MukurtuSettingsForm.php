@@ -94,6 +94,19 @@ class MukurtuSettingsForm extends ConfigFormBase {
       ],
     ];
 
+    $defaultMediaDownload = $config->get('mukurtu_media_download_enabled') ?? TRUE;
+
+    $form['mukurtu_media_download_enabled'] = [
+      '#title' => $this->t('Media Download Button'),
+      '#description' => $this->t('Show or hide the download button on media assets.'),
+      '#type' => 'radios',
+      '#default_value' => $defaultMediaDownload ? 'show' : 'hide',
+      '#options' => [
+        'show' => $this->t('Show download button'),
+        'hide' => $this->t('Hide download button'),
+      ],
+    ];
+
     $bundleInfo = \Drupal::service('entity_type.bundle.info')->getBundleInfo('node');
 
     $form['citation_templates'] = [
@@ -147,10 +160,13 @@ class MukurtuSettingsForm extends ConfigFormBase {
     $config->set('mukurtu_related_content_teasers_display_top_right', $form_state->getValue('mukurtu_related_content_teasers_display_top_right'));
     $config->set('mukurtu_related_content_teasers_display_bottom', $form_state->getValue('mukurtu_related_content_teasers_display_bottom'));
 
+    // Media download button.
+    $config->set('mukurtu_media_download_enabled', $form_state->getValue('mukurtu_media_download_enabled') === 'show');
+
     $config->save();
 
     // Computed citation field needs the node_view tag invalidated.
-    Cache::invalidateTags(['node_view']);
+    Cache::invalidateTags(['node_view', 'media_view']);
 
     parent::submitForm($form, $form_state);
   }

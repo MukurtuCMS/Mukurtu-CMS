@@ -47,5 +47,7 @@
     </span>
   </a>
 
-  <a href="{{ file_url(media.field_media_video_file.entity.fileuri) }}" class="button" download>Download video</a>
+  {% if media_download_enabled %}
+    <a href="{{ file_url(media.field_media_video_file.entity.fileuri) }}" class="button" download>Download video</a>
+  {% endif %}
 </div>
