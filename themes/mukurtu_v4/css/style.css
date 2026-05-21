@@ -2209,6 +2209,33 @@ details.form-wrapper summary + div {
   inline-size: 100%;
 }
 
+.media-carousel .media--document {
+  inline-size: 100%;
+}
+
+.media-asset--pdf-wrapper {
+  inline-size: 100%;
+  aspect-ratio: 8.5/11;
+  max-block-size: 80vh;
+}
+
+.media-asset--pdf {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.media-asset--pdf-actions {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+  gap: var(--v-space-5xs);
+  -webkit-margin-before: var(--v-space-5xs);
+          margin-block-start: var(--v-space-5xs);
+}
+
 /**
  * @file
  * Nav Primary.
@@ -5376,6 +5403,49 @@ header {
   }
 }
 
+.button--download-icon {
+  display: -webkit-inline-box;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  inline-size: 44px;
+  block-size: 44px;
+  padding: 0;
+  -ms-flex-negative: 0;
+      flex-shrink: 0;
+  -webkit-margin-before: 0;
+          margin-block-start: 0;
+}
+.button--download-icon svg {
+  display: block;
+  fill: currentColor;
+}
+
+.word-entry-fields-pair {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  gap: var(--v-space-xs);
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+}
+.word-entry-fields-pair > .field {
+  -webkit-box-flex: 1;
+      -ms-flex: 1;
+          flex: 1;
+  min-inline-size: 10rem;
+}
+
+.dictionary-word-tabs {
+  -webkit-margin-after: var(--v-space-s);
+          margin-block-end: var(--v-space-s);
+}
+
 .page-node-type-dictionary-word .full-node__content .field--name-field-word-entry > .field__item:not(first-child) {
   -webkit-margin-before: var(--v-space-s);
           margin-block-start: var(--v-space-s);
@@ -5451,7 +5521,8 @@ header {
   -webkit-border-before: 5px solid var(--mukurtu-view-row-divider-color);
           border-block-start: 5px solid var(--mukurtu-view-row-divider-color);
 }
-.page-node-type-dictionary-word .field--name-field-recording .media--audio {
+.page-node-type-dictionary-word .field--name-field-recording .media--audio,
+.page-node-type-dictionary-word .field--name-field-sentence-recording .media--audio {
   -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
       -ms-flex-direction: column;
@@ -5465,7 +5536,8 @@ header {
           justify-content: center;
 }
 @media (min-width: 48rem) {
-  .page-node-type-dictionary-word .field--name-field-recording .media--audio {
+  .page-node-type-dictionary-word .field--name-field-recording .media--audio,
+  .page-node-type-dictionary-word .field--name-field-sentence-recording .media--audio {
     -webkit-box-orient: horizontal;
     -webkit-box-direction: normal;
         -ms-flex-direction: row;
@@ -5473,12 +5545,15 @@ header {
   }
 }
 .page-node-type-dictionary-word .field--name-field-recording .media--audio .field--name-field-media-audio-file,
-.page-node-type-dictionary-word .field--name-field-recording .media--audio .field--name-field-contributor {
+.page-node-type-dictionary-word .field--name-field-recording .media--audio .field--name-field-contributor,
+.page-node-type-dictionary-word .field--name-field-sentence-recording .media--audio .field--name-field-media-audio-file,
+.page-node-type-dictionary-word .field--name-field-sentence-recording .media--audio .field--name-field-contributor {
   -webkit-box-flex: 1;
       -ms-flex: 1;
           flex: 1;
 }
-.page-node-type-dictionary-word .field--name-field-recording .media--audio .field--name-field-contributor {
+.page-node-type-dictionary-word .field--name-field-recording .media--audio .field--name-field-contributor,
+.page-node-type-dictionary-word .field--name-field-sentence-recording .media--audio .field--name-field-contributor {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;

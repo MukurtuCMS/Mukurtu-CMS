@@ -41,3 +41,26 @@
     inline-size: 100%;
   }
 }
+
+.media-carousel .media--document {
+  inline-size: 100%;
+}
+
+.media-asset--pdf-wrapper {
+  inline-size: 100%;
+  aspect-ratio: 8.5 / 11;
+  max-block-size: 80vh;
+}
+
+.media-asset--pdf {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.media-asset--pdf-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--v-space-5xs);
+  margin-block-start: var(--v-space-5xs);
+}
