@@ -32,6 +32,10 @@
 
   .button {
     margin-block-start: var(--v-space-5xs);
+
+    &--download-icon {
+      margin-block-start: 0;
+    }
   }
 }
 
