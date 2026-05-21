@@ -33,6 +33,24 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase {
     ];
   }
 
+  // Get all eligible media view modes (excluding always-skipped modes).
+  protected function getMediaViewModes(): array {
+    $view_modes = \Drupal::entityTypeManager()
+      ->getStorage('entity_view_mode')
+      ->loadByProperties(['targetEntityType' => 'media']);
+    $excluded = ['token', 'media_library', 'default'];
+    $options = [];
+    foreach ($view_modes as $view_mode) {
+      $id = $view_mode->id();
+      // IDs are in the form "media.machine_name" — strip the "media." prefix.
+      $machine_name = substr($id, strlen('media.'));
+      if (!in_array($machine_name, $excluded)) {
+        $options[$machine_name] = $view_mode->label();
+      }
+    }
+    return $options;
+  }
+
   // Method to get all media tag taxonomy terms.
   protected function getTerms() {
     $query = \Drupal::entityQuery('taxonomy_term')
@@ -201,6 +219,22 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase {
       ],
     ];
 
+    // Warning media settings — view mode selection.
+    $view_mode_options = $this->getMediaViewModes();
+    $saved_modes = $config->get('warning_view_modes') ?? [];
+    $default_modes = empty($saved_modes) ? array_keys($view_mode_options) : $saved_modes;
+    $form['view_mode_warnings'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Warning media settings'),
+      '#description' => $this->t('Select which media view modes should display content warnings.'),
+    ];
+    $form['view_mode_warnings']['view_modes'] = [
+      '#type' => 'checkboxes',
+      '#title' => $this->t('Enabled View Modes'),
+      '#options' => $view_mode_options,
+      '#default_value' => $default_modes,
+    ];
+
     return parent::buildForm($form, $form_state);
   }
 
@@ -266,6 +300,10 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase {
 
     // Multiple people text.
     $config->set('people_warnings.warning_multiple', $values['people_warnings']['multiple_people_text']);
+
+    // View mode warnings settings — store only the checked (truthy) values.
+    $checked_modes = array_values(array_filter($values['view_mode_warnings']['view_modes']));
+    $config->set('warning_view_modes', $checked_modes);
 
     // Taxonomy warnings settings.
     $taxonomyWarningsConfig = [];

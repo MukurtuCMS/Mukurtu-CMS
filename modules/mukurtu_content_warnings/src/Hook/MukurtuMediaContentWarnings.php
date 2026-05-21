@@ -61,6 +61,12 @@ class MukurtuMediaContentWarnings {
     ])) {
       return;
     }
+    // If specific view modes are configured, only show warnings for those modes.
+    // An empty list means all eligible view modes are allowed.
+    $allowed_modes = $this->contentWarningSettings->get('warning_view_modes') ?? [];
+    if (!empty($allowed_modes) && !in_array($display->getMode(), $allowed_modes)) {
+      return;
+    }
     $build['media_content_warnings'] = $this->buildMediaContentWarnings($entity);
   }
 
