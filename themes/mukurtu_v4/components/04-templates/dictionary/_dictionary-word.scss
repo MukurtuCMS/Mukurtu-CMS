@@ -206,7 +206,8 @@
     border-block-start: 5px solid var(--mukurtu-view-row-divider-color);
   }
 
-  .field--name-field-recording {
+  .field--name-field-recording,
+  .field--name-field-sentence-recording {
     // stylelint-disable-next-line no-descending-specificity
     .media--audio {
       flex-direction: column;
