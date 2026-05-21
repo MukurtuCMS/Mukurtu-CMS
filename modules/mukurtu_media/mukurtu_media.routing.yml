@@ -1,3 +1,11 @@
+mukurtu_media.download_settings_form:
+  path: '/admin/config/mukurtu/media-download-settings'
+  defaults:
+    _title: 'Media download settings'
+    _form: 'Drupal\mukurtu_media\Form\MediaDownloadSettingsForm'
+  requirements:
+    _permission: 'administer site configuration'
+
 mukurtu_media.thumbnail_settings_form:
   path: '/admin/config/system/mukurtu-media-thumbnail-settings'
   defaults:
