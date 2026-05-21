@@ -2173,6 +2173,7 @@ details.form-wrapper summary + div {
 .media--image,
 .media--document,
 .media--audio,
+.media--video,
 .media--remote_video {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -2191,12 +2192,14 @@ details.form-wrapper summary + div {
 .media--image iframe,
 .media--document iframe,
 .media--audio iframe,
+.media--video iframe,
 .media--remote_video iframe {
   background-color: black;
 }
 .media--image .button,
 .media--document .button,
 .media--audio .button,
+.media--video .button,
 .media--remote_video .button {
   -webkit-margin-before: var(--v-space-5xs);
           margin-block-start: var(--v-space-5xs);
@@ -2204,6 +2207,7 @@ details.form-wrapper summary + div {
 .media--image .button--download svg,
 .media--document .button--download svg,
 .media--audio .button--download svg,
+.media--video .button--download svg,
 .media--remote_video .button--download svg {
   fill: white;
   vertical-align: middle;
@@ -2213,6 +2217,7 @@ details.form-wrapper summary + div {
 .media--image .button--download-icon,
 .media--document .button--download-icon,
 .media--audio .button--download-icon,
+.media--video .button--download-icon,
 .media--remote_video .button--download-icon {
   -webkit-margin-before: 0;
           margin-block-start: 0;
