@@ -1,3 +1,11 @@
+mukurtu.settings:
+  type: config_object
+  label: 'Mukurtu settings'
+  mapping:
+    mukurtu_media_download_enabled:
+      type: boolean
+      label: 'Enable media download button'
+
 mukurtu_thumbnail.settings:
   type: config_object
   label: 'Mukurtu Thumbnail Settings'

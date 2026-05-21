@@ -1,5 +1,6 @@
 <?php
 
+use Drupal\Core\Cache\Cache;
 use Drupal\file\Entity\File;
 use Drupal\mukurtu_collection\Entity\Collection;
 use Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager;
@@ -150,6 +151,10 @@ function mukurtu_v4_preprocess_media(array &$variables) {
 
   $config = \Drupal::config('mukurtu.settings');
   $variables['media_download_enabled'] = $config->get('mukurtu_media_download_enabled') ?? TRUE;
+  $variables['#cache']['tags'] = Cache::mergeTags(
+    $variables['#cache']['tags'] ?? [],
+    $config->getCacheTags()
+  );
 }
 
 /**
