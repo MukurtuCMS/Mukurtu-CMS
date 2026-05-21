@@ -33,6 +33,14 @@
   .button {
     margin-block-start: var(--v-space-5xs);
 
+    &--download {
+      svg {
+        fill: white;
+        vertical-align: middle;
+        margin-inline-start: var(--v-space-6xs);
+      }
+    }
+
     &--download-icon {
       margin-block-start: 0;
     }

@@ -2201,6 +2201,15 @@ details.form-wrapper summary + div {
   -webkit-margin-before: var(--v-space-5xs);
           margin-block-start: var(--v-space-5xs);
 }
+.media--image .button--download svg,
+.media--document .button--download svg,
+.media--audio .button--download svg,
+.media--remote_video .button--download svg {
+  fill: white;
+  vertical-align: middle;
+  -webkit-margin-start: var(--v-space-6xs);
+          margin-inline-start: var(--v-space-6xs);
+}
 .media--image .button--download-icon,
 .media--document .button--download-icon,
 .media--audio .button--download-icon,
