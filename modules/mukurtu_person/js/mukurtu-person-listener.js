@@ -89,8 +89,10 @@
           const $path = $button.parent().find('input[type="hidden"]').first();
           if ($path.length) {
             let src = $path.val();
-            // Strip any existing title param to avoid duplicates.
-            src = src.replace(/([?&])title=[^&]*/g, '$1').replace(/[?&]$/, '');
+            // Strip any existing title param to avoid duplicates. Remove the
+            // leading delimiter with the param so no orphan ? or && is left,
+            // then promote a leading & back to ? if it becomes the first char.
+            src = src.replace(/[?&]title=[^&]*/g, '').replace(/^&/, '?');
             src += (src.includes('?') ? '&' : '?') + 'title=' + encodeURIComponent(title);
             $path.val(src);
           }

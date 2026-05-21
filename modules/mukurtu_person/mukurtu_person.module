@@ -65,15 +65,37 @@ function mukurtu_person_node_update(NodeInterface $node): void {
 }
 
 /**
- * Warns when a related person does not have a reciprocal relationship back.
+ * Warns when a newly added related person does not have a reciprocal link back.
  *
- * For each person in field_related_people, checks whether that person also
- * lists this person in their own field_related_people. If not, adds a
- * messenger warning with a link to the missing person's edit form.
+ * On insert, all related people are considered new. On update, only persons
+ * added since the previous save are checked — pre-existing relationships are
+ * skipped so the warning does not repeat on every unrelated save.
+ *
+ * Note: for each newly added related person this loads their paragraph entities
+ * and referenced nodes to check the reverse direction. Drupal's entity storage
+ * caches within the request, but consider a direct entity query approach if
+ * person records with large relationship graphs cause noticeably slow saves.
  */
 function _mukurtu_person_warn_missing_reciprocals(NodeInterface $node): void {
   if ($node->bundle() !== 'person') {
     return;
+  }
+
+  // Build the set of related-person NIDs that existed before this save so we
+  // only warn about newly added relationships. On insert $node->original is not
+  // set, so the set is empty and all related people are treated as new.
+  $pre_existing_nids = [];
+  if (isset($node->original)) {
+    foreach ($node->original->get('field_related_people') as $item) {
+      $paragraph = $item->entity;
+      if (!$paragraph) {
+        continue;
+      }
+      $ref = $paragraph->get('field_related_person')->entity;
+      if ($ref) {
+        $pre_existing_nids[$ref->id()] = TRUE;
+      }
+    }
   }
 
   foreach ($node->get('field_related_people') as $item) {
@@ -85,6 +107,11 @@ function _mukurtu_person_warn_missing_reciprocals(NodeInterface $node): void {
     /** @var \Drupal\node\NodeInterface|null $related */
     $related = $paragraph->get('field_related_person')->entity;
     if (!$related || $related->bundle() !== 'person') {
+      continue;
+    }
+
+    // Skip persons that were already related before this save.
+    if (isset($pre_existing_nids[$related->id()])) {
       continue;
     }
 
