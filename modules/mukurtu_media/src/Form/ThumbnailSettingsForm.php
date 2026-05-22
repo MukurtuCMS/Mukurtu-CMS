@@ -11,7 +11,7 @@ use Drupal\file\Entity\File;
  */
 class ThumbnailSettingsForm extends ConfigFormBase
 {
-  protected $excludedMediaBundles = ['image', 'remote_video'];
+  protected $excludedMediaBundles = [];
 
   /**
    * {@inheritdoc}
@@ -37,8 +37,6 @@ class ThumbnailSettingsForm extends ConfigFormBase
     $config = $this->config('mukurtu_thumbnail.settings');
     $mediaBundleInfo = \Drupal::service('entity_type.bundle.info')->getBundleInfo('media');
     foreach($mediaBundleInfo as $key => $value) {
-      // We do not support thumbnail generation for image and remote video
-      // media items, so they are excluded from these settings.
       if (in_array($key, $this->excludedMediaBundles)) {
         continue;
       }
