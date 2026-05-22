@@ -740,3 +740,16 @@ function mukurtu_core_update_40021(): void {
     $config->save(TRUE);
   }
 }
+
+/**
+ * Switch featured_content entity browser to rendered_entity display.
+ */
+function mukurtu_core_update_40022(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.block_content.featured_content.default');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_featured_content.settings.field_widget_display', 'rendered_entity');
+  $config->set('content.field_featured_content.settings.field_widget_display_settings', ['view_mode' => 'content_browser']);
+  $config->save();
+}

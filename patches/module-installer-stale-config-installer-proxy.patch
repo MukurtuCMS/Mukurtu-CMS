@@ -13,6 +13,10 @@
 #
 # TODO: file this on drupal.org against core/lib/Drupal/Core/Extension/ModuleInstaller.php
 # so it can be included in a future Drupal release and this patch can be removed.
+# Reproducer: any module whose hook_install() uses \Drupal::entityTypeManager()
+# (e.g. to load a config entity) will trigger a container rebuild; any subsequent
+# use of the cached $config_installer variable in the same doInstall() loop will
+# hit "ContainerBuilder synthetic service kernel" from ClassResolver.
 --- a/lib/Drupal/Core/Extension/ModuleInstaller.php
 +++ b/lib/Drupal/Core/Extension/ModuleInstaller.php
 @@ -401,8 +401,7 @@
