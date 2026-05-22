@@ -48,7 +48,7 @@ class ThumbnailSettingsForm extends ConfigFormBase
         '#description' => $this->t("Manage default thumbnail for {$value['label']} media items."),
         '#upload_location' => $this->t("private://"),
         '#upload_validators' => [
-          'file_validate_extensions' => ['png gif jpg jpeg'],
+          'FileExtension' => ['extensions' => 'png gif jpg jpeg'],
         ],
         '#default_value' => $config->get($key) ?? NULL,
       ];
