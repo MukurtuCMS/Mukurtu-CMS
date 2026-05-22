@@ -156,10 +156,13 @@ function mukurtu_v4_preprocess_media(array &$variables) {
  * image. Returns NULL when the entity already has field_thumbnail set (the
  * template renders that directly).
  */
-function _mukurtu_v4_audio_fallback_thumbnail_url($media): ?string {
+function _mukurtu_v4_audio_fallback_thumbnail_url($media, array &$variables): ?string {
   if (!$media->get('field_thumbnail')->isEmpty()) {
     return NULL;
   }
+
+  // Invalidate when the admin thumbnail config changes.
+  $variables['#cache']['tags'][] = 'config:mukurtu_thumbnail.settings';
 
   $config = \Drupal::config('mukurtu_thumbnail.settings');
   $defaultFid = $config->get('audio')[0] ?? NULL;
@@ -174,8 +177,18 @@ function _mukurtu_v4_audio_fallback_thumbnail_url($media): ?string {
   try {
     $configPages = \Drupal::service('config_pages.loader');
     $configPage = $configPages->load('design_settings');
-    if ($configPage && $configPage->hasField('field_design_settings__palette')) {
-      $palette = $configPages->getValue($configPage, 'field_design_settings__palette', 0, 'value') ?? 'blue-gold';
+    if ($configPage) {
+      // Invalidate when the design settings config page changes.
+      $variables['#cache']['tags'] = array_merge(
+        $variables['#cache']['tags'] ?? [],
+        $configPage->getCacheTags()
+      );
+      if ($configPage->hasField('field_design_settings__palette')) {
+        $palette = $configPages->getValue($configPage, 'field_design_settings__palette', 0, 'value') ?? 'blue-gold';
+      }
+    }
+    else {
+      $variables['#cache']['tags'][] = 'config_pages_list';
     }
   }
   catch (\Exception $e) {
@@ -195,16 +208,14 @@ function _mukurtu_v4_audio_fallback_thumbnail_url($media): ?string {
  * Implements template_preprocess_media__audio__carousel_thumbnail().
  */
 function mukurtu_v4_preprocess_media__audio__carousel_thumbnail(array &$variables): void {
-  $variables['audio_fallback_thumbnail_url'] = _mukurtu_v4_audio_fallback_thumbnail_url($variables['media']);
-  $variables['#cache']['contexts'][] = 'config_pages:design_settings';
+  $variables['audio_fallback_thumbnail_url'] = _mukurtu_v4_audio_fallback_thumbnail_url($variables['media'], $variables);
 }
 
 /**
  * Implements template_preprocess_media__audio__media_assets().
  */
 function mukurtu_v4_preprocess_media__audio__media_assets(array &$variables): void {
-  $variables['audio_fallback_thumbnail_url'] = _mukurtu_v4_audio_fallback_thumbnail_url($variables['media']);
-  $variables['#cache']['contexts'][] = 'config_pages:design_settings';
+  $variables['audio_fallback_thumbnail_url'] = _mukurtu_v4_audio_fallback_thumbnail_url($variables['media'], $variables);
 }
 
 /**
@@ -227,10 +238,9 @@ function mukurtu_v4_preprocess_media__audio__digital_heritage_sidebar(array &$va
     'entity.community.canonical',
     'entity.protocol.canonical',
   ]);
-  $variables['audio_fallback_thumbnail_url'] = _mukurtu_v4_audio_fallback_thumbnail_url($variables['media']);
+  $variables['audio_fallback_thumbnail_url'] = _mukurtu_v4_audio_fallback_thumbnail_url($variables['media'], $variables);
   // The rendered output differs by route, so bust the cache per route.
   $variables['#cache']['contexts'][] = 'route';
-  $variables['#cache']['contexts'][] = 'config_pages:design_settings';
 }
 
 /**
