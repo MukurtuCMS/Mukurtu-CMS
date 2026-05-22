@@ -1,0 +1,44 @@
+--- a/lib/Drupal/Core/Extension/ModuleInstaller.php
++++ b/lib/Drupal/Core/Extension/ModuleInstaller.php
+@@ -401,8 +401,7 @@
+
+     foreach ($module_list as $module) {
+       // Install default configuration of the module.
+-      $config_installer = \Drupal::service('config.installer');
+-      $config_installer->installDefaultConfig('module', $module, DefaultConfigMode::InstallSimple);
++      \Drupal::service('config.installer')->installDefaultConfig('module', $module, DefaultConfigMode::InstallSimple);
+
+       // Set the schema version to the number of the last update provided by
+       // the module, or the minimum core schema version.
+@@ -442,10 +441,11 @@
+     // requires the library discovery cache to be rebuilt.
+     \Drupal::service('library.discovery')->clear();
+
+-    $config_installer = \Drupal::service('config.installer');
+     foreach ($module_list as $module) {
+-      // Create config entities a module has in the /install directory.
+-      $config_installer->installDefaultConfig('module', $module, DefaultConfigMode::InstallEntities);
++      // Create config entities a module has in the /install directory. Re-fetch
++      // config.installer each iteration: hook_install can trigger a container
++      // rebuild, which resets the old container and makes any cached proxy stale.
++      \Drupal::service('config.installer')->installDefaultConfig('module', $module, DefaultConfigMode::InstallEntities);
+
+       // Allow the module to perform install tasks.
+       $this->invoke($module, 'install', [$sync_status]);
+@@ -458,14 +458,14 @@
+     // been properly installed. This is often where soft dependencies lie.
+     // @todo This code fixes \Drupal\Tests\help\Functional\HelpTest::testHelp().
+     foreach ($module_list as $module) {
+-      $config_installer->installDefaultConfig('module', $module, DefaultConfigMode::Optional);
++      \Drupal::service('config.installer')->installDefaultConfig('module', $module, DefaultConfigMode::Optional);
+     }
+     // Install optional configuration from other modules once all the modules
+     // have been properly installed. This is often where soft dependencies lie.
+     // @todo This code fixes
+     //   \Drupal\Tests\forum\Functional\Module\DependencyTest::testUninstallDependents().
+     foreach ($module_list as $module) {
+-      $config_installer->installDefaultConfig('module', $module, DefaultConfigMode::SiteOptional);
++      \Drupal::service('config.installer')->installDefaultConfig('module', $module, DefaultConfigMode::SiteOptional);
+     }
+
+     if (count($module_list) > 1) {
