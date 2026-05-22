@@ -40,12 +40,20 @@
   {{ content.media_content_warnings }}
 
   <div class="media-asset--pdf-wrapper">
-    <object alt="Document {{ name }}" data="{{ media_url }}#navpanes=0" class="media-asset--pdf"></object>
+    <object data="{{ media_url }}#navpanes=0" type="application/pdf"
+            title="Document: {{ name }}" class="media-asset--pdf">
+      <p>This PDF cannot be displayed inline.
+        <a href="{{ media_url }}" target="_blank" rel="noopener">Open {{ name }}</a> or
+        <a href="{{ media_url }}" download>download it</a>.
+      </p>
+    </object>
   </div>
 
   <div class="media-asset--pdf-actions">
     <a href="{{ media_url }}" class="button" target="_blank" rel="noopener"
-       aria-label="Open {{ name }} document in new tab">Open full screen</a>
+       aria-label="Open {{ name }} document in new tab">Open full screen
+      <span class="visually-hidden">(opens in new tab)</span>
+    </a>
     <a href="{{ media_url }}" class="button" download>Download document</a>
   </div>
 
