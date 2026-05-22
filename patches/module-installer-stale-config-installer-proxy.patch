@@ -1,3 +1,18 @@
+# Fixes stale config.installer proxy after nested container rebuild in doInstall().
+#
+# Root cause: doInstall() fetched \Drupal::service('config.installer') once and
+# cached it in $config_installer before the InstallEntities/Optional/SiteOptional
+# loops. If any module's hook_install() triggers a nested container rebuild, the
+# old container is reset and the cached proxy's injected services (ConfigManager,
+# EntityTypeManager, ModuleHandler, ClassResolver) all point to the reset container.
+# Subsequent use of the stale proxy causes "ContainerBuilder synthetic service
+# kernel" errors when ClassResolver tries to resolve OOP hook classes.
+#
+# Fix: re-fetch \Drupal::service('config.installer') each loop iteration so a
+# fresh proxy from the current container is always used.
+#
+# TODO: file this on drupal.org against core/lib/Drupal/Core/Extension/ModuleInstaller.php
+# so it can be included in a future Drupal release and this patch can be removed.
 --- a/lib/Drupal/Core/Extension/ModuleInstaller.php
 +++ b/lib/Drupal/Core/Extension/ModuleInstaller.php
 @@ -401,8 +401,7 @@
