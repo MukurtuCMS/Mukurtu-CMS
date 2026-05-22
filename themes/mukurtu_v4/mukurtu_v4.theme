@@ -150,6 +150,64 @@ function mukurtu_v4_preprocess_media(array &$variables) {
 }
 
 /**
+ * Resolves the fallback thumbnail URL for an audio media entity.
+ *
+ * Checks admin-configured site default first, then palette-specific static
+ * image. Returns NULL when the entity already has field_thumbnail set (the
+ * template renders that directly).
+ */
+function _mukurtu_v4_audio_fallback_thumbnail_url($media): ?string {
+  if (!$media->get('field_thumbnail')->isEmpty()) {
+    return NULL;
+  }
+
+  $config = \Drupal::config('mukurtu_thumbnail.settings');
+  $defaultFid = $config->get('audio')[0] ?? NULL;
+  if ($defaultFid) {
+    $file = \Drupal\file\Entity\File::load($defaultFid);
+    if ($file) {
+      return $file->createFileUrl();
+    }
+  }
+
+  $palette = 'blue-gold';
+  try {
+    $configPages = \Drupal::service('config_pages.loader');
+    $configPage = $configPages->load('design_settings');
+    if ($configPage && $configPage->hasField('field_design_settings__palette')) {
+      $palette = $configPages->getValue($configPage, 'field_design_settings__palette', 0, 'value') ?? 'blue-gold';
+    }
+  }
+  catch (\Exception $e) {
+    // Config pages service unavailable; use default palette.
+  }
+
+  $paletteImages = [
+    'blue-gold'   => '/profiles/mukurtu/themes/mukurtu_v4/images/audio-blue-gold.png',
+    'red-bone'    => '/profiles/mukurtu/themes/mukurtu_v4/images/audio-red-bone.png',
+    'yellow-blue' => '/profiles/mukurtu/themes/mukurtu_v4/images/audio-yellow-blue.png',
+  ];
+
+  return $paletteImages[$palette] ?? '/profiles/mukurtu/themes/mukurtu_v4/images/audio.png';
+}
+
+/**
+ * Implements template_preprocess_media__audio__carousel_thumbnail().
+ */
+function mukurtu_v4_preprocess_media__audio__carousel_thumbnail(array &$variables): void {
+  $variables['audio_fallback_thumbnail_url'] = _mukurtu_v4_audio_fallback_thumbnail_url($variables['media']);
+  $variables['#cache']['contexts'][] = 'config_pages:design_settings';
+}
+
+/**
+ * Implements template_preprocess_media__audio__media_assets().
+ */
+function mukurtu_v4_preprocess_media__audio__media_assets(array &$variables): void {
+  $variables['audio_fallback_thumbnail_url'] = _mukurtu_v4_audio_fallback_thumbnail_url($variables['media']);
+  $variables['#cache']['contexts'][] = 'config_pages:design_settings';
+}
+
+/**
  * Implements template_preprocess_media__audio__browse().
  */
 function mukurtu_v4_preprocess_media__audio__browse(array &$variables): void {
@@ -169,8 +227,10 @@ function mukurtu_v4_preprocess_media__audio__digital_heritage_sidebar(array &$va
     'entity.community.canonical',
     'entity.protocol.canonical',
   ]);
+  $variables['audio_fallback_thumbnail_url'] = _mukurtu_v4_audio_fallback_thumbnail_url($variables['media']);
   // The rendered output differs by route, so bust the cache per route.
   $variables['#cache']['contexts'][] = 'route';
+  $variables['#cache']['contexts'][] = 'config_pages:design_settings';
 }
 
 /**
