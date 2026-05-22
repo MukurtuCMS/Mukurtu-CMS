@@ -71,7 +71,7 @@ class MukurtuCommentAccessControlHandler extends CommentAccessControlHandler {
   /**
    * {@inheritdoc}
    */
-  protected function checkFieldAccess($operation, FieldDefinitionInterface $field_definition, AccountInterface $account, FieldItemListInterface $items = NULL) {
+  protected function checkFieldAccess($operation, FieldDefinitionInterface $field_definition, AccountInterface $account, ?FieldItemListInterface $items = NULL) {
     $entity = $items ? $items->getEntity() : NULL;
 
     if ($operation == 'edit') {
