@@ -22,10 +22,10 @@
         "drupal/color_field": "^3.0",
         "drupal/config_pages": "^2.15",
         "drupal/consent_popup": "^1.0",
-        "drupal/core": "~11.2.4",
-        "drupal/core-composer-scaffold": "~11.2.4",
-        "drupal/core-project-message": "~11.2.4",
-        "drupal/core-recommended": "~11.2.4",
+        "drupal/core": "~11.3",
+        "drupal/core-composer-scaffold": "~11.3",
+        "drupal/core-project-message": "~11.3",
+        "drupal/core-recommended": "~11.3",
         "drupal/ctools": "*",
         "drupal/embed": "*",
         "drupal/entity_browser": "*",
@@ -102,6 +102,19 @@
         }
     },
     "extra": {
+        "drupal-scaffold": {
+            "locations": {
+                "web-root": "web/"
+            }
+        },
+        "installer-paths": {
+            "web/core": ["type:drupal-core"],
+            "web/libraries/{$name}": ["type:drupal-library"],
+            "web/modules/contrib/{$name}": ["type:drupal-module"],
+            "web/profiles/{$name}": ["type:drupal-profile"],
+            "web/themes/contrib/{$name}": ["type:drupal-theme"],
+            "drush/Commands/contrib/{$name}": ["type:drupal-drush"]
+        },
         "patches": {
             "drupal/features": {
                 "Issue #2981655: Simple configuration list is incomplete": "https://www.drupal.org/files/issues/2020-05-14/2981655-3.features.Simple-configuration-list-is-incomplete.patch"
