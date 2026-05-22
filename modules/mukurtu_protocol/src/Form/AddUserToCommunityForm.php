@@ -177,7 +177,7 @@ class AddUserToCommunityForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, User $user = NULL) {
+  public function buildForm(array $form, FormStateInterface $form_state, ?User $user = NULL) {
     if (!$user) {
       return $form;
     }
