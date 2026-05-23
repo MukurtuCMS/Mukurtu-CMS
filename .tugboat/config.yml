@@ -40,6 +40,9 @@ services:
           # local directory as the source, copying it into the final location.
           composer config repositories.local-dev path $TUGBOAT_ROOT
           composer update --no-install
+          # Symlink the patches directory so local patch paths in the profile's
+          # composer.json resolve correctly relative to the project root.
+          ln -snf $TUGBOAT_ROOT/patches patches
           composer install --no-ansi --no-interaction --optimize-autoloader --no-progress
 
         # Symlink the web root and grant read access to the home directory.
@@ -64,6 +67,9 @@ services:
           # Copy in the settings.php file to set the database connection.
           cp $TUGBOAT_ROOT/.tugboat/settings.tugboat.php web/sites/default/settings.php
           chown www-data:www-data web/sites/default/settings.php
+          # Ensure patch files are accessible; the project root is separate from
+          # the git checkout at $TUGBOAT_ROOT where patches/ lives.
+          ln -snf $TUGBOAT_ROOT/patches patches
           # Update composer dependencies.
           rm composer.lock
           composer update --no-ansi --no-interaction --optimize-autoloader --no-progress
