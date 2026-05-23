@@ -150,15 +150,19 @@ function mukurtu_v4_preprocess_media(array &$variables) {
 }
 
 /**
- * Resolves the fallback thumbnail URL for an audio media entity.
+ * Resolves the thumbnail URL for an audio media entity.
  *
- * Checks admin-configured site default first, then palette-specific static
- * image. Returns NULL when the entity already has field_thumbnail set (the
- * template renders that directly).
+ * Priority: user-uploaded field_thumbnail > admin-configured site default >
+ * static audio.png fallback. field_thumbnail is hidden in the media_assets
+ * view mode, so we always resolve the URL here rather than relying on the
+ * template's content array.
  */
-function _mukurtu_v4_audio_fallback_thumbnail_url($media, array &$variables): ?string {
+function _mukurtu_v4_audio_fallback_thumbnail_url($media, array &$variables): string {
   if (!$media->get('field_thumbnail')->isEmpty()) {
-    return NULL;
+    $file = $media->get('field_thumbnail')->entity;
+    if ($file) {
+      return $file->createFileUrl();
+    }
   }
 
   // Invalidate when the admin thumbnail config changes.

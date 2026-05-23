@@ -381,7 +381,7 @@ content:
     type: entity_reference_entity_view
     label: above
     settings:
-      view_mode: audio_for_dictionary_teaser
+      view_mode: media_assets
       link: false
     third_party_settings: {  }
     weight: 3

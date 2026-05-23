@@ -679,6 +679,19 @@ function mukurtu_dictionary_update_40016(): void {
 }
 
 /**
+ * Switch field_recording to media_assets view mode on dictionary word displays.
+ */
+function mukurtu_dictionary_update_40018(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.dictionary_word.full');
+  $config->set('content.field_recording.settings.view_mode', 'media_assets');
+  $config->save();
+
+  $paragraph_config = \Drupal::configFactory()->getEditable('core.entity_view_display.paragraph.dictionary_word_entry.default');
+  $paragraph_config->set('content.field_recording.settings.view_mode', 'media_assets');
+  $paragraph_config->save();
+}
+
+/**
  * Add field_coverage to the dictionary search index for map view support.
  */
 function mukurtu_dictionary_update_40017(): void {
