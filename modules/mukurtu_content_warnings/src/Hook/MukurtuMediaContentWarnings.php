@@ -62,11 +62,19 @@ class MukurtuMediaContentWarnings {
     ])) {
       return;
     }
-    // If specific view modes are configured, only show warnings for those modes.
-    // An empty list means all eligible view modes are allowed.
-    $allowed_modes = $this->contentWarningSettings->get('warning_view_modes') ?? [];
-    if (!empty($allowed_modes) && !in_array($display->getMode(), $allowed_modes)) {
+    // null = not yet configured = all modes allowed (backwards compatible default).
+    // [] = admin explicitly unchecked all modes = no warnings anywhere.
+    $allowed_modes = $this->contentWarningSettings->get('warning_view_modes');
+    if ($allowed_modes !== NULL && !in_array($display->getMode(), $allowed_modes)) {
       return;
+    }
+    // Add cache dependency on every people term associated with this entity so
+    // that changes to any person (e.g. marked as deceased) immediately
+    // invalidate this render, even when no warning was previously shown.
+    foreach ($entity->getPeopleTerms() as $term) {
+      CacheableMetadata::createFromRenderArray($build)
+        ->addCacheableDependency($term)
+        ->applyTo($build);
     }
     $build['media_content_warnings'] = $this->buildMediaContentWarnings($entity);
   }

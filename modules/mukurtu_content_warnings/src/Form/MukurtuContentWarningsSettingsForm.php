@@ -221,8 +221,9 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase {
 
     // Warning media settings — view mode selection.
     $view_mode_options = $this->getMediaViewModes();
-    $saved_modes = $config->get('warning_view_modes') ?? [];
-    $default_modes = empty($saved_modes) ? array_keys($view_mode_options) : $saved_modes;
+    // null = not yet configured = all modes enabled; [] = explicitly disabled all.
+    $saved_modes = $config->get('warning_view_modes');
+    $default_modes = ($saved_modes === NULL) ? array_keys($view_mode_options) : $saved_modes;
     $form['view_mode_warnings'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Warning media settings'),
@@ -301,9 +302,19 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase {
     // Multiple people text.
     $config->set('people_warnings.warning_multiple', $values['people_warnings']['multiple_people_text']);
 
-    // View mode warnings settings — store only the checked (truthy) values.
+    // View mode warnings settings.
+    // Store the explicit checked list; if all modes are selected clear the key
+    // so null signals "all modes" (backwards-compatible default).
     $checked_modes = array_values(array_filter($values['view_mode_warnings']['view_modes']));
-    $config->set('warning_view_modes', $checked_modes);
+    $all_modes = array_keys($this->getMediaViewModes());
+    sort($checked_modes);
+    sort($all_modes);
+    if ($checked_modes === $all_modes) {
+      $config->clear('warning_view_modes');
+    }
+    else {
+      $config->set('warning_view_modes', $checked_modes);
+    }
 
     // Taxonomy warnings settings.
     $taxonomyWarningsConfig = [];
