@@ -117,7 +117,7 @@
         },
         "patches": {
             "drupal/core": {
-                "Fix stale config.installer proxy after nested container rebuild during module install": "patches/module-installer-stale-config-installer-proxy.patch"
+                "Fix stale config.installer proxy after nested container rebuild during module install": "web/profiles/mukurtu/patches/module-installer-stale-config-installer-proxy.patch"
             },
             "drupal/features": {
                 "Issue #2981655: Simple configuration list is incomplete": "https://www.drupal.org/files/issues/2020-05-14/2981655-3.features.Simple-configuration-list-is-incomplete.patch"
@@ -126,19 +126,19 @@
                 "Fix illegal choice on exposed sort error": "https://www.drupal.org/files/issues/2022-01-17/3259018-6-illegal-sort-choice.patch"
             },
             "drupal/paragraphs": {
-                "Ensure empty paragraphs register as empty": "patches/paragraphs-118.patch"
+                "Ensure empty paragraphs register as empty": "web/profiles/mukurtu/patches/paragraphs-118.patch"
             },
             "drupal/media_entity_soundcloud": {
                 "Add support for secret URL embeds": "https://www.drupal.org/files/issues/2022-03-28/3272077-2.patch"
             },
             "drupal/og": {
-                "Remove bulk option to remove a user's roles": "patches/832-disallow-og-role-removal.patch"
+                "Remove bulk option to remove a user's roles": "web/profiles/mukurtu/patches/832-disallow-og-role-removal.patch"
             },
             "drupal/search_api_glossary": {
-                "TypeError: Cannot access offset of type string on string": "patches/search_api_glossary_type-error-3492668-8.patch"
+                "TypeError: Cannot access offset of type string on string": "web/profiles/mukurtu/patches/search_api_glossary_type-error-3492668-8.patch"
             },
             "drupal/message_digest": {
-                "Fix null flag fatal error in DigestInterval::access()": "patches/message_digest_ui-digest-interval-null-flag.patch"
+                "Fix null flag fatal error in DigestInterval::access()": "web/profiles/mukurtu/patches/message_digest_ui-digest-interval-null-flag.patch"
             }
         }
     }
