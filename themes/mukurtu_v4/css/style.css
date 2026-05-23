@@ -4509,6 +4509,11 @@ header {
   background-color: rgba(0, 0, 0, 0.25);
   z-index: 10;
 }
+.collection__header__image .field,
+.collection__header__image .field__item,
+.collection__header__image .media {
+  block-size: 100%;
+}
 .collection__header__image img {
   display: block;
   inline-size: 100%;
