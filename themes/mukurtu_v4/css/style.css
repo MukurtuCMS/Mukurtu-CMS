@@ -2230,6 +2230,35 @@ details.form-wrapper summary + div {
   inline-size: 100%;
 }
 
+.media--document__viewer {
+  inline-size: 100%;
+  block-size: min(500px, 70vh);
+  display: block;
+}
+
+.button--download-icon {
+  display: -webkit-inline-box;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  inline-size: 44px;
+  block-size: 44px;
+  padding: 0;
+  -ms-flex-negative: 0;
+      flex-shrink: 0;
+  -webkit-margin-before: 0;
+          margin-block-start: 0;
+}
+.button--download-icon svg {
+  display: block;
+  fill: currentColor;
+}
+
 /**
  * @file
  * Nav Primary.
@@ -5395,29 +5424,6 @@ header {
         -ms-flex-direction: row;
             flex-direction: row;
   }
-}
-
-.button--download-icon {
-  display: -webkit-inline-box;
-  display: -ms-inline-flexbox;
-  display: inline-flex;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
-  inline-size: 44px;
-  block-size: 44px;
-  padding: 0;
-  -ms-flex-negative: 0;
-      flex-shrink: 0;
-  -webkit-margin-before: 0;
-          margin-block-start: 0;
-}
-.button--download-icon svg {
-  display: block;
-  fill: currentColor;
 }
 
 .word-entry-fields-pair {

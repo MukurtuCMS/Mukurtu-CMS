@@ -1,6 +1,6 @@
-mukurtu.settings:
+mukurtu_media.settings:
   type: config_object
-  label: 'Mukurtu settings'
+  label: 'Mukurtu media settings'
   mapping:
     mukurtu_media_download_enabled:
       type: boolean

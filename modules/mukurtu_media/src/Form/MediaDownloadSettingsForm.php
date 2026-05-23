@@ -10,7 +10,7 @@ use Drupal\Core\Form\FormStateInterface;
  */
 class MediaDownloadSettingsForm extends ConfigFormBase {
 
-  const SETTINGS = 'mukurtu.settings';
+  const SETTINGS = 'mukurtu_media.settings';
 
   /**
    * {@inheritdoc}

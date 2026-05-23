@@ -109,22 +109,6 @@
   }
 }
 
-.button--download-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  inline-size: 44px;
-  block-size: 44px;
-  padding: 0;
-  flex-shrink: 0;
-  margin-block-start: 0;
-
-  svg {
-    display: block;
-    fill: currentColor;
-  }
-}
-
 .word-entry-fields-pair {
   display: flex;
   gap: var(--v-space-xs);

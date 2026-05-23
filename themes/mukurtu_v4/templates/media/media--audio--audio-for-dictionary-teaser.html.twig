@@ -1,9 +1,8 @@
 {#
 /**
  * @file
- * Theme override for audio in the dictionary word recording field (field_recording).
- * Kept separate from media--audio--default.html.twig to allow independent
- * styling of the dictionary teaser vs. sample sentence recording contexts.
+ * Theme override for audio media in the audio_for_dictionary_teaser view mode.
+ * Used in the dictionary word recording field (field_recording) on dictionary teasers.
  *
  * Available variables: see media.html.twig.
  * Additional variables:
@@ -22,7 +21,7 @@
   {{ title_suffix.contextual_links }}
   {{ content.media_content_warnings }}
   {{ content.field_media_audio_file }}
-  {% if media_download_enabled %}
+  {% if media_download_enabled and media_url %}
     <a href="{{ media_url }}" class="button button--download-icon" download aria-label="Download audio: {{ name }}">
       <svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="16" height="18" aria-hidden="true"><path d="M11.61 0H3.87v5.57H0L7.74 13l7.74-7.43h-3.87z"/><path fill-rule="evenodd" d="M.52 15H16v3H.52z" clip-rule="evenodd"/></svg>
     </a>

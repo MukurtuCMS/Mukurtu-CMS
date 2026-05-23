@@ -149,7 +149,7 @@ function mukurtu_v4_preprocess_media(array &$variables) {
     $variables['media_url'] = $url;
   }
 
-  $config = \Drupal::config('mukurtu.settings');
+  $config = \Drupal::config('mukurtu_media.settings');
   $variables['media_download_enabled'] = $config->get('mukurtu_media_download_enabled') ?? TRUE;
   $variables['#cache']['tags'] = Cache::mergeTags(
     $variables['#cache']['tags'] ?? [],

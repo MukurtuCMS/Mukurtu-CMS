@@ -54,3 +54,27 @@
     inline-size: 100%;
   }
 }
+
+.media--document {
+  &__viewer {
+    inline-size: 100%;
+    block-size: min(500px, 70vh);
+    display: block;
+  }
+}
+
+.button--download-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 44px;
+  block-size: 44px;
+  padding: 0;
+  flex-shrink: 0;
+  margin-block-start: 0;
+
+  svg {
+    display: block;
+    fill: currentColor;
+  }
+}
