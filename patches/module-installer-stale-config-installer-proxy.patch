@@ -11,12 +11,16 @@
 # Fix: re-fetch \Drupal::service('config.installer') each loop iteration so a
 # fresh proxy from the current container is always used.
 #
-# TODO: file this on drupal.org against core/lib/Drupal/Core/Extension/ModuleInstaller.php
-# so it can be included in a future Drupal release and this patch can be removed.
+# Upstream: this fix should be filed against Drupal core at
+# https://www.drupal.org/project/drupal/issues — search for
+# "ModuleInstaller stale config.installer synthetic service kernel".
+# Once a core issue is filed, replace this comment with the issue URL so the
+# patch can be removed when the fix lands in a Drupal release.
+#
 # Reproducer: any module whose hook_install() uses \Drupal::entityTypeManager()
-# (e.g. to load a config entity) will trigger a container rebuild; any subsequent
-# use of the cached $config_installer variable in the same doInstall() loop will
-# hit "ContainerBuilder synthetic service kernel" from ClassResolver.
+# (e.g. to load a config entity) triggers a container rebuild; any subsequent
+# use of the cached $config_installer in the same doInstall() loop then hits
+# "ContainerBuilder synthetic service kernel" from ClassResolver.
 --- a/lib/Drupal/Core/Extension/ModuleInstaller.php
 +++ b/lib/Drupal/Core/Extension/ModuleInstaller.php
 @@ -401,8 +401,7 @@
