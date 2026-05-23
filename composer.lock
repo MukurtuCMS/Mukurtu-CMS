@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0d0e25b9c1af502e372d282b5c30a403",
+    "content-hash": "0ccef062e72290df816d90734918691b",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -3210,17 +3210,17 @@
         },
         {
             "name": "drupal/gin",
-            "version": "5.0.12",
+            "version": "5.0.13",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/gin.git",
-                "reference": "5.0.12"
+                "reference": "5.0.13"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/gin-5.0.12.zip",
-                "reference": "5.0.12",
-                "shasum": "cb170a5d1c56b3ae2cc0743d7ad3cd4fdd2183d8"
+                "url": "https://ftp.drupal.org/files/projects/gin-5.0.13.zip",
+                "reference": "5.0.13",
+                "shasum": "350618ec83b2b9905da00657b8a6be0b878486fc"
             },
             "require": {
                 "drupal/core": "^11.2",
@@ -3229,8 +3229,8 @@
             "type": "drupal-theme",
             "extra": {
                 "drupal": {
-                    "version": "5.0.12",
-                    "datestamp": "1768553668",
+                    "version": "5.0.13",
+                    "datestamp": "1779536421",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -3810,17 +3810,17 @@
         },
         {
             "name": "drupal/leaflet",
-            "version": "10.4.8",
+            "version": "10.4.9",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/leaflet.git",
-                "reference": "10.4.8"
+                "reference": "10.4.9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/leaflet-10.4.8.zip",
-                "reference": "10.4.8",
-                "shasum": "484bf02560589eecfd3a2aeaab70309b7292086a"
+                "url": "https://ftp.drupal.org/files/projects/leaflet-10.4.9.zip",
+                "reference": "10.4.9",
+                "shasum": "0d2427b4120dd19cf064157d57d0099c421dfd10"
             },
             "require": {
                 "drupal/core": "^10.3 || ^11",
@@ -3829,8 +3829,8 @@
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "10.4.8",
-                    "datestamp": "1778106215",
+                    "version": "10.4.9",
+                    "datestamp": "1779488659",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
