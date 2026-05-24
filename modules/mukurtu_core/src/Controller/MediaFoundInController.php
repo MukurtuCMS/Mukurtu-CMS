@@ -21,113 +21,101 @@ class MediaFoundInController extends ControllerBase {
    * Find entity reference fields that reference the given media.
    */
   protected function getEntityReferenceFieldReferences(MediaInterface $media, $entity_type_id = 'node') {
-    // Get active entity reference fields for nodes that reference media.
     $entityFieldManager = \Drupal::service('entity_field.manager');
     $fields = $entityFieldManager->getActiveFieldStorageDefinitions($entity_type_id);
     $refFields = [];
     foreach ($fields as $fieldname => $field) {
-      if ($field->gettype() == 'entity_reference' && $field->getSetting('target_type') == 'media') {
+      if ($field->getType() == 'entity_reference' && $field->getSetting('target_type') == 'media') {
         $refFields[] = $fieldname;
       }
     }
 
-    // Return early if there are no supported fields to query.
     if (empty($refFields)) {
       return [];
     }
 
-    // Query all those fields for references to the given media.
     $conjunction = count($refFields) == 1 ? 'AND' : 'OR';
-    $contentQuery = $this->entityTypeManager()->getStorage($entity_type_id)->getQuery($conjunction);
+    $query = $this->entityTypeManager()->getStorage($entity_type_id)->getQuery($conjunction);
     foreach ($refFields as $refField) {
-      $contentQuery->condition($refField, $media->id())->accessCheck(TRUE);
+      $query->condition($refField, $media->id());
     }
-    $contentQuery->accessCheck(TRUE);
-    $contentQuery->pager(10);
-    $results = $contentQuery->execute();
+    $query->accessCheck(FALSE);
 
-    return $results;
+    return $query->execute();
   }
 
   /**
    * Find text fields that have the given media embedded.
    */
   protected function getEmbeddedReferences(MediaInterface $media, $entity_type_id = 'node') {
-    // Get text fields for nodes that can embed media.
     $entityFieldManager = \Drupal::service('entity_field.manager');
     $fields = $entityFieldManager->getActiveFieldStorageDefinitions($entity_type_id);
-    $refFields = [];
+    $textFields = [];
     foreach ($fields as $fieldname => $field) {
-      if (in_array($field->gettype(), ['text', 'text_long', 'text_with_summary'])) {
-        $refFields[] = $fieldname;
+      if (in_array($field->getType(), ['text', 'text_long', 'text_with_summary'])) {
+        $textFields[] = $fieldname;
       }
     }
 
-    // Return early if there are no supported fields to query.
-    if (empty($refFields)) {
+    if (empty($textFields)) {
       return [];
     }
 
-    // Query all those fields for references to the given media.
-    $conjunction = count($refFields) == 1 ? 'AND' : 'OR';
-    $contentQuery = $this->entityTypeManager()->getStorage($entity_type_id)->getQuery($conjunction);
-    foreach ($refFields as $refField) {
-      $contentQuery->condition($refField, $media->uuid(), 'CONTAINS')->accessCheck(TRUE);
+    $conjunction = count($textFields) == 1 ? 'AND' : 'OR';
+    $query = $this->entityTypeManager()->getStorage($entity_type_id)->getQuery($conjunction);
+    foreach ($textFields as $textField) {
+      $query->condition($textField, $media->uuid(), 'CONTAINS');
     }
-    $contentQuery->accessCheck(TRUE);
-    $contentQuery->pager();
-    $results = $contentQuery->execute();
+    $query->accessCheck(FALSE);
 
-    return $results;
-  }
-
-  /**
-   * Render the results from field queries.
-   */
-  protected function renderResults($results, $section_label, $entity_type_id = 'node', $view_mode = 'browse') {
-    $build = [];
-
-    // Load the entities so we can render them.
-    $entities = !empty($results) ? $this->entityTypeManager()->getStorage($entity_type_id)->loadMultiple($results) : [];
-
-    if (!empty($entities)) {
-      $build['reference_fields'] = [
-        '#type' => 'details',
-        '#title' => $section_label,
-        '#open' => TRUE,
-      ];
-    }
-
-    // Render the entities.
-    $langcode = $this->languageManager()->getCurrentLanguage()->getId();
-    $entityViewBuilder = $this->entityTypeManager()->getViewBuilder($entity_type_id);
-    foreach ($entities as $entity) {
-      $build['reference_fields']['results'][] = $entityViewBuilder->view($entity, $view_mode, $langcode);
-    }
-    $build['reference_fields']['results'][] = [
-      '#type' => 'pager',
-    ];
-
-    return $build;
+    return $query->execute();
   }
 
   /**
    * Build the "found in" report.
    */
   public function content(MediaInterface $media) {
-    $build = [];
+    $rows = [];
 
-    foreach (['community', 'protocol'] as $entityTypeId) {
-      $label = $this->entityTypeManager()->getDefinition($entityTypeId)->getLabel();
-      $build[] = $this->renderResults($this->getEntityReferenceFieldReferences($media, $entityTypeId), $this->t('@entityTypeLabel Media Fields', ['@entityTypeLabel' => $label]), $entityTypeId);
-      $build[] = $this->renderResults($this->getEmbeddedReferences($media, $entityTypeId), $this->t('@entityTypeLabel Text Fields with Media Embedded', ['@entityTypeLabel' => $label]), $entityTypeId);
+    foreach (['node', 'community', 'protocol'] as $entity_type_id) {
+      $results = array_unique(array_merge(
+        array_values($this->getEntityReferenceFieldReferences($media, $entity_type_id)),
+        array_values($this->getEmbeddedReferences($media, $entity_type_id))
+      ));
+
+      if (empty($results)) {
+        continue;
+      }
+
+      $type_label = $this->entityTypeManager()->getDefinition($entity_type_id)->getLabel();
+      $bundle_info = \Drupal::service('entity_type.bundle.info')->getBundleInfo($entity_type_id);
+      $entities = array_filter(
+        $this->entityTypeManager()->getStorage($entity_type_id)->loadMultiple($results),
+        fn($e) => $e->access('view', $this->currentUser())
+      );
+
+      foreach ($entities as $entity) {
+        $bundle_label = $bundle_info[$entity->bundle()]['label'] ?? $entity->bundle();
+        $rows[] = [
+          [
+            'data' => [
+              '#type' => 'link',
+              '#title' => $entity->label(),
+              '#url' => $entity->toUrl(),
+            ],
+          ],
+          (string) $type_label,
+          (string) $bundle_label,
+        ];
+      }
     }
 
-    $nodeLabel = $this->entityTypeManager()->getDefinition('node')->getLabel();
-    $build[] = $this->renderResults($this->getEntityReferenceFieldReferences($media), $this->t('@entityTypeLabel Media Fields', ['@entityTypeLabel' => $nodeLabel]));
-    $build[] = $this->renderResults($this->getEmbeddedReferences($media), $this->t('@entityTypeLabel Text Fields with Media Embedded', ['@entityTypeLabel' => $nodeLabel]));
-
-    return $build;
+    return [
+      '#type' => 'table',
+      '#header' => [$this->t('Title'), $this->t('Type'), $this->t('Content Type')],
+      '#rows' => $rows,
+      '#empty' => $this->t('This media is not used anywhere.'),
+    ];
   }
 
 }
