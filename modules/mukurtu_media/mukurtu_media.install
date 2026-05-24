@@ -85,7 +85,7 @@ function mukurtu_media_update_40002(): void {
 }
 
 /**
- * Switch remote_video media_library view mode from blazy_oembed to thumbnail.
+ * Switch remote_video and external_embed media_library view modes to thumbnail.
  */
 function mukurtu_media_update_40003(): void {
   $config = \Drupal::configFactory()->getEditable('core.entity_view_display.media.remote_video.media_library');
@@ -114,6 +114,40 @@ function mukurtu_media_update_40003(): void {
 
   $hidden = $config->get('hidden') ?? [];
   $hidden['field_media_oembed_video'] = TRUE;
+  unset($hidden['thumbnail']);
+  $config->set('hidden', $hidden);
+
+  $config->save();
+}
+
+/**
+ * Switch external_embed media_library view mode from text_default to thumbnail.
+ */
+function mukurtu_media_update_40004(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.media.external_embed.media_library');
+  if ($config->isNew()) {
+    return;
+  }
+
+  $content = $config->get('content') ?? [];
+  unset($content['field_media_external_embed']);
+
+  $content['thumbnail'] = [
+    'type' => 'image',
+    'label' => 'hidden',
+    'settings' => [
+      'image_link' => '',
+      'image_style' => 'media_library',
+      'image_loading' => ['attribute' => 'lazy'],
+    ],
+    'third_party_settings' => [],
+    'weight' => 0,
+    'region' => 'content',
+  ];
+  $config->set('content', $content);
+
+  $hidden = $config->get('hidden') ?? [];
+  $hidden['field_media_external_embed'] = TRUE;
   unset($hidden['thumbnail']);
   $config->set('hidden', $hidden);
 
