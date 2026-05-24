@@ -399,3 +399,15 @@ function mukurtu_media_edit_dialog_ajax(array &$form, FormStateInterface $form_s
   }
   return $response;
 }
+
+/**
+ * Implements hook_form_FORM_ID_alter() for soundcloud_media_add_form.
+ *
+ * Adds a class to the URL input container so CSS can put the field and Add
+ * button on the same row.
+ */
+function mukurtu_media_form_soundcloud_media_add_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
+  if (isset($form['container'])) {
+    $form['container']['#attributes']['class'][] = 'media-library-url-input-row';
+  }
+}

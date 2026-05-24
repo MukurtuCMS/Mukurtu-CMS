@@ -49,13 +49,21 @@ class ExternalEmbedForm extends AddFormBase
     // Add a container to group the input elements for styling purposes.
     $form['container'] = [
       '#type' => 'container',
+      '#attributes' => ['class' => ['media-library-url-input-row']],
     ];
 
     $form['container']['external_embed_code'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Add External Embed'),
-      '#description' => $this->t('Embed code from an external website. Note that while the media asset will be managed by cultural protocols, the originating website may not have similar privacy settings. </br>External embeds are usually some kind of code wrapped in &lt;iframe&gt;&lt;/iframe&gt; tags.'),
+      '#rows' => 3,
       '#required' => TRUE,
+    ];
+
+    $form['description'] = [
+      '#type' => 'html_tag',
+      '#tag' => 'div',
+      '#value' => $this->t('Embed code from an external website. Note that while the media asset will be managed by cultural protocols, the originating website may not have similar privacy settings. <br>External embeds are usually some kind of code wrapped in &lt;iframe&gt;&lt;/iframe&gt; tags.'),
+      '#attributes' => ['class' => ['form-item__description']],
     ];
 
     $form['container']['submit'] = [

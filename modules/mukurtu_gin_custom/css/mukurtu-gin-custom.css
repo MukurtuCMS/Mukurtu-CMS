@@ -68,53 +68,99 @@ counterpart, if one exists. */
     padding: var(--space-xs) var(--space-m) !important;
 }
 
-.media-library-add-form .file-upload-help {
-    font-size: 0.85em;
-    margin: 0;
-}
-
 /* Tighten form item spacing inside the add form */
-.media-library-add-form .form-item {
-    margin-top: 0.25rem;
-    margin-bottom: 0.25rem;
+.media-library-add-form .form-item,
+.media-library-add-form .form-item--error-is-shown {
+    margin-top: 0.25rem !important;
+    margin-bottom: 0.25rem !important;
 }
 
 /* Reduce managed file widget internal spacing */
 .media-library-add-form .form-managed-file {
-    margin-bottom: 0;
+    margin-bottom: 0 !important;
 }
 
 /* Hide the selected-media container when nothing is staged yet */
 .media-library-add-form__selected-media:empty {
-    display: none;
+    display: none !important;
 }
 
-/* Constrain the content pane so it scrolls independently of the type sidebar.
-   The sidebar is a flex sibling and naturally stays in place. Suppress the
-   outer dialog content scroll so there is only one scrollbar. The 130px
-   accounts for the dialog title bar, button pane, and surrounding padding. */
-.media-library-widget-modal .ui-dialog-content {
-    overflow: hidden !important;
-}
-
-.media-library-widget-modal .media-library-content {
-    overflow-y: auto;
-    max-height: calc(90vh - 130px);
+/* Single scroll container on the dialog content. The sidebar sticks at the
+   top via position:sticky + align-self:flex-start so it never scrolls away,
+   without needing a separate scroll container that breaks the upload form. */
+.media-library-widget-modal .media-library-menu {
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
 }
 
 /* Compact the view filters and header above the media grid */
 .media-library-widget-modal .media-library-view {
-    margin-top: 0.5rem;
+    margin-top: 0.5rem !important;
 }
 
 .media-library-widget-modal .view-filters {
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.5rem !important;
 }
 
 .media-library-widget-modal .views-exposed-form .form--inline {
-    gap: 0.25rem;
+    gap: 0.25rem !important;
 }
 
+.media-library-widget-modal .view-filters .views-exposed-form {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 16px !important;
+}
+
+.media-library-widget-modal .view-content .js-media-library-views-form {
+    padding: 0 !important;
+}
+
+/* SoundCloud and External Embed add forms: put the URL/embed field and Add
+   button on the same row. align-items:flex-end keeps the button at the bottom
+   of a textarea as well as a single-line textfield. */
+.media-library-url-input-row {
+    display: flex !important;
+    align-items: flex-end !important;
+    gap: var(--space-m);
+}
+
+.media-library-url-input-row .form-item {
+    margin: 0 !important;
+}
+
+.media-library-url-input-row > input[type="submit"] {
+    align-self: flex-end !important;
+    flex-shrink: 0;
+    margin: 0 !important;
+}
+
+/* Make media library table rows feel clickable — JS delegates the click to the row's checkbox. */
+.media-library-widget-modal .views-table tbody tr {
+    cursor: pointer;
+}
+
+/* Hide the checkbox column — kept in DOM for row-click selection JS. */
+.media-library-widget-modal .views-table th.views-field-media-library-select-form,
+.media-library-widget-modal .views-table td.views-field-media-library-select-form {
+    display: none !important;
+}
+
+/* Edit link column injected by JS. */
+.media-library-widget-modal .views-table .mukurtu-edit-col {
+    width: 1%;
+    white-space: nowrap;
+    text-align: right;
+}
+
+/* Highlight selected rows. */
+.media-library-widget-modal .views-table tbody tr.mukurtu-row-selected {
+    background-color: var(--gin-color-primary-light, #e8f0fe);
+}
+
+/* Hide the view-header (grid/table toggle wrapper) — list view is forced via service override. */
 .media-library-widget-modal .view-header {
-    margin: 0.25rem 0;
+    display: none !important;
 }
