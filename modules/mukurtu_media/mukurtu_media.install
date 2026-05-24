@@ -83,3 +83,39 @@ function mukurtu_media_update_40002(): void {
     ])->save();
   }
 }
+
+/**
+ * Switch remote_video media_library view mode from blazy_oembed to thumbnail.
+ */
+function mukurtu_media_update_40003(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.media.remote_video.media_library');
+  if ($config->isNew()) {
+    return;
+  }
+
+  // Move field_media_oembed_video out of content and into hidden.
+  $content = $config->get('content') ?? [];
+  unset($content['field_media_oembed_video']);
+
+  // Add thumbnail with image formatter using the media_library image style.
+  $content['thumbnail'] = [
+    'type' => 'image',
+    'label' => 'hidden',
+    'settings' => [
+      'image_link' => '',
+      'image_style' => 'media_library',
+      'image_loading' => ['attribute' => 'lazy'],
+    ],
+    'third_party_settings' => [],
+    'weight' => 0,
+    'region' => 'content',
+  ];
+  $config->set('content', $content);
+
+  $hidden = $config->get('hidden') ?? [];
+  $hidden['field_media_oembed_video'] = TRUE;
+  unset($hidden['thumbnail']);
+  $config->set('hidden', $hidden);
+
+  $config->save();
+}

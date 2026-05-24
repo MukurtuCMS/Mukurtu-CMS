@@ -6,7 +6,7 @@ dependencies:
     - image.style.media_library
     - media.type.remote_video
   module:
-    - blazy
+    - image
     - layout_builder
 third_party_settings:
   layout_builder:
@@ -17,24 +17,14 @@ targetEntityType: media
 bundle: remote_video
 mode: media_library
 content:
-  field_media_oembed_video:
-    type: blazy_oembed
+  thumbnail:
+    type: image
     label: hidden
     settings:
-      caption: {  }
-      background: false
-      box_caption: ''
-      box_caption_custom: ''
-      box_media_style: ''
-      loading: ''
-      preload: false
-      responsive_image_style: ''
-      use_theme_field: false
-      box_style: ''
+      image_link: ''
       image_style: media_library
-      media_switch: ''
-      ratio: fluid
-      thumbnail_style: ''
+      image_loading:
+        attribute: lazy
     third_party_settings: {  }
     weight: 0
     region: content
@@ -43,6 +33,7 @@ hidden:
   field_communities: true
   field_cultural_protocols: true
   field_identifier: true
+  field_media_oembed_video: true
   field_media_tags: true
   field_people: true
   field_thumbnail: true
@@ -50,5 +41,4 @@ hidden:
   langcode: true
   name: true
   search_api_excerpt: true
-  thumbnail: true
   uid: true
