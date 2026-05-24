@@ -69,7 +69,24 @@ counterpart, if one exists. */
 }
 
 .media-library-add-form .file-upload-help {
+    font-size: 0.85em;
+    margin: 0;
+}
+
+/* Tighten form item spacing inside the add form */
+.media-library-add-form .form-item {
     margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+}
+
+/* Reduce managed file widget internal spacing */
+.media-library-add-form .form-managed-file {
+    margin-bottom: 0;
+}
+
+/* Hide the selected-media container when nothing is staged yet */
+.media-library-add-form__selected-media:empty {
+    display: none;
 }
 
 /* Constrain the content pane so it scrolls independently of the type sidebar.
@@ -83,4 +100,21 @@ counterpart, if one exists. */
 .media-library-widget-modal .media-library-content {
     overflow-y: auto;
     max-height: calc(90vh - 130px);
+}
+
+/* Compact the view filters and header above the media grid */
+.media-library-widget-modal .media-library-view {
+    margin-top: 0.5rem;
+}
+
+.media-library-widget-modal .view-filters {
+    margin-bottom: 0.5rem;
+}
+
+.media-library-widget-modal .views-exposed-form .form--inline {
+    gap: 0.25rem;
+}
+
+.media-library-widget-modal .view-header {
+    margin: 0.25rem 0;
 }
