@@ -3,3 +3,8 @@ mukurtu-gin-custom:
   css:
     base:
       css/mukurtu-gin-custom.css: {}
+  js:
+    js/media-library-cancel.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal

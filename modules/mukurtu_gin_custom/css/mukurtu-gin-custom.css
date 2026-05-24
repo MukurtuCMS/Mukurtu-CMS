@@ -57,3 +57,30 @@ counterpart, if one exists. */
 .ui-dialog .ui-dialog-buttonpane {
     flex-shrink: 0;
 }
+
+/* Media library modal: compact upload form, sticky type sidebar, cancel button. */
+.media-library-add-form .js-mukurtu-cancel-source {
+    display: none;
+}
+
+
+.media-library-add-form__input-wrapper {
+    padding: var(--space-xs) var(--space-m) !important;
+}
+
+.media-library-add-form .file-upload-help {
+    margin-top: 0.25rem;
+}
+
+/* Constrain the content pane so it scrolls independently of the type sidebar.
+   The sidebar is a flex sibling and naturally stays in place. Suppress the
+   outer dialog content scroll so there is only one scrollbar. The 130px
+   accounts for the dialog title bar, button pane, and surrounding padding. */
+.media-library-widget-modal .ui-dialog-content {
+    overflow: hidden !important;
+}
+
+.media-library-widget-modal .media-library-content {
+    overflow-y: auto;
+    max-height: calc(90vh - 130px);
+}

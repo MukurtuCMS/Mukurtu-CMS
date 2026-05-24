@@ -1,11 +1,16 @@
 <?php
 
+use Drupal\Component\Serialization\Json;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\CloseModalDialogCommand;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
+use Drupal\Core\Url;
+use Drupal\media_library\Form\AddFormBase;
+use Drupal\media_library\Plugin\Field\FieldWidget\MediaLibraryWidget;
 use Drupal\mukurtu_media\Entity\Audio;
 use Drupal\mukurtu_media\Entity\Document;
 use Drupal\mukurtu_media\Entity\Image;
@@ -299,4 +304,98 @@ function mukurtu_media_entity_base_field_info_alter(&$fields, EntityTypeInterfac
   if ($entity_type->id() == 'media') {
     $fields['name']->setDescription('Most media names will auto-fill from the filename or external source. This field is not usually shown to end users. While the media name can be changed, we generally recommend using the auto-filled names so that they match your other records and systems.');
   }
+}
+
+/**
+ * Implements hook_field_widget_single_element_form_alter().
+ *
+ * Adds an Edit button alongside the Remove button on every media library
+ * widget item, visible only to users who have update access to that media.
+ */
+function mukurtu_media_field_widget_single_element_form_alter(array &$element, FormStateInterface $form_state, array $context): void {
+  if (!($context['widget'] instanceof MediaLibraryWidget) || empty($element['selection'])) {
+    return;
+  }
+
+  $media_storage = \Drupal::entityTypeManager()->getStorage('media');
+
+  foreach (Element::children($element['selection']) as $delta) {
+    $media_id = $element['selection'][$delta]['target_id']['#value'] ?? NULL;
+    if (!$media_id) {
+      continue;
+    }
+
+    /** @var \Drupal\media\MediaInterface $media */
+    $media = $media_storage->load($media_id);
+    if (!$media || !$media->access('update')) {
+      continue;
+    }
+
+    $aria_label = $media->access('view label')
+      ? t('Edit @label', ['@label' => $media->label()])
+      : t('Edit media');
+
+    $element['selection'][$delta]['edit_button'] = [
+      '#type' => 'link',
+      '#title' => t('Edit'),
+      '#url' => Url::fromRoute('entity.media.edit_form', ['media' => $media_id]),
+      '#attributes' => [
+        'class' => ['use-ajax', 'media-library-item__edit'],
+        'aria-label' => $aria_label,
+        'data-dialog-type' => 'modal',
+        'data-dialog-options' => Json::encode(['width' => 900]),
+      ],
+    ];
+  }
+
+  $element['#attached']['library'][] = 'core/drupal.dialog.ajax';
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function mukurtu_media_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
+  // When a media entity edit form is opened inside a modal dialog, wire the
+  // Save button to an AJAX callback that closes the dialog on success.
+  if (
+    preg_match('/^media_.+_edit_form$/', $form_id) &&
+    \Drupal::request()->query->get('_wrapper_format') === 'drupal_modal'
+  ) {
+    foreach (['submit', 'save'] as $action) {
+      if (isset($form['actions'][$action])) {
+        $form['actions'][$action]['#ajax'] = [
+          'callback' => 'mukurtu_media_edit_dialog_ajax',
+          'progress' => ['type' => 'throbber'],
+        ];
+      }
+    }
+  }
+
+  // In the media library add form, mark each "Remove" button so JS can create
+  // a visible proxy in the dialog footer. The button stays in-place (hidden via
+  // CSS) so its #array_parents remain intact for Drupal's submit handling.
+  if ($form_state->getFormObject() instanceof AddFormBase && isset($form['media'])) {
+    foreach (Element::children($form['media']) as $delta) {
+      if (isset($form['media'][$delta]['remove_button'])) {
+        $form['media'][$delta]['remove_button']['#attributes']['class'][] = 'js-mukurtu-cancel-source';
+      }
+    }
+  }
+}
+
+/**
+ * AJAX callback for media edit forms submitted from a modal dialog.
+ *
+ * Closes the dialog on a clean save; replaces dialog content with the rebuilt
+ * form (including validation messages) when there are errors.
+ */
+function mukurtu_media_edit_dialog_ajax(array &$form, FormStateInterface $form_state): AjaxResponse {
+  $response = new AjaxResponse();
+  if ($form_state->getErrors()) {
+    $response->addCommand(new ReplaceCommand('.ui-dialog-content', $form));
+  }
+  else {
+    $response->addCommand(new CloseModalDialogCommand());
+  }
+  return $response;
 }
