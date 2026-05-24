@@ -83,3 +83,34 @@ function mukurtu_media_update_40002(): void {
     ])->save();
   }
 }
+
+/**
+ * Sync field_thumbnail to the base thumbnail field for audio, remote_video,
+ * and soundcloud media that already have a user-uploaded thumbnail.
+ */
+function mukurtu_media_update_40003(&$sandbox): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('media');
+
+  if (!isset($sandbox['total'])) {
+    $ids = $storage->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('bundle', ['audio', 'remote_video', 'soundcloud'], 'IN')
+      ->condition('field_thumbnail', NULL, 'IS NOT NULL')
+      ->execute();
+    $sandbox['ids'] = array_values($ids);
+    $sandbox['total'] = count($ids);
+    $sandbox['processed'] = 0;
+  }
+
+  $batch = array_splice($sandbox['ids'], 0, 25);
+  foreach ($storage->loadMultiple($batch) as $media) {
+    $fid = $media->get('field_thumbnail')->getValue()[0]['target_id'] ?? NULL;
+    if ($fid) {
+      $media->thumbnail->target_id = $fid;
+      $media->save();
+    }
+    $sandbox['processed']++;
+  }
+
+  $sandbox['#finished'] = $sandbox['total'] ? $sandbox['processed'] / $sandbox['total'] : 1;
+}
