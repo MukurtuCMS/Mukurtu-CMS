@@ -328,6 +328,11 @@ function mukurtu_media_entity_view_alter(array &$build, \Drupal\Core\Entity\Enti
     return;
   }
 
+  // Placeholders apply to content nodes only.
+  if ($entity->getEntityTypeId() !== 'node') {
+    return;
+  }
+
   $restricted_file = $restricted_fid ? \Drupal\file\Entity\File::load($restricted_fid) : NULL;
   $no_media_file   = $no_media_fid   ? \Drupal\file\Entity\File::load($no_media_fid)   : NULL;
 
