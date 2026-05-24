@@ -121,6 +121,79 @@ function mukurtu_media_update_40003(): void {
 }
 
 /**
+ * Switch audio media_library view mode from file_audio/blazy to thumbnail.
+ */
+function mukurtu_media_update_40005(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.media.audio.media_library');
+  if ($config->isNew()) {
+    return;
+  }
+
+  $content = $config->get('content') ?? [];
+  unset($content['field_media_audio_file']);
+  $content['thumbnail'] = [
+    'type' => 'image',
+    'label' => 'hidden',
+    'settings' => [
+      'image_link' => '',
+      'image_style' => 'media_library',
+      'image_loading' => ['attribute' => 'lazy'],
+    ],
+    'third_party_settings' => [],
+    'weight' => 0,
+    'region' => 'content',
+  ];
+  $config->set('content', $content);
+
+  $hidden = $config->get('hidden') ?? [];
+  $hidden['field_media_audio_file'] = TRUE;
+  unset($hidden['thumbnail']);
+  $config->set('hidden', $hidden);
+
+  $config->save();
+}
+
+/**
+ * Add field_thumbnail to audio media_assets view mode; remove blazy from player.
+ */
+function mukurtu_media_update_40006(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.media.audio.media_assets');
+  if ($config->isNew()) {
+    return;
+  }
+
+  $content = $config->get('content') ?? [];
+
+  // Add field_thumbnail so the media-assets template can render it.
+  $content['field_thumbnail'] = [
+    'type' => 'image',
+    'label' => 'hidden',
+    'settings' => [
+      'image_link' => '',
+      'image_style' => 'carousel_thumbnail',
+      'image_loading' => ['attribute' => 'lazy'],
+    ],
+    'third_party_settings' => [],
+    'weight' => 0,
+    'region' => 'content',
+  ];
+
+  // Remove blazy wrapper from the audio player — it creates a large blank container.
+  if (isset($content['field_media_audio_file'])) {
+    $content['field_media_audio_file']['third_party_settings'] = [];
+    $content['field_media_audio_file']['weight'] = 1;
+  }
+
+  $config->set('content', $content);
+
+  $hidden = $config->get('hidden') ?? [];
+  unset($hidden['field_thumbnail']);
+  $config->set('hidden', $hidden);
+
+  $config->save();
+}
+
+/**
  * Switch external_embed media_library view mode from text_default to thumbnail.
  */
 function mukurtu_media_update_40004(): void {
