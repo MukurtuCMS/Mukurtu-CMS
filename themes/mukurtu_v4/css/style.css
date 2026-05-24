@@ -2209,6 +2209,51 @@ details.form-wrapper summary + div {
   inline-size: 100%;
 }
 
+.glightbox-clean .gprev,
+.glightbox-clean .gnext,
+.glightbox-clean .gclose {
+  background-color: var(--brand-primary, #138aab);
+  -webkit-box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+.glightbox-clean .gprev:hover,
+.glightbox-clean .gnext:hover,
+.glightbox-clean .gclose:hover {
+  background-color: var(--brand-primary-dark, #107996);
+}
+.glightbox-clean .gprev.focused, .glightbox-clean .gprev:focus-visible,
+.glightbox-clean .gnext.focused,
+.glightbox-clean .gnext:focus-visible,
+.glightbox-clean .gclose.focused,
+.glightbox-clean .gclose:focus-visible {
+  outline: 3px solid var(--focus-color, #66afe9);
+  outline-offset: 2px;
+}
+.glightbox-clean .gprev,
+.glightbox-clean .gnext {
+  width: 52px;
+  height: 60px;
+}
+.glightbox-clean .gprev svg,
+.glightbox-clean .gnext svg {
+  width: 32px;
+}
+.glightbox-clean .gclose {
+  width: 44px;
+  height: 44px;
+}
+.glightbox-clean .gclose svg {
+  width: 24px;
+}
+.glightbox-clean .gprev .garrow,
+.glightbox-clean .gnext .garrow,
+.glightbox-clean .gclose .garrow {
+  stroke-width: 5;
+}
+.glightbox-clean .gslide-description.description-bottom {
+  display: none;
+}
+
 /**
  * @file
  * Nav Primary.

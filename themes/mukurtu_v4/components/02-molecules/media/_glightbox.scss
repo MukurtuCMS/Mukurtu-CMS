@@ -1,0 +1,52 @@
+// Glightbox control visibility overrides.
+// The library defaults are too small and too transparent to read easily.
+
+.glightbox-clean {
+  .gprev,
+  .gnext,
+  .gclose {
+    background-color: var(--brand-primary, #138aab);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+
+    &:hover {
+      background-color: var(--brand-primary-dark, #107996);
+    }
+
+    &.focused,
+    &:focus-visible {
+      outline: 3px solid var(--focus-color, #66afe9);
+      outline-offset: 2px;
+    }
+  }
+
+  .gprev,
+  .gnext {
+    width: 52px;
+    height: 60px;
+
+    svg {
+      width: 32px;
+    }
+  }
+
+  .gclose {
+    width: 44px;
+    height: 44px;
+
+    svg {
+      width: 24px;
+    }
+  }
+
+  .gprev,
+  .gnext,
+  .gclose {
+    .garrow {
+      stroke-width: 5;
+    }
+  }
+
+  .gslide-description.description-bottom {
+    display: none;
+  }
+}
