@@ -42,6 +42,7 @@ dependencies:
     - mukurtu_dictionary
     - mukurtu_export
     - mukurtu_import
+    - mukurtu_media
     - mukurtu_multipage_items
     - mukurtu_protocol
     - node
@@ -62,4 +63,5 @@ label: 'Mukurtu Manager'
 weight: 2
 is_admin: null
 permissions:
+  - 'administer mukurtu_media configuration'
   - 'select account cancellation method'

@@ -8,3 +8,20 @@ mukurtu_thumbnail.settings:
       sequence:
         type: string
         label: 'Thumbnail fid.'
+
+mukurtu_media.settings:
+  type: config_object
+  label: 'Mukurtu Media settings'
+  mapping:
+    restricted_media_placeholder:
+      type: sequence
+      label: 'Restricted media placeholder image.'
+      sequence:
+        type: string
+        label: 'File fid.'
+    no_media_placeholder:
+      type: sequence
+      label: 'No media placeholder image.'
+      sequence:
+        type: string
+        label: 'File fid.'

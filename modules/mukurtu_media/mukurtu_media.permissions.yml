@@ -1,0 +1,4 @@
+'administer mukurtu_media configuration':
+  title: 'Administer Mukurtu Media configuration'
+  description: 'Configure Mukurtu Media settings including default thumbnails and restricted media placeholder.'
+  restrict access: true
