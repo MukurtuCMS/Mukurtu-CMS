@@ -2209,6 +2209,16 @@ details.form-wrapper summary + div {
   inline-size: 100%;
 }
 
+.media--audio .media-asset--name {
+  display: block;
+  text-align: center;
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--color-text-secondary, currentColor);
+  -webkit-margin-before: var(--v-space-5xs);
+          margin-block-start: var(--v-space-5xs);
+  word-break: break-word;
+}
+
 /**
  * @file
  * Nav Primary.
@@ -5456,7 +5466,6 @@ header {
   -webkit-box-direction: normal;
       -ms-flex-direction: column;
           flex-direction: column;
-  gap: var(--v-space-4xxs);
   -webkit-box-align: center;
       -ms-flex-align: center;
           align-items: center;
@@ -5470,6 +5479,11 @@ header {
     -webkit-box-direction: normal;
         -ms-flex-direction: row;
             flex-direction: row;
+    -ms-flex-wrap: wrap;
+        flex-wrap: wrap;
+    -webkit-column-gap: var(--v-space-4xxs);
+       -moz-column-gap: var(--v-space-4xxs);
+            column-gap: var(--v-space-4xxs);
   }
 }
 .page-node-type-dictionary-word .field--name-field-recording .media--audio .field--name-field-media-audio-file,
@@ -5477,6 +5491,13 @@ header {
   -webkit-box-flex: 1;
       -ms-flex: 1;
           flex: 1;
+}
+@media (min-width: 48rem) {
+  .page-node-type-dictionary-word .field--name-field-recording .media--audio .media-asset--name {
+    -webkit-box-flex: 0;
+        -ms-flex: 0 0 100%;
+            flex: 0 0 100%;
+  }
 }
 .page-node-type-dictionary-word .field--name-field-recording .media--audio .field--name-field-contributor {
   display: -webkit-box;

@@ -41,3 +41,14 @@
     inline-size: 100%;
   }
 }
+
+.media--audio {
+  .media-asset--name {
+    display: block;
+    text-align: center;
+    font-size: var(--font-size-sm, 0.875rem);
+    color: var(--color-text-secondary, currentColor);
+    margin-block-start: var(--v-space-5xs);
+    word-break: break-word;
+  }
+}

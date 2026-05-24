@@ -1,0 +1,29 @@
+{#
+/**
+ * @file
+ * Theme override to present an audio file in the default view mode.
+ *
+ * Used for audio embedded in sample sentences on dictionary word pages.
+ *
+ * Available variables:
+ * - name: Name of the media item.
+ * - content: Media content.
+ * - title_suffix: Additional output populated by modules.
+ * - attributes: HTML attributes for the containing element.
+ * - bundle: machine name of media type.
+ * @see template_preprocess_media()
+ */
+#}
+{%
+  set classes = [
+    'media',
+    'media--' ~ bundle
+  ]
+%}
+
+<div{{ attributes.addClass(classes) }}>
+  {{ title_suffix.contextual_links }}
+  {{ content.media_content_warnings }}
+  {{ content.field_media_audio_file }}
+  <span class="media-asset--name">{{ name }}</span>
+</div>
