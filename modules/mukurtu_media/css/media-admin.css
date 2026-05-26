@@ -11,7 +11,7 @@
 .media-add-list--paired .admin-item {
   border: 1px solid var(--gin-border-color, #ccc);
   border-radius: 4px;
-  background: var(--gin-bg-layer, #fff);
+  background: transparent;
   margin: 0;
   transition: border-color 0.15s ease, background-color 0.15s ease;
 }
