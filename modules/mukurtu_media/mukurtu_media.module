@@ -7,7 +7,6 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Render\Element;
-use Drupal\Core\Render\Markup;
 use Drupal\Core\Url;
 use Drupal\mukurtu_media\Entity\Audio;
 use Drupal\mukurtu_media\Entity\Document;
@@ -104,8 +103,8 @@ function mukurtu_media_preprocess_entity_add_list(&$variables) {
     }
 
     $link = Link::fromTextAndUrl($link_text, $url)->toString();
-    $existing = isset($bundle['description']) ? (string) $bundle['description'] : '';
-    $bundle['description'] = Markup::create($existing . '<p>' . $link . '</p>');
+    $existing = isset($bundle['description']['#markup']) ? (string) $bundle['description']['#markup'] : '';
+    $bundle['description'] = ['#markup' => $existing . '<p>' . $link . '</p>'];
   }
 }
 
