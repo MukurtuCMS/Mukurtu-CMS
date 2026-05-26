@@ -138,8 +138,10 @@ class BulkMediaUrlCreateForm extends FormBase implements ContainerInjectionInter
       $display->buildForm($entity, $form['entities'][$delta]['fields'], $form_state);
 
       // Hide the URL input widget — the URL is already set and shown above.
-      if (isset($form['entities'][$delta]['fields'][$field_name])) {
-        $form['entities'][$delta]['fields'][$field_name]['#access'] = FALSE;
+      foreach ([$field_name, 'path', 'status', 'created', 'uid', 'revision_log_message'] as $field) {
+        if (isset($form['entities'][$delta]['fields'][$field])) {
+          $form['entities'][$delta]['fields'][$field]['#access'] = FALSE;
+        }
       }
     }
 

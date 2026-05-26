@@ -174,6 +174,12 @@ class BulkMediaUploadForm extends FormBase implements ContainerInjectionInterfac
       ];
 
       $display->buildForm($entity, $form['entities'][$delta]['fields'], $form_state);
+
+      foreach (['path', 'status', 'created', 'uid', 'revision_log_message'] as $field) {
+        if (isset($form['entities'][$delta]['fields'][$field])) {
+          $form['entities'][$delta]['fields'][$field]['#access'] = FALSE;
+        }
+      }
     }
 
     $form['actions'] = ['#type' => 'actions'];
