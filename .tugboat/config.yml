@@ -66,7 +66,7 @@ services:
           chown www-data:www-data web/sites/default/settings.php
           # Update composer dependencies.
           rm composer.lock
-          # Force Drupal core to 11.3.x — the base template pins ~11.2.
+          # Force Drupal core to 11.3.x; the base template pins ~11.2.
           composer require --no-update \
             drupal/core:"~11.3" \
             drupal/core-recommended:"~11.3" \
