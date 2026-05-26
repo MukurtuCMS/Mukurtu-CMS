@@ -88,36 +88,42 @@ function mukurtu_media_preprocess_entity_add_list(&$variables) {
 
   $bulk_items = [
     'bulk_upload_image' => [
+      'bundle' => 'image',
       'route' => 'mukurtu_media.bulk_upload',
       'params' => ['media_type' => 'image'],
       'label' => t('Bulk upload images'),
       'description' => t('Upload multiple images at once.'),
     ],
     'bulk_upload_audio' => [
+      'bundle' => 'audio',
       'route' => 'mukurtu_media.bulk_upload',
       'params' => ['media_type' => 'audio'],
       'label' => t('Bulk upload audio'),
       'description' => t('Upload multiple audio files at once.'),
     ],
     'bulk_upload_document' => [
+      'bundle' => 'document',
       'route' => 'mukurtu_media.bulk_upload',
       'params' => ['media_type' => 'document'],
       'label' => t('Bulk upload documents'),
       'description' => t('Upload multiple documents at once.'),
     ],
     'bulk_upload_video' => [
+      'bundle' => 'video',
       'route' => 'mukurtu_media.bulk_upload',
       'params' => ['media_type' => 'video'],
       'label' => t('Bulk upload videos'),
       'description' => t('Upload multiple video files at once.'),
     ],
     'bulk_create_remote_video' => [
+      'bundle' => 'remote_video',
       'route' => 'mukurtu_media.bulk_create',
       'params' => ['media_type' => 'remote_video'],
       'label' => t('Bulk add remote videos'),
       'description' => t('Add multiple remote videos by URL at once.'),
     ],
     'bulk_create_soundcloud' => [
+      'bundle' => 'soundcloud',
       'route' => 'mukurtu_media.bulk_create',
       'params' => ['media_type' => 'soundcloud'],
       'label' => t('Bulk add SoundCloud items'),
@@ -126,6 +132,10 @@ function mukurtu_media_preprocess_entity_add_list(&$variables) {
   ];
 
   foreach ($bulk_items as $key => $item) {
+    // Only show bulk item if the corresponding single-add bundle is accessible.
+    if (!isset($variables['bundles'][$item['bundle']])) {
+      continue;
+    }
     $url = Url::fromRoute($item['route'], $item['params']);
     $variables['bundles'][$key] = [
       'label' => $item['label'],
