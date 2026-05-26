@@ -83,7 +83,7 @@ class BulkMediaUrlCreateForm extends FormBase implements ContainerInjectionInter
     ];
 
     $form['actions'] = ['#type' => 'actions'];
-    $form['actions']['next'] = [
+    $form['actions']['submit'] = [
       '#type' => 'submit',
       '#value' => $this->t('Continue to metadata'),
       '#submit' => ['::createEntitiesSubmit'],
@@ -127,9 +127,17 @@ class BulkMediaUrlCreateForm extends FormBase implements ContainerInjectionInter
         '#parents' => ['entities', $delta, 'fields'],
       ];
 
+      // Show the URL as a read-only label.
+      $form['entities'][$delta]['url_display'] = [
+        '#type' => 'item',
+        '#title' => $this->t('URL'),
+        '#markup' => htmlspecialchars($entity->get($field_name)->value ?? '', ENT_QUOTES, 'UTF-8'),
+        '#weight' => -10,
+      ];
+
       $display->buildForm($entity, $form['entities'][$delta]['fields'], $form_state);
 
-      // The URL is already set; hide the source field widget.
+      // Hide the URL input widget — the URL is already set and shown above.
       if (isset($form['entities'][$delta]['fields'][$field_name])) {
         $form['entities'][$delta]['fields'][$field_name]['#access'] = FALSE;
       }
