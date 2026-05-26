@@ -5,6 +5,7 @@ namespace Drupal\mukurtu_migrate\Form;
 use Drupal\Core\Batch\BatchBuilder;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Extension\Exception\UnknownExtensionException;
+use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\State\StateInterface;
@@ -47,6 +48,13 @@ class ReviewForm extends MukurtuMigrateFormBase {
   protected $moduleHandler;
 
   /**
+   * The module extension list.
+   *
+   * @var \Drupal\Core\Extension\ModuleExtensionList
+   */
+  protected $moduleExtensionList;
+
+  /**
    * Source system data set in buildForm().
    *
    * @var array
@@ -68,8 +76,10 @@ class ReviewForm extends MukurtuMigrateFormBase {
    *   The config factory service.
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
    *   The module handler service.
+   * @param \Drupal\Core\Extension\ModuleExtensionList $module_extension_list
+   *   The module extension list service.
    */
-  public function __construct(StateInterface $state, MigrationPluginManagerInterface $migration_plugin_manager, PrivateTempStoreFactory $tempstore_private, MigrationState $migrationState, ConfigFactoryInterface $config_factory, ?ModuleHandlerInterface $module_handler = NULL) {
+  public function __construct(StateInterface $state, MigrationPluginManagerInterface $migration_plugin_manager, PrivateTempStoreFactory $tempstore_private, MigrationState $migrationState, ConfigFactoryInterface $config_factory, ?ModuleHandlerInterface $module_handler = NULL, ?ModuleExtensionList $module_extension_list = NULL) {
     parent::__construct($config_factory, $migration_plugin_manager, $state, $tempstore_private);
     $this->migrationState = $migrationState;
     if (!$module_handler) {
@@ -77,6 +87,7 @@ class ReviewForm extends MukurtuMigrateFormBase {
       $module_handler = \Drupal::service('module_handler');
     }
     $this->moduleHandler = $module_handler;
+    $this->moduleExtensionList = $module_extension_list ?? \Drupal::service('extension.list.module');
   }
 
   /**
@@ -89,7 +100,8 @@ class ReviewForm extends MukurtuMigrateFormBase {
       $container->get('tempstore.private'),
       $container->get('migrate_drupal.migration_state'),
       $container->get('config.factory'),
-      $container->get('module_handler')
+      $container->get('module_handler'),
+      $container->get('extension.list.module')
     );
   }
 
@@ -212,7 +224,7 @@ class ReviewForm extends MukurtuMigrateFormBase {
           }
           else {
             try {
-              $destination_module_names[] = $this->moduleHandler->getName($destination_module);
+              $destination_module_names[] = $this->moduleExtensionList->getName($destination_module);
             }
             catch (UnknownExtensionException $e) {
               $destination_module_names[] = $destination_module;
