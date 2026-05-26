@@ -5,7 +5,10 @@ use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Link;
 use Drupal\Core\Render\Element;
+use Drupal\Core\Render\Markup;
+use Drupal\Core\Url;
 use Drupal\mukurtu_media\Entity\Audio;
 use Drupal\mukurtu_media\Entity\Document;
 use Drupal\mukurtu_media\Entity\Image;
@@ -75,16 +78,35 @@ function mukurtu_media_entity_field_storage_info(EntityTypeInterface $entity_typ
 }
 
 /**
- * Adds a "Bulk upload" link to file-based media add forms.
+ * Implements hook_preprocess_entity_add_list().
+ *
+ * Appends bulk upload/create links to media type entries on /admin/media/add.
  */
-function _mukurtu_media_add_bulk_upload_link(array &$form, string $media_type): void {
-  $url = \Drupal\Core\Url::fromRoute('mukurtu_media.bulk_upload', ['media_type' => $media_type]);
-  $link = \Drupal\Core\Link::fromTextAndUrl(t('Bulk upload'), $url)->toString();
-  $form['bulk_upload_link'] = [
-    '#type' => 'item',
-    '#markup' => '<p>' . $link . '</p>',
-    '#weight' => -100,
-  ];
+function mukurtu_media_preprocess_entity_add_list(&$variables) {
+  if (\Drupal::routeMatch()->getRouteName() !== 'entity.media.add_page') {
+    return;
+  }
+
+  $file_types = ['image', 'audio', 'document', 'video'];
+  $url_types = ['remote_video', 'soundcloud'];
+
+  foreach ($variables['bundles'] as $bundle_id => &$bundle) {
+    if (in_array($bundle_id, $file_types)) {
+      $url = Url::fromRoute('mukurtu_media.bulk_upload', ['media_type' => $bundle_id]);
+      $link_text = t('Bulk upload');
+    }
+    elseif (in_array($bundle_id, $url_types)) {
+      $url = Url::fromRoute('mukurtu_media.bulk_create', ['media_type' => $bundle_id]);
+      $link_text = t('Bulk create');
+    }
+    else {
+      continue;
+    }
+
+    $link = Link::fromTextAndUrl($link_text, $url)->toString();
+    $existing = isset($bundle['description']) ? (string) $bundle['description'] : '';
+    $bundle['description'] = Markup::create($existing . '<p>' . $link . '</p>');
+  }
 }
 
 /**
@@ -92,8 +114,6 @@ function _mukurtu_media_add_bulk_upload_link(array &$form, string $media_type): 
  */
 function mukurtu_media_form_media_document_add_form_alter(&$form, FormStateInterface $form_state, $form_id)
 {
-  _mukurtu_media_add_bulk_upload_link($form, 'document');
-
   // For new document forms, don't show the "Extracted Text" field because no
   // text has been extracted yet.
   if (isset($form['field_extracted_text'])) {
@@ -129,7 +149,6 @@ function mukurtu_media_form_media_document_edit_form_alter(&$form, FormStateInte
 
 function mukurtu_media_form_media_video_add_form_alter(&$form, FormStateInterface $form_state, $form_id)
 {
-  _mukurtu_media_add_bulk_upload_link($form, 'video');
   $form['field_media_video_file']['widget'][0]['#process'][] = 'mukurtu_media_refresh_media_process';
 
   array_unshift($form["field_thumbnail"]["widget"][0]["#process"], 'mukurtu_media_process_thumb');
@@ -140,7 +159,6 @@ function mukurtu_media_form_media_video_add_form_alter(&$form, FormStateInterfac
  */
 function mukurtu_media_form_media_audio_add_form_alter(&$form, FormStateInterface $form_state, $form_id)
 {
-  _mukurtu_media_add_bulk_upload_link($form, 'audio');
   // Add custom handling on media upload/removal.
   $form['field_media_audio_file']['widget'][0]['#process'][] = 'mukurtu_media_refresh_media_process';
 }
@@ -150,7 +168,6 @@ function mukurtu_media_form_media_audio_add_form_alter(&$form, FormStateInterfac
  */
 function mukurtu_media_form_media_image_add_form_alter(&$form, FormStateInterface $form_state, $form_id)
 {
-  _mukurtu_media_add_bulk_upload_link($form, 'image');
   $form['field_media_image']['widget'][0]['#process'][] = 'mukurtu_media_refresh_media_process';
 }
 

@@ -10,6 +10,18 @@ mukurtu_media.bulk_upload:
       media_type:
         type: 'string'
 
+mukurtu_media.bulk_create:
+  path: '/admin/content/media/bulk-create/{media_type}'
+  defaults:
+    _form: 'Drupal\mukurtu_media\Form\BulkMediaUrlCreateForm'
+    _title_callback: 'Drupal\mukurtu_media\Form\BulkMediaUrlCreateForm::getTitle'
+  requirements:
+    _permission: 'create media'
+  options:
+    parameters:
+      media_type:
+        type: 'string'
+
 mukurtu_media.thumbnail_settings_form:
   path: '/admin/config/system/mukurtu-media-thumbnail-settings'
   defaults:
