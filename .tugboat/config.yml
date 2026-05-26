@@ -66,16 +66,20 @@ services:
           chown www-data:www-data web/sites/default/settings.php
           # Update composer dependencies.
           rm composer.lock
-          # Force Drupal core to 11.3.x; the base template pins ~11.2.
-          composer require --no-update \
-            drupal/core:"~11.3" \
-            drupal/core-recommended:"~11.3" \
-            drupal/core-composer-scaffold:"~11.3" \
-            drupal/core-project-message:"~11.3"
-          # Ignore symfony/polyfill-intl-idn advisory on the root project.
-          # The advisory only affects the pure PHP fallback; native intl is installed above.
-          composer config audit.ignore.PKSA-dwsq-ppd2-mb1x \
-            "Advisory only affects pure PHP fallback; native intl extension is installed"
+          # Patch the template's composer.json to require Drupal 11.3.x and
+          # ignore the symfony/polyfill-intl-idn advisory. composer config
+          # does not support setting audit.ignore keys, so patch directly.
+          php -r "
+            \$d = json_decode(file_get_contents('composer.json'), true);
+            \$d['require']['drupal/core'] = '~11.3';
+            \$d['require']['drupal/core-recommended'] = '~11.3';
+            \$d['require']['drupal/core-composer-scaffold'] = '~11.3';
+            \$d['require']['drupal/core-project-message'] = '~11.3';
+            \$d['config']['audit']['ignore']['PKSA-dwsq-ppd2-mb1x'] =
+              'Advisory only affects pure PHP fallback; native intl is installed';
+            file_put_contents('composer.json',
+              json_encode(\$d, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL);
+          "
           composer update --no-ansi --no-interaction --optimize-autoloader --no-progress
           # Install Drupal with the Mukurtu installation profile. Run as web
           # user to create files with the right permissions. Pass in the
