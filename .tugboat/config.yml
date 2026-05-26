@@ -66,6 +66,12 @@ services:
           chown www-data:www-data web/sites/default/settings.php
           # Update composer dependencies.
           rm composer.lock
+          # Force Drupal core to 11.3.x — the base template pins ~11.2.
+          composer require --no-update \
+            drupal/core:"~11.3" \
+            drupal/core-recommended:"~11.3" \
+            drupal/core-composer-scaffold:"~11.3" \
+            drupal/core-project-message:"~11.3"
           composer update --no-ansi --no-interaction --optimize-autoloader --no-progress
           # Install Drupal with the Mukurtu installation profile. Run as web
           # user to create files with the right permissions. Pass in the
