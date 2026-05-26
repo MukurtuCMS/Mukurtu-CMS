@@ -143,6 +143,37 @@ function mukurtu_media_preprocess_entity_add_list(&$variables) {
       'add_link' => Link::fromTextAndUrl($item['label'], $url),
     ];
   }
+
+  // Reorder bundles so each single-item type is immediately followed by its
+  // bulk variant, producing a two-column paired layout.
+  $pair_order = [
+    'image'        => 'bulk_upload_image',
+    'audio'        => 'bulk_upload_audio',
+    'document'     => 'bulk_upload_document',
+    'video'        => 'bulk_upload_video',
+    'remote_video' => 'bulk_create_remote_video',
+    'soundcloud'   => 'bulk_create_soundcloud',
+  ];
+
+  $ordered = [];
+  foreach ($pair_order as $single_key => $bulk_key) {
+    if (isset($variables['bundles'][$single_key])) {
+      $ordered[$single_key] = $variables['bundles'][$single_key];
+    }
+    if (isset($variables['bundles'][$bulk_key])) {
+      $ordered[$bulk_key] = $variables['bundles'][$bulk_key];
+    }
+  }
+  // Append any remaining bundles that have no bulk pair (e.g. external_embed).
+  foreach ($variables['bundles'] as $key => $bundle) {
+    if (!isset($ordered[$key])) {
+      $ordered[$key] = $bundle;
+    }
+  }
+
+  $variables['bundles'] = $ordered;
+  $variables['attributes']['class'][] = 'media-add-list--paired';
+  $variables['#attached']['library'][] = 'mukurtu_media/media_add_page';
 }
 
 /**

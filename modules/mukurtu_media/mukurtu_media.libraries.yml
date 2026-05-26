@@ -1,0 +1,14 @@
+media_add_page:
+  css:
+    theme:
+      css/media-admin.css: {}
+
+bulk_upload_dropzone:
+  css:
+    theme:
+      css/media-admin.css: {}
+  js:
+    js/bulk-upload-dropzone.js: {}
+  dependencies:
+    - core/drupal
+    - core/once

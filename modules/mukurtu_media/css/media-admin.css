@@ -1,0 +1,68 @@
+/* ============================================================
+   /admin/media/add — paired two-column layout
+   ============================================================ */
+
+.media-add-list--paired {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+/* Remove the horizontal separator line between paired items */
+.media-add-list--paired .admin-item::after {
+  display: none;
+}
+
+/* Unpaired item (e.g. external_embed with no bulk variant) spans full width */
+.media-add-list--paired .admin-item:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 640px) {
+  .media-add-list--paired {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================================
+   Bulk upload — drag-and-drop zone
+   ============================================================ */
+
+.mukurtu-bulk-dropzone {
+  border: 2px dashed var(--gin-border-color-form-element, #949494);
+  border-radius: 4px;
+  padding: 1.5rem;
+  text-align: center;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+  cursor: pointer;
+}
+
+.mukurtu-bulk-dropzone.is-drag-over {
+  background-color: var(--gin-bg-item-hover, rgba(0, 0, 0, 0.04));
+  border-color: var(--gin-color-primary, #0073e6);
+  border-style: solid;
+}
+
+.mukurtu-bulk-dropzone__hint {
+  margin: 0 0 0.75rem;
+  color: var(--gin-color-text-light, #545560);
+  font-style: italic;
+  pointer-events: none;
+}
+
+/* Keep the managed_file widget itself inline/natural inside the zone */
+.mukurtu-bulk-dropzone .js-form-managed-file {
+  display: inline-block;
+  text-align: left;
+}
+
+/* ============================================================
+   Bulk metadata step — file preview thumbnail
+   ============================================================ */
+
+.mukurtu-bulk-file-preview {
+  display: block;
+  max-width: 200px;
+  max-height: 200px;
+  margin-bottom: 0.75rem;
+  border-radius: 4px;
+}

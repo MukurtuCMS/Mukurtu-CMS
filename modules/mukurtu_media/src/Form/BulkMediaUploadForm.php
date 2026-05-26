@@ -7,6 +7,7 @@ use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\File\FileUrlGeneratorInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
 use Drupal\file\Entity\File;
@@ -50,16 +51,19 @@ class BulkMediaUploadForm extends FormBase implements ContainerInjectionInterfac
 
   protected EntityTypeManagerInterface $entityTypeManager;
   protected AccountInterface $currentUser;
+  protected FileUrlGeneratorInterface $fileUrlGenerator;
 
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, AccountInterface $current_user) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, AccountInterface $current_user, FileUrlGeneratorInterface $file_url_generator) {
     $this->entityTypeManager = $entity_type_manager;
     $this->currentUser = $current_user;
+    $this->fileUrlGenerator = $file_url_generator;
   }
 
   public static function create(ContainerInterface $container): static {
     return new static(
       $container->get('entity_type.manager'),
-      $container->get('current_user')
+      $container->get('current_user'),
+      $container->get('file_url_generator')
     );
   }
 
@@ -101,9 +105,11 @@ class BulkMediaUploadForm extends FormBase implements ContainerInjectionInterfac
     $year = date('Y');
     $month = date('m');
 
+    $form['#attached']['library'][] = 'mukurtu_media/bulk_upload_dropzone';
+
     $form['description'] = [
       '#type' => 'item',
-      '#markup' => $this->t('Select multiple files to upload. You will then set protocols and metadata for each file before saving.'),
+      '#markup' => $this->t('Drag files onto the area below, or click Browse to select files. You will then set protocols and metadata for each file before saving.'),
     ];
 
     $form['upload'] = [
@@ -116,6 +122,8 @@ class BulkMediaUploadForm extends FormBase implements ContainerInjectionInterfac
       ],
       '#upload_location' => $config['uri_scheme'] . "://{$year}-{$month}",
       '#required' => TRUE,
+      '#prefix' => '<div class="mukurtu-bulk-dropzone"><p class="mukurtu-bulk-dropzone__hint">' . $this->t('Drop files here or') . '</p>',
+      '#suffix' => '</div>',
     ];
 
     $form['actions'] = ['#type' => 'actions'];
@@ -163,6 +171,22 @@ class BulkMediaUploadForm extends FormBase implements ContainerInjectionInterfac
         '#parents' => ['entities', $delta, 'fields'],
       ];
 
+      // For image media, add a direct file preview (bypasses image styles so
+      // it works reliably for private files before the entity is saved).
+      $field_item = $entity->get($field_name)->first();
+      if ($field_item && ($fid = $field_item->target_id)) {
+        $file = File::load($fid);
+        if ($file && strpos($file->getMimeType(), 'image/') === 0) {
+          $form['entities'][$delta]['file_preview'] = [
+            '#theme' => 'image',
+            '#uri' => $file->getFileUri(),
+            '#alt' => $entity->getName(),
+            '#attributes' => ['class' => ['mukurtu-bulk-file-preview']],
+            '#weight' => -20,
+          ];
+        }
+      }
+
       $display->buildForm($entity, $form['entities'][$delta]['fields'], $form_state);
     }
 
@@ -206,10 +230,6 @@ class BulkMediaUploadForm extends FormBase implements ContainerInjectionInterfac
       if (!$file) {
         continue;
       }
-
-      // Mark permanent so the file is not deleted as a temporary upload.
-      $file->setPermanent();
-      $file->save();
 
       $filename = $file->getFilename();
       $last_dot = strrpos($filename, '.');
