@@ -1,24 +1,39 @@
 /* ============================================================
-   /admin/media/add — paired two-column layout
+   /admin/media/add — paired two-column card layout
    ============================================================ */
 
-.media-add-list--paired {
+/* Use [data-drupal-admin-styles] prefix to match Gin's specificity layer */
+[data-drupal-admin-styles] .media-add-list--paired {
   display: grid;
   grid-template-columns: 1fr 1fr;
+  gap: var(--gin-spacing-s);
 }
 
-/* Remove the horizontal separator line between paired items */
-.media-add-list--paired .admin-item::after {
+[data-drupal-admin-styles] .media-add-list--paired .admin-item {
+  border: 1px solid var(--gin-border-color, #ccc);
+  border-radius: 4px;
+  background: var(--gin-bg-layer, #fff);
+  margin: 0;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+/* Remove Gin's horizontal rule separator between items */
+[data-drupal-admin-styles] .media-add-list--paired .admin-item::after {
   display: none;
 }
 
-/* Unpaired item (e.g. external_embed with no bulk variant) spans full width */
-.media-add-list--paired .admin-item:last-child:nth-child(odd) {
+[data-drupal-admin-styles] .media-add-list--paired .admin-item:hover {
+  border-color: var(--gin-color-primary, #0073e6);
+  background: var(--gin-bg-item-hover, #f0f7ff);
+}
+
+/* Unpaired item (no bulk variant, e.g. external_embed) spans both columns */
+[data-drupal-admin-styles] .media-add-list--paired .admin-item:last-child:nth-child(odd) {
   grid-column: 1 / -1;
 }
 
 @media (max-width: 640px) {
-  .media-add-list--paired {
+  [data-drupal-admin-styles] .media-add-list--paired {
     grid-template-columns: 1fr;
   }
 }
@@ -33,11 +48,10 @@
   padding: 1.5rem;
   text-align: center;
   transition: background-color 0.15s ease, border-color 0.15s ease;
-  cursor: pointer;
 }
 
 .mukurtu-bulk-dropzone.is-drag-over {
-  background-color: var(--gin-bg-item-hover, rgba(0, 0, 0, 0.04));
+  background-color: var(--gin-bg-item-hover, rgba(0, 115, 230, 0.05));
   border-color: var(--gin-color-primary, #0073e6);
   border-style: solid;
 }
@@ -46,23 +60,9 @@
   margin: 0 0 0.75rem;
   color: var(--gin-color-text-light, #545560);
   font-style: italic;
-  pointer-events: none;
 }
 
-/* Keep the managed_file widget itself inline/natural inside the zone */
 .mukurtu-bulk-dropzone .js-form-managed-file {
   display: inline-block;
   text-align: left;
-}
-
-/* ============================================================
-   Bulk metadata step — file preview thumbnail
-   ============================================================ */
-
-.mukurtu-bulk-file-preview {
-  display: block;
-  max-width: 200px;
-  max-height: 200px;
-  margin-bottom: 0.75rem;
-  border-radius: 4px;
 }

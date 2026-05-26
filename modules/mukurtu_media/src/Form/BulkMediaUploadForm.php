@@ -7,7 +7,6 @@ use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\File\FileUrlGeneratorInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
 use Drupal\file\Entity\File;
@@ -51,19 +50,16 @@ class BulkMediaUploadForm extends FormBase implements ContainerInjectionInterfac
 
   protected EntityTypeManagerInterface $entityTypeManager;
   protected AccountInterface $currentUser;
-  protected FileUrlGeneratorInterface $fileUrlGenerator;
 
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, AccountInterface $current_user, FileUrlGeneratorInterface $file_url_generator) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, AccountInterface $current_user) {
     $this->entityTypeManager = $entity_type_manager;
     $this->currentUser = $current_user;
-    $this->fileUrlGenerator = $file_url_generator;
   }
 
   public static function create(ContainerInterface $container): static {
     return new static(
       $container->get('entity_type.manager'),
-      $container->get('current_user'),
-      $container->get('file_url_generator')
+      $container->get('current_user')
     );
   }
 
@@ -107,14 +103,16 @@ class BulkMediaUploadForm extends FormBase implements ContainerInjectionInterfac
 
     $form['#attached']['library'][] = 'mukurtu_media/bulk_upload_dropzone';
 
-    $form['description'] = [
-      '#type' => 'item',
-      '#markup' => $this->t('Drag files onto the area below, or click Browse to select files. You will then set protocols and metadata for each file before saving.'),
+    $form['dropzone'] = [
+      '#type' => 'container',
+      '#attributes' => ['class' => ['mukurtu-bulk-dropzone']],
     ];
-
-    $form['upload'] = [
+    $form['dropzone']['hint'] = [
+      '#markup' => '<p class="mukurtu-bulk-dropzone__hint">' . $this->t('Drop files here, or use Browse to select files.') . '</p>',
+    ];
+    $form['dropzone']['upload'] = [
       '#type' => 'managed_file',
-      '#title' => $this->t('Files'),
+      '#title' => $this->t('Browse files'),
       '#description' => $this->t('Allowed file types: @extensions.', ['@extensions' => $config['extensions']]),
       '#multiple' => TRUE,
       '#upload_validators' => [
@@ -122,8 +120,6 @@ class BulkMediaUploadForm extends FormBase implements ContainerInjectionInterfac
       ],
       '#upload_location' => $config['uri_scheme'] . "://{$year}-{$month}",
       '#required' => TRUE,
-      '#prefix' => '<div class="mukurtu-bulk-dropzone"><p class="mukurtu-bulk-dropzone__hint">' . $this->t('Drop files here or') . '</p>',
-      '#suffix' => '</div>',
     ];
 
     $form['actions'] = ['#type' => 'actions'];
@@ -131,7 +127,7 @@ class BulkMediaUploadForm extends FormBase implements ContainerInjectionInterfac
       '#type' => 'submit',
       '#value' => $this->t('Continue to metadata'),
       '#submit' => ['::uploadFilesSubmit'],
-      '#limit_validation_errors' => [['upload']],
+      '#limit_validation_errors' => [['dropzone']],
       '#button_type' => 'primary',
     ];
 
@@ -171,22 +167,6 @@ class BulkMediaUploadForm extends FormBase implements ContainerInjectionInterfac
         '#parents' => ['entities', $delta, 'fields'],
       ];
 
-      // For image media, add a direct file preview (bypasses image styles so
-      // it works reliably for private files before the entity is saved).
-      $field_item = $entity->get($field_name)->first();
-      if ($field_item && ($fid = $field_item->target_id)) {
-        $file = File::load($fid);
-        if ($file && strpos($file->getMimeType(), 'image/') === 0) {
-          $form['entities'][$delta]['file_preview'] = [
-            '#theme' => 'image',
-            '#uri' => $file->getFileUri(),
-            '#alt' => $entity->getName(),
-            '#attributes' => ['class' => ['mukurtu-bulk-file-preview']],
-            '#weight' => -20,
-          ];
-        }
-      }
-
       $display->buildForm($entity, $form['entities'][$delta]['fields'], $form_state);
     }
 
@@ -218,7 +198,7 @@ class BulkMediaUploadForm extends FormBase implements ContainerInjectionInterfac
     $field_name = $config['field'];
     $needs_alt = $config['alt'] ?? FALSE;
 
-    $fids = $form_state->getValue('upload', []);
+    $fids = $form_state->getValue(['dropzone', 'upload'], []);
     if (empty($fids)) {
       $this->messenger()->addError($this->t('No files were uploaded.'));
       return;
