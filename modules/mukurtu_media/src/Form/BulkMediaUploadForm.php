@@ -8,6 +8,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\StringTranslation\ByteSizeMarkup;
 use Drupal\Core\Url;
 use Drupal\file\Entity\File;
 use Drupal\media\Entity\Media;
@@ -107,7 +108,7 @@ class BulkMediaUploadForm extends FormBase implements ContainerInjectionInterfac
       '#type' => 'container',
       '#attributes' => ['class' => ['mukurtu-bulk-dropzone']],
     ];
-    $max_size = \format_size(\Drupal\Component\Utility\Environment::getUploadMaxSize());
+    $max_size = ByteSizeMarkup::create(\Drupal\Component\Utility\Environment::getUploadMaxSize());
     $form['dropzone']['hint'] = [
       '#markup' => '<p class="mukurtu-bulk-dropzone__hint">' . $this->t('Drop files here, or use Choose Files to select files.') . '</p>',
     ];
