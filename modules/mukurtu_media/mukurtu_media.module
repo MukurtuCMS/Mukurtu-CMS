@@ -75,10 +75,25 @@ function mukurtu_media_entity_field_storage_info(EntityTypeInterface $entity_typ
 }
 
 /**
+ * Adds a "Bulk upload" link to file-based media add forms.
+ */
+function _mukurtu_media_add_bulk_upload_link(array &$form, string $media_type): void {
+  $url = \Drupal\Core\Url::fromRoute('mukurtu_media.bulk_upload', ['media_type' => $media_type]);
+  $link = \Drupal\Core\Link::fromTextAndUrl(t('Bulk upload'), $url)->toString();
+  $form['bulk_upload_link'] = [
+    '#type' => 'item',
+    '#markup' => '<p>' . $link . '</p>',
+    '#weight' => -100,
+  ];
+}
+
+/**
  * Implements hook_form_FORM_ID_alter().
  */
 function mukurtu_media_form_media_document_add_form_alter(&$form, FormStateInterface $form_state, $form_id)
 {
+  _mukurtu_media_add_bulk_upload_link($form, 'document');
+
   // For new document forms, don't show the "Extracted Text" field because no
   // text has been extracted yet.
   if (isset($form['field_extracted_text'])) {
@@ -114,6 +129,7 @@ function mukurtu_media_form_media_document_edit_form_alter(&$form, FormStateInte
 
 function mukurtu_media_form_media_video_add_form_alter(&$form, FormStateInterface $form_state, $form_id)
 {
+  _mukurtu_media_add_bulk_upload_link($form, 'video');
   $form['field_media_video_file']['widget'][0]['#process'][] = 'mukurtu_media_refresh_media_process';
 
   array_unshift($form["field_thumbnail"]["widget"][0]["#process"], 'mukurtu_media_process_thumb');
@@ -124,6 +140,7 @@ function mukurtu_media_form_media_video_add_form_alter(&$form, FormStateInterfac
  */
 function mukurtu_media_form_media_audio_add_form_alter(&$form, FormStateInterface $form_state, $form_id)
 {
+  _mukurtu_media_add_bulk_upload_link($form, 'audio');
   // Add custom handling on media upload/removal.
   $form['field_media_audio_file']['widget'][0]['#process'][] = 'mukurtu_media_refresh_media_process';
 }
@@ -133,6 +150,7 @@ function mukurtu_media_form_media_audio_add_form_alter(&$form, FormStateInterfac
  */
 function mukurtu_media_form_media_image_add_form_alter(&$form, FormStateInterface $form_state, $form_id)
 {
+  _mukurtu_media_add_bulk_upload_link($form, 'image');
   $form['field_media_image']['widget'][0]['#process'][] = 'mukurtu_media_refresh_media_process';
 }
 
