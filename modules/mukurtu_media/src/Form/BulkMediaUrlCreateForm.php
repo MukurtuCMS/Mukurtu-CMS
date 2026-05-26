@@ -2,6 +2,7 @@
 
 namespace Drupal\mukurtu_media\Form;
 
+use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
@@ -12,7 +13,10 @@ use Drupal\media\Entity\Media;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Provides a form for creating multiple URL-based media items at once.
+ * Provides a two-step form for creating multiple URL-based media items at once.
+ *
+ * Step 1: Enter one URL per line.
+ * Step 2: Set protocols and metadata for each item, then save.
  */
 class BulkMediaUrlCreateForm extends FormBase implements ContainerInjectionInterface {
 
@@ -58,19 +62,32 @@ class BulkMediaUrlCreateForm extends FormBase implements ContainerInjectionInter
     }
 
     $form_state->set('media_type', $media_type);
+    $form['#tree'] = TRUE;
 
+    $entities = $form_state->get('bulk_create_entities') ?? [];
+
+    if (empty($entities)) {
+      return $this->buildUrlStep($form, $form_state, $media_type);
+    }
+
+    return $this->buildMetadataStep($form, $form_state, $entities, $media_type);
+  }
+
+  protected function buildUrlStep(array $form, FormStateInterface $form_state, string $media_type): array {
     $form['urls'] = [
       '#type' => 'textarea',
       '#title' => $this->t('URLs'),
-      '#description' => $this->t('Enter one URL per line. A separate media item will be created for each URL.'),
+      '#description' => $this->t('Enter one URL per line. You will then set protocols and metadata for each item before saving.'),
       '#rows' => 10,
       '#required' => TRUE,
     ];
 
     $form['actions'] = ['#type' => 'actions'];
-    $form['actions']['submit'] = [
+    $form['actions']['next'] = [
       '#type' => 'submit',
-      '#value' => $this->t('Create'),
+      '#value' => $this->t('Continue to metadata'),
+      '#submit' => ['::createEntitiesSubmit'],
+      '#limit_validation_errors' => [['urls']],
       '#button_type' => 'primary',
     ];
 
@@ -85,7 +102,62 @@ class BulkMediaUrlCreateForm extends FormBase implements ContainerInjectionInter
     return $form;
   }
 
-  public function submitForm(array &$form, FormStateInterface $form_state): void {
+  protected function buildMetadataStep(array $form, FormStateInterface $form_state, array $entities, string $media_type): array {
+    $field_name = self::SUPPORTED_TYPES[$media_type]['field'];
+    $count = count($entities);
+
+    $form['description'] = [
+      '#type' => 'item',
+      '#markup' => $this->t('Set protocols and metadata for @count item(s) below, then click Save all.', ['@count' => $count]),
+    ];
+
+    $form['entities'] = ['#type' => 'container'];
+
+    foreach ($entities as $delta => $entity) {
+      $display = EntityFormDisplay::collectRenderDisplay($entity, 'default');
+
+      $form['entities'][$delta] = [
+        '#type' => 'details',
+        '#title' => $entity->getName(),
+        '#open' => TRUE,
+      ];
+
+      $form['entities'][$delta]['fields'] = [
+        '#type' => 'container',
+        '#parents' => ['entities', $delta, 'fields'],
+      ];
+
+      $display->buildForm($entity, $form['entities'][$delta]['fields'], $form_state);
+
+      // The URL is already set; hide the source field widget.
+      if (isset($form['entities'][$delta]['fields'][$field_name])) {
+        $form['entities'][$delta]['fields'][$field_name]['#access'] = FALSE;
+      }
+    }
+
+    $form['actions'] = ['#type' => 'actions'];
+    $form['actions']['submit'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Save all'),
+      '#button_type' => 'primary',
+    ];
+    $form['actions']['back'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Back'),
+      '#submit' => ['::backToUrls'],
+      '#limit_validation_errors' => [],
+    ];
+
+    return $form;
+  }
+
+  /**
+   * Submit handler for the "Continue to metadata" button.
+   *
+   * Creates unsaved Media entities from the entered URLs and stores them in
+   * form state so buildForm() can render the metadata step.
+   */
+  public function createEntitiesSubmit(array &$form, FormStateInterface $form_state): void {
     $media_type = $form_state->get('media_type');
     $config = self::SUPPORTED_TYPES[$media_type];
     $field_name = $config['field'];
@@ -98,37 +170,80 @@ class BulkMediaUrlCreateForm extends FormBase implements ContainerInjectionInter
       return;
     }
 
-    $created = [];
-    $failed = [];
-
+    $entities = [];
     foreach ($lines as $url) {
       $name = $this->nameFromUrl($url);
-
-      $media = Media::create([
+      $entities[] = Media::create([
         'bundle' => $media_type,
         'uid' => $this->currentUser->id(),
         'name' => $name,
         $field_name => $url,
         'status' => 1,
       ]);
+    }
+
+    $form_state->set('bulk_create_entities', $entities);
+    $form_state->setRebuild(TRUE);
+  }
+
+  /**
+   * Submit handler for the "Back" button.
+   */
+  public function backToUrls(array &$form, FormStateInterface $form_state): void {
+    $form_state->set('bulk_create_entities', NULL);
+    $form_state->setRebuild(TRUE);
+  }
+
+  public function validateForm(array &$form, FormStateInterface $form_state): void {
+    // Intermediate step buttons (next, back) set #limit_validation_errors;
+    // skip entity validation for those.
+    $triggering = $form_state->getTriggeringElement();
+    if (isset($triggering['#limit_validation_errors'])) {
+      return;
+    }
+
+    $entities = $form_state->get('bulk_create_entities') ?? [];
+    if (empty($entities)) {
+      return;
+    }
+
+    foreach ($entities as $delta => $entity) {
+      $display = EntityFormDisplay::collectRenderDisplay($entity, 'default');
+      $display->extractFormValues($entity, $form['entities'][$delta]['fields'], $form_state);
+      $display->validateFormValues($entity, $form['entities'][$delta]['fields'], $form_state);
+    }
+
+    $form_state->set('bulk_create_entities', $entities);
+  }
+
+  public function submitForm(array &$form, FormStateInterface $form_state): void {
+    $entities = $form_state->get('bulk_create_entities') ?? [];
+    if (empty($entities)) {
+      return;
+    }
+
+    $created = [];
+    $failed = [];
+
+    foreach ($entities as $delta => $entity) {
+      $display = EntityFormDisplay::collectRenderDisplay($entity, 'default');
+      $display->extractFormValues($entity, $form['entities'][$delta]['fields'], $form_state);
 
       try {
-        $media->save();
-        $created[] = $media;
+        $entity->save();
+        $created[] = $entity;
       }
       catch (\Exception $e) {
-        $this->getLogger('mukurtu_media')->error('Failed to create media entity for URL @url: @message', [
-          '@url' => $url,
+        $this->getLogger('mukurtu_media')->error('Failed to save bulk media entity: @message', [
           '@message' => $e->getMessage(),
         ]);
-        $failed[] = $url;
+        $failed[] = $entity->getName();
       }
     }
 
     if (!empty($created)) {
       $count = count($created);
       $this->messenger()->addStatus($this->t('@count media item(s) created successfully.', ['@count' => $count]));
-
       if ($count <= 10) {
         foreach ($created as $media) {
           $edit_url = $media->toUrl('edit-form');
@@ -141,7 +256,7 @@ class BulkMediaUrlCreateForm extends FormBase implements ContainerInjectionInter
     }
 
     if (!empty($failed)) {
-      $this->messenger()->addError($this->t('@count URL(s) could not be processed.', ['@count' => count($failed)]));
+      $this->messenger()->addError($this->t('@count item(s) could not be saved.', ['@count' => count($failed)]));
     }
 
     $form_state->setRedirectUrl(Url::fromRoute('entity.media.collection'));
@@ -156,7 +271,6 @@ class BulkMediaUrlCreateForm extends FormBase implements ContainerInjectionInter
       $segments = array_filter(explode('/', trim($parts['path'], '/')));
       if (!empty($segments)) {
         $last = end($segments);
-        // Remove query-string-like suffixes and decode.
         $last = preg_replace('/[?#].*$/', '', $last);
         $name = urldecode($last);
         if ($name !== '') {

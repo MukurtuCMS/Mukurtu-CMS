@@ -2,6 +2,7 @@
 
 namespace Drupal\mukurtu_media\Form;
 
+use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
@@ -13,15 +14,15 @@ use Drupal\media\Entity\Media;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Provides a form for uploading multiple media assets at once.
+ * Provides a two-step form for uploading multiple media assets at once.
+ *
+ * Step 1: Select files to upload.
+ * Step 2: Set protocols and metadata for each uploaded file, then save.
  */
 class BulkMediaUploadForm extends FormBase implements ContainerInjectionInterface {
 
   /**
-   * The file-based media types supported by this form and their config.
-   *
-   * Keys are bundle IDs. Values are arrays with 'field', 'extensions',
-   * 'uri_scheme', and optionally 'alt' (TRUE if alt text must be set).
+   * File-based media types supported by this form.
    */
   protected const SUPPORTED_TYPES = [
     'image' => [
@@ -66,9 +67,6 @@ class BulkMediaUploadForm extends FormBase implements ContainerInjectionInterfac
     return 'mukurtu_media_bulk_upload_form';
   }
 
-  /**
-   * Returns the page title for the route title callback.
-   */
   public static function getTitle(string $media_type): string {
     $labels = [
       'image' => 'images',
@@ -83,18 +81,29 @@ class BulkMediaUploadForm extends FormBase implements ContainerInjectionInterfac
   public function buildForm(array $form, FormStateInterface $form_state, string $media_type = ''): array {
     if (!isset(self::SUPPORTED_TYPES[$media_type])) {
       $this->messenger()->addError($this->t('Bulk upload is not supported for this media type.'));
-      $form['#attached']['http_header'][] = ['Location', Url::fromRoute('view.mukurtu_media_library.page_1')->toString()];
       return $form;
     }
 
     $config = self::SUPPORTED_TYPES[$media_type];
     $form_state->set('media_type', $media_type);
+    $form['#tree'] = TRUE;
 
-    $form['#attributes']['enctype'] = 'multipart/form-data';
+    $entities = $form_state->get('bulk_upload_entities') ?? [];
+
+    if (empty($entities)) {
+      return $this->buildUploadStep($form, $form_state, $config, $media_type);
+    }
+
+    return $this->buildMetadataStep($form, $form_state, $entities, $config, $media_type);
+  }
+
+  protected function buildUploadStep(array $form, FormStateInterface $form_state, array $config, string $media_type): array {
+    $year = date('Y');
+    $month = date('m');
 
     $form['description'] = [
       '#type' => 'item',
-      '#markup' => $this->t('Select multiple files to upload. A separate media item will be created for each file. Names will be filled in automatically from the filenames.'),
+      '#markup' => $this->t('Select multiple files to upload. You will then set protocols and metadata for each file before saving.'),
     ];
 
     $form['upload'] = [
@@ -105,14 +114,16 @@ class BulkMediaUploadForm extends FormBase implements ContainerInjectionInterfac
       '#upload_validators' => [
         'FileExtension' => ['extensions' => $config['extensions']],
       ],
-      '#upload_location' => $config['uri_scheme'] . '://[date:custom:Y]-[date:custom:m]',
+      '#upload_location' => $config['uri_scheme'] . "://{$year}-{$month}",
       '#required' => TRUE,
     ];
 
     $form['actions'] = ['#type' => 'actions'];
-    $form['actions']['submit'] = [
+    $form['actions']['next'] = [
       '#type' => 'submit',
-      '#value' => $this->t('Upload'),
+      '#value' => $this->t('Continue to metadata'),
+      '#submit' => ['::uploadFilesSubmit'],
+      '#limit_validation_errors' => [['upload']],
       '#button_type' => 'primary',
     ];
 
@@ -127,7 +138,62 @@ class BulkMediaUploadForm extends FormBase implements ContainerInjectionInterfac
     return $form;
   }
 
-  public function submitForm(array &$form, FormStateInterface $form_state): void {
+  protected function buildMetadataStep(array $form, FormStateInterface $form_state, array $entities, array $config, string $media_type): array {
+    $field_name = $config['field'];
+    $count = count($entities);
+
+    $form['description'] = [
+      '#type' => 'item',
+      '#markup' => $this->t('Set protocols and metadata for @count media item(s) below, then click Save all.', ['@count' => $count]),
+    ];
+
+    $form['entities'] = ['#type' => 'container'];
+
+    foreach ($entities as $delta => $entity) {
+      $display = EntityFormDisplay::collectRenderDisplay($entity, 'default');
+
+      $form['entities'][$delta] = [
+        '#type' => 'details',
+        '#title' => $entity->getName(),
+        '#open' => TRUE,
+      ];
+
+      $form['entities'][$delta]['fields'] = [
+        '#type' => 'container',
+        '#parents' => ['entities', $delta, 'fields'],
+      ];
+
+      $display->buildForm($entity, $form['entities'][$delta]['fields'], $form_state);
+
+      // The file is already attached; hide the upload widget.
+      if (isset($form['entities'][$delta]['fields'][$field_name])) {
+        $form['entities'][$delta]['fields'][$field_name]['#access'] = FALSE;
+      }
+    }
+
+    $form['actions'] = ['#type' => 'actions'];
+    $form['actions']['submit'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Save all'),
+      '#button_type' => 'primary',
+    ];
+    $form['actions']['back'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Back'),
+      '#submit' => ['::backToUpload'],
+      '#limit_validation_errors' => [],
+    ];
+
+    return $form;
+  }
+
+  /**
+   * Submit handler for the "Continue to metadata" button.
+   *
+   * Creates unsaved Media entities from the uploaded files and stores them in
+   * form state so buildForm() can render the metadata step.
+   */
+  public function uploadFilesSubmit(array &$form, FormStateInterface $form_state): void {
     $media_type = $form_state->get('media_type');
     $config = self::SUPPORTED_TYPES[$media_type];
     $field_name = $config['field'];
@@ -139,15 +205,16 @@ class BulkMediaUploadForm extends FormBase implements ContainerInjectionInterfac
       return;
     }
 
-    $created = [];
-    $failed = [];
-
+    $entities = [];
     foreach ($fids as $fid) {
       $file = File::load($fid);
       if (!$file) {
-        $failed[] = $fid;
         continue;
       }
+
+      // Mark permanent so the file is not deleted as a temporary upload.
+      $file->setPermanent();
+      $file->save();
 
       $filename = $file->getFilename();
       $last_dot = strrpos($filename, '.');
@@ -158,31 +225,82 @@ class BulkMediaUploadForm extends FormBase implements ContainerInjectionInterfac
         $field_value['alt'] = $name;
       }
 
-      $media = Media::create([
+      $entities[] = Media::create([
         'bundle' => $media_type,
         'uid' => $this->currentUser->id(),
         'name' => $name,
         $field_name => $field_value,
         'status' => 1,
       ]);
+    }
+
+    if (empty($entities)) {
+      $this->messenger()->addError($this->t('Could not load any of the uploaded files.'));
+      return;
+    }
+
+    $form_state->set('bulk_upload_entities', $entities);
+    $form_state->setRebuild(TRUE);
+  }
+
+  /**
+   * Submit handler for the "Back" button.
+   */
+  public function backToUpload(array &$form, FormStateInterface $form_state): void {
+    $form_state->set('bulk_upload_entities', NULL);
+    $form_state->setRebuild(TRUE);
+  }
+
+  public function validateForm(array &$form, FormStateInterface $form_state): void {
+    // Intermediate step buttons (upload, back) set #limit_validation_errors;
+    // skip entity validation for those.
+    $triggering = $form_state->getTriggeringElement();
+    if (isset($triggering['#limit_validation_errors'])) {
+      return;
+    }
+
+    $entities = $form_state->get('bulk_upload_entities') ?? [];
+    if (empty($entities)) {
+      return;
+    }
+
+    foreach ($entities as $delta => $entity) {
+      $display = EntityFormDisplay::collectRenderDisplay($entity, 'default');
+      $display->extractFormValues($entity, $form['entities'][$delta]['fields'], $form_state);
+      $display->validateFormValues($entity, $form['entities'][$delta]['fields'], $form_state);
+    }
+
+    $form_state->set('bulk_upload_entities', $entities);
+  }
+
+  public function submitForm(array &$form, FormStateInterface $form_state): void {
+    $entities = $form_state->get('bulk_upload_entities') ?? [];
+    if (empty($entities)) {
+      return;
+    }
+
+    $created = [];
+    $failed = [];
+
+    foreach ($entities as $delta => $entity) {
+      $display = EntityFormDisplay::collectRenderDisplay($entity, 'default');
+      $display->extractFormValues($entity, $form['entities'][$delta]['fields'], $form_state);
 
       try {
-        $media->save();
-        $created[] = $media;
+        $entity->save();
+        $created[] = $entity;
       }
       catch (\Exception $e) {
-        $this->getLogger('mukurtu_media')->error('Failed to create media entity for file @fid: @message', [
-          '@fid' => $fid,
+        $this->getLogger('mukurtu_media')->error('Failed to save bulk media entity: @message', [
           '@message' => $e->getMessage(),
         ]);
-        $failed[] = $filename;
+        $failed[] = $entity->getName();
       }
     }
 
     if (!empty($created)) {
       $count = count($created);
       $this->messenger()->addStatus($this->t('@count media item(s) created successfully.', ['@count' => $count]));
-
       if ($count <= 10) {
         foreach ($created as $media) {
           $edit_url = $media->toUrl('edit-form');
@@ -195,7 +313,7 @@ class BulkMediaUploadForm extends FormBase implements ContainerInjectionInterfac
     }
 
     if (!empty($failed)) {
-      $this->messenger()->addError($this->t('@count file(s) could not be processed.', ['@count' => count($failed)]));
+      $this->messenger()->addError($this->t('@count item(s) could not be saved.', ['@count' => count($failed)]));
     }
 
     $form_state->setRedirectUrl(Url::fromRoute('entity.media.collection'));
