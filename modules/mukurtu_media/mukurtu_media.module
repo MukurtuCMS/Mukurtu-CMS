@@ -95,6 +95,8 @@ function mukurtu_media_form_media_document_add_form_alter(&$form, FormStateInter
   // Prepend a process callback for the thumbnail field to add our default
   // thumbnail logic.
   array_unshift($form["field_thumbnail"]["widget"][0]["#process"], 'mukurtu_media_process_thumb');
+
+  mukurtu_media_apply_upload_help($form['field_media_document']['widget'][0]);
 }
 
 /**
@@ -113,11 +115,16 @@ function mukurtu_media_form_media_document_edit_form_alter(&$form, FormStateInte
   array_unshift($form['field_thumbnail']['widget'][0]['#process'], 'mukurtu_media_process_thumb');
 }
 
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
 function mukurtu_media_form_media_video_add_form_alter(&$form, FormStateInterface $form_state, $form_id)
 {
   $form['field_media_video_file']['widget'][0]['#process'][] = 'mukurtu_media_refresh_media_process';
 
   array_unshift($form["field_thumbnail"]["widget"][0]["#process"], 'mukurtu_media_process_thumb');
+
+  mukurtu_media_apply_upload_help($form['field_media_video_file']['widget'][0]);
 }
 
 /**
@@ -127,6 +134,8 @@ function mukurtu_media_form_media_audio_add_form_alter(&$form, FormStateInterfac
 {
   // Add custom handling on media upload/removal.
   $form['field_media_audio_file']['widget'][0]['#process'][] = 'mukurtu_media_refresh_media_process';
+
+  mukurtu_media_apply_upload_help($form['field_media_audio_file']['widget'][0]);
 }
 
 /**
@@ -135,6 +144,29 @@ function mukurtu_media_form_media_audio_add_form_alter(&$form, FormStateInterfac
 function mukurtu_media_form_media_image_add_form_alter(&$form, FormStateInterface $form_state, $form_id)
 {
   $form['field_media_image']['widget'][0]['#process'][] = 'mukurtu_media_refresh_media_process';
+
+  mukurtu_media_apply_upload_help($form['field_media_image']['widget'][0]);
+}
+
+/**
+ * Renders and applies the file_upload_help theme as the widget description.
+ *
+ * Fixes #197: Drupal core's ImageWidget skips file_upload_help rendering when
+ * the default_value fids array contains an empty string (new entity), so the
+ * admin add forms miss the "Allowed types" and file size limit lines that the
+ * media library modal shows. We apply the rendering explicitly here.
+ */
+function mukurtu_media_apply_upload_help(array &$element) {
+  if (empty($element['#upload_validators'])) {
+    return;
+  }
+  $file_upload_help = [
+    '#theme' => 'file_upload_help',
+    '#description' => $element['#description'] ?? '',
+    '#upload_validators' => $element['#upload_validators'],
+    '#cardinality' => 1,
+  ];
+  $element['#description'] = \Drupal::service('renderer')->renderInIsolation($file_upload_help);
 }
 
 /**
@@ -294,15 +326,102 @@ function mukurtu_media_process_thumb(&$element, FormStateInterface $form_state, 
  * Fixes #1096: set the HTML accept attribute on the file input in the media
  * library upload modal so the OS file picker greys out invalid extensions, the
  * same way the admin /admin/media/add forms do.
+ *
+ * Also fixes #198: after an image is uploaded, auto-fill the alt text field
+ * with the filename (minus extension), matching the admin form behaviour.
  */
 function mukurtu_media_form_media_library_add_form_upload_alter(&$form, FormStateInterface $form_state, $form_id) {
-  if (empty($form['container']['upload']['#upload_validators']['FileExtension']['extensions'])) {
-    return;
+  if (!empty($form['container']['upload']['#upload_validators']['FileExtension']['extensions'])) {
+    $extensions = $form['container']['upload']['#upload_validators']['FileExtension']['extensions'];
+    $accept = '.' . implode(',.', array_filter(explode(' ', $extensions)));
+    $form['container']['upload']['#accept'] = $accept;
   }
 
-  $extensions = $form['container']['upload']['#upload_validators']['FileExtension']['extensions'];
-  $accept = '.' . implode(',.', array_filter(explode(' ', $extensions)));
-  $form['container']['upload']['#accept'] = $accept;
+  // Auto-fill alt text for any uploaded image that has no alt text yet.
+  if (!isset($form['media'])) {
+    return;
+  }
+  foreach (Element::children($form['media']) as $delta) {
+    if (empty($form['media'][$delta]['fields']['field_media_image']['widget'][0])) {
+      continue;
+    }
+    $widget = &$form['media'][$delta]['fields']['field_media_image']['widget'][0];
+    $fid = $widget['#value']['fids'][0] ?? NULL;
+    $current_alt = $widget['alt']['#value'] ?? $widget['alt']['#default_value'] ?? NULL;
+    if ($fid && empty($current_alt)) {
+      $file = \Drupal\file\Entity\File::load($fid);
+      if ($file) {
+        $filename = $file->getFilename();
+        $alt = substr($filename, 0, strrpos($filename, '.'));
+        $widget['alt']['#value'] = $alt;
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Fixes #194: auto-fill the name field for SoundCloud media created via the
+ * admin form at /admin/media/add/soundcloud, matching modal behaviour.
+ */
+function mukurtu_media_form_media_soundcloud_add_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  array_unshift($form['actions']['submit']['#submit'], 'mukurtu_media_soundcloud_admin_name_submit');
+}
+
+/**
+ * Submit handler: fetches the SoundCloud track title and fills the name field.
+ */
+function mukurtu_media_soundcloud_admin_name_submit(array &$form, FormStateInterface $form_state) {
+  $name = trim($form_state->getValue(['name', 0, 'value']) ?? '');
+  if ($name) {
+    return;
+  }
+  $url = trim($form_state->getValue(['field_media_soundcloud', 0, 'value']) ?? '');
+  if (!$url) {
+    return;
+  }
+  $title = SoundCloudAddForm::fetchSoundCloudTitle($url);
+  if ($title) {
+    $form_state->setValue(['name', 0, 'value'], $title);
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Fixes #194: auto-fill the name field for remote video (YouTube/Vimeo) media
+ * created via the admin form at /admin/media/add/remote_video, matching modal
+ * behaviour.
+ */
+function mukurtu_media_form_media_remote_video_add_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  array_unshift($form['actions']['submit']['#submit'], 'mukurtu_media_remote_video_admin_name_submit');
+}
+
+/**
+ * Submit handler: fetches the oEmbed title for a YouTube/Vimeo URL and fills
+ * the name field.
+ */
+function mukurtu_media_remote_video_admin_name_submit(array &$form, FormStateInterface $form_state) {
+  $name = trim($form_state->getValue(['name', 0, 'value']) ?? '');
+  if ($name) {
+    return;
+  }
+  $url = trim($form_state->getValue(['field_media_oembed_video', 0, 'value']) ?? '');
+  if (!$url) {
+    return;
+  }
+  try {
+    $oembed_url = \Drupal::service('media.oembed.url_resolver')->getResourceUrl($url);
+    $resource = \Drupal::service('media.oembed.resource_fetcher')->fetchResource($oembed_url);
+    $title = $resource->getTitle();
+    if ($title) {
+      $form_state->setValue(['name', 0, 'value'], $title);
+    }
+  }
+  catch (\Exception $e) {
+    // oEmbed fetch failed; proceed without auto-filling name.
+  }
 }
 
 /**

@@ -35,7 +35,7 @@ class SoundCloudAddForm extends SoundcloudForm {
   public function addButtonSubmit(array $form, FormStateInterface $form_state): void {
     $url = trim($form_state->getValue('soundcloud_url') ?? '');
     if ($url) {
-      $this->fetchedTitle = $this->fetchSoundCloudTitle($url);
+      $this->fetchedTitle = static::fetchSoundCloudTitle($url);
     }
     parent::addButtonSubmit($form, $form_state);
   }
@@ -57,9 +57,9 @@ class SoundCloudAddForm extends SoundcloudForm {
    * Returns NULL on any network or parse error so the form can still save with
    * whatever default name the source plugin derives.
    */
-  private function fetchSoundCloudTitle(string $url): ?string {
+  public static function fetchSoundCloudTitle(string $url): ?string {
     try {
-      $response = $this->httpClient->get('https://soundcloud.com/oembed', [
+      $response = \Drupal::httpClient()->get('https://soundcloud.com/oembed', [
         'query' => ['format' => 'json', 'url' => $url],
         'timeout' => 5,
       ]);
