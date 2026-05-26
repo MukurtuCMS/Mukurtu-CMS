@@ -36,6 +36,10 @@ services:
           mkdir ~/mukurtu
           cd ~/mukurtu
           composer create mukurtu/mukurtu-template:dev-main .
+          # Disable Composer's block-insecure audit gate. SA-CORE-2026-004 affects
+          # all available drupal/core versions and no patched release exists yet.
+          # Remove this once a clean 11.2.x release is available.
+          composer config audit.block-insecure false
           # Add our own local checkout repository instead. This will use the
           # local directory as the source, copying it into the final location.
           composer config repositories.local-dev path $TUGBOAT_ROOT
