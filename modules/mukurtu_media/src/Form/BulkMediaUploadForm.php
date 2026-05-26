@@ -107,7 +107,7 @@ class BulkMediaUploadForm extends FormBase implements ContainerInjectionInterfac
       '#type' => 'container',
       '#attributes' => ['class' => ['mukurtu-bulk-dropzone']],
     ];
-    $max_size = format_size(\Drupal\Component\Utility\Environment::getUploadMaxSize());
+    $max_size = \format_size(\Drupal\Component\Utility\Environment::getUploadMaxSize());
     $form['dropzone']['hint'] = [
       '#markup' => '<p class="mukurtu-bulk-dropzone__hint">' . $this->t('Drop files here, or use Choose Files to select files.') . '</p>',
     ];
