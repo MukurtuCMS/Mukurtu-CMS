@@ -127,11 +127,11 @@ class BulkMediaUrlCreateForm extends FormBase implements ContainerInjectionInter
         '#parents' => ['entities', $delta, 'fields'],
       ];
 
-      // Show the URL as a read-only label.
+      // Show the URL as a read-only label above the metadata fields.
       $form['entities'][$delta]['url_display'] = [
         '#type' => 'item',
         '#title' => $this->t('URL'),
-        '#markup' => htmlspecialchars($entity->get($field_name)->value ?? '', ENT_QUOTES, 'UTF-8'),
+        '#markup' => htmlspecialchars($entity->get($field_name)->getString(), ENT_QUOTES, 'UTF-8'),
         '#weight' => -10,
       ];
 

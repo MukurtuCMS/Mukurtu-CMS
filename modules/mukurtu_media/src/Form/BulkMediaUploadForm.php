@@ -163,18 +163,7 @@ class BulkMediaUploadForm extends FormBase implements ContainerInjectionInterfac
         '#parents' => ['entities', $delta, 'fields'],
       ];
 
-      // Show the uploaded file as a read-only preview.
-      $form['entities'][$delta]['file_preview'] = $entity->get($field_name)->view([
-        'label' => 'hidden',
-      ]);
-      $form['entities'][$delta]['file_preview']['#weight'] = -10;
-
       $display->buildForm($entity, $form['entities'][$delta]['fields'], $form_state);
-
-      // Hide the upload widget — the file is already attached and shown above.
-      if (isset($form['entities'][$delta]['fields'][$field_name])) {
-        $form['entities'][$delta]['fields'][$field_name]['#access'] = FALSE;
-      }
     }
 
     $form['actions'] = ['#type' => 'actions'];
