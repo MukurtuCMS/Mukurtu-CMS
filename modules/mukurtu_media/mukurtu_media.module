@@ -79,32 +79,59 @@ function mukurtu_media_entity_field_storage_info(EntityTypeInterface $entity_typ
 /**
  * Implements hook_preprocess_entity_add_list().
  *
- * Appends bulk upload/create links to media type entries on /admin/media/add.
+ * Adds bulk upload/create items to the media type list on /admin/media/add.
  */
 function mukurtu_media_preprocess_entity_add_list(&$variables) {
   if (\Drupal::routeMatch()->getRouteName() !== 'entity.media.add_page') {
     return;
   }
 
-  $file_types = ['image', 'audio', 'document', 'video'];
-  $url_types = ['remote_video', 'soundcloud'];
+  $bulk_items = [
+    'bulk_upload_image' => [
+      'route' => 'mukurtu_media.bulk_upload',
+      'params' => ['media_type' => 'image'],
+      'label' => t('Bulk upload images'),
+      'description' => t('Upload multiple images at once.'),
+    ],
+    'bulk_upload_audio' => [
+      'route' => 'mukurtu_media.bulk_upload',
+      'params' => ['media_type' => 'audio'],
+      'label' => t('Bulk upload audio'),
+      'description' => t('Upload multiple audio files at once.'),
+    ],
+    'bulk_upload_document' => [
+      'route' => 'mukurtu_media.bulk_upload',
+      'params' => ['media_type' => 'document'],
+      'label' => t('Bulk upload documents'),
+      'description' => t('Upload multiple documents at once.'),
+    ],
+    'bulk_upload_video' => [
+      'route' => 'mukurtu_media.bulk_upload',
+      'params' => ['media_type' => 'video'],
+      'label' => t('Bulk upload videos'),
+      'description' => t('Upload multiple video files at once.'),
+    ],
+    'bulk_create_remote_video' => [
+      'route' => 'mukurtu_media.bulk_create',
+      'params' => ['media_type' => 'remote_video'],
+      'label' => t('Bulk add remote videos'),
+      'description' => t('Add multiple remote videos by URL at once.'),
+    ],
+    'bulk_create_soundcloud' => [
+      'route' => 'mukurtu_media.bulk_create',
+      'params' => ['media_type' => 'soundcloud'],
+      'label' => t('Bulk add SoundCloud items'),
+      'description' => t('Add multiple SoundCloud items by URL at once.'),
+    ],
+  ];
 
-  foreach ($variables['bundles'] as $bundle_id => &$bundle) {
-    if (in_array($bundle_id, $file_types)) {
-      $url = Url::fromRoute('mukurtu_media.bulk_upload', ['media_type' => $bundle_id]);
-      $link_text = t('Bulk upload');
-    }
-    elseif (in_array($bundle_id, $url_types)) {
-      $url = Url::fromRoute('mukurtu_media.bulk_create', ['media_type' => $bundle_id]);
-      $link_text = t('Bulk create');
-    }
-    else {
-      continue;
-    }
-
-    $link = Link::fromTextAndUrl($link_text, $url)->toString();
-    $existing = isset($bundle['description']['#markup']) ? (string) $bundle['description']['#markup'] : '';
-    $bundle['description'] = ['#markup' => $existing . '<p>' . $link . '</p>'];
+  foreach ($bulk_items as $key => $item) {
+    $url = Url::fromRoute($item['route'], $item['params']);
+    $variables['bundles'][$key] = [
+      'label' => $item['label'],
+      'description' => ['#markup' => $item['description']],
+      'add_link' => Link::fromTextAndUrl($item['label'], $url),
+    ];
   }
 }
 
