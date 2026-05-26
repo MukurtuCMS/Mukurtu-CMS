@@ -90,6 +90,11 @@
     },
     "config": {
         "sort-packages": true,
+        "audit": {
+            "ignore": {
+                "PKSA-dwsq-ppd2-mb1x": "symfony/polyfill-intl-idn: advisory only affects the pure PHP fallback path; native PHP intl extension is required and available in all target environments"
+            }
+        },
         "allow-plugins": {
             "composer/installers": true,
             "cweagans/composer-patches": true,
