@@ -198,7 +198,7 @@ class BulkMediaUploadForm extends FormBase implements ContainerInjectionInterfac
       $this->messenger()->addError($this->t('@count file(s) could not be processed.', ['@count' => count($failed)]));
     }
 
-    $form_state->setRedirectUrl(Url::fromRoute('view.mukurtu_media_library.page_1'));
+    $form_state->setRedirectUrl(Url::fromRoute('entity.media.collection'));
   }
 
 }
