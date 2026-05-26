@@ -14,6 +14,7 @@ use Drupal\mukurtu_media\Entity\RemoteVideo;
 use Drupal\mukurtu_media\Entity\Video;
 use Drupal\mukurtu_media\Entity\ExternalEmbed;
 use Drupal\mukurtu_media\Form\ExternalEmbedForm;
+use Drupal\mukurtu_media\Form\SoundCloudAddForm;
 use Drupal\mukurtu_media\Entity\SoundCloud;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -53,9 +54,9 @@ function mukurtu_media_media_source_info_alter(array &$sources)
   if (empty($sources['external_embed']['forms']['media_library_add'])) {
     $sources['external_embed']['forms']['media_library_add'] = ExternalEmbedForm::class;
   }
-  if (empty($sources['soundcloud']['forms']['media_library_add'])) {
-    $sources['soundcloud']['forms']['media_library_add'] = SoundCloud::class;
-  }
+  // Always override the contrib SoundcloudForm with our subclass so that the
+  // track title is auto-filled from the SoundCloud oEmbed endpoint (#777).
+  $sources['soundcloud']['forms']['media_library_add'] = SoundCloudAddForm::class;
 }
 
 /**
@@ -285,6 +286,23 @@ function mukurtu_media_process_thumb(&$element, FormStateInterface $form_state, 
     }
   }
   return $element;
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Fixes #1096: set the HTML accept attribute on the file input in the media
+ * library upload modal so the OS file picker greys out invalid extensions, the
+ * same way the admin /admin/media/add forms do.
+ */
+function mukurtu_media_form_media_library_add_form_upload_alter(&$form, FormStateInterface $form_state, $form_id) {
+  if (empty($form['container']['upload']['#upload_validators']['FileExtension']['extensions'])) {
+    return;
+  }
+
+  $extensions = $form['container']['upload']['#upload_validators']['FileExtension']['extensions'];
+  $accept = '.' . implode(',.', array_filter(explode(' ', $extensions)));
+  $form['container']['upload']['#accept'] = $accept;
 }
 
 /**

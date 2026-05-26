@@ -4,6 +4,8 @@ dependencies:
   config:
     - core.entity_form_mode.media.media_library
     - media.type.soundcloud
+  module:
+    - mukurtu_protocol
 id: media.soundcloud.media_library
 targetEntityType: media
 bundle: soundcloud
@@ -17,10 +19,15 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
+  field_cultural_protocols:
+    type: cultural_protocol_widget
+    weight: 1
+    region: content
+    settings: {  }
+    third_party_settings: {  }
 hidden:
   created: true
   field_contributor: true
-  field_cultural_protocols: true
   field_identifier: true
   field_media_soundcloud: true
   field_media_tags: true

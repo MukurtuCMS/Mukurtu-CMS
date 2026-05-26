@@ -83,3 +83,33 @@ function mukurtu_media_update_40002(): void {
     ])->save();
   }
 }
+
+/**
+ * Show field_cultural_protocols in the SoundCloud media_library form display.
+ *
+ * Fixes #784: SoundCloud items created via in-content modal were saved without
+ * a protocol because the field was hidden in the media_library form mode.
+ */
+function mukurtu_media_update_40004(): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('entity_form_display');
+  /** @var \Drupal\Core\Entity\Display\EntityFormDisplayInterface $display */
+  $display = $storage->load('media.soundcloud.media_library');
+  if (!$display) {
+    return;
+  }
+
+  // Only add the field if it isn't already visible.
+  $component = $display->getComponent('field_cultural_protocols');
+  if ($component) {
+    return;
+  }
+
+  $display->setComponent('field_cultural_protocols', [
+    'type' => 'cultural_protocol_widget',
+    'weight' => 1,
+    'region' => 'content',
+    'settings' => [],
+    'third_party_settings' => [],
+  ]);
+  $display->save();
+}
