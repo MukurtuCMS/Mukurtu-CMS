@@ -2,14 +2,13 @@
    /admin/media/add — paired two-column card layout
    ============================================================ */
 
-/* Use [data-drupal-admin-styles] prefix to match Gin's specificity layer */
-[data-drupal-admin-styles] .media-add-list--paired {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--gin-spacing-s);
+.media-add-list--paired {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: var(--gin-spacing-s, 0.5rem);
 }
 
-[data-drupal-admin-styles] .media-add-list--paired .admin-item {
+.media-add-list--paired .admin-item {
   border: 1px solid var(--gin-border-color, #ccc);
   border-radius: 4px;
   background: var(--gin-bg-layer, #fff);
@@ -18,23 +17,23 @@
 }
 
 /* Remove Gin's horizontal rule separator between items */
-[data-drupal-admin-styles] .media-add-list--paired .admin-item::after {
+.media-add-list--paired .admin-item::after {
   display: none;
 }
 
-[data-drupal-admin-styles] .media-add-list--paired .admin-item:hover {
+.media-add-list--paired .admin-item:hover {
   border-color: var(--gin-color-primary, #0073e6);
   background: var(--gin-bg-item-hover, #f0f7ff);
 }
 
 /* Unpaired item (no bulk variant, e.g. external_embed) spans both columns */
-[data-drupal-admin-styles] .media-add-list--paired .admin-item:last-child:nth-child(odd) {
+.media-add-list--paired .admin-item:last-child:nth-child(odd) {
   grid-column: 1 / -1;
 }
 
 @media (max-width: 640px) {
-  [data-drupal-admin-styles] .media-add-list--paired {
-    grid-template-columns: 1fr;
+  .media-add-list--paired {
+    grid-template-columns: 1fr !important;
   }
 }
 
