@@ -10,7 +10,8 @@
 
   function initGLightbox() {
     const lightbox = new GLightbox({
-      selector: 'a.media-asset--link'
+      selector: 'a.media-asset--link',
+      loop: true
     });
   }
 
