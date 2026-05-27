@@ -40,7 +40,7 @@
   {{ title_suffix.contextual_links }}
   {{ content.media_content_warnings }}
 
-  <a href="{{ media_url }}" data-type="iframe" class="media-asset--link" aria-label="Expand {{ name }} document">
+  <a href="#document-{{ media.id }}" data-type="inline" class="media-asset--link" aria-label="Expand {{ name }} document">
     <span class="media-asset--expand">Expand +</span>
     <span class="media-asset--content">
       {% if content.thumbnail['#items'] is not empty %}
@@ -50,6 +50,10 @@
       {% endif %}
     </span>
   </a>
+
+  <div id="document-{{ media.id }}" class="media-asset--glightbox-inline">
+    <object alt="Document {{ name }}" data="{{ media_url }}" class="media-asset--document-viewer"></object>
+  </div>
 
   <a href="{{ media_url }}" class="button" download>Download document</a>
 

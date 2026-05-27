@@ -2227,6 +2227,11 @@ details.form-wrapper summary + div {
   width: 100%;
   min-height: 400px;
 }
+.glightbox-clean .gslide-inline .media-asset--document-viewer {
+  display: block;
+  width: 100%;
+  height: 75vh;
+}
 
 .glightbox-clean .gprev,
 .glightbox-clean .gnext,
