@@ -2,6 +2,7 @@
 
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\InvokeCommand;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -376,9 +377,31 @@ function mukurtu_media_form_media_library_add_form_upload_alter(&$form, FormStat
  *
  * Fixes #194: auto-fill the name field for SoundCloud media created via the
  * admin form at /admin/media/add/soundcloud, matching modal behaviour.
+ * AJAX fires on URL field change (blur with changed value); submit handler
+ * is a fallback in case AJAX was bypassed.
  */
 function mukurtu_media_form_media_soundcloud_add_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  $form['field_media_soundcloud']['widget'][0]['value']['#ajax'] = [
+    'callback' => 'mukurtu_media_soundcloud_url_ajax',
+    'event' => 'change',
+    'progress' => ['type' => 'throbber', 'message' => NULL],
+  ];
   array_unshift($form['actions']['submit']['#submit'], 'mukurtu_media_soundcloud_admin_name_submit');
+}
+
+/**
+ * AJAX callback: fetches the SoundCloud title and sets the name field value.
+ */
+function mukurtu_media_soundcloud_url_ajax(array &$form, FormStateInterface $form_state) {
+  $response = new AjaxResponse();
+  $url = trim($form_state->getValue(['field_media_soundcloud', 0, 'value']) ?? '');
+  if ($url) {
+    $title = SoundCloudAddForm::fetchSoundCloudTitle($url);
+    if ($title) {
+      $response->addCommand(new InvokeCommand('input[name="name[0][value]"]', 'val', [$title]));
+    }
+  }
+  return $response;
 }
 
 /**
@@ -405,9 +428,39 @@ function mukurtu_media_soundcloud_admin_name_submit(array &$form, FormStateInter
  * Fixes #194: auto-fill the name field for remote video (YouTube/Vimeo) media
  * created via the admin form at /admin/media/add/remote_video, matching modal
  * behaviour.
+ * AJAX fires on URL field change (blur with changed value); submit handler
+ * is a fallback in case AJAX was bypassed.
  */
 function mukurtu_media_form_media_remote_video_add_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  $form['field_media_oembed_video']['widget'][0]['value']['#ajax'] = [
+    'callback' => 'mukurtu_media_remote_video_url_ajax',
+    'event' => 'change',
+    'progress' => ['type' => 'throbber', 'message' => NULL],
+  ];
   array_unshift($form['actions']['submit']['#submit'], 'mukurtu_media_remote_video_admin_name_submit');
+}
+
+/**
+ * AJAX callback: fetches the oEmbed title for a YouTube/Vimeo URL and sets
+ * the name field value.
+ */
+function mukurtu_media_remote_video_url_ajax(array &$form, FormStateInterface $form_state) {
+  $response = new AjaxResponse();
+  $url = trim($form_state->getValue(['field_media_oembed_video', 0, 'value']) ?? '');
+  if ($url) {
+    try {
+      $oembed_url = \Drupal::service('media.oembed.url_resolver')->getResourceUrl($url);
+      $resource = \Drupal::service('media.oembed.resource_fetcher')->fetchResource($oembed_url);
+      $title = $resource->getTitle();
+      if ($title) {
+        $response->addCommand(new InvokeCommand('input[name="name[0][value]"]', 'val', [$title]));
+      }
+    }
+    catch (\Exception $e) {
+      // oEmbed fetch failed; leave name field as-is.
+    }
+  }
+  return $response;
 }
 
 /**
