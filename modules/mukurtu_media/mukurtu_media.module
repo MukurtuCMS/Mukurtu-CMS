@@ -316,8 +316,11 @@ function mukurtu_media_process_thumb(&$element, FormStateInterface $form_state, 
  * library upload modal so the OS file picker greys out invalid extensions, the
  * same way the admin /admin/media/add forms do.
  *
- * Also fixes #198: after an image is uploaded in the modal, auto-fill the alt
- * text field and strip the extension from the auto-generated media name.
+ * Also fixes #198: after an image is uploaded in the modal, strip the extension
+ * from the auto-generated media name and attach the JS behavior that copies the
+ * name into the alt text field (PHP form alter cannot reliably set alt #value
+ * in this context because ImageWidget::process adds the element after the form
+ * has already been walked).
  *
  * The FID is read from the media entity stored in form state rather than from
  * the widget's #value['fids'], because the fids hidden input is not rendered
@@ -335,12 +338,15 @@ function mukurtu_media_form_media_library_add_form_upload_alter(&$form, FormStat
   }
 
   $added_media = $form_state->get('media') ?? [];
+  $has_image = FALSE;
 
   foreach (Element::children($form['media']) as $delta) {
     $media_entity = $added_media[$delta] ?? NULL;
     if (!$media_entity || $media_entity->bundle() !== 'image') {
       continue;
     }
+
+    $has_image = TRUE;
 
     // Get the FID from the media entity (reliable after upload).
     $fid = $media_entity->get('field_media_image')->target_id ?? NULL;
@@ -358,19 +364,6 @@ function mukurtu_media_form_media_library_add_form_upload_alter(&$form, FormStat
       ? substr($filename, 0, strrpos($filename, '.'))
       : $filename;
 
-    // Fill alt text via #pre_render so the value is set during rendering,
-    // after all form processing. ImageWidget::process adds the alt element
-    // after doBuildForm has already walked the children, so the alt element
-    // is never run through handleInputElement — setting #value here in
-    // hook_form_alter writes to the unprocessed element and the textfield
-    // renderer ignores it. #pre_render runs last and is always respected.
-    $widget = &$form['media'][$delta]['fields']['field_media_image']['widget'][0];
-    if (!isset($widget['alt'])) {
-      $widget['alt'] = [];
-    }
-    $widget['alt']['#mukurtu_alt_autofill'] = $basename;
-    $widget['alt']['#pre_render'][] = 'mukurtu_media_modal_alt_pre_render';
-
     // Strip the file extension from the auto-generated media name.
     $name_value = &$form['media'][$delta]['fields']['name']['widget'][0]['value'];
     if (isset($name_value)) {
@@ -380,21 +373,14 @@ function mukurtu_media_form_media_library_add_form_upload_alter(&$form, FormStat
       }
     }
   }
-}
 
-/**
- * Pre-render callback: fills the alt text field if still empty.
- *
- * Runs after Drupal's Textfield::preRenderTextfield, which copies #value into
- * #attributes['value'] before our turn. We set both so that the rendered
- * <input value="..."> shows the autofilled text.
- */
-function mukurtu_media_modal_alt_pre_render(array $element): array {
-  if (empty($element['#value']) && !empty($element['#mukurtu_alt_autofill'])) {
-    $element['#value'] = $element['#mukurtu_alt_autofill'];
-    $element['#attributes']['value'] = $element['#mukurtu_alt_autofill'];
+  // Attach the JS behavior that copies the media name into the alt text field.
+  // PHP cannot reliably set the alt #value here because ImageWidget::process
+  // adds the alt element after hook_form_alter has run; JS runs after the full
+  // DOM is written and is the reliable approach.
+  if ($has_image) {
+    $form['#attached']['library'][] = 'mukurtu_media/media-library-image-alt';
   }
-  return $element;
 }
 
 /**
