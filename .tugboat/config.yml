@@ -85,7 +85,7 @@ services:
             file_put_contents('composer.json',
               json_encode(\$d, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL);
           "
-          composer update --no-ansi --no-interaction --optimize-autoloader --no-progress
+          composer update --no-ansi --no-interaction --optimize-autoloader --no-progress --prefer-stable
           # Install Drupal with the Mukurtu installation profile. Run as web
           # user to create files with the right permissions. Pass in the
           # environment variables from Tugboat using the -E option.
