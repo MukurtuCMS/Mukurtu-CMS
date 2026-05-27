@@ -73,10 +73,10 @@ services:
           # which ships a different index.php that requires autoload_runtime.php.
           php -r "
             \$d = json_decode(file_get_contents('composer.json'), true);
-            \$d['require']['drupal/core'] = '^11.3.0';
-            \$d['require']['drupal/core-recommended'] = '^11.3.0';
-            \$d['require']['drupal/core-composer-scaffold'] = '^11.3.0';
-            \$d['require']['drupal/core-project-message'] = '^11.3.0';
+            \$d['require']['drupal/core'] = '11.3.10';
+            \$d['require']['drupal/core-recommended'] = '11.3.10';
+            \$d['require']['drupal/core-composer-scaffold'] = '11.3.10';
+            \$d['require']['drupal/core-project-message'] = '11.3.10';
             \$d['config']['preferred-install']['drupal/core*'] = 'dist';
             \$d['prefer-stable'] = true;
             \$d['config']['allow-plugins']['symfony/runtime'] = true;
