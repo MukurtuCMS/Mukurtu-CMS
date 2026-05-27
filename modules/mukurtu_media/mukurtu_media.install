@@ -196,3 +196,32 @@ function mukurtu_media_update_40005(): void {
   }
   $display->save();
 }
+
+/**
+ * Add field_thumbnail to the image media default form display.
+ *
+ * The image bundle is the only media type without a thumbnail field. The field
+ * itself is registered via bundleFieldDefinitions() (no schema change needed);
+ * this hook adds it to the default form display at weight 4.
+ */
+function mukurtu_media_update_40007(): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('entity_form_display');
+  /** @var \Drupal\Core\Entity\Display\EntityFormDisplayInterface $display */
+  $display = $storage->load('media.image.default');
+  if (!$display) {
+    return;
+  }
+  if (!$display->getComponent('field_thumbnail')) {
+    $display->setComponent('field_thumbnail', [
+      'type' => 'image_image',
+      'weight' => 4,
+      'region' => 'content',
+      'settings' => [
+        'progress_indicator' => 'throbber',
+        'preview_image_style' => 'thumbnail',
+      ],
+      'third_party_settings' => [],
+    ]);
+    $display->save();
+  }
+}

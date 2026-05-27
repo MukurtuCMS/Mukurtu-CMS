@@ -193,9 +193,12 @@ function mukurtu_media_upload_ajax_callback(array &$form, FormStateInterface $fo
       $response->addCommand(new ReplaceCommand("#edit-name-wrapper > div", $form['name']['widget'][0]));
 
       // Use the new name as the alt text for the thumbnail image.
+      // Note: do NOT pass the alt element to a ReplaceCommand here — that would
+      // pre-render it (setting #printed = TRUE) and cause renderRoot() below to
+      // skip it, leaving the alt field empty. Setting #value is enough; the main
+      // ReplaceCommand(NULL, $output) below re-renders the whole widget.
       if ($entity instanceof ImageInterface) {
         $form['field_media_image']['widget'][0]['alt']['#value'] = $filenameNoExt;
-        $response->addCommand(new ReplaceCommand('#edit-field-media-image-0-alt-wrapper', $form['field_media_image']['widget'][0]['alt']));
       }
       else {
         $form["field_thumbnail"]["widget"][0]["alt"]["#value"] = $filenameNoExt;
@@ -250,9 +253,8 @@ function mukurtu_media_remove_ajax_callback(array &$form, FormStateInterface $fo
 
   $entity = $form_state->getFormObject()->getEntity();
   if ($entity instanceof ImageInterface) {
-    // For image media, clear the alt text field.
+    // Clear the alt text field (same no-extra-ReplaceCommand rationale as in the upload callback).
     $form['field_media_image']['widget'][0]['alt']['#value'] = '';
-    $response->addCommand(new ReplaceCommand('#edit-field-media-image-0-alt-wrapper', $form['field_media_image']['widget'][0]['alt']));
   }
   else {
     // Redraw the thumbnail field widget. The thumbnail may have been altered in the managed file process handler.

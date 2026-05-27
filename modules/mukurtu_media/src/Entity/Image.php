@@ -129,6 +129,39 @@ class Image extends Media implements ImageInterface, CulturalProtocolControlledI
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
+    $definitions['field_thumbnail'] = BaseFieldDefinition::create('image')
+      ->setLabel(t('Thumbnail'))
+      ->setDescription(t('An optional separate thumbnail used in certain view contexts. If not provided, the media image itself is used.</br>Select "Choose File" to upload a thumbnail image.'))
+      ->setSettings([
+        'alt_field' => TRUE,
+        'alt_field_required' => TRUE,
+        'title_field' => FALSE,
+        'title_field_required' => FALSE,
+        'max_resolution' => '',
+        'min_resolution' => '',
+        'default_image' => [
+          'uuid' => NULL,
+          'alt' => '',
+          'title' => '',
+          'width' => NULL,
+          'height' => NULL,
+        ],
+        'file_directory' => '[date:custom:Y]-[date:custom:m]',
+        'file_extensions' => 'png gif jpg jpeg',
+        'max_filesize' => '',
+        'handler' => 'default:file',
+        'uri_scheme' => 'private',
+        'display_field' => FALSE,
+        'display_default' => FALSE,
+        'target_type' => 'file'
+      ])
+      ->setCardinality(1)
+      ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
+      ->setTranslatable(TRUE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
     $definitions['field_identifier'] = BaseFieldDefinition::create('string')
       ->setLabel('Identifier')
       ->setDescription('A unique, unambiguous reference to the media asset. Identifiers are often provided by the contributing institution or organization so the original item can be located. Examples include call numbers or accession numbers. Maximum 255 characters.')
