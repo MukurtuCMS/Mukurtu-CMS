@@ -2209,6 +2209,25 @@ details.form-wrapper summary + div {
   inline-size: 100%;
 }
 
+.media-asset--glightbox-inline {
+  display: none;
+}
+
+.glightbox-clean .gslide-inline {
+  padding: 1rem;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+}
+.glightbox-clean .gslide-inline audio {
+  display: block;
+  width: 100%;
+}
+.glightbox-clean .gslide-inline iframe {
+  display: block;
+  width: 100%;
+  min-height: 400px;
+}
+
 .glightbox-clean .gprev,
 .glightbox-clean .gnext,
 .glightbox-clean .gclose {

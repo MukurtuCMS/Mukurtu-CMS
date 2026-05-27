@@ -1,3 +1,26 @@
+// Hidden source elements for Glightbox inline slides (audio, embeds).
+.media-asset--glightbox-inline {
+  display: none;
+}
+
+.glightbox-clean {
+  .gslide-inline {
+    padding: 1rem;
+    box-sizing: border-box;
+
+    audio {
+      display: block;
+      width: 100%;
+    }
+
+    iframe {
+      display: block;
+      width: 100%;
+      min-height: 400px;
+    }
+  }
+}
+
 // Glightbox control visibility overrides.
 // The library defaults are too small and too transparent to read easily.
 

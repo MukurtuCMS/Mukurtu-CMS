@@ -1,0 +1,46 @@
+{#
+/**
+ * @file
+ * Theme override to present a SoundCloud item in the media assets field.
+ *
+ * Available variables:
+ * - media: The media item, with limited access to object properties and
+ *   methods. Only method names starting with "get", "has", or "is" and
+ *   a few common methods such as "id", "label", and "bundle" are available.
+ * - name: Name of the media item.
+ * - content: Media content.
+ * - view_mode: View mode; for example, "teaser" or "full".
+ * - attributes: HTML attributes for the containing element.
+ * - bundle: machine name of media type.
+ * @see template_preprocess_media()
+ */
+#}
+{%
+  set classes = [
+    'media',
+    'media--' ~ bundle
+  ]
+%}
+
+<div{{ attributes.addClass(classes) }}>
+  {{ title_suffix.contextual_links }}
+  {{ content.media_content_warnings }}
+
+  <a href="#soundcloud-{{ media.id }}" data-type="inline" class="media-asset--link" aria-label="Expand {{ name }} audio">
+    <span class="media-asset--expand">Expand +</span>
+    <span class="media-asset--content">
+      {% if content.field_thumbnail['#items'] is not empty %}
+        {{ content.field_thumbnail }}
+      {% else %}
+        <img alt="SoundCloud audio {{ name }}" src="/profiles/mukurtu/themes/mukurtu_v4/images/soundcloud.png">
+      {% endif %}
+    </span>
+  </a>
+
+  <div id="soundcloud-{{ media.id }}" class="media-asset--glightbox-inline">
+    {{ content.field_media_soundcloud }}
+  </div>
+
+  <a href="{{ media.field_media_soundcloud.value }}" class="button" target="_blank" rel="noopener noreferrer">Listen on SoundCloud</a>
+
+</div>
