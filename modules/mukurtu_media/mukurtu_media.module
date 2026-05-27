@@ -340,8 +340,12 @@ function mukurtu_media_process_thumb(&$element, FormStateInterface $form_state, 
  * library upload modal so the OS file picker greys out invalid extensions, the
  * same way the admin /admin/media/add forms do.
  *
- * Also fixes #198: after an image is uploaded, auto-fill the alt text field
- * with the filename (minus extension), matching the admin form behaviour.
+ * Also fixes #198: after an image is uploaded in the modal, auto-fill the alt
+ * text field and strip the extension from the auto-generated media name.
+ *
+ * The FID is read from the media entity stored in form state rather than from
+ * the widget's #value['fids'], because the fids hidden input is not rendered
+ * before the first upload AJAX and therefore has no user-submitted value.
  */
 function mukurtu_media_form_media_library_add_form_upload_alter(&$form, FormStateInterface $form_state, $form_id) {
   if (!empty($form['container']['upload']['#upload_validators']['FileExtension']['extensions'])) {
@@ -350,23 +354,46 @@ function mukurtu_media_form_media_library_add_form_upload_alter(&$form, FormStat
     $form['container']['upload']['#accept'] = $accept;
   }
 
-  // Auto-fill alt text for any uploaded image that has no alt text yet.
   if (!isset($form['media'])) {
     return;
   }
+
+  $added_media = $form_state->get('media') ?? [];
+
   foreach (Element::children($form['media']) as $delta) {
-    if (empty($form['media'][$delta]['fields']['field_media_image']['widget'][0])) {
+    $media_entity = $added_media[$delta] ?? NULL;
+    if (!$media_entity || $media_entity->bundle() !== 'image') {
       continue;
     }
+
+    // Get the FID from the media entity (reliable after upload).
+    $fid = $media_entity->get('field_media_image')->target_id ?? NULL;
+    if (!$fid) {
+      continue;
+    }
+
+    $file = \Drupal\file\Entity\File::load($fid);
+    if (!$file) {
+      continue;
+    }
+
+    $filename = $file->getFilename();
+    $basename = strrpos($filename, '.') !== FALSE
+      ? substr($filename, 0, strrpos($filename, '.'))
+      : $filename;
+
+    // Fill alt text if the field exists and is still empty.
     $widget = &$form['media'][$delta]['fields']['field_media_image']['widget'][0];
-    $fid = $widget['#value']['fids'][0] ?? NULL;
-    $current_alt = $widget['alt']['#value'] ?? $widget['alt']['#default_value'] ?? NULL;
-    if ($fid && empty($current_alt)) {
-      $file = \Drupal\file\Entity\File::load($fid);
-      if ($file) {
-        $filename = $file->getFilename();
-        $alt = substr($filename, 0, strrpos($filename, '.'));
-        $widget['alt']['#value'] = $alt;
+    if (isset($widget['alt']) && empty($widget['alt']['#value'])) {
+      $widget['alt']['#value'] = $basename;
+    }
+
+    // Strip the file extension from the auto-generated media name.
+    $name_value = &$form['media'][$delta]['fields']['name']['widget'][0]['value'];
+    if (isset($name_value)) {
+      $current_name = $name_value['#value'] ?? $name_value['#default_value'] ?? '';
+      if (preg_match('/\.[a-z0-9]{1,5}$/i', $current_name)) {
+        $name_value['#value'] = $basename;
       }
     }
   }
