@@ -97,7 +97,6 @@ function mukurtu_media_form_media_document_add_form_alter(&$form, FormStateInter
   // thumbnail logic.
   array_unshift($form["field_thumbnail"]["widget"][0]["#process"], 'mukurtu_media_process_thumb');
 
-  mukurtu_media_apply_upload_help($form['field_media_document']['widget'][0]);
 }
 
 /**
@@ -125,7 +124,6 @@ function mukurtu_media_form_media_video_add_form_alter(&$form, FormStateInterfac
 
   array_unshift($form["field_thumbnail"]["widget"][0]["#process"], 'mukurtu_media_process_thumb');
 
-  mukurtu_media_apply_upload_help($form['field_media_video_file']['widget'][0]);
 }
 
 /**
@@ -136,7 +134,6 @@ function mukurtu_media_form_media_audio_add_form_alter(&$form, FormStateInterfac
   // Add custom handling on media upload/removal.
   $form['field_media_audio_file']['widget'][0]['#process'][] = 'mukurtu_media_refresh_media_process';
 
-  mukurtu_media_apply_upload_help($form['field_media_audio_file']['widget'][0]);
 }
 
 /**
@@ -146,29 +143,8 @@ function mukurtu_media_form_media_image_add_form_alter(&$form, FormStateInterfac
 {
   $form['field_media_image']['widget'][0]['#process'][] = 'mukurtu_media_refresh_media_process';
 
-  mukurtu_media_apply_upload_help($form['field_media_image']['widget'][0]);
 }
 
-/**
- * Renders and applies the file_upload_help theme as the widget description.
- *
- * Fixes #197: Drupal core's ImageWidget skips file_upload_help rendering when
- * the default_value fids array contains an empty string (new entity), so the
- * admin add forms miss the "Allowed types" and file size limit lines that the
- * media library modal shows. We apply the rendering explicitly here.
- */
-function mukurtu_media_apply_upload_help(array &$element) {
-  if (empty($element['#upload_validators'])) {
-    return;
-  }
-  $file_upload_help = [
-    '#theme' => 'file_upload_help',
-    '#description' => $element['#description'] ?? '',
-    '#upload_validators' => $element['#upload_validators'],
-    '#cardinality' => 1,
-  ];
-  $element['#description'] = \Drupal::service('renderer')->renderInIsolation($file_upload_help);
-}
 
 /**
  * AJAX callback for media upload with our custom thumbnail field refresh.
