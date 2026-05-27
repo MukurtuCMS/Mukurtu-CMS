@@ -10,6 +10,8 @@ use Drupal\mukurtu_core\Entity\PeopleInterface;
 use Drupal\mukurtu_core\Entity\PeopleTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
+use Drupal\Component\Utility\Environment;
+use Drupal\Core\StringTranslation\ByteSizeMarkup;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\file\Entity\File;
 use Drupal\Core\File\FileSystemInterface;
@@ -72,7 +74,7 @@ class Document extends Media implements DocumentInterface, CulturalProtocolContr
 
     $definitions['field_media_document'] = BaseFieldDefinition::create('file')
       ->setLabel(t('Document'))
-      ->setDescription(t('Supported file formats: pdf, txt, rtf, doc, docx, ppt, pptx, xls, xlsx, odf, odg, odp, ods, odt, fodt, fods, fodp, fodg, key, numbers, pages, csv, sxw, zip, rar, gz, 7z, tar.	</br>Select "Choose File" to upload a document.'))
+      ->setDescription(t('Supported file formats: pdf, txt, rtf, doc, docx, ppt, pptx, xls, xlsx, odf, odg, odp, ods, odt, fodt, fods, fodp, fodg, key, numbers, pages, csv, sxw, zip, rar, gz, 7z, tar. </br>Maximum file size: @size.</br>Select "Choose File" to upload a document.', ['@size' => ByteSizeMarkup::create(Environment::getUploadMaxSize())]))
       ->setDefaultValue('')
       ->setSettings([
         'target_type' => 'file',

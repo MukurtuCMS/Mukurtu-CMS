@@ -9,6 +9,8 @@ use Drupal\mukurtu_core\Entity\PeopleTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
+use Drupal\Component\Utility\Environment;
+use Drupal\Core\StringTranslation\ByteSizeMarkup;
 
 /**
  * Defines the Image media entity bundle class.
@@ -47,7 +49,7 @@ class Image extends Media implements ImageInterface, CulturalProtocolControlledI
 
     $definitions['field_media_image'] = BaseFieldDefinition::create('image')
       ->setLabel(t('Image'))
-      ->setDescription(t('Supported formats: jpeg, jpg, png, gif, webp.	</br>Select "Choose File" to upload an image.'))
+      ->setDescription(t('Supported formats: jpeg, jpg, png, gif, webp. </br>Maximum file size: @size.</br>Select "Choose File" to upload an image.', ['@size' => ByteSizeMarkup::create(Environment::getUploadMaxSize())]))
       ->setDefaultValue('')
       ->setSettings([
         'alt_field' => TRUE,

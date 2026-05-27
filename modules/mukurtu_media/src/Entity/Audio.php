@@ -9,6 +9,8 @@ use Drupal\mukurtu_core\Entity\PeopleTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
+use Drupal\Component\Utility\Environment;
+use Drupal\Core\StringTranslation\ByteSizeMarkup;
 
 /**
  * Defines the Audio media entity bundle class.
@@ -47,7 +49,7 @@ class Audio extends Media implements AudioInterface, CulturalProtocolControlledI
 
     $definitions['field_media_audio_file'] = BaseFieldDefinition::create('file')
       ->setLabel(t('Audio file'))
-      ->setDescription(t('Allowed file formats are mp3, m4a, wav, ogg, and aac. </br>Select "Choose File" to upload an audio file.'))
+      ->setDescription(t('Allowed file formats are mp3, m4a, wav, ogg, and aac. </br>Maximum file size: @size.</br>Select "Choose File" to upload an audio file.', ['@size' => ByteSizeMarkup::create(Environment::getUploadMaxSize())]))
       ->setDefaultValue('')
       ->setSettings([
         'target_type' => 'file',

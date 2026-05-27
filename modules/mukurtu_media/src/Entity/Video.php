@@ -9,6 +9,8 @@ use Drupal\mukurtu_core\Entity\PeopleInterface;
 use Drupal\mukurtu_core\Entity\PeopleTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
+use Drupal\Component\Utility\Environment;
+use Drupal\Core\StringTranslation\ByteSizeMarkup;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\file\Entity\File;
@@ -59,7 +61,7 @@ class Video extends Media implements VideoInterface, CulturalProtocolControlledI
 
     $definitions['field_media_video_file'] = BaseFieldDefinition::create('file')
       ->setLabel(t('Video file'))
-      ->setDescription(t('Supported formats: mp4, webm, ogv.	</br>Select "Choose File" to upload a video.'))
+      ->setDescription(t('Supported formats: mp4, webm, ogv. </br>Maximum file size: @size.</br>Select "Choose File" to upload a video.', ['@size' => ByteSizeMarkup::create(Environment::getUploadMaxSize())]))
       ->setDefaultValue('')
       ->setSettings([
         'file_extensions' => 'mp4 webm ogv',
