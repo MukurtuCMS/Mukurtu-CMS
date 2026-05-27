@@ -82,6 +82,16 @@ services:
             \$d['config']['allow-plugins']['symfony/runtime'] = true;
             \$d['config']['audit']['ignore']['PKSA-dwsq-ppd2-mb1x'] =
               'Advisory only affects pure PHP fallback; native intl is installed';
+            \$d['config']['audit']['ignore']['PKSA-fbvq-z33h-r2np'] =
+              'twig/twig advisory; version range pinned by drupal/core-recommended 11.3.10';
+            \$d['config']['audit']['ignore']['PKSA-g9zw-qxh8-pq8w'] =
+              'twig/twig advisory; version range pinned by drupal/core-recommended 11.3.10';
+            \$d['config']['audit']['ignore']['PKSA-yd6k-t2gh-1m43'] =
+              'twig/twig advisory; version range pinned by drupal/core-recommended 11.3.10';
+            \$d['config']['audit']['ignore']['PKSA-1tmc-rt7x-12w6'] =
+              'twig/twig advisory; version range pinned by drupal/core-recommended 11.3.10';
+            \$d['config']['audit']['ignore']['PKSA-xx6c-6d96-db2w'] =
+              'twig/twig advisory; version range pinned by drupal/core-recommended 11.3.10';
             file_put_contents('composer.json',
               json_encode(\$d, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL);
           "
