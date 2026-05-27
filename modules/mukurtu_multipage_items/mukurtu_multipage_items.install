@@ -48,6 +48,21 @@ function mukurtu_multipage_items_install(): void {
 }
 
 /**
+ * Reset MPI _controller config cleared by Drupal 11.3.x RouteSubscriber.
+ *
+ * In Drupal 11.3.x, entity.node.canonical uses _entity_view instead of
+ * _controller. The RouteSubscriber read null from that route and wrote it
+ * to config, leaving _controller null. Reset it to the NodeViewController
+ * fallback so viewRedirect() works correctly.
+ */
+function mukurtu_multipage_items_update_40002(): void {
+  $config = \Drupal::configFactory()->getEditable('mukurtu_multipage_items.settings');
+  if (empty($config->get('_controller'))) {
+    $config->set('_controller', '\Drupal\node\Controller\NodeViewController::view')->save();
+  }
+}
+
+/**
  * Switch field_pages on Multipage Item to rendered_entity (form_selection view mode).
  */
 function mukurtu_multipage_items_update_40001(): void {
