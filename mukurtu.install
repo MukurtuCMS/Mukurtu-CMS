@@ -16,6 +16,7 @@ use Drupal\layout_builder\SectionComponent;
 use Drupal\Component\Uuid\Php;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\field\Entity\FieldConfig;
+use Drupal\shortcut\Entity\Shortcut;
 
 /**
  * Implements hook_install().
@@ -25,9 +26,20 @@ use Drupal\field\Entity\FieldConfig;
  * @see system_install()
  */
 function mukurtu_install() {
-  // First, do everything in standard profile.
-  include_once DRUPAL_ROOT . '/core/profiles/standard/standard.install';
-  standard_install();
+  // Populate the default shortcut set (inlined from standard_install(), which
+  // is absent in some Drupal 11.3.x environments).
+  Shortcut::create([
+    'shortcut_set' => 'default',
+    'title' => t('Add content'),
+    'weight' => -20,
+    'link' => ['uri' => 'internal:/node/add'],
+  ])->save();
+  Shortcut::create([
+    'shortcut_set' => 'default',
+    'title' => t('All content'),
+    'weight' => -19,
+    'link' => ['uri' => 'internal:/admin/content'],
+  ])->save();
 
   // Uninstall search.
   \Drupal::service('module_installer')->uninstall(['search']);
