@@ -194,15 +194,17 @@ function mukurtu_media_upload_ajax_callback(array &$form, FormStateInterface $fo
 
       // Use the new name as the alt text for the thumbnail image.
       if ($entity instanceof ImageInterface) {
-        // Images require special handling.
         $form['field_media_image']['widget'][0]['alt']['#value'] = $filenameNoExt;
+        $response->addCommand(new ReplaceCommand('#edit-field-media-image-0-alt-wrapper', $form['field_media_image']['widget'][0]['alt']));
       }
       else {
         $form["field_thumbnail"]["widget"][0]["alt"]["#value"] = $filenameNoExt;
       }
     }
 
-    $response->addCommand(new ReplaceCommand("#edit-field-thumbnail-wrapper > div > div", $form['field_thumbnail']['widget']));
+    if (!($entity instanceof ImageInterface)) {
+      $response->addCommand(new ReplaceCommand("#edit-field-thumbnail-wrapper > div > div", $form['field_thumbnail']['widget']));
+    }
   }
 
   $form_parents = explode('/', $request->query->get('element_parents'));
@@ -246,8 +248,16 @@ function mukurtu_media_remove_ajax_callback(array &$form, FormStateInterface $fo
   // Redraw the name widget.
   $response->addCommand(new ReplaceCommand("#edit-name-wrapper > div", $form['name']['widget'][0]));
 
-  // Redraw the thumbnail field widget. The thumbnail may have been altered in the managed file process handler.
-  $response->addCommand(new ReplaceCommand("#edit-field-thumbnail-wrapper > div", $form['field_thumbnail']['widget']));
+  $entity = $form_state->getFormObject()->getEntity();
+  if ($entity instanceof ImageInterface) {
+    // For image media, clear the alt text field.
+    $form['field_media_image']['widget'][0]['alt']['#value'] = '';
+    $response->addCommand(new ReplaceCommand('#edit-field-media-image-0-alt-wrapper', $form['field_media_image']['widget'][0]['alt']));
+  }
+  else {
+    // Redraw the thumbnail field widget. The thumbnail may have been altered in the managed file process handler.
+    $response->addCommand(new ReplaceCommand("#edit-field-thumbnail-wrapper > div", $form['field_thumbnail']['widget']));
+  }
 
   $form_parents = explode('/', $request->query->get('element_parents'));
 
