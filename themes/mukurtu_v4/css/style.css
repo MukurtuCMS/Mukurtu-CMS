@@ -2218,6 +2218,12 @@ details.form-wrapper summary + div {
   -webkit-box-sizing: border-box;
           box-sizing: border-box;
 }
+.glightbox-clean .gslide-inline img {
+  display: block;
+  max-width: 100%;
+  max-height: 50vh;
+  margin: 0 auto 1rem;
+}
 .glightbox-clean .gslide-inline audio {
   display: block;
   width: 100%;

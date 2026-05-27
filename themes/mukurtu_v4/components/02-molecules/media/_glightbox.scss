@@ -8,6 +8,13 @@
     padding: 1rem;
     box-sizing: border-box;
 
+    img {
+      display: block;
+      max-width: 100%;
+      max-height: 50vh;
+      margin: 0 auto 1rem;
+    }
+
     audio {
       display: block;
       width: 100%;
