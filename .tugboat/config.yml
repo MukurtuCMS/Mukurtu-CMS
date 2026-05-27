@@ -75,6 +75,7 @@ services:
             \$d['require']['drupal/core-recommended'] = '~11.3';
             \$d['require']['drupal/core-composer-scaffold'] = '~11.3';
             \$d['require']['drupal/core-project-message'] = '~11.3';
+            \$d['config']['allow-plugins']['symfony/runtime'] = true;
             \$d['config']['audit']['ignore']['PKSA-dwsq-ppd2-mb1x'] =
               'Advisory only affects pure PHP fallback; native intl is installed';
             file_put_contents('composer.json',
