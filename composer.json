@@ -16,7 +16,7 @@
     ],
     "require": {
         "composer/installers": "^1.9",
-        "cweagans/composer-patches": "^1.7",
+        "cweagans/composer-patches": "^1.7 || ^2.0",
         "drupal/better_exposed_filters": "^7.1.1",
         "drupal/blazy": "^3.0",
         "drupal/color_field": "^3.0",
