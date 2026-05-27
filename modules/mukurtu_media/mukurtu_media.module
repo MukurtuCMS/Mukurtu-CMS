@@ -358,11 +358,18 @@ function mukurtu_media_form_media_library_add_form_upload_alter(&$form, FormStat
       ? substr($filename, 0, strrpos($filename, '.'))
       : $filename;
 
-    // Fill alt text if the field exists and is still empty.
+    // Fill alt text via #pre_render so the value is set during rendering,
+    // after all form processing. ImageWidget::process adds the alt element
+    // after doBuildForm has already walked the children, so the alt element
+    // is never run through handleInputElement — setting #value here in
+    // hook_form_alter writes to the unprocessed element and the textfield
+    // renderer ignores it. #pre_render runs last and is always respected.
     $widget = &$form['media'][$delta]['fields']['field_media_image']['widget'][0];
-    if (isset($widget['alt']) && empty($widget['alt']['#value'])) {
-      $widget['alt']['#value'] = $basename;
+    if (!isset($widget['alt'])) {
+      $widget['alt'] = [];
     }
+    $widget['alt']['#mukurtu_alt_autofill'] = $basename;
+    $widget['alt']['#pre_render'][] = 'mukurtu_media_modal_alt_pre_render';
 
     // Strip the file extension from the auto-generated media name.
     $name_value = &$form['media'][$delta]['fields']['name']['widget'][0]['value'];
@@ -373,6 +380,21 @@ function mukurtu_media_form_media_library_add_form_upload_alter(&$form, FormStat
       }
     }
   }
+}
+
+/**
+ * Pre-render callback: fills the alt text field if still empty.
+ *
+ * Runs after Drupal's Textfield::preRenderTextfield, which copies #value into
+ * #attributes['value'] before our turn. We set both so that the rendered
+ * <input value="..."> shows the autofilled text.
+ */
+function mukurtu_media_modal_alt_pre_render(array $element): array {
+  if (empty($element['#value']) && !empty($element['#mukurtu_alt_autofill'])) {
+    $element['#value'] = $element['#mukurtu_alt_autofill'];
+    $element['#attributes']['value'] = $element['#mukurtu_alt_autofill'];
+  }
+  return $element;
 }
 
 /**
