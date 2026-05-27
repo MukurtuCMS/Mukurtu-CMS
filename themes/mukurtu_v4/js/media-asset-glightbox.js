@@ -26,8 +26,11 @@
     function blockArrowsOnMediaSlide(e) {
       if (!lightboxOpen) return;
       if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
-      const activeSlide = lightbox.getActiveSlide();
-      if (activeSlide && activeSlide.querySelector('video, iframe')) {
+      // Only block when a video/iframe element actually has focus.
+      // For native <video>, document.activeElement is the video itself.
+      // For cross-origin <iframe>, document.activeElement is the iframe.
+      const focused = document.activeElement;
+      if (focused && (focused.tagName === 'VIDEO' || focused.tagName === 'IFRAME')) {
         e.stopPropagation();
       }
     }

@@ -2217,6 +2217,7 @@ details.form-wrapper summary + div {
   padding: 1rem;
   -webkit-box-sizing: border-box;
           box-sizing: border-box;
+  overflow: hidden;
 }
 .glightbox-clean .gslide-inline img {
   display: block;
