@@ -11,38 +11,31 @@
   function initGLightbox() {
     const lightbox = new GLightbox({
       selector: 'a.media-asset--link',
-      loop: true
+      loop: true,
+      autoplayVideos: false
     });
 
-    // When a video slide is active, stop arrow key events from bubbling up
-    // to Glightbox's document-level keyboard handler. The video element still
-    // receives the event (for seeking) since we stop propagation in the
-    // bubble phase after the target has already handled it.
-    let videoBlockers = [];
+    // When a video or remote-video (iframe) slide is active, block arrow keys
+    // from reaching GLightbox's document-level bubble-phase handler. We use
+    // the capture phase so the event is intercepted before it bubbles at all.
+    // Cross-origin iframes prevent attaching listeners inside them, so a
+    // capture-phase document listener is the only reliable approach for both
+    // native <video> and <iframe> embeds.
+    let lightboxOpen = false;
 
-    function blockVideoArrows(e) {
-      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+    function blockArrowsOnMediaSlide(e) {
+      if (!lightboxOpen) return;
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+      const activeSlide = lightbox.getActiveSlide();
+      if (activeSlide && activeSlide.querySelector('video, iframe')) {
         e.stopPropagation();
       }
     }
 
-    function attachVideoBlockers() {
-      videoBlockers.forEach(({el, fn}) => el.removeEventListener('keydown', fn));
-      videoBlockers = [];
-      const activeSlide = lightbox.getActiveSlide();
-      if (!activeSlide) return;
-      activeSlide.querySelectorAll('video').forEach(video => {
-        video.addEventListener('keydown', blockVideoArrows);
-        videoBlockers.push({el: video, fn: blockVideoArrows});
-      });
-    }
+    document.addEventListener('keydown', blockArrowsOnMediaSlide, true);
 
-    lightbox.on('open', () => setTimeout(attachVideoBlockers, 200));
-    lightbox.on('slide_changed', () => setTimeout(attachVideoBlockers, 200));
-    lightbox.on('close', () => {
-      videoBlockers.forEach(({el, fn}) => el.removeEventListener('keydown', fn));
-      videoBlockers = [];
-    });
+    lightbox.on('open', () => { lightboxOpen = true; });
+    lightbox.on('close', () => { lightboxOpen = false; });
   }
 
   // Drupal behavior
