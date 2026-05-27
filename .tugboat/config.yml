@@ -69,12 +69,16 @@ services:
           # Patch the template's composer.json to require Drupal 11.3.x and
           # ignore the symfony/polyfill-intl-idn advisory. composer config
           # does not support setting audit.ignore keys, so patch directly.
+          # Pin to ^11.3.0 with prefer-stable to avoid resolving to 11.x-dev,
+          # which ships a different index.php that requires autoload_runtime.php.
           php -r "
             \$d = json_decode(file_get_contents('composer.json'), true);
-            \$d['require']['drupal/core'] = '~11.3';
-            \$d['require']['drupal/core-recommended'] = '~11.3';
-            \$d['require']['drupal/core-composer-scaffold'] = '~11.3';
-            \$d['require']['drupal/core-project-message'] = '~11.3';
+            \$d['require']['drupal/core'] = '^11.3.0';
+            \$d['require']['drupal/core-recommended'] = '^11.3.0';
+            \$d['require']['drupal/core-composer-scaffold'] = '^11.3.0';
+            \$d['require']['drupal/core-project-message'] = '^11.3.0';
+            \$d['config']['preferred-install']['drupal/core*'] = 'dist';
+            \$d['prefer-stable'] = true;
             \$d['config']['allow-plugins']['symfony/runtime'] = true;
             \$d['config']['audit']['ignore']['PKSA-dwsq-ppd2-mb1x'] =
               'Advisory only affects pure PHP fallback; native intl is installed';
