@@ -188,7 +188,7 @@ class BulkMediaUrlCreateForm extends FormBase implements ContainerInjectionInter
         $field_name => $url,
         'status' => 1,
       ]);
-      $media->setName($media->getName());
+      $media->setName($media->getName() ?? $url);
       $entities[] = $media;
     }
 
