@@ -11,3 +11,4 @@ media-thumb-focus:
   dependencies:
     - core/drupal
     - core/once
+    - core/jquery
