@@ -138,6 +138,7 @@ class CulturalProtocolWidget extends WidgetBase {
       '#title' => $this->t("Select cultural protocols to apply to the item."),
       '#open' => TRUE,
       '#description' => $this->t("Cultural protocols determine which users can access this content. Cultural protocols are managed by their parent community, which represents a group of contributors. All content must be assigned at least one cultural protocol. Most content only requires one cultural protocol, but more granular access can be specified by selecting multiple protocols, or even protocols from multiple communities. </br>Select one or more cultural protocols. The relevant community or communities will be automatically applied."),
+      '#attributes' => ['autocomplete' => 'off'],
     ];
     $c_delta = 0;
 
@@ -157,12 +158,19 @@ class CulturalProtocolWidget extends WidgetBase {
         }
 
         // Build the protocol checkboxes.
+        // data-protocol-checkbox-default is read by cultural-protocol-widget.js
+        // to reset checkbox state after browser form restoration.
+        $isChecked = in_array($id, $current_protocol_ids);
         $communities[$c_delta]['protocols'][$id] = [
           '#type' => 'checkbox',
           '#title' => $protocolOption['#title'],
           '#description' => $description,
           '#return_value' => $id,
-          '#default_value' => in_array($id, $current_protocol_ids),
+          '#default_value' => $isChecked,
+          '#attributes' => [
+            'autocomplete' => 'off',
+            'data-protocol-checkbox-default' => $isChecked ? '1' : '0',
+          ],
         ];
 
         // Track the protocols we've rendered for the user, so that we can
@@ -208,6 +216,7 @@ class CulturalProtocolWidget extends WidgetBase {
       '#type' => 'fieldset',
       '#field_title' => $this->fieldDefinition->getLabel(),
       '#open' => TRUE,
+      '#attached' => ['library' => ['mukurtu_protocol/cultural-protocol-widget']],
       'protocol_selection' => $communities,
       'sharing_setting' => [
         '#type' => 'radios',
