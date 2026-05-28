@@ -1,26 +1,20 @@
 /**
  * @file
- * Prevents the media library modal from jumping to the top after a thumbnail
- * is uploaded in the external embed add form.
+ * Prevents the external embed media library modal from scrolling to the top
+ * after a thumbnail is uploaded.
  *
- * Root cause: after upload AJAX resolves, Drupal's ajax.js walks the
- * triggering element's ancestors and calls .trigger('focus') on the first
- * ancestor still in the DOM (the fields container, at the top of the form).
- * That focus call scrolls the .ui-dialog-content to the top.
+ * Root cause: after upload AJAX resolves, ajax.js (line 1113) walks the
+ * triggering element's ancestor chain and calls .trigger('focus') on the first
+ * ancestor still in the DOM. That focus call scrolls the dialog back to the top.
  *
- * Primary fix: the PHP process callback sets #ajax['disable-refocus'] = TRUE
- * on the upload/remove buttons. RenderElementBase::preRenderAjaxForm() reads
- * this key (note: hyphen, not underscore) and writes data-disable-refocus="true"
- * to the button HTML. ajax.js checks that attribute and skips the refocus.
+ * Primary fix: set jQuery data('disable-refocus', true) directly on the upload
+ * and remove buttons so ajax.js skips the ancestor-focus walk. jQuery data is
+ * used (not an HTML attribute) because ajax.js reads $(el).data('disable-refocus')
+ * from the internal data cache, not from the DOM.
  *
- * Belt-and-suspenders JS layer:
- * - Trigger: input[type="file"] 'change' — fires when the user picks a file,
- *   which is the actual interaction (the upload button itself is js-hide and
- *   clicked programmatically).
- * - Restoration hook: ajaxComplete — per the comment in core/misc/ajax.js,
- *   this event is delayed until the entire async command queue (including the
- *   refocus call) resolves. Restoring scrollTop at that point undoes any
- *   scroll the refocus may have caused.
+ * Belt-and-suspenders: on file input change, save scrollTop and restore it on
+ * ajaxComplete. ajaxComplete fires after the full command queue AND refocus
+ * (see ajax.js lines 586-601), so restoring here undoes any residual scroll.
  */
 
 (function ($, Drupal, once) {
@@ -28,11 +22,48 @@
 
   Drupal.behaviors.mukurtuThumbFocus = {
     attach: function (context) {
-      once('mukurtu-thumb-file', '[id*="field-thumbnail"] input[type="file"]', context).forEach(function (input) {
-        var scrollable = input.closest('.ui-dialog-content');
-        if (!scrollable) return;
+      // Process the managed_file widget element each time it appears in a new
+      // context (after AJAX rebuild). The widget div's id contains
+      // "field-thumbnail" and it carries the class js-form-managed-file.
+      once(
+        'mukurtu-thumb-widget',
+        '[id*="field-thumbnail"].js-form-managed-file, [id*="field-thumbnail"] .js-form-managed-file',
+        context
+      ).forEach(function (widget) {
+        // Mark every submit button inside the widget so ajax.js skips refocus.
+        widget.querySelectorAll('input[type="submit"]').forEach(function (btn) {
+          $(btn).data('disable-refocus', true);
+        });
 
-        input.addEventListener('change', function () {
+        // Belt-and-suspenders scroll restoration for any upload interactions.
+        var fileInput = widget.querySelector('input[type="file"]');
+        if (!fileInput) {
+          return;
+        }
+
+        fileInput.addEventListener('change', function () {
+          // Find the scrollable dialog container. Try the jQuery UI dialog
+          // class first, then walk ancestors looking for overflow:auto/scroll.
+          var scrollable = widget.closest('.ui-dialog-content');
+          if (!scrollable) {
+            var node = widget.parentElement;
+            while (node && node !== document.documentElement) {
+              var style = window.getComputedStyle(node);
+              if (
+                /(auto|scroll)/.test(style.overflowY) &&
+                node.scrollHeight > node.clientHeight
+              ) {
+                scrollable = node;
+                break;
+              }
+              node = node.parentElement;
+            }
+          }
+
+          if (!scrollable) {
+            return;
+          }
+
           var savedScroll = scrollable.scrollTop;
           $(document).one('ajaxComplete.thumbFocus', function () {
             scrollable.scrollTop = savedScroll;
