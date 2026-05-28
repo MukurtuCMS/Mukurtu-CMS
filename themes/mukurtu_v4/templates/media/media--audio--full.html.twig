@@ -1,0 +1,31 @@
+{#
+/**
+ * @file
+ * Theme override for audio in the full view mode.
+ *
+ * Used when audio media is rendered with view_mode: full, e.g. the
+ * field_recording field on dictionary word entries and field_media_assets
+ * on person and place records.
+ *
+ * Available variables:
+ * - name: Name of the media item.
+ * - content: Media content.
+ * - title_suffix: Additional output populated by modules.
+ * - attributes: HTML attributes for the containing element.
+ * - bundle: machine name of media type.
+ * @see template_preprocess_media()
+ */
+#}
+{%
+  set classes = [
+    'media',
+    'media--' ~ bundle
+  ]
+%}
+
+<div{{ attributes.addClass(classes) }}>
+  {{ title_suffix.contextual_links }}
+  {{ content.media_content_warnings }}
+  {{ content.field_media_audio_file }}
+  <span class="media-asset--name">{{ name }}</span>
+</div>
