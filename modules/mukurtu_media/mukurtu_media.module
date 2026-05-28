@@ -414,12 +414,36 @@ function mukurtu_media_form_media_library_add_form_upload_alter(&$form, FormStat
  * Attaches the thumbnail focus behavior to the external embed modal once the
  * embed has been added and the metadata fields (including field_thumbnail) are
  * visible. Without this, uploading a thumbnail causes the modal to scroll to
- * the top.
+ * the top because Drupal's AJAX refocus logic calls .trigger('focus') on an
+ * ancestor element, which scrolls the browser to it.
  */
 function mukurtu_media_form_media_library_add_form_external_embed_alter(&$form, FormStateInterface $form_state, $form_id) {
-  if (isset($form['media'])) {
-    $form['#attached']['library'][] = 'mukurtu_media/media-thumb-focus';
+  if (!isset($form['media'])) {
+    return;
   }
+  $form['#attached']['library'][] = 'mukurtu_media/media-thumb-focus';
+  // Add a process callback to the thumbnail widget so we can set
+  // disable_refocus on the upload/remove buttons after ManagedFile builds them.
+  foreach (Element::children($form['media']) as $delta) {
+    if (isset($form['media'][$delta]['fields']['field_thumbnail']['widget'][0])) {
+      $form['media'][$delta]['fields']['field_thumbnail']['widget'][0]['#process'][] = 'mukurtu_media_ext_embed_thumb_disable_refocus';
+    }
+  }
+}
+
+/**
+ * Process callback: disables AJAX refocus on the thumbnail upload/remove btns.
+ *
+ * Prevents Drupal's post-AJAX refocus from scrolling the media library modal
+ * back to the top after a thumbnail is uploaded or removed.
+ */
+function mukurtu_media_ext_embed_thumb_disable_refocus(&$element, FormStateInterface $form_state, &$complete_form) {
+  foreach (['upload_button', 'remove_button'] as $btn) {
+    if (isset($element[$btn]['#ajax'])) {
+      $element[$btn]['#ajax']['disable_refocus'] = TRUE;
+    }
+  }
+  return $element;
 }
 
 /**
