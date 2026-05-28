@@ -88,6 +88,13 @@ function mukurtu_media_form_media_document_add_form_alter(&$form, FormStateInter
     $form['field_extracted_text']['#type'] = 'hidden';
   }
 
+  // Grey out unsupported file types in the OS file picker.
+  $widget = &$form['field_media_document']['widget'][0];
+  if (!empty($widget['#upload_validators']['FileExtension']['extensions'])) {
+    $ext = $widget['#upload_validators']['FileExtension']['extensions'];
+    $widget['#accept'] = '.' . implode(',.', array_filter(explode(' ', $ext)));
+  }
+
   // Add a process callback for the document file field. This handler will
   // attach our AJAX callback. We need to do this via a process callback because
   // ManagedFile builds its AJAX callbacks inside of its own process callbacks.
@@ -120,6 +127,12 @@ function mukurtu_media_form_media_document_edit_form_alter(&$form, FormStateInte
  */
 function mukurtu_media_form_media_video_add_form_alter(&$form, FormStateInterface $form_state, $form_id)
 {
+  $widget = &$form['field_media_video_file']['widget'][0];
+  if (!empty($widget['#upload_validators']['FileExtension']['extensions'])) {
+    $ext = $widget['#upload_validators']['FileExtension']['extensions'];
+    $widget['#accept'] = '.' . implode(',.', array_filter(explode(' ', $ext)));
+  }
+
   $form['field_media_video_file']['widget'][0]['#process'][] = 'mukurtu_media_refresh_media_process';
 
   array_unshift($form["field_thumbnail"]["widget"][0]["#process"], 'mukurtu_media_process_thumb');
@@ -131,6 +144,12 @@ function mukurtu_media_form_media_video_add_form_alter(&$form, FormStateInterfac
  */
 function mukurtu_media_form_media_audio_add_form_alter(&$form, FormStateInterface $form_state, $form_id)
 {
+  $widget = &$form['field_media_audio_file']['widget'][0];
+  if (!empty($widget['#upload_validators']['FileExtension']['extensions'])) {
+    $ext = $widget['#upload_validators']['FileExtension']['extensions'];
+    $widget['#accept'] = '.' . implode(',.', array_filter(explode(' ', $ext)));
+  }
+
   // Add custom handling on media upload/removal.
   $form['field_media_audio_file']['widget'][0]['#process'][] = 'mukurtu_media_refresh_media_process';
 
@@ -141,6 +160,12 @@ function mukurtu_media_form_media_audio_add_form_alter(&$form, FormStateInterfac
  */
 function mukurtu_media_form_media_image_add_form_alter(&$form, FormStateInterface $form_state, $form_id)
 {
+  $widget = &$form['field_media_image']['widget'][0];
+  if (!empty($widget['#upload_validators']['FileExtension']['extensions'])) {
+    $ext = $widget['#upload_validators']['FileExtension']['extensions'];
+    $widget['#accept'] = '.' . implode(',.', array_filter(explode(' ', $ext)));
+  }
+
   $form['field_media_image']['widget'][0]['#process'][] = 'mukurtu_media_refresh_media_process';
 
 }
@@ -380,6 +405,20 @@ function mukurtu_media_form_media_library_add_form_upload_alter(&$form, FormStat
   // DOM is written and is the reliable approach.
   if ($has_image) {
     $form['#attached']['library'][] = 'mukurtu_media/media-library-image-alt';
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Attaches the thumbnail focus behavior to the external embed modal once the
+ * embed has been added and the metadata fields (including field_thumbnail) are
+ * visible. Without this, uploading a thumbnail causes the modal to scroll to
+ * the top.
+ */
+function mukurtu_media_form_media_library_add_form_external_embed_alter(&$form, FormStateInterface $form_state, $form_id) {
+  if (isset($form['media'])) {
+    $form['#attached']['library'][] = 'mukurtu_media/media-thumb-focus';
   }
 }
 

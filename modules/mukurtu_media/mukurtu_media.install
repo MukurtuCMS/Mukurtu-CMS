@@ -225,3 +225,47 @@ function mukurtu_media_update_40007(): void {
     $display->save();
   }
 }
+
+/**
+ * Reorder SoundCloud media_library form display fields and show the URL field.
+ *
+ * Desired order: Link (field_media_soundcloud), Name, Cultural Protocols,
+ * Thumbnail, Identifier, People, Media Tags, Contributor.
+ */
+function mukurtu_media_update_40008(): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('entity_form_display');
+  /** @var \Drupal\Core\Entity\Display\EntityFormDisplayInterface $display */
+  $display = $storage->load('media.soundcloud.media_library');
+  if (!$display) {
+    return;
+  }
+
+  // Show the SoundCloud URL field (was hidden in previous config).
+  $display->setComponent('field_media_soundcloud', [
+    'type' => 'string_textfield',
+    'weight' => 0,
+    'region' => 'content',
+    'settings' => ['size' => 60, 'placeholder' => ''],
+    'third_party_settings' => [],
+  ]);
+
+  // Reorder all remaining fields.
+  $weights = [
+    'name' => 1,
+    'field_cultural_protocols' => 2,
+    'field_thumbnail' => 3,
+    'field_identifier' => 4,
+    'field_people' => 5,
+    'field_media_tags' => 6,
+    'field_contributor' => 7,
+  ];
+  foreach ($weights as $field => $weight) {
+    $component = $display->getComponent($field);
+    if ($component) {
+      $component['weight'] = $weight;
+      $display->setComponent($field, $component);
+    }
+  }
+
+  $display->save();
+}

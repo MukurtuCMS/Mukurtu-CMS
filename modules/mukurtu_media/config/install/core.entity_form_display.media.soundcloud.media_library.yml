@@ -13,7 +13,7 @@ targetEntityType: media
 bundle: soundcloud
 mode: media_library
 content:
-  name:
+  field_media_soundcloud:
     type: string_textfield
     weight: 0
     region: content
@@ -21,43 +21,23 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
+  name:
+    type: string_textfield
+    weight: 1
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
   field_cultural_protocols:
     type: cultural_protocol_widget
-    weight: 1
+    weight: 2
     region: content
     settings: {  }
     third_party_settings: {  }
-  field_media_tags:
-    type: tagify_entity_reference_autocomplete_widget
-    weight: 2
-    region: content
-    settings:
-      match_operator: CONTAINS
-      match_limit: 0
-      placeholder: ''
-      suggestions_dropdown: 0
-      show_entity_id: 0
-      show_info_label: 0
-      info_label: ''
-      parent_selection: 1
-    third_party_settings: {  }
-  field_contributor:
-    type: tagify_entity_reference_autocomplete_widget
-    weight: 3
-    region: content
-    settings:
-      match_operator: CONTAINS
-      match_limit: 0
-      placeholder: ''
-      suggestions_dropdown: 0
-      show_entity_id: 0
-      show_info_label: 0
-      info_label: ''
-      parent_selection: 1
-    third_party_settings: {  }
   field_thumbnail:
     type: image_image
-    weight: 4
+    weight: 3
     region: content
     settings:
       progress_indicator: throbber
@@ -65,13 +45,27 @@ content:
     third_party_settings: {  }
   field_identifier:
     type: string_textfield
-    weight: 5
+    weight: 4
     region: content
     settings:
       size: 60
       placeholder: ''
     third_party_settings: {  }
   field_people:
+    type: tagify_entity_reference_autocomplete_widget
+    weight: 5
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 0
+      placeholder: ''
+      suggestions_dropdown: 0
+      show_entity_id: 0
+      show_info_label: 0
+      info_label: ''
+      parent_selection: 1
+    third_party_settings: {  }
+  field_media_tags:
     type: tagify_entity_reference_autocomplete_widget
     weight: 6
     region: content
@@ -85,9 +79,22 @@ content:
       info_label: ''
       parent_selection: 1
     third_party_settings: {  }
+  field_contributor:
+    type: tagify_entity_reference_autocomplete_widget
+    weight: 7
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 0
+      placeholder: ''
+      suggestions_dropdown: 0
+      show_entity_id: 0
+      show_info_label: 0
+      info_label: ''
+      parent_selection: 1
+    third_party_settings: {  }
 hidden:
   created: true
-  field_media_soundcloud: true
   langcode: true
   path: true
   status: true
