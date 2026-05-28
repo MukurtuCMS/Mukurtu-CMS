@@ -38,9 +38,9 @@
 
 <div{{ attributes.addClass(classes) }}>
   {{ title_suffix.contextual_links }}
-  {{ content.media_content_warnings }}
 
   <a href="{{ file_url(media.field_media_video_file.entity.fileuri) }}" class="media-asset--link" aria-label="Expand {{ name }} video">
+    {{ content.media_content_warnings }}
     <span class="media-asset--expand">Expand +</span>
     <span class="media-asset--content">
      {{ content|without('media_content_warnings') }}
