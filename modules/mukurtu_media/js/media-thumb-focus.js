@@ -3,20 +3,24 @@
  * Prevents the media library modal from jumping to the top after a thumbnail
  * is uploaded in the external embed add form.
  *
- * Root cause: after an upload AJAX completes, Drupal walks the triggering
- * element's ancestors and calls .trigger('focus') on the first one still in
- * the DOM. That focus call scrolls the .ui-dialog-content container to the
- * top. The PHP form alter sets disable_refocus on the upload button as the
- * primary fix; this JS is a reliable belt-and-suspenders layer.
+ * Root cause: after upload AJAX resolves, Drupal's ajax.js walks the
+ * triggering element's ancestors and calls .trigger('focus') on the first
+ * ancestor still in the DOM (the fields container, at the top of the form).
+ * That focus call scrolls the .ui-dialog-content to the top.
  *
- * Key timing notes from core/misc/ajax.js:
- *  - ajaxSuccess / ajaxComplete are delayed until after the entire command
- *    queue (including the refocus logic) resolves. So ajaxComplete fires
- *    *after* any scroll caused by refocus — making it the right hook to
- *    restore position.
- *  - The upload button is js-hide and clicked programmatically; the user
- *    interacts with the <input type="file"> instead. Its 'change' event is
- *    the correct trigger to capture the pre-upload scroll position.
+ * Primary fix: the PHP process callback sets #ajax['disable-refocus'] = TRUE
+ * on the upload/remove buttons. RenderElementBase::preRenderAjaxForm() reads
+ * this key (note: hyphen, not underscore) and writes data-disable-refocus="true"
+ * to the button HTML. ajax.js checks that attribute and skips the refocus.
+ *
+ * Belt-and-suspenders JS layer:
+ * - Trigger: input[type="file"] 'change' — fires when the user picks a file,
+ *   which is the actual interaction (the upload button itself is js-hide and
+ *   clicked programmatically).
+ * - Restoration hook: ajaxComplete — per the comment in core/misc/ajax.js,
+ *   this event is delayed until the entire async command queue (including the
+ *   refocus call) resolves. Restoring scrollTop at that point undoes any
+ *   scroll the refocus may have caused.
  */
 
 (function ($, Drupal, once) {
@@ -24,8 +28,6 @@
 
   Drupal.behaviors.mukurtuThumbFocus = {
     attach: function (context) {
-      // Capture scroll position when a file is chosen via the thumbnail input,
-      // then restore it after ajaxComplete (post-refocus, post-behaviors).
       once('mukurtu-thumb-file', '[id*="field-thumbnail"] input[type="file"]', context).forEach(function (input) {
         var scrollable = input.closest('.ui-dialog-content');
         if (!scrollable) return;

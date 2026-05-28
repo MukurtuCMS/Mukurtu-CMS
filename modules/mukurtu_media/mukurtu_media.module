@@ -440,7 +440,7 @@ function mukurtu_media_form_media_library_add_form_external_embed_alter(&$form, 
 function mukurtu_media_ext_embed_thumb_disable_refocus(&$element, FormStateInterface $form_state, &$complete_form) {
   foreach (['upload_button', 'remove_button'] as $btn) {
     if (isset($element[$btn]['#ajax'])) {
-      $element[$btn]['#ajax']['disable_refocus'] = TRUE;
+      $element[$btn]['#ajax']['disable-refocus'] = TRUE;
     }
   }
   return $element;
