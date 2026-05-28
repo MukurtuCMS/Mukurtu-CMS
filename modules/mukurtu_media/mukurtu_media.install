@@ -27,6 +27,16 @@ function mukurtu_media_update_40001(): void {
 }
 
 /**
+ * Implements hook_install().
+ */
+function mukurtu_media_install(): void {
+  $config = \Drupal::configFactory()->getEditable('views.view.media');
+  if (!$config->isNew()) {
+    $config->set('status', FALSE)->save();
+  }
+}
+
+/**
  * Revert audio browse view mode to hide field_thumbnail; create
  * digital_heritage_sidebar view display for audio with thumbnail + player.
  */
@@ -81,5 +91,15 @@ function mukurtu_media_update_40002(): void {
         ],
       ],
     ])->save();
+  }
+}
+
+/**
+ * Disable core views.view.media so Mukurtu's media view controls /admin/content/media.
+ */
+function mukurtu_media_update_40003(): void {
+  $config = \Drupal::configFactory()->getEditable('views.view.media');
+  if (!$config->isNew()) {
+    $config->set('status', FALSE)->save();
   }
 }
