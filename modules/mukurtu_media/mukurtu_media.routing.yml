@@ -4,7 +4,7 @@ mukurtu_media.bulk_upload:
     _form: 'Drupal\mukurtu_media\Form\BulkMediaUploadForm'
     _title_callback: 'Drupal\mukurtu_media\Form\BulkMediaUploadForm::getTitle'
   requirements:
-    _permission: 'create media'
+    _entity_create_access: 'media:{media_type}'
   options:
     parameters:
       media_type:
@@ -16,7 +16,7 @@ mukurtu_media.bulk_create:
     _form: 'Drupal\mukurtu_media\Form\BulkMediaUrlCreateForm'
     _title_callback: 'Drupal\mukurtu_media\Form\BulkMediaUrlCreateForm::getTitle'
   requirements:
-    _permission: 'create media'
+    _entity_create_access: 'media:{media_type}'
   options:
     parameters:
       media_type:

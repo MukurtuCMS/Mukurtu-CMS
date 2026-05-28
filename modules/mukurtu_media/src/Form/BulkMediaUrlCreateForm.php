@@ -182,14 +182,14 @@ class BulkMediaUrlCreateForm extends FormBase implements ContainerInjectionInter
 
     $entities = [];
     foreach ($lines as $url) {
-      $name = $this->nameFromUrl($url);
-      $entities[] = Media::create([
+      $media = Media::create([
         'bundle' => $media_type,
         'uid' => $this->currentUser->id(),
-        'name' => $name,
         $field_name => $url,
         'status' => 1,
       ]);
+      $media->setName($media->getName());
+      $entities[] = $media;
     }
 
     $form_state->set('bulk_create_entities', $entities);
@@ -270,25 +270,6 @@ class BulkMediaUrlCreateForm extends FormBase implements ContainerInjectionInter
     }
 
     $form_state->setRedirectUrl(Url::fromRoute('entity.media.collection'));
-  }
-
-  /**
-   * Derives a human-readable name from a URL.
-   */
-  protected function nameFromUrl(string $url): string {
-    $parts = parse_url($url);
-    if (!empty($parts['path'])) {
-      $segments = array_filter(explode('/', trim($parts['path'], '/')));
-      if (!empty($segments)) {
-        $last = end($segments);
-        $last = preg_replace('/[?#].*$/', '', $last);
-        $name = urldecode($last);
-        if ($name !== '') {
-          return $name;
-        }
-      }
-    }
-    return $url;
   }
 
 }
