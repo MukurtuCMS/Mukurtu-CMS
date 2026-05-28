@@ -148,11 +148,16 @@ class MukurtuMediaLibraryUiBuilder extends MediaLibraryUiBuilder {
    * Suppresses the add form on the "All media" tab.
    */
   protected function buildLibraryContent(MediaLibraryState $state) {
-    $content = parent::buildLibraryContent($state);
     if ($this->isAllMediaMode($state)) {
-      $content['form'] = [];
+      return [
+        '#type' => 'container',
+        '#theme_wrappers' => ['container__media_library_content'],
+        '#attributes' => ['id' => 'media-library-content'],
+        'form' => [],
+        'view' => $this->buildMediaLibraryView($state),
+      ];
     }
-    return $content;
+    return parent::buildLibraryContent($state);
   }
 
   /**
