@@ -362,7 +362,7 @@ function mukurtu_media_entity_view_alter(array &$build, \Drupal\Core\Entity\Enti
       // simply absent, so we can pick the correct placeholder.
       $placeholder_file_to_use = $no_media_file;
       if ($field_name === 'field_representative_media' && $restricted_file) {
-        $source_fields = ['field_thumbnail', 'field_media_assets', 'field_collection_image'];
+        $source_fields = ['field_thumbnail', 'field_media_assets', 'field_collection_image', 'field_word_list_image'];
         foreach ($source_fields as $source) {
           if (!$entity->hasField($source)) {
             continue;

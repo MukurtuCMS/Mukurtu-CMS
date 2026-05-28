@@ -20,7 +20,7 @@ class RepresentativeMediaItemList extends EntityReferenceFieldItemList {
   protected function computeValue(): void {
     $entity = $this->getEntity();
 
-    $media_fields = ['field_thumbnail', 'field_media_assets', 'field_collection_image'];
+    $media_fields = ['field_thumbnail', 'field_media_assets', 'field_collection_image', 'field_word_list_image'];
 
     // Check available media fields. Find the first media item that is
     // accessible to the user and return that. This seems very heavy
