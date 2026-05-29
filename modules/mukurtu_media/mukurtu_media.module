@@ -7,6 +7,7 @@ use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
+use Drupal\file\Element\ManagedFile;
 use Drupal\mukurtu_media\Entity\Audio;
 use Drupal\mukurtu_media\Entity\Document;
 use Drupal\mukurtu_media\Entity\Image;
@@ -409,21 +410,29 @@ function mukurtu_media_form_media_library_add_form_upload_alter(&$form, FormStat
 }
 
 /**
+ * Implements hook_page_attachments().
+ *
+ * Loads the thumbnail focus JS on every page so it is ready the moment the
+ * media library modal opens, without depending on an AJAX response to deliver
+ * it. The behavior uses document-level delegation and a one-time flag so the
+ * overhead is negligible on pages where no media library is present.
+ */
+function mukurtu_media_page_attachments(array &$attachments) {
+  $attachments['#attached']['library'][] = 'mukurtu_media/media-thumb-focus';
+}
+
+/**
  * Implements hook_form_FORM_ID_alter().
  *
- * Attaches the thumbnail focus behavior to the external embed modal once the
- * embed has been added and the metadata fields (including field_thumbnail) are
- * visible. Without this, uploading a thumbnail causes the modal to scroll to
- * the top because Drupal's AJAX refocus logic calls .trigger('focus') on an
- * ancestor element, which scrolls the browser to it.
+ * Adds a process callback to disable Drupal's post-AJAX refocus on the
+ * thumbnail upload/remove buttons. Without this, ajax.js walks the ancestor
+ * chain of the removed button and calls .trigger('focus') on the first
+ * ancestor still in the DOM, scrolling the dialog to the top.
  */
 function mukurtu_media_form_media_library_add_form_external_embed_alter(&$form, FormStateInterface $form_state, $form_id) {
   if (!isset($form['media'])) {
     return;
   }
-  $form['#attached']['library'][] = 'mukurtu_media/media-thumb-focus';
-  // Add a process callback to the thumbnail widget so we can set
-  // disable_refocus on the upload/remove buttons after ManagedFile builds them.
   foreach (Element::children($form['media']) as $delta) {
     if (isset($form['media'][$delta]['fields']['field_thumbnail']['widget'][0])) {
       $form['media'][$delta]['fields']['field_thumbnail']['widget'][0]['#process'][] = 'mukurtu_media_ext_embed_thumb_disable_refocus';
@@ -432,18 +441,47 @@ function mukurtu_media_form_media_library_add_form_external_embed_alter(&$form, 
 }
 
 /**
- * Process callback: disables AJAX refocus on the thumbnail upload/remove btns.
+ * Process callback: replaces the thumbnail upload/remove AJAX callbacks.
  *
- * Prevents Drupal's post-AJAX refocus from scrolling the media library modal
- * back to the top after a thumbnail is uploaded or removed.
+ * The default ManagedFile AJAX response contains no 'invoke+focus' command, so
+ * ajax.js sets focusChanged=false and runs its ancestor-focus walk, which calls
+ * .trigger('focus') on the first ancestor still in the DOM. That triggers a
+ * browser scroll that moves the dialog back to the top.
+ *
+ * The fix: redirect both buttons to a custom callback that wraps the standard
+ * ManagedFile response and appends an InvokeCommand with method='focus'. That
+ * makes ajax.js set focusChanged=true and skip the ancestor-focus walk entirely,
+ * so the dialog scroll position is unchanged after thumbnail upload/remove.
  */
 function mukurtu_media_ext_embed_thumb_disable_refocus(&$element, FormStateInterface $form_state, &$complete_form) {
   foreach (['upload_button', 'remove_button'] as $btn) {
     if (isset($element[$btn]['#ajax'])) {
-      $element[$btn]['#ajax']['disable-refocus'] = TRUE;
+      $element[$btn]['#ajax']['callback'] = 'mukurtu_media_ext_embed_thumb_ajax';
     }
   }
   return $element;
+}
+
+/**
+ * AJAX callback for external embed thumbnail upload and remove buttons.
+ *
+ * Delegates to ManagedFile::uploadAjaxCallback for the standard file handling,
+ * then appends an InvokeCommand(selector, 'focus') to the response. This sets
+ * focusChanged=true in ajax.js (line 1087-1094), which causes it to skip the
+ * ancestor-focus walk that would otherwise scroll the dialog to the top.
+ *
+ * The selector targets a non-focusable wrapper, so the InvokeCommand is a
+ * no-op from the user's perspective — the dialog stays scrolled to wherever
+ * the user was when they clicked the upload/remove button.
+ */
+function mukurtu_media_ext_embed_thumb_ajax(array &$form, FormStateInterface $form_state, Request $request) {
+  $response = ManagedFile::uploadAjaxCallback($form, $form_state, $request);
+  // An invoke+focus command sets focusChanged=true in ajax.js, suppressing the
+  // ancestor-focus walk. The selector targets the thumbnail wrapper, which is
+  // a non-interactive div — so .focus() on it is a browser no-op and nothing
+  // actually scrolls or moves focus.
+  $response->addCommand(new InvokeCommand('[id*="field-thumbnail"]', 'focus'));
+  return $response;
 }
 
 /**

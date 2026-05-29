@@ -10,5 +10,3 @@ media-thumb-focus:
     js/media-thumb-focus.js: {}
   dependencies:
     - core/drupal
-    - core/once
-    - core/jquery
