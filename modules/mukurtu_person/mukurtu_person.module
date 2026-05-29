@@ -65,37 +65,18 @@ function mukurtu_person_node_update(NodeInterface $node): void {
 }
 
 /**
- * Warns when a newly added related person does not have a reciprocal link back.
+ * Warns when a related person does not have a reciprocal link back.
  *
- * On insert, all related people are considered new. On update, only persons
- * added since the previous save are checked — pre-existing relationships are
- * skipped so the warning does not repeat on every unrelated save.
+ * Fires on every save (insert and update) until the reciprocal is in place.
  *
- * Note: for each newly added related person this loads their paragraph entities
- * and referenced nodes to check the reverse direction. Drupal's entity storage
+ * Note: for each related person this loads their paragraph entities and
+ * referenced nodes to check the reverse direction. Drupal's entity storage
  * caches within the request, but consider a direct entity query approach if
  * person records with large relationship graphs cause noticeably slow saves.
  */
 function _mukurtu_person_warn_missing_reciprocals(NodeInterface $node): void {
   if ($node->bundle() !== 'person') {
     return;
-  }
-
-  // Build the set of related-person NIDs that existed before this save so we
-  // only warn about newly added relationships. On insert $node->original is not
-  // set, so the set is empty and all related people are treated as new.
-  $pre_existing_nids = [];
-  if (isset($node->original)) {
-    foreach ($node->original->get('field_related_people') as $item) {
-      $paragraph = $item->entity;
-      if (!$paragraph) {
-        continue;
-      }
-      $ref = $paragraph->get('field_related_person')->entity;
-      if ($ref) {
-        $pre_existing_nids[$ref->id()] = TRUE;
-      }
-    }
   }
 
   foreach ($node->get('field_related_people') as $item) {
@@ -107,11 +88,6 @@ function _mukurtu_person_warn_missing_reciprocals(NodeInterface $node): void {
     /** @var \Drupal\node\NodeInterface|null $related */
     $related = $paragraph->get('field_related_person')->entity;
     if (!$related || $related->bundle() !== 'person') {
-      continue;
-    }
-
-    // Skip persons that were already related before this save.
-    if (isset($pre_existing_nids[$related->id()])) {
       continue;
     }
 
@@ -133,7 +109,7 @@ function _mukurtu_person_warn_missing_reciprocals(NodeInterface $node): void {
       $edit_url = Url::fromRoute('entity.node.edit_form', ['node' => $related->id()])
         ->toString();
       \Drupal::messenger()->addWarning(t(
-        'Do you need to add a reciprocal relationship to: <a href=":url">@name</a>?',
+        'Note: Relationships are created on person records separately. Do you need to add a paired relationship to: <a href=":url">@name</a>?',
         [':url' => $edit_url, '@name' => $related->label()]
       ));
     }
@@ -230,6 +206,10 @@ function mukurtu_person_field_widget_single_element_form_alter(&$element, FormSt
       '#attached' => [
         'library' => ['mukurtu_person/person_listener'],
       ],
+    ];
+    $element['create_person_help'] = [
+      '#markup' => '<div class="form-item__description">' . t('A new person record form will open in a new tab. When you save that person record the tab will close and you will be redirected back here so that you can reference that new person record. Note that you will still need to add the relationship to THIS person record after saving here.') . '</div>',
+      '#weight' => 11,
     ];
   }
 }
