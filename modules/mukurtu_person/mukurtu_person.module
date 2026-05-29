@@ -1,9 +1,14 @@
 <?php
 
+use Drupal\Core\Entity\ContentEntityFormInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 use Drupal\mukurtu_core\Entity\FormattedTextWithTitle;
 use Drupal\mukurtu_person\Entity\Person;
 use Drupal\mukurtu_person\Entity\RelatedPerson;
+use Drupal\views\ViewExecutable;
+use Drupal\views\Plugin\views\query\QueryPluginBase;
 
 /**
 * @file
@@ -26,6 +31,104 @@ function mukurtu_person_entity_bundle_info_alter(array &$bundles)
   if (isset($bundles['paragraph']['related_person'])) {
     $bundles['paragraph']['related_person']['class'] = RelatedPerson::class;
   }
+}
+
+/**
+ * Implements hook_field_widget_single_element_form_alter().
+ *
+ * Replaces the generic entity browser cardinality message on the related person
+ * field with a clearer prompt.
+ */
+function mukurtu_person_field_widget_single_element_form_alter(&$element, FormStateInterface $form_state, array $context) {
+  $field_definition = $context['items']->getFieldDefinition();
+  if ($field_definition->getName() !== 'field_related_person' || $field_definition->getTargetBundle() !== 'related_person') {
+    return;
+  }
+  $existing_prefix = $element['entity_browser']['#prefix'] ?? '';
+  $element['entity_browser']['#prefix'] = '<p>' . t('Select a related person record.') . '</p>' . $existing_prefix;
+
+  if (isset($element['current']['#prefix'])) {
+    $element['current']['#prefix'] = '';
+  }
+
+  // Pass the host node ID to hook_views_query_alter so the entity browser can
+  // exclude it (preventing a person from selecting itself as a related person).
+  //
+  // Why TempStore: the entity browser fires on its own AJAX route
+  // (/entity-browser/modal/mukurtu_content_browser), so \Drupal::routeMatch()
+  // inside hook_views_query_alter reflects that route, not the person edit
+  // page. TempStore is the only reliable way to carry data across that
+  // request boundary.
+  //
+  // Known limitation: the stored value applies to ALL mukurtu_content_browser
+  // entity browser opens by this user within the TTL window, not only the one
+  // on this person form. Two guards limit the blast radius:
+  //   1. bundle='person' check in hook_views_query_alter — only person nodes
+  //      are ever excluded, never other content types.
+  //   2. 1-hour TTL — the value expires well before TempStore's 7-day default,
+  //      so a stale entry from an earlier edit session cannot persist.
+  // A fully scoped fix (per-form-build-ID key) is tracked in the backlog.
+  $form_object = $form_state->getFormObject();
+  if ($form_object instanceof ContentEntityFormInterface) {
+    $host = $form_object->getEntity();
+    if ($host->getEntityTypeId() === 'node' && !$host->isNew()) {
+      \Drupal::service('tempstore.private')
+        ->get('mukurtu_person')
+        ->set('related_person_exclude', [
+          'nid' => $host->id(),
+          'bundle' => $host->bundle(),
+          'time' => \Drupal::time()->getRequestTime(),
+        ]);
+    }
+  }
+
+  $create_url = Url::fromRoute('node.add', ['node_type' => 'person']);
+  if ($create_url->access()) {
+    $element['create_person_link'] = [
+      '#type' => 'link',
+      '#title' => t("Can't find the person? Create a new person record."),
+      '#url' => $create_url,
+      '#attributes' => [
+        'class' => ['button', 'button--small', 'button--extrasmall'],
+        'target' => '_blank',
+        'rel' => 'noopener noreferrer',
+      ],
+      '#weight' => 10,
+    ];
+  }
+}
+
+/**
+ * Implements hook_views_query_alter().
+ *
+ * Excludes the person node currently being edited from the mukurtu_content_browser
+ * view so a person record cannot select itself as a related person.
+ */
+function mukurtu_person_views_query_alter(ViewExecutable $view, QueryPluginBase $query) {
+  if ($view->id() !== 'mukurtu_content_browser' || $view->current_display !== 'entity_browser') {
+    return;
+  }
+
+  // Read the exclusion written by hook_field_widget_single_element_form_alter.
+  // See that hook for a full explanation of why TempStore is used here and
+  // what the known limitations are.
+  $data = \Drupal::service('tempstore.private')
+    ->get('mukurtu_person')
+    ->get('related_person_exclude');
+
+  if (!$data || empty($data['nid']) || empty($data['bundle']) || empty($data['time'])) {
+    return;
+  }
+  // Guard 1: only suppress person nodes, never other content types.
+  if ($data['bundle'] !== 'person') {
+    return;
+  }
+  // Guard 2: ignore values older than 1 hour (TempStore default TTL is 7 days).
+  if (\Drupal::time()->getRequestTime() - $data['time'] > 3600) {
+    return;
+  }
+
+  $query->addWhere('', 'node_field_data.nid', $data['nid'], '<>');
 }
 
 /**
