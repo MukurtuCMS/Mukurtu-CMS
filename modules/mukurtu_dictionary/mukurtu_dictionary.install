@@ -705,6 +705,36 @@ function mukurtu_dictionary_update_40018(): void {
 }
 
 /**
+ * Use audio_for_dictionary_word view mode for recording field on dictionary word entries.
+ */
+function mukurtu_dictionary_update_40019(): void {
+  $config_storage = \Drupal::service('config.storage');
+
+  // Import the new view mode definition from mukurtu_core.
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core');
+  $module_source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+  $view_mode_name = 'core.entity_view_mode.media.audio_for_dictionary_word';
+  $data = $module_source->read($view_mode_name);
+  if ($data !== FALSE) {
+    $config_storage->write($view_mode_name, $data);
+  }
+
+  // Import the new audio view display config from the profile.
+  $profile_path = \Drupal::service('extension.list.profile')->getPath(\Drupal::installProfile());
+  $profile_source = new \Drupal\Core\Config\FileStorage($profile_path . '/config/install');
+  $display_name = 'core.entity_view_display.media.audio.audio_for_dictionary_word';
+  $data = $profile_source->read($display_name);
+  if ($data !== FALSE) {
+    $config_storage->write($display_name, $data);
+  }
+
+  // Switch the dictionary word entry paragraph to use the new view mode.
+  $paragraph_config = \Drupal::configFactory()->getEditable('core.entity_view_display.paragraph.dictionary_word_entry.default');
+  $paragraph_config->set('content.field_recording.settings.view_mode', 'audio_for_dictionary_word');
+  $paragraph_config->save();
+}
+
+/**
  * Add field_coverage to the dictionary search index for map view support.
  */
 function mukurtu_dictionary_update_40017(): void {
