@@ -723,65 +723,130 @@ function mukurtu_dictionary_update_40019(): void {
  * Create the audio_for_dictionary_word view mode and display config entities.
  */
 function mukurtu_dictionary_update_40020(): void {
-  // Create the view mode entity if it doesn't exist.
-  $view_mode_storage = \Drupal::entityTypeManager()->getStorage('entity_view_mode');
-  if (!$view_mode_storage->load('media.audio_for_dictionary_word')) {
-    $view_mode_storage->create([
-      'id' => 'media.audio_for_dictionary_word',
-      'label' => 'Audio Player (Dictionary Word)',
-      'targetEntityType' => 'media',
-      'cache' => TRUE,
-      'status' => TRUE,
-    ])->save();
-  }
+  $config_storage = \Drupal::service('config.storage');
 
-  // Create or update the view display, copying field visibility from the
-  // default display so only field_media_audio_file is rendered.
-  $display_storage = \Drupal::entityTypeManager()->getStorage('entity_view_display');
-  $display = $display_storage->load('media.audio.audio_for_dictionary_word');
-  if (!$display) {
-    $display = $display_storage->create([
+  // Write the view mode entity directly to active config storage.
+  $config_storage->write('core.entity_view_mode.media.audio_for_dictionary_word', [
+    'langcode' => 'en',
+    'status' => TRUE,
+    'dependencies' => ['module' => ['media']],
+    'id' => 'media.audio_for_dictionary_word',
+    'label' => 'Audio Player (Dictionary Word)',
+    'description' => '',
+    'targetEntityType' => 'media',
+    'cache' => TRUE,
+  ]);
+
+  // Write the display entity: only field_media_audio_file visible.
+  $config_storage->write('core.entity_view_display.media.audio.audio_for_dictionary_word', [
+    'langcode' => 'en',
+    'status' => TRUE,
+    'dependencies' => [
+      'config' => [
+        'core.entity_view_mode.media.audio_for_dictionary_word',
+        'media.type.audio',
+      ],
+      'module' => ['file'],
+    ],
+    'third_party_settings' => [],
+    'id' => 'media.audio.audio_for_dictionary_word',
+    'targetEntityType' => 'media',
+    'bundle' => 'audio',
+    'mode' => 'audio_for_dictionary_word',
+    'content' => [
+      'field_media_audio_file' => [
+        'type' => 'file_audio',
+        'label' => 'hidden',
+        'settings' => [
+          'controls' => TRUE,
+          'autoplay' => FALSE,
+          'loop' => FALSE,
+          'multiple_file_display_type' => 'tags',
+        ],
+        'third_party_settings' => [],
+        'weight' => 0,
+        'region' => 'content',
+      ],
+    ],
+    'hidden' => [
+      'created' => TRUE,
+      'field_communities' => TRUE,
+      'field_contributor' => TRUE,
+      'field_cultural_protocols' => TRUE,
+      'field_identifier' => TRUE,
+      'field_media_tags' => TRUE,
+      'field_people' => TRUE,
+      'field_thumbnail' => TRUE,
+      'field_transcription' => TRUE,
+      'flag_export_media' => TRUE,
+      'langcode' => TRUE,
+      'name' => TRUE,
+      'search_api_excerpt' => TRUE,
+      'thumbnail' => TRUE,
+      'uid' => TRUE,
+    ],
+  ]);
+}
+
+/**
+ * Re-write audio_for_dictionary_word display config using config storage.
+ *
+ * update_40020 used the entity API which may have produced an incorrect
+ * display entity. This hook overwrites it unconditionally with hardcoded
+ * config data to guarantee the correct state.
+ */
+function mukurtu_dictionary_update_40021(): void {
+  \Drupal::service('config.storage')->write(
+    'core.entity_view_display.media.audio.audio_for_dictionary_word',
+    [
+      'langcode' => 'en',
+      'status' => TRUE,
+      'dependencies' => [
+        'config' => [
+          'core.entity_view_mode.media.audio_for_dictionary_word',
+          'media.type.audio',
+        ],
+        'module' => ['file'],
+      ],
+      'third_party_settings' => [],
+      'id' => 'media.audio.audio_for_dictionary_word',
       'targetEntityType' => 'media',
       'bundle' => 'audio',
       'mode' => 'audio_for_dictionary_word',
-      'status' => TRUE,
-    ]);
-  }
-
-  // Only show field_media_audio_file; hide everything else.
-  $display->setComponent('field_media_audio_file', [
-    'type' => 'file_audio',
-    'label' => 'hidden',
-    'settings' => [
-      'controls' => TRUE,
-      'autoplay' => FALSE,
-      'loop' => FALSE,
-      'multiple_file_display_type' => 'tags',
-    ],
-    'weight' => 0,
-    'region' => 'content',
-  ]);
-  $fields_to_hide = [
-    'created',
-    'field_communities',
-    'field_contributor',
-    'field_cultural_protocols',
-    'field_identifier',
-    'field_media_tags',
-    'field_people',
-    'field_thumbnail',
-    'field_transcription',
-    'flag_export_media',
-    'langcode',
-    'name',
-    'search_api_excerpt',
-    'thumbnail',
-    'uid',
-  ];
-  foreach ($fields_to_hide as $field) {
-    $display->removeComponent($field);
-  }
-  $display->save();
+      'content' => [
+        'field_media_audio_file' => [
+          'type' => 'file_audio',
+          'label' => 'hidden',
+          'settings' => [
+            'controls' => TRUE,
+            'autoplay' => FALSE,
+            'loop' => FALSE,
+            'multiple_file_display_type' => 'tags',
+          ],
+          'third_party_settings' => [],
+          'weight' => 0,
+          'region' => 'content',
+        ],
+      ],
+      'hidden' => [
+        'created' => TRUE,
+        'field_communities' => TRUE,
+        'field_contributor' => TRUE,
+        'field_cultural_protocols' => TRUE,
+        'field_identifier' => TRUE,
+        'field_media_tags' => TRUE,
+        'field_people' => TRUE,
+        'field_thumbnail' => TRUE,
+        'field_transcription' => TRUE,
+        'flag_export_media' => TRUE,
+        'langcode' => TRUE,
+        'name' => TRUE,
+        'search_api_excerpt' => TRUE,
+        'thumbnail' => TRUE,
+        'uid' => TRUE,
+      ],
+    ]
+  );
 }
 
 /**
