@@ -5,6 +5,13 @@
   &--audio {
     inline-size: 100%;
 
+    // Blazy sets height:auto;min-height:1px on audio.b-lazy which collapses
+    // the player to 1px. Target the audio element directly to restore it.
+    audio {
+      min-height: 2rem;
+      min-block-size: 2rem;
+    }
+
     .b-lazy {
       block-size: revert;
       height: revert;

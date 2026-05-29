@@ -2159,6 +2159,10 @@ details.form-wrapper summary + div {
 .media--audio {
   inline-size: 100%;
 }
+.media--audio audio {
+  min-height: 2rem;
+  min-block-size: 2rem;
+}
 .media--audio .b-lazy {
   block-size: revert;
   height: revert;
