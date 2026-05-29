@@ -140,7 +140,7 @@ class CommunityManagerUserCreationForm extends FormBase {
       '#type' => 'radios',
       '#title' => $this->t('Status'),
       '#options' => [1 => $this->t('Active'), 'pending' => $this->t('Pending'), 0 => $this->t('Blocked')],
-      '#default_value' => 'pending',
+      '#default_value' => 1,
     ];
 
     $form['notify'] = [

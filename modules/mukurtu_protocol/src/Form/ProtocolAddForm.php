@@ -293,7 +293,8 @@ class ProtocolAddForm extends EntityForm {
 
     // Pass users to JS for client-side autocomplete, excluding anyone already
     // added to the membership table. When a community is set, restrict to its
-    // active members; otherwise fall back to all active users.
+    // members; otherwise fall back to all users. No status filter is applied
+    // intentionally so admins can pre-assign blocked/pending users.
     $already_added = array_keys($form_state->get('members') ?? []);
     $suggestions = [];
     if ($community) {
@@ -307,9 +308,10 @@ class ProtocolAddForm extends EntityForm {
       foreach ($memberships as $membership) {
         $member = $membership->getOwner();
         if ($member && $member->id() > 0 && !in_array($member->id(), $already_added)) {
+          $statusSuffix = $member->isActive() ? '' : ' [Blocked/Pending]';
           $suggestions[] = [
             'value' => $member->getDisplayName() . ' (' . $member->id() . ')',
-            'label' => $member->getDisplayName() . ' (' . $member->getEmail() . ')',
+            'label' => $member->getDisplayName() . ' (' . $member->getEmail() . ')' . $statusSuffix,
           ];
         }
       }
@@ -317,7 +319,6 @@ class ProtocolAddForm extends EntityForm {
     else {
       $uids = $this->entityTypeManager->getStorage('user')->getQuery()
         ->accessCheck(TRUE)
-        ->condition('status', 1)
         ->condition('uid', 0, '<>')
         ->sort('name')
         ->execute();
@@ -325,9 +326,10 @@ class ProtocolAddForm extends EntityForm {
         if (in_array($uid, $already_added)) {
           continue;
         }
+        $statusSuffix = $u->isActive() ? '' : ' [Blocked/Pending]';
         $suggestions[] = [
           'value' => $u->getDisplayName() . ' (' . $uid . ')',
-          'label' => $u->getDisplayName() . ' (' . $u->getEmail() . ')',
+          'label' => $u->getDisplayName() . ' (' . $u->getEmail() . ')' . $statusSuffix,
         ];
       }
     }
@@ -392,8 +394,9 @@ class ProtocolAddForm extends EntityForm {
         $row['#attributes']['class'][] = 'error';
         $row['#attributes']['aria-invalid'] = 'true';
       }
+      $statusBadge = $member->isActive() ? '' : ' <span aria-label="' . t('blocked or pending') . '">[' . t('Blocked/Pending') . ']</span>';
       $row['user'] = [
-        '#markup' => $name . ' <small>(' . $member->getEmail() . ')</small>',
+        '#markup' => $name . ' <small>(' . $member->getEmail() . ')</small>' . $statusBadge,
       ];
 
       foreach ($roles as $role_id => $label) {
