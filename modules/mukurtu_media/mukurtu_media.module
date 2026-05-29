@@ -18,7 +18,6 @@ use Drupal\mukurtu_media\Entity\ExternalEmbed;
 use Drupal\mukurtu_media\Form\ExternalEmbedForm;
 use Drupal\mukurtu_media\Entity\SoundCloud;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\RouteCollection;
 
 /**
  * Implements hook_entity_bundle_field_info_alter().
@@ -404,17 +403,3 @@ function mukurtu_media_entity_base_field_info_alter(&$fields, EntityTypeInterfac
   }
 }
 
-/**
- * Implements hook_routes_alter().
- *
- * Replaces the core 'access media overview' permission on entity.media.collection
- * with the Mukurtu role check so protocol role members can access /admin/content/media.
- */
-function mukurtu_media_routes_alter(RouteCollection $collection): void {
-  if ($route = $collection->get('entity.media.collection')) {
-    $requirements = $route->getRequirements();
-    unset($requirements['_permission']);
-    $requirements['_mukurtu_role'] = 'protocol-protocol-community_record_steward+protocol-protocol-contributor+protocol-protocol-curator+protocol-protocol-language_contributor+protocol-protocol-language_steward+protocol-protocol-protocol_steward';
-    $route->setRequirements($requirements);
-  }
-}
