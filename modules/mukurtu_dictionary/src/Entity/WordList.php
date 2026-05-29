@@ -154,16 +154,6 @@ class WordList extends Node implements WordListInterface, CulturalProtocolContro
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
-    $definitions['field_coverage'] = BaseFieldDefinition::create('geofield')
-      ->setLabel(t('Map Points'))
-      ->setDescription(t(''))
-      ->setCardinality(1)
-      ->setRequired(FALSE)
-      ->setRevisionable(TRUE)
-      ->setTranslatable(FALSE)
-      ->setDisplayConfigurable('view', TRUE)
-      ->setDisplayConfigurable('form', TRUE);
-
     $definitions['field_coverage_description'] = BaseFieldDefinition::create('text_long')
       ->setLabel('Location Description')
       ->setDescription(t('A descriptive field to provide additional context and depth to the location(s) connected to the word list.	</br>This HTML field can support rich text and embedded media assets using the editing toolbar.'))
