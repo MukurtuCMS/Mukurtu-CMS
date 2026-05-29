@@ -375,11 +375,11 @@ class ProtocolAddForm extends EntityForm {
   protected static function buildMembershipTable(FormStateInterface $form_state): array {
     $roles = static::getRoles();
 
-    $header = [t('User')];
+    $header = [['data' => t('User'), 'scope' => 'col']];
     foreach ($roles as $label) {
-      $header[] = $label;
+      $header[] = ['data' => $label, 'scope' => 'col'];
     }
-    $header[] = ['data' => t('Actions'), 'class' => ['visually-hidden']];
+    $header[] = ['data' => t('Actions'), 'scope' => 'col', 'class' => ['visually-hidden']];
 
     $table = [
       '#type' => 'table',

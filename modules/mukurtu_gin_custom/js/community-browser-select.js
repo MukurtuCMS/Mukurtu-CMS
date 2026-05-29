@@ -17,8 +17,12 @@
 
         // Make each row focusable and give it a checkbox role so keyboard users
         // and screen readers can interact with it (WCAG 2.1.1, 4.1.2).
+        // Remove the underlying checkbox from the tab order and accessibility
+        // tree — the .views-row is the sole interactive element for AT.
         $view.find('.views-row').each(function () {
           $(this).attr({ tabindex: '0', role: 'checkbox', 'aria-checked': 'false' });
+          $(this).find('.views-field-entity-browser-select input')
+            .attr({ tabindex: '-1', 'aria-hidden': 'true' });
         });
 
         // Handle both click and keyboard (Enter/Space) to toggle selection.
