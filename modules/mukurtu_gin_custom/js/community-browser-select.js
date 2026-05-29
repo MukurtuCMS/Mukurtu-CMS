@@ -46,26 +46,19 @@
         });
       });
 
-      // Runs in the top-level document only. jQuery UI's focus trap uses its
-      // own :tabbable selector which does not recognise <iframe> elements, so
-      // Tab from the dialog's close button cycles back to the close button and
-      // never enters the iframe. We bridge the gap by moving focus to the first
-      // community row once the iframe finishes loading.
-      if (window.self === window.top) {
-        once('community-browser-focus', 'body', context).forEach(function () {
-          $(document).on('dialogopen', '.ui-dialog', function () {
-            var iframe = $(this).find('.entity-browser-modal-iframe')[0];
-            if (!iframe) { return; }
-
-            iframe.addEventListener('load', function () {
-              var iframeDoc = this.contentDocument;
-              if (!iframeDoc) { return; }
-              var firstRow = iframeDoc.querySelector('.view-mukurtu-community-select .views-row');
-              if (firstRow) {
-                firstRow.focus({ preventScroll: true });
-              }
-            });
-          });
+      // Runs inside the entity browser iframe only. jQuery UI's focus trap in
+      // the parent dialog uses :tabbable, which doesn't include <iframe>
+      // elements, so Tab from the close button can never reach rows in the
+      // iframe. Moving focus from within the iframe sidesteps the race
+      // condition that would occur if we tried to do this from the parent
+      // after the iframe's load event (which fires almost immediately on
+      // localhost before a parent-side listener can be added).
+      if (window.self !== window.top) {
+        once('community-browser-autofocus', 'body', context).forEach(function () {
+          var firstRow = document.querySelector('.view-mukurtu-community-select .views-row');
+          if (firstRow) {
+            firstRow.focus({ preventScroll: true });
+          }
         });
       }
     }
