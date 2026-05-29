@@ -2161,6 +2161,7 @@ details.form-wrapper summary + div {
 }
 .media--audio .b-lazy {
   block-size: revert;
+  height: revert;
   min-block-size: -webkit-max-content;
   min-block-size: -moz-max-content;
   min-block-size: max-content;

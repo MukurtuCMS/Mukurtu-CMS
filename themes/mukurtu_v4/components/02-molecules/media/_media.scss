@@ -7,6 +7,7 @@
 
     .b-lazy {
       block-size: revert;
+      height: revert;
       min-block-size: max-content;
       inline-size: 100%;
     }
