@@ -58,12 +58,18 @@ counterpart, if one exists. */
     flex-shrink: 0;
 }
 
-/* Prevent the hidden Tagify backing input from intercepting pointer events.
- * In Drupal 11.3 a stacking-context change causes the position:absolute /
- * opacity:0 input to sit above sibling form elements inside Paragraphs
- * subforms, blocking clicks and showing a row-resize cursor. The input is
- * purely a non-interactive backing store and should never receive pointer
- * events. See https://github.com/MukurtuCMS/Mukurtu-CMS/issues/1680 */
+/* Drupal 11.3 introduced a :has() rule that sets cursor:row-resize on the
+ * entire tr.draggable row when a vertical drag handle is present. This causes
+ * all form elements inside Paragraphs subforms — including Tagify fields — to
+ * inherit row-resize and become visually non-interactive. Reset the cursor on
+ * the content cell so each element shows its natural cursor.
+ * See https://github.com/MukurtuCMS/Mukurtu-CMS/issues/1680 */
+tr.draggable > td:not(.field-multiple-drag) {
+    cursor: auto;
+}
+
+/* Also prevent the hidden Tagify backing input from intercepting pointer
+ * events regardless of stacking context. */
 .tagify + input.tagify-widget {
     pointer-events: none;
 }
