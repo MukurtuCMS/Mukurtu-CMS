@@ -708,26 +708,6 @@ function mukurtu_dictionary_update_40018(): void {
  * Use audio_for_dictionary_word view mode for recording field on dictionary word entries.
  */
 function mukurtu_dictionary_update_40019(): void {
-  $config_storage = \Drupal::service('config.storage');
-
-  // Import the new view mode definition from mukurtu_core.
-  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core');
-  $module_source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
-  $view_mode_name = 'core.entity_view_mode.media.audio_for_dictionary_word';
-  $data = $module_source->read($view_mode_name);
-  if ($data !== FALSE) {
-    $config_storage->write($view_mode_name, $data);
-  }
-
-  // Import the new audio view display config from the profile.
-  $profile_path = \Drupal::service('extension.list.profile')->getPath(\Drupal::installProfile());
-  $profile_source = new \Drupal\Core\Config\FileStorage($profile_path . '/config/install');
-  $display_name = 'core.entity_view_display.media.audio.audio_for_dictionary_word';
-  $data = $profile_source->read($display_name);
-  if ($data !== FALSE) {
-    $config_storage->write($display_name, $data);
-  }
-
   // Switch the dictionary word entry paragraph to use the new view mode.
   $paragraph_config = \Drupal::configFactory()->getEditable('core.entity_view_display.paragraph.dictionary_word_entry.default');
   $paragraph_config->set('content.field_recording.settings.view_mode', 'audio_for_dictionary_word');
@@ -737,6 +717,71 @@ function mukurtu_dictionary_update_40019(): void {
   $node_config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.dictionary_word.full');
   $node_config->set('content.field_recording.settings.view_mode', 'audio_for_dictionary_word');
   $node_config->save();
+}
+
+/**
+ * Create the audio_for_dictionary_word view mode and display config entities.
+ */
+function mukurtu_dictionary_update_40020(): void {
+  // Create the view mode entity if it doesn't exist.
+  $view_mode_storage = \Drupal::entityTypeManager()->getStorage('entity_view_mode');
+  if (!$view_mode_storage->load('media.audio_for_dictionary_word')) {
+    $view_mode_storage->create([
+      'id' => 'media.audio_for_dictionary_word',
+      'label' => 'Audio Player (Dictionary Word)',
+      'targetEntityType' => 'media',
+      'cache' => TRUE,
+      'status' => TRUE,
+    ])->save();
+  }
+
+  // Create or update the view display, copying field visibility from the
+  // default display so only field_media_audio_file is rendered.
+  $display_storage = \Drupal::entityTypeManager()->getStorage('entity_view_display');
+  $display = $display_storage->load('media.audio.audio_for_dictionary_word');
+  if (!$display) {
+    $display = $display_storage->create([
+      'targetEntityType' => 'media',
+      'bundle' => 'audio',
+      'mode' => 'audio_for_dictionary_word',
+      'status' => TRUE,
+    ]);
+  }
+
+  // Only show field_media_audio_file; hide everything else.
+  $display->setComponent('field_media_audio_file', [
+    'type' => 'file_audio',
+    'label' => 'hidden',
+    'settings' => [
+      'controls' => TRUE,
+      'autoplay' => FALSE,
+      'loop' => FALSE,
+      'multiple_file_display_type' => 'tags',
+    ],
+    'weight' => 0,
+    'region' => 'content',
+  ]);
+  $fields_to_hide = [
+    'created',
+    'field_communities',
+    'field_contributor',
+    'field_cultural_protocols',
+    'field_identifier',
+    'field_media_tags',
+    'field_people',
+    'field_thumbnail',
+    'field_transcription',
+    'flag_export_media',
+    'langcode',
+    'name',
+    'search_api_excerpt',
+    'thumbnail',
+    'uid',
+  ];
+  foreach ($fields_to_hide as $field) {
+    $display->removeComponent($field);
+  }
+  $display->save();
 }
 
 /**
