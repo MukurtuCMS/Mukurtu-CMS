@@ -54,7 +54,7 @@ content:
     type: entity_reference_entity_view
     label: hidden
     settings:
-      view_mode: browse
+      view_mode: digital_heritage_sidebar
       link: false
     third_party_settings: {  }
     weight: 0

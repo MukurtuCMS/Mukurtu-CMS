@@ -61,3 +61,5 @@ id: mukurtu_manager
 label: 'Mukurtu Manager'
 weight: 2
 is_admin: null
+permissions:
+  - 'select account cancellation method'

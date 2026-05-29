@@ -105,6 +105,11 @@ function mukurtu_media_form_media_document_edit_form_alter(&$form, FormStateInte
   if (isset($form['field_extracted_text'])) {
     $form['field_extracted_text']['#disabled'] = TRUE;
   }
+
+  // Re-attach thumbnail generation and AJAX callbacks so that replacing a PDF
+  // on an existing document also regenerates the thumbnail.
+  $form['field_media_document']['widget'][0]['#process'][] = 'mukurtu_media_refresh_media_process';
+  array_unshift($form['field_thumbnail']['widget'][0]['#process'], 'mukurtu_media_process_thumb');
 }
 
 function mukurtu_media_form_media_video_add_form_alter(&$form, FormStateInterface $form_state, $form_id)

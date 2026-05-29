@@ -6,3 +6,439 @@
 function mukurtu_browse_install() {
   mukurtu_search_rebuild_index();
 }
+
+/**
+ * Update Search API indexes and Views to support multiple cultural protocols faceting.
+ */
+function mukurtu_browse_update_40001() {
+  // Import updated Search API index and Views configurations.
+  $config_installer = \Drupal::service('config.installer');
+  $config_installer->installDefaultConfig('module', 'mukurtu_browse');
+
+  // Reindex the affected Search API indexes.
+  $indexes = ['mukurtu_default_content_index'];
+  foreach ($indexes as $index_id) {
+    $index = \Drupal\search_api\Entity\Index::load($index_id);
+    if ($index) {
+      $index->reindex();
+    }
+  }
+}
+
+/**
+ * Remove active_widget_order and count_widget_order facet processors from browse views and facets.
+ */
+function mukurtu_browse_update_40002() {
+  $config_factory = \Drupal::service('config.factory');
+
+  // Remove sort processors and enable soft limit on facets embedded in Views filters.
+  $views = [
+    'views.view.mukurtu_browse' => [
+      'facets_community_title',
+      'facets_mukurtu_cultural_protocol_ids',
+      'facets_type',
+      'facets_name',
+      'facets_collections',
+      'facets_media_type',
+      'facets_name_1',
+    ],
+    'views.view.mukurtu_digital_heritage_browse' => [
+      'facets_name',
+      'facets_collections',
+      'facets_community_title',
+      'facets_mukurtu_cultural_protocol_ids',
+      'facets_name_1',
+      'facets_media_type',
+    ],
+  ];
+
+  foreach ($views as $view_id => $filter_ids) {
+    $config = $config_factory->getEditable($view_id);
+    $changed = FALSE;
+    foreach ($filter_ids as $filter_id) {
+      $processor_key = "display.default.display_options.filters.$filter_id.facet.processor_configs";
+      $processor_configs = $config->get($processor_key);
+      foreach (['active_widget_order', 'count_widget_order'] as $processor) {
+        if (isset($processor_configs[$processor])) {
+          unset($processor_configs[$processor]);
+          $config->set($processor_key, $processor_configs);
+          $changed = TRUE;
+        }
+      }
+
+      $soft_limit_key = "display.default.display_options.exposed_form.options.bef.filter.$filter_id.soft_limit";
+      if ($config->get($soft_limit_key) === 0) {
+        $config->set($soft_limit_key, 15);
+        $changed = TRUE;
+      }
+    }
+    if ($changed) {
+      $config->save();
+    }
+  }
+
+  // Remove sort processors from standalone facet config entities.
+  $facets = [
+    'facets.facet.map_category',
+    'facets.facet.digital_heritage_browse_category',
+  ];
+
+  foreach ($facets as $facet_id) {
+    $config = $config_factory->getEditable($facet_id);
+    $processor_configs = $config->get('processor_configs');
+    $changed = FALSE;
+    foreach (['active_widget_order', 'count_widget_order'] as $processor) {
+      if (isset($processor_configs[$processor])) {
+        unset($processor_configs[$processor]);
+        $changed = TRUE;
+      }
+    }
+    if ($changed) {
+      $config->set('processor_configs', $processor_configs)->save();
+    }
+  }
+}
+
+/**
+ * Add text-typed taxonomy name fields to mukurtu_default_content_index.
+ *
+ * Adds parallel type:text fields for keywords, category, people, subject,
+ * language, location, and publisher so fulltext search on the browse page
+ * finds content by taxonomy term name. Existing type:string fields are
+ * preserved for faceting (issue #622).
+ */
+function mukurtu_browse_update_40003() {
+  $config_installer = \Drupal::service('config.installer');
+  $config_installer->installDefaultConfig('module', 'mukurtu_browse');
+
+  $indexes = ['mukurtu_default_content_index'];
+  foreach ($indexes as $index_id) {
+    $index = \Drupal\search_api\Entity\Index::load($index_id);
+    if ($index) {
+      $index->reindex();
+    }
+  }
+}
+/*
+ * Add PDF extracted text fields to the content search index.
+ */
+function mukurtu_browse_update_40004() {
+  $index = \Drupal\search_api\Entity\Index::load('mukurtu_default_content_index');
+  if (!$index) {
+    return;
+  }
+
+  $new_fields = [
+    'media_extracted_text' => [
+      'type' => 'text',
+      'property_path' => 'field_media_assets:entity:field_extracted_text',
+      'datasource_id' => 'entity:node',
+      'label' => 'Media Assets Extracted Text',
+    ],
+    'page_media_extracted_text' => [
+      'type' => 'text',
+      'property_path' => 'field_page_media_assets:entity:field_extracted_text',
+      'datasource_id' => 'entity:node',
+      'label' => 'Page Media Assets Extracted Text',
+    ],
+  ];
+
+  $index_changed = FALSE;
+  foreach ($new_fields as $field_id => $field_config) {
+    if (!$index->getField($field_id)) {
+      $field = new \Drupal\search_api\Item\Field($index, $field_id);
+      $field->setType($field_config['type']);
+      $field->setPropertyPath($field_config['property_path']);
+      $field->setDatasourceId($field_config['datasource_id']);
+      $field->setLabel($field_config['label']);
+      $index->addField($field);
+      $index_changed = TRUE;
+    }
+  }
+
+  // Register both fields with the ignorecase processor, which has all_fields: false.
+  $processors = $index->getProcessors();
+  if (isset($processors['ignorecase'])) {
+    $config = $processors['ignorecase']->getConfiguration();
+    $processor_changed = FALSE;
+    foreach (array_keys($new_fields) as $field_id) {
+      if (!in_array($field_id, $config['fields'])) {
+        $config['fields'][] = $field_id;
+        $processor_changed = TRUE;
+      }
+    }
+    if ($processor_changed) {
+      $processors['ignorecase']->setConfiguration($config);
+      $index->setProcessors($processors);
+      $index_changed = TRUE;
+    }
+  }
+
+  if ($index_changed) {
+    $index->save();
+  }
+
+  $index->reindex();
+}
+
+/**
+ * Add dictionary fulltext and word type fields to the default content search index.
+ */
+function mukurtu_browse_update_40005(): void {
+  $index = \Drupal\search_api\Entity\Index::load('mukurtu_default_content_index');
+  if (!$index) {
+    return;
+  }
+
+  $new_fields = [
+    'dictionary_fulltext' => [
+      'label' => 'Dictionary Fulltext Content',
+      'property_path' => 'aggregated_field',
+      'type' => 'text',
+      'configuration' => [
+        'type' => 'union',
+        'fields' => [
+          'entity:node/field_additional_word_entries:entity:field_alternate_spelling',
+          'entity:node/field_additional_word_entries:entity:field_definition',
+          'entity:node/field_additional_word_entries:entity:field_pronunciation',
+          'entity:node/field_additional_word_entries:entity:field_sample_sentences:entity:field_sentence',
+          'entity:node/field_additional_word_entries:entity:field_source',
+          'entity:node/field_additional_word_entries:entity:field_translation',
+          'entity:node/field_additional_word_entries:entity:field_word_entry_term',
+          'entity:node/field_additional_word_entries:entity:field_word_origin',
+          'entity:node/field_alternate_spelling',
+          'entity:node/field_coverage_description',
+          'entity:node/field_definition',
+          'entity:node/field_description',
+          'entity:node/field_pronunciation',
+          'entity:node/field_sample_sentences:entity:field_sentence',
+          'entity:node/field_source',
+          'entity:node/field_summary',
+          'entity:node/field_translation',
+          'entity:node/field_word_origin',
+          // field_location is intentionally excluded: it is already indexed as a
+          // standalone field for all content types in this index.
+          'entity:node/field_contributor:entity:name',
+          'entity:node/field_additional_word_entries:entity:field_contributor:entity:name',
+          'entity:node/field_word_type:entity:name',
+          'entity:node/field_additional_word_entries:entity:field_word_type:entity:name',
+        ],
+      ],
+    ],
+    'word_type' => [
+      'label' => 'Word Type',
+      'datasource_id' => 'entity:node',
+      'property_path' => 'field_additional_word_entries:entity:field_word_type:entity:name',
+      'type' => 'string',
+    ],
+  ];
+
+  $index_changed = FALSE;
+  foreach ($new_fields as $field_id => $field_info) {
+    if ($index->getField($field_id)) {
+      continue;
+    }
+    $field = \Drupal::getContainer()
+      ->get('search_api.fields_helper')
+      ->createField($index, $field_id, $field_info);
+    $index->addField($field);
+    $index_changed = TRUE;
+  }
+
+  // Register both fields with the ignorecase processor, which has all_fields: false.
+  $processors = $index->getProcessors();
+  if (isset($processors['ignorecase'])) {
+    $config = $processors['ignorecase']->getConfiguration();
+    $processor_changed = FALSE;
+    foreach (array_keys($new_fields) as $field_id) {
+      if (!in_array($field_id, $config['fields'])) {
+        $config['fields'][] = $field_id;
+        $processor_changed = TRUE;
+      }
+    }
+    if ($processor_changed) {
+      $processors['ignorecase']->setConfiguration($config);
+      $index->setProcessors($processors);
+      $index_changed = TRUE;
+    }
+  }
+
+  if ($index_changed) {
+    $index->save();
+  }
+
+  $index->reindex();
+}
+
+/**
+ * Ensure contributor paths are in dictionary fulltext and word type path is correct.
+ */
+function mukurtu_browse_update_40006(): void {
+  $index = \Drupal\search_api\Entity\Index::load('mukurtu_default_content_index');
+  if (!$index) {
+    return;
+  }
+
+  $changed = FALSE;
+
+  // These paths were added to 40005 after initial release; keep here for sites
+  // that ran 40005 before the fix landed.
+  $fulltext = $index->getField('dictionary_fulltext');
+  if ($fulltext) {
+    $config = $fulltext->getConfiguration();
+    $new_paths = [
+      'entity:node/field_contributor:entity:name',
+      'entity:node/field_additional_word_entries:entity:field_contributor:entity:name',
+      'entity:node/field_word_type:entity:name',
+      'entity:node/field_additional_word_entries:entity:field_word_type:entity:name',
+    ];
+    foreach ($new_paths as $path) {
+      if (!in_array($path, $config['fields'])) {
+        $config['fields'][] = $path;
+        $changed = TRUE;
+      }
+    }
+    if ($changed) {
+      $fulltext->setConfiguration($config);
+    }
+  }
+
+  // Correct path added in 40005 after initial release; fix any sites that ran
+  // the old version.
+  $word_type = $index->getField('word_type');
+  if ($word_type && $word_type->getPropertyPath() === 'field_word_type:entity:name') {
+    $word_type->setPropertyPath('field_additional_word_entries:entity:field_word_type:entity:name');
+    $changed = TRUE;
+  }
+
+  if ($changed) {
+    $index->save();
+    $index->reindex();
+  }
+}
+
+/**
+ * Add word type to dictionary fulltext aggregation in browse index.
+ */
+function mukurtu_browse_update_40007(): void {
+  $index = \Drupal\search_api\Entity\Index::load('mukurtu_default_content_index');
+  if (!$index) {
+    return;
+  }
+  $field = $index->getField('dictionary_fulltext');
+  if (!$field) {
+    return;
+  }
+  $new_path = 'entity:node/field_additional_word_entries:entity:field_word_type:entity:name';
+  $config = $field->getConfiguration();
+  if (!in_array($new_path, $config['fields'])) {
+    $config['fields'][] = $new_path;
+    $field->setConfiguration($config);
+    $index->save();
+    $index->reindex();
+  }
+}
+
+/**
+ * Add node-level word type to dictionary fulltext aggregation in browse index.
+ */
+function mukurtu_browse_update_40008(): void {
+  $index = \Drupal\search_api\Entity\Index::load('mukurtu_default_content_index');
+  if (!$index) {
+    return;
+  }
+  $field = $index->getField('dictionary_fulltext');
+  if (!$field) {
+    return;
+  }
+  $new_path = 'entity:node/field_word_type:entity:name';
+  $config = $field->getConfiguration();
+  if (!in_array($new_path, $config['fields'])) {
+    $config['fields'][] = $new_path;
+    $field->setConfiguration($config);
+    $index->save();
+    $index->reindex();
+  }
+}
+
+/**
+ * Add multipage page delta and community record flag fields to the content index.
+ */
+function mukurtu_browse_update_40009() {
+  $index = \Drupal\search_api\Entity\Index::load('mukurtu_default_content_index');
+  if (!$index) {
+    return;
+  }
+
+  // Add processors first via the entity so they are saved together with fields.
+  $processors = $index->getProcessors();
+  foreach (['mukurtu_multipage_page_index', 'mukurtu_community_record_flag'] as $processor_id) {
+    if (!isset($processors[$processor_id])) {
+      $processor_manager = \Drupal::service('plugin.manager.search_api.processor');
+      $processor = $processor_manager->createInstance($processor_id, ['#index' => $index]);
+      $processors[$processor_id] = $processor;
+    }
+  }
+  $index->setProcessors($processors);
+
+  $new_fields = [
+    'multipage_page_delta' => [
+      'type' => 'integer',
+      'property_path' => 'multipage_page_delta',
+      'datasource_id' => 'entity:node',
+      'label' => 'Multipage page delta',
+    ],
+    'is_community_record' => [
+      'type' => 'boolean',
+      'property_path' => 'is_community_record',
+      'datasource_id' => 'entity:node',
+      'label' => 'Is community record',
+    ],
+  ];
+
+  foreach ($new_fields as $field_id => $field_config) {
+    if (!$index->getField($field_id)) {
+      $field = new \Drupal\search_api\Item\Field($index, $field_id);
+      $field->setType($field_config['type']);
+      $field->setPropertyPath($field_config['property_path']);
+      $field->setDatasourceId($field_config['datasource_id']);
+      $field->setLabel($field_config['label']);
+      $index->addField($field);
+    }
+  }
+
+  $index->save();
+  $index->reindex();
+}
+
+/**
+ * Replace multipage_page_delta (integer) with is_additional_mpi_page (boolean).
+ *
+ * The original integer field used a < 1 comparison which silently passed all
+ * items when the processor query found no rows. The boolean field mirrors the
+ * community record pattern and is unambiguous.
+ */
+function mukurtu_browse_update_40010() {
+  $index = \Drupal\search_api\Entity\Index::load('mukurtu_default_content_index');
+  if (!$index) {
+    return;
+  }
+
+  // Remove the old integer field if present.
+  if ($index->getField('multipage_page_delta')) {
+    $index->removeField('multipage_page_delta');
+  }
+
+  // Add the replacement boolean field.
+  if (!$index->getField('is_additional_mpi_page')) {
+    $field = new \Drupal\search_api\Item\Field($index, 'is_additional_mpi_page');
+    $field->setType('boolean');
+    $field->setPropertyPath('is_additional_mpi_page');
+    $field->setDatasourceId('entity:node');
+    $field->setLabel('Is additional multipage item page');
+    $index->addField($field);
+  }
+
+  $index->save();
+  $index->reindex();
+}

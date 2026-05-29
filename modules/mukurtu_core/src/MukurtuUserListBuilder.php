@@ -3,6 +3,8 @@
 namespace Drupal\mukurtu_core;
 
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Link;
+use Drupal\Core\Url;
 use Drupal\user\RoleInterface;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\user\Entity\Role;
@@ -63,8 +65,16 @@ class MukurtuUserListBuilder extends \Drupal\user\UserListBuilder {
       '#theme' => 'username',
       '#account' => $entity,
     ];
-    $row['field_display_name']['data']['#markup'] = $entity->get('field_display_name')->value;
-    $row['status'] = $entity->isActive() ? $this->t('active') : $this->t('blocked');
+    $row['field_display_name']['data']['#markup'] = $entity->get('field_display_name')->value ?? '—';
+    if ($entity->isActive()) {
+      $row['status'] = $this->t('active');
+    }
+    elseif ($entity->hasField('field_pending') && $entity->get('field_pending')->value) {
+      $row['status'] = $this->t('pending');
+    }
+    else {
+      $row['status'] = $this->t('blocked');
+    }
 
     $roles = Role::loadMultiple($entity->getRoles());
     unset($roles[RoleInterface::ANONYMOUS_ID]);
@@ -80,7 +90,10 @@ class MukurtuUserListBuilder extends \Drupal\user\UserListBuilder {
     ];
     $row['communities']['data'] = [
       '#theme' => 'item_list',
-      '#items' => $this->getUserCommunities($entity),
+      '#items' => array_map(
+        fn($community) => Link::fromTextAndUrl($community->getName(), $community->toUrl()),
+        $this->getUserCommunities($entity)
+      ),
     ];
     $row['member_for']['data'] = $this->dateFormatter->formatTimeDiffSince($entity->getCreatedTime(), $options)->toRenderable();
     $last_access = $this->dateFormatter->formatTimeDiffSince($entity->getLastAccessedTime(), $options);
@@ -93,6 +106,29 @@ class MukurtuUserListBuilder extends \Drupal\user\UserListBuilder {
       $row['access']['data']['#markup'] = t('never');
     }
     return $row + parent::buildRow($entity);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getOperations(EntityInterface $entity) {
+    $operations = parent::getOperations($entity);
+    if ($entity->access('cancel')) {
+      $operations['cancel'] = [
+        'title' => $this->t('Block or delete'),
+        'url' => $entity->toUrl('cancel-form'),
+        'weight' => 10,
+        'attributes' => [
+          'aria-label' => $this->t('Block or delete @name', ['@name' => $entity->getDisplayName()]),
+        ],
+      ];
+    }
+    $operations['memberships'] = [
+      'title' => $this->t('View memberships'),
+      'url' => Url::fromRoute('mukurtu_protocol.user_memberships', ['user' => $entity->id()]),
+      'weight' => 20,
+    ];
+    return $operations;
   }
 
   protected function getUserCommunities($account) {
@@ -110,7 +146,7 @@ class MukurtuUserListBuilder extends \Drupal\user\UserListBuilder {
     foreach ($memberships as $membership) {
       $community = $membership->getGroup();
       if ($community) {
-        $communities[$community->id()] = $community->getTitle();
+        $communities[$community->id()] = $community;
       }
     }
     return $communities;

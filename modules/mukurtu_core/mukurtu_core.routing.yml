@@ -30,13 +30,6 @@ mukurtu_core.add:
         type: entity:node_type
         with_config_overrides: TRUE
 
-mukurtu_core.people:
-  path: '/admin/people'
-  defaults:
-    _entity_list: 'user'
-    _title: 'People - All User Accounts'
-  requirements:
-    _permission: 'administer users'
 
 mukurtu_core.approve_user:
   path: '/user/{uid}/approve'
@@ -52,6 +45,15 @@ mukurtu_core.block_user:
   defaults:
     _controller: '\Drupal\mukurtu_core\Controller\MukurtuUserController::blockAjax'
     _title: 'Block User'
+  requirements:
+    _custom_access: '\Drupal\mukurtu_core\Controller\MukurtuUserController::access'
+    uid: \d+
+
+mukurtu_core.set_pending_user:
+  path: '/user/{uid}/set-pending'
+  defaults:
+    _controller: '\Drupal\mukurtu_core\Controller\MukurtuUserController::setPendingAjax'
+    _title: 'Set to Pending'
   requirements:
     _custom_access: '\Drupal\mukurtu_core\Controller\MukurtuUserController::access'
     uid: \d+

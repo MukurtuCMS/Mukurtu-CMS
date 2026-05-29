@@ -1,0 +1,17 @@
+@use "../../../external/include-media";
+@use "../../00-base/layout/layout";
+
+// Local Contexts site project directory page layout.
+.local-contexts-directory {
+  &__main-content {
+    @include layout.layout--full-width-grid;
+
+    .region {
+      grid-column: 1 / -1;
+
+      @include include-media.media('>=2xl') {
+        grid-column: 2 / -2;
+      }
+    }
+  }
+}

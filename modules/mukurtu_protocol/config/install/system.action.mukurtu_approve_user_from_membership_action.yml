@@ -1,0 +1,11 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - mukurtu_protocol
+    - og
+id: mukurtu_approve_user_from_membership_action
+label: 'Approve pending user account(s)'
+type: og_membership
+plugin: mukurtu_approve_user_from_membership_action
+configuration: {  }

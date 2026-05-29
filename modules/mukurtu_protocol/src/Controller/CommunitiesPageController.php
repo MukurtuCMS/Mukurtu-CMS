@@ -3,7 +3,9 @@
 namespace Drupal\mukurtu_protocol\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Url;
 use Drupal\og\Og;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
  * Controller for communities page.
@@ -46,6 +48,13 @@ class CommunitiesPageController extends ControllerBase {
     ];
 
     return $build;
+  }
+
+  /**
+   * Redirects the legacy /admin/protocols path to the current collection page.
+   */
+  public function protocolsDashboardRedirect(): RedirectResponse {
+    return new RedirectResponse(Url::fromRoute('entity.protocol.collection')->toString(), 301);
   }
 
 }

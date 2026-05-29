@@ -1,6 +1,7 @@
 <?php
 
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\node\Entity\Node;
 use Drupal\message\Entity\Message;
 use Drupal\Core\Entity\EntityInterface;
@@ -282,6 +283,137 @@ function mukurtu_notifications_user_insert($entity) {
   // Queue messages to our custom list of admins.
   $subscribers = \Drupal::service('message_subscribe.subscribers');
   $subscribers->sendMessage($message, $message, $notify_options, $subscribe_options);
+}
+
+/**
+ * Sends email notifications to selected users when a new account is created.
+ *
+ * @param \Drupal\user\Entity\User $new_user
+ *   The newly created user entity.
+ * @param array $notify_uids
+ *   Array of user IDs to notify.
+ */
+function mukurtu_notifications_notify_new_account_created(User $new_user, array $notify_uids): void {
+  if (empty($notify_uids)) {
+    return;
+  }
+
+  $message = Message::create([
+    'template' => 'mukurtu_new_user_account_created',
+    'uid' => \Drupal::currentUser()->id(),
+  ]);
+  $message->set('field_user', $new_user);
+  $message->save();
+
+  $flags = ['subscribe_user'];
+  $notifiers = ['email'];
+  $subscribe_options = [
+    'notify message owner' => TRUE,
+    'uids' => [],
+  ];
+  foreach ($notify_uids as $uid) {
+    $notify_user = User::load($uid);
+    if (!$notify_user || empty($notify_user->getEmail())) {
+      continue;
+    }
+    $subscribe_options['uids'][$uid] = new DeliveryCandidate($flags, $notifiers, (int) $uid);
+  }
+
+  \Drupal::service('message_subscribe.subscribers')
+    ->sendMessage($message, $message, [], $subscribe_options);
+}
+
+/**
+ * Resolves group-based notification selections to an array of user IDs.
+ *
+ * @param bool $all_managers
+ *   If TRUE, include all users with the administrator or mukurtu_manager role.
+ * @param array $community_ids
+ *   Entity IDs of communities whose community managers should be notified.
+ * @param array $protocol_ids
+ *   Entity IDs of protocols whose protocol stewards should be notified.
+ *
+ * @return array
+ *   Unique array of integer user IDs.
+ */
+function mukurtu_notifications_resolve_notify_groups(bool $all_managers, array $community_ids, array $protocol_ids): array {
+  $uids = [];
+
+  if ($all_managers) {
+    $manager_uids = \Drupal::entityQuery('user')
+      ->condition('roles', ['administrator', 'mukurtu_manager'], 'IN')
+      ->condition('status', 1)
+      ->accessCheck(FALSE)
+      ->execute();
+    $uids = array_merge($uids, array_values($manager_uids));
+  }
+
+  if (!empty($community_ids)) {
+    $memberships = \Drupal::entityQuery('og_membership')
+      ->condition('entity_type', 'community')
+      ->condition('entity_id', $community_ids, 'IN')
+      ->condition('roles', 'community-community-community_manager')
+      ->condition('state', 'active')
+      ->accessCheck(FALSE)
+      ->execute();
+    $loaded = \Drupal::entityTypeManager()->getStorage('og_membership')->loadMultiple($memberships);
+    foreach ($loaded as $m) {
+      $uids[] = (int) $m->getOwnerId();
+    }
+  }
+
+  if (!empty($protocol_ids)) {
+    $memberships = \Drupal::entityQuery('og_membership')
+      ->condition('entity_type', 'protocol')
+      ->condition('entity_id', $protocol_ids, 'IN')
+      ->condition('roles', 'protocol-protocol-protocol_steward')
+      ->condition('state', 'active')
+      ->accessCheck(FALSE)
+      ->execute();
+    $loaded = \Drupal::entityTypeManager()->getStorage('og_membership')->loadMultiple($memberships);
+    foreach ($loaded as $m) {
+      $uids[] = (int) $m->getOwnerId();
+    }
+  }
+
+  return array_values(array_unique($uids));
+}
+
+/**
+ * Extracts and resolves all notify UIDs from the shared notify form section.
+ *
+ * Reads notify_user_count, notify_users, notify_all_managers,
+ * notify_communities, and notify_protocols from form state, then delegates
+ * to mukurtu_notifications_resolve_notify_groups for group-based selections.
+ *
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ *   The form state from a form that includes the shared notify section.
+ *
+ * @return array
+ *   Unique array of integer user IDs to notify.
+ */
+function mukurtu_notifications_extract_notify_uids(FormStateInterface $form_state): array {
+  $notifyUids = [];
+  $notifyUserCount = $form_state->get('notify_user_count') ?? 1;
+  for ($i = 0; $i < $notifyUserCount; $i++) {
+    $uid = $form_state->getValue(['notify_users', 'user_' . $i]);
+    if (!empty($uid)) {
+      $notifyUids[] = (int) $uid;
+    }
+  }
+
+  $allManagers = (bool) $form_state->getValue('notify_all_managers');
+  $communityIds = array_keys(array_filter($form_state->getValue('notify_communities') ?? []));
+  $protocolIds = [];
+  foreach ($form_state->getValue('notify_protocols') ?? [] as $groupValues) {
+    if (is_array($groupValues)) {
+      $protocolIds = array_merge($protocolIds, array_keys(array_filter($groupValues)));
+    }
+  }
+  $protocolIds = array_unique($protocolIds);
+
+  $groupUids = mukurtu_notifications_resolve_notify_groups($allManagers, $communityIds, $protocolIds);
+  return array_values(array_unique(array_merge($notifyUids, $groupUids)));
 }
 
 /**

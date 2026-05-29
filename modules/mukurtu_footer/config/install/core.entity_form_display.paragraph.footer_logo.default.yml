@@ -1,0 +1,34 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.footer_logo.field_footer_logo_image
+    - field.field.paragraph.footer_logo.field_footer_logo_link
+    - paragraphs.paragraphs_type.footer_logo
+  module:
+    - image
+    - link
+id: paragraph.footer_logo.default
+targetEntityType: paragraph
+bundle: footer_logo
+mode: default
+content:
+  field_footer_logo_image:
+    type: image_image
+    weight: 0
+    region: content
+    settings:
+      progress_indicator: throbber
+      preview_image_style: thumbnail
+    third_party_settings: {}
+  field_footer_logo_link:
+    type: link_default
+    weight: 1
+    region: content
+    settings:
+      placeholder_url: ''
+      placeholder_title: ''
+    third_party_settings: {}
+hidden:
+  created: true
+  status: true

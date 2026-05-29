@@ -14,26 +14,6 @@ plugin: mukurtu_footer
 settings:
   id: mukurtu_footer
   label: 'Mukurtu Footer'
-  label_display: visible
+  label_display: '0'
   provider: mukurtu_footer
-  logo_upload: {  }
-  email_us_text: 'Email us at '
-  contact_email_address: ''
-  social_media:
-    twitter:
-      message_text: ''
-      account_1: ''
-      account_2: ''
-      account_3: ''
-    facebook:
-      message_text: ''
-      account_1: ''
-      account_2: ''
-      account_3: ''
-    instagram:
-      message_text: ''
-      account_1: ''
-      account_2: ''
-      account_3: ''
-  copyright_message: '© 2025 Mukurtu CMS'
-visibility: {  }
+visibility: {}

@@ -1,5 +1,5 @@
 entity.protocol.add_form:
-  route_name: entity.protocol.add_form
+  route_name: mukurtu_protocol.protocol_create
   title: 'Add Protocol'
   appears_on:
     - entity.protocol.collection
@@ -8,6 +8,7 @@ entity.community.add_form:
   title: 'Add Community'
   appears_on:
     - entity.community.collection
+    - entity.protocol.collection
     - mukurtu_protocol.manage_communities
     - mukurtu_protocol.communities_page
 mukurtu_protocol.add_community_role:

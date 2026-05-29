@@ -34,6 +34,11 @@ class CulturalProtocols extends MukurtuImportFieldProcessPluginBase {
         'source' => $source,
         'delimiter' => $multivalue_delimiter,
       ];
+      // Trim whitespace.
+      $process[] = [
+        'plugin' => 'callback',
+        'callable' => 'trim',
+      ];
       // Resolve any UUIDs.
       $process[] = [
         'plugin' => 'uuid_lookup',

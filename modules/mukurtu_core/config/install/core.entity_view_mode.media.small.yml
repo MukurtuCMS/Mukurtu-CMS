@@ -1,0 +1,10 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - media
+id: media.small
+label: 'Small (250px)'
+description: ''
+targetEntityType: media
+cache: true

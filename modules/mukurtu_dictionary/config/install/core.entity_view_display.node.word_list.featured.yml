@@ -17,7 +17,7 @@ targetEntityType: node
 bundle: word_list
 mode: featured
 content:
-  field_representative_media:
+  field_word_list_image:
     type: entity_reference_entity_view
     label: hidden
     settings:
@@ -53,7 +53,6 @@ hidden:
   field_sequence_collection: true
   field_source: true
   field_summary: true
-  field_word_list_image: true
   field_words: true
   flag_email_node: true
   flag_email_og: true

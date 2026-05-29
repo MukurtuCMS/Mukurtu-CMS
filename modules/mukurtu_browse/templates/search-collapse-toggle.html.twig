@@ -1,0 +1,31 @@
+<fieldset class="search-collapse-toggle">
+  <legend class="search-collapse-toggle__header">
+    {{ 'Display options'|t }}
+  </legend>
+  <div class="search-collapse-toggle__content">
+    <label class="search-collapse-toggle__item">
+      {# checked = show all (on-value 0 = collapse off; off-value 1 = collapse on) #}
+      <input
+        type="checkbox"
+        class="search-collapse-toggle__input"
+        data-param="mpi_collapse"
+        data-on-value="0"
+        data-off-value="1"
+        {{ show_all_pages ? 'checked' : '' }}>
+      <span class="search-collapse-toggle__switch" aria-hidden="true"></span>
+      <span class="search-collapse-toggle__label">{{ 'Show all pages'|t }}</span>
+    </label>
+    <label class="search-collapse-toggle__item">
+      {# checked = show community records (on-value 0 = collapse off; off-value 1 = collapse on) #}
+      <input
+        type="checkbox"
+        class="search-collapse-toggle__input"
+        data-param="cr_collapse"
+        data-on-value="0"
+        data-off-value="1"
+        {{ show_community_records ? 'checked' : '' }}>
+      <span class="search-collapse-toggle__switch" aria-hidden="true"></span>
+      <span class="search-collapse-toggle__label">{{ 'Show community records'|t }}</span>
+    </label>
+  </div>
+</fieldset>

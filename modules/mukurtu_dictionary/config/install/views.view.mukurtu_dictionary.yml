@@ -97,7 +97,7 @@ display:
             multi_type: separator
             multi_separator: ', '
       pager:
-        type: mini
+        type: full
         options:
           offset: 0
           pagination_heading_level: h4
@@ -107,6 +107,8 @@ display:
           tags:
             next: 'Next ›'
             previous: '‹ Previous'
+            first: '« First'
+            last: 'Last »'
           expose:
             items_per_page: false
             items_per_page_label: 'Items per page'
@@ -115,6 +117,7 @@ display:
             items_per_page_options_all_label: '- All -'
             offset: false
             offset_label: Offset
+          quantity: 9
       exposed_form:
         type: bef
         options:
@@ -141,6 +144,17 @@ display:
               secondary_label: 'Advanced options'
               secondary_open: false
               reset_button_always_show: false
+            sort:
+              plugin_id: default
+              advanced:
+                combine: false
+                combine_rewrite: ''
+                combine_param: sort_bef_combine
+                reset: false
+                reset_label: ''
+                collapsible: false
+                collapsible_label: 'Sort options'
+                is_secondary: false
             filter:
               search_api_fulltext:
                 plugin_id: default
@@ -156,7 +170,20 @@ display:
                   hide_label: false
                   field_classes: ''
                   sort_options_unsupported: ''
-              facets_type:
+              facets_language:
+                plugin_id: default
+                advanced:
+                  rewrite:
+                    filter_rewrite_values: ''
+                    filter_rewrite_values_key: false
+                  collapsible: false
+                  collapsible_disable_automatic_open: false
+                  open_by_default: false
+                  is_secondary: false
+                  hide_label: false
+                  field_classes: ''
+                  sort_options_unsupported: ''
+              facets_community_title:
                 plugin_id: default
                 advanced:
                   rewrite:
@@ -182,7 +209,46 @@ display:
                   hide_label: false
                   field_classes: ''
                   sort_options_unsupported: ''
-              facets_language:
+              facets_type:
+                plugin_id: default
+                advanced:
+                  rewrite:
+                    filter_rewrite_values: ''
+                    filter_rewrite_values_key: false
+                  collapsible: false
+                  collapsible_disable_automatic_open: false
+                  open_by_default: false
+                  is_secondary: false
+                  hide_label: false
+                  field_classes: ''
+                  sort_options_unsupported: ''
+              facets_word_type:
+                plugin_id: default
+                advanced:
+                  rewrite:
+                    filter_rewrite_values: ''
+                    filter_rewrite_values_key: false
+                  collapsible: false
+                  collapsible_disable_automatic_open: false
+                  open_by_default: false
+                  is_secondary: false
+                  hide_label: false
+                  field_classes: ''
+                  sort_options_unsupported: ''
+              facets_keyword:
+                plugin_id: default
+                advanced:
+                  rewrite:
+                    filter_rewrite_values: ''
+                    filter_rewrite_values_key: false
+                  collapsible: false
+                  collapsible_disable_automatic_open: false
+                  open_by_default: false
+                  is_secondary: false
+                  hide_label: false
+                  field_classes: ''
+                  sort_options_unsupported: ''
+              facets_word_lists:
                 plugin_id: default
                 advanced:
                   rewrite:
@@ -212,45 +278,6 @@ display:
                 soft_limit: 0
                 soft_limit_label_less: 'Show less'
                 soft_limit_label_more: 'Show more'
-              facets_keyword:
-                plugin_id: default
-                advanced:
-                  rewrite:
-                    filter_rewrite_values: ''
-                    filter_rewrite_values_key: false
-                  collapsible: false
-                  collapsible_disable_automatic_open: false
-                  open_by_default: false
-                  is_secondary: false
-                  hide_label: false
-                  field_classes: ''
-                  sort_options_unsupported: ''
-              facets_word_lists:
-                plugin_id: default
-                advanced:
-                  rewrite:
-                    filter_rewrite_values: ''
-                    filter_rewrite_values_key: false
-                  collapsible: false
-                  collapsible_disable_automatic_open: false
-                  open_by_default: false
-                  is_secondary: false
-                  hide_label: false
-                  field_classes: ''
-                  sort_options_unsupported: ''
-              facets_word_type:
-                plugin_id: default
-                advanced:
-                  rewrite:
-                    filter_rewrite_values: ''
-                    filter_rewrite_values_key: false
-                  collapsible: false
-                  collapsible_disable_automatic_open: false
-                  open_by_default: false
-                  is_secondary: false
-                  hide_label: false
-                  field_classes: ''
-                  sort_options_unsupported: ''
       access:
         type: perm
         options:
@@ -267,12 +294,25 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          plugin_id: search_api
+          plugin_id: glossary_custom_order
           order: ASC
           expose:
-            label: ''
-            field_identifier: ''
-          exposed: false
+            label: 'Glossary order'
+            field_identifier: glossary_order
+          exposed: true
+        search_api_relevance:
+          id: search_api_relevance
+          table: search_api_index_mukurtu_dictionary_index
+          field: search_api_relevance
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: search_api
+          order: DESC
+          expose:
+            label: 'Search relevance'
+            field_identifier: relevance
+          exposed: true
         title:
           id: title
           table: search_api_index_mukurtu_dictionary_index
@@ -299,6 +339,7 @@ display:
           operator: or
           value:
             dictionary_word: dictionary_word
+            word_list: word_list
           group: 1
           exposed: false
           expose:
@@ -414,10 +455,10 @@ display:
           parse_mode: terms
           min_length: null
           fields: {  }
-        facets_type:
-          id: facets_type
+        facets_language:
+          id: facets_language
           table: search_api_index_mukurtu_dictionary_index
-          field: facets_type
+          field: facets_language
           relationship: none
           group_type: group
           admin_label: ''
@@ -428,13 +469,13 @@ display:
           exposed: true
           expose:
             operator_id: ''
-            label: 'Content type'
+            label: Language
             description: ''
             use_operator: false
             operator: ''
             operator_limit_selection: false
             operator_list: {  }
-            identifier: type
+            identifier: language
             required: false
             remember: false
             multiple: false
@@ -460,17 +501,58 @@ display:
             min_count: 1
             show_numbers: false
             processor_configs:
-              translate_entity:
-                processor_id: translate_entity
+              display_value_widget_order:
+                processor_id: display_value_widget_order
                 weights:
-                  build: 5
-                settings: {  }
-              replace:
-                processor_id: replace
-                weights:
-                  post_query: 50
+                  sort: 40
                 settings:
-                  replacements: 'All|Content type'
+                  sort: ASC
+        facets_community_title:
+          id: facets_community_title
+          table: search_api_index_mukurtu_dictionary_index
+          field: facets_community_title
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: facets_filter
+          operator: '='
+          value: ''
+          group: 1
+          exposed: true
+          expose:
+            operator_id: ''
+            label: Community
+            description: ''
+            use_operator: false
+            operator: ''
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: community
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          hierarchy: false
+          label_display: visible
+          facet:
+            query_operator: or
+            hard_limit: 0
+            min_count: 1
+            show_numbers: false
+            processor_configs:
               display_value_widget_order:
                 processor_id: display_value_widget_order
                 weights:
@@ -534,10 +616,10 @@ display:
                   sort: 40
                 settings:
                   sort: ASC
-        facets_language:
-          id: facets_language
+        facets_type:
+          id: facets_type
           table: search_api_index_mukurtu_dictionary_index
-          field: facets_language
+          field: facets_type
           relationship: none
           group_type: group
           admin_label: ''
@@ -548,13 +630,13 @@ display:
           exposed: true
           expose:
             operator_id: ''
-            label: Language
+            label: 'Content type'
             description: ''
             use_operator: false
             operator: ''
             operator_limit_selection: false
             operator_list: {  }
-            identifier: language
+            identifier: type
             required: false
             remember: false
             multiple: false
@@ -580,16 +662,27 @@ display:
             min_count: 1
             show_numbers: false
             processor_configs:
+              translate_entity:
+                processor_id: translate_entity
+                weights:
+                  build: 5
+                settings: {  }
+              replace:
+                processor_id: replace
+                weights:
+                  post_query: 50
+                settings:
+                  replacements: 'All|Content type'
               display_value_widget_order:
                 processor_id: display_value_widget_order
                 weights:
                   sort: 40
                 settings:
                   sort: ASC
-        facets_field_glossary_entry:
-          id: facets_field_glossary_entry
+        facets_word_type:
+          id: facets_word_type
           table: search_api_index_mukurtu_dictionary_index
-          field: facets_field_glossary_entry
+          field: facets_word_type
           relationship: none
           group_type: group
           admin_label: ''
@@ -600,13 +693,13 @@ display:
           exposed: true
           expose:
             operator_id: ''
-            label: 'Glossary Entry'
+            label: 'Word Type'
             description: ''
             use_operator: false
             operator: ''
             operator_limit_selection: false
             operator_list: {  }
-            identifier: glossary_entry
+            identifier: word_type
             required: false
             remember: false
             multiple: false
@@ -632,28 +725,29 @@ display:
             query_operator: or
             hard_limit: 0
             min_count: 1
-            show_numbers: true
+            show_numbers: false
             processor_configs:
-              hide_1_result_facet:
-                processor_id: hide_1_result_facet
-                weights:
-                  build: 50
-                settings: {  }
               hierarchy_processor:
                 processor_id: hierarchy_processor
                 weights:
                   build: 100
                 settings: {  }
+              active_widget_order:
+                processor_id: active_widget_order
+                weights:
+                  sort: 20
+                settings:
+                  sort: DESC
+              count_widget_order:
+                processor_id: count_widget_order
+                weights:
+                  sort: 30
+                settings:
+                  sort: DESC
               display_value_widget_order:
                 processor_id: display_value_widget_order
                 weights:
                   sort: 40
-                settings:
-                  sort: ASC
-              glossary_custom_order:
-                processor_id: glossary_custom_order
-                weights:
-                  sort: 35
                 settings:
                   sort: ASC
         facets_keyword:
@@ -803,10 +897,10 @@ display:
                   sort: 40
                 settings:
                   sort: ASC
-        facets_word_type:
-          id: facets_word_type
+        facets_field_glossary_entry:
+          id: facets_field_glossary_entry
           table: search_api_index_mukurtu_dictionary_index
-          field: facets_word_type
+          field: facets_field_glossary_entry
           relationship: none
           group_type: group
           admin_label: ''
@@ -817,13 +911,13 @@ display:
           exposed: true
           expose:
             operator_id: ''
-            label: 'Word Type'
+            label: 'Glossary Entry'
             description: ''
             use_operator: false
             operator: ''
             operator_limit_selection: false
             operator_list: {  }
-            identifier: word_type
+            identifier: glossary_entry
             required: false
             remember: false
             multiple: false
@@ -849,29 +943,28 @@ display:
             query_operator: or
             hard_limit: 0
             min_count: 1
-            show_numbers: false
+            show_numbers: true
             processor_configs:
+              hide_1_result_facet:
+                processor_id: hide_1_result_facet
+                weights:
+                  build: 50
+                settings: {  }
               hierarchy_processor:
                 processor_id: hierarchy_processor
                 weights:
                   build: 100
                 settings: {  }
-              active_widget_order:
-                processor_id: active_widget_order
-                weights:
-                  sort: 20
-                settings:
-                  sort: DESC
-              count_widget_order:
-                processor_id: count_widget_order
-                weights:
-                  sort: 30
-                settings:
-                  sort: DESC
               display_value_widget_order:
                 processor_id: display_value_widget_order
                 weights:
                   sort: 40
+                settings:
+                  sort: ASC
+              glossary_custom_order:
+                processor_id: glossary_custom_order
+                weights:
+                  sort: 35
                 settings:
                   sort: ASC
       filter_groups:
@@ -920,6 +1013,8 @@ display:
         type: search_api_none
       defaults:
         cache: false
+        css_class: false
+      css_class: list
       exposed_block: true
       display_extenders: {  }
     cache_metadata:
@@ -932,5 +1027,352 @@ display:
         - user.permissions
       tags:
         - 'config:mukurtu_dictionary_glossary_order.settings'
+        - 'config:search_api.index.mukurtu_dictionary_index'
+        - 'search_api_list:mukurtu_dictionary_index'
+  mukurtu_dictionary_block_map:
+    id: mukurtu_dictionary_block_map
+    display_title: 'Map View Block'
+    display_plugin: block
+    position: 2
+    display_options:
+      fields:
+        nid:
+          id: nid
+          table: search_api_datasource_mukurtu_dictionary_index_entity_node
+          field: nid
+          relationship: none
+          group_type: group
+          admin_label: ''
+          entity_type: node
+          plugin_id: search_api_field
+          label: ''
+          exclude: false
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: false
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          click_sort_column: value
+          type: number_integer
+          settings:
+            thousand_separator: ''
+            prefix_suffix: true
+          group_column: value
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
+          field_rendering: true
+          fallback_handler: search_api_numeric
+          fallback_options:
+            set_precision: false
+            precision: 0
+            decimal: .
+            separator: ','
+            format_plural: false
+            format_plural_string: !!binary MQNAY291bnQ=
+            prefix: ''
+            suffix: ''
+            link_to_item: false
+            use_highlighting: false
+            multi_type: separator
+            multi_separator: ', '
+            format_plural_values:
+              - '1'
+              - '@count'
+        field_coverage:
+          id: field_coverage
+          table: search_api_index_mukurtu_dictionary_index
+          field: field_coverage
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: search_api_field
+          label: ''
+          exclude: true
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: false
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          click_sort_column: value
+          type: geofield_default
+          settings:
+            output_format: json
+            output_escape: false
+          group_column: value
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
+          field_rendering: true
+          fallback_handler: search_api
+          fallback_options:
+            link_to_item: false
+            use_highlighting: false
+            multi_type: separator
+            multi_separator: ', '
+        title:
+          id: title
+          table: search_api_index_mukurtu_dictionary_index
+          field: title
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: search_api_field
+          label: ''
+          exclude: false
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: false
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          click_sort_column: value
+          type: string
+          settings:
+            link_to_entity: true
+          group_column: value
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
+          field_rendering: true
+          fallback_handler: search_api
+          fallback_options:
+            link_to_item: false
+            use_highlighting: false
+            multi_type: separator
+            multi_separator: ', '
+      style:
+        type: leaflet_map
+        options:
+          grouping:
+            -
+              field: field_coverage
+              rendered: true
+              overlays_options:
+                disabled_overlays: {  }
+                hidden_overlays_controls: {  }
+          data_source:
+            field_coverage: field_coverage
+          entity_source: __base_table
+          name_field: title
+          leaflet_tooltip:
+            value: ''
+            options: '{"permanent":false,"direction":"center"}'
+          leaflet_popup:
+            value: '#rendered_view_fields'
+            view_mode: full
+            options: '{"maxWidth":"400","minWidth":"300","autoPan":true}'
+          leaflet_map: 'OSM Mapnik'
+          height: '600'
+          height_unit: px
+          hide_empty_map: true
+          disable_wheel: false
+          gesture_handling: false
+          fitbounds_options: '{"padding":[0,0]}'
+          reset_map:
+            control: false
+            options: '{"position":"topleft","title":"Reset View"}'
+          map_scale:
+            control: false
+            options: '{"position":"bottomright","maxWidth":100,"metric":true,"imperial":false,"updateWhenIdle":false}'
+          locate:
+            control: false
+            options: '{"position":"topright","setView":"untilPanOrZoom","returnToPrevBounds":true,"keepCurrentZoomLevel":true,"strings":{"title":"Locate my position"}}'
+            automatic: false
+          map_position:
+            force: false
+            center:
+              lat: 0.0
+              lon: 0.0
+            zoomControlPosition: topleft
+            zoom: 12
+            minZoom: 2
+            maxZoom: 18
+            zoomFiner: 0
+          weight: ''
+          icon:
+            iconType: marker
+            iconUrl: ''
+            shadowUrl: ''
+            className: ''
+            iconSize:
+              x: ''
+              'y': ''
+            iconAnchor:
+              x: ''
+              'y': ''
+            shadowSize:
+              x: ''
+              'y': ''
+            shadowAnchor:
+              x: ''
+              'y': ''
+            popupAnchor:
+              x: ''
+              'y': ''
+            html: '<div></div>'
+            html_class: leaflet-map-divicon
+            circle_marker_options: '{"radius":100,"color":"red","fillColor":"#f03","fillOpacity":0.5}'
+          leaflet_markercluster:
+            control: true
+            excluded: ''
+            options: '{"spiderfyOnMaxZoom":true,"showCoverageOnHover":true,"removeOutsideVisibleBounds": false}'
+            include_path: true
+          fullscreen:
+            control: false
+            options: '{"position":"topleft","pseudoFullscreen":false}'
+          path: '{"color":"#3388ff","opacity":"1.0","stroke":true,"weight":3,"fill":"depends","fillColor":"*","fillOpacity":"0.2","radius":"6"}'
+          feature_properties:
+            values: ''
+          map_lazy_load:
+            lazy_load: false
+      row:
+        type: search_api
+        options:
+          view_modes:
+            'entity:node':
+              ':default': map_browse
+              dictionary_word: ':default'
+              word_list: ':default'
+      defaults:
+        css_class: false
+        style: false
+        row: false
+        fields: false
+        filters: true
+        filter_groups: true
+        pager: true
+      css_class: map
+      display_description: ''
+      exposed_block: true
+      display_extenders: {  }
+    cache_metadata:
+      max-age: -1
+      contexts:
+        - 'languages:language_interface'
+        - url
+        - url.query_args
+        - 'user.node_grants:view'
+        - user.permissions
+      tags:
         - 'config:search_api.index.mukurtu_dictionary_index'
         - 'search_api_list:mukurtu_dictionary_index'

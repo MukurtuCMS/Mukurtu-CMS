@@ -23,28 +23,30 @@ class PersonalCollectionAccessControlHandler extends EntityAccessControlHandler 
     switch ($operation) {
 
       case 'view':
-        // Private PCs can only be viewed by owners.
+        // Private PCs can only be viewed by owners. Depends on entity fields.
         if ($entity->isPrivate() && $entity->getOwnerId() != $account->id()) {
-          return AccessResult::forbidden();
+          return AccessResult::forbidden()->addCacheableDependency($entity);
         }
 
         if (!$entity->isPublished()) {
-          return AccessResult::allowedIfHasPermission($account, 'view unpublished personal collection entities');
+          return AccessResult::allowedIfHasPermission($account, 'view unpublished personal collection entities')
+            ->addCacheableDependency($entity);
         }
 
-        return AccessResult::allowedIfHasPermission($account, 'view published personal collection entities');
+        return AccessResult::allowedIfHasPermission($account, 'view published personal collection entities')
+          ->addCacheableDependency($entity);
 
       case 'update':
-        // Only owners can update.
+        // Only owners can update. Depends on entity owner field.
         if ($entity->getOwnerId() != $account->id()) {
-          return AccessResult::forbidden();
+          return AccessResult::forbidden()->addCacheableDependency($entity);
         }
         return AccessResult::allowedIfHasPermission($account, 'edit personal collection entities');
 
       case 'delete':
-        // Only owners can delete.
+        // Only owners can delete. Depends on entity owner field.
         if ($entity->getOwnerId() != $account->id()) {
-          return AccessResult::forbidden();
+          return AccessResult::forbidden()->addCacheableDependency($entity);
         }
         return AccessResult::allowedIfHasPermission($account, 'delete personal collection entities');
     }

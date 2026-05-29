@@ -10,6 +10,13 @@ mukurtu-leaflet-widget:
     - core/jquery.once
     - leaflet/leaflet-widget
 
+tagify-override:
+  version: 1.x
+  js:
+    js/mukurtu-tagify-override.js: {}
+  dependencies:
+    - core/drupal
+
 splide:
   version: 4.1.2
   js:
@@ -17,3 +24,30 @@ splide:
   css:
     theme:
       libraries/splide/splide.min.css: {}
+
+notify-form:
+  version: 1.x
+  css:
+    component:
+      css/mukurtu-notify-form.css: {}
+
+entity_browser_view_decoration:
+  version: 1.x
+  js:
+    js/entity_browser_view_decoration.js: {}
+
+form-disable-enter-submit:
+  version: 1.x
+  js:
+    js/form-disable-enter-submit.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+
+vbo-user-labels:
+  version: 1.x
+  js:
+    js/vbo-user-labels.js: {}
+  dependencies:
+    - core/drupal
+    - core/once

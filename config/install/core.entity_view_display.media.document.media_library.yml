@@ -18,14 +18,6 @@ targetEntityType: media
 bundle: document
 mode: media_library
 content:
-  field_media_document:
-    type: file_default
-    label: above
-    settings:
-      use_description_as_link_text: true
-    third_party_settings: {  }
-    weight: 1
-    region: content
   thumbnail:
     type: image
     label: hidden
@@ -39,6 +31,7 @@ content:
     region: content
 hidden:
   created: true
+  field_media_document: true
   field_communities: true
   field_cultural_protocols: true
   field_extracted_text: true

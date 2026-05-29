@@ -51,7 +51,7 @@ settings:
         - '<h4 id>'
         - '<h5 id>'
         - '<h6 id>'
-        - '<drupal-media title>'
+        - '<drupal-media title data-entity-type data-entity-uuid alt data-view-mode data-caption data-align>'
     ckeditor5_list:
       properties:
         reversed: false

@@ -63,7 +63,7 @@ class WordList extends Node implements WordListInterface, CulturalProtocolContro
 
     $definitions['field_keywords'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Keywords'))
-      ->setDescription(t('Keywords are used to tag word lists to ensure they are discoverable when searching or browsing. </br>As you type, existing keywords will be displayed. Select an existing keyword or enter a new one. To include additional keywords, select "Add another item".'))
+      ->setDescription(t('Keywords are used to tag word lists to ensure they are discoverable when searching or browsing. </br>Include as many keywords as needed. Select from existing keywords or add new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -154,16 +154,6 @@ class WordList extends Node implements WordListInterface, CulturalProtocolContro
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
-    $definitions['field_coverage'] = BaseFieldDefinition::create('geofield')
-      ->setLabel(t('Map Points'))
-      ->setDescription(t(''))
-      ->setCardinality(1)
-      ->setRequired(FALSE)
-      ->setRevisionable(TRUE)
-      ->setTranslatable(FALSE)
-      ->setDisplayConfigurable('view', TRUE)
-      ->setDisplayConfigurable('form', TRUE);
-
     $definitions['field_coverage_description'] = BaseFieldDefinition::create('text_long')
       ->setLabel('Location Description')
       ->setDescription(t('A descriptive field to provide additional context and depth to the location(s) connected to the word list.	</br>This HTML field can support rich text and embedded media assets using the editing toolbar.'))
@@ -176,7 +166,7 @@ class WordList extends Node implements WordListInterface, CulturalProtocolContro
 
     $definitions['field_location'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Location'))
-      ->setDescription(t('A named place, or places, that are closely connected to the word list.	</br>As you type, existing locations will be displayed. Select an existing location or enter a new one. To include additional locations, select "Add another item".'))
+      ->setDescription(t('A named place, or places, that are closely connected to the word list.	</br>Include as many locations as needed. Select from existing locations or add new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',

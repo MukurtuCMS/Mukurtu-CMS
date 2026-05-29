@@ -10,7 +10,12 @@ To learn more about Mukurtu CMS and the larger Mukurtu community, visit [mukurtu
 ## Requirements
 
 * The necessary database server, web server, and PHP installed that meet [modern Drupal requirements](https://www.drupal.org/docs/system-requirements)
+  * Currently only PHP 8.3 is supported. Support for 8.4 will be added later.
+  * Currently MariaDB or MySQL is supported. PostGRES is not.
+  * the Mukurtu Team does our internal work with nginx. Apache SHOULD work fine, but we have not tested it extensively.
 * [Composer](https://getcomposer.org/)
+* To generate PDF thumbnails, [poppler-utils](https://pypi.org/project/poppler-utils/) must be installed on the server.
+* To generate thumbnails for uploaded video files, [FFmpeg](https://ffmpeg.org/) must be installed on the server.
 * For local development, we encourage using [Docker](https://ddev.readthedocs.io/en/stable/users/install/docker-installation/) and [DDEV](https://ddev.readthedocs.io/en/stable/users/install/ddev-installation/) (which includes composer)
 
 ## Install Mukurtu with DDEV
@@ -22,7 +27,7 @@ Using DDEV is the easiest way to get up and running with Mukurtu locally.
 ```
 mkdir mukurtu
 cd mukurtu
-ddev config --project-type=drupal --docroot=web
+ddev config --project-type=drupal --docroot=web --php-version=8.3
 # Optional but recommended: install pdftotext inside the DDEV container:
 echo "RUN sudo apt -qq update; sudo apt install poppler-utils -y;" > .ddev/web-build/Dockerfile.pdftotext
 ddev start

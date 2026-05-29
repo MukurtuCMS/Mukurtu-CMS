@@ -7,6 +7,14 @@ mukurtu-leaflet-preview:
     - core/jquery.once
     - leaflet/leaflet
 
+search-collapse-toggle:
+  version: 1.x
+  js:
+    js/search-collapse-toggle.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+
 mukurtu-browse-view-switch:
   version: 1.x
   js:

@@ -42,7 +42,7 @@ class ProtocolForm extends ContentEntityForm {
         '#type' => 'checkbox',
         '#title' => $this->t('Create new revision'),
         '#default_value' => FALSE,
-        '#weight' => 10,
+        '#weight' => 50,
       ];
     }
 

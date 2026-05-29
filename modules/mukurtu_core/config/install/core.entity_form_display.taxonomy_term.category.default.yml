@@ -56,4 +56,5 @@ content:
     settings:
       display_label: true
     third_party_settings: {  }
-hidden: {  }
+hidden: 
+  relations: true

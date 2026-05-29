@@ -58,6 +58,35 @@ field_settings:
       module:
         - node
         - taxonomy
+  dictionary_fulltext:
+    label: 'Dictionary Fulltext Content'
+    property_path: aggregated_field
+    type: text
+    configuration:
+      type: union
+      fields:
+        - 'entity:node/field_additional_word_entries:entity:field_alternate_spelling'
+        - 'entity:node/field_additional_word_entries:entity:field_definition'
+        - 'entity:node/field_additional_word_entries:entity:field_pronunciation'
+        - 'entity:node/field_additional_word_entries:entity:field_sample_sentences:entity:field_sentence'
+        - 'entity:node/field_additional_word_entries:entity:field_source'
+        - 'entity:node/field_additional_word_entries:entity:field_translation'
+        - 'entity:node/field_additional_word_entries:entity:field_word_entry_term'
+        - 'entity:node/field_additional_word_entries:entity:field_word_origin'
+        - 'entity:node/field_alternate_spelling'
+        - 'entity:node/field_coverage_description'
+        - 'entity:node/field_definition'
+        - 'entity:node/field_description'
+        - 'entity:node/field_pronunciation'
+        - 'entity:node/field_sample_sentences:entity:field_sentence'
+        - 'entity:node/field_source'
+        - 'entity:node/field_summary'
+        - 'entity:node/field_translation'
+        - 'entity:node/field_word_origin'
+        - 'entity:node/field_contributor:entity:name'
+        - 'entity:node/field_additional_word_entries:entity:field_contributor:entity:name'
+        - 'entity:node/field_word_type:entity:name'
+        - 'entity:node/field_additional_word_entries:entity:field_word_type:entity:name'
   field_coverage:
     label: 'Map Points'
     datasource_id: 'entity:node'
@@ -147,6 +176,33 @@ field_settings:
     dependencies:
       module:
         - node
+  language_name:
+    label: 'Language » Taxonomy term » Name'
+    datasource_id: 'entity:node'
+    property_path: 'field_language:entity:name'
+    type: text
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  location_name:
+    label: 'Location » Taxonomy term » Name'
+    datasource_id: 'entity:node'
+    property_path: 'field_location:entity:name'
+    type: text
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  publisher_name:
+    label: 'Publisher » Taxonomy term » Name'
+    datasource_id: 'entity:node'
+    property_path: 'field_publisher:entity:name'
+    type: text
+    dependencies:
+      module:
+        - node
+        - taxonomy
   glossaryaz_title:
     label: 'Glossary AZ - Content » Title'
     property_path: glossaryaz_title
@@ -154,6 +210,27 @@ field_settings:
     indexed_locked: true
     type_locked: true
     hidden: true
+  media_extracted_text:
+    label: 'Media Assets Extracted Text'
+    datasource_id: 'entity:node'
+    property_path: 'field_media_assets:entity:field_extracted_text'
+    type: text
+    dependencies:
+      module:
+        - media
+        - mukurtu_media
+        - node
+  page_media_extracted_text:
+    label: 'Page Media Assets Extracted Text'
+    datasource_id: 'entity:node'
+    property_path: 'field_page_media_assets:entity:field_extracted_text'
+    type: text
+    dependencies:
+      config:
+        - field.storage.node.field_page_media_assets
+      module:
+        - media
+        - mukurtu_media
   media_type:
     label: 'Media Assets » Media » Media type'
     datasource_id: 'entity:node'
@@ -177,11 +254,29 @@ field_settings:
       module:
         - node
         - taxonomy
+  name_text:
+    label: 'Category » Taxonomy term » Name (text)'
+    datasource_id: 'entity:node'
+    property_path: 'field_category:entity:name'
+    type: text
+    dependencies:
+      module:
+        - node
+        - taxonomy
   name_1:
     label: 'Keywords » Taxonomy term » Name'
     datasource_id: 'entity:node'
     property_path: 'field_keywords:entity:name'
     type: string
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  name_1_text:
+    label: 'Keywords » Taxonomy term » Name (text)'
+    datasource_id: 'entity:node'
+    property_path: 'field_keywords:entity:name'
+    type: text
     dependencies:
       module:
         - node
@@ -210,6 +305,15 @@ field_settings:
       module:
         - node
         - taxonomy
+  people_name_text:
+    label: 'People » Taxonomy term » Name (text)'
+    datasource_id: 'entity:node'
+    property_path: 'field_people:entity:name'
+    type: text
+    dependencies:
+      module:
+        - node
+        - taxonomy
   status:
     label: Published
     datasource_id: 'entity:node'
@@ -225,6 +329,15 @@ field_settings:
     datasource_id: 'entity:node'
     property_path: 'field_subject:entity:name'
     type: string
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  subject_name_text:
+    label: 'Subject » Taxonomy term » Name (text)'
+    datasource_id: 'entity:node'
+    property_path: 'field_subject:entity:name'
+    type: text
     dependencies:
       module:
         - node
@@ -256,6 +369,15 @@ field_settings:
     dependencies:
       module:
         - node
+  word_type:
+    label: 'Word Type'
+    datasource_id: 'entity:node'
+    property_path: 'field_additional_word_entries:entity:field_word_type:entity:name'
+    type: string
+    dependencies:
+      module:
+        - node
+        - taxonomy
 datasource_settings:
   'entity:node':
     bundles:
@@ -277,7 +399,7 @@ processor_settings:
   glossary:
     weights:
       preprocess_index: -20
-    glossarytable: 'a:1:{s:13:"glossarytable";a:24:{s:11:"collections";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:15:"community_title";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:16:"contributor_name";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:12:"creator_name";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:14:"field_coverage";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:26:"field_coverage_description";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:24:"field_cultural_narrative";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:22:"field_date_description";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:17:"field_description";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:16:"field_identifier";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:23:"field_rights_statements";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:12:"field_source";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:13:"field_summary";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:27:"field_traditional_knowledge";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:19:"field_transcription";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:10:"media_type";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:4:"name";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:6:"name_1";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:13:"original_date";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:11:"people_name";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:12:"subject_name";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:5:"title";a:2:{s:8:"glossary";s:1:"1";s:8:"grouping";a:3:{s:11:"grouping_09";s:11:"grouping_09";s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;}}s:4:"type";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:3:"uid";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}}}'
+    glossarytable: 'a:1:{s:13:"glossarytable";a:26:{s:11:"collections";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:15:"community_title";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:16:"contributor_name";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:12:"creator_name";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:14:"field_coverage";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:26:"field_coverage_description";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:24:"field_cultural_narrative";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:22:"field_date_description";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:17:"field_description";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:16:"field_identifier";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:23:"field_rights_statements";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:12:"field_source";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:13:"field_summary";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:27:"field_traditional_knowledge";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:19:"field_transcription";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:20:"media_extracted_text";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:10:"media_type";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:4:"name";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:6:"name_1";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:13:"original_date";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:25:"page_media_extracted_text";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:11:"people_name";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:12:"subject_name";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:5:"title";a:2:{s:8:"glossary";s:1:"1";s:8:"grouping";a:3:{s:11:"grouping_09";s:11:"grouping_09";s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;}}s:4:"type";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}s:3:"uid";a:2:{s:8:"grouping";a:3:{s:14:"grouping_other";s:14:"grouping_other";s:11:"grouping_az";i:0;s:11:"grouping_09";i:0;}s:8:"glossary";i:0;}}}'
     field_enabled: 0
     grouping_defaults:
       grouping_other: grouping_other
@@ -293,6 +415,7 @@ processor_settings:
       - community_title
       - contributor_name
       - creator_name
+      - dictionary_fulltext
       - field_coverage
       - field_coverage_description
       - field_cultural_narrative
@@ -305,11 +428,13 @@ processor_settings:
       - field_traditional_knowledge
       - field_transcription
       - glossaryaz_title
+      - media_extracted_text
       - media_type
       - mukurtu_cultural_protocol_ids
       - name
       - name_1
       - original_date
+      - page_media_extracted_text
       - people_name
       - subject_name
       - title
@@ -330,6 +455,7 @@ processor_settings:
     fields:
       - contributor_name
       - creator_name
+      - dictionary_fulltext
       - field_coverage
       - field_coverage_description
       - field_cultural_narrative
@@ -341,10 +467,18 @@ processor_settings:
       - field_summary
       - field_traditional_knowledge
       - field_transcription
+      - media_extracted_text
+      - language_name
+      - location_name
+      - name_1_text
+      - name_text
       - original_date
-      - people_name
-      - subject_name
+      - page_media_extracted_text
+      - people_name_text
+      - publisher_name
+      - subject_name_text
       - title
+      - word_type
   language_with_fallback: {  }
   mukurtu_protocol_cultural_protocol_ids: {  }
   rendered_item: {  }
@@ -356,6 +490,7 @@ processor_settings:
     fields:
       - contributor_name
       - creator_name
+      - dictionary_fulltext
       - field_coverage
       - field_coverage_description
       - field_cultural_narrative
@@ -367,8 +502,18 @@ processor_settings:
       - field_summary
       - field_traditional_knowledge
       - field_transcription
+      - media_extracted_text
+      - language_name
+      - location_name
+      - name_1_text
+      - name_text
       - original_date
+      - page_media_extracted_text
+      - people_name_text
+      - publisher_name
+      - subject_name_text
       - title
+      - word_type
     spaces: ''
     ignored: ._-
     overlap_cjk: 1
@@ -383,6 +528,7 @@ processor_settings:
       - community_title
       - contributor_name
       - creator_name
+      - dictionary_fulltext
       - field_coverage
       - field_coverage_description
       - field_cultural_narrative
@@ -395,15 +541,25 @@ processor_settings:
       - field_traditional_knowledge
       - field_transcription
       - glossaryaz_title
+      - media_extracted_text
       - media_type
       - mukurtu_cultural_protocol_ids
       - name
       - name_1
+      - language_name
+      - location_name
+      - name_1_text
+      - name_text
       - original_date
+      - page_media_extracted_text
       - people_name
+      - people_name_text
+      - publisher_name
       - subject_name
+      - subject_name_text
       - title
       - type
+      - word_type
 tracker_settings:
   default:
     indexing_order: fifo

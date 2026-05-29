@@ -120,6 +120,10 @@ trait CulturalProtocolControlledTrait {
 
       // Strict protocol, need to lookup actual membership.
       if (Og::getMembership($protocol, $user)) {
+        // Skip if the user is blocked in any parent community.
+        if (CulturalProtocols::isUserBlockedFromProtocolViaCommunity($user, $protocol)) {
+          continue;
+        }
         $memberships[$protocol->id()] = $protocol;
       }
     }

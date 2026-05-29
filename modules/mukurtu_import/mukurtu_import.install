@@ -389,3 +389,13 @@ function mukurtu_import_update_40024(): void {
     $config->setData($data)->save();
   }
 }
+
+/**
+ * Update the label for the mukurtu_roundtrip_manager role.
+ */
+function mukurtu_import_update_40025(): void {
+  \Drupal::configFactory()
+    ->getEditable('user.role.mukurtu_roundtrip_manager')
+    ->set('label', 'Roundtrip Manager')
+    ->save();
+}

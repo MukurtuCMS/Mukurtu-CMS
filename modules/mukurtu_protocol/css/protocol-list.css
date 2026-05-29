@@ -1,0 +1,98 @@
+/**
+ * Styles for the hierarchical protocol list at /admin/communities-protocols.
+ */
+
+/* Community rows */
+tr.community-row td {
+  font-weight: bold;
+  border-top: 2px solid var(--gin-border-color, #767676);
+}
+
+tr.community-row:first-child td {
+  border-top: none;
+}
+
+/* Depth-based indentation on the community name cell */
+tr.community-row.depth-1 td:first-child {
+  padding-left: 2em;
+}
+
+tr.community-row.depth-2 td:first-child {
+  padding-left: 4em;
+}
+
+/* Protocol list inside community rows */
+tr.community-row ul,
+tr.community-row ul ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+tr.community-row li::marker {
+  content: none;
+}
+
+tr.community-row .item-list li {
+  margin: 0 0 0.25em 0;
+  padding: 0;
+}
+
+/* Inline name + operations button layout. */
+.name-ops-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+
+.name-ops-wrapper .dropbutton-wrapper {
+  margin: 0;
+}
+
+/* Focus-visible styles scoped to each depth background.
+ * Outline colour #003ecc provides at least 3:1 contrast against all
+ * depth-level backgrounds in both light and dark mode. */
+tr.community-row a:focus-visible,
+tr.community-row button:focus-visible {
+  outline: 3px solid #003ecc;
+  outline-offset: 2px;
+}
+
+html.gin--dark-mode tr.community-row a:focus-visible,
+html.gin--dark-mode tr.community-row button:focus-visible {
+  outline-color: #7ab8f5;
+}
+
+@media (prefers-color-scheme: dark) {
+  tr.community-row a:focus-visible,
+  tr.community-row button:focus-visible {
+    outline-color: #7ab8f5;
+  }
+}
+
+/* Badge shown in the protocol members list when a member is blocked at the
+ * community level but still holds an active protocol membership. */
+.community-blocked-badge {
+  display: inline-block;
+  padding: 0.1em 0.45em;
+  font-size: 0.75em;
+  font-weight: 600;
+  line-height: 1.4;
+  vertical-align: middle;
+  background-color: var(--gin-color-warning-background, #fdf8ed);
+  color: var(--gin-color-warning, #734c00);
+  border: 1px solid currentColor;
+  border-radius: 2px;
+}
+
+html.gin--dark-mode .community-blocked-badge {
+  background-color: var(--gin-color-warning-background, #3d2e00);
+  color: var(--gin-color-warning, #f5c518);
+}
+
+@media (prefers-color-scheme: dark) {
+  .community-blocked-badge {
+    background-color: var(--gin-color-warning-background, #3d2e00);
+    color: var(--gin-color-warning, #f5c518);
+  }
+}

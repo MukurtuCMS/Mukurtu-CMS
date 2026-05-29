@@ -6,6 +6,7 @@ package: 'Mukurtu CMS'
 dependencies:
   - 'drupal:media'
   - 'drupal:node'
+  - 'flat_taxonomy:flat_taxonomy'
   - 'drupal:taxonomy'
   - 'drupal:text'
   - 'drupal:user'

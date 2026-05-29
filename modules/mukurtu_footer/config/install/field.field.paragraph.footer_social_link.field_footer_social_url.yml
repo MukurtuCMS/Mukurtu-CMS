@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_footer_social_url
+    - paragraphs.paragraphs_type.footer_social_link
+  module:
+    - link
+id: paragraph.footer_social_link.field_footer_social_url
+field_name: field_footer_social_url
+entity_type: paragraph
+bundle: footer_social_link
+label: 'Profile URL'
+description: ''
+required: true
+translatable: false
+default_value: {}
+default_value_callback: ''
+settings:
+  link_type: 17
+  title: 1
+field_type: link

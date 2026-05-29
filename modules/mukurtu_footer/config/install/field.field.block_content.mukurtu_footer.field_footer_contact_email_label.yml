@@ -1,0 +1,19 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - block_content.type.mukurtu_footer
+    - field.storage.block_content.field_footer_contact_email_label
+id: block_content.mukurtu_footer.field_footer_contact_email_label
+field_name: field_footer_contact_email_label
+entity_type: block_content
+bundle: mukurtu_footer
+label: 'Contact email label'
+description: 'Text shown before the email address, e.g. "Email us at". Leave empty to show the email address alone.'
+required: false
+translatable: true
+default_value:
+  - value: 'Email us at'
+default_value_callback: ''
+settings: {}
+field_type: string
