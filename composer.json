@@ -147,6 +147,9 @@
             },
             "drupal/field_group": {
                 "Fix EntityViewDisplay/EntityFormDisplay::load() incompatibility with Drupal 11.3.x": "web/profiles/mukurtu/patches/field_group-entity-load-11-3.patch"
+            },
+            "drupal/pathauto": {
+                "Fix missing source_module in PHP 8 MigrateSource attribute on PathautoPattern": "web/profiles/mukurtu/patches/pathauto-source-module-missing-php8-attribute.patch"
             }
         }
     }

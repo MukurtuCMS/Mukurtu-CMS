@@ -1,0 +1,10 @@
+--- a/migrations/d7_pathauto_patterns.yml
++++ b/migrations/d7_pathauto_patterns.yml
+@@ -5,6 +5,7 @@
+   - Configuration
+ source:
+   plugin: pathauto_pattern
++  source_module: pathauto
+   constants:
+     status: true
+     selection_logic: 'and'
