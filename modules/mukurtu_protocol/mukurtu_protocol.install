@@ -506,3 +506,41 @@ function mukurtu_protocol_update_40028(): void {
   $view_data = \Symfony\Component\Yaml\Yaml::parseFile($view_file);
   \Drupal::configFactory()->getEditable('views.view.mukurtu_people')->setData($view_data)->save(TRUE);
 }
+
+/**
+ * Replace og_membership_add_multiple_roles_action with Mukurtu manage-roles
+ * actions on the community/protocol members overview.
+ */
+function mukurtu_protocol_update_40029(): void {
+  $config = \Drupal::configFactory()->getEditable('views.view.og_members_overview');
+  $selected = $config->get('display.default.display_options.fields.og_membership_bulk_form.selected_actions') ?? [];
+  $key = array_search('og_membership_add_multiple_roles_action', $selected);
+  if ($key !== FALSE) {
+    array_splice($selected, $key, 1, [
+      'mukurtu_manage_community_roles_action',
+      'mukurtu_manage_protocol_roles_action',
+    ]);
+  }
+  else {
+    // Ensure both Mukurtu actions are present even if OG action was already removed.
+    if (!in_array('mukurtu_manage_community_roles_action', $selected)) {
+      array_unshift($selected, 'mukurtu_manage_community_roles_action');
+    }
+    if (!in_array('mukurtu_manage_protocol_roles_action', $selected)) {
+      $selected[] = 'mukurtu_manage_protocol_roles_action';
+    }
+  }
+  // Remove the approve-user action from the bulk form; it is no longer surfaced.
+  $selected = array_values(array_filter($selected, fn($a) => $a !== 'mukurtu_approve_user_from_membership_action'));
+  $config->set('display.default.display_options.fields.og_membership_bulk_form.selected_actions', $selected)->save(TRUE);
+
+  // Update the community and protocol manage-roles action labels.
+  \Drupal::configFactory()
+    ->getEditable('system.action.mukurtu_manage_community_roles_action')
+    ->set('label', 'Manage user roles in community')
+    ->save(TRUE);
+  \Drupal::configFactory()
+    ->getEditable('system.action.mukurtu_manage_protocol_roles_action')
+    ->set('label', 'Manage user roles in protocol')
+    ->save(TRUE);
+}
