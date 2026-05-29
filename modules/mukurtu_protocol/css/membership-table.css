@@ -38,11 +38,12 @@
   font-size: 0.85em;
 }
 
-/* Remove button: compact and subtle; min-height 24px per WCAG 2.2 SC 2.5.8 */
+/* Remove button: compact and subtle; min 24x24px per WCAG 2.2 SC 2.5.8 */
 .membership-table .button--small {
   font-size: 0.8em;
   padding: 0.15rem 0.5rem;
   min-height: 24px;
+  min-width: 24px;
 }
 
 /* Add-member row: search field + button side by side */

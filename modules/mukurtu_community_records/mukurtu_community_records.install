@@ -5,3 +5,50 @@
  * Install, update and uninstall functions for the mukurtu_community_records module.
  */
 
+/**
+ * Implements hook_install().
+ *
+ * Adds the is_community_record field and mukurtu_community_record_flag processor
+ * to the default content index. mukurtu_browse installs before this module,
+ * so these items cannot be declared in mukurtu_browse's config/install; they
+ * are added here instead so fresh installs get the same state as sites that
+ * ran mukurtu_browse_update_40009().
+ *
+ * Note: during a full profile install, the search index is not yet created
+ * when this hook fires (the index has cross-module config dependencies that
+ * are satisfied later). The profile's hook_install (mukurtu_install) handles
+ * that case. This hook runs correctly when the module is enabled individually
+ * on an existing site where the index already exists.
+ */
+function mukurtu_community_records_install(): void {
+  $index = \Drupal\search_api\Entity\Index::load('mukurtu_default_content_index');
+  if (!$index) {
+    return;
+  }
+
+  $changed = FALSE;
+
+  $processors = $index->getProcessors();
+  if (!isset($processors['mukurtu_community_record_flag'])) {
+    $processor = \Drupal::service('plugin.manager.search_api.processor')
+      ->createInstance('mukurtu_community_record_flag', ['#index' => $index]);
+    $processors['mukurtu_community_record_flag'] = $processor;
+    $index->setProcessors($processors);
+    $changed = TRUE;
+  }
+
+  if (!$index->getField('is_community_record')) {
+    $field = new \Drupal\search_api\Item\Field($index, 'is_community_record');
+    $field->setType('boolean');
+    $field->setPropertyPath('is_community_record');
+    $field->setDatasourceId('entity:node');
+    $field->setLabel('Is community record');
+    $index->addField($field);
+    $changed = TRUE;
+  }
+
+  if ($changed) {
+    $index->save();
+    $index->reindex();
+  }
+}

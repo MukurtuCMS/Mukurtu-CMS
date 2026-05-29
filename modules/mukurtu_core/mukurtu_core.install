@@ -742,9 +742,56 @@ function mukurtu_core_update_40021(): void {
 }
 
 /**
- * Show field_word_list_image in the word_list grid_browse display.
+ * Switch featured_content entity browser to rendered_entity display.
  */
 function mukurtu_core_update_40022(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.block_content.featured_content.default');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_featured_content.settings.field_widget_display', 'rendered_entity');
+  $config->set('content.field_featured_content.settings.field_widget_display_settings', ['view_mode' => 'content_browser']);
+  $config->save();
+}
+
+/**
+ * Create FieldConfig entities for field_coverage on all content type bundles.
+ *
+ * field_coverage was previously defined as a bundle-level BaseFieldDefinition
+ * in each entity class but backed by a FieldStorageConfig entity, causing
+ * Views to log "non-existent config entity" warnings on every cache rebuild.
+ * The fix converts it to a purely configurable field by removing it from
+ * bundleFieldDefinitions() and creating the missing FieldConfig entities.
+ */
+function mukurtu_core_update_40023(): void {
+  $bundles = [
+    'digital_heritage' => 'A detailed, interactive mapping tool that allows placing and drawing multiple locations related to a digital heritage item. Locations can be single points, paths, rectangles, or free-form polygons. Each location can be given a basic label. This field is also used for the browse by map tools. </br>Note that this mapping data will be shared with the same users or visitors as the rest of the digital heritage item. If the location is sensitive, carefully consider using this field. </br>Use the tools shown on the map to place, draw, edit, and delete points and shapes. Once a point or shape has been placed, select it to add a description if needed.',
+    'collection' => 'A detailed, interactive mapping tool that allows placing and drawing multiple locations related to a collection. Locations can be single points, paths, rectangles, or free-form polygons. Each location can be given a basic label. This field is also used for the browse by map tools. </br>Note that this mapping data will be shared with the same users or visitors as the rest of the collection. If the location is sensitive, carefully consider using this field. </br>Use the tools shown on the map to place, draw, edit, and delete points and shapes. Once a point or shape has been placed, select it to add a description if needed.',
+    'dictionary_word' => 'A detailed, interactive mapping tool that allows placing and drawing multiple locations related to a dictionary word. Locations can be single points, paths, rectangles, or free-form polygons. Each location can be given a basic label. This field is also used for the browse by map tools. Note that this mapping data will be shared with the same users or visitors as the rest of the dictionary word. If the location is sensitive, carefully consider using this field. </br>Use the tools shown on the map to place, draw, edit, and delete points and shapes. Once a point or shape has been placed, select it to add a description if needed.',
+    'word_list' => '',
+    'person' => 'A detailed, interactive mapping tool that allows placing and drawing multiple locations related to a person record. Locations can be single points, paths, rectangles, or free-form polygons. Each location can be given a basic label. This field is also used for the browse by map tools. Note that this mapping data will be shared with the same users or visitors as the rest of the person record. If the location is sensitive, carefully consider using this field. </br>Use the tools shown on the map to place, draw, edit, and delete points and shapes. Once a point or shape has been placed, select it to add a description if needed.',
+    'place' => 'A detailed, interactive mapping tool that allows placing and drawing multiple locations related to a place record. Locations can be single points, paths, rectangles, or free-form polygons. Each location can be given a basic label. This field is also used for the browse by map tools. Note that this mapping data will be shared with the same users or visitors as the rest of the place record. If the location is sensitive, carefully consider using this field. </br>Use the tools shown on the map to place, draw, edit, and delete points and shapes. Once a point or shape has been placed, select it to add a description if needed.',
+  ];
+  foreach ($bundles as $bundle => $description) {
+    if (\Drupal\field\Entity\FieldConfig::loadByName('node', $bundle, 'field_coverage')) {
+      continue;
+    }
+    \Drupal\field\Entity\FieldConfig::create([
+      'field_name' => 'field_coverage',
+      'entity_type' => 'node',
+      'bundle' => $bundle,
+      'label' => 'Map Points',
+      'description' => $description,
+      'required' => FALSE,
+      'translatable' => FALSE,
+    ])->save();
+  }
+}
+
+/**
+ * Show field_word_list_image in the word_list grid_browse display.
+ */
+function mukurtu_core_update_40024(): void {
   $config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.word_list.grid_browse');
   if ($config->isNew()) {
     return;
@@ -772,7 +819,7 @@ function mukurtu_core_update_40022(): void {
 /**
  * Show field_recording in the dictionary_word grid_browse display.
  */
-function mukurtu_core_update_40023(): void {
+function mukurtu_core_update_40025(): void {
   $config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.dictionary_word.grid_browse');
   if ($config->isNew()) {
     return;
