@@ -3,14 +3,13 @@
 
   Drupal.behaviors.membershipScroll = {
     attach(context) {
-      once('membership-scroll', 'body', context).forEach(() => {
+      // Target the wrapper element itself so this re-runs after each AJAX
+      // rebuild (the wrapper is replaced, giving once() a fresh element).
+      once('membership-scroll', '#membership-wrapper', context).forEach((el) => {
         if ((drupalSettings.mukurtuMembership || {}).scrollToTable) {
-          const el = document.getElementById('membership-wrapper');
-          if (el) {
-            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            const searchField = el.querySelector('.membership-add-row .form-autocomplete');
-            if (searchField) requestAnimationFrame(() => searchField.focus());
-          }
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          const searchField = el.querySelector('.membership-add-row .form-autocomplete');
+          if (searchField) requestAnimationFrame(() => searchField.focus());
         }
       });
     },
