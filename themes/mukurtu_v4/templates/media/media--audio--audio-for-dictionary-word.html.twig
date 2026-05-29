@@ -41,7 +41,7 @@
   {{ content.media_content_warnings }}
 
   <span class="media-asset--content">
-    {{ content.field_media_audio_file }}
+    {{ content|without('media_content_warnings') }}
   </span>
 
   <a href="{{ media_url }}" class="button" download>Download audio</a>
