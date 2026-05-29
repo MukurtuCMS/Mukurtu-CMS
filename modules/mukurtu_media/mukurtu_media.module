@@ -382,11 +382,17 @@ function mukurtu_media_form_alter(array &$form, FormStateInterface $form_state, 
  */
 function mukurtu_media_edit_dialog_ajax(array &$form, FormStateInterface $form_state): AjaxResponse {
   $response = new AjaxResponse();
-  if ($form_state->getErrors()) {
-    $response->addCommand(new ReplaceCommand('.ui-dialog-content', $form));
+  if ($form_state->isExecuted()) {
+    $response->addCommand(new CloseModalDialogCommand());
   }
   else {
-    $response->addCommand(new CloseModalDialogCommand());
+    /** @var \Drupal\Core\Render\RendererInterface $renderer */
+    $renderer = \Drupal::service('renderer');
+    $status_messages = ['#type' => 'status_messages'];
+    $form['#prefix'] = ($form['#prefix'] ?? '') . $renderer->renderRoot($status_messages);
+    $output = $renderer->renderRoot($form);
+    $response->setAttachments($form['#attached']);
+    $response->addCommand(new ReplaceCommand('.ui-dialog-content', $output));
   }
   return $response;
 }
