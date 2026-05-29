@@ -3,8 +3,6 @@ status: true
 dependencies:
   config:
     - image.style.thumbnail
-    - user.role.administrator
-    - user.role.mukurtu_manager
   module:
     - image
     - media
