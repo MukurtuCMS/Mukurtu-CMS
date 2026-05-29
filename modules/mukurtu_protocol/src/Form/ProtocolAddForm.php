@@ -315,9 +315,10 @@ class ProtocolAddForm extends EntityForm {
             continue;
           }
           $seen_uids[$uid] = TRUE;
+          $statusSuffix = $member->isActive() ? '' : ' [Blocked/Pending]';
           $suggestions[] = [
             'value' => $member->getDisplayName() . ' (' . $uid . ')',
-            'label' => $member->getDisplayName() . ' (' . $member->getEmail() . ')',
+            'label' => $member->getDisplayName() . ' (' . $member->getEmail() . ')' . $statusSuffix,
           ];
         }
       }
@@ -326,7 +327,6 @@ class ProtocolAddForm extends EntityForm {
       // No communities selected yet — fall back to all active users.
       $uids = $this->entityTypeManager->getStorage('user')->getQuery()
         ->accessCheck(TRUE)
-        ->condition('status', 1)
         ->condition('uid', 0, '<>')
         ->sort('name')
         ->execute();
@@ -334,9 +334,10 @@ class ProtocolAddForm extends EntityForm {
         if (in_array($uid, $already_added)) {
           continue;
         }
+        $statusSuffix = $u->isActive() ? '' : ' [Blocked/Pending]';
         $suggestions[] = [
           'value' => $u->getDisplayName() . ' (' . $uid . ')',
-          'label' => $u->getDisplayName() . ' (' . $u->getEmail() . ')',
+          'label' => $u->getDisplayName() . ' (' . $u->getEmail() . ')' . $statusSuffix,
         ];
       }
     }
@@ -401,8 +402,9 @@ class ProtocolAddForm extends EntityForm {
         $row['#attributes']['class'][] = 'error';
         $row['#attributes']['aria-invalid'] = 'true';
       }
+      $statusBadge = $member->isActive() ? '' : ' <span aria-label="' . t('blocked or pending') . '">[' . t('Blocked/Pending') . ']</span>';
       $row['user'] = [
-        '#markup' => $name . ' <small>(' . $member->getEmail() . ')</small>',
+        '#markup' => $name . ' <small>(' . $member->getEmail() . ')</small>' . $statusBadge,
       ];
 
       foreach ($roles as $role_id => $label) {
