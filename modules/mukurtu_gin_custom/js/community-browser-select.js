@@ -46,19 +46,44 @@
         });
       });
 
-      // Runs inside the entity browser iframe only. jQuery UI's focus trap in
-      // the parent dialog uses :tabbable, which doesn't include <iframe>
-      // elements, so Tab from the close button can never reach rows in the
-      // iframe. Moving focus from within the iframe sidesteps the race
-      // condition that would occur if we tried to do this from the parent
-      // after the iframe's load event (which fires almost immediately on
-      // localhost before a parent-side listener can be added).
-      if (window.self !== window.top) {
-        once('community-browser-autofocus', 'body', context).forEach(function () {
-          var firstRow = document.querySelector('.view-mukurtu-community-select .views-row');
-          if (firstRow) {
-            firstRow.focus({ preventScroll: true });
-          }
+      // Runs in the parent document only. The entity browser renders content
+      // inside an <iframe>. jQuery UI's focus trap uses :tabbable, which never
+      // includes <iframe> elements, so Tab from the dialog close button cycles
+      // endlessly on the close button — keyboard events stay in the parent
+      // window even after programmatic focus is set inside the iframe.
+      //
+      // Fix: intercept Tab on the close button and call
+      // iframe.contentWindow.focus() before focusing the first row. Calling
+      // contentWindow.focus() during a user-initiated keydown event transfers
+      // keyboard event dispatch to the iframe's browsing context, so
+      // subsequent Tab presses cycle through the community rows as expected.
+      if (window.self === window.top) {
+        once('community-browser-focus', 'body', context).forEach(function () {
+          $(window).on('dialog:aftercreate', function (event, dialog, $element) {
+            var $iframe = $element.find('.entity-browser-modal-iframe');
+            if (!$iframe.length) { return; }
+            var iframe = $iframe[0];
+
+            var $closeButton = $element.closest('.ui-dialog').find('.ui-dialog-titlebar-close');
+
+            $closeButton.on('keydown.eb-community', function (e) {
+              if (e.key !== 'Tab' || e.shiftKey) { return; }
+              e.preventDefault();
+              e.stopImmediatePropagation();
+
+              var doc = iframe.contentDocument;
+              if (!doc) { iframe.focus(); return; }
+              var firstRow = doc.querySelector('.view-mukurtu-community-select .views-row');
+              if (!firstRow) { iframe.focus(); return; }
+              iframe.contentWindow.focus();
+              firstRow.focus();
+            });
+
+            // Clean up the close-button listener when the dialog closes.
+            $element.on('dialogclose.eb-community', function () {
+              $closeButton.off('.eb-community');
+            });
+          });
         });
       }
     }
