@@ -122,6 +122,15 @@ function mukurtu_media_form_media_video_add_form_alter(&$form, FormStateInterfac
 /**
  * Implements hook_form_FORM_ID_alter().
  */
+function mukurtu_media_form_media_video_edit_form_alter(&$form, FormStateInterface $form_state, $form_id)
+{
+  $form['field_media_video_file']['widget'][0]['#process'][] = 'mukurtu_media_refresh_media_process';
+  array_unshift($form['field_thumbnail']['widget'][0]['#process'], 'mukurtu_media_process_thumb');
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
 function mukurtu_media_form_media_audio_add_form_alter(&$form, FormStateInterface $form_state, $form_id)
 {
   // Add custom handling on media upload/removal.

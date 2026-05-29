@@ -2,6 +2,7 @@
 
 namespace Drupal\mukurtu_media\Entity;
 
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\media\Entity\Media;
 use Drupal\mukurtu_core\BaseFieldDefinition;
 use Drupal\mukurtu_core\Entity\PeopleInterface;
@@ -16,6 +17,28 @@ use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
 class Audio extends Media implements AudioInterface, CulturalProtocolControlledInterface, MukurtuFilenameGenerationInterface, PeopleInterface {
   use CulturalProtocolControlledTrait;
   use PeopleTrait;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getDefaultThumbnail(): ?int {
+    $config = \Drupal::config('mukurtu_thumbnail.settings');
+    return $config->get('audio_default_thumbnail')[0] ?? NULL;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function preSave(EntityStorageInterface $storage): void {
+    $thumbFid = $this->get('field_thumbnail')->getValue()[0]['target_id'] ?? NULL;
+    if (!$thumbFid) {
+      $thumbFid = $this->getDefaultThumbnail();
+    }
+    if ($thumbFid) {
+      $this->thumbnail->target_id = $thumbFid;
+    }
+    parent::preSave($storage);
+  }
 
   /**
    * {@inheritdoc}
