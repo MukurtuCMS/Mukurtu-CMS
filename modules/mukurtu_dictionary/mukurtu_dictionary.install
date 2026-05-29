@@ -850,6 +850,70 @@ function mukurtu_dictionary_update_40021(): void {
 }
 
 /**
+ * Add field_contributor to the audio_for_dictionary_word display config.
+ */
+function mukurtu_dictionary_update_40022(): void {
+  \Drupal::service('config.storage')->write(
+    'core.entity_view_display.media.audio.audio_for_dictionary_word',
+    [
+      'langcode' => 'en',
+      'status' => TRUE,
+      'dependencies' => [
+        'config' => [
+          'core.entity_view_mode.media.audio_for_dictionary_word',
+          'media.type.audio',
+        ],
+        'module' => ['file'],
+      ],
+      'third_party_settings' => [],
+      'id' => 'media.audio.audio_for_dictionary_word',
+      'targetEntityType' => 'media',
+      'bundle' => 'audio',
+      'mode' => 'audio_for_dictionary_word',
+      'content' => [
+        'field_contributor' => [
+          'type' => 'entity_reference_label',
+          'label' => 'inline',
+          'settings' => ['link' => TRUE],
+          'third_party_settings' => [],
+          'weight' => 1,
+          'region' => 'content',
+        ],
+        'field_media_audio_file' => [
+          'type' => 'file_audio',
+          'label' => 'hidden',
+          'settings' => [
+            'controls' => TRUE,
+            'autoplay' => FALSE,
+            'loop' => FALSE,
+            'multiple_file_display_type' => 'tags',
+          ],
+          'third_party_settings' => [],
+          'weight' => 0,
+          'region' => 'content',
+        ],
+      ],
+      'hidden' => [
+        'created' => TRUE,
+        'field_communities' => TRUE,
+        'field_cultural_protocols' => TRUE,
+        'field_identifier' => TRUE,
+        'field_media_tags' => TRUE,
+        'field_people' => TRUE,
+        'field_thumbnail' => TRUE,
+        'field_transcription' => TRUE,
+        'flag_export_media' => TRUE,
+        'langcode' => TRUE,
+        'name' => TRUE,
+        'search_api_excerpt' => TRUE,
+        'thumbnail' => TRUE,
+        'uid' => TRUE,
+      ],
+    ]
+  );
+}
+
+/**
  * Add field_coverage to the dictionary search index for map view support.
  */
 function mukurtu_dictionary_update_40017(): void {

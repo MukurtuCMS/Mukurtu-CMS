@@ -5488,6 +5488,9 @@ header {
 .page-node-type-dictionary-word .field--name-field-recording .media--audio .button {
   -ms-flex-preferred-size: 100%;
       flex-basis: 100%;
+  max-inline-size: -webkit-max-content;
+  max-inline-size: -moz-max-content;
+  max-inline-size: max-content;
 }
 .page-node-type-dictionary-word .field--name-field-recording .media--audio .field--name-field-contributor {
   display: -webkit-box;

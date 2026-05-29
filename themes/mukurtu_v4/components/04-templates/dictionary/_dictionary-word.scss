@@ -195,6 +195,7 @@
 
       .button {
         flex-basis: 100%;
+        max-inline-size: max-content;
       }
 
       .field--name-field-contributor {
