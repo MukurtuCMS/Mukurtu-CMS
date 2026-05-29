@@ -185,11 +185,16 @@
 
       @include include-media.media('>=md') {
         flex-direction: row;
+        flex-wrap: wrap;
       }
 
       .field--name-field-media-audio-file,
       .field--name-field-contributor {
         flex: 1;
+      }
+
+      .button {
+        flex-basis: 100%;
       }
 
       .field--name-field-contributor {
