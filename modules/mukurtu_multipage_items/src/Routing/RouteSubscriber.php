@@ -17,7 +17,12 @@ class RouteSubscriber extends RouteSubscriberBase {
     if ($route = $collection->get('entity.node.canonical')) {
       $defaultController = $route->getDefault('_controller');
       $config = \Drupal::service('config.factory')->getEditable('mukurtu_multipage_items.settings');
-      $config->set('_controller', $defaultController)->save();
+      // In Drupal 11.3.x, entity.node.canonical uses _entity_view rather than
+      // _controller, so $defaultController may be null. Only persist it when it
+      // has a value so the config-install default is preserved.
+      if (!empty($defaultController)) {
+        $config->set('_controller', $defaultController)->save();
+      }
       $route->setDefault('_controller', '\Drupal\mukurtu_multipage_items\Controller\MultipageItemPageController::viewRedirect');
     }
 
