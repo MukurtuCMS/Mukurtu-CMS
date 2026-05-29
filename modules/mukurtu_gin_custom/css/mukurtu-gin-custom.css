@@ -57,3 +57,13 @@ counterpart, if one exists. */
 .ui-dialog .ui-dialog-buttonpane {
     flex-shrink: 0;
 }
+
+/* Prevent the hidden Tagify backing input from intercepting pointer events.
+ * In Drupal 11.3 a stacking-context change causes the position:absolute /
+ * opacity:0 input to sit above sibling form elements inside Paragraphs
+ * subforms, blocking clicks and showing a row-resize cursor. The input is
+ * purely a non-interactive backing store and should never receive pointer
+ * events. See https://github.com/MukurtuCMS/Mukurtu-CMS/issues/1680 */
+.tagify + input.tagify-widget {
+    pointer-events: none;
+}
