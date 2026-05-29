@@ -179,6 +179,24 @@ function mukurtu_media_preprocess_entity_add_list(&$variables) {
 /**
  * Implements hook_form_FORM_ID_alter().
  */
+function mukurtu_media_form_media_external_embed_add_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  $form['actions']['submit']['#submit'][] = 'mukurtu_media_external_embed_add_redirect';
+}
+
+/**
+ * Redirect to the media overview after external embed creation.
+ *
+ * MediaForm::save() redirects to the canonical URL (the edit form) for users
+ * who lack 'access media overview' permission. Appending this handler ensures
+ * all users land on /admin/content/media after creating an external embed.
+ */
+function mukurtu_media_external_embed_add_redirect(array &$form, FormStateInterface $form_state) {
+  $form_state->setRedirectUrl(Url::fromRoute('entity.media.collection'));
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
 function mukurtu_media_form_media_document_add_form_alter(&$form, FormStateInterface $form_state, $form_id)
 {
   // For new document forms, don't show the "Extracted Text" field because no

@@ -506,3 +506,16 @@ function mukurtu_protocol_update_40028(): void {
   $view_data = \Symfony\Component\Yaml\Yaml::parseFile($view_file);
   \Drupal::configFactory()->getEditable('views.view.mukurtu_people')->setData($view_data)->save(TRUE);
 }
+
+/**
+ * Add administrator and mukurtu_manager site roles to the mukurtu_media view
+ * access so the media toolbar link is visible to those users.
+ */
+function mukurtu_protocol_update_40029(): void {
+  $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_media');
+  $access = $config->get('display.default.display_options.access');
+  $access['options']['site-role']['administrator'] = 'administrator';
+  $access['options']['site-role']['mukurtu_manager'] = 'mukurtu_manager';
+  $config->set('display.default.display_options.access', $access)->save(TRUE);
+  \Drupal::service('router.builder')->rebuild();
+}
