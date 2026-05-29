@@ -26,9 +26,6 @@
         });
 
         // Handle both click and keyboard (Enter/Space) to toggle selection.
-        // The underlying checkbox is kept in the accessibility tree via
-        // visually-hidden CSS (aria-hidden is NOT set on it), but the .views-row
-        // is the primary interactive element exposed to assistive technology.
         $view.on('click keydown', '.views-row', function (e) {
           if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') {
             return;
@@ -48,6 +45,29 @@
           $(this).toggleClass('is-selected', checked).attr('aria-checked', String(checked));
         });
       });
+
+      // Runs in the top-level document only. jQuery UI's focus trap uses its
+      // own :tabbable selector which does not recognise <iframe> elements, so
+      // Tab from the dialog's close button cycles back to the close button and
+      // never enters the iframe. We bridge the gap by moving focus to the first
+      // community row once the iframe finishes loading.
+      if (window.self === window.top) {
+        once('community-browser-focus', 'body', context).forEach(function () {
+          $(document).on('dialogopen', '.ui-dialog', function () {
+            var iframe = $(this).find('.entity-browser-modal-iframe')[0];
+            if (!iframe) { return; }
+
+            iframe.addEventListener('load', function () {
+              var iframeDoc = this.contentDocument;
+              if (!iframeDoc) { return; }
+              var firstRow = iframeDoc.querySelector('.view-mukurtu-community-select .views-row');
+              if (firstRow) {
+                firstRow.focus({ preventScroll: true });
+              }
+            });
+          });
+        });
+      }
     }
   };
 
