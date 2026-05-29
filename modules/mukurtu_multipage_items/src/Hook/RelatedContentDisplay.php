@@ -7,6 +7,7 @@ namespace Drupal\mukurtu_multipage_items\Hook;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Hook\Attribute\Hook;
+use Drupal\Core\Extension\ProceduralCall;
 use Drupal\Core\Hook\Order\OrderAfter;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\mukurtu_multipage_items\MultipageItemManager;
@@ -31,7 +32,7 @@ class RelatedContentDisplay {
   /**
    * Implements hook_form_FORM_ID_alter().
    */
-  #[Hook('form_node_form_alter', order: new OrderAfter(['field_group'], [['field_group_form_alter']]))]
+  #[Hook('form_node_form_alter', order: new OrderAfter(['field_group'], [[ProceduralCall::class, 'field_group_form_alter']]))]
   public function nodeFormAlter(&$form, FormStateInterface $form_state, $form_id): void {
     $node = $form_state->getFormObject()->getEntity();
     if (!$node instanceof NodeInterface) {

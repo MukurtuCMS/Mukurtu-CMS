@@ -75,10 +75,10 @@ class ProtocolAddForm extends EntityForm {
       'protocol_affiliate'        => t('Protocol affiliate'),
       'contributor'               => t('Contributor'),
       'curator'                   => t('Curator'),
-      'community_record_steward'  => t('Community record steward'),
       'language_contributor'      => t('Language contributor'),
-      'language_steward'          => t('Language Steward'),
-      'protocol_steward'          => t('Protocol Steward'),
+      'language_steward'          => t('Language steward'),
+      'community_record_steward'  => t('Community record steward'),
+      'protocol_steward'          => t('Protocol steward'),
     ];
   }
 
@@ -91,9 +91,9 @@ class ProtocolAddForm extends EntityForm {
       'protocol_affiliate'        => t('View content but cannot create or edit. This is a designation for community partners that mirrors the community affiliate role.'),
       'contributor'               => t('Create, edit, and delete their own digital heritage items, person records, place records, and media assets.'),
       'curator'                   => t('Create, edit, and delete their own collections and media assets.'),
-      'community_record_steward'  => t('Add community records to content, as well as edit and delete their community records.'),
       'language_contributor'      => t('Create, edit, and delete their own dictionary words and word lists.'),
       'language_steward'          => t('Create, edit, and delete ALL dictionary words and word lists, and media assets.'),
+      'community_record_steward'  => t('Add community records to content, as well as edit and delete their community records.'),
       'protocol_steward'          => t('Manage protocol membership, create, edit, and delete ALL content and media assets, and manage Local Contexts projects.'),
     ];
   }
@@ -293,7 +293,8 @@ class ProtocolAddForm extends EntityForm {
 
     // Pass users to JS for client-side autocomplete, excluding anyone already
     // added to the membership table. When a community is set, restrict to its
-    // active members; otherwise fall back to all active users.
+    // members; otherwise fall back to all users. No status filter is applied
+    // intentionally so admins can pre-assign blocked/pending users.
     $already_added = array_keys($form_state->get('members') ?? []);
     $suggestions = [];
     if ($community) {
@@ -307,9 +308,10 @@ class ProtocolAddForm extends EntityForm {
       foreach ($memberships as $membership) {
         $member = $membership->getOwner();
         if ($member && $member->id() > 0 && !in_array($member->id(), $already_added)) {
+          $statusSuffix = $member->isActive() ? '' : ' [Blocked/Pending]';
           $suggestions[] = [
             'value' => $member->getDisplayName() . ' (' . $member->id() . ')',
-            'label' => $member->getDisplayName() . ' (' . $member->getEmail() . ')',
+            'label' => $member->getDisplayName() . ' (' . $member->getEmail() . ')' . $statusSuffix,
           ];
         }
       }
@@ -317,7 +319,6 @@ class ProtocolAddForm extends EntityForm {
     else {
       $uids = $this->entityTypeManager->getStorage('user')->getQuery()
         ->accessCheck(TRUE)
-        ->condition('status', 1)
         ->condition('uid', 0, '<>')
         ->sort('name')
         ->execute();
@@ -325,9 +326,10 @@ class ProtocolAddForm extends EntityForm {
         if (in_array($uid, $already_added)) {
           continue;
         }
+        $statusSuffix = $u->isActive() ? '' : ' [Blocked/Pending]';
         $suggestions[] = [
           'value' => $u->getDisplayName() . ' (' . $uid . ')',
-          'label' => $u->getDisplayName() . ' (' . $u->getEmail() . ')',
+          'label' => $u->getDisplayName() . ' (' . $u->getEmail() . ')' . $statusSuffix,
         ];
       }
     }
@@ -392,8 +394,9 @@ class ProtocolAddForm extends EntityForm {
         $row['#attributes']['class'][] = 'error';
         $row['#attributes']['aria-invalid'] = 'true';
       }
+      $statusBadge = $member->isActive() ? '' : ' <span aria-label="' . t('blocked or pending') . '">[' . t('Blocked/Pending') . ']</span>';
       $row['user'] = [
-        '#markup' => $name . ' <small>(' . $member->getEmail() . ')</small>',
+        '#markup' => $name . ' <small>(' . $member->getEmail() . ')</small>' . $statusBadge,
       ];
 
       foreach ($roles as $role_id => $label) {
@@ -550,12 +553,12 @@ class ProtocolAddForm extends EntityForm {
 
     if ($missing_names) {
       $form_state->set('membership_role_errors', $missing_uids);
-      $this->messenger()->addError(
+      $form_state->setError(
+        $form['membership_wrapper']['member_table'],
         $this->t('All members must be assigned at least one role. Missing roles for: @names.', [
           '@names' => implode(', ', $missing_names),
         ])
       );
-      $form_state->setError($form['membership_wrapper']['member_table'], '');
     }
 
     $has_steward = FALSE;
@@ -569,10 +572,10 @@ class ProtocolAddForm extends EntityForm {
     }
 
     if (!$has_steward) {
-      $this->messenger()->addError(
+      $form_state->setError(
+        $form['membership_wrapper']['member_table'],
         $this->t('At least one member must be assigned the Protocol steward role.')
       );
-      $form_state->setError($form['membership_wrapper']['member_table'], '');
     }
   }
 
