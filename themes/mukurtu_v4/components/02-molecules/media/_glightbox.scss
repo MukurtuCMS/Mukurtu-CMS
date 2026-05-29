@@ -49,9 +49,10 @@
       background-color: var(--brand-primary-dark, #107996);
     }
 
-    &.focused,
     &:focus-visible {
-      outline: 3px solid var(--focus-color, #66afe9);
+      // White achieves ~4.5:1 on the brand-primary button background, meeting
+      // WCAG 1.4.11. The global --focus-color (#66afe9) falls short at ~2.5:1.
+      outline: 3px solid #fff;
       outline-offset: 2px;
     }
   }

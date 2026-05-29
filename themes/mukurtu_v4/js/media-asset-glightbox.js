@@ -37,7 +37,17 @@
 
     document.addEventListener('keydown', blockArrowsOnMediaSlide, true);
 
-    lightbox.on('open', () => { lightboxOpen = true; });
+    lightbox.on('open', () => {
+      lightboxOpen = true;
+      // GLightbox renders nav buttons with SVG only — no text. Inject accessible
+      // names so screen readers can identify the controls.
+      const container = document.querySelector('.glightbox-container');
+      if (container) {
+        container.querySelector('.gprev')?.setAttribute('aria-label', 'Previous');
+        container.querySelector('.gnext')?.setAttribute('aria-label', 'Next');
+        container.querySelector('.gclose')?.setAttribute('aria-label', 'Close');
+      }
+    });
     lightbox.on('close', () => { lightboxOpen = false; });
   }
 

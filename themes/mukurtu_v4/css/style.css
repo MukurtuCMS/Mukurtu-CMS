@@ -2252,12 +2252,10 @@ details.form-wrapper summary + div {
 .glightbox-clean .gclose:hover {
   background-color: var(--brand-primary-dark, #107996);
 }
-.glightbox-clean .gprev.focused, .glightbox-clean .gprev:focus-visible,
-.glightbox-clean .gnext.focused,
+.glightbox-clean .gprev:focus-visible,
 .glightbox-clean .gnext:focus-visible,
-.glightbox-clean .gclose.focused,
 .glightbox-clean .gclose:focus-visible {
-  outline: 3px solid var(--focus-color, #66afe9);
+  outline: 3px solid #fff;
   outline-offset: 2px;
 }
 .glightbox-clean .gprev,

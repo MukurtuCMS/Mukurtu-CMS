@@ -46,15 +46,17 @@
       {% if content.thumbnail['#items'] is not empty %}
         {{ content.thumbnail }}
       {% else %}
-        <img alt="document {{ name }}" src="/profiles/mukurtu/themes/mukurtu_v4/images/document.png">
+        <img alt="document {{ name }}" src="{{ base_path }}profiles/mukurtu/themes/mukurtu_v4/images/document.png">
       {% endif %}
     </span>
   </a>
 
   <div id="document-{{ media.id }}" class="media-asset--glightbox-inline">
-    <object alt="Document {{ name }}" data="{{ media_url }}" class="media-asset--document-viewer"></object>
+    <object data="{{ media_url }}" class="media-asset--document-viewer">
+      <p>{{ name }}</p>
+    </object>
   </div>
 
-  <a href="{{ media_url }}" class="button" download>Download document</a>
+  <a href="{{ media_url }}" class="button" download aria-label="Download document: {{ name }}">Download document</a>
 
 </div>
