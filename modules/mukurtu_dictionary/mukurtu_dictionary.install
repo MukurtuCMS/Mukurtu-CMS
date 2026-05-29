@@ -732,6 +732,11 @@ function mukurtu_dictionary_update_40019(): void {
   $paragraph_config = \Drupal::configFactory()->getEditable('core.entity_view_display.paragraph.dictionary_word_entry.default');
   $paragraph_config->set('content.field_recording.settings.view_mode', 'audio_for_dictionary_word');
   $paragraph_config->save();
+
+  // Switch the node full display to use the new view mode (base word entry recording).
+  $node_config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.dictionary_word.full');
+  $node_config->set('content.field_recording.settings.view_mode', 'audio_for_dictionary_word');
+  $node_config->save();
 }
 
 /**
