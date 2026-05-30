@@ -5351,11 +5351,13 @@ header {
   padding-block: var(--v-space-4xxs);
   padding-inline: var(--v-space-2xs);
 }
-.dictionary-word__teaser-heading a {
-  color: var(--color-white);
-  font-size: var(--font-size-xl);
-}
 .dictionary-word__teaser-word {
+  font-size: var(--font-size-xl);
+  font-weight: inherit;
+  margin-block: 0;
+}
+.dictionary-word__teaser-word a {
+  color: var(--color-white);
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -5363,7 +5365,7 @@ header {
       -ms-flex-pack: justify;
           justify-content: space-between;
 }
-.dictionary-word__teaser-word:focus-visible {
+.dictionary-word__teaser-word a:focus-visible {
   outline: 2px solid var(--color-white);
   outline-offset: 2px;
 }
@@ -5371,6 +5373,8 @@ header {
   fill: var(--color-white);
   block-size: var(--line-height-m);
   inline-size: var(--line-height-2xs);
+  -ms-flex-negative: 0;
+      flex-shrink: 0;
 }
 .dictionary-word__teaser-content {
   background-color: var(--brand-light-accent);

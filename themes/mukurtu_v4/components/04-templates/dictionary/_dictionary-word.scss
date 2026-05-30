@@ -7,21 +7,23 @@
     background-color: var(--brand-primary-dark);
     padding-block: var(--v-space-4xxs);
     padding-inline: var(--v-space-2xs);
+  }
+
+  // This is the word heading (h2), also contains a link.
+  &-word {
+    font-size: var(--font-size-xl);
+    font-weight: inherit;
+    margin-block: 0;
 
     a {
       color: var(--color-white);
-      font-size: var(--font-size-xl);
-    }
-  }
+      display: flex;
+      justify-content: space-between;
 
-  // This is the word heading, also a link.
-  &-word {
-    display: flex;
-    justify-content: space-between;
-
-    &:focus-visible {
-      outline: 2px solid var(--color-white);
-      outline-offset: 2px;
+      &:focus-visible {
+        outline: 2px solid var(--color-white);
+        outline-offset: 2px;
+      }
     }
   }
 
@@ -29,6 +31,7 @@
     fill: var(--color-white);
     block-size: var(--line-height-m);
     inline-size: var(--line-height-2xs);
+    flex-shrink: 0;
   }
 
   &-content {
