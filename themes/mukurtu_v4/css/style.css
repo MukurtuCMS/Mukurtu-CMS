@@ -5861,6 +5861,9 @@ header {
   -webkit-margin-after: var(--v-space-2xs);
           margin-block-end: var(--v-space-2xs);
 }
+.path-comment .comment__actions a[href*="/comment/reply/"] {
+  display: none;
+}
 
 .indented {
   -webkit-margin-start: var(--v-space-4xxs);

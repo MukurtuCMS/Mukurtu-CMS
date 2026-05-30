@@ -94,6 +94,11 @@
   .comment {
     margin-block-end: var(--v-space-2xs);
   }
+
+  // Hide Reply on the context comment — user is already on the reply form.
+  .comment__actions a[href*="/comment/reply/"] {
+    display: none;
+  }
 }
 
 // Threaded reply indentation.
