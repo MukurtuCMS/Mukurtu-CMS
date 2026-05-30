@@ -219,9 +219,11 @@ function mukurtu_v4_preprocess_comment(array &$variables): void {
     'custom',
     'j F Y',
   );
+  $author_name = $comment->getOwner()->getDisplayName();
   $variables['created'] = $date_only;
+  $variables['author'] = $author_name;
   $variables['submitted'] = t('Submitted by @username on @date', [
-    '@username' => $variables['author'],
+    '@username' => $author_name,
     '@date' => $date_only,
   ]);
 }

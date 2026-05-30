@@ -70,7 +70,8 @@
 }
 
 // "New" comment badge added by Drupal's History module.
-.comment mark {
+// Target only visible marks — .hidden marks must stay display:none.
+.comment mark:not(.hidden) {
   background-color: var(--brand-secondary);
   color: var(--brand-text-color);
   padding-inline: var(--v-space-6xs);

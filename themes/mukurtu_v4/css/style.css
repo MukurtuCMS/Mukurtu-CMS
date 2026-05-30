@@ -5839,7 +5839,7 @@ header {
   outline-offset: 1px;
 }
 
-.comment mark {
+.comment mark:not(.hidden) {
   background-color: var(--brand-secondary);
   color: var(--brand-text-color);
   padding-inline: var(--v-space-6xs);
