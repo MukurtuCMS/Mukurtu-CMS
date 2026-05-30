@@ -1,4 +1,5 @@
 @use "../../../external/include-media";
+@use "../../00-base/mixins/mixins";
 
 .comment {
   padding: var(--v-space-4xxs) var(--v-space-4xs);
@@ -72,5 +73,23 @@
         text-decoration: underline;
       }
     }
+
+    // Reply stands out as a button.
+    a[href*="/comment/reply/"] {
+      @include mixins.block-link;
+      font-size: var(--font-size-s);
+    }
+  }
+}
+
+// Threaded reply indentation.
+.indented {
+  margin-inline-start: var(--v-space-4xxs);
+  padding-inline-start: var(--v-space-4xxs);
+  border-inline-start: 3px solid var(--brand-light);
+
+  .comment {
+    background-color: var(--color-white);
+    border-inline-start-color: var(--brand-secondary-accent);
   }
 }

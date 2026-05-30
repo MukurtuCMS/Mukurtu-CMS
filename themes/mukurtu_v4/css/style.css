@@ -5828,6 +5828,38 @@ header {
   color: var(--brand-primary-accent);
   text-decoration: underline;
 }
+.comment__actions a[href*="/comment/reply/"] {
+  background-color: var(--color-white);
+  border: 1px solid var(--brand-primary-dark);
+  color: var(--brand-primary-dark);
+  font-weight: var(--text-bold);
+  line-height: normal;
+  text-decoration: none;
+  padding-block: var(--v-space-6xs);
+  padding-inline: var(--v-space-5xs);
+  letter-spacing: normal;
+  font-size: var(--font-size-s);
+}
+.comment__actions a[href*="/comment/reply/"]:hover {
+  background-color: var(--brand-primary-dark);
+  color: var(--color-white);
+}
+.comment__actions a[href*="/comment/reply/"]:focus {
+  outline-offset: 1px;
+}
+
+.indented {
+  -webkit-margin-start: var(--v-space-4xxs);
+          margin-inline-start: var(--v-space-4xxs);
+  -webkit-padding-start: var(--v-space-4xxs);
+          padding-inline-start: var(--v-space-4xxs);
+  -webkit-border-start: 3px solid var(--brand-light);
+          border-inline-start: 3px solid var(--brand-light);
+}
+.indented .comment {
+  background-color: var(--color-white);
+  border-inline-start-color: var(--brand-secondary-accent);
+}
 
 /* @file
  * Styles for the landing page template.
