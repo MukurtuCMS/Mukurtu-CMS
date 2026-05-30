@@ -91,7 +91,7 @@ class MukurtuCommentForm extends CommentForm {
       $status = CommentInterface::NOT_PUBLISHED;
       if (CulturalProtocols::hasSiteOrProtocolPermission($entity, 'skip comment approval', $this->currentUser, TRUE)
        || CulturalProtocols::hasSiteOrProtocolPermission($entity, 'administer comments', $this->currentUser, TRUE)
-       || !$this->anyProtocolsRequireCommentApproval($entity)) {
+       || (!$this->anyProtocolsRequireCommentApproval($entity) && !$this->siteRequiresCommentApproval())) {
           $status = CommentInterface::PUBLISHED;
       }
     }
@@ -319,6 +319,13 @@ class MukurtuCommentForm extends CommentForm {
       // Redirect the user to the entity they are commenting on.
     }
     $form_state->setRedirectUrl($uri);
+  }
+
+  /**
+   * Check if the site-wide comment setting requires approval.
+   */
+  private function siteRequiresCommentApproval(): bool {
+    return (bool) $this->config('mukurtu_protocol.comment_settings')->get('site_comments_require_approval');
   }
 
   /**

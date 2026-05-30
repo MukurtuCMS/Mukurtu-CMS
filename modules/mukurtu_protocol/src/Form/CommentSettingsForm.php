@@ -62,6 +62,19 @@ class CommentSettingsForm extends ConfigFormBase {
       ),
     ];
 
+    $commentsRequireApproval = $config->get('site_comments_require_approval');
+
+    $form['site_comments_require_approval'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Require Approval for Comments'),
+      '#description' => $this->t('If disabled, comments will be immediately published without approval. Protocol-level approval settings can override this - any protocol with approval required will require approval regardless of this setting.'),
+      '#default_value' => $commentsRequireApproval ? 1 : 0,
+      '#options' => [
+        1 => $this->t('Enabled'),
+        0 => $this->t('Disabled'),
+      ],
+    ];
+
     $anonymous = $this->entityTypeManager->getStorage('user_role')->load('anonymous');
     $anonymousCanAccessComments = $anonymous && $anonymous->hasPermission('access comments');
 
@@ -81,6 +94,7 @@ class CommentSettingsForm extends ConfigFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $this->configFactory->getEditable(static::SETTINGS)
       ->set('site_comments_enabled', $form_state->getValue('site_comments_enabled'))
+      ->set('site_comments_require_approval', (bool) $form_state->getValue('site_comments_require_approval'))
       ->save();
 
     $anonymous = $this->entityTypeManager->getStorage('user_role')->load('anonymous');
