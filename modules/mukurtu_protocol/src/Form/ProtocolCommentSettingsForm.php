@@ -47,6 +47,28 @@ class ProtocolCommentSettingsForm extends FormBase {
       ),
     ];
 
+    $commentAccessOptions = [
+      'anonymous'       => $this->t('Visitors (anonymous users)'),
+      'authenticated'   => $this->t('Any site user with access'),
+      'protocol_member' => $this->t('Protocol members only (any protocol role)'),
+    ];
+
+    $form['comment_view_access'] = [
+      '#type' => 'checkboxes',
+      '#title' => $this->t('Who can view comments?'),
+      '#description' => $this->t('Select which users can see comments on content using this protocol. For items with multiple cultural protocols, the most restrictive protocol wins.'),
+      '#options' => $commentAccessOptions,
+      '#default_value' => $protocol->getCommentViewAccess(),
+    ];
+
+    $form['comment_post_access'] = [
+      '#type' => 'checkboxes',
+      '#title' => $this->t('Who can leave comments?'),
+      '#description' => $this->t('Select which users can post comments on content using this protocol. For items with multiple cultural protocols, the most restrictive protocol wins.'),
+      '#options' => $commentAccessOptions,
+      '#default_value' => $protocol->getCommentPostAccess(),
+    ];
+
     $form['actions']['submit'] = [
       '#type' => 'submit',
       '#value' => $this->t('Save'),
@@ -71,6 +93,12 @@ class ProtocolCommentSettingsForm extends FormBase {
     if ($newCommentApprovalStatus == TRUE || $newCommentApprovalStatus == FALSE) {
       $protocol->setCommentRequireApproval($newCommentApprovalStatus);
     }
+
+    $viewAccess = array_values(array_filter($form_state->getValue('comment_view_access')));
+    $protocol->setCommentViewAccess($viewAccess);
+
+    $postAccess = array_values(array_filter($form_state->getValue('comment_post_access')));
+    $protocol->setCommentPostAccess($postAccess);
 
     // Save changes.
     $protocol->save();

@@ -584,3 +584,33 @@ function mukurtu_protocol_update_40031(): void {
     $config->set('display.default.display_options.query.options.query_tags', $tags)->save(TRUE);
   }
 }
+
+/**
+ * Add per-protocol comment view and post access fields.
+ */
+function mukurtu_protocol_update_40032(): void {
+  $manager = \Drupal::entityDefinitionUpdateManager();
+  $fields = [
+    'field_comment_view_access' => 'Who can view comments',
+    'field_comment_post_access' => 'Who can leave comments',
+  ];
+  foreach ($fields as $field_name => $label) {
+    $definition = \Drupal\Core\Field\BaseFieldDefinition::create('list_string')
+      ->setLabel(t($label))
+      ->setRevisionable(FALSE)
+      ->setCardinality(\Drupal\Core\Field\FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
+      ->setSetting('allowed_values', [
+        'anonymous' => 'Visitors (anonymous users)',
+        'authenticated' => 'Any site user with access',
+        'protocol_member' => 'Protocol members only (any protocol role)',
+      ])
+      ->setDefaultValue([
+        ['value' => 'authenticated'],
+        ['value' => 'protocol_member'],
+      ])
+      ->setTranslatable(FALSE)
+      ->setDisplayConfigurable('view', FALSE)
+      ->setDisplayConfigurable('form', FALSE);
+    $manager->installFieldStorageDefinition($field_name, 'protocol', 'mukurtu_protocol', $definition);
+  }
+}
