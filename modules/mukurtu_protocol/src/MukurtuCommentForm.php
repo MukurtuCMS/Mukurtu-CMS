@@ -208,13 +208,6 @@ class MukurtuCommentForm extends CommentForm {
     // already previewing the submission.
     $element['submit']['#access'] = ($comment->id() && CulturalProtocols::hasSiteOrProtocolPermission($entity, 'administer comments', $this->currentUser, TRUE)) || $preview_mode != DRUPAL_REQUIRED || $form_state->get('comment_preview');
 
-    $element['preview'] = [
-      '#type' => 'submit',
-      '#value' => $this->t('Preview'),
-      '#access' => $preview_mode != DRUPAL_DISABLED,
-      '#submit' => ['::submitForm', '::preview'],
-    ];
-
     return $element;
   }
 
