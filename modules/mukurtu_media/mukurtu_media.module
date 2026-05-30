@@ -386,6 +386,11 @@ function mukurtu_media_edit_dialog_ajax(array &$form, FormStateInterface $form_s
     $response->addCommand(new CloseModalDialogCommand());
   }
   else {
+    // Drupal form validation errors are in $form_state->getErrors(), not the
+    // messenger queue. Copy them over so status_messages renders them visibly.
+    foreach ($form_state->getErrors() as $error) {
+      \Drupal::messenger()->addError($error);
+    }
     /** @var \Drupal\Core\Render\RendererInterface $renderer */
     $renderer = \Drupal::service('renderer');
     $status_messages = ['#type' => 'status_messages'];
