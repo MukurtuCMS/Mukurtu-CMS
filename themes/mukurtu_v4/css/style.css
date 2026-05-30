@@ -5839,6 +5839,29 @@ header {
   outline-offset: 1px;
 }
 
+.comment mark {
+  background-color: var(--brand-secondary);
+  color: var(--brand-text-color);
+  padding-inline: var(--v-space-6xs);
+  padding-block: 0.1em;
+  font-size: var(--font-size-s);
+  font-weight: var(--text-bold);
+  display: inline-block;
+  -webkit-margin-after: var(--v-space-5xs);
+          margin-block-end: var(--v-space-5xs);
+}
+
+.path-comment .layout-content {
+  max-width: 1280px;
+  margin-inline: auto;
+  padding-inline: var(--layout-padding);
+  padding-block: var(--v-space-2xs);
+}
+.path-comment .comment {
+  -webkit-margin-after: var(--v-space-2xs);
+          margin-block-end: var(--v-space-2xs);
+}
+
 .indented {
   -webkit-margin-start: var(--v-space-4xxs);
           margin-inline-start: var(--v-space-4xxs);

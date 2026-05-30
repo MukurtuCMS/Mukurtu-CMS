@@ -69,6 +69,33 @@
   }
 }
 
+// "New" comment badge added by Drupal's History module.
+.comment mark {
+  background-color: var(--brand-secondary);
+  color: var(--brand-text-color);
+  padding-inline: var(--v-space-6xs);
+  padding-block: 0.1em;
+  font-size: var(--font-size-s);
+  font-weight: var(--text-bold);
+  display: inline-block;
+  margin-block-end: var(--v-space-5xs);
+}
+
+// Reply page (/comment/reply/…): constrain content to a readable width.
+.path-comment {
+  .layout-content {
+    max-width: 1280px;
+    margin-inline: auto;
+    padding-inline: var(--layout-padding);
+    padding-block: var(--v-space-2xs);
+  }
+
+  // Space between the parent comment context and the reply form.
+  .comment {
+    margin-block-end: var(--v-space-2xs);
+  }
+}
+
 // Threaded reply indentation.
 .indented {
   margin-inline-start: var(--v-space-4xxs);
