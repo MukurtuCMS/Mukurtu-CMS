@@ -5761,6 +5761,74 @@ header {
           border-block-end: none;
 }
 
+.comment {
+  padding: var(--v-space-4xxs) var(--v-space-4xs);
+  -webkit-border-start: 4px solid var(--brand-secondary);
+          border-inline-start: 4px solid var(--brand-secondary);
+  background-color: var(--brand-light-accent);
+  -webkit-margin-after: var(--v-space-4xxs);
+          margin-block-end: var(--v-space-4xxs);
+}
+.comment.unpublished {
+  border-inline-start-style: dashed;
+  border-color: var(--color-gray);
+  opacity: 0.8;
+}
+.comment__meta {
+  font-size: var(--font-size-s);
+  color: var(--color-gray);
+  margin-block: 0 var(--v-space-5xs);
+}
+.comment__meta a {
+  color: inherit;
+}
+.comment__body .field--name-comment-body {
+  -webkit-padding-before: 0;
+          padding-block-start: 0;
+  -webkit-margin-before: 0;
+          margin-block-start: 0;
+  -webkit-border-before: none;
+          border-block-start: none;
+}
+.comment__body p:last-child {
+  -webkit-margin-after: 0;
+          margin-block-end: 0;
+}
+.comment__actions {
+  -webkit-margin-before: var(--v-space-5xs);
+          margin-block-start: var(--v-space-5xs);
+}
+.comment__actions ul,
+.comment__actions ul.links {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+  gap: 0 var(--v-space-4xxs);
+  list-style: none;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+.comment__actions li {
+  margin: 0;
+  padding: 0;
+}
+.comment__actions li::before, .comment__actions li::marker {
+  display: none;
+  content: "";
+}
+.comment__actions a {
+  font-size: var(--font-size-s);
+  color: var(--color-gray);
+  text-decoration: none;
+}
+.comment__actions a:hover, .comment__actions a:focus {
+  color: var(--brand-primary-accent);
+  text-decoration: underline;
+}
+
 /* @file
  * Styles for the landing page template.
  */
