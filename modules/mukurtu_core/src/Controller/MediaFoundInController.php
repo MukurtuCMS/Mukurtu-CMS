@@ -100,7 +100,7 @@ class MediaFoundInController extends ControllerBase {
           [
             'data' => [
               '#type' => 'link',
-              '#title' => $entity->label(),
+              '#title' => $entity->label() ?? (string) $entity->id(),
               '#url' => $entity->toUrl(),
             ],
           ],
@@ -112,6 +112,7 @@ class MediaFoundInController extends ControllerBase {
 
     return [
       '#type' => 'table',
+      '#caption' => $this->t('Content using %label', ['%label' => $media->label()]),
       '#header' => [$this->t('Title'), $this->t('Type'), $this->t('Content Type')],
       '#rows' => $rows,
       '#empty' => $this->t('This media is not used anywhere.'),
