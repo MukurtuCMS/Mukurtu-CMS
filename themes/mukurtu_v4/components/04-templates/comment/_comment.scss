@@ -63,19 +63,6 @@
     }
 
     a {
-      font-size: var(--font-size-s);
-      color: var(--color-gray);
-      text-decoration: none;
-
-      &:hover,
-      &:focus {
-        color: var(--brand-primary-accent);
-        text-decoration: underline;
-      }
-    }
-
-    // Reply stands out as a button.
-    a[href*="/comment/reply/"] {
       @include mixins.block-link;
       font-size: var(--font-size-s);
     }

@@ -5820,15 +5820,6 @@ header {
   content: "";
 }
 .comment__actions a {
-  font-size: var(--font-size-s);
-  color: var(--color-gray);
-  text-decoration: none;
-}
-.comment__actions a:hover, .comment__actions a:focus {
-  color: var(--brand-primary-accent);
-  text-decoration: underline;
-}
-.comment__actions a[href*="/comment/reply/"] {
   background-color: var(--color-white);
   border: 1px solid var(--brand-primary-dark);
   color: var(--brand-primary-dark);
@@ -5840,11 +5831,11 @@ header {
   letter-spacing: normal;
   font-size: var(--font-size-s);
 }
-.comment__actions a[href*="/comment/reply/"]:hover {
+.comment__actions a:hover {
   background-color: var(--brand-primary-dark);
   color: var(--color-white);
 }
-.comment__actions a[href*="/comment/reply/"]:focus {
+.comment__actions a:focus {
   outline-offset: 1px;
 }
 
