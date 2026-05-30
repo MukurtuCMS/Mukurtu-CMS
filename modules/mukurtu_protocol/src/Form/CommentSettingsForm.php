@@ -85,6 +85,15 @@ class CommentSettingsForm extends ConfigFormBase {
       '#default_value' => $anonymousCanAccessComments,
     ];
 
+    $anonymousCanPostComments = $anonymous && $anonymous->hasPermission('post comments');
+
+    $form['anonymous_can_post_comments'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Allow visitors to leave comments'),
+      '#description' => $this->t('When enabled, anonymous (not logged-in) users can post comments on content. This controls the <em>Post comments</em> permission for the Anonymous User role.'),
+      '#default_value' => $anonymousCanPostComments,
+    ];
+
     return parent::buildForm($form, $form_state);
   }
 
@@ -99,13 +108,22 @@ class CommentSettingsForm extends ConfigFormBase {
 
     $anonymous = $this->entityTypeManager->getStorage('user_role')->load('anonymous');
     if ($anonymous) {
-      $allow = (bool) $form_state->getValue('anonymous_can_access_comments');
-      if ($allow) {
+      $allowAccess = (bool) $form_state->getValue('anonymous_can_access_comments');
+      if ($allowAccess) {
         $anonymous->grantPermission('access comments');
       }
       else {
         $anonymous->revokePermission('access comments');
       }
+
+      $allowPost = (bool) $form_state->getValue('anonymous_can_post_comments');
+      if ($allowPost) {
+        $anonymous->grantPermission('post comments');
+      }
+      else {
+        $anonymous->revokePermission('post comments');
+      }
+
       $anonymous->save();
     }
 
