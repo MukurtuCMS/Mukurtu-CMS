@@ -368,6 +368,8 @@ function mukurtu_media_form_alter(array &$form, FormStateInterface $form_state, 
     return;
   }
 
+  unset($form['actions']['delete']);
+
   foreach (['submit', 'save'] as $action) {
     if (isset($form['actions'][$action])) {
       $form['actions'][$action]['#ajax'] = [
