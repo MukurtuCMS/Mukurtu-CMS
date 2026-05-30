@@ -58,6 +58,8 @@ services:
           chown -R www-data:www-data private_files
           find private_files -type d -exec chmod 2775 {} \;
           find private_files -type f -exec chmod 0664 {} \;
+        # Clear Drupal caches so updated templates and code take effect.
+        - cd ~/mukurtu && sudo -u www-data ./vendor/bin/drush cr
       build:
         - |
           cd ~/mukurtu
