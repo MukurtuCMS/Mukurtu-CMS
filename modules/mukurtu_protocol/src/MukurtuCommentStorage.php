@@ -93,7 +93,7 @@ class MukurtuCommentStorage extends CommentStorage {
       $query->setCountQuery($count_query);
     }
 
-    if (!CulturalProtocols::hasSiteOrProtocolPermission($entity, 'administer comments', $this->currentUser, TRUE)) {
+    if (!CulturalProtocols::hasSiteOrProtocolPermission($entity, 'administer comments', $this->currentUser, FALSE)) {
       $query->condition('c.status', CommentInterface::PUBLISHED);
       if ($comments_per_page) {
         $count_query->condition('c.status', CommentInterface::PUBLISHED);

@@ -28,6 +28,19 @@ class MukurtuCommentAccessControlHandler extends CommentAccessControlHandler {
     assert($entity instanceof CommentInterface);
     assert($entity instanceof EntityPublishedInterface);
 
+    // For update/delete, check if the user is a protocol-level comment admin
+    // on the entity being commented on.
+    if (in_array($operation, ['update', 'delete'])) {
+      $commented_entity = $entity->getCommentedEntity();
+      if ($commented_entity && CulturalProtocols::hasSiteOrProtocolPermission($commented_entity, 'administer comments', $account, FALSE)) {
+        return AccessResult::allowed()
+          ->cachePerPermissions()
+          ->addCacheableDependency($entity)
+          ->addCacheableDependency($commented_entity);
+      }
+      return parent::checkAccess($entity, $operation, $account);
+    }
+
     // Mukurtu is only concerned with altering the approval behavior.
     // All other operations can be handled by the stock handler.
     if ($operation != 'approve') {
