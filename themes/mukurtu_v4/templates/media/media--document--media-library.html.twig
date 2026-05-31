@@ -1,7 +1,7 @@
 {#
 /**
  * @file
- * Theme override to present a video file in media library view.
+ * Theme override to present a document in media library view.
  *
  * Available variables:
  * - media: The media item, with limited access to object properties and
@@ -12,8 +12,8 @@
  *   - entity.hasField('field_example') returns TRUE if the entity includes
  *     field_example. (This does not indicate the presence of a value in this
  *     field.)
- *   Calling other methods, such as entity.delete(), will result in
- *   an exception.
+ *   Calling other methods, such as entity.delete(), will result in an
+ *   exception.
  *   See \Drupal\Core\Entity\EntityInterface for a full list of methods.
  * - name: Name of the media item.
  * - content: Media content.
@@ -43,6 +43,6 @@
   {% if content.field_thumbnail['#items'] is not empty %}
     {{ content.thumbnail }}
   {% else %}
-    <img alt="video file {{ name }}" src="/profiles/mukurtu/themes/mukurtu_v4/images/video-square.png">
+    <img alt="document {{ name }}" src="/profiles/mukurtu/themes/mukurtu_v4/images/document-square.png">
   {% endif %}
 </div>
