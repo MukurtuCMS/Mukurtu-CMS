@@ -12,12 +12,47 @@ use Drupal\node\Entity\NodeType;
  * Implements hook_theme().
  */
 function mukurtu_gin_custom_theme(array $existing, string $type, string $theme, string $path): array {
-  // Register the form_selection node template so it's available to all themes,
-  // including the admin theme (gin), which cannot find templates in mukurtu_v4.
+  // Register templates so they're available to all themes, including the admin
+  // theme (gin), which cannot find templates in mukurtu_v4.
   return [
     'node__form_selection' => [
       'base hook' => 'node',
       'template' => 'content/node--form-selection',
+      'path' => $path . '/templates',
+    ],
+    'media__audio__media_library' => [
+      'base hook' => 'media',
+      'template' => 'media/media--audio--media-library',
+      'path' => $path . '/templates',
+    ],
+    'media__document__media_library' => [
+      'base hook' => 'media',
+      'template' => 'media/media--document--media-library',
+      'path' => $path . '/templates',
+    ],
+    'media__image__media_library' => [
+      'base hook' => 'media',
+      'template' => 'media/media--image--media-library',
+      'path' => $path . '/templates',
+    ],
+    'media__remote_video__media_library' => [
+      'base hook' => 'media',
+      'template' => 'media/media--remote-video--media-library',
+      'path' => $path . '/templates',
+    ],
+    'media__external_embed__media_library' => [
+      'base hook' => 'media',
+      'template' => 'media/media--external-embed--media-library',
+      'path' => $path . '/templates',
+    ],
+    'media__soundcloud__media_library' => [
+      'base hook' => 'media',
+      'template' => 'media/media--soundcloud--media-library',
+      'path' => $path . '/templates',
+    ],
+    'media__video__media_library' => [
+      'base hook' => 'media',
+      'template' => 'media/media--video--media-library',
       'path' => $path . '/templates',
     ],
   ];
