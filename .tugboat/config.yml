@@ -46,6 +46,12 @@ services:
         - ln -snf ~/mukurtu/web $DOCROOT
 
       update:
+        # Ensure settings.php is always present with the correct database
+        # credentials, guarding against site-install rewrites or refresh-only
+        # runs where the build phase did not execute.
+        - |
+          cp $TUGBOAT_ROOT/.tugboat/settings.tugboat.php ~/mukurtu/web/sites/default/settings.php
+          chown www-data:www-data ~/mukurtu/web/sites/default/settings.php
         # Set appropriate file permissions/ownership for the files directory.
         - |
           cd ~/mukurtu/web
@@ -121,6 +127,10 @@ services:
           # user to create files with the right permissions. Pass in the
           # environment variables from Tugboat using the -E option.
           sudo -E -u www-data ./vendor/bin/drush site-install mukurtu -y --account-pass="admin" --site-name="Mukurtu CMS"
+          # Restore settings.php after site-install, which rewrites the file
+          # and may drop Tugboat-specific settings added before install.
+          cp $TUGBOAT_ROOT/.tugboat/settings.tugboat.php web/sites/default/settings.php
+          chown www-data:www-data web/sites/default/settings.php
   mariadb:
     image: tugboatqa/mariadb:lts
     commands:
