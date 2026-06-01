@@ -37,7 +37,7 @@ class ExportListListBuilder extends EntityListBuilder {
     }
     $items = $entity->getItems();
     $count = array_sum(array_map('count', $items));
-    $row['label'] = $entity->label();
+    $row['label'] = ['data' => ['#type' => 'link', '#title' => $entity->label(), '#url' => $entity->toUrl('edit-form')]];
     $row['description'] = $entity->getDescription();
     $row['item_count'] = $count;
     $row['scope'] = $entity->isSiteWide() ? $this->t('All Export Users') : $this->t('Only You');
@@ -47,6 +47,19 @@ class ExportListListBuilder extends EntityListBuilder {
   /**
    * {@inheritdoc}
    */
+  /**
+   * {@inheritdoc}
+   */
+  public function getDefaultOperations(EntityInterface $entity) {
+    $operations = parent::getDefaultOperations($entity);
+    $operations['export'] = [
+      'title' => $this->t('Export'),
+      'weight' => 0,
+      'url' => Url::fromRoute('mukurtu_export.start_list_export', ['export_list' => $entity->id()]),
+    ];
+    return $operations;
+  }
+
   protected function getEntityIds() {
     $uid = \Drupal::currentUser()->id();
     $query = $this->getStorage()->getQuery()->accessCheck(TRUE);
@@ -60,13 +73,7 @@ class ExportListListBuilder extends EntityListBuilder {
    * {@inheritdoc}
    */
   public function render() {
-    $build['back_link'] = [
-      '#type' => 'link',
-      '#title' => $this->t('Back to export'),
-      '#url' => Url::fromRoute('mukurtu_export.export_item_and_format_selection'),
-    ];
-    $build['table'] = parent::render();
-    return $build;
+    return parent::render();
   }
 
 }
