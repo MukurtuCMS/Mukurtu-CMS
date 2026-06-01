@@ -4,3 +4,11 @@
  * @file
  * Install, update and uninstall functions for the Mukurtu Export module.
  */
+
+/**
+ * Install the ExportList content entity tables.
+ */
+function mukurtu_export_update_40001() {
+  \Drupal::entityDefinitionUpdateManager()
+    ->installEntityType(\Drupal::entityTypeManager()->getDefinition('export_list'));
+}

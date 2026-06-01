@@ -53,7 +53,6 @@ use Drupal\user\UserInterface;
  *   },
  *   admin_permission = "administer site configuration",
  *   links = {
- *     "canonical" = "/admin/export/format/csv/manage/{csv_exporter}",
  *     "add-form" = "/admin/export/format/csv/add",
  *     "edit-form" = "/admin/export/format/csv/manage/{csv_exporter}",
  *     "delete-form" = "/admin/export/format/csv/manage/{csv_exporter}/delete",

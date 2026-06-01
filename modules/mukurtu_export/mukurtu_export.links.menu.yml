@@ -18,3 +18,10 @@ mukurtu_export.export_settings:
   menu_name: dashboard-roundtrip
   parent: mukurtu_dashboard
   route_name: mukurtu_export.export_settings
+
+mukurtu_export.export_lists:
+  title: 'Export Lists'
+  description: 'Manage saved export lists.'
+  menu_name: dashboard-roundtrip
+  parent: mukurtu_dashboard
+  route_name: entity.export_list.collection

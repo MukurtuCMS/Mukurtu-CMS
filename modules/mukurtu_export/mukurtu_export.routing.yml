@@ -31,3 +31,11 @@ mukurtu_export.content_selected_for_export:
     _form: 'Drupal\mukurtu_export\Form\ExportItemAndFormatSelectionForm'
   requirements:
     _permission: 'access mukurtu export'
+
+mukurtu_export.add_item_to_list:
+  path: '/admin/export/add-item/{entity_type}/{entity_id}'
+  defaults:
+    _title: 'Add to Export List'
+    _form: 'Drupal\mukurtu_export\Form\ExportListAddItemForm'
+  requirements:
+    _permission: 'access mukurtu export'
