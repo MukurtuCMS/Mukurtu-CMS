@@ -46,6 +46,12 @@ services:
         - ln -snf ~/mukurtu/web $DOCROOT
 
       update:
+        # Ensure settings.php is always present with the correct database
+        # credentials, guarding against site-install rewrites or refresh-only
+        # runs where the build phase did not execute.
+        - |
+          cp $TUGBOAT_ROOT/.tugboat/settings.tugboat.php ~/mukurtu/web/sites/default/settings.php
+          chown www-data:www-data ~/mukurtu/web/sites/default/settings.php
         # Set appropriate file permissions/ownership for the files directory.
         - |
           cd ~/mukurtu/web
@@ -58,6 +64,8 @@ services:
           chown -R www-data:www-data private_files
           find private_files -type d -exec chmod 2775 {} \;
           find private_files -type f -exec chmod 0664 {} \;
+        # Clear Drupal caches so updated templates and code take effect.
+        - cd ~/mukurtu && sudo -E -u www-data ./vendor/bin/drush cr
       build:
         - |
           cd ~/mukurtu
@@ -66,11 +74,63 @@ services:
           chown www-data:www-data web/sites/default/settings.php
           # Update composer dependencies.
           rm composer.lock
-          composer update --no-ansi --no-interaction --optimize-autoloader --no-progress
+          # Patch the template's composer.json to require Drupal 11.3.x and
+          # ignore the symfony/polyfill-intl-idn advisory. composer config
+          # does not support setting audit.ignore keys, so patch directly.
+          # Pin to ^11.3.0 with prefer-stable to avoid resolving to 11.x-dev,
+          # which ships a different index.php that requires autoload_runtime.php.
+          php -r "
+            \$d = json_decode(file_get_contents('composer.json'), true);
+            \$d['require']['drupal/core'] = '11.3.10';
+            \$d['require']['drupal/core-recommended'] = '11.3.10';
+            \$d['require']['drupal/core-composer-scaffold'] = '11.3.10';
+            \$d['require']['drupal/core-project-message'] = '11.3.10';
+            \$d['config']['preferred-install']['drupal/core*'] = 'dist';
+            \$d['prefer-stable'] = true;
+            \$d['config']['allow-plugins']['symfony/runtime'] = true;
+            \$d['config']['audit']['ignore']['PKSA-dwsq-ppd2-mb1x'] =
+              'Advisory only affects pure PHP fallback; native intl is installed';
+            \$d['config']['audit']['ignore']['PKSA-fbvq-z33h-r2np'] =
+              'twig/twig advisory; version range pinned by drupal/core-recommended 11.3.10';
+            \$d['config']['audit']['ignore']['PKSA-g9zw-qxh8-pq8w'] =
+              'twig/twig advisory; version range pinned by drupal/core-recommended 11.3.10';
+            \$d['config']['audit']['ignore']['PKSA-yd6k-t2gh-1m43'] =
+              'twig/twig advisory; version range pinned by drupal/core-recommended 11.3.10';
+            \$d['config']['audit']['ignore']['PKSA-1tmc-rt7x-12w6'] =
+              'twig/twig advisory; version range pinned by drupal/core-recommended 11.3.10';
+            \$d['config']['audit']['ignore']['PKSA-xx6c-6d96-db2w'] =
+              'twig/twig advisory; version range pinned by drupal/core-recommended 11.3.10';
+            // drupal/core 11.3.x StaticReflectionParser still uses
+            // Doctrine\Common\Annotations\TokenParser even though core-dev
+            // no longer declares it as a dependency; pin it explicitly so
+            // the transitive-dependency resolver does not drop it.
+            \$d['require']['doctrine/annotations'] = '^2.0';
+            // cweagans/composer-patches 1.7.x cannot resolve local patch
+            // paths that come from a dependency's extra.patches in PHP 8
+            // (null hostname TypeError). Suppress the field_group patch
+            // from mukurtu/mukurtu here and apply it manually after update.
+            \$d['extra']['patches-ignore']['mukurtu/mukurtu']['drupal/field_group'] = [
+              'Fix EntityViewDisplay/EntityFormDisplay::load() incompatibility with Drupal 11.3.x'
+                => 'patches/field_group-entity-load-11-3.patch',
+            ];
+            file_put_contents('composer.json',
+              json_encode(\$d, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL);
+          "
+          composer update --no-ansi --no-interaction --optimize-autoloader --no-progress --prefer-stable
+          # Apply the field_group patch manually. cweagans/composer-patches 1.7.x
+          # cannot handle local-file patches defined in a dependency's
+          # extra.patches (PHP 8 null-hostname TypeError), so we suppress it
+          # above and apply it here once both packages are on disk.
+          patch -p1 -d web/modules/contrib/field_group \
+            < web/profiles/mukurtu/patches/field_group-entity-load-11-3.patch
           # Install Drupal with the Mukurtu installation profile. Run as web
           # user to create files with the right permissions. Pass in the
           # environment variables from Tugboat using the -E option.
           sudo -E -u www-data ./vendor/bin/drush site-install mukurtu -y --account-pass="admin" --site-name="Mukurtu CMS"
+          # Restore settings.php after site-install, which rewrites the file
+          # and may drop Tugboat-specific settings added before install.
+          cp $TUGBOAT_ROOT/.tugboat/settings.tugboat.php web/sites/default/settings.php
+          chown www-data:www-data web/sites/default/settings.php
   mariadb:
     image: tugboatqa/mariadb:lts
     commands:

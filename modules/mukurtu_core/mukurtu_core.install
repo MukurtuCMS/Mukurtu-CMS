@@ -742,24 +742,86 @@ function mukurtu_core_update_40021(): void {
 }
 
 /**
- * Create the form_selection node view mode for entity browser selected-items display.
+ * Switch featured_content entity browser to rendered_entity display.
  */
 function mukurtu_core_update_40022(): void {
-  $storage = \Drupal::entityTypeManager()->getStorage('entity_view_mode');
-  if (!$storage->load('node.form_selection')) {
-    $storage->create([
-      'id' => 'node.form_selection',
-      'label' => 'Form Selection',
-      'targetEntityType' => 'node',
-      'cache' => TRUE,
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.block_content.featured_content.default');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_featured_content.settings.field_widget_display', 'rendered_entity');
+  $config->set('content.field_featured_content.settings.field_widget_display_settings', ['view_mode' => 'content_browser']);
+  $config->save();
+}
+
+/**
+ * Create FieldConfig entities for field_coverage on all content type bundles.
+ *
+ * field_coverage was previously defined as a bundle-level BaseFieldDefinition
+ * in each entity class but backed by a FieldStorageConfig entity, causing
+ * Views to log "non-existent config entity" warnings on every cache rebuild.
+ * The fix converts it to a purely configurable field by removing it from
+ * bundleFieldDefinitions() and creating the missing FieldConfig entities.
+ */
+function mukurtu_core_update_40023(): void {
+  $bundles = [
+    'digital_heritage' => 'A detailed, interactive mapping tool that allows placing and drawing multiple locations related to a digital heritage item. Locations can be single points, paths, rectangles, or free-form polygons. Each location can be given a basic label. This field is also used for the browse by map tools. </br>Note that this mapping data will be shared with the same users or visitors as the rest of the digital heritage item. If the location is sensitive, carefully consider using this field. </br>Use the tools shown on the map to place, draw, edit, and delete points and shapes. Once a point or shape has been placed, select it to add a description if needed.',
+    'collection' => 'A detailed, interactive mapping tool that allows placing and drawing multiple locations related to a collection. Locations can be single points, paths, rectangles, or free-form polygons. Each location can be given a basic label. This field is also used for the browse by map tools. </br>Note that this mapping data will be shared with the same users or visitors as the rest of the collection. If the location is sensitive, carefully consider using this field. </br>Use the tools shown on the map to place, draw, edit, and delete points and shapes. Once a point or shape has been placed, select it to add a description if needed.',
+    'dictionary_word' => 'A detailed, interactive mapping tool that allows placing and drawing multiple locations related to a dictionary word. Locations can be single points, paths, rectangles, or free-form polygons. Each location can be given a basic label. This field is also used for the browse by map tools. Note that this mapping data will be shared with the same users or visitors as the rest of the dictionary word. If the location is sensitive, carefully consider using this field. </br>Use the tools shown on the map to place, draw, edit, and delete points and shapes. Once a point or shape has been placed, select it to add a description if needed.',
+    'word_list' => '',
+    'person' => 'A detailed, interactive mapping tool that allows placing and drawing multiple locations related to a person record. Locations can be single points, paths, rectangles, or free-form polygons. Each location can be given a basic label. This field is also used for the browse by map tools. Note that this mapping data will be shared with the same users or visitors as the rest of the person record. If the location is sensitive, carefully consider using this field. </br>Use the tools shown on the map to place, draw, edit, and delete points and shapes. Once a point or shape has been placed, select it to add a description if needed.',
+    'place' => 'A detailed, interactive mapping tool that allows placing and drawing multiple locations related to a place record. Locations can be single points, paths, rectangles, or free-form polygons. Each location can be given a basic label. This field is also used for the browse by map tools. Note that this mapping data will be shared with the same users or visitors as the rest of the place record. If the location is sensitive, carefully consider using this field. </br>Use the tools shown on the map to place, draw, edit, and delete points and shapes. Once a point or shape has been placed, select it to add a description if needed.',
+  ];
+  foreach ($bundles as $bundle => $description) {
+    if (\Drupal\field\Entity\FieldConfig::loadByName('node', $bundle, 'field_coverage')) {
+      continue;
+    }
+    \Drupal\field\Entity\FieldConfig::create([
+      'field_name' => 'field_coverage',
+      'entity_type' => 'node',
+      'bundle' => $bundle,
+      'label' => 'Map Points',
+      'description' => $description,
+      'required' => FALSE,
+      'translatable' => FALSE,
     ])->save();
   }
 }
 
 /**
+ * Grant article, page, and landing page content permissions to Mukurtu Manager role.
+ */
+function mukurtu_core_update_40024(): void {
+  $role = \Drupal\user\Entity\Role::load('mukurtu_manager');
+  if (!$role) {
+    return;
+  }
+  $permissions = [
+    'create article content',
+    'create landing_page content',
+    'create page content',
+    'delete any article content',
+    'delete any landing_page content',
+    'delete any page content',
+    'delete own article content',
+    'delete own landing_page content',
+    'delete own page content',
+    'edit any article content',
+    'edit any landing_page content',
+    'edit any page content',
+    'edit own article content',
+    'edit own landing_page content',
+    'edit own page content',
+  ];
+  foreach ($permissions as $permission) {
+    $role->grantPermission($permission);
+  }
+  $role->save();
+}
+
  * Install form_selection view display configs for each node bundle.
  */
-function mukurtu_core_update_40023(): void {
+function mukurtu_core_update_40025(): void {
   $configs = [
     ['mukurtu_digital_heritage', 'node.digital_heritage.form_selection'],
     ['mukurtu_collection', 'node.collection.form_selection'],
@@ -792,7 +854,7 @@ function mukurtu_core_update_40023(): void {
 /**
  * Add collection-specific entity browser (no type filter) and view display.
  */
-function mukurtu_core_update_40024(): void {
+function mukurtu_core_update_40026(): void {
   // Add the entity_browser_collection display to the content browser view.
   $view = \Drupal::configFactory()->getEditable('views.view.mukurtu_content_browser');
   if (!$view->isNew()) {
@@ -840,5 +902,20 @@ function mukurtu_core_update_40024(): void {
     if ($data !== FALSE) {
       $config_storage->write($name, $data);
     }
+  }
+}
+
+/**
+ * Create the form_selection node view mode for entity browser selected-items display.
+ */
+function mukurtu_core_update_40027(): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('entity_view_mode');
+  if (!$storage->load('node.form_selection')) {
+    $storage->create([
+      'id' => 'node.form_selection',
+      'label' => 'Form Selection',
+      'targetEntityType' => 'node',
+      'cache' => TRUE,
+    ])->save();
   }
 }

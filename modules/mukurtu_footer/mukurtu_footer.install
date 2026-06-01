@@ -38,6 +38,12 @@ function mukurtu_footer_install() {
  * entity and migrates existing data into its fields.
  */
 function mukurtu_footer_update_40001(): void {
+  // Ensure all config/install configs (block content type, paragraph types,
+  // fields) exist before trying to create entities that use them. On existing
+  // sites, config/install YAMLs are only applied during a fresh module install,
+  // not during updates, so this call fills the gap.
+  \Drupal::service('config.installer')->installDefaultConfig('module', 'mukurtu_footer');
+
   // If a mukurtu_footer block_content entity already exists, nothing to do.
   $existing = \Drupal::entityTypeManager()
     ->getStorage('block_content')
@@ -115,4 +121,15 @@ function mukurtu_footer_update_40001(): void {
     'field_footer_contact_email_label' => $block_settings['email_us_text'] ?? 'Email us at',
     'field_footer_copyright' => $block_settings['copyright_message'] ?? '© [current-date:html_year] Mukurtu CMS',
   ])->save();
+}
+
+/**
+ * Install missing mukurtu_footer configuration on existing sites.
+ *
+ * Sites that ran mukurtu_footer_update_40001() before the config installer
+ * call was added need this hook to create the field storage and field instance
+ * configs that config/install only provides on a fresh module install.
+ */
+function mukurtu_footer_update_40002(): void {
+  \Drupal::service('config.installer')->installDefaultConfig('module', 'mukurtu_footer');
 }

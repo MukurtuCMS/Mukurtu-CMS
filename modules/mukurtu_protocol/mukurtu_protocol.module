@@ -710,6 +710,51 @@ function mukurtu_protocol_query_community_access_alter(AlterableInterface $query
 }
 
 /**
+ * Implements hook_query_TAG_alter().
+ *
+ * Filters the mukurtu_community_select entity browser view to only show
+ * communities where the current user holds the community_manager OG role.
+ */
+function mukurtu_protocol_query_mukurtu_community_manager_select_alter(AlterableInterface $query) {
+  $account = \Drupal::currentUser();
+
+  // UID 1 sees all communities.
+  if ($account->id() == 1) {
+    return;
+  }
+
+  $tables = $query->getTables();
+  $community_table = '';
+  foreach ($tables as $alias => $info) {
+    if ($info['table'] === 'community_field_data') {
+      $community_table = $alias;
+      break;
+    }
+  }
+
+  if (!$community_table) {
+    \Drupal::logger('mukurtu_protocol')->warning('mukurtu_community_manager_select query tag: community_field_data table not found; filter skipped.');
+    return;
+  }
+
+  // INNER JOIN og_membership to limit to communities where the user is an
+  // active member, then INNER JOIN og_membership__roles to require the
+  // community_manager role.
+  $og_alias = $query->innerJoin(
+    'og_membership',
+    'ogm_mgr',
+    "{$community_table}.id = ogm_mgr.entity_id AND ogm_mgr.entity_type = 'community' AND ogm_mgr.state = 'active'"
+  );
+  $query->condition("{$og_alias}.uid", $account->id());
+
+  $query->innerJoin(
+    'og_membership__roles',
+    'ogmr_mgr',
+    "{$og_alias}.id = ogmr_mgr.entity_id AND ogmr_mgr.roles_target_id = 'community-community-community_manager'"
+  );
+}
+
+/**
  * Implements hook_field_widget_single_element_WIDGET_TYPE_form_alter().
  */
 function mukurtu_protocol_field_widget_single_element_entity_browser_entity_reference_form_alter(array &$element, \Drupal\Core\Form\FormStateInterface $form_state, array $context)
@@ -740,7 +785,7 @@ function mukurtu_protocol_field_widget_single_element_entity_browser_entity_refe
       $item['#attributes']['class'][] = 'inaccessible-reference';
 
       $item['display'] = [
-        '#markup' => "<div>" . Html::escape(t("#@id. This @entity_type_label is not available to you.", [
+        '#markup' => "<div role=\"alert\">" . Html::escape(t("#@id. This @entity_type_label is not available to you.", [
           '@id' => $id,
           '@entity_type_label' => lcfirst($entity->getEntityType()->getLabel()),
         ])) . "</div>"
@@ -831,6 +876,62 @@ function mukurtu_protocol_form_og_membership_form_alter(&$form, FormStateInterfa
   if (($group instanceof ProtocolInterface || $group instanceof CommunityInterface) && !empty($form['roles']['widget']['#options'])) {
     $form['roles']['widget']['#options'] = _mukurtu_protocol_sort_role_options($form['roles']['widget']['#options']);
   }
+
+  if (!($group instanceof CommunityInterface) && !($group instanceof ProtocolInterface)) {
+    return;
+  }
+
+  // Helper text for uid, roles, and state fields.
+  if (isset($form['uid']['widget'][0]['target_id'])) {
+    $form['uid']['widget'][0]['target_id']['#description'] = t('Search for an existing user account.');
+  }
+
+  $roles_description = $group instanceof CommunityInterface
+    ? t('Assign the user a community role.')
+    : t('Assign the user a protocol role.');
+  $form['roles']['widget']['#description'] = $roles_description;
+
+  $form['state']['widget']['#description'] = t('Most members can be assigned the active state. Consider adding the user in the blocked state if you need to do additional configuration before giving them access.');
+
+  // Explicit weights: uid → roles → role_descriptions → state.
+  $form['uid']['#weight']    = -10;
+  $form['roles']['#weight']  = 0;
+  $form['state']['#weight']  = 20;
+
+  // Collapsible role description list, positioned between roles and state.
+  if ($group instanceof CommunityInterface) {
+    $role_info = [
+      ['label' => t('Community member'),    'desc' => t('View the community page and be added to protocols within the community.')],
+      ['label' => t('Community affiliate'), 'desc' => t('View the community page and be added to protocols within the community. This is a designation for community partners.')],
+      ['label' => t('Community manager'),   'desc' => t('Manage community membership and create new protocols. View the community page and be added to protocols within the community.')],
+    ];
+  }
+  else {
+    $role_info = [
+      ['label' => t('Protocol member'),          'desc' => t('View content but cannot create or edit.')],
+      ['label' => t('Protocol affiliate'),       'desc' => t('View content but cannot create or edit. This is a designation for community partners that mirrors the community affiliate role.')],
+      ['label' => t('Contributor'),              'desc' => t('Create, edit, and delete their own digital heritage items, person records, place records, and media assets.')],
+      ['label' => t('Curator'),                  'desc' => t('Create, edit, and delete their own collections and media assets.')],
+      ['label' => t('Language contributor'),     'desc' => t('Create, edit, and delete their own dictionary words and word lists.')],
+      ['label' => t('Language steward'),         'desc' => t('Create, edit, and delete ALL dictionary words and word lists, and media assets.')],
+      ['label' => t('Community record steward'), 'desc' => t('Add community records to content, as well as edit and delete their community records.')],
+      ['label' => t('Protocol steward'),         'desc' => t('Manage protocol membership, create, edit, and delete ALL content and media assets, and manage Local Contexts projects.')],
+    ];
+  }
+
+  $items = [];
+  foreach ($role_info as $entry) {
+    $items[] = ['#markup' => '<strong>' . $entry['label'] . '</strong>: ' . $entry['desc']];
+  }
+  $form['role_descriptions'] = [
+    '#type'       => 'details',
+    '#title'      => t('Role descriptions'),
+    '#open'       => FALSE,
+    '#weight'     => 10,
+    '#attributes' => ['class' => ['role-descriptions']],
+    'list'        => ['#theme' => 'item_list', '#items' => $items],
+  ];
+  $form['#attached']['library'][] = 'mukurtu_protocol/membership-table';
 }
 
 /**
@@ -975,7 +1076,7 @@ function mukurtu_protocol_preprocess_views_view_field(&$variables) {
   }
 
   if (CulturalProtocols::isUserBlockedFromProtocolViaCommunity($owner, $group)) {
-    $badge = '<span class="community-blocked-badge" aria-hidden="true">' . t('Community blocked') . '</span>';
+    $badge = '<span class="community-blocked-badge" role="status">' . t('Community blocked') . '</span>';
     $variables['output'] = Markup::create((string) $variables['output'] . ' ' . $badge);
   }
 }
