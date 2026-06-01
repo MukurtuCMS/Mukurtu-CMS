@@ -24,13 +24,6 @@ mukurtu_export.export_results:
     _permission: 'access mukurtu export'
     _custom_access: '\Drupal\mukurtu_export\Form\ExportResultsForm::access'
 
-mukurtu_export.content_selected_for_export:
-  path: '/admin/export/content'
-  defaults:
-    _title: 'Content Selected for Export'
-    _form: 'Drupal\mukurtu_export\Form\ExportItemAndFormatSelectionForm'
-  requirements:
-    _permission: 'access mukurtu export'
 
 mukurtu_export.start_list_export:
   path: '/admin/export/start/{export_list}'

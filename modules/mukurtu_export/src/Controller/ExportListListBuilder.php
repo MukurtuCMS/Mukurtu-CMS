@@ -73,7 +73,15 @@ class ExportListListBuilder extends EntityListBuilder {
    * {@inheritdoc}
    */
   public function render() {
-    return parent::render();
+    $build = parent::render();
+    $build['add_link'] = [
+      '#type' => 'link',
+      '#title' => $this->t('Create new export list'),
+      '#url' => Url::fromRoute('entity.export_list.add_form'),
+      '#attributes' => ['class' => ['button', 'button--primary']],
+      '#weight' => -10,
+    ];
+    return $build;
   }
 
 }

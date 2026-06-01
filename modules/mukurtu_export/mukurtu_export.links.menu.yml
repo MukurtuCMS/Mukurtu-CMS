@@ -5,12 +5,6 @@ mukurtu_export.export:
   parent: mukurtu_dashboard
   route_name: mukurtu_export.export_item_and_format_selection
 
-mukurtu_export.content_selected_for_export:
-  title: 'Content Selected for Export'
-  description: 'Content selected for export.'
-  menu_name: dashboard-roundtrip
-  parent: mukurtu_dashboard
-  route_name: mukurtu_export.content_selected_for_export
 
 mukurtu_export.export_settings:
   title: 'Export Settings'
