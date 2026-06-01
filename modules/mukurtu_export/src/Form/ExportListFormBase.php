@@ -42,22 +42,6 @@ class ExportListFormBase extends ContentEntityForm {
       '#weight' => 10,
     ];
 
-    // Show a read-only item count for existing lists.
-    if (!$entity->isNew()) {
-      $items = $entity->getItems();
-      $node_count = count($items['node'] ?? []);
-      $media_count = count($items['media'] ?? []);
-      $form['item_summary'] = [
-        '#type' => 'item',
-        '#title' => $this->t('Contents'),
-        '#markup' => $this->t('This list contains @nodes content item(s) and @media media item(s).', [
-          '@nodes' => $node_count,
-          '@media' => $media_count,
-        ]),
-        '#weight' => 20,
-      ];
-    }
-
     $form['actions'] = ['#type' => 'actions'];
     $form['actions']['submit'] = [
       '#type' => 'submit',
