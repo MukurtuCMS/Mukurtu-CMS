@@ -183,7 +183,7 @@ class ExportListAddItemForm extends FormBase {
     if ($destination && !str_starts_with($destination, '//')) {
       return Url::fromUserInput($destination);
     }
-    return Url::fromRoute('mukurtu_export.export_item_and_format_selection');
+    return Url::fromRoute('entity.export_list.collection');
   }
 
 }

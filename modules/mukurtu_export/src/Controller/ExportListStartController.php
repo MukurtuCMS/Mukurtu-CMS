@@ -15,11 +15,11 @@ class ExportListStartController extends ControllerBase {
     if (!$export_list->access('view')) {
       throw new AccessDeniedHttpException();
     }
-    \Drupal::service('tempstore.private')
-      ->get('mukurtu_import')
-      ->set('export_list_id', (int) $export_list->id());
+    $store = \Drupal::service('tempstore.private')->get('mukurtu_import');
+    $store->set('export_list_id', (int) $export_list->id());
+    $store->set('exporter_id', 'csv');
 
-    return $this->redirect('mukurtu_export.export_item_and_format_selection');
+    return $this->redirect('mukurtu_export.export_settings');
   }
 
 }
