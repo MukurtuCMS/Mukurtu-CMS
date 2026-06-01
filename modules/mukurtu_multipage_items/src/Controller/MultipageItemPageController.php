@@ -84,7 +84,7 @@ class MultipageItemPageController extends ControllerBase {
 
   public function viewRedirect(EntityInterface $node, $view_mode = 'full', $langcode = NULL) {
     $config = $this->configFactory->get('mukurtu_multipage_items.settings');
-    $controllerString = $config->get('_controller');
+    $controllerString = $config->get('_controller') ?: '\Drupal\node\Controller\NodeViewController::view';
     [$controllerClass, $controllerMethod] = explode('::', $controllerString, 2);
     $originalController = $controllerClass::create(\Drupal::getContainer());
 

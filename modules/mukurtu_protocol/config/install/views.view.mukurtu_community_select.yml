@@ -212,7 +212,8 @@ display:
           disable_sql_rewrite: false
           distinct: true
           replica: false
-          query_tags: {  }
+          query_tags:
+            - mukurtu_community_manager_select
       relationships: {  }
       group_by: true
       header: {  }
