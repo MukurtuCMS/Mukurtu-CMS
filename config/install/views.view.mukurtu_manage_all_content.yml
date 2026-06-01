@@ -102,6 +102,8 @@ display:
               action_id: 'entity:publish_action:node'
               preconfiguration:
                 add_confirmation: false
+            40:
+              action_id: mukurtu_export_add_to_list_action
         title:
           id: title
           table: node_field_data
