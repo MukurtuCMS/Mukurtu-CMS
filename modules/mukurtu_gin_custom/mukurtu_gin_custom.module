@@ -29,6 +29,7 @@ function mukurtu_gin_custom_theme(array $existing, string $type, string $theme, 
 function mukurtu_gin_custom_page_attachments(array &$attachments) {
   $attachments['#attached']['library'][] = 'mukurtu_gin_custom/mukurtu-gin-custom';
   $attachments['#attached']['library'][] = 'mukurtu_gin_custom/entity-browser-toggle';
+  $attachments['#attached']['library'][] = 'mukurtu_gin_custom/community-browser-select';
 }
 
 /**

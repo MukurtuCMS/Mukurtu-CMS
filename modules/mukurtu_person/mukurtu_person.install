@@ -16,10 +16,20 @@ function mukurtu_person_update_40001() {
 }
 
 /**
+ * Set field_media_assets to use the media_assets view mode on person records.
+ */
+function mukurtu_person_update_40002() {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.person.full');
+  $config->set('content.field_media_assets.settings.view_mode', 'media_assets');
+  $config->save();
+  return t('Updated field_media_assets view mode to media_assets on person full display.');
+}
+
+/**
  * Switch the field_related_person entity browser widget on the Related Person
  * paragraph form to use the dedicated person-only browser (no Type filter shown).
  */
-function mukurtu_person_update_40002(): void {
+function mukurtu_person_update_40003(): void {
   $config = \Drupal::configFactory()->getEditable('core.entity_form_display.paragraph.related_person.default');
   if ($config->isNew()) {
     return;
@@ -41,7 +51,7 @@ function mukurtu_person_update_40002(): void {
 /**
  * Switch field_related_content on Person to rendered_entity (form_selection view mode).
  */
-function mukurtu_person_update_40003(): void {
+function mukurtu_person_update_40004(): void {
   $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.person.default');
   if ($config->isNew()) {
     return;
@@ -54,7 +64,7 @@ function mukurtu_person_update_40003(): void {
 /**
  * Switch field_related_person on Related Person paragraph to rendered_entity (form_selection view mode).
  */
-function mukurtu_person_update_40004(): void {
+function mukurtu_person_update_40005(): void {
   $config = \Drupal::configFactory()->getEditable('core.entity_form_display.paragraph.related_person.default');
   if ($config->isNew()) {
     return;

@@ -12,3 +12,12 @@ entity-browser-toggle:
     - core/drupal
     - core/once
     - core/jquery
+
+community-browser-select:
+  version: 1.x
+  js:
+    js/community-browser-select.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+    - core/jquery

@@ -12,21 +12,21 @@
       ).forEach(function (list) {
         var $list = $(list);
 
-        if ($list.find('.item-container').length === 0) {
-          return;
-        }
-
-        var fieldClass = $list.closest('[class*="field--name-"]').attr('class') || '';
+        var $fieldWrapper = $list.closest('[class*="field--name-"]');
+        var fieldClass = $fieldWrapper.attr('class') || '';
         var nameMatch = fieldClass.match(/field--name-([\w-]+)/);
         var fieldName = nameMatch ? nameMatch[1] : '';
 
+        // Fields with non-standard structure: skip entirely (no view, no toggle).
         var excluded = ['field-related-person'];
         if (excluded.indexOf(fieldName) !== -1) {
           return;
         }
 
         var storageKey = 'mukurtu_eb_view_' + (fieldName || 'default');
-        var savedView = localStorage.getItem(storageKey) || 'grid';
+
+        // Fields that should always display as grid with no toggle.
+        var alwaysGrid = $fieldWrapper.hasClass('field--name-field-communities');
 
         function applyView(view) {
           $list.removeClass('eb-view-grid eb-view-list').addClass('eb-view-' + view);
@@ -39,6 +39,12 @@
           }
         }
 
+        if (alwaysGrid) {
+          applyView('grid');
+          return;
+        }
+
+        var savedView = localStorage.getItem(storageKey) || 'list';
         applyView(savedView);
 
         // 4.1.2 / 1.3.1: Wrap the two toggle buttons in a <fieldset> with a
