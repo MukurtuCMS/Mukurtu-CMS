@@ -39,4 +39,5 @@ class AddToExportListAction extends ViewsBulkOperationsActionBase {
     return $return_as_object ? $result : $result->isAllowed();
   }
 
+
 }
