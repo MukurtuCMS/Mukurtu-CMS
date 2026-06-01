@@ -1,0 +1,45 @@
+--- a/field_group.module
++++ b/field_group.module
+@@ -878,10 +878,10 @@
+ function field_group_group_save($group, ?EntityDisplayInterface $display = NULL) {
+   if ($display === NULL) {
+     if ($group->context == 'form') {
+-      $display = EntityFormDisplay::load($group->entity_type . '.' . $group->bundle . '.' . $group->mode);
++      $display = \Drupal::entityTypeManager()->getStorage('entity_form_display')->load($group->entity_type . '.' . $group->bundle . '.' . $group->mode);
+     }
+     elseif ($group->context == 'view') {
+-      $display = EntityViewDisplay::load($group->entity_type . '.' . $group->bundle . '.' . $group->mode);
++      $display = \Drupal::entityTypeManager()->getStorage('entity_view_display')->load($group->entity_type . '.' . $group->bundle . '.' . $group->mode);
+     }
+   }
+ 
+@@ -927,10 +927,10 @@
+  */
+ function field_group_delete_field_group($group) {
+   if ($group->context == 'form') {
+-    $display = EntityFormDisplay::load($group->entity_type . '.' . $group->bundle . '.' . $group->mode);
++    $display = \Drupal::entityTypeManager()->getStorage('entity_form_display')->load($group->entity_type . '.' . $group->bundle . '.' . $group->mode);
+   }
+   elseif ($group->context == 'view') {
+-    $display = EntityViewDisplay::load($group->entity_type . '.' . $group->bundle . '.' . $group->mode);
++    $display = \Drupal::entityTypeManager()->getStorage('entity_view_display')->load($group->entity_type . '.' . $group->bundle . '.' . $group->mode);
+   }
+ 
+   /**
+@@ -961,14 +961,14 @@
+  */
+ function field_group_info_groups($entity_type, $bundle, $context, $mode) {
+   if ($context == 'form') {
+-    $display = EntityFormDisplay::load($entity_type . '.' . $bundle . '.' . $mode);
++    $display = \Drupal::entityTypeManager()->getStorage('entity_form_display')->load($entity_type . '.' . $bundle . '.' . $mode);
+     if (!$display) {
+       return [];
+     }
+     $data = $display->getThirdPartySettings('field_group');
+   }
+   if ($context == 'view') {
+-    $display = EntityViewDisplay::load($entity_type . '.' . $bundle . '.' . $mode);
++    $display = \Drupal::entityTypeManager()->getStorage('entity_view_display')->load($entity_type . '.' . $bundle . '.' . $mode);
+     if (!$display) {
+       return [];
+     }

@@ -139,6 +139,35 @@ class FormHooks
     }
 
     /**
+     * Implements hook_menu_local_tasks_alter().
+     *
+     * Sets explicit weights on core node tabs so all content pages display tabs
+     * in the order: View, Edit, Delete, Manage Collection Organization,
+     * New Sub-collection, Add Community Record, Create Multi-page Item,
+     * Add to Personal Collection, Revisions, Devel. Collection-specific tabs
+     * only appear on collection content types.
+     */
+    #[Hook("menu_local_tasks_alter")]
+    public function menuLocalTasksAlterNodeTabOrder(
+        array &$data,
+        string $route_name,
+    ): void {
+        if (!str_starts_with($route_name, "entity.node.")) {
+            return;
+        }
+        $weights = [
+            "entity.node.edit_form" => 5,
+            "entity.node.delete_form" => 8,
+            "entity.node.version_history" => 30,
+        ];
+        foreach ($weights as $task_id => $weight) {
+            if (isset($data["tabs"][0][$task_id])) {
+                $data["tabs"][0][$task_id]["#weight"] = $weight;
+            }
+        }
+    }
+
+    /**
      * Implements hook_form_FORM_ID_alter() for 'user-register-form' and
      * 'user-form'.
      *
@@ -188,8 +217,14 @@ class FormHooks
                 "pending" => t("Pending"),
                 0 => t("Blocked"),
             ];
-            array_unshift($form["#submit"], [static::class, "userStatusPreSaveSubmit"]);
-            $form["#submit"][] = [static::class, "userStatusPostSaveSubmit"];
+            // EntityForm's submit button has its own #submit array
+            // (['::submitForm', '::save']), which Drupal uses exclusively —
+            // handlers on $form['#submit'] are ignored when the button has
+            // its own. Attach to the button so the pre-save handler runs
+            // before ::submitForm builds the entity, and the post-save
+            // handler runs after ::save writes it.
+            array_unshift($form["actions"]["submit"]["#submit"], [static::class, "userStatusPreSaveSubmit"]);
+            $form["actions"]["submit"]["#submit"][] = [static::class, "userStatusPostSaveSubmit"];
         }
         if (isset($form["account"]["roles"]["#options"])) {
             $desiredOrder = [
@@ -224,7 +259,7 @@ class FormHooks
             if (isset($form["account"]["field_display_name"])) {
                 unset($form["account"]["field_display_name"]);
             }
-            $form["#submit"][] = [static::class, "visitorRegistrationPendingSubmit"];
+            $form["actions"]["submit"]["#submit"][] = [static::class, "visitorRegistrationPendingSubmit"];
             return;
         }
 
@@ -369,7 +404,7 @@ class FormHooks
                 "#target_type" => "user",
                 // Numbered labels give screen reader users positional context when
                 // multiple fields exist.
-                "#title" => t("User @num", ["@num" => $i + 1]),
+                "#title" => t("User to notify @num", ["@num" => $i + 1]),
                 "#title_display" => "invisible",
                 "#selection_handler" => "mukurtu_manager_users",
                 "#required" => false,
@@ -399,6 +434,7 @@ class FormHooks
             "community",
             "community",
         );
+        uasort($communityRolesRaw, fn($a, $b) => $a->getWeight() <=> $b->getWeight());
         $communityRoles = [];
         foreach ($communityRolesRaw as $roleValue) {
             if (
@@ -413,6 +449,7 @@ class FormHooks
             "protocol",
             "protocol",
         );
+        uasort($protocolRolesRaw, fn($a, $b) => $a->getWeight() <=> $b->getWeight());
         $protocolRoles = [];
         foreach ($protocolRolesRaw as $roleValue) {
             if (
@@ -456,12 +493,10 @@ class FormHooks
                     "#type" => "container",
                     "#tree" => true,
                     "#states" => ["visible" => $statesConditions],
-                    "#prefix" => '<div aria-live="polite">',
-                    "#suffix" => "</div>",
                 ];
                 $form["membership"][$communityId]["protocols"]["hint"] = [
                     "#markup" =>
-                        "<p>" .
+                        '<p aria-live="polite">' .
                         t("Select one or more protocol roles below.") .
                         "</p>",
                 ];
@@ -700,8 +735,8 @@ class FormHooks
             ) {
                 $form["account"]["status"]["#default_value"] = "pending";
             }
-            array_unshift($form["#submit"], [static::class, "userStatusPreSaveSubmit"]);
-            $form["#submit"][] = [static::class, "userStatusPostSaveSubmit"];
+            array_unshift($form["actions"]["submit"]["#submit"], [static::class, "userStatusPreSaveSubmit"]);
+            $form["actions"]["submit"]["#submit"][] = [static::class, "userStatusPostSaveSubmit"];
         }
 
         if (isset($form["actions"]["delete"]["#title"])) {
@@ -732,18 +767,23 @@ class FormHooks
     }
 
     /**
-     * Sets field_pending=1 on the saved entity when "Pending" was selected.
+     * Normalizes field_pending after the entity is saved.
      *
+     * field_pending defaults to 1 for new users, so we must explicitly clear it
+     * when "Blocked" is selected to prevent blocked users appearing as pending.
      * Runs after the entity save so the entity ID is available.
      */
     public static function userStatusPostSaveSubmit(
         array $form,
         FormStateInterface $form_state,
     ): void {
-        if ($form_state->get("mukurtu_status_selection") === "pending") {
-            $entity = $form_state->getFormObject()->getEntity();
-            if ($entity && $entity->hasField("field_pending")) {
-                $entity->set("field_pending", 1);
+        $selection = $form_state->get("mukurtu_status_selection");
+        $isPending = ($selection === "pending");
+        $entity = $form_state->getFormObject()->getEntity();
+        if ($entity && $entity->hasField("field_pending")) {
+            $currentPending = (bool) $entity->get("field_pending")->value;
+            if ($currentPending !== $isPending) {
+                $entity->set("field_pending", $isPending ? 1 : 0);
                 $entity->save();
             }
         }
