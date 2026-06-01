@@ -18,6 +18,36 @@ counterpart, if one exists. */
     display: inline-flex;
 }
 
+/* Hide community browser checkbox column via CSS to prevent FOUC before JS runs.
+   Visually hidden (not display:none) so the checkbox remains in the accessibility
+   tree. The .views-row receives role="checkbox" from JS and is the primary
+   interactive element; the underlying input is a fallback. */
+.view-mukurtu-community-select .views-field-entity-browser-select {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Entity browser modal iframe: space below the dialog title bar. */
+.entity-browser-modal-iframe {
+  margin-top: 24px;
+}
+
+/* Community browser: card selected state. */
+.gin-entity-browser .entity-browser-form .views-row.is-selected {
+  outline: 3px solid var(--gin-color-primary, #0036b1);
+  outline-offset: -3px;
+}
+
+/* Community browser: focus ring for keyboard users on unselected cards (WCAG 2.4.7). */
+.gin-entity-browser .entity-browser-form .views-row:focus-visible {
+  outline: 3px solid var(--gin-color-primary, #0036b1);
+  outline-offset: -3px;
+}
+
 /* MW: fixes paragraph titles being cut off in forms. */
 .js .paragraph-type-title {
     flex-basis: 25%;
@@ -25,4 +55,35 @@ counterpart, if one exists. */
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: visible !important;
+}
+
+/* Canonical .ui-dialog positioning override (loaded on every page via
+   hook_page_attachments, covering both front-end and Gin admin contexts).
+   Gin sets .ui-dialog { position: absolute } which causes modal dialogs to
+   drift down the page as the user scrolls. Override to fixed + viewport-center
+   so the dialog always appears in the center of the viewport regardless of
+   scroll position. Uses flexbox so long forms scroll internally rather than
+   extending beyond the viewport. */
+.ui-dialog {
+    position: fixed !important;
+    top: 50vh !important;
+    left: 50vw !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    max-height: 90vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.ui-dialog .ui-dialog-titlebar {
+    flex-shrink: 0;
+}
+
+.ui-dialog .ui-dialog-content {
+    flex: 1 1 auto !important;
+    overflow-y: auto !important;
+}
+
+.ui-dialog .ui-dialog-buttonpane {
+    flex-shrink: 0;
 }

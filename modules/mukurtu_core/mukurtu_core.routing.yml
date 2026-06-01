@@ -76,6 +76,7 @@ mukurtu_core.media_found_in:
     _title: 'Found In'
     _controller: '\Drupal\mukurtu_core\Controller\MediaFoundInController::content'
   options:
+    _admin_route: TRUE
     parameters:
       media:
         type: entity:media
