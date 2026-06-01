@@ -32,7 +32,7 @@ class ExportSettingsForm extends ExportBaseForm {
     $ids = $query->condition($or)->sort('label')->execute();
     $lists = $storage->loadMultiple($ids);
 
-    $options = ['' => $this->t('- Current flag queue -')];
+    $options = [];
     foreach ($lists as $list) {
       $options[$list->id()] = $list->label();
     }
@@ -41,8 +41,10 @@ class ExportSettingsForm extends ExportBaseForm {
       '#type' => 'select',
       '#title' => $this->t('Export list'),
       '#options' => $options,
+      '#empty_option' => $this->t('- Select export list -'),
+      '#empty_value' => '',
       '#default_value' => $this->getActiveExportListId() ?? '',
-      '#description' => $this->t('Choose a saved export list, or use the current flag queue.'),
+      '#description' => $this->t('Choose a saved export list.'),
       '#weight' => -10,
     ];
 
