@@ -32,6 +32,18 @@ mukurtu_export.content_selected_for_export:
   requirements:
     _permission: 'access mukurtu export'
 
+mukurtu_export.start_list_export:
+  path: '/admin/export/start/{export_list}'
+  defaults:
+    _controller: 'Drupal\mukurtu_export\Controller\ExportListStartController::start'
+    _title: 'Start Export'
+  requirements:
+    _permission: 'access mukurtu export'
+  options:
+    parameters:
+      export_list:
+        type: entity:export_list
+
 mukurtu_export.add_item_to_list:
   path: '/admin/export/add-item/{entity_type}/{entity_id}'
   defaults:

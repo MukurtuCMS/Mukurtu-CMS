@@ -14,18 +14,20 @@ class ExportListEditForm extends ExportListFormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $form = parent::buildForm($form, $form_state);
-    $form['actions']['submit']['#value'] = $this->t('Save');
-
-    $form['actions']['export'] = [
-      '#type' => 'submit',
-      '#value' => $this->t('Export'),
-      '#submit' => ['::submitExport'],
-      '#limit_validation_errors' => [],
-      '#weight' => 5,
-    ];
 
     /** @var \Drupal\mukurtu_export\Entity\ExportList $entity */
     $entity = $this->entity;
+
+    $form['actions']['submit']['#value'] = $this->t('Save');
+
+    $form['actions']['export'] = [
+      '#type' => 'link',
+      '#title' => $this->t('Export'),
+      '#url' => \Drupal\Core\Url::fromRoute('mukurtu_export.start_list_export', ['export_list' => $entity->id()]),
+      '#attributes' => ['class' => ['button']],
+      '#gin_action_item' => TRUE,
+      '#weight' => 5,
+    ];
     $items = $entity->getItems();
 
     $options = [];
@@ -74,15 +76,6 @@ class ExportListEditForm extends ExportListFormBase {
     }
 
     return $form;
-  }
-
-  /**
-   * Submit handler: set this list as the active export source and start export.
-   */
-  public function submitExport(array &$form, FormStateInterface $form_state) {
-    $store = \Drupal::service('tempstore.private')->get('mukurtu_import');
-    $store->set('export_list_id', (int) $this->entity->id());
-    $form_state->setRedirect('mukurtu_export.export_item_and_format_selection');
   }
 
   /**
