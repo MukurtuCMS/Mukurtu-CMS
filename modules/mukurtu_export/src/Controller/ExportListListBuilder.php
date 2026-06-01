@@ -21,8 +21,9 @@ class ExportListListBuilder extends EntityListBuilder {
    */
   public function buildHeader() {
     $header['label'] = $this->t('Name');
-    $header['scope'] = $this->t('Visibility');
     $header['description'] = $this->t('Description');
+    $header['item_count'] = $this->t('Items');
+    $header['scope'] = $this->t('Visibility');
     return $header + parent::buildHeader();
   }
 
@@ -34,9 +35,12 @@ class ExportListListBuilder extends EntityListBuilder {
     if (!$entity->access('view')) {
       return [];
     }
+    $items = $entity->getItems();
+    $count = array_sum(array_map('count', $items));
     $row['label'] = $entity->label();
-    $row['scope'] = $entity->isSiteWide() ? $this->t('All Export Users') : $this->t('Only You');
     $row['description'] = $entity->getDescription();
+    $row['item_count'] = $count;
+    $row['scope'] = $entity->isSiteWide() ? $this->t('All Export Users') : $this->t('Only You');
     return $row + parent::buildRow($entity);
   }
 
