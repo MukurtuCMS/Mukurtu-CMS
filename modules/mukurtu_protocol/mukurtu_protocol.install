@@ -586,20 +586,37 @@ function mukurtu_protocol_update_40031(): void {
 }
 
 /**
- * Switch field_featured_content on protocol and community to rendered_entity (form_selection).
+ * Reimport community select view with mukurtu_community_manager_select query tag.
  */
 function mukurtu_protocol_update_40032(): void {
-  $factory = \Drupal::configFactory();
-  foreach ([
-    'core.entity_form_display.protocol.protocol.default' => 'field_featured_content',
-    'core.entity_form_display.community.community.default' => 'field_featured_content',
-  ] as $config_name => $field_name) {
-    $config = $factory->getEditable($config_name);
-    if ($config->isNew()) {
-      continue;
-    }
-    $config->set("content.$field_name.settings.field_widget_display", 'rendered_entity');
-    $config->set("content.$field_name.settings.field_widget_display_settings", ['view_mode' => 'form_selection']);
-    $config->save();
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
+  $view_file = $module_path . '/config/install/views.view.mukurtu_community_select.yml';
+  $view_data = \Symfony\Component\Yaml\Yaml::parseFile($view_file);
+  \Drupal::configFactory()->getEditable('views.view.mukurtu_community_select')->setData($view_data)->save(TRUE);
+}
+
+/**
+ * Switch field_featured_content on Community to rendered_entity (form_selection view mode).
+ */
+function mukurtu_protocol_update_40033(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.community.community.default');
+  if ($config->isNew()) {
+    return;
   }
+  $config->set('content.field_featured_content.settings.field_widget_display', 'rendered_entity');
+  $config->set('content.field_featured_content.settings.field_widget_display_settings', ['view_mode' => 'form_selection']);
+  $config->save();
+}
+
+/**
+ * Switch field_featured_content on Protocol to rendered_entity (form_selection view mode).
+ */
+function mukurtu_protocol_update_40034(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.protocol.protocol.default');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_featured_content.settings.field_widget_display', 'rendered_entity');
+  $config->set('content.field_featured_content.settings.field_widget_display_settings', ['view_mode' => 'form_selection']);
+  $config->save();
 }

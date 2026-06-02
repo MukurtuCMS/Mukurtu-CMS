@@ -53,3 +53,16 @@ function mukurtu_person_update_40003(): void {
     $config->save();
   }
 }
+
+/**
+ * Switch field_related_person on Related Person paragraph to rendered_entity (form_selection view mode).
+ */
+function mukurtu_person_update_40004(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.paragraph.related_person.default');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_related_person.settings.field_widget_display', 'rendered_entity');
+  $config->set('content.field_related_person.settings.field_widget_display_settings', ['view_mode' => 'form_selection']);
+  $config->save();
+}

@@ -16,3 +16,9 @@ mukurtu_media.manage_media_tags_dashboard:
   parent: mukurtu_dashboard
   menu_name: dashboard-media
   url: 'internal:/admin/structure/taxonomy/manage/media_tag/overview'
+mukurtu_media.download_settings_dashboard:
+  title: 'Media download settings'
+  description: 'Configure the media download button.'
+  parent: mukurtu_dashboard
+  menu_name: dashboard-media
+  route_name: mukurtu_media.download_settings_form
