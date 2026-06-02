@@ -1,0 +1,20 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_coverage
+    - node.type.word_list
+  module:
+    - geofield
+id: node.word_list.field_coverage
+field_name: field_coverage
+entity_type: node
+bundle: word_list
+label: 'Map Points'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: geofield

@@ -16,6 +16,7 @@ use Drupal\layout_builder\SectionComponent;
 use Drupal\Component\Uuid\Php;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\field\Entity\FieldConfig;
+use Drupal\shortcut\Entity\Shortcut;
 
 /**
  * Implements hook_install().
@@ -25,9 +26,20 @@ use Drupal\field\Entity\FieldConfig;
  * @see system_install()
  */
 function mukurtu_install() {
-  // First, do everything in standard profile.
-  include_once DRUPAL_ROOT . '/core/profiles/standard/standard.install';
-  standard_install();
+  // Populate the default shortcut set (inlined from standard_install(), which
+  // is absent in some Drupal 11.3.x environments).
+  Shortcut::create([
+    'shortcut_set' => 'default',
+    'title' => t('Add content'),
+    'weight' => -20,
+    'link' => ['uri' => 'internal:/node/add'],
+  ])->save();
+  Shortcut::create([
+    'shortcut_set' => 'default',
+    'title' => t('All content'),
+    'weight' => -19,
+    'link' => ['uri' => 'internal:/admin/content'],
+  ])->save();
 
   // Uninstall search.
   \Drupal::service('module_installer')->uninstall(['search']);
@@ -269,6 +281,8 @@ function mukurtu_install() {
     'access mukurtu_taxonomy_record_term_browser entity browser pages',
     'access mukurtu_taxonomy_record_place_term_browser entity browser pages',
     'access multipage_item_entity_browser entity browser pages',
+    'access mukurtu_dictionary_word_browser entity browser pages',
+    'access mukurtu_person_browser entity browser pages',
     'add personal collection entities',
     'add protocol control entities',
     'delete personal collection entities',
@@ -346,9 +360,6 @@ function mukurtu_install() {
     'administer flaggings',
     'administer flags',
     'administer image styles',
-    'administer language_community display',
-    'administer language_community fields',
-    'administer language_community form display',
     'administer media display',
     'administer media fields',
     'administer media form display',
@@ -411,6 +422,7 @@ function mukurtu_install() {
     'create mukurtu_single_node_delete message',
     'create mukurtu_single_node_insert message',
     'create mukurtu_single_node_update message',
+    'create article content',
     'create page content',
     'create terms in category',
     'create terms in community_type',
@@ -442,6 +454,8 @@ function mukurtu_install() {
     'delete multiple messages',
     'delete orphan revisions',
     'delete own landing_page content',
+    'delete any article content',
+    'delete own article content',
     'delete own page content',
     'delete terms in category',
     'delete terms in community_type',
@@ -463,6 +477,8 @@ function mukurtu_install() {
     'edit design_settings config page entity',
     'edit own comments',
     'edit own landing_page content',
+    'edit any article content',
+    'edit own article content',
     'edit own page content',
     'edit terms in category',
     'edit terms in community_type',
@@ -561,9 +577,6 @@ function mukurtu_install() {
     'administer flaggings',
     'administer flags',
     'administer image styles',
-    'administer language_community display',
-    'administer language_community fields',
-    'administer language_community form display',
     'administer media display',
     'administer media fields',
     'administer media form display',
@@ -733,6 +746,60 @@ function mukurtu_install() {
       $role->grantPermission($permission);
     }
     $role->save();
+  }
+
+  // Add community record and multipage item fields to the default content
+  // index. These cannot be declared in mukurtu_browse's index YAML because
+  // they depend on modules that install after browse, and their hook_install
+  // implementations fire before the index is created (the index has its own
+  // cross-module config dependencies). By this point all modules are installed
+  // and the index exists.
+  $index = \Drupal\search_api\Entity\Index::load('mukurtu_default_content_index');
+  if ($index) {
+    $index_changed = FALSE;
+    $processors = $index->getProcessors();
+
+    if (!isset($processors['mukurtu_community_record_flag'])) {
+      $processor = \Drupal::service('plugin.manager.search_api.processor')
+        ->createInstance('mukurtu_community_record_flag', ['#index' => $index]);
+      $processors['mukurtu_community_record_flag'] = $processor;
+      $index->setProcessors($processors);
+      $index_changed = TRUE;
+    }
+
+    if (!$index->getField('is_community_record')) {
+      $field = new \Drupal\search_api\Item\Field($index, 'is_community_record');
+      $field->setType('boolean');
+      $field->setPropertyPath('is_community_record');
+      $field->setDatasourceId('entity:node');
+      $field->setLabel('Is community record');
+      $index->addField($field);
+      $index_changed = TRUE;
+    }
+
+    $processors = $index->getProcessors();
+    if (!isset($processors['mukurtu_multipage_page_index'])) {
+      $processor = \Drupal::service('plugin.manager.search_api.processor')
+        ->createInstance('mukurtu_multipage_page_index', ['#index' => $index]);
+      $processors['mukurtu_multipage_page_index'] = $processor;
+      $index->setProcessors($processors);
+      $index_changed = TRUE;
+    }
+
+    if (!$index->getField('is_additional_mpi_page')) {
+      $field = new \Drupal\search_api\Item\Field($index, 'is_additional_mpi_page');
+      $field->setType('boolean');
+      $field->setPropertyPath('is_additional_mpi_page');
+      $field->setDatasourceId('entity:node');
+      $field->setLabel('Is additional multipage item page');
+      $index->addField($field);
+      $index_changed = TRUE;
+    }
+
+    if ($index_changed) {
+      $index->save();
+      $index->reindex();
+    }
   }
 
   // function mukurtu_create_default_blocks() {

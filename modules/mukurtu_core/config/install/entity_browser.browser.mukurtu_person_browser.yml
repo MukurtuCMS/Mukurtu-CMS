@@ -1,0 +1,30 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - views.view.mukurtu_content_browser
+  module:
+    - views
+name: mukurtu_person_browser
+label: 'Select Person'
+display: modal
+display_configuration:
+  width: '1200'
+  height: '800'
+  link_text: 'Select Person'
+  auto_open: false
+selection_display: no_display
+selection_display_configuration: {  }
+widget_selector: single
+widget_selector_configuration: {  }
+widgets:
+  6b3c4d5e-2f3a-4b5c-6d7e-8f9a0b1c2d3e:
+    settings:
+      submit_text: 'Add Content'
+      auto_select: false
+      view: mukurtu_content_browser
+      view_display: entity_browser_person
+    uuid: 6b3c4d5e-2f3a-4b5c-6d7e-8f9a0b1c2d3e
+    weight: 1
+    label: 'Select Person'
+    id: view

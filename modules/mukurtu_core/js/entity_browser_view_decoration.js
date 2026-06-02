@@ -13,6 +13,53 @@
   "use strict";
 
   /**
+   * Returns entity IDs already selected in the field widget on the parent form.
+   *
+   * The widget renders each selected entity with a data-entity-id="node:NNN"
+   * attribute. Values are returned in the same "entity_type:id" format used by
+   * entity_browser_select checkboxes so indexOf() comparisons match directly.
+   */
+  function getAlreadySelectedIds() {
+    var ids = [];
+    // The entity browser runs in an iframe; selected items are rendered on the
+    // parent page. Access window.parent.document (same-origin) to find them.
+    var searchDoc = document;
+    try {
+      if (window.parent !== window) {
+        searchDoc = window.parent.document;
+      }
+    }
+    catch (e) {
+      // Cross-origin frame — fall back to the current document.
+    }
+    $(searchDoc).find('[data-entity-id]').each(function () {
+      ids.push($(this).attr('data-entity-id'));
+    });
+    return ids;
+  }
+
+  /**
+   * Disables rows whose entity is already present in the field widget.
+   *
+   * @param {object} context
+   * @param {Array} alreadySelected - Numeric entity ID strings.
+   */
+  function disableAlreadySelected(context, alreadySelected) {
+    if (!alreadySelected.length) {
+      return;
+    }
+    $('.view .views-table tr', context).each(function () {
+      var $row = $(this);
+      var $input = $row.find('.views-field-entity-browser-select input');
+      if ($input.length && alreadySelected.indexOf($input.val()) !== -1) {
+        $input.prop('disabled', true);
+        $row.addClass('eb-already-selected').attr({'aria-disabled': 'true'}).removeAttr('tabindex');
+        $row.find('td:first').append('<span class="visually-hidden"> (already added)</span>');
+      }
+    });
+  }
+
+  /**
    * Update the class of a col based on the status of a checkbox.
    *
    * @param {object} $col
@@ -49,21 +96,46 @@
         updateClasses($col, $input);
       });
 
-      // Add a checked class when clicked.
-      $(once('viewsCol', '.views-col', context)).click(function () {
+      // Disable rows for items already present in the field widget.
+      disableAlreadySelected(context, getAlreadySelectedIds());
+
+      // Add a checked class when clicked or activated by keyboard.
+      var $cols = $(once('viewsCol', '.views-col', context));
+      $cols.not('.eb-already-selected').attr('tabindex', '0');
+      $cols.on('click keydown', function (e) {
+        if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') {
+          return;
+        }
+        if (e.type === 'keydown') {
+          e.preventDefault();
+        }
         var $col = $(this);
         var $input = $col.find('.views-field-entity-browser-select input');
+        if ($input.prop('disabled')) {
+          return;
+        }
         $input.prop('checked', !$input.prop('checked'));
         updateClasses($col, $input);
       });
 
-      // Select/unselect the row with a click anywhere inside the row.
-      $(once('viewsTable', '.view .views-table tr', context)).click(function (e) {
+      // Select/unselect the row with a click or keyboard activation anywhere inside the row.
+      var $rows = $(once('viewsTable', '.view .views-table tr', context));
+      $rows.not('.eb-already-selected').attr('tabindex', '0');
+      $rows.on('click keydown', function (e) {
+        if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') {
+          return;
+        }
+        if (e.type === 'keydown') {
+          e.preventDefault();
+        }
         var $row = $(this);
         var $input = $row.find('.views-field-entity-browser-select input');
-        // But only if the click wasn't right on the input, in which case our
-        // code would make it unselected (after the browser selected it).
-        if (e.target.tagName !== 'INPUT') {
+        if ($input.prop('disabled')) {
+          return;
+        }
+        // For clicks, skip if the click was directly on the input to avoid
+        // double-toggling (browser already handled it).
+        if (e.type === 'keydown' || e.target.tagName !== 'INPUT') {
           if (!$input.is(':radio') || $input.is(':radio') && !$input.prop('checked')) {
             $input.prop('checked', !$input.prop('checked'));
           }

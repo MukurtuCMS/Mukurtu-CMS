@@ -171,16 +171,6 @@ class Place extends Node implements PlaceInterface, CulturalProtocolControlledIn
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
-    $definitions['field_coverage'] = BaseFieldDefinition::create('geofield')
-      ->setLabel(t('Map Points'))
-      ->setDescription(t('A detailed, interactive mapping tool that allows placing and drawing multiple locations related to a place record. Locations can be single points, paths, rectangles, or free-form polygons. Each location can be given a basic label. This field is also used for the browse by map tools. Note that this mapping data will be shared with the same users or visitors as the rest of the place record. If the location is sensitive, carefully consider using this field."	</br>Use the tools shown on the map to place, draw, edit, and delete points and shapes. Once a point or shape has been placed, select it to add a description if needed.'))
-      ->setCardinality(1)
-      ->setRequired(FALSE)
-      ->setRevisionable(TRUE)
-      ->setTranslatable(FALSE)
-      ->setDisplayConfigurable('view', TRUE)
-      ->setDisplayConfigurable('form', TRUE);
-
     $definitions['field_coverage_description'] = BaseFieldDefinition::create('text_long')
       ->setLabel('Location Description')
       ->setDescription(t('A descriptive field to provide additional context and depth to the location(s) connected to the place record.	</br>This HTML field can support rich text and embedded media assets using the editing toolbar.'))

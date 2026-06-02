@@ -14,3 +14,26 @@ function mukurtu_place_update_40001() {
   $config->save();
   return t('Updated the weight of field_coverage in place record form display.');
 }
+
+/**
+ * Set field_media_assets to use the media_assets view mode on place records.
+ */
+function mukurtu_place_update_40002() {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.place.full');
+  $config->set('content.field_media_assets.settings.view_mode', 'media_assets');
+  $config->save();
+  return t('Updated field_media_assets view mode to media_assets on place full display.');
+}
+
+/**
+ * Switch field_related_content widget to rendered_entity (form_selection view mode).
+ */
+function mukurtu_place_update_40003(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.place.default');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_related_content.settings.field_widget_display', 'rendered_entity');
+  $config->set('content.field_related_content.settings.field_widget_display_settings', ['view_mode' => 'form_selection']);
+  $config->save();
+}
