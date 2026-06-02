@@ -897,18 +897,25 @@ function mukurtu_core_update_40027(): void {
  */
 function mukurtu_core_update_40028(): void {
   $config_storage = \Drupal::service('config.storage');
-  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core');
-  $module_source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
 
+  $core_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core');
+  $core_source = new \Drupal\Core\Config\FileStorage($core_path . '/config/install');
   foreach ([
     'views.view.mukurtu_content_browser',
-    'entity_browser.browser.mukurtu_dictionary_word_browser',
     'entity_browser.browser.mukurtu_person_browser',
   ] as $name) {
-    $data = $module_source->read($name);
+    $data = $core_source->read($name);
     if ($data !== FALSE) {
       $config_storage->write($name, $data);
     }
+  }
+
+  // The dictionary word browser is owned by mukurtu_dictionary.
+  $dict_path = \Drupal::service('extension.list.module')->getPath('mukurtu_dictionary');
+  $dict_source = new \Drupal\Core\Config\FileStorage($dict_path . '/config/install');
+  $data = $dict_source->read('entity_browser.browser.mukurtu_dictionary_word_browser');
+  if ($data !== FALSE) {
+    $config_storage->write('entity_browser.browser.mukurtu_dictionary_word_browser', $data);
   }
 
   $authenticated = \Drupal\user\Entity\Role::load('authenticated');
