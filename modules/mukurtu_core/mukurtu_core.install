@@ -855,7 +855,7 @@ function mukurtu_core_update_40026(): void {
     return;
   }
   $contents = str_replace(
-    "  \$vocabulary = Vocabulary::load(\$term->bundle());\n  if (\n",
+    "  \$vocabulary = Vocabulary::load(\$term->bundle());\n\n  if (\n",
     "  \$vocabulary = Vocabulary::load(\$term->bundle());\n  if (!\$vocabulary) {\n    return;\n  }\n\n  if (\n",
     $contents
   );
