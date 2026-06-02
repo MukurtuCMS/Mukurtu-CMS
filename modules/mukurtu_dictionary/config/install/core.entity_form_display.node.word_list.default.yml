@@ -3,6 +3,7 @@ status: true
 dependencies:
   config:
     - entity_browser.browser.mukurtu_content_browser
+    - entity_browser.browser.mukurtu_dictionary_word_browser
     - field.field.node.word_list.comment
     - node.type.word_list
   module:
@@ -311,12 +312,13 @@ content:
     region: content
     settings:
       entity_browser: mukurtu_content_browser
-      field_widget_display: label
+      field_widget_display: rendered_entity
+      field_widget_display_settings:
+        view_mode: form_selection
       field_widget_edit: false
       field_widget_remove: true
       field_widget_replace: false
       open: true
-      field_widget_display_settings: {  }
       selection_mode: selection_append
     third_party_settings: {  }
   field_source:
@@ -348,13 +350,14 @@ content:
     weight: 4
     region: content
     settings:
-      entity_browser: mukurtu_content_browser
-      field_widget_display: label
+      entity_browser: mukurtu_dictionary_word_browser
+      field_widget_display: rendered_entity
+      field_widget_display_settings:
+        view_mode: form_selection
       field_widget_edit: false
       field_widget_remove: true
       field_widget_replace: false
       open: true
-      field_widget_display_settings: {  }
       selection_mode: selection_append
     third_party_settings: {  }
   langcode:
