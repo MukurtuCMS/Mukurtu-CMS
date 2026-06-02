@@ -141,7 +141,7 @@ function mukurtu_core_update_40003(): void {
 function mukurtu_core_update_40004(): void {
   \Drupal::service('module_installer')->install(['flat_taxonomy']);
  }
- 
+
 /**
  * Set tagify default widget setting.
  */
@@ -742,6 +742,19 @@ function mukurtu_core_update_40021(): void {
 }
 
 /**
+ * Switch featured_content entity browser to rendered_entity display.
+ */
+function mukurtu_core_update_40022(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.block_content.featured_content.default');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_featured_content.settings.field_widget_display', 'rendered_entity');
+  $config->set('content.field_featured_content.settings.field_widget_display_settings', ['view_mode' => 'content_browser']);
+  $config->save();
+}
+
+/**
  * Create FieldConfig entities for field_coverage on all content type bundles.
  *
  * field_coverage was previously defined as a bundle-level BaseFieldDefinition
@@ -807,15 +820,103 @@ function mukurtu_core_update_40024(): void {
 }
 
 /**
- * Switch featured_content entity browser to rendered_entity display.
+ * Install form_selection view display configs for each node bundle.
  */
-function mukurtu_core_update_40022(): void {
-  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.block_content.featured_content.default');
-  if ($config->isNew()) {
-    return;
+function mukurtu_core_update_40025(): void {
+  $configs = [
+    ['mukurtu_digital_heritage', 'node.digital_heritage.form_selection'],
+    ['mukurtu_collection', 'node.collection.form_selection'],
+    ['mukurtu_person', 'node.person.form_selection'],
+    ['mukurtu_place', 'node.place.form_selection'],
+    ['mukurtu_dictionary', 'node.dictionary_word.form_selection'],
+    ['mukurtu_dictionary', 'node.word_list.form_selection'],
+  ];
+  $module_handler = \Drupal::moduleHandler();
+  $config_factory = \Drupal::configFactory();
+  foreach ($configs as [$module, $config_name]) {
+    if (!$module_handler->moduleExists($module)) {
+      continue;
+    }
+    $existing = $config_factory->get("core.entity_view_display.$config_name");
+    if (!$existing->isNew()) {
+      continue;
+    }
+    $module_path = \Drupal::service('extension.list.module')->getPath($module);
+    $source = new \Drupal\Core\Config\FileStorage("$module_path/config/install");
+    $data = $source->read("core.entity_view_display.$config_name");
+    if ($data) {
+      $config_factory->getEditable("core.entity_view_display.$config_name")
+        ->setData($data)
+        ->save(TRUE);
+    }
   }
-  $config->set('content.field_featured_content.settings.field_widget_display', 'rendered_entity');
-  $config->set('content.field_featured_content.settings.field_widget_display_settings', ['view_mode' => 'content_browser']);
-  $config->save();
 }
 
+/**
+ * Add collection-specific entity browser (no type filter) and view display.
+ */
+function mukurtu_core_update_40026(): void {
+  // Add the entity_browser_collection display to the content browser view.
+  $view = \Drupal::configFactory()->getEditable('views.view.mukurtu_content_browser');
+  if (!$view->isNew()) {
+    $displays = $view->get('display');
+    if (!isset($displays['entity_browser_collection'])) {
+      $displays['entity_browser_collection'] = [
+        'id' => 'entity_browser_collection',
+        'display_title' => 'Entity browser (Collection)',
+        'display_plugin' => 'entity_browser',
+        'position' => 2,
+        'display_options' => [
+          'filters' => [
+            'type' => [
+              'exposed' => FALSE,
+              'value' => ['collection' => 'collection'],
+            ],
+          ],
+          'display_extenders' => [],
+        ],
+        'cache_metadata' => [
+          'max-age' => -1,
+          'contexts' => [
+            'languages:language_content',
+            'languages:language_interface',
+            'url',
+            'url.query_args',
+            'user.node_grants:view',
+            'user.permissions',
+          ],
+          'tags' => [],
+        ],
+      ];
+      $view->set('display', $displays);
+      $view->save(TRUE);
+    }
+  }
+
+  // Install the new mukurtu_collection_browser entity browser config.
+  $config_storage = \Drupal::service('config.storage');
+  $name = 'entity_browser.browser.mukurtu_collection_browser';
+  if (!$config_storage->exists($name)) {
+    $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core');
+    $source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+    $data = $source->read($name);
+    if ($data !== FALSE) {
+      $config_storage->write($name, $data);
+    }
+  }
+}
+
+/**
+ * Create the form_selection node view mode for entity browser selected-items display.
+ */
+function mukurtu_core_update_40027(): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('entity_view_mode');
+  if (!$storage->load('node.form_selection')) {
+    $storage->create([
+      'id' => 'node.form_selection',
+      'label' => 'Form Selection',
+      'targetEntityType' => 'node',
+      'cache' => TRUE,
+    ])->save();
+  }
+}

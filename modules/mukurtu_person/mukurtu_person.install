@@ -24,3 +24,16 @@ function mukurtu_person_update_40002() {
   $config->save();
   return t('Updated field_media_assets view mode to media_assets on person full display.');
 }
+
+/**
+ * Switch field_related_content widget to rendered_entity (form_selection view mode).
+ */
+function mukurtu_person_update_40003(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.person.default');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_related_content.settings.field_widget_display', 'rendered_entity');
+  $config->set('content.field_related_content.settings.field_widget_display_settings', ['view_mode' => 'form_selection']);
+  $config->save();
+}

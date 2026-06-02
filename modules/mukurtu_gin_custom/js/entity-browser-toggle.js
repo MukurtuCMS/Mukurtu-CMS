@@ -39,8 +39,8 @@
         var savedView = localStorage.getItem(storageKey) || 'list';
         applyView(savedView);
 
-        // 4.1.2 / 1.3.1: Wrap the two toggle buttons in a <fieldset> with a
-        // visually-hidden <legend> so screen readers announce the group purpose.
+        // 4.1.2 / 1.3.1: Wrap toggle buttons in a <fieldset> with a visually-hidden
+        // <legend> so screen readers announce the group purpose.
         // aria-pressed on each button communicates the current state (2.4.3).
         // The legend is hidden visually but remains in the accessibility tree.
         var $toggle = $(
