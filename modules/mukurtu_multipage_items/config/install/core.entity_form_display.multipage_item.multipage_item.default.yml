@@ -16,7 +16,7 @@ content:
     weight: 1
     region: content
     settings:
-      entity_browser: mukurtu_content_browser
+      entity_browser: multipage_item_entity_browser
       field_widget_display: rendered_entity
       field_widget_display_settings:
         view_mode: form_selection
