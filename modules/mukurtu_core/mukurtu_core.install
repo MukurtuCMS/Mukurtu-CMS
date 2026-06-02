@@ -819,3 +819,24 @@ function mukurtu_core_update_40022(): void {
   $config->save();
 }
 
+/**
+ * Remove conflicting PHP 8 MigrateSource attribute from pathauto's migration
+ * source plugin so Drupal reads source_module from the docblock annotation.
+ */
+function mukurtu_core_update_40025(): void {
+  $path = \Drupal::root() . '/modules/contrib/pathauto/src/Plugin/migrate/source/PathautoPattern.php';
+  if (!file_exists($path)) {
+    return;
+  }
+  $contents = file_get_contents($path);
+  // Only modify if the conflicting attribute is present.
+  if (strpos($contents, '#[MigrateSource') === FALSE) {
+    return;
+  }
+  $contents = str_replace("use Drupal\\migrate\\Attribute\\MigrateSource;\n", '', $contents);
+  $contents = preg_replace('/#\[MigrateSource\(\s*id:\s*\'pathauto_pattern\'\s*\)\]\n/', '', $contents);
+  file_put_contents($path, $contents);
+  // Flush plugin cache so the corrected definition is picked up.
+  \Drupal::service('plugin.cache_clearer')->clearCachedDefinitions();
+}
+
