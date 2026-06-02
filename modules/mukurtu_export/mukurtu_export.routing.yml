@@ -29,6 +29,14 @@ mukurtu_export.start_list_export:
       export_list:
         type: entity:export_list
 
+mukurtu_export.add_items_to_list:
+  path: '/admin/export/add-items'
+  defaults:
+    _title: 'Add to Export List'
+    _form: 'Drupal\mukurtu_export\Form\ExportListAddItemsForm'
+  requirements:
+    _permission: 'access mukurtu export'
+
 mukurtu_export.add_item_to_list:
   path: '/admin/export/add-item/{entity_type}/{entity_id}'
   defaults:

@@ -1,5 +1,6 @@
 <?php
 
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 
 /**
@@ -72,6 +73,32 @@ function mukurtu_export_entity_operation(\Drupal\Core\Entity\EntityInterface $en
       'weight' => 50,
     ],
   ];
+}
+
+/**
+ * Implements hook_form_alter().
+ *
+ * Intercepts Views bulk-form submissions for the export flag actions so that
+ * instead of returning to the view, users land on the export list picker.
+ */
+function mukurtu_export_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  if (str_starts_with($form_id, 'views_form_')) {
+    $form['#submit'][] = 'mukurtu_export_bulk_form_submit';
+  }
+}
+
+/**
+ * Form submit handler added by mukurtu_export_form_alter().
+ */
+function mukurtu_export_bulk_form_submit(&$form, FormStateInterface $form_state) {
+  $export_flag_actions = [
+    'flag_action.export_content_flag',
+    'flag_action.export_media_flag',
+  ];
+  if (!in_array($form_state->getValue('action'), $export_flag_actions, TRUE)) {
+    return;
+  }
+  $form_state->setRedirect('mukurtu_export.add_items_to_list');
 }
 
 function mukurtu_export_views_data() {
