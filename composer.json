@@ -150,6 +150,9 @@
             },
             "drupal/pathauto": {
                 "Fix missing source_module on PHP 8 MigrateSource attribute": "web/profiles/mukurtu/patches/pathauto-source-module-missing-php8-attribute.patch"
+            },
+            "drupal/flat_taxonomy": {
+                "Fix null vocabulary crash in presave hook during migration": "web/profiles/mukurtu/patches/flat-taxonomy-null-vocabulary-presave.patch"
             }
         }
     }
