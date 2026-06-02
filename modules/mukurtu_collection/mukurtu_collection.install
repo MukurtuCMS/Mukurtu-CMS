@@ -85,3 +85,56 @@ function mukurtu_collection_update_40002(): void {
   $index->save();
   $index->reindex();
 }
+
+/**
+ * Switch field_child_collections and field_related_content on collection to rendered_entity.
+ */
+function mukurtu_collection_update_40004(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.collection.default');
+  if ($config->isNew()) {
+    return;
+  }
+  foreach (['field_child_collections', 'field_related_content'] as $field) {
+    $config->set("content.$field.settings.field_widget_display", 'rendered_entity');
+    $config->set("content.$field.settings.field_widget_display_settings", ['view_mode' => 'form_selection']);
+  }
+  $config->save();
+}
+
+/**
+ * Switch field_items_in_collection widget to rendered_entity (form_selection view mode).
+ */
+function mukurtu_collection_update_40003(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.collection.default');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_items_in_collection.settings.field_widget_display', 'rendered_entity');
+  $config->set('content.field_items_in_collection.settings.field_widget_display_settings', ['view_mode' => 'form_selection']);
+  $config->save();
+}
+
+/**
+ * Switch personal_collection field_items_in_collection widget to rendered_entity.
+ */
+function mukurtu_collection_update_40005(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.personal_collection.personal_collection.default');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_items_in_collection.settings.field_widget_display', 'rendered_entity');
+  $config->set('content.field_items_in_collection.settings.field_widget_display_settings', ['view_mode' => 'form_selection']);
+  $config->save();
+}
+
+/**
+ * Switch field_child_collections to the collection-specific entity browser.
+ */
+function mukurtu_collection_update_40006(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.collection.default');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_child_collections.settings.entity_browser', 'mukurtu_collection_browser');
+  $config->save();
+}

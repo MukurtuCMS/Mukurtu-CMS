@@ -584,3 +584,22 @@ function mukurtu_protocol_update_40031(): void {
     $config->set('display.default.display_options.query.options.query_tags', $tags)->save(TRUE);
   }
 }
+
+/**
+ * Switch field_featured_content on protocol and community to rendered_entity (form_selection).
+ */
+function mukurtu_protocol_update_40032(): void {
+  $factory = \Drupal::configFactory();
+  foreach ([
+    'core.entity_form_display.protocol.protocol.default' => 'field_featured_content',
+    'core.entity_form_display.community.community.default' => 'field_featured_content',
+  ] as $config_name => $field_name) {
+    $config = $factory->getEditable($config_name);
+    if ($config->isNew()) {
+      continue;
+    }
+    $config->set("content.$field_name.settings.field_widget_display", 'rendered_entity');
+    $config->set("content.$field_name.settings.field_widget_display_settings", ['view_mode' => 'form_selection']);
+    $config->save();
+  }
+}
