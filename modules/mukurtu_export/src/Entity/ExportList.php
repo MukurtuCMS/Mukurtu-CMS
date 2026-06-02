@@ -35,7 +35,7 @@ use Drupal\user\UserInterface;
  *       "html" = "Drupal\Core\Entity\Routing\AdminHtmlRouteProvider",
  *     },
  *   },
- *   admin_permission = "administer site configuration",
+ *   admin_permission = "access mukurtu export",
  *   links = {
  *     "add-form" = "/admin/export/lists/add",
  *     "edit-form" = "/admin/export/lists/manage/{export_list}",
