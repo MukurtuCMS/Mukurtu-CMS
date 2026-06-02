@@ -1,0 +1,10 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+id: node.form_selection
+label: 'Form Selection'
+description: 'Used to display nodes as selected items in entity browser form widgets.'
+targetEntityType: node
+cache: true
