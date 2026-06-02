@@ -1,0 +1,14 @@
+<article{{ attributes.addClass('eb-form-selection-card') }} aria-labelledby="{{ 'eb-card-title-' ~ node.id() }}">
+  {% if content.field_representative_media %}
+    <div class="eb-form-selection-card__media">
+      {{ content.field_representative_media }}
+    </div>
+  {% endif %}
+  <div class="eb-form-selection-card__body">
+    {# 1.3.1: heading element lets screen readers distinguish cards; aria-labelledby on the article uses this id. #}
+    <h3 id="eb-card-title-{{ node.id() }}" class="eb-form-selection-card__title">{{ label }}</h3>
+    {% if content_type_label %}
+      <div class="eb-form-selection-card__type">{{ content_type_label }}</div>
+    {% endif %}
+  </div>
+</article>
