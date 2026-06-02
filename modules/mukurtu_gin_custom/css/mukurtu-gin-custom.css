@@ -69,6 +69,7 @@ counterpart, if one exists. */
   display: block;
 }
 
+
 /* === Entity Browser Form Selection Widget === */
 
 .eb-view-toggle {
@@ -98,14 +99,14 @@ counterpart, if one exists. */
 
 /* 2.4.7: explicit focus indicator that survives Gin's focus reset. */
 .eb-view-toggle__btn:focus-visible {
-  outline: 3px solid var(--color-gin-primary, #2e7d32);
+  outline: 3px solid var(--gin-color-primary, #0036b1);
   outline-offset: 2px;
 }
 
 .eb-view-toggle__btn[aria-pressed="true"] {
-  background: var(--color-gin-primary, #2e7d32);
+  background: var(--gin-color-primary, #0036b1);
   color: #fff;
-  border-color: var(--color-gin-primary, #2e7d32);
+  border-color: var(--gin-color-primary, #0036b1);
   /* 1.4.1: non-color pressed indicator. */
   font-weight: bold;
 }
@@ -153,6 +154,7 @@ counterpart, if one exists. */
   outline: 3px solid #0052cc;
   outline-offset: -3px;
 }
+
 
 /* Suppress Gin's entity_browser.css hover border on the media thumbnail — the
    .field__item div is not focusable so this is not a focus indicator. */
@@ -216,6 +218,29 @@ counterpart, if one exists. */
 .entities-list.eb-view-list .field-multiple-drag {
   cursor: grab;
 }
+
+/* Modal thumbnail column: hide card title/type — thumbnail only */
+.view-mukurtu-content-browser .views-field-rendered-entity .eb-form-selection-card__body {
+  display: none;
+}
+
+/* Audio cards: player spans the full card width instead of the 60px thumbnail slot. */
+.eb-form-selection-card:has(audio) {
+  flex-wrap: wrap;
+}
+
+.eb-form-selection-card:has(audio) .eb-form-selection-card__media {
+  flex: 1 1 100%;
+  width: 100%;
+  height: auto;
+}
+
+.eb-form-selection-card audio {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
 
 /* Canonical .ui-dialog positioning override (loaded on every page via
    hook_page_attachments, covering both front-end and Gin admin contexts).

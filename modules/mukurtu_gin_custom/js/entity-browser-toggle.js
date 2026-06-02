@@ -15,7 +15,15 @@
         var $fieldWrapper = $list.closest('[class*="field--name-"]');
         var fieldClass = $fieldWrapper.attr('class') || '';
         var nameMatch = fieldClass.match(/field--name-([\w-]+)/);
-        var storageKey = 'mukurtu_eb_view_' + (nameMatch ? nameMatch[1] : 'default');
+        var fieldName = nameMatch ? nameMatch[1] : '';
+
+        // Fields with non-standard structure: skip entirely (no view, no toggle).
+        var excluded = ['field-related-person'];
+        if (excluded.indexOf(fieldName) !== -1) {
+          return;
+        }
+
+        var storageKey = 'mukurtu_eb_view_' + (fieldName || 'default');
 
         // Fields that should always display as grid with no toggle.
         var alwaysGrid = $fieldWrapper.hasClass('field--name-field-communities');
