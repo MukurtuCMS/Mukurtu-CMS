@@ -211,21 +211,6 @@ class FormHooks
                 "Usernames must be unique. Several special characters are allowed, including space, period (.), hyphen (-), apostrophe ('), underscore (_), and the @ sign.",
             );
         }
-        if (isset($form["account"]["status"])) {
-            $form["account"]["status"]["#options"] = [
-                1 => t("Active"),
-                "pending" => t("Pending"),
-                0 => t("Blocked"),
-            ];
-            // EntityForm's submit button has its own #submit array
-            // (['::submitForm', '::save']), which Drupal uses exclusively —
-            // handlers on $form['#submit'] are ignored when the button has
-            // its own. Attach to the button so the pre-save handler runs
-            // before ::submitForm builds the entity, and the post-save
-            // handler runs after ::save writes it.
-            array_unshift($form["actions"]["submit"]["#submit"], [static::class, "userStatusPreSaveSubmit"]);
-            $form["actions"]["submit"]["#submit"][] = [static::class, "userStatusPostSaveSubmit"];
-        }
         if (isset($form["account"]["roles"]["#options"])) {
             $desiredOrder = [
                 "authenticated",
@@ -259,8 +244,37 @@ class FormHooks
             if (isset($form["account"]["field_display_name"])) {
                 unset($form["account"]["field_display_name"]);
             }
+            // Modules like notify_user_default set the notify checkbox default
+            // to TRUE. For anonymous self-registration that checkbox is
+            // inaccessible (#access=FALSE), but Drupal still uses its
+            // #default_value as the submitted value. Force it to FALSE so that
+            // RegisterForm::save() does not treat this as an admin-created
+            // notification and send the wrong email template.
+            if (isset($form["account"]["notify"])) {
+                $form["account"]["notify"]["#default_value"] = FALSE;
+            }
             $form["actions"]["submit"]["#submit"][] = [static::class, "visitorRegistrationPendingSubmit"];
             return;
+        }
+
+        // Status options and submit handlers are only needed for authenticated
+        // admin creation — not for anonymous visitor self-registration.
+        if (isset($form["account"]["status"])) {
+            $form["account"]["status"]["#options"] = [
+                1 => t("Active"),
+                "pending" => t("Pending"),
+                0 => t("Blocked"),
+            ];
+            // EntityForm's submit button has its own #submit array
+            // (['::submitForm', '::save']), which Drupal uses exclusively —
+            // handlers on $form['#submit'] are ignored when the button has
+            // its own. Attach to the button so the pre-save handler runs
+            // before ::submitForm builds the entity, and the post-save
+            // handler runs after ::save writes it.
+            array_unshift($form["actions"]["submit"]["#submit"], [static::class, "userEmailRoutingPreSaveSubmit"]);
+            array_unshift($form["actions"]["submit"]["#submit"], [static::class, "userStatusPreSaveSubmit"]);
+            $form["actions"]["submit"]["#submit"][] = [static::class, "userStatusPostSaveSubmit"];
+            $form["actions"]["submit"]["#submit"][] = [static::class, "userEmailRoutingPostSaveSubmit"];
         }
 
         $entityTypeManager = \Drupal::entityTypeManager();
@@ -756,13 +770,15 @@ class FormHooks
         array $form,
         FormStateInterface &$form_state,
     ): void {
-        $val = $form_state->getValue(["account", "status"]);
+        // The 'account' container has no #tree, so status is stored at the
+        // top level of form state (not nested under 'account').
+        $val = $form_state->getValue("status");
         $form_state->set("mukurtu_status_selection", $val);
         if ($val === "pending") {
             // Map the virtual "pending" option to the underlying blocked status
             // so the entity builder stores status=0. field_pending is set in
             // the post-save handler below.
-            $form_state->setValue(["account", "status"], 0);
+            $form_state->setValue("status", 0);
         }
     }
 
@@ -787,6 +803,58 @@ class FormHooks
                 $entity->save();
             }
         }
+    }
+
+    /**
+     * Captures the admin's "Notify user" intent before Drupal sends the email.
+     *
+     * Runs before ::submitForm/::save. When the admin selects Pending status,
+     * suppress the default notify flag so RegisterForm::save() does not send
+     * register_admin_created to a blocked account. The correct email is sent
+     * by userEmailRoutingPostSaveSubmit after the entity is saved.
+     */
+    public static function userEmailRoutingPreSaveSubmit(
+        array $form,
+        FormStateInterface &$form_state,
+    ): void {
+        $notify = (bool) $form_state->getValue("notify");
+        $form_state->set("mukurtu_admin_notify_user", $notify);
+        // userStatusPreSaveSubmit already ran and stored the original selection.
+        // Use that to detect "pending" or explicitly blocked, even though
+        // the status value in form state has been mapped to 0 by now.
+        $statusSelection = $form_state->get("mukurtu_status_selection");
+        // If the admin chose Pending or Blocked, suppress the default
+        // register_admin_created notification. A pending-approval email will
+        // be sent in the post-save handler once the entity is persisted.
+        if ($notify && ($statusSelection === "pending" || $statusSelection === 0)) {
+            $form_state->setValue("notify", 0);
+        }
+    }
+
+    /**
+     * Sends the correct registration email for admin-created pending accounts.
+     *
+     * Runs after ::save and userStatusPostSaveSubmit. When the admin chose
+     * Pending status and had the notify checkbox ticked, the pre-save handler
+     * suppressed the default register_admin_created email. This handler sends
+     * register_pending_approval instead, which matches what the user expects.
+     */
+    public static function userEmailRoutingPostSaveSubmit(
+        array $form,
+        FormStateInterface $form_state,
+    ): void {
+        if (!$form_state->get("mukurtu_admin_notify_user")) {
+            return;
+        }
+        $account = $form_state->getFormObject()->getEntity();
+        if (!$account || !$account->isBlocked()) {
+            return;
+        }
+        _user_mail_notify("register_pending_approval", $account);
+        \Drupal::messenger()->addStatus(t(
+            'A pending-approval welcome message has been emailed to the new user <a href=":url">%name</a>.',
+            [':url' => $account->toUrl()->toString(), '%name' => $account->getAccountName()],
+        ));
     }
 
     /**
@@ -1176,6 +1244,16 @@ class FormHooks
             $this->relabelCancelMethods($form["registration_cancellation"]);
         } else {
             $this->relabelCancelMethods($form);
+        }
+        // Update the email verification description to accurately reflect that
+        // a one-time login link is emailed (not a plain-text password). The
+        // core description says users are "assigned a system-generated
+        // password", which is misleading - the password is generated
+        // internally and never emailed; instead a secure login link is sent.
+        if (isset($form["registration_cancellation"]["user_email_verification"]["#description"])) {
+            $form["registration_cancellation"]["user_email_verification"][
+                "#description"
+            ] = t("New users will receive an email with a one-time login link to set their password before they can log in. With this setting disabled, users will be logged in immediately upon registering and may select their own passwords during registration.");
         }
     }
 
