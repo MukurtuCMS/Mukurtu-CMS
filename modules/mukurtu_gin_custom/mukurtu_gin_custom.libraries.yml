@@ -3,3 +3,21 @@ mukurtu-gin-custom:
   css:
     base:
       css/mukurtu-gin-custom.css: {}
+
+entity-browser-toggle:
+  version: 1.x
+  js:
+    js/entity-browser-toggle.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+    - core/jquery
+
+community-browser-select:
+  version: 1.x
+  js:
+    js/community-browser-select.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+    - core/jquery
