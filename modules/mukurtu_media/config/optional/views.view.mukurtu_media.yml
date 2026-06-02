@@ -3,7 +3,6 @@ status: true
 dependencies:
   config:
     - image.style.thumbnail
-    - user.role.mukurtu_roundtrip_manager
   module:
     - image
     - media
