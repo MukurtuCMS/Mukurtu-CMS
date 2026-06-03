@@ -808,3 +808,37 @@ function mukurtu_dictionary_update_40021(): void {
     $config->save();
   }
 }
+
+/**
+ * Switch entity browser fields to rendered_entity (form_selection view mode)
+ * and use the dedicated dictionary-word-only browser for field_words.
+ */
+function mukurtu_dictionary_update_40022(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.dictionary_word.default');
+  if (!$config->isNew()) {
+    $config->set('content.field_related_content.settings.field_widget_display', 'rendered_entity');
+    $config->set('content.field_related_content.settings.field_widget_display_settings', ['view_mode' => 'form_selection']);
+    $config->save();
+  }
+
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.word_list.default');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_related_content.settings.field_widget_display', 'rendered_entity');
+  $config->set('content.field_related_content.settings.field_widget_display_settings', ['view_mode' => 'form_selection']);
+  $config->set('content.field_words.settings.entity_browser', 'mukurtu_dictionary_word_browser');
+  $config->set('content.field_words.settings.field_widget_display', 'rendered_entity');
+  $config->set('content.field_words.settings.field_widget_display_settings', ['view_mode' => 'form_selection']);
+  $dependencies = $config->get('dependencies.config') ?? [];
+  $key = array_search('entity_browser.browser.mukurtu_content_browser', $dependencies);
+  if ($key !== FALSE) {
+    unset($dependencies[$key]);
+  }
+  if (!in_array('entity_browser.browser.mukurtu_dictionary_word_browser', $dependencies)) {
+    $dependencies[] = 'entity_browser.browser.mukurtu_dictionary_word_browser';
+    sort($dependencies);
+    $config->set('dependencies.config', $dependencies);
+  }
+  $config->save(TRUE);
+}

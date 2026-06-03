@@ -1,0 +1,20 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the mukurtu_landing_page module.
+ */
+
+/**
+ * Create the form_selection view display for the Landing Page node type.
+ */
+function mukurtu_landing_page_update_40001(): void {
+  $config_storage = \Drupal::service('config.storage');
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_landing_page');
+  $module_source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+
+  $data = $module_source->read('core.entity_view_display.node.landing_page.form_selection');
+  if ($data !== FALSE) {
+    $config_storage->write('core.entity_view_display.node.landing_page.form_selection', $data);
+  }
+}
