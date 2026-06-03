@@ -133,20 +133,8 @@ function mukurtu_collection_entity_delete(EntityInterface $entity) {
  * Implements hook_preprocess_node().
  */
 function mukurtu_collection_preprocess_node(array &$variables): void {
-  // DEBUG: log that preprocess fired and capture key values.
-  $node = $variables['node'];
-  $bundle = method_exists($node, 'bundle') ? $node->bundle() : 'unknown';
-  $view_mode = $variables['view_mode'] ?? 'unknown';
-  \Drupal::logger('mukurtu_collection')->debug(
-    'preprocess_node: bundle=@bundle view_mode=@vm uid=@uid',
-    ['@bundle' => $bundle, '@vm' => $view_mode, '@uid' => \Drupal::currentUser()->id()]
-  );
   \Drupal::service('Drupal\mukurtu_collection\Hook\CollectionPreprocessHooks')
     ->preprocessNode($variables);
-  \Drupal::logger('mukurtu_collection')->debug(
-    'preprocess_node after: root_collection_has_children=@v',
-    ['@v' => isset($variables['root_collection_has_children']) ? var_export($variables['root_collection_has_children'], TRUE) : 'NOT SET']
-  );
 }
 
 /**
