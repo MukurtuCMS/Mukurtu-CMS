@@ -7,23 +7,31 @@
     background-color: var(--brand-primary-dark);
     padding-block: var(--v-space-4xxs);
     padding-inline: var(--v-space-2xs);
+  }
+
+  // This is the word heading (h2), also contains a link.
+  &-word {
+    font-size: var(--font-size-xl);
+    font-weight: inherit;
+    margin-block: 0;
 
     a {
       color: var(--color-white);
-      font-size: var(--font-size-xl);
-    }
-  }
+      display: flex;
+      justify-content: space-between;
 
-  // This is the word heading, also a link.
-  &-word {
-    display: flex;
-    justify-content: space-between;
+      &:focus-visible {
+        outline: 2px solid var(--color-white);
+        outline-offset: 2px;
+      }
+    }
   }
 
   svg {
     fill: var(--color-white);
     block-size: var(--line-height-m);
     inline-size: var(--line-height-2xs);
+    flex-shrink: 0;
   }
 
   &-content {
@@ -32,18 +40,33 @@
     padding-inline: var(--v-space-2xs);
   }
 
-  .field--name-field-translation,
-  .field--name-field-recording  {
-    .field__label {
-      display: none;
+  &-media {
+    display: flex;
+    gap: var(--v-space-4xxs);
+    align-items: start;
+
+    .field--name-field-recording {
+      flex: 2;
+      min-inline-size: 0;
     }
   }
 
-  .field--name-field-translation  {
+  &-thumbnail {
+    flex: 1;
+    min-inline-size: 0;
+
+    img {
+      block-size: auto;
+      display: block;
+      inline-size: 100%;
+    }
+  }
+
+  .field--name-field-translation {
+    font-size: var(--font-size-l);
     font-weight: var(--text-bold);
     line-height: var(--line-height-xs);
     margin-block: var(--v-space-5xs);
-    margin-inline: 0 var(--v-space-2xs);
   }
 
   // stylelint-disable-next-line no-descending-specificity
@@ -52,12 +75,17 @@
     margin-inline: 0;
 
     audio {
+      background-color: #f1f3f4;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgb(0 0 0 / 15%);
       display: block;
+      inline-size: 100%;
     }
   }
 
   // stylelint-disable-next-line no-descending-specificity
   .field--name-field-contributor {
+    align-items: baseline;
     display: flex;
     flex-wrap: wrap;
     gap: var(--v-space-6xs);
@@ -73,39 +101,189 @@
         margin-inline-end: var(--v-space-5xs);
       }
     }
+
+    .field__items {
+      font-size: var(--font-size-s);
+    }
   }
 
-  .dictionary-word__media {
+  .field--name-field-recording {
+    container-type: inline-size;
+
+    .field__item {
+      margin-block: 0;
+    }
+
+    .media--audio {
+      display: flex;
+      flex-direction: column;
+      gap: var(--v-space-5xs);
+    }
+  }
+}
+
+// The word list teaser display used on /dictionary.
+.word-list__teaser {
+  &-image {
+    img {
+      block-size: auto;
+      display: block;
+      inline-size: 100%;
+      object-fit: cover;
+    }
+  }
+
+  &-heading {
+    background-color: var(--brand-primary-dark);
+    padding-block: var(--v-space-4xxs);
+    padding-inline: var(--v-space-2xs);
+  }
+
+  &-title {
+    font-size: var(--font-size-xl);
+    font-weight: inherit;
+    margin-block: 0;
+
+    a {
+      color: var(--color-white);
+      display: flex;
+      justify-content: space-between;
+
+      &:focus-visible {
+        outline: 2px solid var(--color-white);
+        outline-offset: 2px;
+      }
+    }
+
+    svg {
+      fill: var(--color-white);
+      block-size: var(--line-height-m);
+      inline-size: var(--line-height-2xs);
+      flex-shrink: 0;
+    }
+  }
+
+  &-content {
+    background-color: var(--brand-light-accent);
+    padding-block: var(--v-space-4xxs);
+    padding-inline: var(--v-space-2xs);
     display: flex;
-    flex-direction: column;
-    gap: var(--v-space-5xs);
-    margin-block: var(--v-space-5xs);
+    gap: var(--v-space-4xxs);
+    align-items: start;
+  }
 
-    > div {
-      flex: 1;
+  &-text {
+    flex: 1;
+    min-inline-size: 0;
+  }
+
+  &-image {
+    flex: 0 0 auto;
+    inline-size: 33%;
+
+    img {
+      block-size: auto;
+      display: block;
+      inline-size: 100%;
+      object-fit: cover;
     }
+  }
 
-    @container (min-width: 34rem) {
-      flex-direction: row;
+  &-type {
+    font-size: var(--font-size-s);
+    font-weight: var(--text-bold);
+    text-transform: uppercase;
+    margin-block-end: var(--v-space-5xs);
+  }
+}
+
+.word-entry-fields-pair {
+  display: flex;
+  gap: var(--v-space-xs);
+  flex-wrap: wrap;
+
+  > .field {
+    flex: 1;
+    min-inline-size: 10rem;
+  }
+}
+
+.dictionary-word-tabs {
+  margin-block-end: var(--v-space-s);
+}
+
+// Use the same specificity hack as _horizontal-tabs.scss to override its styles.
+:is(#extra-specificity-hack, .dictionary-word-tabs) {
+  border: none;
+
+  ul.horizontal-tabs-list {
+    padding-inline: 0;
+  }
+
+  .horizontal-tabs-panes .horizontal-tabs-pane {
+    padding-block-start: 16px;
+  }
+
+  .field--name-field-word-entry-term {
+    margin-block-start: 0;
+  }
+
+  .field--name-field-recording {
+    margin-block: var(--v-space-4xxs);
+
+    .field--name-field-contributor {
+      justify-content: flex-start;
     }
+  }
 
-    .field--name-field-recording {
-      container-type: inline-size;
+  // Field separators in the base entry pane (fields are direct children).
+  .horizontal-tabs-pane > .field:not(.field--name-title):has(.field__item),
+  .horizontal-tabs-pane > .word-entry-fields-pair:has(.field__item) {
+    padding-block-start: var(--v-space-2xs);
+    margin-block-start: var(--v-space-2xs);
+    border-block-start: 3px solid var(--brand-secondary-accent);
+  }
 
-      .field__item {
-        margin-block: 0;
-      }
+  // Field separators in additional entry panes (fields are inside the paragraph).
+  .paragraph--type--dictionary-word-entry > .field:not(.field--name-field-word-entry-term):has(.field__item),
+  .paragraph--type--dictionary-word-entry > .word-entry-fields-pair:has(.field__item) {
+    padding-block-start: var(--v-space-2xs);
+    margin-block-start: var(--v-space-2xs);
+    border-block-start: 3px solid var(--brand-secondary-accent);
+  }
 
-      .media--audio {
-        display: flex;
-        gap: var(--v-space-5xs);
-        flex-direction: column;
+  // Remove border from the first field after the heading in each pane.
+  .horizontal-tabs-pane > .field--name-title + .field,
+  .horizontal-tabs-pane > .field--name-title + .word-entry-fields-pair,
+  .paragraph--type--dictionary-word-entry > .field--name-field-word-entry-term + .field,
+  .paragraph--type--dictionary-word-entry > .field--name-field-word-entry-term + .word-entry-fields-pair {
+    border-block-start: none;
+    padding-block-start: 0;
+    margin-block-start: 0;
+  }
 
-        @container (min-width: 34rem) {
-          flex-direction: row;
-        }
-      }
-    }
+  ul.horizontal-tabs-list li:has(.selected)::after,
+  ul.horizontal-tabs-list li.selected::after {
+    content: none;
+  }
+
+  ul.horizontal-tabs-list li.selected {
+    background-color: var(--brand-secondary-accent);
+  }
+
+  ul.horizontal-tabs-list li.selected a,
+  ul.horizontal-tabs-list li.selected a:hover,
+  ul.horizontal-tabs-list li.selected a:active {
+    color: var(--brand-text-color);
+    background-color: var(--brand-secondary-accent);
+  }
+
+  ul.horizontal-tabs-list li a {
+    font-weight: var(--text-bold);
+  }
+
+  ul.horizontal-tabs-list li a:focus:not(:focus-visible) {
+    outline: none;
   }
 }
 
@@ -127,6 +305,12 @@
 // Full content display for dictionary word nodes.
 .page-node-type-dictionary-word {
   .full-node__content {
+    .field--name-field-sample-sentences > .field__items > .field__item + .field__item {
+      border-block-start: 1px solid var(--brand-secondary-accent);
+      margin-block-start: var(--v-space-2xs);
+      padding-block-start: var(--v-space-2xs);
+    }
+
     .field--name-field-word-entry > .field__item:not(first-child) {
       margin-block-start: var(--v-space-s);
     }
@@ -176,8 +360,8 @@
     @include mixins.divider;
 
     border-width: var(--v-space-4xs);
-    margin-block-start: var(--v-space-l);
-    padding-block-start: var(--v-space-xs);
+    margin-block-start: var(--v-space-s);
+    padding-block-start: var(--v-space-2xs);
   }
 
   .dictionary-word-subheading {

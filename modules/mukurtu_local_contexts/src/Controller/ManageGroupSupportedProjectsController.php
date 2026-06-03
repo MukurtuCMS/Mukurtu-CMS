@@ -22,14 +22,14 @@ class ManageGroupSupportedProjectsController extends ControllerBase {
    * @return \Drupal\Core\Access\AccessResultInterface
    *   The access result.
    */
-  public function access(AccountInterface $account, ContentEntityInterface $group = NULL) {
+  public function access(AccountInterface $account, ?ContentEntityInterface $group = NULL) {
     if ($group) {
       return AccessResult::allowed();
     }
     return AccessResult::forbidden();
   }
 
-  public function title(ContentEntityInterface $group = NULL) {
+  public function title(?ContentEntityInterface $group = NULL) {
     return $this->t("Manage Local Contexts Projects for %group", ['%group' => $group ? $group->getName() : 'Unknown Group']);
   }
 

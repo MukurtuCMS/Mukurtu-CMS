@@ -1,0 +1,15 @@
+person_broadcast:
+  version: 1.x
+  js:
+    js/mukurtu-person-broadcast.js: {}
+  dependencies:
+    - core/drupal
+
+person_listener:
+  version: 1.x
+  js:
+    js/mukurtu-person-listener.js: {}
+  dependencies:
+    - core/drupal
+    - core/jquery
+    - core/once

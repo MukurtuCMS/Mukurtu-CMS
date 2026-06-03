@@ -84,7 +84,7 @@ class MultipageItemPageController extends ControllerBase {
 
   public function viewRedirect(EntityInterface $node, $view_mode = 'full', $langcode = NULL) {
     $config = $this->configFactory->get('mukurtu_multipage_items.settings');
-    $controllerString = $config->get('_controller');
+    $controllerString = $config->get('_controller') ?: '\Drupal\node\Controller\NodeViewController::view';
     [$controllerClass, $controllerMethod] = explode('::', $controllerString, 2);
     $originalController = $controllerClass::create(\Drupal::getContainer());
 
@@ -134,14 +134,10 @@ class MultipageItemPageController extends ControllerBase {
   }
 
   public function newFromNode(NodeInterface $node) {
-    $build = [];
     $mpi = MultipageItem::create(['title' => $node->getTitle(), 'field_pages' => [$node->id()]]);
-    $form = $this->entityTypeManager()
-      ->getFormObject('multipage_item', 'add')
-      ->setEntity($mpi);
-    $build[] = $this->formBuilder()->getForm($form);
-
-    return $build;
+    $mpi->save();
+    $url = Url::fromRoute('entity.multipage_item.edit_form', ['multipage_item' => $mpi->id()]);
+    return new RedirectResponse($url->toString());
   }
 
   /**
@@ -242,7 +238,7 @@ class MultipageItemPageController extends ControllerBase {
    */
   public function title(NodeInterface $node) {
     $mpi = $this->multipageItemManager->getMultipageEntity($node);
-    return $mpi->label();
+    return $mpi ? $mpi->label() : $node->getTitle();
   }
 
   /**
@@ -293,6 +289,7 @@ class MultipageItemPageController extends ControllerBase {
       $url = Url::fromRoute('entity.multipage_item.edit_form', ['multipage_item' => $mpi->id()]);
       return new RedirectResponse($url->toString());
     }
+    throw new \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException();
   }
 
   public function addNewPageTitle($node_type, $page_node) {

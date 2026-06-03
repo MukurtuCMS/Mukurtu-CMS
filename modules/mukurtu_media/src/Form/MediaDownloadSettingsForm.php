@@ -4,6 +4,7 @@ namespace Drupal\mukurtu_media\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Cache\Cache;
 
 /**
  * Site-level configuration for the media download button.
@@ -54,6 +55,9 @@ class MediaDownloadSettingsForm extends ConfigFormBase {
     $this->configFactory->getEditable(static::SETTINGS)
       ->set('mukurtu_media_download_enabled', $form_state->getValue('mukurtu_media_download_enabled') === 'show')
       ->save();
+
+
+    Cache::invalidateTags(['media_view']);
 
     parent::submitForm($form, $form_state);
   }
