@@ -40,19 +40,15 @@ final class CollectionPreprocessHooks {
     // Look up the root collection.
     $root_collection = $this->hierarchyService->getRootCollectionForCollection($node);
 
-    if ($root_collection) {
-      // Always set the has-children flag so the template can decide whether
-      // to render the navigation section, regardless of link accessibility.
+    if ($root_collection && $root_collection->access()) {
+      // Provide the root collection as a link.
+      $variables['root_collection'] = $root_collection->toLink()->toRenderable();
+      $variables['root_collection']['#attributes'] = (new Attribute())->addClass('collection__root-link')->toArray();
+      CacheableMetadata::createFromRenderArray($variables['root_collection'])
+        ->addCacheableDependency($root_collection)
+        ->applyTo($variables['root_collection']);
+      // Provide a flag to indicate if the root collection has any children.
       $variables['root_collection_has_children'] = count($root_collection->getChildCollectionIds()) > 0;
-
-      if ($root_collection->access()) {
-        // Only provide a linked title when the current user can access it.
-        $variables['root_collection'] = $root_collection->toLink()->toRenderable();
-        $variables['root_collection']['#attributes'] = (new Attribute())->addClass('collection__root-link')->toArray();
-        CacheableMetadata::createFromRenderArray($variables['root_collection'])
-          ->addCacheableDependency($root_collection)
-          ->applyTo($variables['root_collection']);
-      }
     }
   }
 
