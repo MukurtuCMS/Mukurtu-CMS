@@ -20,7 +20,7 @@
   {% endif %}
 
   {% if current_page %}
-    <div id="mukurtu-multipage-item-selected-page" {{ current_page_attributes }}>
+    <div id="mukurtu-multipage-item-selected-page" aria-live="polite" {{ current_page_attributes }}>
       {{ current_page }}
     </div>
   {% endif %}
