@@ -1,0 +1,16 @@
+{#
+/**
+ * @file
+ * Theme override to display an audio media item in the dictionary word teaser.
+ *
+ * Renders the audio player followed by an optional Contributor attribution.
+ * field_contributor uses entity_reference_label with link: true so terms
+ * render as links. The contributor label is controlled via the view display.
+ *
+ * @see template_preprocess_media()
+ */
+#}
+<div{{ attributes.addClass(['media', 'media--audio']) }}>
+  {{ content.field_media_audio_file }}
+  {{ content.field_contributor }}
+</div>
