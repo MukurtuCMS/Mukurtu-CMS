@@ -1,0 +1,10 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - media
+id: media.form_selection
+label: 'Form Selection'
+description: 'Thumbnail-only display used in entity browser form selection cards.'
+targetEntityType: media
+cache: true

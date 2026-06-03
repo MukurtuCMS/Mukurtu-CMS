@@ -200,7 +200,7 @@ class CollectionOrganizationForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, Collection $collection = NULL, $available_collections = []) {
+  public function buildForm(array $form, FormStateInterface $form_state, ?Collection $collection = NULL, $available_collections = []) {
     if (!$collection) {
       return $form;
     }
