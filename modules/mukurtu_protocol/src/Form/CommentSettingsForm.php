@@ -62,7 +62,7 @@ class CommentSettingsForm extends ConfigFormBase {
       ),
     ];
 
-    $commentsRequireApproval = $config->get('site_comments_require_approval');
+    $commentsRequireApproval = $config->get('site_comments_require_approval') ?? FALSE;
 
     $form['site_comments_require_approval'] = [
       '#type' => 'radios',
@@ -92,6 +92,11 @@ class CommentSettingsForm extends ConfigFormBase {
       '#title' => $this->t('Allow visitors to leave comments'),
       '#description' => $this->t('When enabled, anonymous (not logged-in) users can post comments on content. This controls the <em>Post comments</em> permission for the Anonymous User role.'),
       '#default_value' => $anonymousCanPostComments,
+      '#states' => [
+        'enabled' => [
+          ':input[name="anonymous_can_access_comments"]' => ['checked' => TRUE],
+        ],
+      ],
     ];
 
     return parent::buildForm($form, $form_state);

@@ -620,3 +620,13 @@ function mukurtu_protocol_update_40034(): void {
   $config->set('content.field_featured_content.settings.field_widget_display_settings', ['view_mode' => 'form_selection']);
   $config->save();
 }
+
+/**
+ * Set default value for site_comments_require_approval config key.
+ */
+function mukurtu_protocol_update_40035(): void {
+  $config = \Drupal::configFactory()->getEditable('mukurtu_protocol.comment_settings');
+  if ($config->get('site_comments_require_approval') === NULL) {
+    $config->set('site_comments_require_approval', FALSE)->save();
+  }
+}
