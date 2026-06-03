@@ -1020,7 +1020,9 @@ function mukurtu_core_update_40031(): void {
   }
   $contents = str_replace("use Drupal\\migrate\\Attribute\\MigrateSource;\n", '', $contents);
   $contents = preg_replace('/#\[MigrateSource\(\s*id:\s*\'pathauto_pattern\'\s*\)\]\n/', '', $contents);
-  file_put_contents($path, $contents);
+  if (file_put_contents($path, $contents) === FALSE) {
+    throw new \RuntimeException("Failed to write patched file: $path");
+  }
   // Flush plugin cache so the corrected definition is picked up.
   \Drupal::service('plugin.cache_clearer')->clearCachedDefinitions();
 }
@@ -1039,10 +1041,16 @@ function mukurtu_core_update_40032(): void {
   if (strpos($contents, 'if (!$vocabulary)') !== FALSE) {
     return;
   }
-  $contents = str_replace(
+  $new_contents = str_replace(
     "  \$vocabulary = Vocabulary::load(\$term->bundle());\n\n  if (\n",
     "  \$vocabulary = Vocabulary::load(\$term->bundle());\n  if (!\$vocabulary) {\n    return;\n  }\n\n  if (\n",
     $contents
   );
-  file_put_contents($path, $contents);
+  // If the pattern didn't match, the module code differs from what we expect — skip.
+  if ($new_contents === $contents) {
+    return;
+  }
+  if (file_put_contents($path, $new_contents) === FALSE) {
+    throw new \RuntimeException("Failed to write patched file: $path");
+  }
 }
