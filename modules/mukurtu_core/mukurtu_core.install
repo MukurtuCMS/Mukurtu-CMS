@@ -1005,10 +1005,24 @@ function mukurtu_core_update_40030(): void {
 }
 
 /**
+ * Add remote_video digital_heritage_sidebar entity view display.
+ */
+function mukurtu_core_update_40031(): void {
+  $config_path = \Drupal::service('extension.list.profile')->getPath('mukurtu') . '/config/install/core.entity_view_display.media.remote_video.digital_heritage_sidebar.yml';
+  if (!file_exists($config_path)) {
+    return;
+  }
+  $data = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($config_path));
+  \Drupal::configFactory()->getEditable('core.entity_view_display.media.remote_video.digital_heritage_sidebar')
+    ->setData($data)
+    ->save(TRUE);
+}
+
+/**
  * Remove conflicting PHP 8 MigrateSource attribute from pathauto's migration
  * source plugin so Drupal reads source_module from the docblock annotation.
  */
-function mukurtu_core_update_40031(): void {
+function mukurtu_core_update_40032(): void {
   $path = \Drupal::root() . '/modules/contrib/pathauto/src/Plugin/migrate/source/PathautoPattern.php';
   if (!file_exists($path)) {
     return;
@@ -1031,7 +1045,7 @@ function mukurtu_core_update_40031(): void {
  * Add null vocabulary guard to flat_taxonomy presave hook to prevent fatal
  * errors when migrating terms whose vocabulary doesn't exist yet.
  */
-function mukurtu_core_update_40032(): void {
+function mukurtu_core_update_40033(): void {
   $path = \Drupal::root() . '/modules/contrib/flat_taxonomy/flat_taxonomy.module';
   if (!file_exists($path)) {
     return;

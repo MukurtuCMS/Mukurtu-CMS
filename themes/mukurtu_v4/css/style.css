@@ -631,7 +631,8 @@ input[type=reset]:focus,
 .button:active,
 .button:focus {
   color: var(--light-text-color);
-  background: var(--brand-primary-accent);
+  background: var(--brand-primary-dark);
+  text-decoration: underline;
 }
 button:focus,
 input[type=button]:focus,
@@ -2207,6 +2208,33 @@ details.form-wrapper summary + div {
   min-inline-size: -moz-min-content;
   min-inline-size: min-content;
   inline-size: 100%;
+}
+
+.media-carousel .media--document {
+  inline-size: 100%;
+}
+
+.media-asset--pdf-wrapper {
+  inline-size: 100%;
+  aspect-ratio: 8.5/11;
+  max-block-size: 80vh;
+}
+
+.media-asset--pdf {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.media-asset--pdf-actions {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+  gap: var(--v-space-5xs);
+  -webkit-margin-before: var(--v-space-5xs);
+          margin-block-start: var(--v-space-5xs);
 }
 
 .media-asset--glightbox-inline {
@@ -4822,7 +4850,8 @@ header {
 }
 .communities__item .field--name-name a:hover, .communities__item .field--name-name a:active, .communities__item .field--name-name a:focus {
   color: var(--light-text-color);
-  background: var(--brand-primary-accent);
+  background: var(--brand-primary-dark);
+  text-decoration: underline;
 }
 .communities__item .field--name-name a:focus {
   outline: 2px solid var(--focus-color);
