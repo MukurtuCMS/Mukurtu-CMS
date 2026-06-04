@@ -79,7 +79,7 @@
   {% set carousels = null %}
 {% endif %}
 
-{% set num_entries = has_additional_word_entries ? node.field_additional_word_entries|length : 0 %}
+{% set num_entries = additional_word_entry_indices|length %}
 
 <article{{ attributes }}>
   <div{{ content_attributes }} class="full-node">
@@ -98,14 +98,12 @@
                     <span class="div-title">{{ node.title.value }}</span>
                   </a>
                 </li>
-                {% for entry in node.field_additional_word_entries %}
-                  {% if entry.entity %}
+                {% for idx in additional_word_entry_indices %}
                   <li role="presentation">
                     <a href="#tab-entry-{{ loop.index }}" role="tab" id="tab-btn-entry-{{ loop.index }}" aria-selected="false" aria-controls="tab-entry-{{ loop.index }}">
-                      <span class="div-title">{{ entry.entity.field_word_entry_term.value ?: 'Entry ' ~ loop.index }}</span>
+                      <span class="div-title">{{ node.field_additional_word_entries[idx].entity.field_word_entry_term.value ?: 'Entry ' ~ loop.index }}</span>
                     </a>
                   </li>
-                  {% endif %}
                 {% endfor %}
               </ul>
               <div class="horizontal-tabs-panes">
@@ -128,12 +126,10 @@
                     {{ content.group_primary_fields.group_base_word_entry.field_contributor }}
                   </div>
                 </div>
-                {% for entry in node.field_additional_word_entries %}
-                  {% if entry.entity %}
+                {% for idx in additional_word_entry_indices %}
                   <div id="tab-entry-{{ loop.index }}" class="horizontal-tabs-pane" role="tabpanel" hidden aria-labelledby="tab-btn-entry-{{ loop.index }}">
-                    {{ content.group_primary_fields.group_additional_word_entries.field_additional_word_entries[loop.index0] }}
+                    {{ content.group_primary_fields.group_additional_word_entries.field_additional_word_entries[idx] }}
                   </div>
-                  {% endif %}
                 {% endfor %}
               </div>
             </div>

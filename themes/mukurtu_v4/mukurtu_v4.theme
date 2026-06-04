@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/includes/AudioHelper.php';
+
 use Drupal\Core\Cache\Cache;
 use Drupal\file\Entity\File;
 use Drupal\mukurtu_collection\Entity\Collection;
@@ -40,21 +42,22 @@ function mukurtu_v4_preprocess_node(&$variables) {
   // entries. Drupal auto-creates an empty paragraph on first save, so we
   // check each referenced paragraph for any meaningful field content.
   if ($node->bundle() === 'dictionary_word' && $node->hasField('field_additional_word_entries')) {
-    $has_additional = FALSE;
     $fields_to_check = ['field_word_entry_term', 'field_translation', 'field_recording', 'field_definition', 'field_pronunciation', 'field_alternate_spelling', 'field_word_type'];
-    foreach ($node->get('field_additional_word_entries') as $item) {
+    $valid_indices = [];
+    foreach ($node->get('field_additional_word_entries') as $delta => $item) {
       $paragraph = $item->entity;
       if (!$paragraph) {
         continue;
       }
       foreach ($fields_to_check as $field_name) {
         if ($paragraph->hasField($field_name) && !$paragraph->get($field_name)->isEmpty()) {
-          $has_additional = TRUE;
-          break 2;
+          $valid_indices[] = $delta;
+          break;
         }
       }
     }
-    $variables['has_additional_word_entries'] = $has_additional;
+    $variables['has_additional_word_entries'] = !empty($valid_indices);
+    $variables['additional_word_entry_indices'] = $valid_indices;
   }
 
   // This creates a twig variable that can be used in node templates to
@@ -179,48 +182,17 @@ function mukurtu_v4_preprocess_media(array &$variables) {
 }
 
 /**
- * Resolves the thumbnail URL for an audio media entity.
- *
- * Priority: user-uploaded field_thumbnail > admin-configured site default >
- * static audio.png fallback. field_thumbnail is hidden in the media_assets
- * view mode, so we always resolve the URL here rather than relying on the
- * template's content array.
- */
-function _mukurtu_v4_audio_fallback_thumbnail_url($media, array &$variables): string {
-  if (!$media->get('field_thumbnail')->isEmpty()) {
-    $file = $media->get('field_thumbnail')->entity;
-    if ($file) {
-      return $file->createFileUrl();
-    }
-  }
-
-  // Invalidate when the admin thumbnail config changes.
-  $variables['#cache']['tags'][] = 'config:mukurtu_thumbnail.settings';
-
-  $config = \Drupal::config('mukurtu_thumbnail.settings');
-  $defaultFid = $config->get('audio')[0] ?? NULL;
-  if ($defaultFid) {
-    $file = \Drupal\file\Entity\File::load($defaultFid);
-    if ($file) {
-      return $file->createFileUrl();
-    }
-  }
-
-  return '/profiles/mukurtu/themes/mukurtu_v4/images/audio.png';
-}
-
-/**
  * Implements template_preprocess_media__audio__carousel_thumbnail().
  */
 function mukurtu_v4_preprocess_media__audio__carousel_thumbnail(array &$variables): void {
-  $variables['audio_fallback_thumbnail_url'] = _mukurtu_v4_audio_fallback_thumbnail_url($variables['media'], $variables);
+  $variables['audio_fallback_thumbnail_url'] = MukurtuV4AudioHelper::fallbackThumbnailUrl($variables['media'], $variables);
 }
 
 /**
  * Implements template_preprocess_media__audio__media_assets().
  */
 function mukurtu_v4_preprocess_media__audio__media_assets(array &$variables): void {
-  $variables['audio_fallback_thumbnail_url'] = _mukurtu_v4_audio_fallback_thumbnail_url($variables['media'], $variables);
+  $variables['audio_fallback_thumbnail_url'] = MukurtuV4AudioHelper::fallbackThumbnailUrl($variables['media'], $variables);
 }
 
 /**
@@ -263,7 +235,7 @@ function mukurtu_v4_preprocess_media__audio__digital_heritage_sidebar(array &$va
     'entity.community.canonical',
     'entity.protocol.canonical',
   ]);
-  $variables['audio_fallback_thumbnail_url'] = _mukurtu_v4_audio_fallback_thumbnail_url($variables['media'], $variables);
+  $variables['audio_fallback_thumbnail_url'] = MukurtuV4AudioHelper::fallbackThumbnailUrl($variables['media'], $variables);
   // The rendered output differs by route, so bust the cache per route.
   $variables['#cache']['contexts'][] = 'route';
 }
