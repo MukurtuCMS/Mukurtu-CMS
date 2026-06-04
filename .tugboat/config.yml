@@ -109,6 +109,7 @@ services:
             // no longer declares it as a dependency; pin it explicitly so
             // the transitive-dependency resolver does not drop it.
             \$d['require']['doctrine/annotations'] = '^2.0';
+            \$d['require']['composer/installers'] = '^2.0';
             file_put_contents('composer.json',
               json_encode(\$d, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL);
           "
