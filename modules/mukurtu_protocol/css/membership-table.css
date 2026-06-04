@@ -75,7 +75,7 @@
 }
 
 .role-descriptions summary:focus-visible {
-  outline: 3px solid;
+  outline: 3px solid currentColor;
   outline-offset: 2px;
 }
 
