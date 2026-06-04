@@ -11,7 +11,7 @@ use Drupal\Core\Cache\Cache;
  */
 class MediaDownloadSettingsForm extends ConfigFormBase {
 
-  const SETTINGS = 'mukurtu.settings';
+  const SETTINGS = 'mukurtu_media.settings';
 
   /**
    * {@inheritdoc}
@@ -55,6 +55,7 @@ class MediaDownloadSettingsForm extends ConfigFormBase {
     $this->configFactory->getEditable(static::SETTINGS)
       ->set('mukurtu_media_download_enabled', $form_state->getValue('mukurtu_media_download_enabled') === 'show')
       ->save();
+
 
     Cache::invalidateTags(['media_view']);
 
