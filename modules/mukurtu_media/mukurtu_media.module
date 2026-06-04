@@ -319,14 +319,20 @@ function mukurtu_media_field_widget_single_element_form_alter(array &$element, F
 
   $media_storage = \Drupal::entityTypeManager()->getStorage('media');
 
+  $media_ids = array_filter(array_map(
+    fn($delta) => $element['selection'][$delta]['target_id']['#value'] ?? NULL,
+    Element::children($element['selection'])
+  ));
+  /** @var \Drupal\media\MediaInterface[] $media_items */
+  $media_items = $media_storage->loadMultiple($media_ids);
+
   foreach (Element::children($element['selection']) as $delta) {
     $media_id = $element['selection'][$delta]['target_id']['#value'] ?? NULL;
     if (!$media_id) {
       continue;
     }
 
-    /** @var \Drupal\media\MediaInterface $media */
-    $media = $media_storage->load($media_id);
+    $media = $media_items[$media_id] ?? NULL;
     if (!$media || !$media->access('update')) {
       continue;
     }

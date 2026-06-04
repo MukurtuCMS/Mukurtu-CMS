@@ -20,19 +20,19 @@
       type: 'button',
       'class': 'button js-mukurtu-cancel-proxy',
       value: Drupal.t('Cancel'),
+      'aria-label': Drupal.t('Cancel media upload'),
     });
 
     $proxy.on('click', function () {
-      // Drupal AJAX for submit buttons is triggered by mousedown then click.
-      $source.trigger('mousedown').trigger('click');
+      $source[0].click();
     });
 
     $buttonSet.prepend($proxy);
   }
 
   // Inject an Edit link at the end of each media library table row.
-  // The checkbox column is hidden via CSS but kept in the DOM so row-click
-  // selection (below) continues to work.
+  // The checkbox column is visually hidden but kept in the accessibility tree
+  // so row-click selection (below) and screen readers continue to work.
   function syncEditLinks() {
     var $table = $('.media-library-widget-modal .views-table');
     if (!$table.length) return;
@@ -49,10 +49,16 @@
       if ($row.find('.mukurtu-edit-col').length) return;
       var mediaId = parseInt($row.find('input[type="checkbox"]').val(), 10);
       if (!mediaId) return;
+
+      if (!$row.attr('tabindex')) {
+        $row.attr('tabindex', '0');
+      }
+
       $row.append(
         '<td class="mukurtu-edit-col">' +
         '<a href="/admin/media/' + mediaId + '/edit" target="_blank" rel="noopener">' +
         Drupal.t('Edit') +
+        '<span class="visually-hidden"> (' + Drupal.t('opens in new tab') + ')</span>' +
         '</a>' +
         '</td>'
       );
@@ -60,6 +66,9 @@
   }
 
   $(document).ajaxComplete(function () {
+    if (!$('.media-library-widget-modal').length && !$('.media-library-add-form').length) {
+      return;
+    }
     syncCancelProxy();
     syncEditLinks();
   });
@@ -90,6 +99,19 @@
       }
       var $cb = $(this).find('input[type="checkbox"]');
       $cb.prop('checked', !$cb.prop('checked')).trigger('change');
+    }
+  );
+
+  // Keyboard selection: Space or Enter on a focused row toggles its checkbox.
+  $(document).on(
+    'keydown',
+    '.media-library-widget-modal .views-table tbody tr',
+    function (e) {
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        var $cb = $(this).find('input[type="checkbox"]');
+        $cb.prop('checked', !$cb.prop('checked')).trigger('change');
+      }
     }
   );
 })(jQuery);

@@ -357,10 +357,21 @@ counterpart, if one exists. */
     cursor: pointer;
 }
 
-/* Hide the checkbox column — kept in DOM for row-click selection JS. */
+.media-library-widget-modal .views-table tbody tr:focus-visible {
+    outline: 3px solid var(--gin-color-primary, #0036b1);
+    outline-offset: -3px;
+}
+
+/* Visually hide the checkbox column but keep it in the accessibility tree
+   so screen readers can still reach the checkboxes. */
 .media-library-widget-modal .views-table th.views-field-media-library-select-form,
 .media-library-widget-modal .views-table td.views-field-media-library-select-form {
-    display: none !important;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
 }
 
 /* Edit link column injected by JS. */

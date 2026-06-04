@@ -57,13 +57,19 @@ class ExternalEmbedForm extends AddFormBase
       '#title' => $this->t('Add External Embed'),
       '#rows' => 3,
       '#required' => TRUE,
+      '#attributes' => ['aria-describedby' => 'external-embed-description'],
     ];
 
+    // Rendered outside the flex container so it spans full width below the row.
+    // Associated with the textarea via aria-describedby instead of #description.
     $form['description'] = [
       '#type' => 'html_tag',
       '#tag' => 'div',
       '#value' => $this->t('Embed code from an external website. Note that while the media asset will be managed by cultural protocols, the originating website may not have similar privacy settings. <br>External embeds are usually some kind of code wrapped in &lt;iframe&gt;&lt;/iframe&gt; tags.'),
-      '#attributes' => ['class' => ['form-item__description']],
+      '#attributes' => [
+        'id' => 'external-embed-description',
+        'class' => ['form-item__description'],
+      ],
     ];
 
     $form['container']['submit'] = [

@@ -129,7 +129,6 @@ class MukurtuMediaLibraryUiBuilder extends MediaLibraryUiBuilder {
       'title' => $display_title,
       'url' => Url::fromRoute('media_library.ui', [], ['query' => $all_state->all()]),
       'attributes' => [
-        'role' => 'button',
         'data-title' => $label,
       ],
     ];
