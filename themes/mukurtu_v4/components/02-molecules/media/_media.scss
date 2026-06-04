@@ -5,8 +5,16 @@
   &--audio {
     inline-size: 100%;
 
+    // Blazy sets height:auto;min-height:1px on audio.b-lazy which collapses
+    // the player to 1px. Target the audio element directly to restore it.
+    audio {
+      min-height: 2rem;
+      min-block-size: 2rem;
+    }
+
     .b-lazy {
       block-size: revert;
+      height: revert;
       min-block-size: max-content;
       inline-size: 100%;
     }
@@ -52,6 +60,17 @@
   .field[data-blazy] {
     min-inline-size: min-content;
     inline-size: 100%;
+  }
+}
+
+.media--audio {
+  .media-asset--name {
+    display: block;
+    text-align: center;
+    font-size: var(--font-size-sm, 0.875rem);
+    color: var(--color-text-secondary, var(--brand-text-color, #464646));
+    margin-block-start: var(--v-space-5xs);
+    word-break: break-word;
   }
 }
 
