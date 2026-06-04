@@ -584,21 +584,6 @@ function mukurtu_protocol_update_40031(): void {
 }
 
 /**
- * Add mukurtu_community_manager_select query tag to community select view.
- */
-function mukurtu_protocol_update_40032(): void {
-  $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_community_select');
-  if ($config->isNew()) {
-    return;
-  }
-  $tags = $config->get('display.default.display_options.query.options.query_tags') ?? [];
-  if (!in_array('mukurtu_community_manager_select', $tags)) {
-    $tags[] = 'mukurtu_community_manager_select';
-    $config->set('display.default.display_options.query.options.query_tags', $tags)->save(TRUE);
-  }
-}
-
-/**
  * Reimport community select view with mukurtu_community_manager_select query tag.
  */
 function mukurtu_protocol_update_40032(): void {
