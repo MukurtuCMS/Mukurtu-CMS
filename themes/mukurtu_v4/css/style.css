@@ -2160,13 +2160,8 @@ details.form-wrapper summary + div {
 .media--audio {
   inline-size: 100%;
 }
-.media--audio audio {
-  min-height: 2rem;
-  min-block-size: 2rem;
-}
 .media--audio .b-lazy {
   block-size: revert;
-  height: revert;
   min-block-size: -webkit-max-content;
   min-block-size: -moz-max-content;
   min-block-size: max-content;
@@ -5826,13 +5821,13 @@ header {
   -webkit-box-direction: normal;
       -ms-flex-direction: column;
           flex-direction: column;
-  gap: var(--v-space-4xxs);
   -webkit-box-align: center;
       -ms-flex-align: center;
           align-items: center;
   -webkit-box-pack: center;
       -ms-flex-pack: center;
           justify-content: center;
+  gap: var(--v-space-4xxs);
 }
 @media (min-width: 48rem) {
   .page-node-type-dictionary-word .field--name-field-recording .media--audio,
@@ -5843,6 +5838,9 @@ header {
             flex-direction: row;
     -ms-flex-wrap: wrap;
         flex-wrap: wrap;
+    -webkit-column-gap: var(--v-space-4xxs);
+       -moz-column-gap: var(--v-space-4xxs);
+            column-gap: var(--v-space-4xxs);
   }
 }
 .page-node-type-dictionary-word .field--name-field-recording .media--audio .field--name-field-media-audio-file,
@@ -5862,6 +5860,14 @@ header {
   max-inline-size: max-content;
   -webkit-margin-before: 0;
           margin-block-start: 0;
+}
+@media (min-width: 48rem) {
+  .page-node-type-dictionary-word .field--name-field-recording .media--audio .media-asset--name,
+  .page-node-type-dictionary-word .field--name-field-sentence-recording .media--audio .media-asset--name {
+    -webkit-box-flex: 0;
+        -ms-flex: 0 0 100%;
+            flex: 0 0 100%;
+  }
 }
 .page-node-type-dictionary-word .field--name-field-recording .media--audio .field--name-field-contributor,
 .page-node-type-dictionary-word .field--name-field-sentence-recording .media--audio .field--name-field-contributor {

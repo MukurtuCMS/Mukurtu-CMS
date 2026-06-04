@@ -379,13 +379,14 @@
     // stylelint-disable-next-line no-descending-specificity
     .media--audio {
       flex-direction: column;
-      gap: var(--v-space-4xxs);
       align-items: center;
       justify-content: center;
+      gap: var(--v-space-4xxs);
 
       @include include-media.media('>=md') {
         flex-direction: row;
         flex-wrap: wrap;
+        column-gap: var(--v-space-4xxs);
       }
 
       .field--name-field-media-audio-file,
@@ -397,6 +398,12 @@
         flex-basis: 100%;
         max-inline-size: max-content;
         margin-block-start: 0;
+      }
+
+      .media-asset--name {
+        @include include-media.media('>=md') {
+          flex: 0 0 100%;
+        }
       }
 
       .field--name-field-contributor {
