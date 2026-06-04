@@ -65,8 +65,7 @@ function mukurtu_media_media_source_info_alter(array &$sources)
   // existing media item is already selected in the library browser.
   foreach ($sources as &$source) {
     $current = $source['forms']['media_library_add'] ?? NULL;
-    if ($current === FileUploadForm::class ||
-        (is_string($current) && is_subclass_of($current, FileUploadForm::class))) {
+    if ($current === FileUploadForm::class) {
       $source['forms']['media_library_add'] = MukurtuFileUploadForm::class;
     }
   }
