@@ -309,7 +309,7 @@ class ImportBaseForm extends FormBase {
    */
   public function getCSVHeaders(FileInterface $file) {
     try {
-      $csv = Reader::createFromPath($file->getFileUri(), 'r');
+      $csv = Reader::from($file->getFileUri(), 'r');
     } catch (Exception $e) {
       return [];
     }

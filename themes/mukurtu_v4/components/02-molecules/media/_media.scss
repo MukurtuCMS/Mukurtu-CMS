@@ -28,6 +28,7 @@
 .media--image,
 .media--document,
 .media--audio,
+.media--video,
 .media--remote_video {
   display: flex;
   flex-direction: column;
@@ -40,6 +41,18 @@
 
   .button {
     margin-block-start: var(--v-space-5xs);
+
+    &--download {
+      svg {
+        fill: white;
+        vertical-align: middle;
+        margin-inline-start: var(--v-space-6xs);
+      }
+    }
+
+    &--download-icon {
+      margin-block-start: 0;
+    }
   }
 }
 
@@ -48,4 +61,51 @@
     min-inline-size: min-content;
     inline-size: 100%;
   }
+}
+
+.media--document {
+  &__viewer {
+    inline-size: 100%;
+    block-size: min(500px, 70vh);
+    display: block;
+  }
+}
+
+.button--download-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 44px;
+  block-size: 44px;
+  padding: 0;
+  flex-shrink: 0;
+  margin-block-start: 0;
+
+  svg {
+    display: block;
+    fill: currentColor;
+  }
+}
+
+.media-carousel .media--document {
+  inline-size: 100%;
+}
+
+.media-asset--pdf-wrapper {
+  inline-size: 100%;
+  aspect-ratio: 8.5 / 11;
+  max-block-size: 80vh;
+}
+
+.media-asset--pdf {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.media-asset--pdf-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--v-space-5xs);
+  margin-block-start: var(--v-space-5xs);
 }
