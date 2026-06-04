@@ -1,0 +1,4 @@
+administer mukurtu media download settings:
+  title: 'Administer Mukurtu media download settings'
+  description: 'Configure the media download button visibility.'
+  restrict access: true

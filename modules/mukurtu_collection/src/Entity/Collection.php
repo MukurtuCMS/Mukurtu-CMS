@@ -118,7 +118,13 @@ class Collection extends Node implements CollectionInterface, CulturalProtocolCo
         'target_type' => 'node',
         'handler' => 'default:node',
         'handler_settings' => [
-          'target_bundles' => NULL,
+          'target_bundles' => [
+            'digital_heritage' => 'digital_heritage',
+            'dictionary_word' => 'dictionary_word',
+            'word_list' => 'word_list',
+            'person' => 'person',
+            'place' => 'place',
+          ],
           'sort' => [
             'field' => 'title',
             'direction' => 'ASC'
@@ -192,16 +198,6 @@ class Collection extends Node implements CollectionInterface, CulturalProtocolCo
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
       ->setTranslatable(TRUE)
-      ->setDisplayConfigurable('view', TRUE)
-      ->setDisplayConfigurable('form', TRUE);
-
-    $definitions['field_coverage'] = BaseFieldDefinition::create('geofield')
-      ->setLabel(t('Map Points'))
-      ->setDescription(t('A detailed, interactive mapping tool that allows placing and drawing multiple locations related to a collection. Locations can be single points, paths, rectangles, or free-form polygons. Each location can be given a basic label. This field is also used for the browse by map tools. </br>Note that this mapping data will be shared with the same users or visitors as the rest of the collection. If the location is sensitive, carefully consider using this field.	</br>Use the tools shown on the map to place, draw, edit, and delete points and shapes. Once a point or shape has been placed, select it to add a description if needed.'))
-      ->setCardinality(1)
-      ->setRequired(FALSE)
-      ->setRevisionable(TRUE)
-      ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
