@@ -1019,9 +1019,60 @@ function mukurtu_core_update_40031(): void {
 }
 
 /**
- * Hide comment subject field and restrict comment body to Basic HTML only.
+ * Remove conflicting PHP 8 MigrateSource attribute from pathauto's migration
+ * source plugin so Drupal reads source_module from the docblock annotation.
  */
 function mukurtu_core_update_40032(): void {
+  $path = \Drupal::root() . '/modules/contrib/pathauto/src/Plugin/migrate/source/PathautoPattern.php';
+  if (!file_exists($path)) {
+    return;
+  }
+  $contents = file_get_contents($path);
+  // Only modify if the conflicting attribute is present.
+  if (strpos($contents, '#[MigrateSource') === FALSE) {
+    return;
+  }
+  $contents = str_replace("use Drupal\\migrate\\Attribute\\MigrateSource;\n", '', $contents);
+  $contents = preg_replace('/#\[MigrateSource\(\s*id:\s*\'pathauto_pattern\'\s*\)\]\n/', '', $contents);
+  if (file_put_contents($path, $contents) === FALSE) {
+    throw new \RuntimeException("Failed to write patched file: $path");
+  }
+  // Flush plugin cache so the corrected definition is picked up.
+  \Drupal::service('plugin.cache_clearer')->clearCachedDefinitions();
+}
+
+/**
+ * Add null vocabulary guard to flat_taxonomy presave hook to prevent fatal
+ * errors when migrating terms whose vocabulary doesn't exist yet.
+ */
+function mukurtu_core_update_40033(): void {
+  $path = \Drupal::root() . '/modules/contrib/flat_taxonomy/flat_taxonomy.module';
+  if (!file_exists($path)) {
+    return;
+  }
+  $contents = file_get_contents($path);
+  // Only modify if the null check is not already present.
+  if (strpos($contents, 'if (!$vocabulary)') !== FALSE) {
+    return;
+  }
+  $new_contents = str_replace(
+    "  \$vocabulary = Vocabulary::load(\$term->bundle());\n\n  if (\n",
+    "  \$vocabulary = Vocabulary::load(\$term->bundle());\n  if (!\$vocabulary) {\n    return;\n  }\n\n  if (\n",
+    $contents
+  );
+  // If the pattern didn't match, the module code differs from what we expect — skip.
+  if ($new_contents === $contents) {
+    return;
+  }
+  if (file_put_contents($path, $new_contents) === FALSE) {
+    throw new \RuntimeException("Failed to write patched file: $path");
+  }
+}
+
+/**
+ * Hide comment subject field and restrict comment body to Basic HTML only.
+ */
+function mukurtu_core_update_40034(): void {
   // Hide subject field from comment form display.
   $form_display = \Drupal::configFactory()->getEditable('core.entity_form_display.comment.comment.default');
   if (!$form_display->isNew()) {
@@ -1045,7 +1096,7 @@ function mukurtu_core_update_40032(): void {
  * Create comment_basic_html text format (no media embed) and restrict comment
  * body to it; removes Insert Media button from comment CKEditor toolbar.
  */
-function mukurtu_core_update_40033(): void {
+function mukurtu_core_update_40035(): void {
   // Create the comment_basic_html filter format if it doesn't exist.
   $format_config = \Drupal::configFactory()->getEditable('filter.format.comment_basic_html');
   if ($format_config->isNew()) {
