@@ -81,7 +81,15 @@
 
 {% set num_entries = 0 %}
 {% for entry in node.field_additional_word_entries %}
-  {% if entry.entity %}{% set num_entries = num_entries + 1 %}{% endif %}
+  {% if entry.entity and (
+    entry.entity.field_word_entry_term.value or
+    entry.entity.field_translation.value or
+    entry.entity.field_recording.target_id or
+    entry.entity.field_definition.value or
+    entry.entity.field_pronunciation.value
+  ) %}
+    {% set num_entries = num_entries + 1 %}
+  {% endif %}
 {% endfor %}
 
 <article{{ attributes }}>
@@ -102,7 +110,13 @@
                   </a>
                 </li>
                 {% for entry in node.field_additional_word_entries %}
-                  {% if entry.entity %}
+                  {% if entry.entity and (
+                    entry.entity.field_word_entry_term.value or
+                    entry.entity.field_translation.value or
+                    entry.entity.field_recording.target_id or
+                    entry.entity.field_definition.value or
+                    entry.entity.field_pronunciation.value
+                  ) %}
                   <li role="presentation">
                     <a href="#tab-entry-{{ loop.index }}" role="tab" id="tab-btn-entry-{{ loop.index }}" aria-selected="false" aria-controls="tab-entry-{{ loop.index }}">
                       <span class="div-title">{{ entry.entity.field_word_entry_term.value ?: 'Entry ' ~ loop.index }}</span>
@@ -132,7 +146,13 @@
                   </div>
                 </div>
                 {% for entry in node.field_additional_word_entries %}
-                  {% if entry.entity %}
+                  {% if entry.entity and (
+                    entry.entity.field_word_entry_term.value or
+                    entry.entity.field_translation.value or
+                    entry.entity.field_recording.target_id or
+                    entry.entity.field_definition.value or
+                    entry.entity.field_pronunciation.value
+                  ) %}
                   <div id="tab-entry-{{ loop.index }}" class="horizontal-tabs-pane" role="tabpanel" hidden aria-labelledby="tab-btn-entry-{{ loop.index }}">
                     {{ content.group_primary_fields.group_additional_word_entries.field_additional_word_entries[loop.index0] }}
                   </div>
