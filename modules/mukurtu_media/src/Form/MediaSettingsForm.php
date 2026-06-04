@@ -65,15 +65,28 @@ class MediaSettingsForm extends ConfigFormBase {
     $config = $this->config(static::SETTINGS);
 
     foreach (['restricted_media_placeholder', 'no_media_placeholder'] as $key) {
-      $fids = $form_state->getValue($key);
-      if (!empty($fids[0])) {
-        $file = File::load($fids[0]);
+      $old_fids = $config->get($key) ?? [];
+      $new_fids = $form_state->getValue($key) ?? [];
+
+      // Mark newly-added files as permanent.
+      foreach (array_diff($new_fids, $old_fids) as $fid) {
+        $file = File::load($fid);
         if ($file) {
           $file->setPermanent();
           $file->save();
         }
       }
-      $config->set($key, $fids);
+
+      // Mark removed files as temporary so Drupal's file GC can clean them up.
+      foreach (array_diff($old_fids, $new_fids) as $fid) {
+        $file = File::load($fid);
+        if ($file) {
+          $file->setTemporary();
+          $file->save();
+        }
+      }
+
+      $config->set($key, $new_fids);
     }
 
     $config->save();

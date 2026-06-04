@@ -363,18 +363,23 @@ function mukurtu_media_entity_view_alter(array &$build, \Drupal\Core\Entity\Enti
       $placeholder_file_to_use = $no_media_file;
       if ($field_name === 'field_representative_media' && $restricted_file) {
         $source_fields = ['field_thumbnail', 'field_media_assets', 'field_collection_image', 'field_word_list_image'];
+        // Batch-load all source media to avoid N+1 queries.
+        $source_ids = [];
         foreach ($source_fields as $source) {
           if (!$entity->hasField($source)) {
             continue;
           }
           foreach ($entity->get($source) as $source_item) {
-            if (!$source_item->target_id) {
-              continue;
+            if ($source_item->target_id) {
+              $source_ids[] = $source_item->target_id;
             }
-            $source_media = $media_storage->load($source_item->target_id);
-            if ($source_media && !$source_media->access('view', $account)) {
+          }
+        }
+        if (!empty($source_ids)) {
+          foreach ($media_storage->loadMultiple($source_ids) as $source_media) {
+            if (!$source_media->access('view', $account)) {
               $placeholder_file_to_use = $restricted_file;
-              break 2;
+              break;
             }
           }
         }
@@ -384,11 +389,16 @@ function mukurtu_media_entity_view_alter(array &$build, \Drupal\Core\Entity\Enti
         continue;
       }
 
+      $alt = $placeholder_file_to_use === $restricted_file
+        ? (string) t('Media not available due to protocol restrictions')
+        : (string) t('No media available');
+
       $build[$field_name] = _mukurtu_media_build_placeholder_field(
         $def, $entity, $field_items, $build['#view_mode'] ?? 'full', $component,
         [
           '#theme' => 'image',
           '#uri' => $placeholder_file_to_use->getFileUri(),
+          '#alt' => $alt,
           '#attributes' => ['class' => [str_replace('_', '-', $field_name) . '-placeholder']],
         ]
       );
@@ -400,10 +410,21 @@ function mukurtu_media_entity_view_alter(array &$build, \Drupal\Core\Entity\Enti
       continue;
     }
 
-    $inaccessible_count = 0;
+    // Batch-load all media items in this field once, avoiding N+1 queries.
+    $target_ids = [];
     foreach ($field_items as $item) {
-      $media = $media_storage->load($item->target_id);
-      if ($media && !$media->access('view', $account)) {
+      if ($item->target_id) {
+        $target_ids[] = $item->target_id;
+      }
+    }
+    if (empty($target_ids)) {
+      continue;
+    }
+    $loaded_media = $media_storage->loadMultiple($target_ids);
+
+    $inaccessible_count = 0;
+    foreach ($loaded_media as $media) {
+      if (!$media->access('view', $account)) {
         $inaccessible_count++;
       }
     }
@@ -415,6 +436,7 @@ function mukurtu_media_entity_view_alter(array &$build, \Drupal\Core\Entity\Enti
     $restricted_render = [
       '#theme' => 'image',
       '#uri' => $restricted_file->getFileUri(),
+      '#alt' => (string) t('Media not available due to protocol restrictions'),
       '#attributes' => ['class' => ['restricted-media-placeholder']],
     ];
 
@@ -427,7 +449,7 @@ function mukurtu_media_entity_view_alter(array &$build, \Drupal\Core\Entity\Enti
     $rendered_index = 0;
     $new_items = [];
     foreach ($field_items as $item) {
-      $media = $media_storage->load($item->target_id);
+      $media = $loaded_media[$item->target_id] ?? NULL;
       if (!$media) {
         continue;
       }
