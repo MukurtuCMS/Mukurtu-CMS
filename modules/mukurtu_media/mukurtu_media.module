@@ -10,6 +10,7 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Url;
+use Drupal\media_library\Form\AddFormBase;
 use Drupal\media_library\Plugin\Field\FieldWidget\MediaLibraryWidget;
 use Drupal\mukurtu_media\Entity\Audio;
 use Drupal\mukurtu_media\Entity\Document;
@@ -332,14 +333,21 @@ function mukurtu_media_field_widget_single_element_form_alter(array &$element, F
 
   $media_storage = \Drupal::entityTypeManager()->getStorage('media');
 
+
+  $media_ids = array_filter(array_map(
+    fn($delta) => $element['selection'][$delta]['target_id']['#value'] ?? NULL,
+    Element::children($element['selection'])
+  ));
+  /** @var \Drupal\media\MediaInterface[] $media_items */
+  $media_items = $media_storage->loadMultiple($media_ids);
+
   foreach (Element::children($element['selection']) as $delta) {
     $media_id = $element['selection'][$delta]['target_id']['#value'] ?? NULL;
     if (!$media_id) {
       continue;
     }
 
-    /** @var \Drupal\media\MediaInterface $media */
-    $media = $media_storage->load($media_id);
+    $media = $media_items[$media_id] ?? NULL;
     if (!$media || !$media->access('update')) {
       continue;
     }
@@ -367,30 +375,34 @@ function mukurtu_media_field_widget_single_element_form_alter(array &$element, F
 
 /**
  * Implements hook_form_alter().
- *
- * When a media entity edit form is opened inside a modal dialog, wire the Save
- * button to an AJAX callback that closes the dialog on success.
  */
 function mukurtu_media_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
-  if (!preg_match('/^media_.+_edit_form$/', $form_id)) {
-    return;
-  }
-
+  // When a media entity edit form is opened inside a modal dialog, wire the
+  // Save button to an AJAX callback that closes the dialog on success.
   // The edit button URL includes ?mukurtu_modal=1. This parameter persists
   // when Drupal's AJAX JS swaps _wrapper_format from drupal_modal to
   // drupal_ajax on form submit, giving a stable signal across both requests.
-  if (!\Drupal::request()->query->get('mukurtu_modal')) {
-    return;
+  if (preg_match('/^media_.+_edit_form$/', $form_id) && \Drupal::request()->query->get('mukurtu_modal')) {
+    unset($form['actions']['delete']);
+
+    foreach (['submit', 'save'] as $action) {
+      if (isset($form['actions'][$action])) {
+        $form['actions'][$action]['#ajax'] = [
+          'callback' => 'mukurtu_media_edit_dialog_ajax',
+          'progress' => ['type' => 'throbber'],
+        ];
+      }
+    }
   }
 
-  unset($form['actions']['delete']);
-
-  foreach (['submit', 'save'] as $action) {
-    if (isset($form['actions'][$action])) {
-      $form['actions'][$action]['#ajax'] = [
-        'callback' => 'mukurtu_media_edit_dialog_ajax',
-        'progress' => ['type' => 'throbber'],
-      ];
+  // In the media library add form, mark each "Remove" button so JS can create
+  // a visible proxy in the dialog footer. The button stays in-place (hidden via
+  // CSS) so its #array_parents remain intact for Drupal's submit handling.
+  if ($form_state->getFormObject() instanceof AddFormBase && isset($form['media'])) {
+    foreach (Element::children($form['media']) as $delta) {
+      if (isset($form['media'][$delta]['remove_button'])) {
+        $form['media'][$delta]['remove_button']['#attributes']['class'][] = 'js-mukurtu-cancel-source';
+      }
     }
   }
 }
@@ -423,4 +435,16 @@ function mukurtu_media_edit_dialog_ajax(array &$form, FormStateInterface $form_s
     $response->addCommand(new ReplaceCommand('.ui-dialog-content', $output));
   }
   return $response;
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for soundcloud_media_add_form.
+ *
+ * Adds a class to the URL input container so CSS can put the field and Add
+ * button on the same row.
+ */
+function mukurtu_media_form_soundcloud_media_add_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
+  if (isset($form['container'])) {
+    $form['container']['#attributes']['class'][] = 'media-library-url-input-row';
+  }
 }
