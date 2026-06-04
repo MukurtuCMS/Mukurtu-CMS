@@ -60,7 +60,7 @@
     display: block;
     text-align: center;
     font-size: var(--font-size-sm, 0.875rem);
-    color: var(--color-text-secondary, currentColor);
+    color: var(--color-text-secondary, var(--brand-text-color, #464646));
     margin-block-start: var(--v-space-5xs);
     word-break: break-word;
   }
