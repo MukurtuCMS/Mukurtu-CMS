@@ -1,0 +1,67 @@
+# Fixes stale config.installer proxy after nested container rebuild in doInstall().
+#
+# Root cause: doInstall() fetched \Drupal::service('config.installer') once and
+# cached it in $config_installer before the InstallEntities/Optional/SiteOptional
+# loops. If any module's hook_install() triggers a nested container rebuild, the
+# old container is reset and the cached proxy's injected services (ConfigManager,
+# EntityTypeManager, ModuleHandler, ClassResolver) all point to the reset container.
+# Subsequent use of the stale proxy causes "ContainerBuilder synthetic service
+# kernel" errors when ClassResolver tries to resolve OOP hook classes.
+#
+# Fix: re-fetch \Drupal::service('config.installer') each loop iteration so a
+# fresh proxy from the current container is always used.
+#
+# Upstream: this fix should be filed against Drupal core at
+# https://www.drupal.org/project/drupal/issues — search for
+# "ModuleInstaller stale config.installer synthetic service kernel".
+# Once a core issue is filed, replace this comment with the issue URL so the
+# patch can be removed when the fix lands in a Drupal release.
+#
+# Reproducer: any module whose hook_install() uses \Drupal::entityTypeManager()
+# (e.g. to load a config entity) triggers a container rebuild; any subsequent
+# use of the cached $config_installer in the same doInstall() loop then hits
+# "ContainerBuilder synthetic service kernel" from ClassResolver.
+--- a/lib/Drupal/Core/Extension/ModuleInstaller.php
++++ b/lib/Drupal/Core/Extension/ModuleInstaller.php
+@@ -401,8 +401,7 @@
+
+     foreach ($module_list as $module) {
+       // Install default configuration of the module.
+-      $config_installer = \Drupal::service('config.installer');
+-      $config_installer->installDefaultConfig('module', $module, DefaultConfigMode::InstallSimple);
++      \Drupal::service('config.installer')->installDefaultConfig('module', $module, DefaultConfigMode::InstallSimple);
+
+       // Set the schema version to the number of the last update provided by
+       // the module, or the minimum core schema version.
+@@ -442,10 +441,11 @@
+     // requires the library discovery cache to be rebuilt.
+     \Drupal::service('library.discovery')->clear();
+
+-    $config_installer = \Drupal::service('config.installer');
+     foreach ($module_list as $module) {
+-      // Create config entities a module has in the /install directory.
+-      $config_installer->installDefaultConfig('module', $module, DefaultConfigMode::InstallEntities);
++      // Create config entities a module has in the /install directory. Re-fetch
++      // config.installer each iteration: hook_install can trigger a container
++      // rebuild, which resets the old container and makes any cached proxy stale.
++      \Drupal::service('config.installer')->installDefaultConfig('module', $module, DefaultConfigMode::InstallEntities);
+
+       // Allow the module to perform install tasks.
+       $this->invoke($module, 'install', [$sync_status]);
+@@ -458,14 +458,14 @@
+     // been properly installed. This is often where soft dependencies lie.
+     // @todo This code fixes \Drupal\Tests\help\Functional\HelpTest::testHelp().
+     foreach ($module_list as $module) {
+-      $config_installer->installDefaultConfig('module', $module, DefaultConfigMode::Optional);
++      \Drupal::service('config.installer')->installDefaultConfig('module', $module, DefaultConfigMode::Optional);
+     }
+     // Install optional configuration from other modules once all the modules
+     // have been properly installed. This is often where soft dependencies lie.
+     // @todo This code fixes
+     //   \Drupal\Tests\forum\Functional\Module\DependencyTest::testUninstallDependents().
+     foreach ($module_list as $module) {
+-      $config_installer->installDefaultConfig('module', $module, DefaultConfigMode::SiteOptional);
++      \Drupal::service('config.installer')->installDefaultConfig('module', $module, DefaultConfigMode::SiteOptional);
+     }
+
+     if (count($module_list) > 1) {

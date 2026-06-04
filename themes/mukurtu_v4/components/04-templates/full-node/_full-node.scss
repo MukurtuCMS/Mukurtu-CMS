@@ -40,6 +40,7 @@
         .dictionary-word-subheading + div.field,
         .field--name-title,
         .dictionary-word__teaser .field,
+        .dictionary-word-tabs .field,
         .field--name-field-sections .field)) {
       @include mixins.divider;
     }
@@ -119,6 +120,11 @@
     }
   }
 
+  // Hide sidebar sections that contain no rendered field content.
+  &__sidebar .sidebar-section:not(:has(.field__item)) {
+    display: none;
+  }
+
   &__sidebar .sidebar-section {
     background-color: var(--brand-light-accent);
     border-block-start: 5px solid var(--brand-secondary);
@@ -137,6 +143,12 @@
 
       &__item {
         line-height: var(--line-height-s);
+      }
+    }
+
+    .field--formatter-entity-reference-label {
+      .field__items {
+        @include mixins.inline-list;
       }
     }
 

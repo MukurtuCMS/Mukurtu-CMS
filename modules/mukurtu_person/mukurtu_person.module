@@ -1,12 +1,14 @@
 <?php
 
 use Drupal\Core\Entity\ContentEntityFormInterface;
+use Drupal\Core\Render\Markup;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\mukurtu_core\Entity\FormattedTextWithTitle;
 use Drupal\mukurtu_person\Entity\Person;
 use Drupal\mukurtu_person\Entity\RelatedPerson;
+use Drupal\node\NodeInterface;
 use Drupal\views\ViewExecutable;
 use Drupal\views\Plugin\views\query\QueryPluginBase;
 
@@ -31,6 +33,109 @@ function mukurtu_person_entity_bundle_info_alter(array &$bundles)
   if (isset($bundles['paragraph']['related_person'])) {
     $bundles['paragraph']['related_person']['class'] = RelatedPerson::class;
   }
+}
+
+/**
+ * Implements hook_node_insert().
+ *
+ * Stores the new person's nid and title in private temp store so that
+ * hook_page_attachments() can attach the broadcast JS on the next page load.
+ * Also checks for missing reciprocal relationships on the new record.
+ */
+function mukurtu_person_node_insert(NodeInterface $node) {
+  if ($node->bundle() !== 'person') {
+    return;
+  }
+  \Drupal::service('tempstore.private')
+    ->get('mukurtu_person')
+    ->set('new_person_broadcast', [
+      'nid' => $node->id(),
+      'title' => $node->label(),
+    ]);
+  _mukurtu_person_warn_missing_reciprocals($node);
+}
+
+/**
+ * Implements hook_node_update().
+ *
+ * Warns when a related person does not have a reciprocal relationship back.
+ */
+function mukurtu_person_node_update(NodeInterface $node): void {
+  _mukurtu_person_warn_missing_reciprocals($node);
+}
+
+/**
+ * Warns when a related person does not have a reciprocal link back.
+ *
+ * Fires on every save (insert and update) until the reciprocal is in place.
+ *
+ * Note: for each related person this loads their paragraph entities and
+ * referenced nodes to check the reverse direction. Drupal's entity storage
+ * caches within the request, but consider a direct entity query approach if
+ * person records with large relationship graphs cause noticeably slow saves.
+ */
+function _mukurtu_person_warn_missing_reciprocals(NodeInterface $node): void {
+  if ($node->bundle() !== 'person') {
+    return;
+  }
+
+  foreach ($node->get('field_related_people') as $item) {
+    $paragraph = $item->entity;
+    if (!$paragraph) {
+      continue;
+    }
+
+    /** @var \Drupal\node\NodeInterface|null $related */
+    $related = $paragraph->get('field_related_person')->entity;
+    if (!$related || $related->bundle() !== 'person') {
+      continue;
+    }
+
+    // Check whether the related person already links back to this person.
+    $has_reciprocal = FALSE;
+    foreach ($related->get('field_related_people') as $back_item) {
+      $back_paragraph = $back_item->entity;
+      if (!$back_paragraph) {
+        continue;
+      }
+      $back_ref = $back_paragraph->get('field_related_person')->entity;
+      if ($back_ref && $back_ref->id() === $node->id()) {
+        $has_reciprocal = TRUE;
+        break;
+      }
+    }
+
+    if (!$has_reciprocal) {
+      $edit_url = Url::fromRoute('entity.node.edit_form', ['node' => $related->id()])
+        ->toString();
+      \Drupal::messenger()->addWarning(t(
+        'Note: Relationships are created on person records separately. Do you need to add a paired relationship to: <a href=":url">@name</a>?',
+        [':url' => $edit_url, '@name' => $related->label()]
+      ));
+    }
+  }
+}
+
+/**
+ * Implements hook_page_attachments().
+ *
+ * If a person was just created (flag set by hook_node_insert), attach the
+ * broadcast JS library with the person data in drupalSettings. The library
+ * fires a BroadcastChannel message that mukurtu-person-listener.js picks up
+ * in any other tab currently editing a related_person paragraph.
+ */
+function mukurtu_person_page_attachments(array &$attachments) {
+  $store = \Drupal::service('tempstore.private')->get('mukurtu_person');
+  $data = $store->get('new_person_broadcast');
+  if (!$data) {
+    return;
+  }
+  $store->delete('new_person_broadcast');
+  $attachments['#attached']['library'][] = 'mukurtu_person/person_broadcast';
+  $attachments['#attached']['drupalSettings']['mukurtuPerson']['newPerson'] = [
+    'nid' => $data['nid'],
+    'title' => $data['title'],
+  ];
 }
 
 /**
@@ -86,14 +191,25 @@ function mukurtu_person_field_widget_single_element_form_alter(&$element, FormSt
   if ($create_url->access()) {
     $element['create_person_link'] = [
       '#type' => 'link',
-      '#title' => t("Can't find the person? Create a new person record."),
+      '#title' => Markup::create(
+        (string) t("Can't find the person? Create a new person record.") .
+        '<span class="visually-hidden"> ' . (string) t('(opens in new tab)') . '</span>'
+      ),
       '#url' => $create_url,
       '#attributes' => [
-        'class' => ['button', 'button--small', 'button--extrasmall'],
+        // mukurtu-person-create-link is the JS hook for the listener behavior.
+        'class' => ['button', 'button--small', 'button--extrasmall', 'mukurtu-person-create-link'],
         'target' => '_blank',
         'rel' => 'noopener noreferrer',
       ],
       '#weight' => 10,
+      '#attached' => [
+        'library' => ['mukurtu_person/person_listener'],
+      ],
+    ];
+    $element['create_person_help'] = [
+      '#markup' => '<div class="form-item__description">' . t('A new person record form will open in a new tab. When you save that person record the tab will close and you will be redirected back here so that you can reference that new person record. Note that you will still need to add the relationship to THIS person record after saving here.') . '</div>',
+      '#weight' => 11,
     ];
   }
 }

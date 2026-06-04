@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\mukurtu_import\Kernel;
 
+use Drupal\Core\File\FileExists;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\file\Entity\File;
@@ -235,7 +236,7 @@ class MukurtuImportTestBase extends MigrateTestBase {
 
     /** @var \Drupal\Core\File\FileSystemInterface $file_system */
     $file_system = \Drupal::service('file_system');
-    $file_uri = $file_system->copy($temp_file_path, 'public://', FileSystemInterface::EXISTS_REPLACE);
+    $file_uri = $file_system->copy($temp_file_path, 'public://', FileExists::Replace);
 
     if ($file_uri) {
       $file = File::create([
