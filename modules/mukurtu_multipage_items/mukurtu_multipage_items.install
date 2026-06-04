@@ -1,0 +1,90 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the mukurtu_multipage_items module.
+ */
+
+/**
+ * Implements hook_install().
+ *
+ * Adds the is_additional_mpi_page field and mukurtu_multipage_page_index
+ * processor to the default content index. mukurtu_browse installs before this
+ * module, so these items cannot be declared in mukurtu_browse's config/install;
+ * they are added here so fresh installs match sites that ran
+ * mukurtu_browse_update_40009() and mukurtu_browse_update_40010().
+ */
+function mukurtu_multipage_items_install(): void {
+  $index = \Drupal\search_api\Entity\Index::load('mukurtu_default_content_index');
+  if (!$index) {
+    return;
+  }
+
+  $changed = FALSE;
+
+  $processors = $index->getProcessors();
+  if (!isset($processors['mukurtu_multipage_page_index'])) {
+    $processor = \Drupal::service('plugin.manager.search_api.processor')
+      ->createInstance('mukurtu_multipage_page_index', ['#index' => $index]);
+    $processors['mukurtu_multipage_page_index'] = $processor;
+    $index->setProcessors($processors);
+    $changed = TRUE;
+  }
+
+  if (!$index->getField('is_additional_mpi_page')) {
+    $field = new \Drupal\search_api\Item\Field($index, 'is_additional_mpi_page');
+    $field->setType('boolean');
+    $field->setPropertyPath('is_additional_mpi_page');
+    $field->setDatasourceId('entity:node');
+    $field->setLabel('Is additional multipage item page');
+    $index->addField($field);
+    $changed = TRUE;
+  }
+
+  if ($changed) {
+    $index->save();
+    $index->reindex();
+  }
+}
+
+/**
+ * Reset MPI _controller config cleared by Drupal 11.3.x RouteSubscriber.
+ *
+ * In Drupal 11.3.x, entity.node.canonical uses _entity_view instead of
+ * _controller. The RouteSubscriber read null from that route and wrote it
+ * to config, leaving _controller null. Reset it to the NodeViewController
+ * fallback so viewRedirect() works correctly.
+ */
+function mukurtu_multipage_items_update_40002(): void {
+  $config = \Drupal::configFactory()->getEditable('mukurtu_multipage_items.settings');
+  if (empty($config->get('_controller'))) {
+    $config->set('_controller', '\Drupal\node\Controller\NodeViewController::view')->save();
+  }
+}
+
+/**
+ * Switch field_pages on Multipage Item to rendered_entity (form_selection view mode).
+ */
+function mukurtu_multipage_items_update_40001(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.multipage_item.multipage_item.default');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_pages.settings.field_widget_display', 'rendered_entity');
+  $config->set('content.field_pages.settings.field_widget_display_settings', ['view_mode' => 'form_selection']);
+  $config->save();
+}
+
+/**
+ * Switch field_pages entity browser from mukurtu_content_browser to
+ * multipage_item_entity_browser to apply MPI-specific content filters.
+ */
+function mukurtu_multipage_items_update_40003(): void {
+  $config = \Drupal::configFactory()->getEditable(
+    'core.entity_form_display.multipage_item.multipage_item.default'
+  );
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_pages.settings.entity_browser', 'multipage_item_entity_browser')->save();
+}
