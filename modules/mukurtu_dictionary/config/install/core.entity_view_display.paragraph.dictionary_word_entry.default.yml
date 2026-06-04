@@ -53,7 +53,7 @@ content:
     type: entity_reference_entity_view
     label: above
     settings:
-      view_mode: full
+      view_mode: audio_for_dictionary_word
       link: false
     third_party_settings: {  }
     weight: 3

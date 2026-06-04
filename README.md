@@ -27,7 +27,7 @@ Using DDEV is the easiest way to get up and running with Mukurtu locally.
 ```
 mkdir mukurtu
 cd mukurtu
-ddev config --project-type=drupal --docroot=web --php-version=8.3
+ddev config --project-type=drupal --docroot=web
 # Optional but recommended: install pdftotext inside the DDEV container:
 echo "RUN sudo apt -qq update; sudo apt install poppler-utils -y;" > .ddev/web-build/Dockerfile.pdftotext
 ddev start

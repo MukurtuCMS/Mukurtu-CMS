@@ -1,0 +1,19 @@
+{#
+/**
+ * @file
+ * Theme override for audio media in the browse view mode.
+ * Used in dictionary word browse cards on /browse.
+ * Shows only the audio player — no contributor, no download button.
+ */
+#}
+{%
+  set classes = [
+    'media',
+    'media--' ~ bundle
+  ]
+%}
+
+<div{{ attributes.addClass(classes) }}>
+  {{ content.media_content_warnings }}
+  {{ content.field_media_audio_file }}
+</div>
