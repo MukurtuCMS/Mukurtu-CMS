@@ -1,7 +1,7 @@
 {#
 /**
  * @file
- * Theme override to present an audio file in carousel thumbnail view.
+ * Theme override to present an audio file in the dictionary word recording field.
  *
  * Available variables:
  * - media: The media item, with limited access to object properties and
@@ -32,17 +32,16 @@
 {%
   set classes = [
     'media',
-    'media--' ~ bundle,
-    'media--carousel-thumbnail'
+    'media--' ~ bundle
   ]
 %}
 
 <div{{ attributes.addClass(classes) }}>
+  {{ title_suffix.contextual_links }}
   {{ content.media_content_warnings }}
 
-  {% if content.field_thumbnail['#items'] is not empty %}
-    {{ content.field_thumbnail }}
-  {% else %}
-    <img alt="SoundCloud file {{ name }}" src="{{ soundcloud_fallback_thumbnail_url }}">
-  {% endif %}
+  {{ content|without('media_content_warnings') }}
+
+  <a href="{{ media_url }}" class="button" download aria-label="Download audio: {{ name }}">Download audio</a>
+
 </div>

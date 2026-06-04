@@ -394,6 +394,12 @@
         flex: 1;
       }
 
+      .button {
+        flex-basis: 100%;
+        max-inline-size: max-content;
+        margin-block-start: 0;
+      }
+
       .media-asset--name {
         @include include-media.media('>=md') {
           flex: 0 0 100%;
