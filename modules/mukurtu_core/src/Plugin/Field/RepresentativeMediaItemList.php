@@ -48,7 +48,6 @@ class RepresentativeMediaItemList extends EntityReferenceFieldItemList {
 
     // No accessible media found. If a dedicated placeholder is configured for
     // this case, leave the list empty so hook_entity_view_alter can inject it.
-    // Otherwise fall back to the site-wide default image.
     $media_settings = \Drupal::config('mukurtu_media.settings');
     $has_restricted_placeholder = !empty($media_settings->get('restricted_media_placeholder'));
     $has_no_media_placeholder   = !empty($media_settings->get('no_media_placeholder'));
@@ -58,11 +57,6 @@ class RepresentativeMediaItemList extends EntityReferenceFieldItemList {
     }
     if (!$has_media_references && $has_no_media_placeholder) {
       return;
-    }
-
-    $default_image = \Drupal::config('mukurtu.settings')->get('mukurtu_default_image');
-    if ($default_image) {
-      $this->list[0] = $this->createItem(0, $default_image);
     }
   }
 

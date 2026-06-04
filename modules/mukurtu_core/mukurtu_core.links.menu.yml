@@ -24,7 +24,7 @@ mukurtu_core.site_configuration:
   route_name: system.admin_config
   expanded: TRUE
 mukurtu_core.settings_assorted:
-  title: "Citation formats and default image"
+  title: "Citation formats"
   parent: mukurtu_dashboard
   menu_name: dashboard-site-settings
   description: "Configuration form for Mukurtu specific options."
