@@ -75,7 +75,7 @@ class Document extends Media implements DocumentInterface, CulturalProtocolContr
 
     $definitions['field_media_document'] = BaseFieldDefinition::create('file')
       ->setLabel(t('Document'))
-      ->setDescription(t('Supported file formats: pdf, txt, rtf, doc, docx, ppt, pptx, xls, xlsx, odf, odg, odp, ods, odt, fodt, fods, fodp, fodg, key, numbers, pages, csv, sxw, zip, rar, gz, 7z, tar. </br>Maximum file size: @size.</br>Select "Choose File" to upload a document.', ['@size' => ByteSizeMarkup::create(Environment::getUploadMaxSize())]))
+      ->setDescription(t('Supported file formats: pdf, txt, rtf, doc, docx, ppt, pptx, xls, xlsx, odf, odg, odp, ods, odt, fodt, fods, fodp, fodg, key, numbers, pages, csv, sxw, zip, rar, gz, 7z, tar. <br />Maximum file size: @size.<br />Select "Choose File" to upload a document.', ['@size' => ByteSizeMarkup::create(Environment::getUploadMaxSize())]))
       ->setDefaultValue('')
       ->setSettings([
         'target_type' => 'file',
@@ -97,7 +97,7 @@ class Document extends Media implements DocumentInterface, CulturalProtocolContr
 
     $definitions['field_media_tags'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Media Tags'))
-      ->setDescription(t('Media tags are used to label media assets to help find them within the media library. They are also used to trigger taxonomy based media content warnings. </br>Include as many media tags as needed. Select from existing media tags or add new ones.'))
+      ->setDescription(t('Media tags are used to label media assets to help find them within the media library. They are also used to trigger taxonomy based media content warnings. <br />Include as many media tags as needed. Select from existing media tags or add new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -122,7 +122,7 @@ class Document extends Media implements DocumentInterface, CulturalProtocolContr
 
     $definitions['field_people'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('People'))
-      ->setDescription(t('A person or people present or referenced in the document. This is used to trigger deceased person media content warnings.	</br>Include as many people as needed. Select from existing people or add new ones.'))
+      ->setDescription(t('A person or people present or referenced in the document. This is used to trigger deceased person media content warnings.	<br />Include as many people as needed. Select from existing people or add new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -147,7 +147,7 @@ class Document extends Media implements DocumentInterface, CulturalProtocolContr
 
     $definitions['field_thumbnail'] = BaseFieldDefinition::create('image')
       ->setLabel(t('Thumbnail'))
-      ->setDescription(t('A thumbnail image showing the first page of the document is automatically generated and is normally used, with a generic image used in certain contexts. A thumbnail image does not usually need to be provided.	</br>Select "Choose File" to upload a thumbnail image.'))
+      ->setDescription(t('A thumbnail image showing the first page of the document is automatically generated and is normally used, with a generic image used in certain contexts. A thumbnail image does not usually need to be provided.	<br />Select "Choose File" to upload a thumbnail image.'))
       ->setSettings([
         'alt_field' => TRUE,
         'alt_field_required' => TRUE,

@@ -85,6 +85,10 @@ function mukurtu_media_update_40002(): void {
 }
 
 /**
+ * 40003: Intentionally not defined.
+ */
+
+/**
  * Show field_cultural_protocols in the SoundCloud media_library form display.
  *
  * Fixes #784: SoundCloud items created via in-content modal were saved without
@@ -196,6 +200,10 @@ function mukurtu_media_update_40005(): void {
   }
   $display->save();
 }
+
+/**
+ * 40006: Intentionally not defined.
+ */
 
 /**
  * Add field_thumbnail to the image media default form display.

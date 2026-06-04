@@ -49,7 +49,7 @@ class Image extends Media implements ImageInterface, CulturalProtocolControlledI
 
     $definitions['field_media_image'] = BaseFieldDefinition::create('image')
       ->setLabel(t('Image'))
-      ->setDescription(t('Supported formats: jpeg, jpg, png, gif, webp. </br>Maximum file size: @size.</br>Select "Choose File" to upload an image.', ['@size' => ByteSizeMarkup::create(Environment::getUploadMaxSize())]))
+      ->setDescription(t('Supported formats: jpeg, jpg, png, gif, webp. <br />Maximum file size: @size.<br />Select "Choose File" to upload an image.', ['@size' => ByteSizeMarkup::create(Environment::getUploadMaxSize())]))
       ->setDefaultValue('')
       ->setSettings([
         'alt_field' => TRUE,
@@ -83,7 +83,7 @@ class Image extends Media implements ImageInterface, CulturalProtocolControlledI
 
     $definitions['field_media_tags'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Media Tags'))
-      ->setDescription(t('Media tags are used to label media assets to help find them within the media library. They are also used to trigger taxonomy based media content warnings.	</br>Include as many media tags as needed. Select from existing media tags or add new ones.'))
+      ->setDescription(t('Media tags are used to label media assets to help find them within the media library. They are also used to trigger taxonomy based media content warnings.	<br />Include as many media tags as needed. Select from existing media tags or add new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -108,7 +108,7 @@ class Image extends Media implements ImageInterface, CulturalProtocolControlledI
 
     $definitions['field_people'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('People'))
-      ->setDescription(t('A person or people present or referenced in the document. This is used to trigger deceased person media content warnings.	</br>As you type, names of existing people will be displayed. </br>Include as many people as needed. Select from existing people or add new ones.'))
+      ->setDescription(t('A person or people present or referenced in the document. This is used to trigger deceased person media content warnings.	<br />As you type, names of existing people will be displayed. <br />Include as many people as needed. Select from existing people or add new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -133,7 +133,7 @@ class Image extends Media implements ImageInterface, CulturalProtocolControlledI
 
     $definitions['field_thumbnail'] = BaseFieldDefinition::create('image')
       ->setLabel(t('Thumbnail'))
-      ->setDescription(t('An optional separate thumbnail used in certain view contexts. If not provided, the media image itself is used.</br>Select "Choose File" to upload a thumbnail image.'))
+      ->setDescription(t('An optional separate thumbnail used in certain view contexts. If not provided, the media image itself is used.<br />Select "Choose File" to upload a thumbnail image.'))
       ->setSettings([
         'alt_field' => TRUE,
         'alt_field_required' => TRUE,
