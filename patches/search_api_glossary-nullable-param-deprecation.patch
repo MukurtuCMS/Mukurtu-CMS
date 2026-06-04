@@ -1,0 +1,12 @@
+diff --git a/src/Plugin/search_api/processor/Glossary.php b/src/Plugin/search_api/processor/Glossary.php
+--- a/src/Plugin/search_api/processor/Glossary.php
++++ b/src/Plugin/search_api/processor/Glossary.php
+@@ -43,7 +43,7 @@ class Glossary extends ProcessorPluginBase {
+   /**
+    * {@inheritdoc}
+    */
+-  public function getPropertyDefinitions(DatasourceInterface $datasource = NULL) {
++  public function getPropertyDefinitions(?DatasourceInterface $datasource = NULL) {
+     $properties = [];
+
+     if (!$datasource) {
