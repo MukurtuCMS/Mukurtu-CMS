@@ -15,7 +15,7 @@
         }
     ],
     "require": {
-        "composer/installers": "^1.9",
+        "composer/installers": "^2.0",
         "cweagans/composer-patches": "^1.7",
         "drupal/better_exposed_filters": "^7.1.1",
         "drupal/blazy": "^3.0",
