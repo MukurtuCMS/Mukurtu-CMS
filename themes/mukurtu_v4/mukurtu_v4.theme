@@ -1,5 +1,6 @@
 <?php
 
+use Drupal\Core\Cache\Cache;
 use Drupal\file\Entity\File;
 use Drupal\mukurtu_collection\Entity\Collection;
 use Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager;
@@ -147,6 +148,13 @@ function mukurtu_v4_preprocess_media(array &$variables) {
     $url = $file->createFileUrl();
     $variables['media_url'] = $url;
   }
+
+  $config = \Drupal::config('mukurtu_media.settings');
+  $variables['media_download_enabled'] = $config->get('mukurtu_media_download_enabled') ?? TRUE;
+  $variables['#cache']['tags'] = Cache::mergeTags(
+    $variables['#cache']['tags'] ?? [],
+    $config->getCacheTags()
+  );
 }
 
 /**
@@ -186,6 +194,9 @@ function mukurtu_v4_preprocess_media_soundcloud_embed(array &$variables): void {
 function mukurtu_v4_preprocess_field_group_html_element__group_community_sidebar(array &$variables): void {
   $route_match = \Drupal::routeMatch();
   $community = $route_match->getParameter('community');
+  if (!$community) {
+    return;
+  }
   $variables['community_name'] = $community->get('name')->value;
   $variables['community_id'] = $community->get('id')->value;
   $local_contexts_projects_manager = \Drupal::service('mukurtu_local_contexts.supported_project_manager');
@@ -199,6 +210,9 @@ function mukurtu_v4_preprocess_field_group_html_element__group_community_sidebar
 function mukurtu_v4_preprocess_field_group_html_element__group_protocol_sidebar(array &$variables): void {
   $route_match = \Drupal::routeMatch();
   $protocol = $route_match->getParameter('protocol');
+  if (!$protocol) {
+    return;
+  }
   $variables['protocol_name'] = $protocol->get('name')->value;
   $variables['protocol_id'] = $protocol->get('id')->value;
   $local_contexts_projects_manager = \Drupal::service('mukurtu_local_contexts.supported_project_manager');

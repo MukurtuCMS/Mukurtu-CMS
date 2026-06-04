@@ -141,7 +141,7 @@ function mukurtu_core_update_40003(): void {
 function mukurtu_core_update_40004(): void {
   \Drupal::service('module_installer')->install(['flat_taxonomy']);
  }
- 
+
 /**
  * Set tagify default widget setting.
  */
@@ -742,6 +742,19 @@ function mukurtu_core_update_40021(): void {
 }
 
 /**
+ * Switch featured_content entity browser to rendered_entity display.
+ */
+function mukurtu_core_update_40022(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.block_content.featured_content.default');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_featured_content.settings.field_widget_display', 'rendered_entity');
+  $config->set('content.field_featured_content.settings.field_widget_display_settings', ['view_mode' => 'content_browser']);
+  $config->save();
+}
+
+/**
  * Create FieldConfig entities for field_coverage on all content type bundles.
  *
  * field_coverage was previously defined as a bundle-level BaseFieldDefinition
@@ -807,22 +820,208 @@ function mukurtu_core_update_40024(): void {
 }
 
 /**
- * Switch featured_content entity browser to rendered_entity display.
+ * Install form_selection view display configs for each node bundle.
  */
-function mukurtu_core_update_40022(): void {
+function mukurtu_core_update_40025(): void {
+  $configs = [
+    ['mukurtu_digital_heritage', 'node.digital_heritage.form_selection'],
+    ['mukurtu_collection', 'node.collection.form_selection'],
+    ['mukurtu_person', 'node.person.form_selection'],
+    ['mukurtu_place', 'node.place.form_selection'],
+    ['mukurtu_dictionary', 'node.dictionary_word.form_selection'],
+    ['mukurtu_dictionary', 'node.word_list.form_selection'],
+  ];
+  $module_handler = \Drupal::moduleHandler();
+  $config_factory = \Drupal::configFactory();
+  foreach ($configs as [$module, $config_name]) {
+    if (!$module_handler->moduleExists($module)) {
+      continue;
+    }
+    $existing = $config_factory->get("core.entity_view_display.$config_name");
+    if (!$existing->isNew()) {
+      continue;
+    }
+    $module_path = \Drupal::service('extension.list.module')->getPath($module);
+    $source = new \Drupal\Core\Config\FileStorage("$module_path/config/install");
+    $data = $source->read("core.entity_view_display.$config_name");
+    if ($data) {
+      $config_factory->getEditable("core.entity_view_display.$config_name")
+        ->setData($data)
+        ->save(TRUE);
+    }
+  }
+}
+
+/**
+ * Add collection-specific entity browser (no type filter) and view display.
+ */
+function mukurtu_core_update_40026(): void {
+  // Install the new mukurtu_collection_browser entity browser config.
+  $config_storage = \Drupal::service('config.storage');
+  $name = 'entity_browser.browser.mukurtu_collection_browser';
+  if (!$config_storage->exists($name)) {
+    $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core');
+    $source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+    $data = $source->read($name);
+    if ($data !== FALSE) {
+      $config_storage->write($name, $data);
+    }
+  }
+}
+
+/**
+ * Create the form_selection node view mode for entity browser selected-items display.
+ */
+function mukurtu_core_update_40027(): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('entity_view_mode');
+  if (!$storage->load('node.form_selection')) {
+    $storage->create([
+      'id' => 'node.form_selection',
+      'label' => 'Form Selection',
+      'targetEntityType' => 'node',
+      'cache' => TRUE,
+    ])->save();
+  }
+}
+
+/**
+ * Install dedicated single-type entity browsers and update the content browser
+ * view to exclude site-structure node types from results.
+ *
+ * - Adds entity_browser_dictionary_word and entity_browser_person display
+ *   variants to views.view.mukurtu_content_browser.
+ * - Installs entity_browser.browser.mukurtu_dictionary_word_browser and
+ *   entity_browser.browser.mukurtu_person_browser.
+ * - Adds an unexposed bundle filter that excludes article, page, and
+ *   landing_page from all mukurtu_content_browser results.
+ */
+function mukurtu_core_update_40028(): void {
+  $config_storage = \Drupal::service('config.storage');
+
+  $core_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core');
+  $core_source = new \Drupal\Core\Config\FileStorage($core_path . '/config/install');
+  foreach ([
+    'views.view.mukurtu_content_browser',
+    'entity_browser.browser.mukurtu_person_browser',
+  ] as $name) {
+    $data = $core_source->read($name);
+    if ($data !== FALSE) {
+      $config_storage->write($name, $data);
+    }
+  }
+
+  // The dictionary word browser is owned by mukurtu_dictionary.
+  $dict_path = \Drupal::service('extension.list.module')->getPath('mukurtu_dictionary');
+  $dict_source = new \Drupal\Core\Config\FileStorage($dict_path . '/config/install');
+  $data = $dict_source->read('entity_browser.browser.mukurtu_dictionary_word_browser');
+  if ($data !== FALSE) {
+    $config_storage->write('entity_browser.browser.mukurtu_dictionary_word_browser', $data);
+  }
+
+  $authenticated = \Drupal\user\Entity\Role::load('authenticated');
+  if ($authenticated) {
+    $authenticated->grantPermission('access mukurtu_dictionary_word_browser entity browser pages');
+    $authenticated->grantPermission('access mukurtu_person_browser entity browser pages');
+    $authenticated->save();
+  }
+}
+
+/**
+ * Create form_selection view displays for article and page node types and
+ * switch field_featured_content on the Featured Content block to rendered_entity.
+ */
+function mukurtu_core_update_40029(): void {
+  $config_storage = \Drupal::service('config.storage');
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core');
+  $module_source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+
+  foreach ([
+    'core.entity_view_display.node.article.form_selection',
+    'core.entity_view_display.node.page.form_selection',
+  ] as $name) {
+    $data = $module_source->read($name);
+    if ($data !== FALSE) {
+      $config_storage->write($name, $data);
+    }
+  }
+
   $config = \Drupal::configFactory()->getEditable('core.entity_form_display.block_content.featured_content.default');
-  if ($config->isNew()) {
+  if (!$config->isNew()) {
+    $config->set('content.field_featured_content.settings.field_widget_display', 'rendered_entity');
+    $config->set('content.field_featured_content.settings.field_widget_display_settings', ['view_mode' => 'form_selection']);
+    $config->save();
+  }
+}
+
+/**
+ * Install form_selection media view mode and displays; update node form_selection
+ * view displays to use the new media view mode.
+ */
+function mukurtu_core_update_40030(): void {
+  $config_storage = \Drupal::service('config.storage');
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core');
+  $module_source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+  $profile_path = \Drupal::service('extension.list.profile')->getPath('mukurtu');
+  $profile_source = new \Drupal\Core\Config\FileStorage($profile_path . '/config/install');
+
+  // Install the new media view mode.
+  $view_mode_name = 'core.entity_view_mode.media.form_selection';
+  $data = $module_source->read($view_mode_name);
+  if ($data !== FALSE) {
+    $config_storage->write($view_mode_name, $data);
+  }
+
+  // Install media view displays for each media type.
+  $media_displays = [
+    'core.entity_view_display.media.image.form_selection',
+    'core.entity_view_display.media.document.form_selection',
+    'core.entity_view_display.media.audio.form_selection',
+    'core.entity_view_display.media.video.form_selection',
+    'core.entity_view_display.media.external_embed.form_selection',
+    'core.entity_view_display.media.remote_video.form_selection',
+  ];
+  foreach ($media_displays as $name) {
+    $data = $profile_source->read($name);
+    if ($data !== FALSE) {
+      $config_storage->write($name, $data);
+    }
+  }
+
+  // Update all node form_selection view displays to use the new media view mode.
+  $node_bundles = [
+    'digital_heritage', 'collection', 'word_list', 'dictionary_word',
+    'person', 'landing_page', 'place', 'page', 'article',
+  ];
+  foreach ($node_bundles as $bundle) {
+    $config = \Drupal::configFactory()->getEditable("core.entity_view_display.node.{$bundle}.form_selection");
+    if ($config->isNew()) {
+      continue;
+    }
+    $current = $config->get('content.field_representative_media.settings.view_mode');
+    if (in_array($current, ['digital_heritage_sidebar', 'small'])) {
+      $config->set('content.field_representative_media.settings.view_mode', 'form_selection')->save();
+    }
+  }
+}
+
+/**
+ * Add remote_video digital_heritage_sidebar entity view display.
+ */
+function mukurtu_core_update_40031(): void {
+  $config_path = \Drupal::service('extension.list.profile')->getPath('mukurtu') . '/config/install/core.entity_view_display.media.remote_video.digital_heritage_sidebar.yml';
+  if (!file_exists($config_path)) {
     return;
   }
-  $config->set('content.field_featured_content.settings.field_widget_display', 'rendered_entity');
-  $config->set('content.field_featured_content.settings.field_widget_display_settings', ['view_mode' => 'content_browser']);
-  $config->save();
+  $data = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($config_path));
+  \Drupal::configFactory()->getEditable('core.entity_view_display.media.remote_video.digital_heritage_sidebar')
+    ->setData($data)
+    ->save(TRUE);
 }
 
 /**
  * Hide comment subject field and restrict comment body to Basic HTML only.
  */
-function mukurtu_core_update_40025(): void {
+function mukurtu_core_update_40032(): void {
   // Hide subject field from comment form display.
   $form_display = \Drupal::configFactory()->getEditable('core.entity_form_display.comment.comment.default');
   if (!$form_display->isNew()) {
@@ -846,7 +1045,7 @@ function mukurtu_core_update_40025(): void {
  * Create comment_basic_html text format (no media embed) and restrict comment
  * body to it; removes Insert Media button from comment CKEditor toolbar.
  */
-function mukurtu_core_update_40026(): void {
+function mukurtu_core_update_40033(): void {
   // Create the comment_basic_html filter format if it doesn't exist.
   $format_config = \Drupal::configFactory()->getEditable('filter.format.comment_basic_html');
   if ($format_config->isNew()) {
@@ -917,4 +1116,3 @@ function mukurtu_core_update_40026(): void {
     $role->save();
   }
 }
-
