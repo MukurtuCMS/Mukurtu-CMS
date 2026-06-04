@@ -145,13 +145,19 @@
             },
             "drupal/message_digest": {
                 "Fix null flag fatal error in DigestInterval::access()": "web/profiles/mukurtu/patches/message_digest_ui-digest-interval-null-flag.patch",
-                "Fix implicit nullable param deprecation in message_digest_allowed_values_callback()": "web/profiles/mukurtu/patches/message_digest-nullable-param-deprecation.patch"
+                "Fix implicit nullable param deprecations": "web/profiles/mukurtu/patches/message_digest-nullable-param-deprecation.patch"
+            },
+            "drupal/message_ui": {
+                "Fix implicit nullable param deprecation in SaveMessage::access()": "web/profiles/mukurtu/patches/message_ui-nullable-param-deprecation.patch"
             },
             "drupal/admin_theme": {
                 "Fix implicit nullable param deprecation in AdminThemeAdminContext::isAdminRoute()": "web/profiles/mukurtu/patches/admin_theme-nullable-param-deprecation.patch"
             },
             "drupal/field_group": {
                 "Fix EntityViewDisplay/EntityFormDisplay::load() incompatibility with Drupal 11.3.x": "web/profiles/mukurtu/patches/field_group-entity-load-11-3.patch"
+            },
+            "composer/installers": {
+                "Fix implicit nullable param deprecations in Installer and BaseInstaller": "web/profiles/mukurtu/patches/composer_installers-nullable-param-deprecation.patch"
             }
         }
     }
