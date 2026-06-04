@@ -42,6 +42,6 @@
 
   {{ content|without('media_content_warnings') }}
 
-  <a href="{{ media_url }}" class="button" download>Download audio</a>
+  <a href="{{ media_url }}" class="button" download aria-label="Download audio: {{ name }}">Download audio</a>
 
 </div>
