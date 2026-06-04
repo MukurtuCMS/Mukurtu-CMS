@@ -79,7 +79,7 @@
   {% set carousels = null %}
 {% endif %}
 
-{% set num_entries = content.group_primary_fields.group_additional_word_entries.field_additional_word_entries['#items']|length %}
+{% set num_entries = node.field_additional_word_entries|length %}
 
 <article{{ attributes }}>
   <div{{ content_attributes }} class="full-node">

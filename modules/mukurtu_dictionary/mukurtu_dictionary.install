@@ -1064,3 +1064,24 @@ function mukurtu_dictionary_update_40028(): void {
   }
   $config->save(TRUE);
 }
+
+/**
+ * Show field_recording on dictionary word browse view display.
+ */
+function mukurtu_dictionary_update_40029(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.dictionary_word.browse');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_recording', [
+    'type' => 'entity_reference_entity_view',
+    'label' => 'hidden',
+    'settings' => ['view_mode' => 'audio_for_dictionary_teaser', 'link' => FALSE],
+    'third_party_settings' => [],
+    'weight' => 3,
+    'region' => 'content',
+  ]);
+  $hidden = $config->get('hidden') ?? [];
+  unset($hidden['field_recording']);
+  $config->set('hidden', $hidden)->save();
+}

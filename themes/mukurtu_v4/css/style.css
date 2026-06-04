@@ -5860,6 +5860,8 @@ header {
   max-inline-size: -webkit-max-content;
   max-inline-size: -moz-max-content;
   max-inline-size: max-content;
+  -webkit-margin-before: 0;
+          margin-block-start: 0;
 }
 .page-node-type-dictionary-word .field--name-field-recording .media--audio .field--name-field-contributor,
 .page-node-type-dictionary-word .field--name-field-sentence-recording .media--audio .field--name-field-contributor {
