@@ -16,8 +16,11 @@
         return;
       }
       once('mukurtu-close-toolbar-trays', 'body', context).forEach(() => {
-        // Defer until after toolbar.js has finished its attach() and restored
-        // the active tray from localStorage.
+        // setTimeout(0) defers until after toolbar.js has finished its own
+        // attach() and restored the active tray from localStorage. There is no
+        // cleaner hook point for this — toolbar.js restores state synchronously
+        // at the end of its attach(), so a zero-delay timeout reliably runs
+        // after it without depending on a specific execution time.
         setTimeout(() => {
           if (
             Drupal.toolbar &&
