@@ -1,26 +1,10 @@
 mukurtu_media.settings:
   type: config_object
-  label: 'Mukurtu media settings'
+  label: 'Mukurtu Media settings'
   mapping:
     mukurtu_media_download_enabled:
       type: boolean
       label: 'Enable media download button'
-
-mukurtu_thumbnail.settings:
-  type: config_object
-  label: 'Mukurtu Thumbnail Settings'
-  mapping:
-    default_thumbnail:
-      type: sequence
-      label: 'Default thumbnails for media bundles.'
-      sequence:
-        type: string
-        label: 'Thumbnail fid.'
-
-mukurtu_media.settings:
-  type: config_object
-  label: 'Mukurtu Media settings'
-  mapping:
     restricted_media_placeholder:
       type: sequence
       label: 'Restricted media placeholder image.'
@@ -33,3 +17,14 @@ mukurtu_media.settings:
       sequence:
         type: string
         label: 'File fid.'
+
+mukurtu_thumbnail.settings:
+  type: config_object
+  label: 'Mukurtu Thumbnail Settings'
+  mapping:
+    default_thumbnail:
+      type: sequence
+      label: 'Default thumbnails for media bundles.'
+      sequence:
+        type: string
+        label: 'Thumbnail fid.'
