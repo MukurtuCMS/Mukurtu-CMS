@@ -277,3 +277,189 @@ function mukurtu_media_update_40006(): void {
 
   $config->save();
 }
+
+/**
+ * Show field_cultural_protocols in the SoundCloud media_library form display.
+ *
+ * Fixes #784: SoundCloud items created via in-content modal were saved without
+ * a protocol because the field was hidden in the media_library form mode.
+ */
+function mukurtu_media_update_40007(): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('entity_form_display');
+  /** @var \Drupal\Core\Entity\Display\EntityFormDisplayInterface $display */
+  $display = $storage->load('media.soundcloud.media_library');
+  if (!$display) {
+    return;
+  }
+
+  // Only add the field if it isn't already visible.
+  $component = $display->getComponent('field_cultural_protocols');
+  if ($component) {
+    return;
+  }
+
+  $display->setComponent('field_cultural_protocols', [
+    'type' => 'cultural_protocol_widget',
+    'weight' => 1,
+    'region' => 'content',
+    'settings' => [],
+    'third_party_settings' => [],
+  ]);
+  $display->save();
+}
+
+/**
+ * Add remaining metadata fields to the SoundCloud media_library form display.
+ *
+ * Adds field_media_tags, field_contributor, field_thumbnail, field_identifier,
+ * and field_people so the in-content modal matches the admin form.
+ */
+function mukurtu_media_update_40008(): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('entity_form_display');
+  /** @var \Drupal\Core\Entity\Display\EntityFormDisplayInterface $display */
+  $display = $storage->load('media.soundcloud.media_library');
+  if (!$display) {
+    return;
+  }
+
+  $fields = [
+    'field_media_tags' => [
+      'type' => 'tagify_entity_reference_autocomplete_widget',
+      'weight' => 2,
+      'settings' => [
+        'match_operator' => 'CONTAINS',
+        'match_limit' => 0,
+        'placeholder' => '',
+        'suggestions_dropdown' => 0,
+        'show_entity_id' => 0,
+        'show_info_label' => 0,
+        'info_label' => '',
+        'parent_selection' => 1,
+      ],
+    ],
+    'field_contributor' => [
+      'type' => 'tagify_entity_reference_autocomplete_widget',
+      'weight' => 3,
+      'settings' => [
+        'match_operator' => 'CONTAINS',
+        'match_limit' => 0,
+        'placeholder' => '',
+        'suggestions_dropdown' => 0,
+        'show_entity_id' => 0,
+        'show_info_label' => 0,
+        'info_label' => '',
+        'parent_selection' => 1,
+      ],
+    ],
+    'field_thumbnail' => [
+      'type' => 'image_image',
+      'weight' => 4,
+      'settings' => [
+        'progress_indicator' => 'throbber',
+        'preview_image_style' => 'thumbnail',
+      ],
+    ],
+    'field_identifier' => [
+      'type' => 'string_textfield',
+      'weight' => 5,
+      'settings' => [
+        'size' => 60,
+        'placeholder' => '',
+      ],
+    ],
+    'field_people' => [
+      'type' => 'tagify_entity_reference_autocomplete_widget',
+      'weight' => 6,
+      'settings' => [
+        'match_operator' => 'CONTAINS',
+        'match_limit' => 0,
+        'placeholder' => '',
+        'suggestions_dropdown' => 0,
+        'show_entity_id' => 0,
+        'show_info_label' => 0,
+        'info_label' => '',
+        'parent_selection' => 1,
+      ],
+    ],
+  ];
+
+  foreach ($fields as $field_name => $config) {
+    if (!$display->getComponent($field_name)) {
+      $display->setComponent($field_name, $config + ['region' => 'content', 'third_party_settings' => []]);
+    }
+  }
+  $display->save();
+}
+
+/**
+ * Add field_thumbnail to the image media default form display.
+ *
+ * The image bundle is the only media type without a thumbnail field. The field
+ * itself is registered via bundleFieldDefinitions() (no schema change needed);
+ * this hook adds it to the default form display at weight 4.
+ */
+function mukurtu_media_update_40009(): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('entity_form_display');
+  /** @var \Drupal\Core\Entity\Display\EntityFormDisplayInterface $display */
+  $display = $storage->load('media.image.default');
+  if (!$display) {
+    return;
+  }
+  if (!$display->getComponent('field_thumbnail')) {
+    $display->setComponent('field_thumbnail', [
+      'type' => 'image_image',
+      'weight' => 4,
+      'region' => 'content',
+      'settings' => [
+        'progress_indicator' => 'throbber',
+        'preview_image_style' => 'thumbnail',
+      ],
+      'third_party_settings' => [],
+    ]);
+    $display->save();
+  }
+}
+
+/**
+ * Reorder SoundCloud media_library form display fields and show the URL field.
+ *
+ * Desired order: Link (field_media_soundcloud), Name, Cultural Protocols,
+ * Thumbnail, Identifier, People, Media Tags, Contributor.
+ */
+function mukurtu_media_update_40010(): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('entity_form_display');
+  /** @var \Drupal\Core\Entity\Display\EntityFormDisplayInterface $display */
+  $display = $storage->load('media.soundcloud.media_library');
+  if (!$display) {
+    return;
+  }
+
+  // Show the SoundCloud URL field (was hidden in previous config).
+  $display->setComponent('field_media_soundcloud', [
+    'type' => 'string_textfield',
+    'weight' => 0,
+    'region' => 'content',
+    'settings' => ['size' => 60, 'placeholder' => ''],
+    'third_party_settings' => [],
+  ]);
+
+  // Reorder all remaining fields.
+  $weights = [
+    'name' => 1,
+    'field_cultural_protocols' => 2,
+    'field_thumbnail' => 3,
+    'field_identifier' => 4,
+    'field_people' => 5,
+    'field_media_tags' => 6,
+    'field_contributor' => 7,
+  ];
+  foreach ($weights as $field => $weight) {
+    $component = $display->getComponent($field);
+    if ($component) {
+      $component['weight'] = $weight;
+      $display->setComponent($field, $component);
+    }
+  }
+
+  $display->save();
+}
