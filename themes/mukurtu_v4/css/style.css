@@ -896,6 +896,10 @@ a:not(.primary-nav__menu-link) svg.tel path {
 .media-carousel .splide__slide:not(.is-active) {
   block-size: 0;
 }
+.media-carousel .splide__track {
+  -webkit-transition: block-size 0.3s ease-in-out;
+  transition: block-size 0.3s ease-in-out;
+}
 
 .thumbnail-carousel.splide:not(.is-overflow) .splide__list {
   -webkit-box-pack: center;
