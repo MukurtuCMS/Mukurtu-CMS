@@ -287,6 +287,21 @@
   }
 }
 
+.word-entry-fields-pair {
+  display: flex;
+  gap: var(--v-space-xs);
+  flex-wrap: wrap;
+
+  > .field {
+    flex: 1;
+    min-inline-size: 10rem;
+  }
+}
+
+.dictionary-word-tabs {
+  margin-block-end: var(--v-space-s);
+}
+
 // Full content display for dictionary word nodes.
 .page-node-type-dictionary-word {
   .full-node__content {
@@ -359,7 +374,8 @@
     border-block-start: 5px solid var(--mukurtu-view-row-divider-color);
   }
 
-  .field--name-field-recording {
+  .field--name-field-recording,
+  .field--name-field-sentence-recording {
     // stylelint-disable-next-line no-descending-specificity
     .media--audio {
       flex-direction: column;

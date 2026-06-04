@@ -12,6 +12,7 @@ use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\file\Entity\File;
+use Drupal\Core\File\FileExists;
 use Drupal\Core\File\FileSystemInterface;
 
 /**
@@ -256,7 +257,7 @@ class Video extends Media implements VideoInterface, CulturalProtocolControlledI
     // Move the thumbnail to its permanent location in private://.
     $fileSystem->prepareDirectory($targetDir, FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS);
     $destination = $targetDir . '/' . basename($tempThumbnailDest);
-    $fileSystem->move($tempThumbnailDest, $destination, FileSystemInterface::EXISTS_REPLACE);
+    $fileSystem->move($tempThumbnailDest, $destination, FileExists::Replace);
 
     // Create a File entity for the new thumbnail, passing the thumbnail info.
     $current_user = \Drupal::currentUser();

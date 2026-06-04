@@ -1,16 +1,30 @@
 {#
 /**
  * @file
- * Theme override to display an audio media item in the dictionary word teaser.
+ * Theme override for audio media in the audio_for_dictionary_teaser view mode.
+ * Used in the dictionary word recording field (field_recording) on dictionary teasers.
  *
- * Renders the audio player followed by an optional Contributor attribution.
- * field_contributor uses entity_reference_label with link: true so terms
- * render as links. The contributor label is controlled via the view display.
- *
- * @see template_preprocess_media()
+ * Available variables: see media.html.twig.
+ * Additional variables:
+ * - media_url: URL to the audio file.
+ * - media_download_enabled: Whether the download button should be shown.
  */
 #}
-<div{{ attributes.addClass(['media', 'media--audio']) }}>
+{%
+  set classes = [
+    'media',
+    'media--' ~ bundle
+  ]
+%}
+
+<div{{ attributes.addClass(classes) }}>
+  {{ title_suffix.contextual_links }}
+  {{ content.media_content_warnings }}
   {{ content.field_media_audio_file }}
+  {% if media_download_enabled and media_url %}
+    <a href="{{ media_url }}" class="button button--download-icon" download aria-label="Download audio: {{ name }}">
+      <svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="16" height="18" aria-hidden="true"><path d="M11.61 0H3.87v5.57H0L7.74 13l7.74-7.43h-3.87z"/><path fill-rule="evenodd" d="M.52 15H16v3H.52z" clip-rule="evenodd"/></svg>
+    </a>
+  {% endif %}
   {{ content.field_contributor }}
 </div>

@@ -297,7 +297,7 @@ class MukurtuEntityViewsData extends EntityViewsData {
             continue;
           }
 
-          if (isset($this->getFieldStorageDefinitions()[$field_name])) {
+          if (isset($this->entityFieldManager->getFieldStorageDefinitions($this->entityType->id())[$field_name])) {
             $this->mapFieldDefinition($table, $field_name, $field_definitions[$field_name], $table_mapping, $data[$table]);
           }
         }
