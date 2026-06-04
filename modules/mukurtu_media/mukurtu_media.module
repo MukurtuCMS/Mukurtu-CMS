@@ -4,6 +4,7 @@ use Drupal\Component\Serialization\Json;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\CloseModalDialogCommand;
+use Drupal\Core\Ajax\InvokeCommand;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -343,6 +344,7 @@ function mukurtu_media_field_widget_single_element_form_alter(array &$element, F
         'aria-label' => $aria_label,
         'data-dialog-type' => 'modal',
         'data-dialog-options' => Json::encode(['width' => 900]),
+        'data-media-edit-id' => 'media-edit-' . $media_id,
       ],
     ];
   }
@@ -389,7 +391,9 @@ function mukurtu_media_form_alter(array &$form, FormStateInterface $form_state, 
 function mukurtu_media_edit_dialog_ajax(array &$form, FormStateInterface $form_state): AjaxResponse {
   $response = new AjaxResponse();
   if ($form_state->isExecuted()) {
+    $media_id = $form_state->getFormObject()->getEntity()->id();
     $response->addCommand(new CloseModalDialogCommand());
+    $response->addCommand(new InvokeCommand('[data-media-edit-id="media-edit-' . $media_id . '"]', 'focus'));
   }
   else {
     // Drupal form validation errors are in $form_state->getErrors(), not the

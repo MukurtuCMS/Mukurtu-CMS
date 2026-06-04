@@ -85,7 +85,7 @@ function mukurtu_media_update_40002(): void {
 }
 
 /**
- * Switch remote_video and external_embed media_library view modes to thumbnail.
+ * Switch remote_video media_library view mode to thumbnail.
  */
 function mukurtu_media_update_40003(): void {
   $config = \Drupal::configFactory()->getEditable('core.entity_view_display.media.remote_video.media_library');
@@ -116,6 +116,63 @@ function mukurtu_media_update_40003(): void {
   $hidden['field_media_oembed_video'] = TRUE;
   unset($hidden['thumbnail']);
   $config->set('hidden', $hidden);
+
+  // Update module dependencies: blazy -> image.
+  $dependencies = $config->get('dependencies') ?? [];
+  $dependencies['module'] = array_values(array_diff($dependencies['module'] ?? [], ['blazy']));
+  if (!in_array('image', $dependencies['module'])) {
+    $dependencies['module'][] = 'image';
+  }
+  sort($dependencies['module']);
+  $config->set('dependencies', $dependencies);
+
+  $config->save();
+}
+
+/**
+ * Switch external_embed media_library view mode from text_default to thumbnail.
+ */
+function mukurtu_media_update_40004(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.media.external_embed.media_library');
+  if ($config->isNew()) {
+    return;
+  }
+
+  $content = $config->get('content') ?? [];
+  unset($content['field_media_external_embed']);
+
+  $content['thumbnail'] = [
+    'type' => 'image',
+    'label' => 'hidden',
+    'settings' => [
+      'image_link' => '',
+      'image_style' => 'media_library',
+      'image_loading' => ['attribute' => 'lazy'],
+    ],
+    'third_party_settings' => [],
+    'weight' => 0,
+    'region' => 'content',
+  ];
+  $config->set('content', $content);
+
+  $hidden = $config->get('hidden') ?? [];
+  $hidden['field_media_external_embed'] = TRUE;
+  unset($hidden['thumbnail']);
+  $config->set('hidden', $hidden);
+
+  // Update dependencies: remove 'text' module; add 'image' module and image style.
+  $dependencies = $config->get('dependencies') ?? [];
+  $dependencies['module'] = array_values(array_diff($dependencies['module'] ?? [], ['text']));
+  if (!in_array('image', $dependencies['module'])) {
+    $dependencies['module'][] = 'image';
+  }
+  sort($dependencies['module']);
+  $dependencies['config'] = $dependencies['config'] ?? [];
+  if (!in_array('image.style.media_library', $dependencies['config'])) {
+    $dependencies['config'][] = 'image.style.media_library';
+  }
+  sort($dependencies['config']);
+  $config->set('dependencies', $dependencies);
 
   $config->save();
 }
@@ -149,6 +206,20 @@ function mukurtu_media_update_40005(): void {
   $hidden['field_media_audio_file'] = TRUE;
   unset($hidden['thumbnail']);
   $config->set('hidden', $hidden);
+
+  // Update dependencies: remove 'blazy' and 'file' modules; add 'image' module and image style.
+  $dependencies = $config->get('dependencies') ?? [];
+  $dependencies['module'] = array_values(array_diff($dependencies['module'] ?? [], ['blazy', 'file']));
+  if (!in_array('image', $dependencies['module'])) {
+    $dependencies['module'][] = 'image';
+  }
+  sort($dependencies['module']);
+  $dependencies['config'] = $dependencies['config'] ?? [];
+  if (!in_array('image.style.media_library', $dependencies['config'])) {
+    $dependencies['config'][] = 'image.style.media_library';
+  }
+  sort($dependencies['config']);
+  $config->set('dependencies', $dependencies);
 
   $config->save();
 }
@@ -190,39 +261,19 @@ function mukurtu_media_update_40006(): void {
   unset($hidden['field_thumbnail']);
   $config->set('hidden', $hidden);
 
-  $config->save();
-}
-
-/**
- * Switch external_embed media_library view mode from text_default to thumbnail.
- */
-function mukurtu_media_update_40004(): void {
-  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.media.external_embed.media_library');
-  if ($config->isNew()) {
-    return;
+  // Update dependencies: remove 'blazy' module; add 'image' module and carousel_thumbnail style.
+  $dependencies = $config->get('dependencies') ?? [];
+  $dependencies['module'] = array_values(array_diff($dependencies['module'] ?? [], ['blazy']));
+  if (!in_array('image', $dependencies['module'])) {
+    $dependencies['module'][] = 'image';
   }
-
-  $content = $config->get('content') ?? [];
-  unset($content['field_media_external_embed']);
-
-  $content['thumbnail'] = [
-    'type' => 'image',
-    'label' => 'hidden',
-    'settings' => [
-      'image_link' => '',
-      'image_style' => 'media_library',
-      'image_loading' => ['attribute' => 'lazy'],
-    ],
-    'third_party_settings' => [],
-    'weight' => 0,
-    'region' => 'content',
-  ];
-  $config->set('content', $content);
-
-  $hidden = $config->get('hidden') ?? [];
-  $hidden['field_media_external_embed'] = TRUE;
-  unset($hidden['thumbnail']);
-  $config->set('hidden', $hidden);
+  sort($dependencies['module']);
+  $dependencies['config'] = $dependencies['config'] ?? [];
+  if (!in_array('image.style.carousel_thumbnail', $dependencies['config'])) {
+    $dependencies['config'][] = 'image.style.carousel_thumbnail';
+  }
+  sort($dependencies['config']);
+  $config->set('dependencies', $dependencies);
 
   $config->save();
 }
