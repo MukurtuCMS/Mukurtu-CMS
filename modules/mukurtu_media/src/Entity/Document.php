@@ -14,6 +14,7 @@ use Drupal\Component\Utility\Environment;
 use Drupal\Core\StringTranslation\ByteSizeMarkup;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\file\Entity\File;
+use Drupal\Core\File\FileExists;
 use Drupal\Core\File\FileSystemInterface;
 
 /**
@@ -352,7 +353,7 @@ class Document extends Media implements DocumentInterface, CulturalProtocolContr
     $targetDir = rtrim(str_replace($docName, '', $uri), '/');
     $fileSystem->prepareDirectory($targetDir, FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS);
     $destination = $targetDir . '/' . $thumbnailName;
-    $fileSystem->move($tempThumbnailDest, $destination, FileSystemInterface::EXISTS_REPLACE);
+    $fileSystem->move($tempThumbnailDest, $destination, FileExists::Replace);
 
     $thumbnailFile = File::create([
       'filename' => $thumbnailName,
