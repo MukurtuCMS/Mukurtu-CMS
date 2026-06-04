@@ -71,6 +71,7 @@
 
 {% set media_bundle = node.field_representative_media.0.entity.bundle.value.0['target_id'] %}
 {% set has_rep_media = node.field_representative_media.0.entity is not empty %}
+{% set has_recording = content.field_recording|render is not empty %}
 
 <article{{ attributes.addClass("horizontal-card") }}>
   <div class="horizontal-card__media">
@@ -83,6 +84,9 @@
       </a>
       {% endif %}
     {% elseif node.field_recording.0.entity is not empty %}
+      {{ content.field_recording }}
+    {% endif %}
+    {% if has_recording %}
       {{ content.field_recording }}
     {% endif %}
   </div>

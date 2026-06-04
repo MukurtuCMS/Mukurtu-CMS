@@ -692,77 +692,231 @@ function mukurtu_dictionary_update_40016(): void {
 }
 
 /**
- * Show field_recording in the dictionary_word browse display.
+ * Switch field_recording to media_assets view mode on dictionary word displays.
  */
-function mukurtu_dictionary_update_40019(): void {
-  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.dictionary_word.browse');
-  if ($config->isNew()) {
-    return;
-  }
-
-  $content = $config->get('content') ?? [];
-  if (!isset($content['field_recording'])) {
-    $content['field_recording'] = [
-      'type' => 'entity_reference_entity_view',
-      'label' => 'hidden',
-      'settings' => [
-        'view_mode' => 'browse',
-        'link' => FALSE,
-      ],
-      'third_party_settings' => [],
-      'weight' => 1,
-      'region' => 'content',
-    ];
-    $config->set('content', $content);
-  }
-
-  $hidden = $config->get('hidden') ?? [];
-  if (isset($hidden['field_recording'])) {
-    unset($hidden['field_recording']);
-    $config->set('hidden', $hidden);
-  }
-
+function mukurtu_dictionary_update_40018(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.dictionary_word.full');
+  $config->set('content.field_recording.settings.view_mode', 'media_assets');
   $config->save();
+
+  $paragraph_config = \Drupal::configFactory()->getEditable('core.entity_view_display.paragraph.dictionary_word_entry.default');
+  $paragraph_config->set('content.field_recording.settings.view_mode', 'media_assets');
+  $paragraph_config->save();
 }
 
 /**
- * Show field_word_list_image in the word_list browse display.
+ * Use audio_for_dictionary_word view mode for recording field on dictionary word entries.
  */
-function mukurtu_dictionary_update_40018(): void {
-  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.word_list.browse');
-  if ($config->isNew()) {
-    return;
-  }
+function mukurtu_dictionary_update_40019(): void {
+  // Switch the dictionary word entry paragraph to use the new view mode.
+  $paragraph_config = \Drupal::configFactory()->getEditable('core.entity_view_display.paragraph.dictionary_word_entry.default');
+  $paragraph_config->set('content.field_recording.settings.view_mode', 'audio_for_dictionary_word');
+  $paragraph_config->save();
 
-  $content = $config->get('content') ?? [];
-  if (!isset($content['field_word_list_image'])) {
-    $content['field_word_list_image'] = [
-      'type' => 'entity_reference_entity_view',
-      'label' => 'hidden',
-      'settings' => [
-        'view_mode' => 'browse',
-        'link' => FALSE,
+  // Switch the node full display to use the new view mode (base word entry recording).
+  $node_config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.dictionary_word.full');
+  $node_config->set('content.field_recording.settings.view_mode', 'audio_for_dictionary_word');
+  $node_config->save();
+}
+
+/**
+ * Create the audio_for_dictionary_word view mode and display config entities.
+ */
+function mukurtu_dictionary_update_40020(): void {
+  $config_storage = \Drupal::service('config.storage');
+
+  // Write the view mode entity directly to active config storage.
+  $config_storage->write('core.entity_view_mode.media.audio_for_dictionary_word', [
+    'langcode' => 'en',
+    'status' => TRUE,
+    'dependencies' => ['module' => ['media']],
+    'id' => 'media.audio_for_dictionary_word',
+    'label' => 'Audio Player (Dictionary Word)',
+    'description' => '',
+    'targetEntityType' => 'media',
+    'cache' => TRUE,
+  ]);
+
+  // Write the display entity: only field_media_audio_file visible.
+  $config_storage->write('core.entity_view_display.media.audio.audio_for_dictionary_word', [
+    'langcode' => 'en',
+    'status' => TRUE,
+    'dependencies' => [
+      'config' => [
+        'core.entity_view_mode.media.audio_for_dictionary_word',
+        'media.type.audio',
+      ],
+      'module' => ['file'],
+    ],
+    'third_party_settings' => [],
+    'id' => 'media.audio.audio_for_dictionary_word',
+    'targetEntityType' => 'media',
+    'bundle' => 'audio',
+    'mode' => 'audio_for_dictionary_word',
+    'content' => [
+      'field_media_audio_file' => [
+        'type' => 'file_audio',
+        'label' => 'hidden',
+        'settings' => [
+          'controls' => TRUE,
+          'autoplay' => FALSE,
+          'loop' => FALSE,
+          'multiple_file_display_type' => 'tags',
+        ],
+        'third_party_settings' => [],
+        'weight' => 0,
+        'region' => 'content',
+      ],
+    ],
+    'hidden' => [
+      'created' => TRUE,
+      'field_communities' => TRUE,
+      'field_contributor' => TRUE,
+      'field_cultural_protocols' => TRUE,
+      'field_identifier' => TRUE,
+      'field_media_tags' => TRUE,
+      'field_people' => TRUE,
+      'field_thumbnail' => TRUE,
+      'field_transcription' => TRUE,
+      'flag_export_media' => TRUE,
+      'langcode' => TRUE,
+      'name' => TRUE,
+      'search_api_excerpt' => TRUE,
+      'thumbnail' => TRUE,
+      'uid' => TRUE,
+    ],
+  ]);
+}
+
+/**
+ * Re-write audio_for_dictionary_word display config using config storage.
+ *
+ * update_40020 used the entity API which may have produced an incorrect
+ * display entity. This hook overwrites it unconditionally with hardcoded
+ * config data to guarantee the correct state.
+ */
+function mukurtu_dictionary_update_40021(): void {
+  \Drupal::service('config.storage')->write(
+    'core.entity_view_display.media.audio.audio_for_dictionary_word',
+    [
+      'langcode' => 'en',
+      'status' => TRUE,
+      'dependencies' => [
+        'config' => [
+          'core.entity_view_mode.media.audio_for_dictionary_word',
+          'media.type.audio',
+        ],
+        'module' => ['file'],
       ],
       'third_party_settings' => [],
-      'weight' => -1,
-      'region' => 'content',
-    ];
-    $config->set('content', $content);
-  }
+      'id' => 'media.audio.audio_for_dictionary_word',
+      'targetEntityType' => 'media',
+      'bundle' => 'audio',
+      'mode' => 'audio_for_dictionary_word',
+      'content' => [
+        'field_media_audio_file' => [
+          'type' => 'file_audio',
+          'label' => 'hidden',
+          'settings' => [
+            'controls' => TRUE,
+            'autoplay' => FALSE,
+            'loop' => FALSE,
+            'multiple_file_display_type' => 'tags',
+          ],
+          'third_party_settings' => [],
+          'weight' => 0,
+          'region' => 'content',
+        ],
+      ],
+      'hidden' => [
+        'created' => TRUE,
+        'field_communities' => TRUE,
+        'field_contributor' => TRUE,
+        'field_cultural_protocols' => TRUE,
+        'field_identifier' => TRUE,
+        'field_media_tags' => TRUE,
+        'field_people' => TRUE,
+        'field_thumbnail' => TRUE,
+        'field_transcription' => TRUE,
+        'flag_export_media' => TRUE,
+        'langcode' => TRUE,
+        'name' => TRUE,
+        'search_api_excerpt' => TRUE,
+        'thumbnail' => TRUE,
+        'uid' => TRUE,
+      ],
+    ]
+  );
+}
 
-  $hidden = $config->get('hidden') ?? [];
-  if (isset($hidden['field_word_list_image'])) {
-    unset($hidden['field_word_list_image']);
-    $config->set('hidden', $hidden);
-  }
-
-  $config->save();
+/**
+ * Add field_contributor to the audio_for_dictionary_word display config.
+ */
+function mukurtu_dictionary_update_40022(): void {
+  \Drupal::service('config.storage')->write(
+    'core.entity_view_display.media.audio.audio_for_dictionary_word',
+    [
+      'langcode' => 'en',
+      'status' => TRUE,
+      'dependencies' => [
+        'config' => [
+          'core.entity_view_mode.media.audio_for_dictionary_word',
+          'media.type.audio',
+        ],
+        'module' => ['file'],
+      ],
+      'third_party_settings' => [],
+      'id' => 'media.audio.audio_for_dictionary_word',
+      'targetEntityType' => 'media',
+      'bundle' => 'audio',
+      'mode' => 'audio_for_dictionary_word',
+      'content' => [
+        'field_contributor' => [
+          'type' => 'entity_reference_label',
+          'label' => 'inline',
+          'settings' => ['link' => TRUE],
+          'third_party_settings' => [],
+          'weight' => 1,
+          'region' => 'content',
+        ],
+        'field_media_audio_file' => [
+          'type' => 'file_audio',
+          'label' => 'hidden',
+          'settings' => [
+            'controls' => TRUE,
+            'autoplay' => FALSE,
+            'loop' => FALSE,
+            'multiple_file_display_type' => 'tags',
+          ],
+          'third_party_settings' => [],
+          'weight' => 0,
+          'region' => 'content',
+        ],
+      ],
+      'hidden' => [
+        'created' => TRUE,
+        'field_communities' => TRUE,
+        'field_cultural_protocols' => TRUE,
+        'field_identifier' => TRUE,
+        'field_media_tags' => TRUE,
+        'field_people' => TRUE,
+        'field_thumbnail' => TRUE,
+        'field_transcription' => TRUE,
+        'flag_export_media' => TRUE,
+        'langcode' => TRUE,
+        'name' => TRUE,
+        'search_api_excerpt' => TRUE,
+        'thumbnail' => TRUE,
+        'uid' => TRUE,
+      ],
+    ]
+  );
 }
 
 /**
  * Add field_coverage to the dictionary search index for map view support.
  */
-function mukurtu_dictionary_update_40017(): void {
+function mukurtu_dictionary_update_40023(): void {
   $index = \Drupal\search_api\Entity\Index::load('mukurtu_dictionary_index');
   if (!$index) {
     return;
@@ -783,7 +937,7 @@ function mukurtu_dictionary_update_40017(): void {
 /**
  * Update dictionary word and word list teaser view displays for issue #1622.
  */
-function mukurtu_dictionary_update_40018(): void {
+function mukurtu_dictionary_update_40024(): void {
   $config_factory = \Drupal::configFactory();
 
   // dictionary_word teaser: show translation label inline; resize thumbnail.
@@ -826,7 +980,7 @@ function mukurtu_dictionary_update_40018(): void {
 /**
  * Refine dictionary word teaser: remove translation label, inline contributor label.
  */
-function mukurtu_dictionary_update_40019(): void {
+function mukurtu_dictionary_update_40025(): void {
   $config_factory = \Drupal::configFactory();
 
   $display = $config_factory->getEditable('core.entity_view_display.node.dictionary_word.teaser');
@@ -843,7 +997,7 @@ function mukurtu_dictionary_update_40019(): void {
 /**
  * Remove hide_1_result_facet processor from glossary_entry facet so the A-Z bar shows with only one letter.
  */
-function mukurtu_dictionary_update_40020(): void {
+function mukurtu_dictionary_update_40026(): void {
   $config = \Drupal::configFactory()->getEditable('facets.facet.glossary_entry');
   if ($config->isNew()) {
     return;
@@ -859,7 +1013,7 @@ function mukurtu_dictionary_update_40020(): void {
 /**
  * Update dictionary word display: new field order and tabbed word entry layout.
  */
-function mukurtu_dictionary_update_40021(): void {
+function mukurtu_dictionary_update_40027(): void {
   $config_factory = \Drupal::configFactory();
 
   foreach ([
@@ -881,7 +1035,7 @@ function mukurtu_dictionary_update_40021(): void {
  * Switch entity browser fields to rendered_entity (form_selection view mode)
  * and use the dedicated dictionary-word-only browser for field_words.
  */
-function mukurtu_dictionary_update_40022(): void {
+function mukurtu_dictionary_update_40028(): void {
   $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.dictionary_word.default');
   if (!$config->isNew()) {
     $config->set('content.field_related_content.settings.field_widget_display', 'rendered_entity');
@@ -909,4 +1063,59 @@ function mukurtu_dictionary_update_40022(): void {
     $config->set('dependencies.config', $dependencies);
   }
   $config->save(TRUE);
+}
+
+/**
+ * Show field_recording on dictionary word browse view display.
+ */
+function mukurtu_dictionary_update_40029(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.dictionary_word.browse');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_recording', [
+    'type' => 'entity_reference_entity_view',
+    'label' => 'hidden',
+    'settings' => ['view_mode' => 'browse', 'link' => FALSE],
+    'third_party_settings' => [],
+    'weight' => 3,
+    'region' => 'content',
+  ]);
+  $hidden = $config->get('hidden') ?? [];
+  unset($hidden['field_recording']);
+  $config->set('hidden', $hidden)->save();
+}
+
+/**
+ * Show field_word_list_image in the word_list browse display.
+ */
+function mukurtu_dictionary_update_40030(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.word_list.browse');
+  if ($config->isNew()) {
+    return;
+  }
+
+  $content = $config->get('content') ?? [];
+  if (!isset($content['field_word_list_image'])) {
+    $content['field_word_list_image'] = [
+      'type' => 'entity_reference_entity_view',
+      'label' => 'hidden',
+      'settings' => [
+        'view_mode' => 'browse',
+        'link' => FALSE,
+      ],
+      'third_party_settings' => [],
+      'weight' => -1,
+      'region' => 'content',
+    ];
+    $config->set('content', $content);
+  }
+
+  $hidden = $config->get('hidden') ?? [];
+  if (isset($hidden['field_word_list_image'])) {
+    unset($hidden['field_word_list_image']);
+    $config->set('hidden', $hidden);
+  }
+
+  $config->save();
 }
