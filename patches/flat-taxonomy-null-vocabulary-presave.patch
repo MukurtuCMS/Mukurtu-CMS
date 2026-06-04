@@ -1,0 +1,14 @@
+diff --git a/flat_taxonomy.module b/flat_taxonomy.module
+index 1e17e5b..ce273b5 100644
+--- a/flat_taxonomy.module
++++ b/flat_taxonomy.module
+@@ -98,6 +98,9 @@ function flat_taxonomy_taxonomy_term_presave(Term $term): void {
+   // edit form as the parent field is hidden but it may occur via a
+   // programmatical save (migration, services, ...).
+   $vocabulary = Vocabulary::load($term->bundle());
++  if (!$vocabulary) {
++    return;
++  }
+ 
+   if (
+     $vocabulary->getThirdPartySetting('flat_taxonomy', 'flat') == FlatConstants::FLAT_TAXONOMY_FLAT

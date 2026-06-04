@@ -16,13 +16,12 @@ function mukurtu_place_update_40001() {
 }
 
 /**
- * Set field_media_assets to use the media_assets view mode on place records.
+ * Switch field_media_assets to media_assets view mode on place full display.
  */
-function mukurtu_place_update_40002() {
+function mukurtu_place_update_40002(): void {
   $config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.place.full');
   $config->set('content.field_media_assets.settings.view_mode', 'media_assets');
   $config->save();
-  return t('Updated field_media_assets view mode to media_assets on place full display.');
 }
 
 /**
