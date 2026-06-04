@@ -5,7 +5,6 @@ dependencies:
     - core.entity_view_mode.media.audio_for_dictionary_teaser
     - core.entity_view_mode.node.browse
     - field.field.node.dictionary_word.comment
-    - field.field.node.dictionary_word.field_recording
     - node.type.dictionary_word
   module:
     - layout_builder
