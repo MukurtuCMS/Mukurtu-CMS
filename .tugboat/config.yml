@@ -1,7 +1,7 @@
 services:
   php:
     # See: https://github.com/TugboatQA/dockerfiles/blob/main/php/TAGS.md
-    image: tugboatqa/php:8.3-apache
+    image: tugboatqa/php:8.4-apache
     default: true
     depends: mariadb
     commands:
@@ -36,6 +36,10 @@ services:
           mkdir ~/mukurtu
           cd ~/mukurtu
           composer create mukurtu/mukurtu-template:dev-main .
+          # Disable Composer's block-insecure audit gate. SA-CORE-2026-004 affects
+          # all available drupal/core versions and no patched release exists yet.
+          # Remove this once a clean 11.2.x release is available.
+          composer config audit.block-insecure false
           # Add our own local checkout repository instead. This will use the
           # local directory as the source, copying it into the final location.
           composer config repositories.local-dev path $TUGBOAT_ROOT
@@ -105,24 +109,10 @@ services:
             // no longer declares it as a dependency; pin it explicitly so
             // the transitive-dependency resolver does not drop it.
             \$d['require']['doctrine/annotations'] = '^2.0';
-            // cweagans/composer-patches 1.7.x cannot resolve local patch
-            // paths that come from a dependency's extra.patches in PHP 8
-            // (null hostname TypeError). Suppress the field_group patch
-            // from mukurtu/mukurtu here and apply it manually after update.
-            \$d['extra']['patches-ignore']['mukurtu/mukurtu']['drupal/field_group'] = [
-              'Fix EntityViewDisplay/EntityFormDisplay::load() incompatibility with Drupal 11.3.x'
-                => 'patches/field_group-entity-load-11-3.patch',
-            ];
             file_put_contents('composer.json',
               json_encode(\$d, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL);
           "
           composer update --no-ansi --no-interaction --optimize-autoloader --no-progress --prefer-stable
-          # Apply the field_group patch manually. cweagans/composer-patches 1.7.x
-          # cannot handle local-file patches defined in a dependency's
-          # extra.patches (PHP 8 null-hostname TypeError), so we suppress it
-          # above and apply it here once both packages are on disk.
-          patch -p1 -d web/modules/contrib/field_group \
-            < web/profiles/mukurtu/patches/field_group-entity-load-11-3.patch
           # Install Drupal with the Mukurtu installation profile. Run as web
           # user to create files with the right permissions. Pass in the
           # environment variables from Tugboat using the -E option.
