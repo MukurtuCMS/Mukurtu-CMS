@@ -1,11 +1,16 @@
 <?php
 
+use Drupal\Component\Serialization\Json;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\CloseModalDialogCommand;
+use Drupal\Core\Ajax\InvokeCommand;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
+use Drupal\Core\Url;
+use Drupal\media_library\Plugin\Field\FieldWidget\MediaLibraryWidget;
 use Drupal\mukurtu_media\Entity\Audio;
 use Drupal\mukurtu_media\Entity\Document;
 use Drupal\mukurtu_media\Entity\Image;
@@ -312,4 +317,110 @@ function mukurtu_media_entity_base_field_info_alter(&$fields, EntityTypeInterfac
   if ($entity_type->id() == 'media') {
     $fields['name']->setDescription('Most media names will auto-fill from the filename or external source. This field is not usually shown to end users. While the media name can be changed, we generally recommend using the auto-filled names so that they match your other records and systems.');
   }
+}
+
+/**
+ * Implements hook_field_widget_single_element_form_alter().
+ *
+ * Adds an Edit button alongside the Remove button on every media library
+ * widget item, visible only to users who have update access to that media.
+ */
+function mukurtu_media_field_widget_single_element_form_alter(array &$element, FormStateInterface $form_state, array $context): void {
+  if (!($context['widget'] instanceof MediaLibraryWidget) || empty($element['selection'])) {
+    return;
+  }
+
+  $media_storage = \Drupal::entityTypeManager()->getStorage('media');
+
+  foreach (Element::children($element['selection']) as $delta) {
+    $media_id = $element['selection'][$delta]['target_id']['#value'] ?? NULL;
+    if (!$media_id) {
+      continue;
+    }
+
+    /** @var \Drupal\media\MediaInterface $media */
+    $media = $media_storage->load($media_id);
+    if (!$media || !$media->access('update')) {
+      continue;
+    }
+
+    $aria_label = $media->access('view label')
+      ? t('Edit @label', ['@label' => $media->label()])
+      : t('Edit media');
+
+    $element['selection'][$delta]['edit_button'] = [
+      '#type' => 'link',
+      '#title' => t('Edit'),
+      '#url' => Url::fromRoute('entity.media.edit_form', ['media' => $media_id], ['query' => ['mukurtu_modal' => '1']]),
+      '#attributes' => [
+        'class' => ['use-ajax', 'media-library-item__edit'],
+        'aria-label' => $aria_label,
+        'data-dialog-type' => 'modal',
+        'data-dialog-options' => Json::encode(['width' => 900]),
+        'data-media-edit-id' => 'media-edit-' . $media_id,
+      ],
+    ];
+  }
+
+  $element['#attached']['library'][] = 'core/drupal.dialog.ajax';
+}
+
+/**
+ * Implements hook_form_alter().
+ *
+ * When a media entity edit form is opened inside a modal dialog, wire the Save
+ * button to an AJAX callback that closes the dialog on success.
+ */
+function mukurtu_media_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
+  if (!preg_match('/^media_.+_edit_form$/', $form_id)) {
+    return;
+  }
+
+  // The edit button URL includes ?mukurtu_modal=1. This parameter persists
+  // when Drupal's AJAX JS swaps _wrapper_format from drupal_modal to
+  // drupal_ajax on form submit, giving a stable signal across both requests.
+  if (!\Drupal::request()->query->get('mukurtu_modal')) {
+    return;
+  }
+
+  unset($form['actions']['delete']);
+
+  foreach (['submit', 'save'] as $action) {
+    if (isset($form['actions'][$action])) {
+      $form['actions'][$action]['#ajax'] = [
+        'callback' => 'mukurtu_media_edit_dialog_ajax',
+        'progress' => ['type' => 'throbber'],
+      ];
+    }
+  }
+}
+
+/**
+ * AJAX callback for media edit forms submitted from a modal dialog.
+ *
+ * Closes the dialog on a clean save; replaces dialog content with the rebuilt
+ * form (including validation messages) when there are errors.
+ */
+function mukurtu_media_edit_dialog_ajax(array &$form, FormStateInterface $form_state): AjaxResponse {
+  $response = new AjaxResponse();
+  if ($form_state->isExecuted()) {
+    $media_id = $form_state->getFormObject()->getEntity()->id();
+    $response->addCommand(new CloseModalDialogCommand());
+    $response->addCommand(new InvokeCommand('[data-media-edit-id="media-edit-' . $media_id . '"]', 'focus'));
+  }
+  else {
+    // Drupal form validation errors are in $form_state->getErrors(), not the
+    // messenger queue. Copy them over so status_messages renders them visibly.
+    foreach ($form_state->getErrors() as $error) {
+      \Drupal::messenger()->addError($error);
+    }
+    /** @var \Drupal\Core\Render\RendererInterface $renderer */
+    $renderer = \Drupal::service('renderer');
+    $status_messages = ['#type' => 'status_messages'];
+    $form['#prefix'] = ($form['#prefix'] ?? '') . $renderer->renderRoot($status_messages);
+    $output = $renderer->renderRoot($form);
+    $response->setAttachments($form['#attached']);
+    $response->addCommand(new ReplaceCommand('.ui-dialog-content', $output));
+  }
+  return $response;
 }
