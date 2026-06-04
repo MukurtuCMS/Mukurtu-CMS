@@ -156,8 +156,6 @@
             "drupal/field_group": {
                 "Fix EntityViewDisplay/EntityFormDisplay::load() incompatibility with Drupal 11.3.x": "web/profiles/mukurtu/patches/field_group-entity-load-11-3.patch"
             },
-            "composer/installers": {
-                "Fix implicit nullable param deprecations in Installer and BaseInstaller": "web/profiles/mukurtu/patches/composer_installers-nullable-param-deprecation.patch"
             "drupal/pathauto": {
                 "Fix missing source_module on PHP 8 MigrateSource attribute": "web/profiles/mukurtu/patches/pathauto-source-module-missing-php8-attribute.patch"
             },
