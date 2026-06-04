@@ -4,6 +4,7 @@ namespace Drupal\mukurtu_protocol\Plugin\views\access;
 
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Cache\CacheableDependencyInterface;
+use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
@@ -47,6 +48,13 @@ class MukurtuPermission extends AccessPluginBase implements CacheableDependencyI
    * @var \Drupal\Core\Extension\ModuleHandlerInterface
    */
   protected $moduleHandler;
+
+  /**
+   * The module extension list.
+   *
+   * @var \Drupal\Core\Extension\ModuleExtensionList
+   */
+  protected $moduleExtensionList;
 
   /**
    * The role storage.
@@ -107,7 +115,7 @@ class MukurtuPermission extends AccessPluginBase implements CacheableDependencyI
    * @param \Drupal\mukurtu_protocol\Access\MukurtuPermissionAccessCheck $mukurtu_permission_access_check
    *   The '_mukurtu_permission' access check service.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, PermissionHandlerInterface $permission_handler, ModuleHandlerInterface $module_handler, RoleStorageInterface $role_storage, OgRoleManagerInterface $role_manager, MembershipManagerInterface $membership_manager, PermissionManagerInterface $permission_manager, MukurtuPermissionAccessCheck $mukurtu_permission_access_check) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, PermissionHandlerInterface $permission_handler, ModuleHandlerInterface $module_handler, RoleStorageInterface $role_storage, OgRoleManagerInterface $role_manager, MembershipManagerInterface $membership_manager, PermissionManagerInterface $permission_manager, MukurtuPermissionAccessCheck $mukurtu_permission_access_check, ModuleExtensionList $module_extension_list) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->permissionHandler = $permission_handler;
     $this->moduleHandler = $module_handler;
@@ -116,6 +124,7 @@ class MukurtuPermission extends AccessPluginBase implements CacheableDependencyI
     $this->membershipManager = $membership_manager;
     $this->permissionManager = $permission_manager;
     $this->mukurtuPermissionAccessCheck = $mukurtu_permission_access_check;
+    $this->moduleExtensionList = $module_extension_list;
   }
 
   /**
@@ -133,6 +142,7 @@ class MukurtuPermission extends AccessPluginBase implements CacheableDependencyI
       $container->get('og.membership_manager'),
       $container->get('og.permission_manager'),
       $container->get('access_check.user.mukurtu_permission'),
+      $container->get('extension.list.module'),
     );
   }
 
@@ -203,7 +213,7 @@ class MukurtuPermission extends AccessPluginBase implements CacheableDependencyI
     $permissions = $this->permissionHandler->getPermissions();
     foreach ($permissions as $perm => $perm_item) {
       $provider = $perm_item['provider'];
-      $display_name = $this->moduleHandler->getName($provider);
+      $display_name = $this->moduleExtensionList->getName($provider);
       $perms[$display_name][$perm] = strip_tags($perm_item['title']);
     }
 
