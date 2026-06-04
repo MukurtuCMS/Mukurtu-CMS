@@ -17,7 +17,7 @@ class MukurtuCommentFieldItemList extends CommentFieldItemList {
   /**
    * {@inheritdoc}
    */
-  public function access($operation = 'view', AccountInterface $account = NULL, $return_as_object = FALSE) {
+  public function access($operation = 'view', ?AccountInterface $account = NULL, $return_as_object = FALSE) {
     $entity = $this->getEntity();
 
     if ($operation === 'edit') {
