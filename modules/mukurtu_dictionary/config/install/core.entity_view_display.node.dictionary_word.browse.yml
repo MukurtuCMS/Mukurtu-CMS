@@ -2,7 +2,6 @@ langcode: en
 status: true
 dependencies:
   config:
-    - core.entity_view_mode.media.audio_for_dictionary_teaser
     - core.entity_view_mode.node.browse
     - field.field.node.dictionary_word.comment
     - node.type.dictionary_word
@@ -46,7 +45,7 @@ content:
     type: entity_reference_entity_view
     label: hidden
     settings:
-      view_mode: audio_for_dictionary_teaser
+      view_mode: browse
       link: false
     third_party_settings: {  }
     weight: 3
