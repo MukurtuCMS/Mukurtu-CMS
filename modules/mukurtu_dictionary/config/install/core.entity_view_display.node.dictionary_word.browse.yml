@@ -59,15 +59,6 @@ content:
     third_party_settings: {  }
     weight: 0
     region: content
-  field_recording:
-    type: entity_reference_entity_view
-    label: hidden
-    settings:
-      view_mode: browse
-      link: false
-    third_party_settings: {  }
-    weight: 1
-    region: content
 hidden:
   comment: true
   draft: true
