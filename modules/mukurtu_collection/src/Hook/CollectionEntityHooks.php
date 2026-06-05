@@ -41,6 +41,13 @@ final class CollectionEntityHooks {
 
     // Always rebuild menu when a collection is created.
     $this->menuRebuildProcessor->markRebuildNeeded();
+
+    // Reindex any sub-collections added at creation time so their
+    // parent_collection_id search index field is updated immediately.
+    $child_ids = $entity->getChildCollectionIds();
+    if (!empty($child_ids)) {
+      $this->reindexCollections($child_ids);
+    }
   }
 
   /**
@@ -77,18 +84,7 @@ final class CollectionEntityHooks {
       $affected = array_unique(array_merge($added, $removed));
 
       if (!empty($affected)) {
-        /** @var \Drupal\search_api\IndexInterface $index */
-        $index = $this->entityTypeManager
-          ->getStorage('search_api_index')
-          ->load('mukurtu_collection_index');
-        if ($index) {
-          $nodes = $this->entityTypeManager->getStorage('node')->loadMultiple($affected);
-          $item_ids = [];
-          foreach ($nodes as $node) {
-            $item_ids[] = $node->id() . ':' . $node->language()->getId();
-          }
-          $index->trackItemsUpdated('entity:node', $item_ids);
-        }
+        $this->reindexCollections($affected);
       }
 
       return;
@@ -98,6 +94,30 @@ final class CollectionEntityHooks {
     if ($entity->label() !== $original->label()) {
       $this->menuRebuildProcessor->markRebuildNeeded();
       return;
+    }
+  }
+
+  /**
+   * Marks collection nodes for immediate Search API reindexing.
+   *
+   * @param int[] $node_ids
+   *   Node IDs to reindex.
+   */
+  private function reindexCollections(array $node_ids): void {
+    /** @var \Drupal\search_api\IndexInterface $index */
+    $index = $this->entityTypeManager
+      ->getStorage('search_api_index')
+      ->load('mukurtu_collection_index');
+    if (!$index) {
+      return;
+    }
+    $nodes = $this->entityTypeManager->getStorage('node')->loadMultiple($node_ids);
+    $item_ids = [];
+    foreach ($nodes as $node) {
+      $item_ids[] = $node->id() . ':' . $node->language()->getId();
+    }
+    if (!empty($item_ids)) {
+      $index->trackItemsUpdated('entity:node', $item_ids);
     }
   }
 
