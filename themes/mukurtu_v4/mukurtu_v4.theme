@@ -299,4 +299,8 @@ function mukurtu_v4_preprocess_comment(array &$variables): void {
     '@username' => $author_name,
     '@date' => $date_only,
   ]);
+  $variables['comment_aria_label'] = t('Comment by @author on @date', [
+    '@author' => $author_name,
+    '@date' => $date_only,
+  ]);
 }

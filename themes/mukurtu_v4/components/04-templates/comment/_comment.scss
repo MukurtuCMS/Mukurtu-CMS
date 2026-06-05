@@ -65,6 +65,11 @@
     a {
       @include mixins.block-link;
       font-size: var(--font-size-s);
+
+      &:focus-visible {
+        outline: 2px solid var(--brand-primary-dark);
+        outline-offset: 2px;
+      }
     }
   }
 }

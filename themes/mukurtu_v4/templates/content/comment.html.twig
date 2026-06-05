@@ -8,7 +8,7 @@
  */
 #}
 
-<article{{ attributes.addClass('js-comment', 'comment') }}>
+<article{{ attributes.addClass('js-comment', 'comment') }} aria-label="{{ comment_aria_label }}">
   {# Hidden timestamp marker used by JS to flag new comments. #}
   <mark class="hidden" data-comment-timestamp="{{ new_indicator_timestamp }}"></mark>
 

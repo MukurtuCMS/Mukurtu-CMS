@@ -6189,6 +6189,10 @@ header {
 .comment__actions a:focus {
   outline-offset: 1px;
 }
+.comment__actions a:focus-visible {
+  outline: 2px solid var(--brand-primary-dark);
+  outline-offset: 2px;
+}
 
 .comment mark:not(.hidden) {
   background-color: var(--brand-secondary);

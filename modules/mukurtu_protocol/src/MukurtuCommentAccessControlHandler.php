@@ -10,6 +10,7 @@ use Drupal\Core\Entity\EntityPublishedInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
 use Drupal\mukurtu_protocol\CulturalProtocols;
 use Drupal\mukurtu_protocol\MukurtuCommentFieldItemList;
 
