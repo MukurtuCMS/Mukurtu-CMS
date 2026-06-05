@@ -4,7 +4,9 @@
  * The actual remove button stays inside the form so Drupal can read its
  * #array_parents on submit. A proxy button in the footer delegates to it.
  */
-(function ($) {
+(function ($, Drupal, once, drupalSettings) {
+  'use strict';
+
   function syncCancelProxy() {
     var $source = $('.js-media-library-add-form .js-mukurtu-cancel-source').first();
     var $buttonSet = $('.ui-dialog-buttonpane .ui-dialog-buttonset');
@@ -43,6 +45,13 @@
       $thead.append('<th class="mukurtu-edit-col"></th>');
     }
 
+    // Build a base URL from drupalSettings so subdirectory installs work.
+    // drupalSettings.mukurtu.mediaEditUrl is set to the route for media ID 0
+    // (e.g. /admin/media/0/edit). Replace the trailing /0/edit per row.
+    var baseUrl = (drupalSettings.mukurtu && drupalSettings.mukurtu.mediaEditUrl)
+      ? drupalSettings.mukurtu.mediaEditUrl.replace('/0/edit', '')
+      : '/admin/media';
+
     // Append an edit link to each body row that doesn't already have one.
     $table.find('tbody tr').each(function () {
       var $row = $(this);
@@ -54,9 +63,13 @@
         $row.attr('tabindex', '0');
       }
 
+      // WCAG 4.1.2: expose selected state to assistive technology.
+      var isChecked = $row.find('input[type="checkbox"]').prop('checked');
+      $row.attr('aria-selected', isChecked ? 'true' : 'false');
+
       $row.append(
         '<td class="mukurtu-edit-col">' +
-        '<a href="/admin/media/' + mediaId + '/edit" target="_blank" rel="noopener">' +
+        '<a href="' + baseUrl + '/' + mediaId + '/edit" target="_blank" rel="noopener">' +
         Drupal.t('Edit') +
         '<span class="visually-hidden"> (' + Drupal.t('opens in new tab') + ')</span>' +
         '</a>' +
@@ -65,20 +78,22 @@
     });
   }
 
-  $(document).ajaxComplete(function () {
-    if (!$('.media-library-widget-modal').length && !$('.media-library-add-form').length) {
-      return;
-    }
-    syncCancelProxy();
-    syncEditLinks();
-  });
+  Drupal.behaviors.mukurtuMediaLibraryCancel = {
+    attach: function (context) {
+      // Run sync functions once per attach cycle for any relevant dialog.
+      once('mukurtu-cancel-proxy', '.ui-dialog-buttonpane', context).forEach(syncCancelProxy);
+      once('mukurtu-edit-links', '.media-library-widget-modal .views-table', context).forEach(syncEditLinks);
+    },
+  };
 
   // Highlight rows whose checkbox is checked.
   $(document).on(
     'change',
     '.media-library-widget-modal .views-table tbody tr input[type="checkbox"]',
     function () {
-      $(this).closest('tr').toggleClass('mukurtu-row-selected', this.checked);
+      $(this).closest('tr')
+        .toggleClass('mukurtu-row-selected', this.checked)
+        .attr('aria-selected', this.checked ? 'true' : 'false');
     }
   );
 
@@ -111,7 +126,9 @@
         e.preventDefault();
         var $cb = $(this).find('input[type="checkbox"]');
         $cb.prop('checked', !$cb.prop('checked')).trigger('change');
+        // aria-selected is updated by the 'change' handler above.
       }
     }
   );
-})(jQuery);
+
+})(jQuery, Drupal, once, drupalSettings);

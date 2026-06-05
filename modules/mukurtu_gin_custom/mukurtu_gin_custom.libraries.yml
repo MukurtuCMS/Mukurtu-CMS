@@ -9,6 +9,7 @@ mukurtu-gin-custom:
   dependencies:
     - core/jquery
     - core/drupal
+    - core/drupalSettings
     - core/once
 
 entity-browser-toggle:

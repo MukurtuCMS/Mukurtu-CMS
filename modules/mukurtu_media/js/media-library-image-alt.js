@@ -11,11 +11,6 @@
 
   Drupal.behaviors.mukurtuMediaLibraryImageAlt = {
     attach: function (context) {
-      // Only act inside the media library upload form.
-      var forms = context.querySelectorAll
-        ? [context]
-        : [document];
-
       once('mukurtu-media-alt-autofill', '.media-library-add-form__fields', context).forEach(function (fieldsEl) {
         // Name field: media[N][fields][name][0][value]
         var nameInput = fieldsEl.querySelector('input[name$="[fields][name][0][value]"]');
