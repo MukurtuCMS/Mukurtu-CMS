@@ -47,6 +47,29 @@ class ProtocolCommentSettingsForm extends FormBase {
       ),
     ];
 
+    $commentAccessOptions = [
+      'anonymous'       => $this->t('Visitors (anonymous users)'),
+      'authenticated'   => $this->t('Any site user with access'),
+      'protocol_member' => $this->t('Protocol members only (any protocol role)'),
+    ];
+
+    $form['comment_view_access'] = [
+      '#type' => 'checkboxes',
+      '#title' => $this->t('Who can view comments?'),
+      '#description' => $this->t('Select which users can see comments on content using this protocol. For items with multiple cultural protocols, the most restrictive protocol wins.'),
+      '#options' => $commentAccessOptions,
+      '#default_value' => $protocol->getCommentViewAccess(),
+    ];
+
+    $form['comment_post_access'] = [
+      '#type' => 'checkboxes',
+      '#title' => $this->t('Who can leave comments?'),
+      '#description' => $this->t('Select which users can post comments on content using this protocol. For items with multiple cultural protocols, the most restrictive protocol wins.'),
+      '#options' => $commentAccessOptions,
+      '#default_value' => $protocol->getCommentPostAccess(),
+      '#after_build' => [[$this, 'addPostAccessStates']],
+    ];
+
     $form['actions']['submit'] = [
       '#type' => 'submit',
       '#value' => $this->t('Save'),
@@ -72,11 +95,34 @@ class ProtocolCommentSettingsForm extends FormBase {
       $protocol->setCommentRequireApproval($newCommentApprovalStatus);
     }
 
+    $viewAccess = array_values(array_filter($form_state->getValue('comment_view_access')));
+    $protocol->setCommentViewAccess($viewAccess);
+
+    $postAccess = array_values(array_filter($form_state->getValue('comment_post_access')));
+    // Visitors cannot post if they cannot view comments.
+    if (!in_array('anonymous', $viewAccess)) {
+      $postAccess = array_values(array_diff($postAccess, ['anonymous']));
+    }
+    $protocol->setCommentPostAccess($postAccess);
+
     // Save changes.
     $protocol->save();
 
     // Comment display is cached per node view.
     Cache::invalidateTags(['node_view']);
+  }
+
+  /**
+   * After-build callback to disable the visitor post-access checkbox when
+   * visitor view-access is unchecked.
+   */
+  public function addPostAccessStates(array $element, FormStateInterface $form_state): array {
+    $element['anonymous']['#states'] = [
+      'disabled' => [
+        ':input[name="comment_view_access[anonymous]"]' => ['unchecked' => TRUE],
+      ],
+    ];
+    return $element;
   }
 
 }

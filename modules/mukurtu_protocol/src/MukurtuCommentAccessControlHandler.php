@@ -11,6 +11,7 @@ use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\mukurtu_protocol\CulturalProtocols;
+use Drupal\mukurtu_protocol\MukurtuCommentFieldItemList;
 
 /**
  * Defines the access control handler for the comment entity type.
@@ -76,7 +77,28 @@ class MukurtuCommentAccessControlHandler extends CommentAccessControlHandler {
    * {@inheritdoc}
    */
   protected function checkCreateAccess(AccountInterface $account, array $context, $entity_bundle = NULL) {
-    return AccessResult::allowedIfHasPermission($account, 'post comments');
+    $result = AccessResult::allowedIfHasPermission($account, 'post comments');
+    if (!$result->isAllowed()) {
+      return $result;
+    }
+
+    if (!empty($context['entity_type_id']) && !empty($context['entity_id'])) {
+      $parent = \Drupal::entityTypeManager()
+        ->getStorage($context['entity_type_id'])
+        ->load($context['entity_id']);
+
+      if ($parent instanceof CulturalProtocolControlledInterface) {
+        foreach ($parent->getProtocolEntities() as $protocol) {
+          $postAccess = $protocol->getCommentPostAccess();
+          if (!empty($postAccess) && !MukurtuCommentFieldItemList::accountMatchesAccessList($account, $postAccess, $protocol)) {
+            return AccessResult::forbidden()
+              ->addCacheTags(["user:{$account->id()}"]);
+          }
+        }
+      }
+    }
+
+    return $result;
   }
 
   /**
