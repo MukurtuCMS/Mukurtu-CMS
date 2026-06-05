@@ -93,12 +93,12 @@ class MukurtuRoleAccessCheck implements AccessInterface {
       $explode_or = array_filter(array_map('trim', explode('+', $rid_string)));
       $intersection = array_intersect($explode_or, $this->getMukurtuRoles($account));
       if (!empty($intersection)) {
-        return AccessResult::allowed()->addCacheContexts(['user.roles']);
+        return AccessResult::allowed()->addCacheContexts(['user.roles', 'og_role']);
       }
     }
 
     // If there is no allowed role, give other access checks a chance.
-    return AccessResult::neutral()->addCacheContexts(['user.roles']);
+    return AccessResult::neutral()->addCacheContexts(['user.roles', 'og_role']);
   }
 
 }

@@ -127,6 +127,14 @@ function mukurtu_collection_entity_delete(EntityInterface $entity) {
 }
 
 /**
+ * Implements hook_preprocess_node().
+ */
+function mukurtu_collection_preprocess_node(array &$variables): void {
+  \Drupal::service('Drupal\mukurtu_collection\Hook\CollectionPreprocessHooks')
+    ->preprocessNode($variables);
+}
+
+/**
  * Implements hook_entity_bundle_info_alter().
  */
 function mukurtu_collection_entity_bundle_info_alter(array &$bundles): void {

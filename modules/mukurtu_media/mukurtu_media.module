@@ -8,6 +8,7 @@ use Drupal\Core\Ajax\InvokeCommand;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Link;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Url;
 use Drupal\file\Element\ManagedFile;
@@ -760,4 +761,230 @@ function mukurtu_media_form_soundcloud_media_add_form_alter(array &$form, FormSt
   if (isset($form['container'])) {
     $form['container']['#attributes']['class'][] = 'media-library-url-input-row';
   }
+}
+
+/**
+ * Implements hook_entity_view_alter().
+ *
+ * Injects placeholder images for media reference fields in two scenarios:
+ *
+ * 1. Restricted media: a referenced media item exists but the current user
+ *    cannot view it due to protocol restrictions.
+ * 2. No media: the field has no items at all.
+ *
+ * hook_preprocess_field cannot be used here because Drupal's FormatterBase::view()
+ * only wraps elements with #theme = 'field' when the formatter returns non-empty
+ * output. When all media items are inaccessible (or absent) the formatter returns
+ * [], so the preprocess hook is never called. hook_entity_view_alter fires after
+ * the entity build is complete and lets us inject the field render array even when
+ * it is missing entirely.
+ */
+function mukurtu_media_entity_view_alter(array &$build, \Drupal\Core\Entity\EntityInterface $entity, \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display) {
+  $config = \Drupal::config('mukurtu_media.settings');
+
+  $restricted_fid = ($config->get('restricted_media_placeholder') ?? [])[0] ?? NULL;
+  $no_media_fid   = ($config->get('no_media_placeholder') ?? [])[0] ?? NULL;
+
+  // Nothing to do if neither placeholder is configured.
+  if (!$restricted_fid && !$no_media_fid) {
+    return;
+  }
+
+  // Placeholders apply to content nodes only.
+  if ($entity->getEntityTypeId() !== 'node') {
+    return;
+  }
+
+  $restricted_file = $restricted_fid ? \Drupal\file\Entity\File::load($restricted_fid) : NULL;
+  $no_media_file   = $no_media_fid   ? \Drupal\file\Entity\File::load($no_media_fid)   : NULL;
+
+  $account = \Drupal::currentUser();
+  $media_storage = \Drupal::entityTypeManager()->getStorage('media');
+
+  foreach ($entity->getFields() as $field_name => $field_items) {
+    $def = $field_items->getFieldDefinition();
+    if ($def->getType() !== 'entity_reference') {
+      continue;
+    }
+    if ($def->getSetting('target_type') !== 'media') {
+      continue;
+    }
+
+    $component = $display->getComponent($field_name);
+
+    // --- Scenario 1: field has no items at all ---
+    if ($field_items->isEmpty()) {
+      if (!$component) {
+        continue;
+      }
+
+      // field_representative_media is a computed field that defers to this hook
+      // when a placeholder is configured. Check the source fields to determine
+      // whether the underlying media is restricted (exists but inaccessible) or
+      // simply absent, so we can pick the correct placeholder.
+      $placeholder_file_to_use = $no_media_file;
+      if ($field_name === 'field_representative_media' && $restricted_file) {
+        $source_fields = ['field_thumbnail', 'field_media_assets', 'field_collection_image', 'field_word_list_image'];
+        // Batch-load all source media to avoid N+1 queries.
+        $source_ids = [];
+        foreach ($source_fields as $source) {
+          if (!$entity->hasField($source)) {
+            continue;
+          }
+          foreach ($entity->get($source) as $source_item) {
+            if ($source_item->target_id) {
+              $source_ids[] = $source_item->target_id;
+            }
+          }
+        }
+        if (!empty($source_ids)) {
+          foreach ($media_storage->loadMultiple($source_ids) as $source_media) {
+            if (!$source_media->access('view', $account)) {
+              $placeholder_file_to_use = $restricted_file;
+              break;
+            }
+          }
+        }
+      }
+
+      if (!$placeholder_file_to_use) {
+        continue;
+      }
+
+      $alt = $placeholder_file_to_use === $restricted_file
+        ? (string) t('Media not available due to protocol restrictions')
+        : (string) t('No media available');
+
+      $build[$field_name] = _mukurtu_media_build_placeholder_field(
+        $def, $entity, $field_items, $build['#view_mode'] ?? 'full', $component,
+        [
+          '#theme' => 'image',
+          '#uri' => $placeholder_file_to_use->getFileUri(),
+          '#alt' => $alt,
+          '#attributes' => ['class' => [str_replace('_', '-', $field_name) . '-placeholder']],
+        ]
+      );
+      continue;
+    }
+
+    // --- Scenario 2: field has items but some are inaccessible ---
+    if (!$restricted_file) {
+      continue;
+    }
+
+    // Batch-load all media items in this field once, avoiding N+1 queries.
+    $target_ids = [];
+    foreach ($field_items as $item) {
+      if ($item->target_id) {
+        $target_ids[] = $item->target_id;
+      }
+    }
+    if (empty($target_ids)) {
+      continue;
+    }
+    $loaded_media = $media_storage->loadMultiple($target_ids);
+
+    $inaccessible_count = 0;
+    foreach ($loaded_media as $media) {
+      if (!$media->access('view', $account)) {
+        $inaccessible_count++;
+      }
+    }
+
+    if ($inaccessible_count === 0) {
+      continue;
+    }
+
+    $restricted_render = [
+      '#theme' => 'image',
+      '#uri' => $restricted_file->getFileUri(),
+      '#alt' => (string) t('Media not available due to protocol restrictions'),
+      '#attributes' => ['class' => ['restricted-media-placeholder']],
+    ];
+
+    $field_in_build = isset($build[$field_name]) && !empty($build[$field_name]);
+    if (!$field_in_build && !$component) {
+      continue;
+    }
+
+    // Walk raw items in order, mixing accessible renders with placeholders.
+    $rendered_index = 0;
+    $new_items = [];
+    foreach ($field_items as $item) {
+      $media = $loaded_media[$item->target_id] ?? NULL;
+      if (!$media) {
+        continue;
+      }
+      if ($media->access('view', $account)) {
+        if ($field_in_build && isset($build[$field_name][$rendered_index])) {
+          $new_items[] = $build[$field_name][$rendered_index];
+        }
+        $rendered_index++;
+      }
+      else {
+        $new_items[] = $restricted_render;
+      }
+    }
+
+    if (empty($new_items)) {
+      continue;
+    }
+
+    if ($field_in_build) {
+      foreach (array_keys($build[$field_name]) as $key) {
+        if (is_numeric($key)) {
+          unset($build[$field_name][$key]);
+        }
+      }
+      foreach ($new_items as $i => $item) {
+        $build[$field_name][$i] = $item;
+      }
+      $build[$field_name]['#cache']['contexts'][] = 'user';
+    }
+    else {
+      $build[$field_name] = _mukurtu_media_build_placeholder_field(
+        $def, $entity, $field_items, $build['#view_mode'] ?? 'full', $component,
+        ...$new_items
+      );
+    }
+  }
+}
+
+/**
+ * Builds a field render array populated with placeholder item render arrays.
+ *
+ * @param \Drupal\Core\Field\FieldDefinitionInterface $def
+ * @param \Drupal\Core\Entity\EntityInterface $entity
+ * @param \Drupal\Core\Field\FieldItemListInterface $field_items
+ * @param string $view_mode
+ * @param array $component  Display component config (label, settings, etc.).
+ * @param array ...$items   One or more render arrays to use as field items.
+ *
+ * @return array
+ */
+function _mukurtu_media_build_placeholder_field($def, $entity, $field_items, $view_mode, $component, array ...$items) {
+  $build = [
+    '#theme' => 'field',
+    '#title' => $def->getLabel(),
+    '#label_display' => $component['label'] ?? 'hidden',
+    '#view_mode' => $view_mode,
+    '#language' => $entity->language()->getId(),
+    '#field_name' => $def->getName(),
+    '#field_type' => 'entity_reference',
+    '#field_translatable' => $def->isTranslatable(),
+    '#entity_type' => $entity->getEntityTypeId(),
+    '#bundle' => $entity->bundle(),
+    '#object' => $entity,
+    '#items' => $field_items,
+    '#formatter' => 'entity_reference_entity_view',
+    '#is_multiple' => $def->getFieldStorageDefinition()->isMultiple(),
+    '#cache' => [
+      'contexts' => ['user'],
+      'tags' => $def->getCacheTags(),
+    ],
+  ];
+  foreach ($items as $i => $item) {
+    $build[$i] = $item;
+  }
+  return $build;
 }

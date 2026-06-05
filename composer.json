@@ -15,7 +15,7 @@
         }
     ],
     "require": {
-        "composer/installers": "^1.9",
+        "composer/installers": "^2.0",
         "cweagans/composer-patches": "^1.7",
         "drupal/better_exposed_filters": "^7.1.1",
         "drupal/blazy": "^3.0",
@@ -140,10 +140,18 @@
                 "Remove bulk option to remove a user's roles": "web/profiles/mukurtu/patches/832-disallow-og-role-removal.patch"
             },
             "drupal/search_api_glossary": {
-                "TypeError: Cannot access offset of type string on string": "web/profiles/mukurtu/patches/search_api_glossary_type-error-3492668-8.patch"
+                "TypeError: Cannot access offset of type string on string": "web/profiles/mukurtu/patches/search_api_glossary_type-error-3492668-8.patch",
+                "Fix implicit nullable param deprecation in Glossary::getPropertyDefinitions()": "web/profiles/mukurtu/patches/search_api_glossary-nullable-param-deprecation.patch"
             },
             "drupal/message_digest": {
-                "Fix null flag fatal error in DigestInterval::access()": "web/profiles/mukurtu/patches/message_digest_ui-digest-interval-null-flag.patch"
+                "Fix null flag fatal error in DigestInterval::access()": "web/profiles/mukurtu/patches/message_digest_ui-digest-interval-null-flag.patch",
+                "Fix implicit nullable param deprecations": "web/profiles/mukurtu/patches/message_digest-nullable-param-deprecation.patch"
+            },
+            "drupal/message_ui": {
+                "Fix implicit nullable param deprecation in SaveMessage::access()": "web/profiles/mukurtu/patches/message_ui-nullable-param-deprecation.patch"
+            },
+            "drupal/admin_theme": {
+                "Fix implicit nullable param deprecation in AdminThemeAdminContext::isAdminRoute()": "web/profiles/mukurtu/patches/admin_theme-nullable-param-deprecation.patch"
             },
             "drupal/field_group": {
                 "Fix EntityViewDisplay/EntityFormDisplay::load() incompatibility with Drupal 11.3.x": "web/profiles/mukurtu/patches/field_group-entity-load-11-3.patch"

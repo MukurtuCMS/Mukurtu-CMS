@@ -1,0 +1,15 @@
+services:
+  # Override Gin's navigation service to use Mukurtu's media view route.
+  # Gin calls \Drupal::classResolver(GinNavigation::class); registering a
+  # service with that fully-qualified class name as the service ID causes the
+  # class resolver to return this instance instead of instantiating GinNavigation
+  # directly.
+  Drupal\gin\GinNavigation:
+    class: Drupal\mukurtu_gin_custom\MukurtuGinNavigation
+    arguments:
+      - '@current_user'
+      - '@entity_type.manager'
+      - '@breadcrumb'
+      - '@current_route_match'
+      - '@menu.link_tree'
+      - '@module_handler'
