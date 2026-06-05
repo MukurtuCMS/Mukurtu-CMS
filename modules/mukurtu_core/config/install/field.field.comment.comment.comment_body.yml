@@ -18,5 +18,5 @@ default_value: {  }
 default_value_callback: ''
 settings:
   allowed_formats:
-    comment_basic_html: comment_basic_html
+    plain_text: plain_text
 field_type: text_long

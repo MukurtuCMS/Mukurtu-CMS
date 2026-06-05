@@ -5,6 +5,7 @@ namespace Drupal\mukurtu_protocol\Form;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Cache\Cache;
+use Drupal\Core\Url;
 
 /**
  * Configure protocol comment settings.
@@ -24,6 +25,15 @@ class ProtocolCommentSettingsForm extends FormBase {
     /** @var \Drupal\mukurtu_protocol\Entity\ProtocolInterface $protocol */
     $protocol = $form_state->get('protocol');
     $commentsEnabled = $protocol->getCommentStatus();
+
+    if ($protocol->getCommentRequireApproval()) {
+      $unapprovedUrl = Url::fromRoute('mukurtu_protocol.manage_protocol_unapproved_comments', ['group' => $protocol->id()]);
+      $form['unapproved_link'] = [
+        '#type' => 'markup',
+        '#markup' => '<p>' . $this->t('<a href=":url">View comments awaiting approval</a> for this protocol.', [':url' => $unapprovedUrl->toString()]) . '</p>',
+      ];
+    }
+
     $form['comments_enabled'] = [
       '#type' => 'radios',
       '#title' => $this->t('Commenting'),
@@ -108,6 +118,8 @@ class ProtocolCommentSettingsForm extends FormBase {
 
     // Comment display is cached per node view.
     Cache::invalidateTags(['node_view']);
+
+    $this->messenger()->addStatus($this->t('Protocol comment settings have been saved.'));
   }
 
   /**

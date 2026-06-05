@@ -1167,3 +1167,39 @@ function mukurtu_core_update_40035(): void {
     $role->save();
   }
 }
+
+/**
+ * Switch comment body to plain_text; remove comment_basic_html format.
+ */
+function mukurtu_core_update_40036(): void {
+  // Editor config must be deleted before the filter format (config dependency).
+  $editor_config = \Drupal::configFactory()->getEditable('editor.editor.comment_basic_html');
+  if (!$editor_config->isNew()) {
+    $editor_config->delete();
+  }
+
+  $format_config = \Drupal::configFactory()->getEditable('filter.format.comment_basic_html');
+  if (!$format_config->isNew()) {
+    $format_config->delete();
+  }
+
+  // Point the field at plain_text.
+  $field_config = \Drupal::configFactory()->getEditable('field.field.comment.comment.comment_body');
+  if (!$field_config->isNew()) {
+    $field_config->set('settings.allowed_formats', ['plain_text' => 'plain_text']);
+    $field_config->save();
+  }
+
+  // Re-format existing comment bodies stored with comment_basic_html.
+  \Drupal::database()->update('comment__comment_body')
+    ->fields(['comment_body_format' => 'plain_text'])
+    ->condition('comment_body_format', 'comment_basic_html')
+    ->execute();
+
+  // Revoke the format permission from the authenticated role.
+  $role = \Drupal\user\Entity\Role::load('authenticated');
+  if ($role && $role->hasPermission('use text format comment_basic_html')) {
+    $role->revokePermission('use text format comment_basic_html');
+    $role->save();
+  }
+}
