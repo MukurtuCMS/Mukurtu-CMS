@@ -14,6 +14,8 @@ use Drupal\mukurtu_media\Entity\RemoteVideo;
 use Drupal\mukurtu_media\Entity\Video;
 use Drupal\mukurtu_media\Entity\ExternalEmbed;
 use Drupal\mukurtu_media\Form\ExternalEmbedForm;
+use Drupal\mukurtu_media\Form\MukurtuFileUploadForm;
+use Drupal\media_library\Form\FileUploadForm;
 use Drupal\mukurtu_media\Entity\SoundCloud;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -55,6 +57,17 @@ function mukurtu_media_media_source_info_alter(array &$sources)
   }
   if (empty($sources['soundcloud']['forms']['media_library_add'])) {
     $sources['soundcloud']['forms']['media_library_add'] = SoundCloud::class;
+  }
+
+  // Replace core's FileUploadForm with our subclass for all file-based sources.
+  // This clears stale 'media' user input before creating new entities, which
+  // prevents cultural protocol checkboxes from being pre-selected when an
+  // existing media item is already selected in the library browser.
+  foreach ($sources as &$source) {
+    $current = $source['forms']['media_library_add'] ?? NULL;
+    if ($current === FileUploadForm::class) {
+      $source['forms']['media_library_add'] = MukurtuFileUploadForm::class;
+    }
   }
 }
 

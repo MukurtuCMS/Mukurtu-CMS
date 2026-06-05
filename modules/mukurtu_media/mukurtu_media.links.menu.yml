@@ -10,6 +10,12 @@ mukurtu_media.add_media_dashboard:
   parent: mukurtu_dashboard
   menu_name: dashboard-media
   route_name: entity.media.add_page
+mukurtu_media.thumbnail_settings_dashboard:
+  title: 'Default media thumbnails'
+  description: 'Set default thumbnail images for each media type'
+  parent: mukurtu_dashboard
+  menu_name: dashboard-media
+  route_name: mukurtu_media.thumbnail_settings_form
 mukurtu_media.manage_media_tags_dashboard:
   title: 'Manage media tags'
   description: 'Manage media tags'
