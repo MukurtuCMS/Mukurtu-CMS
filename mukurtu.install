@@ -836,6 +836,13 @@ function mukurtu_install() {
   //   $block->save();
   // }
 
+  // Disable the core media view so Mukurtu's view is the sole handler at
+  // /admin/content/media.
+  $config = \Drupal::configFactory()->getEditable('views.view.media');
+  if (!$config->isNew()) {
+    $config->set('status', FALSE)->save();
+  }
+
 }
 
 

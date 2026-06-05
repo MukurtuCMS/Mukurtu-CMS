@@ -1,0 +1,12 @@
+diff --git a/src/Routing/AdminThemeAdminContext.php b/src/Routing/AdminThemeAdminContext.php
+--- a/src/Routing/AdminThemeAdminContext.php
++++ b/src/Routing/AdminThemeAdminContext.php
+@@ -55,7 +55,7 @@ class AdminThemeAdminContext extends DefaultAdminContext {
+   /**
+    * {@inheritdoc}
+    */
+-  public function isAdminRoute(Route $route = NULL) {
++  public function isAdminRoute(?Route $route = NULL) {
+     $excludePaths = (string) $this->configFactory->get('admin_theme.settings')->get('exclude_paths');
+     /** @var \Drupal\Core\Condition\ConditionInterface $excludeCondition */
+     $excludeCondition = $this->conditionManager->createInstance('request_path', ['pages' => $excludePaths]);
