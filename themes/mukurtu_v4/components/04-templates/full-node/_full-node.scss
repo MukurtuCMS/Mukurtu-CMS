@@ -121,7 +121,8 @@
   }
 
   // Hide sidebar sections that contain no rendered field content.
-  &__sidebar .sidebar-section:not(:has(.field__item)) {
+  // Exclude .collection__menu which uses custom markup, not field items.
+  &__sidebar .sidebar-section:not(:has(.field__item)):not(.collection__menu) {
     display: none;
   }
 

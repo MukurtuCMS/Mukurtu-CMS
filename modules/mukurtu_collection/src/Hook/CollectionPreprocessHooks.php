@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Drupal\mukurtu_collection\Hook;
 
 use Drupal\Core\Cache\CacheableMetadata;
-use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\Core\Template\Attribute;
 use Drupal\mukurtu_collection\CollectionHierarchyServiceInterface;
 use Drupal\mukurtu_collection\Entity\Collection;
@@ -25,9 +24,10 @@ final class CollectionPreprocessHooks {
   }
 
   /**
-   * Implements hook_preprocess_HOOK() for node templates.
+   * Preprocesses variables for node templates.
+   *
+   * Called from mukurtu_collection_preprocess_node() in the .module file.
    */
-  #[Hook('preprocess_node')]
   public function preprocessNode(array &$variables): void {
     /** @var \Drupal\node\NodeInterface $node */
     $node = $variables['node'];
