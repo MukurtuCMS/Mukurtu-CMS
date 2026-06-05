@@ -1374,6 +1374,7 @@ details.form-wrapper summary + div {
   }
 }
 .horizontal-card__media .media--remote_video iframe {
+  block-size: auto;
   aspect-ratio: 16/9;
 }
 .horizontal-card__media video {

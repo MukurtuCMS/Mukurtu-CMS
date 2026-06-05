@@ -24,11 +24,12 @@ use Symfony\Component\HttpFoundation\Request;
 /**
  * Implements hook_oembed_resource_data_alter().
  *
- * Adds YouTube embed URL parameters to reduce player chrome:
+ * Adds YouTube embed URL parameters to reduce player chrome. Applies to all
+ * YouTube embeds site-wide (browse cards, full DH pages, etc.).
  * - rel=0: suppresses related videos at end of playback
  * - modestbranding=1: removes the YouTube logo from the control bar
  */
-function mukurtu_media_oembed_resource_data_alter(array &$data, string $url): void {
+function mukurtu_media_oembed_resource_data_alter(array &$data, string $_url): void {
   if (empty($data['html']) || ($data['provider_name'] ?? '') !== 'YouTube') {
     return;
   }
