@@ -20,6 +20,8 @@ mukurtu_protocol.comment_settings:
   mapping:
     site_comments_enabled:
       type: integer
+    site_comments_require_approval:
+      type: boolean
 
 mukurtu_protocol.community_organization:
   type: config_object
