@@ -30,7 +30,7 @@ diff --git a/src/Plugin/Notifier/DigestBase.php b/src/Plugin/Notifier/DigestBase
     *   The time service.
     */
 -  public function __construct(array $configuration, $plugin_id, $plugin_definition, LoggerChannelInterface $logger, EntityTypeManagerInterface $entity_type_manager, RendererInterface $renderer, MessageInterface $message = NULL, StateInterface $state, Connection $connection, TimeInterface $time) {
-+  public function __construct(array $configuration, $plugin_id, $plugin_definition, LoggerChannelInterface $logger, EntityTypeManagerInterface $entity_type_manager, RendererInterface $renderer, ?MessageInterface $message = NULL, StateInterface $state, Connection $connection, TimeInterface $time) {
++  public function __construct(array $configuration, $plugin_id, $plugin_definition, LoggerChannelInterface $logger, EntityTypeManagerInterface $entity_type_manager, RendererInterface $renderer, ?MessageInterface $message, StateInterface $state, Connection $connection, TimeInterface $time) {
      // Set some defaults.
      $configuration += [
        'entity_type' => '',
