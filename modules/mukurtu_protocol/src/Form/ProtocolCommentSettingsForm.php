@@ -99,10 +99,8 @@ class ProtocolCommentSettingsForm extends FormBase {
     $protocol->setCommentViewAccess($viewAccess);
 
     $postAccess = array_values(array_filter($form_state->getValue('comment_post_access')));
-    // Visitors cannot post if they cannot view comments.
-    if (!in_array('anonymous', $viewAccess)) {
-      $postAccess = array_values(array_diff($postAccess, ['anonymous']));
-    }
+    // Post access must be a subset of view access — you cannot post if you cannot view.
+    $postAccess = array_values(array_intersect($postAccess, $viewAccess));
     $protocol->setCommentPostAccess($postAccess);
 
     // Save changes.
@@ -117,11 +115,13 @@ class ProtocolCommentSettingsForm extends FormBase {
    * visitor view-access is unchecked.
    */
   public function addPostAccessStates(array $element, FormStateInterface $form_state): array {
-    $element['anonymous']['#states'] = [
-      'disabled' => [
-        ':input[name="comment_view_access[anonymous]"]' => ['unchecked' => TRUE],
-      ],
-    ];
+    foreach (['anonymous', 'authenticated', 'protocol_member'] as $key) {
+      $element[$key]['#states'] = [
+        'disabled' => [
+          ':input[name="comment_view_access[' . $key . ']"]' => ['unchecked' => TRUE],
+        ],
+      ];
+    }
     return $element;
   }
 
