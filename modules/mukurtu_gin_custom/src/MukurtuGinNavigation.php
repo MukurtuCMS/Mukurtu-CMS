@@ -27,7 +27,7 @@ class MukurtuGinNavigation extends GinNavigation {
     try {
       return parent::hasLinkAccessPermission($route_name, $route_parameters);
     }
-    catch (\Exception $e) {
+    catch (\Symfony\Component\Routing\Exception\RouteNotFoundException $e) {
       return FALSE;
     }
   }

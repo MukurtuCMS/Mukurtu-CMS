@@ -12,3 +12,10 @@ bulk_upload_dropzone:
   dependencies:
     - core/drupal
     - core/once
+
+bulk_step_focus:
+  js:
+    js/bulk-step-focus.js: {}
+  dependencies:
+    - core/drupal
+    - core/once

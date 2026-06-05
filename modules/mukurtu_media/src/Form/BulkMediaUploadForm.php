@@ -106,17 +106,27 @@ class BulkMediaUploadForm extends FormBase implements ContainerInjectionInterfac
 
     $form['dropzone'] = [
       '#type' => 'container',
-      '#attributes' => ['class' => ['mukurtu-bulk-dropzone']],
+      '#attributes' => [
+        'class' => ['mukurtu-bulk-dropzone'],
+        'role' => 'region',
+        'aria-label' => $this->t('File drop zone'),
+      ],
     ];
     $max_size = ByteSizeMarkup::create(\Drupal\Component\Utility\Environment::getUploadMaxSize());
     $form['dropzone']['hint'] = [
-      '#markup' => '<p class="mukurtu-bulk-dropzone__hint">' . $this->t('Drop files here, or use Choose Files to select files.') . '</p>',
+      '#markup' => '<p class="mukurtu-bulk-dropzone__hint" aria-hidden="true">' . $this->t('Drop files here, or use Choose Files to select files.') . '</p>',
+    ];
+    // Live region so screen readers are notified when files are dropped.
+    // The .mukurtu-bulk-dropzone__status rule in media-admin.css hides this
+    // element visually while keeping it available to screen readers.
+    $form['dropzone']['status'] = [
+      '#markup' => '<div class="mukurtu-bulk-dropzone__status" aria-live="polite" aria-atomic="true"></div>',
     ];
     $form['dropzone']['upload'] = [
       '#type' => 'managed_file',
       '#title' => $this->t('Choose files'),
-      '#title_display' => 'invisible',
-      '#description' => $this->t('Allowed types: @extensions. Maximum file size: @size.', [
+      '#title_display' => 'before',
+      '#description' => $this->t('Allowed types: @extensions. Maximum file size: @size. You may also drag and drop files onto the area above.', [
         '@extensions' => $config['extensions'],
         '@size' => $max_size,
       ]),
@@ -152,12 +162,33 @@ class BulkMediaUploadForm extends FormBase implements ContainerInjectionInterfac
     $field_name = $config['field'];
     $count = count($entities);
 
+    // Move focus to the step heading on transition so keyboard and screen
+    // reader users are oriented after the form rebuilds (WCAG 2.4.3).
+    $form['step_heading'] = [
+      '#type' => 'html_tag',
+      '#tag' => 'h2',
+      '#value' => $this->t('Step 2: Review and save'),
+      '#attributes' => [
+        'id' => 'bulk-upload-step-heading',
+        'tabindex' => '-1',
+        'class' => ['visually-hidden'],
+      ],
+    ];
+
     $form['description'] = [
       '#type' => 'item',
       '#markup' => $this->t('Set protocols and metadata for @count media item(s) below, then click Save all.', ['@count' => $count]),
     ];
 
-    $form['entities'] = ['#type' => 'container'];
+    if (!empty($config['alt'])) {
+      $form['alt_notice'] = [
+        '#type' => 'item',
+        '#markup' => '<p class="messages messages--status">' . $this->t('Alternative (alt) text has been pre-filled from each filename. Please review and update these values to accurately describe each image for screen reader users.') . '</p>',
+      ];
+    }
+
+    $form['#attached']['library'][] = 'mukurtu_media/bulk_step_focus';
+    $form['entities'] = ['#type' => 'container', '#attributes' => ['aria-live' => 'polite']];
 
     foreach ($entities as $delta => $entity) {
       $display = EntityFormDisplay::collectRenderDisplay($entity, 'default');
@@ -213,6 +244,11 @@ class BulkMediaUploadForm extends FormBase implements ContainerInjectionInterfac
     $fids = $form_state->getValue(['dropzone', 'upload'], []);
     if (empty($fids)) {
       $this->messenger()->addError($this->t('No files were uploaded.'));
+      return;
+    }
+
+    if (count($fids) > 50) {
+      $this->messenger()->addError($this->t('Please upload no more than 50 files at a time.'));
       return;
     }
 

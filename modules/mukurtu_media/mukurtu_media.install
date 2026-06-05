@@ -28,6 +28,8 @@ function mukurtu_media_update_40001(): void {
 
 /**
  * Implements hook_install().
+ *
+ * Also handled by mukurtu_media_update_40003() for existing installations.
  */
 function mukurtu_media_install(): void {
   $config = \Drupal::configFactory()->getEditable('views.view.media');

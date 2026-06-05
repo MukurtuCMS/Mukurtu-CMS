@@ -59,9 +59,24 @@
   margin: 0 0 0.75rem;
   color: var(--gin-color-text-light, #545560);
   font-style: italic;
+  /* aria-hidden="true" is set in PHP; the paragraph is decorative for pointing
+     device users only. The managed_file label is the accessible control. */
 }
 
 .mukurtu-bulk-dropzone .js-form-managed-file {
   display: inline-block;
   text-align: left;
+}
+
+/* Visually-hidden live region for screen reader announcements (WCAG 4.1.3). */
+.mukurtu-bulk-dropzone__status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }

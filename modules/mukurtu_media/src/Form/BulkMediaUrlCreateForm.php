@@ -106,12 +106,26 @@ class BulkMediaUrlCreateForm extends FormBase implements ContainerInjectionInter
     $field_name = self::SUPPORTED_TYPES[$media_type]['field'];
     $count = count($entities);
 
+    // Move focus to the step heading on transition so keyboard and screen
+    // reader users are oriented after the form rebuilds (WCAG 2.4.3).
+    $form['step_heading'] = [
+      '#type' => 'html_tag',
+      '#tag' => 'h2',
+      '#value' => $this->t('Step 2: Review and save'),
+      '#attributes' => [
+        'id' => 'bulk-upload-step-heading',
+        'tabindex' => '-1',
+        'class' => ['visually-hidden'],
+      ],
+    ];
+    $form['#attached']['library'][] = 'mukurtu_media/bulk_step_focus';
+
     $form['description'] = [
       '#type' => 'item',
       '#markup' => $this->t('Set protocols and metadata for @count item(s) below, then click Save all.', ['@count' => $count]),
     ];
 
-    $form['entities'] = ['#type' => 'container'];
+    $form['entities'] = ['#type' => 'container', '#attributes' => ['aria-live' => 'polite']];
 
     foreach ($entities as $delta => $entity) {
       $display = EntityFormDisplay::collectRenderDisplay($entity, 'default');
@@ -173,10 +187,28 @@ class BulkMediaUrlCreateForm extends FormBase implements ContainerInjectionInter
     $field_name = $config['field'];
 
     $raw = $form_state->getValue('urls', '');
-    $lines = array_filter(array_map('trim', explode("\n", $raw)));
+    $lines = array_unique(array_filter(array_map('trim', explode("\n", $raw))));
 
     if (empty($lines)) {
       $this->messenger()->addError($this->t('No URLs were provided.'));
+      return;
+    }
+
+    if (count($lines) > 50) {
+      $this->messenger()->addError($this->t('Please enter no more than 50 URLs at a time.'));
+      return;
+    }
+
+    $invalid = [];
+    foreach ($lines as $url) {
+      if (!filter_var($url, FILTER_VALIDATE_URL)) {
+        $invalid[] = $url;
+      }
+    }
+    if (!empty($invalid)) {
+      foreach ($invalid as $bad_url) {
+        $this->messenger()->addError($this->t('Invalid URL: @url', ['@url' => $bad_url]));
+      }
       return;
     }
 
