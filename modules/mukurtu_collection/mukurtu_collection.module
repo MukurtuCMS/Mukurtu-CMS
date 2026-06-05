@@ -101,7 +101,6 @@ function mukurtu_collection_entity_bundle_field_info(EntityTypeInterface $entity
 function mukurtu_collection_entity_insert(EntityInterface $entity) {
   if ($entity->getEntityTypeId() == 'node' && $entity->bundle() == 'collection') {
     mukurtu_core_invalidate_entity_reference_field_references($entity, MUKURTU_COLLECTION_FIELD_NAME_ITEMS);
-    \Drupal::service('mukurtu_collection.menu_rebuild_processor')->markRebuildNeeded();
   }
 }
 
@@ -111,7 +110,6 @@ function mukurtu_collection_entity_insert(EntityInterface $entity) {
 function mukurtu_collection_entity_update(EntityInterface $entity) {
   if ($entity->getEntityTypeId() == 'node' && $entity->bundle() == 'collection') {
     mukurtu_core_invalidate_entity_reference_field_references($entity, MUKURTU_COLLECTION_FIELD_NAME_ITEMS);
-    \Drupal::service('mukurtu_collection.menu_rebuild_processor')->markRebuildNeeded();
   }
 }
 
@@ -125,7 +123,6 @@ function mukurtu_collection_entity_delete(EntityInterface $entity) {
 
   if ($entity->bundle() == 'collection') {
     mukurtu_core_invalidate_entity_reference_field_references($entity, MUKURTU_COLLECTION_FIELD_NAME_ITEMS);
-    \Drupal::service('mukurtu_collection.menu_rebuild_processor')->markRebuildNeeded();
   }
 }
 

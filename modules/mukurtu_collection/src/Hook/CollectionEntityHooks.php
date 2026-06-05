@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\mukurtu_collection\Hook;
 
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\mukurtu_collection\Entity\Collection;
 use Drupal\mukurtu_collection\MenuRebuildProcessor;
@@ -19,8 +20,13 @@ final class CollectionEntityHooks {
    *
    * @param \Drupal\mukurtu_collection\MenuRebuildProcessor $menuRebuildProcessor
    *   Menu rebuild processor.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
+   *   Entity type manager.
    */
-  public function __construct(protected MenuRebuildProcessor $menuRebuildProcessor) {
+  public function __construct(
+    protected MenuRebuildProcessor $menuRebuildProcessor,
+    protected EntityTypeManagerInterface $entityTypeManager,
+  ) {
   }
 
   /**
@@ -72,11 +78,11 @@ final class CollectionEntityHooks {
 
       if (!empty($affected)) {
         /** @var \Drupal\search_api\IndexInterface $index */
-        $index = \Drupal::entityTypeManager()
+        $index = $this->entityTypeManager
           ->getStorage('search_api_index')
           ->load('mukurtu_collection_index');
         if ($index) {
-          $nodes = \Drupal::entityTypeManager()->getStorage('node')->loadMultiple($affected);
+          $nodes = $this->entityTypeManager->getStorage('node')->loadMultiple($affected);
           $item_ids = [];
           foreach ($nodes as $node) {
             $item_ids[] = $node->id() . ':' . $node->language()->getId();
