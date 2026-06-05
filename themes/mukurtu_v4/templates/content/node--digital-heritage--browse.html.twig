@@ -72,7 +72,7 @@
 {% set media_bundle = node.field_representative_media.0.entity.bundle.value.0['target_id'] %}
 
 <article{{ attributes.addClass("horizontal-card") }}>
-  {% if media_bundle %}
+  {% if media_bundle or content.field_representative_media %}
     <div class="horizontal-card__media">
       {% if media_bundle is same as 'image' %}
       <a href="{{ url }}" aria-hidden="true" tabindex="-1">

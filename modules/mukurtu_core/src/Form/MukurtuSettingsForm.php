@@ -40,22 +40,6 @@ class MukurtuSettingsForm extends ConfigFormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $config = $this->config(static::SETTINGS);
 
-    $default_media_id = $config->get('mukurtu_default_image');
-    if ($default_media_id) {
-      $default_media = \Drupal::entityTypeManager()->getStorage('media')->load($default_media_id);
-    }
-    else {
-      $default_media = NULL;
-    }
-
-    $form['mukurtu_default_image'] = [
-      '#title' => 'Default Image',
-      '#description' => $this->t('This image will be used when media is not available for a field or item.'),
-      '#type'          => 'entity_autocomplete',
-      '#target_type'   => 'media',
-      '#default_value' => $default_media,
-    ];
-
     $defaultRelatedContentOption = $config->get('mukurtu_related_content_display') ?? 'computed';
 
     $form['mukurtu_related_content_display'] = [
@@ -136,9 +120,6 @@ class MukurtuSettingsForm extends ConfigFormBase {
     foreach ($bundleInfo as $bundle => $bundleValue) {
       $config->set($bundle, $form_state->getValue($bundle));
     }
-
-    // Default Image.
-    $config->set('mukurtu_default_image', $form_state->getValue('mukurtu_default_image'));
 
     // Related content.
     $config->set('mukurtu_related_content_display', $form_state->getValue('mukurtu_related_content_display'));
