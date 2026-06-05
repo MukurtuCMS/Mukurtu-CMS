@@ -60,9 +60,31 @@ final class CollectionEntityHooks {
     $new_child_ids = $entity->getChildCollectionIds();
     $old_child_ids = $original->getChildCollectionIds();
 
-    // If the child collections have changed, rebuild the menu.
+    // If the child collections have changed, rebuild the menu and reindex
+    // affected children so their parent_collection_id search index field
+    // reflects the new parent state immediately.
     if ($new_child_ids !== $old_child_ids) {
       $this->menuRebuildProcessor->markRebuildNeeded();
+
+      $added = array_diff($new_child_ids, $old_child_ids);
+      $removed = array_diff($old_child_ids, $new_child_ids);
+      $affected = array_unique(array_merge($added, $removed));
+
+      if (!empty($affected)) {
+        /** @var \Drupal\search_api\IndexInterface $index */
+        $index = \Drupal::entityTypeManager()
+          ->getStorage('search_api_index')
+          ->load('mukurtu_collection_index');
+        if ($index) {
+          $nodes = \Drupal::entityTypeManager()->getStorage('node')->loadMultiple($affected);
+          $item_ids = [];
+          foreach ($nodes as $node) {
+            $item_ids[] = $node->id() . ':' . $node->language()->getId();
+          }
+          $index->trackItemsUpdated('entity:node', $item_ids);
+        }
+      }
+
       return;
     }
 
