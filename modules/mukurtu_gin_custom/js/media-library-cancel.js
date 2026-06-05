@@ -1,20 +1,19 @@
 /**
  * Injects a visible "Cancel" button into the media library dialog footer.
  *
- * The actual remove button stays inside the form so Drupal can read its
- * #array_parents on submit. A proxy button in the footer delegates to it.
+ * Visible whenever the add-media form is open. Clicking it closes the dialog.
  */
 (function ($, Drupal, drupalSettings) {
   'use strict';
 
   function syncCancelProxy() {
-    var $source = $('.js-media-library-add-form .js-mukurtu-cancel-source').first();
+    var $addForm = $('.js-media-library-add-form');
     var $buttonSet = $('.ui-dialog-buttonpane .ui-dialog-buttonset');
 
     // Remove stale proxy whenever we re-evaluate.
     $buttonSet.find('.js-mukurtu-cancel-proxy').remove();
 
-    if (!$source.length || !$buttonSet.length) {
+    if (!$addForm.length || !$buttonSet.length) {
       return;
     }
 
@@ -26,7 +25,7 @@
     });
 
     $proxy.on('click', function () {
-      $source[0].click();
+      $addForm.closest('.ui-dialog-content').dialog('close');
     });
 
     $buttonSet.prepend($proxy);

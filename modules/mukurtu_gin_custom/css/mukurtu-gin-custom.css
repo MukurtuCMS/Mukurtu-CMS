@@ -273,12 +273,7 @@ counterpart, if one exists. */
     flex-shrink: 0;
 }
 
-/* Media library modal: compact upload form, sticky type sidebar, cancel button. */
-.media-library-add-form .js-mukurtu-cancel-source {
-    display: none;
-}
-
-
+/* Media library modal: compact upload form, sticky type sidebar. */
 .media-library-add-form__input-wrapper {
     padding: var(--space-xs) var(--space-m) !important;
 }

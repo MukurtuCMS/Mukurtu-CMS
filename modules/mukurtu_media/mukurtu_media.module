@@ -12,7 +12,6 @@ use Drupal\Core\Link;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Url;
 use Drupal\file\Element\ManagedFile;
-use Drupal\media_library\Form\AddFormBase;
 use Drupal\media_library\Form\FileUploadForm;
 use Drupal\media_library\Plugin\Field\FieldWidget\MediaLibraryWidget;
 use Drupal\mukurtu_media\Entity\Audio;
@@ -709,16 +708,6 @@ function mukurtu_media_form_alter(array &$form, FormStateInterface $form_state, 
     }
   }
 
-  // In the media library add form, mark each "Remove" button so JS can create
-  // a visible proxy in the dialog footer. The button stays in-place (hidden via
-  // CSS) so its #array_parents remain intact for Drupal's submit handling.
-  if ($form_state->getFormObject() instanceof AddFormBase && isset($form['media'])) {
-    foreach (Element::children($form['media']) as $delta) {
-      if (isset($form['media'][$delta]['remove_button'])) {
-        $form['media'][$delta]['remove_button']['#attributes']['class'][] = 'js-mukurtu-cancel-source';
-      }
-    }
-  }
 }
 
 /**
