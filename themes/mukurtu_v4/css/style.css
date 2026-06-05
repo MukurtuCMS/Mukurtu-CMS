@@ -166,6 +166,7 @@ documentation on how to use @include media(). */
   --color-status-dark: #365e38;
   --color-warning-dark: #54738c;
   --color-error-dark: #924d48;
+  --color-text-secondary: #595959;
   --color-white: #fff;
   --color-black: #000;
   --color-gray: #555;
@@ -896,6 +897,10 @@ a:not(.primary-nav__menu-link) svg.tel path {
 .media-carousel .splide__slide:not(.is-active) {
   block-size: 0;
 }
+.media-carousel .splide__track {
+  -webkit-transition: block-size 0.3s ease-in-out;
+  transition: block-size 0.3s ease-in-out;
+}
 
 .thumbnail-carousel.splide:not(.is-overflow) .splide__list {
   -webkit-box-pack: center;
@@ -1367,6 +1372,9 @@ details.form-wrapper summary + div {
   .horizontal-card__media .media iframe {
     block-size: auto;
   }
+}
+.horizontal-card__media .media--remote_video iframe {
+  aspect-ratio: 16/9;
 }
 .horizontal-card__media video {
   max-block-size: 18rem;
@@ -2160,8 +2168,13 @@ details.form-wrapper summary + div {
 .media--audio {
   inline-size: 100%;
 }
+.media--audio audio {
+  min-height: 2rem;
+  min-block-size: 2rem;
+}
 .media--audio .b-lazy {
   block-size: revert;
+  height: revert;
   min-block-size: -webkit-max-content;
   min-block-size: -moz-max-content;
   min-block-size: max-content;
@@ -2229,6 +2242,16 @@ details.form-wrapper summary + div {
   min-inline-size: -moz-min-content;
   min-inline-size: min-content;
   inline-size: 100%;
+}
+
+.media--audio .media-asset--name {
+  display: block;
+  text-align: center;
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--color-text-secondary, var(--brand-text-color, #464646));
+  -webkit-margin-before: var(--v-space-5xs);
+          margin-block-start: var(--v-space-5xs);
+  word-break: break-word;
 }
 
 .media--document__viewer {
@@ -3473,6 +3496,10 @@ body.is-fixed {
 .vertical-card__content-header h2 {
   font-size: var(--card-font-size);
   font-weight: var(--text-bold);
+}
+.vertical-card__media .media--remote_video iframe {
+  width: 100%;
+  aspect-ratio: 16/9;
 }
 .vertical-card--no-border {
   -webkit-padding-after: 0;

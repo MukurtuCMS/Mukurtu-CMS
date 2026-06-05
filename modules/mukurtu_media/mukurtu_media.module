@@ -22,6 +22,28 @@ use Drupal\mukurtu_media\Entity\SoundCloud;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
+ * Implements hook_oembed_resource_data_alter().
+ *
+ * Adds YouTube embed URL parameters to reduce player chrome:
+ * - rel=0: suppresses related videos at end of playback
+ * - modestbranding=1: removes the YouTube logo from the control bar
+ */
+function mukurtu_media_oembed_resource_data_alter(array &$data, string $url): void {
+  if (empty($data['html']) || ($data['provider_name'] ?? '') !== 'YouTube') {
+    return;
+  }
+  $data['html'] = preg_replace_callback(
+    '/src="([^"]+)"/',
+    function (array $matches): string {
+      $src = $matches[1];
+      $separator = str_contains($src, '?') ? '&' : '?';
+      return 'src="' . $src . $separator . 'rel=0&modestbranding=1"';
+    },
+    $data['html']
+  );
+}
+
+/**
  * Implements hook_entity_bundle_field_info_alter().
  */
 function mukurtu_media_entity_bundle_info_alter(array &$bundles): void

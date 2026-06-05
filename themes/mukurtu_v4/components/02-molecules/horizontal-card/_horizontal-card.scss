@@ -31,6 +31,10 @@
       }
     }
 
+    .media--remote_video iframe {
+      aspect-ratio: 16 / 9;
+    }
+
     video {
       max-block-size: 18rem;
     }
