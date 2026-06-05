@@ -72,6 +72,20 @@
           $list.before($toggle);
         }
 
+        function updateToggleVisibility() {
+          if ($list.children('.item-container').length > 0) {
+            $toggle.show();
+          } else {
+            $toggle.hide();
+          }
+        }
+
+        updateToggleVisibility();
+
+        // Show the toggle as soon as the first item is added.
+        var observer = new MutationObserver(updateToggleVisibility);
+        observer.observe(list, { childList: true });
+
         $toggle.on('click', '.eb-view-toggle__btn', function () {
           var view = $(this).hasClass('eb-view-toggle__btn--grid') ? 'grid' : 'list';
           applyView(view);
