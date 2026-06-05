@@ -3497,9 +3497,14 @@ body.is-fixed {
   font-size: var(--card-font-size);
   font-weight: var(--text-bold);
 }
-.vertical-card__media .media--remote_video iframe {
+.vertical-card__media .media--remote_video {
   width: 100%;
   aspect-ratio: 16/9;
+  overflow: hidden;
+}
+.vertical-card__media .media--remote_video iframe {
+  width: 100%;
+  height: 100%;
 }
 .vertical-card--no-border {
   -webkit-padding-after: 0;

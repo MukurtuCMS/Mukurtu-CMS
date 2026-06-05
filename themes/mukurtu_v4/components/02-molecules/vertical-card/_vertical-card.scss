@@ -18,9 +18,13 @@
 
   &__media {
     .media--remote_video {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+
       iframe {
         width: 100%;
-        aspect-ratio: 16 / 9;
+        height: 100%;
       }
     }
   }
