@@ -184,7 +184,23 @@ class MukurtuCommentForm extends CommentForm {
       '#access' => $is_admin,
     ];
 
-    return ContentEntityForm::form($form, $form_state, $comment);
+    $form = ContentEntityForm::form($form, $form_state, $comment);
+
+    // Plain text is the only allowed format; hide the format guidelines after
+    // the text_format element's #process callbacks have populated them.
+    $form['comment_body']['widget'][0]['#after_build'][] = [static::class, 'hideFormatGuidelines'];
+
+    return $form;
+  }
+
+  /**
+   * After-build callback to hide the format guidelines on the comment body.
+   */
+  public static function hideFormatGuidelines(array $element, FormStateInterface $form_state): array {
+    if (isset($element['format']['guidelines'])) {
+      $element['format']['guidelines']['#access'] = FALSE;
+    }
+    return $element;
   }
 
   /**
