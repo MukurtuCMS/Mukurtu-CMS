@@ -45,10 +45,10 @@ class MukurtuCommentDefaultFormatter extends CommentDefaultFormatter {
       // should display if the user is an administrator.
       $elements['#cache']['contexts'][] = 'user.permissions';
 
-      if ($this->currentUser->hasPermission('access comments') || CulturalProtocols::hasSiteOrProtocolPermission($entity, 'administer comments', $this->currentUser, TRUE)) {
+      if ($this->currentUser->hasPermission('access comments') || CulturalProtocols::hasSiteOrProtocolPermission($entity, 'administer comments', $this->currentUser, FALSE)) {
         $output['comments'] = [];
 
-        if ($entity->get($field_name)->comment_count || CulturalProtocols::hasSiteOrProtocolPermission($entity, 'administer comments', $this->currentUser, TRUE)) {
+        if ($entity->get($field_name)->comment_count || CulturalProtocols::hasSiteOrProtocolPermission($entity, 'administer comments', $this->currentUser, FALSE)) {
           $mode = $comment_settings['default_mode'];
           $comments_per_page = $comment_settings['per_page'];
           $comments = $this->storage->loadThread($entity, $field_name, $mode, $comments_per_page, $this->getSetting('pager_id'));
