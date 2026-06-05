@@ -4,7 +4,7 @@
  * The actual remove button stays inside the form so Drupal can read its
  * #array_parents on submit. A proxy button in the footer delegates to it.
  */
-(function ($, Drupal, once, drupalSettings) {
+(function ($, Drupal, drupalSettings) {
   'use strict';
 
   function syncCancelProxy() {
@@ -79,10 +79,14 @@
   }
 
   Drupal.behaviors.mukurtuMediaLibraryCancel = {
-    attach: function (context) {
-      // Run sync functions once per attach cycle for any relevant dialog.
-      once('mukurtu-cancel-proxy', '.ui-dialog-buttonpane', context).forEach(syncCancelProxy);
-      once('mukurtu-edit-links', '.media-library-widget-modal .views-table', context).forEach(syncEditLinks);
+    attach: function () {
+      // Both functions are idempotent and must run on every attach cycle.
+      // once() guards on outer dialog elements (.ui-dialog-buttonpane,
+      // .media-library-widget-modal) would silently fail because Drupal passes
+      // only the inner AJAX fragment as context — those wrappers are never
+      // inside the context element, so once() never matches them post-AJAX.
+      syncCancelProxy();
+      syncEditLinks();
     },
   };
 
@@ -131,4 +135,4 @@
     }
   );
 
-})(jQuery, Drupal, once, drupalSettings);
+})(jQuery, Drupal, drupalSettings);

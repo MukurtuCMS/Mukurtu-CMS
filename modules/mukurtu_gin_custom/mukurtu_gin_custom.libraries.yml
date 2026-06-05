@@ -10,7 +10,6 @@ mukurtu-gin-custom:
     - core/jquery
     - core/drupal
     - core/drupalSettings
-    - core/once
 
 entity-browser-toggle:
   version: 1.x
