@@ -1068,3 +1068,102 @@ function mukurtu_core_update_40033(): void {
     throw new \RuntimeException("Failed to write patched file: $path");
   }
 }
+
+/**
+ * Hide comment subject field and restrict comment body to Basic HTML only.
+ */
+function mukurtu_core_update_40034(): void {
+  // Hide subject field from comment form display.
+  $form_display = \Drupal::configFactory()->getEditable('core.entity_form_display.comment.comment.default');
+  if (!$form_display->isNew()) {
+    $subject = $form_display->get('content.subject');
+    if ($subject) {
+      $form_display->clear('content.subject');
+      $form_display->set('hidden.subject', TRUE);
+      $form_display->save();
+    }
+  }
+
+  // Restrict comment body to Basic HTML only (hides format switcher and tips link).
+  $field_config = \Drupal::configFactory()->getEditable('field.field.comment.comment.comment_body');
+  if (!$field_config->isNew()) {
+    $field_config->set('settings.allowed_formats', ['basic_html' => 'basic_html']);
+    $field_config->save();
+  }
+}
+
+/**
+ * Create comment_basic_html text format (no media embed) and restrict comment
+ * body to it; removes Insert Media button from comment CKEditor toolbar.
+ */
+function mukurtu_core_update_40035(): void {
+  // Create the comment_basic_html filter format if it doesn't exist.
+  $format_config = \Drupal::configFactory()->getEditable('filter.format.comment_basic_html');
+  if ($format_config->isNew()) {
+    $format_config->setData([
+      'langcode' => 'en',
+      'status' => TRUE,
+      'dependencies' => ['module' => ['editor', 'filter']],
+      'name' => 'Comment Basic HTML',
+      'format' => 'comment_basic_html',
+      'weight' => 1,
+      'filters' => [
+        'editor_file_reference' => ['id' => 'editor_file_reference', 'provider' => 'editor', 'status' => TRUE, 'weight' => 11, 'settings' => []],
+        'filter_align' => ['id' => 'filter_align', 'provider' => 'filter', 'status' => TRUE, 'weight' => 7, 'settings' => []],
+        'filter_caption' => ['id' => 'filter_caption', 'provider' => 'filter', 'status' => TRUE, 'weight' => 8, 'settings' => []],
+        'filter_html' => [
+          'id' => 'filter_html',
+          'provider' => 'filter',
+          'status' => TRUE,
+          'weight' => -10,
+          'settings' => [
+            'allowed_html' => '<br> <p> <h2 id> <h3 id> <h4 id> <h5 id> <h6 id> <cite> <dl> <dt> <dd> <span> <img src alt height width data-entity-type data-entity-uuid data-align data-caption> <drupal-entity data-entity-type data-entity-uuid data-entity-embed-display data-entity-embed-display-settings data-align data-caption data-embed-button data-langcode alt title> <iframe src width height frameborder allowfullscreen> <a hreflang href> <blockquote cite> <ul type> <ol type start> <strong> <em> <code> <li>',
+            'filter_html_help' => FALSE,
+            'filter_html_nofollow' => FALSE,
+          ],
+        ],
+        'filter_html_image_secure' => ['id' => 'filter_html_image_secure', 'provider' => 'filter', 'status' => TRUE, 'weight' => 9, 'settings' => []],
+        'filter_htmlcorrector' => ['id' => 'filter_htmlcorrector', 'provider' => 'filter', 'status' => TRUE, 'weight' => 10, 'settings' => []],
+      ],
+    ])->save();
+  }
+
+  // Create the CKEditor 5 config for comment_basic_html (no drupalMedia).
+  $editor_config = \Drupal::configFactory()->getEditable('editor.editor.comment_basic_html');
+  if ($editor_config->isNew()) {
+    $editor_config->setData([
+      'langcode' => 'en',
+      'status' => TRUE,
+      'dependencies' => ['config' => ['filter.format.comment_basic_html'], 'module' => ['ckeditor5']],
+      'format' => 'comment_basic_html',
+      'editor' => 'ckeditor5',
+      'settings' => [
+        'toolbar' => [
+          'items' => ['heading', 'bold', 'italic', 'code', '|', 'bulletedList', 'numberedList', '|', 'link', 'blockQuote', '|', 'specialCharacters', 'sourceEditing'],
+        ],
+        'plugins' => [
+          'ckeditor5_heading' => ['enabled_headings' => ['heading2', 'heading3', 'heading4', 'heading5', 'heading6']],
+          'ckeditor5_sourceEditing' => [
+            'allowed_tags' => ['<cite>', '<dl>', '<dt>', '<dd>', '<span>', '<img src alt height width data-entity-type data-entity-uuid data-align data-caption>', '<drupal-entity data-entity-type data-entity-uuid data-entity-embed-display data-entity-embed-display-settings data-align data-caption data-embed-button data-langcode alt title>', '<iframe src width height frameborder allowfullscreen>', '<a hreflang>', '<blockquote cite>', '<ul type>', '<ol type>', '<h2 id>', '<h3 id>', '<h4 id>', '<h5 id>', '<h6 id>'],
+          ],
+          'ckeditor5_list' => ['properties' => ['reversed' => FALSE, 'startIndex' => TRUE, 'styles' => TRUE], 'multiBlock' => TRUE],
+        ],
+      ],
+      'image_upload' => ['status' => FALSE],
+    ])->save();
+  }
+
+  // Switch comment body to the new comment_basic_html format.
+  $field_config = \Drupal::configFactory()->getEditable('field.field.comment.comment.comment_body');
+  if (!$field_config->isNew()) {
+    $field_config->set('settings.allowed_formats', ['comment_basic_html' => 'comment_basic_html']);
+    $field_config->save();
+  }
+
+  // Grant authenticated users permission to use the new format.
+  $role = \Drupal\user\Entity\Role::load('authenticated');
+  if ($role && !$role->hasPermission('use text format comment_basic_html')) {
+    $role->grantPermission('use text format comment_basic_html');
+    $role->save();
+  }
+}

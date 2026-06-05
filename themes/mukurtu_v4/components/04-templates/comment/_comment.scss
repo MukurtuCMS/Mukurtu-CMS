@@ -1,0 +1,115 @@
+@use "../../../external/include-media";
+@use "../../00-base/mixins/mixins";
+
+.comment {
+  padding: var(--v-space-4xxs) var(--v-space-4xs);
+  border-inline-start: 4px solid var(--brand-secondary);
+  background-color: var(--brand-light-accent);
+  margin-block-end: var(--v-space-4xxs);
+
+  &.unpublished {
+    border-inline-start-style: dashed;
+    border-color: var(--color-gray);
+    opacity: 0.8;
+  }
+
+  &__meta {
+    font-size: var(--font-size-s);
+    color: var(--color-gray);
+    margin-block: 0 var(--v-space-5xs);
+
+    a {
+      color: inherit;
+    }
+  }
+
+  &__body {
+    .field--name-comment-body {
+      // Remove the divider mixin border that full-node__content applies to fields.
+      padding-block-start: 0;
+      margin-block-start: 0;
+      border-block-start: none;
+    }
+
+    p:last-child {
+      margin-block-end: 0;
+    }
+  }
+
+  &__actions {
+    margin-block-start: var(--v-space-5xs);
+
+    // Drupal renders comment links as ul.links.inline — reset list styling.
+    ul,
+    ul.links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0 var(--v-space-4xxs);
+      list-style: none;
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    li {
+      margin: 0;
+      padding: 0;
+
+      &::before,
+      &::marker {
+        display: none;
+        content: '';
+      }
+    }
+
+    a {
+      @include mixins.block-link;
+      font-size: var(--font-size-s);
+    }
+  }
+}
+
+// "New" comment badge added by Drupal's History module.
+// Target only visible marks — .hidden marks must stay display:none.
+.comment mark:not(.hidden) {
+  background-color: var(--brand-secondary);
+  color: var(--brand-text-color);
+  padding-inline: var(--v-space-6xs);
+  padding-block: 0.1em;
+  font-size: var(--font-size-s);
+  font-weight: var(--text-bold);
+  display: inline-block;
+  margin-block-end: var(--v-space-5xs);
+}
+
+// Reply page (/comment/reply/…): constrain content to a readable width.
+.path-comment {
+  .layout-content {
+    max-width: 1280px;
+    margin-inline: auto;
+    padding-inline: var(--layout-padding);
+    padding-block: var(--v-space-2xs);
+  }
+
+  // Space between the parent comment context and the reply form.
+  .comment {
+    margin-block-end: var(--v-space-2xs);
+  }
+
+  // Hide Reply on the context comment — user is already on the reply form.
+  .comment__actions a[href*="/comment/reply/"] {
+    display: none;
+  }
+}
+
+// Threaded reply indentation.
+.indented {
+  margin-inline-start: var(--v-space-4xxs);
+  padding-inline-start: var(--v-space-4xxs);
+  border-inline-start: 3px solid var(--brand-light);
+
+  .comment {
+    background-color: var(--color-white);
+    border-inline-start-color: var(--brand-secondary-accent);
+  }
+}

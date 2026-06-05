@@ -278,3 +278,25 @@ function mukurtu_v4_preprocess_field_group_html_element__group_protocol_sidebar(
   assert($local_contexts_projects_manager instanceof LocalContextsSupportedProjectManager);
   $variables['has_lc_projects'] = (bool) $local_contexts_projects_manager->getGroupSupportedProjects($protocol);
 }
+
+/**
+ * Implements hook_preprocess_comment().
+ *
+ * Reformats the comment timestamp to date-only (e.g. "30 May 2026") and
+ * rebuilds the submitted string without the day-of-week or time.
+ */
+function mukurtu_v4_preprocess_comment(array &$variables): void {
+  $comment = $variables['comment'];
+  $date_only = \Drupal::service('date.formatter')->format(
+    $comment->getCreatedTime(),
+    'custom',
+    'j F Y',
+  );
+  $author_name = $comment->getOwner()->getDisplayName();
+  $variables['created'] = $date_only;
+  $variables['author'] = $author_name;
+  $variables['submitted'] = t('Submitted by @username on @date', [
+    '@username' => $author_name,
+    '@date' => $date_only,
+  ]);
+}

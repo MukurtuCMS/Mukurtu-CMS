@@ -6092,6 +6092,123 @@ header {
           border-block-end: none;
 }
 
+.comment {
+  padding: var(--v-space-4xxs) var(--v-space-4xs);
+  -webkit-border-start: 4px solid var(--brand-secondary);
+          border-inline-start: 4px solid var(--brand-secondary);
+  background-color: var(--brand-light-accent);
+  -webkit-margin-after: var(--v-space-4xxs);
+          margin-block-end: var(--v-space-4xxs);
+}
+.comment.unpublished {
+  border-inline-start-style: dashed;
+  border-color: var(--color-gray);
+  opacity: 0.8;
+}
+.comment__meta {
+  font-size: var(--font-size-s);
+  color: var(--color-gray);
+  margin-block: 0 var(--v-space-5xs);
+}
+.comment__meta a {
+  color: inherit;
+}
+.comment__body .field--name-comment-body {
+  -webkit-padding-before: 0;
+          padding-block-start: 0;
+  -webkit-margin-before: 0;
+          margin-block-start: 0;
+  -webkit-border-before: none;
+          border-block-start: none;
+}
+.comment__body p:last-child {
+  -webkit-margin-after: 0;
+          margin-block-end: 0;
+}
+.comment__actions {
+  -webkit-margin-before: var(--v-space-5xs);
+          margin-block-start: var(--v-space-5xs);
+}
+.comment__actions ul,
+.comment__actions ul.links {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+  gap: 0 var(--v-space-4xxs);
+  list-style: none;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+.comment__actions li {
+  margin: 0;
+  padding: 0;
+}
+.comment__actions li::before, .comment__actions li::marker {
+  display: none;
+  content: "";
+}
+.comment__actions a {
+  background-color: var(--color-white);
+  border: 1px solid var(--brand-primary-dark);
+  color: var(--brand-primary-dark);
+  font-weight: var(--text-bold);
+  line-height: normal;
+  text-decoration: none;
+  padding-block: var(--v-space-6xs);
+  padding-inline: var(--v-space-5xs);
+  letter-spacing: normal;
+  font-size: var(--font-size-s);
+}
+.comment__actions a:hover {
+  background-color: var(--brand-primary-dark);
+  color: var(--color-white);
+}
+.comment__actions a:focus {
+  outline-offset: 1px;
+}
+
+.comment mark:not(.hidden) {
+  background-color: var(--brand-secondary);
+  color: var(--brand-text-color);
+  padding-inline: var(--v-space-6xs);
+  padding-block: 0.1em;
+  font-size: var(--font-size-s);
+  font-weight: var(--text-bold);
+  display: inline-block;
+  -webkit-margin-after: var(--v-space-5xs);
+          margin-block-end: var(--v-space-5xs);
+}
+
+.path-comment .layout-content {
+  max-width: 1280px;
+  margin-inline: auto;
+  padding-inline: var(--layout-padding);
+  padding-block: var(--v-space-2xs);
+}
+.path-comment .comment {
+  -webkit-margin-after: var(--v-space-2xs);
+          margin-block-end: var(--v-space-2xs);
+}
+.path-comment .comment__actions a[href*="/comment/reply/"] {
+  display: none;
+}
+
+.indented {
+  -webkit-margin-start: var(--v-space-4xxs);
+          margin-inline-start: var(--v-space-4xxs);
+  -webkit-padding-start: var(--v-space-4xxs);
+          padding-inline-start: var(--v-space-4xxs);
+  -webkit-border-start: 3px solid var(--brand-light);
+          border-inline-start: 3px solid var(--brand-light);
+}
+.indented .comment {
+  background-color: var(--color-white);
+  border-inline-start-color: var(--brand-secondary-accent);
+}
+
 /* @file
  * Styles for the landing page template.
  */
