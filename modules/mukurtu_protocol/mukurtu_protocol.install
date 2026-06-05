@@ -624,6 +624,18 @@ function mukurtu_protocol_update_40034(): void {
 /**
  * Add per-protocol comment view and post access fields.
  */
+function mukurtu_protocol_update_40036(): void {
+  $form_display = \Drupal::entityTypeManager()
+    ->getStorage('entity_form_display')
+    ->load('protocol.protocol.default');
+  if ($form_display) {
+    foreach (['field_comment_status', 'field_comment_require_approval'] as $field) {
+      $form_display->removeComponent($field);
+    }
+    $form_display->save();
+  }
+}
+
 function mukurtu_protocol_update_40035(): void {
   $manager = \Drupal::entityDefinitionUpdateManager();
   $fields = [
