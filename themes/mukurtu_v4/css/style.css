@@ -952,9 +952,6 @@ a:not(.primary-nav__menu-link) svg.tel path {
   block-size: 50px;
 }
 
-.media-asset--link {
-  position: relative;
-}
 .media-asset--link .media-asset--expand {
   background-color: var(--color-white);
   border: 1px solid var(--brand-primary-dark);
@@ -965,10 +962,6 @@ a:not(.primary-nav__menu-link) svg.tel path {
   padding-block: var(--v-space-6xs);
   padding-inline: var(--v-space-5xs);
   letter-spacing: normal;
-  position: absolute;
-  inset-block-start: 10px;
-  inset-inline-start: 10px;
-  inline-size: 100px;
 }
 .media-asset--link .media-asset--expand:hover {
   background-color: var(--brand-primary-dark);
@@ -977,27 +970,20 @@ a:not(.primary-nav__menu-link) svg.tel path {
 .media-asset--link .media-asset--expand:focus {
   outline-offset: 1px;
 }
-.media-asset--link .media-asset--content {
-  min-inline-size: 300px;
-  min-block-size: 300px;
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  place-content: center;
-  -ms-flex-wrap: wrap;
-      flex-wrap: wrap;
-}
-.media-asset--link .media-asset--content > * {
-  -ms-flex-preferred-size: 100%;
-      flex-basis: 100%;
-}
-.media-asset--link .media-asset--content .field {
-  place-content: center;
+
+.media-asset--actions,
+.media-asset--pdf-actions {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
   -ms-flex-wrap: wrap;
       flex-wrap: wrap;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  gap: var(--v-space-5xs);
+  -webkit-margin-before: var(--v-space-5xs);
+          margin-block-start: var(--v-space-5xs);
 }
 
 #javali-popup {
@@ -2315,17 +2301,6 @@ details.form-wrapper summary + div {
   display: block;
   inline-size: 100%;
   block-size: 100%;
-}
-
-.media-asset--pdf-actions {
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -ms-flex-wrap: wrap;
-      flex-wrap: wrap;
-  gap: var(--v-space-5xs);
-  -webkit-margin-before: var(--v-space-5xs);
-          margin-block-start: var(--v-space-5xs);
 }
 
 .media-asset--glightbox-inline {

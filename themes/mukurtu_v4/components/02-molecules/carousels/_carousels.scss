@@ -154,32 +154,16 @@
 }
 
 .media-asset--link {
-  position: relative;
-
   .media-asset--expand {
     @include mixins.block-link;
-
-    position: absolute;
-    inset-block-start: 10px;
-    inset-inline-start: 10px;
-    inline-size: 100px;
   }
+}
 
-  .media-asset--content {
-    min-inline-size: 300px;
-    min-block-size: 300px;
-    display: flex;
-    place-content: center;
-    flex-wrap: wrap;
-
-    & > * {
-      flex-basis: 100%;
-    }
-
-    .field {
-      place-content: center;
-      display: flex;
-      flex-wrap: wrap;
-    }
-  }
+.media-asset--actions,
+.media-asset--pdf-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--v-space-5xs);
+  margin-block-start: var(--v-space-5xs);
 }

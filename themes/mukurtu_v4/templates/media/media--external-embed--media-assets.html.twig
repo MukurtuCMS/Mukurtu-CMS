@@ -26,12 +26,14 @@
   {{ title_suffix.contextual_links }}
   {{ content.media_content_warnings }}
 
-  <a href="#external-embed-{{ media.id }}" data-type="inline" class="media-asset--link" aria-label="Expand {{ name }}">
-    <span class="media-asset--expand">Expand +</span>
-  </a>
-
   <div class="media-asset--content">
     {{ content.field_media_external_embed }}
+  </div>
+
+  <div class="media-asset--actions">
+    <a href="#external-embed-{{ media.id }}" data-type="inline" class="media-asset--link" aria-label="Expand {{ name }}">
+      <span class="media-asset--expand">Expand +</span>
+    </a>
   </div>
 
   <div id="external-embed-{{ media.id }}" class="media-asset--glightbox-inline">

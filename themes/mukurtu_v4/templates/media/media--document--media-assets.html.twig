@@ -39,10 +39,6 @@
 <div{{ attributes.addClass(classes) }}>
   {{ content.media_content_warnings }}
 
-  <a href="#document-{{ media.id }}" data-type="inline" class="media-asset--link" aria-label="Expand {{ name }} document">
-    <span class="media-asset--expand">Expand +</span>
-  </a>
-
   <div class="media-asset--pdf-wrapper">
     <object data="{{ media_url }}#navpanes=0" type="application/pdf"
             title="Document: {{ name }}" class="media-asset--pdf">
@@ -54,6 +50,9 @@
   </div>
 
   <div class="media-asset--pdf-actions">
+    <a href="#document-{{ media.id }}" data-type="inline" class="media-asset--link" aria-label="Expand {{ name }} document">
+      <span class="media-asset--expand">Expand +</span>
+    </a>
     <a href="{{ media_url }}" class="button" target="_blank" rel="noopener"
        aria-label="Open {{ name }} document in new tab">Open full screen
       <span class="visually-hidden">(opens in new tab)</span>
