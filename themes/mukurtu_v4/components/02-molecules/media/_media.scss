@@ -29,7 +29,9 @@
 .media--document,
 .media--audio,
 .media--video,
-.media--remote_video {
+.media--remote_video,
+.media--external_embed,
+.media--soundcloud {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -39,19 +41,11 @@
     background-color: black;
   }
 
-  .button {
-    margin-block-start: var(--v-space-5xs);
-
-    &--download {
-      svg {
-        fill: white;
-        vertical-align: middle;
-        margin-inline-start: var(--v-space-6xs);
-      }
-    }
-
-    &--download-icon {
-      margin-block-start: 0;
+  .button--download {
+    svg {
+      fill: white;
+      vertical-align: middle;
+      margin-inline-start: var(--v-space-6xs);
     }
   }
 }
@@ -64,10 +58,6 @@
 }
 
 .media--audio {
-  .media-asset--link {
-    inline-size: 100%;
-  }
-
   .media-asset--name {
     display: block;
     text-align: center;

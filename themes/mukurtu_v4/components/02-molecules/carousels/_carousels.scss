@@ -154,8 +154,18 @@
 }
 
 .media-asset--link {
-  .media-asset--expand {
-    @include mixins.block-link;
+  &.button {
+    background-color: var(--color-white);
+    border: 1px solid var(--brand-primary-dark);
+    color: var(--brand-primary-dark);
+
+    &:hover,
+    &:active,
+    &:focus {
+      background-color: var(--brand-primary-dark);
+      color: var(--light-text-color);
+      text-decoration: none;
+    }
   }
 }
 

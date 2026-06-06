@@ -952,23 +952,15 @@ a:not(.primary-nav__menu-link) svg.tel path {
   block-size: 50px;
 }
 
-.media-asset--link .media-asset--expand {
+.media-asset--link.button {
   background-color: var(--color-white);
   border: 1px solid var(--brand-primary-dark);
   color: var(--brand-primary-dark);
-  font-weight: var(--text-bold);
-  line-height: normal;
-  text-decoration: none;
-  padding-block: var(--v-space-6xs);
-  padding-inline: var(--v-space-5xs);
-  letter-spacing: normal;
 }
-.media-asset--link .media-asset--expand:hover {
+.media-asset--link.button:hover, .media-asset--link.button:active, .media-asset--link.button:focus {
   background-color: var(--brand-primary-dark);
-  color: var(--color-white);
-}
-.media-asset--link .media-asset--expand:focus {
-  outline-offset: 1px;
+  color: var(--light-text-color);
+  text-decoration: none;
 }
 
 .media-asset--actions,
@@ -2171,7 +2163,9 @@ details.form-wrapper summary + div {
 .media--document,
 .media--audio,
 .media--video,
-.media--remote_video {
+.media--remote_video,
+.media--external_embed,
+.media--soundcloud {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -2190,34 +2184,22 @@ details.form-wrapper summary + div {
 .media--document iframe,
 .media--audio iframe,
 .media--video iframe,
-.media--remote_video iframe {
+.media--remote_video iframe,
+.media--external_embed iframe,
+.media--soundcloud iframe {
   background-color: black;
-}
-.media--image .button,
-.media--document .button,
-.media--audio .button,
-.media--video .button,
-.media--remote_video .button {
-  -webkit-margin-before: var(--v-space-5xs);
-          margin-block-start: var(--v-space-5xs);
 }
 .media--image .button--download svg,
 .media--document .button--download svg,
 .media--audio .button--download svg,
 .media--video .button--download svg,
-.media--remote_video .button--download svg {
+.media--remote_video .button--download svg,
+.media--external_embed .button--download svg,
+.media--soundcloud .button--download svg {
   fill: white;
   vertical-align: middle;
   -webkit-margin-start: var(--v-space-6xs);
           margin-inline-start: var(--v-space-6xs);
-}
-.media--image .button--download-icon,
-.media--document .button--download-icon,
-.media--audio .button--download-icon,
-.media--video .button--download-icon,
-.media--remote_video .button--download-icon {
-  -webkit-margin-before: 0;
-          margin-block-start: 0;
 }
 
 .media--remote_video .field[data-blazy] {
@@ -2227,9 +2209,6 @@ details.form-wrapper summary + div {
   inline-size: 100%;
 }
 
-.media--audio .media-asset--link {
-  inline-size: 100%;
-}
 .media--audio .media-asset--name {
   display: block;
   text-align: center;
