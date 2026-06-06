@@ -64,6 +64,10 @@
 }
 
 .media--audio {
+  .media-asset--link {
+    inline-size: 100%;
+  }
+
   .media-asset--name {
     display: block;
     text-align: center;
