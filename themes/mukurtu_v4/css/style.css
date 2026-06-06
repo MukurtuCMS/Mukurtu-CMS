@@ -2290,11 +2290,17 @@ details.form-wrapper summary + div {
 }
 
 .media--external_embed .media-asset--content,
-.media--soundcloud .media-asset--content {
+.media--external_embed .field,
+.media--external_embed .field__items,
+.media--external_embed .field__item,
+.media--soundcloud .media-asset--content,
+.media--soundcloud .field,
+.media--soundcloud .field__items,
+.media--soundcloud .field__item {
   inline-size: 100%;
 }
-.media--external_embed .media-asset--content iframe,
-.media--soundcloud .media-asset--content iframe {
+.media--external_embed iframe,
+.media--soundcloud iframe {
   display: block;
   inline-size: 100%;
 }

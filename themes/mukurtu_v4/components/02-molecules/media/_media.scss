@@ -110,13 +110,16 @@
 
 .media--external_embed,
 .media--soundcloud {
-  .media-asset--content {
+  .media-asset--content,
+  .field,
+  .field__items,
+  .field__item {
     inline-size: 100%;
+  }
 
-    iframe {
-      display: block;
-      inline-size: 100%;
-    }
+  iframe {
+    display: block;
+    inline-size: 100%;
   }
 }
 
