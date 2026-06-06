@@ -954,7 +954,7 @@ a:not(.primary-nav__menu-link) svg.tel path {
 
 .media-asset--link.button {
   background-color: var(--color-white);
-  border: 1px solid var(--brand-primary-dark);
+  border: 2px solid var(--brand-primary-dark);
   color: var(--brand-primary-dark);
 }
 .media-asset--link.button:hover, .media-asset--link.button:active, .media-asset--link.button:focus {
