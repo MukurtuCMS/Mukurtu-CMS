@@ -6047,7 +6047,7 @@ header {
     grid-column: 10/span 4;
   }
 }
-.full-node__sidebar .sidebar-section:not(:has(.field__item)) {
+.full-node__sidebar .sidebar-section:not(:has(.field__item)):not(.collection__menu) {
   display: none;
 }
 .full-node__sidebar .sidebar-section {
