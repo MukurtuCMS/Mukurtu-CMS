@@ -57,7 +57,10 @@ class ExportListAddItemsForm extends FormBase {
 
     if (!\array_key_exists('action_id', $form_data)) {
       $this->messenger()->addWarning($this->t('No items are staged for export.'));
-      $form_state->setRedirect('entity.export_list.collection');
+      $destination = $this->getRequest()->query->get('destination');
+      $destination
+        ? $form_state->setRedirectUrl(Url::fromUserInput($destination))
+        : $form_state->setRedirect('entity.export_list.collection');
       return $form;
     }
 
