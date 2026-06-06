@@ -44,6 +44,7 @@ function mukurtu_export_preprocess_flag(&$variables) {
   }
   $variables['attributes']['href'] = $url->toString();
   $variables['attributes']->removeClass('use-ajax');
+  $variables['attributes']->addClass(['button', 'button--small']);
   $variables['title'] = t('Add to export list');
 }
 
@@ -100,6 +101,96 @@ function mukurtu_export_bulk_form_submit(&$form, FormStateInterface $form_state)
   }
   $destination = \Drupal::request()->getRequestUri();
   $form_state->setRedirectUrl(\Drupal\Core\Url::fromRoute('mukurtu_export.add_items_to_list', [], ['query' => ['destination' => $destination]]));
+}
+
+/**
+ * Implements hook_entity_extra_field_info().
+ *
+ * Registers the "Export list membership" pseudo-field for all node and media
+ * bundles so it can be positioned via the display config UI.
+ */
+function mukurtu_export_entity_extra_field_info() {
+  $extra = [];
+  $field_info = [
+    'label' => t('Export list membership'),
+    'description' => t('Shows which export lists this content belongs to.'),
+    'weight' => -50,
+    'visible' => TRUE,
+  ];
+  $bundle_info = \Drupal::service('entity_type.bundle.info');
+  foreach (array_keys($bundle_info->getBundleInfo('node')) as $bundle) {
+    $extra['node'][$bundle]['display']['export_list_membership'] = $field_info;
+  }
+  foreach (array_keys($bundle_info->getBundleInfo('media')) as $bundle) {
+    $extra['media'][$bundle]['display']['export_list_membership'] = $field_info;
+  }
+  return $extra;
+}
+
+/**
+ * Implements hook_entity_view().
+ *
+ * Renders a disclosure widget showing which export lists contain this entity.
+ */
+function mukurtu_export_entity_view(array &$build, \Drupal\Core\Entity\EntityInterface $entity, $display, $view_mode) {
+  if (!in_array($entity->getEntityTypeId(), ['node', 'media'])) {
+    return;
+  }
+  if (!$display->getComponent('export_list_membership')) {
+    return;
+  }
+  if (!\Drupal::currentUser()->hasPermission('access mukurtu export')) {
+    return;
+  }
+
+  $entity_type = $entity->getEntityTypeId();
+  $entity_id = $entity->id();
+  $uid = \Drupal::currentUser()->id();
+
+  $storage = \Drupal::entityTypeManager()->getStorage('export_list');
+  $query = $storage->getQuery()->accessCheck(TRUE);
+  $or = $query->orConditionGroup()
+    ->condition('uid', $uid)
+    ->condition('site_wide', TRUE);
+  $ids = $query->condition($or)->execute();
+  $lists = $storage->loadMultiple($ids);
+
+  $matching = array_filter($lists, function ($list) use ($entity_type, $entity_id) {
+    $items = $list->getItems();
+    return isset($items[$entity_type][$entity_id]);
+  });
+
+  if (empty($matching)) {
+    return;
+  }
+
+  $cache_tags = [];
+  $items = [];
+  foreach ($matching as $list) {
+    $cache_tags = array_merge($cache_tags, $list->getCacheTags());
+    $items[] = [
+      '#type' => 'link',
+      '#title' => $list->label(),
+      '#url' => $list->toUrl('edit-form'),
+    ];
+  }
+
+  $count = count($matching);
+  $build['export_list_membership'] = [
+    '#type' => 'html_tag',
+    '#tag' => 'details',
+    '#attributes' => ['class' => ['export-list-membership']],
+    'summary' => [
+      '#type' => 'html_tag',
+      '#tag' => 'summary',
+      '#value' => \Drupal::translation()->formatPlural($count, 'In 1 export list', 'In @count export lists'),
+    ],
+    'list' => [
+      '#theme' => 'item_list',
+      '#items' => $items,
+    ],
+    '#cache' => ['tags' => $cache_tags],
+  ];
 }
 
 function mukurtu_export_views_data() {
