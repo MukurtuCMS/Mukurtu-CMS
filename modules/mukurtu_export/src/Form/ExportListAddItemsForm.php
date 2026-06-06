@@ -51,7 +51,10 @@ class ExportListAddItemsForm extends FormBase {
 
     if (empty($staged)) {
       $this->messenger()->addWarning($this->t('No items are staged for export.'));
-      $form_state->setRedirect('entity.export_list.collection');
+      $destination = $this->getRequest()->query->get('destination');
+      $destination
+        ? $form_state->setRedirectUrl(Url::fromUserInput($destination))
+        : $form_state->setRedirect('entity.export_list.collection');
       return $form;
     }
 
@@ -106,10 +109,11 @@ class ExportListAddItemsForm extends FormBase {
       '#value' => $this->t('Add to List'),
       '#button_type' => 'primary',
     ];
+    $destination = $this->getRequest()->query->get('destination');
     $form['actions']['cancel'] = [
       '#type' => 'link',
       '#title' => $this->t('Cancel'),
-      '#url' => Url::fromRoute('entity.export_list.collection'),
+      '#url' => $destination ? Url::fromUserInput($destination) : Url::fromRoute('entity.export_list.collection'),
       '#attributes' => ['class' => ['button']],
     ];
 
@@ -189,7 +193,10 @@ class ExportListAddItemsForm extends FormBase {
     }
 
     $this->messenger()->addStatus($this->t('Items added to export list %label.', ['%label' => $list->label()]));
-    $form_state->setRedirect('entity.export_list.collection');
+    $destination = $this->getRequest()->query->get('destination');
+    $destination
+      ? $form_state->setRedirectUrl(Url::fromUserInput($destination))
+      : $form_state->setRedirect('entity.export_list.collection');
   }
 
   /**

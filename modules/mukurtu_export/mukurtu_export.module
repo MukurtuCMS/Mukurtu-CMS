@@ -98,7 +98,8 @@ function mukurtu_export_bulk_form_submit(&$form, FormStateInterface $form_state)
   if (!in_array($form_state->getValue('action'), $export_flag_actions, TRUE)) {
     return;
   }
-  $form_state->setRedirect('mukurtu_export.add_items_to_list');
+  $destination = \Drupal::request()->getRequestUri();
+  $form_state->setRedirectUrl(\Drupal\Core\Url::fromRoute('mukurtu_export.add_items_to_list', [], ['query' => ['destination' => $destination]]));
 }
 
 function mukurtu_export_views_data() {
