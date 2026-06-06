@@ -12,6 +12,7 @@ use Drupal\mukurtu_protocol\CulturalProtocolControlledTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\file\Entity\File;
+use Drupal\Core\File\FileExists;
 use Drupal\Core\File\FileSystemInterface;
 
 /**
@@ -27,7 +28,7 @@ class Document extends Media implements DocumentInterface, CulturalProtocolContr
   public function getDefaultThumbnail()
   {
     $config = \Drupal::config('mukurtu_thumbnail.settings');
-    $defaultDocumentThumbnail = $config->get('document_default_thumbnail')[0] ?? NULL;
+    $defaultDocumentThumbnail = $config->get('document')[0] ?? NULL;
     return $defaultDocumentThumbnail;
   }
 
@@ -350,7 +351,7 @@ class Document extends Media implements DocumentInterface, CulturalProtocolContr
     $targetDir = rtrim(str_replace($docName, '', $uri), '/');
     $fileSystem->prepareDirectory($targetDir, FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS);
     $destination = $targetDir . '/' . $thumbnailName;
-    $fileSystem->move($tempThumbnailDest, $destination, FileSystemInterface::EXISTS_REPLACE);
+    $fileSystem->move($tempThumbnailDest, $destination, FileExists::Replace);
 
     $thumbnailFile = File::create([
       'filename' => $thumbnailName,

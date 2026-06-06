@@ -20,7 +20,7 @@ class MukurtuAddWordToListForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, NodeInterface $node = NULL, Array $lists = []) {
+  public function buildForm(array $form, FormStateInterface $form_state, ?NodeInterface $node = NULL, Array $lists = []) {
     if ($node) {
       $form['node'] = [
         '#type' => 'hidden',
