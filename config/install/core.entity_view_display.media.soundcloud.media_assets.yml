@@ -5,7 +5,6 @@ dependencies:
     - core.entity_view_mode.media.media_assets
     - media.type.soundcloud
   module:
-    - image
     - layout_builder
     - media_entity_soundcloud
 third_party_settings:
@@ -29,19 +28,9 @@ content:
     third_party_settings: {  }
     weight: 0
     region: content
-  field_thumbnail:
-    type: image
-    label: hidden
-    settings:
-      image_link: ''
-      image_style: ''
-      image_loading:
-        attribute: lazy
-    third_party_settings: {  }
-    weight: 1
-    region: content
 hidden:
   created: true
+  field_thumbnail: true
   field_communities: true
   field_contributor: true
   field_cultural_protocols: true

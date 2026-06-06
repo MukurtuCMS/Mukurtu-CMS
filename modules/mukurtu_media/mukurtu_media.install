@@ -132,7 +132,6 @@ function mukurtu_media_update_40005(): void {
         'media.type.soundcloud',
       ],
       'module' => [
-        'image',
         'layout_builder',
         'media_entity_soundcloud',
       ],
@@ -162,18 +161,6 @@ function mukurtu_media_update_40005(): void {
         'weight' => 0,
         'region' => 'content',
       ],
-      'field_thumbnail' => [
-        'type' => 'image',
-        'label' => 'hidden',
-        'settings' => [
-          'image_link' => '',
-          'image_style' => '',
-          'image_loading' => ['attribute' => 'lazy'],
-        ],
-        'third_party_settings' => [],
-        'weight' => 1,
-        'region' => 'content',
-      ],
     ],
     'hidden' => [
       'created' => TRUE,
@@ -182,6 +169,7 @@ function mukurtu_media_update_40005(): void {
       'field_cultural_protocols' => TRUE,
       'field_identifier' => TRUE,
       'field_media_tags' => TRUE,
+      'field_thumbnail' => TRUE,
       'field_people' => TRUE,
       'flag_export_media' => TRUE,
       'langcode' => TRUE,
