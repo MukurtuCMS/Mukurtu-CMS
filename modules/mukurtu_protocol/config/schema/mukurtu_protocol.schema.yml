@@ -22,6 +22,8 @@ mukurtu_protocol.comment_settings:
       type: integer
     site_comments_require_approval:
       type: boolean
+    anonymous_comments_require_email:
+      type: boolean
 
 mukurtu_protocol.community_organization:
   type: config_object

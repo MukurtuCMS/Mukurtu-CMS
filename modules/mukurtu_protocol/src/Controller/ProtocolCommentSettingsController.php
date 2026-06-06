@@ -58,6 +58,7 @@ class ProtocolCommentSettingsController extends ControllerBase {
       ->condition('entity_type', 'node')
       ->condition('status', CommentInterface::NOT_PUBLISHED)
       ->sort('created', 'DESC')
+      ->range(0, 200)
       ->accessCheck(FALSE)
       ->execute();
 
@@ -114,6 +115,7 @@ class ProtocolCommentSettingsController extends ControllerBase {
       ],
       '#rows' => $rows,
       '#empty' => $this->t('No comments awaiting approval for this protocol.'),
+      '#cache' => ['tags' => ['comment_list']],
     ];
   }
 

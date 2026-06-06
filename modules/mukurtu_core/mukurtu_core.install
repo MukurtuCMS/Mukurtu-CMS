@@ -1070,7 +1070,10 @@ function mukurtu_core_update_40033(): void {
 }
 
 /**
- * Hide comment subject field and restrict comment body to Basic HTML only.
+ * Hide comment subject field from the comment form; set body to basic_html.
+ *
+ * Note: subsequent hooks 40035 and 40036 supersede the format change made
+ * here, ultimately switching to plain_text. This hook only hides the subject.
  */
 function mukurtu_core_update_40034(): void {
   // Hide subject field from comment form display.

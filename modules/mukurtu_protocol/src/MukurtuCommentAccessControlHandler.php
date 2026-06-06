@@ -40,8 +40,11 @@ class MukurtuCommentAccessControlHandler extends CommentAccessControlHandler {
       return parent::checkAccess($entity, $operation, $account);
     }
 
-    // For update/delete, check if the user is a protocol-level comment admin
-    // on the entity being commented on.
+    // For update/delete, grant access to protocol-level comment admins on the
+    // entity being commented on. This intentionally allows protocol stewards to
+    // edit or delete any comment (including published ones by other users) on
+    // their protocol's content. Site-wide admins fall through to parent(), which
+    // grants them access via the 'administer comments' permission.
     if (in_array($operation, ['update', 'delete'])) {
       $commented_entity = $entity->getCommentedEntity();
       if ($commented_entity && CulturalProtocols::hasSiteOrProtocolPermission($commented_entity, 'administer comments', $account, FALSE)) {
