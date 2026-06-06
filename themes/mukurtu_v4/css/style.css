@@ -2283,7 +2283,19 @@ details.form-wrapper summary + div {
   fill: currentColor;
 }
 
-.media-carousel .media--document {
+.media-carousel .media--document,
+.media-carousel .media--external_embed,
+.media-carousel .media--soundcloud {
+  inline-size: 100%;
+}
+
+.media--external_embed .media-asset--content,
+.media--soundcloud .media-asset--content {
+  inline-size: 100%;
+}
+.media--external_embed .media-asset--content iframe,
+.media--soundcloud .media-asset--content iframe {
+  display: block;
   inline-size: 100%;
 }
 

@@ -102,8 +102,22 @@
   }
 }
 
-.media-carousel .media--document {
+.media-carousel .media--document,
+.media-carousel .media--external_embed,
+.media-carousel .media--soundcloud {
   inline-size: 100%;
+}
+
+.media--external_embed,
+.media--soundcloud {
+  .media-asset--content {
+    inline-size: 100%;
+
+    iframe {
+      display: block;
+      inline-size: 100%;
+    }
+  }
 }
 
 .media-asset--pdf-wrapper {
