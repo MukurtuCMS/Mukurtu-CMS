@@ -673,3 +673,13 @@ function mukurtu_protocol_update_40037(): void {
     $form_display->save();
   }
 }
+
+/**
+ * Add anonymous_comments_require_email default to comment settings config.
+ */
+function mukurtu_protocol_update_40038(): void {
+  $config = \Drupal::configFactory()->getEditable('mukurtu_protocol.comment_settings');
+  if ($config->get('anonymous_comments_require_email') === NULL) {
+    $config->set('anonymous_comments_require_email', FALSE)->save();
+  }
+}

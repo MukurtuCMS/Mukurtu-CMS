@@ -48,6 +48,10 @@ class MukurtuCommentForm extends CommentForm {
     $form['#theme'] = ['comment_form__' . $entity->getEntityTypeId() . '__' . $entity->bundle() . '__' . $field_name, 'comment_form'];
 
     $anonymous_contact = $field_definition->getSetting('anonymous');
+    $commentSettings = $this->config('mukurtu_protocol.comment_settings');
+    if ($commentSettings->get('anonymous_comments_require_email') && $this->currentUser->isAnonymous()) {
+      $anonymous_contact = CommentInterface::ANONYMOUS_MUST_CONTACT;
+    }
     $is_admin = $comment->id() && CulturalProtocols::hasSiteOrProtocolPermission($entity, 'administer comments', $this->currentUser, TRUE);
     if (!$this->currentUser->isAuthenticated() && $anonymous_contact != CommentInterface::ANONYMOUS_MAYNOT_CONTACT) {
       $form['#attached']['library'][] = 'core/drupal.form';

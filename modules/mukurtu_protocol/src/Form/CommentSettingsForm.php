@@ -99,6 +99,20 @@ class CommentSettingsForm extends ConfigFormBase {
       ],
     ];
 
+    $anonymousRequireEmail = $config->get('anonymous_comments_require_email') ?? FALSE;
+
+    $form['anonymous_comments_require_email'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Require email address from visitors who leave comments'),
+      '#description' => $this->t('When enabled, anonymous users must provide an email address to post a comment. The email address is kept private and will not be shown publicly.'),
+      '#default_value' => $anonymousRequireEmail,
+      '#states' => [
+        'enabled' => [
+          ':input[name="anonymous_can_post_comments"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
+
     return parent::buildForm($form, $form_state);
   }
 
@@ -109,6 +123,7 @@ class CommentSettingsForm extends ConfigFormBase {
     $this->configFactory->getEditable(static::SETTINGS)
       ->set('site_comments_enabled', $form_state->getValue('site_comments_enabled'))
       ->set('site_comments_require_approval', (bool) $form_state->getValue('site_comments_require_approval'))
+      ->set('anonymous_comments_require_email', (bool) $form_state->getValue('anonymous_comments_require_email'))
       ->save();
 
     $anonymous = $this->entityTypeManager->getStorage('user_role')->load('anonymous');
