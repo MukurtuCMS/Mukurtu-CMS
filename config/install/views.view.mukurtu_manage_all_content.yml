@@ -825,7 +825,7 @@ display:
         community:
           id: community
           table: node_field_data
-          field: nid
+          field: mukurtu_community_filter
           relationship: none
           group_type: group
           admin_label: ''
@@ -864,7 +864,7 @@ display:
         protocol:
           id: protocol
           table: node_field_data
-          field: nid
+          field: mukurtu_protocol_filter
           relationship: none
           group_type: group
           admin_label: ''
@@ -949,7 +949,7 @@ display:
         is_community_record:
           id: is_community_record
           table: node_field_data
-          field: nid
+          field: mukurtu_is_community_record
           relationship: none
           group_type: group
           admin_label: ''
@@ -987,7 +987,7 @@ display:
         is_multipage_item:
           id: is_multipage_item
           table: node_field_data
-          field: nid
+          field: mukurtu_is_multipage_item
           relationship: none
           group_type: group
           admin_label: ''
@@ -1025,7 +1025,7 @@ display:
         in_collection:
           id: in_collection
           table: node_field_data
-          field: nid
+          field: mukurtu_in_collection
           relationship: none
           group_type: group
           admin_label: ''
@@ -1064,7 +1064,7 @@ display:
         in_word_list:
           id: in_word_list
           table: node_field_data
-          field: nid
+          field: mukurtu_in_word_list
           relationship: none
           group_type: group
           admin_label: ''

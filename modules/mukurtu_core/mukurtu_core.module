@@ -804,6 +804,57 @@ function mukurtu_core_views_data_alter(array &$data)
       ],
     ];
   }
+
+  if (isset($data['node_field_data'])) {
+    $data['node_field_data']['mukurtu_community_filter'] = [
+      'title' => t('Community'),
+      'filter' => [
+        'id' => 'mukurtu_node_community_filter',
+        'field' => 'nid',
+        'real field' => 'nid',
+      ],
+    ];
+    $data['node_field_data']['mukurtu_protocol_filter'] = [
+      'title' => t('Protocol'),
+      'filter' => [
+        'id' => 'mukurtu_node_protocol_filter',
+        'field' => 'nid',
+        'real field' => 'nid',
+      ],
+    ];
+    $data['node_field_data']['mukurtu_is_community_record'] = [
+      'title' => t('Is community record'),
+      'filter' => [
+        'id' => 'mukurtu_node_is_community_record',
+        'field' => 'nid',
+        'real field' => 'nid',
+      ],
+    ];
+    $data['node_field_data']['mukurtu_is_multipage_item'] = [
+      'title' => t('Is multipage item'),
+      'filter' => [
+        'id' => 'mukurtu_node_is_multipage_item',
+        'field' => 'nid',
+        'real field' => 'nid',
+      ],
+    ];
+    $data['node_field_data']['mukurtu_in_collection'] = [
+      'title' => t('In collection'),
+      'filter' => [
+        'id' => 'mukurtu_node_in_collection',
+        'field' => 'nid',
+        'real field' => 'nid',
+      ],
+    ];
+    $data['node_field_data']['mukurtu_in_word_list'] = [
+      'title' => t('In word list'),
+      'filter' => [
+        'id' => 'mukurtu_node_in_word_list',
+        'field' => 'nid',
+        'real field' => 'nid',
+      ],
+    ];
+  }
 }
 
 /**
