@@ -755,7 +755,7 @@ display:
             identifier: field_category_target_id
             required: false
             remember: false
-            multiple: true
+            multiple: false
             remember_roles:
               authenticated: authenticated
             reduce: false
@@ -800,7 +800,7 @@ display:
             identifier: field_keywords_target_id
             required: false
             remember: false
-            multiple: true
+            multiple: false
             remember_roles:
               authenticated: authenticated
             reduce: false
@@ -818,7 +818,7 @@ display:
             group_items: {  }
           reduce_duplicates: false
           vid: keywords
-          type: textfield
+          type: select
           hierarchy: false
           limit: true
           error_message: true
