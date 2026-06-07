@@ -1,4 +1,5 @@
 @use "../../00-base/layout/layout";
+@use "../../../external/include-media";
 
 // Styles for the local tasks tabs that logged in users see on node edit screens. /
 .local-tasks {
@@ -44,10 +45,165 @@
     @include layout.layout--full-width-grid-item;
   }
 
+  &__inner {
+    @include layout.layout--full-width-grid-item;
+    display: flex;
+    align-items: center;
+    gap: var(--gutter);
+
+    // At lg+, dissolve into the parent grid so __tabs and __export can use
+    // the same grid columns as full-node__main and full-node__list.
+    @include include-media.media('>=lg') {
+      display: contents;
+    }
+
+    ul {
+      flex: 1;
+      padding-inline-start: 0;
+    }
+  }
+
+  &__tabs {
+    // On mobile, fill available flex space and push __export right.
+    flex: 1;
+    min-width: 0;
+
+    @include include-media.media('>=lg') {
+      grid-column: 1 / span 8;
+      align-self: center;
+    }
+
+    @include include-media.media('>=2xl') {
+      grid-column: 2 / span 8;
+    }
+  }
+
+  &__export {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    gap: var(--v-space-4xs);
+    justify-content: flex-end;
+
+    @include include-media.media('>=lg') {
+      grid-column: 9 / span 4;
+      align-self: center;
+    }
+
+    @include include-media.media('>=2xl') {
+      grid-column: 10 / span 4;
+    }
+  }
+
+  .export-list-dropdown {
+    display: block;
+    position: relative;
+
+    summary {
+      display: block;
+      margin: 0;
+      font-family: var(--font-display-face);
+      font-size: var(--font-size-2xs);
+      font-weight: var(--text-bold);
+      line-height: var(--line-height-m);
+      padding-block: 0;
+      padding-inline: var(--v-space-5xs);
+      border: none;
+      box-shadow: inset 0 0 0 1px var(--brand-primary);
+      background-color: var(--color-white);
+      color: var(--brand-primary);
+      cursor: pointer;
+      list-style: none;
+      white-space: nowrap;
+
+      &::-webkit-details-marker { display: none; }
+
+      &::after {
+        content: ' ▾';
+        font-size: var(--font-size-3xs);
+      }
+
+      &:hover,
+      &:focus {
+        background-color: var(--brand-primary);
+        color: var(--color-white);
+        box-shadow: none;
+      }
+    }
+
+    &__menu {
+      position: absolute;
+      inset-inline-end: 0;
+      inset-block-start: 100%;
+      z-index: 100;
+      min-width: 12rem;
+      background-color: var(--color-white);
+      border: 1px solid var(--brand-primary);
+      box-shadow: 0 4px 8px rgb(0 0 0 / 8%);
+      padding-block: var(--v-space-5xs);
+
+      ul {
+        padding-inline-start: 0;
+        margin: 0;
+      }
+
+      li {
+        display: block;
+        margin: 0;
+      }
+
+      a {
+        display: block;
+        padding-block: var(--v-space-5xs);
+        padding-inline: var(--v-space-4xs);
+        font-size: var(--font-size-2xs);
+        text-decoration: none;
+        color: var(--brand-primary);
+
+        &:hover,
+        &:focus {
+          background-color: var(--brand-light);
+        }
+      }
+    }
+  }
+
+  // The .local-tasks a rule (0,3,1) leaks border, padding, and line-height into
+  // dropdown menu items. Override with higher specificity (0,4,1).
+  &:not(.glb-body .local-tasks) .export-list-dropdown__menu a {
+    border: none;
+    background-color: transparent;
+    transition: none;
+    padding-block: var(--v-space-6xs);
+    line-height: 1.5;
+
+    &:hover,
+    &:focus {
+      background-color: var(--brand-light);
+      color: var(--brand-primary);
+    }
+  }
+
   li {
     margin-inline-end: var(--v-space-6xs);
     list-style-type: none;
     display: inline-block;
+  }
+}
+
+// The .local-tasks a rule (specificity 0,3,1) adds padding and border to the export
+// button link, making it taller than the inline tab links. Override with (0,4,1) to
+// remove padding-block and swap border for an inset box-shadow so height = line-height only.
+.local-tasks:not(.glb-body .local-tasks) .local-tasks__export > a {
+  padding-block: 0;
+  border: none;
+  box-shadow: inset 0 0 0 1px var(--brand-primary);
+  line-height: var(--line-height-m);
+
+  &:hover,
+  &:active,
+  &:focus {
+    box-shadow: none;
   }
 }
 

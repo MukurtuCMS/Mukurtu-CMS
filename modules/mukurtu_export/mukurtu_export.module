@@ -136,9 +136,6 @@ function mukurtu_export_entity_view(array &$build, \Drupal\Core\Entity\EntityInt
   if (!in_array($entity->getEntityTypeId(), ['node', 'media'])) {
     return;
   }
-  if (!$display->getComponent('export_list_membership')) {
-    return;
-  }
   if (!\Drupal::currentUser()->hasPermission('access mukurtu export')) {
     return;
   }
@@ -191,6 +188,85 @@ function mukurtu_export_entity_view(array &$build, \Drupal\Core\Entity\EntityInt
     ],
     '#cache' => ['tags' => $cache_tags],
   ];
+}
+
+/**
+ * Implements hook_preprocess_block().
+ *
+ * Injects the "Add to export list" button into the local tasks block so it
+ * can be rendered right-aligned next to the node tabs.
+ */
+function mukurtu_export_preprocess_block(&$variables) {
+  if (($variables['plugin_id'] ?? '') !== 'local_tasks_block') {
+    return;
+  }
+  if (!\Drupal::currentUser()->hasPermission('access mukurtu export')) {
+    return;
+  }
+  $node = \Drupal::routeMatch()->getParameter('node');
+  if (!$node instanceof \Drupal\node\NodeInterface) {
+    return;
+  }
+  $variables['export_button'] = [
+    '#type' => 'link',
+    '#title' => t('Add to export list'),
+    '#url' => \Drupal\Core\Url::fromRoute('mukurtu_export.add_item_to_list', [
+      'entity_type' => 'node',
+      'entity_id' => $node->id(),
+    ], [
+      'query' => ['destination' => \Drupal::request()->getRequestUri()],
+    ]),
+    '#attributes' => [],
+  ];
+
+  // Find which export lists already contain this node.
+  $uid = \Drupal::currentUser()->id();
+  $storage = \Drupal::entityTypeManager()->getStorage('export_list');
+  $query = $storage->getQuery()->accessCheck(TRUE);
+  $or = $query->orConditionGroup()
+    ->condition('uid', $uid)
+    ->condition('site_wide', TRUE);
+  $lists = $storage->loadMultiple($query->condition($or)->execute());
+
+  $matching = array_filter($lists, function ($list) use ($node) {
+    $items = $list->getItems();
+    return isset($items['node'][$node->id()]);
+  });
+
+  if (!empty($matching)) {
+    $variables['#attached']['library'][] = 'mukurtu_export/export_list_dropdown';
+    $cache_tags = [];
+    $count = count($matching);
+    $list_items = [];
+    foreach ($matching as $list) {
+      $cache_tags = array_merge($cache_tags, $list->getCacheTags());
+      $list_items[] = [
+        '#type' => 'link',
+        '#title' => $list->label(),
+        '#url' => $list->toUrl('edit-form'),
+      ];
+    }
+    $variables['export_membership'] = [
+      '#type' => 'html_tag',
+      '#tag' => 'details',
+      '#attributes' => ['class' => ['export-list-dropdown']],
+      'summary' => [
+        '#type' => 'html_tag',
+        '#tag' => 'summary',
+        '#value' => \Drupal::translation()->formatPlural($count, 'In 1 list', 'In @count lists'),
+      ],
+      'menu' => [
+        '#type' => 'html_tag',
+        '#tag' => 'div',
+        '#attributes' => ['class' => ['export-list-dropdown__menu']],
+        'list' => [
+          '#theme' => 'item_list',
+          '#items' => $list_items,
+        ],
+      ],
+      '#cache' => ['tags' => $cache_tags],
+    ];
+  }
 }
 
 function mukurtu_export_views_data() {
