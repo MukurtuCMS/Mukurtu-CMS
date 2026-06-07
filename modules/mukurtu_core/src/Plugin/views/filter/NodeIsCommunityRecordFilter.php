@@ -43,5 +43,4 @@ class NodeIsCommunityRecordFilter extends NodeBooleanExistsFilterBase {
     return $this->value === self::VALUE_YES ? $this->t('Community record') : $this->t('Original record');
   }
 
-
 }
