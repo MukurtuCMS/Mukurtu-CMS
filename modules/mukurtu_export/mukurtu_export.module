@@ -202,15 +202,8 @@ function mukurtu_export_entity_view(array &$build, \Drupal\Core\Entity\EntityInt
     return;
   }
 
-<<<<<<< HEAD
   $items = [];
   foreach ($matching as $list) {
-=======
-  $cache_tags = [];
-  $items = [];
-  foreach ($matching as $list) {
-    $cache_tags = array_merge($cache_tags, $list->getCacheTags());
->>>>>>> 7776c2c3 (Improve export list UX on content pages (#1337))
     $items[] = [
       '#type' => 'link',
       '#title' => $list->label(),
@@ -232,7 +225,6 @@ function mukurtu_export_entity_view(array &$build, \Drupal\Core\Entity\EntityInt
       '#theme' => 'item_list',
       '#items' => $items,
     ],
-<<<<<<< HEAD
   ];
 }
 
@@ -330,12 +322,6 @@ function mukurtu_export_preprocess_block(&$variables) {
   }
 }
 
-=======
-    '#cache' => ['tags' => $cache_tags],
-  ];
-}
-
->>>>>>> 7776c2c3 (Improve export list UX on content pages (#1337))
 function mukurtu_export_views_data() {
   $data = [];
   $data['flagging']['flagged_rendered_entity'] = [
