@@ -734,8 +734,8 @@ display:
             group_items: {  }
         field_category_target_id:
           id: field_category_target_id
-          table: node__field_category
-          field: field_category_target_id
+          table: taxonomy_index
+          field: tid
           relationship: none
           group_type: group
           admin_label: ''
@@ -779,8 +779,8 @@ display:
           error_message: true
         field_keywords_target_id:
           id: field_keywords_target_id
-          table: node__field_keywords
-          field: field_keywords_target_id
+          table: taxonomy_index
+          field: tid
           relationship: none
           group_type: group
           admin_label: ''
