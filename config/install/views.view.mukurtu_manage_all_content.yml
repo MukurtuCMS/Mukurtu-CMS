@@ -83,9 +83,7 @@ display:
             4:
               action_id: mukurtu_export_add_to_list_action
             5:
-              action_id: 'flag_action:export_content_unflag'
-              preconfiguration:
-                add_confirmation: true
+              action_id: mukurtu_export_remove_from_list_action
             29:
               action_id: mukurtu_add_to_collection_action
             37:
