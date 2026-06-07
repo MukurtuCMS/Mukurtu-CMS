@@ -90,10 +90,6 @@ display:
                 add_confirmation: false
             29:
               action_id: mukurtu_add_to_collection_action
-            32:
-              action_id: node_assign_owner_action
-              preconfiguration:
-                add_confirmation: false
             37:
               action_id: 'entity:unpublish_action:node'
               preconfiguration:
@@ -102,6 +98,10 @@ display:
               action_id: 'entity:publish_action:node'
               preconfiguration:
                 add_confirmation: false
+            41:
+              action_id: node_delete_action
+              preconfiguration:
+                add_confirmation: true
         title:
           id: title
           table: node_field_data
