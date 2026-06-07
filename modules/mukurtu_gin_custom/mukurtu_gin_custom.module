@@ -5,6 +5,7 @@
  * Provide Mukurtu Gin Custom.
  */
 
+use Drupal\Core\Url;
 use Drupal\node\NodeInterface;
 use Drupal\node\Entity\NodeType;
 
@@ -63,6 +64,8 @@ function mukurtu_gin_custom_theme(array $existing, string $type, string $theme, 
  */
 function mukurtu_gin_custom_page_attachments(array &$attachments) {
   $attachments['#attached']['library'][] = 'mukurtu_gin_custom/mukurtu-gin-custom';
+  $attachments['#attached']['drupalSettings']['mukurtu']['mediaEditUrl'] =
+    Url::fromRoute('entity.media.edit_form', ['media' => 0])->toString();
   /** @var \Drupal\Core\Routing\AdminContext $admin_context */
   $admin_context = \Drupal::service('router.admin_context');
   if ($admin_context->isAdminRoute()) {

@@ -1,13 +1,19 @@
 <?php
 
+use Drupal\Component\Serialization\Json;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\CloseModalDialogCommand;
+use Drupal\Core\Ajax\InvokeCommand;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Url;
+use Drupal\file\Element\ManagedFile;
+use Drupal\media_library\Form\FileUploadForm;
+use Drupal\media_library\Plugin\Field\FieldWidget\MediaLibraryWidget;
 use Drupal\mukurtu_media\Entity\Audio;
 use Drupal\mukurtu_media\Entity\Document;
 use Drupal\mukurtu_media\Entity\Image;
@@ -17,7 +23,7 @@ use Drupal\mukurtu_media\Entity\Video;
 use Drupal\mukurtu_media\Entity\ExternalEmbed;
 use Drupal\mukurtu_media\Form\ExternalEmbedForm;
 use Drupal\mukurtu_media\Form\MukurtuFileUploadForm;
-use Drupal\media_library\Form\FileUploadForm;
+use Drupal\mukurtu_media\Form\SoundCloudAddForm;
 use Drupal\mukurtu_media\Entity\SoundCloud;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -57,9 +63,9 @@ function mukurtu_media_media_source_info_alter(array &$sources)
   if (empty($sources['external_embed']['forms']['media_library_add'])) {
     $sources['external_embed']['forms']['media_library_add'] = ExternalEmbedForm::class;
   }
-  if (empty($sources['soundcloud']['forms']['media_library_add'])) {
-    $sources['soundcloud']['forms']['media_library_add'] = SoundCloud::class;
-  }
+  // Always override with our subclass so the track title auto-fills from the
+  // SoundCloud oEmbed endpoint (#777).
+  $sources['soundcloud']['forms']['media_library_add'] = SoundCloudAddForm::class;
 
   // Replace core's FileUploadForm with our subclass for all file-based sources.
   // This clears stale 'media' user input before creating new entities, which
@@ -90,124 +96,6 @@ function mukurtu_media_entity_field_storage_info(EntityTypeInterface $entity_typ
 }
 
 /**
- * Implements hook_preprocess_entity_add_list().
- *
- * Adds bulk upload/create items to the media type list on /admin/media/add.
- */
-function mukurtu_media_preprocess_entity_add_list(&$variables) {
-  if (\Drupal::routeMatch()->getRouteName() !== 'entity.media.add_page') {
-    return;
-  }
-
-  $bulk_items = [
-    'bulk_upload_image' => [
-      'bundle' => 'image',
-      'route' => 'mukurtu_media.bulk_upload',
-      'params' => ['media_type' => 'image'],
-      'label' => t('Bulk upload images'),
-      'description' => t('Upload multiple images at once.'),
-    ],
-    'bulk_upload_audio' => [
-      'bundle' => 'audio',
-      'route' => 'mukurtu_media.bulk_upload',
-      'params' => ['media_type' => 'audio'],
-      'label' => t('Bulk upload audio'),
-      'description' => t('Upload multiple audio files at once.'),
-    ],
-    'bulk_upload_document' => [
-      'bundle' => 'document',
-      'route' => 'mukurtu_media.bulk_upload',
-      'params' => ['media_type' => 'document'],
-      'label' => t('Bulk upload documents'),
-      'description' => t('Upload multiple documents at once.'),
-    ],
-    'bulk_upload_video' => [
-      'bundle' => 'video',
-      'route' => 'mukurtu_media.bulk_upload',
-      'params' => ['media_type' => 'video'],
-      'label' => t('Bulk upload videos'),
-      'description' => t('Upload multiple video files at once.'),
-    ],
-    'bulk_create_remote_video' => [
-      'bundle' => 'remote_video',
-      'route' => 'mukurtu_media.bulk_create',
-      'params' => ['media_type' => 'remote_video'],
-      'label' => t('Bulk add remote videos'),
-      'description' => t('Add multiple remote videos by URL at once.'),
-    ],
-    'bulk_create_soundcloud' => [
-      'bundle' => 'soundcloud',
-      'route' => 'mukurtu_media.bulk_create',
-      'params' => ['media_type' => 'soundcloud'],
-      'label' => t('Bulk add SoundCloud items'),
-      'description' => t('Add multiple SoundCloud items by URL at once.'),
-    ],
-  ];
-
-  foreach ($bulk_items as $key => $item) {
-    // Only show bulk item if the corresponding single-add bundle is accessible.
-    if (!isset($variables['bundles'][$item['bundle']])) {
-      continue;
-    }
-    $url = Url::fromRoute($item['route'], $item['params']);
-    $variables['bundles'][$key] = [
-      'label' => $item['label'],
-      'description' => ['#markup' => $item['description']],
-      'add_link' => Link::fromTextAndUrl($item['label'], $url),
-    ];
-  }
-
-  // Reorder bundles so each single-item type is immediately followed by its
-  // bulk variant, producing a two-column paired layout.
-  $pair_order = [
-    'image'        => 'bulk_upload_image',
-    'audio'        => 'bulk_upload_audio',
-    'document'     => 'bulk_upload_document',
-    'video'        => 'bulk_upload_video',
-    'remote_video' => 'bulk_create_remote_video',
-    'soundcloud'   => 'bulk_create_soundcloud',
-  ];
-
-  $ordered = [];
-  foreach ($pair_order as $single_key => $bulk_key) {
-    if (isset($variables['bundles'][$single_key])) {
-      $ordered[$single_key] = $variables['bundles'][$single_key];
-    }
-    if (isset($variables['bundles'][$bulk_key])) {
-      $ordered[$bulk_key] = $variables['bundles'][$bulk_key];
-    }
-  }
-  // Append any remaining bundles that have no bulk pair (e.g. external_embed).
-  foreach ($variables['bundles'] as $key => $bundle) {
-    if (!isset($ordered[$key])) {
-      $ordered[$key] = $bundle;
-    }
-  }
-
-  $variables['bundles'] = $ordered;
-  $variables['attributes']['class'][] = 'media-add-list--paired';
-  $variables['#attached']['library'][] = 'mukurtu_media/media_add_page';
-}
-
-/**
- * Implements hook_form_FORM_ID_alter().
- */
-function mukurtu_media_form_media_external_embed_add_form_alter(&$form, FormStateInterface $form_state, $form_id) {
-  $form['actions']['submit']['#submit'][] = 'mukurtu_media_external_embed_add_redirect';
-}
-
-/**
- * Redirect to the media overview after external embed creation.
- *
- * MediaForm::save() redirects to the canonical URL (the edit form) for users
- * who lack 'access media overview' permission. Appending this handler ensures
- * all users land on /admin/content/media after creating an external embed.
- */
-function mukurtu_media_external_embed_add_redirect(array &$form, FormStateInterface $form_state) {
-  $form_state->setRedirectUrl(Url::fromRoute('entity.media.collection'));
-}
-
-/**
  * Implements hook_form_FORM_ID_alter().
  */
 function mukurtu_media_form_media_document_add_form_alter(&$form, FormStateInterface $form_state, $form_id)
@@ -219,6 +107,13 @@ function mukurtu_media_form_media_document_add_form_alter(&$form, FormStateInter
     $form['field_extracted_text']['#type'] = 'hidden';
   }
 
+  // Grey out unsupported file types in the OS file picker.
+  $widget = &$form['field_media_document']['widget'][0];
+  if (!empty($widget['#upload_validators']['FileExtension']['extensions'])) {
+    $ext = $widget['#upload_validators']['FileExtension']['extensions'];
+    $widget['#accept'] = '.' . implode(',.', array_filter(explode(' ', $ext)));
+  }
+
   // Add a process callback for the document file field. This handler will
   // attach our AJAX callback. We need to do this via a process callback because
   // ManagedFile builds its AJAX callbacks inside of its own process callbacks.
@@ -227,6 +122,7 @@ function mukurtu_media_form_media_document_add_form_alter(&$form, FormStateInter
   // Prepend a process callback for the thumbnail field to add our default
   // thumbnail logic.
   array_unshift($form["field_thumbnail"]["widget"][0]["#process"], 'mukurtu_media_process_thumb');
+
 }
 
 /**
@@ -245,11 +141,21 @@ function mukurtu_media_form_media_document_edit_form_alter(&$form, FormStateInte
   array_unshift($form['field_thumbnail']['widget'][0]['#process'], 'mukurtu_media_process_thumb');
 }
 
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
 function mukurtu_media_form_media_video_add_form_alter(&$form, FormStateInterface $form_state, $form_id)
 {
+  $widget = &$form['field_media_video_file']['widget'][0];
+  if (!empty($widget['#upload_validators']['FileExtension']['extensions'])) {
+    $ext = $widget['#upload_validators']['FileExtension']['extensions'];
+    $widget['#accept'] = '.' . implode(',.', array_filter(explode(' ', $ext)));
+  }
+
   $form['field_media_video_file']['widget'][0]['#process'][] = 'mukurtu_media_refresh_media_process';
 
   array_unshift($form["field_thumbnail"]["widget"][0]["#process"], 'mukurtu_media_process_thumb');
+
 }
 
 /**
@@ -266,8 +172,15 @@ function mukurtu_media_form_media_video_edit_form_alter(&$form, FormStateInterfa
  */
 function mukurtu_media_form_media_audio_add_form_alter(&$form, FormStateInterface $form_state, $form_id)
 {
+  $widget = &$form['field_media_audio_file']['widget'][0];
+  if (!empty($widget['#upload_validators']['FileExtension']['extensions'])) {
+    $ext = $widget['#upload_validators']['FileExtension']['extensions'];
+    $widget['#accept'] = '.' . implode(',.', array_filter(explode(' ', $ext)));
+  }
+
   // Add custom handling on media upload/removal.
   $form['field_media_audio_file']['widget'][0]['#process'][] = 'mukurtu_media_refresh_media_process';
+
 }
 
 /**
@@ -275,8 +188,16 @@ function mukurtu_media_form_media_audio_add_form_alter(&$form, FormStateInterfac
  */
 function mukurtu_media_form_media_image_add_form_alter(&$form, FormStateInterface $form_state, $form_id)
 {
+  $widget = &$form['field_media_image']['widget'][0];
+  if (!empty($widget['#upload_validators']['FileExtension']['extensions'])) {
+    $ext = $widget['#upload_validators']['FileExtension']['extensions'];
+    $widget['#accept'] = '.' . implode(',.', array_filter(explode(' ', $ext)));
+  }
+
   $form['field_media_image']['widget'][0]['#process'][] = 'mukurtu_media_refresh_media_process';
+
 }
+
 
 /**
  * AJAX callback for media upload with our custom thumbnail field refresh.
@@ -302,8 +223,11 @@ function mukurtu_media_upload_ajax_callback(array &$form, FormStateInterface $fo
       $response->addCommand(new ReplaceCommand("#edit-name-wrapper > div", $form['name']['widget'][0]));
 
       // Use the new name as the alt text for the thumbnail image.
+      // Note: do NOT pass the alt element to a ReplaceCommand here — that would
+      // pre-render it (setting #printed = TRUE) and cause renderRoot() below to
+      // skip it, leaving the alt field empty. Setting #value is enough; the main
+      // ReplaceCommand(NULL, $output) below re-renders the whole widget.
       if ($entity instanceof ImageInterface) {
-        // Images require special handling.
         $form['field_media_image']['widget'][0]['alt']['#value'] = $filenameNoExt;
       }
       else {
@@ -311,7 +235,9 @@ function mukurtu_media_upload_ajax_callback(array &$form, FormStateInterface $fo
       }
     }
 
-    $response->addCommand(new ReplaceCommand("#edit-field-thumbnail-wrapper > div > div", $form['field_thumbnail']['widget']));
+    if (!($entity instanceof ImageInterface)) {
+      $response->addCommand(new ReplaceCommand("#edit-field-thumbnail-wrapper > div > div", $form['field_thumbnail']['widget']));
+    }
   }
 
   $form_parents = explode('/', $request->query->get('element_parents'));
@@ -355,8 +281,15 @@ function mukurtu_media_remove_ajax_callback(array &$form, FormStateInterface $fo
   // Redraw the name widget.
   $response->addCommand(new ReplaceCommand("#edit-name-wrapper > div", $form['name']['widget'][0]));
 
-  // Redraw the thumbnail field widget. The thumbnail may have been altered in the managed file process handler.
-  $response->addCommand(new ReplaceCommand("#edit-field-thumbnail-wrapper > div", $form['field_thumbnail']['widget']));
+  $entity = $form_state->getFormObject()->getEntity();
+  if ($entity instanceof ImageInterface) {
+    // Clear the alt text field (same no-extra-ReplaceCommand rationale as in the upload callback).
+    $form['field_media_image']['widget'][0]['alt']['#value'] = '';
+  }
+  else {
+    // Redraw the thumbnail field widget. The thumbnail may have been altered in the managed file process handler.
+    $response->addCommand(new ReplaceCommand("#edit-field-thumbnail-wrapper > div", $form['field_thumbnail']['widget']));
+  }
 
   $form_parents = explode('/', $request->query->get('element_parents'));
 
@@ -430,6 +363,272 @@ function mukurtu_media_process_thumb(&$element, FormStateInterface $form_state, 
 }
 
 /**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Fixes #1096: set the HTML accept attribute on the file input in the media
+ * library upload modal so the OS file picker greys out invalid extensions, the
+ * same way the admin /admin/media/add forms do.
+ *
+ * Also fixes #198: after an image is uploaded in the modal, strip the extension
+ * from the auto-generated media name and attach the JS behavior that copies the
+ * name into the alt text field (PHP form alter cannot reliably set alt #value
+ * in this context because ImageWidget::process adds the element after the form
+ * has already been walked).
+ *
+ * The FID is read from the media entity stored in form state rather than from
+ * the widget's #value['fids'], because the fids hidden input is not rendered
+ * before the first upload AJAX and therefore has no user-submitted value.
+ */
+function mukurtu_media_form_media_library_add_form_upload_alter(&$form, FormStateInterface $form_state, $form_id) {
+  if (!empty($form['container']['upload']['#upload_validators']['FileExtension']['extensions'])) {
+    $extensions = $form['container']['upload']['#upload_validators']['FileExtension']['extensions'];
+    $accept = '.' . implode(',.', array_filter(explode(' ', $extensions)));
+    $form['container']['upload']['#accept'] = $accept;
+  }
+
+  if (!isset($form['media'])) {
+    return;
+  }
+
+  $added_media = $form_state->get('media') ?? [];
+  $has_image = FALSE;
+
+  foreach (Element::children($form['media']) as $delta) {
+    $media_entity = $added_media[$delta] ?? NULL;
+    if (!$media_entity || $media_entity->bundle() !== 'image') {
+      continue;
+    }
+
+    $has_image = TRUE;
+
+    // Get the FID from the media entity (reliable after upload).
+    $fid = $media_entity->get('field_media_image')->target_id ?? NULL;
+    if (!$fid) {
+      continue;
+    }
+
+    $file = \Drupal\file\Entity\File::load($fid);
+    if (!$file) {
+      continue;
+    }
+
+    $filename = $file->getFilename();
+    $basename = strrpos($filename, '.') !== FALSE
+      ? substr($filename, 0, strrpos($filename, '.'))
+      : $filename;
+
+    // Strip the file extension from the auto-generated media name.
+    $name_value = &$form['media'][$delta]['fields']['name']['widget'][0]['value'];
+    if (isset($name_value)) {
+      $current_name = $name_value['#value'] ?? $name_value['#default_value'] ?? '';
+      if (preg_match('/\.[a-z0-9]{1,5}$/i', $current_name)) {
+        $name_value['#value'] = $basename;
+      }
+    }
+  }
+
+  // Attach the JS behavior that copies the media name into the alt text field.
+  // PHP cannot reliably set the alt #value here because ImageWidget::process
+  // adds the alt element after hook_form_alter has run; JS runs after the full
+  // DOM is written and is the reliable approach.
+  if ($has_image) {
+    $form['#attached']['library'][] = 'mukurtu_media/media-library-image-alt';
+  }
+}
+
+/**
+ * Implements hook_page_attachments().
+ *
+ * Loads the thumbnail focus JS on every page so it is ready the moment the
+ * media library modal opens, without depending on an AJAX response to deliver
+ * it. The behavior uses document-level delegation and a one-time flag so the
+ * overhead is negligible on pages where no media library is present.
+ */
+function mukurtu_media_page_attachments(array &$attachments) {
+  $attachments['#attached']['library'][] = 'mukurtu_media/media-thumb-focus';
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Adds a process callback to disable Drupal's post-AJAX refocus on the
+ * thumbnail upload/remove buttons. Without this, ajax.js walks the ancestor
+ * chain of the removed button and calls .trigger('focus') on the first
+ * ancestor still in the DOM, scrolling the dialog to the top.
+ */
+function mukurtu_media_form_media_library_add_form_external_embed_alter(&$form, FormStateInterface $form_state, $form_id) {
+  if (!isset($form['media'])) {
+    return;
+  }
+  foreach (Element::children($form['media']) as $delta) {
+    if (isset($form['media'][$delta]['fields']['field_thumbnail']['widget'][0])) {
+      $form['media'][$delta]['fields']['field_thumbnail']['widget'][0]['#process'][] = 'mukurtu_media_ext_embed_thumb_disable_refocus';
+    }
+  }
+}
+
+/**
+ * Process callback: replaces the thumbnail upload/remove AJAX callbacks.
+ *
+ * The default ManagedFile AJAX response contains no 'invoke+focus' command, so
+ * ajax.js sets focusChanged=false and runs its ancestor-focus walk, which calls
+ * .trigger('focus') on the first ancestor still in the DOM. That triggers a
+ * browser scroll that moves the dialog back to the top.
+ *
+ * The fix: redirect both buttons to a custom callback that wraps the standard
+ * ManagedFile response and appends an InvokeCommand with method='focus'. That
+ * makes ajax.js set focusChanged=true and skip the ancestor-focus walk entirely,
+ * so the dialog scroll position is unchanged after thumbnail upload/remove.
+ */
+function mukurtu_media_ext_embed_thumb_disable_refocus(&$element, FormStateInterface $form_state, &$complete_form) {
+  foreach (['upload_button', 'remove_button'] as $btn) {
+    if (isset($element[$btn]['#ajax'])) {
+      $element[$btn]['#ajax']['callback'] = 'mukurtu_media_ext_embed_thumb_ajax';
+    }
+  }
+  return $element;
+}
+
+/**
+ * AJAX callback for external embed thumbnail upload and remove buttons.
+ *
+ * Delegates to ManagedFile::uploadAjaxCallback for the standard file handling,
+ * then appends an InvokeCommand(selector, 'focus') to the response. This sets
+ * focusChanged=true in ajax.js (line 1087-1094), which causes it to skip the
+ * ancestor-focus walk that would otherwise scroll the dialog to the top.
+ *
+ * The selector targets a non-focusable wrapper, so the InvokeCommand is a
+ * no-op from the user's perspective — the dialog stays scrolled to wherever
+ * the user was when they clicked the upload/remove button.
+ */
+function mukurtu_media_ext_embed_thumb_ajax(array &$form, FormStateInterface $form_state, Request $request) {
+  $response = ManagedFile::uploadAjaxCallback($form, $form_state, $request);
+  // An invoke+focus command sets focusChanged=true in ajax.js, suppressing the
+  // ancestor-focus walk. The selector targets the thumbnail wrapper, which is
+  // a non-interactive div — so .focus() on it is a browser no-op and nothing
+  // actually scrolls or moves focus.
+  $response->addCommand(new InvokeCommand('[id*="field-thumbnail"]', 'focus'));
+  return $response;
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Fixes #194: auto-fill the name field for SoundCloud media created via the
+ * admin form at /admin/media/add/soundcloud, matching modal behaviour.
+ * AJAX fires on URL field change (blur with changed value); submit handler
+ * is a fallback in case AJAX was bypassed.
+ */
+function mukurtu_media_form_media_soundcloud_add_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  $form['field_media_soundcloud']['widget'][0]['value']['#ajax'] = [
+    'callback' => 'mukurtu_media_soundcloud_url_ajax',
+    'event' => 'change',
+    'progress' => ['type' => 'throbber', 'message' => NULL],
+  ];
+  array_unshift($form['actions']['submit']['#submit'], 'mukurtu_media_soundcloud_admin_name_submit');
+}
+
+/**
+ * AJAX callback: fetches the SoundCloud title and sets the name field value.
+ */
+function mukurtu_media_soundcloud_url_ajax(array &$form, FormStateInterface $form_state) {
+  $response = new AjaxResponse();
+  $url = trim($form_state->getValue(['field_media_soundcloud', 0, 'value']) ?? '');
+  if ($url) {
+    $title = SoundCloudAddForm::fetchSoundCloudTitle($url);
+    if ($title) {
+      $response->addCommand(new InvokeCommand('input[name="name[0][value]"]', 'val', [$title]));
+    }
+  }
+  return $response;
+}
+
+/**
+ * Submit handler: fetches the SoundCloud track title and fills the name field.
+ */
+function mukurtu_media_soundcloud_admin_name_submit(array &$form, FormStateInterface $form_state) {
+  $name = trim($form_state->getValue(['name', 0, 'value']) ?? '');
+  if ($name) {
+    return;
+  }
+  $url = trim($form_state->getValue(['field_media_soundcloud', 0, 'value']) ?? '');
+  if (!$url) {
+    return;
+  }
+  $title = SoundCloudAddForm::fetchSoundCloudTitle($url);
+  if ($title) {
+    $form_state->setValue(['name', 0, 'value'], $title);
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Fixes #194: auto-fill the name field for remote video (YouTube/Vimeo) media
+ * created via the admin form at /admin/media/add/remote_video, matching modal
+ * behaviour.
+ * AJAX fires on URL field change (blur with changed value); submit handler
+ * is a fallback in case AJAX was bypassed.
+ */
+function mukurtu_media_form_media_remote_video_add_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  $form['field_media_oembed_video']['widget'][0]['value']['#ajax'] = [
+    'callback' => 'mukurtu_media_remote_video_url_ajax',
+    'event' => 'change',
+    'progress' => ['type' => 'throbber', 'message' => NULL],
+  ];
+  array_unshift($form['actions']['submit']['#submit'], 'mukurtu_media_remote_video_admin_name_submit');
+}
+
+/**
+ * AJAX callback: fetches the oEmbed title for a YouTube/Vimeo URL and sets
+ * the name field value.
+ */
+function mukurtu_media_remote_video_url_ajax(array &$form, FormStateInterface $form_state) {
+  $response = new AjaxResponse();
+  $url = trim($form_state->getValue(['field_media_oembed_video', 0, 'value']) ?? '');
+  if ($url) {
+    try {
+      $oembed_url = \Drupal::service('media.oembed.url_resolver')->getResourceUrl($url);
+      $resource = \Drupal::service('media.oembed.resource_fetcher')->fetchResource($oembed_url);
+      $title = $resource->getTitle();
+      if ($title) {
+        $response->addCommand(new InvokeCommand('input[name="name[0][value]"]', 'val', [$title]));
+      }
+    }
+    catch (\Exception $e) {
+      // oEmbed fetch failed; leave name field as-is.
+    }
+  }
+  return $response;
+}
+
+/**
+ * Submit handler: fetches the oEmbed title for a YouTube/Vimeo URL and fills
+ * the name field.
+ */
+function mukurtu_media_remote_video_admin_name_submit(array &$form, FormStateInterface $form_state) {
+  $name = trim($form_state->getValue(['name', 0, 'value']) ?? '');
+  if ($name) {
+    return;
+  }
+  $url = trim($form_state->getValue(['field_media_oembed_video', 0, 'value']) ?? '');
+  if (!$url) {
+    return;
+  }
+  try {
+    $oembed_url = \Drupal::service('media.oembed.url_resolver')->getResourceUrl($url);
+    $resource = \Drupal::service('media.oembed.resource_fetcher')->fetchResource($oembed_url);
+    $title = $resource->getTitle();
+    if ($title) {
+      $form_state->setValue(['name', 0, 'value'], $title);
+    }
+  }
+  catch (\Exception $e) {
+    // oEmbed fetch failed; proceed without auto-filling name.
+  }
+}
+
+/**
  * Implements hook_entity_base_field_info_alter().
  *
  * @param \Drupal\Core\Field\BaseFieldDefinition[] $fields
@@ -440,6 +639,125 @@ function mukurtu_media_process_thumb(&$element, FormStateInterface $form_state, 
 function mukurtu_media_entity_base_field_info_alter(&$fields, EntityTypeInterface $entity_type) {
   if ($entity_type->id() == 'media') {
     $fields['name']->setDescription('Most media names will auto-fill from the filename or external source. This field is not usually shown to end users. While the media name can be changed, we generally recommend using the auto-filled names so that they match your other records and systems.');
+  }
+}
+
+/**
+ * Implements hook_field_widget_single_element_form_alter().
+ *
+ * Adds an Edit button alongside the Remove button on every media library
+ * widget item, visible only to users who have update access to that media.
+ */
+function mukurtu_media_field_widget_single_element_form_alter(array &$element, FormStateInterface $form_state, array $context): void {
+  if (!($context['widget'] instanceof MediaLibraryWidget) || empty($element['selection'])) {
+    return;
+  }
+
+  $media_storage = \Drupal::entityTypeManager()->getStorage('media');
+
+
+  $media_ids = array_filter(array_map(
+    fn($delta) => $element['selection'][$delta]['target_id']['#value'] ?? NULL,
+    Element::children($element['selection'])
+  ));
+  /** @var \Drupal\media\MediaInterface[] $media_items */
+  $media_items = $media_storage->loadMultiple($media_ids);
+
+  foreach (Element::children($element['selection']) as $delta) {
+    $media_id = $element['selection'][$delta]['target_id']['#value'] ?? NULL;
+    if (!$media_id) {
+      continue;
+    }
+
+    $media = $media_items[$media_id] ?? NULL;
+    if (!$media || !$media->access('update')) {
+      continue;
+    }
+
+    $aria_label = $media->access('view label')
+      ? t('Edit @label', ['@label' => $media->label()])
+      : t('Edit media');
+
+    $element['selection'][$delta]['edit_button'] = [
+      '#type' => 'link',
+      '#title' => t('Edit'),
+      '#url' => Url::fromRoute('entity.media.edit_form', ['media' => $media_id], ['query' => ['mukurtu_modal' => '1']]),
+      '#attributes' => [
+        'class' => ['use-ajax', 'media-library-item__edit'],
+        'aria-label' => $aria_label,
+        'data-dialog-type' => 'modal',
+        'data-dialog-options' => Json::encode(['width' => 900]),
+        'data-media-edit-id' => 'media-edit-' . $media_id,
+      ],
+    ];
+  }
+
+  $element['#attached']['library'][] = 'core/drupal.dialog.ajax';
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function mukurtu_media_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
+  // When a media entity edit form is opened inside a modal dialog, wire the
+  // Save button to an AJAX callback that closes the dialog on success.
+  // The edit button URL includes ?mukurtu_modal=1. This parameter persists
+  // when Drupal's AJAX JS swaps _wrapper_format from drupal_modal to
+  // drupal_ajax on form submit, giving a stable signal across both requests.
+  if (preg_match('/^media_.+_edit_form$/', $form_id) && \Drupal::request()->query->get('mukurtu_modal')) {
+    unset($form['actions']['delete']);
+
+    foreach (['submit', 'save'] as $action) {
+      if (isset($form['actions'][$action])) {
+        $form['actions'][$action]['#ajax'] = [
+          'callback' => 'mukurtu_media_edit_dialog_ajax',
+          'progress' => ['type' => 'throbber'],
+        ];
+      }
+    }
+  }
+
+}
+
+/**
+ * AJAX callback for media edit forms submitted from a modal dialog.
+ *
+ * Closes the dialog on a clean save; replaces dialog content with the rebuilt
+ * form (including validation messages) when there are errors.
+ */
+function mukurtu_media_edit_dialog_ajax(array &$form, FormStateInterface $form_state): AjaxResponse {
+  $response = new AjaxResponse();
+  if ($form_state->isExecuted()) {
+    $media_id = $form_state->getFormObject()->getEntity()->id();
+    $response->addCommand(new CloseModalDialogCommand());
+    $response->addCommand(new InvokeCommand('[data-media-edit-id="media-edit-' . $media_id . '"]', 'focus'));
+  }
+  else {
+    // Drupal form validation errors are in $form_state->getErrors(), not the
+    // messenger queue. Copy them over so status_messages renders them visibly.
+    foreach ($form_state->getErrors() as $error) {
+      \Drupal::messenger()->addError($error);
+    }
+    /** @var \Drupal\Core\Render\RendererInterface $renderer */
+    $renderer = \Drupal::service('renderer');
+    $status_messages = ['#type' => 'status_messages'];
+    $form['#prefix'] = ($form['#prefix'] ?? '') . $renderer->renderRoot($status_messages);
+    $output = $renderer->renderRoot($form);
+    $response->setAttachments($form['#attached']);
+    $response->addCommand(new ReplaceCommand('.ui-dialog-content', $output));
+  }
+  return $response;
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for soundcloud_media_add_form.
+ *
+ * Adds a class to the URL input container so CSS can put the field and Add
+ * button on the same row.
+ */
+function mukurtu_media_form_soundcloud_media_add_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
+  if (isset($form['container'])) {
+    $form['container']['#attributes']['class'][] = 'media-library-url-input-row';
   }
 }
 
