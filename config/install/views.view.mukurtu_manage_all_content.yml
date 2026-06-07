@@ -99,7 +99,7 @@ display:
               preconfiguration:
                 add_confirmation: false
             41:
-              action_id: node_delete_action
+              action_id: 'entity:delete_action:node'
               preconfiguration:
                 add_confirmation: true
         title:
