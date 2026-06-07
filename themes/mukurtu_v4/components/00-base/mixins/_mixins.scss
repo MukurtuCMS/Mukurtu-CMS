@@ -48,7 +48,8 @@
   &:active,
   &:focus {
     color: var(--light-text-color);
-    background: var(--brand-primary-accent);
+    background: var(--brand-primary-dark);
+    text-decoration: underline;
   }
 
   &:focus {

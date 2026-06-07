@@ -281,6 +281,8 @@ function mukurtu_install() {
     'access mukurtu_taxonomy_record_term_browser entity browser pages',
     'access mukurtu_taxonomy_record_place_term_browser entity browser pages',
     'access multipage_item_entity_browser entity browser pages',
+    'access mukurtu_dictionary_word_browser entity browser pages',
+    'access mukurtu_person_browser entity browser pages',
     'add personal collection entities',
     'add protocol control entities',
     'delete personal collection entities',
@@ -420,6 +422,7 @@ function mukurtu_install() {
     'create mukurtu_single_node_delete message',
     'create mukurtu_single_node_insert message',
     'create mukurtu_single_node_update message',
+    'create article content',
     'create page content',
     'create terms in category',
     'create terms in community_type',
@@ -451,6 +454,8 @@ function mukurtu_install() {
     'delete multiple messages',
     'delete orphan revisions',
     'delete own landing_page content',
+    'delete any article content',
+    'delete own article content',
     'delete own page content',
     'delete terms in category',
     'delete terms in community_type',
@@ -472,6 +477,8 @@ function mukurtu_install() {
     'edit design_settings config page entity',
     'edit own comments',
     'edit own landing_page content',
+    'edit any article content',
+    'edit own article content',
     'edit own page content',
     'edit terms in category',
     'edit terms in community_type',
@@ -828,6 +835,13 @@ function mukurtu_install() {
   //   $block->setWeight(4);
   //   $block->save();
   // }
+
+  // Disable the core media view so Mukurtu's view is the sole handler at
+  // /admin/content/media.
+  $config = \Drupal::configFactory()->getEditable('views.view.media');
+  if (!$config->isNew()) {
+    $config->set('status', FALSE)->save();
+  }
 
 }
 

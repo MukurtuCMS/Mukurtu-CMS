@@ -1,3 +1,11 @@
+cultural-protocol-widget:
+  version: 1.x
+  js:
+    js/cultural-protocol-widget.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+
 membership-table:
   version: 1.x
   css:
@@ -25,3 +33,12 @@ mukurtu-community-role-management:
     js/mukurtu-community-role-management.js: {}
   dependencies:
     - core/jquery
+
+protocol-community-browser:
+  version: 1.x
+  js:
+    js/protocol-community-browser.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/once

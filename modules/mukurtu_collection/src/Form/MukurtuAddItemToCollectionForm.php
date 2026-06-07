@@ -22,7 +22,7 @@ class MukurtuAddItemToCollectionForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, NodeInterface $node = NULL, Array $collections = []) {
+  public function buildForm(array $form, FormStateInterface $form_state, ?NodeInterface $node = NULL, Array $collections = []) {
     if ($node) {
       $form['node'] = [
         '#type' => 'hidden',

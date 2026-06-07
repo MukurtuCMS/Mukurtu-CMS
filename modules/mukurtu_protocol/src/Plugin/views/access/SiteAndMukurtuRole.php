@@ -243,7 +243,7 @@ class SiteAndMukurtuRole extends AccessPluginBase implements CacheableDependency
    * {@inheritdoc}
    */
   public function getCacheContexts() {
-    return ['user.roles'];
+    return ['user.roles', 'og_role'];
   }
 
   /**
