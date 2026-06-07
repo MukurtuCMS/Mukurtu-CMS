@@ -806,6 +806,14 @@ function mukurtu_core_views_data_alter(array &$data)
   }
 
   if (isset($data['node_field_data'])) {
+    $data['node_field_data']['mukurtu_published_filter'] = [
+      'title' => t('Published'),
+      'filter' => [
+        'id' => 'mukurtu_node_published_filter',
+        'field' => 'status',
+        'real field' => 'status',
+      ],
+    ];
     $data['node_field_data']['mukurtu_community_filter'] = [
       'title' => t('Community'),
       'filter' => [

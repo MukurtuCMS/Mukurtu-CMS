@@ -1063,15 +1063,15 @@ display:
         status:
           id: status
           table: node_field_data
-          field: status
+          field: mukurtu_published_filter
           relationship: none
           group_type: group
           admin_label: ''
           entity_type: node
           entity_field: status
-          plugin_id: boolean
+          plugin_id: mukurtu_node_published_filter
           operator: '='
-          value: '1'
+          value: 'All'
           group: 1
           exposed: true
           expose:
@@ -1083,7 +1083,7 @@ display:
             operator_limit_selection: false
             operator_list: {  }
             identifier: status
-            required: true
+            required: false
             remember: false
             multiple: false
             remember_roles:
