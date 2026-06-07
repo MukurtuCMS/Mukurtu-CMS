@@ -660,7 +660,7 @@ display:
           entity_type: node
           entity_field: type
           plugin_id: bundle
-          operator: in
+          operator: '='
           value: {  }
           group: 1
           exposed: true
@@ -675,7 +675,7 @@ display:
             identifier: type
             required: false
             remember: false
-            multiple: true
+            multiple: false
             remember_roles:
               authenticated: authenticated
             reduce: false
