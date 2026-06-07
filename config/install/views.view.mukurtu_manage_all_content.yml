@@ -83,11 +83,11 @@ display:
             4:
               action_id: 'flag_action:export_content_flag'
               preconfiguration:
-                add_confirmation: false
+                add_confirmation: true
             5:
               action_id: 'flag_action:export_content_unflag'
               preconfiguration:
-                add_confirmation: false
+                add_confirmation: true
             29:
               action_id: mukurtu_add_to_collection_action
             37:
