@@ -295,6 +295,10 @@ function mukurtu_core_form_views_exposed_form_alter(&$form, FormStateInterface $
       '#selection_settings' => [
         'target_bundles' => ['community'],
       ],
+      // After entity_autocomplete sets its own #element_validate, prepend
+      // ours so that '0' (the "no filter" sentinel from VBO redirect URLs)
+      // is converted to '' before the autocomplete validator runs.
+      '#after_build' => ['mukurtu_core_community_filter_after_build'],
     ];
 
     // Use our custom submit handler.
@@ -311,6 +315,29 @@ function mukurtu_core_mukurtu_manage_all_content_autocomplete_submit($form, &$fo
   // the view still displays results as expected.
   if (!$form_state->getValue('field_mukurtu_community_target_id')) {
     $form_state->setValue('field_mukurtu_community_target_id', 0);
+  }
+}
+
+/**
+ * After-build callback for the community filter autocomplete.
+ *
+ * Prepends a validator so that '0' (the "no filter" sentinel stored in VBO
+ * redirect URLs) is treated as empty before EntityAutocomplete validation.
+ */
+function mukurtu_core_community_filter_after_build($element, &$form_state) {
+  array_unshift($element['#element_validate'], 'mukurtu_core_community_filter_validate');
+  return $element;
+}
+
+/**
+ * Element validator for the community filter autocomplete.
+ *
+ * Converts '0' to '' so EntityAutocomplete validation treats it as empty.
+ */
+function mukurtu_core_community_filter_validate(&$element, FormStateInterface $form_state, &$complete_form) {
+  if ($element['#value'] === '0' || $element['#value'] === 0) {
+    $element['#value'] = '';
+    $form_state->setValueForElement($element, '');
   }
 }
 
