@@ -81,9 +81,7 @@ display:
           force_selection_info: false
           selected_actions:
             4:
-              action_id: 'flag_action:export_content_flag'
-              preconfiguration:
-                add_confirmation: true
+              action_id: mukurtu_export_add_to_list_action
             5:
               action_id: 'flag_action:export_content_unflag'
               preconfiguration:
