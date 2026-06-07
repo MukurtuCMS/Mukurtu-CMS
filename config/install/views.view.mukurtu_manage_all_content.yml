@@ -94,14 +94,17 @@ display:
               action_id: 'entity:unpublish_action:node'
               preconfiguration:
                 add_confirmation: false
+                label_override: Unpublish
             39:
               action_id: 'entity:publish_action:node'
               preconfiguration:
                 add_confirmation: false
+                label_override: Publish
             41:
               action_id: views_bulk_operations_delete_entity
               preconfiguration:
                 add_confirmation: true
+                label_override: Delete
         title:
           id: title
           table: node_field_data
