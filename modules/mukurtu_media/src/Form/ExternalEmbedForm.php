@@ -91,6 +91,11 @@ class ExternalEmbedForm extends AddFormBase
    */
   public function addButtonSubmit(array $form, FormStateInterface $form_state)
   {
+    // Clear stale 'media' user input to prevent protocol pre-selection on new
+    // entities when an existing media item is already in the current selection.
+    $user_input = $form_state->getUserInput();
+    unset($user_input['media']);
+    $form_state->setUserInput($user_input);
     $this->processInputValues([$form_state->getValue('external_embed_code')], $form, $form_state);
   }
 }

@@ -3,8 +3,32 @@
  * Initialize Splide carousel for DH nodes that have multiple media assets.
  */
 
-  ((Drupal, once) => { 
+  ((Drupal, once) => {
     let main, thumbnails;
+
+    /**
+     * Set min-block-size on the track to the tallest slide's scrollHeight.
+     *
+     * scrollHeight reads through the block-size: 0 rule on inactive slides,
+     * so we get each slide's true content height without any DOM manipulation.
+     * Called on mounted and resized so the value stays correct after layout
+     * changes; the track value is cleared first so a shrinking viewport can
+     * reduce the height rather than being locked to a stale larger value.
+     */
+    function equalizeHeight(splideInstance) {
+      const track = splideInstance.root.querySelector('.splide__track');
+      track.style.minBlockSize = '';
+
+      requestAnimationFrame(() => {
+        let maxHeight = 0;
+        splideInstance.Components.Slides.get().forEach(({ slide }) => {
+          maxHeight = Math.max(maxHeight, slide.scrollHeight);
+        });
+        if (maxHeight > 0) {
+          track.style.minBlockSize = maxHeight + 'px';
+        }
+      });
+    }
 
     /**
      * Initialize the carousels.
@@ -36,11 +60,13 @@
         },
       } );
 
+      main.on('mounted resized', () => equalizeHeight(main));
+
       main.sync( thumbnails );
       main.mount();
       thumbnails.mount();
     }
-  
+
     Drupal.behaviors.mediaAssetCarousel = {
       attach(context) {
         once("mediaAssets", ".media-carousels", context).forEach(init);
