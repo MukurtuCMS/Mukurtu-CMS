@@ -571,18 +571,16 @@ function mukurtu_protocol_update_40030(): void {
 }
 
 /**
- * Add mukurtu_community_manager_select query tag to community select view.
+ * Add administrator and mukurtu_manager site roles to the mukurtu_media view
+ * access so the media toolbar link is visible to those users.
  */
 function mukurtu_protocol_update_40031(): void {
-  $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_community_select');
-  if ($config->isNew()) {
-    return;
-  }
-  $tags = $config->get('display.default.display_options.query.options.query_tags') ?? [];
-  if (!in_array('mukurtu_community_manager_select', $tags)) {
-    $tags[] = 'mukurtu_community_manager_select';
-    $config->set('display.default.display_options.query.options.query_tags', $tags)->save(TRUE);
-  }
+  $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_media');
+  $access = $config->get('display.default.display_options.access');
+  $access['options']['site-role']['administrator'] = 'administrator';
+  $access['options']['site-role']['mukurtu_manager'] = 'mukurtu_manager';
+  $config->set('display.default.display_options.access', $access)->save(TRUE);
+  \Drupal::service('router.builder')->rebuild();
 }
 
 /**
