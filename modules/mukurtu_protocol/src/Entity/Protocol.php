@@ -5,6 +5,7 @@ namespace Drupal\mukurtu_protocol\Entity;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Entity\EditorialContentEntityBase;
 use Drupal\Core\Entity\RevisionableInterface;
 use Drupal\Core\Entity\EntityChangedTrait;
@@ -350,6 +351,42 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
   }
 
   /**
+   * {@inheritDoc}
+   */
+  public function getCommentViewAccess(): array {
+    $values = [];
+    foreach ($this->get('field_comment_view_access') as $item) {
+      $values[] = $item->value;
+    }
+    return $values;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public function setCommentViewAccess(array $access): ProtocolInterface {
+    return $this->set('field_comment_view_access', $access);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public function getCommentPostAccess(): array {
+    $values = [];
+    foreach ($this->get('field_comment_post_access') as $item) {
+      $values[] = $item->value;
+    }
+    return $values;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public function setCommentPostAccess(array $access): ProtocolInterface {
+    return $this->set('field_comment_post_access', $access);
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function addMember(AccountInterface $account, $roles = []): MukurtuGroupInterface {
@@ -576,6 +613,40 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
       ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
+
+    $fields['field_comment_view_access'] = BaseFieldDefinition::create('list_string')
+      ->setLabel(t('Who can view comments'))
+      ->setRevisionable(FALSE)
+      ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
+      ->setSetting('allowed_values', [
+        'anonymous' => 'Visitors (anonymous users)',
+        'authenticated' => 'Any site user with access',
+        'protocol_member' => 'Protocol members only (any protocol role)',
+      ])
+      ->setDefaultValue([
+        ['value' => 'authenticated'],
+        ['value' => 'protocol_member'],
+      ])
+      ->setTranslatable(FALSE)
+      ->setDisplayConfigurable('view', FALSE)
+      ->setDisplayConfigurable('form', FALSE);
+
+    $fields['field_comment_post_access'] = BaseFieldDefinition::create('list_string')
+      ->setLabel(t('Who can leave comments'))
+      ->setRevisionable(FALSE)
+      ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
+      ->setSetting('allowed_values', [
+        'anonymous' => 'Visitors (anonymous users)',
+        'authenticated' => 'Any site user with access',
+        'protocol_member' => 'Protocol members only (any protocol role)',
+      ])
+      ->setDefaultValue([
+        ['value' => 'authenticated'],
+        ['value' => 'protocol_member'],
+      ])
+      ->setTranslatable(FALSE)
+      ->setDisplayConfigurable('view', FALSE)
+      ->setDisplayConfigurable('form', FALSE);
 
     $fields['status']->setDescription(t('Publish or unpublish the protocol. If unpublished, this protocol will not be visible to anyone except protocol managers and site admins.'))
       ->setDisplayOptions('form', [

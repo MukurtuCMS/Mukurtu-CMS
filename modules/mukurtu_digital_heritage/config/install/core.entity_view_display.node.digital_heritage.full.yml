@@ -163,7 +163,7 @@ bundle: digital_heritage
 mode: full
 content:
   comment:
-    type: comment_default
+    type: mukurtu_comment_default
     label: above
     settings:
       view_mode: default

@@ -48,6 +48,10 @@ class MukurtuCommentForm extends CommentForm {
     $form['#theme'] = ['comment_form__' . $entity->getEntityTypeId() . '__' . $entity->bundle() . '__' . $field_name, 'comment_form'];
 
     $anonymous_contact = $field_definition->getSetting('anonymous');
+    $commentSettings = $this->config('mukurtu_protocol.comment_settings');
+    if ($commentSettings->get('anonymous_comments_require_email') && $this->currentUser->isAnonymous()) {
+      $anonymous_contact = CommentInterface::ANONYMOUS_MUST_CONTACT;
+    }
     $is_admin = $comment->id() && CulturalProtocols::hasSiteOrProtocolPermission($entity, 'administer comments', $this->currentUser, TRUE);
     if (!$this->currentUser->isAuthenticated() && $anonymous_contact != CommentInterface::ANONYMOUS_MAYNOT_CONTACT) {
       $form['#attached']['library'][] = 'core/drupal.form';
@@ -91,7 +95,7 @@ class MukurtuCommentForm extends CommentForm {
       $status = CommentInterface::NOT_PUBLISHED;
       if (CulturalProtocols::hasSiteOrProtocolPermission($entity, 'skip comment approval', $this->currentUser, TRUE)
        || CulturalProtocols::hasSiteOrProtocolPermission($entity, 'administer comments', $this->currentUser, TRUE)
-       || !$this->anyProtocolsRequireCommentApproval($entity)) {
+       || (!$this->anyProtocolsRequireCommentApproval($entity) && !$this->siteRequiresCommentApproval())) {
           $status = CommentInterface::PUBLISHED;
       }
     }
@@ -184,7 +188,23 @@ class MukurtuCommentForm extends CommentForm {
       '#access' => $is_admin,
     ];
 
-    return ContentEntityForm::form($form, $form_state, $comment);
+    $form = ContentEntityForm::form($form, $form_state, $comment);
+
+    // Plain text is the only allowed format; hide the format guidelines after
+    // the text_format element's #process callbacks have populated them.
+    $form['comment_body']['widget'][0]['#after_build'][] = [static::class, 'hideFormatGuidelines'];
+
+    return $form;
+  }
+
+  /**
+   * After-build callback to hide the format guidelines on the comment body.
+   */
+  public static function hideFormatGuidelines(array $element, FormStateInterface $form_state): array {
+    if (isset($element['format']['guidelines'])) {
+      $element['format']['guidelines']['#access'] = FALSE;
+    }
+    return $element;
   }
 
   /**
@@ -207,13 +227,6 @@ class MukurtuCommentForm extends CommentForm {
     // Only show the save button if comment previews are optional or if we are
     // already previewing the submission.
     $element['submit']['#access'] = ($comment->id() && CulturalProtocols::hasSiteOrProtocolPermission($entity, 'administer comments', $this->currentUser, TRUE)) || $preview_mode != DRUPAL_REQUIRED || $form_state->get('comment_preview');
-
-    $element['preview'] = [
-      '#type' => 'submit',
-      '#value' => $this->t('Preview'),
-      '#access' => $preview_mode != DRUPAL_DISABLED,
-      '#submit' => ['::submitForm', '::preview'],
-    ];
 
     return $element;
   }
@@ -319,6 +332,13 @@ class MukurtuCommentForm extends CommentForm {
       // Redirect the user to the entity they are commenting on.
     }
     $form_state->setRedirectUrl($uri);
+  }
+
+  /**
+   * Check if the site-wide comment setting requires approval.
+   */
+  private function siteRequiresCommentApproval(): bool {
+    return (bool) $this->config('mukurtu_protocol.comment_settings')->get('site_comments_require_approval');
   }
 
   /**

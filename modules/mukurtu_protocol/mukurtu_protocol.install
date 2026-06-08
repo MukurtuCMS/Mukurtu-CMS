@@ -618,3 +618,68 @@ function mukurtu_protocol_update_40034(): void {
   $config->set('content.field_featured_content.settings.field_widget_display_settings', ['view_mode' => 'form_selection']);
   $config->save();
 }
+
+/**
+ * Set default value for site_comments_require_approval config key.
+ */
+function mukurtu_protocol_update_40035(): void {
+  $config = \Drupal::configFactory()->getEditable('mukurtu_protocol.comment_settings');
+  if ($config->get('site_comments_require_approval') === NULL) {
+    $config->set('site_comments_require_approval', FALSE)->save();
+  }
+}
+
+/**
+ * Add per-protocol comment view and post access fields.
+ */
+function mukurtu_protocol_update_40036(): void {
+  $manager = \Drupal::entityDefinitionUpdateManager();
+  $fields = [
+    'field_comment_view_access' => 'Who can view comments',
+    'field_comment_post_access' => 'Who can leave comments',
+  ];
+  foreach ($fields as $field_name => $label) {
+    $definition = \Drupal\Core\Field\BaseFieldDefinition::create('list_string')
+      ->setLabel(t($label))
+      ->setRevisionable(FALSE)
+      ->setCardinality(\Drupal\Core\Field\FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
+      ->setSetting('allowed_values', [
+        'anonymous' => 'Visitors (anonymous users)',
+        'authenticated' => 'Any site user with access',
+        'protocol_member' => 'Protocol members only (any protocol role)',
+      ])
+      ->setDefaultValue([
+        ['value' => 'authenticated'],
+        ['value' => 'protocol_member'],
+      ])
+      ->setTranslatable(FALSE)
+      ->setDisplayConfigurable('view', FALSE)
+      ->setDisplayConfigurable('form', FALSE);
+    $manager->installFieldStorageDefinition($field_name, 'protocol', 'mukurtu_protocol', $definition);
+  }
+}
+
+/**
+ * Remove obsolete comment fields from protocol edit form.
+ */
+function mukurtu_protocol_update_40037(): void {
+  $form_display = \Drupal::entityTypeManager()
+    ->getStorage('entity_form_display')
+    ->load('protocol.protocol.default');
+  if ($form_display) {
+    foreach (['field_comment_status', 'field_comment_require_approval'] as $field) {
+      $form_display->removeComponent($field);
+    }
+    $form_display->save();
+  }
+}
+
+/**
+ * Add anonymous_comments_require_email default to comment settings config.
+ */
+function mukurtu_protocol_update_40038(): void {
+  $config = \Drupal::configFactory()->getEditable('mukurtu_protocol.comment_settings');
+  if ($config->get('anonymous_comments_require_email') === NULL) {
+    $config->set('anonymous_comments_require_email', FALSE)->save();
+  }
+}

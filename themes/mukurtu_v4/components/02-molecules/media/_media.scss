@@ -29,7 +29,9 @@
 .media--document,
 .media--audio,
 .media--video,
-.media--remote_video {
+.media--remote_video,
+.media--external_embed,
+.media--soundcloud {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -39,19 +41,11 @@
     background-color: black;
   }
 
-  .button {
-    margin-block-start: var(--v-space-5xs);
-
-    &--download {
-      svg {
-        fill: white;
-        vertical-align: middle;
-        margin-inline-start: var(--v-space-6xs);
-      }
-    }
-
-    &--download-icon {
-      margin-block-start: 0;
+  .button--download {
+    svg {
+      fill: white;
+      vertical-align: middle;
+      margin-inline-start: var(--v-space-6xs);
     }
   }
 }
@@ -98,8 +92,25 @@
   }
 }
 
-.media-carousel .media--document {
+.media-carousel .media--document,
+.media-carousel .media--external_embed,
+.media-carousel .media--soundcloud {
   inline-size: 100%;
+}
+
+.media--external_embed,
+.media--soundcloud {
+  .media-asset--content,
+  .field,
+  .field__items,
+  .field__item {
+    inline-size: 100%;
+  }
+
+  iframe {
+    display: block;
+    inline-size: 100%;
+  }
 }
 
 .media-asset--pdf-wrapper {
@@ -114,9 +125,3 @@
   block-size: 100%;
 }
 
-.media-asset--pdf-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--v-space-5xs);
-  margin-block-start: var(--v-space-5xs);
-}
