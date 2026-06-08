@@ -87,9 +87,6 @@
     block-size: 0;    // or 100vh, or something what fits your case
   }
 
-  .splide__track {
-    transition: block-size 0.3s ease-in-out;
-  }
 }
 
 .thumbnail-carousel {

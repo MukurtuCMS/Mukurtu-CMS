@@ -16,17 +16,16 @@
      * The track value is cleared first so a shrinking viewport can reduce the
      * height rather than being locked to a stale larger value.
      */
-    function updateTrackHeight(splideInstance, targetIndex) {
+    function updateTrackHeight(splideInstance) {
       const track = splideInstance.root.querySelector('.splide__track');
-      track.style.blockSize = '';
+      track.style.minBlockSize = '';
 
       requestAnimationFrame(() => {
-        const index = targetIndex ?? splideInstance.index;
-        const targetSlide = splideInstance.Components.Slides.getAt(index);
-        if (targetSlide) {
-          const height = targetSlide.slide.scrollHeight;
+        const activeSlide = splideInstance.Components.Slides.getAt(splideInstance.index);
+        if (activeSlide) {
+          const height = activeSlide.slide.scrollHeight;
           if (height > 0) {
-            track.style.blockSize = height + 'px';
+            track.style.minBlockSize = height + 'px';
           }
         }
       });
@@ -62,8 +61,7 @@
         },
       } );
 
-      main.on('mounted resized', () => updateTrackHeight(main));
-      main.on('move', (newIndex) => updateTrackHeight(main, newIndex));
+      main.on('mounted moved resized', () => updateTrackHeight(main));
 
       main.sync( thumbnails );
       main.mount();
