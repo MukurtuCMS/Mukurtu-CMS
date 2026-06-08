@@ -540,8 +540,131 @@ function mukurtu_media_update_40012(): void {
 }
 
 /**
+ * Create media_assets and carousel_thumbnail view displays for SoundCloud.
+ */
+function mukurtu_media_update_40013(): void {
+  $storage = \Drupal::service('config.storage');
+
+  $media_assets = [
+    'langcode' => 'en',
+    'status' => TRUE,
+    'dependencies' => [
+      'config' => [
+        'core.entity_view_mode.media.media_assets',
+        'media.type.soundcloud',
+      ],
+      'module' => [
+        'layout_builder',
+        'media_entity_soundcloud',
+      ],
+    ],
+    'third_party_settings' => [
+      'layout_builder' => [
+        'enabled' => FALSE,
+        'allow_custom' => FALSE,
+      ],
+    ],
+    'id' => 'media.soundcloud.media_assets',
+    'targetEntityType' => 'media',
+    'bundle' => 'soundcloud',
+    'mode' => 'media_assets',
+    'content' => [
+      'field_media_soundcloud' => [
+        'type' => 'soundcloud_embed',
+        'label' => 'hidden',
+        'settings' => [
+          'type' => 'visual',
+          'width' => '100%',
+          'height' => '450',
+          'color' => '#ff5500',
+          'options' => [],
+        ],
+        'third_party_settings' => [],
+        'weight' => 0,
+        'region' => 'content',
+      ],
+    ],
+    'hidden' => [
+      'created' => TRUE,
+      'field_communities' => TRUE,
+      'field_contributor' => TRUE,
+      'field_cultural_protocols' => TRUE,
+      'field_identifier' => TRUE,
+      'field_media_tags' => TRUE,
+      'field_thumbnail' => TRUE,
+      'field_people' => TRUE,
+      'flag_export_media' => TRUE,
+      'langcode' => TRUE,
+      'name' => TRUE,
+      'search_api_excerpt' => TRUE,
+      'thumbnail' => TRUE,
+      'uid' => TRUE,
+    ],
+  ];
+
+  $carousel_thumbnail = [
+    'langcode' => 'en',
+    'status' => TRUE,
+    'dependencies' => [
+      'config' => [
+        'core.entity_view_mode.media.carousel_thumbnail',
+        'image.style.carousel_thumbnail',
+        'media.type.soundcloud',
+      ],
+      'module' => [
+        'image',
+        'layout_builder',
+      ],
+    ],
+    'third_party_settings' => [
+      'layout_builder' => [
+        'enabled' => FALSE,
+        'allow_custom' => FALSE,
+      ],
+    ],
+    'id' => 'media.soundcloud.carousel_thumbnail',
+    'targetEntityType' => 'media',
+    'bundle' => 'soundcloud',
+    'mode' => 'carousel_thumbnail',
+    'content' => [
+      'field_thumbnail' => [
+        'type' => 'image',
+        'label' => 'hidden',
+        'settings' => [
+          'image_link' => '',
+          'image_style' => 'carousel_thumbnail',
+          'image_loading' => ['attribute' => 'lazy'],
+        ],
+        'third_party_settings' => [],
+        'weight' => 0,
+        'region' => 'content',
+      ],
+    ],
+    'hidden' => [
+      'created' => TRUE,
+      'field_communities' => TRUE,
+      'field_contributor' => TRUE,
+      'field_cultural_protocols' => TRUE,
+      'field_identifier' => TRUE,
+      'field_media_soundcloud' => TRUE,
+      'field_media_tags' => TRUE,
+      'field_people' => TRUE,
+      'flag_export_media' => TRUE,
+      'langcode' => TRUE,
+      'name' => TRUE,
+      'search_api_excerpt' => TRUE,
+      'thumbnail' => TRUE,
+      'uid' => TRUE,
+    ],
+  ];
+
+  $storage->write('core.entity_view_display.media.soundcloud.media_assets', $media_assets);
+  $storage->write('core.entity_view_display.media.soundcloud.carousel_thumbnail', $carousel_thumbnail);
+}
+
+/**
  * Set default video and audio thumbnails from module-bundled images.
  */
-function mukurtu_media_update_40005(): void {
+function mukurtu_media_update_40014(): void {
   _mukurtu_media_set_default_thumbnails();
 }

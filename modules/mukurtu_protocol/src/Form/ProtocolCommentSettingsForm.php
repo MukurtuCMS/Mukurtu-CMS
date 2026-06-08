@@ -5,6 +5,7 @@ namespace Drupal\mukurtu_protocol\Form;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Cache\Cache;
+use Drupal\Core\Url;
 
 /**
  * Configure protocol comment settings.
@@ -24,6 +25,35 @@ class ProtocolCommentSettingsForm extends FormBase {
     /** @var \Drupal\mukurtu_protocol\Entity\ProtocolInterface $protocol */
     $protocol = $form_state->get('protocol');
     $commentsEnabled = $protocol->getCommentStatus();
+
+    // Read site-wide settings to enforce as ceiling on protocol options.
+    $siteConfig = \Drupal::config('mukurtu_protocol.comment_settings');
+    $siteCommentsEnabled = $siteConfig->get('site_comments_enabled') ?? TRUE;
+    $anonymous = \Drupal::entityTypeManager()->getStorage('user_role')->load('anonymous');
+    $siteAllowsAnonymousView = $anonymous && $anonymous->hasPermission('access comments');
+    $siteAllowsAnonymousPost = $anonymous && $anonymous->hasPermission('post comments');
+    $form_state->set('site_allows_anonymous_view', $siteAllowsAnonymousView);
+    $form_state->set('site_allows_anonymous_post', $siteAllowsAnonymousPost);
+    $siteRequiresApproval = (bool) ($siteConfig->get('site_comments_require_approval') ?? FALSE);
+    $form_state->set('site_requires_approval', $siteRequiresApproval);
+
+    if (!$siteCommentsEnabled) {
+      $settingsUrl = Url::fromRoute('mukurtu_protocol.comment_settings')->toString();
+      $form['site_disabled_notice'] = [
+        '#type' => 'markup',
+        '#markup' => '<div class="messages messages--warning">' . $this->t('Commenting is currently disabled site-wide. Protocol comment settings will take effect once commenting is <a href=":url">re-enabled site-wide</a>.', [':url' => $settingsUrl]) . '</div>',
+        '#weight' => -10,
+      ];
+    }
+
+    if ($protocol->getCommentRequireApproval()) {
+      $unapprovedUrl = Url::fromRoute('mukurtu_protocol.manage_protocol_unapproved_comments', ['group' => $protocol->id()]);
+      $form['unapproved_link'] = [
+        '#type' => 'markup',
+        '#markup' => '<p>' . $this->t('<a href=":url">View comments awaiting approval</a> for this protocol.', [':url' => $unapprovedUrl->toString()]) . '</p>',
+      ];
+    }
+
     $form['comments_enabled'] = [
       '#type' => 'radios',
       '#title' => $this->t('Commenting'),
@@ -45,6 +75,31 @@ class ProtocolCommentSettingsForm extends FormBase {
         1 => $this->t('Enabled'),
         0 => $this->t('Disabled'),
       ),
+      '#after_build' => [[$this, 'applySiteCeilingToApproval']],
+    ];
+
+    $commentAccessOptions = [
+      'anonymous'       => $this->t('Visitors (anonymous users)'),
+      'authenticated'   => $this->t('Any site user with access'),
+      'protocol_member' => $this->t('Protocol members only (any protocol role)'),
+    ];
+
+    $form['comment_view_access'] = [
+      '#type' => 'checkboxes',
+      '#title' => $this->t('Who can view comments?'),
+      '#description' => $this->t('Select which users can see comments on content using this protocol. For items with multiple cultural protocols, the most restrictive protocol wins.'),
+      '#options' => $commentAccessOptions,
+      '#default_value' => $protocol->getCommentViewAccess(),
+      '#after_build' => [[$this, 'applySiteCeilingToViewAccess']],
+    ];
+
+    $form['comment_post_access'] = [
+      '#type' => 'checkboxes',
+      '#title' => $this->t('Who can leave comments?'),
+      '#description' => $this->t('Select which users can post comments on content using this protocol. For items with multiple cultural protocols, the most restrictive protocol wins.'),
+      '#options' => $commentAccessOptions,
+      '#default_value' => $protocol->getCommentPostAccess(),
+      '#after_build' => [[$this, 'addPostAccessStates'], [$this, 'applySiteCeilingToPostAccess']],
     ];
 
     $form['actions']['submit'] = [
@@ -68,15 +123,93 @@ class ProtocolCommentSettingsForm extends FormBase {
     }
 
     $newCommentApprovalStatus = $form_state->getValue('comments_require_approval');
+    // Site-wide approval requirement is a floor — protocol cannot disable it.
+    $siteConfig = \Drupal::config('mukurtu_protocol.comment_settings');
+    if ($siteConfig->get('site_comments_require_approval')) {
+      $newCommentApprovalStatus = TRUE;
+    }
     if ($newCommentApprovalStatus == TRUE || $newCommentApprovalStatus == FALSE) {
       $protocol->setCommentRequireApproval($newCommentApprovalStatus);
     }
+
+    // Enforce site-wide visitor permissions as a ceiling — strip 'anonymous'
+    // from protocol access lists when site-wide does not permit it.
+    $anonymous = \Drupal::entityTypeManager()->getStorage('user_role')->load('anonymous');
+    $siteAllowsAnonymousView = $anonymous && $anonymous->hasPermission('access comments');
+    $siteAllowsAnonymousPost = $anonymous && $anonymous->hasPermission('post comments');
+
+    $viewAccess = array_values(array_filter($form_state->getValue('comment_view_access')));
+    if (!$siteAllowsAnonymousView) {
+      $viewAccess = array_values(array_diff($viewAccess, ['anonymous']));
+    }
+    $protocol->setCommentViewAccess($viewAccess);
+
+    $postAccess = array_values(array_filter($form_state->getValue('comment_post_access')));
+    if (!$siteAllowsAnonymousPost) {
+      $postAccess = array_values(array_diff($postAccess, ['anonymous']));
+    }
+    // Post access must be a subset of view access — you cannot post if you cannot view.
+    $postAccess = array_values(array_intersect($postAccess, $viewAccess));
+    $protocol->setCommentPostAccess($postAccess);
 
     // Save changes.
     $protocol->save();
 
     // Comment display is cached per node view.
     Cache::invalidateTags(['node_view']);
+
+    $this->messenger()->addStatus($this->t('Protocol comment settings have been saved.'));
+  }
+
+  /**
+   * After-build callback to lock the approval radio when site-wide requires it.
+   */
+  public function applySiteCeilingToApproval(array $element, FormStateInterface $form_state): array {
+    if ($form_state->get('site_requires_approval')) {
+      $element[0]['#disabled'] = TRUE;
+      $settingsUrl = Url::fromRoute('mukurtu_protocol.comment_settings')->toString();
+      $element['#description'] = $this->t('Comment approval is required <a href=":url">site-wide</a>. Protocol-level approval cannot be disabled.', [':url' => $settingsUrl]);
+    }
+    return $element;
+  }
+
+  /**
+   * After-build callback to disable the 'anonymous' view-access checkbox when
+   * site-wide visitor viewing is not permitted.
+   */
+  public function applySiteCeilingToViewAccess(array $element, FormStateInterface $form_state): array {
+    if (!$form_state->get('site_allows_anonymous_view')) {
+      $element['anonymous']['#disabled'] = TRUE;
+      $element['anonymous']['#description'] = $this->t('Visitors are not permitted to view comments site-wide.');
+    }
+    return $element;
+  }
+
+  /**
+   * After-build callback to disable the 'anonymous' post-access checkbox when
+   * site-wide visitor posting is not permitted.
+   */
+  public function applySiteCeilingToPostAccess(array $element, FormStateInterface $form_state): array {
+    if (!$form_state->get('site_allows_anonymous_post')) {
+      $element['anonymous']['#disabled'] = TRUE;
+      $element['anonymous']['#description'] = $this->t('Visitors are not permitted to leave comments site-wide.');
+    }
+    return $element;
+  }
+
+  /**
+   * After-build callback to disable the visitor post-access checkbox when
+   * visitor view-access is unchecked.
+   */
+  public function addPostAccessStates(array $element, FormStateInterface $form_state): array {
+    foreach (['anonymous', 'authenticated', 'protocol_member'] as $key) {
+      $element[$key]['#states'] = [
+        'disabled' => [
+          ':input[name="comment_view_access[' . $key . ']"]' => ['unchecked' => TRUE],
+        ],
+      ];
+    }
+    return $element;
   }
 
 }
