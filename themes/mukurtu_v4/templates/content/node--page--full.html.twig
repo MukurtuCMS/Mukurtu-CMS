@@ -69,7 +69,7 @@
 #}
 
 {# If there's more than 1 media asset, render code for carousels. #}
-{% set num_media_assets = content.field_page_media_assets|children|length %}
+{% set num_media_assets = content.field_page_media_assets ? content.field_page_media_assets|children|length : 0 %}
 {% if num_media_assets > 1 %}
   {% set carousels = true %}
 {# If there's exactly one media asset, render the field without carousel code. #}

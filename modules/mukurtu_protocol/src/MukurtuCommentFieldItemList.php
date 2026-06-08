@@ -7,6 +7,7 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\comment\CommentFieldItemList;
 use Drupal\mukurtu_protocol\CulturalProtocols;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
+use Drupal\mukurtu_protocol\Entity\ProtocolInterface;
 
 /**
  * Defines an item list class for comment fields.
@@ -48,6 +49,21 @@ class MukurtuCommentFieldItemList extends CommentFieldItemList {
         return $return_as_object ? AccessResult::forbidden() : FALSE;
       }
 
+      // Check per-protocol view access setting.
+      if ($entity instanceof CulturalProtocolControlledInterface) {
+        $resolvedAccount = $account ?: \Drupal::currentUser();
+        foreach ($entity->getProtocolEntities() as $protocol) {
+          $viewAccess = $protocol->getCommentViewAccess();
+          if (!empty($viewAccess) && !self::accountMatchesAccessList($resolvedAccount, $viewAccess, $protocol)) {
+            if ($return_as_object) {
+              return AccessResult::forbidden()
+                ->addCacheTags(["user:{$resolvedAccount->id()}"]);
+            }
+            return FALSE;
+          }
+        }
+      }
+
       // Only users with "post comments" or "access comments" permission can
       // view the field value. The formatter,
       // Drupal\comment\Plugin\Field\FieldFormatter\CommentDefaultFormatter,
@@ -61,4 +77,28 @@ class MukurtuCommentFieldItemList extends CommentFieldItemList {
     }
     return parent::access($operation, $account, $return_as_object);
   }
+
+  /**
+   * Checks whether an account matches any of the allowed access categories.
+   *
+   * @param \Drupal\Core\Session\AccountInterface $account
+   * @param string[] $accessList
+   *   Values from field_comment_view_access or field_comment_post_access.
+   * @param \Drupal\mukurtu_protocol\Entity\ProtocolInterface $protocol
+   *
+   * @return bool
+   */
+  public static function accountMatchesAccessList(AccountInterface $account, array $accessList, ProtocolInterface $protocol): bool {
+    if (in_array('anonymous', $accessList) && $account->isAnonymous()) {
+      return TRUE;
+    }
+    if (in_array('authenticated', $accessList) && $account->isAuthenticated()) {
+      return TRUE;
+    }
+    if (in_array('protocol_member', $accessList) && $protocol->getMembership($account)) {
+      return TRUE;
+    }
+    return FALSE;
+  }
+
 }
