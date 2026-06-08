@@ -1087,17 +1087,17 @@ function mukurtu_core_update_40035(): void {
   }
 
   // Add administrator to allowed site roles so UID 1 and admins can access.
-  $access_options = $config->get('display.mukurtu_manage_content.display_options.access.options');
+  $access_options = $config->get('display.default.display_options.access.options');
   if (is_array($access_options) && isset($access_options['site-role'])) {
     $access_options['site-role']['administrator'] = 'administrator';
-    $config->set('display.mukurtu_manage_content.display_options.access.options', $access_options);
+    $config->set('display.default.display_options.access.options', $access_options);
   }
 
   // Show table headers even when there are no results.
-  $style_options = $config->get('display.mukurtu_manage_content.display_options.style.options');
+  $style_options = $config->get('display.default.display_options.style.options');
   if (is_array($style_options)) {
     $style_options['empty_table'] = TRUE;
-    $config->set('display.mukurtu_manage_content.display_options.style.options', $style_options);
+    $config->set('display.default.display_options.style.options', $style_options);
   }
 
   $config->save();
