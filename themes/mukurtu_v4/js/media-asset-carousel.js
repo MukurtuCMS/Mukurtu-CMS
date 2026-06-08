@@ -7,25 +7,26 @@
     let main, thumbnails;
 
     /**
-     * Set min-block-size on the track to the tallest slide's scrollHeight.
+     * Set block-size on the track to match the target slide's scrollHeight.
      *
      * scrollHeight reads through the block-size: 0 rule on inactive slides,
      * so we get each slide's true content height without any DOM manipulation.
-     * Called on mounted and resized so the value stays correct after layout
-     * changes; the track value is cleared first so a shrinking viewport can
-     * reduce the height rather than being locked to a stale larger value.
+     * targetIndex defaults to the current active slide; pass the incoming
+     * index on 'move' so the height animates in sync with the fade transition.
+     * The track value is cleared first so a shrinking viewport can reduce the
+     * height rather than being locked to a stale larger value.
      */
-    function equalizeHeight(splideInstance) {
+    function updateTrackHeight(splideInstance) {
       const track = splideInstance.root.querySelector('.splide__track');
       track.style.minBlockSize = '';
 
       requestAnimationFrame(() => {
-        let maxHeight = 0;
-        splideInstance.Components.Slides.get().forEach(({ slide }) => {
-          maxHeight = Math.max(maxHeight, slide.scrollHeight);
-        });
-        if (maxHeight > 0) {
-          track.style.minBlockSize = maxHeight + 'px';
+        const activeSlide = splideInstance.Components.Slides.getAt(splideInstance.index);
+        if (activeSlide) {
+          const height = activeSlide.slide.scrollHeight;
+          if (height > 0) {
+            track.style.minBlockSize = height + 'px';
+          }
         }
       });
     }
@@ -60,7 +61,7 @@
         },
       } );
 
-      main.on('mounted resized', () => equalizeHeight(main));
+      main.on('mounted moved resized', () => updateTrackHeight(main));
 
       main.sync( thumbnails );
       main.mount();
