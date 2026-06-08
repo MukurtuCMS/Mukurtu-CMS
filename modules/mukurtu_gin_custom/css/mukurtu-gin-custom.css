@@ -290,6 +290,11 @@ counterpart, if one exists. */
     margin-bottom: 0 !important;
 }
 
+/* Hide the managed-file remove button; the Cancel button closes the dialog instead. */
+.media-library-add-form [name$="_remove_button"] {
+    display: none;
+}
+
 /* Hide the selected-media container when nothing is staged yet */
 .media-library-add-form__selected-media:empty {
     display: none !important;
