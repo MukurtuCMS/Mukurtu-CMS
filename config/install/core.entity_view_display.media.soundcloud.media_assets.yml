@@ -1,0 +1,45 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.media.media_assets
+    - media.type.soundcloud
+  module:
+    - layout_builder
+    - media_entity_soundcloud
+third_party_settings:
+  layout_builder:
+    enabled: false
+    allow_custom: false
+id: media.soundcloud.media_assets
+targetEntityType: media
+bundle: soundcloud
+mode: media_assets
+content:
+  field_media_soundcloud:
+    type: soundcloud_embed
+    label: hidden
+    settings:
+      type: visual
+      width: 100%
+      height: '450'
+      color: '#ff5500'
+      options: {  }
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden:
+  created: true
+  field_thumbnail: true
+  field_communities: true
+  field_contributor: true
+  field_cultural_protocols: true
+  field_identifier: true
+  field_media_tags: true
+  field_people: true
+  flag_export_media: true
+  langcode: true
+  name: true
+  search_api_excerpt: true
+  thumbnail: true
+  uid: true
