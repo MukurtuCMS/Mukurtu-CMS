@@ -34,6 +34,8 @@ class ProtocolCommentSettingsForm extends FormBase {
     $siteAllowsAnonymousPost = $anonymous && $anonymous->hasPermission('post comments');
     $form_state->set('site_allows_anonymous_view', $siteAllowsAnonymousView);
     $form_state->set('site_allows_anonymous_post', $siteAllowsAnonymousPost);
+    $siteRequiresApproval = (bool) ($siteConfig->get('site_comments_require_approval') ?? FALSE);
+    $form_state->set('site_requires_approval', $siteRequiresApproval);
 
     if (!$siteCommentsEnabled) {
       $settingsUrl = Url::fromRoute('mukurtu_protocol.comment_settings')->toString();
@@ -73,6 +75,7 @@ class ProtocolCommentSettingsForm extends FormBase {
         1 => $this->t('Enabled'),
         0 => $this->t('Disabled'),
       ),
+      '#after_build' => [[$this, 'applySiteCeilingToApproval']],
     ];
 
     $commentAccessOptions = [
@@ -120,6 +123,11 @@ class ProtocolCommentSettingsForm extends FormBase {
     }
 
     $newCommentApprovalStatus = $form_state->getValue('comments_require_approval');
+    // Site-wide approval requirement is a floor — protocol cannot disable it.
+    $siteConfig = \Drupal::config('mukurtu_protocol.comment_settings');
+    if ($siteConfig->get('site_comments_require_approval')) {
+      $newCommentApprovalStatus = TRUE;
+    }
     if ($newCommentApprovalStatus == TRUE || $newCommentApprovalStatus == FALSE) {
       $protocol->setCommentRequireApproval($newCommentApprovalStatus);
     }
@@ -151,6 +159,18 @@ class ProtocolCommentSettingsForm extends FormBase {
     Cache::invalidateTags(['node_view']);
 
     $this->messenger()->addStatus($this->t('Protocol comment settings have been saved.'));
+  }
+
+  /**
+   * After-build callback to lock the approval radio when site-wide requires it.
+   */
+  public function applySiteCeilingToApproval(array $element, FormStateInterface $form_state): array {
+    if ($form_state->get('site_requires_approval')) {
+      $element[0]['#disabled'] = TRUE;
+      $settingsUrl = Url::fromRoute('mukurtu_protocol.comment_settings')->toString();
+      $element['#description'] = $this->t('Comment approval is required <a href=":url">site-wide</a>. Protocol-level approval cannot be disabled.', [':url' => $settingsUrl]);
+    }
+    return $element;
   }
 
   /**
