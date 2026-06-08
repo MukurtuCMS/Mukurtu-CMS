@@ -630,7 +630,7 @@ display:
           entity_type: node
           entity_field: type
           plugin_id: bundle
-          operator: '='
+          operator: in
           value: {  }
           group: 1
           exposed: true
