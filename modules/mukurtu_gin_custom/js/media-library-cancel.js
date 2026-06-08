@@ -8,7 +8,8 @@
 
   function syncCancelProxy() {
     var $addForm = $('.js-media-library-add-form');
-    var $buttonSet = $('.ui-dialog-buttonpane .ui-dialog-buttonset');
+    // Scope to .media-library-widget-modal so we don't touch unrelated dialogs.
+    var $buttonSet = $('.media-library-widget-modal .ui-dialog-buttonpane .ui-dialog-buttonset');
 
     // Remove stale proxy whenever we re-evaluate.
     $buttonSet.find('.js-mukurtu-cancel-proxy').remove();
@@ -30,6 +31,20 @@
 
     $buttonSet.prepend($proxy);
   }
+
+  // Re-inject the Cancel proxy after each button-pane rebuild triggered by
+  // dialog.ajax.js. dialog:aftercreate bubbles, so we can listen on window.
+  // We then attach a per-dialog listener for dialogButtonsChange (which does
+  // NOT bubble), deferring one tick so jQuery UI finishes rebuilding the pane.
+  window.addEventListener('dialog:aftercreate', function (e) {
+    if (!$(e.target).closest('.media-library-widget-modal').length) {
+      return;
+    }
+    syncCancelProxy();
+    e.target.addEventListener('dialogButtonsChange', function () {
+      setTimeout(syncCancelProxy, 0);
+    });
+  });
 
   // Inject an Edit link at the end of each media library table row.
   // The checkbox column is visually hidden but kept in the accessibility tree
