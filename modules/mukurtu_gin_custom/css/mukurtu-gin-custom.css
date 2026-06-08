@@ -354,6 +354,12 @@ counterpart, if one exists. */
     margin: 0 !important;
 }
 
+/* WCAG 2.4.7: visible focus ring on Insert Selected (and Cancel) in the dialog footer. */
+.media-library-widget-modal .ui-dialog-buttonpane .button:focus-visible {
+  outline: 3px solid var(--gin-color-primary, #0036b1);
+  outline-offset: 2px;
+}
+
 /* Make media library table rows feel clickable — JS delegates the click to the row's checkbox. */
 .media-library-widget-modal .views-table tbody tr {
     cursor: pointer;
