@@ -1,3 +1,4 @@
+@charset "UTF-8";
 /*! See https://eduardoboucas.github.io/include-media/ for detailed
 documentation on how to use @include media(). */
 /*! Drupal visually-hidden CSS class that hides content from visual users and
@@ -1373,10 +1374,6 @@ details.form-wrapper summary + div {
     block-size: auto;
   }
 }
-.horizontal-card__media .media--remote_video iframe {
-  block-size: auto;
-  aspect-ratio: 16/9;
-}
 .horizontal-card__media video {
   max-block-size: 18rem;
 }
@@ -2114,11 +2111,171 @@ details.form-wrapper summary + div {
     grid-column: 2/-2;
   }
 }
+.local-tasks__inner {
+  grid-column: 1/-1;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  gap: var(--gutter);
+}
+@media (min-width: 90rem) {
+  .local-tasks__inner {
+    grid-column: 2/-2;
+  }
+}
+@media (min-width: 60rem) {
+  .local-tasks__inner {
+    display: contents;
+  }
+}
+.local-tasks__inner ul {
+  -webkit-box-flex: 1;
+      -ms-flex: 1;
+          flex: 1;
+  -webkit-padding-start: 0;
+          padding-inline-start: 0;
+}
+.local-tasks__tabs {
+  -webkit-box-flex: 1;
+      -ms-flex: 1;
+          flex: 1;
+  min-width: 0;
+}
+@media (min-width: 60rem) {
+  .local-tasks__tabs {
+    grid-column: 1/span 8;
+    align-self: center;
+  }
+}
+@media (min-width: 90rem) {
+  .local-tasks__tabs {
+    grid-column: 2/span 8;
+  }
+}
+.local-tasks__export {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -ms-flex-negative: 0;
+      flex-shrink: 0;
+  gap: var(--v-space-4xs);
+  -webkit-box-pack: end;
+      -ms-flex-pack: end;
+          justify-content: flex-end;
+}
+@media (min-width: 60rem) {
+  .local-tasks__export {
+    grid-column: 9/span 4;
+    align-self: center;
+  }
+}
+@media (min-width: 90rem) {
+  .local-tasks__export {
+    grid-column: 10/span 4;
+  }
+}
+.local-tasks .export-list-dropdown {
+  display: block;
+  position: relative;
+}
+.local-tasks .export-list-dropdown summary {
+  display: block;
+  margin: 0;
+  font-family: var(--font-display-face);
+  font-size: var(--font-size-2xs);
+  font-weight: var(--text-bold);
+  line-height: var(--line-height-m);
+  padding-block: 0;
+  padding-inline: var(--v-space-5xs);
+  border: none;
+  -webkit-box-shadow: inset 0 0 0 1px var(--brand-primary);
+          box-shadow: inset 0 0 0 1px var(--brand-primary);
+  background-color: var(--color-white);
+  color: var(--brand-primary);
+  cursor: pointer;
+  list-style: none;
+  white-space: nowrap;
+}
+.local-tasks .export-list-dropdown summary::-webkit-details-marker {
+  display: none;
+}
+.local-tasks .export-list-dropdown summary::after {
+  content: " ▾";
+  font-size: var(--font-size-3xs);
+}
+.local-tasks .export-list-dropdown summary:hover, .local-tasks .export-list-dropdown summary:focus {
+  background-color: var(--brand-primary);
+  color: var(--color-white);
+  -webkit-box-shadow: none;
+          box-shadow: none;
+}
+.local-tasks .export-list-dropdown__menu {
+  position: absolute;
+  inset-inline-end: 0;
+  inset-block-start: 100%;
+  z-index: 100;
+  min-width: 12rem;
+  background-color: var(--color-white);
+  border: 1px solid var(--brand-primary);
+  -webkit-box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+  padding-block: var(--v-space-5xs);
+}
+.local-tasks .export-list-dropdown__menu ul {
+  -webkit-padding-start: 0;
+          padding-inline-start: 0;
+  margin: 0;
+}
+.local-tasks .export-list-dropdown__menu li {
+  display: block;
+  margin: 0;
+}
+.local-tasks .export-list-dropdown__menu a {
+  display: block;
+  padding-block: var(--v-space-5xs);
+  padding-inline: var(--v-space-4xs);
+  font-size: var(--font-size-2xs);
+  text-decoration: none;
+  color: var(--brand-primary);
+}
+.local-tasks .export-list-dropdown__menu a:hover, .local-tasks .export-list-dropdown__menu a:focus {
+  background-color: var(--brand-light);
+}
+.local-tasks:not(.glb-body .local-tasks) .export-list-dropdown__menu a {
+  border: none;
+  background-color: transparent;
+  -webkit-transition: none;
+  transition: none;
+  padding-block: var(--v-space-6xs);
+  line-height: 1.5;
+}
+.local-tasks:not(.glb-body .local-tasks) .export-list-dropdown__menu a:hover, .local-tasks:not(.glb-body .local-tasks) .export-list-dropdown__menu a:focus {
+  background-color: var(--brand-light);
+  color: var(--brand-primary);
+}
 .local-tasks li {
   -webkit-margin-end: var(--v-space-6xs);
           margin-inline-end: var(--v-space-6xs);
   list-style-type: none;
   display: inline-block;
+}
+
+.local-tasks:not(.glb-body .local-tasks) .local-tasks__export > a {
+  padding-block: 0;
+  border: none;
+  -webkit-box-shadow: inset 0 0 0 1px var(--brand-primary);
+          box-shadow: inset 0 0 0 1px var(--brand-primary);
+  line-height: var(--line-height-m);
+}
+.local-tasks:not(.glb-body .local-tasks) .local-tasks__export > a:hover, .local-tasks:not(.glb-body .local-tasks) .local-tasks__export > a:active, .local-tasks:not(.glb-body .local-tasks) .local-tasks__export > a:focus {
+  -webkit-box-shadow: none;
+          box-shadow: none;
 }
 
 .local-actions {
@@ -3497,15 +3654,6 @@ body.is-fixed {
 .vertical-card__content-header h2 {
   font-size: var(--card-font-size);
   font-weight: var(--text-bold);
-}
-.vertical-card__media .media--remote_video {
-  width: 100%;
-  aspect-ratio: 16/9;
-  overflow: hidden;
-}
-.vertical-card__media .media--remote_video iframe {
-  width: 100%;
-  height: 100%;
 }
 .vertical-card--no-border {
   -webkit-padding-after: 0;

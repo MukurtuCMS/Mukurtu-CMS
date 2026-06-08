@@ -4,7 +4,6 @@ namespace Drupal\mukurtu_protocol;
 
 use Drupal\comment\CommentAccessControlHandler;
 use Drupal\comment\CommentInterface;
-use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityPublishedInterface;
@@ -13,6 +12,7 @@ use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
 use Drupal\mukurtu_protocol\CulturalProtocols;
+use Drupal\mukurtu_protocol\MukurtuCommentFieldItemList;
 
 /**
  * Defines the access control handler for the comment entity type.
@@ -28,56 +28,81 @@ class MukurtuCommentAccessControlHandler extends CommentAccessControlHandler {
     assert($entity instanceof CommentInterface);
     assert($entity instanceof EntityPublishedInterface);
 
+    // For view, allow protocol-level comment admins to see unpublished comments.
+    if ($operation === 'view') {
+      $commented_entity = $entity->getCommentedEntity();
+      if ($commented_entity && CulturalProtocols::hasSiteOrProtocolPermission($commented_entity, 'administer comments', $account, FALSE)) {
+        return AccessResult::allowed()
+          ->cachePerPermissions()
+          ->addCacheableDependency($entity)
+          ->addCacheableDependency($commented_entity);
+      }
+      return parent::checkAccess($entity, $operation, $account);
+    }
+
+    // For update/delete, grant access to protocol-level comment admins on the
+    // entity being commented on. This intentionally allows protocol stewards to
+    // edit or delete any comment (including published ones by other users) on
+    // their protocol's content. Site-wide admins fall through to parent(), which
+    // grants them access via the 'administer comments' permission.
+    if (in_array($operation, ['update', 'delete'])) {
+      $commented_entity = $entity->getCommentedEntity();
+      if ($commented_entity && CulturalProtocols::hasSiteOrProtocolPermission($commented_entity, 'administer comments', $account, FALSE)) {
+        return AccessResult::allowed()
+          ->cachePerPermissions()
+          ->addCacheableDependency($entity)
+          ->addCacheableDependency($commented_entity);
+      }
+      return parent::checkAccess($entity, $operation, $account);
+    }
+
     // Mukurtu is only concerned with altering the approval behavior.
     // All other operations can be handled by the stock handler.
     if ($operation != 'approve') {
       return parent::checkAccess($entity, $operation, $account);
     }
 
-    // Site comment admins trump protocol level settings. If they have
-    // site comment admin we can skip the protocol checks.
-    $site_comment_admin = $account->hasPermission('administer comments');
-    if ($site_comment_admin && !$entity->isPublished()) {
-      return AccessResult::allowed()
-        ->cachePerPermissions()
-        ->addCacheableDependency($entity);
-    }
-
-    // Fall back to normal comment access checks if the entity doesn't have a
-    // protocol field.
-    if (!($entity instanceof CulturalProtocolControlledInterface)) {
-      return parent::checkAccess($entity, $operation, $account);
-    }
-
-    // See if the user has protocol level comment admin.
-    $protocols = $entity->getProtocolEntities();
-    $protocol_comment_admin = TRUE;
-    $cacheability = new CacheableMetadata();
-    $cacheability->addCacheableDependency($entity);
-    foreach ($protocols as $protocol) {
-      $membership = $protocol->getMembership($account);
-      if (!$membership) {
-        $protocol_comment_admin = FALSE;
-        // No membership found; tag with user:{id} so this cached result is
-        // invalidated if the user gains a protocol membership later.
-        $cacheability->addCacheTags(["user:{$account->id()}"]);
-        continue;
+    // For approve, allow protocol-level comment admins to approve unpublished
+    // comments on content they manage.
+    if (!$entity->isPublished()) {
+      $commented_entity = $entity->getCommentedEntity();
+      if ($commented_entity && CulturalProtocols::hasSiteOrProtocolPermission($commented_entity, 'administer comments', $account, FALSE)) {
+        return AccessResult::allowed()
+          ->cachePerPermissions()
+          ->addCacheableDependency($entity)
+          ->addCacheableDependency($commented_entity);
       }
-      // Carry the membership so role changes auto-invalidate this result.
-      $cacheability->addCacheableDependency($membership);
-      $protocol_comment_admin = $protocol_comment_admin && $membership->hasPermission('administer comments');
     }
 
-    return AccessResult::allowedIf($protocol_comment_admin && !$entity->isPublished())
-      ->cachePerPermissions()
-      ->addCacheableDependency($cacheability);
+    return parent::checkAccess($entity, $operation, $account);
   }
 
   /**
    * {@inheritdoc}
    */
   protected function checkCreateAccess(AccountInterface $account, array $context, $entity_bundle = NULL) {
-    return AccessResult::allowedIfHasPermission($account, 'post comments');
+    $result = AccessResult::allowedIfHasPermission($account, 'post comments');
+    if (!$result->isAllowed()) {
+      return $result;
+    }
+
+    if (!empty($context['entity_type_id']) && !empty($context['entity_id'])) {
+      $parent = \Drupal::entityTypeManager()
+        ->getStorage($context['entity_type_id'])
+        ->load($context['entity_id']);
+
+      if ($parent instanceof CulturalProtocolControlledInterface) {
+        foreach ($parent->getProtocolEntities() as $protocol) {
+          $postAccess = $protocol->getCommentPostAccess();
+          if (!empty($postAccess) && !MukurtuCommentFieldItemList::accountMatchesAccessList($account, $postAccess, $protocol)) {
+            return AccessResult::forbidden()
+              ->addCacheTags(["user:{$account->id()}"]);
+          }
+        }
+      }
+    }
+
+    return $result;
   }
 
   /**
