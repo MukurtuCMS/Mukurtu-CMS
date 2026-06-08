@@ -489,7 +489,7 @@ function mukurtu_media_update_40012(): void {
  * Sync field_thumbnail to the base thumbnail field for audio, remote_video,
  * and soundcloud media that already have a user-uploaded thumbnail.
  */
-function mukurtu_media_update_40005(&$sandbox): void {
+function mukurtu_media_update_40013(&$sandbox): void {
   $storage = \Drupal::entityTypeManager()->getStorage('media');
 
   if (!isset($sandbox['total'])) {
