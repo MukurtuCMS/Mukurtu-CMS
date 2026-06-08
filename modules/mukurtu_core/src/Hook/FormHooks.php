@@ -1285,4 +1285,37 @@ class FormHooks
             $operations["delete"]["title"] = t("Remove from group");
         }
     }
+
+    /**
+     * Implements hook_form_FORM_ID_alter() for 'comment_comment_form'.
+     *
+     * Hides the redundant "Comment" field label and the "About text formats"
+     * help link from the comment form.
+     */
+    #[Hook("form_comment_comment_form_alter")]
+    public function formCommentCommentFormAlter(
+        array &$form,
+        FormStateInterface $form_state,
+    ): void {
+        if (isset($form['comment_body']['widget'][0])) {
+            // The label lives on the text_format element at delta 0.
+            $form['comment_body']['widget'][0]['#title_display'] = 'invisible';
+            // filter_process_format() adds the help link during #process, which
+            // runs after form_alter. Use #after_build to hide it once it exists.
+            $form['comment_body']['widget'][0]['#after_build'][] = [static::class, 'hideCommentBodyFormatHelp'];
+        }
+    }
+
+    /**
+     * #after_build callback: hides the "About text formats" help link.
+     */
+    public static function hideCommentBodyFormatHelp(
+        array $element,
+        FormStateInterface $form_state,
+    ): array {
+        if (isset($element['format']['help'])) {
+            $element['format']['help']['#access'] = FALSE;
+        }
+        return $element;
+    }
 }
