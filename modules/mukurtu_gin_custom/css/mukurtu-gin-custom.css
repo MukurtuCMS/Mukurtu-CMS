@@ -290,8 +290,10 @@ counterpart, if one exists. */
     margin-bottom: 0 !important;
 }
 
-/* Hide the managed-file remove button; the Cancel button closes the dialog instead. */
-.media-library-add-form [name$="_remove_button"] {
+/* Hide both Remove button variants; the Cancel button closes the dialog instead.
+   ManagedFile uses _remove_button (underscore); AddFormBase uses -remove-button (hyphens). */
+.media-library-add-form [name$="_remove_button"],
+.media-library-add-form [name$="-remove-button"] {
     display: none;
 }
 
