@@ -290,6 +290,13 @@ counterpart, if one exists. */
     margin-bottom: 0 !important;
 }
 
+/* Hide both Remove button variants; the Cancel button closes the dialog instead.
+   ManagedFile uses _remove_button (underscore); AddFormBase uses -remove-button (hyphens). */
+.media-library-add-form [name$="_remove_button"],
+.media-library-add-form [name$="-remove-button"] {
+    display: none;
+}
+
 /* Hide the selected-media container when nothing is staged yet */
 .media-library-add-form__selected-media:empty {
     display: none !important;
@@ -345,6 +352,12 @@ counterpart, if one exists. */
     align-self: flex-end !important;
     flex-shrink: 0;
     margin: 0 !important;
+}
+
+/* WCAG 2.4.7: visible focus ring on Insert Selected (and Cancel) in the dialog footer. */
+.media-library-widget-modal .ui-dialog-buttonpane .button:focus-visible {
+  outline: 3px solid var(--gin-color-primary, #0036b1);
+  outline-offset: 2px;
 }
 
 /* Make media library table rows feel clickable — JS delegates the click to the row's checkbox. */
