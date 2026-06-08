@@ -283,6 +283,18 @@ mukurtu_protocol.manage_protocol_comment_settings:
       group:
         type: entity:protocol
 
+mukurtu_protocol.manage_protocol_unapproved_comments:
+  path: 'admin/protocols/{group}/unapproved-comments'
+  defaults:
+    _controller: '\Drupal\mukurtu_protocol\Controller\ProtocolCommentSettingsController::unapprovedComments'
+    _title_callback: '\Drupal\mukurtu_protocol\Controller\ProtocolCommentSettingsController::getUnapprovedTitle'
+  requirements:
+    _custom_access: '\Drupal\mukurtu_protocol\Controller\ProtocolCommentSettingsController::access'
+  options:
+    parameters:
+      group:
+        type: entity:protocol
+
 mukurtu_protocol.community_organization:
   path: '/admin/community-organization'
   defaults:

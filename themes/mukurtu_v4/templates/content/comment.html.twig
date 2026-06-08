@@ -1,0 +1,36 @@
+{#
+/**
+ * @file
+ * Mukurtu theme override for comments.
+ *
+ * Hides the auto-generated subject title (redundant with body) and
+ * restructures metadata and action links for a clean card layout.
+ */
+#}
+
+<article{{ attributes.addClass('js-comment', 'comment') }} aria-label="{{ comment_aria_label }}">
+  {# Hidden timestamp marker used by JS to flag new comments. #}
+  <mark class="hidden" data-comment-timestamp="{{ new_indicator_timestamp }}"></mark>
+
+  {# Permalink anchor — visually hidden but keeps #comment-N URLs working. #}
+  <span class="visually-hidden">{{ permalink }}</span>
+
+  {% if submitted %}
+    <p class="comment__meta">
+      {{ submitted }}
+      {% if parent %}
+        <span class="visually-hidden">{{ parent }}</span>
+      {% endif %}
+    </p>
+  {% endif %}
+
+  <div{{ content_attributes.addClass('comment__body') }}>
+    {{ content|without('links') }}
+  </div>
+
+  {% if content.links %}
+    <footer class="comment__actions">
+      {{ content.links }}
+    </footer>
+  {% endif %}
+</article>
