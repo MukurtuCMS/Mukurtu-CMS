@@ -477,7 +477,7 @@ display:
           group_type: group
           admin_label: ''
           plugin_id: mukurtu_node_row_actions
-          label: Operations
+          label: Actions
           exclude: false
           alter:
             alter_text: false
