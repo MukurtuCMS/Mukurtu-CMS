@@ -68,22 +68,15 @@ class NodeRowActionsField extends FieldPluginBase {
 
       // Publish / Unpublish.
       if ($node->access('update', $this->currentUser)) {
-        $token = \Drupal::csrfToken()->get('mukurtu-node-publish-' . $nid);
         if ($node->isPublished()) {
-          $links['unpublish'] = [
-            'title' => $this->t('Unpublish'),
-            'url' => Url::fromRoute('mukurtu_core.node.quick_unpublish', ['node' => $nid], [
-              'query' => ['token' => $token],
-            ]),
-          ];
+          $url = Url::fromRoute('mukurtu_core.node.quick_unpublish', ['node' => $nid]);
+          $url->setOption('query', ['token' => \Drupal::csrfToken()->get(ltrim($url->getInternalPath(), '/'))]);
+          $links['unpublish'] = ['title' => $this->t('Unpublish'), 'url' => $url];
         }
         else {
-          $links['publish'] = [
-            'title' => $this->t('Publish'),
-            'url' => Url::fromRoute('mukurtu_core.node.quick_publish', ['node' => $nid], [
-              'query' => ['token' => $token],
-            ]),
-          ];
+          $url = Url::fromRoute('mukurtu_core.node.quick_publish', ['node' => $nid]);
+          $url->setOption('query', ['token' => \Drupal::csrfToken()->get(ltrim($url->getInternalPath(), '/'))]);
+          $links['publish'] = ['title' => $this->t('Publish'), 'url' => $url];
         }
       }
 
