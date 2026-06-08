@@ -16,6 +16,19 @@
     }
   }
 
+  &__media {
+    .media--remote_video {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+
+      iframe {
+        width: 100%;
+        height: 100%;
+      }
+    }
+  }
+
   &--no-border {
     padding-block-end: 0;
     margin-block-end: 0;

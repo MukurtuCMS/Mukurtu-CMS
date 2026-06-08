@@ -148,6 +148,40 @@ interface ProtocolInterface extends MukurtuGroupInterface, ContentEntityInterfac
   public function setCommentRequireApproval($require): ProtocolInterface;
 
   /**
+   * Gets the list of user categories allowed to view comments.
+   *
+   * @return string[]
+   *   Array of values: 'anonymous', 'authenticated', 'protocol_member'.
+   */
+  public function getCommentViewAccess(): array;
+
+  /**
+   * Sets the list of user categories allowed to view comments.
+   *
+   * @param string[] $access
+   *
+   * @return \Drupal\mukurtu_protocol\Entity\ProtocolInterface
+   */
+  public function setCommentViewAccess(array $access): ProtocolInterface;
+
+  /**
+   * Gets the list of user categories allowed to leave comments.
+   *
+   * @return string[]
+   *   Array of values: 'anonymous', 'authenticated', 'protocol_member'.
+   */
+  public function getCommentPostAccess(): array;
+
+  /**
+   * Sets the list of user categories allowed to leave comments.
+   *
+   * @param string[] $access
+   *
+   * @return \Drupal\mukurtu_protocol\Entity\ProtocolInterface
+   */
+  public function setCommentPostAccess(array $access): ProtocolInterface;
+
+  /**
    * Get the communities this protocol belongs to.
    *
    * @return \Drupal\mukurtu_protocol\Entity\CommunityInterface[]
