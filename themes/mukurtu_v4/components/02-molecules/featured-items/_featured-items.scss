@@ -147,6 +147,72 @@
         padding-inline: var(--v-space-2xs);
         padding-block: var(--v-space-5xs);
       }
+
+      // Thumbnail play/pause button for .media--digital-heritage-sidebar--clean.
+      .media__thumbnail--playable {
+        position: relative;
+
+        .audio-play-button {
+          position: absolute;
+          inset: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: transparent;
+          border: none;
+          padding: 0;
+          cursor: pointer;
+          z-index: 2;
+
+          &::before {
+            content: '';
+            display: block;
+            inline-size: 3rem;
+            block-size: 3rem;
+            border-radius: 50%;
+            background: rgb(0 0 0 / 55%);
+            position: absolute;
+            transition: background 0.15s;
+          }
+
+          &:hover::before,
+          &:focus-visible::before {
+            background: rgb(0 0 0 / 75%);
+          }
+
+          &:focus-visible {
+            outline: 2px solid var(--focus-color);
+            outline-offset: -2px;
+          }
+
+          svg {
+            fill: white;
+            position: relative;
+            z-index: 1;
+          }
+
+          .audio-play-button__icon--pause {
+            display: none;
+          }
+
+          &.is-playing {
+            .audio-play-button__icon--play {
+              display: none;
+            }
+
+            .audio-play-button__icon--pause {
+              display: block;
+            }
+          }
+        }
+      }
+
+      // Collapse the hidden audio source container once controls are removed by JS.
+      .media__audio-source {
+        block-size: 0;
+        overflow: hidden;
+        flex-shrink: 0;
+      }
     }
   }
 

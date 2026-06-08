@@ -166,6 +166,7 @@ documentation on how to use @include media(). */
   --color-status-dark: #365e38;
   --color-warning-dark: #54738c;
   --color-error-dark: #924d48;
+  --color-text-secondary: #595959;
   --color-white: #fff;
   --color-black: #000;
   --color-gray: #555;
@@ -896,6 +897,10 @@ a:not(.primary-nav__menu-link) svg.tel path {
 .media-carousel .splide__slide:not(.is-active) {
   block-size: 0;
 }
+.media-carousel .splide__track {
+  -webkit-transition: block-size 0.3s ease-in-out;
+  transition: block-size 0.3s ease-in-out;
+}
 
 .thumbnail-carousel.splide:not(.is-overflow) .splide__list {
   -webkit-box-pack: center;
@@ -1221,6 +1226,76 @@ a:not(.primary-nav__menu-link) svg.tel path {
       flex-shrink: 0;
   padding-inline: var(--v-space-2xs);
   padding-block: var(--v-space-5xs);
+}
+.field--name-field-featured-content .featured-item__media .media--audio .media__thumbnail--playable,
+.field--name-field-all-related-content .field__items .featured-item__media .media--audio .media__thumbnail--playable {
+  position: relative;
+}
+.field--name-field-featured-content .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button,
+.field--name-field-all-related-content .field__items .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button {
+  position: absolute;
+  inset: 0;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  z-index: 2;
+}
+.field--name-field-featured-content .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button::before,
+.field--name-field-all-related-content .field__items .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button::before {
+  content: "";
+  display: block;
+  inline-size: 3rem;
+  block-size: 3rem;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  position: absolute;
+  -webkit-transition: background 0.15s;
+  transition: background 0.15s;
+}
+.field--name-field-featured-content .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button:hover::before, .field--name-field-featured-content .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button:focus-visible::before,
+.field--name-field-all-related-content .field__items .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button:hover::before,
+.field--name-field-all-related-content .field__items .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button:focus-visible::before {
+  background: rgba(0, 0, 0, 0.75);
+}
+.field--name-field-featured-content .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button:focus-visible,
+.field--name-field-all-related-content .field__items .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button:focus-visible {
+  outline: 2px solid var(--focus-color);
+  outline-offset: -2px;
+}
+.field--name-field-featured-content .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button svg,
+.field--name-field-all-related-content .field__items .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button svg {
+  fill: white;
+  position: relative;
+  z-index: 1;
+}
+.field--name-field-featured-content .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button .audio-play-button__icon--pause,
+.field--name-field-all-related-content .field__items .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button .audio-play-button__icon--pause {
+  display: none;
+}
+.field--name-field-featured-content .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button.is-playing .audio-play-button__icon--play,
+.field--name-field-all-related-content .field__items .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button.is-playing .audio-play-button__icon--play {
+  display: none;
+}
+.field--name-field-featured-content .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button.is-playing .audio-play-button__icon--pause,
+.field--name-field-all-related-content .field__items .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button.is-playing .audio-play-button__icon--pause {
+  display: block;
+}
+.field--name-field-featured-content .featured-item__media .media--audio .media__audio-source,
+.field--name-field-all-related-content .field__items .featured-item__media .media--audio .media__audio-source {
+  block-size: 0;
+  overflow: hidden;
+  -ms-flex-negative: 0;
+      flex-shrink: 0;
 }
 .field--name-field-featured-content .featured-item__body,
 .field--name-field-all-related-content .field__items .featured-item__body {
@@ -2160,8 +2235,13 @@ details.form-wrapper summary + div {
 .media--audio {
   inline-size: 100%;
 }
+.media--audio audio {
+  min-height: 2rem;
+  min-block-size: 2rem;
+}
 .media--audio .b-lazy {
   block-size: revert;
+  height: revert;
   min-block-size: -webkit-max-content;
   min-block-size: -moz-max-content;
   min-block-size: max-content;
@@ -2229,6 +2309,16 @@ details.form-wrapper summary + div {
   min-inline-size: -moz-min-content;
   min-inline-size: min-content;
   inline-size: 100%;
+}
+
+.media--audio .media-asset--name {
+  display: block;
+  text-align: center;
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--color-text-secondary, var(--brand-text-color, #464646));
+  -webkit-margin-before: var(--v-space-5xs);
+          margin-block-start: var(--v-space-5xs);
+  word-break: break-word;
 }
 
 .media--document__viewer {

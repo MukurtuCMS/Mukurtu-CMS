@@ -3,8 +3,9 @@
  * @file
  * Theme override to present an audio file in digital_heritage_sidebar view mode.
  *
- * Displays a thumbnail image (or fallback audio icon) above the audio player.
- * Used in featured content cards.
+ * Displays a thumbnail image (or fallback audio icon). When not on a page where
+ * skip_player is set, overlays a play/pause button and hides the native audio
+ * controls so the card renders at a fixed aspect ratio without overflow.
  *
  * Available variables:
  * - media: The media item.
@@ -12,7 +13,10 @@
  * - content: Media content.
  * - bundle: machine name of media type.
  * - attributes: HTML attributes for the containing element.
+ * - skip_player: TRUE on community/protocol pages where no player is wanted.
+ * - audio_fallback_thumbnail_url: URL of the default audio icon image.
  * @see template_preprocess_media()
+ * @see mukurtu_v4_preprocess_media__audio__digital_heritage_sidebar()
  */
 #}
 {%
@@ -26,6 +30,36 @@
 <div{{ attributes.addClass(classes) }}>
   {{ content.media_content_warnings }}
 
+  {% if not skip_player %}
+  {{ attach_library('mukurtu_v4/audio-thumbnail-player') }}
+  <div class="media__thumbnail media__thumbnail--playable">
+    {% if content.field_thumbnail['#items'] is not empty %}
+      {{ content.field_thumbnail }}
+    {% else %}
+      <div class="media__audio-fallback">
+        <img alt="audio file {{ name }}" src="{{ audio_fallback_thumbnail_url }}">
+      </div>
+    {% endif %}
+
+    <button class="audio-play-button" type="button"
+      aria-label="{{ 'Play @name'|t({'@name': name}) }}"
+      data-media-name="{{ name }}">
+      <span class="audio-play-button__icon audio-play-button__icon--play" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" focusable="false"><path d="M8 5v14l11-7z"/></svg>
+      </span>
+      <span class="audio-play-button__icon audio-play-button__icon--pause" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" focusable="false"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+      </span>
+    </button>
+  </div>
+
+  {# Audio element for JS control; native controls removed by the JS behavior. #}
+  <div class="media__audio-source" aria-hidden="true">
+    {{ content.field_media_audio_file }}
+  </div>
+
+  {% else %}
+
   <div class="media__thumbnail">
     {% if content.field_thumbnail['#items'] is not empty %}
       {{ content.field_thumbnail }}
@@ -36,9 +70,5 @@
     {% endif %}
   </div>
 
-  {% if not skip_player %}
-  <div class="media__audio-player">
-    {{ content.field_media_audio_file }}
-  </div>
   {% endif %}
 </div>
