@@ -84,8 +84,6 @@ display:
               action_id: mukurtu_export_add_to_list_action
             5:
               action_id: mukurtu_export_remove_from_list_action
-            29:
-              action_id: mukurtu_add_to_collection_action
             37:
               action_id: 'entity:unpublish_action:node'
               preconfiguration:
