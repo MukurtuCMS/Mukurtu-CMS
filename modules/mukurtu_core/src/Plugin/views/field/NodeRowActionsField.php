@@ -41,79 +41,88 @@ class NodeRowActionsField extends FieldPluginBase {
   }
 
   public function query(): void {
-    $this->ensureMyTable();
+    parent::query();
   }
 
   public function render(ResultRow $values): array|string {
-    $nid = $this->getValue($values);
-    if (empty($nid)) {
-      return '';
-    }
+    try {
+      $nid = $this->getValue($values);
+      if (empty($nid)) {
+        return '';
+      }
 
-    $node = $this->entityTypeManager->getStorage('node')->load($nid);
-    if (!$node) {
-      return '';
-    }
+      $node = $this->entityTypeManager->getStorage('node')->load($nid);
+      if (!$node) {
+        return '';
+      }
 
-    $links = [];
+      $links = [];
 
-    // Edit.
-    if ($node->access('update', $this->currentUser)) {
-      $links['edit'] = [
-        'title' => $this->t('Edit'),
-        'url' => $node->toUrl('edit-form'),
-      ];
-    }
-
-    // Publish / Unpublish.
-    if ($node->access('update', $this->currentUser)) {
-      $token = \Drupal::csrfToken()->get('mukurtu-node-publish-' . $nid);
-      if ($node->isPublished()) {
-        $links['unpublish'] = [
-          'title' => $this->t('Unpublish'),
-          'url' => Url::fromRoute('mukurtu_core.node.quick_unpublish', ['node' => $nid], [
-            'query' => ['token' => $token],
-          ]),
+      // Edit.
+      if ($node->access('update', $this->currentUser)) {
+        $links['edit'] = [
+          'title' => $this->t('Edit'),
+          'url' => $node->toUrl('edit-form'),
         ];
       }
-      else {
-        $links['publish'] = [
-          'title' => $this->t('Publish'),
-          'url' => Url::fromRoute('mukurtu_core.node.quick_publish', ['node' => $nid], [
-            'query' => ['token' => $token],
-          ]),
+
+      // Publish / Unpublish.
+      if ($node->access('update', $this->currentUser)) {
+        $token = \Drupal::csrfToken()->get('mukurtu-node-publish-' . $nid);
+        if ($node->isPublished()) {
+          $links['unpublish'] = [
+            'title' => $this->t('Unpublish'),
+            'url' => Url::fromRoute('mukurtu_core.node.quick_unpublish', ['node' => $nid], [
+              'query' => ['token' => $token],
+            ]),
+          ];
+        }
+        else {
+          $links['publish'] = [
+            'title' => $this->t('Publish'),
+            'url' => Url::fromRoute('mukurtu_core.node.quick_publish', ['node' => $nid], [
+              'query' => ['token' => $token],
+            ]),
+          ];
+        }
+      }
+
+      // Add to export list.
+      if ($this->currentUser->hasPermission('access mukurtu export')) {
+        $links['add_to_export_list'] = [
+          'title' => $this->t('Add to export list'),
+          'url' => Url::fromRoute('mukurtu_export.add_node_to_list', ['node' => $nid]),
+        ];
+        $links['remove_from_export_list'] = [
+          'title' => $this->t('Remove from export list'),
+          'url' => Url::fromRoute('mukurtu_export.remove_node_from_list', ['node' => $nid]),
         ];
       }
-    }
 
-    // Add to export list.
-    if ($this->currentUser->hasPermission('access mukurtu export')) {
-      $links['add_to_export_list'] = [
-        'title' => $this->t('Add to export list'),
-        'url' => Url::fromRoute('mukurtu_export.add_node_to_list', ['node' => $nid]),
-      ];
-      $links['remove_from_export_list'] = [
-        'title' => $this->t('Remove from export list'),
-        'url' => Url::fromRoute('mukurtu_export.remove_node_from_list', ['node' => $nid]),
-      ];
-    }
+      // Delete.
+      if ($node->access('delete', $this->currentUser)) {
+        $links['delete'] = [
+          'title' => $this->t('Delete'),
+          'url' => $node->toUrl('delete-form', ['query' => ['destination' => '/admin/content']]),
+        ];
+      }
 
-    // Delete.
-    if ($node->access('delete', $this->currentUser)) {
-      $links['delete'] = [
-        'title' => $this->t('Delete'),
-        'url' => $node->toUrl('delete-form', ['query' => ['destination' => '/admin/content']]),
+      if (empty($links)) {
+        return '';
+      }
+
+      return [
+        '#type' => 'operations',
+        '#links' => $links,
       ];
     }
-
-    if (empty($links)) {
+    catch (\Exception $e) {
+      \Drupal::logger('mukurtu_core')->error('Row actions render error for nid @nid: @msg', [
+        '@nid' => $this->getValue($values),
+        '@msg' => $e->getMessage(),
+      ]);
       return '';
     }
-
-    return [
-      '#type' => 'operations',
-      '#links' => $links,
-    ];
   }
 
 }
