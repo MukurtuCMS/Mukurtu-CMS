@@ -664,7 +664,21 @@ function mukurtu_media_update_40013(): void {
 
 /**
  * Set default video and audio thumbnails from module-bundled images.
+ *
+ * Also migrates the old 'audio' config key to 'audio_default_thumbnail' so
+ * existing sites that had a custom audio thumbnail do not lose it.
  */
 function mukurtu_media_update_40014(): void {
+  $config = \Drupal::configFactory()->getEditable('mukurtu_thumbnail.settings');
+
+  // Migrate old 'audio' key -> 'audio_default_thumbnail' before calling the
+  // helper, which skips keys that are already set.
+  $old_audio = $config->get('audio');
+  if ($old_audio && !$config->get('audio_default_thumbnail')) {
+    $config->set('audio_default_thumbnail', $old_audio);
+    $config->clear('audio');
+    $config->save();
+  }
+
   _mukurtu_media_set_default_thumbnails();
 }
