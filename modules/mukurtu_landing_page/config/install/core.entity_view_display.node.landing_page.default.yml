@@ -65,6 +65,7 @@ bundle: landing_page
 mode: default
 content: {  }
 hidden:
+  export_list_membership: true
   draft: true
   field_all_related_content: true
   field_citation: true
