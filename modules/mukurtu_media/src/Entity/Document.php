@@ -262,7 +262,7 @@ class Document extends Media implements DocumentInterface, CulturalProtocolContr
     // Set the 'thumbnail' field to our generated thumbnail.
     $defaultThumb = $this->get('field_thumbnail')->getValue()[0]['target_id'] ?? NULL;
     if ($defaultThumb) {
-      $this->thumbnail->target_id = $defaultThumb;
+      $this->set('thumbnail', ['target_id' => $defaultThumb]);
     }
     parent::preSave($storage);
   }

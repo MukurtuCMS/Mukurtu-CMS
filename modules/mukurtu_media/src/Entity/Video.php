@@ -29,7 +29,7 @@ class Video extends Media implements VideoInterface, CulturalProtocolControlledI
    */
   function getDefaultThumbnail() {
     $config = \Drupal::config('mukurtu_thumbnail.settings');
-    $defaultVideoThumbnail = $config->get('video')[0] ?? NULL;
+    $defaultVideoThumbnail = $config->get('video_default_thumbnail')[0] ?? NULL;
     return $defaultVideoThumbnail;
   }
 
@@ -194,7 +194,7 @@ class Video extends Media implements VideoInterface, CulturalProtocolControlledI
       $thumbFid = $this->getDefaultThumbnail();
     }
     if ($thumbFid) {
-      $this->thumbnail->target_id = $thumbFid;
+      $this->set('thumbnail', ['target_id' => $thumbFid]);
     }
     parent::preSave($storage);
   }

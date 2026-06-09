@@ -40,9 +40,9 @@
 <div{{ attributes.addClass(classes) }}>
   {{ content.media_content_warnings }}
 
-  {% if content.field_thumbnail['#items'] is not empty %}
+  {% if content.thumbnail['#items'] is not empty %}
     {{ content.thumbnail }}
   {% else %}
-    <img alt="video file {{ name }}" src="/profiles/mukurtu/themes/mukurtu_v4/images/video-square.png">
+    <img alt="video file {{ name }}" src="{{ base_path ~ directory }}/images/video-square.png">
   {% endif %}
 </div>
