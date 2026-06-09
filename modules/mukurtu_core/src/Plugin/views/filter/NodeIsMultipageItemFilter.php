@@ -17,10 +17,22 @@ use Drupal\Core\Form\FormStateInterface;
 class NodeIsMultipageItemFilter extends NodeBooleanExistsFilterBase {
 
   protected function getSubquery(): SelectInterface {
+    // Returns NIDs of non-first pages (delta > 0). Used with NOT IN so that
+    // non-multipage nodes are preserved alongside first-page nodes.
     return $this->database->select('multipage_item__field_pages', 'mip')
       ->fields('mip', ['field_pages_target_id'])
       ->condition('mip.deleted', 0)
-      ->condition('mip.delta', 0);
+      ->condition('mip.delta', 0, '>');
+  }
+
+  public function query(): void {
+    $value = is_array($this->value) ? reset($this->value) : $this->value;
+    if (!isset($value) || $value === self::VALUE_ANY || $value === '') {
+      return;
+    }
+    $this->ensureMyTable();
+    // Exclude non-first pages, preserving nodes not in any multipage item.
+    $this->query->addWhere($this->options['group'], "$this->tableAlias.nid", $this->getSubquery(), 'NOT IN');
   }
 
   protected function valueForm(&$form, FormStateInterface $form_state) {

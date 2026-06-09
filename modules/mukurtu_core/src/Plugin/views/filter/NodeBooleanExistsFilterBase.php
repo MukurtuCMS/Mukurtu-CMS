@@ -78,9 +78,14 @@ abstract class NodeBooleanExistsFilterBase extends FilterPluginBase {
     if (!isset($this->value) || $this->value === self::VALUE_ANY || $this->value === '') {
       return;
     }
+    // FilterPluginBase::acceptExposedInput() wraps scalar values in an array.
+    $value = is_array($this->value) ? reset($this->value) : $this->value;
+    if ($value === self::VALUE_ANY || $value === '') {
+      return;
+    }
     $this->ensureMyTable();
     $subquery = $this->getSubquery();
-    $op = ($this->value === self::VALUE_YES) ? 'IN' : 'NOT IN';
+    $op = ($value === self::VALUE_YES) ? 'IN' : 'NOT IN';
     $this->query->addWhere($this->options['group'], "$this->tableAlias.nid", $subquery, $op);
   }
 

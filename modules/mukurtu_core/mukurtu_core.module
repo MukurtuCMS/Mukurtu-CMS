@@ -499,6 +499,9 @@ function mukurtu_core_entity_presave(EntityInterface $entity) {
  * pending users are excluded.
  */
 function mukurtu_core_views_pre_build(\Drupal\views\ViewExecutable $view) {
+  if ($view->storage->get('base_table') !== 'users_field_data') {
+    return;
+  }
   if (empty($view->filter['status'])) {
     return;
   }
@@ -542,6 +545,9 @@ function mukurtu_core_views_query_alter(\Drupal\views\ViewExecutable $view, \Dru
   }
 
   if (empty($view->mukurtu_filter_pending) && empty($view->mukurtu_filter_blocked)) {
+    return;
+  }
+  if ($view->storage->get('base_table') !== 'users_field_data') {
     return;
   }
   /** @var \Drupal\views\Plugin\views\query\Sql $query */
