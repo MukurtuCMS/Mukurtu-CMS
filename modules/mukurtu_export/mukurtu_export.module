@@ -136,6 +136,9 @@ function mukurtu_export_entity_view(array &$build, \Drupal\Core\Entity\EntityInt
   if (!in_array($entity->getEntityTypeId(), ['node', 'media'])) {
     return;
   }
+  if ($view_mode !== 'full') {
+    return;
+  }
   if (!\Drupal::currentUser()->hasPermission('access mukurtu export')) {
     return;
   }
