@@ -260,36 +260,43 @@ function mukurtu_core_form_user_admin_settings_alter(&$form, FormStateInterface 
 /**
  * Validation handler for the account settings form.
  *
- * Prevents saving setting combinations where "May" or "Must" generate-password
- * mode is paired with email verification or admin-approval registration. When
- * "Administrators only" is selected, genpass mode is N/A and any value is
- * accepted (it has no effect since there is no self-registration form).
+ * Genpass values and their validity:
+ *   0 = "Users must enter a password"   — valid only when verify_mail is OFF.
+ *   1 = "Users may enter a password"    — valid only when verify_mail is OFF
+ *                                         AND register is not admin_approval.
+ *   2 = "Users cannot enter a password" — always valid (the only valid choice
+ *                                         when verify_mail is ON).
+ *
+ * admin_only: no self-registration form exists, so genpass has no effect and
+ * any value is accepted.
  */
 function mukurtu_core_user_admin_settings_validate(&$form, FormStateInterface $form_state) {
   $genpass_mode = (int) $form_state->getValue('genpass_mode');
   $verify_mail = (bool) $form_state->getValue('user_email_verification');
   $register = $form_state->getValue('user_register');
 
-  if ($genpass_mode !== 1 && $genpass_mode !== 2) {
-    return;
-  }
-
-  // admin_only: no self-registration exists, so genpass mode is irrelevant.
+  // admin_only has no self-registration, so genpass mode is irrelevant.
   if ($register === 'admin_only') {
     return;
   }
 
-  if ($verify_mail) {
+  // When email verification is on, only value 2 is valid. Values 0 and 1
+  // both require a password field that Drupal core hides in this mode.
+  if ($verify_mail && $genpass_mode !== 2) {
     $form_state->setError(
       $form['genpass_config_registration']['genpass_mode'],
-      t('"May" and "Must" password generation cannot be combined with email verification. Select "Cannot" generate password, or disable email verification.')
+      t('"Users cannot enter a password on registration" is the only valid choice when email verification is enabled.')
     );
+    return;
   }
 
-  if ($register === 'visitors_admin_approval') {
+  // With admin approval, only value 0 is valid. Values 1 and 2 rely on
+  // generating or omitting a password in ways that conflict with the
+  // pending-approval workflow.
+  if ($register === 'visitors_admin_approval' && $genpass_mode !== 0) {
     $form_state->setError(
       $form['genpass_config_registration']['genpass_mode'],
-      t('"May" and "Must" password generation cannot be used when administrator approval is required. Select "Cannot" generate password, or change "Who can register accounts?" to Visitors.')
+      t('"Users must enter a password on registration" is the only valid choice when administrator approval is required.')
     );
   }
 }

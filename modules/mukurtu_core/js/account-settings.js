@@ -2,50 +2,71 @@
   'use strict';
 
   /**
-   * Enforces the email-verification / generate-password mutual exclusion.
+   * Enforces generate-password / email-verification mutual exclusion.
    *
-   * When email verification is ON:
-   *   - "May" and "Must" generate-password modes are disabled (Cannot is the
-   *     only valid choice).
+   * Genpass values:
+   *   0 = "Users must enter a password"    (system cannot generate)
+   *   1 = "Users may enter a password"     (system may generate)
+   *   2 = "Users cannot enter a password"  (system must generate)
    *
-   * When "May" or "Must" is selected:
-   *   - The email verification checkbox is disabled.
-   *
-   * "Visitors, but administrator approval is required" also makes May and Must
-   * unavailable, since that combination is not supported.
-   *
-   * "Administrators only" is N/A for generate-password — no restriction.
+   * Rules:
+   *   Email verification ON  → only value 2 is valid; auto-select it.
+   *   Admin approval         → only value 0 is valid; auto-select it.
+   *   Value 0 or 1 selected  → email verification cannot be turned on.
+   *   Value 1 or 2 selected  → admin-approval cannot be selected.
    */
   Drupal.behaviors.mukurtuAccountSettings = {
     attach(context) {
-      // Attach once per page, keyed to the verify-mail checkbox. If that
-      // element doesn't exist we're on a different form and can bail early.
       once('mukurtu-account-settings', '#edit-user-email-verification', context).forEach((verifyMailEl) => {
         const registerAdminApproval = document.getElementById('edit-user-register-visitors-admin-approval');
-        const genpassCannot = document.getElementById('edit-genpass-mode-0');
-        const genpassMay = document.getElementById('edit-genpass-mode-1');
-        const genpassMust = document.getElementById('edit-genpass-mode-2');
+        const genpassV0 = document.getElementById('edit-genpass-mode-0'); // must enter
+        const genpassV1 = document.getElementById('edit-genpass-mode-1'); // may enter
+        const genpassV2 = document.getElementById('edit-genpass-mode-2'); // cannot enter
+
+        function setDisabled(el, state) {
+          if (el) el.disabled = state;
+        }
 
         function syncState() {
           const verifyChecked = verifyMailEl.checked;
           const approvalRequired = registerAdminApproval?.checked ?? false;
-          const genpassOptional = (genpassMay?.checked || genpassMust?.checked) ?? false;
 
-          // May/Must are invalid when email verification is on, or when admin
-          // approval is required (regardless of verify setting).
-          const blockGenpass = verifyChecked || approvalRequired;
-          if (genpassMay) genpassMay.disabled = blockGenpass;
-          if (genpassMust) genpassMust.disabled = blockGenpass;
+          if (verifyChecked) {
+            // Email verification ON: only value 2 ("cannot enter") is valid.
+            setDisabled(genpassV0, true);
+            setDisabled(genpassV1, true);
+            setDisabled(genpassV2, false);
+            if ((genpassV0?.checked || genpassV1?.checked) && genpassV2) {
+              genpassV2.checked = true;
+            }
+          }
+          else if (approvalRequired) {
+            // Admin approval (verify OFF): only value 0 ("must enter") is valid.
+            setDisabled(genpassV0, false);
+            setDisabled(genpassV1, true);
+            setDisabled(genpassV2, true);
+            if ((genpassV1?.checked || genpassV2?.checked) && genpassV0) {
+              genpassV0.checked = true;
+            }
+          }
+          else {
+            // Open visitor registration with verify OFF: all values valid.
+            setDisabled(genpassV0, false);
+            setDisabled(genpassV1, false);
+            setDisabled(genpassV2, false);
+          }
 
-          // When May or Must is active, lock out email verification and the
-          // admin-approval radio to prevent saving an invalid combination.
-          verifyMailEl.disabled = genpassOptional;
-          if (registerAdminApproval) registerAdminApproval.disabled = genpassOptional;
+          // Re-evaluate state after any auto-switch above.
+          const mustOrMayEnter = genpassV0?.checked || genpassV1?.checked || false;
+          const mayOrCannotEnter = genpassV1?.checked || genpassV2?.checked || false;
+
+          // Values 0 or 1 are incompatible with email verification being on.
+          verifyMailEl.disabled = mustOrMayEnter;
+          // Values 1 or 2 are incompatible with admin approval being selected.
+          setDisabled(registerAdminApproval, mayOrCannotEnter);
         }
 
-        // Include genpassCannot so switching back from May/Must to Cannot
-        // re-evaluates and re-enables the verify checkbox.
-        [verifyMailEl, registerAdminApproval, genpassCannot, genpassMay, genpassMust]
+        [verifyMailEl, registerAdminApproval, genpassV0, genpassV1, genpassV2]
           .filter(Boolean)
           .forEach(el => el.addEventListener('change', syncState));
 
