@@ -40,6 +40,10 @@ services:
           # all available drupal/core versions and no patched release exists yet.
           # Remove this once a clean 11.2.x release is available.
           composer config audit.block-insecure false
+          # Pin composer/installers to ^2.0 so the cached vendor directory already
+          # has v2.x; this prevents PHP 8.x deprecation notices during build-phase
+          # composer update runs (where v1.x would otherwise be the active plugin).
+          php -r "\$d=json_decode(file_get_contents('composer.json'),true); \$d['require']['composer/installers']='^2.0'; file_put_contents('composer.json',json_encode(\$d,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES).PHP_EOL);"
           # Add our own local checkout repository instead. This will use the
           # local directory as the source, copying it into the final location.
           composer config repositories.local-dev path $TUGBOAT_ROOT
@@ -109,6 +113,7 @@ services:
             // no longer declares it as a dependency; pin it explicitly so
             // the transitive-dependency resolver does not drop it.
             \$d['require']['doctrine/annotations'] = '^2.0';
+            \$d['require']['composer/installers'] = '^2.0';
             file_put_contents('composer.json',
               json_encode(\$d, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL);
           "

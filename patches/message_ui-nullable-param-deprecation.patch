@@ -1,0 +1,12 @@
+diff --git a/src/Plugin/Action/SaveMessage.php b/src/Plugin/Action/SaveMessage.php
+--- a/src/Plugin/Action/SaveMessage.php
++++ b/src/Plugin/Action/SaveMessage.php
+@@ -29,7 +29,7 @@
+   /**
+    * {@inheritdoc}
+    */
+-  public function access($object, AccountInterface $account = NULL, $return_as_object = FALSE) {
++  public function access($object, ?AccountInterface $account = NULL, $return_as_object = FALSE) {
+     return $object->access('update', $account, $return_as_object);
+   }
+
