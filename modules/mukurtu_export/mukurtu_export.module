@@ -120,6 +120,9 @@ function mukurtu_export_entity_extra_field_info() {
   ];
   $bundle_info = \Drupal::service('entity_type.bundle.info');
   foreach (array_keys($bundle_info->getBundleInfo('node')) as $bundle) {
+    if ($bundle === 'landing_page') {
+      continue;
+    }
     $extra['node'][$bundle]['display']['export_list_membership'] = $field_info;
   }
   foreach (array_keys($bundle_info->getBundleInfo('media')) as $bundle) {
