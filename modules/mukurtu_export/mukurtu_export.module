@@ -207,6 +207,9 @@ function mukurtu_export_preprocess_block(&$variables) {
   if (!$node instanceof \Drupal\node\NodeInterface) {
     return;
   }
+  if ($node->bundle() === 'landing_page') {
+    return;
+  }
   $variables['export_button'] = [
     '#type' => 'link',
     '#title' => t('Add to export list'),
