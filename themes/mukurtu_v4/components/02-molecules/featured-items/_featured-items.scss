@@ -83,8 +83,7 @@
     // Images are left beneath the overlay so clicking them navigates to the content.
     video,
     audio,
-    .media--remote_video,
-    .media__audio-player {
+    .media--remote_video {
       position: relative;
       z-index: 1;
     }
@@ -111,7 +110,6 @@
       flex-direction: column;
       overflow: hidden;
       background: var(--brand-secondary-accent);
-      padding-block-start: var(--v-space-4xs);
 
       .media__thumbnail {
         flex: 1;
@@ -140,12 +138,6 @@
             object-fit: contain;
           }
         }
-      }
-
-      .media__audio-player {
-        flex-shrink: 0;
-        padding-inline: var(--v-space-2xs);
-        padding-block: var(--v-space-5xs);
       }
 
       // Thumbnail play/pause button for .media--digital-heritage-sidebar--clean.
