@@ -53,6 +53,12 @@
     var $table = $('.media-library-widget-modal .views-table');
     if (!$table.length) return;
 
+    // WCAG 4.1.2: role=grid is required for aria-selected on <tr> rows to be
+    // announced correctly by NVDA/JAWS (plain <table> role does not expose it).
+    if (!$table.attr('role')) {
+      $table.attr('role', 'grid');
+    }
+
     // Add a header cell for the edit column if not already present.
     var $thead = $table.find('thead tr');
     if (!$thead.find('.mukurtu-edit-col').length) {

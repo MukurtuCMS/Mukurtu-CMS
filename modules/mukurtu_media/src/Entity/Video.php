@@ -194,7 +194,7 @@ class Video extends Media implements VideoInterface, CulturalProtocolControlledI
       $thumbFid = $this->getDefaultThumbnail();
     }
     if ($thumbFid) {
-      $this->thumbnail->target_id = $thumbFid;
+      $this->set('thumbnail', ['target_id' => $thumbFid]);
     }
     parent::preSave($storage);
   }
