@@ -1218,7 +1218,7 @@ function mukurtu_core_update_40037(): void {
 /**
  * Update manage all content view: add administrator site-role and empty_table.
  */
-function mukurtu_core_update_40035(): void {
+function mukurtu_core_update_40038(): void {
   $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_manage_all_content');
   if ($config->isNew()) {
     return;

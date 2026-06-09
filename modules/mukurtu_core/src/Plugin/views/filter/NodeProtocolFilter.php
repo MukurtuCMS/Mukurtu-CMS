@@ -53,11 +53,10 @@ class NodeProtocolFilter extends InOperator {
     // Match nodes whose protocols column contains any selected protocol ID.
     // The column stores pipe-delimited IDs like |1| |3|.
     $this->ensureMyTable();
-    $or = $this->query->getQuery()->orConditionGroup();
+    $or_group = $this->query->setWhereGroup('OR');
     foreach ($this->value as $pid) {
-      $or->condition("$this->tableAlias.field_cultural_protocols__protocols", '%|' . $pid . '|%', 'LIKE');
+      $this->query->addWhere($or_group, "$this->tableAlias.field_cultural_protocols__protocols", '%|' . $pid . '|%', 'LIKE');
     }
-    $this->query->addWhere($this->options['group'], $or);
   }
 
 }
