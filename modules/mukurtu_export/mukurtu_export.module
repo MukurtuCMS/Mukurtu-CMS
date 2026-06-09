@@ -55,7 +55,7 @@ function mukurtu_export_entity_operation(\Drupal\Core\Entity\EntityInterface $en
   if (!\Drupal::currentUser()->hasPermission('access mukurtu export')) {
     return [];
   }
-  return [
+  $operations = [
     'add_to_export_list' => [
       'title' => t('Add to export list'),
       'url' => \Drupal\Core\Url::fromRoute('mukurtu_export.add_item_to_list', [
@@ -67,6 +67,14 @@ function mukurtu_export_entity_operation(\Drupal\Core\Entity\EntityInterface $en
       'weight' => 50,
     ],
   ];
+  if ($entity->getEntityTypeId() === 'node') {
+    $operations['export'] = [
+      'title' => t('Export'),
+      'url' => \Drupal\Core\Url::fromRoute('mukurtu_export.start_adhoc_node', ['node' => $entity->id()]),
+      'weight' => 55,
+    ];
+  }
+  return $operations;
 }
 
 /**
@@ -226,6 +234,12 @@ function mukurtu_export_preprocess_block(&$variables) {
       'query' => ['destination' => \Drupal::request()->getRequestUri()],
     ]),
     '#attributes' => [],
+  ];
+  $variables['export_adhoc_button'] = [
+    '#type' => 'link',
+    '#title' => t('Export'),
+    '#url' => \Drupal\Core\Url::fromRoute('mukurtu_export.start_adhoc_node', ['node' => $node->id()]),
+    '#attributes' => ['class' => ['button', 'button--small']],
   ];
 
   // Find which export lists already contain this node.

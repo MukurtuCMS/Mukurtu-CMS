@@ -44,3 +44,23 @@ mukurtu_export.add_item_to_list:
     _form: 'Drupal\mukurtu_export\Form\ExportListAddItemForm'
   requirements:
     _permission: 'access mukurtu export'
+
+mukurtu_export.start_adhoc_node:
+  path: '/admin/export/start-adhoc/{node}'
+  defaults:
+    _title: 'Export'
+    _controller: 'Drupal\mukurtu_export\Controller\AdHocExportStartController::startNode'
+  options:
+    parameters:
+      node:
+        type: entity:node
+  requirements:
+    _permission: 'access mukurtu export'
+
+mukurtu_export.start_adhoc_bulk:
+  path: '/admin/export/start-adhoc-bulk/{view_id}/{display_id}'
+  defaults:
+    _title: 'Export'
+    _form: 'Drupal\mukurtu_export\Form\AdHocExportItemsForm'
+  requirements:
+    _permission: 'access mukurtu export'
