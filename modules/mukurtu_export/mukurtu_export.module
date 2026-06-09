@@ -4,13 +4,6 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 
 /**
- * Implements hook_entity_type_alter().
- */
-function mukurtu_export_entity_type_alter(array &$entity_types) {
-  //dpm($entity_types['node']);
-}
-
-/**
  * Implements hook_preprocess_flag().
  *
  * Replaces the "Add to export list" flag link with a link to the export list
@@ -281,7 +274,7 @@ function mukurtu_export_preprocess_block(&$variables) {
       'menu' => [
         '#type' => 'html_tag',
         '#tag' => 'div',
-        '#attributes' => ['class' => ['export-list-dropdown__menu']],
+        '#attributes' => ['class' => ['export-list-dropdown__menu'], 'role' => 'list'],
         'list' => [
           '#theme' => 'item_list',
           '#items' => $list_items,

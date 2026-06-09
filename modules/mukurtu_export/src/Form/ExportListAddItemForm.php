@@ -80,9 +80,11 @@ class ExportListAddItemForm extends FormBase {
     $form['new_list_name'] = [
       '#type' => 'textfield',
       '#title' => $this->t('New list name'),
+      '#description' => $this->t('Required when "Create a new list" is selected.'),
       '#maxlength' => 255,
       '#states' => [
         'visible' => [':input[name="export_list_id"]' => ['value' => '_new']],
+        'required' => [':input[name="export_list_id"]' => ['value' => '_new']],
       ],
     ];
 

@@ -45,19 +45,3 @@ function mukurtu_export_update_40004() {
   }
 }
 
-/**
- * Add "Add to export list" bulk action to the manage content view.
- */
-function mukurtu_export_update_40003() {
-  $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_manage_all_content');
-  if ($config->isNew()) {
-    return;
-  }
-  $actions = $config->get('display.mukurtu_manage_content.display_options.fields.views_bulk_operations_bulk_form.selected_actions') ?? [];
-  $action_ids = array_column($actions, 'action_id');
-  if (!in_array('mukurtu_export_add_to_list_action', $action_ids)) {
-    $actions[40] = ['action_id' => 'mukurtu_export_add_to_list_action'];
-    $config->set('display.mukurtu_manage_content.display_options.fields.views_bulk_operations_bulk_form.selected_actions', $actions);
-    $config->save();
-  }
-}
