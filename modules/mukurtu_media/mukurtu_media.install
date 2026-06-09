@@ -488,7 +488,7 @@ function mukurtu_media_update_40012(): void {
 /**
  * Create media_assets and carousel_thumbnail view displays for SoundCloud.
  */
-function mukurtu_media_update_40005(): void {
+function mukurtu_media_update_40013(): void {
   $storage = \Drupal::service('config.storage');
 
   $media_assets = [
