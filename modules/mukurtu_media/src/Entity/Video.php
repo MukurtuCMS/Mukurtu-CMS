@@ -9,6 +9,8 @@ use Drupal\mukurtu_core\Entity\PeopleInterface;
 use Drupal\mukurtu_core\Entity\PeopleTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
+use Drupal\Component\Utility\Environment;
+use Drupal\Core\StringTranslation\ByteSizeMarkup;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\file\Entity\File;
@@ -60,7 +62,7 @@ class Video extends Media implements VideoInterface, CulturalProtocolControlledI
 
     $definitions['field_media_video_file'] = BaseFieldDefinition::create('file')
       ->setLabel(t('Video file'))
-      ->setDescription(t('Supported formats: mp4, webm, ogv.	</br>Select "Choose File" to upload a video.'))
+      ->setDescription(t('Supported formats: mp4, webm, ogv. <br />Maximum file size: @size.<br />Select "Choose File" to upload a video.', ['@size' => ByteSizeMarkup::create(Environment::getUploadMaxSize())]))
       ->setDefaultValue('')
       ->setSettings([
         'file_extensions' => 'mp4 webm ogv',
@@ -82,7 +84,7 @@ class Video extends Media implements VideoInterface, CulturalProtocolControlledI
 
     $definitions['field_media_tags'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Media Tags'))
-      ->setDescription(t('Media tags are used to label media assets to help find them within the media library. They are also used to trigger taxonomy based media content warnings.	</br>Include as many media tags as needed. Select from existing media tags or add new ones.'))
+      ->setDescription(t('Media tags are used to label media assets to help find them within the media library. They are also used to trigger taxonomy based media content warnings.	<br />Include as many media tags as needed. Select from existing media tags or add new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -107,7 +109,7 @@ class Video extends Media implements VideoInterface, CulturalProtocolControlledI
 
     $definitions['field_people'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('People'))
-      ->setDescription(t('A person or people present or referenced in the document. This is used to trigger deceased person media content warnings.	</br>As you type, names of existing people will be displayed. </br>Include as many media tags as needed. Select from existing media tags or add new ones.'))
+      ->setDescription(t('A person or people present or referenced in the document. This is used to trigger deceased person media content warnings.	<br />As you type, names of existing people will be displayed. <br />Include as many media tags as needed. Select from existing media tags or add new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -132,7 +134,7 @@ class Video extends Media implements VideoInterface, CulturalProtocolControlledI
 
     $definitions['field_thumbnail'] = BaseFieldDefinition::create('image')
       ->setLabel(t('Thumbnail'))
-      ->setDescription(t('Videos are usually represented by an interactive video player, with a thumbnail image used in certain contexts. When the thumbnail image is used, you can provide your own image instead of the generic thumbnail. A thumbnail image does not usually need to be provided.	</br>Select "Choose File" to upload a thumbnail image.'))
+      ->setDescription(t('Videos are usually represented by an interactive video player, with a thumbnail image used in certain contexts. When the thumbnail image is used, you can provide your own image instead of the generic thumbnail. A thumbnail image does not usually need to be provided.	<br />Select "Choose File" to upload a thumbnail image.'))
       ->setSettings([
         'alt_field' => TRUE,
         'alt_field_required' => TRUE,
