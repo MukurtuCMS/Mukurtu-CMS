@@ -44,7 +44,7 @@ class AdHocExportStartController extends ControllerBase {
       throw new AccessDeniedHttpException();
     }
 
-    $form_data = $this->getFormData($view_id, $display_id);
+    $form_data = $this->getTempstoreData($view_id, $display_id);
 
     if (empty($form_data['list'])) {
       $this->messenger()->addWarning($this->t('No items selected for export.'));
