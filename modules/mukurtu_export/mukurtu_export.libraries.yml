@@ -1,0 +1,6 @@
+export_list_dropdown:
+  version: VERSION
+  js:
+    js/export-list-dropdown.js: {}
+  dependencies:
+    - core/drupal

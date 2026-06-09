@@ -124,7 +124,7 @@ third_party_settings:
         - field_coverage
         - field_location
         - field_coverage_description
-        - field_related_content
+        - field_all_related_content
       label: 'Additional Information'
       parent_name: group_primary_fields
       region: content
@@ -386,11 +386,11 @@ content:
     third_party_settings: {  }
     weight: 3
     region: content
-  field_related_content:
+  field_all_related_content:
     type: entity_reference_entity_view
     label: above
     settings:
-      view_mode: browse
+      view_mode: featured
       link: false
     third_party_settings: {  }
     weight: 39
@@ -457,7 +457,7 @@ content:
     region: content
 hidden:
   draft: true
-  field_all_related_content: true
+  field_related_content: true
   field_communities: true
   field_content_type: true
   field_cultural_protocols: true

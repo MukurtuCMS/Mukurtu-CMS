@@ -91,6 +91,11 @@ class SiteAndMukurtuRole extends AccessPluginBase implements CacheableDependency
    * {@inheritdoc}
    */
   public function access(AccountInterface $account) {
+    // Users who can bypass node access (UID 1, administrators) always pass.
+    if ($account->hasPermission('bypass node access')) {
+      return TRUE;
+    }
+
     // Check site roles first.
     $requiredRoles['site'] = array_filter($this->options['site-role']);
     if (!empty($requiredRoles['site'])) {
