@@ -682,3 +682,19 @@ function mukurtu_media_update_40014(): void {
 
   _mukurtu_media_set_default_thumbnails();
 }
+
+/**
+ * Re-save all video media entities to apply the corrected default thumbnail.
+ */
+function mukurtu_media_update_40015(): void {
+  $mids = \Drupal::entityQuery('media')
+    ->condition('bundle', 'video')
+    ->accessCheck(FALSE)
+    ->execute();
+  foreach ($mids as $mid) {
+    $media = \Drupal\media\Entity\Media::load($mid);
+    if ($media) {
+      $media->save();
+    }
+  }
+}
