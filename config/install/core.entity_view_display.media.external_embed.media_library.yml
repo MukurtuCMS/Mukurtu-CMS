@@ -3,10 +3,11 @@ status: true
 dependencies:
   config:
     - core.entity_view_mode.media.media_library
+    - image.style.media_library
     - media.type.external_embed
   module:
+    - image
     - layout_builder
-    - text
 third_party_settings:
   layout_builder:
     enabled: false
@@ -16,10 +17,14 @@ targetEntityType: media
 bundle: external_embed
 mode: media_library
 content:
-  field_media_external_embed:
-    type: text_default
+  thumbnail:
+    type: image
     label: hidden
-    settings: {  }
+    settings:
+      image_link: ''
+      image_style: media_library
+      image_loading:
+        attribute: lazy
     third_party_settings: {  }
     weight: 0
     region: content
@@ -28,6 +33,7 @@ hidden:
   field_communities: true
   field_cultural_protocols: true
   field_identifier: true
+  field_media_external_embed: true
   field_media_tags: true
   field_people: true
   field_thumbnail: true
@@ -35,5 +41,4 @@ hidden:
   langcode: true
   name: true
   search_api_excerpt: true
-  thumbnail: true
   uid: true
