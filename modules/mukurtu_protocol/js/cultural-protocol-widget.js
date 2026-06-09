@@ -1,4 +1,4 @@
-(function (Drupal, once) {
+(function ($, Drupal, once) {
   'use strict';
 
   /**
@@ -29,4 +29,14 @@
     }
   };
 
-}(Drupal, once));
+  // Enter key support for protocol checkboxes (Space is native; Enter matches
+  // user expectation for activating focused interactive elements).
+  $(document).on('keydown', '[data-protocol-checkbox-default]', function (e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      this.checked = !this.checked;
+      $(this).trigger('change');
+    }
+  });
+
+}(jQuery, Drupal, once));
