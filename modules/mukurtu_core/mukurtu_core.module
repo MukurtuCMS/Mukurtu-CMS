@@ -253,6 +253,38 @@ function mukurtu_core_page_attachments(array &$attachments) {
 function mukurtu_core_form_user_admin_settings_alter(&$form, FormStateInterface $form_state, $form_id)
 {
   $form['contact']['contact_default_status']['#default_value'] = false;
+  $form['#attached']['library'][] = 'mukurtu_core/account-settings';
+  $form['#validate'][] = 'mukurtu_core_user_admin_settings_validate';
+}
+
+/**
+ * Validation handler for the account settings form.
+ *
+ * Prevents saving setting combinations where "May" or "Must" generate-password
+ * mode is paired with email verification or admin-approval registration — those
+ * combinations are undefined in Mukurtu's registration workflow.
+ */
+function mukurtu_core_user_admin_settings_validate(&$form, FormStateInterface $form_state) {
+  $genpass_mode = (int) $form_state->getValue('genpass_mode');
+  $verify_mail = (bool) $form_state->getValue('user_email_verification');
+  $register = $form_state->getValue('user_register');
+
+  // genpass_mode 1 (May) and 2 (Must) are only valid when registration is open
+  // to visitors with email verification disabled.
+  if ($genpass_mode === 1 || $genpass_mode === 2) {
+    if ($verify_mail) {
+      $form_state->setError(
+        $form['genpass_config_registration']['genpass_mode'],
+        t('"May" and "Must" password generation cannot be combined with email verification. Select "Cannot" generate password, or disable email verification.')
+      );
+    }
+    if ($register !== 'visitors') {
+      $form_state->setError(
+        $form['genpass_config_registration']['genpass_mode'],
+        t('"May" and "Must" password generation require open visitor registration. Select "Cannot" generate password, or change "Who can register accounts?" to Visitors.')
+      );
+    }
+  }
 }
 
 /**
@@ -839,6 +871,17 @@ function mukurtu_core_views_data_alter(array &$data)
       'title' => t('Site roles'),
       'field' => [
         'id' => 'mukurtu_user_roles',
+      ],
+    ];
+  }
+  if (isset($data['node_field_data'])) {
+    $data['node_field_data']['mukurtu_row_actions'] = [
+      'title' => t('Row actions'),
+      'field' => [
+        'id' => 'mukurtu_node_row_actions',
+        'field' => 'nid',
+        'real field' => 'nid',
+        'click sortable' => FALSE,
       ],
     ];
   }

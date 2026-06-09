@@ -335,7 +335,7 @@ class CommunityManagerUserCreationForm extends FormBase {
     $user->save();
 
     if (!empty($values['notify']) && !empty($email) && $status_val == 1) {
-      _user_mail_notify('status_activated', $user);
+      _user_mail_notify('register_admin_created', $user);
     }
 
     $entityTypeManager = \Drupal::service("entity_type.manager");
