@@ -77,6 +77,7 @@ content:
     weight: 100
     region: content
 hidden:
+  export_list_membership: true
   draft: true
   field_communities: true
   field_cultural_protocols: true
