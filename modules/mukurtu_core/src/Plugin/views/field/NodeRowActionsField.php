@@ -88,10 +88,11 @@ class NodeRowActionsField extends FieldPluginBase {
         ];
         $links['add_to_export_list'] = [
           'title' => $this->t('Add to export list'),
-          'url' => Url::fromRoute('mukurtu_export.add_item_to_list', [
-            'entity_type' => 'node',
-            'entity_id' => $nid,
-          ]),
+          'url' => Url::fromRoute('mukurtu_export.add_node_to_list', ['node' => $nid]),
+        ];
+        $links['remove_from_export_list'] = [
+          'title' => $this->t('Remove from export list'),
+          'url' => Url::fromRoute('mukurtu_export.remove_node_from_list', ['node' => $nid]),
         ];
       }
 

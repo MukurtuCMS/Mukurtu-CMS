@@ -64,3 +64,43 @@ mukurtu_export.start_adhoc_bulk:
     _form: 'Drupal\mukurtu_export\Form\AdHocExportItemsForm'
   requirements:
     _permission: 'access mukurtu export'
+
+mukurtu_export.add_items_to_list:
+  path: '/admin/export/add-items/{view_id}/{display_id}'
+  defaults:
+    _title: 'Add to Export List'
+    _form: 'Drupal\mukurtu_export\Form\ExportListAddItemsForm'
+  requirements:
+    _permission: 'access mukurtu export'
+
+mukurtu_export.remove_items_from_list:
+  path: '/admin/export/remove-items/{view_id}/{display_id}'
+  defaults:
+    _title: 'Remove from Export List'
+    _form: 'Drupal\mukurtu_export\Form\ExportListRemoveItemsForm'
+  requirements:
+    _permission: 'access mukurtu export'
+
+mukurtu_export.add_node_to_list:
+  path: '/admin/export/add-node/{node}'
+  defaults:
+    _title: 'Add to Export List'
+    _form: 'Drupal\mukurtu_export\Form\ExportListAddNodeForm'
+  options:
+    parameters:
+      node:
+        type: entity:node
+  requirements:
+    _permission: 'access mukurtu export'
+
+mukurtu_export.remove_node_from_list:
+  path: '/admin/export/remove-node/{node}'
+  defaults:
+    _title: 'Remove from Export List'
+    _form: 'Drupal\mukurtu_export\Form\ExportListRemoveNodeForm'
+  options:
+    parameters:
+      node:
+        type: entity:node
+  requirements:
+    _permission: 'access mukurtu export'
