@@ -763,13 +763,29 @@ class FormHooks
         array $form,
         FormStateInterface &$form_state,
     ): void {
-        $val = $form_state->getValue(["account", "status"]);
+        // Both formUserRegisterFormAlter and formUserFormAlter (base form ID)
+        // attach this handler to user_register_form, so it runs twice. Guard
+        // against the second invocation overwriting the first.
+        if ($form_state->get("mukurtu_status_presave_ran")) {
+            return;
+        }
+        $form_state->set("mukurtu_status_presave_ran", TRUE);
+        // The account form container does not use #tree, so all values land at
+        // the top level of form_state — use getValue("status"), not
+        // getValue(["account", "status"]).
+        $val = $form_state->getValue("status");
         $form_state->set("mukurtu_status_selection", $val);
         if ($val === "pending") {
             // Map the virtual "pending" option to the underlying blocked status
-            // so the entity builder stores status=0. field_pending is set in
-            // the post-save handler below.
-            $form_state->setValue(["account", "status"], 0);
+            // so the entity builder stores status=0.
+            $form_state->setValue("status", 0);
+        }
+        // Explicitly set field_pending on the entity before buildEntity() clones
+        // it. Relying on the field's DB default (1) is unreliable for new users
+        // because non-explicitly-set fields may not be written on INSERT.
+        $entity = $form_state->getFormObject()->getEntity();
+        if ($entity && $entity->hasField("field_pending")) {
+            $entity->set("field_pending", $val === "pending" ? 1 : 0);
         }
     }
 
@@ -784,6 +800,11 @@ class FormHooks
         array $form,
         FormStateInterface $form_state,
     ): void {
+        // Guard against double-execution (same reason as userStatusPreSaveSubmit).
+        if ($form_state->get("mukurtu_status_postsave_ran")) {
+            return;
+        }
+        $form_state->set("mukurtu_status_postsave_ran", TRUE);
         $selection = $form_state->get("mukurtu_status_selection");
         $isPending = ($selection === "pending");
         $entity = $form_state->getFormObject()->getEntity();
