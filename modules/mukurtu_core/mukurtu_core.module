@@ -261,29 +261,36 @@ function mukurtu_core_form_user_admin_settings_alter(&$form, FormStateInterface 
  * Validation handler for the account settings form.
  *
  * Prevents saving setting combinations where "May" or "Must" generate-password
- * mode is paired with email verification or admin-approval registration — those
- * combinations are undefined in Mukurtu's registration workflow.
+ * mode is paired with email verification or admin-approval registration. When
+ * "Administrators only" is selected, genpass mode is N/A and any value is
+ * accepted (it has no effect since there is no self-registration form).
  */
 function mukurtu_core_user_admin_settings_validate(&$form, FormStateInterface $form_state) {
   $genpass_mode = (int) $form_state->getValue('genpass_mode');
   $verify_mail = (bool) $form_state->getValue('user_email_verification');
   $register = $form_state->getValue('user_register');
 
-  // genpass_mode 1 (May) and 2 (Must) are only valid when registration is open
-  // to visitors with email verification disabled.
-  if ($genpass_mode === 1 || $genpass_mode === 2) {
-    if ($verify_mail) {
-      $form_state->setError(
-        $form['genpass_config_registration']['genpass_mode'],
-        t('"May" and "Must" password generation cannot be combined with email verification. Select "Cannot" generate password, or disable email verification.')
-      );
-    }
-    if ($register !== 'visitors') {
-      $form_state->setError(
-        $form['genpass_config_registration']['genpass_mode'],
-        t('"May" and "Must" password generation require open visitor registration. Select "Cannot" generate password, or change "Who can register accounts?" to Visitors.')
-      );
-    }
+  if ($genpass_mode !== 1 && $genpass_mode !== 2) {
+    return;
+  }
+
+  // admin_only: no self-registration exists, so genpass mode is irrelevant.
+  if ($register === 'admin_only') {
+    return;
+  }
+
+  if ($verify_mail) {
+    $form_state->setError(
+      $form['genpass_config_registration']['genpass_mode'],
+      t('"May" and "Must" password generation cannot be combined with email verification. Select "Cannot" generate password, or disable email verification.')
+    );
+  }
+
+  if ($register === 'visitors_admin_approval') {
+    $form_state->setError(
+      $form['genpass_config_registration']['genpass_mode'],
+      t('"May" and "Must" password generation cannot be used when administrator approval is required. Select "Cannot" generate password, or change "Who can register accounts?" to Visitors.')
+    );
   }
 }
 

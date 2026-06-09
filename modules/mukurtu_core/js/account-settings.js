@@ -2,41 +2,50 @@
   'use strict';
 
   /**
-   * Enforces mutual exclusion between incompatible account registration options.
+   * Enforces the email-verification / generate-password mutual exclusion.
    *
-   * "May" and "Must" generate-password modes are only valid when registration
-   * is open to visitors (not admin approval or admin-only) and email
-   * verification is disabled. When either of those conditions is active, the
-   * two modes are disabled; conversely, selecting May or Must locks out the
-   * verify-mail checkbox and the admin-approval radio.
+   * When email verification is ON:
+   *   - "May" and "Must" generate-password modes are disabled (Cannot is the
+   *     only valid choice).
+   *
+   * When "May" or "Must" is selected:
+   *   - The email verification checkbox is disabled.
+   *
+   * "Visitors, but administrator approval is required" also makes May and Must
+   * unavailable, since that combination is not supported.
+   *
+   * "Administrators only" is N/A for generate-password — no restriction.
    */
   Drupal.behaviors.mukurtuAccountSettings = {
     attach(context) {
-      once('mukurtu-account-settings', '#user-admin-settings', context).forEach(() => {
-        const verifyMail = document.getElementById('edit-user-email-verification');
-        const registerVisitors = document.getElementById('edit-user-register-visitors');
+      // Attach once per page, keyed to the verify-mail checkbox. If that
+      // element doesn't exist we're on a different form and can bail early.
+      once('mukurtu-account-settings', '#edit-user-email-verification', context).forEach((verifyMailEl) => {
         const registerAdminApproval = document.getElementById('edit-user-register-visitors-admin-approval');
-        const registerAdminOnly = document.getElementById('edit-user-register-admin-only');
+        const genpassCannot = document.getElementById('edit-genpass-mode-0');
         const genpassMay = document.getElementById('edit-genpass-mode-1');
         const genpassMust = document.getElementById('edit-genpass-mode-2');
 
         function syncState() {
-          const verifyChecked = verifyMail?.checked ?? false;
-          const approvalRequired = registerAdminApproval?.checked || registerAdminOnly?.checked || false;
-          const genpassOptional = genpassMay?.checked || genpassMust?.checked || false;
+          const verifyChecked = verifyMailEl.checked;
+          const approvalRequired = registerAdminApproval?.checked ?? false;
+          const genpassOptional = (genpassMay?.checked || genpassMust?.checked) ?? false;
 
-          // May/Must genpass only valid when register=visitors AND verify_mail=off.
+          // May/Must are invalid when email verification is on, or when admin
+          // approval is required (regardless of verify setting).
           const blockGenpass = verifyChecked || approvalRequired;
           if (genpassMay) genpassMay.disabled = blockGenpass;
           if (genpassMust) genpassMust.disabled = blockGenpass;
 
-          // When May or Must genpass is selected, verify_mail and admin-approval
-          // are incompatible and must be disabled.
-          if (verifyMail) verifyMail.disabled = genpassOptional;
+          // When May or Must is active, lock out email verification and the
+          // admin-approval radio to prevent saving an invalid combination.
+          verifyMailEl.disabled = genpassOptional;
           if (registerAdminApproval) registerAdminApproval.disabled = genpassOptional;
         }
 
-        [verifyMail, registerVisitors, registerAdminApproval, registerAdminOnly, genpassMay, genpassMust]
+        // Include genpassCannot so switching back from May/Must to Cannot
+        // re-evaluates and re-enables the verify checkbox.
+        [verifyMailEl, registerAdminApproval, genpassCannot, genpassMay, genpassMust]
           .filter(Boolean)
           .forEach(el => el.addEventListener('change', syncState));
 
