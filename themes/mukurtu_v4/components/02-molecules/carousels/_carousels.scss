@@ -86,6 +86,7 @@
   .splide__slide:not(.is-active) {
     block-size: 0;    // or 100vh, or something what fits your case
   }
+
 }
 
 .thumbnail-carousel {
@@ -150,32 +151,27 @@
 }
 
 .media-asset--link {
-  position: relative;
+  &.button {
+    background-color: var(--color-white);
+    border: 2px solid var(--brand-primary-dark);
+    color: var(--brand-primary-dark);
 
-  .media-asset--expand {
-    @include mixins.block-link;
-
-    position: absolute;
-    inset-block-start: 10px;
-    inset-inline-start: 10px;
-    inline-size: 100px;
-  }
-
-  .media-asset--content {
-    min-inline-size: 300px;
-    min-block-size: 300px;
-    display: flex;
-    place-content: center;
-    flex-wrap: wrap;
-
-    & > * {
-      flex-basis: 100%;
-    }
-
-    .field {
-      place-content: center;
-      display: flex;
-      flex-wrap: wrap;
+    &:hover,
+    &:active,
+    &:focus {
+      background-color: var(--brand-primary-dark);
+      color: var(--light-text-color);
+      text-decoration: none;
+      outline-color: var(--color-white);
     }
   }
+}
+
+.media-asset--actions,
+.media-asset--pdf-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--v-space-5xs);
+  margin-block-start: var(--v-space-5xs);
 }

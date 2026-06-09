@@ -37,26 +37,37 @@
 %}
 
 <div{{ attributes.addClass(classes) }}>
-  {{ title_suffix.contextual_links }}
   {{ content.media_content_warnings }}
 
-  <a href="#document-{{ media.id }}" data-type="inline" class="media-asset--link" aria-label="Expand {{ name }} document">
-    <span class="media-asset--expand">Expand +</span>
-    <span class="media-asset--content">
-      {% if content.thumbnail['#items'] is not empty %}
-        {{ content.thumbnail }}
-      {% else %}
-        <img alt="document {{ name }}" src="{{ base_path }}profiles/mukurtu/themes/mukurtu_v4/images/document.png">
-      {% endif %}
-    </span>
-  </a>
-
-  <div id="document-{{ media.id }}" class="media-asset--glightbox-inline">
-    <object data="{{ media_url }}" class="media-asset--document-viewer">
-      <p>{{ name }}</p>
+  <div class="media-asset--pdf-wrapper">
+    <object data="{{ media_url }}#navpanes=0" type="application/pdf"
+            title="Document: {{ name }}" class="media-asset--pdf">
+      <p>This PDF cannot be displayed inline.
+        <a href="{{ media_url }}" target="_blank" rel="noopener">Open {{ name }}</a> or
+        <a href="{{ media_url }}" download>download it</a>.
+      </p>
     </object>
   </div>
 
-  <a href="{{ media_url }}" class="button" download aria-label="Download document: {{ name }}">Download document</a>
+  <div class="media-asset--pdf-actions">
+    <a href="#document-{{ media.id }}" data-type="inline" class="media-asset--link button" aria-label="Expand {{ name }} document">Expand +</a>
+    <a href="{{ media_url }}" class="button" target="_blank" rel="noopener"
+       aria-label="Open {{ name }} document in new tab">Open full screen
+      <span class="visually-hidden">(opens in new tab)</span>
+    </a>
+    {% if media_download_enabled %}
+      <a href="{{ media_url }}" class="button button--download" download aria-label="Download {{ name }} document">Download document <svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="16" height="18" aria-hidden="true"><path d="M11.61 0H3.87v5.57H0L7.74 13l7.74-7.43h-3.87z"/><path fill-rule="evenodd" d="M.52 15H16v3H.52z" clip-rule="evenodd"/></svg></a>
+    {% endif %}
+  </div>
+
+  <div id="document-{{ media.id }}" class="media-asset--glightbox-inline">
+    <object data="{{ media_url }}#navpanes=0" type="application/pdf"
+            title="Document: {{ name }}" class="media-asset--document-viewer">
+      <p>This PDF cannot be displayed inline.
+        <a href="{{ media_url }}" target="_blank" rel="noopener">Open {{ name }}</a> or
+        <a href="{{ media_url }}" download>download it</a>.
+      </p>
+    </object>
+  </div>
 
 </div>

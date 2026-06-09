@@ -37,15 +37,16 @@
 %}
 
 <div{{ attributes.addClass(classes) }}>
-  {{ title_suffix.contextual_links }}
   {{ content.media_content_warnings }}
 
-  <a href="{{ media_url }}" class="media-asset--link" aria-label="Expand {{ name }} image">
-    <span class="media-asset--expand">Expand +</span>
-    <span class="media-asset--content">
-     {{ content.field_media_image }}
-    </span>
-  </a>
+  <span class="media-asset--content">
+    {{ content.field_media_image }}
+  </span>
 
-  <a href="{{ media_url }}" class="button" download>Download image</a>
+  <div class="media-asset--actions">
+    <a href="{{ media_url }}" class="media-asset--link button" aria-label="Expand {{ name }} image">Expand +</a>
+    {% if media_download_enabled %}
+      <a href="{{ media_url }}" class="button button--download" download aria-label="Download image: {{ name }}">Download image <svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="16" height="18" aria-hidden="true"><path d="M11.61 0H3.87v5.57H0L7.74 13l7.74-7.43h-3.87z"/><path fill-rule="evenodd" d="M.52 15H16v3H.52z" clip-rule="evenodd"/></svg></a>
+    {% endif %}
+  </div>
 </div>

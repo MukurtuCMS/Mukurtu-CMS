@@ -287,6 +287,21 @@
   }
 }
 
+.word-entry-fields-pair {
+  display: flex;
+  gap: var(--v-space-xs);
+  flex-wrap: wrap;
+
+  > .field {
+    flex: 1;
+    min-inline-size: 10rem;
+  }
+}
+
+.dictionary-word-tabs {
+  margin-block-end: var(--v-space-s);
+}
+
 // Full content display for dictionary word nodes.
 .page-node-type-dictionary-word {
   .full-node__content {
@@ -359,21 +374,36 @@
     border-block-start: 5px solid var(--mukurtu-view-row-divider-color);
   }
 
-  .field--name-field-recording {
+  .field--name-field-recording,
+  .field--name-field-sentence-recording {
     // stylelint-disable-next-line no-descending-specificity
     .media--audio {
       flex-direction: column;
-      gap: var(--v-space-4xxs);
       align-items: center;
       justify-content: center;
+      gap: var(--v-space-4xxs);
 
       @include include-media.media('>=md') {
         flex-direction: row;
+        flex-wrap: wrap;
+        column-gap: var(--v-space-4xxs);
       }
 
       .field--name-field-media-audio-file,
       .field--name-field-contributor {
         flex: 1;
+      }
+
+      .button {
+        flex-basis: 100%;
+        max-inline-size: max-content;
+        margin-block-start: 0;
+      }
+
+      .media-asset--name {
+        @include include-media.media('>=md') {
+          flex: 0 0 100%;
+        }
       }
 
       .field--name-field-contributor {

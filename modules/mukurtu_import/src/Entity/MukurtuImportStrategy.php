@@ -215,7 +215,7 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
 
   protected function getCSVHeaders(FileInterface $file) {
     try {
-      $csv = Reader::createFromPath($file->getFileUri(), 'r');
+      $csv = Reader::from($file->getFileUri(), 'r');
     } catch (Exception $e) {
       return [];
     }

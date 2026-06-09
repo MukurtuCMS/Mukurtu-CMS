@@ -1,0 +1,82 @@
+/* ============================================================
+   /admin/media/add — paired two-column card layout
+   ============================================================ */
+
+.media-add-list--paired {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: var(--gin-spacing-s, 0.5rem);
+}
+
+.media-add-list--paired .admin-item {
+  border: 1px solid var(--gin-border-color, #ccc);
+  border-radius: 4px;
+  background: transparent;
+  margin: 0;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+/* Remove Gin's horizontal rule separator between items */
+.media-add-list--paired .admin-item::after {
+  display: none;
+}
+
+.media-add-list--paired .admin-item:hover {
+  border-color: var(--gin-color-primary, #0073e6);
+  background: var(--gin-bg-item-hover, #f0f7ff);
+}
+
+/* Unpaired item (no bulk variant, e.g. external_embed) spans both columns */
+.media-add-list--paired .admin-item:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 640px) {
+  .media-add-list--paired {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ============================================================
+   Bulk upload — drag-and-drop zone
+   ============================================================ */
+
+.mukurtu-bulk-dropzone {
+  border: 2px dashed var(--gin-border-color-form-element, #949494);
+  border-radius: 4px;
+  padding: 1.5rem;
+  text-align: center;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.mukurtu-bulk-dropzone.is-drag-over {
+  background-color: var(--gin-bg-item-hover, rgba(0, 115, 230, 0.05));
+  border-color: var(--gin-color-primary, #0073e6);
+  border-style: solid;
+}
+
+.mukurtu-bulk-dropzone__hint {
+  margin: 0 0 0.75rem;
+  color: var(--gin-color-text-light, #545560);
+  font-style: italic;
+  /* aria-hidden="true" is set in PHP; the paragraph is decorative for pointing
+     device users only. The managed_file label is the accessible control. */
+}
+
+.mukurtu-bulk-dropzone .js-form-managed-file {
+  display: inline-block;
+  text-align: left;
+}
+
+/* Visually-hidden live region for screen reader announcements (WCAG 4.1.3). */
+.mukurtu-bulk-dropzone__status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
