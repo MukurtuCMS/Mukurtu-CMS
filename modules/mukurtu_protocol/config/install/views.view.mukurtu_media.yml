@@ -553,6 +553,7 @@ display:
           site-role:
             administrator: administrator
             mukurtu_manager: mukurtu_manager
+            mukurtu_roundtrip_manager: mukurtu_roundtrip_manager
           community-role: {  }
           protocol-role:
             protocol-protocol-community_record_steward: protocol-protocol-community_record_steward

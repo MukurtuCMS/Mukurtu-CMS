@@ -4,6 +4,7 @@ dependencies:
   config:
     - user.role.administrator
     - user.role.mukurtu_manager
+    - user.role.mukurtu_roundtrip_manager
   module:
     - mukurtu_protocol
     - node
@@ -553,6 +554,7 @@ display:
           site-role:
             administrator: administrator
             mukurtu_manager: mukurtu_manager
+            mukurtu_roundtrip_manager: mukurtu_roundtrip_manager
           community-role: {  }
           protocol-role:
             protocol-protocol-contributor: protocol-protocol-contributor
