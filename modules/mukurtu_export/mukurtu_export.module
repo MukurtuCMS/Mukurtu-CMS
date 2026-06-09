@@ -155,6 +155,19 @@ function mukurtu_export_entity_view(array &$build, \Drupal\Core\Entity\EntityInt
   $ids = $query->condition($or)->execute();
   $lists = $storage->loadMultiple($ids);
 
+  // Attach cache metadata from every list the user can see (not just matching
+  // ones) so any list change — including adding this entity to a list for the
+  // first time — invalidates this render. The list-level tag covers new lists
+  // being created. The user cache context scopes results per user.
+  $all_cache_tags = ['export_list_list'];
+  foreach ($lists as $list) {
+    $all_cache_tags = array_merge($all_cache_tags, $list->getCacheTags());
+  }
+  \Drupal\Core\Cache\CacheableMetadata::createFromRenderArray($build)
+    ->addCacheTags($all_cache_tags)
+    ->addCacheContexts(['user'])
+    ->applyTo($build);
+
   $matching = array_filter($lists, function ($list) use ($entity_type, $entity_id) {
     $items = $list->getItems();
     return isset($items[$entity_type][$entity_id]);
@@ -164,10 +177,8 @@ function mukurtu_export_entity_view(array &$build, \Drupal\Core\Entity\EntityInt
     return;
   }
 
-  $cache_tags = [];
   $items = [];
   foreach ($matching as $list) {
-    $cache_tags = array_merge($cache_tags, $list->getCacheTags());
     $items[] = [
       '#type' => 'link',
       '#title' => $list->label(),
@@ -189,7 +200,6 @@ function mukurtu_export_entity_view(array &$build, \Drupal\Core\Entity\EntityInt
       '#theme' => 'item_list',
       '#items' => $items,
     ],
-    '#cache' => ['tags' => $cache_tags],
   ];
 }
 
@@ -234,6 +244,15 @@ function mukurtu_export_preprocess_block(&$variables) {
     ->condition('site_wide', TRUE);
   $lists = $storage->loadMultiple($query->condition($or)->execute());
 
+  // Attach cache metadata from all lists so any list change invalidates the
+  // block render, including the first time this node is added to a list.
+  $all_cache_tags = ['export_list_list'];
+  foreach ($lists as $list) {
+    $all_cache_tags = array_merge($all_cache_tags, $list->getCacheTags());
+  }
+  $variables['#cache']['tags'] = array_merge($variables['#cache']['tags'] ?? [], $all_cache_tags);
+  $variables['#cache']['contexts'] = array_merge($variables['#cache']['contexts'] ?? [], ['user']);
+
   $matching = array_filter($lists, function ($list) use ($node) {
     $items = $list->getItems();
     return isset($items['node'][$node->id()]);
@@ -241,11 +260,9 @@ function mukurtu_export_preprocess_block(&$variables) {
 
   if (!empty($matching)) {
     $variables['#attached']['library'][] = 'mukurtu_export/export_list_dropdown';
-    $cache_tags = [];
     $count = count($matching);
     $list_items = [];
     foreach ($matching as $list) {
-      $cache_tags = array_merge($cache_tags, $list->getCacheTags());
       $list_items[] = [
         '#type' => 'link',
         '#title' => $list->label(),
@@ -270,7 +287,6 @@ function mukurtu_export_preprocess_block(&$variables) {
           '#items' => $list_items,
         ],
       ],
-      '#cache' => ['tags' => $cache_tags],
     ];
   }
 }
