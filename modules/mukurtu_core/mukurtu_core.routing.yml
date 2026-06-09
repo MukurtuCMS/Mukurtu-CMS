@@ -1,3 +1,29 @@
+mukurtu_core.node.quick_publish:
+  path: '/admin/content/{node}/publish'
+  defaults:
+    _controller: '\Drupal\mukurtu_core\Controller\NodeQuickActionsController::publish'
+    _title: 'Publish'
+  options:
+    parameters:
+      node:
+        type: entity:node
+  requirements:
+    _csrf_token: 'TRUE'
+    _node_access: 'node.update'
+
+mukurtu_core.node.quick_unpublish:
+  path: '/admin/content/{node}/unpublish'
+  defaults:
+    _controller: '\Drupal\mukurtu_core\Controller\NodeQuickActionsController::unpublish'
+    _title: 'Unpublish'
+  options:
+    parameters:
+      node:
+        type: entity:node
+  requirements:
+    _csrf_token: 'TRUE'
+    _node_access: 'node.update'
+
 mukurtu_core.settings_assorted:
   path: '/admin/config/mukurtu/settings'
   defaults:
