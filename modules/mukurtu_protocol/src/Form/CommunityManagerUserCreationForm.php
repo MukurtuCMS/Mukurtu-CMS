@@ -148,6 +148,12 @@ class CommunityManagerUserCreationForm extends FormBase {
       '#type' => 'checkbox',
       '#title' => $this->t('Notify user of new account'),
       '#default_value' => 1,
+      // Notification requires an email address — hide when the field is empty.
+      '#states' => [
+        'visible' => [
+          ':input[name="email"]' => ['filled' => TRUE],
+        ],
+      ],
     ];
 
     $form['notify_others'] = [
