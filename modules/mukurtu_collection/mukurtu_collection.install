@@ -164,3 +164,15 @@ function mukurtu_collection_update_40006(): void {
 function mukurtu_collection_update_40008(): void {
   \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
 }
+
+/**
+ * Switch collection full view related content to featured view mode.
+ */
+function mukurtu_collection_update_40009(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.collection.full');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_all_related_content.settings.view_mode', 'featured');
+  $config->save();
+}
