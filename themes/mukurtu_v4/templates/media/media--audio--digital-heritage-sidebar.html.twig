@@ -37,12 +37,13 @@
       {{ content.field_thumbnail }}
     {% else %}
       <div class="media__audio-fallback">
-        <img alt="audio file {{ name }}" src="{{ audio_fallback_thumbnail_url }}">
+        <img alt="" role="presentation" src="{{ audio_fallback_thumbnail_url }}">
       </div>
     {% endif %}
 
     <button class="audio-play-button" type="button"
       aria-label="{{ 'Play @name'|t({'@name': name}) }}"
+      aria-pressed="false"
       data-media-name="{{ name }}">
       <span class="audio-play-button__icon audio-play-button__icon--play" aria-hidden="true">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" focusable="false"><path d="M8 5v14l11-7z"/></svg>
@@ -53,7 +54,12 @@
     </button>
   </div>
 
-  {# Audio element for JS control; native controls removed by the JS behavior. #}
+  {#
+    Audio source container. CSS collapses it to zero height; JS removes the
+    native controls and drives playback via the button above. Without JS the
+    audio is not reachable - this is accepted because Drupal requires JS for
+    core functionality.
+  #}
   <div class="media__audio-source" aria-hidden="true">
     {{ content.field_media_audio_file }}
   </div>
@@ -65,7 +71,7 @@
       {{ content.field_thumbnail }}
     {% else %}
       <div class="media__audio-fallback">
-        <img alt="audio file {{ name }}" src="{{ audio_fallback_thumbnail_url }}">
+        <img alt="" role="presentation" src="{{ audio_fallback_thumbnail_url }}">
       </div>
     {% endif %}
   </div>

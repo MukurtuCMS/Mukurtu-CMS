@@ -170,19 +170,20 @@
             inline-size: 3rem;
             block-size: 3rem;
             border-radius: 50%;
-            background: rgb(0 0 0 / 55%);
+            background: rgb(0 0 0 / 70%);
             position: absolute;
             transition: background 0.15s;
           }
 
           &:hover::before,
           &:focus-visible::before {
-            background: rgb(0 0 0 / 75%);
+            background: rgb(0 0 0 / 85%);
           }
 
           &:focus-visible {
-            outline: 2px solid var(--focus-color);
-            outline-offset: -2px;
+            outline: 3px solid #005fcc;
+            outline-offset: 2px;
+            box-shadow: inset 0 0 0 3px #ffffff;
           }
 
           svg {

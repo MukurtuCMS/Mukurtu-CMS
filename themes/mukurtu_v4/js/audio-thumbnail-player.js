@@ -14,13 +14,16 @@
 
   function stopCurrent() {
     if (currentAudio) {
-      currentAudio.pause();
+      if (currentAudio.isConnected) {
+        currentAudio.pause();
+      }
       currentAudio = null;
     }
     if (currentButton) {
       currentButton.classList.remove('is-playing');
       currentButton.setAttribute('aria-label',
         Drupal.t('Play @name', { '@name': currentButton.dataset.mediaName || '' }));
+      currentButton.setAttribute('aria-pressed', 'false');
       currentButton = null;
     }
   }
@@ -44,12 +47,13 @@
 
             if (audioEl.paused) {
               stopCurrent();
-              audioEl.play();
+              audioEl.play().catch(function () { stopCurrent(); });
               currentAudio = audioEl;
               currentButton = button;
               button.classList.add('is-playing');
               button.setAttribute('aria-label',
                 Drupal.t('Pause @name', { '@name': button.dataset.mediaName || '' }));
+              button.setAttribute('aria-pressed', 'true');
             } else {
               stopCurrent();
             }
