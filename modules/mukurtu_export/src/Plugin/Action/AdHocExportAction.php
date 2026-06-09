@@ -9,9 +9,8 @@ use Drupal\Core\Access\AccessResult;
 /**
  * Exports selected content directly without adding it to a named list.
  *
- * The actual work (storing items and redirecting to settings) is performed by
- * AdHocExportItemsForm, which VBO redirects to via confirm_form_route_name.
- * This execute() is a no-op.
+ * VBO redirects to AdHocExportStartController::startBulk() which reads the
+ * VBO tempstore, stores ad_hoc_items, and redirects to export settings.
  *
  * @Action(
  *   id = "mukurtu_export_adhoc_export_action",
@@ -26,7 +25,7 @@ class AdHocExportAction extends ViewsBulkOperationsActionBase {
    * {@inheritdoc}
    */
   public function execute($object = NULL) {
-    // No-op: AdHocExportItemsForm performs the actual work.
+    // No-op: the controller at start_adhoc_bulk performs the actual work.
   }
 
   /**

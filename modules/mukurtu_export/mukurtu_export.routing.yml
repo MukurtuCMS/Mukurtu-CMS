@@ -53,7 +53,7 @@ mukurtu_export.start_adhoc_bulk:
   path: '/admin/export/start-adhoc-bulk/{view_id}/{display_id}'
   defaults:
     _title: 'Export'
-    _form: 'Drupal\mukurtu_export\Form\AdHocExportItemsForm'
+    _controller: 'Drupal\mukurtu_export\Controller\AdHocExportStartController::startBulk'
   requirements:
     _permission: 'access mukurtu export'
 
