@@ -1085,3 +1085,41 @@ function mukurtu_dictionary_update_40029(): void {
   unset($hidden['field_recording']);
   $config->set('hidden', $hidden)->save();
 }
+
+/**
+ * Switch dictionary word and word list full views to use featured view mode.
+ *
+ * Dictionary word: swap field_related_content for field_all_related_content and
+ * update the field group children list to match. Word list: switch related
+ * content from teaser to featured view mode.
+ */
+function mukurtu_dictionary_update_40030(): void {
+  // Dictionary word: promote field_all_related_content, retire field_related_content.
+  $dw = \Drupal::configFactory()->getEditable('core.entity_view_display.node.dictionary_word.full');
+  if (!$dw->isNew()) {
+    // Move content display config.
+    $field_config = $dw->get('content.field_related_content');
+    if ($field_config) {
+      $field_config['settings']['view_mode'] = 'featured';
+      $dw->set('content.field_all_related_content', $field_config);
+      $dw->clear('content.field_related_content');
+    }
+    // Swap hidden flags.
+    $hidden = $dw->get('hidden') ?? [];
+    unset($hidden['field_all_related_content']);
+    $hidden['field_related_content'] = TRUE;
+    $dw->set('hidden', $hidden);
+    // Update field group children list.
+    $children = $dw->get('third_party_settings.field_group.group_additional_fields.children') ?? [];
+    $children = array_map(fn($f) => $f === 'field_related_content' ? 'field_all_related_content' : $f, $children);
+    $dw->set('third_party_settings.field_group.group_additional_fields.children', $children);
+    $dw->save();
+  }
+
+  // Word list: switch field_all_related_content from teaser to featured.
+  $wl = \Drupal::configFactory()->getEditable('core.entity_view_display.node.word_list.full');
+  if (!$wl->isNew()) {
+    $wl->set('content.field_all_related_content.settings.view_mode', 'featured');
+    $wl->save();
+  }
+}

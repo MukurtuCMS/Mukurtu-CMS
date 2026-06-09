@@ -67,3 +67,10 @@ dictionary-word-tabs:
   dependencies:
     - core/drupal
     - core/once
+
+audio-thumbnail-player:
+  js:
+    js/audio-thumbnail-player.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
