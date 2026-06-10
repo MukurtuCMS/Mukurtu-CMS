@@ -701,6 +701,12 @@ function mukurtu_media_update_40014(): void {
 function mukurtu_media_update_40015(&$sandbox): void {
   $database = \Drupal::database();
 
+  // If the table doesn't exist there is nothing to migrate.
+  if (!$database->schema()->tableExists('media__field_thumbnail')) {
+    $sandbox['#finished'] = 1;
+    return;
+  }
+
   if (!isset($sandbox['total'])) {
     $result = $database->select('media__field_thumbnail', 'ft')
       ->fields('ft', ['entity_id', 'revision_id', 'field_thumbnail_target_id'])

@@ -8,7 +8,6 @@ use Drupal\mukurtu_core\BaseFieldDefinition;
 use Drupal\mukurtu_core\Entity\PeopleInterface;
 use Drupal\mukurtu_core\Entity\PeopleTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
 use Drupal\Component\Utility\Environment;
@@ -230,17 +229,6 @@ class Audio extends Media implements AudioInterface, CulturalProtocolControlledI
       ->setDisplayConfigurable('form', TRUE);
 
     return $definitions;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function preSave(EntityStorageInterface $storage) {
-    $uploadedThumb = $this->get('field_thumbnail')->getValue()[0]['target_id'] ?? NULL;
-    if ($uploadedThumb) {
-      $this->thumbnail->target_id = $uploadedThumb;
-    }
-    parent::preSave($storage);
   }
 
 }
