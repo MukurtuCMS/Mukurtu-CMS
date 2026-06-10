@@ -5,6 +5,7 @@ namespace Drupal\mukurtu_media\Entity;
 use Drupal\media\Entity\Media;
 use Drupal\mukurtu_core\BaseFieldDefinition;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\mukurtu_core\Entity\PeopleInterface;
 use Drupal\mukurtu_core\Entity\PeopleTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledTrait;
@@ -163,4 +164,16 @@ class SoundCloud extends Media implements SoundCloudInterface, CulturalProtocolC
 
     return $definitions;
   }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function preSave(EntityStorageInterface $storage) {
+    $uploadedThumb = $this->get('field_thumbnail')->getValue()[0]['target_id'] ?? NULL;
+    if ($uploadedThumb) {
+      $this->thumbnail->target_id = $uploadedThumb;
+    }
+    parent::preSave($storage);
+  }
+
 }

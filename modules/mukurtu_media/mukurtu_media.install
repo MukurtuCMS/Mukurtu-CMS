@@ -540,9 +540,40 @@ function mukurtu_media_update_40012(): void {
 }
 
 /**
+ * Sync field_thumbnail to the base thumbnail field for audio, remote_video,
+ * and soundcloud media that already have a user-uploaded thumbnail.
+ */
+function mukurtu_media_update_40013(&$sandbox): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('media');
+
+  if (!isset($sandbox['total'])) {
+    $ids = $storage->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('bundle', ['audio', 'remote_video', 'soundcloud'], 'IN')
+      ->condition('field_thumbnail', NULL, 'IS NOT NULL')
+      ->execute();
+    $sandbox['ids'] = array_values($ids);
+    $sandbox['total'] = count($ids);
+    $sandbox['processed'] = 0;
+  }
+
+  $batch = array_splice($sandbox['ids'], 0, 25);
+  foreach ($storage->loadMultiple($batch) as $media) {
+    $fid = $media->get('field_thumbnail')->getValue()[0]['target_id'] ?? NULL;
+    if ($fid) {
+      $media->thumbnail->target_id = $fid;
+      $media->save();
+    }
+    $sandbox['processed']++;
+  }
+
+  $sandbox['#finished'] = $sandbox['total'] ? $sandbox['processed'] / $sandbox['total'] : 1;
+}
+
+/**
  * Create media_assets and carousel_thumbnail view displays for SoundCloud.
  */
-function mukurtu_media_update_40013(): void {
+function mukurtu_media_update_40014(): void {
   $storage = \Drupal::service('config.storage');
 
   $media_assets = [
@@ -663,12 +694,64 @@ function mukurtu_media_update_40013(): void {
 }
 
 /**
+ * Re-sync field_thumbnail to the base thumbnail field using direct DB queries,
+ * bypassing prepareSave() thumbnail regeneration for audio, remote_video,
+ * and soundcloud media.
+ */
+function mukurtu_media_update_40015(&$sandbox): void {
+  $database = \Drupal::database();
+
+  if (!$database->schema()->tableExists('media__field_thumbnail')) {
+    $sandbox['#finished'] = 1;
+    return;
+  }
+
+  if (!isset($sandbox['total'])) {
+    $result = $database->select('media__field_thumbnail', 'ft')
+      ->fields('ft', ['entity_id', 'revision_id', 'field_thumbnail_target_id'])
+      ->condition('ft.deleted', 0)
+      ->execute()
+      ->fetchAll();
+
+    $sandbox['items'] = array_values(array_map(fn($r) => (array) $r, $result));
+    $sandbox['total'] = count($sandbox['items']);
+    $sandbox['processed'] = 0;
+  }
+
+  $batch = array_splice($sandbox['items'], 0, 50);
+  foreach ($batch as $row) {
+    $fid = $row['field_thumbnail_target_id'];
+    if (!$fid) {
+      $sandbox['processed']++;
+      continue;
+    }
+
+    $database->update('media__thumbnail')
+      ->fields(['thumbnail_target_id' => $fid])
+      ->condition('entity_id', $row['entity_id'])
+      ->condition('deleted', 0)
+      ->execute();
+
+    $database->update('media_revision__thumbnail')
+      ->fields(['thumbnail_target_id' => $fid])
+      ->condition('entity_id', $row['entity_id'])
+      ->condition('revision_id', $row['revision_id'])
+      ->condition('deleted', 0)
+      ->execute();
+
+    $sandbox['processed']++;
+  }
+
+  $sandbox['#finished'] = $sandbox['total'] ? $sandbox['processed'] / $sandbox['total'] : 1;
+}
+
+/**
  * Set default video and audio thumbnails from module-bundled images.
  *
  * Also migrates the old 'audio' config key to 'audio_default_thumbnail' so
  * existing sites that had a custom audio thumbnail do not lose it.
  */
-function mukurtu_media_update_40014(): void {
+function mukurtu_media_update_40016(): void {
   $config = \Drupal::configFactory()->getEditable('mukurtu_thumbnail.settings');
 
   // Migrate old 'audio' key -> 'audio_default_thumbnail' before calling the
@@ -686,7 +769,7 @@ function mukurtu_media_update_40014(): void {
 /**
  * Re-save all video media entities to apply the corrected default thumbnail.
  */
-function mukurtu_media_update_40015(): void {
+function mukurtu_media_update_40017(): void {
   $mids = \Drupal::entityQuery('media')
     ->condition('bundle', 'video')
     ->accessCheck(FALSE)
@@ -702,7 +785,7 @@ function mukurtu_media_update_40015(): void {
 /**
  * Re-save all audio media entities to apply the corrected default thumbnail.
  */
-function mukurtu_media_update_40016(): void {
+function mukurtu_media_update_40018(): void {
   $mids = \Drupal::entityQuery('media')
     ->condition('bundle', 'audio')
     ->accessCheck(FALSE)
