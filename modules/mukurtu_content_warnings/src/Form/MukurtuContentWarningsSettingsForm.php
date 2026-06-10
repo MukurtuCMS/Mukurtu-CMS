@@ -225,19 +225,19 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase {
     $saved_modes = $config->get('warning_view_modes');
     $default_modes = ($saved_modes === NULL) ? array_keys($view_mode_options) : $saved_modes;
     $view_mode_descriptions = [
-      'audio_for_dictionary_teaser' => $this->t('Dictionary word recordings'),
-      'browse'                      => $this->t('Browse and search result listings'),
-      'carousel_thumbnail'          => $this->t('Secondary media carousel on Digital Heritage pages'),
-      'collections_3_2_'            => $this->t('Collection grid and browse layouts'),
-      'collections_hero'            => $this->t('Hero image at the top of Collection pages'),
-      'digital_heritage_full'       => $this->t('Main media display on Digital Heritage pages'),
-      'digital_heritage_sidebar'    => $this->t('Sidebar and grid view of Digital Heritage pages'),
-      'full'                        => $this->t('Rich text editor embeds (full size)'),
-      'large'                       => $this->t('Rich text editor embeds (large, 900px)'),
-      'media_assets'                => $this->t('Inline media assets on content pages'),
-      'medium'                      => $this->t('Rich text editor embeds (medium, 480px)'),
-      'small'                       => $this->t('Rich text editor embeds (small, 250px)'),
-      'small_250px_'                => $this->t('Small display on Digital Heritage grid and sidebar'),
+      'audio_for_dictionary_teaser' => $this->t('Recording field on Dictionary Word entry teasers'),
+      'browse'                      => $this->t('Media in browse, teaser, and grid displays across all content types'),
+      'carousel_thumbnail'          => $this->t('Thumbnail carousel in multipage browse across all content types'),
+      'collections_3_2_'            => $this->t('Media in Category teasers and Collection browse grid'),
+      'collections_hero'            => $this->t('Hero image on Collection full page'),
+      'digital_heritage_full'       => $this->t('Media in image-with-description block content types'),
+      'digital_heritage_sidebar'    => $this->t('Media in Digital Heritage grid browse, teaser, and featured displays'),
+      'full'                        => $this->t('Default full-page node view'),
+      'large'                       => $this->t('Defined but not actively used in any configured display'),
+      'media_assets'                => $this->t('Media Assets field on full page displays (Digital Heritage, Place, Person, Dictionary Word)'),
+      'medium'                      => $this->t('Defined but not actively used in any configured display'),
+      'small'                       => $this->t('Defined but not actively used in any configured display'),
+      'small_250px_'                => $this->t('Thumbnail field on Dictionary Word teasers'),
     ];
     $form['view_mode_warnings'] = [
       '#type' => 'fieldset',
