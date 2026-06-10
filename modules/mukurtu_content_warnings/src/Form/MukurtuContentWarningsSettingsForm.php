@@ -224,17 +224,40 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase {
     // null = not yet configured = all modes enabled; [] = explicitly disabled all.
     $saved_modes = $config->get('warning_view_modes');
     $default_modes = ($saved_modes === NULL) ? array_keys($view_mode_options) : $saved_modes;
+    $view_mode_descriptions = [
+      'audio_for_dictionary_teaser' => $this->t('Dictionary word recordings'),
+      'browse'                      => $this->t('Browse and search result listings'),
+      'carousel_thumbnail'          => $this->t('Secondary media carousel on Digital Heritage pages'),
+      'collections_3_2_'            => $this->t('Collection grid and browse layouts'),
+      'collections_hero'            => $this->t('Hero image at the top of Collection pages'),
+      'digital_heritage_full'       => $this->t('Main media display on Digital Heritage pages'),
+      'digital_heritage_sidebar'    => $this->t('Sidebar and grid view of Digital Heritage pages'),
+      'full'                        => $this->t('Rich text editor embeds (full size)'),
+      'large'                       => $this->t('Rich text editor embeds (large, 900px)'),
+      'media_assets'                => $this->t('Inline media assets on content pages'),
+      'medium'                      => $this->t('Rich text editor embeds (medium, 480px)'),
+      'small'                       => $this->t('Rich text editor embeds (small, 250px)'),
+      'small_250px_'                => $this->t('Small display on Digital Heritage grid and sidebar'),
+    ];
     $form['view_mode_warnings'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Warning media settings'),
       '#description' => $this->t('Select which media view modes should display content warnings.'),
     ];
     $form['view_mode_warnings']['view_modes'] = [
-      '#type' => 'checkboxes',
+      '#type' => 'container',
+      '#tree' => TRUE,
       '#title' => $this->t('Enabled View Modes'),
-      '#options' => $view_mode_options,
-      '#default_value' => $default_modes,
     ];
+    foreach ($view_mode_options as $mode_key => $mode_label) {
+      $form['view_mode_warnings']['view_modes'][$mode_key] = [
+        '#type' => 'checkbox',
+        '#title' => $mode_label,
+        '#description' => $view_mode_descriptions[$mode_key] ?? '',
+        '#default_value' => in_array($mode_key, $default_modes) ? $mode_key : 0,
+        '#return_value' => $mode_key,
+      ];
+    }
 
     return parent::buildForm($form, $form_state);
   }
