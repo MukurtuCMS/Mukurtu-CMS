@@ -18,7 +18,7 @@ targetEntityType: media
 bundle: soundcloud
 mode: form_selection
 content:
-  field_thumbnail:
+  thumbnail:
     type: image
     label: hidden
     settings:
@@ -38,9 +38,9 @@ hidden:
   field_media_soundcloud: true
   field_media_tags: true
   field_people: true
+  field_thumbnail: true
   flag_export_media: true
   langcode: true
   name: true
   search_api_excerpt: true
-  thumbnail: true
   uid: true

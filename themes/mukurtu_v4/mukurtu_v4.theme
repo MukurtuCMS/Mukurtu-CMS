@@ -185,7 +185,7 @@ function mukurtu_v4_preprocess_media(array &$variables) {
   // form_selection) may also set these, but doing it here ensures the
   // variables are always available regardless of which hook fires first.
   $view_mode = $variables['elements']['#view_mode'] ?? '';
-  $thumbnail_view_modes = ['form_selection', 'carousel_thumbnail', 'media_assets', 'digital_heritage_sidebar'];
+  $thumbnail_view_modes = ['carousel_thumbnail', 'media_assets', 'digital_heritage_sidebar'];
   if (in_array($view_mode, $thumbnail_view_modes)) {
     $bundle = $media->bundle();
     if ($bundle === 'audio') {
@@ -218,13 +218,6 @@ function mukurtu_v4_preprocess_media__audio__carousel_thumbnail(array &$variable
 }
 
 /**
- * Implements template_preprocess_media__audio__form_selection().
- */
-function mukurtu_v4_preprocess_media__audio__form_selection(array &$variables): void {
-  $variables['audio_fallback_thumbnail_url'] = MukurtuV4AudioHelper::fallbackThumbnailUrl($variables['media'], $variables);
-}
-
-/**
  * Implements template_preprocess_media__audio__media_assets().
  */
 function mukurtu_v4_preprocess_media__audio__media_assets(array &$variables): void {
@@ -235,26 +228,6 @@ function mukurtu_v4_preprocess_media__audio__media_assets(array &$variables): vo
  * Implements template_preprocess_media__soundcloud__carousel_thumbnail().
  */
 function mukurtu_v4_preprocess_media__soundcloud__carousel_thumbnail(array &$variables): void {
-  $media = $variables['media'];
-  if ($media->get('field_thumbnail')->isEmpty()) {
-    $variables['#cache']['tags'][] = 'config:mukurtu_thumbnail.settings';
-    $config = \Drupal::config('mukurtu_thumbnail.settings');
-    $defaultFid = $config->get('soundcloud')[0] ?? NULL;
-    if ($defaultFid) {
-      $file = \Drupal\file\Entity\File::load($defaultFid);
-      if ($file) {
-        $variables['soundcloud_fallback_thumbnail_url'] = $file->createFileUrl();
-        return;
-      }
-    }
-    $variables['soundcloud_fallback_thumbnail_url'] = '/profiles/mukurtu/themes/mukurtu_v4/images/soundcloud.png';
-  }
-}
-
-/**
- * Implements template_preprocess_media__soundcloud__form_selection().
- */
-function mukurtu_v4_preprocess_media__soundcloud__form_selection(array &$variables): void {
   $media = $variables['media'];
   if ($media->get('field_thumbnail')->isEmpty()) {
     $variables['#cache']['tags'][] = 'config:mukurtu_thumbnail.settings';
