@@ -41,7 +41,7 @@ class MukurtuV4AudioHelper {
     $variables['#cache']['tags'][] = 'config:mukurtu_thumbnail.settings';
 
     $config = \Drupal::config('mukurtu_thumbnail.settings');
-    $defaultFid = $config->get('audio')[0] ?? NULL;
+    $defaultFid = $config->get('audio')[0] ?? $config->get('audio_default_thumbnail')[0] ?? NULL;
     if ($defaultFid) {
       $file = \Drupal\file\Entity\File::load($defaultFid);
       if ($file) {

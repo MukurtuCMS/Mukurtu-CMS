@@ -698,3 +698,19 @@ function mukurtu_media_update_40015(): void {
     }
   }
 }
+
+/**
+ * Re-save all audio media entities to apply the corrected default thumbnail.
+ */
+function mukurtu_media_update_40016(): void {
+  $mids = \Drupal::entityQuery('media')
+    ->condition('bundle', 'audio')
+    ->accessCheck(FALSE)
+    ->execute();
+  foreach ($mids as $mid) {
+    $media = \Drupal\media\Entity\Media::load($mid);
+    if ($media) {
+      $media->save();
+    }
+  }
+}
