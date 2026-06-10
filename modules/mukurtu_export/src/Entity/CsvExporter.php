@@ -51,9 +51,8 @@ use Drupal\user\UserInterface;
  *       "html" = "Drupal\Core\Entity\Routing\AdminHtmlRouteProvider",
  *     },
  *   },
- *   admin_permission = "administer site configuration",
+ *   admin_permission = "access mukurtu export",
  *   links = {
- *     "canonical" = "/admin/export/format/csv/manage/{csv_exporter}",
  *     "add-form" = "/admin/export/format/csv/add",
  *     "edit-form" = "/admin/export/format/csv/manage/{csv_exporter}",
  *     "delete-form" = "/admin/export/format/csv/manage/{csv_exporter}/delete",

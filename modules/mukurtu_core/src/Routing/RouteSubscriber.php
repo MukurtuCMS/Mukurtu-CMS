@@ -39,11 +39,15 @@ class RouteSubscriber extends RouteSubscriberBase
 
     // Replace the 'access content overview' permission on /admin/content with
     // a Mukurtu role check so protocol role members can access it.
+    // Also point the route at the Mukurtu content overview view so its
+    // VBO configuration (not the core node_bulk_form) is used.
     if ($route = $collection->get('system.admin_content')) {
       $requirements = $route->getRequirements();
       unset($requirements['_permission']);
       $requirements['_mukurtu_role'] = 'administrator+mukurtu_manager+protocol-protocol-community_record_steward+protocol-protocol-contributor+protocol-protocol-curator+protocol-protocol-language_contributor+protocol-protocol-language_steward+protocol-protocol-protocol_steward';
       $route->setRequirements($requirements);
+      $route->setDefault('view_id', 'mukurtu_manage_all_content');
+      $route->setDefault('display_id', 'mukurtu_manage_content');
     }
   }
 }

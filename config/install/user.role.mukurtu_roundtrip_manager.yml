@@ -2,8 +2,20 @@ langcode: en
 status: true
 dependencies:
   module:
+    - flag
+    - mukurtu_export
     - mukurtu_import
 id: mukurtu_roundtrip_manager
 label: 'Roundtrip Manager'
 weight: 3
 is_admin: null
+permissions:
+  - 'access mukurtu export'
+  - 'administer mukurtu_import_strategy'
+  - 'flag export_content'
+  - 'flag export_media'
+  - 'unflag export_content'
+  - 'unflag export_media'
+  - 'create mukurtu_import_strategy'
+  - 'delete own mukurtu_import_strategy'
+  - 'edit own mukurtu_import_strategy'

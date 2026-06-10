@@ -1,16 +1,3 @@
-mukurtu_export.export:
-  title: 'Export'
-  description: 'Export content and media.'
-  menu_name: dashboard-roundtrip
-  parent: mukurtu_dashboard
-  route_name: mukurtu_export.export_item_and_format_selection
-
-mukurtu_export.content_selected_for_export:
-  title: 'Content Selected for Export'
-  description: 'Content selected for export.'
-  menu_name: dashboard-roundtrip
-  parent: mukurtu_dashboard
-  route_name: mukurtu_export.content_selected_for_export
 
 mukurtu_export.export_settings:
   title: 'Export Settings'
@@ -18,3 +5,10 @@ mukurtu_export.export_settings:
   menu_name: dashboard-roundtrip
   parent: mukurtu_dashboard
   route_name: mukurtu_export.export_settings
+
+mukurtu_export.export_lists:
+  title: 'Export Lists'
+  description: 'Manage saved export lists.'
+  menu_name: dashboard-roundtrip
+  parent: mukurtu_dashboard
+  route_name: entity.export_list.collection
