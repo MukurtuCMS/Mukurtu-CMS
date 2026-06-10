@@ -83,8 +83,10 @@
         updateToggleVisibility();
 
         // Show the toggle as soon as the first item is added.
+        // Store on the element so the behavior detach callback can disconnect.
         var observer = new MutationObserver(updateToggleVisibility);
         observer.observe(list, { childList: true });
+        list._mukurtuToggleObserver = observer;
 
         $toggle.on('click', '.eb-view-toggle__btn', function () {
           var view = $(this).hasClass('eb-view-toggle__btn--grid') ? 'grid' : 'list';
@@ -93,6 +95,14 @@
           $(this).attr('aria-pressed', 'true');
           localStorage.setItem(storageKey, view);
         });
+      });
+    },
+    detach: function (context) {
+      $(context).find('.field--widget-entity-browser-entity-reference .entities-list').each(function () {
+        if (this._mukurtuToggleObserver) {
+          this._mukurtuToggleObserver.disconnect();
+          delete this._mukurtuToggleObserver;
+        }
       });
     },
   };

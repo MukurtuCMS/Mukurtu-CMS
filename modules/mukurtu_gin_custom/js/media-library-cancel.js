@@ -62,7 +62,7 @@
     // Add a header cell for the edit column if not already present.
     var $thead = $table.find('thead tr');
     if (!$thead.find('.mukurtu-edit-col').length) {
-      $thead.append('<th class="mukurtu-edit-col"></th>');
+      $thead.append('<th class="mukurtu-edit-col" aria-label="' + Drupal.t('Actions') + '"></th>');
     }
 
     // Build a base URL from drupalSettings so subdirectory installs work.

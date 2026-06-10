@@ -1216,29 +1216,9 @@ function mukurtu_core_update_40037(): void {
 }
 
 /**
- * Fix audio form_selection display to show thumbnail; add soundcloud form_selection display.
- */
-function mukurtu_core_update_40038(): void {
-  $config_storage = \Drupal::service('config.storage');
-  $profile_path = \Drupal::service('extension.list.profile')->getPath('mukurtu');
-  $profile_source = new \Drupal\Core\Config\FileStorage($profile_path . '/config/install');
-
-  $configs = [
-    'core.entity_view_display.media.audio.form_selection',
-    'core.entity_view_display.media.soundcloud.form_selection',
-  ];
-  foreach ($configs as $name) {
-    $data = $profile_source->read($name);
-    if ($data !== FALSE) {
-      $config_storage->write($name, $data);
-    }
-  }
-}
-
-/**
  * Update manage all content view: add administrator site-role and empty_table.
  */
-function mukurtu_core_update_40039(): void {
+function mukurtu_core_update_40038(): void {
   $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_manage_all_content');
   if ($config->isNew()) {
     return;
@@ -1259,4 +1239,23 @@ function mukurtu_core_update_40039(): void {
   }
 
   $config->save();
+}
+
+/**
+ * Fix audio form_selection display to show thumbnail; add soundcloud form_selection display.
+ */
+function mukurtu_core_update_40039(): void {
+  $profile_path = \Drupal::service('extension.list.profile')->getPath('mukurtu');
+  $profile_source = new \Drupal\Core\Config\FileStorage($profile_path . '/config/install');
+
+  $configs = [
+    'core.entity_view_display.media.audio.form_selection',
+    'core.entity_view_display.media.soundcloud.form_selection',
+  ];
+  foreach ($configs as $name) {
+    $data = $profile_source->read($name);
+    if ($data !== FALSE) {
+      \Drupal::configFactory()->getEditable($name)->setData($data)->save();
+    }
+  }
 }

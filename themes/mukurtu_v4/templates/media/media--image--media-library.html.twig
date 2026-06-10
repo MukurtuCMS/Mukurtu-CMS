@@ -43,6 +43,6 @@
   {% if content.thumbnail['#items'] is not empty %}
     {{ content.thumbnail }}
   {% else %}
-    <img alt="image {{ name }}" src="{{ base_path ~ directory }}/images/image-square.png">
+    <img alt="{{ name }}" src="{{ base_path ~ directory }}/images/image-square.png">
   {% endif %}
 </div>

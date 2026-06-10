@@ -43,6 +43,6 @@
   {% if content.field_thumbnail['#items'] is not empty %}
     {{ content.field_thumbnail }}
   {% else %}
-    <img alt="audio file {{ name }}" src="{{ audio_fallback_thumbnail_url }}">
+    <img alt="{{ name }}" src="{{ audio_fallback_thumbnail_url }}">
   {% endif %}
 </div>
