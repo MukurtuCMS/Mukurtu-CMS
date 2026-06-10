@@ -550,7 +550,10 @@ display:
       access:
         type: site_and_mukurtu_role
         options:
-          site-role: {  }
+          site-role:
+            administrator: administrator
+            mukurtu_manager: mukurtu_manager
+            mukurtu_roundtrip_manager: mukurtu_roundtrip_manager
           community-role: {  }
           protocol-role:
             protocol-protocol-community_record_steward: protocol-protocol-community_record_steward

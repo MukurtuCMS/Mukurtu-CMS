@@ -1,0 +1,45 @@
+diff --git a/message_digest.module b/message_digest.module
+--- a/message_digest.module
++++ b/message_digest.module
+@@ -133,7 +133,7 @@ function message_digest_entity_delete(EntityInterface $entity) {
+ /**
+  * Implements callback_allowed_values_function().
+  */
+-function message_digest_allowed_values_callback(FieldStorageDefinitionInterface $definition, FieldableEntityInterface $entity = NULL, &$cacheable = NULL) {
++function message_digest_allowed_values_callback(FieldStorageDefinitionInterface $definition, ?FieldableEntityInterface $entity = NULL, &$cacheable = NULL) {
+   // Always add an 'immediate' option.
+   $values = [
+     t('Send immediately'),
+diff --git a/message_digest_ui/src/Plugin/Action/DigestInterval.php b/message_digest_ui/src/Plugin/Action/DigestInterval.php
+--- a/message_digest_ui/src/Plugin/Action/DigestInterval.php
++++ b/message_digest_ui/src/Plugin/Action/DigestInterval.php
+@@ -87,7 +87,7 @@
+   /**
+    * {@inheritdoc}
+    */
+-  public function access($object, AccountInterface $account = NULL, $return_as_object = FALSE) {
++  public function access($object, ?AccountInterface $account = NULL, $return_as_object = FALSE) {
+     if (!$this->flag) {
+       return $return_as_object ? AccessResult::forbidden() : FALSE;
+     }
+diff --git a/src/Plugin/Notifier/DigestBase.php b/src/Plugin/Notifier/DigestBase.php
+--- a/src/Plugin/Notifier/DigestBase.php
++++ b/src/Plugin/Notifier/DigestBase.php
+@@ -73,7 +73,7 @@
+    * @param \Drupal\Component\Datetime\TimeInterface $time
+    *   The time service.
+    */
+-  public function __construct(array $configuration, $plugin_id, $plugin_definition, LoggerChannelInterface $logger, EntityTypeManagerInterface $entity_type_manager, RendererInterface $renderer, MessageInterface $message = NULL, StateInterface $state, Connection $connection, TimeInterface $time) {
++  public function __construct(array $configuration, $plugin_id, $plugin_definition, LoggerChannelInterface $logger, EntityTypeManagerInterface $entity_type_manager, RendererInterface $renderer, ?MessageInterface $message, StateInterface $state, Connection $connection, TimeInterface $time) {
+     // Set some defaults.
+     $configuration += [
+       'entity_type' => '',
+@@ -90,7 +90,7 @@
+   /**
+    * {@inheritdoc}
+    */
+-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition, MessageInterface $message = NULL) {
++  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition, ?MessageInterface $message = NULL) {
+     return new static(
+       $configuration,
+       $plugin_id,

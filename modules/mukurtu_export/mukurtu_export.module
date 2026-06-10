@@ -1,12 +1,291 @@
 <?php
 
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
+
 /**
- * Implements hook_entity_type_alter().
+ * Implements hook_preprocess_flag().
+ *
+ * Replaces the "Add to export list" flag link with a link to the export list
+ * picker form, so users can choose which list to add the item to.
  */
-function mukurtu_export_entity_type_alter(array &$entity_types) {
-  //dpm($entity_types['node']);
+function mukurtu_export_preprocess_flag(&$variables) {
+  /** @var \Drupal\flag\FlagInterface $flag */
+  $flag = $variables['flag'];
+  if (!in_array($flag->id(), ['export_content', 'export_media'])) {
+    return;
+  }
+
+  /** @var \Drupal\Core\Entity\EntityInterface $entity */
+  $entity = $variables['flaggable'];
+  $destination = \Drupal::request()->getRequestUri();
+
+  $url = Url::fromRoute('mukurtu_export.add_item_to_list', [
+    'entity_type' => $entity->getEntityTypeId(),
+    'entity_id' => $entity->id(),
+  ], [
+    'query' => ['destination' => $destination],
+  ]);
+
+  // The flag template renders <a{{ attributes }}>{{ title }}</a>.
+  // Replace the href with the list picker URL and strip the AJAX class so
+  // the Flag module's AJAX behavior does not intercept the click.
+  // Ensure attributes is an Attribute object (it may arrive as a plain array
+  // when rendered inside a lazy-built placeholder).
+  if (!($variables['attributes'] instanceof \Drupal\Core\Template\Attribute)) {
+    $variables['attributes'] = new \Drupal\Core\Template\Attribute((array) $variables['attributes']);
+  }
+  $variables['attributes']['href'] = $url->toString();
+  $variables['attributes']->removeClass('use-ajax');
+  $variables['attributes']->addClass(['button', 'button--small']);
+  $variables['title'] = t('Add to export list');
 }
 
+
+/**
+ * Implements hook_entity_operation().
+ *
+ * Adds "Add to export list" to the operations dropdown on node/media rows.
+ */
+function mukurtu_export_entity_operation(\Drupal\Core\Entity\EntityInterface $entity) {
+  $supported = ['node', 'media'];
+  if (!in_array($entity->getEntityTypeId(), $supported)) {
+    return [];
+  }
+  if (!\Drupal::currentUser()->hasPermission('access mukurtu export')) {
+    return [];
+  }
+  return [
+    'add_to_export_list' => [
+      'title' => t('Add to export list'),
+      'url' => \Drupal\Core\Url::fromRoute('mukurtu_export.add_item_to_list', [
+        'entity_type' => $entity->getEntityTypeId(),
+        'entity_id' => $entity->id(),
+      ], [
+        'query' => ['destination' => \Drupal::request()->getRequestUri()],
+      ]),
+      'weight' => 50,
+    ],
+  ];
+}
+
+/**
+ * Implements hook_form_alter().
+ *
+ * Intercepts Views bulk-form submissions for the export flag actions so that
+ * instead of returning to the view, users land on the export list picker.
+ */
+function mukurtu_export_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  if (str_starts_with($form_id, 'views_form_')) {
+    $form['#submit'][] = 'mukurtu_export_bulk_form_submit';
+  }
+}
+
+/**
+ * Form submit handler added by mukurtu_export_form_alter().
+ */
+function mukurtu_export_bulk_form_submit(&$form, FormStateInterface $form_state) {
+  $export_flag_actions = [
+    'flag_action.export_content_flag',
+    'flag_action.export_media_flag',
+  ];
+  if (!in_array($form_state->getValue('action'), $export_flag_actions, TRUE)) {
+    return;
+  }
+  $destination = \Drupal::request()->getRequestUri();
+  $form_state->setRedirectUrl(\Drupal\Core\Url::fromRoute('mukurtu_export.add_items_to_list', [], ['query' => ['destination' => $destination]]));
+}
+
+/**
+ * Implements hook_entity_extra_field_info().
+ *
+ * Registers the "Export list membership" pseudo-field for all node and media
+ * bundles so it can be positioned via the display config UI.
+ */
+function mukurtu_export_entity_extra_field_info() {
+  $extra = [];
+  $field_info = [
+    'label' => t('Export list membership'),
+    'description' => t('Shows which export lists this content belongs to.'),
+    'weight' => -50,
+    'visible' => TRUE,
+  ];
+  $bundle_info = \Drupal::service('entity_type.bundle.info');
+  foreach (array_keys($bundle_info->getBundleInfo('node')) as $bundle) {
+    if ($bundle === 'landing_page') {
+      continue;
+    }
+    $extra['node'][$bundle]['display']['export_list_membership'] = $field_info;
+  }
+  foreach (array_keys($bundle_info->getBundleInfo('media')) as $bundle) {
+    $extra['media'][$bundle]['display']['export_list_membership'] = $field_info;
+  }
+  return $extra;
+}
+
+/**
+ * Implements hook_entity_view().
+ *
+ * Renders a disclosure widget showing which export lists contain this entity.
+ */
+function mukurtu_export_entity_view(array &$build, \Drupal\Core\Entity\EntityInterface $entity, $display, $view_mode) {
+  if (!in_array($entity->getEntityTypeId(), ['node', 'media'])) {
+    return;
+  }
+  if ($view_mode !== 'full') {
+    return;
+  }
+  if (!\Drupal::currentUser()->hasPermission('access mukurtu export')) {
+    return;
+  }
+
+  $entity_type = $entity->getEntityTypeId();
+  $entity_id = $entity->id();
+  $uid = \Drupal::currentUser()->id();
+
+  $storage = \Drupal::entityTypeManager()->getStorage('export_list');
+  $query = $storage->getQuery()->accessCheck(TRUE);
+  $or = $query->orConditionGroup()
+    ->condition('uid', $uid)
+    ->condition('site_wide', TRUE);
+  $ids = $query->condition($or)->execute();
+  $lists = $storage->loadMultiple($ids);
+
+  // Attach cache metadata from every list the user can see (not just matching
+  // ones) so any list change — including adding this entity to a list for the
+  // first time — invalidates this render. The list-level tag covers new lists
+  // being created. The user cache context scopes results per user.
+  $all_cache_tags = ['export_list_list'];
+  foreach ($lists as $list) {
+    $all_cache_tags = array_merge($all_cache_tags, $list->getCacheTags());
+  }
+  \Drupal\Core\Cache\CacheableMetadata::createFromRenderArray($build)
+    ->addCacheTags($all_cache_tags)
+    ->addCacheContexts(['user'])
+    ->applyTo($build);
+
+  $matching = array_filter($lists, function ($list) use ($entity_type, $entity_id) {
+    $items = $list->getItems();
+    return isset($items[$entity_type][$entity_id]);
+  });
+
+  if (empty($matching)) {
+    return;
+  }
+
+  $items = [];
+  foreach ($matching as $list) {
+    $items[] = [
+      '#type' => 'link',
+      '#title' => $list->label(),
+      '#url' => $list->toUrl('edit-form'),
+    ];
+  }
+
+  $count = count($matching);
+  $build['export_list_membership'] = [
+    '#type' => 'html_tag',
+    '#tag' => 'details',
+    '#attributes' => ['class' => ['export-list-membership']],
+    'summary' => [
+      '#type' => 'html_tag',
+      '#tag' => 'summary',
+      '#value' => \Drupal::translation()->formatPlural($count, 'In 1 export list', 'In @count export lists'),
+    ],
+    'list' => [
+      '#theme' => 'item_list',
+      '#items' => $items,
+    ],
+  ];
+}
+
+/**
+ * Implements hook_preprocess_block().
+ *
+ * Injects the "Add to export list" button into the local tasks block so it
+ * can be rendered right-aligned next to the node tabs.
+ */
+function mukurtu_export_preprocess_block(&$variables) {
+  if (($variables['plugin_id'] ?? '') !== 'local_tasks_block') {
+    return;
+  }
+  if (!\Drupal::currentUser()->hasPermission('access mukurtu export')) {
+    return;
+  }
+  $node = \Drupal::routeMatch()->getParameter('node');
+  if (!$node instanceof \Drupal\node\NodeInterface) {
+    return;
+  }
+  if ($node->bundle() === 'landing_page') {
+    return;
+  }
+  $variables['export_button'] = [
+    '#type' => 'link',
+    '#title' => t('Add to export list'),
+    '#url' => \Drupal\Core\Url::fromRoute('mukurtu_export.add_item_to_list', [
+      'entity_type' => 'node',
+      'entity_id' => $node->id(),
+    ], [
+      'query' => ['destination' => \Drupal::request()->getRequestUri()],
+    ]),
+    '#attributes' => [],
+  ];
+
+  // Find which export lists already contain this node.
+  $uid = \Drupal::currentUser()->id();
+  $storage = \Drupal::entityTypeManager()->getStorage('export_list');
+  $query = $storage->getQuery()->accessCheck(TRUE);
+  $or = $query->orConditionGroup()
+    ->condition('uid', $uid)
+    ->condition('site_wide', TRUE);
+  $lists = $storage->loadMultiple($query->condition($or)->execute());
+
+  // Attach cache metadata from all lists so any list change invalidates the
+  // block render, including the first time this node is added to a list.
+  $all_cache_tags = ['export_list_list'];
+  foreach ($lists as $list) {
+    $all_cache_tags = array_merge($all_cache_tags, $list->getCacheTags());
+  }
+  $variables['#cache']['tags'] = array_merge($variables['#cache']['tags'] ?? [], $all_cache_tags);
+  $variables['#cache']['contexts'] = array_merge($variables['#cache']['contexts'] ?? [], ['user']);
+
+  $matching = array_filter($lists, function ($list) use ($node) {
+    $items = $list->getItems();
+    return isset($items['node'][$node->id()]);
+  });
+
+  if (!empty($matching)) {
+    $variables['#attached']['library'][] = 'mukurtu_export/export_list_dropdown';
+    $count = count($matching);
+    $list_items = [];
+    foreach ($matching as $list) {
+      $list_items[] = [
+        '#type' => 'link',
+        '#title' => $list->label(),
+        '#url' => $list->toUrl('edit-form'),
+      ];
+    }
+    $variables['export_membership'] = [
+      '#type' => 'html_tag',
+      '#tag' => 'details',
+      '#attributes' => ['class' => ['export-list-dropdown']],
+      'summary' => [
+        '#type' => 'html_tag',
+        '#tag' => 'summary',
+        '#value' => \Drupal::translation()->formatPlural($count, 'In 1 list', 'In @count lists'),
+      ],
+      'menu' => [
+        '#type' => 'html_tag',
+        '#tag' => 'div',
+        '#attributes' => ['class' => ['export-list-dropdown__menu'], 'role' => 'list'],
+        'list' => [
+          '#theme' => 'item_list',
+          '#items' => $list_items,
+        ],
+      ],
+    ];
+  }
+}
 
 function mukurtu_export_views_data() {
   $data = [];

@@ -735,6 +735,8 @@ function mukurtu_install() {
     'rebuild cache access',
   ];
   $roles['mukurtu_roundtrip_manager'] = [
+    'access content overview',
+    'access media overview',
     'access mukurtu import',
     'create mukurtu_import_strategy',
     'edit own mukurtu_import_strategy',
@@ -835,6 +837,13 @@ function mukurtu_install() {
   //   $block->setWeight(4);
   //   $block->save();
   // }
+
+  // Disable the core media view so Mukurtu's view is the sole handler at
+  // /admin/content/media.
+  $config = \Drupal::configFactory()->getEditable('views.view.media');
+  if (!$config->isNew()) {
+    $config->set('status', FALSE)->save();
+  }
 
 }
 

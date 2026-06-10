@@ -27,20 +27,6 @@ content:
     settings:
       media_types: {  }
     third_party_settings: {  }
-  field_comment_require_approval:
-    type: boolean_checkbox
-    weight: 10
-    region: content
-    settings:
-      display_label: true
-    third_party_settings: {  }
-  field_comment_status:
-    type: boolean_checkbox
-    weight: 9
-    region: content
-    settings:
-      display_label: true
-    third_party_settings: {  }
   field_communities:
     type: entity_browser_entity_reference
     weight: 3
@@ -125,4 +111,6 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-hidden: {  }
+hidden:
+  field_comment_require_approval: hidden
+  field_comment_status: hidden

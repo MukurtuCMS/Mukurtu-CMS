@@ -5,10 +5,13 @@ mukurtu-gin-custom:
       css/mukurtu-gin-custom.css: {}
   js:
     js/mukurtu-gin-custom.js: {}
+    js/media-library-cancel.js: {}
     js/mukurtu-tagify-focus.js: {}
   dependencies:
+    - core/jquery
     - core/drupal
     - core/once
+    - core/drupalSettings
     - toolbar/toolbar
 
 entity-browser-toggle:

@@ -20,3 +20,14 @@ services:
     tags:
       - { name: needs_destruction }
   Drupal\mukurtu_collection\MenuRebuildProcessor: '@mukurtu_collection.menu_rebuild_processor'
+
+  Drupal\mukurtu_collection\Hook\CollectionPreprocessHooks:
+    class: Drupal\mukurtu_collection\Hook\CollectionPreprocessHooks
+    arguments:
+      - '@mukurtu_collection.hierarchy_service'
+
+  Drupal\mukurtu_collection\Hook\CollectionEntityHooks:
+    class: Drupal\mukurtu_collection\Hook\CollectionEntityHooks
+    arguments:
+      - '@mukurtu_collection.menu_rebuild_processor'
+      - '@entity_type.manager'

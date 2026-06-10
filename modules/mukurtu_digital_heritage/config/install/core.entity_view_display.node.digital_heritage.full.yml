@@ -163,7 +163,7 @@ bundle: digital_heritage
 mode: full
 content:
   comment:
-    type: comment_default
+    type: mukurtu_comment_default
     label: above
     settings:
       view_mode: default
@@ -183,7 +183,7 @@ content:
     type: entity_reference_entity_view
     label: above
     settings:
-      view_mode: browse
+      view_mode: featured
       link: false
     third_party_settings: {  }
     weight: 42

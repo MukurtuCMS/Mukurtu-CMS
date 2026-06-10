@@ -1068,3 +1068,175 @@ function mukurtu_core_update_40033(): void {
     throw new \RuntimeException("Failed to write patched file: $path");
   }
 }
+
+/**
+ * Hide comment subject field from the comment form; set body to basic_html.
+ *
+ * Note: subsequent hooks 40035 and 40036 supersede the format change made
+ * here, ultimately switching to plain_text. This hook only hides the subject.
+ */
+function mukurtu_core_update_40034(): void {
+  // Hide subject field from comment form display.
+  $form_display = \Drupal::configFactory()->getEditable('core.entity_form_display.comment.comment.default');
+  if (!$form_display->isNew()) {
+    $subject = $form_display->get('content.subject');
+    if ($subject) {
+      $form_display->clear('content.subject');
+      $form_display->set('hidden.subject', TRUE);
+      $form_display->save();
+    }
+  }
+
+  // Restrict comment body to Basic HTML only (hides format switcher and tips link).
+  $field_config = \Drupal::configFactory()->getEditable('field.field.comment.comment.comment_body');
+  if (!$field_config->isNew()) {
+    $field_config->set('settings.allowed_formats', ['basic_html' => 'basic_html']);
+    $field_config->save();
+  }
+}
+
+/**
+ * Create comment_basic_html text format (no media embed) and restrict comment
+ * body to it; removes Insert Media button from comment CKEditor toolbar.
+ */
+function mukurtu_core_update_40035(): void {
+  // Create the comment_basic_html filter format if it doesn't exist.
+  $format_config = \Drupal::configFactory()->getEditable('filter.format.comment_basic_html');
+  if ($format_config->isNew()) {
+    $format_config->setData([
+      'langcode' => 'en',
+      'status' => TRUE,
+      'dependencies' => ['module' => ['editor', 'filter']],
+      'name' => 'Comment Basic HTML',
+      'format' => 'comment_basic_html',
+      'weight' => 1,
+      'filters' => [
+        'editor_file_reference' => ['id' => 'editor_file_reference', 'provider' => 'editor', 'status' => TRUE, 'weight' => 11, 'settings' => []],
+        'filter_align' => ['id' => 'filter_align', 'provider' => 'filter', 'status' => TRUE, 'weight' => 7, 'settings' => []],
+        'filter_caption' => ['id' => 'filter_caption', 'provider' => 'filter', 'status' => TRUE, 'weight' => 8, 'settings' => []],
+        'filter_html' => [
+          'id' => 'filter_html',
+          'provider' => 'filter',
+          'status' => TRUE,
+          'weight' => -10,
+          'settings' => [
+            'allowed_html' => '<br> <p> <h2 id> <h3 id> <h4 id> <h5 id> <h6 id> <cite> <dl> <dt> <dd> <span> <img src alt height width data-entity-type data-entity-uuid data-align data-caption> <drupal-entity data-entity-type data-entity-uuid data-entity-embed-display data-entity-embed-display-settings data-align data-caption data-embed-button data-langcode alt title> <iframe src width height frameborder allowfullscreen> <a hreflang href> <blockquote cite> <ul type> <ol type start> <strong> <em> <code> <li>',
+            'filter_html_help' => FALSE,
+            'filter_html_nofollow' => TRUE,
+          ],
+        ],
+        'filter_html_image_secure' => ['id' => 'filter_html_image_secure', 'provider' => 'filter', 'status' => TRUE, 'weight' => 9, 'settings' => []],
+        'filter_htmlcorrector' => ['id' => 'filter_htmlcorrector', 'provider' => 'filter', 'status' => TRUE, 'weight' => 10, 'settings' => []],
+      ],
+    ])->save();
+  }
+
+  // Create the CKEditor 5 config for comment_basic_html (no drupalMedia).
+  $editor_config = \Drupal::configFactory()->getEditable('editor.editor.comment_basic_html');
+  if ($editor_config->isNew()) {
+    $editor_config->setData([
+      'langcode' => 'en',
+      'status' => TRUE,
+      'dependencies' => ['config' => ['filter.format.comment_basic_html'], 'module' => ['ckeditor5']],
+      'format' => 'comment_basic_html',
+      'editor' => 'ckeditor5',
+      'settings' => [
+        'toolbar' => [
+          'items' => ['heading', 'bold', 'italic', 'code', '|', 'bulletedList', 'numberedList', '|', 'link', 'blockQuote', '|', 'specialCharacters', 'sourceEditing'],
+        ],
+        'plugins' => [
+          'ckeditor5_heading' => ['enabled_headings' => ['heading2', 'heading3', 'heading4', 'heading5', 'heading6']],
+          'ckeditor5_sourceEditing' => [
+            'allowed_tags' => ['<cite>', '<dl>', '<dt>', '<dd>', '<span>', '<img src alt height width data-entity-type data-entity-uuid data-align data-caption>', '<drupal-entity data-entity-type data-entity-uuid data-entity-embed-display data-entity-embed-display-settings data-align data-caption data-embed-button data-langcode alt title>', '<iframe src width height frameborder allowfullscreen>', '<a hreflang>', '<blockquote cite>', '<ul type>', '<ol type>', '<h2 id>', '<h3 id>', '<h4 id>', '<h5 id>', '<h6 id>'],
+          ],
+          'ckeditor5_list' => ['properties' => ['reversed' => FALSE, 'startIndex' => TRUE, 'styles' => TRUE], 'multiBlock' => TRUE],
+        ],
+      ],
+      'image_upload' => ['status' => FALSE],
+    ])->save();
+  }
+
+  // Switch comment body to the new comment_basic_html format.
+  $field_config = \Drupal::configFactory()->getEditable('field.field.comment.comment.comment_body');
+  if (!$field_config->isNew()) {
+    $field_config->set('settings.allowed_formats', ['comment_basic_html' => 'comment_basic_html']);
+    $field_config->save();
+  }
+
+  // Grant authenticated users permission to use the new format.
+  $role = \Drupal\user\Entity\Role::load('authenticated');
+  if ($role && !$role->hasPermission('use text format comment_basic_html')) {
+    $role->grantPermission('use text format comment_basic_html');
+    $role->save();
+  }
+}
+
+/**
+ * Switch comment body to plain_text; remove comment_basic_html format.
+ */
+function mukurtu_core_update_40036(): void {
+  // Editor config must be deleted before the filter format (config dependency).
+  $editor_config = \Drupal::configFactory()->getEditable('editor.editor.comment_basic_html');
+  if (!$editor_config->isNew()) {
+    $editor_config->delete();
+  }
+
+  $format_config = \Drupal::configFactory()->getEditable('filter.format.comment_basic_html');
+  if (!$format_config->isNew()) {
+    $format_config->delete();
+  }
+
+  // Point the field at plain_text.
+  $field_config = \Drupal::configFactory()->getEditable('field.field.comment.comment.comment_body');
+  if (!$field_config->isNew()) {
+    $field_config->set('settings.allowed_formats', ['plain_text' => 'plain_text']);
+    $field_config->save();
+  }
+
+  // Re-format existing comment bodies stored with comment_basic_html.
+  \Drupal::database()->update('comment__comment_body')
+    ->fields(['comment_body_format' => 'plain_text'])
+    ->condition('comment_body_format', 'comment_basic_html')
+    ->execute();
+
+  // Revoke the format permission from the authenticated role.
+  $role = \Drupal\user\Entity\Role::load('authenticated');
+  if ($role && $role->hasPermission('use text format comment_basic_html')) {
+    $role->revokePermission('use text format comment_basic_html');
+    $role->save();
+  }
+}
+
+/**
+ * Remove legacy mukurtu_default_image setting superseded by media placeholders.
+ */
+function mukurtu_core_update_40037(): void {
+  $config = \Drupal::configFactory()->getEditable('mukurtu.settings');
+  $config->clear('mukurtu_default_image')->save();
+}
+
+/**
+ * Update manage all content view: add administrator site-role and empty_table.
+ */
+function mukurtu_core_update_40038(): void {
+  $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_manage_all_content');
+  if ($config->isNew()) {
+    return;
+  }
+
+  // Add administrator to allowed site roles so UID 1 and admins can access.
+  $access_options = $config->get('display.default.display_options.access.options');
+  if (is_array($access_options) && isset($access_options['site-role'])) {
+    $access_options['site-role']['administrator'] = 'administrator';
+    $config->set('display.default.display_options.access.options', $access_options);
+  }
+
+  // Show table headers even when there are no results.
+  $style_options = $config->get('display.default.display_options.style.options');
+  if (is_array($style_options)) {
+    $style_options['empty_table'] = TRUE;
+    $config->set('display.default.display_options.style.options', $style_options);
+  }
+
+  $config->save();
+}

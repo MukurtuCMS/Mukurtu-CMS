@@ -1,0 +1,8 @@
+services:
+  media_library.ui_builder:
+    class: Drupal\mukurtu_media\MukurtuMediaLibraryUiBuilder
+    arguments: ['@entity_type.manager', '@request_stack', '@views.executable', '@form_builder', '@media_library.opener_resolver']
+  mukurtu_media.route_subscriber:
+    class: Drupal\mukurtu_media\Routing\RouteSubscriber
+    tags:
+      - { name: event_subscriber }

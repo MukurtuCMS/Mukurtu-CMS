@@ -101,17 +101,23 @@ class CSV extends ExporterBase {
     $default_settings_id = $settings['settings_id'] ?? NULL;
     $form['export_settings']['#default_value'] = $default_settings_id && in_array($default_settings_id, $option_keys) ? $default_settings_id : reset($option_keys);
 
-    $form['new_setting'] = [
+    $form['settings_actions'] = [
+      '#type' => 'actions',
+    ];
+
+    $form['settings_actions']['new_setting'] = [
       '#type' => 'link',
       '#title' => $this->t('New CSV export setting'),
       '#url' => Url::fromRoute('entity.csv_exporter.add_form'),
+      '#attributes' => ['class' => ['button']],
     ];
 
     if (\Drupal::currentUser()->hasPermission('administer mukurtu_import_strategy')) {
-      $form['manage_settings'] = [
+      $form['settings_actions']['manage_settings'] = [
         '#type' => 'link',
         '#title' => $this->t('Manage saved CSV export settings'),
         '#url' => Url::fromRoute('entity.csv_exporter.collection'),
+        '#attributes' => ['class' => ['button']],
       ];
     }
     return $form;

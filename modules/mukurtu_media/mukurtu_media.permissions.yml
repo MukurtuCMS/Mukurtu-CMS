@@ -1,3 +1,6 @@
+'administer mukurtu_media configuration':
+  title: 'Administer Mukurtu Media configuration'
+  description: 'Configure Mukurtu Media settings including default thumbnails and restricted media placeholder.'
 administer mukurtu media download settings:
   title: 'Administer Mukurtu media download settings'
   description: 'Configure the media download button visibility.'

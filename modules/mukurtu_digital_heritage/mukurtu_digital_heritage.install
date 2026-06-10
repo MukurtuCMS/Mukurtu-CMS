@@ -124,3 +124,27 @@ function mukurtu_digital_heritage_update_40004(): void {
   $config->set('content.field_related_content.settings.field_widget_display_settings', ['view_mode' => 'form_selection']);
   $config->save();
 }
+
+/**
+ * Use mukurtu_comment_default formatter for digital heritage comment field.
+ */
+function mukurtu_digital_heritage_update_40005(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.digital_heritage.full');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.comment.type', 'mukurtu_comment_default');
+  $config->save();
+}
+
+/**
+ * Switch digital heritage full view related content to featured view mode.
+ */
+function mukurtu_digital_heritage_update_40006(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.digital_heritage.full');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_all_related_content.settings.view_mode', 'featured');
+  $config->save();
+}
