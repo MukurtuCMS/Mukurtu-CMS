@@ -62,6 +62,13 @@ class MukurtuMediaContentWarnings {
     ])) {
       return;
     }
+    // Always declare a cache dependency on the settings config so that if a
+    // view mode is re-enabled the cached render for that mode is automatically
+    // invalidated (without a manual cache clear).
+    CacheableMetadata::createFromRenderArray($build)
+      ->addCacheableDependency($this->contentWarningSettings)
+      ->applyTo($build);
+
     // null = not yet configured = all modes allowed (backwards compatible default).
     // [] = admin explicitly unchecked all modes = no warnings anywhere.
     $allowed_modes = $this->contentWarningSettings->get('warning_view_modes');
