@@ -76,6 +76,13 @@ class MukurtuMediaContentWarnings {
         ->addCacheableDependency($term)
         ->applyTo($build);
     }
+    if ($entity->hasField('field_contributor')) {
+      foreach ($entity->get('field_contributor')->referencedEntities() as $term) {
+        CacheableMetadata::createFromRenderArray($build)
+          ->addCacheableDependency($term)
+          ->applyTo($build);
+      }
+    }
     $build['media_content_warnings'] = $this->buildMediaContentWarnings($entity);
   }
 
@@ -202,10 +209,14 @@ class MukurtuMediaContentWarnings {
    */
   protected function getDeceasedPersonNodes(PeopleInterface $entity): array {
     $people_terms = $entity->getPeopleTerms();
-    if (empty($people_terms)) {
+    $contributor_terms = $entity->hasField('field_contributor')
+      ? $entity->get('field_contributor')->referencedEntities()
+      : [];
+    $all_terms = array_merge($people_terms, $contributor_terms);
+    if (empty($all_terms)) {
       return [];
     }
-    $tids = array_map(fn(TermInterface $term) => $term->id(), $people_terms);
+    $tids = array_map(fn(TermInterface $term) => $term->id(), $all_terms);
     $query = $this->entityTypeManager->getStorage('node')->getQuery();
     $nids = $query->condition('type', 'person')
       ->condition('field_deceased', TRUE)
