@@ -266,7 +266,7 @@ function mukurtu_protocol_menu_local_tasks_alter(&$data, $route_name, \Drupal\Co
 
       // Save the contents of the revisions button just in case our calculations
       // show that the current user has edit access.
-      $revisionsTab = $data['tabs'][0]['entity.node.version_history'];
+      $revisionsTab = $data['tabs'][0]['entity.node.version_history'] ?? NULL;
       unset($data['tabs'][0]['entity.node.version_history']);
 
       $route_match = \Drupal::routeMatch();
@@ -291,7 +291,7 @@ function mukurtu_protocol_menu_local_tasks_alter(&$data, $route_name, \Drupal\Co
             }
           }
         }
-        if ($hasEditPermission) {
+        if ($hasEditPermission && $revisionsTab !== NULL) {
           $data['tabs'][0]['entity.node.version_history'] = $revisionsTab;
         }
       }
