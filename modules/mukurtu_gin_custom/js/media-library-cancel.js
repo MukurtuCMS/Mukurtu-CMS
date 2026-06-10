@@ -22,7 +22,6 @@
       type: 'button',
       'class': 'button js-mukurtu-cancel-proxy',
       value: Drupal.t('Cancel'),
-      'aria-label': Drupal.t('Cancel media upload'),
     });
 
     $proxy.on('click', function () {
@@ -53,10 +52,16 @@
     var $table = $('.media-library-widget-modal .views-table');
     if (!$table.length) return;
 
+    // WCAG 4.1.2: table with aria-selected rows must have role="grid" so
+    // assistive technologies correctly interpret the selection semantics.
+    if (!$table.attr('role')) {
+      $table.attr('role', 'grid');
+    }
+
     // Add a header cell for the edit column if not already present.
     var $thead = $table.find('thead tr');
     if (!$thead.find('.mukurtu-edit-col').length) {
-      $thead.append('<th class="mukurtu-edit-col"></th>');
+      $thead.append('<th class="mukurtu-edit-col" scope="col" aria-label="' + Drupal.t('Actions') + '"></th>');
     }
 
     // Build a base URL from drupalSettings so subdirectory installs work.
@@ -80,6 +85,11 @@
       // WCAG 4.1.2: expose selected state to assistive technology.
       var isChecked = $row.find('input[type="checkbox"]').prop('checked');
       $row.attr('aria-selected', isChecked ? 'true' : 'false');
+
+      // WCAG 1.3.1: hide the visually-hidden checkbox cell from the AT tree.
+      // The row already exposes selection state via aria-selected; leaving the
+      // checkbox reachable creates a redundant second control for the same state.
+      $row.find('.views-field-media-library-select-form').attr('aria-hidden', 'true');
 
       $row.append(
         '<td class="mukurtu-edit-col">' +
