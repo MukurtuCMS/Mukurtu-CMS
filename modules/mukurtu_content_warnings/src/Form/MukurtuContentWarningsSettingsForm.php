@@ -38,7 +38,7 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase {
     $view_modes = \Drupal::entityTypeManager()
       ->getStorage('entity_view_mode')
       ->loadByProperties(['targetEntityType' => 'media']);
-    $excluded = ['token', 'media_library'];
+    $excluded = ['token', 'media_library', 'form_selection'];
     $options = [];
     foreach ($view_modes as $view_mode) {
       $id = $view_mode->id();

@@ -1276,3 +1276,28 @@ function mukurtu_core_update_40039(): void {
 
   $config->save();
 }
+
+/**
+ * Add missing SoundCloud and remote_video display configs for digital_heritage
+ * view modes so content warnings apply correctly in those contexts.
+ */
+function mukurtu_core_update_40040(): void {
+  $profile_path = \Drupal::service('extension.list.profile')->getPath('mukurtu');
+  $source = new \Drupal\Core\Config\FileStorage($profile_path . '/config/install');
+  $config_storage = \Drupal::service('config.storage');
+
+  $new_configs = [
+    'core.entity_view_display.media.soundcloud.digital_heritage_full',
+    'core.entity_view_display.media.soundcloud.digital_heritage_sidebar',
+    'core.entity_view_display.media.remote_video.digital_heritage_full',
+  ];
+
+  foreach ($new_configs as $config_name) {
+    if (!$config_storage->exists($config_name)) {
+      $data = $source->read($config_name);
+      if ($data) {
+        $config_storage->write($config_name, $data);
+      }
+    }
+  }
+}

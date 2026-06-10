@@ -1,0 +1,37 @@
+{#
+/**
+ * @file
+ * Theme override to present a SoundCloud item in the digital_heritage_sidebar view mode.
+ *
+ * Displays a thumbnail image (or fallback SoundCloud icon) above a compact player.
+ * Used in featured content cards, teasers, and collection/place record listings.
+ *
+ * Available variables: see media.html.twig.
+ * Additional variables:
+ * - soundcloud_fallback_thumbnail_url: URL for the SoundCloud fallback thumbnail image.
+ * @see template_preprocess_media()
+ */
+#}
+{%
+  set classes = [
+    'media',
+    'media--' ~ bundle,
+    'media--digital-heritage-sidebar'
+  ]
+%}
+
+<div{{ attributes.addClass(classes) }}>
+  {{ content.media_content_warnings }}
+
+  <div class="media__thumbnail">
+    {% if content.field_thumbnail['#items'] is not empty %}
+      {{ content.field_thumbnail }}
+    {% else %}
+      <img alt="SoundCloud file {{ name }}" src="{{ soundcloud_fallback_thumbnail_url }}">
+    {% endif %}
+  </div>
+
+  <div class="media__soundcloud-player">
+    {{ content.field_media_soundcloud }}
+  </div>
+</div>

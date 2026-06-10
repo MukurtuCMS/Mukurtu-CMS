@@ -65,7 +65,7 @@ class MukurtuMediaContentWarnings {
     // null = not yet configured = all modes allowed (backwards compatible default).
     // [] = admin explicitly unchecked all modes = no warnings anywhere.
     $allowed_modes = $this->contentWarningSettings->get('warning_view_modes');
-    if ($allowed_modes !== NULL && !in_array($display->getMode(), $allowed_modes)) {
+    if ($allowed_modes !== NULL && !in_array($build['#view_mode'], $allowed_modes)) {
       return;
     }
     // Add cache dependency on every people term associated with this entity so
