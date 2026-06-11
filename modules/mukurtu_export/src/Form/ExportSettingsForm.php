@@ -23,30 +23,56 @@ class ExportSettingsForm extends ExportBaseForm {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $uid = \Drupal::currentUser()->id();
-    $storage = $this->entityTypeManager->getStorage('export_list');
-    $query = $storage->getQuery()->accessCheck(TRUE);
-    $or = $query->orConditionGroup()
-      ->condition('uid', $uid)
-      ->condition('site_wide', TRUE);
-    $ids = $query->condition($or)->sort('label')->execute();
-    $lists = $storage->loadMultiple($ids);
+    $adHocItems = $this->store->get('ad_hoc_items');
 
-    $options = [];
-    foreach ($lists as $list) {
-      $options[$list->id()] = $list->label();
+    if (!empty($adHocItems)) {
+      // Ad-hoc mode: hide the list selector and show what is being exported.
+      $form['export_list_id'] = [
+        '#type' => 'value',
+        '#value' => '',
+      ];
+
+      $labels = [];
+      foreach ($adHocItems as $entity_type => $ids) {
+        $entities = $this->entityTypeManager->getStorage($entity_type)->loadMultiple($ids);
+        foreach ($entities as $entity) {
+          $labels[] = $entity->label();
+        }
+      }
+      $count = count($labels);
+      $form['adhoc_summary'] = [
+        '#theme' => 'item_list',
+        '#title' => $this->formatPlural($count, 'Exporting 1 selected item', 'Exporting @count selected items'),
+        '#items' => $labels,
+        '#weight' => -10,
+      ];
     }
+    else {
+      $uid = \Drupal::currentUser()->id();
+      $storage = $this->entityTypeManager->getStorage('export_list');
+      $query = $storage->getQuery()->accessCheck(TRUE);
+      $or = $query->orConditionGroup()
+        ->condition('uid', $uid)
+        ->condition('site_wide', TRUE);
+      $ids = $query->condition($or)->sort('label')->execute();
+      $lists = $storage->loadMultiple($ids);
 
-    $form['export_list_id'] = [
-      '#type' => 'select',
-      '#title' => $this->t('Export list'),
-      '#options' => $options,
-      '#empty_option' => $this->t('- Select export list -'),
-      '#empty_value' => '',
-      '#default_value' => $this->getActiveExportListId() ?? '',
-      '#description' => $this->t('Choose a saved export list.'),
-      '#weight' => -10,
-    ];
+      $options = [];
+      foreach ($lists as $list) {
+        $options[$list->id()] = $list->label();
+      }
+
+      $form['export_list_id'] = [
+        '#type' => 'select',
+        '#title' => $this->t('Export list'),
+        '#options' => $options,
+        '#empty_option' => $this->t('- Select export list -'),
+        '#empty_value' => '',
+        '#default_value' => $this->getActiveExportListId() ?? '',
+        '#description' => $this->t('Choose a saved export list.'),
+        '#weight' => -10,
+      ];
+    }
 
     $settings = $this->getExporterConfig()['settings'] ?? [];
     $form += $this->exporter->settingsForm($form, $form_state, $settings);

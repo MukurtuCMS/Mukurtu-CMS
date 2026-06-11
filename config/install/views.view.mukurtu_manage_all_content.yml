@@ -101,6 +101,8 @@ display:
               preconfiguration:
                 add_confirmation: true
                 label_override: Delete
+            43:
+              action_id: mukurtu_export_adhoc_export_action
         title:
           id: title
           table: node_field_data
