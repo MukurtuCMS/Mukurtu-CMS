@@ -36,3 +36,10 @@ function mukurtu_place_update_40003(): void {
   $config->set('content.field_related_content.settings.field_widget_display_settings', ['view_mode' => 'form_selection']);
   $config->save();
 }
+
+/**
+ * Add grid_browse view display for place nodes to fix video playback.
+ */
+function mukurtu_place_update_40004(): void {
+  \Drupal::service('config.installer')->installDefaultConfig('module', 'mukurtu_place');
+}

@@ -16,6 +16,7 @@ class ExportListStartController extends ControllerBase {
       throw new AccessDeniedHttpException();
     }
     $store = \Drupal::service('tempstore.private')->get('mukurtu_import');
+    $store->delete('ad_hoc_items');
     $store->set('export_list_id', (int) $export_list->id());
     $store->set('exporter_id', 'csv');
 
