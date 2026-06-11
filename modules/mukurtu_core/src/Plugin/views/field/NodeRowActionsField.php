@@ -10,7 +10,7 @@ use Drupal\views\ResultRow;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Renders a per-row operations dropbutton matching the bulk action set.
+ * Renders a per-row operations dropbutton for the content admin view.
  *
  * @ViewsField("mukurtu_node_row_actions")
  */
@@ -80,8 +80,12 @@ class NodeRowActionsField extends FieldPluginBase {
         }
       }
 
-      // Add to export list.
+      // Export and export list operations.
       if ($this->currentUser->hasPermission('access mukurtu export')) {
+        $links['export'] = [
+          'title' => $this->t('Export'),
+          'url' => Url::fromRoute('mukurtu_export.start_adhoc_node', ['node' => $nid]),
+        ];
         $links['add_to_export_list'] = [
           'title' => $this->t('Add to export list'),
           'url' => Url::fromRoute('mukurtu_export.add_node_to_list', ['node' => $nid]),
