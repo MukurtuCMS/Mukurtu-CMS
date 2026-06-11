@@ -13,6 +13,7 @@ use Drupal\node\Entity\NodeType;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\user\UserInterface;
 use Drupal\Core\Url;
 use Drupal\Core\Link;
 use Drupal\Core\Cache\Cache;
@@ -255,6 +256,61 @@ function mukurtu_core_form_user_admin_settings_alter(&$form, FormStateInterface 
   $form['contact']['contact_default_status']['#default_value'] = false;
   $form['#attached']['library'][] = 'mukurtu_core/account-settings';
   $form['#validate'][] = 'mukurtu_core_user_admin_settings_validate';
+
+  $form['registration_cancellation']['#weight'] = 1;
+  $form['registration_cancellation']['#title'] = t('Account registration');
+  $opts = &$form['registration_cancellation']['user_register']['#options'];
+  $opts = [
+    UserInterface::REGISTER_ADMINISTRATORS_ONLY => $opts[UserInterface::REGISTER_ADMINISTRATORS_ONLY],
+    UserInterface::REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL => $opts[UserInterface::REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL],
+    UserInterface::REGISTER_VISITORS => $opts[UserInterface::REGISTER_VISITORS],
+  ];
+  // Move password-related fields to the bottom of the genpass registration
+  // section so the form flows: who can register → genpass mode → verification.
+  if (isset($form['registration_cancellation']['user_email_verification'])) {
+    $form['genpass_config_registration']['user_email_verification'] = $form['registration_cancellation']['user_email_verification'];
+    $form['genpass_config_registration']['user_email_verification']['#weight'] = -10;
+    unset($form['registration_cancellation']['user_email_verification']);
+  }
+  if (isset($form['registration_cancellation']['user_password_strength'])) {
+    $form['genpass_config_registration']['user_password_strength'] = $form['registration_cancellation']['user_password_strength'];
+    $form['genpass_config_registration']['user_password_strength']['#weight'] = 10;
+    unset($form['registration_cancellation']['user_password_strength']);
+  }
+  $form['genpass_config_registration']['#title'] = t('Password settings');
+  $form['genpass_config_registration']['genpass_mode']['#title'] = t('Visitor password entry');
+  $form['genpass_config_registration']['genpass_mode']['#options'] = [
+    0 => t('Visitors <strong>must</strong> enter a password on registration. This option is not available if email verification is enabled.'),
+    1 => t('Visitors <strong>may</strong> enter a password on registration. If left empty, a random password will be generated. This option is not available if email verification is enabled.'),
+    2 => t('Visitors <strong>cannot</strong> enter a password on registration; a random password will be generated. This option is the only valid choice if email verification is enabled above.'),
+  ];
+  $form['genpass_config_registration']['#weight'] = 2;
+  // blocking_deleting is created at weight 3 by FormHooks::formUserAdminSettingsAlter.
+
+  // Combine generation parameters, service replacement, and display options
+  // into a single collapsed "Generate Password Settings" group.
+  $form['genpass_settings'] = [
+    '#type' => 'details',
+    '#title' => t('Generate Password Settings'),
+    '#open' => FALSE,
+    '#weight' => 4,
+  ];
+  foreach ([
+    'genpass_display'       => 'genpass_config_registration',
+    'genpass_length'        => 'genpass_config_generation',
+    'genpass_override_core' => 'genpass_config_core_service',
+  ] as $field => $source) {
+    if (isset($form[$source][$field])) {
+      $form['genpass_settings'][$field] = $form[$source][$field];
+      unset($form[$source][$field]);
+    }
+  }
+  unset($form['genpass_config_generation'], $form['genpass_config_core_service']);
+
+  $form['anonymous_settings']['#weight'] = 5;
+  $form['anonymous_settings']['#open'] = FALSE;
+  $form['contact']['#weight'] = 6;
+  $form['contact']['#open'] = FALSE;
 }
 
 /**
@@ -262,13 +318,17 @@ function mukurtu_core_form_user_admin_settings_alter(&$form, FormStateInterface 
  *
  * Genpass values and their validity:
  *   0 = "Users must enter a password"   — valid only when verify_mail is OFF.
- *   1 = "Users may enter a password"    — valid only when verify_mail is OFF
- *                                         AND register is not admin_approval.
+ *   1 = "Users may enter a password"    — valid only when verify_mail is OFF.
  *   2 = "Users cannot enter a password" — always valid (the only valid choice
  *                                         when verify_mail is ON).
  *
  * admin_only: no self-registration form exists, so genpass has no effect and
  * any value is accepted.
+ *
+ * visitors_admin_approval: all three modes are valid. Genpass shows the
+ * generated password as a flash message on the registration page; the
+ * pending-approval email contains no login link, and the one-time login link
+ * is only sent in the activation email after the admin approves the account.
  */
 function mukurtu_core_user_admin_settings_validate(&$form, FormStateInterface $form_state) {
   $genpass_mode = (int) $form_state->getValue('genpass_mode');
@@ -286,17 +346,6 @@ function mukurtu_core_user_admin_settings_validate(&$form, FormStateInterface $f
     $form_state->setError(
       $form['genpass_config_registration']['genpass_mode'],
       t('"Users cannot enter a password on registration" is the only valid choice when email verification is enabled.')
-    );
-    return;
-  }
-
-  // With admin approval, only value 0 is valid. Values 1 and 2 rely on
-  // generating or omitting a password in ways that conflict with the
-  // pending-approval workflow.
-  if ($register === 'visitors_admin_approval' && $genpass_mode !== 0) {
-    $form_state->setError(
-      $form['genpass_config_registration']['genpass_mode'],
-      t('"Users must enter a password on registration" is the only valid choice when administrator approval is required.')
     );
   }
 }

@@ -1252,21 +1252,19 @@ class FormHooks
         array &$form,
         FormStateInterface $form_state,
     ): void {
-        if (
-            isset(
-                $form["registration_cancellation"]["user_cancel_method"][
-                    "#title"
-                ],
-            )
-        ) {
-            $form["registration_cancellation"]["user_cancel_method"][
-                "#title"
-            ] = t("Default option when blocking or deleting a user account:");
-        }
-        if (isset($form["registration_cancellation"])) {
-            $this->relabelCancelMethods($form["registration_cancellation"]);
-        } else {
-            $this->relabelCancelMethods($form);
+        if (isset($form["registration_cancellation"]["user_cancel_method"])) {
+            $cancel_method = $form["registration_cancellation"]["user_cancel_method"];
+            $cancel_method["#title"] = t("Default option when blocking or deleting a user account:");
+            unset($form["registration_cancellation"]["user_cancel_method"]);
+
+            $form["blocking_deleting"] = [
+                "#type" => "details",
+                "#title" => t("Blocking and Deleting Accounts"),
+                "#open" => FALSE,
+                "#weight" => 3,
+                "user_cancel_method" => $cancel_method,
+            ];
+            $this->relabelCancelMethods($form["blocking_deleting"]);
         }
     }
 
