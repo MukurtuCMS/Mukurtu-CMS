@@ -305,6 +305,21 @@ function mukurtu_core_form_user_admin_settings_alter(&$form, FormStateInterface 
       unset($form[$source][$field]);
     }
   }
+  // Warn if either source group still has children after the known fields were
+  // moved — a future genpass update adding new fields would otherwise be
+  // silently dropped when the group is deleted below.
+  foreach (['genpass_config_generation', 'genpass_config_core_service'] as $group) {
+    $remaining = array_filter(
+      array_keys($form[$group] ?? []),
+      fn($k) => !str_starts_with($k, '#'),
+    );
+    if (!empty($remaining)) {
+      \Drupal::logger('mukurtu_core')->warning(
+        'Unexpected fields in @group will be removed from the admin settings form: @fields',
+        ['@group' => $group, '@fields' => implode(', ', $remaining)],
+      );
+    }
+  }
   unset($form['genpass_config_generation'], $form['genpass_config_core_service']);
 
   $form['anonymous_settings']['#weight'] = 5;
@@ -325,10 +340,10 @@ function mukurtu_core_form_user_admin_settings_alter(&$form, FormStateInterface 
  * admin_only: no self-registration form exists, so genpass has no effect and
  * any value is accepted.
  *
- * visitors_admin_approval: all three modes are valid. Genpass shows the
- * generated password as a flash message on the registration page; the
- * pending-approval email contains no login link, and the one-time login link
- * is only sent in the activation email after the admin approves the account.
+ * visitors_admin_approval: all three modes are valid. The pending-approval
+ * email contains no login link; the one-time login link is only sent in the
+ * activation email after the admin approves the account. Genpass flash messages
+ * are suppressed for pending registrations (visitor cannot log in yet).
  */
 function mukurtu_core_user_admin_settings_validate(&$form, FormStateInterface $form_state) {
   $genpass_mode = (int) $form_state->getValue('genpass_mode');
