@@ -734,9 +734,13 @@ class FormHooks
                 0 => t("Blocked"),
             ];
             // Pre-select "Pending" when editing a currently-pending user.
+            // Skip for new entities: field_pending defaults to 1, which would
+            // incorrectly trigger this condition for every new account, setting
+            // #default_value to "pending" even for open-registration signups.
             $entity = $form_state->getFormObject()->getEntity();
             if (
-                !$entity->get("status")->value
+                !$entity->isNew()
+                && !$entity->get("status")->value
                 && $entity->hasField("field_pending")
                 && $entity->get("field_pending")->value
             ) {

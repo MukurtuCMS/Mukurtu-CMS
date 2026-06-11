@@ -18,7 +18,9 @@ class MailHooks {
    * Self-registration:
    * - register_no_approval_required: only when email verification is on
    *   (the email carries the one-time login link for first access).
-   * - register_pending_approval: only when email verification is on.
+   * - register_pending_approval: always sent for visitor self-registration.
+   *   This email contains no OTL — it just notifies the visitor their account
+   *   is awaiting approval. Suppress only for admin-created accounts.
    *
    * Admin-created accounts:
    * - register_admin_created: only when the new account is active AND the
@@ -52,8 +54,10 @@ class MailHooks {
       // when verify is off (user is auto-logged in) or when an admin is
       // creating the account (core can emit this as a fallback).
       'register_no_approval_required' => !$verify_mail || $isAdminCreated,
-      // Same reasoning as above.
-      'register_pending_approval' => !$verify_mail || $isAdminCreated,
+      // Pending-approval notification: no OTL, just tells the visitor their
+      // account is awaiting review. Always send for visitor self-registration;
+      // suppress only when an admin is creating the account.
+      'register_pending_approval' => $isAdminCreated,
       // Site-admin "Account details" notification — never needed; Mukurtu
       // uses its own community-manager notification workflow.
       'register_pending_approval_admin' => TRUE,
