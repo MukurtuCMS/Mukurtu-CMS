@@ -184,6 +184,15 @@ function mukurtu_media_form_media_video_add_form_alter(&$form, FormStateInterfac
 /**
  * Implements hook_form_FORM_ID_alter().
  */
+function mukurtu_media_form_media_video_edit_form_alter(&$form, FormStateInterface $form_state, $form_id)
+{
+  $form['field_media_video_file']['widget'][0]['#process'][] = 'mukurtu_media_refresh_media_process';
+  array_unshift($form['field_thumbnail']['widget'][0]['#process'], 'mukurtu_media_process_thumb');
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
 function mukurtu_media_form_media_audio_add_form_alter(&$form, FormStateInterface $form_state, $form_id)
 {
   $widget = &$form['field_media_audio_file']['widget'][0];
@@ -421,7 +430,7 @@ function mukurtu_media_form_media_library_add_form_upload_alter(&$form, FormStat
       continue;
     }
 
-    $file = \Drupal\file\Entity\File::load($fid);
+    $file = \Drupal::entityTypeManager()->getStorage('file')->load($fid);
     if (!$file) {
       continue;
     }
@@ -718,7 +727,9 @@ function mukurtu_media_form_alter(array &$form, FormStateInterface $form_state, 
   // The edit button URL includes ?mukurtu_modal=1. This parameter persists
   // when Drupal's AJAX JS swaps _wrapper_format from drupal_modal to
   // drupal_ajax on form submit, giving a stable signal across both requests.
-  if (preg_match('/^media_.+_edit_form$/', $form_id) && \Drupal::request()->query->get('mukurtu_modal')) {
+  $mukurtu_bundles = ['video', 'audio', 'image', 'document', 'remote_video', 'external_embed', 'soundcloud'];
+  $pattern = '/^media_(' . implode('|', $mukurtu_bundles) . ')_edit_form$/';
+  if (preg_match($pattern, $form_id) && \Drupal::request()->query->get('mukurtu_modal')) {
     unset($form['actions']['delete']);
 
     foreach (['submit', 'save'] as $action) {

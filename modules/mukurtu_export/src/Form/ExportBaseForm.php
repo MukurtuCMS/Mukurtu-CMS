@@ -6,6 +6,7 @@ use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\TempStore\PrivateTempStoreFactory;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
+use Drupal\mukurtu_export\AdHocExporterSource;
 use Drupal\mukurtu_export\ExportListSource;
 use Drupal\mukurtu_export\FlaggedExporterSource;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -99,6 +100,12 @@ class ExportBaseForm extends FormBase {
       }
     }
     if (!$this->source) {
+      $adHocItems = $this->store->get('ad_hoc_items');
+      if (!empty($adHocItems)) {
+        $this->source = new AdHocExporterSource($adHocItems);
+      }
+    }
+    if (!$this->source) {
       $this->source = new FlaggedExporterSource();
     }
     $this->executable = $this->exporter ? new BatchExportExecutable($this->source, $this->exporter) : NULL;
@@ -150,6 +157,7 @@ class ExportBaseForm extends FormBase {
    */
   protected function reset() {
     $this->setExporterId(NULL);
+    $this->store->delete('ad_hoc_items');
   }
 
   /**

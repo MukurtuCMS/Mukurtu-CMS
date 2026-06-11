@@ -179,6 +179,35 @@ function mukurtu_v4_preprocess_media(array &$variables) {
     $variables['#cache']['tags'] ?? [],
     $config->getCacheTags()
   );
+
+  // Pre-set fallback thumbnail URLs for view modes that show a thumbnail
+  // placeholder. The specific preprocess hooks (e.g. carousel_thumbnail,
+  // form_selection) may also set these, but doing it here ensures the
+  // variables are always available regardless of which hook fires first.
+  $view_mode = $variables['elements']['#view_mode'] ?? '';
+  $thumbnail_view_modes = ['carousel_thumbnail', 'media_assets', 'digital_heritage_sidebar'];
+  if (in_array($view_mode, $thumbnail_view_modes)) {
+    $bundle = $media->bundle();
+    if ($bundle === 'audio') {
+      $variables['audio_fallback_thumbnail_url'] = MukurtuV4AudioHelper::fallbackThumbnailUrl($media, $variables);
+    }
+    elseif ($bundle === 'soundcloud') {
+      if ($media->get('field_thumbnail')->isEmpty()) {
+        $variables['#cache']['tags'][] = 'config:mukurtu_thumbnail.settings';
+        $sc_config = \Drupal::config('mukurtu_thumbnail.settings');
+        $defaultFid = $sc_config->get('soundcloud')[0] ?? NULL;
+        if ($defaultFid) {
+          $scFile = \Drupal\file\Entity\File::load($defaultFid);
+          if ($scFile) {
+            $variables['soundcloud_fallback_thumbnail_url'] = $scFile->createFileUrl();
+          }
+        }
+        if (empty($variables['soundcloud_fallback_thumbnail_url'])) {
+          $variables['soundcloud_fallback_thumbnail_url'] = '/profiles/mukurtu/themes/mukurtu_v4/images/soundcloud.png';
+        }
+      }
+    }
+  }
 }
 
 /**
