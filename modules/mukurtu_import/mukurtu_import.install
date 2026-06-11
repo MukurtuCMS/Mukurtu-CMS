@@ -447,3 +447,17 @@ function mukurtu_import_update_40027(): void {
     }
   }
 }
+
+/**
+ * Install the taxonomy terms import results view.
+ */
+function mukurtu_import_update_40028(): void {
+  $config_name = 'views.view.mukurtu_import_results_taxonomy_terms';
+  $config = \Drupal::configFactory()->getEditable($config_name);
+  if ($config->isNew()) {
+    $path = \Drupal::service('extension.list.module')->getPath('mukurtu_import');
+    $yaml = file_get_contents("{$path}/config/install/{$config_name}.yml");
+    $data = \Drupal\Core\Serialization\Yaml::decode($yaml);
+    $config->setData($data)->save();
+  }
+}
