@@ -66,6 +66,7 @@ label: 'Mukurtu Manager'
 weight: 2
 is_admin: null
 permissions:
+  - 'access mukurtu export'
   - 'administer mukurtu_media configuration'
   - 'administer mukurtu media download settings'
   - 'create article content'
