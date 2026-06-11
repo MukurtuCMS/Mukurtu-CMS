@@ -701,6 +701,7 @@ function mukurtu_media_update_40014(): void {
 function mukurtu_media_update_40015(&$sandbox): void {
   $database = \Drupal::database();
 
+  // If the table doesn't exist there is nothing to migrate.
   if (!$database->schema()->tableExists('media__field_thumbnail')) {
     $sandbox['#finished'] = 1;
     return;
@@ -754,12 +755,19 @@ function mukurtu_media_update_40015(&$sandbox): void {
 function mukurtu_media_update_40016(): void {
   $config = \Drupal::configFactory()->getEditable('mukurtu_thumbnail.settings');
 
-  // Migrate old 'audio' key -> 'audio_default_thumbnail' before calling the
-  // helper, which skips keys that are already set.
-  $old_audio = $config->get('audio');
-  if ($old_audio && !$config->get('audio_default_thumbnail')) {
-    $config->set('audio_default_thumbnail', $old_audio);
-    $config->clear('audio');
+  // Migrate old bare-bundle keys -> suffixed keys before calling the helper,
+  // which skips keys that are already set.
+  $migrations = ['audio' => 'audio_default_thumbnail', 'video' => 'video_default_thumbnail'];
+  $changed = FALSE;
+  foreach ($migrations as $old_key => $new_key) {
+    $old_value = $config->get($old_key);
+    if ($old_value && !$config->get($new_key)) {
+      $config->set($new_key, $old_value);
+      $config->clear($old_key);
+      $changed = TRUE;
+    }
+  }
+  if ($changed) {
     $config->save();
   }
 

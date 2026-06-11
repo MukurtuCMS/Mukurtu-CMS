@@ -1,7 +1,7 @@
 {#
 /**
  * @file
- * Theme override to present a SoundCloud item in media library view.
+ * Theme override to present a SoundCloud file in form selection view.
  *
  * Available variables:
  * - media: The media item, with limited access to object properties and
@@ -12,8 +12,8 @@
  *   - entity.hasField('field_example') returns TRUE if the entity includes
  *     field_example. (This does not indicate the presence of a value in this
  *     field.)
- *   Calling other methods, such as entity.delete(), will result in an
- *   exception.
+ *   Calling other methods, such as entity.delete(), will result in
+ *   an exception.
  *   See \Drupal\Core\Entity\EntityInterface for a full list of methods.
  * - name: Name of the media item.
  * - content: Media content.
@@ -33,16 +33,11 @@
   set classes = [
     'media',
     'media--' ~ bundle,
-    'media--media-library'
+    'media--form-selection'
   ]
 %}
 
 <div{{ attributes.addClass(classes) }}>
   {{ content.media_content_warnings }}
-
-  {% if content.thumbnail['#items'] is not empty %}
-    {{ content.thumbnail }}
-  {% else %}
-    <img alt="{{ name }}" src="{{ base_path ~ mukurtu_v4_path }}/images/soundcloud-square.png">
-  {% endif %}
+  {{ content.thumbnail }}
 </div>
