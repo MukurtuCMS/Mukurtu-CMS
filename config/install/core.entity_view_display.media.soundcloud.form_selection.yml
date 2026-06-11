@@ -2,22 +2,28 @@ langcode: en
 status: true
 dependencies:
   config:
-    - core.entity_view_mode.media.media_library
-    - image.style.media_library
+    - core.entity_view_mode.media.form_selection
+    - image.style.small_250px_w_
     - media.type.soundcloud
   module:
     - image
-id: media.soundcloud.media_library
+    - layout_builder
+    - media_entity_soundcloud
+third_party_settings:
+  layout_builder:
+    enabled: false
+    allow_custom: false
+id: media.soundcloud.form_selection
 targetEntityType: media
 bundle: soundcloud
-mode: media_library
+mode: form_selection
 content:
   thumbnail:
     type: image
     label: hidden
     settings:
       image_link: ''
-      image_style: media_library
+      image_style: small_250px_w_
       image_loading:
         attribute: lazy
     third_party_settings: {  }

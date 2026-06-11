@@ -1241,6 +1241,7 @@ function mukurtu_core_update_40038(): void {
   $config->save();
 }
 
+
 /**
  * Show field_word_list_image in the word_list grid_browse display.
  */
@@ -1304,10 +1305,29 @@ function mukurtu_core_update_40040(): void {
 }
 
 /**
+ * Fix audio form_selection display to show thumbnail; add soundcloud form_selection display.
+ */
+function mukurtu_core_update_40041(): void {
+  $profile_path = \Drupal::service('extension.list.profile')->getPath('mukurtu');
+  $profile_source = new \Drupal\Core\Config\FileStorage($profile_path . '/config/install');
+
+  $configs = [
+    'core.entity_view_display.media.audio.form_selection',
+    'core.entity_view_display.media.soundcloud.form_selection',
+  ];
+  foreach ($configs as $name) {
+    $data = $profile_source->read($name);
+    if ($data !== FALSE) {
+      \Drupal::configFactory()->getEditable($name)->setData($data)->save();
+    }
+  }
+}
+
+/**
  * Add missing SoundCloud and remote_video display configs for digital_heritage
  * view modes so content warnings apply correctly in those contexts.
  */
-function mukurtu_core_update_40041(): void {
+function mukurtu_core_update_40042(): void {
   $profile_path = \Drupal::service('extension.list.profile')->getPath('mukurtu');
   $source = new \Drupal\Core\Config\FileStorage($profile_path . '/config/install');
   $config_storage = \Drupal::service('config.storage');
