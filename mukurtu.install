@@ -735,6 +735,8 @@ function mukurtu_install() {
     'rebuild cache access',
   ];
   $roles['mukurtu_roundtrip_manager'] = [
+    'access content overview',
+    'access media overview',
     'access mukurtu import',
     'create mukurtu_import_strategy',
     'edit own mukurtu_import_strategy',

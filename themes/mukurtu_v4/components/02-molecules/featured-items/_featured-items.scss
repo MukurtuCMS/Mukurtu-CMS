@@ -83,8 +83,7 @@
     // Images are left beneath the overlay so clicking them navigates to the content.
     video,
     audio,
-    .media--remote_video,
-    .media__audio-player {
+    .media--remote_video {
       position: relative;
       z-index: 1;
     }
@@ -111,7 +110,6 @@
       flex-direction: column;
       overflow: hidden;
       background: var(--brand-secondary-accent);
-      padding-block-start: var(--v-space-4xs);
 
       .media__thumbnail {
         flex: 1;
@@ -142,10 +140,71 @@
         }
       }
 
-      .media__audio-player {
+      // Thumbnail play/pause button for .media--digital-heritage-sidebar--clean.
+      .media__thumbnail--playable {
+        position: relative;
+
+        .audio-play-button {
+          position: absolute;
+          inset: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: transparent;
+          border: none;
+          padding: 0;
+          cursor: pointer;
+          z-index: 2;
+
+          &::before {
+            content: '';
+            display: block;
+            inline-size: 3rem;
+            block-size: 3rem;
+            border-radius: 50%;
+            background: rgb(0 0 0 / 70%);
+            position: absolute;
+            transition: background 0.15s;
+          }
+
+          &:hover::before,
+          &:focus-visible::before {
+            background: rgb(0 0 0 / 85%);
+          }
+
+          &:focus-visible {
+            outline: 3px solid #005fcc;
+            outline-offset: 2px;
+            box-shadow: inset 0 0 0 3px #ffffff;
+          }
+
+          svg {
+            fill: white;
+            position: relative;
+            z-index: 1;
+          }
+
+          .audio-play-button__icon--pause {
+            display: none;
+          }
+
+          &.is-playing {
+            .audio-play-button__icon--play {
+              display: none;
+            }
+
+            .audio-play-button__icon--pause {
+              display: block;
+            }
+          }
+        }
+      }
+
+      // Collapse the hidden audio source container once controls are removed by JS.
+      .media__audio-source {
+        block-size: 0;
+        overflow: hidden;
         flex-shrink: 0;
-        padding-inline: var(--v-space-2xs);
-        padding-block: var(--v-space-5xs);
       }
     }
   }

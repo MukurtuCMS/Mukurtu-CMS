@@ -27,18 +27,6 @@ function mukurtu_media_update_40001(): void {
 }
 
 /**
- * Implements hook_install().
- *
- * Also handled by mukurtu_media_update_40004() for existing installations.
- */
-function mukurtu_media_install(): void {
-  $config = \Drupal::configFactory()->getEditable('views.view.media');
-  if (!$config->isNew()) {
-    $config->set('status', FALSE)->save();
-  }
-}
-
-/**
  * Revert audio browse view mode to hide field_thumbnail; create
  * digital_heritage_sidebar view display for audio with thumbnail + player.
  */
@@ -97,9 +85,389 @@ function mukurtu_media_update_40002(): void {
 }
 
 /**
- * Grant 'administer mukurtu_media configuration' to the mukurtu_manager role.
+ * Switch remote_video media_library view mode to thumbnail.
  */
 function mukurtu_media_update_40003(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.media.remote_video.media_library');
+  if ($config->isNew()) {
+    return;
+  }
+
+  // Move field_media_oembed_video out of content and into hidden.
+  $content = $config->get('content') ?? [];
+  unset($content['field_media_oembed_video']);
+
+  // Add thumbnail with image formatter using the media_library image style.
+  $content['thumbnail'] = [
+    'type' => 'image',
+    'label' => 'hidden',
+    'settings' => [
+      'image_link' => '',
+      'image_style' => 'media_library',
+      'image_loading' => ['attribute' => 'lazy'],
+    ],
+    'third_party_settings' => [],
+    'weight' => 0,
+    'region' => 'content',
+  ];
+  $config->set('content', $content);
+
+  $hidden = $config->get('hidden') ?? [];
+  $hidden['field_media_oembed_video'] = TRUE;
+  unset($hidden['thumbnail']);
+  $config->set('hidden', $hidden);
+
+  // Update module dependencies: blazy -> image.
+  $dependencies = $config->get('dependencies') ?? [];
+  $dependencies['module'] = array_values(array_diff($dependencies['module'] ?? [], ['blazy']));
+  if (!in_array('image', $dependencies['module'])) {
+    $dependencies['module'][] = 'image';
+  }
+  sort($dependencies['module']);
+  $config->set('dependencies', $dependencies);
+
+  $config->save();
+}
+
+/**
+ * Switch external_embed media_library view mode from text_default to thumbnail.
+ */
+function mukurtu_media_update_40004(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.media.external_embed.media_library');
+  if ($config->isNew()) {
+    return;
+  }
+
+  $content = $config->get('content') ?? [];
+  unset($content['field_media_external_embed']);
+
+  $content['thumbnail'] = [
+    'type' => 'image',
+    'label' => 'hidden',
+    'settings' => [
+      'image_link' => '',
+      'image_style' => 'media_library',
+      'image_loading' => ['attribute' => 'lazy'],
+    ],
+    'third_party_settings' => [],
+    'weight' => 0,
+    'region' => 'content',
+  ];
+  $config->set('content', $content);
+
+  $hidden = $config->get('hidden') ?? [];
+  $hidden['field_media_external_embed'] = TRUE;
+  unset($hidden['thumbnail']);
+  $config->set('hidden', $hidden);
+
+  // Update dependencies: remove 'text' module; add 'image' module and image style.
+  $dependencies = $config->get('dependencies') ?? [];
+  $dependencies['module'] = array_values(array_diff($dependencies['module'] ?? [], ['text']));
+  if (!in_array('image', $dependencies['module'])) {
+    $dependencies['module'][] = 'image';
+  }
+  sort($dependencies['module']);
+  $dependencies['config'] = $dependencies['config'] ?? [];
+  if (!in_array('image.style.media_library', $dependencies['config'])) {
+    $dependencies['config'][] = 'image.style.media_library';
+  }
+  sort($dependencies['config']);
+  $config->set('dependencies', $dependencies);
+
+  $config->save();
+}
+
+/**
+ * Switch audio media_library view mode from file_audio/blazy to thumbnail.
+ */
+function mukurtu_media_update_40005(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.media.audio.media_library');
+  if ($config->isNew()) {
+    return;
+  }
+
+  $content = $config->get('content') ?? [];
+  unset($content['field_media_audio_file']);
+  $content['thumbnail'] = [
+    'type' => 'image',
+    'label' => 'hidden',
+    'settings' => [
+      'image_link' => '',
+      'image_style' => 'media_library',
+      'image_loading' => ['attribute' => 'lazy'],
+    ],
+    'third_party_settings' => [],
+    'weight' => 0,
+    'region' => 'content',
+  ];
+  $config->set('content', $content);
+
+  $hidden = $config->get('hidden') ?? [];
+  $hidden['field_media_audio_file'] = TRUE;
+  unset($hidden['thumbnail']);
+  $config->set('hidden', $hidden);
+
+  // Update dependencies: remove 'blazy' and 'file' modules; add 'image' module and image style.
+  $dependencies = $config->get('dependencies') ?? [];
+  $dependencies['module'] = array_values(array_diff($dependencies['module'] ?? [], ['blazy', 'file']));
+  if (!in_array('image', $dependencies['module'])) {
+    $dependencies['module'][] = 'image';
+  }
+  sort($dependencies['module']);
+  $dependencies['config'] = $dependencies['config'] ?? [];
+  if (!in_array('image.style.media_library', $dependencies['config'])) {
+    $dependencies['config'][] = 'image.style.media_library';
+  }
+  sort($dependencies['config']);
+  $config->set('dependencies', $dependencies);
+
+  $config->save();
+}
+
+/**
+ * Add field_thumbnail to audio media_assets view mode; remove blazy from player.
+ */
+function mukurtu_media_update_40006(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.media.audio.media_assets');
+  if ($config->isNew()) {
+    return;
+  }
+
+  $content = $config->get('content') ?? [];
+
+  // Add field_thumbnail so the media-assets template can render it.
+  $content['field_thumbnail'] = [
+    'type' => 'image',
+    'label' => 'hidden',
+    'settings' => [
+      'image_link' => '',
+      'image_style' => 'carousel_thumbnail',
+      'image_loading' => ['attribute' => 'lazy'],
+    ],
+    'third_party_settings' => [],
+    'weight' => 0,
+    'region' => 'content',
+  ];
+
+  // Remove blazy wrapper from the audio player — it creates a large blank container.
+  if (isset($content['field_media_audio_file'])) {
+    $content['field_media_audio_file']['third_party_settings'] = [];
+    $content['field_media_audio_file']['weight'] = 1;
+  }
+
+  $config->set('content', $content);
+
+  $hidden = $config->get('hidden') ?? [];
+  unset($hidden['field_thumbnail']);
+  $config->set('hidden', $hidden);
+
+  // Update dependencies: remove 'blazy' module; add 'image' module and carousel_thumbnail style.
+  $dependencies = $config->get('dependencies') ?? [];
+  $dependencies['module'] = array_values(array_diff($dependencies['module'] ?? [], ['blazy']));
+  if (!in_array('image', $dependencies['module'])) {
+    $dependencies['module'][] = 'image';
+  }
+  sort($dependencies['module']);
+  $dependencies['config'] = $dependencies['config'] ?? [];
+  if (!in_array('image.style.carousel_thumbnail', $dependencies['config'])) {
+    $dependencies['config'][] = 'image.style.carousel_thumbnail';
+  }
+  sort($dependencies['config']);
+  $config->set('dependencies', $dependencies);
+
+  $config->save();
+}
+
+/**
+ * Show field_cultural_protocols in the SoundCloud media_library form display.
+ *
+ * Fixes #784: SoundCloud items created via in-content modal were saved without
+ * a protocol because the field was hidden in the media_library form mode.
+ */
+function mukurtu_media_update_40007(): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('entity_form_display');
+  /** @var \Drupal\Core\Entity\Display\EntityFormDisplayInterface $display */
+  $display = $storage->load('media.soundcloud.media_library');
+  if (!$display) {
+    return;
+  }
+
+  // Only add the field if it isn't already visible.
+  $component = $display->getComponent('field_cultural_protocols');
+  if ($component) {
+    return;
+  }
+
+  $display->setComponent('field_cultural_protocols', [
+    'type' => 'cultural_protocol_widget',
+    'weight' => 1,
+    'region' => 'content',
+    'settings' => [],
+    'third_party_settings' => [],
+  ]);
+  $display->save();
+}
+
+/**
+ * Add remaining metadata fields to the SoundCloud media_library form display.
+ *
+ * Adds field_media_tags, field_contributor, field_thumbnail, field_identifier,
+ * and field_people so the in-content modal matches the admin form.
+ */
+function mukurtu_media_update_40008(): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('entity_form_display');
+  /** @var \Drupal\Core\Entity\Display\EntityFormDisplayInterface $display */
+  $display = $storage->load('media.soundcloud.media_library');
+  if (!$display) {
+    return;
+  }
+
+  $fields = [
+    'field_media_tags' => [
+      'type' => 'tagify_entity_reference_autocomplete_widget',
+      'weight' => 2,
+      'settings' => [
+        'match_operator' => 'CONTAINS',
+        'match_limit' => 0,
+        'placeholder' => '',
+        'suggestions_dropdown' => 0,
+        'show_entity_id' => 0,
+        'show_info_label' => 0,
+        'info_label' => '',
+        'parent_selection' => 1,
+      ],
+    ],
+    'field_contributor' => [
+      'type' => 'tagify_entity_reference_autocomplete_widget',
+      'weight' => 3,
+      'settings' => [
+        'match_operator' => 'CONTAINS',
+        'match_limit' => 0,
+        'placeholder' => '',
+        'suggestions_dropdown' => 0,
+        'show_entity_id' => 0,
+        'show_info_label' => 0,
+        'info_label' => '',
+        'parent_selection' => 1,
+      ],
+    ],
+    'field_thumbnail' => [
+      'type' => 'image_image',
+      'weight' => 4,
+      'settings' => [
+        'progress_indicator' => 'throbber',
+        'preview_image_style' => 'thumbnail',
+      ],
+    ],
+    'field_identifier' => [
+      'type' => 'string_textfield',
+      'weight' => 5,
+      'settings' => [
+        'size' => 60,
+        'placeholder' => '',
+      ],
+    ],
+    'field_people' => [
+      'type' => 'tagify_entity_reference_autocomplete_widget',
+      'weight' => 6,
+      'settings' => [
+        'match_operator' => 'CONTAINS',
+        'match_limit' => 0,
+        'placeholder' => '',
+        'suggestions_dropdown' => 0,
+        'show_entity_id' => 0,
+        'show_info_label' => 0,
+        'info_label' => '',
+        'parent_selection' => 1,
+      ],
+    ],
+  ];
+
+  foreach ($fields as $field_name => $config) {
+    if (!$display->getComponent($field_name)) {
+      $display->setComponent($field_name, $config + ['region' => 'content', 'third_party_settings' => []]);
+    }
+  }
+  $display->save();
+}
+
+/**
+ * Add field_thumbnail to the image media default form display.
+ *
+ * The image bundle is the only media type without a thumbnail field. The field
+ * itself is registered via bundleFieldDefinitions() (no schema change needed);
+ * this hook adds it to the default form display at weight 4.
+ */
+function mukurtu_media_update_40009(): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('entity_form_display');
+  /** @var \Drupal\Core\Entity\Display\EntityFormDisplayInterface $display */
+  $display = $storage->load('media.image.default');
+  if (!$display) {
+    return;
+  }
+  if (!$display->getComponent('field_thumbnail')) {
+    $display->setComponent('field_thumbnail', [
+      'type' => 'image_image',
+      'weight' => 4,
+      'region' => 'content',
+      'settings' => [
+        'progress_indicator' => 'throbber',
+        'preview_image_style' => 'thumbnail',
+      ],
+      'third_party_settings' => [],
+    ]);
+    $display->save();
+  }
+}
+
+/**
+ * Reorder SoundCloud media_library form display fields and show the URL field.
+ *
+ * Desired order: Link (field_media_soundcloud), Name, Cultural Protocols,
+ * Thumbnail, Identifier, People, Media Tags, Contributor.
+ */
+function mukurtu_media_update_40010(): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('entity_form_display');
+  /** @var \Drupal\Core\Entity\Display\EntityFormDisplayInterface $display */
+  $display = $storage->load('media.soundcloud.media_library');
+  if (!$display) {
+    return;
+  }
+
+  // Show the SoundCloud URL field (was hidden in previous config).
+  $display->setComponent('field_media_soundcloud', [
+    'type' => 'string_textfield',
+    'weight' => 0,
+    'region' => 'content',
+    'settings' => ['size' => 60, 'placeholder' => ''],
+    'third_party_settings' => [],
+  ]);
+
+  // Reorder all remaining fields.
+  $weights = [
+    'name' => 1,
+    'field_cultural_protocols' => 2,
+    'field_thumbnail' => 3,
+    'field_identifier' => 4,
+    'field_people' => 5,
+    'field_media_tags' => 6,
+    'field_contributor' => 7,
+  ];
+  foreach ($weights as $field => $weight) {
+    $component = $display->getComponent($field);
+    if ($component) {
+      $component['weight'] = $weight;
+      $display->setComponent($field, $component);
+    }
+  }
+
+  $display->save();
+}
+
+/**
+ * Grant 'administer mukurtu_media configuration' to the mukurtu_manager role.
+ */
+function mukurtu_media_update_40011(): void {
   $role = \Drupal::entityTypeManager()->getStorage('user_role')->load('mukurtu_manager');
   if ($role) {
     $role->grantPermission('administer mukurtu_media configuration');
@@ -110,7 +478,7 @@ function mukurtu_media_update_40003(): void {
 /**
  * Disable core views.view.media so Mukurtu's media view controls /admin/content/media.
  */
-function mukurtu_media_update_40004(): void {
+function mukurtu_media_update_40012(): void {
   $config = \Drupal::configFactory()->getEditable('views.view.media');
   if (!$config->isNew()) {
     $config->set('status', FALSE)->save();
@@ -118,9 +486,40 @@ function mukurtu_media_update_40004(): void {
 }
 
 /**
+ * Sync field_thumbnail to the base thumbnail field for audio, remote_video,
+ * and soundcloud media that already have a user-uploaded thumbnail.
+ */
+function mukurtu_media_update_40013(&$sandbox): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('media');
+
+  if (!isset($sandbox['total'])) {
+    $ids = $storage->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('bundle', ['audio', 'remote_video', 'soundcloud'], 'IN')
+      ->condition('field_thumbnail', NULL, 'IS NOT NULL')
+      ->execute();
+    $sandbox['ids'] = array_values($ids);
+    $sandbox['total'] = count($ids);
+    $sandbox['processed'] = 0;
+  }
+
+  $batch = array_splice($sandbox['ids'], 0, 25);
+  foreach ($storage->loadMultiple($batch) as $media) {
+    $fid = $media->get('field_thumbnail')->getValue()[0]['target_id'] ?? NULL;
+    if ($fid) {
+      $media->thumbnail->target_id = $fid;
+      $media->save();
+    }
+    $sandbox['processed']++;
+  }
+
+  $sandbox['#finished'] = $sandbox['total'] ? $sandbox['processed'] / $sandbox['total'] : 1;
+}
+
+/**
  * Create media_assets and carousel_thumbnail view displays for SoundCloud.
  */
-function mukurtu_media_update_40005(): void {
+function mukurtu_media_update_40014(): void {
   $storage = \Drupal::service('config.storage');
 
   $media_assets = [
@@ -238,4 +637,56 @@ function mukurtu_media_update_40005(): void {
 
   $storage->write('core.entity_view_display.media.soundcloud.media_assets', $media_assets);
   $storage->write('core.entity_view_display.media.soundcloud.carousel_thumbnail', $carousel_thumbnail);
+}
+
+/**
+ * Re-sync field_thumbnail to the base thumbnail field using direct DB queries,
+ * bypassing prepareSave() thumbnail regeneration for audio, remote_video,
+ * and soundcloud media.
+ */
+function mukurtu_media_update_40015(&$sandbox): void {
+  $database = \Drupal::database();
+
+  if (!$database->schema()->tableExists('media__field_thumbnail')) {
+    $sandbox['#finished'] = 1;
+    return;
+  }
+
+  if (!isset($sandbox['total'])) {
+    $result = $database->select('media__field_thumbnail', 'ft')
+      ->fields('ft', ['entity_id', 'revision_id', 'field_thumbnail_target_id'])
+      ->condition('ft.deleted', 0)
+      ->execute()
+      ->fetchAll();
+
+    $sandbox['items'] = array_values(array_map(fn($r) => (array) $r, $result));
+    $sandbox['total'] = count($sandbox['items']);
+    $sandbox['processed'] = 0;
+  }
+
+  $batch = array_splice($sandbox['items'], 0, 50);
+  foreach ($batch as $row) {
+    $fid = $row['field_thumbnail_target_id'];
+    if (!$fid) {
+      $sandbox['processed']++;
+      continue;
+    }
+
+    $database->update('media__thumbnail')
+      ->fields(['thumbnail_target_id' => $fid])
+      ->condition('entity_id', $row['entity_id'])
+      ->condition('deleted', 0)
+      ->execute();
+
+    $database->update('media_revision__thumbnail')
+      ->fields(['thumbnail_target_id' => $fid])
+      ->condition('entity_id', $row['entity_id'])
+      ->condition('revision_id', $row['revision_id'])
+      ->condition('deleted', 0)
+      ->execute();
+
+    $sandbox['processed']++;
+  }
+
+  $sandbox['#finished'] = $sandbox['total'] ? $sandbox['processed'] / $sandbox['total'] : 1;
 }
