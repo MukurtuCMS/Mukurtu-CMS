@@ -1011,7 +1011,7 @@ a:not(.primary-nav__menu-link) svg.tel path {
 .mukurtu-content-warnings:hover {
   text-decoration: underline;
 }
-.mukurtu-content-warnings:focus {
+.mukurtu-content-warnings:focus-visible {
   outline: var(--focus-color) solid 2px;
 }
 .mukurtu-content-warnings.dismissed {

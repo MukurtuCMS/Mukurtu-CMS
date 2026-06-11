@@ -21,7 +21,7 @@
     text-decoration: underline;
   }
 
-  &:focus {
+  &:focus-visible {
     outline: var(--focus-color) solid 2px;
   }
 

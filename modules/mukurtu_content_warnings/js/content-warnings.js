@@ -18,6 +18,13 @@
           event.preventDefault();
           this.dismissContentWarning(event.target.closest('.mukurtu-content-warnings'));
         });
+
+        element.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            this.dismissContentWarning(event.target.closest('.mukurtu-content-warnings'));
+          }
+        });
       });
     },
 
