@@ -29,7 +29,7 @@ class Video extends Media implements VideoInterface, CulturalProtocolControlledI
    */
   function getDefaultThumbnail() {
     $config = \Drupal::config('mukurtu_thumbnail.settings');
-    $defaultVideoThumbnail = $config->get('video')[0] ?? NULL;
+    $defaultVideoThumbnail = $config->get('video_default_thumbnail')[0] ?? NULL;
     return $defaultVideoThumbnail;
   }
 
@@ -187,10 +187,14 @@ class Video extends Media implements VideoInterface, CulturalProtocolControlledI
    */
   public function preSave(EntityStorageInterface $storage)
   {
-    // Set the 'thumbnail' field to our generated thumbnail.
-    $defaultThumb = $this->get('field_thumbnail')->getValue()[0]['target_id'] ?? NULL;
-    if ($defaultThumb) {
-      $this->thumbnail->target_id = $defaultThumb;
+    // Set the 'thumbnail' field to our generated thumbnail, falling back to
+    // the configured default when no user-uploaded thumbnail exists.
+    $thumbFid = $this->get('field_thumbnail')->getValue()[0]['target_id'] ?? NULL;
+    if (!$thumbFid) {
+      $thumbFid = $this->getDefaultThumbnail();
+    }
+    if ($thumbFid) {
+      $this->set('thumbnail', ['target_id' => $thumbFid]);
     }
     parent::preSave($storage);
   }

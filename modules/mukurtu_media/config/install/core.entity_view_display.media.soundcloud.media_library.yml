@@ -3,7 +3,7 @@ status: true
 dependencies:
   config:
     - core.entity_view_mode.media.media_library
-    - image.style.medium
+    - image.style.media_library
     - media.type.soundcloud
   module:
     - image
@@ -17,7 +17,7 @@ content:
     label: hidden
     settings:
       image_link: ''
-      image_style: medium
+      image_style: media_library
       image_loading:
         attribute: lazy
     third_party_settings: {  }

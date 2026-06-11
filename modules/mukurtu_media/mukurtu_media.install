@@ -5,6 +5,60 @@
  * Install, update and uninstall functions for the mukurtu_media module.
  */
 
+use Drupal\Core\File\FileSystemInterface;
+use Drupal\file\Entity\File;
+
+/**
+ * Copies a module-bundled image to public files and returns a new File entity ID.
+ */
+function _mukurtu_media_create_bundled_thumbnail(string $filename): ?int {
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_media');
+  $source = $module_path . '/images/' . $filename;
+  if (!file_exists($source)) {
+    return NULL;
+  }
+  $destination_dir = 'public://mukurtu_media';
+  \Drupal::service('file_system')->prepareDirectory($destination_dir, FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS);
+  $uri = \Drupal::service('file_system')->copy($source, $destination_dir . '/' . $filename, FileSystemInterface::EXISTS_REPLACE);
+  if (!$uri) {
+    return NULL;
+  }
+  $file = File::create(['uri' => $uri, 'status' => 1]);
+  $file->save();
+  return $file->id();
+}
+
+/**
+ * Sets default video and audio thumbnails from bundled images if not already configured.
+ */
+function _mukurtu_media_set_default_thumbnails(): void {
+  $config = \Drupal::configFactory()->getEditable('mukurtu_thumbnail.settings');
+  $defaults = [
+    'video_default_thumbnail' => 'video.png',
+    'audio_default_thumbnail' => 'audio.png',
+  ];
+  foreach ($defaults as $key => $filename) {
+    if (!$config->get($key)) {
+      $fid = _mukurtu_media_create_bundled_thumbnail($filename);
+      if ($fid) {
+        $config->set($key, [$fid]);
+      }
+    }
+  }
+  $config->save();
+}
+
+/**
+ * Implements hook_install().
+ */
+function mukurtu_media_install(): void {
+  _mukurtu_media_set_default_thumbnails();
+  $config = \Drupal::configFactory()->getEditable('views.view.media');
+  if (!$config->isNew()) {
+    $config->set('status', FALSE)->save();
+  }
+}
+
 /**
  * Hide field_media_document in document media browse and media_library view modes.
  */
@@ -647,6 +701,7 @@ function mukurtu_media_update_40014(): void {
 function mukurtu_media_update_40015(&$sandbox): void {
   $database = \Drupal::database();
 
+  // If the table doesn't exist there is nothing to migrate.
   if (!$database->schema()->tableExists('media__field_thumbnail')) {
     $sandbox['#finished'] = 1;
     return;
@@ -689,4 +744,32 @@ function mukurtu_media_update_40015(&$sandbox): void {
   }
 
   $sandbox['#finished'] = $sandbox['total'] ? $sandbox['processed'] / $sandbox['total'] : 1;
+}
+
+/**
+ * Set default video and audio thumbnails from module-bundled images.
+ *
+ * Also migrates the old 'audio' config key to 'audio_default_thumbnail' so
+ * existing sites that had a custom audio thumbnail do not lose it.
+ */
+function mukurtu_media_update_40016(): void {
+  $config = \Drupal::configFactory()->getEditable('mukurtu_thumbnail.settings');
+
+  // Migrate old bare-bundle keys -> suffixed keys before calling the helper,
+  // which skips keys that are already set.
+  $migrations = ['audio' => 'audio_default_thumbnail', 'video' => 'video_default_thumbnail'];
+  $changed = FALSE;
+  foreach ($migrations as $old_key => $new_key) {
+    $old_value = $config->get($old_key);
+    if ($old_value && !$config->get($new_key)) {
+      $config->set($new_key, $old_value);
+      $config->clear($old_key);
+      $changed = TRUE;
+    }
+  }
+  if ($changed) {
+    $config->save();
+  }
+
+  _mukurtu_media_set_default_thumbnails();
 }
