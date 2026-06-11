@@ -40,6 +40,7 @@ class ThumbnailSettingsForm extends ConfigFormBase
       if (in_array($key, $this->excludedMediaBundles)) {
         continue;
       }
+      $configKey = $this->getConfigKey($key);
       $form["default_thumbnail"][$key] = [
         '#type' => 'managed_file',
         '#title' => $this->t("{$value['label']} default thumbnail"),
@@ -48,7 +49,7 @@ class ThumbnailSettingsForm extends ConfigFormBase
         '#upload_validators' => [
           'FileExtension' => ['extensions' => 'png gif jpg jpeg'],
         ],
-        '#default_value' => $config->get($key) ?? NULL,
+        '#default_value' => $config->get($configKey) ?? NULL,
       ];
     }
     return parent::buildForm($form, $form_state);
@@ -68,9 +69,19 @@ class ThumbnailSettingsForm extends ConfigFormBase
         $file->setPermanent();
         $file->save();
       }
-      $config->set($key, $formFile);
+      $config->set($this->getConfigKey($key), $formFile);
     }
     $config->save();
     parent::submitForm($form, $form_state);
+  }
+
+  /**
+   * Returns the config key for a given media bundle.
+   *
+   * Audio and video use a suffixed key to avoid collisions with legacy config.
+   */
+  protected function getConfigKey(string $bundle): string {
+    static $suffixed = ['audio', 'video'];
+    return in_array($bundle, $suffixed) ? $bundle . '_default_thumbnail' : $bundle;
   }
 }
