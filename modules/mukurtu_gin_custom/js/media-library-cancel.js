@@ -52,8 +52,8 @@
     var $table = $('.media-library-widget-modal .views-table');
     if (!$table.length) return;
 
-    // WCAG 4.1.2: table with aria-selected rows must have role="grid" so
-    // assistive technologies correctly interpret the selection semantics.
+    // WCAG 4.1.2: role=grid is required for aria-selected on <tr> rows to be
+    // announced correctly by NVDA/JAWS (plain <table> role does not expose it).
     if (!$table.attr('role')) {
       $table.attr('role', 'grid');
     }
