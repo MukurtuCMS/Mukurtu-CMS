@@ -7,6 +7,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\Core\Hook\Order\OrderAfter;
+use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Url;
 use Drupal\og\Og;
@@ -819,6 +820,18 @@ class FormHooks
                 $entity->save();
             }
         }
+
+        // When an admin creates a non-active account with notify checked, our
+        // MailHooks suppresses the email. Core shows no message in that case,
+        // so add one explaining why.
+        if (
+            \Drupal::currentUser()->isAuthenticated()
+            && (bool) $form_state->getValue('notify')
+            && $entity
+            && !$entity->isActive()
+        ) {
+            \Drupal::messenger()->addStatus(t('No welcome email was sent because the account has not been activated.'));
+        }
     }
 
     /**
@@ -833,6 +846,14 @@ class FormHooks
         if ($user && $user->hasField("field_pending") && $user->isBlocked()) {
             $user->set("field_pending", 1);
             $user->save();
+
+            // Clear all status messages (core's misleading pending-approval copy,
+            // genpass password notices) and replace with a single accurate message.
+            // The visitor can't log in yet, so password info and OTL references
+            // are premature here; they'll receive full details on approval.
+            $messenger = \Drupal::messenger();
+            $messenger->deleteByType(MessengerInterface::TYPE_STATUS);
+            $messenger->addStatus(t('Thank you for requesting an account. Your application for an account is currently pending approval. Once it has been approved, you will receive another email containing information about how to log in, set your password, and other details.'));
         }
     }
 
