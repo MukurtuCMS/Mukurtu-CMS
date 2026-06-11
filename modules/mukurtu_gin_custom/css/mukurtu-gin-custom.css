@@ -401,7 +401,13 @@ counterpart, if one exists. */
 
 /* Fix #1722: keep the lower sticky bulk-actions bar beneath the sticky
    header's stacking context (z-index: 4) so its Actions dropdown is not
-   obscured when expanded. Mirrors Gin's selector pattern from tableselect.css. */
+   obscured when expanded. Mirrors Gin's selector pattern from tableselect.css.
+   Note: this intentionally creates a stacking context on .views-bulk-actions
+   at level 3. Any absolutely-positioned descendants will be confined to that
+   context — currently not an issue since the bar contains only flat elements.
+   Attribute [data-drupal-sticky-vbo=true] is set by VBO's JS when the bar
+   enters sticky mode; the conflict only surfaces when scrolled to that
+   position, so this scope is sufficient. */
 .block-system > .views-form .views-bulk-actions[data-drupal-sticky-vbo=true],
 .view-content .views-form .views-bulk-actions[data-drupal-sticky-vbo=true] {
   z-index: 3;
