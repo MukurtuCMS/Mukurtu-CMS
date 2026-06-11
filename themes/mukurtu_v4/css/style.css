@@ -2326,6 +2326,7 @@ details.form-wrapper summary + div {
           box-shadow: inset 0 0 0 1px var(--brand-primary);
   line-height: var(--line-height-m);
   color: var(--brand-primary-dark);
+  letter-spacing: normal;
 }
 .local-tasks:not(.glb-body .local-tasks) .local-tasks__export > a:hover, .local-tasks:not(.glb-body .local-tasks) .local-tasks__export > a:active {
   -webkit-box-shadow: none;
