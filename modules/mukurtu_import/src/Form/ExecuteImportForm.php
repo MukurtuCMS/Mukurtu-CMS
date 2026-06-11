@@ -19,6 +19,7 @@ use Drupal\migrate\MigrateMessage;
 use Drupal\mukurtu_import\MukurtuImportFieldProcessPluginManager;
 use Drupal\mukurtu_import\MukurtuImportStrategyInterface;
 use Exception;
+use League\Csv\Reader;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class ExecuteImportForm extends ImportBaseForm {
@@ -102,6 +103,7 @@ class ExecuteImportForm extends ImportBaseForm {
         $this->t('Filename'),
         $this->t('Import Settings'),
         $this->t('Destination Import Type'),
+        $this->t('Rows'),
       ],
       '#attributes' => [
         'id' => 'import-review',
@@ -135,6 +137,24 @@ class ExecuteImportForm extends ImportBaseForm {
       $form['table'][$fid]['destination'] = [
         '#type' => 'markup',
         '#markup' => "<div>$entity_label: $bundle_label</div>",
+      ];
+
+      // Row count.
+      $row_count = $this->t('—');
+      $file = $this->entityTypeManager->getStorage('file')->load($fid);
+      if ($file) {
+        try {
+          $csv = Reader::from($file->getFileUri(), 'r');
+          $csv->setHeaderOffset(0);
+          $row_count = count($csv);
+        }
+        catch (Exception $e) {
+          // Leave as em dash if the file can't be read.
+        }
+      }
+      $form['table'][$fid]['row_count'] = [
+        '#type' => 'markup',
+        '#markup' => "<div>{$row_count}</div>",
       ];
 
     }
