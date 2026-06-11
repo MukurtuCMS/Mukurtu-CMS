@@ -398,3 +398,11 @@ counterpart, if one exists. */
 .media-library-widget-modal .view-header {
     display: none !important;
 }
+
+/* Fix #1722: keep the lower sticky bulk-actions bar beneath the sticky
+   header's stacking context (z-index: 4) so its Actions dropdown is not
+   obscured when expanded. Mirrors Gin's selector pattern from tableselect.css. */
+.block-system > .views-form .views-bulk-actions[data-drupal-sticky-vbo=true],
+.view-content .views-form .views-bulk-actions[data-drupal-sticky-vbo=true] {
+  z-index: 3;
+}
