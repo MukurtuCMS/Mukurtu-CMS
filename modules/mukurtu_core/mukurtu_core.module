@@ -263,7 +263,7 @@ function mukurtu_core_form_user_admin_settings_alter(&$form, FormStateInterface 
   $opts = [
     UserInterface::REGISTER_ADMINISTRATORS_ONLY => $opts[UserInterface::REGISTER_ADMINISTRATORS_ONLY],
     UserInterface::REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL => $opts[UserInterface::REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL],
-    UserInterface::REGISTER_VISITORS => $opts[UserInterface::REGISTER_VISITORS],
+    UserInterface::REGISTER_VISITORS => t('Visitors, no approval required'),
   ];
   // Move password-related fields to the bottom of the genpass registration
   // section so the form flows: who can register → genpass mode → verification.
