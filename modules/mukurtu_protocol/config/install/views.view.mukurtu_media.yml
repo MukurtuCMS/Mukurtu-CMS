@@ -102,6 +102,11 @@ display:
               preconfiguration:
                 add_confirmation: false
                 label_override: ''
+            4:
+              action_id: views_bulk_operations_delete_entity
+              preconfiguration:
+                add_confirmation: true
+                label_override: Delete
         thumbnail__target_id:
           id: thumbnail__target_id
           table: media_field_data
