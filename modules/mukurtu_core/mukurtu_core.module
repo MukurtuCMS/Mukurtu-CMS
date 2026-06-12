@@ -809,7 +809,6 @@ function mukurtu_core_token_fields(): array {
     'field_category'               => t('Category'),
     'field_summary'                => t('Summary'),
     'field_original_date'          => t('Original Date (Mukurtu)'),
-    'field_coverage'               => t('Coverage'),
     'field_coverage_description'   => t('Coverage Description'),
     'field_transcription'          => t('Transcription'),
     // Dictionary Word fields.
@@ -835,6 +834,14 @@ function mukurtu_core_token_info_alter(&$data) {
       'description' => t('The @label field value (Mukurtu).', ['@label' => $label]),
     ];
   }
+  $data['tokens']['node']['mukurtu_communities'] = [
+    'name' => t('Communities'),
+    'description' => t('Comma-separated list of community names for this item (Mukurtu).'),
+  ];
+  $data['tokens']['node']['mukurtu_protocols'] = [
+    'name' => t('Cultural Protocols'),
+    'description' => t('Comma-separated list of cultural protocol names for this item (Mukurtu).'),
+  ];
 }
 
 /**
@@ -860,6 +867,26 @@ function mukurtu_core_tokens($type, $tokens, array $data, array $options, Bubble
     $replacements[$tokens[$field_name]] = mukurtu_core_token_field_value($node->get($field_name));
   }
 
+  if (isset($tokens['mukurtu_communities']) && method_exists($node, 'getCommunities')) {
+    $labels = [];
+    foreach ($node->getCommunities() as $community) {
+      if ($community !== NULL) {
+        $labels[] = $community->label();
+      }
+    }
+    $replacements[$tokens['mukurtu_communities']] = implode(', ', $labels);
+  }
+
+  if (isset($tokens['mukurtu_protocols']) && method_exists($node, 'getProtocolEntities')) {
+    $labels = [];
+    foreach ($node->getProtocolEntities() as $protocol) {
+      if ($protocol !== NULL) {
+        $labels[] = $protocol->label();
+      }
+    }
+    $replacements[$tokens['mukurtu_protocols']] = implode(', ', $labels);
+  }
+
   return $replacements;
 }
 
@@ -877,10 +904,39 @@ function mukurtu_core_token_field_value(FieldItemListInterface $field): string {
 
   $field_type = $field->getFieldDefinition()->getType();
 
+  if ($field_type === 'original_date') {
+    $parts = [];
+    foreach ($field as $item) {
+      $date = $item->date ?? '';
+      if ($date !== '') {
+        $parts[] = $date;
+      }
+    }
+    return implode(', ', $parts);
+  }
+
   if (in_array($field_type, ['entity_reference', 'entity_reference_revisions'])) {
+    $entities = $field->referencedEntities();
+    // Fallback: load entities directly via storage to bypass any access-layer caching.
+    if (empty($entities)) {
+      $target_type = $field->getFieldDefinition()->getSetting('target_type');
+      if ($target_type) {
+        $storage = \Drupal::entityTypeManager()->getStorage($target_type);
+        foreach ($field->getValue() as $value) {
+          if (!empty($value['target_id'])) {
+            $entity = $storage->load($value['target_id']);
+            if ($entity) {
+              $entities[] = $entity;
+            }
+          }
+        }
+      }
+    }
     $labels = [];
-    foreach ($field->referencedEntities() as $entity) {
-      $labels[] = $entity->label();
+    foreach ($entities as $entity) {
+      if ($entity !== NULL) {
+        $labels[] = $entity->label();
+      }
     }
     return implode(', ', $labels);
   }
