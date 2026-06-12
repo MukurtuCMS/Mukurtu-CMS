@@ -30,6 +30,8 @@ use Drupal\user\UserInterface;
  *     "escape",
  *     "eol",
  *     "multivalue_delimiter",
+ *     "local_contexts_delimiter",
+ *     "default_format",
  *     "field_id",
  *     "field_file",
  *     "field_image",
@@ -110,6 +112,16 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface {
   /**
    * @var string
    */
+  protected $local_contexts_delimiter;
+
+  /**
+   * @var string
+   */
+  protected $default_format;
+
+  /**
+   * @var string
+   */
   protected $field_id;
 
   /**
@@ -181,6 +193,14 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface {
 
     if (!$this->getMultivalueDelimiter()) {
       $this->setMultivalueDelimiter(';');
+    }
+
+    if (!$this->getLocalContextsDelimiter()) {
+      $this->setLocalContextsDelimiter('>');
+    }
+
+    if (!$this->getDefaultFormat()) {
+      $this->setDefaultFormat('basic_html');
     }
 
     if (!$this->getIdFieldSetting()) {
@@ -319,6 +339,24 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface {
 
   public function setMultivalueDelimiter($multivalue_delimiter) {
     $this->multivalue_delimiter = $multivalue_delimiter;
+    return $this;
+  }
+
+  public function getLocalContextsDelimiter() {
+    return $this->local_contexts_delimiter;
+  }
+
+  public function setLocalContextsDelimiter($delimiter) {
+    $this->local_contexts_delimiter = $delimiter;
+    return $this;
+  }
+
+  public function getDefaultFormat() {
+    return $this->default_format;
+  }
+
+  public function setDefaultFormat($format) {
+    $this->default_format = $format;
     return $this;
   }
 

@@ -244,3 +244,17 @@ function mukurtu_export_update_40009(): void {
 
   $config->set('entity_fields_export_list', $entity_fields)->save();
 }
+
+/**
+ * Update recommended_settings_for_import: add local_contexts_delimiter and
+ * default_format fields.
+ */
+function mukurtu_export_update_40010(): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('csv_exporter');
+  $entity = $storage->load('recommended_settings_for_import');
+  if ($entity) {
+    $entity->setLocalContextsDelimiter('>');
+    $entity->setDefaultFormat('basic_html');
+    $entity->save();
+  }
+}
