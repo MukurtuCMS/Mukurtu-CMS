@@ -141,7 +141,6 @@ entity_fields_export_list:
     field_people: People
     field_thumbnail: Thumbnail
     field_identifier: Identifier
-    field_found_in: 'Found In'
   media__document:
     mid: ID
     langcode: Locale
@@ -155,20 +154,6 @@ entity_fields_export_list:
     field_people: People
     field_thumbnail: Thumbnail
     field_identifier: Identifier
-    field_found_in: 'Found In'
-  media__external_embed:
-    mid: ID
-    langcode: Locale
-    uid: 'Authored by'
-    name: Name
-    field_cultural_protocols/protocols: Protocols
-    field_cultural_protocols/sharing_setting: 'Sharing Setting'
-    field_media_external_embed: 'Embed Code'
-    field_keywords: Keywords
-    field_people: People
-    field_thumbnail: Thumbnail
-    field_identifier: Identifier
-    field_found_in: 'Found In'
   media__image:
     mid: ID
     langcode: Locale
@@ -180,7 +165,6 @@ entity_fields_export_list:
     field_keywords: Keywords
     field_people: People
     field_identifier: Identifier
-    field_found_in: 'Found In'
   media__remote_video:
     mid: ID
     langcode: Locale
@@ -193,21 +177,6 @@ entity_fields_export_list:
     field_people: People
     field_thumbnail: Thumbnail
     field_identifier: Identifier
-    field_found_in: 'Found In'
-  media__soundcloud:
-    mid: ID
-    langcode: Locale
-    uid: 'Authored by'
-    name: Name
-    field_cultural_protocols/protocols: Protocols
-    field_cultural_protocols/sharing_setting: 'Sharing Setting'
-    field_media_soundcloud: 'SoundCloud URL'
-    field_contributor: Contributor
-    field_keywords: Keywords
-    field_people: People
-    field_thumbnail: Thumbnail
-    field_identifier: Identifier
-    field_found_in: 'Found In'
   media__video:
     mid: ID
     langcode: Locale
@@ -220,7 +189,6 @@ entity_fields_export_list:
     field_people: People
     field_thumbnail: Thumbnail
     field_identifier: Identifier
-    field_found_in: 'Found In'
   community__community:
     id: ID
     langcode: Locale

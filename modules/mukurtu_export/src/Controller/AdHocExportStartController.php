@@ -4,7 +4,6 @@ namespace Drupal\mukurtu_export\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\TempStore\PrivateTempStoreFactory;
-use Drupal\media\MediaInterface;
 use Drupal\node\NodeInterface;
 use Drupal\views_bulk_operations\Traits\ViewsBulkOperationsFormTrait;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -35,19 +34,6 @@ class AdHocExportStartController extends ControllerBase {
     $store = $this->tempStoreFactory->get('mukurtu_import');
     $store->delete('export_list_id');
     $store->set('ad_hoc_items', ['node' => [(int) $node->id() => (int) $node->id()]]);
-    $store->set('exporter_id', 'csv');
-
-    return $this->redirect('mukurtu_export.export_settings');
-  }
-
-  public function startMedia(MediaInterface $media) {
-    if (!\Drupal::currentUser()->hasPermission('access mukurtu export')) {
-      throw new AccessDeniedHttpException();
-    }
-
-    $store = $this->tempStoreFactory->get('mukurtu_import');
-    $store->delete('export_list_id');
-    $store->set('ad_hoc_items', ['media' => [(int) $media->id() => (int) $media->id()]]);
     $store->set('exporter_id', 'csv');
 
     return $this->redirect('mukurtu_export.export_settings');

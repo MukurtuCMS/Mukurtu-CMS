@@ -1278,16 +1278,11 @@ class FormHooks
         array &$operations,
         EntityInterface $entity,
     ): void {
-        if ($entity->getEntityTypeId() === "og_membership") {
-            if (isset($operations["delete"])) {
-                $operations["delete"]["title"] = t("Remove from group");
-            }
+        if ($entity->getEntityTypeId() !== "og_membership") {
+            return;
         }
-        if ($entity->getEntityTypeId() === "media") {
-            unset($operations["view"]);
-            if (isset($operations["edit"])) {
-                $operations["edit"]["weight"] = -10;
-            }
+        if (isset($operations["delete"])) {
+            $operations["delete"]["title"] = t("Remove from group");
         }
     }
 

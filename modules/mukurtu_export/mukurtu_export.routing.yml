@@ -96,35 +96,3 @@ mukurtu_export.remove_node_from_list:
         type: entity:node
   requirements:
     _permission: 'access mukurtu export'
-
-mukurtu_export.start_adhoc_media:
-  path: '/admin/export/start-adhoc-media/{media}'
-  defaults:
-    _title: 'Export'
-    _controller: 'Drupal\mukurtu_export\Controller\AdHocExportStartController::startMedia'
-  options:
-    parameters:
-      media:
-        type: entity:media
-  requirements:
-    _permission: 'access mukurtu export'
-
-mukurtu_export.remove_media_from_list:
-  path: '/admin/export/remove-media/{media}'
-  defaults:
-    _title: 'Remove from Export List'
-    _form: 'Drupal\mukurtu_export\Form\ExportListRemoveMediaForm'
-  options:
-    parameters:
-      media:
-        type: entity:media
-  requirements:
-    _permission: 'access mukurtu export'
-
-mukurtu_export.taxonomy_export_start:
-  path: '/admin/export/taxonomy'
-  defaults:
-    _title: 'Export Taxonomy'
-    _form: 'Drupal\mukurtu_export\Form\TaxonomyExportStartForm'
-  requirements:
-    _permission: 'access mukurtu export'

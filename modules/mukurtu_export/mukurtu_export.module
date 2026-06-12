@@ -73,27 +73,6 @@ function mukurtu_export_entity_operation(\Drupal\Core\Entity\EntityInterface $en
       'url' => \Drupal\Core\Url::fromRoute('mukurtu_export.start_adhoc_node', ['node' => $entity->id()]),
       'weight' => 55,
     ];
-    $operations['remove_from_export_list'] = [
-      'title' => t('Remove from export list'),
-      'url' => \Drupal\Core\Url::fromRoute('mukurtu_export.remove_node_from_list', ['node' => $entity->id()], [
-        'query' => ['destination' => \Drupal::request()->getRequestUri()],
-      ]),
-      'weight' => 60,
-    ];
-  }
-  if ($entity->getEntityTypeId() === 'media') {
-    $operations['export'] = [
-      'title' => t('Export'),
-      'url' => \Drupal\Core\Url::fromRoute('mukurtu_export.start_adhoc_media', ['media' => $entity->id()]),
-      'weight' => 55,
-    ];
-    $operations['remove_from_export_list'] = [
-      'title' => t('Remove from export list'),
-      'url' => \Drupal\Core\Url::fromRoute('mukurtu_export.remove_media_from_list', ['media' => $entity->id()], [
-        'query' => ['destination' => \Drupal::request()->getRequestUri()],
-      ]),
-      'weight' => 60,
-    ];
   }
   return $operations;
 }

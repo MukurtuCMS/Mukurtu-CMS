@@ -45,29 +45,3 @@ mukurtu_media.media_settings_form:
     _form: 'Drupal\mukurtu_media\Form\MediaSettingsForm'
   requirements:
     _permission: 'administer mukurtu_media configuration'
-
-mukurtu_media.publish:
-  path: '/admin/content/media/{media}/publish'
-  defaults:
-    _controller: 'Drupal\mukurtu_media\Controller\MediaStatusController::publish'
-    _title: 'Publish'
-  requirements:
-    _csrf_token: 'TRUE'
-    _entity_access: 'media.update'
-  options:
-    parameters:
-      media:
-        type: entity:media
-
-mukurtu_media.unpublish:
-  path: '/admin/content/media/{media}/unpublish'
-  defaults:
-    _controller: 'Drupal\mukurtu_media\Controller\MediaStatusController::unpublish'
-    _title: 'Unpublish'
-  requirements:
-    _csrf_token: 'TRUE'
-    _entity_access: 'media.update'
-  options:
-    parameters:
-      media:
-        type: entity:media
