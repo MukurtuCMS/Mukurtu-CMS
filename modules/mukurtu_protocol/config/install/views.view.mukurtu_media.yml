@@ -26,15 +26,14 @@ display:
     display_options:
       title: Media
       fields:
-        media_bulk_form:
-          id: media_bulk_form
-          table: media
-          field: media_bulk_form
+        views_bulk_operations_bulk_form:
+          id: views_bulk_operations_bulk_form
+          table: views
+          field: views_bulk_operations_bulk_form
           relationship: none
           group_type: group
           admin_label: ''
-          entity_type: media
-          plugin_id: bulk_form
+          plugin_id: views_bulk_operations_bulk_form
           label: ''
           exclude: false
           alter:
@@ -76,13 +75,33 @@ display:
           hide_empty: false
           empty_zero: false
           hide_alter_empty: true
+          batch: true
+          batch_size: 10
+          form_step: true
+          buttons: false
           action_title: Action
-          include_exclude: include
+          clear_on_exposed: true
           selected_actions:
-            mukurtu_media_publish_action: mukurtu_media_publish_action
-            mukurtu_media_unpublish_action: mukurtu_media_unpublish_action
-            mukurtu_export_adhoc_export_media_action: mukurtu_export_adhoc_export_media_action
-            mukurtu_export_remove_from_list_media_action: mukurtu_export_remove_from_list_media_action
+            0:
+              action_id: 'entity:publish_action:media'
+              preconfiguration:
+                add_confirmation: false
+                label_override: Publish
+            1:
+              action_id: 'entity:unpublish_action:media'
+              preconfiguration:
+                add_confirmation: false
+                label_override: Unpublish
+            2:
+              action_id: mukurtu_export_adhoc_export_media_action
+              preconfiguration:
+                add_confirmation: false
+                label_override: ''
+            3:
+              action_id: mukurtu_export_remove_from_list_media_action
+              preconfiguration:
+                add_confirmation: false
+                label_override: ''
         thumbnail__target_id:
           id: thumbnail__target_id
           table: media_field_data
