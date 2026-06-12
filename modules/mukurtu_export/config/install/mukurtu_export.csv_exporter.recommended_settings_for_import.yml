@@ -344,7 +344,9 @@ separator: ','
 enclosure: '"'
 escape: \
 eol: \n
-multivalue_delimiter: '||'
+multivalue_delimiter: ';'
+local_contexts_delimiter: '>'
+default_format: basic_html
 field_id: id
 field_file: id
 field_image: id

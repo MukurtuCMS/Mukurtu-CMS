@@ -45,3 +45,21 @@ function mukurtu_export_update_40004() {
   }
 }
 
+/**
+ * Update recommended_settings_for_import: fix multivalue_delimiter and add
+ * local_contexts_delimiter and default_format.
+ *
+ * Note: numbered 40007 because existing sites were already at schema 40006
+ * (hooks 40005 and 40006 were run in development but never committed).
+ */
+function mukurtu_export_update_40007() {
+  $storage = \Drupal::entityTypeManager()->getStorage('csv_exporter');
+  $entity = $storage->load('recommended_settings_for_import');
+  if ($entity) {
+    $entity->setMultivalueDelimiter(';');
+    $entity->setLocalContextsDelimiter('>');
+    $entity->setDefaultFormat('basic_html');
+    $entity->save();
+  }
+}
+
