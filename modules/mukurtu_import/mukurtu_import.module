@@ -29,6 +29,19 @@ function mukurtu_import_migrate_destination_info_alter(array &$definitions) {
 }
 
 /**
+ * Implements hook_views_data_alter().
+ */
+function mukurtu_import_views_data_alter(array &$data): void {
+  $data['taxonomy_term_field_data']['mukurtu_import_term_status'] = [
+    'title' => t('Import status'),
+    'help' => t('Whether this term was newly created or updated during this import.'),
+    'field' => [
+      'id' => 'mukurtu_import_term_status',
+    ],
+  ];
+}
+
+/**
  * Implements hook_theme().
  */
 function mukurtu_import_theme($existing, $type, $theme, $path) {

@@ -67,6 +67,37 @@ display:
           multi_type: separator
           separator: ', '
           field_api_classes: false
+        mukurtu_import_term_status:
+          id: mukurtu_import_term_status
+          table: taxonomy_term_field_data
+          field: mukurtu_import_term_status
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: mukurtu_import_term_status
+          label: Status
+          exclude: false
+          alter:
+            alter_text: false
+            make_link: false
+            absolute: false
+            word_boundary: false
+            ellipsis: false
+            strip_tags: false
+            trim: false
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: true
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
         vid:
           id: vid
           table: taxonomy_term_field_data
@@ -315,12 +346,20 @@ display:
           default_row_class: true
           columns:
             name: name
+            mukurtu_import_term_status: mukurtu_import_term_status
             vid: vid
             changed: changed
           default: '-1'
           info:
             name:
               sortable: true
+              default_sort_order: asc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
+            mukurtu_import_term_status:
+              sortable: false
               default_sort_order: asc
               align: ''
               separator: ''
