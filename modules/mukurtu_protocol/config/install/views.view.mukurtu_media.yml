@@ -7,6 +7,7 @@ dependencies:
     - image
     - media
     - mukurtu_export
+    - mukurtu_media
     - mukurtu_protocol
     - views_bulk_operations
 id: mukurtu_media
@@ -78,8 +79,10 @@ display:
           action_title: Action
           include_exclude: include
           selected_actions:
+            mukurtu_media_publish_action: mukurtu_media_publish_action
+            mukurtu_media_unpublish_action: mukurtu_media_unpublish_action
             mukurtu_export_adhoc_export_media_action: mukurtu_export_adhoc_export_media_action
-            mukurtu_export_add_to_list_media_action: mukurtu_export_add_to_list_media_action
+            mukurtu_export_remove_from_list_media_action: mukurtu_export_remove_from_list_media_action
         thumbnail__target_id:
           id: thumbnail__target_id
           table: media_field_data
