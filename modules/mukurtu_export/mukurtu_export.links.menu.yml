@@ -12,3 +12,10 @@ mukurtu_export.export_lists:
   menu_name: dashboard-roundtrip
   parent: mukurtu_dashboard
   route_name: entity.export_list.collection
+
+mukurtu_export.taxonomy_export:
+  title: 'Export Taxonomy'
+  description: 'Export taxonomy terms to CSV.'
+  menu_name: dashboard-roundtrip
+  parent: mukurtu_dashboard
+  route_name: mukurtu_export.taxonomy_export_start

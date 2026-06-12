@@ -94,7 +94,7 @@ class EntityReference extends MukurtuImportFieldProcessPluginBase implements Con
     if ($ref_type == 'taxonomy_term') {
       $target_bundles = $field_config->getSetting('handler_settings')['target_bundles'] ?? [];
       $all_target_bundles = array_keys($target_bundles);
-      $auto_create = $field_config->getSetting('handler_settings')['auto_create'];
+      $auto_create = $field_config->getSetting('handler_settings')['auto_create'] ?? FALSE;
       $auto_create_bundle = $field_config->getSetting('handler_settings')['auto_create_bundle'] ?? NULL;
 
       if (empty($auto_create_bundle)) {
