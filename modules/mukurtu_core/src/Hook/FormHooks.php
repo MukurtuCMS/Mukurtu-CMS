@@ -855,6 +855,32 @@ class FormHooks
             $messenger->deleteByType(MessengerInterface::TYPE_STATUS);
             $messenger->addStatus(t('Thank you for requesting an account. Your application for an account is currently pending approval. Once it has been approved, you will receive another email containing information about how to log in, set your password, and other details.'));
         }
+        elseif ($user && $user->isActive()) {
+            $genpassMode = (int) \Drupal::config('genpass.settings')->get('genpass_mode');
+            $verifyMail  = (bool) \Drupal::config('user.settings')->get('verify_mail');
+
+            if ($genpassMode === 2 && !$verifyMail) {
+                // The visitor was registered with a system-generated password and
+                // no one-time-login email, so if they log out without setting a
+                // password they will need a password reset to get back in.
+                // Redirect to their account edit page and prompt them to set one now.
+                //
+                // AccountForm::buildForm() skips the "Current password" field when
+                // the session has 'pass_reset_{uid}' set to a value that matches
+                // the 'pass-reset-token' URL query parameter (hash_equals check).
+                // Mirror the same token in both places so the bypass activates.
+                $token = (string) \Drupal::time()->getRequestTime();
+                \Drupal::request()->getSession()->set('pass_reset_' . $user->id(), $token);
+                $messenger = \Drupal::messenger();
+                $messenger->deleteByType(MessengerInterface::TYPE_STATUS);
+                $messenger->addStatus(t('Your account has been created. Please set a password so you can sign in again later.'));
+                $form_state->setRedirectUrl(
+                    Url::fromRoute('entity.user.edit_form', ['user' => $user->id()], [
+                        'query' => ['pass-reset-token' => $token],
+                    ])
+                );
+            }
+        }
     }
 
     /**

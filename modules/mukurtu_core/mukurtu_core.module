@@ -8,6 +8,7 @@
 use Drupal\field\Entity\FieldConfig;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\genpass\GenpassInterface;
 use Drupal\mukurtu_core\BaseFieldOverride;
 use Drupal\node\Entity\NodeType;
 use Drupal\Core\Entity\EntityTypeInterface;
@@ -305,6 +306,16 @@ function mukurtu_core_form_user_admin_settings_alter(&$form, FormStateInterface 
       unset($form[$source][$field]);
     }
   }
+  // Visitors never see a generated password in Mukurtu — bulk-action resets
+  // send a password-reset email instead. Remove the two visitor-facing options
+  // so admins cannot accidentally enable them.
+  if (isset($form['genpass_settings']['genpass_display']['#options'])) {
+    unset(
+      $form['genpass_settings']['genpass_display']['#options'][GenpassInterface::PASSWORD_DISPLAY_USER],
+      $form['genpass_settings']['genpass_display']['#options'][GenpassInterface::PASSWORD_DISPLAY_BOTH],
+    );
+  }
+
   // Warn if either source group still has children after the known fields were
   // moved — a future genpass update adding new fields would otherwise be
   // silently dropped when the group is deleted below.
