@@ -87,7 +87,7 @@ class CommunityRevisionRevertForm extends ConfirmFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state, $community_revision = NULL) {
-    $this->revision = $this->CommunityStorage->loadRevision($community_revision);
+    $this->revision = $this->communityStorage->loadRevision($community_revision);
     $form = parent::buildForm($form, $form_state);
 
     return $form;

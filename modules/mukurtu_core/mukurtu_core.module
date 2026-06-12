@@ -12,7 +12,9 @@ use Drupal\mukurtu_core\BaseFieldOverride;
 use Drupal\node\Entity\NodeType;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\Url;
 use Drupal\Core\Link;
 use Drupal\Core\Cache\Cache;
@@ -779,6 +781,174 @@ function mukurtu_core_menu_links_discovered_alter(&$links) {
     'parent' => 'mukurtu_dashboard',
     'url' => 'route:<nolink>',
   ];
+}
+
+/**
+ * Mukurtu-specific node fields to expose as tokens.
+ *
+ * Shared by hook_token_info_alter() and hook_tokens().
+ */
+function mukurtu_core_token_fields(): array {
+  return [
+    // Digital Heritage fields.
+    'field_creator'                => t('Creator'),
+    'field_contributor'            => t('Contributor'),
+    'field_publisher'              => t('Publisher'),
+    'field_people'                 => t('People'),
+    'field_keywords'               => t('Keywords'),
+    'field_subject'                => t('Subject'),
+    'field_language'               => t('Language'),
+    'field_source'                 => t('Source'),
+    'field_format'                 => t('Format'),
+    'field_type'                   => t('Type'),
+    'field_identifier'             => t('Identifier'),
+    'field_description'            => t('Description'),
+    'field_cultural_narrative'     => t('Cultural Narrative'),
+    'field_traditional_knowledge'  => t('Traditional Knowledge'),
+    'field_date_description'       => t('Date Description'),
+    'field_category'               => t('Category'),
+    'field_summary'                => t('Summary'),
+    'field_original_date'          => t('Original Date (Mukurtu)'),
+    'field_coverage_description'   => t('Coverage Description'),
+    'field_transcription'          => t('Transcription'),
+    // Dictionary Word fields.
+    'field_translation'            => t('Translation'),
+    'field_definition'             => t('Definition'),
+    'field_word_type'              => t('Word Type'),
+    'field_pronunciation'          => t('Pronunciation'),
+    'field_alternate_spelling'     => t('Alternate Spelling'),
+    'field_glossary_entry'         => t('Glossary Entry'),
+  ];
+}
+
+/**
+ * Implements hook_token_info_alter().
+ *
+ * Registers Mukurtu custom field tokens under the existing 'node' token type
+ * so they appear in the token tree on the citation settings form (#1386).
+ */
+function mukurtu_core_token_info_alter(&$data) {
+  foreach (mukurtu_core_token_fields() as $field_name => $label) {
+    $data['tokens']['node'][$field_name] = [
+      'name' => $label,
+      'description' => t('The @label field value (Mukurtu).', ['@label' => $label]),
+    ];
+  }
+  $data['tokens']['node']['mukurtu_communities'] = [
+    'name' => t('Communities'),
+    'description' => t('Comma-separated list of community names for this item (Mukurtu).'),
+  ];
+  $data['tokens']['node']['mukurtu_protocols'] = [
+    'name' => t('Cultural Protocols'),
+    'description' => t('Comma-separated list of cultural protocol names for this item (Mukurtu).'),
+  ];
+}
+
+/**
+ * Implements hook_tokens().
+ */
+function mukurtu_core_tokens($type, $tokens, array $data, array $options, BubbleableMetadata $bubbleable_metadata) {
+  $replacements = [];
+
+  if ($type !== 'node' || empty($data['node'])) {
+    return $replacements;
+  }
+
+  $node = $data['node'];
+  $bubbleable_metadata->addCacheableDependency($node);
+
+  foreach (mukurtu_core_token_fields() as $field_name => $label) {
+    if (!isset($tokens[$field_name])) {
+      continue;
+    }
+    if (!$node->hasField($field_name)) {
+      continue;
+    }
+    $replacements[$tokens[$field_name]] = mukurtu_core_token_field_value($node->get($field_name));
+  }
+
+  if (isset($tokens['mukurtu_communities']) && method_exists($node, 'getCommunities')) {
+    $labels = [];
+    foreach ($node->getCommunities() as $community) {
+      if ($community !== NULL) {
+        $labels[] = $community->label();
+      }
+    }
+    $replacements[$tokens['mukurtu_communities']] = implode(', ', $labels);
+  }
+
+  if (isset($tokens['mukurtu_protocols']) && method_exists($node, 'getProtocolEntities')) {
+    $labels = [];
+    foreach ($node->getProtocolEntities() as $protocol) {
+      if ($protocol !== NULL) {
+        $labels[] = $protocol->label();
+      }
+    }
+    $replacements[$tokens['mukurtu_protocols']] = implode(', ', $labels);
+  }
+
+  return $replacements;
+}
+
+/**
+ * Returns a plain-text string for a field item list.
+ *
+ * Entity reference fields (taxonomy terms, nodes, etc.) produce a
+ * comma-separated list of entity labels. Text and string fields produce
+ * their plain-text value with HTML stripped.
+ */
+function mukurtu_core_token_field_value(FieldItemListInterface $field): string {
+  if ($field->isEmpty()) {
+    return '';
+  }
+
+  $field_type = $field->getFieldDefinition()->getType();
+
+  if ($field_type === 'original_date') {
+    $parts = [];
+    foreach ($field as $item) {
+      $date = $item->date ?? '';
+      if ($date !== '') {
+        $parts[] = $date;
+      }
+    }
+    return implode(', ', $parts);
+  }
+
+  if (in_array($field_type, ['entity_reference', 'entity_reference_revisions'])) {
+    $entities = $field->referencedEntities();
+    // Fallback: load entities directly via storage to bypass any access-layer caching.
+    if (empty($entities)) {
+      $target_type = $field->getFieldDefinition()->getSetting('target_type');
+      if ($target_type) {
+        $storage = \Drupal::entityTypeManager()->getStorage($target_type);
+        foreach ($field->getValue() as $value) {
+          if (!empty($value['target_id'])) {
+            $entity = $storage->load($value['target_id']);
+            if ($entity) {
+              $entities[] = $entity;
+            }
+          }
+        }
+      }
+    }
+    $labels = [];
+    foreach ($entities as $entity) {
+      if ($entity !== NULL) {
+        $labels[] = $entity->label();
+      }
+    }
+    return implode(', ', $labels);
+  }
+
+  $values = [];
+  foreach ($field as $item) {
+    $raw = strip_tags($item->getString());
+    if ($raw !== '') {
+      $values[] = $raw;
+    }
+  }
+  return implode(', ', $values);
 }
 
 /**
