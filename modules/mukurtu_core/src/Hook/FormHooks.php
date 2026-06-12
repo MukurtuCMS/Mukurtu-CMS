@@ -1285,6 +1285,9 @@ class FormHooks
         }
         if ($entity->getEntityTypeId() === "media") {
             unset($operations["view"]);
+            if (isset($operations["edit"])) {
+                $operations["edit"]["weight"] = -10;
+            }
         }
     }
 
