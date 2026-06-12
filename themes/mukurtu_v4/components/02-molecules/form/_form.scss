@@ -31,3 +31,10 @@ details.form-wrapper {
 .user-pass {
   @include layout.layout--full-width-grid-item;
 }
+
+label.form-required::after {
+  display: inline-block;
+  margin-inline-start: 0.15em;
+  content: "*";
+  color: var(--color-error-dark);
+}

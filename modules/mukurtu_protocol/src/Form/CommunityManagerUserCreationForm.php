@@ -148,6 +148,12 @@ class CommunityManagerUserCreationForm extends FormBase {
       '#type' => 'checkbox',
       '#title' => $this->t('Notify user of new account'),
       '#default_value' => 1,
+      // Notification requires an email address — hide when the field is empty.
+      '#states' => [
+        'visible' => [
+          ':input[name="email"]' => ['filled' => TRUE],
+        ],
+      ],
     ];
 
     $form['notify_others'] = [
@@ -335,7 +341,7 @@ class CommunityManagerUserCreationForm extends FormBase {
     $user->save();
 
     if (!empty($values['notify']) && !empty($email) && $status_val == 1) {
-      _user_mail_notify('status_activated', $user);
+      _user_mail_notify('register_admin_created', $user);
     }
 
     $entityTypeManager = \Drupal::service("entity_type.manager");

@@ -1381,6 +1381,14 @@ details.form-wrapper summary + div {
   }
 }
 
+label.form-required::after {
+  display: inline-block;
+  -webkit-margin-start: 0.15em;
+          margin-inline-start: 0.15em;
+  content: "*";
+  color: var(--color-error-dark);
+}
+
 .horizontal-card {
   padding-block: var(--v-space-2xs);
   display: grid;
