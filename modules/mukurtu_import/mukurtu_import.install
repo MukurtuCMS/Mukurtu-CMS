@@ -399,3 +399,76 @@ function mukurtu_import_update_40025(): void {
     ->set('label', 'Roundtrip Manager')
     ->save();
 }
+
+/**
+ * Install pre-built import strategies for all Mukurtu taxonomy vocabularies.
+ */
+function mukurtu_import_update_40026(): void {
+  $path = \Drupal::service('extension.list.module')->getPath('mukurtu_import');
+  $vocabs = [
+    'taxonomy_category_all_fields',
+    'taxonomy_community_type_all_fields',
+    'taxonomy_contributor_all_fields',
+    'taxonomy_creator_all_fields',
+    'taxonomy_format_all_fields',
+    'taxonomy_interpersonal_relationship_all_fields',
+    'taxonomy_keywords_all_fields',
+    'taxonomy_language_all_fields',
+    'taxonomy_location_all_fields',
+    'taxonomy_media_tag_all_fields',
+    'taxonomy_people_all_fields',
+    'taxonomy_place_type_all_fields',
+    'taxonomy_publisher_all_fields',
+    'taxonomy_subject_all_fields',
+    'taxonomy_type_all_fields',
+    'taxonomy_word_type_all_fields',
+  ];
+
+  foreach ($vocabs as $id) {
+    $config_name = "mukurtu_import.mukurtu_import_strategy.{$id}";
+    $config = \Drupal::configFactory()->getEditable($config_name);
+    if ($config->isNew()) {
+      $yaml = file_get_contents("{$path}/config/install/{$config_name}.yml");
+      $data = \Drupal\Core\Serialization\Yaml::decode($yaml);
+      $config->setData($data)->save();
+    }
+  }
+}
+
+/**
+ * Grant 'access mukurtu import' to the Roundtrip Manager and Mukurtu Manager roles.
+ */
+function mukurtu_import_update_40027(): void {
+  foreach (['mukurtu_roundtrip_manager', 'mukurtu_manager'] as $role_id) {
+    $role = \Drupal::entityTypeManager()->getStorage('user_role')->load($role_id);
+    if ($role && !$role->hasPermission('access mukurtu import')) {
+      $role->grantPermission('access mukurtu import');
+      $role->save();
+    }
+  }
+}
+
+/**
+ * Install the taxonomy terms import results view.
+ */
+function mukurtu_import_update_40028(): void {
+  $config_name = 'views.view.mukurtu_import_results_taxonomy_terms';
+  $config = \Drupal::configFactory()->getEditable($config_name);
+  if ($config->isNew()) {
+    $path = \Drupal::service('extension.list.module')->getPath('mukurtu_import');
+    $yaml = file_get_contents("{$path}/config/install/{$config_name}.yml");
+    $data = \Drupal\Core\Serialization\Yaml::decode($yaml);
+    $config->setData($data)->save();
+  }
+}
+
+/**
+ * Add New/Updated status field to taxonomy terms import results view.
+ */
+function mukurtu_import_update_40029(): void {
+  $config_name = 'views.view.mukurtu_import_results_taxonomy_terms';
+  $path = \Drupal::service('extension.list.module')->getPath('mukurtu_import');
+  $yaml = file_get_contents("{$path}/config/install/{$config_name}.yml");
+  $data = \Drupal\Core\Serialization\Yaml::decode($yaml);
+  \Drupal::configFactory()->getEditable($config_name)->setData($data)->save();
+}

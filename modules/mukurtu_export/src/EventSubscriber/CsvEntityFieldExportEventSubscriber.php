@@ -60,6 +60,11 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
     /** @var \Drupal\mukurtu_export\Entity\CsvExporter $config */
     $config = $this->entityTypeManager->getStorage('csv_exporter')->load($event->context['results']['config_id']);
 
+    // Virtual field: reverse lookup of nodes that reference this media item.
+    if ($entity->getEntityTypeId() === 'media' && $field_name === 'field_found_in') {
+      return $this->exportFoundIn($event, $entity, $config);
+    }
+
     try {
       $field = $entity->get($field_name);
     } catch (InvalidArgumentException $e) {
@@ -475,6 +480,36 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
       return $packagedFilePath;
     }
     return NULL;
+  }
+
+  /**
+   * Exports the virtual "found in" field for media entities.
+   *
+   * Performs a reverse entity query to find all nodes that reference this media
+   * item via field_media_assets and returns their IDs or UUIDs.
+   *
+   * @param EntityFieldExportEvent $event
+   *   The export event object.
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The media entity being exported.
+   * @param CsvExporter $config
+   *   The export configuration.
+   *
+   * @protected
+   */
+  protected function exportFoundIn(EntityFieldExportEvent $event, EntityInterface $entity, CsvExporter $config) {
+    $nids = $this->entityTypeManager->getStorage('node')
+      ->getQuery()
+      ->condition('field_media_assets', $entity->id())
+      ->accessCheck(FALSE)
+      ->execute();
+
+    $export = [];
+    $id_format = $config->getIdFieldSetting();
+    foreach ($nids as $nid) {
+      $export[] = $id_format === 'uuid' ? $this->getUUID('node', $nid) : $nid;
+    }
+    $event->setValue($export);
   }
 
 }

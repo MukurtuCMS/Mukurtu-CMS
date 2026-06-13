@@ -140,6 +140,15 @@ class ImportResultsForm extends ImportBaseForm {
       '#arguments' => [$message->render()],
     ];
     $form['multipage_results'] = $multipage_block;
+
+    $taxonomy_block = [
+      '#type' => 'view',
+      '#name' => 'mukurtu_import_results_taxonomy_terms',
+      '#display_id' => 'results',
+      '#embed' => TRUE,
+      '#arguments' => [$message->render()],
+    ];
+    $form['taxonomy_results'] = $taxonomy_block;
   }
 
 }
