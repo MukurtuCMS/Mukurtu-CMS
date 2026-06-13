@@ -5,6 +5,7 @@ namespace Drupal\mukurtu_export\Form;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
+use Drupal\mukurtu_export\ExportChildResolver;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 
@@ -16,16 +17,21 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 class ExportListAddItemForm extends FormBase {
 
   protected EntityTypeManagerInterface $entityTypeManager;
+  protected ExportChildResolver $childResolver;
 
-  public function __construct(EntityTypeManagerInterface $entity_type_manager) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, ExportChildResolver $child_resolver) {
     $this->entityTypeManager = $entity_type_manager;
+    $this->childResolver = $child_resolver;
   }
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    return new static($container->get('entity_type.manager'));
+    return new static(
+      $container->get('entity_type.manager'),
+      $container->get('mukurtu_export.child_resolver'),
+    );
   }
 
   /**
@@ -88,6 +94,24 @@ class ExportListAddItemForm extends FormBase {
       ],
     ];
 
+    // For aggregative types, offer to include child items.
+    if ($entity->getEntityTypeId() === 'node' && in_array($entity->bundle(), ['collection', 'word_list'])) {
+      $children = $this->childResolver->getChildEntities($entity);
+      $child_count = array_sum(array_map('count', $children));
+      if ($child_count > 0) {
+        $form['include_children'] = [
+          '#type' => 'checkbox',
+          '#title' => $this->formatPlural(
+            $child_count,
+            'Also include 1 child item from this @bundle',
+            'Also include @count child items from this @bundle',
+            ['@bundle' => $entity->bundle() === 'collection' ? $this->t('collection') : $this->t('word list')]
+          ),
+          '#default_value' => FALSE,
+        ];
+      }
+    }
+
     $form['actions'] = ['#type' => 'actions'];
     $form['actions']['submit'] = [
       '#type' => 'submit',
@@ -148,6 +172,17 @@ class ExportListAddItemForm extends FormBase {
     $items = $list->getItems();
     $items[$entity_type] = $items[$entity_type] ?? [];
     $items[$entity_type][$entity_id] = $entity_id;
+
+    // Optionally include child items (collections, word lists).
+    if ($form_state->getValue('include_children')) {
+      $entity = $this->entityTypeManager->getStorage($entity_type)->load($entity_id);
+      if ($entity) {
+        foreach ($this->childResolver->getChildEntities($entity) as $child_type => $child_ids) {
+          $items[$child_type] = ($items[$child_type] ?? []) + $child_ids;
+        }
+      }
+    }
+
     $list->setItems($items);
     $list->save();
 

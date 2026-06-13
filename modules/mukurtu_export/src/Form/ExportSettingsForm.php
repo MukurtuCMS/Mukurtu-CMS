@@ -3,14 +3,48 @@
 namespace Drupal\mukurtu_export\Form;
 
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\TempStore\PrivateTempStoreFactory;
+use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
+use Drupal\mukurtu_export\ExportChildResolver;
 use Drupal\mukurtu_export\Form\ExportBaseForm;
+use Drupal\mukurtu_export\MukurtuExporterPluginManager;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Export Plugin Configuration Form.
  */
 class ExportSettingsForm extends ExportBaseForm {
+
+  protected ExportChildResolver $childResolver;
+
+  public function __construct(
+    PrivateTempStoreFactory $temp_store_factory,
+    $entity_type_manager,
+    EntityFieldManagerInterface $entity_field_manager,
+    EntityTypeBundleInfoInterface $entity_bundle_info,
+    MukurtuExporterPluginManager $mukurtu_exporter_plugin_manager,
+    ExportChildResolver $child_resolver,
+  ) {
+    parent::__construct($temp_store_factory, $entity_type_manager, $entity_field_manager, $entity_bundle_info, $mukurtu_exporter_plugin_manager);
+    $this->childResolver = $child_resolver;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): static {
+    return new static(
+      $container->get('tempstore.private'),
+      $container->get('entity_type.manager'),
+      $container->get('entity_field.manager'),
+      $container->get('entity_type.bundle.info'),
+      $container->get('plugin.manager.mukurtu_exporter'),
+      $container->get('mukurtu_export.child_resolver'),
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -99,6 +133,27 @@ class ExportSettingsForm extends ExportBaseForm {
         '#submit' => ['::submitClearSelection'],
         '#limit_validation_errors' => [],
       ];
+
+      // Show "Include child items" button when the selection contains
+      // collections or word lists that haven't been expanded yet.
+      if (!$this->store->get('ad_hoc_children_expanded')) {
+        $child_count = 0;
+        foreach ($adHocItems['node'] ?? [] as $node_id) {
+          $node = $this->entityTypeManager->getStorage('node')->load($node_id);
+          if ($node && in_array($node->bundle(), ['collection', 'word_list'])) {
+            $children = $this->childResolver->getChildEntities($node);
+            $child_count += array_sum(array_map('count', $children));
+          }
+        }
+        if ($child_count > 0) {
+          $form['actions']['include_children'] = [
+            '#type' => 'submit',
+            '#value' => $this->formatPlural($child_count, 'Include 1 child item', 'Include @count child items'),
+            '#submit' => ['::submitExpandSelection'],
+            '#limit_validation_errors' => [],
+          ];
+        }
+      }
     }
     $form['actions']['submit'] = [
       '#type' => 'submit',
@@ -126,6 +181,26 @@ class ExportSettingsForm extends ExportBaseForm {
    */
   public function submitClearSelection(array &$form, FormStateInterface $form_state) {
     $this->store->delete('ad_hoc_items');
+    $this->store->delete('ad_hoc_children_expanded');
+    $form_state->setRedirect('mukurtu_export.export_settings');
+  }
+
+  /**
+   * Submit handler for "Include child items" - expands selection with children.
+   */
+  public function submitExpandSelection(array &$form, FormStateInterface $form_state) {
+    $ad_hoc_items = $this->store->get('ad_hoc_items') ?? [];
+    foreach ($ad_hoc_items['node'] ?? [] as $node_id) {
+      $node = $this->entityTypeManager->getStorage('node')->load($node_id);
+      if (!$node) {
+        continue;
+      }
+      foreach ($this->childResolver->getChildEntities($node) as $child_type => $child_ids) {
+        $ad_hoc_items[$child_type] = ($ad_hoc_items[$child_type] ?? []) + $child_ids;
+      }
+    }
+    $this->store->set('ad_hoc_items', $ad_hoc_items);
+    $this->store->set('ad_hoc_children_expanded', TRUE);
     $form_state->setRedirect('mukurtu_export.export_settings');
   }
 
