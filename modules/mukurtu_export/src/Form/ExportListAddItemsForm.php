@@ -6,6 +6,7 @@ use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\TempStore\PrivateTempStoreFactory;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\mukurtu_export\ExportChildResolver;
 use Drupal\views_bulk_operations\Service\ViewsBulkOperationsActionProcessorInterface;
 use Drupal\views_bulk_operations\Traits\ViewsBulkOperationsFormTrait;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -26,6 +27,7 @@ class ExportListAddItemsForm extends FormBase {
     protected readonly EntityTypeManagerInterface $entityTypeManager,
     protected readonly PrivateTempStoreFactory $tempStoreFactory,
     protected readonly ViewsBulkOperationsActionProcessorInterface $actionProcessor,
+    protected readonly ExportChildResolver $childResolver,
   ) {}
 
   /**
@@ -36,6 +38,7 @@ class ExportListAddItemsForm extends FormBase {
       $container->get('entity_type.manager'),
       $container->get('tempstore.private'),
       $container->get('views_bulk_operations.processor'),
+      $container->get('mukurtu_export.child_resolver'),
     );
   }
 
@@ -91,6 +94,30 @@ class ExportListAddItemsForm extends FormBase {
       '#description' => $this->t('If provided, a new list will be created with this name.'),
       '#maxlength' => 255,
     ];
+
+    // For aggregative types in the selection, offer to include child items.
+    $child_count = 0;
+    foreach ($form_data['list'] as $item) {
+      if ($item[2] !== 'node') {
+        continue;
+      }
+      $node = $this->entityTypeManager->getStorage('node')->load($item[3]);
+      if ($node && in_array($node->bundle(), ['collection', 'word_list'])) {
+        $children = $this->childResolver->getChildEntities($node);
+        $child_count += array_sum(array_map('count', $children));
+      }
+    }
+    if ($child_count > 0) {
+      $form['include_children'] = [
+        '#type' => 'checkbox',
+        '#title' => $this->formatPlural(
+          $child_count,
+          'Also include 1 child item from collections and word lists in this selection',
+          'Also include @count child items from collections and word lists in this selection',
+        ),
+        '#default_value' => FALSE,
+      ];
+    }
 
     $form['actions'] = ['#type' => 'actions'];
     $form['actions']['submit'] = [
@@ -156,6 +183,20 @@ class ExportListAddItemsForm extends FormBase {
         $items[$entity_type][$id] = $id;
       }
     }
+
+    // Optionally include child items from collections and word lists.
+    if ($form_state->getValue('include_children')) {
+      foreach ($by_type['node'] ?? [] as $node_id) {
+        $node = $this->entityTypeManager->getStorage('node')->load($node_id);
+        if (!$node) {
+          continue;
+        }
+        foreach ($this->childResolver->getChildEntities($node) as $child_type => $child_ids) {
+          $items[$child_type] = ($items[$child_type] ?? []) + $child_ids;
+        }
+      }
+    }
+
     $list->setItems($items)->save();
 
     $count = array_sum(array_map('count', $by_type));

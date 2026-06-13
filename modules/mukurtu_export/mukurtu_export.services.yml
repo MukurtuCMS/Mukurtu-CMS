@@ -1,4 +1,7 @@
 services:
+  mukurtu_export.child_resolver:
+    class: Drupal\mukurtu_export\ExportChildResolver
+
   plugin.manager.mukurtu_exporter:
     class: Drupal\mukurtu_export\MukurtuExporterPluginManager
     parent: default_plugin_manager
