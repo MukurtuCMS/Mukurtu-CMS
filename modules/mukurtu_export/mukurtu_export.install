@@ -95,6 +95,73 @@ function mukurtu_export_update_40005() {
 }
 
 /**
+ * Update the recommended CSV exporter settings for media export.
+ *
+ * Adds media__external_embed and media__soundcloud bundle configs, and adds
+ * the field_found_in virtual column to all media bundles. Clears action
+ * plugin caches so the new media VBO export actions are discoverable.
+ */
+function mukurtu_export_update_40006() {
+  $config = \Drupal::service('config.factory')
+    ->getEditable('mukurtu_export.csv_exporter.recommended_settings_for_import');
+
+  if ($config->isNew()) {
+    return;
+  }
+
+  $entity_fields = $config->get('entity_fields_export_list') ?? [];
+
+  // Add field_found_in to all existing media bundles that lack it.
+  foreach ($entity_fields as $key => $fields) {
+    if (str_starts_with($key, 'media__') && !isset($fields['field_found_in'])) {
+      $entity_fields[$key]['field_found_in'] = 'Found In';
+    }
+  }
+
+  // Add media__external_embed if not already present.
+  if (!isset($entity_fields['media__external_embed'])) {
+    $entity_fields['media__external_embed'] = [
+      'mid' => 'ID',
+      'langcode' => 'Locale',
+      'uid' => 'Authored by',
+      'name' => 'Name',
+      'field_cultural_protocols/protocols' => 'Protocols',
+      'field_cultural_protocols/sharing_setting' => 'Sharing Setting',
+      'field_media_external_embed' => 'Embed Code',
+      'field_keywords' => 'Keywords',
+      'field_people' => 'People',
+      'field_thumbnail' => 'Thumbnail',
+      'field_identifier' => 'Identifier',
+      'field_found_in' => 'Found In',
+    ];
+  }
+
+  // Add media__soundcloud if not already present.
+  if (!isset($entity_fields['media__soundcloud'])) {
+    $entity_fields['media__soundcloud'] = [
+      'mid' => 'ID',
+      'langcode' => 'Locale',
+      'uid' => 'Authored by',
+      'name' => 'Name',
+      'field_cultural_protocols/protocols' => 'Protocols',
+      'field_cultural_protocols/sharing_setting' => 'Sharing Setting',
+      'field_media_soundcloud' => 'SoundCloud URL',
+      'field_contributor' => 'Contributor',
+      'field_keywords' => 'Keywords',
+      'field_people' => 'People',
+      'field_thumbnail' => 'Thumbnail',
+      'field_identifier' => 'Identifier',
+      'field_found_in' => 'Found In',
+    ];
+  }
+
+  $config->set('entity_fields_export_list', $entity_fields)->save();
+
+  // Clear action plugin caches so new media VBO export actions are visible.
+  \Drupal::service('plugin.manager.action')->clearCachedDefinitions();
+}
+
+/**
  * Update recommended_settings_for_import: fix multivalue_delimiter and add
  * local_contexts_delimiter and default_format.
  *
@@ -111,4 +178,3 @@ function mukurtu_export_update_40007() {
     $entity->save();
   }
 }
-
