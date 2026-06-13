@@ -45,7 +45,7 @@ trait ImportFormTrait {
   protected function getEntityTypeIdOptions(): array {
     $definitions = $this->entityTypeManager->getDefinitions();
     $options = [];
-    foreach (['node', 'media', 'community', 'protocol', 'paragraph', 'multipage_item'] as $entity_type_id) {
+    foreach (['node', 'media', 'community', 'protocol', 'paragraph', 'multipage_item', 'taxonomy_term'] as $entity_type_id) {
       if (isset($definitions[$entity_type_id]) && $this->userCanCreateAnyBundleForEntityType($entity_type_id)) {
         $options[$entity_type_id] = $definitions[$entity_type_id]->getLabel();
 

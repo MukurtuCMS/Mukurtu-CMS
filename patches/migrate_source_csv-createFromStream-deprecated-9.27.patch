@@ -1,0 +1,12 @@
+diff --git a/src/Plugin/migrate/source/CSV.php b/src/Plugin/migrate/source/CSV.php
+--- a/src/Plugin/migrate/source/CSV.php
++++ b/src/Plugin/migrate/source/CSV.php
+@@ -289,7 +289,7 @@
+     if (!$csv) {
+       throw new \RuntimeException(sprintf('File "%s" could not be opened.', $this->configuration['path']));
+     }
+-    return Reader::createFromStream($csv);
++    return Reader::from($csv);
+   }
+
+ }

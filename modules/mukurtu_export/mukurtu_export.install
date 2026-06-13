@@ -46,6 +46,55 @@ function mukurtu_export_update_40004() {
 }
 
 /**
+ * Update the recommended CSV exporter settings for taxonomy term export.
+ *
+ * Adds missing vocabulary bundles (location, media_tag, place_type), adds
+ * field_thumbnail_image to the category bundle, and adds a reserved parent
+ * column to all taxonomy_term bundles for future hierarchy support.
+ *
+ * Also grants 'access mukurtu export' to the Mukurtu Manager role.
+ */
+function mukurtu_export_update_40005() {
+  $config = \Drupal::service('config.factory')
+    ->getEditable('mukurtu_export.csv_exporter.recommended_settings_for_import');
+
+  if ($config->isNew()) {
+    return;
+  }
+
+  $entity_fields = $config->get('entity_fields_export_list') ?? [];
+
+  // Add parent column to all existing taxonomy_term bundles that lack it.
+  foreach ($entity_fields as $key => $fields) {
+    if (str_starts_with($key, 'taxonomy_term__') && !isset($fields['parent'])) {
+      $entity_fields[$key]['parent'] = 'Parent';
+    }
+  }
+
+  // Add field_thumbnail_image to the category bundle if not already present.
+  if (isset($entity_fields['taxonomy_term__category']) && !isset($entity_fields['taxonomy_term__category']['field_thumbnail_image'])) {
+    $entity_fields['taxonomy_term__category']['field_thumbnail_image'] = 'Thumbnail';
+  }
+
+  // Add vocabulary bundles missing from the original config.
+  $base = ['tid' => 'Term ID', 'langcode' => 'Locale', 'name' => 'Name', 'description' => 'Description', 'parent' => 'Parent'];
+  foreach (['taxonomy_term__location', 'taxonomy_term__media_tag', 'taxonomy_term__place_type'] as $key) {
+    if (!isset($entity_fields[$key])) {
+      $entity_fields[$key] = $base;
+    }
+  }
+
+  $config->set('entity_fields_export_list', $entity_fields)->save();
+
+  // Grant taxonomy export access to the Mukurtu Manager role.
+  $role = \Drupal::entityTypeManager()->getStorage('user_role')->load('mukurtu_manager');
+  if ($role) {
+    $role->grantPermission('access mukurtu export');
+    $role->save();
+  }
+}
+
+/**
  * Update recommended_settings_for_import: fix multivalue_delimiter and add
  * local_contexts_delimiter and default_format.
  *

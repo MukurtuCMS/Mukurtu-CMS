@@ -261,78 +261,112 @@ entity_fields_export_list:
     langcode: Locale
     name: Name
     description: Description
+    parent: Parent
   taxonomy_term__category:
     tid: 'Term ID'
     langcode: Locale
     name: Name
     description: Description
     default_langcode: 'Default translation'
+    field_thumbnail_image: Thumbnail
+    parent: Parent
   taxonomy_term__community_type:
     tid: 'Term ID'
     langcode: Locale
     name: Name
     description: Description
+    parent: Parent
   taxonomy_term__contributor:
     tid: 'Term ID'
     langcode: Locale
     name: Name
     description: Description
+    parent: Parent
   taxonomy_term__creator:
     tid: 'Term ID'
     langcode: Locale
     name: Name
     description: Description
+    parent: Parent
   taxonomy_term__format:
     tid: 'Term ID'
     langcode: Locale
     name: Name
     description: Description
     revision_default: 'Default revision'
+    parent: Parent
   taxonomy_term__interpersonal_relationship:
     tid: 'Term ID'
     langcode: Locale
     name: Name
     description: Description
+    parent: Parent
   taxonomy_term__keywords:
     tid: 'Term ID'
     langcode: Locale
     name: Name
     description: Description
+    parent: Parent
   taxonomy_term__language:
     tid: 'Term ID'
     langcode: Locale
     name: Name
     description: Description
+    parent: Parent
+  taxonomy_term__location:
+    tid: 'Term ID'
+    langcode: Locale
+    name: Name
+    description: Description
+    parent: Parent
+  taxonomy_term__media_tag:
+    tid: 'Term ID'
+    langcode: Locale
+    name: Name
+    description: Description
+    parent: Parent
   taxonomy_term__people:
     tid: 'Term ID'
     langcode: Locale
     name: Name
     description: Description
+    parent: Parent
+  taxonomy_term__place_type:
+    tid: 'Term ID'
+    langcode: Locale
+    name: Name
+    description: Description
+    parent: Parent
   taxonomy_term__publisher:
     tid: 'Term ID'
     langcode: Locale
     name: Name
     description: Description
+    parent: Parent
   taxonomy_term__subject:
     tid: 'Term ID'
     langcode: Locale
     name: Name
     description: Description
+    parent: Parent
   taxonomy_term__tags:
     tid: 'Term ID'
     langcode: Locale
     name: Name
     description: Description
+    parent: Parent
   taxonomy_term__type:
     tid: 'Term ID'
     langcode: Locale
     name: Name
     description: Description
+    parent: Parent
   taxonomy_term__word_type:
     tid: 'Term ID'
     langcode: Locale
     name: Name
     description: Description
+    parent: Parent
   user__user:
     uid: 'User ID'
     langcode: 'Language code'

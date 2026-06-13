@@ -1,0 +1,36 @@
+langcode: en
+status: true
+dependencies: {  }
+id: taxonomy_category_all_fields
+uid: 1
+label: 'Taxonomy - Category'
+description: ''
+target_entity_type_id: taxonomy_term
+target_bundle: category
+mapping:
+  -
+    source: 'Term ID'
+    target: tid
+  -
+    source: Locale
+    target: langcode
+  -
+    source: Name
+    target: name
+  -
+    source: Description
+    target: description
+  -
+    source: Thumbnail
+    target: field_thumbnail_image
+  -
+    source: Parent
+    target: parent
+configuration:
+  delimiter: ','
+  enclosure: '"'
+  escape: \
+  multivalue_delimiter: '||'
+  default_format: basic_html
+  identifier_column: null
+  local_contexts_delimiter: '>'
