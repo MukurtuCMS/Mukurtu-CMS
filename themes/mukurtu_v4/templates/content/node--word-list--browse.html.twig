@@ -70,15 +70,22 @@
 #}
 
 {% set media_bundle = node.field_representative_media.0.entity.bundle.value.0['target_id'] %}
+{% set has_rep_media = node.field_representative_media.0.entity is not empty %}
 
 <article{{ attributes.addClass("horizontal-card") }}>
   <div class="horizontal-card__media">
-    {% if media_bundle is same as 'image' %}
-    <a href="{{ url }}" aria-hidden="true" tabindex="-1">
-    {% endif %}
-      {{ content.field_representative_media }}
-    {% if media_bundle is same as 'image' %}
-    </a>
+    {% if has_rep_media %}
+      {% if media_bundle is same as 'image' %}
+      <a href="{{ url }}" aria-hidden="true" tabindex="-1">
+      {% endif %}
+        {{ content.field_representative_media }}
+      {% if media_bundle is same as 'image' %}
+      </a>
+      {% endif %}
+    {% elseif node.field_word_list_image.0.entity is not empty %}
+      <a href="{{ url }}" aria-hidden="true" tabindex="-1">
+        {{ content.field_word_list_image }}
+      </a>
     {% endif %}
   </div>
 

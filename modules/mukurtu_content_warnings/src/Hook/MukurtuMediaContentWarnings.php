@@ -13,6 +13,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\Core\Routing\AdminContext;
 use Drupal\mukurtu_core\Entity\PeopleInterface;
+use Drupal\node\NodeInterface;
 use Drupal\taxonomy\TermInterface;
 
 /**
@@ -60,6 +61,34 @@ class MukurtuMediaContentWarnings {
       'media_library',
     ])) {
       return;
+    }
+    // Always declare a cache dependency on the settings config so that if a
+    // view mode is re-enabled the cached render for that mode is automatically
+    // invalidated (without a manual cache clear).
+    CacheableMetadata::createFromRenderArray($build)
+      ->addCacheableDependency($this->contentWarningSettings)
+      ->applyTo($build);
+
+    // null = not yet configured = all modes allowed (backwards compatible default).
+    // [] = admin explicitly unchecked all modes = no warnings anywhere.
+    $allowed_modes = $this->contentWarningSettings->get('warning_view_modes');
+    if ($allowed_modes !== NULL && !in_array($build['#view_mode'], $allowed_modes)) {
+      return;
+    }
+    // Add cache dependency on every people term associated with this entity so
+    // that changes to any person (e.g. marked as deceased) immediately
+    // invalidate this render, even when no warning was previously shown.
+    foreach ($entity->getPeopleTerms() as $term) {
+      CacheableMetadata::createFromRenderArray($build)
+        ->addCacheableDependency($term)
+        ->applyTo($build);
+    }
+    if ($entity->hasField('field_contributor')) {
+      foreach ($entity->get('field_contributor')->referencedEntities() as $term) {
+        CacheableMetadata::createFromRenderArray($build)
+          ->addCacheableDependency($term)
+          ->applyTo($build);
+      }
     }
     $build['media_content_warnings'] = $this->buildMediaContentWarnings($entity);
   }
@@ -115,12 +144,12 @@ class MukurtuMediaContentWarnings {
     if (!$this->contentWarningSettings->get('people_warnings.enabled')) {
       return [];
     }
-    $people_terms = $this->getDeceasedPeopleTerms($entity);
-    if (empty($people_terms)) {
+    $person_nodes = $this->getDeceasedPersonNodes($entity);
+    if (empty($person_nodes)) {
       return [];
     }
-    $names = array_map(fn(TermInterface $people_term) => $people_term->getName(), $people_terms);
-    if (count($people_terms) > 1) {
+    $names = array_map(fn(NodeInterface $node) => $node->getTitle(), $person_nodes);
+    if (count($person_nodes) > 1) {
       $warning_template = $this->contentWarningSettings->get('people_warnings.warning_multiple');
       $warning_text = str_replace("[names]", implode(' ', $names), $warning_template);
     }
@@ -128,14 +157,14 @@ class MukurtuMediaContentWarnings {
       $warning_template = $this->contentWarningSettings->get('people_warnings.warning_single');
       $warning_text = str_replace("[name]", implode(' ', $names), $warning_template);
     }
-    // Incorporate cacheability metadata from the people terms.
+    // Incorporate cacheability metadata from the person nodes.
     $build = [
       '#theme' => 'mukurtu_content_warning',
       '#warning' => $warning_text,
     ];
-    $build = array_reduce($people_terms, function ($carry, TermInterface $people_term) {
+    $build = array_reduce($person_nodes, function ($carry, NodeInterface $node) {
       CacheableMetadata::createFromRenderArray($carry)
-        ->addCacheableDependency($people_term)
+        ->addCacheableDependency($node)
         ->applyTo($carry);
       return $carry;
     }, $build);
@@ -177,45 +206,34 @@ class MukurtuMediaContentWarnings {
   }
 
   /**
-   * Get the people terms associated with the entity that have deceased content.
+   * Get the deceased person nodes associated with the entity's people terms.
    *
    * @param \Drupal\mukurtu_core\Entity\PeopleInterface $entity
    *   A content entity that has people associated with it.
    *
-   * @return \Drupal\taxonomy\TermInterface[]
-   *   The people terms associated with the entity that have deceased content.
+   * @return \Drupal\node\NodeInterface[]
+   *   Person nodes marked deceased that reference the entity's people terms.
    */
-  protected function getDeceasedPeopleTerms(PeopleInterface $entity): array {
-    $names = [];
+  protected function getDeceasedPersonNodes(PeopleInterface $entity): array {
     $people_terms = $entity->getPeopleTerms();
-    if (empty($people_terms)) {
-      return $names;
+    $contributor_terms = $entity->hasField('field_contributor')
+      ? $entity->get('field_contributor')->referencedEntities()
+      : [];
+    $all_terms = array_merge($people_terms, $contributor_terms);
+    if (empty($all_terms)) {
+      return [];
     }
-
-    foreach ($people_terms as $person) {
-      if ($this->hasDeceasedPersonContent($person)) {
-        $names[] = $person;
-      }
-    }
-    return $names;
-  }
-
-  /**
-   * Check if the given term has deceased content.
-   *
-   * @param \Drupal\taxonomy\TermInterface $entity
-   *   The term to check.
-   *
-   * @return bool
-   *   TRUE if the term has deceased content, FALSE otherwise.
-   */
-  protected function hasDeceasedPersonContent(TermInterface $entity): bool {
+    $tids = array_map(fn(TermInterface $term) => $term->id(), $all_terms);
     $query = $this->entityTypeManager->getStorage('node')->getQuery();
-    $query->condition('type', 'person')
+    $nids = $query->condition('type', 'person')
       ->condition('field_deceased', TRUE)
-      ->condition('field_other_names.entity:taxonomy_term.tid', $entity->id())
-      ->accessCheck(FALSE);
-    return (bool) $query->count()->execute();
+      ->condition('field_other_names.entity:taxonomy_term.tid', $tids, 'IN')
+      ->accessCheck(FALSE)
+      ->execute();
+    if (empty($nids)) {
+      return [];
+    }
+    return $this->entityTypeManager->getStorage('node')->loadMultiple($nids);
   }
 
 }
