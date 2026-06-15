@@ -31,7 +31,7 @@ class BundleListController extends ControllerBase {
         $entity_type_labels[$entity_type] = $this->t('Taxonomy');
         $taxonomy_bundles = [
           'category' => $this->t('Category'),
-          'keywords' => $this->t('Other Taxonomies'),
+          'other_taxonomies' => $this->t('Other Taxonomies'),
         ];
         foreach ($taxonomy_bundles as $bundle_id => $bundle_label) {
           $url = Url::fromRoute('mukurtu_import.fields_list', ['entity_type' => $entity_type, 'bundle' => $bundle_id]);
@@ -68,7 +68,7 @@ class BundleListController extends ControllerBase {
     }
     // The 'keywords' bundle is used as the representative for all non-category
     // taxonomy vocabularies, which share identical fields.
-    if ($entity_type === 'taxonomy_term' && $bundle === 'keywords') {
+    if ($entity_type === 'taxonomy_term' && $bundle === 'other_taxonomies') {
       return $this->t('Import Format Description for Taxonomy: Other Taxonomies');
     }
 

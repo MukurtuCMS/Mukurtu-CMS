@@ -20,11 +20,14 @@ class ImportFieldDescriptionListForm extends ImportBaseForm {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state, $entity_type = NULL, $bundle = NULL): array {
-    $fields = $this->entityFieldManager->getFieldDefinitions($entity_type, $bundle);
+    // 'other_taxonomies' is a virtual bundle representing all non-category
+    // taxonomy vocabularies; resolve it to a real bundle for field lookups.
+    $effective_bundle = ($entity_type === 'taxonomy_term' && $bundle === 'other_taxonomies') ? 'keywords' : $bundle;
+
+    $fields = $this->entityFieldManager->getFieldDefinitions($entity_type, $effective_bundle);
     $options = [];
 
-
-    $import_field_options = $this->buildTargetOptions($entity_type, $bundle);
+    $import_field_options = $this->buildTargetOptions($entity_type, $effective_bundle);
     unset($import_field_options[-1]);
 
     foreach ($import_field_options as $field_target => $target_label) {
@@ -80,9 +83,15 @@ class ImportFieldDescriptionListForm extends ImportBaseForm {
     $bundle = $form_state->getValue('bundle');
 
     $entity_type_label = $this->entityTypeManager->getDefinition($entity_type_id)->getLabel();
-    $bundle_info = $this->entityBundleInfo->getBundleInfo($entity_type_id);
-    $bundle_label = $bundle && isset($bundle_info[$bundle]) ? $bundle_info[$bundle]['label'] : '';
-    $filename = $bundle && $bundle != $entity_type_id ? "{$entity_type_label} - {$bundle_label}.csv" : "{$entity_type_label}.csv";
+
+    if ($entity_type_id === 'taxonomy_term' && $bundle === 'other_taxonomies') {
+      $filename = 'Taxonomy term - Other Taxonomies.csv';
+    }
+    else {
+      $bundle_info = $this->entityBundleInfo->getBundleInfo($entity_type_id);
+      $bundle_label = $bundle && isset($bundle_info[$bundle]) ? $bundle_info[$bundle]['label'] : '';
+      $filename = $bundle && $bundle != $entity_type_id ? "{$entity_type_label} - {$bundle_label}.csv" : "{$entity_type_label}.csv";
+    }
     $selected_fields = array_filter($form_state->getValue('table'));
 
     // Gather the selected field labels.
