@@ -172,3 +172,50 @@ function mukurtu_export_update_40007() {
     $config->set('multivalue_delimiter', ';')->save();
   }
 }
+
+/**
+ * Split image fields into target_id and alt sub-columns in the recommended
+ * CSV exporter to match the two-column format expected by the import system.
+ */
+function mukurtu_export_update_40008() {
+  $exporter = \Drupal::entityTypeManager()
+    ->getStorage('csv_exporter')
+    ->load('recommended_settings_for_import');
+  if (!$exporter) {
+    return;
+  }
+
+  // Map of field_name => human label used when the field was a single column.
+  $image_field_labels = [
+    'field_media_image'    => 'Image',
+    'field_thumbnail'      => 'Thumbnail',
+    'field_collection_image' => 'Image',
+    'field_banner_image'   => 'Banner Image',
+    'field_thumbnail_image' => 'Thumbnail Image',
+  ];
+
+  $list = $exporter->get('entity_fields_export_list') ?? [];
+  $changed = FALSE;
+
+  foreach ($list as $bundle_key => &$fields) {
+    foreach ($image_field_labels as $field_name => $label) {
+      if (!array_key_exists($field_name, $fields)) {
+        continue;
+      }
+      $keys = array_keys($fields);
+      $pos = array_search($field_name, $keys);
+      $before = array_slice($fields, 0, $pos, TRUE);
+      $after  = array_slice($fields, $pos + 1, NULL, TRUE);
+      $fields = $before
+        + ["{$field_name}/target_id" => "{$label} > File ID",
+           "{$field_name}/alt"       => "{$label} > Alternative text"]
+        + $after;
+      $changed = TRUE;
+    }
+  }
+  unset($fields);
+
+  if ($changed) {
+    $exporter->set('entity_fields_export_list', $list)->save();
+  }
+}

@@ -354,6 +354,32 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
    * @protected
    */
   protected function exportImage(EntityFieldExportEvent $event, $field, CsvExporter $config) {
+    // Split-column path: export only the requested sub-property so the output
+    // matches the two-column format the import system expects.
+    if ($event->sub_field_name === 'target_id') {
+      $export = [];
+      foreach ($field->getValue() as $value) {
+        if ($fid = ($value['target_id'] ?? NULL)) {
+          $export[] = $config->getIdFieldSetting() === 'uuid'
+            ? $this->getUUID('file', $fid)
+            : $fid;
+        }
+      }
+      $event->setValue($export);
+      return;
+    }
+    if ($event->sub_field_name === 'alt') {
+      $export = [];
+      foreach ($field->getValue() as $value) {
+        $export[] = $value['alt'] ?? '';
+      }
+      $event->setValue($export);
+      return;
+    }
+
+    // Legacy single-column path (no sub_field_name): keeps the existing
+    // markdown format for backward compatibility with saved exporters that
+    // still reference the bare field name.
     $setting = $config->getImageFieldSetting();
     $export = [];
 
