@@ -33,6 +33,14 @@
         z-index: 10;
       }
 
+      // Pass block-size through Drupal's field/media wrappers so the img
+      // continues to fill the flex-stretched container.
+      .field,
+      .field__item,
+      .media {
+        block-size: 100%;
+      }
+
       img {
         display: block;
         inline-size: 100%;

@@ -15,6 +15,12 @@ mukurtu_content_warnings.settings:
         warning_multiple:
           type: label
           label: 'Warning Text: Multiple People'
+    warning_view_modes:
+      type: sequence
+      label: 'Warning View Modes'
+      sequence:
+        type: string
+        label: 'View Mode'
     taxonomy_warnings:
       type: sequence
       label: 'Taxonomy Triggered Warnings'
