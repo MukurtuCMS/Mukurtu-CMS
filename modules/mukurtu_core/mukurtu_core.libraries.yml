@@ -59,3 +59,11 @@ vbo-user-labels:
   dependencies:
     - core/drupal
     - core/once
+
+account-settings:
+  version: 1.x
+  js:
+    js/account-settings.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
