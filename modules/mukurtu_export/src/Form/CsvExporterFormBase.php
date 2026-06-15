@@ -261,25 +261,19 @@ class CsvExporterFormBase extends EntityForm {
     // The first item's fields are placed directly in the group (no wrapper);
     // subsequent items each get a collapsed sub-details.
     $groups = [
+      'digital_heritage' => [
+        'label' => $this->t('Digital Heritage'),
+        'items' => [
+          ['type' => 'node', 'bundle' => 'digital_heritage'],
+          ['type' => 'paragraph', 'bundle' => 'indigenous_knowledge_keepers'],
+        ],
+      ],
       'dictionary_word' => [
         'label' => $this->t('Dictionary Word'),
         'items' => [
           ['type' => 'node', 'bundle' => 'dictionary_word'],
           ['type' => 'paragraph', 'bundle' => 'dictionary_word_entry'],
           ['type' => 'paragraph', 'bundle' => 'sample_sentence'],
-        ],
-      ],
-      'word_list' => [
-        'label' => $this->t('Word List'),
-        'items' => [
-          ['type' => 'node', 'bundle' => 'word_list'],
-        ],
-      ],
-      'digital_heritage' => [
-        'label' => $this->t('Digital Heritage'),
-        'items' => [
-          ['type' => 'node', 'bundle' => 'digital_heritage'],
-          ['type' => 'paragraph', 'bundle' => 'indigenous_knowledge_keepers'],
         ],
       ],
       'person' => [
@@ -301,6 +295,12 @@ class CsvExporterFormBase extends EntityForm {
         'label' => $this->t('Collection'),
         'items' => [
           ['type' => 'node', 'bundle' => 'collection'],
+        ],
+      ],
+      'word_list' => [
+        'label' => $this->t('Word List'),
+        'items' => [
+          ['type' => 'node', 'bundle' => 'word_list'],
         ],
       ],
     ];
