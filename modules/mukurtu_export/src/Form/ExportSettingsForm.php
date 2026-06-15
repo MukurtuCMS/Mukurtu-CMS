@@ -77,20 +77,12 @@ class ExportSettingsForm extends ExportBaseForm {
     $settings = $this->getExporterConfig()['settings'] ?? [];
     $form += $this->exporter->settingsForm($form, $form_state, $settings);
 
-    $form['actions'] = [
-      '#type' => 'actions',
-    ];
+    $form['actions'] = ['#type' => 'actions'];
     $form['actions']['back'] = [
       '#type' => 'submit',
       '#value' => $this->t('Back'),
-      '#button_type' => 'primary',
       '#submit' => ['::submitBack'],
-    ];
-    $form['actions']['duplicate_settings'] = [
-      '#type' => 'submit',
-      '#value' => $this->t('Duplicate Settings'),
-      '#button_type' => 'primary',
-      '#submit' => ['::submitDuplicateSettings'],
+      '#gin_action_item' => TRUE,
     ];
     if (!empty($adHocItems)) {
       $form['actions']['clear_selection'] = [
@@ -98,6 +90,7 @@ class ExportSettingsForm extends ExportBaseForm {
         '#value' => $this->t('Clear Selection'),
         '#submit' => ['::submitClearSelection'],
         '#limit_validation_errors' => [],
+        '#gin_action_item' => TRUE,
       ];
     }
     $form['actions']['submit'] = [
@@ -106,19 +99,6 @@ class ExportSettingsForm extends ExportBaseForm {
       '#button_type' => 'primary',
     ];
     return $form;
-  }
-
-  /**
-   * Submit handler for "Duplicate Settings".
-   */
-  public function submitDuplicateSettings(array &$form, FormStateInterface $form_state) {
-    $this->saveListSelection($form_state);
-    if ($id = $this->exporter->duplicateSettings($form, $form_state)) {
-      $settings = $this->exporter->getSettings($form, $form_state);
-      $this->exporter->setConfiguration(['settings' => $settings]);
-      $this->setExporterConfig($this->exporter->getConfiguration());
-      $form_state->setRedirect('entity.csv_exporter.edit_form', ['csv_exporter' => $id]);
-    }
   }
 
   /**
