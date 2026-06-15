@@ -13,7 +13,7 @@ class BundleListController extends ControllerBase {
    */
   public function bundlesList() {
     $build = [];
-    $entity_types = ['node', 'media', 'community', 'protocol', 'paragraph', 'file', 'multipage_item'];
+    $entity_types = ['node', 'media', 'community', 'protocol', 'paragraph', 'file', 'multipage_item', 'taxonomy_term'];
     $entity_type_labels = [];
 
     foreach ($entity_types as $entity_type) {
@@ -22,6 +22,22 @@ class BundleListController extends ControllerBase {
       // Override the paragraph label.
       if ($entity_type === 'paragraph') {
         $entity_type_labels[$entity_type] = $this->t('Compound Types (paragraphs)');
+      }
+
+      // Override the taxonomy_term label and show only two representative
+      // entries: Category (which has a thumbnail image field) and a generic
+      // entry covering all other vocabularies (which share the same fields).
+      if ($entity_type === 'taxonomy_term') {
+        $entity_type_labels[$entity_type] = $this->t('Taxonomy');
+        $taxonomy_bundles = [
+          'category' => $this->t('Category'),
+          'keywords' => $this->t('Other Taxonomies'),
+        ];
+        foreach ($taxonomy_bundles as $bundle_id => $bundle_label) {
+          $url = Url::fromRoute('mukurtu_import.fields_list', ['entity_type' => $entity_type, 'bundle' => $bundle_id]);
+          $build[$entity_type][] = Link::fromTextAndUrl($bundle_label, $url)->toRenderable();
+        }
+        continue;
       }
 
       $bundles = \Drupal::service('entity_type.bundle.info')->getBundleInfo($entity_type);
@@ -50,6 +66,12 @@ class BundleListController extends ControllerBase {
     if (!$bundle || $entity_type == $bundle) {
       return $this->t('Import Format Description for @entity_type', ['@entity_type' => $entity_type_label]);
     }
+    // The 'keywords' bundle is used as the representative for all non-category
+    // taxonomy vocabularies, which share identical fields.
+    if ($entity_type === 'taxonomy_term' && $bundle === 'keywords') {
+      return $this->t('Import Format Description for Taxonomy: Other Taxonomies');
+    }
+
     $bundle_info = \Drupal::service('entity_type.bundle.info')->getBundleInfo($entity_type);
     $bundle_label = isset($bundle_info[$bundle]) ? $bundle_info[$bundle]['label'] : '';
     return $this->t('Import Format Description for @entity_type: @bundle', ['@entity_type' => $entity_type_label, '@bundle' => $bundle_label]);
