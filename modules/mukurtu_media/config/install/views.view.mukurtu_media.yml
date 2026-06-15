@@ -7,6 +7,7 @@ dependencies:
     - image
     - media
     - mukurtu_core
+    - mukurtu_export
     - mukurtu_media
     - mukurtu_protocol
     - views_bulk_operations
@@ -93,6 +94,21 @@ display:
                 add_confirmation: false
                 label_override: Unpublish
             2:
+              action_id: mukurtu_export_adhoc_export_media_action
+              preconfiguration:
+                add_confirmation: false
+                label_override: ''
+            3:
+              action_id: mukurtu_export_add_to_list_media_action
+              preconfiguration:
+                add_confirmation: false
+                label_override: ''
+            4:
+              action_id: mukurtu_export_remove_from_list_media_action
+              preconfiguration:
+                add_confirmation: false
+                label_override: ''
+            5:
               action_id: views_bulk_operations_delete_entity
               preconfiguration:
                 add_confirmation: true

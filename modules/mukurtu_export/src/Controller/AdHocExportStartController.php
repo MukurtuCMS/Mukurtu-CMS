@@ -37,6 +37,9 @@ class AdHocExportStartController extends ControllerBase {
     $store->set('ad_hoc_items', ['node' => [(int) $node->id() => (int) $node->id()]]);
     $store->set('exporter_id', 'csv');
 
+    // Remove destination so Drupal's redirect subscriber doesn't send the user
+    // back to the content list instead of the export settings page.
+    \Drupal::request()->query->remove('destination');
     return $this->redirect('mukurtu_export.export_settings');
   }
 
@@ -50,6 +53,7 @@ class AdHocExportStartController extends ControllerBase {
     $store->set('ad_hoc_items', ['media' => [(int) $media->id() => (int) $media->id()]]);
     $store->set('exporter_id', 'csv');
 
+    \Drupal::request()->query->remove('destination');
     return $this->redirect('mukurtu_export.export_settings');
   }
 
@@ -80,6 +84,7 @@ class AdHocExportStartController extends ControllerBase {
 
     $this->deleteTempstoreData($view_id, $display_id);
 
+    \Drupal::request()->query->remove('destination');
     return $this->redirect('mukurtu_export.export_settings');
   }
 

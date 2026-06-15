@@ -180,7 +180,7 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface {
     }
 
     if (!$this->getMultivalueDelimiter()) {
-      $this->setMultivalueDelimiter('||');
+      $this->setMultivalueDelimiter(';');
     }
 
     if (!$this->getIdFieldSetting()) {

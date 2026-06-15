@@ -162,4 +162,13 @@ function mukurtu_export_update_40006() {
   \Drupal::service('plugin.manager.action')->clearCachedDefinitions();
 }
 
-
+/**
+ * Change the recommended CSV exporter multivalue delimiter from || to ;.
+ */
+function mukurtu_export_update_40007() {
+  $config = \Drupal::service('config.factory')
+    ->getEditable('mukurtu_export.csv_exporter.recommended_settings_for_import');
+  if ($config->get('multivalue_delimiter') === '||') {
+    $config->set('multivalue_delimiter', ';')->save();
+  }
+}

@@ -376,7 +376,7 @@ separator: ','
 enclosure: '"'
 escape: \
 eol: \n
-multivalue_delimiter: '||'
+multivalue_delimiter: ';'
 field_id: id
 field_file: id
 field_image: id
