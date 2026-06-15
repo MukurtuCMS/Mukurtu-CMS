@@ -8,6 +8,8 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\TempStore\PrivateTempStoreFactory;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
+use Drupal\mukurtu_export\AdHocExporterSource;
+use Drupal\mukurtu_export\BatchExportExecutable;
 use Drupal\mukurtu_export\ExportChildResolver;
 use Drupal\mukurtu_export\Form\ExportBaseForm;
 use Drupal\mukurtu_export\MukurtuExporterPluginManager;
@@ -80,6 +82,29 @@ class ExportSettingsForm extends ExportBaseForm {
         '#items' => $labels,
         '#weight' => -10,
       ];
+
+      // Show "Include child items" checkbox when the selection contains
+      // collections or word lists with resolvable children.
+      $child_count = 0;
+      foreach ($adHocItems['node'] ?? [] as $node_id) {
+        $node = $this->entityTypeManager->getStorage('node')->load($node_id);
+        if ($node && in_array($node->bundle(), ['collection', 'word_list'])) {
+          $children = $this->childResolver->getChildEntities($node);
+          $child_count += array_sum(array_map('count', $children));
+        }
+      }
+      if ($child_count > 0) {
+        $form['include_children'] = [
+          '#type' => 'checkbox',
+          '#title' => $this->formatPlural(
+            $child_count,
+            'Also include 1 child item from collections and word lists in this selection',
+            'Also include @count child items from collections and word lists in this selection',
+          ),
+          '#default_value' => FALSE,
+          '#weight' => -5,
+        ];
+      }
     }
     else {
       $uid = \Drupal::currentUser()->id();
@@ -133,27 +158,6 @@ class ExportSettingsForm extends ExportBaseForm {
         '#submit' => ['::submitClearSelection'],
         '#limit_validation_errors' => [],
       ];
-
-      // Show "Include child items" button when the selection contains
-      // collections or word lists that haven't been expanded yet.
-      if (!$this->store->get('ad_hoc_children_expanded')) {
-        $child_count = 0;
-        foreach ($adHocItems['node'] ?? [] as $node_id) {
-          $node = $this->entityTypeManager->getStorage('node')->load($node_id);
-          if ($node && in_array($node->bundle(), ['collection', 'word_list'])) {
-            $children = $this->childResolver->getChildEntities($node);
-            $child_count += array_sum(array_map('count', $children));
-          }
-        }
-        if ($child_count > 0) {
-          $form['actions']['include_children'] = [
-            '#type' => 'submit',
-            '#value' => $this->formatPlural($child_count, 'Include 1 child item', 'Include @count child items'),
-            '#submit' => ['::submitExpandSelection'],
-            '#limit_validation_errors' => [],
-          ];
-        }
-      }
     }
     $form['actions']['submit'] = [
       '#type' => 'submit',
@@ -181,26 +185,6 @@ class ExportSettingsForm extends ExportBaseForm {
    */
   public function submitClearSelection(array &$form, FormStateInterface $form_state) {
     $this->store->delete('ad_hoc_items');
-    $this->store->delete('ad_hoc_children_expanded');
-    $form_state->setRedirect('mukurtu_export.export_settings');
-  }
-
-  /**
-   * Submit handler for "Include child items" - expands selection with children.
-   */
-  public function submitExpandSelection(array &$form, FormStateInterface $form_state) {
-    $ad_hoc_items = $this->store->get('ad_hoc_items') ?? [];
-    foreach ($ad_hoc_items['node'] ?? [] as $node_id) {
-      $node = $this->entityTypeManager->getStorage('node')->load($node_id);
-      if (!$node) {
-        continue;
-      }
-      foreach ($this->childResolver->getChildEntities($node) as $child_type => $child_ids) {
-        $ad_hoc_items[$child_type] = ($ad_hoc_items[$child_type] ?? []) + $child_ids;
-      }
-    }
-    $this->store->set('ad_hoc_items', $ad_hoc_items);
-    $this->store->set('ad_hoc_children_expanded', TRUE);
     $form_state->setRedirect('mukurtu_export.export_settings');
   }
 
@@ -221,20 +205,27 @@ class ExportSettingsForm extends ExportBaseForm {
     $this->exporter->setConfiguration(['settings' => $settings]);
     $this->setExporterConfig($this->exporter->getConfiguration());
 
+    // Expand the selection to include children of collections/word lists.
+    if ($form_state->getValue('include_children')) {
+      $ad_hoc_items = $this->store->get('ad_hoc_items') ?? [];
+      foreach ($ad_hoc_items['node'] ?? [] as $node_id) {
+        $node = $this->entityTypeManager->getStorage('node')->load($node_id);
+        if (!$node) {
+          continue;
+        }
+        foreach ($this->childResolver->getChildEntities($node) as $child_type => $child_ids) {
+          $ad_hoc_items[$child_type] = ($ad_hoc_items[$child_type] ?? []) + $child_ids;
+        }
+      }
+      $this->source = new AdHocExporterSource($ad_hoc_items);
+      $this->executable = new BatchExportExecutable($this->source, $this->exporter);
+    }
+
     $this->executable->export();
 
     $form_state->setRedirect('mukurtu_export.export_results');
   }
 
-  /**
-   * Provide an access check that ensures there is a result to report.
-   *
-   * @param \Drupal\Core\Session\AccountInterface $account
-   *   Run access checks for this account.
-   *
-   * @return \Drupal\Core\Access\AccessResultInterface
-   *   The access result.
-   */
   protected function saveListSelection(FormStateInterface $form_state): void {
     $listId = $form_state->getValue('export_list_id') ?: NULL;
     $this->setActiveExportListId($listId ? (int) $listId : NULL);

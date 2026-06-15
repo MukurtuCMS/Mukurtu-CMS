@@ -34,6 +34,7 @@ class AdHocExportStartController extends ControllerBase {
 
     $store = $this->tempStoreFactory->get('mukurtu_import');
     $store->delete('export_list_id');
+
     $store->set('ad_hoc_items', ['node' => [(int) $node->id() => (int) $node->id()]]);
     $store->set('exporter_id', 'csv');
 
@@ -47,6 +48,7 @@ class AdHocExportStartController extends ControllerBase {
 
     $store = $this->tempStoreFactory->get('mukurtu_import');
     $store->delete('export_list_id');
+
     $store->set('ad_hoc_items', ['media' => [(int) $media->id() => (int) $media->id()]]);
     $store->set('exporter_id', 'csv');
 
@@ -75,6 +77,7 @@ class AdHocExportStartController extends ControllerBase {
 
     $store = $this->tempStoreFactory->get('mukurtu_import');
     $store->delete('export_list_id');
+
     $store->set('ad_hoc_items', $by_type);
     $store->set('exporter_id', 'csv');
 
