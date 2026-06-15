@@ -33,6 +33,24 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase {
     ];
   }
 
+  // Get all eligible media view modes (excluding always-skipped modes).
+  protected function getMediaViewModes(): array {
+    $view_modes = \Drupal::entityTypeManager()
+      ->getStorage('entity_view_mode')
+      ->loadByProperties(['targetEntityType' => 'media']);
+    $excluded = ['token', 'media_library', 'form_selection'];
+    $options = [];
+    foreach ($view_modes as $view_mode) {
+      $id = $view_mode->id();
+      // IDs are in the form "media.machine_name" — strip the "media." prefix.
+      $machine_name = substr($id, strlen('media.'));
+      if (!in_array($machine_name, $excluded)) {
+        $options[$machine_name] = $view_mode->label();
+      }
+    }
+    return $options;
+  }
+
   // Method to get all media tag taxonomy terms.
   protected function getTerms() {
     $query = \Drupal::entityQuery('taxonomy_term')
@@ -201,6 +219,46 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase {
       ],
     ];
 
+    // Warning media settings — view mode selection.
+    $view_mode_options = $this->getMediaViewModes();
+    // null = not yet configured = all modes enabled; [] = explicitly disabled all.
+    $saved_modes = $config->get('warning_view_modes');
+    $default_modes = ($saved_modes === NULL) ? array_keys($view_mode_options) : $saved_modes;
+    $view_mode_descriptions = [
+      'audio_for_dictionary_teaser' => $this->t('Recording field on Dictionary Word entry teasers'),
+      'browse'                      => $this->t('Media in browse, teaser, and grid displays across all content types'),
+      'carousel_thumbnail'          => $this->t('Thumbnail carousel in multipage browse across all content types'),
+      'collections_3_2_'            => $this->t('Media in Category teasers and Collection browse grid'),
+      'collections_hero'            => $this->t('Hero image on Collection full page'),
+      'digital_heritage_full'       => $this->t('Media in image-with-description block content types'),
+      'digital_heritage_sidebar'    => $this->t('Media in Digital Heritage grid browse, teaser, and featured displays'),
+      'full'                        => $this->t('Default full-page node view'),
+      'large'                       => $this->t('Defined but not actively used in any configured display'),
+      'media_assets'                => $this->t('Media Assets field on full page displays (Digital Heritage, Place, Person, Dictionary Word)'),
+      'medium'                      => $this->t('Defined but not actively used in any configured display'),
+      'small'                       => $this->t('Defined but not actively used in any configured display'),
+      'small_250px_'                => $this->t('Thumbnail field on Dictionary Word teasers'),
+    ];
+    $form['view_mode_warnings'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Warning media settings'),
+      '#description' => $this->t('Select which media view modes should display content warnings.'),
+    ];
+    $form['view_mode_warnings']['view_modes'] = [
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#title' => $this->t('Enabled View Modes'),
+    ];
+    foreach ($view_mode_options as $mode_key => $mode_label) {
+      $form['view_mode_warnings']['view_modes'][$mode_key] = [
+        '#type' => 'checkbox',
+        '#title' => $mode_label,
+        '#description' => $view_mode_descriptions[$mode_key] ?? '',
+        '#default_value' => in_array($mode_key, $default_modes) ? $mode_key : 0,
+        '#return_value' => $mode_key,
+      ];
+    }
+
     return parent::buildForm($form, $form_state);
   }
 
@@ -253,6 +311,7 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
+    parent::submitForm($form, $form_state);
     $config = $this->config(static::SETTINGS);
     $values = $form_state->getValues();
 
@@ -266,6 +325,20 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase {
 
     // Multiple people text.
     $config->set('people_warnings.warning_multiple', $values['people_warnings']['multiple_people_text']);
+
+    // View mode warnings settings.
+    // Store the explicit checked list; if all modes are selected clear the key
+    // so null signals "all modes" (backwards-compatible default).
+    $checked_modes = array_values(array_filter($values['view_mode_warnings']['view_modes']));
+    $all_modes = array_keys($this->getMediaViewModes());
+    sort($checked_modes);
+    sort($all_modes);
+    if ($checked_modes === $all_modes) {
+      $config->clear('warning_view_modes');
+    }
+    else {
+      $config->set('warning_view_modes', $checked_modes);
+    }
 
     // Taxonomy warnings settings.
     $taxonomyWarningsConfig = [];
