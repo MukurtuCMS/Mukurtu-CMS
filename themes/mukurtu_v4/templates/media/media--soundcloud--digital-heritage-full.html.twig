@@ -1,0 +1,25 @@
+{#
+/**
+ * @file
+ * Theme override to present a SoundCloud item in the digital_heritage_full view mode.
+ *
+ * Available variables: see media.html.twig.
+ * @see template_preprocess_media()
+ */
+#}
+{%
+  set classes = [
+    'media',
+    'media--' ~ bundle,
+    'media--digital-heritage-full'
+  ]
+%}
+
+<div{{ attributes.addClass(classes) }}>
+  {{ title_suffix.contextual_links }}
+  {{ content.media_content_warnings }}
+
+  <div class="media__soundcloud-player">
+    {{ content.field_media_soundcloud }}
+  </div>
+</div>

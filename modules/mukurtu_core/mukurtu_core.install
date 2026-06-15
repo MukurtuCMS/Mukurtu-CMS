@@ -1241,6 +1241,69 @@ function mukurtu_core_update_40038(): void {
   $config->save();
 }
 
+
+/**
+ * Show field_word_list_image in the word_list grid_browse display.
+ */
+function mukurtu_core_update_40039(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.word_list.grid_browse');
+  if ($config->isNew()) {
+    return;
+  }
+
+  $content = $config->get('content') ?? [];
+  if (!isset($content['field_word_list_image'])) {
+    $content['field_word_list_image'] = [
+      'type' => 'entity_reference_entity_view',
+      'label' => 'hidden',
+      'settings' => [
+        'view_mode' => 'browse',
+        'link' => FALSE,
+      ],
+      'third_party_settings' => [],
+      'weight' => -1,
+      'region' => 'content',
+    ];
+    $config->set('content', $content);
+  }
+
+  $config->save();
+}
+
+/**
+ * Show field_recording in the dictionary_word grid_browse display.
+ */
+function mukurtu_core_update_40040(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.dictionary_word.grid_browse');
+  if ($config->isNew()) {
+    return;
+  }
+
+  $content = $config->get('content') ?? [];
+  if (!isset($content['field_recording'])) {
+    $content['field_recording'] = [
+      'type' => 'entity_reference_entity_view',
+      'label' => 'hidden',
+      'settings' => [
+        'view_mode' => 'browse',
+        'link' => FALSE,
+      ],
+      'third_party_settings' => [],
+      'weight' => 1,
+      'region' => 'content',
+    ];
+    $config->set('content', $content);
+  }
+
+  $hidden = $config->get('hidden') ?? [];
+  if (isset($hidden['field_recording'])) {
+    unset($hidden['field_recording']);
+    $config->set('hidden', $hidden);
+  }
+
+  $config->save();
+}
+
 /**
  * Fix audio form_selection display to show thumbnail; add soundcloud form_selection display.
  */
@@ -1261,12 +1324,37 @@ function mukurtu_core_update_40041(): void {
 }
 
 /**
+ * Add missing SoundCloud and remote_video display configs for digital_heritage
+ * view modes so content warnings apply correctly in those contexts.
+ */
+function mukurtu_core_update_40042(): void {
+  $profile_path = \Drupal::service('extension.list.profile')->getPath('mukurtu');
+  $source = new \Drupal\Core\Config\FileStorage($profile_path . '/config/install');
+  $config_storage = \Drupal::service('config.storage');
+
+  $new_configs = [
+    'core.entity_view_display.media.soundcloud.digital_heritage_full',
+    'core.entity_view_display.media.soundcloud.digital_heritage_sidebar',
+    'core.entity_view_display.media.remote_video.digital_heritage_full',
+  ];
+
+  foreach ($new_configs as $config_name) {
+    if (!$config_storage->exists($config_name)) {
+      $data = $source->read($config_name);
+      if ($data) {
+        $config_storage->write($config_name, $data);
+      }
+    }
+  }
+}
+
+/**
  * Reset genpass_display to admin-only if currently set to a visitor-facing value.
  *
  * Options 2 (user-facing) and 3 (both) have been removed from the admin UI
  * because Mukurtu never shows generated passwords to self-registering visitors.
  */
-function mukurtu_core_update_40042(): void {
+function mukurtu_core_update_40043(): void {
   $config = \Drupal::configFactory()->getEditable('genpass.settings');
   $display = (int) $config->get('genpass_display');
   // 2 = PASSWORD_DISPLAY_USER, 3 = PASSWORD_DISPLAY_BOTH.

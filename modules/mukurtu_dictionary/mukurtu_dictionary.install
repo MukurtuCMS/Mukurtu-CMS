@@ -1123,3 +1123,37 @@ function mukurtu_dictionary_update_40030(): void {
     $wl->save();
   }
 }
+
+/**
+ * Show field_word_list_image in the word_list browse display.
+ */
+function mukurtu_dictionary_update_40031(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.word_list.browse');
+  if ($config->isNew()) {
+    return;
+  }
+
+  $content = $config->get('content') ?? [];
+  if (!isset($content['field_word_list_image'])) {
+    $content['field_word_list_image'] = [
+      'type' => 'entity_reference_entity_view',
+      'label' => 'hidden',
+      'settings' => [
+        'view_mode' => 'browse',
+        'link' => FALSE,
+      ],
+      'third_party_settings' => [],
+      'weight' => -1,
+      'region' => 'content',
+    ];
+    $config->set('content', $content);
+  }
+
+  $hidden = $config->get('hidden') ?? [];
+  if (isset($hidden['field_word_list_image'])) {
+    unset($hidden['field_word_list_image']);
+    $config->set('hidden', $hidden);
+  }
+
+  $config->save();
+}
