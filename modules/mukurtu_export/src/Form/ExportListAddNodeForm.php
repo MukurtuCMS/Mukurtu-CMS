@@ -5,6 +5,7 @@ namespace Drupal\mukurtu_export\Form;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\mukurtu_export\ExportChildResolver;
 use Drupal\node\NodeInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -15,10 +16,14 @@ class ExportListAddNodeForm extends FormBase {
 
   public function __construct(
     protected readonly EntityTypeManagerInterface $entityTypeManager,
+    protected readonly ExportChildResolver $childResolver,
   ) {}
 
   public static function create(ContainerInterface $container): static {
-    return new static($container->get('entity_type.manager'));
+    return new static(
+      $container->get('entity_type.manager'),
+      $container->get('mukurtu_export.child_resolver'),
+    );
   }
 
   public function getFormId(): string {
@@ -60,6 +65,24 @@ class ExportListAddNodeForm extends FormBase {
       '#description' => $this->t('If provided, a new list will be created with this name.'),
       '#maxlength' => 255,
     ];
+
+    // For aggregative types, offer to include child items.
+    if (in_array($node->bundle(), ['collection', 'word_list'])) {
+      $children = $this->childResolver->getChildEntities($node);
+      $child_count = array_sum(array_map('count', $children));
+      if ($child_count > 0) {
+        $form['include_children'] = [
+          '#type' => 'checkbox',
+          '#title' => $this->formatPlural(
+            $child_count,
+            'Also include 1 child item from this @bundle',
+            'Also include @count child items from this @bundle',
+            ['@bundle' => $node->bundle() === 'collection' ? $this->t('collection') : $this->t('word list')]
+          ),
+          '#default_value' => FALSE,
+        ];
+      }
+    }
 
     $form['actions'] = ['#type' => 'actions'];
     $form['actions']['submit'] = [
@@ -108,6 +131,13 @@ class ExportListAddNodeForm extends FormBase {
 
     $items = $list->getItems();
     $items['node'][$node->id()] = $node->id();
+
+    if ($form_state->getValue('include_children')) {
+      foreach ($this->childResolver->getChildEntities($node) as $child_type => $child_ids) {
+        $items[$child_type] = ($items[$child_type] ?? []) + $child_ids;
+      }
+    }
+
     $list->setItems($items)->save();
 
     $this->messenger()->addStatus($this->t('%title added to export list %label.', [
