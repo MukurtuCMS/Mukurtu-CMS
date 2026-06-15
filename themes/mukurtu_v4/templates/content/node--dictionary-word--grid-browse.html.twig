@@ -1,0 +1,35 @@
+{#
+/**
+ * @file
+ * Theme override for Dictionary Word nodes in the grid browse view mode.
+ */
+#}
+
+{% set media_bundle = node.field_representative_media.0.entity.bundle.value.0['target_id'] %}
+{% set has_rep_media = node.field_representative_media.0.entity is not empty %}
+
+<article{{ attributes.addClass("vertical-card") }}>
+  <div class="vertical-card__media">
+    {% if has_rep_media %}
+      {% if media_bundle is same as 'image' %}
+      <a href="{{ url }}" aria-hidden="true" tabindex="-1">
+      {% endif %}
+        {{ content.field_representative_media }}
+      {% if media_bundle is same as 'image' %}
+      </a>
+      {% endif %}
+    {% elseif node.field_recording.0.entity is not empty %}
+      {{ content.field_recording }}
+    {% endif %}
+  </div>
+
+  <div{{ content_attributes }} class="vertical-card__content">
+    <div class="vertical-card__content-header">
+      {{ title_prefix }}
+      <h2{{ title_attributes }}>
+        <a href="{{ url }}" rel="bookmark">{{ label }}</a>
+      </h2>
+      {{ title_suffix }}
+    </div>
+  </div>
+</article>
