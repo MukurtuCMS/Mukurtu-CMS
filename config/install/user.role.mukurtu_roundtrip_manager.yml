@@ -10,7 +10,10 @@ label: 'Roundtrip Manager'
 weight: 3
 is_admin: null
 permissions:
+  - 'access content overview'
+  - 'access media overview'
   - 'access mukurtu export'
+  - 'access mukurtu import'
   - 'administer mukurtu_import_strategy'
   - 'flag export_content'
   - 'flag export_media'
