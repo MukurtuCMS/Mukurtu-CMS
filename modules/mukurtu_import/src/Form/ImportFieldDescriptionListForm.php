@@ -27,6 +27,22 @@ class ImportFieldDescriptionListForm extends ImportBaseForm {
     $fields = $this->entityFieldManager->getFieldDefinitions($entity_type, $effective_bundle);
     $options = [];
 
+    // Per-entity-type overrides for the Field Description column.
+    // Drupal base field descriptions are often missing or too terse for
+    // end users; these replace them on import format pages only.
+    $field_description_overrides = [];
+    if ($entity_type === 'taxonomy_term') {
+      $field_description_overrides = [
+        'description' => $this->t('The description is not normally shown to end users. It may be used for internal documentation to clarify or define the content that should reference this term, or to provide additional details about the term.'),
+        'langcode'    => $this->t('The encoded language. Used for translation and localization.'),
+        'name'        => $this->t('The taxonomy term name.'),
+        'tid'         => $this->t('Identifier number assigned by the system.'),
+        'parent'      => $this->t('Not currently supported in Mukurtu. Used if a site supports hierarchical taxonomies.'),
+        'uuid'        => $this->t('Unique identifier usually assigned by the system.'),
+        'weight'      => $this->t('Not usually used as most sites will default to alphabetical ordering. The weight of this term in relation to other terms in the taxonomy.'),
+      ];
+    }
+
     $import_field_options = $this->buildTargetOptions($entity_type, $effective_bundle);
     unset($import_field_options[-1]);
 
@@ -37,7 +53,7 @@ class ImportFieldDescriptionListForm extends ImportBaseForm {
       $process_plugin = $this->fieldProcessPluginManager->getInstance(['field_definition' => $fields[$field_name]]);
       $options[$field_target] = [
         'label' => $target_label,
-        'description' => $fields[$field_name]->getDescription() ?? '',
+        'description' => $field_description_overrides[$field_name] ?? ($fields[$field_name]->getDescription() ?? ''),
         'format' => $process_plugin->getFormatDescription($fields[$field_name], $field_property),
       ];
     }
