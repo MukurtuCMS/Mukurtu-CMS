@@ -1,6 +1,9 @@
 services:
   mukurtu_export.child_resolver:
     class: Drupal\mukurtu_export\ExportChildResolver
+    arguments:
+      - '@entity_type.manager'
+      - '@mukurtu_multipage_items.multipage_item_manager'
 
   plugin.manager.mukurtu_exporter:
     class: Drupal\mukurtu_export\MukurtuExporterPluginManager

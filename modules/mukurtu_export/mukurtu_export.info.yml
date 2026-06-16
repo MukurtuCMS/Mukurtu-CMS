@@ -13,6 +13,8 @@ dependencies:
   - 'flag:flag'
   - 'mukurtu_core:mukurtu_core'
   - 'mukurtu_protocol:mukurtu_protocol'
+  - 'mukurtu_community_records:mukurtu_community_records'
+  - 'mukurtu_multipage_items:mukurtu_multipage_items'
   - 'mukurtu_taxonomy:mukurtu_taxonomy'
   - 'search_api:search_api'
   - 'views_bulk_operations:views_bulk_operations'

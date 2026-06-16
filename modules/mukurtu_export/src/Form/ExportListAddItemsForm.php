@@ -97,16 +97,33 @@ class ExportListAddItemsForm extends FormBase {
 
     // For aggregative types in the selection, offer to include child items.
     $child_count = 0;
+    $has_or = FALSE;
+    $has_cr = FALSE;
+    $has_mpi = FALSE;
+
     foreach ($form_data['list'] as $item) {
       if ($item[2] !== 'node') {
         continue;
       }
       $node = $this->entityTypeManager->getStorage('node')->load($item[3]);
-      if ($node && in_array($node->bundle(), ['collection', 'word_list'])) {
+      if (!$node) {
+        continue;
+      }
+      if (in_array($node->bundle(), ['collection', 'word_list'])) {
         $children = $this->childResolver->getChildEntities($node);
         $child_count += array_sum(array_map('count', $children));
       }
+      if (!$has_or && !empty($this->childResolver->getAccessibleCommunityRecords($node))) {
+        $has_or = TRUE;
+      }
+      if (!$has_cr && $this->childResolver->getOriginalRecord($node)) {
+        $has_cr = TRUE;
+      }
+      if (!$has_mpi && !empty($this->childResolver->getMultipagePages($node))) {
+        $has_mpi = TRUE;
+      }
     }
+
     if ($child_count > 0) {
       $form['include_children'] = [
         '#type' => 'checkbox',
@@ -115,6 +132,30 @@ class ExportListAddItemsForm extends FormBase {
           'Also include 1 child item from collections and word lists in this selection',
           'Also include @count child items from collections and word lists in this selection',
         ),
+        '#default_value' => FALSE,
+      ];
+    }
+
+    if ($has_or) {
+      $form['include_community_records'] = [
+        '#type' => 'checkbox',
+        '#title' => $this->t('Include all accessible community records for original records in this selection'),
+        '#default_value' => FALSE,
+      ];
+    }
+
+    if ($has_cr) {
+      $form['include_original_records'] = [
+        '#type' => 'checkbox',
+        '#title' => $this->t('Include original records for any community records in this selection'),
+        '#default_value' => FALSE,
+      ];
+    }
+
+    if ($has_mpi) {
+      $form['include_mpi_pages'] = [
+        '#type' => 'checkbox',
+        '#title' => $this->t('Include all accessible pages for multipage items in this selection'),
         '#default_value' => FALSE,
       ];
     }
@@ -193,6 +234,49 @@ class ExportListAddItemsForm extends FormBase {
         }
         foreach ($this->childResolver->getChildEntities($node) as $child_type => $child_ids) {
           $items[$child_type] = ($items[$child_type] ?? []) + $child_ids;
+        }
+      }
+    }
+
+    // Optionally include all accessible community records for any ORs.
+    if ($form_state->getValue('include_community_records')) {
+      foreach ($by_type['node'] ?? [] as $node_id) {
+        $node = $this->entityTypeManager->getStorage('node')->load($node_id);
+        if (!$node) {
+          continue;
+        }
+        foreach ($this->childResolver->getAccessibleCommunityRecords($node) as $cr) {
+          $id = (int) $cr->id();
+          $items['node'][$id] = $id;
+        }
+      }
+    }
+
+    // Optionally include the original record for any CRs.
+    if ($form_state->getValue('include_original_records')) {
+      foreach ($by_type['node'] ?? [] as $node_id) {
+        $node = $this->entityTypeManager->getStorage('node')->load($node_id);
+        if (!$node) {
+          continue;
+        }
+        $or = $this->childResolver->getOriginalRecord($node);
+        if ($or) {
+          $id = (int) $or->id();
+          $items['node'][$id] = $id;
+        }
+      }
+    }
+
+    // Optionally include all accessible pages for any MPI pages.
+    if ($form_state->getValue('include_mpi_pages')) {
+      foreach ($by_type['node'] ?? [] as $node_id) {
+        $node = $this->entityTypeManager->getStorage('node')->load($node_id);
+        if (!$node) {
+          continue;
+        }
+        foreach ($this->childResolver->getMultipagePages($node) as $page) {
+          $id = (int) $page->id();
+          $items['node'][$id] = $id;
         }
       }
     }
