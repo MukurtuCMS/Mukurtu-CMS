@@ -12,7 +12,13 @@
    */
   Drupal.behaviors.mukurtuGinLayoutBuilderToolbar = {
     attach(context) {
-      if (!document.body.classList.contains('glb-body')) {
+      // The dashboard layout builder (/dashboards/*/layout) does not get
+      // glb-body, so check the URL as a fallback.
+      const isDashboardLayout =
+        window.location.pathname.includes('/dashboards/') &&
+        window.location.pathname.endsWith('/layout');
+
+      if (!document.body.classList.contains('glb-body') && !isDashboardLayout) {
         return;
       }
       once('mukurtu-close-toolbar-trays', 'body', context).forEach(() => {
