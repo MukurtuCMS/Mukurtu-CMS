@@ -143,6 +143,9 @@
                 "TypeError: Cannot access offset of type string on string": "web/profiles/mukurtu/patches/search_api_glossary_type-error-3492668-8.patch",
                 "Fix implicit nullable param deprecation in Glossary::getPropertyDefinitions()": "web/profiles/mukurtu/patches/search_api_glossary-nullable-param-deprecation.patch"
             },
+            "drupal/message_digest": {
+                "Fix implicit nullable param deprecation in message_digest_allowed_values_callback()": "web/profiles/mukurtu/patches/message_digest-module-nullable-param-deprecation.patch"
+            },
             "drupal/message_ui": {
                 "Fix implicit nullable param deprecation in SaveMessage::access()": "web/profiles/mukurtu/patches/message_ui-nullable-param-deprecation.patch"
             },
