@@ -67,7 +67,10 @@ class ProtocolHtmlRouteProvider extends AdminHtmlRouteProvider {
           '_controller' => '\Drupal\mukurtu_protocol\Controller\ProtocolController::revisionOverview',
         ])
         ->setRequirement('_permission', 'view all protocol revisions')
-        ->setOption('_admin_route', TRUE);
+        ->setOption('_admin_route', TRUE)
+        ->setOption('parameters', [
+          'protocol' => ['type' => 'entity:protocol'],
+        ]);
 
       return $route;
     }
@@ -91,7 +94,11 @@ class ProtocolHtmlRouteProvider extends AdminHtmlRouteProvider {
           '_title_callback' => '\Drupal\mukurtu_protocol\Controller\ProtocolController::revisionPageTitle',
         ])
         ->setRequirement('_permission', 'view all protocol revisions')
-        ->setOption('_admin_route', TRUE);
+        ->setOption('_admin_route', TRUE)
+        ->setOption('parameters', [
+          'protocol' => ['type' => 'entity:protocol'],
+          'protocol_revision' => ['type' => 'entity_revision:protocol'],
+        ]);
 
       return $route;
     }
@@ -115,7 +122,11 @@ class ProtocolHtmlRouteProvider extends AdminHtmlRouteProvider {
           '_title' => 'Revert to earlier revision',
         ])
         ->setRequirement('_permission', 'revert all protocol revisions')
-        ->setOption('_admin_route', TRUE);
+        ->setOption('_admin_route', TRUE)
+        ->setOption('parameters', [
+          'protocol' => ['type' => 'entity:protocol'],
+          'protocol_revision' => ['type' => 'entity_revision:protocol'],
+        ]);
 
       return $route;
     }
@@ -139,7 +150,11 @@ class ProtocolHtmlRouteProvider extends AdminHtmlRouteProvider {
           '_title' => 'Delete earlier revision',
         ])
         ->setRequirement('_permission', 'delete all protocol revisions')
-        ->setOption('_admin_route', TRUE);
+        ->setOption('_admin_route', TRUE)
+        ->setOption('parameters', [
+          'protocol' => ['type' => 'entity:protocol'],
+          'protocol_revision' => ['type' => 'entity_revision:protocol'],
+        ]);
 
       return $route;
     }
@@ -163,7 +178,11 @@ class ProtocolHtmlRouteProvider extends AdminHtmlRouteProvider {
           '_title' => 'Revert to earlier revision of a translation',
         ])
         ->setRequirement('_permission', 'revert all protocol revisions')
-        ->setOption('_admin_route', TRUE);
+        ->setOption('_admin_route', TRUE)
+        ->setOption('parameters', [
+          'protocol' => ['type' => 'entity:protocol'],
+          'protocol_revision' => ['type' => 'entity_revision:protocol'],
+        ]);
 
       return $route;
     }
