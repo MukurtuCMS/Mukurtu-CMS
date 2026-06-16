@@ -933,6 +933,7 @@ function mukurtu_core_token_fields(): array {
     'field_coverage_description'   => t('Coverage Description'),
     'field_transcription'          => t('Transcription'),
     // Dictionary Word fields.
+    'field_dictionary_word_language' => t('Dictionary Language'),
     'field_translation'            => t('Translation'),
     'field_definition'             => t('Definition'),
     'field_word_type'              => t('Word Type'),
