@@ -273,6 +273,26 @@ counterpart, if one exists. */
     flex-shrink: 0;
 }
 
+/* Fix Layout Builder settings menu blocking block contextual/edit links (#1385).
+   gin_lb removes core's layout-builder.css and replaces it with its own, which
+   positions section configure/remove links and region labels absolutely at
+   z-index: 1-11. The layout-builder__region must allow overflow so absolutely-
+   positioned contextual triggers are not clipped. */
+.layout-builder .layout-builder__region {
+    overflow: visible;
+}
+
+.layout-builder .contextual {
+    z-index: 600;
+    right: auto;
+    left: 0;
+}
+
+[dir="rtl"] .layout-builder .contextual {
+    left: auto;
+    right: 0;
+}
+
 /* Media library modal: compact upload form, sticky type sidebar. */
 .media-library-add-form__input-wrapper {
     padding: var(--space-xs) var(--space-m) !important;
@@ -411,4 +431,17 @@ counterpart, if one exists. */
 .block-system > .views-form .views-bulk-actions[data-drupal-sticky-vbo=true],
 .view-content .views-form .views-bulk-actions[data-drupal-sticky-vbo=true] {
   z-index: 3;
+}
+
+/* Fix #1734: on the dashboard layout builder page the toolbar anti-flicker
+   IIFE restores is-active on secondary toolbar trays (Shortcuts, admin, etc.)
+   from sessionStorage before behaviors run, leaving them visually open and
+   overlapping the layout builder canvas.
+   mukurtu-dashboard-layout is added to <body> via hook_preprocess_html() for
+   layout_builder.dashboards.view and layout_builder.dashboards_override.view.
+   Trays remain accessible via hover and focus — gin's own :hover CSS rule still
+   fires because our :not(:hover):not(:focus-within) guard stops applying the
+   moment the user moves the cursor over the tab. */
+.mukurtu-dashboard-layout .gin-secondary-toolbar .toolbar-secondary .toolbar-bar .toolbar-tab:not(:hover):not(:focus-within) .toolbar-tray {
+  display: none !important;
 }
