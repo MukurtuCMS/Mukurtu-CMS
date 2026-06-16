@@ -268,7 +268,8 @@ entity_fields_export_list:
     name: Name
     description: Description
     default_langcode: 'Default translation'
-    field_thumbnail_image: Thumbnail
+    'field_thumbnail_image/target_id': 'Thumbnail Image > File ID'
+    'field_thumbnail_image/alt': 'Thumbnail Image > Alternative text'
     parent: Parent
   taxonomy_term__community_type:
     tid: 'Term ID'

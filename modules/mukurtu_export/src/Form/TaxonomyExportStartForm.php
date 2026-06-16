@@ -43,8 +43,8 @@ class TaxonomyExportStartForm extends FormBase {
 
     $form['vocabularies'] = [
       '#type' => 'checkboxes',
-      '#title' => $this->t('Vocabularies'),
-      '#description' => $this->t('Select one or more vocabularies to export. All terms in the selected vocabularies will be included.'),
+      '#title' => $this->t('Taxonomies'),
+      '#description' => $this->t('Select one or more taxonomies to export. All terms in the selected taxonomies will be included.'),
       '#options' => $options,
       '#required' => TRUE,
     ];
@@ -70,7 +70,7 @@ class TaxonomyExportStartForm extends FormBase {
       ->execute();
 
     if (empty($ids)) {
-      $this->messenger()->addWarning($this->t('No terms found in the selected vocabularies.'));
+      $this->messenger()->addWarning($this->t('No terms found in the selected taxonomies.'));
       return;
     }
 
