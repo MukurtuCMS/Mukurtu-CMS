@@ -1374,3 +1374,15 @@ function mukurtu_core_update_40044(): void {
     ->set('favicon.mimetype', 'image/x-icon')
     ->save();
 }
+
+/**
+ * Remove the draft boolean base field; draft state is now managed via
+ * content_moderation workflow states (#255).
+ */
+function mukurtu_core_update_40045(): void {
+  $update_manager = \Drupal::entityDefinitionUpdateManager();
+  $field = $update_manager->getFieldStorageDefinition('draft', 'node');
+  if ($field) {
+    $update_manager->uninstallFieldStorageDefinition($field);
+  }
+}

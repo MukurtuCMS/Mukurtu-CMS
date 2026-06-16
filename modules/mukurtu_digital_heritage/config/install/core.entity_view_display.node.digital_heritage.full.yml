@@ -519,7 +519,6 @@ content:
     weight: 20
     region: content
 hidden:
-  draft: true
   field_communities: true
   field_content_type: true
   field_cultural_protocols: true

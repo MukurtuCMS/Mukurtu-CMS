@@ -18,7 +18,7 @@ type: content_moderation
 type_settings:
   states:
     draft:
-      label: 'Under Review'
+      label: Draft
       weight: 0
       published: false
       default_revision: false
@@ -29,7 +29,7 @@ type_settings:
       default_revision: true
   transitions:
     create_new_draft:
-      label: 'Under Review'
+      label: 'Save as Draft'
       from:
         - draft
         - published

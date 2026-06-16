@@ -3,7 +3,6 @@
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Access\AccessResult;
-use Drupal\mukurtu_drafts\Entity\MukurtuDraftInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 
 /**
@@ -11,54 +10,31 @@ use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
  */
 function mukurtu_drafts_entity_access(EntityInterface $entity, $operation, AccountInterface $account)
 {
-  if ($entity instanceof MukurtuDraftInterface) {
-    // Check if the entity is a draft.
-    if ($entity->isDraft()) {
-      if ($account->id() == $entity->getOwnerId()) {
-        // Only grant draft access to the entity's authored by uid.
-        return AccessResult::allowed();
-      }
-      return AccessResult::forbidden();
-    }
+  if (!$entity->hasField('moderation_state')) {
+    return AccessResult::neutral();
   }
-  // If entity does not implement MukurtuDraftInterface, let others determine
-  // access.
-  return AccessResult::neutral();
-}
 
-/**
- * Implements hook_entity_views_data().
- */
-function mukurtu_drafts_views_data()
-{
-  $data = [];
-  $data['node_field_data']['draft'] = [
-    'title' => t('Draft'),
-    'help' => t('Draft status'),
-    'field' => [
-      'id' => 'boolean',
-    ],
-    'sort' => [
-      'id' => 'standard',
-    ],
-    'filter' => [
-      'id' => 'boolean',
-      'label' => t('Is a Draft?'),
-      'type' => 'yes-no',
-      'use_equal' => TRUE,
-    ],
-  ];
-  return $data;
+  $state = $entity->get('moderation_state')->value;
+  if ($state !== 'draft') {
+    return AccessResult::neutral();
+  }
+
+  if (method_exists($entity, 'getOwnerId') && $account->id() == $entity->getOwnerId()) {
+    return AccessResult::allowed()->addCacheContexts(['user']);
+  }
+
+  return AccessResult::forbidden()->addCacheContexts(['user']);
 }
 
 /**
  * Implements hook_entity_view().
  */
 function mukurtu_drafts_entity_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
-
-  if (!$entity instanceof MukurtuDraftInterface || !$entity->isDraft()) {
+  if (!$entity->hasField('moderation_state')) {
     return;
   }
-
+  if ($entity->get('moderation_state')->value !== 'draft') {
+    return;
+  }
   $build['#attributes']['class'][] = 'node--unpublished';
 }
