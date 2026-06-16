@@ -97,14 +97,22 @@ class ExportListAddItemsForm extends FormBase {
 
     // For aggregative types in the selection, offer to include child items.
     $child_count = 0;
+    $recursive_additional = 0;
     foreach ($form_data['list'] as $item) {
       if ($item[2] !== 'node') {
         continue;
       }
       $node = $this->entityTypeManager->getStorage('node')->load($item[3]);
-      if ($node && in_array($node->bundle(), ['collection', 'word_list'])) {
-        $children = $this->childResolver->getChildEntities($node);
-        $child_count += array_sum(array_map('count', $children));
+      if (!$node) {
+        continue;
+      }
+      if (in_array($node->bundle(), ['collection', 'word_list'])) {
+        $direct = array_sum(array_map('count', $this->childResolver->getChildEntities($node)));
+        $child_count += $direct;
+        if ($node->bundle() === 'collection') {
+          $recursive = array_sum(array_map('count', $this->childResolver->getChildEntitiesRecursive($node)));
+          $recursive_additional += ($recursive - $direct);
+        }
       }
     }
     if ($child_count > 0) {
@@ -117,6 +125,21 @@ class ExportListAddItemsForm extends FormBase {
         ),
         '#default_value' => FALSE,
       ];
+
+      if ($recursive_additional > 0) {
+        $form['include_children_recursive'] = [
+          '#type' => 'checkbox',
+          '#title' => $this->formatPlural(
+            $recursive_additional,
+            'Also include all items nested within child collections in this selection (1 additional item)',
+            'Also include all items nested within child collections in this selection (@count additional items)',
+          ),
+          '#default_value' => FALSE,
+          '#states' => [
+            'visible' => [':input[name="include_children"]' => ['checked' => TRUE]],
+          ],
+        ];
+      }
     }
 
     $form['actions'] = ['#type' => 'actions'];
@@ -185,7 +208,18 @@ class ExportListAddItemsForm extends FormBase {
     }
 
     // Optionally include child items from collections and word lists.
-    if ($form_state->getValue('include_children')) {
+    if ($form_state->getValue('include_children_recursive')) {
+      foreach ($by_type['node'] ?? [] as $node_id) {
+        $node = $this->entityTypeManager->getStorage('node')->load($node_id);
+        if (!$node) {
+          continue;
+        }
+        foreach ($this->childResolver->getChildEntitiesRecursive($node) as $child_type => $child_ids) {
+          $items[$child_type] = ($items[$child_type] ?? []) + $child_ids;
+        }
+      }
+    }
+    elseif ($form_state->getValue('include_children')) {
       foreach ($by_type['node'] ?? [] as $node_id) {
         $node = $this->entityTypeManager->getStorage('node')->load($node_id);
         if (!$node) {
