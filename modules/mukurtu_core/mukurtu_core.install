@@ -1347,3 +1347,19 @@ function mukurtu_core_update_40042(): void {
     }
   }
 }
+
+/**
+ * Reset genpass_display to admin-only if currently set to a visitor-facing value.
+ *
+ * Options 2 (user-facing) and 3 (both) have been removed from the admin UI
+ * because Mukurtu never shows generated passwords to self-registering visitors.
+ */
+function mukurtu_core_update_40043(): void {
+  $config = \Drupal::configFactory()->getEditable('genpass.settings');
+  $display = (int) $config->get('genpass_display');
+  // 2 = PASSWORD_DISPLAY_USER, 3 = PASSWORD_DISPLAY_BOTH.
+  if ($display === 2 || $display === 3) {
+    // 1 = PASSWORD_DISPLAY_ADMIN: only show when a site admin creates an account.
+    $config->set('genpass_display', 1)->save();
+  }
+}
