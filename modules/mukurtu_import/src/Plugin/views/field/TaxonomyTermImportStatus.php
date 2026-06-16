@@ -51,7 +51,7 @@ class TaxonomyTermImportStatus extends FieldPluginBase implements ContainerFacto
   /**
    * {@inheritdoc}
    */
-  public function preRender(array $values): void {
+  public function preRender(&$values): void {
     $tids = [];
     foreach ($values as $row) {
       $tid = (int) $this->getValue($row);
