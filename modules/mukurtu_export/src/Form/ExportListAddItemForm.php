@@ -109,6 +109,27 @@ class ExportListAddItemForm extends FormBase {
           ),
           '#default_value' => FALSE,
         ];
+
+        // For collections with nested sub-collections, offer a recursive option.
+        if ($entity->bundle() === 'collection') {
+          $recursive_children = $this->childResolver->getChildEntitiesRecursive($entity);
+          $recursive_count = array_sum(array_map('count', $recursive_children));
+          $additional_count = $recursive_count - $child_count;
+          if ($additional_count > 0) {
+            $form['include_children_recursive'] = [
+              '#type' => 'checkbox',
+              '#title' => $this->formatPlural(
+                $additional_count,
+                'Also include all items nested within child collections (1 additional item)',
+                'Also include all items nested within child collections (@count additional items)',
+              ),
+              '#default_value' => FALSE,
+              '#states' => [
+                'visible' => [':input[name="include_children"]' => ['checked' => TRUE]],
+              ],
+            ];
+          }
+        }
       }
     }
 
@@ -175,9 +196,14 @@ class ExportListAddItemForm extends FormBase {
     $items[$entity_type][$entity_id] = $entity_id;
 
     // Optionally include child items (collections, word lists).
-    if ($form_state->getValue('include_children')) {
-      $entity = $this->entityTypeManager->getStorage($entity_type)->load($entity_id);
-      if ($entity) {
+    $entity = $this->entityTypeManager->getStorage($entity_type)->load($entity_id);
+    if ($entity) {
+      if ($form_state->getValue('include_children_recursive')) {
+        foreach ($this->childResolver->getChildEntitiesRecursive($entity) as $child_type => $child_ids) {
+          $items[$child_type] = ($items[$child_type] ?? []) + $child_ids;
+        }
+      }
+      elseif ($form_state->getValue('include_children')) {
         foreach ($this->childResolver->getChildEntities($entity) as $child_type => $child_ids) {
           $items[$child_type] = ($items[$child_type] ?? []) + $child_ids;
         }

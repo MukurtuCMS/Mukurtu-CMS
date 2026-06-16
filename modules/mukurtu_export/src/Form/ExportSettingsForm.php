@@ -86,11 +86,19 @@ class ExportSettingsForm extends ExportBaseForm {
       // Show "Include child items" checkbox when the selection contains
       // collections or word lists with resolvable children.
       $child_count = 0;
+      $recursive_additional = 0;
       foreach ($adHocItems['node'] ?? [] as $node_id) {
         $node = $this->entityTypeManager->getStorage('node')->load($node_id);
-        if ($node && in_array($node->bundle(), ['collection', 'word_list'])) {
-          $children = $this->childResolver->getChildEntities($node);
-          $child_count += array_sum(array_map('count', $children));
+        if (!$node) {
+          continue;
+        }
+        if (in_array($node->bundle(), ['collection', 'word_list'])) {
+          $direct = array_sum(array_map('count', $this->childResolver->getChildEntities($node)));
+          $child_count += $direct;
+          if ($node->bundle() === 'collection') {
+            $recursive = array_sum(array_map('count', $this->childResolver->getChildEntitiesRecursive($node)));
+            $recursive_additional += ($recursive - $direct);
+          }
         }
       }
       if ($child_count > 0) {
@@ -104,6 +112,22 @@ class ExportSettingsForm extends ExportBaseForm {
           '#default_value' => FALSE,
           '#weight' => -5,
         ];
+
+        if ($recursive_additional > 0) {
+          $form['include_children_recursive'] = [
+            '#type' => 'checkbox',
+            '#title' => $this->formatPlural(
+              $recursive_additional,
+              'Also include all items nested within child collections in this selection (1 additional item)',
+              'Also include all items nested within child collections in this selection (@count additional items)',
+            ),
+            '#default_value' => FALSE,
+            '#weight' => -4,
+            '#states' => [
+              'visible' => [':input[name="include_children"]' => ['checked' => TRUE]],
+            ],
+          ];
+        }
       }
     }
     else {
@@ -186,7 +210,21 @@ class ExportSettingsForm extends ExportBaseForm {
     $this->setExporterConfig($this->exporter->getConfiguration());
 
     // Expand the selection to include children of collections/word lists.
-    if ($form_state->getValue('include_children')) {
+    if ($form_state->getValue('include_children_recursive')) {
+      $ad_hoc_items = $this->store->get('ad_hoc_items') ?? [];
+      foreach ($ad_hoc_items['node'] ?? [] as $node_id) {
+        $node = $this->entityTypeManager->getStorage('node')->load($node_id);
+        if (!$node) {
+          continue;
+        }
+        foreach ($this->childResolver->getChildEntitiesRecursive($node) as $child_type => $child_ids) {
+          $ad_hoc_items[$child_type] = ($ad_hoc_items[$child_type] ?? []) + $child_ids;
+        }
+      }
+      $this->source = new AdHocExporterSource($ad_hoc_items);
+      $this->executable = new BatchExportExecutable($this->source, $this->exporter);
+    }
+    elseif ($form_state->getValue('include_children')) {
       $ad_hoc_items = $this->store->get('ad_hoc_items') ?? [];
       foreach ($ad_hoc_items['node'] ?? [] as $node_id) {
         $node = $this->entityTypeManager->getStorage('node')->load($node_id);
