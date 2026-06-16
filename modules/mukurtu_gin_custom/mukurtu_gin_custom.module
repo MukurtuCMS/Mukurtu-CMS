@@ -77,6 +77,23 @@ function mukurtu_gin_custom_page_attachments(array &$attachments) {
 }
 
 /**
+ * Implements hook_preprocess_html().
+ */
+function mukurtu_gin_custom_preprocess_html(array &$variables): void {
+  $route_name = \Drupal::routeMatch()->getRouteName();
+  // The Dashboards layout builder uses _admin_route => FALSE so gin_lb's
+  // route check may not add glb-body. Add it explicitly so gin_lb CSS and
+  // the toolbar-tray suppression behavior both apply.
+  if (in_array($route_name, [
+    'layout_builder.dashboards.view',
+    'layout_builder.dashboards_override.view',
+  ])) {
+    $variables['attributes']['class'][] = 'glb-body';
+    $variables['attributes']['class'][] = 'mukurtu-dashboard-layout';
+  }
+}
+
+/**
  * Implements hook_preprocess_media().
  *
  * Provides the mukurtu_v4 theme path so module-owned media library templates
