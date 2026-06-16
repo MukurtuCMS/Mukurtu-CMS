@@ -730,7 +730,7 @@ display:
           exposed: true
           expose:
             operator_id: ''
-            label: 'True'
+            label: 'Published status'
             description: null
             use_operator: false
             operator: status_op
@@ -1060,7 +1060,7 @@ display:
           sticky: false
           summary: ''
           empty_table: true
-          caption: ''
+          caption: Media
           description: ''
           class: ''
       row:

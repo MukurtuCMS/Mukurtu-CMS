@@ -131,7 +131,8 @@ function mukurtu_export_update_40006() {
       'field_media_external_embed' => 'Embed Code',
       'field_keywords' => 'Keywords',
       'field_people' => 'People',
-      'field_thumbnail' => 'Thumbnail',
+      'field_thumbnail/target_id' => 'Thumbnail > File ID',
+      'field_thumbnail/alt' => 'Thumbnail > Alternative text',
       'field_identifier' => 'Identifier',
       'field_found_in' => 'Found In',
     ];
@@ -150,7 +151,8 @@ function mukurtu_export_update_40006() {
       'field_contributor' => 'Contributor',
       'field_keywords' => 'Keywords',
       'field_people' => 'People',
-      'field_thumbnail' => 'Thumbnail',
+      'field_thumbnail/target_id' => 'Thumbnail > File ID',
+      'field_thumbnail/alt' => 'Thumbnail > Alternative text',
       'field_identifier' => 'Identifier',
       'field_found_in' => 'Found In',
     ];

@@ -527,14 +527,22 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
     $nids = $this->entityTypeManager->getStorage('node')
       ->getQuery()
       ->condition('field_media_assets', $entity->id())
-      ->accessCheck(FALSE)
+      ->accessCheck(TRUE)
       ->execute();
 
     $export = [];
     $id_format = $config->getIdFieldSetting();
-    foreach ($nids as $nid) {
-      $export[] = $id_format === 'uuid' ? $this->getUUID('node', $nid) : $nid;
+
+    if ($id_format === 'uuid') {
+      $nodes = $this->entityTypeManager->getStorage('node')->loadMultiple($nids);
+      foreach ($nodes as $node) {
+        $export[] = $node->uuid();
+      }
     }
+    else {
+      $export = array_values($nids);
+    }
+
     $event->setValue($export);
   }
 
