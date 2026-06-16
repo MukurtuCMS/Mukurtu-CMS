@@ -851,7 +851,7 @@ function mukurtu_install() {
 /**
  * Fix Gin admin theme favicon path and mimetype (#1097).
  */
-function mukurtu_update_40002() {
+function mukurtu_update_40001() {
   \Drupal::configFactory()
     ->getEditable('gin.settings')
     ->set('favicon.path', 'profiles/mukurtu/themes/mukurtu_v4/favicon.ico')

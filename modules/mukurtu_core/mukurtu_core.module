@@ -1044,13 +1044,9 @@ function mukurtu_core_token_field_value(FieldItemListInterface $field): string {
       $target_type = $field->getFieldDefinition()->getSetting('target_type');
       if ($target_type) {
         $storage = \Drupal::entityTypeManager()->getStorage($target_type);
-        foreach ($field->getValue() as $value) {
-          if (!empty($value['target_id'])) {
-            $entity = $storage->load($value['target_id']);
-            if ($entity) {
-              $entities[] = $entity;
-            }
-          }
+        $ids = array_filter(array_column($field->getValue(), 'target_id'));
+        if ($ids) {
+          $entities = array_values($storage->loadMultiple($ids));
         }
       }
     }

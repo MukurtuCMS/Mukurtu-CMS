@@ -5,6 +5,7 @@ namespace Drupal\mukurtu_protocol\Form;
 use Drupal\Core\Form\ConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
+use Drupal\mukurtu_protocol\Entity\ProtocolInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -78,8 +79,8 @@ class ProtocolRevisionDeleteForm extends ConfirmFormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, $protocol_revision = NULL) {
-    $this->revision = $this->protocolStorage->loadRevision($protocol_revision);
+  public function buildForm(array $form, FormStateInterface $form_state, ProtocolInterface $protocol_revision = NULL) {
+    $this->revision = $protocol_revision;
     $form = parent::buildForm($form, $form_state);
 
     return $form;

@@ -5,6 +5,7 @@ namespace Drupal\mukurtu_protocol\Form;
 use Drupal\Core\Form\ConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
+use Drupal\mukurtu_protocol\Entity\CommunityInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -78,8 +79,8 @@ class CommunityRevisionDeleteForm extends ConfirmFormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, $community_revision = NULL) {
-    $this->revision = $this->communityStorage->loadRevision($community_revision);
+  public function buildForm(array $form, FormStateInterface $form_state, CommunityInterface $community_revision = NULL) {
+    $this->revision = $community_revision;
     $form = parent::buildForm($form, $form_state);
 
     return $form;
