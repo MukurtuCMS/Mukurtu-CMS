@@ -67,7 +67,10 @@ class CommunityHtmlRouteProvider extends AdminHtmlRouteProvider {
           '_controller' => '\Drupal\mukurtu_protocol\Controller\CommunityController::revisionOverview',
         ])
         ->setRequirement('_permission', 'view all community revisions')
-        ->setOption('_admin_route', TRUE);
+        ->setOption('_admin_route', TRUE)
+        ->setOption('parameters', [
+          'community' => ['type' => 'entity:community'],
+        ]);
 
       return $route;
     }
@@ -91,7 +94,11 @@ class CommunityHtmlRouteProvider extends AdminHtmlRouteProvider {
           '_title_callback' => '\Drupal\mukurtu_protocol\Controller\CommunityController::revisionPageTitle',
         ])
         ->setRequirement('_permission', 'view all community revisions')
-        ->setOption('_admin_route', TRUE);
+        ->setOption('_admin_route', TRUE)
+        ->setOption('parameters', [
+          'community' => ['type' => 'entity:community'],
+          'community_revision' => ['type' => 'entity_revision:community'],
+        ]);
 
       return $route;
     }
@@ -115,7 +122,11 @@ class CommunityHtmlRouteProvider extends AdminHtmlRouteProvider {
           '_title' => 'Revert to earlier revision',
         ])
         ->setRequirement('_permission', 'revert all community revisions')
-        ->setOption('_admin_route', TRUE);
+        ->setOption('_admin_route', TRUE)
+        ->setOption('parameters', [
+          'community' => ['type' => 'entity:community'],
+          'community_revision' => ['type' => 'entity_revision:community'],
+        ]);
 
       return $route;
     }
@@ -139,7 +150,11 @@ class CommunityHtmlRouteProvider extends AdminHtmlRouteProvider {
           '_title' => 'Delete earlier revision',
         ])
         ->setRequirement('_permission', 'delete all community revisions')
-        ->setOption('_admin_route', TRUE);
+        ->setOption('_admin_route', TRUE)
+        ->setOption('parameters', [
+          'community' => ['type' => 'entity:community'],
+          'community_revision' => ['type' => 'entity_revision:community'],
+        ]);
 
       return $route;
     }
@@ -163,7 +178,11 @@ class CommunityHtmlRouteProvider extends AdminHtmlRouteProvider {
           '_title' => 'Revert to earlier revision of a translation',
         ])
         ->setRequirement('_permission', 'revert all community revisions')
-        ->setOption('_admin_route', TRUE);
+        ->setOption('_admin_route', TRUE)
+        ->setOption('parameters', [
+          'community' => ['type' => 'entity:community'],
+          'community_revision' => ['type' => 'entity_revision:community'],
+        ]);
 
       return $route;
     }
