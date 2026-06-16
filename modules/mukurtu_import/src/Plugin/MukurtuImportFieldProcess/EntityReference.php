@@ -57,7 +57,38 @@ class EntityReference extends MukurtuImportFieldProcessPluginBase implements Con
   /**
    * {@inheritdoc}
    */
+  public function getSupportedProperties(FieldDefinitionInterface $field_definition): array {
+    $is_single_media_ref = $field_definition->getType() === 'entity_reference'
+      && $field_definition->getSetting('target_type') === 'media'
+      && $field_definition->getFieldStorageDefinition()->getCardinality() === 1;
+
+    if ($is_single_media_ref) {
+      return [
+        'target_id' => [
+          'label' => sprintf('%s > %s', $field_definition->getLabel(), $this->t('File ID')),
+          'description' => $this->getFormatDescription($field_definition, 'target_id'),
+        ],
+        'alt' => [
+          'label' => sprintf('%s > %s', $field_definition->getLabel(), $this->t('Alternative text')),
+          'description' => $this->getFormatDescription($field_definition, 'alt'),
+        ],
+      ];
+    }
+
+    return parent::getSupportedProperties($field_definition);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getProcess(FieldDefinitionInterface $field_config, $source, $context = []): array {
+    // Alt text for single-value media entity_reference is applied post-save
+    // to the referenced media entity by ProtocolAwareEntityContent.
+    if (($context['subfield'] ?? NULL) === 'alt'
+      && $field_config->getSetting('target_type') === 'media') {
+      return [['plugin' => 'get', 'source' => $source]];
+    }
+
     $cardinality = $field_config->getFieldStorageDefinition()->getCardinality();
     $multivalue_delimiter = $context['multivalue_delimiter'] ?? self::MULTIVALUE_DELIMITER;
     $ref_type = $field_config->getSetting('target_type');
@@ -166,6 +197,13 @@ class EntityReference extends MukurtuImportFieldProcessPluginBase implements Con
   public function getFormatDescription(FieldDefinitionInterface $field_config, $field_property = NULL): TranslatableMarkup {
     $multiple = $this->isMultiple($field_config);
     $ref_type = $field_config->getSetting('target_type');
+
+    if ($ref_type === 'media') {
+      if ($field_property === 'alt') {
+        return $this->t('The alt text for the image.');
+      }
+      return $this->t('The file ID or filename of the uploaded image.');
+    }
 
     if ($ref_type == 'user') {
       return $this->formatPlural($multiple, 'The username or user ID.', 'Usernames or User IDs, separated by your selected multi-value delimiter.');

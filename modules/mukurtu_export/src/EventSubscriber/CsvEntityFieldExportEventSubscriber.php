@@ -151,6 +151,29 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
   protected function exportEntityReference(EntityFieldExportEvent $event, $field, CsvExporter $config) {
     $export = [];
     $target_type = $field->getFieldDefinition()->getSettings()['target_type'] ?? NULL;
+
+    // Export alt text from the image field of the referenced media entity.
+    if ($event->sub_field_name === 'alt' && $target_type === 'media') {
+      foreach ($field->getValue() as $value) {
+        if ($mid = ($value['target_id'] ?? NULL)) {
+          $media = $this->entityTypeManager->getStorage('media')->load($mid);
+          $alt = '';
+          if ($media) {
+            foreach ($media->getFields() as $media_field) {
+              if ($media_field->getFieldDefinition()->getType() === 'image') {
+                $image_values = $media_field->getValue();
+                $alt = $image_values[0]['alt'] ?? '';
+                break;
+              }
+            }
+          }
+          $export[] = $alt;
+        }
+      }
+      $event->setValue($export);
+      return;
+    }
+
     $option = $config->getEntityReferenceSetting($target_type);
     $id_format = $config->getIdFieldSetting();
 
