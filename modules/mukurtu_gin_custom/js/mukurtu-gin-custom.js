@@ -28,13 +28,20 @@
         // at the end of its attach(), so a zero-delay timeout reliably runs
         // after it without depending on a specific execution time.
         setTimeout(() => {
-          if (
-            Drupal.toolbar &&
-            Drupal.toolbar.models &&
-            Drupal.toolbar.models.toolbarModel
-          ) {
+          // Close via Backbone model — this also writes the cleared state
+          // back to sessionStorage so the anti-flicker IIFE won't re-open
+          // the tray on the next page load.
+          if (Drupal.toolbar?.models?.toolbarModel) {
             Drupal.toolbar.models.toolbarModel.set('activeTab', null);
           }
+          // The toolbar anti-flicker IIFE (toolbar.js lines 7-38) reads
+          // sessionStorage and directly adds is-active to a tray *before*
+          // Drupal behaviors run, independently of the Backbone model.
+          // That tray is not tracked by the model, so set('activeTab', null)
+          // above doesn't remove it. Strip is-active from all remaining trays.
+          document.querySelectorAll('.toolbar-tray.is-active').forEach(el => {
+            el.classList.remove('is-active');
+          });
         }, 0);
       });
     },
