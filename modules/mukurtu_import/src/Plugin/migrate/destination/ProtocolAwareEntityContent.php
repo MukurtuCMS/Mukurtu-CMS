@@ -172,7 +172,7 @@ class ProtocolAwareEntityContent extends EntityContentBase {
   }
 
   /**
-   * Extracts and clears */alt destination properties for entity_reference-to-media
+   * Extracts and clears /alt destination properties for entity_reference-to-media
    * fields, returning the field-name => alt-text map for post-save processing.
    */
   protected function extractAndClearMediaAltUpdates(Row $row): array {
