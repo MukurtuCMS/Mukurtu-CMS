@@ -1,6 +1,7 @@
 <?php
 
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
@@ -10,7 +11,7 @@ use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
  */
 function mukurtu_drafts_entity_access(EntityInterface $entity, $operation, AccountInterface $account)
 {
-  if (!$entity->hasField('moderation_state')) {
+  if (!$entity instanceof FieldableEntityInterface || !$entity->hasField('moderation_state')) {
     return AccessResult::neutral();
   }
 
@@ -30,7 +31,7 @@ function mukurtu_drafts_entity_access(EntityInterface $entity, $operation, Accou
  * Implements hook_entity_view().
  */
 function mukurtu_drafts_entity_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
-  if (!$entity->hasField('moderation_state')) {
+  if (!$entity instanceof FieldableEntityInterface || !$entity->hasField('moderation_state')) {
     return;
   }
   if ($entity->get('moderation_state')->value !== 'draft') {
