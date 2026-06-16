@@ -79,7 +79,7 @@ class CommunityRevisionDeleteForm extends ConfirmFormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, CommunityInterface $community_revision = NULL) {
+  public function buildForm(array $form, FormStateInterface $form_state, ?CommunityInterface $community_revision = NULL) {
     $this->revision = $community_revision;
     $form = parent::buildForm($form, $form_state);
 

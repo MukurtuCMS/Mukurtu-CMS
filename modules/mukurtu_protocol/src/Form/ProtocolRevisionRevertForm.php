@@ -86,7 +86,7 @@ class ProtocolRevisionRevertForm extends ConfirmFormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, ProtocolInterface $protocol_revision = NULL) {
+  public function buildForm(array $form, FormStateInterface $form_state, ?ProtocolInterface $protocol_revision = NULL) {
     $this->revision = $protocol_revision;
     $form = parent::buildForm($form, $form_state);
 
