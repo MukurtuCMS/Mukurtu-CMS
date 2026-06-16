@@ -8,7 +8,6 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\media\MediaInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * List picker form for removing a single media item from an export list.
@@ -17,13 +16,11 @@ class ExportListRemoveMediaForm extends FormBase {
 
   public function __construct(
     protected readonly EntityTypeManagerInterface $entityTypeManager,
-    protected readonly RequestStack $requestStack,
   ) {}
 
   public static function create(ContainerInterface $container): static {
     return new static(
       $container->get('entity_type.manager'),
-      $container->get('request_stack'),
     );
   }
 
@@ -120,7 +117,7 @@ class ExportListRemoveMediaForm extends FormBase {
   }
 
   protected function getReturnUrl(): Url {
-    $destination = $this->requestStack->getCurrentRequest()->query->get('destination');
+    $destination = $this->requestStack()->getCurrentRequest()->query->get('destination');
     if ($destination && !str_starts_with($destination, 'http')) {
       return Url::fromUserInput($destination);
     }
