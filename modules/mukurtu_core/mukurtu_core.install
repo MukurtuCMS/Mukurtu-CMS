@@ -1363,3 +1363,14 @@ function mukurtu_core_update_40043(): void {
     $config->set('genpass_display', 1)->save();
   }
 }
+
+/**
+ * Fix Gin admin theme favicon path and mimetype (#1097).
+ */
+function mukurtu_core_update_40044(): void {
+  \Drupal::configFactory()
+    ->getEditable('gin.settings')
+    ->set('favicon.path', 'profiles/mukurtu/themes/mukurtu_v4/favicon.ico')
+    ->set('favicon.mimetype', 'image/x-icon')
+    ->save();
+}

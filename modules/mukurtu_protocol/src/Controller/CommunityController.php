@@ -43,35 +43,30 @@ class CommunityController extends ControllerBase implements ContainerInjectionIn
   /**
    * Displays a Community revision.
    *
-   * @param int $community_revision
-   *   The Community revision ID.
+   * @param \Drupal\mukurtu_protocol\Entity\CommunityInterface $community_revision
+   *   The Community revision.
    *
    * @return array
    *   An array suitable for drupal_render().
    */
-  public function revisionShow($community_revision) {
-    $community = $this->entityTypeManager()->getStorage('community')
-      ->loadRevision($community_revision);
+  public function revisionShow(CommunityInterface $community_revision) {
     $view_builder = $this->entityTypeManager()->getViewBuilder('community');
-
-    return $view_builder->view($community);
+    return $view_builder->view($community_revision);
   }
 
   /**
    * Page title callback for a Community revision.
    *
-   * @param int $community_revision
-   *   The Community revision ID.
+   * @param \Drupal\mukurtu_protocol\Entity\CommunityInterface $community_revision
+   *   The Community revision.
    *
    * @return string
    *   The page title.
    */
-  public function revisionPageTitle($community_revision) {
-    $community = $this->entityTypeManager()->getStorage('community')
-      ->loadRevision($community_revision);
+  public function revisionPageTitle(CommunityInterface $community_revision) {
     return $this->t('Revision of %title from %date', [
-      '%title' => $community->label(),
-      '%date' => $this->dateFormatter->format($community->getRevisionCreationTime()),
+      '%title' => $community_revision->label(),
+      '%date' => $this->dateFormatter->format($community_revision->getRevisionCreationTime()),
     ]);
   }
 
