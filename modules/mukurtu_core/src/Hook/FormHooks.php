@@ -7,6 +7,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\Core\Hook\Order\OrderAfter;
+use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Url;
 use Drupal\og\Og;
@@ -200,6 +201,13 @@ class FormHooks
 
         if (isset($form["account"]["notify"])) {
             unset($form["account"]["notify"]["#description"]);
+            // Hide the notify checkbox when no email address is provided —
+            // notification is impossible without one.
+            $form["account"]["notify"]["#states"] = [
+                "visible" => [
+                    ':input[name="mail"]' => ["filled" => TRUE],
+                ],
+            ];
         }
         if (isset($form["account"]["mail"])) {
             $form["account"]["mail"]["#description"] = t(
@@ -727,9 +735,13 @@ class FormHooks
                 0 => t("Blocked"),
             ];
             // Pre-select "Pending" when editing a currently-pending user.
+            // Skip for new entities: field_pending defaults to 1, which would
+            // incorrectly trigger this condition for every new account, setting
+            // #default_value to "pending" even for open-registration signups.
             $entity = $form_state->getFormObject()->getEntity();
             if (
-                !$entity->get("status")->value
+                !$entity->isNew()
+                && !$entity->get("status")->value
                 && $entity->hasField("field_pending")
                 && $entity->get("field_pending")->value
             ) {
@@ -756,13 +768,29 @@ class FormHooks
         array $form,
         FormStateInterface &$form_state,
     ): void {
-        $val = $form_state->getValue(["account", "status"]);
+        // Both formUserRegisterFormAlter and formUserFormAlter (base form ID)
+        // attach this handler to user_register_form, so it runs twice. Guard
+        // against the second invocation overwriting the first.
+        if ($form_state->get("mukurtu_status_presave_ran")) {
+            return;
+        }
+        $form_state->set("mukurtu_status_presave_ran", TRUE);
+        // The account form container does not use #tree, so all values land at
+        // the top level of form_state — use getValue("status"), not
+        // getValue(["account", "status"]).
+        $val = $form_state->getValue("status");
         $form_state->set("mukurtu_status_selection", $val);
         if ($val === "pending") {
             // Map the virtual "pending" option to the underlying blocked status
-            // so the entity builder stores status=0. field_pending is set in
-            // the post-save handler below.
-            $form_state->setValue(["account", "status"], 0);
+            // so the entity builder stores status=0.
+            $form_state->setValue("status", 0);
+        }
+        // Explicitly set field_pending on the entity before buildEntity() clones
+        // it. Relying on the field's DB default (1) is unreliable for new users
+        // because non-explicitly-set fields may not be written on INSERT.
+        $entity = $form_state->getFormObject()->getEntity();
+        if ($entity && $entity->hasField("field_pending")) {
+            $entity->set("field_pending", $val === "pending" ? 1 : 0);
         }
     }
 
@@ -777,6 +805,11 @@ class FormHooks
         array $form,
         FormStateInterface $form_state,
     ): void {
+        // Guard against double-execution (same reason as userStatusPreSaveSubmit).
+        if ($form_state->get("mukurtu_status_postsave_ran")) {
+            return;
+        }
+        $form_state->set("mukurtu_status_postsave_ran", TRUE);
         $selection = $form_state->get("mukurtu_status_selection");
         $isPending = ($selection === "pending");
         $entity = $form_state->getFormObject()->getEntity();
@@ -786,6 +819,18 @@ class FormHooks
                 $entity->set("field_pending", $isPending ? 1 : 0);
                 $entity->save();
             }
+        }
+
+        // When an admin creates a non-active account with notify checked, our
+        // MailHooks suppresses the email. Core shows no message in that case,
+        // so add one explaining why.
+        if (
+            \Drupal::currentUser()->isAuthenticated()
+            && (bool) $form_state->getValue('notify')
+            && $entity
+            && !$entity->isActive()
+        ) {
+            \Drupal::messenger()->addStatus(t('No welcome email was sent because the account has not been activated.'));
         }
     }
 
@@ -801,6 +846,40 @@ class FormHooks
         if ($user && $user->hasField("field_pending") && $user->isBlocked()) {
             $user->set("field_pending", 1);
             $user->save();
+
+            // Clear all status messages (core's misleading pending-approval copy,
+            // genpass password notices) and replace with a single accurate message.
+            // The visitor can't log in yet, so password info and OTL references
+            // are premature here; they'll receive full details on approval.
+            $messenger = \Drupal::messenger();
+            $messenger->deleteByType(MessengerInterface::TYPE_STATUS);
+            $messenger->addStatus(t('Thank you for requesting an account. Your application for an account is currently pending approval. Once it has been approved, you will receive another email containing information about how to log in, set your password, and other details.'));
+        }
+        elseif ($user && $user->isActive()) {
+            $genpassMode = (int) \Drupal::config('genpass.settings')->get('genpass_mode');
+            $verifyMail  = (bool) \Drupal::config('user.settings')->get('verify_mail');
+
+            if ($genpassMode === 2 && !$verifyMail) {
+                // The visitor was registered with a system-generated password and
+                // no one-time-login email, so if they log out without setting a
+                // password they will need a password reset to get back in.
+                // Redirect to their account edit page and prompt them to set one now.
+                //
+                // AccountForm::buildForm() skips the "Current password" field when
+                // the session has 'pass_reset_{uid}' set to a value that matches
+                // the 'pass-reset-token' URL query parameter (hash_equals check).
+                // Mirror the same token in both places so the bypass activates.
+                $token = (string) \Drupal::time()->getRequestTime();
+                \Drupal::request()->getSession()->set('pass_reset_' . $user->id(), $token);
+                $messenger = \Drupal::messenger();
+                $messenger->deleteByType(MessengerInterface::TYPE_STATUS);
+                $messenger->addStatus(t('Your account has been created. Please set a password so you can sign in again later.'));
+                $form_state->setRedirectUrl(
+                    Url::fromRoute('entity.user.edit_form', ['user' => $user->id()], [
+                        'query' => ['pass-reset-token' => $token],
+                    ])
+                );
+            }
         }
     }
 
@@ -1224,21 +1303,19 @@ class FormHooks
         array &$form,
         FormStateInterface $form_state,
     ): void {
-        if (
-            isset(
-                $form["registration_cancellation"]["user_cancel_method"][
-                    "#title"
-                ],
-            )
-        ) {
-            $form["registration_cancellation"]["user_cancel_method"][
-                "#title"
-            ] = t("Default option when blocking or deleting a user account:");
-        }
-        if (isset($form["registration_cancellation"])) {
-            $this->relabelCancelMethods($form["registration_cancellation"]);
-        } else {
-            $this->relabelCancelMethods($form);
+        if (isset($form["registration_cancellation"]["user_cancel_method"])) {
+            $cancel_method = $form["registration_cancellation"]["user_cancel_method"];
+            $cancel_method["#title"] = t("Default option when blocking or deleting a user account:");
+            unset($form["registration_cancellation"]["user_cancel_method"]);
+
+            $form["blocking_deleting"] = [
+                "#type" => "details",
+                "#title" => t("Blocking and Deleting Accounts"),
+                "#open" => FALSE,
+                "#weight" => 3,
+                "user_cancel_method" => $cancel_method,
+            ];
+            $this->relabelCancelMethods($form["blocking_deleting"]);
         }
     }
 
@@ -1289,38 +1366,5 @@ class FormHooks
                 $operations["edit"]["weight"] = -10;
             }
         }
-    }
-
-    /**
-     * Implements hook_form_FORM_ID_alter() for 'comment_comment_form'.
-     *
-     * Hides the redundant "Comment" field label and the "About text formats"
-     * help link from the comment form.
-     */
-    #[Hook("form_comment_comment_form_alter")]
-    public function formCommentCommentFormAlter(
-        array &$form,
-        FormStateInterface $form_state,
-    ): void {
-        if (isset($form['comment_body']['widget'][0])) {
-            // The label lives on the text_format element at delta 0.
-            $form['comment_body']['widget'][0]['#title_display'] = 'invisible';
-            // filter_process_format() adds the help link during #process, which
-            // runs after form_alter. Use #after_build to hide it once it exists.
-            $form['comment_body']['widget'][0]['#after_build'][] = [static::class, 'hideCommentBodyFormatHelp'];
-        }
-    }
-
-    /**
-     * #after_build callback: hides the "About text formats" help link.
-     */
-    public static function hideCommentBodyFormatHelp(
-        array $element,
-        FormStateInterface $form_state,
-    ): array {
-        if (isset($element['format']['help'])) {
-            $element['format']['help']['#access'] = FALSE;
-        }
-        return $element;
     }
 }
