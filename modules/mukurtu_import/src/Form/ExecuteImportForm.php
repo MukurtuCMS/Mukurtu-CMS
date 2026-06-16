@@ -100,10 +100,10 @@ class ExecuteImportForm extends ImportBaseForm {
       '#type' => 'table',
       '#caption' => ['#markup' => '<strong>' . $this->t('Metadata Files') . '</strong>'],
       '#header' => [
-        $this->t('Filename'),
-        $this->t('Import Settings'),
-        $this->t('Destination Import Type'),
-        $this->t('Rows'),
+        ['data' => $this->t('Filename'), 'scope' => 'col'],
+        ['data' => $this->t('Import Settings'), 'scope' => 'col'],
+        ['data' => $this->t('Destination Import Type'), 'scope' => 'col'],
+        ['data' => $this->t('Rows'), 'scope' => 'col'],
       ],
       '#attributes' => [
         'id' => 'import-review',
@@ -140,21 +140,24 @@ class ExecuteImportForm extends ImportBaseForm {
       ];
 
       // Row count.
-      $row_count = $this->t('—');
+      // Default markup uses a visually-hidden text fallback so screen readers
+      // announce "Unknown" rather than reading the decorative dash character.
+      $row_count_markup = '<span aria-hidden="true">-</span><span class="visually-hidden">' . $this->t('Unknown') . '</span>';
       $file = $this->entityTypeManager->getStorage('file')->load($fid);
       if ($file) {
         try {
           $csv = Reader::from($file->getFileUri(), 'r');
           $csv->setHeaderOffset(0);
           $row_count = count($csv);
+          $row_count_markup = (string) $row_count;
         }
         catch (Exception $e) {
-          // Leave as em dash if the file can't be read.
+          // Leave as dash with screen-reader alternative if the file can't be read.
         }
       }
       $form['table'][$fid]['row_count'] = [
         '#type' => 'markup',
-        '#markup' => "<div>{$row_count}</div>",
+        '#markup' => "<div>{$row_count_markup}</div>",
       ];
 
     }
@@ -164,7 +167,7 @@ class ExecuteImportForm extends ImportBaseForm {
       '#type' => 'table',
       '#caption' => ['#markup' => '<strong>' . $this->t('Media/Binary Files') . '</strong>'],
       '#header' => [
-        $this->t('Filename'),
+        ['data' => $this->t('Filename'), 'scope' => 'col'],
       ],
       '#attributes' => [
         'id' => 'import-review-binary',

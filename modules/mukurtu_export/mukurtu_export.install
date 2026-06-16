@@ -97,7 +97,7 @@ function mukurtu_export_update_40005() {
 /**
  * Switch taxonomy_term__category thumbnail to two-field (target_id + alt) export format.
  */
-function mukurtu_export_update_40009(): void {
+function mukurtu_export_update_40006(): void {
   $config = \Drupal::configFactory()->getEditable('mukurtu_export.csv_exporter.recommended_settings_for_import');
   $entity_fields = $config->get('entity_fields_export_list') ?? [];
 

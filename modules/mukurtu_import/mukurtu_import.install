@@ -464,6 +464,9 @@ function mukurtu_import_update_40028(): void {
 
 /**
  * Add New/Updated status field to taxonomy terms import results view.
+ *
+ * Intentionally overwrites (no isNew guard) to add the new field to the view
+ * on sites where update_40028 already created an earlier version of it.
  */
 function mukurtu_import_update_40029(): void {
   $config_name = 'views.view.mukurtu_import_results_taxonomy_terms';

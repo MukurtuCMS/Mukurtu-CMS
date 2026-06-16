@@ -71,9 +71,9 @@ class ImportFieldDescriptionListForm extends ImportBaseForm {
     $form['table'] = [
       '#type' => 'tableselect',
       '#header' => [
-        'label' => $this->t('Field'),
-        'description' => $this->t('Field Description'),
-        'format' => $this->t('Import Format Description'),
+        'label' => ['data' => $this->t('Field'), 'scope' => 'col'],
+        'description' => ['data' => $this->t('Field Description'), 'scope' => 'col'],
+        'format' => ['data' => $this->t('Import Format Description'), 'scope' => 'col'],
       ],
       '#options' => $options,
       '#empty' => $this->t('No fields found'),

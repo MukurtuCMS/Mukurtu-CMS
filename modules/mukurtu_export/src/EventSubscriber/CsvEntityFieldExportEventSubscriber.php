@@ -177,6 +177,9 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
     $option = $config->getEntityReferenceSetting($target_type);
     $id_format = $config->getIdFieldSetting();
 
+    // Entities are loaded one-by-one per reference value. This is acceptable
+    // because multi-value reference fields rarely carry hundreds of items, and
+    // entity exports are not high-frequency operations.
     foreach ($field->getValue() as $value) {
       if ($id = ($value['target_id'] ?? NULL)) {
         if ($option && $target_type) {

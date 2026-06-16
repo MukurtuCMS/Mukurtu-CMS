@@ -8,6 +8,7 @@ use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Field\FieldTypePluginManagerInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\Session\AccountSwitcherInterface;
@@ -46,6 +47,13 @@ class ProtocolAwareEntityContent extends EntityContentBase {
   protected AccountProxyInterface $currentUser;
 
   /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected EntityTypeManagerInterface $entityTypeManager;
+
+  /**
    * Constructs a ProtocolAwareEntityContent.
    *
    * @param array $configuration
@@ -66,14 +74,17 @@ class ProtocolAwareEntityContent extends EntityContentBase {
    *   The field type plugin manager service.
    * @param \Drupal\Core\Session\AccountProxyInterface $current_user
    *   The current user.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The entity type manager.
    * @param \Drupal\Core\Session\AccountSwitcherInterface|null $account_switcher
    *   The account switcher service.
    * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface|null $entity_type_bundle_info
    *   The entity type bundle info service.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, MigrationInterface $migration, EntityStorageInterface $storage, array $bundles, EntityFieldManagerInterface $entity_field_manager, FieldTypePluginManagerInterface $field_type_manager, AccountProxyInterface $current_user, ?AccountSwitcherInterface $account_switcher = NULL, ?EntityTypeBundleInfoInterface $entity_type_bundle_info = NULL) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, MigrationInterface $migration, EntityStorageInterface $storage, array $bundles, EntityFieldManagerInterface $entity_field_manager, FieldTypePluginManagerInterface $field_type_manager, AccountProxyInterface $current_user, EntityTypeManagerInterface $entity_type_manager, ?AccountSwitcherInterface $account_switcher = NULL, ?EntityTypeBundleInfoInterface $entity_type_bundle_info = NULL) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $migration, $storage, $bundles, $entity_field_manager, $field_type_manager, $account_switcher, $entity_type_bundle_info);
     $this->currentUser = $current_user;
+    $this->entityTypeManager = $entity_type_manager;
   }
 
   /**
@@ -81,16 +92,18 @@ class ProtocolAwareEntityContent extends EntityContentBase {
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition, ?MigrationInterface $migration = NULL): static {
     $entity_type = static::getEntityTypeId($plugin_id);
+    $entity_type_manager = $container->get('entity_type.manager');
     return new static(
       $configuration,
       $plugin_id,
       $plugin_definition,
       $migration,
-      $container->get('entity_type.manager')->getStorage($entity_type),
+      $entity_type_manager->getStorage($entity_type),
       array_keys($container->get('entity_type.bundle.info')->getBundleInfo($entity_type)),
       $container->get('entity_field.manager'),
       $container->get('plugin.manager.field.field_type'),
       $container->get('current_user'),
+      $entity_type_manager,
       $container->get('account_switcher'),
       $container->get('entity_type.bundle.info'),
     );
@@ -196,7 +209,7 @@ class ProtocolAwareEntityContent extends EntityContentBase {
    * Updates the alt text on the image field of referenced media entities.
    */
   protected function applyMediaEntityAltText(ContentEntityInterface $entity, array $media_alt_updates): void {
-    $media_storage = \Drupal::entityTypeManager()->getStorage('media');
+    $media_storage = $this->entityTypeManager->getStorage('media');
 
     foreach ($media_alt_updates as $field_name => $alt_text) {
       if (!$entity->hasField($field_name)) {
