@@ -1,0 +1,66 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - content_moderation
+id: mukurtu_editorial_workflow
+label: 'Mukurtu Editorial Workflow'
+type: content_moderation
+type_settings:
+  states:
+    draft:
+      label: Draft
+      weight: 0
+      published: false
+      default_revision: false
+    needs_review:
+      label: 'Needs Review'
+      weight: 1
+      published: false
+      default_revision: false
+    published:
+      label: Published
+      weight: 2
+      published: true
+      default_revision: true
+    archived:
+      label: Archived
+      weight: 3
+      published: false
+      default_revision: true
+  transitions:
+    save_draft:
+      label: 'Save as Draft'
+      from:
+        - needs_review
+        - published
+        - archived
+      to: draft
+      weight: 0
+    submit_for_review:
+      label: 'Submit for Review'
+      from:
+        - draft
+      to: needs_review
+      weight: 1
+    publish:
+      label: Publish
+      from:
+        - draft
+        - needs_review
+      to: published
+      weight: 2
+    archive:
+      label: Archive
+      from:
+        - published
+      to: archived
+      weight: 3
+    restore:
+      label: 'Restore to Draft'
+      from:
+        - archived
+      to: draft
+      weight: 4
+  entity_types: {  }
+  default_moderation_state: draft
