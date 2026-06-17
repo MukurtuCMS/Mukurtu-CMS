@@ -59,7 +59,15 @@
       const warning = e.target.closest('.mukurtu-content-warnings');
       if (!warning) return;
       e.preventDefault();
-      Drupal.behaviors.contentWarnings?.dismissContentWarning(warning);
+      // Dismiss only this specific element (the lightbox clone). Calling
+      // dismissContentWarning() queries by data-mid and would clear the
+      // carousel warning too -- it should persist until dismissed there.
+      if (warning._contentWarningObserver) {
+        warning._contentWarningObserver.disconnect();
+        delete warning._contentWarningObserver;
+      }
+      warning.classList.add('dismissed');
+      Drupal.behaviors.contentWarnings?.setEmbedVisibility(warning, true);
     }
     document.addEventListener('click', dismissWarningInLightbox, true);
     document.addEventListener('keydown', (e) => {
