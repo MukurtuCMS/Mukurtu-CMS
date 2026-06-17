@@ -22,20 +22,21 @@
   ]
 %}
 
-<div{{ attributes.addClass(classes) }}>
-  {{ title_suffix.contextual_links }}
-  {{ content.media_content_warnings }}
+<div class="media-asset--slide">
+  <div{{ attributes.addClass(classes) }}>
+    {{ title_suffix.contextual_links }}
+    {{ content.media_content_warnings }}
 
-  <div class="media-asset--content">
-    {{ content.field_media_soundcloud }}
+    <div class="media-asset--content">
+      {{ content.field_media_soundcloud }}
+    </div>
+
+    <div id="soundcloud-{{ media.id }}" class="media-asset--glightbox-inline">
+      {{ content.field_media_soundcloud }}
+    </div>
   </div>
 
   <div class="media-asset--actions">
     <a href="#soundcloud-{{ media.id }}" data-type="inline" class="media-asset--link button" aria-label="Expand {{ name }} audio">Expand +</a>
   </div>
-
-  <div id="soundcloud-{{ media.id }}" class="media-asset--glightbox-inline">
-    {{ content.field_media_soundcloud }}
-  </div>
-
 </div>

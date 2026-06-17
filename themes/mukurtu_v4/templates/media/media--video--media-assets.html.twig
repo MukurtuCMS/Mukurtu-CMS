@@ -36,12 +36,14 @@
   ]
 %}
 
-<div{{ attributes.addClass(classes) }}>
-  {{ title_suffix.contextual_links }}
+<div class="media-asset--slide">
+  <div{{ attributes.addClass(classes) }}>
+    {{ title_suffix.contextual_links }}
 
-  {{ content.media_content_warnings }}
-  <div class="media-asset--content">
-    {{ content|without('media_content_warnings') }}
+    {{ content.media_content_warnings }}
+    <div class="media-asset--content">
+      {{ content|without('media_content_warnings') }}
+    </div>
   </div>
 
   <div class="media-asset--actions">

@@ -36,12 +36,14 @@
   ]
 %}
 
-<div{{ attributes.addClass(classes) }}>
-  {{ content.media_content_warnings }}
+<div class="media-asset--slide">
+  <div{{ attributes.addClass(classes) }}>
+    {{ content.media_content_warnings }}
 
-  <span class="media-asset--content">
-    {{ content.field_media_image }}
-  </span>
+    <span class="media-asset--content">
+      {{ content.field_media_image }}
+    </span>
+  </div>
 
   <div class="media-asset--actions">
     <a href="{{ media_url }}" class="media-asset--link button" aria-label="Expand {{ name }} image">Expand +</a>

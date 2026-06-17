@@ -175,3 +175,16 @@
   gap: var(--v-space-5xs);
   margin-block-start: var(--v-space-5xs);
 }
+
+// Wrapper that holds the .media content area and action buttons as a flex
+// column. Actions are a sibling of .media so the content-warning overlay
+// (position: absolute; inset: 0 on .media) never covers the buttons.
+.media-asset--slide {
+  display: flex;
+  flex-direction: column;
+  inline-size: 100%;
+
+  > .media {
+    margin-block-end: 0;
+  }
+}
