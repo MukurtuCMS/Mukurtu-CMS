@@ -41,19 +41,20 @@
     {{ title_suffix.contextual_links }}
     {{ content.media_content_warnings }}
 
-    <span class="media-asset--content">
+    <div class="media-asset--audio-group">
       <img alt="{{ name }}" src="{{ audio_fallback_thumbnail_url }}">
-    </span>
-
-    {{ content.field_media_audio_file }}
+      {{ content.field_media_audio_file }}
+    </div>
 
     <span class="media-asset--name">{{ name }}</span>
 
     <div id="audio-{{ media.id }}" class="media-asset--glightbox-inline">
       <div class="media media--audio">
         {{ content.media_content_warnings }}
-        <img alt="{{ name }}" src="{{ audio_fallback_thumbnail_url }}">
-        {{ content.field_media_audio_file }}
+        <div class="media-asset--audio-group">
+          <img alt="{{ name }}" src="{{ audio_fallback_thumbnail_url }}">
+          {{ content.field_media_audio_file }}
+        </div>
       </div>
     </div>
   </div>

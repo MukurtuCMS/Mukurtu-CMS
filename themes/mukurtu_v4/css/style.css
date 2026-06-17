@@ -2490,6 +2490,23 @@ label.form-required::after {
   inline-size: 100%;
 }
 
+.media-asset--audio-group {
+  width: -webkit-max-content;
+  width: -moz-max-content;
+  width: max-content;
+  max-width: 100%;
+}
+.media-asset--audio-group img {
+  display: block;
+  max-width: 100%;
+}
+.media-asset--audio-group .field--name-field-media-audio-file,
+.media-asset--audio-group .field__item,
+.media-asset--audio-group audio {
+  display: block;
+  width: 100%;
+}
+
 .media--audio .media-asset--name {
   display: block;
   text-align: center;
