@@ -10,8 +10,9 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  background-color: rgba(0 0 0 / 90%);
-  backdrop-filter: blur(6px);
+  background-color: rgba(0 0 0 / 70%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   color: white;
   line-height: var(--line-height-xs);
   cursor: pointer;
