@@ -45,7 +45,7 @@
               title="Document: {{ name }}" class="media-asset--pdf">
         <p>This PDF cannot be displayed inline.
           <a href="{{ media_url }}" target="_blank" rel="noopener">Open {{ name }}</a> or
-          <a href="{{ media_url }}" download>download it</a>.
+          <a href="{{ media_url }}" download aria-label="Download {{ name }}">download it</a>.
         </p>
       </object>
     </div>
@@ -57,7 +57,7 @@
                 title="Document: {{ name }}" class="media-asset--document-viewer">
           <p>This PDF cannot be displayed inline.
             <a href="{{ media_url }}" target="_blank" rel="noopener">Open {{ name }}</a> or
-            <a href="{{ media_url }}" download>download it</a>.
+            <a href="{{ media_url }}" download aria-label="Download {{ name }}">download it</a>.
           </p>
         </object>
       </div>
