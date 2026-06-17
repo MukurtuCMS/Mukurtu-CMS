@@ -45,7 +45,6 @@ function mukurtu_export_update_40004() {
   }
 }
 
-
 /**
  * Update the recommended CSV exporter settings for taxonomy term export.
  *
@@ -220,4 +219,28 @@ function mukurtu_export_update_40008() {
   if ($changed) {
     $exporter->set('entity_fields_export_list', $list)->save();
   }
+}
+
+/**
+ * Switch taxonomy_term__category thumbnail to two-field (target_id + alt) export format.
+ */
+function mukurtu_export_update_40009(): void {
+  $config = \Drupal::configFactory()->getEditable('mukurtu_export.csv_exporter.recommended_settings_for_import');
+  $entity_fields = $config->get('entity_fields_export_list') ?? [];
+
+  if (isset($entity_fields['taxonomy_term__category'])) {
+    $cat = &$entity_fields['taxonomy_term__category'];
+    // Remove legacy single-column thumbnail key if present.
+    unset($cat['field_thumbnail_image']);
+    // Insert two-field columns before parent if parent exists, otherwise append.
+    $parent = $cat['parent'] ?? NULL;
+    unset($cat['parent']);
+    $cat['field_thumbnail_image/target_id'] = 'Thumbnail Image > File ID';
+    $cat['field_thumbnail_image/alt'] = 'Thumbnail Image > Alternative text';
+    if ($parent !== NULL) {
+      $cat['parent'] = $parent;
+    }
+  }
+
+  $config->set('entity_fields_export_list', $entity_fields)->save();
 }
