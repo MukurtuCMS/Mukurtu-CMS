@@ -64,4 +64,4 @@ type_settings:
       to: draft
       weight: 4
   entity_types: {  }
-  default_moderation_state: draft
+  default_moderation_state: published

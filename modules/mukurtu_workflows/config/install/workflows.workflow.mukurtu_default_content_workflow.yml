@@ -52,4 +52,4 @@ type_settings:
       - person
       - place
       - word_list
-  default_moderation_state: draft
+  default_moderation_state: published
