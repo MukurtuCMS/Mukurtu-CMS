@@ -8,6 +8,17 @@
 ((Drupal, once) => {
   "use strict";
 
+  // GLightbox clones innerHTML, which copies data-once attributes verbatim.
+  // Strip the once keys from cloned elements so attachBehaviors() treats them
+  // as unprocessed and re-attaches handlers (e.g. content warning dismiss).
+  function attachBehaviorsToSlide(slideContent) {
+    const warnings = slideContent.querySelectorAll('.mukurtu-content-warnings');
+    if (warnings.length) {
+      once.remove('mukurtu-content-warnings', warnings);
+    }
+    Drupal.attachBehaviors(slideContent, drupalSettings);
+  }
+
   function initGLightbox() {
     const lightbox = new GLightbox({
       selector: 'a.media-asset--link',
@@ -47,11 +58,13 @@
         container.querySelector('.gnext')?.setAttribute('aria-label', 'Next');
         container.querySelector('.gclose')?.setAttribute('aria-label', 'Close');
       }
-      // GLightbox clones inline content into the lightbox DOM, so Drupal
-      // behaviors (e.g. content warnings) need to be attached to the clones.
+      // GLightbox clones inline content (including data-once attributes) into
+      // the lightbox DOM. Strip the once keys so Drupal.attachBehaviors() can
+      // re-initialise behaviors (e.g. content warning click handlers) on the
+      // clones.
       const activeContent = container?.querySelector('.current .gslide-content');
       if (activeContent) {
-        Drupal.attachBehaviors(activeContent, drupalSettings);
+        attachBehaviorsToSlide(activeContent);
       }
     });
 
@@ -60,7 +73,7 @@
     lightbox.on('slide_changed', ({ current }) => {
       const slideContent = current.slideNode?.querySelector('.gslide-content');
       if (slideContent) {
-        Drupal.attachBehaviors(slideContent, drupalSettings);
+        attachBehaviorsToSlide(slideContent);
       }
     });
 
