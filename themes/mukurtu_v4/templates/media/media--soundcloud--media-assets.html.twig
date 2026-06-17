@@ -32,7 +32,10 @@
     </div>
 
     <div id="soundcloud-{{ media.id }}" class="media-asset--glightbox-inline">
-      {{ content.field_media_soundcloud }}
+      <div class="media media--soundcloud">
+        {{ content.media_content_warnings }}
+        {{ content.field_media_soundcloud }}
+      </div>
     </div>
   </div>
 

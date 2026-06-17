@@ -58,16 +58,20 @@
       if (!lightboxOpen) return;
       const warning = e.target.closest('.mukurtu-content-warnings');
       if (!warning) return;
+
+      // Only handle warnings inside the lightbox itself. Carousel warnings
+      // behind the overlay must not be dismissed by lightbox interactions.
+      const lightboxContainer = document.querySelector('.glightbox-container');
+      if (!lightboxContainer?.contains(warning)) return;
+
+      // Stop propagation so content-warnings.js's bubble-phase listener does
+      // not also call dismissContentWarning() and create a double-dismiss.
+      e.stopPropagation();
       e.preventDefault();
-      // Dismiss only this specific element (the lightbox clone). Calling
-      // dismissContentWarning() queries by data-mid and would clear the
-      // carousel warning too -- it should persist until dismissed there.
-      if (warning._contentWarningObserver) {
-        warning._contentWarningObserver.disconnect();
-        delete warning._contentWarningObserver;
-      }
-      warning.classList.add('dismissed');
-      Drupal.behaviors.contentWarnings?.setEmbedVisibility(warning, true);
+
+      // Dismiss the lightbox clone AND all carousel/inline copies for this
+      // media item. The user explicitly acknowledged the warning in the lightbox.
+      Drupal.behaviors.contentWarnings?.dismissContentWarning(warning);
     }
     document.addEventListener('click', dismissWarningInLightbox, true);
     document.addEventListener('keydown', (e) => {
