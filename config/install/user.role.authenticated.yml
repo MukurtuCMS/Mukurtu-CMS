@@ -9,6 +9,7 @@ dependencies:
     - entity_browser.browser.multipage_item_entity_browser
     - filter.format.basic_html
     - workflows.workflow.mukurtu_default_content_workflow
+    - workflows.workflow.mukurtu_editorial_workflow
   module:
     - comment
     - content_moderation
@@ -28,3 +29,6 @@ is_admin: false
 permissions:
   - 'use mukurtu_default_content_workflow transition create_new_draft'
   - 'use mukurtu_default_content_workflow transition publish'
+  - 'use mukurtu_editorial_workflow transition resubmit'
+  - 'use mukurtu_editorial_workflow transition save_draft'
+  - 'use mukurtu_editorial_workflow transition submit_for_review'

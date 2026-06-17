@@ -18,14 +18,19 @@ type_settings:
       weight: 1
       published: false
       default_revision: false
+    revision_requested:
+      label: 'Revision Requested'
+      weight: 2
+      published: false
+      default_revision: false
     published:
       label: Published
-      weight: 2
+      weight: 3
       published: true
       default_revision: true
     archived:
       label: Archived
-      weight: 3
+      weight: 4
       published: false
       default_revision: true
   transitions:
@@ -34,6 +39,7 @@ type_settings:
       from:
         - draft
         - needs_review
+        - revision_requested
         - published
         - archived
       to: draft
@@ -44,24 +50,36 @@ type_settings:
         - draft
       to: needs_review
       weight: 1
+    request_revision:
+      label: 'Request revisions'
+      from:
+        - needs_review
+      to: revision_requested
+      weight: 2
+    resubmit:
+      label: 'Resubmit for review'
+      from:
+        - revision_requested
+      to: needs_review
+      weight: 3
     publish:
       label: Publish
       from:
         - draft
         - needs_review
       to: published
-      weight: 2
+      weight: 4
     archive:
       label: Archive
       from:
         - published
       to: archived
-      weight: 3
+      weight: 5
     restore:
       label: 'Restore to Draft'
       from:
         - archived
       to: draft
-      weight: 4
+      weight: 6
   entity_types: {  }
   default_moderation_state: draft

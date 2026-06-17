@@ -85,4 +85,11 @@ permissions:
   - 'update own remote_video media'
   - 'update own soundcloud media'
   - 'update own video media'
+  - 'use mukurtu_editorial_workflow transition archive'
+  - 'use mukurtu_editorial_workflow transition publish'
+  - 'use mukurtu_editorial_workflow transition request_revision'
+  - 'use mukurtu_editorial_workflow transition restore'
+  - 'use mukurtu_editorial_workflow transition resubmit'
+  - 'use mukurtu_editorial_workflow transition save_draft'
+  - 'use mukurtu_editorial_workflow transition submit_for_review'
 role_type: standard

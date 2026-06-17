@@ -1400,3 +1400,51 @@ function mukurtu_core_update_40046(): void {
   $workflow->set('type_settings.transitions.create_new_draft.label', 'Save as Draft');
   $workflow->save();
 }
+
+/**
+ * Add editorial workflow permissions to authenticated role and Protocol Steward
+ * OG role for existing sites.
+ */
+function mukurtu_core_update_40047(): void {
+  $config_factory = \Drupal::configFactory();
+
+  // Authenticated role: save_draft, submit_for_review, resubmit.
+  $auth_role = $config_factory->getEditable('user.role.authenticated');
+  if (!$auth_role->isNew()) {
+    $permissions = $auth_role->get('permissions') ?? [];
+    $new_permissions = [
+      'use mukurtu_editorial_workflow transition resubmit',
+      'use mukurtu_editorial_workflow transition save_draft',
+      'use mukurtu_editorial_workflow transition submit_for_review',
+    ];
+    foreach ($new_permissions as $permission) {
+      if (!in_array($permission, $permissions, TRUE)) {
+        $permissions[] = $permission;
+      }
+    }
+    $auth_role->set('permissions', $permissions);
+    $auth_role->save();
+  }
+
+  // Protocol Steward OG role: all editorial workflow transitions.
+  $ps_role = $config_factory->getEditable('og.og_role.protocol-protocol-protocol_steward');
+  if (!$ps_role->isNew()) {
+    $permissions = $ps_role->get('permissions') ?? [];
+    $new_permissions = [
+      'use mukurtu_editorial_workflow transition archive',
+      'use mukurtu_editorial_workflow transition publish',
+      'use mukurtu_editorial_workflow transition request_revision',
+      'use mukurtu_editorial_workflow transition restore',
+      'use mukurtu_editorial_workflow transition resubmit',
+      'use mukurtu_editorial_workflow transition save_draft',
+      'use mukurtu_editorial_workflow transition submit_for_review',
+    ];
+    foreach ($new_permissions as $permission) {
+      if (!in_array($permission, $permissions, TRUE)) {
+        $permissions[] = $permission;
+      }
+    }
+    $ps_role->set('permissions', $permissions);
+    $ps_role->save();
+  }
+}

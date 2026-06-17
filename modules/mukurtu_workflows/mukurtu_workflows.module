@@ -1,1 +1,82 @@
 <?php
+
+/**
+ * @file
+ * Provides the Mukurtu content moderation workflows.
+ */
+
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\FieldableEntityInterface;
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\views\ViewExecutable;
+use Drupal\views\Plugin\views\query\QueryPluginBase;
+
+/**
+ * Implements hook_entity_view().
+ *
+ * Adds CSS classes for editorial workflow states so themes can style
+ * needs_review and revision_requested content distinctly.
+ */
+function mukurtu_workflows_entity_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode): void {
+  if (!$entity instanceof FieldableEntityInterface || !$entity->hasField('moderation_state')) {
+    return;
+  }
+  $state = $entity->get('moderation_state')->value;
+  if (in_array($state, ['needs_review', 'revision_requested'], TRUE)) {
+    $build['#attributes']['class'][] = 'node--editorial-' . str_replace('_', '-', $state);
+  }
+}
+
+/**
+ * Implements hook_views_query_alter().
+ *
+ * Scopes the content-under-review view to protocols where the current user
+ * is a Protocol Steward. Site admins (bypass node access) see all content.
+ */
+function mukurtu_workflows_views_query_alter(ViewExecutable $view, QueryPluginBase $query): void {
+  if ($view->id() !== 'mukurtu_content_under_review') {
+    return;
+  }
+
+  $account = \Drupal::currentUser();
+
+  if ($account->hasPermission('bypass node access') || $account->hasPermission('administer nodes')) {
+    return;
+  }
+
+  /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
+  $membership_manager = \Drupal::service('og.membership_manager');
+  $memberships = $membership_manager->getMemberships($account->id());
+
+  $steward_protocol_ids = [];
+  foreach ($memberships as $membership) {
+    if ($membership->getGroupEntityType() === 'node' &&
+        $membership->getGroupBundle() === 'protocol' &&
+        $membership->hasRole('protocol-protocol-protocol_steward')) {
+      $steward_protocol_ids[] = (int) $membership->getGroupId();
+    }
+  }
+
+  if (empty($steward_protocol_ids)) {
+    // User stewards no protocols; return an empty result set.
+    $query->addWhereExpression(0, '1 = 0');
+    return;
+  }
+
+  // Filter to nodes whose field_protocols includes at least one of the
+  // user's stewarded protocols. Using a subquery avoids duplicate rows
+  // when a node belongs to multiple protocols.
+  $placeholders = [];
+  $args = [];
+  foreach ($steward_protocol_ids as $i => $pid) {
+    $key = ':pid_' . $i;
+    $placeholders[] = $key;
+    $args[$key] = $pid;
+  }
+  $in_list = implode(', ', $placeholders);
+  $query->addWhereExpression(
+    0,
+    "node_field_data.nid IN (SELECT entity_id FROM {node__field_protocols} WHERE field_protocols_target_id IN ($in_list))",
+    $args
+  );
+}
