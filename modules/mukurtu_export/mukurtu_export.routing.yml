@@ -96,3 +96,11 @@ mukurtu_export.remove_node_from_list:
         type: entity:node
   requirements:
     _permission: 'access mukurtu export'
+
+mukurtu_export.taxonomy_export_start:
+  path: '/admin/export/taxonomy'
+  defaults:
+    _title: 'Export Taxonomy'
+    _form: 'Drupal\mukurtu_export\Form\TaxonomyExportStartForm'
+  requirements:
+    _permission: 'access mukurtu export'

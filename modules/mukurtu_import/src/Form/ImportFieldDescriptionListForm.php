@@ -20,11 +20,30 @@ class ImportFieldDescriptionListForm extends ImportBaseForm {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state, $entity_type = NULL, $bundle = NULL): array {
-    $fields = $this->entityFieldManager->getFieldDefinitions($entity_type, $bundle);
+    // 'other_taxonomies' is a virtual bundle representing all non-category
+    // taxonomy vocabularies; resolve it to a real bundle for field lookups.
+    $effective_bundle = ($entity_type === 'taxonomy_term' && $bundle === 'other_taxonomies') ? 'keywords' : $bundle;
+
+    $fields = $this->entityFieldManager->getFieldDefinitions($entity_type, $effective_bundle);
     $options = [];
 
+    // Per-entity-type overrides for the Field Description column.
+    // Drupal base field descriptions are often missing or too terse for
+    // end users; these replace them on import format pages only.
+    $field_description_overrides = [];
+    if ($entity_type === 'taxonomy_term') {
+      $field_description_overrides = [
+        'description' => $this->t('The description is not normally shown to end users. It may be used for internal documentation to clarify or define the content that should reference this term, or to provide additional details about the term.'),
+        'langcode'    => $this->t('The encoded language. Used for translation and localization.'),
+        'name'        => $this->t('The taxonomy term name.'),
+        'tid'         => $this->t('Identifier number assigned by the system.'),
+        'parent'      => $this->t('Not currently supported in Mukurtu. Used if a site supports hierarchical taxonomies.'),
+        'uuid'        => $this->t('Unique identifier usually assigned by the system.'),
+        'weight'      => $this->t('Not usually used as most sites will default to alphabetical ordering. The weight of this term in relation to other terms in the taxonomy.'),
+      ];
+    }
 
-    $import_field_options = $this->buildTargetOptions($entity_type, $bundle);
+    $import_field_options = $this->buildTargetOptions($entity_type, $effective_bundle);
     unset($import_field_options[-1]);
 
     foreach ($import_field_options as $field_target => $target_label) {
@@ -34,7 +53,7 @@ class ImportFieldDescriptionListForm extends ImportBaseForm {
       $process_plugin = $this->fieldProcessPluginManager->getInstance(['field_definition' => $fields[$field_name]]);
       $options[$field_target] = [
         'label' => $target_label,
-        'description' => $fields[$field_name]->getDescription() ?? '',
+        'description' => $field_description_overrides[$field_name] ?? ($fields[$field_name]->getDescription() ?? ''),
         'format' => $process_plugin->getFormatDescription($fields[$field_name], $field_property),
       ];
     }
@@ -52,9 +71,9 @@ class ImportFieldDescriptionListForm extends ImportBaseForm {
     $form['table'] = [
       '#type' => 'tableselect',
       '#header' => [
-        'label' => $this->t('Field'),
-        'description' => $this->t('Field Description'),
-        'format' => $this->t('Import Format Description'),
+        'label' => ['data' => $this->t('Field'), 'scope' => 'col'],
+        'description' => ['data' => $this->t('Field Description'), 'scope' => 'col'],
+        'format' => ['data' => $this->t('Import Format Description'), 'scope' => 'col'],
       ],
       '#options' => $options,
       '#empty' => $this->t('No fields found'),
@@ -80,9 +99,15 @@ class ImportFieldDescriptionListForm extends ImportBaseForm {
     $bundle = $form_state->getValue('bundle');
 
     $entity_type_label = $this->entityTypeManager->getDefinition($entity_type_id)->getLabel();
-    $bundle_info = $this->entityBundleInfo->getBundleInfo($entity_type_id);
-    $bundle_label = $bundle && isset($bundle_info[$bundle]) ? $bundle_info[$bundle]['label'] : '';
-    $filename = $bundle && $bundle != $entity_type_id ? "{$entity_type_label} - {$bundle_label}.csv" : "{$entity_type_label}.csv";
+
+    if ($entity_type_id === 'taxonomy_term' && $bundle === 'other_taxonomies') {
+      $filename = 'Taxonomy term - Other Taxonomies.csv';
+    }
+    else {
+      $bundle_info = $this->entityBundleInfo->getBundleInfo($entity_type_id);
+      $bundle_label = $bundle && isset($bundle_info[$bundle]) ? $bundle_info[$bundle]['label'] : '';
+      $filename = $bundle && $bundle != $entity_type_id ? "{$entity_type_label} - {$bundle_label}.csv" : "{$entity_type_label}.csv";
+    }
     $selected_fields = array_filter($form_state->getValue('table'));
 
     // Gather the selected field labels.
