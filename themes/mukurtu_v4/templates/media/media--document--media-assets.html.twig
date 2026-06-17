@@ -61,13 +61,16 @@
   </div>
 
   <div id="document-{{ media.id }}" class="media-asset--glightbox-inline">
-    <object data="{{ media_url }}#navpanes=0" type="application/pdf"
-            title="Document: {{ name }}" class="media-asset--document-viewer">
-      <p>This PDF cannot be displayed inline.
-        <a href="{{ media_url }}" target="_blank" rel="noopener">Open {{ name }}</a> or
-        <a href="{{ media_url }}" download>download it</a>.
-      </p>
-    </object>
+    <div class="media media--document">
+      {{ content.media_content_warnings }}
+      <object data="{{ media_url }}#navpanes=0" type="application/pdf"
+              title="Document: {{ name }}" class="media-asset--document-viewer">
+        <p>This PDF cannot be displayed inline.
+          <a href="{{ media_url }}" target="_blank" rel="noopener">Open {{ name }}</a> or
+          <a href="{{ media_url }}" download>download it</a>.
+        </p>
+      </object>
+    </div>
   </div>
 
 </div>
