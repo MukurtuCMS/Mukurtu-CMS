@@ -8,6 +8,15 @@
  */
 (function ($, Drupal, once) {
   Drupal.behaviors.mukurtuModerationStateHeader = {
+    detach(context, settings, trigger) {
+      if (trigger !== 'unload') return;
+      // When AJAX rebuilds the form, remove the moved widget from the sticky
+      // header and reset once() so attachBehaviors re-runs on the new widget.
+      const sticky = document.querySelector('.gin-sticky-form-actions');
+      if (!sticky) return;
+      sticky.querySelectorAll('.field--name-moderation-state').forEach((w) => w.remove());
+      once.remove('moderation-state-header', sticky);
+    },
     attach(context, settings) {
       once('moderation-state-header', '.gin-sticky-form-actions', context).forEach((sticky) => {
         const widget = document.querySelector('.field--name-moderation-state');

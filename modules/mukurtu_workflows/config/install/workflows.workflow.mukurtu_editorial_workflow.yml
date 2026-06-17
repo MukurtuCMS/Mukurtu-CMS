@@ -32,6 +32,7 @@ type_settings:
     save_draft:
       label: 'Save as Draft'
       from:
+        - draft
         - needs_review
         - published
         - archived

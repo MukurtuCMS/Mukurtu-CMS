@@ -1386,3 +1386,17 @@ function mukurtu_core_update_40045(): void {
     $update_manager->uninstallFieldStorageDefinition($field);
   }
 }
+
+/**
+ * Rename "Under Review" to "Draft" in the default Mukurtu content workflow.
+ */
+function mukurtu_core_update_40046(): void {
+  $workflow = \Drupal::configFactory()
+    ->getEditable('workflows.workflow.mukurtu_default_content_workflow');
+  if ($workflow->isNew()) {
+    return;
+  }
+  $workflow->set('type_settings.states.draft.label', 'Draft');
+  $workflow->set('type_settings.transitions.create_new_draft.label', 'Save as Draft');
+  $workflow->save();
+}
