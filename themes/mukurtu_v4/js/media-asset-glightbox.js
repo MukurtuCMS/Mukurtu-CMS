@@ -47,7 +47,23 @@
         container.querySelector('.gnext')?.setAttribute('aria-label', 'Next');
         container.querySelector('.gclose')?.setAttribute('aria-label', 'Close');
       }
+      // GLightbox clones inline content into the lightbox DOM, so Drupal
+      // behaviors (e.g. content warnings) need to be attached to the clones.
+      const activeContent = container?.querySelector('.current .gslide-content');
+      if (activeContent) {
+        Drupal.attachBehaviors(activeContent, drupalSettings);
+      }
     });
+
+    // Re-attach behaviors whenever the slide changes so that cloned content
+    // (e.g. content warning overlays) gets its event handlers.
+    lightbox.on('slide_changed', ({ current }) => {
+      const slideContent = current.slideNode?.querySelector('.gslide-content');
+      if (slideContent) {
+        Drupal.attachBehaviors(slideContent, drupalSettings);
+      }
+    });
+
     lightbox.on('close', () => { lightboxOpen = false; });
   }
 
