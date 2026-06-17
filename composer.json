@@ -144,8 +144,9 @@
                 "Fix implicit nullable param deprecation in Glossary::getPropertyDefinitions()": "web/profiles/mukurtu/patches/search_api_glossary-nullable-param-deprecation.patch"
             },
             "drupal/message_digest": {
-                "Fix null flag fatal error in DigestInterval::access()": "web/profiles/mukurtu/patches/message_digest_ui-digest-interval-null-flag.patch",
-                "Fix implicit nullable param deprecations": "web/profiles/mukurtu/patches/message_digest-nullable-param-deprecation.patch"
+                "Fix implicit nullable param deprecation in message_digest_allowed_values_callback()": "web/profiles/mukurtu/patches/message_digest-module-nullable-param-deprecation.patch",
+                "Fix null flag fatal error and nullable param deprecation in DigestInterval": "web/profiles/mukurtu/patches/message_digest_ui-digest-interval-null-guard.patch",
+                "Fix implicit nullable param deprecation in DigestBase::__construct() and create()": "web/profiles/mukurtu/patches/message_digest-digestbase-nullable-param-deprecation.patch"
             },
             "drupal/message_ui": {
                 "Fix implicit nullable param deprecation in SaveMessage::access()": "web/profiles/mukurtu/patches/message_ui-nullable-param-deprecation.patch"
