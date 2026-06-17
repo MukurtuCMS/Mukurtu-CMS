@@ -8,17 +8,6 @@
 ((Drupal, once) => {
   "use strict";
 
-  // GLightbox clones innerHTML, which copies data-once attributes verbatim.
-  // Strip the once keys from cloned elements so attachBehaviors() treats them
-  // as unprocessed and re-attaches handlers (e.g. content warning dismiss).
-  function attachBehaviorsToSlide(slideContent) {
-    const warnings = slideContent.querySelectorAll('.mukurtu-content-warnings');
-    if (warnings.length) {
-      once.remove('mukurtu-content-warnings', warnings);
-    }
-    Drupal.attachBehaviors(slideContent, drupalSettings);
-  }
-
   function initGLightbox() {
     const lightbox = new GLightbox({
       selector: 'a.media-asset--link',
@@ -58,26 +47,25 @@
         container.querySelector('.gnext')?.setAttribute('aria-label', 'Next');
         container.querySelector('.gclose')?.setAttribute('aria-label', 'Close');
       }
-      // GLightbox clones inline content (including data-once attributes) into
-      // the lightbox DOM. Strip the once keys so Drupal.attachBehaviors() can
-      // re-initialise behaviors (e.g. content warning click handlers) on the
-      // clones.
-      const activeContent = container?.querySelector('.current .gslide-content');
-      if (activeContent) {
-        attachBehaviorsToSlide(activeContent);
-      }
-    });
-
-    // Re-attach behaviors whenever the slide changes so that cloned content
-    // (e.g. content warning overlays) gets its event handlers.
-    lightbox.on('slide_changed', ({ current }) => {
-      const slideContent = current.slideNode?.querySelector('.gslide-content');
-      if (slideContent) {
-        attachBehaviorsToSlide(slideContent);
-      }
     });
 
     lightbox.on('close', () => { lightboxOpen = false; });
+
+    // GLightbox copies slide HTML (including data-once attributes) so
+    // once()-guarded behaviors never attach to the cloned nodes. Delegated
+    // capture-phase listeners on document sidestep this entirely.
+    function dismissWarningInLightbox(e) {
+      if (!lightboxOpen) return;
+      const warning = e.target.closest('.mukurtu-content-warnings');
+      if (!warning) return;
+      e.preventDefault();
+      Drupal.behaviors.contentWarnings?.dismissContentWarning(warning);
+    }
+    document.addEventListener('click', dismissWarningInLightbox, true);
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      dismissWarningInLightbox(e);
+    }, true);
   }
 
   // Drupal behavior
