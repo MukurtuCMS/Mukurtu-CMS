@@ -16,17 +16,23 @@
         const statusSlot = sticky.querySelector('#edit-status, [data-drupal-selector="edit-status"]');
         if (!statusSlot) return;
 
-        // Remove the "Current state: X" label -- redundant in the header.
-        const currentState = widget.querySelector('.js-form-item:first-child .form-item__label');
-        if (currentState && currentState.textContent.trim() === Drupal.t('Current state')) {
-          currentState.closest('.js-form-item')?.remove();
+        // Visually hide "Current state: X" in the header -- it is spatially
+        // redundant there, but must remain in the accessibility tree.
+        const currentStateItem = widget.querySelector('.js-form-item:first-child');
+        if (currentStateItem) {
+          const label = currentStateItem.querySelector('.form-item__label');
+          if (label && label.textContent.trim() === Drupal.t('Current state')) {
+            currentStateItem.classList.add('visually-hidden');
+          }
         }
 
         statusSlot.appendChild(widget);
 
-        // Hide any remaining copy of the widget in the sidebar footer.
+        // Remove any remaining copy of the widget from the sidebar to prevent
+        // duplicate id attributes in the document, which break label/input
+        // association for assistive technology.
         document.querySelectorAll('.gin-sidebar .field--name-moderation-state').forEach((dup) => {
-          dup.style.display = 'none';
+          dup.remove();
         });
       });
     },
