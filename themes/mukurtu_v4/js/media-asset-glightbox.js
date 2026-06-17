@@ -12,7 +12,9 @@
     const lightbox = new GLightbox({
       selector: 'a.media-asset--link',
       loop: true,
-      autoplayVideos: false
+      autoplayVideos: false,
+      width: '92vw',
+      height: '92vh',
     });
 
     // When a video or remote-video (iframe) slide is active, block arrow keys
