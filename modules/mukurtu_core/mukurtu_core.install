@@ -1415,3 +1415,19 @@ function mukurtu_core_update_40047(): void {
     $workflow->save();
   }
 }
+
+/**
+ * Update the draft content view to filter by moderation_state instead of the
+ * removed boolean draft field.
+ */
+function mukurtu_core_update_40048(): void {
+  $module_path = \Drupal::service('module_handler')->getModule('mukurtu_drafts')->getPath();
+  $config_source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+  $config_data = $config_source->read('views.view.mukurtu_draft_content');
+  if ($config_data) {
+    \Drupal::configFactory()
+      ->getEditable('views.view.mukurtu_draft_content')
+      ->setData($config_data)
+      ->save();
+  }
+}
