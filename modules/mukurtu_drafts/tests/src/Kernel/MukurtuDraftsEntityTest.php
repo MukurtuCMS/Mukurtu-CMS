@@ -8,9 +8,8 @@ use Drupal\drafts_entity_test\Entity\TestDraftEntity;
 
 /**
  * Test access to draft entities.
- *
- * @group mukurtu_drafts
  */
+#[\PHPUnit\Framework\Attributes\Group('mukurtu_drafts')]
 class MukurtuDraftsEntityTest extends KernelTestBase {
   /**
    * {@inheritdoc}
@@ -56,14 +55,14 @@ class MukurtuDraftsEntityTest extends KernelTestBase {
     // entity access because another access was overriding the expected result
     // of mukurtu_draft's hook_entity_access().
 
-    $this->assertEquals(TRUE, $entity->access('view', $user, TRUE)->isForbidden());
-    $this->assertEquals(TRUE, $entity->access('update', $user, TRUE)->isForbidden());
-    $this->assertEquals(TRUE, $entity->access('delete', $user, TRUE)->isForbidden());
+    $this->assertTrue($entity->access('view', $user, TRUE)->isForbidden());
+    $this->assertTrue($entity->access('update', $user, TRUE)->isForbidden());
+    $this->assertTrue($entity->access('delete', $user, TRUE)->isForbidden());
 
     // Owner.
-    $this->assertEquals(TRUE, $entity->access('view', $this->owner, TRUE)->isAllowed());
-    $this->assertEquals(TRUE, $entity->access('update', $this->owner, TRUE)->isAllowed());
-    $this->assertEquals(TRUE, $entity->access('delete', $this->owner, TRUE)->isAllowed());
+    $this->assertTrue($entity->access('view', $this->owner, TRUE)->isAllowed());
+    $this->assertTrue($entity->access('update', $this->owner, TRUE)->isAllowed());
+    $this->assertTrue($entity->access('delete', $this->owner, TRUE)->isAllowed());
   }
 
   /**
@@ -80,13 +79,13 @@ class MukurtuDraftsEntityTest extends KernelTestBase {
     ]);
     $user->save();
 
-    $this->assertEquals(TRUE, $entity->access('view', $user, TRUE)->isNeutral());
-    $this->assertEquals(TRUE, $entity->access('update', $user, TRUE)->isNeutral());
-    $this->assertEquals(TRUE, $entity->access('delete', $user, TRUE)->isNeutral());
+    $this->assertTrue($entity->access('view', $user, TRUE)->isNeutral());
+    $this->assertTrue($entity->access('update', $user, TRUE)->isNeutral());
+    $this->assertTrue($entity->access('delete', $user, TRUE)->isNeutral());
 
     // Owner.
-    $this->assertEquals(TRUE, $entity->access('view', $this->owner, TRUE)->isAllowed());
-    $this->assertEquals(TRUE, $entity->access('update', $this->owner, TRUE)->isAllowed());
-    $this->assertEquals(TRUE, $entity->access('delete', $this->owner, TRUE)->isAllowed());
+    $this->assertTrue($entity->access('view', $this->owner, TRUE)->isAllowed());
+    $this->assertTrue($entity->access('update', $this->owner, TRUE)->isAllowed());
+    $this->assertTrue($entity->access('delete', $this->owner, TRUE)->isAllowed());
   }
 }
