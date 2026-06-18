@@ -76,11 +76,6 @@ services:
           # Copy in the settings.php file to set the database connection.
           cp $TUGBOAT_ROOT/.tugboat/settings.tugboat.php web/sites/default/settings.php
           chown www-data:www-data web/sites/default/settings.php
-          # Ensure local patch files exist before composer update tries to apply
-          # them. Patches ship with the profile package, but core is installed
-          # before the profile, so the patches directory is not yet in place.
-          mkdir -p web/profiles/mukurtu/patches
-          cp $TUGBOAT_ROOT/patches/* web/profiles/mukurtu/patches/
           # Update composer dependencies.
           rm composer.lock
           # Patch the template's composer.json to require Drupal 11.3.x and
