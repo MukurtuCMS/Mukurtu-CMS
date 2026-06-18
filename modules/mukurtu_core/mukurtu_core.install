@@ -1431,3 +1431,19 @@ function mukurtu_core_update_40048(): void {
       ->save();
   }
 }
+
+/**
+ * Grant authenticated users permission to use the draft workflow transitions.
+ *
+ * These permissions were added to config/install in this branch but
+ * config/install is only applied on fresh installs, not upgrades.
+ */
+function mukurtu_core_update_40049(): void {
+  $role = \Drupal\user\Entity\Role::load('authenticated');
+  if (!$role) {
+    return;
+  }
+  $role->grantPermission('use mukurtu_default_content_workflow transition create_new_draft');
+  $role->grantPermission('use mukurtu_default_content_workflow transition publish');
+  $role->save();
+}
