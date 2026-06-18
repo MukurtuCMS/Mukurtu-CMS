@@ -4,10 +4,10 @@ namespace Drupal\mukurtu_export\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\TempStore\PrivateTempStoreFactory;
+use Drupal\media\MediaInterface;
 use Drupal\node\NodeInterface;
 use Drupal\views_bulk_operations\Traits\ViewsBulkOperationsFormTrait;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
  * Starts an ad-hoc export for a single node or a VBO bulk selection.
@@ -27,23 +27,28 @@ class AdHocExportStartController extends ControllerBase {
   }
 
   public function startNode(NodeInterface $node) {
-    if (!\Drupal::currentUser()->hasPermission('access mukurtu export')) {
-      throw new AccessDeniedHttpException();
-    }
-
     $store = $this->tempStoreFactory->get('mukurtu_import');
     $store->delete('export_list_id');
     $store->set('ad_hoc_items', ['node' => [(int) $node->id() => (int) $node->id()]]);
     $store->set('exporter_id', 'csv');
 
+    // Remove destination so Drupal's redirect subscriber doesn't send the user
+    // back to the content list instead of the export settings page.
+    \Drupal::request()->query->remove('destination');
+    return $this->redirect('mukurtu_export.export_settings');
+  }
+
+  public function startMedia(MediaInterface $media) {
+    $store = $this->tempStoreFactory->get('mukurtu_import');
+    $store->delete('export_list_id');
+    $store->set('ad_hoc_items', ['media' => [(int) $media->id() => (int) $media->id()]]);
+    $store->set('exporter_id', 'csv');
+
+    \Drupal::request()->query->remove('destination');
     return $this->redirect('mukurtu_export.export_settings');
   }
 
   public function startBulk(string $view_id, string $display_id) {
-    if (!\Drupal::currentUser()->hasPermission('access mukurtu export')) {
-      throw new AccessDeniedHttpException();
-    }
-
     $form_data = $this->getTempstoreData($view_id, $display_id);
 
     if (empty($form_data['list'])) {
@@ -66,6 +71,7 @@ class AdHocExportStartController extends ControllerBase {
 
     $this->deleteTempstoreData($view_id, $display_id);
 
+    \Drupal::request()->query->remove('destination');
     return $this->redirect('mukurtu_export.export_settings');
   }
 

@@ -86,3 +86,4 @@ permissions:
   - 'edit own landing_page content'
   - 'edit own page content'
   - 'select account cancellation method'
+  - 'access mukurtu export'
