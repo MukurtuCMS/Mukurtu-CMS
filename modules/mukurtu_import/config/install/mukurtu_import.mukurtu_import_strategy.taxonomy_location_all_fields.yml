@@ -1,0 +1,33 @@
+langcode: en
+status: true
+dependencies: {  }
+id: taxonomy_location_all_fields
+uid: 1
+label: 'Taxonomy - Location'
+description: ''
+target_entity_type_id: taxonomy_term
+target_bundle: location
+mapping:
+  -
+    source: 'Term ID'
+    target: tid
+  -
+    source: Locale
+    target: langcode
+  -
+    source: Name
+    target: name
+  -
+    source: Description
+    target: description
+  -
+    source: Parent
+    target: parent
+configuration:
+  delimiter: ','
+  enclosure: '"'
+  escape: '\'
+  multivalue_delimiter: '||'
+  default_format: basic_html
+  identifier_column: null
+  local_contexts_delimiter: '>'

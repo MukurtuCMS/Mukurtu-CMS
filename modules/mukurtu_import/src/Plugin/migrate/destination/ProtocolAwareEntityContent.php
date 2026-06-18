@@ -8,6 +8,7 @@ use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Field\FieldTypePluginManagerInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\Session\AccountSwitcherInterface;
@@ -46,6 +47,13 @@ class ProtocolAwareEntityContent extends EntityContentBase {
   protected AccountProxyInterface $currentUser;
 
   /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected EntityTypeManagerInterface $entityTypeManager;
+
+  /**
    * Constructs a ProtocolAwareEntityContent.
    *
    * @param array $configuration
@@ -66,14 +74,17 @@ class ProtocolAwareEntityContent extends EntityContentBase {
    *   The field type plugin manager service.
    * @param \Drupal\Core\Session\AccountProxyInterface $current_user
    *   The current user.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The entity type manager.
    * @param \Drupal\Core\Session\AccountSwitcherInterface|null $account_switcher
    *   The account switcher service.
    * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface|null $entity_type_bundle_info
    *   The entity type bundle info service.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, MigrationInterface $migration, EntityStorageInterface $storage, array $bundles, EntityFieldManagerInterface $entity_field_manager, FieldTypePluginManagerInterface $field_type_manager, AccountProxyInterface $current_user, ?AccountSwitcherInterface $account_switcher = NULL, ?EntityTypeBundleInfoInterface $entity_type_bundle_info = NULL) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, MigrationInterface $migration, EntityStorageInterface $storage, array $bundles, EntityFieldManagerInterface $entity_field_manager, FieldTypePluginManagerInterface $field_type_manager, AccountProxyInterface $current_user, EntityTypeManagerInterface $entity_type_manager, ?AccountSwitcherInterface $account_switcher = NULL, ?EntityTypeBundleInfoInterface $entity_type_bundle_info = NULL) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $migration, $storage, $bundles, $entity_field_manager, $field_type_manager, $account_switcher, $entity_type_bundle_info);
     $this->currentUser = $current_user;
+    $this->entityTypeManager = $entity_type_manager;
   }
 
   /**
@@ -81,16 +92,18 @@ class ProtocolAwareEntityContent extends EntityContentBase {
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition, ?MigrationInterface $migration = NULL): static {
     $entity_type = static::getEntityTypeId($plugin_id);
+    $entity_type_manager = $container->get('entity_type.manager');
     return new static(
       $configuration,
       $plugin_id,
       $plugin_definition,
       $migration,
-      $container->get('entity_type.manager')->getStorage($entity_type),
+      $entity_type_manager->getStorage($entity_type),
       array_keys($container->get('entity_type.bundle.info')->getBundleInfo($entity_type)),
       $container->get('entity_field.manager'),
       $container->get('plugin.manager.field.field_type'),
       $container->get('current_user'),
+      $entity_type_manager,
       $container->get('account_switcher'),
       $container->get('entity_type.bundle.info'),
     );
@@ -100,6 +113,12 @@ class ProtocolAwareEntityContent extends EntityContentBase {
    * {@inheritdoc}
    */
   public function import(Row $row, array $old_destination_id_values = []) {
+    // Extract and clear */alt destination properties for single-value
+    // entity_reference-to-media fields before entity building. Entity
+    // reference fields have no 'alt' sub-property, so passing these to the
+    // entity storage would throw. We apply them post-save instead.
+    $media_alt_updates = $this->extractAndClearMediaAltUpdates($row);
+
     $this->rollbackAction = MigrateIdMapInterface::ROLLBACK_DELETE;
     $entity = $this->getEntity($row, $old_destination_id_values);
     if (!$entity) {
@@ -141,10 +160,82 @@ class ProtocolAwareEntityContent extends EntityContentBase {
       $this->validateEntity($entity);
     }
     $ids = $this->save($entity, $old_destination_id_values);
+
+    if (!empty($media_alt_updates)) {
+      $this->applyMediaEntityAltText($entity, $media_alt_updates);
+    }
+
     if ($this->isTranslationDestination()) {
       $ids[] = $entity->language()->getId();
     }
     return $ids;
+  }
+
+  /**
+   * Extracts and clears /alt destination properties for entity_reference-to-media
+   * fields, returning the field-name => alt-text map for post-save processing.
+   */
+  protected function extractAndClearMediaAltUpdates(Row $row): array {
+    $updates = [];
+    $entity_type_id = $this->storage->getEntityTypeId();
+    $bundle_key = $this->getKey('bundle');
+    $bundle = $bundle_key
+      ? ($row->getDestinationProperty($bundle_key) ?? $entity_type_id)
+      : $entity_type_id;
+
+    $field_defs = $this->entityFieldManager->getFieldDefinitions($entity_type_id, $bundle);
+
+    foreach ($row->getDestination() as $dest_key => $dest_value) {
+      if (!str_ends_with($dest_key, '/alt') || empty($dest_value)) {
+        continue;
+      }
+      $field_name = substr($dest_key, 0, strrpos($dest_key, '/'));
+      if (!isset($field_defs[$field_name])) {
+        continue;
+      }
+      $field_def = $field_defs[$field_name];
+      if ($field_def->getType() === 'entity_reference'
+        && $field_def->getSetting('target_type') === 'media'
+        && $field_def->getFieldStorageDefinition()->getCardinality() === 1) {
+        $updates[$field_name] = $dest_value;
+        $row->setDestinationProperty($dest_key, NULL);
+      }
+    }
+
+    return $updates;
+  }
+
+  /**
+   * Updates the alt text on the image field of referenced media entities.
+   */
+  protected function applyMediaEntityAltText(ContentEntityInterface $entity, array $media_alt_updates): void {
+    $media_storage = $this->entityTypeManager->getStorage('media');
+
+    foreach ($media_alt_updates as $field_name => $alt_text) {
+      if (!$entity->hasField($field_name)) {
+        continue;
+      }
+      $target_id = $entity->get($field_name)->target_id;
+      if (!$target_id) {
+        continue;
+      }
+      $media = $media_storage->load($target_id);
+      if (!$media) {
+        continue;
+      }
+      foreach ($media->getFields() as $media_field_name => $media_field) {
+        if ($media_field->getFieldDefinition()->getType() !== 'image') {
+          continue;
+        }
+        $vals = $media_field->getValue();
+        if (!empty($vals)) {
+          $vals[0]['alt'] = $alt_text;
+          $media->get($media_field_name)->setValue($vals);
+          $media->save();
+        }
+        break;
+      }
+    }
   }
 
   /**
