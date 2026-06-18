@@ -17,6 +17,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 #[ViewsField("mukurtu_import_term_status")]
 class TaxonomyTermImportStatus extends FieldPluginBase implements ContainerFactoryPluginInterface {
 
+  protected array $revisionCounts = [];
+
   public function __construct(
     array $configuration,
     $plugin_id,
@@ -49,17 +51,36 @@ class TaxonomyTermImportStatus extends FieldPluginBase implements ContainerFacto
   /**
    * {@inheritdoc}
    */
+  public function preRender(&$values): void {
+    $tids = [];
+    foreach ($values as $row) {
+      $tid = (int) $this->getValue($row);
+      if ($tid) {
+        $tids[] = $tid;
+      }
+    }
+    if (empty($tids)) {
+      return;
+    }
+    $query = $this->database->select('taxonomy_term_revision', 'r')
+      ->condition('r.tid', $tids, 'IN')
+      ->groupBy('r.tid');
+    $query->addField('r', 'tid');
+    $query->addExpression('COUNT(*)', 'revision_count');
+    foreach ($query->execute() as $record) {
+      $this->revisionCounts[(int) $record->tid] = (int) $record->revision_count;
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function render(ResultRow $values): string {
     $tid = (int) $this->getValue($values);
     if (!$tid) {
       return '';
     }
-    $revision_count = (int) $this->database
-      ->select('taxonomy_term_revision', 'r')
-      ->condition('r.tid', $tid)
-      ->countQuery()
-      ->execute()
-      ->fetchField();
+    $revision_count = $this->revisionCounts[$tid] ?? 1;
     return $revision_count === 1
       ? (string) $this->t('New')
       : (string) $this->t('Updated');

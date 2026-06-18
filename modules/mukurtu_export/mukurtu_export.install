@@ -95,13 +95,52 @@ function mukurtu_export_update_40005() {
 }
 
 /**
+ * Switch taxonomy_term__category thumbnail to two-field (target_id + alt) export format.
+ */
+function mukurtu_export_update_40006(): void {
+  $config = \Drupal::configFactory()->getEditable('mukurtu_export.csv_exporter.recommended_settings_for_import');
+  $entity_fields = $config->get('entity_fields_export_list') ?? [];
+
+  if (isset($entity_fields['taxonomy_term__category'])) {
+    $cat = &$entity_fields['taxonomy_term__category'];
+    // Remove legacy single-column thumbnail key if present.
+    unset($cat['field_thumbnail_image']);
+    // Insert two-field columns before parent if parent exists, otherwise append.
+    $parent = $cat['parent'] ?? NULL;
+    unset($cat['parent']);
+    $cat['field_thumbnail_image/target_id'] = 'Thumbnail Image > File ID';
+    $cat['field_thumbnail_image/alt'] = 'Thumbnail Image > Alternative text';
+    if ($parent !== NULL) {
+      $cat['parent'] = $parent;
+    }
+  }
+
+  $config->set('entity_fields_export_list', $entity_fields)->save();
+}
+
+/**
+ * Update recommended_settings_for_import: fix multivalue_delimiter and add
+ * local_contexts_delimiter and default_format.
+ */
+function mukurtu_export_update_40007() {
+  $storage = \Drupal::entityTypeManager()->getStorage('csv_exporter');
+  $entity = $storage->load('recommended_settings_for_import');
+  if ($entity) {
+    $entity->setMultivalueDelimiter(';');
+    $entity->setLocalContextsDelimiter('>');
+    $entity->setDefaultFormat('basic_html');
+    $entity->save();
+  }
+}
+
+/**
  * Update the recommended CSV exporter settings for media export.
  *
  * Adds media__external_embed and media__soundcloud bundle configs, and adds
  * the field_found_in virtual column to all media bundles. Clears action
  * plugin caches so the new media VBO export actions are discoverable.
  */
-function mukurtu_export_update_40006() {
+function mukurtu_export_update_40008() {
   $config = \Drupal::service('config.factory')
     ->getEditable('mukurtu_export.csv_exporter.recommended_settings_for_import');
 
@@ -161,20 +200,3 @@ function mukurtu_export_update_40006() {
   \Drupal::service('plugin.manager.action')->clearCachedDefinitions();
 }
 
-/**
- * Update recommended_settings_for_import: fix multivalue_delimiter and add
- * local_contexts_delimiter and default_format.
- *
- * Note: numbered 40007 because existing sites were already at schema 40006
- * (hooks 40005 and 40006 were run in development but never committed).
- */
-function mukurtu_export_update_40007() {
-  $storage = \Drupal::entityTypeManager()->getStorage('csv_exporter');
-  $entity = $storage->load('recommended_settings_for_import');
-  if ($entity) {
-    $entity->setMultivalueDelimiter(';');
-    $entity->setLocalContextsDelimiter('>');
-    $entity->setDefaultFormat('basic_html');
-    $entity->save();
-  }
-}

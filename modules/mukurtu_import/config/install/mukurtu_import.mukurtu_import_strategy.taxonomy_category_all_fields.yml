@@ -21,8 +21,11 @@ mapping:
     source: Description
     target: description
   -
-    source: Thumbnail
-    target: field_thumbnail_image
+    source: 'Thumbnail Image > File ID'
+    target: 'field_thumbnail_image/target_id'
+  -
+    source: 'Thumbnail Image > Alternative text'
+    target: 'field_thumbnail_image/alt'
   -
     source: Parent
     target: parent
