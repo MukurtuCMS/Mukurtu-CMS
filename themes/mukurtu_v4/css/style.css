@@ -1032,9 +1032,15 @@ a:not(.primary-nav__menu-link) svg.tel path {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   color: white;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
   line-height: var(--line-height-xs);
   cursor: pointer;
   text-align: center;
+}
+@supports not (backdrop-filter: blur()) {
+  .mukurtu-content-warnings {
+    background-color: rgba(0, 0, 0, 0.9);
+  }
 }
 .mukurtu-content-warnings:hover {
   text-decoration: underline;

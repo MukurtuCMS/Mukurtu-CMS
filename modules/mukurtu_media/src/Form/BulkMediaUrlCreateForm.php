@@ -10,6 +10,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
 use Drupal\media\Entity\Media;
+use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\RequestException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -34,16 +35,19 @@ class BulkMediaUrlCreateForm extends FormBase implements ContainerInjectionInter
 
   protected EntityTypeManagerInterface $entityTypeManager;
   protected AccountInterface $currentUser;
+  protected ClientInterface $httpClient;
 
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, AccountInterface $current_user) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, AccountInterface $current_user, ClientInterface $http_client) {
     $this->entityTypeManager = $entity_type_manager;
     $this->currentUser = $current_user;
+    $this->httpClient = $http_client;
   }
 
   public static function create(ContainerInterface $container): static {
     return new static(
       $container->get('entity_type.manager'),
-      $container->get('current_user')
+      $container->get('current_user'),
+      $container->get('http_client')
     );
   }
 
@@ -51,9 +55,9 @@ class BulkMediaUrlCreateForm extends FormBase implements ContainerInjectionInter
     return 'mukurtu_media_bulk_url_create_form';
   }
 
-  protected static function fetchSoundCloudTitle(string $url): ?string {
+  protected function fetchSoundCloudTitle(string $url): ?string {
     try {
-      $response = \Drupal::httpClient()->get('https://soundcloud.com/oembed', [
+      $response = $this->httpClient->get('https://soundcloud.com/oembed', [
         'query' => ['format' => 'json', 'url' => $url],
         'timeout' => 5,
       ]);
@@ -229,8 +233,8 @@ class BulkMediaUrlCreateForm extends FormBase implements ContainerInjectionInter
     $entities = [];
     foreach ($lines as $url) {
       $name = NULL;
-      if ($media_type === 'soundcloud') {
-        $name = static::fetchSoundCloudTitle($url);
+      if ($media_type === 'soundcloud' && str_contains($url, 'soundcloud.com')) {
+        $name = $this->fetchSoundCloudTitle($url);
       }
       $media = Media::create([
         'bundle' => $media_type,

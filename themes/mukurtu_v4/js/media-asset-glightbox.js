@@ -39,17 +39,24 @@
 
     document.addEventListener('keydown', blockArrowsOnMediaSlide, true);
 
+    // GLightbox renders nav buttons with SVG only — no text. Inject accessible
+    // names so screen readers can identify the controls. Called on both open
+    // and slide_changed because some GLightbox builds re-render nav buttons
+    // between slides, which would clear previously injected labels.
+    function injectLightboxLabels() {
+      const container = document.querySelector('.glightbox-container');
+      if (!container) return;
+      container.querySelector('.gprev')?.setAttribute('aria-label', 'Previous');
+      container.querySelector('.gnext')?.setAttribute('aria-label', 'Next');
+      container.querySelector('.gclose')?.setAttribute('aria-label', 'Close');
+    }
+
     lightbox.on('open', () => {
       lightboxOpen = true;
-      // GLightbox renders nav buttons with SVG only — no text. Inject accessible
-      // names so screen readers can identify the controls.
-      const container = document.querySelector('.glightbox-container');
-      if (container) {
-        container.querySelector('.gprev')?.setAttribute('aria-label', 'Previous');
-        container.querySelector('.gnext')?.setAttribute('aria-label', 'Next');
-        container.querySelector('.gclose')?.setAttribute('aria-label', 'Close');
-      }
+      injectLightboxLabels();
     });
+
+    lightbox.on('slide_changed', injectLightboxLabels);
 
     lightbox.on('close', () => { lightboxOpen = false; });
 
