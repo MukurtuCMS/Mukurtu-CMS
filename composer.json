@@ -164,7 +164,7 @@
                 "Fix null vocabulary crash in presave hook during migration": "web/profiles/mukurtu/patches/flat-taxonomy-null-vocabulary-presave.patch"
             },
             "drupal/migrate_source_csv": {
-                "Replace deprecated createFromStream() with from() for league/csv 9.27+": "patches/migrate_source_csv-createFromStream-deprecated-9.27.patch"
+                "Replace deprecated createFromStream() with from() for league/csv 9.27+": "web/profiles/mukurtu/patches/migrate_source_csv-createFromStream-deprecated-9.27.patch"
             }
         }
     }
