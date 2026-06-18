@@ -1452,3 +1452,18 @@ function mukurtu_core_update_40049(): void {
   $role->grantPermission('use mukurtu_default_content_workflow transition publish');
   $role->save();
 }
+
+/**
+ * Make the draft state the default revision in content workflows.
+ */
+function mukurtu_core_update_40050(): void {
+  foreach (['mukurtu_default_content_workflow', 'mukurtu_editorial_workflow'] as $workflow_id) {
+    $workflow = \Drupal::configFactory()
+      ->getEditable('workflows.workflow.' . $workflow_id);
+    if ($workflow->isNew()) {
+      continue;
+    }
+    $workflow->set('type_settings.states.draft.default_revision', TRUE);
+    $workflow->save();
+  }
+}

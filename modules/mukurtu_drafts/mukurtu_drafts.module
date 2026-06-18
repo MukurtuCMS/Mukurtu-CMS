@@ -47,6 +47,18 @@ function mukurtu_drafts_entity_access(EntityInterface $entity, $operation, Accou
 }
 
 /**
+ * Implements hook_menu_local_tasks_alter().
+ */
+function mukurtu_drafts_menu_local_tasks_alter(array &$data, string $route_name): void {
+  // Remove the "Latest version" tab added by content_moderation when a node
+  // has a pending draft revision. Draft state is surfaced via the banner and
+  // /user/drafts instead.
+  foreach ($data['tabs'] as $level => $tabs) {
+    unset($data['tabs'][$level]['node.latest_version_tab']);
+  }
+}
+
+/**
  * Implements hook_entity_view().
  */
 function mukurtu_drafts_entity_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
@@ -56,5 +68,13 @@ function mukurtu_drafts_entity_view(array &$build, EntityInterface $entity, Enti
   if ($entity->get('moderation_state')->value !== 'draft') {
     return;
   }
-  $build['#attributes']['class'][] = 'node--unpublished';
+  // Inject a real DOM element so assistive technology announces the draft state.
+  // CSS ::before content is unreliable in screen readers.
+  $build['title_prefix']['draft_banner'] = [
+    '#type' => 'html_tag',
+    '#tag' => 'span',
+    '#value' => t('Draft'),
+    '#attributes' => ['class' => ['node--draft-banner']],
+    '#weight' => -100,
+  ];
 }
