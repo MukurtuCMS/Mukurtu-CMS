@@ -2,5 +2,7 @@ mukurtu_drafts.your_drafts:
   path: '/user/drafts'
   defaults:
     _title: 'Your Drafts'
+  options:
+    _admin_route: true
   requirements:
     _access: 'TRUE'

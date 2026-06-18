@@ -106,6 +106,31 @@
   &__comment {
     margin-block-start: var(--v-space-xs);
   }
+}
+
+// Draft indicator badge -- only rendered for users who can view unpublished content.
+.node--unpublished {
+  position: relative;
+
+  &::before {
+    content: 'Draft';
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-end: 0;
+    z-index: 1;
+    background: var(--brand-secondary-dark);
+    color: var(--color-white);
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1;
+    padding: 0.25rem 0.5rem;
+    pointer-events: none;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+}
+
+.full-node {
 
   // Sidebar.
   &__list {

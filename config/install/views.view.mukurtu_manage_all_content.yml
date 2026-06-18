@@ -394,9 +394,9 @@ display:
           click_sort_column: value
           type: boolean
           settings:
-            format: default
-            format_custom_false: ''
-            format_custom_true: ''
+            format: custom
+            format_custom_false: 'Draft'
+            format_custom_true: 'Published'
           group_column: value
           group_columns: {  }
           group_rows: true

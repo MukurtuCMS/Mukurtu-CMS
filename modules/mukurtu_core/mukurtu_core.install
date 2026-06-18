@@ -1439,6 +1439,11 @@ function mukurtu_core_update_40048(): void {
  * config/install is only applied on fresh installs, not upgrades.
  */
 function mukurtu_core_update_40049(): void {
+  // Ensure the workflows module is enabled so its permissions are registered.
+  if (!\Drupal::moduleHandler()->moduleExists('mukurtu_workflows')) {
+    \Drupal::service('module_installer')->install(['mukurtu_workflows']);
+  }
+
   $role = \Drupal\user\Entity\Role::load('authenticated');
   if (!$role) {
     return;
