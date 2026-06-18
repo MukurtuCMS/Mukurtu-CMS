@@ -106,11 +106,10 @@ class BulkMediaUrlCreateForm extends FormBase implements ContainerInjectionInter
       '#button_type' => 'primary',
     ];
 
-    $cancel_url = Url::fromRoute('entity.media.add_form', ['media_type' => $media_type]);
     $form['actions']['cancel'] = [
       '#type' => 'link',
       '#title' => $this->t('Cancel'),
-      '#url' => $cancel_url,
+      '#url' => Url::fromRoute('entity.media.add_page'),
       '#attributes' => ['class' => ['button']],
     ];
 
