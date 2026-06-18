@@ -683,3 +683,12 @@ function mukurtu_protocol_update_40038(): void {
     $config->set('anonymous_comments_require_email', FALSE)->save();
   }
 }
+
+/**
+ * Enable mukurtu_protocol_sync module.
+ */
+function mukurtu_protocol_update_40039(): void {
+  if (!\Drupal::moduleHandler()->moduleExists('mukurtu_protocol_sync')) {
+    \Drupal::service('module_installer')->install(['mukurtu_protocol_sync']);
+  }
+}
