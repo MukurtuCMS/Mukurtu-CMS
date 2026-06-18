@@ -79,6 +79,13 @@ class BulkMediaUploadForm extends FormBase implements ContainerInjectionInterfac
     return "Bulk upload {$label}";
   }
 
+  public static function setFileInputAccept(array $element, FormStateInterface $form_state): array {
+    if (isset($element['upload'], $element['#accept'])) {
+      $element['upload']['#attributes']['accept'] = $element['#accept'];
+    }
+    return $element;
+  }
+
   public function buildForm(array $form, FormStateInterface $form_state, string $media_type = ''): array {
     if (!isset(self::SUPPORTED_TYPES[$media_type])) {
       $this->messenger()->addError($this->t('Bulk upload is not supported for this media type.'));
@@ -135,6 +142,8 @@ class BulkMediaUploadForm extends FormBase implements ContainerInjectionInterfac
         'FileExtension' => ['extensions' => $config['extensions']],
       ],
       '#upload_location' => $config['uri_scheme'] . "://{$year}-{$month}",
+      '#accept' => implode(',', array_map(fn($ext) => '.' . $ext, explode(' ', $config['extensions']))),
+      '#after_build' => [[static::class, 'setFileInputAccept']],
       '#required' => TRUE,
     ];
 
