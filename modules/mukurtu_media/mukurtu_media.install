@@ -805,3 +805,15 @@ function mukurtu_media_update_40018(): void {
     }
   }
 }
+
+/**
+ * Import updated media admin view with community, protocol, and media tag filters.
+ */
+function mukurtu_media_update_40019(): void {
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_media');
+  $config_file = $module_path . '/config/optional/views.view.mukurtu_media.yml';
+  $data = \Symfony\Component\Yaml\Yaml::parseFile($config_file);
+  \Drupal::configFactory()->getEditable('views.view.mukurtu_media')
+    ->setData($data)
+    ->save(TRUE);
+}
