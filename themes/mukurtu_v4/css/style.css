@@ -6278,8 +6278,7 @@ header {
           margin-block-start: var(--v-space-xs);
 }
 
-.node--unpublished::before {
-  content: "Draft";
+.node--draft-banner {
   display: block;
   background: var(--brand-secondary-dark);
   color: var(--color-white);
@@ -6287,7 +6286,6 @@ header {
   font-weight: 700;
   line-height: 1;
   padding: 0.75rem 1.5rem;
-  pointer-events: none;
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 0.1em;
