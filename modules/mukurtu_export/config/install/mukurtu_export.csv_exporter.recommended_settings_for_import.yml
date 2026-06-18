@@ -21,7 +21,8 @@ entity_fields_export_list:
     field_cultural_protocols/protocols: Protocols
     field_cultural_protocols/sharing_setting: 'Sharing Setting'
     field_child_collections: Sub-Collections
-    field_collection_image: Image
+    field_collection_image/target_id: 'Image > File ID'
+    field_collection_image/alt: 'Image > Alternative text'
     field_credit: Credit
     field_description: Description
     field_items_in_collection: 'Items in Collection'
@@ -41,7 +42,8 @@ entity_fields_export_list:
     field_media_assets: 'Media Assets'
     field_word_entry: 'Word Entry'
     field_related_content: 'Related Content'
-    field_thumbnail: Thumbnail
+    field_thumbnail/target_id: 'Thumbnail > File ID'
+    field_thumbnail/alt: 'Thumbnail > Alternative text'
   node__digital_heritage:
     nid: ID
     langcode: Locale
@@ -139,8 +141,10 @@ entity_fields_export_list:
     field_contributor: Contributor
     field_keywords: Keywords
     field_people: People
-    field_thumbnail: Thumbnail
+    field_thumbnail/target_id: 'Thumbnail > File ID'
+    field_thumbnail/alt: 'Thumbnail > Alternative text'
     field_identifier: Identifier
+    field_found_in: 'Found In'
   media__document:
     mid: ID
     langcode: Locale
@@ -152,8 +156,24 @@ entity_fields_export_list:
     field_media_document: Document
     field_keywords: Keywords
     field_people: People
-    field_thumbnail: Thumbnail
+    field_thumbnail/target_id: 'Thumbnail > File ID'
+    field_thumbnail/alt: 'Thumbnail > Alternative text'
     field_identifier: Identifier
+    field_found_in: 'Found In'
+  media__external_embed:
+    mid: ID
+    langcode: Locale
+    uid: 'Authored by'
+    name: Name
+    field_cultural_protocols/protocols: Protocols
+    field_cultural_protocols/sharing_setting: 'Sharing Setting'
+    field_media_external_embed: 'Embed Code'
+    field_keywords: Keywords
+    field_people: People
+    field_thumbnail/target_id: 'Thumbnail > File ID'
+    field_thumbnail/alt: 'Thumbnail > Alternative text'
+    field_identifier: Identifier
+    field_found_in: 'Found In'
   media__image:
     mid: ID
     langcode: Locale
@@ -161,10 +181,12 @@ entity_fields_export_list:
     name: Name
     field_cultural_protocols/protocols: Protocols
     field_cultural_protocols/sharing_setting: 'Sharing Setting'
-    field_media_image: Image
+    field_media_image/target_id: 'Image > File ID'
+    field_media_image/alt: 'Image > Alternative text'
     field_keywords: Keywords
     field_people: People
     field_identifier: Identifier
+    field_found_in: 'Found In'
   media__remote_video:
     mid: ID
     langcode: Locale
@@ -175,8 +197,25 @@ entity_fields_export_list:
     field_media_oembed_video: 'Video URL'
     field_keywords: Keywords
     field_people: People
-    field_thumbnail: Thumbnail
+    field_thumbnail/target_id: 'Thumbnail > File ID'
+    field_thumbnail/alt: 'Thumbnail > Alternative text'
     field_identifier: Identifier
+    field_found_in: 'Found In'
+  media__soundcloud:
+    mid: ID
+    langcode: Locale
+    uid: 'Authored by'
+    name: Name
+    field_cultural_protocols/protocols: Protocols
+    field_cultural_protocols/sharing_setting: 'Sharing Setting'
+    field_media_soundcloud: 'SoundCloud URL'
+    field_contributor: Contributor
+    field_keywords: Keywords
+    field_people: People
+    field_thumbnail/target_id: 'Thumbnail > File ID'
+    field_thumbnail/alt: 'Thumbnail > Alternative text'
+    field_identifier: Identifier
+    field_found_in: 'Found In'
   media__video:
     mid: ID
     langcode: Locale
@@ -187,8 +226,10 @@ entity_fields_export_list:
     field_media_video_file: 'Video file'
     field_keywords: Keywords
     field_people: People
-    field_thumbnail: Thumbnail
+    field_thumbnail/target_id: 'Thumbnail > File ID'
+    field_thumbnail/alt: 'Thumbnail > Alternative text'
     field_identifier: Identifier
+    field_found_in: 'Found In'
   community__community:
     id: ID
     langcode: Locale
@@ -198,8 +239,10 @@ entity_fields_export_list:
     field_access_mode: 'Sharing Protocol'
     field_community_type: 'Community Type'
     field_featured_content: 'Featured Content'
-    field_banner_image: 'Banner Image'
-    field_thumbnail_image: 'Thumbnail Image'
+    field_banner_image/target_id: 'Banner Image > File ID'
+    field_banner_image/alt: 'Banner Image > Alternative text'
+    field_thumbnail_image/target_id: 'Thumbnail Image > File ID'
+    field_thumbnail_image/alt: 'Thumbnail Image > Alternative text'
   protocol__protocol:
     id: ID
     langcode: Locale
@@ -261,78 +304,113 @@ entity_fields_export_list:
     langcode: Locale
     name: Name
     description: Description
+    parent: Parent
   taxonomy_term__category:
     tid: 'Term ID'
     langcode: Locale
     name: Name
     description: Description
     default_langcode: 'Default translation'
+    'field_thumbnail_image/target_id': 'Thumbnail Image > File ID'
+    'field_thumbnail_image/alt': 'Thumbnail Image > Alternative text'
+    parent: Parent
   taxonomy_term__community_type:
     tid: 'Term ID'
     langcode: Locale
     name: Name
     description: Description
+    parent: Parent
   taxonomy_term__contributor:
     tid: 'Term ID'
     langcode: Locale
     name: Name
     description: Description
+    parent: Parent
   taxonomy_term__creator:
     tid: 'Term ID'
     langcode: Locale
     name: Name
     description: Description
+    parent: Parent
   taxonomy_term__format:
     tid: 'Term ID'
     langcode: Locale
     name: Name
     description: Description
     revision_default: 'Default revision'
+    parent: Parent
   taxonomy_term__interpersonal_relationship:
     tid: 'Term ID'
     langcode: Locale
     name: Name
     description: Description
+    parent: Parent
   taxonomy_term__keywords:
     tid: 'Term ID'
     langcode: Locale
     name: Name
     description: Description
+    parent: Parent
   taxonomy_term__language:
     tid: 'Term ID'
     langcode: Locale
     name: Name
     description: Description
+    parent: Parent
+  taxonomy_term__location:
+    tid: 'Term ID'
+    langcode: Locale
+    name: Name
+    description: Description
+    parent: Parent
+  taxonomy_term__media_tag:
+    tid: 'Term ID'
+    langcode: Locale
+    name: Name
+    description: Description
+    parent: Parent
   taxonomy_term__people:
     tid: 'Term ID'
     langcode: Locale
     name: Name
     description: Description
+    parent: Parent
+  taxonomy_term__place_type:
+    tid: 'Term ID'
+    langcode: Locale
+    name: Name
+    description: Description
+    parent: Parent
   taxonomy_term__publisher:
     tid: 'Term ID'
     langcode: Locale
     name: Name
     description: Description
+    parent: Parent
   taxonomy_term__subject:
     tid: 'Term ID'
     langcode: Locale
     name: Name
     description: Description
+    parent: Parent
   taxonomy_term__tags:
     tid: 'Term ID'
     langcode: Locale
     name: Name
     description: Description
+    parent: Parent
   taxonomy_term__type:
     tid: 'Term ID'
     langcode: Locale
     name: Name
     description: Description
+    parent: Parent
   taxonomy_term__word_type:
     tid: 'Term ID'
     langcode: Locale
     name: Name
     description: Description
+    parent: Parent
   user__user:
     uid: 'User ID'
     langcode: 'Language code'
@@ -344,7 +422,7 @@ separator: ','
 enclosure: '"'
 escape: \
 eol: \n
-multivalue_delimiter: '||'
+multivalue_delimiter: ';'
 field_id: id
 field_file: id
 field_image: id

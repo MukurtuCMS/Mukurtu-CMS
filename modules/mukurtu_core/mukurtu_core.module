@@ -1175,6 +1175,33 @@ function mukurtu_core_views_data_alter(array &$data)
       ],
     ];
   }
+
+  if (isset($data['media_field_data'])) {
+    $data['media_field_data']['mukurtu_community_filter'] = [
+      'title' => t('Community'),
+      'filter' => [
+        'id' => 'mukurtu_media_community_filter',
+        'field' => 'mid',
+        'real field' => 'mid',
+      ],
+    ];
+    $data['media_field_data']['mukurtu_protocol_filter'] = [
+      'title' => t('Protocol'),
+      'filter' => [
+        'id' => 'mukurtu_media_protocol_filter',
+        'field' => 'mid',
+        'real field' => 'mid',
+      ],
+    ];
+    $data['media_field_data']['mukurtu_media_tag_filter'] = [
+      'title' => t('Media tag'),
+      'filter' => [
+        'id' => 'mukurtu_media_tag_filter',
+        'field' => 'mid',
+        'real field' => 'mid',
+      ],
+    ];
+  }
 }
 
 /**

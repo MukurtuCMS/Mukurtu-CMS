@@ -1129,3 +1129,45 @@ function _mukurtu_media_build_placeholder_field($def, $entity, $field_items, $vi
   }
   return $build;
 }
+
+/**
+ * Implements hook_entity_operation().
+ *
+ * Adds Publish and Unpublish per-row operations to media admin listings.
+ */
+function mukurtu_media_entity_operation(\Drupal\Core\Entity\EntityInterface $entity) {
+  if ($entity->getEntityTypeId() !== 'media') {
+    return [];
+  }
+  if (!$entity->access('update')) {
+    return [];
+  }
+
+  $operations = [];
+  $destination = \Drupal::request()->getRequestUri();
+
+  if (!$entity->isPublished()) {
+    $publish_url = Url::fromRoute('mukurtu_media.publish', ['media' => $entity->id()]);
+    $csrf_token = \Drupal::csrfToken()->get(ltrim($publish_url->getInternalPath(), '/'));
+    $operations['publish'] = [
+      'title' => t('Publish'),
+      'url' => Url::fromRoute('mukurtu_media.publish', ['media' => $entity->id()], [
+        'query' => ['token' => $csrf_token, 'destination' => $destination],
+      ]),
+      'weight' => 5,
+    ];
+  }
+  else {
+    $unpublish_url = Url::fromRoute('mukurtu_media.unpublish', ['media' => $entity->id()]);
+    $csrf_token_unpublish = \Drupal::csrfToken()->get(ltrim($unpublish_url->getInternalPath(), '/'));
+    $operations['unpublish'] = [
+      'title' => t('Unpublish'),
+      'url' => Url::fromRoute('mukurtu_media.unpublish', ['media' => $entity->id()], [
+        'query' => ['token' => $csrf_token_unpublish, 'destination' => $destination],
+      ]),
+      'weight' => 5,
+    ];
+  }
+
+  return $operations;
+}

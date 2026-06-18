@@ -1,3 +1,5 @@
 node_modules/
 test-results/
+vendor/
+web/
 **/.DS_Store
