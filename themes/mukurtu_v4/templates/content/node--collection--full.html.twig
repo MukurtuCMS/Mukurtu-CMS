@@ -71,15 +71,15 @@
 
   <div{{ content_attributes }} class="full-node collection">
 
+    {{ title_prefix }}
+    {{ title_suffix }}
+
     <div class="collection__header">
       <div class="collection__header__image">
         {{ content.group_primary_fields.field_collection_image }}
       </div>
 
       <div class="collection__header__text">
-        {{ title_prefix }}
-        {{ title_suffix }}
-
         {% if label %}
           <h2{{ title_attributes }}>
           {{ label }}
