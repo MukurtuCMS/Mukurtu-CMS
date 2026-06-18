@@ -10,6 +10,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
 use Drupal\media\Entity\Media;
+use GuzzleHttp\Exception\RequestException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -48,6 +49,20 @@ class BulkMediaUrlCreateForm extends FormBase implements ContainerInjectionInter
 
   public function getFormId(): string {
     return 'mukurtu_media_bulk_url_create_form';
+  }
+
+  protected static function fetchSoundCloudTitle(string $url): ?string {
+    try {
+      $response = \Drupal::httpClient()->get('https://soundcloud.com/oembed', [
+        'query' => ['format' => 'json', 'url' => $url],
+        'timeout' => 5,
+      ]);
+      $data = json_decode((string) $response->getBody(), TRUE);
+      return $data['title'] ?? NULL;
+    }
+    catch (RequestException $e) {
+      return NULL;
+    }
   }
 
   public static function getTitle(string $media_type): string {
@@ -214,13 +229,17 @@ class BulkMediaUrlCreateForm extends FormBase implements ContainerInjectionInter
 
     $entities = [];
     foreach ($lines as $url) {
+      $name = NULL;
+      if ($media_type === 'soundcloud') {
+        $name = static::fetchSoundCloudTitle($url);
+      }
       $media = Media::create([
         'bundle' => $media_type,
         'uid' => $this->currentUser->id(),
         $field_name => $url,
         'status' => 1,
       ]);
-      $media->setName($media->getName() ?? $url);
+      $media->setName($name ?? $media->getName() ?? $url);
       $entities[] = $media;
     }
 
