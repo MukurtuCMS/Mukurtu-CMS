@@ -189,12 +189,12 @@ function mukurtu_media_preprocess_entity_add_list(&$variables) {
   // Reorder bundles so each single-item type is immediately followed by its
   // bulk variant, producing a two-column paired layout.
   $pair_order = [
-    'image'        => 'bulk_upload_image',
     'audio'        => 'bulk_upload_audio',
     'document'     => 'bulk_upload_document',
-    'video'        => 'bulk_upload_video',
+    'image'        => 'bulk_upload_image',
     'remote_video' => 'bulk_create_remote_video',
     'soundcloud'   => 'bulk_create_soundcloud',
+    'video'        => 'bulk_upload_video',
   ];
 
   $ordered = [];
