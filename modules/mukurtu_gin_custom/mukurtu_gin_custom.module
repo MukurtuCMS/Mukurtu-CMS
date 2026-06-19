@@ -71,6 +71,7 @@ function mukurtu_gin_custom_page_attachments(array &$attachments) {
   if ($admin_context->isAdminRoute()) {
     $attachments['#attached']['drupalSettings']['mukurtu']['mediaEditUrl'] =
       Url::fromRoute('entity.media.edit_form', ['media' => 0])->toString();
+    $attachments['#attached']['library'][] = 'mukurtu_gin_custom/gin-collapsed-defaults';
     $attachments['#attached']['library'][] = 'mukurtu_gin_custom/entity-browser-toggle';
     $attachments['#attached']['library'][] = 'mukurtu_gin_custom/community-browser-select';
   }
