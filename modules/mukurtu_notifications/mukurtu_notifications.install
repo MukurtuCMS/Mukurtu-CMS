@@ -92,6 +92,9 @@ function mukurtu_notifications_update_40005(): void {
     $config_storage->write('core.extension', $data);
   }
 
+  // Remove orphan schema version entries left when bypassing module_installer.
+  \Drupal::keyValue('system.schema')->deleteMultiple(['message_digest', 'message_digest_ui']);
+
   foreach (['user' => 'message_digest', 'flagging' => 'message_digest'] as $entity_type => $field_name) {
     $storage = \Drupal::entityTypeManager()
       ->getStorage('field_storage_config')
