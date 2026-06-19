@@ -75,20 +75,21 @@ function mukurtu_notifications_update_40004(): void {
  * Uninstall message_digest modules and remove associated fields.
  */
 function mukurtu_notifications_update_40005(): void {
-  // Remove directly from core.extension. Using module_installer->uninstall()
-  // after editing core.extension causes a conflict because the in-memory module
-  // list is still stale, leading to a MissingDependencyException.
-  $config = \Drupal::configFactory()->getEditable('core.extension');
-  $modules = $config->get('module');
+  // Write directly to config.storage (the raw layer) rather than going through
+  // configFactory()->save(). The factory dispatches ConfigCrudEvent::SAVE, which
+  // triggers a ModuleInstaller subscriber that calls install() on the removed
+  // modules -- a fatal error when the module code no longer exists on disk.
+  $config_storage = \Drupal::service('config.storage');
+  $data = $config_storage->read('core.extension');
   $changed = FALSE;
   foreach (['message_digest_ui', 'message_digest'] as $module) {
-    if (isset($modules[$module])) {
-      unset($modules[$module]);
+    if (isset($data['module'][$module])) {
+      unset($data['module'][$module]);
       $changed = TRUE;
     }
   }
   if ($changed) {
-    $config->set('module', $modules)->save();
+    $config_storage->write('core.extension', $data);
   }
 
   foreach (['user' => 'message_digest', 'flagging' => 'message_digest'] as $entity_type => $field_name) {
