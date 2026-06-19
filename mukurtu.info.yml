@@ -110,7 +110,6 @@ dependencies:
   - 'leaflet:leaflet'
   - 'leaflet:leaflet_views'
   - 'message:message'
-  - 'message_digest:message_digest'
   - 'message_subscribe:message_subscribe_ui'
   - 'message_ui:message_notify_ui'
   - 'message_ui:message_ui'

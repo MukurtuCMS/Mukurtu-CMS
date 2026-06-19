@@ -70,3 +70,39 @@ function mukurtu_notifications_update_40004(): void {
     $config_factory->getEditable($action)->delete();
   }
 }
+
+/**
+ * Uninstall message_digest modules and remove associated fields.
+ */
+function mukurtu_notifications_update_40005(): void {
+  // Remove from core.extension directly -- code may already be absent from disk.
+  $config = \Drupal::configFactory()->getEditable('core.extension');
+  $modules = $config->get('module');
+  $changed = FALSE;
+  foreach (['message_digest_ui', 'message_digest'] as $module) {
+    if (isset($modules[$module])) {
+      unset($modules[$module]);
+      $changed = TRUE;
+    }
+  }
+  if ($changed) {
+    $config->set('module', $modules)->save();
+  }
+
+  // Also try the module installer if code is still present on disk.
+  $module_installer = \Drupal::service('module_installer');
+  foreach (['message_digest_ui', 'message_digest'] as $module) {
+    if (\Drupal::moduleHandler()->moduleExists($module)) {
+      $module_installer->uninstall([$module]);
+    }
+  }
+
+  foreach (['user' => 'message_digest', 'flagging' => 'message_digest'] as $entity_type => $field_name) {
+    $storage = \Drupal::entityTypeManager()
+      ->getStorage('field_storage_config')
+      ->load("$entity_type.$field_name");
+    if ($storage) {
+      $storage->delete();
+    }
+  }
+}
