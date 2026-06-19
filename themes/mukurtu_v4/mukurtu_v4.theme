@@ -34,16 +34,6 @@ function mukurtu_v4_preprocess_breadcrumb(&$variables) {
 function mukurtu_v4_preprocess_node(&$variables) {
   $node = $variables['node'];
 
-  if (!$node->isPublished()) {
-    $variables['title_prefix']['draft_banner'] = [
-      '#type' => 'html_tag',
-      '#tag' => 'div',
-      '#value' => t('Draft'),
-      '#attributes' => ['class' => ['node--draft-banner'], 'role' => 'status'],
-      '#weight' => -100,
-    ];
-  }
-
   if ($node instanceof Collection) {
     $variables['collection_count'] = $node->getCount();
   }

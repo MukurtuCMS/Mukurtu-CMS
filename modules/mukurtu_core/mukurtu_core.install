@@ -1421,6 +1421,9 @@ function mukurtu_core_update_40047(): void {
  * removed boolean draft field.
  */
 function mukurtu_core_update_40048(): void {
+  if (!\Drupal::moduleHandler()->moduleExists('mukurtu_drafts')) {
+    return;
+  }
   $module_path = \Drupal::service('module_handler')->getModule('mukurtu_drafts')->getPath();
   $config_source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
   $config_data = $config_source->read('views.view.mukurtu_draft_content');
@@ -1465,5 +1468,38 @@ function mukurtu_core_update_40050(): void {
     }
     $workflow->set('type_settings.states.draft.default_revision', TRUE);
     $workflow->save();
+  }
+}
+
+/**
+ * Resync the draft content view to add editorial workflow filter and tag cache.
+ */
+function mukurtu_core_update_40051(): void {
+  if (!\Drupal::moduleHandler()->moduleExists('mukurtu_drafts')) {
+    return;
+  }
+  $module_path = \Drupal::service('module_handler')->getModule('mukurtu_drafts')->getPath();
+  $config_source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+  $config_data = $config_source->read('views.view.mukurtu_draft_content');
+  if ($config_data) {
+    \Drupal::configFactory()
+      ->getEditable('views.view.mukurtu_draft_content')
+      ->setData($config_data)
+      ->save();
+  }
+}
+
+/**
+ * Update manage all content view to display moderation state instead of status.
+ */
+function mukurtu_core_update_40052(): void {
+  $profile_path = \Drupal::service('extension.list.profile')->getPath('mukurtu');
+  $config_source = new \Drupal\Core\Config\FileStorage(\Drupal::root() . '/' . $profile_path . '/config/install');
+  $config_data = $config_source->read('views.view.mukurtu_manage_all_content');
+  if ($config_data) {
+    \Drupal::configFactory()
+      ->getEditable('views.view.mukurtu_manage_all_content')
+      ->setData($config_data)
+      ->save();
   }
 }

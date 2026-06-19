@@ -293,7 +293,7 @@ display:
         options:
           perm: 'access content'
       cache:
-        type: none
+        type: tag
         options: {  }
       empty:
         area:
@@ -368,6 +368,7 @@ display:
           operator: in
           value:
             mukurtu_default_content_workflow-draft: mukurtu_default_content_workflow-draft
+            mukurtu_editorial_workflow-draft: mukurtu_editorial_workflow-draft
           group: 1
           exposed: false
           expose:

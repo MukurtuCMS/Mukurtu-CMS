@@ -5,4 +5,4 @@ mukurtu_drafts.your_drafts:
   options:
     _admin_route: true
   requirements:
-    _access: 'TRUE'
+    _user_is_logged_in: 'TRUE'

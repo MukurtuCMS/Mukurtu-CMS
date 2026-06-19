@@ -21,7 +21,7 @@ function mukurtu_drafts_entity_access(EntityInterface $entity, $operation, Accou
   }
 
   // Privileged users bypass draft visibility restrictions.
-  if ($account->hasPermission('bypass node access') || $account->hasPermission('administer nodes')) {
+  if ($account->hasPermission('bypass node access') || $account->hasPermission('administer nodes') || $account->hasPermission('view any unpublished content')) {
     return AccessResult::neutral()
       ->addCacheableDependency($entity)
       ->cachePerPermissions();
@@ -69,12 +69,13 @@ function mukurtu_drafts_entity_view(array &$build, EntityInterface $entity, Enti
     return;
   }
   // Inject a real DOM element so assistive technology announces the draft state.
-  // CSS ::before content is unreliable in screen readers.
+  // CSS ::before content is unreliable in screen readers. role="status" causes
+  // AT to announce the banner as a status message without moving focus.
   $build['title_prefix']['draft_banner'] = [
     '#type' => 'html_tag',
-    '#tag' => 'span',
+    '#tag' => 'div',
     '#value' => t('Draft'),
-    '#attributes' => ['class' => ['node--draft-banner']],
+    '#attributes' => ['class' => ['node--draft-banner'], 'role' => 'status'],
     '#weight' => -100,
   ];
 }
