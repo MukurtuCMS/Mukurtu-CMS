@@ -4,7 +4,6 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Access\AccessResult;
-use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 
 /**
  * Implements hook_entity_access().
@@ -59,19 +58,20 @@ function mukurtu_drafts_menu_local_tasks_alter(array &$data, string $route_name)
 }
 
 /**
- * Implements hook_entity_view().
+ * Implements hook_preprocess_node().
  */
-function mukurtu_drafts_entity_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
-  if (!$entity instanceof FieldableEntityInterface || !$entity->hasField('moderation_state')) {
+function mukurtu_drafts_preprocess_node(array &$variables): void {
+  $node = $variables['node'];
+  if (!($node instanceof FieldableEntityInterface) || !$node->hasField('moderation_state')) {
     return;
   }
-  if ($entity->get('moderation_state')->value !== 'draft') {
+  if ($node->get('moderation_state')->value !== 'draft') {
     return;
   }
   // Inject a real DOM element so assistive technology announces the draft state.
   // CSS ::before content is unreliable in screen readers. role="status" causes
   // AT to announce the banner as a status message without moving focus.
-  $build['title_prefix']['draft_banner'] = [
+  $variables['title_prefix']['draft_banner'] = [
     '#type' => 'html_tag',
     '#tag' => 'div',
     '#value' => t('Draft'),
