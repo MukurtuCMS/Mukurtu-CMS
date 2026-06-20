@@ -7,7 +7,7 @@ id: default_external_metadata_only
 label: 'Default external settings (metadata only)'
 uid: 1
 description: 'Default settings appropriate for export and sharing outside of the same site (using UUIDs). Covers all content types, media assets, taxonomy terms, and other entities. Only includes metadata, NOT the complete media assets.'
-site_wide: false
+site_wide: true
 entity_fields_export_list:
   node__article:
     langcode: Locale

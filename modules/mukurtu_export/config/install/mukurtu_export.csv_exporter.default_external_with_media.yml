@@ -7,7 +7,7 @@ id: default_external_with_media
 label: 'Default external settings (with media assets)'
 uid: 1
 description: 'Default settings appropriate for export and sharing outside of the same site (using UUIDs). Covers all content types, media assets, taxonomy terms, and other entities. Includes a download of local media assets (not remote files).'
-site_wide: false
+site_wide: true
 entity_fields_export_list:
   node__article:
     langcode: Locale

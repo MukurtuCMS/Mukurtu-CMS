@@ -290,3 +290,22 @@ function mukurtu_export_update_40012(): void {
     }
   }
 }
+
+/**
+ * Set all three new default export presets to site-wide visibility.
+ */
+function mukurtu_export_update_40013(): void {
+  $ids = [
+    'default_local_with_media',
+    'default_external_metadata_only',
+    'default_external_with_media',
+  ];
+
+  $storage = \Drupal::entityTypeManager()->getStorage('csv_exporter');
+  foreach ($ids as $id) {
+    $entity = $storage->load($id);
+    if ($entity && !$entity->get('site_wide')) {
+      $entity->set('site_wide', TRUE)->save();
+    }
+  }
+}
