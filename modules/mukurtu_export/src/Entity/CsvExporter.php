@@ -430,6 +430,34 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface {
         }
       }
 
+      // Break image fields into target_id and alt sub-fields to match the
+      // two-column format expected by the import system.
+      if ($field_def->getType() === 'image') {
+        $fileIdLabel = t('File ID');
+        $altLabel = t('Alternative text');
+        $exportDefault = $this->isNew() ? (!$field_def->isReadOnly() || in_array($field_name, $id_fields)) : FALSE;
+
+        if (!in_array('target_id', $mappedSubfields[$key][$field_name] ?? [])) {
+          $result[] = [
+            'field_name' => $field_name . '/target_id',
+            'field_label' => $field_def->getLabel() . ': ' . $fileIdLabel,
+            'csv_header_label' => $field_def->getLabel() . ' > ' . $fileIdLabel,
+            'export' => $exportDefault,
+          ];
+        }
+
+        if (!in_array('alt', $mappedSubfields[$key][$field_name] ?? [])) {
+          $result[] = [
+            'field_name' => $field_name . '/alt',
+            'field_label' => $field_def->getLabel() . ': ' . $altLabel,
+            'csv_header_label' => $field_def->getLabel() . ' > ' . $altLabel,
+            'export' => $exportDefault,
+          ];
+        }
+
+        continue;
+      }
+
       $result[] = [
         'field_name' => $field_name,
         'field_label' => $field_def->getLabel(),

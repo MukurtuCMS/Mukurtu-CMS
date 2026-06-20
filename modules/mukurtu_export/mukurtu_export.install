@@ -34,6 +34,23 @@ function mukurtu_export_update_40002() {
 }
 
 /**
+ * Add "Add to export list" bulk action to the manage content view.
+ */
+function mukurtu_export_update_40003() {
+  $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_manage_all_content');
+  if ($config->isNew()) {
+    return;
+  }
+  $actions = $config->get('display.mukurtu_manage_content.display_options.fields.views_bulk_operations_bulk_form.selected_actions') ?? [];
+  $action_ids = array_column($actions, 'action_id');
+  if (!in_array('mukurtu_export_add_to_list_action', $action_ids)) {
+    $actions[40] = ['action_id' => 'mukurtu_export_add_to_list_action'];
+    $config->set('display.mukurtu_manage_content.display_options.fields.views_bulk_operations_bulk_form.selected_actions', $actions);
+    $config->save();
+  }
+}
+
+/**
  * Grant content/media overview permissions to the Roundtrip Manager role.
  */
 function mukurtu_export_update_40004() {
@@ -130,7 +147,8 @@ function mukurtu_export_update_40006() {
       'field_media_external_embed' => 'Embed Code',
       'field_keywords' => 'Keywords',
       'field_people' => 'People',
-      'field_thumbnail' => 'Thumbnail',
+      'field_thumbnail/target_id' => 'Thumbnail > File ID',
+      'field_thumbnail/alt' => 'Thumbnail > Alternative text',
       'field_identifier' => 'Identifier',
       'field_found_in' => 'Found In',
     ];
@@ -149,7 +167,8 @@ function mukurtu_export_update_40006() {
       'field_contributor' => 'Contributor',
       'field_keywords' => 'Keywords',
       'field_people' => 'People',
-      'field_thumbnail' => 'Thumbnail',
+      'field_thumbnail/target_id' => 'Thumbnail > File ID',
+      'field_thumbnail/alt' => 'Thumbnail > Alternative text',
       'field_identifier' => 'Identifier',
       'field_found_in' => 'Found In',
     ];
@@ -162,17 +181,95 @@ function mukurtu_export_update_40006() {
 }
 
 /**
- * Update recommended_settings_for_import: fix multivalue_delimiter and add
- * local_contexts_delimiter and default_format.
- *
- * Note: numbered 40007 because existing sites were already at schema 40006
- * (hooks 40005 and 40006 were run in development but never committed).
+ * Change the recommended CSV exporter multivalue delimiter from || to ;.
  */
 function mukurtu_export_update_40007() {
+  $config = \Drupal::service('config.factory')
+    ->getEditable('mukurtu_export.csv_exporter.recommended_settings_for_import');
+  if ($config->get('multivalue_delimiter') === '||') {
+    $config->set('multivalue_delimiter', ';')->save();
+  }
+}
+
+/**
+ * Split image fields into target_id and alt sub-columns in the recommended
+ * CSV exporter to match the two-column format expected by the import system.
+ */
+function mukurtu_export_update_40008() {
+  $exporter = \Drupal::entityTypeManager()
+    ->getStorage('csv_exporter')
+    ->load('recommended_settings_for_import');
+  if (!$exporter) {
+    return;
+  }
+
+  // Map of field_name => human label used when the field was a single column.
+  $image_field_labels = [
+    'field_media_image'    => 'Image',
+    'field_thumbnail'      => 'Thumbnail',
+    'field_collection_image' => 'Image',
+    'field_banner_image'   => 'Banner Image',
+    'field_thumbnail_image' => 'Thumbnail Image',
+  ];
+
+  $list = $exporter->get('entity_fields_export_list') ?? [];
+  $changed = FALSE;
+
+  foreach ($list as $bundle_key => &$fields) {
+    foreach ($image_field_labels as $field_name => $label) {
+      if (!array_key_exists($field_name, $fields)) {
+        continue;
+      }
+      $keys = array_keys($fields);
+      $pos = array_search($field_name, $keys);
+      $before = array_slice($fields, 0, $pos, TRUE);
+      $after  = array_slice($fields, $pos + 1, NULL, TRUE);
+      $fields = $before
+        + ["{$field_name}/target_id" => "{$label} > File ID",
+           "{$field_name}/alt"       => "{$label} > Alternative text"]
+        + $after;
+      $changed = TRUE;
+    }
+  }
+  unset($fields);
+
+  if ($changed) {
+    $exporter->set('entity_fields_export_list', $list)->save();
+  }
+}
+
+/**
+ * Switch taxonomy_term__category thumbnail to two-field (target_id + alt) export format.
+ */
+function mukurtu_export_update_40009(): void {
+  $config = \Drupal::configFactory()->getEditable('mukurtu_export.csv_exporter.recommended_settings_for_import');
+  $entity_fields = $config->get('entity_fields_export_list') ?? [];
+
+  if (isset($entity_fields['taxonomy_term__category'])) {
+    $cat = &$entity_fields['taxonomy_term__category'];
+    // Remove legacy single-column thumbnail key if present.
+    unset($cat['field_thumbnail_image']);
+    // Insert two-field columns before parent if parent exists, otherwise append.
+    $parent = $cat['parent'] ?? NULL;
+    unset($cat['parent']);
+    $cat['field_thumbnail_image/target_id'] = 'Thumbnail Image > File ID';
+    $cat['field_thumbnail_image/alt'] = 'Thumbnail Image > Alternative text';
+    if ($parent !== NULL) {
+      $cat['parent'] = $parent;
+    }
+  }
+
+  $config->set('entity_fields_export_list', $entity_fields)->save();
+}
+
+/**
+ * Update recommended_settings_for_import: add local_contexts_delimiter and
+ * default_format fields.
+ */
+function mukurtu_export_update_40010(): void {
   $storage = \Drupal::entityTypeManager()->getStorage('csv_exporter');
   $entity = $storage->load('recommended_settings_for_import');
   if ($entity) {
-    $entity->setMultivalueDelimiter(';');
     $entity->setLocalContextsDelimiter('>');
     $entity->setDefaultFormat('basic_html');
     $entity->save();

@@ -5,6 +5,7 @@ namespace Drupal\mukurtu_export\Form;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 use Drupal\media\MediaInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -18,7 +19,9 @@ class ExportListRemoveMediaForm extends FormBase {
   ) {}
 
   public static function create(ContainerInterface $container): static {
-    return new static($container->get('entity_type.manager'));
+    return new static(
+      $container->get('entity_type.manager'),
+    );
   }
 
   public function getFormId(): string {
@@ -26,6 +29,12 @@ class ExportListRemoveMediaForm extends FormBase {
   }
 
   public function buildForm(array $form, FormStateInterface $form_state, ?MediaInterface $media = NULL): array {
+    if ($media === NULL) {
+      $this->messenger()->addError($this->t('Media item not found.'));
+      $form_state->setRedirect('view.mukurtu_media.media_page_list');
+      return $form;
+    }
+
     $form_state->set('media', $media);
 
     $options = $this->getListOptions($media->id());
@@ -44,6 +53,7 @@ class ExportListRemoveMediaForm extends FormBase {
       '#type' => 'select',
       '#title' => $this->t('Remove from export list'),
       '#options' => $options,
+      '#empty_option' => $this->t('- Select export list -'),
       '#required' => TRUE,
     ];
 
@@ -53,10 +63,11 @@ class ExportListRemoveMediaForm extends FormBase {
       '#value' => $this->t('Remove from List'),
       '#button_type' => 'primary',
     ];
+    $cancel_url = $this->getReturnUrl();
     $form['actions']['cancel'] = [
       '#type' => 'link',
       '#title' => $this->t('Cancel'),
-      '#url' => \Drupal\Core\Url::fromRoute('view.mukurtu_media.media_page_list'),
+      '#url' => $cancel_url,
       '#attributes' => ['class' => ['button']],
     ];
 
@@ -102,7 +113,15 @@ class ExportListRemoveMediaForm extends FormBase {
       '%label' => $list->label(),
     ]));
 
-    $form_state->setRedirect('view.mukurtu_media.media_page_list');
+    $form_state->setRedirectUrl($this->getReturnUrl());
+  }
+
+  protected function getReturnUrl(): Url {
+    $destination = $this->requestStack()->getCurrentRequest()->query->get('destination');
+    if ($destination && !str_starts_with($destination, 'http')) {
+      return Url::fromUserInput($destination);
+    }
+    return Url::fromRoute('view.mukurtu_media.media_page_list');
   }
 
 }

@@ -1027,9 +1027,10 @@ function mukurtu_media_entity_operation(\Drupal\Core\Entity\EntityInterface $ent
 
   $operations = [];
   $destination = \Drupal::request()->getRequestUri();
-  $csrf_token = \Drupal::csrfToken()->get('/admin/content/media/{media}/publish');
 
   if (!$entity->isPublished()) {
+    $publish_url = Url::fromRoute('mukurtu_media.publish', ['media' => $entity->id()]);
+    $csrf_token = \Drupal::csrfToken()->get(ltrim($publish_url->getInternalPath(), '/'));
     $operations['publish'] = [
       'title' => t('Publish'),
       'url' => Url::fromRoute('mukurtu_media.publish', ['media' => $entity->id()], [
@@ -1039,7 +1040,8 @@ function mukurtu_media_entity_operation(\Drupal\Core\Entity\EntityInterface $ent
     ];
   }
   else {
-    $csrf_token_unpublish = \Drupal::csrfToken()->get('/admin/content/media/{media}/unpublish');
+    $unpublish_url = Url::fromRoute('mukurtu_media.unpublish', ['media' => $entity->id()]);
+    $csrf_token_unpublish = \Drupal::csrfToken()->get(ltrim($unpublish_url->getInternalPath(), '/'));
     $operations['unpublish'] = [
       'title' => t('Unpublish'),
       'url' => Url::fromRoute('mukurtu_media.unpublish', ['media' => $entity->id()], [

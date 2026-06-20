@@ -27,16 +27,16 @@ class ImportResultsForm extends ImportBaseForm {
 
     $form['results_message'] = [
       '#type' => 'markup',
-      '#markup' => "<div class=\"messages messages--status\">" . $this->t('All files imported successfully.') . "</div>",
+      '#markup' => "<div class=\"messages messages--status\" role=\"status\" aria-live=\"polite\">" . $this->t('All files imported successfully.') . "</div>",
     ];
 
     if (!empty($messages)) {
-      $form['results_message']['#markup'] = "<div class=\"messages messages--error\">" . $this->t('Some files failed to import.') . "</div>";
+      $form['results_message']['#markup'] = "<div class=\"messages messages--error\" role=\"alert\" aria-live=\"assertive\">" . $this->t('Some files failed to import.') . "</div>";
       foreach ($messages as $message) {
         $filename = $this->getImportFilename($message['fid']) ?? '';
         $form["file_messages"][] = [
           '#type' => 'markup',
-          '#markup' => "<div class=\"messages messages--error\">" . $filename . ": ". $message['message'] . "</div>",
+          '#markup' => "<div class=\"messages messages--error\" role=\"alert\" aria-live=\"assertive\">" . $filename . ": ". $message['message'] . "</div>",
         ];
       }
     }
