@@ -35,7 +35,24 @@
           }
         }
 
+        // Capture the parent form ID before moving the widget. Gin's sticky
+        // header is rendered outside the <form> element (gin_sticky_actions is
+        // unset from the form render array in GinContentFormHelper::formAfterBuild
+        // and placed in the page template). Without form="<id>" the select
+        // would not be submitted and the node would save with the workflow's
+        // default_moderation_state instead of the user's selection.
+        const formEl = widget.closest('form');
+        const formId = formEl ? formEl.id : null;
+
         statusSlot.appendChild(widget);
+
+        if (formId) {
+          widget.querySelectorAll('select, input, textarea').forEach((input) => {
+            if (!input.getAttribute('form')) {
+              input.setAttribute('form', formId);
+            }
+          });
+        }
 
         // Remove any remaining copy of the widget from the sidebar to prevent
         // duplicate id attributes in the document, which break label/input

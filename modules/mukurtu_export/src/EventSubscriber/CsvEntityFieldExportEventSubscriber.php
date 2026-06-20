@@ -60,6 +60,11 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
     /** @var \Drupal\mukurtu_export\Entity\CsvExporter $config */
     $config = $this->entityTypeManager->getStorage('csv_exporter')->load($event->context['results']['config_id']);
 
+    // Virtual field: reverse lookup of nodes that reference this media item.
+    if ($entity->getEntityTypeId() === 'media' && $field_name === 'field_found_in') {
+      return $this->exportFoundIn($event, $entity, $config);
+    }
+
     try {
       $field = $entity->get($field_name);
     } catch (InvalidArgumentException $e) {
@@ -151,9 +156,35 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
   protected function exportEntityReference(EntityFieldExportEvent $event, $field, CsvExporter $config) {
     $export = [];
     $target_type = $field->getFieldDefinition()->getSettings()['target_type'] ?? NULL;
+
+    // Export alt text from the image field of the referenced media entity.
+    if ($event->sub_field_name === 'alt' && $target_type === 'media') {
+      foreach ($field->getValue() as $value) {
+        if ($mid = ($value['target_id'] ?? NULL)) {
+          $media = $this->entityTypeManager->getStorage('media')->load($mid);
+          $alt = '';
+          if ($media) {
+            foreach ($media->getFields() as $media_field) {
+              if ($media_field->getFieldDefinition()->getType() === 'image') {
+                $image_values = $media_field->getValue();
+                $alt = $image_values[0]['alt'] ?? '';
+                break;
+              }
+            }
+          }
+          $export[] = $alt;
+        }
+      }
+      $event->setValue($export);
+      return;
+    }
+
     $option = $config->getEntityReferenceSetting($target_type);
     $id_format = $config->getIdFieldSetting();
 
+    // Entities are loaded one-by-one per reference value. This is acceptable
+    // because multi-value reference fields rarely carry hundreds of items, and
+    // entity exports are not high-frequency operations.
     foreach ($field->getValue() as $value) {
       if ($id = ($value['target_id'] ?? NULL)) {
         if ($option && $target_type) {
@@ -349,6 +380,32 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
    * @protected
    */
   protected function exportImage(EntityFieldExportEvent $event, $field, CsvExporter $config) {
+    // Split-column path: export only the requested sub-property so the output
+    // matches the two-column format the import system expects.
+    if ($event->sub_field_name === 'target_id') {
+      $export = [];
+      foreach ($field->getValue() as $value) {
+        if ($fid = ($value['target_id'] ?? NULL)) {
+          $export[] = $config->getIdFieldSetting() === 'uuid'
+            ? $this->getUUID('file', $fid)
+            : $fid;
+        }
+      }
+      $event->setValue($export);
+      return;
+    }
+    if ($event->sub_field_name === 'alt') {
+      $export = [];
+      foreach ($field->getValue() as $value) {
+        $export[] = $value['alt'] ?? '';
+      }
+      $event->setValue($export);
+      return;
+    }
+
+    // Legacy single-column path (no sub_field_name): keeps the existing
+    // markdown format for backward compatibility with saved exporters that
+    // still reference the bare field name.
     $setting = $config->getImageFieldSetting();
     $export = [];
 
@@ -475,6 +532,44 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
       return $packagedFilePath;
     }
     return NULL;
+  }
+
+  /**
+   * Exports the virtual "found in" field for media entities.
+   *
+   * Performs a reverse entity query to find all nodes that reference this media
+   * item via field_media_assets and returns their IDs or UUIDs.
+   *
+   * @param EntityFieldExportEvent $event
+   *   The export event object.
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The media entity being exported.
+   * @param CsvExporter $config
+   *   The export configuration.
+   *
+   * @protected
+   */
+  protected function exportFoundIn(EntityFieldExportEvent $event, EntityInterface $entity, CsvExporter $config) {
+    $nids = $this->entityTypeManager->getStorage('node')
+      ->getQuery()
+      ->condition('field_media_assets', $entity->id())
+      ->accessCheck(TRUE)
+      ->execute();
+
+    $export = [];
+    $id_format = $config->getIdFieldSetting();
+
+    if ($id_format === 'uuid') {
+      $nodes = $this->entityTypeManager->getStorage('node')->loadMultiple($nids);
+      foreach ($nodes as $node) {
+        $export[] = $node->uuid();
+      }
+    }
+    else {
+      $export = array_values($nids);
+    }
+
+    $event->setValue($export);
   }
 
 }

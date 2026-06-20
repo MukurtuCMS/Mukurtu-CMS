@@ -113,6 +113,12 @@ function mukurtu_gin_custom_preprocess_media(&$variables) {
 function mukurtu_gin_custom_form_node_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
   if (isset($form['moderation_state'])) {
     $form['#attached']['library'][] = 'mukurtu_gin_custom/moderation-state-header';
+
+    // Always use "Save as" regardless of whether the entity is new or existing.
+    // Core uses "Change to" for existing entities; this overrides it for consistency.
+    if (isset($form['moderation_state']['widget'][0]['state'])) {
+      $form['moderation_state']['widget'][0]['state']['#title'] = t('Save as');
+    }
   }
 }
 

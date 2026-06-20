@@ -6277,6 +6277,20 @@ header {
   -webkit-margin-before: var(--v-space-xs);
           margin-block-start: var(--v-space-xs);
 }
+
+.node--draft-banner {
+  display: block;
+  background: var(--brand-secondary-dark);
+  color: var(--color-white);
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0.75rem 1.5rem;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
 .full-node__list {
   grid-column: 1/span 6;
 }

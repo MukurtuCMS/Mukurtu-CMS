@@ -63,14 +63,12 @@ class ExportListRemoveItemsForm extends FormBase {
     $form['list'] = $this->getListRenderable($form_data);
 
     // Show only export lists that contain at least one of the selected entities.
-    $node_ids = [];
+    $ids_by_type = [];
     foreach ($form_data['list'] as $item) {
-      if ($item[2] === 'node') {
-        $node_ids[] = $item[3];
-      }
+      $ids_by_type[$item[2]][] = $item[3];
     }
 
-    $options = $this->getExportListOptions($node_ids);
+    $options = $this->getExportListOptions($ids_by_type);
 
     if (empty($options)) {
       $this->messenger()->addWarning($this->t('The selected items are not in any export list.'));
@@ -150,16 +148,16 @@ class ExportListRemoveItemsForm extends FormBase {
   }
 
   /**
-   * Returns export list options that contain at least one of the given node IDs.
+   * Returns export list options that contain at least one of the selected entities.
    *
-   * @param array $node_ids
-   *   Node IDs to check membership for.
+   * @param array $ids_by_type
+   *   Entity IDs grouped by entity type ID.
    *
    * @return array
    *   Keyed by export list ID, values are labels.
    */
-  protected function getExportListOptions(array $node_ids): array {
-    if (empty($node_ids)) {
+  protected function getExportListOptions(array $ids_by_type): array {
+    if (empty($ids_by_type)) {
       return [];
     }
 
@@ -170,11 +168,13 @@ class ExportListRemoveItemsForm extends FormBase {
     $options = [];
     foreach ($lists as $list) {
       $items = $list->getItems();
-      $list_nodes = $items['node'] ?? [];
-      foreach ($node_ids as $nid) {
-        if (isset($list_nodes[$nid])) {
-          $options[$list->id()] = $list->label();
-          break;
+      foreach ($ids_by_type as $entity_type => $ids) {
+        $list_items = $items[$entity_type] ?? [];
+        foreach ($ids as $id) {
+          if (isset($list_items[$id])) {
+            $options[$list->id()] = $list->label();
+            break 2;
+          }
         }
       }
     }
