@@ -3,14 +3,13 @@ status: true
 dependencies: {  }
 _core:
   default_config_hash: piH8CX5ny4s6Z46Ii04GhznLfMcbfTZVxk5e0rVOcS4
-id: recommended_settings_for_import
-label: 'Default local settings (metadata only)'
+id: default_external_with_media
+label: 'Default external settings (with media assets)'
 uid: 1
-description: 'Default settings appropriate for export and re-import to the same site (using local IDs). Covers all content types, media assets, taxonomy terms, and other entities. Only includes metadata, NOT the complete media assets.'
-site_wide: true
+description: 'Default settings appropriate for export and sharing outside of the same site (using UUIDs). Covers all content types, media assets, taxonomy terms, and other entities. Includes a download of local media assets (not remote files).'
+site_wide: false
 entity_fields_export_list:
   node__article:
-    nid: ID
     langcode: Locale
     uid: 'Authored by'
     title: Title
@@ -20,8 +19,9 @@ entity_fields_export_list:
     field_article_image/target_id: 'Image > File ID'
     field_article_image/alt: 'Image > Alternative text'
     field_article_keywords: Keywords
+    uuid: UUID
   node__collection:
-    nid: ID
+    uuid: UUID
     langcode: Locale
     uid: 'Authored by'
     title: Title
@@ -44,7 +44,6 @@ entity_fields_export_list:
     field_local_contexts_labels_and_notices: 'Local Contexts Labels and Notices'
     field_coverage: 'Map Points'
   node__dictionary_word:
-    nid: ID
     langcode: Locale
     uid: 'Authored by'
     title: Title
@@ -74,8 +73,8 @@ entity_fields_export_list:
     field_local_contexts_labels_and_notices: 'Local Contexts Labels and Notices'
     field_additional_word_entries: 'Word Entries'
     field_coverage: 'Map Points'
+    uuid: UUID
   node__digital_heritage:
-    nid: ID
     langcode: Locale
     uid: 'Authored by'
     title: Title
@@ -114,23 +113,24 @@ entity_fields_export_list:
     field_local_contexts_projects: 'Local Contexts Projects'
     field_local_contexts_labels_and_notices: 'Local Contexts Labels and Notices'
     field_location: Location
+    uuid: UUID
   node__landing_page:
-    nid: ID
     langcode: Language
     uid: 'Authored by'
     title: Title
     default_langcode: 'Default translation'
     layout_builder__layout: Layout
+    uuid: UUID
   node__page:
-    nid: ID
     langcode: Locale
     uid: 'Authored by'
     title: Title
     default_langcode: 'Default translation'
     body: Body
     field_page_media_assets: 'Media Assets'
+    uuid: UUID
   node__person:
-    nid: ID
+    uuid: UUID
     langcode: Locale
     uid: 'Authored by'
     title: Title
@@ -154,7 +154,7 @@ entity_fields_export_list:
     field_local_contexts_labels_and_notices: 'Local Contexts Labels and Notices'
     field_coverage: 'Map Points'
   node__place:
-    nid: ID
+    uuid: UUID
     langcode: Locale
     uid: 'Authored by'
     title: Title
@@ -173,7 +173,6 @@ entity_fields_export_list:
     field_local_contexts_labels_and_notices: 'Local Contexts Labels and Notices'
     field_coverage: 'Map Points'
   node__word_list:
-    nid: ID
     langcode: Locale
     uid: 'Authored by'
     title: Title
@@ -192,8 +191,8 @@ entity_fields_export_list:
     field_local_contexts_projects: 'Local Contexts Projects'
     field_local_contexts_labels_and_notices: 'Local Contexts Labels and Notices'
     field_coverage: 'Map Points'
+    uuid: UUID
   media__audio:
-    mid: ID
     langcode: Locale
     uid: 'Authored by'
     name: Name
@@ -208,8 +207,8 @@ entity_fields_export_list:
     field_identifier: Identifier
     default_langcode: 'Default translation'
     field_media_tags: 'Media Tags'
+    uuid: UUID
   media__document:
-    mid: ID
     langcode: Locale
     uid: 'Authored by'
     name: Name
@@ -223,8 +222,8 @@ entity_fields_export_list:
     field_identifier: Identifier
     default_langcode: 'Default translation'
     field_media_tags: 'Media Tags'
+    uuid: UUID
   media__external_embed:
-    mid: ID
     langcode: Language
     uid: 'Authored by'
     name: Name
@@ -239,8 +238,8 @@ entity_fields_export_list:
     field_media_tags: 'Media Tags'
     field_people: People
     field_identifier: Identifier
+    uuid: UUID
   media__image:
-    mid: ID
     langcode: Locale
     uid: 'Authored by'
     name: Name
@@ -253,8 +252,8 @@ entity_fields_export_list:
     thumbnail/target_id: 'Thumbnail > File ID'
     thumbnail/alt: 'Thumbnail > Alternative text'
     field_media_tags: 'Media Tags'
+    uuid: UUID
   media__remote_video:
-    mid: ID
     langcode: Locale
     uid: 'Authored by'
     name: Name
@@ -269,8 +268,8 @@ entity_fields_export_list:
     thumbnail/alt: 'Thumbnail > Alternative text'
     default_langcode: 'Default translation'
     field_media_tags: 'Media Tags'
+    uuid: UUID
   media__soundcloud:
-    mid: ID
     langcode: Language
     uid: 'Authored by'
     name: Name
@@ -285,8 +284,8 @@ entity_fields_export_list:
     field_thumbnail/alt: 'Thumbnail > Alternative text'
     field_identifier: Identifier
     field_contributor: Contributor
+    uuid: UUID
   media__video:
-    mid: ID
     langcode: Locale
     uid: 'Authored by'
     name: Name
@@ -299,8 +298,8 @@ entity_fields_export_list:
     field_identifier: Identifier
     default_langcode: 'Default translation'
     field_media_tags: 'Media Tags'
+    uuid: UUID
   community__community:
-    id: ID
     langcode: Locale
     user_id: 'Authored by'
     name: Name
@@ -318,8 +317,8 @@ entity_fields_export_list:
     field_local_contexts_api_key: 'Local Contexts API key'
     field_local_contexts_description: 'Local Contexts Description'
     default_langcode: 'Default translation'
+    uuid: UUID
   protocol__protocol:
-    id: ID
     langcode: Locale
     user_id: 'Authored by'
     name: Name
@@ -337,8 +336,8 @@ entity_fields_export_list:
     field_local_contexts_api_key: 'Local Contexts API key'
     field_local_contexts_description: 'Local Contexts Description'
     default_langcode: 'Default translation'
+    uuid: UUID
   paragraph__dictionary_word_entry:
-    id: ID
     langcode: 'Language code'
     field_alternate_spelling: 'Alternate Spelling'
     field_contributor: Contributor
@@ -353,30 +352,30 @@ entity_fields_export_list:
     parent_id: 'Parent ID'
     default_langcode: 'Default translation'
     field_word_entry_term: Term
+    uuid: UUID
   paragraph__footer_logo:
-    id: ID
     langcode: 'Language code'
     parent_id: 'Parent ID'
     default_langcode: 'Default translation'
     field_footer_logo_image/target_id: 'Logo image > File ID'
     field_footer_logo_image/alt: 'Logo image > Alternative text'
     field_footer_logo_link: 'Link URL (optional)'
+    uuid: UUID
   paragraph__footer_social_link:
-    id: ID
     langcode: 'Language code'
     parent_id: 'Parent ID'
     default_langcode: 'Default translation'
     field_footer_social_platform: Platform
     field_footer_social_url: 'Profile URL'
+    uuid: UUID
   paragraph__formatted_text_with_title:
-    id: ID
     langcode: 'Language code'
     field_title: Title
     field_body: Body
     parent_id: 'Parent ID'
     default_langcode: 'Default translation'
+    uuid: UUID
   paragraph__indigenous_knowledge_keepers:
-    id: ID
     langcode: 'Language code'
     field_name: 'Name of the Elder or Knowledge Keeper'
     field_nation: 'Nation or Community'
@@ -386,39 +385,37 @@ entity_fields_export_list:
     field_original_date: Date
     parent_id: 'Parent ID'
     default_langcode: 'Default translation'
+    uuid: UUID
   paragraph__related_person:
-    id: ID
     langcode: 'Language code'
     field_related_person: 'Related Person'
     field_relationship_type: 'Relationship Type'
     parent_id: 'Parent ID'
     default_langcode: 'Default translation'
+    uuid: UUID
   paragraph__sample_sentence:
-    id: ID
     langcode: 'Language code'
     field_sentence: 'Sample Sentence'
     field_sentence_recording: Recording
     parent_id: 'Parent ID'
     default_langcode: 'Default translation'
+    uuid: UUID
   paragraph__text_section_with_title:
-    id: ID
     langcode: 'Language code'
     parent_id: 'Parent ID'
     default_langcode: 'Default translation'
     field_title: Title
     field_body: Body
+    uuid: UUID
   file__file:
-    fid: 'File ID'
     uid: 'User ID'
     filename: Filename
     uri: URI
     filemime: 'File MIME type'
     filesize: 'File size'
-    created: Created
-    changed: Changed
     langcode: 'Language code'
+    uuid: UUID
   taxonomy_term__category:
-    tid: 'Term ID'
     langcode: Locale
     name: Name
     description: Description
@@ -426,112 +423,113 @@ entity_fields_export_list:
     field_thumbnail_image/target_id: 'Thumbnail Image > File ID'
     field_thumbnail_image/alt: 'Thumbnail Image > Alternative text'
     parent: Parent
+    uuid: UUID
   taxonomy_term__community_type:
-    tid: 'Term ID'
     langcode: Locale
     name: Name
     description: Description
     parent: Parent
     default_langcode: 'Default translation'
+    uuid: UUID
   taxonomy_term__contributor:
-    tid: 'Term ID'
     langcode: Locale
     name: Name
     description: Description
     parent: Parent
     default_langcode: 'Default translation'
+    uuid: UUID
   taxonomy_term__creator:
-    tid: 'Term ID'
     langcode: Locale
     name: Name
     description: Description
     parent: Parent
     default_langcode: 'Default translation'
+    uuid: UUID
   taxonomy_term__format:
-    tid: 'Term ID'
     langcode: Locale
     name: Name
     description: Description
     revision_default: 'Default revision'
     parent: Parent
     default_langcode: 'Default translation'
+    uuid: UUID
   taxonomy_term__interpersonal_relationship:
-    tid: 'Term ID'
     langcode: Locale
     name: Name
     description: Description
     parent: Parent
     default_langcode: 'Default translation'
+    uuid: UUID
   taxonomy_term__keywords:
-    tid: 'Term ID'
     langcode: Locale
     name: Name
     description: Description
     parent: Parent
     default_langcode: 'Default translation'
+    uuid: UUID
   taxonomy_term__language:
-    tid: 'Term ID'
     langcode: Locale
     name: Name
     description: Description
     parent: Parent
     default_langcode: 'Default translation'
+    uuid: UUID
   taxonomy_term__location:
-    tid: 'Term ID'
     langcode: Locale
     name: Name
     description: Description
     parent: Parent
     default_langcode: 'Default translation'
+    uuid: UUID
   taxonomy_term__media_tag:
-    tid: 'Term ID'
     langcode: Locale
     name: Name
     description: Description
     parent: Parent
     default_langcode: 'Default translation'
+    uuid: UUID
   taxonomy_term__people:
-    tid: 'Term ID'
     langcode: Locale
     name: Name
     description: Description
     parent: Parent
     default_langcode: 'Default translation'
+    uuid: UUID
   taxonomy_term__place_type:
-    tid: 'Term ID'
     langcode: Locale
     name: Name
     description: Description
     parent: Parent
     default_langcode: 'Default translation'
+    uuid: UUID
   taxonomy_term__publisher:
-    tid: 'Term ID'
     langcode: Locale
     name: Name
     description: Description
     parent: Parent
     default_langcode: 'Default translation'
+    uuid: UUID
   taxonomy_term__subject:
-    tid: 'Term ID'
     langcode: Locale
     name: Name
     description: Description
     parent: Parent
     default_langcode: 'Default translation'
+    uuid: UUID
   taxonomy_term__type:
-    tid: 'Term ID'
     langcode: Locale
     name: Name
     description: Description
     parent: Parent
     default_langcode: 'Default translation'
+    uuid: UUID
   taxonomy_term__word_type:
-    tid: 'Term ID'
     langcode: Locale
     name: Name
     description: Description
     parent: Parent
     default_langcode: 'Default translation'
+    uuid: UUID
 separator: ','
 enclosure: '"'
 escape: \
@@ -539,9 +537,9 @@ eol: \n
 multivalue_delimiter: ;
 local_contexts_delimiter: '>'
 default_format: basic_html
-field_file: id
-field_image: id
-field_id: id
+field_file: file_entity
+field_image: file_entity
+field_id: uuid
 entity_reference_node: id
 entity_reference_media: entity
 entity_reference_taxonomy_term: name

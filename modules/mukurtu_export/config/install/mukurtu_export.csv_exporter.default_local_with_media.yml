@@ -3,11 +3,11 @@ status: true
 dependencies: {  }
 _core:
   default_config_hash: piH8CX5ny4s6Z46Ii04GhznLfMcbfTZVxk5e0rVOcS4
-id: recommended_settings_for_import
-label: 'Default local settings (metadata only)'
+id: default_local_with_media
+label: 'Default local settings (with media assets)'
 uid: 1
-description: 'Default settings appropriate for export and re-import to the same site (using local IDs). Covers all content types, media assets, taxonomy terms, and other entities. Only includes metadata, NOT the complete media assets.'
-site_wide: true
+description: 'Default settings appropriate for export and re-import to the same site (using local IDs). Covers all content types, media assets, taxonomy terms, and other entities. Includes a download of local media assets (not remote files).'
+site_wide: false
 entity_fields_export_list:
   node__article:
     nid: ID
@@ -539,8 +539,8 @@ eol: \n
 multivalue_delimiter: ;
 local_contexts_delimiter: '>'
 default_format: basic_html
-field_file: id
-field_image: id
+field_file: file_entity
+field_image: file_entity
 field_id: id
 entity_reference_node: id
 entity_reference_media: entity
