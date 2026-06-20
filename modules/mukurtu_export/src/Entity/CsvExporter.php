@@ -298,7 +298,12 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface {
   }
 
   public function isSiteWide() {
-    return $this->site_wide === TRUE;
+    return (bool) $this->site_wide;
+  }
+
+  public function setSiteWide(bool $site_wide) {
+    $this->site_wide = $site_wide;
+    return $this;
   }
 
   public function getSeparator() {

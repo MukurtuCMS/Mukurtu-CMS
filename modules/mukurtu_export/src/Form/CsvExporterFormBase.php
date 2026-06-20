@@ -67,6 +67,16 @@ class CsvExporterFormBase extends EntityForm {
       '#default_value' => $entity->getDescription(),
     ];
 
+    $form['site_wide'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Visibility'),
+      '#default_value' => (int) $entity->isSiteWide(),
+      '#options' => [
+        0 => $this->t('Only me'),
+        1 => $this->t('All export users'),
+      ],
+    ];
+
     $form['relationships'] = [
       '#type' => 'details',
       '#open' => TRUE,
@@ -488,6 +498,7 @@ class CsvExporterFormBase extends EntityForm {
       }
     }
 
+    $entity->setSiteWide((bool) $form_state->getValue('site_wide'));
     $entity->setMultivalueDelimiter($form_state->getValue('multivalue_delimiter'));
     $entity->setLocalContextsDelimiter($form_state->getValue('local_contexts_delimiter'));
     $entity->setDefaultFormat($form_state->getValue('default_format'));
