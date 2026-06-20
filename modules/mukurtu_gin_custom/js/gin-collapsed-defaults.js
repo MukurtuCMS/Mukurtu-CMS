@@ -1,3 +1,4 @@
+// Keys sourced from gin/js/toolbar.js and gin/js/navigation/navigation.js.
 if (!localStorage.getItem('Drupal.gin.toolbarExpanded')) {
   localStorage.setItem('Drupal.gin.toolbarExpanded', 'false');
 }
