@@ -2,23 +2,48 @@
 
 namespace Drupal\mukurtu_workflows\Form;
 
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 use Drupal\workflows\Entity\Workflow;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Settings form for switching the site-wide publishing workflow.
+ * Settings form for managing site-wide publishing workflows.
  */
 class WorkflowSettingsForm extends FormBase {
+
+  public function __construct(
+    protected EntityTypeManagerInterface $entityTypeManager,
+  ) {}
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): static {
+    return new static($container->get('entity_type.manager'));
+  }
 
   /**
    * Node bundles that Mukurtu manages via content moderation.
    */
   protected function getManagedBundles(): array {
-    $types = \Drupal::entityTypeManager()
-      ->getStorage('node_type')
-      ->loadMultiple();
+    $types = $this->entityTypeManager->getStorage('node_type')->loadMultiple();
     return array_keys($types);
+  }
+
+  /**
+   * Returns the ID of the workflow currently assigned to node bundles.
+   */
+  protected function getActiveWorkflowId(): ?string {
+    foreach (Workflow::loadMultiple() as $workflow) {
+      $type_settings = $workflow->get('type_settings');
+      if (!empty($type_settings['entity_types']['node'])) {
+        return $workflow->id();
+      }
+    }
+    return NULL;
   }
 
   /**
@@ -32,23 +57,70 @@ class WorkflowSettingsForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state): array {
-    $editorial = Workflow::load('mukurtu_editorial_workflow');
-    $current_mode = 'simple';
-    if ($editorial) {
-      $type_settings = $editorial->get('type_settings');
-      if (!empty($type_settings['entity_types']['node'])) {
-        $current_mode = 'editorial';
+    $active_id = $this->getActiveWorkflowId();
+    $workflows = Workflow::loadMultiple();
+
+    $form['workflow_table'] = [
+      '#type' => 'table',
+      '#header' => [
+        $this->t('Active'),
+        $this->t('Workflow'),
+        $this->t('States'),
+        $this->t('Actions'),
+      ],
+      '#empty' => $this->t('No workflows found.'),
+    ];
+
+    foreach ($workflows as $id => $workflow) {
+      $is_mukurtu = str_starts_with($id, 'mukurtu_');
+      $states = $workflow->getTypePlugin()->getStates();
+      $state_labels = array_map(fn($s) => $s->label(), $states);
+
+      $form['workflow_table'][$id]['active'] = [
+        '#type' => 'radio',
+        '#title' => $this->t('Set @label as active', ['@label' => $workflow->label()]),
+        '#title_display' => 'invisible',
+        '#return_value' => $id,
+        '#default_value' => $active_id,
+        '#parents' => ['active_workflow'],
+      ];
+
+      $form['workflow_table'][$id]['label'] = [
+        '#markup' => $workflow->label(),
+      ];
+
+      $form['workflow_table'][$id]['states'] = [
+        '#markup' => implode(', ', $state_labels),
+      ];
+
+      $links = [
+        'duplicate' => [
+          'title' => $this->t('Duplicate'),
+          'url' => Url::fromRoute('mukurtu_workflows.duplicate', ['workflow' => $id]),
+        ],
+      ];
+      if (!$is_mukurtu) {
+        $links['edit'] = [
+          'title' => $this->t('Edit'),
+          'url' => $workflow->toUrl('edit-form'),
+        ];
+        $links['delete'] = [
+          'title' => $this->t('Delete'),
+          'url' => $workflow->toUrl('delete-form'),
+        ];
       }
+
+      $form['workflow_table'][$id]['actions'] = [
+        '#type' => 'operations',
+        '#links' => $links,
+      ];
     }
 
-    $form['workflow_mode'] = [
-      '#type' => 'radios',
-      '#title' => $this->t('Publishing workflow'),
-      '#default_value' => $current_mode,
-      '#options' => [
-        'simple' => $this->t('Simple -- authors can save drafts and publish content directly.'),
-        'editorial' => $this->t('Editorial -- authors submit content for review; a Protocol Steward must approve it before it publishes.'),
-      ],
+    $form['add_workflow'] = [
+      '#type' => 'link',
+      '#title' => $this->t('Create new workflow'),
+      '#url' => Url::fromRoute('entity.workflow.add_form'),
+      '#attributes' => ['class' => ['button', 'button--action', 'button--primary']],
     ];
 
     $form['actions']['#type'] = 'actions';
@@ -64,34 +136,25 @@ class WorkflowSettingsForm extends FormBase {
   /**
    * {@inheritdoc}
    */
+  public function validateForm(array &$form, FormStateInterface $form_state): void {
+    if (!$form_state->getValue('active_workflow')) {
+      $form_state->setError($form['workflow_table'], $this->t('Please select an active workflow.'));
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function submitForm(array &$form, FormStateInterface $form_state): void {
-    $mode = $form_state->getValue('workflow_mode');
+    $active_id = $form_state->getValue('active_workflow');
     $bundles = $this->getManagedBundles();
 
-    $editorial = Workflow::load('mukurtu_editorial_workflow');
-    $default = Workflow::load('mukurtu_default_content_workflow');
-
-    if (!$editorial || !$default) {
-      $this->messenger()->addError($this->t('Could not load workflow configuration. Please check that the Mukurtu workflows module is properly installed.'));
-      return;
+    foreach (Workflow::loadMultiple() as $id => $workflow) {
+      $type_settings = $workflow->get('type_settings');
+      $type_settings['entity_types'] = ($id === $active_id) ? ['node' => $bundles] : [];
+      $workflow->set('type_settings', $type_settings);
+      $workflow->save();
     }
-
-    $editorial_settings = $editorial->get('type_settings');
-    $default_settings = $default->get('type_settings');
-
-    if ($mode === 'editorial') {
-      $editorial_settings['entity_types'] = ['node' => $bundles];
-      $default_settings['entity_types'] = [];
-    }
-    else {
-      $default_settings['entity_types'] = ['node' => $bundles];
-      $editorial_settings['entity_types'] = [];
-    }
-
-    $editorial->set('type_settings', $editorial_settings);
-    $editorial->save();
-    $default->set('type_settings', $default_settings);
-    $default->save();
 
     $this->messenger()->addStatus($this->t('Publishing workflow settings saved.'));
   }

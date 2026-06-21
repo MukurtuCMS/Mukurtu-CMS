@@ -8,8 +8,56 @@
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 use Drupal\views\ViewExecutable;
 use Drupal\views\Plugin\views\query\QueryPluginBase;
+
+/**
+ * Implements hook_form_workflow_edit_form_alter().
+ *
+ * Redirects back to the Mukurtu workflow settings page after saving.
+ */
+function mukurtu_workflows_form_workflow_edit_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
+  $form['actions']['submit']['#submit'][] = 'mukurtu_workflows_redirect_to_settings';
+}
+
+/**
+ * Implements hook_form_workflow_add_form_alter().
+ *
+ * - Renames "Label" to "Workflow name".
+ * - Hides the workflow type select (only one option exists on this site).
+ * - Redirects to the workflow edit form so users can configure states and
+ *   transitions immediately after naming their workflow.
+ */
+function mukurtu_workflows_form_workflow_add_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
+  $form['label']['#title'] = t('Workflow name');
+
+  // Only one workflow type plugin exists (content_moderation), so hide the
+  // select and set the value automatically.
+  $form['workflow_type'] = [
+    '#type' => 'value',
+    '#value' => 'content_moderation',
+  ];
+
+  $form['actions']['submit']['#submit'][] = 'mukurtu_workflows_redirect_to_workflow_edit';
+}
+
+/**
+ * Submit handler: redirect to the workflow edit form.
+ */
+function mukurtu_workflows_redirect_to_workflow_edit(array &$form, FormStateInterface $form_state): void {
+  /** @var \Drupal\workflows\WorkflowInterface $workflow */
+  $workflow = $form_state->getFormObject()->getEntity();
+  $form_state->setRedirectUrl($workflow->toUrl('edit-form'));
+}
+
+/**
+ * Submit handler: redirect to the Mukurtu publishing workflow settings page.
+ */
+function mukurtu_workflows_redirect_to_settings(array &$form, FormStateInterface $form_state): void {
+  $form_state->setRedirectUrl(Url::fromRoute('mukurtu_workflows.settings'));
+}
 
 /**
  * Implements hook_entity_view().
