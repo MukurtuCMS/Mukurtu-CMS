@@ -28,6 +28,15 @@ entity-browser-toggle:
     - core/once
     - core/jquery
 
+moderation-state-header:
+  version: 1.x
+  js:
+    js/moderation-state-header.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+    - core/jquery
+
 community-browser-select:
   version: 1.x
   js:

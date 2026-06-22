@@ -6333,6 +6333,31 @@ header {
   -webkit-margin-before: var(--v-space-xs);
           margin-block-start: var(--v-space-xs);
 }
+
+.node--status-banner {
+  display: block;
+  color: var(--color-white);
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0.75rem 1.5rem;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.node--status-banner--draft {
+  background: var(--brand-secondary-dark);
+}
+.node--status-banner--needs-review {
+  background: var(--color-warning-dark);
+}
+.node--status-banner--revision-requested {
+  background: var(--color-error-dark);
+}
+.node--status-banner--archived {
+  background: var(--color-gray);
+}
+
 .full-node__list {
   grid-column: 1/span 6;
 }

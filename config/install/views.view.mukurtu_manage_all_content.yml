@@ -6,6 +6,7 @@ dependencies:
     - user.role.mukurtu_manager
     - user.role.mukurtu_roundtrip_manager
   module:
+    - content_moderation
     - mukurtu_protocol
     - node
     - views_bulk_operations
@@ -340,17 +341,17 @@ display:
           multi_type: separator
           separator: ', '
           field_api_classes: false
-        status:
-          id: status
+        moderation_state:
+          id: moderation_state
           table: node_field_data
-          field: status
+          field: moderation_state
           relationship: none
           group_type: group
           admin_label: ''
           entity_type: node
-          entity_field: status
+          entity_field: moderation_state
           plugin_id: field
-          label: Published
+          label: Status
           exclude: false
           alter:
             alter_text: false
@@ -392,11 +393,9 @@ display:
           empty_zero: false
           hide_alter_empty: true
           click_sort_column: value
-          type: boolean
+          type: string
           settings:
-            format: default
-            format_custom_false: ''
-            format_custom_true: ''
+            link_to_entity: false
           group_column: value
           group_columns: {  }
           group_rows: true
@@ -1036,29 +1035,28 @@ display:
             default_group: All
             default_group_multiple: {  }
             group_items: {  }
-        status:
-          id: status
+        moderation_state:
+          id: moderation_state
           table: node_field_data
-          field: mukurtu_published_filter
+          field: moderation_state
           relationship: none
           group_type: group
           admin_label: ''
           entity_type: node
-          entity_field: status
-          plugin_id: mukurtu_node_published_filter
-          operator: '='
-          value: 'All'
+          plugin_id: moderation_state_filter
+          operator: in
+          value: {  }
           group: 1
           exposed: true
           expose:
             operator_id: ''
-            label: Published
+            label: Status
             description: ''
             use_operator: false
-            operator: status_op
+            operator: moderation_state_op
             operator_limit_selection: false
             operator_list: {  }
-            identifier: status
+            identifier: moderation_state
             required: false
             remember: false
             multiple: false
@@ -1087,7 +1085,7 @@ display:
             title: title
             type: type
             community: community
-            status: status
+            moderation_state: moderation_state
             uid: uid
             changed: changed
             row_actions: row_actions
@@ -1117,7 +1115,7 @@ display:
               separator: ''
               empty_column: false
               responsive: ''
-            status:
+            moderation_state:
               sortable: true
               default_sort_order: asc
               align: ''

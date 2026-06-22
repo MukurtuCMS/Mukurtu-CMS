@@ -1,64 +1,81 @@
 <?php
 
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Access\AccessResult;
-use Drupal\mukurtu_drafts\Entity\MukurtuDraftInterface;
-use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 
 /**
  * Implements hook_entity_access().
  */
 function mukurtu_drafts_entity_access(EntityInterface $entity, $operation, AccountInterface $account)
 {
-  if ($entity instanceof MukurtuDraftInterface) {
-    // Check if the entity is a draft.
-    if ($entity->isDraft()) {
-      if ($account->id() == $entity->getOwnerId()) {
-        // Only grant draft access to the entity's authored by uid.
-        return AccessResult::allowed();
-      }
-      return AccessResult::forbidden();
-    }
+  if (!$entity instanceof FieldableEntityInterface || !$entity->hasField('moderation_state')) {
+    return AccessResult::neutral();
   }
-  // If entity does not implement MukurtuDraftInterface, let others determine
-  // access.
-  return AccessResult::neutral();
+
+  $state = $entity->get('moderation_state')->value;
+  if ($state !== 'draft') {
+    return AccessResult::neutral()->addCacheableDependency($entity);
+  }
+
+  // Privileged users bypass draft visibility restrictions.
+  if ($account->hasPermission('bypass node access') || $account->hasPermission('administer nodes') || $account->hasPermission('view any unpublished content')) {
+    return AccessResult::neutral()
+      ->addCacheableDependency($entity)
+      ->cachePerPermissions();
+  }
+
+  if (method_exists($entity, 'getOwnerId') && $account->id() == $entity->getOwnerId()) {
+    return AccessResult::allowed()
+      ->addCacheableDependency($entity)
+      ->addCacheContexts(['user']);
+  }
+
+  // Non-owners are blocked from viewing drafts; edit and delete are governed
+  // by workflow transition permissions.
+  if ($operation === 'view') {
+    return AccessResult::forbidden()
+      ->addCacheableDependency($entity)
+      ->addCacheContexts(['user']);
+  }
+
+  return AccessResult::neutral()
+    ->addCacheableDependency($entity)
+    ->addCacheContexts(['user']);
 }
 
 /**
- * Implements hook_entity_views_data().
+ * Implements hook_menu_local_tasks_alter().
  */
-function mukurtu_drafts_views_data()
-{
-  $data = [];
-  $data['node_field_data']['draft'] = [
-    'title' => t('Draft'),
-    'help' => t('Draft status'),
-    'field' => [
-      'id' => 'boolean',
-    ],
-    'sort' => [
-      'id' => 'standard',
-    ],
-    'filter' => [
-      'id' => 'boolean',
-      'label' => t('Is a Draft?'),
-      'type' => 'yes-no',
-      'use_equal' => TRUE,
-    ],
-  ];
-  return $data;
+function mukurtu_drafts_menu_local_tasks_alter(array &$data, string $route_name): void {
+  // Remove the "Latest version" tab added by content_moderation when a node
+  // has a pending draft revision. Draft state is surfaced via the banner and
+  // /user/drafts instead.
+  foreach ($data['tabs'] as $level => $tabs) {
+    unset($data['tabs'][$level]['node.latest_version_tab']);
+  }
 }
 
 /**
- * Implements hook_entity_view().
+ * Implements hook_preprocess_node().
  */
-function mukurtu_drafts_entity_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
-
-  if (!$entity instanceof MukurtuDraftInterface || !$entity->isDraft()) {
+function mukurtu_drafts_preprocess_node(array &$variables): void {
+  $node = $variables['node'];
+  if (!($node instanceof FieldableEntityInterface) || !$node->hasField('moderation_state')) {
     return;
   }
-
-  $build['#attributes']['class'][] = 'node--unpublished';
+  if ($node->get('moderation_state')->value !== 'draft') {
+    return;
+  }
+  // Inject a real DOM element so assistive technology announces the draft state.
+  // CSS ::before content is unreliable in screen readers. role="status" causes
+  // AT to announce the banner as a status message without moving focus.
+  $variables['title_prefix']['draft_banner'] = [
+    '#type' => 'html_tag',
+    '#tag' => 'div',
+    '#value' => t('Draft'),
+    '#attributes' => ['class' => ['node--draft-banner'], 'role' => 'status'],
+    '#weight' => -100,
+  ];
 }
