@@ -1620,3 +1620,34 @@ function mukurtu_core_update_40056(): void {
   $config->set('type_settings.states.needs_review.label', 'Awaiting Review');
   $config->save();
 }
+
+/**
+ * Replace /user/drafts and /content-under-review with the unified /my-content
+ * and /review-queue views (mukurtu_workflow_overview).
+ */
+function mukurtu_core_update_40057(): void {
+  $config_factory = \Drupal::configFactory();
+
+  // Delete the old standalone views.
+  foreach ([
+    'views.view.mukurtu_draft_content',
+    'views.view.mukurtu_content_under_review',
+  ] as $config_name) {
+    $config = $config_factory->getEditable($config_name);
+    if (!$config->isNew()) {
+      $config->delete();
+    }
+  }
+
+  // Import the new unified view from mukurtu_workflows config/install.
+  $new_view = 'views.view.mukurtu_workflow_overview';
+  if ($config_factory->getEditable($new_view)->isNew()) {
+    $module_path = \Drupal::service('extension.list.module')
+      ->getPath('mukurtu_workflows');
+    $yaml_path = $module_path . '/config/install/' . $new_view . '.yml';
+    if (file_exists($yaml_path)) {
+      $data = \Symfony\Component\Yaml\Yaml::parseFile($yaml_path);
+      $config_factory->getEditable($new_view)->setData($data)->save(TRUE);
+    }
+  }
+}
