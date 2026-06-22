@@ -41,7 +41,6 @@ type_settings:
         - needs_review
         - revision_requested
         - published
-        - archived
       to: draft
       weight: 0
     submit_for_review:
@@ -67,6 +66,7 @@ type_settings:
       from:
         - draft
         - needs_review
+        - revision_requested
       to: published
       weight: 4
     archive:
@@ -82,4 +82,4 @@ type_settings:
       to: draft
       weight: 6
   entity_types: {  }
-  default_moderation_state: published
+  default_moderation_state: draft

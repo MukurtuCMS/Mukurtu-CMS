@@ -1551,3 +1551,32 @@ function mukurtu_core_update_40053(): void {
       ->save();
   }
 }
+
+/**
+ * Adjust editorial workflow transitions and default state.
+ *
+ * - Remove 'archived' from save_draft.from (use the restore transition instead).
+ * - Allow Stewards to publish directly from Revision Requested.
+ * - Default new content to Draft so it doesn't bypass editorial review.
+ */
+function mukurtu_core_update_40054(): void {
+  $config = \Drupal::configFactory()
+    ->getEditable('workflows.workflow.mukurtu_editorial_workflow');
+  if ($config->isNew()) {
+    return;
+  }
+
+  $from = $config->get('type_settings.transitions.save_draft.from');
+  $config->set('type_settings.transitions.save_draft.from',
+    array_values(array_diff($from, ['archived'])));
+
+  $from = $config->get('type_settings.transitions.publish.from');
+  if (!in_array('revision_requested', $from, TRUE)) {
+    $from[] = 'revision_requested';
+    $config->set('type_settings.transitions.publish.from', $from);
+  }
+
+  $config->set('type_settings.default_moderation_state', 'draft');
+
+  $config->save();
+}
