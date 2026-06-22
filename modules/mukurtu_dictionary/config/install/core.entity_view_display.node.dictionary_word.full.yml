@@ -456,7 +456,6 @@ content:
     weight: 100
     region: content
 hidden:
-  draft: true
   field_related_content: true
   field_communities: true
   field_content_type: true

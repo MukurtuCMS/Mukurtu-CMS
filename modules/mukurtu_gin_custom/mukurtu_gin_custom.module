@@ -5,6 +5,7 @@
  * Provide Mukurtu Gin Custom.
  */
 
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\node\NodeInterface;
 use Drupal\node\Entity\NodeType;
@@ -101,6 +102,24 @@ function mukurtu_gin_custom_preprocess_html(array &$variables): void {
  */
 function mukurtu_gin_custom_preprocess_media(&$variables) {
   $variables['mukurtu_v4_path'] = \Drupal::service('extension.list.theme')->getPath('mukurtu_v4');
+}
+
+/**
+ * Implements hook_form_BASE_FORM_ID_alter() for node_form.
+ *
+ * Attaches the JS behavior that moves the moderation state widget into
+ * Gin's sticky header after the DOM is ready.
+ */
+function mukurtu_gin_custom_form_node_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
+  if (isset($form['moderation_state'])) {
+    $form['#attached']['library'][] = 'mukurtu_gin_custom/moderation-state-header';
+
+    // Always use "Save as" regardless of whether the entity is new or existing.
+    // Core uses "Change to" for existing entities; this overrides it for consistency.
+    if (isset($form['moderation_state']['widget'][0]['state'])) {
+      $form['moderation_state']['widget'][0]['state']['#title'] = t('Save as');
+    }
+  }
 }
 
 /**
