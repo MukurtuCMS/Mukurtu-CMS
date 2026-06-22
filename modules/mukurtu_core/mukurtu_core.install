@@ -1641,13 +1641,28 @@ function mukurtu_core_update_40057(): void {
 
   // Import the new unified view from mukurtu_workflows config/install.
   $new_view = 'views.view.mukurtu_workflow_overview';
-  if ($config_factory->getEditable($new_view)->isNew()) {
-    $module_path = \Drupal::service('extension.list.module')
-      ->getPath('mukurtu_workflows');
-    $yaml_path = $module_path . '/config/install/' . $new_view . '.yml';
-    if (file_exists($yaml_path)) {
-      $data = \Symfony\Component\Yaml\Yaml::parseFile($yaml_path);
-      $config_factory->getEditable($new_view)->setData($data)->save(TRUE);
-    }
+  $module_path = \Drupal::service('extension.list.module')
+    ->getPath('mukurtu_workflows');
+  $yaml_path = $module_path . '/config/install/' . $new_view . '.yml';
+  if (file_exists($yaml_path)) {
+    $data = \Symfony\Component\Yaml\Yaml::parseFile($yaml_path);
+    $config_factory->getEditable($new_view)->setData($data)->save(TRUE);
+  }
+}
+
+/**
+ * Update /my-content and /review-queue: access control, admin theme, two-table
+ * layout, and correct moderation_state_filter values.
+ */
+function mukurtu_core_update_40058(): void {
+  $config_factory = \Drupal::configFactory();
+  $module_path = \Drupal::service('extension.list.module')
+    ->getPath('mukurtu_workflows');
+  $yaml_path = $module_path . '/config/install/views.view.mukurtu_workflow_overview.yml';
+  if (file_exists($yaml_path)) {
+    $data = \Symfony\Component\Yaml\Yaml::parseFile($yaml_path);
+    $config_factory->getEditable('views.view.mukurtu_workflow_overview')
+      ->setData($data)
+      ->save(TRUE);
   }
 }

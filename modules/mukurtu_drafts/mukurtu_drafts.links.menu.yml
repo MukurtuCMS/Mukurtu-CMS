@@ -3,4 +3,4 @@ mukurtu_drafts.your_drafts:
   description: 'View your content in progress.'
   parent: mukurtu_dashboard
   menu_name: dashboard-my-account
-  route_name: view.mukurtu_workflow_overview.my_content
+  route_name: mukurtu_workflows.my_content
