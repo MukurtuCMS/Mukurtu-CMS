@@ -383,9 +383,21 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
     // Split-column path: export only the requested sub-property so the output
     // matches the two-column format the import system expects.
     if ($event->sub_field_name === 'target_id') {
+      $setting = $config->getImageFieldSetting();
       $export = [];
       foreach ($field->getValue() as $value) {
         if ($fid = ($value['target_id'] ?? NULL)) {
+          if ($setting == 'path_with_binary') {
+            $export[] = $this->packageFile($event, $fid);
+            continue;
+          }
+          if ($setting == 'file_entity') {
+            if ($this->exportEntityById($event, 'file', $fid)) {
+              $export[] = $fid;
+              $this->packageFile($event, $fid);
+              continue;
+            }
+          }
           $export[] = $config->getIdFieldSetting() === 'uuid'
             ? $this->getUUID('file', $fid)
             : $fid;

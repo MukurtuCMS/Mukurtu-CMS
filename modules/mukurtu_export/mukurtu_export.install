@@ -277,9 +277,60 @@ function mukurtu_export_update_40010(): void {
 }
 
 /**
- * Update recommended_settings_for_import: add multipage_item field mapping.
+ * Rename the recommended export preset label to "Default local settings (metadata only)".
  */
 function mukurtu_export_update_40011(): void {
+  $config = \Drupal::configFactory()->getEditable('mukurtu_export.csv_exporter.recommended_settings_for_import');
+  if ($config->get('label') === 'Recommended Settings for Import') {
+    $config->set('label', 'Default local settings (metadata only)')->save();
+  }
+}
+
+/**
+ * Import three new default export presets for local and external use cases.
+ */
+function mukurtu_export_update_40012(): void {
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_export');
+  $source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+  $config_storage = \Drupal::service('config.storage');
+
+  $new_presets = [
+    'default_local_with_media',
+    'default_external_metadata_only',
+    'default_external_with_media',
+  ];
+
+  foreach ($new_presets as $id) {
+    $config_name = 'mukurtu_export.csv_exporter.' . $id;
+    if (!$config_storage->exists($config_name)) {
+      $config_storage->write($config_name, $source->read($config_name));
+    }
+  }
+}
+
+/**
+ * Set all three new default export presets to site-wide visibility.
+ */
+function mukurtu_export_update_40013(): void {
+  $ids = [
+    'default_local_with_media',
+    'default_external_metadata_only',
+    'default_external_with_media',
+  ];
+
+  $storage = \Drupal::entityTypeManager()->getStorage('csv_exporter');
+  foreach ($ids as $id) {
+    $entity = $storage->load($id);
+    if ($entity && !$entity->get('site_wide')) {
+      $entity->set('site_wide', TRUE)->save();
+    }
+  }
+}
+
+/**
+ * Update recommended_settings_for_import: add multipage_item field mapping.
+ */
+function mukurtu_export_update_40014(): void {
   $storage = \Drupal::entityTypeManager()->getStorage('csv_exporter');
   $exporter = $storage->load('recommended_settings_for_import');
   if (!$exporter) {
