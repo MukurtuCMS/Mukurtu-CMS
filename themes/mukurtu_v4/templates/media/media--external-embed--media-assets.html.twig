@@ -22,20 +22,24 @@
   ]
 %}
 
-<div{{ attributes.addClass(classes) }}>
-  {{ title_suffix.contextual_links }}
-  {{ content.media_content_warnings }}
+<div class="media-asset--slide">
+  <div{{ attributes.addClass(classes) }}>
+    {{ title_suffix.contextual_links }}
+    {{ content.media_content_warnings }}
 
-  <div class="media-asset--content">
-    {{ content.field_media_external_embed }}
+    <div class="media-asset--content">
+      {{ content.field_media_external_embed }}
+    </div>
+
+    <div id="external-embed-{{ media.id }}" class="media-asset--glightbox-inline">
+      <div class="media media--external-embed">
+        {{ content.media_content_warnings }}
+        {{ content.field_media_external_embed }}
+      </div>
+    </div>
   </div>
 
   <div class="media-asset--actions">
     <a href="#external-embed-{{ media.id }}" data-type="inline" class="media-asset--link button" aria-label="Expand {{ name }}">Expand +</a>
   </div>
-
-  <div id="external-embed-{{ media.id }}" class="media-asset--glightbox-inline">
-    {{ content.field_media_external_embed }}
-  </div>
-
 </div>

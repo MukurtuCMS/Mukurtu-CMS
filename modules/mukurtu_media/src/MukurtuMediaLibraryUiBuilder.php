@@ -69,7 +69,8 @@ class MukurtuMediaLibraryUiBuilder extends MediaLibraryUiBuilder {
     if (!$state) {
       $state = MediaLibraryState::fromRequest($this->request);
     }
-    if (!$state->get('media_library_content') && !$this->isAllMediaMode($state)) {
+    if (!$state->get('media_library_content') && !$this->isAllMediaMode($state)
+        && count($state->getAllowedTypeIds()) > 1) {
       $state = $this->stateWithAllMedia($state);
     }
     return parent::buildUi($state);
