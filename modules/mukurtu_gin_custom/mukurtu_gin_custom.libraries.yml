@@ -1,3 +1,8 @@
+gin-collapsed-defaults:
+  header: true
+  js:
+    js/gin-collapsed-defaults.js: { weight: -100, preprocess: false }
+
 mukurtu-gin-custom:
   version: 1.x
   css:
