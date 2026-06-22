@@ -171,7 +171,34 @@
 .media-asset--pdf-actions {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   align-items: center;
   gap: var(--v-space-5xs);
   margin-block-start: var(--v-space-5xs);
+}
+
+// Wrapper that holds the .media content area and action buttons as a flex
+// column. Actions are a sibling of .media so the content-warning overlay
+// (position: absolute; inset: 0 on .media) never covers the buttons.
+.media-asset--slide {
+  display: flex;
+  flex-direction: column;
+  inline-size: 100%;
+  margin-block-end: var(--v-space-s);
+
+  > .media {
+    margin-block-end: 0;
+    // Create a stacking context so the content-warning overlay's z-index: 10
+    // is evaluated within .media only and cannot paint above sibling elements
+    // (e.g. .media-asset--actions buttons) in the parent stacking context.
+    isolation: isolate;
+  }
+
+  // Download button SVG is now outside .media so the nested rule in
+  // _media.scss no longer applies. Restore white fill here.
+  .button--download svg {
+    fill: white;
+    vertical-align: middle;
+    margin-inline-start: var(--v-space-6xs);
+  }
 }

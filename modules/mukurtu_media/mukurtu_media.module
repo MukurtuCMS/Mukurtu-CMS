@@ -119,6 +119,124 @@ function mukurtu_media_entity_field_storage_info(EntityTypeInterface $entity_typ
 }
 
 /**
+ * Implements hook_preprocess_entity_add_list().
+ *
+ * Adds bulk upload/create items to the media type list on /admin/media/add.
+ */
+function mukurtu_media_preprocess_entity_add_list(&$variables) {
+  if (\Drupal::routeMatch()->getRouteName() !== 'entity.media.add_page') {
+    return;
+  }
+
+  $bulk_items = [
+    'bulk_upload_image' => [
+      'bundle' => 'image',
+      'route' => 'mukurtu_media.bulk_upload',
+      'params' => ['media_type' => 'image'],
+      'label' => t('Bulk upload images'),
+      'description' => t('Upload multiple images at once.'),
+    ],
+    'bulk_upload_audio' => [
+      'bundle' => 'audio',
+      'route' => 'mukurtu_media.bulk_upload',
+      'params' => ['media_type' => 'audio'],
+      'label' => t('Bulk upload audio'),
+      'description' => t('Upload multiple audio files at once.'),
+    ],
+    'bulk_upload_document' => [
+      'bundle' => 'document',
+      'route' => 'mukurtu_media.bulk_upload',
+      'params' => ['media_type' => 'document'],
+      'label' => t('Bulk upload documents'),
+      'description' => t('Upload multiple documents at once.'),
+    ],
+    'bulk_upload_video' => [
+      'bundle' => 'video',
+      'route' => 'mukurtu_media.bulk_upload',
+      'params' => ['media_type' => 'video'],
+      'label' => t('Bulk upload videos'),
+      'description' => t('Upload multiple video files at once.'),
+    ],
+    'bulk_create_remote_video' => [
+      'bundle' => 'remote_video',
+      'route' => 'mukurtu_media.bulk_create',
+      'params' => ['media_type' => 'remote_video'],
+      'label' => t('Bulk add remote videos'),
+      'description' => t('Add multiple remote videos by URL at once.'),
+    ],
+    'bulk_create_soundcloud' => [
+      'bundle' => 'soundcloud',
+      'route' => 'mukurtu_media.bulk_create',
+      'params' => ['media_type' => 'soundcloud'],
+      'label' => t('Bulk add SoundCloud items'),
+      'description' => t('Add multiple SoundCloud items by URL at once.'),
+    ],
+  ];
+
+  foreach ($bulk_items as $key => $item) {
+    // Only show bulk item if the corresponding single-add bundle is accessible.
+    if (!isset($variables['bundles'][$item['bundle']])) {
+      continue;
+    }
+    $url = Url::fromRoute($item['route'], $item['params']);
+    $variables['bundles'][$key] = [
+      'label' => $item['label'],
+      'description' => ['#markup' => $item['description']],
+      'add_link' => Link::fromTextAndUrl($item['label'], $url),
+    ];
+  }
+
+  // Reorder bundles so each single-item type is immediately followed by its
+  // bulk variant, producing a two-column paired layout.
+  $pair_order = [
+    'audio'        => 'bulk_upload_audio',
+    'document'     => 'bulk_upload_document',
+    'image'        => 'bulk_upload_image',
+    'remote_video' => 'bulk_create_remote_video',
+    'soundcloud'   => 'bulk_create_soundcloud',
+    'video'        => 'bulk_upload_video',
+  ];
+
+  $ordered = [];
+  foreach ($pair_order as $single_key => $bulk_key) {
+    if (isset($variables['bundles'][$single_key])) {
+      $ordered[$single_key] = $variables['bundles'][$single_key];
+    }
+    if (isset($variables['bundles'][$bulk_key])) {
+      $ordered[$bulk_key] = $variables['bundles'][$bulk_key];
+    }
+  }
+  // Append any remaining bundles that have no bulk pair (e.g. external_embed).
+  foreach ($variables['bundles'] as $key => $bundle) {
+    if (!isset($ordered[$key])) {
+      $ordered[$key] = $bundle;
+    }
+  }
+
+  $variables['bundles'] = $ordered;
+  $variables['attributes']['class'][] = 'media-add-list--paired';
+  $variables['#attached']['library'][] = 'mukurtu_media/media_add_page';
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function mukurtu_media_form_media_external_embed_add_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  $form['actions']['submit']['#submit'][] = 'mukurtu_media_external_embed_add_redirect';
+}
+
+/**
+ * Redirect to the media overview after external embed creation.
+ *
+ * MediaForm::save() redirects to the canonical URL (the edit form) for users
+ * who lack 'access media overview' permission. Appending this handler ensures
+ * all users land on /admin/content/media after creating an external embed.
+ */
+function mukurtu_media_external_embed_add_redirect(array &$form, FormStateInterface $form_state) {
+  $form_state->setRedirectUrl(Url::fromRoute('entity.media.collection'));
+}
+
+/**
  * Implements hook_form_FORM_ID_alter().
  */
 function mukurtu_media_form_media_document_add_form_alter(&$form, FormStateInterface $form_state, $form_id)
