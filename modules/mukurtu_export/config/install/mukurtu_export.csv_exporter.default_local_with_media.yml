@@ -539,8 +539,8 @@ eol: \n
 multivalue_delimiter: ;
 local_contexts_delimiter: '>'
 default_format: basic_html
-field_file: file_entity
-field_image: file_entity
+field_file: path_with_binary
+field_image: path_with_binary
 field_id: id
 entity_reference_node: id
 entity_reference_media: entity
