@@ -6278,9 +6278,8 @@ header {
           margin-block-start: var(--v-space-xs);
 }
 
-.node--draft-banner {
+.node--status-banner {
   display: block;
-  background: var(--brand-secondary-dark);
   color: var(--color-white);
   font-size: 0.875rem;
   font-weight: 700;
@@ -6289,6 +6288,18 @@ header {
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 0.1em;
+}
+.node--status-banner--draft {
+  background: var(--brand-secondary-dark);
+}
+.node--status-banner--needs-review {
+  background: var(--color-warning-dark);
+}
+.node--status-banner--revision-requested {
+  background: var(--color-error-dark);
+}
+.node--status-banner--archived {
+  background: var(--color-gray);
 }
 
 .full-node__list {

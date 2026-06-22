@@ -65,17 +65,32 @@ function mukurtu_drafts_preprocess_node(array &$variables): void {
   if (!($node instanceof FieldableEntityInterface) || !$node->hasField('moderation_state')) {
     return;
   }
-  if ($node->get('moderation_state')->value !== 'draft') {
+
+  // Labels for every non-published moderation state that should display a banner.
+  $banner_states = [
+    'draft' => t('Draft'),
+    'needs_review' => t('Needs Review'),
+    'revision_requested' => t('Revision Requested'),
+    'archived' => t('Archived'),
+  ];
+
+  $state = $node->get('moderation_state')->value;
+  if (!isset($banner_states[$state])) {
     return;
   }
-  // Inject a real DOM element so assistive technology announces the draft state.
+
+  // Inject a real DOM element so assistive technology announces the state.
   // CSS ::before content is unreliable in screen readers. role="status" causes
   // AT to announce the banner as a status message without moving focus.
-  $variables['title_prefix']['draft_banner'] = [
+  $modifier = str_replace('_', '-', $state);
+  $variables['title_prefix']['status_banner'] = [
     '#type' => 'html_tag',
     '#tag' => 'div',
-    '#value' => t('Draft'),
-    '#attributes' => ['class' => ['node--draft-banner'], 'role' => 'status'],
+    '#value' => $banner_states[$state],
+    '#attributes' => [
+      'class' => ['node--status-banner', 'node--status-banner--' . $modifier],
+      'role' => 'status',
+    ],
     '#weight' => -100,
   ];
 }
