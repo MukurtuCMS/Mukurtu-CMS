@@ -16,7 +16,7 @@
 .mukurtu-review-panel > summary {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   padding: 0.3125rem 1.5rem;
   font-size: 0.75rem;
   font-weight: 600;
@@ -72,6 +72,8 @@
   background: var(--brand-light-accent, #f7f5f0);
   border-block-end: 2px solid var(--brand-secondary, #d9d4c2);
   padding: 1rem 1.5rem;
+  max-width: 50rem;
+  margin-inline: auto;
 }
 
 /* ── Note history ───────────────────────────────────────────────── */
