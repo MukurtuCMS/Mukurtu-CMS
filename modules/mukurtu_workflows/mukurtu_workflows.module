@@ -147,12 +147,15 @@ function mukurtu_workflows_preprocess_node(array &$variables): void {
     }
   }
 
-  // Format notes for the template.
+  // Batch-load all authors in a single query to avoid N+1 per note.
   $user_storage = \Drupal::entityTypeManager()->getStorage('user');
   $date_formatter = \Drupal::service('date.formatter');
+  $uids = array_unique(array_column((array) $rows, 'uid'));
+  $authors = $user_storage->loadMultiple($uids);
+
   $notes = [];
   foreach ($rows as $row) {
-    $author = $user_storage->load($row->uid);
+    $author = $authors[$row->uid] ?? NULL;
     $notes[] = [
       'author' => $author ? $author->getDisplayName() : \Drupal::t('Unknown'),
       'created' => $date_formatter->format((int) $row->created, 'medium'),

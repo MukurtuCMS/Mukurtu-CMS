@@ -21,7 +21,7 @@
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.05em;
-  color: rgba(255, 255, 255, 0.88);
+  color: #ffffff;
   cursor: pointer;
   user-select: none;
   /* Remove the default browser disclosure triangle */
@@ -58,7 +58,6 @@
   font-size: 1.125rem;
   font-weight: 300;
   line-height: 1;
-  opacity: 0.75;
   flex-shrink: 0;
 }
 
