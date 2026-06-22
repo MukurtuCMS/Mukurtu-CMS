@@ -3,7 +3,7 @@ status: true
 dependencies: {  }
 _core:
   default_config_hash: piH8CX5ny4s6Z46Ii04GhznLfMcbfTZVxk5e0rVOcS4
-id: recommended_settings_for_import
+id: default_local_metadata_only
 label: 'Default local settings (metadata only)'
 uid: 1
 description: 'Default settings appropriate for export and re-import to the same site (using local IDs). Covers all content types, media assets, taxonomy terms, and other entities. Only includes metadata, NOT the complete media assets.'
