@@ -10,8 +10,23 @@ use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
+use Drupal\node\NodeInterface;
 use Drupal\views\ViewExecutable;
 use Drupal\views\Plugin\views\query\QueryPluginBase;
+
+/**
+ * Implements hook_theme().
+ */
+function mukurtu_workflows_theme(): array {
+  return [
+    'mukurtu_review_panel' => [
+      'variables' => [
+        'notes' => [],
+        'form' => NULL,
+      ],
+    ],
+  ];
+}
 
 /**
  * Implements hook_form_workflow_edit_form_alter().
@@ -76,6 +91,95 @@ function mukurtu_workflows_entity_view(array &$build, EntityInterface $entity, E
 }
 
 /**
+ * Implements hook_preprocess_node().
+ *
+ * Injects the review history and state-change panel into title_suffix so it
+ * appears just below the status banner on full node view pages, regardless of
+ * which node-type template is in use.
+ */
+function mukurtu_workflows_preprocess_node(array &$variables): void {
+  if ($variables['view_mode'] !== 'full') {
+    return;
+  }
+
+  /** @var \Drupal\node\NodeInterface $node */
+  $node = $variables['node'];
+  if (!($node instanceof NodeInterface) || !$node->hasField('moderation_state')) {
+    return;
+  }
+
+  $schema = \Drupal::database()->schema();
+  if (!$schema->tableExists('mukurtu_review_note')) {
+    return;
+  }
+
+  $nid = (int) $node->id();
+
+  // Load review notes oldest-first.
+  $rows = \Drupal::database()->select('mukurtu_review_note', 'mrn')
+    ->fields('mrn')
+    ->condition('mrn.nid', $nid)
+    ->orderBy('mrn.created', 'ASC')
+    ->execute()
+    ->fetchAll();
+
+  // Build human-readable state labels from the node's workflow.
+  $state_labels = [];
+  /** @var \Drupal\content_moderation\ModerationInformationInterface $mod_info */
+  $mod_info = \Drupal::service('content_moderation.moderation_information');
+  $workflow = $mod_info->getWorkflowForEntity($node);
+  if ($workflow) {
+    foreach ($workflow->getTypePlugin()->getStates() as $sid => $wf_state) {
+      $state_labels[$sid] = $wf_state->label();
+    }
+  }
+
+  // Format notes for the template.
+  $user_storage = \Drupal::entityTypeManager()->getStorage('user');
+  $date_formatter = \Drupal::service('date.formatter');
+  $notes = [];
+  foreach ($rows as $row) {
+    $author = $user_storage->load($row->uid);
+    $notes[] = [
+      'author' => $author ? $author->getDisplayName() : \Drupal::t('Unknown'),
+      'created' => $date_formatter->format((int) $row->created, 'medium'),
+      'from_state' => $row->from_state,
+      'to_state' => $row->to_state,
+      'from_state_label' => $state_labels[$row->from_state] ?? $row->from_state,
+      'to_state_label' => $state_labels[$row->to_state] ?? $row->to_state,
+      'state_changed' => $row->from_state !== $row->to_state,
+      'note' => $row->note,
+    ];
+  }
+
+  // Build the state-change form; it returns empty if the user has no allowed
+  // transitions, so we only embed it when it has actionable elements.
+  $form = \Drupal::formBuilder()->getForm(
+    \Drupal\mukurtu_workflows\Form\ReviewStateForm::class,
+    $node
+  );
+  $has_form = !empty($form['actions']);
+
+  // Only show the panel when there is something to display.
+  if (empty($notes) && !$has_form) {
+    return;
+  }
+
+  // Inject into title_suffix so it renders immediately after the status banner
+  // in all node templates (including type-specific overrides like
+  // node--digital-heritage--full.html.twig which don't render {{ content }}).
+  $variables['title_suffix']['review_panel'] = [
+    '#theme' => 'mukurtu_review_panel',
+    '#notes' => $notes,
+    '#form' => $has_form ? $form : NULL,
+    '#cache' => [
+      'contexts' => ['user', 'user.permissions'],
+      'tags' => ['node:' . $nid],
+    ],
+  ];
+}
+
+/**
  * Implements hook_views_query_alter().
  *
  * Scopes the content-under-review view to protocols where the current user
@@ -129,4 +233,78 @@ function mukurtu_workflows_views_query_alter(ViewExecutable $view, QueryPluginBa
     "node_field_data.nid IN (SELECT entity_id FROM {node__field_protocols} WHERE field_protocols_target_id IN ($in_list))",
     $args
   );
+}
+
+/**
+ * Implements hook_form_node_form_alter().
+ *
+ * Adds a "Review note" textarea below the moderation state widget on node
+ * edit forms. A post-save submit handler persists the note.
+ */
+function mukurtu_workflows_form_node_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
+  // Only add the field when the moderation state widget is present.
+  if (empty($form['moderation_state'])) {
+    return;
+  }
+
+  /** @var \Drupal\node\NodeInterface $node */
+  $node = $form_state->getFormObject()->getEntity();
+  if (!$node->hasField('moderation_state')) {
+    return;
+  }
+
+  // Capture the node's current state at form-build time so the submit handler
+  // can record a from_state without reloading the pre-save node.
+  $form['review_note_from_state'] = [
+    '#type' => 'hidden',
+    '#value' => $node->get('moderation_state')->value,
+  ];
+
+  $form['review_note'] = [
+    '#type' => 'textarea',
+    '#title' => t('Review note'),
+    '#required' => FALSE,
+    '#rows' => 3,
+    '#weight' => $form['moderation_state']['#weight'] ?? 100,
+    '#states' => [],
+  ];
+
+  // Append post-save handler. Form-level #submit handlers run after the node
+  // has already been saved by EntityForm::save(), so the new node state is
+  // available via the entity on the form object.
+  $form['#submit'][] = 'mukurtu_workflows_node_form_submit';
+}
+
+/**
+ * Form submit handler: saves a review note after the node edit form saves.
+ */
+function mukurtu_workflows_node_form_submit(array &$form, FormStateInterface $form_state): void {
+  $note_text = trim((string) ($form_state->getValue('review_note') ?? ''));
+  $from_state = (string) ($form_state->getValue('review_note_from_state') ?? '');
+
+  /** @var \Drupal\node\NodeInterface $node */
+  $node = $form_state->getFormObject()->getEntity();
+  $to_state = $node->get('moderation_state')->value;
+  $nid = (int) $node->id();
+
+  // Only save a note if the state changed or the user left a note.
+  if ($from_state === $to_state && $note_text === '') {
+    return;
+  }
+
+  $schema = \Drupal::database()->schema();
+  if (!$schema->tableExists('mukurtu_review_note')) {
+    return;
+  }
+
+  \Drupal::database()->insert('mukurtu_review_note')
+    ->fields([
+      'nid' => $nid,
+      'uid' => (int) \Drupal::currentUser()->id(),
+      'created' => \Drupal::time()->getRequestTime(),
+      'from_state' => $from_state,
+      'to_state' => $to_state,
+      'note' => $note_text !== '' ? $note_text : NULL,
+    ])
+    ->execute();
 }

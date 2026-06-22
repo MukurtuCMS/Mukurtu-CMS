@@ -1,0 +1,47 @@
+{#
+/**
+ * @file
+ * Template for the node review history and state-change panel.
+ *
+ * Available variables:
+ * - notes: List of past review notes. Each item has:
+ *   - author: Display name of the note author.
+ *   - created: Formatted date string.
+ *   - from_state_label: Human-readable label of the prior state.
+ *   - to_state_label: Human-readable label of the new state.
+ *   - state_changed: Boolean, TRUE when from_state != to_state.
+ *   - note: The optional note text (may be NULL).
+ * - form: Render array for ReviewStateForm, or NULL if user has no transitions.
+ */
+#}
+<details class="mukurtu-review-panel">
+  <summary class="mukurtu-review-panel__summary">{{ 'Review history'|t }}</summary>
+
+  <div class="mukurtu-review-panel__content">
+    {% if notes is empty %}
+      <p class="mukurtu-review-panel__empty">{{ 'No review history yet.'|t }}</p>
+    {% else %}
+      <ol class="mukurtu-review-panel__notes">
+        {% for item in notes %}
+          <li class="mukurtu-review-panel__note">
+            <p class="mukurtu-review-panel__meta">
+              <strong>{{ item.author }}</strong> &mdash; {{ item.created }}
+              {% if item.state_changed %}
+                &mdash; {{ item.from_state_label }} &rarr; {{ item.to_state_label }}
+              {% endif %}
+            </p>
+            {% if item.note %}
+              <p class="mukurtu-review-panel__text">{{ item.note }}</p>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ol>
+    {% endif %}
+
+    {% if form %}
+      <div class="mukurtu-review-panel__form">
+        {{ form }}
+      </div>
+    {% endif %}
+  </div>
+</details>

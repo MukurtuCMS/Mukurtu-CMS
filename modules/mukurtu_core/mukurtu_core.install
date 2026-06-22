@@ -1666,3 +1666,67 @@ function mukurtu_core_update_40058(): void {
       ->save(TRUE);
   }
 }
+
+/**
+ * Create the mukurtu_review_note table for the review panel feature.
+ */
+function mukurtu_core_update_40059(): void {
+  $schema = \Drupal::database()->schema();
+  if ($schema->tableExists('mukurtu_review_note')) {
+    return;
+  }
+  $table_spec = [
+    'description' => 'Stores review notes and state-change records for nodes.',
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ],
+      'nid' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'The {node}.nid this note belongs to.',
+      ],
+      'uid' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The {users}.uid who created this note.',
+      ],
+      'created' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Unix timestamp when the note was created.',
+      ],
+      'from_state' => [
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'The moderation state before the transition.',
+      ],
+      'to_state' => [
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'The moderation state after the transition.',
+      ],
+      'note' => [
+        'type' => 'text',
+        'size' => 'medium',
+        'not null' => FALSE,
+        'description' => 'Optional text note left by the reviewer.',
+      ],
+    ],
+    'primary key' => ['id'],
+    'indexes' => [
+      'nid' => ['nid'],
+    ],
+  ];
+  $schema->createTable('mukurtu_review_note', $table_spec);
+}
