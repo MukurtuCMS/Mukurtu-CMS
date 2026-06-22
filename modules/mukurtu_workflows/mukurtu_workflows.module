@@ -23,6 +23,7 @@ function mukurtu_workflows_theme(): array {
       'variables' => [
         'notes' => [],
         'form' => NULL,
+        'state' => NULL,
       ],
     ],
   ];
@@ -93,9 +94,9 @@ function mukurtu_workflows_entity_view(array &$build, EntityInterface $entity, E
 /**
  * Implements hook_preprocess_node().
  *
- * Injects the review history and state-change panel into title_suffix so it
- * appears just below the status banner on full node view pages, regardless of
- * which node-type template is in use.
+ * Injects the review history and state-change panel into title_prefix (after
+ * the status banner) on full node view pages. Only visible to users with edit
+ * access on the node and not shown for published content.
  */
 function mukurtu_workflows_preprocess_node(array &$variables): void {
   if ($variables['view_mode'] !== 'full') {
@@ -105,6 +106,18 @@ function mukurtu_workflows_preprocess_node(array &$variables): void {
   /** @var \Drupal\node\NodeInterface $node */
   $node = $variables['node'];
   if (!($node instanceof NodeInterface) || !$node->hasField('moderation_state')) {
+    return;
+  }
+
+  $state = $node->get('moderation_state')->value;
+
+  // No panel needed on published content; state changes go through edit.
+  if ($state === 'published') {
+    return;
+  }
+
+  // Restrict to users who can edit this node (authors + protocol stewards).
+  if (!$node->access('update')) {
     return;
   }
 
@@ -165,13 +178,19 @@ function mukurtu_workflows_preprocess_node(array &$variables): void {
     return;
   }
 
-  // Inject into title_suffix so it renders immediately after the status banner
-  // in all node templates (including type-specific overrides like
-  // node--digital-heritage--full.html.twig which don't render {{ content }}).
-  $variables['title_suffix']['review_panel'] = [
+  // Place in title_prefix (weight 10, after the status banner at weight 0) so
+  // the panel's summary visually attaches to the bottom of the state banner in
+  // all node templates, including type-specific overrides that don't use
+  // {{ content }}.
+  $variables['title_prefix']['review_panel'] = [
     '#theme' => 'mukurtu_review_panel',
     '#notes' => $notes,
     '#form' => $has_form ? $form : NULL,
+    '#state' => $state,
+    '#weight' => 10,
+    '#attached' => [
+      'library' => ['mukurtu_workflows/review-panel'],
+    ],
     '#cache' => [
       'contexts' => ['user', 'user.permissions'],
       'tags' => ['node:' . $nid],

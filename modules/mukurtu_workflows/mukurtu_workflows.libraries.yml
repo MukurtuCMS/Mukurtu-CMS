@@ -1,0 +1,4 @@
+review-panel:
+  css:
+    component:
+      css/review-panel.css: {}
