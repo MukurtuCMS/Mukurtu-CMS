@@ -69,7 +69,7 @@ function mukurtu_drafts_preprocess_node(array &$variables): void {
   // Labels for every non-published moderation state that should display a banner.
   $banner_states = [
     'draft' => t('Draft'),
-    'needs_review' => t('Needs Review'),
+    'needs_review' => t('Awaiting Review'),
     'revision_requested' => t('Revision Requested'),
     'archived' => t('Archived'),
   ];

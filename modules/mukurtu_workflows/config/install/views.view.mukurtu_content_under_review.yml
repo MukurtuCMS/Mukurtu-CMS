@@ -10,7 +10,7 @@ dependencies:
 id: mukurtu_content_under_review
 label: 'Content under review'
 module: views
-description: 'Shows content in needs_review or revision_requested state for the current user''s stewarded protocols.'
+description: 'Shows content awaiting review or with revision requested for the current user''s stewarded protocols.'
 tag: ''
 base_table: node_field_data
 base_field: nid

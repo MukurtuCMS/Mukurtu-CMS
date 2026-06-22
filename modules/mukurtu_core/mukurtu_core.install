@@ -1607,3 +1607,16 @@ function mukurtu_core_update_40055(): void {
     $config->save();
   }
 }
+
+/**
+ * Rename editorial workflow state "Needs Review" to "Awaiting Review".
+ */
+function mukurtu_core_update_40056(): void {
+  $config = \Drupal::configFactory()
+    ->getEditable('workflows.workflow.mukurtu_editorial_workflow');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('type_settings.states.needs_review.label', 'Awaiting Review');
+  $config->save();
+}

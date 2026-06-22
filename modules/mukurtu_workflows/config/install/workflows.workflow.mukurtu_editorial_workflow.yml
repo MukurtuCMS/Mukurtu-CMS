@@ -14,7 +14,7 @@ type_settings:
       published: false
       default_revision: true
     needs_review:
-      label: 'Needs Review'
+      label: 'Awaiting Review'
       weight: 1
       published: false
       default_revision: false
