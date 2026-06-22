@@ -11,6 +11,10 @@
         // container so they don't paint over the warning overlay.
         this.setEmbedVisibility(element, false);
 
+        // Block keyboard and AT users from reaching media controls behind the
+        // overlay before the warning is dismissed (WCAG 2.1.1, 4.1.2).
+        this.setMediaInert(element, true);
+
         // Watch for iframes/objects inserted later by lazy loaders (e.g. Blazy).
         this.watchForNewEmbeds(element);
 
@@ -73,6 +77,28 @@
         contentWarnings.classList.add('dismissed');
         // Restore any hidden embeds now that the warning is dismissed.
         this.setEmbedVisibility(contentWarnings, true);
+        // Restore keyboard/AT access to the media behind the overlay.
+        this.setMediaInert(contentWarnings, false);
+      });
+    },
+
+    // Mark or unmark interactive elements inside .media as inert so keyboard
+    // and AT users cannot reach them while the content warning overlay is shown.
+    setMediaInert: function (warningEl, inert) {
+      const mediaEl = warningEl.closest('.media');
+      if (!mediaEl) {
+        return;
+      }
+      mediaEl.querySelectorAll('audio, video, object, iframe, a, button, [tabindex]').forEach((el) => {
+        if (warningEl.contains(el)) {
+          return;
+        }
+        if (inert) {
+          el.setAttribute('inert', '');
+        }
+        else {
+          el.removeAttribute('inert');
+        }
       });
     },
   };
