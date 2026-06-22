@@ -57,6 +57,25 @@
   }
 }
 
+.media-asset--audio-group {
+  width: max-content;
+  max-width: 100%;
+
+  img {
+    display: block;
+    max-width: 100%;
+  }
+
+  // Drupal wraps the audio element in field divs. All wrappers and the audio
+  // itself must fill the group so the player matches the image width.
+  .field--name-field-media-audio-file,
+  .field__item,
+  audio {
+    display: block;
+    width: 100%;
+  }
+}
+
 .media--audio {
   .media-asset--name {
     display: block;
