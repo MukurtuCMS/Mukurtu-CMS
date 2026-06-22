@@ -137,7 +137,7 @@ display:
           empty_zero: false
           hide_alter_empty: true
           click_sort_column: value
-          type: string
+          type: content_moderation_state
           settings: {  }
           group_column: value
           group_columns: {  }

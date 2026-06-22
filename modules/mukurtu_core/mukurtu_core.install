@@ -1580,3 +1580,30 @@ function mukurtu_core_update_40054(): void {
 
   $config->save();
 }
+
+/**
+ * Use content_moderation_state formatter for moderation state in views.
+ */
+function mukurtu_core_update_40055(): void {
+  $config_factory = \Drupal::configFactory();
+
+  $view_ids = [
+    'views.view.mukurtu_manage_all_content',
+    'views.view.mukurtu_content_under_review',
+  ];
+
+  foreach ($view_ids as $view_id) {
+    $config = $config_factory->getEditable($view_id);
+    if ($config->isNew()) {
+      continue;
+    }
+    foreach ($config->get('display') as $display_id => $display) {
+      $fields = $display['display_options']['fields'] ?? [];
+      if (isset($fields['moderation_state']) && ($fields['moderation_state']['type'] ?? '') === 'string') {
+        $config->set("display.$display_id.display_options.fields.moderation_state.type", 'content_moderation_state');
+        $config->set("display.$display_id.display_options.fields.moderation_state.settings", []);
+      }
+    }
+    $config->save();
+  }
+}
