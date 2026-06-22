@@ -129,6 +129,14 @@ entity_fields_export_list:
     field_keywords: Keywords
     field_media_assets: 'Media Assets'
     field_words: Words
+  multipage_item__multipage_item:
+    id: ID
+    uuid: UUID
+    langcode: Language
+    uid: Author
+    title: Title
+    status: Status
+    field_pages: Pages
   media__audio:
     mid: ID
     langcode: Locale

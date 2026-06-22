@@ -304,6 +304,15 @@ class ExportListAddItemForm extends FormBase {
       }
     }
 
+    // Also include the parent multipage_item entity when any pages are selected.
+    if ($entity instanceof NodeInterface && !empty(array_filter($form_state->getValue('multipage_pages') ?? []))) {
+      $mpi = $this->childResolver->getMultipageEntity($entity);
+      if ($mpi) {
+        $mpi_id = (int) $mpi->id();
+        $items['multipage_item'][$mpi_id] = $mpi_id;
+      }
+    }
+
     $list->setItems($items);
     $list->save();
 

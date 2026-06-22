@@ -275,3 +275,28 @@ function mukurtu_export_update_40010(): void {
     $entity->save();
   }
 }
+
+/**
+ * Update recommended_settings_for_import: add multipage_item field mapping.
+ */
+function mukurtu_export_update_40011(): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('csv_exporter');
+  $exporter = $storage->load('recommended_settings_for_import');
+  if (!$exporter) {
+    return;
+  }
+  $list = $exporter->get('entity_fields_export_list') ?? [];
+  if (!isset($list['multipage_item__multipage_item'])) {
+    $list['multipage_item__multipage_item'] = [
+      'id'          => 'ID',
+      'uuid'        => 'UUID',
+      'langcode'    => 'Language',
+      'uid'         => 'Author',
+      'title'       => 'Title',
+      'status'      => 'Status',
+      'field_pages' => 'Pages',
+    ];
+    $exporter->set('entity_fields_export_list', $list);
+    $exporter->save();
+  }
+}

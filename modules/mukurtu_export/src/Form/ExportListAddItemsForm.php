@@ -314,6 +314,12 @@ class ExportListAddItemsForm extends FormBase {
           $id = (int) $page->id();
           $items['node'][$id] = $id;
         }
+        // Also include the parent multipage_item entity.
+        $mpi = $this->childResolver->getMultipageEntity($node);
+        if ($mpi) {
+          $mpi_id = (int) $mpi->id();
+          $items['multipage_item'][$mpi_id] = $mpi_id;
+        }
       }
     }
 

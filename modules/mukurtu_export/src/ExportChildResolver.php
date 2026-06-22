@@ -4,6 +4,7 @@ namespace Drupal\mukurtu_export;
 
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\mukurtu_multipage_items\MultipageItemInterface;
 use Drupal\mukurtu_multipage_items\MultipageItemManager;
 use Drupal\node\NodeInterface;
 
@@ -110,6 +111,19 @@ class ExportChildResolver {
       return NULL;
     }
     return $node->get('field_mukurtu_original_record')->entity;
+  }
+
+  /**
+   * Returns the multipage_item entity this node belongs to, or NULL.
+   *
+   * @param \Drupal\node\NodeInterface $node
+   *   Any page in the multipage item.
+   *
+   * @return \Drupal\mukurtu_multipage_items\MultipageItemInterface|null
+   *   The multipage_item entity, or NULL if the node is not part of one.
+   */
+  public function getMultipageEntity(NodeInterface $node): ?MultipageItemInterface {
+    return $this->multipageItemManager->getMultipageEntity($node);
   }
 
   /**

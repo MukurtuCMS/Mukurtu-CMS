@@ -221,7 +221,11 @@ class ExportSettingsForm extends ExportBaseForm {
         // MPI appear in the selection.
         $first_id = array_key_first($mpi_pages);
         if (!isset($mpi_data[$first_id])) {
-          $mpi_data[$first_id] = ['pages' => $mpi_pages];
+          $mpi = $this->childResolver->getMultipageEntity($node);
+          $mpi_data[$first_id] = [
+            'pages'  => $mpi_pages,
+            'mpi_id' => $mpi ? (int) $mpi->id() : NULL,
+          ];
         }
       }
     }
@@ -385,12 +389,18 @@ class ExportSettingsForm extends ExportBaseForm {
     }
 
     // Expand for multipage item page selections.
-    foreach ($form_state->get('adhoc_mpi_data') ?? [] as $first_id => ['pages' => $pages]) {
+    foreach ($form_state->get('adhoc_mpi_data') ?? [] as $first_id => $mpi_entry) {
+      $pages_selected = FALSE;
       foreach ($form_state->getValue('mpi_pages_' . $first_id) ?? [] as $nid => $checked) {
         if ($checked) {
           $nid = (int) $nid;
           $ad_hoc_items['node'][$nid] = $nid;
+          $pages_selected = TRUE;
         }
+      }
+      // Also include the parent multipage_item entity when any pages are selected.
+      if ($pages_selected && !empty($mpi_entry['mpi_id'])) {
+        $ad_hoc_items['multipage_item'][$mpi_entry['mpi_id']] = $mpi_entry['mpi_id'];
       }
     }
 
