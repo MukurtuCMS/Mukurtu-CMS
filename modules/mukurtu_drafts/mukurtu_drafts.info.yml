@@ -5,6 +5,7 @@ core_version_requirement: '^9.4 || ^10 || ^11'
 package: 'Mukurtu CMS'
 version: 4.x-dev
 dependencies:
+  - 'drupal:content_moderation'
   - 'drupal:node'
   - 'drupal:user'
   - 'drupal:views'

@@ -78,7 +78,6 @@ content:
     region: content
 hidden:
   export_list_membership: true
-  draft: true
   field_communities: true
   field_cultural_protocols: true
   field_in_collection: true

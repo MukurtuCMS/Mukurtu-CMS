@@ -350,7 +350,6 @@ content:
     weight: 38
     region: content
 hidden:
-  draft: true
   field_child_collections: true
   field_collection_type: true
   field_content_type: true

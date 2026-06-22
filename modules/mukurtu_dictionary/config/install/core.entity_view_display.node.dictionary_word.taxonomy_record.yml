@@ -115,7 +115,6 @@ content:
     region: content
 hidden:
   comment: true
-  draft: true
   field_additional_word_entries: true
   field_alternate_spelling: true
   field_citation: true

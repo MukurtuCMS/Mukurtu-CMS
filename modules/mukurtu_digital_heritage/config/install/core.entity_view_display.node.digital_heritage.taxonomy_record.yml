@@ -378,7 +378,6 @@ content:
     region: content
 hidden:
   comment: true
-  draft: true
   field_citation: true
   field_content_type: true
   field_coverage_description: true
