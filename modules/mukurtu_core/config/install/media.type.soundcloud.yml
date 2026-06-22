@@ -5,7 +5,7 @@ dependencies:
     - media_entity_soundcloud
 id: soundcloud
 label: SoundCloud
-description: ''
+description: 'A remotely hosted SoundCloud audio track.'
 source: soundcloud
 queue_thumbnail_downloads: false
 new_revision: false

@@ -35,6 +35,39 @@ class MukurtuGinNavigation extends GinNavigation {
   /**
    * {@inheritdoc}
    *
+   * Appends a "Bulk add" link to the Media group in the Create menu.
+   */
+  public function getNavigationCreateMenuItems(): array {
+    $items = parent::getNavigationCreateMenuItems();
+
+    if (empty($items['#items']['create']['below'])) {
+      return $items;
+    }
+
+    foreach ($items['#items']['create']['below'] as &$group) {
+      if (isset($group['class']) && $group['class'] === 'media') {
+        try {
+          if ($this->hasLinkAccessPermission('entity.media.add_page')) {
+            $group['below'][] = [
+              'title' => $this->t('Bulk add'),
+              'class' => 'bulk-add-media',
+              'url' => Url::fromRoute('entity.media.add_page'),
+            ];
+          }
+        }
+        catch (\Exception $e) {
+          // Route unavailable; omit the link.
+        }
+        break;
+      }
+    }
+
+    return $items;
+  }
+
+  /**
+   * {@inheritdoc}
+   *
    * Replaces the "Media" entry with a link to Mukurtu's media view.
    */
   public function getNavigationContentMenuItems(): array {
