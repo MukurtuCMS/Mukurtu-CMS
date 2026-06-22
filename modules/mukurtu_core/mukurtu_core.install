@@ -1730,3 +1730,20 @@ function mukurtu_core_update_40059(): void {
   ];
   $schema->createTable('mukurtu_review_note', $table_spec);
 }
+
+/**
+ * Allow re-publishing published content without drafting it first.
+ */
+function mukurtu_core_update_40060(): void {
+  $config = \Drupal::configFactory()
+    ->getEditable('workflows.workflow.mukurtu_editorial_workflow');
+  if ($config->isNew()) {
+    return;
+  }
+  $from = $config->get('type_settings.transitions.publish.from');
+  if (!in_array('published', $from, TRUE)) {
+    $from[] = 'published';
+    $config->set('type_settings.transitions.publish.from', $from);
+    $config->save();
+  }
+}

@@ -67,6 +67,7 @@ type_settings:
         - draft
         - needs_review
         - revision_requested
+        - published
       to: published
       weight: 4
     archive:
