@@ -817,3 +817,19 @@ function mukurtu_media_update_40019(): void {
     ->setData($data)
     ->save(TRUE);
 }
+
+/**
+ * Update SoundCloud media type description on existing sites.
+ *
+ * config/install YAML is only imported on fresh installs; this hook
+ * applies the description change to already-installed sites.
+ */
+function mukurtu_media_update_40020(): void {
+  $mediaType = \Drupal::entityTypeManager()
+    ->getStorage('media_type')
+    ->load('soundcloud');
+  if ($mediaType && $mediaType->getDescription() === '') {
+    $mediaType->set('description', 'A remotely hosted SoundCloud audio track.');
+    $mediaType->save();
+  }
+}
