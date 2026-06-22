@@ -106,6 +106,24 @@
   &__comment {
     margin-block-start: var(--v-space-xs);
   }
+}
+
+// Draft indicator banner -- injected into title_prefix for unpublished nodes
+// so screen readers can announce it (CSS ::before content is unreliable in AT).
+.node--draft-banner {
+  display: block;
+  background: var(--brand-secondary-dark);
+  color: var(--color-white);
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0.75rem 1.5rem;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.full-node {
 
   // Sidebar.
   &__list {

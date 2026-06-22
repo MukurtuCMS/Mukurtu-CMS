@@ -71,15 +71,15 @@
 
   <div{{ content_attributes }} class="full-node word-list">
 
+    {{ title_prefix }}
+    {{ title_suffix }}
+
     <div class="collection__header">
       <div class="collection__header__image">
         {{ content.field_word_list_image }}
       </div>
 
       <div class="collection__header__text">
-        {{ title_prefix }}
-        {{ title_suffix }}
-
         {% if label %}
           <h2{{ title_attributes }}>
           {{ label }}

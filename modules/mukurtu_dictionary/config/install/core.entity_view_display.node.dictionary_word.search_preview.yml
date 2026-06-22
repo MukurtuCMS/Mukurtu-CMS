@@ -42,7 +42,6 @@ content:
     region: content
 hidden:
   comment: true
-  draft: true
   field_additional_word_entries: true
   field_all_related_content: true
   field_alternate_spelling: true
