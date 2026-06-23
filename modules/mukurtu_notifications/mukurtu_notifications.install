@@ -343,6 +343,10 @@ function mukurtu_notifications_update_40015(): void {
  * version; the view was crashing with PluginNotFoundException. Since the path
  * is /notifications (no URL argument), the uid always comes from the
  * current_user default, so custom validation is unnecessary.
+ *
+ * This is intentionally the last in the chain of view-redeploy hooks (40005,
+ * 40009, 40013, 40014, 40015, 40016). Each earlier hook fixed an in-flight
+ * issue; this one wins and is the canonical final state.
  */
 function mukurtu_notifications_update_40016(): void {
   $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';

@@ -105,6 +105,8 @@ function mukurtu_notifications_node_insert(Node $node) {
     return;
   }
 
+  // Phase 1: record the event for the notifications feed. No email is sent on
+  // insert; email dispatch is phase 2 once per-user opt-in preferences are wired.
   $message = Message::create([
     'template' => 'mukurtu_single_node_insert',
     'uid' => $node->getOwnerId(),
@@ -243,7 +245,7 @@ function mukurtu_notifications_node_delete(Node $node) {
   $message->set('field_content_type', \Drupal::token()->replace('[node:type-name]', ['node' => $node]));
 
   // Record the user who took the action.
-  $message->set('field_user', \Drupal\user\Entity\User::load(\Drupal::currentUser()->id()));
+  $message->set('field_user', \Drupal::currentUser()->id());
 
   $message->save();
 }
