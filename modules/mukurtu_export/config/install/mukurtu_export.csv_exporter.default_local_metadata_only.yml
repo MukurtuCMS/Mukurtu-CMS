@@ -2,7 +2,7 @@ langcode: en
 status: true
 dependencies: {  }
 _core:
-  default_config_hash: piH8CX5ny4s6Z46Ii04GhznLfMcbfTZVxk5e0rVOcS4
+  default_config_hash: s8L6fTx_TGVkh5kLJF86egil75-lLcF2G6lXYfdk95U
 id: default_local_metadata_only
 label: 'Default local settings (metadata only)'
 uid: 1
@@ -193,14 +193,6 @@ entity_fields_export_list:
     field_local_contexts_projects: 'Local Contexts Projects'
     field_local_contexts_labels_and_notices: 'Local Contexts Labels and Notices'
     field_coverage: 'Map Points'
-  multipage_item__multipage_item:
-    id: ID
-    uuid: UUID
-    langcode: Language
-    uid: Author
-    title: Title
-    status: Status
-    field_pages: Pages
   media__audio:
     mid: ID
     langcode: Locale
@@ -308,6 +300,13 @@ entity_fields_export_list:
     field_identifier: Identifier
     default_langcode: 'Default translation'
     field_media_tags: 'Media Tags'
+  multipage_item__multipage_item:
+    id: ID
+    langcode: Language
+    uid: Author
+    title: Title
+    field_pages: Pages
+    default_langcode: 'Default translation'
   community__community:
     id: ID
     langcode: Locale
@@ -556,3 +555,4 @@ entity_reference_media: entity
 entity_reference_taxonomy_term: name
 entity_reference_user: username
 entity_reference_paragraph: entity
+entity_reference_multipage_item: entity

@@ -2,7 +2,7 @@ langcode: en
 status: true
 dependencies: {  }
 _core:
-  default_config_hash: piH8CX5ny4s6Z46Ii04GhznLfMcbfTZVxk5e0rVOcS4
+  default_config_hash: 0UIzmXlXenkzXuC7hXtcAJL3Xn7DvVS-NvQZAcQ2TdE
 id: default_local_with_media
 label: 'Default local settings (with media assets)'
 uid: 1
@@ -300,6 +300,13 @@ entity_fields_export_list:
     field_identifier: Identifier
     default_langcode: 'Default translation'
     field_media_tags: 'Media Tags'
+  multipage_item__multipage_item:
+    id: ID
+    langcode: Language
+    title: Title
+    field_pages: Pages
+    uid: Author
+    default_langcode: 'Default translation'
   community__community:
     id: ID
     langcode: Locale
@@ -548,4 +555,4 @@ entity_reference_media: entity
 entity_reference_taxonomy_term: name
 entity_reference_user: username
 entity_reference_paragraph: entity
-entity_reference_multipage_item: id
+entity_reference_multipage_item: entity
