@@ -301,3 +301,18 @@ function mukurtu_notifications_update_40013(): void {
     $source->read('views.view.mukurtu_message_log')
   );
 }
+
+/**
+ * Re-deploy the mukurtu_message_log view to ensure the latest config is active
+ * on environments where 40013 was pre-empted by a fresh site-install that
+ * set the schema ceiling at 40013 before the table layout was committed.
+ */
+function mukurtu_notifications_update_40014(): void {
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  $config_storage = \Drupal::service('config.storage');
+  $config_storage->write(
+    'views.view.mukurtu_message_log',
+    $source->read('views.view.mukurtu_message_log')
+  );
+}
