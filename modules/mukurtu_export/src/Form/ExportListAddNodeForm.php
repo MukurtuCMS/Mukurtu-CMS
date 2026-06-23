@@ -97,7 +97,8 @@ class ExportListAddNodeForm extends FormBase {
               ),
               '#default_value' => FALSE,
               '#states' => [
-                'visible' => [':input[name="include_children"]' => ['checked' => TRUE]],
+                'visible'  => [':input[name="include_children"]' => ['checked' => TRUE]],
+                'disabled' => [':input[name="include_children"]' => ['checked' => FALSE]],
               ],
             ];
           }

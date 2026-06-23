@@ -73,6 +73,10 @@ class CsvExporterFormBase extends EntityForm {
       '#title' => $this->t('Configuration'),
     ];
 
+    // Per-option #description values on radio sub-elements are rendered as
+    // adjacent <div> elements by Drupal core without aria-describedby linkage,
+    // so screen readers may not announce them on focus. This is a known Drupal
+    // core limitation; the descriptions are still visible in the rendered HTML.
     $form['relationships']['field_id'] = [
       '#type' => 'radios',
       '#title' => $this->t('Select the identifier format to export'),

@@ -9,7 +9,10 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 class CsvExporterController extends ControllerBase {
 
   public function duplicate(CsvExporter $csv_exporter) {
-    if (!$csv_exporter->access('view')) {
+    $create_access = $this->entityTypeManager()
+      ->getAccessControlHandler('csv_exporter')
+      ->createAccess();
+    if (!$csv_exporter->access('view') || !$create_access) {
       throw new AccessDeniedHttpException();
     }
 

@@ -124,7 +124,8 @@ class ExportSettingsForm extends ExportBaseForm {
             '#default_value' => FALSE,
             '#weight' => -4,
             '#states' => [
-              'visible' => [':input[name="include_children"]' => ['checked' => TRUE]],
+              'visible'  => [':input[name="include_children"]' => ['checked' => TRUE]],
+              'disabled' => [':input[name="include_children"]' => ['checked' => FALSE]],
             ],
           ];
         }

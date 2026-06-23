@@ -139,7 +139,8 @@ class ExportListAddItemsForm extends FormBase {
           ),
           '#default_value' => FALSE,
           '#states' => [
-            'visible' => [':input[name="include_children"]' => ['checked' => TRUE]],
+            'visible'  => [':input[name="include_children"]' => ['checked' => TRUE]],
+            'disabled' => [':input[name="include_children"]' => ['checked' => FALSE]],
           ],
         ];
       }
@@ -162,9 +163,7 @@ class ExportListAddItemsForm extends FormBase {
   public function validateForm(array &$form, FormStateInterface $form_state): void {
     $new_name = trim($form_state->getValue('new_list_name') ?? '');
     if (empty($new_name) && empty($form_state->getValue('export_list_id'))) {
-      $error = $this->t('Select an export list or enter a name for a new one.');
-      $form_state->setErrorByName('export_list_id', $error);
-      $form_state->setErrorByName('new_list_name', $error);
+      $form_state->setErrorByName('export_list_id', $this->t('Select an export list or enter a name for a new one.'));
     }
   }
 

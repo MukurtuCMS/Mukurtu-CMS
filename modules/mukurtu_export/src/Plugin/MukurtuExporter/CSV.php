@@ -56,8 +56,14 @@ class CSV extends ExporterBase {
       $entities = $storage->loadMultiple($result);
       foreach ($entities as $id => $entity) {
         $element['#options'][$id] = $entity->label();
+        $links = [];
         if ($entity->access('view')) {
-          $element['#options'][$id] .= " (" . Link::createFromRoute($this->t('Duplicate'), 'mukurtu_export.csv_exporter.duplicate', ['csv_exporter' => $id], [])->toString() . ")";
+          $links[] = Link::createFromRoute($this->t('Duplicate'), 'mukurtu_export.csv_exporter.duplicate', ['csv_exporter' => $id], [])->toString();
+        }
+        // Render action links in #suffix so they appear after the <label>,
+        // not nested inside it (nested <a> inside <label> is invalid HTML).
+        if (!empty($links)) {
+          $element[$id]['#suffix'] = ' (' . implode(', ', $links) . ')';
         }
         $element[$id]['#description'] = $entity->getDescription();
       }
@@ -80,14 +86,20 @@ class CSV extends ExporterBase {
       $entities = $storage->loadMultiple($result);
       foreach($entities as $id => $entity) {
         $element['#options'][$id] = $entity->label();
+        $links = [];
         if ($entity->access('update')) {
-          $element['#options'][$id] .= " (" . Link::createFromRoute($this->t('Edit'), 'entity.csv_exporter.edit_form', ['csv_exporter' => $id], [])->toString() . ")";
+          $links[] = Link::createFromRoute($this->t('Edit'), 'entity.csv_exporter.edit_form', ['csv_exporter' => $id], [])->toString();
         }
         if ($entity->access('view')) {
-          $element['#options'][$id] .= " (" . Link::createFromRoute($this->t('Duplicate'), 'mukurtu_export.csv_exporter.duplicate', ['csv_exporter' => $id], [])->toString() . ")";
+          $links[] = Link::createFromRoute($this->t('Duplicate'), 'mukurtu_export.csv_exporter.duplicate', ['csv_exporter' => $id], [])->toString();
         }
         if ($entity->access('delete')) {
-          $element['#options'][$id] .= " (" . Link::createFromRoute($this->t('Delete'), 'entity.csv_exporter.delete_form', ['csv_exporter' => $id], [])->toString() . ")";
+          $links[] = Link::createFromRoute($this->t('Delete'), 'entity.csv_exporter.delete_form', ['csv_exporter' => $id], [])->toString();
+        }
+        // Render action links in #suffix so they appear after the <label>,
+        // not nested inside it (nested <a> inside <label> is invalid HTML).
+        if (!empty($links)) {
+          $element[$id]['#suffix'] = ' (' . implode(', ', $links) . ')';
         }
         $element[$id]['#description'] = $entity->getDescription();
       }
