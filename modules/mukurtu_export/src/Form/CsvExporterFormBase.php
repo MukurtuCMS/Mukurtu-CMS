@@ -98,7 +98,7 @@ class CsvExporterFormBase extends EntityForm {
 
     $form['relationships']['entity_reference_node'] = [
       '#type' => 'radios',
-      '#title' => $this->t('Content'),
+      '#title' => $this->t('Referenced content'),
       '#default_value' => $entity->getEntityReferenceSetting('node'),
       '#options' => [
         'id' => $this->t('Export the identifier (node ID or UUID)'),
