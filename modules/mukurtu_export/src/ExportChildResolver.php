@@ -127,6 +127,30 @@ class ExportChildResolver {
   }
 
   /**
+   * Adds parent multipage_item entities for every MPI page node in $items.
+   *
+   * Intended as a final post-processing pass in export form submit handlers.
+   * Idempotent: writing the same multipage_item ID multiple times is a no-op.
+   *
+   * @param array $items
+   *   Items map keyed by entity type, passed by reference. Node entries are
+   *   inspected; multipage_item entries are populated as needed.
+   */
+  public function addMpiEntitiesForNodes(array &$items): void {
+    foreach ($items['node'] ?? [] as $node_id) {
+      $node = $this->entityTypeManager->getStorage('node')->load($node_id);
+      if (!$node) {
+        continue;
+      }
+      $mpi = $this->multipageItemManager->getMultipageEntity($node);
+      if ($mpi) {
+        $mpi_id = (int) $mpi->id();
+        $items['multipage_item'][$mpi_id] = $mpi_id;
+      }
+    }
+  }
+
+  /**
    * Returns accessible pages for the multipage item this node belongs to.
    *
    * @param \Drupal\node\NodeInterface $node
