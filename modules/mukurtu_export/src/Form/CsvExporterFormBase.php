@@ -102,10 +102,12 @@ class CsvExporterFormBase extends EntityForm {
       '#default_value' => $entity->getEntityReferenceSetting('node'),
       '#options' => [
         'id' => $this->t('Export the identifier (node ID or UUID)'),
-        'entity' => $this->t('Export the identifier and include the referenced content'),
+        'entity_shallow' => $this->t('Export the identifier and include one level of referenced content'),
+        'entity' => $this->t('Export the identifier and include referenced content recursively'),
       ],
-      'id' => ['#description' => $this->t('Only the ID or UUID is written to the cell. The referenced item is not included in the export.')],
-      'entity' => ['#description' => $this->t('The ID or UUID is written to the cell, and the referenced item is also exported as a separate row in the export package.')],
+      'id' => ['#description' => $this->t('Only the ID or UUID is written to the cell. The referenced content is not included in the export.')],
+      'entity_shallow' => ['#description' => $this->t('The ID or UUID is written to the cell, and the referenced content is also exported. References within referenced content are not followed.')],
+      'entity' => ['#description' => $this->t('The ID or UUID is written to the cell, and the referenced content is also exported. References within referenced content are also followed, recursively. This may result in very large exports, use with caution.')],
     ];
 
     $form['relationships']['entity_reference_media'] = [
@@ -114,10 +116,12 @@ class CsvExporterFormBase extends EntityForm {
       '#default_value' => $entity->getEntityReferenceSetting('media'),
       '#options' => [
         'id' => $this->t('Export the identifier (media ID or UUID)'),
-        'entity' => $this->t('Export the identifier and include the referenced media'),
+        'entity_shallow' => $this->t('Export the identifier and include one level of referenced media'),
+        'entity' => $this->t('Export the identifier and include referenced media recursively'),
       ],
-      'id' => ['#description' => $this->t('Only the ID or UUID is written to the cell. The referenced item is not included in the export.')],
-      'entity' => ['#description' => $this->t('The ID or UUID is written to the cell, and the referenced item is also exported as a separate row in the export package.')],
+      'id' => ['#description' => $this->t('Only the ID or UUID is written to the cell. The referenced media is not included in the export.')],
+      'entity_shallow' => ['#description' => $this->t('The ID or UUID is written to the cell, and the referenced media is also exported. References within referenced media are not followed.')],
+      'entity' => ['#description' => $this->t('The ID or UUID is written to the cell, and the referenced media is also exported. References within referenced media are also followed, recursively. This may result in very large exports, use with caution.')],
     ];
 
     $form['relationships']['media_asset_packaging'] = [
@@ -142,11 +146,13 @@ class CsvExporterFormBase extends EntityForm {
       '#options' => [
         'id' => $this->t('Export the identifier (term ID or UUID)'),
         'name' => $this->t('Export the term label'),
-        'entity' => $this->t('Export the identifier and include the referenced term'),
+        'entity_shallow' => $this->t('Export the identifier and include one level of referenced terms'),
+        'entity' => $this->t('Export the identifier and include referenced terms recursively'),
       ],
-      'id' => ['#description' => $this->t('Only the ID or UUID is written to the cell. The referenced item is not included in the export.')],
+      'id' => ['#description' => $this->t('Only the ID or UUID is written to the cell. The referenced term is not included in the export.')],
       'name' => ['#description' => $this->t('The term\'s label is written to the cell. Useful when sharing data across sites where IDs may differ.')],
-      'entity' => ['#description' => $this->t('The ID or UUID is written to the cell, and the referenced item is also exported as a separate row in the export package.')],
+      'entity_shallow' => ['#description' => $this->t('The ID or UUID is written to the cell, and the referenced term is also exported. References within referenced terms are not followed.')],
+      'entity' => ['#description' => $this->t('The ID or UUID is written to the cell, and the referenced term is also exported. References within referenced terms are also followed, recursively. This may result in very large exports, use with caution.')],
     ];
 
     $form['relationships']['entity_reference_user'] = [
@@ -167,10 +173,12 @@ class CsvExporterFormBase extends EntityForm {
       '#default_value' => $entity->getEntityReferenceSetting('paragraph'),
       '#options' => [
         'id' => $this->t('Export the identifier (paragraph ID or UUID)'),
-        'entity' => $this->t('Export the identifier and include the referenced paragraph'),
+        'entity_shallow' => $this->t('Export the identifier and include one level of referenced paragraphs'),
+        'entity' => $this->t('Export the identifier and include referenced paragraphs recursively'),
       ],
-      'id' => ['#description' => $this->t('Only the ID or UUID is written to the cell. The referenced item is not included in the export.')],
-      'entity' => ['#description' => $this->t('The ID or UUID is written to the cell, and the referenced item is also exported as a separate row in the export package.')],
+      'id' => ['#description' => $this->t('Only the ID or UUID is written to the cell. The referenced paragraph is not included in the export.')],
+      'entity_shallow' => ['#description' => $this->t('The ID or UUID is written to the cell, and the referenced paragraph is also exported. References within referenced paragraphs are not followed.')],
+      'entity' => ['#description' => $this->t('The ID or UUID is written to the cell, and the referenced paragraph is also exported. References within referenced paragraphs are also followed, recursively. This may result in very large exports, use with caution.')],
     ];
 
     $form['csv'] = [
