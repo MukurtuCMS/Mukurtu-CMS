@@ -374,11 +374,13 @@ function mukurtu_workflows_form_alter(array &$form, FormStateInterface $form_sta
  * Recursively removes specific action IDs from any VBO action select element.
  */
 function _mukurtu_workflows_remove_vbo_actions(array &$element, array $action_ids): void {
+  // Modify this element if it is a select with the target action IDs, then
+  // always recurse -- the form has many selects (filter dropdowns, etc.) and
+  // the VBO action select may appear anywhere in the tree.
   if (isset($element['#type']) && $element['#type'] === 'select' && isset($element['#options'])) {
     foreach ($action_ids as $id) {
       unset($element['#options'][$id]);
     }
-    return;
   }
   foreach (\Drupal\Core\Render\Element::children($element) as $key) {
     _mukurtu_workflows_remove_vbo_actions($element[$key], $action_ids);
