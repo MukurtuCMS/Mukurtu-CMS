@@ -344,11 +344,23 @@ function mukurtu_notifications_update_40015(): void {
  * is /notifications (no URL argument), the uid always comes from the
  * current_user default, so custom validation is unnecessary.
  *
- * This is intentionally the last in the chain of view-redeploy hooks (40005,
- * 40009, 40013, 40014, 40015, 40016). Each earlier hook fixed an in-flight
- * issue; this one wins and is the canonical final state.
+ * Each earlier hook (40005, 40009, 40013, 40014, 40015) fixed an in-flight
+ * issue. Hook 40017 follows with an accessibility fix (table caption).
  */
 function mukurtu_notifications_update_40016(): void {
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  $config_storage = \Drupal::service('config.storage');
+  $config_storage->write(
+    'views.view.mukurtu_message_log',
+    $source->read('views.view.mukurtu_message_log')
+  );
+}
+
+/**
+ * Add accessible caption to the notifications table (WCAG 1.3.1).
+ */
+function mukurtu_notifications_update_40017(): void {
   $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
   $source = new FileStorage($config_path);
   $config_storage = \Drupal::service('config.storage');

@@ -381,7 +381,7 @@ display:
           sticky: false
           summary: ''
           empty_table: false
-          caption: ''
+          caption: 'Notification log'
           description: ''
       row:
         type: fields
