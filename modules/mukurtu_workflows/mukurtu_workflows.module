@@ -364,18 +364,21 @@ function _mukurtu_workflows_editorial_workflow_active(): bool {
 }
 
 /**
- * Implements hook_views_pre_render().
+ * Implements hook_views_post_build().
  *
  * Removes Publish and Unpublish from VBO selected_actions on the content
  * admin view when the editorial workflow is active.
  *
  * VBO keys its action <select> options by the numeric delta of each entry in
  * selected_actions (not by the action plugin ID string), so hook_form_alter
- * cannot reliably remove them by plugin ID key. Removing the entries from the
- * field handler's options here, before viewsForm() is called, ensures VBO
- * never adds those actions to its option list.
+ * cannot reliably remove them by plugin ID key.
+ *
+ * hook_views_post_build fires after initHandlers() populates $view->field but
+ * before preRender() caches getBulkOptions(). Modifying selected_actions here
+ * ensures VBO never includes the disallowed actions in its cached option list.
+ * hook_views_pre_render fires AFTER preRender() so it is too late.
  */
-function mukurtu_workflows_views_pre_render(ViewExecutable $view): void {
+function mukurtu_workflows_views_post_build(ViewExecutable $view): void {
   if ($view->id() !== 'mukurtu_manage_all_content') {
     return;
   }
