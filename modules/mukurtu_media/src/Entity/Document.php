@@ -150,7 +150,7 @@ class Document extends Media implements DocumentInterface, CulturalProtocolContr
       ->setDescription(t('A thumbnail image showing the first page of the document is automatically generated and is normally used, with a generic image used in certain contexts. A thumbnail image does not usually need to be provided.	<br />Select "Choose File" to upload a thumbnail image.'))
       ->setSettings([
         'alt_field' => TRUE,
-        'alt_field_required' => TRUE,
+        'alt_field_required' => FALSE,
         'title_field' => FALSE,
         'title_field_required' => FALSE,
         'max_resolution' => '',
@@ -264,6 +264,18 @@ class Document extends Media implements DocumentInterface, CulturalProtocolContr
     if ($defaultThumb) {
       $this->set('thumbnail', ['target_id' => $defaultThumb]);
     }
+
+    // Auto-fill thumbnail alt text from the document name when it is empty.
+    // Covers auto-generated thumbnails (add form, migrations) and existing
+    // documents that were saved before alt text was required.
+    $thumbValue = $this->get('field_thumbnail')->getValue();
+    if (!empty($thumbValue[0]['target_id']) && empty($thumbValue[0]['alt'])) {
+      $this->get('field_thumbnail')->set(0, [
+        'target_id' => $thumbValue[0]['target_id'],
+        'alt' => $this->label(),
+      ]);
+    }
+
     parent::preSave($storage);
   }
 

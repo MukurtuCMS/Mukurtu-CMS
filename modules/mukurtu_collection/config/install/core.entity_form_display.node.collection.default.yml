@@ -137,13 +137,6 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
-  draft:
-    type: boolean_checkbox
-    weight: 7
-    region: content
-    settings:
-      display_label: true
-    third_party_settings: {  }
   field_child_collections:
     type: entity_browser_entity_reference
     weight: 8

@@ -29,7 +29,6 @@ content:
     region: content
 hidden:
   comment: true
-  draft: true
   field_all_community_records: true
   field_all_related_content: true
   field_category: true

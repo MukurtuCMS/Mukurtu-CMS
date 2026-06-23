@@ -3,9 +3,6 @@
 namespace Drupal\drafts_entity_test\Entity;
 
 use Drupal\entity_test\Entity\EntityTest;
-use Drupal\mukurtu_drafts\Entity\MukurtuDraftTrait;
-use Drupal\mukurtu_drafts\Entity\MukurtuDraftInterface;
-use Drupal\Core\Entity\EntityTypeInterface;
 
 /**
  * Defines the TestDraftEntity class.
@@ -49,16 +46,6 @@ use Drupal\Core\Entity\EntityTypeInterface;
  * Note that this entity type annotation intentionally omits the "create" link
  * template. See https://www.drupal.org/node/2293697.
  */
-class TestDraftEntity extends EntityTest implements MukurtuDraftInterface
+class TestDraftEntity extends EntityTest
 {
-  use MukurtuDraftTrait;
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
-    $fields = parent::baseFieldDefinitions($entity_type);
-    $fields += static::draftBaseFieldDefinitions($entity_type);
-    return $fields;
-  }
 }

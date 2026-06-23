@@ -1374,3 +1374,132 @@ function mukurtu_core_update_40044(): void {
     ->set('favicon.mimetype', 'image/x-icon')
     ->save();
 }
+
+/**
+ * Remove the draft boolean base field; draft state is now managed via
+ * content_moderation workflow states (#255).
+ */
+function mukurtu_core_update_40045(): void {
+  $update_manager = \Drupal::entityDefinitionUpdateManager();
+  $field = $update_manager->getFieldStorageDefinition('draft', 'node');
+  if ($field) {
+    $update_manager->uninstallFieldStorageDefinition($field);
+  }
+}
+
+/**
+ * Rename "Under Review" to "Draft" in the default Mukurtu content workflow.
+ */
+function mukurtu_core_update_40046(): void {
+  $workflow = \Drupal::configFactory()
+    ->getEditable('workflows.workflow.mukurtu_default_content_workflow');
+  if ($workflow->isNew()) {
+    return;
+  }
+  $workflow->set('type_settings.states.draft.label', 'Draft');
+  $workflow->set('type_settings.transitions.create_new_draft.label', 'Save as Draft');
+  $workflow->save();
+}
+
+/**
+ * Change default moderation state to published for content workflows.
+ */
+function mukurtu_core_update_40047(): void {
+  foreach (['mukurtu_default_content_workflow', 'mukurtu_editorial_workflow'] as $workflow_id) {
+    $workflow = \Drupal::configFactory()
+      ->getEditable('workflows.workflow.' . $workflow_id);
+    if ($workflow->isNew()) {
+      continue;
+    }
+    $workflow->set('type_settings.default_moderation_state', 'published');
+    $workflow->save();
+  }
+}
+
+/**
+ * Update the draft content view to filter by moderation_state instead of the
+ * removed boolean draft field.
+ */
+function mukurtu_core_update_40048(): void {
+  if (!\Drupal::moduleHandler()->moduleExists('mukurtu_drafts')) {
+    return;
+  }
+  $module_path = \Drupal::service('module_handler')->getModule('mukurtu_drafts')->getPath();
+  $config_source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+  $config_data = $config_source->read('views.view.mukurtu_draft_content');
+  if ($config_data) {
+    \Drupal::configFactory()
+      ->getEditable('views.view.mukurtu_draft_content')
+      ->setData($config_data)
+      ->save();
+  }
+}
+
+/**
+ * Grant authenticated users permission to use the draft workflow transitions.
+ *
+ * These permissions were added to config/install in this branch but
+ * config/install is only applied on fresh installs, not upgrades.
+ */
+function mukurtu_core_update_40049(): void {
+  // Ensure the workflows module is enabled so its permissions are registered.
+  if (!\Drupal::moduleHandler()->moduleExists('mukurtu_workflows')) {
+    \Drupal::service('module_installer')->install(['mukurtu_workflows']);
+  }
+
+  $role = \Drupal\user\Entity\Role::load('authenticated');
+  if (!$role) {
+    return;
+  }
+  $role->grantPermission('use mukurtu_default_content_workflow transition create_new_draft');
+  $role->grantPermission('use mukurtu_default_content_workflow transition publish');
+  $role->save();
+}
+
+/**
+ * Make the draft state the default revision in content workflows.
+ */
+function mukurtu_core_update_40050(): void {
+  foreach (['mukurtu_default_content_workflow', 'mukurtu_editorial_workflow'] as $workflow_id) {
+    $workflow = \Drupal::configFactory()
+      ->getEditable('workflows.workflow.' . $workflow_id);
+    if ($workflow->isNew()) {
+      continue;
+    }
+    $workflow->set('type_settings.states.draft.default_revision', TRUE);
+    $workflow->save();
+  }
+}
+
+/**
+ * Resync the draft content view to add editorial workflow filter and tag cache.
+ */
+function mukurtu_core_update_40051(): void {
+  if (!\Drupal::moduleHandler()->moduleExists('mukurtu_drafts')) {
+    return;
+  }
+  $module_path = \Drupal::service('module_handler')->getModule('mukurtu_drafts')->getPath();
+  $config_source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+  $config_data = $config_source->read('views.view.mukurtu_draft_content');
+  if ($config_data) {
+    \Drupal::configFactory()
+      ->getEditable('views.view.mukurtu_draft_content')
+      ->setData($config_data)
+      ->save();
+  }
+}
+
+/**
+ * Update manage all content view to display moderation state instead of status.
+ */
+function mukurtu_core_update_40052(): void {
+  $profile_path = \Drupal::service('extension.list.profile')->getPath('mukurtu');
+  $config_source = new \Drupal\Core\Config\FileStorage(\Drupal::root() . '/' . $profile_path . '/config/install');
+  $config_data = $config_source->read('views.view.mukurtu_manage_all_content');
+  if ($config_data) {
+    \Drupal::configFactory()
+      ->getEditable('views.view.mukurtu_manage_all_content')
+      ->setData($config_data)
+      ->save();
+  }
+}
