@@ -226,8 +226,8 @@ function mukurtu_workflows_views_query_alter(ViewExecutable $view, QueryPluginBa
 
   $steward_protocol_ids = [];
   foreach ($memberships as $membership) {
-    if ($membership->getGroupEntityType() === 'node' &&
-        $membership->getGroupBundle() === 'protocol' &&
+    // Protocols are a custom OG group entity type 'protocol', not 'node'.
+    if ($membership->getGroupEntityType() === 'protocol' &&
         $membership->hasRole('protocol-protocol-protocol_steward')) {
       $steward_protocol_ids[] = (int) $membership->getGroupId();
     }
@@ -329,4 +329,58 @@ function mukurtu_workflows_node_form_submit(array &$form, FormStateInterface $fo
       'note' => $note_text !== '' ? $note_text : NULL,
     ])
     ->execute();
+}
+
+/**
+ * Returns TRUE when the Mukurtu editorial workflow is the active workflow.
+ *
+ * Result is statically cached -- the active workflow does not change within
+ * a single request.
+ */
+function _mukurtu_workflows_editorial_workflow_active(): bool {
+  $cache = &drupal_static(__FUNCTION__);
+  if (!isset($cache)) {
+    $cache = FALSE;
+    foreach (\Drupal\workflows\Entity\Workflow::loadMultiple() as $wf) {
+      $type_settings = $wf->get('type_settings');
+      if (!empty($type_settings['entity_types']['node'])) {
+        $cache = $wf->id() === 'mukurtu_editorial_workflow';
+        break;
+      }
+    }
+  }
+  return $cache;
+}
+
+/**
+ * Implements hook_form_alter().
+ *
+ * Removes Publish and Unpublish from the VBO bulk-action select on
+ * /admin/content when the editorial workflow is active. State changes should
+ * go through the moderation widget, not direct publish/unpublish actions.
+ */
+function mukurtu_workflows_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
+  if ($form_id !== 'views_form_mukurtu_manage_all_content_mukurtu_manage_content') {
+    return;
+  }
+  if (!_mukurtu_workflows_editorial_workflow_active()) {
+    return;
+  }
+  $vbo_actions = ['entity:publish_action:node', 'entity:unpublish_action:node'];
+  _mukurtu_workflows_remove_vbo_actions($form, $vbo_actions);
+}
+
+/**
+ * Recursively removes specific action IDs from any VBO action select element.
+ */
+function _mukurtu_workflows_remove_vbo_actions(array &$element, array $action_ids): void {
+  if (isset($element['#type']) && $element['#type'] === 'select' && isset($element['#options'])) {
+    foreach ($action_ids as $id) {
+      unset($element['#options'][$id]);
+    }
+    return;
+  }
+  foreach (\Drupal\Core\Render\Element::children($element) as $key) {
+    _mukurtu_workflows_remove_vbo_actions($element[$key], $action_ids);
+  }
 }
