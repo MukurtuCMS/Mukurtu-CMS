@@ -539,9 +539,9 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
    */
   protected function packageFile(EntityFieldExportEvent $event, $fid): string|null {
     if ($file = $this->entityTypeManager->getStorage('file')->load($fid)) {
-      $packagedFilePath = sprintf("files/%s", $file->getFilename());
-      $event->packageFile($file->getFileUri(), $packagedFilePath);
-      return $packagedFilePath;
+      $folder = str_contains($event->field_name, 'thumbnail') ? 'thumbnails' : 'files';
+      $event->packageFile($file->getFileUri(), sprintf("%s/%s", $folder, $file->getFilename()));
+      return $file->getFilename();
     }
     return NULL;
   }
