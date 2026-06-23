@@ -173,6 +173,15 @@ class CsvExporterFormBase extends EntityForm {
       'entity' => ['#description' => $this->t('The ID or UUID is written to the cell, and the referenced item is also exported as a separate row in the export package.')],
     ];
 
+    $form['field_type_specific']['entity_reference']['entity_reference_multipage_item'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Multipage Items'),
+      '#default_value' => $entity->getEntityReferenceSetting('multipage_item') ?? 'id',
+      '#options' => [
+        'id' => $this->t('Export the identifier (multipage item ID or UUID)'),
+      ],
+    ];
+
     $form['csv'] = [
       '#type' => 'details',
       '#open' => FALSE,

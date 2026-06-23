@@ -114,6 +114,7 @@ entity_fields_export_list:
     field_local_contexts_projects: 'Local Contexts Projects'
     field_local_contexts_labels_and_notices: 'Local Contexts Labels and Notices'
     field_location: Location
+    field_multipage_page_of: 'Multipage parent'
   node__landing_page:
     nid: ID
     langcode: Language
@@ -547,3 +548,4 @@ entity_reference_media: entity
 entity_reference_taxonomy_term: name
 entity_reference_user: username
 entity_reference_paragraph: entity
+entity_reference_multipage_item: id

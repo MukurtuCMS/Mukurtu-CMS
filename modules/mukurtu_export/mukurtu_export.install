@@ -328,7 +328,9 @@ function mukurtu_export_update_40013(): void {
 }
 
 /**
- * Update recommended_settings_for_import: add multipage_item field mapping.
+ * Add multipage_item field mapping, field_multipage_page_of to
+ * node__digital_heritage, and entity_reference_multipage_item setting to
+ * the recommended_settings_for_import exporter.
  */
 function mukurtu_export_update_40014(): void {
   $storage = \Drupal::entityTypeManager()->getStorage('csv_exporter');
@@ -336,7 +338,10 @@ function mukurtu_export_update_40014(): void {
   if (!$exporter) {
     return;
   }
+
   $list = $exporter->get('entity_fields_export_list') ?? [];
+
+  // Add the multipage_item entity type field mapping.
   if (!isset($list['multipage_item__multipage_item'])) {
     $list['multipage_item__multipage_item'] = [
       'id'          => 'ID',
@@ -347,7 +352,19 @@ function mukurtu_export_update_40014(): void {
       'status'      => 'Status',
       'field_pages' => 'Pages',
     ];
-    $exporter->set('entity_fields_export_list', $list);
-    $exporter->save();
   }
+
+  // Add field_multipage_page_of to node__digital_heritage.
+  if (isset($list['node__digital_heritage']) && !isset($list['node__digital_heritage']['field_multipage_page_of'])) {
+    $list['node__digital_heritage']['field_multipage_page_of'] = 'Multipage parent';
+  }
+
+  $exporter->set('entity_fields_export_list', $list);
+
+  // Add entity_reference_multipage_item setting.
+  if (!$exporter->getEntityReferenceSetting('multipage_item')) {
+    $exporter->setEntityReferenceSetting('multipage_item', 'id');
+  }
+
+  $exporter->save();
 }
