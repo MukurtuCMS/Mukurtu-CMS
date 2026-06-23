@@ -164,9 +164,10 @@ function mukurtu_notifications_node_update(Node $node) {
         'notify message owner' => FALSE,
         'uids' => [],
       ];
+      $email_validator = \Drupal::service('email.validator');
       $recipients = User::loadMultiple($notify_uids);
       foreach ($recipients as $uid => $recipient) {
-        if (empty($recipient->getEmail())) {
+        if (!$email_validator->isValid($recipient->getEmail())) {
           continue;
         }
         $subscribe_options['uids'][$uid] = new DeliveryCandidate($flags, $notifiers, $uid);
@@ -287,9 +288,10 @@ function mukurtu_notifications_user_insert($entity) {
     'notify message owner' => FALSE,
     'uids' => [],
   ];
+  $email_validator = \Drupal::service('email.validator');
   $admin_users = User::loadMultiple($uids);
   foreach ($admin_users as $uid => $admin_user) {
-    if (empty($admin_user->getEmail())) {
+    if (!$email_validator->isValid($admin_user->getEmail())) {
       continue;
     }
     $subscribe_options['uids'][$uid] = new DeliveryCandidate($flags, $notifiers, $uid);
@@ -331,9 +333,10 @@ function mukurtu_notifications_notify_new_account_created(User $new_user, array 
     'notify message owner' => FALSE,
     'uids' => [],
   ];
+  $email_validator = \Drupal::service('email.validator');
   $notify_users = User::loadMultiple($notify_uids);
   foreach ($notify_users as $uid => $notify_user) {
-    if (empty($notify_user->getEmail())) {
+    if (!$email_validator->isValid($notify_user->getEmail())) {
       continue;
     }
     $subscribe_options['uids'][$uid] = new DeliveryCandidate($flags, $notifiers, (int) $uid);
