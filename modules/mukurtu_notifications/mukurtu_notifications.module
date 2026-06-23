@@ -275,7 +275,11 @@ function mukurtu_notifications_user_insert($entity) {
     'notify message owner' => TRUE,
     'uids' => [],
   ];
-  foreach ($uids as $uid) {
+  $admin_users = User::loadMultiple($uids);
+  foreach ($admin_users as $uid => $admin_user) {
+    if (empty($admin_user->getEmail())) {
+      continue;
+    }
     $subscribe_options['uids'][$uid] = new DeliveryCandidate($flags, $notifiers, $uid);
   }
 
