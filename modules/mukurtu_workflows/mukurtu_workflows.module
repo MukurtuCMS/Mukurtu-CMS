@@ -239,22 +239,22 @@ function mukurtu_workflows_views_query_alter(ViewExecutable $view, QueryPluginBa
     return;
   }
 
-  // Filter to nodes whose field_protocols includes at least one of the
-  // user's stewarded protocols. Using a subquery avoids duplicate rows
-  // when a node belongs to multiple protocols.
-  $placeholders = [];
-  $args = [];
-  foreach ($steward_protocol_ids as $i => $pid) {
-    $key = ':pid_' . $i;
-    $placeholders[] = $key;
-    $args[$key] = $pid;
+  // Find nodes in stewarded protocols via EntityQuery so the cultural_protocol
+  // field's pipe-delimited storage format is handled correctly regardless of
+  // the underlying table structure.
+  $node_storage = \Drupal::entityTypeManager()->getStorage('node');
+  $nid_query = $node_storage->getQuery()->accessCheck(FALSE);
+  $or = $nid_query->orConditionGroup();
+  foreach ($steward_protocol_ids as $pid) {
+    $or->condition('field_cultural_protocols.protocols', '|' . $pid . '|', 'CONTAINS');
   }
-  $in_list = implode(', ', $placeholders);
-  $query->addWhereExpression(
-    0,
-    "node_field_data.nid IN (SELECT entity_id FROM {node__field_protocols} WHERE field_protocols_target_id IN ($in_list))",
-    $args
-  );
+  $nid_query->condition($or);
+  $nids = array_values($nid_query->execute());
+  if (empty($nids)) {
+    $query->addWhereExpression(0, '1 = 0');
+    return;
+  }
+  $query->addWhere(0, 'node_field_data.nid', $nids, 'IN');
 }
 
 /**
