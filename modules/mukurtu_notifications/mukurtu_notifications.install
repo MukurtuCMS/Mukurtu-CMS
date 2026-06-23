@@ -110,7 +110,10 @@ function mukurtu_notifications_update_40004(): void {
 }
 
 /**
- * Deploy the Activity page display for the mukurtu_message_log view.
+ * Deploy the notifications page display for the mukurtu_message_log view.
+ *
+ * Adds the "Notifications" page display at /notifications, scoped to the
+ * current user's messages via a uid contextual filter.
  */
 function mukurtu_notifications_update_40005(): void {
   $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';

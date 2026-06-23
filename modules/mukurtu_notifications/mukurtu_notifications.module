@@ -8,7 +8,6 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Database\Query\AlterableInterface;
-use Drupal\Core\Database\Query\Condition;
 use Drupal\user\Entity\User;
 use Drupal\message_subscribe\Subscribers\DeliveryCandidate;
 use Drupal\mukurtu_collection\Entity\Collection;
@@ -56,44 +55,11 @@ function mukurtu_notifications_entity_view_alter(array &$build, EntityInterface 
 
 /**
  * Implements hook_query_TAG_alter().
+ *
+ * Phase 2: filter message queries by the current user's protocol access grants.
+ * Stubbed until the message entity type is wired to mukurtu_protocol_access.
  */
 function mukurtu_notifications_query_message_access_alter(AlterableInterface $query) {
-  return;
-  $account = User::load(\Drupal::currentUser()->id());
-  if (is_null($account)) {
-    $account = User::getAnonymousUser();
-  }
-
-  if ($account->id() == 1) {
-    return;
-  }
-
-  $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
-
-  // Protocol Set IDs the *user* has access to.
-  $protocol_set_ids = $protocol_manager->getUserGrantIds($account);
-
-  $tables = $query->getTables();
-  $tables_keys = array_keys($tables);
-  $table = reset($tables_keys);
-
-  $query->leftJoin('mukurtu_protocol_access', 'mpa', "$table.mid = mpa.id");
-  $query->condition('mpa.entity_type', 'message');
-
-  if (empty($protocol_set_ids)) {
-    // User doesn't have access to any protocols.
-    $query->condition('protocol_set_id', 0);
-  } else {
-    // User can access media for any of these protocol sets.
-    $or = new Condition('OR');
-    foreach ($protocol_set_ids as $protocol_set_id) {
-      $or->condition('protocol_set_id', $protocol_set_id);
-    }
-
-    $query->condition($or);
-  }
-
-  $query->distinct();
 }
 
 /**
@@ -206,6 +172,17 @@ function mukurtu_notifications_node_update(Node $node) {
   mukurtu_notifications_notify_collection($node, $subscribers);
 }
 
+/**
+ * Deletes all messages of a given template that reference a specific entity.
+ *
+ * @param string $template
+ *   The message template machine name.
+ * @param \Drupal\Core\Entity\EntityInterface $entity
+ *   The entity whose messages should be removed.
+ * @param string $field
+ *   The field name on the message that references the entity. Defaults to
+ *   'field_item'.
+ */
 function mukurtu_notifications_remove_notifications($template, $entity, $field = 'field_item') {
   // Find notifications for the given template that reference the entity.
   $query = \Drupal::entityQuery('message')
@@ -277,7 +254,7 @@ function mukurtu_notifications_user_insert($entity) {
   // need to filter for that in this query.
   $roles = user_role_names(TRUE, 'administer users');
   $rids = array_keys($roles);
-  $uids = Drupal::service('entity_type.manager')->getStorage('user')->getQuery()
+  $uids = \Drupal::service('entity_type.manager')->getStorage('user')->getQuery()
     ->condition('roles', $rids, 'IN')
     ->execute();
 
@@ -470,6 +447,14 @@ function mukurtu_notifications_notify_community(Node $node, $subscribers): void 
   // templates to reference community entities instead of nodes.
 }
 
+/**
+ * Sends notifications to collection followers when new items are added.
+ *
+ * @param \Drupal\node\Entity\Node $node
+ *   The node being updated (must be a Collection).
+ * @param \Drupal\message_subscribe\SubscribersInterface $subscribers
+ *   The message_subscribe service.
+ */
 function mukurtu_notifications_notify_collection(Node $node, $subscribers) {
   // Only handling existing collections here.
   if (!($node instanceof Collection) || !isset($node->original)) {
