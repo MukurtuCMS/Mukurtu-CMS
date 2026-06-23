@@ -3,6 +3,7 @@
 namespace Drupal\mukurtu_workflows\Form;
 
 use Drupal\content_moderation\ModerationInformationInterface;
+use Drupal\content_moderation\StateTransitionValidationInterface;
 use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Form\FormBase;
@@ -24,6 +25,7 @@ class ReviewStateForm extends FormBase {
     protected readonly ModerationInformationInterface $moderationInfo,
     protected readonly Connection $database,
     protected readonly DateFormatterInterface $dateFormatter,
+    protected readonly StateTransitionValidationInterface $stateTransitionValidation,
   ) {}
 
   public static function create(ContainerInterface $container): static {
@@ -31,6 +33,7 @@ class ReviewStateForm extends FormBase {
       $container->get('content_moderation.moderation_information'),
       $container->get('database'),
       $container->get('date.formatter'),
+      $container->get('content_moderation.state_transition_validation'),
     );
   }
 
@@ -48,17 +51,16 @@ class ReviewStateForm extends FormBase {
       return $form;
     }
 
-    $type_plugin = $workflow->getTypePlugin();
     $current_state = $node->get('moderation_state')->value;
     $account = $this->currentUser();
 
-    // Collect transitions the current user is allowed to use from this state.
+    // Use ProtocolAwareStateTransitionValidation (Mukurtu's override of the
+    // content_moderation service) so that OG protocol-level permissions are
+    // checked alongside site-level permissions. Direct hasPermission() calls
+    // would only see site-level permissions, hiding steward transitions.
     $allowed = [];
-    foreach ($type_plugin->getTransitionsForState($current_state) as $transition) {
-      $perm = 'use ' . $workflow->id() . ' transition ' . $transition->id();
-      if ($account->hasPermission($perm)) {
-        $allowed[$transition->to()->id()] = $transition->label();
-      }
+    foreach ($this->stateTransitionValidation->getValidTransitions($node, $account) as $transition) {
+      $allowed[$transition->to()->id()] = $transition->label();
     }
 
     if (empty($allowed)) {
