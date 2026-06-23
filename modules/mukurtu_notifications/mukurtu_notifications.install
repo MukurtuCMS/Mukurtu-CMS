@@ -196,3 +196,46 @@ function mukurtu_notifications_update_40008(): void {
     $config->set('text', $text)->save();
   }
 }
+
+/**
+ * Redeploy the mukurtu_message_log view with the updated notifications page
+ * display: admin theme, corrected title, and IDOR-safe uid argument.
+ */
+function mukurtu_notifications_update_40009(): void {
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  $config_storage = \Drupal::service('config.storage');
+  $config_storage->write(
+    'views.view.mukurtu_message_log',
+    $source->read('views.view.mukurtu_message_log')
+  );
+}
+
+/**
+ * Fix node insert/update message templates to use the content type label token
+ * instead of the DH-specific field_content_type field, and enable token clearing
+ * so unresolved tokens degrade to empty string rather than literal token text.
+ */
+function mukurtu_notifications_update_40010(): void {
+  $templates = [
+    'message.template.mukurtu_single_node_insert',
+    'message.template.mukurtu_single_node_update',
+  ];
+
+  foreach ($templates as $config_name) {
+    $config = \Drupal::configFactory()->getEditable($config_name);
+    if ($config->isNew()) {
+      continue;
+    }
+    $text = $config->get('text');
+    if (!empty($text[0]['value'])) {
+      $text[0]['value'] = str_replace(
+        '[message:field_item:entity:field_content_type]',
+        '[message:field_item:entity:content-type]',
+        $text[0]['value']
+      );
+      $config->set('text', $text);
+    }
+    $config->set('settings.token options.clear', TRUE)->save();
+  }
+}

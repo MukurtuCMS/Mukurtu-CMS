@@ -325,7 +325,8 @@ display:
     display_plugin: page
     position: 2
     display_options:
-      title: Activity
+      title: 'My notifications'
+      use_admin_theme: true
       path: notifications
       access:
         type: role
