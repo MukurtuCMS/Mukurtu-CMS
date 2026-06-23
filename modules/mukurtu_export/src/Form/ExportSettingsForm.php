@@ -87,11 +87,8 @@ class ExportSettingsForm extends ExportBaseForm {
       // collections or word lists with resolvable children.
       $child_count = 0;
       $recursive_additional = 0;
-      foreach ($adHocItems['node'] ?? [] as $node_id) {
-        $node = $this->entityTypeManager->getStorage('node')->load($node_id);
-        if (!$node) {
-          continue;
-        }
+      $nodes = $this->entityTypeManager->getStorage('node')->loadMultiple(array_keys($adHocItems['node'] ?? []));
+      foreach ($nodes as $node) {
         if (in_array($node->bundle(), ['collection', 'word_list'])) {
           $direct = array_sum(array_map('count', $this->childResolver->getChildEntities($node)));
           $child_count += $direct;

@@ -19,7 +19,6 @@ class TaxonomyTermImportStatus extends FieldPluginBase implements ContainerFacto
 
   protected array $revisionCounts = [];
 
-
   public function __construct(
     array $configuration,
     $plugin_id,

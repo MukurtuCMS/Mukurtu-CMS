@@ -58,9 +58,12 @@ class ExportListAddItemsForm extends FormBase {
     if (!\array_key_exists('action_id', $form_data)) {
       $this->messenger()->addWarning($this->t('No items are staged for export.'));
       $destination = $this->getRequest()->query->get('destination');
-      $destination
-        ? $form_state->setRedirectUrl(Url::fromUserInput($destination))
-        : $form_state->setRedirect('entity.export_list.collection');
+      if ($destination && str_starts_with($destination, '/')) {
+        $form_state->setRedirectUrl(Url::fromUserInput($destination));
+      }
+      else {
+        $form_state->setRedirect('entity.export_list.collection');
+      }
       return $form;
     }
 
@@ -101,14 +104,14 @@ class ExportListAddItemsForm extends FormBase {
     // For aggregative types in the selection, offer to include child items.
     $child_count = 0;
     $recursive_additional = 0;
+    $node_ids = [];
     foreach ($form_data['list'] as $item) {
-      if ($item[2] !== 'node') {
-        continue;
+      if ($item[2] === 'node') {
+        $node_ids[] = $item[3];
       }
-      $node = $this->entityTypeManager->getStorage('node')->load($item[3]);
-      if (!$node) {
-        continue;
-      }
+    }
+    $nodes = $this->entityTypeManager->getStorage('node')->loadMultiple($node_ids);
+    foreach ($nodes as $node) {
       if (in_array($node->bundle(), ['collection', 'word_list'])) {
         $direct = array_sum(array_map('count', $this->childResolver->getChildEntities($node)));
         $child_count += $direct;

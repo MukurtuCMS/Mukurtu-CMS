@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\mukurtu_export\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
