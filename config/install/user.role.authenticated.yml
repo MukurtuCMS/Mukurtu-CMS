@@ -8,8 +8,10 @@ dependencies:
     - entity_browser.browser.mukurtu_taxonomy_record_place_term_browser
     - entity_browser.browser.multipage_item_entity_browser
     - filter.format.basic_html
+    - workflows.workflow.mukurtu_default_content_workflow
   module:
     - comment
+    - content_moderation
     - entity_browser
     - filter
     - flag
@@ -18,7 +20,11 @@ dependencies:
     - mukurtu_protocol
     - node
     - system
+    - workflows
 id: authenticated
 label: 'Authenticated user'
 weight: 1
 is_admin: false
+permissions:
+  - 'use mukurtu_default_content_workflow transition create_new_draft'
+  - 'use mukurtu_default_content_workflow transition publish'

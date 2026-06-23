@@ -75,6 +75,5 @@ content:
     settings: {  }
     third_party_settings: {  }
 hidden:
-  draft: true
   field_cultural_protocols: true
   layout_builder__layout: true

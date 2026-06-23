@@ -139,13 +139,6 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
-  draft:
-    type: boolean_checkbox
-    weight: 8
-    region: content
-    settings:
-      display_label: true
-    third_party_settings: {  }
   field_coverage:
     type: leaflet_widget_default
     weight: 8
