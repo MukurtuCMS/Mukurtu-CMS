@@ -110,6 +110,7 @@ function mukurtu_notifications_node_insert(Node $node) {
     'uid' => $node->getOwnerId(),
   ]);
   $message->set('field_item', $node);
+  $message->set('field_user', \Drupal::currentUser()->id());
   $message->save();
 }
 
@@ -132,6 +133,7 @@ function mukurtu_notifications_node_update(Node $node) {
     'uid' => $node->getOwnerId(),
   ]);
   $message->set('field_item', $node);
+  $message->set('field_user', $current_user_id);
   $message->save();
 
   // Notify the node owner and protocol stewards when someone else edits.

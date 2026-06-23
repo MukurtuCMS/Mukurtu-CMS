@@ -239,3 +239,65 @@ function mukurtu_notifications_update_40010(): void {
     $config->set('settings.token options.clear', TRUE)->save();
   }
 }
+
+/**
+ * Attach field_user to the mukurtu_single_node_insert and
+ * mukurtu_single_node_update message templates so the actor can be stored.
+ */
+function mukurtu_notifications_update_40011(): void {
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  $config_storage = \Drupal::service('config.storage');
+
+  $field_configs = [
+    'field.field.message.mukurtu_single_node_insert.field_user',
+    'field.field.message.mukurtu_single_node_update.field_user',
+  ];
+
+  foreach ($field_configs as $config_name) {
+    $config_storage->write($config_name, $source->read($config_name));
+  }
+
+  \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
+}
+
+/**
+ * Update node insert/update notification text to use simple past tense
+ * ("was created/updated") now that the actor is shown in a separate column.
+ */
+function mukurtu_notifications_update_40012(): void {
+  $replacements = [
+    'message.template.mukurtu_single_node_insert' => [
+      'has been created.' => 'was created.',
+    ],
+    'message.template.mukurtu_single_node_update' => [
+      'has been updated.' => 'was updated.',
+    ],
+  ];
+
+  foreach ($replacements as $config_name => $pairs) {
+    $config = \Drupal::configFactory()->getEditable($config_name);
+    if ($config->isNew()) {
+      continue;
+    }
+    $text = $config->get('text');
+    if (!empty($text[0]['value'])) {
+      $text[0]['value'] = str_replace(array_keys($pairs), array_values($pairs), $text[0]['value']);
+      $config->set('text', $text)->save();
+    }
+  }
+}
+
+/**
+ * Redeploy the mukurtu_message_log view with the table layout: three columns
+ * (Date, User, Activity), field_user relationship for the actor display name.
+ */
+function mukurtu_notifications_update_40013(): void {
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  $config_storage = \Drupal::service('config.storage');
+  $config_storage->write(
+    'views.view.mukurtu_message_log',
+    $source->read('views.view.mukurtu_message_log')
+  );
+}
