@@ -159,7 +159,7 @@ function mukurtu_notifications_node_update(Node $node) {
       $flags = ['subscribe_node'];
       $notifiers = ['email'];
       $subscribe_options = [
-        'notify message owner' => TRUE,
+        'notify message owner' => FALSE,
         'uids' => [],
       ];
       $recipients = User::loadMultiple($notify_uids);
@@ -170,7 +170,12 @@ function mukurtu_notifications_node_update(Node $node) {
         $subscribe_options['uids'][$uid] = new DeliveryCandidate($flags, $notifiers, $uid);
       }
       if (!empty($subscribe_options['uids'])) {
-        $subscribers->sendMessage($message, $message, [], $subscribe_options);
+        try {
+          $subscribers->sendMessage($message, $message, [], $subscribe_options);
+        }
+        catch (\Exception $e) {
+          \Drupal::logger('mukurtu_notifications')->warning('Failed to send node update notification: @msg', ['@msg' => $e->getMessage()]);
+        }
       }
     }
   }
@@ -179,7 +184,12 @@ function mukurtu_notifications_node_update(Node $node) {
   // message_subscribe calls OG functions that throw for non-group content,
   // so limit this to nodes with cultural protocols.
   if ($node->hasField('field_cultural_protocols')) {
-    $subscribers->sendMessage($node, $message);
+    try {
+      $subscribers->sendMessage($node, $message);
+    }
+    catch (\Exception $e) {
+      \Drupal::logger('mukurtu_notifications')->warning('Failed to send follow-content notification: @msg', ['@msg' => $e->getMessage()]);
+    }
   }
 
   // Phase 2: protocol and community follow notifications go here once flags
@@ -272,7 +282,7 @@ function mukurtu_notifications_user_insert($entity) {
   $notifiers = ['email'];
   $notify_options = [];
   $subscribe_options = [
-    'notify message owner' => TRUE,
+    'notify message owner' => FALSE,
     'uids' => [],
   ];
   $admin_users = User::loadMultiple($uids);
@@ -285,7 +295,12 @@ function mukurtu_notifications_user_insert($entity) {
 
   // Queue messages to our custom list of admins.
   $subscribers = \Drupal::service('message_subscribe.subscribers');
-  $subscribers->sendMessage($message, $message, $notify_options, $subscribe_options);
+  try {
+    $subscribers->sendMessage($message, $message, $notify_options, $subscribe_options);
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('mukurtu_notifications')->warning('Failed to send user registration notification: @msg', ['@msg' => $e->getMessage()]);
+  }
 }
 
 /**
@@ -311,19 +326,24 @@ function mukurtu_notifications_notify_new_account_created(User $new_user, array 
   $flags = ['subscribe_user'];
   $notifiers = ['email'];
   $subscribe_options = [
-    'notify message owner' => TRUE,
+    'notify message owner' => FALSE,
     'uids' => [],
   ];
-  foreach ($notify_uids as $uid) {
-    $notify_user = User::load($uid);
-    if (!$notify_user || empty($notify_user->getEmail())) {
+  $notify_users = User::loadMultiple($notify_uids);
+  foreach ($notify_users as $uid => $notify_user) {
+    if (empty($notify_user->getEmail())) {
       continue;
     }
     $subscribe_options['uids'][$uid] = new DeliveryCandidate($flags, $notifiers, (int) $uid);
   }
 
-  \Drupal::service('message_subscribe.subscribers')
-    ->sendMessage($message, $message, [], $subscribe_options);
+  try {
+    \Drupal::service('message_subscribe.subscribers')
+      ->sendMessage($message, $message, [], $subscribe_options);
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('mukurtu_notifications')->warning('Failed to send new account notification: @msg', ['@msg' => $e->getMessage()]);
+  }
 }
 
 /**
@@ -466,5 +486,10 @@ function mukurtu_notifications_notify_collection(Node $node, $subscribers) {
   $message->set('field_item', array_values($newItems));
   $message->save();
 
-  $subscribers->sendMessage($node, $message);
+  try {
+    $subscribers->sendMessage($node, $message);
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('mukurtu_notifications')->warning('Failed to send collection notification: @msg', ['@msg' => $e->getMessage()]);
+  }
 }
