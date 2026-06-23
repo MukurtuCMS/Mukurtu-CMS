@@ -316,3 +316,40 @@ function mukurtu_notifications_update_40014(): void {
     $source->read('views.view.mukurtu_message_log')
   );
 }
+
+/**
+ * Fix page display rendering: add defaults block so Views knows which options
+ * override the master display instead of inheriting from it, and switch the
+ * uid argument validator from the removed "user" plugin to "none".
+ *
+ * Without an explicit defaults block, Views initialises all options to TRUE
+ * (inherit from master), causing the page display to render with the master's
+ * unformatted-list style and "Mukurtu Message Log" title.
+ */
+function mukurtu_notifications_update_40015(): void {
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  $config_storage = \Drupal::service('config.storage');
+  $config_storage->write(
+    'views.view.mukurtu_message_log',
+    $source->read('views.view.mukurtu_message_log')
+  );
+}
+
+/**
+ * Fix uid argument validator: replace the removed "user" plugin with "none".
+ *
+ * The "user" argument validator plugin was removed in the current Drupal
+ * version; the view was crashing with PluginNotFoundException. Since the path
+ * is /notifications (no URL argument), the uid always comes from the
+ * current_user default, so custom validation is unnecessary.
+ */
+function mukurtu_notifications_update_40016(): void {
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  $config_storage = \Drupal::service('config.storage');
+  $config_storage->write(
+    'views.view.mukurtu_message_log',
+    $source->read('views.view.mukurtu_message_log')
+  );
+}

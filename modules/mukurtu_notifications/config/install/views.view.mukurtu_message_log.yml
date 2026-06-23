@@ -326,6 +326,16 @@ display:
     display_plugin: page
     position: 2
     display_options:
+      defaults:
+        title: false
+        access: false
+        style: false
+        row: false
+        fields: false
+        relationships: false
+        filters: false
+        arguments: false
+        display_extenders: false
       title: 'My notifications'
       use_admin_theme: true
       path: notifications
@@ -665,15 +675,11 @@ display:
             sort_order: asc
             number_of_records: 0
             format: default_summary
-          specify_validation: true
+          specify_validation: false
           validate:
-            type: user
+            type: none
             fail: 'access denied'
-          validate_options:
-            access: '0'
-            operation: view
-            multiple: '0'
-            argument_default_to_current: '1'
+          validate_options: {}
           limit: false
           error_buckets: []
           break_phrase: false
