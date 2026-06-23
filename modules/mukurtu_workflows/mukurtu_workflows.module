@@ -334,17 +334,23 @@ function mukurtu_workflows_node_form_submit(array &$form, FormStateInterface $fo
 /**
  * Returns TRUE when the Mukurtu editorial workflow is the active workflow.
  *
- * Result is statically cached -- the active workflow does not change within
- * a single request.
+ * Uses content_moderation's own API so the check is authoritative regardless
+ * of how the workflow was configured. Result is statically cached.
  */
 function _mukurtu_workflows_editorial_workflow_active(): bool {
   $cache = &drupal_static(__FUNCTION__);
   if (!isset($cache)) {
     $cache = FALSE;
-    foreach (\Drupal\workflows\Entity\Workflow::loadMultiple() as $wf) {
-      $type_settings = $wf->get('type_settings');
-      if (!empty($type_settings['entity_types']['node'])) {
-        $cache = $wf->id() === 'mukurtu_editorial_workflow';
+    if (!\Drupal::hasService('content_moderation.moderation_information')) {
+      return $cache;
+    }
+    /** @var \Drupal\content_moderation\ModerationInformationInterface $mod_info */
+    $mod_info = \Drupal::service('content_moderation.moderation_information');
+    $node_types = \Drupal::entityTypeManager()->getStorage('node_type')->loadMultiple();
+    foreach ($node_types as $bundle_id => $type) {
+      $workflow = $mod_info->getWorkflowForEntityTypeAndBundle('node', $bundle_id);
+      if ($workflow && $workflow->id() === 'mukurtu_editorial_workflow') {
+        $cache = TRUE;
         break;
       }
     }
