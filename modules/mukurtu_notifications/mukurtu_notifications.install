@@ -70,3 +70,111 @@ function mukurtu_notifications_update_40004(): void {
     $config_factory->getEditable($action)->delete();
   }
 }
+
+/**
+ * Deploy the Activity page display for the mukurtu_message_log view.
+ */
+function mukurtu_notifications_update_40005(): void {
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  $config_storage = \Drupal::service('config.storage');
+  $config_storage->write(
+    'views.view.mukurtu_message_log',
+    $source->read('views.view.mukurtu_message_log')
+  );
+}
+
+/**
+ * Create missing field attachments for message templates.
+ *
+ * The message template field attachments were never deployed, which is why
+ * most notification hooks were disabled. The field storages already exist in
+ * the database; this hook only writes the bundle-level attachment configs.
+ * field_protocol is handled separately in hook_update_40007 using the Field
+ * API so the database schema is created correctly.
+ */
+function mukurtu_notifications_update_40006(): void {
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  $config_storage = \Drupal::service('config.storage');
+
+  // Deploy field attachments for templates whose storage tables already exist.
+  // Note: field_community uses handler 'default:node' because the underlying
+  // field storage (field.storage.message.field_community) targets node -- this
+  // is intentional for now. Phase 2 will update it to target the community
+  // entity type once the follow-community flag is updated.
+  $field_configs = [
+    'field.field.message.mukurtu_single_node_insert.field_item',
+    'field.field.message.mukurtu_single_node_update.field_item',
+    'field.field.message.mukurtu_single_node_delete.field_title',
+    'field.field.message.mukurtu_single_node_delete.field_content_type',
+    'field.field.message.mukurtu_single_node_delete.field_user',
+    'field.field.message.mukurtu_new_item_in_community.field_item',
+    'field.field.message.mukurtu_new_item_in_community.field_community',
+    'field.field.message.mukurtu_new_item_in_protocol.field_item',
+    'field.field.message.mukurtu_new_item_in_collection.field_item',
+    'field.field.message.mukurtu_new_item_in_collection.field_collection',
+    'field.field.message.mukurtu_new_user_registration.field_user',
+  ];
+
+  foreach ($field_configs as $config_name) {
+    $config_storage->write($config_name, $source->read($config_name));
+  }
+
+  // Rebuild entity type and field definitions.
+  \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
+}
+
+/**
+ * Create field_protocol storage and attachment for message templates via Field API.
+ *
+ * Raw config writes (used in hook_update_40006) do not create database tables.
+ * This hook uses FieldStorageConfig and FieldConfig so the schema is created.
+ */
+function mukurtu_notifications_update_40007(): void {
+  // Remove any bad config written without schema in a previous run.
+  \Drupal::configFactory()->getEditable('field.storage.message.field_protocol')->delete();
+  \Drupal::configFactory()->getEditable('field.field.message.mukurtu_new_item_in_protocol.field_protocol')->delete();
+
+  // Create the field storage with proper schema.
+  if (!\Drupal\field\Entity\FieldStorageConfig::loadByName('message', 'field_protocol')) {
+    \Drupal\field\Entity\FieldStorageConfig::create([
+      'field_name' => 'field_protocol',
+      'entity_type' => 'message',
+      'type' => 'entity_reference',
+      'settings' => ['target_type' => 'protocol'],
+      'cardinality' => 1,
+    ])->save();
+  }
+
+  // Attach the field to the mukurtu_new_item_in_protocol template.
+  if (!\Drupal\field\Entity\FieldConfig::loadByName('message', 'mukurtu_new_item_in_protocol', 'field_protocol')) {
+    $storage = \Drupal\field\Entity\FieldStorageConfig::loadByName('message', 'field_protocol');
+    \Drupal\field\Entity\FieldConfig::create([
+      'field_storage' => $storage,
+      'bundle' => 'mukurtu_new_item_in_protocol',
+      'label' => 'Protocol',
+    ])->save();
+  }
+
+  \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
+}
+
+/**
+ * Fix non-descriptive "Details" link text in batch import report template.
+ */
+function mukurtu_notifications_update_40008(): void {
+  $config = \Drupal::configFactory()->getEditable('message.template.mukurtu_batch_import_report');
+  if ($config->isNew()) {
+    return;
+  }
+  $text = $config->get('text');
+  if (!empty($text[0]['value'])) {
+    $text[0]['value'] = str_replace(
+      '>Details</a>',
+      '>View batch import report</a>',
+      $text[0]['value']
+    );
+    $config->set('text', $text)->save();
+  }
+}
