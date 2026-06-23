@@ -134,8 +134,8 @@ class ExportListAddItemsForm extends FormBase {
           '#type' => 'checkbox',
           '#title' => $this->formatPlural(
             $recursive_additional,
-            'Also include all items nested within child collections in this selection (1 additional item)',
-            'Also include all items nested within child collections in this selection (@count additional items)',
+            'Include all items in sub-collections in this selection (1 additional item).',
+            'Include all items in sub-collections in this selection (@count additional items).',
           ),
           '#default_value' => FALSE,
           '#states' => [
