@@ -334,61 +334,63 @@ function mukurtu_workflows_node_form_submit(array &$form, FormStateInterface $fo
 /**
  * Returns TRUE when the Mukurtu editorial workflow is the active workflow.
  *
- * Uses content_moderation's own API so the check is authoritative regardless
- * of how the workflow was configured. Result is statically cached.
+ * Checks via content_moderation's API first, then falls back to reading the
+ * workflow config entity directly. Result is statically cached per request.
  */
 function _mukurtu_workflows_editorial_workflow_active(): bool {
   $cache = &drupal_static(__FUNCTION__);
   if (!isset($cache)) {
     $cache = FALSE;
-    if (!\Drupal::hasService('content_moderation.moderation_information')) {
-      return $cache;
-    }
-    /** @var \Drupal\content_moderation\ModerationInformationInterface $mod_info */
-    $mod_info = \Drupal::service('content_moderation.moderation_information');
-    $node_types = \Drupal::entityTypeManager()->getStorage('node_type')->loadMultiple();
-    foreach ($node_types as $bundle_id => $type) {
-      $workflow = $mod_info->getWorkflowForEntityTypeAndBundle('node', $bundle_id);
-      if ($workflow && $workflow->id() === 'mukurtu_editorial_workflow') {
-        $cache = TRUE;
-        break;
+
+    // Primary: content_moderation API (authoritative when the service exists).
+    if (\Drupal::hasService('content_moderation.moderation_information')) {
+      $mod_info = \Drupal::service('content_moderation.moderation_information');
+      $node_types = \Drupal::entityTypeManager()->getStorage('node_type')->loadMultiple();
+      foreach ($node_types as $bundle_id => $type) {
+        $workflow = $mod_info->getWorkflowForEntityTypeAndBundle('node', $bundle_id);
+        if ($workflow && $workflow->id() === 'mukurtu_editorial_workflow') {
+          $cache = TRUE;
+          return $cache;
+        }
       }
     }
+
+    // Fallback: read the workflow config entity's type_settings directly.
+    $config = \Drupal::config('workflows.workflow.mukurtu_editorial_workflow');
+    $entity_types = $config->get('type_settings.entity_types.node');
+    $cache = !empty($entity_types);
   }
   return $cache;
 }
 
 /**
- * Implements hook_form_alter().
+ * Implements hook_views_pre_render().
  *
- * Removes Publish and Unpublish from the VBO bulk-action select on
- * /admin/content when the editorial workflow is active. State changes should
- * go through the moderation widget, not direct publish/unpublish actions.
+ * Removes Publish and Unpublish from VBO selected_actions on the content
+ * admin view when the editorial workflow is active.
+ *
+ * VBO keys its action <select> options by the numeric delta of each entry in
+ * selected_actions (not by the action plugin ID string), so hook_form_alter
+ * cannot reliably remove them by plugin ID key. Removing the entries from the
+ * field handler's options here, before viewsForm() is called, ensures VBO
+ * never adds those actions to its option list.
  */
-function mukurtu_workflows_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
-  if ($form_id !== 'views_form_mukurtu_manage_all_content_mukurtu_manage_content') {
+function mukurtu_workflows_views_pre_render(ViewExecutable $view): void {
+  if ($view->id() !== 'mukurtu_manage_all_content') {
     return;
   }
   if (!_mukurtu_workflows_editorial_workflow_active()) {
     return;
   }
-  $vbo_actions = ['entity:publish_action:node', 'entity:unpublish_action:node'];
-  _mukurtu_workflows_remove_vbo_actions($form, $vbo_actions);
-}
-
-/**
- * Recursively removes specific action IDs from any VBO action select element.
- */
-function _mukurtu_workflows_remove_vbo_actions(array &$element, array $action_ids): void {
-  // Modify this element if it is a select with the target action IDs, then
-  // always recurse -- the form has many selects (filter dropdowns, etc.) and
-  // the VBO action select may appear anywhere in the tree.
-  if (isset($element['#type']) && $element['#type'] === 'select' && isset($element['#options'])) {
-    foreach ($action_ids as $id) {
-      unset($element['#options'][$id]);
+  $disallowed = ['entity:publish_action:node', 'entity:unpublish_action:node'];
+  foreach ($view->field ?? [] as $field_id => $handler) {
+    if (empty($handler->options['selected_actions'])) {
+      continue;
     }
-  }
-  foreach (\Drupal\Core\Render\Element::children($element) as $key) {
-    _mukurtu_workflows_remove_vbo_actions($element[$key], $action_ids);
+    foreach ($handler->options['selected_actions'] as $delta => $action_config) {
+      if (in_array($action_config['action_id'] ?? '', $disallowed, TRUE)) {
+        unset($view->field[$field_id]->options['selected_actions'][$delta]);
+      }
+    }
   }
 }
