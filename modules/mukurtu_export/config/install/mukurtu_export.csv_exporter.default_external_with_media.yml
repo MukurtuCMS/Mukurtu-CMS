@@ -20,6 +20,7 @@ entity_fields_export_list:
     field_article_image/alt: 'Image > Alternative text'
     field_article_keywords: Keywords
     uuid: UUID
+    field_multipage_page_of: 'Multipage parent'
   node__collection:
     uuid: UUID
     langcode: Locale
@@ -43,6 +44,7 @@ entity_fields_export_list:
     field_local_contexts_projects: 'Local Contexts Projects'
     field_local_contexts_labels_and_notices: 'Local Contexts Labels and Notices'
     field_coverage: 'Map Points'
+    field_multipage_page_of: 'Multipage parent'
   node__dictionary_word:
     langcode: Locale
     uid: 'Authored by'
@@ -74,6 +76,7 @@ entity_fields_export_list:
     field_additional_word_entries: 'Word Entries'
     field_coverage: 'Map Points'
     uuid: UUID
+    field_multipage_page_of: 'Multipage parent'
   node__digital_heritage:
     langcode: Locale
     uid: 'Authored by'
@@ -114,6 +117,7 @@ entity_fields_export_list:
     field_local_contexts_labels_and_notices: 'Local Contexts Labels and Notices'
     field_location: Location
     uuid: UUID
+    field_multipage_page_of: 'Multipage parent'
   node__landing_page:
     langcode: Language
     uid: 'Authored by'
@@ -121,6 +125,7 @@ entity_fields_export_list:
     default_langcode: 'Default translation'
     layout_builder__layout: Layout
     uuid: UUID
+    field_multipage_page_of: 'Multipage parent'
   node__page:
     langcode: Locale
     uid: 'Authored by'
@@ -129,6 +134,7 @@ entity_fields_export_list:
     body: Body
     field_page_media_assets: 'Media Assets'
     uuid: UUID
+    field_multipage_page_of: 'Multipage parent'
   node__person:
     uuid: UUID
     langcode: Locale
@@ -153,6 +159,7 @@ entity_fields_export_list:
     field_local_contexts_projects: 'Local Contexts Projects'
     field_local_contexts_labels_and_notices: 'Local Contexts Labels and Notices'
     field_coverage: 'Map Points'
+    field_multipage_page_of: 'Multipage parent'
   node__place:
     uuid: UUID
     langcode: Locale
@@ -172,6 +179,7 @@ entity_fields_export_list:
     field_local_contexts_projects: 'Local Contexts Projects'
     field_local_contexts_labels_and_notices: 'Local Contexts Labels and Notices'
     field_coverage: 'Map Points'
+    field_multipage_page_of: 'Multipage parent'
   node__word_list:
     langcode: Locale
     uid: 'Authored by'
@@ -192,6 +200,7 @@ entity_fields_export_list:
     field_local_contexts_labels_and_notices: 'Local Contexts Labels and Notices'
     field_coverage: 'Map Points'
     uuid: UUID
+    field_multipage_page_of: 'Multipage parent'
   media__audio:
     langcode: Locale
     uid: 'Authored by'
