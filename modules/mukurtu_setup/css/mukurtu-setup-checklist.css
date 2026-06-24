@@ -40,6 +40,17 @@
   color: #fff;
 }
 
+.mukurtu-setup-checklist__task-header {
+  display: inline;
+}
+
+.mukurtu-setup-checklist__mark-done,
+.mukurtu-setup-checklist__undo,
+.mukurtu-setup-checklist__dismiss {
+  font-size: 0.875rem;
+  font-weight: normal;
+}
+
 .mukurtu-setup-checklist__task-description {
   margin-top: 8px;
   margin-bottom: 8px;

@@ -44,25 +44,25 @@
                 {% if task.complete %}&#10003;{% endif %}
               </div>
               <div class="mukurtu-setup-checklist__task-content">
-                <strong class="mukurtu-setup-checklist__task-label">
-                  {% if task.action_url and not task.complete %}
-                    <a href="{{ task.action_url }}">{{ task.label }}</a>
-                  {% else %}
-                    {{ task.label }}
-                  {% endif %}
-                </strong>
-                <p class="mukurtu-setup-checklist__task-description">{{ task.description }}</p>
-                <div class="mukurtu-setup-checklist__task-actions">
+                <div class="mukurtu-setup-checklist__task-header">
+                  <strong class="mukurtu-setup-checklist__task-label">
+                    {% if task.action_url and not task.complete %}
+                      <a href="{{ task.action_url }}">{{ task.label }}</a>
+                    {% else %}
+                      {{ task.label }}
+                    {% endif %}
+                  </strong>
                   {% if task.complete_url %}
-                    <a href="{{ task.complete_url }}" class="mukurtu-setup-checklist__mark-done">{{ 'Mark as done'|t }}</a>
+                    (<a href="{{ task.complete_url }}" class="mukurtu-setup-checklist__mark-done">{{ 'Mark as done'|t }}</a>)
                   {% endif %}
                   {% if task.uncomplete_url %}
-                    <a href="{{ task.uncomplete_url }}" class="mukurtu-setup-checklist__undo">{{ 'Undo'|t }}</a>
+                    (<a href="{{ task.uncomplete_url }}" class="mukurtu-setup-checklist__undo">{{ 'Undo'|t }}</a>)
                   {% endif %}
                   {% if task.dismiss_url %}
-                    <a href="{{ task.dismiss_url }}" class="mukurtu-setup-checklist__dismiss">{{ 'Dismiss'|t }}</a>
+                    (<a href="{{ task.dismiss_url }}" class="mukurtu-setup-checklist__dismiss">{{ 'Dismiss'|t }}</a>)
                   {% endif %}
                 </div>
+                <p class="mukurtu-setup-checklist__task-description">{{ task.description }}</p>
               </div>
             </li>
           {% endfor %}
