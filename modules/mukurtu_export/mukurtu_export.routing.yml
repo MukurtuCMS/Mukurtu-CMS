@@ -85,6 +85,18 @@ mukurtu_export.add_node_to_list:
   requirements:
     _permission: 'access mukurtu export'
 
+mukurtu_export.csv_exporter.duplicate:
+  path: '/admin/export/format/csv/manage/{csv_exporter}/duplicate'
+  defaults:
+    _controller: 'Drupal\mukurtu_export\Controller\CsvExporterController::duplicate'
+    _title: 'Duplicate Export Settings'
+  options:
+    parameters:
+      csv_exporter:
+        type: entity:csv_exporter
+  requirements:
+    _permission: 'access mukurtu export'
+
 mukurtu_export.remove_node_from_list:
   path: '/admin/export/remove-node/{node}'
   defaults:
