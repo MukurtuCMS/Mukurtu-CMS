@@ -1214,7 +1214,9 @@ function mukurtu_core_preprocess_views_view(&$variables)
 {
   // Add entity browser library tweaks when appropriate.
   $affected_views = [
-    'mukurtu_content_browser'
+    'mukurtu_content_browser',
+    'mukurtu_community_select',
+    'multipage_item_browser',
   ];
   if (in_array($variables['view']->id(), $affected_views)) {
     $variables['view_array']['#attached']['library'][] = 'mukurtu_core/entity_browser_view_decoration';
