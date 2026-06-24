@@ -587,3 +587,26 @@ function mukurtu_notifications_update_40020(): void {
 
   \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
 }
+
+/**
+ * Fix notification feed display issues.
+ *
+ * - Redeploy membership templates with corrected text: username instead of
+ *   "You", entity:label instead of entity:title for community/protocol names.
+ * - Redeploy the view with delta:0 on get_text (stop doubling), reduce:false
+ *   on the type filter (always show all options), and the new Notification
+ *   type column.
+ */
+function mukurtu_notifications_update_40021(): void {
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  $config_storage = \Drupal::service('config.storage');
+
+  foreach ([
+    'message.template.mukurtu_user_added_to_community',
+    'message.template.mukurtu_user_added_to_protocol',
+    'views.view.mukurtu_message_log',
+  ] as $config_name) {
+    $config_storage->write($config_name, $source->read($config_name));
+  }
+}
