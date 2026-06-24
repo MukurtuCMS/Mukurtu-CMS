@@ -3,7 +3,7 @@ status: true
 dependencies:
   config:
     - filter.format.mukurtu_html
-template: mukurtu_content_returned_to_draft
+template: mukurtu_content_to_draft
 label: 'Content returned to draft'
 description: 'A content item was returned to draft.'
 text:

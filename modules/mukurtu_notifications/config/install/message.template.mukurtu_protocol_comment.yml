@@ -3,7 +3,7 @@ status: true
 dependencies:
   config:
     - filter.format.mukurtu_html
-template: mukurtu_comment_on_protocol_content
+template: mukurtu_protocol_comment
 label: 'Comment on protocol content'
 description: 'A comment was posted on content assigned to a protocol.'
 text:

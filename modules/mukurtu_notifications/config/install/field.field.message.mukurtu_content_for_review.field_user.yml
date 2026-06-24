@@ -2,23 +2,23 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.storage.message.field_item
-    - message.template.mukurtu_content_submitted_for_review
+    - field.storage.message.field_user
+    - message.template.mukurtu_content_for_review
   module:
     - message
-    - node
-id: message.mukurtu_content_submitted_for_review.field_item
-field_name: field_item
+    - user
+id: message.mukurtu_content_for_review.field_user
+field_name: field_user
 entity_type: message
-bundle: mukurtu_content_submitted_for_review
-label: Item
+bundle: mukurtu_content_for_review
+label: User
 description: ''
 required: false
 translatable: false
 default_value: {  }
 default_value_callback: ''
 settings:
-  handler: 'default:node'
+  handler: 'default:user'
   handler_settings:
     include_anonymous: false
     filter:

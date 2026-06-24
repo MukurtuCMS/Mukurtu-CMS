@@ -3,7 +3,7 @@ status: true
 dependencies:
   config:
     - filter.format.mukurtu_html
-template: mukurtu_content_submitted_for_review
+template: mukurtu_content_for_review
 label: 'Content submitted for review'
 description: 'A content item was submitted for review.'
 text:

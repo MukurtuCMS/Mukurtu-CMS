@@ -3,7 +3,7 @@ status: true
 dependencies:
   config:
     - core.entity_view_mode.message.mail_body
-    - message.template.mukurtu_comment_on_protocol_content
+    - message.template.mukurtu_content_for_review
   module:
     - layout_builder
     - user
@@ -11,9 +11,9 @@ third_party_settings:
   layout_builder:
     enabled: false
     allow_custom: false
-id: message.mukurtu_comment_on_protocol_content.mail_body
+id: message.mukurtu_content_for_review.mail_body
 targetEntityType: message
-bundle: mukurtu_comment_on_protocol_content
+bundle: mukurtu_content_for_review
 mode: mail_body
 content:
   partial_1:

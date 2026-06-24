@@ -3,7 +3,7 @@ status: true
 dependencies:
   config:
     - core.entity_view_mode.message.mail_subject
-    - message.template.mukurtu_content_submitted_for_review
+    - message.template.mukurtu_content_for_review
   module:
     - layout_builder
     - user
@@ -11,9 +11,9 @@ third_party_settings:
   layout_builder:
     enabled: false
     allow_custom: false
-id: message.mukurtu_content_submitted_for_review.mail_subject
+id: message.mukurtu_content_for_review.mail_subject
 targetEntityType: message
-bundle: mukurtu_content_submitted_for_review
+bundle: mukurtu_content_for_review
 mode: mail_subject
 content:
   partial_0:

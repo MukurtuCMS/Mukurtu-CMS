@@ -431,41 +431,41 @@ function mukurtu_notifications_update_40018(): void {
 
   $configs = [
     // Message templates.
-    'message.template.mukurtu_comment_on_protocol_content',
-    'message.template.mukurtu_content_submitted_for_review',
+    'message.template.mukurtu_protocol_comment',
+    'message.template.mukurtu_content_for_review',
     'message.template.mukurtu_content_published',
     'message.template.mukurtu_content_archived',
-    'message.template.mukurtu_content_returned_to_draft',
+    'message.template.mukurtu_content_to_draft',
     'message.template.mukurtu_user_added_to_community',
     'message.template.mukurtu_user_added_to_protocol',
     // Mail body view displays.
-    'core.entity_view_display.message.mukurtu_comment_on_protocol_content.mail_body',
-    'core.entity_view_display.message.mukurtu_content_submitted_for_review.mail_body',
+    'core.entity_view_display.message.mukurtu_protocol_comment.mail_body',
+    'core.entity_view_display.message.mukurtu_content_for_review.mail_body',
     'core.entity_view_display.message.mukurtu_content_published.mail_body',
     'core.entity_view_display.message.mukurtu_content_archived.mail_body',
-    'core.entity_view_display.message.mukurtu_content_returned_to_draft.mail_body',
+    'core.entity_view_display.message.mukurtu_content_to_draft.mail_body',
     'core.entity_view_display.message.mukurtu_user_added_to_community.mail_body',
     'core.entity_view_display.message.mukurtu_user_added_to_protocol.mail_body',
     // Mail subject view displays.
-    'core.entity_view_display.message.mukurtu_comment_on_protocol_content.mail_subject',
-    'core.entity_view_display.message.mukurtu_content_submitted_for_review.mail_subject',
+    'core.entity_view_display.message.mukurtu_protocol_comment.mail_subject',
+    'core.entity_view_display.message.mukurtu_content_for_review.mail_subject',
     'core.entity_view_display.message.mukurtu_content_published.mail_subject',
     'core.entity_view_display.message.mukurtu_content_archived.mail_subject',
-    'core.entity_view_display.message.mukurtu_content_returned_to_draft.mail_subject',
+    'core.entity_view_display.message.mukurtu_content_to_draft.mail_subject',
     'core.entity_view_display.message.mukurtu_user_added_to_community.mail_subject',
     'core.entity_view_display.message.mukurtu_user_added_to_protocol.mail_subject',
     // Field attachments (field_item).
-    'field.field.message.mukurtu_comment_on_protocol_content.field_item',
-    'field.field.message.mukurtu_content_submitted_for_review.field_item',
+    'field.field.message.mukurtu_protocol_comment.field_item',
+    'field.field.message.mukurtu_content_for_review.field_item',
     'field.field.message.mukurtu_content_published.field_item',
     'field.field.message.mukurtu_content_archived.field_item',
-    'field.field.message.mukurtu_content_returned_to_draft.field_item',
+    'field.field.message.mukurtu_content_to_draft.field_item',
     // Field attachments (field_user).
-    'field.field.message.mukurtu_comment_on_protocol_content.field_user',
-    'field.field.message.mukurtu_content_submitted_for_review.field_user',
+    'field.field.message.mukurtu_protocol_comment.field_user',
+    'field.field.message.mukurtu_content_for_review.field_user',
     'field.field.message.mukurtu_content_published.field_user',
     'field.field.message.mukurtu_content_archived.field_user',
-    'field.field.message.mukurtu_content_returned_to_draft.field_user',
+    'field.field.message.mukurtu_content_to_draft.field_user',
     'field.field.message.mukurtu_user_added_to_community.field_user',
     'field.field.message.mukurtu_user_added_to_protocol.field_user',
   ];
@@ -495,6 +495,10 @@ function mukurtu_notifications_update_40019(): void {
     'message.template.mukurtu_new_user_registration' => 'New user registration',
     'message.template.mukurtu_new_user_account_created' => 'New user account created',
     'message.template.mukurtu_batch_import_report' => 'Batch import report',
+    // Phase 2 templates deployed with corrected short names by hook 40020.
+    'message.template.mukurtu_protocol_comment' => 'Comment on protocol content',
+    'message.template.mukurtu_content_for_review' => 'Content submitted for review',
+    'message.template.mukurtu_content_to_draft' => 'Content returned to draft',
   ];
 
   $config_factory = \Drupal::configFactory();
@@ -513,4 +517,73 @@ function mukurtu_notifications_update_40019(): void {
     'views.view.mukurtu_message_log',
     $source->read('views.view.mukurtu_message_log')
   );
+}
+
+/**
+ * Replace three Phase 2 template names that exceeded the 32-character limit.
+ *
+ * Hook 40018 deployed these configs with names that are too long for Drupal
+ * bundle IDs (EntityBase enforces a 32-character maximum). This hook deletes
+ * the oversized configs and redeploys them under corrected short names:
+ *   mukurtu_comment_on_protocol_content  -> mukurtu_protocol_comment
+ *   mukurtu_content_submitted_for_review -> mukurtu_content_for_review
+ *   mukurtu_content_returned_to_draft    -> mukurtu_content_to_draft
+ */
+function mukurtu_notifications_update_40020(): void {
+  $config_factory = \Drupal::configFactory();
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  $config_storage = \Drupal::service('config.storage');
+
+  // Delete all configs that used the old oversized names.
+  $old_names = [
+    'message.template.mukurtu_comment_on_protocol_content',
+    'message.template.mukurtu_content_submitted_for_review',
+    'message.template.mukurtu_content_returned_to_draft',
+    'core.entity_view_display.message.mukurtu_comment_on_protocol_content.mail_body',
+    'core.entity_view_display.message.mukurtu_comment_on_protocol_content.mail_subject',
+    'core.entity_view_display.message.mukurtu_content_submitted_for_review.mail_body',
+    'core.entity_view_display.message.mukurtu_content_submitted_for_review.mail_subject',
+    'core.entity_view_display.message.mukurtu_content_returned_to_draft.mail_body',
+    'core.entity_view_display.message.mukurtu_content_returned_to_draft.mail_subject',
+    'field.field.message.mukurtu_comment_on_protocol_content.field_item',
+    'field.field.message.mukurtu_comment_on_protocol_content.field_user',
+    'field.field.message.mukurtu_content_submitted_for_review.field_item',
+    'field.field.message.mukurtu_content_submitted_for_review.field_user',
+    'field.field.message.mukurtu_content_returned_to_draft.field_item',
+    'field.field.message.mukurtu_content_returned_to_draft.field_user',
+  ];
+  foreach ($old_names as $name) {
+    $config_factory->getEditable($name)->delete();
+  }
+
+  // Write the corrected configs (already in config/install with short names).
+  $new_names = [
+    'message.template.mukurtu_protocol_comment',
+    'message.template.mukurtu_content_for_review',
+    'message.template.mukurtu_content_to_draft',
+    'core.entity_view_display.message.mukurtu_protocol_comment.mail_body',
+    'core.entity_view_display.message.mukurtu_protocol_comment.mail_subject',
+    'core.entity_view_display.message.mukurtu_content_for_review.mail_body',
+    'core.entity_view_display.message.mukurtu_content_for_review.mail_subject',
+    'core.entity_view_display.message.mukurtu_content_to_draft.mail_body',
+    'core.entity_view_display.message.mukurtu_content_to_draft.mail_subject',
+    'field.field.message.mukurtu_protocol_comment.field_item',
+    'field.field.message.mukurtu_protocol_comment.field_user',
+    'field.field.message.mukurtu_content_for_review.field_item',
+    'field.field.message.mukurtu_content_for_review.field_user',
+    'field.field.message.mukurtu_content_to_draft.field_item',
+    'field.field.message.mukurtu_content_to_draft.field_user',
+  ];
+  foreach ($new_names as $name) {
+    $config_storage->write($name, $source->read($name));
+  }
+
+  // Redeploy the view so the filter value list reflects the new template names.
+  $config_storage->write(
+    'views.view.mukurtu_message_log',
+    $source->read('views.view.mukurtu_message_log')
+  );
+
+  \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
 }

@@ -514,7 +514,7 @@ function mukurtu_notifications_handle_moderation_change(Node $node, string $old_
 
   switch ($new_state) {
     case 'needs_review':
-      $template = 'mukurtu_content_submitted_for_review';
+      $template = 'mukurtu_content_for_review';
       if ($node->hasField('field_cultural_protocols')) {
         $protocol_ids = $node->getProtocols();
         if (!empty($protocol_ids)) {
@@ -545,7 +545,7 @@ function mukurtu_notifications_handle_moderation_change(Node $node, string $old_
       if (!in_array($old_state, ['needs_review', 'published', 'archived'])) {
         return;
       }
-      $template = 'mukurtu_content_returned_to_draft';
+      $template = 'mukurtu_content_to_draft';
       $owner_id = (int) $node->getOwnerId();
       if ($owner_id > 0 && $owner_id !== $current_user_id) {
         $notify_uids = [$owner_id];
@@ -616,7 +616,7 @@ function mukurtu_notifications_comment_insert(CommentInterface $comment) {
   $notify_uids = array_values(array_unique(array_diff($steward_uids, [$current_user_id])));
 
   $message = Message::create([
-    'template' => 'mukurtu_comment_on_protocol_content',
+    'template' => 'mukurtu_protocol_comment',
     'uid' => $current_user_id,
   ]);
   $message->set('field_item', $node);

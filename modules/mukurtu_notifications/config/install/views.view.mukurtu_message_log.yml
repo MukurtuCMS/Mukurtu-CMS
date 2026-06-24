@@ -4,11 +4,11 @@ dependencies:
   config:
     - core.entity_view_mode.message.mail_subject
     - message.template.mukurtu_batch_import_report
-    - message.template.mukurtu_comment_on_protocol_content
     - message.template.mukurtu_content_archived
+    - message.template.mukurtu_content_for_review
     - message.template.mukurtu_content_published
-    - message.template.mukurtu_content_returned_to_draft
-    - message.template.mukurtu_content_submitted_for_review
+    - message.template.mukurtu_content_to_draft
+    - message.template.mukurtu_protocol_comment
     - message.template.mukurtu_new_item_in_collection
     - message.template.mukurtu_new_item_in_community
     - message.template.mukurtu_new_item_in_protocol
@@ -248,11 +248,11 @@ display:
           operator: in
           value:
             mukurtu_batch_import_report: mukurtu_batch_import_report
-            mukurtu_comment_on_protocol_content: mukurtu_comment_on_protocol_content
             mukurtu_content_archived: mukurtu_content_archived
+            mukurtu_content_for_review: mukurtu_content_for_review
             mukurtu_content_published: mukurtu_content_published
-            mukurtu_content_returned_to_draft: mukurtu_content_returned_to_draft
-            mukurtu_content_submitted_for_review: mukurtu_content_submitted_for_review
+            mukurtu_content_to_draft: mukurtu_content_to_draft
+            mukurtu_protocol_comment: mukurtu_protocol_comment
             mukurtu_new_item_in_collection: mukurtu_new_item_in_collection
             mukurtu_new_item_in_community: mukurtu_new_item_in_community
             mukurtu_new_item_in_protocol: mukurtu_new_item_in_protocol

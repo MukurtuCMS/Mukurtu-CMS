@@ -3,14 +3,14 @@ status: true
 dependencies:
   config:
     - field.storage.message.field_item
-    - message.template.mukurtu_comment_on_protocol_content
+    - message.template.mukurtu_content_to_draft
   module:
     - message
     - node
-id: message.mukurtu_comment_on_protocol_content.field_item
+id: message.mukurtu_content_to_draft.field_item
 field_name: field_item
 entity_type: message
-bundle: mukurtu_comment_on_protocol_content
+bundle: mukurtu_content_to_draft
 label: Item
 description: ''
 required: false

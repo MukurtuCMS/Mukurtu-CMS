@@ -2,8 +2,8 @@ langcode: en
 status: true
 dependencies:
   config:
-    - core.entity_view_mode.message.mail_subject
-    - message.template.mukurtu_content_returned_to_draft
+    - core.entity_view_mode.message.mail_body
+    - message.template.mukurtu_content_to_draft
   module:
     - layout_builder
     - user
@@ -11,14 +11,14 @@ third_party_settings:
   layout_builder:
     enabled: false
     allow_custom: false
-id: message.mukurtu_content_returned_to_draft.mail_subject
+id: message.mukurtu_content_to_draft.mail_body
 targetEntityType: message
-bundle: mukurtu_content_returned_to_draft
-mode: mail_subject
+bundle: mukurtu_content_to_draft
+mode: mail_body
 content:
-  partial_0:
+  partial_1:
     weight: 0
     region: content
 hidden:
-  partial_1: true
+  partial_0: true
   search_api_excerpt: true
