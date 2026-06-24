@@ -448,6 +448,7 @@ function mukurtu_import_update_40027(): void {
   }
 }
 
+
 /**
  * Install the taxonomy terms import results view.
  */
