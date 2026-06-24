@@ -56,6 +56,9 @@ class CSV extends ExporterBase {
       $entities = $storage->loadMultiple($result);
       foreach ($entities as $id => $entity) {
         $element['#options'][$id] = $entity->label();
+        if ($entity->access('view')) {
+          $element['#options'][$id] .= " (" . Link::createFromRoute($this->t('Duplicate'), 'mukurtu_export.csv_exporter.duplicate', ['csv_exporter' => $id], [])->toString() . ")";
+        }
         $element[$id]['#description'] = $entity->getDescription();
       }
     }
@@ -79,6 +82,9 @@ class CSV extends ExporterBase {
         $element['#options'][$id] = $entity->label();
         if ($entity->access('update')) {
           $element['#options'][$id] .= " (" . Link::createFromRoute($this->t('Edit'), 'entity.csv_exporter.edit_form', ['csv_exporter' => $id], [])->toString() . ")";
+        }
+        if ($entity->access('view')) {
+          $element['#options'][$id] .= " (" . Link::createFromRoute($this->t('Duplicate'), 'mukurtu_export.csv_exporter.duplicate', ['csv_exporter' => $id], [])->toString() . ")";
         }
         if ($entity->access('delete')) {
           $element['#options'][$id] .= " (" . Link::createFromRoute($this->t('Delete'), 'entity.csv_exporter.delete_form', ['csv_exporter' => $id], [])->toString() . ")";
@@ -129,33 +135,6 @@ class CSV extends ExporterBase {
     return $settings;
   }
 
-  public function duplicateSettings(array &$form, FormStateInterface $form_state) {
-    $id = $form_state->getValue('export_settings');
-
-    if (!$id) {
-      return NULL;
-    }
-
-    /** @var \Drupal\mukurtu_export\Entity\CsvExporter $config */
-    if ($config = \Drupal::entityTypeManager()->getStorage('csv_exporter')->load($id)) {
-      $dupeConfig = $config->createDuplicate();
-      $uuid = $dupeConfig->uuid();
-      $uuid = str_replace('-', '_', $uuid);
-      $dupeConfig->set('id', $uuid);
-      $dupeConfig->set('label', $this->t('Copy of ') . $config->get('label'));
-      // Force to user only.
-      $dupeConfig->set('site_wide', FALSE);
-
-      // Switch owner to duping user.
-      $dupeConfig->setOwnerId(\Drupal::currentUser()->id());
-      $dupeConfig->save();
-      $form_state->setValue('export_settings', $dupeConfig->id());
-      return $dupeConfig->id();
-    }
-
-    return NULL;
-  }
-
   /**
    * {@inheritdoc}
    */
@@ -186,6 +165,9 @@ class CSV extends ExporterBase {
 
     // Track entities that have been exported.
     $context['results']['exported_entities'] = [];
+
+    // Track entities queued under "one level only" mode so their own references are not followed.
+    $context['results']['shallow_entity_ids'] = [];
 
     // Count how many entities we are exporting.
     $context['results']['entities_count'] = array_reduce($entities, function ($accum, $entity_type_array) {

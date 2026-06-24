@@ -7,6 +7,11 @@
 
 declare(strict_types=1);
 
+// Suppress PHP error output so it cannot reach the response body before
+// session headers are set. Errors are still written to the server error log.
+ini_set('display_errors', '0');
+ini_set('display_startup_errors', '0');
+
 // Set database settings for Tugboat.
 $databases['default']['default'] = [
   'database' => 'tugboat',
