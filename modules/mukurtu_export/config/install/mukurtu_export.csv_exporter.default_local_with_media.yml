@@ -1,8 +1,6 @@
 langcode: en
 status: true
 dependencies: {  }
-_core:
-  default_config_hash: piH8CX5ny4s6Z46Ii04GhznLfMcbfTZVxk5e0rVOcS4
 id: default_local_with_media
 label: 'Default local settings (with media assets)'
 uid: 1
@@ -20,6 +18,7 @@ entity_fields_export_list:
     field_article_image/target_id: 'Image > File ID'
     field_article_image/alt: 'Image > Alternative text'
     field_article_keywords: Keywords
+    field_multipage_page_of: 'Multipage parent'
   node__collection:
     nid: ID
     langcode: Locale
@@ -43,6 +42,7 @@ entity_fields_export_list:
     field_local_contexts_projects: 'Local Contexts Projects'
     field_local_contexts_labels_and_notices: 'Local Contexts Labels and Notices'
     field_coverage: 'Map Points'
+    field_multipage_page_of: 'Multipage parent'
   node__dictionary_word:
     nid: ID
     langcode: Locale
@@ -74,6 +74,7 @@ entity_fields_export_list:
     field_local_contexts_labels_and_notices: 'Local Contexts Labels and Notices'
     field_additional_word_entries: 'Word Entries'
     field_coverage: 'Map Points'
+    field_multipage_page_of: 'Multipage parent'
   node__digital_heritage:
     nid: ID
     langcode: Locale
@@ -114,6 +115,7 @@ entity_fields_export_list:
     field_local_contexts_projects: 'Local Contexts Projects'
     field_local_contexts_labels_and_notices: 'Local Contexts Labels and Notices'
     field_location: Location
+    field_multipage_page_of: 'Multipage parent'
   node__landing_page:
     nid: ID
     langcode: Language
@@ -121,6 +123,7 @@ entity_fields_export_list:
     title: Title
     default_langcode: 'Default translation'
     layout_builder__layout: Layout
+    field_multipage_page_of: 'Multipage parent'
   node__page:
     nid: ID
     langcode: Locale
@@ -129,6 +132,7 @@ entity_fields_export_list:
     default_langcode: 'Default translation'
     body: Body
     field_page_media_assets: 'Media Assets'
+    field_multipage_page_of: 'Multipage parent'
   node__person:
     nid: ID
     langcode: Locale
@@ -153,6 +157,7 @@ entity_fields_export_list:
     field_local_contexts_projects: 'Local Contexts Projects'
     field_local_contexts_labels_and_notices: 'Local Contexts Labels and Notices'
     field_coverage: 'Map Points'
+    field_multipage_page_of: 'Multipage parent'
   node__place:
     nid: ID
     langcode: Locale
@@ -172,6 +177,7 @@ entity_fields_export_list:
     field_local_contexts_projects: 'Local Contexts Projects'
     field_local_contexts_labels_and_notices: 'Local Contexts Labels and Notices'
     field_coverage: 'Map Points'
+    field_multipage_page_of: 'Multipage parent'
   node__word_list:
     nid: ID
     langcode: Locale
@@ -192,6 +198,7 @@ entity_fields_export_list:
     field_local_contexts_projects: 'Local Contexts Projects'
     field_local_contexts_labels_and_notices: 'Local Contexts Labels and Notices'
     field_coverage: 'Map Points'
+    field_multipage_page_of: 'Multipage parent'
   media__audio:
     mid: ID
     langcode: Locale
@@ -306,6 +313,13 @@ entity_fields_export_list:
     default_langcode: 'Default translation'
     field_media_tags: 'Media Tags'
     field_found_in: 'Found In'
+  multipage_item__multipage_item:
+    id: ID
+    langcode: Language
+    title: Title
+    field_pages: Pages
+    uid: Author
+    default_langcode: 'Default translation'
   community__community:
     id: ID
     langcode: Locale
@@ -554,3 +568,4 @@ entity_reference_media: entity
 entity_reference_taxonomy_term: name
 entity_reference_user: username
 entity_reference_paragraph: entity
+entity_reference_multipage_item: entity

@@ -40,6 +40,7 @@ use Drupal\user\UserInterface;
  *     "entity_reference_taxonomy_term",
  *     "entity_reference_user",
  *     "entity_reference_paragraph",
+ *     "entity_reference_multipage_item",
  *   },
  *   handlers = {
  *     "access" = "Drupal\mukurtu_export\CsvExporterAccessController",
@@ -159,6 +160,11 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface {
    */
   protected $entity_reference_paragraph;
 
+  /**
+   * @var string
+   */
+  protected $entity_reference_multipage_item;
+
 
   /**
    * {@inheritdoc}
@@ -215,7 +221,7 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface {
       $this->setImageFieldSetting('id');
     }
 
-    foreach (['node', 'media', 'taxonomy_term', 'user', 'paragraph'] as $target_type) {
+    foreach (['node', 'media', 'taxonomy_term', 'user', 'paragraph', 'multipage_item'] as $target_type) {
       if (!$this->getEntityReferenceSetting($target_type)) {
         $this->setEntityReferenceSetting($target_type, 'id');
       }
@@ -422,7 +428,9 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface {
     // Add the remaining, unmapped fields to the end of the list.
     /** @var \Drupal\Core\Field\FieldConfigInterface $field_def */
     foreach($all_field_defs as $field_name => $field_def) {
-      if ($field_def->isComputed()) {
+      // Skip computed fields, except for field_multipage_page_of which has an
+      // export-compatible implementation via the PageOfItemList plugin.
+      if ($field_def->isComputed() && $field_name !== 'field_multipage_page_of') {
         continue;
       }
 
@@ -521,7 +529,7 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface {
   }
 
   public function getSupportedEntityTypes() {
-    return ['node', 'media', 'community', 'protocol', 'paragraph', 'file', 'taxonomy_term'];
+    return ['node', 'media', 'multipage_item', 'community', 'protocol', 'paragraph', 'file', 'taxonomy_term'];
   }
 
 }
