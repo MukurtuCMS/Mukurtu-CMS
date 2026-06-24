@@ -1,8 +1,6 @@
 langcode: en
 status: true
 dependencies: {  }
-_core:
-  default_config_hash: qyJzqBQohddkYyCWG11rN0JK5ztV-jowfmD_vkWpwFU
 id: default_external_metadata_only
 label: 'Default external settings (metadata only)'
 uid: 1
@@ -216,6 +214,7 @@ entity_fields_export_list:
     default_langcode: 'Default translation'
     field_media_tags: 'Media Tags'
     uuid: UUID
+    field_found_in: 'Found In'
   media__document:
     langcode: Locale
     uid: 'Authored by'
@@ -231,6 +230,7 @@ entity_fields_export_list:
     default_langcode: 'Default translation'
     field_media_tags: 'Media Tags'
     uuid: UUID
+    field_found_in: 'Found In'
   media__external_embed:
     langcode: Language
     uid: 'Authored by'
@@ -247,6 +247,7 @@ entity_fields_export_list:
     field_people: People
     field_identifier: Identifier
     uuid: UUID
+    field_found_in: 'Found In'
   media__image:
     langcode: Locale
     uid: 'Authored by'
@@ -261,6 +262,7 @@ entity_fields_export_list:
     thumbnail/alt: 'Thumbnail > Alternative text'
     field_media_tags: 'Media Tags'
     uuid: UUID
+    field_found_in: 'Found In'
   media__remote_video:
     langcode: Locale
     uid: 'Authored by'
@@ -277,6 +279,7 @@ entity_fields_export_list:
     default_langcode: 'Default translation'
     field_media_tags: 'Media Tags'
     uuid: UUID
+    field_found_in: 'Found In'
   media__soundcloud:
     langcode: Language
     uid: 'Authored by'
@@ -293,6 +296,7 @@ entity_fields_export_list:
     field_identifier: Identifier
     field_contributor: Contributor
     uuid: UUID
+    field_found_in: 'Found In'
   media__video:
     langcode: Locale
     uid: 'Authored by'
@@ -307,6 +311,7 @@ entity_fields_export_list:
     default_langcode: 'Default translation'
     field_media_tags: 'Media Tags'
     uuid: UUID
+    field_found_in: 'Found In'
   multipage_item__multipage_item:
     uuid: UUID
     langcode: Language

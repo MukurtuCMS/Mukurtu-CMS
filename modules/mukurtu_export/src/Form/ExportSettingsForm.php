@@ -292,19 +292,6 @@ class ExportSettingsForm extends ExportBaseForm {
   }
 
   /**
-   * Submit handler for "Duplicate Settings".
-   */
-  public function submitDuplicateSettings(array &$form, FormStateInterface $form_state) {
-    $this->saveListSelection($form_state);
-    if ($id = $this->exporter->duplicateSettings($form, $form_state)) {
-      $settings = $this->exporter->getSettings($form, $form_state);
-      $this->exporter->setConfiguration(['settings' => $settings]);
-      $this->setExporterConfig($this->exporter->getConfiguration());
-      $form_state->setRedirect('entity.csv_exporter.edit_form', ['csv_exporter' => $id]);
-    }
-  }
-
-  /**
    * Submit handler for "Clear Selection" - removes ad-hoc items and reloads.
    */
   public function submitClearSelection(array &$form, FormStateInterface $form_state) {
