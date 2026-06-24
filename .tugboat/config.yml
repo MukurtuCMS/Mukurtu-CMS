@@ -23,6 +23,7 @@ services:
         - echo "upload_max_filesize=100M" >> /usr/local/etc/php/conf.d/tugboat.ini
         - echo "post_max_size=100M" >> /usr/local/etc/php/conf.d/tugboat.ini
         - echo "memory_limit=512M" >> /usr/local/etc/php/conf.d/tugboat.ini
+        - echo "max_input_vars=3000" >> /usr/local/etc/php/conf.d/tugboat.ini
 
         # Install composer.
         # See https://getcomposer.org/doc/faqs/how-to-install-composer-programmatically.md
@@ -114,6 +115,10 @@ services:
               json_encode(\$d, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL);
           "
           composer update --no-ansi --no-interaction --optimize-autoloader --no-progress --prefer-stable
+          # Raise max_input_vars for the CSV exporter form, which submits
+          # hundreds of field-mapping inputs and exceeds the default of 1000.
+          # Apache reads .htaccess per-request so no restart is needed.
+          echo "php_value max_input_vars 3000" >> web/.htaccess
           # Install Drupal with the Mukurtu installation profile. Run as web
           # user to create files with the right permissions. Pass in the
           # environment variables from Tugboat using the -E option.

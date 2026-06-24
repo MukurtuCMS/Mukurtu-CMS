@@ -77,21 +77,22 @@ class ExportSettingsForm extends ExportBaseForm {
     $settings = $this->getExporterConfig()['settings'] ?? [];
     $form += $this->exporter->settingsForm($form, $form_state, $settings);
 
-    $form['actions'] = [
-      '#type' => 'actions',
-    ];
+    $form['actions'] = ['#type' => 'actions'];
     $form['actions']['back'] = [
       '#type' => 'submit',
       '#value' => $this->t('Back'),
-      '#button_type' => 'primary',
       '#submit' => ['::submitBack'],
+      '#gin_action_item' => TRUE,
     ];
-    $form['actions']['duplicate_settings'] = [
-      '#type' => 'submit',
-      '#value' => $this->t('Duplicate Settings'),
-      '#button_type' => 'primary',
-      '#submit' => ['::submitDuplicateSettings'],
-    ];
+    if (!empty($adHocItems)) {
+      $form['actions']['clear_selection'] = [
+        '#type' => 'submit',
+        '#value' => $this->t('Clear Selection'),
+        '#submit' => ['::submitClearSelection'],
+        '#limit_validation_errors' => [],
+        '#gin_action_item' => TRUE,
+      ];
+    }
     $form['actions']['submit'] = [
       '#type' => 'submit',
       '#value' => $this->t('Start Export'),
@@ -101,16 +102,11 @@ class ExportSettingsForm extends ExportBaseForm {
   }
 
   /**
-   * Submit handler for "Duplicate Settings".
+   * Submit handler for "Clear Selection" - removes ad-hoc items and reloads.
    */
-  public function submitDuplicateSettings(array &$form, FormStateInterface $form_state) {
-    $this->saveListSelection($form_state);
-    if ($id = $this->exporter->duplicateSettings($form, $form_state)) {
-      $settings = $this->exporter->getSettings($form, $form_state);
-      $this->exporter->setConfiguration(['settings' => $settings]);
-      $this->setExporterConfig($this->exporter->getConfiguration());
-      $form_state->setRedirect('entity.csv_exporter.edit_form', ['csv_exporter' => $id]);
-    }
+  public function submitClearSelection(array &$form, FormStateInterface $form_state) {
+    $this->store->delete('ad_hoc_items');
+    $form_state->setRedirect('mukurtu_export.export_settings');
   }
 
   /**
