@@ -208,6 +208,7 @@ entity_fields_export_list:
     field_identifier: Identifier
     default_langcode: 'Default translation'
     field_media_tags: 'Media Tags'
+    field_found_in: 'Found In'
   media__document:
     mid: ID
     langcode: Locale
@@ -223,6 +224,7 @@ entity_fields_export_list:
     field_identifier: Identifier
     default_langcode: 'Default translation'
     field_media_tags: 'Media Tags'
+    field_found_in: 'Found In'
   media__external_embed:
     mid: ID
     langcode: Language
@@ -239,6 +241,7 @@ entity_fields_export_list:
     field_media_tags: 'Media Tags'
     field_people: People
     field_identifier: Identifier
+    field_found_in: 'Found In'
   media__image:
     mid: ID
     langcode: Locale
@@ -253,6 +256,7 @@ entity_fields_export_list:
     thumbnail/target_id: 'Thumbnail > File ID'
     thumbnail/alt: 'Thumbnail > Alternative text'
     field_media_tags: 'Media Tags'
+    field_found_in: 'Found In'
   media__remote_video:
     mid: ID
     langcode: Locale
@@ -269,6 +273,7 @@ entity_fields_export_list:
     thumbnail/alt: 'Thumbnail > Alternative text'
     default_langcode: 'Default translation'
     field_media_tags: 'Media Tags'
+    field_found_in: 'Found In'
   media__soundcloud:
     mid: ID
     langcode: Language
@@ -285,6 +290,7 @@ entity_fields_export_list:
     field_thumbnail/alt: 'Thumbnail > Alternative text'
     field_identifier: Identifier
     field_contributor: Contributor
+    field_found_in: 'Found In'
   media__video:
     mid: ID
     langcode: Locale
@@ -299,6 +305,7 @@ entity_fields_export_list:
     field_identifier: Identifier
     default_langcode: 'Default translation'
     field_media_tags: 'Media Tags'
+    field_found_in: 'Found In'
   community__community:
     id: ID
     langcode: Locale

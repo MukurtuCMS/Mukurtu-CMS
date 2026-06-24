@@ -309,3 +309,33 @@ function mukurtu_export_update_40013(): void {
     }
   }
 }
+
+/**
+ * Add field_found_in virtual column to the three new default export presets.
+ */
+function mukurtu_export_update_40014(): void {
+  $ids = [
+    'default_local_with_media',
+    'default_external_metadata_only',
+    'default_external_with_media',
+  ];
+  $storage = \Drupal::entityTypeManager()->getStorage('csv_exporter');
+  foreach ($ids as $id) {
+    $entity = $storage->load($id);
+    if (!$entity) {
+      continue;
+    }
+    $list = $entity->get('entity_fields_export_list') ?? [];
+    $changed = FALSE;
+    foreach ($list as $key => &$fields) {
+      if (str_starts_with($key, 'media__') && !isset($fields['field_found_in'])) {
+        $fields['field_found_in'] = 'Found In';
+        $changed = TRUE;
+      }
+    }
+    unset($fields);
+    if ($changed) {
+      $entity->set('entity_fields_export_list', $list)->save();
+    }
+  }
+}
