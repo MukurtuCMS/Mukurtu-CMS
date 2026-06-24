@@ -63,6 +63,24 @@ class SiteSetupTaskManager {
         (string) $this->t('Add category'),
       ),
       new SiteSetupTask(
+        'dictionary_language',
+        (string) $this->t('Add a dictionary language'),
+        (string) $this->t('Add at least one language to your dictionary to begin creating dictionary entries.'),
+        self::GROUP_REQUIRED,
+        TRUE,
+        '/admin/structure/taxonomy/manage/language/add',
+        (string) $this->t('Add language'),
+      ),
+      new SiteSetupTask(
+        'create_mukurtu_manager',
+        (string) $this->t('Create a Mukurtu Manager account'),
+        (string) $this->t('Mukurtu Managers can manage communities, protocols, and site content. Create at least one account with this role.'),
+        self::GROUP_RECOMMENDED,
+        TRUE,
+        '/admin/people/create',
+        (string) $this->t('Create account'),
+      ),
+      new SiteSetupTask(
         'site_name_email',
         (string) $this->t('Set your site name and email'),
         (string) $this->t('Update your site name and contact email address in Site Information.'),
@@ -79,15 +97,6 @@ class SiteSetupTaskManager {
         TRUE,
         '/admin/appearance/settings/mukurtu_v4',
         (string) $this->t('Edit theme settings'),
-      ),
-      new SiteSetupTask(
-        'site_footer',
-        (string) $this->t('Set up your site footer'),
-        (string) $this->t('Add footer content such as contact information, copyright, or links.'),
-        self::GROUP_RECOMMENDED,
-        TRUE,
-        '/admin/content/block-content',
-        (string) $this->t('Edit footer content'),
       ),
       new SiteSetupTask(
         'front_page',
@@ -108,13 +117,22 @@ class SiteSetupTaskManager {
         (string) $this->t('Create a page'),
       ),
       new SiteSetupTask(
-        'content_warnings',
-        (string) $this->t('Configure media content warnings'),
-        (string) $this->t('Set up content warnings for sensitive media, such as images of deceased individuals.'),
+        'navigation_menu',
+        (string) $this->t('Navigation menu'),
+        (string) $this->t("Configure your site's main navigation to help visitors find content."),
+        self::GROUP_RECOMMENDED,
+        FALSE,
+        '/admin/structure/menu/manage/main',
+        (string) $this->t('Edit menu'),
+      ),
+      new SiteSetupTask(
+        'site_footer',
+        (string) $this->t('Set up your site footer'),
+        (string) $this->t('Add footer content such as contact information, copyright, or links.'),
         self::GROUP_RECOMMENDED,
         TRUE,
-        '/admin/config/mukurtu/content-warnings',
-        (string) $this->t('Configure content warnings'),
+        '/admin/content/block-content',
+        (string) $this->t('Edit footer content'),
       ),
     ];
   }
@@ -147,11 +165,12 @@ class SiteSetupTaskManager {
         'create_community' => $this->entityExists('community'),
         'create_protocol' => $this->entityExists('protocol'),
         'create_category' => $this->taxonomyTermExists('category'),
+        'dictionary_language' => $this->taxonomyTermExists('language'),
+        'create_mukurtu_manager' => $this->mukurtuManagerExists(),
         'site_name_email' => $this->isSiteNameSet(),
         'site_logo' => $this->isSiteLogoSet(),
         'site_footer' => $this->isFooterSet(),
         'about_page' => $this->aboutPageExists(),
-        'content_warnings' => $this->taxonomyTermExists('media_tag'),
         default => FALSE,
       };
     }
@@ -294,6 +313,17 @@ class SiteSetupTaskManager {
     return !$footer->get('field_footer_logos')->isEmpty()
       || !$footer->get('field_footer_social_links')->isEmpty()
       || !$footer->get('field_footer_other_links')->isEmpty();
+  }
+
+  private function mukurtuManagerExists(): bool {
+    $ids = $this->entityTypeManager
+      ->getStorage('user')
+      ->getQuery()
+      ->condition('roles', 'mukurtu_manager')
+      ->accessCheck(FALSE)
+      ->range(0, 1)
+      ->execute();
+    return !empty($ids);
   }
 
   private function aboutPageExists(): bool {
