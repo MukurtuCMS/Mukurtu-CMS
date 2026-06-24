@@ -11,6 +11,7 @@ use Drupal\Core\Database\Query\AlterableInterface;
 use Drupal\user\Entity\User;
 use Drupal\message_subscribe\Subscribers\DeliveryCandidate;
 use Drupal\mukurtu_collection\Entity\Collection;
+use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
 
 /**
  * Implements hook_entity_type_alter().
@@ -114,7 +115,7 @@ function mukurtu_notifications_node_update(Node $node) {
     }
 
     // Include protocol stewards for content with cultural protocols assigned.
-    if ($node->hasField('field_cultural_protocols')) {
+    if ($node instanceof CulturalProtocolControlledInterface) {
       $protocol_ids = $node->getProtocols();
       if (!empty($protocol_ids)) {
         $steward_uids = mukurtu_notifications_resolve_notify_groups(FALSE, [], $protocol_ids);
@@ -428,6 +429,9 @@ function mukurtu_notifications_extract_notify_uids(FormStateInterface $form_stat
  *
  * Phase 2: requires mukurtu_follow_protocol flag targeting the protocol entity
  * type. Stubbed until flag configuration is updated.
+ *
+ * @todo Implement in issue #270 (notifications phase 2) once the
+ *   mukurtu_follow_protocol flag targets the protocol entity type.
  */
 function mukurtu_notifications_notify_protocol(Node $node, $subscribers): void {
   // Phase 2 implementation needed: the protocol entity type and follow flag
@@ -440,6 +444,10 @@ function mukurtu_notifications_notify_protocol(Node $node, $subscribers): void {
  * Phase 2: requires mukurtu_follow_community flag targeting the community
  * entity type. Currently the flag targets node entities which no longer
  * represent communities. Stubbed until flag configuration is updated.
+ *
+ * @todo Implement in issue #270 (notifications phase 2) once
+ *   mukurtu_follow_community flag targets the community entity type and
+ *   field_community on message templates references community entities.
  */
 function mukurtu_notifications_notify_community(Node $node, $subscribers): void {
   // Phase 2 implementation needed: update mukurtu_follow_community flag to
@@ -475,6 +483,8 @@ function mukurtu_notifications_notify_collection(Node $node, $subscribers) {
     'uid' => $node->getOwnerId(),
   ]);
   $message->set('field_collection', $node);
+  // field_item has cardinality 1, so only the first new item is stored per
+  // notification. If multi-item recording is needed, revisit in issue #270.
   $message->set('field_item', array_values($newItems));
   $message->save();
 
