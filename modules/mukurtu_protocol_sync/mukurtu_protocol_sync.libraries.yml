@@ -1,0 +1,6 @@
+protocol-sync:
+  js:
+    js/protocol-sync.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
