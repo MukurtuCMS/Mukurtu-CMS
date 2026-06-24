@@ -4,6 +4,7 @@ namespace Drupal\mukurtu_export\Controller;
 
 use Drupal\Core\Config\Entity\ConfigEntityListBuilder;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Url;
 
 
 class CsvExporterListBuilder extends ConfigEntityListBuilder {
@@ -31,6 +32,18 @@ class CsvExporterListBuilder extends ConfigEntityListBuilder {
       $row['description'] = $entity->getDescription();
       return $row + parent::buildRow($entity);
     }
+  }
+
+  public function getDefaultOperations(EntityInterface $entity) {
+    $operations = parent::getDefaultOperations($entity);
+    if ($entity->access('view')) {
+      $operations['duplicate'] = [
+        'title' => $this->t('Duplicate'),
+        'weight' => 10,
+        'url' => Url::fromRoute('mukurtu_export.csv_exporter.duplicate', ['csv_exporter' => $entity->id()]),
+      ];
+    }
+    return $operations;
   }
 
   public function render()
