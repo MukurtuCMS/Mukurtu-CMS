@@ -8,6 +8,7 @@ use Drupal\Core\Url;
 use Drupal\mukurtu_export\ExportChildResolver;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\node\NodeInterface;
 
 /**
  * Form for adding a single entity to an export list.
@@ -143,6 +144,65 @@ class ExportListAddItemForm extends FormBase {
       }
     }
 
+    // For nodes: add community record and multipage item selection.
+    if ($entity instanceof NodeInterface) {
+      // For original records: three-way radio for community record selection.
+      $community_records = $this->childResolver->getAccessibleCommunityRecords($entity);
+      if (!empty($community_records)) {
+        $form['community_records_mode'] = [
+          '#type' => 'radios',
+          '#title' => $this->t('Community records'),
+          '#options' => [
+            'none' => $this->t('Just this record'),
+            'all' => $this->t('This record and all accessible community records'),
+            'select' => $this->t('This record and select community records'),
+          ],
+          '#default_value' => 'none',
+        ];
+        $cr_options = [];
+        foreach ($community_records as $cr) {
+          $cr_options[$cr->id()] = $this->getCommunityRecordLabel($cr);
+        }
+        $form['community_records_select'] = [
+          '#type' => 'checkboxes',
+          '#title' => $this->t('Select community records'),
+          '#options' => $cr_options,
+          '#default_value' => array_keys($cr_options),
+          '#states' => [
+            'visible' => [
+              ':input[name="community_records_mode"]' => ['value' => 'select'],
+            ],
+          ],
+        ];
+        $form_state->set('community_records', $community_records);
+      }
+
+      // For community records: offer to include the original record.
+      $original_record = $this->childResolver->getOriginalRecord($entity);
+      if ($original_record) {
+        $form['include_original_record'] = [
+          '#type' => 'checkbox',
+          '#title' => $this->t('Also include the original record: @title', ['@title' => $original_record->label()]),
+          '#default_value' => FALSE,
+        ];
+        $form_state->set('original_record', $original_record);
+      }
+
+      // For multipage item pages: pre-checked list of all accessible pages.
+      $mpi_pages = $this->childResolver->getMultipagePages($entity);
+      if (!empty($mpi_pages)) {
+        $page_options = [];
+        foreach ($mpi_pages as $page) {
+          $page_options[$page->id()] = $page->label();
+        }
+        $form['multipage_pages'] = [
+          '#type' => 'checkboxes',
+          '#title' => $this->t('Pages in this multipage item'),
+          '#options' => $page_options,
+          '#default_value' => array_keys($page_options),
+        ];
+      }
+    }
 
     $form['actions'] = ['#type' => 'actions'];
     $form['actions']['submit'] = [
@@ -220,6 +280,41 @@ class ExportListAddItemForm extends FormBase {
       }
     }
 
+    // Include community records based on radio selection.
+    $cr_mode = $form_state->getValue('community_records_mode');
+    if ($cr_mode === 'all') {
+      foreach ($form_state->get('community_records') ?? [] as $cr) {
+        $id = (int) $cr->id();
+        $items['node'][$id] = $id;
+      }
+    }
+    elseif ($cr_mode === 'select') {
+      foreach ($form_state->getValue('community_records_select') ?? [] as $nid => $checked) {
+        if ($checked) {
+          $nid = (int) $nid;
+          $items['node'][$nid] = $nid;
+        }
+      }
+    }
+
+    // Include the original record if this node is a community record.
+    if ($form_state->getValue('include_original_record')) {
+      $or = $form_state->get('original_record');
+      if ($or) {
+        $id = (int) $or->id();
+        $items['node'][$id] = $id;
+      }
+    }
+
+    // Include selected multipage item pages.
+    foreach ($form_state->getValue('multipage_pages') ?? [] as $nid => $checked) {
+      if ($checked) {
+        $nid = (int) $nid;
+        $items['node'][$nid] = $nid;
+      }
+    }
+
+    $this->childResolver->addMpiEntitiesForNodes($items);
     $list->setItems($items);
     $list->save();
 
@@ -247,6 +342,20 @@ class ExportListAddItemForm extends FormBase {
     ]));
 
     $form_state->setRedirectUrl($this->getReturnUrl());
+  }
+
+  /**
+   * Builds a display label for a community record using its community names.
+   */
+  protected function getCommunityRecordLabel(NodeInterface $node): string {
+    if (!$node->hasField('field_communities')) {
+      return $node->label();
+    }
+    $names = [];
+    foreach ($node->get('field_communities')->referencedEntities() as $community) {
+      $names[] = $community->getName();
+    }
+    return $names ? implode(', ', $names) : $node->label();
   }
 
   /**

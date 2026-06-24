@@ -89,6 +89,7 @@ mukurtu_export.csv_exporter.duplicate:
   requirements:
     _permission: 'access mukurtu export'
 
+
 mukurtu_export.remove_node_from_list:
   path: '/admin/export/remove-node/{node}'
   defaults:

@@ -87,8 +87,11 @@ class ExportSettingsForm extends ExportBaseForm {
       // collections or word lists with resolvable children.
       $child_count = 0;
       $recursive_additional = 0;
-      $nodes = $this->entityTypeManager->getStorage('node')->loadMultiple(array_keys($adHocItems['node'] ?? []));
-      foreach ($nodes as $node) {
+      foreach ($adHocItems['node'] ?? [] as $node_id) {
+        $node = $this->entityTypeManager->getStorage('node')->load($node_id);
+        if (!$node) {
+          continue;
+        }
         if (in_array($node->bundle(), ['collection', 'word_list'])) {
           $direct = array_sum(array_map('count', $this->childResolver->getChildEntities($node)));
           $child_count += $direct;
@@ -127,6 +130,9 @@ class ExportSettingsForm extends ExportBaseForm {
           ];
         }
       }
+
+      // Build per-node CR and MPI selection sections.
+      $this->buildAdHocCrMpiElements($form, $form_state, $adHocItems['node'] ?? []);
     }
     else {
       $uid = \Drupal::currentUser()->id();
@@ -183,6 +189,110 @@ class ExportSettingsForm extends ExportBaseForm {
   }
 
   /**
+   * Adds CR and MPI selection elements for the ad-hoc node list.
+   *
+   * Builds a fieldset per original record with a three-way radio, a fieldset
+   * per community record with an OR checkbox, and a fieldset per MPI page with
+   * a pre-checked page list. Stores resolved entities in form_state for submit.
+   */
+  protected function buildAdHocCrMpiElements(array &$form, FormStateInterface $form_state, array $node_ids): void {
+    $or_data = [];
+    $cr_data = [];
+    $mpi_data = [];
+
+    foreach ($node_ids as $node_id) {
+      $node = $this->entityTypeManager->getStorage('node')->load($node_id);
+      if (!$node) {
+        continue;
+      }
+
+      $community_records = $this->childResolver->getAccessibleCommunityRecords($node);
+      if (!empty($community_records)) {
+        $or_data[$node_id] = ['node' => $node, 'crs' => $community_records];
+      }
+
+      $original_record = $this->childResolver->getOriginalRecord($node);
+      if ($original_record) {
+        $cr_data[$node_id] = ['node' => $node, 'or' => $original_record];
+      }
+
+      $mpi_pages = $this->childResolver->getMultipagePages($node);
+      if (!empty($mpi_pages)) {
+        // Key by first page nid to deduplicate when multiple pages of the same
+        // MPI appear in the selection.
+        $first_id = array_key_first($mpi_pages);
+        if (!isset($mpi_data[$first_id])) {
+          $mpi_data[$first_id] = ['pages' => $mpi_pages];
+        }
+      }
+    }
+
+    $form_state->set('adhoc_or_data', $or_data);
+    $form_state->set('adhoc_cr_data', $cr_data);
+    $form_state->set('adhoc_mpi_data', $mpi_data);
+
+    // Original record sections.
+    foreach ($or_data as $node_id => ['node' => $node, 'crs' => $community_records]) {
+      $key = 'cr_mode_' . $node_id;
+      $select_key = 'cr_select_' . $node_id;
+      $cr_options = [];
+      foreach ($community_records as $cr) {
+        $cr_options[$cr->id()] = $this->getCommunityRecordLabel($cr);
+      }
+      $form[$key] = [
+        '#type' => 'radios',
+        '#title' => $this->t('Community records for <em>@title</em>', ['@title' => $node->label()]),
+        '#options' => [
+          'none' => $this->t('Just this record'),
+          'all' => $this->t('This record and all accessible community records'),
+          'select' => $this->t('This record and select community records'),
+        ],
+        '#default_value' => 'none',
+        '#weight' => -4,
+      ];
+      $form[$select_key] = [
+        '#type' => 'checkboxes',
+        '#title' => $this->t('Select community records'),
+        '#options' => $cr_options,
+        '#default_value' => array_keys($cr_options),
+        '#states' => [
+          'visible' => [
+            ':input[name="' . $key . '"]' => ['value' => 'select'],
+          ],
+        ],
+        '#weight' => -4,
+      ];
+    }
+
+    // Community record sections.
+    foreach ($cr_data as $node_id => ['node' => $node, 'or' => $original_record]) {
+      $key = 'include_or_' . $node_id;
+      $form[$key] = [
+        '#type' => 'checkbox',
+        '#title' => $this->t('Also include the original record: @title', ['@title' => $original_record->label()]),
+        '#default_value' => FALSE,
+        '#weight' => -4,
+      ];
+    }
+
+    // Multipage item sections.
+    foreach ($mpi_data as $first_id => ['pages' => $pages]) {
+      $key = 'mpi_pages_' . $first_id;
+      $page_options = [];
+      foreach ($pages as $page) {
+        $page_options[$page->id()] = $page->label();
+      }
+      $form[$key] = [
+        '#type' => 'checkboxes',
+        '#title' => $this->t('Pages in this multipage item'),
+        '#options' => $page_options,
+        '#default_value' => array_keys($page_options),
+        '#weight' => -4,
+      ];
+    }
+  }
+
+  /**
    * Submit handler for "Clear Selection" - removes ad-hoc items and reloads.
    */
   public function submitClearSelection(array &$form, FormStateInterface $form_state) {
@@ -207,9 +317,10 @@ class ExportSettingsForm extends ExportBaseForm {
     $this->exporter->setConfiguration(['settings' => $settings]);
     $this->setExporterConfig($this->exporter->getConfiguration());
 
+    $ad_hoc_items = $this->store->get('ad_hoc_items') ?? [];
+
     // Expand the selection to include children of collections/word lists.
     if ($form_state->getValue('include_children_recursive')) {
-      $ad_hoc_items = $this->store->get('ad_hoc_items') ?? [];
       foreach ($ad_hoc_items['node'] ?? [] as $node_id) {
         $node = $this->entityTypeManager->getStorage('node')->load($node_id);
         if (!$node) {
@@ -223,7 +334,6 @@ class ExportSettingsForm extends ExportBaseForm {
       $this->executable = new BatchExportExecutable($this->source, $this->exporter);
     }
     elseif ($form_state->getValue('include_children')) {
-      $ad_hoc_items = $this->store->get('ad_hoc_items') ?? [];
       foreach ($ad_hoc_items['node'] ?? [] as $node_id) {
         $node = $this->entityTypeManager->getStorage('node')->load($node_id);
         if (!$node) {
@@ -233,6 +343,48 @@ class ExportSettingsForm extends ExportBaseForm {
           $ad_hoc_items[$child_type] = ($ad_hoc_items[$child_type] ?? []) + $child_ids;
         }
       }
+    }
+
+    // Expand for community record selections on original records.
+    foreach ($form_state->get('adhoc_or_data') ?? [] as $node_id => ['node' => $node, 'crs' => $community_records]) {
+      $cr_mode = $form_state->getValue('cr_mode_' . $node_id);
+      if ($cr_mode === 'all') {
+        foreach ($community_records as $cr) {
+          $id = (int) $cr->id();
+          $ad_hoc_items['node'][$id] = $id;
+        }
+      }
+      elseif ($cr_mode === 'select') {
+        foreach ($form_state->getValue('cr_select_' . $node_id) ?? [] as $nid => $checked) {
+          if ($checked) {
+            $nid = (int) $nid;
+            $ad_hoc_items['node'][$nid] = $nid;
+          }
+        }
+      }
+    }
+
+    // Expand for OR inclusions from community records.
+    foreach ($form_state->get('adhoc_cr_data') ?? [] as $node_id => ['or' => $original_record]) {
+      if ($form_state->getValue('include_or_' . $node_id)) {
+        $id = (int) $original_record->id();
+        $ad_hoc_items['node'][$id] = $id;
+      }
+    }
+
+    // Expand for multipage item page selections.
+    foreach ($form_state->get('adhoc_mpi_data') ?? [] as $first_id => ['pages' => $pages]) {
+      foreach ($form_state->getValue('mpi_pages_' . $first_id) ?? [] as $nid => $checked) {
+        if ($checked) {
+          $nid = (int) $nid;
+          $ad_hoc_items['node'][$nid] = $nid;
+        }
+      }
+    }
+
+    $this->childResolver->addMpiEntitiesForNodes($ad_hoc_items);
+
+    if (!empty($this->store->get('ad_hoc_items'))) {
       $this->source = new AdHocExporterSource($ad_hoc_items);
       $this->executable = new BatchExportExecutable($this->source, $this->exporter);
     }
@@ -257,6 +409,20 @@ class ExportSettingsForm extends ExportBaseForm {
       $this->exporter = $this->exportPluginManager->getInstance(['id' => 'csv', 'configuration' => []]);
     }
     return AccessResult::allowed();
+  }
+
+  /**
+   * Builds a display label for a community record using its community names.
+   */
+  protected function getCommunityRecordLabel(\Drupal\node\NodeInterface $node): string {
+    if (!$node->hasField('field_communities')) {
+      return $node->label();
+    }
+    $names = [];
+    foreach ($node->get('field_communities')->referencedEntities() as $community) {
+      $names[] = $community->getName();
+    }
+    return $names ? implode(', ', $names) : $node->label();
   }
 
 }

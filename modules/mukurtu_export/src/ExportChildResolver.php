@@ -3,6 +3,10 @@
 namespace Drupal\mukurtu_export;
 
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\mukurtu_multipage_items\MultipageItemInterface;
+use Drupal\mukurtu_multipage_items\MultipageItemManager;
+use Drupal\node\NodeInterface;
 
 /**
  * Resolves child entities for aggregative content types.
@@ -13,6 +17,12 @@ use Drupal\Core\Entity\EntityInterface;
  * collection levels.
  */
 class ExportChildResolver {
+
+  public function __construct(
+    protected readonly EntityTypeManagerInterface $entityTypeManager,
+    protected readonly MultipageItemManager $multipageItemManager,
+  ) {}
+
 
   /**
    * Returns child entity IDs for the given entity, keyed by entity type.
@@ -54,6 +64,109 @@ class ExportChildResolver {
     }
 
     return $children;
+  }
+
+  /**
+   * Returns community records accessible to the current user for an original record.
+   *
+   * @param \Drupal\node\NodeInterface $node
+   *   The candidate original record.
+   *
+   * @return \Drupal\node\NodeInterface[]
+   *   CR nodes keyed by nid, sorted newest first. Empty if none found or if
+   *   the node is itself a community record.
+   */
+  public function getAccessibleCommunityRecords(NodeInterface $node): array {
+    if (!$node->hasField('field_mukurtu_original_record')) {
+      return [];
+    }
+    // If the field is populated this node is itself a CR, not an OR.
+    if (!$node->get('field_mukurtu_original_record')->isEmpty()) {
+      return [];
+    }
+    $ids = $this->entityTypeManager->getStorage('node')->getQuery()
+      ->condition('field_mukurtu_original_record', $node->id())
+      ->accessCheck(TRUE)
+      ->sort('created', 'DESC')
+      ->execute();
+    if (empty($ids)) {
+      return [];
+    }
+    return $this->entityTypeManager->getStorage('node')->loadMultiple($ids);
+  }
+
+  /**
+   * Returns the original record if this node is a community record.
+   *
+   * @param \Drupal\node\NodeInterface $node
+   *   The candidate community record.
+   *
+   * @return \Drupal\node\NodeInterface|null
+   *   The original record node, or NULL if this is not a community record.
+   */
+  public function getOriginalRecord(NodeInterface $node): ?NodeInterface {
+    if (!$node->hasField('field_mukurtu_original_record')) {
+      return NULL;
+    }
+    if ($node->get('field_mukurtu_original_record')->isEmpty()) {
+      return NULL;
+    }
+    return $node->get('field_mukurtu_original_record')->entity;
+  }
+
+  /**
+   * Returns the multipage_item entity this node belongs to, or NULL.
+   *
+   * @param \Drupal\node\NodeInterface $node
+   *   Any page in the multipage item.
+   *
+   * @return \Drupal\mukurtu_multipage_items\MultipageItemInterface|null
+   *   The multipage_item entity, or NULL if the node is not part of one.
+   */
+  public function getMultipageEntity(NodeInterface $node): ?MultipageItemInterface {
+    return $this->multipageItemManager->getMultipageEntity($node);
+  }
+
+  /**
+   * Adds parent multipage_item entities for every MPI page node in $items.
+   *
+   * Intended as a final post-processing pass in export form submit handlers.
+   * Idempotent: writing the same multipage_item ID multiple times is a no-op.
+   *
+   * @param array $items
+   *   Items map keyed by entity type, passed by reference. Node entries are
+   *   inspected; multipage_item entries are populated as needed.
+   */
+  public function addMpiEntitiesForNodes(array &$items): void {
+    foreach ($items['node'] ?? [] as $node_id) {
+      $node = $this->entityTypeManager->getStorage('node')->load($node_id);
+      if (!$node) {
+        continue;
+      }
+      $mpi = $this->multipageItemManager->getMultipageEntity($node);
+      if ($mpi) {
+        $mpi_id = (int) $mpi->id();
+        $items['multipage_item'][$mpi_id] = $mpi_id;
+      }
+    }
+  }
+
+  /**
+   * Returns accessible pages for the multipage item this node belongs to.
+   *
+   * @param \Drupal\node\NodeInterface $node
+   *   Any page in the multipage item.
+   *
+   * @return \Drupal\node\NodeInterface[]
+   *   All accessible page nodes keyed by nid, in field_pages order.
+   *   Empty if the node is not part of a multipage item.
+   */
+  public function getMultipagePages(NodeInterface $node): array {
+    $mpi = $this->multipageItemManager->getMultipageEntity($node);
+    if (!$mpi) {
+      return [];
+    }
+    return $mpi->getPages(TRUE);
   }
 
   /**

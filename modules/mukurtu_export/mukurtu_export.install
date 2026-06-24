@@ -44,7 +44,7 @@ function mukurtu_export_update_40003() {
   $actions = $config->get('display.mukurtu_manage_content.display_options.fields.views_bulk_operations_bulk_form.selected_actions') ?? [];
   $action_ids = array_column($actions, 'action_id');
   if (!in_array('mukurtu_export_add_to_list_action', $action_ids)) {
-    $actions[] = ['action_id' => 'mukurtu_export_add_to_list_action'];
+    $actions[40] = ['action_id' => 'mukurtu_export_add_to_list_action'];
     $config->set('display.mukurtu_manage_content.display_options.fields.views_bulk_operations_bulk_form.selected_actions', $actions);
     $config->save();
   }
@@ -328,9 +328,51 @@ function mukurtu_export_update_40013(): void {
 }
 
 /**
- * Add field_found_in virtual column to the three new default export presets.
+ * Add multipage_item field mapping, field_multipage_page_of to
+ * node__digital_heritage, and entity_reference_multipage_item setting to
+ * the recommended_settings_for_import exporter.
  */
 function mukurtu_export_update_40014(): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('csv_exporter');
+  $exporter = $storage->load('recommended_settings_for_import');
+  if (!$exporter) {
+    return;
+  }
+
+  $list = $exporter->get('entity_fields_export_list') ?? [];
+
+  // Add the multipage_item entity type field mapping.
+  if (!isset($list['multipage_item__multipage_item'])) {
+    $list['multipage_item__multipage_item'] = [
+      'id'          => 'ID',
+      'uuid'        => 'UUID',
+      'langcode'    => 'Language',
+      'uid'         => 'Author',
+      'title'       => 'Title',
+      'status'      => 'Status',
+      'field_pages' => 'Pages',
+    ];
+  }
+
+  // Add field_multipage_page_of to node__digital_heritage.
+  if (isset($list['node__digital_heritage']) && !isset($list['node__digital_heritage']['field_multipage_page_of'])) {
+    $list['node__digital_heritage']['field_multipage_page_of'] = 'Multipage parent';
+  }
+
+  $exporter->set('entity_fields_export_list', $list);
+
+  // Add entity_reference_multipage_item setting.
+  if (!$exporter->getEntityReferenceSetting('multipage_item')) {
+    $exporter->setEntityReferenceSetting('multipage_item', 'id');
+  }
+
+  $exporter->save();
+}
+
+/**
+ * Add field_found_in virtual column to the three new default export presets.
+ */
+function mukurtu_export_update_40015(): void {
   $ids = [
     'default_local_with_media',
     'default_external_metadata_only',
