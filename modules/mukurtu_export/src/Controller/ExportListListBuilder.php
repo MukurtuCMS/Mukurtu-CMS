@@ -47,9 +47,6 @@ class ExportListListBuilder extends EntityListBuilder {
   /**
    * {@inheritdoc}
    */
-  /**
-   * {@inheritdoc}
-   */
   public function getDefaultOperations(EntityInterface $entity) {
     $operations = parent::getDefaultOperations($entity);
     $operations['export'] = [
@@ -60,6 +57,9 @@ class ExportListListBuilder extends EntityListBuilder {
     return $operations;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   protected function getEntityIds() {
     $uid = \Drupal::currentUser()->id();
     $query = $this->getStorage()->getQuery()->accessCheck(TRUE);
