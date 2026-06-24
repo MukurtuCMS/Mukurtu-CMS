@@ -41,6 +41,74 @@ function mukurtu_notifications_views_pre_render(ViewExecutable $view) {
 }
 
 /**
+ * Implements hook_form_views_exposed_form_alter().
+ *
+ * Groups notification type filter options into labelled optgroups.
+ */
+function mukurtu_notifications_form_views_exposed_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
+  $view = $form_state->get('view');
+  if (!$view || $view->id() !== 'mukurtu_message_log') {
+    return;
+  }
+  if (empty($form['type']['#options'])) {
+    return;
+  }
+
+  $groups = [
+    'Group membership' => [
+      'mukurtu_user_added_to_community',
+      'mukurtu_user_added_to_protocol',
+    ],
+    'Comment' => [
+      'mukurtu_protocol_comment',
+    ],
+    'Publishing' => [
+      'mukurtu_content_for_review',
+      'mukurtu_content_published',
+      'mukurtu_content_to_draft',
+      'mukurtu_content_archived',
+    ],
+    'New content' => [
+      'mukurtu_single_node_insert',
+      'mukurtu_new_item_in_collection',
+      'mukurtu_new_item_in_community',
+      'mukurtu_new_item_in_protocol',
+    ],
+    'Updated content' => [
+      'mukurtu_single_node_update',
+    ],
+    'Deleted content' => [
+      'mukurtu_single_node_delete',
+    ],
+  ];
+
+  $all_grouped_keys = [];
+  foreach ($groups as $machine_names) {
+    $all_grouped_keys = array_merge($all_grouped_keys, $machine_names);
+  }
+
+  $current = $form['type']['#options'];
+  $grouped = [];
+
+  foreach ($groups as $group_label => $machine_names) {
+    foreach ($machine_names as $machine_name) {
+      if (isset($current[$machine_name])) {
+        $grouped[$group_label][$machine_name] = $current[$machine_name];
+      }
+    }
+  }
+
+  // Append any options not in a defined group as flat top-level options.
+  foreach ($current as $key => $label) {
+    if (!in_array($key, $all_grouped_keys, TRUE)) {
+      $grouped[$key] = $label;
+    }
+  }
+
+  $form['type']['#options'] = $grouped;
+}
+
+/**
  * Implements hook_entity_type_alter().
  */
 function mukurtu_notifications_entity_type_alter(array &$entity_types) {

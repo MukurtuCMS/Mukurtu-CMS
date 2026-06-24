@@ -4,7 +4,7 @@ dependencies:
   config:
     - filter.format.mukurtu_html
 template: mukurtu_new_user_registration
-label: 'Mukurtu New User Registration'
+label: 'New user registration'
 description: 'A new user has registered with the site and needs approval.'
 text:
   -

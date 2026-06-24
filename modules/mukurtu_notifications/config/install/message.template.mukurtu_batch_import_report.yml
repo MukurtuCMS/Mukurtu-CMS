@@ -4,7 +4,7 @@ dependencies:
   config:
     - filter.format.mukurtu_html
 template: mukurtu_batch_import_report
-label: 'Mukurtu Batch Import Report'
+label: 'Batch import report'
 description: 'A report containing the results of a batch import.'
 text:
   -

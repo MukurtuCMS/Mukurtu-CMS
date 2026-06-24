@@ -618,3 +618,58 @@ function mukurtu_notifications_update_40021(): void {
     $config_storage->write($config_name, $source->read($config_name));
   }
 }
+
+/**
+ * Create field_community_ref storage/attachment and the missing
+ * field_protocol attachment on mukurtu_user_added_to_protocol.
+ *
+ * mukurtu_notifications_install() calls both helpers, but that only runs on
+ * fresh installs. Existing sites that predate Phase 2 need this update hook.
+ * Both helpers are idempotent -- they skip creation if the field already exists.
+ */
+function mukurtu_notifications_update_40022(): void {
+  mukurtu_notifications_create_field_community_ref();
+  mukurtu_notifications_create_field_protocol();
+}
+
+/**
+ * Remove the redundant word "item" from all content notification activity text.
+ *
+ * Templates used the pattern "[content-type] item [title] was created."
+ * where "item" is always redundant. Strips it from all 11 affected templates,
+ * updating both text deltas where they exist (Phase 2 templates have two).
+ */
+function mukurtu_notifications_update_40023(): void {
+  $templates = [
+    'message.template.mukurtu_single_node_insert',
+    'message.template.mukurtu_single_node_update',
+    'message.template.mukurtu_single_node_delete',
+    'message.template.mukurtu_new_item_in_collection',
+    'message.template.mukurtu_new_item_in_community',
+    'message.template.mukurtu_new_item_in_protocol',
+    'message.template.mukurtu_content_archived',
+    'message.template.mukurtu_content_for_review',
+    'message.template.mukurtu_content_published',
+    'message.template.mukurtu_content_to_draft',
+    'message.template.mukurtu_protocol_comment',
+  ];
+
+  $config_factory = \Drupal::configFactory();
+  foreach ($templates as $config_name) {
+    $config = $config_factory->getEditable($config_name);
+    if ($config->isNew()) {
+      continue;
+    }
+    $text = $config->get('text');
+    $changed = FALSE;
+    foreach ($text as $delta => $item) {
+      if (!empty($item['value']) && str_contains($item['value'], ' item&nbsp;')) {
+        $text[$delta]['value'] = str_replace(' item&nbsp;', '&nbsp;', $item['value']);
+        $changed = TRUE;
+      }
+    }
+    if ($changed) {
+      $config->set('text', $text)->save();
+    }
+  }
+}
