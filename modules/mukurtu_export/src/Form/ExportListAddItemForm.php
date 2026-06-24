@@ -5,8 +5,10 @@ namespace Drupal\mukurtu_export\Form;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
+use Drupal\mukurtu_export\ExportChildResolver;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\node\NodeInterface;
 
 /**
  * Form for adding a single entity to an export list.
@@ -16,16 +18,21 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 class ExportListAddItemForm extends FormBase {
 
   protected EntityTypeManagerInterface $entityTypeManager;
+  protected ExportChildResolver $childResolver;
 
-  public function __construct(EntityTypeManagerInterface $entity_type_manager) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, ExportChildResolver $child_resolver) {
     $this->entityTypeManager = $entity_type_manager;
+    $this->childResolver = $child_resolver;
   }
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    return new static($container->get('entity_type.manager'));
+    return new static(
+      $container->get('entity_type.manager'),
+      $container->get('mukurtu_export.child_resolver'),
+    );
   }
 
   /**
@@ -88,6 +95,105 @@ class ExportListAddItemForm extends FormBase {
       ],
     ];
 
+    // For aggregative types, offer to include child items.
+    if ($entity->getEntityTypeId() === 'node' && in_array($entity->bundle(), ['collection', 'word_list'])) {
+      $children = $this->childResolver->getChildEntities($entity);
+      $child_count = array_sum(array_map('count', $children));
+      if ($child_count > 0) {
+        $form['include_children'] = [
+          '#type' => 'checkbox',
+          '#title' => $this->formatPlural(
+            $child_count,
+            'Also include 1 child item from this @bundle',
+            'Also include @count child items from this @bundle',
+            ['@bundle' => $entity->bundle() === 'collection' ? $this->t('collection') : $this->t('word list')]
+          ),
+          '#default_value' => FALSE,
+        ];
+
+        // For collections with nested sub-collections, offer a recursive option.
+        if ($entity->bundle() === 'collection') {
+          $recursive_children = $this->childResolver->getChildEntitiesRecursive($entity);
+          $recursive_count = array_sum(array_map('count', $recursive_children));
+          $additional_count = $recursive_count - $child_count;
+          if ($additional_count > 0) {
+            $form['include_children_recursive'] = [
+              '#type' => 'checkbox',
+              '#title' => $this->formatPlural(
+                $additional_count,
+                'Also include all items nested within child collections (1 additional item)',
+                'Also include all items nested within child collections (@count additional items)',
+              ),
+              '#default_value' => FALSE,
+              '#states' => [
+                'visible' => [':input[name="include_children"]' => ['checked' => TRUE]],
+              ],
+            ];
+          }
+        }
+      }
+    }
+
+    // For nodes: add community record and multipage item selection.
+    if ($entity instanceof NodeInterface) {
+      // For original records: three-way radio for community record selection.
+      $community_records = $this->childResolver->getAccessibleCommunityRecords($entity);
+      if (!empty($community_records)) {
+        $form['community_records_mode'] = [
+          '#type' => 'radios',
+          '#title' => $this->t('Community records'),
+          '#options' => [
+            'none' => $this->t('Just this record'),
+            'all' => $this->t('This record and all accessible community records'),
+            'select' => $this->t('This record and select community records'),
+          ],
+          '#default_value' => 'none',
+        ];
+        $cr_options = [];
+        foreach ($community_records as $cr) {
+          $cr_options[$cr->id()] = $this->getCommunityRecordLabel($cr);
+        }
+        $form['community_records_select'] = [
+          '#type' => 'checkboxes',
+          '#title' => $this->t('Select community records'),
+          '#options' => $cr_options,
+          '#default_value' => array_keys($cr_options),
+          '#states' => [
+            'visible' => [
+              ':input[name="community_records_mode"]' => ['value' => 'select'],
+            ],
+          ],
+        ];
+        $form_state->set('community_records', $community_records);
+      }
+
+      // For community records: offer to include the original record.
+      $original_record = $this->childResolver->getOriginalRecord($entity);
+      if ($original_record) {
+        $form['include_original_record'] = [
+          '#type' => 'checkbox',
+          '#title' => $this->t('Also include the original record: @title', ['@title' => $original_record->label()]),
+          '#default_value' => FALSE,
+        ];
+        $form_state->set('original_record', $original_record);
+      }
+
+      // For multipage item pages: pre-checked list of all accessible pages.
+      $mpi_pages = $this->childResolver->getMultipagePages($entity);
+      if (!empty($mpi_pages)) {
+        $page_options = [];
+        foreach ($mpi_pages as $page) {
+          $page_options[$page->id()] = $page->label();
+        }
+        $form['multipage_pages'] = [
+          '#type' => 'checkboxes',
+          '#title' => $this->t('Pages in this multipage item'),
+          '#options' => $page_options,
+          '#default_value' => array_keys($page_options),
+        ];
+      }
+    }
+
     $form['actions'] = ['#type' => 'actions'];
     $form['actions']['submit'] = [
       '#type' => 'submit',
@@ -148,6 +254,57 @@ class ExportListAddItemForm extends FormBase {
     $items = $list->getItems();
     $items[$entity_type] = $items[$entity_type] ?? [];
     $items[$entity_type][$entity_id] = $entity_id;
+
+    // Optionally include child items (collections, word lists).
+    $entity = $this->entityTypeManager->getStorage($entity_type)->load($entity_id);
+    if ($entity) {
+      if ($form_state->getValue('include_children_recursive')) {
+        foreach ($this->childResolver->getChildEntitiesRecursive($entity) as $child_type => $child_ids) {
+          $items[$child_type] = ($items[$child_type] ?? []) + $child_ids;
+        }
+      }
+      elseif ($form_state->getValue('include_children')) {
+        foreach ($this->childResolver->getChildEntities($entity) as $child_type => $child_ids) {
+          $items[$child_type] = ($items[$child_type] ?? []) + $child_ids;
+        }
+      }
+    }
+
+    // Include community records based on radio selection.
+    $cr_mode = $form_state->getValue('community_records_mode');
+    if ($cr_mode === 'all') {
+      foreach ($form_state->get('community_records') ?? [] as $cr) {
+        $id = (int) $cr->id();
+        $items['node'][$id] = $id;
+      }
+    }
+    elseif ($cr_mode === 'select') {
+      foreach ($form_state->getValue('community_records_select') ?? [] as $nid => $checked) {
+        if ($checked) {
+          $nid = (int) $nid;
+          $items['node'][$nid] = $nid;
+        }
+      }
+    }
+
+    // Include the original record if this node is a community record.
+    if ($form_state->getValue('include_original_record')) {
+      $or = $form_state->get('original_record');
+      if ($or) {
+        $id = (int) $or->id();
+        $items['node'][$id] = $id;
+      }
+    }
+
+    // Include selected multipage item pages.
+    foreach ($form_state->getValue('multipage_pages') ?? [] as $nid => $checked) {
+      if ($checked) {
+        $nid = (int) $nid;
+        $items['node'][$nid] = $nid;
+      }
+    }
+
+    $this->childResolver->addMpiEntitiesForNodes($items);
     $list->setItems($items);
     $list->save();
 
@@ -175,6 +332,20 @@ class ExportListAddItemForm extends FormBase {
     ]));
 
     $form_state->setRedirectUrl($this->getReturnUrl());
+  }
+
+  /**
+   * Builds a display label for a community record using its community names.
+   */
+  protected function getCommunityRecordLabel(NodeInterface $node): string {
+    if (!$node->hasField('field_communities')) {
+      return $node->label();
+    }
+    $names = [];
+    foreach ($node->get('field_communities')->referencedEntities() as $community) {
+      $names[] = $community->getName();
+    }
+    return $names ? implode(', ', $names) : $node->label();
   }
 
   /**
