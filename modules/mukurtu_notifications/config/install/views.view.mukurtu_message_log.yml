@@ -4,6 +4,11 @@ dependencies:
   config:
     - core.entity_view_mode.message.mail_subject
     - message.template.mukurtu_batch_import_report
+    - message.template.mukurtu_comment_on_protocol_content
+    - message.template.mukurtu_content_archived
+    - message.template.mukurtu_content_published
+    - message.template.mukurtu_content_returned_to_draft
+    - message.template.mukurtu_content_submitted_for_review
     - message.template.mukurtu_new_item_in_collection
     - message.template.mukurtu_new_item_in_community
     - message.template.mukurtu_new_item_in_protocol
@@ -12,6 +17,8 @@ dependencies:
     - message.template.mukurtu_single_node_delete
     - message.template.mukurtu_single_node_insert
     - message.template.mukurtu_single_node_update
+    - message.template.mukurtu_user_added_to_community
+    - message.template.mukurtu_user_added_to_protocol
   module:
     - message
     - user
@@ -241,13 +248,21 @@ display:
           operator: in
           value:
             mukurtu_batch_import_report: mukurtu_batch_import_report
+            mukurtu_comment_on_protocol_content: mukurtu_comment_on_protocol_content
+            mukurtu_content_archived: mukurtu_content_archived
+            mukurtu_content_published: mukurtu_content_published
+            mukurtu_content_returned_to_draft: mukurtu_content_returned_to_draft
+            mukurtu_content_submitted_for_review: mukurtu_content_submitted_for_review
             mukurtu_new_item_in_collection: mukurtu_new_item_in_collection
             mukurtu_new_item_in_community: mukurtu_new_item_in_community
             mukurtu_new_item_in_protocol: mukurtu_new_item_in_protocol
+            mukurtu_new_user_account_created: mukurtu_new_user_account_created
             mukurtu_new_user_registration: mukurtu_new_user_registration
             mukurtu_single_node_delete: mukurtu_single_node_delete
             mukurtu_single_node_insert: mukurtu_single_node_insert
             mukurtu_single_node_update: mukurtu_single_node_update
+            mukurtu_user_added_to_community: mukurtu_user_added_to_community
+            mukurtu_user_added_to_protocol: mukurtu_user_added_to_protocol
           group: 1
           exposed: false
           expose:
@@ -607,32 +622,24 @@ display:
           entity_field: template
           plugin_id: bundle
           operator: in
-          value:
-            mukurtu_batch_import_report: mukurtu_batch_import_report
-            mukurtu_new_item_in_collection: mukurtu_new_item_in_collection
-            mukurtu_new_item_in_community: mukurtu_new_item_in_community
-            mukurtu_new_item_in_protocol: mukurtu_new_item_in_protocol
-            mukurtu_new_user_account_created: mukurtu_new_user_account_created
-            mukurtu_single_node_delete: mukurtu_single_node_delete
-            mukurtu_single_node_insert: mukurtu_single_node_insert
-            mukurtu_single_node_update: mukurtu_single_node_update
+          value: {  }
           group: 1
-          exposed: false
+          exposed: true
           expose:
-            operator_id: ''
-            label: ''
+            operator_id: template_op
+            label: 'Notification type'
             description: ''
             use_operator: false
-            operator: ''
+            operator: template_op
             operator_limit_selection: false
             operator_list: {  }
-            identifier: ''
+            identifier: type
             required: false
             remember: false
-            multiple: false
+            multiple: true
             remember_roles:
               authenticated: authenticated
-            reduce: false
+            reduce: true
           is_grouped: false
           group_info:
             label: ''

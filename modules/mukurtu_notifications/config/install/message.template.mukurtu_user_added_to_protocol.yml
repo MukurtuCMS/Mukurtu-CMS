@@ -1,0 +1,21 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - filter.format.mukurtu_html
+template: mukurtu_user_added_to_protocol
+label: 'Added to protocol'
+description: 'A user was added to a protocol.'
+text:
+  -
+    value: '<p>You were added to protocol&nbsp;[message:field_protocol:entity:title].</p>'
+    format: mukurtu_html
+  -
+    value: '<p>You were added to protocol&nbsp;[message:field_protocol:entity:title].</p>'
+    format: mukurtu_html
+settings:
+  'token options':
+    clear: true
+    'token replace': true
+  purge_override: false
+  purge_methods: {  }

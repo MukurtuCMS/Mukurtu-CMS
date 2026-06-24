@@ -1,0 +1,21 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - filter.format.mukurtu_html
+template: mukurtu_user_added_to_community
+label: 'Added to community'
+description: 'A user was added to a community.'
+text:
+  -
+    value: '<p>You were added to community&nbsp;<a href="[message:field_community_ref:entity:url]">[message:field_community_ref:entity:title]</a>.</p>'
+    format: mukurtu_html
+  -
+    value: '<p>You were added to community&nbsp;<a href="[message:field_community_ref:entity:url]">[message:field_community_ref:entity:title]</a>.</p>'
+    format: mukurtu_html
+settings:
+  'token options':
+    clear: true
+    'token replace': true
+  purge_override: false
+  purge_methods: {  }

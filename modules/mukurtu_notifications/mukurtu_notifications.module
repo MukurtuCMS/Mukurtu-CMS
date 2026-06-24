@@ -1,16 +1,18 @@
 <?php
 
+use Drupal\comment\CommentInterface;
 use Drupal\Core\Access\AccessResult;
-use Drupal\Core\Form\FormStateInterface;
-use Drupal\node\Entity\Node;
-use Drupal\message\Entity\Message;
-use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
-use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Database\Query\AlterableInterface;
-use Drupal\user\Entity\User;
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\message\Entity\Message;
 use Drupal\message_subscribe\Subscribers\DeliveryCandidate;
 use Drupal\mukurtu_collection\Entity\Collection;
+use Drupal\node\Entity\Node;
+use Drupal\og\Entity\OgMembership;
+use Drupal\user\Entity\User;
 
 /**
  * Implements hook_entity_type_alter().
@@ -86,6 +88,15 @@ function mukurtu_notifications_node_insert(Node $node) {
  * Implements hook_node_update().
  */
 function mukurtu_notifications_node_update(Node $node) {
+  // Handle content moderation state changes regardless of published status.
+  if ($node->hasField('moderation_state') && isset($node->original)) {
+    $old_state = $node->original->get('moderation_state')->value;
+    $new_state = $node->get('moderation_state')->value;
+    if ($old_state !== $new_state) {
+      mukurtu_notifications_handle_moderation_change($node, $old_state, $new_state);
+    }
+  }
+
   // Don't record events or send notifications for unpublished nodes.
   if (!$node->isPublished()) {
     return;
@@ -483,5 +494,218 @@ function mukurtu_notifications_notify_collection(Node $node, $subscribers) {
   }
   catch (\Exception $e) {
     \Drupal::logger('mukurtu_notifications')->warning('Failed to send collection notification: @msg', ['@msg' => $e->getMessage()]);
+  }
+}
+
+/**
+ * Records and dispatches a notification when content moderation state changes.
+ *
+ * @param \Drupal\node\Entity\Node $node
+ *   The node whose state changed.
+ * @param string $old_state
+ *   The previous moderation state machine name.
+ * @param string $new_state
+ *   The new moderation state machine name.
+ */
+function mukurtu_notifications_handle_moderation_change(Node $node, string $old_state, string $new_state): void {
+  $current_user_id = (int) \Drupal::currentUser()->id();
+  $template = NULL;
+  $notify_uids = [];
+
+  switch ($new_state) {
+    case 'needs_review':
+      $template = 'mukurtu_content_submitted_for_review';
+      if ($node->hasField('field_cultural_protocols')) {
+        $protocol_ids = $node->getProtocols();
+        if (!empty($protocol_ids)) {
+          $steward_uids = mukurtu_notifications_resolve_notify_groups(FALSE, [], $protocol_ids);
+          $notify_uids = array_values(array_unique(array_diff($steward_uids, [$current_user_id])));
+        }
+      }
+      break;
+
+    case 'published':
+      $template = 'mukurtu_content_published';
+      $owner_id = (int) $node->getOwnerId();
+      if ($owner_id > 0 && $owner_id !== $current_user_id) {
+        $notify_uids = [$owner_id];
+      }
+      break;
+
+    case 'archived':
+      $template = 'mukurtu_content_archived';
+      $owner_id = (int) $node->getOwnerId();
+      if ($owner_id > 0 && $owner_id !== $current_user_id) {
+        $notify_uids = [$owner_id];
+      }
+      break;
+
+    case 'draft':
+      // Only notify on reversion from a non-draft state.
+      if (!in_array($old_state, ['needs_review', 'published', 'archived'])) {
+        return;
+      }
+      $template = 'mukurtu_content_returned_to_draft';
+      $owner_id = (int) $node->getOwnerId();
+      if ($owner_id > 0 && $owner_id !== $current_user_id) {
+        $notify_uids = [$owner_id];
+      }
+      break;
+
+    default:
+      return;
+  }
+
+  if (!$template) {
+    return;
+  }
+
+  $message = Message::create([
+    'template' => $template,
+    'uid' => $node->getOwnerId(),
+  ]);
+  $message->set('field_item', $node);
+  $message->set('field_user', $current_user_id);
+  $message->save();
+
+  if (empty($notify_uids)) {
+    return;
+  }
+
+  $subscribe_options = [
+    'notify message owner' => FALSE,
+    'uids' => [],
+  ];
+  $email_validator = \Drupal::service('email.validator');
+  $recipients = User::loadMultiple($notify_uids);
+  foreach ($recipients as $uid => $recipient) {
+    if (!$email_validator->isValid($recipient->getEmail())) {
+      continue;
+    }
+    $subscribe_options['uids'][$uid] = new DeliveryCandidate(['subscribe_node'], ['email'], $uid);
+  }
+
+  if (!empty($subscribe_options['uids'])) {
+    try {
+      \Drupal::service('message_subscribe.subscribers')->sendMessage($message, $message, [], $subscribe_options);
+    }
+    catch (\Exception $e) {
+      \Drupal::logger('mukurtu_notifications')->warning('Failed to send moderation notification: @msg', ['@msg' => $e->getMessage()]);
+    }
+  }
+}
+
+/**
+ * Implements hook_comment_insert().
+ */
+function mukurtu_notifications_comment_insert(CommentInterface $comment) {
+  $node = $comment->getCommentedEntity();
+  if (!($node instanceof Node)) {
+    return;
+  }
+  if (!$node->hasField('field_cultural_protocols')) {
+    return;
+  }
+  $protocol_ids = $node->getProtocols();
+  if (empty($protocol_ids)) {
+    return;
+  }
+
+  $current_user_id = (int) \Drupal::currentUser()->id();
+  $steward_uids = mukurtu_notifications_resolve_notify_groups(FALSE, [], $protocol_ids);
+  $notify_uids = array_values(array_unique(array_diff($steward_uids, [$current_user_id])));
+
+  $message = Message::create([
+    'template' => 'mukurtu_comment_on_protocol_content',
+    'uid' => $current_user_id,
+  ]);
+  $message->set('field_item', $node);
+  $message->set('field_user', $current_user_id);
+  $message->save();
+
+  if (empty($notify_uids)) {
+    return;
+  }
+
+  $subscribe_options = [
+    'notify message owner' => FALSE,
+    'uids' => [],
+  ];
+  $email_validator = \Drupal::service('email.validator');
+  $recipients = User::loadMultiple($notify_uids);
+  foreach ($recipients as $uid => $recipient) {
+    if (!$email_validator->isValid($recipient->getEmail())) {
+      continue;
+    }
+    $subscribe_options['uids'][$uid] = new DeliveryCandidate(['subscribe_node'], ['email'], $uid);
+  }
+
+  if (!empty($subscribe_options['uids'])) {
+    try {
+      \Drupal::service('message_subscribe.subscribers')->sendMessage($message, $message, [], $subscribe_options);
+    }
+    catch (\Exception $e) {
+      \Drupal::logger('mukurtu_notifications')->warning('Failed to send comment notification: @msg', ['@msg' => $e->getMessage()]);
+    }
+  }
+}
+
+/**
+ * Implements hook_og_membership_insert().
+ */
+function mukurtu_notifications_og_membership_insert(OgMembership $membership) {
+  $group = $membership->getGroup();
+  if (!$group) {
+    return;
+  }
+
+  $group_entity_type = $membership->getGroupEntityType();
+  $added_user = $membership->getOwner();
+  if (!$added_user || $added_user->id() == 0) {
+    return;
+  }
+
+  if ($group_entity_type === 'community') {
+    $template = 'mukurtu_user_added_to_community';
+  }
+  elseif ($group_entity_type === 'protocol') {
+    $template = 'mukurtu_user_added_to_protocol';
+  }
+  else {
+    return;
+  }
+
+  $current_user_id = (int) \Drupal::currentUser()->id();
+  $message = Message::create([
+    'template' => $template,
+    'uid' => $current_user_id,
+  ]);
+  $message->set('field_user', (int) $added_user->id());
+  if ($group_entity_type === 'community') {
+    $message->set('field_community_ref', (int) $group->id());
+  }
+  else {
+    $message->set('field_protocol', (int) $group->id());
+  }
+  $message->save();
+
+  $email_validator = \Drupal::service('email.validator');
+  if (!$email_validator->isValid($added_user->getEmail())) {
+    return;
+  }
+
+  $added_uid = (int) $added_user->id();
+  $subscribe_options = [
+    'notify message owner' => FALSE,
+    'uids' => [
+      $added_uid => new DeliveryCandidate(['subscribe_node'], ['email'], $added_uid),
+    ],
+  ];
+
+  try {
+    \Drupal::service('message_subscribe.subscribers')->sendMessage($message, $message, [], $subscribe_options);
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('mukurtu_notifications')->warning('Failed to send membership notification: @msg', ['@msg' => $e->getMessage()]);
   }
 }
