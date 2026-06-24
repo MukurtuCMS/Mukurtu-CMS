@@ -151,8 +151,8 @@ class CsvExporterFormBase extends EntityForm {
       ],
       'id' => ['#description' => $this->t('Only the ID or UUID is written to the cell. The referenced term is not included in the export.')],
       'name' => ['#description' => $this->t('The term\'s label is written to the cell. Useful when sharing data across sites where IDs may differ.')],
-      'entity_shallow' => ['#description' => $this->t('The ID or UUID is written to the cell, and the referenced term is also exported. References within referenced terms are not followed.')],
-      'entity' => ['#description' => $this->t('The ID or UUID is written to the cell, and the referenced term is also exported. References within referenced terms are also followed, recursively. This may result in very large exports, use with caution.')],
+      'entity_shallow' => ['#description' => $this->t('The ID or UUID is written to the cell, and the referenced term is also exported.')],
+      'entity' => ['#description' => $this->t('The ID or UUID is written to the cell, and the referenced term is also exported. This may result in very large exports, use with caution.')],
     ];
 
     $form['relationships']['entity_reference_user'] = [
