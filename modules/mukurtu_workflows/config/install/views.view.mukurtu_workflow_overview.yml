@@ -190,6 +190,20 @@ display:
           hide_empty: false
           empty_zero: false
           hide_alter_empty: true
+          click_sort_column: value
+          type: entity_reference_label
+          settings:
+            link: false
+          group_column: value
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
         moderation_state:
           id: moderation_state
           table: node_field_data
@@ -545,6 +559,20 @@ display:
           hide_empty: false
           empty_zero: false
           hide_alter_empty: true
+          click_sort_column: value
+          type: entity_reference_label
+          settings:
+            link: false
+          group_column: value
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
         changed:
           id: changed
           table: node_field_data
@@ -763,11 +791,15 @@ display:
       use_admin_theme: true
       defaults:
         title: false
+        access: false
         fields: false
         filters: false
         arguments: false
         style: false
         empty: false
+      access:
+        type: review_queue_access
+        options: {  }
       fields:
         title:
           id: title
@@ -849,6 +881,20 @@ display:
           hide_empty: false
           empty_zero: false
           hide_alter_empty: true
+          click_sort_column: value
+          type: entity_reference_label
+          settings:
+            link: false
+          group_column: value
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
         moderation_state:
           id: moderation_state
           table: node_field_data

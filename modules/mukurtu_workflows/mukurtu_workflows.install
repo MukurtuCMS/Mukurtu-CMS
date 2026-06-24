@@ -64,3 +64,29 @@ function mukurtu_workflows_schema(): array {
   ];
   return $schema;
 }
+
+/**
+ * De-link content type labels in workflow views and restrict review queue to
+ * protocol/language stewards.
+ */
+function mukurtu_workflows_update_40001(): void {
+  $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_workflow_overview');
+  if ($config->isNew()) {
+    return;
+  }
+
+  // Disable the entity link on the Type field in all three displays.
+  foreach (['my_content_in_progress', 'my_content_published', 'review_queue'] as $display_id) {
+    $config->set("display.$display_id.display_options.fields.type.type", 'entity_reference_label');
+    $config->set("display.$display_id.display_options.fields.type.settings", ['link' => FALSE]);
+  }
+
+  // Override access on the review_queue display with the custom plugin.
+  $config->set('display.review_queue.display_options.defaults.access', FALSE);
+  $config->set('display.review_queue.display_options.access', [
+    'type' => 'review_queue_access',
+    'options' => [],
+  ]);
+
+  $config->save();
+}

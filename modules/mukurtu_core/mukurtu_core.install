@@ -1747,3 +1747,35 @@ function mukurtu_core_update_40060(): void {
     $config->save();
   }
 }
+
+/**
+ * Grant editorial workflow transition permissions to the Language Steward role
+ * so they can process dictionary words and word lists in the review queue.
+ */
+function mukurtu_core_update_40062(): void {
+  /** @var \Drupal\og\Entity\OgRole|null $role */
+  $role = \Drupal::entityTypeManager()
+    ->getStorage('og_role')
+    ->load('protocol-protocol-language_steward');
+  if (!$role) {
+    return;
+  }
+
+  $transitions = [
+    'use mukurtu_editorial_workflow transition archive',
+    'use mukurtu_editorial_workflow transition publish',
+    'use mukurtu_editorial_workflow transition request_revision',
+    'use mukurtu_editorial_workflow transition restore',
+    'use mukurtu_editorial_workflow transition resubmit',
+    'use mukurtu_editorial_workflow transition save_draft',
+    'use mukurtu_editorial_workflow transition submit_for_review',
+  ];
+
+  foreach ($transitions as $permission) {
+    if (!$role->hasPermission($permission)) {
+      $role->grantPermission($permission);
+    }
+  }
+
+  $role->save();
+}

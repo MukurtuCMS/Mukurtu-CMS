@@ -204,8 +204,9 @@ function mukurtu_workflows_preprocess_node(array &$variables): void {
 /**
  * Implements hook_views_query_alter().
  *
- * Scopes the content-under-review view to protocols where the current user
- * is a Protocol Steward. Site admins (bypass node access) see all content.
+ * Scopes the content-under-review view to protocols where the current user is
+ * a Protocol Steward (all content types) or a Language Steward (dictionary
+ * words and word lists only). Site admins (bypass node access) see all content.
  */
 function mukurtu_workflows_views_query_alter(ViewExecutable $view, QueryPluginBase $query): void {
   $is_content_under_review = $view->id() === 'mukurtu_content_under_review';
@@ -225,16 +226,20 @@ function mukurtu_workflows_views_query_alter(ViewExecutable $view, QueryPluginBa
   $memberships = $membership_manager->getMemberships($account->id());
 
   $steward_protocol_ids = [];
+  $language_steward_protocol_ids = [];
   foreach ($memberships as $membership) {
-    // Protocols are a custom OG group entity type 'protocol', not 'node'.
-    if ($membership->getGroupEntityType() === 'protocol' &&
-        $membership->hasRole('protocol-protocol-protocol_steward')) {
+    if ($membership->getGroupEntityType() !== 'protocol') {
+      continue;
+    }
+    if ($membership->hasRole('protocol-protocol-protocol_steward')) {
       $steward_protocol_ids[] = (int) $membership->getGroupId();
+    }
+    elseif ($membership->hasRole('protocol-protocol-language_steward')) {
+      $language_steward_protocol_ids[] = (int) $membership->getGroupId();
     }
   }
 
-  if (empty($steward_protocol_ids)) {
-    // User stewards no protocols; return an empty result set.
+  if (empty($steward_protocol_ids) && empty($language_steward_protocol_ids)) {
     $query->addWhereExpression(0, '1 = 0');
     return;
   }
@@ -243,13 +248,30 @@ function mukurtu_workflows_views_query_alter(ViewExecutable $view, QueryPluginBa
   // field's pipe-delimited storage format is handled correctly regardless of
   // the underlying table structure.
   $node_storage = \Drupal::entityTypeManager()->getStorage('node');
-  $nid_query = $node_storage->getQuery()->accessCheck(FALSE);
-  $or = $nid_query->orConditionGroup();
-  foreach ($steward_protocol_ids as $pid) {
-    $or->condition('field_cultural_protocols.protocols', '|' . $pid . '|', 'CONTAINS');
+  $nids = [];
+
+  if (!empty($steward_protocol_ids)) {
+    $steward_query = $node_storage->getQuery()->accessCheck(FALSE);
+    $or = $steward_query->orConditionGroup();
+    foreach ($steward_protocol_ids as $pid) {
+      $or->condition('field_cultural_protocols.protocols', '|' . $pid . '|', 'CONTAINS');
+    }
+    $steward_query->condition($or);
+    $nids = array_values($steward_query->execute());
   }
-  $nid_query->condition($or);
-  $nids = array_values($nid_query->execute());
+
+  if (!empty($language_steward_protocol_ids)) {
+    // Language stewards only review dictionary words and word lists.
+    $ls_query = $node_storage->getQuery()->accessCheck(FALSE);
+    $ls_or = $ls_query->orConditionGroup();
+    foreach ($language_steward_protocol_ids as $pid) {
+      $ls_or->condition('field_cultural_protocols.protocols', '|' . $pid . '|', 'CONTAINS');
+    }
+    $ls_query->condition($ls_or)
+      ->condition('type', ['dictionary_word', 'word_list'], 'IN');
+    $nids = array_unique(array_merge($nids, array_values($ls_query->execute())));
+  }
+
   if (empty($nids)) {
     $query->addWhereExpression(0, '1 = 0');
     return;
