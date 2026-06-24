@@ -26,7 +26,10 @@
         }
 
         var protocolsWrapper = fieldsContainer.querySelector('[id*="field-cultural-protocols-wrapper"]');
-        var fieldsetWrapper = protocolsWrapper ? protocolsWrapper.querySelector('.fieldset-wrapper') : null;
+        // Gin admin theme uses BEM class "fieldset__wrapper"; Stable uses "fieldset-wrapper".
+        var fieldsetWrapper = protocolsWrapper
+          ? protocolsWrapper.querySelector('.fieldset__wrapper, .fieldset-wrapper')
+          : null;
         if (!fieldsetWrapper) {
           return;
         }
