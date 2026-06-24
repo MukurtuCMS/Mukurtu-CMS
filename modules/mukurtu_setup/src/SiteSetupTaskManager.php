@@ -21,7 +21,6 @@ class SiteSetupTaskManager {
 
   const GROUP_REQUIRED = 'required';
   const GROUP_RECOMMENDED = 'recommended';
-  const GROUP_OPTIONAL = 'optional';
 
   public function __construct(
     protected EntityTypeManagerInterface $entityTypeManager,
@@ -112,7 +111,7 @@ class SiteSetupTaskManager {
         'content_warnings',
         (string) $this->t('Configure media content warnings'),
         (string) $this->t('Set up content warnings for sensitive media, such as images of deceased individuals.'),
-        self::GROUP_OPTIONAL,
+        self::GROUP_RECOMMENDED,
         TRUE,
         '/admin/config/mukurtu/content-warnings',
         (string) $this->t('Configure content warnings'),
@@ -129,7 +128,6 @@ class SiteSetupTaskManager {
     $groups = [
       self::GROUP_REQUIRED => [],
       self::GROUP_RECOMMENDED => [],
-      self::GROUP_OPTIONAL => [],
     ];
     foreach ($this->getTasks() as $task) {
       $groups[$task->getGroup()][$task->getId()] = $task;

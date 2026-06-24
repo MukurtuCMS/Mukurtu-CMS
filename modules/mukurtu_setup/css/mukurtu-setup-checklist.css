@@ -1,0 +1,14 @@
+.mukurtu-setup-checklist__columns {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+.mukurtu-setup-checklist__columns .mukurtu-setup-checklist__group {
+  flex: 1;
+  min-width: 0;
+}
+
+.mukurtu-setup-checklist__dismissed {
+  margin-top: 2rem;
+}

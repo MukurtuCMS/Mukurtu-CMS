@@ -29,7 +29,6 @@ class SiteSetupController extends ControllerBase {
     $group_labels = [
       SiteSetupTaskManager::GROUP_REQUIRED => $this->t('Required'),
       SiteSetupTaskManager::GROUP_RECOMMENDED => $this->t('Recommended'),
-      SiteSetupTaskManager::GROUP_OPTIONAL => $this->t('Optional'),
     ];
 
     $rendered_groups = [];

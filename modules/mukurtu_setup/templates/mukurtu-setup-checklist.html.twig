@@ -5,7 +5,7 @@
  *
  * Available variables:
  * - groups: Array keyed by group machine name. Each group has:
- *   - label: Translated group label (Required, Recommended, Optional).
+ *   - label: Translated group label (Required, Recommended).
  *   - tasks: Array of task data. Each task has:
  *     - id: Machine name.
  *     - label: Task label.
@@ -23,6 +23,7 @@
  * - all_complete: Boolean, true when every visible task is done.
  */
 #}
+{{ attach_library('mukurtu_setup/setup-checklist') }}
 
 <div class="mukurtu-setup-checklist">
 
@@ -32,42 +33,40 @@
     </div>
   {% endif %}
 
-  {% for group_key, group in groups %}
-    <section class="mukurtu-setup-checklist__group mukurtu-setup-checklist__group--{{ group_key }}">
-      <h2 class="mukurtu-setup-checklist__group-title">{{ group.label }}</h2>
-      <ul class="mukurtu-setup-checklist__task-list">
-        {% for task_id, task in group.tasks %}
-          <li class="mukurtu-setup-checklist__task{% if task.complete %} mukurtu-setup-checklist__task--complete{% endif %}">
-            <div class="mukurtu-setup-checklist__task-status" aria-hidden="true">
-              {% if task.complete %}
-                &#10003;
-              {% else %}
-                &nbsp;
-              {% endif %}
-            </div>
-            <div class="mukurtu-setup-checklist__task-content">
-              <strong class="mukurtu-setup-checklist__task-label">{{ task.label }}</strong>
-              <p class="mukurtu-setup-checklist__task-description">{{ task.description }}</p>
-              <div class="mukurtu-setup-checklist__task-actions">
-                {% if task.action_url and not task.complete %}
-                  <a href="{{ task.action_url }}" class="mukurtu-setup-checklist__action-link">{{ task.action_label }}</a>
-                {% endif %}
-                {% if task.complete_url %}
-                  <a href="{{ task.complete_url }}" class="mukurtu-setup-checklist__mark-done">{{ 'Mark as done'|t }}</a>
-                {% endif %}
-                {% if task.uncomplete_url %}
-                  <a href="{{ task.uncomplete_url }}" class="mukurtu-setup-checklist__undo">{{ 'Undo'|t }}</a>
-                {% endif %}
-                {% if task.dismiss_url %}
-                  <a href="{{ task.dismiss_url }}" class="mukurtu-setup-checklist__dismiss">{{ 'Dismiss'|t }}</a>
-                {% endif %}
+  <div class="mukurtu-setup-checklist__columns">
+    {% for group_key, group in groups %}
+      <section class="mukurtu-setup-checklist__group mukurtu-setup-checklist__group--{{ group_key }}">
+        <h2 class="mukurtu-setup-checklist__group-title">{{ group.label }}</h2>
+        <ul class="mukurtu-setup-checklist__task-list">
+          {% for task_id, task in group.tasks %}
+            <li class="mukurtu-setup-checklist__task{% if task.complete %} mukurtu-setup-checklist__task--complete{% endif %}">
+              <div class="mukurtu-setup-checklist__task-status" aria-hidden="true">
+                {% if task.complete %}&#10003;{% endif %}
               </div>
-            </div>
-          </li>
-        {% endfor %}
-      </ul>
-    </section>
-  {% endfor %}
+              <div class="mukurtu-setup-checklist__task-content">
+                <strong class="mukurtu-setup-checklist__task-label">{{ task.label }}</strong>
+                <p class="mukurtu-setup-checklist__task-description">{{ task.description }}</p>
+                <div class="mukurtu-setup-checklist__task-actions">
+                  {% if task.action_url and not task.complete %}
+                    <a href="{{ task.action_url }}" class="mukurtu-setup-checklist__action-link">{{ task.action_label }}</a>
+                  {% endif %}
+                  {% if task.complete_url %}
+                    <a href="{{ task.complete_url }}" class="mukurtu-setup-checklist__mark-done">{{ 'Mark as done'|t }}</a>
+                  {% endif %}
+                  {% if task.uncomplete_url %}
+                    <a href="{{ task.uncomplete_url }}" class="mukurtu-setup-checklist__undo">{{ 'Undo'|t }}</a>
+                  {% endif %}
+                  {% if task.dismiss_url %}
+                    <a href="{{ task.dismiss_url }}" class="mukurtu-setup-checklist__dismiss">{{ 'Dismiss'|t }}</a>
+                  {% endif %}
+                </div>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      </section>
+    {% endfor %}
+  </div>
 
   {% if dismissed is not empty %}
     <section class="mukurtu-setup-checklist__dismissed">
