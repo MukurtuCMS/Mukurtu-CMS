@@ -14,6 +14,29 @@ use Drupal\node\Entity\Node;
 use Drupal\og\Entity\OgMembership;
 use Drupal\user\Entity\User;
 
+use Drupal\views\ViewExecutable;
+
+/**
+ * Implements hook_views_pre_render().
+ *
+ * Replaces template machine names with human-readable labels in the
+ * "Notification type" column of the mukurtu_message_log view.
+ */
+function mukurtu_notifications_views_pre_render(ViewExecutable $view) {
+  if ($view->id() !== 'mukurtu_message_log') {
+    return;
+  }
+  $template_storage = \Drupal::entityTypeManager()->getStorage('message_template');
+  foreach ($view->result as $row) {
+    if (isset($row->message_field_data_template)) {
+      $template = $template_storage->load($row->message_field_data_template);
+      if ($template) {
+        $row->message_field_data_template = $template->label();
+      }
+    }
+  }
+}
+
 /**
  * Implements hook_entity_type_alter().
  */
