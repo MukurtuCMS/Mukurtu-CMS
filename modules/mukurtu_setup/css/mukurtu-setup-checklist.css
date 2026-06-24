@@ -40,6 +40,11 @@
   color: #fff;
 }
 
+.mukurtu-setup-checklist__task-description {
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
 .mukurtu-setup-checklist__dismissed {
   margin-top: 2rem;
 }
