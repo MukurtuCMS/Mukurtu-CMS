@@ -97,6 +97,8 @@ display:
               preconfiguration:
                 add_confirmation: false
                 label_override: Publish
+            40:
+              action_id: mukurtu_export_add_to_list_action
             41:
               action_id: views_bulk_operations_delete_entity
               preconfiguration:
