@@ -106,7 +106,6 @@ function mukurtu_protocol_sync_form_alter(array &$form, FormStateInterface $form
     }
   }
 
-  $form['#after_build'][] = '_mukurtu_protocol_sync_after_build_move_checkbox';
   $form['#attached']['library'][] = 'mukurtu_protocol_sync/protocol-sync';
 }
 
@@ -118,7 +117,9 @@ function _mukurtu_protocol_sync_default_sync_checkbox(array &$form): void {
     if (!isset($form['media'][$delta]['fields']['field_sync_protocols']['widget'][0]['value'])) {
       continue;
     }
-    $form['media'][$delta]['fields']['field_sync_protocols']['widget'][0]['value']['#default_value'] = 1;
+    $widget = &$form['media'][$delta]['fields']['field_sync_protocols']['widget'][0]['value'];
+    $widget['#default_value'] = 1;
+    $widget['#attributes']['data-mukurtu-protocol-sync'] = '1';
   }
 }
 
@@ -131,6 +132,7 @@ function _mukurtu_protocol_sync_prepopulate_media_form(array &$form, array $prot
 
     if (isset($fields['field_sync_protocols']['widget'][0]['value'])) {
       $fields['field_sync_protocols']['widget'][0]['value']['#default_value'] = 1;
+      $fields['field_sync_protocols']['widget'][0]['value']['#attributes']['data-mukurtu-protocol-sync'] = '1';
     }
 
     if (empty($protocol_ids) || !isset($fields['field_cultural_protocols'])) {
@@ -161,50 +163,6 @@ function _mukurtu_protocol_sync_prepopulate_media_form(array &$form, array $prot
       }
     }
   }
-}
-
-/**
- * After-build: moves the sync checkbox into the cultural protocols fieldset.
- *
- * For media library add forms where media fields are nested under
- * $form['media'][$delta]['fields']. Runs after #name and #id are set so the
- * moved element retains its original form submission path.
- */
-function _mukurtu_protocol_sync_after_build_move_checkbox(array $form, FormStateInterface $form_state): array {
-  if (empty($form['media'])) {
-    return $form;
-  }
-  foreach (Element::children($form['media']) as $delta) {
-    $fields = &$form['media'][$delta]['fields'];
-    if (!isset($fields['field_sync_protocols']['widget'][0]['value']) ||
-        !isset($fields['field_cultural_protocols']['widget'][0]['value'])) {
-      continue;
-    }
-    $sync_element = $fields['field_sync_protocols']['widget'][0]['value'];
-    $sync_element['#weight'] = -10;
-    $sync_element['#attributes']['data-mukurtu-protocol-sync'] = '1';
-    $fields['field_cultural_protocols']['widget'][0]['value']['sync_protocols'] = $sync_element;
-    $fields['field_sync_protocols']['#access'] = FALSE;
-  }
-  return $form;
-}
-
-/**
- * After-build: moves the sync checkbox into the cultural protocols fieldset.
- *
- * For standalone media edit forms where fields are at the top level of $form.
- */
-function _mukurtu_protocol_sync_after_build_move_checkbox_media(array $form, FormStateInterface $form_state): array {
-  if (!isset($form['field_sync_protocols']['widget'][0]['value']) ||
-      !isset($form['field_cultural_protocols']['widget'][0]['value'])) {
-    return $form;
-  }
-  $sync_element = $form['field_sync_protocols']['widget'][0]['value'];
-  $sync_element['#weight'] = -10;
-  $sync_element['#attributes']['data-mukurtu-protocol-sync'] = '1';
-  $form['field_cultural_protocols']['widget'][0]['value']['sync_protocols'] = $sync_element;
-  $form['field_sync_protocols']['#access'] = FALSE;
-  return $form;
 }
 
 /**
@@ -383,9 +341,9 @@ function mukurtu_protocol_sync_form_node_form_alter(array &$form, FormStateInter
 /**
  * Implements hook_form_media_form_alter().
  *
- * Moves the sync checkbox into the cultural protocols fieldset and attaches JS
- * for all media forms. For existing sync-enabled media with a parent, also
- * shows an info message identifying the canonical parent content item.
+ * Attaches JS for all media forms with the sync field. For existing
+ * sync-enabled media with a parent, also shows an info message identifying
+ * the canonical parent content item.
  */
 function mukurtu_protocol_sync_form_media_form_alter(array &$form, FormStateInterface $form_state): void {
   $media = $form_state->getFormObject()->getEntity();
@@ -393,7 +351,11 @@ function mukurtu_protocol_sync_form_media_form_alter(array &$form, FormStateInte
     return;
   }
 
-  $form['#after_build'][] = '_mukurtu_protocol_sync_after_build_move_checkbox_media';
+  // Mark the checkbox so JS can find and move it into the protocols fieldset.
+  if (isset($form['field_sync_protocols']['widget'][0]['value'])) {
+    $form['field_sync_protocols']['widget'][0]['value']['#attributes']['data-mukurtu-protocol-sync'] = '1';
+  }
+
   $form['#attached']['library'][] = 'mukurtu_protocol_sync/protocol-sync';
 
   if ($media->isNew() || !$media->get('field_sync_protocols')->value) {
