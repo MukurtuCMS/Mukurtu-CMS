@@ -33,6 +33,7 @@ final class SiteSetupTask {
     private readonly bool $canAutoDetect,
     private readonly ?string $actionUrl = NULL,
     private readonly ?string $actionLabel = NULL,
+    private readonly bool $dismissible = FALSE,
   ) {}
 
   public function getId(): string {
@@ -61,6 +62,10 @@ final class SiteSetupTask {
 
   public function getActionLabel(): ?string {
     return $this->actionLabel;
+  }
+
+  public function isDismissible(): bool {
+    return $this->dismissible;
   }
 
 }

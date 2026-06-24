@@ -102,7 +102,7 @@ class SiteSetupController extends ControllerBase {
       if (!$task->canAutoDetect()) {
         $row['complete_url'] = $this->buildCsrfUrl('mukurtu_setup.complete_task', $task->getId());
       }
-      if ($task->getGroup() !== SiteSetupTaskManager::GROUP_REQUIRED) {
+      if ($task->getGroup() !== SiteSetupTaskManager::GROUP_REQUIRED || $task->isDismissible()) {
         $row['dismiss_url'] = $this->buildCsrfUrl('mukurtu_setup.dismiss_task', $task->getId());
       }
     }

@@ -70,6 +70,7 @@ class SiteSetupTaskManager {
         TRUE,
         '/admin/structure/taxonomy/manage/language/add',
         (string) $this->t('Add language'),
+        dismissible: TRUE,
       ),
       new SiteSetupTask(
         'create_mukurtu_manager',
