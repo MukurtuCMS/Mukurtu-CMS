@@ -44,12 +44,15 @@
                 {% if task.complete %}&#10003;{% endif %}
               </div>
               <div class="mukurtu-setup-checklist__task-content">
-                <strong class="mukurtu-setup-checklist__task-label">{{ task.label }}</strong>
+                <strong class="mukurtu-setup-checklist__task-label">
+                  {% if task.action_url and not task.complete %}
+                    <a href="{{ task.action_url }}">{{ task.label }}</a>
+                  {% else %}
+                    {{ task.label }}
+                  {% endif %}
+                </strong>
                 <p class="mukurtu-setup-checklist__task-description">{{ task.description }}</p>
                 <div class="mukurtu-setup-checklist__task-actions">
-                  {% if task.action_url and not task.complete %}
-                    <a href="{{ task.action_url }}" class="mukurtu-setup-checklist__action-link">{{ task.action_label }}</a>
-                  {% endif %}
                   {% if task.complete_url %}
                     <a href="{{ task.complete_url }}" class="mukurtu-setup-checklist__mark-done">{{ 'Mark as done'|t }}</a>
                   {% endif %}
