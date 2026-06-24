@@ -120,8 +120,8 @@ class CsvExporterFormBase extends EntityForm {
         'entity' => $this->t('Export the identifier and include referenced media recursively'),
       ],
       'id' => ['#description' => $this->t('Only the ID or UUID is written to the cell. The referenced media is not included in the export.')],
-      'entity_shallow' => ['#description' => $this->t('The ID or UUID is written to the cell, and the referenced media is also exported. References within referenced media are not followed.')],
-      'entity' => ['#description' => $this->t('The ID or UUID is written to the cell, and the referenced media is also exported. References within referenced media are also followed, recursively. This may result in very large exports, use with caution.')],
+      'entity_shallow' => ['#description' => $this->t('The ID or UUID is written to the cell, and the referenced media is also exported.')],
+      'entity' => ['#description' => $this->t('The ID or UUID is written to the cell, and the referenced media is also exported. This may result in very large exports, use with caution.')],
     ];
 
     $form['relationships']['media_asset_packaging'] = [
