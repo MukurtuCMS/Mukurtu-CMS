@@ -178,6 +178,9 @@ class CSV extends ExporterBase {
     // Track entities that have been exported.
     $context['results']['exported_entities'] = [];
 
+    // Track entities queued under "one level only" mode so their own references are not followed.
+    $context['results']['shallow_entity_ids'] = [];
+
     // Count how many entities we are exporting.
     $context['results']['entities_count'] = array_reduce($entities, function ($accum, $entity_type_array) {
       $accum += count($entity_type_array);

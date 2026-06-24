@@ -298,7 +298,12 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface {
   }
 
   public function isSiteWide() {
-    return $this->site_wide === TRUE;
+    return (bool) $this->site_wide;
+  }
+
+  public function setSiteWide(bool $site_wide) {
+    $this->site_wide = $site_wide;
+    return $this;
   }
 
   public function getSeparator() {
@@ -393,7 +398,25 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface {
             $mappedSubfields[$key][$mapped_base_field_name][] = $mapped_subfield_name;
           }
         }
+        elseif ($entity_type_id === 'media' && $mapped_base_field_name === 'field_found_in') {
+          $result[] = [
+            'field_name' => $mapped_field_name,
+            'field_label' => t('Found In'),
+            'csv_header_label' => $mapped_field_label,
+            'export' => TRUE,
+          ];
+        }
       }
+    }
+
+    // For media entities, add the virtual field_found_in if not already mapped.
+    if ($entity_type_id === 'media' && !isset($map[$key]['field_found_in'])) {
+      $result[] = [
+        'field_name' => 'field_found_in',
+        'field_label' => t('Found In'),
+        'csv_header_label' => 'Found In',
+        'export' => $this->isNew() ? TRUE : FALSE,
+      ];
     }
 
     // Add the remaining, unmapped fields to the end of the list.

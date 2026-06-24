@@ -73,7 +73,7 @@ function mukurtu_export_update_40004() {
  */
 function mukurtu_export_update_40005() {
   $config = \Drupal::service('config.factory')
-    ->getEditable('mukurtu_export.csv_exporter.recommended_settings_for_import');
+    ->getEditable('mukurtu_export.csv_exporter.default_local_metadata_only');
 
   if ($config->isNew()) {
     return;
@@ -120,7 +120,7 @@ function mukurtu_export_update_40005() {
  */
 function mukurtu_export_update_40006() {
   $config = \Drupal::service('config.factory')
-    ->getEditable('mukurtu_export.csv_exporter.recommended_settings_for_import');
+    ->getEditable('mukurtu_export.csv_exporter.default_local_metadata_only');
 
   if ($config->isNew()) {
     return;
@@ -185,7 +185,7 @@ function mukurtu_export_update_40006() {
  */
 function mukurtu_export_update_40007() {
   $config = \Drupal::service('config.factory')
-    ->getEditable('mukurtu_export.csv_exporter.recommended_settings_for_import');
+    ->getEditable('mukurtu_export.csv_exporter.default_local_metadata_only');
   if ($config->get('multivalue_delimiter') === '||') {
     $config->set('multivalue_delimiter', ';')->save();
   }
@@ -198,7 +198,7 @@ function mukurtu_export_update_40007() {
 function mukurtu_export_update_40008() {
   $exporter = \Drupal::entityTypeManager()
     ->getStorage('csv_exporter')
-    ->load('recommended_settings_for_import');
+    ->load('default_local_metadata_only');
   if (!$exporter) {
     return;
   }
@@ -242,7 +242,7 @@ function mukurtu_export_update_40008() {
  * Switch taxonomy_term__category thumbnail to two-field (target_id + alt) export format.
  */
 function mukurtu_export_update_40009(): void {
-  $config = \Drupal::configFactory()->getEditable('mukurtu_export.csv_exporter.recommended_settings_for_import');
+  $config = \Drupal::configFactory()->getEditable('mukurtu_export.csv_exporter.default_local_metadata_only');
   $entity_fields = $config->get('entity_fields_export_list') ?? [];
 
   if (isset($entity_fields['taxonomy_term__category'])) {
@@ -263,15 +263,96 @@ function mukurtu_export_update_40009(): void {
 }
 
 /**
- * Update recommended_settings_for_import: add local_contexts_delimiter and
+ * Update default_local_metadata_only: add local_contexts_delimiter and
  * default_format fields.
  */
 function mukurtu_export_update_40010(): void {
   $storage = \Drupal::entityTypeManager()->getStorage('csv_exporter');
-  $entity = $storage->load('recommended_settings_for_import');
+  $entity = $storage->load('default_local_metadata_only');
   if ($entity) {
     $entity->setLocalContextsDelimiter('>');
     $entity->setDefaultFormat('basic_html');
     $entity->save();
+  }
+}
+
+/**
+ * Rename the recommended export preset label to "Default local settings (metadata only)".
+ */
+function mukurtu_export_update_40011(): void {
+  $config = \Drupal::configFactory()->getEditable('mukurtu_export.csv_exporter.default_local_metadata_only');
+  if ($config->get('label') === 'Recommended Settings for Import') {
+    $config->set('label', 'Default local settings (metadata only)')->save();
+  }
+}
+
+/**
+ * Import three new default export presets for local and external use cases.
+ */
+function mukurtu_export_update_40012(): void {
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_export');
+  $source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+  $config_storage = \Drupal::service('config.storage');
+
+  $new_presets = [
+    'default_local_with_media',
+    'default_external_metadata_only',
+    'default_external_with_media',
+  ];
+
+  foreach ($new_presets as $id) {
+    $config_name = 'mukurtu_export.csv_exporter.' . $id;
+    if (!$config_storage->exists($config_name)) {
+      $config_storage->write($config_name, $source->read($config_name));
+    }
+  }
+}
+
+/**
+ * Set all three new default export presets to site-wide visibility.
+ */
+function mukurtu_export_update_40013(): void {
+  $ids = [
+    'default_local_with_media',
+    'default_external_metadata_only',
+    'default_external_with_media',
+  ];
+
+  $storage = \Drupal::entityTypeManager()->getStorage('csv_exporter');
+  foreach ($ids as $id) {
+    $entity = $storage->load($id);
+    if ($entity && !$entity->get('site_wide')) {
+      $entity->set('site_wide', TRUE)->save();
+    }
+  }
+}
+
+/**
+ * Add field_found_in virtual column to the three new default export presets.
+ */
+function mukurtu_export_update_40014(): void {
+  $ids = [
+    'default_local_with_media',
+    'default_external_metadata_only',
+    'default_external_with_media',
+  ];
+  $storage = \Drupal::entityTypeManager()->getStorage('csv_exporter');
+  foreach ($ids as $id) {
+    $entity = $storage->load($id);
+    if (!$entity) {
+      continue;
+    }
+    $list = $entity->get('entity_fields_export_list') ?? [];
+    $changed = FALSE;
+    foreach ($list as $key => &$fields) {
+      if (str_starts_with($key, 'media__') && !isset($fields['field_found_in'])) {
+        $fields['field_found_in'] = 'Found In';
+        $changed = TRUE;
+      }
+    }
+    unset($fields);
+    if ($changed) {
+      $entity->set('entity_fields_export_list', $list)->save();
+    }
   }
 }

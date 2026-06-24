@@ -182,13 +182,24 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
     $option = $config->getEntityReferenceSetting($target_type);
     $id_format = $config->getIdFieldSetting();
 
+    // If the entity being exported was itself pulled in as a shallow reference,
+    // do not follow its references further -- treat them all as identifier-only.
+    $currentEntity = $event->entity;
+    $isShallow = $event->context['results']['shallow_entity_ids'][$currentEntity->getEntityTypeId()][$currentEntity->id()] ?? FALSE;
+
     // Entities are loaded one-by-one per reference value. This is acceptable
     // because multi-value reference fields rarely carry hundreds of items, and
     // entity exports are not high-frequency operations.
     foreach ($field->getValue() as $value) {
       if ($id = ($value['target_id'] ?? NULL)) {
         if ($option && $target_type) {
-          if ($option == 'id') {
+          if ($option == 'id' || $isShallow) {
+            $export[] = $id_format === 'uuid' ? $this->getUUID($target_type, $id) : $id;
+            continue;
+          }
+
+          if ($option == 'entity_shallow') {
+            $this->exportEntityByIdShallow($event, $target_type, $id);
             $export[] = $id_format === 'uuid' ? $this->getUUID($target_type, $id) : $id;
             continue;
           }
@@ -244,10 +255,19 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
     $option = $config->getEntityReferenceSetting($target_type);
     $id_format = $config->getIdFieldSetting();
 
+    $currentEntity = $event->entity;
+    $isShallow = $event->context['results']['shallow_entity_ids'][$currentEntity->getEntityTypeId()][$currentEntity->id()] ?? FALSE;
+
     foreach ($field->getValue() as $value) {
       if ($id = ($value['target_id'] ?? NULL)) {
         if ($option && $target_type) {
-          if ($option == 'id') {
+          if ($option == 'id' || $isShallow) {
+            $export[] = $id_format === 'uuid' ? $this->getUUID($target_type, $id) : $id;
+            continue;
+          }
+
+          if ($option == 'entity_shallow') {
+            $this->exportEntityByIdShallow($event, $target_type, $id);
             $export[] = $id_format === 'uuid' ? $this->getUUID($target_type, $id) : $id;
             continue;
           }
@@ -383,9 +403,21 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
     // Split-column path: export only the requested sub-property so the output
     // matches the two-column format the import system expects.
     if ($event->sub_field_name === 'target_id') {
+      $setting = $config->getImageFieldSetting();
       $export = [];
       foreach ($field->getValue() as $value) {
         if ($fid = ($value['target_id'] ?? NULL)) {
+          if ($setting == 'path_with_binary') {
+            $export[] = $this->packageFile($event, $fid);
+            continue;
+          }
+          if ($setting == 'file_entity') {
+            if ($this->exportEntityById($event, 'file', $fid)) {
+              $export[] = $fid;
+              $this->packageFile($event, $fid);
+              continue;
+            }
+          }
           $export[] = $config->getIdFieldSetting() === 'uuid'
             ? $this->getUUID('file', $fid)
             : $fid;
@@ -499,6 +531,21 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
   protected function exportEntityById(EntityFieldExportEvent $event, $entity_type_id, $id): EntityInterface|null {
     if ($entity = $this->entityTypeManager->getStorage($entity_type_id)->load($id)) {
       $event->exportAdditionalEntity($entity);
+      return $entity;
+    }
+    return NULL;
+  }
+
+  /**
+   * Queues an entity for export and marks it as shallow.
+   *
+   * When an entity is marked shallow, its own entity reference fields will be
+   * exported as identifiers only -- their references will not be followed further.
+   */
+  protected function exportEntityByIdShallow(EntityFieldExportEvent $event, $entity_type_id, $id): EntityInterface|null {
+    if ($entity = $this->entityTypeManager->getStorage($entity_type_id)->load($id)) {
+      $event->exportAdditionalEntity($entity);
+      $event->context['results']['shallow_entity_ids'][$entity_type_id][$id] = $id;
       return $entity;
     }
     return NULL;
