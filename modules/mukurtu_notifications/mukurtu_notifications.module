@@ -27,6 +27,9 @@ function mukurtu_notifications_views_pre_render(ViewExecutable $view) {
     return;
   }
   $template_storage = \Drupal::entityTypeManager()->getStorage('message_template');
+  // message_field_data_template is the Views column alias for the template
+  // field on the message_field_data table. It matches the field_alias set in
+  // views.view.mukurtu_message_log for the "template" field.
   foreach ($view->result as $row) {
     if (isset($row->message_field_data_template)) {
       $template = $template_storage->load($row->message_field_data_template);

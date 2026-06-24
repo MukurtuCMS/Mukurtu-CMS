@@ -21,7 +21,9 @@ dependencies:
   - 'message_subscribe:message_subscribe_ui'
   - 'message_ui:message_notify_ui'
   - 'message_ui:message_ui'
+  - 'drupal:comment'
   - 'mukurtu_collection:mukurtu_collection'
   - 'mukurtu_core:mukurtu_core'
   - 'mukurtu_protocol:mukurtu_protocol'
+  - 'og:og'
 version: 4.x-dev
