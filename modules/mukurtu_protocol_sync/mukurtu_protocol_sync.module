@@ -304,8 +304,10 @@ function mukurtu_protocol_sync_form_node_form_alter(array &$form, FormStateInter
   // button clicks and pass the current protocol selection to the modal.
   $form['#attached']['library'][] = 'mukurtu_protocol_sync/protocol-sync';
 
-  // Add a #submit handler to every media library open button so we can store
-  // the current protocol selection in TempStore before the modal URL is built.
+  // Replace the AJAX callback on every media library open button with a wrapper
+  // that stores the current protocol selection in TempStore before the dialog
+  // URL is built. (#type: 'button' has #executes_submit_callback: FALSE, so
+  // #submit handlers don't run; wrapping #ajax['callback'] is the correct hook.)
   $media_fields_with_buttons = [
     'field_media_assets',
     'field_recording',
@@ -319,8 +321,8 @@ function mukurtu_protocol_sync_form_node_form_alter(array &$form, FormStateInter
     }
     foreach (Element::children($form[$field_name]['widget']) as $delta) {
       if (isset($form[$field_name]['widget'][$delta]['#field_suffix']['open_button'])) {
-        $form[$field_name]['widget'][$delta]['#field_suffix']['open_button']['#submit'][] =
-          'mukurtu_protocol_sync_media_library_open_submit';
+        $form[$field_name]['widget'][$delta]['#field_suffix']['open_button']['#ajax']['callback'] =
+          'mukurtu_protocol_sync_media_library_open_ajax';
       }
     }
   }
@@ -381,37 +383,38 @@ function mukurtu_protocol_sync_form_node_form_alter(array &$form, FormStateInter
 }
 
 /**
- * Submit handler for media library open buttons on node forms.
+ * AJAX callback wrapper for media library open buttons on node forms.
  *
- * Reads the current cultural protocol selection from the submitted node form
- * and stores it in TempStore so hook_form_alter() can pre-populate the media
- * entity's protocol field when the upload form is built inside the modal.
+ * Stores the current protocol selection in TempStore so hook_form_alter() can
+ * pre-populate the media entity's protocol field when the upload form is built.
+ * Then delegates to the core MediaLibraryWidget callback to open the dialog.
+ *
+ * Using the #ajax callback is necessary because #type: 'button' has
+ * #executes_submit_callback: FALSE, so #submit handlers never run.
  */
-function mukurtu_protocol_sync_media_library_open_submit(array &$form, FormStateInterface $form_state): void {
+function mukurtu_protocol_sync_media_library_open_ajax(array $form, FormStateInterface $form_state) {
   $field_value = $form_state->getValue('field_cultural_protocols');
-  if (empty($field_value[0]['value'])) {
-    return;
-  }
+  if (!empty($field_value[0]['value'])) {
+    $value = $field_value[0]['value'];
+    $sharing = (string) ($value['sharing_setting'] ?? '');
 
-  $value = $field_value[0]['value'];
-  $sharing = (string) ($value['sharing_setting'] ?? '');
-
-  $protocol_ids = [];
-  foreach ($value['protocol_selection'] ?? [] as $community) {
-    foreach ($community['protocols'] ?? [] as $protocol_id => $checked) {
-      if ($checked) {
-        $protocol_ids[] = (int) $protocol_id;
+    $protocol_ids = [];
+    foreach ($value['protocol_selection'] ?? [] as $community) {
+      foreach ($community['protocols'] ?? [] as $protocol_id => $checked) {
+        if ($checked) {
+          $protocol_ids[] = (int) $protocol_id;
+        }
       }
+    }
+
+    if (!empty($protocol_ids) && !empty($sharing)) {
+      $tempstore = \Drupal::service('tempstore.private')->get('mukurtu_protocol_sync');
+      $uid = \Drupal::currentUser()->id();
+      $tempstore->set("ps_{$uid}", ['protocols' => $protocol_ids, 'sharing' => $sharing]);
     }
   }
 
-  if (empty($protocol_ids) || empty($sharing)) {
-    return;
-  }
-
-  $tempstore = \Drupal::service('tempstore.private')->get('mukurtu_protocol_sync');
-  $uid = \Drupal::currentUser()->id();
-  $tempstore->set("ps_{$uid}", ['protocols' => $protocol_ids, 'sharing' => $sharing]);
+  return \Drupal\media_library\Plugin\Field\FieldWidget\MediaLibraryWidget::openMediaLibrary($form, $form_state);
 }
 
 /**
