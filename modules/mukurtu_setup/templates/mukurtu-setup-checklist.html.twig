@@ -53,13 +53,13 @@
                     {% endif %}
                   </strong>
                   {% if task.complete_url %}
-                    (<a href="{{ task.complete_url }}" class="mukurtu-setup-checklist__mark-done">{{ 'Mark as done'|t }}</a>)
+                    (<a href="{{ task.complete_url }}" class="mukurtu-setup-checklist__mark-done" aria-label="{{ 'Mark %label as done'|t({'%label': task.label}) }}">{{ 'Mark as done'|t }}</a>)
                   {% endif %}
                   {% if task.uncomplete_url %}
-                    (<a href="{{ task.uncomplete_url }}" class="mukurtu-setup-checklist__undo">{{ 'Undo'|t }}</a>)
+                    (<a href="{{ task.uncomplete_url }}" class="mukurtu-setup-checklist__undo" aria-label="{{ 'Undo %label'|t({'%label': task.label}) }}">{{ 'Undo'|t }}</a>)
                   {% endif %}
                   {% if task.dismiss_url %}
-                    (<a href="{{ task.dismiss_url }}" class="mukurtu-setup-checklist__dismiss">{{ 'Dismiss'|t }}</a>)
+                    (<a href="{{ task.dismiss_url }}" class="mukurtu-setup-checklist__dismiss" aria-label="{{ 'Dismiss %label'|t({'%label': task.label}) }}">{{ 'Dismiss'|t }}</a>)
                   {% endif %}
                 </div>
                 <p class="mukurtu-setup-checklist__task-description">{{ task.description }}</p>
@@ -81,7 +81,7 @@
               <strong class="mukurtu-setup-checklist__task-label">{{ task.label }}</strong>
               <div class="mukurtu-setup-checklist__task-actions">
                 {% if task.restore_url %}
-                  <a href="{{ task.restore_url }}" class="mukurtu-setup-checklist__restore">{{ 'Restore'|t }}</a>
+                  <a href="{{ task.restore_url }}" class="mukurtu-setup-checklist__restore" aria-label="{{ 'Restore %label'|t({'%label': task.label}) }}">{{ 'Restore'|t }}</a>
                 {% endif %}
               </div>
             </div>

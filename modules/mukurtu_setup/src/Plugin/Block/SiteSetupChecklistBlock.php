@@ -47,7 +47,7 @@ class SiteSetupChecklistBlock extends BlockBase implements ContainerFactoryPlugi
       '#complete' => $counts['complete'],
       '#setup_url' => Url::fromRoute('mukurtu_setup.setup_page')->toString(),
       '#cache' => [
-        'tags' => ['config:system.site', 'community_list', 'protocol_list', 'taxonomy_term_list'],
+        'tags' => ['config:system.site', 'community_list', 'protocol_list', 'taxonomy_term_list', 'block_content_list'],
         'contexts' => ['user.roles'],
       ],
     ];

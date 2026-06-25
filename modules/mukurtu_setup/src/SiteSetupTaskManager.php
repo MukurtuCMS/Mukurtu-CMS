@@ -6,6 +6,7 @@ namespace Drupal\mukurtu_setup;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Render\Markup;
 use Drupal\Core\State\StateInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 
@@ -38,7 +39,7 @@ class SiteSetupTaskManager {
       new SiteSetupTask(
         'create_community',
         (string) $this->t('Create a community'),
-        (string) $this->t('Communities are the core organizational unit of Mukurtu. Create at least one to get started.'),
+        Markup::create((string) $this->t('To create any content, at least one community must be created. Communities represent the groups responsible for creating and stewarding content. This will also direct you to create a cultural protocol. Learn more at <a href="https://docs.mukurtu.org/communities-cultural-protocols-categories/UnderstandingCommunitiesAndCulturalProtocols/">Understanding Communities and Cultural Protocols</a>.')),
         self::GROUP_REQUIRED,
         TRUE,
         '/admin/content/communities/add',
@@ -47,7 +48,7 @@ class SiteSetupTaskManager {
       new SiteSetupTask(
         'create_protocol',
         (string) $this->t('Create a cultural protocol'),
-        (string) $this->t('Cultural protocols control who can access your content. Create at least one to assign to digital heritage items.'),
+        (string) $this->t('To create any content, at least one cultural protocol must be created. Cultural protocols are the tool for providing appropriate access to content. You likely created a protocol while creating a community, but may want to create additional protocols.'),
         self::GROUP_REQUIRED,
         TRUE,
         '/admin/content/protocols/add',
@@ -56,7 +57,7 @@ class SiteSetupTaskManager {
       new SiteSetupTask(
         'create_category',
         (string) $this->t('Create a category'),
-        (string) $this->t('Categories help organize your digital heritage content. Add at least one category to your taxonomy.'),
+        Markup::create((string) $this->t('To create digital heritage items, at least one category must be added. Learn more at <a href="https://docs.mukurtu.org/communities-cultural-protocols-categories/UnderstandingCategories/">Understanding Categories</a>.')),
         self::GROUP_REQUIRED,
         TRUE,
         '/admin/structure/taxonomy/manage/category/add',
@@ -65,7 +66,7 @@ class SiteSetupTaskManager {
       new SiteSetupTask(
         'dictionary_language',
         (string) $this->t('Add a dictionary language'),
-        (string) $this->t('Add at least one language to your dictionary to begin creating dictionary entries.'),
+        (string) $this->t('To create dictionary words, at least one language must be added.'),
         self::GROUP_REQUIRED,
         TRUE,
         '/admin/structure/taxonomy/manage/language/add',
@@ -75,7 +76,7 @@ class SiteSetupTaskManager {
       new SiteSetupTask(
         'create_mukurtu_manager',
         (string) $this->t('Create a Mukurtu Manager account'),
-        (string) $this->t('Mukurtu Managers can manage communities, protocols, and site content. Create at least one account with this role.'),
+        Markup::create((string) $this->t('The administrator account created when installing Mukurtu has full access to the Drupal administrator tools which are usually only necessary for maintenance and troubleshooting. Administrator accounts should be used with caution. We strongly recommend creating a separate Mukurtu Manager account for day to day use. Learn more at <a href="https://docs.mukurtu.org/users/user-role-types/">User Roles</a>.')),
         self::GROUP_RECOMMENDED,
         TRUE,
         '/admin/people/create',
@@ -83,8 +84,8 @@ class SiteSetupTaskManager {
       ),
       new SiteSetupTask(
         'site_name_email',
-        (string) $this->t('Set your site name and email'),
-        (string) $this->t('Update your site name and contact email address in Site Information.'),
+        (string) $this->t('Update site name and email'),
+        Markup::create((string) $this->t('If not already set during site installation, update your site name and administrative email. Learn more at <a href="https://docs.mukurtu.org/site-settings/ConfigureBasicSettings/#configure-site-name-and-email">Configure Basic Site Settings</a>.')),
         self::GROUP_RECOMMENDED,
         TRUE,
         '/admin/config/system/site-information',
@@ -92,8 +93,8 @@ class SiteSetupTaskManager {
       ),
       new SiteSetupTask(
         'site_logo',
-        (string) $this->t('Upload a site logo'),
-        (string) $this->t("Add your organization's logo to personalize your Mukurtu site."),
+        (string) $this->t('Change site logo'),
+        Markup::create((string) $this->t('Replace the Mukurtu logo with your organization or community logo. Learn more at <a href="https://docs.mukurtu.org/look-and-feel/ConfigureLogo/#configure-your-logo">Configure Logos</a>.')),
         self::GROUP_RECOMMENDED,
         TRUE,
         '/admin/appearance/settings/mukurtu_v4',
@@ -101,8 +102,8 @@ class SiteSetupTaskManager {
       ),
       new SiteSetupTask(
         'front_page',
-        (string) $this->t('Customize your front page'),
-        (string) $this->t('Edit the default homepage to reflect your organization and collection.'),
+        (string) $this->t('Configure landing page'),
+        Markup::create((string) $this->t('Update the front/landing page to welcome and orient your users. Learn more at <a href="https://docs.mukurtu.org/look-and-feel/ConfigureLandingPage/">Configure Landing Page</a>.')),
         self::GROUP_RECOMMENDED,
         FALSE,
         '/',
@@ -110,8 +111,8 @@ class SiteSetupTaskManager {
       ),
       new SiteSetupTask(
         'about_page',
-        (string) $this->t('Create an About page'),
-        (string) $this->t('Add a page that describes your organization and its mission.'),
+        (string) $this->t('Create an about page'),
+        Markup::create((string) $this->t('Add a page that provides more information about the site. See below for adding a new page to the navigation menu. Learn more at <a href="https://docs.mukurtu.org/look-and-feel/CreateBasicPage/">Create Basic Pages</a>.')),
         self::GROUP_RECOMMENDED,
         TRUE,
         '/node/add/basic_page',
@@ -119,8 +120,8 @@ class SiteSetupTaskManager {
       ),
       new SiteSetupTask(
         'navigation_menu',
-        (string) $this->t('Navigation menu'),
-        (string) $this->t("Configure your site's main navigation to help visitors find content."),
+        (string) $this->t('Configure navigation menu'),
+        Markup::create((string) $this->t('Add, remove, rename, and reorder your main navigation menu. Learn more at <a href="https://docs.mukurtu.org/look-and-feel/ConfigureSiteNavigation/">Configure Site Navigation</a>.')),
         self::GROUP_RECOMMENDED,
         FALSE,
         '/admin/structure/menu/manage/main',
@@ -128,8 +129,8 @@ class SiteSetupTaskManager {
       ),
       new SiteSetupTask(
         'site_footer',
-        (string) $this->t('Set up your site footer'),
-        (string) $this->t('Add footer content such as contact information, copyright, or links.'),
+        (string) $this->t('Configure site footer'),
+        (string) $this->t('Update your site footer with contact information, logos, links, and other information. Learn more at LINK TBD.'),
         self::GROUP_RECOMMENDED,
         TRUE,
         '/admin/content/block-content',
@@ -282,9 +283,11 @@ class SiteSetupTaskManager {
 
   private function isSiteNameSet(): bool {
     $config = $this->configFactory->get('system.site');
+    $name = $config->get('name') ?? '';
     $mail = $config->get('mail') ?? '';
-    // Consider set if the contact email is not an example.com placeholder.
-    return !empty($mail) && !str_contains($mail, 'example.com');
+    $name_set = !empty($name) && !in_array(strtolower(trim($name)), ['drupal', 'my drupal site', ''], TRUE);
+    $mail_set = !empty($mail) && !str_contains($mail, 'example.com');
+    return $name_set && $mail_set;
   }
 
   private function isSiteLogoSet(): bool {
@@ -332,7 +335,6 @@ class SiteSetupTaskManager {
       ->getStorage('node')
       ->getQuery()
       ->condition('type', 'basic_page')
-      ->condition('title', '%about%', 'LIKE')
       ->accessCheck(FALSE)
       ->range(0, 1)
       ->execute();
