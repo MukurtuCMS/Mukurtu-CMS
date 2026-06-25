@@ -3747,9 +3747,21 @@ body.is-always-mobile-nav .header-nav::before {
 /**
  * @file
  * Header navigation search box.
+ *
+ * Two instances are rendered:
+ *   .header-search--mobile  Outside #header-nav, always in the header grid.
+ *                           Shown on small screens; hidden at the desktop
+ *                           breakpoint where the nav becomes a flex bar.
+ *   .header-search--desktop Inside #header-nav's flex container.
+ *                           Hidden on small screens (the nav is a slide-out
+ *                           panel); shown at the desktop breakpoint.
  */
-/* On desktop, align nav and search side by side inside the nav bar. */
+/* On desktop, align the nav and desktop search side by side. */
 @media (min-width: 60rem) {
+  body:not(.is-always-mobile-nav) {
+    /* Hide the mobile bar; show the desktop instance inside the nav. */
+    /* Fixed width on desktop so the nav items have room. */
+  }
   body:not(.is-always-mobile-nav) .header__main-nav {
     display: -webkit-box;
     display: -ms-flexbox;
@@ -3758,23 +3770,44 @@ body.is-always-mobile-nav .header-nav::before {
         -ms-flex-align: center;
             align-items: center;
   }
-}
-
-.header-search {
-  padding-inline: var(--v-space-4xs);
-  padding-block: var(--v-space-5xs);
-  -webkit-border-before: 1px solid var(--color-gray-light, #e0e0e0);
-          border-block-start: 1px solid var(--color-gray-light, #e0e0e0);
-}
-@media (min-width: 60rem) {
-  .header-search {
-    padding-inline: var(--v-space-4xs);
-    padding-block: 0;
-    -webkit-border-before: 0;
-            border-block-start: 0;
+  body:not(.is-always-mobile-nav) .header-search--mobile {
+    display: none;
+  }
+  body:not(.is-always-mobile-nav) .header-search--desktop {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    -webkit-padding-start: var(--v-space-4xs);
+            padding-inline-start: var(--v-space-4xs);
+  }
+  body:not(.is-always-mobile-nav) .header-search__input {
+    -webkit-box-flex: 0;
+        -ms-flex: 0 0 200px;
+            flex: 0 0 200px;
   }
 }
 
+/* ---- Mobile instance ---- */
+/* Full-width bar in the header grid, visible on small screens. */
+.header-search--mobile {
+  grid-column: 1/-1;
+  -webkit-border-before: 1px solid var(--color-divider, #e0e0e0);
+          border-block-start: 1px solid var(--color-divider, #e0e0e0);
+  padding-inline: var(--v-space-4xs);
+  padding-block: var(--v-space-5xs);
+  background: var(--color-white);
+}
+
+/* ---- Desktop instance ---- */
+/* Inside the nav bar flex container; hidden until the desktop breakpoint. */
+.header-search--desktop {
+  display: none;
+}
+
+/* ---- Shared form styles ---- */
 .header-search__form {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -3782,13 +3815,16 @@ body.is-always-mobile-nav .header-nav::before {
   -webkit-box-align: stretch;
       -ms-flex-align: stretch;
           align-items: stretch;
+  inline-size: 100%;
 }
 
 .header-search__input {
   -webkit-appearance: none;
      -moz-appearance: none;
           appearance: none;
-  inline-size: 100%;
+  -webkit-box-flex: 1;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
   padding-block: var(--v-space-5xs);
   padding-inline: var(--v-space-5xs);
   border: 1.5px solid var(--color-text-neutral-medium, #767676);
@@ -3809,11 +3845,6 @@ body.is-always-mobile-nav .header-nav::before {
 .header-search__input::-webkit-search-cancel-button {
   -webkit-appearance: none;
           appearance: none;
-}
-@media (min-width: 60rem) {
-  .header-search__input {
-    inline-size: 200px;
-  }
 }
 
 .header-search__button {
