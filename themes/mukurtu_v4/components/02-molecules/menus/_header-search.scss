@@ -29,20 +29,21 @@ body:not(.is-always-mobile-nav) {
 
 .header-search__form {
   display: flex;
-  align-items: center;
+  align-items: stretch;
 }
 
 .header-search__input {
   appearance: none;
   inline-size: 100%;
-  padding-block: var(--v-space-6xs);
+  padding-block: var(--v-space-5xs);
   padding-inline: var(--v-space-5xs);
   border: 1.5px solid var(--color-text-neutral-medium, #767676);
   border-inline-end: 0;
   border-radius: 4px 0 0 4px;
-  font-size: var(--font-size-s);
+  font-size: var(--font-size-m);
   color: var(--color-text-neutral-loud);
   background: var(--color-white);
+  line-height: 1.4;
 
   &:focus {
     outline: 2px solid var(--brand-secondary-dark);
@@ -56,7 +57,7 @@ body:not(.is-always-mobile-nav) {
   }
 
   @include include-media.media('>=lg') {
-    inline-size: 180px;
+    inline-size: 200px;
   }
 }
 
@@ -65,20 +66,13 @@ body:not(.is-always-mobile-nav) {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  padding-block: var(--v-space-6xs);
+  padding-block: var(--v-space-5xs);
   padding-inline: var(--v-space-5xs);
   border: 1.5px solid var(--brand-primary);
   border-radius: 0 4px 4px 0;
   background: var(--brand-primary);
   cursor: pointer;
   transition: background-color 0.12s ease-in, border-color 0.12s ease-in;
-
-  & svg {
-    display: block;
-    fill: var(--color-white);
-    inline-size: 16px;
-    block-size: 16px;
-  }
 
   &:hover {
     background-color: var(--brand-primary-dark, var(--brand-primary));
@@ -92,9 +86,17 @@ body:not(.is-always-mobile-nav) {
 
   @media (forced-colors: active) {
     border: 2px solid buttontext;
+  }
+}
 
-    & svg {
-      fill: buttontext;
-    }
+.header-search__icon {
+  display: block;
+  fill: var(--color-white);
+  inline-size: 1.125rem;
+  block-size: 1.125rem;
+  flex-shrink: 0;
+
+  @media (forced-colors: active) {
+    fill: buttontext;
   }
 }

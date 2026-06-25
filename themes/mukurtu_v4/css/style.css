@@ -3779,9 +3779,9 @@ body.is-always-mobile-nav .header-nav::before {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
+  -webkit-box-align: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch;
 }
 
 .header-search__input {
@@ -3789,15 +3789,16 @@ body.is-always-mobile-nav .header-nav::before {
      -moz-appearance: none;
           appearance: none;
   inline-size: 100%;
-  padding-block: var(--v-space-6xs);
+  padding-block: var(--v-space-5xs);
   padding-inline: var(--v-space-5xs);
   border: 1.5px solid var(--color-text-neutral-medium, #767676);
   -webkit-border-end: 0;
           border-inline-end: 0;
   border-radius: 4px 0 0 4px;
-  font-size: var(--font-size-s);
+  font-size: var(--font-size-m);
   color: var(--color-text-neutral-loud);
   background: var(--color-white);
+  line-height: 1.4;
   /* Remove the browser-native X clear button on type=search. */
 }
 .header-search__input:focus {
@@ -3811,7 +3812,7 @@ body.is-always-mobile-nav .header-nav::before {
 }
 @media (min-width: 60rem) {
   .header-search__input {
-    inline-size: 180px;
+    inline-size: 200px;
   }
 }
 
@@ -3827,7 +3828,7 @@ body.is-always-mobile-nav .header-nav::before {
           justify-content: center;
   -ms-flex-negative: 0;
       flex-shrink: 0;
-  padding-block: var(--v-space-6xs);
+  padding-block: var(--v-space-5xs);
   padding-inline: var(--v-space-5xs);
   border: 1.5px solid var(--brand-primary);
   border-radius: 0 4px 4px 0;
@@ -3835,12 +3836,6 @@ body.is-always-mobile-nav .header-nav::before {
   cursor: pointer;
   -webkit-transition: background-color 0.12s ease-in, border-color 0.12s ease-in;
   transition: background-color 0.12s ease-in, border-color 0.12s ease-in;
-}
-.header-search__button svg {
-  display: block;
-  fill: var(--color-white);
-  inline-size: 16px;
-  block-size: 16px;
 }
 .header-search__button:hover {
   background-color: var(--brand-primary-dark, var(--brand-primary));
@@ -3854,7 +3849,18 @@ body.is-always-mobile-nav .header-nav::before {
   .header-search__button {
     border: 2px solid buttontext;
   }
-  .header-search__button svg {
+}
+
+.header-search__icon {
+  display: block;
+  fill: var(--color-white);
+  inline-size: 1.125rem;
+  block-size: 1.125rem;
+  -ms-flex-negative: 0;
+      flex-shrink: 0;
+}
+@media (forced-colors: active) {
+  .header-search__icon {
     fill: buttontext;
   }
 }
