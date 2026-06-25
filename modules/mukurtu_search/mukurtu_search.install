@@ -45,3 +45,17 @@ function mukurtu_search_update_40003(): void {
   $config->set('collapse_multipage_pages', TRUE);
   $config->save();
 }
+
+/**
+ * Enable header navigation search box with /browse as the default destination.
+ */
+function mukurtu_search_update_40004(): void {
+  $config = \Drupal::configFactory()->getEditable('mukurtu_search.settings');
+  if ($config->get('header_search_enabled') === NULL) {
+    $config->set('header_search_enabled', TRUE);
+  }
+  if ($config->get('header_search_path') === NULL) {
+    $config->set('header_search_path', '/browse');
+  }
+  $config->save();
+}
