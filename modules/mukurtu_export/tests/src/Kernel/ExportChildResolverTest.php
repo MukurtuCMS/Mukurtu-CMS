@@ -21,6 +21,7 @@ class ExportChildResolverTest extends ProtocolAwareEntityTestBase {
 
   protected static $modules = [
     'mukurtu_export',
+    'mukurtu_multipage_items',
     'field',
   ];
 
@@ -79,7 +80,7 @@ class ExportChildResolverTest extends ProtocolAwareEntityTestBase {
       'label' => 'Words',
     ])->save();
 
-    $this->resolver = new ExportChildResolver();
+    $this->resolver = $this->container->get('mukurtu_export.child_resolver');
   }
 
   protected function createNode(string $bundle, array $fields = []): Node {
