@@ -41,20 +41,14 @@ function mukurtu_notifications_views_pre_render(ViewExecutable $view) {
 }
 
 /**
- * Implements hook_form_views_exposed_form_alter().
+ * Returns the notification type group-to-template mapping.
  *
- * Groups notification type filter options into labelled optgroups.
+ * @return array<string, string[]>
+ *   Keys are human-readable group labels; values are arrays of template
+ *   machine names belonging to that group.
  */
-function mukurtu_notifications_form_views_exposed_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
-  $view = $form_state->get('view');
-  if (!$view || $view->id() !== 'mukurtu_message_log') {
-    return;
-  }
-  if (empty($form['type']['#options'])) {
-    return;
-  }
-
-  $groups = [
+function _mukurtu_notifications_type_groups(): array {
+  return [
     'Group membership' => [
       'mukurtu_user_added_to_community',
       'mukurtu_user_added_to_protocol',
@@ -81,31 +75,65 @@ function mukurtu_notifications_form_views_exposed_form_alter(array &$form, FormS
       'mukurtu_single_node_delete',
     ],
   ];
+}
 
-  $all_grouped_keys = [];
-  foreach ($groups as $machine_names) {
-    $all_grouped_keys = array_merge($all_grouped_keys, $machine_names);
+/**
+ * Implements hook_form_views_exposed_form_alter().
+ *
+ * Replaces the notification type filter with a flat list of group labels.
+ */
+function mukurtu_notifications_form_views_exposed_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
+  $view = $form_state->get('view');
+  if (!$view || $view->id() !== 'mukurtu_message_log') {
+    return;
+  }
+  if (empty($form['type']['#options'])) {
+    return;
   }
 
+  $groups = _mukurtu_notifications_type_groups();
   $current = $form['type']['#options'];
-  $grouped = [];
 
+  // Build a flat list: include a group only if at least one of its templates
+  // exists in the current options (i.e. there is data for it).
+  $options = [];
   foreach ($groups as $group_label => $machine_names) {
-    foreach ($machine_names as $machine_name) {
-      if (isset($current[$machine_name])) {
-        $grouped[$group_label][$machine_name] = $current[$machine_name];
-      }
+    if (!empty(array_intersect_key(array_flip($machine_names), $current))) {
+      $options[$group_label] = $group_label;
     }
   }
 
-  // Append any options not in a defined group as flat top-level options.
-  foreach ($current as $key => $label) {
-    if (!in_array($key, $all_grouped_keys, TRUE)) {
-      $grouped[$key] = $label;
-    }
+  // Preserve the leading "All" / "- Any -" option from the original list.
+  $any = array_slice($current, 0, 1, TRUE);
+  $form['type']['#options'] = $any + $options;
+}
+
+/**
+ * Implements hook_views_pre_execute().
+ *
+ * Expands a selected notification group label into its individual template
+ * machine names before the query runs, so the bundle filter generates the
+ * correct WHERE template IN (...) clause.
+ */
+function mukurtu_notifications_views_pre_execute(ViewExecutable $view) {
+  if ($view->id() !== 'mukurtu_message_log') {
+    return;
+  }
+  if (empty($view->filter['template']->value)) {
+    return;
   }
 
-  $form['type']['#options'] = $grouped;
+  $groups = _mukurtu_notifications_type_groups();
+  $expanded = [];
+  foreach ($view->filter['template']->value as $key) {
+    if (isset($groups[$key])) {
+      $expanded = array_merge($expanded, $groups[$key]);
+    }
+    else {
+      $expanded[] = $key;
+    }
+  }
+  $view->filter['template']->value = array_unique($expanded);
 }
 
 /**
