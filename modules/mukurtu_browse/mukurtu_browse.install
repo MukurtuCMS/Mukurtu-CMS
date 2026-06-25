@@ -442,3 +442,25 @@ function mukurtu_browse_update_40010() {
   $index->save();
   $index->reindex();
 }
+
+/**
+ * Add sections body text field to the default content index.
+ */
+function mukurtu_browse_update_40011(): void {
+  $index = \Drupal\search_api\Entity\Index::load('mukurtu_default_content_index');
+  if (!$index) {
+    return;
+  }
+
+  if (!$index->getField('field_sections_body')) {
+    $field = new \Drupal\search_api\Item\Field($index, 'field_sections_body');
+    $field->setType('text');
+    $field->setPropertyPath('field_sections:entity:field_body');
+    $field->setDatasourceId('entity:node');
+    $field->setLabel('Sections Body Text');
+    $index->addField($field);
+  }
+
+  $index->save();
+  $index->reindex();
+}

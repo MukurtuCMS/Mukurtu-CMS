@@ -126,3 +126,25 @@ function mukurtu_solr_update_40003(): void {
     }
   }
 }
+
+/**
+ * Add sections body text field to the default Solr content index.
+ */
+function mukurtu_solr_update_40004(): void {
+  $index = \Drupal\search_api\Entity\Index::load('mukurtu_default_solr_index');
+  if (!$index) {
+    return;
+  }
+
+  if (!$index->getField('node__field_sections__body')) {
+    $field = new \Drupal\search_api\Item\Field($index, 'node__field_sections__body');
+    $field->setType('text');
+    $field->setPropertyPath('field_sections:entity:field_body');
+    $field->setDatasourceId('entity:node');
+    $field->setLabel('Sections Body Text');
+    $index->addField($field);
+  }
+
+  $index->save();
+  $index->reindex();
+}
