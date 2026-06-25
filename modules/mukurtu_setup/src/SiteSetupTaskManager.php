@@ -37,22 +37,22 @@ class SiteSetupTaskManager {
   public function getTasks(): array {
     return [
       new SiteSetupTask(
-        'create_community',
-        (string) $this->t('Create a community'),
-        Markup::create((string) $this->t('To create any content, at least one community must be created. Communities represent the groups responsible for creating and stewarding content. This will also direct you to create a cultural protocol. Learn more at <a href="https://docs.mukurtu.org/communities-cultural-protocols-categories/UnderstandingCommunitiesAndCulturalProtocols/">Understanding Communities and Cultural Protocols</a>.')),
+        'create_mukurtu_manager',
+        (string) $this->t('Create a Mukurtu Manager account'),
+        Markup::create((string) $this->t('The administrator account created when installing Mukurtu has full access to the Drupal administrator tools which are usually only necessary for maintenance and troubleshooting. Administrator accounts should be used with caution. <strong>We strongly recommend creating a separate Mukurtu Manager account for day to day use.</strong> Learn more at <a href="https://docs.mukurtu.org/users/user-role-types/">User Roles</a>.')),
         self::GROUP_REQUIRED,
         TRUE,
-        '/admin/content/communities/add',
-        (string) $this->t('Add community'),
+        '/admin/people/create',
+        (string) $this->t('Create account'),
       ),
       new SiteSetupTask(
-        'create_protocol',
-        (string) $this->t('Create a cultural protocol'),
-        (string) $this->t('To create any content, at least one cultural protocol must be created. Cultural protocols are the tool for providing appropriate access to content. You likely created a protocol while creating a community, but may want to create additional protocols.'),
+        'create_community',
+        (string) $this->t('Create a community and cultural protocol'),
+        Markup::create((string) $this->t('To create any content, at least one community and cultural protocol must be created. Communities represent the groups responsible for creating and stewarding content, and cultural protocols are the means of providing appropriate access to content. This will also direct you to create a cultural protocol. Learn more at <a href="https://docs.mukurtu.org/communities-cultural-protocols-categories/UnderstandingCommunitiesAndCulturalProtocols/">Understanding Communities and Cultural Protocols</a>.')),
         self::GROUP_REQUIRED,
         TRUE,
-        '/admin/content/protocols/add',
-        (string) $this->t('Add cultural protocol'),
+        '/communities/community/add',
+        (string) $this->t('Add community'),
       ),
       new SiteSetupTask(
         'create_category',
@@ -72,15 +72,6 @@ class SiteSetupTaskManager {
         '/admin/structure/taxonomy/manage/language/add',
         (string) $this->t('Add language'),
         dismissible: TRUE,
-      ),
-      new SiteSetupTask(
-        'create_mukurtu_manager',
-        (string) $this->t('Create a Mukurtu Manager account'),
-        Markup::create((string) $this->t('The administrator account created when installing Mukurtu has full access to the Drupal administrator tools which are usually only necessary for maintenance and troubleshooting. Administrator accounts should be used with caution. We strongly recommend creating a separate Mukurtu Manager account for day to day use. Learn more at <a href="https://docs.mukurtu.org/users/user-role-types/">User Roles</a>.')),
-        self::GROUP_RECOMMENDED,
-        TRUE,
-        '/admin/people/create',
-        (string) $this->t('Create account'),
       ),
       new SiteSetupTask(
         'site_name_email',
@@ -115,7 +106,7 @@ class SiteSetupTaskManager {
         Markup::create((string) $this->t('Add a page that provides more information about the site. See below for adding a new page to the navigation menu. Learn more at <a href="https://docs.mukurtu.org/look-and-feel/CreateBasicPage/">Create Basic Pages</a>.')),
         self::GROUP_RECOMMENDED,
         TRUE,
-        '/node/add/basic_page',
+        '/node/add/page',
         (string) $this->t('Create a page'),
       ),
       new SiteSetupTask(
@@ -133,7 +124,7 @@ class SiteSetupTaskManager {
         (string) $this->t('Update your site footer with contact information, logos, links, and other information. Learn more at LINK TBD.'),
         self::GROUP_RECOMMENDED,
         TRUE,
-        '/admin/content/block-content',
+        '/admin/content/block/1',
         (string) $this->t('Edit footer content'),
       ),
     ];
