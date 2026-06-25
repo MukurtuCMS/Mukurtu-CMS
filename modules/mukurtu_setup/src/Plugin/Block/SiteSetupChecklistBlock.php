@@ -40,16 +40,20 @@ class SiteSetupChecklistBlock extends BlockBase implements ContainerFactoryPlugi
   }
 
   public function build(): array {
+    $cache = [
+      'tags' => ['config:system.site', 'community_list', 'protocol_list', 'taxonomy_term_list', 'block_content_list', 'mukurtu_setup:tasks'],
+      'contexts' => ['user.roles'],
+    ];
     $counts = $this->taskManager->getCounts();
+    if ($counts['total'] > 0 && $counts['complete'] === $counts['total']) {
+      return ['#cache' => $cache];
+    }
     return [
       '#theme' => 'mukurtu_setup_checklist_block',
       '#total' => $counts['total'],
       '#complete' => $counts['complete'],
       '#setup_url' => Url::fromRoute('mukurtu_setup.setup_page')->toString(),
-      '#cache' => [
-        'tags' => ['config:system.site', 'community_list', 'protocol_list', 'taxonomy_term_list', 'block_content_list'],
-        'contexts' => ['user.roles'],
-      ],
+      '#cache' => $cache,
     ];
   }
 

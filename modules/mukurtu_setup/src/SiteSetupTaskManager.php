@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\mukurtu_setup;
 
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Render\Markup;
@@ -105,7 +106,7 @@ class SiteSetupTaskManager {
         (string) $this->t('Create an about page'),
         Markup::create((string) $this->t('Add a page that provides more information about the site. See below for adding a new page to the navigation menu. Learn more at <a href="https://docs.mukurtu.org/look-and-feel/CreateBasicPage/">Create Basic Pages</a>.')),
         self::GROUP_RECOMMENDED,
-        TRUE,
+        FALSE,
         '/node/add/page',
         (string) $this->t('Create a page'),
       ),
@@ -162,7 +163,6 @@ class SiteSetupTaskManager {
         'create_mukurtu_manager' => $this->mukurtuManagerExists(),
         'site_logo' => $this->isSiteLogoSet(),
         'site_footer' => $this->isFooterSet(),
-        'about_page' => $this->aboutPageExists(),
         default => FALSE,
       };
     }
@@ -186,6 +186,7 @@ class SiteSetupTaskManager {
     if (!in_array($taskId, $dismissed, TRUE)) {
       $dismissed[] = $taskId;
       $this->state->set(self::STATE_DISMISSED, $dismissed);
+      Cache::invalidateTags(['mukurtu_setup:tasks']);
     }
   }
 
@@ -198,6 +199,7 @@ class SiteSetupTaskManager {
       fn($id) => $id !== $taskId,
     ));
     $this->state->set(self::STATE_DISMISSED, $dismissed);
+    Cache::invalidateTags(['mukurtu_setup:tasks']);
   }
 
   /**
@@ -208,6 +210,7 @@ class SiteSetupTaskManager {
     if (!in_array($taskId, $completed, TRUE)) {
       $completed[] = $taskId;
       $this->state->set(self::STATE_COMPLETED, $completed);
+      Cache::invalidateTags(['mukurtu_setup:tasks']);
     }
   }
 
@@ -220,6 +223,7 @@ class SiteSetupTaskManager {
       fn($id) => $id !== $taskId,
     ));
     $this->state->set(self::STATE_COMPLETED, $completed);
+    Cache::invalidateTags(['mukurtu_setup:tasks']);
   }
 
   /**
@@ -305,17 +309,6 @@ class SiteSetupTaskManager {
       ->getStorage('user')
       ->getQuery()
       ->condition('roles', 'mukurtu_manager')
-      ->accessCheck(FALSE)
-      ->range(0, 1)
-      ->execute();
-    return !empty($ids);
-  }
-
-  private function aboutPageExists(): bool {
-    $ids = $this->entityTypeManager
-      ->getStorage('node')
-      ->getQuery()
-      ->condition('type', 'basic_page')
       ->accessCheck(FALSE)
       ->range(0, 1)
       ->execute();
