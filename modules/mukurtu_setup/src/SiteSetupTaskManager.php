@@ -78,7 +78,7 @@ class SiteSetupTaskManager {
         (string) $this->t('Update site name and email'),
         Markup::create((string) $this->t('If not already set during site installation, update your site name and administrative email. Learn more at <a href="https://docs.mukurtu.org/site-settings/ConfigureBasicSettings/#configure-site-name-and-email">Configure Basic Site Settings</a>.')),
         self::GROUP_RECOMMENDED,
-        TRUE,
+        FALSE,
         '/admin/config/system/site-information',
         (string) $this->t('Edit site information'),
       ),
@@ -160,7 +160,6 @@ class SiteSetupTaskManager {
         'create_category' => $this->taxonomyTermExists('category'),
         'dictionary_language' => $this->taxonomyTermExists('language'),
         'create_mukurtu_manager' => $this->mukurtuManagerExists(),
-        'site_name_email' => $this->isSiteNameSet(),
         'site_logo' => $this->isSiteLogoSet(),
         'site_footer' => $this->isFooterSet(),
         'about_page' => $this->aboutPageExists(),
@@ -270,15 +269,6 @@ class SiteSetupTaskManager {
       ->range(0, 1)
       ->execute();
     return !empty($ids);
-  }
-
-  private function isSiteNameSet(): bool {
-    $config = $this->configFactory->get('system.site');
-    $name = $config->get('name') ?? '';
-    $mail = $config->get('mail') ?? '';
-    $name_set = !empty($name) && !in_array(strtolower(trim($name)), ['drupal', 'my drupal site', ''], TRUE);
-    $mail_set = !empty($mail) && !str_contains($mail, 'example.com');
-    return $name_set && $mail_set;
   }
 
   private function isSiteLogoSet(): bool {
