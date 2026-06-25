@@ -97,7 +97,7 @@ class SiteSetupTaskManager {
         Markup::create((string) $this->t('Update the front/landing page to welcome and orient your users. Learn more at <a href="https://docs.mukurtu.org/look-and-feel/ConfigureLandingPage/">Configure Landing Page</a>.')),
         self::GROUP_RECOMMENDED,
         FALSE,
-        '/',
+        '/node/1/layout',
         (string) $this->t('View front page'),
       ),
       new SiteSetupTask(
