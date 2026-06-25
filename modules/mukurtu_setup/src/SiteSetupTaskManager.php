@@ -157,7 +157,6 @@ class SiteSetupTaskManager {
     try {
       return match ($taskId) {
         'create_community' => $this->entityExists('community'),
-        'create_protocol' => $this->entityExists('protocol'),
         'create_category' => $this->taxonomyTermExists('category'),
         'dictionary_language' => $this->taxonomyTermExists('language'),
         'create_mukurtu_manager' => $this->mukurtuManagerExists(),

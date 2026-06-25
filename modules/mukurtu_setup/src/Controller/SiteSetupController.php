@@ -63,6 +63,7 @@ class SiteSetupController extends ControllerBase {
           'protocol_list',
           'taxonomy_term_list',
           'block_content_list',
+          'mukurtu_setup:tasks',
         ],
         'contexts' => ['user.roles'],
       ],
