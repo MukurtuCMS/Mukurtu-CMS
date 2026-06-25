@@ -49,6 +49,7 @@
         // Insert the inherited-protocols message immediately after the form-item.
         var message = document.createElement('p');
         message.className = 'mukurtu-protocol-sync-message';
+        message.setAttribute('aria-live', 'polite');
         message.textContent = Drupal.t('Cultural protocols and sharing setting are synced with the parent content.');
         message.style.display = 'none';
         formItem.insertAdjacentElement('afterend', message);
@@ -143,18 +144,37 @@
     var el = document.createElement('div');
     el.className = 'mukurtu-ps-required-message messages messages--warning';
     el.setAttribute('role', 'alert');
+    el.setAttribute('aria-label', Drupal.t('Warning'));
+    el.setAttribute('tabindex', '-1');
     el.textContent = Drupal.t(
       'To sync media cultural protocols, the content must have protocols assigned first. Select content protocols, then add media.'
     );
     container.insertAdjacentElement('afterend', el);
+    el.focus();
 
-    // Dismiss on the next interaction outside the message.
-    document.addEventListener('click', function dismiss(e) {
+    function removeMessage() {
+      el.remove();
+      document.removeEventListener('click', dismissClick, true);
+      document.removeEventListener('keydown', dismissKey, true);
+    }
+
+    // Dismiss on the next click outside the message.
+    function dismissClick(e) {
       if (!el.contains(e.target)) {
-        el.remove();
-        document.removeEventListener('click', dismiss, true);
+        removeMessage();
       }
-    }, { once: true, capture: true });
+    }
+
+    // Dismiss on Escape for keyboard users.
+    function dismissKey(e) {
+      if (e.key === 'Escape') {
+        removeMessage();
+        btn.focus();
+      }
+    }
+
+    document.addEventListener('click', dismissClick, true);
+    document.addEventListener('keydown', dismissKey, true);
   }
 
 })(Drupal, once);
