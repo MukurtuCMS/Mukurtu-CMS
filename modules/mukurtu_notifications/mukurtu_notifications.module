@@ -268,7 +268,8 @@ function mukurtu_notifications_node_update(Node $node) {
       $email_validator = \Drupal::service('email.validator');
       $recipients = User::loadMultiple($notify_uids);
       foreach ($recipients as $uid => $recipient) {
-        if (!$email_validator->isValid($recipient->getEmail())) {
+        $email = $recipient->getEmail();
+        if (empty($email) || !$email_validator->isValid($email)) {
           continue;
         }
         $subscribe_options['uids'][$uid] = new DeliveryCandidate($flags, $notifiers, $uid);
@@ -403,7 +404,8 @@ function mukurtu_notifications_user_insert($entity) {
   $email_validator = \Drupal::service('email.validator');
   $admin_users = User::loadMultiple($uids);
   foreach ($admin_users as $uid => $admin_user) {
-    if (!$email_validator->isValid($admin_user->getEmail())) {
+    $email = $admin_user->getEmail();
+    if (empty($email) || !$email_validator->isValid($email)) {
       continue;
     }
     $subscribe_options['uids'][$uid] = new DeliveryCandidate($flags, $notifiers, $uid);
@@ -448,7 +450,8 @@ function mukurtu_notifications_notify_new_account_created(User $new_user, array 
   $email_validator = \Drupal::service('email.validator');
   $notify_users = User::loadMultiple($notify_uids);
   foreach ($notify_users as $uid => $notify_user) {
-    if (!$email_validator->isValid($notify_user->getEmail())) {
+    $email = $notify_user->getEmail();
+    if (empty($email) || !$email_validator->isValid($email)) {
       continue;
     }
     $subscribe_options['uids'][$uid] = new DeliveryCandidate($flags, $notifiers, (int) $uid);
@@ -701,7 +704,8 @@ function mukurtu_notifications_handle_moderation_change(Node $node, string $old_
   $email_validator = \Drupal::service('email.validator');
   $recipients = User::loadMultiple($notify_uids);
   foreach ($recipients as $uid => $recipient) {
-    if (!$email_validator->isValid($recipient->getEmail())) {
+    $email = $recipient->getEmail();
+    if (empty($email) || !$email_validator->isValid($email)) {
       continue;
     }
     $subscribe_options['uids'][$uid] = new DeliveryCandidate(['subscribe_node'], ['email'], $uid);
@@ -756,7 +760,8 @@ function mukurtu_notifications_comment_insert(CommentInterface $comment) {
   $email_validator = \Drupal::service('email.validator');
   $recipients = User::loadMultiple($notify_uids);
   foreach ($recipients as $uid => $recipient) {
-    if (!$email_validator->isValid($recipient->getEmail())) {
+    $email = $recipient->getEmail();
+    if (empty($email) || !$email_validator->isValid($email)) {
       continue;
     }
     $subscribe_options['uids'][$uid] = new DeliveryCandidate(['subscribe_node'], ['email'], $uid);
@@ -811,8 +816,12 @@ function mukurtu_notifications_og_membership_insert(OgMembership $membership) {
   }
   $message->save();
 
+  $email = $added_user->getEmail();
+  if (empty($email)) {
+    return;
+  }
   $email_validator = \Drupal::service('email.validator');
-  if (!$email_validator->isValid($added_user->getEmail())) {
+  if (!$email_validator->isValid($email)) {
     return;
   }
 
