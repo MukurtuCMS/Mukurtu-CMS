@@ -86,7 +86,21 @@ function mukurtu_protocol_sync_form_alter(array &$form, FormStateInterface $form
   $entity_id = $opener_params['entity_id'] ?? NULL;
 
   if ($entity_type_id !== 'node' || empty($entity_id)) {
-    _mukurtu_protocol_sync_default_sync_checkbox($form);
+    // For new nodes, the media library button's #submit handler stores the
+    // node form's current protocol selection in TempStore before the modal
+    // opens. Read that data here to pre-populate the media's protocol field.
+    $tempstore = \Drupal::service('tempstore.private')->get('mukurtu_protocol_sync');
+    $uid = \Drupal::currentUser()->id();
+    $ps_data = $tempstore->get("ps_{$uid}");
+
+    if (!empty($ps_data['protocols']) && !empty($ps_data['sharing'])) {
+      // Leave the TempStore entry intact; it will be consumed by the first
+      // media item or cleared when the user leaves the modal.
+      _mukurtu_protocol_sync_prepopulate_media_form($form, $ps_data['protocols'], $ps_data['sharing']);
+    }
+    else {
+      _mukurtu_protocol_sync_default_sync_checkbox($form);
+    }
   }
   else {
     $node = \Drupal::entityTypeManager()->getStorage('node')->load($entity_id);
@@ -286,6 +300,31 @@ function mukurtu_protocol_sync_entity_delete(EntityInterface $entity): void {
  * different canonical parent node.
  */
 function mukurtu_protocol_sync_form_node_form_alter(array &$form, FormStateInterface $form_state): void {
+  // Attach the library to all node forms so the JS can intercept media library
+  // button clicks and pass the current protocol selection to the modal.
+  $form['#attached']['library'][] = 'mukurtu_protocol_sync/protocol-sync';
+
+  // Add a #submit handler to every media library open button so we can store
+  // the current protocol selection in TempStore before the modal URL is built.
+  $media_fields_with_buttons = [
+    'field_media_assets',
+    'field_recording',
+    'field_thumbnail',
+    'field_collection_image',
+    'field_word_list_image',
+  ];
+  foreach ($media_fields_with_buttons as $field_name) {
+    if (!isset($form[$field_name]['widget'])) {
+      continue;
+    }
+    foreach (Element::children($form[$field_name]['widget']) as $delta) {
+      if (isset($form[$field_name]['widget'][$delta]['#field_suffix']['open_button'])) {
+        $form[$field_name]['widget'][$delta]['#field_suffix']['open_button']['#submit'][] =
+          'mukurtu_protocol_sync_media_library_open_submit';
+      }
+    }
+  }
+
   $node = $form_state->getFormObject()->getEntity();
   if (!$node || $node->isNew()) {
     return;
@@ -342,6 +381,40 @@ function mukurtu_protocol_sync_form_node_form_alter(array &$form, FormStateInter
 }
 
 /**
+ * Submit handler for media library open buttons on node forms.
+ *
+ * Reads the current cultural protocol selection from the submitted node form
+ * and stores it in TempStore so hook_form_alter() can pre-populate the media
+ * entity's protocol field when the upload form is built inside the modal.
+ */
+function mukurtu_protocol_sync_media_library_open_submit(array &$form, FormStateInterface $form_state): void {
+  $field_value = $form_state->getValue('field_cultural_protocols');
+  if (empty($field_value[0]['value'])) {
+    return;
+  }
+
+  $value = $field_value[0]['value'];
+  $sharing = (string) ($value['sharing_setting'] ?? '');
+
+  $protocol_ids = [];
+  foreach ($value['protocol_selection'] ?? [] as $community) {
+    foreach ($community['protocols'] ?? [] as $protocol_id => $checked) {
+      if ($checked) {
+        $protocol_ids[] = (int) $protocol_id;
+      }
+    }
+  }
+
+  if (empty($protocol_ids) || empty($sharing)) {
+    return;
+  }
+
+  $tempstore = \Drupal::service('tempstore.private')->get('mukurtu_protocol_sync');
+  $uid = \Drupal::currentUser()->id();
+  $tempstore->set("ps_{$uid}", ['protocols' => $protocol_ids, 'sharing' => $sharing]);
+}
+
+/**
  * Implements hook_form_media_form_alter().
  *
  * Attaches JS for all media forms with the sync field. For existing
@@ -355,8 +428,9 @@ function mukurtu_protocol_sync_form_media_form_alter(array &$form, FormStateInte
   }
 
   // Mark the checkbox so JS can find and move it into the protocols fieldset.
-  if (isset($form['field_sync_protocols']['widget'][0]['value'])) {
-    $form['field_sync_protocols']['widget'][0]['value']['#attributes']['data-mukurtu-protocol-sync'] = '1';
+  // BooleanCheckboxWidget declares multiple_values=TRUE; path is widget.value.
+  if (isset($form['field_sync_protocols']['widget']['value'])) {
+    $form['field_sync_protocols']['widget']['value']['#attributes']['data-mukurtu-protocol-sync'] = '1';
   }
 
   $form['#attached']['library'][] = 'mukurtu_protocol_sync/protocol-sync';
