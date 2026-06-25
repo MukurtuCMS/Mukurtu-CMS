@@ -41,6 +41,7 @@ permissions:
   - 'use mukurtu_editorial_workflow transition publish'
   - 'use mukurtu_editorial_workflow transition request_revision'
   - 'use mukurtu_editorial_workflow transition restore'
+  - 'use mukurtu_editorial_workflow transition return_to_review'
   - 'use mukurtu_editorial_workflow transition resubmit'
   - 'use mukurtu_editorial_workflow transition save_draft'
   - 'use mukurtu_editorial_workflow transition submit_for_review'

@@ -1779,3 +1779,60 @@ function mukurtu_core_update_40062(): void {
 
   $role->save();
 }
+
+/**
+ * Add return_to_review transition and expand request_revision to cover published state.
+ */
+function mukurtu_core_update_40063(): void {
+  $workflow = \Drupal::configFactory()
+    ->getEditable('workflows.workflow.mukurtu_editorial_workflow');
+  if ($workflow->isNew()) {
+    return;
+  }
+
+  // Add published as a valid from-state for the request_revision transition.
+  $from = $workflow->get('type_settings.transitions.request_revision.from') ?? [];
+  if (!in_array('published', $from)) {
+    $from[] = 'published';
+    $workflow->set('type_settings.transitions.request_revision.from', $from);
+  }
+
+  // Add the new return_to_review transition (published -> needs_review).
+  $existing = $workflow->get('type_settings.transitions.return_to_review');
+  if (empty($existing)) {
+    $workflow->set('type_settings.transitions.return_to_review', [
+      'label' => 'Return to Review',
+      'from' => ['published'],
+      'to' => 'needs_review',
+      'weight' => 7,
+    ]);
+  }
+
+  $workflow->save();
+
+  // Grant the new transition permission to both steward OG roles.
+  $permission = 'use mukurtu_editorial_workflow transition return_to_review';
+  $og_role_storage = \Drupal::entityTypeManager()->getStorage('og_role');
+
+  foreach (['protocol-protocol-protocol_steward', 'protocol-protocol-language_steward'] as $role_id) {
+    /** @var \Drupal\og\Entity\OgRole|null $role */
+    $role = $og_role_storage->load($role_id);
+    if ($role && !$role->hasPermission($permission)) {
+      $role->grantPermission($permission);
+      $role->save();
+    }
+  }
+}
+
+/**
+ * Rename the request_revision transition label to 'Needs edits'.
+ */
+function mukurtu_core_update_40064(): void {
+  $workflow = \Drupal::configFactory()
+    ->getEditable('workflows.workflow.mukurtu_editorial_workflow');
+  if ($workflow->isNew()) {
+    return;
+  }
+  $workflow->set('type_settings.transitions.request_revision.label', 'Needs edits');
+  $workflow->save();
+}

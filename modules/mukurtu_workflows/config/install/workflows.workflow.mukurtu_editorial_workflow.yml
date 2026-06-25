@@ -50,9 +50,10 @@ type_settings:
       to: needs_review
       weight: 1
     request_revision:
-      label: 'Request revisions'
+      label: 'Needs edits'
       from:
         - needs_review
+        - published
       to: revision_requested
       weight: 2
     resubmit:
@@ -82,5 +83,11 @@ type_settings:
         - archived
       to: draft
       weight: 6
+    return_to_review:
+      label: 'Return to Review'
+      from:
+        - published
+      to: needs_review
+      weight: 7
   entity_types: {  }
   default_moderation_state: draft
