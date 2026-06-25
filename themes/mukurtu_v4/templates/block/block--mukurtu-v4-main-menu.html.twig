@@ -45,6 +45,25 @@
   </button>
 </div>
 
+{# Mobile: search bar visible in the header at all screen sizes below desktop. #}
+{% if header_search_enabled %}
+<div class="header-search header-search--mobile">
+  <form class="header-search__form" action="{{ header_search_path }}" method="get" role="search">
+    <input
+      class="header-search__input"
+      type="search"
+      name="search_api_fulltext"
+      placeholder="{{ 'Search'|t }}"
+      aria-label="{{ 'Search'|t }}"
+      autocomplete="off"
+    />
+    <button class="header-search__button" type="submit" aria-label="{{ 'Search'|t }}">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25.002 25.002" aria-hidden="true" focusable="false" class="header-search__icon"><path fill-rule="evenodd" d="M11.08 19c-4.36 0-7.91-3.55-7.91-7.92 0-4.36 3.55-7.91 7.91-7.91 4.37 0 7.92 3.55 7.92 7.91 0 4.37-3.55 7.92-7.92 7.92m13.69 2.41-4.36-4.36c1.1-1.72 1.75-3.77 1.75-5.97C22.16 4.96 17.2 0 11.08 0S0 4.96 0 11.08s4.96 11.08 11.08 11.08c2.2 0 4.25-.65 5.97-1.75l4.36 4.36c.31.31.81.31 1.12 0l2.24-2.24a.79.79 0 0 0 0-1.12" clip-rule="evenodd"/></svg>
+    </button>
+  </form>
+</div>
+{% endif %}
+
 <div id="header-nav" class="header-nav" data-drupal-selector="header-nav">
   <div class="header__main-nav">
 
@@ -66,20 +85,19 @@
       </div>
     </nav>
 
+    {# Desktop: search bar inside the flex nav bar. #}
     {% if header_search_enabled %}
-    <div class="header-search">
+    <div class="header-search header-search--desktop">
       <form class="header-search__form" action="{{ header_search_path }}" method="get" role="search">
-        <label for="header-search-input" class="visually-hidden">{{ 'Search'|t }}</label>
         <input
-          id="header-search-input"
           class="header-search__input"
           type="search"
           name="search_api_fulltext"
           placeholder="{{ 'Search'|t }}"
+          aria-label="{{ 'Search'|t }}"
           autocomplete="off"
         />
-        <button class="header-search__button" type="submit">
-          <span class="visually-hidden">{{ 'Search'|t }}</span>
+        <button class="header-search__button" type="submit" aria-label="{{ 'Search'|t }}">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25.002 25.002" aria-hidden="true" focusable="false" class="header-search__icon"><path fill-rule="evenodd" d="M11.08 19c-4.36 0-7.91-3.55-7.91-7.92 0-4.36 3.55-7.91 7.91-7.91 4.37 0 7.92 3.55 7.92 7.91 0 4.37-3.55 7.92-7.92 7.92m13.69 2.41-4.36-4.36c1.1-1.72 1.75-3.77 1.75-5.97C22.16 4.96 17.2 0 11.08 0S0 4.96 0 11.08s4.96 11.08 11.08 11.08c2.2 0 4.25-.65 5.97-1.75l4.36 4.36c.31.31.81.31 1.12 0l2.24-2.24a.79.79 0 0 0 0-1.12" clip-rule="evenodd"/></svg>
         </button>
       </form>

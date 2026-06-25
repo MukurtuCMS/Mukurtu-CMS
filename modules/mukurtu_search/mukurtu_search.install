@@ -47,7 +47,7 @@ function mukurtu_search_update_40003(): void {
 }
 
 /**
- * Enable header navigation search box with /browse as the default destination.
+ * Set default header search settings for existing installs.
  */
 function mukurtu_search_update_40004(): void {
   $config = \Drupal::configFactory()->getEditable('mukurtu_search.settings');

@@ -101,6 +101,34 @@ class SearchSettingsForm extends ConfigFormBase {
       '#default_value' => $backend,
     ];
 
+    $form['header_search'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Header search'),
+      '#description' => $this->t('Controls the search box that appears in the header navigation bar.'),
+    ];
+
+    $form['header_search']['header_search_enabled'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Show search box in the header navigation'),
+      '#default_value' => (bool) ($config->get('header_search_enabled') ?? TRUE),
+    ];
+
+    $form['header_search']['header_search_path'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Search destination'),
+      '#description' => $this->t('Users will be sent to this page with their search query.'),
+      '#options' => [
+        '/browse' => $this->t('Browse (/browse)'),
+        '/digital-heritage' => $this->t('Digital Heritage (/digital-heritage)'),
+      ],
+      '#default_value' => $config->get('header_search_path') ?? '/browse',
+      '#states' => [
+        'visible' => [
+          ':input[name="header_search_enabled"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
+
     return parent::buildForm($form, $form_state);
   }
 
