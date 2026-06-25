@@ -3744,6 +3744,127 @@ body.is-always-mobile-nav .header-nav::before {
   text-decoration: none;
 }
 
+/**
+ * @file
+ * Header navigation search box.
+ */
+/* On desktop, align nav and search side by side inside the nav bar. */
+@media (min-width: 60rem) {
+  body:not(.is-always-mobile-nav) .header__main-nav {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+  }
+}
+
+.header-search {
+  padding-inline: var(--v-space-4xs);
+  padding-block: var(--v-space-5xs);
+  -webkit-border-before: 1px solid var(--color-gray-light, #e0e0e0);
+          border-block-start: 1px solid var(--color-gray-light, #e0e0e0);
+}
+@media (min-width: 60rem) {
+  .header-search {
+    padding-inline: var(--v-space-4xs);
+    padding-block: 0;
+    -webkit-border-before: 0;
+            border-block-start: 0;
+  }
+}
+
+.header-search__form {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch;
+}
+
+.header-search__input {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  inline-size: 100%;
+  padding-block: var(--v-space-5xs);
+  padding-inline: var(--v-space-5xs);
+  border: 1.5px solid var(--color-text-neutral-medium, #767676);
+  -webkit-border-end: 0;
+          border-inline-end: 0;
+  border-radius: 4px 0 0 4px;
+  font-size: var(--font-size-m);
+  color: var(--color-text-neutral-loud);
+  background: var(--color-white);
+  line-height: 1.4;
+  /* Remove the browser-native X clear button on type=search. */
+}
+.header-search__input:focus {
+  outline: 2px solid var(--brand-secondary-dark);
+  outline-offset: 0;
+  border-color: var(--brand-secondary-dark);
+}
+.header-search__input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+          appearance: none;
+}
+@media (min-width: 60rem) {
+  .header-search__input {
+    inline-size: 200px;
+  }
+}
+
+.header-search__button {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -ms-flex-negative: 0;
+      flex-shrink: 0;
+  padding-block: var(--v-space-5xs);
+  padding-inline: var(--v-space-5xs);
+  border: 1.5px solid var(--brand-primary);
+  border-radius: 0 4px 4px 0;
+  background: var(--brand-primary);
+  cursor: pointer;
+  -webkit-transition: background-color 0.12s ease-in, border-color 0.12s ease-in;
+  transition: background-color 0.12s ease-in, border-color 0.12s ease-in;
+}
+.header-search__button:hover {
+  background-color: var(--brand-primary-dark, var(--brand-primary));
+  border-color: var(--brand-primary-dark, var(--brand-primary));
+}
+.header-search__button:focus {
+  outline: 2px solid var(--brand-secondary-dark);
+  outline-offset: 2px;
+}
+@media (forced-colors: active) {
+  .header-search__button {
+    border: 2px solid buttontext;
+  }
+}
+
+.header-search__icon {
+  display: block;
+  fill: var(--color-white);
+  inline-size: 1.125rem;
+  block-size: 1.125rem;
+  -ms-flex-negative: 0;
+      flex-shrink: 0;
+}
+@media (forced-colors: active) {
+  .header-search__icon {
+    fill: buttontext;
+  }
+}
+
 :root {
   /* Width of slide out navigation */
   --mobile-nav-width: 500px;
@@ -6334,9 +6455,8 @@ header {
           margin-block-start: var(--v-space-xs);
 }
 
-.node--draft-banner {
+.node--status-banner {
   display: block;
-  background: var(--brand-secondary-dark);
   color: var(--color-white);
   font-size: 0.875rem;
   font-weight: 700;
@@ -6345,6 +6465,18 @@ header {
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 0.1em;
+}
+.node--status-banner--draft {
+  background: var(--brand-secondary-dark);
+}
+.node--status-banner--needs-review {
+  background: var(--color-warning-dark);
+}
+.node--status-banner--revision-requested {
+  background: var(--color-error-dark);
+}
+.node--status-banner--archived {
+  background: var(--color-gray);
 }
 
 .full-node__list {
