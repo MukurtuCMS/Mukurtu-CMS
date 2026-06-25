@@ -82,7 +82,7 @@ class ReviewQueueAccess extends AccessPluginBase implements CacheableDependencyI
    * {@inheritdoc}
    */
   public function alterRouteDefinition(Route $route) {
-    $route->setRequirement('_user_is_logged_in', 'TRUE');
+    $route->setRequirement('_review_queue_access', 'TRUE');
   }
 
   /**
