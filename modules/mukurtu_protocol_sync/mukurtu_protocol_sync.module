@@ -114,10 +114,12 @@ function mukurtu_protocol_sync_form_alter(array &$form, FormStateInterface $form
  */
 function _mukurtu_protocol_sync_default_sync_checkbox(array &$form): void {
   foreach (Element::children($form['media']) as $delta) {
-    if (!isset($form['media'][$delta]['fields']['field_sync_protocols']['widget'][0]['value'])) {
+    // BooleanCheckboxWidget declares multiple_values=TRUE, so it skips the
+    // numeric delta wrapper: the path is widget.value, not widget.0.value.
+    if (!isset($form['media'][$delta]['fields']['field_sync_protocols']['widget']['value'])) {
       continue;
     }
-    $widget = &$form['media'][$delta]['fields']['field_sync_protocols']['widget'][0]['value'];
+    $widget = &$form['media'][$delta]['fields']['field_sync_protocols']['widget']['value'];
     $widget['#default_value'] = 1;
     $widget['#attributes']['data-mukurtu-protocol-sync'] = '1';
   }
@@ -130,9 +132,10 @@ function _mukurtu_protocol_sync_prepopulate_media_form(array &$form, array $prot
   foreach (Element::children($form['media']) as $delta) {
     $fields = &$form['media'][$delta]['fields'];
 
-    if (isset($fields['field_sync_protocols']['widget'][0]['value'])) {
-      $fields['field_sync_protocols']['widget'][0]['value']['#default_value'] = 1;
-      $fields['field_sync_protocols']['widget'][0]['value']['#attributes']['data-mukurtu-protocol-sync'] = '1';
+    // BooleanCheckboxWidget uses multiple_values=TRUE (no [0] delta wrapper).
+    if (isset($fields['field_sync_protocols']['widget']['value'])) {
+      $fields['field_sync_protocols']['widget']['value']['#default_value'] = 1;
+      $fields['field_sync_protocols']['widget']['value']['#attributes']['data-mukurtu-protocol-sync'] = '1';
     }
 
     if (empty($protocol_ids) || !isset($fields['field_cultural_protocols'])) {
