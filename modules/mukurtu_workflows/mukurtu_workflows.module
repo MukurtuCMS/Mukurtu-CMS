@@ -202,6 +202,33 @@ function mukurtu_workflows_preprocess_node(array &$variables): void {
 }
 
 /**
+ * Returns NIDs where the LATEST node revision has one of the given states.
+ *
+ * Queries content_moderation_state_field_revision directly because moderation
+ * states with default_revision=false (needs_review, revision_requested) leave
+ * the published revision as the node default, so the _field_data tables still
+ * reflect the published state -- only the revision table has the latest state.
+ */
+function _mukurtu_workflows_nids_by_latest_state(array $states): array {
+  $db = \Drupal::database();
+
+  // Subquery: latest node revision ID tracked by content_moderation_state.
+  $subquery = $db->select('content_moderation_state_field_revision', 's');
+  $subquery->addField('s', 'content_entity_id');
+  $subquery->addExpression('MAX(s.content_entity_revision_id)', 'max_vid');
+  $subquery->condition('s.content_entity_type_id', 'node');
+  $subquery->groupBy('s.content_entity_id');
+
+  $query = $db->select('content_moderation_state_field_revision', 'cmfr');
+  $query->join($subquery, 'latest', 'cmfr.content_entity_id = latest.content_entity_id AND cmfr.content_entity_revision_id = latest.max_vid');
+  $query->addField('cmfr', 'content_entity_id');
+  $query->condition('cmfr.content_entity_type_id', 'node');
+  $query->condition('cmfr.moderation_state', $states, 'IN');
+
+  return $query->execute()->fetchCol();
+}
+
+/**
  * Implements hook_views_query_alter().
  *
  * Scopes the content-under-review view to protocols where the current user is
@@ -223,11 +250,7 @@ function mukurtu_workflows_views_query_alter(ViewExecutable $view, QueryPluginBa
   // non-published, non-archived workflow state. The UID contextual argument in
   // the view already scopes this to the current user's content.
   if ($is_in_progress) {
-    $nids = array_values($node_storage->getQuery()
-      ->latestRevision()
-      ->condition('moderation_state', ['draft', 'needs_review', 'revision_requested'], 'IN')
-      ->accessCheck(FALSE)
-      ->execute());
+    $nids = _mukurtu_workflows_nids_by_latest_state(['draft', 'needs_review', 'revision_requested']);
     if (empty($nids)) {
       $query->addWhereExpression(0, '1 = 0');
       return;
@@ -238,11 +261,7 @@ function mukurtu_workflows_views_query_alter(ViewExecutable $view, QueryPluginBa
 
   // For the review queue, filter by the LATEST revision's moderation state so
   // that content re-drafted from a published state is included.
-  $latest_review_nids = array_values($node_storage->getQuery()
-    ->latestRevision()
-    ->condition('moderation_state', ['needs_review', 'revision_requested'], 'IN')
-    ->accessCheck(FALSE)
-    ->execute());
+  $latest_review_nids = _mukurtu_workflows_nids_by_latest_state(['needs_review', 'revision_requested']);
 
   if (empty($latest_review_nids)) {
     $query->addWhereExpression(0, '1 = 0');
