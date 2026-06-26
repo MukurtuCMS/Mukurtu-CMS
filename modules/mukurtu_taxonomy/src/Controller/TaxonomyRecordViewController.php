@@ -227,7 +227,7 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
       '#facets' => $facets,
       '#vocabulary_label' => $this->getSingularVocabularyLabel($taxonomy_term->bundle()),
       '#term_name' => $taxonomy_term->label(),
-      '#term_description' => $taxonomy_term->getDescription() ?? '',
+      '#term_description' => $this->getTermDescription($taxonomy_term),
       '#attached' => [
         'library' => [
           'field_group/element.horizontal_tabs',
@@ -252,6 +252,22 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
     }
 
     return $build;
+  }
+
+  /**
+   * Return the term description as a filtered Markup object, or empty string.
+   *
+   * Runs the stored description through check_markup() so HTML tags from the
+   * term's text format are preserved and safe to output in Twig without |raw.
+   */
+  protected function getTermDescription(TermInterface $taxonomy_term): string|\Drupal\Core\Render\Markup {
+    $description_field = $taxonomy_term->get('description');
+    if ($description_field->isEmpty()) {
+      return '';
+    }
+    $text = $description_field->value ?? '';
+    $format = $description_field->format ?? 'basic_html';
+    return $text ? check_markup($text, $format) : '';
   }
 
   /**
