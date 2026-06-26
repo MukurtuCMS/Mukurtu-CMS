@@ -180,31 +180,25 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
       ];
     }
 
-    // If the view has been deleted, we're done.
-    $view = Views::getView($this->getViewName());
+    // Use the core taxonomy_term view which queries taxonomy_index directly.
+    // The mukurtu_taxonomy_references view filters by UUID via Search API
+    // fulltext, but no UUID fields are indexed -- so it always returns empty.
+    // taxonomy_index is always populated by Drupal's taxonomy system.
+    $view = Views::getView('taxonomy_term');
     if (!$view) {
       return $build;
     }
-
-    // Set the display and inject the taxonomy term UUID into the fulltext
-    // search filter. Disable user-facing exposed search and sorts.
-    $view->setDisplay('content_block');
-    $filters = $view->display_handler->getOption('filters');
-    $filters['search_api_fulltext']['value'] = $taxonomy_term->uuid();
-    // Remove the user-facing search filter entirely so an empty value doesn't
-    // suppress results. Search and sort will be re-implemented properly later.
-    unset($filters['search_api_fulltext_1']);
-    $view->display_handler->overrideOption('filters', $filters);
-
-    $sorts = $view->display_handler->getOption('sorts');
-    foreach ($sorts as &$sort) {
-      $sort['exposed'] = FALSE;
-    }
-    unset($sort);
-    $view->display_handler->overrideOption('sorts', $sorts);
-
-    // Build the renderable array from the view.
-    $referencedContent = $view->buildRenderable('content_block');
+    $view->setDisplay('default');
+    $view->setArguments([$taxonomy_term->id()]);
+    // Remove the term entity header -- title and intro text are rendered
+    // by the page title callback and the taxonomy-records template instead.
+    $view->display_handler->overrideOption('header', []);
+    // Render items using the browse view mode so they display as grid cards.
+    $view->display_handler->overrideOption('row', [
+      'type' => 'entity:node',
+      'options' => ['view_mode' => 'browse'],
+    ]);
+    $referencedContent = $view->buildRenderable('default');
 
     // Facets.
     // Load all facets configured to use our browse block as a datasource.
