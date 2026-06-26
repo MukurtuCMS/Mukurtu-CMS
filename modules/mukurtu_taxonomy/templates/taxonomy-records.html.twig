@@ -1,9 +1,16 @@
+<div class="taxonomy-term-intro">
+  {% if term_description %}
+    <div class="taxonomy-term-description">{{ term_description }}</div>
+  {% endif %}
+  <p>{{ 'All available content using the @vocab term @term.'|t({'@vocab': vocabulary_label, '@term': term_name}) }}</p>
+</div>
+
 {% if records|length == 1%}
 <div data-horizontal-tabs class="taxonomy-records">
   {% set singlerecord = records|first %}
   {{ singlerecord.content }}
 </div>
-{% else %}
+{% elseif records|length > 1 %}
 <div data-horizontal-tabs class="taxonomy-records horizontal-tabs clearfix">
   <ul data-horizontal-tabs-list class="horizontal-tabs-list visually-hidden"></ul>
   <div{{ attributes.setAttribute('data-horizontal-tabs-panes', TRUE) }}>
@@ -35,8 +42,7 @@
   {% endif %}
 </div>
 {% if referenced_content is not empty %}
-  <h2>{{ 'Referenced Content'|t }}</h2>
-  <div class="referenced-content">
-  {{ referenced_content }}
+  <div class="referenced-content grid">
+    {{ referenced_content }}
   </div>
 {% endif %}

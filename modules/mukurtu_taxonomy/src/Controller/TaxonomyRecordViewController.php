@@ -61,6 +61,48 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
   }
 
   /**
+   * Return the singular display label for a vocabulary machine name.
+   */
+  protected function getSingularVocabularyLabel(string $vocab): string {
+    $map = [
+      'category' => 'Category',
+      'community_type' => 'Community Type',
+      'contributor' => 'Contributor',
+      'creator' => 'Creator',
+      'format' => 'Format',
+      'interpersonal_relationship' => 'Interpersonal Relationship',
+      'keywords' => 'Keyword',
+      'language' => 'Language',
+      'location' => 'Location',
+      'media_tag' => 'Media Tag',
+      'people' => 'Person',
+      'place_type' => 'Place Type',
+      'publisher' => 'Publisher',
+      'subject' => 'Subject',
+      'type' => 'Type',
+      'word_type' => 'Word Type',
+    ];
+    if (isset($map[$vocab])) {
+      return $map[$vocab];
+    }
+    $vocabulary = $this->entityTypeManager()->getStorage('taxonomy_vocabulary')->load($vocab);
+    return $vocabulary ? $vocabulary->label() : $vocab;
+  }
+
+  /**
+   * Return the page title for a taxonomy term page.
+   *
+   * @param \Drupal\taxonomy\TermInterface $taxonomy_term
+   *   The taxonomy term.
+   *
+   * @return string
+   *   The page title in the format "Vocabulary Label: Term Name".
+   */
+  public function title(TermInterface $taxonomy_term): string {
+    return $this->getSingularVocabularyLabel($taxonomy_term->bundle()) . ': ' . $taxonomy_term->label();
+  }
+
+  /**
    * Return the machine name of the view to use based on the search backend config.
    *
    * @return string
@@ -145,11 +187,19 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
     }
 
     // Set the display and inject the taxonomy term UUID into the fulltext
-    // search filter.
+    // search filter. Disable user-facing exposed search and sorts.
     $view->setDisplay('content_block');
     $filters = $view->display_handler->getOption('filters');
     $filters['search_api_fulltext']['value'] = $taxonomy_term->uuid();
+    $filters['search_api_fulltext_1']['exposed'] = FALSE;
     $view->display_handler->overrideOption('filters', $filters);
+
+    $sorts = $view->display_handler->getOption('sorts');
+    foreach ($sorts as &$sort) {
+      $sort['exposed'] = FALSE;
+    }
+    unset($sort);
+    $view->display_handler->overrideOption('sorts', $sorts);
 
     // Build the renderable array from the view.
     $referencedContent = $view->buildRenderable('content_block');
@@ -178,6 +228,9 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
       '#records' => $records,
       '#referenced_content' => $referencedContent,
       '#facets' => $facets,
+      '#vocabulary_label' => $this->getSingularVocabularyLabel($taxonomy_term->bundle()),
+      '#term_name' => $taxonomy_term->label(),
+      '#term_description' => $taxonomy_term->getDescription() ?? '',
       '#attached' => [
         'library' => [
           'field_group/element.horizontal_tabs',
