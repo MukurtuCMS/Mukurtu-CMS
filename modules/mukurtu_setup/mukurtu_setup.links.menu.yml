@@ -1,0 +1,8 @@
+mukurtu_setup.setup_page:
+  class: Drupal\mukurtu_setup\Menu\SetupMenuLink
+  title: 'Site Setup'
+  description: 'View and track site setup tasks.'
+  parent: mukurtu_core.dashboard_admin
+  menu_name: dashboard-site-settings
+  route_name: mukurtu_setup.setup_page
+  weight: -100

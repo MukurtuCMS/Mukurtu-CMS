@@ -338,6 +338,12 @@ class FormHooks
             ),
             "#open" => false,
             "#attached" => ["library" => ["mukurtu_core/notify-form"]],
+            // aria-live on the stable parent so AJAX replacements of the inner
+            // notify-users-wrapper are announced. The wrapper element itself
+            // cannot carry aria-live because it is replaced on each AJAX call,
+            // which destroys and re-creates the live region before the
+            // announcement fires.
+            "#attributes" => ["aria-live" => "polite"],
         ];
 
         $form["notify"]["notify_all_managers"] = [
@@ -398,7 +404,7 @@ class FormHooks
             "#prefix" =>
                 '<div id="notify-users-wrapper" role="group" aria-labelledby="' .
                 $users_label_id .
-                '" aria-live="polite"><p id="' .
+                '"><p id="' .
                 $users_label_id .
                 '" class="fieldset__label fieldset__label--group">' .
                 t("Notify specific users:") .

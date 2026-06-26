@@ -1,0 +1,61 @@
+.mukurtu-setup-checklist__columns {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+.mukurtu-setup-checklist__columns .mukurtu-setup-checklist__group {
+  flex: 1;
+  min-width: 0;
+}
+
+.mukurtu-setup-checklist__task-list {
+  list-style: none;
+  padding: 0;
+}
+
+.mukurtu-setup-checklist__task {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.mukurtu-setup-checklist__task-status {
+  flex-shrink: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid #767676;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.1rem;
+  font-size: 0.9rem;
+  color: transparent;
+}
+
+.mukurtu-setup-checklist__task--complete .mukurtu-setup-checklist__task-status {
+  background-color: #2e7d32;
+  border-color: #2e7d32;
+  color: #fff;
+}
+
+.mukurtu-setup-checklist__task-header {
+  display: inline;
+}
+
+.mukurtu-setup-checklist__mark-done,
+.mukurtu-setup-checklist__undo,
+.mukurtu-setup-checklist__dismiss {
+  font-size: 0.875rem;
+  font-weight: normal;
+}
+
+.mukurtu-setup-checklist__task-description {
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.mukurtu-setup-checklist__dismissed {
+  margin-top: 2rem;
+}
