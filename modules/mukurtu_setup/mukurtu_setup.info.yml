@@ -1,0 +1,13 @@
+name: 'Mukurtu Setup'
+type: module
+description: 'Provides a site setup checklist for administrators and Mukurtu Managers.'
+core_version_requirement: '^10 || ^11'
+package: 'Mukurtu CMS'
+version: 4.x-dev
+dependencies:
+  - 'drupal:block'
+  - 'drupal:block_content'
+  - 'drupal:node'
+  - 'drupal:system'
+  - 'drupal:taxonomy'
+  - 'mukurtu_protocol:mukurtu_protocol'
