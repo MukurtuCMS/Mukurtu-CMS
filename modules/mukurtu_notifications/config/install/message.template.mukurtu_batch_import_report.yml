@@ -8,7 +8,7 @@ label: 'Mukurtu Batch Import Report'
 description: 'A report containing the results of a batch import.'
 text:
   -
-    value: 'Batch imported [message:field_number_imported] items on [message:created] (<a href="/import/report/[message:mid]">Details</a>).'
+    value: 'Batch imported [message:field_number_imported] items on [message:created] (<a href="/import/report/[message:mid]">View batch import report</a>).'
     format: mukurtu_html
 settings:
   'token options':
