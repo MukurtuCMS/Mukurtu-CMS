@@ -106,6 +106,10 @@ services:
           # and may drop Tugboat-specific settings added before install.
           cp $TUGBOAT_ROOT/.tugboat/settings.tugboat.php web/sites/default/settings.php
           chown www-data:www-data web/sites/default/settings.php
+          # Run any pending update hooks introduced by this branch and clear
+          # caches so templates and config changes take effect immediately.
+          sudo -E -u www-data ./vendor/bin/drush updb -y
+          sudo -E -u www-data ./vendor/bin/drush cr
       update:
         # Ensure settings.php is always present with the correct database
         # credentials, guarding against site-install rewrites or refresh-only
@@ -125,10 +129,19 @@ services:
           chown -R www-data:www-data private_files
           find private_files -type d -exec chmod 2775 {} \;
           find private_files -type f -exec chmod 0664 {} \;
-        # Run pending database update hooks so new config/code is deployed.
-        - cd ~/mukurtu && sudo -E -u www-data ./vendor/bin/drush updb -y
-        # Clear Drupal caches so updated templates and code take effect.
-        - cd ~/mukurtu && sudo -E -u www-data ./vendor/bin/drush cr
+        # Run pending database update hooks and clear caches. On a fresh build
+        # the database does not exist yet (site-install runs in the build phase
+        # after this), so skip gracefully; the build phase runs updb/cr after
+        # site-install. On a PR refresh the database is already populated and
+        # these commands apply the branch's pending update hooks normally.
+        - |
+          cd ~/mukurtu
+          if sudo -E -u www-data ./vendor/bin/drush core:status 2>/dev/null; then
+            sudo -E -u www-data ./vendor/bin/drush updb -y
+            sudo -E -u www-data ./vendor/bin/drush cr
+          else
+            echo "Drupal not yet installed; updb/cr will run after site-install in the build phase."
+          fi
   mariadb:
     image: tugboatqa/mariadb:lts
     commands:
