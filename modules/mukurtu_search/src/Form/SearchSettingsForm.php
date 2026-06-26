@@ -86,12 +86,14 @@ class SearchSettingsForm extends ConfigFormBase {
       ],
       '#default_value' => $config->get('header_search_path') ?? '/browse',
       '#states' => [
-        'visible' => [':input[name="header_search_enabled"]' => ['checked' => TRUE]],
+        'visible' => [
+          ':input[name="header_search_enabled"]' => ['checked' => TRUE],
+        ],
       ],
     ];
 
     $form['backend'] = [
-      '#title' => 'Search Backend',
+      '#title' => $this->t('Search Backend'),
       '#description' => $this->t('Select which Search API backend to use for search. Note that backends must be configured prior to use. See @link.', ['@link' => $link]),
       '#type'          => 'radios',
       '#options' => [
@@ -99,34 +101,6 @@ class SearchSettingsForm extends ConfigFormBase {
         'solr' => $this->t('Search API Solr'),
       ],
       '#default_value' => $backend,
-    ];
-
-    $form['header_search'] = [
-      '#type' => 'fieldset',
-      '#title' => $this->t('Header search'),
-      '#description' => $this->t('Controls the search box that appears in the header navigation bar.'),
-    ];
-
-    $form['header_search']['header_search_enabled'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Show search box in the header navigation'),
-      '#default_value' => (bool) ($config->get('header_search_enabled') ?? TRUE),
-    ];
-
-    $form['header_search']['header_search_path'] = [
-      '#type' => 'select',
-      '#title' => $this->t('Search destination'),
-      '#description' => $this->t('Users will be sent to this page with their search query.'),
-      '#options' => [
-        '/browse' => $this->t('Browse (/browse)'),
-        '/digital-heritage' => $this->t('Digital Heritage (/digital-heritage)'),
-      ],
-      '#default_value' => $config->get('header_search_path') ?? '/browse',
-      '#states' => [
-        'visible' => [
-          ':input[name="header_search_enabled"]' => ['checked' => TRUE],
-        ],
-      ],
     ];
 
     return parent::buildForm($form, $form_state);
@@ -142,7 +116,9 @@ class SearchSettingsForm extends ConfigFormBase {
     $config->set('collapse_multipage_pages', !(bool) $form_state->getValue('collapse_multipage_pages'));
     $config->set('collapse_community_records', !(bool) $form_state->getValue('collapse_community_records'));
     $config->set('header_search_enabled', (bool) $form_state->getValue('header_search_enabled'));
-    $config->set('header_search_path', $form_state->getValue('header_search_path'));
+    $allowed_paths = ['/browse', '/digital-heritage'];
+    $path = $form_state->getValue('header_search_path');
+    $config->set('header_search_path', in_array($path, $allowed_paths, TRUE) ? $path : '/browse');
     $config->save();
 
     parent::submitForm($form, $form_state);

@@ -48,7 +48,7 @@
 {# Mobile: search bar visible in the header at all screen sizes below desktop. #}
 {% if header_search_enabled %}
 <div class="header-search header-search--mobile">
-  <form class="header-search__form" action="{{ header_search_path }}" method="get" role="search">
+  <form class="header-search__form" action="{{ header_search_path }}" method="get" role="search" aria-label="{{ 'Search'|t }}">
     <input
       class="header-search__input"
       type="search"
@@ -88,7 +88,7 @@
     {# Desktop: search bar inside the flex nav bar. #}
     {% if header_search_enabled %}
     <div class="header-search header-search--desktop">
-      <form class="header-search__form" action="{{ header_search_path }}" method="get" role="search">
+      <form class="header-search__form" action="{{ header_search_path }}" method="get" role="search" aria-label="{{ 'Search'|t }}">
         <input
           class="header-search__input"
           type="search"
