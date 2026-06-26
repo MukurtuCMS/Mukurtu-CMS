@@ -191,7 +191,9 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
     $view->setDisplay('content_block');
     $filters = $view->display_handler->getOption('filters');
     $filters['search_api_fulltext']['value'] = $taxonomy_term->uuid();
-    $filters['search_api_fulltext_1']['exposed'] = FALSE;
+    // Remove the user-facing search filter entirely so an empty value doesn't
+    // suppress results. Search and sort will be re-implemented properly later.
+    unset($filters['search_api_fulltext_1']);
     $view->display_handler->overrideOption('filters', $filters);
 
     $sorts = $view->display_handler->getOption('sorts');
