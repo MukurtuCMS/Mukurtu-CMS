@@ -3774,6 +3774,7 @@ body:not(.is-always-mobile-nav) {
 @media (max-width: 59.9rem) {
   body:not(.is-always-mobile-nav) .header-search--mobile {
     grid-column: 2/-2;
+    grid-row: 1;
     align-self: center;
     -webkit-border-before: none;
             border-block-start: none;

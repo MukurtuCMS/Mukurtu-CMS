@@ -28,6 +28,7 @@ body:not(.is-always-mobile-nav) {
   @include include-media.media('<lg') {
     & .header-search--mobile {
       grid-column: 2 / -2;
+      grid-row: 1;
       align-self: center;
       border-block-start: none;
       background: transparent;
