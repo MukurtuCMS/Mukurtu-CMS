@@ -29,6 +29,7 @@ class ManageBulkRolesFormTest extends KernelTestBase {
     'workflows',
     'field',
     'file',
+    'filter',
     'image',
     'node',
     'node_access_test',
