@@ -3756,10 +3756,32 @@ body.is-always-mobile-nav .header-nav::before {
  *                           Hidden on small screens (the nav is a slide-out
  *                           panel); shown at the desktop breakpoint.
  */
-/* On desktop, align the nav and desktop search side by side. */
+/* Default (is-always-mobile-nav): full-width strip in the header grid. */
+.header-search--mobile {
+  grid-column: 1/-1;
+  -webkit-border-before: 1px solid var(--color-divider, #e0e0e0);
+          border-block-start: 1px solid var(--color-divider, #e0e0e0);
+  padding-inline: var(--v-space-5xs);
+  padding-block: var(--v-space-5xs);
+  background: var(--color-white);
+}
+
+body:not(.is-always-mobile-nav) {
+  /* Mobile: search sits in the middle columns (2-4) of the header row,
+   * between the logo (col 1) and the hamburger button (cols 5-6). */
+  /* Desktop: hide the mobile bar; show the instance inside the nav bar. */
+}
+@media (max-width: 59.9rem) {
+  body:not(.is-always-mobile-nav) .header-search--mobile {
+    grid-column: 2/-2;
+    align-self: center;
+    -webkit-border-before: none;
+            border-block-start: none;
+    background: transparent;
+  }
+}
 @media (min-width: 60rem) {
   body:not(.is-always-mobile-nav) {
-    /* Hide the mobile bar; show the desktop instance inside the nav. */
     /* Fixed width on desktop so the nav items have room. */
   }
   body:not(.is-always-mobile-nav) .header__main-nav {
@@ -3788,17 +3810,6 @@ body.is-always-mobile-nav .header-nav::before {
         -ms-flex: 0 0 200px;
             flex: 0 0 200px;
   }
-}
-
-/* ---- Mobile instance ---- */
-/* Full-width bar in the header grid, visible on small screens. */
-.header-search--mobile {
-  grid-column: 1/-1;
-  -webkit-border-before: 1px solid var(--color-divider, #e0e0e0);
-          border-block-start: 1px solid var(--color-divider, #e0e0e0);
-  padding-inline: var(--v-space-4xs);
-  padding-block: var(--v-space-5xs);
-  background: var(--color-white);
 }
 
 /* ---- Desktop instance ---- */
@@ -6488,9 +6499,8 @@ header {
           margin-block-start: var(--v-space-xs);
 }
 
-.node--draft-banner {
+.node--status-banner {
   display: block;
-  background: var(--brand-secondary-dark);
   color: var(--color-white);
   font-size: 0.875rem;
   font-weight: 700;
@@ -6499,6 +6509,18 @@ header {
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 0.1em;
+}
+.node--status-banner--draft {
+  background: var(--brand-secondary-dark);
+}
+.node--status-banner--needs-review {
+  background: var(--color-warning-dark);
+}
+.node--status-banner--revision-requested {
+  background: var(--color-error-dark);
+}
+.node--status-banner--archived {
+  background: var(--color-gray);
 }
 
 .full-node__list {

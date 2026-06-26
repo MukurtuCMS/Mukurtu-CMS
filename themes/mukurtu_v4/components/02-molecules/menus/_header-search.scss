@@ -13,15 +13,34 @@
 
 @use "../../../external/include-media";
 
-/* On desktop, align the nav and desktop search side by side. */
+/* Default (is-always-mobile-nav): full-width strip in the header grid. */
+.header-search--mobile {
+  grid-column: 1 / -1;
+  border-block-start: 1px solid var(--color-divider, #e0e0e0);
+  padding-inline: var(--v-space-5xs);
+  padding-block: var(--v-space-5xs);
+  background: var(--color-white);
+}
+
 body:not(.is-always-mobile-nav) {
+  /* Mobile: search sits in the middle columns (2-4) of the header row,
+   * between the logo (col 1) and the hamburger button (cols 5-6). */
+  @include include-media.media('<lg') {
+    & .header-search--mobile {
+      grid-column: 2 / -2;
+      align-self: center;
+      border-block-start: none;
+      background: transparent;
+    }
+  }
+
+  /* Desktop: hide the mobile bar; show the instance inside the nav bar. */
   @include include-media.media('>=lg') {
     & .header__main-nav {
       display: flex;
       align-items: center;
     }
 
-    /* Hide the mobile bar; show the desktop instance inside the nav. */
     & .header-search--mobile {
       display: none;
     }
@@ -37,16 +56,6 @@ body:not(.is-always-mobile-nav) {
       flex: 0 0 200px;
     }
   }
-}
-
-/* ---- Mobile instance ---- */
-/* Full-width bar in the header grid, visible on small screens. */
-.header-search--mobile {
-  grid-column: 1 / -1;
-  border-block-start: 1px solid var(--color-divider, #e0e0e0);
-  padding-inline: var(--v-space-4xs);
-  padding-block: var(--v-space-5xs);
-  background: var(--color-white);
 }
 
 /* ---- Desktop instance ---- */
