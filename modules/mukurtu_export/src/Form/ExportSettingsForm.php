@@ -118,13 +118,14 @@ class ExportSettingsForm extends ExportBaseForm {
             '#type' => 'checkbox',
             '#title' => $this->formatPlural(
               $recursive_additional,
-              'Also include all items nested within child collections in this selection (1 additional item)',
-              'Also include all items nested within child collections in this selection (@count additional items)',
+              'Include all items in sub-collections in this selection (1 additional item).',
+              'Include all items in sub-collections in this selection (@count additional items).',
             ),
             '#default_value' => FALSE,
             '#weight' => -4,
             '#states' => [
-              'visible' => [':input[name="include_children"]' => ['checked' => TRUE]],
+              'visible'  => [':input[name="include_children"]' => ['checked' => TRUE]],
+              'disabled' => [':input[name="include_children"]' => ['checked' => FALSE]],
             ],
           ];
         }

@@ -1503,3 +1503,39 @@ function mukurtu_core_update_40052(): void {
       ->save();
   }
 }
+
+/**
+ * Install mukurtu_setup and add the setup checklist block to the dashboard.
+ */
+function mukurtu_core_update_40061(): void {
+  if (!\Drupal::moduleHandler()->moduleExists('mukurtu_setup')) {
+    \Drupal::service('module_installer')->install(['mukurtu_setup']);
+  }
+
+  $config = \Drupal::configFactory()->getEditable('dashboards.dashboard.mukurtu_dashboard');
+  if ($config->isNew()) {
+    return;
+  }
+
+  $uuid = '08fde6c5-ad7d-4e16-a742-b2ed6f52b6a6';
+  $sections = $config->get('sections') ?? [];
+  if (isset($sections[0]['components'][$uuid])) {
+    return;
+  }
+
+  $sections[0]['components'][$uuid] = [
+    'uuid' => $uuid,
+    'region' => 'two',
+    'configuration' => [
+      'id' => 'mukurtu_setup_checklist',
+      'label' => 'Setup Checklist',
+      'label_display' => 'visible',
+      'provider' => 'mukurtu_setup',
+      'context_mapping' => [],
+    ],
+    'weight' => 1,
+    'additional' => [],
+  ];
+
+  $config->set('sections', $sections)->save();
+}
