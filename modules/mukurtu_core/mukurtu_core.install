@@ -1890,3 +1890,22 @@ function mukurtu_core_update_40065(): void {
   $config->clear('display.review_queue.display_options.filters.moderation_state');
   $config->save();
 }
+
+/**
+ * Grant stewards and contributors access to view latest unpublished revisions.
+ */
+function mukurtu_core_update_40066(): void {
+  $role = \Drupal::entityTypeManager()->getStorage('user_role')->load('authenticated');
+  if ($role && !$role->hasPermission('view latest version')) {
+    $role->grantPermission('view latest version');
+    $role->save();
+  }
+
+  foreach (['protocol-protocol-protocol_steward', 'protocol-protocol-language_steward'] as $role_id) {
+    $og_role = \Drupal::entityTypeManager()->getStorage('og_role')->load($role_id);
+    if ($og_role && !$og_role->hasPermission('view any unpublished content')) {
+      $og_role->grantPermission('view any unpublished content');
+      $og_role->save();
+    }
+  }
+}

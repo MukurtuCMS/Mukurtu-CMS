@@ -93,4 +93,5 @@ permissions:
   - 'use mukurtu_editorial_workflow transition resubmit'
   - 'use mukurtu_editorial_workflow transition save_draft'
   - 'use mukurtu_editorial_workflow transition submit_for_review'
+  - 'view any unpublished content'
 role_type: standard
