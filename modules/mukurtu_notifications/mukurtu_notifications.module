@@ -136,7 +136,8 @@ function mukurtu_notifications_node_update(Node $node) {
       $email_validator = \Drupal::service('email.validator');
       $recipients = User::loadMultiple($notify_uids);
       foreach ($recipients as $uid => $recipient) {
-        if (!$email_validator->isValid($recipient->getEmail())) {
+        $email = $recipient->getEmail();
+        if (!$email || !$email_validator->isValid($email)) {
           continue;
         }
         $subscribe_options['uids'][$uid] = new DeliveryCandidate($flags, $notifiers, $uid);
