@@ -464,6 +464,17 @@ function mukurtu_browse_update_40011(): void {
     $index->addField($field);
   }
 
+  // Register with ignorecase, which has all_fields: false and requires explicit registration.
+  $processors = $index->getProcessors();
+  if (isset($processors['ignorecase'])) {
+    $config = $processors['ignorecase']->getConfiguration();
+    if (!in_array('field_sections_body', $config['fields'])) {
+      $config['fields'][] = 'field_sections_body';
+      $processors['ignorecase']->setConfiguration($config);
+      $index->setProcessors($processors);
+    }
+  }
+
   $index->save();
   $index->reindex();
 }
