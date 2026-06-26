@@ -3,7 +3,7 @@
     {% if term_description %}
       <div class="taxonomy-term-description">{{ term_description }}</div>
     {% endif %}
-    <p>{{ 'All available content using the @vocab term @term.'|t({'@vocab': vocabulary_label, '@term': term_name}) }}</p>
+    <p>{{ 'All available content using the @vocab term <em>@term</em>.'|t({'@vocab': vocabulary_label, '@term': term_name}) }}</p>
   </div>
 
   {% if records|length == 1%}

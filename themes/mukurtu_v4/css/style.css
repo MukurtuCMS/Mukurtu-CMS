@@ -3744,6 +3744,172 @@ body.is-always-mobile-nav .header-nav::before {
   text-decoration: none;
 }
 
+/**
+ * @file
+ * Header navigation search box.
+ *
+ * Two instances are rendered:
+ *   .header-search--mobile  Outside #header-nav, always in the header grid.
+ *                           Shown on small screens; hidden at the desktop
+ *                           breakpoint where the nav becomes a flex bar.
+ *   .header-search--desktop Inside #header-nav's flex container.
+ *                           Hidden on small screens (the nav is a slide-out
+ *                           panel); shown at the desktop breakpoint.
+ */
+/* Default (is-always-mobile-nav): full-width strip in the header grid. */
+.header-search--mobile {
+  grid-column: 1/-1;
+  -webkit-border-before: 1px solid var(--color-divider, #e0e0e0);
+          border-block-start: 1px solid var(--color-divider, #e0e0e0);
+  padding-inline: var(--v-space-5xs);
+  padding-block: var(--v-space-5xs);
+  background: var(--color-white);
+}
+
+body:not(.is-always-mobile-nav) {
+  /* Mobile: search sits in the middle columns (2-4) of the header row,
+   * between the logo (col 1) and the hamburger button (cols 5-6). */
+  /* Desktop: hide the mobile bar; show the instance inside the nav bar. */
+}
+@media (max-width: 59.9rem) {
+  body:not(.is-always-mobile-nav) .header-search--mobile {
+    grid-column: 2/-2;
+    grid-row: 1;
+    align-self: center;
+    -webkit-border-before: none;
+            border-block-start: none;
+    background: transparent;
+  }
+}
+@media (min-width: 60rem) {
+  body:not(.is-always-mobile-nav) {
+    /* Fixed width on desktop so the nav items have room. */
+  }
+  body:not(.is-always-mobile-nav) .header__main-nav {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+  }
+  body:not(.is-always-mobile-nav) .header-search--mobile {
+    display: none;
+  }
+  body:not(.is-always-mobile-nav) .header-search--desktop {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    -webkit-padding-start: var(--v-space-4xs);
+            padding-inline-start: var(--v-space-4xs);
+  }
+  body:not(.is-always-mobile-nav) .header-search__input {
+    -webkit-box-flex: 0;
+        -ms-flex: 0 0 200px;
+            flex: 0 0 200px;
+  }
+}
+
+/* ---- Desktop instance ---- */
+/* Inside the nav bar flex container; hidden until the desktop breakpoint. */
+.header-search--desktop {
+  display: none;
+}
+
+/* ---- Shared form styles ---- */
+.header-search__form {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch;
+  inline-size: 100%;
+}
+
+.header-search__input {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  -webkit-box-flex: 1;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
+  padding-block: var(--v-space-5xs);
+  padding-inline: var(--v-space-5xs);
+  border: 1.5px solid var(--color-text-neutral-medium, #767676);
+  -webkit-border-end: 0;
+          border-inline-end: 0;
+  border-radius: 4px 0 0 4px;
+  font-size: var(--font-size-m);
+  color: var(--color-text-neutral-loud);
+  background: var(--color-white);
+  line-height: 1.4;
+  /* Remove the browser-native X clear button on type=search. */
+}
+.header-search__input:focus {
+  outline: 2px solid var(--brand-secondary-dark);
+  outline-offset: 2px;
+  border-color: var(--brand-secondary-dark);
+}
+.header-search__input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+          appearance: none;
+}
+
+.header-search__button {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -ms-flex-negative: 0;
+      flex-shrink: 0;
+  min-block-size: 2.75rem;
+  min-inline-size: 2.75rem;
+  padding-block: var(--v-space-5xs);
+  padding-inline: var(--v-space-5xs);
+  border: 1.5px solid var(--brand-primary);
+  border-radius: 0 4px 4px 0;
+  background: var(--brand-primary);
+  cursor: pointer;
+  -webkit-transition: background-color 0.12s ease-in, border-color 0.12s ease-in;
+  transition: background-color 0.12s ease-in, border-color 0.12s ease-in;
+}
+.header-search__button:hover {
+  background-color: var(--brand-primary-dark, var(--brand-primary));
+  border-color: var(--brand-primary-dark, var(--brand-primary));
+}
+.header-search__button:focus {
+  outline: 2px solid var(--brand-secondary-dark);
+  outline-offset: 2px;
+}
+@media (forced-colors: active) {
+  .header-search__button {
+    border: 2px solid buttontext;
+  }
+}
+
+.header-search__icon {
+  display: block;
+  fill: var(--color-white);
+  inline-size: 1.125rem;
+  block-size: 1.125rem;
+  -ms-flex-negative: 0;
+      flex-shrink: 0;
+}
+@media (forced-colors: active) {
+  .header-search__icon {
+    fill: buttontext;
+  }
+}
+
 :root {
   /* Width of slide out navigation */
   --mobile-nav-width: 500px;
@@ -6334,9 +6500,8 @@ header {
           margin-block-start: var(--v-space-xs);
 }
 
-.node--draft-banner {
+.node--status-banner {
   display: block;
-  background: var(--brand-secondary-dark);
   color: var(--color-white);
   font-size: 0.875rem;
   font-weight: 700;
@@ -6345,6 +6510,18 @@ header {
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 0.1em;
+}
+.node--status-banner--draft {
+  background: var(--brand-secondary-dark);
+}
+.node--status-banner--needs-review {
+  background: var(--color-warning-dark);
+}
+.node--status-banner--revision-requested {
+  background: var(--color-error-dark);
+}
+.node--status-banner--archived {
+  background: var(--color-gray);
 }
 
 .full-node__list {
@@ -6799,6 +6976,28 @@ header {
 @media (min-width: 90rem) {
   .taxonomy-term-page > * {
     grid-column: 2/-2;
+  }
+}
+
+@media (min-width: 60rem) {
+  .taxonomy-term-page .grid:has(.views-row) {
+    -webkit-column-count: 2;
+       -moz-column-count: 2;
+            column-count: 2;
+  }
+}
+@media (min-width: 80rem) {
+  .taxonomy-term-page .grid:has(.views-row) {
+    -webkit-column-count: 3;
+       -moz-column-count: 3;
+            column-count: 3;
+  }
+}
+@media (min-width: 90rem) {
+  .taxonomy-term-page .grid:has(.views-row) {
+    -webkit-column-count: 4;
+       -moz-column-count: 4;
+            column-count: 4;
   }
 }
 

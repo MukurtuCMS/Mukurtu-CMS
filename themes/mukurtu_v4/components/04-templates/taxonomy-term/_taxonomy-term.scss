@@ -12,3 +12,17 @@
     }
   }
 }
+
+.taxonomy-term-page .grid:has(.views-row) {
+  @include include-media.media('>=lg') {
+    column-count: 2;
+  }
+
+  @include include-media.media('>=xl') {
+    column-count: 3;
+  }
+
+  @include include-media.media('>=2xl') {
+    column-count: 4;
+  }
+}
