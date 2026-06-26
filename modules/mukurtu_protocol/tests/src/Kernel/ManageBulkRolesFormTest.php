@@ -145,9 +145,8 @@ class ManageBulkRolesFormTest extends KernelTestBase {
   protected function addMember(array $og_role_names = []): \Drupal\og\Entity\OgMembership {
     $user = User::create(['name' => $this->randomString()]);
     $user->save();
-    $membership = $this->community->addMember($user, $og_role_names);
-    $membership->save();
-    return $membership;
+    $this->community->addMember($user, $og_role_names);
+    return Og::getMembership($this->community, $user);
   }
 
   /**
