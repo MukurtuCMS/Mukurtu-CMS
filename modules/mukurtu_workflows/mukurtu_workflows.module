@@ -211,13 +211,48 @@ function mukurtu_workflows_preprocess_node(array &$variables): void {
 function mukurtu_workflows_views_query_alter(ViewExecutable $view, QueryPluginBase $query): void {
   $is_content_under_review = $view->id() === 'mukurtu_content_under_review';
   $is_review_queue = $view->id() === 'mukurtu_workflow_overview' && $view->current_display === 'review_queue';
-  if (!$is_content_under_review && !$is_review_queue) {
+  $is_in_progress = $view->id() === 'mukurtu_workflow_overview' && $view->current_display === 'my_content_in_progress';
+
+  if (!$is_content_under_review && !$is_review_queue && !$is_in_progress) {
+    return;
+  }
+
+  $node_storage = \Drupal::entityTypeManager()->getStorage('node');
+
+  // The "In progress" tab shows content whose LATEST revision is in a
+  // non-published, non-archived workflow state. The UID contextual argument in
+  // the view already scopes this to the current user's content.
+  if ($is_in_progress) {
+    $nids = array_values($node_storage->getQuery()
+      ->latestRevision()
+      ->condition('moderation_state', ['draft', 'needs_review', 'revision_requested'], 'IN')
+      ->accessCheck(FALSE)
+      ->execute());
+    if (empty($nids)) {
+      $query->addWhereExpression(0, '1 = 0');
+      return;
+    }
+    $query->addWhere(0, 'node_field_data.nid', $nids, 'IN');
+    return;
+  }
+
+  // For the review queue, filter by the LATEST revision's moderation state so
+  // that content re-drafted from a published state is included.
+  $latest_review_nids = array_values($node_storage->getQuery()
+    ->latestRevision()
+    ->condition('moderation_state', ['needs_review', 'revision_requested'], 'IN')
+    ->accessCheck(FALSE)
+    ->execute());
+
+  if (empty($latest_review_nids)) {
+    $query->addWhereExpression(0, '1 = 0');
     return;
   }
 
   $account = \Drupal::currentUser();
 
   if ($account->hasPermission('bypass node access') || $account->hasPermission('administer nodes')) {
+    $query->addWhere(0, 'node_field_data.nid', $latest_review_nids, 'IN');
     return;
   }
 
@@ -247,7 +282,6 @@ function mukurtu_workflows_views_query_alter(ViewExecutable $view, QueryPluginBa
   // Find nodes in stewarded protocols via EntityQuery so the cultural_protocol
   // field's pipe-delimited storage format is handled correctly regardless of
   // the underlying table structure.
-  $node_storage = \Drupal::entityTypeManager()->getStorage('node');
   $nids = [];
 
   if (!empty($steward_protocol_ids)) {
@@ -271,6 +305,9 @@ function mukurtu_workflows_views_query_alter(ViewExecutable $view, QueryPluginBa
       ->condition('type', ['dictionary_word', 'word_list'], 'IN');
     $nids = array_unique(array_merge($nids, array_values($ls_query->execute())));
   }
+
+  // Intersect protocol-scoped nodes with those in a review state.
+  $nids = array_values(array_intersect($nids, $latest_review_nids));
 
   if (empty($nids)) {
     $query->addWhereExpression(0, '1 = 0');

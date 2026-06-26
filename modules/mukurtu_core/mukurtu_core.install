@@ -1872,3 +1872,21 @@ function mukurtu_core_update_40064(): void {
   $workflow->set('type_settings.transitions.request_revision.label', 'Needs edits');
   $workflow->save();
 }
+
+/**
+ * Remove default-revision-based view filters replaced by views_query_alter.
+ *
+ * The status=0 filter on my_content_in_progress and the moderation_state
+ * filter on review_queue both looked at the default revision, missing content
+ * that was published and then re-drafted. Both are now handled in PHP using
+ * EntityQuery::latestRevision().
+ */
+function mukurtu_core_update_40065(): void {
+  $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_workflow_overview');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->clear('display.my_content_in_progress.display_options.filters.status');
+  $config->clear('display.review_queue.display_options.filters.moderation_state');
+  $config->save();
+}
