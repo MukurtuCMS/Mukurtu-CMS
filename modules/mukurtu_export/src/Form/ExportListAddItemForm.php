@@ -100,14 +100,23 @@ class ExportListAddItemForm extends FormBase {
       $children = $this->childResolver->getChildEntities($entity);
       $child_count = array_sum(array_map('count', $children));
       if ($child_count > 0) {
+        // For collections, label only counts direct items (not sub-collections).
+        $item_count = $entity->bundle() === 'collection' && $entity->hasField('field_items_in_collection')
+          ? count($entity->get('field_items_in_collection')->referencedEntities())
+          : $child_count;
         $form['include_children'] = [
           '#type' => 'checkbox',
-          '#title' => $this->formatPlural(
-            $child_count,
-            'Also include 1 child item from this @bundle',
-            'Also include @count child items from this @bundle',
-            ['@bundle' => $entity->bundle() === 'collection' ? $this->t('collection') : $this->t('word list')]
-          ),
+          '#title' => $entity->bundle() === 'word_list'
+            ? $this->formatPlural(
+                $child_count,
+                'Include the 1 word in this word list.',
+                'Include all @count words in this word list.',
+              )
+            : $this->formatPlural(
+                $item_count,
+                'Include the 1 item in this collection.',
+                'Include all @count items in this collection.',
+              ),
           '#default_value' => FALSE,
         ];
 
@@ -121,12 +130,13 @@ class ExportListAddItemForm extends FormBase {
               '#type' => 'checkbox',
               '#title' => $this->formatPlural(
                 $additional_count,
-                'Also include all items nested within child collections (1 additional item)',
-                'Also include all items nested within child collections (@count additional items)',
+                'Include all items in sub-collections (1 additional item).',
+                'Include all items in sub-collections (@count additional items).',
               ),
               '#default_value' => FALSE,
               '#states' => [
-                'visible' => [':input[name="include_children"]' => ['checked' => TRUE]],
+                'visible'  => [':input[name="include_children"]' => ['checked' => TRUE]],
+                'disabled' => [':input[name="include_children"]' => ['checked' => FALSE]],
               ],
             ];
           }
