@@ -1,0 +1,14 @@
+@use "../../../external/include-media";
+@use "../../00-base/layout/layout";
+
+.taxonomy-term-page {
+  @include layout.layout--full-width-grid;
+
+  > * {
+    grid-column: 1 / -1;
+
+    @include include-media.media('>=2xl') {
+      grid-column: 2 / -2;
+    }
+  }
+}

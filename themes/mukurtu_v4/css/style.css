@@ -6775,6 +6775,33 @@ header {
   background-color: var(--color-error-light);
 }
 
+.taxonomy-term-page {
+  display: grid;
+  grid-template-columns: var(--grid-6col);
+  padding-inline: var(--layout-padding) var(--layout-padding);
+  -webkit-column-gap: var(--gutter);
+     -moz-column-gap: var(--gutter);
+          column-gap: var(--gutter);
+}
+@media (min-width: 60rem) {
+  .taxonomy-term-page {
+    grid-template-columns: var(--grid-12col);
+  }
+}
+@media (min-width: 90rem) {
+  .taxonomy-term-page {
+    grid-template-columns: minmax(0, auto) var(--grid-12col-max-width) minmax(0, auto);
+  }
+}
+.taxonomy-term-page > * {
+  grid-column: 1/-1;
+}
+@media (min-width: 90rem) {
+  .taxonomy-term-page > * {
+    grid-column: 2/-2;
+  }
+}
+
 .word-list .full-node__main {
   container-type: inline-size;
 }

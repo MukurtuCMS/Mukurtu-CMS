@@ -193,10 +193,11 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
     // Remove the term entity header -- title and intro text are rendered
     // by the page title callback and the taxonomy-records template instead.
     $view->display_handler->overrideOption('header', []);
-    // Render items using the browse view mode so they display as grid cards.
+    // Render items using the grid_browse view mode (vertical card: image top,
+    // title below) which suits the column-count grid layout.
     $view->display_handler->overrideOption('row', [
       'type' => 'entity:node',
-      'options' => ['view_mode' => 'browse'],
+      'options' => ['view_mode' => 'grid_browse'],
     ]);
     $referencedContent = $view->buildRenderable('default');
 
