@@ -58,9 +58,12 @@ class ExportListAddItemsForm extends FormBase {
     if (!\array_key_exists('action_id', $form_data)) {
       $this->messenger()->addWarning($this->t('No items are staged for export.'));
       $destination = $this->getRequest()->query->get('destination');
-      $destination
-        ? $form_state->setRedirectUrl(Url::fromUserInput($destination))
-        : $form_state->setRedirect('entity.export_list.collection');
+      if ($destination && str_starts_with($destination, '/')) {
+        $form_state->setRedirectUrl(Url::fromUserInput($destination));
+      }
+      else {
+        $form_state->setRedirect('entity.export_list.collection');
+      }
       return $form;
     }
 
@@ -148,12 +151,13 @@ class ExportListAddItemsForm extends FormBase {
           '#type' => 'checkbox',
           '#title' => $this->formatPlural(
             $recursive_additional,
-            'Also include all items nested within child collections in this selection (1 additional item)',
-            'Also include all items nested within child collections in this selection (@count additional items)',
+            'Include all items in sub-collections in this selection (1 additional item).',
+            'Include all items in sub-collections in this selection (@count additional items).',
           ),
           '#default_value' => FALSE,
           '#states' => [
-            'visible' => [':input[name="include_children"]' => ['checked' => TRUE]],
+            'visible'  => [':input[name="include_children"]' => ['checked' => TRUE]],
+            'disabled' => [':input[name="include_children"]' => ['checked' => FALSE]],
           ],
         ];
       }
