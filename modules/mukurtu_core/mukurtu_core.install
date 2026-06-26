@@ -1649,3 +1649,16 @@ function mukurtu_core_update_40062(&$sandbox): string {
     '@total' => $sandbox['total'],
   ]);
 }
+
+/**
+ * Grant mukurtu_manager Layout Builder override permissions for landing pages and basic pages.
+ */
+function mukurtu_core_update_40063(): void {
+  $role = \Drupal\user\Entity\Role::load('mukurtu_manager');
+  if (!$role) {
+    return;
+  }
+  $role->grantPermission('configure editable landing_page node layout overrides');
+  $role->grantPermission('configure editable page node layout overrides');
+  $role->save();
+}
