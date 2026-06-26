@@ -90,3 +90,15 @@ function mukurtu_workflows_update_40001(): void {
 
   $config->save();
 }
+
+/**
+ * Rename the "Revision Requested" workflow state label to "Edits Needed".
+ */
+function mukurtu_workflows_update_40002(): void {
+  $config = \Drupal::configFactory()->getEditable('workflows.workflow.mukurtu_editorial_workflow');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('type_settings.states.revision_requested.label', 'Edits Needed');
+  $config->save();
+}

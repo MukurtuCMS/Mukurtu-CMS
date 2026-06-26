@@ -19,7 +19,7 @@ type_settings:
       published: false
       default_revision: false
     revision_requested:
-      label: 'Revision Requested'
+      label: 'Edits Needed'
       weight: 2
       published: false
       default_revision: false
