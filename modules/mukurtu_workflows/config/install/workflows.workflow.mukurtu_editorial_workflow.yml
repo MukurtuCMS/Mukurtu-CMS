@@ -47,6 +47,7 @@ type_settings:
       label: 'Submit for Review'
       from:
         - draft
+        - needs_review
       to: needs_review
       weight: 1
     request_revision:

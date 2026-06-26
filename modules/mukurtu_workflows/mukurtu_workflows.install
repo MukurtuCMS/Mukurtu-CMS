@@ -92,6 +92,22 @@ function mukurtu_workflows_update_40001(): void {
 }
 
 /**
+ * Allow contributors to re-save content as "Awaiting Review" from needs_review.
+ */
+function mukurtu_workflows_update_40003(): void {
+  $config = \Drupal::configFactory()->getEditable('workflows.workflow.mukurtu_editorial_workflow');
+  if ($config->isNew()) {
+    return;
+  }
+  $from = $config->get('type_settings.transitions.submit_for_review.from') ?? ['draft'];
+  if (!in_array('needs_review', $from, TRUE)) {
+    $from[] = 'needs_review';
+    $config->set('type_settings.transitions.submit_for_review.from', $from);
+    $config->save();
+  }
+}
+
+/**
  * Rename the "Revision Requested" workflow state label to "Edits Needed".
  */
 function mukurtu_workflows_update_40002(): void {
