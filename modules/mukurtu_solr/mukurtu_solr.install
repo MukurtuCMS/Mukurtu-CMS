@@ -139,9 +139,12 @@ function mukurtu_solr_update_40004(): void {
   if (!$index->getField('node__field_sections__body')) {
     $field = new \Drupal\search_api\Item\Field($index, 'node__field_sections__body');
     $field->setType('text');
-    $field->setPropertyPath('field_sections:entity:field_body');
-    $field->setDatasourceId('entity:node');
+    $field->setPropertyPath('aggregated_field');
     $field->setLabel('Sections Body Text');
+    $field->setConfiguration([
+      'type' => 'union',
+      'fields' => ['entity:node/field_sections:entity:field_body'],
+    ]);
     $index->addField($field);
   }
 

@@ -146,12 +146,12 @@ field_settings:
         - node
   field_sections_body:
     label: 'Sections Body Text'
-    datasource_id: 'entity:node'
-    property_path: 'field_sections:entity:field_body'
+    property_path: aggregated_field
     type: text
-    dependencies:
-      module:
-        - node
+    configuration:
+      type: union
+      fields:
+        - 'entity:node/field_sections:entity:field_body'
   field_source:
     label: Source
     datasource_id: 'entity:node'
