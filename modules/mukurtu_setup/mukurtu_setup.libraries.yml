@@ -1,0 +1,4 @@
+setup-checklist:
+  css:
+    theme:
+      css/mukurtu-setup-checklist.css: {}

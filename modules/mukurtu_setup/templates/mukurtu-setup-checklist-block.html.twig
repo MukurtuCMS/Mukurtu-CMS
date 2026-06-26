@@ -1,0 +1,25 @@
+{#
+/**
+ * @file
+ * Dashboard block showing site setup progress summary.
+ *
+ * Available variables:
+ * - total: Total number of visible (non-dismissed) tasks.
+ * - complete: Number of completed tasks.
+ * - setup_url: URL to the full setup checklist page.
+ */
+#}
+<div class="mukurtu-setup-block">
+  {% if total == complete %}
+    <p class="mukurtu-setup-block__status mukurtu-setup-block__status--complete">
+      {{ 'Setup complete'|t }}
+    </p>
+  {% else %}
+    <p class="mukurtu-setup-block__status">
+      {{ '@complete of @total tasks complete'|t({'@complete': complete, '@total': total}) }}
+    </p>
+  {% endif %}
+  <a href="{{ setup_url }}" class="mukurtu-setup-block__link">
+    {{ 'View setup checklist'|t }}
+  </a>
+</div>
