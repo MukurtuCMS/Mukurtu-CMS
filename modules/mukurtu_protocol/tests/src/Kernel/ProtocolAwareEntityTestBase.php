@@ -18,6 +18,7 @@ class ProtocolAwareEntityTestBase extends EntityKernelTestBase {
     'content_moderation',
     'workflows',
     'field',
+    'file',
     'filter',
     'image',
     'node',
