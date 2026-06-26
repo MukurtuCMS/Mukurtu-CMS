@@ -1,0 +1,5 @@
+mukurtu_notifications.my_notifications:
+  title: 'My notifications'
+  description: 'View your notifications.'
+  menu_name: dashboard-my-account
+  route_name: view.mukurtu_message_log.mukurtu_notifications_page

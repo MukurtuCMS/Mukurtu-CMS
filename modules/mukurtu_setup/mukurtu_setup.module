@@ -1,0 +1,28 @@
+<?php
+
+declare(strict_types=1);
+
+/**
+ * Implements hook_theme().
+ */
+function mukurtu_setup_theme(): array {
+  return [
+    'mukurtu_setup_checklist' => [
+      'variables' => [
+        'groups' => [],
+        'dismissed' => [],
+        'all_complete' => FALSE,
+        'setup_page_url' => NULL,
+      ],
+      'template' => 'mukurtu-setup-checklist',
+    ],
+    'mukurtu_setup_checklist_block' => [
+      'variables' => [
+        'total' => 0,
+        'complete' => 0,
+        'setup_url' => NULL,
+      ],
+      'template' => 'mukurtu-setup-checklist-block',
+    ],
+  ];
+}
