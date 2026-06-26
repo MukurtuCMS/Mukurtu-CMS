@@ -360,14 +360,19 @@ function mukurtu_workflows_form_node_form_alter(array &$form, FormStateInterface
     '#value' => $node->get('moderation_state')->value,
   ];
 
+  $moderation_weight = $form['moderation_state']['#weight'] ?? 100;
   $form['review_note'] = [
     '#type' => 'textarea',
     '#title' => t('Review note'),
     '#required' => FALSE,
     '#rows' => 3,
-    '#weight' => $form['moderation_state']['#weight'] ?? 100,
-    '#states' => [],
+    '#weight' => $moderation_weight + 1,
   ];
+
+  // Place in the same footer group as the moderation state widget when present.
+  if (isset($form['footer'])) {
+    $form['review_note']['#group'] = 'footer';
+  }
 
   // Append post-save handler. Form-level #submit handlers run after the node
   // has already been saved by EntityForm::save(), so the new node state is
