@@ -49,7 +49,7 @@ class ProtocolAwareEntityTestBase extends EntityKernelTestBase {
   protected function setUp(): void {
     parent::setUp();
 
-    $this->installConfig(['filter', 'og', 'system']);
+    $this->installConfig(['filter', 'image', 'og', 'system']);
     $this->installEntitySchema('og_membership');
     $this->installEntitySchema('user');
     $this->installEntitySchema('taxonomy_term');
