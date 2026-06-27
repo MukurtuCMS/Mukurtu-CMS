@@ -174,8 +174,8 @@ abstract class ManageBulkRolesFormBase extends FormBase {
     foreach ($table_values as $membership_id => $row) {
       $checked = array_filter(array_intersect_key($row, $role_ids));
       if (empty($checked)) {
-        $form_state->setError(
-          $form['roles_table'][$membership_id],
+        $form_state->setErrorByName(
+          "roles_table][$membership_id",
           $this->t('Each member must have at least one role. To remove a member from the group, use the members list.')
         );
       }
@@ -225,8 +225,8 @@ abstract class ManageBulkRolesFormBase extends FormBase {
     }
 
     if ($managers_outside + $managers_in_form === 0) {
-      $form_state->setError(
-        $form['roles_table'],
+      $form_state->setErrorByName(
+        'roles_table',
         $this->t('At least one manager must remain in the group. Assign the manager role to at least one member, or assign it to another member before removing it here.')
       );
     }
