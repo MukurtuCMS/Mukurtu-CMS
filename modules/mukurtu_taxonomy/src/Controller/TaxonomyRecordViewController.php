@@ -61,29 +61,38 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
   }
 
   /**
+   * Singular display labels for Mukurtu's built-in vocabulary machine names.
+   *
+   * Vocabulary::label() returns the admin-supplied name (typically plural,
+   * e.g. "Keywords"). This map provides the singular form used in page titles
+   * ("Keyword: Art"). Any new Mukurtu vocabulary should be added here.
+   * Custom site vocabularies not in this list fall back to the admin label.
+   */
+  const VOCABULARY_LABEL_MAP = [
+    'category' => 'Category',
+    'community_type' => 'Community Type',
+    'contributor' => 'Contributor',
+    'creator' => 'Creator',
+    'format' => 'Format',
+    'interpersonal_relationship' => 'Interpersonal Relationship',
+    'keywords' => 'Keyword',
+    'language' => 'Language',
+    'location' => 'Location',
+    'media_tag' => 'Media Tag',
+    'people' => 'Person',
+    'place_type' => 'Place Type',
+    'publisher' => 'Publisher',
+    'subject' => 'Subject',
+    'type' => 'Type',
+    'word_type' => 'Word Type',
+  ];
+
+  /**
    * Return the singular display label for a vocabulary machine name.
    */
   protected function getSingularVocabularyLabel(string $vocab): string {
-    $map = [
-      'category' => 'Category',
-      'community_type' => 'Community Type',
-      'contributor' => 'Contributor',
-      'creator' => 'Creator',
-      'format' => 'Format',
-      'interpersonal_relationship' => 'Interpersonal Relationship',
-      'keywords' => 'Keyword',
-      'language' => 'Language',
-      'location' => 'Location',
-      'media_tag' => 'Media Tag',
-      'people' => 'Person',
-      'place_type' => 'Place Type',
-      'publisher' => 'Publisher',
-      'subject' => 'Subject',
-      'type' => 'Type',
-      'word_type' => 'Word Type',
-    ];
-    if (isset($map[$vocab])) {
-      return $map[$vocab];
+    if (isset(self::VOCABULARY_LABEL_MAP[$vocab])) {
+      return self::VOCABULARY_LABEL_MAP[$vocab];
     }
     $vocabulary = $this->entityTypeManager()->getStorage('taxonomy_vocabulary')->load($vocab);
     return $vocabulary ? $vocabulary->label() : $vocab;
@@ -122,6 +131,14 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
    *
    * @return string
    *   The facet source ID.
+   *
+   * @todo Facets are currently non-functional on taxonomy term pages.
+   *   Referenced content now comes from the core taxonomy_term SQL view
+   *   (taxonomy_index), not from Search API. The facets module integrates
+   *   with Search API, not core Views, so any facets configured for these
+   *   source IDs will load but won't filter the displayed content. Facet
+   *   support requires either re-adding a Search API-backed view or a custom
+   *   facet source plugin for the taxonomy_term view.
    */
   protected function getFacetSourceId(): string {
     $views = [
@@ -184,6 +201,9 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
     // The mukurtu_taxonomy_references view filters by UUID via Search API
     // fulltext, but no UUID fields are indexed -- so it always returns empty.
     // taxonomy_index is always populated by Drupal's taxonomy system.
+    // Views::getView() returns a new ViewExecutable instance each call
+    // (see ViewExecutableFactory::get()), so overrideOption() mutations below
+    // are scoped to this request only and don't affect other callers.
     $view = Views::getView('taxonomy_term');
     if (!$view) {
       return $build;
