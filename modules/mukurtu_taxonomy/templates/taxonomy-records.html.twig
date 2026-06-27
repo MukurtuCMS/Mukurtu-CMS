@@ -45,7 +45,7 @@
   </div>
 
   {% if referenced_content is not empty %}
-    <div class="referenced-content grid">
+    <div class="referenced-content grid" aria-label="{{ 'Referenced content'|t }}">
       {{ referenced_content }}
     </div>
   {% endif %}
