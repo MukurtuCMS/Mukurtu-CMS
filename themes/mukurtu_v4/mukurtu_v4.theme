@@ -109,6 +109,17 @@ function mukurtu_v4_preprocess_block(&$variables) {
     $variables['content']['#items']['title'] = $variables['label'];
   }
 
+  // Inject header search config into the main menu block template.
+  if (isset($variables['plugin_id']) && $variables['plugin_id'] === 'system_menu_block:main') {
+    $search_config = \Drupal::config('mukurtu_search.settings');
+    $variables['header_search_enabled'] = (bool) ($search_config->get('header_search_enabled') ?? TRUE);
+    $variables['header_search_path'] = $search_config->get('header_search_path') ?? '/browse';
+    $variables['#cache']['tags'] = Cache::mergeTags(
+      $variables['#cache']['tags'] ?? [],
+      $search_config->getCacheTags()
+    );
+  }
+
   // Directs the theme to use the block template for the Mukurtu footer,
   // mukurtu-footer.html.twig. Otherwise, it would use the default template,
   // block.html.twig, and our footer would not display.
