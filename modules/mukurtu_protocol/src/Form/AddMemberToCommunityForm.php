@@ -384,6 +384,7 @@ class AddMemberToCommunityForm extends FormBase {
     }
     else {
       $this->saveCommunityMemberships($user, $selections);
+      $this->messenger()->addWarning($this->t('You are not a protocol steward of any protocols in this community and cannot assign protocol roles.'));
       $form_state->setRedirect('mukurtu_protocol.community_members_list', ['group' => $cid]);
     }
   }
