@@ -86,11 +86,11 @@ class WorkflowSettingsForm extends FormBase {
       ];
 
       $form['workflow_table'][$id]['label'] = [
-        '#markup' => $workflow->label(),
+        '#plain_text' => $workflow->label(),
       ];
 
       $form['workflow_table'][$id]['states'] = [
-        '#markup' => implode(', ', $state_labels),
+        '#plain_text' => implode(', ', $state_labels),
       ];
 
       $links = [

@@ -33,6 +33,7 @@
               {% endif %}
             </p>
             {% if item.note %}
+              {# item.note is user-entered text; Twig auto-escapes {{ }} output. #}
               <p class="mukurtu-review-panel__text">{{ item.note }}</p>
             {% endif %}
           </li>

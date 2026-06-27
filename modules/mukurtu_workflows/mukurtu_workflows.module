@@ -286,11 +286,18 @@ function mukurtu_workflows_views_pre_render(ViewExecutable $view): void {
 
   foreach ($view->result as $row) {
     $nid = $row->nid ?? NULL;
-    if ($nid !== NULL && isset($states[$nid], $nodes[$nid])) {
-      $node = clone $nodes[$nid];
-      $node->set('moderation_state', $states[$nid]);
-      $row->_entity = $node;
+    if ($nid === NULL || !isset($states[$nid], $nodes[$nid])) {
+      continue;
     }
+    $node = $nodes[$nid];
+    $latest_state = $states[$nid];
+    if ($node->get('moderation_state')->value !== $latest_state) {
+      // Clone only when the default-revision state differs from the latest
+      // so we don't mutate the entity cache for rows already showing correctly.
+      $node = clone $node;
+      $node->set('moderation_state', $latest_state);
+    }
+    $row->_entity = $node;
   }
 }
 
@@ -370,6 +377,9 @@ function mukurtu_workflows_views_query_alter(ViewExecutable $view, QueryPluginBa
   $nids = [];
 
   if (!empty($steward_protocol_ids)) {
+    // accessCheck(FALSE): querying the protocol field value, not node grants.
+    // Results are intersected with $latest_review_nids below, so no content
+    // outside the steward's protocols or review states is exposed.
     $steward_query = $node_storage->getQuery()->accessCheck(FALSE);
     $or = $steward_query->orConditionGroup();
     foreach ($steward_protocol_ids as $pid) {
@@ -381,6 +391,7 @@ function mukurtu_workflows_views_query_alter(ViewExecutable $view, QueryPluginBa
 
   if (!empty($language_steward_protocol_ids)) {
     // Language stewards only review dictionary words and word lists.
+    // accessCheck(FALSE): same rationale as above.
     $ls_query = $node_storage->getQuery()->accessCheck(FALSE);
     $ls_or = $ls_query->orConditionGroup();
     foreach ($language_steward_protocol_ids as $pid) {
