@@ -14,11 +14,26 @@
 }
 
 .taxonomy-term-page .grid:has(.views-row) {
+  // Disable the global masonry-grid column-count so the CSS Grid below
+  // can span the full container width. The .view class no longer exists
+  // in Drupal 11 -- the view wrapper is a bare div inside
+  // .views-element-container.
   @include include-media.media('>=lg') {
-    column-count: 2;
+    column-count: 1;
   }
 
-  @include include-media.media('>=xl') {
-    column-count: 4;
+  .views-element-container > div {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--v-space-3xs);
+
+    @include include-media.media('>=lg') {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    @include include-media.media('>=xl') {
+      gap: var(--v-space-2xs);
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
   }
 }
