@@ -339,8 +339,7 @@ class AddMemberToCommunityForm extends FormBase {
     $user = $uid ? User::load($uid) : NULL;
 
     if (!$user) {
-      $this->messenger()->addWarning($this->t('Please select a user.'));
-      $form_state->setRebuild(TRUE);
+      $form_state->setErrorByName('user', $this->t('Please select a user.'));
       return;
     }
 
@@ -349,10 +348,9 @@ class AddMemberToCommunityForm extends FormBase {
 
     // Check that the selected user is not already a community member.
     if ($community && $community->getMembership($user)) {
-      $this->messenger()->addWarning($this->t('@user is already a member of this community.', [
+      $form_state->setErrorByName('user', $this->t('@user is already a member of this community.', [
         '@user' => $user->getDisplayName(),
       ]));
-      $form_state->setRebuild(TRUE);
       return;
     }
 
@@ -366,8 +364,7 @@ class AddMemberToCommunityForm extends FormBase {
     }
 
     if (!$has_role) {
-      $this->messenger()->addWarning($this->t('Please select at least one community role.'));
-      $form_state->setRebuild(TRUE);
+      $form_state->setErrorByName('memberships', $this->t('Please select at least one community role.'));
       return;
     }
 
@@ -384,7 +381,9 @@ class AddMemberToCommunityForm extends FormBase {
     }
     else {
       $this->saveCommunityMemberships($user, $selections);
-      $this->messenger()->addWarning($this->t('You are not a protocol steward of any protocols in this community and cannot assign protocol roles.'));
+      $this->messenger()->addStatus($this->t('@user has been added to the community. No protocol roles are available to assign.', [
+        '@user' => $user->getDisplayName(),
+      ]));
       $form_state->setRedirect('mukurtu_protocol.community_members_list', ['group' => $cid]);
     }
   }
@@ -404,6 +403,11 @@ class AddMemberToCommunityForm extends FormBase {
     $uid  = $form_state->get('selected_user');
     $user = User::load($uid);
     $cid  = $form_state->get('community_id');
+
+    if (!$uid || !$user) {
+      $this->messenger()->addError($this->t('An error occurred. Please try again.'));
+      return;
+    }
 
     $community_selections = $form_state->get('community_selections') ?? [];
     $this->saveCommunityMemberships($user, $community_selections);
