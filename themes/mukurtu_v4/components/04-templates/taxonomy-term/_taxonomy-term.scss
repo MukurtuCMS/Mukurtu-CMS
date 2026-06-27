@@ -15,12 +15,12 @@
 
 .taxonomy-term-page .grid:has(.views-row) {
   // Reset the multi-column layout from the global masonry-grid rule so the
-  // CSS Grid on .view-content can span full width.
+  // CSS Grid on .view can span full width.
   @include include-media.media('>=lg') {
     column-count: 1;
   }
 
-  .view-content {
+  .view {
     display: grid;
     grid-template-columns: 1fr;
     gap: var(--v-space-3xs);
