@@ -14,28 +14,11 @@
 }
 
 .taxonomy-term-page .grid:has(.views-row) {
-  // Reset the multi-column layout from the global masonry-grid rule so the
-  // CSS Grid on .view can span full width.
   @include include-media.media('>=lg') {
-    column-count: 1;
+    column-count: 2;
   }
 
-  .view {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--v-space-3xs);
-
-    @include include-media.media('>=lg') {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    @include include-media.media('>=xl') {
-      gap: var(--v-space-2xs);
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-
-    @include include-media.media('>=2xl') {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
+  @include include-media.media('>=xl') {
+    column-count: 4;
   }
 }
