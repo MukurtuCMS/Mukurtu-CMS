@@ -17,12 +17,12 @@ type_settings:
       label: 'Awaiting Review'
       weight: 1
       published: false
-      default_revision: false
+      default_revision: true
     revision_requested:
       label: 'Edits Needed'
       weight: 2
       published: false
-      default_revision: false
+      default_revision: true
     published:
       label: Published
       weight: 3

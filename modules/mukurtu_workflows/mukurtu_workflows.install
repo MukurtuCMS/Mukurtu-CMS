@@ -108,6 +108,20 @@ function mukurtu_workflows_update_40003(): void {
 }
 
 /**
+ * Make needs_review and revision_requested default revisions so content is
+ * unpublished (removed from browse pages) when moved out of published state.
+ */
+function mukurtu_workflows_update_40004(): void {
+  $config = \Drupal::configFactory()->getEditable('workflows.workflow.mukurtu_editorial_workflow');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('type_settings.states.needs_review.default_revision', TRUE);
+  $config->set('type_settings.states.revision_requested.default_revision', TRUE);
+  $config->save();
+}
+
+/**
  * Rename the "Revision Requested" workflow state label to "Edits Needed".
  */
 function mukurtu_workflows_update_40002(): void {
