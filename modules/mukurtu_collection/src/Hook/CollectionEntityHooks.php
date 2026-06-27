@@ -104,6 +104,9 @@ final class CollectionEntityHooks {
    *   Node IDs to reindex.
    */
   private function reindexCollections(array $node_ids): void {
+    if (!$this->entityTypeManager->hasDefinition('search_api_index')) {
+      return;
+    }
     /** @var \Drupal\search_api\IndexInterface $index */
     $index = $this->entityTypeManager
       ->getStorage('search_api_index')
