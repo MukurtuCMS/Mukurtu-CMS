@@ -229,6 +229,68 @@ function _mukurtu_workflows_nids_by_latest_state(array $states): array {
 }
 
 /**
+ * Returns a map of NID => latest moderation state machine name.
+ *
+ * Same subquery pattern as _mukurtu_workflows_nids_by_latest_state() but
+ * returns an associative array so callers can look up the state by NID.
+ */
+function _mukurtu_workflows_latest_states_by_nid(array $nids): array {
+  if (empty($nids)) {
+    return [];
+  }
+  $db = \Drupal::database();
+
+  $subquery = $db->select('content_moderation_state_field_revision', 's');
+  $subquery->addField('s', 'content_entity_id');
+  $subquery->addExpression('MAX(s.content_entity_revision_id)', 'max_vid');
+  $subquery->condition('s.content_entity_type_id', 'node');
+  $subquery->condition('s.content_entity_id', $nids, 'IN');
+  $subquery->groupBy('s.content_entity_id');
+
+  $query = $db->select('content_moderation_state_field_revision', 'cmfr');
+  $query->join($subquery, 'latest', 'cmfr.content_entity_id = latest.content_entity_id AND cmfr.content_entity_revision_id = latest.max_vid');
+  $query->addField('cmfr', 'content_entity_id');
+  $query->addField('cmfr', 'moderation_state');
+  $query->condition('cmfr.content_entity_type_id', 'node');
+
+  return $query->execute()->fetchAllKeyed();
+}
+
+/**
+ * Implements hook_views_post_execute().
+ *
+ * Fixes the "Status" column in the review queue: the moderation_state views
+ * handler joins content_moderation_state_field_revision on the DEFAULT
+ * revision's VID, so published nodes re-submitted to needs_review show
+ * "Published". After execution we overwrite the field alias on each result
+ * row with the true latest-revision moderation state.
+ */
+function mukurtu_workflows_views_post_execute(ViewExecutable $view): void {
+  if ($view->id() !== 'mukurtu_workflow_overview' || $view->current_display !== 'review_queue') {
+    return;
+  }
+  if (empty($view->result)) {
+    return;
+  }
+
+  $nids = array_column($view->result, 'nid');
+  $states = _mukurtu_workflows_latest_states_by_nid($nids);
+  if (empty($states)) {
+    return;
+  }
+
+  // The moderation_state views field stores its value in the result row under
+  // the alias produced by ModerationStateJoinViewsHandlerTrait::ensureMyTable().
+  $alias = 'content_moderation_state_field_revision_moderation_state';
+  foreach ($view->result as $row) {
+    $nid = $row->nid ?? NULL;
+    if ($nid !== NULL && isset($states[$nid])) {
+      $row->$alias = $states[$nid];
+    }
+  }
+}
+
+/**
  * Implements hook_views_query_alter().
  *
  * Scopes the content-under-review view to protocols where the current user is

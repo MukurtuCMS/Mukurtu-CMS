@@ -4,3 +4,14 @@ services:
     arguments: ['@og.membership_manager']
     tags:
       - { name: access_check, applies_to: _review_queue_access }
+
+  mukurtu_workflows.latest_version_steward_check:
+    class: Drupal\mukurtu_workflows\Access\LatestVersionStewardCheck
+    arguments: ['@content_moderation.moderation_information', '@og.membership_manager']
+    tags:
+      - { name: access_check, applies_to: _mukurtu_latest_version_access }
+
+  mukurtu_workflows.latest_version_route_subscriber:
+    class: Drupal\mukurtu_workflows\Routing\LatestVersionRouteSubscriber
+    tags:
+      - { name: event_subscriber }

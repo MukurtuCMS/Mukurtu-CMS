@@ -33,3 +33,4 @@ permissions:
   - 'use mukurtu_editorial_workflow transition save_draft'
   - 'use mukurtu_editorial_workflow transition submit_for_review'
   - 'view latest version'
+  - 'view own unpublished content'
