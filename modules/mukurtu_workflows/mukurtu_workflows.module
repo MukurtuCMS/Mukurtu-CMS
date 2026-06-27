@@ -257,15 +257,17 @@ function _mukurtu_workflows_latest_states_by_nid(array $nids): array {
 }
 
 /**
- * Implements hook_views_post_execute().
+ * Implements hook_views_pre_render().
  *
- * Fixes the "Status" column in the review queue: the moderation_state views
- * handler joins content_moderation_state_field_revision on the DEFAULT
- * revision's VID, so published nodes re-submitted to needs_review show
- * "Published". After execution we overwrite the field alias on each result
- * row with the true latest-revision moderation state.
+ * Fixes the "Status" column in the review queue: the moderation_state field
+ * uses the EntityField plugin which reads from $row->_entity. The default
+ * node revision is still the published one for re-submitted content, so the
+ * column shows "Published". We pre-populate $row->_entity with a cloned node
+ * whose moderation_state is overridden to the true latest-revision value.
+ * EntityField::preRender() checks $row->_entity first and skips reloading,
+ * so this intercepts rendering before the wrong state is displayed.
  */
-function mukurtu_workflows_views_post_execute(ViewExecutable $view): void {
+function mukurtu_workflows_views_pre_render(ViewExecutable $view): void {
   if ($view->id() !== 'mukurtu_workflow_overview' || $view->current_display !== 'review_queue') {
     return;
   }
@@ -273,19 +275,21 @@ function mukurtu_workflows_views_post_execute(ViewExecutable $view): void {
     return;
   }
 
-  $nids = array_column($view->result, 'nid');
+  $nids = array_filter(array_column($view->result, 'nid'));
   $states = _mukurtu_workflows_latest_states_by_nid($nids);
   if (empty($states)) {
     return;
   }
 
-  // The moderation_state views field stores its value in the result row under
-  // the alias produced by ModerationStateJoinViewsHandlerTrait::ensureMyTable().
-  $alias = 'content_moderation_state_field_revision_moderation_state';
+  $node_storage = \Drupal::entityTypeManager()->getStorage('node');
+  $nodes = $node_storage->loadMultiple(array_keys($states));
+
   foreach ($view->result as $row) {
     $nid = $row->nid ?? NULL;
-    if ($nid !== NULL && isset($states[$nid])) {
-      $row->$alias = $states[$nid];
+    if ($nid !== NULL && isset($states[$nid], $nodes[$nid])) {
+      $node = clone $nodes[$nid];
+      $node->set('moderation_state', $states[$nid]);
+      $row->_entity = $node;
     }
   }
 }
