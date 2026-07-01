@@ -119,7 +119,7 @@
           <aside class="full-node__sidebar">
             <div class="sidebar-section">
               {{ content.community_protocol_list }}
-              {{ content.group_metadata }}
+              {{ content.group_metadata|without('flag_export_content') }}
             </div>
           </aside>
         </div>

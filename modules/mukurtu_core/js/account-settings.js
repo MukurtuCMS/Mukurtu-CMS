@@ -13,7 +13,9 @@
    *   Admin-only → genpass mode disabled (no registration form); strength stays enabled.
    *   Admin-approval → email verification disabled; all genpass modes remain available.
    *   Email verification ON → genpass locked to 2 (auto-switched if needed).
-   *   Email verification OFF → all genpass modes available.
+   *   Email verification OFF, no approval required → genpass value 1 disabled
+   *     (auto-switched to 0 if needed); values 0 and 2 remain available.
+   *   Email verification OFF, approval required → all genpass modes available.
    */
   Drupal.behaviors.mukurtuAccountSettings = {
     attach(context) {
@@ -94,8 +96,20 @@
             }
             announce(Drupal.t('Email verification is enabled. Visitor password entry is set to automatic generation.'));
           }
+          else if (registerVisitors?.checked) {
+            // No approval and no email verification: value 1 ("may enter") is
+            // unsafe because a blank submission logs the visitor in with a
+            // password they never see and can't recover after logging out.
+            setDisabled(genpassV0, false);
+            setDisabled(genpassV1, true);
+            setDisabled(genpassV2, false);
+            if (genpassV1?.checked && genpassV0) {
+              genpassV0.checked = true;
+            }
+            announce(Drupal.t('Visitors can register without approval and email verification is disabled. Visitor password entry is set to require a password.'));
+          }
           else {
-            // All genpass values available (open registration or admin approval).
+            // All genpass values available (admin approval required).
             setDisabled(genpassV0, false);
             setDisabled(genpassV1, false);
             setDisabled(genpassV2, false);
