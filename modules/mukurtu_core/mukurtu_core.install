@@ -1539,3 +1539,112 @@ function mukurtu_core_update_40061(): void {
 
   $config->set('sections', $sections)->save();
 }
+
+/**
+ * Enable Layout Builder on basic pages; migrate existing nodes to preserve content.
+ */
+function mukurtu_core_update_40062(&$sandbox): string {
+  if (!isset($sandbox['progress'])) {
+    // Create the layout_builder__layout field instance for the page bundle if absent.
+    if (!\Drupal\field\Entity\FieldConfig::loadByName('node', 'page', 'layout_builder__layout')) {
+      $module_path = \Drupal::service('module_handler')->getModule('mukurtu_core')->getPath();
+      $config_source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+      $config_data = $config_source->read('field.field.node.page.layout_builder__layout');
+      if ($config_data) {
+        \Drupal::configFactory()
+          ->getEditable('field.field.node.page.layout_builder__layout')
+          ->setData($config_data)
+          ->save();
+      }
+    }
+
+    // Enable Layout Builder on the page default and full view displays.
+    foreach (['default', 'full'] as $mode) {
+      $display = \Drupal::entityTypeManager()
+        ->getStorage('entity_view_display')
+        ->load('node.page.' . $mode);
+      if ($display) {
+        $display->setThirdPartySetting('layout_builder', 'enabled', TRUE);
+        $display->setThirdPartySetting('layout_builder', 'allow_custom', TRUE);
+        // Remove all legacy field components so Layout Builder controls rendering.
+        foreach (array_keys($display->getComponents()) as $name) {
+          $display->removeComponent($name);
+        }
+        $display->save();
+      }
+    }
+
+    // Collect all basic page node IDs for the sandbox migration.
+    $nids = \Drupal::entityQuery('node')
+      ->condition('type', 'page')
+      ->accessCheck(FALSE)
+      ->execute();
+    $sandbox['nids'] = array_values($nids);
+    $sandbox['total'] = count($nids);
+    $sandbox['progress'] = 0;
+  }
+
+  if ($sandbox['total'] === 0) {
+    $sandbox['#finished'] = 1;
+    return 'Layout Builder enabled on basic pages. No existing nodes to migrate.';
+  }
+
+  $batch_size = 25;
+  $nids_batch = array_slice($sandbox['nids'], $sandbox['progress'], $batch_size);
+
+  foreach ($nids_batch as $nid) {
+    $node = \Drupal\node\Entity\Node::load($nid);
+    if ($node && $node->hasField('layout_builder__layout') && $node->get('layout_builder__layout')->isEmpty()) {
+      $uuid_generator = new \Drupal\Component\Uuid\Php();
+
+      $body_component = new \Drupal\layout_builder\SectionComponent(
+        $uuid_generator->generate(),
+        'content',
+        [
+          'id' => 'field_block:node:page:body',
+          'label' => '',
+          'label_display' => '0',
+          'formatter' => [
+            'type' => 'text_default',
+            'settings' => [],
+            'label' => 'hidden',
+          ],
+          'context_mapping' => ['entity' => 'layout_builder.entity'],
+          'provider' => 'layout_builder',
+        ]
+      );
+
+      // field_page_media_assets is excluded from Layout Builder sections;
+      // the node template renders it separately via preprocess to preserve
+      // the media carousel behaviour.
+      $section = new \Drupal\layout_builder\Section(
+        'layout_onecol',
+        [],
+        [$body_component]
+      );
+
+      $node->set('layout_builder__layout', [$section]);
+      $node->save();
+    }
+    $sandbox['progress']++;
+  }
+
+  $sandbox['#finished'] = $sandbox['progress'] / $sandbox['total'];
+  return (string) t('Migrated @done of @total basic page nodes to Layout Builder.', [
+    '@done' => $sandbox['progress'],
+    '@total' => $sandbox['total'],
+  ]);
+}
+
+/**
+ * Grant mukurtu_manager Layout Builder override permissions for landing pages and basic pages.
+ */
+function mukurtu_core_update_40063(): void {
+  $role = \Drupal\user\Entity\Role::load('mukurtu_manager');
+  if (!$role) {
+    return;
+  }
+  $role->grantPermission('configure editable landing_page node layout overrides');
+  $role->grantPermission('configure editable page node layout overrides');
+  $role->save();
+}

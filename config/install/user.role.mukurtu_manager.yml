@@ -70,6 +70,8 @@ permissions:
   - 'access mukurtu import'
   - 'administer mukurtu_media configuration'
   - 'administer mukurtu media download settings'
+  - 'configure editable landing_page node layout overrides'
+  - 'configure editable page node layout overrides'
   - 'create article content'
   - 'create landing_page content'
   - 'create page content'

@@ -6500,6 +6500,17 @@ header {
           margin-block-start: var(--v-space-xs);
 }
 
+@media (min-width: 60rem) {
+  .page-node-type-page .full-node__main {
+    grid-column: 1/span 12;
+  }
+}
+@media (min-width: 90rem) {
+  .page-node-type-page .full-node__main {
+    grid-column: 2/span 12;
+  }
+}
+
 .node--draft-banner {
   display: block;
   background: var(--brand-secondary-dark);
