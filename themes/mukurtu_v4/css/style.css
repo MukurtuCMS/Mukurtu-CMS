@@ -6500,8 +6500,9 @@ header {
           margin-block-start: var(--v-space-xs);
 }
 
-.node--status-banner {
+.node--draft-banner {
   display: block;
+  background: var(--brand-secondary-dark);
   color: var(--color-white);
   font-size: 0.875rem;
   font-weight: 700;
@@ -6510,18 +6511,6 @@ header {
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-}
-.node--status-banner--draft {
-  background: var(--brand-secondary-dark);
-}
-.node--status-banner--needs-review {
-  background: var(--color-warning-dark);
-}
-.node--status-banner--revision-requested {
-  background: var(--color-error-dark);
-}
-.node--status-banner--archived {
-  background: var(--color-gray);
 }
 
 .full-node__list {
@@ -6977,6 +6966,17 @@ header {
   .taxonomy-term-page > * {
     grid-column: 2/-2;
   }
+}
+
+.referenced-content--divided {
+  -webkit-padding-before: var(--v-space-2xs);
+          padding-block-start: var(--v-space-2xs);
+  -webkit-margin-before: var(--v-space-2xs);
+          margin-block-start: var(--v-space-2xs);
+  -webkit-border-before: 5px solid var(--mukurtu-view-row-divider-color);
+          border-block-start: 5px solid var(--mukurtu-view-row-divider-color);
+  -webkit-margin-before: 0;
+          margin-block-start: 0;
 }
 
 @media (min-width: 60rem) {
