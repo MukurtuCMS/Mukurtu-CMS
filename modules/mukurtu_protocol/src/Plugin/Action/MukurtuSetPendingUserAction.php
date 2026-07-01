@@ -17,7 +17,6 @@ use Drupal\views_bulk_operations\Action\ViewsBulkOperationsActionBase;
  *   id = "mukurtu_set_pending_user_action",
  *   label = @Translation("Set user(s) pending"),
  *   type = "user",
- *   confirm = TRUE,
  *   requirements = {
  *     "_custom_access" = TRUE,
  *   },
@@ -30,14 +29,15 @@ class MukurtuSetPendingUserAction extends ViewsBulkOperationsActionBase {
    */
   public function execute($entity = NULL) {
     if (!$entity instanceof User) {
-      return;
+      return '';
     }
     if (!$this->access($entity, \Drupal::currentUser())) {
-      return;
+      return '';
     }
     $entity->set('status', FALSE);
     $entity->set('field_pending', 1);
     $entity->save();
+    return (string) $this->t('Set @count user(s) to pending.');
   }
 
   /**

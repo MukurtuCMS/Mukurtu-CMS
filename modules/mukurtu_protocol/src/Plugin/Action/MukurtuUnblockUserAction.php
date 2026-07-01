@@ -17,7 +17,6 @@ use Drupal\views_bulk_operations\Action\ViewsBulkOperationsActionBase;
  *   id = "mukurtu_unblock_user_action",
  *   label = @Translation("Unblock or approve user(s)"),
  *   type = "user",
- *   confirm = TRUE,
  *   requirements = {
  *     "_custom_access" = TRUE,
  *   },
@@ -30,10 +29,10 @@ class MukurtuUnblockUserAction extends ViewsBulkOperationsActionBase {
    */
   public function execute($entity = NULL) {
     if (!$entity instanceof User) {
-      return;
+      return '';
     }
     if (!$this->access($entity, \Drupal::currentUser())) {
-      return;
+      return '';
     }
     if ($entity->status->value != 1) {
       $entity->set('status', TRUE);
@@ -51,6 +50,7 @@ class MukurtuUnblockUserAction extends ViewsBulkOperationsActionBase {
         );
       }
     }
+    return (string) $this->t('Unblocked @count user(s).');
   }
 
   /**

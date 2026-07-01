@@ -17,7 +17,7 @@ use Drupal\views_bulk_operations\Action\ViewsBulkOperationsActionBase;
  *   id = "mukurtu_block_user_action",
  *   label = @Translation("Block user(s)"),
  *   type = "user",
- *   confirm = TRUE,
+ *   confirm_form_route_name = "mukurtu_protocol.user_cancel_confirm",
  *   requirements = {
  *     "_custom_access" = TRUE,
  *   },
@@ -27,6 +27,11 @@ class MukurtuBlockUserAction extends ViewsBulkOperationsActionBase {
 
   /**
    * {@inheritdoc}
+   *
+   * Unused by the bulk form: since confirm_form_route_name is set above, VBO
+   * redirects to MukurtuUserCancelConfirmForm before ever calling execute(),
+   * and that form calls user_cancel() directly. Kept only for safety/BC in
+   * case this action is ever invoked outside the bulk form.
    */
   public function execute($entity = NULL) {
     if (!$entity instanceof User) {
