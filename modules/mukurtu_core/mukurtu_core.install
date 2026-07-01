@@ -1826,6 +1826,36 @@ function mukurtu_core_update_40063(): void {
     return;
   }
 
+  // Backfill: established sites never received the revision_requested state
+  // or request_revision/resubmit transitions added by the editorial workflow
+  // "Part 2" commit, since that only shipped via config/install (which only
+  // applies to fresh installs). Restore the canonical definitions if missing
+  // or incomplete before proceeding.
+  if (!$workflow->get('type_settings.states.revision_requested.weight')) {
+    $workflow->set('type_settings.states.revision_requested', [
+      'label' => 'Edits Needed',
+      'weight' => 2,
+      'published' => FALSE,
+      'default_revision' => TRUE,
+    ]);
+  }
+  if (!$workflow->get('type_settings.transitions.request_revision.to')) {
+    $workflow->set('type_settings.transitions.request_revision', [
+      'label' => 'Needs edits',
+      'from' => ['needs_review'],
+      'to' => 'revision_requested',
+      'weight' => 2,
+    ]);
+  }
+  if (!$workflow->get('type_settings.transitions.resubmit.to')) {
+    $workflow->set('type_settings.transitions.resubmit', [
+      'label' => 'Resubmit for review',
+      'from' => ['revision_requested'],
+      'to' => 'needs_review',
+      'weight' => 3,
+    ]);
+  }
+
   // Add published as a valid from-state for the request_revision transition.
   $from = $workflow->get('type_settings.transitions.request_revision.from') ?? [];
   if (!in_array('published', $from)) {
