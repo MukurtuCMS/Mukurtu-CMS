@@ -442,3 +442,39 @@ function mukurtu_browse_update_40010() {
   $index->save();
   $index->reindex();
 }
+
+/**
+ * Add sections body text field to the default content index.
+ */
+function mukurtu_browse_update_40011(): void {
+  $index = \Drupal\search_api\Entity\Index::load('mukurtu_default_content_index');
+  if (!$index) {
+    return;
+  }
+
+  if (!$index->getField('field_sections_body')) {
+    $field = new \Drupal\search_api\Item\Field($index, 'field_sections_body');
+    $field->setType('text');
+    $field->setPropertyPath('aggregated_field');
+    $field->setLabel('Sections Body Text');
+    $field->setConfiguration([
+      'type' => 'union',
+      'fields' => ['entity:node/field_sections:entity:field_body'],
+    ]);
+    $index->addField($field);
+  }
+
+  // Register with ignorecase, which has all_fields: false and requires explicit registration.
+  $processors = $index->getProcessors();
+  if (isset($processors['ignorecase'])) {
+    $config = $processors['ignorecase']->getConfiguration();
+    if (!in_array('field_sections_body', $config['fields'])) {
+      $config['fields'][] = 'field_sections_body';
+      $processors['ignorecase']->setConfiguration($config);
+      $index->setProcessors($processors);
+    }
+  }
+
+  $index->save();
+  $index->reindex();
+}
