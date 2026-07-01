@@ -1335,7 +1335,7 @@ class FormHooks
                 "Block the user account(s), do not change their content.",
             ),
             "user_cancel_block_unpublish" => t(
-                "Block the user account(s) and unpublish their content.",
+                "Block the user account(s) and archive their content.",
             ),
             "user_cancel_reassign" => t(
                 "Delete the user account(s), keep their content and assign it to the Anonymous user account. This cannot be undone.",

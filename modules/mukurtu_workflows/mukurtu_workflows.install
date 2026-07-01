@@ -132,3 +132,33 @@ function mukurtu_workflows_update_40002(): void {
   $config->set('type_settings.states.revision_requested.label', 'Edits Needed');
   $config->save();
 }
+
+/**
+ * Add an "archived" state to the basic content workflow, matching the
+ * editorial workflow's existing archived state.
+ */
+function mukurtu_workflows_update_40005(): void {
+  $config = \Drupal::configFactory()->getEditable('workflows.workflow.mukurtu_default_content_workflow');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('type_settings.states.archived', [
+    'label' => 'Archived',
+    'weight' => 2,
+    'published' => FALSE,
+    'default_revision' => TRUE,
+  ]);
+  $config->set('type_settings.transitions.archive', [
+    'label' => 'Archive',
+    'from' => ['published'],
+    'to' => 'archived',
+    'weight' => 2,
+  ]);
+  $config->set('type_settings.transitions.restore', [
+    'label' => 'Restore to Draft',
+    'from' => ['archived'],
+    'to' => 'draft',
+    'weight' => 3,
+  ]);
+  $config->save();
+}
