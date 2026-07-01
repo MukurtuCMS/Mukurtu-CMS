@@ -245,8 +245,6 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
       '#records' => $records,
       '#referenced_content' => $referencedContent,
       '#facets' => $facets,
-      '#vocabulary_label' => $this->getSingularVocabularyLabel($taxonomy_term->bundle()),
-      '#term_name' => $taxonomy_term->label(),
       '#term_description' => $this->getTermDescription($taxonomy_term),
       '#attached' => [
         'library' => [
