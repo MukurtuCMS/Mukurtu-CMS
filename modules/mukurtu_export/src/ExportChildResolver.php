@@ -208,6 +208,9 @@ class ExportChildResolver {
       }
       foreach ($entity->get($field_name)->referencedEntities() as $child) {
         $id = (int) $child->id();
+        if (isset($visited[$id])) {
+          continue;
+        }
         $children['node'][$id] = $id;
         if ($field_name === 'field_child_collections') {
           foreach ($this->collectChildEntitiesRecursive($child, $visited) as $type => $ids) {

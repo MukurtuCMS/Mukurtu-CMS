@@ -710,6 +710,14 @@ field_settings:
     dependencies:
       module:
         - node
+  node__field_sections__body:
+    label: 'Sections Body Text'
+    property_path: aggregated_field
+    type: text
+    configuration:
+      type: union
+      fields:
+        - 'entity:node/field_sections:entity:field_body'
   node__field_source:
     label: Source
     datasource_id: 'entity:node'
@@ -1022,6 +1030,7 @@ processor_settings:
       - node__field_other_names__name__facet
       - node__field_other_names__uuid
       - node__field_rights_and_usage
+      - node__field_sections__body
       - node__field_source
       - node__field_subject__name
       - node__field_subject__name__facet
