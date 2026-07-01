@@ -84,7 +84,14 @@ class MukurtuUserCancelConfirmForm extends FormBase {
 
     if (!$accounts) {
       $form['no_accounts'] = [
-        '#markup' => $this->t('You do not have permission to block or delete any of the selected users.'),
+        '#type' => 'container',
+        '#attributes' => [
+          'class' => ['messages', 'messages--warning'],
+          'role' => 'alert',
+        ],
+        'message' => [
+          '#markup' => $this->t('You do not have permission to block or delete any of the selected users.'),
+        ],
       ];
       $this->addCancelButton($form);
       return $form;

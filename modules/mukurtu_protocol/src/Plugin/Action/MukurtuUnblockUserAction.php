@@ -29,10 +29,10 @@ class MukurtuUnblockUserAction extends ViewsBulkOperationsActionBase {
    */
   public function execute($entity = NULL) {
     if (!$entity instanceof User) {
-      return '';
+      return (string) $this->t('Skipped @count user(s) (access denied).');
     }
     if (!$this->access($entity, \Drupal::currentUser())) {
-      return '';
+      return (string) $this->t('Skipped @count user(s) (access denied).');
     }
     if ($entity->status->value != 1) {
       $entity->set('status', TRUE);
