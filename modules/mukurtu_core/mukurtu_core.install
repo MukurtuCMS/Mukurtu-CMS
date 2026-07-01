@@ -1614,27 +1614,13 @@ function mukurtu_core_update_40062(&$sandbox): string {
         ]
       );
 
-      $media_component = new \Drupal\layout_builder\SectionComponent(
-        $uuid_generator->generate(),
-        'content',
-        [
-          'id' => 'field_block:node:page:field_page_media_assets',
-          'label' => '',
-          'label_display' => '0',
-          'formatter' => [
-            'type' => 'entity_reference_entity_view',
-            'settings' => ['view_mode' => 'default', 'link' => FALSE],
-            'label' => 'hidden',
-          ],
-          'context_mapping' => ['entity' => 'layout_builder.entity'],
-          'provider' => 'layout_builder',
-        ]
-      );
-
+      // field_page_media_assets is excluded from Layout Builder sections;
+      // the node template renders it separately via preprocess to preserve
+      // the media carousel behaviour.
       $section = new \Drupal\layout_builder\Section(
         'layout_onecol',
         [],
-        [$body_component, $media_component]
+        [$body_component]
       );
 
       $node->set('layout_builder__layout', [$section]);

@@ -73,6 +73,23 @@ function mukurtu_v4_preprocess_node(&$variables) {
       ]);
     }
   }
+
+  // Pre-render basic page media assets for carousel use in the node template.
+  // The field is not part of the Layout Builder sections so it must be passed
+  // as a separate template variable.
+  if ($node->bundle() === 'page' && $node->hasField('field_page_media_assets') && !$node->get('field_page_media_assets')->isEmpty()) {
+    $variables['page_media_assets_count'] = $node->get('field_page_media_assets')->count();
+    $variables['page_media_assets_display'] = $node->field_page_media_assets->view([
+      'type' => 'entity_reference_entity_view',
+      'label' => 'hidden',
+      'settings' => ['view_mode' => 'default', 'link' => FALSE],
+    ]);
+    $variables['page_media_thumbnail_display'] = $node->field_page_media_assets->view([
+      'type' => 'entity_reference_entity_view',
+      'label' => 'hidden',
+      'settings' => ['view_mode' => 'carousel_thumbnail', 'link' => FALSE],
+    ]);
+  }
 }
 
 /**

@@ -81,6 +81,22 @@
 
         </div>
 
+        {% if page_media_assets_count is defined and page_media_assets_count > 0 %}
+          {% if page_media_assets_count > 1 %}
+            <div class="media-carousels" data-id="{{ node.id }}">
+              <section class="splide media-carousel" aria-label="Media Assets Carousel">
+                {{ page_media_assets_display }}
+              </section>
+
+              <section class="splide thumbnail-carousel" aria-label="Thumbnail Carousel">
+                {{ page_media_thumbnail_display }}
+              </section>
+            </div>
+          {% else %}
+            {{ page_media_assets_display }}
+          {% endif %}
+        {% endif %}
+
       </div>
 
     </div> {# __grid #}
