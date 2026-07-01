@@ -1,10 +1,7 @@
 <div class="taxonomy-term-page">
-  <div class="taxonomy-term-intro">
-    {% if term_description %}
-      <div class="taxonomy-term-description">{{ term_description }}</div>
-    {% endif %}
-    <p>{{ 'All available content using the @vocab term %term.'|t({'@vocab': vocabulary_label, '%term': term_name}) }}</p>
-  </div>
+  {% if term_description %}
+    <div class="taxonomy-term-description">{{ term_description }}</div>
+  {% endif %}
 
   {% if records|length == 1%}
   <div data-horizontal-tabs class="taxonomy-records">
@@ -45,7 +42,7 @@
   </div>
 
   {% if referenced_content is not empty %}
-    <div class="referenced-content grid" aria-label="{{ 'Referenced content'|t }}">
+    <div class="referenced-content grid{% if term_description %} referenced-content--divided{% endif %}" aria-label="{{ 'Referenced content'|t }}">
       {{ referenced_content }}
     </div>
   {% endif %}
