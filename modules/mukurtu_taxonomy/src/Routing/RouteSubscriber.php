@@ -17,6 +17,7 @@ class RouteSubscriber extends RouteSubscriberBase {
     // Use a custom Mukurtu controller to view taxonomy terms.
     if ($route = $collection->get('entity.taxonomy_term.canonical')) {
       $route->setDefault('_controller', '\Drupal\mukurtu_taxonomy\Controller\TaxonomyRecordViewController::build');
+      $route->setDefault('_title_callback', '\Drupal\mukurtu_taxonomy\Controller\TaxonomyRecordViewController::title');
     }
   }
 

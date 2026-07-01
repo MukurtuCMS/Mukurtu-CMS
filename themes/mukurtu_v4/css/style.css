@@ -6986,24 +6986,19 @@ header {
             column-count: 1;
   }
 }
-.taxonomy-term-page .grid:has(.views-row) .view-content {
+.taxonomy-term-page .grid:has(.views-row) .views-element-container > div {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--v-space-3xs);
 }
 @media (min-width: 60rem) {
-  .taxonomy-term-page .grid:has(.views-row) .view-content {
+  .taxonomy-term-page .grid:has(.views-row) .views-element-container > div {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 @media (min-width: 80rem) {
-  .taxonomy-term-page .grid:has(.views-row) .view-content {
+  .taxonomy-term-page .grid:has(.views-row) .views-element-container > div {
     gap: var(--v-space-2xs);
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-@media (min-width: 90rem) {
-  .taxonomy-term-page .grid:has(.views-row) .view-content {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }

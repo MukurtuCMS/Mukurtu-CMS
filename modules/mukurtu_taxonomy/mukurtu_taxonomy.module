@@ -28,6 +28,9 @@ function mukurtu_taxonomy_theme($existing, $type, $theme, $path) {
         'records' => NULL,
         'referenced_content' => NULL,
         'facets' => [],
+        'vocabulary_label' => '',
+        'term_name' => '',
+        'term_description' => '',
       ],
     ],
   ];

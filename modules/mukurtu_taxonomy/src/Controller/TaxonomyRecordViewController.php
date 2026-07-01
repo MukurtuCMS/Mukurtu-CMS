@@ -61,6 +61,57 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
   }
 
   /**
+   * Singular display labels for Mukurtu's built-in vocabulary machine names.
+   *
+   * Vocabulary::label() returns the admin-supplied name (typically plural,
+   * e.g. "Keywords"). This map provides the singular form used in page titles
+   * ("Keyword: Art"). Any new Mukurtu vocabulary should be added here.
+   * Custom site vocabularies not in this list fall back to the admin label.
+   */
+  const VOCABULARY_LABEL_MAP = [
+    'category' => 'Category',
+    'community_type' => 'Community Type',
+    'contributor' => 'Contributor',
+    'creator' => 'Creator',
+    'format' => 'Format',
+    'interpersonal_relationship' => 'Interpersonal Relationship',
+    'keywords' => 'Keyword',
+    'language' => 'Language',
+    'location' => 'Location',
+    'media_tag' => 'Media Tag',
+    'people' => 'Person',
+    'place_type' => 'Place Type',
+    'publisher' => 'Publisher',
+    'subject' => 'Subject',
+    'type' => 'Type',
+    'word_type' => 'Word Type',
+  ];
+
+  /**
+   * Return the singular display label for a vocabulary machine name.
+   */
+  protected function getSingularVocabularyLabel(string $vocab): string {
+    if (isset(self::VOCABULARY_LABEL_MAP[$vocab])) {
+      return self::VOCABULARY_LABEL_MAP[$vocab];
+    }
+    $vocabulary = $this->entityTypeManager()->getStorage('taxonomy_vocabulary')->load($vocab);
+    return $vocabulary ? $vocabulary->label() : $vocab;
+  }
+
+  /**
+   * Return the page title for a taxonomy term page.
+   *
+   * @param \Drupal\taxonomy\TermInterface $taxonomy_term
+   *   The taxonomy term.
+   *
+   * @return string
+   *   The page title in the format "Vocabulary Label: Term Name".
+   */
+  public function title(TermInterface $taxonomy_term): string {
+    return $this->getSingularVocabularyLabel($taxonomy_term->bundle()) . ': ' . $taxonomy_term->label();
+  }
+
+  /**
    * Return the machine name of the view to use based on the search backend config.
    *
    * @return string
@@ -80,6 +131,14 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
    *
    * @return string
    *   The facet source ID.
+   *
+   * @todo Facets are currently non-functional on taxonomy term pages.
+   *   Referenced content now comes from the core taxonomy_term SQL view
+   *   (taxonomy_index), not from Search API. The facets module integrates
+   *   with Search API, not core Views, so any facets configured for these
+   *   source IDs will load but won't filter the displayed content. Facet
+   *   support requires either re-adding a Search API-backed view or a custom
+   *   facet source plugin for the taxonomy_term view.
    */
   protected function getFacetSourceId(): string {
     $views = [
@@ -138,21 +197,29 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
       ];
     }
 
-    // If the view has been deleted, we're done.
-    $view = Views::getView($this->getViewName());
+    // Use the core taxonomy_term view which queries taxonomy_index directly.
+    // The mukurtu_taxonomy_references view filters by UUID via Search API
+    // fulltext, but no UUID fields are indexed -- so it always returns empty.
+    // taxonomy_index is always populated by Drupal's taxonomy system.
+    // Views::getView() returns a new ViewExecutable instance each call
+    // (see ViewExecutableFactory::get()), so overrideOption() mutations below
+    // are scoped to this request only and don't affect other callers.
+    $view = Views::getView('taxonomy_term');
     if (!$view) {
       return $build;
     }
-
-    // Set the display and inject the taxonomy term UUID into the fulltext
-    // search filter.
-    $view->setDisplay('content_block');
-    $filters = $view->display_handler->getOption('filters');
-    $filters['search_api_fulltext']['value'] = $taxonomy_term->uuid();
-    $view->display_handler->overrideOption('filters', $filters);
-
-    // Build the renderable array from the view.
-    $referencedContent = $view->buildRenderable('content_block');
+    $view->setDisplay('default');
+    $view->setArguments([$taxonomy_term->id()]);
+    // Remove the term entity header -- title and intro text are rendered
+    // by the page title callback and the taxonomy-records template instead.
+    $view->display_handler->overrideOption('header', []);
+    // Render items using the grid_browse view mode (vertical card: image top,
+    // title below) which suits the column-count grid layout.
+    $view->display_handler->overrideOption('row', [
+      'type' => 'entity:node',
+      'options' => ['view_mode' => 'grid_browse'],
+    ]);
+    $referencedContent = $view->buildRenderable('default');
 
     // Facets.
     // Load all facets configured to use our browse block as a datasource.
@@ -178,6 +245,9 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
       '#records' => $records,
       '#referenced_content' => $referencedContent,
       '#facets' => $facets,
+      '#vocabulary_label' => $this->getSingularVocabularyLabel($taxonomy_term->bundle()),
+      '#term_name' => $taxonomy_term->label(),
+      '#term_description' => $this->getTermDescription($taxonomy_term),
       '#attached' => [
         'library' => [
           'field_group/element.horizontal_tabs',
@@ -202,6 +272,22 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
     }
 
     return $build;
+  }
+
+  /**
+   * Return the term description as a filtered Markup object, or empty string.
+   *
+   * Runs the stored description through check_markup() so HTML tags from the
+   * term's text format are preserved and safe to output in Twig without |raw.
+   */
+  protected function getTermDescription(TermInterface $taxonomy_term): string|\Drupal\Core\Render\Markup {
+    $description_field = $taxonomy_term->get('description');
+    if ($description_field->isEmpty()) {
+      return '';
+    }
+    $text = $description_field->value ?? '';
+    $format = $description_field->format ?? 'basic_html';
+    return $text ? check_markup($text, $format) : '';
   }
 
   /**
