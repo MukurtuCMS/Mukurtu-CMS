@@ -29,6 +29,9 @@ class ReviewQueueAccessCheckTest extends KernelTestBase {
   protected static $modules = [
     'content_moderation',
     'field',
+    'file',
+    'image',
+    'media',
     'mukurtu_protocol',
     'mukurtu_workflows',
     'node',
@@ -52,8 +55,9 @@ class ReviewQueueAccessCheckTest extends KernelTestBase {
   protected function setUp(): void {
     parent::setUp();
 
-    $this->installConfig(['og']);
+    $this->installConfig(['og', 'media']);
     $this->installEntitySchema('community');
+    $this->installEntitySchema('media');
     $this->installEntitySchema('og_membership');
     $this->installEntitySchema('protocol');
     $this->installEntitySchema('taxonomy_term');
