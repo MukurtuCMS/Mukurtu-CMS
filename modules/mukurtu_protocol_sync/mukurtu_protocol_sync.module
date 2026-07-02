@@ -308,6 +308,11 @@ function mukurtu_protocol_sync_form_node_form_alter(array &$form, FormStateInter
   // that stores the current protocol selection in TempStore before the dialog
   // URL is built. (#type: 'button' has #executes_submit_callback: FALSE, so
   // #submit handlers don't run; wrapping #ajax['callback'] is the correct hook.)
+  // MediaLibraryWidget::form() is not delta-indexed: 'open_button' is a direct
+  // child of the widget element itself, not nested under a numeric delta.
+  // hook_form_alter() also runs before MediaLibraryWidget::preRenderWidget()
+  // moves the button into #field_suffix, so it's still keyed as 'open_button'
+  // (not '#field_suffix']['open_button']) at this point.
   $media_fields_with_buttons = [
     'field_media_assets',
     'field_recording',
@@ -316,14 +321,9 @@ function mukurtu_protocol_sync_form_node_form_alter(array &$form, FormStateInter
     'field_word_list_image',
   ];
   foreach ($media_fields_with_buttons as $field_name) {
-    if (!isset($form[$field_name]['widget'])) {
-      continue;
-    }
-    foreach (Element::children($form[$field_name]['widget']) as $delta) {
-      if (isset($form[$field_name]['widget'][$delta]['#field_suffix']['open_button'])) {
-        $form[$field_name]['widget'][$delta]['#field_suffix']['open_button']['#ajax']['callback'] =
-          'mukurtu_protocol_sync_media_library_open_ajax';
-      }
+    if (isset($form[$field_name]['widget']['open_button'])) {
+      $form[$field_name]['widget']['open_button']['#ajax']['callback'] =
+        'mukurtu_protocol_sync_media_library_open_ajax';
     }
   }
 
