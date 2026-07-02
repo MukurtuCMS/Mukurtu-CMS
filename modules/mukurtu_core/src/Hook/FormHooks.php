@@ -10,6 +10,7 @@ use Drupal\Core\Hook\Order\OrderAfter;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Url;
+use Drupal\mukurtu_core\UserCancelMethods;
 use Drupal\og\Og;
 use Drupal\views\ViewExecutable;
 use Drupal\og\OgMembershipInterface;
@@ -338,6 +339,12 @@ class FormHooks
             ),
             "#open" => false,
             "#attached" => ["library" => ["mukurtu_core/notify-form"]],
+            // aria-live on the stable parent so AJAX replacements of the inner
+            // notify-users-wrapper are announced. The wrapper element itself
+            // cannot carry aria-live because it is replaced on each AJAX call,
+            // which destroys and re-creates the live region before the
+            // announcement fires.
+            "#attributes" => ["aria-live" => "polite"],
         ];
 
         $form["notify"]["notify_all_managers"] = [
@@ -398,7 +405,7 @@ class FormHooks
             "#prefix" =>
                 '<div id="notify-users-wrapper" role="group" aria-labelledby="' .
                 $users_label_id .
-                '" aria-live="polite"><p id="' .
+                '"><p id="' .
                 $users_label_id .
                 '" class="fieldset__label fieldset__label--group">' .
                 t("Notify specific users:") .
@@ -907,7 +914,7 @@ class FormHooks
                 "Block or delete options:",
             );
         }
-        $this->relabelCancelMethods($form);
+        UserCancelMethods::relabelCancelMethods($form);
         if (isset($form["actions"]["submit"])) {
             $form["actions"]["submit"]["#value"] = t("Block or delete account");
         }
@@ -1289,7 +1296,7 @@ class FormHooks
                 "Block or delete options:",
             );
         }
-        $this->relabelCancelMethods($form);
+        UserCancelMethods::relabelCancelMethods($form);
     }
 
     /**
@@ -1315,33 +1322,7 @@ class FormHooks
                 "#weight" => 3,
                 "user_cancel_method" => $cancel_method,
             ];
-            $this->relabelCancelMethods($form["blocking_deleting"]);
-        }
-    }
-
-    /**
-     * Replaces "Disable the account" with "Block the account" in cancel method
-     * radio option descriptions wherever they appear in a form subtree.
-     */
-    private function relabelCancelMethods(array &$element): void {
-        $replacements = [
-            "user_cancel_block" => t(
-                "Block the user account(s), do not change their content.",
-            ),
-            "user_cancel_block_unpublish" => t(
-                "Block the user account(s) and unpublish their content.",
-            ),
-            "user_cancel_reassign" => t(
-                "Delete the user account(s), keep their content and assign it to the Anonymous user account. This cannot be undone.",
-            ),
-            "user_cancel_delete" => t(
-                "Delete the user account(s) and their content. This cannot be undone and is high risk.",
-            ),
-        ];
-        foreach ($replacements as $key => $label) {
-            if (isset($element["user_cancel_method"]["#options"][$key])) {
-                $element["user_cancel_method"]["#options"][$key] = $label;
-            }
+            UserCancelMethods::relabelCancelMethods($form["blocking_deleting"]);
         }
     }
 

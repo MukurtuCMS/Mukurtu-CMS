@@ -27,6 +27,11 @@ type_settings:
       weight: 1
       published: true
       default_revision: true
+    archived:
+      label: Archived
+      weight: 2
+      published: false
+      default_revision: true
   transitions:
     create_new_draft:
       label: 'Save as Draft'
@@ -40,8 +45,21 @@ type_settings:
       from:
         - draft
         - published
+        - archived
       to: published
       weight: 1
+    archive:
+      label: Archive
+      from:
+        - published
+      to: archived
+      weight: 2
+    restore:
+      label: 'Restore to Draft'
+      from:
+        - archived
+      to: draft
+      weight: 3
   entity_types:
     node:
       - article

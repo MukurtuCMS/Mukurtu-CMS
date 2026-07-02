@@ -23,6 +23,7 @@ class ExportChildResolver {
     protected readonly MultipageItemManager $multipageItemManager,
   ) {}
 
+
   /**
    * Returns child entity IDs for the given entity, keyed by entity type.
    *
@@ -207,6 +208,9 @@ class ExportChildResolver {
       }
       foreach ($entity->get($field_name)->referencedEntities() as $child) {
         $id = (int) $child->id();
+        if (isset($visited[$id])) {
+          continue;
+        }
         $children['node'][$id] = $id;
         if ($field_name === 'field_child_collections') {
           foreach ($this->collectChildEntitiesRecursive($child, $visited) as $type => $ids) {

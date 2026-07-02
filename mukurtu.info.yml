@@ -139,6 +139,7 @@ dependencies:
   - 'mukurtu_place:mukurtu_place'
   - 'mukurtu_protocol:mukurtu_protocol'
   - 'mukurtu_protocol_sync:mukurtu_protocol_sync'
+  - 'mukurtu_setup:mukurtu_setup'
   - 'mukurtu_site_settings:mukurtu_site_settings'
   - 'mukurtu_taxonomy:mukurtu_taxonomy'
   - 'mukurtu_workflows:mukurtu_workflows'
