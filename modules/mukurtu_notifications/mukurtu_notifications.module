@@ -1,18 +1,402 @@
 <?php
 
+use Drupal\comment\CommentInterface;
 use Drupal\Core\Access\AccessResult;
-use Drupal\Core\Form\FormStateInterface;
-use Drupal\node\Entity\Node;
-use Drupal\message\Entity\Message;
-use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
-use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Database\Query\AlterableInterface;
-use Drupal\user\Entity\Role;
-use Drupal\user\Entity\User;
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\FieldableEntityInterface;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\message\Entity\Message;
 use Drupal\message_subscribe\Subscribers\DeliveryCandidate;
-use Drupal\mukurtu_collection\Entity\Collection;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
+use Drupal\node\Entity\Node;
+use Drupal\og\Entity\OgMembership;
+use Drupal\user\Entity\User;
+
+use Drupal\views\ViewExecutable;
+
+/**
+ * Implements hook_views_pre_render().
+ *
+ * Replaces template machine names with human-readable labels in the
+ * "Notification type" column of the mukurtu_message_log view.
+ */
+function mukurtu_notifications_views_pre_render(ViewExecutable $view) {
+  if ($view->id() !== 'mukurtu_message_log') {
+    return;
+  }
+  $template_storage = \Drupal::entityTypeManager()->getStorage('message_template');
+  // message_field_data_template is the Views column alias for the template
+  // field on the message_field_data table. It matches the field_alias set in
+  // views.view.mukurtu_message_log for the "template" field.
+  foreach ($view->result as $row) {
+    if (isset($row->message_field_data_template)) {
+      $template = $template_storage->load($row->message_field_data_template);
+      if ($template) {
+        $row->message_field_data_template = $template->label();
+      }
+    }
+  }
+}
+
+/**
+ * Returns the notification type group-to-template mapping.
+ *
+ * Derived from _mukurtu_notifications_categories(), excluding
+ * 'mukurtu_new_user_registration': that template must stay opt-in-only via
+ * the email preference field and never become selectable in this general
+ * activity filter (it's an admin-facing pending-approval notice).
+ *
+ * @return array<string, string[]>
+ *   Keys are human-readable group labels; values are arrays of template
+ *   machine names belonging to that group.
+ */
+function _mukurtu_notifications_type_groups(): array {
+  $groups = [];
+  foreach (_mukurtu_notifications_categories() as $category) {
+    $templates = array_values(array_diff($category['templates'], ['mukurtu_new_user_registration']));
+    if (!empty($templates)) {
+      $groups[$category['label']] = $templates;
+    }
+  }
+  return $groups;
+}
+
+/**
+ * Implements hook_form_views_exposed_form_alter().
+ *
+ * Replaces the notification type filter with a flat list of group labels.
+ */
+function mukurtu_notifications_form_views_exposed_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
+  $view = $form_state->get('view');
+  if (!$view || $view->id() !== 'mukurtu_message_log') {
+    return;
+  }
+  if (empty($form['type']['#options'])) {
+    return;
+  }
+
+  $groups = _mukurtu_notifications_type_groups();
+  $current = $form['type']['#options'];
+
+  // Build a flat list: include a group only if at least one of its templates
+  // exists in the current options (i.e. there is data for it). This is a
+  // multi-select "in" operator filter, so there's no synthetic "- Any -"
+  // placeholder entry to preserve -- leaving everything unchecked already
+  // means "no restriction".
+  $options = [];
+  foreach ($groups as $group_label => $machine_names) {
+    if (!empty(array_intersect_key(array_flip($machine_names), $current))) {
+      $options[$group_label] = $group_label;
+    }
+  }
+
+  $form['type']['#options'] = $options;
+}
+
+/**
+ * Returns the notification templates shown by default when no type filter
+ * is selected on the notifications page.
+ *
+ * mukurtu_new_user_registration is intentionally excluded (via
+ * _mukurtu_notifications_type_groups(), which this is derived from): it is
+ * an admin-facing message and should not appear in the general activity feed.
+ *
+ * @return string[]
+ *   Template machine names.
+ */
+function _mukurtu_notifications_default_type_filter(): array {
+  $templates = [];
+  foreach (_mukurtu_notifications_type_groups() as $machine_names) {
+    $templates = array_merge($templates, $machine_names);
+  }
+  return $templates;
+}
+
+/**
+ * Implements hook_views_pre_execute().
+ *
+ * Expands a selected notification group label into its individual template
+ * machine names before the query runs, so the bundle filter generates the
+ * correct WHERE template IN (...) clause, on both the personal feed and the
+ * admin "all notifications" page. If no group is selected: the personal
+ * feed applies a curated default restriction (bypassing the exposed form's
+ * #options, which only allow group labels) so admin-only templates don't
+ * leak into the general activity feed by default; the admin page applies
+ * no restriction at all, showing every template.
+ */
+function mukurtu_notifications_views_pre_execute(ViewExecutable $view) {
+  if ($view->id() !== 'mukurtu_message_log') {
+    return;
+  }
+  if (!in_array($view->current_display, ['mukurtu_notifications_page', 'mukurtu_notifications_admin_page'], TRUE)) {
+    return;
+  }
+
+  if (empty($view->filter['template']->value)) {
+    if ($view->current_display === 'mukurtu_notifications_page') {
+      $view->filter['template']->value = _mukurtu_notifications_default_type_filter();
+    }
+    return;
+  }
+
+  $groups = _mukurtu_notifications_type_groups();
+  $expanded = [];
+  foreach ($view->filter['template']->value as $key) {
+    if (isset($groups[$key])) {
+      $expanded = array_merge($expanded, $groups[$key]);
+    }
+    else {
+      $expanded[] = $key;
+    }
+  }
+  $view->filter['template']->value = array_unique($expanded);
+}
+
+/**
+ * Returns the canonical notification category definitions.
+ *
+ * Single source of truth for the template-to-category mapping used to gate
+ * email delivery (_mukurtu_notifications_template_category(),
+ * _mukurtu_notifications_category_labels()), for the per-user email
+ * preference field's allowed values, and (via _mukurtu_notifications_type_groups())
+ * for the notifications page's exposed type filter.
+ *
+ * @return array<string, array{label: string, templates: string[]}>
+ *   Keyed by category machine name.
+ */
+function _mukurtu_notifications_categories(): array {
+  return [
+    'user_account' => [
+      'label' => 'User account',
+      'templates' => [
+        'mukurtu_new_user_registration',
+        'mukurtu_new_user_account_created',
+        'mukurtu_user_deleted',
+        'mukurtu_user_approved',
+        'mukurtu_user_set_pending',
+        'mukurtu_user_blocked',
+        'mukurtu_user_unblocked',
+      ],
+    ],
+    'memberships' => [
+      'label' => 'Memberships',
+      'templates' => [
+        'mukurtu_user_added_to_protocol',
+        'mukurtu_removed_from_community',
+        'mukurtu_removed_from_protocol',
+      ],
+    ],
+    'comments' => [
+      'label' => 'Comments',
+      'templates' => [
+        'mukurtu_protocol_comment',
+        'mukurtu_comment_approved',
+        'mukurtu_comment_denied',
+      ],
+    ],
+    'publishing' => [
+      'label' => 'Publishing',
+      'templates' => [
+        'mukurtu_content_for_review',
+        'mukurtu_content_published',
+        'mukurtu_content_to_draft',
+        'mukurtu_content_archived',
+        'mukurtu_single_node_update',
+      ],
+    ],
+    'content' => [
+      'label' => 'Content',
+      'templates' => [
+        'mukurtu_single_node_insert',
+        'mukurtu_single_node_delete',
+      ],
+    ],
+    'roundtrip' => [
+      'label' => 'Roundtrip',
+      'templates' => [
+        'mukurtu_batch_import_report',
+      ],
+    ],
+  ];
+}
+
+/**
+ * Returns the canonical notification category labels, keyed by machine name.
+ *
+ * @return array<string, string>
+ */
+function _mukurtu_notifications_category_labels(): array {
+  return array_map(static fn (array $category) => $category['label'], _mukurtu_notifications_categories());
+}
+
+/**
+ * Maps a message template machine name to its notification category.
+ *
+ * @param string $template
+ *   The message template machine name.
+ *
+ * @return string|null
+ *   The category machine name, or NULL if the template isn't categorized.
+ */
+function _mukurtu_notifications_template_category(string $template): ?string {
+  foreach (_mukurtu_notifications_categories() as $key => $category) {
+    if (in_array($template, $category['templates'], TRUE)) {
+      return $key;
+    }
+  }
+  return NULL;
+}
+
+/**
+ * Allowed-values callback for field_notify_email_categories.
+ *
+ * @return array<string, string>
+ *   Category machine name => human-readable label.
+ */
+function mukurtu_notifications_notification_categories_allowed_values(FieldStorageDefinitionInterface $definition, ?FieldableEntityInterface $entity = NULL, &$cacheable = NULL): array {
+  $cacheable = TRUE;
+  return _mukurtu_notifications_category_labels();
+}
+
+/**
+ * Allowed-values callback for field_notify_frequency.
+ *
+ * @return array<string, string>
+ *   Frequency machine name => human-readable label.
+ */
+function mukurtu_notifications_notification_frequency_allowed_values(FieldStorageDefinitionInterface $definition, ?FieldableEntityInterface $entity = NULL, &$cacheable = NULL): array {
+  $cacheable = TRUE;
+  return [
+    'immediate' => 'Immediate',
+    'daily' => 'Daily',
+    'weekly' => 'Weekly',
+  ];
+}
+
+/**
+ * Checks whether a user has a digest (daily/weekly) email preference.
+ *
+ * @param int $uid
+ *   The user ID to check.
+ *
+ * @return bool
+ *   TRUE if the user's emails should be batched into a digest rather than
+ *   sent immediately.
+ */
+function _mukurtu_notifications_user_wants_digest(int $uid): bool {
+  $user = User::load($uid);
+  if (!$user || !$user->hasField('field_notify_frequency') || $user->get('field_notify_frequency')->isEmpty()) {
+    return FALSE;
+  }
+  return in_array($user->get('field_notify_frequency')->value, ['daily', 'weekly'], TRUE);
+}
+
+/**
+ * Checks whether a user wants to receive email for a notification template.
+ *
+ * Uncategorized templates are always emailed (there's no way for a user to
+ * opt out of something with no category), which should not happen in
+ * practice since every installed template is covered by
+ * _mukurtu_notifications_categories().
+ *
+ * @param int $uid
+ *   The recipient's user ID.
+ * @param string $template
+ *   The message template machine name.
+ *
+ * @return bool
+ *   TRUE if the user should be emailed for this template.
+ */
+function _mukurtu_notifications_user_wants_email(int $uid, string $template): bool {
+  $category = _mukurtu_notifications_template_category($template);
+  if ($category === NULL) {
+    return TRUE;
+  }
+
+  $user = User::load($uid);
+  if (!$user || !$user->hasField('field_notify_email_categories')) {
+    return TRUE;
+  }
+
+  $selected = array_column($user->get('field_notify_email_categories')->getValue(), 'value');
+  return in_array($category, $selected, TRUE);
+}
+
+/**
+ * Creates one Message per recipient and attempts email for each, gated by
+ * the recipient's notification email preference.
+ *
+ * Every notification-worthy event should be visible in the feed of everyone
+ * it concerns. Since neither the message entity nor the /notifications view
+ * supports a single message with multiple viewers (the view filters
+ * strictly on message.uid = current user), each recipient gets their own
+ * Message row. The actor (if any) is excluded from email -- they don't need
+ * to be emailed about their own action -- but if they're also a recipient
+ * (e.g. the owner editing their own content) they still get a feed record.
+ *
+ * @param string $template
+ *   The message template machine name.
+ * @param array $field_values
+ *   Additional field values to set on each message (e.g. field_item).
+ * @param int[] $recipient_uids
+ *   Uids who should see this in their feed and, subject to their email
+ *   preference, be emailed.
+ * @param int $actor_uid
+ *   The uid who performed the triggering action, if any. Excluded from
+ *   email regardless of preference. Defaults to 0 (no actor to exclude).
+ */
+function _mukurtu_notifications_notify(string $template, array $field_values, array $recipient_uids, int $actor_uid = 0): void {
+  if (empty($recipient_uids)) {
+    return;
+  }
+
+  $email_validator = \Drupal::service('email.validator');
+  $subscribers = \Drupal::service('message_subscribe.subscribers');
+  $recipients = User::loadMultiple($recipient_uids);
+
+  foreach ($recipients as $uid => $recipient) {
+    $uid = (int) $uid;
+    $wants_email = FALSE;
+
+    if ($uid !== $actor_uid) {
+      $email = $recipient->getEmail();
+      $wants_email = !empty($email) && $email_validator->isValid($email) && _mukurtu_notifications_user_wants_email($uid, $template);
+    }
+
+    // Digest-preference recipients get their email batched by cron instead
+    // of sent now; the message itself still saves normally either way, so
+    // the feed is unaffected.
+    $wants_digest = $wants_email && _mukurtu_notifications_user_wants_digest($uid);
+
+    $message = Message::create(['template' => $template, 'uid' => $uid] + $field_values);
+    if ($wants_digest) {
+      $message->set('field_digest_pending', TRUE);
+    }
+    $message->save();
+
+    if (!$wants_email || $wants_digest) {
+      continue;
+    }
+
+    $subscribe_options = [
+      'notify message owner' => FALSE,
+      'uids' => [
+        $uid => new DeliveryCandidate([], ['email'], $uid),
+      ],
+    ];
+
+    try {
+      $subscribers->sendMessage($message, $message, [], $subscribe_options);
+    }
+    catch (\Exception $e) {
+      \Drupal::logger('mukurtu_notifications')->warning('Failed to send @template notification: @msg', ['@template' => $template, '@msg' => $e->getMessage()]);
+    }
+  }
+}
 
 /**
  * Implements hook_entity_type_alter().
@@ -21,6 +405,31 @@ function mukurtu_notifications_entity_type_alter(array &$entity_types) {
   $entity_types['message']->setHandlerClass('access', '\Drupal\Core\Entity\EntityAccessControlHandler');
   //$entity_types['message']->setHandlerClass('query_access', '\Drupal\entity\QueryAccess\QueryAccessHandler');
   $entity_types['message']->setHandlerClass('permission_provider', '\Drupal\Core\Entity\EntityPermissionProvider');
+}
+
+/**
+ * Implements hook_entity_base_field_info().
+ *
+ * Adds field_digest_pending to every message bundle at once. A base field
+ * (rather than the per-bundle field.field.*.yml config used elsewhere in
+ * this module) is the right tool here: every one of the ~25 message
+ * templates needs this identically, and per-bundle config would mean a
+ * separate file for each one.
+ */
+function mukurtu_notifications_entity_base_field_info(\Drupal\Core\Entity\EntityTypeInterface $entity_type) {
+  if ($entity_type->id() !== 'message') {
+    return [];
+  }
+
+  $fields = [];
+  $fields['field_digest_pending'] = \Drupal\Core\Field\BaseFieldDefinition::create('boolean')
+    ->setLabel(t('Digest pending'))
+    ->setDescription(t('Whether this message is waiting to be included in a digest email rather than sent immediately.'))
+    ->setDefaultValue(FALSE)
+    ->setDisplayConfigurable('form', FALSE)
+    ->setDisplayConfigurable('view', FALSE);
+
+  return $fields;
 }
 
 /**
@@ -73,106 +482,112 @@ function mukurtu_notifications_node_insert(Node $node) {
     return;
   }
 
-  // Phase 1: record the event for the notifications feed. No email is sent on
-  // insert; email dispatch is phase 2 once per-user opt-in preferences are wired.
-  $message = Message::create([
-    'template' => 'mukurtu_single_node_insert',
-    'uid' => $node->getOwnerId(),
-  ]);
-  $message->set('field_item', $node);
-  $message->set('field_user', \Drupal::currentUser()->id());
-  $message->save();
+  mukurtu_notifications_notify_content_created($node);
 }
 
 /**
  * Implements hook_node_update().
  */
 function mukurtu_notifications_node_update(Node $node) {
+  // Handle content moderation state changes regardless of published status.
+  if ($node->hasField('moderation_state') && isset($node->original)) {
+    $old_state = $node->original->get('moderation_state')->value;
+    $new_state = $node->get('moderation_state')->value;
+    if ($old_state !== $new_state) {
+      mukurtu_notifications_handle_moderation_change($node, $old_state, $new_state);
+    }
+  }
+
   // Don't record events or send notifications for unpublished nodes.
   if (!$node->isPublished()) {
     return;
   }
 
-  $subscribers = \Drupal::service('message_subscribe.subscribers');
   $current_user_id = (int) \Drupal::currentUser()->id();
   $owner_id = (int) $node->getOwnerId();
 
-  // Record the node update event.
-  $message = Message::create([
-    'template' => 'mukurtu_single_node_update',
-    'uid' => $node->getOwnerId(),
-  ]);
-  $message->set('field_item', $node);
-  $message->set('field_user', $current_user_id);
-  $message->save();
-
-  // Notify the node owner and protocol stewards when someone else edits.
-  if ($current_user_id !== $owner_id) {
-    $notify_uids = [];
-
-    // Include the node owner.
-    if ($owner_id > 0) {
-      $notify_uids[] = $owner_id;
-    }
-
-    // Include protocol stewards for content with cultural protocols assigned.
-    if ($node instanceof CulturalProtocolControlledInterface) {
-      $protocol_ids = $node->getProtocols();
-      if (!empty($protocol_ids)) {
-        $steward_uids = mukurtu_notifications_resolve_notify_groups(FALSE, [], $protocol_ids);
-        $notify_uids = array_merge($notify_uids, $steward_uids);
-      }
-    }
-
-    // Exclude the editor and deduplicate.
-    $notify_uids = array_values(array_unique(array_diff($notify_uids, [$current_user_id])));
-
-    if (!empty($notify_uids)) {
-      $flags = ['subscribe_node'];
-      $notifiers = ['email'];
-      $subscribe_options = [
-        'notify message owner' => FALSE,
-        'uids' => [],
-      ];
-      $email_validator = \Drupal::service('email.validator');
-      $recipients = User::loadMultiple($notify_uids);
-      foreach ($recipients as $uid => $recipient) {
-        $email = $recipient->getEmail();
-        if (!$email || !$email_validator->isValid($email)) {
-          continue;
-        }
-        $subscribe_options['uids'][$uid] = new DeliveryCandidate($flags, $notifiers, $uid);
-      }
-      if (!empty($subscribe_options['uids'])) {
-        try {
-          $subscribers->sendMessage($message, $message, [], $subscribe_options);
-        }
-        catch (\Exception $e) {
-          \Drupal::logger('mukurtu_notifications')->warning('Failed to send node update notification: @msg', ['@msg' => $e->getMessage()]);
-        }
-      }
+  // Always record the update in the owner's feed. Protocol stewards are
+  // added too, but only when someone other than the owner made the edit --
+  // self-edits don't need steward attention. The shared helper skips
+  // emailing the editor about their own action either way.
+  $notify_uids = $owner_id > 0 ? [$owner_id] : [];
+  if ($current_user_id !== $owner_id && $node instanceof CulturalProtocolControlledInterface) {
+    $protocol_ids = $node->getProtocols();
+    if (!empty($protocol_ids)) {
+      $notify_uids = array_merge($notify_uids, mukurtu_notifications_resolve_notify_groups(FALSE, [], $protocol_ids, _mukurtu_notifications_protocol_steward_roles($node)));
     }
   }
+  $notify_uids = array_values(array_unique($notify_uids));
 
-  // Send "Mukurtu Follow Content" notifications to flag subscribers.
-  // message_subscribe calls OG functions that throw for non-group content,
-  // so limit this to nodes with cultural protocols.
-  if ($node->hasField('field_cultural_protocols')) {
-    try {
-      $subscribers->sendMessage($node, $message);
-    }
-    catch (\Exception $e) {
-      \Drupal::logger('mukurtu_notifications')->warning('Failed to send follow-content notification: @msg', ['@msg' => $e->getMessage()]);
-    }
+  _mukurtu_notifications_notify('mukurtu_single_node_update', [
+    'field_item' => $node,
+    'field_user' => $current_user_id,
+  ], $notify_uids, $current_user_id);
+
+  // Check for a newly-added protocol/community association.
+  mukurtu_notifications_notify_content_created($node);
+}
+
+/**
+ * Notifies the owner and any relevant protocol stewards/community managers
+ * when content is created, or when a protocol/community is newly associated
+ * with existing content via a later edit.
+ *
+ * Replaces the old separate mukurtu_new_item_in_protocol/_community
+ * templates and triggers: those only fired on the "added via edit" case and
+ * missed content that already had a protocol/community set at creation
+ * time, and never notified the owner. Reuses the existing
+ * mukurtu_single_node_insert template/text ("[content-type] [title] was
+ * created.") for both cases -- the message itself doesn't need to name the
+ * specific protocol/community.
+ *
+ * On update, only fires when a protocol/community was newly added (diffed
+ * against $node->original) -- editing already-tagged content doesn't
+ * re-notify; the separate "Content updated" notification already covers
+ * generic edits.
+ */
+function mukurtu_notifications_notify_content_created(Node $node): void {
+  $is_update = isset($node->original);
+
+  $new_protocol_ids = [];
+  $new_community_ids = [];
+
+  if ($node instanceof CulturalProtocolControlledInterface) {
+    $current_protocol_ids = $node->getProtocols();
+    $old_protocol_ids = ($is_update && $node->original instanceof CulturalProtocolControlledInterface)
+      ? $node->original->getProtocols()
+      : [];
+    $new_protocol_ids = array_diff($current_protocol_ids, $old_protocol_ids);
+
+    $current_community_ids = array_keys($node->getCommunities());
+    $old_community_ids = ($is_update && $node->original instanceof CulturalProtocolControlledInterface)
+      ? array_keys($node->original->getCommunities())
+      : [];
+    $new_community_ids = array_diff($current_community_ids, $old_community_ids);
   }
 
-  // Phase 2: protocol and community follow notifications go here once flags
-  // are updated to target the protocol/community entity types.
-  // mukurtu_notifications_notify_protocol($node, $subscribers);
-  // mukurtu_notifications_notify_community($node, $subscribers);
+  // On update, only fire for a newly-added protocol/community; on insert,
+  // always fire (at minimum, to notify the owner).
+  if ($is_update && empty($new_protocol_ids) && empty($new_community_ids)) {
+    return;
+  }
 
-  // Check for "Mukurtu Follow Collection" notifications.
-  mukurtu_notifications_notify_collection($node, $subscribers);
+  $owner_id = (int) $node->getOwnerId();
+  $recipient_uids = $owner_id > 0 ? [$owner_id] : [];
+
+  if (!empty($new_protocol_ids)) {
+    $recipient_uids = array_merge($recipient_uids, mukurtu_notifications_resolve_notify_groups(FALSE, [], $new_protocol_ids, _mukurtu_notifications_protocol_steward_roles($node)));
+  }
+  if (!empty($new_community_ids)) {
+    $recipient_uids = array_merge($recipient_uids, mukurtu_notifications_resolve_notify_groups(FALSE, $new_community_ids, []));
+  }
+  $recipient_uids = array_values(array_unique($recipient_uids));
+
+  $actor_uid = (int) \Drupal::currentUser()->id();
+  _mukurtu_notifications_notify('mukurtu_single_node_insert', [
+    'field_item' => $node,
+    'field_user' => $actor_uid,
+  ], $recipient_uids, $actor_uid);
 }
 
 /**
@@ -211,23 +626,31 @@ function mukurtu_notifications_node_delete(Node $node) {
   mukurtu_notifications_remove_notifications('mukurtu_single_node_insert', $node);
   mukurtu_notifications_remove_notifications('mukurtu_single_node_update', $node);
 
-  // Record the node delete event.
-  $template = 'mukurtu_single_node_delete';
-  $message = Message::create([
-    'template' => $template,
-    'uid' => $node->getOwnerId(),
-  ]);
+  // Notify the owner and any relevant protocol stewards/community managers.
+  $owner_id = (int) $node->getOwnerId();
+  $recipient_uids = $owner_id > 0 ? [$owner_id] : [];
 
-  // Add the node's title to the message.
-  $message->set('field_title', $node->getTitle());
+  if ($node instanceof CulturalProtocolControlledInterface) {
+    $protocol_ids = $node->getProtocols();
+    if (!empty($protocol_ids)) {
+      $recipient_uids = array_merge($recipient_uids, mukurtu_notifications_resolve_notify_groups(FALSE, [], $protocol_ids, _mukurtu_notifications_protocol_steward_roles($node)));
+    }
+    $community_ids = array_keys($node->getCommunities());
+    if (!empty($community_ids)) {
+      $recipient_uids = array_merge($recipient_uids, mukurtu_notifications_resolve_notify_groups(FALSE, $community_ids, []));
+    }
+  }
+  $recipient_uids = array_values(array_unique($recipient_uids));
 
-  // Record the content type.
-  $message->set('field_content_type', \Drupal::token()->replace('[node:type-name]', ['node' => $node]));
+  $actor_uid = (int) \Drupal::currentUser()->id();
 
-  // Record the user who took the action.
-  $message->set('field_user', \Drupal::currentUser()->id());
-
-  $message->save();
+  // field_title/field_content_type are plain strings, not entity
+  // references, since the node is gone by the time this is viewed.
+  _mukurtu_notifications_notify('mukurtu_single_node_delete', [
+    'field_title' => $node->getTitle(),
+    'field_content_type' => \Drupal::token()->replace('[node:type-name]', ['node' => $node]),
+    'field_user' => $actor_uid,
+  ], $recipient_uids, $actor_uid);
 }
 
 /**
@@ -240,62 +663,22 @@ function mukurtu_notifications_user_insert($entity) {
     return;
   }
 
-  // Create the new user registration message.
-  $template = 'mukurtu_new_user_registration';
-  $message = Message::create([
-    'template' => $template,
-    'uid' => 1,
-  ]);
+  // Mukurtu managers can opt out of "User account" category emails via
+  // their own notification preferences; the in-app feed record is
+  // unconditional.
+  $manager_uids = mukurtu_notifications_resolve_notify_groups(TRUE, [], []);
 
-  // Record the user requesting the account.
-  $message->set('field_user', $entity);
-  $message->save();
-
-  // Find all users with 'administer users' permission.
-  // TODO: Eventually we want an option for these admin users to
-  // be able to opt out of these emails. At that point we'll
-  // need to filter for that in this query.
-  $rids = [];
-  foreach (Role::loadMultiple() as $role) {
-    if ($role->hasPermission('administer users')) {
-      $rids[] = $role->id();
-    }
-  }
-  $uids = \Drupal::service('entity_type.manager')->getStorage('user')->getQuery()
-    ->accessCheck(FALSE)
-    ->condition('roles', $rids, 'IN')
-    ->execute();
-
-  // Build the options required to send the message to specific
-  // uids via message subscribe, rather than querying flags.
-  $flags = ['subscribe_user'];
-  $notifiers = ['email'];
-  $notify_options = [];
-  $subscribe_options = [
-    'notify message owner' => FALSE,
-    'uids' => [],
-  ];
-  $email_validator = \Drupal::service('email.validator');
-  $admin_users = User::loadMultiple($uids);
-  foreach ($admin_users as $uid => $admin_user) {
-    if (!$email_validator->isValid($admin_user->getEmail())) {
-      continue;
-    }
-    $subscribe_options['uids'][$uid] = new DeliveryCandidate($flags, $notifiers, $uid);
-  }
-
-  // Queue messages to our custom list of admins.
-  $subscribers = \Drupal::service('message_subscribe.subscribers');
-  try {
-    $subscribers->sendMessage($message, $message, $notify_options, $subscribe_options);
-  }
-  catch (\Exception $e) {
-    \Drupal::logger('mukurtu_notifications')->warning('Failed to send user registration notification: @msg', ['@msg' => $e->getMessage()]);
-  }
+  _mukurtu_notifications_notify('mukurtu_new_user_registration', [
+    'field_user' => $entity,
+  ], $manager_uids);
 }
 
 /**
- * Sends email notifications to selected users when a new account is created.
+ * Sends notifications to Mukurtu managers and selected users when a new
+ * account is created.
+ *
+ * Mukurtu managers are unconditional recipients; $notify_uids are additional
+ * recipients selected via the account-creation form.
  *
  * @param \Drupal\user\Entity\User $new_user
  *   The newly created user entity.
@@ -303,39 +686,219 @@ function mukurtu_notifications_user_insert($entity) {
  *   Array of user IDs to notify.
  */
 function mukurtu_notifications_notify_new_account_created(User $new_user, array $notify_uids): void {
-  if (empty($notify_uids)) {
+  $manager_uids = mukurtu_notifications_resolve_notify_groups(TRUE, [], []);
+  $recipient_uids = array_values(array_unique(array_merge($manager_uids, $notify_uids)));
+
+  _mukurtu_notifications_notify('mukurtu_new_user_account_created', [
+    'field_user' => $new_user,
+  ], $recipient_uids, (int) \Drupal::currentUser()->id());
+}
+
+/**
+ * Notifies Mukurtu managers and Roundtrip managers when a batch import
+ * finishes.
+ *
+ * @param int $count
+ *   The number of items imported.
+ */
+function mukurtu_notifications_notify_batch_import_report(int $count): void {
+  $manager_uids = mukurtu_notifications_resolve_notify_groups(TRUE, [], []);
+  $roundtrip_uids = \Drupal::entityQuery('user')
+    ->condition('roles', 'mukurtu_roundtrip_manager')
+    ->accessCheck(FALSE)
+    ->execute();
+  $recipient_uids = array_values(array_unique(array_merge($manager_uids, array_values($roundtrip_uids))));
+
+  _mukurtu_notifications_notify('mukurtu_batch_import_report', [
+    'field_number_imported' => $count,
+  ], $recipient_uids, (int) \Drupal::currentUser()->id());
+}
+
+/**
+ * Returns the account state implied by a user's status/field_pending values.
+ *
+ * Accounts are one of three states: 'active' (status=1), 'pending'
+ * (status=0, field_pending=1), or 'blocked' (status=0, field_pending=0) --
+ * see mukurtu_core.install:706 for how field_pending distinguishes pending
+ * from blocked.
+ */
+function _mukurtu_notifications_user_account_state(bool $status, bool $pending): string {
+  if ($status) {
+    return 'active';
+  }
+  return $pending ? 'pending' : 'blocked';
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_update() for user.
+ *
+ * Notifies Mukurtu managers when an account's approval state changes:
+ * pending->active (approved), any->pending (set pending), blocked->active
+ * (unblocked), or active/pending->blocked (blocked).
+ */
+function mukurtu_notifications_user_update($account) {
+  if (!isset($account->original)) {
     return;
   }
 
-  $message = Message::create([
-    'template' => 'mukurtu_new_user_account_created',
-    'uid' => \Drupal::currentUser()->id(),
-  ]);
-  $message->set('field_user', $new_user);
-  $message->save();
+  $old_state = _mukurtu_notifications_user_account_state(
+    (bool) $account->original->get('status')->value,
+    $account->original->hasField('field_pending') ? (bool) $account->original->get('field_pending')->value : FALSE
+  );
+  $new_state = _mukurtu_notifications_user_account_state(
+    (bool) $account->get('status')->value,
+    $account->hasField('field_pending') ? (bool) $account->get('field_pending')->value : FALSE
+  );
 
-  $flags = ['subscribe_user'];
-  $notifiers = ['email'];
-  $subscribe_options = [
-    'notify message owner' => FALSE,
-    'uids' => [],
-  ];
-  $email_validator = \Drupal::service('email.validator');
-  $notify_users = User::loadMultiple($notify_uids);
-  foreach ($notify_users as $uid => $notify_user) {
-    if (!$email_validator->isValid($notify_user->getEmail())) {
+  if ($old_state === $new_state) {
+    return;
+  }
+
+  $template = match (TRUE) {
+    $old_state === 'pending' && $new_state === 'active' => 'mukurtu_user_approved',
+    $new_state === 'pending' => 'mukurtu_user_set_pending',
+    $old_state === 'blocked' && $new_state === 'active' => 'mukurtu_user_unblocked',
+    $new_state === 'blocked' => 'mukurtu_user_blocked',
+    default => NULL,
+  };
+
+  if (!$template) {
+    return;
+  }
+
+  $manager_uids = mukurtu_notifications_resolve_notify_groups(TRUE, [], []);
+  _mukurtu_notifications_notify($template, [
+    'field_user' => $account->id(),
+  ], $manager_uids, (int) \Drupal::currentUser()->id());
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_delete() for user.
+ *
+ * Notifies Mukurtu managers when a user account is deleted. field_title
+ * (a plain string, reused from mukurtu_single_node_delete's pattern) stores
+ * the deleted user's display name, since the user entity itself won't be
+ * loadable when the message is later viewed.
+ */
+function mukurtu_notifications_user_delete($account) {
+  $display_name = $account->hasField('field_display_name') && !$account->get('field_display_name')->isEmpty()
+    ? $account->get('field_display_name')->value
+    : $account->getAccountName();
+
+  $manager_uids = mukurtu_notifications_resolve_notify_groups(TRUE, [], []);
+  _mukurtu_notifications_notify('mukurtu_user_deleted', [
+    'field_title' => $display_name,
+  ], $manager_uids, (int) \Drupal::currentUser()->id());
+}
+
+/**
+ * Implements hook_cron().
+ *
+ * Note that Drupal 11.x does not yet support cron implementations using
+ * classes/services. See https://www.drupal.org/project/drupal/issues/3383487.
+ */
+function mukurtu_notifications_cron() {
+  mukurtu_notifications_process_digest('daily', 86400);
+  mukurtu_notifications_process_digest('weekly', 604800);
+}
+
+/**
+ * Sends batched digest emails to users with the given frequency preference.
+ *
+ * Only runs once the interval has elapsed since its last run (tracked via
+ * State, matching mukurtu_local_contexts_cron()'s pattern). For each user
+ * with pending digest messages, sends one email listing all of them (each
+ * rendered via its existing 'mail_subject' view mode -- no new per-template
+ * rendering logic needed) and clears field_digest_pending on all of them,
+ * whether or not the send succeeded (best-effort, matching how immediate
+ * sends already just log and swallow failures without retrying).
+ *
+ * @param string $frequency
+ *   'daily' or 'weekly', matching field_notify_frequency's allowed values.
+ * @param int $interval
+ *   Minimum seconds between runs for this frequency.
+ */
+function mukurtu_notifications_process_digest(string $frequency, int $interval): void {
+  $state = \Drupal::state();
+  $now = \Drupal::time()->getCurrentTime();
+  $last_run = (int) $state->get('mukurtu_notifications.digest_last_run.' . $frequency, 0);
+
+  if ($now - $last_run < $interval) {
+    return;
+  }
+  $state->set('mukurtu_notifications.digest_last_run.' . $frequency, $now);
+
+  $uids = \Drupal::entityQuery('user')
+    ->condition('field_notify_frequency', $frequency)
+    ->accessCheck(FALSE)
+    ->execute();
+
+  if (empty($uids)) {
+    return;
+  }
+
+  $site_name = \Drupal::config('system.site')->get('name');
+  $frequency_label = ucfirst($frequency);
+  $view_builder = \Drupal::entityTypeManager()->getViewBuilder('message');
+  $renderer = \Drupal::service('renderer');
+  $mail_manager = \Drupal::service('plugin.manager.mail');
+
+  foreach (User::loadMultiple($uids) as $uid => $user) {
+    $mids = \Drupal::entityQuery('message')
+      ->condition('uid', $uid)
+      ->condition('field_digest_pending', TRUE)
+      ->accessCheck(FALSE)
+      ->execute();
+
+    if (empty($mids)) {
       continue;
     }
-    $subscribe_options['uids'][$uid] = new DeliveryCandidate($flags, $notifiers, (int) $uid);
-  }
 
-  try {
-    \Drupal::service('message_subscribe.subscribers')
-      ->sendMessage($message, $message, [], $subscribe_options);
+    $messages = Message::loadMultiple($mids);
+    $email = $user->getEmail();
+
+    if (!empty($email)) {
+      $items = [];
+      foreach ($messages as $message) {
+        $build = $view_builder->view($message, 'mail_subject');
+        $items[] = (string) $renderer->renderInIsolation($build);
+      }
+
+      $body = [
+        '#theme' => 'item_list',
+        '#items' => $items,
+        '#prefix' => '<p>Recent activity:</p>',
+      ];
+
+      $params = [
+        'subject' => "Your {$frequency_label} {$site_name} digest",
+        'body' => $renderer->renderInIsolation($body),
+      ];
+
+      try {
+        $mail_manager->mail('mukurtu_notifications', 'digest', $email, $user->getPreferredLangcode(), $params);
+      }
+      catch (\Exception $e) {
+        \Drupal::logger('mukurtu_notifications')->warning('Failed to send @frequency digest to uid @uid: @msg', ['@frequency' => $frequency, '@uid' => $uid, '@msg' => $e->getMessage()]);
+      }
+    }
+
+    foreach ($messages as $message) {
+      $message->set('field_digest_pending', FALSE);
+      $message->save();
+    }
   }
-  catch (\Exception $e) {
-    \Drupal::logger('mukurtu_notifications')->warning('Failed to send new account notification: @msg', ['@msg' => $e->getMessage()]);
+}
+
+/**
+ * Implements hook_mail().
+ */
+function mukurtu_notifications_mail($key, &$message, $params) {
+  if ($key !== 'digest') {
+    return;
   }
+  $message['subject'] = $params['subject'];
+  $message['body'][] = $params['body'];
 }
 
 /**
@@ -347,11 +910,16 @@ function mukurtu_notifications_notify_new_account_created(User $new_user, array 
  *   Entity IDs of communities whose community managers should be notified.
  * @param array $protocol_ids
  *   Entity IDs of protocols whose protocol stewards should be notified.
+ * @param string[] $protocol_roles
+ *   The protocol OG role(s) to resolve for $protocol_ids. Defaults to
+ *   protocol stewards only; pass the result of
+ *   _mukurtu_notifications_protocol_steward_roles() to also include
+ *   language stewards for dictionary word/word list content.
  *
  * @return array
  *   Unique array of integer user IDs.
  */
-function mukurtu_notifications_resolve_notify_groups(bool $all_managers, array $community_ids, array $protocol_ids): array {
+function mukurtu_notifications_resolve_notify_groups(bool $all_managers, array $community_ids, array $protocol_ids, array $protocol_roles = ['protocol-protocol-protocol_steward']): array {
   $uids = [];
 
   if ($all_managers) {
@@ -381,7 +949,7 @@ function mukurtu_notifications_resolve_notify_groups(bool $all_managers, array $
     $memberships = \Drupal::entityQuery('og_membership')
       ->condition('entity_type', 'protocol')
       ->condition('entity_id', $protocol_ids, 'IN')
-      ->condition('roles', 'protocol-protocol-protocol_steward')
+      ->condition('roles', $protocol_roles, 'IN')
       ->condition('state', 'active')
       ->accessCheck(FALSE)
       ->execute();
@@ -392,6 +960,28 @@ function mukurtu_notifications_resolve_notify_groups(bool $all_managers, array $
   }
 
   return array_values(array_unique($uids));
+}
+
+/**
+ * Returns the protocol OG roles that should be notified about a node.
+ *
+ * Language stewards manage dictionary words and word lists specifically
+ * (see config/install/og.og_role.protocol-protocol-language_steward.yml)
+ * and should get the same content notifications as protocol stewards, but
+ * only for those two bundles -- not all content types.
+ *
+ * @param \Drupal\node\Entity\Node $node
+ *   The node the notification is about.
+ *
+ * @return string[]
+ *   Protocol OG role machine names to resolve.
+ */
+function _mukurtu_notifications_protocol_steward_roles(Node $node): array {
+  $roles = ['protocol-protocol-protocol_steward'];
+  if (in_array($node->bundle(), ['dictionary_word', 'word_list'], TRUE)) {
+    $roles[] = 'protocol-protocol-language_steward';
+  }
+  return $roles;
 }
 
 /**
@@ -432,73 +1022,215 @@ function mukurtu_notifications_extract_notify_uids(FormStateInterface $form_stat
 }
 
 /**
- * Notify followers when a node is added to a protocol they follow.
- *
- * Phase 2: requires mukurtu_follow_protocol flag targeting the protocol entity
- * type. Stubbed until flag configuration is updated.
- *
- * @todo Implement in issue #270 (notifications phase 2) once the
- *   mukurtu_follow_protocol flag targets the protocol entity type.
- */
-function mukurtu_notifications_notify_protocol(Node $node, $subscribers): void {
-  // Phase 2 implementation needed: the protocol entity type and follow flag
-  // must be aligned before this can send notifications.
-}
-
-/**
- * Notify followers when a node is added to a community they follow.
- *
- * Phase 2: requires mukurtu_follow_community flag targeting the community
- * entity type. Currently the flag targets node entities which no longer
- * represent communities. Stubbed until flag configuration is updated.
- *
- * @todo Implement in issue #270 (notifications phase 2) once
- *   mukurtu_follow_community flag targets the community entity type and
- *   field_community on message templates references community entities.
- */
-function mukurtu_notifications_notify_community(Node $node, $subscribers): void {
-  // Phase 2 implementation needed: update mukurtu_follow_community flag to
-  // target community entity type and update field_community on message
-  // templates to reference community entities instead of nodes.
-}
-
-/**
- * Sends notifications to collection followers when new items are added.
+ * Records and dispatches a notification when content moderation state changes.
  *
  * @param \Drupal\node\Entity\Node $node
- *   The node being updated (must be a Collection).
- * @param \Drupal\message_subscribe\SubscribersInterface $subscribers
- *   The message_subscribe service.
+ *   The node whose state changed.
+ * @param string $old_state
+ *   The previous moderation state machine name.
+ * @param string $new_state
+ *   The new moderation state machine name.
  */
-function mukurtu_notifications_notify_collection(Node $node, $subscribers) {
-  // Only handling existing collections here.
-  if (!($node instanceof Collection) || !isset($node->original)) {
+function mukurtu_notifications_handle_moderation_change(Node $node, string $old_state, string $new_state): void {
+  $current_user_id = (int) \Drupal::currentUser()->id();
+  $owner_id = (int) $node->getOwnerId();
+  $template = NULL;
+
+  switch ($new_state) {
+    case 'needs_review':
+      $template = 'mukurtu_content_for_review';
+      break;
+
+    case 'published':
+      $template = 'mukurtu_content_published';
+      break;
+
+    case 'archived':
+      $template = 'mukurtu_content_archived';
+      break;
+
+    case 'draft':
+      // Only notify on reversion from a non-draft state.
+      if (!in_array($old_state, ['needs_review', 'published', 'archived'])) {
+        return;
+      }
+      $template = 'mukurtu_content_to_draft';
+      break;
+
+    default:
+      return;
+  }
+
+  $notify_uids = $owner_id > 0 ? [$owner_id] : [];
+  if ($node instanceof CulturalProtocolControlledInterface) {
+    $protocol_ids = $node->getProtocols();
+    if (!empty($protocol_ids)) {
+      $notify_uids = array_merge($notify_uids, mukurtu_notifications_resolve_notify_groups(FALSE, [], $protocol_ids, _mukurtu_notifications_protocol_steward_roles($node)));
+    }
+  }
+  $notify_uids = array_values(array_unique($notify_uids));
+
+  _mukurtu_notifications_notify($template, [
+    'field_item' => $node,
+    'field_user' => $current_user_id,
+  ], $notify_uids, $current_user_id);
+}
+
+/**
+ * Implements hook_comment_insert().
+ */
+function mukurtu_notifications_comment_insert(CommentInterface $comment) {
+  $node = $comment->getCommentedEntity();
+  if (!($node instanceof Node)) {
+    return;
+  }
+  if (!$node instanceof CulturalProtocolControlledInterface) {
+    return;
+  }
+  $protocol_ids = $node->getProtocols();
+  if (empty($protocol_ids)) {
     return;
   }
 
-  // Check if there are any new items in the collection.
-  $currentItems = mukurtu_core_flatten_entity_ref_field($node, MUKURTU_COLLECTION_FIELD_NAME_ITEMS);
-  $oldItems = mukurtu_core_flatten_entity_ref_field($node->original, MUKURTU_COLLECTION_FIELD_NAME_ITEMS);
-  $newItems = array_diff($currentItems, $oldItems);
+  $current_user_id = (int) \Drupal::currentUser()->id();
+  $steward_uids = mukurtu_notifications_resolve_notify_groups(FALSE, [], $protocol_ids, _mukurtu_notifications_protocol_steward_roles($node));
+  $notify_uids = array_values(array_unique(array_merge([$current_user_id], $steward_uids)));
 
-  if (empty($newItems)) {
+  _mukurtu_notifications_notify('mukurtu_protocol_comment', [
+    'field_item' => $node,
+    'field_user' => $current_user_id,
+  ], $notify_uids, $current_user_id);
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_update() for comment.
+ *
+ * Notifies the commenter and protocol stewards when a pending comment is
+ * approved (transitions from unpublished to published).
+ */
+function mukurtu_notifications_comment_update(CommentInterface $comment) {
+  if (!isset($comment->original) || $comment->original->isPublished() || !$comment->isPublished()) {
     return;
   }
 
-  $message = Message::create([
-    'template' => 'mukurtu_new_item_in_collection',
-    'uid' => $node->getOwnerId(),
-  ]);
-  $message->set('field_collection', $node);
-  // field_item has cardinality 1, so only the first new item is stored per
-  // notification. If multi-item recording is needed, revisit in issue #270.
-  $message->set('field_item', array_values($newItems));
-  $message->save();
+  $node = $comment->getCommentedEntity();
+  if (!($node instanceof Node) || !($node instanceof CulturalProtocolControlledInterface)) {
+    return;
+  }
+  $protocol_ids = $node->getProtocols();
+  if (empty($protocol_ids)) {
+    return;
+  }
 
-  try {
-    $subscribers->sendMessage($node, $message);
+  $commenter_uid = (int) $comment->getOwnerId();
+  $steward_uids = mukurtu_notifications_resolve_notify_groups(FALSE, [], $protocol_ids, _mukurtu_notifications_protocol_steward_roles($node));
+  $notify_uids = array_values(array_unique(array_merge([$commenter_uid], $steward_uids)));
+
+  _mukurtu_notifications_notify('mukurtu_comment_approved', [
+    'field_item' => $node,
+    'field_user' => $commenter_uid,
+  ], $notify_uids, (int) \Drupal::currentUser()->id());
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_delete() for comment.
+ *
+ * Notifies the commenter and protocol stewards when a pending (unpublished)
+ * comment is denied by deletion.
+ */
+function mukurtu_notifications_comment_delete(CommentInterface $comment) {
+  if ($comment->isPublished()) {
+    return;
   }
-  catch (\Exception $e) {
-    \Drupal::logger('mukurtu_notifications')->warning('Failed to send collection notification: @msg', ['@msg' => $e->getMessage()]);
+
+  $node = $comment->getCommentedEntity();
+  if (!($node instanceof Node) || !($node instanceof CulturalProtocolControlledInterface)) {
+    return;
   }
+  $protocol_ids = $node->getProtocols();
+  if (empty($protocol_ids)) {
+    return;
+  }
+
+  $commenter_uid = (int) $comment->getOwnerId();
+  $steward_uids = mukurtu_notifications_resolve_notify_groups(FALSE, [], $protocol_ids, _mukurtu_notifications_protocol_steward_roles($node));
+  $notify_uids = array_values(array_unique(array_merge([$commenter_uid], $steward_uids)));
+
+  _mukurtu_notifications_notify('mukurtu_comment_denied', [
+    'field_item' => $node,
+    'field_user' => $commenter_uid,
+  ], $notify_uids, (int) \Drupal::currentUser()->id());
+}
+
+/**
+ * Implements hook_og_membership_insert().
+ */
+function mukurtu_notifications_og_membership_insert(OgMembership $membership) {
+  $group = $membership->getGroup();
+  if (!$group) {
+    return;
+  }
+
+  $group_entity_type = $membership->getGroupEntityType();
+  $added_user = $membership->getOwner();
+  if (!$added_user || $added_user->id() == 0) {
+    return;
+  }
+
+  // "Added to community" is not a notification type -- only protocol adds
+  // are notified.
+  if ($group_entity_type !== 'protocol') {
+    return;
+  }
+
+  $added_uid = (int) $added_user->id();
+  $field_values = ['field_user' => $added_uid];
+  $template = 'mukurtu_user_added_to_protocol';
+  $field_values['field_protocol'] = (int) $group->id();
+  $group_uids = mukurtu_notifications_resolve_notify_groups(FALSE, [], [$group->id()]);
+
+  $recipient_uids = array_values(array_unique(array_merge([$added_uid], $group_uids)));
+
+  // The added user is a recipient, so their own feed shows "you were added"
+  // -- the message's uid for their copy must be the added user, not the
+  // actor who added them (the shared helper handles this per recipient).
+  _mukurtu_notifications_notify($template, $field_values, $recipient_uids, (int) \Drupal::currentUser()->id());
+}
+
+/**
+ * Implements hook_og_membership_delete().
+ *
+ * Mirrors mukurtu_notifications_og_membership_insert() for removals.
+ */
+function mukurtu_notifications_og_membership_delete(OgMembership $membership) {
+  $group = $membership->getGroup();
+  if (!$group) {
+    return;
+  }
+
+  $group_entity_type = $membership->getGroupEntityType();
+  $removed_user = $membership->getOwner();
+  if (!$removed_user || $removed_user->id() == 0) {
+    return;
+  }
+
+  $removed_uid = (int) $removed_user->id();
+  $field_values = ['field_user' => $removed_uid];
+  if ($group_entity_type === 'community') {
+    $template = 'mukurtu_removed_from_community';
+    $field_values['field_community_ref'] = (int) $group->id();
+    $group_uids = mukurtu_notifications_resolve_notify_groups(FALSE, [$group->id()], []);
+  }
+  elseif ($group_entity_type === 'protocol') {
+    $template = 'mukurtu_removed_from_protocol';
+    $field_values['field_protocol'] = (int) $group->id();
+    $group_uids = mukurtu_notifications_resolve_notify_groups(FALSE, [], [$group->id()]);
+  }
+  else {
+    return;
+  }
+
+  $recipient_uids = array_values(array_unique(array_merge([$removed_uid], $group_uids)));
+
+  _mukurtu_notifications_notify($template, $field_values, $recipient_uids, (int) \Drupal::currentUser()->id());
 }

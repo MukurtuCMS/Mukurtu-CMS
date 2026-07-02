@@ -4,11 +4,11 @@ dependencies:
   config:
     - filter.format.mukurtu_html
 template: mukurtu_single_node_insert
-label: 'Mukurtu Single Node Insert'
+label: 'Content created'
 description: 'Standard template for a single node being created.'
 text:
   -
-    value: '<p>[message:field_item:entity:content-type] item&nbsp;<a href="[message:field_item:entity:url]">[message:field_item:entity:title]</a> was created.</p>'
+    value: '<p>[message:field_item:entity:content-type]&nbsp;<a href="[message:field_item:entity:url]">[message:field_item:entity:title]</a> was created.</p>'
     format: mukurtu_html
 settings:
   'token options':

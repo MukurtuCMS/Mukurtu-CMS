@@ -2,12 +2,12 @@ langcode: en
 status: true
 dependencies:
   module:
-    - node
+    - mukurtu_protocol
 id: mukurtu_email_community
 label: 'Mukurtu Email Community'
 bundles:
   - community
-entity_type: node
+entity_type: community
 global: false
 weight: 2
 flag_short: 'Flag this item'
@@ -17,7 +17,7 @@ unflag_short: 'Unflag this item'
 unflag_long: ''
 unflag_message: ''
 unflag_denied_text: ''
-flag_type: 'entity:node'
+flag_type: 'entity:community'
 link_type: ajax_link
 flagTypeConfig:
   show_in_links: {  }

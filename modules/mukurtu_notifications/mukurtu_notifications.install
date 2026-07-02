@@ -10,17 +10,20 @@ use Drupal\Core\Config\FileStorage;
 /**
  * Implements hook_install().
  *
- * Creates field_protocol storage and attachment via Field API on fresh installs.
- * These cannot live in config/install because their dependency on the protocol
- * entity type causes UnmetDependenciesException in test environments that
- * bootstrap modules in isolation.
+ * Creates field_protocol and field_community_ref storages and attachments via
+ * Field API on fresh installs. These cannot live in config/install because
+ * their dependencies on custom entity types cause UnmetDependenciesException
+ * in test environments that bootstrap modules in isolation.
  */
 function mukurtu_notifications_install(): void {
   mukurtu_notifications_create_field_protocol();
+  mukurtu_notifications_create_field_community_ref();
+  mukurtu_notifications_create_field_notify_email_categories();
+  mukurtu_notifications_create_field_notify_frequency();
 }
 
 /**
- * Creates the field_protocol field storage and attachment if they do not exist.
+ * Creates the field_protocol storage and all bundle attachments if missing.
  */
 function mukurtu_notifications_create_field_protocol(): void {
   if (!\Drupal\field\Entity\FieldStorageConfig::loadByName('message', 'field_protocol')) {
@@ -33,12 +36,140 @@ function mukurtu_notifications_create_field_protocol(): void {
     ])->save();
   }
 
-  if (!\Drupal\field\Entity\FieldConfig::loadByName('message', 'mukurtu_new_item_in_protocol', 'field_protocol')) {
-    $storage = \Drupal\field\Entity\FieldStorageConfig::loadByName('message', 'field_protocol');
+  $storage = \Drupal\field\Entity\FieldStorageConfig::loadByName('message', 'field_protocol');
+  $bundles = [
+    'mukurtu_new_item_in_protocol',
+    'mukurtu_user_added_to_protocol',
+    'mukurtu_removed_from_protocol',
+  ];
+  foreach ($bundles as $bundle) {
+    if (!\Drupal\field\Entity\FieldConfig::loadByName('message', $bundle, 'field_protocol')) {
+      \Drupal\field\Entity\FieldConfig::create([
+        'field_storage' => $storage,
+        'bundle' => $bundle,
+        'label' => 'Protocol',
+      ])->save();
+    }
+  }
+
+  \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
+}
+
+/**
+ * Creates the field_community_ref storage and all bundle attachments if missing.
+ *
+ * field_community_ref is a proper entity_reference to the community entity
+ * type. The existing field_community targets node (a legacy mismatch) and
+ * cannot be used for community entity references.
+ */
+function mukurtu_notifications_create_field_community_ref(): void {
+  if (!\Drupal\field\Entity\FieldStorageConfig::loadByName('message', 'field_community_ref')) {
+    \Drupal\field\Entity\FieldStorageConfig::create([
+      'field_name' => 'field_community_ref',
+      'entity_type' => 'message',
+      'type' => 'entity_reference',
+      'settings' => ['target_type' => 'community'],
+      'cardinality' => 1,
+    ])->save();
+  }
+
+  $storage = \Drupal\field\Entity\FieldStorageConfig::loadByName('message', 'field_community_ref');
+  $bundles = [
+    'mukurtu_user_added_to_community',
+    'mukurtu_new_item_in_community',
+    'mukurtu_removed_from_community',
+  ];
+  foreach ($bundles as $bundle) {
+    if (!\Drupal\field\Entity\FieldConfig::loadByName('message', $bundle, 'field_community_ref')) {
+      \Drupal\field\Entity\FieldConfig::create([
+        'field_storage' => $storage,
+        'bundle' => $bundle,
+        'label' => 'Community',
+      ])->save();
+    }
+  }
+
+  \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
+}
+
+/**
+ * Creates the field_notify_email_categories storage and attachment on
+ * the user entity if missing, defaulting existing and new users to "all
+ * categories on" so no one's email volume silently drops.
+ *
+ * Uses the Field API rather than config/install (like field_protocol and
+ * field_community_ref above) because writing field storage config directly
+ * via config storage in an update hook does not create the underlying
+ * database table -- only the Field API's create()->save() triggers that.
+ */
+function mukurtu_notifications_create_field_notify_email_categories(): void {
+  if (!\Drupal\field\Entity\FieldStorageConfig::loadByName('user', 'field_notify_email_categories')) {
+    \Drupal\field\Entity\FieldStorageConfig::create([
+      'field_name' => 'field_notify_email_categories',
+      'entity_type' => 'user',
+      'type' => 'list_string',
+      'cardinality' => -1,
+      'settings' => [
+        'allowed_values' => [],
+        'allowed_values_function' => 'mukurtu_notifications_notification_categories_allowed_values',
+      ],
+    ])->save();
+  }
+
+  $all_categories = array_keys(_mukurtu_notifications_category_labels());
+  if (!\Drupal\field\Entity\FieldConfig::loadByName('user', 'user', 'field_notify_email_categories')) {
     \Drupal\field\Entity\FieldConfig::create([
-      'field_storage' => $storage,
-      'bundle' => 'mukurtu_new_item_in_protocol',
-      'label' => 'Protocol',
+      'field_name' => 'field_notify_email_categories',
+      'entity_type' => 'user',
+      'bundle' => 'user',
+      'label' => 'Email notifications',
+      'description' => "Choose which types of activity you'd like to receive email notifications about. You'll still see all activity in your notifications feed regardless of these settings.",
+      'required' => FALSE,
+      'default_value' => array_map(static fn (string $key) => ['value' => $key], $all_categories),
+    ])->save();
+  }
+
+  \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
+
+  // Backfill existing users to "all categories on".
+  $uids = \Drupal::entityQuery('user')->accessCheck(FALSE)->execute();
+  foreach (\Drupal\user\Entity\User::loadMultiple($uids) as $user) {
+    $user->set('field_notify_email_categories', $all_categories);
+    $user->save();
+  }
+}
+
+/**
+ * Creates the field_notify_frequency storage and attachment on the user
+ * entity if missing.
+ *
+ * No backfill needed: _mukurtu_notifications_user_wants_digest() already
+ * treats an empty/unset value as "immediate" (today's behavior for every
+ * existing user), so only the default for brand-new users needs setting.
+ */
+function mukurtu_notifications_create_field_notify_frequency(): void {
+  if (!\Drupal\field\Entity\FieldStorageConfig::loadByName('user', 'field_notify_frequency')) {
+    \Drupal\field\Entity\FieldStorageConfig::create([
+      'field_name' => 'field_notify_frequency',
+      'entity_type' => 'user',
+      'type' => 'list_string',
+      'cardinality' => 1,
+      'settings' => [
+        'allowed_values' => [],
+        'allowed_values_function' => 'mukurtu_notifications_notification_frequency_allowed_values',
+      ],
+    ])->save();
+  }
+
+  if (!\Drupal\field\Entity\FieldConfig::loadByName('user', 'user', 'field_notify_frequency')) {
+    \Drupal\field\Entity\FieldConfig::create([
+      'field_name' => 'field_notify_frequency',
+      'entity_type' => 'user',
+      'bundle' => 'user',
+      'label' => 'Email frequency',
+      'description' => 'How often you want to receive notification emails.',
+      'required' => FALSE,
+      'default_value' => [['value' => 'immediate']],
     ])->save();
   }
 
@@ -348,8 +479,7 @@ function mukurtu_notifications_update_40015(): void {
  * current_user default, so custom validation is unnecessary.
  *
  * Each earlier hook (40005, 40009, 40013, 40014, 40015) fixed an in-flight
- * issue. Hook 40017 follows with a final re-deploy to ensure all environments
- * have the complete view config.
+ * issue. Hook 40017 follows with an accessibility fix (table caption).
  */
 function mukurtu_notifications_update_40016(): void {
   $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
@@ -362,12 +492,7 @@ function mukurtu_notifications_update_40016(): void {
 }
 
 /**
- * Re-deploy the mukurtu_message_log view to ensure all environments have the
- * complete config: defaults block, caption, uid argument, and table layout.
- *
- * The caption for WCAG 1.3.1 compliance was included in the config written by
- * hook 40016; this hook ensures it lands on environments where 40016 ran
- * before the caption was committed.
+ * Add accessible caption to the notifications table (WCAG 1.3.1).
  */
 function mukurtu_notifications_update_40017(): void {
   $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
@@ -376,5 +501,641 @@ function mukurtu_notifications_update_40017(): void {
   $config_storage->write(
     'views.view.mukurtu_message_log',
     $source->read('views.view.mukurtu_message_log')
+  );
+}
+
+/**
+ * Deploy extended Phase 1 notification templates, mail displays, and fields.
+ *
+ * The original Phase 1 scope (node CRUD, user registration, collections) was
+ * extended during development to include seven additional templates: comment
+ * on protocol content, four editorial workflow transitions (needs_review,
+ * published, archived, draft), and two group membership notifications. These
+ * are deployed here rather than deferred to Phase 2 because the corresponding
+ * hooks (hook_comment_insert, hook_og_membership_insert,
+ * mukurtu_notifications_handle_moderation_change) are already active in this
+ * branch. mail_body / mail_subject view displays and field attachments are
+ * included. field_community_ref and field_protocol bundle attachments are
+ * created via the Field API so the DB schema is handled correctly.
+ */
+function mukurtu_notifications_update_40018(): void {
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  $config_storage = \Drupal::service('config.storage');
+
+  $configs = [
+    // Message templates.
+    'message.template.mukurtu_protocol_comment',
+    'message.template.mukurtu_content_for_review',
+    'message.template.mukurtu_content_published',
+    'message.template.mukurtu_content_archived',
+    'message.template.mukurtu_content_to_draft',
+    'message.template.mukurtu_user_added_to_community',
+    'message.template.mukurtu_user_added_to_protocol',
+    // Mail body view displays.
+    'core.entity_view_display.message.mukurtu_protocol_comment.mail_body',
+    'core.entity_view_display.message.mukurtu_content_for_review.mail_body',
+    'core.entity_view_display.message.mukurtu_content_published.mail_body',
+    'core.entity_view_display.message.mukurtu_content_archived.mail_body',
+    'core.entity_view_display.message.mukurtu_content_to_draft.mail_body',
+    'core.entity_view_display.message.mukurtu_user_added_to_community.mail_body',
+    'core.entity_view_display.message.mukurtu_user_added_to_protocol.mail_body',
+    // Mail subject view displays.
+    'core.entity_view_display.message.mukurtu_protocol_comment.mail_subject',
+    'core.entity_view_display.message.mukurtu_content_for_review.mail_subject',
+    'core.entity_view_display.message.mukurtu_content_published.mail_subject',
+    'core.entity_view_display.message.mukurtu_content_archived.mail_subject',
+    'core.entity_view_display.message.mukurtu_content_to_draft.mail_subject',
+    'core.entity_view_display.message.mukurtu_user_added_to_community.mail_subject',
+    'core.entity_view_display.message.mukurtu_user_added_to_protocol.mail_subject',
+    // Field attachments (field_item).
+    'field.field.message.mukurtu_protocol_comment.field_item',
+    'field.field.message.mukurtu_content_for_review.field_item',
+    'field.field.message.mukurtu_content_published.field_item',
+    'field.field.message.mukurtu_content_archived.field_item',
+    'field.field.message.mukurtu_content_to_draft.field_item',
+    // Field attachments (field_user).
+    'field.field.message.mukurtu_protocol_comment.field_user',
+    'field.field.message.mukurtu_content_for_review.field_user',
+    'field.field.message.mukurtu_content_published.field_user',
+    'field.field.message.mukurtu_content_archived.field_user',
+    'field.field.message.mukurtu_content_to_draft.field_user',
+    'field.field.message.mukurtu_user_added_to_community.field_user',
+    'field.field.message.mukurtu_user_added_to_protocol.field_user',
+  ];
+
+  foreach ($configs as $config_name) {
+    $config_storage->write($config_name, $source->read($config_name));
+  }
+
+  // field_community_ref and the field_protocol/mukurtu_user_added_to_protocol
+  // attachment must be created via Field API so DB schema is handled correctly.
+  mukurtu_notifications_create_field_community_ref();
+  mukurtu_notifications_create_field_protocol();
+}
+
+/**
+ * Rename message template labels to user-friendly names for the filter UI,
+ * and redeploy the notifications view with an exposed notification type filter.
+ */
+function mukurtu_notifications_update_40019(): void {
+  $label_map = [
+    'message.template.mukurtu_single_node_insert' => 'Content created',
+    'message.template.mukurtu_single_node_update' => 'Content updated',
+    'message.template.mukurtu_single_node_delete' => 'Content deleted',
+    'message.template.mukurtu_new_item_in_protocol' => 'New item in protocol',
+    'message.template.mukurtu_new_item_in_community' => 'New item in community',
+    'message.template.mukurtu_new_item_in_collection' => 'New item in collection',
+    'message.template.mukurtu_new_user_registration' => 'New user registration',
+    'message.template.mukurtu_new_user_account_created' => 'New user account created',
+    'message.template.mukurtu_batch_import_report' => 'Batch import report',
+    // Phase 2 templates deployed with corrected short names by hook 40020.
+    'message.template.mukurtu_protocol_comment' => 'Comment on protocol content',
+    'message.template.mukurtu_content_for_review' => 'Content submitted for review',
+    'message.template.mukurtu_content_to_draft' => 'Content returned to draft',
+  ];
+
+  $config_factory = \Drupal::configFactory();
+  foreach ($label_map as $config_name => $new_label) {
+    $config = $config_factory->getEditable($config_name);
+    if (!$config->isNew()) {
+      $config->set('label', $new_label)->save();
+    }
+  }
+
+  // Redeploy the view with the exposed notification type filter.
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  $config_storage = \Drupal::service('config.storage');
+  $config_storage->write(
+    'views.view.mukurtu_message_log',
+    $source->read('views.view.mukurtu_message_log')
+  );
+}
+
+/**
+ * Replace three Phase 2 template names that exceeded the 32-character limit.
+ *
+ * Hook 40018 deployed these configs with names that are too long for Drupal
+ * bundle IDs (EntityBase enforces a 32-character maximum). This hook deletes
+ * the oversized configs and redeploys them under corrected short names:
+ *   mukurtu_comment_on_protocol_content  -> mukurtu_protocol_comment
+ *   mukurtu_content_submitted_for_review -> mukurtu_content_for_review
+ *   mukurtu_content_returned_to_draft    -> mukurtu_content_to_draft
+ */
+function mukurtu_notifications_update_40020(): void {
+  $config_factory = \Drupal::configFactory();
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  $config_storage = \Drupal::service('config.storage');
+
+  // Delete all configs that used the old oversized names.
+  $old_names = [
+    'message.template.mukurtu_comment_on_protocol_content',
+    'message.template.mukurtu_content_submitted_for_review',
+    'message.template.mukurtu_content_returned_to_draft',
+    'core.entity_view_display.message.mukurtu_comment_on_protocol_content.mail_body',
+    'core.entity_view_display.message.mukurtu_comment_on_protocol_content.mail_subject',
+    'core.entity_view_display.message.mukurtu_content_submitted_for_review.mail_body',
+    'core.entity_view_display.message.mukurtu_content_submitted_for_review.mail_subject',
+    'core.entity_view_display.message.mukurtu_content_returned_to_draft.mail_body',
+    'core.entity_view_display.message.mukurtu_content_returned_to_draft.mail_subject',
+    'field.field.message.mukurtu_comment_on_protocol_content.field_item',
+    'field.field.message.mukurtu_comment_on_protocol_content.field_user',
+    'field.field.message.mukurtu_content_submitted_for_review.field_item',
+    'field.field.message.mukurtu_content_submitted_for_review.field_user',
+    'field.field.message.mukurtu_content_returned_to_draft.field_item',
+    'field.field.message.mukurtu_content_returned_to_draft.field_user',
+  ];
+  foreach ($old_names as $name) {
+    $config_factory->getEditable($name)->delete();
+  }
+
+  // Write the corrected configs (already in config/install with short names).
+  $new_names = [
+    'message.template.mukurtu_protocol_comment',
+    'message.template.mukurtu_content_for_review',
+    'message.template.mukurtu_content_to_draft',
+    'core.entity_view_display.message.mukurtu_protocol_comment.mail_body',
+    'core.entity_view_display.message.mukurtu_protocol_comment.mail_subject',
+    'core.entity_view_display.message.mukurtu_content_for_review.mail_body',
+    'core.entity_view_display.message.mukurtu_content_for_review.mail_subject',
+    'core.entity_view_display.message.mukurtu_content_to_draft.mail_body',
+    'core.entity_view_display.message.mukurtu_content_to_draft.mail_subject',
+    'field.field.message.mukurtu_protocol_comment.field_item',
+    'field.field.message.mukurtu_protocol_comment.field_user',
+    'field.field.message.mukurtu_content_for_review.field_item',
+    'field.field.message.mukurtu_content_for_review.field_user',
+    'field.field.message.mukurtu_content_to_draft.field_item',
+    'field.field.message.mukurtu_content_to_draft.field_user',
+  ];
+  foreach ($new_names as $name) {
+    $config_storage->write($name, $source->read($name));
+  }
+
+  // Redeploy the view so the filter value list reflects the new template names.
+  $config_storage->write(
+    'views.view.mukurtu_message_log',
+    $source->read('views.view.mukurtu_message_log')
+  );
+
+  \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
+}
+
+/**
+ * Fix notification feed display issues.
+ *
+ * Supersedes view redeployments in 40005, 40009, 40013, 40014, 40015, 40016,
+ * 40017, 40019. This is the authoritative final view config for this branch.
+ *
+ * - Redeploy membership templates with corrected text: username instead of
+ *   "You", entity:label instead of entity:title for community/protocol names.
+ * - Redeploy the view with delta:0 on get_text (stop doubling), reduce:false
+ *   on the type filter (always show all options), and the new Notification
+ *   type column.
+ */
+function mukurtu_notifications_update_40021(): void {
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  $config_storage = \Drupal::service('config.storage');
+
+  foreach ([
+    'message.template.mukurtu_user_added_to_community',
+    'message.template.mukurtu_user_added_to_protocol',
+    'views.view.mukurtu_message_log',
+  ] as $config_name) {
+    $config_storage->write($config_name, $source->read($config_name));
+  }
+}
+
+/**
+ * Create field_community_ref storage/attachment and the missing
+ * field_protocol attachment on mukurtu_user_added_to_protocol.
+ *
+ * mukurtu_notifications_install() calls both helpers, but that only runs on
+ * fresh installs. Existing sites that predate Phase 2 need this update hook.
+ * Both helpers are idempotent -- they skip creation if the field already exists.
+ */
+function mukurtu_notifications_update_40022(): void {
+  mukurtu_notifications_create_field_community_ref();
+  mukurtu_notifications_create_field_protocol();
+}
+
+/**
+ * Remove the redundant word "item" from all content notification activity text.
+ *
+ * Templates used the pattern "[content-type] item [title] was created."
+ * where "item" is always redundant. Strips it from all 11 affected templates,
+ * updating both text deltas where they exist (Phase 2 templates have two).
+ */
+function mukurtu_notifications_update_40023(): void {
+  $templates = [
+    'message.template.mukurtu_single_node_insert',
+    'message.template.mukurtu_single_node_update',
+    'message.template.mukurtu_single_node_delete',
+    'message.template.mukurtu_new_item_in_collection',
+    'message.template.mukurtu_new_item_in_community',
+    'message.template.mukurtu_new_item_in_protocol',
+    'message.template.mukurtu_content_archived',
+    'message.template.mukurtu_content_for_review',
+    'message.template.mukurtu_content_published',
+    'message.template.mukurtu_content_to_draft',
+    'message.template.mukurtu_protocol_comment',
+  ];
+
+  $config_factory = \Drupal::configFactory();
+  foreach ($templates as $config_name) {
+    $config = $config_factory->getEditable($config_name);
+    if ($config->isNew()) {
+      continue;
+    }
+    $text = $config->get('text');
+    $changed = FALSE;
+    foreach ($text as $delta => $item) {
+      if (!empty($item['value']) && str_contains($item['value'], ' item&nbsp;')) {
+        $text[$delta]['value'] = str_replace(' item&nbsp;', '&nbsp;', $item['value']);
+        $changed = TRUE;
+      }
+    }
+    if ($changed) {
+      $config->set('text', $text)->save();
+    }
+  }
+}
+
+/**
+ * Deploy message_subscribe/message_subscribe_email flag_prefix overrides.
+ *
+ * The contrib defaults ('subscribe' and 'email') don't match any of this
+ * site's enabled, user-facing follow/email flags (mukurtu_follow_content,
+ * mukurtu_follow_collection, mukurtu_follow_community,
+ * mukurtu_email_content, mukurtu_email_collection,
+ * mukurtu_email_community), so message_subscribe's flag-based subscriber
+ * auto-discovery never found any subscribers -- clicking Follow or Get
+ * Email never resulted in a notification being sent. This redeploys the
+ * two settings configs with prefixes that match the flags actually in use.
+ */
+function mukurtu_notifications_update_40024(): void {
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  $config_storage = \Drupal::service('config.storage');
+
+  foreach ([
+    'message_subscribe.settings',
+    'message_subscribe_email.settings',
+  ] as $config_name) {
+    $config_storage->write($config_name, $source->read($config_name));
+  }
+}
+
+/**
+ * Implement community follow notifications: retarget flag, wire up field.
+ *
+ * mukurtu_follow_community previously targeted node bundle "community"
+ * (legacy pre-migration content that no longer represents real
+ * communities). This redeploys the flag re-targeted at the actual
+ * `community` entity type, redeploys the community canonical view display
+ * with the follow button added to the sidebar, attaches field_community_ref
+ * to the mukurtu_new_item_in_community message bundle, and redeploys that
+ * template's text (corrected to reference field_community_ref instead of
+ * the node-targeted field_community). Old Flagging records tied to the
+ * previous node-targeted flag are intentionally left as harmless orphans --
+ * there is no meaningful way to map legacy community nodes to real
+ * community entities.
+ */
+function mukurtu_notifications_update_40025(): void {
+  $notifications_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $protocol_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol') . '/config/install';
+  $notifications_source = new FileStorage($notifications_path);
+  $protocol_source = new FileStorage($protocol_path);
+  $config_storage = \Drupal::service('config.storage');
+
+  $config_storage->write('flag.flag.mukurtu_follow_community', $notifications_source->read('flag.flag.mukurtu_follow_community'));
+  $config_storage->write('message.template.mukurtu_new_item_in_community', $notifications_source->read('message.template.mukurtu_new_item_in_community'));
+  $config_storage->write('core.entity_view_display.community.community.full', $protocol_source->read('core.entity_view_display.community.community.full'));
+
+  mukurtu_notifications_create_field_community_ref();
+}
+
+/**
+ * Implement protocol follow notifications: new flag, new field wiring.
+ *
+ * mukurtu_follow_protocol did not exist previously. This deploys the new
+ * flag targeting the `protocol` entity type and redeploys the protocol
+ * canonical view display with the follow button added to the sidebar.
+ * field_protocol on mukurtu_new_item_in_protocol was already wired in
+ * Phase 1, so no field changes are needed here.
+ */
+function mukurtu_notifications_update_40026(): void {
+  $notifications_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $protocol_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol') . '/config/install';
+  $notifications_source = new FileStorage($notifications_path);
+  $protocol_source = new FileStorage($protocol_path);
+  $config_storage = \Drupal::service('config.storage');
+
+  $config_storage->write('flag.flag.mukurtu_follow_protocol', $notifications_source->read('flag.flag.mukurtu_follow_protocol'));
+  $config_storage->write('core.entity_view_display.protocol.protocol.default', $protocol_source->read('core.entity_view_display.protocol.protocol.default'));
+}
+
+/**
+ * Retarget mukurtu_email_community and add mukurtu_email_protocol.
+ *
+ * message_subscribe_email automatically flags a matching mukurtu_email_*
+ * flag whenever a user with the "email me about my subscriptions"
+ * preference flags a mukurtu_follow_* flag (see
+ * message_subscribe_email/src/EventSubscriber/FlagEvents.php), by swapping
+ * the flag_prefix in the flag ID. Since mukurtu_follow_community/_protocol
+ * now target the community/protocol entity types, their email counterparts
+ * must match or that automatic flagging throws a fatal LogicException.
+ * mukurtu_email_protocol did not exist previously, matching the missing
+ * mukurtu_follow_protocol gap fixed in update_40026.
+ */
+function mukurtu_notifications_update_40027(): void {
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  $config_storage = \Drupal::service('config.storage');
+
+  foreach ([
+    'flag.flag.mukurtu_email_community',
+    'flag.flag.mukurtu_email_protocol',
+  ] as $config_name) {
+    $config_storage->write($config_name, $source->read($config_name));
+  }
+}
+
+/**
+ * Removes the community/protocol follow buttons added by update_40025/40026.
+ *
+ * Product direction changed: no follow/flag buttons should be exposed
+ * anywhere. The flag config entities themselves stay in place (unused,
+ * per decision), but the view displays are redeployed without the flag
+ * field so the button no longer renders on the community/protocol
+ * canonical pages.
+ */
+function mukurtu_notifications_update_40028(): void {
+  $protocol_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol') . '/config/install';
+  $source = new FileStorage($protocol_path);
+  $config_storage = \Drupal::service('config.storage');
+
+  foreach ([
+    'core.entity_view_display.community.community.full',
+    'core.entity_view_display.protocol.protocol.default',
+  ] as $config_name) {
+    $config_storage->write($config_name, $source->read($config_name));
+  }
+}
+
+/**
+ * Hides the pre-existing follow/email flag buttons on article/landing pages.
+ *
+ * Consistent with update_40028: no flag/follow buttons should be exposed
+ * anywhere, including the ones that predate this module's Phase 2 work.
+ * The unrelated flag_export_content field is left visible.
+ */
+function mukurtu_notifications_update_40029(): void {
+  $core_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core') . '/config/optional';
+  $landing_page_path = \Drupal::service('extension.list.module')->getPath('mukurtu_landing_page') . '/config/install';
+  $core_source = new FileStorage($core_path);
+  $landing_page_source = new FileStorage($landing_page_path);
+  $config_storage = \Drupal::service('config.storage');
+
+  $config_storage->write('core.entity_view_display.node.article.default', $core_source->read('core.entity_view_display.node.article.default'));
+  $config_storage->write('core.entity_view_display.node.landing_page.teaser', $landing_page_source->read('core.entity_view_display.node.landing_page.teaser'));
+}
+
+/**
+ * Deploys the per-category email notification preference field.
+ *
+ * Every notification-worthy event now always creates an in-app feed entry
+ * (see mukurtu_notifications_node_update() and friends); this field lets
+ * each user choose which categories of that activity they also want
+ * emailed about. Existing users are backfilled to "all categories on" so
+ * no one's email volume silently drops when this ships.
+ */
+function mukurtu_notifications_update_40030(): void {
+  mukurtu_notifications_create_field_notify_email_categories();
+
+  $root_path = \Drupal::service('extension.list.profile')->getPath('mukurtu') . '/config/install';
+  $root_source = new FileStorage($root_path);
+  \Drupal::service('config.storage')->write('core.entity_form_display.user.user.default', $root_source->read('core.entity_form_display.user.user.default'));
+}
+
+/**
+ * Fully removes the community/protocol follow buttons.
+ *
+ * Two independent leaks had to be closed, on top of update_40028/40029:
+ * - flag.flagTypeConfig.show_in_links is a second, independent rendering
+ *   mechanism that shows the flag link directly in the entity's "links"
+ *   area regardless of view display field visibility.
+ * - update_40028 removed the flag_mukurtu_follow_* and flag_mukurtu_email_*
+ *   pseudo-fields from the community/protocol view displays' `content`
+ *   section, but never added them to `hidden`. Drupal defaults any
+ *   undeclared extra field to visible, so the buttons kept reappearing.
+ *   Every community/protocol view mode is now covered, not just the
+ *   canonical one.
+ */
+function mukurtu_notifications_update_40031(): void {
+  $notifications_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $protocol_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol') . '/config/install';
+  $notifications_source = new FileStorage($notifications_path);
+  $protocol_source = new FileStorage($protocol_path);
+  $config_storage = \Drupal::service('config.storage');
+
+  foreach ([
+    'flag.flag.mukurtu_follow_content',
+    'flag.flag.mukurtu_follow_collection',
+    'flag.flag.mukurtu_follow_community',
+    'flag.flag.mukurtu_follow_protocol',
+  ] as $config_name) {
+    $config_storage->write($config_name, $notifications_source->read($config_name));
+  }
+
+  foreach ([
+    'core.entity_view_display.community.community.full',
+    'core.entity_view_display.community.community.default',
+    'core.entity_view_display.community.community.browse',
+    'core.entity_view_display.protocol.protocol.default',
+  ] as $config_name) {
+    $config_storage->write($config_name, $protocol_source->read($config_name));
+  }
+}
+
+/**
+ * Deploys the 9 new notification templates (user deleted/approved/set
+ * pending/blocked/unblocked, removed from community/protocol, comment
+ * approved/denied) and their mail_subject/mail_body displays, and attaches
+ * field_protocol/field_community_ref to the two new "removed from" bundles.
+ */
+function mukurtu_notifications_update_40032(): void {
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  $config_storage = \Drupal::service('config.storage');
+
+  $templates = [
+    'mukurtu_user_deleted',
+    'mukurtu_user_approved',
+    'mukurtu_user_set_pending',
+    'mukurtu_user_blocked',
+    'mukurtu_user_unblocked',
+    'mukurtu_removed_from_community',
+    'mukurtu_removed_from_protocol',
+    'mukurtu_comment_approved',
+    'mukurtu_comment_denied',
+  ];
+
+  $configs = [];
+  foreach ($templates as $template) {
+    $configs[] = 'message.template.' . $template;
+    $configs[] = 'core.entity_view_display.message.' . $template . '.mail_subject';
+    $configs[] = 'core.entity_view_display.message.' . $template . '.mail_body';
+  }
+
+  // field_user attachments (all but mukurtu_user_deleted, which uses
+  // field_title instead since the user entity is gone by view time).
+  foreach (array_diff($templates, ['mukurtu_user_deleted']) as $template) {
+    $configs[] = 'field.field.message.' . $template . '.field_user';
+  }
+
+  // field_item attachments for the two comment templates.
+  $configs[] = 'field.field.message.mukurtu_comment_approved.field_item';
+  $configs[] = 'field.field.message.mukurtu_comment_denied.field_item';
+
+  // field_title for mukurtu_user_deleted.
+  $configs[] = 'field.field.message.mukurtu_user_deleted.field_title';
+
+  // field_number_imported attachment for the batch import report, wired up
+  // for the first time in this release.
+  $configs[] = 'field.field.message.mukurtu_batch_import_report.field_number_imported';
+
+  foreach ($configs as $config_name) {
+    $config_storage->write($config_name, $source->read($config_name));
+  }
+
+  // field_protocol/field_community_ref on the two new "removed from"
+  // bundles (idempotent -- these helpers skip bundles that already exist).
+  mukurtu_notifications_create_field_protocol();
+  mukurtu_notifications_create_field_community_ref();
+}
+
+/**
+ * Migrates existing users' field_notify_email_categories selections from
+ * the old category taxonomy to the new one (User account, Memberships,
+ * Comments, Publishing, Content, Roundtrip).
+ *
+ * Unlike mukurtu_notifications_create_field_notify_email_categories()'s
+ * backfill (which resets everyone to "all categories on" -- appropriate
+ * only the first time the field is created), this preserves each user's
+ * existing opt-out choices by remapping old selections to their closest
+ * new-category equivalent. 'deleted_content' has no replacement since it
+ * never gated any email delivery.
+ */
+function mukurtu_notifications_update_40033(): void {
+  $map = [
+    'group_membership' => ['memberships'],
+    'comment' => ['comments'],
+    'publishing' => ['publishing'],
+    'new_content' => ['content'],
+    'updated_content' => ['publishing'],
+    'deleted_content' => [],
+    'administration' => ['user_account', 'roundtrip'],
+  ];
+
+  $uids = \Drupal::entityQuery('user')->accessCheck(FALSE)->execute();
+  foreach (\Drupal\user\Entity\User::loadMultiple($uids) as $user) {
+    if (!$user->hasField('field_notify_email_categories')) {
+      continue;
+    }
+    $old_values = array_column($user->get('field_notify_email_categories')->getValue(), 'value');
+    $new_values = [];
+    foreach ($old_values as $old_key) {
+      foreach ($map[$old_key] ?? [] as $new_key) {
+        $new_values[] = $new_key;
+      }
+    }
+    $user->set('field_notify_email_categories', array_values(array_unique($new_values)));
+    $user->save();
+  }
+}
+
+/**
+ * Fixes community/protocol name tokens across 6 message templates.
+ *
+ * [message:field_community_ref:entity:label] and
+ * [message:field_protocol:entity:label]/:title never resolved -- 'label'
+ * and 'title' aren't real fields on the community/protocol entities (their
+ * entity_keys.label is 'name'), and token exposure for these custom entity
+ * types only covers actual field names, not generic label/title aliases.
+ * Confirmed empirically: [community:name]/[protocol:name] resolve
+ * correctly, [community:label]/[protocol:title] do not. Also removes
+ * "Added to community" as a notification type per product decision --
+ * mukurtu_user_added_to_community's text is fixed for consistency even
+ * though nothing creates it anymore.
+ */
+function mukurtu_notifications_update_40034(): void {
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  $config_storage = \Drupal::service('config.storage');
+
+  foreach ([
+    'message.template.mukurtu_removed_from_community',
+    'message.template.mukurtu_removed_from_protocol',
+    'message.template.mukurtu_user_added_to_protocol',
+    'message.template.mukurtu_user_added_to_community',
+    'message.template.mukurtu_new_item_in_community',
+    'message.template.mukurtu_new_item_in_protocol',
+  ] as $config_name) {
+    $config_storage->write($config_name, $source->read($config_name));
+  }
+}
+
+/**
+ * Installs the field_digest_pending base field on the message entity.
+ *
+ * Declared via hook_entity_base_field_info() so it applies to every message
+ * bundle at once; on existing sites the storage schema itself still needs
+ * to be installed explicitly via the entity definition update manager.
+ */
+function mukurtu_notifications_update_40035(): void {
+  $storage_definition = \Drupal\Core\Field\BaseFieldDefinition::create('boolean')
+    ->setLabel(t('Digest pending'))
+    ->setDescription(t('Whether this message is waiting to be included in a digest email rather than sent immediately.'))
+    ->setDefaultValue(FALSE)
+    ->setDisplayConfigurable('form', FALSE)
+    ->setDisplayConfigurable('view', FALSE);
+
+  \Drupal::entityDefinitionUpdateManager()->installFieldStorageDefinition(
+    'field_digest_pending',
+    'message',
+    'mukurtu_notifications',
+    $storage_definition
+  );
+}
+
+/**
+ * Deploys the email-frequency preference field and the admin "all
+ * notifications" view display.
+ *
+ * The new menu link in mukurtu_notifications.links.menu.yml needs no
+ * explicit deployment step -- links.menu.yml entries are discovered plugin
+ * definitions, not config entities, so they appear automatically once the
+ * updated file is in place and caches are rebuilt.
+ */
+function mukurtu_notifications_update_40036(): void {
+  mukurtu_notifications_create_field_notify_frequency();
+
+  $config_storage = \Drupal::service('config.storage');
+
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  $config_storage->write(
+    'views.view.mukurtu_message_log',
+    $source->read('views.view.mukurtu_message_log')
+  );
+
+  $root_path = \Drupal::service('extension.list.profile')->getPath('mukurtu') . '/config/install';
+  $root_source = new FileStorage($root_path);
+  $config_storage->write(
+    'core.entity_form_display.user.user.default',
+    $root_source->read('core.entity_form_display.user.user.default')
   );
 }

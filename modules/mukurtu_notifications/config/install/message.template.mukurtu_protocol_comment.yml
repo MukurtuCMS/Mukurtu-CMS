@@ -1,0 +1,21 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - filter.format.mukurtu_html
+template: mukurtu_protocol_comment
+label: 'Comment on protocol content'
+description: 'A comment was posted on content assigned to a protocol.'
+text:
+  -
+    value: '<p>A comment was posted on [message:field_item:entity:content-type]&nbsp;<a href="[message:field_item:entity:url]">[message:field_item:entity:title]</a>.</p>'
+    format: mukurtu_html
+  -
+    value: '<p>A comment was posted on [message:field_item:entity:content-type]&nbsp;<a href="[message:field_item:entity:url]">[message:field_item:entity:title]</a>.</p>'
+    format: mukurtu_html
+settings:
+  'token options':
+    clear: true
+    'token replace': true
+  purge_override: false
+  purge_methods: {  }

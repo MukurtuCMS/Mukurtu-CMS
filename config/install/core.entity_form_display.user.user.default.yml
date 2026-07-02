@@ -3,12 +3,15 @@ status: true
 dependencies:
   config:
     - field.field.user.user.field_display_name
+    - field.field.user.user.field_notify_email_categories
+    - field.field.user.user.field_notify_frequency
     - field.field.user.user.message_digest
     - field.field.user.user.message_subscribe_email
     - field.field.user.user.user_picture
     - image.style.media_library
   module:
     - image
+    - options
     - user
 id: user.user.default
 targetEntityType: user
@@ -27,6 +30,18 @@ content:
     settings:
       size: 60
       placeholder: ''
+    third_party_settings: {  }
+  field_notify_email_categories:
+    type: options_buttons
+    weight: 9
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_notify_frequency:
+    type: options_buttons
+    weight: 10
+    region: content
+    settings: {  }
     third_party_settings: {  }
   google_analytics:
     weight: 3

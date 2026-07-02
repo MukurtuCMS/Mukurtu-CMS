@@ -4,6 +4,11 @@ dependencies:
   config:
     - core.entity_view_mode.message.mail_subject
     - message.template.mukurtu_batch_import_report
+    - message.template.mukurtu_content_archived
+    - message.template.mukurtu_content_for_review
+    - message.template.mukurtu_content_published
+    - message.template.mukurtu_content_to_draft
+    - message.template.mukurtu_protocol_comment
     - message.template.mukurtu_new_item_in_collection
     - message.template.mukurtu_new_item_in_community
     - message.template.mukurtu_new_item_in_protocol
@@ -12,6 +17,8 @@ dependencies:
     - message.template.mukurtu_single_node_delete
     - message.template.mukurtu_single_node_insert
     - message.template.mukurtu_single_node_update
+    - message.template.mukurtu_user_added_to_community
+    - message.template.mukurtu_user_added_to_protocol
   module:
     - message
     - user
@@ -181,7 +188,7 @@ display:
         type: basic
         options:
           submit_button: Apply
-          reset_button: false
+          reset_button: true
           reset_button_label: Reset
           exposed_sorts_label: 'Sort by'
           expose_sort_order: true
@@ -241,13 +248,21 @@ display:
           operator: in
           value:
             mukurtu_batch_import_report: mukurtu_batch_import_report
+            mukurtu_content_archived: mukurtu_content_archived
+            mukurtu_content_for_review: mukurtu_content_for_review
+            mukurtu_content_published: mukurtu_content_published
+            mukurtu_content_to_draft: mukurtu_content_to_draft
+            mukurtu_protocol_comment: mukurtu_protocol_comment
             mukurtu_new_item_in_collection: mukurtu_new_item_in_collection
             mukurtu_new_item_in_community: mukurtu_new_item_in_community
             mukurtu_new_item_in_protocol: mukurtu_new_item_in_protocol
+            mukurtu_new_user_account_created: mukurtu_new_user_account_created
             mukurtu_new_user_registration: mukurtu_new_user_registration
             mukurtu_single_node_delete: mukurtu_single_node_delete
             mukurtu_single_node_insert: mukurtu_single_node_insert
             mukurtu_single_node_update: mukurtu_single_node_update
+            mukurtu_user_added_to_community: mukurtu_user_added_to_community
+            mukurtu_user_added_to_protocol: mukurtu_user_added_to_protocol
           group: 1
           exposed: false
           expose:
@@ -352,8 +367,9 @@ display:
           default_row_class: true
           columns:
             created: created
-            field_display_name: field_display_name
+            template: template
             get_text: get_text
+            field_display_name: field_display_name
           default: none
           info:
             created:
@@ -364,6 +380,13 @@ display:
               empty_column: false
               responsive: ''
             field_display_name:
+              sortable: false
+              default_sort_order: asc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
+            template:
               sortable: false
               default_sort_order: asc
               align: ''
@@ -467,17 +490,17 @@ display:
           multi_type: separator
           separator: ', '
           field_api_classes: false
-        field_display_name:
-          id: field_display_name
-          table: user__field_display_name
-          field: field_display_name
-          relationship: field_user
+        template:
+          id: template
+          table: message_field_data
+          field: template
+          relationship: none
           group_type: group
           admin_label: ''
-          entity_type: user
-          entity_field: field_display_name
+          entity_type: message
+          entity_field: template
           plugin_id: field
-          label: 'User'
+          label: 'Notification type'
           exclude: false
           alter:
             alter_text: false
@@ -510,7 +533,7 @@ display:
           element_class: ''
           element_label_type: ''
           element_label_class: ''
-          element_label_colon: false
+          element_label_colon: true
           element_wrapper_type: ''
           element_wrapper_class: ''
           element_default_classes: true
@@ -581,7 +604,71 @@ display:
           hide_empty: false
           empty_zero: false
           hide_alter_empty: true
-          delta: null
+          delta: 0
+        field_display_name:
+          id: field_display_name
+          table: user__field_display_name
+          field: field_display_name
+          relationship: field_user
+          group_type: group
+          admin_label: ''
+          entity_type: user
+          entity_field: field_display_name
+          plugin_id: field
+          label: 'User'
+          exclude: false
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: false
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          type: string
+          settings:
+            link_to_entity: false
+          group_column: value
+          group_columns: {}
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
       relationships:
         field_user:
           id: field_user
@@ -607,31 +694,21 @@ display:
           entity_field: template
           plugin_id: bundle
           operator: in
-          value:
-            mukurtu_batch_import_report: mukurtu_batch_import_report
-            mukurtu_new_item_in_collection: mukurtu_new_item_in_collection
-            mukurtu_new_item_in_community: mukurtu_new_item_in_community
-            mukurtu_new_item_in_protocol: mukurtu_new_item_in_protocol
-            mukurtu_new_user_account_created: mukurtu_new_user_account_created
-            mukurtu_single_node_delete: mukurtu_single_node_delete
-            mukurtu_single_node_insert: mukurtu_single_node_insert
-            mukurtu_single_node_update: mukurtu_single_node_update
-            # mukurtu_new_user_registration is intentionally excluded: it is an
-            # admin-facing message and should not appear in the user activity feed.
+          value: {  }
           group: 1
-          exposed: false
+          exposed: true
           expose:
-            operator_id: ''
-            label: ''
+            operator_id: template_op
+            label: 'Notification type'
             description: ''
             use_operator: false
-            operator: ''
+            operator: template_op
             operator_limit_selection: false
             operator_list: {  }
-            identifier: ''
+            identifier: type
             required: false
             remember: false
-            multiple: false
+            multiple: true
             remember_roles:
               authenticated: authenticated
             reduce: false
@@ -688,6 +765,406 @@ display:
           not: false
           reduce_duplicates: false
           transform: {  }
+      display_extenders: {  }
+    cache_metadata:
+      max-age: -1
+      contexts:
+        - 'languages:language_content'
+        - 'languages:language_interface'
+        - url.query_args
+        - user.permissions
+        - user.roles
+      tags: {  }
+  mukurtu_notifications_admin_page:
+    id: mukurtu_notifications_admin_page
+    display_title: 'Admin Page'
+    display_plugin: page
+    position: 3
+    display_options:
+      defaults:
+        title: false
+        access: false
+        style: false
+        row: false
+        fields: false
+        relationships: false
+        filters: false
+        arguments: false
+        display_extenders: false
+      title: 'All notifications'
+      use_admin_theme: true
+      path: admin/notifications
+      access:
+        type: role
+        options:
+          role:
+            administrator: administrator
+      style:
+        type: table
+        options:
+          grouping: []
+          row_class: ''
+          default_row_class: true
+          columns:
+            created: created
+            template: template
+            get_text: get_text
+            field_display_name: field_display_name
+          default: none
+          info:
+            created:
+              sortable: false
+              default_sort_order: asc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
+            field_display_name:
+              sortable: false
+              default_sort_order: asc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
+            template:
+              sortable: false
+              default_sort_order: asc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
+            get_text:
+              sortable: false
+              default_sort_order: asc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
+          override: true
+          sticky: false
+          summary: ''
+          empty_table: false
+          caption: 'All notifications'
+          description: ''
+      row:
+        type: fields
+        options:
+          default_field_elements: true
+          inline: {}
+          separator: ''
+          hide_empty: false
+      fields:
+        created:
+          id: created
+          table: message_field_data
+          field: created
+          relationship: none
+          group_type: group
+          admin_label: ''
+          entity_type: message
+          entity_field: created
+          plugin_id: field
+          label: 'Date'
+          exclude: false
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: false
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          click_sort_column: value
+          type: timestamp
+          settings:
+            date_format: short
+            custom_date_format: ''
+            timezone: ''
+            tooltip:
+              date_format: ''
+              custom_date_format: ''
+            time_diff:
+              enabled: false
+              future_format: '@interval hence'
+              past_format: '@interval ago'
+              granularity: 2
+              refresh: 60
+          group_column: value
+          group_columns: {}
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
+        template:
+          id: template
+          table: message_field_data
+          field: template
+          relationship: none
+          group_type: group
+          admin_label: ''
+          entity_type: message
+          entity_field: template
+          plugin_id: field
+          label: 'Notification type'
+          exclude: false
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: true
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          type: string
+          settings:
+            link_to_entity: false
+          group_column: value
+          group_columns: {}
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
+        get_text:
+          id: get_text
+          table: message
+          field: get_text
+          relationship: none
+          group_type: group
+          admin_label: ''
+          entity_type: message
+          plugin_id: get_text
+          label: 'Activity'
+          exclude: false
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: false
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          delta: 0
+        field_display_name:
+          id: field_display_name
+          table: user__field_display_name
+          field: field_display_name
+          relationship: field_user
+          group_type: group
+          admin_label: ''
+          entity_type: user
+          entity_field: field_display_name
+          plugin_id: field
+          label: 'User'
+          exclude: false
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: false
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          type: string
+          settings:
+            link_to_entity: false
+          group_column: value
+          group_columns: {}
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
+      relationships:
+        field_user:
+          id: field_user
+          table: message__field_user
+          field: field_user
+          relationship: none
+          group_type: group
+          admin_label: 'Actor user'
+          entity_type: message
+          entity_field: field_user
+          plugin_id: standard
+          required: false
+          label: User
+      filters:
+        template:
+          id: template
+          table: message_field_data
+          field: template
+          relationship: none
+          group_type: group
+          admin_label: ''
+          entity_type: message
+          entity_field: template
+          plugin_id: bundle
+          operator: in
+          value: {  }
+          group: 1
+          exposed: true
+          expose:
+            operator_id: template_op
+            label: 'Notification type'
+            description: ''
+            use_operator: false
+            operator: template_op
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: type
+            required: false
+            remember: false
+            multiple: true
+            remember_roles:
+              administrator: administrator
+            reduce: false
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+      arguments: {  }
       display_extenders: {  }
     cache_metadata:
       max-age: -1
