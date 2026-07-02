@@ -154,12 +154,15 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
 
     $messages = [];
     $exception_fid = NULL;
+    $imported_count = 0;
 
     // Find our failure point.
     foreach (array_keys($results) as $migration_id) {
       if ($migration_id === 'message') {
         continue;
       }
+
+      $imported_count += ($results[$migration_id]['@created'] ?? 0) + ($results[$migration_id]['@updated'] ?? 0);
 
       if (isset($results[$migration_id]['@failures']) && $results[$migration_id]['@failures'] > 0) {
         preg_match('/^\d+__(\d+)__.*/', $migration_id, $matches);
@@ -172,6 +175,8 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
         }
       }
     }
+
+    mukurtu_notifications_notify_batch_import_report($imported_count);
 
     // Tag the error messages with the fid so we can display it next to the
     // file later.

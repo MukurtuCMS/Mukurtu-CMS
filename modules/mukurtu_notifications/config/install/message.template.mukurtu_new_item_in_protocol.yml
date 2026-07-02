@@ -8,7 +8,7 @@ label: 'New item in protocol'
 description: 'A new item has been added to a protocol.'
 text:
   -
-    value: "<p>[message:field_item:entity:field_content_type]&nbsp;<a href=\"[message:field_item:entity:url]\">[message:field_item:entity:title]</a>&nbsp;is now available in protocol <a href=\"[message:field_protocol:entity:url]\">[message:field_protocol:entity:title]</a>.</p>\r\n\r\n"
+    value: "<p>[message:field_item:entity:field_content_type]&nbsp;<a href=\"[message:field_item:entity:url]\">[message:field_item:entity:title]</a>&nbsp;is now available in protocol <a href=\"[message:field_protocol:entity:url]\">[message:field_protocol:entity:name]</a>.</p>\r\n\r\n"
     format: mukurtu_html
 settings:
   'token options':

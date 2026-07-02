@@ -8,7 +8,7 @@ label: 'New item in community'
 description: 'A new item has been added to a community.'
 text:
   -
-    value: "<p>[message:field_item:entity:field_content_type]&nbsp;<a href=\"[message:field_item:entity:url]\">[message:field_item:entity:title]</a> has been added to <a href=\"[message:field_community:entity:url]\">[message:field_community:entity:title]</a>.</p>\r\n"
+    value: "<p>[message:field_item:entity:field_content_type]&nbsp;<a href=\"[message:field_item:entity:url]\">[message:field_item:entity:title]</a> has been added to <a href=\"[message:field_community_ref:entity:url]\">[message:field_community_ref:entity:name]</a>.</p>\r\n"
     format: mukurtu_html
 settings:
   'token options':

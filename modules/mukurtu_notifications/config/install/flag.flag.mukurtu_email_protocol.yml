@@ -3,11 +3,11 @@ status: true
 dependencies:
   module:
     - mukurtu_protocol
-id: mukurtu_email_community
-label: 'Mukurtu Email Community'
+id: mukurtu_email_protocol
+label: 'Mukurtu Email Protocol'
 bundles:
-  - community
-entity_type: community
+  - protocol
+entity_type: protocol
 global: false
 weight: 2
 flag_short: 'Flag this item'
@@ -17,7 +17,7 @@ unflag_short: 'Unflag this item'
 unflag_long: ''
 unflag_message: ''
 unflag_denied_text: ''
-flag_type: 'entity:community'
+flag_type: 'entity:protocol'
 link_type: ajax_link
 flagTypeConfig:
   show_in_links: {  }
