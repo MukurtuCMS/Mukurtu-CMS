@@ -19,6 +19,7 @@ install:
   - contact
   - menu_link_content
   - mukurtu_content_warnings
+  - mukurtu_protocol_sync
   - datetime
   - block_content
   - editor
@@ -137,6 +138,7 @@ dependencies:
   - 'mukurtu_person:mukurtu_person'
   - 'mukurtu_place:mukurtu_place'
   - 'mukurtu_protocol:mukurtu_protocol'
+  - 'mukurtu_protocol_sync:mukurtu_protocol_sync'
   - 'mukurtu_setup:mukurtu_setup'
   - 'mukurtu_site_settings:mukurtu_site_settings'
   - 'mukurtu_taxonomy:mukurtu_taxonomy'

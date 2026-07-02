@@ -1,0 +1,470 @@
+<?php
+
+/**
+ * @file
+ * Hooks and logic for media-to-content protocol synchronization.
+ */
+
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\Element;
+use Drupal\node\NodeInterface;
+
+/**
+ * Implements hook_entity_field_storage_info().
+ */
+function mukurtu_protocol_sync_entity_field_storage_info(EntityTypeInterface $entity_type): array {
+  if ($entity_type->id() !== 'media') {
+    return [];
+  }
+  return [
+    'field_sync_protocols' => BaseFieldDefinition::create('boolean')
+      ->setLabel(t('Sync protocols with content.'))
+      ->setDescription(t("When enabled, this media asset's protocols will match its content, when the content protocols are updated."))
+      ->setDefaultValue(FALSE)
+      ->setRevisionable(TRUE),
+    'field_protocol_parent' => BaseFieldDefinition::create('entity_reference')
+      ->setLabel(t('Protocol parent'))
+      ->setDescription(t("The content item that manages this media asset's protocols."))
+      ->setSetting('target_type', 'node')
+      ->setCardinality(1)
+      ->setRevisionable(TRUE),
+  ];
+}
+
+/**
+ * Implements hook_entity_bundle_field_info().
+ */
+function mukurtu_protocol_sync_entity_bundle_field_info(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions): array {
+  if ($entity_type->id() !== 'media') {
+    return [];
+  }
+  return [
+    'field_sync_protocols' => BaseFieldDefinition::create('boolean')
+      ->setLabel(t('Sync protocols with content.'))
+      ->setDescription(t("When enabled, this media asset's protocols will match its content, when the content protocols are updated."))
+      ->setDefaultValue(FALSE)
+      ->setRevisionable(TRUE)
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', FALSE),
+    'field_protocol_parent' => BaseFieldDefinition::create('entity_reference')
+      ->setLabel(t('Protocol parent'))
+      ->setDescription(t("The content item that manages this media asset's protocols."))
+      ->setSetting('target_type', 'node')
+      ->setCardinality(1)
+      ->setRevisionable(TRUE)
+      ->setDisplayConfigurable('form', FALSE)
+      ->setDisplayConfigurable('view', FALSE),
+  ];
+}
+
+/**
+ * Implements hook_form_alter().
+ *
+ * Pre-populates protocol fields and defaults the sync checkbox to checked
+ * when media is being added from within a content form's media library modal.
+ */
+function mukurtu_protocol_sync_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
+  if (strpos($form_id, 'media_library_add_form_') !== 0) {
+    return;
+  }
+
+  // Media items appear after a file is uploaded via AJAX.
+  if (empty($form['media'])) {
+    return;
+  }
+
+  $state = $form_state->get('media_library_state');
+  if (!$state) {
+    return;
+  }
+
+  $opener_params = $state->getOpenerParameters();
+  $entity_type_id = $opener_params['entity_type_id'] ?? NULL;
+  $entity_id = $opener_params['entity_id'] ?? NULL;
+
+  if ($entity_type_id !== 'node' || empty($entity_id)) {
+    // For new nodes, the media library button's #submit handler stores the
+    // node form's current protocol selection in TempStore before the modal
+    // opens. Read that data here to pre-populate the media's protocol field.
+    $tempstore = \Drupal::service('tempstore.private')->get('mukurtu_protocol_sync');
+    $uid = \Drupal::currentUser()->id();
+    $ps_data = $tempstore->get("ps_{$uid}");
+
+    if (!empty($ps_data['protocols']) && !empty($ps_data['sharing'])) {
+      // Leave the TempStore entry intact; it will be consumed by the first
+      // media item or cleared when the user leaves the modal.
+      _mukurtu_protocol_sync_prepopulate_media_form($form, $ps_data['protocols'], $ps_data['sharing']);
+    }
+    else {
+      _mukurtu_protocol_sync_default_sync_checkbox($form);
+    }
+  }
+  else {
+    $node = \Drupal::entityTypeManager()->getStorage('node')->load($entity_id);
+    if (!$node || !$node->hasField('field_cultural_protocols')) {
+      _mukurtu_protocol_sync_default_sync_checkbox($form);
+    }
+    else {
+      $protocol_item = $node->get('field_cultural_protocols')->first();
+      if (!$protocol_item) {
+        _mukurtu_protocol_sync_default_sync_checkbox($form);
+      }
+      else {
+        $protocol_ids = $protocol_item->getProtocolIds();
+        $sharing_setting = $protocol_item->sharing_setting ?? 'all';
+        _mukurtu_protocol_sync_prepopulate_media_form($form, $protocol_ids, $sharing_setting);
+      }
+    }
+  }
+
+  $form['#attached']['library'][] = 'mukurtu_protocol_sync/protocol-sync';
+}
+
+/**
+ * Defaults the sync checkbox to checked without pre-populating protocols.
+ */
+function _mukurtu_protocol_sync_default_sync_checkbox(array &$form): void {
+  foreach (Element::children($form['media']) as $delta) {
+    // BooleanCheckboxWidget declares multiple_values=TRUE, so it skips the
+    // numeric delta wrapper: the path is widget.value, not widget.0.value.
+    if (!isset($form['media'][$delta]['fields']['field_sync_protocols']['widget']['value'])) {
+      continue;
+    }
+    $widget = &$form['media'][$delta]['fields']['field_sync_protocols']['widget']['value'];
+    $widget['#default_value'] = 1;
+    $widget['#attributes']['data-mukurtu-protocol-sync'] = '1';
+  }
+}
+
+/**
+ * Pre-populates protocol checkboxes and defaults sync to checked on media items.
+ */
+function _mukurtu_protocol_sync_prepopulate_media_form(array &$form, array $protocol_ids, string $sharing_setting): void {
+  foreach (Element::children($form['media']) as $delta) {
+    $fields = &$form['media'][$delta]['fields'];
+
+    // BooleanCheckboxWidget uses multiple_values=TRUE (no [0] delta wrapper).
+    if (isset($fields['field_sync_protocols']['widget']['value'])) {
+      $fields['field_sync_protocols']['widget']['value']['#default_value'] = 1;
+      $fields['field_sync_protocols']['widget']['value']['#attributes']['data-mukurtu-protocol-sync'] = '1';
+    }
+
+    if (empty($protocol_ids) || !isset($fields['field_cultural_protocols'])) {
+      continue;
+    }
+
+    $protocol_widget = &$fields['field_cultural_protocols']['widget'][0]['value'];
+    if (!isset($protocol_widget['protocol_selection'])) {
+      continue;
+    }
+
+    if (isset($protocol_widget['sharing_setting'])) {
+      $protocol_widget['sharing_setting']['#default_value'] = $sharing_setting;
+    }
+
+    foreach (Element::children($protocol_widget['protocol_selection']) as $c_delta) {
+      if (!isset($protocol_widget['protocol_selection'][$c_delta]['protocols'])) {
+        continue;
+      }
+      foreach ($protocol_widget['protocol_selection'][$c_delta]['protocols'] as $protocol_id => &$checkbox) {
+        if (!is_array($checkbox) || ($checkbox['#type'] ?? '') !== 'checkbox') {
+          continue;
+        }
+        if (in_array($protocol_id, $protocol_ids)) {
+          $checkbox['#default_value'] = TRUE;
+          $checkbox['#attributes']['data-protocol-checkbox-default'] = '1';
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_entity_insert().
+ */
+function mukurtu_protocol_sync_entity_insert(EntityInterface $entity): void {
+  if (!($entity instanceof NodeInterface)) {
+    return;
+  }
+  _mukurtu_protocol_sync_sync_media_from_node($entity);
+}
+
+/**
+ * Implements hook_entity_update().
+ */
+function mukurtu_protocol_sync_entity_update(EntityInterface $entity): void {
+  if (!($entity instanceof NodeInterface)) {
+    return;
+  }
+  _mukurtu_protocol_sync_sync_media_from_node($entity);
+}
+
+/**
+ * Syncs protocols from a node to its sync-enabled media items.
+ *
+ * Media with no parent set (field_protocol_parent = NULL) is claimed by this
+ * node. Media already owned by this node is synced. Media owned by a different
+ * node is skipped to preserve the canonical parent relationship.
+ */
+function _mukurtu_protocol_sync_sync_media_from_node(NodeInterface $node): void {
+  if (!$node->hasField('field_cultural_protocols')) {
+    return;
+  }
+
+  $protocol_value = $node->get('field_cultural_protocols')->getValue();
+  if (empty($protocol_value)) {
+    return;
+  }
+
+  $media_fields = [
+    'field_media_assets',
+    'field_recording',
+    'field_thumbnail',
+    'field_collection_image',
+    'field_word_list_image',
+  ];
+
+  $processed_ids = [];
+
+  foreach ($media_fields as $field_name) {
+    if (!$node->hasField($field_name)) {
+      continue;
+    }
+
+    foreach ($node->get($field_name)->referencedEntities() as $media) {
+      $media_id = $media->id();
+      if (in_array($media_id, $processed_ids)) {
+        continue;
+      }
+
+      if (!$media->hasField('field_sync_protocols') || !$media->get('field_sync_protocols')->value) {
+        continue;
+      }
+      if (!$media->hasField('field_protocol_parent')) {
+        continue;
+      }
+
+      $parent_ref = $media->get('field_protocol_parent')->entity;
+      $parent_id = $parent_ref ? (int) $parent_ref->id() : NULL;
+
+      if ($parent_id === NULL) {
+        $media->set('field_protocol_parent', $node->id());
+        $media->set('field_cultural_protocols', $protocol_value);
+        $media->save();
+        $processed_ids[] = $media_id;
+      }
+      elseif ($parent_id === (int) $node->id()) {
+        $media->set('field_cultural_protocols', $protocol_value);
+        $media->save();
+        $processed_ids[] = $media_id;
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_entity_delete().
+ *
+ * When a canonical parent node is deleted, detach its sync-enabled media.
+ * Media retains its last-synced protocols and becomes independently managed.
+ */
+function mukurtu_protocol_sync_entity_delete(EntityInterface $entity): void {
+  if (!($entity instanceof NodeInterface)) {
+    return;
+  }
+
+  $media_ids = \Drupal::entityQuery('media')
+    ->condition('field_protocol_parent', $entity->id())
+    ->accessCheck(FALSE)
+    ->execute();
+
+  if (empty($media_ids)) {
+    return;
+  }
+
+  $storage = \Drupal::entityTypeManager()->getStorage('media');
+  foreach ($storage->loadMultiple($media_ids) as $media) {
+    $media->set('field_sync_protocols', FALSE);
+    $media->set('field_protocol_parent', NULL);
+    $media->save();
+  }
+}
+
+/**
+ * Implements hook_form_node_form_alter().
+ *
+ * Warns when a content form references media whose protocols are managed by a
+ * different canonical parent node.
+ */
+function mukurtu_protocol_sync_form_node_form_alter(array &$form, FormStateInterface $form_state): void {
+  // Attach the library to all node forms so the JS can intercept media library
+  // button clicks and pass the current protocol selection to the modal.
+  $form['#attached']['library'][] = 'mukurtu_protocol_sync/protocol-sync';
+
+  // Replace the AJAX callback on every media library open button with a wrapper
+  // that stores the current protocol selection in TempStore before the dialog
+  // URL is built. (#type: 'button' has #executes_submit_callback: FALSE, so
+  // #submit handlers don't run; wrapping #ajax['callback'] is the correct hook.)
+  // MediaLibraryWidget::form() is not delta-indexed: 'open_button' is a direct
+  // child of the widget element itself, not nested under a numeric delta.
+  // hook_form_alter() also runs before MediaLibraryWidget::preRenderWidget()
+  // moves the button into #field_suffix, so it's still keyed as 'open_button'
+  // (not '#field_suffix']['open_button']) at this point.
+  $media_fields_with_buttons = [
+    'field_media_assets',
+    'field_recording',
+    'field_thumbnail',
+    'field_collection_image',
+    'field_word_list_image',
+  ];
+  foreach ($media_fields_with_buttons as $field_name) {
+    if (isset($form[$field_name]['widget']['open_button'])) {
+      $form[$field_name]['widget']['open_button']['#ajax']['callback'] =
+        'mukurtu_protocol_sync_media_library_open_ajax';
+    }
+  }
+
+  $node = $form_state->getFormObject()->getEntity();
+  if (!$node || $node->isNew()) {
+    return;
+  }
+
+  $media_fields = [
+    'field_media_assets',
+    'field_recording',
+    'field_thumbnail',
+    'field_collection_image',
+    'field_word_list_image',
+  ];
+
+  $warnings = [];
+
+  foreach ($media_fields as $field_name) {
+    if (!$node->hasField($field_name)) {
+      continue;
+    }
+    foreach ($node->get($field_name)->referencedEntities() as $media) {
+      if (!$media->hasField('field_sync_protocols') || !$media->get('field_sync_protocols')->value) {
+        continue;
+      }
+      if (!$media->hasField('field_protocol_parent')) {
+        continue;
+      }
+      $parent_ref = $media->get('field_protocol_parent')->entity;
+      if (!$parent_ref || (int) $parent_ref->id() === (int) $node->id()) {
+        continue;
+      }
+      $parent_label = $parent_ref->access('view') ? $parent_ref->label() : t('another content item');
+      $warnings[] = t('The media asset %media is already used in %parent. Its protocols cannot be synced with this content.', [
+        '%media' => $media->label(),
+        '%parent' => $parent_label,
+      ]);
+    }
+  }
+
+  if (empty($warnings)) {
+    return;
+  }
+
+  $items = array_map(fn($w) => ['#markup' => '<p>' . $w . '</p>'], $warnings);
+  $form['mukurtu_protocol_sync_warning'] = [
+    '#type' => 'container',
+    '#attributes' => [
+      'class' => ['messages', 'messages--warning'],
+      'role' => 'alert',
+      'aria-label' => t('Warning'),
+    ],
+    '#weight' => -100,
+    'title' => ['#markup' => '<h2 class="visually-hidden">' . t('Warning message') . '</h2>'],
+  ] + $items;
+}
+
+/**
+ * AJAX callback wrapper for media library open buttons on node forms.
+ *
+ * Stores the current protocol selection in TempStore so hook_form_alter() can
+ * pre-populate the media entity's protocol field when the upload form is built.
+ * Then delegates to the core MediaLibraryWidget callback to open the dialog.
+ *
+ * Using the #ajax callback is necessary because #type: 'button' has
+ * #executes_submit_callback: FALSE, so #submit handlers never run.
+ */
+function mukurtu_protocol_sync_media_library_open_ajax(array $form, FormStateInterface $form_state) {
+  $field_value = $form_state->getValue('field_cultural_protocols');
+  if (!empty($field_value[0]['value'])) {
+    $value = $field_value[0]['value'];
+    $sharing = (string) ($value['sharing_setting'] ?? '');
+
+    $protocol_ids = [];
+    foreach ($value['protocol_selection'] ?? [] as $community) {
+      foreach ($community['protocols'] ?? [] as $protocol_id => $checked) {
+        if ($checked) {
+          $protocol_ids[] = (int) $protocol_id;
+        }
+      }
+    }
+
+    if (!empty($protocol_ids) && !empty($sharing)) {
+      $tempstore = \Drupal::service('tempstore.private')->get('mukurtu_protocol_sync');
+      $uid = \Drupal::currentUser()->id();
+      $tempstore->set("ps_{$uid}", ['protocols' => $protocol_ids, 'sharing' => $sharing]);
+    }
+  }
+
+  return \Drupal\media_library\Plugin\Field\FieldWidget\MediaLibraryWidget::openMediaLibrary($form, $form_state);
+}
+
+/**
+ * Implements hook_form_media_form_alter().
+ *
+ * Attaches JS for all media forms with the sync field. For existing
+ * sync-enabled media with a parent, also shows an info message identifying
+ * the canonical parent content item.
+ */
+function mukurtu_protocol_sync_form_media_form_alter(array &$form, FormStateInterface $form_state): void {
+  $media = $form_state->getFormObject()->getEntity();
+  if (!$media || !$media->hasField('field_sync_protocols') || !$media->hasField('field_cultural_protocols')) {
+    return;
+  }
+
+  // Mark the checkbox so JS can find and move it into the protocols fieldset.
+  // BooleanCheckboxWidget declares multiple_values=TRUE; path is widget.value.
+  if (isset($form['field_sync_protocols']['widget']['value'])) {
+    $form['field_sync_protocols']['widget']['value']['#attributes']['data-mukurtu-protocol-sync'] = '1';
+  }
+
+  $form['#attached']['library'][] = 'mukurtu_protocol_sync/protocol-sync';
+
+  if ($media->isNew() || !$media->get('field_sync_protocols')->value) {
+    return;
+  }
+  if (!$media->hasField('field_protocol_parent')) {
+    return;
+  }
+
+  $parent_ref = $media->get('field_protocol_parent')->entity;
+  if (!$parent_ref) {
+    return;
+  }
+
+  $parent_label = $parent_ref->access('view') ? $parent_ref->label() : t('another content item');
+
+  $form['mukurtu_protocol_sync_info'] = [
+    '#type' => 'container',
+    '#attributes' => [
+      'class' => ['messages', 'messages--status'],
+      'role' => 'status',
+      'aria-label' => t('Status message'),
+    ],
+    '#weight' => -100,
+    'title' => ['#markup' => '<h2 class="visually-hidden">' . t('Status message') . '</h2>'],
+    'message' => [
+      '#markup' => t("This media asset's protocols are set by %parent. To manage protocols independently, disable \"Sync protocols with content\".", [
+        '%parent' => $parent_label,
+      ]),
+    ],
+  ];
+}
