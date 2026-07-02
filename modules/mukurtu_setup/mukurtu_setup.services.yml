@@ -1,0 +1,4 @@
+services:
+  mukurtu_setup.task_manager:
+    class: Drupal\mukurtu_setup\SiteSetupTaskManager
+    arguments: ['@entity_type.manager', '@config.factory', '@state']

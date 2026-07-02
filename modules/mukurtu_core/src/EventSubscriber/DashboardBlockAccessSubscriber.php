@@ -35,6 +35,8 @@ class DashboardBlockAccessSubscriber implements EventSubscriberInterface {
         in_array('administrator', $this->currentUser->getRoles(), TRUE),
       'system_menu_block:dashboard-site-settings' =>
         !empty(array_intersect(['administrator', 'mukurtu_manager'], $this->currentUser->getRoles())),
+      'mukurtu_setup_checklist' =>
+        !empty(array_intersect(['administrator', 'mukurtu_manager'], $this->currentUser->getRoles())),
     ];
 
     if (!array_key_exists($plugin_id, $restricted)) {

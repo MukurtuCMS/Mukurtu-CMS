@@ -10,6 +10,7 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\message\Entity\Message;
 use Drupal\message_subscribe\Subscribers\DeliveryCandidate;
 use Drupal\mukurtu_collection\Entity\Collection;
+use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
 use Drupal\node\Entity\Node;
 use Drupal\og\Entity\OgMembership;
 use Drupal\user\Entity\User;
@@ -109,17 +110,42 @@ function mukurtu_notifications_form_views_exposed_form_alter(array &$form, FormS
 }
 
 /**
+ * Returns the notification templates shown by default when no type filter
+ * is selected on the notifications page.
+ *
+ * Kept separate from _mukurtu_notifications_type_groups() because a couple
+ * of user-facing templates (batch import reports, account-created notices)
+ * aren't grouped under a dropdown label but should still appear by default.
+ * mukurtu_new_user_registration is intentionally excluded: it is an
+ * admin-facing message and should not appear in the general activity feed.
+ *
+ * @return string[]
+ *   Template machine names.
+ */
+function _mukurtu_notifications_default_type_filter(): array {
+  $templates = ['mukurtu_batch_import_report', 'mukurtu_new_user_account_created'];
+  foreach (_mukurtu_notifications_type_groups() as $machine_names) {
+    $templates = array_merge($templates, $machine_names);
+  }
+  return $templates;
+}
+
+/**
  * Implements hook_views_pre_execute().
  *
  * Expands a selected notification group label into its individual template
  * machine names before the query runs, so the bundle filter generates the
- * correct WHERE template IN (...) clause.
+ * correct WHERE template IN (...) clause. If no group is selected, applies
+ * a default restriction directly to the filter's query value (bypassing the
+ * exposed form's #options, which only allow group labels) so admin-only
+ * templates don't leak into the general activity feed by default.
  */
 function mukurtu_notifications_views_pre_execute(ViewExecutable $view) {
-  if ($view->id() !== 'mukurtu_message_log') {
+  if ($view->id() !== 'mukurtu_message_log' || $view->current_display !== 'mukurtu_notifications_page') {
     return;
   }
   if (empty($view->filter['template']->value)) {
+    $view->filter['template']->value = _mukurtu_notifications_default_type_filter();
     return;
   }
 
@@ -247,7 +273,7 @@ function mukurtu_notifications_node_update(Node $node) {
     }
 
     // Include protocol stewards for content with cultural protocols assigned.
-    if ($node->hasField('field_cultural_protocols')) {
+    if ($node instanceof CulturalProtocolControlledInterface) {
       $protocol_ids = $node->getProtocols();
       if (!empty($protocol_ids)) {
         $steward_uids = mukurtu_notifications_resolve_notify_groups(FALSE, [], $protocol_ids);
@@ -288,7 +314,7 @@ function mukurtu_notifications_node_update(Node $node) {
   // Send "Mukurtu Follow Content" notifications to flag subscribers.
   // message_subscribe calls OG functions that throw for non-group content,
   // so limit this to nodes with cultural protocols.
-  if ($node->hasField('field_cultural_protocols')) {
+  if ($node instanceof CulturalProtocolControlledInterface) {
     try {
       $subscribers->sendMessage($node, $message);
     }
@@ -389,6 +415,7 @@ function mukurtu_notifications_user_insert($entity) {
   $roles = user_role_names(TRUE, 'administer users');
   $rids = array_keys($roles);
   $uids = \Drupal::service('entity_type.manager')->getStorage('user')->getQuery()
+    ->accessCheck(FALSE)
     ->condition('roles', $rids, 'IN')
     ->execute();
 
@@ -640,7 +667,7 @@ function mukurtu_notifications_handle_moderation_change(Node $node, string $old_
   switch ($new_state) {
     case 'needs_review':
       $template = 'mukurtu_content_for_review';
-      if ($node->hasField('field_cultural_protocols')) {
+      if ($node instanceof CulturalProtocolControlledInterface) {
         $protocol_ids = $node->getProtocols();
         if (!empty($protocol_ids)) {
           $steward_uids = mukurtu_notifications_resolve_notify_groups(FALSE, [], $protocol_ids);
@@ -729,7 +756,7 @@ function mukurtu_notifications_comment_insert(CommentInterface $comment) {
   if (!($node instanceof Node)) {
     return;
   }
-  if (!$node->hasField('field_cultural_protocols')) {
+  if (!$node instanceof CulturalProtocolControlledInterface) {
     return;
   }
   $protocol_ids = $node->getProtocols();
