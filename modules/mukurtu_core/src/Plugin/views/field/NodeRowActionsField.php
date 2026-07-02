@@ -66,8 +66,12 @@ class NodeRowActionsField extends FieldPluginBase {
         ];
       }
 
-      // Publish / Unpublish.
-      if ($node->access('update', $this->currentUser)) {
+      // Publish / Unpublish -- hidden when the editorial workflow is active
+      // because state changes go through the moderation widget instead.
+      $editorial_active = \Drupal::moduleHandler()->moduleExists('mukurtu_workflows') &&
+        function_exists('_mukurtu_workflows_editorial_workflow_active') &&
+        _mukurtu_workflows_editorial_workflow_active();
+      if (!$editorial_active && $node->access('update', $this->currentUser)) {
         if ($node->isPublished()) {
           $url = Url::fromRoute('mukurtu_core.node.quick_unpublish', ['node' => $nid]);
           $url->setOption('query', ['token' => \Drupal::csrfToken()->get(ltrim($url->getInternalPath(), '/'))]);

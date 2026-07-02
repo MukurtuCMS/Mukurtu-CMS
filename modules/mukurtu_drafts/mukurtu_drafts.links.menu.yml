@@ -1,6 +1,6 @@
 mukurtu_drafts.your_drafts:
-  title: 'My drafts'
-  description: 'View your drafts.'
+  title: 'My content'
+  description: 'View your content in progress.'
   parent: mukurtu_dashboard
   menu_name: dashboard-my-account
-  route_name: mukurtu_drafts.your_drafts
+  route_name: mukurtu_workflows.my_content

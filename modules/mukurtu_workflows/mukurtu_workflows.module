@@ -1,1 +1,559 @@
 <?php
+
+/**
+ * @file
+ * Provides the Mukurtu content moderation workflows.
+ */
+
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\FieldableEntityInterface;
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
+use Drupal\node\NodeInterface;
+use Drupal\views\ViewExecutable;
+use Drupal\views\Plugin\views\query\QueryPluginBase;
+
+/**
+ * Implements hook_theme().
+ */
+function mukurtu_workflows_theme(): array {
+  return [
+    'mukurtu_review_panel' => [
+      'variables' => [
+        'notes' => [],
+        'form' => NULL,
+        'state' => NULL,
+      ],
+    ],
+  ];
+}
+
+/**
+ * Implements hook_form_workflow_edit_form_alter().
+ *
+ * Redirects back to the Mukurtu workflow settings page after saving.
+ */
+function mukurtu_workflows_form_workflow_edit_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
+  $form['actions']['submit']['#submit'][] = 'mukurtu_workflows_redirect_to_settings';
+}
+
+/**
+ * Implements hook_form_workflow_add_form_alter().
+ *
+ * - Renames "Label" to "Workflow name".
+ * - Hides the workflow type select (only one option exists on this site).
+ * - Redirects to the workflow edit form so users can configure states and
+ *   transitions immediately after naming their workflow.
+ */
+function mukurtu_workflows_form_workflow_add_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
+  $form['label']['#title'] = t('Workflow name');
+
+  // Only one workflow type plugin exists (content_moderation), so hide the
+  // select and set the value automatically.
+  $form['workflow_type'] = [
+    '#type' => 'value',
+    '#value' => 'content_moderation',
+  ];
+
+  $form['actions']['submit']['#submit'][] = 'mukurtu_workflows_redirect_to_workflow_edit';
+}
+
+/**
+ * Submit handler: redirect to the workflow edit form.
+ */
+function mukurtu_workflows_redirect_to_workflow_edit(array &$form, FormStateInterface $form_state): void {
+  /** @var \Drupal\workflows\WorkflowInterface $workflow */
+  $workflow = $form_state->getFormObject()->getEntity();
+  $form_state->setRedirectUrl($workflow->toUrl('edit-form'));
+}
+
+/**
+ * Submit handler: redirect to the Mukurtu publishing workflow settings page.
+ */
+function mukurtu_workflows_redirect_to_settings(array &$form, FormStateInterface $form_state): void {
+  $form_state->setRedirectUrl(Url::fromRoute('mukurtu_workflows.settings'));
+}
+
+/**
+ * Implements hook_entity_view().
+ *
+ * Adds CSS classes for editorial workflow states so themes can style
+ * needs_review and revision_requested content distinctly.
+ */
+function mukurtu_workflows_entity_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode): void {
+  if (!$entity instanceof FieldableEntityInterface || !$entity->hasField('moderation_state')) {
+    return;
+  }
+  $state = $entity->get('moderation_state')->value;
+  if (in_array($state, ['needs_review', 'revision_requested'], TRUE)) {
+    $build['#attributes']['class'][] = 'node--editorial-' . str_replace('_', '-', $state);
+  }
+}
+
+/**
+ * Implements hook_preprocess_node().
+ *
+ * Injects the review history and state-change panel into title_prefix (after
+ * the status banner) on full node view pages. Only visible to users with edit
+ * access on the node and not shown for published content.
+ */
+function mukurtu_workflows_preprocess_node(array &$variables): void {
+  if ($variables['view_mode'] !== 'full') {
+    return;
+  }
+
+  /** @var \Drupal\node\NodeInterface $node */
+  $node = $variables['node'];
+  if (!($node instanceof NodeInterface) || !$node->hasField('moderation_state')) {
+    return;
+  }
+
+  $state = $node->get('moderation_state')->value;
+
+  // No panel needed on published content; state changes go through edit.
+  if ($state === 'published') {
+    return;
+  }
+
+  // Restrict to users who can edit this node (authors + protocol stewards).
+  if (!$node->access('update')) {
+    return;
+  }
+
+  $schema = \Drupal::database()->schema();
+  if (!$schema->tableExists('mukurtu_review_note')) {
+    return;
+  }
+
+  $nid = (int) $node->id();
+
+  // Load review notes oldest-first.
+  $rows = \Drupal::database()->select('mukurtu_review_note', 'mrn')
+    ->fields('mrn')
+    ->condition('mrn.nid', $nid)
+    ->orderBy('mrn.created', 'ASC')
+    ->execute()
+    ->fetchAll();
+
+  // Build human-readable state labels from the node's workflow.
+  $state_labels = [];
+  /** @var \Drupal\content_moderation\ModerationInformationInterface $mod_info */
+  $mod_info = \Drupal::service('content_moderation.moderation_information');
+  $workflow = $mod_info->getWorkflowForEntity($node);
+  if ($workflow) {
+    foreach ($workflow->getTypePlugin()->getStates() as $sid => $wf_state) {
+      $state_labels[$sid] = $wf_state->label();
+    }
+  }
+
+  // Batch-load all authors in a single query to avoid N+1 per note.
+  $user_storage = \Drupal::entityTypeManager()->getStorage('user');
+  $date_formatter = \Drupal::service('date.formatter');
+  $uids = array_unique(array_column((array) $rows, 'uid'));
+  $authors = $user_storage->loadMultiple($uids);
+
+  $notes = [];
+  foreach ($rows as $row) {
+    $author = $authors[$row->uid] ?? NULL;
+    $notes[] = [
+      'author' => $author ? $author->getDisplayName() : \Drupal::t('Unknown'),
+      'created' => $date_formatter->format((int) $row->created, 'medium'),
+      'from_state' => $row->from_state,
+      'to_state' => $row->to_state,
+      'from_state_label' => $state_labels[$row->from_state] ?? $row->from_state,
+      'to_state_label' => $state_labels[$row->to_state] ?? $row->to_state,
+      'state_changed' => $row->from_state !== $row->to_state,
+      'note' => $row->note,
+    ];
+  }
+
+  // Build the state-change form; it returns empty if the user has no allowed
+  // transitions, so we only embed it when it has actionable elements.
+  $form = \Drupal::formBuilder()->getForm(
+    \Drupal\mukurtu_workflows\Form\ReviewStateForm::class,
+    $node
+  );
+  $has_form = !empty($form['actions']);
+
+  // Only show the panel when there is something to display.
+  if (empty($notes) && !$has_form) {
+    return;
+  }
+
+  // Place in title_prefix (weight 10, after the status banner at weight 0) so
+  // the panel's summary visually attaches to the bottom of the state banner in
+  // all node templates, including type-specific overrides that don't use
+  // {{ content }}.
+  $variables['title_prefix']['review_panel'] = [
+    '#theme' => 'mukurtu_review_panel',
+    '#notes' => $notes,
+    '#form' => $has_form ? $form : NULL,
+    '#state' => $state,
+    '#weight' => 10,
+    '#attached' => [
+      'library' => ['mukurtu_workflows/review-panel'],
+    ],
+    '#cache' => [
+      'contexts' => ['user', 'user.permissions'],
+      'tags' => ['node:' . $nid],
+    ],
+  ];
+}
+
+/**
+ * Returns NIDs where the LATEST node revision has one of the given states.
+ *
+ * Queries content_moderation_state_field_revision directly because moderation
+ * states with default_revision=false (needs_review, revision_requested) leave
+ * the published revision as the node default, so the _field_data tables still
+ * reflect the published state -- only the revision table has the latest state.
+ */
+function _mukurtu_workflows_nids_by_latest_state(array $states): array {
+  $db = \Drupal::database();
+
+  // Subquery: latest node revision ID tracked by content_moderation_state.
+  $subquery = $db->select('content_moderation_state_field_revision', 's');
+  $subquery->addField('s', 'content_entity_id');
+  $subquery->addExpression('MAX(s.content_entity_revision_id)', 'max_vid');
+  $subquery->condition('s.content_entity_type_id', 'node');
+  $subquery->groupBy('s.content_entity_id');
+
+  $query = $db->select('content_moderation_state_field_revision', 'cmfr');
+  $query->join($subquery, 'latest', 'cmfr.content_entity_id = latest.content_entity_id AND cmfr.content_entity_revision_id = latest.max_vid');
+  $query->addField('cmfr', 'content_entity_id');
+  $query->condition('cmfr.content_entity_type_id', 'node');
+  $query->condition('cmfr.moderation_state', $states, 'IN');
+
+  return $query->execute()->fetchCol();
+}
+
+/**
+ * Returns a map of NID => latest moderation state machine name.
+ *
+ * Same subquery pattern as _mukurtu_workflows_nids_by_latest_state() but
+ * returns an associative array so callers can look up the state by NID.
+ */
+function _mukurtu_workflows_latest_states_by_nid(array $nids): array {
+  if (empty($nids)) {
+    return [];
+  }
+  $db = \Drupal::database();
+
+  $subquery = $db->select('content_moderation_state_field_revision', 's');
+  $subquery->addField('s', 'content_entity_id');
+  $subquery->addExpression('MAX(s.content_entity_revision_id)', 'max_vid');
+  $subquery->condition('s.content_entity_type_id', 'node');
+  $subquery->condition('s.content_entity_id', $nids, 'IN');
+  $subquery->groupBy('s.content_entity_id');
+
+  $query = $db->select('content_moderation_state_field_revision', 'cmfr');
+  $query->join($subquery, 'latest', 'cmfr.content_entity_id = latest.content_entity_id AND cmfr.content_entity_revision_id = latest.max_vid');
+  $query->addField('cmfr', 'content_entity_id');
+  $query->addField('cmfr', 'moderation_state');
+  $query->condition('cmfr.content_entity_type_id', 'node');
+
+  return $query->execute()->fetchAllKeyed();
+}
+
+/**
+ * Implements hook_views_pre_render().
+ *
+ * Fixes the "Status" column in the review queue: the moderation_state field
+ * uses the EntityField plugin which reads from $row->_entity. The default
+ * node revision is still the published one for re-submitted content, so the
+ * column shows "Published". We pre-populate $row->_entity with a cloned node
+ * whose moderation_state is overridden to the true latest-revision value.
+ * EntityField::preRender() checks $row->_entity first and skips reloading,
+ * so this intercepts rendering before the wrong state is displayed.
+ */
+function mukurtu_workflows_views_pre_render(ViewExecutable $view): void {
+  if ($view->id() !== 'mukurtu_workflow_overview' || $view->current_display !== 'review_queue') {
+    return;
+  }
+  if (empty($view->result)) {
+    return;
+  }
+
+  $nids = array_filter(array_column($view->result, 'nid'));
+  $states = _mukurtu_workflows_latest_states_by_nid($nids);
+  if (empty($states)) {
+    return;
+  }
+
+  $node_storage = \Drupal::entityTypeManager()->getStorage('node');
+  $nodes = $node_storage->loadMultiple(array_keys($states));
+
+  foreach ($view->result as $row) {
+    $nid = $row->nid ?? NULL;
+    if ($nid === NULL || !isset($states[$nid], $nodes[$nid])) {
+      continue;
+    }
+    $node = $nodes[$nid];
+    $latest_state = $states[$nid];
+    if ($node->get('moderation_state')->value !== $latest_state) {
+      // Clone only when the default-revision state differs from the latest
+      // so we don't mutate the entity cache for rows already showing correctly.
+      $node = clone $node;
+      $node->set('moderation_state', $latest_state);
+    }
+    $row->_entity = $node;
+  }
+}
+
+/**
+ * Implements hook_views_query_alter().
+ *
+ * Scopes the content-under-review view to protocols where the current user is
+ * a Protocol Steward (all content types) or a Language Steward (dictionary
+ * words and word lists only). Site admins (bypass node access) see all content.
+ */
+function mukurtu_workflows_views_query_alter(ViewExecutable $view, QueryPluginBase $query): void {
+  $is_content_under_review = $view->id() === 'mukurtu_content_under_review';
+  $is_review_queue = $view->id() === 'mukurtu_workflow_overview' && $view->current_display === 'review_queue';
+  $is_in_progress = $view->id() === 'mukurtu_workflow_overview' && $view->current_display === 'my_content_in_progress';
+
+  if (!$is_content_under_review && !$is_review_queue && !$is_in_progress) {
+    return;
+  }
+
+  $node_storage = \Drupal::entityTypeManager()->getStorage('node');
+
+  // The "In progress" tab shows content whose LATEST revision is in a
+  // non-published, non-archived workflow state. The UID contextual argument in
+  // the view already scopes this to the current user's content.
+  if ($is_in_progress) {
+    $nids = _mukurtu_workflows_nids_by_latest_state(['draft', 'needs_review', 'revision_requested']);
+    if (empty($nids)) {
+      $query->addWhereExpression(0, '1 = 0');
+      return;
+    }
+    $query->addWhere(0, 'node_field_data.nid', $nids, 'IN');
+    return;
+  }
+
+  // For the review queue, filter by the LATEST revision's moderation state so
+  // that content re-drafted from a published state is included.
+  $latest_review_nids = _mukurtu_workflows_nids_by_latest_state(['needs_review', 'revision_requested']);
+
+  if (empty($latest_review_nids)) {
+    $query->addWhereExpression(0, '1 = 0');
+    return;
+  }
+
+  $account = \Drupal::currentUser();
+
+  if ($account->hasPermission('bypass node access') || $account->hasPermission('administer nodes')) {
+    $query->addWhere(0, 'node_field_data.nid', $latest_review_nids, 'IN');
+    return;
+  }
+
+  /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
+  $membership_manager = \Drupal::service('og.membership_manager');
+  $memberships = $membership_manager->getMemberships($account->id());
+
+  $steward_protocol_ids = [];
+  $language_steward_protocol_ids = [];
+  foreach ($memberships as $membership) {
+    if ($membership->getGroupEntityType() !== 'protocol') {
+      continue;
+    }
+    if ($membership->hasRole('protocol-protocol-protocol_steward')) {
+      $steward_protocol_ids[] = (int) $membership->getGroupId();
+    }
+    elseif ($membership->hasRole('protocol-protocol-language_steward')) {
+      $language_steward_protocol_ids[] = (int) $membership->getGroupId();
+    }
+  }
+
+  if (empty($steward_protocol_ids) && empty($language_steward_protocol_ids)) {
+    $query->addWhereExpression(0, '1 = 0');
+    return;
+  }
+
+  // Find nodes in stewarded protocols via EntityQuery so the cultural_protocol
+  // field's pipe-delimited storage format is handled correctly regardless of
+  // the underlying table structure.
+  $nids = [];
+
+  if (!empty($steward_protocol_ids)) {
+    // accessCheck(FALSE): querying the protocol field value, not node grants.
+    // Results are intersected with $latest_review_nids below, so no content
+    // outside the steward's protocols or review states is exposed.
+    $steward_query = $node_storage->getQuery()->accessCheck(FALSE);
+    $or = $steward_query->orConditionGroup();
+    foreach ($steward_protocol_ids as $pid) {
+      $or->condition('field_cultural_protocols.protocols', '|' . $pid . '|', 'CONTAINS');
+    }
+    $steward_query->condition($or);
+    $nids = array_values($steward_query->execute());
+  }
+
+  if (!empty($language_steward_protocol_ids)) {
+    // Language stewards only review dictionary words and word lists.
+    // accessCheck(FALSE): same rationale as above.
+    $ls_query = $node_storage->getQuery()->accessCheck(FALSE);
+    $ls_or = $ls_query->orConditionGroup();
+    foreach ($language_steward_protocol_ids as $pid) {
+      $ls_or->condition('field_cultural_protocols.protocols', '|' . $pid . '|', 'CONTAINS');
+    }
+    $ls_query->condition($ls_or)
+      ->condition('type', ['dictionary_word', 'word_list'], 'IN');
+    $nids = array_unique(array_merge($nids, array_values($ls_query->execute())));
+  }
+
+  // Intersect protocol-scoped nodes with those in a review state.
+  $nids = array_values(array_intersect($nids, $latest_review_nids));
+
+  if (empty($nids)) {
+    $query->addWhereExpression(0, '1 = 0');
+    return;
+  }
+  $query->addWhere(0, 'node_field_data.nid', $nids, 'IN');
+}
+
+/**
+ * Implements hook_form_node_form_alter().
+ *
+ * Adds a "Review note" textarea below the moderation state widget on node
+ * edit forms. A post-save submit handler persists the note.
+ */
+function mukurtu_workflows_form_node_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
+  // Only add the field when the moderation state widget is present.
+  if (empty($form['moderation_state'])) {
+    return;
+  }
+
+  /** @var \Drupal\node\NodeInterface $node */
+  $node = $form_state->getFormObject()->getEntity();
+  if (!$node->hasField('moderation_state')) {
+    return;
+  }
+
+  // Capture the node's current state at form-build time so the submit handler
+  // can record a from_state without reloading the pre-save node.
+  $form['review_note_from_state'] = [
+    '#type' => 'hidden',
+    '#value' => $node->get('moderation_state')->value,
+  ];
+
+  $moderation_weight = $form['moderation_state']['#weight'] ?? 100;
+  $form['review_note'] = [
+    '#type' => 'textarea',
+    '#title' => t('Review note'),
+    '#required' => FALSE,
+    '#rows' => 3,
+    '#weight' => $moderation_weight + 1,
+  ];
+
+  // Place in the same footer group as the moderation state widget when present.
+  if (isset($form['footer'])) {
+    $form['review_note']['#group'] = 'footer';
+  }
+
+  // Append post-save handler. Form-level #submit handlers run after the node
+  // has already been saved by EntityForm::save(), so the new node state is
+  // available via the entity on the form object.
+  $form['#submit'][] = 'mukurtu_workflows_node_form_submit';
+}
+
+/**
+ * Form submit handler: saves a review note after the node edit form saves.
+ */
+function mukurtu_workflows_node_form_submit(array &$form, FormStateInterface $form_state): void {
+  $note_text = trim((string) ($form_state->getValue('review_note') ?? ''));
+  $from_state = (string) ($form_state->getValue('review_note_from_state') ?? '');
+
+  /** @var \Drupal\node\NodeInterface $node */
+  $node = $form_state->getFormObject()->getEntity();
+  $to_state = $node->get('moderation_state')->value;
+  $nid = (int) $node->id();
+
+  // Only save a note if the state changed or the user left a note.
+  if ($from_state === $to_state && $note_text === '') {
+    return;
+  }
+
+  $schema = \Drupal::database()->schema();
+  if (!$schema->tableExists('mukurtu_review_note')) {
+    return;
+  }
+
+  \Drupal::database()->insert('mukurtu_review_note')
+    ->fields([
+      'nid' => $nid,
+      'uid' => (int) \Drupal::currentUser()->id(),
+      'created' => \Drupal::time()->getRequestTime(),
+      'from_state' => $from_state,
+      'to_state' => $to_state,
+      'note' => $note_text !== '' ? $note_text : NULL,
+    ])
+    ->execute();
+}
+
+/**
+ * Returns TRUE when the Mukurtu editorial workflow is the active workflow.
+ *
+ * Checks via content_moderation's API first, then falls back to reading the
+ * workflow config entity directly. Result is statically cached per request.
+ */
+function _mukurtu_workflows_editorial_workflow_active(): bool {
+  $cache = &drupal_static(__FUNCTION__);
+  if (!isset($cache)) {
+    $cache = FALSE;
+
+    // Primary: content_moderation API (authoritative when the service exists).
+    if (\Drupal::hasService('content_moderation.moderation_information')) {
+      $mod_info = \Drupal::service('content_moderation.moderation_information');
+      $node_types = \Drupal::entityTypeManager()->getStorage('node_type')->loadMultiple();
+      foreach ($node_types as $bundle_id => $type) {
+        $workflow = $mod_info->getWorkflowForEntityTypeAndBundle('node', $bundle_id);
+        if ($workflow && $workflow->id() === 'mukurtu_editorial_workflow') {
+          $cache = TRUE;
+          return $cache;
+        }
+      }
+    }
+
+    // Fallback: read the workflow config entity's type_settings directly.
+    $config = \Drupal::config('workflows.workflow.mukurtu_editorial_workflow');
+    $entity_types = $config->get('type_settings.entity_types.node');
+    $cache = !empty($entity_types);
+  }
+  return $cache;
+}
+
+/**
+ * Implements hook_views_post_build().
+ *
+ * Removes Publish and Unpublish from VBO selected_actions on the content
+ * admin view when the editorial workflow is active.
+ *
+ * VBO keys its action <select> options by the numeric delta of each entry in
+ * selected_actions (not by the action plugin ID string), so hook_form_alter
+ * cannot reliably remove them by plugin ID key.
+ *
+ * hook_views_post_build fires after initHandlers() populates $view->field but
+ * before preRender() caches getBulkOptions(). Modifying selected_actions here
+ * ensures VBO never includes the disallowed actions in its cached option list.
+ * hook_views_pre_render fires AFTER preRender() so it is too late.
+ */
+function mukurtu_workflows_views_post_build(ViewExecutable $view): void {
+  if ($view->id() !== 'mukurtu_manage_all_content') {
+    return;
+  }
+  if (!_mukurtu_workflows_editorial_workflow_active()) {
+    return;
+  }
+  $disallowed = ['entity:publish_action:node', 'entity:unpublish_action:node'];
+  foreach ($view->field ?? [] as $field_id => $handler) {
+    if (empty($handler->options['selected_actions'])) {
+      continue;
+    }
+    foreach ($handler->options['selected_actions'] as $delta => $action_config) {
+      if (in_array($action_config['action_id'] ?? '', $disallowed, TRUE)) {
+        unset($view->field[$field_id]->options['selected_actions'][$delta]);
+      }
+    }
+  }
+}

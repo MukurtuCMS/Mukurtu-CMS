@@ -1,0 +1,29 @@
+mukurtu_workflows.my_content:
+  path: '/my-content'
+  defaults:
+    _controller: '\Drupal\mukurtu_workflows\Controller\MyContentController::view'
+    _title: 'My content'
+  requirements:
+    _user_is_logged_in: 'TRUE'
+  options:
+    _admin_route: TRUE
+
+mukurtu_workflows.settings:
+  path: '/admin/config/mukurtu/workflow-settings'
+  defaults:
+    _form: '\Drupal\mukurtu_workflows\Form\WorkflowSettingsForm'
+    _title: 'Publishing workflow'
+  requirements:
+    _permission: 'administer site configuration'
+
+mukurtu_workflows.duplicate:
+  path: '/admin/config/mukurtu/workflow-settings/duplicate/{workflow}'
+  defaults:
+    _form: '\Drupal\mukurtu_workflows\Form\WorkflowDuplicateForm'
+    _title: 'Duplicate workflow'
+  requirements:
+    _permission: 'administer site configuration'
+  options:
+    parameters:
+      workflow:
+        type: entity:workflow
