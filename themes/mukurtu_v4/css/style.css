@@ -6724,8 +6724,36 @@ header {
 }
 
 /* @file
- * Styles for the landing page template.
+ * Styles for the landing page template and Layout Builder block types.
  */
+.block--call-to-action {
+  padding: var(--v-space-xs);
+  border: 1px solid var(--brand-light);
+}
+.block--call-to-action__link {
+  -webkit-margin-before: var(--v-space-4xs);
+          margin-block-start: var(--v-space-4xs);
+}
+.block--call-to-action__link a {
+  background-color: var(--color-white);
+  border: 1px solid var(--brand-primary-dark);
+  color: var(--brand-primary-dark);
+  font-weight: var(--text-bold);
+  line-height: normal;
+  text-decoration: none;
+  padding-block: var(--v-space-6xs);
+  padding-inline: var(--v-space-5xs);
+  letter-spacing: normal;
+  display: inline-block;
+}
+.block--call-to-action__link a:hover {
+  background-color: var(--brand-primary-dark);
+  color: var(--color-white);
+}
+.block--call-to-action__link a:focus {
+  outline-offset: 1px;
+}
+
 .layout--onecol .block-wrapper {
   -webkit-box-shadow: 0 12px 12px 0 var(--brand-light);
           box-shadow: 0 12px 12px 0 var(--brand-light);

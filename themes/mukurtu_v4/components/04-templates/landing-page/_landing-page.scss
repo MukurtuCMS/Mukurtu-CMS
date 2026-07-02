@@ -1,7 +1,22 @@
 /* @file
- * Styles for the landing page template.
+ * Styles for the landing page template and Layout Builder block types.
  */
  @use "../../../external/include-media";
+@use "../../00-base/mixins/mixins";
+
+.block--call-to-action {
+  padding: var(--v-space-xs);
+  border: 1px solid var(--brand-light);
+
+  &__link {
+    margin-block-start: var(--v-space-4xs);
+
+    a {
+      @include mixins.block-link;
+      display: inline-block;
+    }
+  }
+}
 
 .layout--onecol {
   .block-wrapper {

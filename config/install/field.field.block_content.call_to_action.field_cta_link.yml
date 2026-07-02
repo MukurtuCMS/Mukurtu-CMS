@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - block_content.type.call_to_action
+    - field.storage.block_content.field_cta_link
+  module:
+    - link
+id: block_content.call_to_action.field_cta_link
+field_name: field_cta_link
+entity_type: block_content
+bundle: call_to_action
+label: 'Button link'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  title: 1
+  link_type: 3
+field_type: link

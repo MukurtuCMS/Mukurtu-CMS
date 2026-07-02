@@ -1648,3 +1648,64 @@ function mukurtu_core_update_40063(): void {
   $role->grantPermission('configure editable page node layout overrides');
   $role->save();
 }
+
+/**
+ * Add Media and Call to Action block types; tighten Layout Builder block restrictions for basic pages.
+ */
+function mukurtu_core_update_40064(): void {
+  $profile_path = \Drupal::service('extension.list.profile')->getPath('mukurtu');
+  $config_source = new \Drupal\Core\Config\FileStorage($profile_path . '/config/install');
+  $config_factory = \Drupal::configFactory();
+
+  // Install new config in dependency order: types, storages, fields, displays.
+  $new_configs = [
+    // Block content types.
+    'block_content.type.media_block',
+    'block_content.type.call_to_action',
+    // Field storages.
+    'field.storage.block_content.field_block_media',
+    'field.storage.block_content.field_cta_link',
+    // Field instances.
+    'field.field.block_content.media_block.field_block_media',
+    'field.field.block_content.call_to_action.body',
+    'field.field.block_content.call_to_action.field_cta_link',
+    // Form displays.
+    'core.entity_form_display.block_content.media_block.default',
+    'core.entity_form_display.block_content.call_to_action.default',
+    // View displays.
+    'core.entity_view_display.block_content.media_block.default',
+    'core.entity_view_display.block_content.call_to_action.default',
+  ];
+
+  foreach ($new_configs as $config_name) {
+    if ($config_factory->get($config_name)->isNew()) {
+      $data = $config_source->read($config_name);
+      if ($data) {
+        $config_factory->getEditable($config_name)->setData($data)->save();
+      }
+    }
+  }
+
+  // Update the "Basic block" label to "Text".
+  $basic_block = $config_factory->getEditable('block_content.type.basic');
+  if (!$basic_block->isNew() && $basic_block->get('label') === 'Basic block') {
+    $basic_block->set('label', 'Text')->save();
+  }
+
+  // Tighten Layout Builder block restrictions on both page view displays.
+  $restricted_categories = [];
+  $allowed_categories = ['Content fields', 'Custom block types', 'Inline blocks'];
+  foreach (['node.page.default', 'node.page.full'] as $display_id) {
+    $display = \Drupal::entityTypeManager()
+      ->getStorage('entity_view_display')
+      ->load($display_id);
+    if (!$display) {
+      continue;
+    }
+    $restrictions = $display->getThirdPartySetting('layout_builder_restrictions', 'entity_view_mode_restriction', []);
+    $restrictions['restricted_categories'] = $restricted_categories;
+    $display->setThirdPartySetting('layout_builder_restrictions', 'allowed_block_categories', $allowed_categories);
+    $display->setThirdPartySetting('layout_builder_restrictions', 'entity_view_mode_restriction', $restrictions);
+    $display->save();
+  }
+}

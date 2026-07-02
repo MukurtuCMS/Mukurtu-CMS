@@ -17,46 +17,15 @@ third_party_settings:
     allow_custom: true
   layout_builder_restrictions:
     allowed_block_categories:
-      - 'Chaos Tools'
-      - 'Config Pages'
       - 'Content fields'
-      - Custom
       - 'Custom block types'
-      - 'Custom blocks'
-      - Devel
-      - Facets
-      - Forms
-      - Help
       - 'Inline blocks'
-      - 'Lists (Views)'
-      - Menus
-      - 'Organic Groups'
-      - Subscriptions
-      - System
-      - User
-      - Views
-      - core
     entity_view_mode_restriction:
       allowed_layouts:
         - layout_onecol
       denylisted_blocks: {  }
       allowlisted_blocks: {  }
-      restricted_categories:
-        - 'Chaos Tools'
-        - 'Config Pages'
-        - Custom
-        - Devel
-        - Facets
-        - Forms
-        - Help
-        - 'Inline blocks'
-        - Menus
-        - 'Organic Groups'
-        - Subscriptions
-        - System
-        - User
-        - Views
-        - core
+      restricted_categories: {  }
 id: node.page.default
 targetEntityType: node
 bundle: page
