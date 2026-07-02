@@ -132,3 +132,64 @@ function mukurtu_workflows_update_40002(): void {
   $config->set('type_settings.states.revision_requested.label', 'Edits Needed');
   $config->save();
 }
+
+/**
+ * Add an "archived" state to the basic content workflow, matching the
+ * editorial workflow's existing archived state.
+ */
+function mukurtu_workflows_update_40005(): void {
+  $config = \Drupal::configFactory()->getEditable('workflows.workflow.mukurtu_default_content_workflow');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('type_settings.states.archived', [
+    'label' => 'Archived',
+    'weight' => 2,
+    'published' => FALSE,
+    'default_revision' => TRUE,
+  ]);
+  $config->set('type_settings.transitions.archive', [
+    'label' => 'Archive',
+    'from' => ['published'],
+    'to' => 'archived',
+    'weight' => 2,
+  ]);
+  $config->set('type_settings.transitions.restore', [
+    'label' => 'Restore to Draft',
+    'from' => ['archived'],
+    'to' => 'draft',
+    'weight' => 3,
+  ]);
+  $config->save();
+}
+
+/**
+ * Allow archived content to be restored directly to published (and, for the
+ * editorial workflow, back to review) instead of only to draft.
+ */
+function mukurtu_workflows_update_40006(): void {
+  $editorial = \Drupal::configFactory()->getEditable('workflows.workflow.mukurtu_editorial_workflow');
+  if (!$editorial->isNew()) {
+    $publish_from = $editorial->get('type_settings.transitions.publish.from') ?? [];
+    if (!in_array('archived', $publish_from, TRUE)) {
+      $publish_from[] = 'archived';
+      $editorial->set('type_settings.transitions.publish.from', $publish_from);
+    }
+    $return_to_review_from = $editorial->get('type_settings.transitions.return_to_review.from') ?? [];
+    if (!in_array('archived', $return_to_review_from, TRUE)) {
+      $return_to_review_from[] = 'archived';
+      $editorial->set('type_settings.transitions.return_to_review.from', $return_to_review_from);
+    }
+    $editorial->save();
+  }
+
+  $default = \Drupal::configFactory()->getEditable('workflows.workflow.mukurtu_default_content_workflow');
+  if (!$default->isNew()) {
+    $publish_from = $default->get('type_settings.transitions.publish.from') ?? [];
+    if (!in_array('archived', $publish_from, TRUE)) {
+      $publish_from[] = 'archived';
+      $default->set('type_settings.transitions.publish.from', $publish_from);
+    }
+    $default->save();
+  }
+}
