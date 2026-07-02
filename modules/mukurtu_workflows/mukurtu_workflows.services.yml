@@ -1,0 +1,6 @@
+services:
+  mukurtu_workflows.review_queue_access_check:
+    class: Drupal\mukurtu_workflows\Access\ReviewQueueAccessCheck
+    arguments: ['@og.membership_manager']
+    tags:
+      - { name: access_check, applies_to: _review_queue_access }

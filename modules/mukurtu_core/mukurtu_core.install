@@ -1402,9 +1402,57 @@ function mukurtu_core_update_40046(): void {
 }
 
 /**
- * Change default moderation state to published for content workflows.
+ * Add editorial workflow permissions to authenticated role and Protocol Steward
+ * OG role for existing sites.
  */
 function mukurtu_core_update_40047(): void {
+  $config_factory = \Drupal::configFactory();
+
+  // Authenticated role: save_draft, submit_for_review, resubmit.
+  $auth_role = $config_factory->getEditable('user.role.authenticated');
+  if (!$auth_role->isNew()) {
+    $permissions = $auth_role->get('permissions') ?? [];
+    $new_permissions = [
+      'use mukurtu_editorial_workflow transition resubmit',
+      'use mukurtu_editorial_workflow transition save_draft',
+      'use mukurtu_editorial_workflow transition submit_for_review',
+    ];
+    foreach ($new_permissions as $permission) {
+      if (!in_array($permission, $permissions, TRUE)) {
+        $permissions[] = $permission;
+      }
+    }
+    $auth_role->set('permissions', $permissions);
+    $auth_role->save();
+  }
+
+  // Protocol Steward OG role: all editorial workflow transitions.
+  $ps_role = $config_factory->getEditable('og.og_role.protocol-protocol-protocol_steward');
+  if (!$ps_role->isNew()) {
+    $permissions = $ps_role->get('permissions') ?? [];
+    $new_permissions = [
+      'use mukurtu_editorial_workflow transition archive',
+      'use mukurtu_editorial_workflow transition publish',
+      'use mukurtu_editorial_workflow transition request_revision',
+      'use mukurtu_editorial_workflow transition restore',
+      'use mukurtu_editorial_workflow transition resubmit',
+      'use mukurtu_editorial_workflow transition save_draft',
+      'use mukurtu_editorial_workflow transition submit_for_review',
+    ];
+    foreach ($new_permissions as $permission) {
+      if (!in_array($permission, $permissions, TRUE)) {
+        $permissions[] = $permission;
+      }
+    }
+    $ps_role->set('permissions', $permissions);
+    $ps_role->save();
+  }
+}
+
+/**
+ * Change default moderation state to published for content workflows.
+ */
+function mukurtu_core_update_40048(): void {
   foreach (['mukurtu_default_content_workflow', 'mukurtu_editorial_workflow'] as $workflow_id) {
     $workflow = \Drupal::configFactory()
       ->getEditable('workflows.workflow.' . $workflow_id);
@@ -1420,7 +1468,7 @@ function mukurtu_core_update_40047(): void {
  * Update the draft content view to filter by moderation_state instead of the
  * removed boolean draft field.
  */
-function mukurtu_core_update_40048(): void {
+function mukurtu_core_update_40049(): void {
   if (!\Drupal::moduleHandler()->moduleExists('mukurtu_drafts')) {
     return;
   }
@@ -1441,7 +1489,7 @@ function mukurtu_core_update_40048(): void {
  * These permissions were added to config/install in this branch but
  * config/install is only applied on fresh installs, not upgrades.
  */
-function mukurtu_core_update_40049(): void {
+function mukurtu_core_update_40050(): void {
   // Ensure the workflows module is enabled so its permissions are registered.
   if (!\Drupal::moduleHandler()->moduleExists('mukurtu_workflows')) {
     \Drupal::service('module_installer')->install(['mukurtu_workflows']);
@@ -1459,7 +1507,7 @@ function mukurtu_core_update_40049(): void {
 /**
  * Make the draft state the default revision in content workflows.
  */
-function mukurtu_core_update_40050(): void {
+function mukurtu_core_update_40051(): void {
   foreach (['mukurtu_default_content_workflow', 'mukurtu_editorial_workflow'] as $workflow_id) {
     $workflow = \Drupal::configFactory()
       ->getEditable('workflows.workflow.' . $workflow_id);
@@ -1474,7 +1522,7 @@ function mukurtu_core_update_40050(): void {
 /**
  * Resync the draft content view to add editorial workflow filter and tag cache.
  */
-function mukurtu_core_update_40051(): void {
+function mukurtu_core_update_40052(): void {
   if (!\Drupal::moduleHandler()->moduleExists('mukurtu_drafts')) {
     return;
   }
@@ -1492,7 +1540,7 @@ function mukurtu_core_update_40051(): void {
 /**
  * Update manage all content view to display moderation state instead of status.
  */
-function mukurtu_core_update_40052(): void {
+function mukurtu_core_update_40053(): void {
   $profile_path = \Drupal::service('extension.list.profile')->getPath('mukurtu');
   $config_source = new \Drupal\Core\Config\FileStorage(\Drupal::root() . '/' . $profile_path . '/config/install');
   $config_data = $config_source->read('views.view.mukurtu_manage_all_content');
@@ -1501,6 +1549,202 @@ function mukurtu_core_update_40052(): void {
       ->getEditable('views.view.mukurtu_manage_all_content')
       ->setData($config_data)
       ->save();
+  }
+}
+
+/**
+ * Adjust editorial workflow transitions and default state.
+ *
+ * - Remove 'archived' from save_draft.from (use the restore transition instead).
+ * - Allow Stewards to publish directly from Revision Requested.
+ * - Default new content to Draft so it doesn't bypass editorial review.
+ */
+function mukurtu_core_update_40054(): void {
+  $config = \Drupal::configFactory()
+    ->getEditable('workflows.workflow.mukurtu_editorial_workflow');
+  if ($config->isNew()) {
+    return;
+  }
+
+  $from = $config->get('type_settings.transitions.save_draft.from');
+  $config->set('type_settings.transitions.save_draft.from',
+    array_values(array_diff($from, ['archived'])));
+
+  $from = $config->get('type_settings.transitions.publish.from');
+  if (!in_array('revision_requested', $from, TRUE)) {
+    $from[] = 'revision_requested';
+    $config->set('type_settings.transitions.publish.from', $from);
+  }
+
+  $config->set('type_settings.default_moderation_state', 'draft');
+
+  $config->save();
+}
+
+/**
+ * Use content_moderation_state formatter for moderation state in views.
+ */
+function mukurtu_core_update_40055(): void {
+  $config_factory = \Drupal::configFactory();
+
+  $view_ids = [
+    'views.view.mukurtu_manage_all_content',
+    'views.view.mukurtu_content_under_review',
+  ];
+
+  foreach ($view_ids as $view_id) {
+    $config = $config_factory->getEditable($view_id);
+    if ($config->isNew()) {
+      continue;
+    }
+    foreach ($config->get('display') as $display_id => $display) {
+      $fields = $display['display_options']['fields'] ?? [];
+      if (isset($fields['moderation_state']) && ($fields['moderation_state']['type'] ?? '') === 'string') {
+        $config->set("display.$display_id.display_options.fields.moderation_state.type", 'content_moderation_state');
+        $config->set("display.$display_id.display_options.fields.moderation_state.settings", []);
+      }
+    }
+    $config->save();
+  }
+}
+
+/**
+ * Rename editorial workflow state "Needs Review" to "Awaiting Review".
+ */
+function mukurtu_core_update_40056(): void {
+  $config = \Drupal::configFactory()
+    ->getEditable('workflows.workflow.mukurtu_editorial_workflow');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('type_settings.states.needs_review.label', 'Awaiting Review');
+  $config->save();
+}
+
+/**
+ * Replace /user/drafts and /content-under-review with the unified /my-content
+ * and /review-queue views (mukurtu_workflow_overview).
+ */
+function mukurtu_core_update_40057(): void {
+  $config_factory = \Drupal::configFactory();
+
+  // Delete the old standalone views.
+  foreach ([
+    'views.view.mukurtu_draft_content',
+    'views.view.mukurtu_content_under_review',
+  ] as $config_name) {
+    $config = $config_factory->getEditable($config_name);
+    if (!$config->isNew()) {
+      $config->delete();
+    }
+  }
+
+  // Import the new unified view from mukurtu_workflows config/install.
+  $new_view = 'views.view.mukurtu_workflow_overview';
+  $module_path = \Drupal::service('extension.list.module')
+    ->getPath('mukurtu_workflows');
+  $yaml_path = $module_path . '/config/install/' . $new_view . '.yml';
+  if (file_exists($yaml_path)) {
+    $data = \Symfony\Component\Yaml\Yaml::parseFile($yaml_path);
+    $config_factory->getEditable($new_view)->setData($data)->save(TRUE);
+  }
+}
+
+/**
+ * Update /my-content and /review-queue: access control, admin theme, two-table
+ * layout, and correct moderation_state_filter values.
+ */
+function mukurtu_core_update_40058(): void {
+  $config_factory = \Drupal::configFactory();
+  $module_path = \Drupal::service('extension.list.module')
+    ->getPath('mukurtu_workflows');
+  $yaml_path = $module_path . '/config/install/views.view.mukurtu_workflow_overview.yml';
+  if (file_exists($yaml_path)) {
+    $data = \Symfony\Component\Yaml\Yaml::parseFile($yaml_path);
+    $config_factory->getEditable('views.view.mukurtu_workflow_overview')
+      ->setData($data)
+      ->save(TRUE);
+  }
+}
+
+/**
+ * Create the mukurtu_review_note table for the review panel feature.
+ */
+function mukurtu_core_update_40059(): void {
+  $schema = \Drupal::database()->schema();
+  if ($schema->tableExists('mukurtu_review_note')) {
+    return;
+  }
+  $table_spec = [
+    'description' => 'Stores review notes and state-change records for nodes.',
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ],
+      'nid' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'The {node}.nid this note belongs to.',
+      ],
+      'uid' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The {users}.uid who created this note.',
+      ],
+      'created' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Unix timestamp when the note was created.',
+      ],
+      'from_state' => [
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'The moderation state before the transition.',
+      ],
+      'to_state' => [
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'The moderation state after the transition.',
+      ],
+      'note' => [
+        'type' => 'text',
+        'size' => 'medium',
+        'not null' => FALSE,
+        'description' => 'Optional text note left by the reviewer.',
+      ],
+    ],
+    'primary key' => ['id'],
+    'indexes' => [
+      'nid' => ['nid'],
+    ],
+  ];
+  $schema->createTable('mukurtu_review_note', $table_spec);
+}
+
+/**
+ * Allow re-publishing published content without drafting it first.
+ */
+function mukurtu_core_update_40060(): void {
+  $config = \Drupal::configFactory()
+    ->getEditable('workflows.workflow.mukurtu_editorial_workflow');
+  if ($config->isNew()) {
+    return;
+  }
+  $from = $config->get('type_settings.transitions.publish.from');
+  if (!in_array('published', $from, TRUE)) {
+    $from[] = 'published';
+    $config->set('type_settings.transitions.publish.from', $from);
+    $config->save();
   }
 }
 
@@ -1541,6 +1785,179 @@ function mukurtu_core_update_40061(): void {
 }
 
 /**
+ * Grant editorial workflow transition permissions to the Language Steward role
+ * so they can process dictionary words and word lists in the review queue.
+ */
+function mukurtu_core_update_40062(): void {
+  /** @var \Drupal\og\Entity\OgRole|null $role */
+  $role = \Drupal::entityTypeManager()
+    ->getStorage('og_role')
+    ->load('protocol-protocol-language_steward');
+  if (!$role) {
+    return;
+  }
+
+  $transitions = [
+    'use mukurtu_editorial_workflow transition archive',
+    'use mukurtu_editorial_workflow transition publish',
+    'use mukurtu_editorial_workflow transition request_revision',
+    'use mukurtu_editorial_workflow transition restore',
+    'use mukurtu_editorial_workflow transition resubmit',
+    'use mukurtu_editorial_workflow transition save_draft',
+    'use mukurtu_editorial_workflow transition submit_for_review',
+  ];
+
+  foreach ($transitions as $permission) {
+    if (!$role->hasPermission($permission)) {
+      $role->grantPermission($permission);
+    }
+  }
+
+  $role->save();
+}
+
+/**
+ * Add return_to_review transition and expand request_revision to cover published state.
+ */
+function mukurtu_core_update_40063(): void {
+  $workflow = \Drupal::configFactory()
+    ->getEditable('workflows.workflow.mukurtu_editorial_workflow');
+  if ($workflow->isNew()) {
+    return;
+  }
+
+  // Backfill: established sites never received the revision_requested state
+  // or request_revision/resubmit transitions added by the editorial workflow
+  // "Part 2" commit, since that only shipped via config/install (which only
+  // applies to fresh installs). Restore the canonical definitions if missing
+  // or incomplete before proceeding.
+  if (!$workflow->get('type_settings.states.revision_requested.weight')) {
+    $workflow->set('type_settings.states.revision_requested', [
+      'label' => 'Edits Needed',
+      'weight' => 2,
+      'published' => FALSE,
+      'default_revision' => TRUE,
+    ]);
+  }
+  if (!$workflow->get('type_settings.transitions.request_revision.to')) {
+    $workflow->set('type_settings.transitions.request_revision', [
+      'label' => 'Needs edits',
+      'from' => ['needs_review'],
+      'to' => 'revision_requested',
+      'weight' => 2,
+    ]);
+  }
+  if (!$workflow->get('type_settings.transitions.resubmit.to')) {
+    $workflow->set('type_settings.transitions.resubmit', [
+      'label' => 'Resubmit for review',
+      'from' => ['revision_requested'],
+      'to' => 'needs_review',
+      'weight' => 3,
+    ]);
+  }
+
+  // Add published as a valid from-state for the request_revision transition.
+  $from = $workflow->get('type_settings.transitions.request_revision.from') ?? [];
+  if (!in_array('published', $from)) {
+    $from[] = 'published';
+    $workflow->set('type_settings.transitions.request_revision.from', $from);
+  }
+
+  // Add the new return_to_review transition (published -> needs_review).
+  $existing = $workflow->get('type_settings.transitions.return_to_review');
+  if (empty($existing)) {
+    $workflow->set('type_settings.transitions.return_to_review', [
+      'label' => 'Return to Review',
+      'from' => ['published'],
+      'to' => 'needs_review',
+      'weight' => 7,
+    ]);
+  }
+
+  $workflow->save();
+
+  // Grant the new transition permission to both steward OG roles.
+  $permission = 'use mukurtu_editorial_workflow transition return_to_review';
+  $og_role_storage = \Drupal::entityTypeManager()->getStorage('og_role');
+
+  foreach (['protocol-protocol-protocol_steward', 'protocol-protocol-language_steward'] as $role_id) {
+    /** @var \Drupal\og\Entity\OgRole|null $role */
+    $role = $og_role_storage->load($role_id);
+    if ($role && !$role->hasPermission($permission)) {
+      $role->grantPermission($permission);
+      $role->save();
+    }
+  }
+}
+
+/**
+ * Rename the request_revision transition label to 'Needs edits'.
+ */
+function mukurtu_core_update_40064(): void {
+  $workflow = \Drupal::configFactory()
+    ->getEditable('workflows.workflow.mukurtu_editorial_workflow');
+  if ($workflow->isNew()) {
+    return;
+  }
+  $workflow->set('type_settings.transitions.request_revision.label', 'Needs edits');
+  $workflow->save();
+}
+
+/**
+ * Remove default-revision-based view filters replaced by views_query_alter.
+ *
+ * The status=0 filter on my_content_in_progress and the moderation_state
+ * filter on review_queue both looked at the default revision, missing content
+ * that was published and then re-drafted. Both are now handled in PHP using
+ * EntityQuery::latestRevision().
+ */
+function mukurtu_core_update_40065(): void {
+  $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_workflow_overview');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->clear('display.my_content_in_progress.display_options.filters.status');
+  $config->clear('display.review_queue.display_options.filters.moderation_state');
+  $config->save();
+}
+
+/**
+ * Grant contributors access to view their own awaiting-review content.
+ *
+ * Revokes the ineffective OG-role 'view any unpublished content' permission
+ * added in error -- OG role permissions never satisfy $account->hasPermission().
+ * Steward access to /node/{nid}/latest is now handled by the custom
+ * _mukurtu_latest_version_access route check.
+ */
+function mukurtu_core_update_40066(): void {
+  $role = \Drupal::entityTypeManager()->getStorage('user_role')->load('authenticated');
+  if ($role) {
+    $changed = FALSE;
+    if (!$role->hasPermission('view own unpublished content')) {
+      $role->grantPermission('view own unpublished content');
+      $changed = TRUE;
+    }
+    // view latest version was added in a prior hook; ensure it is present.
+    if (!$role->hasPermission('view latest version')) {
+      $role->grantPermission('view latest version');
+      $changed = TRUE;
+    }
+    if ($changed) {
+      $role->save();
+    }
+  }
+
+  // Remove the OG-role permission that was added incorrectly.
+  foreach (['protocol-protocol-protocol_steward', 'protocol-protocol-language_steward'] as $role_id) {
+    $og_role = \Drupal::entityTypeManager()->getStorage('og_role')->load($role_id);
+    if ($og_role && $og_role->hasPermission('view any unpublished content')) {
+      $og_role->revokePermission('view any unpublished content');
+      $og_role->save();
+    }
+  }
+}
+
+/**
  * Restore the geofield_mukurtu widget for field_coverage on all bundles.
  *
  * The widget was inadvertently switched to the stock leaflet_widget_default
@@ -1548,7 +1965,7 @@ function mukurtu_core_update_40061(): void {
  * the GeoJSON Feature properties (including Map Point descriptions) before
  * storage.
  */
-function mukurtu_core_update_40062(): void {
+function mukurtu_core_update_40067(): void {
   $bundles = [
     'collection',
     'word_list',

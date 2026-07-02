@@ -10,10 +10,14 @@
   Drupal.behaviors.mukurtuModerationStateHeader = {
     detach(context, settings, trigger) {
       if (trigger !== 'unload') return;
-      // When AJAX rebuilds the form, remove the moved widget from the sticky
-      // header and reset once() so attachBehaviors re-runs on the new widget.
+      // Drupal calls detachBehaviors(context) with the trigger defaulted to
+      // 'unload' for unrelated AJAX operations too (e.g. opening a dialog),
+      // passing that dialog's own element as context. Only react when the
+      // sticky header is actually part of what's being detached -- e.g. a
+      // genuine full-page/form teardown -- otherwise this fires on every
+      // modal open anywhere on the page and deletes the moved widget.
       const sticky = document.querySelector('.gin-sticky-form-actions');
-      if (!sticky) return;
+      if (!sticky || !context.contains || !context.contains(sticky)) return;
       sticky.querySelectorAll('.field--name-moderation-state').forEach((w) => w.remove());
       once.remove('moderation-state-header', sticky);
     },

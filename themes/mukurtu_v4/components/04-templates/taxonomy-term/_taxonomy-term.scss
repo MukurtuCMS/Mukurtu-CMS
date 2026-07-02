@@ -1,5 +1,6 @@
 @use "../../../external/include-media";
 @use "../../00-base/layout/layout";
+@use "../../00-base/mixins/mixins";
 
 .taxonomy-term-page {
   @include layout.layout--full-width-grid;
@@ -11,6 +12,11 @@
       grid-column: 2 / -2;
     }
   }
+}
+
+.referenced-content--divided {
+  @include mixins.divider;
+  margin-block-start: 0;
 }
 
 .taxonomy-term-page .grid:has(.views-row) {
