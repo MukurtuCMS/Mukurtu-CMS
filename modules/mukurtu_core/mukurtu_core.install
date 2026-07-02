@@ -1956,3 +1956,31 @@ function mukurtu_core_update_40066(): void {
     }
   }
 }
+
+/**
+ * Restore the geofield_mukurtu widget for field_coverage on all bundles.
+ *
+ * The widget was inadvertently switched to the stock leaflet_widget_default
+ * widget in #1433, which routes submitted values through GeoPHP and strips
+ * the GeoJSON Feature properties (including Map Point descriptions) before
+ * storage.
+ */
+function mukurtu_core_update_40067(): void {
+  $bundles = [
+    'collection',
+    'word_list',
+    'dictionary_word',
+    'place',
+    'digital_heritage',
+    'person',
+  ];
+
+  foreach ($bundles as $bundle) {
+    $config = \Drupal::configFactory()->getEditable("core.entity_form_display.node.$bundle.default");
+    if ($config->isNew() || $config->get('content.field_coverage.type') === NULL) {
+      continue;
+    }
+
+    $config->set('content.field_coverage.type', 'geofield_mukurtu')->save();
+  }
+}

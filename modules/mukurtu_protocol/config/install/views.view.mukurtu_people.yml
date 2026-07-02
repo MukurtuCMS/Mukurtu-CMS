@@ -89,10 +89,14 @@ display:
               action_id: mukurtu_unblock_user_action
               preconfiguration:
                 label_override: 'Unblock or approve'
+                add_confirmation: true
+                confirm_help_text: 'Are you sure you want to unblock the selected user(s)?'
             2:
               action_id: mukurtu_set_pending_user_action
               preconfiguration:
                 label_override: 'Set pending'
+                add_confirmation: true
+                confirm_help_text: 'Are you sure you want to set the selected user(s) to pending?'
         name:
           id: name
           table: users_field_data
