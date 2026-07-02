@@ -683,3 +683,13 @@ function mukurtu_protocol_update_40038(): void {
     $config->set('anonymous_comments_require_email', FALSE)->save();
   }
 }
+
+/**
+ * Add confirmation steps to the Site Users bulk actions.
+ */
+function mukurtu_protocol_update_40039(): void {
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
+  $view_file = $module_path . '/config/install/views.view.mukurtu_people.yml';
+  $view_data = \Symfony\Component\Yaml\Yaml::parseFile($view_file);
+  \Drupal::configFactory()->getEditable('views.view.mukurtu_people')->setData($view_data)->save(TRUE);
+}

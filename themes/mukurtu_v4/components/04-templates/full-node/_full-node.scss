@@ -119,11 +119,10 @@
   }
 }
 
-// Draft indicator banner -- injected into title_prefix for unpublished nodes
+// Moderation state banner -- injected into title_prefix for unpublished nodes
 // so screen readers can announce it (CSS ::before content is unreliable in AT).
-.node--draft-banner {
+.node--status-banner {
   display: block;
-  background: var(--brand-secondary-dark);
   color: var(--color-white);
   font-size: 0.875rem;
   font-weight: 700;
@@ -132,6 +131,22 @@
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 0.1em;
+
+  &--draft {
+    background: var(--brand-secondary-dark);
+  }
+
+  &--needs-review {
+    background: var(--color-warning-dark);
+  }
+
+  &--revision-requested {
+    background: var(--color-error-dark);
+  }
+
+  &--archived {
+    background: var(--color-gray);
+  }
 }
 
 .full-node {
