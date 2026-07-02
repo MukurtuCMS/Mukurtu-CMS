@@ -140,7 +140,7 @@ content:
     settings: {  }
     third_party_settings: {  }
   field_coverage:
-    type: leaflet_widget_default
+    type: geofield_mukurtu
     weight: 8
     region: content
     settings:

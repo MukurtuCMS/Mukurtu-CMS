@@ -1,3 +1,13 @@
+mukurtu_protocol.user_cancel_confirm:
+  path: '/admin/people/cancel/{view_id}/{display_id}'
+  defaults:
+    _form: '\Drupal\mukurtu_protocol\Form\MukurtuUserCancelConfirmForm'
+    _title: 'Block or delete users'
+  requirements:
+    _custom_access: '\Drupal\mukurtu_core\Controller\MukurtuUserController::access'
+  options:
+    _admin_route: TRUE
+
 mukurtu_protocol.add_user_to_community:
   path: '/user/{user}/add-to-community'
   defaults:
