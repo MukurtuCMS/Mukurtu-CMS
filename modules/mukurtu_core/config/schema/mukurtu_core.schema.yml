@@ -18,143 +18,249 @@ entity_form_display.field.geofield_mukurtu:
 
 field.widget.settings.geofield_mukurtu:
   type: mapping
-  label: 'Geofield (WKT) settings'
+  label: 'Mukurtu Leaflet (GeoJSON) widget settings'
   mapping:
     geometry_validation:
-      type: integer
+      type: boolean
       label: 'Enable Geometry Validation'
     map:
       type: mapping
-      label: 'Settings'
+      label: 'Map'
       mapping:
         leaflet_map:
           type: string
-          label: 'Leaflet Map'
+          label: 'Leaflet map'
         height:
-          type: string
-          label: 'Map Height'
-        locate:
-          type: string
-          label: 'Locate Map'
+          type: integer
+          label: 'Height'
         auto_center:
-          type: string
-          label: 'Auto-center Map'
-        scroll_zoom_enabled:
-          type: string
-          label: 'Scroll Zoom Enabled'
+          type: integer
+          label: 'Automatically center map'
         map_position:
           type: mapping
-          label: 'Map Position Settings'
+          label: 'Map Position'
           mapping:
-            zoom:
-              type: string
-              label: 'Zoom'
-            minZoom:
-              type: string
-              label: 'Minimum Zoom'
-            maxZoom:
-              type: string
-              label: 'Maximum Zoom'
-            zoomFiner:
-              type: string
-              label: 'Zoom Finer'
             force:
-              type: integer
+              type: boolean
               label: 'Force'
             center:
               type: mapping
-              label: "Center Settings"
+              label: 'Center'
               mapping:
                 lat:
-                  type: string
-                  label: 'Latitude'
+                  type: float
+                  label: 'Lat'
                 lon:
-                  type: string
-                  label: 'Longitude'
-    toolbar:
-      type: mapping
-      label: 'Settings'
-      mapping:
-        position:
-          type: string
-        marker:
-          type: string
-        drawPolyline:
-          type: string
-        drawRectangle:
-          type: string
-        drawPolygon:
-          type: string
-        editMode:
-          type: string
-        dragMode:
-          type: string
-        removalMode:
-          type: string
-        drawCircle:
-          type: boolean
-        drawText:
-          type: boolean
-        cutPolygon:
-          type: integer
-        rotateMode:
-          type: integer
-    reset_map:
-      type: mapping
-      label: 'Settings'
-      mapping:
-        position:
-          type: string
-        control:
-          type: integer
-    fullscreen:
-      type: mapping
-      label: 'Settings'
-      mapping:
-        options:
-          type: string
-        control:
-          type: integer
-    path:
-      type: string
-      label: 'Path'
-    input:
-      type: mapping
-      label: 'Settings'
-      mapping:
-        show:
-          type: integer
-        readonly:
-          type: integer
-    geocoder:
-      type: mapping
-      label: 'Settings'
-      mapping:
-        control:
-          type: boolean
-          label: 'Geocoder Control'
-        settings:
-          type: mapping
-          label: 'Geocoder Settings'
-          mapping:
-            position:
+                  type: float
+                  label: 'Lon'
+            zoomControlPosition:
               type: string
-            input_size:
-              type: integer
-            providers:
-              type: sequence
-              sequence:
-                type: string
-            min_terms:
-              type: integer
-            delay:
-              type: integer
+              label: 'Position'
             zoom:
               type: integer
+              label: 'Zoom'
+            minZoom:
+              type: integer
+              label: 'Min zoom'
+            maxZoom:
+              type: integer
+              label: 'Max zoom'
+            zoomFiner:
+              type: integer
+              label: 'Zoom finer'
+        scroll_zoom_enabled:
+          type: integer
+          label: 'Scroll zoom enabled'
+    input:
+      type: mapping
+      label: 'Input'
+      mapping:
+        show:
+          type: boolean
+          label: 'Show'
+        readonly:
+          type: boolean
+          label: 'Read only'
+    toolbar:
+      type: mapping
+      label: 'Toolbar'
+      mapping:
+        position:
+          type: string
+          label: 'Position'
+        marker:
+          type: string
+          label: 'Marker'
+        drawMarker:
+          type: boolean
+          label: 'Draw marker'
+        drawPolyline:
+          type: boolean
+          label: 'Draw Polyline'
+        drawRectangle:
+          type: boolean
+          label: 'Draw Rectangle'
+        drawPolygon:
+          type: boolean
+          label: 'Draw Polygon'
+        drawCircle:
+          type: boolean
+          label: 'Draw Circle'
+        drawCircleMarker:
+          type: boolean
+          label: 'Draw Circle Marker'
+        drawText:
+          type: boolean
+          label: 'Draw Text'
+        editMode:
+          type: boolean
+          label: 'Edit Mode'
+        dragMode:
+          type: boolean
+          label: 'Drag Mode'
+        cutPolygon:
+          type: boolean
+          label: 'Cut Polygon'
+        removalMode:
+          type: boolean
+          label: 'Removal Mode'
+        rotateMode:
+          type: boolean
+          label: 'Rotate Mode'
+    reset_map:
+      type: mapping
+      label: 'Reset Map View'
+      mapping:
+        control:
+          type: boolean
+          label: 'Control'
+        options:
+          type: text
+          label: 'Options'
+    map_scale:
+      type: mapping
+      label: 'Map Scale Control'
+      mapping:
+        control:
+          type: boolean
+          label: 'Control'
+        options:
+          type: text
+          label: 'Options'
+    fullscreen:
+      type: mapping
+      label: 'Leaflet Fullscreen'
+      mapping:
+        control:
+          type: boolean
+          label: 'Control'
+        options:
+          type: text
+          label: 'Options'
+    path:
+      type: text
+      label: 'Path'
+    feature_properties:
+      type: mapping
+      label: 'Feature Additional Properties'
+      mapping:
+        values:
+          type: text
+          label: 'Values'
+    locate:
+      type: mapping
+      label: 'Locate User Position'
+      mapping:
+        control:
+          type: boolean
+          label: 'Control'
+        options:
+          type: text
+          label: 'Options'
+        automatic:
+          type: boolean
+          label: 'Automatically locate user current position'
+    geocoder:
+      type: mapping
+      label: 'Geocoder'
+      mapping:
+        control:
+          type: boolean
+          label: 'Enable Geocoder map control'
+        settings:
+          type: mapping
+          label: 'Geocoder settings'
+          mapping:
+            set_marker:
+              type: boolean
+              label: 'Marker'
             popup:
               type: boolean
+              label: 'Popup'
+            autocomplete:
+              type: mapping
+              label: 'Autocomplete'
+              mapping:
+                placeholder:
+                  type: string
+                  label: 'Placeholder'
+                title:
+                  type: string
+                  label: 'Title'
+            position:
+              type: string
+              label: 'Position'
+            input_size:
+              type: integer
+              label: 'Input size'
+            providers:
+              type: sequence
+              label: 'Providers'
+              sequence:
+                type: mapping
+                label: 'Provider'
+                mapping:
+                  weight:
+                    type: integer
+                    label: 'Weight'
+                  checked:
+                    type: boolean
+                    label: 'Checked'
+            min_terms:
+              type: integer
+              label: 'Minimum terms'
+            delay:
+              type: integer
+              label: 'Delay'
+            zoom:
+              type: integer
+              label: 'Zoom'
             options:
               type: string
+              label: 'Options'
+    geojson_overlays:
+      type: mapping
+      label: 'GeoJSON Overlay'
+      mapping:
+        sources:
+          type: mapping
+          label: 'Sources'
+          mapping:
+            fields:
+              type: sequence
+              label: 'Field Sources'
+              sequence:
+                type: string
+                label: 'Field Source'
+        zoom_to_geojson:
+          type: boolean
+          label: 'Zoom to GeoJSON'
+        path:
+          type: text
+          label: 'GeoJSON Overlays Style'
+        snapping:
+          type: boolean
+          label: 'Snapping enabled'
 
 #field.formatter.settings.geofield_mukurtu:
 #  type: mapping
