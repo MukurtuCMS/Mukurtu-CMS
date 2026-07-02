@@ -8,6 +8,44 @@
 use Drupal\Core\Config\FileStorage;
 
 /**
+ * Implements hook_install().
+ *
+ * Creates field_protocol storage and attachment via Field API on fresh installs.
+ * These cannot live in config/install because their dependency on the protocol
+ * entity type causes UnmetDependenciesException in test environments that
+ * bootstrap modules in isolation.
+ */
+function mukurtu_notifications_install(): void {
+  mukurtu_notifications_create_field_protocol();
+}
+
+/**
+ * Creates the field_protocol field storage and attachment if they do not exist.
+ */
+function mukurtu_notifications_create_field_protocol(): void {
+  if (!\Drupal\field\Entity\FieldStorageConfig::loadByName('message', 'field_protocol')) {
+    \Drupal\field\Entity\FieldStorageConfig::create([
+      'field_name' => 'field_protocol',
+      'entity_type' => 'message',
+      'type' => 'entity_reference',
+      'settings' => ['target_type' => 'protocol'],
+      'cardinality' => 1,
+    ])->save();
+  }
+
+  if (!\Drupal\field\Entity\FieldConfig::loadByName('message', 'mukurtu_new_item_in_protocol', 'field_protocol')) {
+    $storage = \Drupal\field\Entity\FieldStorageConfig::loadByName('message', 'field_protocol');
+    \Drupal\field\Entity\FieldConfig::create([
+      'field_storage' => $storage,
+      'bundle' => 'mukurtu_new_item_in_protocol',
+      'label' => 'Protocol',
+    ])->save();
+  }
+
+  \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
+}
+
+/**
  * Install new user account created message template and view displays.
  */
 function mukurtu_notifications_update_40001(): void {
@@ -72,9 +110,279 @@ function mukurtu_notifications_update_40004(): void {
 }
 
 /**
- * Uninstall message_digest modules and remove associated fields.
+ * Deploy the notifications page display for the mukurtu_message_log view.
+ *
+ * Adds the "Notifications" page display at /notifications, scoped to the
+ * current user's messages via a uid contextual filter.
  */
 function mukurtu_notifications_update_40005(): void {
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  $config_storage = \Drupal::service('config.storage');
+  $config_storage->write(
+    'views.view.mukurtu_message_log',
+    $source->read('views.view.mukurtu_message_log')
+  );
+}
+
+/**
+ * Create missing field attachments for message templates.
+ *
+ * The message template field attachments were never deployed, which is why
+ * most notification hooks were disabled. The field storages already exist in
+ * the database; this hook only writes the bundle-level attachment configs.
+ * field_protocol is handled separately in hook_update_40007 using the Field
+ * API so the database schema is created correctly.
+ */
+function mukurtu_notifications_update_40006(): void {
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  $config_storage = \Drupal::service('config.storage');
+
+  // Deploy field attachments for templates whose storage tables already exist.
+  // Note: field_community uses handler 'default:node' because the underlying
+  // field storage (field.storage.message.field_community) targets node -- this
+  // is intentional for now. Phase 2 will update it to target the community
+  // entity type once the follow-community flag is updated.
+  $field_configs = [
+    'field.field.message.mukurtu_single_node_insert.field_item',
+    'field.field.message.mukurtu_single_node_update.field_item',
+    'field.field.message.mukurtu_single_node_delete.field_title',
+    'field.field.message.mukurtu_single_node_delete.field_content_type',
+    'field.field.message.mukurtu_single_node_delete.field_user',
+    'field.field.message.mukurtu_new_item_in_community.field_item',
+    'field.field.message.mukurtu_new_item_in_community.field_community',
+    'field.field.message.mukurtu_new_item_in_protocol.field_item',
+    'field.field.message.mukurtu_new_item_in_collection.field_item',
+    'field.field.message.mukurtu_new_item_in_collection.field_collection',
+    'field.field.message.mukurtu_new_user_registration.field_user',
+  ];
+
+  foreach ($field_configs as $config_name) {
+    $config_storage->write($config_name, $source->read($config_name));
+  }
+
+  // Rebuild entity type and field definitions.
+  \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
+}
+
+/**
+ * Create field_protocol storage and attachment for message templates via Field API.
+ *
+ * Raw config writes (used in hook_update_40006) do not create database tables.
+ * This hook uses FieldStorageConfig and FieldConfig so the schema is created.
+ */
+function mukurtu_notifications_update_40007(): void {
+  // Remove any bad config written without schema in a previous run.
+  \Drupal::configFactory()->getEditable('field.storage.message.field_protocol')->delete();
+  \Drupal::configFactory()->getEditable('field.field.message.mukurtu_new_item_in_protocol.field_protocol')->delete();
+
+  // Create the field storage and attachment with proper DB schema.
+  mukurtu_notifications_create_field_protocol();
+}
+
+/**
+ * Fix non-descriptive "Details" link text in batch import report template.
+ */
+function mukurtu_notifications_update_40008(): void {
+  $config = \Drupal::configFactory()->getEditable('message.template.mukurtu_batch_import_report');
+  if ($config->isNew()) {
+    return;
+  }
+  $text = $config->get('text');
+  if (!empty($text[0]['value'])) {
+    $text[0]['value'] = str_replace(
+      '>Details</a>',
+      '>View batch import report</a>',
+      $text[0]['value']
+    );
+    $config->set('text', $text)->save();
+  }
+}
+
+/**
+ * Redeploy the mukurtu_message_log view with the updated notifications page
+ * display: admin theme, corrected title, and IDOR-safe uid argument.
+ */
+function mukurtu_notifications_update_40009(): void {
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  $config_storage = \Drupal::service('config.storage');
+  $config_storage->write(
+    'views.view.mukurtu_message_log',
+    $source->read('views.view.mukurtu_message_log')
+  );
+}
+
+/**
+ * Fix node insert/update message templates to use the content type label token
+ * instead of the DH-specific field_content_type field, and enable token clearing
+ * so unresolved tokens degrade to empty string rather than literal token text.
+ */
+function mukurtu_notifications_update_40010(): void {
+  $templates = [
+    'message.template.mukurtu_single_node_insert',
+    'message.template.mukurtu_single_node_update',
+  ];
+
+  foreach ($templates as $config_name) {
+    $config = \Drupal::configFactory()->getEditable($config_name);
+    if ($config->isNew()) {
+      continue;
+    }
+    $text = $config->get('text');
+    if (!empty($text[0]['value'])) {
+      $text[0]['value'] = str_replace(
+        '[message:field_item:entity:field_content_type]',
+        '[message:field_item:entity:content-type]',
+        $text[0]['value']
+      );
+      $config->set('text', $text);
+    }
+    $config->set('settings.token options.clear', TRUE)->save();
+  }
+}
+
+/**
+ * Attach field_user to the mukurtu_single_node_insert and
+ * mukurtu_single_node_update message templates so the actor can be stored.
+ */
+function mukurtu_notifications_update_40011(): void {
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  $config_storage = \Drupal::service('config.storage');
+
+  $field_configs = [
+    'field.field.message.mukurtu_single_node_insert.field_user',
+    'field.field.message.mukurtu_single_node_update.field_user',
+  ];
+
+  foreach ($field_configs as $config_name) {
+    $config_storage->write($config_name, $source->read($config_name));
+  }
+
+  \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
+}
+
+/**
+ * Update node insert/update notification text to use simple past tense
+ * ("was created/updated") now that the actor is shown in a separate column.
+ */
+function mukurtu_notifications_update_40012(): void {
+  $replacements = [
+    'message.template.mukurtu_single_node_insert' => [
+      'has been created.' => 'was created.',
+    ],
+    'message.template.mukurtu_single_node_update' => [
+      'has been updated.' => 'was updated.',
+    ],
+  ];
+
+  foreach ($replacements as $config_name => $pairs) {
+    $config = \Drupal::configFactory()->getEditable($config_name);
+    if ($config->isNew()) {
+      continue;
+    }
+    $text = $config->get('text');
+    if (!empty($text[0]['value'])) {
+      $text[0]['value'] = str_replace(array_keys($pairs), array_values($pairs), $text[0]['value']);
+      $config->set('text', $text)->save();
+    }
+  }
+}
+
+/**
+ * Redeploy the mukurtu_message_log view with the table layout: three columns
+ * (Date, User, Activity), field_user relationship for the actor display name.
+ */
+function mukurtu_notifications_update_40013(): void {
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  $config_storage = \Drupal::service('config.storage');
+  $config_storage->write(
+    'views.view.mukurtu_message_log',
+    $source->read('views.view.mukurtu_message_log')
+  );
+}
+
+/**
+ * Re-deploy the mukurtu_message_log view to ensure the latest config is active
+ * on environments where 40013 was pre-empted by a fresh site-install that
+ * set the schema ceiling at 40013 before the table layout was committed.
+ */
+function mukurtu_notifications_update_40014(): void {
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  $config_storage = \Drupal::service('config.storage');
+  $config_storage->write(
+    'views.view.mukurtu_message_log',
+    $source->read('views.view.mukurtu_message_log')
+  );
+}
+
+/**
+ * Fix page display rendering: add defaults block so Views knows which options
+ * override the master display instead of inheriting from it, and switch the
+ * uid argument validator from the removed "user" plugin to "none".
+ *
+ * Without an explicit defaults block, Views initialises all options to TRUE
+ * (inherit from master), causing the page display to render with the master's
+ * unformatted-list style and "Mukurtu Message Log" title.
+ */
+function mukurtu_notifications_update_40015(): void {
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  $config_storage = \Drupal::service('config.storage');
+  $config_storage->write(
+    'views.view.mukurtu_message_log',
+    $source->read('views.view.mukurtu_message_log')
+  );
+}
+
+/**
+ * Fix uid argument validator: replace the removed "user" plugin with "none".
+ *
+ * The "user" argument validator plugin was removed in the current Drupal
+ * version; the view was crashing with PluginNotFoundException. Since the path
+ * is /notifications (no URL argument), the uid always comes from the
+ * current_user default, so custom validation is unnecessary.
+ *
+ * Each earlier hook (40005, 40009, 40013, 40014, 40015) fixed an in-flight
+ * issue. Hook 40017 follows with a final re-deploy to ensure all environments
+ * have the complete view config.
+ */
+function mukurtu_notifications_update_40016(): void {
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  $config_storage = \Drupal::service('config.storage');
+  $config_storage->write(
+    'views.view.mukurtu_message_log',
+    $source->read('views.view.mukurtu_message_log')
+  );
+}
+
+/**
+ * Re-deploy the mukurtu_message_log view to ensure all environments have the
+ * complete config: defaults block, caption, uid argument, and table layout.
+ *
+ * The caption for WCAG 1.3.1 compliance was included in the config written by
+ * hook 40016; this hook ensures it lands on environments where 40016 ran
+ * before the caption was committed.
+ */
+function mukurtu_notifications_update_40017(): void {
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  $config_storage = \Drupal::service('config.storage');
+  $config_storage->write(
+    'views.view.mukurtu_message_log',
+    $source->read('views.view.mukurtu_message_log')
+  );
+}
+
+/**
+ * Uninstall message_digest modules and remove associated fields.
+ */
+function mukurtu_notifications_update_40018(): void {
   // Write directly to config.storage (the raw layer) rather than going through
   // configFactory()->save(). The factory dispatches ConfigCrudEvent::SAVE, which
   // triggers a ModuleInstaller subscriber that calls install() on the removed

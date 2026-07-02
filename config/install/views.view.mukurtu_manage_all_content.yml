@@ -97,6 +97,8 @@ display:
               preconfiguration:
                 add_confirmation: false
                 label_override: Publish
+            40:
+              action_id: mukurtu_export_add_to_list_action
             41:
               action_id: views_bulk_operations_delete_entity
               preconfiguration:
@@ -393,9 +395,8 @@ display:
           empty_zero: false
           hide_alter_empty: true
           click_sort_column: value
-          type: string
-          settings:
-            link_to_entity: false
+          type: content_moderation_state
+          settings: {  }
           group_column: value
           group_columns: {  }
           group_rows: true

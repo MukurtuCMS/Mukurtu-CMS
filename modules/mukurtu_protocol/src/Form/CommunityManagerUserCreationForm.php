@@ -125,6 +125,7 @@ class CommunityManagerUserCreationForm extends FormBase {
     $form['pass'] = [
       '#type' => 'password_confirm',
       '#title' => $this->t('Password'),
+      '#title_display' => 'invisible',
       '#description' => $this->t('Leave blank to allow the user to set their own password via a password reset email.'),
       '#required' => FALSE,
     ];
@@ -162,6 +163,11 @@ class CommunityManagerUserCreationForm extends FormBase {
       '#description' => $this->t('You can choose to notify other users about the creation of this new account. This is useful if you think the user may need to be enrolled in additional communities and/or protocols. If you choose to notify other users, they will receive an email with the new account username and a link to the user profile.'),
       '#open' => FALSE,
       '#attached' => ['library' => ['mukurtu_core/notify-form']],
+      // aria-live on the stable parent so AJAX replacements of the inner
+      // notify-users-wrapper are announced. The wrapper element itself cannot
+      // carry aria-live because it is replaced on each AJAX call, which
+      // destroys and re-creates the live region before the announcement fires.
+      '#attributes' => ['aria-live' => 'polite'],
     ];
 
     if (!empty($communities)) {
@@ -203,7 +209,7 @@ class CommunityManagerUserCreationForm extends FormBase {
     $form['notify_others']['notify_users'] = [
       '#type' => 'container',
       '#tree' => TRUE,
-      '#prefix' => '<div id="notify-users-wrapper" role="group" aria-labelledby="' . $users_label_id . '" aria-live="polite"><p id="' . $users_label_id . '" class="fieldset__label fieldset__label--group">' . $this->t('Notify specific users:') . '</p>',
+      '#prefix' => '<div id="notify-users-wrapper" role="group" aria-labelledby="' . $users_label_id . '"><p id="' . $users_label_id . '" class="fieldset__label fieldset__label--group">' . $this->t('Notify specific users:') . '</p>',
       '#suffix' => '</div>',
     ];
 

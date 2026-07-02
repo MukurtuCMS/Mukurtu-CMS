@@ -1,0 +1,43 @@
+mukurtu_setup.setup_page:
+  path: '/admin/mukurtu/setup'
+  defaults:
+    _controller: '\Drupal\mukurtu_setup\Controller\SiteSetupController::page'
+    _title: 'Site Setup'
+  requirements:
+    _custom_access: '\Drupal\mukurtu_setup\Controller\SiteSetupController::access'
+
+mukurtu_setup.dismiss_task:
+  path: '/admin/mukurtu/setup/dismiss/{task_id}'
+  defaults:
+    _controller: '\Drupal\mukurtu_setup\Controller\SiteSetupDismissController::dismiss'
+    _title: 'Dismiss task'
+  requirements:
+    _csrf_token: 'TRUE'
+    _custom_access: '\Drupal\mukurtu_setup\Controller\SiteSetupDismissController::access'
+
+mukurtu_setup.restore_task:
+  path: '/admin/mukurtu/setup/restore/{task_id}'
+  defaults:
+    _controller: '\Drupal\mukurtu_setup\Controller\SiteSetupDismissController::restore'
+    _title: 'Restore task'
+  requirements:
+    _csrf_token: 'TRUE'
+    _custom_access: '\Drupal\mukurtu_setup\Controller\SiteSetupDismissController::access'
+
+mukurtu_setup.complete_task:
+  path: '/admin/mukurtu/setup/complete/{task_id}'
+  defaults:
+    _controller: '\Drupal\mukurtu_setup\Controller\SiteSetupDismissController::complete'
+    _title: 'Mark task complete'
+  requirements:
+    _csrf_token: 'TRUE'
+    _custom_access: '\Drupal\mukurtu_setup\Controller\SiteSetupDismissController::access'
+
+mukurtu_setup.uncomplete_task:
+  path: '/admin/mukurtu/setup/uncomplete/{task_id}'
+  defaults:
+    _controller: '\Drupal\mukurtu_setup\Controller\SiteSetupDismissController::uncomplete'
+    _title: 'Mark task incomplete'
+  requirements:
+    _csrf_token: 'TRUE'
+    _custom_access: '\Drupal\mukurtu_setup\Controller\SiteSetupDismissController::access'

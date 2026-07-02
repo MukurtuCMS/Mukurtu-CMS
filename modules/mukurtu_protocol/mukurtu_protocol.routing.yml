@@ -1,3 +1,14 @@
+mukurtu_protocol.user_cancel_confirm:
+  path: '/admin/people/cancel/{view_id}/{display_id}'
+  defaults:
+    _form: '\Drupal\mukurtu_protocol\Form\MukurtuUserCancelConfirmForm'
+    _title: 'Block or delete users'
+    _title_callback: '\Drupal\mukurtu_protocol\Form\MukurtuUserCancelConfirmForm::title'
+  requirements:
+    _custom_access: '\Drupal\mukurtu_core\Controller\MukurtuUserController::access'
+  options:
+    _admin_route: TRUE
+
 mukurtu_protocol.add_user_to_community:
   path: '/user/{user}/add-to-community'
   defaults:
@@ -195,14 +206,12 @@ mukurtu_protocol.protocol_manage_roles_form:
         type: entity:protocol
 
 mukurtu_protocol.community_add_membership:
-  path: 'admin/communities/{group}/members/add/{og_membership_type}'
+  path: 'admin/communities/{group}/members/add'
   defaults:
-    _controller: '\Drupal\og\Controller\OgAdminMembersController::addForm'
+    _form: '\Drupal\mukurtu_protocol\Form\AddMemberToCommunityForm'
     _title: 'Add member'
-    og_membership_type: default
-    entity_type_id: community
   requirements:
-    _og_membership_add_access: 'TRUE'
+    _custom_access: '\Drupal\mukurtu_protocol\Form\AddMemberToCommunityForm::access'
   options:
     _admin_route: TRUE
     parameters:

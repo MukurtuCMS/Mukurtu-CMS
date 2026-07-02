@@ -3,6 +3,7 @@ status: true
 dependencies:
   module:
     - layout_builder_restrictions
+    - mukurtu_setup
 third_party_settings:
   layout_builder_restrictions:
     allowed_block_categories: {  }
@@ -38,6 +39,17 @@ sections:
           depth: null
           expand_all_items: false
         weight: 2
+        additional: {  }
+      08fde6c5-ad7d-4e16-a742-b2ed6f52b6a6:
+        uuid: 08fde6c5-ad7d-4e16-a742-b2ed6f52b6a6
+        region: two
+        configuration:
+          id: mukurtu_setup_checklist
+          label: 'Setup Checklist'
+          label_display: visible
+          provider: mukurtu_setup
+          context_mapping: {  }
+        weight: 1
         additional: {  }
       7750a799-df47-49a4-883f-e4b0f8342104:
         uuid: 7750a799-df47-49a4-883f-e4b0f8342104

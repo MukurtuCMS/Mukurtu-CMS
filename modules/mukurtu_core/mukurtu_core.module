@@ -284,7 +284,7 @@ function mukurtu_core_form_user_admin_settings_alter(&$form, FormStateInterface 
   $form['genpass_config_registration']['genpass_mode']['#title'] = t('Visitor password entry');
   $form['genpass_config_registration']['genpass_mode']['#options'] = [
     0 => t('Visitors <strong>must</strong> enter a password on registration. This option is not available if email verification is enabled.'),
-    1 => t('Visitors <strong>may</strong> enter a password on registration. If left empty, a random password will be generated. This option is not available if email verification is enabled.'),
+    1 => t('Visitors <strong>may</strong> enter a password on registration. If left empty, a random password will be generated. This option requires either email verification or administrator approval.'),
     2 => t('Visitors <strong>cannot</strong> enter a password on registration; a random password will be generated. This option is the only valid choice if email verification is enabled above.'),
   ];
   $form['genpass_config_registration']['#weight'] = 2;
@@ -346,7 +346,9 @@ function mukurtu_core_form_user_admin_settings_alter(&$form, FormStateInterface 
  *
  * Genpass values and their validity:
  *   0 = "Users must enter a password"   — valid only when verify_mail is OFF.
- *   1 = "Users may enter a password"    — valid only when verify_mail is OFF.
+ *   1 = "Users may enter a password"    — valid only when verify_mail is OFF,
+ *                                         and only when administrator
+ *                                         approval is required.
  *   2 = "Users cannot enter a password" — always valid (the only valid choice
  *                                         when verify_mail is ON).
  *
@@ -357,6 +359,12 @@ function mukurtu_core_form_user_admin_settings_alter(&$form, FormStateInterface 
  * email contains no login link; the one-time login link is only sent in the
  * activation email after the admin approves the account. Genpass flash messages
  * are suppressed for pending registrations (visitor cannot log in yet).
+ *
+ * visitors (no approval required): value 1 is invalid when verify_mail is
+ * OFF. A visitor who leaves the password field blank is logged in
+ * immediately with a system-generated password they never see, and is
+ * locked out once they log out. Only values 0 and 2 are safe here — 2
+ * already redirects the new user to set a password on their account page.
  */
 function mukurtu_core_user_admin_settings_validate(&$form, FormStateInterface $form_state) {
   $genpass_mode = (int) $form_state->getValue('genpass_mode');
@@ -374,6 +382,16 @@ function mukurtu_core_user_admin_settings_validate(&$form, FormStateInterface $f
     $form_state->setError(
       $form['genpass_config_registration']['genpass_mode'],
       t('"Users cannot enter a password on registration" is the only valid choice when email verification is enabled.')
+    );
+  }
+
+  // Without email verification or administrator approval, a visitor who
+  // skips the optional password field is logged in immediately with no way
+  // to know their system-generated password.
+  if (!$verify_mail && $register === UserInterface::REGISTER_VISITORS && $genpass_mode === 1) {
+    $form_state->setError(
+      $form['genpass_config_registration']['genpass_mode'],
+      t('"Users must enter a password on registration" is the only valid choice when visitors can register without administrator approval and email verification is disabled.')
     );
   }
 }
@@ -1214,7 +1232,9 @@ function mukurtu_core_preprocess_views_view(&$variables)
 {
   // Add entity browser library tweaks when appropriate.
   $affected_views = [
-    'mukurtu_content_browser'
+    'mukurtu_content_browser',
+    'mukurtu_community_select',
+    'multipage_item_browser',
   ];
   if (in_array($variables['view']->id(), $affected_views)) {
     $variables['view_array']['#attached']['library'][] = 'mukurtu_core/entity_browser_view_decoration';

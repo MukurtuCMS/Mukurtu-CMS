@@ -547,16 +547,29 @@ function mukurtu_protocol_query_media_access_alter(AlterableInterface $query)
   }
 
   if ($mediaTable) {
-    $query->leftJoin('mukurtu_protocol_access', 'mpa', "{$mediaTable}.mid = mpa.id");
-    $query->condition('mpa.entity_type_id', 'media');
-    $query->condition('mpa.grant_view', 1);
-
-    // User can access media for any of these protocol set grants.
-    $inProtocolGrantSet = $query->orConditionGroup();
-    foreach ($grants as $grant) {
-      $inProtocolGrantSet->condition('protocol_set_id', $grant);
+    // Build named placeholders for each grant ID.
+    $placeholders = [];
+    $args = [];
+    foreach ($grants as $i => $grant) {
+      $key = ':grant_' . $i;
+      $placeholders[] = $key;
+      $args[$key] = $grant;
     }
-    $query->condition($inProtocolGrantSet);
+    $in_clause = implode(', ', $placeholders);
+
+    // Use EXISTS instead of a JOIN so that media entities with multiple
+    // access grants ("any" sharing + multiple protocols) do not produce
+    // duplicate rows in the result set.
+    $query->where(
+      "EXISTS (
+        SELECT 1 FROM {mukurtu_protocol_access} mpa
+        WHERE mpa.id = {$mediaTable}.mid
+          AND mpa.entity_type_id = 'media'
+          AND mpa.grant_view = 1
+          AND mpa.protocol_set_id IN ($in_clause)
+      )",
+      $args
+    );
   }
 }
 

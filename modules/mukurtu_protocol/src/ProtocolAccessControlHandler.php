@@ -54,17 +54,12 @@ class ProtocolAccessControlHandler extends EntityAccessControlHandler {
     }
 
     if ($operation == 'update') {
-      // Only protocol stewards have permission to edit protocols.
+      // Protocol stewards can always edit their protocols.
       $membership = Og::getMembership($entity, $account);
       if ($membership && $membership->hasRole("protocol-protocol-protocol_steward")) {
         return AccessResult::allowed()->addCacheableDependency($membership);
       }
-      // Tag with the membership if it exists (role mismatch), or with the
-      // user tag so Community::addMember() can invalidate the cached result.
-      $result = AccessResult::forbidden();
-      return $membership
-        ? $result->addCacheableDependency($membership)
-        : $result->addCacheTags(["user:{$account->id()}"]);
+      // Fall through to community membership check below.
     }
 
     // These are checks that happen regardless of OG specific permissions.
