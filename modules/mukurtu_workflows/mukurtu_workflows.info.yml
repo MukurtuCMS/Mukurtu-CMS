@@ -4,4 +4,9 @@ description: Provides the default Mukurtu content moderation workflows.
 core_version_requirement: '^9.4 || ^10 || ^11'
 package: 'Mukurtu CMS'
 dependencies:
+  - drupal:node
+  - drupal:user
+  - drupal:views
+  - drupal:content_moderation
   - mukurtu_protocol
+  - 'og:og'

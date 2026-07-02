@@ -1,0 +1,134 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the mukurtu_workflows module.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function mukurtu_workflows_schema(): array {
+  $schema['mukurtu_review_note'] = [
+    'description' => 'Stores review notes and state-change records for nodes.',
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ],
+      'nid' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'The {node}.nid this note belongs to.',
+      ],
+      'uid' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The {users}.uid who created this note.',
+      ],
+      'created' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Unix timestamp when the note was created.',
+      ],
+      'from_state' => [
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'The moderation state before the transition.',
+      ],
+      'to_state' => [
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'The moderation state after the transition.',
+      ],
+      'note' => [
+        'type' => 'text',
+        'size' => 'medium',
+        'not null' => FALSE,
+        'description' => 'Optional text note left by the reviewer.',
+      ],
+    ],
+    'primary key' => ['id'],
+    'indexes' => [
+      'nid' => ['nid'],
+    ],
+  ];
+  return $schema;
+}
+
+/**
+ * De-link content type labels in workflow views and restrict review queue to
+ * protocol/language stewards.
+ */
+function mukurtu_workflows_update_40001(): void {
+  $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_workflow_overview');
+  if ($config->isNew()) {
+    return;
+  }
+
+  // Disable the entity link on the Type field in all three displays.
+  foreach (['my_content_in_progress', 'my_content_published', 'review_queue'] as $display_id) {
+    $config->set("display.$display_id.display_options.fields.type.type", 'entity_reference_label');
+    $config->set("display.$display_id.display_options.fields.type.settings", ['link' => FALSE]);
+  }
+
+  // Override access on the review_queue display with the custom plugin.
+  $config->set('display.review_queue.display_options.defaults.access', FALSE);
+  $config->set('display.review_queue.display_options.access', [
+    'type' => 'review_queue_access',
+    'options' => [],
+  ]);
+
+  $config->save();
+}
+
+/**
+ * Allow contributors to re-save content as "Awaiting Review" from needs_review.
+ */
+function mukurtu_workflows_update_40003(): void {
+  $config = \Drupal::configFactory()->getEditable('workflows.workflow.mukurtu_editorial_workflow');
+  if ($config->isNew()) {
+    return;
+  }
+  $from = $config->get('type_settings.transitions.submit_for_review.from') ?? ['draft'];
+  if (!in_array('needs_review', $from, TRUE)) {
+    $from[] = 'needs_review';
+    $config->set('type_settings.transitions.submit_for_review.from', $from);
+    $config->save();
+  }
+}
+
+/**
+ * Make needs_review and revision_requested default revisions so content is
+ * unpublished (removed from browse pages) when moved out of published state.
+ */
+function mukurtu_workflows_update_40004(): void {
+  $config = \Drupal::configFactory()->getEditable('workflows.workflow.mukurtu_editorial_workflow');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('type_settings.states.needs_review.default_revision', TRUE);
+  $config->set('type_settings.states.revision_requested.default_revision', TRUE);
+  $config->save();
+}
+
+/**
+ * Rename the "Revision Requested" workflow state label to "Edits Needed".
+ */
+function mukurtu_workflows_update_40002(): void {
+  $config = \Drupal::configFactory()->getEditable('workflows.workflow.mukurtu_editorial_workflow');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('type_settings.states.revision_requested.label', 'Edits Needed');
+  $config->save();
+}
