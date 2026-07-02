@@ -378,3 +378,37 @@ function mukurtu_notifications_update_40017(): void {
     $source->read('views.view.mukurtu_message_log')
   );
 }
+
+/**
+ * Uninstall message_digest modules and remove associated fields.
+ */
+function mukurtu_notifications_update_40018(): void {
+  // Write directly to config.storage (the raw layer) rather than going through
+  // configFactory()->save(). The factory dispatches ConfigCrudEvent::SAVE, which
+  // triggers a ModuleInstaller subscriber that calls install() on the removed
+  // modules -- a fatal error when the module code no longer exists on disk.
+  $config_storage = \Drupal::service('config.storage');
+  $data = $config_storage->read('core.extension');
+  $changed = FALSE;
+  foreach (['message_digest_ui', 'message_digest'] as $module) {
+    if (isset($data['module'][$module])) {
+      unset($data['module'][$module]);
+      $changed = TRUE;
+    }
+  }
+  if ($changed) {
+    $config_storage->write('core.extension', $data);
+  }
+
+  // Remove orphan schema version entries left when bypassing module_installer.
+  \Drupal::keyValue('system.schema')->deleteMultiple(['message_digest', 'message_digest_ui']);
+
+  foreach (['user' => 'message_digest', 'flagging' => 'message_digest'] as $entity_type => $field_name) {
+    $storage = \Drupal::entityTypeManager()
+      ->getStorage('field_storage_config')
+      ->load("$entity_type.$field_name");
+    if ($storage) {
+      $storage->delete();
+    }
+  }
+}

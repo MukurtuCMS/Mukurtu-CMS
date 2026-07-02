@@ -1067,12 +1067,7 @@ class FormHooks
     }
 
     /**
-     * Removes message_digest notification actions from the user admin bulk form.
-     *
-     * These come from message_digest_ui optional config and should not be
-     * exposed in Mukurtu's user management UI. This hook acts as a safety net
-     * alongside the composer patch and update hook 40004: if the patch fails to
-     * apply on a given environment the actions are still hidden from the UI.
+     * Removes unwanted actions from the user admin bulk form and OG membership form.
      */
     #[Hook("form_alter")]
     public function formAlterRemoveNotificationBulkActions(
@@ -1093,9 +1088,6 @@ class FormHooks
         }
 
         $actions_to_remove = [
-            "message_digest_interval.email_user.immediate",
-            "message_digest_interval.email_user.daily",
-            "message_digest_interval.email_user.weekly",
             "og_membership_approve_pending_action",
             "og_membership_pending_action",
             "mukurtu_block_user_action",
