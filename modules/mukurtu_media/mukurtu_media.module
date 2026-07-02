@@ -860,6 +860,27 @@ function mukurtu_media_form_alter(array &$form, FormStateInterface $form_state, 
     }
   }
 
+  // Guard against a Drupal core defect: MediaLibrarySelectForm::viewsFormValidate()
+  // calls array_filter() on the 'media_library_select_form' value without a
+  // NULL check. When the underlying view returns zero rows (e.g. a field
+  // restricted to a media bundle with no existing media yet), no checkboxes
+  // are added under that #tree key, so getValue() returns NULL instead of []
+  // and array_filter(NULL) throws a TypeError. Normalize the value before
+  // core's own validate handler runs.
+  // @see \Drupal\media_library\Plugin\views\field\MediaLibrarySelectForm::viewsFormValidate()
+  if (str_starts_with($form_id, 'views_form_media_library_widget') && isset($form['#validate']) && is_array($form['#validate'])) {
+    array_unshift($form['#validate'], '_mukurtu_media_normalize_media_library_select_form');
+  }
+
+}
+
+/**
+ * #validate callback: ensures the media library select tree is an array.
+ */
+function _mukurtu_media_normalize_media_library_select_form(array &$form, FormStateInterface $form_state): void {
+  if (!is_array($form_state->getValue('media_library_select_form'))) {
+    $form_state->setValue('media_library_select_form', []);
+  }
 }
 
 /**
