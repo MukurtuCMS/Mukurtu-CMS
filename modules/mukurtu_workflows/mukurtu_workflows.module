@@ -567,9 +567,12 @@ function mukurtu_workflows_views_post_build(ViewExecutable $view): void {
  * status = 0 directly on the user's nodes for user_cancel_block_unpublish,
  * but content moderation resets a moderated entity's published flag to match
  * its current moderation state on every save, so that update is silently
- * undone. Move moderated nodes to the archived state instead, which is
- * respected by content moderation and matches what "unpublish" is supposed
- * to accomplish. Non-moderated nodes are left to core's default behavior.
+ * undone. Move currently-published moderated nodes to the archived state
+ * instead, which is respected by content moderation and matches what
+ * "unpublish" is supposed to accomplish. Nodes already in a non-published
+ * moderation state (draft, needs review, etc.) are left untouched since they
+ * were never public. Non-moderated nodes are left to core's default
+ * behavior.
  */
 function mukurtu_workflows_user_cancel(array $edit, UserInterface $account, string $method): void {
   if ($method !== 'user_cancel_block_unpublish') {
@@ -588,7 +591,7 @@ function mukurtu_workflows_user_cancel(array $edit, UserInterface $account, stri
   $moderation_info = \Drupal::service('content_moderation.moderation_information');
   /** @var \Drupal\node\NodeInterface $node */
   foreach ($node_storage->loadMultiple($nids) as $node) {
-    if (!$moderation_info->isModeratedEntity($node)) {
+    if (!$moderation_info->isModeratedEntity($node) || !$node->isPublished()) {
       continue;
     }
     $workflow = $moderation_info->getWorkflowForEntityTypeAndBundle('node', $node->bundle());

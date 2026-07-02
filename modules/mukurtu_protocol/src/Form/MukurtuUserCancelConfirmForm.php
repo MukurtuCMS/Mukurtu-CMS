@@ -4,8 +4,9 @@ namespace Drupal\mukurtu_protocol\Form;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\TempStore\PrivateTempStoreFactory;
-use Drupal\mukurtu_core\Hook\FormHooks;
+use Drupal\mukurtu_core\UserCancelMethods;
 use Drupal\user\Entity\User;
 use Drupal\views_bulk_operations\Service\ViewsBulkOperationsActionManager;
 use Drupal\views_bulk_operations\Service\ViewsBulkOperationsActionProcessorInterface;
@@ -108,20 +109,27 @@ class MukurtuUserCancelConfirmForm extends FormBase {
     ];
 
     $select_cancel = $current_user->hasPermission('administer users') || $current_user->hasPermission('select account cancellation method');
-    $form['user_cancel_method'] = [
-      '#type' => 'radios',
+    // Wrapped in a fieldset so the "Cancellation method" heading is a
+    // <legend> programmatically tied to its radio group, rather than a
+    // caption floating above a bare <div> of options.
+    $form['user_cancel_method_wrapper'] = [
+      '#type' => 'fieldset',
       '#title' => $this->t('Cancellation method'),
       '#access' => $select_cancel,
     ];
-    $form['user_cancel_method'] += user_cancel_methods();
-    FormHooks::relabelCancelMethods($form);
+    $form['user_cancel_method_wrapper']['user_cancel_method'] = [
+      '#type' => 'radios',
+    ];
+    $form['user_cancel_method_wrapper']['user_cancel_method'] += user_cancel_methods();
+    UserCancelMethods::relabelCancelMethods($form['user_cancel_method_wrapper']);
 
     if (!$select_cancel) {
-      $default_method = $form['user_cancel_method']['#default_value'];
+      $default_method = $form['user_cancel_method_wrapper']['user_cancel_method']['#default_value'];
       $form['user_cancel_method_show'] = [
         '#type' => 'item',
         '#title' => $this->t('When cancelling these accounts'),
-        '#plain_text' => $form['user_cancel_method']['#options'][$default_method],
+        '#plain_text' => $form['user_cancel_method_wrapper']['user_cancel_method']['#options'][$default_method],
+        '#attributes' => ['id' => 'mukurtu-user-cancel-method-show'],
       ];
     }
 
@@ -139,16 +147,29 @@ class MukurtuUserCancelConfirmForm extends FormBase {
       '#description' => $this->t('When enabled, the user will receive an email notification after the account has been canceled.'),
     ];
 
-    $form['#title'] = $this->t('Are you sure you want to block or delete the selected user(s)?');
-
     $form['actions']['submit'] = [
       '#type' => 'submit',
       '#button_type' => 'primary',
       '#value' => $this->t('Confirm'),
     ];
+    if (!$select_cancel) {
+      $form['actions']['submit']['#attributes']['aria-describedby'] = 'mukurtu-user-cancel-method-show';
+    }
     $this->addCancelButton($form);
 
     return $form;
+  }
+
+  /**
+   * Title callback for the mukurtu_protocol.user_cancel_confirm route.
+   *
+   * Mirrors the confirmation question set in buildForm(), without
+   * re-running its per-account permission filtering, so the page's actual
+   * heading and browser title describe what the form asks instead of the
+   * route's generic static fallback.
+   */
+  public function title(): TranslatableMarkup {
+    return $this->t('Are you sure you want to block or delete the selected user(s)?');
   }
 
   /**
