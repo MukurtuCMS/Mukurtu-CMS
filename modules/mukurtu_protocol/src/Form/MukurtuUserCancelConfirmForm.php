@@ -5,6 +5,7 @@ namespace Drupal\mukurtu_protocol\Form;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\TempStore\PrivateTempStoreFactory;
+use Drupal\mukurtu_core\Hook\FormHooks;
 use Drupal\user\Entity\User;
 use Drupal\views_bulk_operations\Service\ViewsBulkOperationsActionManager;
 use Drupal\views_bulk_operations\Service\ViewsBulkOperationsActionProcessorInterface;
@@ -113,6 +114,7 @@ class MukurtuUserCancelConfirmForm extends FormBase {
       '#access' => $select_cancel,
     ];
     $form['user_cancel_method'] += user_cancel_methods();
+    FormHooks::relabelCancelMethods($form);
 
     if (!$select_cancel) {
       $default_method = $form['user_cancel_method']['#default_value'];

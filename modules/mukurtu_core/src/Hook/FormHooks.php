@@ -913,7 +913,7 @@ class FormHooks
                 "Block or delete options:",
             );
         }
-        $this->relabelCancelMethods($form);
+        self::relabelCancelMethods($form);
         if (isset($form["actions"]["submit"])) {
             $form["actions"]["submit"]["#value"] = t("Block or delete account");
         }
@@ -1295,7 +1295,7 @@ class FormHooks
                 "Block or delete options:",
             );
         }
-        $this->relabelCancelMethods($form);
+        self::relabelCancelMethods($form);
     }
 
     /**
@@ -1321,7 +1321,7 @@ class FormHooks
                 "#weight" => 3,
                 "user_cancel_method" => $cancel_method,
             ];
-            $this->relabelCancelMethods($form["blocking_deleting"]);
+            self::relabelCancelMethods($form["blocking_deleting"]);
         }
     }
 
@@ -1329,7 +1329,7 @@ class FormHooks
      * Replaces "Disable the account" with "Block the account" in cancel method
      * radio option descriptions wherever they appear in a form subtree.
      */
-    private function relabelCancelMethods(array &$element): void {
+    public static function relabelCancelMethods(array &$element): void {
         $replacements = [
             "user_cancel_block" => t(
                 "Block the user account(s), do not change their content.",

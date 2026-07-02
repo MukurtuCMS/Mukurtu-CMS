@@ -70,6 +70,7 @@ type_settings:
         - needs_review
         - revision_requested
         - published
+        - archived
       to: published
       weight: 4
     archive:
@@ -88,6 +89,7 @@ type_settings:
       label: 'Return to Review'
       from:
         - published
+        - archived
       to: needs_review
       weight: 7
   entity_types: {  }
