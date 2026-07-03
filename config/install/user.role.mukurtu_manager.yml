@@ -72,6 +72,7 @@ permissions:
   - 'administer mukurtu media download settings'
   - 'configure editable landing_page node layout overrides'
   - 'configure editable page node layout overrides'
+  - 'create and edit custom blocks'
   - 'create article content'
   - 'create landing_page content'
   - 'create page content'

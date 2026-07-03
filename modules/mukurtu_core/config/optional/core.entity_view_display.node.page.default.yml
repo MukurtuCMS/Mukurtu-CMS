@@ -20,6 +20,9 @@ third_party_settings:
     entity_view_mode_restriction:
       allowed_layouts:
         - layout_onecol
+        - layout_twocol_section
+        - layout_threecol_section
+        - layout_fourcol_section
       denylisted_blocks: {  }
       allowlisted_blocks: {  }
       restricted_categories: {  }

@@ -46,4 +46,17 @@
       });
     },
   };
+  /**
+   * Rename the core "Create content block" button in the Layout Builder block
+   * picker to a friendlier label. The button carries the class
+   * inline-block-create-button regardless of context, so we target that
+   * directly without checking the page or route.
+   */
+  Drupal.behaviors.mukurtuLayoutBuilderAddBlockLabel = {
+    attach(context) {
+      once('mukurtu-lb-add-block-label', '.inline-block-create-button', context).forEach(el => {
+        el.textContent = Drupal.t('Add a block');
+      });
+    },
+  };
 })(Drupal, once);

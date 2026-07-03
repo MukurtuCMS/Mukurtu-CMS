@@ -1,0 +1,14 @@
+{% if thumbnail_display is defined and thumbnail_display %}
+  {{ attach_library('mukurtu_v4/media-carousel') }}
+  {{ attach_library('mukurtu_v4/media-glightbox') }}
+  <div class="media-carousels" data-id="{{ block_content.id() }}">
+    <section class="splide media-carousel" aria-label="{{ 'Media Assets Carousel'|t }}">
+      {{ content.field_media_items }}
+    </section>
+    <section class="splide thumbnail-carousel" aria-label="{{ 'Thumbnail Carousel'|t }}">
+      {{ thumbnail_display }}
+    </section>
+  </div>
+{% else %}
+  {{ content.field_media_items }}
+{% endif %}

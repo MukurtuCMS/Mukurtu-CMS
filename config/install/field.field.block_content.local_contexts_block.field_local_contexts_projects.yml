@@ -1,0 +1,20 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - block_content.type.local_contexts_block
+    - field.storage.block_content.field_local_contexts_projects
+  module:
+    - mukurtu_local_contexts
+id: block_content.local_contexts_block.field_local_contexts_projects
+field_name: field_local_contexts_projects
+entity_type: block_content
+bundle: local_contexts_block
+label: 'Local Contexts projects'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: local_contexts_project

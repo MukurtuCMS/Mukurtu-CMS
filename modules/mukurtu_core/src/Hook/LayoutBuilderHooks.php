@@ -24,18 +24,33 @@ class LayoutBuilderHooks {
     }
 
     $allowed_categories = [
-      // field_block plugins (e.g. body, title).
-      'Content fields',
       // inline_block plugins created on this entity.
       'Inline blocks',
-      // Reusable block_content library blocks.
-      'Content block',
     ];
 
     foreach ($definitions as $plugin_id => $definition) {
       $category = (string) ($definition['category'] ?? '');
       if (!in_array($category, $allowed_categories, TRUE)) {
         unset($definitions[$plugin_id]);
+      }
+    }
+
+    // Within "Inline blocks", further restrict to the approved block types.
+    $allowed_inline_bundles = [
+      'basic',
+      'media_block',
+      'media_carousel_block',
+      'featured_content',
+      'local_contexts_block',
+      'horizontal_divider',
+      'call_to_action',
+    ];
+    foreach ($definitions as $plugin_id => $definition) {
+      if (str_starts_with($plugin_id, 'inline_block:')) {
+        $bundle = substr($plugin_id, strlen('inline_block:'));
+        if (!in_array($bundle, $allowed_inline_bundles, TRUE)) {
+          unset($definitions[$plugin_id]);
+        }
       }
     }
   }

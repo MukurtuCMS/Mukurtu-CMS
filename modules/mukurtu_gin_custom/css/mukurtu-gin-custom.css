@@ -273,6 +273,14 @@ counterpart, if one exists. */
     flex-shrink: 0;
 }
 
+/* Widen the Layout Builder off-canvas dialogs (layout picker, block picker, block
+   config forms). Each dialog link carries data-dialog-options='{"width":450}' which
+   jQuery UI applies as an inline style; !important is required to override it. */
+.ui-dialog.ui-dialog-off-canvas {
+    width: 650px !important;
+    max-width: 90vw !important;
+}
+
 /* Fix Layout Builder settings menu blocking block contextual/edit links (#1385).
    gin_lb removes core's layout-builder.css and replaces it with its own, which
    positions section configure/remove links and region labels absolutely at

@@ -93,6 +93,27 @@ function mukurtu_v4_preprocess_node(&$variables) {
 }
 
 /**
+ * Implements hook_preprocess_block_content__media_carousel_block().
+ *
+ * Pre-renders field_media_items in carousel_thumbnail view mode so the block
+ * template can display a synchronized thumbnail strip alongside the main
+ * carousel, mirroring the behaviour of digital heritage full node display.
+ */
+function mukurtu_v4_preprocess_block_content__media_carousel_block(array &$variables): void {
+  /** @var \Drupal\block_content\BlockContentInterface $block_content */
+  $block_content = $variables['elements']['#block_content'];
+  if ($block_content->hasField('field_media_items') && !$block_content->field_media_items->isEmpty() && $block_content->field_media_items->count() > 1) {
+    $variables['thumbnail_display'] = $block_content->field_media_items->view([
+      'type' => 'entity_reference_entity_view',
+      'label' => 'hidden',
+      'settings' => [
+        'view_mode' => 'carousel_thumbnail',
+      ],
+    ]);
+  }
+}
+
+/**
  * Implements hook_theme_suggestions_page_alter().
  */
 function mukurtu_v4_theme_suggestions_page_alter(array &$suggestions, array $variables) {

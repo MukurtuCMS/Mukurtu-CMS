@@ -119,6 +119,13 @@
   }
 }
 
+// Horizontal divider block placed via Layout Builder.
+.layout-builder-divider {
+  border: none;
+  border-block-start: 1px solid var(--brand-light);
+  margin-block: var(--v-space-xs);
+}
+
 // Moderation state banner -- injected into title_prefix for unpublished nodes
 // so screen readers can announce it (CSS ::before content is unreliable in AT).
 .node--status-banner {

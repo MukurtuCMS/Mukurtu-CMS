@@ -2102,27 +2102,67 @@ function mukurtu_core_update_40070(): void {
   $config_source = new \Drupal\Core\Config\FileStorage($profile_path . '/config/install');
   $config_factory = \Drupal::configFactory();
 
-  // Install new config in dependency order: types, storages, fields, displays.
-  $new_configs = [
-    // Block content types.
+  // Install block content type config entities via config factory (no DB schema changes needed).
+  $block_type_configs = [
     'block_content.type.media_block',
     'block_content.type.call_to_action',
-    // Field storages.
+    'block_content.type.media_carousel_block',
+    'block_content.type.local_contexts_block',
+    'block_content.type.horizontal_divider',
+  ];
+  foreach ($block_type_configs as $config_name) {
+    if ($config_factory->get($config_name)->isNew()) {
+      $data = $config_source->read($config_name);
+      if ($data) {
+        $config_factory->getEditable($config_name)->setData($data)->save();
+      }
+    }
+  }
+
+  // Install field storage configs via the entity API so that:
+  // (a) a UUID is automatically generated, and
+  // (b) FieldStorageDefinitionListener fires and creates the dedicated DB tables.
+  $field_storage_configs = [
     'field.storage.block_content.field_block_media',
     'field.storage.block_content.field_cta_link',
+    'field.storage.block_content.field_media_items',
+    'field.storage.block_content.field_local_contexts_labels_and_notices',
+    'field.storage.block_content.field_local_contexts_projects',
+  ];
+  foreach ($field_storage_configs as $config_name) {
+    if ($config_factory->get($config_name)->isNew()) {
+      $data = $config_source->read($config_name);
+      if ($data) {
+        // Remove uuid so it is auto-generated; unset _core (install-only key).
+        unset($data['uuid'], $data['_core']);
+        \Drupal\field\Entity\FieldStorageConfig::create($data)->save();
+      }
+    }
+  }
+
+  // Install field instance, form display, and view display configs.
+  $remaining_configs = [
     // Field instances.
     'field.field.block_content.media_block.field_block_media',
     'field.field.block_content.call_to_action.body',
     'field.field.block_content.call_to_action.field_cta_link',
+    'field.field.block_content.media_carousel_block.field_media_items',
+    'field.field.block_content.local_contexts_block.field_local_contexts_labels_and_notices',
+    'field.field.block_content.local_contexts_block.field_local_contexts_projects',
     // Form displays.
     'core.entity_form_display.block_content.media_block.default',
     'core.entity_form_display.block_content.call_to_action.default',
+    'core.entity_form_display.block_content.media_carousel_block.default',
+    'core.entity_form_display.block_content.local_contexts_block.default',
+    'core.entity_form_display.block_content.horizontal_divider.default',
     // View displays.
     'core.entity_view_display.block_content.media_block.default',
     'core.entity_view_display.block_content.call_to_action.default',
+    'core.entity_view_display.block_content.media_carousel_block.default',
+    'core.entity_view_display.block_content.local_contexts_block.default',
+    'core.entity_view_display.block_content.horizontal_divider.default',
   ];
-
-  foreach ($new_configs as $config_name) {
+  foreach ($remaining_configs as $config_name) {
     if ($config_factory->get($config_name)->isNew()) {
       $data = $config_source->read($config_name);
       if ($data) {
@@ -2154,4 +2194,16 @@ function mukurtu_core_update_40070(): void {
     $display->setThirdPartySetting('layout_builder_restrictions', 'entity_view_mode_restriction', $restrictions);
     $display->save();
   }
+}
+
+/**
+ * Grant mukurtu_manager permission to create and edit custom blocks for Layout Builder inline blocks.
+ */
+function mukurtu_core_update_40071(): void {
+  $role = \Drupal\user\Entity\Role::load('mukurtu_manager');
+  if (!$role) {
+    return;
+  }
+  $role->grantPermission('create and edit custom blocks');
+  $role->save();
 }
