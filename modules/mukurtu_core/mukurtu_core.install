@@ -2095,7 +2095,7 @@ function mukurtu_core_update_40067(): void {
 }
 
 /**
- * Add Media and Call to Action block types; tighten Layout Builder block restrictions for basic pages.
+ * Add Media and Call to Action block types; configure Layout Builder restrictions for basic pages.
  */
 function mukurtu_core_update_40070(): void {
   $profile_path = \Drupal::service('extension.list.profile')->getPath('mukurtu');
@@ -2137,9 +2137,10 @@ function mukurtu_core_update_40070(): void {
     $basic_block->set('label', 'Text')->save();
   }
 
-  // Tighten Layout Builder block restrictions on both page view displays.
-  $restricted_categories = [];
-  $allowed_categories = ['Content fields', 'Custom block types', 'Inline blocks'];
+  // Configure Layout Builder restrictions on both page view displays.
+  // allowed_block_categories is intentionally empty -- role-based filtering
+  // is handled dynamically in LayoutBuilderHooks::restrictBlocksForRole().
+  // Only layout restrictions (allowed_layouts) are enforced here.
   foreach (['node.page.default', 'node.page.full'] as $display_id) {
     $display = \Drupal::entityTypeManager()
       ->getStorage('entity_view_display')
@@ -2148,8 +2149,8 @@ function mukurtu_core_update_40070(): void {
       continue;
     }
     $restrictions = $display->getThirdPartySetting('layout_builder_restrictions', 'entity_view_mode_restriction', []);
-    $restrictions['restricted_categories'] = $restricted_categories;
-    $display->setThirdPartySetting('layout_builder_restrictions', 'allowed_block_categories', $allowed_categories);
+    $restrictions['restricted_categories'] = [];
+    $display->setThirdPartySetting('layout_builder_restrictions', 'allowed_block_categories', []);
     $display->setThirdPartySetting('layout_builder_restrictions', 'entity_view_mode_restriction', $restrictions);
     $display->save();
   }

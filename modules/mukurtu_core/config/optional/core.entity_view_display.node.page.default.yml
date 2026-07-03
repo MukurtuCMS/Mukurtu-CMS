@@ -16,10 +16,7 @@ third_party_settings:
     enabled: true
     allow_custom: true
   layout_builder_restrictions:
-    allowed_block_categories:
-      - 'Content fields'
-      - 'Custom block types'
-      - 'Inline blocks'
+    allowed_block_categories: {  }
     entity_view_mode_restriction:
       allowed_layouts:
         - layout_onecol
