@@ -3,6 +3,8 @@
 namespace Drupal\mukurtu_core\Hook;
 
 use Drupal\Core\Hook\Attribute\Hook;
+use Drupal\layout_builder\OverridesSectionStorageInterface;
+use Drupal\node\NodeInterface;
 
 /**
  * Hook implementations for mukurtu_core layout builder.
@@ -12,14 +14,27 @@ class LayoutBuilderHooks {
   /**
    * Implements hook_plugin_filter_block__layout_builder_alter().
    *
-   * Administrators see all blocks. Every other role (including mukurtu_manager)
-   * is restricted to the curated set of categories appropriate for
-   * content editors on basic pages and landing pages.
+   * Administrators see all blocks. For basic pages only, every other role is
+   * restricted to the curated set of inline block types. Other content types
+   * (landing pages etc.) manage their own restrictions via layout_builder_restrictions
+   * config and are not altered here.
    */
   #[Hook('plugin_filter_block__layout_builder_alter')]
   public function restrictBlocksForRole(array &$definitions, array $extra): void {
     // Administrators see everything -- no filtering needed.
     if (\Drupal::currentUser()->hasRole('administrator')) {
+      return;
+    }
+
+    // Only restrict on basic pages. Other content types (e.g. landing pages)
+    // have their own restrictions configured via layout_builder_restrictions.
+    if (isset($extra['section_storage']) && $extra['section_storage'] instanceof OverridesSectionStorageInterface) {
+      $entity = $extra['section_storage']->getContextValue('entity');
+      if (!($entity instanceof NodeInterface) || $entity->bundle() !== 'page') {
+        return;
+      }
+    }
+    else {
       return;
     }
 
