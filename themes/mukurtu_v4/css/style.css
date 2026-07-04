@@ -4343,6 +4343,23 @@ header {
   }
 }
 
+.full-node--access-denied .full-node__main {
+  grid-column: 1/-1;
+}
+@media (min-width: 90rem) {
+  .full-node--access-denied .full-node__main {
+    grid-column: 2/-2;
+  }
+}
+
+.full-node--access-denied .full-node__content {
+  text-align: center;
+}
+
+.layout-container:has(.full-node--access-denied) .page__title {
+  text-align: center;
+}
+
 .browse__default__header {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -6442,7 +6459,8 @@ header {
 .field--name-title,
 .dictionary-word__teaser .field,
 .dictionary-word-tabs .field,
-.field--name-field-sections .field)) {
+.field--name-field-sections .field,
+.block-wrapper .field)) {
   -webkit-padding-before: var(--v-space-2xs);
           padding-block-start: var(--v-space-2xs);
   -webkit-margin-before: var(--v-space-2xs);
@@ -6967,6 +6985,10 @@ header {
 }
 .layout-container .page__title h1 {
   margin-block: 0;
+}
+.page-node-type-page .layout-container .page__title {
+  -webkit-box-shadow: none;
+          box-shadow: none;
 }
 .layout-container .region__highlighted {
   display: grid;

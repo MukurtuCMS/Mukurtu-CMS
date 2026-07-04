@@ -41,7 +41,8 @@
         .field--name-title,
         .dictionary-word__teaser .field,
         .dictionary-word-tabs .field,
-        .field--name-field-sections .field)) {
+        .field--name-field-sections .field,
+        .block-wrapper .field)) {
       @include mixins.divider;
     }
 
