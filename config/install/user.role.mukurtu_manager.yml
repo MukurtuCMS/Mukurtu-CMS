@@ -42,6 +42,7 @@ dependencies:
     - message_ui
     - mukurtu_collection
     - mukurtu_content_warnings
+    - mukurtu_core
     - mukurtu_dictionary
     - mukurtu_export
     - mukurtu_import
@@ -68,6 +69,7 @@ is_admin: null
 permissions:
   - 'access mukurtu export'
   - 'access mukurtu import'
+  - 'administer mukurtu access denied page'
   - 'administer mukurtu_media configuration'
   - 'administer mukurtu media download settings'
   - 'create article content'

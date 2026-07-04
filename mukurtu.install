@@ -72,6 +72,13 @@ function mukurtu_install() {
     ->set('use_admin_theme', TRUE)
     ->save();
 
+  // Set the custom 403 (access denied) page (system.site.yml is not owned by
+  // Mukurtu).
+  \Drupal::configFactory()
+    ->getEditable('system.site')
+    ->set('page.403', '/mukurtu/access-denied')
+    ->save();
+
   // Create the default landing page using the service.
   \Drupal::service('mukurtu_landing_page.default_landing_page')->createDefaultLandingPage();
 
