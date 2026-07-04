@@ -2207,3 +2207,40 @@ function mukurtu_core_update_40071(): void {
   $role->grantPermission('create and edit custom blocks');
   $role->save();
 }
+
+/**
+ * Add body field to the basic (Text) block type; remove body from featured_content.
+ */
+function mukurtu_core_update_40072(): void {
+  $config_source = new \Drupal\Core\Config\FileStorage(
+    \Drupal::service('extension.list.module')->getPath('mukurtu_core') . '/../../config/install'
+  );
+
+  // Add body field instance to the basic block type.
+  $data = $config_source->read('field.field.block_content.basic.body');
+  if ($data && !\Drupal::entityTypeManager()->getStorage('field_config')->load('block_content.basic.body')) {
+    \Drupal\field\Entity\FieldConfig::create($data)->save();
+  }
+
+  // Update basic block form and view displays to include the body field.
+  foreach (['core.entity_form_display.block_content.basic.default', 'core.entity_view_display.block_content.basic.default'] as $config_name) {
+    $data = $config_source->read($config_name);
+    if ($data) {
+      \Drupal::configFactory()->getEditable($config_name)->setData($data)->save();
+    }
+  }
+
+  // Remove body field from featured_content block type.
+  $body_field = \Drupal::entityTypeManager()->getStorage('field_config')->load('block_content.featured_content.body');
+  if ($body_field) {
+    $body_field->delete();
+  }
+
+  // Update featured_content form and view displays without the body field.
+  foreach (['core.entity_form_display.block_content.featured_content.default', 'core.entity_view_display.block_content.featured_content.default'] as $config_name) {
+    $data = $config_source->read($config_name);
+    if ($data) {
+      \Drupal::configFactory()->getEditable($config_name)->setData($data)->save();
+    }
+  }
+}
