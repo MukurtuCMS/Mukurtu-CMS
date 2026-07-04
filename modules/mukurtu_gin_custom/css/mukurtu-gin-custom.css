@@ -382,6 +382,31 @@ counterpart, if one exists. */
     margin: 0 !important;
 }
 
+/* In the Layout Builder context, gin_lb renders the sidebar ul with class
+   glb-media-library-menu and sets its width to 20em. Reduce it to match the
+   proportions of the non-LB media library modal. */
+.media-library-widget-modal .glb-media-library-menu {
+    width: 14em !important;
+}
+/* Reset the extra right margin gin_lb adds to the sidebar ul. */
+.media-library-widget-modal .media-library-wrapper > ul {
+    margin-right: 0 !important;
+    margin-left: 0 !important;
+}
+
+/* gin_lb puts the button (form-actions) BEFORE the count and gives it flex:1,
+   leaving "Insert selected" left-aligned. Fix: stop the buttonset from growing
+   and move it after the count so it reads [count] [button], right-aligned. */
+.media-library-widget-modal .ui-dialog-buttonpane .media-library-selected-count {
+    flex: 1 1 auto !important;
+    order: 1 !important;
+}
+.media-library-widget-modal .ui-dialog-buttonpane .ui-dialog-buttonset,
+.media-library-widget-modal .ui-dialog-buttonpane .form-actions {
+    flex: 0 0 auto !important;
+    order: 2 !important;
+}
+
 /* WCAG 2.4.7: visible focus ring on Insert Selected (and Cancel) in the dialog footer. */
 .media-library-widget-modal .ui-dialog-buttonpane .button:focus-visible {
   outline: 3px solid var(--gin-color-primary, #0036b1);
