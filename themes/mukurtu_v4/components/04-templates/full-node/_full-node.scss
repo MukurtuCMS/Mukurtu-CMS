@@ -123,7 +123,7 @@
 // Horizontal divider block placed via Layout Builder.
 .layout-builder-divider {
   border: none;
-  border-block-start: 1px solid var(--brand-light);
+  border-block-start: 5px solid var(--mukurtu-view-row-divider-color);
   margin-block: var(--v-space-xs);
 }
 

@@ -7,6 +7,8 @@
 
 {% set block_entity = content['#block_content'] %}
 <div{{ attributes.addClass('block--call-to-action') }}>
+  {{ title_prefix }}
+  {{ title_suffix }}
   {% if block_entity.body.value %}
     <div class="block--call-to-action__body">
       {{ content.body }}

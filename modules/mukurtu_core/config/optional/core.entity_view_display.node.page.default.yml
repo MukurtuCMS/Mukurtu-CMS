@@ -32,6 +32,8 @@ bundle: page
 mode: default
 content: {  }
 hidden:
+  content_moderation_control: true
+  export_list_membership: true
   body: true
   field_all_related_content: true
   field_citation: true

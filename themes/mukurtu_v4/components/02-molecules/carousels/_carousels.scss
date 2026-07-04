@@ -4,11 +4,11 @@
 // Shared styles across carousels.
 .splide {
   &__arrow--prev {
-    inset-inline-start: -2em;
+    inset-inline-start: 0.5em;
   }
 
   &__arrow--next {
-    inset-inline-end: -2em;
+    inset-inline-end: 0.5em;
   }
 
   // Vertically center images inside slides if they are <200px in height.

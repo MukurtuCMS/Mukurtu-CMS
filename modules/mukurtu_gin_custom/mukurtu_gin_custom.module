@@ -126,6 +126,20 @@ function mukurtu_gin_custom_form_node_form_alter(array &$form, FormStateInterfac
 }
 
 /**
+ * Implements hook_field_widget_single_element_form_alter().
+ */
+function mukurtu_gin_custom_field_widget_single_element_form_alter(array &$element, FormStateInterface $form_state, array $context): void {
+  // The entity browser widget renders as a collapsible <details> element.
+  // For field_featured_content in the Layout Builder configure-block dialog,
+  // this is confusing -- the field is the only thing being configured.
+  // Change it to a plain container so the selection is always visible.
+  $field_name = $context['items']->getFieldDefinition()->getName();
+  if ($field_name === 'field_featured_content' && ($element['#type'] ?? '') === 'details') {
+    $element['#type'] = 'container';
+  }
+}
+
+/**
  * Implements hook_preprocess_node() for the form_selection view mode.
  */
 function mukurtu_gin_custom_preprocess_node(&$variables) {

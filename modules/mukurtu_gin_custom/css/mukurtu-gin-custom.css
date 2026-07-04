@@ -301,6 +301,21 @@ counterpart, if one exists. */
     right: 0;
 }
 
+/* Horizontal divider renders as a 1px <hr> with almost no hover area.
+   Keep the contextual links trigger permanently visible so editors can
+   reach Configure/Remove without pixel-perfect hovering. Drupal's contextual
+   JS hides the trigger by toggling the visually-hidden class, so override
+   all of its properties to keep it rendered. */
+.layout-builder .block--horizontal-divider .contextual .trigger.visually-hidden {
+    position: relative !important;
+    overflow: visible !important;
+    clip: auto !important;
+    -webkit-clip-path: none !important;
+    clip-path: none !important;
+    width: auto !important;
+    height: auto !important;
+}
+
 /* Media library modal: compact upload form, sticky type sidebar. */
 .media-library-add-form__input-wrapper {
     padding: var(--space-xs) var(--space-m) !important;
@@ -357,6 +372,23 @@ counterpart, if one exists. */
     margin-bottom: 0 !important;
     padding-top: 0 !important;
     padding-bottom: 16px !important;
+}
+
+/* gin_lb adds background-image:url(chevron.svg) !important to .glb-form-element--type-select.
+   The mukurtu theme already adds a ::after triangle on the wrapper, so both arrows show.
+   Remove gin_lb's background-image arrow to leave only the mukurtu triangle. */
+.media-library-widget-modal .glb-form-element--type-select {
+    background-image: none !important;
+}
+
+/* inset-block-start: 50% on the ::after is relative to the full .js-form-type-select
+   wrapper, which includes the "Sort by" label above the select input. The label pushes
+   the 50% mark up into the label area, leaving the arrow near the top of the input.
+   Shift down by ~0.75rem to re-center the arrow within the select input. */
+.media-library-widget-modal .js-form-type-select::after,
+.media-library-widget-modal .select-wrapper::after {
+    inset-block-start: calc(50% + 0.75rem) !important;
+    transform: translateY(-50%) !important;
 }
 
 .media-library-widget-modal .view-content .js-media-library-views-form {

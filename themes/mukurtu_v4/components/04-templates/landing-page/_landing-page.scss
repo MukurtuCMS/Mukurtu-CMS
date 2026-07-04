@@ -6,7 +6,7 @@
 
 .block--call-to-action {
   padding: var(--v-space-xs);
-  border: 1px solid var(--brand-light);
+  text-align: center;
 
   &__link {
     margin-block-start: var(--v-space-4xs);
@@ -30,6 +30,12 @@
     h2 {
       text-align: center;
       margin-block-end: var(--v-space-2xs);
+    }
+
+    // Text block: add breathing room around the body content.
+    &:has(.field--name-body) {
+      padding-inline: var(--v-space-xs);
+      padding-block-end: var(--v-space-xs);
     }
   }
 

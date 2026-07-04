@@ -153,18 +153,19 @@
     padding-block-end: var(--v-space-5xs);
     border-block-end: 1px solid var(--brand-light);
     margin-block: 0 var(--v-space-5xs);
+    text-align: center;
   }
 }
 
 .local-contexts-project .local-contexts-projects-container {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(4, 1fr);
   gap: var(--v-space-5xs);
 }
 
 .local-contexts-label-group {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(4, 1fr);
   gap: var(--v-space-5xs);
 
   & + .local-contexts-label-group {
