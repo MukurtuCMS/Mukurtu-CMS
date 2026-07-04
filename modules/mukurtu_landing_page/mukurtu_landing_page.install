@@ -6,6 +6,13 @@
  */
 
 /**
+ * Rebuild node access grants so published landing pages are visible in Views.
+ */
+function mukurtu_landing_page_update_40002(): void {
+  node_access_rebuild();
+}
+
+/**
  * Create the form_selection view display for the Landing Page node type.
  */
 function mukurtu_landing_page_update_40001(): void {
