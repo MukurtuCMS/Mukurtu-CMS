@@ -8,7 +8,7 @@ label: 'Comment denied'
 description: 'A comment on protocol content was denied.'
 text:
   -
-    value: '<p>A comment on&nbsp;<a href="[message:field_item:entity:url]">[message:field_item:entity:title]</a> was denied.</p>'
+    value: '<p>A comment on&nbsp;[message:field_item:entity:mukurtu-notification-link] was denied.</p>'
     format: mukurtu_html
 settings:
   'token options':

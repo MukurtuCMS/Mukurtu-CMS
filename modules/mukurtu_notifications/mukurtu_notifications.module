@@ -1,6 +1,7 @@
 <?php
 
 use Drupal\comment\CommentInterface;
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Database\Query\AlterableInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
@@ -8,6 +9,8 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\BubbleableMetadata;
+use Drupal\Core\Render\Markup;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\message\Entity\Message;
 use Drupal\message_subscribe\Subscribers\DeliveryCandidate;
@@ -16,30 +19,80 @@ use Drupal\node\Entity\Node;
 use Drupal\og\Entity\OgMembership;
 use Drupal\user\Entity\User;
 
-use Drupal\views\ViewExecutable;
+/**
+ * Implements hook_token_info().
+ *
+ * Declares a single "safe link" token per entity type, so notification
+ * template text never has to compose <a href="[...:url]">[...:title]</a> by
+ * hand -- see mukurtu_notifications_tokens() for why that composition is
+ * unsafe in this specific context.
+ */
+function mukurtu_notifications_token_info() {
+  $info['tokens']['node']['mukurtu-notification-link'] = [
+    'name' => t('Notification link'),
+    'description' => t('A full &lt;a&gt; tag linking to the content, safe to use inside message template text.'),
+  ];
+  $info['tokens']['user']['mukurtu-notification-link'] = [
+    'name' => t('Notification edit link'),
+    'description' => t("A full &lt;a&gt; tag linking to the account's edit form, safe to use inside message template text."),
+  ];
+  $info['tokens']['protocol']['mukurtu-notification-link'] = [
+    'name' => t('Notification link'),
+    'description' => t('A full &lt;a&gt; tag linking to the protocol, safe to use inside message template text.'),
+  ];
+  $info['tokens']['community']['mukurtu-notification-link'] = [
+    'name' => t('Notification link'),
+    'description' => t('A full &lt;a&gt; tag linking to the community, safe to use inside message template text.'),
+  ];
+  return $info;
+}
 
 /**
- * Implements hook_views_pre_render().
+ * Implements hook_tokens().
  *
- * Replaces template machine names with human-readable labels in the
- * "Notification type" column of the mukurtu_message_log view.
+ * Message templates render through their text format's filters (e.g.
+ * mukurtu_html's filter_html, which calls Xss::filter() on every href/src
+ * attribute) BEFORE tokens are replaced -- see
+ * \Drupal\message\Entity\MessageTemplate::getText(), which is called before
+ * \Drupal\message\Entity\Message::processTokens() ever runs. An unresolved
+ * chained token sitting directly inside an href, e.g.
+ * "[message:field_item:entity:url]", looks to
+ * \Drupal\Component\Utility\UrlHelper::stripDangerousProtocols() like a
+ * sequence of disallowed URI schemes ("message:", "field_item:", "entity:")
+ * and gets stripped down to just its last segment ("url]") before it's ever
+ * replaced -- confirmed empirically: rendering that raw template text
+ * through any of this site's HTML-capable text formats reproduces the exact
+ * mangled output seen in production. Token replacement itself runs after
+ * that filtering and is never re-filtered, so a token whose *replacement
+ * value* is a complete, pre-built anchor tag is unaffected: there's no
+ * literal "word:" text in an href attribute at filter time because the
+ * anchor doesn't exist yet.
  */
-function mukurtu_notifications_views_pre_render(ViewExecutable $view) {
-  if ($view->id() !== 'mukurtu_message_log') {
-    return;
+function mukurtu_notifications_tokens($type, array $tokens, array $data, array $options, BubbleableMetadata $bubbleable_metadata) {
+  $replacements = [];
+
+  if ($type === 'node' && !empty($data['node']) && isset($tokens['mukurtu-notification-link'])) {
+    $node = $data['node'];
+    $bubbleable_metadata->addCacheableDependency($node);
+    $url = $node->toUrl('canonical', ['absolute' => TRUE])->toString();
+    $replacements[$tokens['mukurtu-notification-link']] = Markup::create('<a href="' . Html::escape($url) . '">' . Html::escape($node->label()) . '</a>');
   }
-  $template_storage = \Drupal::entityTypeManager()->getStorage('message_template');
-  // message_field_data_template is the Views column alias for the template
-  // field on the message_field_data table. It matches the field_alias set in
-  // views.view.mukurtu_message_log for the "template" field.
-  foreach ($view->result as $row) {
-    if (isset($row->message_field_data_template)) {
-      $template = $template_storage->load($row->message_field_data_template);
-      if ($template) {
-        $row->message_field_data_template = $template->label();
-      }
-    }
+
+  if ($type === 'user' && !empty($data['user']) && isset($tokens['mukurtu-notification-link'])) {
+    $account = $data['user'];
+    $bubbleable_metadata->addCacheableDependency($account);
+    $url = $account->toUrl('edit-form', ['absolute' => TRUE])->toString();
+    $replacements[$tokens['mukurtu-notification-link']] = Markup::create('<a href="' . Html::escape($url) . '">' . Html::escape($account->label()) . '</a>');
   }
+
+  if (in_array($type, ['protocol', 'community'], TRUE) && !empty($data[$type]) && isset($tokens['mukurtu-notification-link'])) {
+    $entity = $data[$type];
+    $bubbleable_metadata->addCacheableDependency($entity);
+    $url = $entity->toUrl('canonical', ['absolute' => TRUE])->toString();
+    $replacements[$tokens['mukurtu-notification-link']] = Markup::create('<a href="' . Html::escape($url) . '">' . Html::escape($entity->label()) . '</a>');
+  }
+
+  return $replacements;
 }
 
 /**
@@ -95,6 +148,56 @@ function mukurtu_notifications_form_views_exposed_form_alter(array &$form, FormS
   }
 
   $form['type']['#options'] = $options;
+
+  // Expand the submitted group label(s) into real template machine names
+  // via #element_validate, not hook_views_pre_execute: Views builds the
+  // filter's SQL "IN (...)" condition from $filter->value during
+  // ViewExecutable::build() (_build('filter'), which runs the exposed form
+  // through full Form API validation/submission first), and only invokes
+  // hook_views_pre_execute() afterward -- by then the query is already
+  // built, so mutating $filter->value there is a no-op. #element_validate
+  // runs during that same build()-time form processing, before the filter's
+  // query() method reads the value.
+  $form['type']['#element_validate'][] = 'mukurtu_notifications_type_filter_validate';
+}
+
+/**
+ * Element validate callback for the notifications page's type filter.
+ *
+ * Rewrites the submitted group label(s) (e.g. "Comments") into their
+ * underlying template machine names (e.g. mukurtu_protocol_comment,
+ * mukurtu_comment_approved, mukurtu_comment_denied) so the bundle filter's
+ * query() method -- which runs later in the same build() pass -- generates
+ * the correct WHERE template IN (...) clause. When nothing is selected, the
+ * personal feed display gets the curated default restriction applied here
+ * instead (bypassing the exposed form's #options, which only ever expose
+ * group labels) so admin-only templates like mukurtu_new_user_registration
+ * don't leak into the general activity feed; the admin "all notifications"
+ * display is left unrestricted, showing every template.
+ */
+function mukurtu_notifications_type_filter_validate(array $element, FormStateInterface $form_state, array $form): void {
+  $view = $form_state->get('view');
+  $selected = (array) $form_state->getValue($element['#parents']);
+  $selected = array_filter($selected, static fn ($value) => $value !== 0 && $value !== '0');
+
+  if (empty($selected)) {
+    if ($view && $view->current_display === 'mukurtu_notifications_page') {
+      $form_state->setValueForElement($element, _mukurtu_notifications_default_type_filter());
+    }
+    return;
+  }
+
+  $groups = _mukurtu_notifications_type_groups();
+  $expanded = [];
+  foreach ($selected as $key) {
+    if (isset($groups[$key])) {
+      $expanded = array_merge($expanded, $groups[$key]);
+    }
+    else {
+      $expanded[] = $key;
+    }
+  }
+  $form_state->setValueForElement($element, array_unique($expanded));
 }
 
 /**
@@ -114,46 +217,6 @@ function _mukurtu_notifications_default_type_filter(): array {
     $templates = array_merge($templates, $machine_names);
   }
   return $templates;
-}
-
-/**
- * Implements hook_views_pre_execute().
- *
- * Expands a selected notification group label into its individual template
- * machine names before the query runs, so the bundle filter generates the
- * correct WHERE template IN (...) clause, on both the personal feed and the
- * admin "all notifications" page. If no group is selected: the personal
- * feed applies a curated default restriction (bypassing the exposed form's
- * #options, which only allow group labels) so admin-only templates don't
- * leak into the general activity feed by default; the admin page applies
- * no restriction at all, showing every template.
- */
-function mukurtu_notifications_views_pre_execute(ViewExecutable $view) {
-  if ($view->id() !== 'mukurtu_message_log') {
-    return;
-  }
-  if (!in_array($view->current_display, ['mukurtu_notifications_page', 'mukurtu_notifications_admin_page'], TRUE)) {
-    return;
-  }
-
-  if (empty($view->filter['template']->value)) {
-    if ($view->current_display === 'mukurtu_notifications_page') {
-      $view->filter['template']->value = _mukurtu_notifications_default_type_filter();
-    }
-    return;
-  }
-
-  $groups = _mukurtu_notifications_type_groups();
-  $expanded = [];
-  foreach ($view->filter['template']->value as $key) {
-    if (isset($groups[$key])) {
-      $expanded = array_merge($expanded, $groups[$key]);
-    }
-    else {
-      $expanded[] = $key;
-    }
-  }
-  $view->filter['template']->value = array_unique($expanded);
 }
 
 /**
@@ -700,8 +763,14 @@ function mukurtu_notifications_notify_new_account_created(User $new_user, array 
  *
  * @param int $count
  *   The number of items imported.
+ * @param string $results_summary
+ *   Rendered HTML summarizing the per-migration results and any error
+ *   messages from the run, stored on field_import_results so the "View
+ *   batch import report" link (built from the resulting message's ID, see
+ *   mukurtu_import.batch_report) has real per-batch content to show,
+ *   instead of the dead /import/report/[message:mid] link this replaced.
  */
-function mukurtu_notifications_notify_batch_import_report(int $count): void {
+function mukurtu_notifications_notify_batch_import_report(int $count, string $results_summary = ''): void {
   $manager_uids = mukurtu_notifications_resolve_notify_groups(TRUE, [], []);
   $roundtrip_uids = \Drupal::entityQuery('user')
     ->condition('roles', 'mukurtu_roundtrip_manager')
@@ -711,6 +780,10 @@ function mukurtu_notifications_notify_batch_import_report(int $count): void {
 
   _mukurtu_notifications_notify('mukurtu_batch_import_report', [
     'field_number_imported' => $count,
+    'field_import_results' => [
+      'value' => $results_summary,
+      'format' => 'mukurtu_html',
+    ],
   ], $recipient_uids, (int) \Drupal::currentUser()->id());
 }
 

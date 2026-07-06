@@ -8,7 +8,7 @@ label: 'User set to pending'
 description: 'A user account was set to pending.'
 text:
   -
-    value: "<p>[message:field_user:entity:display-name]'s account was set to pending.</p>"
+    value: "<p>[message:field_user:entity:mukurtu-notification-link]'s account was set to pending.</p>"
     format: mukurtu_html
 settings:
   'token options':

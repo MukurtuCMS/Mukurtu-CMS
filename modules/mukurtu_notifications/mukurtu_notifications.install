@@ -1310,3 +1310,158 @@ function mukurtu_notifications_update_40036(): void {
     $root_source->read('core.entity_form_display.user.user.default')
   );
 }
+
+/**
+ * Redeploys the message log view defensively.
+ *
+ * Sites can end up with a stale copy of this view -- e.g. if update_40036
+ * already ran here before its body was finalized -- since Drupal only
+ * tracks the last update number run per module, not the content of each
+ * hook, so editing an already-applied hook's body never re-applies on a
+ * site that already ran it. This unconditionally rewrites the view again
+ * so every site converges on the current config/install copy (notably
+ * link_to_entity: false on the "Notification type" column) regardless of
+ * its update-hook history.
+ */
+function mukurtu_notifications_update_40037(): void {
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  \Drupal::service('config.storage')->write(
+    'views.view.mukurtu_message_log',
+    $source->read('views.view.mukurtu_message_log')
+  );
+}
+
+/**
+ * Redeploys notification templates to use the new mukurtu-notification-link
+ * token instead of composing <a href="[...:url]">[...:title]</a> by hand.
+ *
+ * That hand-composed markup is broken: message templates render through
+ * their text format's filters (mukurtu_html's filter_html calls
+ * Xss::filter() on every href/src attribute) BEFORE tokens are replaced, so
+ * an unresolved chained token sitting directly inside an href --
+ * "[message:field_item:entity:url]" -- looks like a sequence of disallowed
+ * URI schemes to UrlHelper::stripDangerousProtocols() and gets stripped
+ * down to just its last segment ("url]") before it's ever replaced. The new
+ * token's replacement value is a complete, pre-built anchor tag, so there's
+ * no literal "word:" text inside an href attribute at filter time -- see
+ * mukurtu_notifications_tokens() for the full explanation.
+ *
+ * Also repoints the two account-created/registration templates' links from
+ * the account's public canonical page to its edit form, and the four
+ * approve/pending/block/unblock templates' plain-text display name to the
+ * same edit-form link, since every recipient of these is a Mukurtu Manager
+ * who would otherwise have to navigate there manually to act on it.
+ */
+function mukurtu_notifications_update_40038(): void {
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  $config_storage = \Drupal::service('config.storage');
+
+  $templates = [
+    'mukurtu_comment_denied',
+    'mukurtu_content_for_review',
+    'mukurtu_content_archived',
+    'mukurtu_comment_approved',
+    'mukurtu_content_to_draft',
+    'mukurtu_content_published',
+    'mukurtu_protocol_comment',
+    'mukurtu_single_node_insert',
+    'mukurtu_single_node_update',
+    'mukurtu_user_set_pending',
+    'mukurtu_user_approved',
+    'mukurtu_user_blocked',
+    'mukurtu_user_unblocked',
+    'mukurtu_new_user_registration',
+    'mukurtu_new_user_account_created',
+  ];
+
+  foreach ($templates as $template) {
+    $config_storage->write('message.template.' . $template, $source->read('message.template.' . $template));
+  }
+}
+
+/**
+ * Deploys a real, ID-addressable batch import report.
+ *
+ * The "View batch import report" link previously pointed at
+ * /import/report/[message:mid], a route that has never existed --
+ * /admin/import/results (ImportResultsForm) is the only existing results
+ * page, and it's tempstore-scoped to whichever import last ran in that
+ * browser session, with no way to address a specific past batch. This
+ * attaches the field_import_results field (storage already present in
+ * config/install but never attached to any bundle) to
+ * mukurtu_batch_import_report so mukurtu_notifications_notify_batch_import_report()
+ * has somewhere to persist the per-migration breakdown, and redeploys the
+ * template so its link points at the new mukurtu_import.batch_report route.
+ */
+function mukurtu_notifications_update_40039(): void {
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  $config_storage = \Drupal::service('config.storage');
+
+  $config_storage->write(
+    'field.field.message.mukurtu_batch_import_report.field_import_results',
+    $source->read('field.field.message.mukurtu_batch_import_report.field_import_results')
+  );
+  $config_storage->write(
+    'message.template.mukurtu_batch_import_report',
+    $source->read('message.template.mukurtu_batch_import_report')
+  );
+
+  \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
+}
+
+/**
+ * Fixes the "Notification type" column still linking to the message
+ * template's edit form despite link_to_entity: false.
+ *
+ * That setting was never actually in effect: the "template" field is a
+ * base field of type entity_reference (it's the Message entity's bundle
+ * key), and the "string" formatter's field_types are only ['string',
+ * 'uri'] -- see \Drupal\Core\Field\Plugin\Field\FieldFormatter\StringFormatter.
+ * Since "string" was never applicable to an entity_reference field,
+ * \Drupal\Core\Field\FormatterPluginManager::getInstance() silently fell
+ * back to entity_reference's actual default formatter,
+ * entity_reference_label, whose own "link" setting (a different key
+ * entirely from "link_to_entity") defaults to TRUE -- confirmed
+ * empirically by inspecting the rendered <td>, which really did contain
+ * <a href="/admin/structure/message/manage/...">. This redeploys the view
+ * using entity_reference_label with link: false, the formatter actually in
+ * effect. mukurtu_notifications_views_pre_render(), which used to
+ * overwrite the raw value with its human-readable label, is removed in
+ * the same commit -- entity_reference_label already displays the
+ * referenced message_template's label natively, and doing both would
+ * break the formatter (it needs the real machine name to load the
+ * entity).
+ */
+function mukurtu_notifications_update_40040(): void {
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  \Drupal::service('config.storage')->write(
+    'views.view.mukurtu_message_log',
+    $source->read('views.view.mukurtu_message_log')
+  );
+}
+
+/**
+ * Links the protocol/community name in the three membership notifications
+ * (added to protocol, removed from protocol, removed from community) using
+ * the same mukurtu-notification-link token, now extended to the protocol
+ * and community entity types. The affected user's name in these templates
+ * stays plain text -- per product decision, these are informational rather
+ * than account-management notifications.
+ */
+function mukurtu_notifications_update_40041(): void {
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  $config_storage = \Drupal::service('config.storage');
+
+  foreach ([
+    'mukurtu_user_added_to_protocol',
+    'mukurtu_removed_from_protocol',
+    'mukurtu_removed_from_community',
+  ] as $template) {
+    $config_storage->write('message.template.' . $template, $source->read('message.template.' . $template));
+  }
+}

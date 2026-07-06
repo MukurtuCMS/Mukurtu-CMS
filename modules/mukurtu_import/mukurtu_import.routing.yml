@@ -89,3 +89,15 @@ mukurtu_import.execute_import:
     _form: 'Drupal\mukurtu_import\Form\ExecuteImportForm'
   requirements:
     _permission: 'access mukurtu import'
+
+mukurtu_import.batch_report:
+  path: '/admin/import/report/{message}'
+  defaults:
+    _controller: '\Drupal\mukurtu_import\Controller\BatchReportController::build'
+    _title_callback: '\Drupal\mukurtu_import\Controller\BatchReportController::title'
+  requirements:
+    _custom_access: '\Drupal\mukurtu_import\Controller\BatchReportController::access'
+  options:
+    parameters:
+      message:
+        type: entity:message

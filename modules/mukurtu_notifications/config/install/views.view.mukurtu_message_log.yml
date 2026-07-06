@@ -541,9 +541,9 @@ display:
           hide_empty: false
           empty_zero: false
           hide_alter_empty: true
-          type: string
+          type: entity_reference_label
           settings:
-            link_to_entity: false
+            link: false
           group_column: value
           group_columns: {}
           group_rows: true
@@ -981,9 +981,9 @@ display:
           hide_empty: false
           empty_zero: false
           hide_alter_empty: true
-          type: string
+          type: entity_reference_label
           settings:
-            link_to_entity: false
+            link: false
           group_column: value
           group_columns: {}
           group_rows: true

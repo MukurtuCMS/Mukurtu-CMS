@@ -8,10 +8,10 @@ label: 'Added to protocol'
 description: 'A user was added to a protocol.'
 text:
   -
-    value: '<p>[message:field_user:entity:display-name] was added to protocol&nbsp;[message:field_protocol:entity:name].</p>'
+    value: '<p>[message:field_user:entity:display-name] was added to protocol&nbsp;[message:field_protocol:entity:mukurtu-notification-link].</p>'
     format: mukurtu_html
   -
-    value: '<p>[message:field_user:entity:display-name] was added to protocol&nbsp;[message:field_protocol:entity:name].</p>'
+    value: '<p>[message:field_user:entity:display-name] was added to protocol&nbsp;[message:field_protocol:entity:mukurtu-notification-link].</p>'
     format: mukurtu_html
 settings:
   'token options':

@@ -8,7 +8,7 @@ label: 'Removed from protocol'
 description: 'A user was removed from a protocol.'
 text:
   -
-    value: '<p>[message:field_user:entity:display-name] was removed from protocol&nbsp;[message:field_protocol:entity:name].</p>'
+    value: '<p>[message:field_user:entity:display-name] was removed from protocol&nbsp;[message:field_protocol:entity:mukurtu-notification-link].</p>'
     format: mukurtu_html
 settings:
   'token options':

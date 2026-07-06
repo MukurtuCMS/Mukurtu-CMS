@@ -8,10 +8,10 @@ label: 'New user account created'
 description: 'A new user account has been created by an administrator or manager.'
 text:
   -
-    value: "New user account created: [message:field_user:entity:account-name]"
+    value: "New user account created: [message:field_user:entity:mukurtu-notification-link]"
     format: mukurtu_html
   -
-    value: "<p>A new user account <a href=\"[message:field_user:entity:url]\">[message:field_user:entity:field_display_name] ([message:field_user:entity:account-name])</a> has been created. You may want to add them to more communities or protocols. <a href=\"[message:field_user:entity:url]\">Review their account</a>.</p>\r\n"
+    value: "<p>A new user account [message:field_user:entity:mukurtu-notification-link] has been created. You may want to add them to more communities or protocols.</p>\r\n"
     format: mukurtu_html
 settings:
   'token options':

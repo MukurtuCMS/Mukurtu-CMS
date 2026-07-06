@@ -8,7 +8,7 @@ label: 'Content updated'
 description: 'Standard template for a single node being updated.'
 text:
   -
-    value: "<p>[message:field_item:entity:content-type]&nbsp;<a href=\"[message:field_item:entity:url]\">[message:field_item:entity:title]</a> was updated.</p>\r\n"
+    value: "<p>[message:field_item:entity:content-type]&nbsp;[message:field_item:entity:mukurtu-notification-link] was updated.</p>\r\n"
     format: mukurtu_html
 settings:
   'token options':
