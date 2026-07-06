@@ -1,0 +1,46 @@
+/**
+ * Inline edit button for Layout Builder blocks on front-end page views.
+ */
+
+.lb-editable {
+  position: relative;
+}
+
+.lb-edit-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+  opacity: 0;
+  transition: opacity 0.15s ease, box-shadow 0.15s ease;
+  text-decoration: none;
+  color: #444;
+}
+
+.lb-edit-btn svg {
+  width: 1rem;
+  height: 1rem;
+  fill: currentColor;
+  pointer-events: none;
+}
+
+.lb-editable:hover .lb-edit-btn,
+.lb-edit-btn:focus {
+  opacity: 1;
+}
+
+.lb-edit-btn:hover,
+.lb-edit-btn:focus {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
+  outline: 2px solid var(--brand-primary, #005a9c);
+  outline-offset: 2px;
+}

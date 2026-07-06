@@ -5,6 +5,8 @@
  * Provide Mukurtu Gin Custom.
  */
 
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\RedirectCommand;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\node\NodeInterface;
@@ -77,6 +79,76 @@ function mukurtu_gin_custom_page_attachments(array &$attachments) {
       Url::fromRoute('entity.media.edit_form', ['media' => 0])->toString();
     $attachments['#attached']['library'][] = 'mukurtu_gin_custom/entity-browser-toggle';
     $attachments['#attached']['library'][] = 'mukurtu_gin_custom/community-browser-select';
+  }
+
+  // Attach front-end LB block edit controls on node canonical pages where the
+  // viewing user can configure the layout and the node has a custom LB override.
+  // Edit URLs are passed via drupalSettings (not the block render array) so they
+  // are always fresh and never served from a stale render cache entry.
+  $route = \Drupal::routeMatch()->getRouteName();
+  if ($route === 'entity.node.canonical') {
+    $node = \Drupal::routeMatch()->getParameter('node');
+    if ($node instanceof NodeInterface &&
+        \Drupal::currentUser()->hasPermission('configure editable ' . $node->bundle() . ' node layout overrides') &&
+        $node->hasField('layout_builder__layout') &&
+        !$node->get('layout_builder__layout')->isEmpty()) {
+      $attachments['#attached']['library'][] = 'mukurtu_gin_custom/lb-frontend-edit';
+      // Build a UUID->edit-URL map for every non-field block in the layout.
+      // - Reusable blocks (block_content:*): link to the entity edit form so all
+      //   content fields are shown, not just the LB wrapper settings.
+      // - All other non-field blocks: link to the LB configure-block form.
+      $return_url = \Drupal::request()->getRequestUri();
+      $storage_id = $node->getEntityTypeId() . '.' . $node->id();
+      $entity_repository = \Drupal::service('entity.repository');
+      $edit_urls = [];
+      foreach ($node->get('layout_builder__layout')->getSections() as $delta => $section) {
+        foreach ($section->getComponents() as $component) {
+          $plugin_id = $component->getPlugin()->getPluginId();
+          if (str_starts_with($plugin_id, 'field_block:') || str_starts_with($plugin_id, 'extra_field_block:')) {
+            continue;
+          }
+          if (str_starts_with($plugin_id, 'block_content:')) {
+            // Reusable block: edit the block_content entity directly.
+            $block_uuid = substr($plugin_id, strlen('block_content:'));
+            $block_content = $entity_repository->loadEntityByUuid('block_content', $block_uuid);
+            if ($block_content && $block_content->access('update')) {
+              $edit_urls[$component->getUuid()] = $block_content->toUrl('edit-form', [
+                'query' => ['destination' => $return_url],
+              ])->toString();
+            }
+          }
+          else {
+            // Inline block or other plugin: use the LB configure-block form.
+            $edit_urls[$component->getUuid()] = Url::fromRoute('layout_builder.update_block', [
+              'section_storage_type' => 'overrides',
+              'section_storage' => $storage_id,
+              'delta' => $delta,
+              'region' => $component->getRegion(),
+              'uuid' => $component->getUuid(),
+            ], ['query' => ['frontend_edit' => '1', 'frontend_return' => $return_url]])->toString();
+          }
+        }
+      }
+      $attachments['#attached']['drupalSettings']['mukurtuLbEditUrls'] = $edit_urls;
+    }
+  }
+}
+
+/**
+ * Implements hook_css_alter().
+ *
+ * When the front-end LB block edit library is attached, strip core's dark
+ * off-canvas CSS so that gin_lb's white dialog override takes effect -- the
+ * same stripping gin_lb/CssAlter does on actual layout_builder.* routes.
+ */
+function mukurtu_gin_custom_css_alter(array &$css, \Drupal\Core\Asset\AttachedAssetsInterface $assets): void {
+  if (!in_array('mukurtu_gin_custom/lb-frontend-edit', $assets->getLibraries(), TRUE)) {
+    return;
+  }
+  foreach (array_keys($css) as $path) {
+    if (str_starts_with($path, 'core/misc/dialog/off-canvas/css/')) {
+      unset($css[$path]);
+    }
   }
 }
 
@@ -162,6 +234,13 @@ function mukurtu_gin_custom_form_layout_builder_configure_block_alter(array &$fo
     }
   }
 
+  // Frontend edit mode: override the AJAX callback so the form commits its
+  // tempstore changes to the entity and redirects back to the page.
+  if (\Drupal::request()->query->get('frontend_edit') &&
+      isset($form['actions']['submit']['#ajax'])) {
+    $form['actions']['submit']['#ajax']['callback'] = 'mukurtu_gin_custom_lb_frontend_edit_ajax';
+  }
+
   // Horizontal divider: hide the Title and Display title fields -- the block
   // is purely presentational and needs no label.
   if ($form_object->getCurrentComponent()->getPlugin()->getPluginId() !== 'inline_block:horizontal_divider') {
@@ -204,6 +283,28 @@ function mukurtu_gin_custom_field_widget_single_element_form_alter(array &$eleme
   if ($field_name === 'field_featured_content' && ($element['#type'] ?? '') === 'details') {
     $element['#type'] = 'container';
   }
+}
+
+
+/**
+ * AJAX callback for the LB update-block form when opened in frontend-edit mode.
+ *
+ * Commits the tempstore to the entity and redirects back to the original page
+ * instead of returning LB canvas-update commands.
+ */
+function mukurtu_gin_custom_lb_frontend_edit_ajax(array $form, FormStateInterface $form_state): AjaxResponse {
+  if ($form_state->hasAnyErrors()) {
+    return $form_state->getFormObject()->ajaxSubmit($form, $form_state);
+  }
+
+  $storage = $form_state->getFormObject()->getSectionStorage();
+  $storage->save();
+  \Drupal::service('layout_builder.tempstore_repository')->delete($storage);
+
+  $return_url = \Drupal::request()->query->get('frontend_return') ?: '/';
+  $response = new AjaxResponse();
+  $response->addCommand(new RedirectCommand($return_url));
+  return $response;
 }
 
 /**
