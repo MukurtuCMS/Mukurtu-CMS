@@ -248,6 +248,10 @@ function mukurtu_export_preprocess_block(&$variables) {
   if ($node->bundle() === 'landing_page') {
     return;
   }
+  $route_name = \Drupal::routeMatch()->getRouteName();
+  if (str_starts_with($route_name, 'layout_builder.')) {
+    return;
+  }
   $variables['export_button'] = [
     '#type' => 'link',
     '#title' => t('Add to export list'),

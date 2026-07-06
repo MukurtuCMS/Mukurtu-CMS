@@ -2244,3 +2244,83 @@ function mukurtu_core_update_40072(): void {
     }
   }
 }
+
+/**
+ * Pre-place body and media assets as field blocks in the basic page full layout.
+ */
+function mukurtu_core_update_40073(): void {
+  /** @var \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display */
+  $display = \Drupal::entityTypeManager()->getStorage('entity_view_display')->load('node.page.full');
+  if (!$display) {
+    return;
+  }
+
+  // Remove body and media from the hidden fields so they are managed by LB.
+  $hidden = $display->get('hidden');
+  unset($hidden['body']);
+  unset($hidden['field_page_media_assets']);
+  $display->set('hidden', $hidden);
+
+  $sections = $display->getThirdPartySetting('layout_builder', 'sections');
+  if (empty($sections)) {
+    $display->save();
+    return;
+  }
+
+  /** @var \Drupal\layout_builder\Section $section */
+  $section = $sections[0];
+
+  // Skip if body is already placed (idempotent guard).
+  foreach ($section->getComponents() as $comp) {
+    if ($comp->getPlugin()->getPluginId() === 'field_block:node:page:body') {
+      $display->save();
+      return;
+    }
+  }
+
+  $uuid_gen = new \Drupal\Component\Uuid\Php();
+
+  $media_comp = new \Drupal\layout_builder\SectionComponent(
+    $uuid_gen->generate(),
+    'content',
+    [
+      'id' => 'field_block:node:page:field_page_media_assets',
+      'label' => '',
+      'label_display' => '0',
+      'formatter' => [
+        'type' => 'entity_reference_entity_view',
+        'settings' => ['view_mode' => 'media_assets', 'link' => FALSE],
+        'label' => 'hidden',
+        'third_party_settings' => [],
+      ],
+      'context_mapping' => ['entity' => 'layout_builder.entity'],
+      'provider' => 'layout_builder',
+    ]
+  );
+  $media_comp->setWeight(-1);
+
+  $body_comp = new \Drupal\layout_builder\SectionComponent(
+    $uuid_gen->generate(),
+    'content',
+    [
+      'id' => 'field_block:node:page:body',
+      'label' => '',
+      'label_display' => '0',
+      'formatter' => [
+        'type' => 'text_default',
+        'settings' => [],
+        'label' => 'hidden',
+        'third_party_settings' => [],
+      ],
+      'context_mapping' => ['entity' => 'layout_builder.entity'],
+      'provider' => 'layout_builder',
+    ]
+  );
+  $body_comp->setWeight(-2);
+
+  $section->appendComponent($media_comp);
+  $section->appendComponent($body_comp);
+
+  $display->setThirdPartySetting('layout_builder', 'sections', [$section]);
+  $display->save();
+}

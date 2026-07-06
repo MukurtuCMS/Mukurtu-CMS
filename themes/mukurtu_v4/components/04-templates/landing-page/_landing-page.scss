@@ -14,7 +14,28 @@
     a {
       @include mixins.block-link;
       display: inline-block;
+      border-width: 2px;
+      padding-block: var(--v-space-3xs);
+      padding-inline: var(--v-space-4xxs);
+      font-size: var(--font-size-m);
     }
+  }
+}
+
+.block--media-carousel-block {
+  .button--download,
+  .button--download-icon {
+    display: none;
+  }
+
+  // Thumbnail carousel arrows are repositioned to the main image edges via JS
+  // (media-asset-carousel.js). These custom properties are the fallback.
+  .thumbnail-carousel .splide__arrow--prev {
+    inset-inline-start: var(--carousel-arrow-offset, 0.5em);
+  }
+
+  .thumbnail-carousel .splide__arrow--next {
+    inset-inline-end: var(--carousel-arrow-offset, 0.5em);
   }
 }
 

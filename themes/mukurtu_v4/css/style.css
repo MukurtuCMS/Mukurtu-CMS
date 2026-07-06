@@ -6802,6 +6802,10 @@ header {
   padding-inline: var(--v-space-5xs);
   letter-spacing: normal;
   display: inline-block;
+  border-width: 2px;
+  padding-block: var(--v-space-3xs);
+  padding-inline: var(--v-space-4xxs);
+  font-size: var(--font-size-m);
 }
 .block--call-to-action__link a:hover {
   background-color: var(--brand-primary-dark);
@@ -6809,6 +6813,17 @@ header {
 }
 .block--call-to-action__link a:focus {
   outline-offset: 1px;
+}
+
+.block--media-carousel-block .button--download,
+.block--media-carousel-block .button--download-icon {
+  display: none;
+}
+.block--media-carousel-block .thumbnail-carousel .splide__arrow--prev {
+  inset-inline-start: var(--carousel-arrow-offset, 0.5em);
+}
+.block--media-carousel-block .thumbnail-carousel .splide__arrow--next {
+  inset-inline-end: var(--carousel-arrow-offset, 0.5em);
 }
 
 .layout--onecol .block-wrapper {

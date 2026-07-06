@@ -498,6 +498,14 @@ counterpart, if one exists. */
   z-index: 3;
 }
 
+/* Layout Builder configure-block dialog: gap between Back and Add block. */
+.ui-dialog-off-canvas .form-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
 /* Fix #1734: on the dashboard layout builder page the toolbar anti-flicker
    IIFE restores is-active on secondary toolbar trays (Shortcuts, admin, etc.)
    from sessionStorage before behaviors run, leaving them visually open and

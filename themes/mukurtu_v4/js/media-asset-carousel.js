@@ -32,6 +32,35 @@
     }
 
     /**
+     * In a Layout Builder carousel block, align the thumbnail carousel's
+     * arrows with the rendered edges of the main image.
+     */
+    function alignArrowsToImage(mainSplide, thumbSplide) {
+      const block = mainSplide.root.closest('.block--media-carousel-block');
+      if (!block) return;
+
+      const update = () => {
+        const img = mainSplide.root.querySelector('.splide__slide img');
+        if (!img) return;
+        const splideW = thumbSplide.root.offsetWidth;
+        const imgW = img.getBoundingClientRect().width;
+        if (splideW <= 0 || imgW <= 0) return;
+        const offset = Math.max(0, (splideW - imgW) / 2);
+        thumbSplide.root.style.setProperty('--carousel-arrow-offset', offset + 'px');
+      };
+
+      const img = mainSplide.root.querySelector('.splide__slide img');
+      if (img && img.complete && img.naturalWidth > 0) {
+        update();
+      }
+      else if (img) {
+        img.addEventListener('load', update, { once: true });
+      }
+
+      window.addEventListener('resize', update);
+    }
+
+    /**
      * Initialize the carousels.
      */
     function init(el) {
@@ -66,6 +95,8 @@
       main.sync( thumbnails );
       main.mount();
       thumbnails.mount();
+
+      alignArrowsToImage(main, thumbnails);
     }
 
     Drupal.behaviors.mediaAssetCarousel = {

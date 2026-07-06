@@ -74,17 +74,22 @@ function mukurtu_v4_preprocess_node(&$variables) {
     }
   }
 
-  // Pre-render basic page media assets for carousel use in the node template.
-  // The field is not part of the Layout Builder sections so it must be passed
-  // as a separate template variable.
-  if ($node->bundle() === 'page' && $node->hasField('field_page_media_assets') && !$node->get('field_page_media_assets')->isEmpty()) {
-    $variables['page_media_assets_count'] = $node->get('field_page_media_assets')->count();
-    $variables['page_media_assets_display'] = $node->field_page_media_assets->view([
-      'type' => 'entity_reference_entity_view',
-      'label' => 'hidden',
-      'settings' => ['view_mode' => 'default', 'link' => FALSE],
-    ]);
-    $variables['page_media_thumbnail_display'] = $node->field_page_media_assets->view([
+}
+
+/**
+ * Implements hook_preprocess_field() for field_page_media_assets on nodes.
+ *
+ * Provides thumbnail_display and node_id for the carousel field template.
+ */
+function mukurtu_v4_preprocess_field(array &$variables): void {
+  if ($variables['element']['#field_name'] !== 'field_page_media_assets' ||
+      $variables['element']['#entity_type'] !== 'node') {
+    return;
+  }
+  $node = $variables['element']['#object'];
+  $variables['node_id'] = $node->id();
+  if ($node->get('field_page_media_assets')->count() > 1) {
+    $variables['thumbnail_display'] = $node->field_page_media_assets->view([
       'type' => 'entity_reference_entity_view',
       'label' => 'hidden',
       'settings' => ['view_mode' => 'carousel_thumbnail', 'link' => FALSE],
@@ -228,6 +233,15 @@ function mukurtu_v4_preprocess_media(array &$variables) {
 
   $config = \Drupal::config('mukurtu_media.settings');
   $variables['media_download_enabled'] = $config->get('mukurtu_media_download_enabled') ?? TRUE;
+
+  // Suppress the download button when media renders inside the basic page
+  // media assets carousel (field_page_media_assets via Layout Builder).
+  if ($variables['media_download_enabled'] && ($variables['elements']['#view_mode'] ?? '') === 'media_assets') {
+    $node = \Drupal::routeMatch()->getParameter('node');
+    if ($node instanceof \Drupal\node\NodeInterface && $node->bundle() === 'page') {
+      $variables['media_download_enabled'] = FALSE;
+    }
+  }
   $variables['#cache']['tags'] = Cache::mergeTags(
     $variables['#cache']['tags'] ?? [],
     $config->getCacheTags()

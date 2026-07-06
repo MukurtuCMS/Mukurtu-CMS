@@ -126,6 +126,73 @@ function mukurtu_gin_custom_form_node_form_alter(array &$form, FormStateInterfac
 }
 
 /**
+ * Implements hook_form_BASE_FORM_ID_alter() for layout_builder_configure_block.
+ */
+function mukurtu_gin_custom_form_layout_builder_configure_block_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
+  $form_object = $form_state->getFormObject();
+  if (!method_exists($form_object, 'getCurrentComponent')) {
+    return;
+  }
+
+  // Add a Back link when adding a new inline block so editors can return to
+  // the block type list without having to dismiss the entire dialog.
+  if ($form_id === 'layout_builder_add_block') {
+    $route_match = \Drupal::routeMatch();
+    $delta = $route_match->getRawParameter('delta');
+    $region = $route_match->getRawParameter('region');
+    if ($delta !== NULL && $region !== NULL) {
+      $section_storage = $form_object->getSectionStorage();
+      $form['actions']['back'] = [
+        '#type' => 'link',
+        '#title' => t('Back'),
+        '#url' => Url::fromRoute('layout_builder.choose_inline_block', [
+          'section_storage_type' => $section_storage->getStorageType(),
+          'section_storage' => $section_storage->getStorageId(),
+          'delta' => $delta,
+          'region' => $region,
+        ]),
+        '#attributes' => [
+          'class' => ['use-ajax', 'button', 'button--secondary'],
+          'data-dialog-type' => 'dialog',
+          'data-dialog-renderer' => 'off_canvas',
+        ],
+        '#weight' => -10,
+      ];
+      $form['#attached']['library'][] = 'core/drupal.ajax';
+    }
+  }
+
+  // Horizontal divider: hide the Title and Display title fields -- the block
+  // is purely presentational and needs no label.
+  if ($form_object->getCurrentComponent()->getPlugin()->getPluginId() !== 'inline_block:horizontal_divider') {
+    return;
+  }
+  if (isset($form['settings']['label'])) {
+    $form['settings']['label']['#access'] = FALSE;
+  }
+  if (isset($form['settings']['label_display'])) {
+    $form['settings']['label_display']['#access'] = FALSE;
+  }
+}
+
+/**
+ * Implements hook_form_BASE_FORM_ID_alter() for block_content_form.
+ *
+ * Horizontal dividers have no meaningful title. Hide the required block
+ * description field and pre-fill it so entity validation still passes.
+ */
+function mukurtu_gin_custom_form_block_content_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
+  $entity = $form_state->getFormObject()->getEntity();
+  if ($entity->bundle() !== 'horizontal_divider' || !isset($form['info'])) {
+    return;
+  }
+  $form['info']['#attributes']['style'] = 'display:none';
+  if (empty($form['info']['widget'][0]['value']['#default_value'])) {
+    $form['info']['widget'][0]['value']['#default_value'] = 'Horizontal divider';
+  }
+}
+
+/**
  * Implements hook_field_widget_single_element_form_alter().
  */
 function mukurtu_gin_custom_field_widget_single_element_form_alter(array &$element, FormStateInterface $form_state, array $context): void {
