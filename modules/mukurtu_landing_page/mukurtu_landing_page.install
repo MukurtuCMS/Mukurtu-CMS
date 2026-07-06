@@ -6,6 +6,30 @@
  */
 
 /**
+ * Allow Text and Local Contexts inline blocks on landing pages.
+ */
+function mukurtu_landing_page_update_40003(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.landing_page.default');
+
+  // Add the inline block allowlist.
+  $allowlisted = $config->get('third_party_settings.layout_builder_restrictions.entity_view_mode_restriction.allowlisted_blocks') ?? [];
+  $allowlisted['Inline blocks'] = [
+    'inline_block:basic',
+    'inline_block:local_contexts_block',
+  ];
+  $config->set('third_party_settings.layout_builder_restrictions.entity_view_mode_restriction.allowlisted_blocks', $allowlisted);
+
+  // Remove 'Inline blocks' from restricted_categories. When a category is in
+  // restricted_categories the module ignores the allowlist and shows nothing;
+  // the allowlist entry alone is sufficient to limit which types are available.
+  $restricted = $config->get('third_party_settings.layout_builder_restrictions.entity_view_mode_restriction.restricted_categories') ?? [];
+  $restricted = array_values(array_filter($restricted, fn($c) => $c !== 'Inline blocks'));
+  $config->set('third_party_settings.layout_builder_restrictions.entity_view_mode_restriction.restricted_categories', $restricted);
+
+  $config->save();
+}
+
+/**
  * Rebuild node access grants so published landing pages are visible in Views.
  */
 function mukurtu_landing_page_update_40002(): void {
