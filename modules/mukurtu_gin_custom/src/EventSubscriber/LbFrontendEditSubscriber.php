@@ -52,6 +52,14 @@ class LbFrontendEditSubscriber implements EventSubscriberInterface {
     }
 
     $build['#attributes']['data-layout-block-uuid'] = $event->getComponent()->getUuid();
+
+    // Expose the block's admin label so the JS can build a contextual
+    // accessible name ("Edit Hero Image block") instead of a generic one.
+    $label = trim((string) $plugin->label());
+    if ($label !== '') {
+      $build['#attributes']['data-lb-block-label'] = $label;
+    }
+
     $event->setBuild($build);
   }
 

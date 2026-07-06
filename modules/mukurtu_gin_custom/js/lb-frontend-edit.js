@@ -24,13 +24,25 @@
 
         block.classList.add('lb-editable');
 
-        var btn = document.createElement('a');
+        // Use a <button> rather than <a> so the implicit ARIA role (button) matches
+        // the action -- clicking opens a dialog, not navigating to another page.
+        // Drupal AJAX reads the URL from data-ajax-url on non-anchor elements.
+        var blockLabel = block.getAttribute('data-lb-block-label');
+        var ariaLabel = blockLabel
+          ? Drupal.t('Edit @label', {'@label': blockLabel})
+          : Drupal.t('Edit block');
+
+        var btn = document.createElement('button');
+        btn.type = 'button';
         btn.className = 'lb-edit-btn use-ajax';
-        btn.href = url;
+        btn.setAttribute('data-ajax-url', url);
         btn.setAttribute('data-dialog-type', 'dialog');
         btn.setAttribute('data-dialog-renderer', 'off_canvas');
         btn.setAttribute('data-dialog-options', JSON.stringify({ width: 400 }));
-        btn.setAttribute('aria-label', Drupal.t('Edit block'));
+        // aria-haspopup informs assistive technologies that activating this
+        // button opens a dialog rather than performing a navigation or submission.
+        btn.setAttribute('aria-haspopup', 'dialog');
+        btn.setAttribute('aria-label', ariaLabel);
         btn.innerHTML =
           '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
             '<path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>' +

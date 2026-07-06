@@ -2212,13 +2212,13 @@ function mukurtu_core_update_40071(): void {
  * Add body field to the basic (Text) block type; remove body from featured_content.
  */
 function mukurtu_core_update_40072(): void {
-  $config_source = new \Drupal\Core\Config\FileStorage(
-    \Drupal::service('extension.list.module')->getPath('mukurtu_core') . '/../../config/install'
-  );
+  $profile_path = \Drupal::service('extension.list.profile')->getPath('mukurtu');
+  $config_source = new \Drupal\Core\Config\FileStorage($profile_path . '/config/install');
 
   // Add body field instance to the basic block type.
   $data = $config_source->read('field.field.block_content.basic.body');
   if ($data && !\Drupal::entityTypeManager()->getStorage('field_config')->load('block_content.basic.body')) {
+    unset($data['uuid'], $data['_core']);
     \Drupal\field\Entity\FieldConfig::create($data)->save();
   }
 
@@ -2231,6 +2231,9 @@ function mukurtu_core_update_40072(): void {
   }
 
   // Remove body field from featured_content block type.
+  // Destructive: any stored body content on existing featured_content blocks
+  // will be purged. Safe here because the body field was never exposed to
+  // editors in the featured_content form display.
   $body_field = \Drupal::entityTypeManager()->getStorage('field_config')->load('block_content.featured_content.body');
   if ($body_field) {
     $body_field->delete();

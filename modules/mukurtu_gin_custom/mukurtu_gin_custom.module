@@ -5,6 +5,7 @@
  * Provide Mukurtu Gin Custom.
  */
 
+use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\RedirectCommand;
 use Drupal\Core\Form\FormStateInterface;
@@ -302,6 +303,9 @@ function mukurtu_gin_custom_lb_frontend_edit_ajax(array $form, FormStateInterfac
   \Drupal::service('layout_builder.tempstore_repository')->delete($storage);
 
   $return_url = \Drupal::request()->query->get('frontend_return') ?: '/';
+  if (UrlHelper::isExternal($return_url)) {
+    $return_url = '/';
+  }
   $response = new AjaxResponse();
   $response->addCommand(new RedirectCommand($return_url));
   return $response;

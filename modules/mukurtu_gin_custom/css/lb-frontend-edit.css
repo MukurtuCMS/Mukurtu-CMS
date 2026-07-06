@@ -16,14 +16,16 @@
   justify-content: center;
   width: 2rem;
   height: 2rem;
+  /* #767676 on white = 4.54:1 -- meets WCAG 1.4.11 non-text contrast (3:1). */
   background: #fff;
-  border: 1px solid #ccc;
+  border: 1px solid #767676;
   border-radius: 50%;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
   opacity: 0;
   transition: opacity 0.15s ease, box-shadow 0.15s ease;
-  text-decoration: none;
+  cursor: pointer;
   color: #444;
+  padding: 0;
 }
 
 .lb-edit-btn svg {
@@ -33,13 +35,15 @@
   pointer-events: none;
 }
 
+/* Reveal on hover or whenever focus is anywhere within the block -- this lets
+   sighted keyboard users see the button before they tab to it. */
 .lb-editable:hover .lb-edit-btn,
-.lb-edit-btn:focus {
+.lb-editable:focus-within .lb-edit-btn {
   opacity: 1;
 }
 
 .lb-edit-btn:hover,
-.lb-edit-btn:focus {
+.lb-edit-btn:focus-visible {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
   outline: 2px solid var(--brand-primary, #005a9c);
   outline-offset: 2px;
