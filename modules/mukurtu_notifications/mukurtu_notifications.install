@@ -6,20 +6,59 @@
  */
 
 use Drupal\Core\Config\FileStorage;
+use Drupal\flag\Entity\Flag;
 
 /**
  * Implements hook_install().
  *
  * Creates field_protocol and field_community_ref storages and attachments via
- * Field API on fresh installs. These cannot live in config/install because
- * their dependencies on custom entity types cause UnmetDependenciesException
- * in test environments that bootstrap modules in isolation.
+ * Field API, and the community/protocol follow/email flags via the Flag API,
+ * on fresh installs. These cannot live in config/install because their
+ * dependencies on custom entity types owned by mukurtu_protocol cause
+ * UnmetDependenciesException: mukurtu_protocol and mukurtu_notifications
+ * depend on each other (mukurtu_protocol calls notification functions from a
+ * form submit handler; mukurtu_notifications checks node objects against
+ * mukurtu_protocol's CulturalProtocolControlledInterface), so the module
+ * installer cannot guarantee mukurtu_protocol is already active when
+ * mukurtu_notifications' config/install is processed on a fresh install.
  */
 function mukurtu_notifications_install(): void {
   mukurtu_notifications_create_field_protocol();
   mukurtu_notifications_create_field_community_ref();
   mukurtu_notifications_create_field_notify_email_categories();
   mukurtu_notifications_create_field_notify_frequency();
+  mukurtu_notifications_create_flag_email_community();
+  mukurtu_notifications_create_flag_email_protocol();
+  mukurtu_notifications_create_flag_follow_community();
+  mukurtu_notifications_create_flag_follow_protocol();
+  mukurtu_notifications_configure_message_subscribe();
+}
+
+/**
+ * Sets the flag_prefix (and other) settings message_subscribe and
+ * message_subscribe_email need to auto-discover subscribers via our
+ * mukurtu_follow_ and mukurtu_email_ prefixed flags.
+ *
+ * These cannot live in config/install because message_subscribe and
+ * message_subscribe_email already install their own default
+ * message_subscribe.settings/message_subscribe_email.settings config, and
+ * Drupal's config installer throws PreExistingConfigException if another
+ * module's config/install tries to provide a config object that already
+ * exists in active configuration.
+ */
+function mukurtu_notifications_configure_message_subscribe(): void {
+  \Drupal::configFactory()->getEditable('message_subscribe.settings')
+    ->set('use_queue', FALSE)
+    ->set('notify_own_actions', FALSE)
+    ->set('flag_prefix', 'mukurtu_follow')
+    ->set('debug_mode', FALSE)
+    ->set('default_notifiers', ['email'])
+    ->set('range', 100)
+    ->save();
+
+  \Drupal::configFactory()->getEditable('message_subscribe_email.settings')
+    ->set('flag_prefix', 'mukurtu_email')
+    ->save();
 }
 
 /**
@@ -174,6 +213,157 @@ function mukurtu_notifications_create_field_notify_frequency(): void {
   }
 
   \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
+}
+
+/**
+ * Creates or updates the mukurtu_email_community flag.
+ *
+ * Also used by update_40027 to retarget a pre-existing flag, so this sets
+ * values on a loaded flag rather than only creating a new one -- Flag::create()
+ * with an id that already exists in config storage throws EntityStorageException.
+ */
+function mukurtu_notifications_create_flag_email_community(): void {
+  _mukurtu_notifications_save_flag([
+    'id' => 'mukurtu_email_community',
+    'label' => 'Mukurtu Email Community',
+    'bundles' => ['community'],
+    'entity_type' => 'community',
+    'global' => FALSE,
+    'weight' => 2,
+    'flag_short' => 'Flag this item',
+    'flag_long' => '',
+    'flag_message' => '',
+    'unflag_short' => 'Unflag this item',
+    'unflag_long' => '',
+    'unflag_message' => '',
+    'unflag_denied_text' => '',
+    'flag_type' => 'entity:community',
+    'link_type' => 'ajax_link',
+    'flagTypeConfig' => [
+      'show_in_links' => [],
+      'show_as_field' => TRUE,
+      'show_on_form' => FALSE,
+      'show_contextual_link' => FALSE,
+      'extra_permissions' => ['owner' => '0'],
+    ],
+    'linkTypeConfig' => [],
+  ]);
+}
+
+/**
+ * Creates or updates the mukurtu_email_protocol flag.
+ */
+function mukurtu_notifications_create_flag_email_protocol(): void {
+  _mukurtu_notifications_save_flag([
+    'id' => 'mukurtu_email_protocol',
+    'label' => 'Mukurtu Email Protocol',
+    'bundles' => ['protocol'],
+    'entity_type' => 'protocol',
+    'global' => FALSE,
+    'weight' => 2,
+    'flag_short' => 'Flag this item',
+    'flag_long' => '',
+    'flag_message' => '',
+    'unflag_short' => 'Unflag this item',
+    'unflag_long' => '',
+    'unflag_message' => '',
+    'unflag_denied_text' => '',
+    'flag_type' => 'entity:protocol',
+    'link_type' => 'ajax_link',
+    'flagTypeConfig' => [
+      'show_in_links' => [],
+      'show_as_field' => TRUE,
+      'show_on_form' => FALSE,
+      'show_contextual_link' => FALSE,
+      'extra_permissions' => ['owner' => '0'],
+    ],
+    'linkTypeConfig' => [],
+  ]);
+}
+
+/**
+ * Creates or updates the mukurtu_follow_community flag.
+ *
+ * Also used by update_40025 to retarget the pre-existing node-bundle-targeted
+ * flag onto the community entity type -- see the comment on that function.
+ */
+function mukurtu_notifications_create_flag_follow_community(): void {
+  _mukurtu_notifications_save_flag([
+    'id' => 'mukurtu_follow_community',
+    'label' => 'Mukurtu Follow Community',
+    'bundles' => ['community'],
+    'entity_type' => 'community',
+    'global' => FALSE,
+    'weight' => 3,
+    'flag_short' => 'Follow this Community',
+    'flag_long' => '',
+    'flag_message' => '',
+    'unflag_short' => 'Stop Following this Community',
+    'unflag_long' => '',
+    'unflag_message' => '',
+    'unflag_denied_text' => '',
+    'flag_type' => 'entity:community',
+    'link_type' => 'ajax_link',
+    'flagTypeConfig' => [
+      'show_in_links' => [],
+      'show_as_field' => TRUE,
+      'show_on_form' => FALSE,
+      'show_contextual_link' => FALSE,
+      'extra_permissions' => ['owner' => '0'],
+    ],
+    'linkTypeConfig' => [],
+  ]);
+}
+
+/**
+ * Creates or updates the mukurtu_follow_protocol flag.
+ */
+function mukurtu_notifications_create_flag_follow_protocol(): void {
+  _mukurtu_notifications_save_flag([
+    'id' => 'mukurtu_follow_protocol',
+    'label' => 'Mukurtu Follow Protocol',
+    'bundles' => ['protocol'],
+    'entity_type' => 'protocol',
+    'global' => FALSE,
+    'weight' => 3,
+    'flag_short' => 'Follow this Protocol',
+    'flag_long' => '',
+    'flag_message' => '',
+    'unflag_short' => 'Stop Following this Protocol',
+    'unflag_long' => '',
+    'unflag_message' => '',
+    'unflag_denied_text' => '',
+    'flag_type' => 'entity:protocol',
+    'link_type' => 'ajax_link',
+    'flagTypeConfig' => [
+      'show_in_links' => [],
+      'show_as_field' => TRUE,
+      'show_on_form' => FALSE,
+      'show_contextual_link' => FALSE,
+      'extra_permissions' => ['owner' => '0'],
+    ],
+    'linkTypeConfig' => [],
+  ]);
+}
+
+/**
+ * Creates a flag from $values, or updates it in place if it already exists.
+ *
+ * Flag::create() with an id that already exists in config storage throws
+ * EntityStorageException, so an existing flag must be loaded and have its
+ * properties set individually instead of being recreated.
+ */
+function _mukurtu_notifications_save_flag(array $values): void {
+  $flag = Flag::load($values['id']);
+  if ($flag) {
+    foreach ($values as $property => $value) {
+      $flag->set($property, $value);
+    }
+  }
+  else {
+    $flag = Flag::create($values);
+  }
+  $flag->save();
 }
 
 /**
@@ -776,16 +966,7 @@ function mukurtu_notifications_update_40023(): void {
  * two settings configs with prefixes that match the flags actually in use.
  */
 function mukurtu_notifications_update_40024(): void {
-  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
-  $source = new FileStorage($config_path);
-  $config_storage = \Drupal::service('config.storage');
-
-  foreach ([
-    'message_subscribe.settings',
-    'message_subscribe_email.settings',
-  ] as $config_name) {
-    $config_storage->write($config_name, $source->read($config_name));
-  }
+  mukurtu_notifications_configure_message_subscribe();
 }
 
 /**
@@ -810,7 +991,7 @@ function mukurtu_notifications_update_40025(): void {
   $protocol_source = new FileStorage($protocol_path);
   $config_storage = \Drupal::service('config.storage');
 
-  $config_storage->write('flag.flag.mukurtu_follow_community', $notifications_source->read('flag.flag.mukurtu_follow_community'));
+  mukurtu_notifications_create_flag_follow_community();
   $config_storage->write('message.template.mukurtu_new_item_in_community', $notifications_source->read('message.template.mukurtu_new_item_in_community'));
   $config_storage->write('core.entity_view_display.community.community.full', $protocol_source->read('core.entity_view_display.community.community.full'));
 
@@ -827,13 +1008,11 @@ function mukurtu_notifications_update_40025(): void {
  * Phase 1, so no field changes are needed here.
  */
 function mukurtu_notifications_update_40026(): void {
-  $notifications_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
   $protocol_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol') . '/config/install';
-  $notifications_source = new FileStorage($notifications_path);
   $protocol_source = new FileStorage($protocol_path);
   $config_storage = \Drupal::service('config.storage');
 
-  $config_storage->write('flag.flag.mukurtu_follow_protocol', $notifications_source->read('flag.flag.mukurtu_follow_protocol'));
+  mukurtu_notifications_create_flag_follow_protocol();
   $config_storage->write('core.entity_view_display.protocol.protocol.default', $protocol_source->read('core.entity_view_display.protocol.protocol.default'));
 }
 
@@ -851,16 +1030,8 @@ function mukurtu_notifications_update_40026(): void {
  * mukurtu_follow_protocol gap fixed in update_40026.
  */
 function mukurtu_notifications_update_40027(): void {
-  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
-  $source = new FileStorage($config_path);
-  $config_storage = \Drupal::service('config.storage');
-
-  foreach ([
-    'flag.flag.mukurtu_email_community',
-    'flag.flag.mukurtu_email_protocol',
-  ] as $config_name) {
-    $config_storage->write($config_name, $source->read($config_name));
-  }
+  mukurtu_notifications_create_flag_email_community();
+  mukurtu_notifications_create_flag_email_protocol();
 }
 
 /**
@@ -944,11 +1115,11 @@ function mukurtu_notifications_update_40031(): void {
   foreach ([
     'flag.flag.mukurtu_follow_content',
     'flag.flag.mukurtu_follow_collection',
-    'flag.flag.mukurtu_follow_community',
-    'flag.flag.mukurtu_follow_protocol',
   ] as $config_name) {
     $config_storage->write($config_name, $notifications_source->read($config_name));
   }
+  mukurtu_notifications_create_flag_follow_community();
+  mukurtu_notifications_create_flag_follow_protocol();
 
   foreach ([
     'core.entity_view_display.community.community.full',
