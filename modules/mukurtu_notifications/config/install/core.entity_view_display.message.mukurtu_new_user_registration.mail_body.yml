@@ -16,9 +16,8 @@ targetEntityType: message
 bundle: mukurtu_new_user_registration
 mode: mail_body
 content:
-  partial_1:
+  partial_0:
     weight: 0
     region: content
 hidden:
-  partial_0: true
   search_api_excerpt: true

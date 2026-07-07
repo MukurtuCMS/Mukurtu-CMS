@@ -175,8 +175,18 @@ class FormHooks
      *
      * Hides 'Administrator' option from the Roles selection for Mukurtu Managers
      * so that they cannot assign the admin role.
+     *
+     * Must run after the notify_user_default module's form alter
+     * (notify_user_default_form_user_register_form_alter()), which
+     * unconditionally sets the notify checkbox's #default_value to TRUE. This
+     * fix undoes that for anonymous self-registration below.
      */
-    #[Hook("form_user_register_form_alter")]
+    #[
+        Hook(
+            "form_user_register_form_alter",
+            order: new OrderAfter(["notify_user_default"]),
+        ),
+    ]
     public function formUserRegisterFormAlter(
         array &$form,
         FormStateInterface $form_state,
@@ -209,6 +219,18 @@ class FormHooks
                     ':input[name="mail"]' => ["filled" => TRUE],
                 ],
             ];
+            // notify_user_default always defaults this checkbox to checked,
+            // even when core has set #access to FALSE for it (genuine
+            // anonymous self-registration). Because Checkbox::valueCallback()
+            // falls back to #default_value when #access is FALSE, that stray
+            // TRUE default is what actually gets submitted — making core
+            // treat the registration as admin-notified and send the "an
+            // administrator created this account" email instead of the
+            // "no approval required" email. Reset it when the checkbox isn't
+            // actually usable in this form.
+            if (empty($form["account"]["notify"]["#access"])) {
+                $form["account"]["notify"]["#default_value"] = FALSE;
+            }
         }
         if (isset($form["account"]["mail"])) {
             $form["account"]["mail"]["#description"] = t(
