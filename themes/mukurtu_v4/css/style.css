@@ -4343,6 +4343,23 @@ header {
   }
 }
 
+.full-node--access-denied .full-node__main {
+  grid-column: 1/-1;
+}
+@media (min-width: 90rem) {
+  .full-node--access-denied .full-node__main {
+    grid-column: 2/-2;
+  }
+}
+
+.full-node--access-denied .full-node__content {
+  text-align: center;
+}
+
+.layout-container:has(.full-node--access-denied) .page__title {
+  text-align: center;
+}
+
 .browse__default__header {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -6518,6 +6535,17 @@ header {
 .full-node__comment {
   -webkit-margin-before: var(--v-space-xs);
           margin-block-start: var(--v-space-xs);
+}
+
+@media (min-width: 60rem) {
+  .page-node-type-page .full-node__main {
+    grid-column: 1/span 12;
+  }
+}
+@media (min-width: 90rem) {
+  .page-node-type-page .full-node__main {
+    grid-column: 2/span 12;
+  }
 }
 
 .node--status-banner {

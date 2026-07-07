@@ -131,3 +131,19 @@ mukurtu_core.entity.google_tag_container.collection:
     _title: 'Google Tag containers'
   requirements:
     _custom_access: '\Drupal\google_tag\GoogleTagController::containerListingAccess'
+
+mukurtu_core.access_denied:
+  path: '/mukurtu/access-denied'
+  defaults:
+    _controller: '\Drupal\mukurtu_core\Controller\AccessDeniedPageController::build'
+    _title_callback: '\Drupal\mukurtu_core\Controller\AccessDeniedPageController::getTitle'
+  requirements:
+    _access: 'TRUE'
+
+mukurtu_core.access_denied_settings:
+  path: '/admin/config/mukurtu/access-denied'
+  defaults:
+    _form: '\Drupal\mukurtu_core\Form\AccessDeniedSettingsForm'
+    _title: 'Access Denied Page Settings'
+  requirements:
+    _permission: 'administer mukurtu access denied page'
