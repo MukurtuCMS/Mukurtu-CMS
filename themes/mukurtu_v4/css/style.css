@@ -4343,6 +4343,23 @@ header {
   }
 }
 
+.full-node--access-denied .full-node__main {
+  grid-column: 1/-1;
+}
+@media (min-width: 90rem) {
+  .full-node--access-denied .full-node__main {
+    grid-column: 2/-2;
+  }
+}
+
+.full-node--access-denied .full-node__content {
+  text-align: center;
+}
+
+.layout-container:has(.full-node--access-denied) .page__title {
+  text-align: center;
+}
+
 .browse__default__header {
   display: -webkit-box;
   display: -ms-flexbox;
