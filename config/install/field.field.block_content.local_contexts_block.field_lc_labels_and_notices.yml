@@ -3,11 +3,11 @@ status: true
 dependencies:
   config:
     - block_content.type.local_contexts_block
-    - field.storage.block_content.field_local_contexts_labels_and_notices
+    - field.storage.block_content.field_lc_labels_and_notices
   module:
     - mukurtu_local_contexts
-id: block_content.local_contexts_block.field_local_contexts_labels_and_notices
-field_name: field_local_contexts_labels_and_notices
+id: block_content.local_contexts_block.field_lc_labels_and_notices
+field_name: field_lc_labels_and_notices
 entity_type: block_content
 bundle: local_contexts_block
 label: 'Local Contexts labels and notices'

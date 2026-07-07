@@ -2126,7 +2126,7 @@ function mukurtu_core_update_40070(): void {
     'field.storage.block_content.field_block_media',
     'field.storage.block_content.field_cta_link',
     'field.storage.block_content.field_media_items',
-    'field.storage.block_content.field_local_contexts_labels_and_notices',
+    'field.storage.block_content.field_lc_labels_and_notices',
     'field.storage.block_content.field_local_contexts_projects',
   ];
   foreach ($field_storage_configs as $config_name) {
@@ -2147,7 +2147,7 @@ function mukurtu_core_update_40070(): void {
     'field.field.block_content.call_to_action.body',
     'field.field.block_content.call_to_action.field_cta_link',
     'field.field.block_content.media_carousel_block.field_media_items',
-    'field.field.block_content.local_contexts_block.field_local_contexts_labels_and_notices',
+    'field.field.block_content.local_contexts_block.field_lc_labels_and_notices',
     'field.field.block_content.local_contexts_block.field_local_contexts_projects',
     // Form displays.
     'core.entity_form_display.block_content.media_block.default',

@@ -3,7 +3,7 @@ status: true
 dependencies:
   config:
     - block_content.type.local_contexts_block
-    - field.field.block_content.local_contexts_block.field_local_contexts_labels_and_notices
+    - field.field.block_content.local_contexts_block.field_lc_labels_and_notices
     - field.field.block_content.local_contexts_block.field_local_contexts_projects
   module:
     - mukurtu_local_contexts
@@ -19,7 +19,7 @@ content:
     third_party_settings: {  }
     weight: 0
     region: content
-  field_local_contexts_labels_and_notices:
+  field_lc_labels_and_notices:
     type: local_contexts_label_and_notice
     label: hidden
     settings: {  }
