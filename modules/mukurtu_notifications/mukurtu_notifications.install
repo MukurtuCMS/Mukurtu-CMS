@@ -381,15 +381,19 @@ function mukurtu_notifications_update_40017(): void {
 
 /**
  * Fix mukurtu_new_user_registration mail_body display pointing at a
- * nonexistent partial_1 delta, which left the admin notification email body
- * blank.
+ * nonexistent partial_1 delta, and its message body linking with the [url]
+ * token instead of [edit-url]. The former left the admin notification email
+ * body blank; the latter left its link unresolved.
  */
 function mukurtu_notifications_update_40018(): void {
   $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
   $source = new FileStorage($config_path);
   $config_storage = \Drupal::service('config.storage');
-  $config_storage->write(
+  $configs = [
+    'message.template.mukurtu_new_user_registration',
     'core.entity_view_display.message.mukurtu_new_user_registration.mail_body',
-    $source->read('core.entity_view_display.message.mukurtu_new_user_registration.mail_body')
-  );
+  ];
+  foreach ($configs as $config_name) {
+    $config_storage->write($config_name, $source->read($config_name));
+  }
 }
