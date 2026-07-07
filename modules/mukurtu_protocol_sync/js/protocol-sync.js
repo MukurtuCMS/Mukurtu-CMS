@@ -50,7 +50,6 @@
         var message = document.createElement('p');
         message.className = 'mukurtu-protocol-sync-message';
         message.setAttribute('aria-live', 'polite');
-        message.textContent = Drupal.t('Cultural protocols and sharing setting are synced with the parent content.');
         message.style.display = 'none';
         formItem.insertAdjacentElement('afterend', message);
 
@@ -66,11 +65,17 @@
           var targets = getSyncTargets();
           if (checkbox.checked) {
             targets.forEach(function (el) { el.style.display = 'none'; });
+            // Set the text at the same time the region becomes visible so
+            // assistive tech observes a real content mutation and reliably
+            // announces it (toggling display alone on unchanging text is
+            // not consistently announced across screen readers).
+            message.textContent = Drupal.t('Cultural protocols and sharing setting are synced with the parent content.');
             message.style.display = '';
           }
           else {
             targets.forEach(function (el) { el.style.display = ''; });
             message.style.display = 'none';
+            message.textContent = '';
           }
         }
 
@@ -92,13 +97,14 @@
    */
   Drupal.behaviors.mukurtuProtocolSyncNodeForm = {
     attach: function (context, settings) {
-      once('mukurtu-ps-node-form', '.js-media-library-open-button', context).forEach(function (btn) {
-        // Only act on buttons that live inside a node edit/create form.
-        var nodeForm = btn.closest('form[id*="node-"]');
-        if (!nodeForm) {
-          return;
-        }
-
+      // Guard on the form rather than the button itself. Listeners bound to
+      // the same target element fire in registration order regardless of the
+      // capture flag, so a capture listener on the button cannot reliably
+      // beat Drupal core's own AJAX listener bound to that same button. A
+      // capture listener on an ancestor (the form) is guaranteed to run
+      // first, since it fires during the capture phase before the event
+      // reaches the button.
+      once('mukurtu-ps-node-form', 'form[id*="node-"]', context).forEach(function (nodeForm) {
         function protocolsSelected() {
           var protocolWrapper = nodeForm.querySelector('[id*="field-cultural-protocols"][id$="-wrapper"]');
           if (!protocolWrapper) {
@@ -109,42 +115,50 @@
           return !!(hasProtocol && hasSharing);
         }
 
-        // Intercept mousedown in capture phase: Drupal's AJAX sets the
-        // triggering element on mousedown, so we must block there first.
-        btn.addEventListener('mousedown', function (event) {
-          if (!protocolsSelected()) {
-            event.preventDefault();
-            event.stopImmediatePropagation();
+        function guard(event) {
+          var btn = event.target.closest('.js-media-library-open-button');
+          if (!btn || !nodeForm.contains(btn) || protocolsSelected()) {
+            return;
           }
-        }, true);
-
-        // Also intercept click in capture phase as a safety net, and show
-        // the user-facing message here so the dismiss handler (which listens
-        // for the next click) isn't triggered by the same interaction.
-        btn.addEventListener('click', function (event) {
-          if (!protocolsSelected()) {
-            event.preventDefault();
-            event.stopImmediatePropagation();
+          // Drupal core's AJAX behavior triggers keyboard activation (Enter
+          // and Space) by calling its response handler directly from its own
+          // 'keypress' listener, not by dispatching a click, so keypress must
+          // be guarded here too. Ignore keypresses that aren't an activation.
+          if (event.type === 'keypress' && event.key !== 'Enter' && event.key !== ' ') {
+            return;
+          }
+          event.preventDefault();
+          event.stopPropagation();
+          // Show the message on click and keypress (completed interactions),
+          // not on mousedown, so the dismiss handler (which listens for the
+          // next click) isn't triggered by the same interaction that opened it.
+          if (event.type === 'click' || event.type === 'keypress') {
             _showProtocolRequiredMessage(btn);
           }
-        }, true);
+        }
+
+        nodeForm.addEventListener('mousedown', guard, true);
+        nodeForm.addEventListener('click', guard, true);
+        nodeForm.addEventListener('keypress', guard, true);
       });
     }
   };
 
-  function _showProtocolRequiredMessage(btn) {
-    var container = btn.closest('.js-media-library-widget') || btn.parentElement;
+  // Tracks the currently displayed "protocols required" message so a new
+  // one (from any field's button) always replaces the previous one instead
+  // of stacking duplicate messages and dismiss listeners.
+  var activeProtocolMessage = null;
 
-    // Remove any previously shown message for this widget.
-    var sibling = container.nextElementSibling;
-    if (sibling && sibling.classList.contains('mukurtu-ps-required-message')) {
-      sibling.remove();
+  function _showProtocolRequiredMessage(btn) {
+    if (activeProtocolMessage) {
+      activeProtocolMessage.remove();
     }
+
+    var container = btn.closest('.js-media-library-widget') || btn.parentElement;
 
     var el = document.createElement('div');
     el.className = 'mukurtu-ps-required-message messages messages--warning';
     el.setAttribute('role', 'alert');
-    el.setAttribute('aria-label', Drupal.t('Warning'));
     el.setAttribute('tabindex', '-1');
     el.textContent = Drupal.t(
       'To sync media cultural protocols, the content must have protocols assigned first. Select content protocols, then add media.'
@@ -152,29 +166,32 @@
     container.insertAdjacentElement('afterend', el);
     el.focus();
 
-    function removeMessage() {
+    function remove() {
       el.remove();
       document.removeEventListener('click', dismissClick, true);
       document.removeEventListener('keydown', dismissKey, true);
+      activeProtocolMessage = null;
     }
 
     // Dismiss on the next click outside the message.
     function dismissClick(e) {
       if (!el.contains(e.target)) {
-        removeMessage();
+        remove();
       }
     }
 
     // Dismiss on Escape for keyboard users.
     function dismissKey(e) {
       if (e.key === 'Escape') {
-        removeMessage();
+        remove();
         btn.focus();
       }
     }
 
     document.addEventListener('click', dismissClick, true);
     document.addEventListener('keydown', dismissKey, true);
+
+    activeProtocolMessage = {remove: remove};
   }
 
 })(Drupal, once);

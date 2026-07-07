@@ -67,7 +67,7 @@ function mukurtu_protocol_sync_entity_bundle_field_info(EntityTypeInterface $ent
  * when media is being added from within a content form's media library modal.
  */
 function mukurtu_protocol_sync_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
-  if (strpos($form_id, 'media_library_add_form_') !== 0) {
+  if (!str_starts_with($form_id, 'media_library_add_form_')) {
     return;
   }
 
@@ -257,8 +257,12 @@ function _mukurtu_protocol_sync_sync_media_from_node(NodeInterface $node): void 
         $processed_ids[] = $media_id;
       }
       elseif ($parent_id === (int) $node->id()) {
-        $media->set('field_cultural_protocols', $protocol_value);
-        $media->save();
+        // Skip the save when protocols already match to avoid an extra
+        // media revision on every node save that doesn't touch protocols.
+        if ($media->get('field_cultural_protocols')->getValue() !== $protocol_value) {
+          $media->set('field_cultural_protocols', $protocol_value);
+          $media->save();
+        }
         $processed_ids[] = $media_id;
       }
     }
@@ -375,7 +379,6 @@ function mukurtu_protocol_sync_form_node_form_alter(array &$form, FormStateInter
     '#attributes' => [
       'class' => ['messages', 'messages--warning'],
       'role' => 'alert',
-      'aria-label' => t('Warning'),
     ],
     '#weight' => -100,
     'title' => ['#markup' => '<h2 class="visually-hidden">' . t('Warning message') . '</h2>'],
@@ -394,11 +397,13 @@ function mukurtu_protocol_sync_form_node_form_alter(array &$form, FormStateInter
  */
 function mukurtu_protocol_sync_media_library_open_ajax(array $form, FormStateInterface $form_state) {
   $field_value = $form_state->getValue('field_cultural_protocols');
+
+  $protocol_ids = [];
+  $sharing = '';
   if (!empty($field_value[0]['value'])) {
     $value = $field_value[0]['value'];
     $sharing = (string) ($value['sharing_setting'] ?? '');
 
-    $protocol_ids = [];
     foreach ($value['protocol_selection'] ?? [] as $community) {
       foreach ($community['protocols'] ?? [] as $protocol_id => $checked) {
         if ($checked) {
@@ -406,12 +411,18 @@ function mukurtu_protocol_sync_media_library_open_ajax(array $form, FormStateInt
         }
       }
     }
+  }
 
-    if (!empty($protocol_ids) && !empty($sharing)) {
-      $tempstore = \Drupal::service('tempstore.private')->get('mukurtu_protocol_sync');
-      $uid = \Drupal::currentUser()->id();
-      $tempstore->set("ps_{$uid}", ['protocols' => $protocol_ids, 'sharing' => $sharing]);
-    }
+  $tempstore = \Drupal::service('tempstore.private')->get('mukurtu_protocol_sync');
+  $uid = \Drupal::currentUser()->id();
+
+  if (!empty($protocol_ids) && !empty($sharing)) {
+    $tempstore->set("ps_{$uid}", ['protocols' => $protocol_ids, 'sharing' => $sharing]);
+  }
+  else {
+    // Clear any stale selection so a previously-stored (and since cleared)
+    // protocol selection can't leak into pre-populating unrelated media.
+    $tempstore->delete("ps_{$uid}");
   }
 
   return \Drupal\media_library\Plugin\Field\FieldWidget\MediaLibraryWidget::openMediaLibrary($form, $form_state);
@@ -457,7 +468,6 @@ function mukurtu_protocol_sync_form_media_form_alter(array &$form, FormStateInte
     '#attributes' => [
       'class' => ['messages', 'messages--status'],
       'role' => 'status',
-      'aria-label' => t('Status message'),
     ],
     '#weight' => -100,
     'title' => ['#markup' => '<h2 class="visually-hidden">' . t('Status message') . '</h2>'],
