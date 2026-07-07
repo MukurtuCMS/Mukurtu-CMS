@@ -763,65 +763,6 @@ class FormHooks
                 "Block or delete account",
             );
         }
-
-        // Notification preferences section (only on existing accounts).
-        $account = $form_state->getFormObject()->getEntity();
-        if (!$account->isNew() && $account->hasField("message_subscribe_email")) {
-            $form["notification_preferences"] = [
-                "#type" => "details",
-                "#title" => t("Notification preferences"),
-                "#open" => FALSE,
-                "#weight" => 10,
-            ];
-            $form["notification_preferences"]["message_subscribe_email"] = [
-                "#type" => "checkbox",
-                "#title" => t("Receive email notifications for content I follow"),
-                "#default_value" => (bool) $account->get("message_subscribe_email")->value,
-            ];
-            if ($account->hasField("message_digest")) {
-                $field_definitions = \Drupal::service("entity_field.manager")
-                    ->getFieldDefinitions("user", "user");
-                $options = [];
-                if (isset($field_definitions["message_digest"])) {
-                    $options = message_digest_allowed_values_callback(
-                        $field_definitions["message_digest"]->getFieldStorageDefinition()
-                    );
-                }
-                $form["notification_preferences"]["message_digest"] = [
-                    "#type" => "select",
-                    "#title" => t("Email frequency"),
-                    "#options" => $options,
-                    "#default_value" => $account->get("message_digest")->value ?? 0,
-                    "#states" => [
-                        "visible" => [
-                            ':input[name="message_subscribe_email"]' => ["checked" => TRUE],
-                        ],
-                    ],
-                ];
-            }
-            $form["#entity_builders"][] = [static::class, "buildNotificationPreferences"];
-        }
-    }
-
-    /**
-     * Entity builder callback to save notification preference fields.
-     *
-     * Runs before entity save so the changed values are persisted with the
-     * rest of the user entity in the same transaction.
-     */
-    public static function buildNotificationPreferences(
-        string $entity_type,
-        User $user,
-        array &$form,
-        FormStateInterface $form_state,
-    ): void {
-        if ($user->hasField("message_subscribe_email")) {
-            $user->set("message_subscribe_email", (int) $form_state->getValue("message_subscribe_email"));
-        }
-        if ($user->hasField("message_digest")) {
-            $digest_val = $form_state->getValue("message_digest");
-            $user->set("message_digest", $digest_val !== NULL ? $digest_val : 0);
-        }
     }
 
     /**
