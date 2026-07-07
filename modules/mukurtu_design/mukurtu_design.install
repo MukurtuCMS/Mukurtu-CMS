@@ -1,0 +1,21 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the Mukurtu Design module.
+ */
+
+use Drupal\field\Entity\FieldConfig;
+
+/**
+ * Correct the design settings palette default value to match the site default.
+ */
+function mukurtu_design_update_10000(): void {
+  $field = FieldConfig::loadByName('config_pages', 'design_settings', 'field_design_settings__palette');
+  if (!$field) {
+    return;
+  }
+
+  $field->setDefaultValue(['value' => 'red-bone']);
+  $field->save();
+}
