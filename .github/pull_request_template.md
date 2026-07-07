@@ -1,4 +1,4 @@
-Pre-merge checklist:
+## Pre-merge checklist:
 
 - [ ] I have checked for and if required, created update hooks.
 - [ ] I have run an accessibility check, and resolved any issues.
