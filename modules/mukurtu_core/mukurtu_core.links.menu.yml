@@ -32,7 +32,7 @@ mukurtu_core.settings_assorted:
 mukurtu_core.citation_templates:
   title: "Citation templates"
   parent: mukurtu_dashboard
-  menu_name: dashboard-content-settings
+  menu_name: dashboard-site-settings
   description: "Configure citation field templates."
   route_name: mukurtu_core.citation_templates
 mukurtu_core.manual:

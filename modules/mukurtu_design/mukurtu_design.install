@@ -19,3 +19,15 @@ function mukurtu_design_update_10000(): void {
   $field->setDefaultValue(['value' => 'red-bone']);
   $field->save();
 }
+
+/**
+ * Move the design settings page from /admin/config/designsettings to /admin/config/color-settings.
+ */
+function mukurtu_design_update_10001(): void {
+  $config = \Drupal::configFactory()->getEditable('config_pages.type.design_settings');
+  if ($config->isNew()) {
+    return;
+  }
+
+  $config->set('menu.path', '/admin/config/color-settings')->save();
+}
