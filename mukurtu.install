@@ -44,10 +44,6 @@ function mukurtu_install() {
   // Uninstall search.
   \Drupal::service('module_installer')->uninstall(['search']);
 
-  // Message digest UI doesn't seem to get correctly resolved as a
-  // dependency, so we'll install it here.
-  \Drupal::service('module_installer')->install(['message_digest_ui']);
-
   // @todo: Make an installation option to enable this module.
   // \Drupal::service('module_installer')->install(['mukurtu_solr']);
 
@@ -371,7 +367,6 @@ function mukurtu_install() {
     'administer media fields',
     'administer media form display',
     'administer menu',
-    'administer message digest',
     'administer message display',
     'administer message fields',
     'administer message form display',
@@ -588,7 +583,6 @@ function mukurtu_install() {
     'administer media fields',
     'administer media form display',
     'administer menu',
-    'administer message digest',
     'administer message display',
     'administer message fields',
     'administer message form display',

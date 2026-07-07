@@ -3,7 +3,6 @@ status: true
 dependencies:
   config:
     - field.field.user.user.field_display_name
-    - field.field.user.user.message_digest
     - field.field.user.user.message_subscribe_email
     - field.field.user.user.user_picture
     - image.style.media_library
@@ -42,7 +41,6 @@ hidden:
   langcode: true
   path: true
   user_picture: true
-  message_digest: true
   message_subscribe_email: true
   contact: true
   timezone: true
