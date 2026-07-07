@@ -44,7 +44,7 @@ function mukurtu_protocol_sync_entity_bundle_field_info(EntityTypeInterface $ent
   return [
     'field_sync_protocols' => BaseFieldDefinition::create('boolean')
       ->setLabel(t('Sync protocols with content.'))
-      ->setDescription(t("When enabled, this media asset's protocols will match its content, when the content protocols are updated."))
+      ->setDescription(t("When enabled, this media asset's protocols will always match those of it's parent content to keep content and media access in sync. Disable sync to set media protocols independent of parent content.  Media created within a content form will automatically inherit content protocols; media created elsewhere require protocol selection, but will sync once added to content."))
       ->setDefaultValue(FALSE)
       ->setRevisionable(TRUE)
       ->setDisplayConfigurable('form', TRUE)
