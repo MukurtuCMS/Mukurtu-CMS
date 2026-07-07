@@ -97,12 +97,6 @@
     }
   }
 
-  &__citation {
-    .field--name-field-citation {
-      @include mixins.divider;
-    }
-  }
-
   &__comment {
     margin-block-start: var(--v-space-xs);
   }
@@ -190,6 +184,40 @@
       a {
         word-break: normal;
         overflow-wrap: anywhere;
+      }
+    }
+
+    .field--name-field-citation {
+      overflow-wrap: anywhere;
+      word-break: normal;
+
+      .button--copy-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        inline-size: 44px;
+        block-size: 44px;
+        padding: 0;
+        flex-shrink: 0;
+        margin-block-start: var(--v-space-4xxs);
+
+        svg {
+          display: block;
+          fill: currentColor;
+        }
+
+        &:focus-visible {
+          // The global --focus-color (#66afe9) is only ~2.4:1 against this
+          // field's near-white sidebar background, below the 3:1 minimum
+          // (WCAG 1.4.11). Use the button's own dark background color
+          // instead, matching the pattern in _glightbox.scss.
+          outline: 2px solid var(--brand-primary-dark);
+          outline-offset: 2px;
+        }
+
+        &.is-copied {
+          background-color: var(--color-status-dark);
+        }
       }
     }
 

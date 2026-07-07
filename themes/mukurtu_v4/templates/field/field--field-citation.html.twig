@@ -1,0 +1,44 @@
+{#
+/**
+ * @file
+ * Theme override for the field_citation field.
+ *
+ * Adds a "Copy citation" icon button and an aria-live status region so users
+ * can copy the plain-text citation (including the record URL) to the
+ * clipboard. See js/copy-citation.js and mukurtu_v4.libraries.yml
+ * (copy-citation library).
+ *
+ * Available variables: see field.html.twig.
+ */
+#}
+{%
+  set classes = [
+    'field',
+    'field--name-' ~ field_name|clean_class,
+    'field--type-' ~ field_type|clean_class,
+    'field--label-' ~ label_display,
+  ]
+%}
+{%
+  set title_classes = [
+    'field__label',
+    label_display == 'visually_hidden' ? 'visually-hidden',
+  ]
+%}
+
+{{ attach_library('mukurtu_v4/copy-citation') }}
+
+<div{{ attributes.addClass(classes) }}>
+  {% if not label_hidden %}
+    <div{{ title_attributes.addClass(title_classes) }}>{{ label }}</div>
+  {% endif %}
+  {% for item in items %}
+    <div{{ item.attributes.addClass('field__item') }}>
+      <div class="citation-text" data-citation-text>{{ item.content }}</div>
+      <button type="button" class="button button--copy-icon" data-copy-citation aria-label="{{ 'Copy citation'|t }}">
+        <svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="16" height="18" aria-hidden="true"><path d="M11 0H3a1 1 0 0 0-1 1v1H1a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-1h1a1 1 0 0 0 1-1V1a1 1 0 0 0-1-1zM10 17H1V3h1v12a1 1 0 0 0 1 1h7v1zm2-2H3V2h8v13z"/></svg>
+      </button>
+      <div class="visually-hidden" role="status" aria-live="polite" data-copy-citation-status></div>
+    </div>
+  {% endfor %}
+</div>
