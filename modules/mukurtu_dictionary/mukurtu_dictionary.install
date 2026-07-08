@@ -1157,3 +1157,42 @@ function mukurtu_dictionary_update_40031(): void {
 
   $config->save();
 }
+
+/**
+ * Hide the export-list flag button on dictionary word and word list displays.
+ */
+function mukurtu_dictionary_update_40033(): void {
+  $displays = [
+    'core.entity_view_display.node.dictionary_word.full' => 'group_metadata',
+    'core.entity_view_display.node.dictionary_word.taxonomy_record' => NULL,
+    'core.entity_view_display.node.dictionary_word.search_preview' => NULL,
+    'core.entity_view_display.node.word_list.default' => NULL,
+    'core.entity_view_display.node.word_list.full' => NULL,
+    'core.entity_view_display.node.word_list.taxonomy_record' => NULL,
+  ];
+
+  foreach ($displays as $display_id => $group_name) {
+    $config = \Drupal::configFactory()->getEditable($display_id);
+    if ($config->isNew()) {
+      continue;
+    }
+
+    $content = $config->get('content') ?? [];
+    if (isset($content['flag_export_content'])) {
+      unset($content['flag_export_content']);
+      $config->set('content', $content);
+    }
+
+    $hidden = $config->get('hidden') ?? [];
+    $hidden['flag_export_content'] = TRUE;
+    $config->set('hidden', $hidden);
+
+    if ($group_name) {
+      $children = $config->get("third_party_settings.field_group.$group_name.children") ?? [];
+      $children = array_values(array_filter($children, fn($child) => $child !== 'flag_export_content'));
+      $config->set("third_party_settings.field_group.$group_name.children", $children);
+    }
+
+    $config->save();
+  }
+}
