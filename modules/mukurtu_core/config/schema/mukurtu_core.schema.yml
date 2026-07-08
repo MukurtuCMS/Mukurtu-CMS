@@ -798,3 +798,14 @@ block.settings.mukurtu_core_example:
 media.source.external_embed:
   type: media.source.field_aware
   label: '"External Embed" media source configuration'
+
+mukurtu_core.access_denied:
+  type: config_object
+  label: 'Access denied page settings'
+  mapping:
+    title:
+      type: label
+      label: 'Title'
+    message:
+      type: text_format
+      label: 'Message'
