@@ -35,6 +35,14 @@ mukurtu_core.citation_templates:
   menu_name: dashboard-site-settings
   description: "Configure citation field templates."
   route_name: mukurtu_core.citation_templates
+mukurtu_core.access_denied_settings:
+  title: "Access Denied Page"
+  parent: mukurtu_dashboard
+  menu_name: dashboard-site-settings
+  description: "Edit the title and message shown on the access denied (403) page."
+  route_name: mukurtu_core.access_denied_settings
+  expanded: TRUE
+  weight: 0
 mukurtu_core.manual:
   title: 'Mukurtu User Manual'
   description: 'Mukurtu 4 user manual.'
