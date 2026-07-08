@@ -1,0 +1,4 @@
+title: 'Incorrect Permissions'
+message:
+  value: 'If you think you should have access, contact the site administrator for more information.'
+  format: full_html

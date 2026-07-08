@@ -1,0 +1,22 @@
+@use "../../00-base/layout/layout";
+
+// The access denied (403) page reuses the full-node grid, but takes the
+// full-width single-column treatment (like a basic page) instead of the
+// narrower content+sidebar width used by templates such as Digital Heritage
+// or Person.
+.full-node--access-denied .full-node__main {
+  @include layout.layout--full-width-grid-item;
+}
+
+.full-node--access-denied .full-node__content {
+  text-align: center;
+}
+
+// The page title is rendered outside of page--403.html.twig's control (in
+// the shared page.html.twig template above <main>), so :has() is used to
+// scope this to pages where our access-denied content is present rather
+// than depending on a body/path class (which reflects the originally
+// requested path, not this route, since Drupal forwards internally).
+.layout-container:has(.full-node--access-denied) .page__title {
+  text-align: center;
+}
