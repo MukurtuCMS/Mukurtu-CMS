@@ -51,6 +51,7 @@ third_party_settings:
         - group_base_word_entry
         - group_additional_word_entries
         - group_additional_fields
+        - comment
       label: 'Primary Fields'
       parent_name: ''
       region: content
