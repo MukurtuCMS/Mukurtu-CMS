@@ -14,7 +14,6 @@ dependencies:
   - 'drupal:views'
   - 'flag:flag'
   - 'message:message'
-  - 'message_digest:message_digest'
   - 'message_notify:message_notify'
   - 'message_subscribe:message_subscribe'
   - 'message_subscribe:message_subscribe_email'
