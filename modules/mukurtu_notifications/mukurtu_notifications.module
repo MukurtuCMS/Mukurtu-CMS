@@ -1149,12 +1149,19 @@ function mukurtu_notifications_extract_notify_uids(FormStateInterface $form_stat
  *
  * @param \Drupal\node\Entity\Node $node
  *   The node whose state changed.
- * @param string $old_state
- *   The previous moderation state machine name.
- * @param string $new_state
- *   The new moderation state machine name.
+ * @param string|null $old_state
+ *   The previous moderation state machine name, or NULL if the field wasn't
+ *   yet populated (e.g. a node saved before its bundle had the field).
+ * @param string|null $new_state
+ *   The new moderation state machine name, or NULL if the field isn't
+ *   populated yet (e.g. a programmatically-created node that hasn't been
+ *   through the moderation form).
  */
-function mukurtu_notifications_handle_moderation_change(Node $node, string $old_state, string $new_state): void {
+function mukurtu_notifications_handle_moderation_change(Node $node, ?string $old_state, ?string $new_state): void {
+  if ($new_state === NULL) {
+    return;
+  }
+
   $current_user_id = (int) \Drupal::currentUser()->id();
   $owner_id = (int) $node->getOwnerId();
   $template = NULL;
