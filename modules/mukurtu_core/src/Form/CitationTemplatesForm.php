@@ -49,8 +49,8 @@ class CitationTemplatesForm extends ConfigFormBase {
     foreach ($bundleInfo as $bundleName => $bundleValue) {
       $form['citation_templates'][$bundleName] = [
         '#type' => 'textarea',
-        '#title' => $this->t($bundleValue['label'] . ' Citation Template'),
-        '#description' => $this->t('Manage citation template for ' . $bundleValue['label'] . '.'),
+        '#title' => $this->t('@label Citation Template', ['@label' => $bundleValue['label']]),
+        '#description' => $this->t('Manage citation template for @label.', ['@label' => $bundleValue['label']]),
         '#default_value' => $config->get($bundleName) ?? '',
       ];
 
