@@ -196,6 +196,28 @@ function mukurtu_gin_custom_form_node_form_alter(array &$form, FormStateInterfac
       $form['moderation_state']['widget'][0]['state']['#title'] = t('Save as');
     }
   }
+
+  // Basic pages manage their blocks and content via Layout Builder, which
+  // this form does not expose -- point editors to the Layout tab instead.
+  $entity = $form_state->getFormObject()->getEntity();
+  if ($entity instanceof NodeInterface &&
+      $entity->bundle() === 'page' &&
+      !$entity->isNew() &&
+      $entity->hasField('layout_builder__layout')) {
+    $layout_url = Url::fromRoute('layout_builder.overrides.node.view', ['node' => $entity->id()]);
+    if ($layout_url->access()) {
+      $form['mukurtu_layout_builder_notice'] = [
+        '#type' => 'container',
+        '#attributes' => ['class' => ['messages', 'messages--status']],
+        '#weight' => -1000,
+        'message' => [
+          '#markup' => t('This page uses layout builder to add and manage page blocks and content. Use the <a href=":url">Layout</a> tab to make changes.', [
+            ':url' => $layout_url->toString(),
+          ]),
+        ],
+      ];
+    }
+  }
 }
 
 /**
@@ -252,6 +274,7 @@ function mukurtu_gin_custom_form_layout_builder_configure_block_alter(array &$fo
   }
   if (isset($form['settings']['label_display'])) {
     $form['settings']['label_display']['#access'] = FALSE;
+    $form['settings']['label_display']['#default_value'] = FALSE;
   }
 }
 

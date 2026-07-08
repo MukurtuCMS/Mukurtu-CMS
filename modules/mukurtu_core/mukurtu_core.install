@@ -2355,3 +2355,84 @@ function mukurtu_core_update_40074(): void {
     }
   }
 }
+
+/**
+ * Add the missing media assets field block to existing page node overrides.
+ *
+ * Update 40068 created per-node Layout Builder overrides for existing page
+ * nodes containing only the body component, explicitly excluding
+ * field_page_media_assets. Update 40073 later added that field block to the
+ * page bundle's default view display, but per-node overrides take
+ * precedence over the default display and are never touched by it, so any
+ * page with an override from update 40068 is still missing its media
+ * carousel.
+ */
+function mukurtu_core_update_40075(&$sandbox): string {
+  if (!isset($sandbox['progress'])) {
+    $nids = \Drupal::entityQuery('node')
+      ->condition('type', 'page')
+      ->accessCheck(FALSE)
+      ->execute();
+    $sandbox['nids'] = array_values($nids);
+    $sandbox['total'] = count($nids);
+    $sandbox['progress'] = 0;
+  }
+
+  if ($sandbox['total'] === 0) {
+    $sandbox['#finished'] = 1;
+    return 'No basic page nodes to check for the media carousel field block.';
+  }
+
+  $batch_size = 25;
+  $nids_batch = array_slice($sandbox['nids'], $sandbox['progress'], $batch_size);
+  $uuid_generator = new \Drupal\Component\Uuid\Php();
+
+  foreach ($nids_batch as $nid) {
+    $node = \Drupal\node\Entity\Node::load($nid);
+    if ($node && $node->hasField('layout_builder__layout') && !$node->get('layout_builder__layout')->isEmpty()) {
+      $sections = $node->get('layout_builder__layout')->getSections();
+      if (!empty($sections)) {
+        $has_media_block = FALSE;
+        foreach ($sections as $section) {
+          foreach ($section->getComponents() as $component) {
+            if ($component->getPlugin()->getPluginId() === 'field_block:node:page:field_page_media_assets') {
+              $has_media_block = TRUE;
+              break 2;
+            }
+          }
+        }
+
+        if (!$has_media_block) {
+          $media_component = new \Drupal\layout_builder\SectionComponent(
+            $uuid_generator->generate(),
+            'content',
+            [
+              'id' => 'field_block:node:page:field_page_media_assets',
+              'label' => '',
+              'label_display' => '0',
+              'formatter' => [
+                'type' => 'entity_reference_entity_view',
+                'settings' => ['view_mode' => 'media_assets', 'link' => FALSE],
+                'label' => 'hidden',
+                'third_party_settings' => [],
+              ],
+              'context_mapping' => ['entity' => 'layout_builder.entity'],
+              'provider' => 'layout_builder',
+            ]
+          );
+          $media_component->setWeight(-1);
+          $sections[0]->appendComponent($media_component);
+          $node->set('layout_builder__layout', $sections);
+          $node->save();
+        }
+      }
+    }
+    $sandbox['progress']++;
+  }
+
+  $sandbox['#finished'] = $sandbox['progress'] / $sandbox['total'];
+  return (string) t('Checked @done of @total basic page nodes for the missing media carousel field block.', [
+    '@done' => $sandbox['progress'],
+    '@total' => $sandbox['total'],
+  ]);
+}
