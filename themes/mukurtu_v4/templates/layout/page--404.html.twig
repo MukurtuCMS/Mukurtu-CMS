@@ -1,0 +1,70 @@
+{#
+/**
+ * @file
+ * Theme override to display the "page not found" (404) page.
+ *
+ * Same as page.html.twig, but constrains .layout-content to the standard
+ * content width and centers the text, since this page has no reliable body
+ * class to target otherwise.
+ *
+ * @see page.html.twig
+ * @see template_preprocess_page()
+ * @see html.html.twig
+ */
+#}
+
+<div class="layout-container">
+  {# Account menu that displays when logged in. #}
+  <div class="page__account-menu">
+    {{ page.user_menu }}
+  </div>
+
+
+  <header id="header" class="site-header header" data-drupal-selector="site-header" role="banner">
+    {# Site branding and main menu. #}
+    {{ page.header }}
+  </header>
+
+  <div class="page__breadcrumbs">
+    {# Breadcrumbs. #}
+    {{ page.breadcrumb }}
+  </div>
+
+  {{ page.highlighted }}
+
+  {{ page.help }}
+
+  {{ page.page_title }}
+
+  <main id="main-content" role="main" tabindex="-1">
+  {# link is in html.html.twig #}
+
+    {% block page_content %}
+
+    {% if page.sidebar_first %}
+      <aside class="layout-sidebar-first" role="complementary">
+        {{ page.sidebar_first }}
+      </aside>
+    {% endif %}
+
+    <div class="layout-content layout-content--404">
+      {{ page.content }}
+    </div>{# /.layout-content #}
+
+    {% if page.sidebar_second %}
+      <aside class="layout-sidebar-second" role="complementary">
+        {{ page.sidebar_second }}
+      </aside>
+    {% endif %}
+
+  {% endblock %}
+
+  </main>
+
+  {% if page.footer %}
+    <footer role="contentinfo" class="footer">
+      {{ page.footer }}
+    </footer>
+  {% endif %}
+
+</div>{# /.layout-container #}

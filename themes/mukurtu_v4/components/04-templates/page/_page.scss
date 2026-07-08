@@ -99,4 +99,18 @@
       }
     }
   }
+
+  // Constrain and center the "page not found" text to match other pages.
+  .layout-content--404 {
+    @include layout.layout--full-width-grid;
+    text-align: center;
+
+    > .region {
+      grid-column: 1 / -1;
+
+      @include include-media.media('>=2xl') {
+        grid-column: 2 / -2;
+      }
+    }
+  }
 }

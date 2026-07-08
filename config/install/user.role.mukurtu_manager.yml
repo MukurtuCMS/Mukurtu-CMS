@@ -37,11 +37,11 @@ dependencies:
     - leaflet
     - media
     - message
-    - message_digest
     - message_notify_ui
     - message_ui
     - mukurtu_collection
     - mukurtu_content_warnings
+    - mukurtu_core
     - mukurtu_dictionary
     - mukurtu_export
     - mukurtu_import
@@ -68,6 +68,7 @@ is_admin: null
 permissions:
   - 'access mukurtu export'
   - 'access mukurtu import'
+  - 'administer mukurtu access denied page'
   - 'administer mukurtu_media configuration'
   - 'administer mukurtu media download settings'
   - 'configure editable landing_page node layout overrides'

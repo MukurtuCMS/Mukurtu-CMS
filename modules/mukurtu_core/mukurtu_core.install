@@ -2327,3 +2327,31 @@ function mukurtu_core_update_40073(): void {
   $display->setThirdPartySetting('layout_builder', 'sections', [$section]);
   $display->save();
 }
+
+/**
+ * Add the custom 403 access denied page, permission, and default config.
+ */
+function mukurtu_core_update_40074(): void {
+  // Point the site's 403 page at the new custom access-denied route
+  // (system.site.yml is not owned by Mukurtu).
+  \Drupal::configFactory()
+    ->getEditable('system.site')
+    ->set('page.403', '/mukurtu/access-denied')
+    ->save();
+
+  // Grant the new permission to the Mukurtu Manager role.
+  user_role_grant_permissions('mukurtu_manager', ['administer mukurtu access denied page']);
+
+  // Install the default mukurtu_core.access_denied config if it doesn't
+  // already exist.
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core');
+  $config_source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+  $config_factory = \Drupal::configFactory();
+
+  if ($config_factory->get('mukurtu_core.access_denied')->isNew()) {
+    $data = $config_source->read('mukurtu_core.access_denied');
+    if ($data) {
+      $config_factory->getEditable('mukurtu_core.access_denied')->setData($data)->save();
+    }
+  }
+}
