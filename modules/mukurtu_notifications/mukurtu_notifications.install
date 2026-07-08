@@ -82,6 +82,9 @@ function mukurtu_notifications_create_field_protocol(): void {
     'mukurtu_removed_from_protocol',
   ];
   foreach ($bundles as $bundle) {
+    if (!\Drupal\message\Entity\MessageTemplate::load($bundle)) {
+      continue;
+    }
     if (!\Drupal\field\Entity\FieldConfig::loadByName('message', $bundle, 'field_protocol')) {
       \Drupal\field\Entity\FieldConfig::create([
         'field_storage' => $storage,
@@ -119,6 +122,9 @@ function mukurtu_notifications_create_field_community_ref(): void {
     'mukurtu_removed_from_community',
   ];
   foreach ($bundles as $bundle) {
+    if (!\Drupal\message\Entity\MessageTemplate::load($bundle)) {
+      continue;
+    }
     if (!\Drupal\field\Entity\FieldConfig::loadByName('message', $bundle, 'field_community_ref')) {
       \Drupal\field\Entity\FieldConfig::create([
         'field_storage' => $storage,
