@@ -248,6 +248,7 @@ function _mukurtu_notifications_categories(): array {
     'memberships' => [
       'label' => 'Memberships',
       'templates' => [
+        'mukurtu_user_added_to_community',
         'mukurtu_user_added_to_protocol',
         'mukurtu_removed_from_community',
         'mukurtu_removed_from_protocol',
@@ -540,6 +541,19 @@ function mukurtu_notifications_query_message_access_alter(AlterableInterface $qu
  * Implements hook_node_insert().
  */
 function mukurtu_notifications_node_insert(Node $node) {
+  // The editorial workflow's default state for new content is "draft", but
+  // a transition like "Submit for Review" is valid straight from "draft" --
+  // so brand-new content can be created and submitted for review in a single
+  // save. Treat that as a moderation state change from the implicit "draft"
+  // starting point so the same notification fires as it would on a later
+  // edit that makes the same transition.
+  if ($node->hasField('moderation_state')) {
+    $new_state = $node->get('moderation_state')->value;
+    if ($new_state !== 'draft') {
+      mukurtu_notifications_handle_moderation_change($node, 'draft', $new_state);
+    }
+  }
+
   // Record the node insert event for all published nodes.
   if (!$node->isPublished()) {
     return;
@@ -553,10 +567,12 @@ function mukurtu_notifications_node_insert(Node $node) {
  */
 function mukurtu_notifications_node_update(Node $node) {
   // Handle content moderation state changes regardless of published status.
+  $moderation_state_changed = FALSE;
   if ($node->hasField('moderation_state') && isset($node->original)) {
     $old_state = $node->original->get('moderation_state')->value;
     $new_state = $node->get('moderation_state')->value;
     if ($old_state !== $new_state) {
+      $moderation_state_changed = TRUE;
       mukurtu_notifications_handle_moderation_change($node, $old_state, $new_state);
     }
   }
@@ -566,26 +582,31 @@ function mukurtu_notifications_node_update(Node $node) {
     return;
   }
 
-  $current_user_id = (int) \Drupal::currentUser()->id();
-  $owner_id = (int) $node->getOwnerId();
+  // Skip the generic "content updated" notification when a moderation state
+  // change already sent its own notification for this same save (e.g.
+  // "content published") -- otherwise both fire for the one save.
+  if (!$moderation_state_changed) {
+    $current_user_id = (int) \Drupal::currentUser()->id();
+    $owner_id = (int) $node->getOwnerId();
 
-  // Always record the update in the owner's feed. Protocol stewards are
-  // added too, but only when someone other than the owner made the edit --
-  // self-edits don't need steward attention. The shared helper skips
-  // emailing the editor about their own action either way.
-  $notify_uids = $owner_id > 0 ? [$owner_id] : [];
-  if ($current_user_id !== $owner_id && $node instanceof CulturalProtocolControlledInterface) {
-    $protocol_ids = $node->getProtocols();
-    if (!empty($protocol_ids)) {
-      $notify_uids = array_merge($notify_uids, mukurtu_notifications_resolve_notify_groups(FALSE, [], $protocol_ids, _mukurtu_notifications_protocol_steward_roles($node)));
+    // Always record the update in the owner's feed. Protocol stewards are
+    // added too, but only when someone other than the owner made the edit --
+    // self-edits don't need steward attention. The shared helper skips
+    // emailing the editor about their own action either way.
+    $notify_uids = $owner_id > 0 ? [$owner_id] : [];
+    if ($current_user_id !== $owner_id && $node instanceof CulturalProtocolControlledInterface) {
+      $protocol_ids = $node->getProtocols();
+      if (!empty($protocol_ids)) {
+        $notify_uids = array_merge($notify_uids, mukurtu_notifications_resolve_notify_groups(FALSE, [], $protocol_ids, _mukurtu_notifications_protocol_steward_roles($node)));
+      }
     }
-  }
-  $notify_uids = array_values(array_unique($notify_uids));
+    $notify_uids = array_values(array_unique($notify_uids));
 
-  _mukurtu_notifications_notify('mukurtu_single_node_update', [
-    'field_item' => $node,
-    'field_user' => $current_user_id,
-  ], $notify_uids, $current_user_id);
+    _mukurtu_notifications_notify('mukurtu_single_node_update', [
+      'field_item' => $node,
+      'field_user' => $current_user_id,
+    ], $notify_uids, $current_user_id);
+  }
 
   // Check for a newly-added protocol/community association.
   mukurtu_notifications_notify_content_created($node);
@@ -734,6 +755,27 @@ function mukurtu_notifications_user_insert($entity) {
   _mukurtu_notifications_notify('mukurtu_new_user_registration', [
     'field_user' => $entity,
   ], $manager_uids);
+
+  // Visitor self-registration immediately follows this insert with a second,
+  // update save that sets field_pending -- see
+  // mukurtu_core\Hook\FormHooks::visitorRegistrationPendingSubmit(). Flag
+  // this uid so mukurtu_notifications_user_update() can skip the resulting
+  // "User set to pending" notification, which would otherwise duplicate the
+  // registration notice just sent above for the same real-world event.
+  $recent_registrations = &_mukurtu_notifications_recent_registrations();
+  $recent_registrations[$entity->id()] = TRUE;
+}
+
+/**
+ * Request-scoped set of uids that just received a new-registration
+ * notification, keyed by uid.
+ *
+ * @return array<int, bool>
+ *   Reference to the static storage.
+ */
+function &_mukurtu_notifications_recent_registrations(): array {
+  $storage = &drupal_static(__FUNCTION__, []);
+  return $storage;
 }
 
 /**
@@ -837,6 +879,14 @@ function mukurtu_notifications_user_update($account) {
 
   if (!$template) {
     return;
+  }
+
+  if ($template === 'mukurtu_user_set_pending') {
+    $recent_registrations = &_mukurtu_notifications_recent_registrations();
+    if (!empty($recent_registrations[$account->id()])) {
+      unset($recent_registrations[$account->id()]);
+      return;
+    }
   }
 
   $manager_uids = mukurtu_notifications_resolve_notify_groups(TRUE, [], []);
@@ -1143,10 +1193,24 @@ function mukurtu_notifications_handle_moderation_change(Node $node, string $old_
   }
   $notify_uids = array_values(array_unique($notify_uids));
 
-  _mukurtu_notifications_notify($template, [
+  $field_values = [
     'field_item' => $node,
     'field_user' => $current_user_id,
-  ], $notify_uids, $current_user_id);
+  ];
+
+  // A contributor submitting their own content for review wants a
+  // confirmation that it went through, unlike an ordinary self-edit -- so
+  // the owner's copy of this specific template isn't subject to the usual
+  // "don't email people about their own action" exclusion. Actor uid 0
+  // excludes no one, per _mukurtu_notifications_notify()'s contract.
+  if ($template === 'mukurtu_content_for_review' && $owner_id > 0 && $owner_id === $current_user_id) {
+    _mukurtu_notifications_notify($template, $field_values, [$owner_id], 0);
+    $other_uids = array_values(array_diff($notify_uids, [$owner_id]));
+    _mukurtu_notifications_notify($template, $field_values, $other_uids, $current_user_id);
+    return;
+  }
+
+  _mukurtu_notifications_notify($template, $field_values, $notify_uids, $current_user_id);
 }
 
 /**
@@ -1250,17 +1314,22 @@ function mukurtu_notifications_og_membership_insert(OgMembership $membership) {
     return;
   }
 
-  // "Added to community" is not a notification type -- only protocol adds
-  // are notified.
-  if ($group_entity_type !== 'protocol') {
-    return;
-  }
-
   $added_uid = (int) $added_user->id();
   $field_values = ['field_user' => $added_uid];
-  $template = 'mukurtu_user_added_to_protocol';
-  $field_values['field_protocol'] = (int) $group->id();
-  $group_uids = mukurtu_notifications_resolve_notify_groups(FALSE, [], [$group->id()]);
+
+  if ($group_entity_type === 'community') {
+    $template = 'mukurtu_user_added_to_community';
+    $field_values['field_community_ref'] = (int) $group->id();
+    $group_uids = mukurtu_notifications_resolve_notify_groups(FALSE, [$group->id()], []);
+  }
+  elseif ($group_entity_type === 'protocol') {
+    $template = 'mukurtu_user_added_to_protocol';
+    $field_values['field_protocol'] = (int) $group->id();
+    $group_uids = mukurtu_notifications_resolve_notify_groups(FALSE, [], [$group->id()]);
+  }
+  else {
+    return;
+  }
 
   $recipient_uids = array_values(array_unique(array_merge([$added_uid], $group_uids)));
 
