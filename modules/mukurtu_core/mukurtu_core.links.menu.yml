@@ -24,13 +24,17 @@ mukurtu_core.site_configuration:
   route_name: system.admin_config
   expanded: TRUE
 mukurtu_core.settings_assorted:
-  title: "Citation formats"
+  title: "Related content settings"
+  parent: mukurtu_dashboard
+  menu_name: dashboard-content-settings
+  description: "Configure related content display settings."
+  route_name: mukurtu_core.settings_assorted
+mukurtu_core.citation_templates:
+  title: "Citation templates"
   parent: mukurtu_dashboard
   menu_name: dashboard-site-settings
-  description: "Configuration form for Mukurtu specific options."
-  route_name: mukurtu_core.settings_assorted
-  expanded: TRUE
-  weight: 0
+  description: "Configure citation field templates."
+  route_name: mukurtu_core.citation_templates
 mukurtu_core.access_denied_settings:
   title: "Access Denied Page"
   parent: mukurtu_dashboard
