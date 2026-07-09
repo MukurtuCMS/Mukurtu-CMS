@@ -10,7 +10,7 @@ context:
   fallback:
     language: ''
 menu:
-  path: /admin/config/designsettings
+  path: /admin/config/color-settings
   weight: 0
   description: 'Switch the color palette of your Mukurtu installation.'
 token: false

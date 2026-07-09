@@ -693,3 +693,12 @@ function mukurtu_protocol_update_40039(): void {
   $view_data = \Symfony\Component\Yaml\Yaml::parseFile($view_file);
   \Drupal::configFactory()->getEditable('views.view.mukurtu_people')->setData($view_data)->save(TRUE);
 }
+
+/**
+ * Enable mukurtu_protocol_sync module.
+ */
+function mukurtu_protocol_update_40040(): void {
+  if (!\Drupal::moduleHandler()->moduleExists('mukurtu_protocol_sync')) {
+    \Drupal::service('module_installer')->install(['mukurtu_protocol_sync']);
+  }
+}
