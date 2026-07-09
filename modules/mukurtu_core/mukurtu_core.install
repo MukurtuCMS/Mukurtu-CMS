@@ -2058,8 +2058,9 @@ function mukurtu_core_update_40073(): void {
  * unrelated digital_heritage_sidebar mode.
  */
 function mukurtu_core_update_40074(): void {
-  \Drupal::configFactory()
-    ->getEditable('core.entity_view_display.node.digital_heritage.grid_browse')
-    ->set('content.field_representative_media.settings.view_mode', 'browse')
-    ->save();
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.digital_heritage.grid_browse');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_representative_media.settings.view_mode', 'browse')->save();
 }
