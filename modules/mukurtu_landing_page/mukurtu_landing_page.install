@@ -18,3 +18,25 @@ function mukurtu_landing_page_update_40001(): void {
     $config_storage->write('core.entity_view_display.node.landing_page.form_selection', $data);
   }
 }
+
+/**
+ * Hide the export-list flag button on the landing page teaser display.
+ */
+function mukurtu_landing_page_update_40002(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.landing_page.teaser');
+  if ($config->isNew()) {
+    return;
+  }
+
+  $content = $config->get('content') ?? [];
+  if (isset($content['flag_export_content'])) {
+    unset($content['flag_export_content']);
+    $config->set('content', $content);
+  }
+
+  $hidden = $config->get('hidden') ?? [];
+  $hidden['flag_export_content'] = TRUE;
+  $config->set('hidden', $hidden);
+
+  $config->save();
+}

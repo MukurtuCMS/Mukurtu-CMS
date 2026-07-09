@@ -1298,7 +1298,6 @@ a:not(.primary-nav__menu-link) svg.tel path {
 }
 .field--name-field-featured-content .featured-item__body,
 .field--name-field-all-related-content .field__items .featured-item__body {
-  padding-block: var(--v-space-5xs) var(--v-space-4xxs);
   padding-inline: var(--v-space-4xxs);
   display: -webkit-box;
   display: -ms-flexbox;
