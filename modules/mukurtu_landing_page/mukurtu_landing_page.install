@@ -53,7 +53,7 @@ function mukurtu_landing_page_update_40001(): void {
 /**
  * Hide the export-list flag button on the landing page teaser display.
  */
-function mukurtu_landing_page_update_40002(): void {
+function mukurtu_landing_page_update_40004(): void {
   $config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.landing_page.teaser');
   if ($config->isNew()) {
     return;
