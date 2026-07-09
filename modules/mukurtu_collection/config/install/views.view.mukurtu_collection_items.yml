@@ -4,11 +4,11 @@ dependencies:
   config:
     - core.entity_view_mode.node.browse
     - core.entity_view_mode.node.grid_browse
-    - core.entity_view_mode.node.map_browse
   module:
     - geofield
     - leaflet_views
     - mukurtu_collection
+    - mukurtu_core
     - node
     - user
 id: mukurtu_collection_items
