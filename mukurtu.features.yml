@@ -27,8 +27,6 @@ excluded:
   - core.entity_view_display.message.mukurtu_new_item_in_community.mail_subject
   - core.entity_view_display.message.mukurtu_new_item_in_protocol.mail_body
   - core.entity_view_display.message.mukurtu_new_item_in_protocol.mail_subject
-  - core.entity_view_display.message.mukurtu_new_user_registration.mail_body
-  - core.entity_view_display.message.mukurtu_new_user_registration.mail_subject
   - core.entity_view_display.message.mukurtu_single_node_delete.mail_body
   - core.entity_view_display.message.mukurtu_single_node_delete.mail_subject
   - core.entity_view_display.message.mukurtu_single_node_insert.mail_body
