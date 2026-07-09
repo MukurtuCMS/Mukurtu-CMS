@@ -93,6 +93,12 @@ mukurtu_core.site_information_settings:
   parent: mukurtu_dashboard
   menu_name: dashboard-site-settings
   route_name: system.site_information_settings
+mukurtu_core.notification_messages:
+  title: 'Notification messages'
+  description: 'Manage notification email templates.'
+  parent: mukurtu_dashboard
+  menu_name: dashboard-site-settings
+  route_name: message.overview_templates
 mukurtu_core.my_account:
   title: 'Manage my account'
   description: 'User account page'
