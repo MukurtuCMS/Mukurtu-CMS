@@ -267,7 +267,8 @@ function mukurtu_collection_user_view(array &$build, EntityInterface $entity, En
   $cache->addCacheTags(['user:' . $entity->id()]);
 
   if ($viewer->isAnonymous()) {
-    $cache->applyTo($build['personal_collections'] = []);
+    $build['personal_collections'] = [];
+    $cache->applyTo($build['personal_collections']);
     return;
   }
 
@@ -276,7 +277,8 @@ function mukurtu_collection_user_view(array &$build, EntityInterface $entity, En
   $ids = $access_service->getViewableCollectionIds($viewer, $entity);
 
   if (empty($ids)) {
-    $cache->applyTo($build['personal_collections'] = []);
+    $build['personal_collections'] = [];
+    $cache->applyTo($build['personal_collections']);
     return;
   }
 
