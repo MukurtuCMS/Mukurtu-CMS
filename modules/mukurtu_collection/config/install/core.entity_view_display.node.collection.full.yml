@@ -49,7 +49,6 @@ third_party_settings:
         speed: fast
     group_metadata:
       children:
-        - flag_export_content
         - group_sidebar_mukurtu_fields
         - group_additional_metadata
         - group_rights
@@ -335,11 +334,6 @@ content:
     third_party_settings: {  }
     weight: 2
     region: content
-  flag_export_content:
-    settings: {  }
-    third_party_settings: {  }
-    weight: 5
-    region: content
   field_citation:
     type: text_default
     label: above
@@ -360,6 +354,7 @@ hidden:
   field_title: true
   flag_email_node: true
   flag_email_og: true
+  flag_export_content: true
   flag_mukurtu_email_collection: true
   flag_mukurtu_email_og: true
   flag_mukurtu_follow_collection: true
