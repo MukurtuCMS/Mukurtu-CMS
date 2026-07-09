@@ -1,0 +1,13 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - user
+id: mukurtu_user_pattern
+label: 'User Profiles'
+type: 'canonical_entities:user'
+pattern: '[user:field_display_name]'
+selection_criteria: {  }
+selection_logic: and
+weight: 0
+relationships: {  }

@@ -521,6 +521,17 @@ function mukurtu_core_entity_base_field_info(EntityTypeInterface $entity_type) {
 }
 
 /**
+ * Implements hook_entity_bundle_field_info_alter().
+ */
+function mukurtu_core_entity_bundle_field_info_alter(&$fields, EntityTypeInterface $entity_type, $bundle) {
+  // Display names are used to build user profile URLs (see
+  // pathauto.pattern.mukurtu_user_pattern), so require them to be unique.
+  if ($entity_type->id() === 'user' && isset($fields['field_display_name'])) {
+    $fields['field_display_name']->addConstraint('UniqueField', ['caseSensitive' => FALSE]);
+  }
+}
+
+/**
  * Implements hook_entity_type_alter().
  */
 function mukurtu_core_entity_type_alter(array &$entity_types) {
@@ -545,8 +556,12 @@ function mukurtu_core_node_view(array &$build, EntityInterface $entity, EntityVi
  */
 function mukurtu_core_user_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
   // Build status-action links on the full user profile page.
-  // Skip for users viewing their own account.
-  if ($view_mode == 'full' && \Drupal::currentUser()->id() != $entity->id()) {
+  // Skip for users viewing their own account, and for viewers who aren't
+  // allowed to actually use the block/approve/set-pending actions (the
+  // routes those links point to are gated the same way, via
+  // MukurtuUserController::access()).
+  $can_manage_users = \Drupal\mukurtu_core\Controller\MukurtuUserController::create(\Drupal::getContainer())->access()->isAllowed();
+  if ($view_mode == 'full' && \Drupal::currentUser()->id() != $entity->id() && $can_manage_users) {
     $status = $entity->status->value;
     $is_pending = $entity->hasField('field_pending') && (bool) $entity->get('field_pending')->value;
     $links = [];

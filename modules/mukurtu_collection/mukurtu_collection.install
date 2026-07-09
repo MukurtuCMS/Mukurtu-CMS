@@ -176,3 +176,31 @@ function mukurtu_collection_update_40009(): void {
   $config->set('content.field_all_related_content.settings.view_mode', 'featured');
   $config->save();
 }
+
+/**
+ * Add the "Personal collections" pseudo-field to the default user profile
+ * display so a user's public (and, on their own profile, private) personal
+ * collections are shown.
+ */
+function mukurtu_collection_update_40010(): void {
+  $display = \Drupal::configFactory()->getEditable('core.entity_view_display.user.user.default');
+  if ($display->isNew()) {
+    return;
+  }
+  $display->set('content.personal_collections', [
+    'settings' => [],
+    'third_party_settings' => [],
+    'weight' => 20,
+    'region' => 'content',
+  ])->save();
+}
+
+/**
+ * Allow visitors to view public personal collections by direct link, per the
+ * field_pc_privacy help text ("Anyone with a link to a public personal
+ * collection can see it."). Private collections remain owner-only via
+ * PersonalCollectionAccessControlHandler.
+ */
+function mukurtu_collection_update_40011(): void {
+  user_role_grant_permissions('anonymous', ['view published personal collection entities']);
+}

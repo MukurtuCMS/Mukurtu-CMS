@@ -31,6 +31,13 @@ class RouteSubscriber extends RouteSubscriberBase
       $route->setRequirement('_custom_access', '\Drupal\mukurtu_core\Controller\MukurtuDashboardController::access');
     }
 
+    // Redirect anonymous visitors hitting /user to the login form instead of
+    // showing the generic access-denied page.
+    if ($route = $collection->get('user.page')) {
+      $route->setDefault('_controller', '\Drupal\mukurtu_core\Controller\MukurtuUserPageController::userPage');
+      $route->setRequirement('_access', 'TRUE');
+    }
+
     // Relabel the user account cancel route to reflect that both blocking
     // and deletion are available options.
     if ($route = $collection->get('entity.user.cancel_form')) {

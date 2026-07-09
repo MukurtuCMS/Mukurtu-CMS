@@ -7,6 +7,7 @@ namespace Drupal\Tests\mukurtu_collection\Kernel\Access;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Og;
 use Drupal\og\Entity\OgRole;
+use Drupal\Core\Session\AnonymousUserSession;
 use Drupal\mukurtu_collection\Entity\PersonalCollection;
 use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
@@ -75,6 +76,16 @@ class PersonalCollectionEntityAccessTest extends KernelTestBase
     $role->grantPermission('view published personal collection entities');
     $role->save();
 
+    // Create the anonymous role with the same permission granted, matching
+    // the site's default anonymous role configuration (public personal
+    // collections are shareable with visitors by direct link).
+    $anonymousRole = Role::create([
+      'id' => 'anonymous',
+      'label' => 'anonymous',
+    ]);
+    $anonymousRole->grantPermission('view published personal collection entities');
+    $anonymousRole->save();
+
     $owner = User::create([
       'name' => $this->randomString(),
     ]);
@@ -107,6 +118,13 @@ class PersonalCollectionEntityAccessTest extends KernelTestBase
     $this->assertEquals(TRUE, $this->personalCollection->access('view', $this->owner));
     $this->assertEquals(TRUE, $this->personalCollection->access('update', $this->owner));
     $this->assertEquals(TRUE, $this->personalCollection->access('delete', $this->owner));
+
+    // Anonymous visitor: a public, published personal collection is
+    // shareable by direct link, so anonymous can view but not modify it.
+    $anonymous = new AnonymousUserSession();
+    $this->assertEquals(TRUE, $this->personalCollection->access('view', $anonymous));
+    $this->assertEquals(FALSE, $this->personalCollection->access('update', $anonymous));
+    $this->assertEquals(FALSE, $this->personalCollection->access('delete', $anonymous));
   }
 
   /**
@@ -128,6 +146,13 @@ class PersonalCollectionEntityAccessTest extends KernelTestBase
     $this->assertEquals(TRUE, $this->personalCollection->access('view', $this->owner));
     $this->assertEquals(TRUE, $this->personalCollection->access('update', $this->owner));
     $this->assertEquals(TRUE, $this->personalCollection->access('delete', $this->owner));
+
+    // Anonymous visitor: private collections are never visible to anonymous,
+    // regardless of the anonymous role's permissions.
+    $anonymous = new AnonymousUserSession();
+    $this->assertEquals(FALSE, $this->personalCollection->access('view', $anonymous));
+    $this->assertEquals(FALSE, $this->personalCollection->access('update', $anonymous));
+    $this->assertEquals(FALSE, $this->personalCollection->access('delete', $anonymous));
   }
 
   /**

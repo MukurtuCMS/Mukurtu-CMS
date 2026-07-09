@@ -7,6 +7,8 @@
 
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Link;
@@ -230,4 +232,65 @@ function mukurtu_collection_entity_access(EntityInterface $entity, $operation, A
   if ($operation == 'view') {
     return AccessResult::allowed();
   }
+}
+
+/**
+ * Implements hook_entity_extra_field_info().
+ */
+function mukurtu_collection_entity_extra_field_info() {
+  $extra = [];
+  $extra['user']['user']['display']['personal_collections'] = [
+    'label' => t('Personal collections'),
+    'weight' => 20,
+    'visible' => TRUE,
+  ];
+  return $extra;
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_view() for the user entity.
+ *
+ * Lists the personal collections a viewer is allowed to see on a user's
+ * profile: the profile owner sees their own public and private collections,
+ * any other logged-in viewer sees only the owner's public collections, and
+ * anonymous visitors see nothing here (personal collections are shared with
+ * visitors only via an explicit share link, not through a profile listing).
+ */
+function mukurtu_collection_user_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
+  if (!$display->getComponent('personal_collections')) {
+    return;
+  }
+
+  $viewer = \Drupal::currentUser();
+  $cache = new CacheableMetadata();
+  $cache->addCacheContexts(['user']);
+  $cache->addCacheTags(['user:' . $entity->id()]);
+
+  if ($viewer->isAnonymous()) {
+    $cache->applyTo($build['personal_collections'] = []);
+    return;
+  }
+
+  /** @var \Drupal\mukurtu_collection\PersonalCollectionProfileAccessInterface $access_service */
+  $access_service = \Drupal::service('mukurtu_collection.personal_collection_profile_access');
+  $ids = $access_service->getViewableCollectionIds($viewer, $entity);
+
+  if (empty($ids)) {
+    $cache->applyTo($build['personal_collections'] = []);
+    return;
+  }
+
+  $storage = \Drupal::entityTypeManager()->getStorage('personal_collection');
+  $collections = $storage->loadMultiple($ids);
+  foreach ($collections as $id => $collection) {
+    if (!$collection->access('view', $viewer)) {
+      unset($collections[$id]);
+      continue;
+    }
+    $cache->addCacheableDependency($collection);
+  }
+
+  $view_builder = \Drupal::entityTypeManager()->getViewBuilder('personal_collection');
+  $build['personal_collections'] = $view_builder->viewMultiple($collections, 'teaser');
+  $cache->applyTo($build['personal_collections']);
 }

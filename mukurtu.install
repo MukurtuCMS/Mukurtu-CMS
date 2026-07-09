@@ -273,6 +273,7 @@ function mukurtu_install() {
     'access site-wide contact form',
     'view media',
     'view published community entities',
+    'view published personal collection entities',
   ];
   $roles['authenticated'] = [
     'access comments',

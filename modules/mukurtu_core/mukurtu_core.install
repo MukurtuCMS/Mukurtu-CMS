@@ -2012,3 +2012,38 @@ function mukurtu_core_update_40072(): void {
     }
   }
 }
+
+/**
+ * Allow authenticated users to view other users' profile pages.
+ */
+function mukurtu_core_update_40073(): void {
+  user_role_grant_permissions('authenticated', ['access user profiles']);
+}
+
+/**
+ * Remove the orphaned "Email users" flag component from the default user
+ * profile display; the "email_user" flag it referenced does not exist in
+ * Mukurtu (see mukurtu_notifications_update_40004()).
+ */
+function mukurtu_core_update_40074(): void {
+  $display = \Drupal::configFactory()->getEditable('core.entity_view_display.user.user.default');
+  if (!$display->isNew()) {
+    $display->clear('content.flag_email_user')->save();
+  }
+}
+
+/**
+ * Install the display-name-based Pathauto pattern for user profile URLs.
+ */
+function mukurtu_core_update_40075(): void {
+  if (!\Drupal::configFactory()->get('pathauto.pattern.mukurtu_user_pattern')->isNew()) {
+    return;
+  }
+
+  $profile_path = \Drupal::service('extension.list.profile')->getPath('mukurtu');
+  $profile_source = new \Drupal\Core\Config\FileStorage($profile_path . '/config/install');
+  $data = $profile_source->read('pathauto.pattern.mukurtu_user_pattern');
+  if ($data !== FALSE) {
+    \Drupal::configFactory()->getEditable('pathauto.pattern.mukurtu_user_pattern')->setData($data)->save();
+  }
+}
