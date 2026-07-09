@@ -28,7 +28,6 @@ third_party_settings:
         - field_in_word_list
         - field_local_contexts_projects
         - field_local_contexts_labels_and_notices
-        - flag_export_content
       label: Metadata
       parent_name: ''
       region: content
@@ -51,6 +50,7 @@ third_party_settings:
         - group_base_word_entry
         - group_additional_word_entries
         - group_additional_fields
+        - comment
       label: 'Primary Fields'
       parent_name: ''
       region: content
@@ -450,11 +450,6 @@ content:
     third_party_settings: {  }
     weight: 4
     region: content
-  flag_export_content:
-    settings: {  }
-    third_party_settings: {  }
-    weight: 100
-    region: content
 hidden:
   field_related_content: true
   field_communities: true
@@ -468,6 +463,7 @@ hidden:
   field_thumbnail: true
   flag_email_node: true
   flag_email_og: true
+  flag_export_content: true
   flag_mukurtu_email_content: true
   flag_mukurtu_email_node: true
   flag_mukurtu_email_og: true

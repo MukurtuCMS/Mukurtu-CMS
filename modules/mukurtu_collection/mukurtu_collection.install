@@ -273,3 +273,29 @@ function mukurtu_collection_update_40012(): void {
     $generator->updateEntityAlias($personal_collection, 'bulkupdate');
   }
 }
+
+/**
+ * Hide the export-list flag button on the collection full display.
+ */
+function mukurtu_collection_update_40013(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.collection.full');
+  if ($config->isNew()) {
+    return;
+  }
+
+  $content = $config->get('content') ?? [];
+  if (isset($content['flag_export_content'])) {
+    unset($content['flag_export_content']);
+    $config->set('content', $content);
+  }
+
+  $hidden = $config->get('hidden') ?? [];
+  $hidden['flag_export_content'] = TRUE;
+  $config->set('hidden', $hidden);
+
+  $children = $config->get('third_party_settings.field_group.group_metadata.children') ?? [];
+  $children = array_values(array_filter($children, fn($child) => $child !== 'flag_export_content'));
+  $config->set('third_party_settings.field_group.group_metadata.children', $children);
+
+  $config->save();
+}
