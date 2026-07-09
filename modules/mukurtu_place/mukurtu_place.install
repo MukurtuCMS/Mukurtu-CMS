@@ -43,3 +43,39 @@ function mukurtu_place_update_40003(): void {
 function mukurtu_place_update_40004(): void {
   \Drupal::service('config.installer')->installDefaultConfig('module', 'mukurtu_place');
 }
+
+/**
+ * Hide the export-list flag button on place displays.
+ */
+function mukurtu_place_update_40005(): void {
+  $displays = [
+    'core.entity_view_display.node.place.full' => 'group_metadata',
+    'core.entity_view_display.node.place.default' => NULL,
+    'core.entity_view_display.node.place.taxonomy_record' => NULL,
+  ];
+
+  foreach ($displays as $display_id => $group_name) {
+    $config = \Drupal::configFactory()->getEditable($display_id);
+    if ($config->isNew()) {
+      continue;
+    }
+
+    $content = $config->get('content') ?? [];
+    if (isset($content['flag_export_content'])) {
+      unset($content['flag_export_content']);
+      $config->set('content', $content);
+    }
+
+    $hidden = $config->get('hidden') ?? [];
+    $hidden['flag_export_content'] = TRUE;
+    $config->set('hidden', $hidden);
+
+    if ($group_name) {
+      $children = $config->get("third_party_settings.field_group.$group_name.children") ?? [];
+      $children = array_values(array_filter($children, fn($child) => $child !== 'flag_export_content'));
+      $config->set("third_party_settings.field_group.$group_name.children", $children);
+    }
+
+    $config->save();
+  }
+}
