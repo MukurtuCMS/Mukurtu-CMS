@@ -8,7 +8,10 @@ label: 'Comment approved'
 description: 'A comment on protocol content was approved.'
 text:
   -
-    value: '<p>A comment on&nbsp;[message:field_item:entity:mukurtu-notification-link] was approved.</p>'
+    value: '<p>A comment on&nbsp;[message:mukurtu-content-link] was approved.</p>'
+    format: mukurtu_html
+  -
+    value: '<p>A comment on&nbsp;[message:mukurtu-content-link] was approved.</p>'
     format: mukurtu_html
 settings:
   'token options':

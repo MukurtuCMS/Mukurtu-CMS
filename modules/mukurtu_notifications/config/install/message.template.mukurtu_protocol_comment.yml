@@ -8,10 +8,10 @@ label: 'Comment on protocol content'
 description: 'A comment was posted on content assigned to a protocol.'
 text:
   -
-    value: '<p>A comment was posted on [message:field_item:entity:content-type]&nbsp;[message:field_item:entity:mukurtu-notification-link].</p>'
+    value: '<p>A comment was posted on [message:field_content_type]&nbsp;[message:mukurtu-content-link].</p>'
     format: mukurtu_html
   -
-    value: '<p>A comment was posted on [message:field_item:entity:content-type]&nbsp;[message:field_item:entity:mukurtu-notification-link].</p>'
+    value: '<p>A comment was posted on [message:field_content_type]&nbsp;[message:mukurtu-content-link].</p>'
     format: mukurtu_html
 settings:
   'token options':

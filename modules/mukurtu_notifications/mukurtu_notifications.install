@@ -1505,3 +1505,135 @@ function mukurtu_notifications_update_40042(): void {
     $config_storage->write('message.template.' . $template, $source->read('message.template.' . $template));
   }
 }
+
+/**
+ * Fixes the "added to community" notification's broken link.
+ *
+ * mukurtu_user_added_to_community was missed by update_40042 -- it still
+ * hand-composed <a href="[message:field_community_ref:entity:url]">, which
+ * mukurtu_html's filter_html strips down to a bare "url]" fragment before
+ * tokens are ever replaced (see mukurtu_notifications_tokens() for the full
+ * explanation). This redeploys it to use the mukurtu-notification-link
+ * token instead, matching the other three membership-notification
+ * templates.
+ */
+function mukurtu_notifications_update_40043(): void {
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  \Drupal::service('config.storage')->write(
+    'message.template.mukurtu_user_added_to_community',
+    $source->read('message.template.mukurtu_user_added_to_community')
+  );
+}
+
+/**
+ * Fixes blank notification email bodies across 14 templates.
+ *
+ * message_notify maps the "mail_subject" view mode to a template's text
+ * delta 0 and "mail_body" to delta 1 (see mukurtu_notifications_tokens()'s
+ * neighboring functions and message_notify.module for the convention). These
+ * 14 templates only ever defined one text entry (delta 0), so their
+ * mail_body display -- which every bundle in this module points at delta 1
+ * -- had nothing to render and sent a blank email body. This redeploys each
+ * template with its text duplicated into both deltas, matching the working
+ * two-delta templates (e.g. mukurtu_content_published) that were never
+ * affected.
+ */
+function mukurtu_notifications_update_40044(): void {
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  $config_storage = \Drupal::service('config.storage');
+
+  foreach ([
+    'mukurtu_batch_import_report',
+    'mukurtu_comment_approved',
+    'mukurtu_comment_denied',
+    'mukurtu_new_user_registration',
+    'mukurtu_removed_from_community',
+    'mukurtu_removed_from_protocol',
+    'mukurtu_single_node_delete',
+    'mukurtu_single_node_insert',
+    'mukurtu_single_node_update',
+    'mukurtu_user_approved',
+    'mukurtu_user_blocked',
+    'mukurtu_user_deleted',
+    'mukurtu_user_set_pending',
+    'mukurtu_user_unblocked',
+  ] as $template) {
+    $config_storage->write('message.template.' . $template, $source->read('message.template.' . $template));
+  }
+}
+
+/**
+ * Adds title/content-type snapshot fields to 8 content-referencing
+ * templates, and redeploys their text to use the new mukurtu-content-link
+ * token in place of the raw entity-reference link.
+ *
+ * These templates reference content via the field_item entity reference.
+ * Message::processTokens() re-resolves that reference live on every view
+ * (never a stored snapshot), so once the referenced node is deleted, the
+ * chained [message:field_item:entity:...] tokens have nothing left to
+ * resolve and either go blank (clear: true) or show literal unresolved
+ * token text (clear: false) in any previously-sent notification still in
+ * the log. field_title/field_content_type (the same plain-string fields
+ * mukurtu_single_node_delete already uses, for the same reason) are
+ * populated at send time alongside field_item, and
+ * mukurtu_notifications_tokens()'s new mukurtu-content-link token uses them
+ * as a fallback when field_item's target no longer loads -- see that
+ * function for the full explanation.
+ */
+function mukurtu_notifications_update_40045(): void {
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  $config_storage = \Drupal::service('config.storage');
+
+  $templates = [
+    'mukurtu_content_for_review',
+    'mukurtu_content_published',
+    'mukurtu_content_archived',
+    'mukurtu_content_to_draft',
+    'mukurtu_protocol_comment',
+    'mukurtu_comment_approved',
+    'mukurtu_comment_denied',
+    'mukurtu_single_node_update',
+  ];
+
+  foreach ($templates as $template) {
+    foreach (['field_title', 'field_content_type'] as $field_name) {
+      $config_name = 'field.field.message.' . $template . '.' . $field_name;
+      if (!$config_storage->exists($config_name)) {
+        $config_storage->write($config_name, $source->read($config_name));
+      }
+    }
+    $config_storage->write('message.template.' . $template, $source->read('message.template.' . $template));
+  }
+}
+
+/**
+ * Adds the mukurtu_protocol_comment_pending template and the comment-insert
+ * wording branch that uses it.
+ *
+ * mukurtu_notifications_comment_insert() previously always sent
+ * mukurtu_protocol_comment ("was posted"), even for a comment that actually
+ * requires approval first and isn't published yet. This adds the sibling
+ * bundle used for that pending-review case ("was submitted for review"),
+ * mirroring the existing mukurtu_content_published/mukurtu_content_for_review
+ * split for node moderation.
+ */
+function mukurtu_notifications_update_40046(): void {
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  $config_storage = \Drupal::service('config.storage');
+
+  foreach ([
+    'message.template.mukurtu_protocol_comment_pending',
+    'field.field.message.mukurtu_protocol_comment_pending.field_item',
+    'field.field.message.mukurtu_protocol_comment_pending.field_user',
+    'field.field.message.mukurtu_protocol_comment_pending.field_title',
+    'field.field.message.mukurtu_protocol_comment_pending.field_content_type',
+    'core.entity_view_display.message.mukurtu_protocol_comment_pending.mail_body',
+    'core.entity_view_display.message.mukurtu_protocol_comment_pending.mail_subject',
+  ] as $config_name) {
+    $config_storage->write($config_name, $source->read($config_name));
+  }
+}

@@ -10,6 +10,9 @@ text:
   -
     value: "<p>[message:field_user:entity:mukurtu-notification-link]'s account was unblocked.</p>"
     format: mukurtu_html
+  -
+    value: "<p>[message:field_user:entity:mukurtu-notification-link]'s account was unblocked.</p>"
+    format: mukurtu_html
 settings:
   'token options':
     clear: false

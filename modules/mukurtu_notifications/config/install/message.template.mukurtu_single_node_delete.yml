@@ -10,6 +10,9 @@ text:
   -
     value: "<p>[message:field_content_type]&nbsp;<em>[message:field_title]</em> was deleted.</p>\r\n"
     format: mukurtu_html
+  -
+    value: "<p>[message:field_content_type]&nbsp;<em>[message:field_title]</em> was deleted.</p>\r\n"
+    format: mukurtu_html
 settings:
   'token options':
     clear: false

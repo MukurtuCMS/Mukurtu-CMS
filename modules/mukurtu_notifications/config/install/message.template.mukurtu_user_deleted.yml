@@ -10,6 +10,9 @@ text:
   -
     value: '<p>User account [message:field_title] was deleted.</p>'
     format: mukurtu_html
+  -
+    value: '<p>User account [message:field_title] was deleted.</p>'
+    format: mukurtu_html
 settings:
   'token options':
     clear: false

@@ -8,10 +8,10 @@ label: 'Content published'
 description: 'A content item was published.'
 text:
   -
-    value: '<p>[message:field_item:entity:content-type]&nbsp;[message:field_item:entity:mukurtu-notification-link] was published.</p>'
+    value: '<p>[message:field_content_type]&nbsp;[message:mukurtu-content-link] was published.</p>'
     format: mukurtu_html
   -
-    value: '<p>[message:field_item:entity:content-type]&nbsp;[message:field_item:entity:mukurtu-notification-link] was published.</p>'
+    value: '<p>[message:field_content_type]&nbsp;[message:mukurtu-content-link] was published.</p>'
     format: mukurtu_html
 settings:
   'token options':

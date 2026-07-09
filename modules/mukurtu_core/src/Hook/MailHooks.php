@@ -36,6 +36,12 @@ class MailHooks {
    *
    * Also prevents a fatal TypeError in PhpMail when a user account has no
    * email address and a status-change notification is triggered (e.g. unblock).
+   *
+   * Also rewrites core's "status_activated" email when it's actually
+   * reactivating a previously-blocked account rather than activating a
+   * brand-new one: core reuses the same "activate your new account, set
+   * your password" wording (with a one-time login link) for both cases,
+   * which doesn't make sense for someone who already has credentials.
    */
   #[Hook('mail_alter')]
   public function mailAlter(array &$message): void {
@@ -70,6 +76,17 @@ class MailHooks {
     if ($suppress) {
       $message['send'] = FALSE;
       return;
+    }
+
+    if ($message['key'] === 'status_activated' && $account && isset($account->original) && $account->original->isBlocked()) {
+      $site_name = \Drupal::config('system.site')->get('name');
+      $message['subject'] = t('Your account at @site has been reactivated', ['@site' => $site_name]);
+      $message['body'] = [
+        t("@name,\n\nYour account on @site has been reactivated. You may now log in as usual.\n\n--  @site team", [
+          '@name' => $account->getDisplayName(),
+          '@site' => $site_name,
+        ]),
+      ];
     }
 
     // Prevent a fatal TypeError when the account has no email address.

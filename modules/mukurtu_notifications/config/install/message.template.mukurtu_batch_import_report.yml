@@ -10,6 +10,9 @@ text:
   -
     value: 'Batch imported [message:field_number_imported] items on [message:created] (<a href="/admin/import/report/[message:mid]">View batch import report</a>).'
     format: mukurtu_html
+  -
+    value: 'Batch imported [message:field_number_imported] items on [message:created] (<a href="/admin/import/report/[message:mid]">View batch import report</a>).'
+    format: mukurtu_html
 settings:
   'token options':
     clear: false

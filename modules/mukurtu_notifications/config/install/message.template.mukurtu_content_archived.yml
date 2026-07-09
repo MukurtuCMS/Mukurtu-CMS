@@ -8,10 +8,10 @@ label: 'Content archived'
 description: 'A content item was archived.'
 text:
   -
-    value: '<p>[message:field_item:entity:content-type]&nbsp;[message:field_item:entity:mukurtu-notification-link] was archived.</p>'
+    value: '<p>[message:field_content_type]&nbsp;[message:mukurtu-content-link] was archived.</p>'
     format: mukurtu_html
   -
-    value: '<p>[message:field_item:entity:content-type]&nbsp;[message:field_item:entity:mukurtu-notification-link] was archived.</p>'
+    value: '<p>[message:field_content_type]&nbsp;[message:mukurtu-content-link] was archived.</p>'
     format: mukurtu_html
 settings:
   'token options':

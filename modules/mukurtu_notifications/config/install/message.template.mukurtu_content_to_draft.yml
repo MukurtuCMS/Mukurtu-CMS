@@ -8,10 +8,10 @@ label: 'Content returned to draft'
 description: 'A content item was returned to draft.'
 text:
   -
-    value: '<p>[message:field_item:entity:content-type]&nbsp;[message:field_item:entity:mukurtu-notification-link] was returned to draft.</p>'
+    value: '<p>[message:field_content_type]&nbsp;[message:mukurtu-content-link] was returned to draft.</p>'
     format: mukurtu_html
   -
-    value: '<p>[message:field_item:entity:content-type]&nbsp;[message:field_item:entity:mukurtu-notification-link] was returned to draft.</p>'
+    value: '<p>[message:field_content_type]&nbsp;[message:mukurtu-content-link] was returned to draft.</p>'
     format: mukurtu_html
 settings:
   'token options':

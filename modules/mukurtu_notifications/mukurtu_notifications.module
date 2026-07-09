@@ -30,19 +30,23 @@ use Drupal\user\Entity\User;
 function mukurtu_notifications_token_info() {
   $info['tokens']['node']['mukurtu-notification-link'] = [
     'name' => t('Notification link'),
-    'description' => t('A full &lt;a&gt; tag linking to the content, safe to use inside message template text.'),
+    'description' => t('"Title (URL)" text linking to the content, safe to use inside message template text.'),
   ];
   $info['tokens']['user']['mukurtu-notification-link'] = [
     'name' => t('Notification edit link'),
-    'description' => t("A full &lt;a&gt; tag linking to the account's edit form, safe to use inside message template text."),
+    'description' => t('"Name (URL)" text linking to the account\'s edit form, safe to use inside message template text.'),
   ];
   $info['tokens']['protocol']['mukurtu-notification-link'] = [
     'name' => t('Notification link'),
-    'description' => t('A full &lt;a&gt; tag linking to the protocol, safe to use inside message template text.'),
+    'description' => t('"Name (URL)" text linking to the protocol, safe to use inside message template text.'),
   ];
   $info['tokens']['community']['mukurtu-notification-link'] = [
     'name' => t('Notification link'),
-    'description' => t('A full &lt;a&gt; tag linking to the community, safe to use inside message template text.'),
+    'description' => t('"Name (URL)" text linking to the community, safe to use inside message template text.'),
+  ];
+  $info['tokens']['message']['mukurtu-content-link'] = [
+    'name' => t('Content link (deletion-safe)'),
+    'description' => t("A message's referenced content, linked if it still exists, or falling back to its title text if it's since been deleted."),
   ];
   return $info;
 }
@@ -64,9 +68,17 @@ function mukurtu_notifications_token_info() {
  * through any of this site's HTML-capable text formats reproduces the exact
  * mangled output seen in production. Token replacement itself runs after
  * that filtering and is never re-filtered, so a token whose *replacement
- * value* is a complete, pre-built anchor tag is unaffected: there's no
- * literal "word:" text in an href attribute at filter time because the
- * anchor doesn't exist yet.
+ * value* is plain, pre-escaped text is unaffected: there's no literal
+ * "word:" text in an href attribute at filter time because the replacement
+ * never contains an href at all.
+ *
+ * The replacement is "Label (URL)" plain text rather than an <a> tag for a
+ * second reason: Drupal's mail renderer (MailFormatHelper::htmlToText())
+ * converts every anchor in an HTML mail body into "Label [n]" plus a
+ * "[n] URL" footnote at the bottom of the message. Emitting the URL inline
+ * as plain text instead sidesteps that conversion entirely, so the link
+ * prints inline right after the name in both the HTML and plain-text mail
+ * views.
  */
 function mukurtu_notifications_tokens($type, array $tokens, array $data, array $options, BubbleableMetadata $bubbleable_metadata) {
   $replacements = [];
@@ -75,21 +87,39 @@ function mukurtu_notifications_tokens($type, array $tokens, array $data, array $
     $node = $data['node'];
     $bubbleable_metadata->addCacheableDependency($node);
     $url = $node->toUrl('canonical', ['absolute' => TRUE])->toString();
-    $replacements[$tokens['mukurtu-notification-link']] = Markup::create('<a href="' . Html::escape($url) . '">' . Html::escape($node->label()) . '</a>');
+    $replacements[$tokens['mukurtu-notification-link']] = Markup::create(Html::escape($node->label()) . ' (' . Html::escape($url) . ')');
   }
 
   if ($type === 'user' && !empty($data['user']) && isset($tokens['mukurtu-notification-link'])) {
     $account = $data['user'];
     $bubbleable_metadata->addCacheableDependency($account);
     $url = $account->toUrl('edit-form', ['absolute' => TRUE])->toString();
-    $replacements[$tokens['mukurtu-notification-link']] = Markup::create('<a href="' . Html::escape($url) . '">' . Html::escape($account->label()) . '</a>');
+    $replacements[$tokens['mukurtu-notification-link']] = Markup::create(Html::escape($account->label()) . ' (' . Html::escape($url) . ')');
   }
 
   if (in_array($type, ['protocol', 'community'], TRUE) && !empty($data[$type]) && isset($tokens['mukurtu-notification-link'])) {
     $entity = $data[$type];
     $bubbleable_metadata->addCacheableDependency($entity);
     $url = $entity->toUrl('canonical', ['absolute' => TRUE])->toString();
-    $replacements[$tokens['mukurtu-notification-link']] = Markup::create('<a href="' . Html::escape($url) . '">' . Html::escape($entity->label()) . '</a>');
+    $replacements[$tokens['mukurtu-notification-link']] = Markup::create(Html::escape($entity->label()) . ' (' . Html::escape($url) . ')');
+  }
+
+  if ($type === 'message' && !empty($data['message']) && isset($tokens['mukurtu-content-link'])) {
+    $message = $data['message'];
+    $node = ($message->hasField('field_item') && !$message->get('field_item')->isEmpty())
+      ? $message->get('field_item')->entity
+      : NULL;
+
+    if ($node instanceof Node) {
+      $bubbleable_metadata->addCacheableDependency($node);
+      $url = $node->toUrl('canonical', ['absolute' => TRUE])->toString();
+      $replacements[$tokens['mukurtu-content-link']] = Markup::create(Html::escape($node->label()) . ' (' . Html::escape($url) . ')');
+    }
+    elseif ($message->hasField('field_title') && !$message->get('field_title')->isEmpty()) {
+      // The referenced node is gone (deleted) -- fall back to the plain
+      // title snapshot taken at send time; there's nothing left to link to.
+      $replacements[$tokens['mukurtu-content-link']] = Markup::create(Html::escape($message->get('field_title')->value));
+    }
   }
 
   return $replacements;
@@ -148,6 +178,25 @@ function mukurtu_notifications_form_views_exposed_form_alter(array &$form, FormS
   }
 
   $form['type']['#options'] = $options;
+
+  // Views already populated #default_value with the filter's actual current
+  // value -- raw template machine names (e.g. the expanded result of a
+  // prior submission via mukurtu_notifications_type_filter_validate()
+  // below), not the group label(s) #options is keyed by above. Left as-is,
+  // the widget can't match raw machine names against group-label keys, so
+  // redisplay ends up showing the wrong (or extra) categories as selected.
+  // Reverse-map back to the group label(s) that actually own the current
+  // value so only those show as checked.
+  $current_value = array_filter((array) ($form['type']['#default_value'] ?? []));
+  if (!empty($current_value)) {
+    $selected_groups = [];
+    foreach ($groups as $group_label => $machine_names) {
+      if (array_intersect($machine_names, $current_value)) {
+        $selected_groups[] = $group_label;
+      }
+    }
+    $form['type']['#default_value'] = $selected_groups;
+  }
 
   // Expand the submitted group label(s) into real template machine names
   // via #element_validate, not hook_views_pre_execute: Views builds the
@@ -258,6 +307,7 @@ function _mukurtu_notifications_categories(): array {
       'label' => 'Comments',
       'templates' => [
         'mukurtu_protocol_comment',
+        'mukurtu_protocol_comment_pending',
         'mukurtu_comment_approved',
         'mukurtu_comment_denied',
       ],
@@ -547,10 +597,11 @@ function mukurtu_notifications_node_insert(Node $node) {
   // save. Treat that as a moderation state change from the implicit "draft"
   // starting point so the same notification fires as it would on a later
   // edit that makes the same transition.
+  $already_notified_uids = [];
   if ($node->hasField('moderation_state')) {
     $new_state = $node->get('moderation_state')->value;
     if ($new_state !== 'draft') {
-      mukurtu_notifications_handle_moderation_change($node, 'draft', $new_state);
+      $already_notified_uids = mukurtu_notifications_handle_moderation_change($node, 'draft', $new_state);
     }
   }
 
@@ -559,7 +610,12 @@ function mukurtu_notifications_node_insert(Node $node) {
     return;
   }
 
-  mukurtu_notifications_notify_content_created($node);
+  // Skip re-notifying anyone about the generic "was created" message who
+  // already got a moderation-state notification for this same save (e.g.
+  // "was published") -- but community managers who didn't (e.g.
+  // mukurtu_notifications_handle_moderation_change() has no path that
+  // reaches them) still need the "was created" message.
+  mukurtu_notifications_notify_content_created($node, $already_notified_uids);
 }
 
 /**
@@ -605,7 +661,7 @@ function mukurtu_notifications_node_update(Node $node) {
     _mukurtu_notifications_notify('mukurtu_single_node_update', [
       'field_item' => $node,
       'field_user' => $current_user_id,
-    ], $notify_uids, $current_user_id);
+    ] + _mukurtu_notifications_node_snapshot_fields($node), $notify_uids, $current_user_id);
   }
 
   // Check for a newly-added protocol/community association.
@@ -629,8 +685,15 @@ function mukurtu_notifications_node_update(Node $node) {
  * against $node->original) -- editing already-tagged content doesn't
  * re-notify; the separate "Content updated" notification already covers
  * generic edits.
+ *
+ * @param int[] $already_notified_uids
+ *   Uids to exclude from the recipient list -- used on insert to pass the
+ *   uids mukurtu_notifications_handle_moderation_change() already notified
+ *   for this same save (e.g. a new node saved directly as "published"), so
+ *   anyone in that set isn't double-emailed here even if they'd otherwise
+ *   also qualify as a community manager.
  */
-function mukurtu_notifications_notify_content_created(Node $node): void {
+function mukurtu_notifications_notify_content_created(Node $node, array $already_notified_uids = []): void {
   $is_update = isset($node->original);
 
   $new_protocol_ids = [];
@@ -651,7 +714,7 @@ function mukurtu_notifications_notify_content_created(Node $node): void {
   }
 
   // On update, only fire for a newly-added protocol/community; on insert,
-  // always fire (at minimum, to notify the owner).
+  // always fire (at minimum, to notify the owner, unless already notified).
   if ($is_update && empty($new_protocol_ids) && empty($new_community_ids)) {
     return;
   }
@@ -665,7 +728,11 @@ function mukurtu_notifications_notify_content_created(Node $node): void {
   if (!empty($new_community_ids)) {
     $recipient_uids = array_merge($recipient_uids, mukurtu_notifications_resolve_notify_groups(FALSE, $new_community_ids, []));
   }
-  $recipient_uids = array_values(array_unique($recipient_uids));
+  $recipient_uids = array_values(array_diff(array_unique($recipient_uids), $already_notified_uids));
+
+  if (empty($recipient_uids)) {
+    return;
+  }
 
   $actor_uid = (int) \Drupal::currentUser()->id();
   _mukurtu_notifications_notify('mukurtu_single_node_insert', [
@@ -746,6 +813,11 @@ function mukurtu_notifications_user_insert($entity) {
   if ($entity->isActive()) {
     return;
   }
+
+  // Only reachable via visitor self-registration under admin approval; if
+  // user.settings:register is 'admin_only' (the default), self-registration
+  // is disabled and this never fires. Site admins commonly enable it
+  // post-install, so this isn't dead code.
 
   // Mukurtu managers can opt out of "User account" category emails via
   // their own notification preferences; the in-app feed record is
@@ -1145,6 +1217,22 @@ function mukurtu_notifications_extract_notify_uids(FormStateInterface $form_stat
 }
 
 /**
+ * Builds the plain-text title/content-type snapshot fields shared by
+ * templates that reference content via field_item, so old notifications
+ * still show a title after the referenced node is deleted -- see
+ * mukurtu_notifications_tokens()'s "mukurtu-content-link" token, which reads
+ * these back as its fallback when field_item's target no longer loads.
+ *
+ * @return array{field_title: string, field_content_type: string}
+ */
+function _mukurtu_notifications_node_snapshot_fields(Node $node): array {
+  return [
+    'field_title' => $node->getTitle(),
+    'field_content_type' => \Drupal::token()->replace('[node:type-name]', ['node' => $node]),
+  ];
+}
+
+/**
  * Records and dispatches a notification when content moderation state changes.
  *
  * @param \Drupal\node\Entity\Node $node
@@ -1156,10 +1244,16 @@ function mukurtu_notifications_extract_notify_uids(FormStateInterface $form_stat
  *   The new moderation state machine name, or NULL if the field isn't
  *   populated yet (e.g. a programmatically-created node that hasn't been
  *   through the moderation form).
+ *
+ * @return int[]
+ *   The uids actually notified, or an empty array if no notification was
+ *   sent -- used by mukurtu_notifications_node_insert() to keep
+ *   mukurtu_notifications_notify_content_created() from double-notifying
+ *   anyone who already got a moderation-state message for this same save.
  */
-function mukurtu_notifications_handle_moderation_change(Node $node, ?string $old_state, ?string $new_state): void {
+function mukurtu_notifications_handle_moderation_change(Node $node, ?string $old_state, ?string $new_state): array {
   if ($new_state === NULL) {
-    return;
+    return [];
   }
 
   $current_user_id = (int) \Drupal::currentUser()->id();
@@ -1182,13 +1276,13 @@ function mukurtu_notifications_handle_moderation_change(Node $node, ?string $old
     case 'draft':
       // Only notify on reversion from a non-draft state.
       if (!in_array($old_state, ['needs_review', 'published', 'archived'])) {
-        return;
+        return [];
       }
       $template = 'mukurtu_content_to_draft';
       break;
 
     default:
-      return;
+      return [];
   }
 
   $notify_uids = $owner_id > 0 ? [$owner_id] : [];
@@ -1203,7 +1297,7 @@ function mukurtu_notifications_handle_moderation_change(Node $node, ?string $old
   $field_values = [
     'field_item' => $node,
     'field_user' => $current_user_id,
-  ];
+  ] + _mukurtu_notifications_node_snapshot_fields($node);
 
   // A contributor submitting their own content for review wants a
   // confirmation that it went through, unlike an ordinary self-edit -- so
@@ -1214,10 +1308,11 @@ function mukurtu_notifications_handle_moderation_change(Node $node, ?string $old
     _mukurtu_notifications_notify($template, $field_values, [$owner_id], 0);
     $other_uids = array_values(array_diff($notify_uids, [$owner_id]));
     _mukurtu_notifications_notify($template, $field_values, $other_uids, $current_user_id);
-    return;
+    return $notify_uids;
   }
 
   _mukurtu_notifications_notify($template, $field_values, $notify_uids, $current_user_id);
+  return $notify_uids;
 }
 
 /**
@@ -1240,10 +1335,16 @@ function mukurtu_notifications_comment_insert(CommentInterface $comment) {
   $steward_uids = mukurtu_notifications_resolve_notify_groups(FALSE, [], $protocol_ids, _mukurtu_notifications_protocol_steward_roles($node));
   $notify_uids = array_values(array_unique(array_merge([$current_user_id], $steward_uids)));
 
-  _mukurtu_notifications_notify('mukurtu_protocol_comment', [
+  // A comment that requires approval hasn't actually "been posted" yet from
+  // readers' perspective -- use the pending-review wording so stewards know
+  // it needs their action, matching mukurtu_comment_approved/_denied's use
+  // of publish state as the same signal elsewhere in this file.
+  $template = $comment->isPublished() ? 'mukurtu_protocol_comment' : 'mukurtu_protocol_comment_pending';
+
+  _mukurtu_notifications_notify($template, [
     'field_item' => $node,
     'field_user' => $current_user_id,
-  ], $notify_uids, $current_user_id);
+  ] + _mukurtu_notifications_node_snapshot_fields($node), $notify_uids, $current_user_id);
 }
 
 /**
@@ -1273,7 +1374,7 @@ function mukurtu_notifications_comment_update(CommentInterface $comment) {
   _mukurtu_notifications_notify('mukurtu_comment_approved', [
     'field_item' => $node,
     'field_user' => $commenter_uid,
-  ], $notify_uids, (int) \Drupal::currentUser()->id());
+  ] + _mukurtu_notifications_node_snapshot_fields($node), $notify_uids, (int) \Drupal::currentUser()->id());
 }
 
 /**
@@ -1303,7 +1404,7 @@ function mukurtu_notifications_comment_delete(CommentInterface $comment) {
   _mukurtu_notifications_notify('mukurtu_comment_denied', [
     'field_item' => $node,
     'field_user' => $commenter_uid,
-  ], $notify_uids, (int) \Drupal::currentUser()->id());
+  ] + _mukurtu_notifications_node_snapshot_fields($node), $notify_uids, (int) \Drupal::currentUser()->id());
 }
 
 /**
@@ -1382,4 +1483,26 @@ function mukurtu_notifications_og_membership_delete(OgMembership $membership) {
   $recipient_uids = array_values(array_unique(array_merge([$removed_uid], $group_uids)));
 
   _mukurtu_notifications_notify($template, $field_values, $recipient_uids, (int) \Drupal::currentUser()->id());
+}
+
+/**
+ * Implements hook_module_implements_alter().
+ *
+ * Moves mukurtu_notifications_node_insert() to run after
+ * pathauto_entity_insert(). A brand-new node can be created and submitted
+ * for review in the same save (see mukurtu_notifications_node_insert()'s own
+ * comment on this), which sends a mukurtu_content_for_review notification
+ * containing a link built from $node->toUrl(). hook_node_insert() otherwise
+ * runs before Pathauto's hook_entity_insert() creates the URL alias, so that
+ * link would permanently bake in the not-yet-aliased /node/{id} path instead
+ * of the friendly URL. Scoped to node_insert only so other hooks this module
+ * implements aren't affected.
+ */
+function mukurtu_notifications_module_implements_alter(&$implementations, $hook): void {
+  if ($hook !== 'node_insert' || !isset($implementations['mukurtu_notifications'], $implementations['pathauto'])) {
+    return;
+  }
+  $group = $implementations['mukurtu_notifications'];
+  unset($implementations['mukurtu_notifications']);
+  $implementations['mukurtu_notifications'] = $group;
 }
