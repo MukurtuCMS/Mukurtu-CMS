@@ -30,7 +30,6 @@ third_party_settings:
         - group_sidebar_mukurtu_fields
         - group_additional_metadata
         - group_rights
-        - flag_export_content
       label: Metadata
       parent_name: ''
       region: content
@@ -513,11 +512,6 @@ content:
     third_party_settings: {  }
     weight: 40
     region: content
-  flag_export_content:
-    settings: {  }
-    third_party_settings: {  }
-    weight: 20
-    region: content
 hidden:
   field_communities: true
   field_content_type: true
@@ -530,6 +524,7 @@ hidden:
   field_sequence_collection: true
   flag_email_node: true
   flag_email_og: true
+  flag_export_content: true
   flag_mukurtu_email_content: true
   flag_mukurtu_email_node: true
   flag_mukurtu_email_og: true
