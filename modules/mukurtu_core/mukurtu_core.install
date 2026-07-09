@@ -2436,3 +2436,23 @@ function mukurtu_core_update_40075(&$sandbox): string {
     '@total' => $sandbox['total'],
   ]);
 }
+
+/**
+ * Flush node_view cache after fixing the related content cache invalidation gap.
+ */
+function mukurtu_core_update_40076(): void {
+  \Drupal\Core\Cache\Cache::invalidateTags(['node_view']);
+}
+
+/**
+ * Remove the orphaned related content teasers display settings.
+ *
+ * These controls were never read anywhere in the codebase, so any value an
+ * admin selected had no effect on the site.
+ */
+function mukurtu_core_update_40077(): void {
+  \Drupal::configFactory()->getEditable('mukurtu.settings')
+    ->clear('mukurtu_related_content_teasers_display_top_right')
+    ->clear('mukurtu_related_content_teasers_display_bottom')
+    ->save();
+}
