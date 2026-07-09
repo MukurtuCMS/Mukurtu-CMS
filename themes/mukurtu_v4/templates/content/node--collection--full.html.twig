@@ -114,7 +114,7 @@
       </div>
 
       {# Sidebar. #}
-      {% if content.group_metadata is not empty %}
+      {% if content.community_protocol_list is not empty or content.group_metadata is not empty or root_collection_has_children %}
         <div class="full-node__list">
           <aside class="full-node__sidebar">
             <div class="sidebar-section">
