@@ -1159,6 +1159,77 @@ function mukurtu_dictionary_update_40031(): void {
 }
 
 /**
+ * Ensure the comment field and its displays exist on dictionary_word.
+ */
+function mukurtu_dictionary_update_40032(): void {
+  if (!\Drupal\field\Entity\FieldConfig::loadByName('node', 'dictionary_word', 'comment')) {
+    \Drupal\field\Entity\FieldConfig::create([
+      'field_name' => 'comment',
+      'entity_type' => 'node',
+      'bundle' => 'dictionary_word',
+      'label' => 'Comments',
+      'description' => '',
+      'required' => FALSE,
+      'translatable' => TRUE,
+      'default_value' => [
+        [
+          'status' => 2,
+          'cid' => 0,
+          'last_comment_timestamp' => 0,
+          'last_comment_name' => NULL,
+          'last_comment_uid' => 0,
+          'comment_count' => 0,
+        ],
+      ],
+      'settings' => [
+        'default_mode' => 1,
+        'per_page' => 50,
+        'anonymous' => 0,
+        'form_location' => TRUE,
+        'preview' => 1,
+      ],
+    ])->save();
+  }
+
+  $form_display = \Drupal::configFactory()->getEditable('core.entity_form_display.node.dictionary_word.default');
+  if (!$form_display->isNew() && !$form_display->get('content.comment')) {
+    $form_display->set('content.comment', [
+      'type' => 'comment_default',
+      'weight' => 9,
+      'region' => 'content',
+      'settings' => [],
+      'third_party_settings' => [],
+    ]);
+    $form_display->save();
+  }
+
+  $view_display = \Drupal::configFactory()->getEditable('core.entity_view_display.node.dictionary_word.full');
+  if (!$view_display->isNew()) {
+    if (!$view_display->get('content.comment')) {
+      $view_display->set('content.comment', [
+        'type' => 'mukurtu_comment_default',
+        'label' => 'above',
+        'settings' => [
+          'view_mode' => 'default',
+          'pager_id' => 0,
+        ],
+        'third_party_settings' => [],
+        'weight' => 2,
+        'region' => 'content',
+      ]);
+    }
+
+    $children = $view_display->get('third_party_settings.field_group.group_primary_fields.children') ?? [];
+    if ($children && !in_array('comment', $children)) {
+      $children[] = 'comment';
+      $view_display->set('third_party_settings.field_group.group_primary_fields.children', $children);
+    }
+
+    $view_display->save();
+  }
+}
+
+/**
  * Hide the export-list flag button on dictionary word and word list displays.
  */
 function mukurtu_dictionary_update_40033(): void {
