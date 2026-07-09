@@ -1,0 +1,11 @@
+name: 'Mukurtu Protocol Sync'
+type: module
+description: 'Allows media assets to sync cultural protocols from their parent content items.'
+core_version_requirement: '^10 || ^11'
+package: 'Mukurtu CMS'
+dependencies:
+  - 'drupal:media'
+  - 'drupal:node'
+  - 'mukurtu_media:mukurtu_media'
+  - 'mukurtu_protocol:mukurtu_protocol'
+version: 4.x-dev
