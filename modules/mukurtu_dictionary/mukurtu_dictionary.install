@@ -1304,3 +1304,24 @@ function mukurtu_dictionary_update_40035(): void {
     $config->set($key, TRUE)->save();
   }
 }
+
+/**
+ * Fix /dictionary's Map mode popups, which rendered dictionary_word and
+ * word_list using Drupal's ":default" view mode instead of the dedicated
+ * map_browse teaser mode -- the view_modes mapping had the two inverted
+ * (#1624).
+ */
+function mukurtu_dictionary_update_40036(): void {
+  $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_dictionary');
+  if ($config->isNew()) {
+    return;
+  }
+  $prefix = 'display.mukurtu_dictionary_block_map.display_options.row.options.view_modes.entity:node.';
+  if ($config->get($prefix . ':default') === NULL) {
+    return;
+  }
+  $config->set($prefix . ':default', 'default');
+  $config->set($prefix . 'dictionary_word', 'map_browse');
+  $config->set($prefix . 'word_list', 'map_browse');
+  $config->save();
+}

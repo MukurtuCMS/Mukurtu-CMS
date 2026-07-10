@@ -1431,15 +1431,15 @@ display:
         options:
           view_modes:
             'entity:node':
-              ':default': map_browse
-              article: ':default'
-              collection: ':default'
-              dictionary_word: ':default'
-              digital_heritage: ':default'
-              page: ':default'
-              person: ':default'
-              place: ':default'
-              word_list: ':default'
+              ':default': default
+              article: map_browse
+              collection: map_browse
+              dictionary_word: map_browse
+              digital_heritage: map_browse
+              page: map_browse
+              person: map_browse
+              place: map_browse
+              word_list: map_browse
       defaults:
         css_class: false
         style: false

@@ -530,3 +530,24 @@ function mukurtu_browse_update_40013(): void {
     }
   }
 }
+
+/**
+ * Fix /browse's Map mode popups, which rendered every named content type
+ * using Drupal's ":default" view mode instead of the dedicated map_browse
+ * teaser mode -- the view_modes mapping had the two inverted (#1624).
+ */
+function mukurtu_browse_update_40014(): void {
+  $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_browse');
+  if ($config->isNew()) {
+    return;
+  }
+  $prefix = 'display.mukurtu_browse_block_map.display_options.row.options.view_modes.entity:node.';
+  if ($config->get($prefix . ':default') === NULL) {
+    return;
+  }
+  $config->set($prefix . ':default', 'default');
+  foreach (['article', 'collection', 'dictionary_word', 'digital_heritage', 'page', 'person', 'place', 'word_list'] as $bundle) {
+    $config->set($prefix . $bundle, 'map_browse');
+  }
+  $config->save();
+}
