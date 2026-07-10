@@ -30,7 +30,6 @@ third_party_settings:
         - group_sidebar_mukurtu_fields
         - group_additional_metadata
         - group_rights
-        - flag_export_content
       label: Metadata
       parent_name: ''
       region: content
@@ -163,7 +162,7 @@ bundle: digital_heritage
 mode: full
 content:
   comment:
-    type: comment_default
+    type: mukurtu_comment_default
     label: above
     settings:
       view_mode: default
@@ -183,7 +182,7 @@ content:
     type: entity_reference_entity_view
     label: above
     settings:
-      view_mode: browse
+      view_mode: featured
       link: false
     third_party_settings: {  }
     weight: 42
@@ -513,13 +512,7 @@ content:
     third_party_settings: {  }
     weight: 40
     region: content
-  flag_export_content:
-    settings: {  }
-    third_party_settings: {  }
-    weight: 20
-    region: content
 hidden:
-  draft: true
   field_communities: true
   field_content_type: true
   field_cultural_protocols: true
@@ -531,6 +524,7 @@ hidden:
   field_sequence_collection: true
   flag_email_node: true
   flag_email_og: true
+  flag_export_content: true
   flag_mukurtu_email_content: true
   flag_mukurtu_email_node: true
   flag_mukurtu_email_og: true

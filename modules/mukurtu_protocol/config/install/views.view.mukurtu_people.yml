@@ -77,18 +77,26 @@ display:
           batch_size: 10
           form_step: true
           buttons: false
-          action_title: Action
+          action_title: 'Action for selected users'
           clear_on_exposed: true
-          force_selection_info: false
+          show_multipage_selection_box: always_hide
           selected_actions:
-            4:
-              action_id: mukurtu_remove_community_membership_action
-            5:
-              action_id: mukurtu_add_community_membership_action
-            6:
-              action_id: mukurtu_remove_protocol_membership_action
-            7:
-              action_id: mukurtu_add_protocol_membership_action
+            0:
+              action_id: mukurtu_block_user_action
+              preconfiguration:
+                label_override: 'Block or delete'
+            1:
+              action_id: mukurtu_unblock_user_action
+              preconfiguration:
+                label_override: 'Unblock or approve'
+                add_confirmation: true
+                confirm_help_text: 'Are you sure you want to unblock the selected user(s)?'
+            2:
+              action_id: mukurtu_set_pending_user_action
+              preconfiguration:
+                label_override: 'Set pending'
+                add_confirmation: true
+                confirm_help_text: 'Are you sure you want to set the selected user(s) to pending?'
         name:
           id: name
           table: users_field_data
@@ -150,7 +158,7 @@ display:
           admin_label: ''
           plugin_id: field
           label: 'Display Name'
-          exclude: false
+          exclude: true
           alter:
             alter_text: false
             text: ''
@@ -204,6 +212,122 @@ display:
           multi_type: separator
           separator: ', '
           field_api_classes: false
+        status:
+          id: status
+          table: users_field_data
+          field: status
+          relationship: none
+          group_type: group
+          admin_label: ''
+          entity_type: user
+          entity_field: status
+          plugin_id: field
+          label: Status
+          exclude: false
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: true
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          click_sort_column: value
+          type: boolean
+          settings:
+            format: custom
+            format_custom_false: Blocked
+            format_custom_true: Active
+          group_column: value
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
+        roles_plain:
+          id: roles_plain
+          table: users
+          field: roles_plain
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: user_roles_plain
+          label: 'Site Roles'
+          exclude: false
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: true
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
         communities:
           id: communities
           table: users
@@ -264,7 +388,7 @@ display:
           entity_type: user
           entity_field: created
           plugin_id: field
-          label: 'Member for'
+          label: 'Member since'
           exclude: false
           alter:
             alter_text: false
@@ -305,11 +429,89 @@ display:
           hide_empty: false
           empty_zero: false
           hide_alter_empty: true
+          click_sort_column: value
+          type: timestamp
+          settings:
+            date_format: medium
+            custom_date_format: ''
+            timezone: ''
+          group_column: value
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
+        access:
+          id: access
+          table: users_field_data
+          field: access
+          relationship: none
+          group_type: group
+          admin_label: ''
+          entity_type: user
+          entity_field: access
+          plugin_id: field
+          label: 'Last access'
+          exclude: false
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: true
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: Never
+          hide_empty: false
+          empty_zero: true
+          hide_alter_empty: true
+          click_sort_column: value
           type: timestamp_ago
           settings:
-            future_format: '@interval'
-            past_format: '@interval'
+            future_format: '@interval hence'
+            past_format: '@interval ago'
             granularity: 2
+          group_column: value
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
         operations:
           id: operations
           table: users
@@ -320,7 +522,7 @@ display:
           entity_type: user
           plugin_id: entity_operations
           label: Operations
-          exclude: true
+          exclude: false
           alter:
             alter_text: false
             text: ''
@@ -361,6 +563,56 @@ display:
           empty_zero: false
           hide_alter_empty: true
           destination: true
+        roles:
+          id: roles
+          table: users
+          field: roles
+          relationship: none
+          group_type: group
+          admin_label: ''
+          entity_type: user
+          plugin_id: mukurtu_user_roles
+          label: 'Site roles'
+          exclude: true
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: true
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
         mail:
           id: mail
           table: users_field_data
@@ -541,6 +793,132 @@ display:
             name: name
             field_display_name: field_display_name
             mail: mail
+        status:
+          id: status
+          table: users_field_data
+          field: status
+          relationship: none
+          group_type: group
+          admin_label: ''
+          entity_type: user
+          entity_field: status
+          plugin_id: boolean
+          operator: '='
+          value: All
+          group: 1
+          exposed: true
+          expose:
+            operator_id: ''
+            label: Status
+            description: ''
+            use_operator: false
+            operator: ''
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: status
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+          is_grouped: true
+          group_info:
+            label: Status
+            description: ''
+            identifier: status
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items:
+              1:
+                title: Active
+                operator: '='
+                value: '1'
+              2:
+                title: Blocked
+                operator: '='
+                value: '0'
+        roles_target_id:
+          id: roles_target_id
+          table: user__roles
+          field: roles_target_id
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: user_roles
+          operator: or
+          value: {  }
+          group: 1
+          exposed: true
+          expose:
+            operator_id: roles_target_id_op
+            label: 'Site role'
+            description: ''
+            use_operator: false
+            operator: roles_target_id_op
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: role
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+            reduce: false
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          reduce_duplicates: false
+        community_filter:
+          id: community_filter
+          table: users
+          field: communities
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: user_community_filter
+          operator: in
+          value: {  }
+          group: 1
+          exposed: true
+          expose:
+            operator_id: community_filter_op
+            label: Communities
+            description: ''
+            use_operator: false
+            operator: community_filter_op
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: community
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
         default_langcode:
           id: default_langcode
           table: users_field_data
@@ -636,11 +1014,14 @@ display:
           columns:
             views_bulk_operations_bulk_form: views_bulk_operations_bulk_form
             name: name
-            field_display_name: field_display_name
+            status: status
+            roles_plain: roles_plain
             communities: communities
             created: created
+            access: access
             operations: operations
             mail: mail
+            field_display_name: field_display_name
           default: created
           info:
             views_bulk_operations_bulk_form:
@@ -655,13 +1036,20 @@ display:
               separator: ''
               empty_column: false
               responsive: ''
-            field_display_name:
+            status:
               sortable: true
               default_sort_order: asc
               align: ''
               separator: ''
               empty_column: false
               responsive: ''
+            roles_plain:
+              sortable: false
+              default_sort_order: asc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: priority-low
             communities:
               sortable: false
               default_sort_order: asc
@@ -669,7 +1057,21 @@ display:
               separator: ''
               empty_column: false
               responsive: ''
+            field_display_name:
+              sortable: false
+              default_sort_order: asc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
             created:
+              sortable: true
+              default_sort_order: desc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: priority-low
+            access:
               sortable: true
               default_sort_order: desc
               align: ''
@@ -692,7 +1094,7 @@ display:
           sticky: false
           summary: ''
           empty_table: true
-          caption: ''
+          caption: 'Site Users'
           description: ''
           class: ''
       row:

@@ -47,11 +47,17 @@ class MukurtuDictionaryController extends ControllerBase {
   }
 
   public function content() {
-    // Render the browse view block.
-    $browse_view_block = [
+    $list_view_block = [
       '#type' => 'view',
       '#name' => $this->getViewName(),
       '#display_id' => 'mukurtu_dictionary_block',
+      '#embed' => TRUE,
+    ];
+
+    $map_view_block = [
+      '#type' => 'view',
+      '#name' => $this->getViewName(),
+      '#display_id' => 'mukurtu_dictionary_block_map',
       '#embed' => TRUE,
     ];
 
@@ -83,8 +89,10 @@ class MukurtuDictionaryController extends ControllerBase {
 
     return [
       '#theme' => 'mukurtu_dictionary_page',
-      '#results' => $browse_view_block,
+      '#list_results' => $list_view_block,
+      '#map_results' => $map_view_block,
       '#glossary' => $glossary,
+      '#attached' => ['library' => ['mukurtu_dictionary/mukurtu-dictionary-view-switch']],
     ];
   }
 

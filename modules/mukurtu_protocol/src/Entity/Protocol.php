@@ -2,8 +2,10 @@
 
 namespace Drupal\mukurtu_protocol\Entity;
 
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Entity\EditorialContentEntityBase;
 use Drupal\Core\Entity\RevisionableInterface;
 use Drupal\Core\Entity\EntityChangedTrait;
@@ -24,7 +26,7 @@ use Exception;
  * @ContentEntityType(
  *   id = "protocol",
  *   label = @Translation("Cultural Protocol"),
- *   label_collection = @Translation("Cultural Protocols"),
+ *   label_collection = @Translation("Communities and Cultural Protocols"),
  *   label_singular = @Translation("Cultural Protocol"),
  *   label_plural = @Translation("Cultural Protocols"),
  *   label_count = @PluralTranslation(
@@ -79,7 +81,7 @@ use Exception;
  *     "revision_revert" = "/protocols/protocol/{protocol}/revisions/{protocol_revision}/revert",
  *     "revision_delete" = "/protocols/protocol/{protocol}/revisions/{protocol_revision}/delete",
  *     "translation_revert" = "/protocols/protocol/{protocol}/revisions/{protocol_revision}/revert/{langcode}",
- *     "collection" = "/admin/protocols",
+ *     "collection" = "/admin/communities-protocols",
  *   },
  *   field_ui_base_route = "protocol.settings"
  * )
@@ -349,6 +351,42 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
   }
 
   /**
+   * {@inheritDoc}
+   */
+  public function getCommentViewAccess(): array {
+    $values = [];
+    foreach ($this->get('field_comment_view_access') as $item) {
+      $values[] = $item->value;
+    }
+    return $values;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public function setCommentViewAccess(array $access): ProtocolInterface {
+    return $this->set('field_comment_view_access', $access);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public function getCommentPostAccess(): array {
+    $values = [];
+    foreach ($this->get('field_comment_post_access') as $item) {
+      $values[] = $item->value;
+    }
+    return $values;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public function setCommentPostAccess(array $access): ProtocolInterface {
+    return $this->set('field_comment_post_access', $access);
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function addMember(AccountInterface $account, $roles = []): MukurtuGroupInterface {
@@ -367,6 +405,7 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
       $membership = Og::createMembership($this, $account);
       $membership->setRoles($ogRoles);
       $membership->save();
+      Cache::invalidateTags(["user:{$account->id()}"]);
     } else {
       return $this->setRoles($account, $roles);
     }
@@ -380,6 +419,7 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
     $membership = Og::getMembership($this, $account, OgMembershipInterface::ALL_STATES);
     if ($membership) {
       $membership->delete();
+      Cache::invalidateTags(["user:{$account->id()}"]);
     }
 
     return $this;
@@ -403,6 +443,7 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
       // Add the roles.
       $membership->setRoles($ogRoles);
       $membership->save();
+      Cache::invalidateTags(["user:{$account->id()}"]);
     }
 
     return $this;
@@ -495,7 +536,7 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
 
     $fields['user_id'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Authored by'))
-      ->setDescription(t('The user ID of author of the Protocol.'))
+      ->setDescription(t('The username and ID of the user that created the protocol.'))
       ->setRevisionable(TRUE)
       ->setSetting('target_type', 'user')
       ->setSetting('handler', 'default')
@@ -519,7 +560,7 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
 
     $fields['name'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Cultural protocol name'))
-      ->setDescription(t('The name of the Protocol.'))
+      ->setDescription(t('The name of the cultural protocol as you want it displayed across the site.'))
       ->setRevisionable(TRUE)
       ->setTranslatable(TRUE)
       ->setSettings([
@@ -541,6 +582,7 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
 
     $fields['field_description'] = BaseFieldDefinition::create('text_with_summary')
       ->setLabel(t('Description'))
+      ->setDescription(t('A description of the cultural protocol that gives site visitors more information about the protocol and its purpose. This is shown to anyone who can view the protocol page.'))
       ->setTranslatable(TRUE)
       ->setDisplayOptions('view', [
         'label' => 'visible',
@@ -556,7 +598,7 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
 
     $fields['field_comment_status'] = BaseFieldDefinition::create('boolean')
       ->setLabel(t('Comments Status'))
-      ->setDescription(t('If comments are enabled for the protocol.'))
+      ->setDescription(t('Enable or disable comments for all content using this protocol.'))
       ->setRevisionable(FALSE)
       ->setDefaultValue(TRUE)
       ->setTranslatable(FALSE)
@@ -565,25 +607,59 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
 
     $fields['field_comment_require_approval'] = BaseFieldDefinition::create('boolean')
       ->setLabel(t('Comments Require Approval'))
-      ->setDescription(t('If comments require approval for the protocol.'))
+      ->setDescription(t('Enable or disable comment approval for all content using this protocol.'))
       ->setRevisionable(FALSE)
       ->setDefaultValue(TRUE)
       ->setTranslatable(FALSE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
-    $fields['status']->setDescription(t('A boolean indicating whether the Protocol is published.'))
+    $fields['field_comment_view_access'] = BaseFieldDefinition::create('list_string')
+      ->setLabel(t('Who can view comments'))
+      ->setRevisionable(FALSE)
+      ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
+      ->setSetting('allowed_values', [
+        'anonymous' => 'Visitors (anonymous users)',
+        'authenticated' => 'Any site user with access',
+        'protocol_member' => 'Protocol members only (any protocol role)',
+      ])
+      ->setDefaultValue([
+        ['value' => 'authenticated'],
+        ['value' => 'protocol_member'],
+      ])
+      ->setTranslatable(FALSE)
+      ->setDisplayConfigurable('view', FALSE)
+      ->setDisplayConfigurable('form', FALSE);
+
+    $fields['field_comment_post_access'] = BaseFieldDefinition::create('list_string')
+      ->setLabel(t('Who can leave comments'))
+      ->setRevisionable(FALSE)
+      ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
+      ->setSetting('allowed_values', [
+        'anonymous' => 'Visitors (anonymous users)',
+        'authenticated' => 'Any site user with access',
+        'protocol_member' => 'Protocol members only (any protocol role)',
+      ])
+      ->setDefaultValue([
+        ['value' => 'authenticated'],
+        ['value' => 'protocol_member'],
+      ])
+      ->setTranslatable(FALSE)
+      ->setDisplayConfigurable('view', FALSE)
+      ->setDisplayConfigurable('form', FALSE);
+
+    $fields['status']->setDescription(t('Publish or unpublish the protocol. If unpublished, this protocol will not be visible to anyone except protocol managers and site admins.'))
       ->setDisplayOptions('form', [
         'type' => 'boolean_checkbox',
       ]);
 
     $fields['created'] = BaseFieldDefinition::create('created')
       ->setLabel(t('Created'))
-      ->setDescription(t('The time that the entity was created.'));
+      ->setDescription(t('The time that the protocol was created.'));
 
     $fields['changed'] = BaseFieldDefinition::create('changed')
       ->setLabel(t('Changed'))
-      ->setDescription(t('The time that the entity was last edited.'));
+      ->setDescription(t('The time that the protocol was last edited.'));
 
     $fields['revision_translation_affected'] = BaseFieldDefinition::create('boolean')
       ->setLabel(t('Revision translation affected'))
@@ -595,6 +671,7 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
     $fields['field_communities'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Communities'))
       ->setSetting('target_type', 'community')
+      ->setDescription(t('Protocols must belong to at least one community. If a protocol belongs to multiple communities, it will be displayed on each of those community pages. Select "Select communities" to choose from available communities.'))
       ->setSetting('handler', 'community_selection_for_protocols')
       ->setSetting('handler_settings', [
         'auto_create' => FALSE,
@@ -612,6 +689,7 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
 
     $fields['field_featured_content'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Featured Content'))
+      ->setDescription(t('Select content to be displayed on the protocol page. Protocols apply to featured content.'))
       ->setSetting('target_type', 'node')
       ->setSetting('handler', 'default:node')
       ->setSetting('handler_settings', [
@@ -630,7 +708,7 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
 
     $fields['field_banner_image'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Banner Image'))
-      ->setDescription(t('Note: banner and thumbnail images require a cultural protocol (like all other media assets). If you cannot upload images here, ensure that you are enrolled in a relevant cultural protocol with permission to upload media.'))
+      ->setDescription(t('The banner image is displayed on the protocol page. Note: banner images require a cultural protocol (like all other media assets). If you cannot upload images here, ensure that you are enrolled in a relevant cultural protocol with permission to upload media.'))
       ->setSetting('target_type', 'media')
       ->setSetting('handler', 'default:media')
       ->setSetting('handler_settings', [
@@ -675,7 +753,7 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
 
     $fields['field_thumbnail_image'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Thumbnail Image'))
-      ->setDescription(t('Note: banner and thumbnail images require a cultural protocol (like all other media assets). If you cannot upload images here, ensure that you are enrolled in a relevant cultural protocol with permission to upload media.'))
+      ->setDescription(t('The thumbnail image is not used in the stock Mukurtu 4 theme. Note: thumbnail images require a cultural protocol (like all other media assets). If you cannot upload images here, ensure that you are enrolled in a relevant cultural protocol with permission to upload media.'))
       ->setSetting('target_type', 'media')
       ->setSetting('handler', 'default:media')
       ->setSetting('handler_settings', [
@@ -695,7 +773,7 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
 
     $fields['field_membership_display'] = BaseFieldDefinition::create('list_string')
       ->setLabel(t('Membership Display'))
-      ->setDescription('')
+      ->setDescription(t('Select which, if any, protocol members are displayed on the protocol page.'))
       ->setSettings([
         'allowed_values' => [
           'none' => 'Do not display',
@@ -729,7 +807,7 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
     $fields['field_local_contexts_description'] = BaseFieldDefinition::create('text_long')
       ->setName('field_local_contexts_description')
       ->setLabel(t('Local Contexts Description'))
-      ->setDescription(t('Enter the description for the Local Contexts project directory page.'))
+      ->setDescription(t('All protocol-level Local Contexts projects are displayed on a directory page. Provide a more detailed description of the use and development of these projects if applicable.'))
       ->setRequired(FALSE)
       ->setTranslatable(TRUE)
       ->setDefaultValue([])

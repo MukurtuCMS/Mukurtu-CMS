@@ -8,3 +8,54 @@
 function mukurtu_search_install() {
   mukurtu_search_rebuild_index();
 }
+
+/**
+ * Reimport mukurtu_browse_auto_index config and reindex (issue #622).
+ *
+ * Replaces __uuid fields with __name (string) and __name__text (text) for
+ * all taxonomy reference fields, enabling fulltext search on term names while
+ * preserving string variants for faceting.
+ */
+function mukurtu_search_update_40001() {
+  mukurtu_search_rebuild_index();
+  if ($index = \Drupal\search_api\Entity\Index::load('mukurtu_browse_auto_index')) {
+    $index->reindex();
+  }
+}
+
+/**
+ * Set default collapse settings: both off (preserves existing behaviour).
+ */
+function mukurtu_search_update_40002(): void {
+  $config = \Drupal::configFactory()->getEditable('mukurtu_search.settings');
+  if ($config->get('collapse_multipage_pages') === NULL) {
+    $config->set('collapse_multipage_pages', FALSE);
+  }
+  if ($config->get('collapse_community_records') === NULL) {
+    $config->set('collapse_community_records', FALSE);
+  }
+  $config->save();
+}
+
+/**
+ * Disable "Show all multipage item pages in search results" by default.
+ */
+function mukurtu_search_update_40003(): void {
+  $config = \Drupal::configFactory()->getEditable('mukurtu_search.settings');
+  $config->set('collapse_multipage_pages', TRUE);
+  $config->save();
+}
+
+/**
+ * Set default header search settings for existing installs.
+ */
+function mukurtu_search_update_40004(): void {
+  $config = \Drupal::configFactory()->getEditable('mukurtu_search.settings');
+  if ($config->get('header_search_enabled') === NULL) {
+    $config->set('header_search_enabled', TRUE);
+  }
+  if ($config->get('header_search_path') === NULL) {
+    $config->set('header_search_path', '/browse');
+  }
+  $config->save();
+}

@@ -4,7 +4,7 @@ dependencies:
   module:
     - media
 id: media.small_250px_
-label: 'Small (250px)'
+label: 'Digital Heritage Small'
 description: ''
 targetEntityType: media
 cache: true

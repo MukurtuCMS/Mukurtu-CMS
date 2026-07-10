@@ -1,6 +1,2 @@
-mukurtu_drafts.your_drafts:
-  path: '/user/drafts'
-  defaults:
-    _title: 'Your Drafts'
-  requirements:
-    _access: 'TRUE'
+# No custom routes -- the drafts page is now provided by the
+# mukurtu_workflow_overview view at /my-content.

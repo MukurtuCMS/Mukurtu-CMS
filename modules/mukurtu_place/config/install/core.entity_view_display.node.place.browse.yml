@@ -44,7 +44,6 @@ content:
     region: content
 hidden:
   comment: true
-  draft: true
   field_all_related_content: true
   field_citation: true
   field_coverage: true

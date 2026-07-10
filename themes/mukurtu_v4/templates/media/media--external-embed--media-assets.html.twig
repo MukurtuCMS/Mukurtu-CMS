@@ -1,0 +1,45 @@
+{#
+/**
+ * @file
+ * Theme override to present an external embed in the media assets field.
+ *
+ * Available variables:
+ * - media: The media item, with limited access to object properties and
+ *   methods. Only method names starting with "get", "has", or "is" and
+ *   a few common methods such as "id", "label", and "bundle" are available.
+ * - name: Name of the media item.
+ * - content: Media content.
+ * - view_mode: View mode; for example, "teaser" or "full".
+ * - attributes: HTML attributes for the containing element.
+ * - bundle: machine name of media type.
+ * @see template_preprocess_media()
+ */
+#}
+{%
+  set classes = [
+    'media',
+    'media--' ~ bundle
+  ]
+%}
+
+<div class="media-asset--slide">
+  <div{{ attributes.addClass(classes) }}>
+    {{ title_suffix.contextual_links }}
+    {{ content.media_content_warnings }}
+
+    <div class="media-asset--content">
+      {{ content.field_media_external_embed }}
+    </div>
+
+    <div id="external-embed-{{ media.id }}" class="media-asset--glightbox-inline">
+      <div class="media media--external-embed">
+        {{ content.media_content_warnings }}
+        {{ content.field_media_external_embed }}
+      </div>
+    </div>
+  </div>
+
+  <div class="media-asset--actions">
+    <a href="#external-embed-{{ media.id }}" data-type="inline" class="media-asset--link button" aria-label="Expand {{ name }}">Expand +</a>
+  </div>
+</div>

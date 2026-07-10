@@ -85,19 +85,26 @@
       {% set media = content.field_page_media_assets.0 %}
     {% elseif content.field_recording %}
       {% set media = content.field_recording.0 %}
+    {% elseif content.field_word_list_image %}
+      {% set media = content.field_word_list_image.0 %}
     {% endif %}
-<article{{ attributes }}>
 
-  <a href="{{ url }}" class="featured-item__link">View Content</a>
+<article{{ attributes }}>
 
   <div class="featured-item__media">
     {{ media|add_suggestion('clean') }}
   </div>
 
-  <div class="featured-item__type">{{ node.type.entity.label }}</div>
+  <div class="featured-item__body">
 
-  <h3{{ title_attributes }}>
-    <a href="{{ url }}" rel="bookmark">{{ label|add_suggestion('clean') }}</a>
-  </h3>
+    <div class="featured-item__type">{{ node.type.entity.label }}</div>
+
+    <h3{{ title_attributes }}>
+      <a href="{{ url }}" rel="bookmark" class="featured-item__title-link">
+        {{- label|add_suggestion('clean') -}}
+      </a>
+    </h3>
+
+  </div>
 
 </article>

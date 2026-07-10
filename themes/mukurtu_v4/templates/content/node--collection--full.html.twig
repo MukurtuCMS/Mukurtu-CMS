@@ -71,15 +71,15 @@
 
   <div{{ content_attributes }} class="full-node collection">
 
+    {{ title_prefix }}
+    {{ title_suffix }}
+
     <div class="collection__header">
       <div class="collection__header__image">
-        {{ content.group_primary_fields.field_collection_image|render|striptags('<img>')|raw }}
+        {{ content.group_primary_fields.field_collection_image }}
       </div>
 
       <div class="collection__header__text">
-        {{ title_prefix }}
-        {{ title_suffix }}
-
         {% if label %}
           <h2{{ title_attributes }}>
           {{ label }}
@@ -114,7 +114,7 @@
       </div>
 
       {# Sidebar. #}
-      {% if content.group_metadata is not empty %}
+      {% if content.community_protocol_list is not empty or content.group_metadata is not empty or root_collection_has_children %}
         <div class="full-node__list">
           <aside class="full-node__sidebar">
             <div class="sidebar-section">
@@ -125,16 +125,17 @@
             {{ content.group_metadata.group_rights }}
             {% if root_collection_has_children %}
               <div class="sidebar-section collection__menu">
-                <h2 class="collection__menu-title">{{ 'In this Collection'|t }}</h2>
-                {{ root_collection }}
-                {{ drupal_block('system_menu_block:mukurtu-collection-menu', {
-                  label_display: 0,
-                  level: 2,
-                  expand_all_items: 1,
-                }) }}
+                <h3 class="collection__menu-title" id="collection-menu-heading">{{ 'In this Collection'|t }}</h3>
+                <nav aria-labelledby="collection-menu-heading">
+                  {{ root_collection }}
+                  {{ drupal_block('system_menu_block:mukurtu-collection-menu', {
+                    label_display: 0,
+                    level: 2,
+                    expand_all_items: 1,
+                  }) }}
+                </nav>
               </div>
             {% endif %}
-            {{ content.group_metadata.flag_export_content }}
             {{ content.group_primary_fields.field_citation }}
           </aside>
         </div>

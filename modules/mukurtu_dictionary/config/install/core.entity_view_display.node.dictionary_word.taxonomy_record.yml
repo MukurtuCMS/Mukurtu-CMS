@@ -108,14 +108,8 @@ content:
     third_party_settings: {  }
     weight: 3
     region: content
-  flag_export_content:
-    weight: 10
-    settings: {  }
-    third_party_settings: {  }
-    region: content
 hidden:
   comment: true
-  draft: true
   field_additional_word_entries: true
   field_alternate_spelling: true
   field_citation: true
@@ -145,6 +139,7 @@ hidden:
   field_word_type: true
   flag_email_node: true
   flag_email_og: true
+  flag_export_content: true
   flag_mukurtu_email_content: true
   flag_mukurtu_email_node: true
   flag_mukurtu_email_og: true

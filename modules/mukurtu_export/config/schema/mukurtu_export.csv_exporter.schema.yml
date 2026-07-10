@@ -43,6 +43,12 @@ mukurtu_export.csv_exporter.*:
     multivalue_delimiter:
       type: string
       label: 'Multivalue delimiter'
+    local_contexts_delimiter:
+      type: string
+      label: 'Local Contexts delimiter'
+    default_format:
+      type: string
+      label: 'Default text format'
     field_file:
       type: string
       label: 'File field export handling'
@@ -60,4 +66,6 @@ mukurtu_export.csv_exporter.*:
     entity_reference_user:
       type: string
     entity_reference_paragraph:
+      type: string
+    entity_reference_multipage_item:
       type: string

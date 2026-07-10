@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\mukurtu_collection\Hook;
 
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\mukurtu_collection\Entity\Collection;
 use Drupal\mukurtu_collection\MenuRebuildProcessor;
@@ -19,8 +20,13 @@ final class CollectionEntityHooks {
    *
    * @param \Drupal\mukurtu_collection\MenuRebuildProcessor $menuRebuildProcessor
    *   Menu rebuild processor.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
+   *   Entity type manager.
    */
-  public function __construct(protected MenuRebuildProcessor $menuRebuildProcessor) {
+  public function __construct(
+    protected MenuRebuildProcessor $menuRebuildProcessor,
+    protected EntityTypeManagerInterface $entityTypeManager,
+  ) {
   }
 
   /**
@@ -35,6 +41,13 @@ final class CollectionEntityHooks {
 
     // Always rebuild menu when a collection is created.
     $this->menuRebuildProcessor->markRebuildNeeded();
+
+    // Reindex any sub-collections added at creation time so their
+    // parent_collection_id search index field is updated immediately.
+    $child_ids = $entity->getChildCollectionIds();
+    if (!empty($child_ids)) {
+      $this->reindexCollections($child_ids);
+    }
   }
 
   /**
@@ -60,9 +73,20 @@ final class CollectionEntityHooks {
     $new_child_ids = $entity->getChildCollectionIds();
     $old_child_ids = $original->getChildCollectionIds();
 
-    // If the child collections have changed, rebuild the menu.
+    // If the child collections have changed, rebuild the menu and reindex
+    // affected children so their parent_collection_id search index field
+    // reflects the new parent state immediately.
     if ($new_child_ids !== $old_child_ids) {
       $this->menuRebuildProcessor->markRebuildNeeded();
+
+      $added = array_diff($new_child_ids, $old_child_ids);
+      $removed = array_diff($old_child_ids, $new_child_ids);
+      $affected = array_unique(array_merge($added, $removed));
+
+      if (!empty($affected)) {
+        $this->reindexCollections($affected);
+      }
+
       return;
     }
 
@@ -70,6 +94,33 @@ final class CollectionEntityHooks {
     if ($entity->label() !== $original->label()) {
       $this->menuRebuildProcessor->markRebuildNeeded();
       return;
+    }
+  }
+
+  /**
+   * Marks collection nodes for immediate Search API reindexing.
+   *
+   * @param int[] $node_ids
+   *   Node IDs to reindex.
+   */
+  private function reindexCollections(array $node_ids): void {
+    if (!$this->entityTypeManager->hasDefinition('search_api_index')) {
+      return;
+    }
+    /** @var \Drupal\search_api\IndexInterface $index */
+    $index = $this->entityTypeManager
+      ->getStorage('search_api_index')
+      ->load('mukurtu_collection_index');
+    if (!$index) {
+      return;
+    }
+    $nodes = $this->entityTypeManager->getStorage('node')->loadMultiple($node_ids);
+    $item_ids = [];
+    foreach ($nodes as $node) {
+      $item_ids[] = $node->id() . ':' . $node->language()->getId();
+    }
+    if (!empty($item_ids)) {
+      $index->trackItemsUpdated('entity:node', $item_ids);
     }
   }
 

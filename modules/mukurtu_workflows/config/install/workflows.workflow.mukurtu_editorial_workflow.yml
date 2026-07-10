@@ -1,0 +1,96 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - content_moderation
+id: mukurtu_editorial_workflow
+label: 'Mukurtu Editorial Workflow'
+type: content_moderation
+type_settings:
+  states:
+    draft:
+      label: Draft
+      weight: 0
+      published: false
+      default_revision: true
+    needs_review:
+      label: 'Awaiting Review'
+      weight: 1
+      published: false
+      default_revision: true
+    revision_requested:
+      label: 'Edits Needed'
+      weight: 2
+      published: false
+      default_revision: true
+    published:
+      label: Published
+      weight: 3
+      published: true
+      default_revision: true
+    archived:
+      label: Archived
+      weight: 4
+      published: false
+      default_revision: true
+  transitions:
+    save_draft:
+      label: 'Save as Draft'
+      from:
+        - draft
+        - needs_review
+        - revision_requested
+        - published
+      to: draft
+      weight: 0
+    submit_for_review:
+      label: 'Submit for Review'
+      from:
+        - draft
+        - needs_review
+      to: needs_review
+      weight: 1
+    request_revision:
+      label: 'Needs edits'
+      from:
+        - needs_review
+        - published
+      to: revision_requested
+      weight: 2
+    resubmit:
+      label: 'Resubmit for review'
+      from:
+        - revision_requested
+      to: needs_review
+      weight: 3
+    publish:
+      label: Publish
+      from:
+        - draft
+        - needs_review
+        - revision_requested
+        - published
+        - archived
+      to: published
+      weight: 4
+    archive:
+      label: Archive
+      from:
+        - published
+      to: archived
+      weight: 5
+    restore:
+      label: 'Restore to Draft'
+      from:
+        - archived
+      to: draft
+      weight: 6
+    return_to_review:
+      label: 'Return to Review'
+      from:
+        - published
+        - archived
+      to: needs_review
+      weight: 7
+  entity_types: {  }
+  default_moderation_state: draft

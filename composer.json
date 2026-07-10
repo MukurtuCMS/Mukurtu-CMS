@@ -15,17 +15,17 @@
         }
     ],
     "require": {
-        "composer/installers": "^1.9",
+        "composer/installers": "^2.0",
         "cweagans/composer-patches": "^1.7",
         "drupal/better_exposed_filters": "^7.1.1",
         "drupal/blazy": "^3.0",
         "drupal/color_field": "^3.0",
         "drupal/config_pages": "^2.15",
         "drupal/consent_popup": "^1.0",
-        "drupal/core": "~11.2.4",
-        "drupal/core-composer-scaffold": "~11.2.4",
-        "drupal/core-project-message": "~11.2.4",
-        "drupal/core-recommended": "~11.2.4",
+        "drupal/core": "~11.4.0",
+        "drupal/core-composer-scaffold": "~11.4.0",
+        "drupal/core-project-message": "~11.4.0",
+        "drupal/core-recommended": "~11.4.0",
         "drupal/ctools": "*",
         "drupal/embed": "*",
         "drupal/entity_browser": "*",
@@ -33,6 +33,7 @@
         "drupal/entity_reference_revisions": "*",
         "drupal/extlink": "^2.0",
         "drupal/facets": "^3.0",
+        "drupal/flat_taxonomy": "^2.0",
         "drupal/facets_reset_button": "^1.0",
         "drupal/features": "^3.14",
         "drupal/field_group": "^4.0",
@@ -48,8 +49,6 @@
         "drupal/leaflet": "^10.2",
         "drupal/media_entity_soundcloud": "^3.2",
         "drupal/message": "^1.5",
-        "drupal/message_digest": "^1.3",
-        "drupal/message_digest_ui": "*",
         "drupal/message_notify": "^1.3",
         "drupal/message_subscribe": "^2.0",
         "drupal/message_ui": "^1.0@beta",
@@ -58,7 +57,7 @@
         "drupal/migrate_tools": "^6.0",
         "drupal/og": "^1.x-dev",
         "drupal/paragraphs": "*",
-        "drupal/pathauto": "*",
+        "drupal/pathauto": "^1.14",
         "drupal/redirect": "*",
         "drupal/restui": "*",
         "drupal/search_api": "*",
@@ -76,8 +75,10 @@
         "drupal/admin_theme": "^1.1",
         "drupal/config_translation_po": "^1.0",
         "geocoder-php/nominatim-provider": "*",
-        "drupal/tagify": "^1.2",
-        "drupal/rebuild_cache_access": "^1.12"
+        "drupal/genpass": "^2.1",
+        "drupal/rebuild_cache_access": "^1.12",
+        "drupal/notify_user_default": "^1.0",
+        "drupal/readonly_field_widget": "^2.1"
     },
     "require-dev": {
         "drupal/devel": "*",
@@ -87,6 +88,11 @@
     },
     "config": {
         "sort-packages": true,
+        "audit": {
+            "ignore": {
+                "PKSA-dwsq-ppd2-mb1x": "symfony/polyfill-intl-idn: advisory only affects the pure PHP fallback path; native PHP intl extension is required and available in all target environments"
+            }
+        },
         "allow-plugins": {
             "composer/installers": true,
             "cweagans/composer-patches": true,
@@ -95,11 +101,28 @@
             "drupal/core-project-message": true,
             "php-http/discovery": true,
             "phpstan/extension-installer": true,
-            "tbachert/spi": true
+            "tbachert/spi": true,
+            "symfony/runtime": true
         }
     },
     "extra": {
+        "drupal-scaffold": {
+            "locations": {
+                "web-root": "web/"
+            }
+        },
+        "installer-paths": {
+            "web/core": ["type:drupal-core"],
+            "web/libraries/{$name}": ["type:drupal-library"],
+            "web/modules/contrib/{$name}": ["type:drupal-module"],
+            "web/profiles/{$name}": ["type:drupal-profile"],
+            "web/themes/contrib/{$name}": ["type:drupal-theme"],
+            "drush/Commands/contrib/{$name}": ["type:drupal-drush"]
+        },
         "patches": {
+            "drupal/core": {
+                "Fix stale config.installer proxy after nested container rebuild during module install": "web/profiles/mukurtu/patches/module-installer-stale-config-installer-proxy.patch"
+            },
             "drupal/features": {
                 "Issue #2981655: Simple configuration list is incomplete": "https://www.drupal.org/files/issues/2020-05-14/2981655-3.features.Simple-configuration-list-is-incomplete.patch"
             },
@@ -116,7 +139,26 @@
                 "Remove bulk option to remove a user's roles": "web/profiles/mukurtu/patches/832-disallow-og-role-removal.patch"
             },
             "drupal/search_api_glossary": {
-                "TypeError: Cannot access offset of type string on string": "web/profiles/mukurtu/patches/search_api_glossary_type-error-3492668-8.patch"
+                "TypeError: Cannot access offset of type string on string": "web/profiles/mukurtu/patches/search_api_glossary_type-error-3492668-8.patch",
+                "Fix implicit nullable param deprecation in Glossary::getPropertyDefinitions()": "web/profiles/mukurtu/patches/search_api_glossary-nullable-param-deprecation.patch"
+            },
+            "drupal/message_ui": {
+                "Fix implicit nullable param deprecation in SaveMessage::access()": "web/profiles/mukurtu/patches/message_ui-nullable-param-deprecation.patch"
+            },
+            "drupal/admin_theme": {
+                "Fix implicit nullable param deprecation in AdminThemeAdminContext::isAdminRoute()": "web/profiles/mukurtu/patches/admin_theme-nullable-param-deprecation.patch"
+            },
+            "drupal/field_group": {
+                "Fix EntityViewDisplay/EntityFormDisplay::load() incompatibility with Drupal 11.3.x": "web/profiles/mukurtu/patches/field_group-entity-load-11-3.patch"
+            },
+            "drupal/pathauto": {
+                "Fix missing source_module on PHP 8 MigrateSource attribute": "web/profiles/mukurtu/patches/pathauto-source-module-missing-php8-attribute.patch"
+            },
+            "drupal/flat_taxonomy": {
+                "Fix null vocabulary crash in presave hook during migration": "web/profiles/mukurtu/patches/flat-taxonomy-null-vocabulary-presave.patch"
+            },
+            "drupal/migrate_source_csv": {
+                "Replace deprecated createFromStream() with from() for league/csv 9.27+": "web/profiles/mukurtu/patches/migrate_source_csv-createFromStream-deprecated-9.27.patch"
             }
         }
     }

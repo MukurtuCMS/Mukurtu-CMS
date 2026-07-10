@@ -4,3 +4,201 @@
  * @file
  * Install, update and uninstall functions for the mukurtu_collection module.
  */
+
+/**
+ * Update the weight of field_coverage in the collection form display.
+ */
+function mukurtu_collection_update_40001() {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.collection.default');
+  $config->set('content.field_coverage.weight', 0);
+  $config->save();
+  return t('Updated the weight of field_coverage in collection form display.');
+}
+
+/**
+ * Add MPI and community record collapse fields to the collection search index.
+ */
+function mukurtu_collection_update_40002(): void {
+  $index = \Drupal\search_api\Entity\Index::load('mukurtu_collection_index');
+  if (!$index) {
+    return;
+  }
+
+  $module_handler = \Drupal::moduleHandler();
+  $processor_manager = \Drupal::service('plugin.manager.search_api.processor');
+  $processors = $index->getProcessors();
+  $index_changed = FALSE;
+
+  $candidates = [
+    [
+      'module' => 'mukurtu_multipage_items',
+      'processor_id' => 'mukurtu_multipage_page_index',
+      'field_id' => 'is_additional_mpi_page',
+      'field' => [
+        'type' => 'boolean',
+        'property_path' => 'is_additional_mpi_page',
+        'datasource_id' => 'entity:node',
+        'label' => 'Is additional multipage item page',
+      ],
+    ],
+    [
+      'module' => 'mukurtu_community_records',
+      'processor_id' => 'mukurtu_community_record_flag',
+      'field_id' => 'is_community_record',
+      'field' => [
+        'type' => 'boolean',
+        'property_path' => 'is_community_record',
+        'datasource_id' => 'entity:node',
+        'label' => 'Is community record',
+      ],
+    ],
+  ];
+
+  foreach ($candidates as $candidate) {
+    if (!$module_handler->moduleExists($candidate['module'])) {
+      continue;
+    }
+
+    if (!isset($processors[$candidate['processor_id']])) {
+      $processor = $processor_manager->createInstance($candidate['processor_id'], ['#index' => $index]);
+      $processors[$candidate['processor_id']] = $processor;
+      $index_changed = TRUE;
+    }
+
+    if (!$index->getField($candidate['field_id'])) {
+      $cfg = $candidate['field'];
+      $field = new \Drupal\search_api\Item\Field($index, $candidate['field_id']);
+      $field->setType($cfg['type']);
+      $field->setPropertyPath($cfg['property_path']);
+      $field->setDatasourceId($cfg['datasource_id']);
+      $field->setLabel($cfg['label']);
+      $index->addField($field);
+      $index_changed = TRUE;
+    }
+  }
+
+  if (!$index_changed) {
+    return;
+  }
+
+  $index->setProcessors($processors);
+  $index->save();
+  $index->reindex();
+}
+
+/**
+ * Switch field_child_collections and field_related_content on collection to rendered_entity.
+ */
+function mukurtu_collection_update_40004(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.collection.default');
+  if ($config->isNew()) {
+    return;
+  }
+  foreach (['field_child_collections', 'field_related_content'] as $field) {
+    $config->set("content.$field.settings.field_widget_display", 'rendered_entity');
+    $config->set("content.$field.settings.field_widget_display_settings", ['view_mode' => 'form_selection']);
+  }
+  $config->save();
+}
+
+/**
+ * Switch field_items_in_collection widget to rendered_entity (form_selection view mode).
+ */
+function mukurtu_collection_update_40003(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.collection.default');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_items_in_collection.settings.field_widget_display', 'rendered_entity');
+  $config->set('content.field_items_in_collection.settings.field_widget_display_settings', ['view_mode' => 'form_selection']);
+  $config->save();
+}
+
+/**
+ * Switch personal_collection field_items_in_collection widget to rendered_entity.
+ */
+function mukurtu_collection_update_40005(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.personal_collection.personal_collection.default');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_items_in_collection.settings.field_widget_display', 'rendered_entity');
+  $config->set('content.field_items_in_collection.settings.field_widget_display_settings', ['view_mode' => 'form_selection']);
+  $config->save();
+}
+
+/**
+ * Switch field_child_collections to the collection-specific entity browser.
+ *
+ * Install the mukurtu_collection_browser entity browser config here rather than
+ * waiting for mukurtu_core_update_40026, because Drupal runs update hooks
+ * alphabetically by module name (mukurtu_collection before mukurtu_core). The
+ * form display must not reference a browser that doesn't exist yet.
+ */
+function mukurtu_collection_update_40006(): void {
+  $name = 'entity_browser.browser.mukurtu_collection_browser';
+  if (!\Drupal::service('config.storage')->exists($name)) {
+    $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core');
+    $source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+    $data = $source->read($name);
+    if ($data !== FALSE) {
+      \Drupal::configFactory()->getEditable($name)->setData($data)->save(TRUE);
+    }
+  }
+
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.collection.default');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_child_collections.settings.entity_browser', 'mukurtu_collection_browser');
+  $config->save();
+}
+
+/**
+ * Restrict items_in_collection to allowed content types.
+ *
+ * The target_bundles restriction lives in PHP entity code (Collection.php and
+ * PersonalCollection.php), not in config. Clearing cached field definitions is
+ * sufficient to apply the change to running sites.
+ */
+function mukurtu_collection_update_40008(): void {
+  \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
+}
+
+/**
+ * Switch collection full view related content to featured view mode.
+ */
+function mukurtu_collection_update_40009(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.collection.full');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_all_related_content.settings.view_mode', 'featured');
+  $config->save();
+}
+
+/**
+ * Hide the export-list flag button on the collection full display.
+ */
+function mukurtu_collection_update_40010(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.collection.full');
+  if ($config->isNew()) {
+    return;
+  }
+
+  $content = $config->get('content') ?? [];
+  if (isset($content['flag_export_content'])) {
+    unset($content['flag_export_content']);
+    $config->set('content', $content);
+  }
+
+  $hidden = $config->get('hidden') ?? [];
+  $hidden['flag_export_content'] = TRUE;
+  $config->set('hidden', $hidden);
+
+  $children = $config->get('third_party_settings.field_group.group_metadata.children') ?? [];
+  $children = array_values(array_filter($children, fn($child) => $child !== 'flag_export_content'));
+  $config->set('third_party_settings.field_group.group_metadata.children', $children);
+
+  $config->save();
+}

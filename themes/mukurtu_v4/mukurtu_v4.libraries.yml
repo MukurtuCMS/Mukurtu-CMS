@@ -60,3 +60,17 @@ media-glightbox:
     - core/drupal
     - core/once
     - mukurtu_v4/glightbox
+
+dictionary-word-tabs:
+  js:
+    js/dictionary-word-tabs.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+
+audio-thumbnail-player:
+  js:
+    js/audio-thumbnail-player.js: {}
+  dependencies:
+    - core/drupal
+    - core/once

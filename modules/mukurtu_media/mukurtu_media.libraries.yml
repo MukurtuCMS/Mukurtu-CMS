@@ -1,0 +1,34 @@
+media-library-image-alt:
+  js:
+    js/media-library-image-alt.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+
+media-thumb-focus:
+  js:
+    js/media-thumb-focus.js: {}
+  dependencies:
+    - core/drupal
+
+media_add_page:
+  css:
+    theme:
+      css/media-admin.css: {}
+
+bulk_upload_dropzone:
+  css:
+    theme:
+      css/media-admin.css: {}
+  js:
+    js/bulk-upload-dropzone.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+
+bulk_step_focus:
+  js:
+    js/bulk-step-focus.js: {}
+  dependencies:
+    - core/drupal
+    - core/once

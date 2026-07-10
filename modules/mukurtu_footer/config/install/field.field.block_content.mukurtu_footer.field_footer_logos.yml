@@ -1,0 +1,31 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - block_content.type.mukurtu_footer
+    - field.storage.block_content.field_footer_logos
+    - paragraphs.paragraphs_type.footer_logo
+  module:
+    - entity_reference_revisions
+    - paragraphs
+id: block_content.mukurtu_footer.field_footer_logos
+field_name: field_footer_logos
+entity_type: block_content
+bundle: mukurtu_footer
+label: Logos
+description: 'Upload logos to display in the footer. Each logo can have an optional link URL.'
+required: false
+translatable: false
+default_value: {}
+default_value_callback: ''
+settings:
+  handler: default:paragraph
+  handler_settings:
+    negate: 0
+    target_bundles:
+      footer_logo: footer_logo
+    target_bundles_drag_drop:
+      footer_logo:
+        enabled: true
+        weight: 0
+field_type: entity_reference_revisions

@@ -1,6 +1,4 @@
 @use "../../../external/include-media";
-@use "../../00-base/layout/layout";
-@use "../../00-base/mixins/mixins";
 
 .community--full,
 .protocol--full {
@@ -49,43 +47,22 @@
     min-inline-size: calc(46.5vw + 1rem);
   }
 
-  .field--name-field-featured-content {
+  .featured-content__heading {
     margin-block-start: var(--v-space-l);
+    margin-block-end: var(--v-space-2xs);
+  }
 
-    & > .field__items {
-      margin-block-start: var(--v-space-4xs);
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(auto, calc(33% - var(--gutter))));
-      gap: var(--gutter);
+  .field--name-field-featured-content {
+    margin-block-start: 0;
 
-      .field__item {
-        max-inline-size: calc(100vw - (var(--layout-padding-full-width) * 2));
-
-        a {
-          display: block;
-
-          &.dictionary-word__teaser-word {
-            display: flex;
-          }
-
-          @include mixins.button;
-        }
-      }
+    // Cap at 3 columns — community/protocol pages have a sidebar
+    @include include-media.media('>=xl') {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
-    .dictionary-word__teaser-content,
-    .dictionary-word__teaser-heading {
-      padding-inline: 0;
-      padding-block: 0;
-      background-color: unset;
-    }
-
-    .dictionary-word__media {
-      display: block;
-
-      audio {
-        max-inline-size: 100%;
-      }
+    // No audio player on community/protocol cards — let thumbnail fill the full media area
+    .featured-item__media .media--audio {
+      padding-block-start: 0;
     }
   }
 }

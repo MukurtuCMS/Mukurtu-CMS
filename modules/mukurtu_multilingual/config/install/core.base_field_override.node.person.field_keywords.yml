@@ -9,7 +9,7 @@ field_name: field_keywords
 entity_type: node
 bundle: person
 label: Keywords
-description: "Keywords are used to tag person records to ensure that they are discoverable when searching or browsing. Examples include significant life events or organizations which the person was involved with.\tAs you type, existing keywords will be displayed. </br>Select an existing keyword or enter a new one. To include additional keywords, select \"Add another item\"."
+description: "Keywords are used to tag person records to ensure that they are discoverable when searching or browsing. Examples include significant life events or organizations which the person was involved with.<br>Include as many keywords as needed. Select from existing keywords or add new ones."
 required: false
 translatable: false
 default_value:

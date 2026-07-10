@@ -8,11 +8,15 @@
 use Drupal\field\Entity\FieldConfig;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\genpass\GenpassInterface;
 use Drupal\mukurtu_core\BaseFieldOverride;
 use Drupal\node\Entity\NodeType;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\BubbleableMetadata;
+use Drupal\user\UserInterface;
 use Drupal\Core\Url;
 use Drupal\Core\Link;
 use Drupal\Core\Cache\Cache;
@@ -55,6 +59,32 @@ function mukurtu_core_entity_type_build(array &$entity_types) {
 }
 
 /**
+ * Implements hook_entity_field_access().
+ *
+ * Allow community managers to view restricted user fields (status, roles,
+ * access) that core hides from non-admins.
+ */
+function mukurtu_core_entity_field_access($operation, \Drupal\Core\Field\FieldDefinitionInterface $field_definition, \Drupal\Core\Session\AccountInterface $account, ?\Drupal\Core\Field\FieldItemListInterface $items = NULL) {
+  if ($operation !== 'view' || $field_definition->getTargetEntityTypeId() !== 'user') {
+    return \Drupal\Core\Access\AccessResult::neutral();
+  }
+  $restricted = ['status', 'roles', 'access', 'mail'];
+  if (!in_array($field_definition->getName(), $restricted)) {
+    return \Drupal\Core\Access\AccessResult::neutral();
+  }
+  if ($account->hasPermission('administer users')) {
+    return \Drupal\Core\Access\AccessResult::neutral();
+  }
+  $user = \Drupal\user\Entity\User::load($account->id());
+  foreach (\Drupal\og\Og::getMemberships($user) as $membership) {
+    if ($membership->getGroupBundle() === 'community' && $membership->hasPermission('manage members')) {
+      return \Drupal\Core\Access\AccessResult::allowed()->cachePerUser()->addCacheTags(['user:' . $account->id()]);
+    }
+  }
+  return \Drupal\Core\Access\AccessResult::neutral();
+}
+
+/**
  * Implements hook_entity_operation().
  */
 function mukurtu_core_entity_operation(EntityInterface $entity) {
@@ -72,6 +102,110 @@ function mukurtu_core_entity_operation(EntityInterface $entity) {
       'url' => Url::fromRoute('mukurtu_core.content_found_in', ["node" => $entity->id()]),
       'weight' => 150,
     );
+  }
+  if ($entity->getEntityTypeId() == 'user') {
+    $account = \Drupal::currentUser();
+    // Don't show approve/block on a user's own account.
+    if ($account->id() == $entity->id()) {
+      return $operations;
+    }
+    $is_site_admin = $account->hasPermission('administer users');
+
+    // Build managed-community IDs in one pass; skip the OG query for site
+    // admins who don't need community scoping.
+    $cm_community_ids = [];
+    if (!$is_site_admin) {
+      $current_user = \Drupal\user\Entity\User::load($account->id());
+      foreach (\Drupal\og\Og::getMemberships($current_user) as $membership) {
+        if ($membership->getGroupBundle() === 'community' && $membership->hasPermission('manage members')) {
+          $cm_community_ids[] = $membership->getGroupId();
+        }
+      }
+    }
+    $can_manage = $is_site_admin || !empty($cm_community_ids);
+
+    if ($can_manage) {
+      $target_community_ids = [];
+      foreach (\Drupal\og\Og::getMemberships($entity) as $m) {
+        if ($m->getGroupBundle() === 'community') {
+          $target_community_ids[] = $m->getGroupId();
+        }
+      }
+
+      // Show "Add to Community" unless the target is already in every community
+      // the current user manages. If the current user manages no communities,
+      // always show (the form handles further scoping).
+      if (empty($cm_community_ids) || !empty(array_diff($cm_community_ids, $target_community_ids))) {
+        $operations['add_to_community'] = [
+          'title' => t('Add to Community'),
+          'url' => Url::fromRoute('mukurtu_protocol.add_user_to_community', ['user' => $entity->id()]),
+          'weight' => 90,
+        ];
+      }
+
+      $target_is_protected = !empty(array_intersect(
+        \Drupal\mukurtu_core\Controller\MukurtuUserController::PROTECTED_ROLES,
+        $entity->getRoles()
+      ));
+      $status = $entity->get('status')->value;
+      $is_pending = $entity->hasField('field_pending') && (bool) $entity->get('field_pending')->value;
+      $shared_communities = array_intersect($cm_community_ids, $target_community_ids);
+      $can_manage_inactive = $is_site_admin || (!$target_is_protected && !empty($shared_communities));
+
+      if ($status == 0 && $is_pending) {
+        // Pending: offer Approve (activates) or Block (explicitly blocks).
+        $operations['approve_user'] = [
+          'title' => t('Unblock or approve'),
+          'url' => Url::fromRoute('mukurtu_core.approve_user', ['uid' => $entity->id()]),
+          'weight' => 100,
+          'attributes' => ['class' => ['use-ajax']],
+        ];
+        if ($can_manage_inactive) {
+          $operations['block_user'] = [
+            'title' => t('Block'),
+            'url' => Url::fromRoute('mukurtu_core.block_user', ['uid' => $entity->id()]),
+            'weight' => 101,
+            'attributes' => ['class' => ['use-ajax']],
+          ];
+        }
+      }
+      elseif ($status == 0) {
+        // Explicitly blocked: offer Approve or revert to Pending.
+        $operations['approve_user'] = [
+          'title' => t('Unblock or approve'),
+          'url' => Url::fromRoute('mukurtu_core.approve_user', ['uid' => $entity->id()]),
+          'weight' => 100,
+          'attributes' => ['class' => ['use-ajax']],
+        ];
+        if ($can_manage_inactive) {
+          $operations['set_pending_user'] = [
+            'title' => t('Set pending'),
+            'url' => Url::fromRoute('mukurtu_core.set_pending_user', ['uid' => $entity->id()]),
+            'weight' => 101,
+            'attributes' => ['class' => ['use-ajax']],
+          ];
+        }
+      }
+      else {
+        // Active: offer Block or Set to Pending.
+        if ($is_site_admin || !$target_is_protected) {
+          if ($is_site_admin || !empty($shared_communities)) {
+            $operations['block_user'] = [
+              'title' => t('Block'),
+              'url' => Url::fromRoute('mukurtu_core.block_user', ['uid' => $entity->id()]),
+              'weight' => 100,
+              'attributes' => ['class' => ['use-ajax']],
+            ];
+            $operations['set_pending_user'] = [
+              'title' => t('Set pending'),
+              'url' => Url::fromRoute('mukurtu_core.set_pending_user', ['uid' => $entity->id()]),
+              'weight' => 101,
+              'attributes' => ['class' => ['use-ajax']],
+            ];
+          }
+        }
+      }
+    }
   }
   return $operations;
 }
@@ -108,8 +242,10 @@ function mukurtu_core_page_attachments(array &$attachments) {
     }
   }
 
-  // Add our leaflet JS. We could scope this better.
+  // Add our shared JS libraries. We could scope these better.
   $attachments['#attached']['library'][] = 'mukurtu_core/mukurtu-leaflet-widget';
+  $attachments['#attached']['library'][] = 'mukurtu_core/tagify-override';
+  $attachments['#attached']['library'][] = 'mukurtu_core/form-disable-enter-submit';
 }
 
 /**
@@ -117,12 +253,147 @@ function mukurtu_core_page_attachments(array &$attachments) {
  *
  * Changes default form values at /admin/config/people/accounts:
  *  - Disables "Enable the personal contact form by default for new users"
- *  - Sets "Who can register accounts?" to "administrators only"
  */
 function mukurtu_core_form_user_admin_settings_alter(&$form, FormStateInterface $form_state, $form_id)
 {
   $form['contact']['contact_default_status']['#default_value'] = false;
-  $form['registration_cancellation']['user_register']['#default_value'] = 'admin_only';
+  $form['#attached']['library'][] = 'mukurtu_core/account-settings';
+  $form['#validate'][] = 'mukurtu_core_user_admin_settings_validate';
+
+  $form['registration_cancellation']['#weight'] = 1;
+  $form['registration_cancellation']['#title'] = t('Account registration');
+  $opts = &$form['registration_cancellation']['user_register']['#options'];
+  $opts = [
+    UserInterface::REGISTER_ADMINISTRATORS_ONLY => $opts[UserInterface::REGISTER_ADMINISTRATORS_ONLY],
+    UserInterface::REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL => $opts[UserInterface::REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL],
+    UserInterface::REGISTER_VISITORS => t('Visitors, no approval required'),
+  ];
+  // Move password-related fields to the bottom of the genpass registration
+  // section so the form flows: who can register → genpass mode → verification.
+  if (isset($form['registration_cancellation']['user_email_verification'])) {
+    $form['genpass_config_registration']['user_email_verification'] = $form['registration_cancellation']['user_email_verification'];
+    $form['genpass_config_registration']['user_email_verification']['#weight'] = -10;
+    unset($form['registration_cancellation']['user_email_verification']);
+  }
+  if (isset($form['registration_cancellation']['user_password_strength'])) {
+    $form['genpass_config_registration']['user_password_strength'] = $form['registration_cancellation']['user_password_strength'];
+    $form['genpass_config_registration']['user_password_strength']['#weight'] = 10;
+    unset($form['registration_cancellation']['user_password_strength']);
+  }
+  $form['genpass_config_registration']['#title'] = t('Password settings');
+  $form['genpass_config_registration']['genpass_mode']['#title'] = t('Visitor password entry');
+  $form['genpass_config_registration']['genpass_mode']['#options'] = [
+    0 => t('Visitors <strong>must</strong> enter a password on registration. This option is not available if email verification is enabled.'),
+    1 => t('Visitors <strong>may</strong> enter a password on registration. If left empty, a random password will be generated. This option requires either email verification or administrator approval.'),
+    2 => t('Visitors <strong>cannot</strong> enter a password on registration; a random password will be generated. This option is the only valid choice if email verification is enabled above.'),
+  ];
+  $form['genpass_config_registration']['#weight'] = 2;
+  // blocking_deleting is created at weight 3 by FormHooks::formUserAdminSettingsAlter.
+
+  // Combine generation parameters, service replacement, and display options
+  // into a single collapsed "Generate Password Settings" group.
+  $form['genpass_settings'] = [
+    '#type' => 'details',
+    '#title' => t('Generate Password Settings'),
+    '#open' => FALSE,
+    '#weight' => 4,
+  ];
+  foreach ([
+    'genpass_display'       => 'genpass_config_registration',
+    'genpass_length'        => 'genpass_config_generation',
+    'genpass_override_core' => 'genpass_config_core_service',
+  ] as $field => $source) {
+    if (isset($form[$source][$field])) {
+      $form['genpass_settings'][$field] = $form[$source][$field];
+      unset($form[$source][$field]);
+    }
+  }
+  // Visitors never see a generated password in Mukurtu — bulk-action resets
+  // send a password-reset email instead. Remove the two visitor-facing options
+  // so admins cannot accidentally enable them.
+  if (isset($form['genpass_settings']['genpass_display']['#options'])) {
+    unset(
+      $form['genpass_settings']['genpass_display']['#options'][GenpassInterface::PASSWORD_DISPLAY_USER],
+      $form['genpass_settings']['genpass_display']['#options'][GenpassInterface::PASSWORD_DISPLAY_BOTH],
+    );
+  }
+
+  // Warn if either source group still has children after the known fields were
+  // moved — a future genpass update adding new fields would otherwise be
+  // silently dropped when the group is deleted below.
+  foreach (['genpass_config_generation', 'genpass_config_core_service'] as $group) {
+    $remaining = array_filter(
+      array_keys($form[$group] ?? []),
+      fn($k) => !str_starts_with($k, '#'),
+    );
+    if (!empty($remaining)) {
+      \Drupal::logger('mukurtu_core')->warning(
+        'Unexpected fields in @group will be removed from the admin settings form: @fields',
+        ['@group' => $group, '@fields' => implode(', ', $remaining)],
+      );
+    }
+  }
+  unset($form['genpass_config_generation'], $form['genpass_config_core_service']);
+
+  $form['anonymous_settings']['#weight'] = 5;
+  $form['anonymous_settings']['#open'] = FALSE;
+  $form['contact']['#weight'] = 6;
+  $form['contact']['#open'] = FALSE;
+}
+
+/**
+ * Validation handler for the account settings form.
+ *
+ * Genpass values and their validity:
+ *   0 = "Users must enter a password"   — valid only when verify_mail is OFF.
+ *   1 = "Users may enter a password"    — valid only when verify_mail is OFF,
+ *                                         and only when administrator
+ *                                         approval is required.
+ *   2 = "Users cannot enter a password" — always valid (the only valid choice
+ *                                         when verify_mail is ON).
+ *
+ * admin_only: no self-registration form exists, so genpass has no effect and
+ * any value is accepted.
+ *
+ * visitors_admin_approval: all three modes are valid. The pending-approval
+ * email contains no login link; the one-time login link is only sent in the
+ * activation email after the admin approves the account. Genpass flash messages
+ * are suppressed for pending registrations (visitor cannot log in yet).
+ *
+ * visitors (no approval required): value 1 is invalid when verify_mail is
+ * OFF. A visitor who leaves the password field blank is logged in
+ * immediately with a system-generated password they never see, and is
+ * locked out once they log out. Only values 0 and 2 are safe here — 2
+ * already redirects the new user to set a password on their account page.
+ */
+function mukurtu_core_user_admin_settings_validate(&$form, FormStateInterface $form_state) {
+  $genpass_mode = (int) $form_state->getValue('genpass_mode');
+  $verify_mail = (bool) $form_state->getValue('user_email_verification');
+  $register = $form_state->getValue('user_register');
+
+  // admin_only has no self-registration, so genpass mode is irrelevant.
+  if ($register === 'admin_only') {
+    return;
+  }
+
+  // When email verification is on, only value 2 is valid. Values 0 and 1
+  // both require a password field that Drupal core hides in this mode.
+  if ($verify_mail && $genpass_mode !== 2) {
+    $form_state->setError(
+      $form['genpass_config_registration']['genpass_mode'],
+      t('"Users cannot enter a password on registration" is the only valid choice when email verification is enabled.')
+    );
+  }
+
+  // Without email verification or administrator approval, a visitor who
+  // skips the optional password field is logged in immediately with no way
+  // to know their system-generated password.
+  if (!$verify_mail && $register === UserInterface::REGISTER_VISITORS && $genpass_mode === 1) {
+    $form_state->setError(
+      $form['genpass_config_registration']['genpass_mode'],
+      t('"Users must enter a password on registration" is the only valid choice when visitors can register without administrator approval and email verification is disabled.')
+    );
+  }
 }
 
 /**
@@ -133,51 +404,18 @@ function mukurtu_core_form_user_login_form_alter(&$form, FormStateInterface $for
 }
 
 /**
- * Custom submit handler to redirect to dashboard on login.
+ * Custom submit handler to redirect to the front page on login.
+ *
+ * Only redirects when no ?destination parameter is present, so mid-session
+ * redirects (e.g. access-denied bounces) still land the user where they
+ * were headed.
  */
 function mukurtu_core_user_login_form_submit($form, FormStateInterface $form_state) {
-  $url = Url::fromRoute('entity.dashboard.canonical', ['dashboard' => 'mukurtu_dashboard']);
-  $form_state->setRedirectUrl($url);
-}
-
-/**
- * Implements hook_form_FORM_ID_alter().
- */
-function mukurtu_core_form_views_exposed_form_alter(&$form, FormStateInterface $form_state, $form_id) {
-  $view = $form_state->getStorage('view');
-
-  $views = ['mukurtu_manage_all_media', 'mukurtu_manage_all_content'];
-
-  if (in_array($view['view']->id(), $views)) {
-    // Replace the default textfield with an entity autocomplete.
-    $form['field_mukurtu_community_target_id'] = [
-      '#type' => 'entity_autocomplete',
-      '#target_type' => 'node',
-      '#default_value' => 0,
-      '#process_default_value' => FALSE,
-      '#required' => FALSE,
-      '#selection_handler' => 'default',
-      '#selection_settings' => [
-        'target_bundles' => ['community'],
-      ],
-    ];
-
-    // Use our custom submit handler.
-    array_unshift($form['#submit'], 'mukurtu_core_mukurtu_manage_all_content_autocomplete_submit');
+  if (!\Drupal::request()->query->has('destination')) {
+    $form_state->setRedirectUrl(Url::fromRoute('<front>'));
   }
 }
 
-/**
- * Custom submit handler for field_mukurtu_community_target_id.
- */
-function mukurtu_core_mukurtu_manage_all_content_autocomplete_submit($form, &$form_state) {
-  // Hot replacing the textfield with auto complete messes up default
-  // value handling. Replace it here so when there's no input
-  // the view still displays results as expected.
-  if (!$form_state->getValue('field_mukurtu_community_target_id')) {
-    $form_state->setValue('field_mukurtu_community_target_id', 0);
-  }
-}
 
 /**
  * Prepares variables for list of available node type templates.
@@ -306,25 +544,57 @@ function mukurtu_core_node_view(array &$build, EntityInterface $entity, EntityVi
  * Implements hook_ENTITY_TYPE_view().
  */
 function mukurtu_core_user_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
-  // Build an "approve" link to block/unblock users.
-  // However, do not display link for users who view their own account page!
-  // We don't want users blocking or approving themselves.
+  // Build status-action links on the full user profile page.
+  // Skip for users viewing their own account.
   if ($view_mode == 'full' && \Drupal::currentUser()->id() != $entity->id()) {
     $status = $entity->status->value;
-    $title = $status ? t('Block User') : t('Approve User');
-    $route = $status ? 'mukurtu_core.block_user' : 'mukurtu_core.approve_user';
+    $is_pending = $entity->hasField('field_pending') && (bool) $entity->get('field_pending')->value;
+    $links = [];
+
+    if ($status == 1) {
+      // Active: offer Block and Set to Pending.
+      $links['block'] = [
+        'title' => t('Block'),
+        'url' => Url::fromRoute('mukurtu_core.block_user', ['uid' => $entity->id()]),
+        'attributes' => ['class' => ['use-ajax']],
+      ];
+      $links['set_pending'] = [
+        'title' => t('Set pending'),
+        'url' => Url::fromRoute('mukurtu_core.set_pending_user', ['uid' => $entity->id()]),
+        'attributes' => ['class' => ['use-ajax']],
+      ];
+    }
+    elseif ($is_pending) {
+      // Pending: offer Approve and Block.
+      $links['approve'] = [
+        'title' => t('Unblock or approve'),
+        'url' => Url::fromRoute('mukurtu_core.approve_user', ['uid' => $entity->id()]),
+        'attributes' => ['class' => ['use-ajax']],
+      ];
+      $links['block'] = [
+        'title' => t('Block'),
+        'url' => Url::fromRoute('mukurtu_core.block_user', ['uid' => $entity->id()]),
+        'attributes' => ['class' => ['use-ajax']],
+      ];
+    }
+    else {
+      // Blocked: offer Approve and Set to Pending.
+      $links['approve'] = [
+        'title' => t('Unblock or approve'),
+        'url' => Url::fromRoute('mukurtu_core.approve_user', ['uid' => $entity->id()]),
+        'attributes' => ['class' => ['use-ajax']],
+      ];
+      $links['set_pending'] = [
+        'title' => t('Set pending'),
+        'url' => Url::fromRoute('mukurtu_core.set_pending_user', ['uid' => $entity->id()]),
+        'attributes' => ['class' => ['use-ajax']],
+      ];
+    }
+
     $build['mukurtu_toggle_user_approval'] = [
       '#theme' => 'links',
       '#weight' => -2,
-      '#links' => [
-        'mukurtu-toggle-user-approval' => [
-          'title' => $title,
-          'url' => Url::fromRoute($route, ['uid' => $entity->id()]),
-          'attributes' => [
-            'class' => ['use-ajax'],
-          ],
-        ],
-      ],
+      '#links' => $links,
       '#attached' => ['library' => ['core/drupal.ajax']],
     ];
   }
@@ -339,6 +609,129 @@ function mukurtu_core_entity_presave(EntityInterface $entity) {
     if ($entity->hasField('field_content_type')) {
       $entity->set('field_content_type', $entity->type->entity->label());
     }
+  }
+
+  // Active users are never pending; clear the flag whenever status=1.
+  if ($entity->getEntityTypeId() == 'user' && $entity->hasField('field_pending')) {
+    if ($entity->get('status')->value == 1) {
+      $entity->set('field_pending', 0);
+    }
+  }
+
+  // Prevent any code path (bulk actions, direct edits) from blocking the
+  // currently logged-in user's own account.
+  if ($entity instanceof \Drupal\user\Entity\User && !$entity->isNew()) {
+    if ($entity->id() == \Drupal::currentUser()->id()
+        && isset($entity->original)
+        && $entity->original->isActive()
+        && $entity->isBlocked()) {
+      $entity->set('status', 1);
+      \Drupal::messenger()->addWarning(t('You cannot block your own account.'));
+    }
+  }
+}
+
+/**
+ * Implements hook_views_pre_build().
+ *
+ * When "Pending" is selected as the status filter, reset the exposed input to
+ * "All" so BooleanOperator does not write an invalid SQL condition, and set a
+ * flag for hook_views_query_alter. When "Blocked" is selected, set a flag so
+ * pending users are excluded.
+ */
+function mukurtu_core_views_pre_build(\Drupal\views\ViewExecutable $view) {
+  if ($view->storage->get('base_table') !== 'users_field_data') {
+    return;
+  }
+  if (empty($view->filter['status'])) {
+    return;
+  }
+  $input = $view->getExposedInput();
+  $status = $input['status'] ?? NULL;
+
+  if ($status === 'pending') {
+    $input['status'] = 'All';
+    $view->setExposedInput($input);
+    $view->mukurtu_filter_pending = TRUE;
+  }
+  elseif ($status === '0') {
+    // Reset so BooleanOperator adds nothing; we own the full condition.
+    $input['status'] = 'All';
+    $view->setExposedInput($input);
+    $view->mukurtu_filter_blocked = TRUE;
+  }
+}
+
+/**
+ * Implements hook_views_query_alter().
+ *
+ * For pending: adds status=0 AND field_pending=1.
+ * For blocked: adds field_pending IS NULL OR field_pending=0.
+ * For mukurtu_content_browser: excludes the currently-edited node so it
+ * cannot be selected as a related item, child collection, etc. (issue #776).
+ */
+function mukurtu_core_views_query_alter(\Drupal\views\ViewExecutable $view, \Drupal\views\Plugin\views\query\QueryPluginBase $query) {
+  // Exclude the currently-edited node from the content browser to prevent
+  // self-selection. original_path is added to the browser URL by the entity
+  // browser Modal display plugin and contains the internal path of the calling
+  // page (e.g. /node/42/edit).
+  if ($view->id() === 'mukurtu_content_browser') {
+    $original_path = \Drupal::request()->query->get('original_path');
+    // The trailing slash after the ID is intentional: it matches edit/revision
+    // paths (e.g. /node/42/edit) but not bare /node/42 view pages, which is
+    // correct since the browser is only opened from node edit forms.
+    if ($original_path && preg_match('#^/?node/(\d+)/#', $original_path, $matches)) {
+      $query->addWhere(0, 'node_field_data.nid', (int) $matches[1], '!=');
+    }
+  }
+
+  if (empty($view->mukurtu_filter_pending) && empty($view->mukurtu_filter_blocked)) {
+    return;
+  }
+  if ($view->storage->get('base_table') !== 'users_field_data') {
+    return;
+  }
+  /** @var \Drupal\views\Plugin\views\query\Sql $query */
+  $configuration = [
+    'table' => 'user__field_pending',
+    'field' => 'entity_id',
+    'left_table' => 'users_field_data',
+    'left_field' => 'uid',
+    'operator' => '=',
+  ];
+  $join = \Drupal::service('plugin.manager.views.join')->createInstance('standard', $configuration);
+  $alias = $query->addTable('user__field_pending', NULL, $join);
+
+  if (!empty($view->mukurtu_filter_pending)) {
+    $query->addWhere(0, 'users_field_data.status', 0, '=');
+    $query->addWhere(0, "$alias.field_pending_value", 1, '=');
+  }
+  else {
+    // Blocked: status=0 AND not pending.
+    $query->addWhere(0, 'users_field_data.status', 0, '=');
+    $query->addWhereExpression(0, "($alias.field_pending_value IS NULL OR $alias.field_pending_value = 0)");
+  }
+}
+
+/**
+ * Implements hook_preprocess_views_view_field().
+ *
+ * Replaces "Blocked" with "Pending" in any Views status column for users
+ * who have field_pending=1, so that admin-approval registrations display
+ * correctly on /admin/people and similar views.
+ */
+function mukurtu_core_preprocess_views_view_field(&$variables) {
+  $field = $variables['field'];
+  if ($field->field !== 'status') {
+    return;
+  }
+  $row = $variables['row'];
+  if (empty($row->_entity) || !($row->_entity instanceof \Drupal\user\Entity\User)) {
+    return;
+  }
+  $user = $row->_entity;
+  if ($user->hasField('field_pending') && $user->get('field_pending')->value && !$user->isActive()) {
+    $variables['output'] = \Drupal\Core\Render\Markup::create(t('Pending'));
   }
 }
 
@@ -493,6 +886,9 @@ function mukurtu_core_invalidate_entity_reference_field_references(EntityInterfa
  * so the link to its layout page must be assembled dynamically.
  */
 function mukurtu_core_menu_links_discovered_alter(&$links) {
+  // Remove the core "My account" link (/user) from the account menu.
+  unset($links['user.page']);
+
   $config = \Drupal::config('system.site');
   $homepagePath = $config->get('page.front');
   $links['mukurtu_core.landing_page_dashboard'] = [
@@ -524,4 +920,323 @@ function mukurtu_core_menu_links_discovered_alter(&$links) {
     'parent' => 'mukurtu_dashboard',
     'url' => 'route:<nolink>',
   ];
+}
+
+/**
+ * Mukurtu-specific node fields to expose as tokens.
+ *
+ * Shared by hook_token_info_alter() and hook_tokens().
+ */
+function mukurtu_core_token_fields(): array {
+  return [
+    // Digital Heritage fields.
+    'field_creator'                => t('Creator'),
+    'field_contributor'            => t('Contributor'),
+    'field_publisher'              => t('Publisher'),
+    'field_people'                 => t('People'),
+    'field_keywords'               => t('Keywords'),
+    'field_subject'                => t('Subject'),
+    'field_language'               => t('Language'),
+    'field_source'                 => t('Source'),
+    'field_format'                 => t('Format'),
+    'field_type'                   => t('Type'),
+    'field_identifier'             => t('Identifier'),
+    'field_description'            => t('Description'),
+    'field_cultural_narrative'     => t('Cultural Narrative'),
+    'field_traditional_knowledge'  => t('Traditional Knowledge'),
+    'field_date_description'       => t('Date Description'),
+    'field_category'               => t('Category'),
+    'field_summary'                => t('Summary'),
+    'field_original_date'          => t('Original Date (Mukurtu)'),
+    'field_coverage_description'   => t('Coverage Description'),
+    'field_transcription'          => t('Transcription'),
+    // Dictionary Word fields.
+    'field_dictionary_word_language' => t('Dictionary Language'),
+    'field_translation'            => t('Translation'),
+    'field_definition'             => t('Definition'),
+    'field_word_type'              => t('Word Type'),
+    'field_pronunciation'          => t('Pronunciation'),
+    'field_alternate_spelling'     => t('Alternate Spelling'),
+    'field_glossary_entry'         => t('Glossary Entry'),
+  ];
+}
+
+/**
+ * Implements hook_token_info_alter().
+ *
+ * Registers Mukurtu custom field tokens under the existing 'node' token type
+ * so they appear in the token tree on the citation settings form (#1386).
+ */
+function mukurtu_core_token_info_alter(&$data) {
+  foreach (mukurtu_core_token_fields() as $field_name => $label) {
+    $data['tokens']['node'][$field_name] = [
+      'name' => $label,
+      'description' => t('The @label field value (Mukurtu).', ['@label' => $label]),
+    ];
+  }
+  $data['tokens']['node']['mukurtu_communities'] = [
+    'name' => t('Communities'),
+    'description' => t('Comma-separated list of community names for this item (Mukurtu).'),
+  ];
+  $data['tokens']['node']['mukurtu_protocols'] = [
+    'name' => t('Cultural Protocols'),
+    'description' => t('Comma-separated list of cultural protocol names for this item (Mukurtu).'),
+  ];
+}
+
+/**
+ * Implements hook_tokens().
+ */
+function mukurtu_core_tokens($type, $tokens, array $data, array $options, BubbleableMetadata $bubbleable_metadata) {
+  $replacements = [];
+
+  if ($type !== 'node' || empty($data['node'])) {
+    return $replacements;
+  }
+
+  $node = $data['node'];
+  $bubbleable_metadata->addCacheableDependency($node);
+
+  foreach (mukurtu_core_token_fields() as $field_name => $label) {
+    if (!isset($tokens[$field_name])) {
+      continue;
+    }
+    if (!$node->hasField($field_name)) {
+      continue;
+    }
+    $replacements[$tokens[$field_name]] = mukurtu_core_token_field_value($node->get($field_name));
+  }
+
+  if (isset($tokens['mukurtu_communities']) && method_exists($node, 'getCommunities')) {
+    $labels = [];
+    foreach ($node->getCommunities() as $community) {
+      if ($community !== NULL) {
+        $labels[] = $community->label();
+      }
+    }
+    $replacements[$tokens['mukurtu_communities']] = implode(', ', $labels);
+  }
+
+  if (isset($tokens['mukurtu_protocols']) && method_exists($node, 'getProtocolEntities')) {
+    $labels = [];
+    foreach ($node->getProtocolEntities() as $protocol) {
+      if ($protocol !== NULL) {
+        $labels[] = $protocol->label();
+      }
+    }
+    $replacements[$tokens['mukurtu_protocols']] = implode(', ', $labels);
+  }
+
+  return $replacements;
+}
+
+/**
+ * Returns a plain-text string for a field item list.
+ *
+ * Entity reference fields (taxonomy terms, nodes, etc.) produce a
+ * comma-separated list of entity labels. Text and string fields produce
+ * their plain-text value with HTML stripped.
+ */
+function mukurtu_core_token_field_value(FieldItemListInterface $field): string {
+  if ($field->isEmpty()) {
+    return '';
+  }
+
+  $field_type = $field->getFieldDefinition()->getType();
+
+  if ($field_type === 'original_date') {
+    $parts = [];
+    foreach ($field as $item) {
+      $date = $item->date ?? '';
+      if ($date !== '') {
+        $parts[] = $date;
+      }
+    }
+    return implode(', ', $parts);
+  }
+
+  if (in_array($field_type, ['entity_reference', 'entity_reference_revisions'])) {
+    $entities = $field->referencedEntities();
+    // Fallback: load entities directly via storage to bypass any access-layer caching.
+    if (empty($entities)) {
+      $target_type = $field->getFieldDefinition()->getSetting('target_type');
+      if ($target_type) {
+        $storage = \Drupal::entityTypeManager()->getStorage($target_type);
+        $ids = array_filter(array_column($field->getValue(), 'target_id'));
+        if ($ids) {
+          $entities = array_values($storage->loadMultiple($ids));
+        }
+      }
+    }
+    $labels = [];
+    foreach ($entities as $entity) {
+      if ($entity !== NULL) {
+        $labels[] = $entity->label();
+      }
+    }
+    return implode(', ', $labels);
+  }
+
+  $values = [];
+  foreach ($field as $item) {
+    $raw = strip_tags($item->getString());
+    if ($raw !== '') {
+      $values[] = $raw;
+    }
+  }
+  return implode(', ', $values);
+}
+
+/**
+ * Implements hook_views_data_alter().
+ */
+function mukurtu_core_views_data_alter(array &$data)
+{
+  if (isset($data['paragraphs_item_field_data'])) {
+    // Add the parent type field to Views.
+    $data['paragraphs_item_field_data']['parent_type'] = [
+      'title' => t('Parent type'),
+      'field' => [
+        'id' => 'paragraph_parent_type',
+      ],
+    ];
+    // Add the parent name field to Views.
+    $data['paragraphs_item_field_data']['parent_name'] = [
+      'title' => t('Parent name'),
+      'field' => [
+        'id' => 'paragraph_parent_name',
+      ],
+    ];
+  }
+  if (isset($data['users'])) {
+    $data['users']['roles'] = [
+      'title' => t('Site roles'),
+      'field' => [
+        'id' => 'mukurtu_user_roles',
+      ],
+    ];
+  }
+
+  if (isset($data['node_field_data'])) {
+    $data['node_field_data']['mukurtu_row_actions'] = [
+      'title' => t('Row actions'),
+      'field' => [
+        'id' => 'mukurtu_node_row_actions',
+        'field' => 'nid',
+        'real field' => 'nid',
+        'click sortable' => FALSE,
+      ],
+    ];
+    $data['node_field_data']['mukurtu_community_field'] = [
+      'title' => t('Community'),
+      'field' => [
+        'id' => 'mukurtu_node_community_field',
+        'field' => 'nid',
+        'real field' => 'nid',
+        'click sortable' => FALSE,
+      ],
+    ];
+    $data['node_field_data']['mukurtu_published_filter'] = [
+      'title' => t('Published'),
+      'filter' => [
+        'id' => 'mukurtu_node_published_filter',
+        'field' => 'status',
+        'real field' => 'status',
+      ],
+    ];
+    $data['node_field_data']['mukurtu_community_filter'] = [
+      'title' => t('Community'),
+      'filter' => [
+        'id' => 'mukurtu_node_community_filter',
+        'field' => 'nid',
+        'real field' => 'nid',
+      ],
+    ];
+    $data['node_field_data']['mukurtu_protocol_filter'] = [
+      'title' => t('Protocol'),
+      'filter' => [
+        'id' => 'mukurtu_node_protocol_filter',
+        'field' => 'nid',
+        'real field' => 'nid',
+      ],
+    ];
+    $data['node_field_data']['mukurtu_is_community_record'] = [
+      'title' => t('Is community record'),
+      'filter' => [
+        'id' => 'mukurtu_node_is_community_record',
+        'field' => 'nid',
+        'real field' => 'nid',
+      ],
+    ];
+    $data['node_field_data']['mukurtu_is_multipage_item'] = [
+      'title' => t('Is multipage item'),
+      'filter' => [
+        'id' => 'mukurtu_node_is_multipage_item',
+        'field' => 'nid',
+        'real field' => 'nid',
+      ],
+    ];
+    $data['node_field_data']['mukurtu_in_collection'] = [
+      'title' => t('In collection'),
+      'filter' => [
+        'id' => 'mukurtu_node_in_collection',
+        'field' => 'nid',
+        'real field' => 'nid',
+      ],
+    ];
+    $data['node_field_data']['mukurtu_in_word_list'] = [
+      'title' => t('In word list'),
+      'filter' => [
+        'id' => 'mukurtu_node_in_word_list',
+        'field' => 'nid',
+        'real field' => 'nid',
+      ],
+    ];
+  }
+
+  if (isset($data['media_field_data'])) {
+    $data['media_field_data']['mukurtu_community_filter'] = [
+      'title' => t('Community'),
+      'filter' => [
+        'id' => 'mukurtu_media_community_filter',
+        'field' => 'mid',
+        'real field' => 'mid',
+      ],
+    ];
+    $data['media_field_data']['mukurtu_protocol_filter'] = [
+      'title' => t('Protocol'),
+      'filter' => [
+        'id' => 'mukurtu_media_protocol_filter',
+        'field' => 'mid',
+        'real field' => 'mid',
+      ],
+    ];
+    $data['media_field_data']['mukurtu_media_tag_filter'] = [
+      'title' => t('Media tag'),
+      'filter' => [
+        'id' => 'mukurtu_media_tag_filter',
+        'field' => 'mid',
+        'real field' => 'mid',
+      ],
+    ];
+  }
+}
+
+/**
+ * Implements hook_preprocess_views_view().
+ *
+ * Provided by Nate Lampton, see
+ * https://github.com/MukurtuCMS/Mukurtu-CMS/issues/775#issuecomment-2763105092.
+ */
+function mukurtu_core_preprocess_views_view(&$variables)
+{
+  // Add entity browser library tweaks when appropriate.
+  $affected_views = [
+    'mukurtu_content_browser',
+    'mukurtu_community_select',
+    'multipage_item_browser',
+  ];
+  if (in_array($variables['view']->id(), $affected_views)) {
+    $variables['view_array']['#attached']['library'][] = 'mukurtu_core/entity_browser_view_decoration';
+  }
 }

@@ -19,6 +19,7 @@ install:
   - contact
   - menu_link_content
   - mukurtu_content_warnings
+  - mukurtu_protocol_sync
   - datetime
   - block_content
   - editor
@@ -43,6 +44,7 @@ install:
   - google_tag
   - twig_tweak
   - facets_reset_button
+  - flat_taxonomy
   - term_merge
   - term_merge_manager
   - dashboards
@@ -51,7 +53,10 @@ install:
   - geocoder
   - geocoder_field
   - tagify
+  - genpass
   - rebuild_cache_access
+  - notify_user_default
+  - readonly_field_widget
 
 dependencies:
   - 'blazy:blazy'
@@ -91,7 +96,11 @@ dependencies:
   - 'drupal:admin_theme'
   - 'drupal:tagify'
   - 'drupal:rebuild_cache_access'
+  - 'drupal:genpass'
+  - 'drupal:notify_user_default'
+  - 'drupal:readonly_field_widget'
   - 'embed:embed'
+  - 'flat_taxonomy:flat_taxonomy'
   - 'entity_browser:entity_browser'
   - 'entity_embed:entity_embed'
   - 'entity_reference_revisions:entity_reference_revisions'
@@ -102,7 +111,6 @@ dependencies:
   - 'leaflet:leaflet'
   - 'leaflet:leaflet_views'
   - 'message:message'
-  - 'message_digest:message_digest'
   - 'message_subscribe:message_subscribe_ui'
   - 'message_ui:message_notify_ui'
   - 'message_ui:message_ui'
@@ -115,6 +123,7 @@ dependencies:
   - 'mukurtu_dev:mukurtu_dev'
   - 'mukurtu_dictionary:mukurtu_dictionary'
   - 'mukurtu_digital_heritage:mukurtu_digital_heritage'
+  - 'mukurtu_drafts:mukurtu_drafts'
   - 'mukurtu_export:mukurtu_export'
   - 'mukurtu_footer:mukurtu_footer'
   - 'mukurtu_gin_custom:mukurtu_gin_custom'
@@ -128,8 +137,11 @@ dependencies:
   - 'mukurtu_person:mukurtu_person'
   - 'mukurtu_place:mukurtu_place'
   - 'mukurtu_protocol:mukurtu_protocol'
+  - 'mukurtu_protocol_sync:mukurtu_protocol_sync'
+  - 'mukurtu_setup:mukurtu_setup'
   - 'mukurtu_site_settings:mukurtu_site_settings'
   - 'mukurtu_taxonomy:mukurtu_taxonomy'
+  - 'mukurtu_workflows:mukurtu_workflows'
   - 'og:og'
   - 'og_ui:og_ui'
   - 'paragraphs:paragraphs'

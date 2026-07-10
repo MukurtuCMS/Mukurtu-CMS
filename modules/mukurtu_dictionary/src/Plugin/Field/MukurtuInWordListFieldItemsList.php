@@ -24,7 +24,7 @@ class MukurtuInWordListFieldItemsList extends EntityReferenceFieldItemList {
       ->condition('type', 'word_list')
       ->condition(WordList::WORDS_FIELD, $entity->id())
       ->condition('status', TRUE)
-      ->accessCheck(TRUE);
+      ->accessCheck(FALSE);
     $results = $query->execute();
 
     if (!empty($results)) {

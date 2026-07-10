@@ -43,10 +43,17 @@ class MukurtuRemoveCommunityMembershipAction extends ViewsBulkOperationsActionBa
     /** @var \Drupal\mukurtu_protocol\Entity\Community $community */
     $community = \Drupal::entityTypeManager()->getStorage('community')->load($community_id);
 
-    // Set membership and roles.
+    // Prevent removing a user who still belongs to a child protocol.
+    foreach ($community->getProtocols() as $protocol) {
+      if ($protocol->getMembership($entity)) {
+        \Drupal::messenger()->addWarning($this->t('Could not remove %user from the community because they still have protocol roles. Remove them from all protocols first.', ['%user' => $entity->getDisplayName()]));
+        return;
+      }
+    }
+
     $community->removeMember($entity);
 
-    return $this->t('Removed user @username from community @community', ['@user' => $entity->getDisplayName(), '@community' => $community->getName()]);
+    return $this->t('Removed user @username from community @community', ['@username' => $entity->getDisplayName(), '@community' => $community->getName()]);
   }
 
   /**
@@ -69,19 +76,12 @@ class MukurtuRemoveCommunityMembershipAction extends ViewsBulkOperationsActionBa
       }
 
       // Check if requesting user can modify this community's membership.
+      // The protocol-role guard (a user cannot be removed while enrolled in a
+      // child protocol) is enforced in execute(), not here, so that the row
+      // checkbox remains selectable and the admin receives an explicit warning
+      // rather than a silently disabled action.
       $membership = $community->getMembership($account);
       if ($membership && ($membership->hasPermission('administer group') || $membership->hasPermission('manage members'))) {
-
-        // Check if target user is in protocols in the given community.
-        // A user cannot be removed from a community if they are in protocols
-        // in that community.
-        $protocols = $community->getProtocols();
-        foreach ($protocols as $protocol) {
-          if ($protocol->getMembership($object)) {
-            return $return_as_object ? AccessResult::forbidden() : FALSE;
-          }
-        }
-
         return $return_as_object ? AccessResult::allowed() : TRUE;
       }
     }

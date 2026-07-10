@@ -32,7 +32,6 @@ function mukurtu_core_update_40000() {
   // Reserved for future use if needed.
 }
 
-
 /**
  * Sort category browse terms alphabetically.
  */
@@ -69,4 +68,1967 @@ function mukurtu_core_update_40001(): void {
 
   $view->set('display', $display);
   $view->save();
+}
+
+/**
+ * Add dedicated user registration form display.
+ */
+function mukurtu_core_update_40002(): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('entity_form_display');
+  $display = $storage->load('user.user.register');
+
+  if (!$display) {
+    $display = $storage->create([
+      'targetEntityType' => 'user',
+      'bundle' => 'user',
+      'mode' => 'register',
+      'status' => TRUE,
+    ]);
+  }
+
+  $display
+    ->setComponent('account', [
+      'weight' => 0,
+      'region' => 'content',
+      'settings' => [],
+      'third_party_settings' => [],
+    ])
+    ->setComponent('field_display_name', [
+      'type' => 'string_textfield',
+      'weight' => 1,
+      'region' => 'content',
+      'settings' => [
+        'size' => 60,
+        'placeholder' => '',
+      ],
+      'third_party_settings' => [],
+    ])
+    ->setComponent('google_analytics', [
+      'weight' => 3,
+      'region' => 'content',
+      'settings' => [],
+      'third_party_settings' => [],
+    ])
+    ->setComponent('language', [
+      'weight' => 3,
+      'region' => 'content',
+      'settings' => [],
+      'third_party_settings' => [],
+    ])
+    ->removeComponent('contact')
+    ->removeComponent('langcode')
+    ->removeComponent('message_digest')
+    ->removeComponent('message_subscribe_email')
+    ->removeComponent('path')
+    ->removeComponent('user_picture')
+    ->removeComponent('timezone')
+    ->save();
+}
+
+/**
+ * Set user registration to admin_only if not already explicitly configured.
+ */
+function mukurtu_core_update_40003(): void {
+  $config = \Drupal::configFactory()->getEditable('user.settings');
+  if ($config->get('register') === 'visitors') {
+    $config->set('register', 'admin_only')->save();
+  }
+}
+
+/**
+ * Enable flat_taxonomy module.
+ */
+function mukurtu_core_update_40004(): void {
+  \Drupal::service('module_installer')->install(['flat_taxonomy']);
+ }
+
+/**
+ * Set tagify default widget setting.
+ */
+function mukurtu_core_update_40005(): void {
+  $config = \Drupal::configFactory()->getEditable('tagify.settings');
+  $config->set('set_default_widget', TRUE)->save();
+}
+
+/**
+ * Install genpass and notify_user_default modules.
+ */
+function mukurtu_core_update_40006(): void {
+  \Drupal::service('module_installer')->install(['genpass', 'notify_user_default']);
+}
+
+/**
+ * Add author, status, and updated fields to the content browser view.
+ */
+function mukurtu_core_update_40007(): void {
+  $view = \Drupal\views\Entity\View::load('mukurtu_content_browser');
+  if (!$view) {
+    return;
+  }
+
+  $display = $view->get('display');
+  if (empty($display['default']['display_options']['fields'])) {
+    return;
+  }
+
+  $fields = &$display['default']['display_options']['fields'];
+
+  if (empty($fields['uid'])) {
+    $fields['uid'] = [
+      'id' => 'uid',
+      'table' => 'node_field_data',
+      'field' => 'uid',
+      'relationship' => 'none',
+      'group_type' => 'group',
+      'admin_label' => '',
+      'entity_type' => 'node',
+      'entity_field' => 'uid',
+      'plugin_id' => 'field',
+      'label' => 'Author',
+      'exclude' => FALSE,
+      'alter' => [
+        'alter_text' => FALSE,
+        'text' => '',
+        'make_link' => FALSE,
+        'path' => '',
+        'absolute' => FALSE,
+        'external' => FALSE,
+        'replace_spaces' => FALSE,
+        'path_case' => 'none',
+        'trim_whitespace' => FALSE,
+        'alt' => '',
+        'rel' => '',
+        'link_class' => '',
+        'prefix' => '',
+        'suffix' => '',
+        'target' => '',
+        'nl2br' => FALSE,
+        'max_length' => 0,
+        'word_boundary' => TRUE,
+        'ellipsis' => TRUE,
+        'more_link' => FALSE,
+        'more_link_text' => '',
+        'more_link_path' => '',
+        'strip_tags' => FALSE,
+        'trim' => FALSE,
+        'preserve_tags' => '',
+        'html' => FALSE,
+      ],
+      'element_type' => '',
+      'element_class' => '',
+      'element_label_type' => '',
+      'element_label_class' => '',
+      'element_label_colon' => FALSE,
+      'element_wrapper_type' => '',
+      'element_wrapper_class' => '',
+      'element_default_classes' => TRUE,
+      'empty' => '',
+      'hide_empty' => FALSE,
+      'empty_zero' => FALSE,
+      'hide_alter_empty' => TRUE,
+      'click_sort_column' => 'target_id',
+      'type' => 'entity_reference_label',
+      'settings' => [
+        'link' => TRUE,
+      ],
+      'group_column' => 'target_id',
+      'group_columns' => [],
+      'group_rows' => TRUE,
+      'delta_limit' => 0,
+      'delta_offset' => 0,
+      'delta_reversed' => FALSE,
+      'delta_first_last' => FALSE,
+      'multi_type' => 'separator',
+      'separator' => ', ',
+      'field_api_classes' => FALSE,
+    ];
+  }
+
+  if (empty($fields['status'])) {
+    $fields['status'] = [
+      'id' => 'status',
+      'table' => 'node_field_data',
+      'field' => 'status',
+      'relationship' => 'none',
+      'group_type' => 'group',
+      'admin_label' => '',
+      'entity_type' => 'node',
+      'entity_field' => 'status',
+      'plugin_id' => 'field',
+      'label' => 'Status',
+      'exclude' => FALSE,
+      'alter' => [
+        'alter_text' => FALSE,
+        'text' => '',
+        'make_link' => FALSE,
+        'path' => '',
+        'absolute' => FALSE,
+        'external' => FALSE,
+        'replace_spaces' => FALSE,
+        'path_case' => 'none',
+        'trim_whitespace' => FALSE,
+        'alt' => '',
+        'rel' => '',
+        'link_class' => '',
+        'prefix' => '',
+        'suffix' => '',
+        'target' => '',
+        'nl2br' => FALSE,
+        'max_length' => 0,
+        'word_boundary' => TRUE,
+        'ellipsis' => TRUE,
+        'more_link' => FALSE,
+        'more_link_text' => '',
+        'more_link_path' => '',
+        'strip_tags' => FALSE,
+        'trim' => FALSE,
+        'preserve_tags' => '',
+        'html' => FALSE,
+      ],
+      'element_type' => '',
+      'element_class' => '',
+      'element_label_type' => '',
+      'element_label_class' => '',
+      'element_label_colon' => FALSE,
+      'element_wrapper_type' => '',
+      'element_wrapper_class' => '',
+      'element_default_classes' => TRUE,
+      'empty' => '',
+      'hide_empty' => FALSE,
+      'empty_zero' => FALSE,
+      'hide_alter_empty' => TRUE,
+      'click_sort_column' => 'value',
+      'type' => 'boolean',
+      'settings' => [
+        'format' => 'custom',
+        'format_custom_false' => 'Unpublished',
+        'format_custom_true' => 'Published',
+      ],
+      'group_column' => 'value',
+      'group_columns' => [],
+      'group_rows' => TRUE,
+      'delta_limit' => 0,
+      'delta_offset' => 0,
+      'delta_reversed' => FALSE,
+      'delta_first_last' => FALSE,
+      'multi_type' => 'separator',
+      'separator' => ', ',
+      'field_api_classes' => FALSE,
+    ];
+  }
+
+  if (empty($fields['created'])) {
+    $fields['created'] = [
+      'id' => 'created',
+      'table' => 'node_field_data',
+      'field' => 'created',
+      'relationship' => 'none',
+      'group_type' => 'group',
+      'admin_label' => '',
+      'entity_type' => 'node',
+      'entity_field' => 'created',
+      'plugin_id' => 'field',
+      'label' => 'Updated',
+      'exclude' => FALSE,
+      'alter' => [
+        'alter_text' => FALSE,
+        'text' => '',
+        'make_link' => FALSE,
+        'path' => '',
+        'absolute' => FALSE,
+        'external' => FALSE,
+        'replace_spaces' => FALSE,
+        'path_case' => 'none',
+        'trim_whitespace' => FALSE,
+        'alt' => '',
+        'rel' => '',
+        'link_class' => '',
+        'prefix' => '',
+        'suffix' => '',
+        'target' => '',
+        'nl2br' => FALSE,
+        'max_length' => 0,
+        'word_boundary' => TRUE,
+        'ellipsis' => TRUE,
+        'more_link' => FALSE,
+        'more_link_text' => '',
+        'more_link_path' => '',
+        'strip_tags' => FALSE,
+        'trim' => FALSE,
+        'preserve_tags' => '',
+        'html' => FALSE,
+      ],
+      'element_type' => '',
+      'element_class' => '',
+      'element_label_type' => '',
+      'element_label_class' => '',
+      'element_label_colon' => FALSE,
+      'element_wrapper_type' => '',
+      'element_wrapper_class' => '',
+      'element_default_classes' => TRUE,
+      'empty' => '',
+      'hide_empty' => FALSE,
+      'empty_zero' => FALSE,
+      'hide_alter_empty' => TRUE,
+      'click_sort_column' => 'value',
+      'type' => 'timestamp',
+      'settings' => [
+        'date_format' => 'short',
+        'custom_date_format' => '',
+        'timezone' => '',
+        'tooltip' => [
+          'date_format' => 'long',
+          'custom_date_format' => '',
+        ],
+      ],
+      'group_column' => 'value',
+      'group_columns' => [],
+      'group_rows' => TRUE,
+      'delta_limit' => 0,
+      'delta_offset' => 0,
+      'delta_reversed' => FALSE,
+      'delta_first_last' => FALSE,
+      'multi_type' => 'separator',
+      'separator' => ', ',
+      'field_api_classes' => FALSE,
+    ];
+  }
+
+  $view->set('display', $display);
+  $view->save();
+}
+
+/*
+ * Install readonly_field_widget module.
+ */
+function mukurtu_core_update_40008(): void {
+  \Drupal::service('module_installer')->install(['readonly_field_widget']);
+}
+
+/**
+ * Install the mukurtu_all_paragraphs view.
+ */
+function mukurtu_core_update_40009(): void {
+  $config_installer = \Drupal::service('config.installer');
+  $config_installer->installDefaultConfig('module', 'mukurtu_core');
+}
+
+/**
+ * Disable user_admin_people view so MukurtuUserListBuilder serves /admin/people.
+ */
+function mukurtu_core_update_40010(): void {
+  $view = \Drupal::entityTypeManager()->getStorage('view')->load('user_admin_people');
+  if ($view && $view->status()) {
+    $view->setStatus(FALSE);
+    $view->save();
+  }
+}
+
+/**
+ * Rename dashboard-my-content menu to dashboard-my-account and update the
+ * Mukurtu dashboard block to reference the new menu.
+ */
+function mukurtu_core_update_40011(): void {
+  $config_factory = \Drupal::configFactory();
+
+  // Create the new dashboard-my-account menu if it doesn't exist yet.
+  $new_menu = $config_factory->getEditable('system.menu.dashboard-my-account');
+  if ($new_menu->isNew()) {
+    $new_menu
+      ->set('langcode', 'en')
+      ->set('status', TRUE)
+      ->set('dependencies', [])
+      ->set('id', 'dashboard-my-account')
+      ->set('label', 'My Account')
+      ->set('description', 'Access users own content and account information.')
+      ->set('locked', FALSE)
+      ->save();
+  }
+
+  // Update the dashboard block in the "three" region to reference the new menu.
+  $dashboard = $config_factory->getEditable('dashboards.dashboard.mukurtu_dashboard');
+  $sections = $dashboard->get('sections');
+  foreach ($sections as $section_key => $section) {
+    foreach ($section['components'] ?? [] as $comp_key => $component) {
+      if (($component['configuration']['id'] ?? '') === 'system_menu_block:dashboard-my-content') {
+        $sections[$section_key]['components'][$comp_key]['configuration']['id'] = 'system_menu_block:dashboard-my-account';
+        $sections[$section_key]['components'][$comp_key]['configuration']['label'] = 'My account';
+      }
+    }
+  }
+  $dashboard->set('sections', $sections)->save();
+
+  // Delete the old dashboard-my-content menu.
+  $old_menu = $config_factory->getEditable('system.menu.dashboard-my-content');
+  if (!$old_menu->isNew()) {
+    $old_menu->delete();
+  }
+}
+
+/**
+ * Remove "Add Component" and child links from the account menu.
+ */
+function mukurtu_core_update_40012(): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('menu_link_content');
+
+  $ids = $storage->getQuery()
+    ->accessCheck(FALSE)
+    ->condition('menu_name', 'account')
+    ->condition('title', 'Add Component')
+    ->execute();
+
+  foreach ($ids as $id) {
+    $parent = $storage->load($id);
+    if (!$parent) {
+      continue;
+    }
+    $child_ids = $storage->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('parent', 'menu_link_content:' . $parent->uuid())
+      ->execute();
+    foreach ($storage->loadMultiple($child_ids) as $child) {
+      $child->delete();
+    }
+    $parent->delete();
+  }
+}
+
+/**
+ * Reorder account menu: Create Content first (-1000), Dashboard second (-100).
+ *
+ * Matches by title in the account menu. Admins may have renamed these links,
+ * in which case this hook silently skips them — no manual follow-up needed
+ * since custom names imply intentional customization.
+ */
+function mukurtu_core_update_40013(): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('menu_link_content');
+
+  $weights = [
+    'Create Content' => -1000,
+    'Dashboard' => -100,
+  ];
+
+  foreach ($weights as $title => $weight) {
+    $ids = $storage->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('menu_name', 'account')
+      ->condition('title', $title)
+      ->execute();
+    foreach ($storage->loadMultiple($ids) as $link) {
+      $link->set('weight', $weight)->save();
+    }
+  }
+}
+
+/**
+ * Reorganize mukurtu_dashboard blocks: move admin panels to region three,
+ * recent content to region two, and update weights throughout.
+ */
+function mukurtu_core_update_40014(): void {
+  $config = \Drupal::configFactory()->getEditable('dashboards.dashboard.mukurtu_dashboard');
+  $sections = $config->get('sections');
+
+  // Map of component UUID => [region, weight] to apply.
+  $updates = [
+    '0d6f9095-ddc7-4e04-b102-a47eab86f9dc' => ['region' => 'two',   'weight' => 2],
+    '7ea8f4fe-f816-4b62-80ed-597ea6d8d39a' => ['region' => 'three', 'weight' => 8],
+    '4baf6b8d-6deb-4742-aac9-5a4ca97be575' => ['region' => 'one',   'weight' => 2],
+    '8e52ecf9-f13d-4974-b4e5-9ecff8af170a' => ['region' => 'one',   'weight' => 3],
+    '9c53fff8-81e9-481e-b21c-2000b83a178e' => ['region' => 'one',   'weight' => 4],
+    'bb1a29d8-00e8-4229-b1b0-20d69ca33db7' => ['region' => 'two',   'weight' => 6],
+    '0339943d-08c4-45a9-9f08-052ad308db5e' => ['region' => 'three', 'weight' => 6],
+    'a663f15a-8760-424c-9433-c3f97fa8b623' => ['region' => 'three', 'weight' => 7],
+    '02ce0aa5-8aec-43f3-b2e0-62d5dbf8efce' => ['region' => 'three', 'weight' => 5],
+    '58ca9634-095d-4720-9aed-76c640314ac4' => ['region' => 'one',   'weight' => 6],
+  ];
+
+  foreach ($sections as $section_key => $section) {
+    foreach ($section['components'] ?? [] as $uuid => $component) {
+      if (isset($updates[$uuid])) {
+        $sections[$section_key]['components'][$uuid]['region'] = $updates[$uuid]['region'];
+        $sections[$section_key]['components'][$uuid]['weight'] = $updates[$uuid]['weight'];
+      }
+    }
+  }
+
+  $config->set('sections', $sections)->save();
+}
+
+/**
+ * Update field_coverage widget: world-view fallback zoom and enable locate button.
+ */
+function mukurtu_core_update_40015(): void {
+  $form_displays = [
+    'core.entity_form_display.node.collection.default',
+    'core.entity_form_display.node.dictionary_word.default',
+    'core.entity_form_display.node.word_list.default',
+    'core.entity_form_display.node.digital_heritage.default',
+    'core.entity_form_display.node.person.default',
+    'core.entity_form_display.node.place.default',
+  ];
+  foreach ($form_displays as $config_name) {
+    $config = \Drupal::configFactory()->getEditable($config_name);
+    if ($config->isNew()) {
+      continue;
+    }
+    $settings = $config->get('content.field_coverage.settings');
+    if (empty($settings)) {
+      continue;
+    }
+    $settings['map']['map_position']['zoom'] = '2';
+    $settings['map']['map_position']['minZoom'] = '1';
+    $settings['locate']['control'] = 1;
+    $locate_options = json_decode($settings['locate']['options'] ?? '{}', TRUE);
+    unset($locate_options['keepCurrentZoomLevel']);
+    $settings['locate']['options'] = json_encode($locate_options);
+    $config->set('content.field_coverage.settings', $settings)->save();
+  }
+}
+
+/**
+ * Fix field_coverage widget: set minZoom to 1 and remove keepCurrentZoomLevel.
+ */
+function mukurtu_core_update_40016(): void {
+  $form_displays = [
+    'core.entity_form_display.node.collection.default',
+    'core.entity_form_display.node.dictionary_word.default',
+    'core.entity_form_display.node.word_list.default',
+    'core.entity_form_display.node.digital_heritage.default',
+    'core.entity_form_display.node.person.default',
+    'core.entity_form_display.node.place.default',
+  ];
+  foreach ($form_displays as $config_name) {
+    $config = \Drupal::configFactory()->getEditable($config_name);
+    if ($config->isNew()) {
+      continue;
+    }
+    $settings = $config->get('content.field_coverage.settings');
+    if (empty($settings)) {
+      continue;
+    }
+    $settings['map']['map_position']['minZoom'] = '1';
+    $locate_options = json_decode($settings['locate']['options'] ?? '{}', TRUE);
+    unset($locate_options['keepCurrentZoomLevel']);
+    $settings['locate']['options'] = json_encode($locate_options);
+    $config->set('content.field_coverage.settings', $settings)->save();
+  }
+}
+
+/**
+ * Add small, medium, and large media view modes.
+ */
+function mukurtu_core_update_40017(): void {
+  $config_storage = \Drupal::service('config.storage');
+
+  // Import view mode definitions from mukurtu_core module.
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core');
+  $module_source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+
+  foreach (['small', 'medium', 'large'] as $mode) {
+    $name = 'core.entity_view_mode.media.' . $mode;
+    $data = $module_source->read($name);
+    if ($data !== FALSE) {
+      $config_storage->write($name, $data);
+    }
+  }
+
+  // Import view display configs from the profile.
+  $profile_path = \Drupal::service('extension.list.profile')->getPath(\Drupal::installProfile());
+  $profile_source = new \Drupal\Core\Config\FileStorage($profile_path . '/config/install');
+
+  $bundles = ['image', 'video', 'audio', 'document', 'external_embed', 'remote_video'];
+  foreach (['small', 'medium', 'large'] as $mode) {
+    foreach ($bundles as $bundle) {
+      $name = 'core.entity_view_display.media.' . $bundle . '.' . $mode;
+      $data = $profile_source->read($name);
+      if ($data !== FALSE) {
+        $config_storage->write($name, $data);
+      }
+    }
+  }
+}
+
+/**
+ * Fix drupal-media allowed attributes in CKEditor5 to preserve view modes on edit.
+ */
+function mukurtu_core_update_40018(): void {
+  $config_factory = \Drupal::configFactory();
+  $new_view_modes = ['small' => 'small', 'medium' => 'medium', 'large' => 'large'];
+
+  foreach (['basic_html', 'full_html'] as $format) {
+    // Fix editor allowed_tags so CKEditor5 preserves data-view-mode.
+    $editor = $config_factory->getEditable('editor.editor.' . $format);
+    if (!$editor->isNew()) {
+      $allowed_tags = $editor->get('settings.plugins.ckeditor5_sourceEditing.allowed_tags') ?? [];
+      $target = '<drupal-media title data-entity-type data-entity-uuid alt data-view-mode data-caption data-align>';
+      $key = NULL;
+      foreach ($allowed_tags as $k => $tag) {
+        if (str_starts_with(trim($tag), '<drupal-media')) {
+          $key = $k;
+          break;
+        }
+      }
+      if ($key !== NULL && trim($allowed_tags[$key]) !== $target) {
+        $allowed_tags[$key] = $target;
+        $editor->set('settings.plugins.ckeditor5_sourceEditing.allowed_tags', $allowed_tags);
+        $editor->save(TRUE);
+      }
+    }
+
+    // Add new view modes to the media_embed filter's allowed_view_modes.
+    $filter = $config_factory->getEditable('filter.format.' . $format);
+    if (!$filter->isNew()) {
+      $allowed = $filter->get('filters.media_embed.settings.allowed_view_modes') ?? [];
+      $filter->set('filters.media_embed.settings.allowed_view_modes', array_merge($allowed, $new_view_modes));
+      $filter->save(TRUE);
+    }
+  }
+}
+
+/**
+ * Update legacy media view mode labels to avoid duplicates with new view modes.
+ */
+function mukurtu_core_update_40019(): void {
+  $config_storage = \Drupal::service('config.storage');
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core');
+  $module_source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+
+  foreach (['digital_heritage_full', 'digital_heritage_sidebar', 'small_250px_'] as $mode) {
+    $name = 'core.entity_view_mode.media.' . $mode;
+    $data = $module_source->read($name);
+    if ($data !== FALSE) {
+      $config_storage->write($name, $data);
+    }
+  }
+}
+
+/**
+ * Add field_pending to user entity to distinguish Pending from Blocked accounts.
+ */
+function mukurtu_core_update_40020(): void {
+  $field_storage = \Drupal\field\Entity\FieldStorageConfig::loadByName('user', 'field_pending');
+  if (!$field_storage) {
+    \Drupal\field\Entity\FieldStorageConfig::create([
+      'field_name' => 'field_pending',
+      'entity_type' => 'user',
+      'type' => 'boolean',
+      'cardinality' => 1,
+    ])->save();
+  }
+  if (!\Drupal\field\Entity\FieldConfig::loadByName('user', 'user', 'field_pending')) {
+    \Drupal\field\Entity\FieldConfig::create([
+      'field_name' => 'field_pending',
+      'entity_type' => 'user',
+      'bundle' => 'user',
+      'label' => 'Pending',
+      'default_value' => [['value' => 1]],
+    ])->save();
+  }
+}
+
+/**
+ * Hide local actions block on /dictionary.
+ */
+function mukurtu_core_update_40021(): void {
+  $config = \Drupal::configFactory()->getEditable('block.block.mukurtu_v4_local_actions');
+  if (!$config) {
+    return;
+  }
+  $pages = $config->get('visibility.request_path.pages') ?? '';
+  if (!str_contains($pages, '/dictionary')) {
+    $config->set('visibility.request_path.pages', $pages . "\r\n/dictionary");
+    $config->save(TRUE);
+  }
+}
+
+/**
+ * Switch featured_content entity browser to rendered_entity display.
+ */
+function mukurtu_core_update_40022(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.block_content.featured_content.default');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_featured_content.settings.field_widget_display', 'rendered_entity');
+  $config->set('content.field_featured_content.settings.field_widget_display_settings', ['view_mode' => 'content_browser']);
+  $config->save();
+}
+
+/**
+ * Create FieldConfig entities for field_coverage on all content type bundles.
+ *
+ * field_coverage was previously defined as a bundle-level BaseFieldDefinition
+ * in each entity class but backed by a FieldStorageConfig entity, causing
+ * Views to log "non-existent config entity" warnings on every cache rebuild.
+ * The fix converts it to a purely configurable field by removing it from
+ * bundleFieldDefinitions() and creating the missing FieldConfig entities.
+ */
+function mukurtu_core_update_40023(): void {
+  $bundles = [
+    'digital_heritage' => 'A detailed, interactive mapping tool that allows placing and drawing multiple locations related to a digital heritage item. Locations can be single points, paths, rectangles, or free-form polygons. Each location can be given a basic label. This field is also used for the browse by map tools. </br>Note that this mapping data will be shared with the same users or visitors as the rest of the digital heritage item. If the location is sensitive, carefully consider using this field. </br>Use the tools shown on the map to place, draw, edit, and delete points and shapes. Once a point or shape has been placed, select it to add a description if needed.',
+    'collection' => 'A detailed, interactive mapping tool that allows placing and drawing multiple locations related to a collection. Locations can be single points, paths, rectangles, or free-form polygons. Each location can be given a basic label. This field is also used for the browse by map tools. </br>Note that this mapping data will be shared with the same users or visitors as the rest of the collection. If the location is sensitive, carefully consider using this field. </br>Use the tools shown on the map to place, draw, edit, and delete points and shapes. Once a point or shape has been placed, select it to add a description if needed.',
+    'dictionary_word' => 'A detailed, interactive mapping tool that allows placing and drawing multiple locations related to a dictionary word. Locations can be single points, paths, rectangles, or free-form polygons. Each location can be given a basic label. This field is also used for the browse by map tools. Note that this mapping data will be shared with the same users or visitors as the rest of the dictionary word. If the location is sensitive, carefully consider using this field. </br>Use the tools shown on the map to place, draw, edit, and delete points and shapes. Once a point or shape has been placed, select it to add a description if needed.',
+    'word_list' => '',
+    'person' => 'A detailed, interactive mapping tool that allows placing and drawing multiple locations related to a person record. Locations can be single points, paths, rectangles, or free-form polygons. Each location can be given a basic label. This field is also used for the browse by map tools. Note that this mapping data will be shared with the same users or visitors as the rest of the person record. If the location is sensitive, carefully consider using this field. </br>Use the tools shown on the map to place, draw, edit, and delete points and shapes. Once a point or shape has been placed, select it to add a description if needed.',
+    'place' => 'A detailed, interactive mapping tool that allows placing and drawing multiple locations related to a place record. Locations can be single points, paths, rectangles, or free-form polygons. Each location can be given a basic label. This field is also used for the browse by map tools. Note that this mapping data will be shared with the same users or visitors as the rest of the place record. If the location is sensitive, carefully consider using this field. </br>Use the tools shown on the map to place, draw, edit, and delete points and shapes. Once a point or shape has been placed, select it to add a description if needed.',
+  ];
+  foreach ($bundles as $bundle => $description) {
+    if (\Drupal\field\Entity\FieldConfig::loadByName('node', $bundle, 'field_coverage')) {
+      continue;
+    }
+    \Drupal\field\Entity\FieldConfig::create([
+      'field_name' => 'field_coverage',
+      'entity_type' => 'node',
+      'bundle' => $bundle,
+      'label' => 'Map Points',
+      'description' => $description,
+      'required' => FALSE,
+      'translatable' => FALSE,
+    ])->save();
+  }
+}
+
+/**
+ * Grant article, page, and landing page content permissions to Mukurtu Manager role.
+ */
+function mukurtu_core_update_40024(): void {
+  $role = \Drupal\user\Entity\Role::load('mukurtu_manager');
+  if (!$role) {
+    return;
+  }
+  $permissions = [
+    'create article content',
+    'create landing_page content',
+    'create page content',
+    'delete any article content',
+    'delete any landing_page content',
+    'delete any page content',
+    'delete own article content',
+    'delete own landing_page content',
+    'delete own page content',
+    'edit any article content',
+    'edit any landing_page content',
+    'edit any page content',
+    'edit own article content',
+    'edit own landing_page content',
+    'edit own page content',
+  ];
+  foreach ($permissions as $permission) {
+    $role->grantPermission($permission);
+  }
+  $role->save();
+}
+
+/**
+ * Install form_selection view display configs for each node bundle.
+ */
+function mukurtu_core_update_40025(): void {
+  $configs = [
+    ['mukurtu_digital_heritage', 'node.digital_heritage.form_selection'],
+    ['mukurtu_collection', 'node.collection.form_selection'],
+    ['mukurtu_person', 'node.person.form_selection'],
+    ['mukurtu_place', 'node.place.form_selection'],
+    ['mukurtu_dictionary', 'node.dictionary_word.form_selection'],
+    ['mukurtu_dictionary', 'node.word_list.form_selection'],
+  ];
+  $module_handler = \Drupal::moduleHandler();
+  $config_factory = \Drupal::configFactory();
+  foreach ($configs as [$module, $config_name]) {
+    if (!$module_handler->moduleExists($module)) {
+      continue;
+    }
+    $existing = $config_factory->get("core.entity_view_display.$config_name");
+    if (!$existing->isNew()) {
+      continue;
+    }
+    $module_path = \Drupal::service('extension.list.module')->getPath($module);
+    $source = new \Drupal\Core\Config\FileStorage("$module_path/config/install");
+    $data = $source->read("core.entity_view_display.$config_name");
+    if ($data) {
+      $config_factory->getEditable("core.entity_view_display.$config_name")
+        ->setData($data)
+        ->save(TRUE);
+    }
+  }
+}
+
+/**
+ * Add collection-specific entity browser (no type filter) and view display.
+ */
+function mukurtu_core_update_40026(): void {
+  // Install the new mukurtu_collection_browser entity browser config.
+  $config_storage = \Drupal::service('config.storage');
+  $name = 'entity_browser.browser.mukurtu_collection_browser';
+  if (!$config_storage->exists($name)) {
+    $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core');
+    $source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+    $data = $source->read($name);
+    if ($data !== FALSE) {
+      $config_storage->write($name, $data);
+    }
+  }
+}
+
+/**
+ * Create the form_selection node view mode for entity browser selected-items display.
+ */
+function mukurtu_core_update_40027(): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('entity_view_mode');
+  if (!$storage->load('node.form_selection')) {
+    $storage->create([
+      'id' => 'node.form_selection',
+      'label' => 'Form Selection',
+      'targetEntityType' => 'node',
+      'cache' => TRUE,
+    ])->save();
+  }
+}
+
+/**
+ * Install dedicated single-type entity browsers and update the content browser
+ * view to exclude site-structure node types from results.
+ *
+ * - Adds entity_browser_dictionary_word and entity_browser_person display
+ *   variants to views.view.mukurtu_content_browser.
+ * - Installs entity_browser.browser.mukurtu_dictionary_word_browser and
+ *   entity_browser.browser.mukurtu_person_browser.
+ * - Adds an unexposed bundle filter that excludes article, page, and
+ *   landing_page from all mukurtu_content_browser results.
+ */
+function mukurtu_core_update_40028(): void {
+  $config_storage = \Drupal::service('config.storage');
+
+  $core_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core');
+  $core_source = new \Drupal\Core\Config\FileStorage($core_path . '/config/install');
+  foreach ([
+    'views.view.mukurtu_content_browser',
+    'entity_browser.browser.mukurtu_person_browser',
+  ] as $name) {
+    $data = $core_source->read($name);
+    if ($data !== FALSE) {
+      $config_storage->write($name, $data);
+    }
+  }
+
+  // The dictionary word browser is owned by mukurtu_dictionary.
+  $dict_path = \Drupal::service('extension.list.module')->getPath('mukurtu_dictionary');
+  $dict_source = new \Drupal\Core\Config\FileStorage($dict_path . '/config/install');
+  $data = $dict_source->read('entity_browser.browser.mukurtu_dictionary_word_browser');
+  if ($data !== FALSE) {
+    $config_storage->write('entity_browser.browser.mukurtu_dictionary_word_browser', $data);
+  }
+
+  $authenticated = \Drupal\user\Entity\Role::load('authenticated');
+  if ($authenticated) {
+    $authenticated->grantPermission('access mukurtu_dictionary_word_browser entity browser pages');
+    $authenticated->grantPermission('access mukurtu_person_browser entity browser pages');
+    $authenticated->save();
+  }
+}
+
+/**
+ * Create form_selection view displays for article and page node types and
+ * switch field_featured_content on the Featured Content block to rendered_entity.
+ */
+function mukurtu_core_update_40029(): void {
+  $config_storage = \Drupal::service('config.storage');
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core');
+  $module_source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+
+  foreach ([
+    'core.entity_view_display.node.article.form_selection',
+    'core.entity_view_display.node.page.form_selection',
+  ] as $name) {
+    $data = $module_source->read($name);
+    if ($data !== FALSE) {
+      $config_storage->write($name, $data);
+    }
+  }
+
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.block_content.featured_content.default');
+  if (!$config->isNew()) {
+    $config->set('content.field_featured_content.settings.field_widget_display', 'rendered_entity');
+    $config->set('content.field_featured_content.settings.field_widget_display_settings', ['view_mode' => 'form_selection']);
+    $config->save();
+  }
+}
+
+/**
+ * Install form_selection media view mode and displays; update node form_selection
+ * view displays to use the new media view mode.
+ */
+function mukurtu_core_update_40030(): void {
+  $config_storage = \Drupal::service('config.storage');
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core');
+  $module_source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+  $profile_path = \Drupal::service('extension.list.profile')->getPath('mukurtu');
+  $profile_source = new \Drupal\Core\Config\FileStorage($profile_path . '/config/install');
+
+  // Install the new media view mode.
+  $view_mode_name = 'core.entity_view_mode.media.form_selection';
+  $data = $module_source->read($view_mode_name);
+  if ($data !== FALSE) {
+    $config_storage->write($view_mode_name, $data);
+  }
+
+  // Install media view displays for each media type.
+  $media_displays = [
+    'core.entity_view_display.media.image.form_selection',
+    'core.entity_view_display.media.document.form_selection',
+    'core.entity_view_display.media.audio.form_selection',
+    'core.entity_view_display.media.video.form_selection',
+    'core.entity_view_display.media.external_embed.form_selection',
+    'core.entity_view_display.media.remote_video.form_selection',
+  ];
+  foreach ($media_displays as $name) {
+    $data = $profile_source->read($name);
+    if ($data !== FALSE) {
+      $config_storage->write($name, $data);
+    }
+  }
+
+  // Update all node form_selection view displays to use the new media view mode.
+  $node_bundles = [
+    'digital_heritage', 'collection', 'word_list', 'dictionary_word',
+    'person', 'landing_page', 'place', 'page', 'article',
+  ];
+  foreach ($node_bundles as $bundle) {
+    $config = \Drupal::configFactory()->getEditable("core.entity_view_display.node.{$bundle}.form_selection");
+    if ($config->isNew()) {
+      continue;
+    }
+    $current = $config->get('content.field_representative_media.settings.view_mode');
+    if (in_array($current, ['digital_heritage_sidebar', 'small'])) {
+      $config->set('content.field_representative_media.settings.view_mode', 'form_selection')->save();
+    }
+  }
+}
+
+/**
+ * Add remote_video digital_heritage_sidebar entity view display.
+ */
+function mukurtu_core_update_40031(): void {
+  $config_path = \Drupal::service('extension.list.profile')->getPath('mukurtu') . '/config/install/core.entity_view_display.media.remote_video.digital_heritage_sidebar.yml';
+  if (!file_exists($config_path)) {
+    return;
+  }
+  $data = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($config_path));
+  \Drupal::configFactory()->getEditable('core.entity_view_display.media.remote_video.digital_heritage_sidebar')
+    ->setData($data)
+    ->save(TRUE);
+}
+
+/**
+ * Remove conflicting PHP 8 MigrateSource attribute from pathauto's migration
+ * source plugin so Drupal reads source_module from the docblock annotation.
+ */
+function mukurtu_core_update_40032(): void {
+  $path = \Drupal::root() . '/modules/contrib/pathauto/src/Plugin/migrate/source/PathautoPattern.php';
+  if (!file_exists($path)) {
+    return;
+  }
+  $contents = file_get_contents($path);
+  // Only modify if the conflicting attribute is present.
+  if (strpos($contents, '#[MigrateSource') === FALSE) {
+    return;
+  }
+  $contents = str_replace("use Drupal\\migrate\\Attribute\\MigrateSource;\n", '', $contents);
+  $contents = preg_replace('/#\[MigrateSource\(\s*id:\s*\'pathauto_pattern\'\s*\)\]\n/', '', $contents);
+  if (file_put_contents($path, $contents) === FALSE) {
+    throw new \RuntimeException("Failed to write patched file: $path");
+  }
+  // Flush plugin cache so the corrected definition is picked up.
+  \Drupal::service('plugin.cache_clearer')->clearCachedDefinitions();
+}
+
+/**
+ * Add null vocabulary guard to flat_taxonomy presave hook to prevent fatal
+ * errors when migrating terms whose vocabulary doesn't exist yet.
+ */
+function mukurtu_core_update_40033(): void {
+  $path = \Drupal::root() . '/modules/contrib/flat_taxonomy/flat_taxonomy.module';
+  if (!file_exists($path)) {
+    return;
+  }
+  $contents = file_get_contents($path);
+  // Only modify if the null check is not already present.
+  if (strpos($contents, 'if (!$vocabulary)') !== FALSE) {
+    return;
+  }
+  $new_contents = str_replace(
+    "  \$vocabulary = Vocabulary::load(\$term->bundle());\n\n  if (\n",
+    "  \$vocabulary = Vocabulary::load(\$term->bundle());\n  if (!\$vocabulary) {\n    return;\n  }\n\n  if (\n",
+    $contents
+  );
+  // If the pattern didn't match, the module code differs from what we expect — skip.
+  if ($new_contents === $contents) {
+    return;
+  }
+  if (file_put_contents($path, $new_contents) === FALSE) {
+    throw new \RuntimeException("Failed to write patched file: $path");
+  }
+}
+
+/**
+ * Hide comment subject field from the comment form; set body to basic_html.
+ *
+ * Note: subsequent hooks 40035 and 40036 supersede the format change made
+ * here, ultimately switching to plain_text. This hook only hides the subject.
+ */
+function mukurtu_core_update_40034(): void {
+  // Hide subject field from comment form display.
+  $form_display = \Drupal::configFactory()->getEditable('core.entity_form_display.comment.comment.default');
+  if (!$form_display->isNew()) {
+    $subject = $form_display->get('content.subject');
+    if ($subject) {
+      $form_display->clear('content.subject');
+      $form_display->set('hidden.subject', TRUE);
+      $form_display->save();
+    }
+  }
+
+  // Restrict comment body to Basic HTML only (hides format switcher and tips link).
+  $field_config = \Drupal::configFactory()->getEditable('field.field.comment.comment.comment_body');
+  if (!$field_config->isNew()) {
+    $field_config->set('settings.allowed_formats', ['basic_html' => 'basic_html']);
+    $field_config->save();
+  }
+}
+
+/**
+ * Create comment_basic_html text format (no media embed) and restrict comment
+ * body to it; removes Insert Media button from comment CKEditor toolbar.
+ */
+function mukurtu_core_update_40035(): void {
+  // Create the comment_basic_html filter format if it doesn't exist.
+  $format_config = \Drupal::configFactory()->getEditable('filter.format.comment_basic_html');
+  if ($format_config->isNew()) {
+    $format_config->setData([
+      'langcode' => 'en',
+      'status' => TRUE,
+      'dependencies' => ['module' => ['editor', 'filter']],
+      'name' => 'Comment Basic HTML',
+      'format' => 'comment_basic_html',
+      'weight' => 1,
+      'filters' => [
+        'editor_file_reference' => ['id' => 'editor_file_reference', 'provider' => 'editor', 'status' => TRUE, 'weight' => 11, 'settings' => []],
+        'filter_align' => ['id' => 'filter_align', 'provider' => 'filter', 'status' => TRUE, 'weight' => 7, 'settings' => []],
+        'filter_caption' => ['id' => 'filter_caption', 'provider' => 'filter', 'status' => TRUE, 'weight' => 8, 'settings' => []],
+        'filter_html' => [
+          'id' => 'filter_html',
+          'provider' => 'filter',
+          'status' => TRUE,
+          'weight' => -10,
+          'settings' => [
+            'allowed_html' => '<br> <p> <h2 id> <h3 id> <h4 id> <h5 id> <h6 id> <cite> <dl> <dt> <dd> <span> <img src alt height width data-entity-type data-entity-uuid data-align data-caption> <drupal-entity data-entity-type data-entity-uuid data-entity-embed-display data-entity-embed-display-settings data-align data-caption data-embed-button data-langcode alt title> <iframe src width height frameborder allowfullscreen> <a hreflang href> <blockquote cite> <ul type> <ol type start> <strong> <em> <code> <li>',
+            'filter_html_help' => FALSE,
+            'filter_html_nofollow' => TRUE,
+          ],
+        ],
+        'filter_html_image_secure' => ['id' => 'filter_html_image_secure', 'provider' => 'filter', 'status' => TRUE, 'weight' => 9, 'settings' => []],
+        'filter_htmlcorrector' => ['id' => 'filter_htmlcorrector', 'provider' => 'filter', 'status' => TRUE, 'weight' => 10, 'settings' => []],
+      ],
+    ])->save();
+  }
+
+  // Create the CKEditor 5 config for comment_basic_html (no drupalMedia).
+  $editor_config = \Drupal::configFactory()->getEditable('editor.editor.comment_basic_html');
+  if ($editor_config->isNew()) {
+    $editor_config->setData([
+      'langcode' => 'en',
+      'status' => TRUE,
+      'dependencies' => ['config' => ['filter.format.comment_basic_html'], 'module' => ['ckeditor5']],
+      'format' => 'comment_basic_html',
+      'editor' => 'ckeditor5',
+      'settings' => [
+        'toolbar' => [
+          'items' => ['heading', 'bold', 'italic', 'code', '|', 'bulletedList', 'numberedList', '|', 'link', 'blockQuote', '|', 'specialCharacters', 'sourceEditing'],
+        ],
+        'plugins' => [
+          'ckeditor5_heading' => ['enabled_headings' => ['heading2', 'heading3', 'heading4', 'heading5', 'heading6']],
+          'ckeditor5_sourceEditing' => [
+            'allowed_tags' => ['<cite>', '<dl>', '<dt>', '<dd>', '<span>', '<img src alt height width data-entity-type data-entity-uuid data-align data-caption>', '<drupal-entity data-entity-type data-entity-uuid data-entity-embed-display data-entity-embed-display-settings data-align data-caption data-embed-button data-langcode alt title>', '<iframe src width height frameborder allowfullscreen>', '<a hreflang>', '<blockquote cite>', '<ul type>', '<ol type>', '<h2 id>', '<h3 id>', '<h4 id>', '<h5 id>', '<h6 id>'],
+          ],
+          'ckeditor5_list' => ['properties' => ['reversed' => FALSE, 'startIndex' => TRUE, 'styles' => TRUE], 'multiBlock' => TRUE],
+        ],
+      ],
+      'image_upload' => ['status' => FALSE],
+    ])->save();
+  }
+
+  // Switch comment body to the new comment_basic_html format.
+  $field_config = \Drupal::configFactory()->getEditable('field.field.comment.comment.comment_body');
+  if (!$field_config->isNew()) {
+    $field_config->set('settings.allowed_formats', ['comment_basic_html' => 'comment_basic_html']);
+    $field_config->save();
+  }
+
+  // Grant authenticated users permission to use the new format.
+  $role = \Drupal\user\Entity\Role::load('authenticated');
+  if ($role && !$role->hasPermission('use text format comment_basic_html')) {
+    $role->grantPermission('use text format comment_basic_html');
+    $role->save();
+  }
+}
+
+/**
+ * Switch comment body to plain_text; remove comment_basic_html format.
+ */
+function mukurtu_core_update_40036(): void {
+  // Editor config must be deleted before the filter format (config dependency).
+  $editor_config = \Drupal::configFactory()->getEditable('editor.editor.comment_basic_html');
+  if (!$editor_config->isNew()) {
+    $editor_config->delete();
+  }
+
+  $format_config = \Drupal::configFactory()->getEditable('filter.format.comment_basic_html');
+  if (!$format_config->isNew()) {
+    $format_config->delete();
+  }
+
+  // Point the field at plain_text.
+  $field_config = \Drupal::configFactory()->getEditable('field.field.comment.comment.comment_body');
+  if (!$field_config->isNew()) {
+    $field_config->set('settings.allowed_formats', ['plain_text' => 'plain_text']);
+    $field_config->save();
+  }
+
+  // Re-format existing comment bodies stored with comment_basic_html.
+  \Drupal::database()->update('comment__comment_body')
+    ->fields(['comment_body_format' => 'plain_text'])
+    ->condition('comment_body_format', 'comment_basic_html')
+    ->execute();
+
+  // Revoke the format permission from the authenticated role.
+  $role = \Drupal\user\Entity\Role::load('authenticated');
+  if ($role && $role->hasPermission('use text format comment_basic_html')) {
+    $role->revokePermission('use text format comment_basic_html');
+    $role->save();
+  }
+}
+
+/**
+ * Remove legacy mukurtu_default_image setting superseded by media placeholders.
+ */
+function mukurtu_core_update_40037(): void {
+  $config = \Drupal::configFactory()->getEditable('mukurtu.settings');
+  $config->clear('mukurtu_default_image')->save();
+}
+
+/**
+ * Update manage all content view: add administrator site-role and empty_table.
+ */
+function mukurtu_core_update_40038(): void {
+  $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_manage_all_content');
+  if ($config->isNew()) {
+    return;
+  }
+
+  // Add administrator to allowed site roles so UID 1 and admins can access.
+  $access_options = $config->get('display.default.display_options.access.options');
+  if (is_array($access_options) && isset($access_options['site-role'])) {
+    $access_options['site-role']['administrator'] = 'administrator';
+    $config->set('display.default.display_options.access.options', $access_options);
+  }
+
+  // Show table headers even when there are no results.
+  $style_options = $config->get('display.default.display_options.style.options');
+  if (is_array($style_options)) {
+    $style_options['empty_table'] = TRUE;
+    $config->set('display.default.display_options.style.options', $style_options);
+  }
+
+  $config->save();
+}
+
+
+/**
+ * Show field_word_list_image in the word_list grid_browse display.
+ */
+function mukurtu_core_update_40039(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.word_list.grid_browse');
+  if ($config->isNew()) {
+    return;
+  }
+
+  $content = $config->get('content') ?? [];
+  if (!isset($content['field_word_list_image'])) {
+    $content['field_word_list_image'] = [
+      'type' => 'entity_reference_entity_view',
+      'label' => 'hidden',
+      'settings' => [
+        'view_mode' => 'browse',
+        'link' => FALSE,
+      ],
+      'third_party_settings' => [],
+      'weight' => -1,
+      'region' => 'content',
+    ];
+    $config->set('content', $content);
+  }
+
+  $config->save();
+}
+
+/**
+ * Show field_recording in the dictionary_word grid_browse display.
+ */
+function mukurtu_core_update_40040(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.dictionary_word.grid_browse');
+  if ($config->isNew()) {
+    return;
+  }
+
+  $content = $config->get('content') ?? [];
+  if (!isset($content['field_recording'])) {
+    $content['field_recording'] = [
+      'type' => 'entity_reference_entity_view',
+      'label' => 'hidden',
+      'settings' => [
+        'view_mode' => 'browse',
+        'link' => FALSE,
+      ],
+      'third_party_settings' => [],
+      'weight' => 1,
+      'region' => 'content',
+    ];
+    $config->set('content', $content);
+  }
+
+  $hidden = $config->get('hidden') ?? [];
+  if (isset($hidden['field_recording'])) {
+    unset($hidden['field_recording']);
+    $config->set('hidden', $hidden);
+  }
+
+  $config->save();
+}
+
+/**
+ * Fix audio form_selection display to show thumbnail; add soundcloud form_selection display.
+ */
+function mukurtu_core_update_40041(): void {
+  $profile_path = \Drupal::service('extension.list.profile')->getPath('mukurtu');
+  $profile_source = new \Drupal\Core\Config\FileStorage($profile_path . '/config/install');
+
+  $configs = [
+    'core.entity_view_display.media.audio.form_selection',
+    'core.entity_view_display.media.soundcloud.form_selection',
+  ];
+  foreach ($configs as $name) {
+    $data = $profile_source->read($name);
+    if ($data !== FALSE) {
+      \Drupal::configFactory()->getEditable($name)->setData($data)->save();
+    }
+  }
+}
+
+/**
+ * Add missing SoundCloud and remote_video display configs for digital_heritage
+ * view modes so content warnings apply correctly in those contexts.
+ */
+function mukurtu_core_update_40042(): void {
+  $profile_path = \Drupal::service('extension.list.profile')->getPath('mukurtu');
+  $source = new \Drupal\Core\Config\FileStorage($profile_path . '/config/install');
+  $config_storage = \Drupal::service('config.storage');
+
+  $new_configs = [
+    'core.entity_view_display.media.soundcloud.digital_heritage_full',
+    'core.entity_view_display.media.soundcloud.digital_heritage_sidebar',
+    'core.entity_view_display.media.remote_video.digital_heritage_full',
+  ];
+
+  foreach ($new_configs as $config_name) {
+    if (!$config_storage->exists($config_name)) {
+      $data = $source->read($config_name);
+      if ($data) {
+        $config_storage->write($config_name, $data);
+      }
+    }
+  }
+}
+
+/**
+ * Reset genpass_display to admin-only if currently set to a visitor-facing value.
+ *
+ * Options 2 (user-facing) and 3 (both) have been removed from the admin UI
+ * because Mukurtu never shows generated passwords to self-registering visitors.
+ */
+function mukurtu_core_update_40043(): void {
+  $config = \Drupal::configFactory()->getEditable('genpass.settings');
+  $display = (int) $config->get('genpass_display');
+  // 2 = PASSWORD_DISPLAY_USER, 3 = PASSWORD_DISPLAY_BOTH.
+  if ($display === 2 || $display === 3) {
+    // 1 = PASSWORD_DISPLAY_ADMIN: only show when a site admin creates an account.
+    $config->set('genpass_display', 1)->save();
+  }
+}
+
+/**
+ * Fix Gin admin theme favicon path and mimetype (#1097).
+ */
+function mukurtu_core_update_40044(): void {
+  \Drupal::configFactory()
+    ->getEditable('gin.settings')
+    ->set('favicon.path', 'profiles/mukurtu/themes/mukurtu_v4/favicon.ico')
+    ->set('favicon.mimetype', 'image/x-icon')
+    ->save();
+}
+
+/**
+ * Remove the draft boolean base field; draft state is now managed via
+ * content_moderation workflow states (#255).
+ */
+function mukurtu_core_update_40045(): void {
+  $update_manager = \Drupal::entityDefinitionUpdateManager();
+  $field = $update_manager->getFieldStorageDefinition('draft', 'node');
+  if ($field) {
+    $update_manager->uninstallFieldStorageDefinition($field);
+  }
+}
+
+/**
+ * Rename "Under Review" to "Draft" in the default Mukurtu content workflow.
+ */
+function mukurtu_core_update_40046(): void {
+  $workflow = \Drupal::configFactory()
+    ->getEditable('workflows.workflow.mukurtu_default_content_workflow');
+  if ($workflow->isNew()) {
+    return;
+  }
+  $workflow->set('type_settings.states.draft.label', 'Draft');
+  $workflow->set('type_settings.transitions.create_new_draft.label', 'Save as Draft');
+  $workflow->save();
+}
+
+/**
+ * Add editorial workflow permissions to authenticated role and Protocol Steward
+ * OG role for existing sites.
+ */
+function mukurtu_core_update_40047(): void {
+  $config_factory = \Drupal::configFactory();
+
+  // Authenticated role: save_draft, submit_for_review, resubmit.
+  $auth_role = $config_factory->getEditable('user.role.authenticated');
+  if (!$auth_role->isNew()) {
+    $permissions = $auth_role->get('permissions') ?? [];
+    $new_permissions = [
+      'use mukurtu_editorial_workflow transition resubmit',
+      'use mukurtu_editorial_workflow transition save_draft',
+      'use mukurtu_editorial_workflow transition submit_for_review',
+    ];
+    foreach ($new_permissions as $permission) {
+      if (!in_array($permission, $permissions, TRUE)) {
+        $permissions[] = $permission;
+      }
+    }
+    $auth_role->set('permissions', $permissions);
+    $auth_role->save();
+  }
+
+  // Protocol Steward OG role: all editorial workflow transitions.
+  $ps_role = $config_factory->getEditable('og.og_role.protocol-protocol-protocol_steward');
+  if (!$ps_role->isNew()) {
+    $permissions = $ps_role->get('permissions') ?? [];
+    $new_permissions = [
+      'use mukurtu_editorial_workflow transition archive',
+      'use mukurtu_editorial_workflow transition publish',
+      'use mukurtu_editorial_workflow transition request_revision',
+      'use mukurtu_editorial_workflow transition restore',
+      'use mukurtu_editorial_workflow transition resubmit',
+      'use mukurtu_editorial_workflow transition save_draft',
+      'use mukurtu_editorial_workflow transition submit_for_review',
+    ];
+    foreach ($new_permissions as $permission) {
+      if (!in_array($permission, $permissions, TRUE)) {
+        $permissions[] = $permission;
+      }
+    }
+    $ps_role->set('permissions', $permissions);
+    $ps_role->save();
+  }
+}
+
+/**
+ * Change default moderation state to published for content workflows.
+ */
+function mukurtu_core_update_40048(): void {
+  foreach (['mukurtu_default_content_workflow', 'mukurtu_editorial_workflow'] as $workflow_id) {
+    $workflow = \Drupal::configFactory()
+      ->getEditable('workflows.workflow.' . $workflow_id);
+    if ($workflow->isNew()) {
+      continue;
+    }
+    $workflow->set('type_settings.default_moderation_state', 'published');
+    $workflow->save();
+  }
+}
+
+/**
+ * Update the draft content view to filter by moderation_state instead of the
+ * removed boolean draft field.
+ */
+function mukurtu_core_update_40049(): void {
+  if (!\Drupal::moduleHandler()->moduleExists('mukurtu_drafts')) {
+    return;
+  }
+  $module_path = \Drupal::service('module_handler')->getModule('mukurtu_drafts')->getPath();
+  $config_source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+  $config_data = $config_source->read('views.view.mukurtu_draft_content');
+  if ($config_data) {
+    \Drupal::configFactory()
+      ->getEditable('views.view.mukurtu_draft_content')
+      ->setData($config_data)
+      ->save();
+  }
+}
+
+/**
+ * Grant authenticated users permission to use the draft workflow transitions.
+ *
+ * These permissions were added to config/install in this branch but
+ * config/install is only applied on fresh installs, not upgrades.
+ */
+function mukurtu_core_update_40050(): void {
+  // Ensure the workflows module is enabled so its permissions are registered.
+  if (!\Drupal::moduleHandler()->moduleExists('mukurtu_workflows')) {
+    \Drupal::service('module_installer')->install(['mukurtu_workflows']);
+  }
+
+  $role = \Drupal\user\Entity\Role::load('authenticated');
+  if (!$role) {
+    return;
+  }
+  $role->grantPermission('use mukurtu_default_content_workflow transition create_new_draft');
+  $role->grantPermission('use mukurtu_default_content_workflow transition publish');
+  $role->save();
+}
+
+/**
+ * Make the draft state the default revision in content workflows.
+ */
+function mukurtu_core_update_40051(): void {
+  foreach (['mukurtu_default_content_workflow', 'mukurtu_editorial_workflow'] as $workflow_id) {
+    $workflow = \Drupal::configFactory()
+      ->getEditable('workflows.workflow.' . $workflow_id);
+    if ($workflow->isNew()) {
+      continue;
+    }
+    $workflow->set('type_settings.states.draft.default_revision', TRUE);
+    $workflow->save();
+  }
+}
+
+/**
+ * Resync the draft content view to add editorial workflow filter and tag cache.
+ */
+function mukurtu_core_update_40052(): void {
+  if (!\Drupal::moduleHandler()->moduleExists('mukurtu_drafts')) {
+    return;
+  }
+  $module_path = \Drupal::service('module_handler')->getModule('mukurtu_drafts')->getPath();
+  $config_source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+  $config_data = $config_source->read('views.view.mukurtu_draft_content');
+  if ($config_data) {
+    \Drupal::configFactory()
+      ->getEditable('views.view.mukurtu_draft_content')
+      ->setData($config_data)
+      ->save();
+  }
+}
+
+/**
+ * Update manage all content view to display moderation state instead of status.
+ */
+function mukurtu_core_update_40053(): void {
+  $profile_path = \Drupal::service('extension.list.profile')->getPath('mukurtu');
+  $config_source = new \Drupal\Core\Config\FileStorage(\Drupal::root() . '/' . $profile_path . '/config/install');
+  $config_data = $config_source->read('views.view.mukurtu_manage_all_content');
+  if ($config_data) {
+    \Drupal::configFactory()
+      ->getEditable('views.view.mukurtu_manage_all_content')
+      ->setData($config_data)
+      ->save();
+  }
+}
+
+/**
+ * Adjust editorial workflow transitions and default state.
+ *
+ * - Remove 'archived' from save_draft.from (use the restore transition instead).
+ * - Allow Stewards to publish directly from Revision Requested.
+ * - Default new content to Draft so it doesn't bypass editorial review.
+ */
+function mukurtu_core_update_40054(): void {
+  $config = \Drupal::configFactory()
+    ->getEditable('workflows.workflow.mukurtu_editorial_workflow');
+  if ($config->isNew()) {
+    return;
+  }
+
+  $from = $config->get('type_settings.transitions.save_draft.from');
+  $config->set('type_settings.transitions.save_draft.from',
+    array_values(array_diff($from, ['archived'])));
+
+  $from = $config->get('type_settings.transitions.publish.from');
+  if (!in_array('revision_requested', $from, TRUE)) {
+    $from[] = 'revision_requested';
+    $config->set('type_settings.transitions.publish.from', $from);
+  }
+
+  $config->set('type_settings.default_moderation_state', 'draft');
+
+  $config->save();
+}
+
+/**
+ * Use content_moderation_state formatter for moderation state in views.
+ */
+function mukurtu_core_update_40055(): void {
+  $config_factory = \Drupal::configFactory();
+
+  $view_ids = [
+    'views.view.mukurtu_manage_all_content',
+    'views.view.mukurtu_content_under_review',
+  ];
+
+  foreach ($view_ids as $view_id) {
+    $config = $config_factory->getEditable($view_id);
+    if ($config->isNew()) {
+      continue;
+    }
+    foreach ($config->get('display') as $display_id => $display) {
+      $fields = $display['display_options']['fields'] ?? [];
+      if (isset($fields['moderation_state']) && ($fields['moderation_state']['type'] ?? '') === 'string') {
+        $config->set("display.$display_id.display_options.fields.moderation_state.type", 'content_moderation_state');
+        $config->set("display.$display_id.display_options.fields.moderation_state.settings", []);
+      }
+    }
+    $config->save();
+  }
+}
+
+/**
+ * Rename editorial workflow state "Needs Review" to "Awaiting Review".
+ */
+function mukurtu_core_update_40056(): void {
+  $config = \Drupal::configFactory()
+    ->getEditable('workflows.workflow.mukurtu_editorial_workflow');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('type_settings.states.needs_review.label', 'Awaiting Review');
+  $config->save();
+}
+
+/**
+ * Replace /user/drafts and /content-under-review with the unified /my-content
+ * and /review-queue views (mukurtu_workflow_overview).
+ */
+function mukurtu_core_update_40057(): void {
+  $config_factory = \Drupal::configFactory();
+
+  // Delete the old standalone views.
+  foreach ([
+    'views.view.mukurtu_draft_content',
+    'views.view.mukurtu_content_under_review',
+  ] as $config_name) {
+    $config = $config_factory->getEditable($config_name);
+    if (!$config->isNew()) {
+      $config->delete();
+    }
+  }
+
+  // Import the new unified view from mukurtu_workflows config/install.
+  $new_view = 'views.view.mukurtu_workflow_overview';
+  $module_path = \Drupal::service('extension.list.module')
+    ->getPath('mukurtu_workflows');
+  $yaml_path = $module_path . '/config/install/' . $new_view . '.yml';
+  if (file_exists($yaml_path)) {
+    $data = \Symfony\Component\Yaml\Yaml::parseFile($yaml_path);
+    $config_factory->getEditable($new_view)->setData($data)->save(TRUE);
+  }
+}
+
+/**
+ * Update /my-content and /review-queue: access control, admin theme, two-table
+ * layout, and correct moderation_state_filter values.
+ */
+function mukurtu_core_update_40058(): void {
+  $config_factory = \Drupal::configFactory();
+  $module_path = \Drupal::service('extension.list.module')
+    ->getPath('mukurtu_workflows');
+  $yaml_path = $module_path . '/config/install/views.view.mukurtu_workflow_overview.yml';
+  if (file_exists($yaml_path)) {
+    $data = \Symfony\Component\Yaml\Yaml::parseFile($yaml_path);
+    $config_factory->getEditable('views.view.mukurtu_workflow_overview')
+      ->setData($data)
+      ->save(TRUE);
+  }
+}
+
+/**
+ * Create the mukurtu_review_note table for the review panel feature.
+ */
+function mukurtu_core_update_40059(): void {
+  $schema = \Drupal::database()->schema();
+  if ($schema->tableExists('mukurtu_review_note')) {
+    return;
+  }
+  $table_spec = [
+    'description' => 'Stores review notes and state-change records for nodes.',
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ],
+      'nid' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'The {node}.nid this note belongs to.',
+      ],
+      'uid' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The {users}.uid who created this note.',
+      ],
+      'created' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Unix timestamp when the note was created.',
+      ],
+      'from_state' => [
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'The moderation state before the transition.',
+      ],
+      'to_state' => [
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'The moderation state after the transition.',
+      ],
+      'note' => [
+        'type' => 'text',
+        'size' => 'medium',
+        'not null' => FALSE,
+        'description' => 'Optional text note left by the reviewer.',
+      ],
+    ],
+    'primary key' => ['id'],
+    'indexes' => [
+      'nid' => ['nid'],
+    ],
+  ];
+  $schema->createTable('mukurtu_review_note', $table_spec);
+}
+
+/**
+ * Allow re-publishing published content without drafting it first.
+ */
+function mukurtu_core_update_40060(): void {
+  $config = \Drupal::configFactory()
+    ->getEditable('workflows.workflow.mukurtu_editorial_workflow');
+  if ($config->isNew()) {
+    return;
+  }
+  $from = $config->get('type_settings.transitions.publish.from');
+  if (!in_array('published', $from, TRUE)) {
+    $from[] = 'published';
+    $config->set('type_settings.transitions.publish.from', $from);
+    $config->save();
+  }
+}
+
+/**
+ * Install mukurtu_setup and add the setup checklist block to the dashboard.
+ */
+function mukurtu_core_update_40061(): void {
+  if (!\Drupal::moduleHandler()->moduleExists('mukurtu_setup')) {
+    \Drupal::service('module_installer')->install(['mukurtu_setup']);
+  }
+
+  $config = \Drupal::configFactory()->getEditable('dashboards.dashboard.mukurtu_dashboard');
+  if ($config->isNew()) {
+    return;
+  }
+
+  $uuid = '08fde6c5-ad7d-4e16-a742-b2ed6f52b6a6';
+  $sections = $config->get('sections') ?? [];
+  if (isset($sections[0]['components'][$uuid])) {
+    return;
+  }
+
+  $sections[0]['components'][$uuid] = [
+    'uuid' => $uuid,
+    'region' => 'two',
+    'configuration' => [
+      'id' => 'mukurtu_setup_checklist',
+      'label' => 'Setup Checklist',
+      'label_display' => 'visible',
+      'provider' => 'mukurtu_setup',
+      'context_mapping' => [],
+    ],
+    'weight' => 1,
+    'additional' => [],
+  ];
+
+  $config->set('sections', $sections)->save();
+}
+
+/**
+ * Grant editorial workflow transition permissions to the Language Steward role
+ * so they can process dictionary words and word lists in the review queue.
+ */
+function mukurtu_core_update_40062(): void {
+  /** @var \Drupal\og\Entity\OgRole|null $role */
+  $role = \Drupal::entityTypeManager()
+    ->getStorage('og_role')
+    ->load('protocol-protocol-language_steward');
+  if (!$role) {
+    return;
+  }
+
+  $transitions = [
+    'use mukurtu_editorial_workflow transition archive',
+    'use mukurtu_editorial_workflow transition publish',
+    'use mukurtu_editorial_workflow transition request_revision',
+    'use mukurtu_editorial_workflow transition restore',
+    'use mukurtu_editorial_workflow transition resubmit',
+    'use mukurtu_editorial_workflow transition save_draft',
+    'use mukurtu_editorial_workflow transition submit_for_review',
+  ];
+
+  foreach ($transitions as $permission) {
+    if (!$role->hasPermission($permission)) {
+      $role->grantPermission($permission);
+    }
+  }
+
+  $role->save();
+}
+
+/**
+ * Add return_to_review transition and expand request_revision to cover published state.
+ */
+function mukurtu_core_update_40063(): void {
+  $workflow = \Drupal::configFactory()
+    ->getEditable('workflows.workflow.mukurtu_editorial_workflow');
+  if ($workflow->isNew()) {
+    return;
+  }
+
+  // Backfill: established sites never received the revision_requested state
+  // or request_revision/resubmit transitions added by the editorial workflow
+  // "Part 2" commit, since that only shipped via config/install (which only
+  // applies to fresh installs). Restore the canonical definitions if missing
+  // or incomplete before proceeding.
+  if (!$workflow->get('type_settings.states.revision_requested.weight')) {
+    $workflow->set('type_settings.states.revision_requested', [
+      'label' => 'Edits Needed',
+      'weight' => 2,
+      'published' => FALSE,
+      'default_revision' => TRUE,
+    ]);
+  }
+  if (!$workflow->get('type_settings.transitions.request_revision.to')) {
+    $workflow->set('type_settings.transitions.request_revision', [
+      'label' => 'Needs edits',
+      'from' => ['needs_review'],
+      'to' => 'revision_requested',
+      'weight' => 2,
+    ]);
+  }
+  if (!$workflow->get('type_settings.transitions.resubmit.to')) {
+    $workflow->set('type_settings.transitions.resubmit', [
+      'label' => 'Resubmit for review',
+      'from' => ['revision_requested'],
+      'to' => 'needs_review',
+      'weight' => 3,
+    ]);
+  }
+
+  // Add published as a valid from-state for the request_revision transition.
+  $from = $workflow->get('type_settings.transitions.request_revision.from') ?? [];
+  if (!in_array('published', $from)) {
+    $from[] = 'published';
+    $workflow->set('type_settings.transitions.request_revision.from', $from);
+  }
+
+  // Add the new return_to_review transition (published -> needs_review).
+  $existing = $workflow->get('type_settings.transitions.return_to_review');
+  if (empty($existing)) {
+    $workflow->set('type_settings.transitions.return_to_review', [
+      'label' => 'Return to Review',
+      'from' => ['published'],
+      'to' => 'needs_review',
+      'weight' => 7,
+    ]);
+  }
+
+  $workflow->save();
+
+  // Grant the new transition permission to both steward OG roles.
+  $permission = 'use mukurtu_editorial_workflow transition return_to_review';
+  $og_role_storage = \Drupal::entityTypeManager()->getStorage('og_role');
+
+  foreach (['protocol-protocol-protocol_steward', 'protocol-protocol-language_steward'] as $role_id) {
+    /** @var \Drupal\og\Entity\OgRole|null $role */
+    $role = $og_role_storage->load($role_id);
+    if ($role && !$role->hasPermission($permission)) {
+      $role->grantPermission($permission);
+      $role->save();
+    }
+  }
+}
+
+/**
+ * Rename the request_revision transition label to 'Needs edits'.
+ */
+function mukurtu_core_update_40064(): void {
+  $workflow = \Drupal::configFactory()
+    ->getEditable('workflows.workflow.mukurtu_editorial_workflow');
+  if ($workflow->isNew()) {
+    return;
+  }
+  $workflow->set('type_settings.transitions.request_revision.label', 'Needs edits');
+  $workflow->save();
+}
+
+/**
+ * Remove default-revision-based view filters replaced by views_query_alter.
+ *
+ * The status=0 filter on my_content_in_progress and the moderation_state
+ * filter on review_queue both looked at the default revision, missing content
+ * that was published and then re-drafted. Both are now handled in PHP using
+ * EntityQuery::latestRevision().
+ */
+function mukurtu_core_update_40065(): void {
+  $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_workflow_overview');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->clear('display.my_content_in_progress.display_options.filters.status');
+  $config->clear('display.review_queue.display_options.filters.moderation_state');
+  $config->save();
+}
+
+/**
+ * Grant contributors access to view their own awaiting-review content.
+ *
+ * Revokes the ineffective OG-role 'view any unpublished content' permission
+ * added in error -- OG role permissions never satisfy $account->hasPermission().
+ * Steward access to /node/{nid}/latest is now handled by the custom
+ * _mukurtu_latest_version_access route check.
+ */
+function mukurtu_core_update_40066(): void {
+  $role = \Drupal::entityTypeManager()->getStorage('user_role')->load('authenticated');
+  if ($role) {
+    $changed = FALSE;
+    if (!$role->hasPermission('view own unpublished content')) {
+      $role->grantPermission('view own unpublished content');
+      $changed = TRUE;
+    }
+    // view latest version was added in a prior hook; ensure it is present.
+    if (!$role->hasPermission('view latest version')) {
+      $role->grantPermission('view latest version');
+      $changed = TRUE;
+    }
+    if ($changed) {
+      $role->save();
+    }
+  }
+
+  // Remove the OG-role permission that was added incorrectly.
+  foreach (['protocol-protocol-protocol_steward', 'protocol-protocol-language_steward'] as $role_id) {
+    $og_role = \Drupal::entityTypeManager()->getStorage('og_role')->load($role_id);
+    if ($og_role && $og_role->hasPermission('view any unpublished content')) {
+      $og_role->revokePermission('view any unpublished content');
+      $og_role->save();
+    }
+  }
+}
+
+/**
+ * Restore the geofield_mukurtu widget for field_coverage on all bundles.
+ *
+ * The widget was inadvertently switched to the stock leaflet_widget_default
+ * widget in #1433, which routes submitted values through GeoPHP and strips
+ * the GeoJSON Feature properties (including Map Point descriptions) before
+ * storage.
+ */
+function mukurtu_core_update_40067(): void {
+  $bundles = [
+    'collection',
+    'word_list',
+    'dictionary_word',
+    'place',
+    'digital_heritage',
+    'person',
+  ];
+
+  foreach ($bundles as $bundle) {
+    $config = \Drupal::configFactory()->getEditable("core.entity_form_display.node.$bundle.default");
+    if ($config->isNew() || $config->get('content.field_coverage.type') === NULL) {
+      continue;
+    }
+
+    $config->set('content.field_coverage.type', 'geofield_mukurtu')->save();
+  }
+}
+
+/**
+ * Flush node_view cache after fixing the related content cache invalidation gap.
+ */
+function mukurtu_core_update_40068(): void {
+  \Drupal\Core\Cache\Cache::invalidateTags(['node_view']);
+}
+
+/**
+ * Remove the orphaned related content teasers display settings.
+ *
+ * These controls were never read anywhere in the codebase, so any value an
+ * admin selected had no effect on the site.
+ */
+function mukurtu_core_update_40069(): void {
+  \Drupal::configFactory()->getEditable('mukurtu.settings')
+    ->clear('mukurtu_related_content_teasers_display_top_right')
+    ->clear('mukurtu_related_content_teasers_display_bottom')
+    ->save();
+}
+
+/**
+ * Add the custom 403 access denied page, permission, and default config.
+ */
+function mukurtu_core_update_40072(): void {
+  // Point the site's 403 page at the new custom access-denied route
+  // (system.site.yml is not owned by Mukurtu).
+  \Drupal::configFactory()
+    ->getEditable('system.site')
+    ->set('page.403', '/mukurtu/access-denied')
+    ->save();
+
+  // Grant the new permission to the Mukurtu Manager role.
+  user_role_grant_permissions('mukurtu_manager', ['administer mukurtu access denied page']);
+
+  // Install the default mukurtu_core.access_denied config if it doesn't
+  // already exist.
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core');
+  $config_source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+  $config_factory = \Drupal::configFactory();
+
+  if ($config_factory->get('mukurtu_core.access_denied')->isNew()) {
+    $data = $config_source->read('mukurtu_core.access_denied');
+    if ($data) {
+      $config_factory->getEditable('mukurtu_core.access_denied')->setData($data)->save();
+    }
+  }
 }

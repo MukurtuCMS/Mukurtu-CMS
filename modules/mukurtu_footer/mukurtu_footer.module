@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Provides the Mukurtu Footer module.
+ */
+
+/**
  * Implements hook_theme().
  */
 function mukurtu_footer_theme($existing, $type, $theme, $path) {
@@ -8,16 +13,13 @@ function mukurtu_footer_theme($existing, $type, $theme, $path) {
     'mukurtu_footer' => [
       'template' => 'mukurtu-footer',
       'variables' => [
-        'logos' => [],
-        'email_us_text' => [],
-        'contact_email_address' => [],
-        'twitter' => [],
-        'twitter_accounts' => [],
-        'facebook' => [],
-        'facebook_accounts' => [],
-        'instagram' => [],
-        'instagram_accounts' => [],
-        'copyright_message' => [],
+        'text_field'            => [],
+        'logos'                 => [],
+        'social_links'          => [],
+        'other_links'           => [],
+        'contact_email_text'    => '',
+        'contact_email_address' => '',
+        'copyright_message'     => '',
       ],
     ],
   ];

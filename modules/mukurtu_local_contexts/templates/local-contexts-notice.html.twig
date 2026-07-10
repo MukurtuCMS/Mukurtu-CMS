@@ -1,5 +1,29 @@
-<div class="local-contexts-notice">
-	<img src="{{ svg_url ?? img_url }}" alt="{{ name }}">
-	<div class="name">{{ name }}</div>
-	<div class="text">{{ text }}</div>
+{{ attach_library('mukurtu_local_contexts/local-contexts-dialog') }}
+<div class="local-contexts-notice local-contexts-dialog">
+  <button type="button" class="local-contexts-dialog__trigger" aria-haspopup="dialog" aria-expanded="false" aria-controls="{{ dialog_id }}">
+    <img src="{{ svg_url ?? img_url }}" alt="">
+    <span class="local-contexts-notice__name">{{ name }}</span>
+  </button>
+  <dialog id="{{ dialog_id }}" class="local-contexts-dialog__panel" aria-label="{{ name }}">
+    <button type="button" class="local-contexts-dialog__close" aria-label="{{ 'Close'|t }}" autofocus>&#x2715;</button>
+    <div class="local-contexts-dialog__header">
+      <img src="{{ svg_url ?? img_url }}" alt="">
+      <div class="local-contexts-dialog__header-text">
+        <h2 class="local-contexts-dialog__title">{{ name }}</h2>
+      </div>
+    </div>
+    <div class="local-contexts-dialog__text">{{ text }}</div>
+    {% if translations %}
+      {% for translation in translations %}
+        <div class="local-contexts-dialog__translation">
+          {% if translation.name %}
+            <div class="local-contexts-dialog__translation-name">{{ translation.name }}</div>
+          {% endif %}
+          {% if translation.text %}
+            <div class="local-contexts-dialog__translation-text">{{ translation.text }}</div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    {% endif %}
+  </dialog>
 </div>

@@ -12,6 +12,8 @@ class LocalContextsLabel extends LocalContextsHubBase {
   public $name;
   public $img_url;
   public $svg_url;
+  public $audio_url;
+  public $community;
   public $default_text;
   public $translations;
 
@@ -25,7 +27,10 @@ class LocalContextsLabel extends LocalContextsHubBase {
     $query = $this->db->select('mukurtu_local_contexts_labels', 'l')
       ->condition('l.project_id', $this->project_id)
       ->condition('l.id', $this->label_id)
-      ->fields('l', ['id', 'name', 'img_url', 'svg_url', 'default_text']);
+      ->fields('l', [
+        'id', 'name', 'img_url', 'svg_url',
+        'audio_url', 'community', 'default_text',
+      ]);
     $result = $query->execute();
 
     $tQuery = $this->db->select('mukurtu_local_contexts_label_translations', 't')
@@ -37,6 +42,8 @@ class LocalContextsLabel extends LocalContextsHubBase {
     $this->name = $label['name'] ?? '';
     $this->img_url = $label['img_url'] ?? NULL;
     $this->svg_url = $label['svg_url'] ?? NULL;
+    $this->audio_url = $label['audio_url'] ?? NULL;
+    $this->community = $label['community'] ?? '';
     $this->default_text = $label['default_text'] ?? '';
 
     // Load every translation.

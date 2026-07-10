@@ -6,14 +6,11 @@ use Drupal\node\Entity\Node;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
-use Drupal\mukurtu_drafts\Entity\MukurtuDraftTrait;
-use Drupal\mukurtu_drafts\Entity\MukurtuDraftInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Access\AccessResult;
 
-class MukurtuNode extends Node implements CulturalProtocolControlledInterface, MukurtuDraftInterface {
+class MukurtuNode extends Node implements CulturalProtocolControlledInterface {
   use CulturalProtocolControlledTrait;
-  use MukurtuDraftTrait;
 
   /**
    * {@inheritdoc}
@@ -30,9 +27,6 @@ class MukurtuNode extends Node implements CulturalProtocolControlledInterface, M
 
   public static function bundleFieldDefinitions(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
     $definitions = self::getProtocolFieldDefinitions();
-
-    // Add the drafts field.
-    $definitions += static::draftBaseFieldDefinitions($entity_type);
 
     return $definitions;
   }

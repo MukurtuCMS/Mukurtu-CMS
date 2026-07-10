@@ -1,0 +1,15 @@
+mukurtu_workflows.settings:
+  title: 'Publishing workflow'
+  route_name: mukurtu_workflows.settings
+  description: 'Enable an editorial workflow requiring Protocol Steward review before content is published.'
+  parent: mukurtu_dashboard
+  menu_name: dashboard-site-settings
+  weight: 0
+
+mukurtu_workflows.review_queue:
+  title: 'Review queue'
+  route_name: view.mukurtu_workflow_overview.review_queue
+  description: 'Content submitted for your review as a Protocol Steward.'
+  parent: mukurtu_dashboard
+  menu_name: dashboard-my-account
+  weight: 1

@@ -18,18 +18,23 @@ type: content_moderation
 type_settings:
   states:
     draft:
-      label: 'Under Review'
+      label: Draft
       weight: 0
       published: false
-      default_revision: false
+      default_revision: true
     published:
       label: Published
       weight: 1
       published: true
       default_revision: true
+    archived:
+      label: Archived
+      weight: 2
+      published: false
+      default_revision: true
   transitions:
     create_new_draft:
-      label: 'Under Review'
+      label: 'Save as Draft'
       from:
         - draft
         - published
@@ -40,8 +45,21 @@ type_settings:
       from:
         - draft
         - published
+        - archived
       to: published
       weight: 1
+    archive:
+      label: Archive
+      from:
+        - published
+      to: archived
+      weight: 2
+    restore:
+      label: 'Restore to Draft'
+      from:
+        - archived
+      to: draft
+      weight: 3
   entity_types:
     node:
       - article
@@ -52,4 +70,4 @@ type_settings:
       - person
       - place
       - word_list
-  default_moderation_state: draft
+  default_moderation_state: published

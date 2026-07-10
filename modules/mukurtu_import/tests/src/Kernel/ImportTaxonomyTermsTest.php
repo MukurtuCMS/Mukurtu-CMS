@@ -91,16 +91,17 @@ class ImportTaxonomyTermsTest extends MukurtuImportTestBase {
     $this->assertEquals('Keyword 3', $terms[2]->getName());
 
     // Create a new node via import. Use some of the same terms created above.
+    // field_cultural_protocols is required, so both subfields must be provided.
     $data2 = [
-      ['title', 'keywords', 'sharing_setting', 'protocols'],
-      ["Existing Term Test", 'Keyword 1;Keyword 3', 'any', $this->protocol->id()],
+      ['title', 'keywords', 'protocols', 'sharing_setting'],
+      ["Existing Term Test", 'Keyword 1;Keyword 3', $this->protocol->id(), 'any'],
     ];
     $import_file2 = $this->createCsvFile($data2);
     $mapping2 = [
       ['target' => 'title', 'source' => 'title'],
       ['target' => 'field_keywords', 'source' => 'keywords'],
-      ['target' => 'field_cultural_protocols/sharing_setting', 'source' => 'sharing_setting'],
       ['target' => 'field_cultural_protocols/protocols', 'source' => 'protocols'],
+      ['target' => 'field_cultural_protocols/sharing_setting', 'source' => 'sharing_setting'],
     ];
 
     $result2 = $this->importCsvFile($import_file2, $mapping2);

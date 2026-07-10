@@ -7,8 +7,6 @@ const sourcemaps = require("gulp-sourcemaps");
 const dartSass = require("sass");
 const gulpSass = require("gulp-sass");
 const { ESLint } = require("eslint");
-const imagemin = require("gulp-imagemin");
-const pngquant = require("imagemin-pngquant");
 const fs = require("fs");
 
 const sassCompiler = gulpSass(dartSass);
@@ -35,7 +33,7 @@ async function lintStyles(cb) {
 function buildStyles() {
   return src("./components/**/*.scss")
     .pipe(sourcemaps.init())
-    .pipe(sassCompiler({ style: "compressed" }).on("error", sassCompiler.logError))
+    .pipe(sassCompiler({ style: "expanded" }).on("error", sassCompiler.logError))
     .pipe(autoprefixer("last 2 versions"))
     .pipe(sourcemaps.write("."))
     .pipe(dest("./css"));
@@ -78,18 +76,6 @@ async function lintScripts() {
   return outputJSLintingResults(results);
 }
 
-function minifyImages() {
-  return src("./src/images/**/*")
-    .pipe(
-      imagemin({
-        progressive: true,
-        svgoPlugins: [{ removeViewBox: false }],
-        use: [pngquant()],
-      })
-    )
-    .pipe(dest("./images"));
-}
-
 function copyLibraries() {
   // Ensure libraries directory exists.
   const librariesDir = "./libraries";
@@ -127,7 +113,6 @@ function watchFiles() {
   ], lintStyles)
 }
 
-exports.imagemin = minifyImages;
 exports.eslint = lintScripts;
 exports.stylelint = lintStyles;
 exports.buildSass = buildStyles;
@@ -135,4 +120,4 @@ exports.copyLibraries = copyLibraries;
 exports.sass = series(lintStyles, buildStyles);
 exports.watch = watchFiles;
 
-exports.default = parallel(minifyImages, lintScripts, series(lintStyles, buildStyles), copyLibraries);
+exports.default = parallel(lintScripts, series(lintStyles, buildStyles), copyLibraries);

@@ -192,7 +192,7 @@ class ProjectDirectoryController extends ControllerBase {
   }
 
   public function title(?ContentEntityInterface $group = NULL)  {
-    return $this->t("Local Contexts Project Directory for %group", ['%group' => $group ? $group->getName() : 'Unknown Group']);
+    return $this->t("%group's Local Contexts Projects", ['%group' => $group ? $group->getName() : 'Unknown Group']);
   }
 
 }

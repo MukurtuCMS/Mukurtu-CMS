@@ -36,16 +36,17 @@
   ]
 %}
 
-<div{{ attributes.addClass(classes) }}>
-  {{ title_suffix.contextual_links }}
-  {{ content.media_content_warnings }}
+<div class="media-asset--slide">
+  <div{{ attributes.addClass(classes) }}>
+    {{ title_suffix.contextual_links }}
 
-  <a href="{{ media.field_media_oembed_video.value }}" class="media-asset--link" aria-label="Expand {{ name }} video">
-    <span class="media-asset--expand">Expand +</span>
-    <span class="media-asset--content">
-     {{ content|without('media_content_warnings') }}
-    </span>
-  </a>
+    {{ content.media_content_warnings }}
+    <div class="media-asset--content">
+      {{ content|without('media_content_warnings') }}
+    </div>
+  </div>
 
-  <a href="{{ media.field_media_oembed_video.value }}" class="button">Access video</a>
+  <div class="media-asset--actions">
+    <a href="{{ media.field_media_oembed_video.value }}" data-extlink class="media-asset--link button" aria-label="Expand {{ name }} video">Expand +</a>
+  </div>
 </div>

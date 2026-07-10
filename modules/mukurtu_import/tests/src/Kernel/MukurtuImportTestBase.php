@@ -4,11 +4,13 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\mukurtu_import\Kernel;
 
+use Drupal\Core\File\FileExists;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\file\Entity\File;
 use Drupal\file\FileInterface;
 use Drupal\migrate\MigrateMessage;
+use Drupal\migrate\Plugin\MigrationInterface;
 use Drupal\mukurtu_import\Entity\MukurtuImportStrategy;
 use Drupal\mukurtu_import\ImportBatchExecutable;
 use Drupal\mukurtu_protocol\Entity\Community;
@@ -30,6 +32,13 @@ class MukurtuImportTestBase extends MigrateTestBase {
     setCurrentUser as drupalSetCurrentUser;
     setUpCurrentUser as drupalSetUpCurrentUser;
   }
+  /**
+   * The migration used in the most recent importCsvFile() call.
+   *
+   * @var \Drupal\migrate\Plugin\MigrationInterface
+   */
+  protected MigrationInterface $lastMigration;
+
   /**
    * The user account set as the current user in the tests.
    *
@@ -228,7 +237,7 @@ class MukurtuImportTestBase extends MigrateTestBase {
 
     /** @var \Drupal\Core\File\FileSystemInterface $file_system */
     $file_system = \Drupal::service('file_system');
-    $file_uri = $file_system->copy($temp_file_path, 'public://', FileSystemInterface::EXISTS_REPLACE);
+    $file_uri = $file_system->copy($temp_file_path, 'public://', FileExists::Replace);
 
     if ($file_uri) {
       $file = File::create([
@@ -267,6 +276,7 @@ class MukurtuImportTestBase extends MigrateTestBase {
     $message = new MigrateMessage();
     $migration_plugin_manager = \Drupal::service('plugin.manager.migration');
     $migration = $migration_plugin_manager->createStubMigration($definition);
+    $this->lastMigration = $migration;
     $time = \Drupal::service('datetime.time');
     $translation = \Drupal::service('string_translation');
     $executable = new ImportBatchExecutable(

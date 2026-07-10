@@ -32,8 +32,10 @@ documentation on how to use @include media(). */
 @use '02-molecules/horizontal-tabs/horizontal-tabs';
 @use '02-molecules/image-w-description/image-w-description';
 @use '02-molecules/language-switcher/language-switcher';
+@use '02-molecules/local-contexts/local-contexts';
 @use '02-molecules/local-tasks/local-tasks';
 @use '02-molecules/media/media';
+@use '02-molecules/media/glightbox';
 @use '02-molecules/menus/menu';
 @use '02-molecules/vertical-card/vertical-card';
 @use '03-organisms/breadcrumbs/breadcrumbs';
@@ -41,6 +43,7 @@ documentation on how to use @include media(). */
 @use '03-organisms/header/header';
 @use '03-organisms/masonry-grid/masonry-grid';
 @use '03-organisms/related-content/related-content';
+@use '04-templates/access-denied/access-denied';
 @use '04-templates/browse-pages/browse';
 @use '04-templates/browse-pages/collections';
 @use '04-templates/categories/categories';
@@ -51,7 +54,10 @@ documentation on how to use @include media(). */
 @use '04-templates/dictionary/dictionary-word';
 @use '04-templates/digital-heritage/digital-heritage-node';
 @use '04-templates/full-node/full-node';
+@use '04-templates/comment/comment';
 @use '04-templates/landing-page/landing-page';
+@use '04-templates/local-contexts/local-contexts-directory';
 @use '04-templates/layout/layout-builder';
 @use '04-templates/page/page';
+@use '04-templates/taxonomy-term/taxonomy-term';
 @use '04-templates/word-list/word-list';

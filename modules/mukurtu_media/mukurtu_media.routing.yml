@@ -1,3 +1,35 @@
+mukurtu_media.bulk_upload:
+  path: '/admin/content/media/bulk-upload/{media_type}'
+  defaults:
+    _form: 'Drupal\mukurtu_media\Form\BulkMediaUploadForm'
+    _title_callback: 'Drupal\mukurtu_media\Form\BulkMediaUploadForm::getTitle'
+  requirements:
+    _entity_create_access: 'media:{media_type}'
+  options:
+    parameters:
+      media_type:
+        type: 'string'
+
+mukurtu_media.bulk_create:
+  path: '/admin/content/media/bulk-create/{media_type}'
+  defaults:
+    _form: 'Drupal\mukurtu_media\Form\BulkMediaUrlCreateForm'
+    _title_callback: 'Drupal\mukurtu_media\Form\BulkMediaUrlCreateForm::getTitle'
+  requirements:
+    _entity_create_access: 'media:{media_type}'
+  options:
+    parameters:
+      media_type:
+        type: 'string'
+
+mukurtu_media.download_settings_form:
+  path: '/admin/config/mukurtu/media-download-settings'
+  defaults:
+    _title: 'Media download settings'
+    _form: 'Drupal\mukurtu_media\Form\MediaDownloadSettingsForm'
+  requirements:
+    _permission: 'administer mukurtu media download settings'
+
 mukurtu_media.thumbnail_settings_form:
   path: '/admin/config/system/mukurtu-media-thumbnail-settings'
   defaults:
@@ -5,3 +37,37 @@ mukurtu_media.thumbnail_settings_form:
     _form: 'Drupal\mukurtu_media\Form\ThumbnailSettingsForm'
   requirements:
     _permission: 'administer mukurtu_media configuration'
+
+mukurtu_media.media_settings_form:
+  path: '/admin/config/mukurtu/media-settings'
+  defaults:
+    _title: 'Mukurtu Media Settings'
+    _form: 'Drupal\mukurtu_media\Form\MediaSettingsForm'
+  requirements:
+    _permission: 'administer mukurtu_media configuration'
+
+mukurtu_media.publish:
+  path: '/admin/content/media/{media}/publish'
+  defaults:
+    _controller: 'Drupal\mukurtu_media\Controller\MediaStatusController::publish'
+    _title: 'Publish'
+  requirements:
+    _csrf_token: 'TRUE'
+    _entity_access: 'media.update'
+  options:
+    parameters:
+      media:
+        type: entity:media
+
+mukurtu_media.unpublish:
+  path: '/admin/content/media/{media}/unpublish'
+  defaults:
+    _controller: 'Drupal\mukurtu_media\Controller\MediaStatusController::unpublish'
+    _title: 'Unpublish'
+  requirements:
+    _csrf_token: 'TRUE'
+    _entity_access: 'media.update'
+  options:
+    parameters:
+      media:
+        type: entity:media

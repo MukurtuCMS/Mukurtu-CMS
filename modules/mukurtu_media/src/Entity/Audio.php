@@ -2,6 +2,7 @@
 
 namespace Drupal\mukurtu_media\Entity;
 
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\media\Entity\Media;
 use Drupal\mukurtu_core\BaseFieldDefinition;
 use Drupal\mukurtu_core\Entity\PeopleInterface;
@@ -9,6 +10,8 @@ use Drupal\mukurtu_core\Entity\PeopleTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
+use Drupal\Component\Utility\Environment;
+use Drupal\Core\StringTranslation\ByteSizeMarkup;
 
 /**
  * Defines the Audio media entity bundle class.
@@ -16,6 +19,28 @@ use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
 class Audio extends Media implements AudioInterface, CulturalProtocolControlledInterface, MukurtuFilenameGenerationInterface, PeopleInterface {
   use CulturalProtocolControlledTrait;
   use PeopleTrait;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getDefaultThumbnail(): ?int {
+    $config = \Drupal::config('mukurtu_thumbnail.settings');
+    return $config->get('audio_default_thumbnail')[0] ?? NULL;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function preSave(EntityStorageInterface $storage): void {
+    $thumbFid = $this->get('field_thumbnail')->getValue()[0]['target_id'] ?? NULL;
+    if (!$thumbFid) {
+      $thumbFid = $this->getDefaultThumbnail();
+    }
+    if ($thumbFid) {
+      $this->set('thumbnail', ['target_id' => $thumbFid]);
+    }
+    parent::preSave($storage);
+  }
 
   /**
    * {@inheritdoc}
@@ -47,7 +72,7 @@ class Audio extends Media implements AudioInterface, CulturalProtocolControlledI
 
     $definitions['field_media_audio_file'] = BaseFieldDefinition::create('file')
       ->setLabel(t('Audio file'))
-      ->setDescription(t('Allowed file formats are mp3, m4a, wav, ogg, and aac. </br>Select "Choose File" to upload an audio file.'))
+      ->setDescription(t('Allowed file formats are mp3, m4a, wav, ogg, and aac. <br />Maximum file size: @size.<br />Select "Choose File" to upload an audio file.', ['@size' => ByteSizeMarkup::create(Environment::getUploadMaxSize())]))
       ->setDefaultValue('')
       ->setSettings([
         'target_type' => 'file',
@@ -83,7 +108,7 @@ class Audio extends Media implements AudioInterface, CulturalProtocolControlledI
 
     $definitions['field_contributor'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Contributor'))
-      ->setDescription(t('Speakers or singers present in the audio file. Contributors listed here are displayed in the speaker field that accompanies the audio file in dictionary words.	</br>As you type, names of existing contributors will be displayed. Select an existing contributor or enter a new name. To include additional contributors, select "Add another item".'))
+      ->setDescription(t('Speakers or singers present in the audio file. Contributors listed here are displayed in the speaker field that accompanies the audio file in dictionary words.	<br />Include as many contributors as needed. Select from existing contributors or add new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -108,7 +133,7 @@ class Audio extends Media implements AudioInterface, CulturalProtocolControlledI
 
     $definitions['field_media_tags'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Media Tags'))
-      ->setDescription(t('Media tags are used to label media assets to help find them within the media library. They are also used to trigger taxonomy based media content warnings.	</br>As you type, existing media tags will be displayed. Select an existing media tag or enter a new term. To include additional media tags, select "Add another item".'))
+      ->setDescription(t('Media tags are used to label media assets to help find them within the media library. They are also used to trigger taxonomy based media content warnings.	<br />Include as many media tags as needed. Select from existing media tags or add new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -133,7 +158,7 @@ class Audio extends Media implements AudioInterface, CulturalProtocolControlledI
 
     $definitions['field_people'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('People'))
-      ->setDescription(t('A person or people present or referenced in the audio file. This is used to trigger deceased person media content warnings.	</br>As you type, names of existing people will be displayed. Select an existing person or enter a new name. To include additional people, select "Add another item".'))
+      ->setDescription(t('A person or people present or referenced in the audio file. This is used to trigger deceased person media content warnings.	<br />Include as many people as needed. Select from existing people or add new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -158,7 +183,7 @@ class Audio extends Media implements AudioInterface, CulturalProtocolControlledI
 
     $definitions['field_thumbnail'] = BaseFieldDefinition::create('image')
       ->setLabel(t('Thumbnail'))
-      ->setDescription(t('Audio files are usually represented by an interactive audio player, with a thumbnail image used in certain contexts. When the thumbnail image is used, you can provide your own image instead of the generic thumbnail. A thumbnail image does not usually need to be provided.	</br>Select "Choose File" to upload a thumbnail image.'))
+      ->setDescription(t('Audio files are usually represented by an interactive audio player, with a thumbnail image used in certain contexts. When the thumbnail image is used, you can provide your own image instead of the generic thumbnail. A thumbnail image does not usually need to be provided.	<br />Select "Choose File" to upload a thumbnail image.'))
       ->setSettings([
         'alt_field' => TRUE,
         'alt_field_required' => TRUE,
@@ -205,4 +230,5 @@ class Audio extends Media implements AudioInterface, CulturalProtocolControlledI
 
     return $definitions;
   }
+
 }

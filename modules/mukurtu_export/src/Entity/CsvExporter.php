@@ -30,6 +30,8 @@ use Drupal\user\UserInterface;
  *     "escape",
  *     "eol",
  *     "multivalue_delimiter",
+ *     "local_contexts_delimiter",
+ *     "default_format",
  *     "field_id",
  *     "field_file",
  *     "field_image",
@@ -38,6 +40,7 @@ use Drupal\user\UserInterface;
  *     "entity_reference_taxonomy_term",
  *     "entity_reference_user",
  *     "entity_reference_paragraph",
+ *     "entity_reference_multipage_item",
  *   },
  *   handlers = {
  *     "access" = "Drupal\mukurtu_export\CsvExporterAccessController",
@@ -51,9 +54,8 @@ use Drupal\user\UserInterface;
  *       "html" = "Drupal\Core\Entity\Routing\AdminHtmlRouteProvider",
  *     },
  *   },
- *   admin_permission = "administer site configuration",
+ *   admin_permission = "access mukurtu export",
  *   links = {
- *     "canonical" = "/admin/export/format/csv/manage/{csv_exporter}",
  *     "add-form" = "/admin/export/format/csv/add",
  *     "edit-form" = "/admin/export/format/csv/manage/{csv_exporter}",
  *     "delete-form" = "/admin/export/format/csv/manage/{csv_exporter}/delete",
@@ -111,6 +113,16 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface {
   /**
    * @var string
    */
+  protected $local_contexts_delimiter;
+
+  /**
+   * @var string
+   */
+  protected $default_format;
+
+  /**
+   * @var string
+   */
   protected $field_id;
 
   /**
@@ -148,6 +160,11 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface {
    */
   protected $entity_reference_paragraph;
 
+  /**
+   * @var string
+   */
+  protected $entity_reference_multipage_item;
+
 
   /**
    * {@inheritdoc}
@@ -181,7 +198,15 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface {
     }
 
     if (!$this->getMultivalueDelimiter()) {
-      $this->setMultivalueDelimiter('||');
+      $this->setMultivalueDelimiter(';');
+    }
+
+    if (!$this->getLocalContextsDelimiter()) {
+      $this->setLocalContextsDelimiter('>');
+    }
+
+    if (!$this->getDefaultFormat()) {
+      $this->setDefaultFormat('basic_html');
     }
 
     if (!$this->getIdFieldSetting()) {
@@ -196,7 +221,7 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface {
       $this->setImageFieldSetting('id');
     }
 
-    foreach (['node', 'media', 'taxonomy_term', 'user', 'paragraph'] as $target_type) {
+    foreach (['node', 'media', 'taxonomy_term', 'user', 'paragraph', 'multipage_item'] as $target_type) {
       if (!$this->getEntityReferenceSetting($target_type)) {
         $this->setEntityReferenceSetting($target_type, 'id');
       }
@@ -279,7 +304,12 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface {
   }
 
   public function isSiteWide() {
-    return $this->site_wide === TRUE;
+    return (bool) $this->site_wide;
+  }
+
+  public function setSiteWide(bool $site_wide) {
+    $this->site_wide = $site_wide;
+    return $this;
   }
 
   public function getSeparator() {
@@ -323,6 +353,24 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface {
     return $this;
   }
 
+  public function getLocalContextsDelimiter() {
+    return $this->local_contexts_delimiter;
+  }
+
+  public function setLocalContextsDelimiter($delimiter) {
+    $this->local_contexts_delimiter = $delimiter;
+    return $this;
+  }
+
+  public function getDefaultFormat() {
+    return $this->default_format;
+  }
+
+  public function setDefaultFormat($format) {
+    $this->default_format = $format;
+    return $this;
+  }
+
   public function getMappedFields($entity_type_id, $bundle) {
     $all_field_defs = \Drupal::service('entity_field.manager')->getFieldDefinitions($entity_type_id, $bundle);
     $entity_type = \Drupal::entityTypeManager()->getStorage($entity_type_id)->getEntityType();
@@ -356,13 +404,33 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface {
             $mappedSubfields[$key][$mapped_base_field_name][] = $mapped_subfield_name;
           }
         }
+        elseif ($entity_type_id === 'media' && $mapped_base_field_name === 'field_found_in') {
+          $result[] = [
+            'field_name' => $mapped_field_name,
+            'field_label' => t('Found In'),
+            'csv_header_label' => $mapped_field_label,
+            'export' => TRUE,
+          ];
+        }
       }
+    }
+
+    // For media entities, add the virtual field_found_in if not already mapped.
+    if ($entity_type_id === 'media' && !isset($map[$key]['field_found_in'])) {
+      $result[] = [
+        'field_name' => 'field_found_in',
+        'field_label' => t('Found In'),
+        'csv_header_label' => 'Found In',
+        'export' => $this->isNew() ? TRUE : FALSE,
+      ];
     }
 
     // Add the remaining, unmapped fields to the end of the list.
     /** @var \Drupal\Core\Field\FieldConfigInterface $field_def */
     foreach($all_field_defs as $field_name => $field_def) {
-      if ($field_def->isComputed()) {
+      // Skip computed fields, except for field_multipage_page_of which has an
+      // export-compatible implementation via the PageOfItemList plugin.
+      if ($field_def->isComputed() && $field_name !== 'field_multipage_page_of') {
         continue;
       }
 
@@ -391,6 +459,34 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface {
             'export' => $this->isNew() ? (!$field_def->isReadOnly() || in_array($field_name, $id_fields)) : FALSE,
           ];
         }
+      }
+
+      // Break image fields into target_id and alt sub-fields to match the
+      // two-column format expected by the import system.
+      if ($field_def->getType() === 'image') {
+        $fileIdLabel = t('File ID');
+        $altLabel = t('Alternative text');
+        $exportDefault = $this->isNew() ? (!$field_def->isReadOnly() || in_array($field_name, $id_fields)) : FALSE;
+
+        if (!in_array('target_id', $mappedSubfields[$key][$field_name] ?? [])) {
+          $result[] = [
+            'field_name' => $field_name . '/target_id',
+            'field_label' => $field_def->getLabel() . ': ' . $fileIdLabel,
+            'csv_header_label' => $field_def->getLabel() . ' > ' . $fileIdLabel,
+            'export' => $exportDefault,
+          ];
+        }
+
+        if (!in_array('alt', $mappedSubfields[$key][$field_name] ?? [])) {
+          $result[] = [
+            'field_name' => $field_name . '/alt',
+            'field_label' => $field_def->getLabel() . ': ' . $altLabel,
+            'csv_header_label' => $field_def->getLabel() . ' > ' . $altLabel,
+            'export' => $exportDefault,
+          ];
+        }
+
+        continue;
       }
 
       $result[] = [
@@ -433,7 +529,7 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface {
   }
 
   public function getSupportedEntityTypes() {
-    return ['node', 'media', 'community', 'protocol', 'paragraph', 'file', 'taxonomy_term'];
+    return ['node', 'media', 'multipage_item', 'community', 'protocol', 'paragraph', 'file', 'taxonomy_term'];
   }
 
 }

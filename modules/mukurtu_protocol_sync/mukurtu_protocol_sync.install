@@ -1,0 +1,56 @@
+<?php
+
+/**
+ * @file
+ * Install, update, and uninstall functions for the mukurtu_protocol_sync module.
+ */
+
+use Drupal\Core\Field\BaseFieldDefinition;
+
+/**
+ * Implements hook_install().
+ */
+function mukurtu_protocol_sync_install(): void {
+  $manager = \Drupal::entityDefinitionUpdateManager();
+
+  $field_sync = BaseFieldDefinition::create('boolean')
+    ->setLabel(t('Sync protocols with content.'))
+    ->setDescription(t("When enabled, this media asset's protocols will match its content, when the content protocols are updated."))
+    ->setDefaultValue(FALSE)
+    ->setRevisionable(TRUE)
+    ->setDisplayConfigurable('form', TRUE)
+    ->setDisplayConfigurable('view', FALSE);
+  $manager->installFieldStorageDefinition('field_sync_protocols', 'media', 'mukurtu_protocol_sync', $field_sync);
+
+  $field_parent = BaseFieldDefinition::create('entity_reference')
+    ->setLabel(t('Protocol parent'))
+    ->setDescription(t("The content item that manages this media asset's protocols."))
+    ->setSetting('target_type', 'node')
+    ->setCardinality(1)
+    ->setRevisionable(TRUE)
+    ->setDisplayConfigurable('form', FALSE)
+    ->setDisplayConfigurable('view', FALSE);
+  $manager->installFieldStorageDefinition('field_protocol_parent', 'media', 'mukurtu_protocol_sync', $field_parent);
+
+  // Add field_sync_protocols to default and media_library form displays
+  // for all media bundles.
+  $bundles = ['image', 'audio', 'video', 'document', 'remote_video', 'soundcloud', 'external_embed'];
+  $display_storage = \Drupal::entityTypeManager()->getStorage('entity_form_display');
+
+  foreach ($bundles as $bundle) {
+    foreach (['default', 'media_library'] as $mode) {
+      $display = $display_storage->load("media.{$bundle}.{$mode}");
+      if (!$display) {
+        continue;
+      }
+      $display->setComponent('field_sync_protocols', [
+        'type' => 'boolean_checkbox',
+        'weight' => 3,
+        'region' => 'content',
+        'settings' => ['display_label' => TRUE],
+        'third_party_settings' => [],
+      ]);
+      $display->save();
+    }
+  }
+}

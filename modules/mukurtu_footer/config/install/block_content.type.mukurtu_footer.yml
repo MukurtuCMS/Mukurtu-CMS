@@ -1,0 +1,7 @@
+langcode: en
+status: true
+dependencies: {}
+id: mukurtu_footer
+label: 'Mukurtu Footer'
+revision: false
+description: 'Footer block with logos, social links, contact email, and copyright.'

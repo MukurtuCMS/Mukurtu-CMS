@@ -4,3 +4,397 @@
  * @file
  * Install, update and uninstall functions for the Mukurtu Export module.
  */
+
+/**
+ * Install the ExportList content entity tables.
+ */
+function mukurtu_export_update_40001() {
+  \Drupal::entityDefinitionUpdateManager()
+    ->installEntityType(\Drupal::entityTypeManager()->getDefinition('export_list'));
+}
+
+/**
+ * Grant export permissions to the Roundtrip Manager role.
+ */
+function mukurtu_export_update_40002() {
+  $role = \Drupal::entityTypeManager()->getStorage('user_role')->load('mukurtu_roundtrip_manager');
+  if ($role) {
+    foreach ([
+      'access mukurtu export',
+      'administer mukurtu_import_strategy',
+      'flag export_content',
+      'flag export_media',
+      'unflag export_content',
+      'unflag export_media',
+    ] as $permission) {
+      $role->grantPermission($permission);
+    }
+    $role->save();
+  }
+}
+
+/**
+ * Add "Add to export list" bulk action to the manage content view.
+ */
+function mukurtu_export_update_40003() {
+  $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_manage_all_content');
+  if ($config->isNew()) {
+    return;
+  }
+  $actions = $config->get('display.mukurtu_manage_content.display_options.fields.views_bulk_operations_bulk_form.selected_actions') ?? [];
+  $action_ids = array_column($actions, 'action_id');
+  if (!in_array('mukurtu_export_add_to_list_action', $action_ids)) {
+    $actions[40] = ['action_id' => 'mukurtu_export_add_to_list_action'];
+    $config->set('display.mukurtu_manage_content.display_options.fields.views_bulk_operations_bulk_form.selected_actions', $actions);
+    $config->save();
+  }
+}
+
+/**
+ * Grant content/media overview permissions to the Roundtrip Manager role.
+ */
+function mukurtu_export_update_40004() {
+  $role = \Drupal::entityTypeManager()->getStorage('user_role')->load('mukurtu_roundtrip_manager');
+  if ($role) {
+    $role->grantPermission('access content overview');
+    $role->grantPermission('access media overview');
+    $role->save();
+  }
+}
+
+/**
+ * Update the recommended CSV exporter settings for taxonomy term export.
+ *
+ * Adds missing vocabulary bundles (location, media_tag, place_type), adds
+ * field_thumbnail_image to the category bundle, and adds a reserved parent
+ * column to all taxonomy_term bundles for future hierarchy support.
+ *
+ * Also grants 'access mukurtu export' to the Mukurtu Manager role.
+ */
+function mukurtu_export_update_40005() {
+  $config = \Drupal::service('config.factory')
+    ->getEditable('mukurtu_export.csv_exporter.default_local_metadata_only');
+
+  if ($config->isNew()) {
+    return;
+  }
+
+  $entity_fields = $config->get('entity_fields_export_list') ?? [];
+
+  // Add parent column to all existing taxonomy_term bundles that lack it.
+  foreach ($entity_fields as $key => $fields) {
+    if (str_starts_with($key, 'taxonomy_term__') && !isset($fields['parent'])) {
+      $entity_fields[$key]['parent'] = 'Parent';
+    }
+  }
+
+  // Add field_thumbnail_image to the category bundle if not already present.
+  if (isset($entity_fields['taxonomy_term__category']) && !isset($entity_fields['taxonomy_term__category']['field_thumbnail_image'])) {
+    $entity_fields['taxonomy_term__category']['field_thumbnail_image'] = 'Thumbnail';
+  }
+
+  // Add vocabulary bundles missing from the original config.
+  $base = ['tid' => 'Term ID', 'langcode' => 'Locale', 'name' => 'Name', 'description' => 'Description', 'parent' => 'Parent'];
+  foreach (['taxonomy_term__location', 'taxonomy_term__media_tag', 'taxonomy_term__place_type'] as $key) {
+    if (!isset($entity_fields[$key])) {
+      $entity_fields[$key] = $base;
+    }
+  }
+
+  $config->set('entity_fields_export_list', $entity_fields)->save();
+
+  // Grant taxonomy export access to the Mukurtu Manager role.
+  $role = \Drupal::entityTypeManager()->getStorage('user_role')->load('mukurtu_manager');
+  if ($role) {
+    $role->grantPermission('access mukurtu export');
+    $role->save();
+  }
+}
+
+/**
+ * Update the recommended CSV exporter settings for media export.
+ *
+ * Adds media__external_embed and media__soundcloud bundle configs, and adds
+ * the field_found_in virtual column to all media bundles. Clears action
+ * plugin caches so the new media VBO export actions are discoverable.
+ */
+function mukurtu_export_update_40006() {
+  $config = \Drupal::service('config.factory')
+    ->getEditable('mukurtu_export.csv_exporter.default_local_metadata_only');
+
+  if ($config->isNew()) {
+    return;
+  }
+
+  $entity_fields = $config->get('entity_fields_export_list') ?? [];
+
+  // Add field_found_in to all existing media bundles that lack it.
+  foreach ($entity_fields as $key => $fields) {
+    if (str_starts_with($key, 'media__') && !isset($fields['field_found_in'])) {
+      $entity_fields[$key]['field_found_in'] = 'Found In';
+    }
+  }
+
+  // Add media__external_embed if not already present.
+  if (!isset($entity_fields['media__external_embed'])) {
+    $entity_fields['media__external_embed'] = [
+      'mid' => 'ID',
+      'langcode' => 'Locale',
+      'uid' => 'Authored by',
+      'name' => 'Name',
+      'field_cultural_protocols/protocols' => 'Protocols',
+      'field_cultural_protocols/sharing_setting' => 'Sharing Setting',
+      'field_media_external_embed' => 'Embed Code',
+      'field_keywords' => 'Keywords',
+      'field_people' => 'People',
+      'field_thumbnail/target_id' => 'Thumbnail > File ID',
+      'field_thumbnail/alt' => 'Thumbnail > Alternative text',
+      'field_identifier' => 'Identifier',
+      'field_found_in' => 'Found In',
+    ];
+  }
+
+  // Add media__soundcloud if not already present.
+  if (!isset($entity_fields['media__soundcloud'])) {
+    $entity_fields['media__soundcloud'] = [
+      'mid' => 'ID',
+      'langcode' => 'Locale',
+      'uid' => 'Authored by',
+      'name' => 'Name',
+      'field_cultural_protocols/protocols' => 'Protocols',
+      'field_cultural_protocols/sharing_setting' => 'Sharing Setting',
+      'field_media_soundcloud' => 'SoundCloud URL',
+      'field_contributor' => 'Contributor',
+      'field_keywords' => 'Keywords',
+      'field_people' => 'People',
+      'field_thumbnail/target_id' => 'Thumbnail > File ID',
+      'field_thumbnail/alt' => 'Thumbnail > Alternative text',
+      'field_identifier' => 'Identifier',
+      'field_found_in' => 'Found In',
+    ];
+  }
+
+  $config->set('entity_fields_export_list', $entity_fields)->save();
+
+  // Clear action plugin caches so new media VBO export actions are visible.
+  \Drupal::service('plugin.manager.action')->clearCachedDefinitions();
+}
+
+/**
+ * Change the recommended CSV exporter multivalue delimiter from || to ;.
+ */
+function mukurtu_export_update_40007() {
+  $config = \Drupal::service('config.factory')
+    ->getEditable('mukurtu_export.csv_exporter.default_local_metadata_only');
+  if ($config->get('multivalue_delimiter') === '||') {
+    $config->set('multivalue_delimiter', ';')->save();
+  }
+}
+
+/**
+ * Split image fields into target_id and alt sub-columns in the recommended
+ * CSV exporter to match the two-column format expected by the import system.
+ */
+function mukurtu_export_update_40008() {
+  $exporter = \Drupal::entityTypeManager()
+    ->getStorage('csv_exporter')
+    ->load('default_local_metadata_only');
+  if (!$exporter) {
+    return;
+  }
+
+  // Map of field_name => human label used when the field was a single column.
+  $image_field_labels = [
+    'field_media_image'    => 'Image',
+    'field_thumbnail'      => 'Thumbnail',
+    'field_collection_image' => 'Image',
+    'field_banner_image'   => 'Banner Image',
+    'field_thumbnail_image' => 'Thumbnail Image',
+  ];
+
+  $list = $exporter->get('entity_fields_export_list') ?? [];
+  $changed = FALSE;
+
+  foreach ($list as $bundle_key => &$fields) {
+    foreach ($image_field_labels as $field_name => $label) {
+      if (!array_key_exists($field_name, $fields)) {
+        continue;
+      }
+      $keys = array_keys($fields);
+      $pos = array_search($field_name, $keys);
+      $before = array_slice($fields, 0, $pos, TRUE);
+      $after  = array_slice($fields, $pos + 1, NULL, TRUE);
+      $fields = $before
+        + ["{$field_name}/target_id" => "{$label} > File ID",
+           "{$field_name}/alt"       => "{$label} > Alternative text"]
+        + $after;
+      $changed = TRUE;
+    }
+  }
+  unset($fields);
+
+  if ($changed) {
+    $exporter->set('entity_fields_export_list', $list)->save();
+  }
+}
+
+/**
+ * Switch taxonomy_term__category thumbnail to two-field (target_id + alt) export format.
+ */
+function mukurtu_export_update_40009(): void {
+  $config = \Drupal::configFactory()->getEditable('mukurtu_export.csv_exporter.default_local_metadata_only');
+  $entity_fields = $config->get('entity_fields_export_list') ?? [];
+
+  if (isset($entity_fields['taxonomy_term__category'])) {
+    $cat = &$entity_fields['taxonomy_term__category'];
+    // Remove legacy single-column thumbnail key if present.
+    unset($cat['field_thumbnail_image']);
+    // Insert two-field columns before parent if parent exists, otherwise append.
+    $parent = $cat['parent'] ?? NULL;
+    unset($cat['parent']);
+    $cat['field_thumbnail_image/target_id'] = 'Thumbnail Image > File ID';
+    $cat['field_thumbnail_image/alt'] = 'Thumbnail Image > Alternative text';
+    if ($parent !== NULL) {
+      $cat['parent'] = $parent;
+    }
+  }
+
+  $config->set('entity_fields_export_list', $entity_fields)->save();
+}
+
+/**
+ * Update default_local_metadata_only: add local_contexts_delimiter and
+ * default_format fields.
+ */
+function mukurtu_export_update_40010(): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('csv_exporter');
+  $entity = $storage->load('default_local_metadata_only');
+  if ($entity) {
+    $entity->setLocalContextsDelimiter('>');
+    $entity->setDefaultFormat('basic_html');
+    $entity->save();
+  }
+}
+
+/**
+ * Rename the recommended export preset label to "Default local settings (metadata only)".
+ */
+function mukurtu_export_update_40011(): void {
+  $config = \Drupal::configFactory()->getEditable('mukurtu_export.csv_exporter.default_local_metadata_only');
+  if ($config->get('label') === 'Recommended Settings for Import') {
+    $config->set('label', 'Default local settings (metadata only)')->save();
+  }
+}
+
+/**
+ * Import three new default export presets for local and external use cases.
+ */
+function mukurtu_export_update_40012(): void {
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_export');
+  $source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+  $config_storage = \Drupal::service('config.storage');
+
+  $new_presets = [
+    'default_local_with_media',
+    'default_external_metadata_only',
+    'default_external_with_media',
+  ];
+
+  foreach ($new_presets as $id) {
+    $config_name = 'mukurtu_export.csv_exporter.' . $id;
+    if (!$config_storage->exists($config_name)) {
+      $config_storage->write($config_name, $source->read($config_name));
+    }
+  }
+}
+
+/**
+ * Set all three new default export presets to site-wide visibility.
+ */
+function mukurtu_export_update_40013(): void {
+  $ids = [
+    'default_local_with_media',
+    'default_external_metadata_only',
+    'default_external_with_media',
+  ];
+
+  $storage = \Drupal::entityTypeManager()->getStorage('csv_exporter');
+  foreach ($ids as $id) {
+    $entity = $storage->load($id);
+    if ($entity && !$entity->get('site_wide')) {
+      $entity->set('site_wide', TRUE)->save();
+    }
+  }
+}
+
+/**
+ * Add multipage_item field mapping, field_multipage_page_of to
+ * node__digital_heritage, and entity_reference_multipage_item setting to
+ * the recommended_settings_for_import exporter.
+ */
+function mukurtu_export_update_40014(): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('csv_exporter');
+  $exporter = $storage->load('recommended_settings_for_import');
+  if (!$exporter) {
+    return;
+  }
+
+  $list = $exporter->get('entity_fields_export_list') ?? [];
+
+  // Add the multipage_item entity type field mapping.
+  if (!isset($list['multipage_item__multipage_item'])) {
+    $list['multipage_item__multipage_item'] = [
+      'id'          => 'ID',
+      'uuid'        => 'UUID',
+      'langcode'    => 'Language',
+      'uid'         => 'Author',
+      'title'       => 'Title',
+      'status'      => 'Status',
+      'field_pages' => 'Pages',
+    ];
+  }
+
+  // Add field_multipage_page_of to node__digital_heritage.
+  if (isset($list['node__digital_heritage']) && !isset($list['node__digital_heritage']['field_multipage_page_of'])) {
+    $list['node__digital_heritage']['field_multipage_page_of'] = 'Multipage parent';
+  }
+
+  $exporter->set('entity_fields_export_list', $list);
+
+  // Add entity_reference_multipage_item setting.
+  if (!$exporter->getEntityReferenceSetting('multipage_item')) {
+    $exporter->setEntityReferenceSetting('multipage_item', 'id');
+  }
+
+  $exporter->save();
+}
+
+/**
+ * Add field_found_in virtual column to the three new default export presets.
+ */
+function mukurtu_export_update_40015(): void {
+  $ids = [
+    'default_local_with_media',
+    'default_external_metadata_only',
+    'default_external_with_media',
+  ];
+  $storage = \Drupal::entityTypeManager()->getStorage('csv_exporter');
+  foreach ($ids as $id) {
+    $entity = $storage->load($id);
+    if (!$entity) {
+      continue;
+    }
+    $list = $entity->get('entity_fields_export_list') ?? [];
+    $changed = FALSE;
+    foreach ($list as $key => &$fields) {
+      if (str_starts_with($key, 'media__') && !isset($fields['field_found_in'])) {
+        $fields['field_found_in'] = 'Found In';
+        $changed = TRUE;
+      }
+    }
+    unset($fields);
+    if ($changed) {
+      $entity->set('entity_fields_export_list', $list)->save();
+    }
+  }
+}

@@ -24,11 +24,23 @@ mukurtu_core.site_configuration:
   route_name: system.admin_config
   expanded: TRUE
 mukurtu_core.settings_assorted:
-  title: "Citation formats and default image"
+  title: "Related content settings"
+  parent: mukurtu_dashboard
+  menu_name: dashboard-content-settings
+  description: "Configure related content display settings."
+  route_name: mukurtu_core.settings_assorted
+mukurtu_core.citation_templates:
+  title: "Citation templates"
   parent: mukurtu_dashboard
   menu_name: dashboard-site-settings
-  description: "Configuration form for Mukurtu specific options."
-  route_name: mukurtu_core.settings_assorted
+  description: "Configure citation field templates."
+  route_name: mukurtu_core.citation_templates
+mukurtu_core.access_denied_settings:
+  title: "Access Denied Page"
+  parent: mukurtu_dashboard
+  menu_name: dashboard-site-settings
+  description: "Edit the title and message shown on the access denied (403) page."
+  route_name: mukurtu_core.access_denied_settings
   expanded: TRUE
   weight: 0
 mukurtu_core.manual:
@@ -48,7 +60,7 @@ mukurtu_core.people:
   description: 'Manage users'
   parent: mukurtu_dashboard
   menu_name: dashboard-users
-  route_name: mukurtu_core.people
+  route_name: view.mukurtu_people.page_1
 mukurtu_core.create_user:
   title: 'Add user'
   description: 'Create a new user account.'
@@ -82,11 +94,11 @@ mukurtu_core.site_information_settings:
   menu_name: dashboard-site-settings
   route_name: system.site_information_settings
 mukurtu_core.my_account:
-  title: 'My account'
+  title: 'Manage my account'
   description: 'User account page'
   parent: mukurtu_dashboard
-  menu_name: dashboard-my-content
-  route_name: user.page
+  menu_name: dashboard-my-account
+  route_name: user.edit
 mukurtu_core.entity.menu.edit_form:
   title: 'Main navigation menu'
   description: 'Main navigation menu'

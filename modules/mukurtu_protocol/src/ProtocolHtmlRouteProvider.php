@@ -67,7 +67,10 @@ class ProtocolHtmlRouteProvider extends AdminHtmlRouteProvider {
           '_controller' => '\Drupal\mukurtu_protocol\Controller\ProtocolController::revisionOverview',
         ])
         ->setRequirement('_permission', 'view all protocol revisions')
-        ->setOption('_admin_route', TRUE);
+        ->setOption('_admin_route', TRUE)
+        ->setOption('parameters', [
+          'protocol' => ['type' => 'entity:protocol'],
+        ]);
 
       return $route;
     }
@@ -91,7 +94,11 @@ class ProtocolHtmlRouteProvider extends AdminHtmlRouteProvider {
           '_title_callback' => '\Drupal\mukurtu_protocol\Controller\ProtocolController::revisionPageTitle',
         ])
         ->setRequirement('_permission', 'view all protocol revisions')
-        ->setOption('_admin_route', TRUE);
+        ->setOption('_admin_route', TRUE)
+        ->setOption('parameters', [
+          'protocol' => ['type' => 'entity:protocol'],
+          'protocol_revision' => ['type' => 'entity_revision:protocol'],
+        ]);
 
       return $route;
     }
@@ -115,7 +122,11 @@ class ProtocolHtmlRouteProvider extends AdminHtmlRouteProvider {
           '_title' => 'Revert to earlier revision',
         ])
         ->setRequirement('_permission', 'revert all protocol revisions')
-        ->setOption('_admin_route', TRUE);
+        ->setOption('_admin_route', TRUE)
+        ->setOption('parameters', [
+          'protocol' => ['type' => 'entity:protocol'],
+          'protocol_revision' => ['type' => 'entity_revision:protocol'],
+        ]);
 
       return $route;
     }
@@ -139,7 +150,11 @@ class ProtocolHtmlRouteProvider extends AdminHtmlRouteProvider {
           '_title' => 'Delete earlier revision',
         ])
         ->setRequirement('_permission', 'delete all protocol revisions')
-        ->setOption('_admin_route', TRUE);
+        ->setOption('_admin_route', TRUE)
+        ->setOption('parameters', [
+          'protocol' => ['type' => 'entity:protocol'],
+          'protocol_revision' => ['type' => 'entity_revision:protocol'],
+        ]);
 
       return $route;
     }
@@ -163,7 +178,11 @@ class ProtocolHtmlRouteProvider extends AdminHtmlRouteProvider {
           '_title' => 'Revert to earlier revision of a translation',
         ])
         ->setRequirement('_permission', 'revert all protocol revisions')
-        ->setOption('_admin_route', TRUE);
+        ->setOption('_admin_route', TRUE)
+        ->setOption('parameters', [
+          'protocol' => ['type' => 'entity:protocol'],
+          'protocol_revision' => ['type' => 'entity_revision:protocol'],
+        ]);
 
       return $route;
     }
@@ -194,6 +213,13 @@ class ProtocolHtmlRouteProvider extends AdminHtmlRouteProvider {
   }
 
   /**
+   * Suppresses the default add-form route — replaced by mukurtu_protocol.protocol_create.
+   */
+  protected function getAddFormRoute(EntityTypeInterface $entity_type): ?Route {
+    return NULL;
+  }
+
+  /**
    * Gets the collection route.
    *
    * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
@@ -217,7 +243,7 @@ class ProtocolHtmlRouteProvider extends AdminHtmlRouteProvider {
           '_title_arguments' => $label->getArguments(),
           '_title_context' => $label->getOption('context'),
         ])
-        ->setRequirement('_mukurtu_permission', 'site:administer site configuration+protocol:update group+protocol:approve and deny subscription+protocol:manage members');
+        ->setRequirement('_mukurtu_permission', 'site:administer site configuration+protocol:update group+protocol:approve and deny subscription+protocol:manage members+community:update group+community:approve and deny subscription+community:manage members');
       return $route;
     }
   }

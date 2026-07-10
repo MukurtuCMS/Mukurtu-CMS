@@ -11,7 +11,7 @@ use Drupal\file\Entity\File;
  */
 class ThumbnailSettingsForm extends ConfigFormBase
 {
-  protected $excludedMediaBundles = ['audio', 'image', 'remote_video'];
+  protected $excludedMediaBundles = [];
 
   /**
    * {@inheritdoc}
@@ -37,20 +37,19 @@ class ThumbnailSettingsForm extends ConfigFormBase
     $config = $this->config('mukurtu_thumbnail.settings');
     $mediaBundleInfo = \Drupal::service('entity_type.bundle.info')->getBundleInfo('media');
     foreach($mediaBundleInfo as $key => $value) {
-      // We do not support thumbnail generation for audio, image, and remote
-      // video media items, so they are excluded from these settings.
       if (in_array($key, $this->excludedMediaBundles)) {
         continue;
       }
+      $configKey = $this->getConfigKey($key);
       $form["default_thumbnail"][$key] = [
         '#type' => 'managed_file',
         '#title' => $this->t("{$value['label']} default thumbnail"),
         '#description' => $this->t("Manage default thumbnail for {$value['label']} media items."),
-        '#upload_location' => $this->t("private://"),
+        '#upload_location' => 'public://thumbnail-settings',
         '#upload_validators' => [
-          'file_validate_extensions' => ['png gif jpg jpeg'],
+          'FileExtension' => ['extensions' => 'png gif jpg jpeg'],
         ],
-        '#default_value' => $config->get($key) ?? NULL,
+        '#default_value' => $config->get($configKey) ?? NULL,
       ];
     }
     return parent::buildForm($form, $form_state);
@@ -70,9 +69,19 @@ class ThumbnailSettingsForm extends ConfigFormBase
         $file->setPermanent();
         $file->save();
       }
-      $config->set($key, $formFile);
+      $config->set($this->getConfigKey($key), $formFile);
     }
     $config->save();
     parent::submitForm($form, $form_state);
+  }
+
+  /**
+   * Returns the config key for a given media bundle.
+   *
+   * Audio and video use a suffixed key to avoid collisions with legacy config.
+   */
+  protected function getConfigKey(string $bundle): string {
+    static $suffixed = ['audio', 'video'];
+    return in_array($bundle, $suffixed) ? $bundle . '_default_thumbnail' : $bundle;
   }
 }

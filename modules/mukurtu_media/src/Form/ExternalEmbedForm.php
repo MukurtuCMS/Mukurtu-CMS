@@ -49,13 +49,27 @@ class ExternalEmbedForm extends AddFormBase
     // Add a container to group the input elements for styling purposes.
     $form['container'] = [
       '#type' => 'container',
+      '#attributes' => ['class' => ['media-library-url-input-row']],
     ];
 
     $form['container']['external_embed_code'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Add External Embed'),
-      '#description' => $this->t('Embed code from an external website. Note that while the media asset will be managed by cultural protocols, the originating website may not have similar privacy settings. </br>External embeds are usually some kind of code wrapped in &lt;iframe&gt;&lt;/iframe&gt; tags.'),
+      '#rows' => 3,
       '#required' => TRUE,
+      '#attributes' => ['aria-describedby' => 'external-embed-description'],
+    ];
+
+    // Rendered outside the flex container so it spans full width below the row.
+    // Associated with the textarea via aria-describedby instead of #description.
+    $form['description'] = [
+      '#type' => 'html_tag',
+      '#tag' => 'div',
+      '#value' => $this->t('Embed code from an external website. Note that while the media asset will be managed by cultural protocols, the originating website may not have similar privacy settings. <br>External embeds are usually some kind of code wrapped in &lt;iframe&gt;&lt;/iframe&gt; tags.'),
+      '#attributes' => [
+        'id' => 'external-embed-description',
+        'class' => ['form-item__description'],
+      ],
     ];
 
     $form['container']['submit'] = [
@@ -91,6 +105,11 @@ class ExternalEmbedForm extends AddFormBase
    */
   public function addButtonSubmit(array $form, FormStateInterface $form_state)
   {
+    // Clear stale 'media' user input to prevent protocol pre-selection on new
+    // entities when an existing media item is already in the current selection.
+    $user_input = $form_state->getUserInput();
+    unset($user_input['media']);
+    $form_state->setUserInput($user_input);
     $this->processInputValues([$form_state->getValue('external_embed_code')], $form, $form_state);
   }
 }

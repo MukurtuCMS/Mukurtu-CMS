@@ -18,6 +18,18 @@ use Drupal\leaflet\Plugin\Field\FieldWidget\LeafletDefaultWidget;
  * )
  */
 class GeofieldMukurtuWidget extends LeafletDefaultWidget {
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function defaultSettings(): array {
+    $defaults = parent::defaultSettings();
+    $defaults['map']['map_position']['zoom'] = '2';
+    $defaults['locate']['control'] = TRUE;
+    $defaults['locate']['automatic'] = TRUE;
+    return $defaults;
+  }
+
   /**
    * Return the specific Geofield Backend Value.
    *

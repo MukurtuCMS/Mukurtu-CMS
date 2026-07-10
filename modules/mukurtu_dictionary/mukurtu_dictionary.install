@@ -5,40 +5,1265 @@
  * Install, update and uninstall functions for the mukurtu_dictionary module.
  */
 
-use Drupal\og\Og;
-use Drupal\og\Entity\OgRole;
 use Drupal\user\Entity\Role;
 
 /**
  * Implements hook_install().
  */
 function mukurtu_dictionary_install() {
-  // Language Communities are groups.
-  try {
-    Og::addGroup('language_community', 'language_community');
-  } catch (InvalidArgumentException $e) {
-    // Intentionally left blank, already a group.
-  }
-
-  // Create Language community roles.
-  $languageStewardRole = OgRole::create([
-    'name' => 'language steward',
-  ]);
-  $languageStewardRole->setGroupType('language_community');
-  $languageStewardRole->setGroupBundle('language_community');
-  $languageStewardRole->save();
-
-  $languageContributorRole = OgRole::create([
-    'name' => 'language contributor',
-  ]);
-  $languageContributorRole->setGroupType('language_community');
-  $languageContributorRole->setGroupBundle('language_community');
-  $languageContributorRole->save();
-
   // Grant dictionary glossary order permission to mukurtu_manager role.
   $role = Role::load('mukurtu_manager');
   if ($role) {
     $role->grantPermission('administer dictionary glossary order');
     $role->save();
+  }
+}
+
+/**
+ * Update the weight of field_coverage in the dictionary word form display.
+ */
+function mukurtu_dictionary_update_40001() {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.dictionary_word.default');
+  $config->set('content.field_coverage.weight', 1);
+  $config->save();
+  return t('Updated the weight of field_coverage in dictionary word form display.');
+}
+
+/**
+ * Update the weight of field_coverage in the word list form display.
+ */
+function mukurtu_dictionary_update_40002() {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.word_list.default');
+  $config->set('content.field_coverage.weight',8);
+  $config->save();
+  return t('Updated the weight of field_coverage in word list form display.');
+}
+
+/**
+ * Update Search API indexes and Views to support multiple cultural protocols faceting.
+ */
+function mukurtu_dictionary_update_40003() {
+  // Import updated Search API index and Views configurations.
+  $config_installer = \Drupal::service('config.installer');
+  $config_installer->installDefaultConfig('module', 'mukurtu_dictionary');
+
+  // Reindex the affected Search API indexes.
+  $indexes = ['mukurtu_dictionary_index'];
+  foreach ($indexes as $index_id) {
+    $index = \Drupal\search_api\Entity\Index::load($index_id);
+    if ($index) {
+      $index->reindex();
+    }
+  }
+}
+
+/**
+ * Update word list featured view display to use field_word_list_image.
+ */
+function mukurtu_dictionary_update_40004(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.word_list.featured');
+
+  // Remove old field_representative_media from content.
+  $content = $config->get('content');
+  unset($content['field_representative_media']);
+
+  // Add field_word_list_image if not already present.
+  if (!isset($content['field_word_list_image'])) {
+    $content['field_word_list_image'] = [
+      'type' => 'entity_reference_entity_view',
+      'label' => 'hidden',
+      'settings' => [
+        'view_mode' => 'digital_heritage_sidebar',
+        'link' => FALSE,
+      ],
+      'third_party_settings' => [],
+      'weight' => 1,
+      'region' => 'content',
+    ];
+  }
+  $config->set('content', $content);
+
+  // Remove field_word_list_image from hidden if present.
+  $hidden = $config->get('hidden');
+  unset($hidden['field_word_list_image']);
+  $config->set('hidden', $hidden);
+
+  $config->save();
+}
+
+/**
+ * Add fulltext content, contributor, and location fields to dictionary search indexes.
+ */
+function mukurtu_dictionary_update_40005(): void {
+  $index_ids = ['mukurtu_dictionary_index', 'mukurtu_dictionary_solr_index'];
+
+  $new_fields = [
+    'mukurtu_dictionary_index' => [
+      'dictionary_fulltext' => [
+        'label' => 'Dictionary Fulltext Content',
+        'property_path' => 'aggregated_field',
+        'type' => 'text',
+        'configuration' => [
+          'type' => 'union',
+          'fields' => [
+            'entity:node/field_additional_word_entries:entity:field_alternate_spelling',
+            'entity:node/field_additional_word_entries:entity:field_definition',
+            'entity:node/field_additional_word_entries:entity:field_pronunciation',
+            'entity:node/field_additional_word_entries:entity:field_sample_sentences:entity:field_sentence',
+            'entity:node/field_additional_word_entries:entity:field_source',
+            'entity:node/field_additional_word_entries:entity:field_translation',
+            'entity:node/field_additional_word_entries:entity:field_word_entry_term',
+            'entity:node/field_additional_word_entries:entity:field_word_origin',
+            'entity:node/field_alternate_spelling',
+            'entity:node/field_coverage_description',
+            'entity:node/field_definition',
+            'entity:node/field_description',
+            'entity:node/field_pronunciation',
+            'entity:node/field_sample_sentences:entity:field_sentence',
+            'entity:node/field_source',
+            'entity:node/field_summary',
+            'entity:node/field_translation',
+            'entity:node/field_word_origin',
+            'entity:node/field_contributor:entity:name',
+            'entity:node/field_location:entity:name',
+          ],
+        ],
+      ],
+    ],
+    'mukurtu_dictionary_solr_index' => [
+      'dictionary_browse_solr_contributor' => [
+        'label' => 'Contributor (Dictionary Word)',
+        'datasource_id' => 'entity:node',
+        'property_path' => 'field_contributor:entity:name',
+        'type' => 'string',
+      ],
+      'dictionary_browse_solr_location' => [
+        'label' => 'Location',
+        'datasource_id' => 'entity:node',
+        'property_path' => 'field_location:entity:name',
+        'type' => 'string',
+      ],
+      'dictionary_browse_solr_fulltext' => [
+        'label' => 'Dictionary Fulltext Content',
+        'property_path' => 'aggregated_field',
+        'type' => 'text',
+        'configuration' => [
+          'type' => 'union',
+          'fields' => [
+            'entity:node/field_additional_word_entries:entity:field_alternate_spelling',
+            'entity:node/field_additional_word_entries:entity:field_definition',
+            'entity:node/field_additional_word_entries:entity:field_pronunciation',
+            'entity:node/field_additional_word_entries:entity:field_sample_sentences:entity:field_sentence',
+            'entity:node/field_additional_word_entries:entity:field_source',
+            'entity:node/field_additional_word_entries:entity:field_translation',
+            'entity:node/field_additional_word_entries:entity:field_word_entry_term',
+            'entity:node/field_additional_word_entries:entity:field_word_origin',
+            'entity:node/field_alternate_spelling',
+            'entity:node/field_coverage_description',
+            'entity:node/field_definition',
+            'entity:node/field_description',
+            'entity:node/field_pronunciation',
+            'entity:node/field_sample_sentences:entity:field_sentence',
+            'entity:node/field_source',
+            'entity:node/field_summary',
+            'entity:node/field_translation',
+            'entity:node/field_word_origin',
+          ],
+        ],
+      ],
+    ],
+  ];
+
+  foreach ($index_ids as $index_id) {
+    $index = \Drupal\search_api\Entity\Index::load($index_id);
+    if (!$index) {
+      continue;
+    }
+    foreach ($new_fields[$index_id] as $field_id => $field_info) {
+      if ($index->getField($field_id)) {
+        continue;
+      }
+      $field = \Drupal::getContainer()
+        ->get('search_api.fields_helper')
+        ->createField($index, $field_id, $field_info);
+      $index->addField($field);
+    }
+    $index->save();
+    $index->reindex();
+  }
+}
+
+/**
+ * Fix word type property path and add word entry contributor to fulltext.
+ */
+function mukurtu_dictionary_update_40006(): void {
+  $updates = [
+    'mukurtu_dictionary_index' => [
+      'fulltext_field' => 'dictionary_fulltext',
+      'word_type_field' => 'word_type',
+      'new_fulltext_paths' => [
+        'entity:node/field_additional_word_entries:entity:field_contributor:entity:name',
+      ],
+    ],
+    'mukurtu_dictionary_solr_index' => [
+      'fulltext_field' => 'dictionary_browse_solr_fulltext',
+      'word_type_field' => 'dictionary_browse_solr_word_type',
+      'new_fulltext_paths' => [
+        'entity:node/field_contributor:entity:name',
+        'entity:node/field_additional_word_entries:entity:field_contributor:entity:name',
+      ],
+    ],
+  ];
+
+  foreach ($updates as $index_id => $info) {
+    $index = \Drupal\search_api\Entity\Index::load($index_id);
+    if (!$index) {
+      continue;
+    }
+
+    $changed = FALSE;
+
+    // Add missing contributor paths to the fulltext aggregated field.
+    $fulltext = $index->getField($info['fulltext_field']);
+    if ($fulltext) {
+      $config = $fulltext->getConfiguration();
+      foreach ($info['new_fulltext_paths'] as $path) {
+        if (!in_array($path, $config['fields'])) {
+          $config['fields'][] = $path;
+          $changed = TRUE;
+        }
+      }
+      if ($changed) {
+        $fulltext->setConfiguration($config);
+      }
+    }
+
+    // Fix word type property path to traverse through word entry paragraphs.
+    $word_type = $index->getField($info['word_type_field']);
+    if ($word_type && $word_type->getPropertyPath() === 'field_word_type:entity:name') {
+      $word_type->setPropertyPath('field_additional_word_entries:entity:field_word_type:entity:name');
+      $changed = TRUE;
+    }
+
+    if ($changed) {
+      $index->save();
+      $index->reindex();
+    }
+  }
+}
+
+/**
+ * Add word type to dictionary fulltext aggregation.
+ */
+function mukurtu_dictionary_update_40007(): void {
+  $index_fulltext_map = [
+    'mukurtu_dictionary_index' => 'dictionary_fulltext',
+    'mukurtu_dictionary_solr_index' => 'dictionary_browse_solr_fulltext',
+  ];
+  $new_path = 'entity:node/field_additional_word_entries:entity:field_word_type:entity:name';
+
+  foreach ($index_fulltext_map as $index_id => $fulltext_field) {
+    $index = \Drupal\search_api\Entity\Index::load($index_id);
+    if (!$index) {
+      continue;
+    }
+    $field = $index->getField($fulltext_field);
+    if (!$field) {
+      continue;
+    }
+    $config = $field->getConfiguration();
+    if (!in_array($new_path, $config['fields'])) {
+      $config['fields'][] = $new_path;
+      $field->setConfiguration($config);
+      $index->save();
+      $index->reindex();
+    }
+  }
+}
+
+/**
+ * Add location to dictionary Solr index fulltext aggregation.
+ */
+function mukurtu_dictionary_update_40008(): void {
+  $index = \Drupal\search_api\Entity\Index::load('mukurtu_dictionary_solr_index');
+  if (!$index) {
+    return;
+  }
+  $field = $index->getField('dictionary_browse_solr_fulltext');
+  if (!$field) {
+    return;
+  }
+  $new_path = 'entity:node/field_location:entity:name';
+  $config = $field->getConfiguration();
+  if (!in_array($new_path, $config['fields'])) {
+    $config['fields'][] = $new_path;
+    $field->setConfiguration($config);
+    $index->save();
+    $index->reindex();
+  }
+}
+
+/**
+ * Add node-level word type to dictionary fulltext aggregation.
+ */
+function mukurtu_dictionary_update_40009(): void {
+  $index_fulltext_map = [
+    'mukurtu_dictionary_index' => 'dictionary_fulltext',
+    'mukurtu_dictionary_solr_index' => 'dictionary_browse_solr_fulltext',
+  ];
+  $new_path = 'entity:node/field_word_type:entity:name';
+
+  foreach ($index_fulltext_map as $index_id => $fulltext_field) {
+    $index = \Drupal\search_api\Entity\Index::load($index_id);
+    if (!$index) {
+      continue;
+    }
+    $field = $index->getField($fulltext_field);
+    if (!$field) {
+      continue;
+    }
+    $config = $field->getConfiguration();
+    if (!in_array($new_path, $config['fields'])) {
+      $config['fields'][] = $new_path;
+      $field->setConfiguration($config);
+      $index->save();
+      $index->reindex();
+    }
+  }
+}
+
+/**
+ * Add MPI and community record collapse fields to the dictionary index.
+ *
+ * Each processor/field pair is added only if the providing module is enabled,
+ * since MPI and community records are optional features enabled after install.
+ */
+function mukurtu_dictionary_update_40010(): void {
+  $index = \Drupal\search_api\Entity\Index::load('mukurtu_dictionary_index');
+  if (!$index) {
+    return;
+  }
+
+  $module_handler = \Drupal::moduleHandler();
+  $processor_manager = \Drupal::service('plugin.manager.search_api.processor');
+  $processors = $index->getProcessors();
+  $index_changed = FALSE;
+
+  $candidates = [
+    [
+      'module' => 'mukurtu_multipage_items',
+      'processor_id' => 'mukurtu_multipage_page_index',
+      'field_id' => 'is_additional_mpi_page',
+      'field' => [
+        'type' => 'boolean',
+        'property_path' => 'is_additional_mpi_page',
+        'datasource_id' => 'entity:node',
+        'label' => 'Is additional multipage item page',
+      ],
+    ],
+    [
+      'module' => 'mukurtu_community_records',
+      'processor_id' => 'mukurtu_community_record_flag',
+      'field_id' => 'is_community_record',
+      'field' => [
+        'type' => 'boolean',
+        'property_path' => 'is_community_record',
+        'datasource_id' => 'entity:node',
+        'label' => 'Is community record',
+      ],
+    ],
+  ];
+
+  foreach ($candidates as $candidate) {
+    if (!$module_handler->moduleExists($candidate['module'])) {
+      continue;
+    }
+
+    if (!isset($processors[$candidate['processor_id']])) {
+      $processor = $processor_manager->createInstance($candidate['processor_id'], ['#index' => $index]);
+      $processors[$candidate['processor_id']] = $processor;
+      $index_changed = TRUE;
+    }
+
+    if (!$index->getField($candidate['field_id'])) {
+      $cfg = $candidate['field'];
+      $field = new \Drupal\search_api\Item\Field($index, $candidate['field_id']);
+      $field->setType($cfg['type']);
+      $field->setPropertyPath($cfg['property_path']);
+      $field->setDatasourceId($cfg['datasource_id']);
+      $field->setLabel($cfg['label']);
+      $index->addField($field);
+      $index_changed = TRUE;
+    }
+  }
+
+  if (!$index_changed) {
+    return;
+  }
+
+  $index->setProcessors($processors);
+  $index->save();
+  $index->reindex();
+}
+
+/**
+ * Re-apply MPI/CR collapse fields if the 40010 save failed.
+ *
+ * The 40010 hook ran (schema was bumped) but the index save may have failed
+ * because the install config briefly declared those modules as hard
+ * dependencies. This hook is idempotent and a no-op when 40010 succeeded.
+ */
+function mukurtu_dictionary_update_40011(): void {
+  mukurtu_dictionary_update_40010();
+}
+
+/**
+ * Remove the LanguageCommunity entity type (superseded by Community).
+ */
+function mukurtu_dictionary_update_40012(): void {
+  $db = \Drupal::database();
+  $schema = $db->schema();
+
+  // Remove OG memberships referencing language_community groups.
+  if ($schema->tableExists('og_membership')) {
+    $db->delete('og_membership')
+      ->condition('entity_type', 'language_community')
+      ->execute();
+  }
+
+  // Drop language_community tables if they exist.
+  foreach (['language_community_field_revision', 'language_community_revision', 'language_community_field_data', 'language_community'] as $table) {
+    if ($schema->tableExists($table)) {
+      $schema->dropTable($table);
+    }
+  }
+
+  // Remove the language_community OG roles.
+  $non_default_role_ids = [
+    'language_community-language_community-language_steward',
+    'language_community-language_community-language_contributor',
+  ];
+  foreach ($non_default_role_ids as $role_id) {
+    $og_role = \Drupal\og\Entity\OgRole::load($role_id);
+    if ($og_role) {
+      $og_role->delete();
+    }
+  }
+
+  // Delete default roles directly via config storage rather than the entity
+  // API. OgRole::preSave() throws on roles whose type is 'member' or
+  // 'non-member', blocking OgRole::delete() on those IDs even when the
+  // owning group type is being removed.
+  $default_role_ids = [
+    'language_community-language_community-member',
+    'language_community-language_community-non-member',
+  ];
+  foreach ($default_role_ids as $role_id) {
+    $config = \Drupal::configFactory()->getEditable('og.role.' . $role_id);
+    if (!$config->isNew()) {
+      $config->delete();
+    }
+  }
+}
+
+/**
+ * Add word_list to type filter, enable multi-select on facets, add community facet.
+ */
+function mukurtu_dictionary_update_40015(): void {
+  $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_dictionary');
+  if (!$config) {
+    return;
+  }
+
+  $base = 'display.default.display_options';
+
+  // 1. Include word_list in the hard type filter so word lists appear in results.
+  $value = $config->get("$base.filters.type.value") ?? [];
+  $value['word_list'] = 'word_list';
+  $config->set("$base.filters.type.value", $value);
+
+  // 2. Enable multiple selections on all exposed facet dropdown filters.
+  $multi_filters = [
+    'facets_type',
+    'facets_mukurtu_cultural_protocol_ids',
+    'facets_language',
+    'facets_keyword',
+    'facets_word_lists',
+    'facets_word_type',
+  ];
+  foreach ($multi_filters as $filter_id) {
+    $config->set("$base.filters.$filter_id.expose.multiple", TRUE);
+    $config->set("$base.filters.$filter_id.group_info.multiple", TRUE);
+  }
+
+  // 3. Add community facet filter.
+  $community_filter = [
+    'id' => 'facets_community_title',
+    'table' => 'search_api_index_mukurtu_dictionary_index',
+    'field' => 'facets_community_title',
+    'relationship' => 'none',
+    'group_type' => 'group',
+    'admin_label' => '',
+    'plugin_id' => 'facets_filter',
+    'operator' => '=',
+    'value' => '',
+    'group' => 1,
+    'exposed' => TRUE,
+    'expose' => [
+      'operator_id' => '',
+      'label' => 'Community',
+      'description' => '',
+      'use_operator' => FALSE,
+      'operator' => '',
+      'operator_limit_selection' => FALSE,
+      'operator_list' => [],
+      'identifier' => 'community',
+      'required' => FALSE,
+      'remember' => FALSE,
+      'multiple' => TRUE,
+      'remember_roles' => ['authenticated' => 'authenticated'],
+    ],
+    'is_grouped' => FALSE,
+    'group_info' => [
+      'label' => '',
+      'description' => '',
+      'identifier' => '',
+      'optional' => TRUE,
+      'widget' => 'select',
+      'multiple' => TRUE,
+      'remember' => FALSE,
+      'default_group' => 'All',
+      'default_group_multiple' => [],
+      'group_items' => [],
+    ],
+    'hierarchy' => FALSE,
+    'label_display' => 'visible',
+    'facet' => [
+      'query_operator' => 'or',
+      'hard_limit' => 0,
+      'min_count' => 1,
+      'show_numbers' => FALSE,
+      'processor_configs' => [
+        'display_value_widget_order' => [
+          'processor_id' => 'display_value_widget_order',
+          'weights' => ['sort' => 40],
+          'settings' => ['sort' => 'ASC'],
+        ],
+      ],
+    ],
+  ];
+  $config->set("$base.filters.facets_community_title", $community_filter);
+
+  // 4. Add community facet to BEF filter config.
+  $bef_entry = [
+    'plugin_id' => 'default',
+    'advanced' => [
+      'rewrite' => [
+        'filter_rewrite_values' => '',
+        'filter_rewrite_values_key' => FALSE,
+      ],
+      'collapsible' => FALSE,
+      'collapsible_disable_automatic_open' => FALSE,
+      'open_by_default' => FALSE,
+      'is_secondary' => FALSE,
+      'hide_label' => FALSE,
+      'field_classes' => '',
+      'sort_options_unsupported' => '',
+    ],
+  ];
+  $config->set("$base.exposed_form.options.bef.filter.facets_community_title", $bef_entry);
+
+  $config->save();
+}
+
+/**
+ * Fix word_type index field; set community facet to single-select; move before cultural protocol; reorder filters; use glossary custom order sort.
+ */
+function mukurtu_dictionary_update_40016(): void {
+  // Fix word_type index field to use the main node field.
+  $index_ids = ['mukurtu_dictionary_index', 'mukurtu_dictionary_solr_index'];
+  foreach ($index_ids as $index_id) {
+    $index = \Drupal\search_api\Entity\Index::load($index_id);
+    if (!$index) {
+      continue;
+    }
+    $field = $index->getField('word_type');
+    if (!$field) {
+      continue;
+    }
+    if ($field->getPropertyPath() !== 'field_word_type:entity:name') {
+      $field->setPropertyPath('field_word_type:entity:name');
+      $index->save();
+      $index->reindex();
+    }
+  }
+
+  // Set community facet to single-select and move it before cultural protocol.
+  $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_dictionary');
+  if (!$config) {
+    return;
+  }
+  $base = 'display.default.display_options';
+
+  $config->set("$base.filters.facets_community_title.expose.multiple", FALSE);
+  $config->set("$base.filters.facets_community_title.group_info.multiple", FALSE);
+
+  $filters = $config->get("$base.filters");
+  if (isset($filters['facets_community_title']) && isset($filters['facets_mukurtu_cultural_protocol_ids'])) {
+    $community = $filters['facets_community_title'];
+    unset($filters['facets_community_title']);
+    $new_filters = [];
+    foreach ($filters as $key => $value) {
+      if ($key === 'facets_mukurtu_cultural_protocol_ids') {
+        $new_filters['facets_community_title'] = $community;
+      }
+      $new_filters[$key] = $value;
+    }
+    $config->set("$base.filters", $new_filters);
+  }
+
+  // Reorder exposed filters: search > language > community > protocol > type > word_type > keyword.
+  $filters = $config->get("$base.filters");
+  $order = [
+    'type',
+    'search_api_language',
+    'search_api_fulltext',
+    'facets_language',
+    'facets_community_title',
+    'facets_mukurtu_cultural_protocol_ids',
+    'facets_type',
+    'facets_word_type',
+    'facets_keyword',
+    'facets_word_lists',
+    'facets_field_glossary_entry',
+  ];
+  $new_filters = [];
+  foreach ($order as $key) {
+    if (isset($filters[$key])) {
+      $new_filters[$key] = $filters[$key];
+    }
+  }
+  foreach ($filters as $key => $value) {
+    if (!isset($new_filters[$key])) {
+      $new_filters[$key] = $value;
+    }
+  }
+  $config->set("$base.filters", $new_filters);
+
+  // Use glossary custom order sort plugin for field_glossary_entry and expose it.
+  $config->set("$base.sorts.field_glossary_entry.plugin_id", 'glossary_custom_order');
+  $config->set("$base.sorts.field_glossary_entry.expose.label", 'Glossary order');
+  $config->set("$base.sorts.field_glossary_entry.expose.field_identifier", 'glossary_order');
+  $config->set("$base.sorts.field_glossary_entry.exposed", TRUE);
+
+  // Add search relevance sort option.
+  $config->set("$base.sorts.search_api_relevance", [
+    'id' => 'search_api_relevance',
+    'table' => 'search_api_index_mukurtu_dictionary_index',
+    'field' => 'search_api_relevance',
+    'relationship' => 'none',
+    'group_type' => 'group',
+    'admin_label' => '',
+    'plugin_id' => 'search_api',
+    'order' => 'DESC',
+    'expose' => [
+      'label' => 'Search relevance',
+      'field_identifier' => 'relevance',
+    ],
+    'exposed' => TRUE,
+  ]);
+
+  // Add BEF sort section.
+  $config->set("$base.exposed_form.options.bef.sort", [
+    'plugin_id' => 'default',
+    'advanced' => [
+      'combine' => FALSE,
+      'combine_rewrite' => '',
+      'combine_param' => 'sort_bef_combine',
+      'reset' => FALSE,
+      'reset_label' => '',
+      'collapsible' => FALSE,
+      'collapsible_label' => 'Sort options',
+      'is_secondary' => FALSE,
+    ],
+  ]);
+
+  $config->save();
+}
+
+/**
+ * Switch field_recording to media_assets view mode on dictionary word displays.
+ */
+function mukurtu_dictionary_update_40018(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.dictionary_word.full');
+  $config->set('content.field_recording.settings.view_mode', 'media_assets');
+  $config->save();
+
+  $paragraph_config = \Drupal::configFactory()->getEditable('core.entity_view_display.paragraph.dictionary_word_entry.default');
+  $paragraph_config->set('content.field_recording.settings.view_mode', 'media_assets');
+  $paragraph_config->save();
+}
+
+/**
+ * Use audio_for_dictionary_word view mode for recording field on dictionary word entries.
+ */
+function mukurtu_dictionary_update_40019(): void {
+  // Switch the dictionary word entry paragraph to use the new view mode.
+  $paragraph_config = \Drupal::configFactory()->getEditable('core.entity_view_display.paragraph.dictionary_word_entry.default');
+  $paragraph_config->set('content.field_recording.settings.view_mode', 'audio_for_dictionary_word');
+  $paragraph_config->save();
+
+  // Switch the node full display to use the new view mode (base word entry recording).
+  $node_config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.dictionary_word.full');
+  $node_config->set('content.field_recording.settings.view_mode', 'audio_for_dictionary_word');
+  $node_config->save();
+}
+
+/**
+ * Create the audio_for_dictionary_word view mode and display config entities.
+ */
+function mukurtu_dictionary_update_40020(): void {
+  $config_storage = \Drupal::service('config.storage');
+
+  // Write the view mode entity directly to active config storage.
+  $config_storage->write('core.entity_view_mode.media.audio_for_dictionary_word', [
+    'langcode' => 'en',
+    'status' => TRUE,
+    'dependencies' => ['module' => ['media']],
+    'id' => 'media.audio_for_dictionary_word',
+    'label' => 'Audio Player (Dictionary Word)',
+    'description' => '',
+    'targetEntityType' => 'media',
+    'cache' => TRUE,
+  ]);
+
+  // Write the display entity: only field_media_audio_file visible.
+  $config_storage->write('core.entity_view_display.media.audio.audio_for_dictionary_word', [
+    'langcode' => 'en',
+    'status' => TRUE,
+    'dependencies' => [
+      'config' => [
+        'core.entity_view_mode.media.audio_for_dictionary_word',
+        'media.type.audio',
+      ],
+      'module' => ['file'],
+    ],
+    'third_party_settings' => [],
+    'id' => 'media.audio.audio_for_dictionary_word',
+    'targetEntityType' => 'media',
+    'bundle' => 'audio',
+    'mode' => 'audio_for_dictionary_word',
+    'content' => [
+      'field_media_audio_file' => [
+        'type' => 'file_audio',
+        'label' => 'hidden',
+        'settings' => [
+          'controls' => TRUE,
+          'autoplay' => FALSE,
+          'loop' => FALSE,
+          'multiple_file_display_type' => 'tags',
+        ],
+        'third_party_settings' => [],
+        'weight' => 0,
+        'region' => 'content',
+      ],
+    ],
+    'hidden' => [
+      'created' => TRUE,
+      'field_communities' => TRUE,
+      'field_contributor' => TRUE,
+      'field_cultural_protocols' => TRUE,
+      'field_identifier' => TRUE,
+      'field_media_tags' => TRUE,
+      'field_people' => TRUE,
+      'field_thumbnail' => TRUE,
+      'field_transcription' => TRUE,
+      'flag_export_media' => TRUE,
+      'langcode' => TRUE,
+      'name' => TRUE,
+      'search_api_excerpt' => TRUE,
+      'thumbnail' => TRUE,
+      'uid' => TRUE,
+    ],
+  ]);
+}
+
+/**
+ * Re-write audio_for_dictionary_word display config using config storage.
+ *
+ * update_40020 used the entity API which may have produced an incorrect
+ * display entity. This hook overwrites it unconditionally with hardcoded
+ * config data to guarantee the correct state.
+ */
+function mukurtu_dictionary_update_40021(): void {
+  \Drupal::service('config.storage')->write(
+    'core.entity_view_display.media.audio.audio_for_dictionary_word',
+    [
+      'langcode' => 'en',
+      'status' => TRUE,
+      'dependencies' => [
+        'config' => [
+          'core.entity_view_mode.media.audio_for_dictionary_word',
+          'media.type.audio',
+        ],
+        'module' => ['file'],
+      ],
+      'third_party_settings' => [],
+      'id' => 'media.audio.audio_for_dictionary_word',
+      'targetEntityType' => 'media',
+      'bundle' => 'audio',
+      'mode' => 'audio_for_dictionary_word',
+      'content' => [
+        'field_media_audio_file' => [
+          'type' => 'file_audio',
+          'label' => 'hidden',
+          'settings' => [
+            'controls' => TRUE,
+            'autoplay' => FALSE,
+            'loop' => FALSE,
+            'multiple_file_display_type' => 'tags',
+          ],
+          'third_party_settings' => [],
+          'weight' => 0,
+          'region' => 'content',
+        ],
+      ],
+      'hidden' => [
+        'created' => TRUE,
+        'field_communities' => TRUE,
+        'field_contributor' => TRUE,
+        'field_cultural_protocols' => TRUE,
+        'field_identifier' => TRUE,
+        'field_media_tags' => TRUE,
+        'field_people' => TRUE,
+        'field_thumbnail' => TRUE,
+        'field_transcription' => TRUE,
+        'flag_export_media' => TRUE,
+        'langcode' => TRUE,
+        'name' => TRUE,
+        'search_api_excerpt' => TRUE,
+        'thumbnail' => TRUE,
+        'uid' => TRUE,
+      ],
+    ]
+  );
+}
+
+/**
+ * Add field_contributor to the audio_for_dictionary_word display config.
+ */
+function mukurtu_dictionary_update_40022(): void {
+  \Drupal::service('config.storage')->write(
+    'core.entity_view_display.media.audio.audio_for_dictionary_word',
+    [
+      'langcode' => 'en',
+      'status' => TRUE,
+      'dependencies' => [
+        'config' => [
+          'core.entity_view_mode.media.audio_for_dictionary_word',
+          'media.type.audio',
+        ],
+        'module' => ['file'],
+      ],
+      'third_party_settings' => [],
+      'id' => 'media.audio.audio_for_dictionary_word',
+      'targetEntityType' => 'media',
+      'bundle' => 'audio',
+      'mode' => 'audio_for_dictionary_word',
+      'content' => [
+        'field_contributor' => [
+          'type' => 'entity_reference_label',
+          'label' => 'inline',
+          'settings' => ['link' => TRUE],
+          'third_party_settings' => [],
+          'weight' => 1,
+          'region' => 'content',
+        ],
+        'field_media_audio_file' => [
+          'type' => 'file_audio',
+          'label' => 'hidden',
+          'settings' => [
+            'controls' => TRUE,
+            'autoplay' => FALSE,
+            'loop' => FALSE,
+            'multiple_file_display_type' => 'tags',
+          ],
+          'third_party_settings' => [],
+          'weight' => 0,
+          'region' => 'content',
+        ],
+      ],
+      'hidden' => [
+        'created' => TRUE,
+        'field_communities' => TRUE,
+        'field_cultural_protocols' => TRUE,
+        'field_identifier' => TRUE,
+        'field_media_tags' => TRUE,
+        'field_people' => TRUE,
+        'field_thumbnail' => TRUE,
+        'field_transcription' => TRUE,
+        'flag_export_media' => TRUE,
+        'langcode' => TRUE,
+        'name' => TRUE,
+        'search_api_excerpt' => TRUE,
+        'thumbnail' => TRUE,
+        'uid' => TRUE,
+      ],
+    ]
+  );
+}
+
+/**
+ * Add field_coverage to the dictionary search index for map view support.
+ */
+function mukurtu_dictionary_update_40023(): void {
+  $index = \Drupal\search_api\Entity\Index::load('mukurtu_dictionary_index');
+  if (!$index) {
+    return;
+  }
+
+  if (!$index->getField('field_coverage')) {
+    $field = new \Drupal\search_api\Item\Field($index, 'field_coverage');
+    $field->setType('string');
+    $field->setPropertyPath('field_coverage');
+    $field->setDatasourceId('entity:node');
+    $field->setLabel('Map Points');
+    $index->addField($field);
+    $index->save();
+    $index->reindex();
+  }
+}
+
+/**
+ * Update dictionary word and word list teaser view displays for issue #1622.
+ */
+function mukurtu_dictionary_update_40024(): void {
+  $config_factory = \Drupal::configFactory();
+
+  // dictionary_word teaser: show translation label inline; resize thumbnail.
+  $display = $config_factory->getEditable('core.entity_view_display.node.dictionary_word.teaser');
+  if (!$display->isNew()) {
+    $display
+      ->set('content.field_translation.label', 'inline')
+      ->set('content.field_thumbnail.settings.view_mode', 'small_250px_')
+      ->save();
+  }
+
+  // Audio teaser: hide contributor label so the Twig template can supply "Speaker".
+  $audio_display = $config_factory->getEditable('core.entity_view_display.media.audio.audio_for_dictionary_teaser');
+  if (!$audio_display->isNew()) {
+    $audio_display
+      ->set('content.field_contributor.label', 'hidden')
+      ->save();
+  }
+
+  // word_list teaser: use smaller image style; add field_summary.
+  $wl_display = $config_factory->getEditable('core.entity_view_display.node.word_list.teaser');
+  if (!$wl_display->isNew()) {
+    $wl_display
+      ->set('content.field_representative_media.settings.image_style', 'small_250px_w_')
+      ->set('content.field_summary', [
+        'type' => 'string',
+        'label' => 'hidden',
+        'settings' => ['link_to_entity' => FALSE],
+        'third_party_settings' => [],
+        'weight' => 1,
+        'region' => 'content',
+      ]);
+    // Remove field_summary from the hidden list if present.
+    $hidden = $wl_display->get('hidden') ?? [];
+    unset($hidden['field_summary']);
+    $wl_display->set('hidden', $hidden)->save();
+  }
+}
+
+/**
+ * Refine dictionary word teaser: remove translation label, inline contributor label.
+ */
+function mukurtu_dictionary_update_40025(): void {
+  $config_factory = \Drupal::configFactory();
+
+  $display = $config_factory->getEditable('core.entity_view_display.node.dictionary_word.teaser');
+  if (!$display->isNew()) {
+    $display->set('content.field_translation.label', 'hidden')->save();
+  }
+
+  $audio_display = $config_factory->getEditable('core.entity_view_display.media.audio.audio_for_dictionary_teaser');
+  if (!$audio_display->isNew()) {
+    $audio_display->set('content.field_contributor.label', 'inline')->save();
+  }
+}
+
+/**
+ * Remove hide_1_result_facet processor from glossary_entry facet so the A-Z bar shows with only one letter.
+ */
+function mukurtu_dictionary_update_40026(): void {
+  $config = \Drupal::configFactory()->getEditable('facets.facet.glossary_entry');
+  if ($config->isNew()) {
+    return;
+  }
+  $processors = $config->get('processor_configs') ?? [];
+  if (isset($processors['hide_1_result_facet'])) {
+    unset($processors['hide_1_result_facet']);
+    $config->set('processor_configs', $processors);
+    $config->save();
+  }
+}
+
+/**
+ * Update dictionary word display: new field order and tabbed word entry layout.
+ */
+function mukurtu_dictionary_update_40027(): void {
+  $config_factory = \Drupal::configFactory();
+
+  foreach ([
+    'core.entity_view_display.node.dictionary_word.full',
+    'core.entity_view_display.paragraph.dictionary_word_entry.default',
+  ] as $config_name) {
+    $config_path = \Drupal::service('extension.list.profile')->getPath('mukurtu') . '/modules/mukurtu_dictionary/config/install/' . $config_name . '.yml';
+    if (!file_exists($config_path)) {
+      continue;
+    }
+    $data = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($config_path));
+    $config = $config_factory->getEditable($config_name);
+    $config->setData($data);
+    $config->save();
+  }
+}
+
+/**
+ * Switch entity browser fields to rendered_entity (form_selection view mode)
+ * and use the dedicated dictionary-word-only browser for field_words.
+ */
+function mukurtu_dictionary_update_40028(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.dictionary_word.default');
+  if (!$config->isNew()) {
+    $config->set('content.field_related_content.settings.field_widget_display', 'rendered_entity');
+    $config->set('content.field_related_content.settings.field_widget_display_settings', ['view_mode' => 'form_selection']);
+    $config->save();
+  }
+
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.word_list.default');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_related_content.settings.field_widget_display', 'rendered_entity');
+  $config->set('content.field_related_content.settings.field_widget_display_settings', ['view_mode' => 'form_selection']);
+  $config->set('content.field_words.settings.entity_browser', 'mukurtu_dictionary_word_browser');
+  $config->set('content.field_words.settings.field_widget_display', 'rendered_entity');
+  $config->set('content.field_words.settings.field_widget_display_settings', ['view_mode' => 'form_selection']);
+  $dependencies = $config->get('dependencies.config') ?? [];
+  $key = array_search('entity_browser.browser.mukurtu_content_browser', $dependencies);
+  if ($key !== FALSE) {
+    unset($dependencies[$key]);
+  }
+  if (!in_array('entity_browser.browser.mukurtu_dictionary_word_browser', $dependencies)) {
+    $dependencies[] = 'entity_browser.browser.mukurtu_dictionary_word_browser';
+    sort($dependencies);
+    $config->set('dependencies.config', $dependencies);
+  }
+  $config->save(TRUE);
+}
+
+/**
+ * Show field_recording on dictionary word browse view display.
+ */
+function mukurtu_dictionary_update_40029(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.dictionary_word.browse');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_recording', [
+    'type' => 'entity_reference_entity_view',
+    'label' => 'hidden',
+    'settings' => ['view_mode' => 'browse', 'link' => FALSE],
+    'third_party_settings' => [],
+    'weight' => 3,
+    'region' => 'content',
+  ]);
+  $hidden = $config->get('hidden') ?? [];
+  unset($hidden['field_recording']);
+  $config->set('hidden', $hidden)->save();
+}
+
+/**
+ * Switch dictionary word and word list full views to use featured view mode.
+ *
+ * Dictionary word: swap field_related_content for field_all_related_content and
+ * update the field group children list to match. Word list: switch related
+ * content from teaser to featured view mode.
+ */
+function mukurtu_dictionary_update_40030(): void {
+  // Dictionary word: promote field_all_related_content, retire field_related_content.
+  $dw = \Drupal::configFactory()->getEditable('core.entity_view_display.node.dictionary_word.full');
+  if (!$dw->isNew()) {
+    // Move content display config.
+    $field_config = $dw->get('content.field_related_content');
+    if ($field_config) {
+      $field_config['settings']['view_mode'] = 'featured';
+      $dw->set('content.field_all_related_content', $field_config);
+      $dw->clear('content.field_related_content');
+    }
+    // Swap hidden flags.
+    $hidden = $dw->get('hidden') ?? [];
+    unset($hidden['field_all_related_content']);
+    $hidden['field_related_content'] = TRUE;
+    $dw->set('hidden', $hidden);
+    // Update field group children list.
+    $children = $dw->get('third_party_settings.field_group.group_additional_fields.children') ?? [];
+    $children = array_map(fn($f) => $f === 'field_related_content' ? 'field_all_related_content' : $f, $children);
+    $dw->set('third_party_settings.field_group.group_additional_fields.children', $children);
+    $dw->save();
+  }
+
+  // Word list: switch field_all_related_content from teaser to featured.
+  $wl = \Drupal::configFactory()->getEditable('core.entity_view_display.node.word_list.full');
+  if (!$wl->isNew()) {
+    $wl->set('content.field_all_related_content.settings.view_mode', 'featured');
+    $wl->save();
+  }
+}
+
+/**
+ * Show field_word_list_image in the word_list browse display.
+ */
+function mukurtu_dictionary_update_40031(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.word_list.browse');
+  if ($config->isNew()) {
+    return;
+  }
+
+  $content = $config->get('content') ?? [];
+  if (!isset($content['field_word_list_image'])) {
+    $content['field_word_list_image'] = [
+      'type' => 'entity_reference_entity_view',
+      'label' => 'hidden',
+      'settings' => [
+        'view_mode' => 'browse',
+        'link' => FALSE,
+      ],
+      'third_party_settings' => [],
+      'weight' => -1,
+      'region' => 'content',
+    ];
+    $config->set('content', $content);
+  }
+
+  $hidden = $config->get('hidden') ?? [];
+  if (isset($hidden['field_word_list_image'])) {
+    unset($hidden['field_word_list_image']);
+    $config->set('hidden', $hidden);
+  }
+
+  $config->save();
+}
+
+/**
+ * Ensure the comment field and its displays exist on dictionary_word.
+ */
+function mukurtu_dictionary_update_40032(): void {
+  if (!\Drupal\field\Entity\FieldConfig::loadByName('node', 'dictionary_word', 'comment')) {
+    \Drupal\field\Entity\FieldConfig::create([
+      'field_name' => 'comment',
+      'entity_type' => 'node',
+      'bundle' => 'dictionary_word',
+      'label' => 'Comments',
+      'description' => '',
+      'required' => FALSE,
+      'translatable' => TRUE,
+      'default_value' => [
+        [
+          'status' => 2,
+          'cid' => 0,
+          'last_comment_timestamp' => 0,
+          'last_comment_name' => NULL,
+          'last_comment_uid' => 0,
+          'comment_count' => 0,
+        ],
+      ],
+      'settings' => [
+        'default_mode' => 1,
+        'per_page' => 50,
+        'anonymous' => 0,
+        'form_location' => TRUE,
+        'preview' => 1,
+      ],
+    ])->save();
+  }
+
+  $form_display = \Drupal::configFactory()->getEditable('core.entity_form_display.node.dictionary_word.default');
+  if (!$form_display->isNew() && !$form_display->get('content.comment')) {
+    $form_display->set('content.comment', [
+      'type' => 'comment_default',
+      'weight' => 9,
+      'region' => 'content',
+      'settings' => [],
+      'third_party_settings' => [],
+    ]);
+    $form_display->save();
+  }
+
+  $view_display = \Drupal::configFactory()->getEditable('core.entity_view_display.node.dictionary_word.full');
+  if (!$view_display->isNew()) {
+    if (!$view_display->get('content.comment')) {
+      $view_display->set('content.comment', [
+        'type' => 'mukurtu_comment_default',
+        'label' => 'above',
+        'settings' => [
+          'view_mode' => 'default',
+          'pager_id' => 0,
+        ],
+        'third_party_settings' => [],
+        'weight' => 2,
+        'region' => 'content',
+      ]);
+    }
+
+    $children = $view_display->get('third_party_settings.field_group.group_primary_fields.children') ?? [];
+    if ($children && !in_array('comment', $children)) {
+      $children[] = 'comment';
+      $view_display->set('third_party_settings.field_group.group_primary_fields.children', $children);
+    }
+
+    $view_display->save();
+  }
+}
+
+/**
+ * Hide the export-list flag button on dictionary word and word list displays.
+ */
+function mukurtu_dictionary_update_40033(): void {
+  $displays = [
+    'core.entity_view_display.node.dictionary_word.full' => 'group_metadata',
+    'core.entity_view_display.node.dictionary_word.taxonomy_record' => NULL,
+    'core.entity_view_display.node.dictionary_word.search_preview' => NULL,
+    'core.entity_view_display.node.word_list.default' => NULL,
+    'core.entity_view_display.node.word_list.full' => NULL,
+    'core.entity_view_display.node.word_list.taxonomy_record' => NULL,
+  ];
+
+  foreach ($displays as $display_id => $group_name) {
+    $config = \Drupal::configFactory()->getEditable($display_id);
+    if ($config->isNew()) {
+      continue;
+    }
+
+    $content = $config->get('content') ?? [];
+    if (isset($content['flag_export_content'])) {
+      unset($content['flag_export_content']);
+      $config->set('content', $content);
+    }
+
+    $hidden = $config->get('hidden') ?? [];
+    $hidden['flag_export_content'] = TRUE;
+    $config->set('hidden', $hidden);
+
+    if ($group_name) {
+      $children = $config->get("third_party_settings.field_group.$group_name.children") ?? [];
+      $children = array_values(array_filter($children, fn($child) => $child !== 'flag_export_content'));
+      $config->set("third_party_settings.field_group.$group_name.children", $children);
+    }
+
+    $config->save();
   }
 }

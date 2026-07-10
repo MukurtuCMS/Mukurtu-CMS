@@ -3,6 +3,7 @@ status: true
 dependencies:
   config:
     - entity_browser.browser.mukurtu_content_browser
+    - entity_browser.browser.mukurtu_dictionary_word_browser
     - field.field.node.word_list.comment
     - node.type.word_list
   module:
@@ -138,16 +139,9 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
-  draft:
-    type: boolean_checkbox
-    weight: 8
-    region: content
-    settings:
-      display_label: true
-    third_party_settings: {  }
   field_coverage:
-    type: leaflet_widget_default
-    weight: 31
+    type: geofield_mukurtu
+    weight: 8
     region: content
     settings:
       geometry_validation: 0
@@ -157,8 +151,8 @@ content:
         auto_center: '1'
         scroll_zoom_enabled: '1'
         map_position:
-          zoom: '12'
-          minZoom: '3'
+          zoom: '2'
+          minZoom: '1'
           maxZoom: '18'
           zoomFiner: '0'
           force: 0
@@ -207,9 +201,9 @@ content:
         options: '{"position":"bottomright","maxWidth":100,"metric":true,"imperial":false,"updateWhenIdle":false}'
         control: 0
       locate:
-        options: '{"position":"topright","setView":"untilPanOrZoom","returnToPrevBounds":true,"keepCurrentZoomLevel":true,"strings":{"title":"Locate my position"}}'
+        options: '{"position":"topright","setView":"untilPanOrZoom","returnToPrevBounds":true,"strings":{"title":"Locate my position"}}'
         automatic: '1'
-        control: 0
+        control: 1
       feature_properties:
         values: ''
     third_party_settings: {  }
@@ -311,12 +305,13 @@ content:
     region: content
     settings:
       entity_browser: mukurtu_content_browser
-      field_widget_display: label
+      field_widget_display: rendered_entity
+      field_widget_display_settings:
+        view_mode: form_selection
       field_widget_edit: false
       field_widget_remove: true
       field_widget_replace: false
       open: true
-      field_widget_display_settings: {  }
       selection_mode: selection_append
     third_party_settings: {  }
   field_source:
@@ -348,13 +343,14 @@ content:
     weight: 4
     region: content
     settings:
-      entity_browser: mukurtu_content_browser
-      field_widget_display: label
+      entity_browser: mukurtu_dictionary_word_browser
+      field_widget_display: rendered_entity
+      field_widget_display_settings:
+        view_mode: form_selection
       field_widget_edit: false
       field_widget_remove: true
       field_widget_replace: false
       open: true
-      field_widget_display_settings: {  }
       selection_mode: selection_append
     third_party_settings: {  }
   langcode:

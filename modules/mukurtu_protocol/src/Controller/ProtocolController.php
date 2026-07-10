@@ -43,35 +43,30 @@ class ProtocolController extends ControllerBase implements ContainerInjectionInt
   /**
    * Displays a Protocol revision.
    *
-   * @param int $protocol_revision
-   *   The Protocol revision ID.
+   * @param \Drupal\mukurtu_protocol\Entity\ProtocolInterface $protocol_revision
+   *   The Protocol revision.
    *
    * @return array
    *   An array suitable for drupal_render().
    */
-  public function revisionShow($protocol_revision) {
-    $protocol = $this->entityTypeManager()->getStorage('protocol')
-      ->loadRevision($protocol_revision);
+  public function revisionShow(ProtocolInterface $protocol_revision) {
     $view_builder = $this->entityTypeManager()->getViewBuilder('protocol');
-
-    return $view_builder->view($protocol);
+    return $view_builder->view($protocol_revision);
   }
 
   /**
    * Page title callback for a Protocol revision.
    *
-   * @param int $protocol_revision
-   *   The Protocol revision ID.
+   * @param \Drupal\mukurtu_protocol\Entity\ProtocolInterface $protocol_revision
+   *   The Protocol revision.
    *
    * @return string
    *   The page title.
    */
-  public function revisionPageTitle($protocol_revision) {
-    $protocol = $this->entityTypeManager()->getStorage('protocol')
-      ->loadRevision($protocol_revision);
+  public function revisionPageTitle(ProtocolInterface $protocol_revision) {
     return $this->t('Revision of %title from %date', [
-      '%title' => $protocol->label(),
-      '%date' => $this->dateFormatter->format($protocol->getRevisionCreationTime()),
+      '%title' => $protocol_revision->label(),
+      '%date' => $this->dateFormatter->format($protocol_revision->getRevisionCreationTime()),
     ]);
   }
 
@@ -144,7 +139,7 @@ class ProtocolController extends ControllerBase implements ContainerInjectionInt
             '#template' => '{% trans %}{{ date }} by {{ username }}{% endtrans %}{% if message %}<p class="revision-log">{{ message }}</p>{% endif %}',
             '#context' => [
               'date' => $link,
-              'username' => $this->renderer->renderPlain($username),
+              'username' => $this->renderer->renderInIsolation($username),
               'message' => [
                 '#markup' => $revision->getRevisionLogMessage(),
                 '#allowed_tags' => Xss::getHtmlTagList(),

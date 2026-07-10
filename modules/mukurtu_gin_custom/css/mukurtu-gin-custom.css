@@ -18,6 +18,36 @@ counterpart, if one exists. */
     display: inline-flex;
 }
 
+/* Hide community browser checkbox column via CSS to prevent FOUC before JS runs.
+   Visually hidden (not display:none) so the checkbox remains in the accessibility
+   tree. The .views-row receives role="checkbox" from JS and is the primary
+   interactive element; the underlying input is a fallback. */
+.view-mukurtu-community-select .views-field-entity-browser-select {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Entity browser modal iframe: space below the dialog title bar. */
+.entity-browser-modal-iframe {
+  margin-top: 24px;
+}
+
+/* Community browser: card selected state. */
+.gin-entity-browser .entity-browser-form .views-row.is-selected {
+  outline: 3px solid var(--gin-color-primary, #0036b1);
+  outline-offset: -3px;
+}
+
+/* Community browser: focus ring for keyboard users on unselected cards (WCAG 2.4.7). */
+.gin-entity-browser .entity-browser-form .views-row:focus-visible {
+  outline: 3px solid var(--gin-color-primary, #0036b1);
+  outline-offset: -3px;
+}
+
 /* MW: fixes paragraph titles being cut off in forms. */
 .js .paragraph-type-title {
     flex-basis: 25%;
@@ -25,4 +55,393 @@ counterpart, if one exists. */
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: visible !important;
+}
+
+/* Content browser modal: thumbnail column */
+.view-mukurtu-content-browser .views-field-rendered-entity {
+  width: 60px;
+}
+
+.view-mukurtu-content-browser .views-field-rendered-entity img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  display: block;
+}
+
+
+/* === Entity Browser Form Selection Widget === */
+
+.eb-view-toggle {
+  /* The toggle is now a <fieldset>. Reset fieldset default styles so layout
+   * is not affected. The visually-hidden legend is preserved in the a11y tree
+   * but removed from the visual flow by Drupal's .visually-hidden utility. */
+  border: none;
+  margin: 0;
+  padding: 0;
+  display: inline-flex;
+  gap: 0.5rem;
+  vertical-align: middle;
+  margin-left: 0.75rem;
+}
+
+.eb-view-toggle__btn {
+  /* 2.5.8: minimum 24x24px target size. */
+  min-height: 24px;
+  padding: 0.35rem 0.75rem;
+  border: 2px solid currentColor;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 3px;
+  font-size: 0.85rem;
+  line-height: 1.2;
+}
+
+/* 2.4.7: explicit focus indicator that survives Gin's focus reset. */
+.eb-view-toggle__btn:focus-visible {
+  outline: 3px solid var(--gin-color-primary, #0036b1);
+  outline-offset: 2px;
+}
+
+.eb-view-toggle__btn[aria-pressed="true"] {
+  background: var(--gin-color-primary, #0036b1);
+  color: #fff;
+  border-color: var(--gin-color-primary, #0036b1);
+  /* 1.4.1: non-color pressed indicator. */
+  font-weight: bold;
+}
+
+/* Individual card - base styles (used in both views) */
+.eb-form-selection-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem;
+}
+
+.eb-form-selection-card .contextual {
+  display: none;
+}
+
+.eb-form-selection-card__media {
+  flex: 0 0 60px;
+  width: 60px;
+  height: 60px;
+  overflow: hidden;
+}
+
+.eb-form-selection-card__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Content browser modal: already-selected rows */
+.view-mukurtu-content-browser .views-table tr.eb-already-selected {
+  cursor: not-allowed;
+  background-color: #f0f0f0;
+}
+
+.view-mukurtu-content-browser .views-table tr.eb-already-selected td {
+  pointer-events: none;
+  color: #595959;
+}
+
+/* Content browser modal: keyboard focus ring for interactive rows/cols */
+.view-mukurtu-content-browser .views-table tr:focus-visible,
+.view-mukurtu-content-browser .views-col:focus-visible {
+  outline: 3px solid #0052cc;
+  outline-offset: -3px;
+}
+
+
+/* Suppress Gin's entity_browser.css hover border on the media thumbnail — the
+   .field__item div is not focusable so this is not a focus indicator. */
+.entities-list .item-container .eb-form-selection-card__media .field__item:hover {
+  border-color: transparent !important;
+  cursor: default;
+}
+
+.eb-form-selection-card__title {
+  /* Reset heading defaults: the <h3> is used for semantics only; visually
+   * it should remain a compact label within the card. */
+  margin: 0;
+  font-weight: normal;
+  font-size: 0.9rem;
+  line-height: 1.3;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+.eb-form-selection-card__type {
+  font-size: 0.8rem;
+  /* 1.4.3: #595959 on white = 7.0:1, above the 4.5:1 AA requirement. */
+  color: #595959;
+  margin-top: 0.2rem;
+}
+
+/* List view — display is set via JS inline style to beat gin's grid */
+.entities-list.eb-view-list > div {
+  /* 1.4.11: #767676 on white = 4.54:1, meeting the 3:1 UI component minimum.
+   * #e0e0e0 was 1.32:1, which failed. */
+  border-bottom: 1px solid #767676;
+}
+
+.entities-list.eb-view-list > div:last-child {
+  border-bottom: none;
+}
+
+/* Grid view — display/grid-template-columns set via JS inline style */
+.entities-list.eb-view-grid > div {
+  /* 1.4.11: same fix as list view divider above. */
+  border: 1px solid #767676;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.entities-list.eb-view-grid .eb-form-selection-card {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.5rem;
+}
+
+.entities-list.eb-view-grid .eb-form-selection-card__media {
+  width: 100%;
+  height: 100px;
+  flex: none;
+}
+
+/* Keep remove/edit buttons accessible in both views */
+.entities-list.eb-view-grid .field-multiple-drag,
+.entities-list.eb-view-list .field-multiple-drag {
+  cursor: grab;
+}
+
+/* Modal thumbnail column: hide card title/type — thumbnail only */
+.view-mukurtu-content-browser .views-field-rendered-entity .eb-form-selection-card__body {
+  display: none;
+}
+
+/* Audio cards: player spans the full card width instead of the 60px thumbnail slot. */
+.eb-form-selection-card:has(audio) {
+  flex-wrap: wrap;
+}
+
+.eb-form-selection-card:has(audio) .eb-form-selection-card__media {
+  flex: 1 1 100%;
+  width: 100%;
+  height: auto;
+}
+
+.eb-form-selection-card audio {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
+
+/* Canonical .ui-dialog positioning override (loaded on every page via
+   hook_page_attachments, covering both front-end and Gin admin contexts).
+   Gin sets .ui-dialog { position: absolute } which causes modal dialogs to
+   drift down the page as the user scrolls. Override to fixed + viewport-center
+   so the dialog always appears in the center of the viewport regardless of
+   scroll position. Uses flexbox so long forms scroll internally rather than
+   extending beyond the viewport. */
+.ui-dialog {
+    position: fixed !important;
+    top: 50vh !important;
+    left: 50vw !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    max-height: 90vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.ui-dialog .ui-dialog-titlebar {
+    flex-shrink: 0;
+}
+
+.ui-dialog .ui-dialog-content {
+    flex: 1 1 auto !important;
+    overflow-y: auto !important;
+}
+
+.ui-dialog .ui-dialog-buttonpane {
+    flex-shrink: 0;
+}
+
+/* Fix Layout Builder settings menu blocking block contextual/edit links (#1385).
+   gin_lb removes core's layout-builder.css and replaces it with its own, which
+   positions section configure/remove links and region labels absolutely at
+   z-index: 1-11. The layout-builder__region must allow overflow so absolutely-
+   positioned contextual triggers are not clipped. */
+.layout-builder .layout-builder__region {
+    overflow: visible;
+}
+
+.layout-builder .contextual {
+    z-index: 600;
+    right: auto;
+    left: 0;
+}
+
+[dir="rtl"] .layout-builder .contextual {
+    left: auto;
+    right: 0;
+}
+
+/* Media library modal: compact upload form, sticky type sidebar. */
+.media-library-add-form__input-wrapper {
+    padding: var(--space-xs) var(--space-m) !important;
+}
+
+/* Tighten form item spacing inside the add form */
+.media-library-add-form .form-item,
+.media-library-add-form .form-item--error-is-shown {
+    margin-top: 0.25rem !important;
+    margin-bottom: 0.25rem !important;
+}
+
+/* Reduce managed file widget internal spacing */
+.media-library-add-form .form-managed-file {
+    margin-bottom: 0 !important;
+}
+
+/* Hide both Remove button variants; the Cancel button closes the dialog instead.
+   ManagedFile uses _remove_button (underscore); AddFormBase uses -remove-button (hyphens). */
+.media-library-add-form [name$="_remove_button"],
+.media-library-add-form [name$="-remove-button"] {
+    display: none;
+}
+
+/* Hide the selected-media container when nothing is staged yet */
+.media-library-add-form__selected-media:empty {
+    display: none !important;
+}
+
+/* Single scroll container on the dialog content. The sidebar sticks at the
+   top via position:sticky + align-self:flex-start so it never scrolls away,
+   without needing a separate scroll container that breaks the upload form. */
+.media-library-widget-modal .media-library-menu {
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+}
+
+/* Compact the view filters and header above the media grid */
+.media-library-widget-modal .media-library-view {
+    margin-top: 0.5rem !important;
+}
+
+.media-library-widget-modal .view-filters {
+    margin-bottom: 0.5rem !important;
+}
+
+.media-library-widget-modal .views-exposed-form .form--inline {
+    gap: 0.25rem !important;
+}
+
+.media-library-widget-modal .view-filters .views-exposed-form {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 16px !important;
+}
+
+.media-library-widget-modal .view-content .js-media-library-views-form {
+    padding: 0 !important;
+}
+
+/* SoundCloud and External Embed add forms: put the URL/embed field and Add
+   button on the same row. align-items:flex-end keeps the button at the bottom
+   of a textarea as well as a single-line textfield. */
+.media-library-url-input-row {
+    display: flex !important;
+    align-items: flex-end !important;
+    gap: var(--space-m);
+}
+
+.media-library-url-input-row .form-item {
+    margin: 0 !important;
+}
+
+.media-library-url-input-row > input[type="submit"] {
+    align-self: flex-end !important;
+    flex-shrink: 0;
+    margin: 0 !important;
+}
+
+/* WCAG 2.4.7: visible focus ring on Insert Selected (and Cancel) in the dialog footer. */
+.media-library-widget-modal .ui-dialog-buttonpane .button:focus-visible {
+  outline: 3px solid var(--gin-color-primary, #0036b1);
+  outline-offset: 2px;
+}
+
+/* Make media library table rows feel clickable — JS delegates the click to the row's checkbox. */
+.media-library-widget-modal .views-table tbody tr {
+    cursor: pointer;
+}
+
+.media-library-widget-modal .views-table tbody tr:focus-visible {
+    outline: 3px solid var(--gin-color-primary, #0036b1);
+    outline-offset: -3px;
+}
+
+/* Visually hide the checkbox column but keep it in the accessibility tree
+   so screen readers can still reach the checkboxes. */
+.media-library-widget-modal .views-table th.views-field-media-library-select-form,
+.media-library-widget-modal .views-table td.views-field-media-library-select-form {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+}
+
+/* Edit link column injected by JS. */
+.media-library-widget-modal .views-table .mukurtu-edit-col {
+    width: 1%;
+    white-space: nowrap;
+    text-align: right;
+}
+
+/* Highlight selected rows. */
+.media-library-widget-modal .views-table tbody tr.mukurtu-row-selected {
+    background-color: var(--gin-color-primary-light, #e8f0fe);
+}
+
+/* Hide the view-header (grid/table toggle wrapper) — list view is forced via service override. */
+.media-library-widget-modal .view-header {
+    display: none !important;
+}
+
+/* Fix #1722: keep the lower sticky bulk-actions bar beneath the sticky
+   header's stacking context (z-index: 4) so its Actions dropdown is not
+   obscured when expanded. Mirrors Gin's selector pattern from tableselect.css.
+   Note: this intentionally creates a stacking context on .views-bulk-actions
+   at level 3. Any absolutely-positioned descendants will be confined to that
+   context — currently not an issue since the bar contains only flat elements.
+   Attribute [data-drupal-sticky-vbo=true] is set by VBO's JS when the bar
+   enters sticky mode; the conflict only surfaces when scrolled to that
+   position, so this scope is sufficient. */
+.block-system > .views-form .views-bulk-actions[data-drupal-sticky-vbo=true],
+.view-content .views-form .views-bulk-actions[data-drupal-sticky-vbo=true] {
+  z-index: 3;
+}
+
+/* Fix #1734: on the dashboard layout builder page the toolbar anti-flicker
+   IIFE restores is-active on secondary toolbar trays (Shortcuts, admin, etc.)
+   from sessionStorage before behaviors run, leaving them visually open and
+   overlapping the layout builder canvas.
+   mukurtu-dashboard-layout is added to <body> via hook_preprocess_html() for
+   layout_builder.dashboards.view and layout_builder.dashboards_override.view.
+   Trays remain accessible via hover and focus — gin's own :hover CSS rule still
+   fires because our :not(:hover):not(:focus-within) guard stops applying the
+   moment the user moves the cursor over the tab. */
+.mukurtu-dashboard-layout .gin-secondary-toolbar .toolbar-secondary .toolbar-bar .toolbar-tab:not(:hover):not(:focus-within) .toolbar-tray {
+  display: none !important;
 }

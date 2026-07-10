@@ -1,0 +1,170 @@
+/**
+ * Mukurtu review history and state-change panel.
+ *
+ * The panel sits in title_prefix immediately after the status banner, so each
+ * state modifier class uses the same CSS custom property as the banner to make
+ * the summary appear as a seamless extension of it.
+ */
+
+/* ── Disclosure element ─────────────────────────────────────────── */
+
+.mukurtu-review-panel {
+  display: block;
+  margin: 0;
+}
+
+.mukurtu-review-panel > summary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.3125rem 1.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: #ffffff;
+  cursor: pointer;
+  user-select: none;
+  /* Remove the default browser disclosure triangle */
+  list-style: none;
+}
+
+/* Firefox */
+.mukurtu-review-panel > summary::-moz-list-bullet { display: none; }
+/* Chrome / Safari */
+.mukurtu-review-panel > summary::-webkit-details-marker { display: none; }
+
+/* ── Banner colour per moderation state ─────────────────────────── */
+
+.mukurtu-review-panel--draft > summary {
+  background: var(--brand-secondary-dark, #7a734d);
+}
+
+.mukurtu-review-panel--needs-review > summary {
+  background: var(--color-warning-dark, #54738c);
+}
+
+.mukurtu-review-panel--revision-requested > summary {
+  background: var(--color-error-dark, #924d48);
+}
+
+.mukurtu-review-panel--archived > summary {
+  background: var(--color-gray, #555);
+}
+
+/* ── Expand / collapse indicator ────────────────────────────────── */
+
+.mukurtu-review-panel > summary::after {
+  content: '+';
+  font-size: 1.125rem;
+  font-weight: 300;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.mukurtu-review-panel[open] > summary::after {
+  content: '\2212'; /* − minus sign */
+}
+
+/* ── Expanded content area ──────────────────────────────────────── */
+
+.mukurtu-review-panel__content {
+  background: var(--brand-light-accent, #f7f5f0);
+  border-block-end: 2px solid var(--brand-secondary, #d9d4c2);
+  padding: 1rem 1.5rem;
+  max-width: 50rem;
+  margin-inline: auto;
+}
+
+/* ── Note history ───────────────────────────────────────────────── */
+
+.mukurtu-review-panel__notes {
+  list-style: none;
+  margin: 0 0 0.75rem;
+  padding: 0;
+}
+
+.mukurtu-review-panel__note {
+  padding: 0.5rem 0;
+  border-block-end: 1px solid rgba(0, 0, 0, 0.07);
+}
+
+.mukurtu-review-panel__note:last-child {
+  border-block-end: none;
+}
+
+.mukurtu-review-panel__meta {
+  font-size: 0.8125rem;
+  color: var(--color-gray, #555);
+  margin: 0 0 0.125rem;
+}
+
+.mukurtu-review-panel__text {
+  margin: 0.25rem 0 0;
+  font-style: italic;
+  font-size: 0.9375rem;
+}
+
+.mukurtu-review-panel__empty {
+  color: var(--color-gray, #555);
+  font-size: 0.875rem;
+  font-style: italic;
+  margin: 0 0 0.75rem;
+}
+
+/* ── State-change form ──────────────────────────────────────────── */
+
+.mukurtu-review-panel__form {
+  padding-block-start: 0.75rem;
+  border-block-start: 1px solid var(--brand-secondary, #d9d4c2);
+}
+
+.mukurtu-review-panel__form .form-item {
+  margin-block-end: 0.625rem;
+}
+
+.mukurtu-review-panel__form label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  display: block;
+  margin-block-end: 0.25rem;
+}
+
+.mukurtu-review-panel__form textarea {
+  width: 100%;
+  max-width: 36rem;
+  padding: 0.4375rem 0.625rem;
+  border: 1px solid var(--brand-secondary, #d9d4c2);
+  font-size: 0.875rem;
+  background: #fff;
+  resize: vertical;
+}
+
+/* Outline / secondary buttons for state transitions */
+.mukurtu-review-panel__form .form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-block-start: 0.5rem;
+}
+
+.mukurtu-review-panel__form .form-actions input[type="submit"],
+.mukurtu-review-panel__form .form-actions button[type="submit"] {
+  background: transparent;
+  border: 1px solid var(--brand-primary, #ac143a);
+  color: var(--brand-primary, #ac143a);
+  padding: 0.3125rem 0.875rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+  box-shadow: none;
+  border-radius: 0;
+  text-transform: none;
+}
+
+.mukurtu-review-panel__form .form-actions input[type="submit"]:hover,
+.mukurtu-review-panel__form .form-actions button[type="submit"]:hover {
+  background: var(--brand-primary, #ac143a);
+  color: #fff;
+}

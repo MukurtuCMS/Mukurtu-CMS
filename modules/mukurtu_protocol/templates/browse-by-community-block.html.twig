@@ -1,0 +1,24 @@
+{#
+/**
+ * @file
+ * Template for the Browse by Community landing page block.
+ *
+ * Uses the same wrapper classes as the former Views-based block so that
+ * existing CSS rules (.view-browse-by-community .community-page-browse) apply
+ * without introducing the max-width constraint from .community-page-listing.
+ *
+ * Available variables:
+ * - communities: A list of rendered community entities (browse view mode).
+ */
+#}
+<div class="view-browse-by-community">
+  <div class="community-page-browse">
+    <div class="communities">
+      {% for community in communities %}
+        <div class="community-browse-block__row communities__item">
+          {{ community }}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>

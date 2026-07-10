@@ -1,8 +1,42 @@
+mukurtu_core.node.quick_publish:
+  path: '/admin/content/{node}/publish'
+  defaults:
+    _controller: '\Drupal\mukurtu_core\Controller\NodeQuickActionsController::publish'
+    _title: 'Publish'
+  options:
+    parameters:
+      node:
+        type: entity:node
+  requirements:
+    _csrf_token: 'TRUE'
+    _node_access: 'node.update'
+
+mukurtu_core.node.quick_unpublish:
+  path: '/admin/content/{node}/unpublish'
+  defaults:
+    _controller: '\Drupal\mukurtu_core\Controller\NodeQuickActionsController::unpublish'
+    _title: 'Unpublish'
+  options:
+    parameters:
+      node:
+        type: entity:node
+  requirements:
+    _csrf_token: 'TRUE'
+    _node_access: 'node.update'
+
 mukurtu_core.settings_assorted:
   path: '/admin/config/mukurtu/settings'
   defaults:
     _form: '\Drupal\mukurtu_core\Form\MukurtuSettingsForm'
-    _title: 'Mukurtu Settings'
+    _title: 'Related content settings'
+  requirements:
+    _permission: 'administer site configuration'
+
+mukurtu_core.citation_templates:
+  path: '/admin/config/mukurtu/citation-templates'
+  defaults:
+    _form: '\Drupal\mukurtu_core\Form\CitationTemplatesForm'
+    _title: 'Citation templates'
   requirements:
     _permission: 'administer site configuration'
 
@@ -30,13 +64,6 @@ mukurtu_core.add:
         type: entity:node_type
         with_config_overrides: TRUE
 
-mukurtu_core.people:
-  path: '/admin/people'
-  defaults:
-    _entity_list: 'user'
-    _title: 'People - All User Accounts'
-  requirements:
-    _permission: 'administer users'
 
 mukurtu_core.approve_user:
   path: '/user/{uid}/approve'
@@ -52,6 +79,15 @@ mukurtu_core.block_user:
   defaults:
     _controller: '\Drupal\mukurtu_core\Controller\MukurtuUserController::blockAjax'
     _title: 'Block User'
+  requirements:
+    _custom_access: '\Drupal\mukurtu_core\Controller\MukurtuUserController::access'
+    uid: \d+
+
+mukurtu_core.set_pending_user:
+  path: '/user/{uid}/set-pending'
+  defaults:
+    _controller: '\Drupal\mukurtu_core\Controller\MukurtuUserController::setPendingAjax'
+    _title: 'Set to Pending'
   requirements:
     _custom_access: '\Drupal\mukurtu_core\Controller\MukurtuUserController::access'
     uid: \d+
@@ -74,6 +110,7 @@ mukurtu_core.media_found_in:
     _title: 'Found In'
     _controller: '\Drupal\mukurtu_core\Controller\MediaFoundInController::content'
   options:
+    _admin_route: TRUE
     parameters:
       media:
         type: entity:media
@@ -102,3 +139,19 @@ mukurtu_core.entity.google_tag_container.collection:
     _title: 'Google Tag containers'
   requirements:
     _custom_access: '\Drupal\google_tag\GoogleTagController::containerListingAccess'
+
+mukurtu_core.access_denied:
+  path: '/mukurtu/access-denied'
+  defaults:
+    _controller: '\Drupal\mukurtu_core\Controller\AccessDeniedPageController::build'
+    _title_callback: '\Drupal\mukurtu_core\Controller\AccessDeniedPageController::getTitle'
+  requirements:
+    _access: 'TRUE'
+
+mukurtu_core.access_denied_settings:
+  path: '/admin/config/mukurtu/access-denied'
+  defaults:
+    _form: '\Drupal\mukurtu_core\Form\AccessDeniedSettingsForm'
+    _title: 'Access Denied Page Settings'
+  requirements:
+    _permission: 'administer mukurtu access denied page'

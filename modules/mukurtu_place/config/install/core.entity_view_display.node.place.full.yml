@@ -53,7 +53,6 @@ third_party_settings:
         - field_local_contexts_projects
         - field_other_place_names
         - field_local_contexts_labels_and_notices
-        - flag_export_content
         - field_citation
       label: Metadata
       parent_name: ''
@@ -239,7 +238,7 @@ content:
     type: entity_reference_entity_view
     label: hidden
     settings:
-      view_mode: full
+      view_mode: media_assets
       link: false
     third_party_settings: {  }
     weight: 1
@@ -269,13 +268,7 @@ content:
     third_party_settings: {  }
     weight: 10
     region: content
-  flag_export_content:
-    settings: {  }
-    third_party_settings: {  }
-    weight: 20
-    region: content
 hidden:
-  draft: true
   field_communities: true
   field_content_type: true
   field_cultural_protocols: true
@@ -288,6 +281,7 @@ hidden:
   field_title: true
   flag_email_node: true
   flag_email_og: true
+  flag_export_content: true
   flag_mukurtu_email_content: true
   flag_mukurtu_email_node: true
   flag_mukurtu_email_og: true

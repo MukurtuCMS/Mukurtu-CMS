@@ -121,3 +121,584 @@ function mukurtu_protocol_install() {
   $config->set('enabled_entity_types', $types);
   $config->save();
 }
+
+/*
+  * Update community form display: show parent/child communities as read-only.
+ */
+function mukurtu_protocol_update_40001(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.community.community.default');
+
+  // Add readonly_field_widget to config dependencies.
+  $dependencies = $config->get('dependencies.module');
+  if (!in_array('readonly_field_widget', $dependencies)) {
+    $dependencies[] = 'readonly_field_widget';
+    sort($dependencies);
+    $config->set('dependencies.module', $dependencies);
+  }
+
+  // Switch field_child_communities from entity_reference_autocomplete to
+  // readonly_field_widget.
+  $config->set('content.field_child_communities', [
+    'type' => 'readonly_field_widget',
+    'weight' => 11,
+    'region' => 'content',
+    'settings' => [
+      'label' => 'above',
+      'formatter_type' => 'entity_reference_label',
+      'formatter_settings' => [
+        'entity_reference_label' => ['link' => TRUE],
+      ],
+      'show_description' => FALSE,
+      'error_validation' => FALSE,
+    ],
+    'third_party_settings' => [],
+  ]);
+
+  // Move field_parent_community from hidden to visible as readonly_field_widget.
+  $config->set('content.field_parent_community', [
+    'type' => 'readonly_field_widget',
+    'weight' => 10,
+    'region' => 'content',
+    'settings' => [
+      'label' => 'above',
+      'formatter_type' => NULL,
+      'formatter_settings' => [],
+      'show_description' => FALSE,
+      'error_validation' => FALSE,
+    ],
+    'third_party_settings' => [],
+  ]);
+  $config->clear('hidden.field_parent_community');
+
+  // Hide revision fields.
+  $config->set('hidden.create_new_revision', TRUE);
+  $config->set('hidden.revision_log', TRUE);
+
+  // Update field weights.
+  $config->set('content.field_banner_image.weight', 6);
+  $config->set('content.field_community_type.weight', 9);
+  $config->set('content.field_featured_content.weight', 8);
+  $config->set('content.field_membership_display.weight', 5);
+  $config->set('content.field_thumbnail_image.weight', 7);
+  $config->set('content.path.weight', 12);
+  $config->set('content.user_id.weight', 13);
+
+  $config->save();
+}
+
+/**
+ * Update community and protocol featured content to use featured view mode.
+ */
+function mukurtu_protocol_update_40002(): void {
+  $configs = [
+    'core.entity_view_display.community.community.full',
+    'core.entity_view_display.protocol.protocol.default',
+  ];
+
+  foreach ($configs as $config_name) {
+    $config = \Drupal::configFactory()->getEditable($config_name);
+    $config->set('content.field_featured_content.label', 'hidden');
+    $config->set('content.field_featured_content.settings.view_mode', 'featured');
+    $config->save();
+  }
+}
+
+/*
+ * Replace the Views-based browse by community block with the custom block plugin
+ * on existing landing page nodes so sub-communities are filtered out.
+ */
+function mukurtu_protocol_update_40003(): void {
+  $node_storage = \Drupal::entityTypeManager()->getStorage('node');
+
+  $nids = $node_storage->getQuery()
+    ->condition('type', 'landing_page')
+    ->accessCheck(FALSE)
+    ->execute();
+
+  foreach ($nids as $nid) {
+    /** @var \Drupal\node\NodeInterface $node */
+    $node = $node_storage->load($nid);
+    if (!$node->hasField('layout_builder__layout')) {
+      continue;
+    }
+
+    $changed = FALSE;
+    $sections = $node->get('layout_builder__layout')->getSections();
+
+    foreach ($sections as $section) {
+      foreach ($section->getComponents() as $component) {
+        if ($component->getPluginId() !== 'views_block:browse_by_community-community_browse_block') {
+          continue;
+        }
+        $config = $component->get('configuration') ?? [];
+        $component->setConfiguration([
+          'id' => 'mukurtu_browse_by_community',
+          'label' => $config['label'] ?? 'Browse by Community',
+          'label_display' => $config['label_display'] ?? '0',
+          'provider' => 'mukurtu_protocol',
+          'context_mapping' => $config['context_mapping'] ?? [],
+        ]);
+        $changed = TRUE;
+      }
+    }
+
+    if ($changed) {
+      $node->set('layout_builder__layout', $sections);
+      $node->save();
+    }
+  }
+}
+/**
+ * Remove orphaned community_type field from community browse view display.
+ */
+function mukurtu_protocol_update_40004(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.community.community.browse');
+
+  $content = $config->get('content');
+  if (isset($content['community_type'])) {
+    unset($content['community_type']);
+    $config->set('content', $content);
+  }
+
+  $hidden = $config->get('hidden');
+  if (!isset($hidden['community_type'])) {
+    $hidden['community_type'] = TRUE;
+    $config->set('hidden', $hidden);
+  }
+}
+
+/**
+ * Re-import mukurtu_people view: add Status/Roles columns, block/unblock bulk actions.
+ */
+function mukurtu_protocol_update_40006(): void {
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
+  $config_file = $module_path . '/config/install/views.view.mukurtu_people.yml';
+  $data = \Symfony\Component\Yaml\Yaml::parseFile($config_file);
+  \Drupal::configFactory()->getEditable('views.view.mukurtu_people')->setData($data)->save(TRUE);
+}
+
+/**
+ * Rebuild the router after protocol collection path change to /admin/communities-protocols.
+ */
+function mukurtu_protocol_update_40007(): void {
+  \Drupal::service('router.builder')->rebuild();
+}
+
+/**
+ * Add Communities filter to the core user_admin_people view (/admin/people).
+ */
+function mukurtu_protocol_update_40008(): void {
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
+  $config_file = $module_path . '/config/install/views.view.user_admin_people.yml';
+  $data = \Symfony\Component\Yaml\Yaml::parseFile($config_file);
+  \Drupal::configFactory()->getEditable('views.view.user_admin_people')->setData($data)->save(TRUE);
+}
+
+/**
+ * Update "Role" filter label to "Site role" on the user admin people view.
+ */
+function mukurtu_protocol_update_40009(): void {
+  \Drupal::configFactory()
+    ->getEditable('views.view.user_admin_people')
+    ->set('display.default.display_options.filters.roles_target_id.expose.label', 'Site role')
+    ->save(TRUE);
+}
+
+/**
+ * Re-import mukurtu_people view: add columns, filters, and column reordering.
+ */
+function mukurtu_protocol_update_40010(): void {
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
+  $config_file = $module_path . '/config/install/views.view.mukurtu_people.yml';
+  $data = \Symfony\Component\Yaml\Yaml::parseFile($config_file);
+  \Drupal::configFactory()->getEditable('views.view.mukurtu_people')->setData($data)->save(TRUE);
+}
+
+/**
+ * Install "Manage roles" bulk actions for community and protocol members pages.
+ *
+ * For fresh installs, config/install/ handles these action configs automatically.
+ * This hook only applies to existing sites updating from a prior release.
+ */
+function mukurtu_protocol_update_40011(): void {
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
+  $action_ids = [
+    'mukurtu_manage_community_roles_action',
+    'mukurtu_manage_protocol_roles_action',
+  ];
+  foreach ($action_ids as $action_id) {
+    $config_path = $module_path . '/config/install/system.action.' . $action_id . '.yml';
+    $data = \Drupal\Core\Serialization\Yaml::decode(file_get_contents($config_path));
+    \Drupal::configFactory()->getEditable('system.action.' . $action_id)->setData($data)->save(TRUE);
+  }
+  \Drupal::service('router.builder')->rebuild();
+}
+
+/**
+ * Reorder community roles: Community Member, Community Affiliate, Community Manager.
+ */
+function mukurtu_protocol_update_40012(): void {
+  $weights = [
+    'community-community-community_member'    => 13,
+    'community-community-community_affiliate' => 15,
+    'community-community-community_manager'   => 17,
+  ];
+  foreach ($weights as $role_id => $weight) {
+    $config = \Drupal::configFactory()->getEditable('og.og_role.' . $role_id);
+    if (!$config->isNew()) {
+      $config->set('weight', $weight)->save(TRUE);
+    }
+  }
+}
+
+/**
+ * Reorder protocol roles: Member, Affiliate, Contributor, Curator,
+ * Language Contributor, Language Steward, Community Record Steward, Protocol Steward.
+ */
+function mukurtu_protocol_update_40013(): void {
+  $weights = [
+    'protocol-protocol-protocol_member'           => 10,
+    'protocol-protocol-protocol_affiliate'        => 11,
+    'protocol-protocol-contributor'               => 12,
+    'protocol-protocol-curator'                   => 13,
+    'protocol-protocol-language_contributor'      => 14,
+    'protocol-protocol-language_steward'          => 15,
+    'protocol-protocol-community_record_steward'  => 16,
+    'protocol-protocol-protocol_steward'          => 17,
+  ];
+  foreach ($weights as $role_id => $weight) {
+    $config = \Drupal::configFactory()->getEditable('og.og_role.' . $role_id);
+    if (!$config->isNew()) {
+      $config->set('weight', $weight)->save(TRUE);
+    }
+  }
+}
+
+/**
+ * Rebuild node access grants so community-blocked users lose protocol access.
+ */
+function mukurtu_protocol_update_40014(): void {
+  node_access_rebuild(TRUE);
+}
+
+/**
+ * Install Approve User action; add Unblock to og_members_overview bulk form.
+ *
+ * Installs the mukurtu_approve_user_from_membership_action config before
+ * re-importing the view that references it, then updates the view to include
+ * og_membership_unblock_action.
+ */
+function mukurtu_protocol_update_40015(): void {
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
+
+  // Install the new action config first so the view reference is valid.
+  $action_file = $module_path . '/config/install/system.action.mukurtu_approve_user_from_membership_action.yml';
+  $action_data = \Symfony\Component\Yaml\Yaml::parseFile($action_file);
+  \Drupal::configFactory()->getEditable('system.action.mukurtu_approve_user_from_membership_action')->setData($action_data)->save(TRUE);
+
+  // Re-import the view with the updated selected_actions list.
+  $view_file = $module_path . '/config/install/views.view.og_members_overview.yml';
+  $view_data = \Symfony\Component\Yaml\Yaml::parseFile($view_file);
+  \Drupal::configFactory()->getEditable('views.view.og_members_overview')->setData($view_data)->save(TRUE);
+}
+
+/**
+ * Add Approve/Unblock and Set Pending bulk actions to /admin/people;
+ * add Set Pending to /admin/people/list VBO form.
+ */
+function mukurtu_protocol_update_40016(): void {
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
+
+  // Install action config entities so they appear in the user_bulk_form.
+  foreach ([
+    'system.action.mukurtu_unblock_user_action',
+    'system.action.mukurtu_set_pending_user_action',
+  ] as $config_name) {
+    $file = $module_path . '/config/install/' . $config_name . '.yml';
+    $data = \Symfony\Component\Yaml\Yaml::parseFile($file);
+    \Drupal::configFactory()->getEditable($config_name)->setData($data)->save(TRUE);
+  }
+
+  // Re-import mukurtu_people view to add mukurtu_set_pending_user_action.
+  $view_file = $module_path . '/config/install/views.view.mukurtu_people.yml';
+  $view_data = \Symfony\Component\Yaml\Yaml::parseFile($view_file);
+  \Drupal::configFactory()->getEditable('views.view.mukurtu_people')->setData($view_data)->save(TRUE);
+}
+
+/**
+ * Superseded by mukurtu_protocol_update_40020().
+ */
+function mukurtu_protocol_update_40017(): void {
+}
+
+/**
+ * Superseded by mukurtu_protocol_update_40020().
+ */
+function mukurtu_protocol_update_40018(): void {
+}
+
+/**
+ * Superseded by mukurtu_protocol_update_40020().
+ */
+function mukurtu_protocol_update_40019(): void {
+}
+
+/**
+ * Update /admin/people view: filters, columns, last-access display, and bulk
+ * action labels (consolidates 40017-40019).
+ */
+function mukurtu_protocol_update_40020(): void {
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
+  $view_file = $module_path . '/config/install/views.view.user_admin_people.yml';
+  $view_data = \Symfony\Component\Yaml\Yaml::parseFile($view_file);
+  \Drupal::configFactory()->getEditable('views.view.user_admin_people')->setData($view_data)->save(TRUE);
+}
+
+/**
+ * Superseded by mukurtu_protocol_update_40028().
+ */
+function mukurtu_protocol_update_40021(): void {
+}
+
+/**
+ * Superseded by mukurtu_protocol_update_40028().
+ */
+function mukurtu_protocol_update_40022(): void {
+}
+
+/**
+ * Superseded by mukurtu_protocol_update_40028().
+ */
+function mukurtu_protocol_update_40023(): void {
+}
+
+/**
+ * Superseded by mukurtu_protocol_update_40020() (user_admin_people view).
+ */
+function mukurtu_protocol_update_40024(): void {
+}
+
+/**
+ * Superseded by mukurtu_protocol_update_40028().
+ */
+function mukurtu_protocol_update_40025(): void {
+}
+
+/**
+ * Superseded by mukurtu_protocol_update_40028().
+ */
+function mukurtu_protocol_update_40026(): void {
+}
+
+/**
+ * Superseded by mukurtu_protocol_update_40028().
+ */
+function mukurtu_protocol_update_40027(): void {
+}
+
+/**
+ * Update /admin/people/list view: filters, columns, last-access display, VBO
+ * label overrides, and hide multipage selection counter (consolidates 40021-40027).
+ */
+function mukurtu_protocol_update_40028(): void {
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
+  $view_file = $module_path . '/config/install/views.view.mukurtu_people.yml';
+  $view_data = \Symfony\Component\Yaml\Yaml::parseFile($view_file);
+  \Drupal::configFactory()->getEditable('views.view.mukurtu_people')->setData($view_data)->save(TRUE);
+}
+
+/**
+ * Replace og_membership_add_multiple_roles_action with Mukurtu manage-roles
+ * actions on the community/protocol members overview.
+ */
+function mukurtu_protocol_update_40029(): void {
+  $config = \Drupal::configFactory()->getEditable('views.view.og_members_overview');
+  $selected = $config->get('display.default.display_options.fields.og_membership_bulk_form.selected_actions') ?? [];
+  $key = array_search('og_membership_add_multiple_roles_action', $selected);
+  if ($key !== FALSE) {
+    array_splice($selected, $key, 1, [
+      'mukurtu_manage_community_roles_action',
+      'mukurtu_manage_protocol_roles_action',
+    ]);
+  }
+  else {
+    // Ensure both Mukurtu actions are present even if OG action was already removed.
+    if (!in_array('mukurtu_manage_community_roles_action', $selected)) {
+      array_unshift($selected, 'mukurtu_manage_community_roles_action');
+    }
+    if (!in_array('mukurtu_manage_protocol_roles_action', $selected)) {
+      $selected[] = 'mukurtu_manage_protocol_roles_action';
+    }
+  }
+  // Remove the approve-user action from the bulk form; it is no longer surfaced.
+  $selected = array_values(array_filter($selected, fn($a) => $a !== 'mukurtu_approve_user_from_membership_action'));
+  $config->set('display.default.display_options.fields.og_membership_bulk_form.selected_actions', $selected)->save(TRUE);
+
+  // Update the community and protocol manage-roles action labels.
+  \Drupal::configFactory()
+    ->getEditable('system.action.mukurtu_manage_community_roles_action')
+    ->set('label', 'Manage user roles in community')
+    ->save(TRUE);
+  \Drupal::configFactory()
+    ->getEditable('system.action.mukurtu_manage_protocol_roles_action')
+    ->set('label', 'Manage user roles in protocol')
+    ->save(TRUE);
+}
+
+/**
+ * Update OG role weights to match canonical ordering.
+ */
+function mukurtu_protocol_update_40030(): void {
+  $weights = [
+    'community-community-community_member'         => 10,
+    'community-community-community_affiliate'      => 20,
+    'community-community-community_manager'        => 30,
+    'protocol-protocol-protocol_member'            => 10,
+    'protocol-protocol-protocol_affiliate'         => 20,
+    'protocol-protocol-contributor'                => 30,
+    'protocol-protocol-curator'                    => 40,
+    'protocol-protocol-language_contributor'       => 50,
+    'protocol-protocol-language_steward'           => 60,
+    'protocol-protocol-community_record_steward'   => 70,
+    'protocol-protocol-protocol_steward'           => 80,
+  ];
+  foreach ($weights as $role_id => $weight) {
+    $config = \Drupal::configFactory()->getEditable('og.og_role.' . $role_id);
+    if (!$config->isNew()) {
+      $config->set('weight', $weight)->save(TRUE);
+    }
+  }
+}
+
+/**
+ * Add administrator and mukurtu_manager site roles to the mukurtu_media view
+ * access so the media toolbar link is visible to those users.
+ */
+function mukurtu_protocol_update_40031(): void {
+  $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_media');
+  $access = $config->get('display.default.display_options.access');
+  $access['options']['site-role']['administrator'] = 'administrator';
+  $access['options']['site-role']['mukurtu_manager'] = 'mukurtu_manager';
+  $config->set('display.default.display_options.access', $access)->save(TRUE);
+  \Drupal::service('router.builder')->rebuild();
+}
+
+/**
+ * Reimport community select view with mukurtu_community_manager_select query tag.
+ */
+function mukurtu_protocol_update_40032(): void {
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
+  $view_file = $module_path . '/config/install/views.view.mukurtu_community_select.yml';
+  $view_data = \Symfony\Component\Yaml\Yaml::parseFile($view_file);
+  \Drupal::configFactory()->getEditable('views.view.mukurtu_community_select')->setData($view_data)->save(TRUE);
+}
+
+/**
+ * Switch field_featured_content on Community to rendered_entity (form_selection view mode).
+ */
+function mukurtu_protocol_update_40033(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.community.community.default');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_featured_content.settings.field_widget_display', 'rendered_entity');
+  $config->set('content.field_featured_content.settings.field_widget_display_settings', ['view_mode' => 'form_selection']);
+  $config->save();
+}
+
+/**
+ * Switch field_featured_content on Protocol to rendered_entity (form_selection view mode).
+ */
+function mukurtu_protocol_update_40034(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.protocol.protocol.default');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_featured_content.settings.field_widget_display', 'rendered_entity');
+  $config->set('content.field_featured_content.settings.field_widget_display_settings', ['view_mode' => 'form_selection']);
+  $config->save();
+}
+
+/**
+ * Set default value for site_comments_require_approval config key.
+ */
+function mukurtu_protocol_update_40035(): void {
+  $config = \Drupal::configFactory()->getEditable('mukurtu_protocol.comment_settings');
+  if ($config->get('site_comments_require_approval') === NULL) {
+    $config->set('site_comments_require_approval', FALSE)->save();
+  }
+}
+
+/**
+ * Add per-protocol comment view and post access fields.
+ */
+function mukurtu_protocol_update_40036(): void {
+  $manager = \Drupal::entityDefinitionUpdateManager();
+  $fields = [
+    'field_comment_view_access' => 'Who can view comments',
+    'field_comment_post_access' => 'Who can leave comments',
+  ];
+  foreach ($fields as $field_name => $label) {
+    $definition = \Drupal\Core\Field\BaseFieldDefinition::create('list_string')
+      ->setLabel(t($label))
+      ->setRevisionable(FALSE)
+      ->setCardinality(\Drupal\Core\Field\FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
+      ->setSetting('allowed_values', [
+        'anonymous' => 'Visitors (anonymous users)',
+        'authenticated' => 'Any site user with access',
+        'protocol_member' => 'Protocol members only (any protocol role)',
+      ])
+      ->setDefaultValue([
+        ['value' => 'authenticated'],
+        ['value' => 'protocol_member'],
+      ])
+      ->setTranslatable(FALSE)
+      ->setDisplayConfigurable('view', FALSE)
+      ->setDisplayConfigurable('form', FALSE);
+    $manager->installFieldStorageDefinition($field_name, 'protocol', 'mukurtu_protocol', $definition);
+  }
+}
+
+/**
+ * Remove obsolete comment fields from protocol edit form.
+ */
+function mukurtu_protocol_update_40037(): void {
+  $form_display = \Drupal::entityTypeManager()
+    ->getStorage('entity_form_display')
+    ->load('protocol.protocol.default');
+  if ($form_display) {
+    foreach (['field_comment_status', 'field_comment_require_approval'] as $field) {
+      $form_display->removeComponent($field);
+    }
+    $form_display->save();
+  }
+}
+
+/**
+ * Add anonymous_comments_require_email default to comment settings config.
+ */
+function mukurtu_protocol_update_40038(): void {
+  $config = \Drupal::configFactory()->getEditable('mukurtu_protocol.comment_settings');
+  if ($config->get('anonymous_comments_require_email') === NULL) {
+    $config->set('anonymous_comments_require_email', FALSE)->save();
+  }
+}
+
+/**
+ * Add confirmation steps to the Site Users bulk actions.
+ */
+function mukurtu_protocol_update_40039(): void {
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
+  $view_file = $module_path . '/config/install/views.view.mukurtu_people.yml';
+  $view_data = \Symfony\Component\Yaml\Yaml::parseFile($view_file);
+  \Drupal::configFactory()->getEditable('views.view.mukurtu_people')->setData($view_data)->save(TRUE);
+}
+
+/**
+ * Enable mukurtu_protocol_sync module.
+ */
+function mukurtu_protocol_update_40040(): void {
+  if (!\Drupal::moduleHandler()->moduleExists('mukurtu_protocol_sync')) {
+    \Drupal::service('module_installer')->install(['mukurtu_protocol_sync']);
+  }
+}

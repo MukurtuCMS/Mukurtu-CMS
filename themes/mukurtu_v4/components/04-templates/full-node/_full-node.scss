@@ -40,6 +40,7 @@
         .dictionary-word-subheading + div.field,
         .field--name-title,
         .dictionary-word__teaser .field,
+        .dictionary-word-tabs .field,
         .field--name-field-sections .field)) {
       @include mixins.divider;
     }
@@ -105,6 +106,39 @@
   &__comment {
     margin-block-start: var(--v-space-xs);
   }
+}
+
+// Moderation state banner -- injected into title_prefix for unpublished nodes
+// so screen readers can announce it (CSS ::before content is unreliable in AT).
+.node--status-banner {
+  display: block;
+  color: var(--color-white);
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0.75rem 1.5rem;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+
+  &--draft {
+    background: var(--brand-secondary-dark);
+  }
+
+  &--needs-review {
+    background: var(--color-warning-dark);
+  }
+
+  &--revision-requested {
+    background: var(--color-error-dark);
+  }
+
+  &--archived {
+    background: var(--color-gray);
+  }
+}
+
+.full-node {
 
   // Sidebar.
   &__list {
@@ -117,6 +151,12 @@
     @include include-media.media('>=2xl') {
       grid-column: 10 / span 4;
     }
+  }
+
+  // Hide sidebar sections that contain no rendered field content.
+  // Exclude .collection__menu which uses custom markup, not field items.
+  &__sidebar .sidebar-section:not(:has(.field__item)):not(.collection__menu) {
+    display: none;
   }
 
   &__sidebar .sidebar-section {
@@ -138,9 +178,10 @@
       &__item {
         line-height: var(--line-height-s);
       }
+    }
 
-      // If multiple items, show as comma-separated list.
-      &__items:where(:not(.field--name-field-all-related-content .field__items)) {
+    .field--formatter-entity-reference-label {
+      .field__items {
         @include mixins.inline-list;
       }
     }
@@ -175,40 +216,8 @@
       }
     }
 
-    .tk-labels,
-    .bc-labels {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: var(--v-space-4xxs);
-    }
-
     .name {
       line-height: var(--line-height-xs);
-    }
-
-    // Local Contexts Projects
-    .local-contexts-project .tk-label,
-    .local-contexts-project .bc-label,
-    .local-contexts-label {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: var(--v-space-4xxs);
-      margin-block-start: var(--v-space-4xxs);
-
-      // stylelint-disable-next-line no-descending-specificity
-      .text {
-        display: none;
-      }
-    }
-
-    // Local Contexts Labels and Notices.
-    .field--name-field-local-contexts-labels-and-notices {
-      .field__items {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: var(--v-space-4xxs);
-      }
     }
 
     .field:last-of-type {

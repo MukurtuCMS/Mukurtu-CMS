@@ -3,6 +3,9 @@ status: true
 dependencies:
   config:
     - filter.format.full_html
+    - node.type.article
+    - node.type.landing_page
+    - node.type.page
     - taxonomy.vocabulary.category
     - taxonomy.vocabulary.community_type
     - taxonomy.vocabulary.contributor
@@ -34,14 +37,15 @@ dependencies:
     - leaflet
     - media
     - message
-    - message_digest
     - message_notify_ui
     - message_ui
     - mukurtu_collection
     - mukurtu_content_warnings
+    - mukurtu_core
     - mukurtu_dictionary
     - mukurtu_export
     - mukurtu_import
+    - mukurtu_media
     - mukurtu_multipage_items
     - mukurtu_protocol
     - node
@@ -61,3 +65,26 @@ id: mukurtu_manager
 label: 'Mukurtu Manager'
 weight: 2
 is_admin: null
+permissions:
+  - 'access mukurtu export'
+  - 'access mukurtu import'
+  - 'administer mukurtu access denied page'
+  - 'administer mukurtu_media configuration'
+  - 'administer mukurtu media download settings'
+  - 'create article content'
+  - 'create landing_page content'
+  - 'create page content'
+  - 'delete any article content'
+  - 'delete any landing_page content'
+  - 'delete any page content'
+  - 'delete own article content'
+  - 'delete own landing_page content'
+  - 'delete own page content'
+  - 'edit any article content'
+  - 'edit any landing_page content'
+  - 'edit any page content'
+  - 'edit own article content'
+  - 'edit own landing_page content'
+  - 'edit own page content'
+  - 'select account cancellation method'
+  - 'access mukurtu export'

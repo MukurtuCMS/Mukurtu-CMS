@@ -1,0 +1,103 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the mukurtu_person module.
+ */
+
+/**
+ * Update the weight of field_coverage in the person record form display.
+ */
+function mukurtu_person_update_40001() {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.person.default');
+  $config->set('content.field_coverage.weight', 10);
+  $config->save();
+  return t('Updated the weight of field_coverage in person record form display.');
+}
+
+/**
+ * Switch field_media_assets to media_assets view mode on person full display.
+ */
+function mukurtu_person_update_40002(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.person.full');
+  $config->set('content.field_media_assets.settings.view_mode', 'media_assets');
+  $config->save();
+}
+
+/**
+ * Switch field_related_person to the dedicated person-only browser and
+ * switch field_related_content to rendered_entity (form_selection view mode).
+ */
+function mukurtu_person_update_40003(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.paragraph.related_person.default');
+  if (!$config->isNew()) {
+    $config->set('content.field_related_person.settings.entity_browser', 'mukurtu_person_browser');
+    $dependencies = $config->get('dependencies.config') ?? [];
+    $key = array_search('entity_browser.browser.mukurtu_content_browser', $dependencies);
+    if ($key !== FALSE) {
+      unset($dependencies[$key]);
+    }
+    if (!in_array('entity_browser.browser.mukurtu_person_browser', $dependencies)) {
+      $dependencies[] = 'entity_browser.browser.mukurtu_person_browser';
+      sort($dependencies);
+      $config->set('dependencies.config', $dependencies);
+    }
+    $config->save(TRUE);
+  }
+
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.person.default');
+  if (!$config->isNew()) {
+    $config->set('content.field_related_content.settings.field_widget_display', 'rendered_entity');
+    $config->set('content.field_related_content.settings.field_widget_display_settings', ['view_mode' => 'form_selection']);
+    $config->save();
+  }
+}
+
+/**
+ * Switch field_related_person on Related Person paragraph to rendered_entity (form_selection view mode).
+ */
+function mukurtu_person_update_40004(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.paragraph.related_person.default');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_related_person.settings.field_widget_display', 'rendered_entity');
+  $config->set('content.field_related_person.settings.field_widget_display_settings', ['view_mode' => 'form_selection']);
+  $config->save();
+}
+
+/**
+ * Hide the export-list flag button on person displays.
+ */
+function mukurtu_person_update_40005(): void {
+  $displays = [
+    'core.entity_view_display.node.person.full' => 'group_metadata',
+    'core.entity_view_display.node.person.default' => NULL,
+    'core.entity_view_display.node.person.taxonomy_record' => NULL,
+  ];
+
+  foreach ($displays as $display_id => $group_name) {
+    $config = \Drupal::configFactory()->getEditable($display_id);
+    if ($config->isNew()) {
+      continue;
+    }
+
+    $content = $config->get('content') ?? [];
+    if (isset($content['flag_export_content'])) {
+      unset($content['flag_export_content']);
+      $config->set('content', $content);
+    }
+
+    $hidden = $config->get('hidden') ?? [];
+    $hidden['flag_export_content'] = TRUE;
+    $config->set('hidden', $hidden);
+
+    if ($group_name) {
+      $children = $config->get("third_party_settings.field_group.$group_name.children") ?? [];
+      $children = array_values(array_filter($children, fn($child) => $child !== 'flag_export_content'));
+      $config->set("third_party_settings.field_group.$group_name.children", $children);
+    }
+
+    $config->save();
+  }
+}

@@ -1,5 +1,8 @@
 <?php
 
+require_once __DIR__ . '/includes/AudioHelper.php';
+
+use Drupal\Core\Cache\Cache;
 use Drupal\file\Entity\File;
 use Drupal\mukurtu_collection\Entity\Collection;
 use Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager;
@@ -35,6 +38,28 @@ function mukurtu_v4_preprocess_node(&$variables) {
     $variables['collection_count'] = $node->getCount();
   }
 
+  // Expose whether a dictionary word has real (non-empty) additional word
+  // entries. Drupal auto-creates an empty paragraph on first save, so we
+  // check each referenced paragraph for any meaningful field content.
+  if ($node->bundle() === 'dictionary_word' && $node->hasField('field_additional_word_entries')) {
+    $fields_to_check = ['field_word_entry_term', 'field_translation', 'field_recording', 'field_definition', 'field_pronunciation', 'field_alternate_spelling', 'field_word_type'];
+    $valid_indices = [];
+    foreach ($node->get('field_additional_word_entries') as $delta => $item) {
+      $paragraph = $item->entity;
+      if (!$paragraph) {
+        continue;
+      }
+      foreach ($fields_to_check as $field_name) {
+        if ($paragraph->hasField($field_name) && !$paragraph->get($field_name)->isEmpty()) {
+          $valid_indices[] = $delta;
+          break;
+        }
+      }
+    }
+    $variables['has_additional_word_entries'] = !empty($valid_indices);
+    $variables['additional_word_entry_indices'] = $valid_indices;
+  }
+
   // This creates a twig variable that can be used in node templates to
   // render the media assets field (a second time) with thumbnail display.
   if ($node->hasField('field_media_assets')) {
@@ -47,6 +72,21 @@ function mukurtu_v4_preprocess_node(&$variables) {
         ],
       ]);
     }
+  }
+}
+
+/**
+ * Implements hook_theme_suggestions_page_alter().
+ */
+function mukurtu_v4_theme_suggestions_page_alter(array &$suggestions, array $variables) {
+  $route_name = \Drupal::routeMatch()->getRouteName();
+  $lc_directory_routes = [
+    'mukurtu_local_contexts.site_project_directory',
+    'mukurtu_local_contexts.community_projects_directory',
+    'mukurtu_local_contexts.protocol_projects_directory',
+  ];
+  if (in_array($route_name, $lc_directory_routes)) {
+    $suggestions[] = 'page__local_contexts_site_project_directory';
   }
 }
 
@@ -69,6 +109,17 @@ function mukurtu_v4_preprocess_block(&$variables) {
     $variables['content']['#items']['title'] = $variables['label'];
   }
 
+  // Inject header search config into the main menu block template.
+  if (isset($variables['plugin_id']) && $variables['plugin_id'] === 'system_menu_block:main') {
+    $search_config = \Drupal::config('mukurtu_search.settings');
+    $variables['header_search_enabled'] = (bool) ($search_config->get('header_search_enabled') ?? TRUE);
+    $variables['header_search_path'] = $search_config->get('header_search_path') ?? '/browse';
+    $variables['#cache']['tags'] = Cache::mergeTags(
+      $variables['#cache']['tags'] ?? [],
+      $search_config->getCacheTags()
+    );
+  }
+
   // Directs the theme to use the block template for the Mukurtu footer,
   // mukurtu-footer.html.twig. Otherwise, it would use the default template,
   // block.html.twig, and our footer would not display.
@@ -82,10 +133,20 @@ function mukurtu_v4_preprocess_block(&$variables) {
  * Implements hook_preprocess_field__community__name__community().
  */
 function mukurtu_v4_preprocess_field__community__name__community(array &$variables): void {
-  $path = \Drupal::service('path.current')->getPath();
-  if ($path != '/communities') {
+  if ($variables['element']['#view_mode'] !== 'browse') {
     return;
   }
+
+  // Get community type label if set.
+  $community = $variables['element']['#object'] ?? NULL;
+  $community_type_label = '';
+  if ($community && $community->hasField('field_community_type') && !$community->field_community_type->isEmpty()) {
+    $term = $community->field_community_type->entity;
+    if ($term) {
+      $community_type_label = $term->label();
+    }
+  }
+
   $truncate_length = 60;
   foreach ($variables['items'] as &$item) {
     if (!isset($item['content']['#title'])) {
@@ -93,8 +154,12 @@ function mukurtu_v4_preprocess_field__community__name__community(array &$variabl
     }
     $value = $item['content']['#title']['#context']['value'];
     if (strlen($value) > $truncate_length) {
-      $item['content']['#title']['#context']['value'] = substr($value, 0, $truncate_length) . '…';
+      $value = substr($value, 0, $truncate_length) . '…';
     }
+    if ($community_type_label) {
+      $value .= ' (' . $community_type_label . ')';
+    }
+    $item['content']['#title']['#context']['value'] = $value;
   }
 }
 
@@ -118,6 +183,76 @@ function mukurtu_v4_preprocess_media(array &$variables) {
     $url = $file->createFileUrl();
     $variables['media_url'] = $url;
   }
+
+  $config = \Drupal::config('mukurtu_media.settings');
+  $variables['media_download_enabled'] = $config->get('mukurtu_media_download_enabled') ?? TRUE;
+  $variables['#cache']['tags'] = Cache::mergeTags(
+    $variables['#cache']['tags'] ?? [],
+    $config->getCacheTags()
+  );
+
+  // Pre-set fallback thumbnail URLs for view modes that show a thumbnail
+  // placeholder. The specific preprocess hooks (e.g. carousel_thumbnail,
+  // form_selection) may also set these, but doing it here ensures the
+  // variables are always available regardless of which hook fires first.
+  $view_mode = $variables['elements']['#view_mode'] ?? '';
+  $thumbnail_view_modes = ['carousel_thumbnail', 'media_assets', 'digital_heritage_sidebar'];
+  if (in_array($view_mode, $thumbnail_view_modes)) {
+    $bundle = $media->bundle();
+    if ($bundle === 'audio') {
+      $variables['audio_fallback_thumbnail_url'] = MukurtuV4AudioHelper::fallbackThumbnailUrl($media, $variables);
+    }
+    elseif ($bundle === 'soundcloud') {
+      if ($media->get('field_thumbnail')->isEmpty()) {
+        $variables['#cache']['tags'][] = 'config:mukurtu_thumbnail.settings';
+        $sc_config = \Drupal::config('mukurtu_thumbnail.settings');
+        $defaultFid = $sc_config->get('soundcloud')[0] ?? NULL;
+        if ($defaultFid) {
+          $scFile = \Drupal\file\Entity\File::load($defaultFid);
+          if ($scFile) {
+            $variables['soundcloud_fallback_thumbnail_url'] = $scFile->createFileUrl();
+          }
+        }
+        if (empty($variables['soundcloud_fallback_thumbnail_url'])) {
+          $variables['soundcloud_fallback_thumbnail_url'] = '/profiles/mukurtu/themes/mukurtu_v4/images/soundcloud.png';
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Implements template_preprocess_media__audio__carousel_thumbnail().
+ */
+function mukurtu_v4_preprocess_media__audio__carousel_thumbnail(array &$variables): void {
+  $variables['audio_fallback_thumbnail_url'] = MukurtuV4AudioHelper::fallbackThumbnailUrl($variables['media'], $variables);
+}
+
+/**
+ * Implements template_preprocess_media__audio__media_assets().
+ */
+function mukurtu_v4_preprocess_media__audio__media_assets(array &$variables): void {
+  $variables['audio_fallback_thumbnail_url'] = MukurtuV4AudioHelper::fallbackThumbnailUrl($variables['media'], $variables);
+}
+
+/**
+ * Implements template_preprocess_media__soundcloud__carousel_thumbnail().
+ */
+function mukurtu_v4_preprocess_media__soundcloud__carousel_thumbnail(array &$variables): void {
+  $media = $variables['media'];
+  if ($media->get('field_thumbnail')->isEmpty()) {
+    $variables['#cache']['tags'][] = 'config:mukurtu_thumbnail.settings';
+    $config = \Drupal::config('mukurtu_thumbnail.settings');
+    $defaultFid = $config->get('soundcloud')[0] ?? NULL;
+    if ($defaultFid) {
+      $file = \Drupal\file\Entity\File::load($defaultFid);
+      if ($file) {
+        $variables['soundcloud_fallback_thumbnail_url'] = $file->createFileUrl();
+        return;
+      }
+    }
+    $variables['soundcloud_fallback_thumbnail_url'] = '/profiles/mukurtu/themes/mukurtu_v4/images/soundcloud.png';
+  }
 }
 
 /**
@@ -129,6 +264,20 @@ function mukurtu_v4_preprocess_media__audio__browse(array &$variables): void {
       $file['#attributes']['preload'] = 'none';
     }
   }
+}
+
+/**
+ * Implements template_preprocess_media__audio__digital_heritage_sidebar().
+ */
+function mukurtu_v4_preprocess_media__audio__digital_heritage_sidebar(array &$variables): void {
+  $route = \Drupal::routeMatch()->getRouteName();
+  $variables['skip_player'] = in_array($route, [
+    'entity.community.canonical',
+    'entity.protocol.canonical',
+  ]);
+  $variables['audio_fallback_thumbnail_url'] = MukurtuV4AudioHelper::fallbackThumbnailUrl($variables['media'], $variables);
+  // The rendered output differs by route, so bust the cache per route.
+  $variables['#cache']['contexts'][] = 'route';
 }
 
 /**
@@ -144,6 +293,9 @@ function mukurtu_v4_preprocess_media_soundcloud_embed(array &$variables): void {
 function mukurtu_v4_preprocess_field_group_html_element__group_community_sidebar(array &$variables): void {
   $route_match = \Drupal::routeMatch();
   $community = $route_match->getParameter('community');
+  if (!$community) {
+    return;
+  }
   $variables['community_name'] = $community->get('name')->value;
   $variables['community_id'] = $community->get('id')->value;
   $local_contexts_projects_manager = \Drupal::service('mukurtu_local_contexts.supported_project_manager');
@@ -157,9 +309,38 @@ function mukurtu_v4_preprocess_field_group_html_element__group_community_sidebar
 function mukurtu_v4_preprocess_field_group_html_element__group_protocol_sidebar(array &$variables): void {
   $route_match = \Drupal::routeMatch();
   $protocol = $route_match->getParameter('protocol');
+  if (!$protocol) {
+    return;
+  }
   $variables['protocol_name'] = $protocol->get('name')->value;
   $variables['protocol_id'] = $protocol->get('id')->value;
   $local_contexts_projects_manager = \Drupal::service('mukurtu_local_contexts.supported_project_manager');
   assert($local_contexts_projects_manager instanceof LocalContextsSupportedProjectManager);
   $variables['has_lc_projects'] = (bool) $local_contexts_projects_manager->getGroupSupportedProjects($protocol);
+}
+
+/**
+ * Implements hook_preprocess_comment().
+ *
+ * Reformats the comment timestamp to date-only (e.g. "30 May 2026") and
+ * rebuilds the submitted string without the day-of-week or time.
+ */
+function mukurtu_v4_preprocess_comment(array &$variables): void {
+  $comment = $variables['comment'];
+  $date_only = \Drupal::service('date.formatter')->format(
+    $comment->getCreatedTime(),
+    'custom',
+    'j F Y',
+  );
+  $author_name = $comment->getOwner()->getDisplayName();
+  $variables['created'] = $date_only;
+  $variables['author'] = $author_name;
+  $variables['submitted'] = t('Submitted by @username on @date', [
+    '@username' => $author_name,
+    '@date' => $date_only,
+  ]);
+  $variables['comment_aria_label'] = t('Comment by @author on @date', [
+    '@author' => $author_name,
+    '@date' => $date_only,
+  ]);
 }

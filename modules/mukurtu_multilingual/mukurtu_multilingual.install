@@ -68,3 +68,39 @@ function mukurtu_multilingual_install() {
     }
   }
 }
+
+/**
+ * Update the description for the keywords field on dictionary words.
+ */
+function mukurtu_multilingual_update_40001() {
+  $config = \Drupal::configFactory()->getEditable('core.base_field_override.node.dictionary_word.field_keywords');
+  $config->set('description', 'Keywords are used to tag dictionary words to ensure that they are discoverable when searching or browsing.<br>Include as many keywords as needed. Select from existing keywords or add new ones.');
+  $config->save();
+}
+
+/**
+ * Update the description for the keywords field on person records.
+ */
+function mukurtu_multilingual_update_40002() {
+  $config = \Drupal::configFactory()->getEditable('core.base_field_override.node.person.field_keywords');
+  $config->set('description', 'Keywords are used to tag person records to ensure that they are discoverable when searching or browsing.<br>Include as many keywords as needed. Select from existing keywords or add new ones.');
+  $config->save();
+}
+
+/**
+ * Update the description for the keywords field on place records.
+ */
+function mukurtu_multilingual_update_40003() {
+  $config = \Drupal::configFactory()->getEditable('core.base_field_override.node.place.field_keywords');
+  $config->set('description', 'Keywords are used to tag place records to ensure that they are discoverable when searching or browsing.<br>Include as many keywords as needed. Select from existing keywords or add new ones.');
+  $config->save();
+}
+
+/**
+ * Update the description for the relationship type field in person records.
+ */
+function mukurtu_multilingual_update_40004() {
+  $config = \Drupal::configFactory()->getEditable('core.base_field_override.paragraph.related_person.field_relationship_type');
+  $config->set('description', 'The type of relationship between the related person and the subject of the person record. </br>Select from existing relationship types or add a new one.');
+  $config->save();
+}

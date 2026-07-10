@@ -1,7 +1,7 @@
 services:
   php:
     # See: https://github.com/TugboatQA/dockerfiles/blob/main/php/TAGS.md
-    image: tugboatqa/php:8.3-apache
+    image: tugboatqa/php:8.4-apache
     default: true
     depends: mariadb
     commands:
@@ -23,6 +23,7 @@ services:
         - echo "upload_max_filesize=100M" >> /usr/local/etc/php/conf.d/tugboat.ini
         - echo "post_max_size=100M" >> /usr/local/etc/php/conf.d/tugboat.ini
         - echo "memory_limit=512M" >> /usr/local/etc/php/conf.d/tugboat.ini
+        - echo "max_input_vars=3000" >> /usr/local/etc/php/conf.d/tugboat.ini
 
         # Install composer.
         # See https://getcomposer.org/doc/faqs/how-to-install-composer-programmatically.md
@@ -36,16 +37,93 @@ services:
           mkdir ~/mukurtu
           cd ~/mukurtu
           composer create mukurtu/mukurtu-template:dev-main .
+          # Pin composer/installers to ^2.0 so the cached vendor directory already
+          # has v2.x; this prevents PHP 8.x deprecation notices during build-phase
+          # composer update runs (where v1.x would otherwise be the active plugin).
+          php -r "\$d=json_decode(file_get_contents('composer.json'),true); \$d['require']['composer/installers']='^2.0'; file_put_contents('composer.json',json_encode(\$d,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES).PHP_EOL);"
           # Add our own local checkout repository instead. This will use the
           # local directory as the source, copying it into the final location.
           composer config repositories.local-dev path $TUGBOAT_ROOT
+          # Explicitly allow the symfony/runtime plugin (pulled in transitively
+          # via drush 13.7.x) rather than relying solely on mukurtu-template's
+          # own committed allow-plugins default, since this init phase runs
+          # before the build-phase patch below and may hit a cached image
+          # built before that upstream default was added.
+          composer config --no-plugins allow-plugins.symfony/runtime true
           composer update --no-install
           composer install --no-ansi --no-interaction --optimize-autoloader --no-progress
 
         # Symlink the web root and grant read access to the home directory.
         - ln -snf ~/mukurtu/web $DOCROOT
 
+      build:
+        - |
+          cd ~/mukurtu
+          # Copy in the settings.php file to set the database connection.
+          cp $TUGBOAT_ROOT/.tugboat/settings.tugboat.php web/sites/default/settings.php
+          chown www-data:www-data web/sites/default/settings.php
+          # Update composer dependencies.
+          rm composer.lock
+          # Patch the template's composer.json to require Drupal 11.4.x and
+          # ignore the symfony/polyfill-intl-idn advisory. composer config
+          # does not support setting audit.ignore keys, so patch directly.
+          # Pin to an exact version with prefer-stable to avoid resolving to
+          # 11.x-dev, which ships a different index.php that requires
+          # autoload_runtime.php.
+          php -r "
+            \$d = json_decode(file_get_contents('composer.json'), true);
+            \$d['require']['drupal/core'] = '11.4.1';
+            \$d['require']['drupal/core-recommended'] = '11.4.1';
+            \$d['require']['drupal/core-composer-scaffold'] = '11.4.1';
+            \$d['require']['drupal/core-project-message'] = '11.4.1';
+            \$d['config']['preferred-install']['drupal/core*'] = 'dist';
+            \$d['prefer-stable'] = true;
+            \$d['config']['allow-plugins']['symfony/runtime'] = true;
+            \$d['config']['audit']['ignore']['PKSA-dwsq-ppd2-mb1x'] =
+              'Advisory only affects pure PHP fallback; native intl is installed';
+            \$d['config']['audit']['ignore']['PKSA-fbvq-z33h-r2np'] =
+              'twig/twig advisory; version range pinned by drupal/core-recommended 11.4.1';
+            \$d['config']['audit']['ignore']['PKSA-g9zw-qxh8-pq8w'] =
+              'twig/twig advisory; version range pinned by drupal/core-recommended 11.4.1';
+            \$d['config']['audit']['ignore']['PKSA-yd6k-t2gh-1m43'] =
+              'twig/twig advisory; version range pinned by drupal/core-recommended 11.4.1';
+            \$d['config']['audit']['ignore']['PKSA-1tmc-rt7x-12w6'] =
+              'twig/twig advisory; version range pinned by drupal/core-recommended 11.4.1';
+            \$d['config']['audit']['ignore']['PKSA-xx6c-6d96-db2w'] =
+              'twig/twig advisory; version range pinned by drupal/core-recommended 11.4.1';
+            // drupal/core 11.3.x StaticReflectionParser still uses
+            // Doctrine\Common\Annotations\TokenParser even though core-dev
+            // no longer declares it as a dependency; pin it explicitly so
+            // the transitive-dependency resolver does not drop it.
+            \$d['require']['doctrine/annotations'] = '^2.0';
+            \$d['require']['composer/installers'] = '^2.0';
+            file_put_contents('composer.json',
+              json_encode(\$d, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL);
+          "
+          composer update --no-ansi --no-interaction --optimize-autoloader --no-progress --prefer-stable
+          # Raise max_input_vars for the CSV exporter form, which submits
+          # hundreds of field-mapping inputs and exceeds the default of 1000.
+          # Apache reads .htaccess per-request so no restart is needed.
+          echo "php_value max_input_vars 3000" >> web/.htaccess
+          # Install Drupal with the Mukurtu installation profile. Run as web
+          # user to create files with the right permissions. Pass in the
+          # environment variables from Tugboat using the -E option.
+          sudo -E -u www-data ./vendor/bin/drush site-install mukurtu -y --account-pass="admin" --site-name="Mukurtu CMS"
+          # Restore settings.php after site-install, which rewrites the file
+          # and may drop Tugboat-specific settings added before install.
+          cp $TUGBOAT_ROOT/.tugboat/settings.tugboat.php web/sites/default/settings.php
+          chown www-data:www-data web/sites/default/settings.php
+          # Run any pending update hooks introduced by this branch and clear
+          # caches so templates and config changes take effect immediately.
+          sudo -E -u www-data ./vendor/bin/drush updb -y
+          sudo -E -u www-data ./vendor/bin/drush cr
       update:
+        # Ensure settings.php is always present with the correct database
+        # credentials, guarding against site-install rewrites or refresh-only
+        # runs where the build phase did not execute.
+        - |
+          cp $TUGBOAT_ROOT/.tugboat/settings.tugboat.php ~/mukurtu/web/sites/default/settings.php
+          chown www-data:www-data ~/mukurtu/web/sites/default/settings.php
         # Set appropriate file permissions/ownership for the files directory.
         - |
           cd ~/mukurtu/web
@@ -58,19 +136,19 @@ services:
           chown -R www-data:www-data private_files
           find private_files -type d -exec chmod 2775 {} \;
           find private_files -type f -exec chmod 0664 {} \;
-      build:
+        # Run pending database update hooks and clear caches. On a fresh build
+        # the database does not exist yet (site-install runs in the build phase
+        # after this), so skip gracefully; the build phase runs updb/cr after
+        # site-install. On a PR refresh the database is already populated and
+        # these commands apply the branch's pending update hooks normally.
         - |
           cd ~/mukurtu
-          # Copy in the settings.php file to set the database connection.
-          cp $TUGBOAT_ROOT/.tugboat/settings.tugboat.php web/sites/default/settings.php
-          chown www-data:www-data web/sites/default/settings.php
-          # Update composer dependencies.
-          rm composer.lock
-          composer update --no-ansi --no-interaction --optimize-autoloader --no-progress
-          # Install Drupal with the Mukurtu installation profile. Run as web
-          # user to create files with the right permissions. Pass in the
-          # environment variables from Tugboat using the -E option.
-          sudo -E -u www-data ./vendor/bin/drush site-install mukurtu -y --account-pass="admin" --site-name="Mukurtu CMS"
+          if sudo -E -u www-data ./vendor/bin/drush core:status 2>/dev/null; then
+            sudo -E -u www-data ./vendor/bin/drush updb -y
+            sudo -E -u www-data ./vendor/bin/drush cr
+          else
+            echo "Drupal not yet installed; updb/cr will run after site-install in the build phase."
+          fi
   mariadb:
     image: tugboatqa/mariadb:lts
     commands:

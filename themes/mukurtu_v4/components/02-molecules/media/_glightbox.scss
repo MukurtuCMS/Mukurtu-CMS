@@ -1,0 +1,101 @@
+// Hidden source elements for Glightbox inline slides (audio, embeds).
+.media-asset--glightbox-inline {
+  display: none;
+}
+
+.glightbox-clean {
+  .gslide-inline {
+    padding: 1rem;
+    box-sizing: border-box;
+    overflow: hidden;
+    // GLightbox's bundled CSS sets background: #fff on this element, which
+    // creates a visible white card behind inline slides. Override to transparent
+    // so the dark overlay backdrop shows through instead.
+    background: transparent;
+
+    img {
+      display: block;
+      max-width: 100%;
+      max-height: 88vh;
+      margin: 0 auto;
+    }
+
+    audio {
+      display: block;
+      width: 100%;
+    }
+
+    iframe {
+      display: block;
+      width: 100%;
+      height: calc(88vh - 2rem);
+      min-height: 400px;
+    }
+
+    .media-asset--document-viewer {
+      display: block;
+      width: 100%;
+      height: calc(88vh - 2rem);
+    }
+
+    // When the slide content is wrapped in a .media element (for content
+    // warning overlay support), ensure it creates the positioning context.
+    .media {
+      position: relative;
+    }
+  }
+}
+
+// Glightbox control visibility overrides.
+// The library defaults are too small and too transparent to read easily.
+
+.glightbox-clean {
+  .gprev,
+  .gnext,
+  .gclose {
+    background-color: var(--brand-primary, #138aab);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+
+    &:hover {
+      background-color: var(--brand-primary-dark, #107996);
+    }
+
+    &:focus-visible {
+      // White achieves ~4.5:1 on the brand-primary button background, meeting
+      // WCAG 1.4.11. The global --focus-color (#66afe9) falls short at ~2.5:1.
+      outline: 3px solid #fff;
+      outline-offset: 2px;
+    }
+  }
+
+  .gprev,
+  .gnext {
+    width: 52px;
+    height: 60px;
+
+    svg {
+      width: 32px;
+    }
+  }
+
+  .gclose {
+    width: 44px;
+    height: 44px;
+
+    svg {
+      width: 24px;
+    }
+  }
+
+  .gprev,
+  .gnext,
+  .gclose {
+    .garrow {
+      stroke-width: 5;
+    }
+  }
+
+  .gslide-description.description-bottom {
+    display: none;
+  }
+}

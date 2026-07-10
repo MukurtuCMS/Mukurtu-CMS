@@ -1,6 +1,44 @@
+cultural-protocol-widget:
+  version: 1.x
+  js:
+    js/cultural-protocol-widget.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+
+membership-table:
+  version: 1.x
+  css:
+    theme:
+      css/membership-table.css: {}
+  js:
+    js/membership-autocomplete.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/once
+    - core/jquery.ui.autocomplete
+
+protocol-list:
+  version: 1.x
+  css:
+    theme:
+      css/protocol-list.css: {}
+  dependencies:
+    - core/base
+
 mukurtu-community-role-management:
   version: 1.x
   js:
     js/mukurtu-community-role-management.js: {}
   dependencies:
     - core/jquery
+
+protocol-community-browser:
+  version: 1.x
+  js:
+    js/protocol-community-browser.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/once

@@ -38,8 +38,6 @@ function mukurtu_multipage_items_theme() {
         'page_nav_attributes' => NULL,
         'current_page' => NULL,
         'current_page_attributes' => NULL,
-/*         'next_page' => NULL,
-        'previous_page' => NULL, */
       ],
     ],
   ];
@@ -264,7 +262,11 @@ function mukurtu_multipage_items_views_query_alter(ViewExecutable $view, QueryPl
     $bundles_config = \Drupal::config('mukurtu_multipage_items.settings')->get('bundles_config');
     $enabledBundles = array_keys(array_filter($bundles_config));
 
-    $query->addWhere('enabledBundles', 'type', $enabledBundles, 'IN');
+    if (!empty($enabledBundles)) {
+      $query->addWhere(0, 'node_field_data.type', $enabledBundles, 'IN');
+    }
+
+    $connection = \Drupal::database();
 
     // Exclude nodes that are already pages in an MPI.
     $table_mapping = \Drupal::entityTypeManager()->getStorage('multipage_item')->getTableMapping();
@@ -272,7 +274,6 @@ function mukurtu_multipage_items_views_query_alter(ViewExecutable $view, QueryPl
     $field_storage_definitions = \Drupal::service('entity_field.manager')->getFieldStorageDefinitions('multipage_item')['field_pages'];
     $field_column = $table_mapping->getFieldColumnName($field_storage_definitions, 'target_id');
 
-    $connection = \Drupal::database();
     $result = $connection->select($field_table, 'f')
       ->fields('f', array($field_column))
       ->distinct(TRUE)
@@ -282,5 +283,15 @@ function mukurtu_multipage_items_views_query_alter(ViewExecutable $view, QueryPl
     if ($result) {
       $query->addWhere('notPages', 'nid', $result, 'NOT IN');
     }
+
+    // Exclude community records (nodes that are derived from another record).
+    $cr_result = $connection->select('node__field_mukurtu_original_record', 'cr')
+      ->fields('cr', ['entity_id'])
+      ->distinct(TRUE)
+      ->execute()->fetchCol();
+    if ($cr_result) {
+      $query->addWhere('notCommunityRecords', 'nid', $cr_result, 'NOT IN');
+    }
+
   }
 }

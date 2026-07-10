@@ -1,16 +1,18 @@
 <?php
 
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\node\Entity\Node;
 use Drupal\message\Entity\Message;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Database\Query\AlterableInterface;
-use Drupal\Core\Database\Query\Condition;
+use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
 use Drupal\message_subscribe\Subscribers\DeliveryCandidate;
 use Drupal\mukurtu_collection\Entity\Collection;
+use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
 
 /**
  * Implements hook_entity_type_alter().
@@ -55,137 +57,135 @@ function mukurtu_notifications_entity_view_alter(array &$build, EntityInterface 
 
 /**
  * Implements hook_query_TAG_alter().
+ *
+ * Phase 2: filter message queries by the current user's protocol access grants.
+ * Stubbed until the message entity type is wired to mukurtu_protocol_access.
  */
 function mukurtu_notifications_query_message_access_alter(AlterableInterface $query) {
-  return;
-  $account = User::load(\Drupal::currentUser()->id());
-  if (is_null($account)) {
-    $account = User::getAnonymousUser();
-  }
-
-  if ($account->id() == 1) {
-    return;
-  }
-
-  $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
-
-  // Protocol Set IDs the *user* has access to.
-  $protocol_set_ids = $protocol_manager->getUserGrantIds($account);
-
-  $tables = $query->getTables();
-  $tables_keys = array_keys($tables);
-  $table = reset($tables_keys);
-
-  $query->leftJoin('mukurtu_protocol_access', 'mpa', "$table.mid = mpa.id");
-  $query->condition('mpa.entity_type', 'message');
-
-  if (empty($protocol_set_ids)) {
-    // User doesn't have access to any protocols.
-    $query->condition('protocol_set_id', 0);
-  } else {
-    // User can access media for any of these protocol sets.
-    $or = new Condition('OR');
-    foreach ($protocol_set_ids as $protocol_set_id) {
-      $or->condition('protocol_set_id', $protocol_set_id);
-    }
-
-    $query->condition($or);
-  }
-
-  $query->distinct();
 }
 
 /**
  * Implements hook_node_insert().
  */
 function mukurtu_notifications_node_insert(Node $node) {
-  return;
-  // Record the node insert event.
-  $template = 'mukurtu_single_node_insert';
-  $message = Message::create([
-    'template' => $template,
-    'uid' => $node->getOwnerId(),
-  ]);
-
-  // Add the subject node to the message.
-  $message->set('field_item', $node);
-
-  // Set the message to inherit the protocol of the subject node.
-  $message->set(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET, $node);
-
-  //$message->set('field_published', $node->isPublished());
-  $message->save();
-
-  // No messages created for unpublished items.
+  // Record the node insert event for all published nodes.
   if (!$node->isPublished()) {
     return;
   }
 
-  /* if ($node->getOwnerId() == $currentUser->id()) {
-    return;
-  } */
-
-/*   $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
-  if ($protocol_manager->hasProtocolFields($node)) {
-    $message = Message::create([
-      'template' => 'mukurtu_new_item_in_protocol',
-      'uid' => $node->getOwnerId(),
-    ]);
-    $message->set('field_item', $node);
-    $message->set(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET, $node);
-    $message->save();
-  } */
+  // Phase 1: record the event for the notifications feed. No email is sent on
+  // insert; email dispatch is phase 2 once per-user opt-in preferences are wired.
+  $message = Message::create([
+    'template' => 'mukurtu_single_node_insert',
+    'uid' => $node->getOwnerId(),
+  ]);
+  $message->set('field_item', $node);
+  $message->set('field_user', \Drupal::currentUser()->id());
+  $message->save();
 }
 
 /**
  * Implements hook_node_update().
  */
 function mukurtu_notifications_node_update(Node $node) {
-  return;
-  //$notifier = \Drupal::service('message_notify.sender');
-  $subscribers = \Drupal::service('message_subscribe.subscribers');
-
-  // Record the node update event.
-  $template = 'mukurtu_single_node_update';
-  $message = Message::create([
-    'template' => $template,
-    'uid' => $node->getOwnerId(),
-  ]);
-
-  // Add the subject node to the message.
-  $message->set('field_item', $node);
-
-  // Set the message to inherit the protocol of the subject node.
-  $message->set(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET, $node);
-  $message->save();
-
-  // Don't send out notifications for unpublished nodes.
+  // Don't record events or send notifications for unpublished nodes.
   if (!$node->isPublished()) {
     return;
   }
 
-  // Send "Mukurtu Follow Content" notifications.
-  $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
+  $subscribers = \Drupal::service('message_subscribe.subscribers');
+  $current_user_id = (int) \Drupal::currentUser()->id();
+  $owner_id = (int) $node->getOwnerId();
 
-  // Only do it for protocol aware bundles. Otherwise
-  // message_subscribe will call og\MembershipManager->getGroupIds
-  // which will throw an exception for being non-group content.
-  if ($protocol_manager->hasProtocolFields($node)) {
-    $subscribers->sendMessage($node, $message);
+  // Record the node update event.
+  $message = Message::create([
+    'template' => 'mukurtu_single_node_update',
+    'uid' => $node->getOwnerId(),
+  ]);
+  $message->set('field_item', $node);
+  $message->set('field_user', $current_user_id);
+  $message->save();
+
+  // Notify the node owner and protocol stewards when someone else edits.
+  if ($current_user_id !== $owner_id) {
+    $notify_uids = [];
+
+    // Include the node owner.
+    if ($owner_id > 0) {
+      $notify_uids[] = $owner_id;
+    }
+
+    // Include protocol stewards for content with cultural protocols assigned.
+    if ($node instanceof CulturalProtocolControlledInterface) {
+      $protocol_ids = $node->getProtocols();
+      if (!empty($protocol_ids)) {
+        $steward_uids = mukurtu_notifications_resolve_notify_groups(FALSE, [], $protocol_ids);
+        $notify_uids = array_merge($notify_uids, $steward_uids);
+      }
+    }
+
+    // Exclude the editor and deduplicate.
+    $notify_uids = array_values(array_unique(array_diff($notify_uids, [$current_user_id])));
+
+    if (!empty($notify_uids)) {
+      $flags = ['subscribe_node'];
+      $notifiers = ['email'];
+      $subscribe_options = [
+        'notify message owner' => FALSE,
+        'uids' => [],
+      ];
+      $email_validator = \Drupal::service('email.validator');
+      $recipients = User::loadMultiple($notify_uids);
+      foreach ($recipients as $uid => $recipient) {
+        $email = $recipient->getEmail();
+        if (!$email || !$email_validator->isValid($email)) {
+          continue;
+        }
+        $subscribe_options['uids'][$uid] = new DeliveryCandidate($flags, $notifiers, $uid);
+      }
+      if (!empty($subscribe_options['uids'])) {
+        try {
+          $subscribers->sendMessage($message, $message, [], $subscribe_options);
+        }
+        catch (\Exception $e) {
+          \Drupal::logger('mukurtu_notifications')->warning('Failed to send node update notification: @msg', ['@msg' => $e->getMessage()]);
+        }
+      }
+    }
   }
 
-  // Check for "Mukurtu Follow Protocol" notifications.
-  mukurtu_notifications_notify_protocol($node, $subscribers);
+  // Send "Mukurtu Follow Content" notifications to flag subscribers.
+  // message_subscribe calls OG functions that throw for non-group content,
+  // so limit this to nodes with cultural protocols.
+  if ($node->hasField('field_cultural_protocols')) {
+    try {
+      $subscribers->sendMessage($node, $message);
+    }
+    catch (\Exception $e) {
+      \Drupal::logger('mukurtu_notifications')->warning('Failed to send follow-content notification: @msg', ['@msg' => $e->getMessage()]);
+    }
+  }
 
-  // Check for "Mukurtu Follow Community" notifications.
-  mukurtu_notifications_notify_community($node, $subscribers);
+  // Phase 2: protocol and community follow notifications go here once flags
+  // are updated to target the protocol/community entity types.
+  // mukurtu_notifications_notify_protocol($node, $subscribers);
+  // mukurtu_notifications_notify_community($node, $subscribers);
 
-  // Check for "Mukurtu Follow Collection" notifcations.
+  // Check for "Mukurtu Follow Collection" notifications.
   mukurtu_notifications_notify_collection($node, $subscribers);
-
-  // Check for "Mukurtu Follow Language" notifcations.
 }
 
+/**
+ * Deletes all messages of a given template that reference a specific entity.
+ *
+ * @param string $template
+ *   The message template machine name.
+ * @param \Drupal\Core\Entity\EntityInterface $entity
+ *   The entity whose messages should be removed.
+ * @param string $field
+ *   The field name on the message that references the entity. Defaults to
+ *   'field_item'.
+ */
 function mukurtu_notifications_remove_notifications($template, $entity, $field = 'field_item') {
   // Find notifications for the given template that reference the entity.
   $query = \Drupal::entityQuery('message')
@@ -204,12 +204,12 @@ function mukurtu_notifications_remove_notifications($template, $entity, $field =
 }
 
 /**
- * Implements hook_node_update().
+ * Implements hook_node_delete().
  */
 function mukurtu_notifications_node_delete(Node $node) {
-  return;
   // Remove any old notifications for the deleted node.
   mukurtu_notifications_remove_notifications('mukurtu_single_node_insert', $node);
+  mukurtu_notifications_remove_notifications('mukurtu_single_node_update', $node);
 
   // Record the node delete event.
   $template = 'mukurtu_single_node_delete';
@@ -225,12 +225,8 @@ function mukurtu_notifications_node_delete(Node $node) {
   $message->set('field_content_type', \Drupal::token()->replace('[node:type-name]', ['node' => $node]));
 
   // Record the user who took the action.
-  $message->set('field_user', \Drupal\user\Entity\User::load(\Drupal::currentUser()->id()));
+  $message->set('field_user', \Drupal::currentUser()->id());
 
-  // Record the deleted node's protocols.
-  // We can't use inheritance because node won't exist later.
-  $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
-  $protocol_manager->copyProtocolFields($node, $message);
   $message->save();
 }
 
@@ -238,7 +234,6 @@ function mukurtu_notifications_node_delete(Node $node) {
  * Implements hook_ENTITY_TYPE_insert().
  */
 function mukurtu_notifications_user_insert($entity) {
-  return;
   // Only want to send notifications for users that
   // require action to be unblocked.
   if ($entity->isActive()) {
@@ -260,9 +255,14 @@ function mukurtu_notifications_user_insert($entity) {
   // TODO: Eventually we want an option for these admin users to
   // be able to opt out of these emails. At that point we'll
   // need to filter for that in this query.
-  $roles = user_role_names(TRUE, 'administer users');
-  $rids = array_keys($roles);
-  $uids = Drupal::service('entity_type.manager')->getStorage('user')->getQuery()
+  $rids = [];
+  foreach (Role::loadMultiple() as $role) {
+    if ($role->hasPermission('administer users')) {
+      $rids[] = $role->id();
+    }
+  }
+  $uids = \Drupal::service('entity_type.manager')->getStorage('user')->getQuery()
+    ->accessCheck(FALSE)
     ->condition('roles', $rids, 'IN')
     ->execute();
 
@@ -272,119 +272,204 @@ function mukurtu_notifications_user_insert($entity) {
   $notifiers = ['email'];
   $notify_options = [];
   $subscribe_options = [
-    'notify message owner' => TRUE,
+    'notify message owner' => FALSE,
     'uids' => [],
   ];
-  foreach ($uids as $uid) {
+  $email_validator = \Drupal::service('email.validator');
+  $admin_users = User::loadMultiple($uids);
+  foreach ($admin_users as $uid => $admin_user) {
+    if (!$email_validator->isValid($admin_user->getEmail())) {
+      continue;
+    }
     $subscribe_options['uids'][$uid] = new DeliveryCandidate($flags, $notifiers, $uid);
   }
 
   // Queue messages to our custom list of admins.
   $subscribers = \Drupal::service('message_subscribe.subscribers');
-  $subscribers->sendMessage($message, $message, $notify_options, $subscribe_options);
+  try {
+    $subscribers->sendMessage($message, $message, $notify_options, $subscribe_options);
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('mukurtu_notifications')->warning('Failed to send user registration notification: @msg', ['@msg' => $e->getMessage()]);
+  }
 }
 
 /**
- * Check if node is new to a followed protocol.
+ * Sends email notifications to selected users when a new account is created.
  *
- * @param Node $node
- * @return void
+ * @param \Drupal\user\Entity\User $new_user
+ *   The newly created user entity.
+ * @param array $notify_uids
+ *   Array of user IDs to notify.
  */
-function mukurtu_notifications_notify_protocol(Node $node, $subscribers) {
-  return;
-  $protocol_manager = \Drupal::service('mukurtu_protocol.protocol_manager');
-
-  // If this node isn't using protocols we are done.
-  if (!$protocol_manager->hasProtocolFields($node)) {
+function mukurtu_notifications_notify_new_account_created(User $new_user, array $notify_uids): void {
+  if (empty($notify_uids)) {
     return;
   }
 
-  // Determine the new/updated protocols.
-  $protocols = [];
-  if ($node->isNew() || !isset($node->original)) {
-    $read = $protocol_manager->getProtocols($node, MUKURTU_PROTOCOL_FIELD_NAME_READ);
-    $write = $protocol_manager->getProtocols($node, MUKURTU_PROTOCOL_FIELD_NAME_WRITE);
-    $protocols = array_unique(array_merge($read, $write));
-  } else {
-    $read = $protocol_manager->getProtocols($node, MUKURTU_PROTOCOL_FIELD_NAME_READ);
-    $write = $protocol_manager->getProtocols($node, MUKURTU_PROTOCOL_FIELD_NAME_WRITE);
-    $protocols = array_unique(array_merge($read, $write));
-    $readOriginal = $protocol_manager->getProtocols($node->original, MUKURTU_PROTOCOL_FIELD_NAME_READ);
-    $writeOriginal = $protocol_manager->getProtocols($node->original, MUKURTU_PROTOCOL_FIELD_NAME_WRITE);
-    $protocolsOriginal = array_unique(array_merge($readOriginal, $writeOriginal));
-    $protocols = array_diff($protocols, $protocolsOriginal);
-  }
+  $message = Message::create([
+    'template' => 'mukurtu_new_user_account_created',
+    'uid' => \Drupal::currentUser()->id(),
+  ]);
+  $message->set('field_user', $new_user);
+  $message->save();
 
-  // For all the new/updated protocols, build the message and have
-  // Message Subscribe determine if any are being followed.
-  if (!empty($protocols)) {
-    $protocolNodes = \Drupal::entityTypeManager()->getStorage('node')->loadMultiple($protocols);
-    foreach ($protocolNodes as $protocolNode) {
-      // Build the message.
-      $message = Message::create([
-        'template' => 'mukurtu_new_item_in_protocol',
-        'uid' => $node->getOwnerId(),
-      ]);
-
-      // Add the subject node to the message.
-      $message->set('field_item', $node);
-
-      // Add the followed protocol to the message.
-      $message->set('field_protocol', $protocolNode);
-
-      // Set the message to inherit the protocol of the subject node.
-      $message->set(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET, $node);
-
-      // Send the message.
-      $subscribers->sendMessage($protocolNode, $message);
-    }
-  }
-}
-
-function mukurtu_notifications_notify_community(Node $node, $subscribers) {
-  if (!$node->hasField(MUKURTU_COMMUNITY_FIELD_NAME_COMMUNITY)) {
-    return;
-  }
-
-  $communities = $node->get(MUKURTU_COMMUNITY_FIELD_NAME_COMMUNITY);
-
-  // Build a list of communities that didn't change between revisions.
-  $communitiesToSkip = [];
-  if (!$node->isNew() && isset($node->original)) {
-    $skip = $node->original->get(MUKURTU_COMMUNITY_FIELD_NAME_COMMUNITY);
-    foreach ($skip as $skipCommunity) {
-      $communitiesToSkip[] = $skipCommunity->entity->id();
-    }
-  }
-
-  foreach ($communities as $community) {
-    // Don't notify for communities that aren't new.
-    if (in_array($community->entity->id(), $communitiesToSkip)) {
+  $flags = ['subscribe_user'];
+  $notifiers = ['email'];
+  $subscribe_options = [
+    'notify message owner' => FALSE,
+    'uids' => [],
+  ];
+  $email_validator = \Drupal::service('email.validator');
+  $notify_users = User::loadMultiple($notify_uids);
+  foreach ($notify_users as $uid => $notify_user) {
+    if (!$email_validator->isValid($notify_user->getEmail())) {
       continue;
     }
+    $subscribe_options['uids'][$uid] = new DeliveryCandidate($flags, $notifiers, (int) $uid);
+  }
 
-    // Build the message.
-    $message = Message::create([
-      'template' => 'mukurtu_new_item_in_community',
-      'uid' => $node->getOwnerId(),
-    ]);
-
-    // Add the subject node to the message.
-    $message->set('field_item', $node);
-
-    // Add the followed protocol to the message.
-    $message->set('field_community', $community->entity);
-
-    // Set the message to inherit the protocol of the subject node.
-    $message->set(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET, $node);
-
-    // Skip context otherwise Message Subscribe tries to run OG
-    // getGroupIds on a node that doesn't support it.
-    $options = ['skip context' => TRUE];
-    $subscribers->sendMessage($community->entity, $message, [], $options);
+  try {
+    \Drupal::service('message_subscribe.subscribers')
+      ->sendMessage($message, $message, [], $subscribe_options);
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('mukurtu_notifications')->warning('Failed to send new account notification: @msg', ['@msg' => $e->getMessage()]);
   }
 }
 
+/**
+ * Resolves group-based notification selections to an array of user IDs.
+ *
+ * @param bool $all_managers
+ *   If TRUE, include all users with the administrator or mukurtu_manager role.
+ * @param array $community_ids
+ *   Entity IDs of communities whose community managers should be notified.
+ * @param array $protocol_ids
+ *   Entity IDs of protocols whose protocol stewards should be notified.
+ *
+ * @return array
+ *   Unique array of integer user IDs.
+ */
+function mukurtu_notifications_resolve_notify_groups(bool $all_managers, array $community_ids, array $protocol_ids): array {
+  $uids = [];
+
+  if ($all_managers) {
+    $manager_uids = \Drupal::entityQuery('user')
+      ->condition('roles', ['administrator', 'mukurtu_manager'], 'IN')
+      ->condition('status', 1)
+      ->accessCheck(FALSE)
+      ->execute();
+    $uids = array_merge($uids, array_values($manager_uids));
+  }
+
+  if (!empty($community_ids)) {
+    $memberships = \Drupal::entityQuery('og_membership')
+      ->condition('entity_type', 'community')
+      ->condition('entity_id', $community_ids, 'IN')
+      ->condition('roles', 'community-community-community_manager')
+      ->condition('state', 'active')
+      ->accessCheck(FALSE)
+      ->execute();
+    $loaded = \Drupal::entityTypeManager()->getStorage('og_membership')->loadMultiple($memberships);
+    foreach ($loaded as $m) {
+      $uids[] = (int) $m->getOwnerId();
+    }
+  }
+
+  if (!empty($protocol_ids)) {
+    $memberships = \Drupal::entityQuery('og_membership')
+      ->condition('entity_type', 'protocol')
+      ->condition('entity_id', $protocol_ids, 'IN')
+      ->condition('roles', 'protocol-protocol-protocol_steward')
+      ->condition('state', 'active')
+      ->accessCheck(FALSE)
+      ->execute();
+    $loaded = \Drupal::entityTypeManager()->getStorage('og_membership')->loadMultiple($memberships);
+    foreach ($loaded as $m) {
+      $uids[] = (int) $m->getOwnerId();
+    }
+  }
+
+  return array_values(array_unique($uids));
+}
+
+/**
+ * Extracts and resolves all notify UIDs from the shared notify form section.
+ *
+ * Reads notify_user_count, notify_users, notify_all_managers,
+ * notify_communities, and notify_protocols from form state, then delegates
+ * to mukurtu_notifications_resolve_notify_groups for group-based selections.
+ *
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ *   The form state from a form that includes the shared notify section.
+ *
+ * @return array
+ *   Unique array of integer user IDs to notify.
+ */
+function mukurtu_notifications_extract_notify_uids(FormStateInterface $form_state): array {
+  $notifyUids = [];
+  $notifyUserCount = $form_state->get('notify_user_count') ?? 1;
+  for ($i = 0; $i < $notifyUserCount; $i++) {
+    $uid = $form_state->getValue(['notify_users', 'user_' . $i]);
+    if (!empty($uid)) {
+      $notifyUids[] = (int) $uid;
+    }
+  }
+
+  $allManagers = (bool) $form_state->getValue('notify_all_managers');
+  $communityIds = array_keys(array_filter($form_state->getValue('notify_communities') ?? []));
+  $protocolIds = [];
+  foreach ($form_state->getValue('notify_protocols') ?? [] as $groupValues) {
+    if (is_array($groupValues)) {
+      $protocolIds = array_merge($protocolIds, array_keys(array_filter($groupValues)));
+    }
+  }
+  $protocolIds = array_unique($protocolIds);
+
+  $groupUids = mukurtu_notifications_resolve_notify_groups($allManagers, $communityIds, $protocolIds);
+  return array_values(array_unique(array_merge($notifyUids, $groupUids)));
+}
+
+/**
+ * Notify followers when a node is added to a protocol they follow.
+ *
+ * Phase 2: requires mukurtu_follow_protocol flag targeting the protocol entity
+ * type. Stubbed until flag configuration is updated.
+ *
+ * @todo Implement in issue #270 (notifications phase 2) once the
+ *   mukurtu_follow_protocol flag targets the protocol entity type.
+ */
+function mukurtu_notifications_notify_protocol(Node $node, $subscribers): void {
+  // Phase 2 implementation needed: the protocol entity type and follow flag
+  // must be aligned before this can send notifications.
+}
+
+/**
+ * Notify followers when a node is added to a community they follow.
+ *
+ * Phase 2: requires mukurtu_follow_community flag targeting the community
+ * entity type. Currently the flag targets node entities which no longer
+ * represent communities. Stubbed until flag configuration is updated.
+ *
+ * @todo Implement in issue #270 (notifications phase 2) once
+ *   mukurtu_follow_community flag targets the community entity type and
+ *   field_community on message templates references community entities.
+ */
+function mukurtu_notifications_notify_community(Node $node, $subscribers): void {
+  // Phase 2 implementation needed: update mukurtu_follow_community flag to
+  // target community entity type and update field_community on message
+  // templates to reference community entities instead of nodes.
+}
+
+/**
+ * Sends notifications to collection followers when new items are added.
+ *
+ * @param \Drupal\node\Entity\Node $node
+ *   The node being updated (must be a Collection).
+ * @param \Drupal\message_subscribe\SubscribersInterface $subscribers
+ *   The message_subscribe service.
+ */
 function mukurtu_notifications_notify_collection(Node $node, $subscribers) {
   // Only handling existing collections here.
   if (!($node instanceof Collection) || !isset($node->original)) {
@@ -400,16 +485,20 @@ function mukurtu_notifications_notify_collection(Node $node, $subscribers) {
     return;
   }
 
-  // Build the message.
   $message = Message::create([
     'template' => 'mukurtu_new_item_in_collection',
-    'field_collection' => $node,
-    'field_item' => $newItems,
     'uid' => $node->getOwnerId(),
   ]);
+  $message->set('field_collection', $node);
+  // field_item has cardinality 1, so only the first new item is stored per
+  // notification. If multi-item recording is needed, revisit in issue #270.
+  $message->set('field_item', array_values($newItems));
+  $message->save();
 
-  // Set the message to inherit the protocol of the collection.
-  $message->set(MUKURTU_PROTOCOL_FIELD_NAME_INHERITANCE_TARGET, $node);
-
-  $subscribers->sendMessage($node, $message);
+  try {
+    $subscribers->sendMessage($node, $message);
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('mukurtu_notifications')->warning('Failed to send collection notification: @msg', ['@msg' => $e->getMessage()]);
+  }
 }

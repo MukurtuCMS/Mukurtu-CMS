@@ -71,15 +71,15 @@
 
   <div{{ content_attributes }} class="full-node word-list">
 
+    {{ title_prefix }}
+    {{ title_suffix }}
+
     <div class="collection__header">
       <div class="collection__header__image">
         {{ content.field_word_list_image }}
       </div>
 
       <div class="collection__header__text">
-        {{ title_prefix }}
-        {{ title_suffix }}
-
         {% if label %}
           <h2{{ title_attributes }}>
           {{ label }}
@@ -115,16 +115,12 @@
               {{ content.community_protocol_list }}
               {{ content.field_keywords }}
               {{ content.field_source }}
-              {{ content.local_contexts_project }}
-              {{ content.local_contexts_label_and_notice }}
+              {{ content.field_local_contexts_projects }}
+              {{ content.field_local_contexts_labels_and_notices }}
               {{ content.field_citation }}
             </div>
           </aside>
         {% endif %}
-
-        <div class="full-node__flag-export-content">
-          {{ content.flag_export_content}}
-        </div>
 
       </div>
     </div>

@@ -2,8 +2,11 @@ langcode: en
 status: true
 dependencies:
   config:
+    - user.role.administrator
     - user.role.mukurtu_manager
+    - user.role.mukurtu_roundtrip_manager
   module:
+    - content_moderation
     - mukurtu_protocol
     - node
     - views_bulk_operations
@@ -81,27 +84,28 @@ display:
           force_selection_info: false
           selected_actions:
             4:
-              action_id: 'flag_action:export_content_flag'
-              preconfiguration:
-                add_confirmation: false
+              action_id: mukurtu_export_add_to_list_action
             5:
-              action_id: 'flag_action:export_content_unflag'
-              preconfiguration:
-                add_confirmation: false
-            29:
-              action_id: mukurtu_add_to_collection_action
-            32:
-              action_id: node_assign_owner_action
-              preconfiguration:
-                add_confirmation: false
+              action_id: mukurtu_export_remove_from_list_action
             37:
               action_id: 'entity:unpublish_action:node'
               preconfiguration:
                 add_confirmation: false
+                label_override: Unpublish
             39:
               action_id: 'entity:publish_action:node'
               preconfiguration:
                 add_confirmation: false
+                label_override: Publish
+            40:
+              action_id: mukurtu_export_add_to_list_action
+            41:
+              action_id: views_bulk_operations_delete_entity
+              preconfiguration:
+                add_confirmation: true
+                label_override: Delete
+            43:
+              action_id: mukurtu_export_adhoc_export_action
         title:
           id: title
           table: node_field_data
@@ -112,7 +116,7 @@ display:
           entity_type: node
           entity_field: title
           plugin_id: field
-          label: ''
+          label: Title
           exclude: false
           alter:
             alter_text: false
@@ -214,15 +218,15 @@ display:
           multi_type: separator
           separator: ', '
           field_api_classes: false
-        field_category:
-          id: field_category
-          table: node__field_category
-          field: field_category
+        community:
+          id: community
+          table: node_field_data
+          field: mukurtu_community_field
           relationship: none
           group_type: group
           admin_label: ''
-          plugin_id: field
-          label: Category
+          plugin_id: mukurtu_node_community_field
+          label: Community
           exclude: false
           alter:
             alter_text: false
@@ -263,83 +267,6 @@ display:
           hide_empty: false
           empty_zero: false
           hide_alter_empty: true
-          click_sort_column: target_id
-          type: entity_reference_label
-          settings:
-            link: true
-          group_column: target_id
-          group_columns: {  }
-          group_rows: true
-          delta_limit: 0
-          delta_offset: 0
-          delta_reversed: false
-          delta_first_last: false
-          multi_type: separator
-          separator: ', '
-          field_api_classes: false
-        field_keywords:
-          id: field_keywords
-          table: node__field_keywords
-          field: field_keywords
-          relationship: none
-          group_type: group
-          admin_label: ''
-          plugin_id: field
-          label: Keywords
-          exclude: false
-          alter:
-            alter_text: false
-            text: ''
-            make_link: false
-            path: ''
-            absolute: false
-            external: false
-            replace_spaces: false
-            path_case: none
-            trim_whitespace: false
-            alt: ''
-            rel: ''
-            link_class: ''
-            prefix: ''
-            suffix: ''
-            target: ''
-            nl2br: false
-            max_length: 0
-            word_boundary: true
-            ellipsis: true
-            more_link: false
-            more_link_text: ''
-            more_link_path: ''
-            strip_tags: false
-            trim: false
-            preserve_tags: ''
-            html: false
-          element_type: ''
-          element_class: ''
-          element_label_type: ''
-          element_label_class: ''
-          element_label_colon: true
-          element_wrapper_type: ''
-          element_wrapper_class: ''
-          element_default_classes: true
-          empty: ''
-          hide_empty: false
-          empty_zero: false
-          hide_alter_empty: true
-          click_sort_column: target_id
-          type: entity_reference_label
-          settings:
-            link: true
-          group_column: target_id
-          group_columns: {  }
-          group_rows: true
-          delta_limit: 0
-          delta_offset: 0
-          delta_reversed: false
-          delta_first_last: false
-          multi_type: separator
-          separator: ', '
-          field_api_classes: false
         changed:
           id: changed
           table: node_field_data
@@ -416,17 +343,17 @@ display:
           multi_type: separator
           separator: ', '
           field_api_classes: false
-        status:
-          id: status
+        moderation_state:
+          id: moderation_state
           table: node_field_data
-          field: status
+          field: moderation_state
           relationship: none
           group_type: group
           admin_label: ''
           entity_type: node
-          entity_field: status
+          entity_field: moderation_state
           plugin_id: field
-          label: Published
+          label: Status
           exclude: false
           alter:
             alter_text: false
@@ -468,11 +395,8 @@ display:
           empty_zero: false
           hide_alter_empty: true
           click_sort_column: value
-          type: boolean
-          settings:
-            format: default
-            format_custom_false: ''
-            format_custom_true: ''
+          type: content_moderation_state
+          settings: {  }
           group_column: value
           group_columns: {  }
           group_rows: true
@@ -548,6 +472,55 @@ display:
           multi_type: separator
           separator: ', '
           field_api_classes: false
+        row_actions:
+          id: row_actions
+          table: node_field_data
+          field: mukurtu_row_actions
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: mukurtu_node_row_actions
+          label: Actions
+          exclude: false
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: true
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
       pager:
         type: mini
         options:
@@ -559,9 +532,9 @@ display:
             next: ››
             previous: ‹‹
           expose:
-            items_per_page: false
+            items_per_page: true
             items_per_page_label: 'Items per page'
-            items_per_page_options: '5, 10, 25, 50'
+            items_per_page_options: '20, 50, 100'
             items_per_page_options_all: false
             items_per_page_options_all_label: '- All -'
             offset: false
@@ -581,7 +554,9 @@ display:
         type: site_and_mukurtu_role
         options:
           site-role:
+            administrator: administrator
             mukurtu_manager: mukurtu_manager
+            mukurtu_roundtrip_manager: mukurtu_roundtrip_manager
           community-role: {  }
           protocol-role:
             protocol-protocol-contributor: protocol-protocol-contributor
@@ -611,87 +586,6 @@ display:
           granularity: second
       arguments: {  }
       filters:
-        status:
-          id: status
-          table: node_field_data
-          field: status
-          relationship: none
-          group_type: group
-          admin_label: ''
-          entity_type: node
-          entity_field: status
-          plugin_id: boolean
-          operator: '='
-          value: '1'
-          group: 1
-          exposed: true
-          expose:
-            operator_id: ''
-            label: Published
-            description: ''
-            use_operator: false
-            operator: status_op
-            operator_limit_selection: false
-            operator_list: {  }
-            identifier: status
-            required: true
-            remember: false
-            multiple: false
-            remember_roles:
-              authenticated: authenticated
-          is_grouped: false
-          group_info:
-            label: ''
-            description: ''
-            identifier: ''
-            optional: true
-            widget: select
-            multiple: false
-            remember: false
-            default_group: All
-            default_group_multiple: {  }
-            group_items: {  }
-        type:
-          id: type
-          table: node_field_data
-          field: type
-          relationship: none
-          group_type: group
-          admin_label: ''
-          entity_type: node
-          entity_field: type
-          plugin_id: bundle
-          operator: in
-          value: {  }
-          group: 1
-          exposed: true
-          expose:
-            operator_id: type_op
-            label: 'Content type'
-            description: ''
-            use_operator: false
-            operator: type_op
-            operator_limit_selection: false
-            operator_list: {  }
-            identifier: type
-            required: false
-            remember: false
-            multiple: true
-            remember_roles:
-              authenticated: authenticated
-            reduce: false
-          is_grouped: false
-          group_info:
-            label: ''
-            description: ''
-            identifier: ''
-            optional: true
-            widget: select
-            multiple: false
-            remember: false
-            default_group: All
-            default_group_multiple: {  }
-            group_items: {  }
         title:
           id: title
           table: node_field_data
@@ -733,10 +627,175 @@ display:
             default_group: All
             default_group_multiple: {  }
             group_items: {  }
+        nid:
+          id: nid
+          table: node_field_data
+          field: nid
+          relationship: none
+          group_type: group
+          admin_label: ''
+          entity_type: node
+          entity_field: nid
+          plugin_id: numeric
+          operator: '='
+          value:
+            value: ''
+            min: ''
+            max: ''
+          group: 1
+          exposed: true
+          expose:
+            operator_id: nid_op
+            label: 'Content ID'
+            description: ''
+            use_operator: false
+            operator: nid_op
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: nid
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+            placeholder: ''
+            min_placeholder: ''
+            max_placeholder: ''
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+        type:
+          id: type
+          table: node_field_data
+          field: type
+          relationship: none
+          group_type: group
+          admin_label: ''
+          entity_type: node
+          entity_field: type
+          plugin_id: bundle
+          operator: in
+          value: {  }
+          group: 1
+          exposed: true
+          expose:
+            operator_id: type_op
+            label: 'Content type'
+            description: ''
+            use_operator: false
+            operator: type_op
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: type
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+            reduce: false
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+        community:
+          id: community
+          table: node_field_data
+          field: mukurtu_community_filter
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: mukurtu_node_community_filter
+          operator: in
+          value: {  }
+          group: 1
+          exposed: true
+          expose:
+            operator_id: community_op
+            label: Community
+            description: ''
+            use_operator: false
+            operator: community_op
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: community
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+            reduce: false
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+        protocol:
+          id: protocol
+          table: node_field_data
+          field: mukurtu_protocol_filter
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: mukurtu_node_protocol_filter
+          operator: in
+          value: {  }
+          group: 1
+          exposed: true
+          expose:
+            operator_id: protocol_op
+            label: Protocol
+            description: ''
+            use_operator: false
+            operator: protocol_op
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: protocol
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+            reduce: false
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
         field_category_target_id:
           id: field_category_target_id
-          table: node__field_category
-          field: field_category_target_id
+          table: taxonomy_index
+          field: tid
           relationship: none
           group_type: group
           admin_label: ''
@@ -756,7 +815,7 @@ display:
             identifier: field_category_target_id
             required: false
             remember: false
-            multiple: true
+            multiple: false
             remember_roles:
               authenticated: authenticated
             reduce: false
@@ -780,8 +839,8 @@ display:
           error_message: true
         field_keywords_target_id:
           id: field_keywords_target_id
-          table: node__field_keywords
-          field: field_keywords_target_id
+          table: taxonomy_index
+          field: tid
           relationship: none
           group_type: group
           admin_label: ''
@@ -801,7 +860,7 @@ display:
             identifier: field_keywords_target_id
             required: false
             remember: false
-            multiple: true
+            multiple: false
             remember_roles:
               authenticated: authenticated
             reduce: false
@@ -819,10 +878,203 @@ display:
             group_items: {  }
           reduce_duplicates: false
           vid: keywords
-          type: textfield
+          type: select
           hierarchy: false
           limit: true
           error_message: true
+        in_collection:
+          id: in_collection
+          table: node_field_data
+          field: mukurtu_in_collection
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: mukurtu_node_in_collection
+          operator: in
+          value: {  }
+          group: 1
+          exposed: true
+          expose:
+            operator_id: in_collection_op
+            label: Collection
+            description: ''
+            use_operator: false
+            operator: in_collection_op
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: in_collection
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+            reduce: false
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+        in_word_list:
+          id: in_word_list
+          table: node_field_data
+          field: mukurtu_in_word_list
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: mukurtu_node_in_word_list
+          operator: in
+          value: {  }
+          group: 1
+          exposed: true
+          expose:
+            operator_id: in_word_list_op
+            label: 'Word list'
+            description: ''
+            use_operator: false
+            operator: in_word_list_op
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: in_word_list
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+            reduce: false
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+        is_community_record:
+          id: is_community_record
+          table: node_field_data
+          field: mukurtu_is_community_record
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: mukurtu_node_is_community_record
+          operator: '='
+          value: All
+          group: 1
+          exposed: true
+          expose:
+            operator_id: ''
+            label: 'Community record'
+            description: ''
+            use_operator: false
+            operator: ''
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: is_community_record
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+        is_multipage_item:
+          id: is_multipage_item
+          table: node_field_data
+          field: mukurtu_is_multipage_item
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: mukurtu_node_is_multipage_item
+          operator: '='
+          value: All
+          group: 1
+          exposed: true
+          expose:
+            operator_id: ''
+            label: 'Multipage item'
+            description: ''
+            use_operator: false
+            operator: ''
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: is_multipage_item
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+        moderation_state:
+          id: moderation_state
+          table: node_field_data
+          field: moderation_state
+          relationship: none
+          group_type: group
+          admin_label: ''
+          entity_type: node
+          plugin_id: moderation_state_filter
+          operator: in
+          value: {  }
+          group: 1
+          exposed: true
+          expose:
+            operator_id: ''
+            label: Status
+            description: ''
+            use_operator: false
+            operator: moderation_state_op
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: moderation_state
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
       style:
         type: table
         options:
@@ -833,11 +1085,11 @@ display:
             views_bulk_operations_bulk_form: views_bulk_operations_bulk_form
             title: title
             type: type
-            field_category: field_category
-            field_keywords: field_keywords
-            changed: changed
-            status: status
+            community: community
+            moderation_state: moderation_state
             uid: uid
+            changed: changed
+            row_actions: row_actions
           default: changed
           info:
             views_bulk_operations_bulk_form:
@@ -859,24 +1111,12 @@ display:
               separator: ''
               empty_column: false
               responsive: ''
-            field_category:
+            community:
               align: ''
               separator: ''
               empty_column: false
               responsive: ''
-            field_keywords:
-              align: ''
-              separator: ''
-              empty_column: false
-              responsive: ''
-            changed:
-              sortable: true
-              default_sort_order: desc
-              align: ''
-              separator: ''
-              empty_column: false
-              responsive: ''
-            status:
+            moderation_state:
               sortable: true
               default_sort_order: asc
               align: ''
@@ -890,10 +1130,22 @@ display:
               separator: ''
               empty_column: false
               responsive: ''
+            changed:
+              sortable: true
+              default_sort_order: desc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
+            row_actions:
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
           override: true
           sticky: true
           summary: ''
-          empty_table: false
+          empty_table: true
           caption: ''
           description: ''
           class: ''

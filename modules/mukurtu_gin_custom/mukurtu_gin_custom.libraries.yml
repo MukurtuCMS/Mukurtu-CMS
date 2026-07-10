@@ -1,5 +1,47 @@
+gin-collapsed-defaults:
+  header: true
+  js:
+    js/gin-collapsed-defaults.js: { weight: -100, preprocess: false }
+
 mukurtu-gin-custom:
   version: 1.x
   css:
     base:
       css/mukurtu-gin-custom.css: {}
+  js:
+    js/mukurtu-gin-custom.js: {}
+    js/media-library-cancel.js: {}
+    js/mukurtu-tagify-focus.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/once
+    - core/drupalSettings
+    - toolbar/toolbar
+
+entity-browser-toggle:
+  version: 1.x
+  js:
+    js/entity-browser-toggle.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+    - core/jquery
+
+moderation-state-header:
+  version: 1.x
+  js:
+    js/moderation-state-header.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+    - core/jquery
+
+community-browser-select:
+  version: 1.x
+  js:
+    js/community-browser-select.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+    - core/jquery

@@ -8,7 +8,7 @@
 /**
  * Update Creative Commons license URLs to include trailing slash.
  */
-function mukurtu_digital_heritage_update_11001(&$sandbox) {
+function mukurtu_digital_heritage_update_40001(&$sandbox) {
   $url_map = [
     'http://creativecommons.org/licenses/by/4.0' => 'https://creativecommons.org/licenses/by/4.0/',
     'http://creativecommons.org/licenses/by-nc/4.0' => 'https://creativecommons.org/licenses/by-nc/4.0/',
@@ -53,7 +53,7 @@ function mukurtu_digital_heritage_update_11001(&$sandbox) {
 /**
  * Update Rights Statements URLs from http to https.
  */
-function mukurtu_digital_heritage_update_11002(&$sandbox) {
+function mukurtu_digital_heritage_update_40002(&$sandbox) {
   $url_map = [
     'http://rightsstatements.org/vocab/InC/1.0/' => 'https://rightsstatements.org/vocab/InC/1.0/',
     'http://rightsstatements.org/vocab/InC-OW-EU/1.0/' => 'https://rightsstatements.org/vocab/InC-OW-EU/1.0/',
@@ -99,4 +99,87 @@ function mukurtu_digital_heritage_update_11002(&$sandbox) {
   $sandbox['#finished'] = $sandbox['total'] > 0
     ? min($sandbox['current'] / $sandbox['total'], 1)
     : 1;
+}
+
+/**
+ * Update digital heritage featured view mode to use digital_heritage_sidebar
+ * for representative media so featured cards show thumbnail above audio player.
+ */
+function mukurtu_digital_heritage_update_40003(): void {
+  \Drupal::configFactory()
+    ->getEditable('core.entity_view_display.node.digital_heritage.featured')
+    ->set('content.field_representative_media.settings.view_mode', 'digital_heritage_sidebar')
+    ->save();
+}
+
+/**
+ * Switch field_related_content widget to rendered_entity (form_selection view mode).
+ */
+function mukurtu_digital_heritage_update_40004(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.digital_heritage.default');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_related_content.settings.field_widget_display', 'rendered_entity');
+  $config->set('content.field_related_content.settings.field_widget_display_settings', ['view_mode' => 'form_selection']);
+  $config->save();
+}
+
+/**
+ * Use mukurtu_comment_default formatter for digital heritage comment field.
+ */
+function mukurtu_digital_heritage_update_40005(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.digital_heritage.full');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.comment.type', 'mukurtu_comment_default');
+  $config->save();
+}
+
+/**
+ * Switch digital heritage full view related content to featured view mode.
+ */
+function mukurtu_digital_heritage_update_40006(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.digital_heritage.full');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_all_related_content.settings.view_mode', 'featured');
+  $config->save();
+}
+
+/**
+ * Hide the export-list flag button on digital heritage displays.
+ */
+function mukurtu_digital_heritage_update_40007(): void {
+  $displays = [
+    'core.entity_view_display.node.digital_heritage.full' => 'group_metadata',
+    'core.entity_view_display.node.digital_heritage.taxonomy_record' => NULL,
+  ];
+
+  foreach ($displays as $display_id => $group_name) {
+    $config = \Drupal::configFactory()->getEditable($display_id);
+    if ($config->isNew()) {
+      continue;
+    }
+
+    $content = $config->get('content') ?? [];
+    if (isset($content['flag_export_content'])) {
+      unset($content['flag_export_content']);
+      $config->set('content', $content);
+    }
+
+    $hidden = $config->get('hidden') ?? [];
+    $hidden['flag_export_content'] = TRUE;
+    $config->set('hidden', $hidden);
+
+    if ($group_name) {
+      $children = $config->get("third_party_settings.field_group.$group_name.children") ?? [];
+      $children = array_values(array_filter($children, fn($child) => $child !== 'flag_export_content'));
+      $config->set("third_party_settings.field_group.$group_name.children", $children);
+    }
+
+    $config->save();
+  }
 }

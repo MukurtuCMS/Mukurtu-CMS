@@ -41,6 +41,15 @@ content:
     third_party_settings: {  }
     weight: 2
     region: content
+  field_recording:
+    type: entity_reference_entity_view
+    label: hidden
+    settings:
+      view_mode: browse
+      link: false
+    third_party_settings: {  }
+    weight: 3
+    region: content
   field_representative_media:
     type: entity_reference_entity_view
     label: hidden
@@ -52,7 +61,6 @@ content:
     region: content
 hidden:
   comment: true
-  draft: true
   field_additional_word_entries: true
   field_all_related_content: true
   field_alternate_spelling: true
@@ -73,7 +81,6 @@ hidden:
   field_multipage_page_of: true
   field_pronunciation: true
   field_protocol_control: true
-  field_recording: true
   field_related_content: true
   field_sample_sentences: true
   field_sequence_collection: true
