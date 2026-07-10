@@ -3929,7 +3929,7 @@ body.is-fixed {
 }
 
 .vertical-card {
-  --card-font-size: var(--font-size-m);
+  --card-font-size: var(--font-size-l);
   -webkit-column-break-inside: avoid;
      -moz-column-break-inside: avoid;
           break-inside: avoid;
@@ -3940,6 +3940,10 @@ body.is-fixed {
   -webkit-padding-after: var(--v-space-3xs);
           padding-block-end: var(--v-space-3xs);
   margin-block: 0 var(--v-space-3xs);
+}
+.vertical-card__content-header {
+  -webkit-margin-after: var(--v-space-6xs);
+          margin-block-end: var(--v-space-6xs);
 }
 .vertical-card__content-header h2 {
   margin-block: 0;
@@ -3976,7 +3980,6 @@ body.is-fixed {
 }
 .vertical-card__content-type {
   font-size: var(--font-size-s);
-  font-weight: var(--text-bold);
   text-transform: uppercase;
 }
 .vertical-card__content-body {
@@ -4008,7 +4011,7 @@ body.is-fixed {
 .vertical-card__content-body .field .field__label {
   -ms-flex-negative: 0;
       flex-shrink: 0;
-  font-size: inherit;
+  font-size: initial;
   font-weight: var(--text-bold);
 }
 .vertical-card__content-body .field .field__label::after {
@@ -4024,6 +4027,7 @@ body.is-fixed {
 }
 .vertical-card__content-body .field .field__item {
   display: inline-block;
+  font-size: initial;
 }
 .vertical-card__content-body .field .field__items .field__item:not(:last-of-type)::after {
   content: ",";
