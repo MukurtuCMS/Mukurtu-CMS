@@ -116,3 +116,17 @@ function mukurtu_person_update_40006(): void {
     \Drupal::configFactory()->getEditable($config_name)->setData($data)->save(TRUE);
   }
 }
+
+/**
+ * Show field_in_collection in Map mode, matching List and Grid (#1624).
+ */
+function mukurtu_person_update_40007(): void {
+  $config_source = new \Drupal\Core\Config\FileStorage(
+    \Drupal::service('extension.list.module')->getPath('mukurtu_person') . '/config/install'
+  );
+  $config_name = 'core.entity_view_display.node.person.map_browse';
+  $data = $config_source->read($config_name);
+  if ($data) {
+    \Drupal::configFactory()->getEditable($config_name)->setData($data)->save(TRUE);
+  }
+}
