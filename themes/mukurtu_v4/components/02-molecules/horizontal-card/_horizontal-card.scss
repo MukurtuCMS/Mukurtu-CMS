@@ -30,6 +30,16 @@
         block-size: auto;
       }
     }
+
+    .media--remote_video iframe,
+    .media--soundcloud iframe {
+      block-size: auto;
+      aspect-ratio: 16 / 9;
+    }
+
+    video {
+      max-block-size: 18rem;
+    }
   }
 
   &__content {

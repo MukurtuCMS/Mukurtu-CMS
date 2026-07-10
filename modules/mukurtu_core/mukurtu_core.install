@@ -2034,8 +2034,9 @@ function mukurtu_core_update_40072(): void {
 }
 
 /**
- * Render video, remote_video, and soundcloud media as thumbnails (not full
- * players/embeds) in the "browse" view mode used by List/Grid/Map cards.
+ * Show a manually-provided thumbnail image for video, remote_video, and
+ * soundcloud media in the "browse" view mode used by List/Grid/Map cards,
+ * falling back to the native player/embed when no thumbnail is set.
  */
 function mukurtu_core_update_40073(): void {
   $config_source = new \Drupal\Core\Config\FileStorage(

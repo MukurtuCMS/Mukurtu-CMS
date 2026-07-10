@@ -4,8 +4,11 @@
  * Shared card media wrapper for List/Grid/Map cards.
  *
  * Wraps the representative media thumbnail in a link to the node so the
- * whole card is clickable. Audio is excluded because its native player
- * controls need to stay clickable/interactive rather than navigate away.
+ * whole card is clickable. Only bundles that always render a static image
+ * are wrapped. Audio, video, remote_video, and soundcloud are excluded
+ * because they can render a native, interactive player/embed (whenever no
+ * manual thumbnail override is set), whose controls need to stay
+ * clickable rather than navigate away.
  *
  * Expected variables:
  * - media_bundle: machine name of the representative media's bundle.
@@ -13,7 +16,7 @@
  * - url: node URL to link to.
  */
 #}
-{% if media_bundle and media_bundle is not same as 'audio' %}
+{% if media_bundle in ['image', 'document', 'external_embed'] %}
 <a href="{{ url }}" aria-hidden="true" tabindex="-1">
   {{ media }}
 </a>

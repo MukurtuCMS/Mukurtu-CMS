@@ -6,6 +6,8 @@ dependencies:
     - image.style.medium_480px_w_
     - media.type.video
   module:
+    - blazy
+    - file
     - image
     - layout_builder
 third_party_settings:
@@ -17,7 +19,24 @@ targetEntityType: media
 bundle: video
 mode: browse
 content:
-  thumbnail:
+  field_media_video_file:
+    type: file_video
+    label: hidden
+    settings:
+      controls: true
+      autoplay: false
+      loop: false
+      multiple_file_display_type: tags
+      muted: false
+      width: 640
+      height: 480
+      playsinline: false
+    third_party_settings:
+      blazy:
+        blazy: false
+    weight: 1
+    region: content
+  field_thumbnail:
     type: image
     label: hidden
     settings:
@@ -34,11 +53,10 @@ hidden:
   field_cultural_protocols: true
   field_identifier: true
   field_media_tags: true
-  field_media_video_file: true
   field_people: true
-  field_thumbnail: true
   flag_export_media: true
   langcode: true
   name: true
   search_api_excerpt: true
+  thumbnail: true
   uid: true
