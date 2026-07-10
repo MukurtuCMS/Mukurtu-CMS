@@ -769,6 +769,24 @@ function mukurtu_core_update_40023(): void {
   // place content type was added won't have the place node type yet, which
   // makes the FieldConfig::create() below throw a LogicException.
   if (!\Drupal::moduleHandler()->moduleExists('mukurtu_place')) {
+    // mukurtu_place's core.entity_form_display.node.place.default config
+    // depends on this entity browser, which was added to the already-
+    // installed mukurtu_taxonomy module's config/install at the same time as
+    // mukurtu_place -- config/install is only applied when a module is
+    // freshly installed, so existing sites never picked it up. Import it
+    // first so installing mukurtu_place doesn't fail its config dependency
+    // validation.
+    $config_name = 'entity_browser.browser.mukurtu_taxonomy_record_place_term_browser';
+    $config_factory = \Drupal::configFactory();
+    if ($config_factory->get($config_name)->isNew()) {
+      $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_taxonomy');
+      $config_source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+      $data = $config_source->read($config_name);
+      if ($data) {
+        $config_factory->getEditable($config_name)->setData($data)->save();
+      }
+    }
+
     \Drupal::service('module_installer')->install(['mukurtu_place']);
   }
 
