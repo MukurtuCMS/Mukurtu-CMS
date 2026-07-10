@@ -108,5 +108,15 @@
         }
       }
     }
+
+    // Summary reads as body copy, not a label/value pair -- give it more
+    // room than the labelled fields below it and make sure there's always
+    // clear separation before the next field, regardless of whether a
+    // content-type label above it (present on /browse, hidden on
+    // /digital-heritage) already provided some visual breathing room.
+    .field--name-field-summary {
+      font-size: var(--font-size-s);
+      margin-block-end: var(--v-space-5xs);
+    }
   }
 }

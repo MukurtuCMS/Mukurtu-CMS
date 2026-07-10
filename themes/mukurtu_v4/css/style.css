@@ -4032,6 +4032,11 @@ body.is-fixed {
 .vertical-card__content-body .field .field__items .field__item:not(:last-of-type)::after {
   content: ",";
 }
+.vertical-card__content-body .field--name-field-summary {
+  font-size: var(--font-size-s);
+  -webkit-margin-after: var(--v-space-5xs);
+          margin-block-end: var(--v-space-5xs);
+}
 
 .page__breadcrumbs {
   -webkit-box-shadow: inset 0 41px 18px -42px var(--mukurtu-breadcrumb-gradient-color);
