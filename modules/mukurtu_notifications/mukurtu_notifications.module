@@ -13,6 +13,9 @@ use Drupal\user\Entity\User;
 use Drupal\message_subscribe\Subscribers\DeliveryCandidate;
 use Drupal\mukurtu_collection\Entity\Collection;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
+use Drupal\Component\Utility\Html;
+use Drupal\Core\Render\BubbleableMetadata;
+use Drupal\Core\Render\Markup;
 
 /**
  * Implements hook_entity_type_alter().
@@ -501,4 +504,54 @@ function mukurtu_notifications_notify_collection(Node $node, $subscribers) {
   catch (\Exception $e) {
     \Drupal::logger('mukurtu_notifications')->warning('Failed to send collection notification: @msg', ['@msg' => $e->getMessage()]);
   }
+}
+
+/**
+ * Implements hook_token_info_alter().
+ *
+ * Registers a token that resolves to the account's display name and edit
+ * page URL together, rather than a bare URL. Notification message
+ * templates need this because a raw chained token (e.g. [entity:url])
+ * placed directly inside an href attribute gets mangled by the
+ * mukurtu_html text format's filter_html filter before token replacement
+ * ever runs: filter_html strips what looks like a disallowed URI scheme,
+ * and an unresolved token's colon-separated segments
+ * (message:field_user:entity:...) match that pattern.
+ */
+function mukurtu_notifications_token_info_alter(&$data) {
+  $data['tokens']['user']['mukurtu-notification-link'] = [
+    'name' => t('Notification link'),
+    'description' => t('The display name, username, and account edit page URL, on its own line (Mukurtu).'),
+  ];
+}
+
+/**
+ * Implements hook_tokens().
+ */
+function mukurtu_notifications_tokens($type, $tokens, array $data, array $options, BubbleableMetadata $bubbleable_metadata) {
+  $replacements = [];
+
+  if ($type !== 'user' || empty($data['user']) || !isset($tokens['mukurtu-notification-link'])) {
+    return $replacements;
+  }
+
+  /** @var \Drupal\user\UserInterface $account */
+  $account = $data['user'];
+  $bubbleable_metadata->addCacheableDependency($account);
+
+  $label = Html::escape($account->getDisplayName()) . ' (' . Html::escape($account->getAccountName()) . ')';
+  if (!$account->id()) {
+    $replacements[$tokens['mukurtu-notification-link']] = Markup::create($label);
+    return $replacements;
+  }
+
+  // The URL is placed on its own line, rather than wrapped in an <a> tag,
+  // to match the pattern used by core's own admin approval notification
+  // (register_pending_approval_admin, which uses [user:edit-url] the same
+  // way). Outgoing mail on this site is plain text only, so a wrapped link
+  // would otherwise be rewritten into a numbered footnote reference.
+  $url = Html::escape($account->toUrl('edit-form', ['absolute' => TRUE])->toString());
+  $replacements[$tokens['mukurtu-notification-link']] = Markup::create($label . '<br /><br />' . $url);
+
+  return $replacements;
 }
