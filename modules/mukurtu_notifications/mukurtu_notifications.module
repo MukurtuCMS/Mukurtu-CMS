@@ -1450,7 +1450,9 @@ function mukurtu_notifications_og_membership_insert(OgMembership $membership) {
 /**
  * Implements hook_og_membership_delete().
  *
- * Mirrors mukurtu_notifications_og_membership_insert() for removals.
+ * Unlike mukurtu_notifications_og_membership_insert(), the removed user is
+ * NOT a recipient here -- only the community manager / protocol steward
+ * should be notified that someone was removed.
  */
 function mukurtu_notifications_og_membership_delete(OgMembership $membership) {
   $group = $membership->getGroup();
@@ -1480,7 +1482,7 @@ function mukurtu_notifications_og_membership_delete(OgMembership $membership) {
     return;
   }
 
-  $recipient_uids = array_values(array_unique(array_merge([$removed_uid], $group_uids)));
+  $recipient_uids = array_values(array_unique($group_uids));
 
   _mukurtu_notifications_notify($template, $field_values, $recipient_uids, (int) \Drupal::currentUser()->id());
 }
