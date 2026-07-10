@@ -22,10 +22,10 @@
         "drupal/color_field": "^3.0",
         "drupal/config_pages": "^2.15",
         "drupal/consent_popup": "^1.0",
-        "drupal/core": "~11.3.0",
-        "drupal/core-composer-scaffold": "~11.3.0",
-        "drupal/core-project-message": "~11.3.0",
-        "drupal/core-recommended": "~11.3.0",
+        "drupal/core": "~11.4.0",
+        "drupal/core-composer-scaffold": "~11.4.0",
+        "drupal/core-project-message": "~11.4.0",
+        "drupal/core-recommended": "~11.4.0",
         "drupal/ctools": "*",
         "drupal/embed": "*",
         "drupal/entity_browser": "*",
@@ -101,7 +101,8 @@
             "drupal/core-project-message": true,
             "php-http/discovery": true,
             "phpstan/extension-installer": true,
-            "tbachert/spi": true
+            "tbachert/spi": true,
+            "symfony/runtime": true
         }
     },
     "extra": {
