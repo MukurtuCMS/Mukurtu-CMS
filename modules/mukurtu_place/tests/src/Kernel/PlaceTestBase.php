@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_place\Kernel;
 
 use Drupal\Tests\mukurtu_core\Kernel\MukurtuKernelTestBase;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\mukurtu_place\Entity\Place;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
@@ -78,6 +80,22 @@ abstract class PlaceTestBase extends MukurtuKernelTestBase {
     Vocabulary::create(['vid' => 'keywords', 'name' => 'Keywords'])->save();
     Vocabulary::create(['vid' => 'location', 'name' => 'Location'])->save();
     Vocabulary::create(['vid' => 'place_type', 'name' => 'Place Type'])->save();
+
+    // field_coverage is a config-based geofield, not a base field, so it
+    // must be created explicitly rather than picked up automatically.
+    if (!FieldStorageConfig::loadByName('node', 'field_coverage')) {
+      FieldStorageConfig::create([
+        'field_name' => 'field_coverage',
+        'entity_type' => 'node',
+        'type' => 'geofield',
+        'cardinality' => 1,
+      ])->save();
+    }
+    FieldConfig::create([
+      'field_storage' => FieldStorageConfig::loadByName('node', 'field_coverage'),
+      'bundle' => 'place',
+      'label' => 'Map Points',
+    ])->save();
 
     node_access_rebuild();
   }

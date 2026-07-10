@@ -29,6 +29,7 @@ abstract class MukurtuMediaTestBase extends MukurtuKernelTestBase {
     'image',
     'media',
     'media_entity_soundcloud',
+    'media_library',
     'node',
     'og',
     'options',

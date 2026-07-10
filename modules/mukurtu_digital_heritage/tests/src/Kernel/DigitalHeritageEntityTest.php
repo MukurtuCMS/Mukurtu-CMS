@@ -6,7 +6,6 @@ namespace Drupal\Tests\mukurtu_digital_heritage\Kernel;
 
 use Drupal\mukurtu_digital_heritage\DigitalHeritageInterface;
 use Drupal\mukurtu_digital_heritage\Entity\DigitalHeritage;
-use Drupal\mukurtu_drafts\Entity\MukurtuDraftInterface;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
 use Drupal\node\Entity\Node;
 
@@ -30,7 +29,6 @@ class DigitalHeritageEntityTest extends DigitalHeritageTestBase {
     $this->assertInstanceOf(DigitalHeritage::class, $loaded);
     $this->assertInstanceOf(DigitalHeritageInterface::class, $loaded);
     $this->assertInstanceOf(CulturalProtocolControlledInterface::class, $loaded);
-    $this->assertInstanceOf(MukurtuDraftInterface::class, $loaded);
   }
 
   /**

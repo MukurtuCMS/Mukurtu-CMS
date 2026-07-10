@@ -99,7 +99,6 @@ abstract class DictionaryTestBase extends MukurtuKernelTestBase {
     $this->installEntitySchema('search_api_server');
     $this->installEntitySchema('node');
     $this->installEntitySchema('paragraph');
-    $this->installEntitySchema('language_community');
 
     // Create the node type bundles so hook_entity_bundle_info_alter in
     // mukurtu_dictionary assigns DictionaryWord and WordList bundle classes.

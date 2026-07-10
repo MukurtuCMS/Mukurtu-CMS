@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_person\Kernel;
 
-use Drupal\mukurtu_drafts\Entity\MukurtuDraftInterface;
 use Drupal\mukurtu_person\Entity\Person;
 use Drupal\mukurtu_person\PersonInterface;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
@@ -39,7 +38,6 @@ class PersonEntityTest extends PersonTestBase {
     $this->assertInstanceOf(Person::class, $loaded);
     $this->assertInstanceOf(PersonInterface::class, $loaded);
     $this->assertInstanceOf(CulturalProtocolControlledInterface::class, $loaded);
-    $this->assertInstanceOf(MukurtuDraftInterface::class, $loaded);
   }
 
   // ---------------------------------------------------------------------------
@@ -248,30 +246,6 @@ class PersonEntityTest extends PersonTestBase {
     $this->assertCount(1, $protocols);
     $this->assertEquals($this->protocol->id(), reset($protocols)->id());
     $this->assertEquals('any', $loaded->getSharingSetting());
-  }
-
-  // ---------------------------------------------------------------------------
-  // Draft field persistence
-  // ---------------------------------------------------------------------------
-
-  /**
-   * Draft status persists through save and reload.
-   */
-  public function testDraftStatusPersistsThroughSave(): void {
-    $person = $this->buildPerson('Draft Test');
-    $person->setDraft();
-    $person->save();
-
-    $loaded = Node::load($person->id());
-    $this->assertTrue($loaded->isDraft());
-  }
-
-  /**
-   * A newly created person is not a draft by default.
-   */
-  public function testPersonIsNotDraftByDefault(): void {
-    $person = $this->buildPerson('Non-Draft Test');
-    $this->assertFalse($person->isDraft());
   }
 
   /**

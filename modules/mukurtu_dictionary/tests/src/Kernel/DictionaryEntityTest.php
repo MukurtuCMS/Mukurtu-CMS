@@ -13,7 +13,6 @@ use Drupal\mukurtu_dictionary\Entity\SampleSentence;
 use Drupal\mukurtu_dictionary\Entity\SampleSentenceInterface;
 use Drupal\mukurtu_dictionary\Entity\WordList;
 use Drupal\mukurtu_dictionary\Entity\WordListInterface;
-use Drupal\mukurtu_drafts\Entity\MukurtuDraftInterface;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
 use Drupal\node\Entity\Node;
 use Drupal\paragraphs\Entity\Paragraph;
@@ -45,7 +44,6 @@ class DictionaryEntityTest extends DictionaryTestBase {
     $this->assertInstanceOf(DictionaryWordInterface::class, $loaded);
     $this->assertInstanceOf(CulturalProtocolControlledInterface::class, $loaded);
     $this->assertInstanceOf(BundleSpecificCheckCreateAccessInterface::class, $loaded);
-    $this->assertInstanceOf(MukurtuDraftInterface::class, $loaded);
   }
 
   /**
@@ -61,7 +59,6 @@ class DictionaryEntityTest extends DictionaryTestBase {
     $this->assertInstanceOf(WordList::class, $loaded);
     $this->assertInstanceOf(WordListInterface::class, $loaded);
     $this->assertInstanceOf(CulturalProtocolControlledInterface::class, $loaded);
-    $this->assertInstanceOf(MukurtuDraftInterface::class, $loaded);
   }
 
   /**

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_place\Kernel;
 
-use Drupal\mukurtu_drafts\Entity\MukurtuDraftInterface;
 use Drupal\mukurtu_place\Entity\Place;
 use Drupal\mukurtu_place\PlaceInterface;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
@@ -39,7 +38,6 @@ class PlaceEntityTest extends PlaceTestBase {
     $this->assertInstanceOf(Place::class, $loaded);
     $this->assertInstanceOf(PlaceInterface::class, $loaded);
     $this->assertInstanceOf(CulturalProtocolControlledInterface::class, $loaded);
-    $this->assertInstanceOf(MukurtuDraftInterface::class, $loaded);
   }
 
   // ---------------------------------------------------------------------------
@@ -199,30 +197,6 @@ class PlaceEntityTest extends PlaceTestBase {
     $this->assertCount(1, $protocols);
     $this->assertEquals($this->protocol->id(), reset($protocols)->id());
     $this->assertEquals('any', $loaded->getSharingSetting());
-  }
-
-  // ---------------------------------------------------------------------------
-  // Draft field persistence
-  // ---------------------------------------------------------------------------
-
-  /**
-   * Draft status persists through save and reload.
-   */
-  public function testDraftStatusPersistsThroughSave(): void {
-    $place = $this->buildPlace('Draft Test');
-    $place->setDraft();
-    $place->save();
-
-    $loaded = Node::load($place->id());
-    $this->assertTrue($loaded->isDraft());
-  }
-
-  /**
-   * A newly created place is not a draft by default.
-   */
-  public function testPlaceIsNotDraftByDefault(): void {
-    $place = $this->buildPlace('Non-Draft Test');
-    $this->assertFalse($place->isDraft());
   }
 
 }
