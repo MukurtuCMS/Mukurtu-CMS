@@ -36,6 +36,12 @@
   inset-inline-end: 0.125rem;
 }
 
+/* Leaflet's own CSS sets a generic blue (#0078A8) for all links inside the
+   map, overriding the site's usual link color. */
+.leaflet-container a:not(.leaflet-popup-close-button) {
+  color: var(--brand-primary-dark);
+}
+
 .leaflet-control-layers {
   /* TODO remove when this can be disabled in Drupal. */
   display: none;
