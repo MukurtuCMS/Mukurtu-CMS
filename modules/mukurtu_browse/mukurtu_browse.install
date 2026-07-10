@@ -506,3 +506,27 @@ function mukurtu_browse_update_40012(): void {
     }
   }
 }
+
+/**
+ * Enable the Leaflet "Reset View" recenter control on the Map mode of
+ * /browse, /digital-heritage, and the homepage map browse block, so users
+ * who pan/zoom away from the initial extent have a way back (#1624).
+ */
+function mukurtu_browse_update_40013(): void {
+  $displays = [
+    'views.view.mukurtu_browse' => 'mukurtu_browse_block_map',
+    'views.view.mukurtu_digital_heritage_browse' => 'mukurtu_digital_heritage_browse_block_map',
+    'views.view.mukurtu_browse_by_map' => 'map_block',
+  ];
+
+  foreach ($displays as $config_name => $display_id) {
+    $config = \Drupal::configFactory()->getEditable($config_name);
+    if ($config->isNew()) {
+      continue;
+    }
+    $key = "display.$display_id.display_options.style.options.reset_map.control";
+    if ($config->get($key) !== NULL) {
+      $config->set($key, TRUE)->save();
+    }
+  }
+}

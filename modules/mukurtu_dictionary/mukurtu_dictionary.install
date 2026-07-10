@@ -1289,3 +1289,18 @@ function mukurtu_dictionary_update_40034(): void {
     }
   }
 }
+
+/**
+ * Enable the Leaflet "Reset View" recenter control on /dictionary's Map
+ * mode, matching /browse and /digital-heritage (#1624).
+ */
+function mukurtu_dictionary_update_40035(): void {
+  $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_dictionary');
+  if ($config->isNew()) {
+    return;
+  }
+  $key = 'display.mukurtu_dictionary_block_map.display_options.style.options.reset_map.control';
+  if ($config->get($key) !== NULL) {
+    $config->set($key, TRUE)->save();
+  }
+}
