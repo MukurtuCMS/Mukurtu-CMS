@@ -32,7 +32,8 @@ class MailHooks {
    *
    * Site-admin notification:
    * - register_pending_approval_admin: always suppressed. Mukurtu uses its
-   *   own community-manager notification system instead.
+   *   own Message/digest notification system instead (see
+   *   mukurtu_notifications_user_insert()).
    *
    * Also prevents a fatal TypeError in PhpMail when a user account has no
    * email address and a status-change notification is triggered (e.g. unblock).
@@ -64,8 +65,9 @@ class MailHooks {
       // account is awaiting review. Always send for visitor self-registration;
       // suppress only when an admin is creating the account.
       'register_pending_approval' => $isAdminCreated,
-      // Site-admin "Account details" notification — never needed; Mukurtu
-      // uses its own community-manager notification workflow.
+      // Site-admin "Account details" notification — never needed; Mukurtu's
+      // own Message/digest system notifies managers of pending registrations
+      // instead (see mukurtu_notifications_user_insert()).
       'register_pending_approval_admin' => TRUE,
       // Admin-created welcome email: only for active accounts. Pending and
       // blocked accounts receive no email at creation time.
