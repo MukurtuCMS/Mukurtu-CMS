@@ -47,4 +47,49 @@
   &__eyebrow {
     font-weight: var(--text-bold);
   }
+
+  &__content-type {
+    font-size: var(--font-size-s);
+    font-weight: var(--text-bold);
+    text-transform: uppercase;
+  }
+
+  &__content-body {
+    margin-block-start: var(--v-space-3xs);
+    line-height: var(--line-height-m);
+
+    .field.field--type-entity-reference {
+      display: flex;
+      flex-direction: column;
+      gap: var(--v-space-5xs);
+      align-items: first baseline;
+      border: 0;
+      padding-block-start: 0;
+      margin-block-start: 0;
+
+      &:first-of-type {
+        margin-block-end: var(--v-space-5xs);
+      }
+
+      .field__label {
+        font-weight: var(--text-bold);
+
+        &::after {
+          content: ':';
+        }
+      }
+
+      .field__items {
+        .field__item {
+          display: inline-block;
+        }
+
+        .field__item:not(:last-of-type) {
+          &::after {
+            content: ',';
+          }
+        }
+      }
+    }
+  }
 }

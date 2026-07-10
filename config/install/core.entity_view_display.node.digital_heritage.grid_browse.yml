@@ -24,7 +24,23 @@ content:
     settings:
       link: true
     third_party_settings: {  }
+    weight: 3
+    region: content
+  field_category:
+    type: entity_reference_label
+    label: inline
+    settings:
+      link: false
+    third_party_settings: {  }
     weight: 2
+    region: content
+  field_communities:
+    type: entity_reference_label
+    label: inline
+    settings:
+      link: false
+    third_party_settings: {  }
+    weight: 1
     region: content
   field_representative_media:
     type: entity_reference_entity_view
@@ -39,9 +55,7 @@ hidden:
   comment: true
   draft: true
   field_all_related_content: true
-  field_category: true
   field_citation: true
-  field_communities: true
   field_content_type: true
   field_contributor: true
   field_coverage: true

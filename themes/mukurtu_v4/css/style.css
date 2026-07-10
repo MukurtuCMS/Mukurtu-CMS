@@ -3973,6 +3973,50 @@ body.is-fixed {
 .vertical-card__eyebrow {
   font-weight: var(--text-bold);
 }
+.vertical-card__content-type {
+  font-size: var(--font-size-s);
+  font-weight: var(--text-bold);
+  text-transform: uppercase;
+}
+.vertical-card__content-body {
+  -webkit-margin-before: var(--v-space-3xs);
+          margin-block-start: var(--v-space-3xs);
+  line-height: var(--line-height-m);
+}
+.vertical-card__content-body .field.field--type-entity-reference {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  gap: var(--v-space-5xs);
+  -webkit-box-align: first baseline;
+      -ms-flex-align: first baseline;
+          align-items: first baseline;
+  border: 0;
+  -webkit-padding-before: 0;
+          padding-block-start: 0;
+  -webkit-margin-before: 0;
+          margin-block-start: 0;
+}
+.vertical-card__content-body .field.field--type-entity-reference:first-of-type {
+  -webkit-margin-after: var(--v-space-5xs);
+          margin-block-end: var(--v-space-5xs);
+}
+.vertical-card__content-body .field.field--type-entity-reference .field__label {
+  font-weight: var(--text-bold);
+}
+.vertical-card__content-body .field.field--type-entity-reference .field__label::after {
+  content: ":";
+}
+.vertical-card__content-body .field.field--type-entity-reference .field__items .field__item {
+  display: inline-block;
+}
+.vertical-card__content-body .field.field--type-entity-reference .field__items .field__item:not(:last-of-type)::after {
+  content: ",";
+}
 
 .page__breadcrumbs {
   -webkit-box-shadow: inset 0 41px 18px -42px var(--mukurtu-breadcrumb-gradient-color);

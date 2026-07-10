@@ -1,0 +1,35 @@
+{#
+/**
+ * @file
+ * Theme override for Dictionary Word nodes in the map browse view mode.
+ */
+#}
+
+{% set media_bundle = node.field_representative_media.0.entity.bundle.value.0['target_id'] %}
+{% set has_rep_media = node.field_representative_media.0.entity is not empty %}
+
+<article{{ attributes.addClass(["vertical-card", "vertical-card--no-border", "vertical-card--large-font"]) }}>
+  {% if has_rep_media or node.field_recording.0.entity is not empty %}
+    <div class="vertical-card__media">
+      {% if has_rep_media %}
+        {% include '@mukurtu_v4/content/_card-media.html.twig' with {
+          media_bundle: media_bundle,
+          media: content.field_representative_media,
+          url: url,
+        } %}
+      {% else %}
+        {{ content.field_recording }}
+      {% endif %}
+    </div>
+  {% endif %}
+
+  <div{{ content_attributes }} class="vertical-card__content">
+    <div class="vertical-card__content-header">
+      {{ title_prefix }}
+      <h2{{ title_attributes }}>
+        <a href="{{ url }}" rel="bookmark">{{ label }}</a>
+      </h2>
+      {{ title_suffix }}
+    </div>
+  </div>
+</article>

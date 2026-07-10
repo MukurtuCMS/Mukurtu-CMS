@@ -17,6 +17,14 @@ targetEntityType: node
 bundle: person
 mode: grid_browse
 content:
+  field_communities:
+    type: entity_reference_label
+    label: inline
+    settings:
+      link: false
+    third_party_settings: {  }
+    weight: 1
+    region: content
   field_representative_media:
     type: entity_reference_entity_view
     label: hidden
@@ -31,7 +39,6 @@ hidden:
   draft: true
   field_all_related_content: true
   field_citation: true
-  field_communities: true
   field_content_type: true
   field_coverage: true
   field_coverage_description: true

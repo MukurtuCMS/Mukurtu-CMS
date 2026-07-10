@@ -202,3 +202,23 @@ function mukurtu_collection_update_40010(): void {
 
   $config->save();
 }
+
+/**
+ * Add the collection.taxonomy_record display, so collections referenced on
+ * a taxonomy term page render consistently instead of falling back to the
+ * default display (#1624).
+ */
+function mukurtu_collection_update_40011(): void {
+  $config_name = 'core.entity_view_display.node.collection.taxonomy_record';
+  if (!\Drupal::configFactory()->get($config_name)->isNew()) {
+    return;
+  }
+
+  $config_source = new \Drupal\Core\Config\FileStorage(
+    \Drupal::service('extension.list.module')->getPath('mukurtu_collection') . '/config/install'
+  );
+  $data = $config_source->read($config_name);
+  if ($data) {
+    \Drupal::configFactory()->getEditable($config_name)->setData($data)->save(TRUE);
+  }
+}

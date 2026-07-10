@@ -2,9 +2,9 @@ langcode: en
 status: true
 dependencies:
   config:
-    - core.entity_view_mode.node.grid_browse
-    - field.field.node.place.comment
-    - node.type.place
+    - core.entity_view_mode.node.map_browse
+    - field.field.node.collection.comment
+    - node.type.collection
   module:
     - layout_builder
     - user
@@ -12,20 +12,12 @@ third_party_settings:
   layout_builder:
     enabled: false
     allow_custom: false
-id: node.place.grid_browse
+id: node.collection.map_browse
 targetEntityType: node
-bundle: place
-mode: grid_browse
+bundle: collection
+mode: map_browse
 content:
-  field_communities:
-    type: entity_reference_label
-    label: inline
-    settings:
-      link: false
-    third_party_settings: {  }
-    weight: 1
-    region: content
-  field_representative_media:
+  field_collection_image:
     type: entity_reference_entity_view
     label: hidden
     settings:
@@ -36,33 +28,34 @@ content:
     region: content
 hidden:
   comment: true
+  draft: true
   field_all_related_content: true
+  field_child_collections: true
   field_citation: true
-  field_content_type: true
+  field_communities: true
   field_coverage: true
   field_coverage_description: true
   field_cultural_protocols: true
+  field_description: true
   field_in_collection: true
+  field_items_in_collection: true
   field_keywords: true
   field_local_contexts_labels_and_notices: true
   field_local_contexts_projects: true
   field_location: true
-  field_media_assets: true
   field_multipage_page_of: true
-  field_other_place_names: true
-  field_place_type: true
-  field_protocol_control: true
+  field_parent_collection: true
   field_related_content: true
-  field_sections: true
-  field_sequence_collection: true
+  field_representative_media: true
+  field_source: true
+  field_summary: true
   field_title: true
   flag_email_node: true
   flag_email_og: true
   flag_export_content: true
-  flag_mukurtu_email_content: true
-  flag_mukurtu_email_node: true
+  flag_mukurtu_email_collection: true
   flag_mukurtu_email_og: true
-  flag_mukurtu_follow_content: true
+  flag_mukurtu_follow_collection: true
   flag_subscribe_node: true
   flag_subscribe_og: true
   langcode: true
