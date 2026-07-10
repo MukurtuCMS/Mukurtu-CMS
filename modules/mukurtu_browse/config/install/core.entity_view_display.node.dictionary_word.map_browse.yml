@@ -40,22 +40,6 @@ content:
     third_party_settings: {  }
     weight: 2
     region: content
-  field_in_collection:
-    type: entity_reference_label
-    label: above
-    settings:
-      link: true
-    third_party_settings: {  }
-    weight: 3
-    region: content
-  field_in_word_list:
-    type: entity_reference_label
-    label: above
-    settings:
-      link: true
-    third_party_settings: {  }
-    weight: 4
-    region: content
 hidden:
   comment: true
   field_additional_word_entries: true
@@ -87,6 +71,8 @@ hidden:
   field_word_entry: true
   field_word_origin: true
   field_word_type: true
+  field_in_collection: true
+  field_in_word_list: true
   flag_email_node: true
   flag_email_og: true
   flag_export_content: true
