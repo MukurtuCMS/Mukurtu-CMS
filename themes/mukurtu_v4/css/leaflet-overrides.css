@@ -13,6 +13,14 @@
     margin-block-start: var(--v-space-4xs);
   }
 
+  /* The landing page's ".block-wrapper h2" rule (which centers a block's
+     own heading, e.g. "Browse by Map") is more specific than the card's
+     own title rule and leaks into card titles rendered inside the popup. */
+  & .vertical-card__content-header h2 {
+    text-align: start;
+    margin-block-end: 0;
+  }
+
   & .field--name-field-media-video-file {
     display: flex;
     justify-content: center;

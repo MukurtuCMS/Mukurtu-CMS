@@ -551,3 +551,19 @@ function mukurtu_browse_update_40014(): void {
   }
   $config->save();
 }
+
+/**
+ * Make the homepage "Browse by Map" block render its popups the same way
+ * as /browse's Map mode, instead of its own diverging popup size, zoom
+ * limit, and rendering path (#1624).
+ */
+function mukurtu_browse_update_40015(): void {
+  $config_source = new \Drupal\Core\Config\FileStorage(
+    \Drupal::service('extension.list.module')->getPath('mukurtu_browse') . '/config/install'
+  );
+  $config_name = 'views.view.mukurtu_browse_by_map';
+  $data = $config_source->read($config_name);
+  if ($data) {
+    \Drupal::configFactory()->getEditable($config_name)->setData($data)->save(TRUE);
+  }
+}
