@@ -1,5 +1,6 @@
 <?php
 
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\mukurtu_browse\Plugin\views\argument\MukurtuBoundingBox;
 use Drupal\node\NodeInterface;
@@ -91,6 +92,17 @@ function mukurtu_browse_views_plugins_argument_alter(array &$plugins) {
 function mukurtu_browse_preprocess_node(&$variables) {
   // Only apply to List and Grid browse view modes.
   if (!in_array($variables['view_mode'], ['browse', 'grid_browse'], TRUE)) {
+    return;
+  }
+  // The same node/view mode can render on both /browse and /digital-heritage,
+  // which must not share a render cache entry now that they differ here.
+  CacheableMetadata::createFromRenderArray($variables)
+    ->addCacheContexts(['route'])
+    ->applyTo($variables);
+
+  // The content type label is redundant on /digital-heritage, since every
+  // result there is already a digital heritage item.
+  if (\Drupal::routeMatch()->getRouteName() === 'mukurtu_browse.browse_digital_heritage_page') {
     return;
   }
   $node = $variables['node'];

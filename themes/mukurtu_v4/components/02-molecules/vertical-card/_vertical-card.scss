@@ -11,6 +11,7 @@
 
   &__content-header {
     h2 {
+      margin-block: 0;
       font-size: var(--card-font-size);
       font-weight:  var(--text-bold);
     }
@@ -55,20 +56,20 @@
   }
 
   &__content-body {
-    margin-block-start: var(--v-space-3xs);
+    margin-block-start: var(--v-space-6xs);
     line-height: var(--line-height-m);
 
     .field.field--type-entity-reference {
       display: flex;
       flex-direction: column;
-      gap: var(--v-space-5xs);
+      gap: var(--v-space-6xs);
       align-items: first baseline;
       border: 0;
       padding-block-start: 0;
       margin-block-start: 0;
 
       &:first-of-type {
-        margin-block-end: var(--v-space-5xs);
+        margin-block-end: var(--v-space-6xs);
       }
 
       .field__label {
