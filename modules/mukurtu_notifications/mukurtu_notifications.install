@@ -412,31 +412,3 @@ function mukurtu_notifications_update_40018(): void {
     }
   }
 }
-
-/**
- * Remove the mukurtu_new_user_registration message template.
- *
- * The admin pending-approval notification is now sent through core's own
- * register_pending_approval_admin mail (widened to reach every user with
- * the 'administer users' permission, see mukurtu_core's MailHooks), so its
- * content is edited at /admin/config/people/accounts instead of via a
- * separate Message template.
- */
-function mukurtu_notifications_update_40019(): void {
-  $config_storage = \Drupal::service('config.storage');
-  $configs = [
-    'message.template.mukurtu_new_user_registration',
-    'core.entity_view_display.message.mukurtu_new_user_registration.mail_body',
-    'core.entity_view_display.message.mukurtu_new_user_registration.mail_subject',
-    'field.field.message.mukurtu_new_user_registration.field_user',
-  ];
-  foreach ($configs as $config_name) {
-    $config_storage->delete($config_name);
-  }
-
-  // The message log view's bundle filters and config dependencies still
-  // reference the template removed above; re-deploy it from disk.
-  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
-  $source = new FileStorage($config_path);
-  $config_storage->write('views.view.mukurtu_message_log', $source->read('views.view.mukurtu_message_log'));
-}

@@ -234,6 +234,70 @@ function mukurtu_notifications_node_delete(Node $node) {
 }
 
 /**
+ * Implements hook_ENTITY_TYPE_insert().
+ */
+function mukurtu_notifications_user_insert($entity) {
+  // Only want to send notifications for users that
+  // require action to be unblocked.
+  if ($entity->isActive()) {
+    return;
+  }
+
+  // Create the new user registration message.
+  $template = 'mukurtu_new_user_registration';
+  $message = Message::create([
+    'template' => $template,
+    'uid' => 1,
+  ]);
+
+  // Record the user requesting the account.
+  $message->set('field_user', $entity);
+  $message->save();
+
+  // Find all users with 'administer users' permission.
+  // TODO: Eventually we want an option for these admin users to
+  // be able to opt out of these emails. At that point we'll
+  // need to filter for that in this query.
+  $rids = [];
+  foreach (Role::loadMultiple() as $role) {
+    if ($role->hasPermission('administer users')) {
+      $rids[] = $role->id();
+    }
+  }
+  $uids = \Drupal::service('entity_type.manager')->getStorage('user')->getQuery()
+    ->accessCheck(FALSE)
+    ->condition('roles', $rids, 'IN')
+    ->execute();
+
+  // Build the options required to send the message to specific
+  // uids via message subscribe, rather than querying flags.
+  $flags = ['subscribe_user'];
+  $notifiers = ['email'];
+  $notify_options = [];
+  $subscribe_options = [
+    'notify message owner' => FALSE,
+    'uids' => [],
+  ];
+  $email_validator = \Drupal::service('email.validator');
+  $admin_users = User::loadMultiple($uids);
+  foreach ($admin_users as $uid => $admin_user) {
+    if (!$email_validator->isValid($admin_user->getEmail())) {
+      continue;
+    }
+    $subscribe_options['uids'][$uid] = new DeliveryCandidate($flags, $notifiers, $uid);
+  }
+
+  // Queue messages to our custom list of admins.
+  $subscribers = \Drupal::service('message_subscribe.subscribers');
+  try {
+    $subscribers->sendMessage($message, $message, $notify_options, $subscribe_options);
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('mukurtu_notifications')->warning('Failed to send user registration notification: @msg', ['@msg' => $e->getMessage()]);
+  }
+}
+
+/**
  * Sends email notifications to selected users when a new account is created.
  *
  * @param \Drupal\user\Entity\User $new_user

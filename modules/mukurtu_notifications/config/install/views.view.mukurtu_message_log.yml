@@ -8,6 +8,7 @@ dependencies:
     - message.template.mukurtu_new_item_in_community
     - message.template.mukurtu_new_item_in_protocol
     - message.template.mukurtu_new_user_account_created
+    - message.template.mukurtu_new_user_registration
     - message.template.mukurtu_single_node_delete
     - message.template.mukurtu_single_node_insert
     - message.template.mukurtu_single_node_update
@@ -243,6 +244,7 @@ display:
             mukurtu_new_item_in_collection: mukurtu_new_item_in_collection
             mukurtu_new_item_in_community: mukurtu_new_item_in_community
             mukurtu_new_item_in_protocol: mukurtu_new_item_in_protocol
+            mukurtu_new_user_registration: mukurtu_new_user_registration
             mukurtu_single_node_delete: mukurtu_single_node_delete
             mukurtu_single_node_insert: mukurtu_single_node_insert
             mukurtu_single_node_update: mukurtu_single_node_update
@@ -614,6 +616,8 @@ display:
             mukurtu_single_node_delete: mukurtu_single_node_delete
             mukurtu_single_node_insert: mukurtu_single_node_insert
             mukurtu_single_node_update: mukurtu_single_node_update
+            # mukurtu_new_user_registration is intentionally excluded: it is an
+            # admin-facing message and should not appear in the user activity feed.
           group: 1
           exposed: false
           expose:

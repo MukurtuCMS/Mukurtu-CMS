@@ -3,8 +3,6 @@
 namespace Drupal\mukurtu_core\Hook;
 
 use Drupal\Core\Hook\Attribute\Hook;
-use Drupal\user\Entity\Role;
-use Drupal\user\Entity\User;
 
 /**
  * Hook implementations for mukurtu_core mail handling.
@@ -33,11 +31,8 @@ class MailHooks {
    *   they are never appropriate here.
    *
    * Site-admin notification:
-   * - register_pending_approval_admin: sent using core's own
-   *   /admin/config/people/accounts subject/body config, but widened to
-   *   reach every user with the 'administer users' permission instead of
-   *   just the single site notification address. This keeps the email's
-   *   content editable in one place instead of two.
+   * - register_pending_approval_admin: always suppressed. Mukurtu uses its
+   *   own community-manager notification system instead.
    *
    * Also prevents a fatal TypeError in PhpMail when a user account has no
    * email address and a status-change notification is triggered (e.g. unblock).
@@ -63,6 +58,9 @@ class MailHooks {
       // account is awaiting review. Always send for visitor self-registration;
       // suppress only when an admin is creating the account.
       'register_pending_approval' => $isAdminCreated,
+      // Site-admin "Account details" notification — never needed; Mukurtu
+      // uses its own community-manager notification workflow.
+      'register_pending_approval_admin' => TRUE,
       // Admin-created welcome email: only for active accounts. Pending and
       // blocked accounts receive no email at creation time.
       'register_admin_created' => $account && !$account->isActive(),
@@ -74,10 +72,6 @@ class MailHooks {
       return;
     }
 
-    if ($message['key'] === 'register_pending_approval_admin') {
-      $this->widenAdminNotificationRecipients($message);
-    }
-
     // Prevent a fatal TypeError when the account has no email address.
     if (empty($message['to'])) {
       $message['send'] = FALSE;
@@ -85,46 +79,6 @@ class MailHooks {
         'Suppressed @key notification for user @uid: account has no email address.',
         ['@key' => $message['key'], '@uid' => $account?->id() ?? 'unknown']
       );
-    }
-  }
-
-  /**
-   * Redirects the pending-approval admin notification to all admins.
-   *
-   * Core only sends this to the single configured site notification
-   * address. Mukurtu wants everyone with the 'administer users' permission
-   * notified, so the 'to' address is widened to a comma-separated list
-   * (the mail backend's To header accepts multiple addresses this way)
-   * rather than replacing the mail entirely with a separate template.
-   */
-  private function widenAdminNotificationRecipients(array &$message): void {
-    $rids = [];
-    foreach (Role::loadMultiple() as $role) {
-      if ($role->hasPermission('administer users')) {
-        $rids[] = $role->id();
-      }
-    }
-    if (empty($rids)) {
-      return;
-    }
-
-    $uids = \Drupal::entityTypeManager()->getStorage('user')->getQuery()
-      ->accessCheck(FALSE)
-      ->condition('roles', $rids, 'IN')
-      ->execute();
-    if (empty($uids)) {
-      return;
-    }
-
-    $email_validator = \Drupal::service('email.validator');
-    $emails = [];
-    foreach (User::loadMultiple($uids) as $admin_user) {
-      if ($email_validator->isValid($admin_user->getEmail())) {
-        $emails[] = $admin_user->getEmail();
-      }
-    }
-    if (!empty($emails)) {
-      $message['to'] = implode(',', $emails);
     }
   }
 
