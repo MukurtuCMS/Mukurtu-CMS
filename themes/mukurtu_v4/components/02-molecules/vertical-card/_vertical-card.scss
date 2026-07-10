@@ -1,7 +1,7 @@
 // As seen in Grid Browse display.
 
 .vertical-card {
-  --card-font-size: var(--font-size-s);
+  --card-font-size: var(--font-size-m);
 
   break-inside: avoid;
   border-block-start: 0;
@@ -57,7 +57,18 @@
 
   &__content-body {
     margin-block-start: var(--v-space-6xs);
+    font-size: var(--font-size-2xs);
     line-height: var(--line-height-m);
+
+    // Field labels (including the "Communities and Cultural Protocols"
+    // label from community-protocol-list.html.twig, which isn't an
+    // entity-reference field) should read as secondary to the card title,
+    // not compete with or exceed it -- override the global .field__label
+    // size/breakpoint escalation, which is tuned for full-page sidebars.
+    .field__label {
+      font-size: inherit;
+      font-weight: var(--text-bold);
+    }
 
     .field.field--type-entity-reference {
       display: flex;
@@ -73,8 +84,6 @@
       }
 
       .field__label {
-        font-weight: var(--text-bold);
-
         &::after {
           content: ':';
         }

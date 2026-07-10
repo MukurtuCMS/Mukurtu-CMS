@@ -101,3 +101,18 @@ function mukurtu_person_update_40005(): void {
     $config->save();
   }
 }
+
+/**
+ * Show field_in_collection in List mode, matching every other content
+ * type's browse display (#1624).
+ */
+function mukurtu_person_update_40006(): void {
+  $config_source = new \Drupal\Core\Config\FileStorage(
+    \Drupal::service('extension.list.module')->getPath('mukurtu_person') . '/config/install'
+  );
+  $config_name = 'core.entity_view_display.node.person.browse';
+  $data = $config_source->read($config_name);
+  if ($data) {
+    \Drupal::configFactory()->getEditable($config_name)->setData($data)->save(TRUE);
+  }
+}

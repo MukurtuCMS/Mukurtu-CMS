@@ -1267,3 +1267,24 @@ function mukurtu_dictionary_update_40033(): void {
     $config->save();
   }
 }
+
+/**
+ * Show field_in_collection in List mode for dictionary_word and word_list,
+ * matching every other content type's browse display (#1624).
+ */
+function mukurtu_dictionary_update_40034(): void {
+  $config_source = new \Drupal\Core\Config\FileStorage(
+    \Drupal::service('extension.list.module')->getPath('mukurtu_dictionary') . '/config/install'
+  );
+  $config_factory = \Drupal::configFactory();
+
+  foreach ([
+    'core.entity_view_display.node.dictionary_word.browse',
+    'core.entity_view_display.node.word_list.browse',
+  ] as $config_name) {
+    $data = $config_source->read($config_name);
+    if ($data) {
+      $config_factory->getEditable($config_name)->setData($data)->save(TRUE);
+    }
+  }
+}

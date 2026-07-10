@@ -42,6 +42,14 @@ content:
     third_party_settings: {  }
     weight: 1
     region: content
+  field_in_collection:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 5
+    region: content
   field_representative_media:
     type: entity_reference_entity_view
     label: hidden
@@ -77,7 +85,6 @@ hidden:
   field_external_links: true
   field_format: true
   field_identifier: true
-  field_in_collection: true
   field_keywords: true
   field_knowledge_keepers: true
   field_language: true

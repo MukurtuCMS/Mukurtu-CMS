@@ -482,9 +482,9 @@ function mukurtu_browse_update_40011(): void {
 /**
  * Show the representative media field in Map mode for dictionary_word and
  * word_list, which was hidden and left their map_browse Twig templates
- * unable to display it, and show field_summary in digital_heritage's List
- * mode, matching its field description that says it should appear in
- * previews (#1624).
+ * unable to display it, and show field_summary and field_in_collection in
+ * digital_heritage's List mode -- field_summary's own field description
+ * says it should appear in previews (#1624).
  */
 function mukurtu_browse_update_40012(): void {
   $config_source = new \Drupal\Core\Config\FileStorage(

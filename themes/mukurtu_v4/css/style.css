@@ -3929,7 +3929,7 @@ body.is-fixed {
 }
 
 .vertical-card {
-  --card-font-size: var(--font-size-s);
+  --card-font-size: var(--font-size-m);
   -webkit-column-break-inside: avoid;
      -moz-column-break-inside: avoid;
           break-inside: avoid;
@@ -3982,7 +3982,12 @@ body.is-fixed {
 .vertical-card__content-body {
   -webkit-margin-before: var(--v-space-6xs);
           margin-block-start: var(--v-space-6xs);
+  font-size: var(--font-size-2xs);
   line-height: var(--line-height-m);
+}
+.vertical-card__content-body .field__label {
+  font-size: inherit;
+  font-weight: var(--text-bold);
 }
 .vertical-card__content-body .field.field--type-entity-reference {
   display: -webkit-box;
@@ -4005,9 +4010,6 @@ body.is-fixed {
 .vertical-card__content-body .field.field--type-entity-reference:first-of-type {
   -webkit-margin-after: var(--v-space-6xs);
           margin-block-end: var(--v-space-6xs);
-}
-.vertical-card__content-body .field.field--type-entity-reference .field__label {
-  font-weight: var(--text-bold);
 }
 .vertical-card__content-body .field.field--type-entity-reference .field__label::after {
   content: ":";

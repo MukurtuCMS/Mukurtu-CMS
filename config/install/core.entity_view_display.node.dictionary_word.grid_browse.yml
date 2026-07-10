@@ -35,6 +35,14 @@ content:
     third_party_settings: {  }
     weight: 1
     region: content
+  field_in_collection:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 2
+    region: content
 hidden:
   comment: true
   draft: true
@@ -51,7 +59,6 @@ hidden:
   field_definition: true
   field_dictionary_word_language: true
   field_glossary_entry: true
-  field_in_collection: true
   field_in_word_list: true
   field_keywords: true
   field_local_contexts_labels_and_notices: true
