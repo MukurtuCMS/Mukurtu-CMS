@@ -109,6 +109,10 @@
         "drupal-scaffold": {
             "locations": {
                 "web-root": "web/"
+            },
+            "file-mapping": {
+                "[web-root]/index.php": "scaffold/index.php",
+                "[web-root]/update.php": "scaffold/update.php"
             }
         },
         "installer-paths": {

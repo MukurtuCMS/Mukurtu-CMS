@@ -97,6 +97,15 @@ services:
             // the transitive-dependency resolver does not drop it.
             \$d['require']['doctrine/annotations'] = '^2.0';
             \$d['require']['composer/installers'] = '^2.0';
+            // Allow the mukurtu/mukurtu profile (a dependency here, not the
+            // root package) to apply its own scaffold file-mapping override
+            // for web/index.php and web/update.php. Without this, Composer's
+            // scaffold plugin silently ignores that package's file-mapping,
+            // and drupal/core's own scaffolded index.php ships a bare
+            // require_once('autoload_runtime.php') that fails to resolve
+            // once PHP's working directory is the docroot rather than the
+            // directory containing vendor/autoload_runtime.php.
+            \$d['extra']['drupal-scaffold']['allowed-packages'][] = 'mukurtu/mukurtu';
             file_put_contents('composer.json',
               json_encode(\$d, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL);
           "
