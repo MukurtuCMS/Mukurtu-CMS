@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_dictionary\Kernel;
 
 use Drupal\Tests\mukurtu_core\Kernel\MukurtuKernelTestBase;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\mukurtu_dictionary\Entity\DictionaryWord;
 use Drupal\mukurtu_dictionary\Entity\WordList;
 use Drupal\node\Entity\Node;
@@ -117,6 +119,22 @@ abstract class DictionaryTestBase extends MukurtuKernelTestBase {
     Vocabulary::create(['vid' => 'word_type', 'name' => 'Word Type'])->save();
     Vocabulary::create(['vid' => 'contributor', 'name' => 'Contributor'])->save();
     Vocabulary::create(['vid' => 'location', 'name' => 'Location'])->save();
+
+    // field_coverage is a config-based geofield, not a base field, so it
+    // must be created explicitly rather than picked up automatically.
+    if (!FieldStorageConfig::loadByName('node', 'field_coverage')) {
+      FieldStorageConfig::create([
+        'field_name' => 'field_coverage',
+        'entity_type' => 'node',
+        'type' => 'geofield',
+        'cardinality' => 1,
+      ])->save();
+    }
+    FieldConfig::create([
+      'field_storage' => FieldStorageConfig::loadByName('node', 'field_coverage'),
+      'bundle' => 'dictionary_word',
+      'label' => 'Map Points',
+    ])->save();
 
     // Create at least one language term. DictionaryWord::bundleCheckCreateAccess
     // requires at least one language to exist.
