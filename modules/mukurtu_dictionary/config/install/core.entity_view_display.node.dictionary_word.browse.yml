@@ -49,6 +49,14 @@ content:
     third_party_settings: {  }
     weight: 4
     region: content
+  field_in_word_list:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 5
+    region: content
   field_recording:
     type: entity_reference_entity_view
     label: hidden
@@ -79,7 +87,6 @@ hidden:
   field_cultural_protocols: true
   field_definition: true
   field_glossary_entry: true
-  field_in_word_list: true
   field_keywords: true
   field_local_contexts_labels_and_notices: true
   field_local_contexts_projects: true

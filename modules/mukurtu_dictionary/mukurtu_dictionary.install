@@ -1270,7 +1270,8 @@ function mukurtu_dictionary_update_40033(): void {
 
 /**
  * Show field_in_collection in List mode for dictionary_word and word_list,
- * matching every other content type's browse display (#1624).
+ * matching every other content type's browse display, and show
+ * field_in_word_list on dictionary_word (#1624).
  */
 function mukurtu_dictionary_update_40034(): void {
   $config_source = new \Drupal\Core\Config\FileStorage(

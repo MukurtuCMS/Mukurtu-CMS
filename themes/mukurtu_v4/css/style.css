@@ -1490,46 +1490,46 @@ label.form-required::after {
           margin-block-start: var(--v-space-3xs);
   line-height: var(--line-height-m);
 }
-.horizontal-card__content-body .field.field--type-entity-reference {
+.horizontal-card__content-body .field {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-      -ms-flex-direction: column;
-          flex-direction: column;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+  -webkit-box-align: baseline;
+      -ms-flex-align: baseline;
+          align-items: baseline;
   gap: var(--v-space-5xs);
-  -webkit-box-align: first baseline;
-      -ms-flex-align: first baseline;
-          align-items: first baseline;
   border: 0;
   -webkit-padding-before: 0;
           padding-block-start: 0;
   -webkit-margin-before: 0;
           margin-block-start: 0;
 }
-@media (min-width: 60rem) {
-  .horizontal-card__content-body .field.field--type-entity-reference {
-    -webkit-box-orient: horizontal;
-    -webkit-box-direction: normal;
-        -ms-flex-direction: row;
-            flex-direction: row;
-  }
-}
-.horizontal-card__content-body .field.field--type-entity-reference:first-of-type {
+.horizontal-card__content-body .field:not(:last-of-type) {
   -webkit-margin-after: var(--v-space-5xs);
           margin-block-end: var(--v-space-5xs);
 }
-.horizontal-card__content-body .field.field--type-entity-reference .field__label {
+.horizontal-card__content-body .field .field__label {
+  -ms-flex-negative: 0;
+      flex-shrink: 0;
   font-weight: var(--text-bold);
 }
-.horizontal-card__content-body .field.field--type-entity-reference .field__label::after {
+.horizontal-card__content-body .field .field__label::after {
   content: ":";
 }
-.horizontal-card__content-body .field.field--type-entity-reference .field__items .field__item {
+.horizontal-card__content-body .field .field__items {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+  gap: var(--v-space-5xs);
+}
+.horizontal-card__content-body .field .field__item {
   display: inline-block;
 }
-.horizontal-card__content-body .field.field--type-entity-reference .field__items .field__item:not(:last-of-type)::after {
+.horizontal-card__content-body .field .field__items .field__item:not(:last-of-type)::after {
   content: ",";
 }
 
@@ -3982,42 +3982,50 @@ body.is-fixed {
 .vertical-card__content-body {
   -webkit-margin-before: var(--v-space-6xs);
           margin-block-start: var(--v-space-6xs);
-  font-size: var(--font-size-2xs);
-  line-height: var(--line-height-m);
+  font-size: var(--font-size-xs);
+  line-height: 1.3;
 }
-.vertical-card__content-body .field__label {
-  font-size: inherit;
-  font-weight: var(--text-bold);
-}
-.vertical-card__content-body .field.field--type-entity-reference {
+.vertical-card__content-body .field {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-      -ms-flex-direction: column;
-          flex-direction: column;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+  -webkit-box-align: baseline;
+      -ms-flex-align: baseline;
+          align-items: baseline;
   gap: var(--v-space-6xs);
-  -webkit-box-align: first baseline;
-      -ms-flex-align: first baseline;
-          align-items: first baseline;
   border: 0;
   -webkit-padding-before: 0;
           padding-block-start: 0;
   -webkit-margin-before: 0;
           margin-block-start: 0;
 }
-.vertical-card__content-body .field.field--type-entity-reference:first-of-type {
+.vertical-card__content-body .field:not(:last-of-type) {
   -webkit-margin-after: var(--v-space-6xs);
           margin-block-end: var(--v-space-6xs);
 }
-.vertical-card__content-body .field.field--type-entity-reference .field__label::after {
+.vertical-card__content-body .field .field__label {
+  -ms-flex-negative: 0;
+      flex-shrink: 0;
+  font-size: inherit;
+  font-weight: var(--text-bold);
+}
+.vertical-card__content-body .field .field__label::after {
   content: ":";
 }
-.vertical-card__content-body .field.field--type-entity-reference .field__items .field__item {
+.vertical-card__content-body .field .field__items {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+  gap: var(--v-space-6xs);
+}
+.vertical-card__content-body .field .field__item {
   display: inline-block;
 }
-.vertical-card__content-body .field.field--type-entity-reference .field__items .field__item:not(:last-of-type)::after {
+.vertical-card__content-body .field .field__items .field__item:not(:last-of-type)::after {
   content: ",";
 }
 
