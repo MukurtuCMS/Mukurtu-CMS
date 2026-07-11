@@ -29,7 +29,7 @@ content:
     type: entity_reference_entity_view
     label: above
     settings:
-      view_mode: teaser
+      view_mode: grid_browse
       link: false
     third_party_settings: {  }
     weight: 4

@@ -299,3 +299,19 @@ function mukurtu_collection_update_40013(): void {
 
   $config->save();
 }
+
+/**
+ * Switch personal collection items to grid_browse view mode.
+ *
+ * Matches the regular collection full display so /personal-collection/*
+ * pages render "Content in Collection" as image-forward grid cards instead
+ * of bare teaser title links.
+ */
+function mukurtu_collection_update_40014(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.personal_collection.personal_collection.full');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_items_in_collection.settings.view_mode', 'grid_browse');
+  $config->save();
+}
