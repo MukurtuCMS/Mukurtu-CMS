@@ -38,25 +38,25 @@ class MukurtuAddItemToCollectionController extends ControllerBase {
    * Check if the node is of a bundle that can be added to a collection.
    */
   protected function isValidCollectionItemBundle(NodeInterface $node) {
-    $config = $this->entityTypeManager()->getStorage('field_config')->load('node.collection.' . MUKURTU_COLLECTION_FIELD_NAME_ITEMS);
-
-    if ($config) {
-      $settings = $config->getSettings();
-      // Null target bundles means ALL bundles in Drupal.
-      if (is_null($settings['handler_settings']['target_bundles'])) {
-        return TRUE;
-      }
-
-      // Look for the specific bundle.
-      if (isset($settings['handler_settings']['target_bundles'])) {
-        $bundles = $settings['handler_settings']['target_bundles'];
-        if (empty($bundles) || in_array($node->bundle(), $bundles)) {
-          // The node is of the correct bundle.
-          return TRUE;
-        }
-      }
+    // field_items_in_collection is a base field defined in code (see
+    // Collection::bundleFieldDefinitions()), not a configurable Field UI
+    // field, so it must be looked up via the entity field manager rather
+    // than the field_config storage.
+    $fields = \Drupal::service('entity_field.manager')->getFieldDefinitions('node', 'collection');
+    if (!isset($fields[MUKURTU_COLLECTION_FIELD_NAME_ITEMS])) {
+      return FALSE;
     }
-    return FALSE;
+
+    $settings = $fields[MUKURTU_COLLECTION_FIELD_NAME_ITEMS]->getSettings();
+    $targetBundles = $settings['handler_settings']['target_bundles'] ?? NULL;
+
+    // Null target bundles means ALL bundles in Drupal.
+    if (is_null($targetBundles)) {
+      return TRUE;
+    }
+
+    // Look for the specific bundle.
+    return empty($targetBundles) || in_array($node->bundle(), $targetBundles);
   }
 
   /**
