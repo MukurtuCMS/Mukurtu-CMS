@@ -18,6 +18,8 @@ use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
 use Drupal\node\Entity\Node;
 use Drupal\og\Entity\OgMembership;
 use Drupal\user\Entity\User;
+use Drupal\views\Plugin\views\query\QueryPluginBase;
+use Drupal\views\ViewExecutable;
 
 /**
  * Implements hook_token_info().
@@ -32,21 +34,41 @@ function mukurtu_notifications_token_info() {
     'name' => t('Notification link'),
     'description' => t('"Title (URL)" text linking to the content, safe to use inside message template text.'),
   ];
+  $info['tokens']['node']['mukurtu-notification-html-link'] = [
+    'name' => t('Notification HTML link'),
+    'description' => t('A real <a> link to the content. Only safe for non-email rendering (e.g. the notifications log page) -- see mukurtu_notifications_tokens().'),
+  ];
   $info['tokens']['user']['mukurtu-notification-link'] = [
     'name' => t('Notification edit link'),
     'description' => t('"Name (URL)" text linking to the account\'s edit form, safe to use inside message template text.'),
+  ];
+  $info['tokens']['user']['mukurtu-notification-html-link'] = [
+    'name' => t('Notification edit HTML link'),
+    'description' => t('A real <a> link to the account\'s edit form. Only safe for non-email rendering -- see mukurtu_notifications_tokens().'),
   ];
   $info['tokens']['protocol']['mukurtu-notification-link'] = [
     'name' => t('Notification link'),
     'description' => t('"Name (URL)" text linking to the protocol, safe to use inside message template text.'),
   ];
+  $info['tokens']['protocol']['mukurtu-notification-html-link'] = [
+    'name' => t('Notification HTML link'),
+    'description' => t('A real <a> link to the protocol. Only safe for non-email rendering -- see mukurtu_notifications_tokens().'),
+  ];
   $info['tokens']['community']['mukurtu-notification-link'] = [
     'name' => t('Notification link'),
     'description' => t('"Name (URL)" text linking to the community, safe to use inside message template text.'),
   ];
+  $info['tokens']['community']['mukurtu-notification-html-link'] = [
+    'name' => t('Notification HTML link'),
+    'description' => t('A real <a> link to the community. Only safe for non-email rendering -- see mukurtu_notifications_tokens().'),
+  ];
   $info['tokens']['message']['mukurtu-content-link'] = [
     'name' => t('Content link (deletion-safe)'),
     'description' => t("A message's referenced content, linked if it still exists, or falling back to its title text if it's since been deleted."),
+  ];
+  $info['tokens']['message']['mukurtu-content-html-link'] = [
+    'name' => t('Content HTML link (deletion-safe)'),
+    'description' => t("A real <a> link to a message's referenced content, or falling back to its title text if it's since been deleted. Only safe for non-email rendering -- see mukurtu_notifications_tokens()."),
   ];
   return $info;
 }
@@ -72,39 +94,67 @@ function mukurtu_notifications_token_info() {
  * "word:" text in an href attribute at filter time because the replacement
  * never contains an href at all.
  *
- * The replacement is "Label (URL)" plain text rather than an <a> tag for a
+ * The plain-text replacement is "Label (URL)" rather than an <a> tag for a
  * second reason: Drupal's mail renderer (MailFormatHelper::htmlToText())
  * converts every anchor in an HTML mail body into "Label [n]" plus a
  * "[n] URL" footnote at the bottom of the message. Emitting the URL inline
  * as plain text instead sidesteps that conversion entirely, so the link
  * prints inline right after the name in both the HTML and plain-text mail
  * views.
+ *
+ * The "-html-" sibling tokens render a real <a> tag instead, for the one
+ * place that's actually safe: the notifications log page (a plain web page,
+ * not the mail pipeline), rendered from a third template partial the
+ * mail_subject/mail_body partials never touch -- see
+ * mukurtu_notifications_views_query_alter() and the "get_text" Views field's
+ * delta on views.view.mukurtu_message_log. They must never be used in a
+ * subject or body partial: the mail renderer would footnote them, and an
+ * unresolved instance sitting directly in an href would suffer the same
+ * chained-token mangling described above.
  */
 function mukurtu_notifications_tokens($type, array $tokens, array $data, array $options, BubbleableMetadata $bubbleable_metadata) {
   $replacements = [];
 
-  if ($type === 'node' && !empty($data['node']) && isset($tokens['mukurtu-notification-link'])) {
+  if ($type === 'node' && !empty($data['node']) && (isset($tokens['mukurtu-notification-link']) || isset($tokens['mukurtu-notification-html-link']))) {
     $node = $data['node'];
     $bubbleable_metadata->addCacheableDependency($node);
     $url = $node->toUrl('canonical', ['absolute' => TRUE])->toString();
-    $replacements[$tokens['mukurtu-notification-link']] = Markup::create(Html::escape($node->label()) . ' (' . Html::escape($url) . ')');
+    $label = Html::escape($node->label());
+    if (isset($tokens['mukurtu-notification-link'])) {
+      $replacements[$tokens['mukurtu-notification-link']] = Markup::create($label . ' (' . Html::escape($url) . ')');
+    }
+    if (isset($tokens['mukurtu-notification-html-link'])) {
+      $replacements[$tokens['mukurtu-notification-html-link']] = Markup::create('<a href="' . Html::escape($url) . '">' . $label . '</a>');
+    }
   }
 
-  if ($type === 'user' && !empty($data['user']) && isset($tokens['mukurtu-notification-link'])) {
+  if ($type === 'user' && !empty($data['user']) && (isset($tokens['mukurtu-notification-link']) || isset($tokens['mukurtu-notification-html-link']))) {
     $account = $data['user'];
     $bubbleable_metadata->addCacheableDependency($account);
     $url = $account->toUrl('edit-form', ['absolute' => TRUE])->toString();
-    $replacements[$tokens['mukurtu-notification-link']] = Markup::create(Html::escape($account->label()) . ' (' . Html::escape($url) . ')');
+    $label = Html::escape($account->label());
+    if (isset($tokens['mukurtu-notification-link'])) {
+      $replacements[$tokens['mukurtu-notification-link']] = Markup::create($label . ' (' . Html::escape($url) . ')');
+    }
+    if (isset($tokens['mukurtu-notification-html-link'])) {
+      $replacements[$tokens['mukurtu-notification-html-link']] = Markup::create('<a href="' . Html::escape($url) . '">' . $label . '</a>');
+    }
   }
 
-  if (in_array($type, ['protocol', 'community'], TRUE) && !empty($data[$type]) && isset($tokens['mukurtu-notification-link'])) {
+  if (in_array($type, ['protocol', 'community'], TRUE) && !empty($data[$type]) && (isset($tokens['mukurtu-notification-link']) || isset($tokens['mukurtu-notification-html-link']))) {
     $entity = $data[$type];
     $bubbleable_metadata->addCacheableDependency($entity);
     $url = $entity->toUrl('canonical', ['absolute' => TRUE])->toString();
-    $replacements[$tokens['mukurtu-notification-link']] = Markup::create(Html::escape($entity->label()) . ' (' . Html::escape($url) . ')');
+    $label = Html::escape($entity->label());
+    if (isset($tokens['mukurtu-notification-link'])) {
+      $replacements[$tokens['mukurtu-notification-link']] = Markup::create($label . ' (' . Html::escape($url) . ')');
+    }
+    if (isset($tokens['mukurtu-notification-html-link'])) {
+      $replacements[$tokens['mukurtu-notification-html-link']] = Markup::create('<a href="' . Html::escape($url) . '">' . $label . '</a>');
+    }
   }
 
-  if ($type === 'message' && !empty($data['message']) && isset($tokens['mukurtu-content-link'])) {
+  if ($type === 'message' && !empty($data['message']) && (isset($tokens['mukurtu-content-link']) || isset($tokens['mukurtu-content-html-link']))) {
     $message = $data['message'];
     $node = ($message->hasField('field_item') && !$message->get('field_item')->isEmpty())
       ? $message->get('field_item')->entity
@@ -113,12 +163,24 @@ function mukurtu_notifications_tokens($type, array $tokens, array $data, array $
     if ($node instanceof Node) {
       $bubbleable_metadata->addCacheableDependency($node);
       $url = $node->toUrl('canonical', ['absolute' => TRUE])->toString();
-      $replacements[$tokens['mukurtu-content-link']] = Markup::create(Html::escape($node->label()) . ' (' . Html::escape($url) . ')');
+      $label = Html::escape($node->label());
+      if (isset($tokens['mukurtu-content-link'])) {
+        $replacements[$tokens['mukurtu-content-link']] = Markup::create($label . ' (' . Html::escape($url) . ')');
+      }
+      if (isset($tokens['mukurtu-content-html-link'])) {
+        $replacements[$tokens['mukurtu-content-html-link']] = Markup::create('<a href="' . Html::escape($url) . '">' . $label . '</a>');
+      }
     }
     elseif ($message->hasField('field_title') && !$message->get('field_title')->isEmpty()) {
       // The referenced node is gone (deleted) -- fall back to the plain
       // title snapshot taken at send time; there's nothing left to link to.
-      $replacements[$tokens['mukurtu-content-link']] = Markup::create(Html::escape($message->get('field_title')->value));
+      $label = Html::escape($message->get('field_title')->value);
+      if (isset($tokens['mukurtu-content-link'])) {
+        $replacements[$tokens['mukurtu-content-link']] = Markup::create($label);
+      }
+      if (isset($tokens['mukurtu-content-html-link'])) {
+        $replacements[$tokens['mukurtu-content-html-link']] = Markup::create($label);
+      }
     }
   }
 
@@ -178,75 +240,70 @@ function mukurtu_notifications_form_views_exposed_form_alter(array &$form, FormS
   }
 
   $form['type']['#options'] = $options;
-
-  // Views already populated #default_value with the filter's actual current
-  // value -- raw template machine names (e.g. the expanded result of a
-  // prior submission via mukurtu_notifications_type_filter_validate()
-  // below), not the group label(s) #options is keyed by above. Left as-is,
-  // the widget can't match raw machine names against group-label keys, so
-  // redisplay ends up showing the wrong (or extra) categories as selected.
-  // Reverse-map back to the group label(s) that actually own the current
-  // value so only those show as checked.
-  $current_value = array_filter((array) ($form['type']['#default_value'] ?? []));
-  if (!empty($current_value)) {
-    $selected_groups = [];
-    foreach ($groups as $group_label => $machine_names) {
-      if (array_intersect($machine_names, $current_value)) {
-        $selected_groups[] = $group_label;
-      }
-    }
-    $form['type']['#default_value'] = $selected_groups;
-  }
-
-  // Expand the submitted group label(s) into real template machine names
-  // via #element_validate, not hook_views_pre_execute: Views builds the
-  // filter's SQL "IN (...)" condition from $filter->value during
-  // ViewExecutable::build() (_build('filter'), which runs the exposed form
-  // through full Form API validation/submission first), and only invokes
-  // hook_views_pre_execute() afterward -- by then the query is already
-  // built, so mutating $filter->value there is a no-op. #element_validate
-  // runs during that same build()-time form processing, before the filter's
-  // query() method reads the value.
-  $form['type']['#element_validate'][] = 'mukurtu_notifications_type_filter_validate';
 }
 
 /**
- * Element validate callback for the notifications page's type filter.
+ * Implements hook_views_query_alter().
  *
- * Rewrites the submitted group label(s) (e.g. "Comments") into their
- * underlying template machine names (e.g. mukurtu_protocol_comment,
- * mukurtu_comment_approved, mukurtu_comment_denied) so the bundle filter's
- * query() method -- which runs later in the same build() pass -- generates
- * the correct WHERE template IN (...) clause. When nothing is selected, the
- * personal feed display gets the curated default restriction applied here
- * instead (bypassing the exposed form's #options, which only ever expose
- * group labels) so admin-only templates like mukurtu_new_user_registration
- * don't leak into the general activity feed; the admin "all notifications"
- * display is left unrestricted, showing every template.
+ * Expands the notification type filter's exposed group-label selections
+ * (e.g. "Comments") into the underlying template machine names the
+ * "template" bundle filter's WHERE condition needs to match against, and
+ * applies the curated default restriction on the personal Activity Page
+ * when nothing is selected (so admin-only templates like
+ * mukurtu_new_user_registration don't leak into the general activity feed;
+ * the admin "all notifications" display stays unrestricted).
+ *
+ * This used to be done via #element_validate on the exposed form (see git
+ * history), rewriting the submitted value before the filter's query()
+ * method read it. That never actually ran: this view's exposed_form is
+ * Views' "basic" plugin, which reads exposed input directly via
+ * FilterPluginBase::acceptExposedInput() for a GET request without a full
+ * Form API validate/submit pass, so #element_validate callbacks on its
+ * elements are never invoked -- the "template" filter's WHERE condition was
+ * always built from the raw, unrecognized group-label text instead of real
+ * template machine names. Rewriting the already-built WHERE condition here
+ * (rather than the exposed input itself) leaves the exposed form's own
+ * rendering -- which independently reads that same raw group-label value
+ * for its #default_value -- displaying the friendly group label(s) as
+ * checked, matching the label-keyed #options set above.
  */
-function mukurtu_notifications_type_filter_validate(array $element, FormStateInterface $form_state, array $form): void {
-  $view = $form_state->get('view');
-  $selected = (array) $form_state->getValue($element['#parents']);
-  $selected = array_filter($selected, static fn ($value) => $value !== 0 && $value !== '0');
-
-  if (empty($selected)) {
-    if ($view && $view->current_display === 'mukurtu_notifications_page') {
-      $form_state->setValueForElement($element, _mukurtu_notifications_default_type_filter());
-    }
+function mukurtu_notifications_views_query_alter(ViewExecutable $view, QueryPluginBase $query): void {
+  if ($view->id() !== 'mukurtu_message_log' || !isset($view->filter['template'])) {
     return;
   }
 
-  $groups = _mukurtu_notifications_type_groups();
-  $expanded = [];
-  foreach ($selected as $key) {
-    if (isset($groups[$key])) {
-      $expanded = array_merge($expanded, $groups[$key]);
+  $selected = array_filter((array) ($view->getExposedInput()['type'] ?? []), static fn ($value) => $value !== 0 && $value !== '0');
+
+  if (empty($selected)) {
+    if ($view->current_display !== 'mukurtu_notifications_page') {
+      return;
     }
-    else {
-      $expanded[] = $key;
+    $expanded = _mukurtu_notifications_default_type_filter();
+  }
+  else {
+    $groups = _mukurtu_notifications_type_groups();
+    $expanded = [];
+    foreach ($selected as $key) {
+      $expanded = isset($groups[$key]) ? array_merge($expanded, $groups[$key]) : array_merge($expanded, [$key]);
+    }
+    $expanded = array_values(array_unique($expanded));
+  }
+
+  $field = $view->filter['template']->tableAlias . '.' . $view->filter['template']->realField;
+  $found = FALSE;
+  foreach ($query->where as &$group) {
+    foreach ($group['conditions'] as &$condition) {
+      if (($condition['field'] ?? NULL) === $field) {
+        $condition['value'] = $expanded;
+        $found = TRUE;
+      }
     }
   }
-  $form_state->setValueForElement($element, array_unique($expanded));
+  unset($group, $condition);
+
+  if (!$found) {
+    $query->addWhere(0, $field, $expanded, 'IN');
+  }
 }
 
 /**

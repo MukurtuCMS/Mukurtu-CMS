@@ -2,11 +2,11 @@ langcode: en
 status: true
 dependencies:
   config:
-    - core.entity_view_mode.message.mail_body
-    - message.template.mukurtu_user_blocked
+  - core.entity_view_mode.message.mail_body
+  - message.template.mukurtu_user_blocked
   module:
-    - layout_builder
-    - user
+  - layout_builder
+  - user
 third_party_settings:
   layout_builder:
     enabled: false
@@ -22,3 +22,4 @@ content:
 hidden:
   partial_0: true
   search_api_excerpt: true
+  partial_2: true

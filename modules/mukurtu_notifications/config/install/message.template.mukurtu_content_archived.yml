@@ -2,20 +2,21 @@ langcode: en
 status: true
 dependencies:
   config:
-    - filter.format.mukurtu_html
+  - filter.format.mukurtu_html
 template: mukurtu_content_archived
-label: 'Content archived'
-description: 'A content item was archived.'
+label: Content archived
+description: A content item was archived.
 text:
-  -
-    value: '<p>[message:field_content_type]&nbsp;[message:mukurtu-content-link] was archived.</p>'
-    format: mukurtu_html
-  -
-    value: '<p>[message:field_content_type]&nbsp;[message:mukurtu-content-link] was archived.</p>'
-    format: mukurtu_html
+- value: '[message:field_content_type]&nbsp;[message:field_title] was archived.'
+  format: mukurtu_html
+- value: <p>[message:field_content_type]&nbsp;[message:mukurtu-content-link] was archived.</p>
+  format: mukurtu_html
+- value: <p>[message:field_content_type]&nbsp;[message:mukurtu-content-html-link]
+    was archived.</p>
+  format: mukurtu_html
 settings:
-  'token options':
+  token options:
     clear: true
-    'token replace': true
+    token replace: true
   purge_override: false
-  purge_methods: {  }
+  purge_methods: {}

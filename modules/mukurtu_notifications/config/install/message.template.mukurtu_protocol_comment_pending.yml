@@ -2,20 +2,23 @@ langcode: en
 status: true
 dependencies:
   config:
-    - filter.format.mukurtu_html
+  - filter.format.mukurtu_html
 template: mukurtu_protocol_comment_pending
-label: 'Comment on protocol content (pending review)'
-description: 'A comment requiring approval was submitted on content assigned to a protocol.'
+label: Comment on protocol content (pending review)
+description: A comment requiring approval was submitted on content assigned to a protocol.
 text:
-  -
-    value: '<p>A comment on [message:field_content_type]&nbsp;[message:mukurtu-content-link] was submitted for review.</p>'
-    format: mukurtu_html
-  -
-    value: '<p>A comment on [message:field_content_type]&nbsp;[message:mukurtu-content-link] was submitted for review.</p>'
-    format: mukurtu_html
+- value: A comment on [message:field_content_type]&nbsp;[message:field_title] was
+    submitted for review.
+  format: mukurtu_html
+- value: <p>A comment on [message:field_content_type]&nbsp;[message:mukurtu-content-link]
+    was submitted for review.</p>
+  format: mukurtu_html
+- value: <p>A comment on [message:field_content_type]&nbsp;[message:mukurtu-content-html-link]
+    was submitted for review.</p>
+  format: mukurtu_html
 settings:
-  'token options':
+  token options:
     clear: true
-    'token replace': true
+    token replace: true
   purge_override: false
-  purge_methods: {  }
+  purge_methods: {}

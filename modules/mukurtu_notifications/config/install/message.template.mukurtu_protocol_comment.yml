@@ -2,20 +2,20 @@ langcode: en
 status: true
 dependencies:
   config:
-    - filter.format.mukurtu_html
+  - filter.format.mukurtu_html
 template: mukurtu_protocol_comment
-label: 'Comment on protocol content'
-description: 'A comment was posted on content assigned to a protocol.'
+label: Comment on protocol content
+description: A comment was posted on content assigned to a protocol.
 text:
-  -
-    value: '<p>A comment was posted on [message:field_content_type]&nbsp;[message:mukurtu-content-link].</p>'
-    format: mukurtu_html
-  -
-    value: '<p>A comment was posted on [message:field_content_type]&nbsp;[message:mukurtu-content-link].</p>'
-    format: mukurtu_html
+- value: A comment was posted on [message:field_content_type]&nbsp;[message:field_title].
+  format: mukurtu_html
+- value: <p>A comment was posted on [message:field_content_type]&nbsp;[message:mukurtu-content-link].</p>
+  format: mukurtu_html
+- value: <p>A comment was posted on [message:field_content_type]&nbsp;[message:mukurtu-content-html-link].</p>
+  format: mukurtu_html
 settings:
-  'token options':
+  token options:
     clear: true
-    'token replace': true
+    token replace: true
   purge_override: false
-  purge_methods: {  }
+  purge_methods: {}

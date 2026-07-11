@@ -1637,3 +1637,98 @@ function mukurtu_notifications_update_40046(): void {
     $config_storage->write($config_name, $source->read($config_name));
   }
 }
+
+/**
+ * Widens the "All notifications" admin page's access to Mukurtu Managers.
+ *
+ * mukurtu_notifications_resolve_notify_groups(TRUE, ...) has always notified
+ * both the administrator and mukurtu_manager roles (e.g. for
+ * mukurtu_new_user_registration, which is deliberately excluded from the
+ * personal Activity Page's type filter -- see
+ * _mukurtu_notifications_type_groups()). But the only display where that
+ * admin-facing template isn't filtered out, the Admin Page
+ * (mukurtu_notifications_admin_page, path admin/notifications), was
+ * access-restricted to the administrator role only, so a Mukurtu Manager
+ * without the administrator role had a Message row created for them with no
+ * page anywhere that would ever show it.
+ */
+function mukurtu_notifications_update_40047(): void {
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  $config_storage = \Drupal::service('config.storage');
+  $config_storage->write(
+    'views.view.mukurtu_message_log',
+    $source->read('views.view.mukurtu_message_log')
+  );
+}
+
+/**
+ * Rewrites message template subjects to be short and link-free, and adds a
+ * third, real-link text partial for the notifications log page.
+ *
+ * Nearly every template used the same plain-text-safe
+ * mukurtu-notification-link/mukurtu-content-link token in both its subject
+ * (text delta 0, used for the email subject and -- until this update -- also
+ * for the notifications log page) and its body (delta 1). That token
+ * deliberately renders as "Label (URL)" plain text rather than a real link
+ * (see mukurtu_notifications_tokens()), which is correct for an email
+ * subject line but meant the raw URL text leaked into the subject, and the
+ * log page (which needs a real clickable link, not email-safe plain text)
+ * showed the same dead "Label (URL)" text instead of a link.
+ *
+ * This redeploys: each template's rewritten subject (delta 0, now short and
+ * link-free), a new delta 2 using the new mukurtu-notification-html-link/
+ * mukurtu-content-html-link tokens (a real <a> tag, safe here because the
+ * log page is a plain web page, not the mail pipeline), and the Views
+ * "get_text" field's delta (already updated to 2 in mukurtu_notifications_
+ * update_40047's views.view.mukurtu_message_log redeploy) picking up delta
+ * 2 instead of delta 0.
+ */
+function mukurtu_notifications_update_40048(): void {
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  $config_storage = \Drupal::service('config.storage');
+
+  foreach ([
+    'mukurtu_batch_import_report',
+    'mukurtu_comment_approved',
+    'mukurtu_comment_denied',
+    'mukurtu_content_archived',
+    'mukurtu_content_for_review',
+    'mukurtu_content_published',
+    'mukurtu_content_to_draft',
+    'mukurtu_new_user_account_created',
+    'mukurtu_new_user_registration',
+    'mukurtu_protocol_comment',
+    'mukurtu_protocol_comment_pending',
+    'mukurtu_removed_from_community',
+    'mukurtu_removed_from_protocol',
+    'mukurtu_single_node_insert',
+    'mukurtu_single_node_update',
+    'mukurtu_user_added_to_community',
+    'mukurtu_user_added_to_protocol',
+    'mukurtu_user_approved',
+    'mukurtu_user_blocked',
+    'mukurtu_user_set_pending',
+    'mukurtu_user_unblocked',
+  ] as $template) {
+    $config_storage->write('message.template.' . $template, $source->read('message.template.' . $template));
+
+    // The new delta-2 partial is a dynamically-registered extra field
+    // (message_entity_extra_field_info()); a display that doesn't
+    // explicitly hide it shows it by default, so it must be added to
+    // 'hidden' on both the mail_subject and mail_body displays or it
+    // bleeds into both the subject and body.
+    foreach (['mail_subject', 'mail_body'] as $view_mode) {
+      $config_name = 'core.entity_view_display.message.' . $template . '.' . $view_mode;
+      if ($config_storage->exists($config_name)) {
+        $config_storage->write($config_name, $source->read($config_name));
+      }
+    }
+  }
+
+  $config_storage->write(
+    'views.view.mukurtu_message_log',
+    $source->read('views.view.mukurtu_message_log')
+  );
+}

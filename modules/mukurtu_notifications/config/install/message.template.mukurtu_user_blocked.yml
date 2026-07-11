@@ -2,20 +2,21 @@ langcode: en
 status: true
 dependencies:
   config:
-    - filter.format.mukurtu_html
+  - filter.format.mukurtu_html
 template: mukurtu_user_blocked
-label: 'User blocked'
-description: 'A user account was blocked.'
+label: User blocked
+description: A user account was blocked.
 text:
-  -
-    value: "<p>[message:field_user:entity:mukurtu-notification-link]'s account was blocked.</p>"
-    format: mukurtu_html
-  -
-    value: "<p>[message:field_user:entity:mukurtu-notification-link]'s account was blocked.</p>"
-    format: mukurtu_html
+- value: '[message:field_user:entity:display-name]''s account was blocked.'
+  format: mukurtu_html
+- value: <p>[message:field_user:entity:mukurtu-notification-link]'s account was blocked.</p>
+  format: mukurtu_html
+- value: <p>[message:field_user:entity:mukurtu-notification-html-link]'s account was
+    blocked.</p>
+  format: mukurtu_html
 settings:
-  'token options':
+  token options:
     clear: false
-    'token replace': true
+    token replace: true
   purge_override: false
-  purge_methods: {  }
+  purge_methods: {}

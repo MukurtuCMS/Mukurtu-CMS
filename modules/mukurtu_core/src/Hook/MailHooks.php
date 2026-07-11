@@ -80,7 +80,8 @@ class MailHooks {
       return;
     }
 
-    if ($message['key'] === 'status_activated' && $account && isset($account->original) && $account->original->isBlocked()) {
+    $was_pending = $account && isset($account->original) && $account->original->hasField('field_pending') && (bool) $account->original->get('field_pending')->value;
+    if ($message['key'] === 'status_activated' && $account && isset($account->original) && $account->original->isBlocked() && !$was_pending) {
       $site_name = \Drupal::config('system.site')->get('name');
       $message['subject'] = t('Your account at @site has been reactivated', ['@site' => $site_name]);
       $message['body'] = [

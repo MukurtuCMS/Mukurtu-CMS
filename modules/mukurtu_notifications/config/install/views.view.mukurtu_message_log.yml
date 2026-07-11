@@ -604,7 +604,7 @@ display:
           hide_empty: false
           empty_zero: false
           hide_alter_empty: true
-          delta: 0
+          delta: 2
         field_display_name:
           id: field_display_name
           table: user__field_display_name
@@ -799,6 +799,7 @@ display:
         options:
           role:
             administrator: administrator
+            mukurtu_manager: mukurtu_manager
       style:
         type: table
         options:
@@ -1044,7 +1045,7 @@ display:
           hide_empty: false
           empty_zero: false
           hide_alter_empty: true
-          delta: 0
+          delta: 2
         field_display_name:
           id: field_display_name
           table: user__field_display_name

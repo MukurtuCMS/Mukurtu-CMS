@@ -2,20 +2,23 @@ langcode: en
 status: true
 dependencies:
   config:
-    - filter.format.mukurtu_html
+  - filter.format.mukurtu_html
 template: mukurtu_new_user_registration
-label: 'New user registration'
-description: 'A new user has registered with the site and needs approval.'
+label: New user registration
+description: A new user has registered with the site and needs approval.
 text:
-  -
-    value: "<p>New user registration: [message:field_user:entity:mukurtu-notification-link] has requested an account and requires action.</p>\r\n"
-    format: mukurtu_html
-  -
-    value: "<p>New user registration: [message:field_user:entity:mukurtu-notification-link] has requested an account and requires action.</p>\r\n"
-    format: mukurtu_html
+- value: 'New user registration: [message:field_user:entity:display-name] has requested
+    an account and needs review.'
+  format: mukurtu_html
+- value: "<p>New user registration: [message:field_user:entity:mukurtu-notification-link]\
+    \ has requested an account and requires action.</p>\r\n"
+  format: mukurtu_html
+- value: "<p>New user registration: [message:field_user:entity:mukurtu-notification-html-link]\
+    \ has requested an account and requires action.</p>\r\n"
+  format: mukurtu_html
 settings:
-  'token options':
+  token options:
     clear: false
-    'token replace': true
+    token replace: true
   purge_override: false
-  purge_methods: {  }
+  purge_methods: {}
