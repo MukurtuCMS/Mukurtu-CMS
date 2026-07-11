@@ -146,8 +146,9 @@ class FormHooks
      * Sets explicit weights on core node tabs so all content pages display tabs
      * in the order: View, Edit, Delete, Manage Collection Organization,
      * New Sub-collection, Add Community Record, Create Multi-page Item,
-     * Add to Collection, Add to Personal Collection, Revisions, Devel.
-     * Collection-specific tabs only appear on collection content types.
+     * Add to Collection, Add to Word List, Add to Personal Collection,
+     * Revisions, Devel. Collection-specific tabs only appear on collection
+     * content types.
      */
     #[Hook("menu_local_tasks_alter")]
     public function menuLocalTasksAlterNodeTabOrder(
