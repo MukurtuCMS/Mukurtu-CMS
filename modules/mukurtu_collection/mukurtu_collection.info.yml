@@ -29,5 +29,6 @@ dependencies:
   - 'mukurtu_media:mukurtu_media'
   - 'mukurtu_notifications:mukurtu_notifications'
   - 'mukurtu_protocol:mukurtu_protocol'
+  - 'mukurtu_taxonomy:mukurtu_taxonomy'
   - 'search_api:search_api'
 version: 4.x-dev
