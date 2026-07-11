@@ -45,12 +45,10 @@
 
       <div class="full-node__main">
         <div class="full-node__content">
-          {{ content|without('field_media_assets', 'field_summary', 'field_description', 'field_items_in_collection', 'field_pc_privacy', 'name', 'user_id') }}
+          {{ content|without('field_media_assets', 'field_summary', 'field_description', 'field_pc_privacy', 'name', 'user_id') }}
         </div>
       </div>
     </div>
-
-    {{ content.field_items_in_collection }}
 
   </div> {# /full-node. #}
 </article>
