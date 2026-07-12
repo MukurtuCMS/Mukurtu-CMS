@@ -246,6 +246,11 @@ function mukurtu_core_page_attachments(array &$attachments) {
   $attachments['#attached']['library'][] = 'mukurtu_core/mukurtu-leaflet-widget';
   $attachments['#attached']['library'][] = 'mukurtu_core/tagify-override';
   $attachments['#attached']['library'][] = 'mukurtu_core/form-disable-enter-submit';
+
+  // Needed so "use-ajax" modal links (e.g. the "Add to Collection" family of
+  // local tasks) work without depending on some other module happening to
+  // load it first.
+  $attachments['#attached']['library'][] = 'core/drupal.dialog.ajax';
 }
 
 /**

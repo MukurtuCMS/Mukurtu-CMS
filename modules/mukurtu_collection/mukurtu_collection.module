@@ -5,6 +5,10 @@
  * Provide Mukurtu Collection Type.
  */
 
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\CloseModalDialogCommand;
+use Drupal\Core\Ajax\RedirectCommand;
+use Drupal\Core\Ajax\HtmlCommand;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -219,6 +223,78 @@ function mukurtu_collection_form_alter(&$form, FormStateInterface $form_state, $
       $form['actions']['submit']['#submit'][] = $args[0]['mukurtu_collection']['submit'][0];
     }
   }
+
+  // When the "Add to Collection" or "Add to Personal Collection" forms are
+  // opened inside a modal dialog (see the "use-ajax" local task links in
+  // mukurtu_collection.links.task.yml), wire their submit buttons to an AJAX
+  // callback that closes the dialog on success instead of doing a full page
+  // navigation. The ?mukurtu_modal=1 query flag persists across the
+  // drupal_modal -> drupal_ajax wrapper format switch Drupal's dialog JS
+  // performs on submit, so it reliably signals "this form is in a modal."
+  if (\Drupal::request()->query->get('mukurtu_modal')) {
+    if (in_array($form_id, ['mukurtu_collection_add_item_to_collection_form', 'mukurtu_collection_add_item_to_personal_collection_form'])) {
+      $form['submit']['#ajax'] = [
+        'callback' => 'mukurtu_collection_add_to_x_dialog_ajax',
+        'progress' => ['type' => 'throbber'],
+      ];
+    }
+    elseif ($form_id === 'personal_collection_form' && \Drupal::routeMatch()->getRouteName() === 'mukurtu_collection.add_item_to_personal_collection') {
+      // This is the embedded "create a new personal collection" entity form.
+      // It has no "node" value of its own, so stash the item being added
+      // (taken from the route, since that's what the controller built this
+      // form for) so the AJAX callback knows where to send the user back to.
+      $node = \Drupal::routeMatch()->getParameter('node');
+      if ($node) {
+        $form['mukurtu_return_node'] = [
+          '#type' => 'hidden',
+          '#value' => $node->id(),
+        ];
+      }
+      $form['actions']['submit']['#ajax'] = [
+        'callback' => 'mukurtu_collection_add_to_x_dialog_ajax',
+        'progress' => ['type' => 'throbber'],
+      ];
+    }
+  }
+}
+
+/**
+ * AJAX callback for the "Add to Collection" / "Add to Personal Collection"
+ * forms (including the embedded "create a new personal collection" form)
+ * when submitted from a modal dialog.
+ *
+ * Closes the dialog and returns to the item's page on a clean save; replaces
+ * the dialog content with the rebuilt form (including validation messages)
+ * when there are errors.
+ */
+function mukurtu_collection_add_to_x_dialog_ajax(array &$form, FormStateInterface $form_state): AjaxResponse {
+  $response = new AjaxResponse();
+  if ($form_state->isExecuted()) {
+    $nodeId = $form_state->getValue('node') ?? $form_state->getValue('mukurtu_return_node');
+    $node = $nodeId ? \Drupal::entityTypeManager()->getStorage('node')->load($nodeId) : NULL;
+    $response->addCommand(new CloseModalDialogCommand());
+    if ($node) {
+      $response->addCommand(new RedirectCommand($node->toUrl()->toString()));
+    }
+  }
+  else {
+    // Drupal form validation errors are in $form_state->getErrors(), not the
+    // messenger queue. Copy them over so status_messages renders them visibly.
+    foreach ($form_state->getErrors() as $error) {
+      \Drupal::messenger()->addError($error);
+    }
+    /** @var \Drupal\Core\Render\RendererInterface $renderer */
+    $renderer = \Drupal::service('renderer');
+    $status_messages = ['#type' => 'status_messages'];
+    $form['#prefix'] = ($form['#prefix'] ?? '') . $renderer->renderRoot($status_messages);
+    $output = $renderer->renderRoot($form);
+    $response->setAttachments($form['#attached']);
+    // Use HtmlCommand (not ReplaceCommand) - ".ui-dialog-content" is the
+    // #drupal-modal wrapper itself, not a child of it. Replacing the wrapper
+    // would break focus restoration and CloseModalDialogCommand's selector.
+    $response->addCommand(new HtmlCommand('.ui-dialog-content', $output));
+  }
+  return $response;
 }
 
 /**
