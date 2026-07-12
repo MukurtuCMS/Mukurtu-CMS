@@ -274,6 +274,41 @@ counterpart, if one exists. */
     flex-shrink: 0;
 }
 
+/* Fix the titlebar close icon drifting off-center. Gin's own dialog CSS
+   (dist/css/theme/dialog.css) sizes .ui-icon-closethick to fill the button
+   (top/left: 0, width/height: 100%, transform: none) via a mask-image, but a
+   conflicting rule elsewhere sets a translate() transform sized for a
+   top/left: 50% + negative-margin centering approach instead. Re-assert
+   Gin's own intended values so the icon is reliably centered regardless of
+   which page/theme context the dialog is opened from. */
+.ui-dialog .ui-dialog-titlebar-close .ui-icon {
+    top: 0 !important;
+    left: 0 !important;
+    transform: none !important;
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+}
+
+/* Space out form fields from the submit button. Content rendered inside a
+   dialog only has its own field markup - none of the surrounding page
+   layout CSS that normally provides this spacing on a full page. */
+.ui-dialog .ui-dialog-content .js-form-item {
+    margin-block-end: 1rem;
+}
+
+.ui-dialog .ui-dialog-content input[type="submit"] {
+    margin-block-start: 0.5rem;
+}
+
+/* The front-end select arrow's maroon accent color is tuned for
+   mukurtu_v4's light-background pages; it clashes against Gin's dark
+   dialog chrome. Recolor to Gin's own accent so form content inside a
+   dialog reads as part of the same (dark) surface as the dialog itself. */
+.ui-dialog .js-form-type-select::after {
+    border-top-color: var(--gin-color-primary, #0036b1);
+}
+
 /* Fix Layout Builder settings menu blocking block contextual/edit links (#1385).
    gin_lb removes core's layout-builder.css and replaces it with its own, which
    positions section configure/remove links and region labels absolutely at
