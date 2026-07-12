@@ -20,7 +20,7 @@ class MukurtuAddItemToCollectionController extends ControllerBase {
    *   The access result.
    */
   public function access(AccountInterface $account, NodeInterface $node) {
-    if ($this->isValidCollectionItemBundle($node)) {
+    if (static::isValidCollectionItemBundle($node)) {
       // Eventually we'll want to add "add to new collection" functionality.
       /* if ($this->entityTypeManager()->getAccessControlHandler('node')->createAccess('collection')) {
         return AccessResult::allowed();
@@ -36,8 +36,11 @@ class MukurtuAddItemToCollectionController extends ControllerBase {
 
   /**
    * Check if the node is of a bundle that can be added to a collection.
+   *
+   * Public/static so it can be reused by CollectionQuickActionAccessHelper
+   * without duplicating this logic for the browse-card quick action.
    */
-  protected function isValidCollectionItemBundle(NodeInterface $node) {
+  public static function isValidCollectionItemBundle(NodeInterface $node) {
     // field_items_in_collection is a base field defined in code (see
     // Collection::bundleFieldDefinitions()), not a configurable Field UI
     // field, so it must be looked up via the entity field manager rather

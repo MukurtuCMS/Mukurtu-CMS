@@ -1,6 +1,7 @@
 <?php
 
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 use Drupal\mukurtu_browse\Plugin\views\argument\MukurtuBoundingBox;
 use Drupal\node\NodeInterface;
 use Drupal\node\NodeTypeInterface;
@@ -98,10 +99,80 @@ function mukurtu_browse_preprocess_node(&$variables) {
     return;
   }
   $node_type = $node->type->entity;
-  if (!$node_type instanceof NodeTypeInterface) {
-    return;
+  if ($node_type instanceof NodeTypeInterface) {
+    $variables['content_type_label'] = $node_type->label();
   }
-  $variables['content_type_label'] = $node_type->label();
+
+  $variables['quick_actions'] = mukurtu_browse_build_quick_actions($variables, $node);
+}
+
+/**
+ * Builds the quick-actions data for a node's List-mode (browse) card.
+ *
+ * Other modules contribute actions (Add to Collection, Export, etc.) via
+ * hook_mukurtu_browse_quick_actions_alter(). Each contributed action is a
+ * keyed array with the shape:
+ * - title: (TranslatableMarkup) Visible label (used in the overflow menu).
+ * - url: (\Drupal\Core\Url) Destination.
+ * - group: (string) 'icon' to render as a standalone icon button, anything
+ *   else (including omitted) renders inside the overflow menu.
+ * - icon: (string, optional) Basename of an SVG in the theme's images/
+ *   directory, only meaningful for the 'icon' group.
+ * - accessible_title: (TranslatableMarkup, optional) Accessible name for an
+ *   'icon' group action's aria-label; falls back to 'title' if omitted.
+ *   Icon-only buttons need a name that identifies the item, not just the
+ *   action ("Add @title to Collection", not just "Add to Collection").
+ * - weight: (int, optional) Sort order within its group, lower first.
+ * - attributes: (array, optional) Extra attributes for the <a> tag, e.g. to
+ *   trigger an AJAX modal.
+ * - cache: (array, optional) 'tags' and/or 'contexts' this action's
+ *   visibility depends on, merged into the node's render cache metadata.
+ *
+ * @return array
+ *   ['icon_actions' => [...], 'overflow_actions' => [...]], each a list of
+ *   the action arrays described above, sorted by weight.
+ */
+function mukurtu_browse_build_quick_actions(array &$variables, NodeInterface $node) {
+  $actions = [];
+  $cache_tags = [];
+  $cache_contexts = ['user.permissions'];
+
+  $edit_access = $node->access('update', NULL, TRUE);
+  $cache_tags = array_merge($cache_tags, $edit_access->getCacheTags());
+  $cache_contexts = array_merge($cache_contexts, $edit_access->getCacheContexts());
+  if ($edit_access->isAllowed()) {
+    $actions['edit'] = [
+      'title' => t('Edit'),
+      'url' => Url::fromRoute('entity.node.edit_form', ['node' => $node->id()]),
+      'group' => 'overflow',
+      'weight' => 0,
+      'attributes' => [],
+    ];
+  }
+
+  \Drupal::moduleHandler()->alter('mukurtu_browse_quick_actions', $actions, $node);
+
+  foreach ($actions as $action) {
+    $cache_tags = array_merge($cache_tags, $action['cache']['tags'] ?? []);
+    $cache_contexts = array_merge($cache_contexts, $action['cache']['contexts'] ?? []);
+  }
+
+  $variables['#cache']['tags'] = array_unique(array_merge($variables['#cache']['tags'] ?? [], $cache_tags));
+  $variables['#cache']['contexts'] = array_unique(array_merge($variables['#cache']['contexts'] ?? [], $cache_contexts));
+
+  uasort($actions, fn(array $a, array $b) => ($a['weight'] ?? 0) <=> ($b['weight'] ?? 0));
+
+  $icon_actions = array_values(array_filter($actions, fn(array $action) => ($action['group'] ?? 'overflow') === 'icon'));
+  $overflow_actions = array_values(array_filter($actions, fn(array $action) => ($action['group'] ?? 'overflow') !== 'icon'));
+
+  if ($icon_actions || $overflow_actions) {
+    $variables['#attached']['library'][] = 'mukurtu_v4/quick-actions';
+  }
+
+  return [
+    'icon_actions' => $icon_actions,
+    'overflow_actions' => $overflow_actions,
+  ];
 }
 
 /**

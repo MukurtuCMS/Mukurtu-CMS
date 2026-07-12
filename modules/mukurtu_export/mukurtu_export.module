@@ -99,6 +99,47 @@ function mukurtu_export_entity_operation(\Drupal\Core\Entity\EntityInterface $en
 }
 
 /**
+ * Implements hook_mukurtu_browse_quick_actions_alter().
+ *
+ * Adds "Export" and "Add to export list" to a node's browse-card quick
+ * actions, gated on the same 'access mukurtu export' permission (manager
+ * roles only) as the equivalent admin operations-dropdown links added by
+ * mukurtu_export_entity_operation() above.
+ */
+function mukurtu_export_mukurtu_browse_quick_actions_alter(array &$actions, \Drupal\node\NodeInterface $node) {
+  if (!\Drupal::currentUser()->hasPermission('access mukurtu export')) {
+    return;
+  }
+
+  $destination = \Drupal::request()->getRequestUri();
+
+  $actions['add_to_export_list'] = [
+    'title' => t('Add to export list'),
+    'url' => \Drupal\Core\Url::fromRoute('mukurtu_export.add_item_to_list', [
+      'entity_type' => 'node',
+      'entity_id' => $node->id(),
+    ], ['query' => ['destination' => $destination]]),
+    'group' => 'overflow',
+    'weight' => 20,
+    'attributes' => [],
+    'cache' => [
+      'contexts' => ['user.permissions', 'url'],
+    ],
+  ];
+
+  $actions['export'] = [
+    'title' => t('Export'),
+    'url' => \Drupal\Core\Url::fromRoute('mukurtu_export.start_adhoc_node', ['node' => $node->id()]),
+    'group' => 'overflow',
+    'weight' => 21,
+    'attributes' => [],
+    'cache' => [
+      'contexts' => ['user.permissions'],
+    ],
+  ];
+}
+
+/**
  * Implements hook_form_alter().
  *
  * Intercepts Views bulk-form submissions for the export flag actions so that

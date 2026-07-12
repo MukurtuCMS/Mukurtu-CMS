@@ -1,0 +1,92 @@
+// Quick-action icon(s) + overflow menu shown on a content card (List mode
+// today; Grid/Map modes are a planned fast-follow reusing this same
+// component, so these rules are intentionally not nested under
+// .horizontal-card).
+.quick-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--v-space-4xs);
+  margin-block-start: var(--v-space-4xs);
+
+  &__icon-link,
+  &__overflow-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+    border-radius: 50%;
+    background: none;
+    border: 0;
+    cursor: pointer;
+
+    svg {
+      // Not --brand-secondary: it's a site-configurable accent color with
+      // no guaranteed contrast against white, and these icons are the only
+      // visible affordance for their buttons (WCAG 1.4.11).
+      fill: var(--brand-primary);
+    }
+
+    &:hover,
+    &:focus-visible {
+      background-color: var(--brand-light);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--brand-primary);
+      outline-offset: 2px;
+    }
+  }
+
+  &__overflow {
+    position: relative;
+
+    // Remove the default disclosure-triangle marker; the summary's own
+    // "more actions" icon is the only visible affordance.
+    summary {
+      list-style: none;
+
+      &::-webkit-details-marker {
+        display: none;
+      }
+
+      &::marker {
+        content: '';
+      }
+    }
+  }
+
+  &__overflow-menu {
+    position: absolute;
+    inset-block-start: 100%;
+    inset-inline-end: 0;
+    z-index: 10;
+    min-inline-size: 12rem;
+    margin: var(--v-space-5xs) 0 0;
+    padding: var(--v-space-5xs) 0;
+    list-style: none;
+    background-color: var(--color-white);
+    border: 1px solid var(--mukurtu-view-row-divider-color);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+
+    li {
+      margin: 0;
+    }
+
+    a {
+      display: block;
+      padding: var(--v-space-5xs) var(--v-space-2xs);
+      min-block-size: 2.75rem;
+      display: flex;
+      align-items: center;
+      color: var(--brand-primary);
+      text-decoration: none;
+      white-space: nowrap;
+
+      &:hover,
+      &:focus-visible {
+        background-color: var(--brand-light);
+      }
+    }
+  }
+}

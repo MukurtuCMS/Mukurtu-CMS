@@ -135,6 +135,23 @@ function mukurtu_collection_preprocess_node(array &$variables): void {
 }
 
 /**
+ * Implements hook_mukurtu_browse_quick_actions_alter().
+ */
+function mukurtu_collection_mukurtu_browse_quick_actions_alter(array &$actions, \Drupal\node\NodeInterface $node): void {
+  \Drupal::service('Drupal\mukurtu_collection\Hook\CollectionPreprocessHooks')
+    ->browseQuickActionsAlter($actions, $node);
+}
+
+/**
+ * AJAX callback for the Add to Collection / Add to Personal Collection
+ * forms submitted from a browse-card modal. See CollectionFormHooks.
+ */
+function mukurtu_collection_add_item_dialog_ajax(array &$form, FormStateInterface $form_state): \Drupal\Core\Ajax\AjaxResponse {
+  return \Drupal::service('Drupal\mukurtu_collection\Hook\CollectionFormHooks')
+    ->ajaxSubmit($form, $form_state);
+}
+
+/**
  * Implements hook_entity_bundle_info_alter().
  */
 function mukurtu_collection_entity_bundle_info_alter(array &$bundles): void {
@@ -219,6 +236,9 @@ function mukurtu_collection_form_alter(&$form, FormStateInterface $form_state, $
       $form['actions']['submit']['#submit'][] = $args[0]['mukurtu_collection']['submit'][0];
     }
   }
+
+  \Drupal::service('Drupal\mukurtu_collection\Hook\CollectionFormHooks')
+    ->formAlter($form, $form_state, $form_id);
 }
 
 /**
