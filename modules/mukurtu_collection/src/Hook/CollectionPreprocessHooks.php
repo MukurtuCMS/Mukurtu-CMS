@@ -10,6 +10,7 @@ use Drupal\Core\Template\Attribute;
 use Drupal\Core\Url;
 use Drupal\mukurtu_collection\CollectionHierarchyServiceInterface;
 use Drupal\mukurtu_collection\CollectionQuickActionAccessHelper;
+use Drupal\mukurtu_collection\Controller\MukurtuAddItemToCollectionController;
 use Drupal\mukurtu_collection\Entity\Collection;
 use Drupal\node\NodeInterface;
 
@@ -70,51 +71,63 @@ final class CollectionPreprocessHooks {
    * hook_mukurtu_browse_quick_actions_alter().
    */
   public function browseQuickActionsAlter(array &$actions, NodeInterface $node): void {
-    // The mukurtu_modal query flag is how CollectionFormHooks::formAlter()
-    // tells these two forms apart from their existing full-page "Add to
-    // Collection" / "Add to Personal Collection" tab usage - it persists
-    // across Drupal's ajax_form submission, same pattern as
-    // mukurtu_media_form_alter()'s ?mukurtu_modal=1 flag.
-    $dialog_attributes = [
-      'class' => ['use-ajax'],
-      'data-dialog-type' => 'modal',
-      'data-dialog-options' => Json::encode(['width' => 600]),
-    ];
+    // mukurtu_modal is the existing flag (see mukurtu_collection_form_alter()
+    // in the .module file) that opts these forms into the AJAX modal
+    // treatment already used by their full-page tabs. mukurtu_stay is new
+    // and specific to this quick-action context: the tabs' shared ajax
+    // callback (mukurtu_collection_add_to_x_dialog_ajax()) redirects to the
+    // item's own page on success, which is correct when you're already on
+    // that page but would navigate a user away from the browse listing they
+    // were on when they clicked the icon here - mukurtu_stay tells that
+    // callback to stay put (close the dialog, show the message, return
+    // focus) instead.
+    $current_user = \Drupal::currentUser();
 
-    if ($this->quickActionAccessHelper->hasAddableCollectionFor($node)) {
-      $icon_attributes = $dialog_attributes;
-      // Distinguishes this trigger from add_to_personal_collection's below
-      // (both can be present for the same node) so CollectionFormHooks can
-      // return focus to the specific element that opened the dialog,
-      // rather than a selector matching both.
-      $icon_attributes['data-quick-action-trigger'] = 'collection-' . $node->id();
+    // Gates both branches below regardless of the user's general
+    // collection-creation access - a bundle collections can't contain
+    // shouldn't get an Add to Collection action just because the user
+    // happens to be able to create collections in general.
+    $valid_bundle = MukurtuAddItemToCollectionController::isValidCollectionItemBundle($node);
+    $create_collection_access = \Drupal::entityTypeManager()
+      ->getAccessControlHandler('node')
+      ->createAccess('collection', $current_user, [], TRUE);
+
+    if ($valid_bundle && ($this->quickActionAccessHelper->hasAddableCollectionFor($node) || $create_collection_access->isAllowed())) {
       $actions['add_to_collection'] = [
         'title' => t('Add to Collection'),
         // @node (not %node) - this fills an aria-label attribute, which
         // must be plain text; %node would wrap the value in
         // <em class="placeholder"> markup and corrupt the attribute.
         'accessible_title' => t('Add @node to Collection', ['@node' => $node->getTitle()]),
-        'url' => Url::fromRoute('mukurtu_collection.add_item_to_collection', ['node' => $node->id()], ['query' => ['mukurtu_modal' => '1']]),
+        'url' => Url::fromRoute('mukurtu_collection.add_item_to_collection', ['node' => $node->id()], ['query' => ['mukurtu_modal' => '1', 'mukurtu_stay' => '1']]),
         'group' => 'icon',
         'icon' => 'collection-add',
         'weight' => -10,
-        'attributes' => $icon_attributes,
+        'attributes' => [
+          'class' => ['use-ajax'],
+          'data-dialog-type' => 'modal',
+          'data-dialog-options' => Json::encode(['width' => 560]),
+          'data-quick-action-trigger' => 'collection-' . $node->id(),
+        ],
         'cache' => [
-          'tags' => $this->quickActionAccessHelper->getCacheTags(),
-          'contexts' => ['user'],
+          'tags' => array_merge($this->quickActionAccessHelper->getCacheTags(), $create_collection_access->getCacheTags()),
+          'contexts' => array_merge(['user'], $create_collection_access->getCacheContexts()),
         ],
       ];
     }
 
-    if (\Drupal::currentUser()->hasPermission('add personal collection entities')) {
-      $overflow_attributes = $dialog_attributes;
-      $overflow_attributes['data-quick-action-trigger'] = 'personal-collection-' . $node->id();
+    if ($current_user->hasPermission('add personal collection entities')) {
       $actions['add_to_personal_collection'] = [
         'title' => t('Add to Personal Collection'),
-        'url' => Url::fromRoute('mukurtu_collection.add_item_to_personal_collection', ['node' => $node->id()], ['query' => ['mukurtu_modal' => '1']]),
+        'url' => Url::fromRoute('mukurtu_collection.add_item_to_personal_collection', ['node' => $node->id()], ['query' => ['mukurtu_modal' => '1', 'mukurtu_stay' => '1']]),
         'group' => 'overflow',
         'weight' => 10,
-        'attributes' => $overflow_attributes,
+        'attributes' => [
+          'class' => ['use-ajax'],
+          'data-dialog-type' => 'modal',
+          'data-dialog-options' => Json::encode(['width' => 900]),
+          'data-quick-action-trigger' => 'personal-collection-' . $node->id(),
+        ],
         'cache' => [
           'contexts' => ['user.permissions'],
         ],

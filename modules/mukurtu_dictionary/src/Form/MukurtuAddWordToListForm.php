@@ -4,6 +4,7 @@ namespace Drupal\mukurtu_dictionary\Form;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\mukurtu_dictionary\Entity\WordList;
 use Drupal\node\NodeInterface;
 use Drupal\Core\Entity\RevisionableInterface;
 use Exception;
@@ -20,7 +21,7 @@ class MukurtuAddWordToListForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, ?NodeInterface $node = NULL, Array $lists = []) {
+  public function buildForm(array $form, FormStateInterface $form_state, ?NodeInterface $node = NULL) {
     if ($node) {
       $form['node'] = [
         '#type' => 'hidden',
@@ -28,22 +29,37 @@ class MukurtuAddWordToListForm extends FormBase {
       ];
     }
 
-    if (!empty($lists)) {
-      foreach ($lists as $list) {
-        $options[$list->id()] = $list->getTitle();
-      }
-
-      $form['word_list'] = [
-        '#type' => 'select',
-        '#title' => $this->t('Select Word List'),
-        '#options' => $options,
-      ];
-    }
+    $form['word_list'] = [
+      '#type' => 'entity_autocomplete_tagify',
+      '#title' => $this->t('Select Word List'),
+      '#target_type' => 'node',
+      '#required' => TRUE,
+      '#cardinality' => -1,
+      // 0 = show all eligible word lists on click, not just as-you-type
+      // matches.
+      '#suggestions_dropdown' => 0,
+      '#identifier' => 'mukurtu-add-word-to-list',
+      // Tagify copies classes from the original input onto its generated
+      // wrapper; the "show all on click" behavior looks up that wrapper by
+      // this exact class, so it must be set here too.
+      '#attributes' => ['class' => ['mukurtu-add-word-to-list']],
+      '#selection_handler' => 'mukurtu_eligible_container',
+      '#selection_settings' => [
+        'target_bundles' => ['word_list'],
+        'mukurtu_containing_field' => WordList::WORDS_FIELD,
+        'mukurtu_current_item' => $node?->id(),
+      ],
+    ];
 
     $form['submit'] = [
       '#type' => 'submit',
       '#value' => $this->t('Add to Word List'),
     ];
+
+    // This form is only ever shown inside a Gin-styled modal dialog
+    // regardless of the active front-end theme, so force tagify's Gin
+    // styling rather than relying on theme auto-detection.
+    $form['#attached']['library'][] = 'tagify/gin';
 
     return $form;
   }
@@ -52,20 +68,33 @@ class MukurtuAddWordToListForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $listId = $form_state->getValue('word_list');
+    // The tagify widget's value is a JSON-encoded array of selected tags.
+    $selected = json_decode($form_state->getValue('word_list') ?? '', TRUE) ?: [];
     $nodeId = $form_state->getValue('node');
-
-    /**
-     * @var \Drupal\mukurtu_dictionary\Entity\WordListInterface
-     */
-    $list = \Drupal::entityTypeManager()->getStorage('node')->load($listId);
 
     /**
      * @var \Drupal\mukurtu_dictionary\Entity\DictionaryWord
      */
     $node = \Drupal::entityTypeManager()->getStorage('node')->load($nodeId);
 
-    if ($node && $list && $list->bundle() == 'word_list' && $list->access('update')) {
+    if (!$node) {
+      return;
+    }
+
+    $form_state->setRedirect('entity.node.canonical', ['node' => $node->id()]);
+
+    foreach ($selected as $item) {
+      $listId = $item['entity_id'] ?? NULL;
+
+      /**
+       * @var \Drupal\mukurtu_dictionary\Entity\WordListInterface
+       */
+      $list = $listId ? \Drupal::entityTypeManager()->getStorage('node')->load($listId) : NULL;
+
+      if (!$list || $list->bundle() != 'word_list' || !$list->access('update')) {
+        continue;
+      }
+
       // Add the word to the list.
       $list->add($node);
 
@@ -74,7 +103,6 @@ class MukurtuAddWordToListForm extends FormBase {
         $list->setRevisionLogMessage($this->t("Added @node to the word list.", ['@node' => $node->getTitle()]));
       }
 
-      $form_state->setRedirect('entity.node.canonical', ['node' => $node->id()]);
       try {
         $list->save();
         $this->messenger()->addStatus($this->t("Added %node to %list", ['%node' => $node->getTitle(), '%list' => $list->getTitle()]));
@@ -82,7 +110,6 @@ class MukurtuAddWordToListForm extends FormBase {
         $this->messenger()->addError($this->t("Failed to add the word to the word list"));
       }
     }
-
   }
 
 }

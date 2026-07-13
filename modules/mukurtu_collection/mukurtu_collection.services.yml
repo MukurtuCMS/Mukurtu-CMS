@@ -39,8 +39,3 @@ services:
     arguments:
       - '@mukurtu_collection.menu_rebuild_processor'
       - '@entity_type.manager'
-
-  Drupal\mukurtu_collection\Hook\CollectionFormHooks:
-    class: Drupal\mukurtu_collection\Hook\CollectionFormHooks
-    arguments:
-      - '@renderer'

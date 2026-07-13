@@ -1,6 +1,12 @@
 <?php
 
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\CloseModalDialogCommand;
+use Drupal\Core\Ajax\RedirectCommand;
+use Drupal\Core\Ajax\HtmlCommand;
+use Drupal\Core\Ajax\InvokeCommand;
+use Drupal\Core\Ajax\MessageCommand;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\core\Entity\EntityTypeInterface;
@@ -181,6 +187,179 @@ function mukurtu_dictionary_form_node_dictionary_word_form_alter(&$form, FormSta
  */
 function mukurtu_dictionary_form_node_dictionary_word_edit_form_alter(&$form, FormStateInterface $form_state) {
   mukurtu_dictionary_language_field_config_helper($form, $form_state);
+}
+
+/**
+ * Implements hook_form_form_id_alter().
+ *
+ * When the "Add to Word List" form is opened inside a modal dialog (see the
+ * "use-ajax" local task link in mukurtu_dictionary.links.task.yml), wire its
+ * submit button to an AJAX callback that closes the dialog on success
+ * instead of doing a full page navigation. The ?mukurtu_modal=1 query flag
+ * persists across the drupal_modal -> drupal_ajax wrapper format switch
+ * Drupal's dialog JS performs on submit, so it reliably signals "this form
+ * is in a modal."
+ */
+function mukurtu_dictionary_form_mukurtu_dictionary_add_word_to_list_form_alter(&$form, FormStateInterface $form_state) {
+  if (\Drupal::request()->query->get('mukurtu_modal')) {
+    $form['submit']['#ajax'] = [
+      'callback' => 'mukurtu_dictionary_add_word_to_list_dialog_ajax',
+      'progress' => ['type' => 'throbber'],
+    ];
+  }
+}
+
+/**
+ * Implements hook_module_implements_alter().
+ *
+ * field_group moves its own hook_form_alter() to the end of the module list
+ * so it can attach group metadata after everyone else has had a chance to
+ * alter the form. Our own alter needs to run after that (to strip the tabs
+ * from the embedded "create a new word list" form), so move
+ * mukurtu_dictionary to the end too - since this runs after field_group's
+ * own reordering, it ends up after field_group.
+ */
+function mukurtu_dictionary_module_implements_alter(&$implementations, $hook) {
+  if ($hook === 'form_alter' && isset($implementations['mukurtu_dictionary'])) {
+    $group = $implementations['mukurtu_dictionary'];
+    unset($implementations['mukurtu_dictionary']);
+    $implementations['mukurtu_dictionary'] = $group;
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ *
+ * Trims the embedded "create a new word list" entity form down to just the
+ * fields needed for a quick create - keep only Title and Cultural Protocols
+ * (both required; Cultural Protocols can't be defaulted, since it must
+ * reflect an actual protocol the user belongs to). Everything else can be
+ * filled in later by editing the word list normally. Also wires the form's
+ * submit button to close the modal dialog on success, mirroring
+ * mukurtu_dictionary_form_mukurtu_dictionary_add_word_to_list_form_alter().
+ */
+function mukurtu_dictionary_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  if ($form_id !== 'node_word_list_form' || \Drupal::routeMatch()->getRouteName() !== 'mukurtu_dictionary.add_word_to_list') {
+    return;
+  }
+
+  $hideFields = [
+    'field_summary', 'field_description', 'field_word_list_image',
+    'field_source', 'field_words', 'field_related_content',
+    'field_keywords', 'field_coverage', 'field_coverage_description', 'field_location',
+    'field_local_contexts_projects', 'field_local_contexts_labels_and_notices',
+    'revision_log', 'path', 'promote', 'sticky', 'og_audience', 'uid', 'created',
+    'comment', 'moderation_state',
+  ];
+  foreach ($hideFields as $fieldName) {
+    if (isset($form[$fieldName])) {
+      $form[$fieldName]['#access'] = FALSE;
+    }
+  }
+
+  $form['#fieldgroups'] = [];
+  $form['#group_children'] = [];
+
+  // Not useful for a quick "create and add" flow.
+  if (isset($form['actions']['preview'])) {
+    $form['actions']['preview']['#access'] = FALSE;
+  }
+
+  if (\Drupal::request()->query->get('mukurtu_modal')) {
+    // This is the embedded "create a new word list" entity form. It has no
+    // "node" value of its own, so stash the item being added (taken from
+    // the route, since that's what the controller built this form for) so
+    // the AJAX callback knows where to send the user back to.
+    $node = \Drupal::routeMatch()->getParameter('node');
+    if ($node) {
+      $form['mukurtu_return_node'] = [
+        '#type' => 'hidden',
+        '#value' => $node->id(),
+      ];
+    }
+    $form['actions']['submit']['#ajax'] = [
+      'callback' => 'mukurtu_dictionary_add_word_to_list_dialog_ajax',
+      'progress' => ['type' => 'throbber'],
+    ];
+    // Core's dialog JS hoists any ".form-actions" button into the dialog's
+    // shared buttonpane (see prepareDialogButtons() in
+    // core/misc/dialog/dialog.ajax.js), even while this form's <details> is
+    // collapsed. With two forms in one dialog that makes this form's Save
+    // button look like "the" dialog action and swallow clicks meant for the
+    // other (picker) form. Strip the class so it stays inline. Must be a
+    // #pre_render callback, not done directly here - the class is added by
+    // Actions::processActions(), which runs later than hook_form_alter, so
+    // it isn't there yet to remove at this point. Must be a closure, not a
+    // plain function name string - #pre_render requires either an anonymous
+    // function or a TrustedCallbackInterface method.
+    $form['actions']['#pre_render'][] = function (array $element): array {
+      if (!empty($element['#attributes']['class'])) {
+        $element['#attributes']['class'] = array_diff($element['#attributes']['class'], ['form-actions']);
+      }
+      return $element;
+    };
+  }
+}
+
+/**
+ * AJAX callback for the "Add to Word List" form (including the embedded
+ * "create a new word list" form) when submitted from a modal dialog.
+ *
+ * Closes the dialog and returns to the word's page on a clean save; replaces
+ * the dialog content with the rebuilt form (including validation messages)
+ * when there are errors.
+ */
+function mukurtu_dictionary_add_word_to_list_dialog_ajax(array &$form, FormStateInterface $form_state): AjaxResponse {
+  $response = new AjaxResponse();
+  if ($form_state->isExecuted()) {
+    $nodeId = $form_state->getValue('node') ?? $form_state->getValue('mukurtu_return_node');
+    $response->addCommand(new CloseModalDialogCommand());
+
+    // mukurtu_stay marks this as opened from a browse-card quick action
+    // (see Drupal\mukurtu_dictionary\Hook\BrowseHooks::browseQuickActionsAlter())
+    // rather than the full-page tab this callback was originally built for
+    // - stay on the listing instead of navigating to the item's own page.
+    if (\Drupal::request()->query->get('mukurtu_stay')) {
+      // Messages set via messenger() during submitForm() would normally
+      // ride along with the redirect below to the next page load; since
+      // there's no redirect in this branch, convert them to AJAX commands
+      // instead so the "Added X to Y" confirmation isn't silently lost.
+      foreach (\Drupal::messenger()->all() as $type => $messages) {
+        foreach ($messages as $message) {
+          $response->addCommand(new MessageCommand($message, NULL, ['type' => $type]));
+        }
+      }
+      \Drupal::messenger()->deleteAll();
+
+      if ($nodeId) {
+        $response->addCommand(new InvokeCommand('[data-quick-action-trigger="word-list-' . $nodeId . '"]', 'focus'));
+      }
+    }
+    else {
+      $node = $nodeId ? \Drupal::entityTypeManager()->getStorage('node')->load($nodeId) : NULL;
+      if ($node) {
+        $response->addCommand(new RedirectCommand($node->toUrl()->toString()));
+      }
+    }
+  }
+  else {
+    // Drupal form validation errors are in $form_state->getErrors(), not the
+    // messenger queue. Copy them over so status_messages renders them visibly.
+    foreach ($form_state->getErrors() as $error) {
+      \Drupal::messenger()->addError($error);
+    }
+    /** @var \Drupal\Core\Render\RendererInterface $renderer */
+    $renderer = \Drupal::service('renderer');
+    $status_messages = ['#type' => 'status_messages'];
+    $form['#prefix'] = ($form['#prefix'] ?? '') . $renderer->renderRoot($status_messages);
+    $output = $renderer->renderRoot($form);
+    $response->setAttachments($form['#attached']);
+    // Use HtmlCommand (not ReplaceCommand) - ".ui-dialog-content" is the
+    // #drupal-modal wrapper itself, not a child of it. Replacing the wrapper
+    // would break focus restoration and CloseModalDialogCommand's selector.
+    $response->addCommand(new HtmlCommand('.ui-dialog-content', $output));
+  }
+  return $response;
 }
 
 // Helper method to pull dictionary language field options from config.

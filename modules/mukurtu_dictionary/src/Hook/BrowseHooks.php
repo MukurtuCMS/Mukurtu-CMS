@@ -17,13 +17,29 @@ class BrowseHooks
     #[Hook('mukurtu_browse_quick_actions_alter')]
     public function browseQuickActionsAlter(array &$actions, NodeInterface $node): void
     {
-        if (!$this->hasAddableWordListFor($node)) {
+        // Word lists can only ever contain dictionary_word items - this
+        // gates everything below regardless of the user's general
+        // word_list creation access.
+        if ($node->bundle() !== 'dictionary_word') {
             return;
         }
 
+        $createAccess = \Drupal::entityTypeManager()
+            ->getAccessControlHandler('node')
+            ->createAccess('word_list', \Drupal::currentUser(), [], true);
+
+        if (!$this->hasAddableWordListFor($node) && !$createAccess->isAllowed()) {
+            return;
+        }
+
+        // mukurtu_modal opts the form into the AJAX modal treatment its
+        // full-page tab already uses (see mukurtu_dictionary.module).
+        // mukurtu_stay tells that shared ajax callback to stay on this
+        // browse listing instead of redirecting to the item's own page,
+        // which is what it does for the tab (where you're already there).
         $actions['add_to_word_list'] = [
             'title' => t('Add to Word List'),
-            'url' => Url::fromRoute('mukurtu_dictionary.add_word_to_list', ['node' => $node->id()], ['query' => ['mukurtu_modal' => '1']]),
+            'url' => Url::fromRoute('mukurtu_dictionary.add_word_to_list', ['node' => $node->id()], ['query' => ['mukurtu_modal' => '1', 'mukurtu_stay' => '1']]),
             'group' => 'overflow',
             'weight' => 15,
             'attributes' => [
@@ -33,8 +49,8 @@ class BrowseHooks
                 'data-quick-action-trigger' => 'word-list-' . $node->id(),
             ],
             'cache' => [
-                'tags' => $this->getEditableWordListsData()['tags'],
-                'contexts' => ['user'],
+                'tags' => array_merge($this->getEditableWordListsData()['tags'], $createAccess->getCacheTags()),
+                'contexts' => array_merge(['user'], $createAccess->getCacheContexts()),
             ],
         ];
     }
