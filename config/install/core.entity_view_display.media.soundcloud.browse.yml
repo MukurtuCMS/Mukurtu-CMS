@@ -4,36 +4,30 @@ dependencies:
   config:
     - core.entity_view_mode.media.browse
     - image.style.medium_480px_w_
-    - media.type.video
+    - media.type.soundcloud
   module:
-    - blazy
-    - file
     - image
     - layout_builder
+    - media_entity_soundcloud
 third_party_settings:
   layout_builder:
     enabled: false
     allow_custom: false
-id: media.video.browse
+id: media.soundcloud.browse
 targetEntityType: media
-bundle: video
+bundle: soundcloud
 mode: browse
 content:
-  field_media_video_file:
-    type: file_video
+  field_media_soundcloud:
+    type: soundcloud_embed
     label: hidden
     settings:
-      controls: true
-      autoplay: false
-      loop: false
-      multiple_file_display_type: tags
-      muted: false
-      width: 640
-      height: 480
-      playsinline: false
-    third_party_settings:
-      blazy:
-        blazy: false
+      type: visual
+      width: '100%'
+      height: '450'
+      color: '#ff5500'
+      options: {  }
+    third_party_settings: {  }
     weight: 1
     region: content
   field_thumbnail:
@@ -50,6 +44,7 @@ content:
 hidden:
   created: true
   field_communities: true
+  field_contributor: true
   field_cultural_protocols: true
   field_identifier: true
   field_media_tags: true
