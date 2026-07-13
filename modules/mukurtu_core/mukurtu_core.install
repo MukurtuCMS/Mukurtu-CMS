@@ -2032,3 +2032,22 @@ function mukurtu_core_update_40072(): void {
     }
   }
 }
+
+/**
+ * Switch the Gin admin theme accent to a WCAG AA compliant teal.
+ *
+ * Gin's "teal" accent preset renders links at #10857f on white, a 4.48:1
+ * contrast ratio - just under the 4.5:1 required by WCAG 2.1 AA (1.4.3).
+ * This is member-facing on admin-route pages such as /my-content. Sites
+ * still on the default preset are moved to a slightly darker custom teal
+ * (#0e7873, 5.3:1); sites with their own accent choice are left alone.
+ */
+function mukurtu_core_update_40073(): void {
+  $settings = \Drupal::configFactory()->getEditable('gin.settings');
+  if ($settings->get('preset_accent_color') === 'teal' && empty($settings->get('accent_color'))) {
+    $settings
+      ->set('preset_accent_color', 'custom')
+      ->set('accent_color', '#0e7873')
+      ->save();
+  }
+}
