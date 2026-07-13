@@ -1,5 +1,6 @@
 <?php
 
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\mukurtu_browse\Plugin\views\argument\MukurtuBoundingBox;
@@ -104,6 +105,19 @@ function mukurtu_browse_preprocess_node(&$variables) {
   }
 
   $variables['quick_actions'] = mukurtu_browse_build_quick_actions($variables, $node);
+}
+
+/**
+ * Implements hook_node_view_alter().
+ *
+ * Suppresses Drupal core's contextual-links (gear/pencil) UI on List-mode
+ * (browse) cards - the quick-actions overflow menu already provides Edit
+ * there, and showing both in the same corner is redundant/confusing.
+ */
+function mukurtu_browse_node_view_alter(array &$build, NodeInterface $node, EntityViewDisplayInterface $display) {
+  if (($build['#view_mode'] ?? NULL) === 'browse') {
+    unset($build['#contextual_links']);
+  }
 }
 
 /**
