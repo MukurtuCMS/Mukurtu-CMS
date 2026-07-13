@@ -12,6 +12,18 @@ counterpart, if one exists. */
   max-width: 100% !important;
 }
 
+/* The "create a new collection/word list/personal collection" quick-create
+dialogs (see the "mukurtu-quick-create-form" class added in
+mukurtu_collection.module / mukurtu_dictionary.module) keep only a couple of
+fields, so full-size description text (Gin's own _form.scss only lightens the
+color, it doesn't shrink the size) ends up more visually prominent than the
+short fields themselves. Shrink it in these dialogs specifically. */
+.mukurtu-quick-create-form .form-item__description,
+.mukurtu-quick-create-form .fieldset__description,
+.mukurtu-quick-create-form .claro-details__description {
+  font-size: 0.8125rem;
+}
+
 /* MW: Fixes checkbox and community name overlapping in protocol select community modal, hopefully other similar issues. Not sure why !important is required */
 .gin-entity-browser .entity-browser-form .views-row .views-field-name {
     padding: 2.5rem !important;

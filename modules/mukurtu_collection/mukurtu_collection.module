@@ -260,6 +260,11 @@ function mukurtu_collection_form_alter(&$form, FormStateInterface $form_state, $
     // normal flat positions instead of wrapping them in tab markup.
     $form['#fieldgroups'] = [];
     $form['#group_children'] = [];
+
+    // Marks this as a quick-create dialog form for mukurtu_gin_custom's CSS,
+    // which shrinks field description text so it doesn't visually dominate
+    // these short forms.
+    $form['#attributes']['class'][] = 'mukurtu-quick-create-form';
   }
 
   // Same trim for the embedded "create a new collection" entity form - keep
@@ -290,6 +295,28 @@ function mukurtu_collection_form_alter(&$form, FormStateInterface $form_state, $
     if (isset($form['actions']['preview'])) {
       $form['actions']['preview']['#access'] = FALSE;
     }
+
+    // Marks this as a quick-create dialog form for mukurtu_gin_custom's CSS,
+    // which shrinks field description text so it doesn't visually dominate
+    // this short form.
+    $form['#attributes']['class'][] = 'mukurtu-quick-create-form';
+
+    // Status, Menu settings, and Review note aren't set directly on $form
+    // by this point - Status/Menu settings come from core (NodeForm/menu_ui)
+    // and Review note is added by
+    // mukurtu_workflows_form_node_form_alter(), all via
+    // hook_form_BASE_FORM_ID_alter() implementations that can run after this
+    // hook_form_alter(), so #access can't be set on them here yet. Must be a
+    // #pre_render callback, which runs at actual render time after all
+    // alters/#process callbacks have finished, regardless of module order.
+    $form['#pre_render'][] = function (array $element): array {
+      foreach (['status', 'menu', 'review_note'] as $key) {
+        if (isset($element[$key])) {
+          $element[$key]['#access'] = FALSE;
+        }
+      }
+      return $element;
+    };
   }
 
   // When the "Add to Collection" or "Add to Personal Collection" forms are
