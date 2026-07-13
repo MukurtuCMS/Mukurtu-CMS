@@ -265,6 +265,27 @@ function mukurtu_dictionary_form_alter(&$form, FormStateInterface $form_state, $
     $form['actions']['preview']['#access'] = FALSE;
   }
 
+  // Marks this as a quick-create dialog form for mukurtu_gin_custom's CSS,
+  // which shrinks field description text so it doesn't visually dominate
+  // this short form.
+  $form['#attributes']['class'][] = 'mukurtu-quick-create-form';
+
+  // Status, Menu settings, and Review note aren't set directly on $form by
+  // this point - Status/Menu settings come from core (NodeForm/menu_ui) and
+  // Review note is added by mukurtu_workflows_form_node_form_alter(), all
+  // via hook_form_BASE_FORM_ID_alter() implementations that can run after
+  // this hook_form_alter(), so #access can't be set on them here yet. Must
+  // be a #pre_render callback, which runs at actual render time after all
+  // alters/#process callbacks have finished, regardless of module order.
+  $form['#pre_render'][] = function (array $element): array {
+    foreach (['status', 'menu', 'review_note'] as $key) {
+      if (isset($element[$key])) {
+        $element[$key]['#access'] = FALSE;
+      }
+    }
+    return $element;
+  };
+
   if (\Drupal::request()->query->get('mukurtu_modal')) {
     // This is the embedded "create a new word list" entity form. It has no
     // "node" value of its own, so stash the item being added (taken from
