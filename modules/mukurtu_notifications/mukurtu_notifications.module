@@ -190,10 +190,11 @@ function mukurtu_notifications_tokens($type, array $tokens, array $data, array $
 /**
  * Returns the notification type group-to-template mapping.
  *
- * Derived from _mukurtu_notifications_categories(), excluding
- * 'mukurtu_new_user_registration': that template must stay opt-in-only via
- * the email preference field and never become selectable in this general
- * activity filter (it's an admin-facing pending-approval notice).
+ * Derived from _mukurtu_notifications_categories(). Email delivery for
+ * 'mukurtu_new_user_registration' stays mandatory regardless of this
+ * grouping -- see _mukurtu_notifications_user_wants_email() -- but it's
+ * still shown and selectable here like every other "User account"
+ * template so managers can see it in their own activity feed.
  *
  * @return array<string, string[]>
  *   Keys are human-readable group labels; values are arrays of template
@@ -202,10 +203,7 @@ function mukurtu_notifications_tokens($type, array $tokens, array $data, array $
 function _mukurtu_notifications_type_groups(): array {
   $groups = [];
   foreach (_mukurtu_notifications_categories() as $category) {
-    $templates = array_values(array_diff($category['templates'], ['mukurtu_new_user_registration']));
-    if (!empty($templates)) {
-      $groups[$category['label']] = $templates;
-    }
+    $groups[$category['label']] = $category['templates'];
   }
   return $groups;
 }
@@ -309,10 +307,6 @@ function mukurtu_notifications_views_query_alter(ViewExecutable $view, QueryPlug
 /**
  * Returns the notification templates shown by default when no type filter
  * is selected on the notifications page.
- *
- * mukurtu_new_user_registration is intentionally excluded (via
- * _mukurtu_notifications_type_groups(), which this is derived from): it is
- * an admin-facing message and should not appear in the general activity feed.
  *
  * @return string[]
  *   Template machine names.
@@ -469,6 +463,11 @@ function _mukurtu_notifications_user_wants_digest(int $uid): bool {
 /**
  * Checks whether a user wants to receive email for a notification template.
  *
+ * mukurtu_new_user_registration is a pending-approval notice to managers and
+ * always emails regardless of preference -- it's grouped under "User
+ * account" for display/filtering purposes (_mukurtu_notifications_type_groups()),
+ * but must not be opt-out-able the way the rest of that category is.
+ *
  * Uncategorized templates are always emailed (there's no way for a user to
  * opt out of something with no category), which should not happen in
  * practice since every installed template is covered by
@@ -483,6 +482,10 @@ function _mukurtu_notifications_user_wants_digest(int $uid): bool {
  *   TRUE if the user should be emailed for this template.
  */
 function _mukurtu_notifications_user_wants_email(int $uid, string $template): bool {
+  if ($template === 'mukurtu_new_user_registration') {
+    return TRUE;
+  }
+
   $category = _mukurtu_notifications_template_category($template);
   if ($category === NULL) {
     return TRUE;
@@ -1509,7 +1512,11 @@ function mukurtu_notifications_og_membership_insert(OgMembership $membership) {
  *
  * Unlike mukurtu_notifications_og_membership_insert(), the removed user is
  * NOT a recipient here -- only the community manager / protocol steward
- * should be notified that someone was removed.
+ * should be notified that someone was removed. The acting user is added to
+ * the recipient list explicitly (they won't always already be a manager/
+ * steward of this specific group, e.g. a site admin removing someone via
+ * the admin UI) so the removal shows up in their own feed too; the shared
+ * helper still excludes them from the email itself.
  */
 function mukurtu_notifications_og_membership_delete(OgMembership $membership) {
   $group = $membership->getGroup();
@@ -1524,6 +1531,7 @@ function mukurtu_notifications_og_membership_delete(OgMembership $membership) {
   }
 
   $removed_uid = (int) $removed_user->id();
+  $actor_uid = (int) \Drupal::currentUser()->id();
   $field_values = ['field_user' => $removed_uid];
   if ($group_entity_type === 'community') {
     $template = 'mukurtu_removed_from_community';
@@ -1539,9 +1547,9 @@ function mukurtu_notifications_og_membership_delete(OgMembership $membership) {
     return;
   }
 
-  $recipient_uids = array_values(array_unique($group_uids));
+  $recipient_uids = array_values(array_unique(array_merge($actor_uid > 0 ? [$actor_uid] : [], $group_uids)));
 
-  _mukurtu_notifications_notify($template, $field_values, $recipient_uids, (int) \Drupal::currentUser()->id());
+  _mukurtu_notifications_notify($template, $field_values, $recipient_uids, $actor_uid);
 }
 
 /**

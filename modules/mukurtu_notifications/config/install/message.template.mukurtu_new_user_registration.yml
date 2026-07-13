@@ -11,10 +11,10 @@ text:
     an account and needs review.'
   format: mukurtu_html
 - value: "<p>New user registration: [message:field_user:entity:mukurtu-notification-link]\
-    \ has requested an account and requires action.</p>\r\n"
+    \ has requested an account and needs review.</p>\r\n"
   format: mukurtu_html
 - value: "<p>New user registration: [message:field_user:entity:mukurtu-notification-html-link]\
-    \ has requested an account and requires action.</p>\r\n"
+    \ has requested an account and needs review.</p>\r\n"
   format: mukurtu_html
 settings:
   token options:

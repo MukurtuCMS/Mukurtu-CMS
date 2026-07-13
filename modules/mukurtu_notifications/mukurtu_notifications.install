@@ -1732,3 +1732,32 @@ function mukurtu_notifications_update_40048(): void {
     $source->read('views.view.mukurtu_message_log')
   );
 }
+
+/**
+ * Redeploys the new-user-registration wording fix and the admin
+ * notifications page's new "Recipient" column.
+ *
+ * mukurtu_new_user_registration's mail/log body text previously said
+ * "requires action" instead of "needs review", inconsistent with its
+ * subject line. views.view.mukurtu_message_log's admin display
+ * (mukurtu_notifications_admin_page) shows one row per recipient by
+ * design (see _mukurtu_notifications_notify() in the .module file), but
+ * had no column identifying which recipient each row belongs to, so
+ * multiple rows for one action read as exact duplicates. This adds a
+ * "Recipient" field (a new uid relationship + field_display_name field,
+ * mirroring the existing actor-facing "User" column) to that display only.
+ */
+function mukurtu_notifications_update_40049(): void {
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  $config_storage = \Drupal::service('config.storage');
+
+  $config_storage->write(
+    'message.template.mukurtu_new_user_registration',
+    $source->read('message.template.mukurtu_new_user_registration')
+  );
+  $config_storage->write(
+    'views.view.mukurtu_message_log',
+    $source->read('views.view.mukurtu_message_log')
+  );
+}
