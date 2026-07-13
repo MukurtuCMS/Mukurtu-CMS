@@ -274,6 +274,15 @@ function mukurtu_dictionary_form_alter(&$form, FormStateInterface $form_state, $
       'callback' => 'mukurtu_dictionary_add_word_to_list_dialog_ajax',
       'progress' => ['type' => 'throbber'],
     ];
+    // Core's dialog JS hoists any ".form-actions" button into the dialog's
+    // shared buttonpane (see prepareDialogButtons() in
+    // core/misc/dialog/dialog.ajax.js), even while this form's <details> is
+    // collapsed. With two forms in one dialog that makes this form's Save
+    // button look like "the" dialog action and swallow clicks meant for the
+    // other (picker) form. Strip the class so it stays inline.
+    if (!empty($form['actions']['#attributes']['class'])) {
+      $form['actions']['#attributes']['class'] = array_diff($form['actions']['#attributes']['class'], ['form-actions']);
+    }
   }
 }
 

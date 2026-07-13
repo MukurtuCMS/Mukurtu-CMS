@@ -317,6 +317,15 @@ function mukurtu_collection_form_alter(&$form, FormStateInterface $form_state, $
         'callback' => 'mukurtu_collection_add_to_x_dialog_ajax',
         'progress' => ['type' => 'throbber'],
       ];
+      // Core's dialog JS hoists any ".form-actions" button into the dialog's
+      // shared buttonpane (see prepareDialogButtons() in
+      // core/misc/dialog/dialog.ajax.js), even while this form's <details>
+      // is collapsed. With two forms in one dialog that makes this form's
+      // Save button look like "the" dialog action and swallow clicks meant
+      // for the other (picker) form. Strip the class so it stays inline.
+      if (!empty($form['actions']['#attributes']['class'])) {
+        $form['actions']['#attributes']['class'] = array_diff($form['actions']['#attributes']['class'], ['form-actions']);
+      }
     }
     elseif ($form_id === 'node_collection_form' && \Drupal::routeMatch()->getRouteName() === 'mukurtu_collection.add_item_to_collection') {
       // This is the embedded "create a new collection" entity form. It has
@@ -334,6 +343,12 @@ function mukurtu_collection_form_alter(&$form, FormStateInterface $form_state, $
         'callback' => 'mukurtu_collection_add_to_x_dialog_ajax',
         'progress' => ['type' => 'throbber'],
       ];
+      // See the matching comment in the personal_collection_form branch
+      // above - keeps this form's Save button inline instead of being
+      // hoisted into the dialog's shared buttonpane.
+      if (!empty($form['actions']['#attributes']['class'])) {
+        $form['actions']['#attributes']['class'] = array_diff($form['actions']['#attributes']['class'], ['form-actions']);
+      }
     }
   }
 }
