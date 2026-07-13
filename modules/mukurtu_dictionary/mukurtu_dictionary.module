@@ -208,8 +208,78 @@ function mukurtu_dictionary_form_mukurtu_dictionary_add_word_to_list_form_alter(
 }
 
 /**
- * AJAX callback for the "Add to Word List" form when submitted from a modal
- * dialog.
+ * Implements hook_module_implements_alter().
+ *
+ * field_group moves its own hook_form_alter() to the end of the module list
+ * so it can attach group metadata after everyone else has had a chance to
+ * alter the form. Our own alter needs to run after that (to strip the tabs
+ * from the embedded "create a new word list" form), so move
+ * mukurtu_dictionary to the end too - since this runs after field_group's
+ * own reordering, it ends up after field_group.
+ */
+function mukurtu_dictionary_module_implements_alter(&$implementations, $hook) {
+  if ($hook === 'form_alter' && isset($implementations['mukurtu_dictionary'])) {
+    $group = $implementations['mukurtu_dictionary'];
+    unset($implementations['mukurtu_dictionary']);
+    $implementations['mukurtu_dictionary'] = $group;
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ *
+ * Trims the embedded "create a new word list" entity form down to just the
+ * fields needed for a quick create - keep only Title and Cultural Protocols
+ * (both required; Cultural Protocols can't be defaulted, since it must
+ * reflect an actual protocol the user belongs to). Everything else can be
+ * filled in later by editing the word list normally. Also wires the form's
+ * submit button to close the modal dialog on success, mirroring
+ * mukurtu_dictionary_form_mukurtu_dictionary_add_word_to_list_form_alter().
+ */
+function mukurtu_dictionary_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  if ($form_id !== 'node_word_list_form' || \Drupal::routeMatch()->getRouteName() !== 'mukurtu_dictionary.add_word_to_list') {
+    return;
+  }
+
+  $hideFields = [
+    'field_summary', 'field_description', 'field_word_list_image',
+    'field_source', 'field_words', 'field_related_content',
+    'field_keywords', 'field_coverage', 'field_coverage_description', 'field_location',
+    'field_local_contexts_projects', 'field_local_contexts_labels_and_notices',
+    'revision_log', 'path', 'promote', 'sticky', 'og_audience', 'uid', 'created',
+    'comment', 'moderation_state',
+  ];
+  foreach ($hideFields as $fieldName) {
+    if (isset($form[$fieldName])) {
+      $form[$fieldName]['#access'] = FALSE;
+    }
+  }
+
+  $form['#fieldgroups'] = [];
+  $form['#group_children'] = [];
+
+  if (\Drupal::request()->query->get('mukurtu_modal')) {
+    // This is the embedded "create a new word list" entity form. It has no
+    // "node" value of its own, so stash the item being added (taken from
+    // the route, since that's what the controller built this form for) so
+    // the AJAX callback knows where to send the user back to.
+    $node = \Drupal::routeMatch()->getParameter('node');
+    if ($node) {
+      $form['mukurtu_return_node'] = [
+        '#type' => 'hidden',
+        '#value' => $node->id(),
+      ];
+    }
+    $form['actions']['submit']['#ajax'] = [
+      'callback' => 'mukurtu_dictionary_add_word_to_list_dialog_ajax',
+      'progress' => ['type' => 'throbber'],
+    ];
+  }
+}
+
+/**
+ * AJAX callback for the "Add to Word List" form (including the embedded
+ * "create a new word list" form) when submitted from a modal dialog.
  *
  * Closes the dialog and returns to the word's page on a clean save; replaces
  * the dialog content with the rebuilt form (including validation messages)
@@ -218,7 +288,8 @@ function mukurtu_dictionary_form_mukurtu_dictionary_add_word_to_list_form_alter(
 function mukurtu_dictionary_add_word_to_list_dialog_ajax(array &$form, FormStateInterface $form_state): AjaxResponse {
   $response = new AjaxResponse();
   if ($form_state->isExecuted()) {
-    $node = \Drupal::entityTypeManager()->getStorage('node')->load($form_state->getValue('node'));
+    $nodeId = $form_state->getValue('node') ?? $form_state->getValue('mukurtu_return_node');
+    $node = $nodeId ? \Drupal::entityTypeManager()->getStorage('node')->load($nodeId) : NULL;
     $response->addCommand(new CloseModalDialogCommand());
     if ($node) {
       $response->addCommand(new RedirectCommand($node->toUrl()->toString()));

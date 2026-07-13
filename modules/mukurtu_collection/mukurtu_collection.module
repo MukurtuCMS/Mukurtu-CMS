@@ -198,6 +198,24 @@ function mukurtu_collection_entity_bundle_field_info_alter(&$fields, EntityTypeI
 
 
 /**
+ * Implements hook_module_implements_alter().
+ *
+ * field_group moves its own hook_form_alter() to the end of the module list
+ * so it can attach group metadata after everyone else has had a chance to
+ * alter the form. Our own alter needs to run after that (to strip the
+ * "Mukurtu Essentials" tabs from the embedded personal collection form), so
+ * move mukurtu_collection to the end too - since this runs after
+ * field_group's own reordering, it ends up after field_group.
+ */
+function mukurtu_collection_module_implements_alter(&$implementations, $hook) {
+  if ($hook === 'form_alter' && isset($implementations['mukurtu_collection'])) {
+    $group = $implementations['mukurtu_collection'];
+    unset($implementations['mukurtu_collection']);
+    $implementations['mukurtu_collection'] = $group;
+  }
+}
+
+/**
  * Implements hook_form_alter().
  */
 function mukurtu_collection_form_alter(&$form, FormStateInterface $form_state, $form_id) {
@@ -224,6 +242,51 @@ function mukurtu_collection_form_alter(&$form, FormStateInterface $form_state, $
     }
   }
 
+  // Trim the embedded "create a new personal collection" entity form down to
+  // just the fields needed for a quick create - the rest can be filled in
+  // later by editing the collection normally. This applies whether the form
+  // is reached via the modal or its no-JS fallback page, since the same
+  // overwhelming full entity form is the underlying issue either way.
+  if ($form_id === 'personal_collection_form' && \Drupal::routeMatch()->getRouteName() === 'mukurtu_collection.add_item_to_personal_collection') {
+    foreach (['field_summary', 'field_description', 'field_media_assets', 'field_items_in_collection', 'revision_log', 'path'] as $fieldName) {
+      if (isset($form[$fieldName])) {
+        $form[$fieldName]['#access'] = FALSE;
+      }
+    }
+
+    // Drop the "Mukurtu Essentials" / "Items" tabs entirely - with only
+    // Name and Privacy Setting left, a tabbed layout is unnecessary. Emptying
+    // #fieldgroups makes field_group leave the remaining fields in their
+    // normal flat positions instead of wrapping them in tab markup.
+    $form['#fieldgroups'] = [];
+    $form['#group_children'] = [];
+  }
+
+  // Same trim for the embedded "create a new collection" entity form - keep
+  // only Title and Cultural Protocols (both required; Cultural Protocols
+  // can't be defaulted, since it must reflect an actual protocol the user
+  // belongs to). Everything else can be filled in later by editing the
+  // collection normally.
+  if ($form_id === 'node_collection_form' && \Drupal::routeMatch()->getRouteName() === 'mukurtu_collection.add_item_to_collection') {
+    $hideFields = [
+      'field_summary', 'field_description', 'field_collection_image',
+      'field_source', 'field_items_in_collection', 'field_child_collections',
+      'field_related_content', 'field_keywords', 'field_coverage',
+      'field_coverage_description', 'field_location', 'field_local_contexts_projects',
+      'field_local_contexts_labels_and_notices', 'field_credit',
+      'revision_log', 'path', 'promote', 'sticky', 'og_audience', 'uid', 'created',
+      'comment', 'moderation_state',
+    ];
+    foreach ($hideFields as $fieldName) {
+      if (isset($form[$fieldName])) {
+        $form[$fieldName]['#access'] = FALSE;
+      }
+    }
+
+    $form['#fieldgroups'] = [];
+    $form['#group_children'] = [];
+  }
+
   // When the "Add to Collection" or "Add to Personal Collection" forms are
   // opened inside a modal dialog (see the "use-ajax" local task links in
   // mukurtu_collection.links.task.yml), wire their submit buttons to an AJAX
@@ -243,6 +306,23 @@ function mukurtu_collection_form_alter(&$form, FormStateInterface $form_state, $
       // It has no "node" value of its own, so stash the item being added
       // (taken from the route, since that's what the controller built this
       // form for) so the AJAX callback knows where to send the user back to.
+      $node = \Drupal::routeMatch()->getParameter('node');
+      if ($node) {
+        $form['mukurtu_return_node'] = [
+          '#type' => 'hidden',
+          '#value' => $node->id(),
+        ];
+      }
+      $form['actions']['submit']['#ajax'] = [
+        'callback' => 'mukurtu_collection_add_to_x_dialog_ajax',
+        'progress' => ['type' => 'throbber'],
+      ];
+    }
+    elseif ($form_id === 'node_collection_form' && \Drupal::routeMatch()->getRouteName() === 'mukurtu_collection.add_item_to_collection') {
+      // This is the embedded "create a new collection" entity form. It has
+      // no "node" value of its own, so stash the item being added (taken
+      // from the route, since that's what the controller built this form
+      // for) so the AJAX callback knows where to send the user back to.
       $node = \Drupal::routeMatch()->getParameter('node');
       if ($node) {
         $form['mukurtu_return_node'] = [

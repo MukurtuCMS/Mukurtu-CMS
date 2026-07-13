@@ -3,6 +3,7 @@
 namespace Drupal\mukurtu_dictionary\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\node\Entity\Node;
 use Drupal\node\NodeInterface;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Session\AccountInterface;
@@ -23,7 +24,7 @@ class MukurtuAddWordToListController extends ControllerBase {
    */
   public function access(AccountInterface $account, NodeInterface $node) {
     if ($node->bundle() == 'dictionary_word') {
-      if ($this->userCanEditExistingWordLists($node)) {
+      if ($this->userCanEditExistingWordLists($node) || $this->entityTypeManager()->getAccessControlHandler('node')->createAccess('word_list', $account)) {
         return AccessResult::allowed();
       }
     }
@@ -90,10 +91,22 @@ class MukurtuAddWordToListController extends ControllerBase {
     $build = [];
 
     // Existing word list.
-    $lists = $this->getValidWordLists($node);
-    if (!empty($lists)) {
-      $build['existing'] = \Drupal::formBuilder()->getForm('Drupal\mukurtu_dictionary\Form\MukurtuAddWordToListForm', $node, $lists);
+    $build['existing'] = \Drupal::formBuilder()->getForm('Drupal\mukurtu_dictionary\Form\MukurtuAddWordToListForm', $node);
+
+    // New word list.
+    if ($this->entityTypeManager()->getAccessControlHandler('node')->createAccess('word_list')) {
+      $newList = Node::create(['type' => 'word_list']);
+      $newList->add($node);
+
+      $form = $this->entityTypeManager()->getFormObject('node', 'default')->setEntity($newList);
+
+      $build['new_list'] = [
+        '#type' => 'details',
+        '#title' => $this->t('Create a new word list'),
+      ];
+      $build['new_list']['form'] = $this->formBuilder()->getForm($form);
     }
+
     return $build;
   }
 

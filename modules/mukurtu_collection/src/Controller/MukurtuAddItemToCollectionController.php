@@ -3,6 +3,7 @@
 namespace Drupal\mukurtu_collection\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\node\Entity\Node;
 use Drupal\node\NodeInterface;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Session\AccountInterface;
@@ -21,12 +22,7 @@ class MukurtuAddItemToCollectionController extends ControllerBase {
    */
   public function access(AccountInterface $account, NodeInterface $node) {
     if ($this->isValidCollectionItemBundle($node)) {
-      // Eventually we'll want to add "add to new collection" functionality.
-      /* if ($this->entityTypeManager()->getAccessControlHandler('node')->createAccess('collection')) {
-        return AccessResult::allowed();
-      } */
-
-      if ($this->userCanEditExistingCollections($node)) {
+      if ($this->userCanEditExistingCollections($node) || $this->entityTypeManager()->getAccessControlHandler('node')->createAccess('collection', $account)) {
         return AccessResult::allowed();
       }
     }
@@ -123,10 +119,22 @@ class MukurtuAddItemToCollectionController extends ControllerBase {
     $build = [];
 
     // Existing collection.
-    $collections = $this->getValidCollections($node);
-    if (!empty($collections)) {
-      $build['existing'] = $this->formBuilder()->getForm('Drupal\mukurtu_collection\Form\MukurtuAddItemToCollectionForm', $node, $collections);
+    $build['existing'] = $this->formBuilder()->getForm('Drupal\mukurtu_collection\Form\MukurtuAddItemToCollectionForm', $node);
+
+    // New collection.
+    if ($this->entityTypeManager()->getAccessControlHandler('node')->createAccess('collection')) {
+      $newCollection = Node::create(['type' => 'collection']);
+      $newCollection->add($node);
+
+      $form = $this->entityTypeManager()->getFormObject('node', 'default')->setEntity($newCollection);
+
+      $build['new_collection'] = [
+        '#type' => 'details',
+        '#title' => $this->t('Create a new collection'),
+      ];
+      $build['new_collection']['form'] = $this->formBuilder()->getForm($form);
     }
+
     return $build;
   }
 
