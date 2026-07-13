@@ -211,8 +211,10 @@ class CSV extends ExporterBase {
 
     }
 
-    // @todo error handling here?
-    $fs->prepareDirectory($context['results']['basepath'], FileSystemInterface::CREATE_DIRECTORY);
+    if (!$fs->prepareDirectory($context['results']['basepath'], FileSystemInterface::CREATE_DIRECTORY)) {
+      \Drupal::logger('mukurtu_export')->error('Unable to create export working directory at %uri.', ['%uri' => $context['results']['basepath']]);
+      throw new Exception('Failed to create export working directory.');
+    }
 
     $context['message'] = t('Setting up the export.');
   }
@@ -260,9 +262,13 @@ class CSV extends ExporterBase {
     $filename = sprintf("%s - %s.csv", $entityLabel, $bundleLabel);
     $filepath = "{$context['results']['basepath']}/$filename";
 
-    // @todo handle error.
     $output = fopen($filepath, 'a');
     $context['sandbox']['batch']['output_files'][$entity_type_id][$bundle] = $output;
+
+    if (!$output) {
+      \Drupal::logger('mukurtu_export')->error('Unable to open export output file at %filepath.', ['%filepath' => $filepath]);
+      return $output;
+    }
 
     // Add file as deliverable.
     $context['results']['deliverables']['metadata'][] = ['uri' => $filepath, 'entryname' => basename($filepath)];
