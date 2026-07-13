@@ -285,6 +285,11 @@ function mukurtu_collection_form_alter(&$form, FormStateInterface $form_state, $
 
     $form['#fieldgroups'] = [];
     $form['#group_children'] = [];
+
+    // Not useful for a quick "create and add" flow.
+    if (isset($form['actions']['preview'])) {
+      $form['actions']['preview']['#access'] = FALSE;
+    }
   }
 
   // When the "Add to Collection" or "Add to Personal Collection" forms are

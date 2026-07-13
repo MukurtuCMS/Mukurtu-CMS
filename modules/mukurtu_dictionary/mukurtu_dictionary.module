@@ -258,6 +258,11 @@ function mukurtu_dictionary_form_alter(&$form, FormStateInterface $form_state, $
   $form['#fieldgroups'] = [];
   $form['#group_children'] = [];
 
+  // Not useful for a quick "create and add" flow.
+  if (isset($form['actions']['preview'])) {
+    $form['actions']['preview']['#access'] = FALSE;
+  }
+
   if (\Drupal::request()->query->get('mukurtu_modal')) {
     // This is the embedded "create a new word list" entity form. It has no
     // "node" value of its own, so stash the item being added (taken from
