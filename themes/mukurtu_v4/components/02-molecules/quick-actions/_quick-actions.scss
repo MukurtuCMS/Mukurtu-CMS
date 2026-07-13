@@ -1,3 +1,5 @@
+@use "../../../external/include-media";
+
 // Quick-action icon(s) + overflow menu shown on a content card (List mode
 // today; Grid/Map modes are a planned fast-follow reusing this same
 // component, so these rules are intentionally not nested under
@@ -7,6 +9,26 @@
   align-items: center;
   gap: var(--v-space-4xs);
   margin-block-start: var(--v-space-4xs);
+
+  // At >=md the card has enough width that floating the actions in the
+  // top-right corner of the content column (not overlapping the media
+  // column) reads better than adding a row of height below the title on
+  // every single card. Below md, leave them in normal flow - narrow cards
+  // don't have the spare width to float them without risking title overlap.
+  //
+  // inset-inline-end is offset (not 0) because core's contextual-links
+  // trigger (the hover-triggered Edit/Delete gear, see
+  // core/modules/contextual/css/contextual.theme.css: position: absolute;
+  // top: 6px; right: 0;) shares the same positioned ancestor
+  // (.horizontal-card__content, see _horizontal-card.scss) and anchors to
+  // the same corner - without this offset the two overlap and core's
+  // (normally-hidden-until-hover) trigger intercepts clicks meant for ours.
+  @include include-media.media('>=md') {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-end: 2.75rem;
+    margin-block-start: 0;
+  }
 
   &__icon-link,
   &__overflow-toggle {
@@ -70,6 +92,11 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 
     li {
+      // The base theme sets `ul li { list-style-type: square; }` directly
+      // on li elements (00-base/typography), which beats `list-style: none`
+      // on the parent ul above since it's a specified (not inherited)
+      // value on the li itself - has to be overridden here specifically.
+      list-style: none;
       margin: 0;
     }
 

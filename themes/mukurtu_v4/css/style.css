@@ -1458,10 +1458,17 @@ label.form-required::after {
 }
 .horizontal-card__content {
   grid-column: 1/span 1;
+  position: relative;
 }
 @media (min-width: 48rem) {
   .horizontal-card__content {
     grid-column: 4/span 6;
+  }
+}
+@media (min-width: 48rem) {
+  .horizontal-card__content-header {
+    -webkit-padding-end: 8.5rem;
+            padding-inline-end: 8.5rem;
   }
 }
 .horizontal-card__content-header h2 {
@@ -3938,6 +3945,15 @@ body.is-fixed {
   -webkit-margin-before: var(--v-space-4xs);
           margin-block-start: var(--v-space-4xs);
 }
+@media (min-width: 48rem) {
+  .quick-actions {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-end: 2.75rem;
+    -webkit-margin-before: 0;
+            margin-block-start: 0;
+  }
+}
 .quick-actions__icon-link, .quick-actions__overflow-toggle {
   display: -webkit-inline-box;
   display: -ms-inline-flexbox;
@@ -3992,6 +4008,7 @@ body.is-fixed {
           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 .quick-actions__overflow-menu li {
+  list-style: none;
   margin: 0;
 }
 .quick-actions__overflow-menu a {

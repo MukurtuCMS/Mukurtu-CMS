@@ -43,6 +43,9 @@
 
   &__content {
     grid-column: 1 / span 1;
+    // Positioning context for .quick-actions floating top-right at >=md
+    // (see components/02-molecules/quick-actions/_quick-actions.scss).
+    position: relative;
 
     @include include-media.media('>=md') {
       grid-column: 4 / span 6;
@@ -50,6 +53,15 @@
   }
 
   &__content-header {
+    // Reserves room for the floating .quick-actions cluster (~2 icons wide,
+    // offset from the edge to clear core's contextual-links trigger - see
+    // _quick-actions.scss) so a long title can't run underneath it. Fixed
+    // width, not a percentage, since it needs to clear the icons' actual
+    // size regardless of how wide the content column happens to be.
+    @include include-media.media('>=md') {
+      padding-inline-end: 8.5rem;
+    }
+
     h2 {
       max-inline-size: 90%;
       font-size: var(--font-size-xl);
