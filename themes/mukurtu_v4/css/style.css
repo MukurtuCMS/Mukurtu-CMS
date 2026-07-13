@@ -2033,13 +2033,13 @@ label.form-required::after {
 
 .local-contexts-project .local-contexts-projects-container {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(5rem, 1fr));
   gap: var(--v-space-5xs);
 }
 
 .local-contexts-label-group {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(5rem, 1fr));
   gap: var(--v-space-5xs);
 }
 .local-contexts-label-group + .local-contexts-label-group {
@@ -2496,6 +2496,16 @@ label.form-required::after {
   min-inline-size: -moz-min-content;
   min-inline-size: min-content;
   inline-size: 100%;
+}
+
+.block--media-block {
+  min-inline-size: 0;
+}
+.block--media-block img,
+.block--media-block video {
+  max-inline-size: 100%;
+  inline-size: 100%;
+  block-size: auto;
 }
 
 .media-asset--audio-group {

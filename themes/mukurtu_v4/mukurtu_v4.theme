@@ -83,7 +83,8 @@ function mukurtu_v4_preprocess_node(&$variables) {
  */
 function mukurtu_v4_preprocess_field(array &$variables): void {
   if ($variables['element']['#field_name'] !== 'field_page_media_assets' ||
-      $variables['element']['#entity_type'] !== 'node') {
+      $variables['element']['#entity_type'] !== 'node' ||
+      $variables['element']['#view_mode'] === '_custom') {
     return;
   }
   $node = $variables['element']['#object'];

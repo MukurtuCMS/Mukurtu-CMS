@@ -57,6 +57,19 @@
   }
 }
 
+// Media block content must shrink to fit its Layout Builder region instead
+// of overflowing past it at native image/video resolution.
+.block--media-block {
+  min-inline-size: 0;
+
+  img,
+  video {
+    max-inline-size: 100%;
+    inline-size: 100%;
+    block-size: auto;
+  }
+}
+
 .media-asset--audio-group {
   width: max-content;
   max-width: 100%;
