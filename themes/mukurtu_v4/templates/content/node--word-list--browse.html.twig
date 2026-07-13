@@ -75,13 +75,11 @@
 <article{{ attributes.addClass("horizontal-card") }}>
   <div class="horizontal-card__media">
     {% if has_rep_media %}
-      {% if media_bundle is same as 'image' %}
-      <a href="{{ url }}" aria-hidden="true" tabindex="-1">
-      {% endif %}
-        {{ content.field_representative_media }}
-      {% if media_bundle is same as 'image' %}
-      </a>
-      {% endif %}
+      {% include '@mukurtu_v4/content/_card-media.html.twig' with {
+        media_bundle: media_bundle,
+        media: content.field_representative_media,
+        url: url,
+      } %}
     {% elseif node.field_word_list_image.0.entity is not empty %}
       <a href="{{ url }}" aria-hidden="true" tabindex="-1">
         {{ content.field_word_list_image }}

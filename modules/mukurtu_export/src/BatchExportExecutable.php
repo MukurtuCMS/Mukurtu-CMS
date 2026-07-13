@@ -5,6 +5,7 @@ namespace Drupal\mukurtu_export;
 use ZipArchive;
 use Exception;
 use Drupal\file\Entity\File;
+use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 
 class BatchExportExecutable implements MukurtuExportExecutableInterface
@@ -82,11 +83,20 @@ class BatchExportExecutable implements MukurtuExportExecutableInterface
       $context['sandbox']['packaged'] = 0;
       $zipName = 'export-' . date('m-d-Y_hia') . '.zip';
       $context['sandbox']['download'] = "private://exports/{$context['results']['uid']}/$zipName";
+
+      // Make sure the destination directory exists before we try to
+      // resolve a real path for it below.
+      $directory = $fs->dirname($context['sandbox']['download']);
+      $fs->prepareDirectory($directory, FileSystemInterface::CREATE_DIRECTORY);
     }
 
     // Open the Zip archive.
     $zipPath = $fs->realpath($context['sandbox']['download']);
-    $zip->open($zipPath, ZipArchive::CREATE);
+    if (!$zipPath || $zip->open($zipPath, ZipArchive::CREATE) !== TRUE) {
+      \Drupal::logger('mukurtu_export')->error('Unable to open zip archive at %uri for export packaging.', ['%uri' => $context['sandbox']['download']]);
+      $context['finished'] = 1;
+      return;
+    }
 
     // Get the batch of files to zip and remove from the global list.
     $filesBatch = array_slice($context['sandbox']['deliverables'], 0, $batchSize);
