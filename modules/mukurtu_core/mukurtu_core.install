@@ -2456,3 +2456,36 @@ function mukurtu_core_update_40077(): void {
     ->clear('mukurtu_related_content_teasers_display_bottom')
     ->save();
 }
+
+/**
+ * Show a manually-provided thumbnail image for video, remote_video, and
+ * soundcloud media in the "browse" view mode used by List/Grid/Map cards,
+ * falling back to the native player/embed when no thumbnail is set.
+ */
+function mukurtu_core_update_40078(): void {
+  $config_source = new \Drupal\Core\Config\FileStorage(
+    \Drupal::service('extension.list.profile')->getPath('mukurtu') . '/config/install'
+  );
+  $config_factory = \Drupal::configFactory();
+
+  foreach (['media.video.browse', 'media.remote_video.browse', 'media.soundcloud.browse'] as $name) {
+    $config_name = 'core.entity_view_display.' . $name;
+    $data = $config_source->read($config_name);
+    if ($data) {
+      $config_factory->getEditable($config_name)->setData($data)->save(TRUE);
+    }
+  }
+}
+
+/**
+ * Use the same "browse" media view mode for digital_heritage's Grid Browse
+ * representative media as every other content type, instead of the
+ * unrelated digital_heritage_sidebar mode.
+ */
+function mukurtu_core_update_40079(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.digital_heritage.grid_browse');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_representative_media.settings.view_mode', 'browse')->save();
+}

@@ -1449,7 +1449,8 @@ label.form-required::after {
     block-size: auto;
   }
 }
-.horizontal-card__media .media--remote_video iframe {
+.horizontal-card__media .media--remote_video iframe,
+.horizontal-card__media .media--soundcloud iframe {
   block-size: auto;
   aspect-ratio: 16/9;
 }
@@ -3945,14 +3946,19 @@ body.is-fixed {
   font-size: var(--card-font-size);
   font-weight: var(--text-bold);
 }
-.vertical-card__media .media--remote_video {
+.vertical-card__media .media--remote_video,
+.vertical-card__media .media--soundcloud {
   width: 100%;
   aspect-ratio: 16/9;
   overflow: hidden;
 }
-.vertical-card__media .media--remote_video iframe {
+.vertical-card__media .media--remote_video iframe,
+.vertical-card__media .media--soundcloud iframe {
   width: 100%;
   height: 100%;
+}
+.vertical-card__media video {
+  max-block-size: 18rem;
 }
 .vertical-card--no-border {
   -webkit-padding-after: 0;

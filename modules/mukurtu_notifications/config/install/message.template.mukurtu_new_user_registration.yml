@@ -4,11 +4,14 @@ dependencies:
   config:
     - filter.format.mukurtu_html
 template: mukurtu_new_user_registration
-label: 'Mukurtu New User Registration'
+label: 'New user registration'
 description: 'A new user has registered with the site and needs approval.'
 text:
   -
-    value: "<p>New user registration: <a href=\"[message:field_user:entity:url]\">[message:field_user:entity:field_display_name] ([message:field_user:entity:account-name])</a> has requested an account and requires action.</p>\r\n"
+    value: "<p>New user registration: [message:field_user:entity:mukurtu-notification-link] has requested an account and requires action.</p>\r\n"
+    format: mukurtu_html
+  -
+    value: "<p>New user registration: [message:field_user:entity:mukurtu-notification-link] has requested an account and requires action.</p>\r\n"
     format: mukurtu_html
 settings:
   'token options':
