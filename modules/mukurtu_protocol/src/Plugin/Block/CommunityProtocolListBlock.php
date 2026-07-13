@@ -5,12 +5,10 @@ declare(strict_types=1);
 namespace Drupal\mukurtu_protocol\Plugin\Block;
 
 use Drupal\Core\Block\BlockBase;
-use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\Core\Session\AccountInterface;
-use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
+use Drupal\mukurtu_protocol\Hook\CommunityProtocolList;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -32,13 +30,11 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class CommunityProtocolListBlock extends BlockBase implements ContainerFactoryPluginInterface {
 
-  use StringTranslationTrait;
-
   public function __construct(
     array $configuration,
     $plugin_id,
     $plugin_definition,
-    protected AccountInterface $currentUser,
+    protected CommunityProtocolList $communityProtocolList,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
   }
@@ -51,7 +47,7 @@ class CommunityProtocolListBlock extends BlockBase implements ContainerFactoryPl
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('current_user'),
+      $container->get('class_resolver')->getInstanceFromDefinition(CommunityProtocolList::class),
     );
   }
 
@@ -64,38 +60,7 @@ class CommunityProtocolListBlock extends BlockBase implements ContainerFactoryPl
       return [];
     }
 
-    $items = [];
-    $protocols = $node->getProtocolEntities();
-    foreach ($protocols as $protocol) {
-      // Check access to the protocol and community, since some
-      // protocols/communities applied to content may not be accessible to the
-      // current user. In the case where the protocol/community is not
-      // accessible, just display the protocol/community label.
-      $protocol_access = $protocol->access('view', $this->currentUser, TRUE);
-      $protocol_display = $protocol_access->isAllowed()
-        ? $protocol->toLink()->toString()
-        : $protocol->label();
-      $communities = $protocol->getCommunities();
-      foreach ($communities as $community) {
-        $community_access = $community->access('view', $this->currentUser, TRUE);
-        $community_display = $community_access->isAllowed()
-          ? $community->toLink()->toString()
-          : $community->label();
-        $item_render_array = ['#markup' => sprintf('%s: %s', $community_display, $protocol_display)];
-        CacheableMetadata::createFromRenderArray($item_render_array)
-          ->addCacheableDependency($protocol)
-          ->addCacheableDependency($community)
-          ->addCacheContexts(['user'])
-          ->applyTo($item_render_array);
-        $items[] = $item_render_array;
-      }
-    }
-
-    return [
-      '#theme' => 'community_protocol_list',
-      '#title' => $this->t('Communities and Cultural Protocols'),
-      '#items' => $items,
-    ];
+    return $this->communityProtocolList->buildCommunityProtocolList($node);
   }
 
 }
