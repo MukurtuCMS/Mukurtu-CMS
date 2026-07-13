@@ -315,3 +315,15 @@ function mukurtu_collection_update_40014(): void {
   $config->set('content.field_items_in_collection.settings.view_mode', 'grid_browse');
   $config->save();
 }
+
+/**
+ * Hide the field label on the personal collection header image.
+ */
+function mukurtu_collection_update_40015(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.personal_collection.personal_collection.full');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_media_assets.label', 'hidden');
+  $config->save();
+}
