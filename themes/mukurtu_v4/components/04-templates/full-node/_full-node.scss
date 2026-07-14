@@ -97,12 +97,6 @@
     }
   }
 
-  &__citation {
-    .field--name-field-citation {
-      @include mixins.divider;
-    }
-  }
-
   &__comment {
     margin-block-start: var(--v-space-xs);
   }
@@ -190,6 +184,62 @@
       a {
         word-break: normal;
         overflow-wrap: anywhere;
+      }
+    }
+
+    .field--name-field-citation {
+      overflow-wrap: anywhere;
+      word-break: normal;
+
+      .button--copy-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        // Ghost/outline style: no fill, so the 44px tap target (kept for
+        // WCAG 2.5.5/2.5.8) reads as a plain icon rather than a solid block.
+        inline-size: 44px;
+        block-size: 44px;
+        padding: 0;
+        flex-shrink: 0;
+        margin-block-start: var(--v-space-4xxs);
+        background: none;
+        color: var(--brand-primary-dark);
+
+        &:hover,
+        &:active,
+        &:focus {
+          background: none;
+        }
+
+        svg {
+          display: block;
+          fill: currentColor;
+        }
+
+        &:focus-visible {
+          // The global --focus-color (#66afe9) is only ~2.4:1 against this
+          // field's near-white sidebar background, below the 3:1 minimum
+          // (WCAG 1.4.11). Use the button's own dark color instead,
+          // matching the pattern in _glightbox.scss.
+          outline: 2px solid var(--brand-primary-dark);
+          outline-offset: 2px;
+        }
+
+        &.is-copied {
+          color: var(--color-status-dark);
+        }
+      }
+
+      .citation-copy-feedback {
+        color: var(--color-status-dark);
+        font-size: var(--font-size-s);
+        opacity: 0;
+        transition: opacity 0.2s ease;
+      }
+
+      .button--copy-icon.is-copied + .citation-copy-feedback {
+        opacity: 1;
       }
     }
 
