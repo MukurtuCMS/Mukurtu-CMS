@@ -1,10 +1,19 @@
 /* todo: when Claro is officially replaced by Gin (see https://www.drupal.org/about/core/blog/drupal-core-will-adopt-gin-admin-theme-to-replace-claro),
 remove the .claro-details__description class and replace it with its Gin
 counterpart, if one exists.
-.description covers the same text when the form renders through core's
-default (non-Claro) theming instead - the case for front-end users, whose
-dialogs don't get Claro/Gin's form theming at all. */
-.form-item__description, .fieldset__description, .claro-details__description, .description {
+[id$="--description"] covers the same text when the form renders through
+core's default (non-Claro) theming instead - the case for front-end users,
+whose dialogs don't get Claro/Gin's form theming at all. Core's own
+description wrapper markup always ends its id in "--description" (see
+FormElementBase/DetailsElementForm's #description handling), but only
+carries an actual class (.description) for a plain form item's description -
+a <details>/fieldset's own description (e.g. "Cultural Protocols") has no
+class at all outside Claro/Gin, so match on the id suffix instead of relying
+on any one class. */
+.form-item__description,
+.fieldset__description,
+.claro-details__description,
+[id$="--description"] {
   /* For form description text, force the line length to fill the width of its
   container. */
 
@@ -24,7 +33,7 @@ short fields themselves. Shrink it in these dialogs specifically. */
 .mukurtu-quick-create-form .form-item__description,
 .mukurtu-quick-create-form .fieldset__description,
 .mukurtu-quick-create-form .claro-details__description,
-.mukurtu-quick-create-form .description {
+.mukurtu-quick-create-form [id$="--description"] {
   font-size: 0.75rem;
   line-height: 1.3;
 }
