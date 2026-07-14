@@ -81,3 +81,10 @@ audio-thumbnail-player:
   dependencies:
     - core/drupal
     - core/once
+
+copy-citation:
+  js:
+    js/copy-citation.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
