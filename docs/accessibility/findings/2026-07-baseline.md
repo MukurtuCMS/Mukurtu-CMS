@@ -90,9 +90,17 @@ are only reachable logged-in, so the anonymous pass can't cover them.
     `presentation-role-conflict`, minor): Leaflet renders each marker as
     `<img alt="" role="button" tabindex="0">` — keyboard-focusable, announced as an
     unnamed button, while the empty `alt` simultaneously marks it presentational.
-    Fix in Mukurtu's Leaflet integration (`modules/mukurtu_core/js/mukurtu-leaflet-widget.js`
-    and the browse preview) by setting the marker `alt`/`title` to something
-    meaningful (e.g. the item or location name). WCAG 4.1.2-adjacent.
+    WCAG 4.1.2-adjacent.
+    - **✅ Fixed 2026-07-13** in `MukurtuLeafletFormatter::viewElements()`: every
+      feature without a title now gets one named after the entity whose location it
+      shows ("Location of <label>"; related-coverage markers use the related item's
+      label). The contrib leaflet JS turns the feature title into the marker's
+      `alt`/`title` attributes. Verified in the DOM
+      (`alt="Location of DH 1"`) and by re-scan — both axe findings cleared, so the
+      digital heritage item page now has 0 violations of any kind. Note this covers
+      maps rendered by the Mukurtu formatter (item pages); the **views-based browse
+      map** (`views.view.mukurtu_browse_by_map`) renders markers by its own path and
+      should be checked for the same issue when it has locatable content.
   - **Leaflet control/attribution contrast** flagged for human review (axe
     "incomplete") — check the zoom controls and attribution links with a contrast
     tool during the manual pass.
