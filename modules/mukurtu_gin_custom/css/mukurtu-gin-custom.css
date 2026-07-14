@@ -520,3 +520,23 @@ counterpart, if one exists. */
 .mukurtu-dashboard-layout .gin-secondary-toolbar .toolbar-secondary .toolbar-bar .toolbar-tab:not(:hover):not(:focus-within) .toolbar-tray {
   display: none !important;
 }
+
+/* Layout Builder's off-canvas/dialog forms (add/configure/move block) don't
+   render a [data-drupal-messages] placeholder in the DOM until a message is
+   actually needed. Drupal core's Drupal.Message.defaultWrapper() (message.js)
+   only falls back to creating one when it finds none anywhere in the document,
+   and it appends that fallback as a bare, unstyled div directly to <body> -
+   the very end of the page. In normal document flow that renders the message
+   stack at the bottom of the screen, growing there with each subsequent AJAX
+   response instead of appearing near the dialog the user is working in.
+   A real placeholder (e.g. the page's highlighted-region messages block) is
+   always nested inside wrapper markup, never a direct child of <body>, so
+   `body > [data-drupal-messages]` reliably targets only this fallback case. */
+body > [data-drupal-messages] {
+  position: fixed !important;
+  z-index: 99999 !important;
+  inset-block-start: 1rem !important;
+  inset-inline-start: 50% !important;
+  transform: translateX(-50%) !important;
+  inline-size: min(90vw, 40rem) !important;
+}
