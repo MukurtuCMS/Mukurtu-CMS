@@ -37,6 +37,10 @@ function mukurtu_collection_theme($existing, $type, $theme, $path) {
         'results' => NULL,
       ],
     ],
+    'personal_collection' => [
+      'render element' => 'elements',
+      'file' => 'personal_collection.page.inc',
+    ],
   ];
 }
 
