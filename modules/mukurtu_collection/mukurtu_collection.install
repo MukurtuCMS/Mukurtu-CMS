@@ -6,6 +6,19 @@
  */
 
 /**
+ * Implements hook_install().
+ */
+function mukurtu_collection_install() {
+  // Enable personal_collection for pathauto, same as mukurtu_protocol does
+  // for community/protocol.
+  $config = \Drupal::configFactory()->getEditable('pathauto.settings');
+  $types = $config->get('enabled_entity_types') ?: [];
+  $types[] = 'personal_collection';
+  $config->set('enabled_entity_types', $types);
+  $config->save();
+}
+
+/**
  * Update the weight of field_coverage in the collection form display.
  */
 function mukurtu_collection_update_40001() {
@@ -178,9 +191,93 @@ function mukurtu_collection_update_40009(): void {
 }
 
 /**
- * Hide the export-list flag button on the collection full display.
+ * Clear entity type definitions so personal_collection picks up its new view builder.
+ *
+ * PersonalCollection.php now uses PersonalCollectionViewBuilder instead of the
+ * default core EntityViewBuilder, which is required for the new
+ * personal-collection--full/--teaser theme templates to be used at all.
  */
 function mukurtu_collection_update_40010(): void {
+  \Drupal::entityTypeManager()->clearCachedDefinitions();
+}
+
+/**
+ * Show the personal collection image in the "My Personal Collections" listing.
+ *
+ * Parallels the thumbnail shown in the collection browse_collections view
+ * mode, so the personal collections listing visually matches /collections.
+ */
+function mukurtu_collection_update_40011(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.personal_collection.personal_collection.teaser');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->clear('hidden.field_media_assets');
+  $config->set('content.field_media_assets', [
+    'type' => 'entity_reference_entity_view',
+    'label' => 'hidden',
+    'settings' => [
+      'view_mode' => 'collections_3_2_',
+      'link' => FALSE,
+    ],
+    'third_party_settings' => [],
+    'weight' => 3,
+    'region' => 'content',
+  ]);
+  $config->save();
+}
+
+/**
+ * Add pretty path aliases for personal collections.
+ *
+ * Pathauto only exposes a "path" field (and therefore an alias type plugin)
+ * for entity types explicitly listed in pathauto.settings:enabled_entity_types
+ * (see mukurtu_protocol_install() for the same pattern with community/
+ * protocol). Registers personal_collection there, imports the new pathauto
+ * pattern, then backfills aliases for existing personal collections, which
+ * previously only had the raw /personal-collection/{id} path.
+ */
+function mukurtu_collection_update_40012(): void {
+  if (!\Drupal::moduleHandler()->moduleExists('pathauto')) {
+    return;
+  }
+
+  $pathauto_settings = \Drupal::configFactory()->getEditable('pathauto.settings');
+  $types = $pathauto_settings->get('enabled_entity_types') ?: [];
+  if (!in_array('personal_collection', $types, TRUE)) {
+    $types[] = 'personal_collection';
+    $pathauto_settings->set('enabled_entity_types', $types);
+    $pathauto_settings->save();
+  }
+
+  // The pathauto "path" field is computed via hook_entity_base_field_info(),
+  // so the field/entity definition caches must be cleared before the
+  // personal_collection alias type plugin and pattern can be used.
+  \Drupal::entityTypeManager()->clearCachedDefinitions();
+  \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
+  \Drupal::service('plugin.manager.alias_type')->clearCachedDefinitions();
+
+  $name = 'pathauto.pattern.mukurtu_personal_collection_pattern';
+  if (!\Drupal::service('config.storage')->exists($name)) {
+    $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_collection');
+    $source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+    $data = $source->read($name);
+    if ($data !== FALSE) {
+      \Drupal::configFactory()->getEditable($name)->setData($data)->save(TRUE);
+    }
+  }
+
+  $storage = \Drupal::entityTypeManager()->getStorage('personal_collection');
+  $generator = \Drupal::service('pathauto.generator');
+  foreach ($storage->loadMultiple() as $personal_collection) {
+    $generator->updateEntityAlias($personal_collection, 'bulkupdate');
+  }
+}
+
+/**
+ * Hide the export-list flag button on the collection full display.
+ */
+function mukurtu_collection_update_40013(): void {
   $config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.collection.full');
   if ($config->isNew()) {
     return;
@@ -200,5 +297,33 @@ function mukurtu_collection_update_40010(): void {
   $children = array_values(array_filter($children, fn($child) => $child !== 'flag_export_content'));
   $config->set('third_party_settings.field_group.group_metadata.children', $children);
 
+  $config->save();
+}
+
+/**
+ * Switch personal collection items to grid_browse view mode.
+ *
+ * Matches the regular collection full display so /personal-collection/*
+ * pages render "Content in Collection" as image-forward grid cards instead
+ * of bare teaser title links.
+ */
+function mukurtu_collection_update_40014(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.personal_collection.personal_collection.full');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_items_in_collection.settings.view_mode', 'grid_browse');
+  $config->save();
+}
+
+/**
+ * Hide the field label on the personal collection header image.
+ */
+function mukurtu_collection_update_40015(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.personal_collection.personal_collection.full');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_media_assets.label', 'hidden');
   $config->save();
 }
