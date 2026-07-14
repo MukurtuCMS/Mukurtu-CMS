@@ -215,7 +215,14 @@ function mukurtu_dictionary_form_mukurtu_dictionary_add_word_to_list_form_alter(
  * own reordering, it ends up after field_group.
  */
 function mukurtu_dictionary_module_implements_alter(&$implementations, $hook) {
-  mukurtu_core_move_form_alter_to_end($implementations, $hook, 'mukurtu_dictionary');
+  // Inlined rather than delegated to a mukurtu_core helper - this hook can
+  // run during container compilation, before \Drupal::$container (and thus
+  // any cross-module procedural call) is available.
+  if ($hook === 'form_alter' && isset($implementations['mukurtu_dictionary'])) {
+    $group = $implementations['mukurtu_dictionary'];
+    unset($implementations['mukurtu_dictionary']);
+    $implementations['mukurtu_dictionary'] = $group;
+  }
 }
 
 /**
