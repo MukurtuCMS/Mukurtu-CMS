@@ -374,23 +374,20 @@ counterpart, if one exists. */
     padding-bottom: 16px !important;
 }
 
-/* gin_lb adds background-image:url(chevron.svg) !important to .glb-form-element--type-select
-   on every select it renders (media library, and every Layout Builder add/configure/move
-   block dialog). The mukurtu theme already adds a ::after triangle on the same wrapper, so
-   both arrows show. Remove gin_lb's background-image arrow everywhere to leave only the
-   mukurtu triangle. */
-.glb-form-element--type-select {
-    background-image: none !important;
-}
-
-/* inset-block-start: 50% on the ::after is relative to the full .js-form-type-select
-   wrapper, which includes the "Sort by" label above the select input. The label pushes
-   the 50% mark up into the label area, leaving the arrow near the top of the input.
-   Shift down by ~0.75rem to re-center the arrow within the select input. */
-.media-library-widget-modal .js-form-type-select::after,
-.media-library-widget-modal .select-wrapper::after {
-    inset-block-start: calc(50% + 0.75rem) !important;
-    transform: translateY(-50%) !important;
+/* gin_lb adds its own background-image:url(chevron.svg) !important arrow to every
+   .glb-form-element--type-select it renders (media library, and every Layout Builder
+   add/configure/move block dialog), already color-matched to Gin's light/dark admin
+   theme. The mukurtu front-end theme also draws its own ::after triangle on the same
+   wrapper (.js-form-type-select / .select-wrapper) using the site's front-end brand
+   accent color -- which some color palettes set to red -- so two mismatched arrows
+   show. Hide the mukurtu triangle inside gin_lb's own form markup (identified by the
+   glb-form-item class, which only ever appears in gin_lb's dialogs) and keep gin_lb's
+   own properly themed chevron as the single arrow. */
+.glb-form-item.js-form-type-select::after,
+.glb-form-item .js-form-type-select::after,
+.glb-form-item.select-wrapper::after,
+.glb-form-item .select-wrapper::after {
+    content: none !important;
 }
 
 .media-library-widget-modal .view-content .js-media-library-views-form {
@@ -539,4 +536,19 @@ body > [data-drupal-messages] {
   inset-inline-start: 50% !important;
   transform: translateX(-50%) !important;
   inline-size: min(90vw, 40rem) !important;
+}
+
+/* Layout Builder's own status/warning/error messages (e.g. "You have unsaved
+   changes") don't actually use [data-drupal-messages] at all -- gin_lb hides
+   its status-messages--gin-lb markup and re-renders each message as a popup
+   via the Toastify JS library (gin_lb/assets/js/gin_lb_toastify.js), which
+   hardcodes gravity: 'bottom', position: 'right'. Toastify sets that
+   placement with inline styles, so only an !important rule in a stylesheet
+   can override it. Reposition to a fixed, top-centered toast to match. */
+.toastify.glb-messages {
+  top: 1rem !important;
+  bottom: auto !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) !important;
 }
