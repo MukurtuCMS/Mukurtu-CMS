@@ -1890,13 +1890,34 @@ function mukurtu_core_update_40068(&$sandbox): string {
         ]
       );
 
-      // field_page_media_assets is excluded from Layout Builder sections;
-      // the node template renders it separately via preprocess to preserve
-      // the media carousel behaviour.
+      // Matches the field_page_media_assets field_block already present in
+      // the bundle's own default full display (core.entity_view_display.
+      // node.page.full.yml), so migrated nodes end up with the same layout
+      // a brand new page gets.
+      $media_component = new \Drupal\layout_builder\SectionComponent(
+        $uuid_generator->generate(),
+        'content',
+        [
+          'id' => 'field_block:node:page:field_page_media_assets',
+          'label' => '',
+          'label_display' => '0',
+          'formatter' => [
+            'type' => 'entity_reference_entity_view',
+            'settings' => [
+              'view_mode' => 'media_assets',
+              'link' => FALSE,
+            ],
+            'label' => 'hidden',
+          ],
+          'context_mapping' => ['entity' => 'layout_builder.entity'],
+          'provider' => 'layout_builder',
+        ]
+      );
+
       $section = new \Drupal\layout_builder\Section(
         'layout_onecol',
         [],
-        [$body_component]
+        [$body_component, $media_component]
       );
 
       $node->set('layout_builder__layout', [$section]);
@@ -2488,4 +2509,85 @@ function mukurtu_core_update_40079(): void {
     return;
   }
   $config->set('content.field_representative_media.settings.view_mode', 'browse')->save();
+}
+
+/**
+ * Backfill the media assets block on basic pages migrated by update 40068.
+ *
+ * That update built each migrated page's Layout Builder override with only a
+ * body field block, omitting field_page_media_assets -- inconsistent with
+ * the bundle's own default full display (core.entity_view_display.node.
+ * page.full.yml), which has always included it. Add the missing component
+ * to any page override that doesn't already have one.
+ */
+function mukurtu_core_update_40080(&$sandbox): string {
+  if (!isset($sandbox['progress'])) {
+    $nids = \Drupal::entityQuery('node')
+      ->condition('type', 'page')
+      ->accessCheck(FALSE)
+      ->execute();
+    $sandbox['nids'] = array_values($nids);
+    $sandbox['total'] = count($nids);
+    $sandbox['progress'] = 0;
+    $sandbox['fixed'] = 0;
+  }
+
+  if ($sandbox['total'] === 0) {
+    $sandbox['#finished'] = 1;
+    return 'No basic page nodes found.';
+  }
+
+  $batch_size = 25;
+  $nids_batch = array_slice($sandbox['nids'], $sandbox['progress'], $batch_size);
+
+  foreach ($nids_batch as $nid) {
+    $node = \Drupal\node\Entity\Node::load($nid);
+    if ($node && $node->hasField('layout_builder__layout') && !$node->get('layout_builder__layout')->isEmpty()) {
+      $sections = $node->get('layout_builder__layout')->getSections();
+      $has_media_component = FALSE;
+      foreach ($sections as $section) {
+        foreach ($section->getComponents() as $component) {
+          if ($component->getPluginId() === 'field_block:node:page:field_page_media_assets') {
+            $has_media_component = TRUE;
+            break 2;
+          }
+        }
+      }
+
+      if (!$has_media_component && !empty($sections)) {
+        $uuid_generator = new \Drupal\Component\Uuid\Php();
+        $media_component = new \Drupal\layout_builder\SectionComponent(
+          $uuid_generator->generate(),
+          'content',
+          [
+            'id' => 'field_block:node:page:field_page_media_assets',
+            'label' => '',
+            'label_display' => '0',
+            'formatter' => [
+              'type' => 'entity_reference_entity_view',
+              'settings' => [
+                'view_mode' => 'media_assets',
+                'link' => FALSE,
+              ],
+              'label' => 'hidden',
+            ],
+            'context_mapping' => ['entity' => 'layout_builder.entity'],
+            'provider' => 'layout_builder',
+          ]
+        );
+        $sections[0]->appendComponent($media_component);
+        $node->set('layout_builder__layout', $sections);
+        $node->save();
+        $sandbox['fixed']++;
+      }
+    }
+    $sandbox['progress']++;
+  }
+
+  $sandbox['#finished'] = $sandbox['progress'] / $sandbox['total'];
+  return (string) t('Checked @done of @total basic page nodes, added the missing media block to @fixed.', [
+    '@done' => $sandbox['progress'],
+    '@total' => $sandbox['total'],
+    '@fixed' => $sandbox['fixed'],
+  ]);
 }
