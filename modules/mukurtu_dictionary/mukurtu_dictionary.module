@@ -2,11 +2,6 @@
 
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Ajax\AjaxResponse;
-use Drupal\Core\Ajax\CloseModalDialogCommand;
-use Drupal\Core\Ajax\RedirectCommand;
-use Drupal\Core\Ajax\HtmlCommand;
-use Drupal\Core\Ajax\InvokeCommand;
-use Drupal\Core\Ajax\MessageCommand;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\core\Entity\EntityTypeInterface;
@@ -220,11 +215,7 @@ function mukurtu_dictionary_form_mukurtu_dictionary_add_word_to_list_form_alter(
  * own reordering, it ends up after field_group.
  */
 function mukurtu_dictionary_module_implements_alter(&$implementations, $hook) {
-  if ($hook === 'form_alter' && isset($implementations['mukurtu_dictionary'])) {
-    $group = $implementations['mukurtu_dictionary'];
-    unset($implementations['mukurtu_dictionary']);
-    $implementations['mukurtu_dictionary'] = $group;
-  }
+  mukurtu_core_move_form_alter_to_end($implementations, $hook, 'mukurtu_dictionary');
 }
 
 /**
@@ -310,15 +301,8 @@ function mukurtu_dictionary_form_alter(&$form, FormStateInterface $form_state, $
     // other (picker) form. Strip the class so it stays inline. Must be a
     // #pre_render callback, not done directly here - the class is added by
     // Actions::processActions(), which runs later than hook_form_alter, so
-    // it isn't there yet to remove at this point. Must be a closure, not a
-    // plain function name string - #pre_render requires either an anonymous
-    // function or a TrustedCallbackInterface method.
-    $form['actions']['#pre_render'][] = function (array $element): array {
-      if (!empty($element['#attributes']['class'])) {
-        $element['#attributes']['class'] = array_diff($element['#attributes']['class'], ['form-actions']);
-      }
-      return $element;
-    };
+    // it isn't there yet to remove at this point.
+    $form['actions']['#pre_render'][] = 'mukurtu_core_strip_form_actions_class';
   }
 }
 
@@ -331,56 +315,10 @@ function mukurtu_dictionary_form_alter(&$form, FormStateInterface $form_state, $
  * when there are errors.
  */
 function mukurtu_dictionary_add_word_to_list_dialog_ajax(array &$form, FormStateInterface $form_state): AjaxResponse {
-  $response = new AjaxResponse();
-  if ($form_state->isExecuted()) {
-    $nodeId = $form_state->getValue('node') ?? $form_state->getValue('mukurtu_return_node');
-    $response->addCommand(new CloseModalDialogCommand());
-
-    // mukurtu_stay marks this as opened from a browse-card quick action
-    // (see Drupal\mukurtu_dictionary\Hook\BrowseHooks::browseQuickActionsAlter())
-    // rather than the full-page tab this callback was originally built for
-    // - stay on the listing instead of navigating to the item's own page.
-    if (\Drupal::request()->query->get('mukurtu_stay')) {
-      // Messages set via messenger() during submitForm() would normally
-      // ride along with the redirect below to the next page load; since
-      // there's no redirect in this branch, convert them to AJAX commands
-      // instead so the "Added X to Y" confirmation isn't silently lost.
-      foreach (\Drupal::messenger()->all() as $type => $messages) {
-        foreach ($messages as $message) {
-          $response->addCommand(new MessageCommand($message, NULL, ['type' => $type]));
-        }
-      }
-      \Drupal::messenger()->deleteAll();
-
-      if ($nodeId) {
-        $response->addCommand(new InvokeCommand('[data-quick-action-trigger="word-list-' . $nodeId . '"]', 'focus'));
-      }
-    }
-    else {
-      $node = $nodeId ? \Drupal::entityTypeManager()->getStorage('node')->load($nodeId) : NULL;
-      if ($node) {
-        $response->addCommand(new RedirectCommand($node->toUrl()->toString()));
-      }
-    }
-  }
-  else {
-    // Drupal form validation errors are in $form_state->getErrors(), not the
-    // messenger queue. Copy them over so status_messages renders them visibly.
-    foreach ($form_state->getErrors() as $error) {
-      \Drupal::messenger()->addError($error);
-    }
-    /** @var \Drupal\Core\Render\RendererInterface $renderer */
-    $renderer = \Drupal::service('renderer');
-    $status_messages = ['#type' => 'status_messages'];
-    $form['#prefix'] = ($form['#prefix'] ?? '') . $renderer->renderRoot($status_messages);
-    $output = $renderer->renderRoot($form);
-    $response->setAttachments($form['#attached']);
-    // Use HtmlCommand (not ReplaceCommand) - ".ui-dialog-content" is the
-    // #drupal-modal wrapper itself, not a child of it. Replacing the wrapper
-    // would break focus restoration and CloseModalDialogCommand's selector.
-    $response->addCommand(new HtmlCommand('.ui-dialog-content', $output));
-  }
-  return $response;
+  // mukurtu_stay marks this as opened from a browse-card quick action (see
+  // Drupal\mukurtu_dictionary\Hook\BrowseHooks::browseQuickActionsAlter())
+  // rather than the full-page tab this callback was originally built for.
+  return mukurtu_core_modal_form_ajax_response($form, $form_state, fn ($nodeId) => '[data-quick-action-trigger="word-list-' . $nodeId . '"]');
 }
 
 // Helper method to pull dictionary language field options from config.

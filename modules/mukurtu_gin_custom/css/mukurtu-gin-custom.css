@@ -315,11 +315,13 @@ short fields themselves. Shrink it in these dialogs specifically. */
 }
 
 /* The front-end select arrow's maroon accent color is tuned for
-   mukurtu_v4's light-background pages; it clashes against Gin's dark
-   dialog chrome. Recolor to Gin's own accent so form content inside a
-   dialog reads as part of the same (dark) surface as the dialog itself. */
+   mukurtu_v4's light-background pages; it clashes against Gin's dialog
+   chrome (the select's own background stays light - this only recolors the
+   arrow). Use Gin's own dark-mode-aware focus color, which also keeps
+   contrast against Gin Dark Mode's dialog background above the WCAG 1.4.11
+   3:1 minimum (unlike --gin-color-primary, which drops to ~1.8:1 there). */
 .ui-dialog .js-form-type-select::after {
-    border-top-color: var(--gin-color-primary, #0036b1);
+    border-top-color: var(--gin-color-focus, rgba(0, 125, 250, .6));
 }
 
 /* Fix Layout Builder settings menu blocking block contextual/edit links (#1385).
@@ -423,9 +425,12 @@ short fields themselves. Shrink it in these dialogs specifically. */
     margin: 0 !important;
 }
 
-/* WCAG 2.4.7: visible focus ring on dialog footer buttons in any modal, not just the media library one. */
+/* WCAG 2.4.7: visible focus ring on dialog footer buttons in any modal, not
+   just the media library one. Use --gin-color-focus (not --gin-color-primary)
+   so the ring keeps 3:1 contrast (WCAG 1.4.11) against Gin Dark Mode's
+   dialog background. */
 .ui-dialog .ui-dialog-buttonpane .button:focus-visible {
-  outline: 3px solid var(--gin-color-primary, #0036b1);
+  outline: 3px solid var(--gin-color-focus, rgba(0, 125, 250, .6));
   outline-offset: 2px;
 }
 

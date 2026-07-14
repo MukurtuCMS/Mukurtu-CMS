@@ -121,8 +121,13 @@ class MukurtuAddItemToCollectionController extends ControllerBase {
   public function content(NodeInterface $node) {
     $build = [];
 
-    // Existing collection.
-    $build['existing'] = $this->formBuilder()->getForm('Drupal\mukurtu_collection\Form\MukurtuAddItemToCollectionForm', $node);
+    // Existing collection. Only show the picker if there's actually a
+    // collection eligible to add to - it's a required field, so with no
+    // eligible collections it would just be a dead end.
+    $hasExistingCollections = $this->userCanEditExistingCollections($node);
+    if ($hasExistingCollections) {
+      $build['existing'] = $this->formBuilder()->getForm('Drupal\mukurtu_collection\Form\MukurtuAddItemToCollectionForm', $node);
+    }
 
     // New collection.
     if ($this->entityTypeManager()->getAccessControlHandler('node')->createAccess('collection')) {
@@ -134,6 +139,9 @@ class MukurtuAddItemToCollectionController extends ControllerBase {
       $build['new_collection'] = [
         '#type' => 'details',
         '#title' => $this->t('Create a new collection'),
+        // Open by default when there's no existing collection to pick from,
+        // since it's then the only actionable option in the dialog.
+        '#open' => !$hasExistingCollections,
       ];
       $build['new_collection']['form'] = $this->formBuilder()->getForm($form);
     }

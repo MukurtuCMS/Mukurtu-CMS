@@ -14,6 +14,12 @@ use Drupal\node\Entity\NodeType;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\CloseModalDialogCommand;
+use Drupal\Core\Ajax\HtmlCommand;
+use Drupal\Core\Ajax\InvokeCommand;
+use Drupal\Core\Ajax\MessageCommand;
+use Drupal\Core\Ajax\RedirectCommand;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\user\UserInterface;
@@ -251,6 +257,118 @@ function mukurtu_core_page_attachments(array &$attachments) {
   // local tasks) work without depending on some other module happening to
   // load it first.
   $attachments['#attached']['library'][] = 'core/drupal.dialog.ajax';
+}
+
+/**
+ * Build an AJAX response for a form submitted inside a modal dialog.
+ *
+ * Shared by the "Add to Collection" / "Add to Personal Collection" / "Add to
+ * Word List" dialog forms (and their embedded "create a new X" forms), which
+ * all follow the same close-on-success / re-render-with-errors pattern.
+ *
+ * On success, closes the dialog and redirects to the item's page. On
+ * validation failure, rebuilds the form (with status messages) into the
+ * dialog and moves focus there - HtmlCommand replaces the whole dialog
+ * content, which detaches whatever was previously focused (e.g. the Save
+ * button), so core ajax.js's default focus-restore has nothing usable to
+ * refocus.
+ *
+ * Expects the form to have a "node" or "mukurtu_return_node" hidden value
+ * identifying the item to redirect back to on success.
+ *
+ * $quickActionFocusSelector opts a caller into the browse-card quick-action
+ * flow: when the request carries a "mukurtu_stay" query param (set when the
+ * dialog was opened from a quick-action icon rather than the full-page tab),
+ * stay on the listing instead of redirecting - relay any messenger()
+ * messages as MessageCommands (since there's no redirect for them to ride
+ * along with) and return focus to the triggering icon. The callable receives
+ * ($nodeId, $form_state) and must return the CSS selector for that icon.
+ */
+function mukurtu_core_modal_form_ajax_response(array &$form, FormStateInterface $form_state, ?callable $quickActionFocusSelector = NULL): AjaxResponse {
+  $response = new AjaxResponse();
+  if ($form_state->isExecuted()) {
+    $nodeId = $form_state->getValue('node') ?? $form_state->getValue('mukurtu_return_node');
+    $response->addCommand(new CloseModalDialogCommand());
+
+    if ($quickActionFocusSelector && \Drupal::request()->query->get('mukurtu_stay')) {
+      foreach (\Drupal::messenger()->all() as $type => $messages) {
+        foreach ($messages as $message) {
+          $response->addCommand(new MessageCommand($message, NULL, ['type' => $type]));
+        }
+      }
+      \Drupal::messenger()->deleteAll();
+
+      if ($nodeId) {
+        $response->addCommand(new InvokeCommand($quickActionFocusSelector($nodeId, $form_state), 'focus'));
+      }
+    }
+    else {
+      $node = $nodeId ? \Drupal::entityTypeManager()->getStorage('node')->load($nodeId) : NULL;
+      if ($node) {
+        $response->addCommand(new RedirectCommand($node->toUrl()->toString()));
+      }
+    }
+    return $response;
+  }
+
+  // Drupal form validation errors are in $form_state->getErrors(), not the
+  // messenger queue. Copy them over so status_messages renders them visibly.
+  foreach ($form_state->getErrors() as $error) {
+    \Drupal::messenger()->addError($error);
+  }
+  /** @var \Drupal\Core\Render\RendererInterface $renderer */
+  $renderer = \Drupal::service('renderer');
+  $status_messages = ['#type' => 'status_messages'];
+  $form['#prefix'] = ($form['#prefix'] ?? '') . $renderer->renderRoot($status_messages);
+  $output = $renderer->renderRoot($form);
+  $response->setAttachments($form['#attached']);
+  // Use HtmlCommand (not ReplaceCommand) - ".ui-dialog-content" is the
+  // #drupal-modal wrapper itself, not a child of it. Replacing the wrapper
+  // would break focus restoration and CloseModalDialogCommand's selector.
+  $response->addCommand(new HtmlCommand('.ui-dialog-content', $output));
+  $response->addCommand(new InvokeCommand('.ui-dialog-content [data-drupal-messages]', 'attr', ['tabindex', '-1']));
+  $response->addCommand(new InvokeCommand('.ui-dialog-content [data-drupal-messages]', 'trigger', ['focus']));
+  return $response;
+}
+
+/**
+ * Move a module's hook_form_alter() to the end of the implementations list.
+ *
+ * field_group moves its own hook_form_alter() to the end of the module list
+ * so it can attach group metadata after everyone else has had a chance to
+ * alter the form. A module that needs to run after field_group (e.g. to trim
+ * a field_group-managed form down for a quick-create dialog) needs to move
+ * itself to the end too - since this runs after field_group's own
+ * reordering, it ends up after field_group.
+ */
+function mukurtu_core_move_form_alter_to_end(array &$implementations, $hook, $moduleName) {
+  if ($hook === 'form_alter' && isset($implementations[$moduleName])) {
+    $group = $implementations[$moduleName];
+    unset($implementations[$moduleName]);
+    $implementations[$moduleName] = $group;
+  }
+}
+
+/**
+ * #pre_render callback: keep a dialog form's actions inline, not hoisted.
+ *
+ * Core's dialog JS hoists any ".form-actions" button into the dialog's
+ * shared buttonpane (see prepareDialogButtons() in
+ * core/misc/dialog/dialog.ajax.js). When more than one form shares a dialog
+ * (e.g. an "existing item" picker alongside an embedded "create new" form),
+ * that makes whichever form's Save button gets hoisted look like "the"
+ * dialog action and swallow clicks meant for the other form. Strip the class
+ * so it stays inline instead.
+ *
+ * Must be a #pre_render callback, not applied directly in hook_form_alter() -
+ * the class is added by Actions::processActions(), which runs later than
+ * hook_form_alter(), so it isn't there yet to remove at that point.
+ */
+function mukurtu_core_strip_form_actions_class(array $element): array {
+  if (!empty($element['#attributes']['class'])) {
+    $element['#attributes']['class'] = array_diff($element['#attributes']['class'], ['form-actions']);
+  }
+  return $element;
 }
 
 /**
