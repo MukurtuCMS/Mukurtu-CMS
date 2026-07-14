@@ -332,24 +332,6 @@ function mukurtu_core_modal_form_ajax_response(array &$form, FormStateInterface 
 }
 
 /**
- * Move a module's hook_form_alter() to the end of the implementations list.
- *
- * field_group moves its own hook_form_alter() to the end of the module list
- * so it can attach group metadata after everyone else has had a chance to
- * alter the form. A module that needs to run after field_group (e.g. to trim
- * a field_group-managed form down for a quick-create dialog) needs to move
- * itself to the end too - since this runs after field_group's own
- * reordering, it ends up after field_group.
- */
-function mukurtu_core_move_form_alter_to_end(array &$implementations, $hook, $moduleName) {
-  if ($hook === 'form_alter' && isset($implementations[$moduleName])) {
-    $group = $implementations[$moduleName];
-    unset($implementations[$moduleName]);
-    $implementations[$moduleName] = $group;
-  }
-}
-
-/**
  * #pre_render callback: keep a dialog form's actions inline, not hoisted.
  *
  * Core's dialog JS hoists any ".form-actions" button into the dialog's
