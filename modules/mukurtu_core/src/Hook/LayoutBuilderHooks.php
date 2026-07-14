@@ -76,6 +76,7 @@ class LayoutBuilderHooks {
 
     // Within "Inline blocks", further restrict to the approved block types.
     $allowed_inline_bundles = [
+      'basic',
       'media_carousel_block',
       'featured_content',
       'local_contexts_block',
