@@ -30,12 +30,11 @@
   {{ title_prefix }}
   {{ title_suffix }}
   {% block content %}
-    {% if export_button is defined or export_adhoc_button is defined %}
+    {% if export_adhoc_button is defined %}
       <div class="local-tasks__inner">
         <div class="local-tasks__tabs">{{ content }}</div>
         <div class="local-tasks__export">
           {{ export_adhoc_button }}
-          {{ export_button }}
           {{ export_membership }}
         </div>
       </div>

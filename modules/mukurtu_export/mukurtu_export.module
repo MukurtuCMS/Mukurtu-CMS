@@ -330,8 +330,11 @@ function mukurtu_export_entity_view(array &$build, \Drupal\Core\Entity\EntityInt
 /**
  * Implements hook_preprocess_block().
  *
- * Injects the "Add to export list" button into the local tasks block so it
- * can be rendered right-aligned next to the node tabs.
+ * Injects the "Export" button and the "In N export lists" membership widget
+ * into the local tasks block so they render right-aligned next to the node
+ * tabs. "Add to export list" itself is one of those tabs (see
+ * mukurtu_export.links.task.yml) rather than injected here, to avoid two
+ * copies of the same action sitting side by side.
  */
 function mukurtu_export_preprocess_block(&$variables) {
   if (($variables['plugin_id'] ?? '') !== 'local_tasks_block') {
@@ -347,17 +350,6 @@ function mukurtu_export_preprocess_block(&$variables) {
   if ($node->bundle() === 'landing_page') {
     return;
   }
-  $variables['export_button'] = [
-    '#type' => 'link',
-    '#title' => t('Add to export list'),
-    '#url' => \Drupal\Core\Url::fromRoute('mukurtu_export.add_item_to_list', [
-      'entity_type' => 'node',
-      'entity_id' => $node->id(),
-    ], [
-      'query' => ['destination' => \Drupal::request()->getRequestUri()],
-    ]),
-    '#attributes' => [],
-  ];
   $variables['export_adhoc_button'] = [
     '#type' => 'link',
     '#title' => t('Export'),
