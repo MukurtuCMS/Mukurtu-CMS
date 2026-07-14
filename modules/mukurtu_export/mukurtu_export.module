@@ -162,20 +162,29 @@ function mukurtu_export_form_alter(&$form, FormStateInterface $form_state, $form
 
   // When the "Add to export list" picker is opened inside a modal dialog
   // (see the browse-card quick action in
-  // mukurtu_export_mukurtu_browse_quick_actions_alter() above), wire its
+  // mukurtu_export_mukurtu_browse_quick_actions_alter() and the full-view
+  // "Add to export list" tab in mukurtu_export.links.task.yml), wire its
   // submit button to an AJAX callback that closes the dialog on success
   // instead of doing a full page navigation - the same treatment as the
   // "Add to Collection" family of quick actions.
   if ($form_id === 'mukurtu_export_add_item_to_list' && \Drupal::request()->query->get('mukurtu_modal')) {
     // mukurtu_core_modal_form_ajax_response() looks for "node" or
     // "mukurtu_return_node"; this form has neither, so stash the item being
-    // added (taken from the route, since that's what built this form) - only
-    // when it's a node, which is the only entity type the quick action ever
-    // passes.
-    if (\Drupal::routeMatch()->getParameter('entity_type') === 'node') {
+    // added, taken from whichever route built this form - the quick action's
+    // entity_type/entity_id route (only ever a node) or the full-view tab's
+    // plain node route.
+    $route_match = \Drupal::routeMatch();
+    if ($route_match->getParameter('entity_type') === 'node') {
+      $node_id = $route_match->getParameter('entity_id');
+    }
+    else {
+      $node = $route_match->getParameter('node');
+      $node_id = $node instanceof \Drupal\node\NodeInterface ? $node->id() : $node;
+    }
+    if ($node_id) {
       $form['mukurtu_return_node'] = [
         '#type' => 'hidden',
-        '#value' => \Drupal::routeMatch()->getParameter('entity_id'),
+        '#value' => $node_id,
       ];
     }
     $form['actions']['submit']['#ajax'] = [
