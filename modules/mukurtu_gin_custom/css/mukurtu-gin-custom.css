@@ -374,10 +374,12 @@ counterpart, if one exists. */
     padding-bottom: 16px !important;
 }
 
-/* gin_lb adds background-image:url(chevron.svg) !important to .glb-form-element--type-select.
-   The mukurtu theme already adds a ::after triangle on the wrapper, so both arrows show.
-   Remove gin_lb's background-image arrow to leave only the mukurtu triangle. */
-.media-library-widget-modal .glb-form-element--type-select {
+/* gin_lb adds background-image:url(chevron.svg) !important to .glb-form-element--type-select
+   on every select it renders (media library, and every Layout Builder add/configure/move
+   block dialog). The mukurtu theme already adds a ::after triangle on the same wrapper, so
+   both arrows show. Remove gin_lb's background-image arrow everywhere to leave only the
+   mukurtu triangle. */
+.glb-form-element--type-select {
     background-image: none !important;
 }
 
