@@ -1362,4 +1362,46 @@ class FormHooks
             }
         }
     }
+
+    /**
+     * Implements hook_form_FORM_ID_alter() for 'entity_view_display_edit_form'.
+     *
+     * Disables the "Use Layout Builder" option on Manage Display for content
+     * types whose custom full-view templates directly reference fields by
+     * name and are not yet compatible with Layout Builder's section-based
+     * rendering (see issue #1807).
+     */
+    #[Hook("form_entity_view_display_edit_form_alter")]
+    public function formEntityViewDisplayEditFormAlter(
+        array &$form,
+        FormStateInterface $form_state,
+    ): void {
+        if (!isset($form["layout"]["enabled"])) {
+            return;
+        }
+
+        $display = $form_state->getFormObject()->getEntity();
+        if ($display->getTargetEntityTypeId() !== "node") {
+            return;
+        }
+
+        $unsupportedBundles = [
+            "article",
+            "page",
+            "dictionary_word",
+            "word_list",
+            "collection",
+            "digital_heritage",
+            "person",
+            "place",
+        ];
+        if (!in_array($display->getTargetBundle(), $unsupportedBundles, TRUE)) {
+            return;
+        }
+
+        $form["layout"]["enabled"]["#disabled"] = TRUE;
+        $form["layout"]["enabled"]["#description"] = t(
+            "Layout Builder is not yet supported for this content type.",
+        );
+    }
 }
