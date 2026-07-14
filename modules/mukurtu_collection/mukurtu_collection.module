@@ -6,9 +6,6 @@
  */
 
 use Drupal\Core\Ajax\AjaxResponse;
-use Drupal\Core\Ajax\CloseModalDialogCommand;
-use Drupal\Core\Ajax\RedirectCommand;
-use Drupal\Core\Ajax\HtmlCommand;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -208,11 +205,7 @@ function mukurtu_collection_entity_bundle_field_info_alter(&$fields, EntityTypeI
  * field_group's own reordering, it ends up after field_group.
  */
 function mukurtu_collection_module_implements_alter(&$implementations, $hook) {
-  if ($hook === 'form_alter' && isset($implementations['mukurtu_collection'])) {
-    $group = $implementations['mukurtu_collection'];
-    unset($implementations['mukurtu_collection']);
-    $implementations['mukurtu_collection'] = $group;
-  }
+  mukurtu_core_move_form_alter_to_end($implementations, $hook, 'mukurtu_collection');
 }
 
 /**
@@ -358,15 +351,7 @@ function mukurtu_collection_form_alter(&$form, FormStateInterface $form_state, $
       // Must be a #pre_render callback, not done directly here - the class
       // is added by Actions::processActions(), which runs later than
       // hook_form_alter, so it isn't there yet to remove at this point.
-      // Must be a closure, not a plain function name string - #pre_render
-      // requires either an anonymous function or a
-      // TrustedCallbackInterface method.
-      $form['actions']['#pre_render'][] = function (array $element): array {
-        if (!empty($element['#attributes']['class'])) {
-          $element['#attributes']['class'] = array_diff($element['#attributes']['class'], ['form-actions']);
-        }
-        return $element;
-      };
+      $form['actions']['#pre_render'][] = 'mukurtu_core_strip_form_actions_class';
     }
     elseif ($form_id === 'node_collection_form' && \Drupal::routeMatch()->getRouteName() === 'mukurtu_collection.add_item_to_collection') {
       // This is the embedded "create a new collection" entity form. It has
@@ -387,12 +372,7 @@ function mukurtu_collection_form_alter(&$form, FormStateInterface $form_state, $
       // See the matching comment in the personal_collection_form branch
       // above - keeps this form's Save button inline instead of being
       // hoisted into the dialog's shared buttonpane.
-      $form['actions']['#pre_render'][] = function (array $element): array {
-        if (!empty($element['#attributes']['class'])) {
-          $element['#attributes']['class'] = array_diff($element['#attributes']['class'], ['form-actions']);
-        }
-        return $element;
-      };
+      $form['actions']['#pre_render'][] = 'mukurtu_core_strip_form_actions_class';
     }
   }
 }
@@ -407,33 +387,7 @@ function mukurtu_collection_form_alter(&$form, FormStateInterface $form_state, $
  * when there are errors.
  */
 function mukurtu_collection_add_to_x_dialog_ajax(array &$form, FormStateInterface $form_state): AjaxResponse {
-  $response = new AjaxResponse();
-  if ($form_state->isExecuted()) {
-    $nodeId = $form_state->getValue('node') ?? $form_state->getValue('mukurtu_return_node');
-    $node = $nodeId ? \Drupal::entityTypeManager()->getStorage('node')->load($nodeId) : NULL;
-    $response->addCommand(new CloseModalDialogCommand());
-    if ($node) {
-      $response->addCommand(new RedirectCommand($node->toUrl()->toString()));
-    }
-  }
-  else {
-    // Drupal form validation errors are in $form_state->getErrors(), not the
-    // messenger queue. Copy them over so status_messages renders them visibly.
-    foreach ($form_state->getErrors() as $error) {
-      \Drupal::messenger()->addError($error);
-    }
-    /** @var \Drupal\Core\Render\RendererInterface $renderer */
-    $renderer = \Drupal::service('renderer');
-    $status_messages = ['#type' => 'status_messages'];
-    $form['#prefix'] = ($form['#prefix'] ?? '') . $renderer->renderRoot($status_messages);
-    $output = $renderer->renderRoot($form);
-    $response->setAttachments($form['#attached']);
-    // Use HtmlCommand (not ReplaceCommand) - ".ui-dialog-content" is the
-    // #drupal-modal wrapper itself, not a child of it. Replacing the wrapper
-    // would break focus restoration and CloseModalDialogCommand's selector.
-    $response->addCommand(new HtmlCommand('.ui-dialog-content', $output));
-  }
-  return $response;
+  return mukurtu_core_modal_form_ajax_response($form, $form_state);
 }
 
 /**

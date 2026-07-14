@@ -90,8 +90,13 @@ class MukurtuAddWordToListController extends ControllerBase {
   public function content(NodeInterface $node) {
     $build = [];
 
-    // Existing word list.
-    $build['existing'] = \Drupal::formBuilder()->getForm('Drupal\mukurtu_dictionary\Form\MukurtuAddWordToListForm', $node);
+    // Existing word list. Only show the picker if there's actually a word
+    // list eligible to add to - it's a required field, so with no eligible
+    // word lists it would just be a dead end.
+    $hasExistingLists = $this->userCanEditExistingWordLists($node);
+    if ($hasExistingLists) {
+      $build['existing'] = \Drupal::formBuilder()->getForm('Drupal\mukurtu_dictionary\Form\MukurtuAddWordToListForm', $node);
+    }
 
     // New word list.
     if ($this->entityTypeManager()->getAccessControlHandler('node')->createAccess('word_list')) {
@@ -103,6 +108,9 @@ class MukurtuAddWordToListController extends ControllerBase {
       $build['new_list'] = [
         '#type' => 'details',
         '#title' => $this->t('Create a new word list'),
+        // Open by default when there's no existing word list to pick from,
+        // since it's then the only actionable option in the dialog.
+        '#open' => !$hasExistingLists,
       ];
       $build['new_list']['form'] = $this->formBuilder()->getForm($form);
     }

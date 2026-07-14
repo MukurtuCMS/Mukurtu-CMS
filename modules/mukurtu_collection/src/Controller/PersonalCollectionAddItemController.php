@@ -25,13 +25,37 @@ class PersonalCollectionAddItemController extends ControllerBase {
   }
 
   /**
+   * Check if the user owns any personal collection eligible for this item.
+   *
+   * Uses the same selection handler/settings PersonalCollectionAddItemForm's
+   * Tagify picker uses, so this check and what the widget actually offers
+   * never disagree.
+   */
+  protected function hasEligiblePersonalCollections(NodeInterface $node) {
+    $handler = \Drupal::service('plugin.manager.entity_reference_selection')->getInstance([
+      'target_type' => 'personal_collection',
+      'handler' => 'mukurtu_eligible_container',
+      'mukurtu_containing_field' => 'field_items_in_collection',
+      'mukurtu_current_item' => $node->id(),
+      'mukurtu_owned_by_current_user' => TRUE,
+    ]);
+
+    return !empty($handler->getReferenceableEntities(NULL, 'CONTAINS', 1));
+  }
+
+  /**
    * Add item to personal collection page.
    */
   public function content(NodeInterface $node) {
     $build = [];
 
-    // Existing collection.
-    $build['existing'] = \Drupal::formBuilder()->getForm('Drupal\mukurtu_collection\Form\PersonalCollectionAddItemForm', $node);
+    // Existing collection. Only show the picker if there's actually a
+    // personal collection eligible to add to - it's a required field, so
+    // with no eligible collections it would just be a dead end.
+    $hasExistingCollections = $this->hasEligiblePersonalCollections($node);
+    if ($hasExistingCollections) {
+      $build['existing'] = \Drupal::formBuilder()->getForm('Drupal\mukurtu_collection\Form\PersonalCollectionAddItemForm', $node);
+    }
 
     // New Personal Collection.
     $newCollection = PersonalCollection::create([
@@ -44,6 +68,9 @@ class PersonalCollectionAddItemController extends ControllerBase {
     $build['new_collection'] = [
       '#type' => 'details',
       '#title' => $this->t('Create a new personal collection'),
+      // Open by default when there's no existing collection to pick from,
+      // since it's then the only actionable option in the dialog.
+      '#open' => !$hasExistingCollections,
     ];
     $build['new_collection']['form'] = $this->formBuilder()->getForm($form);
 
