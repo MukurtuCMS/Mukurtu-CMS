@@ -273,6 +273,10 @@ function mukurtu_collection_form_alter(&$form, FormStateInterface $form_state, $
     // which shrinks field description text so it doesn't visually dominate
     // these short forms.
     $form['#attributes']['class'][] = 'mukurtu-quick-create-form';
+
+    // Core's node form only confirms the personal collection itself was
+    // created - add a second message confirming the item was added to it.
+    $form['actions']['submit']['#submit'][] = 'mukurtu_collection_add_item_to_new_target_submit';
   }
 
   // Same trim for the embedded "create a new collection" entity form - keep
@@ -325,6 +329,10 @@ function mukurtu_collection_form_alter(&$form, FormStateInterface $form_state, $
       }
       return $element;
     };
+
+    // Core's node form only confirms the collection itself was created -
+    // add a second message confirming the item was added to it.
+    $form['actions']['submit']['#submit'][] = 'mukurtu_collection_add_item_to_new_target_submit';
   }
 
   // When the "Add to Collection" or "Add to Personal Collection" forms are
@@ -405,6 +413,27 @@ function mukurtu_collection_form_alter(&$form, FormStateInterface $form_state, $
         return $element;
       };
     }
+  }
+}
+
+/**
+ * Form submit handler added by mukurtu_collection_form_alter().
+ *
+ * Core's node/entity form only confirms that the embedded "create a new
+ * collection"/"create a new personal collection" form's own entity was
+ * created - the item being added to it is set on that entity in memory
+ * before the form is even built (see MukurtuAddItemToCollectionController),
+ * so it's already saved along with it, but nothing says so. Add a second
+ * message confirming that part too.
+ */
+function mukurtu_collection_add_item_to_new_target_submit(array &$form, FormStateInterface $form_state) {
+  $node = \Drupal::routeMatch()->getParameter('node');
+  $target = $form_state->getFormObject()->getEntity();
+  if ($node instanceof \Drupal\node\NodeInterface && $target) {
+    \Drupal::messenger()->addStatus(t('Added %item to %target.', [
+      '%item' => $node->getTitle(),
+      '%target' => $target->label(),
+    ]));
   }
 }
 
