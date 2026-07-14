@@ -78,7 +78,7 @@ final class CollectionPreprocessHooks {
     // callback (mukurtu_collection_add_to_x_dialog_ajax()) redirects to the
     // item's own page on success, which is correct when you're already on
     // that page but would navigate a user away from the browse listing they
-    // were on when they clicked the icon here - mukurtu_stay tells that
+    // were on when they clicked this quick action - mukurtu_stay tells that
     // callback to stay put (close the dialog, show the message, return
     // focus) instead.
     $current_user = \Drupal::currentUser();
@@ -95,14 +95,9 @@ final class CollectionPreprocessHooks {
     if ($valid_bundle && ($this->quickActionAccessHelper->hasAddableCollectionFor($node) || $create_collection_access->isAllowed())) {
       $actions['add_to_collection'] = [
         'title' => t('Add to Collection'),
-        // @node (not %node) - this fills an aria-label attribute, which
-        // must be plain text; %node would wrap the value in
-        // <em class="placeholder"> markup and corrupt the attribute.
-        'accessible_title' => t('Add @node to Collection', ['@node' => $node->getTitle()]),
         'url' => Url::fromRoute('mukurtu_collection.add_item_to_collection', ['node' => $node->id()], ['query' => ['mukurtu_modal' => '1', 'mukurtu_stay' => '1']]),
-        'group' => 'icon',
-        'icon' => 'collection-add',
-        'weight' => -10,
+        'group' => 'overflow',
+        'weight' => 5,
         'attributes' => [
           'class' => ['use-ajax'],
           'data-dialog-type' => 'modal',

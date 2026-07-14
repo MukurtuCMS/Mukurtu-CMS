@@ -1,5 +1,7 @@
 <?php
 
+use Drupal\Component\Serialization\Json;
+use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 
@@ -111,19 +113,27 @@ function mukurtu_export_mukurtu_browse_quick_actions_alter(array &$actions, \Dru
     return;
   }
 
-  $destination = \Drupal::request()->getRequestUri();
-
+  // mukurtu_modal/mukurtu_stay give this the same AJAX-modal treatment as
+  // the "Add to Collection" family of quick actions (see
+  // mukurtu_export_form_alter() and mukurtu_export_add_item_to_list_dialog_ajax()
+  // below) - the picker opens in a dialog and stays on the browse listing on
+  // success instead of navigating away.
   $actions['add_to_export_list'] = [
     'title' => t('Add to export list'),
     'url' => \Drupal\Core\Url::fromRoute('mukurtu_export.add_item_to_list', [
       'entity_type' => 'node',
       'entity_id' => $node->id(),
-    ], ['query' => ['destination' => $destination]]),
+    ], ['query' => ['mukurtu_modal' => '1', 'mukurtu_stay' => '1']]),
     'group' => 'overflow',
     'weight' => 20,
-    'attributes' => [],
+    'attributes' => [
+      'class' => ['use-ajax'],
+      'data-dialog-type' => 'modal',
+      'data-dialog-options' => Json::encode(['width' => 560]),
+      'data-quick-action-trigger' => 'export-list-' . $node->id(),
+    ],
     'cache' => [
-      'contexts' => ['user.permissions', 'url'],
+      'contexts' => ['user.permissions'],
     ],
   ];
 
@@ -149,6 +159,45 @@ function mukurtu_export_form_alter(&$form, FormStateInterface $form_state, $form
   if (str_starts_with($form_id, 'views_form_')) {
     $form['#submit'][] = 'mukurtu_export_bulk_form_submit';
   }
+
+  // When the "Add to export list" picker is opened inside a modal dialog
+  // (see the browse-card quick action in
+  // mukurtu_export_mukurtu_browse_quick_actions_alter() above), wire its
+  // submit button to an AJAX callback that closes the dialog on success
+  // instead of doing a full page navigation - the same treatment as the
+  // "Add to Collection" family of quick actions.
+  if ($form_id === 'mukurtu_export_add_item_to_list' && \Drupal::request()->query->get('mukurtu_modal')) {
+    // mukurtu_core_modal_form_ajax_response() looks for "node" or
+    // "mukurtu_return_node"; this form has neither, so stash the item being
+    // added (taken from the route, since that's what built this form) - only
+    // when it's a node, which is the only entity type the quick action ever
+    // passes.
+    if (\Drupal::routeMatch()->getParameter('entity_type') === 'node') {
+      $form['mukurtu_return_node'] = [
+        '#type' => 'hidden',
+        '#value' => \Drupal::routeMatch()->getParameter('entity_id'),
+      ];
+    }
+    $form['actions']['submit']['#ajax'] = [
+      'callback' => 'mukurtu_export_add_item_to_list_dialog_ajax',
+      'progress' => ['type' => 'throbber'],
+    ];
+    // The dialog's own close (X) button already covers this; a full-page
+    // "Cancel" link inside the modal would just navigate the whole page.
+    $form['actions']['cancel']['#access'] = FALSE;
+  }
+}
+
+/**
+ * AJAX callback for the "Add to export list" form when submitted from a
+ * modal dialog.
+ *
+ * Closes the dialog and returns to the item's page on a clean save; replaces
+ * the dialog content with the rebuilt form (including validation messages)
+ * when there are errors.
+ */
+function mukurtu_export_add_item_to_list_dialog_ajax(array &$form, FormStateInterface $form_state): AjaxResponse {
+  return mukurtu_core_modal_form_ajax_response($form, $form_state, fn ($nodeId) => '[data-quick-action-trigger="export-list-' . $nodeId . '"]');
 }
 
 /**
