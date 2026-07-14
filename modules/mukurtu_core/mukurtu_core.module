@@ -332,28 +332,6 @@ function mukurtu_core_modal_form_ajax_response(array &$form, FormStateInterface 
 }
 
 /**
- * #pre_render callback: keep a dialog form's actions inline, not hoisted.
- *
- * Core's dialog JS hoists any ".form-actions" button into the dialog's
- * shared buttonpane (see prepareDialogButtons() in
- * core/misc/dialog/dialog.ajax.js). When more than one form shares a dialog
- * (e.g. an "existing item" picker alongside an embedded "create new" form),
- * that makes whichever form's Save button gets hoisted look like "the"
- * dialog action and swallow clicks meant for the other form. Strip the class
- * so it stays inline instead.
- *
- * Must be a #pre_render callback, not applied directly in hook_form_alter() -
- * the class is added by Actions::processActions(), which runs later than
- * hook_form_alter(), so it isn't there yet to remove at that point.
- */
-function mukurtu_core_strip_form_actions_class(array $element): array {
-  if (!empty($element['#attributes']['class'])) {
-    $element['#attributes']['class'] = array_diff($element['#attributes']['class'], ['form-actions']);
-  }
-  return $element;
-}
-
-/**
  * Implements hook_form_FORM_ID_alter().
  *
  * Changes default form values at /admin/config/people/accounts:

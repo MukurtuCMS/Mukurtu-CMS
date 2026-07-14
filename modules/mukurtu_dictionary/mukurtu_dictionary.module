@@ -308,8 +308,15 @@ function mukurtu_dictionary_form_alter(&$form, FormStateInterface $form_state, $
     // other (picker) form. Strip the class so it stays inline. Must be a
     // #pre_render callback, not done directly here - the class is added by
     // Actions::processActions(), which runs later than hook_form_alter, so
-    // it isn't there yet to remove at this point.
-    $form['actions']['#pre_render'][] = 'mukurtu_core_strip_form_actions_class';
+    // it isn't there yet to remove at this point. Must be a closure, not a
+    // plain function name string - #pre_render requires either an anonymous
+    // function or a TrustedCallbackInterface method.
+    $form['actions']['#pre_render'][] = function (array $element): array {
+      if (!empty($element['#attributes']['class'])) {
+        $element['#attributes']['class'] = array_diff($element['#attributes']['class'], ['form-actions']);
+      }
+      return $element;
+    };
   }
 }
 
