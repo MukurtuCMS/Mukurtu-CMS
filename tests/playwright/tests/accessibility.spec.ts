@@ -65,6 +65,34 @@ const memberPages = [
 ];
 
 /**
+ * Item pages discovered while logged in. On protocol-heavy sites most
+ * content is only reachable as a member, so these cover the gated item
+ * views (protocol fields, content warnings) the anonymous pass can't see.
+ */
+const memberDiscoveredPages = [
+  {
+    slug: 'member-digital-heritage-item',
+    listPath: '/digital-heritage',
+    itemLink: 'main a[href*="/digital-heritage/"]',
+  },
+  {
+    slug: 'member-collection-page',
+    listPath: '/collections',
+    itemLink: 'main a[href*="/collection"]',
+  },
+  {
+    slug: 'member-community-page',
+    listPath: '/communities',
+    itemLink: '.communities__item a',
+  },
+  {
+    slug: 'member-dictionary-word',
+    listPath: '/dictionary',
+    itemLink: 'main a[href*="/dictionary-word"]',
+  },
+];
+
+/**
  * Find the first item link on a listing page and return its URL.
  */
 async function discoverItemUrl(page: Page, listPath: string, itemLink: string): Promise<string | null> {
@@ -107,6 +135,15 @@ test.describe('Accessibility: member pages', () => {
   for (const { slug, path } of memberPages) {
     test(`axe scan: ${slug}`, async ({ page }, testInfo) => {
       await page.goto(path);
+      await auditPage(page, testInfo, slug);
+    });
+  }
+
+  for (const { slug, listPath, itemLink } of memberDiscoveredPages) {
+    test(`axe scan: ${slug}`, async ({ page }, testInfo) => {
+      const url = await discoverItemUrl(page, listPath, itemLink);
+      test.skip(url === null, `No item link matching "${itemLink}" found on ${listPath} for this member.`);
+      await page.goto(url);
       await auditPage(page, testInfo, slug);
     });
   }

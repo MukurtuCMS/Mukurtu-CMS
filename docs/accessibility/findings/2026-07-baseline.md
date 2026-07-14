@@ -63,9 +63,43 @@ On `/my-content`, table-header sort links render in teal `#10857f` on white — 
 2. ~~**Fix:** landmark wrapping for the flagged `.region` in `mukurtu_v4`~~ — **done 2026-07-10**, see above.
 3. **Upstream:** verify the three toolbar rules against current Drupal core/Gin; file or link issues; record under authoring-tool in the ACR.
 4. **Coverage:** extend `default-content.spec.ts` with anonymous-visible digital heritage items (with media for carousel/lightbox coverage), an open collection, community landing content, and dictionary words on an open protocol — then re-run the item-page scans.
-5. **Coverage:** create a non-admin member test account and re-run member scans with `A11Y_USERNAME`/`A11Y_PASSWORD` for toolbar-free results.
+5. ~~**Coverage:** create a non-admin member test account and re-run member scans with `A11Y_USERNAME`/`A11Y_PASSWORD` for toolbar-free results~~ — **done 2026-07-13**, see addendum below.
 6. **Manual pass:** work through [../manual-checklist.md](../manual-checklist.md) starting with the priority-1 components (Leaflet maps, content warnings) from the [page inventory](../page-inventory.md).
 7. **Triage into ACR:** after items 1–5, assign first conformance levels in [../acr/mukurtu-acr.yaml](../acr/mukurtu-acr.yaml).
+
+## Addendum: non-admin member scan (2026-07-13)
+
+Re-ran the suite as a regular member account (community + protocol member, no admin
+roles) via `A11Y_USERNAME`/`A11Y_PASSWORD`, and extended the spec with member-side
+item-page discovery (`memberDiscoveredPages`) — on protocol-heavy sites, item pages
+are only reachable logged-in, so the anonymous pass can't cover them.
+
+**Results:**
+
+- **Zero WCAG violations on every member page.** All three violation rules from the
+  baseline member scan (invalid ARIA attribute, unnamed buttons/links) are confirmed
+  to be the admin toolbar only — regular members never see them. `/my-content` also
+  renders in the front-end theme for non-admins, so the (already fixed) Gin accent
+  issue never reached regular members there.
+- **New coverage:** digital heritage item, dictionary word, and community pages
+  (protocol-gated, member view). Collection page still skips — no collections exist
+  on the test site.
+- **New findings — all in the Leaflet map on the digital heritage item page**
+  (matches the #1-priority component in the [page inventory](../page-inventory.md)):
+  - **Map markers are unnamed focusable buttons** (axe: `aria-allowed-role` +
+    `presentation-role-conflict`, minor): Leaflet renders each marker as
+    `<img alt="" role="button" tabindex="0">` — keyboard-focusable, announced as an
+    unnamed button, while the empty `alt` simultaneously marks it presentational.
+    Fix in Mukurtu's Leaflet integration (`modules/mukurtu_core/js/mukurtu-leaflet-widget.js`
+    and the browse preview) by setting the marker `alt`/`title` to something
+    meaningful (e.g. the item or location name). WCAG 4.1.2-adjacent.
+  - **Leaflet control/attribution contrast** flagged for human review (axe
+    "incomplete") — check the zoom controls and attribution links with a contrast
+    tool during the manual pass.
+
+**Test account for future runs:** `a11y_member` (member of all communities/protocols
+on the local site). Re-create on any environment with a community/protocol member
+account and pass `A11Y_USERNAME`/`A11Y_PASSWORD`.
 
 ## Raw data
 

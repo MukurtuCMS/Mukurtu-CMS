@@ -30,6 +30,12 @@ Item pages are discovered from the browse listings at run time so the spec works
 | My content | `/my-content` | Member content dashboard |
 | Personal collections | `/user/personal-collections` | |
 | Account page | `/user` | |
+| Digital heritage item (member view) | discovered from `/digital-heritage` | Protocol-gated fields, map, media |
+| Collection page (member view) | discovered from `/collections` | |
+| Community page (member view) | discovered from `/communities` | |
+| Dictionary word (member view) | discovered from `/dictionary` | Tabs, audio |
+
+Member scans use the account in `A11Y_USERNAME`/`A11Y_PASSWORD` (default `admin`/`admin`). Use a regular community/protocol member account for representative results — admin accounts add Drupal-toolbar noise, and on protocol-heavy sites only members can reach the gated item pages.
 
 ## High-risk interactive components
 
