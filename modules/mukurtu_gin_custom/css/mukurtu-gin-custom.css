@@ -255,14 +255,27 @@ short fields themselves. Shrink it in these dialogs specifically. */
 }
 
 
-/* Canonical .ui-dialog positioning override (loaded on every page via
-   hook_page_attachments, covering both front-end and Gin admin contexts).
-   Gin sets .ui-dialog { position: absolute } which causes modal dialogs to
-   drift down the page as the user scrolls. Override to fixed + viewport-center
-   so the dialog always appears in the center of the viewport regardless of
-   scroll position. Uses flexbox so long forms scroll internally rather than
-   extending beyond the viewport. */
+/* Canonical .ui-dialog positioning/background override (loaded on every
+   page via hook_page_attachments, covering both front-end and Gin admin
+   contexts).
+   - Position: Gin sets .ui-dialog { position: absolute } which causes modal
+     dialogs to drift down the page as the user scrolls. Override to fixed +
+     viewport-center so the dialog always appears in the center of the
+     viewport regardless of scroll position. Uses flexbox so long forms
+     scroll internally rather than extending beyond the viewport.
+   - Background/text color: Gin's own rules for these key off its
+     --gin-bg-layer/--gin-color-text custom properties, which are only
+     defined when Gin's own base CSS loads - true for logged-in users with
+     the admin toolbar (it pulls Gin's CSS in as a side effect) but not for
+     other front-end users, who otherwise get a fully transparent, unreadable
+     dialog. Supply the same light-mode defaults Gin itself uses as
+     fallbacks, so the dialog looks the same regardless of which users
+     happen to trigger a Gin CSS load - real Gin dark-mode values (defined
+     when its CSS does load) still take precedence over these fallbacks. */
 .ui-dialog {
+    /* !important: core's own dialog CSS sets background: transparent at the
+       same specificity, later in the cascade, which would otherwise win. */
+    background: var(--gin-bg-layer, #fff) !important;
     position: fixed !important;
     top: 50vh !important;
     left: 50vw !important;
@@ -279,6 +292,10 @@ short fields themselves. Shrink it in these dialogs specifically. */
 }
 
 .ui-dialog .ui-dialog-content {
+    /* !important: core's own dialog CSS sets background: none at the same
+       specificity, later in the cascade, which would otherwise win. */
+    background: var(--gin-bg-layer, #fff) !important;
+    color: var(--gin-color-text, #222330) !important;
     flex: 1 1 auto !important;
     overflow-y: auto !important;
 }
