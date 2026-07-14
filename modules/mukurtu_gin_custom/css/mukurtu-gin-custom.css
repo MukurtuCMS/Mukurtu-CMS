@@ -21,7 +21,8 @@ short fields themselves. Shrink it in these dialogs specifically. */
 .mukurtu-quick-create-form .form-item__description,
 .mukurtu-quick-create-form .fieldset__description,
 .mukurtu-quick-create-form .claro-details__description {
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
+  line-height: 1.3;
 }
 
 /* MW: Fixes checkbox and community name overlapping in protocol select community modal, hopefully other similar issues. Not sure why !important is required */
