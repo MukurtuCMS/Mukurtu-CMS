@@ -26,7 +26,11 @@
 
         // Use a <button> rather than <a> so the implicit ARIA role (button) matches
         // the action -- clicking opens a dialog, not navigating to another page.
-        // Drupal AJAX reads the URL from data-ajax-url on non-anchor elements.
+        // Drupal's core AJAX binding (Drupal.ajax.bindAjaxLinks) only ever reads
+        // the URL from the element's href attribute, regardless of tag name, so
+        // href is set here even though it's not semantically meaningful on a
+        // <button> -- the browser ignores it for navigation, but jQuery's
+        // .attr('href') still reads it, which is all Drupal's AJAX binding needs.
         var blockLabel = block.getAttribute('data-lb-block-label');
         var ariaLabel = blockLabel
           ? Drupal.t('Edit @label', {'@label': blockLabel})
@@ -35,7 +39,7 @@
         var btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'lb-edit-btn use-ajax';
-        btn.setAttribute('data-ajax-url', url);
+        btn.setAttribute('href', url);
         btn.setAttribute('data-dialog-type', 'dialog');
         btn.setAttribute('data-dialog-renderer', 'off_canvas');
         btn.setAttribute('data-dialog-options', JSON.stringify({ width: 400 }));
