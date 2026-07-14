@@ -522,14 +522,23 @@ counterpart, if one exists. */
    render a [data-drupal-messages] placeholder in the DOM until a message is
    actually needed. Drupal core's Drupal.Message.defaultWrapper() (message.js)
    only falls back to creating one when it finds none anywhere in the document,
-   and it appends that fallback as a bare, unstyled div directly to <body> -
-   the very end of the page. In normal document flow that renders the message
-   stack at the bottom of the screen, growing there with each subsequent AJAX
-   response instead of appearing near the dialog the user is working in.
-   A real placeholder (e.g. the page's highlighted-region messages block) is
-   always nested inside wrapper markup, never a direct child of <body>, so
-   `body > [data-drupal-messages]` reliably targets only this fallback case. */
-body > [data-drupal-messages] {
+   and it appends that fallback as a bare div with NO class directly to <body>
+   (document.createElement('div') followed by only setAttribute('data-drupal-
+   messages', '') -- no class is ever added to this wrapper). In normal
+   document flow that renders the message stack at the bottom of the screen,
+   growing there with each subsequent AJAX response instead of appearing near
+   the dialog the user is working in.
+   Every real, theme-rendered placeholder always carries a class on this same
+   element -- e.g. Gin's own status-messages.html.twig outputs
+   `<div data-drupal-messages class="messages-list">` and gin_lb's
+   status-messages--gin-lb.html.twig outputs `class="glb-messages-list ..."` --
+   regardless of how deeply it's nested in the page. `:not([class])` reliably
+   targets only the class-less JS fallback without touching real messages
+   (an earlier version of this rule assumed the fallback could be identified
+   by being a direct child of <body>, which incorrectly also matched Gin's own
+   properly-themed status messages on the Layout Builder page and stripped
+   their styling -- this is not fooled by nesting depth). */
+[data-drupal-messages]:not([class]) {
   position: fixed !important;
   z-index: 99999 !important;
   inset-block-start: 1rem !important;
