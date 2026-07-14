@@ -291,9 +291,15 @@ function mukurtu_core_modal_form_ajax_response(array &$form, FormStateInterface 
     $response->addCommand(new CloseModalDialogCommand());
 
     if ($quickActionFocusSelector && \Drupal::request()->query->get('mukurtu_stay')) {
+      // MessageCommand clears any previously displayed messages by default -
+      // only the first command in this response should do that; the rest
+      // must pass clear_previous=FALSE or they'd wipe out each other,
+      // leaving only the last message visible.
+      $first = TRUE;
       foreach (\Drupal::messenger()->all() as $type => $messages) {
         foreach ($messages as $message) {
-          $response->addCommand(new MessageCommand($message, NULL, ['type' => $type]));
+          $response->addCommand(new MessageCommand($message, NULL, ['type' => $type], $first));
+          $first = FALSE;
         }
       }
       \Drupal::messenger()->deleteAll();
