@@ -1,7 +1,10 @@
 /* todo: when Claro is officially replaced by Gin (see https://www.drupal.org/about/core/blog/drupal-core-will-adopt-gin-admin-theme-to-replace-claro),
 remove the .claro-details__description class and replace it with its Gin
-counterpart, if one exists. */
-.form-item__description, .fieldset__description, .claro-details__description {
+counterpart, if one exists.
+.description covers the same text when the form renders through core's
+default (non-Claro) theming instead - the case for front-end users, whose
+dialogs don't get Claro/Gin's form theming at all. */
+.form-item__description, .fieldset__description, .claro-details__description, .description {
   /* For form description text, force the line length to fill the width of its
   container. */
 
@@ -20,7 +23,8 @@ color, it doesn't shrink the size) ends up more visually prominent than the
 short fields themselves. Shrink it in these dialogs specifically. */
 .mukurtu-quick-create-form .form-item__description,
 .mukurtu-quick-create-form .fieldset__description,
-.mukurtu-quick-create-form .claro-details__description {
+.mukurtu-quick-create-form .claro-details__description,
+.mukurtu-quick-create-form .description {
   font-size: 0.75rem;
   line-height: 1.3;
 }
