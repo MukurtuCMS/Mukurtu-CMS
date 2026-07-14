@@ -132,7 +132,11 @@
       liveRegion.setAttribute('aria-live', 'polite');
       liveRegion.setAttribute('aria-atomic', 'true');
       liveRegion.className = 'visually-hidden';
-      tagsElement.insertAdjacentElement('afterend', liveRegion);
+      // Insert after the original input, not after tagsElement - tagify.css
+      // hides the original input via a "tags + input.tagify-widget" adjacent-
+      // sibling selector, which stops matching (making the input visible
+      // again) if anything is inserted between them.
+      original.insertAdjacentElement('afterend', liveRegion);
 
       const announce = (message) => {
         // Clear first so repeated identical messages still trigger a re-read.
