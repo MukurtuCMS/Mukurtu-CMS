@@ -8,6 +8,7 @@
 {% set media_bundle = node.field_representative_media.0.entity.bundle.value.0['target_id'] %}
 {% set has_rep_media = node.field_representative_media.0.entity is not empty %}
 {% set has_recording = node.field_recording.0.entity is not empty %}
+{% set same_media = has_rep_media and has_recording and node.field_representative_media.0.entity.id.value == node.field_recording.0.entity.id.value %}
 
 <article{{ attributes.addClass(["vertical-card", "vertical-card--no-border", "vertical-card--large-font"]) }}>
   {% if has_rep_media or has_recording %}
@@ -21,7 +22,7 @@
       {% else %}
         {{ content.field_recording }}
       {% endif %}
-      {% if has_rep_media and has_recording %}
+      {% if has_rep_media and has_recording and not same_media %}
         {{ content.field_recording }}
       {% endif %}
     </div>
