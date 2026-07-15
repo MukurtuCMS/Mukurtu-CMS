@@ -301,6 +301,19 @@ counterpart, if one exists. */
     right: 0;
 }
 
+/* Fix gin_lb's "Add a new content block" off-canvas list (block category
+   links): gin_lb's own _layout-builder.scss hardcodes color: #eee with no
+   .gin--dark-mode guard, assuming a dark backdrop. In Gin's light mode this
+   renders as ~1.1:1 contrast on white, failing WCAG 1.4.3 (4.5:1 minimum).
+   Use Gin's own text-color variable instead, so the fix tracks whichever
+   mode is active rather than hardcoding one. Selector list and specificity
+   matched to gin_lb's own rule; !important needed since gin_lb's rule is
+   equal specificity and may load after ours in the aggregated CSS. */
+#drupal-off-canvas:not(.drupal-off-canvas-reset) .inline-block-create-button,
+#drupal-off-canvas-wrapper .inline-block-create-button {
+  color: var(--gin-color-text, #222330) !important;
+}
+
 /* Horizontal divider renders as a 1px <hr> with almost no hover area.
    Keep the contextual links trigger permanently visible so editors can
    reach Configure/Remove without pixel-perfect hovering. Drupal's contextual
