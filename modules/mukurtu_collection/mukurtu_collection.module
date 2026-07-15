@@ -36,9 +36,31 @@ function mukurtu_collection_theme($existing, $type, $theme, $path) {
         'results' => NULL,
       ],
     ],
+    'mukurtu_collection_items_browse' => [
+      'variables' => [
+        'list_results' => NULL,
+        'grid_results' => NULL,
+        'map_results' => NULL,
+      ],
+    ],
     'personal_collection' => [
       'render element' => 'elements',
       'file' => 'personal_collection.page.inc',
+    ],
+  ];
+}
+
+/**
+ * Implements hook_views_data_alter().
+ */
+function mukurtu_collection_views_data_alter(array &$data) {
+  $data['node_field_data']['mukurtu_collection_items'] = [
+    'title' => t('Items in Collection'),
+    'help' => t('Scope Content to the items referenced by a Collection.'),
+    'argument' => [
+      'id' => 'mukurtu_collection_items',
+      'field' => 'nid',
+      'real field' => 'nid',
     ],
   ];
 }

@@ -327,3 +327,36 @@ function mukurtu_collection_update_40015(): void {
   $config->set('content.field_media_assets.label', 'hidden');
   $config->save();
 }
+
+/**
+ * Add the grid/list/map switcher view for items in a collection.
+ *
+ * Installs the new mukurtu_collection_items view and switches
+ * field_items_in_collection on the collection full display to the new
+ * formatter that renders it.
+ */
+function mukurtu_collection_update_40016(): void {
+  $name = 'views.view.mukurtu_collection_items';
+  if (!\Drupal::service('config.storage')->exists($name)) {
+    $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_collection');
+    $source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+    $data = $source->read($name);
+    if ($data !== FALSE) {
+      \Drupal::configFactory()->getEditable($name)->setData($data)->save(TRUE);
+    }
+  }
+
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.collection.full');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_items_in_collection', [
+    'type' => 'mukurtu_collection_items_browse',
+    'label' => 'hidden',
+    'settings' => [],
+    'third_party_settings' => [],
+    'weight' => 4,
+    'region' => 'content',
+  ]);
+  $config->save();
+}
