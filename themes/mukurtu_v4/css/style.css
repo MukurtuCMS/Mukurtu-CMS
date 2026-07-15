@@ -5379,6 +5379,50 @@ header {
           border-block-start: none;
 }
 
+.collection-items-browse .browse-links {
+  -webkit-margin-after: var(--v-space-4xxs);
+          margin-block-end: var(--v-space-4xxs);
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  gap: var(--v-space-5xs);
+}
+.collection-items-browse .browse-links a,
+.collection-items-browse .browse-links button {
+  background-color: var(--color-white);
+  border: 1px solid var(--brand-primary-dark);
+  color: var(--brand-primary-dark);
+  font-weight: var(--text-bold);
+  line-height: normal;
+  text-decoration: none;
+  padding-block: var(--v-space-6xs);
+  padding-inline: var(--v-space-5xs);
+  letter-spacing: normal;
+}
+.collection-items-browse .browse-links a:hover,
+.collection-items-browse .browse-links button:hover {
+  background-color: var(--brand-primary-dark);
+  color: var(--color-white);
+}
+.collection-items-browse .browse-links a:focus,
+.collection-items-browse .browse-links button:focus {
+  outline-offset: 1px;
+}
+.collection-items-browse .browse-links .active-toggle {
+  background-color: var(--brand-primary-dark);
+  color: var(--color-white);
+}
+.collection-items-browse .browse-links .active-toggle:hover {
+  background-color: var(--brand-primary-accent);
+}
+.collection-items-browse .grid .views-row:first-of-type,
+.collection-items-browse .list .views-row:first-of-type {
+  -webkit-border-before: none;
+          border-block-start: none;
+  -webkit-margin-before: 0;
+          margin-block-start: 0;
+}
+
 .community-page-listing {
   padding-inline: var(--layout-padding);
 }
