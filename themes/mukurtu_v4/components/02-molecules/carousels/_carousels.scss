@@ -73,6 +73,24 @@
 
 // Media Asset Carousels.
 .media-carousel {
+  // Flex/grid descendants default to min-width: auto, which lets a slide's
+  // native image resolution force the carousel wider than its Layout
+  // Builder column. Let the whole chain shrink to fit instead.
+  min-inline-size: 0;
+
+  // Splide's default translucent arrow background (library CSS) relies on
+  // the page background behind it for contrast. These arrows sit on top of
+  // user-uploaded photos of unknown color/luminance, so an opaque background
+  // is needed to keep WCAG 1.4.11 non-text contrast regardless of image.
+  .splide__arrow {
+    background: rgb(0 0 0 / 60%);
+    opacity: 1;
+
+    svg {
+      fill: white;
+    }
+  }
+
   .media {
     margin-block: 0 var(--v-space-s);
     margin-inline: auto;
@@ -81,6 +99,12 @@
   // stylelint-disable-next-line no-descending-specificity
   .splide__list {
     align-items: flex-start;
+  }
+
+  .splide__track,
+  .splide__list,
+  .splide__slide {
+    min-inline-size: 0;
   }
 
   .splide__slide:not(.is-active) {

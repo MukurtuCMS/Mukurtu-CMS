@@ -59,7 +59,8 @@
 
 // Media block content must shrink to fit its Layout Builder region instead
 // of overflowing past it at native image/video resolution.
-.block--media-block {
+.block--media-block,
+.block--media-carousel-block {
   min-inline-size: 0;
 
   img,
@@ -68,6 +69,11 @@
     inline-size: 100%;
     block-size: auto;
   }
+}
+
+.block--media-carousel-block .media-carousels {
+  min-inline-size: 0;
+  inline-size: 100%;
 }
 
 .media-asset--audio-group {

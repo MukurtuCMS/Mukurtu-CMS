@@ -4,6 +4,13 @@
 
 .lb-editable {
   position: relative;
+  /* Without this, a block's box can be forced wider than its Layout Builder
+     column by its content's intrinsic size (default grid/flex min-width is
+     auto, not 0), leaving the corner-anchored edit button visually detached
+     from the block in narrow columns. Block-type-agnostic so any block gets
+     this guard, not just ones with their own shrink-to-fit CSS. */
+  min-inline-size: 0;
+  max-inline-size: 100%;
 }
 
 .lb-edit-btn {

@@ -16,10 +16,17 @@
     color: inherit;
     text-align: center;
     inline-size: 100%;
+    // Grid/flex items default to min-width: auto, which lets this trigger's
+    // intrinsic content size (image + padding) force the label grid track
+    // wider than its minmax() floor, squishing/overlapping neighboring
+    // labels at narrow column widths.
+    min-inline-size: 0;
 
     img {
-      block-size: 5rem;
-      flex-shrink: 0;
+      max-block-size: 5rem;
+      max-inline-size: 100%;
+      block-size: auto;
+      inline-size: auto;
     }
 
     &:hover {

@@ -83,18 +83,28 @@ function mukurtu_v4_preprocess_node(&$variables) {
  */
 function mukurtu_v4_preprocess_field(array &$variables): void {
   if ($variables['element']['#field_name'] !== 'field_page_media_assets' ||
-      $variables['element']['#entity_type'] !== 'node' ||
-      $variables['element']['#view_mode'] === '_custom') {
+      $variables['element']['#entity_type'] !== 'node') {
     return;
   }
   $node = $variables['element']['#object'];
   $variables['node_id'] = $node->id();
-  if ($node->get('field_page_media_assets')->count() > 1) {
-    $variables['thumbnail_display'] = $node->field_page_media_assets->view([
-      'type' => 'entity_reference_entity_view',
-      'label' => 'hidden',
-      'settings' => ['view_mode' => 'carousel_thumbnail', 'link' => FALSE],
-    ]);
+  $items = $node->get('field_page_media_assets');
+  if ($items->count() > 1) {
+    // Render each referenced media entity directly instead of calling
+    // $items->view() -- that re-invokes the entity_reference_entity_view
+    // formatter for this same field, which re-enters this field template
+    // (the items|length > 1 branch) and recurses indefinitely.
+    $view_builder = \Drupal::entityTypeManager()->getViewBuilder('media');
+    $thumbnails = [];
+    foreach ($items->referencedEntities() as $media) {
+      // Mirror the access check entity_reference_entity_view would have
+      // performed per item, since calling the view builder directly (to
+      // avoid re-entering the field formatter, see above) skips it.
+      if ($media->access('view')) {
+        $thumbnails[] = $view_builder->view($media, 'carousel_thumbnail');
+      }
+    }
+    $variables['thumbnail_display'] = $thumbnails;
   }
 }
 
