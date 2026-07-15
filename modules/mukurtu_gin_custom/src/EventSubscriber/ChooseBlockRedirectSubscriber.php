@@ -2,9 +2,10 @@
 
 namespace Drupal\mukurtu_gin_custom\EventSubscriber;
 
+use Drupal\Core\DependencyInjection\ClassResolverInterface;
 use Drupal\Core\Url;
+use Drupal\layout_builder\Controller\ChooseBlockController;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Event\ViewEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
@@ -22,10 +23,27 @@ use Symfony\Component\HttpKernel\KernelEvents;
  * Combined, a role restricted to inline blocks only ends up with a
  * completely empty "Choose a block" page: no other categories (removed by
  * our own restriction) and no inline blocks either (removed by core). The
- * user has to click through an empty page + filter box for nothing. Redirect
- * straight to the "Add a block" link's target when that happens.
+ * user has to click through an empty page + filter box for nothing.
+ *
+ * Render the "Add a block" page's own content directly instead of
+ * redirecting to it. An earlier version of this fix used a plain
+ * RedirectResponse, but issuing an HTTP redirect mid-AJAX-request (the
+ * off-canvas dialog only ever reaches this route via AJAX) leaves Drupal's
+ * per-request asset-library tracking inconsistent between the redirected-
+ * from and redirected-to requests. That caused the off-canvas response to
+ * load core/misc/dialog/dialog.js twice, crashing on "Identifier
+ * 'DrupalDialogEvent' has already been declared" and, as a side effect,
+ * breaking the ajaxSubmit binding needed to save the block. Administrators
+ * (who see multiple categories and never hit this redirect) never
+ * encountered the crash, which is what pointed at this subscriber.
+ * Rendering the same content in-place, in the single original request,
+ * avoids the second request/response cycle entirely.
  */
 class ChooseBlockRedirectSubscriber implements EventSubscriberInterface {
+
+  public function __construct(
+    protected ClassResolverInterface $classResolver,
+  ) {}
 
   /**
    * {@inheritdoc}
@@ -38,7 +56,7 @@ class ChooseBlockRedirectSubscriber implements EventSubscriberInterface {
   }
 
   /**
-   * Redirects to the inline block list when there's nothing else to show.
+   * Shows the inline block list directly when there's nothing else to show.
    */
   public function onView(ViewEvent $event): void {
     $request = $event->getRequest();
@@ -64,9 +82,14 @@ class ChooseBlockRedirectSubscriber implements EventSubscriberInterface {
       return;
     }
 
-    $url = $build['add_block']['#url'];
-    $url->setOption('query', $request->query->all());
-    $event->setResponse(new RedirectResponse($url->toString()));
+    /** @var \Drupal\layout_builder\Controller\ChooseBlockController $controller */
+    $controller = $this->classResolver->getInstanceFromDefinition(ChooseBlockController::class);
+    $inline_build = $controller->inlineBlockList(
+      $request->attributes->get('section_storage'),
+      $request->attributes->get('delta'),
+      $request->attributes->get('region'),
+    );
+    $event->setControllerResult($inline_build);
   }
 
 }

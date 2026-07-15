@@ -11,6 +11,8 @@ services:
 
   mukurtu_gin_custom.choose_block_redirect_subscriber:
     class: Drupal\mukurtu_gin_custom\EventSubscriber\ChooseBlockRedirectSubscriber
+    arguments:
+      - '@class_resolver'
     tags:
       - { name: event_subscriber }
 
