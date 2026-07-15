@@ -344,6 +344,20 @@ short fields themselves. Shrink it in these dialogs specifically. */
     padding: var(--gin-spacing-s, .75rem) var(--gin-spacing-l, 1.5rem) !important;
 }
 
+.tagify__dropdown {
+    /* Background fallback: tagify's own gin.css skin (web/modules/contrib/
+       tagify/css/gin.css) defines --tagify-dd-bg-color from Gin's
+       --gin-bg-layer2, but never actually applies it to this selector -
+       .tagify__dropdown has no background rule at all in that stylesheet.
+       On an admin (Gin) page it happens to sit over Gin's own themed canvas,
+       but on the front end there's nothing behind it, so the floating
+       dropdown panel is fully transparent and whatever's underneath (e.g.
+       the dialog's own submit button) shows through. Matches Gin's own
+       --gin-bg-layer2 light-mode value, same pattern as the other fallbacks
+       in this file. */
+    background: var(--gin-bg-layer2, #edeff5) !important;
+}
+
 /* Fix the titlebar close icon drifting off-center. Gin's own dialog CSS
    (dist/css/theme/dialog.css) sizes .ui-icon-closethick to fill the button
    (top/left: 0, width/height: 100%, transform: none) via a mask-image, but a
