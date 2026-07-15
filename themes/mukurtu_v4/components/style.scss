@@ -20,6 +20,7 @@ documentation on how to use @include media(). */
 @use '01-atoms/images/images';
 @use '01-atoms/images/logo';
 @use '01-atoms/link/link';
+@use '01-atoms/privacy-badge/privacy-badge';
 @use '01-atoms/select/select';
 @use '01-atoms/textfield/textfield';
 @use '02-molecules/callout/callout';
@@ -48,6 +49,7 @@ documentation on how to use @include media(). */
 @use '04-templates/browse-pages/collections';
 @use '04-templates/categories/categories';
 @use '04-templates/collection/collection';
+@use '04-templates/collection/collection-items-browse';
 @use '04-templates/communities/communities';
 @use '04-templates/community/community';
 @use '04-templates/dictionary/dictionary';

@@ -23,6 +23,15 @@ content:
     third_party_settings: {  }
     weight: 1
     region: content
+  field_media_assets:
+    type: entity_reference_entity_view
+    label: hidden
+    settings:
+      view_mode: collections_3_2_
+      link: false
+    third_party_settings: {  }
+    weight: 3
+    region: content
   field_summary:
     label: above
     type: string
@@ -41,7 +50,6 @@ content:
     region: content
 hidden:
   field_items_in_collection: true
-  field_media_assets: true
   field_pc_privacy: true
   langcode: true
   search_api_excerpt: true
