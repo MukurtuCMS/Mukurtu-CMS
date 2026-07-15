@@ -301,17 +301,27 @@ counterpart, if one exists. */
     right: 0;
 }
 
-/* Fix gin_lb's "Add a new content block" off-canvas list (block category
-   links): gin_lb's own _layout-builder.scss hardcodes color: #eee with no
-   .gin--dark-mode guard, assuming a dark backdrop. In Gin's light mode this
-   renders as ~1.1:1 contrast on white, failing WCAG 1.4.3 (4.5:1 minimum).
-   Use Gin's own text-color variable instead, so the fix tracks whichever
-   mode is active rather than hardcoding one. Selector list and specificity
-   matched to gin_lb's own rule; !important needed since gin_lb's rule is
-   equal specificity and may load after ours in the aggregated CSS. */
-#drupal-off-canvas:not(.drupal-off-canvas-reset) .inline-block-create-button,
-#drupal-off-canvas-wrapper .inline-block-create-button {
-  color: var(--gin-color-text, #222330) !important;
+/* Fix low-contrast text throughout the Layout Builder off-canvas dialog
+   (e.g. the "Add a new content block" category list - core's
+   .inline-block-list__item/.inline-block-create-button links). Gin's own
+   off-canvas CSS defines --off-canvas-text-color: #e5e5e5 and
+   --off-canvas-link-color: #85bef4 on #drupal-off-canvas-wrapper, sized for
+   its own dark (#444) off-canvas background. But this file's own
+   .ui-dialog .ui-dialog-content rule (above) repaints the off-canvas
+   dialog's inner content area white, without updating these variables to
+   match - so anything relying on them (nearly every link/list item in the
+   dialog) renders near-invisible light text on white, failing WCAG 1.4.3.
+   Override both variables to Gin's light/dark-mode-aware colors so they
+   track the actual (white, in light mode) background instead of Gin's
+   original dark-only design. !important needed: Gin's off-canvas CSS sets
+   these same custom properties on the same selector, but is only fetched
+   once the dialog opens - after this file's page-load rule - so without it
+   a same-specificity, later-loaded tie would go to Gin's value. Verified
+   against a live PR #1770 Tugboat preview with Playwright: computed link
+   color changes from rgb(229, 229, 229) to rgb(34, 35, 48). */
+#drupal-off-canvas-wrapper {
+  --off-canvas-text-color: var(--gin-color-text, #222330) !important;
+  --off-canvas-link-color: var(--gin-color-primary, #0036b1) !important;
 }
 
 /* Horizontal divider renders as a 1px <hr> with almost no hover area.
