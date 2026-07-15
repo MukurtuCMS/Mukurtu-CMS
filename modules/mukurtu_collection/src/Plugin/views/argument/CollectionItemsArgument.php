@@ -37,7 +37,7 @@ class CollectionItemsArgument extends ArgumentPluginBase {
         ['field' => 'deleted', 'value' => 0],
       ],
     ];
-    $join = Views::pluginManager('join')->createInstance('standard', $configuration);
+    $join = \Drupal::service('plugin.manager.views.join')->createInstance('standard', $configuration);
     $alias = $query->addTable('node__field_items_in_collection', $this->relationship, $join);
 
     $query->addWhere(0, "$alias.entity_id", $this->argument, '=');
