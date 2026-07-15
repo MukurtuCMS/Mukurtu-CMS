@@ -1289,7 +1289,7 @@ display:
           gesture_handling: false
           fitbounds_options: '{"padding":[0,0]}'
           reset_map:
-            control: false
+            control: true
             options: '{"position":"topleft","title":"Reset View"}'
           map_scale:
             control: false
@@ -1350,9 +1350,9 @@ display:
         options:
           view_modes:
             'entity:node':
-              ':default': map_browse
-              dictionary_word: ':default'
-              word_list: ':default'
+              ':default': default
+              dictionary_word: map_browse
+              word_list: map_browse
       defaults:
         css_class: false
         style: false

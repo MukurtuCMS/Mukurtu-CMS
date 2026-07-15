@@ -43,6 +43,14 @@ content:
     third_party_settings: {  }
     weight: 0
     region: content
+  field_summary:
+    type: string
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 3
+    region: content
 hidden:
   comment: true
   field_all_related_content: true
@@ -81,7 +89,6 @@ hidden:
   field_sequence_collection: true
   field_source: true
   field_subject: true
-  field_summary: true
   field_title: true
   field_traditional_knowledge: true
   field_transcription: true

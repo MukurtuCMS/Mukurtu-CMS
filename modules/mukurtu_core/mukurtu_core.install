@@ -2065,3 +2065,33 @@ function mukurtu_core_update_40074(): void {
   }
   $config->set('content.field_representative_media.settings.view_mode', 'browse')->save();
 }
+
+/**
+ * Show communities/category fields in Grid mode for digital_heritage and
+ * person, fix collection's Grid mode to show field_collection_image instead
+ * of the unused field_representative_media, add the collection.map_browse
+ * display, and show field_in_collection in Grid mode for digital_heritage,
+ * person, dictionary_word, and word_list, so Grid/Map mode template
+ * completeness work (#1624) has the field visibility it needs.
+ */
+function mukurtu_core_update_40075(): void {
+  $config_source = new \Drupal\Core\Config\FileStorage(
+    \Drupal::service('extension.list.profile')->getPath('mukurtu') . '/config/install'
+  );
+  $config_factory = \Drupal::configFactory();
+
+  foreach ([
+    'node.digital_heritage.grid_browse',
+    'node.person.grid_browse',
+    'node.collection.grid_browse',
+    'node.collection.map_browse',
+    'node.dictionary_word.grid_browse',
+    'node.word_list.grid_browse',
+  ] as $name) {
+    $config_name = 'core.entity_view_display.' . $name;
+    $data = $config_source->read($config_name);
+    if ($data) {
+      $config_factory->getEditable($config_name)->setData($data)->save(TRUE);
+    }
+  }
+}
