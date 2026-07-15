@@ -9,7 +9,13 @@
         {{ content.field_media_items }}
       </section>
       <section class="splide thumbnail-carousel" aria-label="{{ 'Thumbnail Carousel'|t }}">
-        {{ thumbnail_display }}
+        <div class="splide__track">
+          <ul class="splide__list">
+            {% for thumbnail in thumbnail_display %}
+              <li class="splide__slide">{{ thumbnail }}</li>
+            {% endfor %}
+          </ul>
+        </div>
       </section>
     </div>
   {% else %}

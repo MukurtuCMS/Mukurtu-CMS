@@ -123,13 +123,19 @@ function mukurtu_v4_preprocess_block__inline_block__media_carousel_block(array &
   /** @var \Drupal\block_content\BlockContentInterface|null $block_content */
   $block_content = $variables['content']['#block_content'] ?? NULL;
   if ($block_content && $block_content->hasField('field_media_items') && !$block_content->field_media_items->isEmpty() && $block_content->field_media_items->count() > 1) {
-    $variables['thumbnail_display'] = $block_content->field_media_items->view([
-      'type' => 'entity_reference_entity_view',
-      'label' => 'hidden',
-      'settings' => [
-        'view_mode' => 'carousel_thumbnail',
-      ],
-    ]);
+    // Render each referenced media entity directly (see
+    // mukurtu_v4_preprocess_field() above for the same pattern) so the
+    // template can wrap each one in a proper splide__slide -- Splide
+    // requires a .splide__track > .splide__list > .splide__slide structure
+    // and won't mount without it.
+    $view_builder = \Drupal::entityTypeManager()->getViewBuilder('media');
+    $thumbnails = [];
+    foreach ($block_content->field_media_items->referencedEntities() as $media) {
+      if ($media->access('view')) {
+        $thumbnails[] = $view_builder->view($media, 'carousel_thumbnail');
+      }
+    }
+    $variables['thumbnail_display'] = $thumbnails;
   }
 }
 
