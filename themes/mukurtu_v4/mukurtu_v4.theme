@@ -6,6 +6,16 @@ use Drupal\Core\Cache\Cache;
 use Drupal\file\Entity\File;
 use Drupal\mukurtu_collection\Entity\Collection;
 use Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager;
+use Drupal\mukurtu_v4\MukurtuV4PreRender;
+
+/**
+ * Implements hook_element_info_alter().
+ */
+function mukurtu_v4_element_info_alter(array &$info) {
+  if (isset($info['status_messages'])) {
+    $info['status_messages']['#pre_render'][] = [MukurtuV4PreRender::class, 'messagePlaceholder'];
+  }
+}
 
 /**
  * Implements hook_preprocess_breadcrumb().
