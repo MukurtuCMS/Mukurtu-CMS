@@ -399,10 +399,10 @@ function mukurtu_collection_form_alter(&$form, FormStateInterface $form_state, $
       // for the other (picker) form. Strip the class so it stays inline.
       // Must be a #pre_render callback, not done directly here - the class
       // is added by Actions::processActions(), which runs later than
-      // hook_form_alter, so it isn't there yet to remove at this point.
-      // Must be a closure, not a plain function name string - #pre_render
-      // requires either an anonymous function or a
-      // TrustedCallbackInterface method.
+      // hook_form_alter, so it isn't there yet to remove at this point. Must
+      // be a closure, not a plain function name string - #pre_render
+      // requires either an anonymous function or a TrustedCallbackInterface
+      // method.
       $form['actions']['#pre_render'][] = function (array $element): array {
         if (!empty($element['#attributes']['class'])) {
           $element['#attributes']['class'] = array_diff($element['#attributes']['class'], ['form-actions']);
@@ -428,10 +428,9 @@ function mukurtu_collection_form_alter(&$form, FormStateInterface $form_state, $
       ];
       // See the matching comment in the personal_collection_form branch
       // above - keeps this form's Save button inline instead of being
-      // hoisted into the dialog's shared buttonpane.
-      // Must be a closure, not a plain function name string - #pre_render
-      // requires either an anonymous function or a
-      // TrustedCallbackInterface method.
+      // hoisted into the dialog's shared buttonpane. Must be a closure, not
+      // a plain function name string - #pre_render requires either an
+      // anonymous function or a TrustedCallbackInterface method.
       $form['actions']['#pre_render'][] = function (array $element): array {
         if (!empty($element['#attributes']['class'])) {
           $element['#attributes']['class'] = array_diff($element['#attributes']['class'], ['form-actions']);
