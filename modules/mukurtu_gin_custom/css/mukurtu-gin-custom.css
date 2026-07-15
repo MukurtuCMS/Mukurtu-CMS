@@ -302,6 +302,19 @@ short fields themselves. Shrink it in these dialogs specifically. */
 
 .ui-dialog .ui-dialog-titlebar {
     flex-shrink: 0;
+    /* Padding fallback: same reasoning as .ui-dialog-content below. Matches
+       Gin's own --gin-spacing-m/--gin-spacing-l values. */
+    padding: var(--gin-spacing-m, 1rem) var(--gin-spacing-l, 1.5rem) !important;
+}
+
+.ui-widget-overlay {
+    /* Background fallback: Gin's own dialog.css sets this same property on
+       this same selector, so ours only applies when Gin's variables.css
+       doesn't load - same reasoning as the other fallbacks in this file.
+       Without it the modal backdrop is fully transparent (opacity .9 of
+       nothing), so the page behind the dialog never dims. Matches Gin's own
+       --gin-bg-layer2 light-mode value. */
+    background: var(--gin-bg-layer2, #edeff5) !important;
 }
 
 .ui-dialog .ui-dialog-content {
