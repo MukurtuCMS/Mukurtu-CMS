@@ -369,7 +369,14 @@ class CollectionEntityTest extends ProtocolAwareEntityTestBase {
     // collection to add it to.
     $this->collection->add($thing);
     $this->collection->save();
-    $access = $controller->access($this->currentUser, $thing);
+
+    // $this->currentUser can still reach the page at this point because they
+    // can create a brand new collection to add the item to instead. Use a
+    // second, unprivileged user with no protocol membership (and therefore no
+    // "create collection content" access) to test the case where there's
+    // neither an eligible existing collection nor the ability to create one.
+    $otherUser = $this->createUser();
+    $access = $controller->access($otherUser, $thing);
     $this->assertFalse($access->isAllowed());
   }
 
