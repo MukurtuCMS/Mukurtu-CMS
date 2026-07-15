@@ -13,6 +13,9 @@ jobs:
   wait-for-tugboat:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      issues: read
     outputs:
       preview_url: ${{ steps.wait-for-preview.outputs.preview_url }}
     steps:
@@ -40,8 +43,7 @@ jobs:
           echo "Tugboat preview did not become ready in time."
           exit 1
         env:
-          # Secret configured on the Mukurtu-CMS repository.
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   playwright-tests:
     needs: wait-for-tugboat

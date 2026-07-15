@@ -31,7 +31,8 @@
       }
     }
 
-    .media--remote_video iframe {
+    .media--remote_video iframe,
+    .media--soundcloud iframe {
       block-size: auto;
       aspect-ratio: 16 / 9;
     }

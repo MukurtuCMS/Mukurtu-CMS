@@ -67,34 +67,4 @@
  *
  */
 #}
-{% if content.field_hero_full_width == 'Yes' %}
-  {% set hero_width = "full-width" %}
-{% endif %}
-
-{% set attributes = attributes
-  .addClass('landing-hero')
-  .addClass(hero_width)
-%}
-
-<article {{ attributes }} aria-labelledby="landing-hero-title">
-  {% if node.field_hero_image %}
-    <div class="landing-hero__image">
-      {{ node.field_hero_image.value }}
-    </div>
-  {% endif %}
-  {% if node.field_hero_title or node.field_hero_text %}
-    <div class="landing-hero__content-section">
-      {% if node.field_hero_title %}
-        <div class="landing-hero__title" id="landing-hero-title">
-          {{ node.field_hero_title.value }}
-        </div>
-      {% endif %}
-      {% if node.field_hero_text %}
-        <div class="landing-hero__text">
-          {{ node.field_hero_text.value|raw }}
-        </div>
-      {% endif %}
-    </div>
-  {% endif %}
-</article>
 {{ content }}

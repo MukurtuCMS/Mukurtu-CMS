@@ -2042,7 +2042,7 @@ function mukurtu_core_update_40072(): void {
  * still on the default preset are moved to a slightly darker custom teal
  * (#0e7873, 5.3:1); sites with their own accent choice are left alone.
  */
-function mukurtu_core_update_40073(): void {
+function mukurtu_core_update_40075(): void {
   $settings = \Drupal::configFactory()->getEditable('gin.settings');
   if ($settings->get('preset_accent_color') === 'teal' && empty($settings->get('accent_color'))) {
     $settings
@@ -2050,4 +2050,34 @@ function mukurtu_core_update_40073(): void {
       ->set('accent_color', '#0e7873')
       ->save();
   }
+ * Show a manually-provided thumbnail image for video, remote_video, and
+ * soundcloud media in the "browse" view mode used by List/Grid/Map cards,
+ * falling back to the native player/embed when no thumbnail is set.
+ */
+function mukurtu_core_update_40073(): void {
+  $config_source = new \Drupal\Core\Config\FileStorage(
+    \Drupal::service('extension.list.profile')->getPath('mukurtu') . '/config/install'
+  );
+  $config_factory = \Drupal::configFactory();
+
+  foreach (['media.video.browse', 'media.remote_video.browse', 'media.soundcloud.browse'] as $name) {
+    $config_name = 'core.entity_view_display.' . $name;
+    $data = $config_source->read($config_name);
+    if ($data) {
+      $config_factory->getEditable($config_name)->setData($data)->save(TRUE);
+    }
+  }
+}
+
+/**
+ * Use the same "browse" media view mode for digital_heritage's Grid Browse
+ * representative media as every other content type, instead of the
+ * unrelated digital_heritage_sidebar mode.
+ */
+function mukurtu_core_update_40074(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.digital_heritage.grid_browse');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_representative_media.settings.view_mode', 'browse')->save();
 }
