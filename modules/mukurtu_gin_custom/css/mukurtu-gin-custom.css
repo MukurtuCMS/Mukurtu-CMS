@@ -311,21 +311,24 @@ short fields themselves. Shrink it in these dialogs specifically. */
     color: var(--gin-color-text, #222330) !important;
     flex: 1 1 auto !important;
     overflow-y: auto !important;
-    /* Padding fallback: Gin's own padding rule only applies via its more
-       specific .ui-widget-content.ui-dialog-content selector, which is only
-       loaded along with the rest of Gin's CSS - same admin-toolbar-permission
-       gating as the background/text-color issue above. Without it, users who
-       don't trigger a Gin CSS load fall back to core's much smaller
-       `.5em 1em` padding, making the dialog content look flush/edge-to-edge.
+    /* Padding fallback: Gin's own padding rule lives on a more specific
+       .ui-widget-content.ui-dialog-content selector, so it wins the cascade
+       whenever Gin's dialog.css component loads - but that can happen
+       *without* Gin's base variables.css also loading (observed on at least
+       one environment), in which case Gin's own rule resolves --gin-spacing-l
+       to nothing and collapses to 0 padding, and our lower-specificity
+       fallback never gets a chance to run. !important forces this fallback
+       to win regardless of which partial combination of Gin's CSS happens to
+       load, the same reasoning as the background/color !important above.
        This fallback matches Gin's own --gin-spacing-l value. */
-    padding-inline: var(--gin-spacing-l, 1.5rem);
+    padding-inline: var(--gin-spacing-l, 1.5rem) !important;
 }
 
 .ui-dialog .ui-dialog-buttonpane {
     flex-shrink: 0;
     /* Padding fallback: same reasoning as .ui-dialog-content above. Matches
        Gin's own --gin-spacing-s/--gin-spacing-l values. */
-    padding: var(--gin-spacing-s, .75rem) var(--gin-spacing-l, 1.5rem);
+    padding: var(--gin-spacing-s, .75rem) var(--gin-spacing-l, 1.5rem) !important;
 }
 
 /* Fix the titlebar close icon drifting off-center. Gin's own dialog CSS
