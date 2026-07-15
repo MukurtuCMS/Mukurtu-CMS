@@ -11,7 +11,6 @@ dependencies:
   - 'drupal:taxonomy'
   - 'mukurtu_collection:mukurtu_collection'
   - 'mukurtu_core:mukurtu_core'
-  - 'mukurtu_dictionary:mukurtu_dictionary'
   - 'mukurtu_multipage_items:mukurtu_multipage_items'
   - 'mukurtu_protocol:mukurtu_protocol'
   - 'paragraphs:paragraphs'
