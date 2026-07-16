@@ -3,12 +3,12 @@
 @use "../../../external/include-media";
 
 .block-featured-content {
-  padding-inline: var(--layout-padding);
+  // This block only ever appears as a Layout Builder inline block, sitting
+  // inside a region rather than against the page edge, so it doesn't need
+  // the page-gutter padding-inline scale (up to 72px/side at >=lg) other
+  // full-width components use - that was eating into narrow columns and
+  // could even block the grid below from ever reaching 2+ columns.
   padding-block-end: var(--v-space-s);
-
-  @include include-media.media('>=lg') {
-    padding-inline: var(--layout-padding-m);
-  }
 }
 
 .field--name-field-featured-content,
