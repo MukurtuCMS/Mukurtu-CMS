@@ -4,7 +4,6 @@
  */
 
   ((Drupal, once) => {
-    let main, thumbnails;
 
     /**
      * Set block-size on the track to match the target slide's scrollHeight.
@@ -64,18 +63,18 @@
      * Initialize the carousels.
      */
     function init(el) {
-      const id = el.dataset.id;
-      const mediaSelector =`[data-id="${id}"] .splide.media-carousel`;
-      const thumbSelector =`[data-id="${id}"] .splide.thumbnail-carousel`;
+      const mediaEl = el.querySelector('.splide.media-carousel');
+      const thumbEl = el.querySelector('.splide.thumbnail-carousel');
+      if (!mediaEl || !thumbEl) return;
 
-      main = new Splide(mediaSelector, {
+      const main = new Splide(mediaEl, {
         type: 'fade',
         rewind: true,
         pagination: false,
         arrows: false,
       } );
 
-      thumbnails = new Splide(thumbSelector, {
+      const thumbnails = new Splide(thumbEl, {
         autoWidth: true,
         fixedHeight: '106px',
         gap: '10px',
