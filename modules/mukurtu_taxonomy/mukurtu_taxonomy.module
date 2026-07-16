@@ -117,24 +117,30 @@ function mukurtu_taxonomy_form_alter(&$form, \Drupal\Core\Form\FormStateInterfac
  * mirrors the Layout Builder guard added for issue #1807).
  */
 function mukurtu_taxonomy_form_taxonomy_vocabulary_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
-  $form['#after_build'][] = 'mukurtu_taxonomy_lock_flat_taxonomy_checkbox';
+  $form['#process'][] = 'mukurtu_taxonomy_lock_flat_taxonomy_checkbox';
 }
 
 /**
- * Form #after_build callback: locks the flat_taxonomy checkbox on.
+ * Form #process callback: locks the flat_taxonomy checkbox on.
  *
- * Attached via #after_build (rather than altering $form['flat'] directly
- * in the alter above) so this always runs after flat_taxonomy's own
- * hook_form_taxonomy_vocabulary_form_alter() has added the checkbox,
- * regardless of module hook-invocation order.
+ * Attached via #process on the root form element (not #after_build, and
+ * not directly in the alter above) so it runs before FormBuilder's
+ * handleInputElement() converts #disabled into the real HTML `disabled`
+ * attribute for the 'flat' child element - #after_build runs after that
+ * conversion has already happened for every child, so setting #disabled
+ * there never reaches the rendered HTML. Attaching to the root form
+ * (rather than checking for $form['flat'] directly in the alter) also
+ * works regardless of whether flat_taxonomy's own
+ * hook_form_taxonomy_vocabulary_form_alter() runs before or after this
+ * one, since all modules' form alters complete before any #process runs.
  */
-function mukurtu_taxonomy_lock_flat_taxonomy_checkbox($form, \Drupal\Core\Form\FormStateInterface $form_state) {
-  if (isset($form['flat'])) {
-    $form['flat']['#default_value'] = TRUE;
-    $form['flat']['#disabled'] = TRUE;
-    $form['flat']['#description'] = t('Mukurtu does not currently support nested/hierarchical taxonomies.');
+function mukurtu_taxonomy_lock_flat_taxonomy_checkbox($element, \Drupal\Core\Form\FormStateInterface $form_state, &$complete_form) {
+  if (isset($element['flat'])) {
+    $element['flat']['#default_value'] = TRUE;
+    $element['flat']['#disabled'] = TRUE;
+    $element['flat']['#description'] = t('Mukurtu does not currently support nested/hierarchical taxonomies.');
   }
-  return $form;
+  return $element;
 }
 
 /**
