@@ -78,9 +78,10 @@ Axe checks start report-only so a red wall of pre-existing violations doesn't bl
 | Milestone | Status |
 |---|---|
 | Program charter, inventory, checklists | In place (July 2026) |
-| Automated axe scan infrastructure | In place (July 2026) |
-| Baseline automated audit | See [findings/](findings/) |
-| OpenACR scaffold | In place, all criteria `not-evaluated` until triage |
-| Manual audit of high-risk components | Not started |
+| Automated axe scan infrastructure | In place (July 2026); member-view + gated item pages covered |
+| Baseline automated audit | Done — all 15 inventory pages scan clean after first remediations; see [findings/](findings/) |
+| First remediations | Done (July 2026): Gin accent contrast, page-title landmark, Leaflet marker names |
+| OpenACR report | First triage pass done (v2): 7 web criteria `supports`, authoring-tool 4.1.2 `partially-supports`; rest `not-evaluated` pending manual evidence |
+| Manual audit of high-risk components | Not started — template ready ([findings/manual-findings-template.md](findings/manual-findings-template.md)); axe "incomplete" contrast queue folded in |
 | CI integration (report-only) | Not started |
 | Admin/authoring (ATAG) scope | Not started |

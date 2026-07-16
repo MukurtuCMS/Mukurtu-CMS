@@ -82,8 +82,13 @@ are only reachable logged-in, so the anonymous pass can't cover them.
   renders in the front-end theme for non-admins, so the (already fixed) Gin accent
   issue never reached regular members there.
 - **New coverage:** digital heritage item, dictionary word, and community pages
-  (protocol-gated, member view). Collection page still skips — no collections exist
-  on the test site.
+  (protocol-gated, member view). Collection page initially skipped (no reachable
+  collections); as of 2026-07-16 it is discovered and scans clean — every page in
+  the inventory (15) now scans at **0 WCAG violations and 0 best-practice
+  violations**. The only remaining axe output is the "incomplete" human-review
+  queue: Leaflet zoom/attribution contrast (digital heritage item), heading
+  contrast over images (home/member home), and one contrast check on the
+  collection page — all folded into the manual pass.
 - **New findings — all in the Leaflet map on the digital heritage item page**
   (matches the #1-priority component in the [page inventory](../page-inventory.md)):
   - **Map markers are unnamed focusable buttons** (axe: `aria-allowed-role` +
