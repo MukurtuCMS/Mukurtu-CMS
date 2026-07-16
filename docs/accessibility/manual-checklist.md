@@ -2,7 +2,7 @@
 
 Automated scans catch only a third or so of WCAG issues. This checklist covers the rest: what a human verifies with a keyboard and a screen reader. Work through it per page for the general checks, and per component for the high-risk widgets in the [page inventory](page-inventory.md).
 
-Record results in a dated file under [findings/](findings/), noting the page/component, what failed, and the WCAG Success Criterion.
+Record results in a dated file under [findings/](findings/) — copy [findings/manual-findings-template.md](findings/manual-findings-template.md) to `findings/YYYY-MM-manual.md` and fill it in as you go.
 
 **Screen readers to test with:** NVDA + Firefox (Windows), VoiceOver + Safari (macOS), or Orca + Firefox (Linux). One is enough per audit pass; rotate across passes.
 
