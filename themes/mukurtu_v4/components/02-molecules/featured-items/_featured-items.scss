@@ -70,7 +70,8 @@
     // Images are left beneath the overlay so clicking them navigates to the content.
     video,
     audio,
-    .media--remote_video {
+    .media--remote_video,
+    .media--soundcloud {
       position: relative;
       z-index: 1;
     }
@@ -80,7 +81,8 @@
       block-size: 100%;
     }
 
-    .media--remote_video {
+    .media--remote_video,
+    .media--soundcloud {
       inline-size: 100%;
       block-size: 100%;
 
@@ -89,6 +91,17 @@
         inline-size: 100%;
         block-size: 100%;
       }
+    }
+
+    // The SoundCloud template wraps its embed in an extra
+    // .media__soundcloud-player div (unlike remote_video, whose field is a
+    // direct child of .media--remote_video), so block-size: 100% on the
+    // iframe above has no explicit-height ancestor to resolve against
+    // without this - percentage heights need a non-auto height somewhere
+    // in the chain.
+    .media--soundcloud .media__soundcloud-player {
+      inline-size: 100%;
+      block-size: 100%;
     }
 
     .media--audio {
