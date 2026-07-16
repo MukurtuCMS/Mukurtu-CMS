@@ -304,6 +304,21 @@ Those files are injected by Drupal so they shouldn't be bundled to style.css. */
   padding-block: var(--v-separation);
 }
 
+.layout__region {
+  min-inline-size: 0;
+}
+
+.layout--twocol-section,
+.layout--threecol-section,
+.layout--fourcol-section {
+  margin-inline: calc(var(--gutter) / -2);
+}
+.layout--twocol-section > .layout__region,
+.layout--threecol-section > .layout__region,
+.layout--fourcol-section > .layout__region {
+  padding-inline: calc(var(--gutter) / 2);
+}
+
 div.palette-demo {
   position: relative;
   display: -webkit-box;
@@ -1032,10 +1047,12 @@ a:not(.primary-nav__menu-link) svg.tel path {
   inline-size: 100%;
   -webkit-margin-after: var(--v-space-s);
           margin-block-end: var(--v-space-s);
+  min-inline-size: 0;
 }
 .media-asset--slide > .media {
   -webkit-margin-after: 0;
           margin-block-end: 0;
+  min-inline-size: 0;
   isolation: isolate;
 }
 .media-asset--slide .button--download svg {
@@ -1169,9 +1186,11 @@ a:not(.primary-nav__menu-link) svg.tel path {
 .field--name-field-featured-content .featured-item__media video,
 .field--name-field-featured-content .featured-item__media audio,
 .field--name-field-featured-content .featured-item__media .media--remote_video,
+.field--name-field-featured-content .featured-item__media .media--soundcloud,
 .field--name-field-all-related-content .field__items .featured-item__media video,
 .field--name-field-all-related-content .field__items .featured-item__media audio,
-.field--name-field-all-related-content .field__items .featured-item__media .media--remote_video {
+.field--name-field-all-related-content .field__items .featured-item__media .media--remote_video,
+.field--name-field-all-related-content .field__items .featured-item__media .media--soundcloud {
   position: relative;
   z-index: 1;
 }
@@ -1181,13 +1200,24 @@ a:not(.primary-nav__menu-link) svg.tel path {
   block-size: 100%;
 }
 .field--name-field-featured-content .featured-item__media .media--remote_video,
-.field--name-field-all-related-content .field__items .featured-item__media .media--remote_video {
+.field--name-field-featured-content .featured-item__media .media--soundcloud,
+.field--name-field-all-related-content .field__items .featured-item__media .media--remote_video,
+.field--name-field-all-related-content .field__items .featured-item__media .media--soundcloud {
   inline-size: 100%;
   block-size: 100%;
 }
 .field--name-field-featured-content .featured-item__media .media--remote_video .field, .field--name-field-featured-content .featured-item__media .media--remote_video iframe,
+.field--name-field-featured-content .featured-item__media .media--soundcloud .field,
+.field--name-field-featured-content .featured-item__media .media--soundcloud iframe,
 .field--name-field-all-related-content .field__items .featured-item__media .media--remote_video .field,
-.field--name-field-all-related-content .field__items .featured-item__media .media--remote_video iframe {
+.field--name-field-all-related-content .field__items .featured-item__media .media--remote_video iframe,
+.field--name-field-all-related-content .field__items .featured-item__media .media--soundcloud .field,
+.field--name-field-all-related-content .field__items .featured-item__media .media--soundcloud iframe {
+  inline-size: 100%;
+  block-size: 100%;
+}
+.field--name-field-featured-content .featured-item__media .media--soundcloud .media__soundcloud-player,
+.field--name-field-all-related-content .field__items .featured-item__media .media--soundcloud .media__soundcloud-player {
   inline-size: 100%;
   block-size: 100%;
 }
@@ -1909,6 +1939,7 @@ label.form-required::after {
 
 .local-contexts-dialog {
   display: inline-block;
+  min-inline-size: 0;
 }
 .local-contexts-dialog__trigger {
   display: -webkit-inline-box;
@@ -2081,17 +2112,13 @@ label.form-required::after {
   text-align: center;
 }
 
-.local-contexts-project .local-contexts-projects-container {
+.local-contexts-project .local-contexts-projects-container,
+.local-contexts-label-group .local-contexts-label-group-items {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(5rem, 1fr));
   gap: var(--v-space-5xs);
 }
 
-.local-contexts-label-group {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(5rem, 1fr));
-  gap: var(--v-space-5xs);
-}
 .local-contexts-label-group + .local-contexts-label-group {
   -webkit-margin-before: var(--v-space-4xxs);
           margin-block-start: var(--v-space-4xxs);
@@ -2100,12 +2127,9 @@ label.form-required::after {
   -webkit-border-before: 1px solid var(--brand-light);
           border-block-start: 1px solid var(--brand-light);
 }
-.local-contexts-label-group .project-title {
-  grid-column: 1/-1;
-}
 
 .local-contexts-project,
-.field--name-field-local-contexts-labels-and-notices .field__item {
+.local-contexts-label-group {
   background-color: var(--brand-light-accent);
   padding-inline: var(--v-space-4xxs);
   padding-block: var(--v-space-5xs) var(--v-space-4xxs);
@@ -2114,7 +2138,7 @@ label.form-required::after {
 }
 
 .field--name-field-local-contexts-projects .field__label,
-.field--name-field-local-contexts-labels-and-notices .field__label {
+.field--name-field-lc-labels-and-notices .field__label {
   -webkit-border-after: 4px solid var(--brand-secondary);
           border-block-end: 4px solid var(--brand-secondary);
   margin-block: 0 1rem;

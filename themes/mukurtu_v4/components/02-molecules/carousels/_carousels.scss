@@ -221,9 +221,20 @@
   flex-direction: column;
   inline-size: 100%;
   margin-block-end: var(--v-space-s);
+  // This is the non-carousel fallback (a media block with only one item, no
+  // thumbnail nav) - the .media-carousel/.thumbnail-carousel min-inline-size
+  // guards elsewhere in this file don't apply to this markup, so a single
+  // large image here can still force its Layout Builder region wider than
+  // its flex-basis share the same way the carousel used to. Flex items
+  // default to min-width: auto, so this needs its own guard.
+  min-inline-size: 0;
 
   > .media {
     margin-block-end: 0;
+    // Same min-width: auto default applies one level down: .media is itself
+    // a flex item within this column, and its content (the image) shouldn't
+    // set a floor wider than the region either.
+    min-inline-size: 0;
     // Create a stacking context so the content-warning overlay's z-index: 10
     // is evaluated within .media only and cannot paint above sibling elements
     // (e.g. .media-asset--actions buttons) in the parent stacking context.
