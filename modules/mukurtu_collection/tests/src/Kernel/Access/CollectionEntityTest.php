@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\mukurtu_collection\Kernel\Access;
 
+use Drupal\mukurtu_collection\Controller\MukurtuAddItemToCollectionController;
 use Drupal\mukurtu_collection\Entity\Collection;
 use Drupal\mukurtu_protocol\Entity\Community;
 use Drupal\mukurtu_protocol\Entity\Protocol;
@@ -331,6 +332,52 @@ class CollectionEntityTest extends ProtocolAwareEntityTestBase {
 
     $this->collection->addChildCollection($middleParentCollection);
     $this->assertEquals(9, $this->collection->getCount());
+  }
+
+  /**
+   * Test access to the "Add to Collection" local task.
+   *
+   * Regression test for the "Add to Collection" tab never appearing because
+   * MukurtuAddItemToCollectionController::isValidCollectionItemBundle() used
+   * to look up a field_config entity for field_items_in_collection, which
+   * does not exist since it is a base field defined in code.
+   */
+  public function testAddItemToCollectionAccess() {
+    // field_items_in_collection only accepts a specific set of bundles
+    // (see Collection::bundleFieldDefinitions()); use one of them here.
+    NodeType::create([
+      'type' => 'digital_heritage',
+      'name' => 'Digital Heritage',
+    ])->save();
+
+    $thing = Node::create([
+      'title' => $this->randomString(),
+      'type' => 'digital_heritage',
+      'status' => TRUE,
+      'uid' => $this->currentUser->id(),
+    ]);
+    $thing->save();
+
+    $controller = new MukurtuAddItemToCollectionController();
+
+    // The pre-existing collection doesn't contain the node yet, so there is
+    // an eligible collection to add it to.
+    $access = $controller->access($this->currentUser, $thing);
+    $this->assertTrue($access->isAllowed());
+
+    // Add the node to the only collection. There is no longer an eligible
+    // collection to add it to.
+    $this->collection->add($thing);
+    $this->collection->save();
+
+    // $this->currentUser can still reach the page at this point because they
+    // can create a brand new collection to add the item to instead. Use a
+    // second, unprivileged user with no protocol membership (and therefore no
+    // "create collection content" access) to test the case where there's
+    // neither an eligible existing collection nor the ability to create one.
+    $otherUser = $this->createUser();
+    $access = $controller->access($otherUser, $thing);
+    $this->assertFalse($access->isAllowed());
   }
 
 }

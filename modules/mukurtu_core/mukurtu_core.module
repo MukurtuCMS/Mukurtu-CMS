@@ -14,6 +14,11 @@ use Drupal\node\Entity\NodeType;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\CloseModalDialogCommand;
+use Drupal\Core\Ajax\HtmlCommand;
+use Drupal\Core\Ajax\InvokeCommand;
+use Drupal\Core\Ajax\RedirectCommand;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\user\UserInterface;
@@ -246,6 +251,60 @@ function mukurtu_core_page_attachments(array &$attachments) {
   $attachments['#attached']['library'][] = 'mukurtu_core/mukurtu-leaflet-widget';
   $attachments['#attached']['library'][] = 'mukurtu_core/tagify-override';
   $attachments['#attached']['library'][] = 'mukurtu_core/form-disable-enter-submit';
+
+  // Needed so "use-ajax" modal links (e.g. the "Add to Collection" family of
+  // local tasks) work without depending on some other module happening to
+  // load it first.
+  $attachments['#attached']['library'][] = 'core/drupal.dialog.ajax';
+}
+
+/**
+ * Build an AJAX response for a form submitted inside a modal dialog.
+ *
+ * Shared by the "Add to Collection" / "Add to Personal Collection" / "Add to
+ * Word List" dialog forms (and their embedded "create a new X" forms), which
+ * all follow the same close-on-success / re-render-with-errors pattern.
+ *
+ * On success, closes the dialog and redirects to the item's page. On
+ * validation failure, rebuilds the form (with status messages) into the
+ * dialog and moves focus there - HtmlCommand replaces the whole dialog
+ * content, which detaches whatever was previously focused (e.g. the Save
+ * button), so core ajax.js's default focus-restore has nothing usable to
+ * refocus.
+ *
+ * Expects the form to have a "node" or "mukurtu_return_node" hidden value
+ * identifying the item to redirect back to on success.
+ */
+function mukurtu_core_modal_form_ajax_response(array &$form, FormStateInterface $form_state): AjaxResponse {
+  $response = new AjaxResponse();
+  if ($form_state->isExecuted()) {
+    $nodeId = $form_state->getValue('node') ?? $form_state->getValue('mukurtu_return_node');
+    $node = $nodeId ? \Drupal::entityTypeManager()->getStorage('node')->load($nodeId) : NULL;
+    $response->addCommand(new CloseModalDialogCommand());
+    if ($node) {
+      $response->addCommand(new RedirectCommand($node->toUrl()->toString()));
+    }
+    return $response;
+  }
+
+  // Drupal form validation errors are in $form_state->getErrors(), not the
+  // messenger queue. Copy them over so status_messages renders them visibly.
+  foreach ($form_state->getErrors() as $error) {
+    \Drupal::messenger()->addError($error);
+  }
+  /** @var \Drupal\Core\Render\RendererInterface $renderer */
+  $renderer = \Drupal::service('renderer');
+  $status_messages = ['#type' => 'status_messages'];
+  $form['#prefix'] = ($form['#prefix'] ?? '') . $renderer->renderRoot($status_messages);
+  $output = $renderer->renderRoot($form);
+  $response->setAttachments($form['#attached']);
+  // Use HtmlCommand (not ReplaceCommand) - ".ui-dialog-content" is the
+  // #drupal-modal wrapper itself, not a child of it. Replacing the wrapper
+  // would break focus restoration and CloseModalDialogCommand's selector.
+  $response->addCommand(new HtmlCommand('.ui-dialog-content', $output));
+  $response->addCommand(new InvokeCommand('.ui-dialog-content [data-drupal-messages]', 'attr', ['tabindex', '-1']));
+  $response->addCommand(new InvokeCommand('.ui-dialog-content [data-drupal-messages]', 'trigger', ['focus']));
+  return $response;
 }
 
 /**

@@ -2,7 +2,14 @@ mukurtu_collection.add_item_to_collection:
   route_name: mukurtu_collection.add_item_to_collection
   base_route: entity.node.canonical
   title: 'Add to Collection'
-  weight: 50
+  weight: 22
+  options:
+    attributes:
+      class: ['use-ajax']
+      data-dialog-type: modal
+      data-dialog-options: '{"width":560}'
+    query:
+      mukurtu_modal: 1
 
 mukurtu_collection.new_subcollection:
   title: 'New Sub-collection'
@@ -42,6 +49,13 @@ mukurtu_collection.add_item_to_personal_collection:
   base_route: entity.node.canonical
   title: 'Add to Personal Collection'
   weight: 25
+  options:
+    attributes:
+      class: ['use-ajax']
+      data-dialog-type: modal
+      data-dialog-options: '{"width":900}'
+    query:
+      mukurtu_modal: 1
 
 mukurtu_collection.collection_organization:
   route_name: mukurtu_collection.collection_organization
