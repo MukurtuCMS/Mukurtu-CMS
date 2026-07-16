@@ -105,6 +105,34 @@ Walk the page with the screen reader's reading commands (not just Tab). Verify:
 
 ---
 
+## Platform capability checks (author-provided alternatives)
+
+Criteria like captions (1.2.2) and media alternatives (1.2.1, 1.2.3, 1.2.5)
+depend on content that site owners add later. For a platform ACR the test is
+**capability**: can an author, using only stock Mukurtu, produce content that
+passes? (VPAT "Supports" = "at least one method that meets the criterion.")
+Test as an author — seed one local video, one remote video, and one audio item,
+then attempt each path:
+
+- [ ] **Transcript path (1.2.1, 1.2.3):** fill `field_transcription` on a
+      digital heritage item with audio/video → verify the transcript actually
+      renders on the item page near the media (searchable-but-hidden does not
+      satisfy the criterion)
+- [ ] **Captions, local video (1.2.2):** attempt to attach a caption/subtitle
+      file to an uploaded video → does any mechanism exist? Does the player
+      output a `<track>` element? (Known Drupal core gap — issue #3002770)
+- [ ] **Captions, remote video (1.2.2):** embed a captioned YouTube/Vimeo
+      video → verify the provider's caption control survives the embed
+- [ ] **Audio description (1.2.5):** is there any path (descriptive audio
+      version as an alternate file, or 1.2.3-style alternative)?
+- [ ] **Audio control (1.4.2):** confirm no media autoplays anywhere
+- [ ] **Authoring guidance (ATAG B, authoring-tool component):** are the
+      alternative fields visible, labeled, and explained in the authoring
+      forms — would an author know to use them?
+
+Record outcomes in the findings file and write the ACR notes in capability
+language: "Authors can satisfy X by …" / "No mechanism exists for X — issue #N."
+
 ## Quick reference: WCAG 2.1 AA criteria most often failed manually
 
 | SC | What to check |

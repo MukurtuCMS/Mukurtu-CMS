@@ -128,6 +128,21 @@ at the page where the component actually renders (see the
 | 12 | Masonry grid | browse Grid view | ⬜ | |
 | 13 | Multipage navigation | a multipage item | ⬜ | |
 
+### Platform capability checks (1.2.x media alternatives)
+
+*See "Platform capability checks" in [../manual-checklist.md](../manual-checklist.md) —
+these evaluate whether an author CAN meet the criterion with stock Mukurtu,
+not whether current content does.*
+
+| Capability | Where to test | Result | Finding |
+|---|---|---|---|
+| Transcript renders near media (1.2.1, 1.2.3) | DH item with audio/video + `field_transcription` | ⬜ | |
+| Captions on local video (1.2.2) | video media authoring + player output | ⬜ | |
+| Captions on remote video (1.2.2) | captioned YouTube/Vimeo embed | ⬜ | |
+| Audio description path (1.2.5) | DH item with video | ⬜ | |
+| No autoplay (1.4.2) | any page with media | ⬜ | |
+| Authoring guidance for alternatives (ATAG B) | media + DH authoring forms | ⬜ | |
+
 ## Contrast checks (from axe "incomplete" queue)
 
 *Axe queues elements it can't judge (text over images, overlays) for human
