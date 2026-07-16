@@ -18,9 +18,12 @@ export class Login {
     const usernameField = this.page.getByLabel('Username');
     const passwordField = this.page.getByLabel('Password');
     const loginButton = this.page.getByRole('button', { name: 'Log in' });
-    await usernameField.fill(username);
+    // Longer timeouts than the global 5s actionTimeout: the first request
+    // against a cold environment (freshly built Tugboat preview) can take
+    // much longer to render the form and to process the login submission.
+    await usernameField.fill(username, { timeout: 30000 });
     await passwordField.fill(password);
-    await loginButton.click();
+    await loginButton.click({ timeout: 30000 });
   }
 
   public async logout(): Promise<void> {
