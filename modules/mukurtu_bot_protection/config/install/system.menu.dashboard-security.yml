@@ -1,0 +1,7 @@
+langcode: en
+status: true
+dependencies: {  }
+id: dashboard-security
+label: Security
+description: 'Bot, spam, and crawler protection settings.'
+locked: false

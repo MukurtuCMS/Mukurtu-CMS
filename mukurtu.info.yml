@@ -57,9 +57,11 @@ install:
   - rebuild_cache_access
   - notify_user_default
   - readonly_field_widget
+  - mukurtu_bot_protection
 
 dependencies:
   - 'blazy:blazy'
+  - 'captcha:captcha'
   - 'ctools:ctools'
   - 'devel:devel'
   - 'drupal:automated_cron'
@@ -104,16 +106,19 @@ dependencies:
   - 'entity_browser:entity_browser'
   - 'entity_embed:entity_embed'
   - 'entity_reference_revisions:entity_reference_revisions'
+  - 'facet_bot_blocker:facet_bot_blocker'
   - 'facets:facets'
   - 'field_group:field_group'
   - 'flag:flag'
   - 'geofield:geofield'
+  - 'key:key'
   - 'leaflet:leaflet'
   - 'leaflet:leaflet_views'
   - 'message:message'
   - 'message_subscribe:message_subscribe_ui'
   - 'message_ui:message_notify_ui'
   - 'message_ui:message_ui'
+  - 'mukurtu_bot_protection:mukurtu_bot_protection'
   - 'mukurtu_browse:mukurtu_browse'
   - 'mukurtu_collection:mukurtu_collection'
   - 'mukurtu_community_records:mukurtu_community_records'
@@ -146,6 +151,7 @@ dependencies:
   - 'og_ui:og_ui'
   - 'paragraphs:paragraphs'
   - 'pathauto:pathauto'
+  - 'recaptcha:recaptcha'
   - 'redirect:redirect'
   - 'restui:restui'
   - 'search_api:search_api'
@@ -153,6 +159,8 @@ dependencies:
   - 'search_api_glossary:search_api_glossary'
   - 'term_merge:term_merge'
   - 'token:token'
+  - 'turnstile:turnstile'
+  - 'turnstile_protect:turnstile_protect'
   - 'views_bulk_operations:views_bulk_operations'
 
 

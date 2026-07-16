@@ -2065,3 +2065,61 @@ function mukurtu_core_update_40074(): void {
   }
   $config->set('content.field_representative_media.settings.view_mode', 'browse')->save();
 }
+
+/**
+ * Install the Mukurtu Bot Protection module and its dependencies (CAPTCHA,
+ * reCAPTCHA, Cloudflare Turnstile, and faceted search crawler blocking).
+ */
+function mukurtu_core_update_40075(): void {
+  if (!\Drupal::moduleHandler()->moduleExists('mukurtu_bot_protection')) {
+    \Drupal::service('module_installer')->install(['mukurtu_bot_protection']);
+  }
+
+  // Protect the feedback contact form and comment form with a CAPTCHA point,
+  // matching what mukurtu_install() sets up on a fresh install.
+  foreach (['contact_message_feedback_form', 'comment_comment_form'] as $form_id) {
+    if (!\Drupal\captcha\Entity\CaptchaPoint::load($form_id)) {
+      \Drupal\captcha\Entity\CaptchaPoint::create([
+        'formId' => $form_id,
+        'captchaType' => 'default',
+        'label' => $form_id,
+        'status' => TRUE,
+      ])->save();
+    }
+  }
+}
+
+/**
+ * Add the Security section to the Mukurtu admin dashboard.
+ */
+function mukurtu_core_update_40076(): void {
+  $config = \Drupal::configFactory()->getEditable('dashboards.dashboard.mukurtu_dashboard');
+  if ($config->isNew()) {
+    return;
+  }
+
+  $uuid = '3f8b6c1a-2e4d-4a9f-9c7b-5d1e8a2f6b3c';
+  $sections = $config->get('sections') ?? [];
+  if (isset($sections[0]['components'][$uuid])) {
+    return;
+  }
+
+  $sections[0]['components'][$uuid] = [
+    'uuid' => $uuid,
+    'region' => 'three',
+    'configuration' => [
+      'id' => 'system_menu_block:dashboard-security',
+      'label' => 'Security',
+      'label_display' => 'visible',
+      'provider' => 'system',
+      'context_mapping' => [],
+      'level' => 1,
+      'depth' => NULL,
+      'expand_all_items' => FALSE,
+    ],
+    'weight' => 9,
+    'additional' => [],
+  ];
+
+  $config->set('sections', $sections)->save();
+}
