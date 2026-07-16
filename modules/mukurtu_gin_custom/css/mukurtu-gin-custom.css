@@ -341,6 +341,19 @@ short fields themselves. Shrink it in these dialogs specifically. */
     overflow: visible;
 }
 
+/* Flex items default to min-width: auto, so a block's content (e.g. a wide
+   carousel or media asset) can force its Layout Builder region wider than
+   its flex-basis percentage while editing - the same class of bug already
+   fixed for the front end (see lb-frontend-edit.css's .lb-editable rule).
+   layout-builder-block is added by core only in the edit canvas
+   (LayoutBuilder::buildAdministrativeSection()) and wraps every block
+   uniformly, so this one rule covers all block types generically instead
+   of duplicating each front-end component fix here. */
+.layout-builder-block {
+    min-width: 0;
+    max-width: 100%;
+}
+
 .layout-builder .contextual {
     z-index: 600;
     right: auto;
