@@ -20,8 +20,11 @@
     wrapper.setAttribute('aria-label', messageTypes[type]);
     wrapper.setAttribute('data-drupal-message-id', id);
 
+    // WCAG 4.1.3: role="contentinfo" above is a landmark, not a live region,
+    // so screen readers won't announce this without its own role here.
+    const liveRegionRole = type === 'status' ? 'status' : 'alert';
     wrapper.innerHTML = `
-      <div class="messages__container" data-drupal-selector="messages-container"${type === 'error' ? ' role="alert"' : ''}>
+      <div class="messages__container" data-drupal-selector="messages-container" role="${liveRegionRole}">
         <div class="messages__header">
           <h2 class="visually-hidden">${messageTypes[type]}</h2>
         </div>

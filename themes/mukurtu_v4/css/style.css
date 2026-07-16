@@ -4041,7 +4041,7 @@ body.is-fixed {
   -webkit-box-align: center;
       -ms-flex-align: center;
           align-items: center;
-  color: var(--brand-primary);
+  color: var(--brand-primary-dark);
   text-decoration: none;
   white-space: nowrap;
 }

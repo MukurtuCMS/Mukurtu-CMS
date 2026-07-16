@@ -106,7 +106,9 @@
       min-block-size: 2.75rem;
       display: flex;
       align-items: center;
-      color: var(--brand-primary);
+      // --brand-primary is only ~4.0:1 against white - enough for the icon
+      // fill above (WCAG 1.4.11, 3:1) but not for text (1.4.3, 4.5:1).
+      color: var(--brand-primary-dark);
       text-decoration: none;
       white-space: nowrap;
 
