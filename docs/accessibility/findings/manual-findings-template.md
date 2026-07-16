@@ -73,17 +73,60 @@ apply (see ../manual-checklist.md → Maps).*
 
 ## Checklist results
 
-*Quick pass/fail record against the checklist sections that ran, so coverage
-is auditable later. ✅ pass · ❌ fail (link the finding) · ➖ not applicable ·
-⬜ not tested.*
+*Record an outcome for EVERY row — passes included, not just failures. A
+missing or empty cell is ambiguous (passed? never tested?), and the ACR can
+only move a criterion to `supports` on the strength of a recorded passing
+test; detailed narrative entries above are for failures only. This mirrors
+WCAG-EM / Trusted Tester practice: every test gets an explicit outcome.
+✅ pass · ❌ fail (append the finding ID, e.g. ❌ M1) · ➖ not applicable ·
+⬜ planned but not run. The rows below are the standing inventory — add rows
+when new pages/components ship, don't remove any.*
 
-| Checklist section | Page/component | Result | Finding |
+### Per-page passes
+
+*Columns are the three page-level passes in [../manual-checklist.md](../manual-checklist.md).*
+
+| Page | Keyboard | Screen reader | Zoom/reflow |
 |---|---|---|---|
-| *Per-page keyboard pass* | *home* | *✅* | |
-| *Per-page keyboard pass* | */browse (Map view)* | *❌* | *M1* |
-| *Per-page screen reader pass* | *home* | *⬜* | |
-| *Maps* | *browse map* | *❌* | *M1* |
-| *Content warning overlay* | *digital heritage item* | *⬜* | |
+| Home `/` (anonymous) | ⬜ | ⬜ | ⬜ |
+| Browse `/browse` (incl. Map view) | ⬜ | ⬜ | ⬜ |
+| Digital Heritage browse `/digital-heritage` | ⬜ | ⬜ | ⬜ |
+| Collections browse `/collections` | ⬜ | ⬜ | ⬜ |
+| Communities `/communities` | ⬜ | ⬜ | ⬜ |
+| Dictionary browse `/dictionary` | ⬜ | ⬜ | ⬜ |
+| Login `/user/login` (incl. error state) | ⬜ | ⬜ | ⬜ |
+| Home `/` (member) | ⬜ | ⬜ | ⬜ |
+| My content `/my-content` (member) | ⬜ | ⬜ | ⬜ |
+| Personal collections `/user/personal-collections` (member) | ⬜ | ⬜ | ⬜ |
+| Account `/user` (member) | ⬜ | ⬜ | ⬜ |
+| Digital heritage item (member) | ⬜ | ⬜ | ⬜ |
+| Collection page (member) | ⬜ | ⬜ | ⬜ |
+| Community page (member) | ⬜ | ⬜ | ⬜ |
+| Dictionary word (member) | ⬜ | ⬜ | ⬜ |
+
+### Component checks
+
+*One row per component section in [../manual-checklist.md](../manual-checklist.md),
+at the page where the component actually renders (see the
+[page inventory](../page-inventory.md) priority list).*
+
+| # | Component | Where to test | Result | Finding |
+|---|---|---|---|---|
+| 1 | Leaflet map — browse | `/browse` Map view | ⬜ | |
+| 1 | Leaflet map — item location | digital heritage item | ⬜ | |
+| 2 | Content warning overlay | digital heritage item with warnings | ⬜ | |
+| 2 | Consent popup | first visit (clear cookies) | ⬜ | |
+| 3 | Carousel (Splide) | digital heritage item with multiple media | ⬜ | |
+| 4 | Lightbox (GLightbox) | digital heritage item media | ⬜ | |
+| 5 | Audio player | dictionary word sample sentences | ⬜ | |
+| 6 | Tabs | dictionary word | ⬜ | |
+| 7 | Cultural protocol widget | any node add/edit form (member) | ⬜ | |
+| 8 | Dialogs (aria-modal, Local Contexts) | where dialogs trigger | ⬜ | |
+| 9 | Autocomplete (Tagify / membership) | member-facing forms | ⬜ | |
+| 10 | Toggles — view switchers | `/browse`, `/dictionary` | ⬜ | |
+| 11 | Toggles — facets show-more / search collapse | `/digital-heritage` | ⬜ | |
+| 12 | Masonry grid | browse Grid view | ⬜ | |
+| 13 | Multipage navigation | a multipage item | ⬜ | |
 
 ## Contrast checks (from axe "incomplete" queue)
 
