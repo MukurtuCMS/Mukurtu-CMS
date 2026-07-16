@@ -441,7 +441,11 @@ function mukurtu_import_update_40026(): void {
 function mukurtu_import_update_40027(): void {
   foreach (['mukurtu_roundtrip_manager', 'mukurtu_manager'] as $role_id) {
     $role = \Drupal::entityTypeManager()->getStorage('user_role')->load($role_id);
-    if ($role && !$role->hasPermission('access mukurtu import')) {
+    if (!$role || !$role->id()) {
+      \Drupal::logger('mukurtu_import')->warning('Role %role_id could not be loaded or is malformed (missing ID); skipping permission grant.', ['%role_id' => $role_id]);
+      continue;
+    }
+    if (!$role->hasPermission('access mukurtu import')) {
       $role->grantPermission('access mukurtu import');
       $role->save();
     }

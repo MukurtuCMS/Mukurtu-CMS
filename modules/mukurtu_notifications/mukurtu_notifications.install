@@ -438,7 +438,22 @@ function mukurtu_notifications_update_40018(): void {
       ->getStorage('field_storage_config')
       ->load("$entity_type.$field_name");
     if ($storage) {
-      $storage->delete();
+      try {
+        $storage->delete();
+      }
+      catch (\Exception $e) {
+        // FieldStorageConfig::delete() renames the live table to a
+        // deterministic field_deleted_data_<hash> name. If a prior partial
+        // update run already got this far, that table exists and the
+        // rename collides. Fall back to removing the config directly, same
+        // as the raw core.extension write above, and leave the orphaned
+        // table for a normal field-purge run to clean up.
+        \Drupal::logger('mukurtu_notifications')->warning('Could not cleanly delete field storage %name (likely an orphaned table from a prior partial update run); removing config directly. %message', [
+          '%name' => "$entity_type.$field_name",
+          '%message' => $e->getMessage(),
+        ]);
+        \Drupal::service('config.storage')->delete("field.storage.$entity_type.$field_name");
+      }
     }
   }
 }
