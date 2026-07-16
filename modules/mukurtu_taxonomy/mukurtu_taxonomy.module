@@ -108,6 +108,36 @@ function mukurtu_taxonomy_form_alter(&$form, \Drupal\Core\Form\FormStateInterfac
 }
 
 /**
+ * Implements hook_form_FORM_ID_alter() for taxonomy_vocabulary_form.
+ *
+ * Mukurtu does not support hierarchical taxonomies, but the flat_taxonomy
+ * module exposes a checkbox to turn flat enforcement off per-vocabulary.
+ * Lock it on and explain why, rather than letting an admin quietly put a
+ * vocabulary into an unsupported hierarchical state (see issue #1788,
+ * mirrors the Layout Builder guard added for issue #1807).
+ */
+function mukurtu_taxonomy_form_taxonomy_vocabulary_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
+  $form['#after_build'][] = 'mukurtu_taxonomy_lock_flat_taxonomy_checkbox';
+}
+
+/**
+ * Form #after_build callback: locks the flat_taxonomy checkbox on.
+ *
+ * Attached via #after_build (rather than altering $form['flat'] directly
+ * in the alter above) so this always runs after flat_taxonomy's own
+ * hook_form_taxonomy_vocabulary_form_alter() has added the checkbox,
+ * regardless of module hook-invocation order.
+ */
+function mukurtu_taxonomy_lock_flat_taxonomy_checkbox($form, \Drupal\Core\Form\FormStateInterface $form_state) {
+  if (isset($form['flat'])) {
+    $form['flat']['#default_value'] = TRUE;
+    $form['flat']['#disabled'] = TRUE;
+    $form['flat']['#description'] = t('Mukurtu does not currently support nested/hierarchical taxonomies.');
+  }
+  return $form;
+}
+
+/**
  * Implements hook_form_form_id_alter().
  */
 function mukurtu_taxonomy_form_taxonomy_term_category_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
