@@ -1378,7 +1378,7 @@ a:not(.primary-nav__menu-link) svg.tel path {
 }
 
 .field--name-field-featured-content {
-  grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(15rem, 100%), 1fr));
   justify-items: center;
   max-inline-size: 80rem;
   margin-inline: auto;

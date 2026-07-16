@@ -252,7 +252,7 @@
 // narrow Layout Builder column isn't forced to 4 squished cards, and 1-2
 // items grow (capped) and center instead of leaving the row half-empty.
 .field--name-field-featured-content {
-  grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(15rem, 100%), 1fr));
   justify-items: center;
   max-inline-size: 80rem; // 1280px, matches --grid-12col-max-width; also caps auto-fit at 4 columns on wide/full-bleed sections.
   margin-inline: auto;
