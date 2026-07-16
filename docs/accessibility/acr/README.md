@@ -24,11 +24,34 @@ ddev exec "cd web/profiles/mukurtu/docs/accessibility/acr && \
 
 (With Node 20+ on the host you can run the same `npx` command directly from this directory.)
 
-## Rendering to markdown/HTML
+## Rendering the human-readable report (release artifact)
+
+`openacr output` renders the YAML into a VPAT-style markdown document — criterion
+numbers with their names linked to the W3C spec (e.g. "2.4.2 Page Titled"),
+per-component conformance levels with our notes, and summary count tables.
+[openacr-markdown-0.1.0.handlebars](openacr-markdown-0.1.0.handlebars) is the
+GSA's template, vendored here because the npm package doesn't resolve it on its
+own (same reasoning as the vendored catalog).
 
 ```bash
-npx -y -p @openacr/openacr openacr output -f mukurtu-acr.yaml -c catalog-2.4-edition-wcag-2.1-en.yaml -o mukurtu-acr.markdown
+# From the site project root; output lands in this directory.
+ddev exec "cd web/profiles/mukurtu/docs/accessibility/acr && \
+  npx -y -p @openacr/openacr openacr output -f mukurtu-acr.yaml \
+    -c catalog-2.4-edition-wcag-2.1-en.yaml \
+    -t openacr-markdown-0.1.0.handlebars \
+    -o mukurtu-acr.markdown"
 ```
+
+At each tagged release, generate this and attach **both** files to the GitHub
+release: the YAML (machine-readable, canonical) and the markdown (for humans).
+Don't commit the rendered markdown to the repo — it's a build artifact of the
+YAML and would drift.
+
+**Before publishing a release ACR:** a final conformance report should not
+contain `not-evaluated` for Level A/AA criteria (VPAT reserves "Not Evaluated"
+for AAA). While the working copy legitimately carries `not-evaluated` between
+audit cycles, treat remaining ones as the to-do list that gates calling a
+release's ACR complete.
 
 ## Structure of a criterion entry
 
