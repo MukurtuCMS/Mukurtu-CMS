@@ -2,7 +2,9 @@
 
 namespace Drupal\mukurtu_export\Controller;
 
+use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\mukurtu_export\Form\ExportListAddItemForm;
 use Drupal\node\NodeInterface;
 
@@ -16,6 +18,17 @@ use Drupal\node\NodeInterface;
  * "Add to Collection" and "Add to Word List" tabs.
  */
 class ExportListAddNodeController extends ControllerBase {
+
+  /**
+   * Access callback for the route.
+   *
+   * The route's _permission only confirms export-manager status, not that
+   * the user may view $node - without this, an arbitrary node ID (including
+   * one behind a protocol the user isn't a member of) would be reachable.
+   */
+  public function access(AccountInterface $account, NodeInterface $node): AccessResultInterface {
+    return $node->access('view', $account, TRUE);
+  }
 
   /**
    * Add node to export list page.
