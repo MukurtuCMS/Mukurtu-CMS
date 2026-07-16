@@ -14,8 +14,8 @@ author:
   phone: ""
   website: "https://mukurtu.org"
 report_date: "2026-07-10"
-last_modified_date: "2026-07-10"
-version: 1
+last_modified_date: "2026-07-16"
+version: 2
 notes: >-
   This is a living document maintained as part of the Mukurtu CMS
   accessibility program (see docs/accessibility/README.md in the Mukurtu CMS
@@ -53,8 +53,14 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                Automated checks (axe-core, July 2026) across the audited page
+                inventory found no missing text alternatives. Map location
+                markers previously exposed as unnamed buttons were fixed to
+                carry the name of the item whose location they show. Alt text
+                quality on real site content is author-dependent and is
+                reviewed in the manual audit cycle.
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -93,8 +99,13 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                Automated structural checks (axe-core, July 2026) pass across
+                the audited page inventory. The page title region was moved
+                inside the main landmark so all page content is contained by
+                landmarks (fixed July 2026). Heading outline quality and
+                reading order are verified in the manual audit cycle.
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -203,8 +214,13 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                A skip-to-main-content link is provided on every page, and as
+                of July 2026 the page heading sits inside the skip link's
+                target landmark. Automated checks pass; keyboard verification
+                of the skip link across page types is part of the manual
+                audit cycle.
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -213,8 +229,11 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                Automated checks (axe-core, July 2026) confirm every audited
+                page has a page title. Title descriptiveness is reviewed with
+                headings and labels (2.4.6) in the manual audit cycle.
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -283,8 +302,12 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                Automated checks (axe-core, July 2026) confirm a valid lang
+                attribute on the html element of every audited page. Language
+                of parts (3.1.2) for content in Indigenous languages is a
+                separate criterion and remains under evaluation.
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -343,12 +366,27 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                Automated ARIA checks (axe-core, July 2026) pass across the
+                audited page inventory, including protocol-gated member
+                views. Map location markers previously rendered as focusable
+                buttons with no accessible name were fixed (July 2026).
+                Keyboard and screen reader verification of custom widgets
+                (carousel, tabs, audio player, autocomplete) is part of the
+                manual audit cycle.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: partially-supports
+              notes: >-
+                July 2026 scans of pages rendered with the administration
+                toolbar found toolbar menu buttons and links with no
+                accessible name and an invalid ARIA attribute on toolbar
+                menus. These originate in the upstream Drupal core/Gin
+                admin toolbar and affect authenticated administrators and
+                authors only; upstream verification and issue links are
+                tracked in the project's accessibility findings. The full
+                authoring interface will be evaluated in a later phase.
   success_criteria_level_aa:
     notes: ""
     criteria:
@@ -396,8 +434,14 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                Automated contrast checks (axe-core, July 2026) pass across
+                the audited page inventory. A failing admin accent color
+                (4.48:1) reachable by members on /my-content was darkened to
+                5.3:1 (fixed July 2026). Elements automated tools cannot
+                judge (headings over images, map controls) are queued for
+                manual contrast measurement.
           - name: authoring-tool
             adherence:
               level: not-evaluated

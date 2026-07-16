@@ -65,7 +65,7 @@ On `/my-content`, table-header sort links render in teal `#10857f` on white — 
 4. **Coverage:** extend `default-content.spec.ts` with anonymous-visible digital heritage items (with media for carousel/lightbox coverage), an open collection, community landing content, and dictionary words on an open protocol — then re-run the item-page scans.
 5. ~~**Coverage:** create a non-admin member test account and re-run member scans with `A11Y_USERNAME`/`A11Y_PASSWORD` for toolbar-free results~~ — **done 2026-07-13**, see addendum below.
 6. **Manual pass:** work through [../manual-checklist.md](../manual-checklist.md) starting with the priority-1 components (Leaflet maps, content warnings) from the [page inventory](../page-inventory.md).
-7. **Triage into ACR:** after items 1–5, assign first conformance levels in [../acr/mukurtu-acr.yaml](../acr/mukurtu-acr.yaml).
+7. **Triage into ACR:** first pass done 2026-07-16 — seven criteria with strong automated evidence assigned levels in [../acr/mukurtu-acr.yaml](../acr/mukurtu-acr.yaml) (web: 1.1.1, 1.3.1, 1.4.3, 2.4.1, 2.4.2, 3.1.1, 4.1.2 `supports` with manual-verification caveats; authoring-tool 4.1.2 `partially-supports` for the upstream toolbar findings). Remaining criteria stay `not-evaluated` until the manual pass provides evidence.
 
 ## Addendum: non-admin member scan (2026-07-13)
 
