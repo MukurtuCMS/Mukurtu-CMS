@@ -848,4 +848,31 @@ function mukurtu_install() {
 
 }
 
+/**
+ * Repair a malformed mukurtu_roundtrip_manager role.
+ *
+ * mukurtu_import_update_40025() updated this role's label via a raw
+ * configFactory()->getEditable()->set()->save() call, assuming the role
+ * already existed. On sites where it didn't yet (this role's full definition
+ * only ships via this profile's config/install, which Drupal only applies on
+ * a fresh install), getEditable() returned a brand-new empty config object,
+ * and the save() persisted a bare record containing only 'label' - no 'id',
+ * no permissions. Any code that loads or reloads that role through the
+ * entity API (directly, or via a cascading roles reload triggered by saving
+ * any other role) then throws EntityMalformedException("The entity does not
+ * have an ID."). Read the raw config here, never through the entity API, to
+ * avoid triggering that same crash while checking for it.
+ */
+function mukurtu_update_40001(): void {
+  $config = \Drupal::configFactory()->getEditable('user.role.mukurtu_roundtrip_manager');
+  if ($config->isNew() || $config->get('id')) {
+    return;
+  }
+
+  $profile_path = \Drupal::service('extension.list.profile')->getPath('mukurtu');
+  $yaml = file_get_contents($profile_path . '/config/install/user.role.mukurtu_roundtrip_manager.yml');
+  $data = \Drupal\Core\Serialization\Yaml::decode($yaml);
+  $config->setData($data)->save();
+}
+
 
