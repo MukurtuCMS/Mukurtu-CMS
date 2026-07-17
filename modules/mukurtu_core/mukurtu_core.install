@@ -2065,3 +2065,14 @@ function mukurtu_core_update_40074(): void {
   }
   $config->set('content.field_representative_media.settings.view_mode', 'browse')->save();
 }
+
+/**
+ * Stop linking the Content type column on the manage all content view.
+ */
+function mukurtu_core_update_40075(): void {
+  $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_manage_all_content');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('display.default.display_options.fields.type.settings.link', FALSE)->save();
+}
