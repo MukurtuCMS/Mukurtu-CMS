@@ -9,6 +9,11 @@
   gap: 1rem;
 }
 
+.mukurtu-super-admin-warning__text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 .mukurtu-super-admin-warning__dismiss {
   flex-shrink: 0;
   display: inline-flex;

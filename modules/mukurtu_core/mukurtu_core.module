@@ -260,7 +260,7 @@ function mukurtu_core_page_attachments(array &$attachments) {
       ]);
       $dismiss_link = Link::fromTextAndUrl(Markup::create('<span aria-hidden="true">&times;</span>'), $dismiss_url)->toString();
       $manager_link = Link::fromTextAndUrl(t('Mukurtu Manager'), Url::fromUri('https://docs.mukurtu.org/users/user-role-types/'))->toString();
-      $message = new FormattableMarkup('<div class="mukurtu-super-admin-warning">@text @dismiss</div>', [
+      $message = new FormattableMarkup('<div class="mukurtu-super-admin-warning"><div class="mukurtu-super-admin-warning__text">@text</div>@dismiss</div>', [
         '@text' => t('You are logged in as an Administrator (UID 1), which gives you the ability to take actions that can break the site and corrupt your data. We strongly recommended using a @manager_link account instead for most site management.', [
           '@manager_link' => $manager_link,
         ]),
