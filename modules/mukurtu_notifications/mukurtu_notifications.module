@@ -1351,6 +1351,19 @@ function mukurtu_notifications_handle_moderation_change(Node $node, ?string $old
     if (!empty($protocol_ids)) {
       $notify_uids = array_merge($notify_uids, mukurtu_notifications_resolve_notify_groups(FALSE, [], $protocol_ids, _mukurtu_notifications_protocol_steward_roles($node)));
     }
+
+    // Community managers only care about the "published" transition --
+    // that's what makes content available in their community -- not the
+    // for-review/archived/draft states, which are steward/owner concerns.
+    // Notifying them here means notify_content_created() will see them in
+    // the returned uids and skip its own "was created" message for the
+    // same save, so they get one message ("published") instead of two.
+    if ($template === 'mukurtu_content_published') {
+      $community_ids = array_keys($node->getCommunities());
+      if (!empty($community_ids)) {
+        $notify_uids = array_merge($notify_uids, mukurtu_notifications_resolve_notify_groups(FALSE, $community_ids, []));
+      }
+    }
   }
   $notify_uids = array_values(array_unique($notify_uids));
 
