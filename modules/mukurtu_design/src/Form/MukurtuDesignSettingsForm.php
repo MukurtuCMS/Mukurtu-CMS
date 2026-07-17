@@ -42,10 +42,11 @@ class MukurtuDesignSettingsForm extends ConfigFormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $config = $this->config(static::SETTINGS);
 
-    $options = [];
-    foreach (DesignPalette::PALETTES as $key => $label) {
-      $options[$key] = $this->t($label);
-    }
+    $options = [
+      'blue-gold' => $this->t('Blue and gold'),
+      'red-bone' => $this->t('Red and bone'),
+      'custom' => $this->t('Custom'),
+    ];
 
     $form['palette'] = [
       '#type' => 'mukurtu_palette_radios',
