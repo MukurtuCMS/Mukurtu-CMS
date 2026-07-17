@@ -43,7 +43,7 @@ jobs:
         run: echo "COMPCACHE=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
       - name: Cache composer dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: $COMPCACHE
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -59,7 +59,7 @@ jobs:
       # Usually checkout is the first action, but we set up the mukurtu-template
       # first, then put the checkout inside of it.
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           path: web/profiles/mukurtu
 
