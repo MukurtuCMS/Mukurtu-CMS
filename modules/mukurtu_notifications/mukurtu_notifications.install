@@ -1761,3 +1761,50 @@ function mukurtu_notifications_update_40049(): void {
     $source->read('views.view.mukurtu_message_log')
   );
 }
+
+/**
+ * Removes the mukurtu_new_item_in_collection/_community/_protocol message
+ * templates and their fields/displays.
+ *
+ * These three were phase-1 leftovers: mukurtu_notifications_notify_content_
+ * created()'s docblock explains they were replaced by reusing
+ * mukurtu_single_node_insert for both the "created" and "added to
+ * protocol/community" cases, and mukurtu_new_item_in_collection was never
+ * wired up to a notify() call site at all. None of the three has any
+ * hook_ENTITY_TYPE_insert()/_update() caller left in this module, so they're
+ * dead code -- and their mail_body displays still only have one text delta
+ * (never received the update_40044/_40048 fixes the live templates got),
+ * so they would send blank-body emails if anyone ever reintroduced a caller.
+ * Formally dropped from phase-2 scope (2026-07-17 PR #1760 discussion)
+ * rather than fixed, since nothing currently reaches them.
+ *
+ * field.storage.message.field_collection and .field_community are deleted
+ * too -- confirmed via grep that no other template's field.field config or
+ * any PHP in this module references either one. field_community_ref (used by
+ * the live mukurtu_user_added_to_community/mukurtu_removed_from_community
+ * templates) is a distinct field and is untouched.
+ */
+function mukurtu_notifications_update_40050(): void {
+  $config_factory = \Drupal::configFactory();
+
+  foreach ([
+    'message.template.mukurtu_new_item_in_collection',
+    'message.template.mukurtu_new_item_in_community',
+    'message.template.mukurtu_new_item_in_protocol',
+    'core.entity_view_display.message.mukurtu_new_item_in_collection.mail_body',
+    'core.entity_view_display.message.mukurtu_new_item_in_collection.mail_subject',
+    'core.entity_view_display.message.mukurtu_new_item_in_community.mail_body',
+    'core.entity_view_display.message.mukurtu_new_item_in_community.mail_subject',
+    'core.entity_view_display.message.mukurtu_new_item_in_protocol.mail_body',
+    'core.entity_view_display.message.mukurtu_new_item_in_protocol.mail_subject',
+    'field.field.message.mukurtu_new_item_in_collection.field_collection',
+    'field.field.message.mukurtu_new_item_in_collection.field_item',
+    'field.field.message.mukurtu_new_item_in_community.field_community',
+    'field.field.message.mukurtu_new_item_in_community.field_item',
+    'field.field.message.mukurtu_new_item_in_protocol.field_item',
+    'field.storage.message.field_collection',
+    'field.storage.message.field_community',
+  ] as $name) {
+    $config_factory->getEditable($name)->delete();
+  }
+}

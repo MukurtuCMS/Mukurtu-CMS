@@ -241,6 +241,25 @@ function mukurtu_notifications_form_views_exposed_form_alter(array &$form, FormS
 }
 
 /**
+ * Implements hook_views_pre_view().
+ *
+ * Security: the personal Activity Page (path "notifications") must only ever
+ * show the logged-in user's own messages. Its "uid" contextual filter has no
+ * validation and no %uid path segment, so Views accepts /notifications/<uid>
+ * as an optional trailing argument, which would let any authenticated user
+ * read another user's private notification feed. Message entity access is
+ * globally force-denied (see QueryAccessSubscriber), so this view is the only
+ * thing that can enforce scoping. Force the argument to the current user and
+ * ignore any URL-supplied value. mukurtu_notifications_admin_page is
+ * role-gated and intentionally unrestricted, so it is untouched.
+ */
+function mukurtu_notifications_views_pre_view(ViewExecutable $view, string $display_id, array &$args): void {
+  if ($view->id() === 'mukurtu_message_log' && $display_id === 'mukurtu_notifications_page') {
+    $args[0] = (string) \Drupal::currentUser()->id();
+  }
+}
+
+/**
  * Implements hook_views_query_alter().
  *
  * Expands the notification type filter's exposed group-label selections
