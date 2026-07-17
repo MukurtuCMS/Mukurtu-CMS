@@ -1,124 +1,145 @@
-# Accessibility Findings — July 2026 Baseline
+# Accessibility Findings — July 2026 Automated Baseline
 
-First automated scan of the accessibility program. axe-core 4.x via `tests/playwright/tests/accessibility.spec.ts` (WCAG 2.1 A/AA tags + best-practice), run 2026-07-10 against a local DDEV site (`mukurtu.ddev.site`, Drupal 11.3, Mukurtu profile at commit on `AM-accessibility-program`).
+The first full cycle of the accessibility program's automated scanning: baseline
+audit, remediation, and re-verification, run 2026-07-10 through 2026-07-16.
+Method: axe-core 4.x via `tests/playwright/tests/accessibility.spec.ts` (WCAG 2.1
+A/AA rule tags, with best-practice findings recorded separately) against a local
+DDEV site (`mukurtu.ddev.site`, Drupal 11.x, `AM-accessibility-program` branch).
+Scans ran anonymously and as a regular member account (community + protocol
+member, no admin roles) — member scans discover and cover the protocol-gated
+item pages that anonymous visitors cannot reach.
 
-**Caveats for this baseline:**
+## Where we are now
 
-- The test site had very little content: no digital heritage items, no anonymous-visible dictionary words, collections, or community pages. All four discovered-item scans skipped. Anonymous pages were scanned mostly empty, so the clean anonymous results are weaker evidence than they look.
-- Member pages were scanned as **admin** (`admin`/`admin`), so they include the Drupal admin toolbar, which a regular member never sees. Three of the four violation rules below live entirely in that toolbar.
-- No manual (keyboard/screen reader) testing yet — see [../manual-checklist.md](../manual-checklist.md) for the next pass.
+**Every page in the [audit inventory](../page-inventory.md) — 15 pages, anonymous
+and member — scans at 0 WCAG violations and 0 best-practice violations.** Three
+defects were found and fixed during the cycle (below). The only remaining axe
+output is the "incomplete" queue: contrast checks axe cannot compute on its own,
+handed to the manual pass.
 
-## Coverage
-
-| Scanned | Result |
+| Coverage | Result |
 |---|---|
-| `/`, `/browse`, `/digital-heritage`, `/collections`, `/communities`, `/dictionary`, `/user/login` (anonymous) | 0 WCAG violations |
-| `/`, `/my-content`, `/user/personal-collections`, `/user` (as admin) | 3–4 WCAG violation rules each |
-| Digital heritage item, collection, community, dictionary word pages | **Not scanned — no accessible content** |
+| Anonymous: `/`, `/browse`, `/digital-heritage`, `/collections`, `/communities`, `/dictionary`, `/user/login` | Clean |
+| Member: `/`, `/my-content`, `/user/personal-collections`, `/user` | Clean |
+| Member, discovered item pages: digital heritage item, collection, community, dictionary word | Clean |
+| Not yet scanned | Anonymous item pages (test site content is all protocol-gated); admin/authoring UI (later phase) |
 
-## Findings by WCAG Success Criterion
+No manual keyboard/screen-reader testing has happened yet — that is the next
+phase, using [../manual-checklist.md](../manual-checklist.md) and the
+[manual findings template](manual-findings-template.md).
 
-### 4.1.2 Name, Role, Value — invalid ARIA attribute (axe: `aria-valid-attr`, critical)
+## Defects found and fixed this cycle
 
-`aria-toolbar-link__labelledby="menu--create"` (an invalid ARIA attribute name) on three `ul.toolbar-block__content` menus. Present on every page rendered with the admin toolbar.
+### 1. Contrast failure on member table sort links — WCAG 1.4.3 (serious)
 
-- **Source:** Drupal core Navigation module / Gin admin toolbar — **not Mukurtu code**. Verify against the installed core/Gin versions and check for an upstream issue before writing any local override.
-- **Affected users:** admins/authors only.
-- **Suggested action:** file or link an upstream issue; track under the authoring-tool component of the ACR.
+Table-header sort links on `/my-content` rendered at 4.48:1 (teal `#10857f` on
+white), just under the 4.5:1 AA requirement. Cause: Mukurtu shipped Gin's "teal"
+accent preset in `config/install/gin.settings.yml`, and `/my-content` is an
+admin route rendered in Gin for admin users.
 
-### 4.1.2 Name, Role, Value — buttons without discernible text (axe: `button-name`, critical)
+**Fixed:** custom accent `#0e7873` (5.3:1) in the install config, with
+`mukurtu_core_update_40076()` migrating existing sites still on the default
+preset (sites with their own accent choice are untouched). Note: for non-admin
+members `/my-content` renders in the front-end theme, so regular members never
+saw this — the fix protects admin-theme users and any future admin-route
+exposure.
 
-Six admin toolbar buttons (`.toolbar-link--*` "Extend" submenu toggles and the sidebar toggle) have no computed accessible name — their inner `<span>` text appears to be hidden from the accessibility tree.
+### 2. Page title outside landmarks — axe `region` best-practice (all pages)
 
-- **Source:** same admin toolbar as above; upstream candidate.
-- **Affected users:** admins/authors only.
+The page-title region (the `<h1>`) rendered in a bare `div.region` between the
+header and main landmarks on every page.
 
-### 2.4.4 Link Purpose / 4.1.2 — links without discernible text (axe: `link-name`, serious)
+**Fixed:** `{{ page.page_title }}` moved inside `<main>` in
+`themes/mukurtu_v4/templates/layout/page.html.twig` (which all page variants
+extend) and `page--404.html.twig`. Also puts the `<h1>` inside the skip-link
+target.
 
-Eight admin toolbar links (`/admin/content`, `/admin/people`, etc.) with no computed accessible name; same hidden-span cause as above.
+### 3. Unnamed, focusable map markers — WCAG 4.1.2-adjacent (Leaflet)
 
-- **Source:** same admin toolbar; upstream candidate.
+Leaflet rendered each location marker as `<img alt="" role="button"
+tabindex="0">`: keyboard-focusable, announced as an unnamed button, while the
+empty `alt` simultaneously marked it presentational (axe `aria-allowed-role` +
+`presentation-role-conflict`).
 
-### 1.4.3 Contrast (Minimum) — table sort links at 4.48:1 (axe: `color-contrast`, serious)
+**Fixed:** `MukurtuLeafletFormatter::viewElements()` now gives every feature
+without a title one named for the entity whose location it shows ("Location of
+<label>"; related-coverage markers use the related item's label). The contrib
+leaflet JS turns the feature title into the marker's `alt`/`title` attributes —
+verified in the DOM (`alt="Location of DH 1"`) and by re-scan. **Scope note:**
+this covers maps rendered by the Mukurtu field formatter (item pages); the
+views-based browse map (`views.view.mukurtu_browse_by_map`) builds markers by a
+separate path and needs the same check once it has locatable content.
 
-On `/my-content`, table-header sort links render in teal `#10857f` on white — contrast 4.48:1, just under the 4.5:1 AA requirement for 14px text.
+## Known open findings — upstream admin toolbar (authoring-tool scope)
 
-- **Source:** `#10857f` is Gin's "teal" accent preset (`/my-content` is an admin route, so it renders in the Gin theme). Mukurtu shipped `preset_accent_color: teal` in `config/install/gin.settings.yml`.
-- **Affected users:** all logged-in members using `/my-content`.
-- **✅ Fixed 2026-07-10:** switched to a custom accent `#0e7873` (5.3:1) in `config/install/gin.settings.yml`, with `mukurtu_core_update_40073()` migrating existing sites still on the default teal preset (sites with their own accent choice are untouched). Re-scan confirms the violation is gone.
+Scanning as an **admin** (only) surfaces three violation rules, all confined to
+the Drupal core/Gin admin toolbar; regular members and visitors never encounter
+them:
 
-## Advisory findings (axe best-practice, not WCAG failures)
+- `aria-valid-attr` (critical): invalid attribute `aria-toolbar-link__labelledby`
+  on three `ul.toolbar-block__content` menus
+- `button-name` (critical): six toolbar buttons ("Extend" submenu toggles,
+  sidebar toggle) with no computed accessible name — inner `<span>` text hidden
+  from the accessibility tree
+- `link-name` (serious): eight toolbar links (`/admin/content`, `/admin/people`,
+  …) with no accessible name, same hidden-span cause
 
-- **`region` — content outside landmarks** on every anonymous listing page (`.layout-container > .region`): the page-title region (the `<h1>`) rendered between the header and main landmarks.
-  - **✅ Fixed 2026-07-10:** moved `{{ page.page_title }}` inside `<main>` in `themes/mukurtu_v4/templates/layout/page.html.twig` (which all page variants extend) and `page--404.html.twig`. Also puts the `<h1>` inside the skip-link target. Re-scan shows all anonymous pages fully clean (0 WCAG, 0 best-practice).
+**Status:** recorded under the authoring-tool component of the
+[ACR](../acr/mukurtu-acr.yaml) as `partially-supports` (4.1.2). Next step:
+verify against current Drupal core/Gin releases, then file or link upstream
+issues — not Mukurtu code, so no local override until upstream triage says so.
 
-## Needs human review (axe "incomplete")
+## Handed to the manual pass (axe "incomplete" queue)
 
-- **Contrast on the home page:** block `h2` headings and the Leaflet map controls/attribution links — axe couldn't compute backgrounds (images/overlays). Check with a contrast tool during the manual pass.
-- **`aria-valid-attr-value` on `article` elements** (home and member pages) — axe flagged an ARIA reference it couldn't resolve; inspect during the manual pass.
+Contrast checks axe could not compute (backgrounds are images/overlays or
+map tiles) — measure with a contrast tool during the manual pass:
 
-## Actions for the next cycle
+- Leaflet zoom controls and attribution links (digital heritage item page)
+- Block `h2` headings over images (home, member home)
+- One flagged element on the collection page
+- Also: `aria-valid-attr-value` on `article` elements (home and member pages) —
+  an ARIA reference axe couldn't resolve; inspect once manually
 
-1. ~~**Fix:** Gin accent contrast on `/my-content` (WCAG 1.4.3)~~ — **done 2026-07-10**, see above.
-2. ~~**Fix:** landmark wrapping for the flagged `.region` in `mukurtu_v4`~~ — **done 2026-07-10**, see above.
-3. **Upstream:** verify the three toolbar rules against current Drupal core/Gin; file or link issues; record under authoring-tool in the ACR.
-4. **Coverage:** extend `default-content.spec.ts` with anonymous-visible digital heritage items (with media for carousel/lightbox coverage), an open collection, community landing content, and dictionary words on an open protocol — then re-run the item-page scans.
-5. ~~**Coverage:** create a non-admin member test account and re-run member scans with `A11Y_USERNAME`/`A11Y_PASSWORD` for toolbar-free results~~ — **done 2026-07-13**, see addendum below.
-6. **Manual pass:** work through [../manual-checklist.md](../manual-checklist.md) starting with the priority-1 components (Leaflet maps, content warnings) from the [page inventory](../page-inventory.md).
-7. **Triage into ACR:** first pass done 2026-07-16 — seven criteria with strong automated evidence assigned levels in [../acr/mukurtu-acr.yaml](../acr/mukurtu-acr.yaml) (web: 1.1.1, 1.3.1, 1.4.3, 2.4.1, 2.4.2, 3.1.1, 4.1.2 `supports` with manual-verification caveats; authoring-tool 4.1.2 `partially-supports` for the upstream toolbar findings). Remaining criteria stay `not-evaluated` until the manual pass provides evidence.
+## ACR status after this cycle
 
-## Addendum: non-admin member scan (2026-07-13)
+First triage pass recorded in [../acr/mukurtu-acr.yaml](../acr/mukurtu-acr.yaml)
+(version 2): web component `supports` with dated method notes for 1.1.1, 1.3.1,
+1.4.3, 2.4.1, 2.4.2, 3.1.1, 4.1.2; authoring-tool 4.1.2 `partially-supports`
+(toolbar findings above). All other criteria remain `not-evaluated` until the
+manual pass and the platform capability checks (1.2.x media alternatives)
+provide evidence — see the capability-testing section of the
+[manual checklist](../manual-checklist.md).
 
-Re-ran the suite as a regular member account (community + protocol member, no admin
-roles) via `A11Y_USERNAME`/`A11Y_PASSWORD`, and extended the spec with member-side
-item-page discovery (`memberDiscoveredPages`) — on protocol-heavy sites, item pages
-are only reachable logged-in, so the anonymous pass can't cover them.
+## Remaining actions for the next cycle
 
-**Results:**
+1. **Manual pass** (keyboard, screen reader, zoom/reflow, contrast queue) using
+   the [template](manual-findings-template.md) — priority order per the
+   [page inventory](../page-inventory.md): Leaflet maps, content warnings,
+   carousels, lightbox, audio player first.
+2. **Platform capability checks** for author-provided media alternatives
+   (1.2.x) — transcript rendering, local-video captions (expected gap), remote
+   video captions, autoplay.
+3. **Upstream:** verify + file the three toolbar issues; add issue links to the
+   ACR notes.
+4. **Coverage:** extend `default-content.spec.ts` with anonymous-visible content
+   (digital heritage items with media, an open collection, open-protocol
+   dictionary words) so anonymous item pages can be scanned; check the
+   views-based browse map markers once locatable content exists.
+5. **CI:** add the report-only axe job to `.github/workflows/playwright.yml`
+   per the charter's ratchet plan.
+6. **Triage:** fold manual results into the ACR — the remaining `not-evaluated`
+   A/AA criteria are the gate for a publishable release ACR.
 
-- **Zero WCAG violations on every member page.** All three violation rules from the
-  baseline member scan (invalid ARIA attribute, unnamed buttons/links) are confirmed
-  to be the admin toolbar only — regular members never see them. `/my-content` also
-  renders in the front-end theme for non-admins, so the (already fixed) Gin accent
-  issue never reached regular members there.
-- **New coverage:** digital heritage item, dictionary word, and community pages
-  (protocol-gated, member view). Collection page initially skipped (no reachable
-  collections); as of 2026-07-16 it is discovered and scans clean — every page in
-  the inventory (15) now scans at **0 WCAG violations and 0 best-practice
-  violations**. The only remaining axe output is the "incomplete" human-review
-  queue: Leaflet zoom/attribution contrast (digital heritage item), heading
-  contrast over images (home/member home), and one contrast check on the
-  collection page — all folded into the manual pass.
-- **New findings — all in the Leaflet map on the digital heritage item page**
-  (matches the #1-priority component in the [page inventory](../page-inventory.md)):
-  - **Map markers are unnamed focusable buttons** (axe: `aria-allowed-role` +
-    `presentation-role-conflict`, minor): Leaflet renders each marker as
-    `<img alt="" role="button" tabindex="0">` — keyboard-focusable, announced as an
-    unnamed button, while the empty `alt` simultaneously marks it presentational.
-    WCAG 4.1.2-adjacent.
-    - **✅ Fixed 2026-07-13** in `MukurtuLeafletFormatter::viewElements()`: every
-      feature without a title now gets one named after the entity whose location it
-      shows ("Location of <label>"; related-coverage markers use the related item's
-      label). The contrib leaflet JS turns the feature title into the marker's
-      `alt`/`title` attributes. Verified in the DOM
-      (`alt="Location of DH 1"`) and by re-scan — both axe findings cleared, so the
-      digital heritage item page now has 0 violations of any kind. Note this covers
-      maps rendered by the Mukurtu formatter (item pages); the **views-based browse
-      map** (`views.view.mukurtu_browse_by_map`) renders markers by its own path and
-      should be checked for the same issue when it has locatable content.
-  - **Leaflet control/attribution contrast** flagged for human review (axe
-    "incomplete") — check the zoom controls and attribution links with a contrast
-    tool during the manual pass.
+## Reproducing these scans
 
-**Test account for future runs:** `a11y_member` (member of all communities/protocols
-on the local site). Re-create on any environment with a community/protocol member
-account and pass `A11Y_USERNAME`/`A11Y_PASSWORD`.
-
-## Raw data
-
-Per-page axe JSON is written to `tests/playwright/test-results/a11y/` on every run (not committed). Re-generate with:
+Per-page axe JSON is written to `tests/playwright/test-results/a11y/` on every
+run (gitignored). Member scans need a regular community/protocol member account
+— on the local site this is `a11y_member`; on any other environment create one
+and pass it via env vars:
 
 ```bash
 cd tests/playwright
-PLAYWRIGHT_BASE_URL=https://mukurtu.ddev.site npx playwright test accessibility --project=chromium
+PLAYWRIGHT_BASE_URL=https://mukurtu.ddev.site \
+A11Y_USERNAME=a11y_member A11Y_PASSWORD=... \
+npx playwright test accessibility --project=chromium
 ```
