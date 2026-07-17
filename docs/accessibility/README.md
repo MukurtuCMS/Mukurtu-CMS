@@ -17,7 +17,7 @@ This matches Drupal core's own accessibility commitment and the requirements of 
 The program runs in two phases, against two W3C standards that cover different
 things:
 
-- **WCAG** (Web Content Accessibility Guidelines) applies to the *pages Mukurtu
+- **WCAG** ([Web Content Accessibility Guidelines](https://www.w3.org/TR/WCAG21/)) applies to the *pages Mukurtu
   renders* — it is the standard for both phases, since visitors and authors
   alike experience rendered pages.
 - **ATAG 2.0** ([Authoring Tool Accessibility Guidelines](https://www.w3.org/TR/ATAG20/))
@@ -40,7 +40,7 @@ collections, dictionaries, communities, maps, and account pages.
 2.1 AA *and* ATAG 2.0.** Content creation forms, bulk media upload,
 import/export, dashboards.
 
-**Why in stages:** the visitor/member experience is the smaller, self-contained
+**Why are we doing this in stages:** the visitor/member experience is the smaller, self-contained
 surface with the largest audience, and it is measured against a single
 standard — so it can reach a defensible conformance claim first. The authoring
 experience is a much larger surface (every form, workflow, and admin screen),
