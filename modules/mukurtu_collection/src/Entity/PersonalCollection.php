@@ -331,7 +331,7 @@ class PersonalCollection extends EditorialContentEntityBase implements PersonalC
 
     $fields['field_description'] = BaseFieldDefinition::create('text_long')
       ->setLabel('Description')
-      ->setDescription(t('A longer description or explanation of the personal collection if needed.	</br>This HTML field can support rich text and embedded media assets using the editing toolbar.'))
+      ->setDescription(t('A longer description or explanation of the personal collection if needed.	<br />This HTML field can support rich text and embedded media assets using the editing toolbar.'))
       ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -364,7 +364,7 @@ class PersonalCollection extends EditorialContentEntityBase implements PersonalC
 
     $fields['field_media_assets'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Personal Collection Image'))
-      ->setDescription(t('A featured image that is used on the personal collection page. The image may be drawn from content in the collection, or selected to complement the collection.	</br>Select "Add media" to select or upload an image.'))
+      ->setDescription(t('A featured image that is used on the personal collection page. The image may be drawn from content in the collection, or selected to complement the collection.	<br />Select "Add media" to select or upload an image.'))
       ->setSetting('target_type', 'media')
       ->setSetting('handler', 'default:media')
       ->setSetting('handler_settings', [
@@ -390,7 +390,7 @@ class PersonalCollection extends EditorialContentEntityBase implements PersonalC
 
     $fields['field_items_in_collection'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Items'))
-      ->setDescription(t('The digital heritage items, person records, dictionary words, or other existing content included in the personal collection.	</br>Select "Select Content" to choose from existing site content.'))
+      ->setDescription(t('The digital heritage items, person records, dictionary words, or other existing content included in the personal collection.	<br />Select "Select Content" to choose from existing site content.'))
       ->setSetting('target_type', 'node')
       ->setSetting('handler', 'default:node')
       ->setSetting('handler_settings', [

@@ -8,7 +8,7 @@ field_name: field_treaty_territory
 entity_type: paragraph
 bundle: indigenous_knowledge_keepers
 label: 'Treaty Territory'
-description: 'For some individuals, or in relation to some teachings, it may be important for the Knowledge Keeper to acknowledge their relationship to a treaty. This may be particularly important regarding oral teachings about land or treaty rights. Only used if applicable and indicated by the Knowledge Keeper. </br>Maximum 255 characters.'
+description: 'For some individuals, or in relation to some teachings, it may be important for the Knowledge Keeper to acknowledge their relationship to a treaty. This may be particularly important regarding oral teachings about land or treaty rights. Only used if applicable and indicated by the Knowledge Keeper. <br />Maximum 255 characters.'
 required: false
 translatable: true
 default_value: {  }
