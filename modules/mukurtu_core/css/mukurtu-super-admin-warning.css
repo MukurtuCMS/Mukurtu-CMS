@@ -1,0 +1,37 @@
+/**
+ * Styles for the dismissible UID 1 super admin warning message.
+ */
+
+.mukurtu-super-admin-warning {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.mukurtu-super-admin-warning__dismiss {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  min-height: 1.5rem;
+  padding: .25rem;
+  font-size: 1.25rem;
+  line-height: 1;
+  text-decoration: none;
+  color: inherit;
+  border-radius: .25rem;
+}
+
+.mukurtu-super-admin-warning__dismiss:hover,
+.mukurtu-super-admin-warning__dismiss:focus {
+  background-color: rgba(0, 0, 0, .1);
+  color: inherit;
+  text-decoration: none;
+}
+
+.mukurtu-super-admin-warning__dismiss:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}

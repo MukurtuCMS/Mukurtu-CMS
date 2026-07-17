@@ -25,6 +25,8 @@ use Drupal\user\UserInterface;
 use Drupal\Core\Url;
 use Drupal\Core\Link;
 use Drupal\Core\Cache\Cache;
+use Drupal\Core\Render\Markup;
+use Drupal\Component\Render\FormattableMarkup;
 
 /**
  * Implements hook_theme().
@@ -225,13 +227,17 @@ function mukurtu_core_page_attachments(array &$attachments) {
   // want to bother them with the message.
   if (\Drupal::currentUser()->id() == 1) {
     $show_admin_message = TRUE;
+    $request = \Drupal::request();
+    if ($request->getSession()->get(\Drupal\mukurtu_core\Controller\SuperAdminWarningController::SESSION_KEY)) {
+      $show_admin_message = FALSE;
+    }
     $query = \Drupal::entityQuery('node');
     $query->accessCheck(FALSE);
     $content_count = $query->count()->execute();
     if ($content_count === 0) {
       $show_admin_message = FALSE;
     }
-    $uri = \Drupal::request()->getUri();
+    $uri = $request->getUri();
     $ajax_uris = [
       'ajax',
       'modal',
@@ -243,7 +249,22 @@ function mukurtu_core_page_attachments(array &$attachments) {
       }
     }
     if ($show_admin_message) {
-      \Drupal::messenger()->addError(t('You are logged in as the super admin (UID 1), which gives you the ability to take actions that can break the site and corrupt your data. Consider logging into a different account.'));
+      $dismiss_url = Url::fromRoute('mukurtu_core.dismiss_super_admin_warning');
+      $dismiss_url->setOption('query', [
+        'token' => \Drupal::csrfToken()->get($dismiss_url->getInternalPath()),
+        'destination' => \Drupal::service('path.current')->getPath(),
+      ]);
+      $dismiss_url->setOption('attributes', [
+        'class' => ['mukurtu-super-admin-warning__dismiss'],
+        'aria-label' => t('Dismiss for this session'),
+      ]);
+      $dismiss_link = Link::fromTextAndUrl(Markup::create('<span aria-hidden="true">&times;</span>'), $dismiss_url)->toString();
+      $message = new FormattableMarkup('<div class="mukurtu-super-admin-warning">@text @dismiss</div>', [
+        '@text' => t('You are logged in as the super admin (UID 1), which gives you the ability to take actions that can break the site and corrupt your data. Consider logging into a different account.'),
+        '@dismiss' => $dismiss_link,
+      ]);
+      \Drupal::messenger()->addError($message);
+      $attachments['#attached']['library'][] = 'mukurtu_core/super-admin-warning';
     }
   }
 
