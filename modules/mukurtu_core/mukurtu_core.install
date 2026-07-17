@@ -815,6 +815,21 @@ function mukurtu_core_update_40023(): void {
 }
 
 /**
+ * Ensure the malformed mukurtu_roundtrip_manager role is repaired first.
+ *
+ * Saving any role invalidates Drupal's role/permission cache, which reloads
+ * all roles - including the malformed mukurtu_roundtrip_manager left behind
+ * by mukurtu_import_update_40025() on affected sites. See mukurtu_update_40001().
+ */
+function mukurtu_core_update_dependencies(): array {
+  return [
+    'mukurtu_core' => [
+      '40024' => ['mukurtu' => '40001'],
+    ],
+  ];
+}
+
+/**
  * Grant article, page, and landing page content permissions to Mukurtu Manager role.
  */
 function mukurtu_core_update_40024(): void {

@@ -14,6 +14,20 @@ function mukurtu_export_update_40001() {
 }
 
 /**
+ * Ensure the malformed mukurtu_roundtrip_manager role is repaired first.
+ *
+ * See mukurtu_update_40001() and mukurtu_core_update_dependencies() for why
+ * this hook needs mukurtu_roundtrip_manager's config repaired before it runs.
+ */
+function mukurtu_export_update_dependencies(): array {
+  return [
+    'mukurtu_export' => [
+      '40002' => ['mukurtu' => '40001'],
+    ],
+  ];
+}
+
+/**
  * Grant export permissions to the Roundtrip Manager role.
  */
 function mukurtu_export_update_40002() {
