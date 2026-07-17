@@ -231,7 +231,7 @@ class MukurtuImportTestBase extends MigrateTestBase {
     $temp_file_path = tempnam(sys_get_temp_dir(), 'test_') . '.csv';
     $handle = fopen($temp_file_path, 'w');
     foreach ($data as $row) {
-      fputcsv($handle, $row);
+      fputcsv($handle, $row, ',', '"', '\\');
     }
     fclose($handle);
 
