@@ -20,49 +20,26 @@ jobs:
       preview_url: ${{ steps.wait-for-preview.outputs.preview_url }}
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
       - name: Wait for Tugboat Preview
         id: wait-for-preview
         run: |
-          # Define the maximum wait time (20 minutes) for the preview comment.
-          MAX_WAIT=1200
+          # Define the maximum wait time (10 minutes).
+          MAX_WAIT=600
           INTERVAL=30
           ELAPSED=0
-          PREVIEW_URL=""
           while [ $ELAPSED -lt $MAX_WAIT ]; do
             PREVIEW_URL=$(gh api repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments | jq -r '.[].body' | grep -Po 'https://(?!www\.)[a-zA-Z0-9.-]+\.tugboatqa.com' | head -n 1 || true)
             if [[ ! -z "$PREVIEW_URL" ]]; then
-              echo "Preview URL found: $PREVIEW_URL"
-              break
-            fi
-            echo "Waiting for Tugboat preview comment..."
-            sleep $INTERVAL
-            ELAPSED=$((ELAPSED + INTERVAL))
-          done
-
-          if [[ -z "$PREVIEW_URL" ]]; then
-            echo "Tugboat preview URL did not appear in time."
-            exit 1
-          fi
-
-          # The comment can appear before the preview site has finished
-          # booting, so poll the URL itself until it responds successfully.
-          READY_MAX_WAIT=300
-          READY_INTERVAL=15
-          READY_ELAPSED=0
-          while [ $READY_ELAPSED -lt $READY_MAX_WAIT ]; do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$PREVIEW_URL" || true)
-            if [[ "$STATUS" =~ ^(2|3)[0-9][0-9]$ ]]; then
               echo "Preview is ready: $PREVIEW_URL"
               echo "preview_url=$PREVIEW_URL" >> "$GITHUB_OUTPUT"
               exit 0
             fi
-            echo "Waiting for Tugboat preview to respond (last status: $STATUS)..."
-            sleep $READY_INTERVAL
-            READY_ELAPSED=$((READY_ELAPSED + READY_INTERVAL))
+            echo "Waiting for Tugboat preview..."
+            sleep $INTERVAL
+            ELAPSED=$((ELAPSED + INTERVAL))
           done
-
           echo "Tugboat preview did not become ready in time."
           exit 1
         env:
@@ -74,10 +51,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version: 20
 
@@ -102,10 +79,10 @@ jobs:
     if: github.event_name == 'push'
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version: 20
 
