@@ -764,6 +764,32 @@ function mukurtu_core_update_40022(): void {
  * bundleFieldDefinitions() and creating the missing FieldConfig entities.
  */
 function mukurtu_core_update_40023(): void {
+  // mukurtu_place is a required profile dependency, but that only
+  // auto-installs on fresh installs. Existing sites installed before the
+  // place content type was added won't have the place node type yet, which
+  // makes the FieldConfig::create() below throw a LogicException.
+  if (!\Drupal::moduleHandler()->moduleExists('mukurtu_place')) {
+    // mukurtu_place's core.entity_form_display.node.place.default config
+    // depends on this entity browser, which was added to the already-
+    // installed mukurtu_taxonomy module's config/install at the same time as
+    // mukurtu_place -- config/install is only applied when a module is
+    // freshly installed, so existing sites never picked it up. Import it
+    // first so installing mukurtu_place doesn't fail its config dependency
+    // validation.
+    $config_name = 'entity_browser.browser.mukurtu_taxonomy_record_place_term_browser';
+    $config_factory = \Drupal::configFactory();
+    if ($config_factory->get($config_name)->isNew()) {
+      $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_taxonomy');
+      $config_source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+      $data = $config_source->read($config_name);
+      if ($data) {
+        $config_factory->getEditable($config_name)->setData($data)->save();
+      }
+    }
+
+    \Drupal::service('module_installer')->install(['mukurtu_place']);
+  }
+
   $bundles = [
     'digital_heritage' => 'A detailed, interactive mapping tool that allows placing and drawing multiple locations related to a digital heritage item. Locations can be single points, paths, rectangles, or free-form polygons. Each location can be given a basic label. This field is also used for the browse by map tools. </br>Note that this mapping data will be shared with the same users or visitors as the rest of the digital heritage item. If the location is sensitive, carefully consider using this field. </br>Use the tools shown on the map to place, draw, edit, and delete points and shapes. Once a point or shape has been placed, select it to add a description if needed.',
     'collection' => 'A detailed, interactive mapping tool that allows placing and drawing multiple locations related to a collection. Locations can be single points, paths, rectangles, or free-form polygons. Each location can be given a basic label. This field is also used for the browse by map tools. </br>Note that this mapping data will be shared with the same users or visitors as the rest of the collection. If the location is sensitive, carefully consider using this field. </br>Use the tools shown on the map to place, draw, edit, and delete points and shapes. Once a point or shape has been placed, select it to add a description if needed.',
@@ -789,11 +815,27 @@ function mukurtu_core_update_40023(): void {
 }
 
 /**
+ * Ensure the malformed mukurtu_roundtrip_manager role is repaired first.
+ *
+ * Saving any role invalidates Drupal's role/permission cache, which reloads
+ * all roles - including the malformed mukurtu_roundtrip_manager left behind
+ * by mukurtu_import_update_40025() on affected sites. See mukurtu_update_40001().
+ */
+function mukurtu_core_update_dependencies(): array {
+  return [
+    'mukurtu_core' => [
+      '40024' => ['mukurtu' => '40001'],
+    ],
+  ];
+}
+
+/**
  * Grant article, page, and landing page content permissions to Mukurtu Manager role.
  */
 function mukurtu_core_update_40024(): void {
   $role = \Drupal\user\Entity\Role::load('mukurtu_manager');
-  if (!$role) {
+  if (!$role || !$role->id()) {
+    \Drupal::logger('mukurtu_core')->warning('Role mukurtu_manager could not be loaded or is malformed (missing ID); skipping permission grant.');
     return;
   }
   $permissions = [
@@ -2083,4 +2125,25 @@ function mukurtu_core_update_40074(): void {
     return;
   }
   $config->set('content.field_representative_media.settings.view_mode', 'browse')->save();
+}
+
+/**
+ * Fix the account menu's Dashboard link to point at the current route.
+ *
+ * The /dashboard route was removed in favor of /dashboard/mukurtu_dashboard
+ * (the dashboards module's canonical route), but sites installed before
+ * that change still have a menu_link_content entity pointing at the old,
+ * now-nonexistent /dashboard path, causing an UnexpectedValueException
+ * whenever the account menu is rendered.
+ */
+function mukurtu_core_update_40075(): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('menu_link_content');
+  $ids = $storage->getQuery()
+    ->accessCheck(FALSE)
+    ->condition('menu_name', 'account')
+    ->condition('link.uri', 'internal:/dashboard')
+    ->execute();
+  foreach ($storage->loadMultiple($ids) as $link) {
+    $link->set('link', ['uri' => 'internal:/dashboard/mukurtu_dashboard'])->save();
+  }
 }
