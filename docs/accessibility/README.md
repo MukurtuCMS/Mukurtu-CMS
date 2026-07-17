@@ -14,9 +14,44 @@ This matches Drupal core's own accessibility commitment and the requirements of 
 
 ## Scope
 
-**Current phase: visitor and logged-in member experiences.** That means everything an anonymous visitor or an authenticated community/protocol member sees: browsing, searching, digital heritage items, collections, dictionaries, communities, maps, and account pages.
+The program runs in two phases, against two W3C standards that cover different
+things:
 
-**Later phase:** the authoring and administrative experience (content creation forms, bulk media upload, import/export, dashboards). As a CMS, Mukurtu should eventually also measure against ATAG 2.0, which covers accessible authoring tools.
+- **WCAG** (Web Content Accessibility Guidelines) applies to the *pages Mukurtu
+  renders* — it is the standard for both phases, since visitors and authors
+  alike experience rendered pages.
+- **ATAG 2.0** ([Authoring Tool Accessibility Guidelines](https://www.w3.org/TR/ATAG20/))
+  applies to *software used to create web content* — which is what a CMS is. It
+  has two halves: **Part A** requires the authoring interface itself to be
+  accessible (a screen reader or keyboard-only user must be able to *be an
+  author* — create items, upload media, manage protocols); **Part B** requires
+  the tool to help authors *produce* accessible content (prompting for alt
+  text, preserving accessibility information through workflows, guiding
+  authors toward transcripts and captions). Drupal core has committed to
+  ATAG 2.0 AA for its administration interface, which sets the precedent
+  Mukurtu follows.
+
+**Phase 1 (current): visitor and logged-in member experiences, against WCAG
+2.1 AA.** Everything an anonymous visitor or an authenticated
+community/protocol member sees: browsing, searching, digital heritage items,
+collections, dictionaries, communities, maps, and account pages.
+
+**Phase 2 (later): the authoring and administrative experience, against WCAG
+2.1 AA *and* ATAG 2.0.** Content creation forms, bulk media upload,
+import/export, dashboards.
+
+**Why in stages:** the visitor/member experience is the smaller, self-contained
+surface with the largest audience, and it is measured against a single
+standard — so it can reach a defensible conformance claim first. The authoring
+experience is a much larger surface (every form, workflow, and admin screen),
+is measured against two standards at once, and much of it is inherited from
+Drupal core and the Gin admin theme — meaning findings there often need
+upstream coordination rather than local fixes (see the admin toolbar findings
+already recorded under the authoring-tool component of the ACR). Sequencing
+keeps each phase's evidence, fixes, and ACR claims clean instead of half-done
+everywhere. Part B capability checks that overlap Phase 1 content (media
+alternatives an author can provide) are already folded into the
+[manual checklist](manual-checklist.md) rather than waiting for Phase 2.
 
 ## How conformance is tracked
 
