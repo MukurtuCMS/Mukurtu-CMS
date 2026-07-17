@@ -14,23 +14,39 @@ function mukurtu_export_update_40001() {
 }
 
 /**
+ * Ensure the malformed mukurtu_roundtrip_manager role is repaired first.
+ *
+ * See mukurtu_update_40001() and mukurtu_core_update_dependencies() for why
+ * this hook needs mukurtu_roundtrip_manager's config repaired before it runs.
+ */
+function mukurtu_export_update_dependencies(): array {
+  return [
+    'mukurtu_export' => [
+      '40002' => ['mukurtu' => '40001'],
+    ],
+  ];
+}
+
+/**
  * Grant export permissions to the Roundtrip Manager role.
  */
 function mukurtu_export_update_40002() {
   $role = \Drupal::entityTypeManager()->getStorage('user_role')->load('mukurtu_roundtrip_manager');
-  if ($role) {
-    foreach ([
-      'access mukurtu export',
-      'administer mukurtu_import_strategy',
-      'flag export_content',
-      'flag export_media',
-      'unflag export_content',
-      'unflag export_media',
-    ] as $permission) {
-      $role->grantPermission($permission);
-    }
-    $role->save();
+  if (!$role || !$role->id()) {
+    \Drupal::logger('mukurtu_export')->warning('Role mukurtu_roundtrip_manager could not be loaded or is malformed (missing ID); skipping permission grant.');
+    return;
   }
+  foreach ([
+    'access mukurtu export',
+    'administer mukurtu_import_strategy',
+    'flag export_content',
+    'flag export_media',
+    'unflag export_content',
+    'unflag export_media',
+  ] as $permission) {
+    $role->grantPermission($permission);
+  }
+  $role->save();
 }
 
 /**
