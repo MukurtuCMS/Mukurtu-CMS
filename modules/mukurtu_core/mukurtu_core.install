@@ -2128,3 +2128,23 @@ function mukurtu_core_update_40075(): void {
     $link->set('link', ['uri' => 'internal:/dashboard/mukurtu_dashboard'])->save();
   }
 }
+
+/**
+ * Install the Tour module and mukurtu_tour, and grant access tour.
+ */
+function mukurtu_core_update_40076(): void {
+  if (!\Drupal::moduleHandler()->moduleExists('mukurtu_tour')) {
+    \Drupal::service('module_installer')->install(['tour', 'mukurtu_tour']);
+  }
+
+  foreach (['administrator', 'mukurtu_manager'] as $role_id) {
+    $role = \Drupal\user\Entity\Role::load($role_id);
+    if (!$role) {
+      continue;
+    }
+    if (!$role->hasPermission('access tour')) {
+      $role->grantPermission('access tour');
+      $role->save();
+    }
+  }
+}

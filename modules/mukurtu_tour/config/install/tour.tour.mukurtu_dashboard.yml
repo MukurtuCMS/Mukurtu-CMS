@@ -1,0 +1,48 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - mukurtu_tour
+  module:
+    - dashboards
+id: mukurtu_dashboard
+label: 'Mukurtu Dashboard'
+routes:
+  -
+    route_name: entity.dashboard.canonical
+    route_params:
+      dashboard: mukurtu_dashboard
+tips:
+  welcome:
+    id: welcome
+    plugin: text
+    label: 'Welcome to your dashboard'
+    weight: -100
+    position: bottom
+    selector: null
+    body: 'This dashboard is where you manage your Mukurtu site. Take a quick tour to see where things are.'
+  setup_checklist:
+    id: setup_checklist
+    plugin: text
+    label: 'Setup checklist'
+    weight: -90
+    position: right
+    selector: '.block-mukurtu-setup-checklist'
+    body: 'New sites start here. Work through this checklist to finish configuring your Mukurtu site.'
+  communities_protocols:
+    id: communities_protocols
+    plugin: text
+    label: 'Communities and cultural protocols'
+    weight: -80
+    position: right
+    selector: '.menu--dashboard-3cs'
+    body: 'Manage the communities and cultural protocols that control access to your content.'
+  content:
+    id: content
+    plugin: text
+    label: 'Your content'
+    weight: -70
+    position: right
+    selector: '.menu--dashboard-content'
+    body: 'Create and manage the digital heritage items, collections, and pages on your site.'

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "815d88fadc4061a5556cf11d799f43ac",
+    "content-hash": "d083354ed6ad96593ed5810ec88f66e7",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -5474,6 +5474,64 @@
             "homepage": "https://www.drupal.org/project/token",
             "support": {
                 "source": "https://git.drupalcode.org/project/token"
+            }
+        },
+        {
+            "name": "drupal/tour",
+            "version": "3.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://git.drupalcode.org/project/tour.git",
+                "reference": "3.0.0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://ftp.drupal.org/files/projects/tour-3.0.0.zip",
+                "reference": "3.0.0",
+                "shasum": "08a065ae1e217aa30e76233417d944a29b019b44"
+            },
+            "require": {
+                "drupal/core": "^11.3 || ^12"
+            },
+            "require-dev": {
+                "drupal/dashboard": "*",
+                "php-forge/foxy": "^0.1"
+            },
+            "suggest": {
+                "drupal/tour_core": "*",
+                "drupal/tour_core_language": "*"
+            },
+            "type": "drupal-module",
+            "extra": {
+                "drupal": {
+                    "version": "3.0.0",
+                    "datestamp": "1782838401",
+                    "security-coverage": {
+                        "status": "covered",
+                        "message": "Covered by Drupal's security advisory policy"
+                    }
+                }
+            },
+            "notification-url": "https://packages.drupal.org/8/downloads",
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "Stephen Mustgrave (smustgrave)",
+                    "homepage": "https://www.drupal.org/u/smustgrave",
+                    "role": "Maintainer"
+                },
+                {
+                    "name": "smustgrave",
+                    "homepage": "https://www.drupal.org/user/3252890"
+                }
+            ],
+            "description": "The Tour module provides guided tours of the site interface via tooltips.",
+            "homepage": "https://drupal.org/project/tour",
+            "support": {
+                "source": "https://git.drupalcode.org/project/tour",
+                "issues": "https://drupal.org/project/issues/tour"
             }
         },
         {
