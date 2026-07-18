@@ -40,6 +40,7 @@ class LocalContextsLabelFormatter extends FormatterBase {
           '#img_url' => $label->img_url,
           '#audio_url' => $label->audio_url,
           '#community' => $label->community,
+          '#language' => $label->language,
           '#translations' => $label->translations,
           '#dialog_id' => Html::getUniqueId('lc-label'),
         ];
