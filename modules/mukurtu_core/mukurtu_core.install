@@ -2128,3 +2128,18 @@ function mukurtu_core_update_40075(): void {
     $link->set('link', ['uri' => 'internal:/dashboard/mukurtu_dashboard'])->save();
   }
 }
+
+/**
+ * Install the klaro module for GDPR/cookie consent management.
+ */
+function mukurtu_core_update_40076(): void {
+  \Drupal::service('module_installer')->install(['klaro']);
+  \Drupal::configFactory()->getEditable('klaro.settings')
+    ->set('show_toggle_button', TRUE)
+    ->save();
+  // Klaro only shows its consent UI to roles with the "use klaro"
+  // permission; grant it to visitors and logged-in users so the consent
+  // banner actually appears once a site enables any of Klaro's services.
+  user_role_grant_permissions('anonymous', ['use klaro']);
+  user_role_grant_permissions('authenticated', ['use klaro']);
+}

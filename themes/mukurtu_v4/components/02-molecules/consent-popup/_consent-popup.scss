@@ -3,3 +3,26 @@
   max-inline-size: 1000px !important;
   border-radius: 5px;
 }
+
+// The Klaro cookie consent banner/modal uses z-index values between 999 and
+// 1001 (see drupal/klaro_js's klaro.css). consent_popup's full-viewport
+// backdrop ships at the same z-index (1000), so ties are resolved by DOM
+// order rather than intent. Raise it above Klaro's range so the protocol
+// consent gate always takes precedence over the cookie banner when both
+// blocks are enabled on a site.
+.block-consent-popup {
+  z-index: 1100;
+}
+
+// Neither module hides the other from the accessibility tree while its own
+// overlay is open, so raising the z-index above would leave Klaro's toggle
+// button (and any open Klaro dialog) visually hidden behind the opaque
+// consent_popup backdrop but still focusable and in tab order (WCAG 2.4.11).
+// Hide Klaro's UI outright while the protocol gate is open; it reappears
+// once consent_popup removes this class from the body. Klaro's toggle
+// button (#klaro_toggle_dialog) is injected as its own direct child of
+// <body>, not nested inside .klaro, so it needs its own selector.
+body.consent-popup-opened .klaro,
+body.consent-popup-opened .klaro_toggle_dialog {
+  display: none;
+}

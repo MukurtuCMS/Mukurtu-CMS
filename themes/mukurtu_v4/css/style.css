@@ -1028,6 +1028,15 @@ a:not(.primary-nav__menu-link) svg.tel path {
   border-radius: 5px;
 }
 
+.block-consent-popup {
+  z-index: 1100;
+}
+
+body.consent-popup-opened .klaro,
+body.consent-popup-opened .klaro_toggle_dialog {
+  display: none;
+}
+
 .media:has(.mukurtu-content-warnings) {
   position: relative;
 }
