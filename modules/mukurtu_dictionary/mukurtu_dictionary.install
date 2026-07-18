@@ -43,6 +43,15 @@ function mukurtu_dictionary_update_40002() {
  * Update Search API indexes and Views to support multiple cultural protocols faceting.
  */
 function mukurtu_dictionary_update_40003() {
+  // tagify is a declared dependency in mukurtu_dictionary.info.yml, but
+  // Drupal only auto-enables a newly declared dependency on a fresh module
+  // install, not on an already-installed site. Ensure it's enabled before
+  // importing the form display config below, which already references the
+  // tagify widget.
+  if (!\Drupal::moduleHandler()->moduleExists('tagify')) {
+    \Drupal::service('module_installer')->install(['tagify']);
+  }
+
   // Import updated Search API index and Views configurations.
   $config_installer = \Drupal::service('config.installer');
   $config_installer->installDefaultConfig('module', 'mukurtu_dictionary');
