@@ -39,6 +39,8 @@ class CommunityForm extends ContentEntityForm {
     $this->injectAdvancedSidebarContainer($form);
     $form = parent::form($form, $form_state);
     $this->buildAdvancedSidebarAuthorGroup($form);
+    $this->groupAdvancedSidebarRevisionLog($form);
+    $this->suppressAdvancedSidebarStatusDescription($form);
     return $form;
   }
 

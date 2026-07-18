@@ -49,7 +49,26 @@ trait MukurtuAdvancedSidebarFormTrait {
   }
 
   /**
-   * Wraps the 'new_revision' checkbox in a 'Revision information' group.
+   * Creates the 'Revision information' group in the 'advanced' sidebar.
+   *
+   * Idempotent: safe to call from both form() (for 'revision_log', built by
+   * every operation) and buildForm() (for 'new_revision', added only for
+   * existing entities), whichever runs first.
+   */
+  protected function ensureAdvancedSidebarRevisionGroup(array &$form): void {
+    if (!isset($form['revision_information'])) {
+      $form['revision_information'] = [
+        '#type' => 'details',
+        '#title' => $this->t('Revision information'),
+        '#group' => 'advanced',
+        '#weight' => 20,
+        '#optional' => TRUE,
+      ];
+    }
+  }
+
+  /**
+   * Wraps the 'new_revision' checkbox in the 'Revision information' group.
    *
    * Call from buildForm(), after the checkbox has been added.
    */
@@ -57,14 +76,36 @@ trait MukurtuAdvancedSidebarFormTrait {
     if (!isset($form['new_revision'])) {
       return;
     }
-    $form['revision_information'] = [
-      '#type' => 'details',
-      '#title' => $this->t('Revision information'),
-      '#group' => 'advanced',
-      '#weight' => 20,
-      '#optional' => TRUE,
-    ];
+    $this->ensureAdvancedSidebarRevisionGroup($form);
     $form['new_revision']['#group'] = 'revision_information';
+  }
+
+  /**
+   * Wraps the 'revision_log' field in the 'Revision information' group.
+   *
+   * EditorialContentEntityBase adds this field via RevisionLogEntityTrait
+   * regardless of show_revision_ui, so it appears on both add and edit
+   * forms. Call after parent::form() has built the field widget.
+   */
+  protected function groupAdvancedSidebarRevisionLog(array &$form): void {
+    if (!isset($form['revision_log'])) {
+      return;
+    }
+    $this->ensureAdvancedSidebarRevisionGroup($form);
+    $form['revision_log']['#group'] = 'revision_information';
+  }
+
+  /**
+   * Removes the 'status' field's help text.
+   *
+   * Gin hoists the 'status' checkbox into the sticky header's "Published"
+   * toggle on content forms, where the field's full description reads as
+   * awkward clutter next to a plain toggle. Node's own 'status' base field
+   * has no description for the same reason. Call after parent::form() has
+   * built the field widget.
+   */
+  protected function suppressAdvancedSidebarStatusDescription(array &$form): void {
+    unset($form['status']['widget']['value']['#description']);
   }
 
 }
