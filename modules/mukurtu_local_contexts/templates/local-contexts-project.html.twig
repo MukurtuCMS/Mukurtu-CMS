@@ -17,19 +17,20 @@
             <div class="local-contexts-dialog__header">
               <img src="{{ tk_label.svg_url ?? tk_label.img_url }}" alt="">
             </div>
+            {% set tk_tab_id = project_id ~ '-' ~ tk_label.id %}
             {% if tk_label.translations and tk_label.language %}
-              <div class="local-contexts-dialog__tabs" role="tablist">
-                <button type="button" class="local-contexts-dialog__tab" role="tab" aria-selected="true" aria-controls="{{ tk_label.id }}-panel-0" id="{{ tk_label.id }}-tab-0">{{ tk_label.language }}</button>
+              <div class="local-contexts-dialog__tabs" role="tablist" aria-label="{{ tk_label.name }}">
+                <button type="button" class="local-contexts-dialog__tab" role="tab" aria-selected="true" aria-controls="{{ tk_tab_id }}-panel-0" id="{{ tk_tab_id }}-tab-0">{{ tk_label.language }}</button>
                 {% for translation in tk_label.translations %}
-                  <button type="button" class="local-contexts-dialog__tab" role="tab" aria-selected="false" tabindex="-1" aria-controls="{{ tk_label.id }}-panel-{{ loop.index }}" id="{{ tk_label.id }}-tab-{{ loop.index }}">{{ translation.language }}</button>
+                  <button type="button" class="local-contexts-dialog__tab" role="tab" aria-selected="false" tabindex="-1" aria-controls="{{ tk_tab_id }}-panel-{{ loop.index }}" id="{{ tk_tab_id }}-tab-{{ loop.index }}">{{ translation.language }}</button>
                 {% endfor %}
               </div>
-              <div class="local-contexts-dialog__tabpanel" id="{{ tk_label.id }}-panel-0" role="tabpanel" aria-labelledby="{{ tk_label.id }}-tab-0">
+              <div class="local-contexts-dialog__tabpanel" id="{{ tk_tab_id }}-panel-0" role="tabpanel" aria-labelledby="{{ tk_tab_id }}-tab-0">
                 <h2 class="local-contexts-dialog__title">{{ tk_label.name }}</h2>
                 <div class="local-contexts-dialog__text">{{ tk_label.text }}</div>
               </div>
               {% for translation in tk_label.translations %}
-                <div class="local-contexts-dialog__tabpanel" id="{{ tk_label.id }}-panel-{{ loop.index }}" role="tabpanel" aria-labelledby="{{ tk_label.id }}-tab-{{ loop.index }}" hidden>
+                <div class="local-contexts-dialog__tabpanel" id="{{ tk_tab_id }}-panel-{{ loop.index }}" role="tabpanel" aria-labelledby="{{ tk_tab_id }}-tab-{{ loop.index }}" hidden>
                   {% if translation.name %}
                     <h2 class="local-contexts-dialog__title">{{ translation.name }}</h2>
                   {% endif %}
@@ -44,7 +45,7 @@
             {% endif %}
             {% if tk_label.audio_url %}
               <div class="local-contexts-dialog__audio">
-                <audio controls>
+                <audio controls aria-label="{{ tk_label.name }}">
                   <source src="{{ tk_label.audio_url }}">
                 </audio>
               </div>
@@ -73,19 +74,20 @@
             <div class="local-contexts-dialog__header">
               <img src="{{ bc_label.svg_url ?? bc_label.img_url }}" alt="">
             </div>
+            {% set bc_tab_id = project_id ~ '-' ~ bc_label.id %}
             {% if bc_label.translations and bc_label.language %}
-              <div class="local-contexts-dialog__tabs" role="tablist">
-                <button type="button" class="local-contexts-dialog__tab" role="tab" aria-selected="true" aria-controls="{{ bc_label.id }}-panel-0" id="{{ bc_label.id }}-tab-0">{{ bc_label.language }}</button>
+              <div class="local-contexts-dialog__tabs" role="tablist" aria-label="{{ bc_label.name }}">
+                <button type="button" class="local-contexts-dialog__tab" role="tab" aria-selected="true" aria-controls="{{ bc_tab_id }}-panel-0" id="{{ bc_tab_id }}-tab-0">{{ bc_label.language }}</button>
                 {% for translation in bc_label.translations %}
-                  <button type="button" class="local-contexts-dialog__tab" role="tab" aria-selected="false" tabindex="-1" aria-controls="{{ bc_label.id }}-panel-{{ loop.index }}" id="{{ bc_label.id }}-tab-{{ loop.index }}">{{ translation.language }}</button>
+                  <button type="button" class="local-contexts-dialog__tab" role="tab" aria-selected="false" tabindex="-1" aria-controls="{{ bc_tab_id }}-panel-{{ loop.index }}" id="{{ bc_tab_id }}-tab-{{ loop.index }}">{{ translation.language }}</button>
                 {% endfor %}
               </div>
-              <div class="local-contexts-dialog__tabpanel" id="{{ bc_label.id }}-panel-0" role="tabpanel" aria-labelledby="{{ bc_label.id }}-tab-0">
+              <div class="local-contexts-dialog__tabpanel" id="{{ bc_tab_id }}-panel-0" role="tabpanel" aria-labelledby="{{ bc_tab_id }}-tab-0">
                 <h2 class="local-contexts-dialog__title">{{ bc_label.name }}</h2>
                 <div class="local-contexts-dialog__text">{{ bc_label.text }}</div>
               </div>
               {% for translation in bc_label.translations %}
-                <div class="local-contexts-dialog__tabpanel" id="{{ bc_label.id }}-panel-{{ loop.index }}" role="tabpanel" aria-labelledby="{{ bc_label.id }}-tab-{{ loop.index }}" hidden>
+                <div class="local-contexts-dialog__tabpanel" id="{{ bc_tab_id }}-panel-{{ loop.index }}" role="tabpanel" aria-labelledby="{{ bc_tab_id }}-tab-{{ loop.index }}" hidden>
                   {% if translation.name %}
                     <h2 class="local-contexts-dialog__title">{{ translation.name }}</h2>
                   {% endif %}
@@ -100,7 +102,7 @@
             {% endif %}
             {% if bc_label.audio_url %}
               <div class="local-contexts-dialog__audio">
-                <audio controls>
+                <audio controls aria-label="{{ bc_label.name }}">
                   <source src="{{ bc_label.audio_url }}">
                 </audio>
               </div>

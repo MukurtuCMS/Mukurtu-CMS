@@ -12,6 +12,7 @@ function mukurtu_local_contexts_theme($existing, $type, $theme, $path) {
     'local_contexts_project' => [
       'template' => 'local-contexts-project',
       'variables' => [
+        'project_id' => NULL,
         'title' => [],
         'privacy' => [],
         'project_url' => NULL,

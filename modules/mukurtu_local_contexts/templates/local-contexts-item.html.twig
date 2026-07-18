@@ -20,7 +20,7 @@
       {% endif %}
     </div>
     {% if translations and language %}
-      <div class="local-contexts-dialog__tabs" role="tablist">
+      <div class="local-contexts-dialog__tabs" role="tablist" aria-label="{{ name }}">
         <button type="button" class="local-contexts-dialog__tab" role="tab" aria-selected="true" aria-controls="{{ dialog_id }}-panel-0" id="{{ dialog_id }}-tab-0">{{ language }}</button>
         {% for translation in translations %}
           <button type="button" class="local-contexts-dialog__tab" role="tab" aria-selected="false" tabindex="-1" aria-controls="{{ dialog_id }}-panel-{{ loop.index }}" id="{{ dialog_id }}-tab-{{ loop.index }}">{{ translation.language }}</button>
@@ -62,7 +62,7 @@
     {% endif %}
     {% if audio_url %}
       <div class="local-contexts-dialog__audio">
-        <audio controls>
+        <audio controls aria-label="{{ name }}">
           <source src="{{ audio_url }}">
         </audio>
       </div>
