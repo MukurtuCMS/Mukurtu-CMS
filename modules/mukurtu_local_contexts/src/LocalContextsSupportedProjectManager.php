@@ -20,6 +20,23 @@ class LocalContextsSupportedProjectManager {
   }
 
   /**
+   * Determine if a project ID matches a legacy (v3-migrated) TK Labels project.
+   *
+   * Legacy projects are synthetic projects created by mukurtu_migrate to
+   * preserve v3 TK Labels customizations. They are never created through the
+   * Local Contexts Hub sync UI and should not be offered for new selections.
+   *
+   * @param string $id
+   *   The project ID to check.
+   *
+   * @return bool
+   *   True if the ID matches 'default_tk', 'sitewide_tk', or 'comm_{nid}_tk'.
+   */
+  public function isLegacyProjectId(string $id): bool {
+    return $id === 'default_tk' || $id === 'sitewide_tk' || (bool) preg_match('/^comm_\d+_tk$/', $id);
+  }
+
+  /**
    * Add project ID as a site project.
    *
    * @param string $project_id
@@ -134,6 +151,9 @@ class LocalContextsSupportedProjectManager {
   /**
    * Get all site projects that have been added.
    *
+   * @param bool $exclude_legacy
+   *   Whether to exclude legacy (v3-migrated) projects from the result.
+   *
    * @return array
    *   The project information, keyed by project ID.
    */
@@ -150,9 +170,9 @@ class LocalContextsSupportedProjectManager {
     $projects = $result->fetchAllAssoc('id', PDO::FETCH_ASSOC);
 
     if ($exclude_legacy) {
-      foreach (['default_tk', 'sitewide_tk'] as $legacy_id) {
-        if (isset($projects[$legacy_id])) {
-          unset($projects[$legacy_id]);
+      foreach (array_keys($projects) as $id) {
+        if ($this->isLegacyProjectId((string) $id)) {
+          unset($projects[$id]);
         }
       }
     }
@@ -164,11 +184,13 @@ class LocalContextsSupportedProjectManager {
    *
    * @param \Drupal\Core\Entity\ContentEntityInterface $group
    *   The OG group (community or protocol).
+   * @param bool $exclude_legacy
+   *   Whether to exclude legacy (v3-migrated) projects from the result.
    *
    * @return array
    *   The project information, keyed by project ID.
    */
-  public function getGroupSupportedProjects(ContentEntityInterface $group): array {
+  public function getGroupSupportedProjects(ContentEntityInterface $group, $exclude_legacy = FALSE): array {
     $query = $this->db->select('mukurtu_local_contexts_supported_projects', 'sp');
     $query->join('mukurtu_local_contexts_projects', 'p', 'sp.project_id = p.id');
     $query
@@ -178,7 +200,16 @@ class LocalContextsSupportedProjectManager {
     $query->orderBy('p.title');
 
     $result = $query->execute();
-    return $result->fetchAllAssoc('id', PDO::FETCH_ASSOC);
+    $projects = $result->fetchAllAssoc('id', PDO::FETCH_ASSOC);
+
+    if ($exclude_legacy) {
+      foreach (array_keys($projects) as $id) {
+        if ($this->isLegacyProjectId((string) $id)) {
+          unset($projects[$id]);
+        }
+      }
+    }
+    return $projects;
   }
 
   /**
