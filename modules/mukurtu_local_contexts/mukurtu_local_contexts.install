@@ -360,3 +360,10 @@ function mukurtu_local_contexts_update_10000() {
   );
 
 }
+
+/**
+ * Grant the Mukurtu Manager role access to the legacy project remap tool.
+ */
+function mukurtu_local_contexts_update_10001() {
+  user_role_grant_permissions('mukurtu_manager', ['administer local contexts legacy projects']);
+}
