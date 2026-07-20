@@ -72,10 +72,10 @@ services:
           # autoload_runtime.php.
           php -r "
             \$d = json_decode(file_get_contents('composer.json'), true);
-            \$d['require']['drupal/core'] = '11.4.1';
-            \$d['require']['drupal/core-recommended'] = '11.4.1';
-            \$d['require']['drupal/core-composer-scaffold'] = '11.4.1';
-            \$d['require']['drupal/core-project-message'] = '11.4.1';
+            \$d['require']['drupal/core'] = '11.4.4';
+            \$d['require']['drupal/core-recommended'] = '11.4.4';
+            \$d['require']['drupal/core-composer-scaffold'] = '11.4.4';
+            \$d['require']['drupal/core-project-message'] = '11.4.4';
             \$d['config']['preferred-install']['drupal/core*'] = 'dist';
             \$d['prefer-stable'] = true;
             \$d['config']['allow-plugins']['symfony/runtime'] = true;
