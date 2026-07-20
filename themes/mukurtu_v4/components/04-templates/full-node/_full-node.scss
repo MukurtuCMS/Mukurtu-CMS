@@ -99,6 +99,8 @@
 
   &__comment {
     margin-block-start: var(--v-space-xs);
+
+    @include layout.layout--full-width-grid-item;
   }
 }
 
