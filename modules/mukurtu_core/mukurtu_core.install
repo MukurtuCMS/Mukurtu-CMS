@@ -2140,3 +2140,14 @@ function mukurtu_core_update_40076(): void {
     $link->set('link', ['uri' => 'internal:/dashboard/mukurtu_dashboard'])->save();
   }
 }
+
+/**
+ * Stop linking the Content type column on the manage all content view.
+ */
+function mukurtu_core_update_40076(): void {
+  $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_manage_all_content');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('display.default.display_options.fields.type.settings.link', FALSE)->save();
+}
