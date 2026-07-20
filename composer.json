@@ -81,6 +81,7 @@
         "drupal/readonly_field_widget": "^2.1"
     },
     "require-dev": {
+        "composer/composer": "^2.10.2",
         "drupal/devel": "*",
         "drupal/core-dev": "*",
         "drupal/coder": "*",
