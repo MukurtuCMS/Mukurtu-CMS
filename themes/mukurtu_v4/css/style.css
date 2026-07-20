@@ -2509,6 +2509,11 @@ label.form-required::after {
           margin-inline-start: var(--v-space-6xs);
 }
 
+img[class$=-placeholder] {
+  display: block;
+  margin-inline: auto;
+}
+
 .media--remote_video .field[data-blazy] {
   min-inline-size: -webkit-min-content;
   min-inline-size: -moz-min-content;
