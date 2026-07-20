@@ -5,6 +5,7 @@ namespace Drupal\mukurtu_local_contexts\Form;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\TempStore\PrivateTempStoreFactory;
 use Drupal\mukurtu_local_contexts\LocalContextsApi;
 use Drupal\mukurtu_local_contexts\LocalContextsProject;
 use Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager;
@@ -20,8 +21,13 @@ abstract class ManageSupportedProjectsBase extends FormBase {
    *
    * @param \Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager $supportedProjectManager
    *   The Local Contexts supported project manager.
+   * @param \Drupal\Core\TempStore\PrivateTempStoreFactory $tempStoreFactory
+   *   The private tempstore factory.
    */
-  public function __construct(protected LocalContextsSupportedProjectManager $supportedProjectManager) {
+  public function __construct(
+    protected LocalContextsSupportedProjectManager $supportedProjectManager,
+    protected PrivateTempStoreFactory $tempStoreFactory,
+  ) {
   }
 
   /**
@@ -30,6 +36,7 @@ abstract class ManageSupportedProjectsBase extends FormBase {
   public static function create(ContainerInterface $container): static {
     return new static(
       $container->get('mukurtu_local_contexts.supported_project_manager'),
+      $container->get('tempstore.private'),
     );
   }
 
@@ -135,13 +142,17 @@ abstract class ManageSupportedProjectsBase extends FormBase {
         '#attributes' => ['class' => ['bulk-action-wrapper', 'container-inline']],
         '#tree' => FALSE,
       ];
+      $action_options = [
+        'add' => $this->t('Add / Sync'),
+        'delete' => $this->t('Delete'),
+      ];
+      if ($this->currentUser()->hasPermission('administer local contexts legacy projects')) {
+        $action_options['decommission'] = $this->t('Decommission');
+      }
       $form['bulk_action_wrapper']['action'] = [
         '#type' => 'select',
         '#title' => $this->t('With selected items'),
-        '#options' => [
-          'add' => $this->t('Add / Sync'),
-          'delete' => $this->t('Delete'),
-        ],
+        '#options' => $action_options,
         '#empty_option' => $this->t('- Select action -'),
       ];
       $form['bulk_action_wrapper']['submit'] = [
@@ -187,8 +198,26 @@ abstract class ManageSupportedProjectsBase extends FormBase {
       }
 
       // Loop over any remaining projects that are no longer on the hub.
+      // Legacy (v3-migrated) projects always fall into this bucket too,
+      // since they were never on the Hub to begin with - show their actual
+      // active/reference status instead of the generic "no longer on the
+      // hub" messaging, which would be misleading for them.
       $missing_projects = array_diff_key($supported_projects, $all_projects);
       foreach ($missing_projects as $id => $project) {
+        if ($this->supportedProjectManager->isLegacyProjectId((string) $id)) {
+          $reference_count = $this->countLegacyProjectReferences((string) $id);
+          $status = $reference_count === 0
+            ? $this->t('Active — no remaining references')
+            : $this->formatPlural($reference_count, 'Active — referenced by 1 node', 'Active — referenced by @count nodes');
+          $options[$id] = [
+            'title' => $project['title'],
+            'status' => $status,
+            'last_sync' => \Drupal::service('date.formatter')->format($project['updated'], 'short'),
+            'project_id' => $id,
+          ];
+          continue;
+        }
+
         $options[$id] = [
           'title' => $project['title'],
           'status' => [
@@ -288,9 +317,31 @@ abstract class ManageSupportedProjectsBase extends FormBase {
       case 'delete':
         $this->submitDelete($all_projects, $selected_projects, $group);
         break;
+      case 'decommission':
+        $this->submitDecommission($all_projects, $selected_projects, $group, $form_state);
+        break;
       default:
         $form_state->setErrorByName('action', $this->t('Select an action to apply.'));
     }
+  }
+
+  /**
+   * Count the distinct nodes still referencing a legacy project.
+   *
+   * @param string $id
+   *   The legacy project ID.
+   *
+   * @return int
+   *   The count of distinct nodes referencing the project, via either the
+   *   whole-project field or any of its individual labels/notices.
+   */
+  protected function countLegacyProjectReferences(string $id): int {
+    $referencing = (new LocalContextsProject($id))->getReferencingNodeIds();
+    $nids = $referencing['project'];
+    foreach ($referencing['labels_and_notices'] as $label_nids) {
+      $nids = array_merge($nids, $label_nids);
+    }
+    return count(array_unique($nids));
   }
 
   /**
@@ -391,6 +442,63 @@ abstract class ManageSupportedProjectsBase extends FormBase {
         }
       }
     }
+  }
+
+  /**
+   * Validate a decommission request and hand off to the confirmation page.
+   *
+   * Unlike submitDelete(), this doesn't delete anything directly - it only
+   * validates the selection (must be legacy projects with zero remaining
+   * content references), stores the validated subset for the confirmation
+   * step, and redirects there. Decommissioning is destructive and permanent,
+   * so it always goes through an explicit confirm step.
+   *
+   * @param array $all_projects
+   *   All projects to which the Local Contexts API key has access.
+   * @param array $selected_projects
+   *   An array of IDs that were selected to be decommissioned.
+   * @param \Drupal\Core\Entity\ContentEntityInterface|null $group
+   *   If decommissioning from a group, the entity object. If NULL,
+   *   decommissioning from the site-wide projects.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state, used to redirect to the confirmation page.
+   *
+   * @return void
+   */
+  protected function submitDecommission(array $all_projects, array $selected_projects, ?ContentEntityInterface $group, FormStateInterface $form_state): void {
+    if (!$this->currentUser()->hasPermission('administer local contexts legacy projects')) {
+      $form_state->setErrorByName('action', $this->t('You do not have permission to decommission legacy projects.'));
+      return;
+    }
+
+    $valid_ids = [];
+    foreach ($selected_projects as $id) {
+      if (!$this->supportedProjectManager->isLegacyProjectId((string) $id)) {
+        $title = $all_projects[$id]['title'] ?? $id;
+        $this->messenger()->addError($this->t('The project %project cannot be decommissioned because it is not a legacy project. Use Delete instead.', ['%project' => $title]));
+        continue;
+      }
+
+      $project = new LocalContextsProject($id);
+      if ($project->inUse()) {
+        $this->messenger()->addError($this->t('The project %project cannot be decommissioned because it is still referenced by content. Use the legacy project remap tool to reassign the remaining content first.', ['%project' => $project->getTitle()]));
+        continue;
+      }
+
+      $valid_ids[] = $id;
+    }
+
+    if (!$valid_ids) {
+      return;
+    }
+
+    $this->tempStoreFactory->get('mukurtu_local_contexts.decommission')->set($this->currentUser()->id(), [
+      'scope' => $group ? $group->getEntityTypeId() : 'site',
+      'group_id' => $group ? (int) $group->id() : NULL,
+      'project_ids' => $valid_ids,
+    ]);
+
+    $form_state->setRedirect('mukurtu_local_contexts.decommission_legacy_projects_confirm');
   }
 
 }
