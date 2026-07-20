@@ -1,7 +1,19 @@
 /* todo: when Claro is officially replaced by Gin (see https://www.drupal.org/about/core/blog/drupal-core-will-adopt-gin-admin-theme-to-replace-claro),
 remove the .claro-details__description class and replace it with its Gin
-counterpart, if one exists. */
-.form-item__description, .fieldset__description, .claro-details__description {
+counterpart, if one exists.
+[id$="--description"] covers the same text when the form renders through
+core's default (non-Claro) theming instead - the case for front-end users,
+whose dialogs don't get Claro/Gin's form theming at all. Core's own
+description wrapper markup always ends its id in "--description" (see
+FormElementBase/DetailsElementForm's #description handling), but only
+carries an actual class (.description) for a plain form item's description -
+a <details>/fieldset's own description (e.g. "Cultural Protocols") has no
+class at all outside Claro/Gin, so match on the id suffix instead of relying
+on any one class. */
+.form-item__description,
+.fieldset__description,
+.claro-details__description,
+[id$="--description"] {
   /* For form description text, force the line length to fill the width of its
   container. */
 
@@ -20,7 +32,8 @@ color, it doesn't shrink the size) ends up more visually prominent than the
 short fields themselves. Shrink it in these dialogs specifically. */
 .mukurtu-quick-create-form .form-item__description,
 .mukurtu-quick-create-form .fieldset__description,
-.mukurtu-quick-create-form .claro-details__description {
+.mukurtu-quick-create-form .claro-details__description,
+.mukurtu-quick-create-form [id$="--description"] {
   font-size: 0.75rem;
   line-height: 1.3;
 }
@@ -255,14 +268,27 @@ short fields themselves. Shrink it in these dialogs specifically. */
 }
 
 
-/* Canonical .ui-dialog positioning override (loaded on every page via
-   hook_page_attachments, covering both front-end and Gin admin contexts).
-   Gin sets .ui-dialog { position: absolute } which causes modal dialogs to
-   drift down the page as the user scrolls. Override to fixed + viewport-center
-   so the dialog always appears in the center of the viewport regardless of
-   scroll position. Uses flexbox so long forms scroll internally rather than
-   extending beyond the viewport. */
+/* Canonical .ui-dialog positioning/background override (loaded on every
+   page via hook_page_attachments, covering both front-end and Gin admin
+   contexts).
+   - Position: Gin sets .ui-dialog { position: absolute } which causes modal
+     dialogs to drift down the page as the user scrolls. Override to fixed +
+     viewport-center so the dialog always appears in the center of the
+     viewport regardless of scroll position. Uses flexbox so long forms
+     scroll internally rather than extending beyond the viewport.
+   - Background/text color: Gin's own rules for these key off its
+     --gin-bg-layer/--gin-color-text custom properties, which are only
+     defined when Gin's own base CSS loads - true for logged-in users with
+     the admin toolbar (it pulls Gin's CSS in as a side effect) but not for
+     other front-end users, who otherwise get a fully transparent, unreadable
+     dialog. Supply the same light-mode defaults Gin itself uses as
+     fallbacks, so the dialog looks the same regardless of which users
+     happen to trigger a Gin CSS load - real Gin dark-mode values (defined
+     when its CSS does load) still take precedence over these fallbacks. */
 .ui-dialog {
+    /* !important: core's own dialog CSS sets background: transparent at the
+       same specificity, later in the cascade, which would otherwise win. */
+    background: var(--gin-bg-layer, #fff) !important;
     position: fixed !important;
     top: 50vh !important;
     left: 50vw !important;
@@ -276,15 +302,60 @@ short fields themselves. Shrink it in these dialogs specifically. */
 
 .ui-dialog .ui-dialog-titlebar {
     flex-shrink: 0;
+    /* Padding fallback: same reasoning as .ui-dialog-content below. Matches
+       Gin's own --gin-spacing-m/--gin-spacing-l values. */
+    padding: var(--gin-spacing-m, 1rem) var(--gin-spacing-l, 1.5rem) !important;
+}
+
+.ui-widget-overlay {
+    /* Background fallback: Gin's own dialog.css sets this same property on
+       this same selector, so ours only applies when Gin's variables.css
+       doesn't load - same reasoning as the other fallbacks in this file.
+       Without it the modal backdrop is fully transparent (opacity .9 of
+       nothing), so the page behind the dialog never dims. Matches Gin's own
+       --gin-bg-layer2 light-mode value. */
+    background: var(--gin-bg-layer2, #edeff5) !important;
 }
 
 .ui-dialog .ui-dialog-content {
+    /* !important: core's own dialog CSS sets background: none at the same
+       specificity, later in the cascade, which would otherwise win. */
+    background: var(--gin-bg-layer, #fff) !important;
+    color: var(--gin-color-text, #222330) !important;
     flex: 1 1 auto !important;
     overflow-y: auto !important;
+    /* Padding fallback: Gin's own padding rule lives on a more specific
+       .ui-widget-content.ui-dialog-content selector, so it wins the cascade
+       whenever Gin's dialog.css component loads - but that can happen
+       *without* Gin's base variables.css also loading (observed on at least
+       one environment), in which case Gin's own rule resolves --gin-spacing-l
+       to nothing and collapses to 0 padding, and our lower-specificity
+       fallback never gets a chance to run. !important forces this fallback
+       to win regardless of which partial combination of Gin's CSS happens to
+       load, the same reasoning as the background/color !important above.
+       This fallback matches Gin's own --gin-spacing-l value. */
+    padding-inline: var(--gin-spacing-l, 1.5rem) !important;
 }
 
 .ui-dialog .ui-dialog-buttonpane {
     flex-shrink: 0;
+    /* Padding fallback: same reasoning as .ui-dialog-content above. Matches
+       Gin's own --gin-spacing-s/--gin-spacing-l values. */
+    padding: var(--gin-spacing-s, .75rem) var(--gin-spacing-l, 1.5rem) !important;
+}
+
+.tagify__dropdown {
+    /* Background fallback: tagify's own gin.css skin (web/modules/contrib/
+       tagify/css/gin.css) defines --tagify-dd-bg-color from Gin's
+       --gin-bg-layer2, but never actually applies it to this selector -
+       .tagify__dropdown has no background rule at all in that stylesheet.
+       On an admin (Gin) page it happens to sit over Gin's own themed canvas,
+       but on the front end there's nothing behind it, so the floating
+       dropdown panel is fully transparent and whatever's underneath (e.g.
+       the dialog's own submit button) shows through. Matches Gin's own
+       --gin-bg-layer2 light-mode value, same pattern as the other fallbacks
+       in this file. */
+    background: var(--gin-bg-layer2, #edeff5) !important;
 }
 
 /* Fix the titlebar close icon drifting off-center. Gin's own dialog CSS

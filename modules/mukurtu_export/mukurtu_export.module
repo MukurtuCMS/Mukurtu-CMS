@@ -1,5 +1,7 @@
 <?php
 
+use Drupal\Component\Serialization\Json;
+use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 
@@ -99,6 +101,55 @@ function mukurtu_export_entity_operation(\Drupal\Core\Entity\EntityInterface $en
 }
 
 /**
+ * Implements hook_mukurtu_browse_quick_actions_alter().
+ *
+ * Adds "Export" and "Add to export list" to a node's browse-card quick
+ * actions, gated on the same 'access mukurtu export' permission (manager
+ * roles only) as the equivalent admin operations-dropdown links added by
+ * mukurtu_export_entity_operation() above.
+ */
+function mukurtu_export_mukurtu_browse_quick_actions_alter(array &$actions, \Drupal\node\NodeInterface $node) {
+  if (!\Drupal::currentUser()->hasPermission('access mukurtu export')) {
+    return;
+  }
+
+  // mukurtu_modal/mukurtu_stay give this the same AJAX-modal treatment as
+  // the "Add to Collection" family of quick actions (see
+  // mukurtu_export_form_alter() and mukurtu_export_add_item_to_list_dialog_ajax()
+  // below) - the picker opens in a dialog and stays on the browse listing on
+  // success instead of navigating away.
+  $actions['add_to_export_list'] = [
+    'title' => t('Add to export list'),
+    'url' => \Drupal\Core\Url::fromRoute('mukurtu_export.add_item_to_list', [
+      'entity_type' => 'node',
+      'entity_id' => $node->id(),
+    ], ['query' => ['mukurtu_modal' => '1', 'mukurtu_stay' => '1']]),
+    'group' => 'overflow',
+    'weight' => 20,
+    'attributes' => [
+      'class' => ['use-ajax'],
+      'data-dialog-type' => 'modal',
+      'data-dialog-options' => Json::encode(['width' => 560]),
+      'data-quick-action-trigger' => 'export-list-' . $node->id(),
+    ],
+    'cache' => [
+      'contexts' => ['user.permissions'],
+    ],
+  ];
+
+  $actions['export'] = [
+    'title' => t('Export'),
+    'url' => \Drupal\Core\Url::fromRoute('mukurtu_export.start_adhoc_node', ['node' => $node->id()]),
+    'group' => 'overflow',
+    'weight' => 21,
+    'attributes' => [],
+    'cache' => [
+      'contexts' => ['user.permissions'],
+    ],
+  ];
+}
+
+/**
  * Implements hook_form_alter().
  *
  * Intercepts Views bulk-form submissions for the export flag actions so that
@@ -108,6 +159,54 @@ function mukurtu_export_form_alter(&$form, FormStateInterface $form_state, $form
   if (str_starts_with($form_id, 'views_form_')) {
     $form['#submit'][] = 'mukurtu_export_bulk_form_submit';
   }
+
+  // When the "Add to export list" picker is opened inside a modal dialog
+  // (see the browse-card quick action in
+  // mukurtu_export_mukurtu_browse_quick_actions_alter() and the full-view
+  // "Add to export list" tab in mukurtu_export.links.task.yml), wire its
+  // submit button to an AJAX callback that closes the dialog on success
+  // instead of doing a full page navigation - the same treatment as the
+  // "Add to Collection" family of quick actions.
+  if ($form_id === 'mukurtu_export_add_item_to_list' && \Drupal::request()->query->get('mukurtu_modal')) {
+    // mukurtu_core_modal_form_ajax_response() looks for "node" or
+    // "mukurtu_return_node"; this form has neither, so stash the item being
+    // added, taken from whichever route built this form - the quick action's
+    // entity_type/entity_id route (only ever a node) or the full-view tab's
+    // plain node route.
+    $route_match = \Drupal::routeMatch();
+    if ($route_match->getParameter('entity_type') === 'node') {
+      $node_id = $route_match->getParameter('entity_id');
+    }
+    else {
+      $node = $route_match->getParameter('node');
+      $node_id = $node instanceof \Drupal\node\NodeInterface ? $node->id() : $node;
+    }
+    if ($node_id) {
+      $form['mukurtu_return_node'] = [
+        '#type' => 'hidden',
+        '#value' => $node_id,
+      ];
+    }
+    $form['actions']['submit']['#ajax'] = [
+      'callback' => 'mukurtu_export_add_item_to_list_dialog_ajax',
+      'progress' => ['type' => 'throbber'],
+    ];
+    // The dialog's own close (X) button already covers this; a full-page
+    // "Cancel" link inside the modal would just navigate the whole page.
+    $form['actions']['cancel']['#access'] = FALSE;
+  }
+}
+
+/**
+ * AJAX callback for the "Add to export list" form when submitted from a
+ * modal dialog.
+ *
+ * Closes the dialog and returns to the item's page on a clean save; replaces
+ * the dialog content with the rebuilt form (including validation messages)
+ * when there are errors.
+ */
+function mukurtu_export_add_item_to_list_dialog_ajax(array &$form, FormStateInterface $form_state): AjaxResponse {
+  return mukurtu_core_modal_form_ajax_response($form, $form_state, fn ($nodeId) => '[data-quick-action-trigger="export-list-' . $nodeId . '"]');
 }
 
 /**
@@ -231,8 +330,9 @@ function mukurtu_export_entity_view(array &$build, \Drupal\Core\Entity\EntityInt
 /**
  * Implements hook_preprocess_block().
  *
- * Injects the "Add to export list" button into the local tasks block so it
- * can be rendered right-aligned next to the node tabs.
+ * Injects the "Add to export list" and "Export" buttons and the "In N
+ * export lists" membership widget into the local tasks block so they render
+ * right-aligned next to the node tabs.
  */
 function mukurtu_export_preprocess_block(&$variables) {
   if (($variables['plugin_id'] ?? '') !== 'local_tasks_block') {
@@ -251,13 +351,14 @@ function mukurtu_export_preprocess_block(&$variables) {
   $variables['export_button'] = [
     '#type' => 'link',
     '#title' => t('Add to export list'),
-    '#url' => \Drupal\Core\Url::fromRoute('mukurtu_export.add_item_to_list', [
-      'entity_type' => 'node',
-      'entity_id' => $node->id(),
-    ], [
-      'query' => ['destination' => \Drupal::request()->getRequestUri()],
+    '#url' => \Drupal\Core\Url::fromRoute('mukurtu_export.add_node_to_export_list', ['node' => $node->id()], [
+      'query' => ['mukurtu_modal' => '1'],
     ]),
-    '#attributes' => [],
+    '#attributes' => [
+      'class' => ['use-ajax'],
+      'data-dialog-type' => 'modal',
+      'data-dialog-options' => Json::encode(['width' => 560]),
+    ],
   ];
   $variables['export_adhoc_button'] = [
     '#type' => 'link',

@@ -21,6 +21,13 @@ language-switcher:
     - core/drupal
     - core/once
 
+quick-actions:
+  js:
+    components/02-molecules/quick-actions/quick-actions-menu.js: {}
+  dependencies:
+    - core/drupal
+    - core/drupal.dialog.ajax
+
 olivero-navigation:
   version: 10.1
   js:
@@ -81,3 +88,7 @@ copy-citation:
   dependencies:
     - core/drupal
     - core/once
+
+drupal.message:
+  js:
+    js/message.theme.js: {}

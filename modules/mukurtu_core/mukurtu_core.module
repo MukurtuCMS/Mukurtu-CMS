@@ -18,6 +18,7 @@ use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\CloseModalDialogCommand;
 use Drupal\Core\Ajax\HtmlCommand;
 use Drupal\Core\Ajax\InvokeCommand;
+use Drupal\Core\Ajax\MessageCommand;
 use Drupal\Core\Ajax\RedirectCommand;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\BubbleableMetadata;
@@ -274,15 +275,44 @@ function mukurtu_core_page_attachments(array &$attachments) {
  *
  * Expects the form to have a "node" or "mukurtu_return_node" hidden value
  * identifying the item to redirect back to on success.
+ *
+ * $quickActionFocusSelector opts a caller into the browse-card quick-action
+ * flow: when the request carries a "mukurtu_stay" query param (set when the
+ * dialog was opened from a quick-action icon rather than the full-page tab),
+ * stay on the listing instead of redirecting - relay any messenger()
+ * messages as MessageCommands (since there's no redirect for them to ride
+ * along with) and return focus to the triggering icon. The callable receives
+ * ($nodeId, $form_state) and must return the CSS selector for that icon.
  */
-function mukurtu_core_modal_form_ajax_response(array &$form, FormStateInterface $form_state): AjaxResponse {
+function mukurtu_core_modal_form_ajax_response(array &$form, FormStateInterface $form_state, ?callable $quickActionFocusSelector = NULL): AjaxResponse {
   $response = new AjaxResponse();
   if ($form_state->isExecuted()) {
     $nodeId = $form_state->getValue('node') ?? $form_state->getValue('mukurtu_return_node');
-    $node = $nodeId ? \Drupal::entityTypeManager()->getStorage('node')->load($nodeId) : NULL;
     $response->addCommand(new CloseModalDialogCommand());
-    if ($node) {
-      $response->addCommand(new RedirectCommand($node->toUrl()->toString()));
+
+    if ($quickActionFocusSelector && \Drupal::request()->query->get('mukurtu_stay')) {
+      // MessageCommand clears any previously displayed messages by default -
+      // only the first command in this response should do that; the rest
+      // must pass clear_previous=FALSE or they'd wipe out each other,
+      // leaving only the last message visible.
+      $first = TRUE;
+      foreach (\Drupal::messenger()->all() as $type => $messages) {
+        foreach ($messages as $message) {
+          $response->addCommand(new MessageCommand($message, NULL, ['type' => $type], $first));
+          $first = FALSE;
+        }
+      }
+      \Drupal::messenger()->deleteAll();
+
+      if ($nodeId) {
+        $response->addCommand(new InvokeCommand($quickActionFocusSelector($nodeId, $form_state), 'focus'));
+      }
+    }
+    else {
+      $node = $nodeId ? \Drupal::entityTypeManager()->getStorage('node')->load($nodeId) : NULL;
+      if ($node) {
+        $response->addCommand(new RedirectCommand($node->toUrl()->toString()));
+      }
     }
     return $response;
   }

@@ -285,6 +285,10 @@ function mukurtu_dictionary_form_alter(&$form, FormStateInterface $form_state, $
     return $element;
   };
 
+  // Core's node form only confirms the word list itself was created - add a
+  // second message confirming the word was added to it.
+  $form['actions']['submit']['#submit'][] = 'mukurtu_dictionary_add_word_to_new_list_submit';
+
   if (\Drupal::request()->query->get('mukurtu_modal')) {
     // This is the embedded "create a new word list" entity form. It has no
     // "node" value of its own, so stash the item being added (taken from
@@ -322,6 +326,26 @@ function mukurtu_dictionary_form_alter(&$form, FormStateInterface $form_state, $
 }
 
 /**
+ * Form submit handler added by mukurtu_dictionary_form_alter().
+ *
+ * Core's node form only confirms that the embedded "create a new word list"
+ * form's own entity was created - the word being added to it is set on that
+ * entity in memory before the form is even built (see
+ * MukurtuAddWordToListController), so it's already saved along with it, but
+ * nothing says so. Add a second message confirming that part too.
+ */
+function mukurtu_dictionary_add_word_to_new_list_submit(array &$form, FormStateInterface $form_state) {
+  $node = \Drupal::routeMatch()->getParameter('node');
+  $target = $form_state->getFormObject()->getEntity();
+  if ($node instanceof \Drupal\node\NodeInterface && $target) {
+    \Drupal::messenger()->addStatus(t('Added %item to %target.', [
+      '%item' => $node->getTitle(),
+      '%target' => $target->label(),
+    ]));
+  }
+}
+
+/**
  * AJAX callback for the "Add to Word List" form (including the embedded
  * "create a new word list" form) when submitted from a modal dialog.
  *
@@ -330,7 +354,10 @@ function mukurtu_dictionary_form_alter(&$form, FormStateInterface $form_state, $
  * when there are errors.
  */
 function mukurtu_dictionary_add_word_to_list_dialog_ajax(array &$form, FormStateInterface $form_state): AjaxResponse {
-  return mukurtu_core_modal_form_ajax_response($form, $form_state);
+  // mukurtu_stay marks this as opened from a browse-card quick action (see
+  // Drupal\mukurtu_dictionary\Hook\BrowseHooks::browseQuickActionsAlter())
+  // rather than the full-page tab this callback was originally built for.
+  return mukurtu_core_modal_form_ajax_response($form, $form_state, fn ($nodeId) => '[data-quick-action-trigger="word-list-' . $nodeId . '"]');
 }
 
 // Helper method to pull dictionary language field options from config.
