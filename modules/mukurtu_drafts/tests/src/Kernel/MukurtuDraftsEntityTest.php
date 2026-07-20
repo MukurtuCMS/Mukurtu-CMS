@@ -11,6 +11,7 @@ use Drupal\KernelTests\KernelTestBase;
  *
  * @group mukurtu_drafts
  */
+#[\PHPUnit\Framework\Attributes\Group('mukurtu_drafts')]
 class MukurtuDraftsEntityTest extends KernelTestBase {
 
   protected static $modules = ['system', 'user'];

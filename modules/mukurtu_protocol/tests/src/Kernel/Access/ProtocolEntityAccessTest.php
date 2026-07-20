@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_protocol\Kernel\Access;
 
@@ -14,9 +14,8 @@ use Drupal\user\Entity\User;
 
 /**
  * Tests access to protocols.
- *
- * @group mukurtu_protocol
  */
+#[\PHPUnit\Framework\Attributes\Group('mukurtu_protocol')]
 class ProtocolEntityAccessTest extends KernelTestBase {
 
   /**
@@ -63,14 +62,12 @@ class ProtocolEntityAccessTest extends KernelTestBase {
   protected function setUp(): void {
     parent::setUp();
 
-    ///
     $this->installSchema('system', 'sequences');
     $this->installSchema('node', 'node_access');
     $this->installEntitySchema('user');
     $this->installEntitySchema('node');
     $this->installEntitySchema('media');
     $this->installEntitySchema('og_membership');
-    $this->installEntitySchema('user');
     $this->installEntitySchema('taxonomy_term');
     $this->installEntitySchema('workflow');
     $this->installEntitySchema('community');
