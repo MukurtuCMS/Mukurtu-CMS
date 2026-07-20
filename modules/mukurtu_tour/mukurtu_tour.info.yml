@@ -8,3 +8,4 @@ dependencies:
   - 'drupal:tour'
   - 'dashboards:dashboards'
   - 'mukurtu_setup:mukurtu_setup'
+  - 'mukurtu_digital_heritage:mukurtu_digital_heritage'
