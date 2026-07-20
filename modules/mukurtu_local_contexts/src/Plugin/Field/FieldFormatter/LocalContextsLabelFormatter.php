@@ -53,6 +53,7 @@ class LocalContextsLabelFormatter extends FormatterBase {
           '#text' => $notice->default_text,
           '#svg_url' => $notice->svg_url,
           '#img_url' => $notice->img_url,
+          '#language' => $notice->language,
           '#translations' => $notice->translations,
           '#dialog_id' => Html::getUniqueId('lc-notice'),
         ];

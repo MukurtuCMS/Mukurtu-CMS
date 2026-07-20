@@ -19,6 +19,7 @@ NOTICE_UUID:notice_type => [
   "name" => "Traditional Knowledge (TK) Notice",
   "svg_url" => "https://storage.googleapis.com/local-context-hub-staging.appspot.com/labels/notices/tk-notice.svg",
   "text" => "The TK (Traditional Knowledge) Notice is a visible notification that there are accompanying cultural rights and responsibilities that need further...",
+  "language" => "English",
   "translations" => [ TRANSLATION_INDEX => ["locale" => ..., "language" => ..., "name" => ..., "text" => ...], ... ],
 ]
 
@@ -129,22 +130,46 @@ NOTICE_UUID:notice_type => [
             <div class="notice">
               <img src="{{ notice.svg_url ?? notice.img_url }}" alt="{{ notice.name }}">
               <div class="label-content">
-                <h4 class="label__name">{{ notice.name }}</h4>
-                <div class="text">{{ notice.text }}</div>
-                {% if notice.translations %}
+                {% set notice_tab_id = project.id ~ '-' ~ notice.notice_type %}
+                {% if notice.translations and notice.language %}
+                  <div class="local-contexts-dialog__tabs" role="tablist" aria-label="{{ notice.name }}">
+                    <button type="button" class="local-contexts-dialog__tab" role="tab" aria-selected="true" aria-controls="{{ notice_tab_id }}-panel-0" id="{{ notice_tab_id }}-tab-0">{{ notice.language }}</button>
+                    {% for translation in notice.translations %}
+                      <button type="button" class="local-contexts-dialog__tab" role="tab" aria-selected="false" tabindex="-1" aria-controls="{{ notice_tab_id }}-panel-{{ loop.index }}" id="{{ notice_tab_id }}-tab-{{ loop.index }}">{{ translation.language }}</button>
+                    {% endfor %}
+                  </div>
+                  <div class="local-contexts-dialog__tabpanel" id="{{ notice_tab_id }}-panel-0" role="tabpanel" aria-labelledby="{{ notice_tab_id }}-tab-0">
+                    <h4 class="label__name">{{ notice.name }}</h4>
+                    <div class="text">{{ notice.text }}</div>
+                  </div>
                   {% for translation in notice.translations %}
-                    <div class="local-contexts-dialog__translation">
-                      {% if translation.language %}
-                        <div class="local-contexts-dialog__translation-language">{{ translation.language }}</div>
-                      {% endif %}
+                    <div class="local-contexts-dialog__tabpanel" id="{{ notice_tab_id }}-panel-{{ loop.index }}" role="tabpanel" aria-labelledby="{{ notice_tab_id }}-tab-{{ loop.index }}" hidden>
                       {% if translation.name %}
-                        <div class="local-contexts-dialog__translation-name">{{ translation.name }}</div>
+                        <h4 class="label__name">{{ translation.name }}</h4>
                       {% endif %}
                       {% if translation.text %}
-                        <div class="local-contexts-dialog__translation-text">{{ translation.text }}</div>
+                        <div class="text">{{ translation.text }}</div>
                       {% endif %}
                     </div>
                   {% endfor %}
+                {% else %}
+                  <h4 class="label__name">{{ notice.name }}</h4>
+                  <div class="text">{{ notice.text }}</div>
+                  {% if notice.translations %}
+                    {% for translation in notice.translations %}
+                      <div class="local-contexts-dialog__translation">
+                        {% if translation.language %}
+                          <div class="local-contexts-dialog__translation-language">{{ translation.language }}</div>
+                        {% endif %}
+                        {% if translation.name %}
+                          <div class="local-contexts-dialog__translation-name">{{ translation.name }}</div>
+                        {% endif %}
+                        {% if translation.text %}
+                          <div class="local-contexts-dialog__translation-text">{{ translation.text }}</div>
+                        {% endif %}
+                      </div>
+                    {% endfor %}
+                  {% endif %}
                 {% endif %}
               </div>
             </div>

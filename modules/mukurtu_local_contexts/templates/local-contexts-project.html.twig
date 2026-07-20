@@ -134,21 +134,44 @@
                 <h2 class="local-contexts-dialog__title">{{ notice.name }}</h2>
               </div>
             </div>
-            <div class="local-contexts-dialog__text">{{ notice.text }}</div>
-            {% if notice.translations %}
+            {% set notice_tab_id = project_id ~ '-' ~ notice.notice_type %}
+            {% if notice.translations and notice.language %}
+              <div class="local-contexts-dialog__tabs" role="tablist" aria-label="{{ notice.name }}">
+                <button type="button" class="local-contexts-dialog__tab" role="tab" aria-selected="true" aria-controls="{{ notice_tab_id }}-panel-0" id="{{ notice_tab_id }}-tab-0">{{ notice.language }}</button>
+                {% for translation in notice.translations %}
+                  <button type="button" class="local-contexts-dialog__tab" role="tab" aria-selected="false" tabindex="-1" aria-controls="{{ notice_tab_id }}-panel-{{ loop.index }}" id="{{ notice_tab_id }}-tab-{{ loop.index }}">{{ translation.language }}</button>
+                {% endfor %}
+              </div>
+              <div class="local-contexts-dialog__tabpanel" id="{{ notice_tab_id }}-panel-0" role="tabpanel" aria-labelledby="{{ notice_tab_id }}-tab-0">
+                <div class="local-contexts-dialog__text">{{ notice.text }}</div>
+              </div>
               {% for translation in notice.translations %}
-                <div class="local-contexts-dialog__translation">
-                  {% if translation.language %}
-                    <div class="local-contexts-dialog__translation-language">{{ translation.language }}</div>
-                  {% endif %}
+                <div class="local-contexts-dialog__tabpanel" id="{{ notice_tab_id }}-panel-{{ loop.index }}" role="tabpanel" aria-labelledby="{{ notice_tab_id }}-tab-{{ loop.index }}" hidden>
                   {% if translation.name %}
-                    <div class="local-contexts-dialog__translation-name">{{ translation.name }}</div>
+                    <h2 class="local-contexts-dialog__title">{{ translation.name }}</h2>
                   {% endif %}
                   {% if translation.text %}
-                    <div class="local-contexts-dialog__translation-text">{{ translation.text }}</div>
+                    <div class="local-contexts-dialog__text">{{ translation.text }}</div>
                   {% endif %}
                 </div>
               {% endfor %}
+            {% else %}
+              <div class="local-contexts-dialog__text">{{ notice.text }}</div>
+              {% if notice.translations %}
+                {% for translation in notice.translations %}
+                  <div class="local-contexts-dialog__translation">
+                    {% if translation.language %}
+                      <div class="local-contexts-dialog__translation-language">{{ translation.language }}</div>
+                    {% endif %}
+                    {% if translation.name %}
+                      <div class="local-contexts-dialog__translation-name">{{ translation.name }}</div>
+                    {% endif %}
+                    {% if translation.text %}
+                      <div class="local-contexts-dialog__translation-text">{{ translation.text }}</div>
+                    {% endif %}
+                  </div>
+                {% endfor %}
+              {% endif %}
             {% endif %}
             {% if project_url %}
               <div class="local-contexts-dialog__project-link"><a href="{{ project_url }}" target="_blank" rel="noopener noreferrer">{{ title }}</a></div>

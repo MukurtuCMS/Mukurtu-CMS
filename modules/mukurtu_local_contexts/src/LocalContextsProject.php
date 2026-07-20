@@ -182,7 +182,7 @@ class LocalContextsProject extends LocalContextsHubBase {
   public function getNotices() {
     $query = $this->db->select('mukurtu_local_contexts_notices', 'n')
       ->condition('n.project_id', $this->id)
-      ->fields('n', ['project_id', 'type', 'name', 'img_url', 'svg_url', 'default_text']);
+      ->fields('n', ['project_id', 'type', 'name', 'img_url', 'svg_url', 'default_text', 'language']);
     $result = $query->execute();
 
     $notices = [];
@@ -195,6 +195,7 @@ class LocalContextsProject extends LocalContextsHubBase {
         'img_url' => $notice['img_url'],
         'svg_url' => $notice['svg_url'],
         'text' => $notice['default_text'],
+        'language' => $notice['language'],
         'translations' => [],
       ];
     }
@@ -295,6 +296,8 @@ class LocalContextsProject extends LocalContextsHubBase {
         'type' => $notice['notice_type'],
         'img_url' => $notice['img_url'],
         'svg_url' => $notice['svg_url'],
+        'locale' => $notice['language_tag'] ?? NULL,
+        'language' => $notice['language'] ?? NULL,
         'default_text' => $notice['default_text'],
         'display' => 'notice',
         'updated' => time(),

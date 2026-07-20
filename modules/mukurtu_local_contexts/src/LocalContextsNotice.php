@@ -14,6 +14,7 @@ class LocalContextsNotice extends LocalContextsHubBase
   public $img_url;
   public $svg_url;
   public $default_text;
+  public $language;
   public $translations;
 
   public function __construct($id)
@@ -28,7 +29,7 @@ class LocalContextsNotice extends LocalContextsHubBase
     $query = $this->db->select('mukurtu_local_contexts_notices', 'n')
       ->condition('n.project_id', $this->project_id)
       ->condition('n.type', $this->type)
-      ->fields('n', ['name', 'img_url', 'svg_url', 'default_text']);
+      ->fields('n', ['name', 'img_url', 'svg_url', 'default_text', 'language']);
     $result = $query->execute();
 
     $notice = $result->fetchAssoc();
@@ -36,6 +37,7 @@ class LocalContextsNotice extends LocalContextsHubBase
     $this->img_url = $notice['img_url'] ?? NULL;
     $this->svg_url = $notice['svg_url'] ?? NULL;
     $this->default_text = $notice['default_text'] ?? '';
+    $this->language = $notice['language'] ?? NULL;
 
     $tQuery = $this->db->select('mukurtu_local_contexts_notice_translations', 't')
       ->condition('t.project_id', $this->project_id)
