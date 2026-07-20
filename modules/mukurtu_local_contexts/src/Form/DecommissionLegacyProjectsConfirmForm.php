@@ -162,7 +162,7 @@ class DecommissionLegacyProjectsConfirmForm extends ConfirmFormBase {
 
     $group = NULL;
     if ($scope !== 'site' && $group_id) {
-      $group = $this->entityTypeManager()->getStorage($scope)->load($group_id);
+      $group = \Drupal::entityTypeManager()->getStorage($scope)->load($group_id);
     }
 
     $decommissioned = 0;
