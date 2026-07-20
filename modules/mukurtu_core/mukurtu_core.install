@@ -1910,60 +1910,84 @@ function mukurtu_core_update_40068(&$sandbox): string {
   $batch_size = 25;
   $nids_batch = array_slice($sandbox['nids'], $sandbox['progress'], $batch_size);
 
+  $account_switcher = \Drupal::service('account_switcher');
   foreach ($nids_batch as $nid) {
-    $node = \Drupal\node\Entity\Node::load($nid);
-    if ($node && $node->hasField('layout_builder__layout') && $node->get('layout_builder__layout')->isEmpty()) {
-      $uuid_generator = new \Drupal\Component\Uuid\Php();
+    try {
+      $node = \Drupal\node\Entity\Node::load($nid);
+      if ($node && $node->hasField('layout_builder__layout') && $node->get('layout_builder__layout')->isEmpty()) {
+        $uuid_generator = new \Drupal\Component\Uuid\Php();
 
-      $body_component = new \Drupal\layout_builder\SectionComponent(
-        $uuid_generator->generate(),
-        'content',
-        [
-          'id' => 'field_block:node:page:body',
-          'label' => '',
-          'label_display' => '0',
-          'formatter' => [
-            'type' => 'text_default',
-            'settings' => [],
-            'label' => 'hidden',
-          ],
-          'context_mapping' => ['entity' => 'layout_builder.entity'],
-          'provider' => 'layout_builder',
-        ]
-      );
-
-      // Matches the field_page_media_assets field_block already present in
-      // the bundle's own default full display (core.entity_view_display.
-      // node.page.full.yml), so migrated nodes end up with the same layout
-      // a brand new page gets.
-      $media_component = new \Drupal\layout_builder\SectionComponent(
-        $uuid_generator->generate(),
-        'content',
-        [
-          'id' => 'field_block:node:page:field_page_media_assets',
-          'label' => '',
-          'label_display' => '0',
-          'formatter' => [
-            'type' => 'entity_reference_entity_view',
-            'settings' => [
-              'view_mode' => 'media_assets',
-              'link' => FALSE,
+        $body_component = new \Drupal\layout_builder\SectionComponent(
+          $uuid_generator->generate(),
+          'content',
+          [
+            'id' => 'field_block:node:page:body',
+            'label' => '',
+            'label_display' => '0',
+            'formatter' => [
+              'type' => 'text_default',
+              'settings' => [],
+              'label' => 'hidden',
             ],
-            'label' => 'hidden',
-          ],
-          'context_mapping' => ['entity' => 'layout_builder.entity'],
-          'provider' => 'layout_builder',
-        ]
-      );
+            'context_mapping' => ['entity' => 'layout_builder.entity'],
+            'provider' => 'layout_builder',
+          ]
+        );
 
-      $section = new \Drupal\layout_builder\Section(
-        'layout_onecol',
-        [],
-        [$body_component, $media_component]
-      );
+        // Matches the field_page_media_assets field_block already present in
+        // the bundle's own default full display (core.entity_view_display.
+        // node.page.full.yml), so migrated nodes end up with the same layout
+        // a brand new page gets.
+        $media_component = new \Drupal\layout_builder\SectionComponent(
+          $uuid_generator->generate(),
+          'content',
+          [
+            'id' => 'field_block:node:page:field_page_media_assets',
+            'label' => '',
+            'label_display' => '0',
+            'formatter' => [
+              'type' => 'entity_reference_entity_view',
+              'settings' => [
+                'view_mode' => 'media_assets',
+                'link' => FALSE,
+              ],
+              'label' => 'hidden',
+            ],
+            'context_mapping' => ['entity' => 'layout_builder.entity'],
+            'provider' => 'layout_builder',
+          ]
+        );
 
-      $node->set('layout_builder__layout', [$section]);
-      $node->save();
+        $section = new \Drupal\layout_builder\Section(
+          'layout_onecol',
+          [],
+          [$body_component, $media_component]
+        );
+
+        $node->set('layout_builder__layout', [$section]);
+
+        // Save as the node's own owner so mukurtu_notifications_node_update()
+        // doesn't treat this migration as someone else editing the page and
+        // email the owner/stewards a "your content was updated" notice.
+        $owner = $node->getOwner();
+        if ($owner) {
+          $account_switcher->switchTo($owner);
+        }
+        try {
+          $node->save();
+        }
+        finally {
+          if ($owner) {
+            $account_switcher->switchBack();
+          }
+        }
+      }
+    }
+    catch (\Exception $e) {
+      \Drupal::logger('mukurtu_core')->error('Failed to migrate node @nid to Layout Builder: @message', [
+        '@nid' => $nid,
+        '@message' => $e->getMessage(),
+      ]);
     }
     $sandbox['progress']++;
   }

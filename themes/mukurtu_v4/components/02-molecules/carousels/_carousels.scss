@@ -120,6 +120,20 @@
   // chain shrink to fit instead.
   min-inline-size: 0;
 
+  // Splide's default translucent arrow background (library CSS) relies on
+  // the page background behind it for contrast. These arrows sit on top of
+  // user-uploaded thumbnail photos of unknown color/luminance, so an opaque
+  // background is needed to keep WCAG 1.4.11 non-text contrast regardless of
+  // image.
+  .splide__arrow {
+    background: rgb(0 0 0 / 60%);
+    opacity: 1;
+
+    svg {
+      fill: white;
+    }
+  }
+
   &.splide:not(.is-overflow) .splide__list {
     justify-content: center;
   }

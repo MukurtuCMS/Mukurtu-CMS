@@ -951,6 +951,13 @@ a:not(.primary-nav__menu-link) svg.tel path {
 .thumbnail-carousel {
   min-inline-size: 0;
 }
+.thumbnail-carousel .splide__arrow {
+  background: rgba(0, 0, 0, 0.6);
+  opacity: 1;
+}
+.thumbnail-carousel .splide__arrow svg {
+  fill: white;
+}
 .thumbnail-carousel.splide:not(.is-overflow) .splide__list {
   -webkit-box-pack: center;
       -ms-flex-pack: center;
