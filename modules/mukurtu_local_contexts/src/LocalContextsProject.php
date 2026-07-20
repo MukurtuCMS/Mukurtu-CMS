@@ -445,4 +445,54 @@ class LocalContextsProject extends LocalContextsHubBase {
     return $referencing;
   }
 
+  /**
+   * Resolve the display name of a specific label or notice on this project.
+   *
+   * @param string $refType
+   *   Either 'label' or 'notice'.
+   * @param string $refId
+   *   The label ID (for 'label') or notice type (for 'notice').
+   *
+   * @return string|null
+   *   The display name, or NULL if no matching label/notice is found.
+   */
+  public function resolveLabelOrNoticeName(string $refType, string $refId): ?string {
+    if ($refType === 'notice') {
+      foreach ($this->getNotices() as $notice) {
+        if ($notice['notice_type'] === $refId) {
+          return $notice['name'];
+        }
+      }
+      return NULL;
+    }
+
+    $labels = array_merge($this->getLabels('tk'), $this->getLabels('bc'));
+    return $labels[$refId]['name'] ?? NULL;
+  }
+
+  /**
+   * Get the node IDs referencing one specific label or notice.
+   *
+   * Unlike getReferencingNodeIds()['labels_and_notices'][$refId], this
+   * queries the exact "project_id:ref_id:ref_type" compound value directly,
+   * so it can't be affected by a label ID and a notice type colliding on the
+   * same string (which would otherwise silently overwrite one another in
+   * that merged, flatly-keyed array).
+   *
+   * @param string $refType
+   *   Either 'label' or 'notice'.
+   * @param string $refId
+   *   The label ID (for 'label') or notice type (for 'notice').
+   *
+   * @return int[]
+   *   Node IDs referencing this exact label/notice.
+   */
+  public function getReferencingNodeIdsForRef(string $refType, string $refId): array {
+    $value = $this->id . ':' . $refId . ':' . $refType;
+    $query = \Drupal::entityQuery('node')
+      ->condition('field_local_contexts_labels_and_notices', $value)
+      ->accessCheck(FALSE);
+    return array_values($query->execute());
+  }
+
 }

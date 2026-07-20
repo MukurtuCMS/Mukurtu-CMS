@@ -6,6 +6,7 @@ use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\TempStore\PrivateTempStoreFactory;
+use Drupal\Core\Url;
 use Drupal\mukurtu_local_contexts\LocalContextsApi;
 use Drupal\mukurtu_local_contexts\LocalContextsProject;
 use Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager;
@@ -358,7 +359,20 @@ abstract class ManageSupportedProjectsBase extends FormBase {
     if ($reference_count === 0) {
       return $this->t('Active — no remaining references');
     }
-    return $this->formatPlural($reference_count, 'Active — referenced by 1 node', 'Active — referenced by @count nodes');
+
+    $text = $this->formatPlural($reference_count, 'Active — referenced by 1 node', 'Active — referenced by @count nodes');
+
+    if (!$this->supportedProjectManager->isLegacyProjectId($id)) {
+      return $text;
+    }
+
+    return [
+      'data' => [
+        '#type' => 'link',
+        '#title' => $text,
+        '#url' => Url::fromRoute('mukurtu_local_contexts.legacy_project_label_breakdown', ['project_id' => $id]),
+      ],
+    ];
   }
 
   /**
