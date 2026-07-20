@@ -6600,6 +6600,12 @@ header {
 .full-node__comment {
   -webkit-margin-before: var(--v-space-xs);
           margin-block-start: var(--v-space-xs);
+  grid-column: 1/-1;
+}
+@media (min-width: 90rem) {
+  .full-node__comment {
+    grid-column: 2/-2;
+  }
 }
 
 .node--status-banner {
