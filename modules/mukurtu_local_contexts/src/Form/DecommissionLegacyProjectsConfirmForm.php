@@ -107,6 +107,7 @@ class DecommissionLegacyProjectsConfirmForm extends ConfirmFormBase {
 
     $form['items'] = [
       '#theme' => 'item_list',
+      '#title' => $this->t('Selected items'),
       '#items' => $items,
       '#weight' => -10,
     ];
