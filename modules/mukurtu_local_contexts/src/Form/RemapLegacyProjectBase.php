@@ -100,6 +100,7 @@ abstract class RemapLegacyProjectBase extends FormBase {
     $form['legacy_project_id'] = [
       '#type' => 'radios',
       '#title' => $this->t('Legacy project to reassign'),
+      '#description' => $this->t("Legacy projects come from your v3 migration. 'Default' labels were never customized; 'Sitewide' labels were customized at the site level; a community-specific project appears only if that community customized its own labels in v3."),
       '#options' => $legacyOptions,
       '#default_value' => $form_state->get('legacy_project_id'),
       '#required' => TRUE,
