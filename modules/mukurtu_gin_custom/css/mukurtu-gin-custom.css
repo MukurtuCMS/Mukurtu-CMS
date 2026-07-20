@@ -499,3 +499,15 @@ short fields themselves. Shrink it in these dialogs specifically. */
 .mukurtu-dashboard-layout .gin-secondary-toolbar .toolbar-secondary .toolbar-bar .toolbar-tab:not(:hover):not(:focus-within) .toolbar-tray {
   display: none !important;
 }
+
+/* Fix #1825: on /admin/export/settings, each saved export setting's
+   (Edit, Duplicate, Delete) action links are rendered via #suffix
+   (see CSV.php), placing them as a sibling immediately before the next
+   radio option's form-item wrapper with no spacing, making the list hard
+   to scan. Add breathing room below the actions row, and indent it to
+   align with the label/description text above (Claro's .form-type--boolean
+   uses the same --input--label-spacing to offset past the floated radio). */
+.mukurtu-export-settings .csv-exporter-actions {
+  margin-inline-start: var(--input--label-spacing);
+  margin-block-end: 1.5rem;
+}
