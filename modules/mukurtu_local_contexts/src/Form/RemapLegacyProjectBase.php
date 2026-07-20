@@ -118,6 +118,7 @@ abstract class RemapLegacyProjectBase extends FormBase {
     $form['actions']['next'] = [
       '#type' => 'submit',
       '#value' => $this->t('Next: Map Labels'),
+      '#button_type' => 'primary',
       '#submit' => ['::submitSelect'],
     ];
 
@@ -189,6 +190,7 @@ abstract class RemapLegacyProjectBase extends FormBase {
     $form['actions']['preview'] = [
       '#type' => 'submit',
       '#value' => $this->t('Preview'),
+      '#button_type' => 'primary',
       '#submit' => ['::submitMap'],
     ];
 
@@ -291,6 +293,7 @@ abstract class RemapLegacyProjectBase extends FormBase {
     $form['actions']['confirm'] = [
       '#type' => 'submit',
       '#value' => $this->t('Confirm & Run Batch'),
+      '#button_type' => 'primary',
       '#submit' => ['::submitConfirm'],
       '#access' => $preview['total'] > 0,
     ];
