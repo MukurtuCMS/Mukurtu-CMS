@@ -146,7 +146,11 @@ abstract class ManageSupportedProjectsBase extends FormBase {
         'add' => $this->t('Add / Sync'),
         'delete' => $this->t('Delete'),
       ];
-      if ($this->currentUser()->hasPermission('administer local contexts legacy projects')) {
+      $has_legacy_projects = (bool) array_filter(
+        array_keys($supported_projects),
+        fn ($id) => $this->supportedProjectManager->isLegacyProjectId((string) $id)
+      );
+      if ($has_legacy_projects && $this->currentUser()->hasPermission('administer local contexts legacy projects')) {
         $action_options['decommission'] = $this->t('Decommission');
       }
       $form['bulk_action_wrapper']['action'] = [
@@ -193,7 +197,7 @@ abstract class ManageSupportedProjectsBase extends FormBase {
             $supported_projects[$id]['updated'],
             'short'
           );
-          $options[$id]['status'] = $this->t('Active');
+          $options[$id]['status'] = $this->describeActiveStatus($id);
         }
       }
 
@@ -205,13 +209,9 @@ abstract class ManageSupportedProjectsBase extends FormBase {
       $missing_projects = array_diff_key($supported_projects, $all_projects);
       foreach ($missing_projects as $id => $project) {
         if ($this->supportedProjectManager->isLegacyProjectId((string) $id)) {
-          $reference_count = $this->countLegacyProjectReferences((string) $id);
-          $status = $reference_count === 0
-            ? $this->t('Active — no remaining references')
-            : $this->formatPlural($reference_count, 'Active — referenced by 1 node', 'Active — referenced by @count nodes');
           $options[$id] = [
             'title' => $project['title'],
-            'status' => $status,
+            'status' => $this->describeActiveStatus((string) $id),
             'last_sync' => \Drupal::service('date.formatter')->format($project['updated'], 'short'),
             'project_id' => $id,
           ];
@@ -326,22 +326,39 @@ abstract class ManageSupportedProjectsBase extends FormBase {
   }
 
   /**
-   * Count the distinct nodes still referencing a legacy project.
+   * Count the distinct nodes still referencing a project.
    *
    * @param string $id
-   *   The legacy project ID.
+   *   The project ID.
    *
    * @return int
    *   The count of distinct nodes referencing the project, via either the
    *   whole-project field or any of its individual labels/notices.
    */
-  protected function countLegacyProjectReferences(string $id): int {
+  protected function countProjectReferences(string $id): int {
     $referencing = (new LocalContextsProject($id))->getReferencingNodeIds();
     $nids = $referencing['project'];
     foreach ($referencing['labels_and_notices'] as $label_nids) {
       $nids = array_merge($nids, $label_nids);
     }
     return count(array_unique($nids));
+  }
+
+  /**
+   * Describe an active project's status, including its reference count.
+   *
+   * @param string $id
+   *   The project ID.
+   *
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup
+   *   The status text, e.g. "Active — referenced by 3 nodes".
+   */
+  protected function describeActiveStatus(string $id) {
+    $reference_count = $this->countProjectReferences($id);
+    if ($reference_count === 0) {
+      return $this->t('Active — no remaining references');
+    }
+    return $this->formatPlural($reference_count, 'Active — referenced by 1 node', 'Active — referenced by @count nodes');
   }
 
   /**
