@@ -11,3 +11,10 @@ mukurtu_local_contexts.site_projects_directory:
   parent: mukurtu_dashboard
   menu_name: dashboard-site-settings
   route_name: mukurtu_local_contexts.site_project_directory
+
+mukurtu_local_contexts.remap_legacy_project_site:
+  title: 'Remap Legacy Projects'
+  description: 'Reassign content off legacy (v3-migrated) Local Contexts projects onto real Local Contexts Hub projects, in bulk.'
+  parent: mukurtu_dashboard
+  menu_name: dashboard-site-settings
+  route_name: mukurtu_local_contexts.remap_legacy_project_site

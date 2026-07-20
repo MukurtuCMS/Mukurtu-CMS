@@ -28,6 +28,14 @@ mukurtu_local_contexts.site_project_directory_settings:
   requirements:
     _permission: 'administer site configuration'
 
+mukurtu_local_contexts.remap_legacy_project_site:
+  path: '/admin/local-contexts/legacy-projects/remap'
+  defaults:
+    _title: 'Reassign legacy Local Contexts project'
+    _form: 'Drupal\mukurtu_local_contexts\Form\RemapLegacyProjectSite'
+  requirements:
+    _permission: 'administer local contexts legacy projects'
+
 ##
 # Community LC projects (front-end):
 ##
@@ -59,6 +67,18 @@ mukurtu_local_contexts.manage_community_supported_projects:
       group:
         type: entity:community
 
+mukurtu_local_contexts.remap_legacy_project_community:
+  path: '/admin/communities/{group}/local-contexts/legacy-projects/remap'
+  defaults:
+    _title: 'Reassign legacy Local Contexts project'
+    _form: 'Drupal\mukurtu_local_contexts\Form\RemapLegacyProjectGroup'
+  requirements:
+    _permission: 'administer local contexts legacy projects'
+  options:
+    parameters:
+      group:
+        type: entity:community
+
 ##
 # Protocol LC projects (front-end):
 ##
@@ -84,6 +104,18 @@ mukurtu_local_contexts.manage_protocol_supported_projects:
     _form: 'Drupal\mukurtu_local_contexts\Form\ManageSupportedProjectsGroup'
   requirements:
     _custom_access: '\Drupal\mukurtu_local_contexts\Controller\ManageGroupSupportedProjectsController::access'
+  options:
+    parameters:
+      group:
+        type: entity:protocol
+
+mukurtu_local_contexts.remap_legacy_project_protocol:
+  path: '/admin/protocols/{group}/local-contexts/legacy-projects/remap'
+  defaults:
+    _title: 'Reassign legacy Local Contexts project'
+    _form: 'Drupal\mukurtu_local_contexts\Form\RemapLegacyProjectGroup'
+  requirements:
+    _permission: 'administer local contexts legacy projects'
   options:
     parameters:
       group:

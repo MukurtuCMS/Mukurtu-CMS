@@ -11,6 +11,11 @@ mukurtu_local_contexts.site_project_directory_settings:
   title: 'Project Directory Settings'
   base_route: mukurtu_local_contexts.manage_site_supported_projects
 
+mukurtu_local_contexts.remap_legacy_project_site:
+  route_name: mukurtu_local_contexts.remap_legacy_project_site
+  title: 'Remap Legacy Projects'
+  base_route: mukurtu_local_contexts.manage_site_supported_projects
+
 ##
 # Local tasks for Communities:
 ##
@@ -19,11 +24,21 @@ mukurtu_local_contexts.manage_community_supported_projects:
   title: 'Manage Projects'
   base_route: mukurtu_local_contexts.manage_community_supported_projects
 
+mukurtu_local_contexts.remap_legacy_project_community:
+  route_name: mukurtu_local_contexts.remap_legacy_project_community
+  title: 'Remap Legacy Projects'
+  base_route: mukurtu_local_contexts.manage_community_supported_projects
+
 ##
 # Local tasks for Contexts:
 ##
 mukurtu_local_contexts.manage_protocol_supported_projects:
   route_name: mukurtu_local_contexts.manage_protocol_supported_projects
   title: 'Manage Projects'
+  base_route: mukurtu_local_contexts.manage_protocol_supported_projects
+
+mukurtu_local_contexts.remap_legacy_project_protocol:
+  route_name: mukurtu_local_contexts.remap_legacy_project_protocol
+  title: 'Remap Legacy Projects'
   base_route: mukurtu_local_contexts.manage_protocol_supported_projects
 

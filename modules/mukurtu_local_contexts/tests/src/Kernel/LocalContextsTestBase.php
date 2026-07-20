@@ -88,8 +88,10 @@ abstract class LocalContextsTestBase extends EntityKernelTestBase {
    *   The project ID the label belongs to.
    * @param string $name
    *   The label name.
+   * @param string $tkOrBc
+   *   Whether this is a 'TK' or 'BC' label.
    */
-  protected function seedLabel(string $labelId, string $projectId, string $name = 'Label'): void {
+  protected function seedLabel(string $labelId, string $projectId, string $name = 'Label', string $tkOrBc = 'TK'): void {
     $this->container->get('database')->insert('mukurtu_local_contexts_labels')
       ->fields([
         'id' => $labelId,
@@ -97,9 +99,33 @@ abstract class LocalContextsTestBase extends EntityKernelTestBase {
         'name' => $name,
         'type' => 'Attribution',
         'display' => 'label',
-        'tk_or_bc' => 'TK',
+        'tk_or_bc' => $tkOrBc,
         'img_url' => '',
         'community' => '',
+        'default_text' => '',
+        'updated' => 1,
+      ])
+      ->execute();
+  }
+
+  /**
+   * Seed a notice directly in the DB, associated with a project.
+   *
+   * @param string $type
+   *   The notice type.
+   * @param string $projectId
+   *   The project ID the notice belongs to.
+   * @param string $name
+   *   The notice name.
+   */
+  protected function seedNotice(string $type, string $projectId, string $name = 'Notice'): void {
+    $this->container->get('database')->insert('mukurtu_local_contexts_notices')
+      ->fields([
+        'project_id' => $projectId,
+        'type' => $type,
+        'name' => $name,
+        'display' => 'notice',
+        'img_url' => '',
         'default_text' => '',
         'updated' => 1,
       ])
