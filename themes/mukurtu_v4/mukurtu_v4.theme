@@ -298,6 +298,8 @@ function mukurtu_v4_preprocess_field_group_html_element__group_community_sidebar
   }
   $variables['community_name'] = $community->get('name')->value;
   $variables['community_id'] = $community->get('id')->value;
+  $community_alias = \Drupal::service('path_alias.manager')->getAliasByPath('/communities/community/' . $community->id());
+  $variables['community_lc_url'] = $community_alias . '/local-contexts';
   $local_contexts_projects_manager = \Drupal::service('mukurtu_local_contexts.supported_project_manager');
   assert($local_contexts_projects_manager instanceof LocalContextsSupportedProjectManager);
   $variables['has_lc_projects'] = (bool) $local_contexts_projects_manager->getGroupSupportedProjects($community);
@@ -314,6 +316,8 @@ function mukurtu_v4_preprocess_field_group_html_element__group_protocol_sidebar(
   }
   $variables['protocol_name'] = $protocol->get('name')->value;
   $variables['protocol_id'] = $protocol->get('id')->value;
+  $protocol_alias = \Drupal::service('path_alias.manager')->getAliasByPath('/protocols/protocol/' . $protocol->id());
+  $variables['protocol_lc_url'] = $protocol_alias . '/local-contexts';
   $local_contexts_projects_manager = \Drupal::service('mukurtu_local_contexts.supported_project_manager');
   assert($local_contexts_projects_manager instanceof LocalContextsSupportedProjectManager);
   $variables['has_lc_projects'] = (bool) $local_contexts_projects_manager->getGroupSupportedProjects($protocol);
