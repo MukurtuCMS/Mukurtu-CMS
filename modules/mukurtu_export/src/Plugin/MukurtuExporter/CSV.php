@@ -63,7 +63,7 @@ class CSV extends ExporterBase {
         // Render action links in #suffix so they appear after the <label>,
         // not nested inside it (nested <a> inside <label> is invalid HTML).
         if (!empty($links)) {
-          $element[$id]['#suffix'] = ' (' . implode(', ', $links) . ')';
+          $element[$id]['#suffix'] = '<div class="csv-exporter-actions">(' . implode(', ', $links) . ')</div>';
         }
         $element[$id]['#description'] = $entity->getDescription();
       }
@@ -99,7 +99,7 @@ class CSV extends ExporterBase {
         // Render action links in #suffix so they appear after the <label>,
         // not nested inside it (nested <a> inside <label> is invalid HTML).
         if (!empty($links)) {
-          $element[$id]['#suffix'] = ' (' . implode(', ', $links) . ')';
+          $element[$id]['#suffix'] = '<div class="csv-exporter-actions">(' . implode(', ', $links) . ')</div>';
         }
         $element[$id]['#description'] = $entity->getDescription();
       }
