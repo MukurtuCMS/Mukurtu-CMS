@@ -5040,9 +5040,6 @@ header {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
   background: var(--brand-primary);
   position: relative;
 }
@@ -5057,16 +5054,16 @@ header {
   background-color: rgba(0, 0, 0, 0.25);
   z-index: 10;
 }
-.collections__image__container .field-reference {
-  block-size: auto;
+.collections__image__container .field-representative-media,
+.collections__image__container .media {
+  block-size: 100%;
 }
-.collections__image__container .field-reference div {
-  block-size: auto;
-}
-.collections__image__container .field-reference img {
+.collections__image__container img {
   display: block;
-  max-inline-size: 100%;
-  block-size: auto;
+  inline-size: 100%;
+  block-size: 100%;
+  -o-object-fit: cover;
+     object-fit: cover;
 }
 .collections .field-summary {
   overflow: visible;

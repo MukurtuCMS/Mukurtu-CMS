@@ -171,7 +171,6 @@
   &__image {
     &__container {
       display: flex;
-      align-items: center;
       background: var(--brand-primary);
       position: relative;
 
@@ -187,18 +186,18 @@
         z-index: 10;
       }
 
-      .field-reference {
-        block-size: auto;
+      // Pass block-size through Drupal's field/media wrappers so the img
+      // continues to fill the flex-stretched container.
+      .field-representative-media,
+      .media {
+        block-size: 100%;
+      }
 
-        div {
-          block-size: auto;
-        }
-
-        img {
-          display: block;
-          max-inline-size: 100%;
-          block-size: auto;
-        }
+      img {
+        display: block;
+        inline-size: 100%;
+        block-size: 100%;
+        object-fit: cover;
       }
     }
   }
