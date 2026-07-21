@@ -1061,23 +1061,22 @@ function mukurtu_notifications_update_40025(): void {
  * (legacy pre-migration content that no longer represents real
  * communities). This redeploys the flag re-targeted at the actual
  * `community` entity type, redeploys the community canonical view display
- * with the follow button added to the sidebar, attaches field_community_ref
- * to the mukurtu_new_item_in_community message bundle, and redeploys that
- * template's text (corrected to reference field_community_ref instead of
- * the node-targeted field_community). Old Flagging records tied to the
- * previous node-targeted flag are intentionally left as harmless orphans --
- * there is no meaningful way to map legacy community nodes to real
- * community entities.
+ * with the follow button added to the sidebar, and attaches
+ * field_community_ref to the mukurtu_new_item_in_community message bundle.
+ * mukurtu_new_item_in_community is confirmed dead code (no notify() call
+ * site) and its template config is removed entirely in update_40050, so
+ * this hook no longer redeploys that template's text -- the source YAML
+ * was already deleted from config/install. Old Flagging records tied to
+ * the previous node-targeted flag are intentionally left as harmless
+ * orphans -- there is no meaningful way to map legacy community nodes to
+ * real community entities.
  */
 function mukurtu_notifications_update_40026(): void {
-  $notifications_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
   $protocol_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol') . '/config/install';
-  $notifications_source = new FileStorage($notifications_path);
   $protocol_source = new FileStorage($protocol_path);
   $config_storage = \Drupal::service('config.storage');
 
   mukurtu_notifications_create_flag_follow_community();
-  $config_storage->write('message.template.mukurtu_new_item_in_community', $notifications_source->read('message.template.mukurtu_new_item_in_community'));
   $config_storage->write('core.entity_view_display.community.community.full', $protocol_source->read('core.entity_view_display.community.community.full'));
 
   mukurtu_notifications_create_field_community_ref();
@@ -1314,7 +1313,7 @@ function mukurtu_notifications_update_40034(): void {
 }
 
 /**
- * Fixes community/protocol name tokens across 6 message templates.
+ * Fixes community/protocol name tokens across 4 message templates.
  *
  * [message:field_community_ref:entity:label] and
  * [message:field_protocol:entity:label]/:title never resolved -- 'label'
@@ -1325,7 +1324,11 @@ function mukurtu_notifications_update_40034(): void {
  * correctly, [community:label]/[protocol:title] do not. Also removes
  * "Added to community" as a notification type per product decision --
  * mukurtu_user_added_to_community's text is fixed for consistency even
- * though nothing creates it anymore.
+ * though nothing creates it anymore. mukurtu_new_item_in_community and
+ * mukurtu_new_item_in_protocol are excluded here -- both are confirmed
+ * dead code with no notify() call site, their source YAML is already
+ * gone from config/install, and their active config is removed entirely
+ * in update_40050.
  */
 function mukurtu_notifications_update_40035(): void {
   $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
@@ -1337,8 +1340,6 @@ function mukurtu_notifications_update_40035(): void {
     'message.template.mukurtu_removed_from_protocol',
     'message.template.mukurtu_user_added_to_protocol',
     'message.template.mukurtu_user_added_to_community',
-    'message.template.mukurtu_new_item_in_community',
-    'message.template.mukurtu_new_item_in_protocol',
   ] as $config_name) {
     $config_storage->write($config_name, $source->read($config_name));
   }
