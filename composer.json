@@ -40,7 +40,6 @@
         "drupal/flag": "^4.0",
         "drupal/geocoder": "^4.30",
         "drupal/geofield": "^1.59",
-        "drupal/geolocation": "*",
         "drupal/gin": "^5.0",
         "drupal/gin_lb": "^3.0@beta",
         "drupal/gin_toolbar": "^3.0",
