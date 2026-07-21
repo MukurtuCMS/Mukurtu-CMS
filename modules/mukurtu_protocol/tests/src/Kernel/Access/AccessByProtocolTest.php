@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\mukurtu_protocol\Kernel\Access;
 
+use PHPUnit\Framework\Attributes\Group;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\Tests\node\Traits\ContentTypeCreationTrait;
 use Drupal\Tests\og\Traits\OgMembershipCreationTrait;
@@ -19,9 +20,8 @@ use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
 
 /**
  * Tests access to content by protocol control.
- *
- * @group mukurtu_protocol
  */
+#[Group('mukurtu_protocol')]
 class AccessByProtocolTest extends KernelTestBase {
 
   use ContentTypeCreationTrait;
