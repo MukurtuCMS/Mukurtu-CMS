@@ -9,6 +9,7 @@ use Drupal\Core\TypedData\ComplexDataDefinitionInterface;
 use Drupal\Core\TypedData\TypedDataInterface;
 use Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Field\FieldItemListInterface;
 
 /**
  * Defines the 'local_contexts_project' field type.
@@ -75,10 +76,53 @@ class LocalContextsProjectItem extends StringItem implements OptionsProviderInte
   }
 
   /**
+   * Get the project IDs already stored on this specific field/entity.
+   *
+   * Used so that legacy projects already referenced by this entity are never
+   * excluded from the settable option/value set, even though they should not
+   * be offered as a new choice.
+   *
+   * @return string[]
+   */
+  protected function getCurrentlyReferencedIds(): array {
+    $parent = $this->getParent();
+    if (!$parent instanceof FieldItemListInterface) {
+      return [];
+    }
+    $ids = [];
+    foreach ($parent as $item) {
+      if (!empty($item->value)) {
+        $ids[] = $item->value;
+      }
+    }
+    return array_unique($ids);
+  }
+
+  /**
+   * Remove legacy projects from a project list unless already referenced.
+   *
+   * @param array $projects
+   *   Project info, keyed by project ID (as returned by the manager).
+   *
+   * @return array
+   *   The filtered project list.
+   */
+  protected function excludeUnreferencedLegacyProjects(array $projects): array {
+    $referenced = $this->getCurrentlyReferencedIds();
+    foreach (array_keys($projects) as $id) {
+      if ($this->localContextsProjectManager->isLegacyProjectId((string) $id) && !in_array($id, $referenced, TRUE)) {
+        unset($projects[$id]);
+      }
+    }
+    return $projects;
+  }
+
+  /**
    * {@inheritDoc}
    */
   public function getSettableValues(?AccountInterface $account = NULL) {
     $options = $account ? $this->localContextsProjectManager->getUserProjects($account) : $this->localContextsProjectManager->getSiteSupportedProjects();
+    $options = $this->excludeUnreferencedLegacyProjects($options);
     return array_keys($this->flattenProjectOptions($options));
   }
 
@@ -87,6 +131,7 @@ class LocalContextsProjectItem extends StringItem implements OptionsProviderInte
    */
   public function getSettableOptions(?AccountInterface $account = NULL) {
     $options = $account ? $this->localContextsProjectManager->getUserProjects($account) : $this->localContextsProjectManager->getSiteSupportedProjects();
+    $options = $this->excludeUnreferencedLegacyProjects($options);
     return $this->flattenProjectOptions($options);
   }
 
