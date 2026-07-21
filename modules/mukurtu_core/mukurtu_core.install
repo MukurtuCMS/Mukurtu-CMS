@@ -2144,7 +2144,7 @@ function mukurtu_core_update_40076(): void {
 /**
  * Stop linking the Content type column on the manage all content view.
  */
-function mukurtu_core_update_40076(): void {
+function mukurtu_core_update_40077(): void {
   $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_manage_all_content');
   if ($config->isNew()) {
     return;
