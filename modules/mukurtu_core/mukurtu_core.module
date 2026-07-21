@@ -1299,3 +1299,19 @@ function mukurtu_core_preprocess_views_view(&$variables)
     $variables['view_array']['#attached']['library'][] = 'mukurtu_core/entity_browser_view_decoration';
   }
 }
+
+/**
+ * Implements hook_library_info_alter().
+ *
+ * leaflet_markercluster.drupal.js gives every Views "grouping" value its own
+ * MarkerClusterGroup, so nearby markers in different groups never cluster
+ * together (see #1813). Appending our override into this library's own JS
+ * list (rather than attaching it separately) guarantees it always loads
+ * immediately after leaflet_markercluster.drupal.js, on exactly the pages
+ * where that library is already in use.
+ */
+function mukurtu_core_library_info_alter(&$libraries, $extension) {
+  if ($extension === 'leaflet_markercluster' && isset($libraries['leaflet-markercluster-drupal'])) {
+    $libraries['leaflet-markercluster-drupal']['js']['/' . \Drupal::service('extension.list.module')->getPath('mukurtu_core') . '/js/mukurtu-leaflet-markercluster-grouping-fix.js'] = [];
+  }
+}
