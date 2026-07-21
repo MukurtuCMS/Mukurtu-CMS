@@ -47,21 +47,22 @@ class GroupAliasParamConverter implements ParamConverterInterface {
       return NULL;
     }
 
+    // Try the alias first, since an entity's name could itself be numeric
+    // (e.g. a community literally named "1990") and would otherwise be
+    // shadowed by the numeric-ID fallback below.
+    $system_path = $this->aliasManager->getPathByAlias($info['alias_prefix'] . $value);
+    if (str_starts_with($system_path, $info['canonical_prefix'])) {
+      $id = substr($system_path, strlen($info['canonical_prefix']));
+      if (is_numeric($id)) {
+        return $this->entityTypeManager->getStorage($info['entity_type'])->load($id);
+      }
+    }
+
     if (is_numeric($value)) {
       return $this->entityTypeManager->getStorage($info['entity_type'])->load($value);
     }
 
-    $system_path = $this->aliasManager->getPathByAlias($info['alias_prefix'] . $value);
-    if (!str_starts_with($system_path, $info['canonical_prefix'])) {
-      return NULL;
-    }
-
-    $id = substr($system_path, strlen($info['canonical_prefix']));
-    if (!is_numeric($id)) {
-      return NULL;
-    }
-
-    return $this->entityTypeManager->getStorage($info['entity_type'])->load($id);
+    return NULL;
   }
 
   /**
