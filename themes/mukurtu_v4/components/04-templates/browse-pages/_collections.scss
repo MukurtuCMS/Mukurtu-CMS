@@ -186,10 +186,14 @@
         z-index: 10;
       }
 
-      // Pass block-size through Drupal's field/media wrappers so the img
-      // continues to fill the flex-stretched container.
+      // Pass inline-size/block-size through Drupal's field/media wrappers so
+      // the img continues to fill the flex-stretched container. The main
+      // axis isn't stretched by flexbox by default, so inline-size needs to
+      // be set explicitly (unlike block-size, which flex's default
+      // align-items: stretch already handles).
       .field-representative-media,
       .media {
+        inline-size: 100%;
         block-size: 100%;
       }
 

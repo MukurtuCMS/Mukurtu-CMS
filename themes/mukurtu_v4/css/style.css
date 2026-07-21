@@ -5056,6 +5056,7 @@ header {
 }
 .collections__image__container .field-representative-media,
 .collections__image__container .media {
+  inline-size: 100%;
   block-size: 100%;
 }
 .collections__image__container img {
