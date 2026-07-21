@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\mukurtu_protocol\Kernel;
 
+use PHPUnit\Framework\Attributes\Group;
 use Drupal\node\Entity\Node;
 use Drupal\mukurtu_protocol\Entity\Community;
 use Drupal\mukurtu_protocol\Entity\Protocol;
@@ -14,9 +15,8 @@ use Drupal\user\Entity\Role;
  * Verifies the block reuses
  * \Drupal\mukurtu_protocol\Hook\CommunityProtocolList::buildCommunityProtocolList()
  * instead of duplicating its logic.
- *
- * @group mukurtu_protocol
  */
+#[Group('mukurtu_protocol')]
 class CommunityProtocolListBlockTest extends ProtocolAwareEntityTestBase {
 
   /**
