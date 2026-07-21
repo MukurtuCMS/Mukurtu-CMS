@@ -9,9 +9,6 @@ dependencies:
     - message.template.mukurtu_content_published
     - message.template.mukurtu_content_to_draft
     - message.template.mukurtu_protocol_comment
-    - message.template.mukurtu_new_item_in_collection
-    - message.template.mukurtu_new_item_in_community
-    - message.template.mukurtu_new_item_in_protocol
     - message.template.mukurtu_new_user_account_created
     - message.template.mukurtu_new_user_registration
     - message.template.mukurtu_single_node_delete
@@ -253,9 +250,6 @@ display:
             mukurtu_content_published: mukurtu_content_published
             mukurtu_content_to_draft: mukurtu_content_to_draft
             mukurtu_protocol_comment: mukurtu_protocol_comment
-            mukurtu_new_item_in_collection: mukurtu_new_item_in_collection
-            mukurtu_new_item_in_community: mukurtu_new_item_in_community
-            mukurtu_new_item_in_protocol: mukurtu_new_item_in_protocol
             mukurtu_new_user_account_created: mukurtu_new_user_account_created
             mukurtu_new_user_registration: mukurtu_new_user_registration
             mukurtu_single_node_delete: mukurtu_single_node_delete
