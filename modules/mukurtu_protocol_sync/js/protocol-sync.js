@@ -4,8 +4,13 @@
   /**
    * Moves the sync checkbox into the protocols fieldset and toggles visibility.
    *
-   * Runs inside the media library modal after a file is uploaded (AJAX context)
-   * and on standalone media edit forms.
+   * Runs inside the media library modal after a file is uploaded (AJAX
+   * context), on standalone media add/edit forms, and on the bulk media
+   * upload/create forms. In the media library modal (opened from a content
+   * page) protocols are typically already inherited, so the toggle goes to
+   * the top of the fieldset. Elsewhere protocols are never pre-populated, so
+   * the toggle goes after protocol selection instead (see the
+   * data-mukurtu-protocol-sync-position attribute).
    */
   Drupal.behaviors.mukurtuProtocolSync = {
     attach: function (context, settings) {
@@ -40,8 +45,16 @@
           return;
         }
 
-        // Move the sync form-item into the top of the protocols fieldset-wrapper.
-        fieldsetWrapper.insertBefore(formItem, fieldsetWrapper.firstElementChild);
+        // Move the sync form-item into the protocols fieldset-wrapper: to the
+        // top when protocols are expected to already be filled in (opened
+        // from a content page), or after protocol selection when they aren't
+        // (standalone and bulk forms).
+        if (checkbox.dataset.mukurtuProtocolSyncPosition === 'after') {
+          fieldsetWrapper.appendChild(formItem);
+        }
+        else {
+          fieldsetWrapper.insertBefore(formItem, fieldsetWrapper.firstElementChild);
+        }
         if (syncFieldWrapper) {
           syncFieldWrapper.style.display = 'none';
         }
