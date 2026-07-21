@@ -1853,3 +1853,28 @@ function mukurtu_notifications_update_40050(): void {
     $config_factory->getEditable($name)->delete();
   }
 }
+
+/**
+ * Revoke permissions for the message templates dropped in update_40050.
+ *
+ * update_40050 deleted the mukurtu_new_item_in_collection/_community/_protocol
+ * message templates but left the create/delete/update/view permissions those
+ * templates caused message_ui to register still granted to mukurtu_manager
+ * and administrator (mukurtu_install() also hardcoded them, independently of
+ * whether the templates exist -- fixed separately in mukurtu.install). Since
+ * nothing currently re-registers these permissions, Drupal core silently
+ * strips them from a role the next time it's saved and logs a "Non-existent
+ * permission(s)... were removed" error; this revokes them proactively instead.
+ */
+function mukurtu_notifications_update_40051(): void {
+  $permissions = [];
+  foreach (['collection', 'community', 'protocol'] as $bundle) {
+    foreach (['create', 'delete', 'update', 'view'] as $op) {
+      $permissions[] = "$op mukurtu_new_item_in_$bundle message";
+    }
+  }
+
+  foreach (['mukurtu_manager', 'administrator'] as $rid) {
+    user_role_revoke_permissions($rid, $permissions);
+  }
+}
