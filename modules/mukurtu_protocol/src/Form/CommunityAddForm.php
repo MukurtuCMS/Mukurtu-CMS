@@ -304,6 +304,14 @@ class CommunityAddForm extends ContentEntityForm {
   public function validateForm(array &$form, FormStateInterface $form_state): void {
     parent::validateForm($form, $form_state);
 
+    // The membership table this validates only exists on the streamlined
+    // new-community form (see the matching check in form()); adding a
+    // translation to an existing community has no membership_wrapper to
+    // validate or attach errors to.
+    if (!$this->entity->isNew()) {
+      return;
+    }
+
     $roles = ['community_member', 'community_affiliate', 'community_manager'];
     $stored_members = $form_state->get('members') ?? [];
     $table_values = $form_state->getValue(['membership_wrapper', 'member_table']) ?? [];
