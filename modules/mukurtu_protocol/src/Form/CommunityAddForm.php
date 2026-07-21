@@ -28,6 +28,15 @@ class CommunityAddForm extends ContentEntityForm {
   public function form(array $form, FormStateInterface $form_state) {
     $form = parent::form($form, $form_state);
 
+    // Drupal also routes "add translation" requests through the entity
+    // type's add form handler. Only the genuine new-community creation flow
+    // (a new, unsaved entity) should get the streamlined allow list and
+    // membership UI below; adding a translation to an existing community
+    // should show the full set of fields, same as editing one.
+    if (!$this->entity->isNew()) {
+      return $form;
+    }
+
     // The Add form is a streamlined version of the edit form, hide any fields
     // that are not required using an allow list.
     $allow_list = [
@@ -384,6 +393,13 @@ class CommunityAddForm extends ContentEntityForm {
    * {@inheritdoc}
    */
   public function save(array $form, FormStateInterface $form_state) {
+    // Adding a translation to an existing community should behave like a
+    // normal entity save (see the matching check in form()), not repeat the
+    // new-community member setup and protocol-creation redirect below.
+    if (!$this->entity->isNew()) {
+      return parent::save($form, $form_state);
+    }
+
     if ($this->entity->save()) {
       /** @var \Drupal\mukurtu_protocol\Entity\Community $community */
       $community = $this->entity;
