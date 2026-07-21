@@ -6,6 +6,8 @@
  */
 
 use Drupal\field\Entity\FieldConfig;
+use Drupal\mukurtu_design\DesignPalette;
+use Drupal\user\Entity\Role;
 
 /**
  * Correct the design settings palette default value to match the site default.
@@ -30,4 +32,136 @@ function mukurtu_design_update_10001(): void {
   }
 
   $config->set('menu.path', '/admin/config/color-settings')->save();
+}
+
+/**
+ * Migrate design_settings Config Pages data to mukurtu_design.settings.
+ *
+ * This reads the old Config Pages tables directly via the Database API
+ * rather than the config_pages entity API. By the time update hooks run,
+ * a deployment has typically already run `composer update`, which removes
+ * config_pages' PHP files (and its entity type plugin definition) even
+ * though the module's database tables and system.schema entry are still
+ * present, so the entity API can't be relied on here.
+ */
+function mukurtu_design_update_40001(): void {
+  $database = \Drupal::database();
+  if (!$database->schema()->tableExists('config_pages')) {
+    return;
+  }
+
+  $entity_id = $database->select('config_pages', 'cp')
+    ->fields('cp', ['id'])
+    ->condition('cp.type', 'design_settings')
+    ->execute()
+    ->fetchField();
+  if (!$entity_id) {
+    return;
+  }
+
+  $palette = 'red-bone';
+  if ($database->schema()->tableExists('config_pages__field_design_settings__palette')) {
+    $value = $database->select('config_pages__field_design_settings__palette', 'f')
+      ->fields('f', ['field_design_settings__palette_value'])
+      ->condition('f.entity_id', $entity_id)
+      ->condition('f.deleted', 0)
+      ->execute()
+      ->fetchField();
+    if ($value) {
+      $palette = $value;
+    }
+  }
+
+  // Map the old Config Pages field tables/columns to the new config keys.
+  $field_mapping = [
+    'config_pages__field_palette_brand_primary' => ['field_palette_brand_primary_color', 'brand_primary'],
+    'config_pages__field_palette_brand_primary_dark' => ['field_palette_brand_primary_dark_color', 'brand_primary_dark'],
+    'config_pages__field_palette_brand_primary_acc' => ['field_palette_brand_primary_acc_color', 'brand_primary_accent'],
+    'config_pages__field_palette_brand_secondary' => ['field_palette_brand_secondary_color', 'brand_secondary'],
+    'config_pages__field_palette_brand_secondary_da' => ['field_palette_brand_secondary_da_color', 'brand_secondary_dark'],
+    'config_pages__field_palette_brand_secondary_ac' => ['field_palette_brand_secondary_ac_color', 'brand_secondary_accent'],
+  ];
+
+  $config = \Drupal::configFactory()->getEditable(DesignPalette::SETTINGS);
+  $colors = $config->get('colors') ?? [];
+  foreach ($field_mapping as $table => [$column, $config_key]) {
+    if (!$database->schema()->tableExists($table)) {
+      continue;
+    }
+    $color_value = $database->select($table, 'f')
+      ->fields('f', [$column])
+      ->condition('f.entity_id', $entity_id)
+      ->condition('f.deleted', 0)
+      ->execute()
+      ->fetchField();
+    if ($color_value) {
+      $colors[$config_key] = $color_value;
+    }
+  }
+
+  $config->set('palette', $palette)->set('colors', $colors)->save();
+
+  if ($palette === 'custom') {
+    \Drupal::classResolver(DesignPalette::class)->generateCustomCss($colors);
+  }
+}
+
+/**
+ * Migrate design_settings Config Pages permissions to the new permission.
+ */
+function mukurtu_design_update_40002(): void {
+  $role = Role::load('mukurtu_manager');
+  if (!$role) {
+    return;
+  }
+
+  $changed = FALSE;
+  foreach (['edit design_settings config page entity', 'view design_settings config page entity'] as $old_permission) {
+    if ($role->hasPermission($old_permission)) {
+      $role->revokePermission($old_permission);
+      $changed = TRUE;
+    }
+  }
+  if (!$role->hasPermission('administer mukurtu design settings')) {
+    $role->grantPermission('administer mukurtu design settings');
+    $changed = TRUE;
+  }
+  if ($changed) {
+    $role->save();
+  }
+}
+
+/**
+ * Remove the design_settings Config Pages config and uninstall config_pages.
+ */
+function mukurtu_design_update_40003(): void {
+  $config_names = [
+    'config_pages.type.design_settings',
+    'core.entity_form_display.config_pages.design_settings.default',
+    'core.entity_view_display.config_pages.design_settings.default',
+    'field.field.config_pages.design_settings.field_design_settings__palette',
+    'field.field.config_pages.design_settings.field_palette_brand_primary',
+    'field.field.config_pages.design_settings.field_palette_brand_primary_acc',
+    'field.field.config_pages.design_settings.field_palette_brand_primary_dark',
+    'field.field.config_pages.design_settings.field_palette_brand_secondary',
+    'field.field.config_pages.design_settings.field_palette_brand_secondary_ac',
+    'field.field.config_pages.design_settings.field_palette_brand_secondary_da',
+    'field.storage.config_pages.field_design_settings__palette',
+    'field.storage.config_pages.field_palette_brand_primary',
+    'field.storage.config_pages.field_palette_brand_primary_acc',
+    'field.storage.config_pages.field_palette_brand_primary_dark',
+    'field.storage.config_pages.field_palette_brand_secondary',
+    'field.storage.config_pages.field_palette_brand_secondary_ac',
+    'field.storage.config_pages.field_palette_brand_secondary_da',
+  ];
+  foreach ($config_names as $config_name) {
+    $config = \Drupal::configFactory()->getEditable($config_name);
+    if (!$config->isNew()) {
+      $config->delete();
+    }
+  }
+
+  if (\Drupal::moduleHandler()->moduleExists('config_pages')) {
+    \Drupal::service('module_installer')->uninstall(['config_pages'], FALSE);
+  }
 }
