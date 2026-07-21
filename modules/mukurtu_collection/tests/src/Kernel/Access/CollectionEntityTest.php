@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\mukurtu_collection\Kernel\Access;
 
+use PHPUnit\Framework\Attributes\Group;
 use Drupal\mukurtu_collection\Controller\MukurtuAddItemToCollectionController;
 use Drupal\mukurtu_collection\Entity\Collection;
 use Drupal\mukurtu_protocol\Entity\Community;
@@ -12,9 +13,8 @@ use Drupal\Tests\mukurtu_protocol\Kernel\ProtocolAwareEntityTestBase;
 
 /**
  * Tests collection operations & functionality.
- *
- * @group mukurtu_collection
  */
+#[Group('mukurtu_collection')]
 class CollectionEntityTest extends ProtocolAwareEntityTestBase {
 
   /**
