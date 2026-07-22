@@ -80,6 +80,7 @@
         "sibyx/phpgpx": "@RC"
     },
     "require-dev": {
+        "composer/composer": "^2.10.2",
         "drupal/devel": "*",
         "drupal/core-dev": "*",
         "drupal/coder": "*",
