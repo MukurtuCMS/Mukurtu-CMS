@@ -101,7 +101,7 @@ class ProjectDirectoryController extends ControllerBase {
     $endpointParts = parse_url($endpointUrl);
     $projectBaseUrl = $endpointParts['scheme'] . '://' . $endpointParts['host'];
 
-    $projects = $this->localContextsProjectManager->getGroupSupportedProjects($group);
+    $projects = $this->localContextsProjectManager->getGroupSupportedProjects($group, TRUE);
     if ($projects) {
       $group_description = $group->get('field_local_contexts_description');
       $description = [
@@ -141,7 +141,7 @@ class ProjectDirectoryController extends ControllerBase {
     $endpointParts = parse_url($endpointUrl);
     $projectBaseUrl = $endpointParts['scheme'] . '://' . $endpointParts['host'];
 
-    $projects = $this->localContextsProjectManager->getGroupSupportedProjects($group);
+    $projects = $this->localContextsProjectManager->getGroupSupportedProjects($group, TRUE);
     if ($projects) {
       $group_description = $group->get('field_local_contexts_description');
       $description = [
