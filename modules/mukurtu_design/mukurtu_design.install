@@ -133,6 +133,13 @@ function mukurtu_design_update_40002(): void {
 
 /**
  * Remove the design_settings Config Pages config and uninstall config_pages.
+ *
+ * Writes directly to config.storage (the raw layer) rather than going
+ * through module_installer->uninstall() or configFactory()->save(). Both
+ * dispatch events/hooks that can invoke config_pages' own code, which is a
+ * fatal error once composer has already removed the module's PHP files from
+ * a deployment (the same reason mukurtu_notifications_update_40018() bypasses
+ * module_installer for message_digest/message_digest_ui).
  */
 function mukurtu_design_update_40003(): void {
   $config_names = [
@@ -161,7 +168,62 @@ function mukurtu_design_update_40003(): void {
     }
   }
 
-  if (\Drupal::moduleHandler()->moduleExists('config_pages')) {
-    \Drupal::service('module_installer')->uninstall(['config_pages'], FALSE);
+  $config_storage = \Drupal::service('config.storage');
+  $data = $config_storage->read('core.extension');
+  if (isset($data['module']['config_pages'])) {
+    unset($data['module']['config_pages']);
+    $config_storage->write('core.extension', $data);
+  }
+  \Drupal::keyValue('system.schema')->delete('config_pages');
+}
+
+/**
+ * Uninstall color_field, left behind when config_pages was removed.
+ *
+ * A standalone hook (not folded into update_40003) because update hooks
+ * only run once per site: some sites may already have run 40003 (uninstalling
+ * config_pages while its code still existed) without this hook, so a
+ * separate one is the only way to reach every affected site regardless of
+ * how far they already got. See update_40003 for why this writes directly
+ * to config.storage instead of using module_installer->uninstall().
+ */
+function mukurtu_design_update_40004(): void {
+  $config_storage = \Drupal::service('config.storage');
+  $data = $config_storage->read('core.extension');
+  if (isset($data['module']['color_field'])) {
+    unset($data['module']['color_field']);
+    $config_storage->write('core.extension', $data);
+  }
+  \Drupal::keyValue('system.schema')->delete('color_field');
+}
+
+/**
+ * Implements hook_update_requirements_alter().
+ *
+ * Drupal's own update requirements check runs before any hook_update_N and
+ * blocks the whole update run with an Error severity "Missing or invalid
+ * modules" requirement if core.extension lists a module whose code no longer
+ * exists on disk. Since color_field and config_pages were removed from the
+ * codebase in the same release that mukurtu_design_update_40003()/_40004()
+ * were added to clean up core.extension, those hooks can never run on
+ * affected sites -- the site is stuck before update hooks even start.
+ * Suppress the error only when the two known-removed modules are the sole
+ * cause, so any other genuinely missing module still blocks the update as
+ * intended.
+ */
+function mukurtu_design_update_requirements_alter(array &$requirements): void {
+  if (empty($requirements['invalid_module'])) {
+    return;
+  }
+
+  $module_extension_list = \Drupal::service('extension.list.module');
+  $known_removed = ['color_field', 'config_pages'];
+  $modules = array_keys(\Drupal::config('core.extension')->get('module') ?? []);
+  $still_invalid = array_filter($modules, function ($name) use ($module_extension_list, $known_removed) {
+    return !in_array($name, $known_removed, TRUE) && !$module_extension_list->exists($name);
+  });
+
+  if (empty($still_invalid)) {
+    unset($requirements['invalid_module']);
   }
 }
