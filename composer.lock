@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "96c0ec9103e2eed9f6ab566524f5c3dc",
+    "content-hash": "d2452769af549b2c24f961d828ed9350",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -3224,76 +3224,6 @@
                 "source": "https://git.drupalcode.org/project/geofield",
                 "issues": "https://www.drupal.org/project/issues/geofield",
                 "irc": "irc://irc.freenode.org/drupal-contribute"
-            }
-        },
-        {
-            "name": "drupal/geolocation",
-            "version": "3.15.0",
-            "source": {
-                "type": "git",
-                "url": "https://git.drupalcode.org/project/geolocation.git",
-                "reference": "8.x-3.15"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/geolocation-8.x-3.15.zip",
-                "reference": "8.x-3.15",
-                "shasum": "758a3b330fedf46118577e031c21f144dd171148"
-            },
-            "require": {
-                "drupal/core": "^10 || ^11 || ^12"
-            },
-            "require-dev": {
-                "drupal/address": "^2",
-                "drupal/feeds": "^3.0",
-                "drupal/geocoder": "^4.29",
-                "drupal/geofield": "^1.64",
-                "drupal/geolocation_demo": "*",
-                "drupal/geolocation_geometry": "*",
-                "drupal/geolocation_google_maps": "*",
-                "drupal/geolocation_google_maps_demo": "*",
-                "drupal/geolocation_google_static_maps": "*",
-                "drupal/geolocation_leaflet": "*",
-                "drupal/migrate_plus": "^6.0",
-                "drupal/migrate_tools": "^6.0",
-                "drupal/search_api": "^1.38",
-                "drupal/search_api_location": "^1.x-dev@dev",
-                "drupal/search_api_location_views-search_api_location_views": "*",
-                "drupal/tamper": "^1.0@beta",
-                "gasparesganga/php-shapefile": "^3",
-                "geocodio/geocodio-library-php": "^3.0",
-                "sibyx/phpgpx": "^1.1"
-            },
-            "type": "drupal-module",
-            "extra": {
-                "drupal": {
-                    "version": "8.x-3.15",
-                    "datestamp": "1782326156",
-                    "security-coverage": {
-                        "status": "covered",
-                        "message": "Covered by Drupal's security advisory policy"
-                    }
-                }
-            },
-            "notification-url": "https://packages.drupal.org/8/downloads",
-            "license": [
-                "GPL-2.0-or-later"
-            ],
-            "authors": [
-                {
-                    "name": "derjochenmeyer",
-                    "homepage": "https://www.drupal.org/u/derjochenmeyer"
-                },
-                {
-                    "name": "cadamski",
-                    "homepage": "https://www.drupal.org/u/cadamski"
-                }
-            ],
-            "description": "Provides a simple geolocation Drupal field type to store and display location data (lat, lng).",
-            "homepage": "https://www.drupal.org/project/geolocation",
-            "support": {
-                "source": "https://git.drupal.org/project/geolocation.git",
-                "issues": "https://www.drupal.org/project/issues/geolocation"
             }
         },
         {
