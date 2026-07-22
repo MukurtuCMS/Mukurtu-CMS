@@ -61,6 +61,7 @@ dependencies:
     - taxonomy
     - term_merge
     - toolbar
+    - visitors
 id: mukurtu_manager
 label: 'Mukurtu Manager'
 weight: 2
@@ -68,6 +69,7 @@ is_admin: null
 permissions:
   - 'access mukurtu export'
   - 'access mukurtu import'
+  - 'access visitors'
   - 'administer mukurtu access denied page'
   - 'administer mukurtu_media configuration'
   - 'administer mukurtu media download settings'

@@ -22,7 +22,7 @@ services:
         # Adjust a few PHP settings. Higher memory limit is needed for install.
         - echo "upload_max_filesize=100M" >> /usr/local/etc/php/conf.d/tugboat.ini
         - echo "post_max_size=100M" >> /usr/local/etc/php/conf.d/tugboat.ini
-        - echo "memory_limit=512M" >> /usr/local/etc/php/conf.d/tugboat.ini
+        - echo "memory_limit=1024M" >> /usr/local/etc/php/conf.d/tugboat.ini
         - echo "max_input_vars=3000" >> /usr/local/etc/php/conf.d/tugboat.ini
 
         # Install composer.
