@@ -58,7 +58,7 @@
         "drupal/migrate_tools": "^6.0",
         "drupal/notify_user_default": "^1.0",
         "drupal/og": "^1.x-dev",
-        "drupal/paragraphs": "*",
+        "drupal/paragraphs": "^1.21",
         "drupal/pathauto": "^1.14",
         "drupal/readonly_field_widget": "^2.1",
         "drupal/rebuild_cache_access": "^1.12",
