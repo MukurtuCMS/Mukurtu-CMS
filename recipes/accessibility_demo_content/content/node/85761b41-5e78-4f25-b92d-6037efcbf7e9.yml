@@ -1,0 +1,47 @@
+# Lightweight Article node, used only as a target for the Digital Heritage
+# item's "Related content" field so that relationship renders as a real link
+# for accessibility testing. See ../../README.md.
+_meta:
+  version: '1.0'
+  entity_type: node
+  uuid: 85761b41-5e78-4f25-b92d-6037efcbf7e9
+  bundle: article
+  default_langcode: en
+default:
+  title:
+    -
+      value: 'Sample Related Story (placeholder)'
+  status:
+    -
+      value: true
+  promote:
+    -
+      value: false
+  sticky:
+    -
+      value: false
+  uid:
+    -
+      target_id: 1
+  revision_uid:
+    -
+      target_id: 1
+  moderation_state:
+    -
+      value: published
+  path:
+    -
+      alias: '/accessibility-demo/sample-related-story'
+      langcode: en
+  body:
+    -
+      value: |
+        <h2>A sample heading</h2>
+        <p>This is placeholder body text used only to test accessibility of headings, paragraphs, lists, and links on a related content page.</p>
+        <ul>
+          <li>Sample list item one</li>
+          <li>Sample list item two</li>
+        </ul>
+        <p>Here is a <a href="/">sample link back to the homepage</a> for link-text testing.</p>
+      format: basic_html
+      summary: 'Placeholder article created for accessibility testing.'

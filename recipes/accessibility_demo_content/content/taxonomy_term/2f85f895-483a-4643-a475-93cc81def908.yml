@@ -1,0 +1,13 @@
+_meta:
+  version: '1.0'
+  entity_type: taxonomy_term
+  uuid: 2f85f895-483a-4643-a475-93cc81def908
+  bundle: publisher
+  default_langcode: en
+default:
+  name:
+    -
+      value: 'Example Cultural Center (placeholder)'
+  status:
+    -
+      value: true

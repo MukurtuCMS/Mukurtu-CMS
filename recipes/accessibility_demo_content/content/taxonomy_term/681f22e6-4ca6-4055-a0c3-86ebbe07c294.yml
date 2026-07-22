@@ -1,0 +1,13 @@
+_meta:
+  version: '1.0'
+  entity_type: taxonomy_term
+  uuid: 681f22e6-4ca6-4055-a0c3-86ebbe07c294
+  bundle: subject
+  default_langcode: en
+default:
+  name:
+    -
+      value: 'Basketry'
+  status:
+    -
+      value: true
