@@ -16,30 +16,78 @@ jobs:
     permissions:
       contents: read
       issues: read
+      statuses: read
     outputs:
       preview_url: ${{ steps.wait-for-preview.outputs.preview_url }}
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Wait for Tugboat Preview
         id: wait-for-preview
         run: |
-          # Define the maximum wait time (10 minutes).
-          MAX_WAIT=600
+          # Poll the "Tugboat" commit status and, once it reports success,
+          # look for the PR comment containing the live preview URL (the
+          # status's target_url only points at the Tugboat dashboard, not
+          # the preview host itself). This fails fast on a real build error
+          # instead of always waiting out the full timeout. The status has
+          # been observed to flip success -> pending -> success while a
+          # rebuild is still in progress, so an early "success" reading is
+          # not trusted as final until the preview URL comment actually
+          # shows up; if it hasn't yet, we just keep polling within the
+          # same overall budget rather than failing outright.
+          MAX_WAIT=2400
           INTERVAL=30
           ELAPSED=0
+          PREVIEW_URL=""
           while [ $ELAPSED -lt $MAX_WAIT ]; do
-            PREVIEW_URL=$(gh api repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments | jq -r '.[].body' | grep -Po 'https://(?!www\.)[a-zA-Z0-9.-]+\.tugboatqa.com' | head -n 1 || true)
-            if [[ ! -z "$PREVIEW_URL" ]]; then
+            TUGBOAT_STATE=$(gh api "repos/${{ github.repository }}/commits/${{ github.event.pull_request.head.sha }}/status" --jq '[.statuses[] | select(.context=="Tugboat")][0].state // "pending"' 2>/dev/null || echo "pending")
+
+            if [[ "$TUGBOAT_STATE" == "failure" || "$TUGBOAT_STATE" == "error" ]]; then
+              echo "Tugboat build failed (status: $TUGBOAT_STATE). See the Tugboat commit status check for details."
+              exit 1
+            fi
+
+            if [[ "$TUGBOAT_STATE" == "success" ]]; then
+              # --paginate is required: without it this call silently only
+              # sees the first 30 PR comments, so the URL is invisible on
+              # any PR whose conversation has grown past that.
+              PREVIEW_URL=$(gh api "repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments" --paginate | jq -r '.[].body' | grep -Po 'https://(?!www\.|dashboard\.)[a-zA-Z0-9.-]+\.tugboatqa.com' | tail -n 1 || true)
+              if [[ ! -z "$PREVIEW_URL" ]]; then
+                echo "Preview URL found: $PREVIEW_URL"
+                break
+              fi
+              echo "Tugboat status is success but no preview URL comment yet, still waiting..."
+            else
+              echo "Tugboat status: $TUGBOAT_STATE, waiting..."
+            fi
+
+            sleep $INTERVAL
+            ELAPSED=$((ELAPSED + INTERVAL))
+          done
+
+          if [[ -z "$PREVIEW_URL" ]]; then
+            echo "Tugboat preview did not become available within the timeout."
+            exit 1
+          fi
+
+          # The comment can appear before the preview site has finished
+          # booting, so poll the URL itself until it responds successfully.
+          READY_MAX_WAIT=300
+          READY_INTERVAL=15
+          READY_ELAPSED=0
+          while [ $READY_ELAPSED -lt $READY_MAX_WAIT ]; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$PREVIEW_URL" || true)
+            if [[ "$STATUS" =~ ^(2|3)[0-9][0-9]$ ]]; then
               echo "Preview is ready: $PREVIEW_URL"
               echo "preview_url=$PREVIEW_URL" >> "$GITHUB_OUTPUT"
               exit 0
             fi
-            echo "Waiting for Tugboat preview..."
-            sleep $INTERVAL
-            ELAPSED=$((ELAPSED + INTERVAL))
+            echo "Waiting for Tugboat preview to respond (last status: $STATUS)..."
+            sleep $READY_INTERVAL
+            READY_ELAPSED=$((READY_ELAPSED + READY_INTERVAL))
           done
+
           echo "Tugboat preview did not become ready in time."
           exit 1
         env:
@@ -51,10 +99,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 20
 
@@ -64,7 +112,7 @@ jobs:
 
       - name: Install Playwright Browsers
         working-directory: tests/playwright
-        run: npx playwright install
+        run: npx playwright install chromium --with-deps
 
       - name: Run Playwright Tests
         working-directory: tests/playwright
@@ -79,10 +127,10 @@ jobs:
     if: github.event_name == 'push'
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 20
 
@@ -92,7 +140,7 @@ jobs:
 
       - name: Install Playwright Browsers
         working-directory: tests/playwright
-        run: npx playwright install
+        run: npx playwright install chromium --with-deps
 
       - name: Run Playwright Tests
         working-directory: tests/playwright
