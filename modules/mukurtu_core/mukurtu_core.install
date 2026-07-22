@@ -2167,6 +2167,18 @@ function mukurtu_core_update_40076(): void {
 }
 
 /**
+ * Enable the Visitors module for built-in, no-external-service analytics.
+ */
+function mukurtu_core_update_40077(): void {
+  \Drupal::service('module_installer')->install(['visitors']);
+
+  $role = \Drupal\user\Entity\Role::load('mukurtu_manager');
+  if ($role) {
+    $role->grantPermission('access visitors')->save();
+  }
+}
+
+/**
  * Fix the account menu's Dashboard link to point at the current route.
  *
  * The /dashboard route was removed in favor of /dashboard/mukurtu_dashboard
@@ -2175,7 +2187,7 @@ function mukurtu_core_update_40076(): void {
  * now-nonexistent /dashboard path, causing an UnexpectedValueException
  * whenever the account menu is rendered.
  */
-function mukurtu_core_update_40077(): void {
+function mukurtu_core_update_40078(): void {
   $storage = \Drupal::entityTypeManager()->getStorage('menu_link_content');
   $ids = $storage->getQuery()
     ->accessCheck(FALSE)
@@ -2190,7 +2202,7 @@ function mukurtu_core_update_40077(): void {
 /**
  * Stop linking the Content type column on the manage all content view.
  */
-function mukurtu_core_update_40078(): void {
+function mukurtu_core_update_40079(): void {
   $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_manage_all_content');
   if ($config->isNew()) {
     return;

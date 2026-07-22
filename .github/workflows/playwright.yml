@@ -16,6 +16,7 @@ jobs:
     permissions:
       contents: read
       issues: read
+      statuses: read
     outputs:
       preview_url: ${{ steps.wait-for-preview.outputs.preview_url }}
     steps:
@@ -25,24 +26,48 @@ jobs:
       - name: Wait for Tugboat Preview
         id: wait-for-preview
         run: |
-          # Define the maximum wait time (20 minutes) for the preview comment.
-          MAX_WAIT=1200
+          # Poll the "Tugboat" commit status and, once it reports success,
+          # look for the PR comment containing the live preview URL (the
+          # status's target_url only points at the Tugboat dashboard, not
+          # the preview host itself). This fails fast on a real build error
+          # instead of always waiting out the full timeout. The status has
+          # been observed to flip success -> pending -> success while a
+          # rebuild is still in progress, so an early "success" reading is
+          # not trusted as final until the preview URL comment actually
+          # shows up; if it hasn't yet, we just keep polling within the
+          # same overall budget rather than failing outright.
+          MAX_WAIT=2400
           INTERVAL=30
           ELAPSED=0
           PREVIEW_URL=""
           while [ $ELAPSED -lt $MAX_WAIT ]; do
-            PREVIEW_URL=$(gh api repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments | jq -r '.[].body' | grep -Po 'https://(?!www\.)[a-zA-Z0-9.-]+\.tugboatqa.com' | head -n 1 || true)
-            if [[ ! -z "$PREVIEW_URL" ]]; then
-              echo "Preview URL found: $PREVIEW_URL"
-              break
+            TUGBOAT_STATE=$(gh api "repos/${{ github.repository }}/commits/${{ github.event.pull_request.head.sha }}/status" --jq '[.statuses[] | select(.context=="Tugboat")][0].state // "pending"' 2>/dev/null || echo "pending")
+
+            if [[ "$TUGBOAT_STATE" == "failure" || "$TUGBOAT_STATE" == "error" ]]; then
+              echo "Tugboat build failed (status: $TUGBOAT_STATE). See the Tugboat commit status check for details."
+              exit 1
             fi
-            echo "Waiting for Tugboat preview comment..."
+
+            if [[ "$TUGBOAT_STATE" == "success" ]]; then
+              # --paginate is required: without it this call silently only
+              # sees the first 30 PR comments, so the URL is invisible on
+              # any PR whose conversation has grown past that.
+              PREVIEW_URL=$(gh api "repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments" --paginate | jq -r '.[].body' | grep -Po 'https://(?!www\.|dashboard\.)[a-zA-Z0-9.-]+\.tugboatqa.com' | tail -n 1 || true)
+              if [[ ! -z "$PREVIEW_URL" ]]; then
+                echo "Preview URL found: $PREVIEW_URL"
+                break
+              fi
+              echo "Tugboat status is success but no preview URL comment yet, still waiting..."
+            else
+              echo "Tugboat status: $TUGBOAT_STATE, waiting..."
+            fi
+
             sleep $INTERVAL
             ELAPSED=$((ELAPSED + INTERVAL))
           done
 
           if [[ -z "$PREVIEW_URL" ]]; then
-            echo "Tugboat preview URL did not appear in time."
+            echo "Tugboat preview did not become available within the timeout."
             exit 1
           fi
 
