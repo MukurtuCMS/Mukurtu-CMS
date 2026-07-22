@@ -1,0 +1,8 @@
+name: 'Mukurtu Local Contexts Test'
+type: module
+description: 'Provides base fields for testing mukurtu_local_contexts field types.'
+package: Testing
+core_version_requirement: '^9.4 || ^10 || ^11'
+dependencies:
+  - 'drupal:node'
+  - 'mukurtu_local_contexts:mukurtu_local_contexts'

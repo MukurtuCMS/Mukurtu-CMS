@@ -43,6 +43,7 @@ install:
   - automated_cron
   - google_tag
   - klaro
+  - visitors
   - twig_tweak
   - facets_reset_button
   - flat_taxonomy
