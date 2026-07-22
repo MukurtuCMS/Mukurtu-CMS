@@ -36,6 +36,34 @@ mukurtu_local_contexts.site_project_directory_settings:
   requirements:
     _permission: 'administer site configuration'
 
+mukurtu_local_contexts.legacy_project_label_breakdown:
+  path: '/admin/local-contexts/legacy-projects/{project_id}/breakdown'
+  defaults:
+    _controller: '\Drupal\mukurtu_local_contexts\Controller\LegacyProjectLabelBreakdownController::build'
+    _title_callback: '\Drupal\mukurtu_local_contexts\Controller\LegacyProjectLabelBreakdownController::title'
+  requirements:
+    _custom_access: '\Drupal\mukurtu_local_contexts\Controller\LegacyProjectLabelBreakdownController::access'
+    project_id: '[^/]+'
+
+mukurtu_local_contexts.legacy_label_removal_review:
+  path: '/admin/local-contexts/legacy-projects/{project_id}/labels-notices/{ref_type}/{ref_id}/review'
+  defaults:
+    _form: 'Drupal\mukurtu_local_contexts\Form\LegacyLabelRemovalReviewForm'
+    _title_callback: '\Drupal\mukurtu_local_contexts\Form\LegacyLabelRemovalReviewForm::title'
+  requirements:
+    _custom_access: '\Drupal\mukurtu_local_contexts\Form\LegacyLabelRemovalReviewForm::access'
+    project_id: '[^/]+'
+    ref_type: 'label|notice'
+    ref_id: '[^/]+'
+
+mukurtu_local_contexts.legacy_label_removal_confirm:
+  path: '/admin/local-contexts/legacy-projects/label-removal-confirm'
+  defaults:
+    _form: 'Drupal\mukurtu_local_contexts\Form\LegacyLabelRemovalConfirmForm'
+    _title_callback: '\Drupal\mukurtu_local_contexts\Form\LegacyLabelRemovalConfirmForm::title'
+  requirements:
+    _custom_access: '\Drupal\mukurtu_local_contexts\Form\LegacyLabelRemovalConfirmForm::access'
+
 mukurtu_local_contexts.remap_legacy_project_site:
   path: '/admin/local-contexts/legacy-projects/remap'
   defaults:
