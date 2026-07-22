@@ -17,24 +17,6 @@ To learn more about Mukurtu CMS and the larger Mukurtu community, visit [mukurtu
 * To generate PDF thumbnails, [poppler-utils](https://pypi.org/project/poppler-utils/) must be installed on the server.
 * To generate thumbnails for uploaded video files, [FFmpeg](https://ffmpeg.org/) must be installed on the server.
 * For local development, we encourage using [Docker](https://ddev.readthedocs.io/en/stable/users/install/docker-installation/) and [DDEV](https://ddev.readthedocs.io/en/stable/users/install/ddev-installation/) (which includes composer)
-
-## Install Mukurtu with DDEV
-
-Using DDEV is the easiest way to get up and running with Mukurtu locally.
-
-* Download and install [DDEV](https://ddev.readthedocs.io/en/stable/users/install/ddev-installation/)
-* Make a new folder in which to work and initialize a DDEV project inside it. Run the following commands to download and install Mukurtu.
-```
-mkdir mukurtu
-cd mukurtu
-ddev config --project-type=drupal --docroot=web
-# Optional but recommended: install pdftotext inside the DDEV container:
-echo "RUN sudo apt -qq update; sudo apt install poppler-utils -y;" > .ddev/web-build/Dockerfile.pdftotext
-ddev start
-ddev composer create-project mukurtu/mukurtu-template:dev-main
-ddev drush si --site-name=Mukurtu --account-name=admin --account-pass=admin
-ddev launch
-```
 * If planning to develop on the Mukurtu CMS installation profile, follow the [additional installation steps to connect a Git checkout to the new project](https://github.com/MukurtuCMS/Mukurtu-CMS/wiki).
 
 ## Installing Mukurtu CMS with Composer
