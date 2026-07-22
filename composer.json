@@ -20,8 +20,6 @@
         "drupal/admin_theme": "^1.1",
         "drupal/better_exposed_filters": "^7.1.1",
         "drupal/blazy": "^3.0",
-        "drupal/color_field": "^3.0",
-        "drupal/config_pages": "^2.15",
         "drupal/config_translation_po": "^1.0",
         "drupal/consent_popup": "^1.0",
         "drupal/core": "~11.4.0",
