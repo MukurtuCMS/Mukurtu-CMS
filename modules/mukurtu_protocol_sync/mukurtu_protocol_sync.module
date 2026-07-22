@@ -124,7 +124,8 @@ function mukurtu_protocol_sync_form_alter(array &$form, FormStateInterface $form
 }
 
 /**
- * Defaults the sync checkbox to checked without pre-populating protocols.
+ * Defaults the sync checkbox to unchecked since no protocols were found to
+ * infer sync from (non-protocol-aware content, or none selected yet).
  */
 function _mukurtu_protocol_sync_default_sync_checkbox(array &$form): void {
   foreach (Element::children($form['media']) as $delta) {
@@ -134,7 +135,7 @@ function _mukurtu_protocol_sync_default_sync_checkbox(array &$form): void {
       continue;
     }
     $widget = &$form['media'][$delta]['fields']['field_sync_protocols']['widget']['value'];
-    $widget['#default_value'] = 1;
+    $widget['#default_value'] = 0;
     $widget['#attributes']['data-mukurtu-protocol-sync'] = '1';
   }
 }
@@ -180,6 +181,51 @@ function _mukurtu_protocol_sync_prepopulate_media_form(array &$form, array $prot
       }
     }
   }
+}
+
+/**
+ * Implements hook_form_mukurtu_media_bulk_upload_form_alter().
+ *
+ * Wires the sync checkbox for each uploaded item into the same JS placement
+ * used elsewhere, positioned after protocol selection since bulk uploads
+ * aren't started from a content page and never have protocols pre-populated.
+ */
+function mukurtu_protocol_sync_form_mukurtu_media_bulk_upload_form_alter(array &$form, FormStateInterface $form_state): void {
+  _mukurtu_protocol_sync_mark_bulk_sync_checkboxes($form);
+}
+
+/**
+ * Implements hook_form_mukurtu_media_bulk_url_create_form_alter().
+ *
+ * Same wiring as the bulk upload form, for the URL-based bulk create form
+ * (remote_video, soundcloud).
+ */
+function mukurtu_protocol_sync_form_mukurtu_media_bulk_url_create_form_alter(array &$form, FormStateInterface $form_state): void {
+  _mukurtu_protocol_sync_mark_bulk_sync_checkboxes($form);
+}
+
+/**
+ * Marks each entity's sync checkbox for JS placement below its protocols
+ * fieldset, and attaches the library. Shared by both bulk media forms, which
+ * render one details/fields group per entity under $form['entities'][$delta].
+ */
+function _mukurtu_protocol_sync_mark_bulk_sync_checkboxes(array &$form): void {
+  if (empty($form['entities'])) {
+    return;
+  }
+
+  foreach (Element::children($form['entities']) as $delta) {
+    // BooleanCheckboxWidget declares multiple_values=TRUE, so it skips the
+    // numeric delta wrapper: the path is widget.value, not widget.0.value.
+    if (!isset($form['entities'][$delta]['fields']['field_sync_protocols']['widget']['value'])) {
+      continue;
+    }
+    $widget = &$form['entities'][$delta]['fields']['field_sync_protocols']['widget']['value'];
+    $widget['#attributes']['data-mukurtu-protocol-sync'] = '1';
+    $widget['#attributes']['data-mukurtu-protocol-sync-position'] = 'after';
+  }
+
+  $form['#attached']['library'][] = 'mukurtu_protocol_sync/protocol-sync';
 }
 
 /**
@@ -317,18 +363,19 @@ function mukurtu_protocol_sync_form_node_form_alter(array &$form, FormStateInter
   // hook_form_alter() also runs before MediaLibraryWidget::preRenderWidget()
   // moves the button into #field_suffix, so it's still keyed as 'open_button'
   // (not '#field_suffix']['open_button']) at this point.
-  $media_fields_with_buttons = [
-    'field_media_assets',
-    'field_recording',
-    'field_thumbnail',
-    'field_collection_image',
-    'field_word_list_image',
-  ];
-  foreach ($media_fields_with_buttons as $field_name) {
-    if (isset($form[$field_name]['widget']['open_button'])) {
-      $form[$field_name]['widget']['open_button']['#ajax']['callback'] =
-        'mukurtu_protocol_sync_media_library_open_ajax';
-    }
+  //
+  // Detected dynamically rather than via a fixed field-name list, since a
+  // hardcoded list silently misses media reference fields on content types
+  // that name theirs differently (e.g. field_page_media_assets on Basic
+  // Page) and lets stale TempStore data from a previous node leak through.
+  $media_reference_fields = array_filter(
+    Element::children($form),
+    fn(string $field_name) => isset($form[$field_name]['widget']['open_button'])
+  );
+
+  foreach ($media_reference_fields as $field_name) {
+    $form[$field_name]['widget']['open_button']['#ajax']['callback'] =
+      'mukurtu_protocol_sync_media_library_open_ajax';
   }
 
   $node = $form_state->getFormObject()->getEntity();
@@ -336,17 +383,9 @@ function mukurtu_protocol_sync_form_node_form_alter(array &$form, FormStateInter
     return;
   }
 
-  $media_fields = [
-    'field_media_assets',
-    'field_recording',
-    'field_thumbnail',
-    'field_collection_image',
-    'field_word_list_image',
-  ];
-
   $warnings = [];
 
-  foreach ($media_fields as $field_name) {
+  foreach ($media_reference_fields as $field_name) {
     if (!$node->hasField($field_name)) {
       continue;
     }
@@ -443,8 +482,12 @@ function mukurtu_protocol_sync_form_media_form_alter(array &$form, FormStateInte
 
   // Mark the checkbox so JS can find and move it into the protocols fieldset.
   // BooleanCheckboxWidget declares multiple_values=TRUE; path is widget.value.
+  // Standalone media forms aren't reached from a content page, so protocols
+  // are never pre-populated here; place the toggle after protocol selection
+  // instead of before it.
   if (isset($form['field_sync_protocols']['widget']['value'])) {
     $form['field_sync_protocols']['widget']['value']['#attributes']['data-mukurtu-protocol-sync'] = '1';
+    $form['field_sync_protocols']['widget']['value']['#attributes']['data-mukurtu-protocol-sync-position'] = 'after';
   }
 
   $form['#attached']['library'][] = 'mukurtu_protocol_sync/protocol-sync';
