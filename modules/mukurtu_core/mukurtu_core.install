@@ -2109,6 +2109,18 @@ function mukurtu_core_update_40074(): void {
 }
 
 /**
+ * Enable the Visitors module for built-in, no-external-service analytics.
+ */
+function mukurtu_core_update_40075(): void {
+  \Drupal::service('module_installer')->install(['visitors']);
+
+  $role = \Drupal\user\Entity\Role::load('mukurtu_manager');
+  if ($role) {
+    $role->grantPermission('access visitors')->save();
+  }
+}
+
+/**
  * Fix the account menu's Dashboard link to point at the current route.
  *
  * The /dashboard route was removed in favor of /dashboard/mukurtu_dashboard
@@ -2117,7 +2129,7 @@ function mukurtu_core_update_40074(): void {
  * now-nonexistent /dashboard path, causing an UnexpectedValueException
  * whenever the account menu is rendered.
  */
-function mukurtu_core_update_40075(): void {
+function mukurtu_core_update_40076(): void {
   $storage = \Drupal::entityTypeManager()->getStorage('menu_link_content');
   $ids = $storage->getQuery()
     ->accessCheck(FALSE)
@@ -2130,10 +2142,21 @@ function mukurtu_core_update_40075(): void {
 }
 
 /**
+ * Stop linking the Content type column on the manage all content view.
+ */
+function mukurtu_core_update_40077(): void {
+  $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_manage_all_content');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('display.default.display_options.fields.type.settings.link', FALSE)->save();
+}
+
+/**
  * Grant Language Stewards comment permissions so they can view and approve
  * comments on dictionary words and word lists, matching Protocol Stewards.
  */
-function mukurtu_core_update_40076(): void {
+function mukurtu_core_update_40078(): void {
   /** @var \Drupal\og\Entity\OgRole|null $role */
   $role = \Drupal::entityTypeManager()
     ->getStorage('og_role')
@@ -2149,15 +2172,4 @@ function mukurtu_core_update_40076(): void {
   }
 
   $role->save();
-}
-
-/**
- * Stop linking the Content type column on the manage all content view.
- */
-function mukurtu_core_update_40077(): void {
-  $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_manage_all_content');
-  if ($config->isNew()) {
-    return;
-  }
-  $config->set('display.default.display_options.fields.type.settings.link', FALSE)->save();
 }
