@@ -1,0 +1,120 @@
+# The main "fully-described" Dictionary Word item for the accessibility
+# program. Reuses the Community/Protocol bootstrapped by the
+# accessibility_demo_content recipe (see this recipe's own recipe.yml
+# "recipes:" prerequisite), and reuses several taxonomy terms and media from
+# that recipe rather than creating near-duplicates. See ../../README.md.
+_meta:
+  version: '1.0'
+  entity_type: node
+  uuid: 9258ad53-9c74-425e-8035-bfd3a5bbcf1a
+  bundle: dictionary_word
+  default_langcode: en
+  depends:
+    405f324c-b98c-4378-a0c6-c4749533da0c: paragraph
+    53362a70-fbcc-41b6-81c6-dfc1c0e38c3a: paragraph
+    2520bf8f-2993-4c32-9f95-062814b7a2cc: media
+    9942587c-1bc3-481a-9f68-264b728c598e: media
+    80af4173-fb4b-4640-bbae-55ed5df92de6: media
+    85761b41-5e78-4f25-b92d-6037efcbf7e9: node
+    a153b9f5-f2ab-4d27-8306-aea67943618b: taxonomy_term
+    b090f1d3-9163-47d8-abd8-504f95385477: taxonomy_term
+    b954ff14-94dd-4ef4-9bde-4e9cdf357abf: taxonomy_term
+    9b7c9130-61a7-4ee7-9fd9-3d23a0e68904: taxonomy_term
+    bc25363f-22ef-4bf2-bde0-e65719ef7fa1: taxonomy_term
+default:
+  title:
+    -
+      value: 'Sample Word (Accessibility Demo)'
+  status:
+    -
+      value: true
+  promote:
+    -
+      value: false
+  sticky:
+    -
+      value: false
+  uid:
+    -
+      target_id: 1
+  revision_uid:
+    -
+      target_id: 1
+  moderation_state:
+    -
+      value: published
+  path:
+    -
+      alias: '/accessibility-demo/sample-word'
+      langcode: en
+  field_cultural_protocols:
+    -
+      sharing_setting: all
+      protocols: '|1|'
+  field_dictionary_word_language:
+    -
+      entity: b090f1d3-9163-47d8-abd8-504f95385477
+  field_alternate_spelling:
+    -
+      value: 'sample-alt-spelling'
+  field_glossary_entry:
+    -
+      value: 'sample-word'
+  field_keywords:
+    -
+      entity: a153b9f5-f2ab-4d27-8306-aea67943618b
+  field_location:
+    -
+      entity: 9b7c9130-61a7-4ee7-9fd9-3d23a0e68904
+  field_contributor:
+    -
+      entity: b954ff14-94dd-4ef4-9bde-4e9cdf357abf
+  field_definition:
+    -
+      value: 'This is a placeholder definition for a sample dictionary word, used only to test accessibility of the rendered page.'
+      format: plain_text
+  field_pronunciation:
+    -
+      value: 'Placeholder pronunciation guide text.'
+      format: plain_text
+  field_recording:
+    -
+      entity: 9942587c-1bc3-481a-9f68-264b728c598e
+  field_media_assets:
+    -
+      entity: 2520bf8f-2993-4c32-9f95-062814b7a2cc
+    -
+      entity: 9942587c-1bc3-481a-9f68-264b728c598e
+    -
+      entity: 80af4173-fb4b-4640-bbae-55ed5df92de6
+  field_thumbnail:
+    -
+      entity: 2520bf8f-2993-4c32-9f95-062814b7a2cc
+  field_sample_sentences:
+    -
+      entity: 405f324c-b98c-4378-a0c6-c4749533da0c
+  field_additional_word_entries:
+    -
+      entity: 53362a70-fbcc-41b6-81c6-dfc1c0e38c3a
+  field_source:
+    -
+      value: 'Placeholder Source'
+  field_translation:
+    -
+      value: 'placeholder translation'
+  field_word_origin:
+    -
+      value: 'Placeholder word origin'
+  field_word_type:
+    -
+      entity: bc25363f-22ef-4bf2-bde0-e65719ef7fa1
+  field_related_content:
+    -
+      entity: 85761b41-5e78-4f25-b92d-6037efcbf7e9
+  field_coverage_description:
+    -
+      value: 'Placeholder coverage description: a generic, non-specific location used only for accessibility testing.'
+      format: plain_text
+  field_coverage:
+    -
+      value: 'POINT (-98.5795 39.828175)'

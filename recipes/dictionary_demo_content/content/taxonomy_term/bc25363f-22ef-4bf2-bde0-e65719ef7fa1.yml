@@ -1,0 +1,13 @@
+_meta:
+  version: '1.0'
+  entity_type: taxonomy_term
+  uuid: bc25363f-22ef-4bf2-bde0-e65719ef7fa1
+  bundle: word_type
+  default_langcode: en
+default:
+  name:
+    -
+      value: Noun
+  status:
+    -
+      value: true
