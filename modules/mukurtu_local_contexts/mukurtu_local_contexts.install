@@ -30,6 +30,12 @@ function mukurtu_local_contexts_schema() {
         'not null' => TRUE,
         'description' => 'Group entity ID or 0 for site',
       ],
+      'api_key' => [
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+        'description' => 'The Local Contexts Hub API key that added/owns this project, if any.',
+      ],
     ],
     'primary key' => ['project_id', 'type', 'group_id'],
   ];
@@ -359,4 +365,122 @@ function mukurtu_local_contexts_update_10000() {
     ]
   );
 
+}
+
+/**
+ * Add an api_key column to the supported projects table and backfill it.
+ *
+ * This records which Local Contexts Hub API key added/owns each supported
+ * project, in preparation for supporting multiple API keys per site,
+ * community, or protocol. Backfilled from whichever single key is currently
+ * stored for each scope, since that is the best available approximation of
+ * which key was originally used.
+ */
+function mukurtu_local_contexts_update_10001() {
+  $db = \Drupal::database();
+  $schema = $db->schema();
+
+  if (!$schema->fieldExists('mukurtu_local_contexts_supported_projects', 'api_key')) {
+    $schema->addField('mukurtu_local_contexts_supported_projects', 'api_key', [
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+      'description' => 'The Local Contexts Hub API key that added/owns this project, if any.',
+    ]);
+  }
+
+  // Backfill site-scoped rows from the site-wide key.
+  $site_api_key = \Drupal::config('mukurtu_local_contexts.settings')->get('site_api_key');
+  if (!empty($site_api_key)) {
+    $db->update('mukurtu_local_contexts_supported_projects')
+      ->fields(['api_key' => $site_api_key])
+      ->condition('type', 'site')
+      ->condition('group_id', 0)
+      ->execute();
+  }
+
+  // Backfill group-scoped (community/protocol) rows from each group's key.
+  $groups = $db->select('mukurtu_local_contexts_supported_projects', 'sp')
+    ->fields('sp', ['type', 'group_id'])
+    ->condition('sp.type', 'site', '<>')
+    ->distinct()
+    ->execute()
+    ->fetchAll();
+
+  $entity_type_manager = \Drupal::entityTypeManager();
+  foreach ($groups as $row) {
+    if (!$entity_type_manager->hasDefinition($row->type)) {
+      continue;
+    }
+    $group = $entity_type_manager->getStorage($row->type)->load($row->group_id);
+    if (!$group || !$group->hasField('field_local_contexts_api_key')) {
+      continue;
+    }
+    $api_key = $group->get('field_local_contexts_api_key')->value;
+    if (empty($api_key)) {
+      continue;
+    }
+    $db->update('mukurtu_local_contexts_supported_projects')
+      ->fields(['api_key' => $api_key])
+      ->condition('type', $row->type)
+      ->condition('group_id', $row->group_id)
+      ->execute();
+  }
+}
+
+/**
+ * Migrate Local Contexts API key storage from a single value to a list.
+ *
+ * Allows a site, community, or protocol to be connected to more than one
+ * Local Contexts Hub account at once. Existing single values are preserved
+ * as the first (only) item in the new list-based storage.
+ */
+function mukurtu_local_contexts_update_10002() {
+  $entity_definition_update_manager = \Drupal::entityDefinitionUpdateManager();
+  $entity_type_manager = \Drupal::entityTypeManager();
+
+  foreach (['community', 'protocol'] as $entity_type_id) {
+    $storage_definition = $entity_definition_update_manager->getFieldStorageDefinition('field_local_contexts_api_key', $entity_type_id);
+    if (!$storage_definition) {
+      continue;
+    }
+
+    // Preserve existing single values before uninstalling the field storage.
+    $storage = $entity_type_manager->getStorage($entity_type_id);
+    $ids = $storage->getQuery()->accessCheck(FALSE)->execute();
+    $existing_values = [];
+    foreach ($storage->loadMultiple($ids) as $entity) {
+      $value = $entity->get('field_local_contexts_api_key')->value;
+      if (!empty($value)) {
+        $existing_values[$entity->id()] = $value;
+      }
+    }
+
+    $entity_definition_update_manager->uninstallFieldStorageDefinition($storage_definition);
+
+    // Reinstall using the (now unlimited-cardinality) definition from code.
+    $entity_type = $entity_type_manager->getDefinition($entity_type_id);
+    $field_class = $entity_type->getClass();
+    $new_storage_definition = $field_class::baseFieldDefinitions($entity_type)['field_local_contexts_api_key'];
+    $entity_definition_update_manager->installFieldStorageDefinition(
+      'field_local_contexts_api_key',
+      $entity_type_id,
+      'mukurtu_protocol',
+      $new_storage_definition
+    );
+
+    foreach ($existing_values as $id => $value) {
+      $entity = $storage->loadUnchanged($id);
+      $entity->set('field_local_contexts_api_key', [$value]);
+      $entity->save();
+    }
+  }
+
+  // Migrate the site-wide key config from a single value to a list.
+  $config = \Drupal::configFactory()->getEditable('mukurtu_local_contexts.settings');
+  $old_key = $config->get('site_api_key');
+  $keys = !empty($old_key) ? [$old_key] : [];
+  $config->set('site_api_keys', $keys);
+  $config->clear('site_api_key');
+  $config->save();
 }

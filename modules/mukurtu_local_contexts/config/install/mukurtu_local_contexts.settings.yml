@@ -1,4 +1,4 @@
-site_api_key: ''
+site_api_keys: {  }
 site_projects_directory_description:
   value: ''
   format: null

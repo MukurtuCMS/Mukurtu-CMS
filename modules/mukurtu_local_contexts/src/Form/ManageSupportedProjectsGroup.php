@@ -33,14 +33,11 @@ class ManageSupportedProjectsGroup extends ManageSupportedProjectsBase {
       '#value' => $this->t('Select the Local Contexts projects you would like to add or remove for this group. Existing projects can be selected to update their content.'),
     ];
 
-    $api_key = $form_state->get('api_key');
-    if (!$api_key) {
-      if ($bundle === 'community') {
-        $form['api_key_wrapper']['#description'] .= '<br>' . $this->t('This API key is stored for this community only.');
-      }
-      elseif ($bundle === 'protocol') {
-        $form['api_key_wrapper']['#description'] .= '<br>' . $this->t('This API key is stored for this protocol only.');
-      }
+    if ($bundle === 'community') {
+      $form['api_key_wrapper']['#description'] .= '<br>' . $this->t('These API keys are stored for this community only.');
+    }
+    elseif ($bundle === 'protocol') {
+      $form['api_key_wrapper']['#description'] .= '<br>' . $this->t('These API keys are stored for this protocol only.');
     }
 
     return $form;

@@ -10,6 +10,7 @@ use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\RevisionableInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\media\MediaInterface;
 use Drupal\og\Entity\OgRole;
@@ -832,12 +833,12 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
       ->setLabel(t('Local Contexts API key'))
       ->setRequired(FALSE)
       ->setTranslatable(FALSE)
+      ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
       ->setSettings([
         'max_length' => 255,
         'is_ascii' => TRUE,
         'case_sensitive' => FALSE,
       ])
-      ->setDefaultValue('')
       // Keep this field out of Form/Display UIs entirely.
       ->setDisplayConfigurable('form', FALSE)
       ->setDisplayConfigurable('view', FALSE);

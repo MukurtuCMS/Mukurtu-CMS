@@ -3,6 +3,7 @@
 namespace Drupal\mukurtu_local_contexts;
 
 use PDO;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\og\Og;
@@ -15,8 +16,37 @@ class LocalContextsSupportedProjectManager {
    *
    * @param \Drupal\Core\Database\Connection $db
    *   The database connection.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
+   *   The config factory.
    */
-  public function __construct(protected Connection $db) {
+  public function __construct(protected Connection $db, protected ConfigFactoryInterface $configFactory) {
+  }
+
+  /**
+   * Get all Local Contexts Hub API keys configured for the site.
+   *
+   * @return string[]
+   *   The configured site-wide API keys.
+   */
+  public function getSiteApiKeys(): array {
+    return array_values(array_filter((array) $this->configFactory->get('mukurtu_local_contexts.settings')->get('site_api_keys')));
+  }
+
+  /**
+   * Get all Local Contexts Hub API keys configured for a group.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $group
+   *   The OG group (community or protocol).
+   *
+   * @return string[]
+   *   The configured API keys for the group.
+   */
+  public function getGroupApiKeys(ContentEntityInterface $group): array {
+    if (!$group->hasField('field_local_contexts_api_key')) {
+      return [];
+    }
+    $keys = array_column($group->get('field_local_contexts_api_key')->getValue(), 'value');
+    return array_values(array_filter($keys));
   }
 
   /**
@@ -41,15 +71,18 @@ class LocalContextsSupportedProjectManager {
    *
    * @param string $project_id
    *   The project ID to add.
+   * @param string|null $api_key
+   *   The Local Contexts Hub API key used to add this project, if any.
    *
    * @return void
    */
-  public function addSiteProject($project_id) {
+  public function addSiteProject($project_id, ?string $api_key = NULL) {
     if (!$this->isSiteSupportedProject($project_id)) {
       $fields = [
         'project_id' => $project_id,
         'type' => 'site',
         'group_id' => 0,
+        'api_key' => $api_key,
       ];
       $query = $this->db->insert('mukurtu_local_contexts_supported_projects')->fields($fields);
       $query->execute();
@@ -88,7 +121,7 @@ class LocalContextsSupportedProjectManager {
   public function getAllProjects(): array {
     $query = $this->db->select('mukurtu_local_contexts_supported_projects', 'sp');
     $query->join('mukurtu_local_contexts_projects', 'p', 'sp.project_id = p.id');
-    $query->fields('sp', ['type', 'group_id']);
+    $query->fields('sp', ['type', 'group_id', 'api_key']);
     $query->fields('p', ['id', 'provider_id', 'title', 'privacy', 'updated']);
     $query->orderBy('sp.type', 'DESC');
     $query->orderBy('sp.group_id');
@@ -163,7 +196,8 @@ class LocalContextsSupportedProjectManager {
     $query
       ->condition('sp.type', 'site')
       ->condition('sp.group_id', 0)
-      ->fields('p', ['id', 'provider_id', 'title', 'privacy', 'updated']);
+      ->fields('p', ['id', 'provider_id', 'title', 'privacy', 'updated'])
+      ->fields('sp', ['api_key']);
     $query->orderBy('p.title');
 
     $result = $query->execute();
@@ -177,6 +211,46 @@ class LocalContextsSupportedProjectManager {
       }
     }
     return $projects;
+  }
+
+  /**
+   * Get the project IDs of site projects added with a given API key.
+   *
+   * @param string $api_key
+   *   The API key.
+   *
+   * @return string[]
+   *   The project IDs.
+   */
+  public function getSiteProjectsByApiKey(string $api_key): array {
+    return $this->db->select('mukurtu_local_contexts_supported_projects', 'sp')
+      ->condition('sp.type', 'site')
+      ->condition('sp.group_id', 0)
+      ->condition('sp.api_key', $api_key)
+      ->fields('sp', ['project_id'])
+      ->execute()
+      ->fetchCol();
+  }
+
+  /**
+   * Get the project IDs of group projects added with a given API key.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $group
+   *   The OG group (community or protocol).
+   * @param string $api_key
+   *   The API key.
+   *
+   * @return string[]
+   *   The project IDs.
+   */
+  public function getGroupProjectsByApiKey(ContentEntityInterface $group, string $api_key): array {
+    return $this->db->select('mukurtu_local_contexts_supported_projects', 'sp')
+      ->condition('sp.type', $group->getEntityTypeId())
+      ->condition('sp.group_id', $group->id())
+      ->condition('sp.api_key', $api_key)
+      ->fields('sp', ['project_id'])
+      ->execute()
+      ->fetchCol();
   }
 
   /**
@@ -196,7 +270,8 @@ class LocalContextsSupportedProjectManager {
     $query
       ->condition('sp.type', $group->getEntityTypeId())
       ->condition('sp.group_id', $group->id())
-      ->fields('p', ['id', 'provider_id', 'title', 'privacy', 'updated']);
+      ->fields('p', ['id', 'provider_id', 'title', 'privacy', 'updated'])
+      ->fields('sp', ['api_key']);
     $query->orderBy('p.title');
 
     $result = $query->execute();
@@ -241,15 +316,18 @@ class LocalContextsSupportedProjectManager {
    *   The OG group (community or protocol).
    * @param string $project_id
    *   The project ID to add.
+   * @param string|null $api_key
+   *   The Local Contexts Hub API key used to add this project, if any.
    *
    * @return void
    */
-  public function addGroupProject(ContentEntityInterface $group, string $project_id) {
+  public function addGroupProject(ContentEntityInterface $group, string $project_id, ?string $api_key = NULL) {
     if (!$this->isGroupSupportedProject($group, $project_id)) {
       $fields = [
         'project_id' => $project_id,
         'type' => $group->getEntityTypeId(),
         'group_id' => $group->id(),
+        'api_key' => $api_key,
       ];
       $query = $this->db->insert('mukurtu_local_contexts_supported_projects')->fields($fields);
       $query->execute();
