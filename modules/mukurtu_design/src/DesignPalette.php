@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace Drupal\mukurtu_design;
 
-use Drupal\config_pages\ConfigPagesLoaderServiceInterface;
 use Drupal\Core\Cache\CacheableMetadata;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
-use Drupal\Core\Entity\EntityFieldManagerInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Routing\AdminContext;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -19,16 +17,37 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 final class DesignPalette implements ContainerInjectionInterface {
   use StringTranslationTrait;
 
-  const CONFIG_PAGE_NAME = 'design_settings';
-
-  const CONFIG_PAGE_PALETTE_FIELD = 'field_design_settings__palette';
+  const SETTINGS = 'mukurtu_design.settings';
 
   const CUSTOM_PALETTE_CSS_URI = 'public://mukurtu-design/custom-palette.css';
 
   /**
-   * The config pages service.
+   * The available palette machine names, keyed to their labels.
    */
-  protected ConfigPagesLoaderServiceInterface $configPages;
+  const PALETTES = [
+    'blue-gold' => 'Blue and gold',
+    'red-bone' => 'Red and bone',
+    'custom' => 'Custom',
+  ];
+
+  /**
+   * Maps config "colors" keys to the CSS custom properties they populate.
+   */
+  const CSS_VAR_MAPPING = [
+    'brand_primary' => '--brand-primary',
+    'brand_primary_dark' => '--brand-primary-dark',
+    'brand_primary_accent' => '--brand-primary-accent',
+    'brand_secondary' => '--brand-secondary',
+    'brand_secondary_dark' => '--brand-secondary-dark',
+    'brand_secondary_accent' => '--brand-secondary-accent',
+  ];
+
+  /**
+   * The config factory service.
+   *
+   * @var \Drupal\Core\Config\ConfigFactoryInterface
+   */
+  protected ConfigFactoryInterface $configFactory;
 
   /**
    * The Admin Context service.
@@ -38,43 +57,23 @@ final class DesignPalette implements ContainerInjectionInterface {
   protected AdminContext $adminContext;
 
   /**
-   * The entity type manager service.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
-   */
-  protected EntityTypeManagerInterface $entityTypeManager;
-
-  /**
-   * The entity field manager.
-   *
-   * @var \Drupal\Core\Entity\EntityFieldManagerInterface
-   */
-  protected EntityFieldManagerInterface $entityFieldManager;
-
-  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    $configPages = $container->get('config_pages.loader');
+    $configFactory = $container->get('config.factory');
     $adminContext = $container->get('router.admin_context');
-    $entityTypeManager = $container->get('entity_type.manager');
-    $entityFieldManager = $container->get('entity_field.manager');
 
-    assert($configPages instanceof ConfigPagesLoaderServiceInterface);
+    assert($configFactory instanceof ConfigFactoryInterface);
     assert($adminContext instanceof AdminContext);
-    assert($entityTypeManager instanceof EntityTypeManagerInterface);
-    assert($entityFieldManager instanceof EntityFieldManagerInterface);
-    return new self($configPages, $adminContext, $entityTypeManager, $entityFieldManager);
+    return new self($configFactory, $adminContext);
   }
 
   /**
    * Constructor for DesignPalette.
    */
-  public function __construct(ConfigPagesLoaderServiceInterface $configPages, AdminContext $admin_context, EntityTypeManagerInterface $entityTypeManager, EntityFieldManagerInterface $entityFieldManager) {
-    $this->configPages = $configPages;
+  public function __construct(ConfigFactoryInterface $configFactory, AdminContext $admin_context) {
+    $this->configFactory = $configFactory;
     $this->adminContext = $admin_context;
-    $this->entityTypeManager = $entityTypeManager;
-    $this->entityFieldManager = $entityFieldManager;
   }
 
   /**
@@ -97,27 +96,11 @@ final class DesignPalette implements ContainerInjectionInterface {
       return;
     }
 
-    $configPage = $this->configPages->load(self::CONFIG_PAGE_NAME);
-    $configPagesEntityType = $this->entityTypeManager->getDefinition('config_pages');
-
-    $palette = 'red-bone';
-    if ($configPage && $configPage->hasField(self::CONFIG_PAGE_PALETTE_FIELD)) {
-      $palette = $this->configPages->getValue($configPage, self::CONFIG_PAGE_PALETTE_FIELD, 0, 'value');
-    }
+    $config = $this->configFactory->get(self::SETTINGS);
+    $palette = $config->get('palette') ?? 'red-bone';
     $attachments['#attached']['library'][] = 'mukurtu_v4/palette.' . $palette;
 
-    // Add the list cache tag in the case where no config page has ever been
-    // saved. This ensures that after a fresh site install that when you save
-    // the form caches are invalidated and the palette is applied.
-    if ($configPage === NULL) {
-      (new CacheableMetadata())
-        ->addCacheTags($configPagesEntityType->getListCacheTags())
-        ->applyTo($attachments);
-    }
-    else {
-      CacheableMetadata::createFromObject($configPage)
-        ->applyTo($attachments);
-    }
+    CacheableMetadata::createFromObject($config)->applyTo($attachments);
   }
 
   /**
@@ -127,10 +110,6 @@ final class DesignPalette implements ContainerInjectionInterface {
     if ($extension !== 'mukurtu_v4') {
       return;
     }
-    // We load the palettes from CONFIG_PAGE_PALETTE_FIELD field storage.
-    $fieldStorageDefinitions = $this->entityFieldManager->getFieldStorageDefinitions('config_pages');
-
-    $palettes = options_allowed_values($fieldStorageDefinitions[self::CONFIG_PAGE_PALETTE_FIELD]);
 
     $libraries["palettes_demo"] = [
       'css' => [
@@ -142,20 +121,17 @@ final class DesignPalette implements ContainerInjectionInterface {
         ],
       ],
     ];
-    foreach (array_keys($palettes) as $palette) {
+    foreach (array_keys(self::PALETTES) as $palette) {
       if ($palette === 'custom') {
         // Check if custom CSS file exists, if not generate it.
         $file_system = \Drupal::service('file_system');
         $css_real_path = $file_system->realpath(self::CUSTOM_PALETTE_CSS_URI);
-        
+
         if (!$css_real_path || !file_exists($css_real_path)) {
-          // Load design_settings config page and generate CSS.
-          $configPage = $this->configPages->load(self::CONFIG_PAGE_NAME);
-          if ($configPage) {
-            _mukurtu_design_generate_custom_css($configPage);
-          }
+          $colors = $this->configFactory->get(self::SETTINGS)->get('colors') ?? [];
+          $this->generateCustomCss($colors);
         }
-        
+
         // Custom palette uses generated CSS file from custom public directory.
         $libraries["palette.$palette"] = [
           'css' => [
@@ -167,7 +143,8 @@ final class DesignPalette implements ContainerInjectionInterface {
             ],
           ],
         ];
-      } else {
+      }
+      else {
         // Standard palettes use theme CSS files.
         $libraries["palette.$palette"] = [
           'css' => [
@@ -181,6 +158,38 @@ final class DesignPalette implements ContainerInjectionInterface {
         ];
       }
     }
+  }
+
+  /**
+   * Generates the custom palette CSS file from an array of hex colors.
+   *
+   * @param array $colors
+   *   An array keyed by the self::CSS_VAR_MAPPING keys, with hex color
+   *   string values.
+   */
+  public function generateCustomCss(array $colors): void {
+    $css_vars = [];
+    foreach (self::CSS_VAR_MAPPING as $key => $css_var) {
+      if (!empty($colors[$key])) {
+        $css_vars[$css_var] = $colors[$key];
+      }
+    }
+
+    $css_content = ":root {\n";
+    if (!empty($css_vars)) {
+      foreach ($css_vars as $var_name => $color) {
+        $css_content .= "  $var_name: $color;\n";
+      }
+    }
+    else {
+      $css_content .= "  /* No custom colors defined */\n";
+    }
+    $css_content .= "}\n";
+
+    $file_system = \Drupal::service('file_system');
+    $directory = dirname(self::CUSTOM_PALETTE_CSS_URI);
+    $file_system->prepareDirectory($directory, $file_system::CREATE_DIRECTORY | $file_system::MODIFY_PERMISSIONS);
+    file_put_contents(self::CUSTOM_PALETTE_CSS_URI, $css_content);
   }
 
 }
