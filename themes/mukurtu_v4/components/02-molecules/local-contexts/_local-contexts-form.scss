@@ -1,0 +1,35 @@
+// Local Contexts project/label selection widgets (node edit forms).
+// See _local-contexts.scss for the separate display-formatter styling.
+
+.field--name-field-local-contexts-projects,
+.field--name-field-local-contexts-labels-and-notices {
+  .form-checkboxes {
+    display: flex;
+    flex-direction: column;
+    gap: var(--v-space-5xs);
+  }
+
+  .form-type--checkbox {
+    margin-block: 0;
+  }
+}
+
+.local-contexts-label-widget__group {
+  margin-block-end: var(--v-space-4xxs);
+  padding-inline: var(--v-space-4xxs);
+  padding-block: var(--v-space-5xs) var(--v-space-4xxs);
+  background-color: var(--brand-light-accent);
+
+  // Fade only the disabled checkboxes/labels (exempt from AA contrast as
+  // inactive UI), not the summary — its title text stays a live, operable
+  // disclosure control and must keep AA-compliant contrast.
+  &.is-disabled {
+    .form-checkboxes {
+      opacity: 0.5;
+    }
+
+    summary {
+      cursor: not-allowed;
+    }
+  }
+}

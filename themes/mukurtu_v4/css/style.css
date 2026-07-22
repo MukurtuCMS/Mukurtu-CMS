@@ -2157,6 +2157,36 @@ label.form-required::after {
   color: var(--brand-text-color);
 }
 
+.field--name-field-local-contexts-projects .form-checkboxes,
+.field--name-field-local-contexts-labels-and-notices .form-checkboxes {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  gap: var(--v-space-5xs);
+}
+.field--name-field-local-contexts-projects .form-type--checkbox,
+.field--name-field-local-contexts-labels-and-notices .form-type--checkbox {
+  margin-block: 0;
+}
+
+.local-contexts-label-widget__group {
+  -webkit-margin-after: var(--v-space-4xxs);
+          margin-block-end: var(--v-space-4xxs);
+  padding-inline: var(--v-space-4xxs);
+  padding-block: var(--v-space-5xs) var(--v-space-4xxs);
+  background-color: var(--brand-light-accent);
+}
+.local-contexts-label-widget__group.is-disabled .form-checkboxes {
+  opacity: 0.5;
+}
+.local-contexts-label-widget__group.is-disabled summary {
+  cursor: not-allowed;
+}
+
 .local-tasks {
   display: grid;
   grid-template-columns: var(--grid-6col);
