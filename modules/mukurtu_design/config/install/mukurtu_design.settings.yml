@@ -1,0 +1,8 @@
+palette: red-bone
+colors:
+  brand_primary: '#ac143a'
+  brand_primary_dark: '#9a1134'
+  brand_primary_accent: '#c9c2a8'
+  brand_secondary: '#d9d4c2'
+  brand_secondary_dark: '#7a734d'
+  brand_secondary_accent: '#c9c2a8'
