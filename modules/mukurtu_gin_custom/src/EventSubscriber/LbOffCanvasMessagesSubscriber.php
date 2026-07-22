@@ -34,6 +34,24 @@ use Symfony\Component\HttpKernel\KernelEvents;
  * \Drupal\Core\Ajax\AjaxFormHelperTrait::ajaxSubmit() already uses on its
  * validation-error path, so whatever is queued gets drained and displayed
  * right there in the dialog instead of leaking to a later, unrelated page.
+ *
+ * Two things are deliberately narrowed, because \Drupal\Core\Messenger has no
+ * concept of which request queued a message -- any status_messages element
+ * that renders drains everything currently queued, regardless of source:
+ * - Block/section *picker* routes (ChooseBlockController,
+ *   ChooseSectionController) never build a #type => layout_builder element
+ *   and never queue a message themselves. Draining the queue there only ever
+ *   surfaces a warning left over from an earlier action, which reads as the
+ *   warning firing prematurely (e.g. as soon as the "Add block" list opens,
+ *   before any block exists). They're excluded so the warning only appears
+ *   once an actual cancel-able form is on screen.
+ * - The injected element is scoped to #display => 'warning' so it only ever
+ *   drains PrepareLayout's warning-type "You have unsaved changes." message,
+ *   not unrelated status-type messages like "The layout override has been
+ *   saved." (queued by LayoutBuilderEntityFormTrait::saveTasks() on save).
+ *   Without this, a save-confirmation message that hadn't been displayed yet
+ *   gets dragged into the next dialog alongside the warning, showing two
+ *   contradictory messages together.
  */
 class LbOffCanvasMessagesSubscriber implements EventSubscriberInterface {
 
@@ -44,6 +62,15 @@ class LbOffCanvasMessagesSubscriber implements EventSubscriberInterface {
     'drupal_dialog',
     'drupal_dialog.off_canvas',
     'drupal_dialog.off_canvas_top',
+  ];
+
+  /**
+   * Picker/listing routes that never rebuild the canvas or queue a message.
+   */
+  protected const PICKER_ROUTES = [
+    'layout_builder.choose_block',
+    'layout_builder.choose_inline_block',
+    'layout_builder.choose_section',
   ];
 
   /**
@@ -64,7 +91,7 @@ class LbOffCanvasMessagesSubscriber implements EventSubscriberInterface {
     $request = $event->getRequest();
 
     $route_name = (string) $request->attributes->get('_route');
-    if (!str_starts_with($route_name, 'layout_builder.')) {
+    if (!str_starts_with($route_name, 'layout_builder.') || in_array($route_name, self::PICKER_ROUTES, TRUE)) {
       return;
     }
 
@@ -80,6 +107,7 @@ class LbOffCanvasMessagesSubscriber implements EventSubscriberInterface {
 
     $build['status_messages'] = [
       '#type' => 'status_messages',
+      '#display' => 'warning',
       '#weight' => -1000,
     ];
     $build['#sorted'] = FALSE;

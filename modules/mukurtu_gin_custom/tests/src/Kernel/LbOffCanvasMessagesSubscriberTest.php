@@ -54,6 +54,7 @@ class LbOffCanvasMessagesSubscriberTest extends KernelTestBase {
     $injected = [
       'status_messages' => [
         '#type' => 'status_messages',
+        '#display' => 'warning',
         '#weight' => -1000,
       ],
       '#sorted' => FALSE,
@@ -61,7 +62,7 @@ class LbOffCanvasMessagesSubscriberTest extends KernelTestBase {
 
     return [
       'off-canvas dialog gets status_messages injected' => [
-        'layout_builder.choose_block',
+        'layout_builder.add_block',
         'drupal_dialog.off_canvas',
         [],
         $injected,
@@ -72,6 +73,12 @@ class LbOffCanvasMessagesSubscriberTest extends KernelTestBase {
         [],
         $injected,
       ],
+      'other cancel-able form routes also get status_messages injected' => [
+        'layout_builder.remove_block',
+        'drupal_dialog.off_canvas',
+        [],
+        $injected,
+      ],
       'full page view (no wrapper format) is left alone' => [
         'layout_builder.overrides.node.view',
         NULL,
@@ -79,7 +86,7 @@ class LbOffCanvasMessagesSubscriberTest extends KernelTestBase {
         ['#markup' => 'canvas'],
       ],
       'non-dialog ajax wrapper format is left alone' => [
-        'layout_builder.choose_block',
+        'layout_builder.add_block',
         'drupal_ajax',
         [],
         [],
@@ -91,10 +98,28 @@ class LbOffCanvasMessagesSubscriberTest extends KernelTestBase {
         [],
       ],
       'status_messages already present is not duplicated' => [
-        'layout_builder.choose_block',
+        'layout_builder.add_block',
         'drupal_dialog.off_canvas',
         ['status_messages' => ['#type' => 'status_messages', '#already' => TRUE]],
         ['status_messages' => ['#type' => 'status_messages', '#already' => TRUE]],
+      ],
+      'block picker dialog is left alone' => [
+        'layout_builder.choose_block',
+        'drupal_dialog.off_canvas',
+        [],
+        [],
+      ],
+      'inline block picker dialog is left alone' => [
+        'layout_builder.choose_inline_block',
+        'drupal_dialog.off_canvas',
+        [],
+        [],
+      ],
+      'section picker dialog is left alone' => [
+        'layout_builder.choose_section',
+        'drupal_dialog.off_canvas',
+        [],
+        [],
       ],
     ];
   }
