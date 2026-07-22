@@ -42,7 +42,6 @@
         "drupal/genpass": "^2.1",
         "drupal/geocoder": "^4.30",
         "drupal/geofield": "^1.59",
-        "drupal/geolocation": "*",
         "drupal/gin": "^5.0",
         "drupal/gin_lb": "^3.0@beta",
         "drupal/gin_toolbar": "^3.0",
@@ -60,7 +59,7 @@
         "drupal/migrate_tools": "^6.0",
         "drupal/notify_user_default": "^1.0",
         "drupal/og": "^1.x-dev",
-        "drupal/paragraphs": "*",
+        "drupal/paragraphs": "^1.21",
         "drupal/pathauto": "^1.14",
         "drupal/readonly_field_widget": "^2.1",
         "drupal/rebuild_cache_access": "^1.12",
@@ -81,6 +80,7 @@
         "sibyx/phpgpx": "@RC"
     },
     "require-dev": {
+        "composer/composer": "^2.10.2",
         "drupal/devel": "*",
         "drupal/core-dev": "*",
         "drupal/coder": "*",
