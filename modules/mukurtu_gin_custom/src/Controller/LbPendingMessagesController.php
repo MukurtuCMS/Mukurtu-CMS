@@ -2,47 +2,41 @@
 
 namespace Drupal\mukurtu_gin_custom\Controller;
 
-use Drupal\Core\Ajax\AjaxResponse;
-use Drupal\Core\Ajax\InsertCommand;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Messenger\MessengerInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 /**
- * Surfaces queued Layout Builder warning messages on the base page.
+ * Surfaces queued Layout Builder warning messages once a dialog closes.
  *
  * Layout Builder's off-canvas dialogs no longer have
- * "You have unsaved changes." injected into them directly: gin_lb's
- * Toastify presentation renders any status message as a viewport-fixed
- * toast, which visually collides with the off_canvas_top dialog panel
- * regardless of where in the DOM the message markup lives (see issue #1822
- * follow-up review). Instead, mukurtu-gin-custom.js calls this endpoint
- * once the off-canvas dialog closes, so the warning surfaces on the base
- * page -- with no dialog open to collide with -- instead of only leaking to
- * whatever unrelated page loads next.
+ * "You have unsaved changes." injected into them directly (see issue #1822
+ * follow-up review). This endpoint hands the raw, still-queued warning text
+ * to mukurtu-gin-custom.js, which displays it via a Toastify call it drives
+ * itself -- deliberately bypassing gin_lb's own automatic Toastify behavior
+ * (triggered by its '.glb-messages--warning' template class), since that
+ * hardcodes a 6-second auto-hide with no per-message override. Driving
+ * Toastify directly lets the warning stay on screen (duration: -1) until a
+ * user doing a long editing session manually dismisses it, and keeps this
+ * endpoint from touching status_messages/[data-drupal-messages] rendering
+ * at all, so it can't interact with unrelated queued messages there.
  *
  * @see js/lb-pending-messages.js
  */
 class LbPendingMessagesController extends ControllerBase {
 
   /**
-   * Returns an AJAX command inserting any queued warning messages.
+   * Returns any queued warning messages as plain text, draining the queue.
    */
-  public function build(): AjaxResponse {
-    $response = new AjaxResponse();
-
-    // Peek rather than drain: skip inserting an empty status_messages
-    // wrapper when there's nothing queued.
-    if (!$this->messenger()->messagesByType(MessengerInterface::TYPE_WARNING)) {
-      return $response;
+  public function build(): JsonResponse {
+    $warnings = $this->messenger()->messagesByType(MessengerInterface::TYPE_WARNING);
+    if ($warnings) {
+      $this->messenger()->deleteByType(MessengerInterface::TYPE_WARNING);
     }
 
-    $build = [
-      '#type' => 'status_messages',
-      '#display' => 'warning',
-    ];
-    $response->addCommand(new InsertCommand('[data-drupal-messages]', $build));
-
-    return $response;
+    return new JsonResponse([
+      'messages' => array_map('strval', $warnings),
+    ]);
   }
 
 }

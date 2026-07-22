@@ -18,7 +18,6 @@ mukurtu-gin-custom:
     - core/drupal
     - core/once
     - core/drupalSettings
-    - core/drupal.ajax
     - toolbar/toolbar
 
 entity-browser-toggle:

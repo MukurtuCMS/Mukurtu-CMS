@@ -26,7 +26,7 @@ class LbPendingMessagesControllerTest extends KernelTestBase {
   ];
 
   /**
-   * Tests that a queued warning is inserted, but a status message is not.
+   * Tests that a queued warning is returned, but a status message is not.
    */
   public function testBuildDrainsOnlyWarnings(): void {
     $messenger = \Drupal::messenger();
@@ -34,13 +34,9 @@ class LbPendingMessagesControllerTest extends KernelTestBase {
     $messenger->addWarning('You have unsaved changes.');
 
     $response = LbPendingMessagesController::create(\Drupal::getContainer())->build();
-    $commands = $response->getCommands();
+    $data = json_decode((string) $response->getContent(), TRUE);
 
-    $this->assertCount(1, $commands);
-    $this->assertSame('insert', $commands[0]['command']);
-    $this->assertSame('[data-drupal-messages]', $commands[0]['selector']);
-    $this->assertStringContainsString('You have unsaved changes.', (string) $commands[0]['data']);
-    $this->assertStringNotContainsString('The layout override has been saved.', (string) $commands[0]['data']);
+    $this->assertSame(['You have unsaved changes.'], $data['messages']);
 
     // The warning was drained; the status message is left queued for its
     // normal display point on the next full page render.
@@ -49,14 +45,15 @@ class LbPendingMessagesControllerTest extends KernelTestBase {
   }
 
   /**
-   * Tests that nothing is inserted when no warning is queued.
+   * Tests that an empty list is returned when no warning is queued.
    */
   public function testBuildWithNoQueuedWarning(): void {
     \Drupal::messenger()->addStatus('The layout override has been saved.');
 
     $response = LbPendingMessagesController::create(\Drupal::getContainer())->build();
+    $data = json_decode((string) $response->getContent(), TRUE);
 
-    $this->assertSame([], $response->getCommands());
+    $this->assertSame([], $data['messages']);
   }
 
 }
