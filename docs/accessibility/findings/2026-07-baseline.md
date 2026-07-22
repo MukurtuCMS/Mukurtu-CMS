@@ -38,7 +38,7 @@ accent preset in `config/install/gin.settings.yml`, and `/my-content` is an
 admin route rendered in Gin for admin users.
 
 **Fixed:** custom accent `#0e7873` (5.3:1) in the install config, with
-`mukurtu_core_update_40076()` migrating existing sites still on the default
+`mukurtu_core_update_40078()` migrating existing sites still on the default
 preset (sites with their own accent choice are untouched). Note: for non-admin
 members `/my-content` renders in the front-end theme, so regular members never
 saw this — the fix protects admin-theme users and any future admin-route
