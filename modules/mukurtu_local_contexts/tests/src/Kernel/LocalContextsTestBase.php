@@ -43,6 +43,8 @@ abstract class LocalContextsTestBase extends EntityKernelTestBase {
       'mukurtu_local_contexts_projects',
       'mukurtu_local_contexts_labels',
       'mukurtu_local_contexts_notices',
+      'mukurtu_local_contexts_label_translations',
+      'mukurtu_local_contexts_notice_translations',
     ]);
 
     NodeType::create([
