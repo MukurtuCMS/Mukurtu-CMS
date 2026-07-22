@@ -1,0 +1,29 @@
+mukurtu_design.settings:
+  type: config_object
+  label: 'Mukurtu Design settings'
+  mapping:
+    palette:
+      type: string
+      label: 'Palette'
+    colors:
+      type: mapping
+      label: 'Custom palette colors'
+      mapping:
+        brand_primary:
+          type: string
+          label: 'Brand primary'
+        brand_primary_dark:
+          type: string
+          label: 'Brand Primary Dark'
+        brand_primary_accent:
+          type: string
+          label: 'Brand Primary Accent'
+        brand_secondary:
+          type: string
+          label: 'Brand Secondary'
+        brand_secondary_dark:
+          type: string
+          label: 'Brand Secondary Dark'
+        brand_secondary_accent:
+          type: string
+          label: 'Brand Secondary Accent'

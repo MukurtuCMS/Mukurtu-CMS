@@ -6,14 +6,15 @@
  or your current system user. See core/tests/README.md and
  https://www.drupal.org/node/2116263 for details.
 -->
-<phpunit bootstrap="web/core/tests/bootstrap.php" colors="true"
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd"
+         bootstrap="web/core/tests/bootstrap.php" colors="true"
          beStrictAboutTestsThatDoNotTestAnything="true"
          beStrictAboutOutputDuringTests="true"
          beStrictAboutChangesToGlobalState="true"
          failOnWarning="true"
-         printerClass="\Drupal\Tests\Listeners\HtmlOutputPrinter"
          cacheResult="false"
-         verbose="true"
+         cacheDirectory=".phpunit.cache"
 >
   <php>
     <!-- Set error reporting to E_ALL. -->
@@ -40,6 +41,18 @@
     <!-- Example for changing the driver args to webdriver tests MINK_DRIVER_ARGS_WEBDRIVER value: '["chrome", { "chromeOptions": { "w3c": false } }, "http://localhost:4444/wd/hub"]' For using the Firefox browser, replace "chrome" with "firefox" -->
     <env name="MINK_DRIVER_ARGS_WEBDRIVER" value=''/>
   </php>
+  <extensions>
+    <!-- Functional tests HTML output logging. -->
+    <bootstrap class="Drupal\TestTools\Extension\HtmlLogging\HtmlOutputLogger">
+      <parameter name="outputDirectory" value="sites/simpletest/browser_output"/>
+      <parameter name="verbose" value="true"/>
+    </bootstrap>
+    <!-- Debug dump() printer. -->
+    <bootstrap class="Drupal\TestTools\Extension\Dump\DebugDump">
+      <parameter name="colors" value="true"/>
+      <parameter name="printCaller" value="true"/>
+    </bootstrap>
+  </extensions>
   <testsuites>
     <testsuite name="kernel">
       <directory>web/profiles/mukurtu/modules/mukurtu_protocol/tests/src/Kernel</directory>
@@ -63,29 +76,23 @@
       <directory>web/profiles/mukurtu/modules/mukurtu_protocol/tests/src/Functional</directory>
     </testsuite>
   </testsuites>
-  <listeners>
-    <listener class="\Drupal\Tests\Listeners\DrupalListener">
-    </listener>
-  </listeners>
-  <!-- Filter for coverage reports. -->
-  <filter>
-    <whitelist>
+  <!-- Settings for coverage reports. -->
+  <source>
+    <include>
       <directory>./includes</directory>
       <directory>./lib</directory>
       <!-- Extensions can have their own test directories, so exclude those. -->
       <directory>./modules</directory>
-      <exclude>
-        <directory>./modules/*/src/Tests</directory>
-        <directory>./modules/*/tests</directory>
-      </exclude>
       <directory>../modules</directory>
-      <exclude>
-        <directory>../modules/*/src/Tests</directory>
-        <directory>../modules/*/tests</directory>
-        <directory>../modules/*/*/src/Tests</directory>
-        <directory>../modules/*/*/tests</directory>
-      </exclude>
       <directory>../sites</directory>
-    </whitelist>
-  </filter>
+    </include>
+    <exclude>
+      <directory>./modules/*/src/Tests</directory>
+      <directory>./modules/*/tests</directory>
+      <directory>../modules/*/src/Tests</directory>
+      <directory>../modules/*/tests</directory>
+      <directory>../modules/*/*/src/Tests</directory>
+      <directory>../modules/*/*/tests</directory>
+    </exclude>
+  </source>
 </phpunit>
