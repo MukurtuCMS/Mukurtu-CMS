@@ -13,6 +13,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class ProtocolForm extends ContentEntityForm {
 
+  use MukurtuAdvancedSidebarFormTrait;
+
   /**
    * The current user account.
    *
@@ -33,6 +35,18 @@ class ProtocolForm extends ContentEntityForm {
   /**
    * {@inheritdoc}
    */
+  public function form(array $form, FormStateInterface $form_state) {
+    $this->injectAdvancedSidebarContainer($form);
+    $form = parent::form($form, $form_state);
+    $this->buildAdvancedSidebarAuthorGroup($form);
+    $this->groupAdvancedSidebarRevisionLog($form);
+    $this->suppressAdvancedSidebarStatusDescription($form);
+    return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function buildForm(array $form, FormStateInterface $form_state) {
     /* @var \Drupal\mukurtu_protocol\Entity\Protocol $entity */
     $form = parent::buildForm($form, $form_state);
@@ -42,8 +56,8 @@ class ProtocolForm extends ContentEntityForm {
         '#type' => 'checkbox',
         '#title' => $this->t('Create new revision'),
         '#default_value' => FALSE,
-        '#weight' => 50,
       ];
+      $this->groupAdvancedSidebarRevisionCheckbox($form);
     }
 
     return $form;
