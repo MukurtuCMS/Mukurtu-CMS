@@ -1,0 +1,37 @@
+# Sample portrait media, reusing the Community/Protocol bootstrapped by the
+# accessibility_demo_content recipe (this recipe's prerequisite). See
+# ../../README.md.
+_meta:
+  version: '1.0'
+  entity_type: media
+  uuid: ee043e3d-bab3-4fb4-9f51-5b4be7aa6d5f
+  bundle: image
+  default_langcode: en
+  depends:
+    44678f1a-b915-4f40-849b-542984bbc2ef: file
+    df5dbc8d-e098-4879-aded-9f4b07031197: community
+default:
+  name:
+    -
+      value: 'Sample Portrait Photograph (placeholder)'
+  status:
+    -
+      value: true
+  uid:
+    -
+      target_id: 1
+  field_communities:
+    -
+      entity: df5dbc8d-e098-4879-aded-9f4b07031197
+  field_cultural_protocols:
+    -
+      sharing_setting: all
+      protocols: '|1|'
+  field_media_image:
+    -
+      entity: 44678f1a-b915-4f40-849b-542984bbc2ef
+      alt: 'A generated placeholder portrait photograph with a dark gradient background, used only for accessibility testing.'
+      title: ''
+  field_identifier:
+    -
+      value: 'ACC-DEMO-IMG-002'

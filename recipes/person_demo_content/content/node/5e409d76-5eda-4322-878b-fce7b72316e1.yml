@@ -1,0 +1,113 @@
+# The main "fully-described" Person item for the accessibility program.
+# Reuses the Community/Protocol bootstrapped by the accessibility_demo_content
+# recipe (see this recipe's own recipe.yml "recipes:" prerequisite), and
+# reuses several taxonomy terms and media from that recipe rather than
+# creating near-duplicates. See ../../README.md.
+_meta:
+  version: '1.0'
+  entity_type: node
+  uuid: 5e409d76-5eda-4322-878b-fce7b72316e1
+  bundle: person
+  default_langcode: en
+  depends:
+    ee043e3d-bab3-4fb4-9f51-5b4be7aa6d5f: media
+    9942587c-1bc3-481a-9f68-264b728c598e: media
+    80af4173-fb4b-4640-bbae-55ed5df92de6: media
+    7c12c276-2217-43dc-be9a-f765129f0a40: paragraph
+    dbbbc459-9609-406f-83e4-1d93bd800c6e: paragraph
+    85761b41-5e78-4f25-b92d-6037efcbf7e9: node
+    a153b9f5-f2ab-4d27-8306-aea67943618b: taxonomy_term
+    27422e7b-032e-4894-8c2f-fc015710a980: taxonomy_term
+    b954ff14-94dd-4ef4-9bde-4e9cdf357abf: taxonomy_term
+    2c7576a3-199d-4f73-9e7d-0c01a4850140: taxonomy_term
+    9b7c9130-61a7-4ee7-9fd9-3d23a0e68904: taxonomy_term
+    33754259-acc4-45c7-8e4a-0ba8a94ba128: taxonomy_term
+default:
+  title:
+    -
+      value: 'Sample Person (Accessibility Demo)'
+  status:
+    -
+      value: true
+  promote:
+    -
+      value: false
+  sticky:
+    -
+      value: false
+  uid:
+    -
+      target_id: 1
+  revision_uid:
+    -
+      target_id: 1
+  moderation_state:
+    -
+      value: published
+  path:
+    -
+      alias: '/accessibility-demo/sample-person'
+      langcode: en
+  field_cultural_protocols:
+    -
+      sharing_setting: all
+      protocols: '|1|'
+  field_media_assets:
+    -
+      entity: ee043e3d-bab3-4fb4-9f51-5b4be7aa6d5f
+    -
+      entity: 9942587c-1bc3-481a-9f68-264b728c598e
+    -
+      entity: 80af4173-fb4b-4640-bbae-55ed5df92de6
+  field_keywords:
+    -
+      entity: a153b9f5-f2ab-4d27-8306-aea67943618b
+  field_other_names:
+    -
+      entity: 27422e7b-032e-4894-8c2f-fc015710a980
+    -
+      entity: b954ff14-94dd-4ef4-9bde-4e9cdf357abf
+    -
+      entity: 2c7576a3-199d-4f73-9e7d-0c01a4850140
+  field_location:
+    -
+      entity: 9b7c9130-61a7-4ee7-9fd9-3d23a0e68904
+  field_place_of_birth:
+    -
+      entity: 9b7c9130-61a7-4ee7-9fd9-3d23a0e68904
+  field_place_of_death:
+    -
+      entity: 33754259-acc4-45c7-8e4a-0ba8a94ba128
+  field_deceased:
+    -
+      value: true
+  field_date_born:
+    -
+      date: '1950'
+      timestamp: -631152000
+      year: '1950'
+      month: ''
+      day: ''
+  field_date_died:
+    -
+      date: '2020'
+      timestamp: 1577836800
+      year: '2020'
+      month: ''
+      day: ''
+  field_sections:
+    -
+      entity: 7c12c276-2217-43dc-be9a-f765129f0a40
+  field_related_people:
+    -
+      entity: dbbbc459-9609-406f-83e4-1d93bd800c6e
+  field_related_content:
+    -
+      entity: 85761b41-5e78-4f25-b92d-6037efcbf7e9
+  field_coverage_description:
+    -
+      value: 'Placeholder coverage description: a generic, non-specific location used only for accessibility testing.'
+      format: plain_text
+  field_coverage:
+    -
+      value: 'POINT (-98.5795 39.828175)'
