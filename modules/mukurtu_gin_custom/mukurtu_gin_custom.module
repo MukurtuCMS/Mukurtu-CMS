@@ -126,6 +126,29 @@ function mukurtu_gin_custom_form_node_form_alter(array &$form, FormStateInterfac
 }
 
 /**
+ * Implements hook_gin_content_form_routes().
+ *
+ * Opts taxonomy term, Community, and Cultural Protocol edit forms into
+ * Gin's two-column edit-form layout (right-hand 'advanced' sidebar), the
+ * same treatment node/media/block_content forms already receive.
+ *
+ * Community and Protocol creation go through separate, non-entity-form
+ * classes (CommunityAddForm, ProtocolAddForm) reached via custom routes,
+ * not the default entity add-form route, so only the edit routes apply
+ * here.
+ *
+ * @see \Drupal\gin\GinContentFormHelper::isContentForm()
+ */
+function mukurtu_gin_custom_gin_content_form_routes(): array {
+  return [
+    'entity.taxonomy_term.add_form',
+    'entity.taxonomy_term.edit_form',
+    'entity.community.edit_form',
+    'entity.protocol.edit_form',
+  ];
+}
+
+/**
  * Implements hook_preprocess_node() for the form_selection view mode.
  */
 function mukurtu_gin_custom_preprocess_node(&$variables) {
