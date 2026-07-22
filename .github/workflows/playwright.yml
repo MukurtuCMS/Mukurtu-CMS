@@ -52,7 +52,7 @@ jobs:
               # --paginate is required: without it this call silently only
               # sees the first 30 PR comments, so the URL is invisible on
               # any PR whose conversation has grown past that.
-              PREVIEW_URL=$(gh api "repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments" --paginate | jq -r '.[].body' | grep -Po 'https://(?!www\.)[a-zA-Z0-9.-]+\.tugboatqa.com' | tail -n 1 || true)
+              PREVIEW_URL=$(gh api "repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments" --paginate | jq -r '.[].body' | grep -Po 'https://(?!www\.|dashboard\.)[a-zA-Z0-9.-]+\.tugboatqa.com' | tail -n 1 || true)
               if [[ ! -z "$PREVIEW_URL" ]]; then
                 echo "Preview URL found: $PREVIEW_URL"
                 break
