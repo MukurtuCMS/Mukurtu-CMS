@@ -29,3 +29,9 @@ field.value.local_contexts_project:
     value:
       type: label
       label: Value
+
+field.storage_settings.local_contexts_project:
+  type: field.storage_settings.string
+
+field.storage_settings.local_contexts_label_and_notice:
+  type: field.storage_settings.string
