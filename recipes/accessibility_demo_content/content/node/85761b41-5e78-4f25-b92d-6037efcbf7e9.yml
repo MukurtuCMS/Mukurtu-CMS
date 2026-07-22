@@ -1,12 +1,19 @@
-# Lightweight Article node, used only as a target for the Digital Heritage
-# item's "Related content" field so that relationship renders as a real link
-# for accessibility testing. See ../../README.md.
+# The "fully-described" Article item for the accessibility program. Also
+# used as a target for other recipes' "Related content" fields (Digital
+# Heritage, Collection, Person, Place, Dictionary Word) so those
+# relationships render as real links for accessibility testing.
+# See ../../README.md.
 _meta:
   version: '1.0'
   entity_type: node
   uuid: 85761b41-5e78-4f25-b92d-6037efcbf7e9
   bundle: article
   default_langcode: en
+  depends:
+    4bcaac48-ddf0-4dab-87ae-27edd59c03bb: file
+    298c0286-34f6-4b00-8495-bc0e840be802: taxonomy_term
+    a153b9f5-f2ab-4d27-8306-aea67943618b: taxonomy_term
+    893ab887-eb7d-477b-964d-470e848e5544: taxonomy_term
 default:
   title:
     -
@@ -45,3 +52,16 @@ default:
         <p>Here is a <a href="/">sample link back to the homepage</a> for link-text testing.</p>
       format: basic_html
       summary: 'Placeholder article created for accessibility testing.'
+  field_article_category:
+    -
+      entity: 298c0286-34f6-4b00-8495-bc0e840be802
+  field_article_keywords:
+    -
+      entity: a153b9f5-f2ab-4d27-8306-aea67943618b
+    -
+      entity: 893ab887-eb7d-477b-964d-470e848e5544
+  field_article_image:
+    -
+      entity: 4bcaac48-ddf0-4dab-87ae-27edd59c03bb
+      alt: 'A generated placeholder photograph of a woven basket with a brown gradient background, used only for accessibility testing.'
+      title: ''

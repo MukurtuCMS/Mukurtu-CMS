@@ -41,9 +41,14 @@ for what that testing surfaced.
   - An audio file (a generated tone) with a transcript in `field_transcription`.
   - A PDF document with extracted text in `field_extracted_text`.
 - **1 paragraph** (Indigenous Knowledge Keeper) with every field filled in.
-- **1 Article node** ("Sample Related Story"), used only as a target for the
-  Digital Heritage item's "Related content" field, with a body containing a
-  heading, a list, and a link — useful for testing rich-text accessibility.
+- **1 fully-described Article node** ("Sample Related Story"), with a body
+  containing a heading, a list, and a link (useful for testing rich-text
+  accessibility), plus `field_article_category`, `field_article_keywords`,
+  and `field_article_image` (with alt text) — all reusing terms/files created
+  above rather than duplicating them. Also used as the "Related content"
+  target for every other recipe in this directory (Digital Heritage,
+  Collection, Person, Place, Word List/Dictionary Word), since it needs to
+  exist before any of them.
 - **1 Digital Heritage node** with essentially every field populated (see
   "Fields intentionally left empty" below for the exceptions).
 
