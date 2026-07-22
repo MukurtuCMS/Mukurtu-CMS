@@ -39,7 +39,7 @@ js-form-type-[something] exists on form items. We have to keep them.
 <div{{ attributes.addClass(classes) }}>
   {% if label_display in ['before', 'invisible'] %}
     {{ label }}
-    <div class="palette-demo palette-demo--{{ value }}">
+    <div class="palette-demo palette-demo--{{ value }}" aria-hidden="true">
       <span class="brand-primary"></span>
       <span class="brand-secondary"></span>
       <span class="accent">
@@ -62,7 +62,7 @@ js-form-type-[something] exists on form items. We have to keep them.
   {% endif %}
   {% if label_display == 'after' %}
     {{ label }}
-    <div class="palette-demo palette-demo--{{ value }}">
+    <div class="palette-demo palette-demo--{{ value }}" aria-hidden="true">
       <span class="brand-primary"></span>
       <span class="brand-secondary"></span>
       <span class="accent">
