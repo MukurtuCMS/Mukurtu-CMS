@@ -10,9 +10,9 @@ To learn more about Mukurtu CMS and the larger Mukurtu community, visit [mukurtu
 ## Requirements
 
 * The necessary database server, web server, and PHP installed that meet [modern Drupal requirements](https://www.drupal.org/docs/system-requirements)
-  * Currently only PHP 8.3 is supported. Support for 8.4 will be added later.
+  * PHP 8.4 is supported.
   * Currently MariaDB or MySQL is supported. PostGRES is not.
-  * the Mukurtu Team does our internal work with nginx. Apache SHOULD work fine, but we have not tested it extensively.
+  * The Mukurtu Team does our internal work with nginx. Apache SHOULD work fine, but we have not tested it extensively.
 * [Composer](https://getcomposer.org/)
 * To generate PDF thumbnails, [poppler-utils](https://pypi.org/project/poppler-utils/) must be installed on the server.
 * To generate thumbnails for uploaded video files, [FFmpeg](https://ffmpeg.org/) must be installed on the server.
