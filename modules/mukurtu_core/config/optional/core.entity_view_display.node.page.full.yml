@@ -2,46 +2,98 @@ langcode: en
 status: true
 dependencies:
   config:
+    - core.entity_view_mode.node.full
     - field.field.node.page.body
     - field.field.node.page.field_page_media_assets
+    - field.field.node.page.layout_builder__layout
     - node.type.page
   module:
+    - layout_builder
+    - layout_builder_restrictions
+    - layout_discovery
     - text
     - user
+third_party_settings:
+  layout_builder:
+    enabled: true
+    allow_custom: true
+    sections:
+      -
+        layout_id: layout_onecol
+        layout_settings:
+          label: ''
+        components:
+          73a41886-cf3a-4084-b392-d481ae9c9ecd:
+            uuid: 73a41886-cf3a-4084-b392-d481ae9c9ecd
+            region: content
+            configuration:
+              id: 'field_block:node:page:field_page_media_assets'
+              label: ''
+              label_display: '0'
+              provider: layout_builder
+              context_mapping:
+                entity: layout_builder.entity
+              formatter:
+                type: entity_reference_entity_view
+                label: hidden
+                settings:
+                  view_mode: media_assets
+                  link: false
+                third_party_settings: {  }
+            weight: -1
+            additional: {  }
+          7601b1b0-6631-4314-a2ca-a75d59b9538c:
+            uuid: 7601b1b0-6631-4314-a2ca-a75d59b9538c
+            region: content
+            configuration:
+              id: 'field_block:node:page:body'
+              label: ''
+              label_display: '0'
+              provider: layout_builder
+              context_mapping:
+                entity: layout_builder.entity
+              formatter:
+                type: text_default
+                label: hidden
+                settings: {  }
+                third_party_settings: {  }
+            weight: -2
+            additional: {  }
+        third_party_settings: {  }
+  layout_builder_restrictions:
+    allowed_block_categories: {  }
+    entity_view_mode_restriction:
+      allowed_layouts:
+        - layout_onecol
+        - layout_twocol_section
+        - layout_threecol_section
+        - layout_fourcol_section
+      denylisted_blocks: {  }
+      allowlisted_blocks: {  }
+      restricted_categories: {  }
 id: node.page.full
 targetEntityType: node
 bundle: page
 mode: full
 content:
-  body:
-    type: text_default
-    label: hidden
+  content_moderation_control:
     settings: {  }
     third_party_settings: {  }
-    weight: 1
+    weight: -20
     region: content
-  field_citation:
-    type: text_default
-    label: above
+  export_list_membership:
     settings: {  }
     third_party_settings: {  }
-    weight: 5
-    region: content
-  field_page_media_assets:
-    type: entity_reference_entity_view
-    label: hidden
-    settings:
-      view_mode: default
-      link: false
-    third_party_settings: {  }
-    weight: 2
+    weight: -50
     region: content
 hidden:
   field_all_related_content: true
+  field_citation: true
   field_communities: true
   field_in_collection: true
   field_multipage_page_of: true
   field_representative_media: true
+  field_title: true
   flag_email_node: true
   flag_email_og: true
   flag_export_content: true
@@ -52,6 +104,6 @@ hidden:
   flag_subscribe_node: true
   flag_subscribe_og: true
   langcode: true
+  layout_builder__layout: true
   links: true
   search_api_excerpt: true
-  field_title: true
