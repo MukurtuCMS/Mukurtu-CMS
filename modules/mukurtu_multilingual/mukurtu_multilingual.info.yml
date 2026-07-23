@@ -8,3 +8,6 @@ dependencies:
   - drupal:content_translation
   - drupal:locale
   - drupal:config_translation_po
+  - 'mukurtu_protocol:mukurtu_protocol'
+  - 'mukurtu_collection:mukurtu_collection'
+  - 'mukurtu_multipage_items:mukurtu_multipage_items'
