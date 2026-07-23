@@ -16,6 +16,13 @@ services:
     tags:
       - { name: event_subscriber }
 
+  mukurtu_gin_custom.lb_suppress_unsaved_warning_subscriber:
+    class: Drupal\mukurtu_gin_custom\EventSubscriber\LbSuppressUnsavedWarningSubscriber
+    arguments:
+      - '@messenger'
+    tags:
+      - { name: event_subscriber }
+
   # Override Gin's navigation service to use Mukurtu's media view route.
   # Gin calls \Drupal::classResolver(GinNavigation::class); registering a
   # service with that fully-qualified class name as the service ID causes the

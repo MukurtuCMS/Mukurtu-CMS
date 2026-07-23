@@ -12,11 +12,13 @@ mukurtu-gin-custom:
     js/mukurtu-gin-custom.js: {}
     js/media-library-cancel.js: {}
     js/mukurtu-tagify-focus.js: {}
+    js/lb-pending-messages.js: {}
   dependencies:
     - core/jquery
     - core/drupal
     - core/once
     - core/drupalSettings
+    - core/drupal.announce
     - toolbar/toolbar
 
 entity-browser-toggle:
