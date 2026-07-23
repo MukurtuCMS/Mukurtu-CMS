@@ -64,6 +64,9 @@ class LocalContextsLabelFormatter extends FormatterBase {
       $project = new LocalContextsProject($project_id);
       $project_title = $project->isValid() ? $project->getTitle() : null;
       $project_url = $project->isValid() ? $project->getUrl() : null;
+      $not_available = $project->isValid() && $project->isNotAvailable();
+      $archived = $project->isValid() && $project->isArchived();
+      $last_synced = $project->isValid() ? $project->getUpdated() : null;
       $group_items = array_map(function ($item) use ($project_title, $project_url) {
         $item['#project_title'] = $project_title;
         $item['#project_url'] = $project_url;
@@ -73,6 +76,9 @@ class LocalContextsLabelFormatter extends FormatterBase {
         '#theme' => 'local_contexts_label_group',
         '#project_title' => $project_title,
         '#items' => $group_items,
+        '#not_available' => $not_available,
+        '#archived' => $archived,
+        '#last_synced' => $last_synced,
       ];
       $delta++;
     }

@@ -182,30 +182,94 @@ abstract class ManageSupportedProjectsBase extends FormBase {
             $supported_projects[$id]['updated'],
             'short'
           );
-          $options[$id]['status'] = $this->t('Active');
+          $options[$id]['status'] = $this->buildStatusCell($supported_projects[$id]);
         }
       }
 
-      // Loop over any remaining projects that are no longer on the hub.
+      // Loop over any remaining projects that are no longer on the hub as of
+      // this request. This is a live, request-scoped signal (using the key
+      // just submitted in this form) that is separate from the persisted
+      // per-project status (which reflects the last actual cron sync attempt
+      // for the group's/site's configured key) - a project can be missing
+      // here simply because the form's key hasn't caught up to cron yet.
       $missing_projects = array_diff_key($supported_projects, $all_projects);
       foreach ($missing_projects as $id => $project) {
-        $options[$id] = [
-          'title' => $project['title'],
-          'status' => [
-            'data' => [
-              '#type' => 'html_tag',
-              '#tag' => 'strong',
-              '#value' => $this->t('Not available'),
-              '#attributes' => ['title' => $this->t('This project has been deleted from the Local Contexts Hub and can no longer be synced.')],
+        // If we already have a persisted status for this project (e.g. a
+        // recorded 401/403/404 from cron), prefer that specific reason.
+        // Otherwise this is the "pending sync" case described above.
+        if (($project['status'] ?? LocalContextsProject::STATUS_ACTIVE) !== LocalContextsProject::STATUS_ACTIVE) {
+          $options[$id] = [
+            'title' => $project['title'],
+            'status' => $this->buildStatusCell($project),
+            'project_id' => $id,
+          ];
+        }
+        else {
+          $options[$id] = [
+            'title' => $project['title'],
+            'status' => [
+              'data' => [
+                '#type' => 'html_tag',
+                '#tag' => 'strong',
+                '#value' => $this->t('Not available (pending sync)'),
+                '#attributes' => ['title' => $this->t('This project was not returned by the Local Contexts Hub using the API key currently entered on this form. It may simply be pending the next sync.')],
+              ],
             ],
-          ],
-          'project_id' => $id,
-        ];
+            'project_id' => $id,
+          ];
+        }
       }
       $form['projects']['#options'] = $options;
     }
 
     return $form;
+  }
+
+  /**
+   * Build the status column render array for a supported project row.
+   *
+   * @param array $project
+   *   The project info, including 'status', 'archived', and
+   *   'status_message' keys (as returned by
+   *   LocalContextsSupportedProjectManager::getSiteSupportedProjects() /
+   *   getGroupSupportedProjects()).
+   *
+   * @return array|\Drupal\Core\StringTranslation\TranslatableMarkup
+   *   A render array for a warning/informational badge, or a plain
+   *   translated string for the normal active state.
+   */
+  protected function buildStatusCell(array $project) {
+    $status = $project['status'] ?? LocalContextsProject::STATUS_ACTIVE;
+
+    if ($status === LocalContextsProject::STATUS_ACTIVE) {
+      if (!empty($project['archived'])) {
+        return [
+          'data' => [
+            '#type' => 'html_tag',
+            '#tag' => 'em',
+            '#value' => $this->t('Archived'),
+            '#attributes' => ['title' => $this->t('This project has been archived on the Local Contexts Hub. It remains active and usable here.')],
+          ],
+        ];
+      }
+      return $this->t('Active');
+    }
+
+    $tooltips = [
+      LocalContextsProject::STATUS_UNAUTHORIZED => $this->t('The API key used to sync this project was rejected by the Local Contexts Hub. Update the API key to resume syncing.'),
+      LocalContextsProject::STATUS_FORBIDDEN => $this->t('The API key used to sync this project does not have access to it (for example, a private project). Check the project privacy settings on the Hub, or use a different API key.'),
+      LocalContextsProject::STATUS_NOT_FOUND => $this->t('This project has been deleted from the Local Contexts Hub and can no longer be synced.'),
+    ];
+    $tooltip = $tooltips[$status] ?? $this->t('This project could not be synced with the Local Contexts Hub. @message', ['@message' => $project['status_message'] ?? '']);
+
+    return [
+      'data' => [
+        '#type' => 'html_tag',
+        '#tag' => 'strong',
+        '#value' => $this->t('Not available'),
+        '#attributes' => ['title' => $tooltip],
+      ],
+    ];
   }
 
   /**

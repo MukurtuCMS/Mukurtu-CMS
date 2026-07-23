@@ -8,6 +8,7 @@ use Drupal\Core\TypedData\OptionsProviderInterface;
 use Drupal\Core\TypedData\ComplexDataDefinitionInterface;
 use Drupal\Core\TypedData\TypedDataInterface;
 use Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager;
+use Drupal\mukurtu_local_contexts\LocalContextsProject;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 
@@ -132,6 +133,28 @@ class LocalContextsLabelItem extends StringItem implements OptionsProviderInterf
   }
 
   /**
+   * Remove labels/notices from unavailable (401/403/404) projects unless
+   * already referenced.
+   *
+   * @param array $values
+   *   Label or notice rows keyed by ID, each with a 'project_id' and
+   *   'status' key.
+   *
+   * @return array
+   *   The filtered label/notice list.
+   */
+  protected function excludeUnavailableValues(array $values): array {
+    $referenced = $this->getCurrentlyReferencedProjectIds();
+    foreach ($values as $key => $value) {
+      $status = $value['status'] ?? LocalContextsProject::STATUS_ACTIVE;
+      if (in_array($status, LocalContextsProject::UNAVAILABLE_STATUSES, TRUE) && !in_array($value['project_id'], $referenced, TRUE)) {
+        unset($values[$key]);
+      }
+    }
+    return $values;
+  }
+
+  /**
    * {@inheritDoc}
    */
   public function getSettableValues(?AccountInterface $account = NULL) {
@@ -139,6 +162,8 @@ class LocalContextsLabelItem extends StringItem implements OptionsProviderInterf
     $notices = $account ? $this->localContextsProjectManager->getUserNotices($account) : $this->localContextsProjectManager->getSiteNotices();
     $labels = $this->excludeUnreferencedLegacyValues($labels);
     $notices = $this->excludeUnreferencedLegacyValues($notices);
+    $labels = $this->excludeUnavailableValues($labels);
+    $notices = $this->excludeUnavailableValues($notices);
     $values = [];
 
     foreach ($labels as $label) {
@@ -158,6 +183,8 @@ class LocalContextsLabelItem extends StringItem implements OptionsProviderInterf
     $notices = $account ? $this->localContextsProjectManager->getUserNotices($account) : $this->localContextsProjectManager->getSiteNotices();
     $labels = $this->excludeUnreferencedLegacyValues($labels);
     $notices = $this->excludeUnreferencedLegacyValues($notices);
+    $labels = $this->excludeUnavailableValues($labels);
+    $notices = $this->excludeUnavailableValues($notices);
     $labelOptions = $this->flattenOptions($labels);
     $noticeOptions = $this->flattenOptions($notices);
     $options = array_merge($labelOptions, $noticeOptions);

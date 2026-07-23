@@ -89,7 +89,7 @@ class LocalContextsSupportedProjectManager {
     $query = $this->db->select('mukurtu_local_contexts_supported_projects', 'sp');
     $query->join('mukurtu_local_contexts_projects', 'p', 'sp.project_id = p.id');
     $query->fields('sp', ['type', 'group_id']);
-    $query->fields('p', ['id', 'provider_id', 'title', 'privacy', 'updated']);
+    $query->fields('p', ['id', 'provider_id', 'title', 'privacy', 'updated', 'status', 'archived']);
     $query->orderBy('sp.type', 'DESC');
     $query->orderBy('sp.group_id');
     $query->orderBy('p.title');
@@ -163,7 +163,7 @@ class LocalContextsSupportedProjectManager {
     $query
       ->condition('sp.type', 'site')
       ->condition('sp.group_id', 0)
-      ->fields('p', ['id', 'provider_id', 'title', 'privacy', 'updated']);
+      ->fields('p', ['id', 'provider_id', 'title', 'privacy', 'updated', 'status', 'status_message', 'archived']);
     $query->orderBy('p.title');
 
     $result = $query->execute();
@@ -196,7 +196,7 @@ class LocalContextsSupportedProjectManager {
     $query
       ->condition('sp.type', $group->getEntityTypeId())
       ->condition('sp.group_id', $group->id())
-      ->fields('p', ['id', 'provider_id', 'title', 'privacy', 'updated']);
+      ->fields('p', ['id', 'provider_id', 'title', 'privacy', 'updated', 'status', 'status_message', 'archived']);
     $query->orderBy('p.title');
 
     $result = $query->execute();
@@ -388,7 +388,7 @@ class LocalContextsSupportedProjectManager {
       ->condition('sp.type', 'site')
       ->condition('sp.group_id', 0);
     $query->fields('labels', ['id', 'name', 'type', 'display']);
-    $query->fields('p', ['provider_id', 'title', 'privacy', 'updated']);
+    $query->fields('p', ['provider_id', 'title', 'privacy', 'updated', 'status']);
     $query->addField('p', 'id', 'project_id');
 
     $result = $query->execute();
@@ -409,7 +409,7 @@ class LocalContextsSupportedProjectManager {
       ->condition('sp.type', 'site')
       ->condition('sp.group_id', 0);
     $query->fields('notices', ['type', 'name', 'default_text', 'display']);
-    $query->fields('p', ['provider_id', 'title', 'privacy', 'updated']);
+    $query->fields('p', ['provider_id', 'title', 'privacy', 'updated', 'status']);
     $query->addField('p', 'id', 'project_id');
 
     $result = $query->execute();
@@ -425,6 +425,7 @@ class LocalContextsSupportedProjectManager {
         'svg_url' => $notice['svg_url'],
         'text' => $notice['default_text'],
         'display' => $notice['display'],
+        'status' => $notice['status'],
       ];
     }
     return $notices;
@@ -451,7 +452,7 @@ class LocalContextsSupportedProjectManager {
     $query->condition('project_id', $project_ids, 'IN');
     $query->join('mukurtu_local_contexts_projects', 'p', 'labels.project_id = p.id');
     $query->fields('labels', ['id', 'name', 'type', 'display']);
-    $query->fields('p', ['provider_id', 'title', 'privacy', 'updated']);
+    $query->fields('p', ['provider_id', 'title', 'privacy', 'updated', 'status']);
     $query->addField('p', 'id', 'project_id');
 
     $result = $query->execute();
@@ -481,7 +482,7 @@ class LocalContextsSupportedProjectManager {
     $query->condition('project_id', $project_ids, 'IN');
     $query->join('mukurtu_local_contexts_projects', 'p', 'notices.project_id = p.id');
     $query->fields('notices', ['project_id', 'type', 'name', 'default_text', 'display', 'svg_url']);
-    $query->fields('p', ['provider_id', 'title', 'privacy', 'updated']);
+    $query->fields('p', ['provider_id', 'title', 'privacy', 'updated', 'status']);
 
     $result = $query->execute();
     $notices = [];
@@ -496,6 +497,7 @@ class LocalContextsSupportedProjectManager {
         'svg_url' => $notice['svg_url'],
         'text' => $notice['default_text'],
         'display' => $notice['display'],
+        'status' => $notice['status'],
       ];
     }
 
