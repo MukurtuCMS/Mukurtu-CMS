@@ -27,11 +27,7 @@ class ManageSupportedProjectsGroup extends ManageSupportedProjectsBase {
     $bundle = $group->bundle();
 
     $form = parent::buildForm($form, $form_state);
-    $form['projects']['#caption'] = [
-      '#type' => 'html_tag',
-      '#tag' => 'p',
-      '#value' => $this->t('Select the Local Contexts projects you would like to add or remove for this group. Existing projects can be selected to update their content.'),
-    ];
+    $form['projects_caption']['#value'] = $this->t('Select the Local Contexts projects you would like to add or remove for this group. Existing projects can be selected to update their content.');
 
     if ($bundle === 'community') {
       $form['api_key_wrapper']['#description'] .= '<br>' . $this->t('These API keys are stored for this community only.');

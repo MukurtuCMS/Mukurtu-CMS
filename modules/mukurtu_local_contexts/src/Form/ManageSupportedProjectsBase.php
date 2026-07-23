@@ -2,6 +2,7 @@
 
 namespace Drupal\mukurtu_local_contexts\Form;
 
+use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -79,7 +80,14 @@ abstract class ManageSupportedProjectsBase extends FormBase {
     }
     $form_state->setTemporaryValue('supported_projects', $supported_projects);
 
+    // Get the admin-provided labels for this scope's API keys, since the
+    // Hub only shows the account name a key belongs to on its own site.
+    $key_labels = $group
+      ? $this->supportedProjectManager->getGroupApiKeyLabels($group)
+      : $this->supportedProjectManager->getSiteApiKeyLabels();
+
     $form['#tree'] = TRUE;
+    $form['#attached']['library'][] = 'mukurtu_local_contexts/manage-projects';
 
     $form['api_key_wrapper'] = [
       '#type' => 'fieldset',
@@ -98,7 +106,7 @@ abstract class ManageSupportedProjectsBase extends FormBase {
       foreach ($api_keys as $delta => $api_key) {
         $form['api_key_wrapper']['keys'][$delta]['value'] = [
           '#type' => 'markup',
-          '#markup' => '<span class="api-key-current">' . $this->maskApiKey($api_key) . '</span>',
+          '#markup' => '<span class="api-key-current">' . $this->formatApiKeyDisplay($api_key, $key_labels) . '</span>',
         ];
         $form['api_key_wrapper']['keys'][$delta]['remove'] = [
           '#type' => 'submit',
@@ -122,13 +130,24 @@ abstract class ManageSupportedProjectsBase extends FormBase {
     $form['api_key_wrapper']['add']['api_key'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Add API key'),
+      '#required' => TRUE,
       '#parents' => ['api_key'],
+    ];
+    $form['api_key_wrapper']['add']['label'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Name (optional)'),
+      '#maxlength' => 255,
+      '#parents' => ['api_key_label'],
     ];
     $form['api_key_wrapper']['add']['submit'] = [
       '#type' => 'submit',
       '#value' => $this->t('Add key'),
       '#validate' => ['::validateApiKey'],
       '#submit' => ['::submitApiKey'],
+      // Restrict validation to this button's own fields, since the API key
+      // field is required but other buttons on this form (bulk actions,
+      // per-key removal) shouldn't be blocked by it being empty.
+      '#limit_validation_errors' => [['api_key'], ['api_key_label']],
     ];
 
     $form['bulk_action_wrapper'] = [
@@ -149,49 +168,59 @@ abstract class ManageSupportedProjectsBase extends FormBase {
       '#type' => 'submit',
       '#value' => $this->t('Apply action'),
       '#button_type' => 'primary',
-      // Disable the button if there are no projects to add.
-      '#disabled' => empty($all_projects),
+      // '#disabled' is finalized below once it's known whether there's
+      // anything selectable, including already-tracked projects that are no
+      // longer visible from the Hub (e.g. all keys were removed) and only
+      // need deleting, not a live Hub key.
+      '#disabled' => TRUE,
       '#validate' => ['::validateForm'],
       '#submit' => ['::submitForm'],
+      // Restrict validation to this button's own fields, since the API key
+      // field being required (for the separate "Add key" button) shouldn't
+      // block bulk actions on the existing project list.
+      '#limit_validation_errors' => [['action'], ['projects']],
     ];
 
-    $form['projects'] = [
-      '#type' => 'tableselect',
-      '#header' => [
-        'title' => $this->t('Title'),
-        'status' => $this->t('Status'),
-        'last_sync' => $this->t('Last synced'),
-        'project_id' => $this->t('Project ID'),
-        'source' => $this->t('Source'),
-      ],
-      '#caption' => NULL, // Set in child classes.
-      '#empty' => $this->t('No Local Context projects are available to the configured API keys. Add an API key above, and check that projects have been set up within that Local Contexts Hub account.'),
-      '#js_select' => TRUE,
+    // Set in child classes.
+    $form['projects_caption'] = [
+      '#type' => 'html_tag',
+      '#tag' => 'p',
+      '#value' => '',
     ];
 
-    $options = [];
+    $project_header = [
+      'title' => $this->t('Title'),
+      'status' => $this->t('Status'),
+      'last_sync' => $this->t('Last synced'),
+      'project_id' => $this->t('Project ID'),
+    ];
+
+    // Group every project's row by the API key it belongs to, so each key's
+    // projects render under their own heading instead of a per-row Source
+    // column repeating the same (often long) key on every line.
+    $rows_by_key = [];
     foreach ($all_projects as $project) {
       $id = $project['unique_id'];
-      $options[$id] = [
+      $row = [
         'title' => $project['title'],
         'status' => $this->t('Not added'),
         'last_sync' => '',
         'project_id' => $id,
-        'source' => $this->maskApiKey($project['_api_key']),
       ];
       if (isset($supported_projects[$id])) {
-        $options[$id]['last_sync'] = \Drupal::service('date.formatter')->format(
+        $row['last_sync'] = \Drupal::service('date.formatter')->format(
           $supported_projects[$id]['updated'],
           'short'
         );
-        $options[$id]['status'] = $this->t('Active');
+        $row['status'] = $this->t('Active');
       }
+      $rows_by_key[$project['_api_key']][$id] = $row;
     }
 
     // Loop over any remaining projects that are no longer on the hub.
     $missing_projects = array_diff_key($supported_projects, $all_projects);
     foreach ($missing_projects as $id => $project) {
-      $options[$id] = [
+      $row = [
         'title' => $project['title'],
         'status' => [
           'data' => [
@@ -202,10 +231,61 @@ abstract class ManageSupportedProjectsBase extends FormBase {
           ],
         ],
         'project_id' => $id,
-        'source' => !empty($project['api_key']) ? $this->maskApiKey($project['api_key']) : '',
+      ];
+      // Group with its originating key if that key is still configured;
+      // otherwise it falls into the "No API key" section below alongside
+      // legacy/NULL-api_key projects.
+      $key = $project['api_key'] ?? '';
+      $rows_by_key[in_array($key, $api_keys, TRUE) ? $key : ''][$id] = $row;
+    }
+
+    $form['projects'] = [
+      '#type' => 'container',
+      '#tree' => TRUE,
+    ];
+
+    $has_projects = FALSE;
+    foreach ($api_keys as $delta => $api_key) {
+      if (empty($rows_by_key[$api_key])) {
+        continue;
+      }
+      $has_projects = TRUE;
+      $form['projects'][$delta]['table'] = [
+        '#type' => 'tableselect',
+        '#header' => $project_header,
+        '#options' => $rows_by_key[$api_key],
+        // Using the table's own caption (rather than a preceding heading)
+        // keeps each section's label programmatically tied to its table,
+        // including for the "select all" checkbox screen readers announce.
+        '#caption' => $this->formatApiKeyDisplay($api_key, $key_labels),
+        '#attributes' => ['class' => ['mukurtu-local-contexts-project-table']],
+        '#js_select' => TRUE,
+      ];
+      unset($rows_by_key[$api_key]);
+    }
+
+    // Anything left over isn't attributable to a currently configured key.
+    if (!empty($rows_by_key[''])) {
+      $has_projects = TRUE;
+      $form['projects']['unattributed']['table'] = [
+        '#type' => 'tableselect',
+        '#header' => $project_header,
+        '#options' => $rows_by_key[''],
+        '#caption' => $this->t('No API key'),
+        '#attributes' => ['class' => ['mukurtu-local-contexts-project-table']],
+        '#js_select' => TRUE,
       ];
     }
-    $form['projects']['#options'] = $options;
+
+    if (!$has_projects) {
+      $form['projects']['empty'] = [
+        '#type' => 'html_tag',
+        '#tag' => 'p',
+        '#value' => $this->t('No Local Context projects are available to the configured API keys. Add an API key above, and check that projects have been set up within that Local Contexts Hub account.'),
+      ];
+    }
+
+    $form['bulk_action_wrapper']['submit']['#disabled'] = !$has_projects;
 
     return $form;
   }
@@ -221,6 +301,25 @@ abstract class ManageSupportedProjectsBase extends FormBase {
    */
   protected function maskApiKey(string $api_key): string {
     return substr($api_key, 0, 10) . str_repeat('X', max(0, strlen($api_key) - 10));
+  }
+
+  /**
+   * Format an API key for display, using its admin-provided label if set.
+   *
+   * @param string $api_key
+   *   The API key.
+   * @param string[] $key_labels
+   *   Labels keyed by API key, as returned by getSiteApiKeyLabels() or
+   *   getGroupApiKeyLabels().
+   *
+   * @return string
+   *   The formatted display value.
+   */
+  protected function formatApiKeyDisplay(string $api_key, array $key_labels): string {
+    $label = $key_labels[$api_key] ?? NULL;
+    return $label
+      ? $this->t('@label (@key)', ['@label' => $label, '@key' => $this->maskApiKey($api_key)])
+      : $this->maskApiKey($api_key);
   }
 
   /**
@@ -241,6 +340,7 @@ abstract class ManageSupportedProjectsBase extends FormBase {
    */
   public function submitApiKey(array &$form, FormStateInterface $form_state) {
     $api_key = $form_state->getValue('api_key');
+    $label = trim((string) $form_state->getValue('api_key_label'));
     $group = $form_state->get('group');
 
     if ($group) {
@@ -250,6 +350,9 @@ abstract class ManageSupportedProjectsBase extends FormBase {
         $group->set('field_local_contexts_api_key', $keys);
         $group->save();
       }
+      if ($label !== '') {
+        $this->supportedProjectManager->setGroupApiKeyLabel($group, $api_key, $label);
+      }
     }
     else {
       $keys = $this->supportedProjectManager->getSiteApiKeys();
@@ -257,8 +360,22 @@ abstract class ManageSupportedProjectsBase extends FormBase {
         $keys[] = $api_key;
         $this->configFactory()->getEditable('mukurtu_local_contexts.settings')->set('site_api_keys', $keys)->save();
       }
+      if ($label !== '') {
+        $this->supportedProjectManager->setSiteApiKeyLabel($api_key, $label);
+      }
     }
 
+    // Clear the submitted values so the fields are empty on the rebuilt
+    // form, rather than showing the just-added key back to the user.
+    // Textfield's valueCallback() repopulates from the raw user input on
+    // rebuild, not from $form_state's processed values, so both must be
+    // cleared.
+    $form_state->setValueForElement($form['api_key_wrapper']['add']['api_key'], '');
+    $form_state->setValueForElement($form['api_key_wrapper']['add']['label'], '');
+    $user_input = $form_state->getUserInput();
+    NestedArray::setValue($user_input, $form['api_key_wrapper']['add']['api_key']['#parents'], '');
+    NestedArray::setValue($user_input, $form['api_key_wrapper']['add']['label']['#parents'], '');
+    $form_state->setUserInput($user_input);
     $form_state->setRebuild();
   }
 
@@ -277,6 +394,19 @@ abstract class ManageSupportedProjectsBase extends FormBase {
       ? $this->supportedProjectManager->getGroupProjectsByApiKey($group, $api_key)
       : $this->supportedProjectManager->getSiteProjectsByApiKey($api_key);
 
+    // Projects with no recorded API key (added before per-project key
+    // tracking existed, or legacy migrated projects) can't be attributed
+    // to a specific key. If any of them are still in use, block removal
+    // of any key in this scope rather than letting them go untracked.
+    $unattributed = $group
+      ? $this->supportedProjectManager->getGroupProjectsWithoutApiKey($group)
+      : $this->supportedProjectManager->getSiteProjectsWithoutApiKey();
+    foreach ($unattributed as $id) {
+      if ((new LocalContextsProject($id))->inUse()) {
+        $in_use[] = $id;
+      }
+    }
+
     if ($in_use) {
       $this->messenger()->addError($this->formatPlural(
         count($in_use),
@@ -290,10 +420,12 @@ abstract class ManageSupportedProjectsBase extends FormBase {
       $keys = array_values(array_diff($this->supportedProjectManager->getGroupApiKeys($group), [$api_key]));
       $group->set('field_local_contexts_api_key', $keys);
       $group->save();
+      $this->supportedProjectManager->removeGroupApiKeyLabel($group, $api_key);
     }
     else {
       $keys = array_values(array_diff($this->supportedProjectManager->getSiteApiKeys(), [$api_key]));
       $this->configFactory()->getEditable('mukurtu_local_contexts.settings')->set('site_api_keys', $keys)->save();
+      $this->supportedProjectManager->removeSiteApiKeyLabel($api_key);
     }
 
     $form_state->setRebuild();
@@ -303,7 +435,15 @@ abstract class ManageSupportedProjectsBase extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $selected_projects = array_filter($form_state->getValue('projects'));
+    // Projects render as one tableselect per API key section, so their
+    // selections need to be merged back into a single flat list.
+    $selected_projects = [];
+    foreach ((array) $form_state->getValue('projects') as $section) {
+      if (isset($section['table']) && is_array($section['table'])) {
+        $selected_projects += $section['table'];
+      }
+    }
+    $selected_projects = array_filter($selected_projects);
     /** @var ContentEntityInterface $group */
     $group = $form_state->get('group');
     $action = $form_state->getValue('action');
@@ -348,16 +488,46 @@ abstract class ManageSupportedProjectsBase extends FormBase {
     $sync_count = 0;
     $last_added_title = '';
     $last_synced_title = '';
+    $failed_titles = [];
     $selected_projects = array_filter($selected_projects);
     foreach ($selected_projects as $id) {
       // Prefer the API key this project was originally added with, since
       // re-syncing shouldn't change which account it's associated with.
-      $api_key = $supported_projects[$id]['api_key'] ?? $all_projects[$id]['_api_key'] ?? '';
+      $known_api_key = $supported_projects[$id]['api_key'] ?? $all_projects[$id]['_api_key'] ?? NULL;
 
       $project = new LocalContextsProject($id);
       // If never updated before, this is a new project.
       $is_new = !$project->getUpdated();
-      $project->fetchFromHub($api_key);
+
+      if ($known_api_key !== NULL) {
+        $candidate_keys = [$known_api_key];
+      }
+      else {
+        // The project list built for this request didn't include this
+        // project (this form can be rebuilt more than once per submission,
+        // and the cached project list isn't guaranteed to reflect the
+        // latest one). Fall back to trying every key currently configured
+        // for this scope rather than sending a request with no API key,
+        // which the Hub will always reject.
+        $candidate_keys = $group
+          ? $this->supportedProjectManager->getGroupApiKeys($group)
+          : $this->supportedProjectManager->getSiteApiKeys();
+      }
+
+      $api_key = NULL;
+      foreach ($candidate_keys as $candidate_key) {
+        if ($project->fetchFromHub($candidate_key)) {
+          $api_key = $candidate_key;
+          break;
+        }
+      }
+
+      if ($api_key === NULL) {
+        // Don't track this project if the hub fetch failed, otherwise it
+        // ends up recorded as supported without a matching local copy.
+        $failed_titles[] = $all_projects[$id]['title'] ?? $id;
+        continue;
+      }
       if ($group) {
         $this->supportedProjectManager->addGroupProject($group, $id, $api_key);
       }
@@ -386,6 +556,11 @@ abstract class ManageSupportedProjectsBase extends FormBase {
         '@title' => $last_synced_title,
       ]);
       $this->messenger()->addStatus($message);
+    }
+    if ($failed_titles) {
+      $this->messenger()->addError($this->t('The following project(s) could not be added or synced because the Local Contexts Hub request failed: %titles. Try again.', [
+        '%titles' => implode(', ', $failed_titles),
+      ]));
     }
   }
 

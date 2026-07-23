@@ -282,6 +282,37 @@ function mukurtu_local_contexts_schema() {
     ],
   ];
 
+  $schema['mukurtu_local_contexts_api_key_labels'] = [
+    'description' => 'Admin-provided display labels for Local Contexts Hub API keys',
+    'fields' => [
+      'type' => [
+        'type' => 'varchar',
+        'length' => 256,
+        'not null' => TRUE,
+        'description' => 'Group entity type ID or site',
+      ],
+      'group_id' => [
+        'type' => 'int',
+        'size' => 'normal',
+        'not null' => TRUE,
+        'description' => 'Group entity ID or 0 for site',
+      ],
+      'api_key' => [
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'description' => 'The Local Contexts Hub API key',
+      ],
+      'label' => [
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'description' => 'An admin-provided display label for this key',
+      ],
+    ],
+    'primary key' => ['type', 'group_id', 'api_key'],
+  ];
+
   $schema['mukurtu_local_contexts_notice_translations'] = [
     'description' => 'Local Contexts Notice Translations',
     'fields' => [
@@ -483,4 +514,47 @@ function mukurtu_local_contexts_update_10002() {
   $config->set('site_api_keys', $keys);
   $config->clear('site_api_key');
   $config->save();
+}
+
+/**
+ * Add a table for admin-provided Local Contexts Hub API key labels.
+ *
+ * Since the Hub only shows the account name a key belongs to on its own
+ * site (not through the API), admins can optionally set their own display
+ * label per key here instead of only seeing the masked key value.
+ */
+function mukurtu_local_contexts_update_10003() {
+  $schema = \Drupal::database()->schema();
+  if (!$schema->tableExists('mukurtu_local_contexts_api_key_labels')) {
+    $schema->createTable('mukurtu_local_contexts_api_key_labels', [
+      'description' => 'Admin-provided display labels for Local Contexts Hub API keys',
+      'fields' => [
+        'type' => [
+          'type' => 'varchar',
+          'length' => 256,
+          'not null' => TRUE,
+          'description' => 'Group entity type ID or site',
+        ],
+        'group_id' => [
+          'type' => 'int',
+          'size' => 'normal',
+          'not null' => TRUE,
+          'description' => 'Group entity ID or 0 for site',
+        ],
+        'api_key' => [
+          'type' => 'varchar',
+          'length' => 255,
+          'not null' => TRUE,
+          'description' => 'The Local Contexts Hub API key',
+        ],
+        'label' => [
+          'type' => 'varchar',
+          'length' => 255,
+          'not null' => TRUE,
+          'description' => 'An admin-provided display label for this key',
+        ],
+      ],
+      'primary key' => ['type', 'group_id', 'api_key'],
+    ]);
+  }
 }

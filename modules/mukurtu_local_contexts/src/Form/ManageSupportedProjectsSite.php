@@ -24,11 +24,7 @@ class ManageSupportedProjectsSite extends ManageSupportedProjectsBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $form = parent::buildForm($form, $form_state);
-    $form['projects']['#caption'] = [
-      '#type' => 'html_tag',
-      '#tag' => 'p',
-      '#value' => $this->t('Select the site-wide Local Contexts projects you would like to add or remove. Existing projects can be selected to update their content.'),
-    ];
+    $form['projects_caption']['#value'] = $this->t('Select the site-wide Local Contexts projects you would like to add or remove. Existing projects can be selected to update their content.');
     return $form;
   }
 
