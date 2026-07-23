@@ -75,9 +75,7 @@ function mukurtu_local_contexts_theme($existing, $type, $theme, $path) {
  */
 function mukurtu_local_contexts_cron() {
   // Set up the required services.
-  $config = \Drupal::config('mukurtu_local_contexts.settings');
   $logger = \Drupal::logger('cron');
-  $entityTypeManager = \Drupal::entityTypeManager();
   $state = \Drupal::state();
   $now = \Drupal::time()->getCurrentTime();
 
@@ -106,56 +104,36 @@ function mukurtu_local_contexts_cron() {
       return;
     }
 
-    $protocol_storage = $entityTypeManager->getStorage('protocol');
-    $community_storage = $entityTypeManager->getStorage('community');
-    $group_id = FALSE;
-    $group = FALSE;
-    $api_key = FALSE;
+    // Each supported project now records which API key added/owns it, so
+    // resolution happens per project rather than per group. This allows a
+    // site, community, or protocol to sync projects added under different
+    // Local Contexts Hub API keys.
     foreach ($projects as $project_id => $project) {
-      // Projects are sorted by group ID. If the group ID changes, update the
-      // API key and group for the next set of projects.
-      if ($project['group_id'] !== $group_id) {
-        $group_id = $project['group_id'];
-        switch ($project['type']) {
-          case 'site':
-            $api_key = $config->get('site_api_key');
-            $group = NULL;
-            break;
-          case 'protocol':
-            $group = $protocol_storage->load($group_id);
-            break;
-          case 'community':
-            $group = $community_storage->load($group_id);
-            break;
-        }
-        if ($group) {
-          $api_key = $group->get('field_local_contexts_api_key')->value;
-        }
+      $api_key = $project['api_key'] ?? NULL;
 
-        // If no API key is found in either the site or group, log an error.
-        if (!$api_key) {
-          $error_message = '';
-          if ($group) {
-            $error_message .= 'No Local Contexts API key found for the @type @title (ID @id). This prevented some Local Contexts data from syncing.<a href=":url">Edit the Local Contexts settings to add or update the API key for this @type</a>.';
-            $error_url = Url::fromRoute('mukurtu_local_contexts.manage_' . $project['type'] .  '_supported_projects', ['group' => $group_id])->toString();
-            $error_title = $group->label();
-          }
-          else {
-            $error_message .= 'No site-wide Local Contexts API key found. This prevented some Local Contexts data from syncing. <a href=":url">Configure the Local Contexts settings to add or update the site-wide API key</a>.';
-            $error_url = Url::fromRoute('mukurtu_local_contexts.manage_site_supported_projects')->toString();
-            $error_title = 'Site-wide Local Contexts projects';
-          }
-          $logger->error($error_message, ['@type' => $project['type'], '@title' =>  $error_title, '@id' => $group_id, ':url' => $error_url]);
+      // Skip (and log) projects with no known API key. This does not affect
+      // sibling projects in the same site/community/protocol.
+      if (empty($api_key)) {
+        if ($project['type'] === 'site') {
+          $error_message = 'No Local Contexts API key found for the site project @title (ID @id). This prevented it from syncing. <a href=":url">Configure the Local Contexts settings to add or update a site-wide API key</a>.';
+          $error_url = Url::fromRoute('mukurtu_local_contexts.manage_site_supported_projects')->toString();
         }
-      }
-
-      // Skip over all projects within a group that don't have an API key.
-      if (!$api_key) {
+        else {
+          $error_message = 'No Local Contexts API key found for the project @title (ID @id) on the @type with ID @group_id. This prevented it from syncing. <a href=":url">Edit the Local Contexts settings to add or update an API key for this @type</a>.';
+          $error_url = Url::fromRoute('mukurtu_local_contexts.manage_' . $project['type'] . '_supported_projects', ['group' => $project['group_id']])->toString();
+        }
+        $logger->error($error_message, [
+          '@type' => $project['type'],
+          '@title' => $project['title'] ?? $project_id,
+          '@id' => $project_id,
+          '@group_id' => $project['group_id'],
+          ':url' => $error_url,
+        ]);
         continue;
       }
 
-      $project = new LocalContextsProject($project_id);
-      if ($project->fetchFromHub($api_key)) {
+      $lc_project = new LocalContextsProject($project_id);
+      if ($lc_project->fetchFromHub($api_key)) {
         $project_count++;
       }
     }

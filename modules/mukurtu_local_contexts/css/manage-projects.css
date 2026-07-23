@@ -1,0 +1,12 @@
+.mukurtu-local-contexts-project-table {
+  margin-top: 1.5em;
+}
+
+.mukurtu-local-contexts-project-table caption {
+  caption-side: top;
+  text-align: left;
+  font-weight: bold;
+  padding: 0.5em 0;
+  border-top: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+}
