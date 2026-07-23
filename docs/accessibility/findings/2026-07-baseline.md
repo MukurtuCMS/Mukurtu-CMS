@@ -89,6 +89,25 @@ them:
 verify against current Drupal core/Gin releases, then file or link upstream
 issues — not Mukurtu code, so no local override until upstream triage says so.
 
+## New finding (2026-07-23): unnamed PDF thumbnail in the media carousel
+
+The `recipes/accessibility_demo_content` recipe (see below) made anonymous
+digital-heritage-item and dictionary-word pages scannable for the first time —
+previously always skipped for lack of anonymously-visible content. That
+coverage immediately surfaced a real defect:
+
+**`image-alt` (critical, WCAG 1.1.1)** — the auto-generated preview image for
+the PDF document in the media carousel (`sample-field-notes_thumbnail.png`)
+renders with no `alt` attribute at all (not even `alt=""`):
+`<img loading="lazy" src=".../sample-field-notes_thumbnail.png..." width="155" height="200">`.
+Present on both the digital heritage item and dictionary word pages (same
+reused media asset). Also flagged: `aria-allowed-role` (best-practice, minor)
+on the Splide carousel's slide elements — lower priority, needs a quick check
+of whether it's a Splide library quirk or Mukurtu markup.
+
+**Not yet fixed** — logged here as a new finding for triage, not remediated in
+this pass.
+
 ## Handed to the manual pass (axe "incomplete" queue)
 
 Contrast checks axe could not compute (backgrounds are images/overlays or
