@@ -10,7 +10,7 @@ use Drupal\mukurtu_gin_custom\Controller\LbPendingMessagesController;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests that queued Layout Builder warnings surface via AJAX on demand.
+ * Tests that queued Layout Builder messages surface via AJAX on demand.
  *
  * @see \Drupal\mukurtu_gin_custom\Controller\LbPendingMessagesController
  */
@@ -26,9 +26,9 @@ class LbPendingMessagesControllerTest extends KernelTestBase {
   ];
 
   /**
-   * Tests that a queued warning is returned, but a status message is not.
+   * Tests that queued warnings and statuses are both returned and drained.
    */
-  public function testBuildDrainsOnlyWarnings(): void {
+  public function testBuildDrainsWarningsAndStatuses(): void {
     $messenger = \Drupal::messenger();
     $messenger->addStatus('The layout override has been saved.');
     $messenger->addWarning('You have unsaved changes.');
@@ -36,24 +36,22 @@ class LbPendingMessagesControllerTest extends KernelTestBase {
     $response = LbPendingMessagesController::create(\Drupal::getContainer())->build();
     $data = json_decode((string) $response->getContent(), TRUE);
 
-    $this->assertSame(['You have unsaved changes.'], $data['messages']);
+    $this->assertSame(['You have unsaved changes.'], $data['warnings']);
+    $this->assertSame(['The layout override has been saved.'], $data['statuses']);
 
-    // The warning was drained; the status message is left queued for its
-    // normal display point on the next full page render.
     $this->assertSame([], $messenger->messagesByType(MessengerInterface::TYPE_WARNING));
-    $this->assertNotEmpty($messenger->messagesByType(MessengerInterface::TYPE_STATUS));
+    $this->assertSame([], $messenger->messagesByType(MessengerInterface::TYPE_STATUS));
   }
 
   /**
-   * Tests that an empty list is returned when no warning is queued.
+   * Tests that empty lists are returned when nothing is queued.
    */
-  public function testBuildWithNoQueuedWarning(): void {
-    \Drupal::messenger()->addStatus('The layout override has been saved.');
-
+  public function testBuildWithNothingQueued(): void {
     $response = LbPendingMessagesController::create(\Drupal::getContainer())->build();
     $data = json_decode((string) $response->getContent(), TRUE);
 
-    $this->assertSame([], $data['messages']);
+    $this->assertSame([], $data['warnings']);
+    $this->assertSame([], $data['statuses']);
   }
 
 }

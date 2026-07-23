@@ -7,35 +7,47 @@ use Drupal\Core\Messenger\MessengerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 /**
- * Surfaces queued Layout Builder warning messages once a dialog closes.
+ * Surfaces queued Layout Builder messages that have nowhere else to render.
  *
- * Layout Builder's off-canvas dialogs no longer have
- * "You have unsaved changes." injected into them directly (see issue #1822
- * follow-up review). This endpoint hands the raw, still-queued warning text
- * to mukurtu-gin-custom.js, which displays it via a Toastify call it drives
- * itself -- deliberately bypassing gin_lb's own automatic Toastify behavior
- * (triggered by its '.glb-messages--warning' template class), since that
- * hardcodes a 6-second auto-hide with no per-message override. Driving
- * Toastify directly lets the warning stay on screen (duration: -1) until a
- * user doing a long editing session manually dismisses it, and keeps this
- * endpoint from touching status_messages/[data-drupal-messages] rendering
- * at all, so it can't interact with unrelated queued messages there.
+ * The Layout Builder edit page's own template has no "highlighted" region
+ * (or any other block region besides "content"), so any message queued via
+ * the core Messenger service -- "You have unsaved changes." warnings,
+ * "The layout override has been saved." status confirmations, etc. -- has
+ * nowhere to display through the normal block/region system, regardless of
+ * dialogs or AJAX (confirmed by inspecting a real save response: the queued
+ * status message never appears anywhere in the returned HTML).
+ *
+ * mukurtu-gin-custom.js calls this endpoint and displays whatever it
+ * returns via a Toastify call it drives itself, since that's the only
+ * reliable way to surface a message on this page at all:
+ * - once on page load, for status messages (e.g. right after a save, since
+ *   gin_lb's default save_behavior redirects back to this same page);
+ * - once an off-canvas dialog closes (debounced against multi-step dialog
+ *   flows), for warning messages.
  *
  * @see js/lb-pending-messages.js
  */
 class LbPendingMessagesController extends ControllerBase {
 
   /**
-   * Returns any queued warning messages as plain text, draining the queue.
+   * Returns any queued warning/status messages as plain text, draining them.
    */
   public function build(): JsonResponse {
-    $warnings = $this->messenger()->messagesByType(MessengerInterface::TYPE_WARNING);
+    $messenger = $this->messenger();
+
+    $warnings = $messenger->messagesByType(MessengerInterface::TYPE_WARNING);
     if ($warnings) {
-      $this->messenger()->deleteByType(MessengerInterface::TYPE_WARNING);
+      $messenger->deleteByType(MessengerInterface::TYPE_WARNING);
+    }
+
+    $statuses = $messenger->messagesByType(MessengerInterface::TYPE_STATUS);
+    if ($statuses) {
+      $messenger->deleteByType(MessengerInterface::TYPE_STATUS);
     }
 
     return new JsonResponse([
-      'messages' => array_map('strval', $warnings),
+      'warnings' => array_map('strval', $warnings),
+      'statuses' => array_map('strval', $statuses),
     ]);
   }
 
