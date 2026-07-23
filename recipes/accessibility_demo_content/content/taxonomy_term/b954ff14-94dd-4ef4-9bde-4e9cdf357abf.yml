@@ -1,0 +1,13 @@
+_meta:
+  version: '1.0'
+  entity_type: taxonomy_term
+  uuid: b954ff14-94dd-4ef4-9bde-4e9cdf357abf
+  bundle: contributor
+  default_langcode: en
+default:
+  name:
+    -
+      value: 'Sample Contributor'
+  status:
+    -
+      value: true

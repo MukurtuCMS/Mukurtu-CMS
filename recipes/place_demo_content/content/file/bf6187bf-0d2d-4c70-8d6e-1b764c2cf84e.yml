@@ -1,0 +1,24 @@
+_meta:
+  version: '1.0'
+  entity_type: file
+  uuid: bf6187bf-0d2d-4c70-8d6e-1b764c2cf84e
+  default_langcode: en
+default:
+  uid:
+    -
+      target_id: 1
+  filename:
+    -
+      value: sample-landscape.jpg
+  uri:
+    -
+      value: 'private://accessibility-demo/sample-landscape.jpg'
+  filemime:
+    -
+      value: image/jpeg
+  filesize:
+    -
+      value: 58070
+  status:
+    -
+      value: true

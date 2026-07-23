@@ -1,0 +1,37 @@
+name: 'Accessibility demo content'
+description: >-
+  Creates one fully-described Digital Heritage item (and its supporting
+  Community, Protocol, taxonomy terms, media, and paragraph entities) so the
+  accessibility program has a real, media-rich page to test against on
+  Tugboat and local builds. See README.md in this directory for the
+  assumptions this recipe makes and what it intentionally leaves out.
+type: 'Content'
+install: []
+config:
+  actions:
+    # Organic Groups normally auto-subscribes a new group's owner as a plain
+    # "member" the instant the Community entity is saved (og_entity_insert()
+    # in the og module). The real "Add community" form works around this by
+    # explicitly upgrading that membership to Community Manager right after
+    # saving. Recipes can't replicate that form-submit side effect
+    # declaratively, and a Protocol can't be created without its creator
+    # already holding Community Manager (see ProtocolCommunitySelection), so
+    # this turns off the auto-subscribe behavior just long enough for our own
+    # content/og_membership entity to create that membership with the right
+    # role from the start. See README.md.
+    og.settings:
+      simpleConfigUpdate:
+        auto_add_group_owner_membership: false
+    # Works around a pre-existing bug: the profile ships
+    # mukurtu_protocol.community_organization with a placeholder entry
+    # claiming Community ID 1 is already organized, even though no Community
+    # exists yet on a fresh install. That stale entry makes the very first
+    # Community's computed field_child_communities field fail validation
+    # against a nonexistent entity — this happens with or without this
+    # recipe, including through the normal "Add community" UI form. Clearing
+    # it here is safe on the fresh install this recipe assumes, but is not
+    # something to run against a site that already has real communities. See
+    # README.md.
+    mukurtu_protocol.community_organization:
+      simpleConfigUpdate:
+        organization: {  }

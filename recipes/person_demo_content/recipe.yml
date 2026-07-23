@@ -1,0 +1,11 @@
+name: 'Person demo content'
+description: >-
+  Creates one fully-described Person item (plus a second, lightweight Person
+  used only as a "related people" target) so the accessibility program has a
+  real, rendered Person page to test against on Tugboat and local builds.
+  See README.md in this directory for the assumptions this recipe makes and
+  what it intentionally leaves out.
+type: 'Content'
+recipes:
+  - accessibility_demo_content
+install: []

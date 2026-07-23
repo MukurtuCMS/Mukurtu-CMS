@@ -1,0 +1,40 @@
+# Sample document media. field_extracted_text is filled in so the
+# accessibility program can verify how document text-alternative content
+# renders alongside the file download link.
+_meta:
+  version: '1.0'
+  entity_type: media
+  uuid: 80af4173-fb4b-4640-bbae-55ed5df92de6
+  bundle: document
+  default_langcode: en
+  depends:
+    2b8ee295-bca7-4577-b7bf-3aaffe6af6eb: file
+    df5dbc8d-e098-4879-aded-9f4b07031197: community
+    1008afed-c70c-419e-bc55-eb37451a1b69: protocol
+default:
+  name:
+    -
+      value: 'Sample Field Notes (placeholder)'
+  status:
+    -
+      value: true
+  uid:
+    -
+      target_id: 1
+  field_communities:
+    -
+      entity: df5dbc8d-e098-4879-aded-9f4b07031197
+  field_cultural_protocols:
+    -
+      sharing_setting: all
+      protocols: '|1|'
+  field_media_document:
+    -
+      entity: 2b8ee295-bca7-4577-b7bf-3aaffe6af6eb
+  field_extracted_text:
+    -
+      value: 'This is a generated placeholder document used only to test how file-based media (documents) render for accessibility review. It does not represent real collection records or field notes.'
+      format: plain_text
+  field_identifier:
+    -
+      value: 'ACC-DEMO-DOC-001'

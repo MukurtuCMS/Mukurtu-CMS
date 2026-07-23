@@ -1,0 +1,195 @@
+# The main "fully-described" Digital Heritage item for the accessibility
+# program. Every field that can be safely and meaningfully populated offline
+# is filled in; a few are intentionally left empty. See ../../README.md for
+# the full list of assumptions and gaps (Local Contexts fields, the assumed
+# node/community/protocol IDs, etc).
+_meta:
+  version: '1.0'
+  entity_type: node
+  uuid: 6f2e8bda-3424-40de-87c4-b453e1f69e8a
+  bundle: digital_heritage
+  default_langcode: en
+  depends:
+    2520bf8f-2993-4c32-9f95-062814b7a2cc: media
+    9942587c-1bc3-481a-9f68-264b728c598e: media
+    80af4173-fb4b-4640-bbae-55ed5df92de6: media
+    86208b8d-8275-4bc5-9f5e-673045d8c739: paragraph
+    85761b41-5e78-4f25-b92d-6037efcbf7e9: node
+    298c0286-34f6-4b00-8495-bc0e840be802: taxonomy_term
+    b954ff14-94dd-4ef4-9bde-4e9cdf357abf: taxonomy_term
+    27422e7b-032e-4894-8c2f-fc015710a980: taxonomy_term
+    08664956-920e-4fc6-a8eb-4ea614205c1d: taxonomy_term
+    a153b9f5-f2ab-4d27-8306-aea67943618b: taxonomy_term
+    893ab887-eb7d-477b-964d-470e848e5544: taxonomy_term
+    b090f1d3-9163-47d8-abd8-504f95385477: taxonomy_term
+    9b7c9130-61a7-4ee7-9fd9-3d23a0e68904: taxonomy_term
+    2c7576a3-199d-4f73-9e7d-0c01a4850140: taxonomy_term
+    2f85f895-483a-4643-a475-93cc81def908: taxonomy_term
+    681f22e6-4ca6-4055-a0c3-86ebbe07c294: taxonomy_term
+    48855174-0ca5-45ad-a41e-fee5a98d927e: taxonomy_term
+default:
+  title:
+    -
+      value: 'Woven Basket, Maker Unknown (Sample Item)'
+  status:
+    -
+      value: true
+  promote:
+    -
+      value: false
+  sticky:
+    -
+      value: false
+  uid:
+    -
+      target_id: 1
+  revision_uid:
+    -
+      target_id: 1
+  moderation_state:
+    -
+      value: published
+  path:
+    -
+      alias: '/accessibility-demo/sample-digital-heritage-item'
+      langcode: en
+  field_content_type:
+    -
+      value: 'Digital Heritage'
+  field_representative_media:
+    -
+      entity: 2520bf8f-2993-4c32-9f95-062814b7a2cc
+  field_media_assets:
+    -
+      entity: 2520bf8f-2993-4c32-9f95-062814b7a2cc
+    -
+      entity: 9942587c-1bc3-481a-9f68-264b728c598e
+    -
+      entity: 80af4173-fb4b-4640-bbae-55ed5df92de6
+  field_communities:
+    -
+      target_id: 1
+  field_cultural_protocols:
+    -
+      sharing_setting: all
+      protocols: '|1|'
+  field_category:
+    -
+      entity: 298c0286-34f6-4b00-8495-bc0e840be802
+  field_contributor:
+    -
+      entity: b954ff14-94dd-4ef4-9bde-4e9cdf357abf
+  field_creator:
+    -
+      entity: 27422e7b-032e-4894-8c2f-fc015710a980
+  field_format:
+    -
+      entity: 08664956-920e-4fc6-a8eb-4ea614205c1d
+  field_keywords:
+    -
+      entity: a153b9f5-f2ab-4d27-8306-aea67943618b
+    -
+      entity: 893ab887-eb7d-477b-964d-470e848e5544
+  field_language:
+    -
+      entity: b090f1d3-9163-47d8-abd8-504f95385477
+  field_location:
+    -
+      entity: 9b7c9130-61a7-4ee7-9fd9-3d23a0e68904
+  field_people:
+    -
+      entity: 2c7576a3-199d-4f73-9e7d-0c01a4850140
+  field_publisher:
+    -
+      entity: 2f85f895-483a-4643-a475-93cc81def908
+  field_subject:
+    -
+      entity: 681f22e6-4ca6-4055-a0c3-86ebbe07c294
+  field_type:
+    -
+      entity: 48855174-0ca5-45ad-a41e-fee5a98d927e
+  field_knowledge_keepers:
+    -
+      entity: 86208b8d-8275-4bc5-9f5e-673045d8c739
+  field_related_content:
+    -
+      entity: 85761b41-5e78-4f25-b92d-6037efcbf7e9
+  field_citation:
+    -
+      value: '<p>Example Cultural Center. "Woven Basket, Maker Unknown." Sample Item Collection, 1990. Placeholder citation for accessibility testing.</p>'
+      format: basic_html
+  field_description:
+    -
+      value: |
+        <h2>About this item</h2>
+        <p>This is placeholder description text for a sample Digital Heritage item, created only to test accessibility of the rendered page &mdash; headings, paragraphs, and lists.</p>
+        <ul>
+          <li>Sample detail one</li>
+          <li>Sample detail two</li>
+          <li>Sample detail three</li>
+        </ul>
+      format: basic_html
+  field_cultural_narrative:
+    -
+      value: |
+        <h2>Cultural narrative (placeholder)</h2>
+        <p>This is placeholder text standing in for a cultural narrative field. It exists only to test long-form rich text rendering and does not describe any real cultural knowledge.</p>
+      format: basic_html
+  field_coverage_description:
+    -
+      value: 'Placeholder coverage description: a generic, non-specific location used only for accessibility testing.'
+      format: plain_text
+  field_traditional_knowledge:
+    -
+      value: 'This is placeholder text standing in for traditional knowledge content. It exists only to test the rendered layout and does not describe any real traditional knowledge.'
+      format: plain_text
+  field_transcription:
+    -
+      value: 'Placeholder transcription text used only to test how transcript content renders for accessibility review.'
+      format: plain_text
+  field_date_description:
+    -
+      value: 'circa 1990 (placeholder)'
+  field_source:
+    -
+      value: 'Placeholder Source'
+  field_summary:
+    -
+      value: 'A short placeholder summary of this sample Digital Heritage item, for accessibility testing.'
+  field_identifier:
+    -
+      value: 'ACC-DEMO-DH-001'
+  field_rights_and_usage:
+    -
+      value: 'Placeholder rights and usage statement for accessibility testing purposes only.'
+  # Only external links: 'internal:' and 'entity:' URIs fail
+  # LinkNotExistingInternalConstraint's route-generation check specifically
+  # while running inside `drush recipe` (it resolves fine both before and
+  # after, e.g. in a plain `drush php:script` in the same request state) —
+  # looks like a transient routing/container state issue in that command's
+  # execution context, not something to work around here. See README.md.
+  field_external_links:
+    -
+      uri: 'https://www.w3.org/WAI/'
+      title: 'Web Content Accessibility Guidelines (WAI)'
+      options: {  }
+    -
+      uri: 'https://creativecommons.org/licenses/by-nc-sa/4.0/'
+      title: 'License: CC BY-NC-SA 4.0'
+      options: {  }
+  field_creative_commons:
+    -
+      value: 'https://creativecommons.org/licenses/by-nc-sa/4.0/'
+  field_rights_statements:
+    -
+      value: 'https://rightsstatements.org/vocab/InC-EDU/1.0/'
+  field_original_date:
+    -
+      date: '1990'
+      timestamp: 631152000
+      year: '1990'
+      month: ''
+      day: ''
+  field_coverage:
+    -
+      value: 'POINT (-98.5795 39.828175)'

@@ -1,0 +1,32 @@
+# Sample Indigenous Knowledge Keeper paragraph. All fields use clearly
+# fictional placeholder labels deliberately, rather than invented cultural
+# or traditional-knowledge specifics. See ../../README.md.
+_meta:
+  version: '1.0'
+  entity_type: paragraph
+  uuid: 86208b8d-8275-4bc5-9f5e-673045d8c739
+  bundle: indigenous_knowledge_keepers
+  default_langcode: en
+default:
+  field_name:
+    -
+      value: 'Sample Knowledge Keeper (placeholder)'
+  field_nation:
+    -
+      value: 'Example Nation (placeholder)'
+  field_treaty_territory:
+    -
+      value: 'Example Territory (placeholder)'
+  field_living_place:
+    -
+      value: 'Example Community (placeholder)'
+  field_teaching:
+    -
+      value: 'This is placeholder text representing a teaching or story that might be shared by a knowledge keeper. It exists only to test how this text renders for accessibility review, and is not a real teaching.'
+  field_original_date:
+    -
+      date: '1990'
+      timestamp: 631152000
+      year: '1990'
+      month: ''
+      day: ''

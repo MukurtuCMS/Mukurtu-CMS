@@ -111,6 +111,7 @@ class MukurtuLeafletFormatter extends LeafletDefaultFormatter implements Contain
       }
     }
 
+    $marker_labels = [];
     if ($this->getSetting('include_related_coverage')) {
       $entity = $items->getEntity();
       if ($entity->hasField('field_all_related_content')) {
@@ -118,6 +119,7 @@ class MukurtuLeafletFormatter extends LeafletDefaultFormatter implements Contain
           if ($related->hasField('field_coverage') && !$related->get('field_coverage')->isEmpty()) {
             $build = \Drupal::entityTypeManager()->getViewBuilder('node')->view($related, 'map_browse');
             $descriptions[count($new_values)] = (string) $this->renderer->render($build);
+            $marker_labels[count($new_values)] = $related->label();
             $new_values[] = $related->get('field_coverage')->first()->getValue();
           }
         }
@@ -132,6 +134,7 @@ class MukurtuLeafletFormatter extends LeafletDefaultFormatter implements Contain
     // Now take the finished render object and modify the JavaScript settings
     // for the Leaflet map to render the descriptions in each popup, rather than
     // repeating the entity label for every popup.
+    $entity_label = $items->getEntity()->label();
     foreach ($render as $delta => &$item) {
       $settings = &$item['#attached']['drupalSettings']['leaflet'];
       $settings_key = key($settings);
@@ -142,6 +145,15 @@ class MukurtuLeafletFormatter extends LeafletDefaultFormatter implements Contain
         if (!empty($descriptions[$feature_delta])) {
           // Note $feature is modified by reference.
           $feature['popup']['value'] = $descriptions[$feature_delta];
+        }
+        // Leaflet renders markers as focusable role="button" images whose
+        // accessible name comes from the feature title (used for the alt
+        // attribute). Without one, screen reader users land on an unnamed
+        // button (WCAG 4.1.2), so name each marker after the entity whose
+        // location it shows.
+        if (empty($feature['title'])) {
+          $label = $marker_labels[$feature_delta] ?? $entity_label;
+          $feature['title'] = (string) $this->t('Location of @label', ['@label' => $label]);
         }
       }
     }

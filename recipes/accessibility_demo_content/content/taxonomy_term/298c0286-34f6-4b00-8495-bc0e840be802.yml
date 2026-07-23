@@ -1,0 +1,13 @@
+_meta:
+  version: '1.0'
+  entity_type: taxonomy_term
+  uuid: 298c0286-34f6-4b00-8495-bc0e840be802
+  bundle: category
+  default_langcode: en
+default:
+  name:
+    -
+      value: 'Belongings (sample category)'
+  status:
+    -
+      value: true
