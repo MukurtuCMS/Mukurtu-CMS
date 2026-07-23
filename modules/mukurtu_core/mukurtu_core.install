@@ -2155,7 +2155,7 @@ function mukurtu_core_update_40077(): void {
 /**
  * Install the Tour module and mukurtu_tour, and grant access tour.
  */
-function mukurtu_core_update_40077(): void {
+function mukurtu_core_update_40078(): void {
   if (!\Drupal::moduleHandler()->moduleExists('mukurtu_tour')) {
     \Drupal::service('module_installer')->install(['tour', 'mukurtu_tour']);
   }
