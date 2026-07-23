@@ -2155,7 +2155,7 @@ function mukurtu_core_update_40077(): void {
 /**
  * Install the klaro module for GDPR/cookie consent management.
  */
-function mukurtu_core_update_40077(): void {
+function mukurtu_core_update_40078(): void {
   \Drupal::service('module_installer')->install(['klaro']);
   \Drupal::configFactory()->getEditable('klaro.settings')
     ->set('show_toggle_button', TRUE)
