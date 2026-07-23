@@ -73,6 +73,70 @@ function mukurtu_v4_preprocess_node(&$variables) {
       ]);
     }
   }
+
+}
+
+/**
+ * Implements hook_preprocess_field() for field_page_media_assets on nodes.
+ *
+ * Provides thumbnail_display and node_id for the carousel field template.
+ */
+function mukurtu_v4_preprocess_field(array &$variables): void {
+  if ($variables['element']['#field_name'] !== 'field_page_media_assets' ||
+      $variables['element']['#entity_type'] !== 'node') {
+    return;
+  }
+  $node = $variables['element']['#object'];
+  $variables['node_id'] = $node->id();
+  $items = $node->get('field_page_media_assets');
+  if ($items->count() > 1) {
+    // Render each referenced media entity directly instead of calling
+    // $items->view() -- that re-invokes the entity_reference_entity_view
+    // formatter for this same field, which re-enters this field template
+    // (the items|length > 1 branch) and recurses indefinitely.
+    $view_builder = \Drupal::entityTypeManager()->getViewBuilder('media');
+    $thumbnails = [];
+    foreach ($items->referencedEntities() as $media) {
+      // Mirror the access check entity_reference_entity_view would have
+      // performed per item, since calling the view builder directly (to
+      // avoid re-entering the field formatter, see above) skips it.
+      if ($media->access('view')) {
+        $thumbnails[] = $view_builder->view($media, 'carousel_thumbnail');
+      }
+    }
+    $variables['thumbnail_display'] = $thumbnails;
+  }
+}
+
+/**
+ * Implements hook_preprocess_block__inline_block__media_carousel_block().
+ *
+ * Pre-renders field_media_items in carousel_thumbnail view mode so the block
+ * template can display a synchronized thumbnail strip alongside the main
+ * carousel, mirroring the behaviour of digital heritage full node display.
+ *
+ * This must be a block-level hook (not block_content) because the template
+ * block--inline-block--media-carousel-block.html.twig is a block plugin
+ * template; variables set in hook_preprocess_block_content never reach it.
+ */
+function mukurtu_v4_preprocess_block__inline_block__media_carousel_block(array &$variables): void {
+  /** @var \Drupal\block_content\BlockContentInterface|null $block_content */
+  $block_content = $variables['content']['#block_content'] ?? NULL;
+  if ($block_content && $block_content->hasField('field_media_items') && !$block_content->field_media_items->isEmpty() && $block_content->field_media_items->count() > 1) {
+    // Render each referenced media entity directly (see
+    // mukurtu_v4_preprocess_field() above for the same pattern) so the
+    // template can wrap each one in a proper splide__slide -- Splide
+    // requires a .splide__track > .splide__list > .splide__slide structure
+    // and won't mount without it.
+    $view_builder = \Drupal::entityTypeManager()->getViewBuilder('media');
+    $thumbnails = [];
+    foreach ($block_content->field_media_items->referencedEntities() as $media) {
+      if ($media->access('view')) {
+        $thumbnails[] = $view_builder->view($media, 'carousel_thumbnail');
+      }
+    }
+    $variables['thumbnail_display'] = $thumbnails;
+  }
 }
 
 /**
@@ -186,6 +250,15 @@ function mukurtu_v4_preprocess_media(array &$variables) {
 
   $config = \Drupal::config('mukurtu_media.settings');
   $variables['media_download_enabled'] = $config->get('mukurtu_media_download_enabled') ?? TRUE;
+
+  // Suppress the download button when media renders inside the basic page
+  // media assets carousel (field_page_media_assets via Layout Builder).
+  if ($variables['media_download_enabled'] && ($variables['elements']['#view_mode'] ?? '') === 'media_assets') {
+    $node = \Drupal::routeMatch()->getParameter('node');
+    if ($node instanceof \Drupal\node\NodeInterface && $node->bundle() === 'page') {
+      $variables['media_download_enabled'] = FALSE;
+    }
+  }
   $variables['#cache']['tags'] = Cache::mergeTags(
     $variables['#cache']['tags'] ?? [],
     $config->getCacheTags()

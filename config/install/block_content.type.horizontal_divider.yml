@@ -1,0 +1,11 @@
+langcode: en
+status: true
+dependencies: {  }
+id: horizontal_divider
+label: 'Horizontal divider'
+revision: 0
+description: 'A visual divider between sections.'
+help: ''
+new_revision: false
+preview_mode: 1
+display_submitted: true
