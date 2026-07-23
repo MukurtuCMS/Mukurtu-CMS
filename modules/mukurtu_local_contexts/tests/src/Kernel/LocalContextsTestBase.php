@@ -58,8 +58,13 @@ abstract class LocalContextsTestBase extends EntityKernelTestBase {
    *   The project ID.
    * @param string $title
    *   The project title.
+   * @param string $status
+   *   The project's sync status. One of the LocalContextsProject::STATUS_*
+   *   constants. Defaults to active.
+   * @param bool $archived
+   *   Whether the project is archived on the hub.
    */
-  protected function seedSiteProject(string $id, string $title = 'Project'): void {
+  protected function seedSiteProject(string $id, string $title = 'Project', string $status = 'active', bool $archived = FALSE): void {
     $db = $this->container->get('database');
     $db->insert('mukurtu_local_contexts_projects')
       ->fields([
@@ -68,6 +73,9 @@ abstract class LocalContextsTestBase extends EntityKernelTestBase {
         'title' => $title,
         'privacy' => 'public',
         'updated' => 1,
+        'status' => $status,
+        'status_updated' => 1,
+        'archived' => (int) $archived,
       ])
       ->execute();
     $db->insert('mukurtu_local_contexts_supported_projects')
