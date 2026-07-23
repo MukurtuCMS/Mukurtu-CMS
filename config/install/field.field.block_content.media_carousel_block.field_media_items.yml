@@ -1,0 +1,42 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - block_content.type.media_carousel_block
+    - field.storage.block_content.field_media_items
+    - media.type.audio
+    - media.type.document
+    - media.type.external_embed
+    - media.type.image
+    - media.type.remote_video
+    - media.type.soundcloud
+    - media.type.video
+  module:
+    - media
+id: block_content.media_carousel_block.field_media_items
+field_name: field_media_items
+entity_type: block_content
+bundle: media_carousel_block
+label: 'Media items'
+description: 'Add one or more media items. Multiple items display as a carousel.'
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:media'
+  handler_settings:
+    target_bundles:
+      audio: audio
+      document: document
+      external_embed: external_embed
+      image: image
+      remote_video: remote_video
+      soundcloud: soundcloud
+      video: video
+    sort:
+      field: _none
+      direction: ASC
+    auto_create: false
+    auto_create_bundle: image
+field_type: entity_reference

@@ -3,32 +3,19 @@
 @use "../../../external/include-media";
 
 .block-featured-content {
-  padding-inline: var(--layout-padding);
+  // This block only ever appears as a Layout Builder inline block, sitting
+  // inside a region rather than against the page edge, so it doesn't need
+  // the page-gutter padding-inline scale (up to 72px/side at >=lg) other
+  // full-width components use - that was eating into narrow columns and
+  // could even block the grid below from ever reaching 2+ columns.
   padding-block-end: var(--v-space-s);
-
-  @include include-media.media('>=lg') {
-    padding-inline: var(--layout-padding-m);
-  }
 }
 
 .field--name-field-featured-content,
 .field--name-field-all-related-content .field__items {
   margin-block: var(--v-space-4xxs);
   display: grid;
-  grid-template-columns: 1fr;
   gap: var(--gutter);
-
-  @include include-media.media('>=md') {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  @include include-media.media('>=lg') {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  @include include-media.media('>=xl') {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
 
   .field__item {
     position: relative;
@@ -83,7 +70,8 @@
     // Images are left beneath the overlay so clicking them navigates to the content.
     video,
     audio,
-    .media--remote_video {
+    .media--remote_video,
+    .media--soundcloud {
       position: relative;
       z-index: 1;
     }
@@ -93,7 +81,8 @@
       block-size: 100%;
     }
 
-    .media--remote_video {
+    .media--remote_video,
+    .media--soundcloud {
       inline-size: 100%;
       block-size: 100%;
 
@@ -102,6 +91,17 @@
         inline-size: 100%;
         block-size: 100%;
       }
+    }
+
+    // The SoundCloud template wraps its embed in an extra
+    // .media__soundcloud-player div (unlike remote_video, whose field is a
+    // direct child of .media--remote_video), so block-size: 100% on the
+    // iframe above has no explicit-height ancestor to resolve against
+    // without this - percentage heights need a non-auto height somewhere
+    // in the chain.
+    .media--soundcloud .media__soundcloud-player {
+      inline-size: 100%;
+      block-size: 100%;
     }
 
     .media--audio {
@@ -258,5 +258,42 @@
     }
   }
 
+}
+
+// Featured Content block (Layout Builder inline block): size columns
+// against the block's own rendered width instead of viewport width, so a
+// narrow Layout Builder column isn't forced to 4 squished cards, and 1-2
+// items grow (capped) and center instead of leaving the row half-empty.
+.field--name-field-featured-content {
+  grid-template-columns: repeat(auto-fit, minmax(min(15rem, 100%), 1fr));
+  justify-items: center;
+  max-inline-size: 80rem; // 1280px, matches --grid-12col-max-width; also caps auto-fit at 4 columns on wide/full-bleed sections.
+  margin-inline: auto;
+
+  .field__item {
+    // Grid items default to min-inline-size: auto, which can let long
+    // titles force a track wider than its minmax() floor.
+    min-inline-size: 0;
+    inline-size: 100%;
+    max-inline-size: 24rem; // Caps individual card growth when few items are present.
+  }
+}
+
+// Related Content grid (full-width contexts, e.g. node.page.featured,
+// node.collection.default, grid_browse displays): unchanged, viewport-driven.
+.field--name-field-all-related-content .field__items {
+  grid-template-columns: 1fr;
+
+  @include include-media.media('>=md') {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @include include-media.media('>=lg') {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  @include include-media.media('>=xl') {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }
 
