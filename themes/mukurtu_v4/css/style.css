@@ -1828,7 +1828,7 @@ label.form-required::after {
   block-size: 1em;
 }
 
-.language-switcher .links {
+.language-switcher > ul {
   position: absolute;
   background-color: var(--color-white);
   padding-inline: 2em;
@@ -1840,14 +1840,14 @@ label.form-required::after {
   -webkit-transform: translateX(-50%);
           transform: translateX(-50%);
 }
-.language-switcher .links li {
+.language-switcher > ul li {
   list-style-type: none;
 }
-.language-switcher .links li + li {
+.language-switcher > ul li + li {
   -webkit-margin-before: 1em;
           margin-block-start: 1em;
 }
-.language-switcher .links a {
+.language-switcher > ul a {
   background-color: var(--color-white);
   border: 1px solid var(--brand-primary-dark);
   color: var(--brand-primary-dark);
@@ -1858,18 +1858,18 @@ label.form-required::after {
   padding-inline: var(--v-space-5xs);
   letter-spacing: normal;
 }
-.language-switcher .links a:hover {
+.language-switcher > ul a:hover {
   background-color: var(--brand-primary-dark);
   color: var(--color-white);
 }
-.language-switcher .links a:focus {
+.language-switcher > ul a:focus {
   outline-offset: 1px;
 }
-.language-switcher .links a.is-active {
+.language-switcher > ul a.is-active {
   background-color: var(--brand-primary-dark);
   color: var(--color-white);
 }
-.language-switcher .links a.is-active:hover {
+.language-switcher > ul a.is-active:hover {
   background-color: var(--brand-primary-accent);
 }
 .language-switcher .contextual {
