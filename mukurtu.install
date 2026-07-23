@@ -17,6 +17,7 @@ use Drupal\Component\Uuid\Php;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\shortcut\Entity\Shortcut;
+use Drupal\captcha\Entity\CaptchaPoint;
 
 /**
  * Implements hook_install().
@@ -843,6 +844,23 @@ function mukurtu_install() {
   $config = \Drupal::configFactory()->getEditable('views.view.media');
   if (!$config->isNew()) {
     $config->set('status', FALSE)->save();
+  }
+
+  // Protect the feedback contact form and comment form with a CAPTCHA point.
+  // Created here (rather than in mukurtu_bot_protection's own config/install)
+  // because contact.form.feedback and comment.type.comment are not owned by
+  // mukurtu_bot_protection, and the profile's own hook_install() is
+  // guaranteed to run after every module (and the profile's own config) is
+  // fully installed.
+  foreach (['contact_message_feedback_form', 'comment_comment_form'] as $form_id) {
+    if (!CaptchaPoint::load($form_id)) {
+      CaptchaPoint::create([
+        'formId' => $form_id,
+        'captchaType' => 'default',
+        'label' => $form_id,
+        'status' => TRUE,
+      ])->save();
+    }
   }
 
 }

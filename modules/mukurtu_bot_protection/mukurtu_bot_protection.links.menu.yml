@@ -1,0 +1,34 @@
+mukurtu_bot_protection.settings:
+  title: 'Bot & spam protection'
+  description: 'Choose your CAPTCHA backend and manage reCAPTCHA/Turnstile credentials.'
+  parent: mukurtu_dashboard
+  menu_name: dashboard-security
+  route_name: mukurtu_bot_protection.settings
+
+mukurtu_bot_protection.turnstile_protect_link:
+  title: 'Cloudflare Turnstile route protection'
+  description: 'Choose which site routes require a Turnstile challenge before they can be accessed.'
+  parent: mukurtu_dashboard
+  menu_name: dashboard-security
+  route_name: turnstile_protect.settings
+
+mukurtu_bot_protection.facet_bot_blocker_link:
+  title: 'Faceted search crawler blocking'
+  description: 'Limit how many facet parameters a single request can combine, to block AI/LLM crawler traps.'
+  parent: mukurtu_dashboard
+  menu_name: dashboard-security
+  route_name: facet_bot_blocker.settings_form
+
+mukurtu_bot_protection.altcha_link:
+  title: 'ALTCHA settings'
+  description: "Configure ALTCHA's verification method (self-hosted, Sentinel, or SaaS) and widget appearance."
+  parent: mukurtu_dashboard
+  menu_name: dashboard-security
+  route_name: altcha.settings
+
+mukurtu_bot_protection.honeypot_link:
+  title: 'Honeypot settings'
+  description: "Configure Honeypot's time limit and logging, and review which forms it protects."
+  parent: mukurtu_dashboard
+  menu_name: dashboard-security
+  route_name: honeypot.config
