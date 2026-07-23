@@ -373,50 +373,76 @@ class LocalContextsProject extends LocalContextsHubBase {
   }
 
   public function inUse() : bool {
-    // @todo Decide if we should lookup ALL fields of our local contexts types
-    // or if we want to keep things hardwired to just our usage.
+    $referencing = $this->getReferencingNodeIds();
 
-    // Check if any content is using the projects in the projects field.
-    $query = \Drupal::entityQuery('node')
-      ->condition('field_local_contexts_projects', $this->id)
-      ->accessCheck(FALSE);
-    $results = $query->execute();
-    if (!empty($results)) {
+    if (!empty($referencing['project'])) {
       return TRUE;
     }
 
-    $labels = array_merge($this->getLabels("tk"), $this->getLabels("bc"));
-    $notices = $this->getNotices();
-
-    if (!empty($labels)) {
-      // Build the project ID: label ID: 'label' keys.
-      $values = array_map(fn($v) => $this->id . ':' . $v['id'] . ':' . 'label', $labels);
-
-      // Check if any content is using those keys.
-      $query = \Drupal::entityQuery('node')
-        ->condition('field_local_contexts_labels_and_notices', $values, 'IN')
-        ->accessCheck(FALSE);
-      $results = $query->execute();
-      if (!empty($results)) {
-        return TRUE;
-      }
-    }
-    else if (!empty($notices)) {
-      // Build the project ID: notice type: 'notice' keys.
-      $notices = array_keys($notices);
-      $values = array_map(fn($v) => strval($v) . ':' . 'notice', $notices);
-
-      // Check if any content is using those keys.
-      $query = \Drupal::entityQuery('node')
-        ->condition('field_local_contexts_labels_and_notices', $values, 'IN')
-        ->accessCheck(FALSE);
-      $results = $query->execute();
-      if (!empty($results)) {
+    foreach ($referencing['labels_and_notices'] as $nids) {
+      if (!empty($nids)) {
         return TRUE;
       }
     }
 
     return FALSE;
+  }
+
+  /**
+   * Get the IDs of nodes referencing this project.
+   *
+   * Checks both the whole-project field (field_local_contexts_projects) and
+   * the individual label/notice field (field_local_contexts_labels_and_notices),
+   * independently - a project can be referenced via either or both, and
+   * unlike a simple "is this project in use" check, this needs per-label/
+   * notice granularity so callers can tell exactly which references exist.
+   *
+   * @return array
+   *   An array with keys:
+   *   - 'project': int[] of node IDs referencing this project via the
+   *     whole-project field.
+   *   - 'labels_and_notices': array keyed by label ID or notice type (the
+   *     same identifier that appears as the middle segment of a
+   *     "project_id:label_id_or_type:display" field value), each value an
+   *     int[] of node IDs referencing that specific label/notice.
+   */
+  public function getReferencingNodeIds(): array {
+    $referencing = [
+      'project' => [],
+      'labels_and_notices' => [],
+    ];
+
+    $query = \Drupal::entityQuery('node')
+      ->condition('field_local_contexts_projects', $this->id)
+      ->accessCheck(FALSE);
+    $referencing['project'] = array_values($query->execute());
+
+    $labels = array_merge($this->getLabels('tk'), $this->getLabels('bc'));
+    foreach ($labels as $labelId => $label) {
+      $value = $this->id . ':' . $labelId . ':label';
+      $query = \Drupal::entityQuery('node')
+        ->condition('field_local_contexts_labels_and_notices', $value)
+        ->accessCheck(FALSE);
+      $results = array_values($query->execute());
+      if (!empty($results)) {
+        $referencing['labels_and_notices'][$labelId] = $results;
+      }
+    }
+
+    $notices = $this->getNotices();
+    foreach ($notices as $notice) {
+      $type = $notice['notice_type'];
+      $value = $this->id . ':' . $type . ':notice';
+      $query = \Drupal::entityQuery('node')
+        ->condition('field_local_contexts_labels_and_notices', $value)
+        ->accessCheck(FALSE);
+      $results = array_values($query->execute());
+      if (!empty($results)) {
+        $referencing['labels_and_notices'][$type] = $results;
+      }
+    }
+
+    return $referencing;
   }
 
 }

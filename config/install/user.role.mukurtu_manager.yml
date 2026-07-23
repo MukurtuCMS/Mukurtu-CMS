@@ -45,6 +45,7 @@ dependencies:
     - mukurtu_dictionary
     - mukurtu_export
     - mukurtu_import
+    - mukurtu_local_contexts
     - mukurtu_media
     - mukurtu_multipage_items
     - mukurtu_protocol
@@ -68,6 +69,7 @@ is_admin: null
 permissions:
   - 'access mukurtu export'
   - 'access mukurtu import'
+  - 'administer local contexts legacy projects'
   - 'administer mukurtu access denied page'
   - 'administer mukurtu_media configuration'
   - 'administer mukurtu media download settings'
