@@ -2166,3 +2166,35 @@ function mukurtu_core_update_40078(): void {
   user_role_grant_permissions('anonymous', ['use klaro']);
   user_role_grant_permissions('authenticated', ['use klaro']);
 }
+
+/**
+ * Install the SoundCloud klaro_app config so SoundCloud embeds can be
+ * gated behind cookie consent the same way YouTube/Vimeo embeds already are.
+ */
+function mukurtu_core_update_40079(): void {
+  $config_storage = \Drupal::service('config.storage');
+  $name = 'klaro.klaro_app.soundcloud';
+  if ($config_storage->exists($name)) {
+    return;
+  }
+  $profile_path = \Drupal::service('extension.list.profile')->getPath('mukurtu');
+  $source = new \Drupal\Core\Config\FileStorage(\Drupal::root() . '/' . $profile_path . '/config/install');
+  $data = $source->read($name);
+  if ($data !== FALSE) {
+    $config_storage->write($name, $data);
+  }
+}
+
+/**
+ * Block unknown external resources by default so embeds from domains with
+ * no named klaro_app (e.g. arbitrary External Embed media) are still gated
+ * behind consent under a generic "Other services" prompt, instead of
+ * rendering live until an admin adds a named service for that domain.
+ */
+function mukurtu_core_update_40080(): void {
+  \Drupal::configFactory()->getEditable('klaro.settings')
+    ->set('block_unknown', TRUE)
+    ->set('block_unknown_label', 'Other services')
+    ->set('block_unknown_description', 'Allow loading of external resources from other services')
+    ->save();
+}

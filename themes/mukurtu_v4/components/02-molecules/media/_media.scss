@@ -50,6 +50,48 @@
   }
 }
 
+// This shared block's align-items: center means Klaro's injected consent-
+// notice placeholder (a flex sibling of the now-hidden iframe/embed) sizes
+// to its own intrinsic content width by default, rendering as a narrow,
+// centered box instead of matching the full width the embed would have
+// occupied. Card-specific contexts (horizontal-card, vertical-card) already
+// handle this themselves; this covers the plain full-content-item case
+// (e.g. digital_heritage_full view mode), which has no card wrapper.
+.media--remote_video,
+.media--external_embed,
+.media--soundcloud {
+  // klaro-js wraps .klaro.cm-as-context-notice in an additional outer div
+  // (not itself carrying the "klaro" class) that it creates before
+  // rendering the notice into it, and sets THAT div's inline max-width/
+  // height from the original iframe's width/height HTML attributes --
+  // e.g. width="300" produces style="max-width:300px". Whenever that
+  // width attribute is a valid CSS length (unlike SoundCloud's "100%",
+  // which produces an invalid "100%px" the browser silently drops), it
+  // constrains the notice regardless of any sizing on .cm-as-context-
+  // notice itself, so it has to be overridden here too.
+  [data-type='placeholder'] {
+    max-width: 100% !important;
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  .klaro.cm-as-context-notice {
+    width: 100% !important;
+  }
+}
+
+// The notice's width:100% above is relative to its immediate parent. The
+// External Embed field, in the media_assets view mode actually used on a
+// digital heritage node's full page (media--external-embed--media-
+// assets.html.twig), is wrapped in an extra unstyled .media-asset--content
+// div that's itself a shrink-wrapped flex child of .media--external_embed
+// (same align-items: center from the shared rule above) -- so width:100%
+// on the notice was only ever relative to that already-shrunk wrapper.
+// Stretch it too so there's a full-width parent for the notice to fill.
+.media--external_embed .media-asset--content {
+  width: 100%;
+}
+
 .media--remote_video {
   .field[data-blazy] {
     min-inline-size: min-content;

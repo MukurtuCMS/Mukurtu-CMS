@@ -31,10 +31,61 @@
       }
     }
 
+    // Give the media wrapper itself a definite box instead of letting the
+    // iframe's own aspect-ratio drive its size. Klaro's consent-gating JS
+    // replaces a blocked iframe with its own placeholder div (sized from the
+    // iframe's width/height HTML attributes via inline styles, which are
+    // often unsuitable for a browse-list thumbnail); without an
+    // independently-sized, overflow-hidden wrapper, that placeholder can
+    // grow to its natural content width and spill over onto adjacent card
+    // content.
+    .media--remote_video,
+    .media--soundcloud {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+
+      // Klaro's consent-notice content (description text + two buttons)
+      // is usually taller than a 16:9 thumbnail slot; keeping the strict
+      // aspect-ratio/overflow:hidden box in that case just clips the
+      // buttons out of view entirely. Let the box grow to fit the notice
+      // instead of cropping it.
+      &:has(.klaro.cm-as-context-notice) {
+        aspect-ratio: auto;
+        height: auto;
+        overflow: visible;
+      }
+    }
+
     .media--remote_video iframe,
     .media--soundcloud iframe {
-      block-size: auto;
-      aspect-ratio: 16 / 9;
+      // !important overrides klaro-js's own inline width/height styles on
+      // the placeholder div it injects in place of a blocked iframe.
+      width: 100% !important;
+      max-width: 100% !important;
+      height: 100% !important;
+    }
+
+    // klaro-js wraps .klaro.cm-as-context-notice in an additional outer
+    // div (not itself carrying the "klaro" class) sized from the original
+    // iframe's width/height HTML attributes via inline styles -- e.g.
+    // width="300" produces style="max-width:300px". Whenever that's a
+    // valid CSS length (unlike SoundCloud's "100%", which the browser
+    // silently drops as invalid), it constrains the notice regardless of
+    // any sizing on .cm-as-context-notice itself.
+    .media--remote_video [data-type='placeholder'],
+    .media--soundcloud [data-type='placeholder'] {
+      max-width: 100% !important;
+      width: 100% !important;
+      height: auto !important;
+    }
+
+    .media--remote_video .klaro.cm-as-context-notice,
+    .media--soundcloud .klaro.cm-as-context-notice {
+      width: 100% !important;
+      max-width: 100% !important;
+      height: auto !important;
+      min-height: 8rem;
     }
 
     video {

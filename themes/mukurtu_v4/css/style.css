@@ -1037,6 +1037,43 @@ body.consent-popup-opened .klaro_toggle_dialog {
   display: none;
 }
 
+.klaro.klaro-theme-mukurtu_v4 {
+  --klaro-primary-color: var(--brand-primary-dark);
+  --klaro-link-color-hover: var(--brand-primary-accent);
+  --klaro-button-bg: var(--brand-primary-dark);
+  --klaro-button-text-color: var(--light-text-color);
+  --klaro-button-border: none;
+  --klaro-button-border-radius: var(--v-space-6xs);
+  --klaro-button-padding: var(--v-space-5xs) var(--v-space-2xs);
+  --klaro-button-font-size: var(--font-size-base);
+  --klaro-button-font-weight: var(--text-bold);
+  --klaro-button-bg-hover: var(--brand-primary-dark);
+  --klaro-button-text-color-hover: var(--light-text-color);
+  --klaro-button-border-hover: none;
+  --klaro-button-focus-outline: 2px solid var(--focus-color);
+  --klaro-button-focus-outline-offset: 2px;
+  --klaro-dialog-focus-outline: 2px solid var(--focus-color);
+}
+.klaro.klaro-theme-mukurtu_v4 .context-notice p {
+  line-height: 1.3;
+}
+.klaro.klaro-theme-mukurtu_v4 .cm-btn:hover {
+  text-decoration: underline;
+}
+.klaro.klaro-theme-mukurtu_v4 .context-notice p.cm-buttons {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  gap: var(--v-space-6xs);
+}
+
 .media:has(.mukurtu-content-warnings) {
   position: relative;
 }
@@ -1477,10 +1514,36 @@ label.form-required::after {
     block-size: auto;
   }
 }
+.horizontal-card__media .media--remote_video,
+.horizontal-card__media .media--soundcloud {
+  width: 100%;
+  aspect-ratio: 16/9;
+  overflow: hidden;
+}
+.horizontal-card__media .media--remote_video:has(.klaro.cm-as-context-notice),
+.horizontal-card__media .media--soundcloud:has(.klaro.cm-as-context-notice) {
+  aspect-ratio: auto;
+  height: auto;
+  overflow: visible;
+}
 .horizontal-card__media .media--remote_video iframe,
 .horizontal-card__media .media--soundcloud iframe {
-  block-size: auto;
-  aspect-ratio: 16/9;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 100% !important;
+}
+.horizontal-card__media .media--remote_video [data-type=placeholder],
+.horizontal-card__media .media--soundcloud [data-type=placeholder] {
+  max-width: 100% !important;
+  width: 100% !important;
+  height: auto !important;
+}
+.horizontal-card__media .media--remote_video .klaro.cm-as-context-notice,
+.horizontal-card__media .media--soundcloud .klaro.cm-as-context-notice {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  min-height: 8rem;
 }
 .horizontal-card__media video {
   max-block-size: 18rem;
@@ -2516,6 +2579,23 @@ label.form-required::after {
   vertical-align: middle;
   -webkit-margin-start: var(--v-space-6xs);
           margin-inline-start: var(--v-space-6xs);
+}
+
+.media--remote_video [data-type=placeholder],
+.media--external_embed [data-type=placeholder],
+.media--soundcloud [data-type=placeholder] {
+  max-width: 100% !important;
+  width: 100% !important;
+  height: auto !important;
+}
+.media--remote_video .klaro.cm-as-context-notice,
+.media--external_embed .klaro.cm-as-context-notice,
+.media--soundcloud .klaro.cm-as-context-notice {
+  width: 100% !important;
+}
+
+.media--external_embed .media-asset--content {
+  width: 100%;
 }
 
 .media--remote_video .field[data-blazy] {
@@ -3979,10 +4059,30 @@ body.is-fixed {
   aspect-ratio: 16/9;
   overflow: hidden;
 }
+.vertical-card__media .media--remote_video:has(.klaro.cm-as-context-notice),
+.vertical-card__media .media--soundcloud:has(.klaro.cm-as-context-notice) {
+  aspect-ratio: auto;
+  min-height: 14rem;
+  -webkit-margin-after: var(--v-space-3xs);
+          margin-block-end: var(--v-space-3xs);
+  overflow: visible;
+}
 .vertical-card__media .media--remote_video iframe,
 .vertical-card__media .media--soundcloud iframe {
-  width: 100%;
-  height: 100%;
+  width: 100% !important;
+  height: 100% !important;
+}
+.vertical-card__media .media--remote_video [data-type=placeholder],
+.vertical-card__media .media--soundcloud [data-type=placeholder] {
+  max-width: 100% !important;
+  width: 100% !important;
+  height: auto !important;
+}
+.vertical-card__media .media--remote_video .klaro.cm-as-context-notice,
+.vertical-card__media .media--soundcloud .klaro.cm-as-context-notice {
+  width: 100% !important;
+  height: auto !important;
+  min-height: 14rem;
 }
 .vertical-card__media video {
   max-block-size: 18rem;

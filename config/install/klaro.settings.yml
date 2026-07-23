@@ -15,10 +15,10 @@ auto_decorate_page_attachments: true
 auto_decorate_preprocess_field: true
 get_entity_thumbnail: true
 auto_decorate_final_html: false
-block_unknown: false
+block_unknown: true
 log_unknown_resources: false
-block_unknown_label: 'Unknown services'
-block_unknown_description: 'Allow loading of unknown external resources'
+block_unknown_label: 'Other services'
+block_unknown_description: 'Allow loading of external resources from other services'
 library:
   element_id: 'klaro'
   storage_method: 'cookie'
