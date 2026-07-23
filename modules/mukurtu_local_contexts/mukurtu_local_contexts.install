@@ -67,6 +67,33 @@ function mukurtu_local_contexts_schema() {
         'not null' => TRUE,
         'default' => 0,
       ],
+      'status' => [
+        'description' => 'The last known sync status: active, unauthorized, forbidden, not_found, or error.',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => 'active',
+      ],
+      'status_message' => [
+        'description' => 'The last error/detail message returned by the hub, if any.',
+        'type' => 'text',
+        'not null' => FALSE,
+      ],
+      'status_updated' => [
+        'description' => 'The Unix timestamp of the last sync attempt (success or failure).',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ],
+      'archived' => [
+        'description' => 'Whether the hub has marked this project as archived.',
+        'type' => 'int',
+        'size' => 'tiny',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ],
     ],
     'primary key' => ['id'],
     'indexes' => [
@@ -359,4 +386,39 @@ function mukurtu_local_contexts_update_10000() {
     ]
   );
 
+}
+
+/**
+ * Add project sync status and archived tracking columns.
+ */
+function mukurtu_local_contexts_update_10001() {
+  $schema = \Drupal::database()->schema();
+
+  $schema->addField('mukurtu_local_contexts_projects', 'status', [
+    'type' => 'varchar',
+    'length' => 32,
+    'not null' => TRUE,
+    'default' => 'active',
+    'description' => 'The last known sync status: active, unauthorized, forbidden, not_found, or error.',
+  ]);
+  $schema->addField('mukurtu_local_contexts_projects', 'status_message', [
+    'type' => 'text',
+    'not null' => FALSE,
+    'description' => 'The last error/detail message returned by the hub, if any.',
+  ]);
+  $schema->addField('mukurtu_local_contexts_projects', 'status_updated', [
+    'type' => 'int',
+    'unsigned' => TRUE,
+    'not null' => TRUE,
+    'default' => 0,
+    'description' => 'The Unix timestamp of the last sync attempt (success or failure).',
+  ]);
+  $schema->addField('mukurtu_local_contexts_projects', 'archived', [
+    'type' => 'int',
+    'size' => 'tiny',
+    'unsigned' => TRUE,
+    'not null' => TRUE,
+    'default' => 0,
+    'description' => 'Whether the hub has marked this project as archived.',
+  ]);
 }

@@ -5,6 +5,26 @@ namespace Drupal\mukurtu_local_contexts;
 class LocalContextsProject extends LocalContextsHubBase {
 
   /**
+   * Sync status values.
+   */
+  const STATUS_ACTIVE = 'active';
+  const STATUS_UNAUTHORIZED = 'unauthorized';
+  const STATUS_FORBIDDEN = 'forbidden';
+  const STATUS_NOT_FOUND = 'not_found';
+  const STATUS_ERROR = 'error';
+
+  /**
+   * Statuses that block a project/label from being offered as a NEW
+   * selection in field widgets. A generic STATUS_ERROR (e.g. a transient
+   * network failure) deliberately does not block new selections.
+   */
+  const UNAVAILABLE_STATUSES = [
+    self::STATUS_UNAUTHORIZED,
+    self::STATUS_FORBIDDEN,
+    self::STATUS_NOT_FOUND,
+  ];
+
+  /**
    * @var string The 36 character Local Contexts project ID.
    */
   protected $id;
@@ -30,9 +50,25 @@ class LocalContextsProject extends LocalContextsHubBase {
   protected bool $valid;
 
   /**
-   * @var string|null Any error that occurs during the fetch process.
+   * @var string|null The last known sync status. One of the STATUS_*
+   *   constants.
    */
-  protected ?string $errorMessage;
+  protected ?string $status;
+
+  /**
+   * @var string|null The last error/detail message from the hub, if any.
+   */
+  protected ?string $statusMessage;
+
+  /**
+   * @var int|null Timestamp of the last sync attempt (success or failure).
+   */
+  protected ?int $statusUpdated;
+
+  /**
+   * @var bool Whether the hub has marked this project as archived.
+   */
+  protected bool $archived;
 
   public function __construct($id) {
     parent::__construct();
@@ -42,6 +78,10 @@ class LocalContextsProject extends LocalContextsHubBase {
     $this->title = $project['title'] ?? NULL;
     $this->privacy = $project['privacy'] ?? NULL;
     $this->updated = $project['updated'] ?? NULL;
+    $this->status = $project['status'] ?? self::STATUS_ACTIVE;
+    $this->statusMessage = $project['status_message'] ?? NULL;
+    $this->statusUpdated = $project['status_updated'] ?? NULL;
+    $this->archived = !empty($project['archived']);
   }
 
   /**
@@ -54,7 +94,7 @@ class LocalContextsProject extends LocalContextsHubBase {
     $query = $this->db
       ->select('mukurtu_local_contexts_projects', 'project')
       ->condition('project.id', $this->id)
-      ->fields('project', ['id', 'provider_id', 'title', 'privacy', 'updated']);
+      ->fields('project', ['id', 'provider_id', 'title', 'privacy', 'updated', 'status', 'status_message', 'status_updated', 'archived']);
     $result = $query->execute();
     return $result->fetchAssoc();
   }
@@ -71,16 +111,20 @@ class LocalContextsProject extends LocalContextsHubBase {
    */
   public function fetchFromHub($api_key) {
     $id = $this->id;
-    if ($project = $this->lcApi->makeRequest("projects/{$id}", $api_key)) {
-      if (empty($project['unique_id'])) {
-        $this->errorMessage = $project['detail'] ?? '';
-        return FALSE;
-      }
+    $project = $this->lcApi->makeRequest("projects/{$id}", $api_key);
+    $http_code = $this->lcApi->getStatusCode();
 
+    if (!empty($project['unique_id'])) {
       // Update the object properties.
       $this->title = $project['title'];
       $this->privacy = $project['project_privacy'];
       $this->updated = $this->requestTime;
+      $this->status = self::STATUS_ACTIVE;
+      $this->statusMessage = NULL;
+      $this->statusUpdated = $this->requestTime;
+      // The exact field name for the hub's archive flag should be confirmed
+      // against a live response; both known candidate names are checked.
+      $this->archived = (bool) ($project['archived'] ?? $project['is_archived'] ?? FALSE);
 
       // Provider ID seems to sometimes be an array, sometimes a string.
       $provider_id = is_array($project['external_ids']['providers_id']) ? reset($project['external_ids']['providers_id']) : $project['external_ids']['providers_id'];
@@ -92,6 +136,10 @@ class LocalContextsProject extends LocalContextsHubBase {
         'title' => $this->title,
         'privacy' => $this->privacy,
         'updated' => $this->updated,
+        'status' => $this->status,
+        'status_message' => $this->statusMessage,
+        'status_updated' => $this->statusUpdated,
+        'archived' => (int) $this->archived,
       ];
 
       $query = $this->db->update('mukurtu_local_contexts_projects')
@@ -131,12 +179,37 @@ class LocalContextsProject extends LocalContextsHubBase {
       }
 
       // Delete any saved tk, bc labels, notices, and their translations that
-      // no longer exist.
+      // no longer exist. This must only ever happen on a genuinely
+      // successful fetch, never on a failed one (see below).
       $this->deleteSavedLabelsAndTranslations($prior_saved_labels, $project['unique_id']);
       $this->deleteSavedNoticesAndTranslations($prior_saved_notices, $project['unique_id']);
+
+      return TRUE;
     }
 
-    return isset($project['unique_id']);
+    // The fetch failed. Classify the failure by HTTP status and persist only
+    // the status columns, leaving title/privacy/updated/archived at their
+    // last-known-good values so existing content keeps rendering correctly.
+    // Cached labels/notices are deliberately left untouched here.
+    $this->status = match (TRUE) {
+      $http_code === 401 => self::STATUS_UNAUTHORIZED,
+      $http_code === 403 => self::STATUS_FORBIDDEN,
+      $http_code === 404 => self::STATUS_NOT_FOUND,
+      default => self::STATUS_ERROR,
+    };
+    $this->statusMessage = $project['detail'] ?? ($this->lcApi->getErrorMessage() ?: "HTTP {$http_code}");
+    $this->statusUpdated = $this->requestTime;
+
+    $this->db->update('mukurtu_local_contexts_projects')
+      ->condition('id', $id)
+      ->fields([
+        'status' => $this->status,
+        'status_message' => $this->statusMessage,
+        'status_updated' => $this->statusUpdated,
+      ])
+      ->execute();
+
+    return FALSE;
   }
 
   public function getLabels($tk_or_bc) {
@@ -370,6 +443,35 @@ class LocalContextsProject extends LocalContextsHubBase {
 
   public function isValid() {
     return $this->valid;
+  }
+
+  public function getStatus(): ?string {
+    return $this->status;
+  }
+
+  public function getStatusMessage(): ?string {
+    return $this->statusMessage;
+  }
+
+  public function getStatusUpdated(): ?int {
+    return $this->statusUpdated;
+  }
+
+  public function isArchived(): bool {
+    return $this->archived;
+  }
+
+  /**
+   * Whether this project should be treated as unavailable for new content.
+   *
+   * A project is not available when the last sync attempt failed for any
+   * reason (401/403/404/other). Archived projects are NOT considered
+   * unavailable - they remain fully active and usable on our end.
+   *
+   * @return bool
+   */
+  public function isNotAvailable(): bool {
+    return $this->status !== NULL && $this->status !== self::STATUS_ACTIVE;
   }
 
   public function inUse() : bool {
