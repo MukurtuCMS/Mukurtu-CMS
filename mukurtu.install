@@ -60,6 +60,14 @@ function mukurtu_install() {
 
   \Drupal::service('module_installer')->install(['gin_toolbar']);
 
+  // Install the Tour module here, rather than as a profile dependency, so it
+  // isn't enabled until after the theme/gin_toolbar installs above. Enabling
+  // it earlier (as a hard dependency processed during install_profile_modules)
+  // leaves Tour's own hook_modules_installed() implementation unable to
+  // construct against the container by the time this hook_install() finishes,
+  // throwing "You have requested a synthetic service (kernel)".
+  \Drupal::service('module_installer')->install(['tour', 'mukurtu_tour']);
+
   // Homepage will be set to the landing page node created below.
 
   // Set the homepage (system.site.yml is not owned by Mukurtu).
