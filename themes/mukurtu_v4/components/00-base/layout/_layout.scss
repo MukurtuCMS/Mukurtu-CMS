@@ -148,3 +148,46 @@
 .layout__region--content>.block {
   padding-block: var(--v-separation);
 }
+
+// Flex items default to min-inline-size: auto, letting a block's content
+// force its Layout Builder region wider than its flex-basis share whenever
+// that content can't shrink small enough on its own (native image/video
+// resolution, a wide embed, etc.) - this has surfaced repeatedly across
+// different block types this session (media carousels, single-image
+// fallbacks, ...) each needing its own targeted fix. Guard the region
+// itself once, generically, instead of chasing every block type's markup
+// individually. This mirrors the equivalent admin-only fix already applied
+// to .layout-builder-block in mukurtu_gin_custom.css for the Layout Builder
+// edit canvas, which doesn't load this theme's CSS at all.
+.layout__region {
+  min-inline-size: 0;
+}
+
+// Drupal core ships the twocol/threecol/fourcol Layout Builder section
+// layouts with zero gap between regions (each .layout__region is just
+// flex: 0 1 <n>%, no gap/margin/padding at the section level) - any
+// spacing seen between columns previously came incidentally from
+// individual block types' own internal padding, not the section itself,
+// so column count/block combinations with no such padding touch edge to
+// edge. Add a real gutter so every combination gets consistent spacing.
+//
+// Every column-split variant core ships (50/50, 33/67, 25/50/25, 25/25/25/25,
+// etc.) sums its regions' flex-basis to exactly 100%, so a flexbox `gap`
+// property would add (region count - 1) * gutter of extra required width on
+// top of that already-100% total. flex-wrap: wrap is set, so once content
+// can't shrink enough to absorb that overflow the trailing region(s) wrap
+// onto a new row - worse with more columns (more gaps) and narrower columns
+// (less room to shrink away the deficit). Use the classic padding + negative
+// margin technique instead: it creates the same visual gutter without adding
+// any extra width demand, since each region's flex-basis percentage is still
+// computed against a container widened by the same amount its own padding
+// removes.
+.layout--twocol-section,
+.layout--threecol-section,
+.layout--fourcol-section {
+  margin-inline: calc(var(--gutter) / -2);
+
+  > .layout__region {
+    padding-inline: calc(var(--gutter) / 2);
+  }
+}

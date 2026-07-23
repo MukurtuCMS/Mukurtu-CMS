@@ -1,5 +1,12 @@
 .local-contexts-dialog {
   display: inline-block;
+  // Grid items default to min-inline-size: auto, which can let this item's
+  // intrinsic content size (icon + caption) force its grid track wider than
+  // the minmax() floor in local-contexts-projects-container/label-group,
+  // independently of how many items are in the group. The __trigger button
+  // below already zeroes its own min-size, but that doesn't zero this outer
+  // grid-item's own min-content contribution.
+  min-inline-size: 0;
 
   &__trigger {
     display: inline-flex;
@@ -16,10 +23,17 @@
     color: inherit;
     text-align: center;
     inline-size: 100%;
+    // Grid/flex items default to min-width: auto, which lets this trigger's
+    // intrinsic content size (image + padding) force the label grid track
+    // wider than its minmax() floor, squishing/overlapping neighboring
+    // labels at narrow column widths.
+    min-inline-size: 0;
 
     img {
-      block-size: 5rem;
-      flex-shrink: 0;
+      max-block-size: 5rem;
+      max-inline-size: 100%;
+      block-size: auto;
+      inline-size: auto;
     }
 
     &:hover {
@@ -153,33 +167,27 @@
     padding-block-end: var(--v-space-5xs);
     border-block-end: 1px solid var(--brand-light);
     margin-block: 0 var(--v-space-5xs);
+    text-align: center;
   }
 }
 
-.local-contexts-project .local-contexts-projects-container {
+.local-contexts-project .local-contexts-projects-container,
+.local-contexts-label-group .local-contexts-label-group-items {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(5rem, 1fr));
   gap: var(--v-space-5xs);
 }
 
 .local-contexts-label-group {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--v-space-5xs);
-
   & + .local-contexts-label-group {
     margin-block-start: var(--v-space-4xxs);
     padding-block-start: var(--v-space-4xxs);
     border-block-start: 1px solid var(--brand-light);
   }
-
-  .project-title {
-    grid-column: 1 / -1;
-  }
 }
 
 .local-contexts-project,
-.field--name-field-local-contexts-labels-and-notices .field__item {
+.local-contexts-label-group {
   background-color: var(--brand-light-accent);
   padding-inline: var(--v-space-4xxs);
   padding-block: var(--v-space-5xs) var(--v-space-4xxs);
@@ -187,7 +195,7 @@
 }
 
 .field--name-field-local-contexts-projects .field__label,
-.field--name-field-local-contexts-labels-and-notices .field__label {
+.field--name-field-lc-labels-and-notices .field__label {
   border-block-end: 4px solid var(--brand-secondary);
   margin-block: 0 1rem;
 }

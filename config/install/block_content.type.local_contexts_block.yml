@@ -1,0 +1,11 @@
+langcode: en
+status: true
+dependencies: {  }
+id: local_contexts_block
+label: 'Local Contexts'
+revision: 0
+description: 'A block for displaying Local Contexts labels and project notices.'
+help: ''
+new_revision: false
+preview_mode: 1
+display_submitted: true
