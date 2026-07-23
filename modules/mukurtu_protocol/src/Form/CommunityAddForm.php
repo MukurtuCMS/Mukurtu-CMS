@@ -405,7 +405,15 @@ class CommunityAddForm extends ContentEntityForm {
     // normal entity save (see the matching check in form()), not repeat the
     // new-community member setup and protocol-creation redirect below.
     if (!$this->entity->isNew()) {
-      return parent::save($form, $form_state);
+      $status = parent::save($form, $form_state);
+      // Without an explicit redirect, Drupal defaults to reloading the
+      // current request URL, which for a translation-add is this same
+      // "add translation" route. Reloading it after the translation has
+      // been created throws, since Drupal refuses to add a translation
+      // that already exists. Redirect to the entity instead, matching
+      // CommunityForm::save()'s redirect for the edit-translation path.
+      $form_state->setRedirect('entity.community.canonical', ['community' => $this->entity->id()]);
+      return $status;
     }
 
     if ($this->entity->save()) {
