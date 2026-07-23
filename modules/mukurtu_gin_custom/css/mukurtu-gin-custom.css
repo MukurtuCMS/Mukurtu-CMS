@@ -287,6 +287,14 @@ short fields themselves. Shrink it in these dialogs specifically. */
     flex-shrink: 0;
 }
 
+/* Widen the Layout Builder off-canvas dialogs (layout picker, block picker, block
+   config forms). Each dialog link carries data-dialog-options='{"width":450}' which
+   jQuery UI applies as an inline style; !important is required to override it. */
+.ui-dialog.ui-dialog-off-canvas {
+    width: 650px !important;
+    max-width: 90vw !important;
+}
+
 /* Fix the titlebar close icon drifting off-center. Gin's own dialog CSS
    (dist/css/theme/dialog.css) sizes .ui-icon-closethick to fill the button
    (top/left: 0, width/height: 100%, transform: none) via a mask-image, but a
@@ -333,6 +341,19 @@ short fields themselves. Shrink it in these dialogs specifically. */
     overflow: visible;
 }
 
+/* Flex items default to min-width: auto, so a block's content (e.g. a wide
+   carousel or media asset) can force its Layout Builder region wider than
+   its flex-basis percentage while editing - the same class of bug already
+   fixed for the front end (see lb-frontend-edit.css's .lb-editable rule).
+   layout-builder-block is added by core only in the edit canvas
+   (LayoutBuilder::buildAdministrativeSection()) and wraps every block
+   uniformly, so this one rule covers all block types generically instead
+   of duplicating each front-end component fix here. */
+.layout-builder-block {
+    min-width: 0;
+    max-width: 100%;
+}
+
 .layout-builder .contextual {
     z-index: 600;
     right: auto;
@@ -342,6 +363,44 @@ short fields themselves. Shrink it in these dialogs specifically. */
 [dir="rtl"] .layout-builder .contextual {
     left: auto;
     right: 0;
+}
+
+/* Fix low-contrast text throughout the Layout Builder off-canvas dialog
+   (e.g. the "Add a new content block" category list - core's
+   .inline-block-list__item/.inline-block-create-button links). Gin's own
+   off-canvas CSS defines --off-canvas-text-color: #e5e5e5 and
+   --off-canvas-link-color: #85bef4 on #drupal-off-canvas-wrapper, sized for
+   its own dark (#444) off-canvas background. But this file's own
+   .ui-dialog .ui-dialog-content rule (above) repaints the off-canvas
+   dialog's inner content area white, without updating these variables to
+   match - so anything relying on them (nearly every link/list item in the
+   dialog) renders near-invisible light text on white, failing WCAG 1.4.3.
+   Override both variables to Gin's light/dark-mode-aware colors so they
+   track the actual (white, in light mode) background instead of Gin's
+   original dark-only design. !important needed: Gin's off-canvas CSS sets
+   these same custom properties on the same selector, but is only fetched
+   once the dialog opens - after this file's page-load rule - so without it
+   a same-specificity, later-loaded tie would go to Gin's value. Verified
+   against a live PR #1770 Tugboat preview with Playwright: computed link
+   color changes from rgb(229, 229, 229) to rgb(34, 35, 48). */
+#drupal-off-canvas-wrapper {
+  --off-canvas-text-color: var(--gin-color-text, #222330) !important;
+  --off-canvas-link-color: var(--gin-color-primary, #0036b1) !important;
+}
+
+/* Horizontal divider renders as a 1px <hr> with almost no hover area.
+   Keep the contextual links trigger permanently visible so editors can
+   reach Configure/Remove without pixel-perfect hovering. Drupal's contextual
+   JS hides the trigger by toggling the visually-hidden class, so override
+   all of its properties to keep it rendered. */
+.layout-builder .block--horizontal-divider .contextual .trigger.visually-hidden {
+    position: relative !important;
+    overflow: visible !important;
+    clip: auto !important;
+    -webkit-clip-path: none !important;
+    clip-path: none !important;
+    width: auto !important;
+    height: auto !important;
 }
 
 /* Media library modal: compact upload form, sticky type sidebar. */
@@ -402,6 +461,22 @@ short fields themselves. Shrink it in these dialogs specifically. */
     padding-bottom: 16px !important;
 }
 
+/* gin_lb adds its own background-image:url(chevron.svg) !important arrow to every
+   .glb-form-element--type-select it renders (media library, and every Layout Builder
+   add/configure/move block dialog), already color-matched to Gin's light/dark admin
+   theme. The mukurtu front-end theme also draws its own ::after triangle on the same
+   wrapper (.js-form-type-select / .select-wrapper) using the site's front-end brand
+   accent color -- which some color palettes set to red -- so two mismatched arrows
+   show. Hide the mukurtu triangle inside gin_lb's own form markup (identified by the
+   glb-form-item class, which only ever appears in gin_lb's dialogs) and keep gin_lb's
+   own properly themed chevron as the single arrow. */
+.glb-form-item.js-form-type-select::after,
+.glb-form-item .js-form-type-select::after,
+.glb-form-item.select-wrapper::after,
+.glb-form-item .select-wrapper::after {
+    content: none !important;
+}
+
 .media-library-widget-modal .view-content .js-media-library-views-form {
     padding: 0 !important;
 }
@@ -423,6 +498,31 @@ short fields themselves. Shrink it in these dialogs specifically. */
     align-self: flex-end !important;
     flex-shrink: 0;
     margin: 0 !important;
+}
+
+/* In the Layout Builder context, gin_lb renders the sidebar ul with class
+   glb-media-library-menu and sets its width to 20em. Reduce it to match the
+   proportions of the non-LB media library modal. */
+.media-library-widget-modal .glb-media-library-menu {
+    width: 14em !important;
+}
+/* Reset the extra right margin gin_lb adds to the sidebar ul. */
+.media-library-widget-modal .media-library-wrapper > ul {
+    margin-right: 0 !important;
+    margin-left: 0 !important;
+}
+
+/* gin_lb puts the button (form-actions) BEFORE the count and gives it flex:1,
+   leaving "Insert selected" left-aligned. Fix: stop the buttonset from growing
+   and move it after the count so it reads [count] [button], right-aligned. */
+.media-library-widget-modal .ui-dialog-buttonpane .media-library-selected-count {
+    flex: 1 1 auto !important;
+    order: 1 !important;
+}
+.media-library-widget-modal .ui-dialog-buttonpane .ui-dialog-buttonset,
+.media-library-widget-modal .ui-dialog-buttonpane .form-actions {
+    flex: 0 0 auto !important;
+    order: 2 !important;
 }
 
 /* WCAG 2.4.7: visible focus ring on dialog footer buttons in any modal, not
@@ -487,6 +587,14 @@ short fields themselves. Shrink it in these dialogs specifically. */
   z-index: 3;
 }
 
+/* Layout Builder configure-block dialog: gap between Back and Add block. */
+.ui-dialog-off-canvas .form-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
 /* Fix #1734: on the dashboard layout builder page the toolbar anti-flicker
    IIFE restores is-active on secondary toolbar trays (Shortcuts, admin, etc.)
    from sessionStorage before behaviors run, leaving them visually open and
@@ -498,6 +606,50 @@ short fields themselves. Shrink it in these dialogs specifically. */
    moment the user moves the cursor over the tab. */
 .mukurtu-dashboard-layout .gin-secondary-toolbar .toolbar-secondary .toolbar-bar .toolbar-tab:not(:hover):not(:focus-within) .toolbar-tray {
   display: none !important;
+}
+
+/* Layout Builder's off-canvas/dialog forms (add/configure/move block) don't
+   render a [data-drupal-messages] placeholder in the DOM until a message is
+   actually needed. Drupal core's Drupal.Message.defaultWrapper() (message.js)
+   only falls back to creating one when it finds none anywhere in the document,
+   and it appends that fallback as a bare div with NO class directly to <body>
+   (document.createElement('div') followed by only setAttribute('data-drupal-
+   messages', '') -- no class is ever added to this wrapper). In normal
+   document flow that renders the message stack at the bottom of the screen,
+   growing there with each subsequent AJAX response instead of appearing near
+   the dialog the user is working in.
+   Every real, theme-rendered placeholder always carries a class on this same
+   element -- e.g. Gin's own status-messages.html.twig outputs
+   `<div data-drupal-messages class="messages-list">` and gin_lb's
+   status-messages--gin-lb.html.twig outputs `class="glb-messages-list ..."` --
+   regardless of how deeply it's nested in the page. `:not([class])` reliably
+   targets only the class-less JS fallback without touching real messages
+   (an earlier version of this rule assumed the fallback could be identified
+   by being a direct child of <body>, which incorrectly also matched Gin's own
+   properly-themed status messages on the Layout Builder page and stripped
+   their styling -- this is not fooled by nesting depth). */
+[data-drupal-messages]:not([class]) {
+  position: fixed !important;
+  z-index: 99999 !important;
+  inset-block-start: 1rem !important;
+  inset-inline-start: 50% !important;
+  transform: translateX(-50%) !important;
+  inline-size: min(90vw, 40rem) !important;
+}
+
+/* Layout Builder's own status/warning/error messages (e.g. "You have unsaved
+   changes") don't actually use [data-drupal-messages] at all -- gin_lb hides
+   its status-messages--gin-lb markup and re-renders each message as a popup
+   via the Toastify JS library (gin_lb/assets/js/gin_lb_toastify.js), which
+   hardcodes gravity: 'bottom', position: 'right'. Toastify sets that
+   placement with inline styles, so only an !important rule in a stylesheet
+   can override it. Reposition to a fixed, top-centered toast to match. */
+.toastify.glb-messages {
+  top: 1rem !important;
+  bottom: auto !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) !important;
 }
 
 /* Fix #1825: on /admin/export/settings, each saved export setting's

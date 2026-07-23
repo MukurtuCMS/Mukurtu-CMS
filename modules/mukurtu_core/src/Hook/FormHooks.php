@@ -1388,7 +1388,6 @@ class FormHooks
 
         $unsupportedBundles = [
             "article",
-            "page",
             "dictionary_word",
             "word_list",
             "collection",
@@ -1404,5 +1403,47 @@ class FormHooks
         $form["layout"]["enabled"]["#description"] = t(
             "Layout Builder is not yet supported for this content type.",
         );
+    }
+
+    /**
+     * Implements hook_form_BASE_FORM_ID_alter() for 'taxonomy_term_form'.
+     *
+     * Moves admin-only elements (parent term relations, publishing status)
+     * into the 'advanced' vertical-tabs sidebar that ContentEntityForm
+     * already builds for taxonomy terms (taxonomy_term has
+     * show_revision_ui: TRUE), so they render in Gin's right-hand sidebar
+     * instead of stacked at the bottom of the form. This applies to every
+     * vocabulary since 'taxonomy_term_form' is the base form ID shared by
+     * all of them.
+     *
+     * The 'path' field groups itself into 'advanced' automatically via
+     * \Drupal\path\Plugin\Field\FieldWidget\PathWidget, so it needs no
+     * handling here. 'langcode' is intentionally left in the main content
+     * area, matching NodeForm's own convention.
+     */
+    #[Hook("form_taxonomy_term_form_alter")]
+    public function formTaxonomyTermFormAlter(
+        array &$form,
+        FormStateInterface $form_state,
+    ): void {
+        if (!isset($form["advanced"])) {
+            return;
+        }
+
+        if (isset($form["relations"])) {
+            $form["relations"]["#group"] = "advanced";
+        }
+
+        // 'status' has no wrapper of its own; vertical-tabs children must be
+        // 'details' elements, so give it one.
+        if (isset($form["status"])) {
+            $form["publishing_options"] = [
+                "#type" => "details",
+                "#title" => t("Publishing options"),
+                "#group" => "advanced",
+                "#weight" => 25,
+            ];
+            $form["status"]["#group"] = "publishing_options";
+        }
     }
 }
