@@ -12,6 +12,7 @@ function mukurtu_local_contexts_theme($existing, $type, $theme, $path) {
     'local_contexts_project' => [
       'template' => 'local-contexts-project',
       'variables' => [
+        'project_id' => NULL,
         'title' => [],
         'privacy' => [],
         'project_url' => NULL,
@@ -30,6 +31,7 @@ function mukurtu_local_contexts_theme($existing, $type, $theme, $path) {
         'img_url' => NULL,
         'audio_url' => NULL,
         'community' => NULL,
+        'language' => NULL,
         'translations' => [],
         'dialog_id' => NULL,
         'project_title' => NULL,
@@ -44,6 +46,7 @@ function mukurtu_local_contexts_theme($existing, $type, $theme, $path) {
         'name' => [],
         'svg_url' => NULL,
         'img_url' => NULL,
+        'language' => NULL,
         'translations' => [],
         'dialog_id' => NULL,
         'project_title' => NULL,

@@ -15,6 +15,7 @@ class LocalContextsLabel extends LocalContextsHubBase {
   public $audio_url;
   public $community;
   public $default_text;
+  public $language;
   public $translations;
 
   public function __construct($id) {
@@ -29,7 +30,7 @@ class LocalContextsLabel extends LocalContextsHubBase {
       ->condition('l.id', $this->label_id)
       ->fields('l', [
         'id', 'name', 'img_url', 'svg_url',
-        'audio_url', 'community', 'default_text',
+        'audio_url', 'community', 'default_text', 'language',
       ]);
     $result = $query->execute();
 
@@ -45,51 +46,9 @@ class LocalContextsLabel extends LocalContextsHubBase {
     $this->audio_url = $label['audio_url'] ?? NULL;
     $this->community = $label['community'] ?? '';
     $this->default_text = $label['default_text'] ?? '';
+    $this->language = $label['language'] ?? NULL;
 
-    // Load every translation.
-    $bookkeep = [];
-    while ($translationInfo = $tResult->fetchAssoc()) {
-      // Bookkeep the number of locales there are (including where locale is
-      // null).
-
-      // Must determine the proper index to store each translation at, since we
-      // could have no locales or multiple translations per locale.
-      $translationIndex = '';
-
-      // Handle translations with no or null locale.
-      if (!isset($translationInfo['locale']) || $translationInfo['locale'] == '') {
-        // Check if the bookkeep is tracking translations with no locale yet.
-
-        if (!isset($bookkeep['no_locale_count'])) {
-          // If it isn't, initialize the no_locale_count key to 1.
-          $bookkeep['no_locale_count'] = 1;
-        }
-        else {
-          // If it is, increment the no locale count by 1.
-          $bookkeep['no_locale_count']++;
-        }
-
-        // Now set the translation index to the no locale count.
-        $translationIndex = strval($bookkeep['no_locale_count']);
-      }
-
-      // Handle translations with locales.
-      else {
-        // Check if this locale exists in the bookkeep.
-        if (!isset($bookkeep[$translationInfo['locale']])) {
-          // If not, initialize its count to 1.
-          $bookkeep[$translationInfo['locale']] = 1;
-        }
-        else {
-          // If so, increment its count by 1.
-          $bookkeep[$translationInfo['locale']]++;
-        }
-        // Generate the translation index but add its count to the end so it's
-        // unique.
-        $translationIndex = $translationInfo['locale'] . '-' . $bookkeep[$translationInfo['locale']];
-      }
-      $this->translations[$translationIndex] = $translationInfo;
-    }
+    $this->translations = $this->indexTranslations($tResult->fetchAll(\PDO::FETCH_ASSOC));
   }
 
 }

@@ -13,22 +13,41 @@
     <button type="button" class="local-contexts-dialog__close" aria-label="{{ 'Close'|t }}">&#x2715;</button>
     <div class="local-contexts-dialog__header">
       <img src="{{ svg_url ?? img_url }}" alt="">
-      <div class="local-contexts-dialog__header-text">
-        <h2 class="local-contexts-dialog__title">{{ name }}</h2>
-        {% if community %}
+      {% if community %}
+        <div class="local-contexts-dialog__header-text">
           <div class="local-contexts-dialog__community">{{ community }}</div>
-        {% endif %}
-      </div>
+        </div>
+      {% endif %}
     </div>
-    <div class="local-contexts-dialog__text">{{ text }}</div>
-    {% if project_url %}
-      <div class="local-contexts-dialog__project-link">
-        <a href="{{ project_url }}" target="_blank" rel="noopener noreferrer">{{ project_title }}</a>
+    {% if translations and language %}
+      <div class="local-contexts-dialog__tabs" role="tablist" aria-label="{{ name }}">
+        <button type="button" class="local-contexts-dialog__tab" role="tab" aria-selected="true" aria-controls="{{ dialog_id }}-panel-0" id="{{ dialog_id }}-tab-0">{{ language }}</button>
+        {% for translation in translations %}
+          <button type="button" class="local-contexts-dialog__tab" role="tab" aria-selected="false" tabindex="-1" aria-controls="{{ dialog_id }}-panel-{{ loop.index }}" id="{{ dialog_id }}-tab-{{ loop.index }}">{{ translation.language }}</button>
+        {% endfor %}
       </div>
-    {% endif %}
-    {% if translations %}
+      <div class="local-contexts-dialog__tabpanel" id="{{ dialog_id }}-panel-0" role="tabpanel" aria-labelledby="{{ dialog_id }}-tab-0">
+        <h2 class="local-contexts-dialog__title">{{ name }}</h2>
+        <div class="local-contexts-dialog__text">{{ text }}</div>
+      </div>
+      {% for translation in translations %}
+        <div class="local-contexts-dialog__tabpanel" id="{{ dialog_id }}-panel-{{ loop.index }}" role="tabpanel" aria-labelledby="{{ dialog_id }}-tab-{{ loop.index }}" hidden>
+          {% if translation.name %}
+            <h2 class="local-contexts-dialog__title">{{ translation.name }}</h2>
+          {% endif %}
+          {% if translation.text %}
+            <div class="local-contexts-dialog__text">{{ translation.text }}</div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    {% elseif translations %}
+      <h2 class="local-contexts-dialog__title">{{ name }}</h2>
+      <div class="local-contexts-dialog__text">{{ text }}</div>
       {% for translation in translations %}
         <div class="local-contexts-dialog__translation">
+          {% if translation.language %}
+            <div class="local-contexts-dialog__translation-language">{{ translation.language }}</div>
+          {% endif %}
           {% if translation.name %}
             <div class="local-contexts-dialog__translation-name">{{ translation.name }}</div>
           {% endif %}
@@ -37,12 +56,20 @@
           {% endif %}
         </div>
       {% endfor %}
+    {% else %}
+      <h2 class="local-contexts-dialog__title">{{ name }}</h2>
+      <div class="local-contexts-dialog__text">{{ text }}</div>
     {% endif %}
     {% if audio_url %}
       <div class="local-contexts-dialog__audio">
-        <audio controls>
+        <audio controls aria-label="{{ name }}">
           <source src="{{ audio_url }}">
         </audio>
+      </div>
+    {% endif %}
+    {% if project_url %}
+      <div class="local-contexts-dialog__project-link">
+        <a href="{{ project_url }}" target="_blank" rel="noopener noreferrer">{{ project_title }}</a>
       </div>
     {% endif %}
     </div>

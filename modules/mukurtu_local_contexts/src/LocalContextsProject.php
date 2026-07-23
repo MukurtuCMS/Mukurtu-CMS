@@ -143,7 +143,7 @@ class LocalContextsProject extends LocalContextsHubBase {
     $query = $this->db->select('mukurtu_local_contexts_labels', 'l')
       ->condition('l.project_id', $this->id)
       ->condition('l.tk_or_bc', $tk_or_bc)
-      ->fields('l', ['id', 'name', 'img_url', 'svg_url', 'default_text']);
+      ->fields('l', ['id', 'name', 'img_url', 'svg_url', 'audio_url', 'default_text', 'language']);
     $result = $query->execute();
 
     $labels = [];
@@ -153,8 +153,27 @@ class LocalContextsProject extends LocalContextsHubBase {
         'name' => $label['name'],
         'img_url' => $label['img_url'],
         'svg_url' => $label['svg_url'],
+        'audio_url' => $label['audio_url'],
         'text' => $label['default_text'],
+        'language' => $label['language'],
+        'translations' => [],
       ];
+    }
+
+    if ($labels) {
+      $tQuery = $this->db->select('mukurtu_local_contexts_label_translations', 't')
+        ->condition('t.label_id', array_keys($labels), 'IN')
+        ->fields('t', ['label_id', 'locale', 'language', 'name', 'text']);
+      $tResult = $tQuery->execute();
+
+      $translationsByLabel = [];
+      while ($translation = $tResult->fetchAssoc()) {
+        $translationsByLabel[$translation['label_id']][] = $translation;
+      }
+
+      foreach ($translationsByLabel as $labelId => $rows) {
+        $labels[$labelId]['translations'] = $this->indexTranslations($rows);
+      }
     }
 
     return $labels;
@@ -163,7 +182,7 @@ class LocalContextsProject extends LocalContextsHubBase {
   public function getNotices() {
     $query = $this->db->select('mukurtu_local_contexts_notices', 'n')
       ->condition('n.project_id', $this->id)
-      ->fields('n', ['project_id', 'type', 'name', 'img_url', 'svg_url', 'default_text']);
+      ->fields('n', ['project_id', 'type', 'name', 'img_url', 'svg_url', 'default_text', 'language']);
     $result = $query->execute();
 
     $notices = [];
@@ -176,7 +195,28 @@ class LocalContextsProject extends LocalContextsHubBase {
         'img_url' => $notice['img_url'],
         'svg_url' => $notice['svg_url'],
         'text' => $notice['default_text'],
+        'language' => $notice['language'],
+        'translations' => [],
       ];
+    }
+
+    if ($notices) {
+      $tQuery = $this->db->select('mukurtu_local_contexts_notice_translations', 't')
+        ->condition('t.project_id', $this->id)
+        ->fields('t', ['type', 'locale', 'language', 'name', 'text']);
+      $tResult = $tQuery->execute();
+
+      $translationsByType = [];
+      while ($translation = $tResult->fetchAssoc()) {
+        $translationsByType[$translation['type']][] = $translation;
+      }
+
+      foreach ($translationsByType as $noticeType => $rows) {
+        $noticeId = $this->id . ':' . $noticeType;
+        if (isset($notices[$noticeId])) {
+          $notices[$noticeId]['translations'] = $this->indexTranslations($rows);
+        }
+      }
     }
 
     return $notices;
@@ -256,6 +296,8 @@ class LocalContextsProject extends LocalContextsHubBase {
         'type' => $notice['notice_type'],
         'img_url' => $notice['img_url'],
         'svg_url' => $notice['svg_url'],
+        'locale' => $notice['language_tag'] ?? NULL,
+        'language' => $notice['language'] ?? NULL,
         'default_text' => $notice['default_text'],
         'display' => 'notice',
         'updated' => time(),

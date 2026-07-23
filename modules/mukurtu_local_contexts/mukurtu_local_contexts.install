@@ -256,6 +256,18 @@ function mukurtu_local_contexts_schema() {
         'not null' => FALSE,
         'description' => 'SVG URL',
       ],
+      'locale' => [
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => FALSE,
+        'description' => 'Language code',
+      ],
+      'language' => [
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => FALSE,
+        'description' => 'Language',
+      ],
       'default_text' => [
         'type' => 'text',
         'not null' => TRUE,
@@ -359,4 +371,32 @@ function mukurtu_local_contexts_update_10000() {
     ]
   );
 
+}
+
+/**
+ * Add locale/language columns to Local Contexts notices.
+ */
+function mukurtu_local_contexts_update_10001() {
+  $schema = \Drupal::database()->schema();
+
+  $schema->addField(
+    'mukurtu_local_contexts_notices',
+    'locale',
+    [
+      'type' => 'varchar',
+      'length' => 64,
+      'not null' => FALSE,
+      'description' => 'Language code',
+    ]
+  );
+  $schema->addField(
+    'mukurtu_local_contexts_notices',
+    'language',
+    [
+      'type' => 'varchar',
+      'length' => 128,
+      'not null' => FALSE,
+      'description' => 'Language',
+    ]
+  );
 }
