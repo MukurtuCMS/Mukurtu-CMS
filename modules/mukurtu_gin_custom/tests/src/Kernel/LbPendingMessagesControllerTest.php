@@ -10,7 +10,7 @@ use Drupal\mukurtu_gin_custom\Controller\LbPendingMessagesController;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests that queued Layout Builder messages surface via AJAX on demand.
+ * Tests that a queued "layout saved" status message surfaces via AJAX.
  *
  * @see \Drupal\mukurtu_gin_custom\Controller\LbPendingMessagesController
  */
@@ -26,31 +26,26 @@ class LbPendingMessagesControllerTest extends KernelTestBase {
   ];
 
   /**
-   * Tests that queued warnings and statuses are both returned and drained.
+   * Tests that a queued status message is returned and drained.
    */
-  public function testBuildDrainsWarningsAndStatuses(): void {
+  public function testBuildDrainsStatuses(): void {
     $messenger = \Drupal::messenger();
     $messenger->addStatus('The layout override has been saved.');
-    $messenger->addWarning('You have unsaved changes.');
 
     $response = LbPendingMessagesController::create(\Drupal::getContainer())->build();
     $data = json_decode((string) $response->getContent(), TRUE);
 
-    $this->assertSame(['You have unsaved changes.'], $data['warnings']);
     $this->assertSame(['The layout override has been saved.'], $data['statuses']);
-
-    $this->assertSame([], $messenger->messagesByType(MessengerInterface::TYPE_WARNING));
     $this->assertSame([], $messenger->messagesByType(MessengerInterface::TYPE_STATUS));
   }
 
   /**
-   * Tests that empty lists are returned when nothing is queued.
+   * Tests that an empty list is returned when nothing is queued.
    */
   public function testBuildWithNothingQueued(): void {
     $response = LbPendingMessagesController::create(\Drupal::getContainer())->build();
     $data = json_decode((string) $response->getContent(), TRUE);
 
-    $this->assertSame([], $data['warnings']);
     $this->assertSame([], $data['statuses']);
   }
 

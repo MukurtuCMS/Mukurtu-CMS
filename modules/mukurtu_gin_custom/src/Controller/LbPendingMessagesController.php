@@ -7,38 +7,34 @@ use Drupal\Core\Messenger\MessengerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 /**
- * Surfaces queued Layout Builder messages that have nowhere else to render.
+ * Surfaces the "layout saved" confirmation, which has nowhere else to render.
  *
  * The Layout Builder edit page's own template has no "highlighted" region
- * (or any other block region besides "content"), so any message queued via
- * the core Messenger service -- "You have unsaved changes." warnings,
- * "The layout override has been saved." status confirmations, etc. -- has
- * nowhere to display through the normal block/region system, regardless of
- * dialogs or AJAX (confirmed by inspecting a real save response: the queued
- * status message never appears anywhere in the returned HTML).
+ * (or any other block region besides "content"), so a status message queued
+ * via the core Messenger service -- "The layout override has been saved.",
+ * queued by LayoutBuilderEntityFormTrait::saveTasks() on save -- has nowhere
+ * to display through the normal block/region system on this page (confirmed
+ * by inspecting a real save response: the queued message never appears
+ * anywhere in the returned HTML). gin_lb's default save_behavior redirects
+ * back to this same page rather than the node's canonical view, so there's
+ * no other page for it to naturally show on either.
  *
- * mukurtu-gin-custom.js calls this endpoint and displays whatever it
- * returns via a Toastify call it drives itself, since that's the only
- * reliable way to surface a message on this page at all:
- * - once on page load, for status messages (e.g. right after a save, since
- *   gin_lb's default save_behavior redirects back to this same page);
- * - once an off-canvas dialog closes (debounced against multi-step dialog
- *   flows), for warning messages.
+ * mukurtu-gin-custom.js calls this endpoint once per page load and displays
+ * whatever it returns via a Toastify call it drives itself, since that's the
+ * only reliable way to surface a message on this page at all.
+ *
+ * The "You have unsaved changes." warning is deliberately not handled here;
+ * see LbSuppressUnsavedWarningSubscriber, which discards it entirely.
  *
  * @see js/lb-pending-messages.js
  */
 class LbPendingMessagesController extends ControllerBase {
 
   /**
-   * Returns any queued warning/status messages as plain text, draining them.
+   * Returns any queued status messages as plain text, draining them.
    */
   public function build(): JsonResponse {
     $messenger = $this->messenger();
-
-    $warnings = $messenger->messagesByType(MessengerInterface::TYPE_WARNING);
-    if ($warnings) {
-      $messenger->deleteByType(MessengerInterface::TYPE_WARNING);
-    }
 
     $statuses = $messenger->messagesByType(MessengerInterface::TYPE_STATUS);
     if ($statuses) {
@@ -46,7 +42,6 @@ class LbPendingMessagesController extends ControllerBase {
     }
 
     return new JsonResponse([
-      'warnings' => array_map('strval', $warnings),
       'statuses' => array_map('strval', $statuses),
     ]);
   }
