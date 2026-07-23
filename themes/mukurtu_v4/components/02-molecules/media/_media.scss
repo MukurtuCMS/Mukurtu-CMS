@@ -50,6 +50,14 @@
   }
 }
 
+// Media placeholder images (mukurtu_media_entity_view_alter()) are rendered
+// as bare #theme: 'image' elements with no .media wrapper, so they don't
+// pick up the flex centering above. Center them directly instead.
+img[class$="-placeholder"] {
+  display: block;
+  margin-inline: auto;
+}
+
 .media--remote_video {
   .field[data-blazy] {
     min-inline-size: min-content;
