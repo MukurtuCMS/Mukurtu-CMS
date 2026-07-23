@@ -10,11 +10,21 @@
 
   &--unavailable {
     background-color: var(--color-warning-light);
-    color: var(--color-warning-dark);
+    // --color-warning-dark only reaches 4.14:1 against --color-warning-light,
+    // short of the 4.5:1 AA minimum for this badge's 16px bold text. This
+    // darker shade is scoped to the badge only, the shared token is
+    // untouched to avoid regressions elsewhere it's used.
+    color: #3f5a73;
   }
 
   &--archived {
     background-color: var(--color-status-light);
     color: var(--color-status-dark);
   }
+}
+
+.local-contexts-status-note {
+  display: block;
+  font-size: var(--font-size-2xs);
+  color: var(--color-text-secondary);
 }

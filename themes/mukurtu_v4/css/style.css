@@ -819,11 +819,17 @@ a:not(.primary-nav__menu-link) svg.tel path {
 }
 .local-contexts-status-badge--unavailable {
   background-color: var(--color-warning-light);
-  color: var(--color-warning-dark);
+  color: #3f5a73;
 }
 .local-contexts-status-badge--archived {
   background-color: var(--color-status-light);
   color: var(--color-status-dark);
+}
+
+.local-contexts-status-note {
+  display: block;
+  font-size: var(--font-size-2xs);
+  color: var(--color-text-secondary);
 }
 
 .js-form-type-email input,
