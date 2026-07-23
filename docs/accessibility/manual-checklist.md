@@ -2,38 +2,69 @@
 
 Automated scans catch only a third or so of WCAG issues. This checklist covers the rest: what a human verifies with a keyboard and a screen reader. Work through it per page for the general checks, and per component for the high-risk widgets in the [page inventory](page-inventory.md).
 
+Two layers of automated scanning already run before any of this: **axe-core** (`tests/playwright/tests/accessibility.spec.ts`) for standard WCAG rule violations, and **automated checks** (`tests/playwright/tests/accessibility-automated-checks.spec.ts`) for a handful of things axe can't assert on its own — reflow/zoom, focus visibility, vague link text, and a keyboard-trap smoke test. Results land in `test-results/a11y/` and `test-results/a11y-extra/` respectively (gitignored; re-run before a session, don't rely on stale files). **Run both before starting a manual pass** — don't manually re-check anything they already cover; use their output as your starting point instead. See the "What's automated now" table below for exactly where the line sits.
+
 Record results in a dated file under [findings/](findings/) — copy [findings/manual-findings-template.md](findings/manual-findings-template.md) to `findings/YYYY-MM-manual.md` and fill it in as you go.
 
 **Screen readers to test with:** NVDA + Firefox (Windows), VoiceOver + Safari (macOS), or Orca + Firefox (Linux). One is enough per audit pass; rotate across passes.
 
 ---
 
+## What's automated now
+
+The honest line between "a script checked this" and "only a human can confirm this," as of the second automated-checks layer (2026-07). Update this table whenever a check's coverage changes — it's the thing that keeps the checklist below from silently duplicating work the machines already do.
+
+| Checklist item | Status | How | What still needs a human |
+|---|---|---|---|
+| Skip link exists | Automated | axe `skip-link` rule (best-practice tag) | Whether it's visible on focus and actually moves focus when activated |
+| No positive `tabindex` | Automated | axe `tabindex` rule (best-practice tag) | — |
+| Heading order (no skipped levels) | Automated | axe `heading-order` rule (best-practice tag) | Whether the outline is *meaningful*, not just non-skipping |
+| Landmarks present, content contained | Automated | axe `region` rule (best-practice tag) | Whether landmark labeling makes sense read aloud |
+| Zoom disabled in viewport meta | Automated | axe `meta-viewport` rule (wcag2aa tag) | — |
+| **Reflow at 320px (1.4.10)** | **Automated** | `checkReflow` — real horizontal-overflow assertion, no human judgment needed | — |
+| **Text resize to 200% (1.4.4)** | **Semi-automated** | `checkTextZoom` — approximates zoom via root font-size, not true browser zoom | Confirm any flagged page in a real browser's zoom before filing |
+| **Focus visible everywhere (2.4.7)** | **Semi-automated** | `checkFocusVisible` — flags `outline:none`/no `box-shadow` on focus | Whether an indicator that *is* present has sufficient contrast/thickness |
+| **Vague link text (2.4.4)** | **Semi-automated** | `checkLinkText` — flags exact-match generic phrases ("click here", "read more"…) with no extra accessible context | Link text that's *specifically* misleading rather than generically vague (the heuristic only catches the common phrasing list) |
+| **No keyboard trap (2.1.2)** | **Semi-automated, smoke test only** | `checkKeyboardTrap` — tabs through the page, flags a cycle confined to a subset of the page's tab stops | Traps that only appear after an interaction (e.g. opening a modal first); compound native controls (audio/video/`<select>`) are flagged separately as "confirm manually" since their internal focus isn't visible outside their shadow DOM |
+| Everything keyboard-reachable/operable (2.1.1) | Human | — | Arrow-key/Enter/Space behavior inside composite widgets requires real interaction |
+| Logical/visual reading order (2.4.3) | Human | — | No reliable general heuristic for "does DOM order match visual order" |
+| No surprise on focus (3.2.1) | Human | — | Requires observing actual navigation/submission side effects |
+| Alt text *quality*, not just presence (1.1.1) | Human | — | Axe/checks confirm an `alt` attribute exists — not that it's accurate or useful |
+| Screen reader announcements (headings read sensibly, dynamic updates, form errors) | Human | — | Requires an actual screen reader session |
+| Language of parts for Indigenous-language content (3.1.2) | Human | — | Depends on editorial content, not markup a script can verify generically |
+| Component interaction patterns (ARIA roles' *behavior*, not just presence) | Human | — | See the component sections below |
+| Media alternatives (captions, transcripts, audio description) | Human (capability test) | — | See "Platform capability checks" below |
+
+---
+
 ## Per-page keyboard pass
 
-Tab from the top of the page to the bottom. Verify:
+Tab from the top of the page to the bottom. Check the automated reports first — skip-link existence, no-traps, and focus-visible all have a machine-generated starting point now (see the table above); this pass is about what they can't judge:
 
-- [ ] **Skip link** — first Tab reveals a "skip to main content" link that works (2.4.1)
+- [ ] **Skip link works** — activating it (not just its presence) actually moves focus into `#main-content` (2.4.1)
 - [ ] **Logical order** — focus moves in reading order, no surprising jumps (2.4.3)
-- [ ] **Visible focus** — you can always see where focus is, on every element (2.4.7)
+- [ ] **Focus indicator quality** — where the automated check found a visible outline/box-shadow, confirm it has enough contrast and thickness to actually see (2.4.7)
 - [ ] **Everything reachable** — every link, button, form control, and custom widget can receive focus (2.1.1)
 - [ ] **Everything operable** — Enter activates links; Enter/Space activates buttons; arrows work inside composite widgets (2.1.1)
-- [ ] **No traps** — you can Tab out of every component, including embedded maps and players (2.1.2)
+- [ ] **No traps after interaction** — the automated smoke test only catches traps present on page load; open modals/dropdowns/carousels first, then confirm Tab still escapes (2.1.2). For any page the automated check flagged as "needs manual confirmation" (native audio/video/select controls), confirm Tab actually exits that control.
 - [ ] **No surprise on focus** — focusing a control never triggers navigation or submission by itself (3.2.1)
 
 ## Per-page screen reader pass
 
-Walk the page with the screen reader's reading commands (not just Tab). Verify:
+Walk the page with the screen reader's reading commands (not just Tab). Landmark presence, non-skipping heading levels, and page title existence are already axe-checked (see the table above) — this pass is about whether they're actually *meaningful* read aloud:
 
-- [ ] **Page title** announces and describes the page (2.4.2)
-- [ ] **Landmarks** — header/nav/main/footer are announced; content lives in landmarks (1.3.1)
-- [ ] **Headings** form a sensible outline; levels don't skip arbitrarily (1.3.1, 2.4.6)
+- [ ] **Page title** announces and describes the page, not just exists (2.4.2)
+- [ ] **Landmarks** are labeled sensibly when there's more than one of a kind (1.3.1)
+- [ ] **Headings** form a sensible outline, not just a non-skipping one (1.3.1, 2.4.6)
 - [ ] **Images** — meaningful images have useful alt text; decorative ones are silent (1.1.1)
-- [ ] **Links** make sense read alone — no bare "read more" without context (2.4.4)
+- [ ] **Links** make sense read alone — the automated check only catches generic phrases like "read more" with zero extra context; confirm link text is specifically accurate, not just non-generic (2.4.4)
 - [ ] **Form fields** announce a label, required state, and any error text (1.3.1, 3.3.1, 3.3.2)
 - [ ] **Dynamic updates** — AJAX results (facets, view switches) are announced or focus moves to them (4.1.3)
 - [ ] **Language** — page language is set; passages in Indigenous languages carry `lang` attributes where language codes exist (3.1.1, 3.1.2)
 
 ## Per-page zoom/reflow pass
+
+**Fully automated** — `checkReflow` and `checkTextZoom` in `accessibility-automated-checks.spec.ts` assert both directly (real horizontal-overflow checks, no human judgment needed for reflow; text-zoom is a close approximation). Pull results from `test-results/a11y-extra/*-reflow.json` and `*-text-zoom.json` instead of testing this by hand. Only re-check manually if you want to confirm a flagged page in a real browser's zoom control rather than the approximated version:
 
 - [ ] At 200% browser zoom, no text is cut off and nothing overlaps (1.4.4)
 - [ ] At 320px effective width (400% zoom on a 1280px window), content reflows to one column with no horizontal scrolling (1.4.10)
@@ -76,6 +107,12 @@ Walk the page with the screen reader's reading commands (not just Tab). Verify:
 - [ ] Play/pause is a button with a label that reflects state
 - [ ] All controls keyboard-operable; state changes announced
 - [ ] A transcript or text alternative is available for spoken audio content (1.2.1)
+- [ ] **Tab actually exits the player.** The automated keyboard-trap check
+      can't see inside a native `<audio controls>` element's shadow DOM — from
+      outside, its internal play/seek/volume controls look like focus never
+      advances at all, which the check flags as "needs manual confirmation"
+      rather than a confirmed trap. Tab through the player by hand and confirm
+      focus does eventually move to the next page element (2.1.2).
 
 ### Tabs (dictionary word)
 

@@ -65,18 +65,29 @@ We follow the approach of [CivicActions' Drupal-ACR project](https://github.com/
 
 ### Automated scans (axe-core via Playwright)
 
-The Playwright suite in `tests/playwright/` includes `tests/accessibility.spec.ts`, which runs [axe-core](https://github.com/dequelabs/axe-core) against every page in the [page inventory](page-inventory.md) using the WCAG 2.1 A/AA rule tags.
+The Playwright suite in `tests/playwright/` includes `tests/accessibility.spec.ts`, which runs [axe-core](https://github.com/dequelabs/axe-core) against every page in the [page inventory](page-inventory.md) using the WCAG 2.1 A/AA rule tags (WCAG 2.2 rule tags are also scanned and reported separately, informationally — see Scope).
 
 ```bash
 cd tests/playwright
-yarn install
+npm install
 # Point at your local DDEV site if it isn't the default URL:
-PLAYWRIGHT_BASE_URL=https://mukurtu.ddev.site yarn playwright test accessibility --project=chromium
+PLAYWRIGHT_BASE_URL=https://mukurtu.ddev.site npx playwright test accessibility --project=chromium
 ```
 
 The scans are **report-only**: violations never fail the tests. Each page's full axe results are written to `test-results/a11y/<page>.json` and attached to the Playwright HTML report. This is deliberate — see "The ratchet" below.
 
-Automated scanning catches roughly 30–40% of WCAG issues (missing alt text, form labels, contrast, ARIA misuse, duplicate landmarks). The rest requires manual testing.
+### Automated checks beyond axe (reflow, focus, links, keyboard traps)
+
+`tests/accessibility-automated-checks.spec.ts` runs a second layer that axe-core can't do on its own: real WCAG 1.4.10 reflow and approximated 1.4.4 text-zoom checks (both fully automated, no human judgment needed), a WCAG 2.4.7 focus-visibility smoke test, a WCAG 2.4.4 vague-link-text heuristic, and a WCAG 2.1.2 keyboard-trap smoke test. These narrow the manual checklist down further — see [manual-checklist.md](manual-checklist.md)'s "What's automated now" table for exactly what each one catches and what still needs a human.
+
+```bash
+cd tests/playwright
+PLAYWRIGHT_BASE_URL=https://mukurtu.ddev.site npx playwright test accessibility-automated-checks --project=chromium
+```
+
+Also report-only; results land in `test-results/a11y-extra/<page>-<check>.json`.
+
+Between the two layers, automated scanning now catches roughly 30–40% of WCAG issues outright (missing alt text, form labels, contrast, ARIA misuse, duplicate landmarks) plus smoke-test coverage of several more (reflow, focus visibility, keyboard traps). The rest requires manual testing.
 
 ### Manual testing (keyboard + screen reader)
 

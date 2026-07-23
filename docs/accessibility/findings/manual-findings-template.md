@@ -84,7 +84,7 @@ when new pages/components ship, don't remove any.*
 
 ### Per-page passes
 
-*Columns are the three page-level passes in [../manual-checklist.md](../manual-checklist.md).*
+*Columns are the three page-level passes in [../manual-checklist.md](../manual-checklist.md). **Zoom/reflow is now fully automated** — fill that column from `test-results/a11y-extra/<page>-reflow.json` and `*-text-zoom.json` (✅ if the file has zero findings) rather than testing by hand; same for the parts of Keyboard already covered by the focus-visible/keyboard-trap automated checks (see the "What's automated now" table in the checklist) — only record a manual ❌/✅ there for what those checks can't judge.*
 
 | Page | Keyboard | Screen reader | Zoom/reflow |
 |---|---|---|---|

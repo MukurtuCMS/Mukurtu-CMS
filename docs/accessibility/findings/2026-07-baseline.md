@@ -108,6 +108,53 @@ of whether it's a Splide library quirk or Mukurtu markup.
 **Not yet fixed** — logged here as a new finding for triage, not remediated in
 this pass.
 
+## New finding (2026-07-23): second automated-checks layer, first results
+
+Added `tests/accessibility-automated-checks.spec.ts` — a set of checks beyond
+what axe-core can assert on its own: real WCAG 1.4.10 reflow and approximated
+1.4.4 text-zoom (both need no human judgment to detect), a 2.4.7
+focus-visibility smoke test, a 2.4.4 vague-link-text heuristic, and a 2.1.2
+keyboard-trap smoke test. See the "What's automated now" table in
+[../manual-checklist.md](../manual-checklist.md) for exactly what each one
+covers and what still needs a human — this converts several previously
+fully-manual checklist rows into "run the script, then spot-check what it
+flags."
+
+First run against the recipe-seeded site surfaced:
+
+- **Reflow (1.4.10), confirmed real:** nearly every page overflows by ~5px at
+  320px width (325px content in a 320px viewport) — small, consistent across
+  unrelated page types, so almost certainly one shared layout element rather
+  than N separate bugs. Content/item pages (collection, dictionary word,
+  digital heritage item) overflow considerably more (up to 527px) — likely an
+  additional, distinct sidebar/widget issue on top of the sitewide one. Not
+  yet root-caused or fixed.
+- **Text zoom (1.4.4):** one isolated case — `/dictionary` overflows at 200%
+  text size (1491px vs 1280px). Worth a look at the alphabet index bar,
+  which is the likely culprit (many single-letter items that may not wrap).
+- **Focus visible (2.4.7):** 4 of 46 checked elements on the dictionary word
+  page have no visible outline or box-shadow when focused (a word-type link,
+  a contributor link, and two `.button` elements). First concrete instance of
+  this criterion failing anywhere in the program so far.
+- **Keyboard trap (2.1.2), correctly *not* flagged as a defect:** the first
+  version of this check produced two false-positive patterns before I
+  tightened it — (1) a short admin-route page wrapping normally from its last
+  focusable element back to the first (not a trap, just reaching the end of
+  the page) and (2) the native `<audio controls>` element on the digital
+  heritage item and dictionary word pages, whose internal play/seek/volume
+  controls live in a shadow DOM the check can't see into, making Tab *look*
+  like it never leaves the element. Both are now handled: whole-page
+  wraparounds are suppressed entirely (not a trap), and the audio-player
+  pattern is downgraded to "needs manual confirmation" rather than reported
+  as a suspected trap. This is exactly the residual instance the manual
+  checklist's audio player section now calls out explicitly: confirm by hand
+  that Tab actually exits the player.
+- **Link text, WCAG 2.2 (informational):** zero findings across the full
+  inventory for both — no vague link text, and no WCAG 2.2-only rule
+  violations anywhere yet.
+
+**Not yet fixed:** the reflow findings above. Logged for triage.
+
 ## Handed to the manual pass (axe "incomplete" queue)
 
 Contrast checks axe could not compute (backgrounds are images/overlays or
@@ -131,22 +178,32 @@ provide evidence — see the capability-testing section of the
 
 ## Remaining actions for the next cycle
 
-1. **Manual pass** (keyboard, screen reader, zoom/reflow, contrast queue) using
-   the [template](manual-findings-template.md) — priority order per the
-   [page inventory](../page-inventory.md): Leaflet maps, content warnings,
-   carousels, lightbox, audio player first.
+1. **Manual pass** (keyboard, screen reader, contrast queue — zoom/reflow is
+   now automated, see above) using the [template](manual-findings-template.md)
+   — priority order per the [page inventory](../page-inventory.md): Leaflet
+   maps, content warnings, carousels, lightbox, audio player first. For the
+   audio player specifically, confirm Tab actually exits it (see the new
+   finding above).
 2. **Platform capability checks** for author-provided media alternatives
    (1.2.x) — transcript rendering, local-video captions (expected gap), remote
    video captions, autoplay.
 3. **Upstream:** verify + file the three toolbar issues; add issue links to the
    ACR notes.
-4. **Coverage:** extend `default-content.spec.ts` with anonymous-visible content
-   (digital heritage items with media, an open collection, open-protocol
-   dictionary words) so anonymous item pages can be scanned; check the
-   views-based browse map markers once locatable content exists.
-5. **CI:** add the report-only axe job to `.github/workflows/playwright.yml`
-   per the charter's ratchet plan.
-6. **Triage:** fold manual results into the ACR — the remaining `not-evaluated`
+4. ~~**Coverage:** extend content so anonymous item pages can be scanned~~ —
+   **done 2026-07-23** via `recipes/accessibility_demo_content` and its
+   dependents, not a spec change. Still open: check the views-based browse
+   map's markers once it has locatable content — the recipe seeds a map on
+   the item page (Mukurtu formatter path, already fixed), not the separate
+   browse map view.
+5. **Fix:** the sitewide ~5px reflow overflow at 320px, plus the larger
+   content/item-page overflow (up to ~527px) and the `/dictionary` text-zoom
+   overflow — all new findings above, not yet root-caused.
+6. **Fix:** PDF thumbnail missing `alt` in the media carousel, and the 4
+   focus-visible failures on the dictionary word page — both new findings
+   above.
+7. **CI:** add the report-only axe job (and the automated-checks job) to
+   `.github/workflows/playwright.yml` per the charter's ratchet plan.
+8. **Triage:** fold manual results into the ACR — the remaining `not-evaluated`
    A/AA criteria are the gate for a publishable release ACR.
 
 ## Reproducing these scans
