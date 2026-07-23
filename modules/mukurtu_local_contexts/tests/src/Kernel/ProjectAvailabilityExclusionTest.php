@@ -4,14 +4,14 @@ namespace Drupal\Tests\mukurtu_local_contexts\Kernel;
 
 use Drupal\node\Entity\Node;
 use Drupal\mukurtu_local_contexts\LocalContextsProject;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests that unavailable (401/403/404) projects/labels are excluded from new
  * selections but preserved on content that already references them, while
  * archived projects remain fully selectable.
- *
- * @group mukurtu_local_contexts
  */
+#[Group('mukurtu_local_contexts')]
 class ProjectAvailabilityExclusionTest extends LocalContextsTestBase {
 
   /**
