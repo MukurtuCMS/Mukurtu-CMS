@@ -77,24 +77,25 @@
     margin-block-start: var(--v-space-3xs);
     line-height: var(--line-height-m);
 
-    .field.field--type-entity-reference {
+    // Applies to every field shown in the card body -- entity-reference
+    // fields (Category, Collections, Word Lists) and the plain .field
+    // markup from community-protocol-list.html.twig alike -- so labels
+    // and values always sit inline instead of stacking label-above-value.
+    .field {
       display: flex;
-      flex-direction: column;
+      flex-wrap: wrap;
+      align-items: baseline;
       gap: var(--v-space-5xs);
-      align-items: first baseline;
       border: 0;
       padding-block-start: 0;
       margin-block-start: 0;
 
-      @include include-media.media('>=lg') {
-        flex-direction: row;
-      }
-
-      &:first-of-type {
+      &:not(:last-of-type) {
         margin-block-end: var(--v-space-5xs);
       }
 
       .field__label {
+        flex-shrink: 0;
         font-weight: var(--text-bold);
 
         &::after {
@@ -103,14 +104,18 @@
       }
 
       .field__items {
-        .field__item {
-          display: inline-block;
-        }
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--v-space-5xs);
+      }
 
-        .field__item:not(:last-of-type) {
-          &::after {
-            content: ',';
-          }
+      .field__item {
+        display: inline-block;
+      }
+
+      .field__items .field__item:not(:last-of-type) {
+        &::after {
+          content: ',';
         }
       }
     }

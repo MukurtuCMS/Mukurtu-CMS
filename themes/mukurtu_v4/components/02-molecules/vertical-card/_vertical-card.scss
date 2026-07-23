@@ -1,7 +1,7 @@
 // As seen in Grid Browse display.
 
 .vertical-card {
-  --card-font-size: var(--font-size-s);
+  --card-font-size: var(--font-size-l);
 
   break-inside: avoid;
   border-block-start: 0;
@@ -10,7 +10,10 @@
   margin-block: 0 var(--v-space-3xs);
 
   &__content-header {
+    margin-block-end: var(--v-space-6xs);
+
     h2 {
+      margin-block: 0;
       font-size: var(--card-font-size);
       font-weight:  var(--text-bold);
     }
@@ -46,5 +49,74 @@
 
   &__eyebrow {
     font-weight: var(--text-bold);
+  }
+
+  &__content-type {
+    font-size: var(--font-size-s);
+    text-transform: uppercase;
+  }
+
+  &__content-body {
+    margin-block-start: var(--v-space-5xs);
+    font-size: var(--font-size-xs);
+    line-height: 1.3;
+
+    // Applies to every field shown in the card body -- entity-reference
+    // fields (Category, Collections, Word Lists) and the plain .field
+    // markup from community-protocol-list.html.twig alike -- so labels
+    // and values always sit inline instead of stacking label-above-value.
+    // Also overrides the global .field__label size/breakpoint escalation,
+    // which is tuned for full-page sidebars and would otherwise read
+    // larger than the card title itself.
+    .field {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: var(--v-space-6xs);
+      border: 0;
+      padding-block-start: 0;
+      margin-block-start: 0;
+
+      &:not(:last-of-type) {
+        margin-block-end: var(--v-space-6xs);
+      }
+
+      .field__label {
+        flex-shrink: 0;
+        font-size: initial;
+        font-weight: var(--text-bold);
+
+        &::after {
+          content: ':';
+        }
+      }
+
+      .field__items {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--v-space-6xs);
+      }
+
+      .field__item {
+        display: inline-block;
+        font-size: initial;
+      }
+
+      .field__items .field__item:not(:last-of-type) {
+        &::after {
+          content: ',';
+        }
+      }
+    }
+
+    // Summary reads as body copy, not a label/value pair -- give it more
+    // room than the labelled fields below it and make sure there's always
+    // clear separation before the next field, regardless of whether a
+    // content-type label above it (present on /browse, hidden on
+    // /digital-heritage) already provided some visual breathing room.
+    .field--name-field-summary {
+      font-size: var(--font-size-s);
+      margin-block-end: var(--v-space-5xs);
+    }
   }
 }

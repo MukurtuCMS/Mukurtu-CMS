@@ -478,3 +478,92 @@ function mukurtu_browse_update_40011(): void {
   $index->save();
   $index->reindex();
 }
+
+/**
+ * Show the representative media field in Map mode for dictionary_word and
+ * word_list, which was hidden and left their map_browse Twig templates
+ * unable to display it, show field_summary and field_in_collection in
+ * digital_heritage's List mode -- field_summary's own field description
+ * says it should appear in previews -- and show field_summary in
+ * digital_heritage's Map mode too (#1624).
+ */
+function mukurtu_browse_update_40012(): void {
+  $config_source = new \Drupal\Core\Config\FileStorage(
+    \Drupal::service('extension.list.module')->getPath('mukurtu_browse') . '/config/install'
+  );
+  $config_factory = \Drupal::configFactory();
+
+  foreach ([
+    'node.dictionary_word.map_browse',
+    'node.word_list.map_browse',
+    'node.digital_heritage.browse',
+    'node.digital_heritage.map_browse',
+  ] as $name) {
+    $config_name = 'core.entity_view_display.' . $name;
+    $data = $config_source->read($config_name);
+    if ($data) {
+      $config_factory->getEditable($config_name)->setData($data)->save(TRUE);
+    }
+  }
+}
+
+/**
+ * Enable the Leaflet "Reset View" recenter control on the Map mode of
+ * /browse, /digital-heritage, and the homepage map browse block, so users
+ * who pan/zoom away from the initial extent have a way back (#1624).
+ */
+function mukurtu_browse_update_40013(): void {
+  $displays = [
+    'views.view.mukurtu_browse' => 'mukurtu_browse_block_map',
+    'views.view.mukurtu_digital_heritage_browse' => 'mukurtu_digital_heritage_browse_block_map',
+    'views.view.mukurtu_browse_by_map' => 'map_block',
+  ];
+
+  foreach ($displays as $config_name => $display_id) {
+    $config = \Drupal::configFactory()->getEditable($config_name);
+    if ($config->isNew()) {
+      continue;
+    }
+    $key = "display.$display_id.display_options.style.options.reset_map.control";
+    if ($config->get($key) !== NULL) {
+      $config->set($key, TRUE)->save();
+    }
+  }
+}
+
+/**
+ * Fix /browse's Map mode popups, which rendered every named content type
+ * using Drupal's ":default" view mode instead of the dedicated map_browse
+ * teaser mode -- the view_modes mapping had the two inverted (#1624).
+ */
+function mukurtu_browse_update_40014(): void {
+  $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_browse');
+  if ($config->isNew()) {
+    return;
+  }
+  $prefix = 'display.mukurtu_browse_block_map.display_options.row.options.view_modes.entity:node.';
+  if ($config->get($prefix . ':default') === NULL) {
+    return;
+  }
+  $config->set($prefix . ':default', 'default');
+  foreach (['article', 'collection', 'dictionary_word', 'digital_heritage', 'page', 'person', 'place', 'word_list'] as $bundle) {
+    $config->set($prefix . $bundle, 'map_browse');
+  }
+  $config->save();
+}
+
+/**
+ * Make the homepage "Browse by Map" block render its popups the same way
+ * as /browse's Map mode, instead of its own diverging popup size, zoom
+ * limit, and rendering path (#1624).
+ */
+function mukurtu_browse_update_40015(): void {
+  $config_source = new \Drupal\Core\Config\FileStorage(
+    \Drupal::service('extension.list.module')->getPath('mukurtu_browse') . '/config/install'
+  );
+  $config_name = 'views.view.mukurtu_browse_by_map';
+  $data = $config_source->read($config_name);
+  if ($data) {
+    \Drupal::configFactory()->getEditable($config_name)->setData($data)->save(TRUE);
+  }
+}

@@ -1,3 +1,10 @@
+{#
+/**
+ * @file
+ * Theme override for Digital Heritage nodes in the map browse view mode.
+ */
+#}
+
 {% set media_bundle = node.field_representative_media.0.entity.bundle.value.0['target_id'] %}
 
 <article{{ attributes.addClass(["vertical-card", "vertical-card--no-border", "vertical-card--large-font"]) }}>
@@ -19,7 +26,9 @@
       </h2>
       {{ title_suffix }}
     </div>
+
     <div class="vertical-card__content-body">
+      {{ content.field_summary }}
       {{ content.community_protocol_list }}
     </div>
   </div>
