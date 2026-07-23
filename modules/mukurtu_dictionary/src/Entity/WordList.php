@@ -19,7 +19,7 @@ class WordList extends Node implements WordListInterface, CulturalProtocolContro
 
     $definitions['field_description'] = BaseFieldDefinition::create('text_long')
       ->setLabel(t('Description'))
-      ->setDescription(t('The explanation or definition of the word list. The description may include guidance on use, explanation of word selection or arrangement, or any other contextual information.	</br>This HTML field can support rich text and embedded media assets using the editing toolbar.'))
+      ->setDescription(t('The explanation or definition of the word list. The description may include guidance on use, explanation of word selection or arrangement, or any other contextual information.	<br />This HTML field can support rich text and embedded media assets using the editing toolbar.'))
       ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -57,7 +57,7 @@ class WordList extends Node implements WordListInterface, CulturalProtocolContro
 
     $definitions['field_keywords'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Keywords'))
-      ->setDescription(t('Keywords are used to tag word lists to ensure they are discoverable when searching or browsing. </br>Include as many keywords as needed. Select from existing keywords or add new ones.'))
+      ->setDescription(t('Keywords are used to tag word lists to ensure they are discoverable when searching or browsing. <br />Include as many keywords as needed. Select from existing keywords or add new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -82,7 +82,7 @@ class WordList extends Node implements WordListInterface, CulturalProtocolContro
 
     $definitions['field_word_list_image'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Image'))
-      ->setDescription(t('A featured image that is used on the word list page and in previews across the site.	</br>Select "Add media" to select or upload an image.'))
+      ->setDescription(t('A featured image that is used on the word list page and in previews across the site.	<br />Select "Add media" to select or upload an image.'))
       ->setSettings([
         'target_type' => 'media',
         'handler' => 'default:media',
@@ -107,7 +107,7 @@ class WordList extends Node implements WordListInterface, CulturalProtocolContro
 
     $definitions['field_words'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Words'))
-      ->setDescription(t('The words included in the word list.	</br>Use the "Select Content" button to choose from existing words. Words will be displayed in the order they are added, and can be manually arranged by dragging them into the desired order.'))
+      ->setDescription(t('The words included in the word list.	<br />Use the "Select Content" button to choose from existing words. Words will be displayed in the order they are added, and can be manually arranged by dragging them into the desired order.'))
       ->setSettings([
         'target_type' => 'node',
         'handler' => 'default:node',
@@ -132,7 +132,7 @@ class WordList extends Node implements WordListInterface, CulturalProtocolContro
 
     $definitions['field_related_content'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Related Content'))
-      ->setDescription(t('Word lists can be related to any other site content when there is a connection that is important to show. Eg: a digital heritage lesson plan that is supplemented by the word list. </br>Note that this field is not used to indicate words in the word list. See the words field instead. </br>Select "Select Content" to choose from existing site content.'))
+      ->setDescription(t('Word lists can be related to any other site content when there is a connection that is important to show. Eg: a digital heritage lesson plan that is supplemented by the word list. <br />Note that this field is not used to indicate words in the word list. See the words field instead. <br />Select "Select Content" to choose from existing site content.'))
         ->setSettings([
           'target_type' => 'node',
           'handler' => 'default:node',
@@ -150,7 +150,7 @@ class WordList extends Node implements WordListInterface, CulturalProtocolContro
 
     $definitions['field_coverage_description'] = BaseFieldDefinition::create('text_long')
       ->setLabel('Location Description')
-      ->setDescription(t('A descriptive field to provide additional context and depth to the location(s) connected to the word list.	</br>This HTML field can support rich text and embedded media assets using the editing toolbar.'))
+      ->setDescription(t('A descriptive field to provide additional context and depth to the location(s) connected to the word list.	<br />This HTML field can support rich text and embedded media assets using the editing toolbar.'))
       ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -160,7 +160,7 @@ class WordList extends Node implements WordListInterface, CulturalProtocolContro
 
     $definitions['field_location'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Location'))
-      ->setDescription(t('A named place, or places, that are closely connected to the word list.	</br>Include as many locations as needed. Select from existing locations or add new ones.'))
+      ->setDescription(t('A named place, or places, that are closely connected to the word list.	<br />Include as many locations as needed. Select from existing locations or add new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -180,7 +180,7 @@ class WordList extends Node implements WordListInterface, CulturalProtocolContro
 
     $definitions['field_local_contexts_projects'] = BaseFieldDefinition::create('local_contexts_project')
       ->setLabel(t('Local Contexts Projects'))
-      ->setDescription(t('This field will apply all of the Labels from the selected Local Contexts Project(s) to the collection.	</br>Select one or more Local Contexts Projects.'))
+      ->setDescription(t('This field will apply all of the Labels from the selected Local Contexts Project(s) to the collection.	<br />Select one or more Local Contexts Projects.'))
       ->setCardinality(-1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -190,7 +190,7 @@ class WordList extends Node implements WordListInterface, CulturalProtocolContro
 
     $definitions['field_local_contexts_labels_and_notices'] = BaseFieldDefinition::create('local_contexts_label_and_notice')
       ->setLabel(t('Local Contexts Labels and Notices'))
-      ->setDescription(t('This field allows selective application of one or more Labels from any available Local Contexts Project to the collection.	</br>Select one or more Labels from the appropriate Local Contexts Project. If a complete project has already been selected, do not also select individual Labels from the same project.'))
+      ->setDescription(t('This field allows selective application of one or more Labels from any available Local Contexts Project to the collection.	<br />Select one or more Labels from the appropriate Local Contexts Project. If a complete project has already been selected, do not also select individual Labels from the same project.'))
       ->setCardinality(-1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)

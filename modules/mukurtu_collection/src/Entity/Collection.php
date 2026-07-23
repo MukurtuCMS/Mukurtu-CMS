@@ -20,7 +20,7 @@ class Collection extends Node implements CollectionInterface, CulturalProtocolCo
 
     $definitions['field_child_collections'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Sub-Collections'))
-      ->setDescription(t('Large collections may benefit from more internal structure or organization. This is done using sub-collections and may reflect existing physical arrangement (eg: boxes, folders, subfolders), topical groupings, or any other arrangement that will help users navigate the collection. Sub-collections can be multiple levels deep.	</br>Select "Select Content" to choose from existing collections. Sub-collections can also be added using the "+ New Sub-collection" button when viewing the collection. Sub-collections will be displayed in the order they are added, and can be manually arranged by dragging them into the desired order.'))
+      ->setDescription(t('Large collections may benefit from more internal structure or organization. This is done using sub-collections and may reflect existing physical arrangement (eg: boxes, folders, subfolders), topical groupings, or any other arrangement that will help users navigate the collection. Sub-collections can be multiple levels deep.	<br />Select "Select Content" to choose from existing collections. Sub-collections can also be added using the "+ New Sub-collection" button when viewing the collection. Sub-collections will be displayed in the order they are added, and can be manually arranged by dragging them into the desired order.'))
       ->setSettings([
         'target_type' => 'node',
         'handler' => 'default:node',
@@ -58,7 +58,7 @@ class Collection extends Node implements CollectionInterface, CulturalProtocolCo
 
     $definitions['field_collection_image'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Image'))
-      ->setDescription(t('A featured image that is used on the collection page and in previews across the site. The image may be drawn from content in the collection, or selected to complement the collection.	</br>Select "Add media" to select or upload an image.'))
+      ->setDescription(t('A featured image that is used on the collection page and in previews across the site. The image may be drawn from content in the collection, or selected to complement the collection.	<br />Select "Add media" to select or upload an image.'))
       ->setSettings([
         'target_type' => 'media',
         'handler' => 'default:media',
@@ -97,7 +97,7 @@ class Collection extends Node implements CollectionInterface, CulturalProtocolCo
 
     $definitions['field_description'] = BaseFieldDefinition::create('text_long')
       ->setLabel('Description')
-      ->setDescription(t('The history, story, explanation, provenance, arrangement information, or other description information about the collection. This is often based on existing collection descriptions and may include finding aids and other supplementary documentation.	</br>This HTML field can support rich text and embedded media assets using the editing toolbar.'))
+      ->setDescription(t('The history, story, explanation, provenance, arrangement information, or other description information about the collection. This is often based on existing collection descriptions and may include finding aids and other supplementary documentation.	<br />This HTML field can support rich text and embedded media assets using the editing toolbar.'))
       ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -107,7 +107,7 @@ class Collection extends Node implements CollectionInterface, CulturalProtocolCo
 
     $definitions['field_items_in_collection'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Items in Collection'))
-      ->setDescription(t('The content found in the collection. Collections most commonly focus on digital heritage items, but content of any type can be included.	</br>Select "Select Content" to choose from existing site content. Content will be displayed in the order they are added, and can be manually arranged by dragging them into the desired order.'))
+      ->setDescription(t('The content found in the collection. Collections most commonly focus on digital heritage items, but content of any type can be included.	<br />Select "Select Content" to choose from existing site content. Content will be displayed in the order they are added, and can be manually arranged by dragging them into the desired order.'))
       ->setSettings([
         'target_type' => 'node',
         'handler' => 'default:node',
@@ -136,7 +136,7 @@ class Collection extends Node implements CollectionInterface, CulturalProtocolCo
 
     $definitions['field_keywords'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Keywords'))
-      ->setDescription(t('Keywords are used to tag collections to ensure they are discoverable when searching or browsing. </br>Include as many keywords as needed. Select from existing keywords or add new ones.'))
+      ->setDescription(t('Keywords are used to tag collections to ensure they are discoverable when searching or browsing. <br />Include as many keywords as needed. Select from existing keywords or add new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -161,7 +161,7 @@ class Collection extends Node implements CollectionInterface, CulturalProtocolCo
 
     $definitions['field_related_content'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Related Content'))
-      ->setDescription(t('Collections can be related to any other site content when there is a connection that is important to show. Eg: another collection from the same donor. </br>Note that this field is not used to indicate content in the collection. See the items in collection field instead. </br>Select "Select Content" to choose from existing site content.'))
+      ->setDescription(t('Collections can be related to any other site content when there is a connection that is important to show. Eg: another collection from the same donor. <br />Note that this field is not used to indicate content in the collection. See the items in collection field instead. <br />Select "Select Content" to choose from existing site content.'))
       ->setSettings([
         'target_type' => 'node',
         'handler' => 'default:node',
@@ -197,7 +197,7 @@ class Collection extends Node implements CollectionInterface, CulturalProtocolCo
 
     $definitions['field_coverage_description'] = BaseFieldDefinition::create('text_long')
       ->setLabel('Location Description')
-      ->setDescription(t('A descriptive field to provide additional context and depth to the location(s) connected to the collection.	</br>This HTML field can support rich text and embedded media assets using the editing toolbar.'))
+      ->setDescription(t('A descriptive field to provide additional context and depth to the location(s) connected to the collection.	<br />This HTML field can support rich text and embedded media assets using the editing toolbar.'))
       ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -207,7 +207,7 @@ class Collection extends Node implements CollectionInterface, CulturalProtocolCo
 
     $definitions['field_location'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Location'))
-      ->setDescription(t('A named place, or places, that are closely connected to the collection. Examples include the location where a photo was taken, places named in a story, or the site where an object was created.	</br>Include as many locations as needed. Select from existing locations or add new ones.'))
+      ->setDescription(t('A named place, or places, that are closely connected to the collection. Examples include the location where a photo was taken, places named in a story, or the site where an object was created.	<br />Include as many locations as needed. Select from existing locations or add new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -227,7 +227,7 @@ class Collection extends Node implements CollectionInterface, CulturalProtocolCo
 
     $definitions['field_local_contexts_projects'] = BaseFieldDefinition::create('local_contexts_project')
       ->setLabel(t('Local Contexts Projects'))
-      ->setDescription(t('This field will apply all of the Labels from the selected Local Contexts Project(s) to the collection.	</br>Select one or more Local Contexts Projects.'))
+      ->setDescription(t('This field will apply all of the Labels from the selected Local Contexts Project(s) to the collection.	<br />Select one or more Local Contexts Projects.'))
       ->setCardinality(-1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -237,7 +237,7 @@ class Collection extends Node implements CollectionInterface, CulturalProtocolCo
 
     $definitions['field_local_contexts_labels_and_notices'] = BaseFieldDefinition::create('local_contexts_label_and_notice')
       ->setLabel(t('Local Contexts Labels and Notices'))
-      ->setDescription(t('This field allows selective application of one or more Labels from any available Local Contexts Project to the collection.	</br>Select one or more Labels from the appropriate Local Contexts Project. If a complete project has already been selected, do not also select individual Labels from the same project.'))
+      ->setDescription(t('This field allows selective application of one or more Labels from any available Local Contexts Project to the collection.	<br />Select one or more Labels from the appropriate Local Contexts Project. If a complete project has already been selected, do not also select individual Labels from the same project.'))
       ->setCardinality(-1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)

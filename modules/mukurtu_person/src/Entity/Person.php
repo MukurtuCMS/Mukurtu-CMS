@@ -17,7 +17,7 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
 
     $definitions['field_keywords'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Keywords'))
-      ->setDescription(t('Keywords are used to tag person records to ensure that they are discoverable when searching or browsing. Examples include significant life events or organizations which the person was involved with.	</br>Include as many keywords as needed. Select from existing keywords or add new ones.'))
+      ->setDescription(t('Keywords are used to tag person records to ensure that they are discoverable when searching or browsing. Examples include significant life events or organizations which the person was involved with.	<br />Include as many keywords as needed. Select from existing keywords or add new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -42,7 +42,7 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
 
     $definitions['field_media_assets'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Media Assets'))
-      ->setDescription(t('Media assets are a key element of most person records, though they are not required. Supported media types are images, documents, video, audio, and embed code. Person records can include more than one media asset, and each media asset can be a different media type. Media assets can be assigned a different cultural protocol from the person record to allow differential access to the media assets and metadata.	</br>Select "Add media" to select or upload media assets.'))
+      ->setDescription(t('Media assets are a key element of most person records, though they are not required. Supported media types are images, documents, video, audio, and embed code. Person records can include more than one media asset, and each media asset can be a different media type. Media assets can be assigned a different cultural protocol from the person record to allow differential access to the media assets and metadata.	<br />Select "Add media" to select or upload media assets.'))
       ->setSettings([
         'target_type' => 'media',
         'handler' => 'default:media',
@@ -72,7 +72,7 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
 
     $definitions['field_date_born'] = BaseFieldDefinition::create('original_date')
       ->setLabel(t('Date Born'))
-      ->setDescription(t('The date the person was born.	</br>Enter the year and, if known, select the month and day.'))
+      ->setDescription(t('The date the person was born.	<br />Enter the year and, if known, select the month and day.'))
       ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -82,7 +82,7 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
 
     $definitions['field_date_died'] = BaseFieldDefinition::create('original_date')
       ->setLabel(t('Date Died'))
-      ->setDescription('The date the person died.	</br>Enter the year and, if known, select the month and day.')
+      ->setDescription('The date the person died.	<br />Enter the year and, if known, select the month and day.')
       ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -92,7 +92,7 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
 
     $definitions['field_deceased'] = BaseFieldDefinition::create('boolean')
       ->setLabel(t('Deceased'))
-      ->setDescription('Indicates if the person is deceased or not. If the deceased person media content warning is configured, warnings will be displayed based on this field.	</br>Select the slider to indicate that the person is deceased. ')
+      ->setDescription('Indicates if the person is deceased or not. If the deceased person media content warning is configured, warnings will be displayed based on this field.	<br />Select the slider to indicate that the person is deceased. ')
       ->setDefaultValue(FALSE)
       ->setRevisionable(TRUE)
       ->setDisplayConfigurable('form', TRUE)
@@ -152,7 +152,7 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
 
     $definitions['field_related_content'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Related Content'))
-      ->setDescription(t('Person records can be related to any other site content when there is a connection between those items that is important to show. Note that the person record will automatically aggregate all content where the person is referenced based on the representative terms field, and manually managing related content may not be necessary. </br>Select "Select Content" to choose from existing site content.'))
+      ->setDescription(t('Person records can be related to any other site content when there is a connection between those items that is important to show. Note that the person record will automatically aggregate all content where the person is referenced based on the representative terms field, and manually managing related content may not be necessary. <br />Select "Select Content" to choose from existing site content.'))
       ->setSettings([
         'target_type' => 'node',
         'handler' => 'default:node',
@@ -170,7 +170,7 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
 
     $definitions['field_other_names'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Other Names'))
-      ->setDescription(t('People may be identified by multiple names, monikers, identities, and with inconsistent spellings across different content. This field is used to aggregate and display all content where the person is identified by connecting those disparate names.	</br>Include as many names as needed. Select from existing names or add new ones.'))
+      ->setDescription(t('People may be identified by multiple names, monikers, identities, and with inconsistent spellings across different content. This field is used to aggregate and display all content where the person is identified by connecting those disparate names.	<br />Include as many names as needed. Select from existing names or add new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -195,7 +195,7 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
 
     $definitions['field_coverage_description'] = BaseFieldDefinition::create('text_long')
       ->setLabel('Location Description')
-      ->setDescription(t('A descriptive field to provide additional context and depth to the location(s) connected to the person record.	</br>This HTML field can support rich text and embedded media assets using the editing toolbar.'))
+      ->setDescription(t('A descriptive field to provide additional context and depth to the location(s) connected to the person record.	<br />This HTML field can support rich text and embedded media assets using the editing toolbar.'))
       ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -205,7 +205,7 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
 
     $definitions['field_location'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Location'))
-      ->setDescription(t('A named place, or places, that are closely connected to the person record. Examples include the places a person was born, lived, died, or sites of important life events.	</br>Include as many locations as needed. Select from existing locations or add new ones.'))
+      ->setDescription(t('A named place, or places, that are closely connected to the person record. Examples include the places a person was born, lived, died, or sites of important life events.	<br />Include as many locations as needed. Select from existing locations or add new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -225,7 +225,7 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
 
     $definitions['field_place_of_birth'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Place of Birth'))
-      ->setDescription(t('The place where the person was born.	</br>Select from existing locations or add a new one.'))
+      ->setDescription(t('The place where the person was born.	<br />Select from existing locations or add a new one.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -265,7 +265,7 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
 
     $definitions['field_local_contexts_projects'] = BaseFieldDefinition::create('local_contexts_project')
       ->setLabel(t('Local Contexts Projects'))
-      ->setDescription(t('This field will apply all of the Labels from the selected Local Contexts Project(s) to the person record.	</br>Select one or more Local Contexts Projects.'))
+      ->setDescription(t('This field will apply all of the Labels from the selected Local Contexts Project(s) to the person record.	<br />Select one or more Local Contexts Projects.'))
       ->setCardinality(-1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)

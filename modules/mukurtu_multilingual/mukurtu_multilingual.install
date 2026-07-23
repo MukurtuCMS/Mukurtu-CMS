@@ -101,7 +101,7 @@ function mukurtu_multilingual_update_40003() {
  */
 function mukurtu_multilingual_update_40004() {
   $config = \Drupal::configFactory()->getEditable('core.base_field_override.paragraph.related_person.field_relationship_type');
-  $config->set('description', 'The type of relationship between the related person and the subject of the person record. </br>Select from existing relationship types or add a new one.');
+  $config->set('description', 'The type of relationship between the related person and the subject of the person record. <br />Select from existing relationship types or add a new one.');
   $config->save();
 }
 

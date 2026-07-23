@@ -8,7 +8,7 @@ field_name: field_summary
 entity_type: node
 bundle: digital_heritage
 label: Summary
-description: 'A short summary of the digital heritage item. The summary should supplement the title and help distinguish between similar items. The summary is displayed as part of the item preview when browsing the site. </br>Maximum 255 characters.'
+description: 'A short summary of the digital heritage item. The summary should supplement the title and help distinguish between similar items. The summary is displayed as part of the item preview when browsing the site. <br />Maximum 255 characters.'
 required: false
 translatable: true
 default_value:

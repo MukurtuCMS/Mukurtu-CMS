@@ -26,7 +26,7 @@ class SoundCloud extends Media implements SoundCloudInterface, CulturalProtocolC
 
     $definitions['field_media_soundcloud'] = BaseFieldDefinition::create('string')
       ->setLabel(t('SoundCloud URL'))
-      ->setDescription(t('A track, playlist, or album hosted on SoundCloud. The remote file will stream using SoundCloud\'s media player, and is not copied to the site. Note that while the media asset will be managed by cultural protocols, the originating website may not have similar privacy settings.	</br>Enter the URL of the SoundCloud track, playlist, or album.'))
+      ->setDescription(t('A track, playlist, or album hosted on SoundCloud. The remote file will stream using SoundCloud\'s media player, and is not copied to the site. Note that while the media asset will be managed by cultural protocols, the originating website may not have similar privacy settings.	<br />Enter the URL of the SoundCloud track, playlist, or album.'))
       ->setDefaultValue('')
       ->setSettings([
         'max_length' => 255,
@@ -42,7 +42,7 @@ class SoundCloud extends Media implements SoundCloudInterface, CulturalProtocolC
 
     $definitions['field_media_tags'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Media Tags'))
-      ->setDescription(t('Media tags are used to label media assets to help find them within the media library. They are also used to trigger taxonomy based media content warnings.	</br>Include as many media tags as needed. Select from existing media tags or add new ones.'))
+      ->setDescription(t('Media tags are used to label media assets to help find them within the media library. They are also used to trigger taxonomy based media content warnings.	<br />Include as many media tags as needed. Select from existing media tags or add new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -67,7 +67,7 @@ class SoundCloud extends Media implements SoundCloudInterface, CulturalProtocolC
 
     $definitions['field_people'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('People'))
-      ->setDescription(t('A person or people present or referenced in the document. This is used to trigger deceased person media content warnings.	</br>As you type, names of existing people will be displayed. </br>Include as many media tags as needed. Select from existing media tags or add new ones.'))
+      ->setDescription(t('A person or people present or referenced in the document. This is used to trigger deceased person media content warnings.	<br />As you type, names of existing people will be displayed. <br />Include as many media tags as needed. Select from existing media tags or add new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -92,7 +92,7 @@ class SoundCloud extends Media implements SoundCloudInterface, CulturalProtocolC
 
     $definitions['field_thumbnail'] = BaseFieldDefinition::create('image')
       ->setLabel(t('Thumbnail'))
-      ->setDescription(t('SoundCloud audio is usually represented by an interactive audio player, with a thumbnail image used in certain contexts. When the thumbnail image is used, you can provide your own image instead of the generic thumbnail. A thumbnail image does not usually need to be provided.	</br>Select "Choose File" to upload a thumbnail image.'))
+      ->setDescription(t('SoundCloud audio is usually represented by an interactive audio player, with a thumbnail image used in certain contexts. When the thumbnail image is used, you can provide your own image instead of the generic thumbnail. A thumbnail image does not usually need to be provided.	<br />Select "Choose File" to upload a thumbnail image.'))
       ->setSettings([
         'alt_field' => TRUE,
         'alt_field_required' => TRUE,
@@ -139,7 +139,7 @@ class SoundCloud extends Media implements SoundCloudInterface, CulturalProtocolC
 
     $definitions['field_contributor'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Contributor'))
-      ->setDescription(t('Speakers or singers present in the audio file. Contributors listed here are displayed in the speaker field that accompanies the audio file in dictionary words. </br>Include as many contributors as needed. Select from existing contributors or add new ones.'))
+      ->setDescription(t('Speakers or singers present in the audio file. Contributors listed here are displayed in the speaker field that accompanies the audio file in dictionary words. <br />Include as many contributors as needed. Select from existing contributors or add new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',

@@ -10,7 +10,7 @@ field_name: field_external_links
 entity_type: node
 bundle: digital_heritage
 label: 'External Links'
-description: 'Links to other records or websites where the digital heritage item is available online, or to other related websites. Examples include the online catalog of the holding repository, or the publisher''s listing. </br>To include additional links, select "Add another item".'
+description: 'Links to other records or websites where the digital heritage item is available online, or to other related websites. Examples include the online catalog of the holding repository, or the publisher''s listing. <br />To include additional links, select "Add another item".'
 required: false
 translatable: true
 default_value: {  }
