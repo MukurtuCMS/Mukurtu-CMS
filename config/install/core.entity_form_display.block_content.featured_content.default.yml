@@ -4,29 +4,17 @@ dependencies:
   config:
     - block_content.type.featured_content
     - entity_browser.browser.mukurtu_content_browser
-    - field.field.block_content.featured_content.body
     - field.field.block_content.featured_content.field_featured_content
   module:
     - entity_browser
-    - text
 id: block_content.featured_content.default
 targetEntityType: block_content
 bundle: featured_content
 mode: default
 content:
-  body:
-    type: text_textarea_with_summary
-    weight: 1
-    region: content
-    settings:
-      rows: 9
-      summary_rows: 3
-      placeholder: ''
-      show_summary: false
-    third_party_settings: {  }
   field_featured_content:
     type: entity_browser_entity_reference
-    weight: 2
+    weight: 1
     region: content
     settings:
       entity_browser: mukurtu_content_browser

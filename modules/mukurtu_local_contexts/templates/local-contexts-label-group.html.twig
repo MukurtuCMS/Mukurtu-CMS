@@ -7,7 +7,9 @@
   {% elseif archived %}
     <div class="local-contexts-status-badge local-contexts-status-badge--archived">{{ 'Archived on Local Contexts Hub'|t }}</div>
   {% endif %}
-  {% for item in items %}
-    {{ item }}
-  {% endfor %}
+  <div class="local-contexts-label-group-items">
+    {% for item in items %}
+      {{ item }}
+    {% endfor %}
+  </div>
 </div>
