@@ -1,0 +1,20 @@
+.local-contexts-status-badge {
+  display: inline-block;
+  font-size: var(--font-size-s);
+  font-weight: var(--text-bold);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+  padding-block: var(--v-space-6xs);
+  padding-inline: var(--v-space-4xs);
+  border-radius: var(--v-space-6xs);
+
+  &--unavailable {
+    background-color: var(--color-warning-light);
+    color: var(--color-warning-dark);
+  }
+
+  &--archived {
+    background-color: var(--color-status-light);
+    color: var(--color-status-dark);
+  }
+}

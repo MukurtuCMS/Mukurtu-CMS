@@ -18,6 +18,9 @@ function mukurtu_local_contexts_theme($existing, $type, $theme, $path) {
         'tk_labels' => [],
         'bc_labels' => [],
         'notices' => [],
+        'not_available' => FALSE,
+        'archived' => FALSE,
+        'last_synced' => NULL,
       ],
     ],
     'local_contexts_label' => [
@@ -55,6 +58,9 @@ function mukurtu_local_contexts_theme($existing, $type, $theme, $path) {
       'variables' => [
         'project_title' => NULL,
         'items' => [],
+        'not_available' => FALSE,
+        'archived' => FALSE,
+        'last_synced' => NULL,
       ],
     ],
     'local_contexts_site_project_directory' => [
@@ -81,8 +87,7 @@ function mukurtu_local_contexts_cron() {
   $state = \Drupal::state();
   $now = \Drupal::time()->getCurrentTime();
 
-  //$interval = (int) $config->get('hub_refresh_interval') ?: 86400;
-  $interval = 1;
+  $interval = (int) $config->get('hub_refresh_interval') ?: 86400;
   $last_run = (int) $state->get('mukurtu_local_contexts.hub_last_refresh', 0);
 
   // Only run if the configured interval has passed.
@@ -157,6 +162,14 @@ function mukurtu_local_contexts_cron() {
       $project = new LocalContextsProject($project_id);
       if ($project->fetchFromHub($api_key)) {
         $project_count++;
+      }
+      else {
+        $logger->warning('Local Contexts project @title (@id) did not sync (@status): @message', [
+          '@title' => $project->getTitle() ?? $project_id,
+          '@id' => $project_id,
+          '@status' => $project->getStatus(),
+          '@message' => $project->getStatusMessage(),
+        ]);
       }
     }
   }
