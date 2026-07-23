@@ -18,3 +18,17 @@ mukurtu_bot_protection.facet_bot_blocker_link:
   parent: mukurtu_dashboard
   menu_name: dashboard-security
   route_name: facet_bot_blocker.settings_form
+
+mukurtu_bot_protection.altcha_link:
+  title: 'ALTCHA settings'
+  description: "Configure ALTCHA's verification method (self-hosted, Sentinel, or SaaS) and widget appearance."
+  parent: mukurtu_dashboard
+  menu_name: dashboard-security
+  route_name: altcha.settings
+
+mukurtu_bot_protection.honeypot_link:
+  title: 'Honeypot settings'
+  description: "Configure Honeypot's time limit and logging, and review which forms it protects."
+  parent: mukurtu_dashboard
+  menu_name: dashboard-security
+  route_name: honeypot.config

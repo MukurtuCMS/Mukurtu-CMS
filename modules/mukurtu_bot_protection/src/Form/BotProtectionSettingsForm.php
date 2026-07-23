@@ -33,11 +33,18 @@ class BotProtectionSettingsForm extends FormBase {
   const TURNSTILE_KEY_ID = 'mukurtu_turnstile';
 
   /**
-   * CAPTCHA points that are enabled/disabled together based on the backend.
+   * Config name used by the Honeypot module for its settings.
+   */
+  const HONEYPOT_SETTINGS = 'honeypot.settings';
+
+  /**
+   * Forms that are enabled/disabled together based on the backend, and that
+   * Honeypot protection is independently toggled on/off for.
    */
   const MANAGED_CAPTCHA_POINTS = [
     'user_register_form',
     'user_pass',
+    'user_login_form',
     'contact_message_feedback_form',
     'comment_comment_form',
   ];
@@ -57,6 +64,7 @@ class BotProtectionSettingsForm extends FormBase {
     $backend = match ($default_challenge) {
       'recaptcha/reCAPTCHA' => 'recaptcha',
       'turnstile/Turnstile' => 'turnstile',
+      'altcha/ALTCHA' => 'altcha',
       'captcha/Math' => 'basic',
       default => 'none',
     };
@@ -72,13 +80,14 @@ class BotProtectionSettingsForm extends FormBase {
     $form['backend'] = [
       '#type' => 'radios',
       '#title' => $this->t('CAPTCHA backend'),
-      '#description' => $this->t('Basic challenge requires no external account and works immediately. reCAPTCHA and Cloudflare Turnstile require you to register your site with Google or Cloudflare and enter the resulting keys below before they can be selected.'),
+      '#description' => $this->t('Basic challenge and ALTCHA require no external account and work immediately. reCAPTCHA and Cloudflare Turnstile require you to register your site with Google or Cloudflare and enter the resulting keys below before they can be selected.'),
       '#default_value' => $backend,
       '#options' => [
         'none' => $this->t('No challenge (not recommended)'),
         'basic' => $this->t('Basic challenge (default, no account needed)'),
         'recaptcha' => $this->t('Google reCAPTCHA'),
         'turnstile' => $this->t('Cloudflare Turnstile'),
+        'altcha' => $this->t('ALTCHA (proof-of-work, no account needed)'),
       ],
     ];
 
@@ -159,6 +168,16 @@ class BotProtectionSettingsForm extends FormBase {
         '#submit' => ['::clearTurnstileCredentials'],
       ];
     }
+
+    $honeypot_form_settings = $this->config(self::HONEYPOT_SETTINGS)->get('form_settings') ?? [];
+    $honeypot_enabled = !empty(array_intersect_key(array_filter($honeypot_form_settings), array_flip(self::MANAGED_CAPTCHA_POINTS)));
+
+    $form['honeypot'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Enable Honeypot spam protection'),
+      '#description' => $this->t("Adds a hidden field and a minimum time delay to catch automated form submissions. Works alongside any CAPTCHA backend above, including 'No challenge'."),
+      '#default_value' => $honeypot_enabled,
+    ];
 
     $form['actions'] = ['#type' => 'actions'];
     $form['actions']['submit'] = [
@@ -242,7 +261,16 @@ class BotProtectionSettingsForm extends FormBase {
           ->save();
         $this->setManagedCaptchaPointsStatus(TRUE);
         break;
+
+      case 'altcha':
+        $this->configFactory()->getEditable(self::CAPTCHA_SETTINGS)
+          ->set('default_challenge', 'altcha/ALTCHA')
+          ->save();
+        $this->setManagedCaptchaPointsStatus(TRUE);
+        break;
     }
+
+    $this->setHoneypotProtectionStatus((bool) $form_state->getValue('honeypot'));
 
     $this->messenger()->addStatus($this->t('The bot protection configuration has been saved.'));
   }
@@ -257,6 +285,18 @@ class BotProtectionSettingsForm extends FormBase {
         $point->setStatus($enabled)->save();
       }
     }
+  }
+
+  /**
+   * Enables or disables Honeypot protection on the forms Mukurtu manages.
+   */
+  protected function setHoneypotProtectionStatus(bool $enabled): void {
+    $config = $this->configFactory()->getEditable(self::HONEYPOT_SETTINGS);
+    $form_settings = $config->get('form_settings') ?? [];
+    foreach (self::MANAGED_CAPTCHA_POINTS as $id) {
+      $form_settings[$id] = $enabled;
+    }
+    $config->set('form_settings', $form_settings)->save();
   }
 
   /**

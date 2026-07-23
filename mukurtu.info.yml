@@ -61,6 +61,7 @@ install:
   - mukurtu_bot_protection
 
 dependencies:
+  - 'altcha:altcha'
   - 'blazy:blazy'
   - 'captcha:captcha'
   - 'ctools:ctools'
@@ -112,6 +113,7 @@ dependencies:
   - 'field_group:field_group'
   - 'flag:flag'
   - 'geofield:geofield'
+  - 'honeypot:honeypot'
   - 'key:key'
   - 'leaflet:leaflet'
   - 'leaflet:leaflet_views'

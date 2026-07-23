@@ -1,11 +1,13 @@
 name: 'Mukurtu Bot Protection'
 type: module
-description: 'Provides unified administration of CAPTCHA, reCAPTCHA, Cloudflare Turnstile, and faceted search crawler blocking.'
+description: 'Provides unified administration of CAPTCHA, reCAPTCHA, Cloudflare Turnstile, ALTCHA, Honeypot, and faceted search crawler blocking.'
 package: 'Mukurtu CMS'
 core_version_requirement: '^10 || ^11'
 configure: mukurtu_bot_protection.settings
 dependencies:
+  - altcha:altcha
   - captcha:captcha
+  - honeypot:honeypot
   - recaptcha:recaptcha
   - turnstile:turnstile
   - turnstile_protect:turnstile_protect

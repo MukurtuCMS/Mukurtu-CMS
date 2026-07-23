@@ -3009,3 +3009,40 @@ function mukurtu_core_update_40085(): void {
 
   $config->set('sections', $sections)->save();
 }
+
+/**
+ * Install ALTCHA and Honeypot and protect the login form with CAPTCHA.
+ */
+function mukurtu_core_update_40086(): void {
+  $module_installer = \Drupal::service('module_installer');
+  $module_handler = \Drupal::moduleHandler();
+  foreach (['altcha', 'honeypot'] as $module) {
+    if (!$module_handler->moduleExists($module)) {
+      $module_installer->install([$module]);
+    }
+  }
+
+  // The captcha module ships a disabled user_login_form CAPTCHA point by
+  // default; enable it to match the login-form protection mukurtu_bot_
+  // protection_install() sets up on new installs.
+  $point = \Drupal\captcha\Entity\CaptchaPoint::load('user_login_form');
+  if ($point) {
+    $point->setStatus(TRUE)->save();
+  }
+
+  // Protect the same 5 forms with Honeypot, matching mukurtu_bot_protection_
+  // install()'s defaults on new installs.
+  $honeypot_forms = [
+    'user_register_form',
+    'user_pass',
+    'user_login_form',
+    'contact_message_feedback_form',
+    'comment_comment_form',
+  ];
+  $honeypot_config = \Drupal::configFactory()->getEditable('honeypot.settings');
+  $form_settings = $honeypot_config->get('form_settings') ?? [];
+  foreach ($honeypot_forms as $form_id) {
+    $form_settings[$form_id] = TRUE;
+  }
+  $honeypot_config->set('form_settings', $form_settings)->save();
+}
