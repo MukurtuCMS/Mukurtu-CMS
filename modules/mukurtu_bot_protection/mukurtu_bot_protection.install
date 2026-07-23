@@ -25,13 +25,13 @@ function mukurtu_bot_protection_install($is_syncing) {
     }
   }
 
-  // Explicitly assert the zero-config basic challenge as the default
+  // Explicitly assert the zero-config ALTCHA challenge as the default
   // backend, rather than relying on it merely happening to match captcha
   // module's own shipped default. reCAPTCHA and Turnstile require an admin
   // to supply external credentials, so they must never be active out of
   // the box.
   \Drupal::configFactory()->getEditable('captcha.settings')
-    ->set('default_challenge', 'captcha/Math')
+    ->set('default_challenge', 'altcha/ALTCHA')
     ->save();
 
   // Honeypot needs no external credentials either, so protect the same

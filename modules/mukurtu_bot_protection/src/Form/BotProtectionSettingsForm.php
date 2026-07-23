@@ -84,10 +84,10 @@ class BotProtectionSettingsForm extends FormBase {
       '#default_value' => $backend,
       '#options' => [
         'none' => $this->t('No challenge (not recommended)'),
-        'basic' => $this->t('Basic challenge (default, no account needed)'),
+        'basic' => $this->t('Basic challenge (no account needed)'),
         'recaptcha' => $this->t('Google reCAPTCHA'),
         'turnstile' => $this->t('Cloudflare Turnstile'),
-        'altcha' => $this->t('ALTCHA (proof-of-work, no account needed)'),
+        'altcha' => $this->t('ALTCHA (default, proof-of-work, no account needed)'),
       ],
     ];
 
