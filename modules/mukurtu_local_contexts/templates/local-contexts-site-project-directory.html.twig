@@ -27,6 +27,11 @@ NOTICE_UUID:notice_type => [
     {% for project in projects %}
     <div class="project">
       <h2 class="project__title"><a href={{ project.url }} title={{'View the project details on the Local Contexts Hub'}}>{{ project.title }}</a></h2>
+      {% if project.status and project.status != 'active' %}
+        <div class="local-contexts-status-badge local-contexts-status-badge--unavailable" title="{{ 'Last synced: @date'|t({'@date': project.updated ? project.updated|format_date('short') : 'never'}) }}">{{ 'Not available'|t }}</div>
+      {% elseif project.archived %}
+        <div class="local-contexts-status-badge local-contexts-status-badge--archived">{{ 'Archived on Local Contexts Hub'|t }}</div>
+      {% endif %}
       {% if project.tk_labels %}
         <h3 class="labels-type">{{ 'TK Labels'|t }}</h3>
         <div class="tk-labels">

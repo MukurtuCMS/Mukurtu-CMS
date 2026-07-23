@@ -2,6 +2,11 @@
   {% if project_title %}
     <h3 class="project-title">{{ project_title }}</h3>
   {% endif %}
+  {% if not_available %}
+    <div class="local-contexts-status-badge local-contexts-status-badge--unavailable" title="{{ 'Last synced: @date'|t({'@date': last_synced ? last_synced|format_date('short') : 'never'}) }}">{{ 'Not available'|t }}</div>
+  {% elseif archived %}
+    <div class="local-contexts-status-badge local-contexts-status-badge--archived">{{ 'Archived on Local Contexts Hub'|t }}</div>
+  {% endif %}
   {% for item in items %}
     {{ item }}
   {% endfor %}
