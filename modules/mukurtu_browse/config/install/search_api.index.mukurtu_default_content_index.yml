@@ -180,7 +180,7 @@ field_settings:
   field_local_contexts_labels_and_notices:
     label: 'Local Contexts Label'
     datasource_id: 'entity:node'
-    property_path: field_local_contexts_labels_and_notices
+    property_path: mukurtu_local_contexts_effective_labels
     type: string
     dependencies:
       module:
@@ -507,6 +507,7 @@ processor_settings:
       - title
       - word_type
   language_with_fallback: {  }
+  mukurtu_local_contexts_effective_labels: {  }
   mukurtu_protocol_cultural_protocol_ids: {  }
   rendered_item: {  }
   tokenizer:

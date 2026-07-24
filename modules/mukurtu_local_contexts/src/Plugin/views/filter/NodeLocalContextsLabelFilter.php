@@ -69,10 +69,29 @@ class NodeLocalContextsLabelFilter extends InOperator {
     }
 
     $this->ensureMyTable();
+
+    // Selecting an entire Local Contexts Project applies all of that
+    // project's labels/notices, so a node should also match if it has the
+    // owning project applied directly, even if the label/notice itself was
+    // never individually selected. The project ID is always the first
+    // segment of the compound "{project_id}:{id}:{label|notice}" value.
+    $projectIds = [];
+    foreach ((array) $this->value as $value) {
+      [$projectId] = explode(':', $value, 2);
+      $projectIds[$projectId] = $projectId;
+    }
+
     $subquery = $this->database->select('node__field_local_contexts_labels_and_notices', 'l')
       ->fields('l', ['entity_id'])
       ->condition('l.field_local_contexts_labels_and_notices_value', $this->value, 'IN')
       ->condition('l.deleted', 0);
+
+    $projectSubquery = $this->database->select('node__field_local_contexts_projects', 'p')
+      ->fields('p', ['entity_id'])
+      ->condition('p.field_local_contexts_projects_value', array_values($projectIds), 'IN')
+      ->condition('p.deleted', 0);
+    $subquery->union($projectSubquery, 'UNION');
+
     $this->query->addWhere($this->options['group'], "$this->tableAlias.nid", $subquery, 'IN');
   }
 

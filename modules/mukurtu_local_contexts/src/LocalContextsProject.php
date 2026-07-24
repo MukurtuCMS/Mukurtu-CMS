@@ -182,6 +182,31 @@ class LocalContextsProject extends LocalContextsHubBase {
     return $notices;
   }
 
+  /**
+   * Gets the compound label/notice keys for this project's labels/notices.
+   *
+   * Uses the same "{project_id}:{id}:{label|notice}" compound key format
+   * stored in field_local_contexts_labels_and_notices, so a project's
+   * labels/notices can be matched against selections of that field even
+   * when the individual label/notice was never directly applied and only
+   * the project itself was.
+   *
+   * @return string[]
+   *   The compound label/notice keys belonging to this project.
+   */
+  public function getLabelAndNoticeKeys(): array {
+    $keys = [];
+    foreach (['tk', 'bc'] as $tk_or_bc) {
+      foreach ($this->getLabels($tk_or_bc) as $label) {
+        $keys[] = $this->id . ':' . $label['id'] . ':label';
+      }
+    }
+    foreach ($this->getNotices() as $notice) {
+      $keys[] = $notice['project_id'] . ':' . $notice['notice_type'] . ':notice';
+    }
+    return $keys;
+  }
+
   protected function saveLabels($labels, $tk_or_bc, $id, &$prior_saved_labels) {
     foreach ($labels as $label) {
       $labelFields = [

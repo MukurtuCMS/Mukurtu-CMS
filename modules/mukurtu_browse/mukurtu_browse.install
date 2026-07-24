@@ -493,3 +493,19 @@ function mukurtu_browse_update_40012(): void {
     $index->reindex();
   }
 }
+
+/**
+ * Make the LC Label facet also match content via an applied LC Project.
+ */
+function mukurtu_browse_update_40013(): void {
+  // Import the updated Search API index configuration (repoints the Local
+  // Contexts Label field at the new effective-labels processor property).
+  $config_installer = \Drupal::service('config.installer');
+  $config_installer->installDefaultConfig('module', 'mukurtu_browse');
+
+  // Reindex so existing content picks up project-inherited labels/notices.
+  $index = \Drupal\search_api\Entity\Index::load('mukurtu_default_content_index');
+  if ($index) {
+    $index->reindex();
+  }
+}
