@@ -38,6 +38,10 @@ function mukurtu_core_theme($existing, $type, $theme, $path) {
       'template' => 'mukurtu-node-add-list',
       'variables' => ['content' => NULL],
     ],
+    'mukurtu_related_content_grouped' => [
+      'template' => 'mukurtu-related-content-grouped',
+      'variables' => ['title' => NULL, 'items' => [], 'filters' => [], 'has_filters' => FALSE],
+    ],
   ];
 }
 

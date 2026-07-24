@@ -1,0 +1,5 @@
+services:
+  Drupal\mukurtu_place\Hook\PlacePreprocessHooks:
+    class: Drupal\mukurtu_place\Hook\PlacePreprocessHooks
+    arguments:
+      - '@mukurtu_core.related_content_grouper'
