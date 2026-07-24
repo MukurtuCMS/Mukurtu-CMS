@@ -12,3 +12,8 @@ services:
     class: Drupal\mukurtu_core\EventSubscriber\ConfigSaveCacheInvalidationSubscriber
     tags:
       - { name: event_subscriber }
+  mukurtu_core.user_profile_admin_theme_negotiator:
+    class: Drupal\mukurtu_core\Theme\UserProfileAdminThemeNegotiator
+    arguments: ['@current_user', '@config.factory']
+    tags:
+      - { name: theme_negotiator, priority: 1000 }

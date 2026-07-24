@@ -635,6 +635,31 @@ function mukurtu_core_user_view(array &$build, EntityInterface $entity, EntityVi
     $links = [];
 
     if ($status == 1) {
+      $status_label = t('Active');
+    }
+    elseif ($is_pending) {
+      $status_label = t('Pending');
+    }
+    else {
+      $status_label = t('Blocked');
+    }
+    $build['mukurtu_user_status_and_actions'] = [
+      '#type' => 'container',
+      '#weight' => -3,
+      '#attributes' => [
+        'class' => ['mukurtu-user-status-and-actions'],
+        'role' => 'group',
+        'aria-label' => t('Account status and actions'),
+      ],
+    ];
+    $build['mukurtu_user_status_and_actions']['status'] = [
+      '#type' => 'markup',
+      '#markup' => t('Account status: @status', ['@status' => $status_label]),
+      '#prefix' => '<div class="mukurtu-user-status">',
+      '#suffix' => '</div>',
+    ];
+
+    if ($status == 1) {
       // Active: offer Block and Set to Pending.
       $links['block'] = [
         'title' => t('Block'),
@@ -674,12 +699,28 @@ function mukurtu_core_user_view(array &$build, EntityInterface $entity, EntityVi
       ];
     }
 
-    $build['mukurtu_toggle_user_approval'] = [
+    $build['mukurtu_user_status_and_actions']['links'] = [
       '#theme' => 'links',
-      '#weight' => -2,
       '#links' => $links,
       '#attached' => ['library' => ['core/drupal.ajax']],
     ];
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_view_alter().
+ *
+ * Core's "Member for" pseudo-field hardcodes an <h4>, which becomes a stray
+ * heading-level skip on this page (no other headings sit between the page
+ * title and it). Render it as plain text instead.
+ */
+function mukurtu_core_user_view_alter(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display) {
+  if (isset($build['member_for']['#markup'])) {
+    $build['member_for']['#markup'] = str_replace(
+      ['<h4 class="label">', '</h4>'],
+      ['', ':'],
+      $build['member_for']['#markup']
+    );
   }
 }
 
