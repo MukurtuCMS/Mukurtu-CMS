@@ -2,6 +2,39 @@
  * Styles for the dismissible UID 1 super admin warning message.
  */
 
+/*
+ * The BCSans font-face is normally declared by the mukurtu_v4 theme's own
+ * stylesheet, which isn't loaded on admin themes (e.g. Gin). Redeclare just
+ * the bold face here (the only weight this banner uses) so the font matches
+ * the front end regardless of the active theme.
+ */
+@font-face {
+  font-family: BCSans;
+  font-weight: 700;
+  src: url('../../../themes/mukurtu_v4/fonts/BCSans-Bold.woff2') format('woff2'),
+    url('../../../themes/mukurtu_v4/fonts/BCSans-Bold.woff') format('woff');
+}
+
+.mukurtu-super-admin-warning-wrapper {
+  /* Fallback values (matching themes/mukurtu_v4/components/00-base) keep the
+   * banner styled on admin themes like Gin, which don't define these custom
+   * properties. */
+  box-sizing: border-box;
+  font-family: var(--font-display-face, 'BCSans', 'Noto Sans', verdana, arial, sans-serif);
+  padding: var(--v-space-4xxs, 1rem);
+  margin-block: var(--v-space-4xxs, 1rem);
+  border-radius: 3px;
+  line-height: var(--line-height-s, 1.75rem);
+  font-weight: 900;
+  border: 2px solid var(--color-error-dark, #924d48);
+  color: var(--color-error-dark, #924d48);
+  background-color: var(--color-error-light, #f2dedf);
+}
+
+.mukurtu-super-admin-warning__text a {
+  color: inherit;
+}
+
 .mukurtu-super-admin-warning {
   display: flex;
   align-items: flex-start;
