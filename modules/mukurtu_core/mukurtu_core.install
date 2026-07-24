@@ -2951,3 +2951,14 @@ function mukurtu_core_update_40083(&$sandbox): string {
     '@total' => $sandbox['total'],
   ]);
 }
+
+/**
+ * Enable Charts and GeoIP so the Visitors analytics reports render fully.
+ */
+function mukurtu_core_update_40084(): void {
+  \Drupal::service('module_installer')->install(['charts', 'charts_chartjs', 'visitors_geoip']);
+
+  \Drupal::configFactory()->getEditable('charts.settings')
+    ->set('charts_default_settings.library', 'chartjs')
+    ->save();
+}
