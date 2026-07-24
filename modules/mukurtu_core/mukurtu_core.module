@@ -218,13 +218,18 @@ function mukurtu_core_entity_operation(EntityInterface $entity) {
 }
 
 /**
- * Implements hook_page_attachments.
+ * Implements hook_preprocess_page.
  */
-function mukurtu_core_page_attachments(array &$attachments) {
+function mukurtu_core_preprocess_page(array &$variables) {
   // If the user is UID 1 and there is content on the site, warn them that
   // might be a bad idea because UID 1 can do just about anything. If there's
   // no content on the site, we assume they are setting things up and we don't
   // want to bother them with the message.
+  //
+  // This is rendered as a standalone alert element (not via
+  // \Drupal::messenger()) because core's status-messages template assigns
+  // role="contentinfo" to every message type, which duplicates the page
+  // footer's contentinfo landmark. See issue #1875.
   if (\Drupal::currentUser()->id() == 1) {
     $show_admin_message = TRUE;
     $request = \Drupal::request();
@@ -266,11 +271,32 @@ function mukurtu_core_page_attachments(array &$attachments) {
         ]),
         '@dismiss' => $dismiss_link,
       ]);
-      \Drupal::messenger()->addError($message);
-      $attachments['#attached']['library'][] = 'mukurtu_core/super-admin-warning';
+      $variables['page']['highlighted']['mukurtu_super_admin_warning'] = [
+        '#type' => 'container',
+        '#attributes' => [
+          'class' => ['mukurtu-super-admin-warning-wrapper'],
+          'role' => 'alert',
+        ],
+        '#markup' => new FormattableMarkup('<h2 class="visually-hidden">@heading</h2>@message', [
+          '@heading' => t('Warning message'),
+          '@message' => $message,
+        ]),
+        '#weight' => -1000,
+        // This depends on session state (dismissal) and the current node
+        // count, neither of which is expressed via cache contexts/tags, so
+        // it must never be cached - matching the messenger status_messages
+        // block it replaces, which core also sets to max-age 0.
+        '#cache' => ['max-age' => 0],
+      ];
+      $variables['#attached']['library'][] = 'mukurtu_core/super-admin-warning';
     }
   }
+}
 
+/**
+ * Implements hook_page_attachments.
+ */
+function mukurtu_core_page_attachments(array &$attachments) {
   // Add our shared JS libraries. We could scope these better.
   $attachments['#attached']['library'][] = 'mukurtu_core/mukurtu-leaflet-widget';
   $attachments['#attached']['library'][] = 'mukurtu_core/tagify-override';

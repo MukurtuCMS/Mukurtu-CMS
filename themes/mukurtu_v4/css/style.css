@@ -7226,6 +7226,14 @@ header {
     grid-template-columns: minmax(0, auto) var(--grid-12col-max-width) minmax(0, auto);
   }
 }
+.layout-container .region__highlighted .mukurtu-super-admin-warning-wrapper {
+  grid-column: 1/-1;
+}
+@media (min-width: 90rem) {
+  .layout-container .region__highlighted .mukurtu-super-admin-warning-wrapper {
+    grid-column: 2/-2;
+  }
+}
 .layout-container .region__highlighted .messages-list {
   grid-column: 1/-1;
 }
