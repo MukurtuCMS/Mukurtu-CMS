@@ -355,9 +355,22 @@ class LocalContextsProject extends LocalContextsHubBase {
   }
 
   public function getUrl(): string {
-    $endpoint = $this->configFactory->get(self::SETTINGS_CONFIG_KEY)->get('hub_endpoint') ?? LocalContextsApi::DEFAULT_HUB_URL;
+    return static::buildUrl($this->id);
+  }
+
+  /**
+   * Builds the Local Contexts Hub URL for a given project ID.
+   *
+   * @param string $id
+   *   The 36 character Local Contexts project ID.
+   *
+   * @return string
+   *   The URL of the project's page on the Local Contexts Hub.
+   */
+  public static function buildUrl(string $id): string {
+    $endpoint = \Drupal::config(self::SETTINGS_CONFIG_KEY)->get('hub_endpoint') ?? LocalContextsApi::DEFAULT_HUB_URL;
     $baseUrl = preg_replace('#/api/v2/?$#', '', rtrim($endpoint, '/'));
-    return $baseUrl . '/projects/' . $this->id . '/';
+    return $baseUrl . '/projects/' . $id . '/';
   }
 
   public function getPrivacy() {
