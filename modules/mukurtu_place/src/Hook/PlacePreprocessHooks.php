@@ -6,6 +6,7 @@ namespace Drupal\mukurtu_place\Hook;
 
 use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\mukurtu_core\Service\RelatedContentGrouper;
 use Drupal\mukurtu_place\Entity\Place;
 
 /**
@@ -14,6 +15,10 @@ use Drupal\mukurtu_place\Entity\Place;
 final class PlacePreprocessHooks {
 
   use StringTranslationTrait;
+
+  public function __construct(
+    protected RelatedContentGrouper $relatedContentGrouper,
+  ) {}
 
   /**
    * Implements hook_preprocess_HOOK() for node templates.
@@ -26,6 +31,10 @@ final class PlacePreprocessHooks {
       return;
     }
 
+    // Building the grouped, filterable render array here rather than in a
+    // formatter, since field_all_related_content is shared by several
+    // content types and only Person/Place need this grouping.
+    $variables['content']['field_all_related_content'] = $this->relatedContentGrouper->build($node);
     $variables['content']['field_all_related_content']['#title'] = $this->t('Referenced Content');
   }
 
