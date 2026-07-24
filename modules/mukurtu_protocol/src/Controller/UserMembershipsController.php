@@ -31,6 +31,14 @@ class UserMembershipsController extends ControllerBase {
   }
 
   /**
+   * Title callback for the current user's own memberships page.
+   */
+  public function myTitle() {
+    $user = $this->entityTypeManager()->getStorage('user')->load($this->currentUser()->id());
+    return $this->title($user);
+  }
+
+  /**
    * Access callback: allow own profile or users with 'administer users'.
    */
   public function access(AccountInterface $account, UserInterface $user) {
