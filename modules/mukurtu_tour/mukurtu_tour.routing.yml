@@ -1,0 +1,6 @@
+mukurtu_tour.dismiss:
+  path: '/tour/{tour}/dismiss'
+  defaults:
+    _controller: '\Drupal\mukurtu_tour\Controller\TourDismissController::dismiss'
+  requirements:
+    _user_is_logged_in: 'TRUE'

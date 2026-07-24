@@ -1,0 +1,6 @@
+services:
+  mukurtu_tour.dismissal_manager:
+    class: Drupal\mukurtu_tour\TourDismissalManager
+    arguments: ['@user.data', '@current_user']
+  Drupal\mukurtu_tour\TourDismissalManager:
+    alias: mukurtu_tour.dismissal_manager

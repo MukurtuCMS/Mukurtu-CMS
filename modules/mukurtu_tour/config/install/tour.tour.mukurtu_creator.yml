@@ -1,0 +1,24 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - mukurtu_tour
+  module:
+    - mukurtu_digital_heritage
+id: mukurtu_creator
+label: 'Mukurtu Content Creator'
+routes:
+  -
+    route_name: node.add
+    route_params:
+      node_type: digital_heritage
+tips:
+  creator_welcome:
+    id: creator_welcome
+    plugin: text
+    label: 'PLACEHOLDER: Adding a digital heritage item'
+    weight: -100
+    position: bottom
+    selector: null
+    body: 'PLACEHOLDER copy pending approval. This tour is only shown to users with permission to create digital heritage content, as an example of targeting a tour to a specific audience rather than everyone with Tour access. <a href="/tour/mukurtu_creator/dismiss">PLACEHOLDER: Don''t show this tour again</a>'
