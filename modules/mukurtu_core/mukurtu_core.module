@@ -25,6 +25,7 @@ use Drupal\user\UserInterface;
 use Drupal\Core\Url;
 use Drupal\Core\Link;
 use Drupal\Core\Cache\Cache;
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Render\Markup;
 use Drupal\Component\Render\FormattableMarkup;
 
@@ -620,6 +621,17 @@ function mukurtu_core_entity_type_alter(array &$entity_types) {
 function mukurtu_core_node_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
   if ($display->getComponent('field_title')) {
     $build['field_title'] = $entity->title->view();
+  }
+
+  // field_all_related_content is computed by querying all nodes system-wide
+  // for references back to this entity (see AllRelatedContentItemList). That
+  // result can change when any node elsewhere is saved, so tag the render
+  // array to invalidate on any node list change rather than relying on this
+  // entity's own cache tags, which only fire when this entity itself is saved.
+  if ($display->getComponent('field_all_related_content')) {
+    $cache = CacheableMetadata::createFromRenderArray($build);
+    $cache->addCacheTags(['node_list']);
+    $cache->applyTo($build);
   }
 }
 
