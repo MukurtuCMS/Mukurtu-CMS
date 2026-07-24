@@ -4478,7 +4478,8 @@ header {
 }
 .related-content__filter {
   background-color: var(--color-white);
-  border: 1px solid var(--cr-border);
+  color: var(--brand-text-color);
+  border: 1px solid var(--brand-text-color);
   border-radius: var(--v-space-6xs);
   padding-block: var(--v-space-6xs);
   padding-inline: var(--v-space-4xs);
@@ -4487,6 +4488,7 @@ header {
 }
 .related-content__filter:hover {
   background-color: var(--brand-light);
+  color: var(--brand-text-color);
 }
 .related-content__filter:focus-visible {
   outline: 2px solid var(--focus-color);
@@ -4495,6 +4497,9 @@ header {
 .related-content__filter.is-active {
   background-color: var(--brand-primary-dark);
   border-color: var(--brand-primary-dark);
+  color: var(--light-text-color);
+}
+.related-content__filter.is-active:hover {
   color: var(--light-text-color);
 }
 .related-content .field__item[hidden] {

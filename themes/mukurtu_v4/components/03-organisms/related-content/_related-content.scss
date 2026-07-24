@@ -22,7 +22,8 @@
 
   &__filter {
     background-color: var(--color-white);
-    border: 1px solid var(--cr-border);
+    color: var(--brand-text-color);
+    border: 1px solid var(--brand-text-color);
     border-radius: var(--v-space-6xs);
     padding-block: var(--v-space-6xs);
     padding-inline: var(--v-space-4xs);
@@ -31,6 +32,7 @@
 
     &:hover {
       background-color: var(--brand-light);
+      color: var(--brand-text-color);
     }
 
     &:focus-visible {
@@ -42,6 +44,10 @@
       background-color: var(--brand-primary-dark);
       border-color: var(--brand-primary-dark);
       color: var(--light-text-color);
+
+      &:hover {
+        color: var(--light-text-color);
+      }
     }
   }
 
