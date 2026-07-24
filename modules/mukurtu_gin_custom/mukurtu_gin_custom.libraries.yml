@@ -45,3 +45,20 @@ community-browser-select:
     - core/drupal
     - core/once
     - core/jquery
+
+lb-frontend-edit:
+  version: 1.x
+  css:
+    component:
+      css/lb-frontend-edit.css: {}
+  js:
+    js/lb-frontend-edit.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+    - core/drupal.ajax
+    - core/drupal.off_canvas
+    - core/jquery
+    - gin/gin_base
+    - gin_lb/gin_lb
+    - gin_lb/gin_lb_10

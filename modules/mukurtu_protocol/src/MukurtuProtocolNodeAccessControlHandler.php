@@ -35,6 +35,17 @@ class MukurtuProtocolNodeAccessControlHandler extends NodeAccessControlHandler {
         return parent::checkAccess($entity, $operation, $account)
           ->addCacheableDependency($entity);
       }
+      // Role-based node type permissions are sufficient when no protocols are
+      // set -- same intent as checkCreateAccess(), which also honors them.
+      $bundle = $entity->bundle();
+      if ($operation === 'update' && $account->hasPermission("edit any $bundle content")) {
+        return AccessResult::allowedIfHasPermission($account, "edit any $bundle content")
+          ->addCacheableDependency($entity);
+      }
+      if ($operation === 'delete' && $account->hasPermission("delete any $bundle content")) {
+        return AccessResult::allowedIfHasPermission($account, "delete any $bundle content")
+          ->addCacheableDependency($entity);
+      }
       return AccessResult::forbidden()->addCacheableDependency($entity);
     }
 

@@ -1,0 +1,11 @@
+langcode: en
+status: true
+dependencies: {  }
+id: media_carousel_block
+label: 'Media assets'
+revision: 0
+description: 'A block for placing multiple media items as a carousel.'
+help: ''
+new_revision: false
+preview_mode: 1
+display_submitted: true

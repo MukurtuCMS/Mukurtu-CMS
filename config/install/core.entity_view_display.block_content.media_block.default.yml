@@ -1,0 +1,25 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - block_content.type.media_block
+    - field.field.block_content.media_block.field_block_media
+  module:
+    - media
+id: block_content.media_block.default
+targetEntityType: block_content
+bundle: media_block
+mode: default
+content:
+  field_block_media:
+    type: entity_reference_entity_view
+    label: hidden
+    settings:
+      view_mode: default
+      link: false
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden:
+  langcode: true
+  search_api_excerpt: true
