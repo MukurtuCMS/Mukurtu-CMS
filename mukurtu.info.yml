@@ -43,6 +43,9 @@ install:
   - automated_cron
   - google_tag
   - visitors
+  - visitors_geoip
+  - charts
+  - charts_chartjs
   - twig_tweak
   - facets_reset_button
   - flat_taxonomy
