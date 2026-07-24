@@ -21,16 +21,7 @@ class CitationItemList extends FieldItemList
     $entity = $this->getEntity();
     $targetBundle = $entity->bundle();
 
-    $templates = [];
-
-    $bundleInfo = \Drupal::service('entity_type.bundle.info')->getBundleInfo('node');
-
-    // Gather all bundles dynamically.
-    foreach ($bundleInfo as $bundleName => $bundleValue) {
-      $templates[$bundleName] = $config->get($bundleName);
-    }
-
-    $targetTemplate = $templates[$targetBundle];
+    $targetTemplate = $config->get("citation_templates.$targetBundle") ?? '';
 
     $tokenService = \Drupal::service("token");
 
