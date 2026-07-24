@@ -116,13 +116,13 @@ class LocalContextsProject extends LocalContextsHubBase {
       // Save the tk labels and their translations.
       if (isset($project['tk_labels'])) {
         $this->saveLabels($project['tk_labels'], "tk", $project['unique_id'], $prior_saved_labels);
-        $this->saveLabelTranslations($project['tk_labels']);
+        $this->saveLabelTranslations($project['tk_labels'], $project['unique_id']);
       }
 
       // Save the bc labels and their translations.
       if (isset($project['bc_labels'])) {
         $this->saveLabels($project['bc_labels'], "bc", $project['unique_id'], $prior_saved_labels);
-        $this->saveLabelTranslations($project['bc_labels']);
+        $this->saveLabelTranslations($project['bc_labels'], $project['unique_id']);
       }
 
       // Save the notices and their translations.
@@ -182,6 +182,31 @@ class LocalContextsProject extends LocalContextsHubBase {
     return $notices;
   }
 
+  /**
+   * Gets the compound label/notice keys for this project's labels/notices.
+   *
+   * Uses the same "{project_id}:{id}:{label|notice}" compound key format
+   * stored in field_local_contexts_labels_and_notices, so a project's
+   * labels/notices can be matched against selections of that field even
+   * when the individual label/notice was never directly applied and only
+   * the project itself was.
+   *
+   * @return string[]
+   *   The compound label/notice keys belonging to this project.
+   */
+  public function getLabelAndNoticeKeys(): array {
+    $keys = [];
+    foreach (['tk', 'bc'] as $tk_or_bc) {
+      foreach ($this->getLabels($tk_or_bc) as $label) {
+        $keys[] = $this->id . ':' . $label['id'] . ':label';
+      }
+    }
+    foreach ($this->getNotices() as $notice) {
+      $keys[] = $notice['project_id'] . ':' . $notice['notice_type'] . ':notice';
+    }
+    return $keys;
+  }
+
   protected function saveLabels($labels, $tk_or_bc, $id, &$prior_saved_labels) {
     foreach ($labels as $label) {
       $labelFields = [
@@ -220,12 +245,13 @@ class LocalContextsProject extends LocalContextsHubBase {
     }
   }
 
-  protected function saveLabelTranslations($labels) {
+  protected function saveLabelTranslations($labels, $projectId) {
     foreach ($labels as $label) {
       $translations = $label['translations'] ?? [];
       foreach ($translations as $translation) {
         $translationFields = [
           'label_id' => $label['unique_id'],
+          'project_id' => $projectId,
           'locale' => $translation['language_tag'] ?? NULL,
           'language' => $translation['language'] ?? NULL,
           'name' => $translation['translated_name'] ?? '',
@@ -236,9 +262,12 @@ class LocalContextsProject extends LocalContextsHubBase {
         // The label hub doesn't identify translations. Users can
         // alter locale/language as they see fit, so we will delete all
         // translations and insert them all fresh rather than trying to
-        // update.
+        // update. Label ids are not unique across projects, so scope by
+        // project_id too, or this would also delete another project's
+        // translations for a same-id label.
         $query = $this->db->delete('mukurtu_local_contexts_label_translations')
-          ->condition('label_id', $label['unique_id']);
+          ->condition('label_id', $label['unique_id'])
+          ->condition('project_id', $projectId);
         $query->execute();
         $query = $this->db->insert('mukurtu_local_contexts_label_translations')->fields($translationFields);
         $query->execute();
@@ -316,7 +345,8 @@ class LocalContextsProject extends LocalContextsHubBase {
   protected function deleteSavedLabelsAndTranslations(&$prior_saved_labels, $id) {
     foreach ($prior_saved_labels as $deleted_label_id => $deleted_label) {
       $query = $this->db->delete('mukurtu_local_contexts_label_translations')
-        ->condition('label_id', $deleted_label_id);
+        ->condition('label_id', $deleted_label_id)
+        ->condition('project_id', $id);
       $query->execute();
 
       $query = $this->db->delete('mukurtu_local_contexts_labels')

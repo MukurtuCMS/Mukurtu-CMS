@@ -35,6 +35,7 @@ class LocalContextsLabel extends LocalContextsHubBase {
 
     $tQuery = $this->db->select('mukurtu_local_contexts_label_translations', 't')
       ->condition('t.label_id', $this->label_id)
+      ->condition('t.project_id', $this->project_id)
       ->fields('t', ['id', 'locale', 'language', 'name', 'text']);
     $tResult = $tQuery->execute();
 

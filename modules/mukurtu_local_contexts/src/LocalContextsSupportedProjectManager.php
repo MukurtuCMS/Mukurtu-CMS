@@ -112,7 +112,12 @@ class LocalContextsSupportedProjectManager {
     $query->addField('p', 'id', 'project_id');
 
     $result = $query->execute();
-    $labels = $result->fetchAllAssoc('id', PDO::FETCH_ASSOC);
+    $labels = [];
+    while ($label = $result->fetchAssoc()) {
+      // Label ids are not unique across projects, so key compound to avoid
+      // collisions (mirrors how notices are keyed below).
+      $labels[$label['project_id'] . ':' . $label['id']] = $label;
+    }
     return $labels;
   }
 
@@ -316,26 +321,32 @@ class LocalContextsSupportedProjectManager {
 
     // Delete labels provided by the project.
     $labels = $this->getAllLabels();
-    foreach ($labels as $label_id => $label) {
+    foreach ($labels as $label) {
       if ($label['project_id'] == $project_id) {
         $query = $this->db->delete('mukurtu_local_contexts_labels')
-          ->condition('id', $label_id);
+          ->condition('id', $label['id'])
+          ->condition('project_id', $project_id);
         $query->execute();
         $query = $this->db->delete('mukurtu_local_contexts_label_translations')
-          ->condition('label_id', $label_id);
+          ->condition('label_id', $label['id'])
+          ->condition('project_id', $project_id);
         $query->execute();
       }
     }
 
-    // Delete notices provided by the project.
+    // Delete notices provided by the project. Notices have a compound
+    // primary key (project_id, type) - there is no 'id' or 'label_id'
+    // column on these tables.
     $notices = $this->getAllNotices();
-    foreach ($notices as $notice_id => $notice) {
+    foreach ($notices as $notice) {
       if ($notice['project_id'] == $project_id) {
         $query = $this->db->delete('mukurtu_local_contexts_notices')
-          ->condition('id', $notice_id);
+          ->condition('project_id', $project_id)
+          ->condition('type', $notice['type']);
         $query->execute();
         $query = $this->db->delete('mukurtu_local_contexts_notice_translations')
-          ->condition('label_id', $notice_id);
+          ->condition('project_id', $project_id)
+          ->condition('type', $notice['type']);
         $query->execute();
       }
     }
@@ -349,6 +360,38 @@ class LocalContextsSupportedProjectManager {
     $query = $this->db->delete('mukurtu_local_contexts_projects')
       ->condition('id', $project_id);
     $query->execute();
+  }
+
+  /**
+   * Get legacy project IDs that are referenced by existing content.
+   *
+   * Legacy projects (see isLegacyProjectId()) should not normally be offered
+   * as selectable options, but if content already references one it must
+   * still appear so that filters/facets can find that content.
+   *
+   * @return string[]
+   *   Legacy project IDs referenced by field_local_contexts_projects or
+   *   field_local_contexts_labels_and_notices on existing nodes.
+   */
+  public function getReferencedLegacyProjectIds(): array {
+    $ids = $this->db->select('node__field_local_contexts_projects', 'p')
+      ->fields('p', ['field_local_contexts_projects_value'])
+      ->distinct()
+      ->execute()
+      ->fetchCol();
+
+    $label_values = $this->db->select('node__field_local_contexts_labels_and_notices', 'l')
+      ->fields('l', ['field_local_contexts_labels_and_notices_value'])
+      ->distinct()
+      ->execute()
+      ->fetchCol();
+    foreach ($label_values as $value) {
+      [$project_id] = explode(':', $value, 2);
+      $ids[] = $project_id;
+    }
+
+    $legacy_ids = array_filter(array_unique($ids), [$this, 'isLegacyProjectId']);
+    return array_values($legacy_ids);
   }
 
   /**
@@ -392,7 +435,13 @@ class LocalContextsSupportedProjectManager {
     $query->addField('p', 'id', 'project_id');
 
     $result = $query->execute();
-    return $result->fetchAllAssoc('id', PDO::FETCH_ASSOC);
+    $labels = [];
+    while ($label = $result->fetchAssoc()) {
+      // Label ids are not unique across projects, so key compound to avoid
+      // collisions (mirrors how notices are keyed below).
+      $labels[$label['project_id'] . ':' . $label['id']] = $label;
+    }
+    return $labels;
   }
 
   /**
@@ -456,7 +505,12 @@ class LocalContextsSupportedProjectManager {
 
     $result = $query->execute();
 
-    $labels = $result->fetchAllAssoc('id', PDO::FETCH_ASSOC);
+    $labels = [];
+    while ($label = $result->fetchAssoc()) {
+      // Label ids are not unique across projects, so key compound to avoid
+      // collisions (mirrors how notices are keyed below).
+      $labels[$label['project_id'] . ':' . $label['id']] = $label;
+    }
     return $labels;
   }
 
