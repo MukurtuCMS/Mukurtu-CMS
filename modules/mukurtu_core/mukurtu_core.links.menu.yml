@@ -117,3 +117,9 @@ mukurtu_core.consent_popup:
   parent: mukurtu_dashboard
   menu_name: dashboard-look-feel
   url: 'internal:/admin/structure/block/manage/mukurtu_v4_consentpopup'
+mukurtu_core.klaro_settings:
+  title: 'Cookie & Consent Settings'
+  description: 'Configure the Klaro cookie and consent manager.'
+  route_name: klaro.admin
+  parent: mukurtu_dashboard
+  menu_name: dashboard-site-settings

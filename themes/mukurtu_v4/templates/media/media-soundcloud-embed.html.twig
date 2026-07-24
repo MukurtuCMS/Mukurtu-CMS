@@ -1,0 +1,39 @@
+{#
+/**
+ * @file
+ * Default theme implementation to embed a soundcloud url.
+ *
+ * Overrides media_entity_soundcloud's default template to support Klaro
+ * cookie-consent gating. When mukurtu_core's SoundcloudPreprocessHooks has
+ * matched this embed against an enabled klaro_app (klaro_app_id is set),
+ * render Klaro's blocked-embed markup instead of a live iframe so the
+ * klaro-js runtime can replace it with its consent placeholder.
+ *
+ * Available variables:
+ * - width: The width of the iframe.
+ * - height: The height of the iframe.
+ * - type: The type of embed: visual or classic.
+ * - url: The built SoundCloud embed URL.
+ * - klaro_app_id: The matched klaro_app id if this embed should be gated by
+ *   consent, unset/empty otherwise.
+ *
+ * @see template_preprocess_media_soundcloud_embed()
+ * @see \Drupal\mukurtu_core\Hook\SoundcloudPreprocessHooks::preprocessMediaSoundcloudEmbed()
+ *
+ * @ingroup themeable
+ */
+#}
+{% if klaro_app_id %}
+  <iframe
+    width="{{ width }}"
+    height="{{ height }}"
+    scrolling="no"
+    frameborder="no"
+    type="text/plain"
+    data-src="{{ url }}"
+    data-name="{{ klaro_app_id }}"
+    title="{{ title }}"
+  ></iframe>
+{% else %}
+  <iframe width="{{ width }}" height="{{ height }}" scrolling="no" frameborder="no" src="{{ url }}" title="{{ title }}"></iframe>
+{% endif %}

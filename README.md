@@ -67,6 +67,12 @@ Or, if hosting your own server with:
 sudo apt install poppler-utils
 ```
 
+### Set up cookie and consent management (Klaro)
+
+Mukurtu ships the [Klaro](https://www.drupal.org/project/klaro) module (enabled by default) for GDPR/cookie consent management, configurable at `admin/config/user-interface/klaro` (also linked from the dashboard as "Cookie & Consent Settings"). It ships with all of its pre-built services (Google Analytics, YouTube, Google Maps, etc.) disabled, so it has no effect until a site enables what it actually uses.
+
+If you configure a Google Tag Manager container via the existing Google Tag module (`admin/config/services/google-tag/containers`), also enable Klaro's `gtm_consent_mode`, `ga_consent_mode`, and/or `google_ads_consent_mode` services (Klaro admin > Manage > Services) so those tags respect visitor consent via Google Consent Mode v2. Klaro also ships a `google_consent_mode` recipe that does this in one step: `ddev drush recipe web/modules/contrib/klaro/recipes/google_consent_mode`.
+
 ### Updates
 
 To update your local DDEV environment to a newer version of main, run `ddev composer upgrade`. Note that there may be data changes, so use at your own risk.

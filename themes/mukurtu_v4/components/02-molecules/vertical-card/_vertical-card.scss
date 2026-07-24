@@ -23,9 +23,37 @@
       aspect-ratio: 16 / 9;
       overflow: hidden;
 
+      &:has(.klaro.cm-as-context-notice) {
+        aspect-ratio: auto;
+        min-height: 14rem;
+        margin-block-end: var(--v-space-3xs);
+        overflow: visible;
+      }
+
+      // !important overrides klaro-js's own inline width/height styles on
+      // the placeholder div it injects in place of a blocked iframe.
       iframe {
-        width: 100%;
-        height: 100%;
+        width: 100% !important;
+        height: 100% !important;
+      }
+
+      // klaro-js wraps .klaro.cm-as-context-notice in an additional outer
+      // div (not itself carrying the "klaro" class) sized from the
+      // original iframe's width/height HTML attributes via inline styles
+      // -- e.g. width="300" produces style="max-width:300px". Whenever
+      // that's a valid CSS length (unlike SoundCloud's "100%", which the
+      // browser silently drops as invalid), it constrains the notice
+      // regardless of any sizing on .cm-as-context-notice itself.
+      [data-type='placeholder'] {
+        max-width: 100% !important;
+        width: 100% !important;
+        height: auto !important;
+      }
+
+      .klaro.cm-as-context-notice {
+        width: 100% !important;
+        height: auto !important;
+        min-height: 14rem;
       }
     }
 
