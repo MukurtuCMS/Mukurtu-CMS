@@ -1029,10 +1029,25 @@ function mukurtu_protocol_action_info_alter(array &$definitions): void {
 /**
  * Implements hook_entity_access().
  *
- * Prevents deleting an OG community membership when the user still belongs to
- * any protocols within that community.
+ * Grants community/protocol managers view access to profiles of members in
+ * groups they manage (site-wide `access user profiles` only covers the
+ * `mukurtu_manager`/`administrator` roles, not per-group OG managers), and
+ * prevents deleting an OG community membership when the user still belongs
+ * to any protocols within that community.
  */
 function mukurtu_protocol_entity_access(\Drupal\Core\Entity\EntityInterface $entity, $operation, AccountInterface $account) {
+  if ($entity->getEntityTypeId() === 'user' && in_array($operation, ['view', 'view label', 'view linked label'], TRUE)) {
+    /** @var \Drupal\mukurtu_protocol\OgManagerAccessChecker $og_manager_access */
+    $og_manager_access = \Drupal::service('mukurtu_protocol.og_manager_access');
+    if ($og_manager_access->sharesManagedGroup($account, $entity)) {
+      return AccessResult::allowed()
+        ->cachePerUser()
+        ->addCacheableDependency($entity)
+        ->addCacheTags(["user:{$account->id()}", "user:{$entity->id()}"]);
+    }
+    return AccessResult::neutral();
+  }
+
   if ($operation !== 'delete' || $entity->getEntityTypeId() !== 'og_membership') {
     return AccessResult::neutral();
   }
@@ -1052,6 +1067,29 @@ function mukurtu_protocol_entity_access(\Drupal\Core\Entity\EntityInterface $ent
     if ($protocol->getMembership($member)) {
       return AccessResult::forbidden()->setReason(t('Cannot remove @user from the community while they belong to a protocol within it. Remove them from all protocols first.', ['@user' => $member->getDisplayName()]));
     }
+  }
+
+  return AccessResult::neutral();
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_access() for the dashboard entity type.
+ *
+ * Grants community/protocol managers view access to the dashboard, since the
+ * dashboard's own access handler only checks site-wide permissions and can't
+ * see per-group OG roles.
+ */
+function mukurtu_protocol_dashboard_access(\Drupal\Core\Entity\EntityInterface $entity, $operation, AccountInterface $account) {
+  if ($operation !== 'view') {
+    return AccessResult::neutral();
+  }
+
+  /** @var \Drupal\mukurtu_protocol\OgManagerAccessChecker $og_manager_access */
+  $og_manager_access = \Drupal::service('mukurtu_protocol.og_manager_access');
+  if ($og_manager_access->managesAnyGroup($account)) {
+    return AccessResult::allowed()
+      ->cachePerUser()
+      ->addCacheTags(["user:{$account->id()}"]);
   }
 
   return AccessResult::neutral();

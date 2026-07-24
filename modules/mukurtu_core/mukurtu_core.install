@@ -2951,3 +2951,30 @@ function mukurtu_core_update_40083(&$sandbox): string {
     '@total' => $sandbox['total'],
   ]);
 }
+
+/**
+ * Show the member-since date on the user profile page.
+ */
+function mukurtu_core_update_40084(): void {
+  $display = \Drupal::entityTypeManager()
+    ->getStorage('entity_view_display')
+    ->load('user.user.default');
+
+  if ($display) {
+    $display
+      ->setComponent('member_for', [
+        'weight' => 2,
+        'region' => 'content',
+        'settings' => [],
+        'third_party_settings' => [],
+      ])
+      ->save();
+  }
+}
+
+/**
+ * Grant mukurtu_manager the dashboard view permission.
+ */
+function mukurtu_core_update_40085(): void {
+  user_role_grant_permissions('mukurtu_manager', ['can view mukurtu_dashboard dashboard']);
+}

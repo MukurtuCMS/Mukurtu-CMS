@@ -14,3 +14,6 @@ services:
     arguments: ['@og.role_manager', '@og.membership_manager']
     tags:
       - { name: access_check, applies_to: _mukurtu_permission }
+  mukurtu_protocol.og_manager_access:
+    class: Drupal\mukurtu_protocol\OgManagerAccessChecker
+    arguments: ['@og.membership_manager']
