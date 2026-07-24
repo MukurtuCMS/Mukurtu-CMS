@@ -2998,3 +2998,44 @@ function mukurtu_core_update_40086(): void {
     ->set('block_unknown_description', 'Allow loading of external resources from other services')
     ->save();
 }
+
+/**
+ * Move citation field templates under a nested 'citation_templates' key.
+ *
+ * Citation templates were previously stored as top-level keys in the
+ * shared mukurtu.settings config object, keyed directly by node bundle
+ * machine name. This risks colliding with other top-level keys in the
+ * same object (e.g. mukurtu_related_content_display) if a bundle
+ * machine name ever matches one. Move all bundle-keyed citation
+ * template values to citation_templates.<bundle> instead. See issue #188.
+ */
+function mukurtu_core_update_40087(): void {
+  $config = \Drupal::configFactory()->getEditable('mukurtu.settings');
+  if ($config->isNew()) {
+    return;
+  }
+
+  // Keys that are known non-bundle settings in mukurtu.settings. A bundle
+  // that happens to share one of these names is skipped defensively, since
+  // we can't otherwise tell the setting apart from a bundle-named template.
+  $reservedKeys = ['mukurtu_related_content_display', 'citation_templates'];
+
+  $bundleInfo = \Drupal::service('entity_type.bundle.info')->getBundleInfo('node');
+  $rawData = $config->getRawData();
+
+  foreach ($bundleInfo as $bundleName => $bundleValue) {
+    if (in_array($bundleName, $reservedKeys, TRUE)) {
+      \Drupal::logger('mukurtu_core')->warning(
+        'Skipped citation template migration for bundle "@bundle" because its machine name collides with a reserved mukurtu.settings key. Re-enter its citation template manually at the Citation Templates settings form.',
+        ['@bundle' => $bundleName]
+      );
+      continue;
+    }
+    if (array_key_exists($bundleName, $rawData)) {
+      $config->set("citation_templates.$bundleName", $rawData[$bundleName]);
+      $config->clear($bundleName);
+    }
+  }
+
+  $config->save();
+}
