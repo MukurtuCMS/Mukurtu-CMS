@@ -371,6 +371,13 @@ function mukurtu_v4_preprocess_field_group_html_element__group_community_sidebar
   }
   $variables['community_name'] = $community->get('name')->value;
   $variables['community_id'] = $community->get('id')->value;
+  $community_system_path = '/communities/community/' . $community->id();
+  $community_alias = \Drupal::service('path_alias.manager')->getAliasByPath($community_system_path);
+  // If the community has no alias yet, getAliasByPath() returns the system
+  // path unchanged; fall back to the numeric ID the LC directory route also
+  // accepts, instead of building a path no route matches.
+  $community_lc_slug = ($community_alias === $community_system_path) ? '/community/' . $community->id() : $community_alias;
+  $variables['community_lc_url'] = $community_lc_slug . '/local-contexts';
   $local_contexts_projects_manager = \Drupal::service('mukurtu_local_contexts.supported_project_manager');
   assert($local_contexts_projects_manager instanceof LocalContextsSupportedProjectManager);
   $variables['has_lc_projects'] = (bool) $local_contexts_projects_manager->getGroupSupportedProjects($community);
@@ -387,6 +394,13 @@ function mukurtu_v4_preprocess_field_group_html_element__group_protocol_sidebar(
   }
   $variables['protocol_name'] = $protocol->get('name')->value;
   $variables['protocol_id'] = $protocol->get('id')->value;
+  $protocol_system_path = '/protocols/protocol/' . $protocol->id();
+  $protocol_alias = \Drupal::service('path_alias.manager')->getAliasByPath($protocol_system_path);
+  // If the protocol has no alias yet, getAliasByPath() returns the system
+  // path unchanged; fall back to the numeric ID the LC directory route also
+  // accepts, instead of building a path no route matches.
+  $protocol_lc_slug = ($protocol_alias === $protocol_system_path) ? '/protocol/' . $protocol->id() : $protocol_alias;
+  $variables['protocol_lc_url'] = $protocol_lc_slug . '/local-contexts';
   $local_contexts_projects_manager = \Drupal::service('mukurtu_local_contexts.supported_project_manager');
   assert($local_contexts_projects_manager instanceof LocalContextsSupportedProjectManager);
   $variables['has_lc_projects'] = (bool) $local_contexts_projects_manager->getGroupSupportedProjects($protocol);

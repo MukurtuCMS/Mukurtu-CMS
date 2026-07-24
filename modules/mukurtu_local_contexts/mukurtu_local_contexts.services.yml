@@ -16,3 +16,8 @@ services:
       - '@entity_type.manager'
     tags:
       - { name: cron }
+  mukurtu_local_contexts.group_alias_param_converter:
+    class: Drupal\mukurtu_local_contexts\ParamConverter\GroupAliasParamConverter
+    arguments: ['@path_alias.manager', '@entity_type.manager']
+    tags:
+      - { name: paramconverter }
