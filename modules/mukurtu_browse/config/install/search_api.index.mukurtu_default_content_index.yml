@@ -6,6 +6,7 @@ dependencies:
   module:
     - media
     - mukurtu_collection
+    - mukurtu_local_contexts
     - mukurtu_protocol
     - node
     - search_api_glossary
@@ -168,6 +169,22 @@ field_settings:
     dependencies:
       module:
         - node
+  field_local_contexts_projects:
+    label: 'Local Contexts Project'
+    datasource_id: 'entity:node'
+    property_path: field_local_contexts_projects
+    type: string
+    dependencies:
+      module:
+        - mukurtu_local_contexts
+  field_local_contexts_labels_and_notices:
+    label: 'Local Contexts Label'
+    datasource_id: 'entity:node'
+    property_path: field_local_contexts_labels_and_notices
+    type: string
+    dependencies:
+      module:
+        - mukurtu_local_contexts
   field_traditional_knowledge:
     label: 'Traditional Knowledge'
     datasource_id: 'entity:node'
@@ -556,6 +573,8 @@ processor_settings:
       - media_extracted_text
       - media_type
       - mukurtu_cultural_protocol_ids
+      - field_local_contexts_projects
+      - field_local_contexts_labels_and_notices
       - name
       - name_1
       - language_name

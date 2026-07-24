@@ -7,6 +7,7 @@ dependencies:
     - user.role.mukurtu_roundtrip_manager
   module:
     - content_moderation
+    - mukurtu_local_contexts
     - mukurtu_protocol
     - node
     - views_bulk_operations
@@ -774,6 +775,84 @@ display:
             operator_limit_selection: false
             operator_list: {  }
             identifier: protocol
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+            reduce: false
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+        lc_project:
+          id: lc_project
+          table: node_field_data
+          field: mukurtu_lc_project_filter
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: mukurtu_node_local_contexts_project_filter
+          operator: in
+          value: {  }
+          group: 1
+          exposed: true
+          expose:
+            operator_id: lc_project_op
+            label: 'Local Contexts Project'
+            description: ''
+            use_operator: false
+            operator: lc_project_op
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: lc_project
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+            reduce: false
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+        lc_label:
+          id: lc_label
+          table: node_field_data
+          field: mukurtu_lc_label_filter
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: mukurtu_node_local_contexts_label_filter
+          operator: in
+          value: {  }
+          group: 1
+          exposed: true
+          expose:
+            operator_id: lc_label_op
+            label: 'Local Contexts Label'
+            description: ''
+            use_operator: false
+            operator: lc_label_op
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: lc_label
             required: false
             remember: false
             multiple: false

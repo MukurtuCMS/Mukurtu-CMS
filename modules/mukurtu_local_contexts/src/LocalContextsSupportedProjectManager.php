@@ -352,6 +352,38 @@ class LocalContextsSupportedProjectManager {
   }
 
   /**
+   * Get legacy project IDs that are referenced by existing content.
+   *
+   * Legacy projects (see isLegacyProjectId()) should not normally be offered
+   * as selectable options, but if content already references one it must
+   * still appear so that filters/facets can find that content.
+   *
+   * @return string[]
+   *   Legacy project IDs referenced by field_local_contexts_projects or
+   *   field_local_contexts_labels_and_notices on existing nodes.
+   */
+  public function getReferencedLegacyProjectIds(): array {
+    $ids = $this->db->select('node__field_local_contexts_projects', 'p')
+      ->fields('p', ['field_local_contexts_projects_value'])
+      ->distinct()
+      ->execute()
+      ->fetchCol();
+
+    $label_values = $this->db->select('node__field_local_contexts_labels_and_notices', 'l')
+      ->fields('l', ['field_local_contexts_labels_and_notices_value'])
+      ->distinct()
+      ->execute()
+      ->fetchCol();
+    foreach ($label_values as $value) {
+      [$project_id] = explode(':', $value, 2);
+      $ids[] = $project_id;
+    }
+
+    $legacy_ids = array_filter(array_unique($ids), [$this, 'isLegacyProjectId']);
+    return array_values($legacy_ids);
+  }
+
+  /**
    * Get all projects a user can use.
    *
    * @param \Drupal\Core\Session\AccountInterface $account

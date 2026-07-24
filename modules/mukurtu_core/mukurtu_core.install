@@ -2951,3 +2951,19 @@ function mukurtu_core_update_40083(&$sandbox): string {
     '@total' => $sandbox['total'],
   ]);
 }
+
+/**
+ * Add LC Project and LC Label exposed filters to the admin/content view.
+ */
+function mukurtu_core_update_40084(): void {
+  $config_source = new \Drupal\Core\Config\FileStorage(
+    \Drupal::service('extension.list.profile')->getPath('mukurtu') . '/config/install'
+  );
+  $config_factory = \Drupal::configFactory();
+
+  $config_name = 'views.view.mukurtu_manage_all_content';
+  $data = $config_source->read($config_name);
+  if ($data) {
+    $config_factory->getEditable($config_name)->setData($data)->save(TRUE);
+  }
+}

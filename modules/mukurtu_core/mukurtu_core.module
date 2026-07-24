@@ -1275,6 +1275,22 @@ function mukurtu_core_views_data_alter(array &$data)
         'real field' => 'nid',
       ],
     ];
+    $data['node_field_data']['mukurtu_lc_project_filter'] = [
+      'title' => t('Local Contexts Project'),
+      'filter' => [
+        'id' => 'mukurtu_node_local_contexts_project_filter',
+        'field' => 'nid',
+        'real field' => 'nid',
+      ],
+    ];
+    $data['node_field_data']['mukurtu_lc_label_filter'] = [
+      'title' => t('Local Contexts Label'),
+      'filter' => [
+        'id' => 'mukurtu_node_local_contexts_label_filter',
+        'field' => 'nid',
+        'real field' => 'nid',
+      ],
+    ];
   }
 
   if (isset($data['media_field_data'])) {

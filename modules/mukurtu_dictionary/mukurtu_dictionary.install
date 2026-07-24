@@ -1276,3 +1276,18 @@ function mukurtu_dictionary_update_40033(): void {
     $config->save();
   }
 }
+
+/**
+ * Add LC Project and LC Label facets to /dictionary.
+ */
+function mukurtu_dictionary_update_40034(): void {
+  // Import updated Search API index and Views configurations.
+  $config_installer = \Drupal::service('config.installer');
+  $config_installer->installDefaultConfig('module', 'mukurtu_dictionary');
+
+  // Reindex the affected Search API index.
+  $index = \Drupal\search_api\Entity\Index::load('mukurtu_dictionary_index');
+  if ($index) {
+    $index->reindex();
+  }
+}

@@ -478,3 +478,18 @@ function mukurtu_browse_update_40011(): void {
   $index->save();
   $index->reindex();
 }
+
+/**
+ * Add LC Project and LC Label facets to /browse and /digital-heritage.
+ */
+function mukurtu_browse_update_40012(): void {
+  // Import updated Search API index and Views configurations.
+  $config_installer = \Drupal::service('config.installer');
+  $config_installer->installDefaultConfig('module', 'mukurtu_browse');
+
+  // Reindex the affected Search API index.
+  $index = \Drupal\search_api\Entity\Index::load('mukurtu_default_content_index');
+  if ($index) {
+    $index->reindex();
+  }
+}
