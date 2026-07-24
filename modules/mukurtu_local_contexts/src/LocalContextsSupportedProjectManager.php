@@ -334,15 +334,19 @@ class LocalContextsSupportedProjectManager {
       }
     }
 
-    // Delete notices provided by the project.
+    // Delete notices provided by the project. Notices have a compound
+    // primary key (project_id, type) - there is no 'id' or 'label_id'
+    // column on these tables.
     $notices = $this->getAllNotices();
-    foreach ($notices as $notice_id => $notice) {
+    foreach ($notices as $notice) {
       if ($notice['project_id'] == $project_id) {
         $query = $this->db->delete('mukurtu_local_contexts_notices')
-          ->condition('id', $notice_id);
+          ->condition('project_id', $project_id)
+          ->condition('type', $notice['type']);
         $query->execute();
         $query = $this->db->delete('mukurtu_local_contexts_notice_translations')
-          ->condition('label_id', $notice_id);
+          ->condition('project_id', $project_id)
+          ->condition('type', $notice['type']);
         $query->execute();
       }
     }
