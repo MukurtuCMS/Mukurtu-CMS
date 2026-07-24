@@ -32,10 +32,17 @@ class MailHooks {
    *
    * Site-admin notification:
    * - register_pending_approval_admin: always suppressed. Mukurtu uses its
-   *   own community-manager notification system instead.
+   *   own Message/digest notification system instead (see
+   *   mukurtu_notifications_user_insert()).
    *
    * Also prevents a fatal TypeError in PhpMail when a user account has no
    * email address and a status-change notification is triggered (e.g. unblock).
+   *
+   * Also rewrites core's "status_activated" email when it's actually
+   * reactivating a previously-blocked account rather than activating a
+   * brand-new one: core reuses the same "activate your new account, set
+   * your password" wording (with a one-time login link) for both cases,
+   * which doesn't make sense for someone who already has credentials.
    */
   #[Hook('mail_alter')]
   public function mailAlter(array &$message): void {
@@ -58,8 +65,9 @@ class MailHooks {
       // account is awaiting review. Always send for visitor self-registration;
       // suppress only when an admin is creating the account.
       'register_pending_approval' => $isAdminCreated,
-      // Site-admin "Account details" notification — never needed; Mukurtu
-      // uses its own community-manager notification workflow.
+      // Site-admin "Account details" notification — never needed; Mukurtu's
+      // own Message/digest system notifies managers of pending registrations
+      // instead (see mukurtu_notifications_user_insert()).
       'register_pending_approval_admin' => TRUE,
       // Admin-created welcome email: only for active accounts. Pending and
       // blocked accounts receive no email at creation time.
@@ -70,6 +78,18 @@ class MailHooks {
     if ($suppress) {
       $message['send'] = FALSE;
       return;
+    }
+
+    $was_pending = $account && isset($account->original) && $account->original->hasField('field_pending') && (bool) $account->original->get('field_pending')->value;
+    if ($message['key'] === 'status_activated' && $account && isset($account->original) && $account->original->isBlocked() && !$was_pending) {
+      $site_name = \Drupal::config('system.site')->get('name');
+      $message['subject'] = t('Your account at @site has been reactivated', ['@site' => $site_name]);
+      $message['body'] = [
+        t("@name,\n\nYour account on @site has been reactivated. You may now log in as usual.\n\n--  @site team", [
+          '@name' => $account->getDisplayName(),
+          '@site' => $site_name,
+        ]),
+      ];
     }
 
     // Prevent a fatal TypeError when the account has no email address.

@@ -1,0 +1,21 @@
+langcode: en
+status: true
+dependencies:
+  config:
+  - filter.format.mukurtu_html
+template: mukurtu_comment_approved
+label: Comment approved
+description: A comment on protocol content was approved.
+text:
+- value: A comment on&nbsp;[message:field_title] was approved.
+  format: mukurtu_html
+- value: <p>A comment on&nbsp;[message:mukurtu-content-link] was approved.</p>
+  format: mukurtu_html
+- value: <p>A comment on&nbsp;[message:mukurtu-content-html-link] was approved.</p>
+  format: mukurtu_html
+settings:
+  token options:
+    clear: false
+    token replace: true
+  purge_override: false
+  purge_methods: {}

@@ -2951,3 +2951,25 @@ function mukurtu_core_update_40083(&$sandbox): string {
     '@total' => $sandbox['total'],
   ]);
 }
+
+/**
+ * Grant Language Stewards comment permissions so they can view and approve
+ * comments on dictionary words and word lists, matching Protocol Stewards.
+ */
+function mukurtu_core_update_40084(): void {
+  /** @var \Drupal\og\Entity\OgRole|null $role */
+  $role = \Drupal::entityTypeManager()
+    ->getStorage('og_role')
+    ->load('protocol-protocol-language_steward');
+  if (!$role) {
+    return;
+  }
+
+  foreach (['administer comments', 'skip comment approval'] as $permission) {
+    if (!$role->hasPermission($permission)) {
+      $role->grantPermission($permission);
+    }
+  }
+
+  $role->save();
+}

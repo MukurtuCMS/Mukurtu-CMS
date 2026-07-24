@@ -4,11 +4,14 @@ dependencies:
   config:
     - filter.format.mukurtu_html
 template: mukurtu_single_node_delete
-label: 'Mukurtu Single Node Delete'
+label: 'Content deleted'
 description: 'The standard message for the deletion of a single node.'
 text:
   -
-    value: "<p>[message:field_content_type] item&nbsp;<em>[message:field_title]</em> was deleted.</p>\r\n"
+    value: "<p>[message:field_content_type]&nbsp;<em>[message:field_title]</em> was deleted.</p>\r\n"
+    format: mukurtu_html
+  -
+    value: "<p>[message:field_content_type]&nbsp;<em>[message:field_title]</em> was deleted.</p>\r\n"
     format: mukurtu_html
 settings:
   'token options':

@@ -1,0 +1,23 @@
+langcode: en
+status: true
+dependencies:
+  config:
+  - filter.format.mukurtu_html
+template: mukurtu_user_set_pending
+label: User set to pending
+description: A user account was set to pending.
+text:
+- value: '[message:field_user:entity:display-name]''s account was set to pending.'
+  format: mukurtu_html
+- value: <p>[message:field_user:entity:mukurtu-notification-link]'s account was set
+    to pending.</p>
+  format: mukurtu_html
+- value: <p>[message:field_user:entity:mukurtu-notification-html-link]'s account was
+    set to pending.</p>
+  format: mukurtu_html
+settings:
+  token options:
+    clear: false
+    token replace: true
+  purge_override: false
+  purge_methods: {}

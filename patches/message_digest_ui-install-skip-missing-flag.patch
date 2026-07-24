@@ -1,0 +1,16 @@
+diff --git a/message_digest_ui/message_digest_ui.install b/message_digest_ui/message_digest_ui.install
+--- a/message_digest_ui/message_digest_ui.install
++++ b/message_digest_ui/message_digest_ui.install
+@@ -22,7 +22,11 @@ function message_digest_ui_install() {
+   // Add the `message_digest` field to flagging types.
+   $prefix = \Drupal::config('message_subscribe_email.settings')->get('flag_prefix');
+   foreach (['node', 'term', 'user'] as $name) {
+-    $display = \Drupal::service('entity_display.repository')->getFormDisplay('flagging', $prefix . '_' . $name, 'default');
++    $flag_id = $prefix . '_' . $name;
++    if (!\Drupal::entityTypeManager()->getStorage('flag')->load($flag_id)) {
++      continue;
++    }
++    $display = \Drupal::service('entity_display.repository')->getFormDisplay('flagging', $flag_id, 'default');
+     if (!$display->getComponent('message_digest')) {
+       $settings = [
+         'type' => 'options_select',

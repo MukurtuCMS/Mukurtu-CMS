@@ -28,10 +28,10 @@ The following are flags that can be toggled per user to control notifications.
 | Flag | Machine Name | Message Template(s) | Description |
 | --- | --- | --- | --- |
 | Mukurtu Follow Content | mukurtu_follow_content| Mukurtu Single Node Update (mukurtu_single_node_update) | Notify on node update, new comments |
-| Mukurtu Follow Protocol | mukurtu_follow_protocol | Mukurtu New Item in Protocol (mukurtu_new_item_in_protocol) | Notify on new items added to protocol |
-| Mukurtu Follow Community | mukurtu_follow_community | Mukurtu New Item in Community (mukurtu_new_item_in_community) | Notify on new, accessible items added to the community |
-| Mukurtu Follow Collection | mukurtu_follow_collection | Mukurtu New Item in Collection (mukurtu_new_item_in_collection) |Notify on new items added to a collection, new comments |
+| Mukurtu Follow Collection | mukurtu_follow_collection | (not implemented; mukurtu_new_item_in_collection removed 2026-07-17, dead code with no notify() call site) | Flag exists, but nothing currently notifies on it |
 | Mukurtu Follow Language (TODO) | mukurtu_follow_language | | Notify on new dictionary words added to the language |
+
+Note: the "New content" event (mukurtu_single_node_insert) now covers protocol/community additions directly -- see mukurtu_notifications_notify_content_created() in the .module file -- replacing the old separate mukurtu_new_item_in_protocol/_community templates, which were also removed 2026-07-17.
 
 <br/>
 Notifications are also sent to the content's author for certain events:

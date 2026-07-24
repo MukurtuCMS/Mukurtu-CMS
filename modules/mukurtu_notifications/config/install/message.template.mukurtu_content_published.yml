@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+  - filter.format.mukurtu_html
+template: mukurtu_content_published
+label: Content published
+description: A content item was published.
+text:
+- value: '[message:field_content_type]&nbsp;[message:field_title] was published.'
+  format: mukurtu_html
+- value: <p>[message:field_content_type]&nbsp;[message:mukurtu-content-link] was published.</p>
+  format: mukurtu_html
+- value: <p>[message:field_content_type]&nbsp;[message:mukurtu-content-html-link]
+    was published.</p>
+  format: mukurtu_html
+settings:
+  token options:
+    clear: true
+    token replace: true
+  purge_override: false
+  purge_methods: {}
