@@ -1073,6 +1073,29 @@ function mukurtu_protocol_entity_access(\Drupal\Core\Entity\EntityInterface $ent
 }
 
 /**
+ * Implements hook_ENTITY_TYPE_access() for the dashboard entity type.
+ *
+ * Grants community/protocol managers view access to the dashboard, since the
+ * dashboard's own access handler only checks site-wide permissions and can't
+ * see per-group OG roles.
+ */
+function mukurtu_protocol_dashboard_access(\Drupal\Core\Entity\EntityInterface $entity, $operation, AccountInterface $account) {
+  if ($operation !== 'view') {
+    return AccessResult::neutral();
+  }
+
+  /** @var \Drupal\mukurtu_protocol\OgManagerAccessChecker $og_manager_access */
+  $og_manager_access = \Drupal::service('mukurtu_protocol.og_manager_access');
+  if ($og_manager_access->managesAnyGroup($account)) {
+    return AccessResult::allowed()
+      ->cachePerUser()
+      ->addCacheTags(["user:{$account->id()}"]);
+  }
+
+  return AccessResult::neutral();
+}
+
+/**
  * Implements hook_preprocess_views_view_field().
  */
 function mukurtu_protocol_preprocess_views_view_field(&$variables) {

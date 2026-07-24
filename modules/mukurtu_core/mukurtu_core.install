@@ -2971,3 +2971,10 @@ function mukurtu_core_update_40084(): void {
       ->save();
   }
 }
+
+/**
+ * Grant mukurtu_manager the dashboard view permission.
+ */
+function mukurtu_core_update_40085(): void {
+  user_role_grant_permissions('mukurtu_manager', ['can view mukurtu_dashboard dashboard']);
+}

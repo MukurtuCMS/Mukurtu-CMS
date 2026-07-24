@@ -31,13 +31,7 @@ class OgManagerAccessChecker {
    *   $target also belongs to.
    */
   public function sharesManagedGroup(AccountInterface $manager, AccountInterface $target): bool {
-    $managed_group_ids = [];
-    foreach ($this->membershipManager->getMemberships($manager->id()) as $membership) {
-      $bundle = $membership->getGroupBundle();
-      if (in_array($bundle, self::MANAGED_BUNDLES, TRUE) && $membership->hasPermission('manage members')) {
-        $managed_group_ids[$bundle][] = $membership->getGroupId();
-      }
-    }
+    $managed_group_ids = $this->getManagedGroupIds($manager);
 
     if (!$managed_group_ids) {
       return FALSE;
@@ -51,6 +45,41 @@ class OgManagerAccessChecker {
     }
 
     return FALSE;
+  }
+
+  /**
+   * Checks whether $account has 'manage members' in any community/protocol.
+   *
+   * @param \Drupal\Core\Session\AccountInterface $account
+   *   The account to check for "manage members" permission.
+   *
+   * @return bool
+   *   TRUE if $account has 'manage members' in at least one community or
+   *   protocol group.
+   */
+  public function managesAnyGroup(AccountInterface $account): bool {
+    return (bool) $this->getManagedGroupIds($account);
+  }
+
+  /**
+   * Builds a map of community/protocol group ids $account manages.
+   *
+   * @param \Drupal\Core\Session\AccountInterface $account
+   *   The account to check for "manage members" permission.
+   *
+   * @return array
+   *   An array keyed by group bundle, of arrays of group ids $account has
+   *   'manage members' permission in.
+   */
+  protected function getManagedGroupIds(AccountInterface $account): array {
+    $managed_group_ids = [];
+    foreach ($this->membershipManager->getMemberships($account->id()) as $membership) {
+      $bundle = $membership->getGroupBundle();
+      if (in_array($bundle, self::MANAGED_BUNDLES, TRUE) && $membership->hasPermission('manage members')) {
+        $managed_group_ids[$bundle][] = $membership->getGroupId();
+      }
+    }
+    return $managed_group_ids;
   }
 
 }
