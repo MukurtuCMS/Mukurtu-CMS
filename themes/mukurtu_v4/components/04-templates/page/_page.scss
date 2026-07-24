@@ -54,6 +54,12 @@
     }
   }
 
+  // Basic pages use Layout Builder; the page title shadow would appear as an
+  // unwanted divider between the title and the first Layout Builder block.
+  .page-node-type-page & .page__title {
+    box-shadow: none;
+  }
+
   // Make sure Drupal messages are within the grid.
   .region__highlighted {
     @include layout.layout--full-width-grid;

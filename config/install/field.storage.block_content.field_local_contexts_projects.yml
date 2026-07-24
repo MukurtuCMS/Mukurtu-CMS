@@ -1,0 +1,18 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - block_content
+    - mukurtu_local_contexts
+id: block_content.field_local_contexts_projects
+field_name: field_local_contexts_projects
+entity_type: block_content
+type: local_contexts_project
+settings: {  }
+module: mukurtu_local_contexts
+locked: false
+cardinality: -1
+translatable: false
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

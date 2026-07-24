@@ -1,0 +1,35 @@
+{{ attach_library('mukurtu_v4/media-glightbox') }}
+
+{% if items|length > 1 %}
+  {{ attach_library('mukurtu_v4/media-carousel') }}
+  <div class="media-carousels" data-id="{{ node_id }}">
+    <section class="splide media-carousel" aria-label="{{ 'Media Assets Carousel'|t }}">
+      <div{{ attributes.addClass('field', 'field--name-field-page-media-assets', 'splide__track') }}>
+        <ul class="splide__list field__items">
+          {% for item in items %}
+            <li{{ item.attributes.addClass('field__item splide__slide') }}>{{ item.content }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </section>
+    {% if thumbnail_display is defined and thumbnail_display %}
+      <section class="splide thumbnail-carousel" aria-label="{{ 'Thumbnail Carousel'|t }}">
+        <div class="splide__track">
+          <ul class="splide__list">
+            {% for thumbnail in thumbnail_display %}
+              <li class="splide__slide">{{ thumbnail }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </section>
+    {% endif %}
+  </div>
+{% else %}
+  <div{{ attributes }}>
+    <div class="field-item__container">
+      {% for item in items %}
+        <div class="field-item" {{ item.attributes }}>{{ item.content }}</div>
+      {% endfor %}
+    </div>
+  </div>
+{% endif %}
