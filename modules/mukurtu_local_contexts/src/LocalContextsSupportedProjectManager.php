@@ -112,7 +112,12 @@ class LocalContextsSupportedProjectManager {
     $query->addField('p', 'id', 'project_id');
 
     $result = $query->execute();
-    $labels = $result->fetchAllAssoc('id', PDO::FETCH_ASSOC);
+    $labels = [];
+    while ($label = $result->fetchAssoc()) {
+      // Label ids are not unique across projects, so key compound to avoid
+      // collisions (mirrors how notices are keyed below).
+      $labels[$label['project_id'] . ':' . $label['id']] = $label;
+    }
     return $labels;
   }
 
@@ -316,13 +321,15 @@ class LocalContextsSupportedProjectManager {
 
     // Delete labels provided by the project.
     $labels = $this->getAllLabels();
-    foreach ($labels as $label_id => $label) {
+    foreach ($labels as $label) {
       if ($label['project_id'] == $project_id) {
         $query = $this->db->delete('mukurtu_local_contexts_labels')
-          ->condition('id', $label_id);
+          ->condition('id', $label['id'])
+          ->condition('project_id', $project_id);
         $query->execute();
         $query = $this->db->delete('mukurtu_local_contexts_label_translations')
-          ->condition('label_id', $label_id);
+          ->condition('label_id', $label['id'])
+          ->condition('project_id', $project_id);
         $query->execute();
       }
     }
@@ -424,7 +431,13 @@ class LocalContextsSupportedProjectManager {
     $query->addField('p', 'id', 'project_id');
 
     $result = $query->execute();
-    return $result->fetchAllAssoc('id', PDO::FETCH_ASSOC);
+    $labels = [];
+    while ($label = $result->fetchAssoc()) {
+      // Label ids are not unique across projects, so key compound to avoid
+      // collisions (mirrors how notices are keyed below).
+      $labels[$label['project_id'] . ':' . $label['id']] = $label;
+    }
+    return $labels;
   }
 
   /**
@@ -488,7 +501,12 @@ class LocalContextsSupportedProjectManager {
 
     $result = $query->execute();
 
-    $labels = $result->fetchAllAssoc('id', PDO::FETCH_ASSOC);
+    $labels = [];
+    while ($label = $result->fetchAssoc()) {
+      // Label ids are not unique across projects, so key compound to avoid
+      // collisions (mirrors how notices are keyed below).
+      $labels[$label['project_id'] . ':' . $label['id']] = $label;
+    }
     return $labels;
   }
 

@@ -181,6 +181,12 @@ function mukurtu_local_contexts_schema() {
         'not null' => TRUE,
         'description' => 'Label ID',
       ],
+      'project_id' => [
+        'type' => 'varchar',
+        'length' => 36,
+        'not null' => TRUE,
+        'description' => 'Project ID',
+      ],
       'locale' => [
         'type' => 'varchar',
         'length' => 64,
@@ -214,6 +220,7 @@ function mukurtu_local_contexts_schema() {
     'primary key' => ['id'],
     'indexes' => [
       'label' => ['id', 'label_id'],
+      'project' => ['project_id', 'label_id'],
       'updated' => ['updated'],
     ],
   ];
@@ -359,4 +366,63 @@ function mukurtu_local_contexts_update_10000() {
     ]
   );
 
+}
+
+/**
+ * Add project_id to Local Contexts label translations.
+ *
+ * Label ids are not unique across projects (unlike notices, which have
+ * always stored project_id), so translations could not be reliably scoped
+ * to the project that owns them. This backfills project_id for existing
+ * rows on a best-effort basis: for label ids that are unique across
+ * projects (the common case) it is exact; for the rare label id shared by
+ * more than one project, one project is picked arbitrarily, which is still
+ * strictly better than the previous fully-unscoped state, and self-heals
+ * the next time either project's Local Contexts Hub sync re-runs (saving
+ * translations now always writes the correct project_id).
+ */
+function mukurtu_local_contexts_update_40001(): void {
+  $schema = \Drupal::database()->schema();
+
+  if (!$schema->fieldExists('mukurtu_local_contexts_label_translations', 'project_id')) {
+    $schema->addField('mukurtu_local_contexts_label_translations', 'project_id', [
+      'type' => 'varchar',
+      'length' => 36,
+      'not null' => TRUE,
+      'description' => 'Project ID',
+      'initial' => '',
+    ]);
+  }
+
+  \Drupal::database()->query("
+    UPDATE {mukurtu_local_contexts_label_translations} t
+    INNER JOIN {mukurtu_local_contexts_labels} l ON l.id = t.label_id
+    SET t.project_id = l.project_id
+    WHERE t.project_id = ''
+  ");
+
+  if (!$schema->indexExists('mukurtu_local_contexts_label_translations', 'project')) {
+    $schema->addIndex('mukurtu_local_contexts_label_translations', 'project', ['project_id', 'label_id'], [
+      'fields' => [
+        'id' => [
+          'type' => 'serial',
+          'not null' => TRUE,
+          'description' => 'Translation ID',
+        ],
+        'label_id' => [
+          'type' => 'varchar',
+          'length' => 36,
+          'not null' => TRUE,
+          'description' => 'Label ID',
+        ],
+        'project_id' => [
+          'type' => 'varchar',
+          'length' => 36,
+          'not null' => TRUE,
+          'description' => 'Project ID',
+        ],
+      ],
+      'primary key' => ['id'],
+    ]);
+  }
 }
