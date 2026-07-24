@@ -104,3 +104,45 @@ function mukurtu_multilingual_update_40004() {
   $config->set('description', 'The type of relationship between the related person and the subject of the person record. </br>Select from existing relationship types or add a new one.');
   $config->save();
 }
+
+/**
+ * Add content translation settings for the 5 Layout Builder block types
+ * added by the basic-page Layout Builder feature (PR #1770).
+ *
+ * These block types (call_to_action, horizontal_divider,
+ * local_contexts_block, media_block, media_carousel_block) never shipped
+ * with base field overrides or content_translation settings the way every
+ * other block_content bundle does, so on a multilingual site they were
+ * missing translation support entirely. Guarded by isNew() so this is a
+ * no-op if the config already exists.
+ */
+function mukurtu_multilingual_update_40005(): void {
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_multilingual');
+  $config_source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+  $config_factory = \Drupal::configFactory();
+
+  $bundles = [
+    'call_to_action',
+    'horizontal_divider',
+    'local_contexts_block',
+    'media_block',
+    'media_carousel_block',
+  ];
+
+  foreach ($bundles as $bundle) {
+    $config_names = [
+      "core.base_field_override.block_content.$bundle.status",
+      "core.base_field_override.block_content.$bundle.info",
+      "core.base_field_override.block_content.$bundle.changed",
+      "language.content_settings.block_content.$bundle",
+    ];
+    foreach ($config_names as $config_name) {
+      if ($config_factory->get($config_name)->isNew()) {
+        $data = $config_source->read($config_name);
+        if ($data) {
+          $config_factory->getEditable($config_name)->setData($data)->save();
+        }
+      }
+    }
+  }
+}
