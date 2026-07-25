@@ -4,8 +4,54 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "05f342a14264e5bb53580d25dabd7955",
+    "content-hash": "0c393fb4fcc132854881f1d26b83d078",
     "packages": [
+        {
+            "name": "altcha-org/altcha",
+            "version": "v1.3.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/altcha-org/altcha-lib-php.git",
+                "reference": "9a9b98c48dea0b2e8c353ea991d5f5627cbdab36"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/altcha-org/altcha-lib-php/zipball/9a9b98c48dea0b2e8c353ea991d5f5627cbdab36",
+                "reference": "9a9b98c48dea0b2e8c353ea991d5f5627cbdab36",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.2"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3.72",
+                "phpstan/extension-installer": "^1.4",
+                "phpstan/phpstan": "^2.1",
+                "phpstan/phpstan-phpunit": "^2.0",
+                "phpunit/phpunit": "^11.5.50"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "AltchaOrg\\Altcha\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Daniel Regeci",
+                    "email": "536331+ovx@users.noreply.github.com"
+                }
+            ],
+            "support": {
+                "issues": "https://github.com/altcha-org/altcha-lib-php/issues",
+                "source": "https://github.com/altcha-org/altcha-lib-php/tree/v1.3.3"
+            },
+            "time": "2026-04-02T12:13:35+00:00"
+        },
         {
             "name": "asm89/stack-cors",
             "version": "v2.4.0",
@@ -1253,6 +1299,65 @@
             ],
             "support": {
                 "source": "https://git.drupalcode.org/project/admin_theme"
+            }
+        },
+        {
+            "name": "drupal/altcha",
+            "version": "1.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://git.drupalcode.org/project/altcha.git",
+                "reference": "1.2.0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://ftp.drupal.org/files/projects/altcha-1.2.0.zip",
+                "reference": "1.2.0",
+                "shasum": "4eb18938e801024f2fd495a7c52b5d3562032372"
+            },
+            "require": {
+                "altcha-org/altcha": "^1.3.1",
+                "drupal/captcha": "^1.15 || ^2.0",
+                "drupal/core": "^10.2 || ^11",
+                "ext-openssl": "*"
+            },
+            "type": "drupal-module",
+            "extra": {
+                "drupal": {
+                    "version": "1.2.0",
+                    "datestamp": "1784268242",
+                    "security-coverage": {
+                        "status": "covered",
+                        "message": "Covered by Drupal's security advisory policy"
+                    }
+                }
+            },
+            "notification-url": "https://packages.drupal.org/8/downloads",
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "Filip Heymans",
+                    "homepage": "https://www.drupal.org/user/880584",
+                    "role": "Maintainer"
+                },
+                {
+                    "name": "Jeremy Declerck",
+                    "homepage": "https://www.drupal.org/user/3659100",
+                    "role": "Maintainer"
+                },
+                {
+                    "name": "Robin De Herdt",
+                    "homepage": "https://www.drupal.org/user/3555113",
+                    "role": "Maintainer"
+                }
+            ],
+            "description": "Provides a free, open-source Captcha alternative utilizing a proof-of-work mechanism to safeguard your website against spam and unwanted content.",
+            "homepage": "https://drupal.org/project/altcha",
+            "support": {
+                "source": "https://git.drupalcode.org/project/altcha",
+                "issues": "https://drupal.org/project/issues/altcha"
             }
         },
         {
@@ -3627,27 +3732,31 @@
             }
         },
         {
-            "name": "drupal/jquery_ui",
-            "version": "1.8.0",
+            "name": "drupal/honeypot",
+            "version": "2.2.2",
             "source": {
                 "type": "git",
-                "url": "https://git.drupalcode.org/project/jquery_ui.git",
-                "reference": "8.x-1.8"
+                "url": "https://git.drupalcode.org/project/honeypot.git",
+                "reference": "2.2.2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/jquery_ui-8.x-1.8.zip",
-                "reference": "8.x-1.8",
-                "shasum": "a53e99216a81d1e35fa357885656a2cf420f1a6a"
+                "url": "https://ftp.drupal.org/files/projects/honeypot-2.2.2.zip",
+                "reference": "2.2.2",
+                "shasum": "828872d31d1a2c37a818cacae7fcd77a60996c66"
             },
             "require": {
-                "drupal/core": "^9.2 || ^10 || ^11"
+                "drupal/core": "^10.3 || ^11"
+            },
+            "require-dev": {
+                "drupal/rules": "^4.0",
+                "drupal/webform": "^6.2"
             },
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "8.x-1.8",
-                    "datestamp": "1758954737",
+                    "version": "2.2.2",
+                    "datestamp": "1739854442",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -3660,201 +3769,36 @@
             ],
             "authors": [
                 {
-                    "name": "bnjmnm",
-                    "homepage": "https://www.drupal.org/user/2369194"
+                    "name": "Jeff Geerling",
+                    "homepage": "https://www.drupal.org/user/389011",
+                    "email": "geerlingguy@mac.com"
                 },
                 {
-                    "name": "jjeff",
-                    "homepage": "https://www.drupal.org/user/17190"
+                    "name": "manuel garcia",
+                    "homepage": "https://www.drupal.org/user/213194"
                 },
                 {
-                    "name": "lauriii",
-                    "homepage": "https://www.drupal.org/user/1078742"
+                    "name": "tr",
+                    "homepage": "https://www.drupal.org/user/202830"
                 },
                 {
-                    "name": "litwol",
-                    "homepage": "https://www.drupal.org/user/78134"
-                },
-                {
-                    "name": "mfb",
-                    "homepage": "https://www.drupal.org/user/12302"
-                },
-                {
-                    "name": "mfer",
-                    "homepage": "https://www.drupal.org/user/25701"
-                },
-                {
-                    "name": "mikelutz",
-                    "homepage": "https://www.drupal.org/user/2972409"
-                },
-                {
-                    "name": "nod_",
-                    "homepage": "https://www.drupal.org/user/598310"
-                },
-                {
-                    "name": "phenaproxima",
-                    "homepage": "https://www.drupal.org/user/205645"
-                },
-                {
-                    "name": "rajeshreeputra",
-                    "homepage": "https://www.drupal.org/user/3418561"
-                },
-                {
-                    "name": "robloach",
-                    "homepage": "https://www.drupal.org/user/61114"
-                },
-                {
-                    "name": "sun",
-                    "homepage": "https://www.drupal.org/user/54136"
-                },
-                {
-                    "name": "webchick",
-                    "homepage": "https://www.drupal.org/user/24967"
-                },
-                {
-                    "name": "wim leers",
-                    "homepage": "https://www.drupal.org/user/99777"
-                },
-                {
-                    "name": "zrpnr",
-                    "homepage": "https://www.drupal.org/user/1448368"
+                    "name": "vijaycs85",
+                    "homepage": "https://www.drupal.org/user/93488"
                 }
             ],
-            "description": "Provides jQuery UI library.",
-            "homepage": "https://www.drupal.org/project/jquery_ui",
+            "description": "Mitigates spam form submissions using the honeypot method.",
+            "homepage": "https://www.drupal.org/project/honeypot",
+            "keywords": [
+                "deterrent",
+                "form",
+                "honeypot",
+                "honeytrap",
+                "php",
+                "spam"
+            ],
             "support": {
-                "source": "https://git.drupalcode.org/project/jquery_ui"
-            }
-        },
-        {
-            "name": "drupal/jquery_ui_autocomplete",
-            "version": "2.1.0",
-            "source": {
-                "type": "git",
-                "url": "https://git.drupalcode.org/project/jquery_ui_autocomplete.git",
-                "reference": "2.1.0"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/jquery_ui_autocomplete-2.1.0.zip",
-                "reference": "2.1.0",
-                "shasum": "ecf9500d8bff6c3673e92019a09dcce87ac81fc6"
-            },
-            "require": {
-                "drupal/core": "^9.2 || ^10 || ^11",
-                "drupal/jquery_ui": "^1.7",
-                "drupal/jquery_ui_menu": "^2.1"
-            },
-            "type": "drupal-module",
-            "extra": {
-                "drupal": {
-                    "version": "2.1.0",
-                    "datestamp": "1717035046",
-                    "security-coverage": {
-                        "status": "covered",
-                        "message": "Covered by Drupal's security advisory policy"
-                    }
-                }
-            },
-            "notification-url": "https://packages.drupal.org/8/downloads",
-            "license": [
-                "GPL-2.0-or-later"
-            ],
-            "authors": [
-                {
-                    "name": "bnjmnm",
-                    "homepage": "https://www.drupal.org/user/2369194"
-                },
-                {
-                    "name": "lauriii",
-                    "homepage": "https://www.drupal.org/user/1078742"
-                },
-                {
-                    "name": "nod_",
-                    "homepage": "https://www.drupal.org/user/598310"
-                },
-                {
-                    "name": "phenaproxima",
-                    "homepage": "https://www.drupal.org/user/205645"
-                },
-                {
-                    "name": "Wim Leers",
-                    "homepage": "https://www.drupal.org/user/99777"
-                },
-                {
-                    "name": "zrpnr",
-                    "homepage": "https://www.drupal.org/user/1448368"
-                }
-            ],
-            "description": "Provides jQuery UI Autocomplete library.",
-            "homepage": "https://www.drupal.org/project/jquery_ui_autocomplete",
-            "support": {
-                "source": "https://git.drupalcode.org/project/jquery_ui_autocomplete"
-            }
-        },
-        {
-            "name": "drupal/jquery_ui_menu",
-            "version": "2.1.0",
-            "source": {
-                "type": "git",
-                "url": "https://git.drupalcode.org/project/jquery_ui_menu.git",
-                "reference": "2.1.0"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/jquery_ui_menu-2.1.0.zip",
-                "reference": "2.1.0",
-                "shasum": "9aa6958e52ea12c1cdedd7908c5aeb5309b8b4ea"
-            },
-            "require": {
-                "drupal/core": "^9.2 || ^10 || ^11",
-                "drupal/jquery_ui": "^1.7"
-            },
-            "type": "drupal-module",
-            "extra": {
-                "drupal": {
-                    "version": "2.1.0",
-                    "datestamp": "1717031358",
-                    "security-coverage": {
-                        "status": "covered",
-                        "message": "Covered by Drupal's security advisory policy"
-                    }
-                }
-            },
-            "notification-url": "https://packages.drupal.org/8/downloads",
-            "license": [
-                "GPL-2.0-or-later"
-            ],
-            "authors": [
-                {
-                    "name": "bnjmnm",
-                    "homepage": "https://www.drupal.org/user/2369194"
-                },
-                {
-                    "name": "lauriii",
-                    "homepage": "https://www.drupal.org/user/1078742"
-                },
-                {
-                    "name": "nod_",
-                    "homepage": "https://www.drupal.org/user/598310"
-                },
-                {
-                    "name": "phenaproxima",
-                    "homepage": "https://www.drupal.org/user/205645"
-                },
-                {
-                    "name": "Wim Leers",
-                    "homepage": "https://www.drupal.org/user/99777"
-                },
-                {
-                    "name": "zrpnr",
-                    "homepage": "https://www.drupal.org/user/1448368"
-                }
-            ],
-            "description": "Provides jQuery UI Menu library.",
-            "homepage": "https://www.drupal.org/project/jquery_ui_menu",
-            "support": {
-                "source": "https://git.drupalcode.org/project/jquery_ui_menu"
+                "source": "https://git.drupalcode.org/project/honeypot",
+                "issues": "https://www.drupal.org/project/issues/honeypot"
             }
         },
         {
@@ -3931,6 +3875,101 @@
                 "source": "https://git.drupalcode.org/project/key",
                 "issues": "http://drupal.org/project/key"
             }
+        },
+        {
+            "name": "drupal/klaro",
+            "version": "3.1.1",
+            "source": {
+                "type": "git",
+                "url": "https://git.drupalcode.org/project/klaro.git",
+                "reference": "3.1.1"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://ftp.drupal.org/files/projects/klaro-3.1.1.zip",
+                "reference": "3.1.1",
+                "shasum": "d6bb6fed0d7e6f2e5bb47eb9e7043613ec182041"
+            },
+            "require": {
+                "drupal/core": "^10.2 || ^11",
+                "drupal/klaro_js": "~3.1.0"
+            },
+            "type": "drupal-module",
+            "extra": {
+                "drupal": {
+                    "version": "3.1.1",
+                    "datestamp": "1782906912",
+                    "security-coverage": {
+                        "status": "covered",
+                        "message": "Covered by Drupal's security advisory policy"
+                    }
+                }
+            },
+            "notification-url": "https://packages.drupal.org/8/downloads",
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "jan kellermann",
+                    "homepage": "https://www.drupal.org/user/371731"
+                },
+                {
+                    "name": "jurgenhaas",
+                    "homepage": "https://www.drupal.org/user/168924"
+                },
+                {
+                    "name": "kulmjens",
+                    "homepage": "https://www.drupal.org/user/3595515"
+                },
+                {
+                    "name": "metalbote",
+                    "homepage": "https://www.drupal.org/user/2809357"
+                },
+                {
+                    "name": "sascha_meissner",
+                    "homepage": "https://www.drupal.org/user/3678470"
+                }
+            ],
+            "description": "Implements the Klaro! consent manager utility into Drupal.",
+            "homepage": "https://www.drupal.org/project/klaro",
+            "keywords": [
+                "Drupal"
+            ],
+            "support": {
+                "source": "https://git.drupalcode.org/project/klaro",
+                "issues": "https://www.drupal.org/project/issues/klaro"
+            }
+        },
+        {
+            "name": "drupal/klaro_js",
+            "version": "3.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://git.drupalcode.org/project/klaro_js.git",
+                "reference": "ae838c1c20e4cc6f8681a7920cc462f0f1332ad6"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://git.drupalcode.org/api/v4/projects/project%2Fklaro_js/repository/archive.zip?sha=ae838c1c20e4cc6f8681a7920cc462f0f1332ad6",
+                "reference": "ae838c1c20e4cc6f8681a7920cc462f0f1332ad6",
+                "shasum": ""
+            },
+            "type": "drupal-library",
+            "extra": {
+                "installer-name": "klaro",
+                "upstream-version": "v0.7.22"
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "Mirror of the Klaro consent manager javascript library tagged as a Drupal library.",
+            "homepage": "https://github.com/klaro-org/klaro-js/",
+            "support": {
+                "source": "https://git.drupalcode.org/project/klaro_js/-/tree/3.1.0"
+            },
+            "time": "2026-04-10T18:49:54+00:00"
         },
         {
             "name": "drupal/layout_builder_restrictions",
