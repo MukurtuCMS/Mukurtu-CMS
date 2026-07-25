@@ -17,6 +17,22 @@ targetEntityType: node
 bundle: place
 mode: grid_browse
 content:
+  field_communities:
+    type: entity_reference_label
+    label: inline
+    settings:
+      link: false
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  field_in_collection:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 2
+    region: content
   field_representative_media:
     type: entity_reference_entity_view
     label: hidden
@@ -30,12 +46,10 @@ hidden:
   comment: true
   field_all_related_content: true
   field_citation: true
-  field_communities: true
   field_content_type: true
   field_coverage: true
   field_coverage_description: true
   field_cultural_protocols: true
-  field_in_collection: true
   field_keywords: true
   field_local_contexts_labels_and_notices: true
   field_local_contexts_projects: true
