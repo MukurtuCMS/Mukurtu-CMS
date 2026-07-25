@@ -4,6 +4,9 @@ dependencies:
   config:
     - core.entity_view_mode.media.digital_heritage_full
     - core.entity_view_mode.media.digital_heritage_sidebar
+    - core.entity_view_mode.media.large
+    - core.entity_view_mode.media.medium
+    - core.entity_view_mode.media.small
     - core.entity_view_mode.media.small_250px_
   module:
     - blazy
@@ -19,15 +22,15 @@ filters:
     status: false
     weight: 3
     settings:
+      media_switch: ''
+      hybrid_style: ''
+      box_style: ''
+      box_media_style: ''
+      box_caption: ''
       filter_tags:
         img: img
         iframe: iframe
-      media_switch: ''
-      box_style: ''
-      box_media_style: ''
-      hybrid_style: ''
       use_data_uri: '0'
-      box_caption: ''
   editor_file_reference:
     id: editor_file_reference
     provider: editor
