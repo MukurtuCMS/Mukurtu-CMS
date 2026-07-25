@@ -30,6 +30,14 @@
         <a href="{{ url }}" rel="bookmark">{{ label }}</a>
       </h2>
       {{ title_suffix }}
+      {% if content_type_label %}
+        <div class="vertical-card__content-type">{{ content_type_label }}</div>
+      {% endif %}
+    </div>
+
+    <div class="vertical-card__content-body">
+      {{ content.community_protocol_list }}
+      {{ content.field_in_collection }}
     </div>
   </div>
 </article>

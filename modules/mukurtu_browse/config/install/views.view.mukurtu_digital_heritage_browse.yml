@@ -1308,7 +1308,7 @@ display:
           gesture_handling: false
           fitbounds_options: '{"padding":[0,0]}'
           reset_map:
-            control: false
+            control: true
             options: '{"position":"topleft","title":"Reset View"}'
           map_scale:
             control: false
