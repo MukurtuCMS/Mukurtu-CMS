@@ -1,0 +1,103 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_form_mode.node.submission
+    - field.field.node.digital_heritage.field_content_type
+    - node.type.digital_heritage
+  module:
+    - media_library
+    - options
+    - tagify
+    - text
+id: node.digital_heritage.submission
+targetEntityType: node
+bundle: digital_heritage
+mode: submission
+content:
+  title:
+    type: string_textfield
+    weight: -10
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_summary:
+    type: string_textfield
+    weight: -9
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_description:
+    type: text_textarea
+    weight: -8
+    region: content
+    settings:
+      rows: 9
+      placeholder: ''
+    third_party_settings: {  }
+  field_media_assets:
+    type: media_library_widget
+    weight: -7
+    region: content
+    settings:
+      media_types:
+        - audio
+        - document
+        - external_embed
+        - image
+        - remote_video
+        - soundcloud
+        - video
+    third_party_settings: {  }
+  field_category:
+    type: options_buttons
+    weight: -6
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_creator:
+    type: tagify_entity_reference_autocomplete_widget
+    weight: -5
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 0
+      placeholder: ''
+      suggestions_dropdown: 0
+      show_entity_id: 0
+      show_info_label: 0
+      info_label: ''
+      parent_selection: 1
+    third_party_settings: {  }
+hidden:
+  field_content_type: true
+  field_coverage: true
+  field_coverage_description: true
+  field_cultural_narrative: true
+  field_traditional_knowledge: true
+  field_date_description: true
+  field_source: true
+  field_identifier: true
+  field_rights_and_usage: true
+  field_knowledge_keepers: true
+  field_transcription: true
+  field_related_content: true
+  field_external_links: true
+  field_creative_commons: true
+  field_local_contexts_projects: true
+  field_local_contexts_labels_and_notices: true
+  field_rights_statements: true
+  field_location: true
+  field_original_date: true
+  field_contributor: true
+  field_format: true
+  field_keywords: true
+  field_language: true
+  field_people: true
+  field_publisher: true
+  field_subject: true
+  field_type: true

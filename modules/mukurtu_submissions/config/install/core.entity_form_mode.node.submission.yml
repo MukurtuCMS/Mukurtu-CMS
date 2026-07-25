@@ -1,0 +1,9 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+id: node.submission
+label: Submission
+targetEntityType: node
+cache: true

@@ -1,0 +1,13 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.digital_heritage
+id: digital_heritage
+label: 'Digital Heritage Item'
+target_entity_type_id: node
+target_bundle: digital_heritage
+allowed_media_types:
+  - image
+  - document
+access_expectations_enabled: true

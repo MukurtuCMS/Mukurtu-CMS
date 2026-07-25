@@ -1,0 +1,59 @@
+entity.mukurtu_submission_settings.collection:
+  path: '/admin/config/mukurtu/submissions'
+  defaults:
+    _entity_list: 'mukurtu_submission_settings'
+    _title: 'Public Submissions'
+  requirements:
+    _permission: 'administer mukurtu submissions'
+
+entity.mukurtu_submission_settings.add_form:
+  path: '/admin/config/mukurtu/submissions/add'
+  defaults:
+    _entity_form: 'mukurtu_submission_settings.add'
+    _title: 'Add submission settings'
+  requirements:
+    _entity_create_access: 'mukurtu_submission_settings'
+
+entity.mukurtu_submission_settings.edit_form:
+  path: '/admin/config/mukurtu/submissions/{mukurtu_submission_settings}'
+  defaults:
+    _entity_form: 'mukurtu_submission_settings.edit'
+    _title: 'Edit submission settings'
+  requirements:
+    _entity_access: 'mukurtu_submission_settings.update'
+
+entity.mukurtu_submission_settings.delete_form:
+  path: '/admin/config/mukurtu/submissions/{mukurtu_submission_settings}/delete'
+  defaults:
+    _entity_form: 'mukurtu_submission_settings.delete'
+    _title: 'Delete submission settings'
+  requirements:
+    _entity_access: 'mukurtu_submission_settings.delete'
+
+mukurtu_submissions.submit:
+  path: '/submit/{entity_type_id}/{bundle}'
+  defaults:
+    _form: '\Drupal\mukurtu_submissions\Form\PublicSubmissionForm'
+    _title_callback: '\Drupal\mukurtu_submissions\Form\PublicSubmissionForm::title'
+  requirements:
+    _custom_access: '\Drupal\mukurtu_submissions\Access\SubmissionAccessCheck::access'
+
+mukurtu_submissions.thank_you:
+  path: '/submit/{entity_type_id}/{bundle}/thank-you'
+  defaults:
+    _controller: '\Drupal\mukurtu_submissions\Controller\ThankYouController::view'
+    _title: 'Thank you'
+  requirements:
+    _access: 'TRUE'
+
+mukurtu_submissions.contact_submitter:
+  path: '/admin/content/pending-submissions/{mukurtu_submission}/contact'
+  defaults:
+    _form: '\Drupal\mukurtu_submissions\Form\ContactSubmitterForm'
+    _title: 'Contact submitter'
+  requirements:
+    _entity_access: 'mukurtu_submission.update'
+  options:
+    parameters:
+      mukurtu_submission:
+        type: entity:mukurtu_submission

@@ -1,0 +1,67 @@
+<?php
+
+/**
+ * @file
+ * Install, update, and uninstall functions for the Mukurtu Submissions module.
+ */
+
+use Drupal\user\Entity\User;
+
+/**
+ * Implements hook_install().
+ */
+function mukurtu_submissions_install($is_syncing): void {
+  if ($is_syncing) {
+    return;
+  }
+
+  $config = \Drupal::configFactory()->getEditable('mukurtu_submissions.settings');
+  if (!$config->get('service_account_uid')) {
+    $account = mukurtu_submissions_create_service_account();
+    $config->set('service_account_uid', (int) $account->id())->save();
+  }
+
+  foreach (['administrator', 'mukurtu_manager'] as $role_id) {
+    $role = \Drupal::entityTypeManager()->getStorage('user_role')->load($role_id);
+    if (!$role || !$role->id()) {
+      continue;
+    }
+    $changed = FALSE;
+    foreach (['administer mukurtu submissions', 'review mukurtu submissions'] as $permission) {
+      if (!$role->hasPermission($permission)) {
+        $role->grantPermission($permission);
+        $changed = TRUE;
+      }
+    }
+    if ($changed) {
+      $role->save();
+    }
+  }
+}
+
+/**
+ * Creates the blocked "Public Submissions" service account.
+ */
+function mukurtu_submissions_create_service_account(): User {
+  $account = User::create([
+    'name' => 'Public Submissions',
+    'mail' => 'public-submissions@' . \Drupal::request()->getHost(),
+    'status' => 0,
+    'pass' => \Drupal::service('password_generator')->generate(32),
+  ]);
+  $account->save();
+  return $account;
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function mukurtu_submissions_uninstall(): void {
+  $uid = \Drupal::config('mukurtu_submissions.settings')->get('service_account_uid');
+  if ($uid) {
+    $account = User::load($uid);
+    if ($account) {
+      $account->delete();
+    }
+  }
+}
