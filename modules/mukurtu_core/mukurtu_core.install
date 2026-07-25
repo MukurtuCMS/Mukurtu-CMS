@@ -3048,53 +3048,6 @@ function mukurtu_core_update_40086(): void {
 }
 
 /**
- * Install the klaro module for GDPR/cookie consent management.
- */
-function mukurtu_core_update_40087(): void {
-  \Drupal::service('module_installer')->install(['klaro']);
-  \Drupal::configFactory()->getEditable('klaro.settings')
-    ->set('show_toggle_button', TRUE)
-    ->save();
-  // Klaro only shows its consent UI to roles with the "use klaro"
-  // permission; grant it to visitors and logged-in users so the consent
-  // banner actually appears once a site enables any of Klaro's services.
-  user_role_grant_permissions('anonymous', ['use klaro']);
-  user_role_grant_permissions('authenticated', ['use klaro']);
-}
-
-/**
- * Install the SoundCloud klaro_app config so SoundCloud embeds can be
- * gated behind cookie consent the same way YouTube/Vimeo embeds already are.
- */
-function mukurtu_core_update_40088(): void {
-  $config_storage = \Drupal::service('config.storage');
-  $name = 'klaro.klaro_app.soundcloud';
-  if ($config_storage->exists($name)) {
-    return;
-  }
-  $profile_path = \Drupal::service('extension.list.profile')->getPath('mukurtu');
-  $source = new \Drupal\Core\Config\FileStorage(\Drupal::root() . '/' . $profile_path . '/config/install');
-  $data = $source->read($name);
-  if ($data !== FALSE) {
-    $config_storage->write($name, $data);
-  }
-}
-
-/**
- * Block unknown external resources by default so embeds from domains with
- * no named klaro_app (e.g. arbitrary External Embed media) are still gated
- * behind consent under a generic "Other services" prompt, instead of
- * rendering live until an admin adds a named service for that domain.
- */
-function mukurtu_core_update_40089(): void {
-  \Drupal::configFactory()->getEditable('klaro.settings')
-    ->set('block_unknown', TRUE)
-    ->set('block_unknown_label', 'Other services')
-    ->set('block_unknown_description', 'Allow loading of external resources from other services')
-    ->save();
-}
-
-/**
  * Show communities/category fields in Grid mode for digital_heritage and
  * person, fix collection's Grid mode to show field_collection_image instead
  * of the unused field_representative_media, add the collection.map_browse
@@ -3122,4 +3075,62 @@ function mukurtu_core_update_40087(): void {
       $config_factory->getEditable($config_name)->setData($data)->save(TRUE);
     }
   }
+}
+
+/**
+ * Enable Charts and GeoIP so the Visitors analytics reports render fully.
+ */
+function mukurtu_core_update_40088(): void {
+  \Drupal::service('module_installer')->install(['charts', 'charts_chartjs', 'visitors_geoip']);
+
+  \Drupal::configFactory()->getEditable('charts.settings')
+    ->set('charts_default_settings.library', 'chartjs')
+    ->save();
+}
+
+/**
+ * Install the klaro module for GDPR/cookie consent management.
+ */
+function mukurtu_core_update_40089(): void {
+  \Drupal::service('module_installer')->install(['klaro']);
+  \Drupal::configFactory()->getEditable('klaro.settings')
+    ->set('show_toggle_button', TRUE)
+    ->save();
+  // Klaro only shows its consent UI to roles with the "use klaro"
+  // permission; grant it to visitors and logged-in users so the consent
+  // banner actually appears once a site enables any of Klaro's services.
+  user_role_grant_permissions('anonymous', ['use klaro']);
+  user_role_grant_permissions('authenticated', ['use klaro']);
+}
+
+/**
+ * Install the SoundCloud klaro_app config so SoundCloud embeds can be
+ * gated behind cookie consent the same way YouTube/Vimeo embeds already are.
+ */
+function mukurtu_core_update_40090(): void {
+  $config_storage = \Drupal::service('config.storage');
+  $name = 'klaro.klaro_app.soundcloud';
+  if ($config_storage->exists($name)) {
+    return;
+  }
+  $profile_path = \Drupal::service('extension.list.profile')->getPath('mukurtu');
+  $source = new \Drupal\Core\Config\FileStorage(\Drupal::root() . '/' . $profile_path . '/config/install');
+  $data = $source->read($name);
+  if ($data !== FALSE) {
+    $config_storage->write($name, $data);
+  }
+}
+
+/**
+ * Block unknown external resources by default so embeds from domains with
+ * no named klaro_app (e.g. arbitrary External Embed media) are still gated
+ * behind consent under a generic "Other services" prompt, instead of
+ * rendering live until an admin adds a named service for that domain.
+ */
+function mukurtu_core_update_40091(): void {
+  \Drupal::configFactory()->getEditable('klaro.settings')
+    ->set('block_unknown', TRUE)
+    ->set('block_unknown_label', 'Other services')
+    ->set('block_unknown_description', 'Allow loading of external resources from other services')
+    ->save();
 }

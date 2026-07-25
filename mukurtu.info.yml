@@ -44,6 +44,9 @@ install:
   - google_tag
   - klaro
   - visitors
+  - visitors_geoip
+  - charts
+  - charts_chartjs
   - twig_tweak
   - facets_reset_button
   - flat_taxonomy
