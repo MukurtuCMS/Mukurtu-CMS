@@ -79,3 +79,39 @@ function mukurtu_place_update_40005(): void {
     $config->save();
   }
 }
+
+/**
+ * Show the communities field in Grid mode, and field_in_collection in both
+ * List and Grid mode, matching every other content type's browse displays
+ * (#1624).
+ */
+function mukurtu_place_update_40006(): void {
+  $config_source = new \Drupal\Core\Config\FileStorage(
+    \Drupal::service('extension.list.module')->getPath('mukurtu_place') . '/config/install'
+  );
+  $config_factory = \Drupal::configFactory();
+
+  foreach ([
+    'core.entity_view_display.node.place.grid_browse',
+    'core.entity_view_display.node.place.browse',
+  ] as $config_name) {
+    $data = $config_source->read($config_name);
+    if ($data) {
+      $config_factory->getEditable($config_name)->setData($data)->save(TRUE);
+    }
+  }
+}
+
+/**
+ * Show field_in_collection in Map mode, matching List and Grid (#1624).
+ */
+function mukurtu_place_update_40007(): void {
+  $config_source = new \Drupal\Core\Config\FileStorage(
+    \Drupal::service('extension.list.module')->getPath('mukurtu_place') . '/config/install'
+  );
+  $config_name = 'core.entity_view_display.node.place.map_browse';
+  $data = $config_source->read($config_name);
+  if ($data) {
+    \Drupal::configFactory()->getEditable($config_name)->setData($data)->save(TRUE);
+  }
+}
