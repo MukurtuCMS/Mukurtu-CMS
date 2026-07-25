@@ -1,0 +1,17 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - block_content.type.call_to_action
+id: block_content.call_to_action.changed
+field_name: changed
+entity_type: block_content
+bundle: call_to_action
+label: Changed
+description: 'The time that the content block was last edited.'
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: changed

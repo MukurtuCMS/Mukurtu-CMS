@@ -41,7 +41,8 @@
         .field--name-title,
         .dictionary-word__teaser .field,
         .dictionary-word-tabs .field,
-        .field--name-field-sections .field)) {
+        .field--name-field-sections .field,
+        .block-wrapper .field)) {
       @include mixins.divider;
     }
 
@@ -102,6 +103,24 @@
 
     @include layout.layout--full-width-grid-item;
   }
+}
+
+// Basic pages use full-width layout (12 columns instead of 8).
+.page-node-type-page .full-node__main {
+  @include include-media.media('>=lg') {
+    grid-column: 1 / span 12;
+  }
+
+  @include include-media.media('>=2xl') {
+    grid-column: 2 / span 12;
+  }
+}
+
+// Horizontal divider block placed via Layout Builder.
+.layout-builder-divider {
+  border: none;
+  border-block-start: 5px solid var(--mukurtu-view-row-divider-color);
+  margin-block: var(--v-space-xs);
 }
 
 // Moderation state banner -- injected into title_prefix for unpublished nodes
