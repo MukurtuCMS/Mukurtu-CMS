@@ -3028,3 +3028,14 @@ function mukurtu_core_update_40087(): void {
     }
   }
 }
+
+/**
+ * Enable Charts and GeoIP so the Visitors analytics reports render fully.
+ */
+function mukurtu_core_update_40088(): void {
+  \Drupal::service('module_installer')->install(['charts', 'charts_chartjs', 'visitors_geoip']);
+
+  \Drupal::configFactory()->getEditable('charts.settings')
+    ->set('charts_default_settings.library', 'chartjs')
+    ->save();
+}
