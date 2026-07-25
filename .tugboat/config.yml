@@ -116,6 +116,13 @@ services:
           # Run any pending update hooks introduced by this branch and clear
           # caches so templates and config changes take effect immediately.
           sudo -E -u www-data ./vendor/bin/drush updb -y
+          # Disable Honeypot's time-based submission check on this preview
+          # only. Its 5-second default rejects Playwright's near-instant
+          # form fills as spam, which would otherwise fail every automated
+          # login. Production sites keep the real default (see
+          # mukurtu_bot_protection.install / mukurtu_core.install) - this
+          # override only ever applies to Tugboat's test/preview database.
+          sudo -E -u www-data ./vendor/bin/drush config:set honeypot.settings time_limit 0 -y
           sudo -E -u www-data ./vendor/bin/drush cr
       update:
         # Ensure settings.php is always present with the correct database
@@ -145,6 +152,9 @@ services:
           cd ~/mukurtu
           if sudo -E -u www-data ./vendor/bin/drush core:status 2>/dev/null; then
             sudo -E -u www-data ./vendor/bin/drush updb -y
+            # See the matching override in the build phase above for why
+            # this is disabled only on this preview, not in production.
+            sudo -E -u www-data ./vendor/bin/drush config:set honeypot.settings time_limit 0 -y
             sudo -E -u www-data ./vendor/bin/drush cr
           else
             echo "Drupal not yet installed; updb/cr will run after site-install in the build phase."
