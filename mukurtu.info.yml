@@ -42,6 +42,7 @@ install:
   - views_ui
   - automated_cron
   - google_tag
+  - klaro
   - visitors
   - visitors_geoip
   - charts
