@@ -174,9 +174,12 @@ class MukurtuResourceFetcher implements ResourceFetcherInterface {
       $data = Json::decode((string) $response->getBody());
     }
     catch (\Throwable $e) {
-      $this->logger->warning('YouTube Data API fallback request failed for video @id: @message', [
+      // Deliberately omit $e->getMessage(): Guzzle exception messages
+      // include the full request URI, which contains the API key as a
+      // query parameter, and would otherwise leak it into watchdog logs.
+      $this->logger->warning('YouTube Data API fallback request failed for video @id (@class).', [
         '@id' => $video_id,
-        '@message' => $e->getMessage(),
+        '@class' => get_class($e),
       ]);
       return NULL;
     }
