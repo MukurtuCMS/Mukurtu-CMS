@@ -3134,3 +3134,31 @@ function mukurtu_core_update_40091(): void {
     ->set('block_unknown_description', 'Allow loading of external resources from other services')
     ->save();
 }
+
+/**
+ * Defensively ensure the YouTube/Vimeo klaro_app configs exist, in case they
+ * were not picked up when the klaro module was enabled in update 40089.
+ */
+function mukurtu_core_update_40092(): void {
+  $config_storage = \Drupal::service('config.storage');
+  $module_path = \Drupal::service('extension.list.module')->getPath('klaro');
+  $source = new \Drupal\Core\Config\FileStorage(\Drupal::root() . '/' . $module_path . '/config/install');
+  foreach (['klaro.klaro_app.youtube', 'klaro.klaro_app.vimeo'] as $name) {
+    if ($config_storage->exists($name)) {
+      continue;
+    }
+    $data = $source->read($name);
+    if ($data !== FALSE) {
+      $config_storage->write($name, $data);
+    }
+  }
+}
+
+/**
+ * Install the key module, needed for the optional YouTube Data API key
+ * fallback used when the standard oEmbed fetch to YouTube is blocked on a
+ * given host (issue #565).
+ */
+function mukurtu_core_update_40093(): void {
+  \Drupal::service('module_installer')->install(['key']);
+}
