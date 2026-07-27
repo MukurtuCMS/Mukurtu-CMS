@@ -1,0 +1,52 @@
+<?php
+
+/**
+ * @file
+ * Install functions for the Mukurtu Bot Protection module.
+ */
+
+use Drupal\captcha\Entity\CaptchaPoint;
+
+/**
+ * Implements hook_install().
+ *
+ * The captcha module ships user_register_form, user_pass, and
+ * user_login_form CAPTCHA points disabled by default. Their config names
+ * already belong to captcha, so we can't ship our own config/install
+ * overrides for them (config/install collisions are resolved by install
+ * order, which isn't ours to control). Enabling them here instead
+ * guarantees the correct end state regardless of install order.
+ */
+function mukurtu_bot_protection_install($is_syncing) {
+  foreach (['user_register_form', 'user_pass', 'user_login_form'] as $id) {
+    $point = CaptchaPoint::load($id);
+    if ($point) {
+      $point->setStatus(TRUE)->save();
+    }
+  }
+
+  // Explicitly assert the zero-config ALTCHA challenge as the default
+  // backend, rather than relying on it merely happening to match captcha
+  // module's own shipped default. reCAPTCHA and Turnstile require an admin
+  // to supply external credentials, so they must never be active out of
+  // the box.
+  \Drupal::configFactory()->getEditable('captcha.settings')
+    ->set('default_challenge', 'altcha/ALTCHA')
+    ->save();
+
+  // Honeypot needs no external credentials either, so protect the same
+  // forms with it by default alongside the basic CAPTCHA challenge.
+  $honeypot_forms = [
+    'user_register_form',
+    'user_pass',
+    'user_login_form',
+    'contact_message_feedback_form',
+    'comment_comment_form',
+  ];
+  $honeypot_config = \Drupal::configFactory()->getEditable('honeypot.settings');
+  $form_settings = $honeypot_config->get('form_settings') ?? [];
+  foreach ($honeypot_forms as $form_id) {
+    $form_settings[$form_id] = TRUE;
+  }
+  $honeypot_config->set('form_settings', $form_settings)->save();
+}

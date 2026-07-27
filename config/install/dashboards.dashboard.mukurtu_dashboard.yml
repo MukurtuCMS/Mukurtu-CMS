@@ -3,6 +3,7 @@ status: true
 dependencies:
   module:
     - layout_builder_restrictions
+    - mukurtu_bot_protection
     - mukurtu_setup
 third_party_settings:
   layout_builder_restrictions:
@@ -203,6 +204,20 @@ sections:
           depth: null
           expand_all_items: false
         weight: 5
+        additional: {  }
+      3f8b6c1a-2e4d-4a9f-9c7b-5d1e8a2f6b3c:
+        uuid: 3f8b6c1a-2e4d-4a9f-9c7b-5d1e8a2f6b3c
+        region: three
+        configuration:
+          id: 'system_menu_block:dashboard-security'
+          label: Security
+          label_display: visible
+          provider: system
+          context_mapping: {  }
+          level: 1
+          depth: null
+          expand_all_items: false
+        weight: 9
         additional: {  }
       a663f15a-8760-424c-9433-c3f97fa8b623:
         uuid: a663f15a-8760-424c-9433-c3f97fa8b623
