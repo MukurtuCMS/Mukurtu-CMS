@@ -40,6 +40,8 @@ class LocalContextsLabelFormatter extends FormatterBase {
           '#img_url' => $label->img_url,
           '#audio_url' => $label->audio_url,
           '#community' => $label->community,
+          '#locale' => $label->locale,
+          '#language' => $label->language,
           '#translations' => $label->translations,
           '#dialog_id' => Html::getUniqueId('lc-label'),
         ];
@@ -52,6 +54,8 @@ class LocalContextsLabelFormatter extends FormatterBase {
           '#text' => $notice->default_text,
           '#svg_url' => $notice->svg_url,
           '#img_url' => $notice->img_url,
+          '#locale' => $notice->locale,
+          '#language' => $notice->language,
           '#translations' => $notice->translations,
           '#dialog_id' => Html::getUniqueId('lc-notice'),
         ];
