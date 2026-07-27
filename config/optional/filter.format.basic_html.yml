@@ -2,9 +2,9 @@ langcode: en
 status: true
 dependencies:
   config:
-    - core.entity_view_mode.media.digital_heritage_full
-    - core.entity_view_mode.media.digital_heritage_sidebar
-    - core.entity_view_mode.media.small_250px_
+    - core.entity_view_mode.media.image_with_description
+    - core.entity_view_mode.media.teaser_featured
+    - core.entity_view_mode.media.dictionary_word_thumbnail
   module:
     - blazy
     - editor
@@ -73,11 +73,11 @@ filters:
     status: true
     weight: 100
     settings:
-      default_view_mode: digital_heritage_full
+      default_view_mode: image_with_description
       allowed_view_modes:
-        digital_heritage_full: digital_heritage_full
-        digital_heritage_sidebar: digital_heritage_sidebar
-        small_250px_: small_250px_
+        image_with_description: image_with_description
+        teaser_featured: teaser_featured
+        dictionary_word_thumbnail: dictionary_word_thumbnail
         small: small
         medium: medium
         large: large

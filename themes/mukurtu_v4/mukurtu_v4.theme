@@ -269,7 +269,7 @@ function mukurtu_v4_preprocess_media(array &$variables) {
   // form_selection) may also set these, but doing it here ensures the
   // variables are always available regardless of which hook fires first.
   $view_mode = $variables['elements']['#view_mode'] ?? '';
-  $thumbnail_view_modes = ['carousel_thumbnail', 'media_assets', 'digital_heritage_sidebar'];
+  $thumbnail_view_modes = ['carousel_thumbnail', 'media_assets', 'teaser_featured'];
   if (in_array($view_mode, $thumbnail_view_modes)) {
     $bundle = $media->bundle();
     if ($bundle === 'audio') {
@@ -340,9 +340,9 @@ function mukurtu_v4_preprocess_media__audio__browse(array &$variables): void {
 }
 
 /**
- * Implements template_preprocess_media__audio__digital_heritage_sidebar().
+ * Implements template_preprocess_media__audio__teaser_featured().
  */
-function mukurtu_v4_preprocess_media__audio__digital_heritage_sidebar(array &$variables): void {
+function mukurtu_v4_preprocess_media__audio__teaser_featured(array &$variables): void {
   $route = \Drupal::routeMatch()->getRouteName();
   $variables['skip_player'] = in_array($route, [
     'entity.community.canonical',

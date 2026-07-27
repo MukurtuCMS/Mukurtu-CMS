@@ -2,7 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
-    - core.entity_view_mode.media.digital_heritage_sidebar
+    - core.entity_view_mode.media.image_with_description
     - media.type.audio
   module:
     - blazy
@@ -12,22 +12,11 @@ third_party_settings:
   layout_builder:
     enabled: false
     allow_custom: false
-id: media.audio.digital_heritage_sidebar
+id: media.audio.image_with_description
 targetEntityType: media
 bundle: audio
-mode: digital_heritage_sidebar
+mode: image_with_description
 content:
-  field_thumbnail:
-    type: image
-    label: hidden
-    settings:
-      image_link: ''
-      image_style: carousel_thumbnail
-      image_loading:
-        attribute: lazy
-    third_party_settings: {  }
-    weight: 0
-    region: content
   field_media_audio_file:
     type: file_audio
     label: hidden
@@ -38,8 +27,8 @@ content:
       multiple_file_display_type: tags
     third_party_settings:
       blazy:
-        blazy: false
-    weight: 1
+        blazy: true
+    weight: 0
     region: content
 hidden:
   created: true
@@ -49,6 +38,7 @@ hidden:
   field_identifier: true
   field_media_tags: true
   field_people: true
+  field_thumbnail: true
   field_transcription: true
   flag_export_media: true
   langcode: true
