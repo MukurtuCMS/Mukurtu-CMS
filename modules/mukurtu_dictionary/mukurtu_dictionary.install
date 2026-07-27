@@ -1276,3 +1276,61 @@ function mukurtu_dictionary_update_40033(): void {
     $config->save();
   }
 }
+
+/**
+ * Show field_in_collection in List mode for dictionary_word and word_list,
+ * matching every other content type's browse display, and show
+ * field_in_word_list on dictionary_word (#1624).
+ */
+function mukurtu_dictionary_update_40034(): void {
+  $config_source = new \Drupal\Core\Config\FileStorage(
+    \Drupal::service('extension.list.module')->getPath('mukurtu_dictionary') . '/config/install'
+  );
+  $config_factory = \Drupal::configFactory();
+
+  foreach ([
+    'core.entity_view_display.node.dictionary_word.browse',
+    'core.entity_view_display.node.word_list.browse',
+  ] as $config_name) {
+    $data = $config_source->read($config_name);
+    if ($data) {
+      $config_factory->getEditable($config_name)->setData($data)->save(TRUE);
+    }
+  }
+}
+
+/**
+ * Enable the Leaflet "Reset View" recenter control on /dictionary's Map
+ * mode, matching /browse and /digital-heritage (#1624).
+ */
+function mukurtu_dictionary_update_40035(): void {
+  $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_dictionary');
+  if ($config->isNew()) {
+    return;
+  }
+  $key = 'display.mukurtu_dictionary_block_map.display_options.style.options.reset_map.control';
+  if ($config->get($key) !== NULL) {
+    $config->set($key, TRUE)->save();
+  }
+}
+
+/**
+ * Fix /dictionary's Map mode popups, which rendered dictionary_word and
+ * word_list using Drupal's ":default" view mode instead of the dedicated
+ * map_browse teaser mode -- the view_modes mapping had the two inverted
+ * (#1624).
+ */
+function mukurtu_dictionary_update_40036(): void {
+  $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_dictionary');
+  if ($config->isNew()) {
+    return;
+  }
+  $prefix = 'display.mukurtu_dictionary_block_map.display_options.row.options.view_modes.entity:node.';
+  if ($config->get($prefix . ':default') === NULL) {
+    return;
+  }
+  $config->set($prefix . ':default', 'default');
+  $config->set($prefix . 'dictionary_word', 'map_browse');
+  $config->set($prefix . 'word_list', 'map_browse');
+  $config->save();
+}

@@ -64,6 +64,14 @@
   .region__highlighted {
     @include layout.layout--full-width-grid;
 
+    // The super admin warning banner is injected into this region directly
+    // (not through Drupal's messenger/status_messages, to avoid a duplicate
+    // contentinfo landmark - see mukurtu_core_preprocess_page()), so it needs
+    // the same grid placement as .messages-list below.
+    .mukurtu-super-admin-warning-wrapper {
+      @include layout.layout--full-width-grid-item;
+    }
+
     .messages-list {
       grid-column: 1 / -1;
 
