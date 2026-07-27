@@ -92,7 +92,16 @@
 /* mukurtu_v4's global `a` rule sets color and text-decoration-color together
  * via the `text-decoration` shorthand, and its extlink icon SVGs are colored
  * with an explicit fill/stroke rather than currentColor - none of that
- * follows from overriding `color` alone, so each is overridden explicitly. */
+ * follows from overriding `color` alone, so each is overridden explicitly.
+ *
+ * This hardcoded white is only safe against Gin's warning background
+ * (--gin-bg-warning, always a dark tone in both light and dark Gin mode) and
+ * would fail contrast against mukurtu_v4's own light warning background if
+ * that were ever the *only* one in play. That fallback-only case isn't
+ * reachable today: this banner only renders for UID 1, and gin_toolbar
+ * loads Gin's color variables globally on every page - front end included -
+ * for any user with toolbar access, so the Gin branch above is always the
+ * one that applies here. */
 .mukurtu-super-admin-warning__text a,
 .mukurtu-super-admin-warning__text a:hover,
 .mukurtu-super-admin-warning__text a:active {
