@@ -68,18 +68,6 @@
  */
 #}
 
-{# If there's more than 1 media asset, render code for carousels. #}
-{% set num_media_assets = content.field_page_media_assets ? content.field_page_media_assets|children|length : 0 %}
-{% if num_media_assets > 1 %}
-  {% set carousels = true %}
-{# If there's exactly one media asset, render the field without carousel code. #}
-{% elseif num_media_assets == 1 %}
-  {% set carousels = false %}
-{% else %}
-{# If there are no media assets, don't render the field at all. #}
-  {% set carousels = null %}
-{% endif %}
-
 <article{{ attributes }}>
   <div{{ content_attributes }} class="full-node">
     {{ title_prefix }}
@@ -89,22 +77,7 @@
       <div class="full-node__main">
         <div class="full-node__content">
 
-          {{ content.body }}
-
-          {% if carousels %}
-            <div class="media-carousels" data-id="{{ node.id }}">
-              <section class="splide media-carousel" aria-label="Media Assets Carousel">
-                {{ content.field_page_media_assets }}
-              </section>
-
-              <section class="splide thumbnail-carousel" aria-label="Thumbnail Carousel">
-                {{ thumbnail_display }}
-              </section>
-            </div>
-
-          {% elseif carousels == false  %}
-            {{ content.field_page_media_assets }}
-          {% endif %}
+          {{ content }}
 
         </div>
 

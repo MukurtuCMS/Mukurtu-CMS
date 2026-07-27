@@ -1,0 +1,7 @@
+langcode: en
+status: true
+dependencies: {  }
+id: call_to_action
+label: 'Call to action'
+revision: false
+description: 'A block with optional descriptive text and a button link.'

@@ -1,0 +1,42 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - block_content.type.local_contexts_block
+    - field.field.block_content.local_contexts_block.field_lc_labels_and_notices
+    - field.field.block_content.local_contexts_block.field_local_contexts_projects
+  module:
+    - mukurtu_local_contexts
+id: block_content.local_contexts_block.default
+targetEntityType: block_content
+bundle: local_contexts_block
+mode: default
+content:
+  field_local_contexts_projects:
+    type: local_contexts_project
+    weight: 0
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_lc_labels_and_notices:
+    type: local_contexts_label_and_notice
+    weight: 1
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  info:
+    type: string_textfield
+    weight: -5
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  langcode:
+    type: language_select
+    weight: 2
+    region: content
+    settings:
+      include_locked: true
+    third_party_settings: {  }
+hidden: {  }

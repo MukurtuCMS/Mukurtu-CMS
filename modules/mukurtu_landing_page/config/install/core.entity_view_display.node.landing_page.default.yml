@@ -38,6 +38,9 @@ third_party_settings:
         - layout_onecol
       denylisted_blocks: {  }
       allowlisted_blocks:
+        'Inline blocks':
+          - 'inline_block:basic'
+          - 'inline_block:local_contexts_block'
         'Lists (Views)':
           - 'views_block:browse_by_community-community_browse_block'
           - 'views_block:mukurtu_browse_by_map-map_block'
@@ -51,7 +54,6 @@ third_party_settings:
         - Facets
         - Forms
         - Help
-        - 'Inline blocks'
         - Menus
         - 'Organic Groups'
         - Subscriptions
