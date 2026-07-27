@@ -15,6 +15,7 @@ class LocalContextsLabel extends LocalContextsHubBase {
   public $audio_url;
   public $community;
   public $default_text;
+  public $locale;
   public $language;
   public $translations;
 
@@ -30,7 +31,7 @@ class LocalContextsLabel extends LocalContextsHubBase {
       ->condition('l.id', $this->label_id)
       ->fields('l', [
         'id', 'name', 'img_url', 'svg_url',
-        'audio_url', 'community', 'default_text', 'language',
+        'audio_url', 'community', 'default_text', 'locale', 'language',
       ]);
     $result = $query->execute();
 
@@ -46,6 +47,7 @@ class LocalContextsLabel extends LocalContextsHubBase {
     $this->audio_url = $label['audio_url'] ?? NULL;
     $this->community = $label['community'] ?? '';
     $this->default_text = $label['default_text'] ?? '';
+    $this->locale = $label['locale'] ?? NULL;
     $this->language = $label['language'] ?? NULL;
 
     $this->translations = $this->indexTranslations($tResult->fetchAll(\PDO::FETCH_ASSOC));

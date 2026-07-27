@@ -2,6 +2,8 @@
 
 namespace Drupal\mukurtu_local_contexts;
 
+use Drupal\Component\Utility\Html;
+
 class LocalContextsProject extends LocalContextsHubBase {
 
   /**
@@ -143,7 +145,7 @@ class LocalContextsProject extends LocalContextsHubBase {
     $query = $this->db->select('mukurtu_local_contexts_labels', 'l')
       ->condition('l.project_id', $this->id)
       ->condition('l.tk_or_bc', $tk_or_bc)
-      ->fields('l', ['id', 'name', 'img_url', 'svg_url', 'audio_url', 'default_text', 'language']);
+      ->fields('l', ['id', 'name', 'img_url', 'svg_url', 'audio_url', 'default_text', 'locale', 'language']);
     $result = $query->execute();
 
     $labels = [];
@@ -155,8 +157,10 @@ class LocalContextsProject extends LocalContextsHubBase {
         'svg_url' => $label['svg_url'],
         'audio_url' => $label['audio_url'],
         'text' => $label['default_text'],
+        'locale' => $label['locale'],
         'language' => $label['language'],
         'translations' => [],
+        'dialog_id' => Html::getUniqueId('lc-label'),
       ];
     }
 
@@ -182,7 +186,7 @@ class LocalContextsProject extends LocalContextsHubBase {
   public function getNotices() {
     $query = $this->db->select('mukurtu_local_contexts_notices', 'n')
       ->condition('n.project_id', $this->id)
-      ->fields('n', ['project_id', 'type', 'name', 'img_url', 'svg_url', 'default_text', 'language']);
+      ->fields('n', ['project_id', 'type', 'name', 'img_url', 'svg_url', 'default_text', 'locale', 'language']);
     $result = $query->execute();
 
     $notices = [];
@@ -195,8 +199,10 @@ class LocalContextsProject extends LocalContextsHubBase {
         'img_url' => $notice['img_url'],
         'svg_url' => $notice['svg_url'],
         'text' => $notice['default_text'],
+        'locale' => $notice['locale'],
         'language' => $notice['language'],
         'translations' => [],
+        'dialog_id' => Html::getUniqueId('lc-notice'),
       ];
     }
 

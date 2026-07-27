@@ -2158,7 +2158,7 @@ label.form-required::after {
   color: var(--brand-text-color);
 }
 .local-contexts-dialog__tab:focus-visible {
-  outline: 2px solid var(--focus-color);
+  outline: 2px solid var(--brand-primary-dark);
   outline-offset: 2px;
 }
 .local-contexts-dialog__tab[aria-selected=true] {

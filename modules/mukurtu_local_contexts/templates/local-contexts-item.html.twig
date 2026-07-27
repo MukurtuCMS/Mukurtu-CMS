@@ -28,37 +28,37 @@
       </div>
       <div class="local-contexts-dialog__tabpanel" id="{{ dialog_id }}-panel-0" role="tabpanel" aria-labelledby="{{ dialog_id }}-tab-0">
         <h2 class="local-contexts-dialog__title">{{ name }}</h2>
-        <div class="local-contexts-dialog__text">{{ text }}</div>
+        <div class="local-contexts-dialog__text"{% if locale %} lang="{{ locale }}"{% endif %}>{{ text }}</div>
       </div>
       {% for translation in translations %}
         <div class="local-contexts-dialog__tabpanel" id="{{ dialog_id }}-panel-{{ loop.index }}" role="tabpanel" aria-labelledby="{{ dialog_id }}-tab-{{ loop.index }}" hidden>
           {% if translation.name %}
-            <h2 class="local-contexts-dialog__title">{{ translation.name }}</h2>
+            <h2 class="local-contexts-dialog__title"{% if translation.locale %} lang="{{ translation.locale }}"{% endif %}>{{ translation.name }}</h2>
           {% endif %}
           {% if translation.text %}
-            <div class="local-contexts-dialog__text">{{ translation.text }}</div>
+            <div class="local-contexts-dialog__text"{% if translation.locale %} lang="{{ translation.locale }}"{% endif %}>{{ translation.text }}</div>
           {% endif %}
         </div>
       {% endfor %}
     {% elseif translations %}
       <h2 class="local-contexts-dialog__title">{{ name }}</h2>
-      <div class="local-contexts-dialog__text">{{ text }}</div>
+      <div class="local-contexts-dialog__text"{% if locale %} lang="{{ locale }}"{% endif %}>{{ text }}</div>
       {% for translation in translations %}
         <div class="local-contexts-dialog__translation">
           {% if translation.language %}
             <div class="local-contexts-dialog__translation-language">{{ translation.language }}</div>
           {% endif %}
           {% if translation.name %}
-            <div class="local-contexts-dialog__translation-name">{{ translation.name }}</div>
+            <div class="local-contexts-dialog__translation-name"{% if translation.locale %} lang="{{ translation.locale }}"{% endif %}>{{ translation.name }}</div>
           {% endif %}
           {% if translation.text %}
-            <div class="local-contexts-dialog__translation-text">{{ translation.text }}</div>
+            <div class="local-contexts-dialog__translation-text"{% if translation.locale %} lang="{{ translation.locale }}"{% endif %}>{{ translation.text }}</div>
           {% endif %}
         </div>
       {% endfor %}
     {% else %}
       <h2 class="local-contexts-dialog__title">{{ name }}</h2>
-      <div class="local-contexts-dialog__text">{{ text }}</div>
+      <div class="local-contexts-dialog__text"{% if locale %} lang="{{ locale }}"{% endif %}>{{ text }}</div>
     {% endif %}
     {% if audio_url %}
       <div class="local-contexts-dialog__audio">

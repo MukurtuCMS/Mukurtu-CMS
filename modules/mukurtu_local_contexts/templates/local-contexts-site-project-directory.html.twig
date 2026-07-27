@@ -8,8 +8,10 @@ project array has: ['id', 'provider_id', 'title', 'privacy', 'updated']
   "svg_url" => "https://storage.googleapis.com/local-context-hub-staging.appspot.com/labels/tklabels/tk-outreach.svg",
   "text" => "This Label is being used to indicate that this material is traditionally and usually not publicly available...",
   "audio_url" => "https://storage.googleapis.com/local-context-hub-staging.appspot.com/labels/tklabels/tk-outreach.mp3",
+  "locale" => "en",
   "language" => "English",
   "translations" => [ TRANSLATION_INDEX => ["locale" => ..., "language" => ..., "name" => ..., "text" => ...], ... ],
+  "dialog_id" => "lc-label--123",
 ]
 
 'notices' format:
@@ -19,8 +21,10 @@ NOTICE_UUID:notice_type => [
   "name" => "Traditional Knowledge (TK) Notice",
   "svg_url" => "https://storage.googleapis.com/local-context-hub-staging.appspot.com/labels/notices/tk-notice.svg",
   "text" => "The TK (Traditional Knowledge) Notice is a visible notification that there are accompanying cultural rights and responsibilities that need further...",
+  "locale" => "en",
   "language" => "English",
   "translations" => [ TRANSLATION_INDEX => ["locale" => ..., "language" => ..., "name" => ..., "text" => ...], ... ],
+  "dialog_id" => "lc-notice--123",
 ]
 
 #}
@@ -40,7 +44,7 @@ NOTICE_UUID:notice_type => [
             <div class="tk-label">
               <img src="{{ label.svg_url ?? label.img_url }}" alt="{{ label.name }}">
               <div class="label-content">
-                {% set label_tab_id = project.id ~ '-' ~ label.id %}
+                {% set label_tab_id = label.dialog_id %}
                 {% if label.translations and label.language %}
                   <div class="local-contexts-dialog__tabs" role="tablist" aria-label="{{ label.name }}">
                     <button type="button" class="local-contexts-dialog__tab" role="tab" aria-selected="true" aria-controls="{{ label_tab_id }}-panel-0" id="{{ label_tab_id }}-tab-0">{{ label.language }}</button>
@@ -50,21 +54,21 @@ NOTICE_UUID:notice_type => [
                   </div>
                   <div class="local-contexts-dialog__tabpanel" id="{{ label_tab_id }}-panel-0" role="tabpanel" aria-labelledby="{{ label_tab_id }}-tab-0">
                     <h4 class="label__name">{{ label.name }}</h4>
-                    <div class="text">{{ label.text }}</div>
+                    <div class="text"{% if label.locale %} lang="{{ label.locale }}"{% endif %}>{{ label.text }}</div>
                   </div>
                   {% for translation in label.translations %}
                     <div class="local-contexts-dialog__tabpanel" id="{{ label_tab_id }}-panel-{{ loop.index }}" role="tabpanel" aria-labelledby="{{ label_tab_id }}-tab-{{ loop.index }}" hidden>
                       {% if translation.name %}
-                        <h4 class="label__name">{{ translation.name }}</h4>
+                        <h4 class="label__name"{% if translation.locale %} lang="{{ translation.locale }}"{% endif %}>{{ translation.name }}</h4>
                       {% endif %}
                       {% if translation.text %}
-                        <div class="text">{{ translation.text }}</div>
+                        <div class="text"{% if translation.locale %} lang="{{ translation.locale }}"{% endif %}>{{ translation.text }}</div>
                       {% endif %}
                     </div>
                   {% endfor %}
                 {% else %}
                   <h4 class="label__name">{{ label.name }}</h4>
-                  <div class="text">{{ label.text }}</div>
+                  <div class="text"{% if label.locale %} lang="{{ label.locale }}"{% endif %}>{{ label.text }}</div>
                 {% endif %}
                 {% if label.audio_url %}
                   <div class="local-contexts-dialog__audio">
@@ -85,7 +89,7 @@ NOTICE_UUID:notice_type => [
             <div class="bc-label">
               <img src="{{ label.svg_url ?? label.img_url }}" alt="{{ label.name }}">
               <div class="label-content">
-                {% set label_tab_id = project.id ~ '-' ~ label.id %}
+                {% set label_tab_id = label.dialog_id %}
                 {% if label.translations and label.language %}
                   <div class="local-contexts-dialog__tabs" role="tablist" aria-label="{{ label.name }}">
                     <button type="button" class="local-contexts-dialog__tab" role="tab" aria-selected="true" aria-controls="{{ label_tab_id }}-panel-0" id="{{ label_tab_id }}-tab-0">{{ label.language }}</button>
@@ -95,21 +99,21 @@ NOTICE_UUID:notice_type => [
                   </div>
                   <div class="local-contexts-dialog__tabpanel" id="{{ label_tab_id }}-panel-0" role="tabpanel" aria-labelledby="{{ label_tab_id }}-tab-0">
                     <h4 class="label__name">{{ label.name }}</h4>
-                    <div class="text">{{ label.text }}</div>
+                    <div class="text"{% if label.locale %} lang="{{ label.locale }}"{% endif %}>{{ label.text }}</div>
                   </div>
                   {% for translation in label.translations %}
                     <div class="local-contexts-dialog__tabpanel" id="{{ label_tab_id }}-panel-{{ loop.index }}" role="tabpanel" aria-labelledby="{{ label_tab_id }}-tab-{{ loop.index }}" hidden>
                       {% if translation.name %}
-                        <h4 class="label__name">{{ translation.name }}</h4>
+                        <h4 class="label__name"{% if translation.locale %} lang="{{ translation.locale }}"{% endif %}>{{ translation.name }}</h4>
                       {% endif %}
                       {% if translation.text %}
-                        <div class="text">{{ translation.text }}</div>
+                        <div class="text"{% if translation.locale %} lang="{{ translation.locale }}"{% endif %}>{{ translation.text }}</div>
                       {% endif %}
                     </div>
                   {% endfor %}
                 {% else %}
                   <h4 class="label__name">{{ label.name }}</h4>
-                  <div class="text">{{ label.text }}</div>
+                  <div class="text"{% if label.locale %} lang="{{ label.locale }}"{% endif %}>{{ label.text }}</div>
                 {% endif %}
                 {% if label.audio_url %}
                   <div class="local-contexts-dialog__audio">
@@ -130,7 +134,7 @@ NOTICE_UUID:notice_type => [
             <div class="notice">
               <img src="{{ notice.svg_url ?? notice.img_url }}" alt="{{ notice.name }}">
               <div class="label-content">
-                {% set notice_tab_id = project.id ~ '-' ~ notice.notice_type %}
+                {% set notice_tab_id = notice.dialog_id %}
                 {% if notice.translations and notice.language %}
                   <div class="local-contexts-dialog__tabs" role="tablist" aria-label="{{ notice.name }}">
                     <button type="button" class="local-contexts-dialog__tab" role="tab" aria-selected="true" aria-controls="{{ notice_tab_id }}-panel-0" id="{{ notice_tab_id }}-tab-0">{{ notice.language }}</button>
@@ -140,21 +144,21 @@ NOTICE_UUID:notice_type => [
                   </div>
                   <div class="local-contexts-dialog__tabpanel" id="{{ notice_tab_id }}-panel-0" role="tabpanel" aria-labelledby="{{ notice_tab_id }}-tab-0">
                     <h4 class="label__name">{{ notice.name }}</h4>
-                    <div class="text">{{ notice.text }}</div>
+                    <div class="text"{% if notice.locale %} lang="{{ notice.locale }}"{% endif %}>{{ notice.text }}</div>
                   </div>
                   {% for translation in notice.translations %}
                     <div class="local-contexts-dialog__tabpanel" id="{{ notice_tab_id }}-panel-{{ loop.index }}" role="tabpanel" aria-labelledby="{{ notice_tab_id }}-tab-{{ loop.index }}" hidden>
                       {% if translation.name %}
-                        <h4 class="label__name">{{ translation.name }}</h4>
+                        <h4 class="label__name"{% if translation.locale %} lang="{{ translation.locale }}"{% endif %}>{{ translation.name }}</h4>
                       {% endif %}
                       {% if translation.text %}
-                        <div class="text">{{ translation.text }}</div>
+                        <div class="text"{% if translation.locale %} lang="{{ translation.locale }}"{% endif %}>{{ translation.text }}</div>
                       {% endif %}
                     </div>
                   {% endfor %}
                 {% else %}
                   <h4 class="label__name">{{ notice.name }}</h4>
-                  <div class="text">{{ notice.text }}</div>
+                  <div class="text"{% if notice.locale %} lang="{{ notice.locale }}"{% endif %}>{{ notice.text }}</div>
                   {% if notice.translations %}
                     {% for translation in notice.translations %}
                       <div class="local-contexts-dialog__translation">
@@ -162,10 +166,10 @@ NOTICE_UUID:notice_type => [
                           <div class="local-contexts-dialog__translation-language">{{ translation.language }}</div>
                         {% endif %}
                         {% if translation.name %}
-                          <div class="local-contexts-dialog__translation-name">{{ translation.name }}</div>
+                          <div class="local-contexts-dialog__translation-name"{% if translation.locale %} lang="{{ translation.locale }}"{% endif %}>{{ translation.name }}</div>
                         {% endif %}
                         {% if translation.text %}
-                          <div class="local-contexts-dialog__translation-text">{{ translation.text }}</div>
+                          <div class="local-contexts-dialog__translation-text"{% if translation.locale %} lang="{{ translation.locale }}"{% endif %}>{{ translation.text }}</div>
                         {% endif %}
                       </div>
                     {% endfor %}
