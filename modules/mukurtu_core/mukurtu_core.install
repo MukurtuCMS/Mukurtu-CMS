@@ -3145,7 +3145,7 @@ function mukurtu_core_update_40091(): void {
  * machine name ever matches one. Move all bundle-keyed citation
  * template values to citation_templates.<bundle> instead. See issue #188.
  */
-function mukurtu_core_update_40087(): void {
+function mukurtu_core_update_40092(): void {
   $config = \Drupal::configFactory()->getEditable('mukurtu.settings');
   if ($config->isNew()) {
     return;
