@@ -12,18 +12,6 @@
         {
             "type": "composer",
             "url": "https://asset-packagist.org"
-        },
-        {
-            "type": "package",
-            "package": {
-                "name": "yaireo/tagify",
-                "version": "4.35.4",
-                "type": "drupal-library",
-                "dist": {
-                    "url": "https://github.com/yaireo/tagify/archive/refs/tags/v4.35.4.zip",
-                    "type": "zip"
-                }
-            }
         }
     ],
     "require": {
@@ -98,8 +86,7 @@
         "drupal/visitors": "^2.0",
         "drush/drush": "^13",
         "geocoder-php/nominatim-provider": "*",
-        "sibyx/phpgpx": "@RC",
-        "yaireo/tagify": "^4.35"
+        "sibyx/phpgpx": "@RC"
     },
     "require-dev": {
         "composer/composer": "^2.10.2",
