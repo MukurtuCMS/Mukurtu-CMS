@@ -42,6 +42,14 @@ content:
     third_party_settings: {  }
     weight: 1
     region: content
+  field_in_collection:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 4
+    region: content
   field_representative_media:
     type: entity_reference_entity_view
     label: hidden
@@ -50,6 +58,14 @@ content:
       link: false
     third_party_settings: {  }
     weight: 0
+    region: content
+  field_summary:
+    type: string
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 3
     region: content
 hidden:
   comment: true
@@ -68,7 +84,6 @@ hidden:
   field_external_links: true
   field_format: true
   field_identifier: true
-  field_in_collection: true
   field_keywords: true
   field_knowledge_keepers: true
   field_language: true
@@ -89,7 +104,6 @@ hidden:
   field_sequence_collection: true
   field_source: true
   field_subject: true
-  field_summary: true
   field_title: true
   field_traditional_knowledge: true
   field_transcription: true

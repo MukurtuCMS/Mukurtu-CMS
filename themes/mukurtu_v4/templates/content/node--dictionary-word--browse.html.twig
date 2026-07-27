@@ -71,7 +71,8 @@
 
 {% set media_bundle = node.field_representative_media.0.entity.bundle.value.0['target_id'] %}
 {% set has_rep_media = node.field_representative_media.0.entity is not empty %}
-{% set has_recording = content.field_recording|render is not empty %}
+{% set has_recording = node.field_recording.0.entity is not empty %}
+{% set same_media = has_rep_media and has_recording and node.field_representative_media.0.entity.id.value == node.field_recording.0.entity.id.value %}
 
 <article{{ attributes.addClass("horizontal-card") }}>
   <div class="horizontal-card__media">
@@ -81,10 +82,10 @@
         media: content.field_representative_media,
         url: url,
       } %}
-    {% elseif node.field_recording.0.entity is not empty %}
+    {% elseif has_recording %}
       {{ content.field_recording }}
     {% endif %}
-    {% if has_recording %}
+    {% if has_rep_media and has_recording and not same_media %}
       {{ content.field_recording }}
     {% endif %}
   </div>
@@ -102,8 +103,10 @@
     </div>
 
     <div class="horizontal-card__content-body">
-      {{ content.field_communities }}
+      {{ content.community_protocol_list }}
       {{ content.field_category }}
+      {{ content.field_in_collection }}
+      {{ content.field_in_word_list }}
     </div>
   </div>
 </article>
