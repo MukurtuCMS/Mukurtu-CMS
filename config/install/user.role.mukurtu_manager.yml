@@ -2,7 +2,6 @@ langcode: en
 status: true
 dependencies:
   config:
-    - dashboards.dashboard.mukurtu_dashboard
     - filter.format.full_html
     - node.type.article
     - node.type.landing_page
@@ -26,7 +25,6 @@ dependencies:
     - comment
     - contact
     - contextual
-    - dashboards
     - devel
     - embed
     - entity_reference_revisions
@@ -75,7 +73,6 @@ permissions:
   - 'administer mukurtu access denied page'
   - 'administer mukurtu_media configuration'
   - 'administer mukurtu media download settings'
-  - 'can view mukurtu_dashboard dashboard'
   - 'configure editable landing_page node layout overrides'
   - 'configure editable page node layout overrides'
   - 'create and edit custom blocks'
