@@ -155,3 +155,12 @@ mukurtu_core.access_denied_settings:
     _title: 'Access Denied Page Settings'
   requirements:
     _permission: 'administer mukurtu access denied page'
+
+mukurtu_core.dismiss_super_admin_warning:
+  path: '/admin/mukurtu/dismiss-super-admin-warning'
+  defaults:
+    _controller: '\Drupal\mukurtu_core\Controller\SuperAdminWarningController::dismiss'
+    _title: 'Dismiss super admin warning'
+  requirements:
+    _csrf_token: 'TRUE'
+    _custom_access: '\Drupal\mukurtu_core\Controller\SuperAdminWarningController::access'

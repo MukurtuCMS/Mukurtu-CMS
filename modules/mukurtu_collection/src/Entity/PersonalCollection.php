@@ -23,7 +23,7 @@ use Drupal\Core\Field\FieldDefinitionInterface;
  *   label = @Translation("Personal collection"),
  *   handlers = {
  *     "storage" = "Drupal\mukurtu_collection\PersonalCollectionStorage",
- *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
+ *     "view_builder" = "Drupal\mukurtu_collection\Entity\PersonalCollectionViewBuilder",
  *     "list_builder" = "Drupal\mukurtu_collection\PersonalCollectionListBuilder",
  *     "views_data" = "Drupal\mukurtu_collection\Entity\PersonalCollectionViewsData",
  *     "translation" = "Drupal\mukurtu_collection\PersonalCollectionTranslationHandler",
@@ -71,7 +71,8 @@ use Drupal\Core\Field\FieldDefinitionInterface;
  *     "translation_revert" = "/personal-collection/{personal_collection}/revisions/{personal_collection_revision}/revert/{langcode}",
  *     "collection" = "/admin/structure/personal_collection",
  *   },
- *   field_ui_base_route = "personal_collection.settings"
+ *   field_ui_base_route = "personal_collection.settings",
+ *   enable_page_title_template = TRUE
  * )
  */
 class PersonalCollection extends EditorialContentEntityBase implements PersonalCollectionInterface {

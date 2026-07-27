@@ -203,6 +203,23 @@ function mukurtu_protocol_update_40002(): void {
   }
 }
 
+/**
+ * Ensure field_coverage's FieldConfig exists before this hook saves nodes.
+ *
+ * Saving a node here lazily triggers a Views-data rebuild for the search_api
+ * index, which needs a FieldConfig for field_coverage ("Map Points"). That
+ * FieldConfig is created by mukurtu_core_update_40023(); on sites where
+ * mukurtu_core's hooks haven't run yet, the rebuild fails with "Could not
+ * retrieve data definition for field 'Map Points'".
+ */
+function mukurtu_protocol_update_dependencies(): array {
+  return [
+    'mukurtu_protocol' => [
+      '40003' => ['mukurtu_core' => '40023'],
+    ],
+  ];
+}
+
 /*
  * Replace the Views-based browse by community block with the custom block plugin
  * on existing landing page nodes so sub-communities are filtered out.

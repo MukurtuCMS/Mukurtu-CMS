@@ -34,7 +34,9 @@
   </div>
 
   <div class="block-wrapper__second">
+    {{ title_prefix }}
     <{{title_tag}}{{ title_attributes }}>{{ block_entity.info.value }}</{{title_tag}}>
+    {{ title_suffix }}
     {{content.body}}
   </div>
 </div>

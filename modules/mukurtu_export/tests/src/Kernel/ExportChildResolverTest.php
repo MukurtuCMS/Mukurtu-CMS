@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\mukurtu_export\Kernel;
 
+use PHPUnit\Framework\Attributes\Group;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
@@ -14,9 +15,8 @@ use Drupal\Tests\mukurtu_protocol\Kernel\ProtocolAwareEntityTestBase;
 
 /**
  * Tests ExportChildResolver for collections and word lists.
- *
- * @group mukurtu_export
  */
+#[Group('mukurtu_export')]
 class ExportChildResolverTest extends ProtocolAwareEntityTestBase {
 
   protected static $modules = [

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_import\Kernel;
 
+use PHPUnit\Framework\Attributes\Group;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\file\Entity\File;
@@ -16,9 +17,8 @@ use Drupal\Tests\media\Traits\MediaTypeCreationTrait;
 /**
  * Tests that drupal-media embed tags in formatted text fields can reference
  * media assets by name or filename during CSV import.
- *
- * @group mukurtu_import
  */
+#[Group('mukurtu_import')]
 class ImportFormattedTextMediaEmbedTest extends MukurtuImportTestBase {
 
   use MediaTypeCreationTrait;

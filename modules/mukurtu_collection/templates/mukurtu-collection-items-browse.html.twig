@@ -1,0 +1,12 @@
+<div class="browse-container collection-items-browse">
+  <div class="browse-results">
+    <div class="browse-links">
+      <button data-browse-mode="grid" aria-label="{{ 'Switch to grid view'|t }}">{{ 'Grid'|t }}</button>
+      <button data-browse-mode="list" aria-label="{{ 'Switch to list view'|t }}" class="active-toggle">{{ 'List'|t }}</button>
+      <button data-browse-mode="map" aria-label="{{ 'Switch to map view'|t }}">{{ 'Map'|t }}</button>
+    </div>
+    {{ list_results }}
+    {{ grid_results }}
+    {{ map_results }}
+  </div>
+</div>

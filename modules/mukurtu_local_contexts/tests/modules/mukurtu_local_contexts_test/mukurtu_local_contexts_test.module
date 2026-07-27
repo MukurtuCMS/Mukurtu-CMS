@@ -1,0 +1,36 @@
+<?php
+
+/**
+ * @file
+ * Test support module providing base fields for mukurtu_local_contexts
+ * kernel tests, mirroring how real content entities (e.g. DigitalHeritage)
+ * attach these fields, without pulling in their heavy module dependencies.
+ */
+
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
+
+/**
+ * Implements hook_entity_base_field_info().
+ */
+function mukurtu_local_contexts_test_entity_base_field_info(EntityTypeInterface $entity_type) {
+  if ($entity_type->id() !== 'node') {
+    return [];
+  }
+
+  $fields = [];
+  $fields['field_local_contexts_projects'] = BaseFieldDefinition::create('local_contexts_project')
+    ->setLabel(t('Local Contexts Projects'))
+    ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
+    ->setDisplayConfigurable('form', TRUE)
+    ->setDisplayConfigurable('view', TRUE);
+
+  $fields['field_local_contexts_labels_and_notices'] = BaseFieldDefinition::create('local_contexts_label_and_notice')
+    ->setLabel(t('Local Contexts Labels and Notices'))
+    ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
+    ->setDisplayConfigurable('form', TRUE)
+    ->setDisplayConfigurable('view', TRUE);
+
+  return $fields;
+}

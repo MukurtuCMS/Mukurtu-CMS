@@ -3,10 +3,12 @@ status: true
 dependencies:
   config:
     - core.entity_view_mode.media.browse
+    - image.style.medium_480px_w_
     - media.type.video
   module:
     - blazy
     - file
+    - image
     - layout_builder
 third_party_settings:
   layout_builder:
@@ -32,6 +34,17 @@ content:
     third_party_settings:
       blazy:
         blazy: false
+    weight: 1
+    region: content
+  field_thumbnail:
+    type: image
+    label: hidden
+    settings:
+      image_link: ''
+      image_style: medium_480px_w_
+      image_loading:
+        attribute: lazy
+    third_party_settings: {  }
     weight: 0
     region: content
 hidden:
@@ -41,7 +54,6 @@ hidden:
   field_identifier: true
   field_media_tags: true
   field_people: true
-  field_thumbnail: true
   flag_export_media: true
   langcode: true
   name: true

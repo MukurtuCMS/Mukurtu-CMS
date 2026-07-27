@@ -1,0 +1,7 @@
+langcode: en
+status: true
+dependencies: {  }
+id: media_block
+label: Media
+revision: false
+description: 'A block for placing a single media item (image, video, audio, document).'

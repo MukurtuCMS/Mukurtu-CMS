@@ -6,6 +6,23 @@
  */
 
 /**
+ * Ensure the message_digest cleanup runs before this hook installs a module.
+ *
+ * Installing flat_taxonomy triggers a module-list rebuild that validates
+ * every module still listed in core.extension exists on disk. On sites
+ * where mukurtu_notifications_update_40018() (which removes the
+ * message_digest/message_digest_ui entries) hasn't run yet, that rebuild
+ * fails with "The module message_digest does not exist."
+ */
+function mukurtu_taxonomy_update_dependencies(): array {
+  return [
+    'mukurtu_taxonomy' => [
+      '40001' => ['mukurtu_notifications' => '40018'],
+    ],
+  ];
+}
+
+/**
  * Enable flat_taxonomy and mark all stock Mukurtu vocabularies as flat.
  */
 function mukurtu_taxonomy_update_40001(): void {

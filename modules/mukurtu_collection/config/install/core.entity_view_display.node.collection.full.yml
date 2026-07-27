@@ -282,11 +282,9 @@ content:
     weight: 3
     region: content
   field_items_in_collection:
-    type: entity_reference_entity_view
+    type: mukurtu_collection_items_browse
     label: hidden
-    settings:
-      view_mode: grid_browse
-      link: false
+    settings: {  }
     third_party_settings: {  }
     weight: 4
     region: content

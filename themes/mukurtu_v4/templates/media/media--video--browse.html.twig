@@ -1,0 +1,23 @@
+{#
+/**
+ * @file
+ * Theme override for video media in the browse view mode.
+ * Shows the manually-provided thumbnail image if the editor set one;
+ * otherwise falls back to the native video player.
+ */
+#}
+{%
+  set classes = [
+    'media',
+    'media--' ~ bundle
+  ]
+%}
+
+<div{{ attributes.addClass(classes) }}>
+  {{ content.media_content_warnings }}
+  {% if media.field_thumbnail.isEmpty() %}
+    {{ content.field_media_video_file }}
+  {% else %}
+    {{ content.field_thumbnail }}
+  {% endif %}
+</div>

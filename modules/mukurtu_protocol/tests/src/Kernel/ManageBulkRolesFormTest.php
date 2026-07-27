@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_protocol\Kernel;
 
+use PHPUnit\Framework\Attributes\Group;
 use Drupal\Core\Form\FormState;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Entity\OgRole;
@@ -15,9 +16,8 @@ use Drupal\user\Entity\User;
 
 /**
  * Tests ManageBulkRolesFormBase validation logic.
- *
- * @group mukurtu_protocol
  */
+#[Group('mukurtu_protocol')]
 class ManageBulkRolesFormTest extends KernelTestBase {
 
   /**

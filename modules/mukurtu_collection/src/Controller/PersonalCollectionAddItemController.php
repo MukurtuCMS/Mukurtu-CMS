@@ -25,38 +25,22 @@ class PersonalCollectionAddItemController extends ControllerBase {
   }
 
   /**
-   * Return a list of collections the item can be added to.
+   * Check if the user owns any personal collection eligible for this item.
+   *
+   * Uses the same selection handler/settings PersonalCollectionAddItemForm's
+   * Tagify picker uses, so this check and what the widget actually offers
+   * never disagree.
    */
-  protected function getValidCollections(NodeInterface $node) {
-    $query = \Drupal::entityQuery('personal_collection')
-      ->condition('field_items_in_collection', $node->id(), '=')
-      ->condition('user_id', $this->currentUser()->id(), '=')
-      ->accessCheck(TRUE)
-      ->sort('changed', 'DESC');
-    $collectionsThatContainItem = $query->execute();
+  protected function hasEligiblePersonalCollections(NodeInterface $node) {
+    $handler = \Drupal::service('plugin.manager.entity_reference_selection')->getInstance([
+      'target_type' => 'personal_collection',
+      'handler' => 'mukurtu_eligible_container',
+      'mukurtu_containing_field' => 'field_items_in_collection',
+      'mukurtu_current_item' => $node->id(),
+      'mukurtu_owned_by_current_user' => TRUE,
+    ]);
 
-    $query = \Drupal::entityQuery('personal_collection')
-      ->condition('user_id', $this->currentUser()->id(), '=')
-      ->accessCheck(TRUE)
-      ->sort('changed', 'DESC');
-    $allCollections = $query->execute();
-
-    $collections = [];
-    $collectionsNids = array_diff($allCollections, $collectionsThatContainItem);
-    if (!empty($collectionsNids)) {
-      // This might be too slow for an access check.
-      // Might need to push this part to the form.
-      $collections = $this->entityTypeManager()->getStorage('personal_collection')->loadMultiple($collectionsNids);
-      foreach ($collections as $delta => $collection) {
-        // Remove collections the user cannot update.
-        if (!$collection->access('update')) {
-          unset($collections[$delta]);
-          continue;
-        }
-      }
-    }
-
-    return $collections;
+    return !empty($handler->getReferenceableEntities(NULL, 'CONTAINS', 1));
   }
 
   /**
@@ -65,10 +49,12 @@ class PersonalCollectionAddItemController extends ControllerBase {
   public function content(NodeInterface $node) {
     $build = [];
 
-    // Existing collection.
-    $collections = $this->getValidCollections($node);
-    if (!empty($collections)) {
-      $build['existing'] = \Drupal::formBuilder()->getForm('Drupal\mukurtu_collection\Form\PersonalCollectionAddItemForm', $node, $collections);
+    // Existing collection. Only show the picker if there's actually a
+    // personal collection eligible to add to - it's a required field, so
+    // with no eligible collections it would just be a dead end.
+    $hasExistingCollections = $this->hasEligiblePersonalCollections($node);
+    if ($hasExistingCollections) {
+      $build['existing'] = \Drupal::formBuilder()->getForm('Drupal\mukurtu_collection\Form\PersonalCollectionAddItemForm', $node);
     }
 
     // New Personal Collection.
@@ -82,6 +68,9 @@ class PersonalCollectionAddItemController extends ControllerBase {
     $build['new_collection'] = [
       '#type' => 'details',
       '#title' => $this->t('Create a new personal collection'),
+      // Open by default when there's no existing collection to pick from,
+      // since it's then the only actionable option in the dialog.
+      '#open' => !$hasExistingCollections,
     ];
     $build['new_collection']['form'] = $this->formBuilder()->getForm($form);
 

@@ -58,7 +58,7 @@ class CommunityProtocolList implements ContainerInjectionInterface {
    * @return array
    *   Render array for the community protocol list.
    */
-  protected function buildCommunityProtocolList(CulturalProtocolControlledInterface $node): array {
+  public function buildCommunityProtocolList(CulturalProtocolControlledInterface $node): array {
     $items = [];
     $protocols = $node->getProtocolEntities();
     foreach ($protocols as $protocol) {

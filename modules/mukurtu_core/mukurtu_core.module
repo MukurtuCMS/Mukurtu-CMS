@@ -14,12 +14,19 @@ use Drupal\node\Entity\NodeType;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\CloseModalDialogCommand;
+use Drupal\Core\Ajax\HtmlCommand;
+use Drupal\Core\Ajax\InvokeCommand;
+use Drupal\Core\Ajax\RedirectCommand;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\user\UserInterface;
 use Drupal\Core\Url;
 use Drupal\Core\Link;
 use Drupal\Core\Cache\Cache;
+use Drupal\Core\Render\Markup;
+use Drupal\Component\Render\FormattableMarkup;
 
 /**
  * Implements hook_theme().
@@ -211,22 +218,31 @@ function mukurtu_core_entity_operation(EntityInterface $entity) {
 }
 
 /**
- * Implements hook_page_attachments.
+ * Implements hook_preprocess_page.
  */
-function mukurtu_core_page_attachments(array &$attachments) {
+function mukurtu_core_preprocess_page(array &$variables) {
   // If the user is UID 1 and there is content on the site, warn them that
   // might be a bad idea because UID 1 can do just about anything. If there's
   // no content on the site, we assume they are setting things up and we don't
   // want to bother them with the message.
+  //
+  // This is rendered as a standalone alert element (not via
+  // \Drupal::messenger()) because core's status-messages template assigns
+  // role="contentinfo" to every message type, which duplicates the page
+  // footer's contentinfo landmark. See issue #1875.
   if (\Drupal::currentUser()->id() == 1) {
     $show_admin_message = TRUE;
+    $request = \Drupal::request();
+    if ($request->getSession()->get(\Drupal\mukurtu_core\Controller\SuperAdminWarningController::SESSION_KEY)) {
+      $show_admin_message = FALSE;
+    }
     $query = \Drupal::entityQuery('node');
     $query->accessCheck(FALSE);
     $content_count = $query->count()->execute();
     if ($content_count === 0) {
       $show_admin_message = FALSE;
     }
-    $uri = \Drupal::request()->getUri();
+    $uri = $request->getUri();
     $ajax_uris = [
       'ajax',
       'modal',
@@ -238,14 +254,107 @@ function mukurtu_core_page_attachments(array &$attachments) {
       }
     }
     if ($show_admin_message) {
-      \Drupal::messenger()->addError(t('You are logged in as the super admin (UID 1), which gives you the ability to take actions that can break the site and corrupt your data. Consider logging into a different account.'));
+      $dismiss_url = Url::fromRoute('mukurtu_core.dismiss_super_admin_warning');
+      $dismiss_url->setOption('query', [
+        'token' => \Drupal::csrfToken()->get($dismiss_url->getInternalPath()),
+        'destination' => \Drupal::service('path.current')->getPath(),
+      ]);
+      $dismiss_url->setOption('attributes', [
+        'class' => ['mukurtu-super-admin-warning__dismiss'],
+        'aria-label' => t('Dismiss for this session'),
+      ]);
+      $dismiss_link = Link::fromTextAndUrl(Markup::create('<span aria-hidden="true">&times;</span>'), $dismiss_url)->toString();
+      $manager_link = Link::fromTextAndUrl(t('Mukurtu Manager'), Url::fromUri('https://docs.mukurtu.org/users/user-role-types/'))->toString();
+      $message = new FormattableMarkup('<div class="mukurtu-super-admin-warning"><div class="mukurtu-super-admin-warning__text">@text</div>@dismiss</div>', [
+        '@text' => t('You are logged in as an Administrator (UID 1), which gives you the ability to take actions that can break the site and corrupt your data. We strongly recommended using a @manager_link account instead for most site management.', [
+          '@manager_link' => $manager_link,
+        ]),
+        '@dismiss' => $dismiss_link,
+      ]);
+      $variables['page']['highlighted']['mukurtu_super_admin_warning'] = [
+        '#type' => 'container',
+        '#attributes' => [
+          'class' => ['mukurtu-super-admin-warning-wrapper'],
+          'role' => 'alert',
+        ],
+        '#markup' => new FormattableMarkup('<h2 class="visually-hidden">@heading</h2>@message', [
+          '@heading' => t('Warning message'),
+          '@message' => $message,
+        ]),
+        '#weight' => -1000,
+        // This depends on session state (dismissal) and the current node
+        // count, neither of which is expressed via cache contexts/tags, so
+        // it must never be cached - matching the messenger status_messages
+        // block it replaces, which core also sets to max-age 0.
+        '#cache' => ['max-age' => 0],
+      ];
+      $variables['#attached']['library'][] = 'mukurtu_core/super-admin-warning';
     }
   }
+}
 
+/**
+ * Implements hook_page_attachments.
+ */
+function mukurtu_core_page_attachments(array &$attachments) {
   // Add our shared JS libraries. We could scope these better.
   $attachments['#attached']['library'][] = 'mukurtu_core/mukurtu-leaflet-widget';
   $attachments['#attached']['library'][] = 'mukurtu_core/tagify-override';
   $attachments['#attached']['library'][] = 'mukurtu_core/form-disable-enter-submit';
+
+  // Needed so "use-ajax" modal links (e.g. the "Add to Collection" family of
+  // local tasks) work without depending on some other module happening to
+  // load it first.
+  $attachments['#attached']['library'][] = 'core/drupal.dialog.ajax';
+}
+
+/**
+ * Build an AJAX response for a form submitted inside a modal dialog.
+ *
+ * Shared by the "Add to Collection" / "Add to Personal Collection" / "Add to
+ * Word List" dialog forms (and their embedded "create a new X" forms), which
+ * all follow the same close-on-success / re-render-with-errors pattern.
+ *
+ * On success, closes the dialog and redirects to the item's page. On
+ * validation failure, rebuilds the form (with status messages) into the
+ * dialog and moves focus there - HtmlCommand replaces the whole dialog
+ * content, which detaches whatever was previously focused (e.g. the Save
+ * button), so core ajax.js's default focus-restore has nothing usable to
+ * refocus.
+ *
+ * Expects the form to have a "node" or "mukurtu_return_node" hidden value
+ * identifying the item to redirect back to on success.
+ */
+function mukurtu_core_modal_form_ajax_response(array &$form, FormStateInterface $form_state): AjaxResponse {
+  $response = new AjaxResponse();
+  if ($form_state->isExecuted()) {
+    $nodeId = $form_state->getValue('node') ?? $form_state->getValue('mukurtu_return_node');
+    $node = $nodeId ? \Drupal::entityTypeManager()->getStorage('node')->load($nodeId) : NULL;
+    $response->addCommand(new CloseModalDialogCommand());
+    if ($node) {
+      $response->addCommand(new RedirectCommand($node->toUrl()->toString()));
+    }
+    return $response;
+  }
+
+  // Drupal form validation errors are in $form_state->getErrors(), not the
+  // messenger queue. Copy them over so status_messages renders them visibly.
+  foreach ($form_state->getErrors() as $error) {
+    \Drupal::messenger()->addError($error);
+  }
+  /** @var \Drupal\Core\Render\RendererInterface $renderer */
+  $renderer = \Drupal::service('renderer');
+  $status_messages = ['#type' => 'status_messages'];
+  $form['#prefix'] = ($form['#prefix'] ?? '') . $renderer->renderRoot($status_messages);
+  $output = $renderer->renderRoot($form);
+  $response->setAttachments($form['#attached']);
+  // Use HtmlCommand (not ReplaceCommand) - ".ui-dialog-content" is the
+  // #drupal-modal wrapper itself, not a child of it. Replacing the wrapper
+  // would break focus restoration and CloseModalDialogCommand's selector.
+  $response->addCommand(new HtmlCommand('.ui-dialog-content', $output));
+  $response->addCommand(new InvokeCommand('.ui-dialog-content [data-drupal-messages]', 'attr', ['tabindex', '-1']));
+  $response->addCommand(new InvokeCommand('.ui-dialog-content [data-drupal-messages]', 'trigger', ['focus']));
+  return $response;
 }
 
 /**
@@ -1238,5 +1347,21 @@ function mukurtu_core_preprocess_views_view(&$variables)
   ];
   if (in_array($variables['view']->id(), $affected_views)) {
     $variables['view_array']['#attached']['library'][] = 'mukurtu_core/entity_browser_view_decoration';
+  }
+}
+
+/**
+ * Implements hook_library_info_alter().
+ *
+ * leaflet_markercluster.drupal.js gives every Views "grouping" value its own
+ * MarkerClusterGroup, so nearby markers in different groups never cluster
+ * together (see #1813). Appending our override into this library's own JS
+ * list (rather than attaching it separately) guarantees it always loads
+ * immediately after leaflet_markercluster.drupal.js, on exactly the pages
+ * where that library is already in use.
+ */
+function mukurtu_core_library_info_alter(&$libraries, $extension) {
+  if ($extension === 'leaflet_markercluster' && isset($libraries['leaflet-markercluster-drupal'])) {
+    $libraries['leaflet-markercluster-drupal']['js']['/' . \Drupal::service('extension.list.module')->getPath('mukurtu_core') . '/js/mukurtu-leaflet-markercluster-grouping-fix.js'] = [];
   }
 }

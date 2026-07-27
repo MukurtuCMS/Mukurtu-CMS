@@ -1,0 +1,23 @@
+{#
+/**
+ * @file
+ * Theme override for remote video media in the browse view mode.
+ * Shows the manually-provided thumbnail image if the editor set one;
+ * otherwise falls back to the native oEmbed player.
+ */
+#}
+{%
+  set classes = [
+    'media',
+    'media--' ~ bundle
+  ]
+%}
+
+<div{{ attributes.addClass(classes) }}>
+  {{ content.media_content_warnings }}
+  {% if media.field_thumbnail.isEmpty() %}
+    {{ content.field_media_oembed_video }}
+  {% else %}
+    {{ content.field_thumbnail }}
+  {% endif %}
+</div>

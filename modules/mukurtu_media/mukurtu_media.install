@@ -369,6 +369,14 @@ function mukurtu_media_update_40007(): void {
  * and field_people so the in-content modal matches the admin form.
  */
 function mukurtu_media_update_40008(): void {
+  // tagify is a declared dependency in mukurtu_media.info.yml, but Drupal
+  // only auto-enables a newly declared dependency on a fresh module install,
+  // not on an already-installed site. Ensure it's enabled before setting the
+  // tagify widget below.
+  if (!\Drupal::moduleHandler()->moduleExists('tagify')) {
+    \Drupal::service('module_installer')->install(['tagify']);
+  }
+
   $storage = \Drupal::entityTypeManager()->getStorage('entity_form_display');
   /** @var \Drupal\Core\Entity\Display\EntityFormDisplayInterface $display */
   $display = $storage->load('media.soundcloud.media_library');

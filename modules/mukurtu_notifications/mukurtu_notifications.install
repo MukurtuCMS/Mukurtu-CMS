@@ -380,6 +380,36 @@ function mukurtu_notifications_update_40017(): void {
 }
 
 /**
+ * Implements hook_update_requirements_alter().
+ *
+ * Drupal's own update requirements check runs before any hook_update_N and
+ * blocks the whole update run with an Error severity "Missing or invalid
+ * modules" requirement if core.extension lists a module whose code no longer
+ * exists on disk. Since message_digest and message_digest_ui were removed
+ * from the codebase in the same release that mukurtu_notifications_update_40018()
+ * was added to clean up core.extension, that hook can never run on affected
+ * sites -- the site is stuck before update hooks even start. Suppress the
+ * error only when the two known-removed modules are the sole cause, so any
+ * other genuinely missing module still blocks the update as intended.
+ */
+function mukurtu_notifications_update_requirements_alter(array &$requirements): void {
+  if (empty($requirements['invalid_module'])) {
+    return;
+  }
+
+  $module_extension_list = \Drupal::service('extension.list.module');
+  $known_removed = ['message_digest', 'message_digest_ui'];
+  $modules = array_keys(\Drupal::config('core.extension')->get('module') ?? []);
+  $still_invalid = array_filter($modules, function ($name) use ($module_extension_list, $known_removed) {
+    return !in_array($name, $known_removed, TRUE) && !$module_extension_list->exists($name);
+  });
+
+  if (empty($still_invalid)) {
+    unset($requirements['invalid_module']);
+  }
+}
+
+/**
  * Uninstall message_digest modules and remove associated fields.
  */
 function mukurtu_notifications_update_40018(): void {
@@ -408,7 +438,22 @@ function mukurtu_notifications_update_40018(): void {
       ->getStorage('field_storage_config')
       ->load("$entity_type.$field_name");
     if ($storage) {
-      $storage->delete();
+      try {
+        $storage->delete();
+      }
+      catch (\Exception $e) {
+        // FieldStorageConfig::delete() renames the live table to a
+        // deterministic field_deleted_data_<hash> name. If a prior partial
+        // update run already got this far, that table exists and the
+        // rename collides. Fall back to removing the config directly, same
+        // as the raw core.extension write above, and leave the orphaned
+        // table for a normal field-purge run to clean up.
+        \Drupal::logger('mukurtu_notifications')->warning('Could not cleanly delete field storage %name (likely an orphaned table from a prior partial update run); removing config directly. %message', [
+          '%name' => "$entity_type.$field_name",
+          '%message' => $e->getMessage(),
+        ]);
+        \Drupal::service('config.storage')->delete("field.storage.$entity_type.$field_name");
+      }
     }
   }
 }

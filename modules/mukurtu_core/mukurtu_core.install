@@ -764,6 +764,32 @@ function mukurtu_core_update_40022(): void {
  * bundleFieldDefinitions() and creating the missing FieldConfig entities.
  */
 function mukurtu_core_update_40023(): void {
+  // mukurtu_place is a required profile dependency, but that only
+  // auto-installs on fresh installs. Existing sites installed before the
+  // place content type was added won't have the place node type yet, which
+  // makes the FieldConfig::create() below throw a LogicException.
+  if (!\Drupal::moduleHandler()->moduleExists('mukurtu_place')) {
+    // mukurtu_place's core.entity_form_display.node.place.default config
+    // depends on this entity browser, which was added to the already-
+    // installed mukurtu_taxonomy module's config/install at the same time as
+    // mukurtu_place -- config/install is only applied when a module is
+    // freshly installed, so existing sites never picked it up. Import it
+    // first so installing mukurtu_place doesn't fail its config dependency
+    // validation.
+    $config_name = 'entity_browser.browser.mukurtu_taxonomy_record_place_term_browser';
+    $config_factory = \Drupal::configFactory();
+    if ($config_factory->get($config_name)->isNew()) {
+      $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_taxonomy');
+      $config_source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+      $data = $config_source->read($config_name);
+      if ($data) {
+        $config_factory->getEditable($config_name)->setData($data)->save();
+      }
+    }
+
+    \Drupal::service('module_installer')->install(['mukurtu_place']);
+  }
+
   $bundles = [
     'digital_heritage' => 'A detailed, interactive mapping tool that allows placing and drawing multiple locations related to a digital heritage item. Locations can be single points, paths, rectangles, or free-form polygons. Each location can be given a basic label. This field is also used for the browse by map tools. </br>Note that this mapping data will be shared with the same users or visitors as the rest of the digital heritage item. If the location is sensitive, carefully consider using this field. </br>Use the tools shown on the map to place, draw, edit, and delete points and shapes. Once a point or shape has been placed, select it to add a description if needed.',
     'collection' => 'A detailed, interactive mapping tool that allows placing and drawing multiple locations related to a collection. Locations can be single points, paths, rectangles, or free-form polygons. Each location can be given a basic label. This field is also used for the browse by map tools. </br>Note that this mapping data will be shared with the same users or visitors as the rest of the collection. If the location is sensitive, carefully consider using this field. </br>Use the tools shown on the map to place, draw, edit, and delete points and shapes. Once a point or shape has been placed, select it to add a description if needed.',
@@ -789,11 +815,27 @@ function mukurtu_core_update_40023(): void {
 }
 
 /**
+ * Ensure the malformed mukurtu_roundtrip_manager role is repaired first.
+ *
+ * Saving any role invalidates Drupal's role/permission cache, which reloads
+ * all roles - including the malformed mukurtu_roundtrip_manager left behind
+ * by mukurtu_import_update_40025() on affected sites. See mukurtu_update_40001().
+ */
+function mukurtu_core_update_dependencies(): array {
+  return [
+    'mukurtu_core' => [
+      '40024' => ['mukurtu' => '40001'],
+    ],
+  ];
+}
+
+/**
  * Grant article, page, and landing page content permissions to Mukurtu Manager role.
  */
 function mukurtu_core_update_40024(): void {
   $role = \Drupal\user\Entity\Role::load('mukurtu_manager');
-  if (!$role) {
+  if (!$role || !$role->id()) {
+    \Drupal::logger('mukurtu_core')->warning('Role mukurtu_manager could not be loaded or is malformed (missing ID); skipping permission grant.');
     return;
   }
   $permissions = [
@@ -1817,6 +1859,160 @@ function mukurtu_core_update_40062(): void {
 }
 
 /**
+ * Enable Layout Builder on basic pages; migrate existing nodes to preserve content.
+ */
+function mukurtu_core_update_40068(&$sandbox): string {
+  if (!isset($sandbox['progress'])) {
+    // Create the layout_builder__layout field instance for the page bundle if absent.
+    if (!\Drupal\field\Entity\FieldConfig::loadByName('node', 'page', 'layout_builder__layout')) {
+      $module_path = \Drupal::service('module_handler')->getModule('mukurtu_core')->getPath();
+      $config_source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+      $config_data = $config_source->read('field.field.node.page.layout_builder__layout');
+      if ($config_data) {
+        \Drupal::configFactory()
+          ->getEditable('field.field.node.page.layout_builder__layout')
+          ->setData($config_data)
+          ->save();
+      }
+    }
+
+    // Enable Layout Builder on the page default and full view displays.
+    foreach (['default', 'full'] as $mode) {
+      $display = \Drupal::entityTypeManager()
+        ->getStorage('entity_view_display')
+        ->load('node.page.' . $mode);
+      if ($display) {
+        $display->setThirdPartySetting('layout_builder', 'enabled', TRUE);
+        $display->setThirdPartySetting('layout_builder', 'allow_custom', TRUE);
+        // Remove all legacy field components so Layout Builder controls rendering.
+        foreach (array_keys($display->getComponents()) as $name) {
+          $display->removeComponent($name);
+        }
+        $display->save();
+      }
+    }
+
+    // Collect all basic page node IDs for the sandbox migration.
+    $nids = \Drupal::entityQuery('node')
+      ->condition('type', 'page')
+      ->accessCheck(FALSE)
+      ->execute();
+    $sandbox['nids'] = array_values($nids);
+    $sandbox['total'] = count($nids);
+    $sandbox['progress'] = 0;
+  }
+
+  if ($sandbox['total'] === 0) {
+    $sandbox['#finished'] = 1;
+    return 'Layout Builder enabled on basic pages. No existing nodes to migrate.';
+  }
+
+  $batch_size = 25;
+  $nids_batch = array_slice($sandbox['nids'], $sandbox['progress'], $batch_size);
+
+  $account_switcher = \Drupal::service('account_switcher');
+  foreach ($nids_batch as $nid) {
+    try {
+      $node = \Drupal\node\Entity\Node::load($nid);
+      if ($node && $node->hasField('layout_builder__layout') && $node->get('layout_builder__layout')->isEmpty()) {
+        $uuid_generator = new \Drupal\Component\Uuid\Php();
+
+        $body_component = new \Drupal\layout_builder\SectionComponent(
+          $uuid_generator->generate(),
+          'content',
+          [
+            'id' => 'field_block:node:page:body',
+            'label' => '',
+            'label_display' => '0',
+            'formatter' => [
+              'type' => 'text_default',
+              'settings' => [],
+              'label' => 'hidden',
+            ],
+            'context_mapping' => ['entity' => 'layout_builder.entity'],
+            'provider' => 'layout_builder',
+          ]
+        );
+
+        // Matches the field_page_media_assets field_block already present in
+        // the bundle's own default full display (core.entity_view_display.
+        // node.page.full.yml), so migrated nodes end up with the same layout
+        // a brand new page gets.
+        $media_component = new \Drupal\layout_builder\SectionComponent(
+          $uuid_generator->generate(),
+          'content',
+          [
+            'id' => 'field_block:node:page:field_page_media_assets',
+            'label' => '',
+            'label_display' => '0',
+            'formatter' => [
+              'type' => 'entity_reference_entity_view',
+              'settings' => [
+                'view_mode' => 'media_assets',
+                'link' => FALSE,
+              ],
+              'label' => 'hidden',
+            ],
+            'context_mapping' => ['entity' => 'layout_builder.entity'],
+            'provider' => 'layout_builder',
+          ]
+        );
+
+        $section = new \Drupal\layout_builder\Section(
+          'layout_onecol',
+          [],
+          [$body_component, $media_component]
+        );
+
+        $node->set('layout_builder__layout', [$section]);
+
+        // Save as the node's own owner so mukurtu_notifications_node_update()
+        // doesn't treat this migration as someone else editing the page and
+        // email the owner/stewards a "your content was updated" notice.
+        $owner = $node->getOwner();
+        if ($owner) {
+          $account_switcher->switchTo($owner);
+        }
+        try {
+          $node->save();
+        }
+        finally {
+          if ($owner) {
+            $account_switcher->switchBack();
+          }
+        }
+      }
+    }
+    catch (\Exception $e) {
+      \Drupal::logger('mukurtu_core')->error('Failed to migrate node @nid to Layout Builder: @message', [
+        '@nid' => $nid,
+        '@message' => $e->getMessage(),
+      ]);
+    }
+    $sandbox['progress']++;
+  }
+
+  $sandbox['#finished'] = $sandbox['progress'] / $sandbox['total'];
+  return (string) t('Migrated @done of @total basic page nodes to Layout Builder.', [
+    '@done' => $sandbox['progress'],
+    '@total' => $sandbox['total'],
+  ]);
+}
+
+/**
+ * Grant mukurtu_manager Layout Builder override permissions for landing pages and basic pages.
+ */
+function mukurtu_core_update_40069(): void {
+  $role = \Drupal\user\Entity\Role::load('mukurtu_manager');
+  if (!$role) {
+    return;
+  }
+  $role->grantPermission('configure editable landing_page node layout overrides');
+  $role->grantPermission('configure editable page node layout overrides');
+  $role->save();
+}
+
+/**
  * Add return_to_review transition and expand request_revision to cover published state.
  */
 function mukurtu_core_update_40063(): void {
@@ -1986,29 +2182,243 @@ function mukurtu_core_update_40067(): void {
 }
 
 /**
- * Flush node_view cache after fixing the related content cache invalidation gap.
+ * Add Media and Call to Action block types; configure Layout Builder restrictions for basic pages.
  */
-function mukurtu_core_update_40068(): void {
-  \Drupal\Core\Cache\Cache::invalidateTags(['node_view']);
+function mukurtu_core_update_40070(): void {
+  $profile_path = \Drupal::service('extension.list.profile')->getPath('mukurtu');
+  $config_source = new \Drupal\Core\Config\FileStorage($profile_path . '/config/install');
+  $config_factory = \Drupal::configFactory();
+
+  // Install block content type config entities via config factory (no DB schema changes needed).
+  $block_type_configs = [
+    'block_content.type.media_block',
+    'block_content.type.call_to_action',
+    'block_content.type.media_carousel_block',
+    'block_content.type.local_contexts_block',
+    'block_content.type.horizontal_divider',
+  ];
+  foreach ($block_type_configs as $config_name) {
+    if ($config_factory->get($config_name)->isNew()) {
+      $data = $config_source->read($config_name);
+      if ($data) {
+        $config_factory->getEditable($config_name)->setData($data)->save();
+      }
+    }
+  }
+
+  // Install field storage configs via the entity API so that:
+  // (a) a UUID is automatically generated, and
+  // (b) FieldStorageDefinitionListener fires and creates the dedicated DB tables.
+  $field_storage_configs = [
+    'field.storage.block_content.field_block_media',
+    'field.storage.block_content.field_cta_link',
+    'field.storage.block_content.field_media_items',
+    'field.storage.block_content.field_lc_labels_and_notices',
+    'field.storage.block_content.field_local_contexts_projects',
+  ];
+  foreach ($field_storage_configs as $config_name) {
+    if ($config_factory->get($config_name)->isNew()) {
+      $data = $config_source->read($config_name);
+      if ($data) {
+        // Remove uuid so it is auto-generated; unset _core (install-only key).
+        unset($data['uuid'], $data['_core']);
+        \Drupal\field\Entity\FieldStorageConfig::create($data)->save();
+      }
+    }
+  }
+
+  // Install field instance, form display, and view display configs.
+  $remaining_configs = [
+    // Field instances.
+    'field.field.block_content.media_block.field_block_media',
+    'field.field.block_content.call_to_action.body',
+    'field.field.block_content.call_to_action.field_cta_link',
+    'field.field.block_content.media_carousel_block.field_media_items',
+    'field.field.block_content.local_contexts_block.field_lc_labels_and_notices',
+    'field.field.block_content.local_contexts_block.field_local_contexts_projects',
+    // Form displays.
+    'core.entity_form_display.block_content.media_block.default',
+    'core.entity_form_display.block_content.call_to_action.default',
+    'core.entity_form_display.block_content.media_carousel_block.default',
+    'core.entity_form_display.block_content.local_contexts_block.default',
+    'core.entity_form_display.block_content.horizontal_divider.default',
+    // View displays.
+    'core.entity_view_display.block_content.media_block.default',
+    'core.entity_view_display.block_content.call_to_action.default',
+    'core.entity_view_display.block_content.media_carousel_block.default',
+    'core.entity_view_display.block_content.local_contexts_block.default',
+    'core.entity_view_display.block_content.horizontal_divider.default',
+  ];
+  foreach ($remaining_configs as $config_name) {
+    if ($config_factory->get($config_name)->isNew()) {
+      $data = $config_source->read($config_name);
+      if ($data) {
+        $config_factory->getEditable($config_name)->setData($data)->save();
+      }
+    }
+  }
+
+  // Update the "Basic block" label to "Text".
+  $basic_block = $config_factory->getEditable('block_content.type.basic');
+  if (!$basic_block->isNew() && $basic_block->get('label') === 'Basic block') {
+    $basic_block->set('label', 'Text')->save();
+  }
+
+  // Configure Layout Builder restrictions on both page view displays.
+  // allowed_block_categories is intentionally empty -- role-based filtering
+  // is handled dynamically in LayoutBuilderHooks::restrictBlocksForRole().
+  // Only layout restrictions (allowed_layouts) are enforced here.
+  foreach (['node.page.default', 'node.page.full'] as $display_id) {
+    $display = \Drupal::entityTypeManager()
+      ->getStorage('entity_view_display')
+      ->load($display_id);
+    if (!$display) {
+      continue;
+    }
+    $restrictions = $display->getThirdPartySetting('layout_builder_restrictions', 'entity_view_mode_restriction', []);
+    $restrictions['restricted_categories'] = [];
+    $display->setThirdPartySetting('layout_builder_restrictions', 'allowed_block_categories', []);
+    $display->setThirdPartySetting('layout_builder_restrictions', 'entity_view_mode_restriction', $restrictions);
+    $display->save();
+  }
 }
 
 /**
- * Remove the orphaned related content teasers display settings.
- *
- * These controls were never read anywhere in the codebase, so any value an
- * admin selected had no effect on the site.
+ * Grant mukurtu_manager permission to create and edit custom blocks for Layout Builder inline blocks.
  */
-function mukurtu_core_update_40069(): void {
-  \Drupal::configFactory()->getEditable('mukurtu.settings')
-    ->clear('mukurtu_related_content_teasers_display_top_right')
-    ->clear('mukurtu_related_content_teasers_display_bottom')
-    ->save();
+function mukurtu_core_update_40071(): void {
+  $role = \Drupal\user\Entity\Role::load('mukurtu_manager');
+  if (!$role) {
+    return;
+  }
+  $role->grantPermission('create and edit custom blocks');
+  $role->save();
+}
+
+/**
+ * Add body field to the basic (Text) block type; remove body from featured_content.
+ */
+function mukurtu_core_update_40072(): void {
+  $profile_path = \Drupal::service('extension.list.profile')->getPath('mukurtu');
+  $config_source = new \Drupal\Core\Config\FileStorage($profile_path . '/config/install');
+
+  // Add body field instance to the basic block type.
+  $data = $config_source->read('field.field.block_content.basic.body');
+  if ($data && !\Drupal::entityTypeManager()->getStorage('field_config')->load('block_content.basic.body')) {
+    unset($data['uuid'], $data['_core']);
+    \Drupal\field\Entity\FieldConfig::create($data)->save();
+  }
+
+  // Update basic block form and view displays to include the body field.
+  foreach (['core.entity_form_display.block_content.basic.default', 'core.entity_view_display.block_content.basic.default'] as $config_name) {
+    $data = $config_source->read($config_name);
+    if ($data) {
+      \Drupal::configFactory()->getEditable($config_name)->setData($data)->save();
+    }
+  }
+
+  // Remove body field from featured_content block type.
+  // Destructive: any stored body content on existing featured_content blocks
+  // will be purged. Safe here because the body field was never exposed to
+  // editors in the featured_content form display.
+  $body_field = \Drupal::entityTypeManager()->getStorage('field_config')->load('block_content.featured_content.body');
+  if ($body_field) {
+    $body_field->delete();
+  }
+
+  // Update featured_content form and view displays without the body field.
+  foreach (['core.entity_form_display.block_content.featured_content.default', 'core.entity_view_display.block_content.featured_content.default'] as $config_name) {
+    $data = $config_source->read($config_name);
+    if ($data) {
+      \Drupal::configFactory()->getEditable($config_name)->setData($data)->save();
+    }
+  }
+}
+
+/**
+ * Pre-place body and media assets as field blocks in the basic page full layout.
+ */
+function mukurtu_core_update_40073(): void {
+  /** @var \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display */
+  $display = \Drupal::entityTypeManager()->getStorage('entity_view_display')->load('node.page.full');
+  if (!$display) {
+    return;
+  }
+
+  // Remove body and media from the hidden fields so they are managed by LB.
+  $hidden = $display->get('hidden');
+  unset($hidden['body']);
+  unset($hidden['field_page_media_assets']);
+  $display->set('hidden', $hidden);
+
+  $sections = $display->getThirdPartySetting('layout_builder', 'sections');
+  if (empty($sections)) {
+    $display->save();
+    return;
+  }
+
+  /** @var \Drupal\layout_builder\Section $section */
+  $section = $sections[0];
+
+  // Skip if body is already placed (idempotent guard).
+  foreach ($section->getComponents() as $comp) {
+    if ($comp->getPlugin()->getPluginId() === 'field_block:node:page:body') {
+      $display->save();
+      return;
+    }
+  }
+
+  $uuid_gen = new \Drupal\Component\Uuid\Php();
+
+  $media_comp = new \Drupal\layout_builder\SectionComponent(
+    $uuid_gen->generate(),
+    'content',
+    [
+      'id' => 'field_block:node:page:field_page_media_assets',
+      'label' => '',
+      'label_display' => '0',
+      'formatter' => [
+        'type' => 'entity_reference_entity_view',
+        'settings' => ['view_mode' => 'media_assets', 'link' => FALSE],
+        'label' => 'hidden',
+        'third_party_settings' => [],
+      ],
+      'context_mapping' => ['entity' => 'layout_builder.entity'],
+      'provider' => 'layout_builder',
+    ]
+  );
+  $media_comp->setWeight(-1);
+
+  $body_comp = new \Drupal\layout_builder\SectionComponent(
+    $uuid_gen->generate(),
+    'content',
+    [
+      'id' => 'field_block:node:page:body',
+      'label' => '',
+      'label_display' => '0',
+      'formatter' => [
+        'type' => 'text_default',
+        'settings' => [],
+        'label' => 'hidden',
+        'third_party_settings' => [],
+      ],
+      'context_mapping' => ['entity' => 'layout_builder.entity'],
+      'provider' => 'layout_builder',
+    ]
+  );
+  $body_comp->setWeight(-2);
+
+  $section->appendComponent($media_comp);
+  $section->appendComponent($body_comp);
+
+  $display->setThirdPartySetting('layout_builder', 'sections', [$section]);
+  $display->save();
 }
 
 /**
  * Add the custom 403 access denied page, permission, and default config.
  */
-function mukurtu_core_update_40072(): void {
+function mukurtu_core_update_40074(): void {
   // Point the site's 403 page at the new custom access-denied route
   // (system.site.yml is not owned by Mukurtu).
   \Drupal::configFactory()
@@ -2031,4 +2441,696 @@ function mukurtu_core_update_40072(): void {
       $config_factory->getEditable('mukurtu_core.access_denied')->setData($data)->save();
     }
   }
+}
+
+/**
+ * Add the missing media assets field block to existing page node overrides.
+ *
+ * Update 40068 created per-node Layout Builder overrides for existing page
+ * nodes containing only the body component, explicitly excluding
+ * field_page_media_assets. Update 40073 later added that field block to the
+ * page bundle's default view display, but per-node overrides take
+ * precedence over the default display and are never touched by it, so any
+ * page with an override from update 40068 is still missing its media
+ * carousel.
+ */
+function mukurtu_core_update_40075(&$sandbox): string {
+  if (!isset($sandbox['progress'])) {
+    $nids = \Drupal::entityQuery('node')
+      ->condition('type', 'page')
+      ->accessCheck(FALSE)
+      ->execute();
+    $sandbox['nids'] = array_values($nids);
+    $sandbox['total'] = count($nids);
+    $sandbox['progress'] = 0;
+  }
+
+  if ($sandbox['total'] === 0) {
+    $sandbox['#finished'] = 1;
+    return 'No basic page nodes to check for the media carousel field block.';
+  }
+
+  $batch_size = 25;
+  $nids_batch = array_slice($sandbox['nids'], $sandbox['progress'], $batch_size);
+  $uuid_generator = new \Drupal\Component\Uuid\Php();
+
+  foreach ($nids_batch as $nid) {
+    $node = \Drupal\node\Entity\Node::load($nid);
+    if ($node && $node->hasField('layout_builder__layout') && !$node->get('layout_builder__layout')->isEmpty()) {
+      $sections = $node->get('layout_builder__layout')->getSections();
+      if (!empty($sections)) {
+        $has_media_block = FALSE;
+        foreach ($sections as $section) {
+          foreach ($section->getComponents() as $component) {
+            if ($component->getPlugin()->getPluginId() === 'field_block:node:page:field_page_media_assets') {
+              $has_media_block = TRUE;
+              break 2;
+            }
+          }
+        }
+
+        if (!$has_media_block) {
+          $media_component = new \Drupal\layout_builder\SectionComponent(
+            $uuid_generator->generate(),
+            'content',
+            [
+              'id' => 'field_block:node:page:field_page_media_assets',
+              'label' => '',
+              'label_display' => '0',
+              'formatter' => [
+                'type' => 'entity_reference_entity_view',
+                'settings' => ['view_mode' => 'media_assets', 'link' => FALSE],
+                'label' => 'hidden',
+                'third_party_settings' => [],
+              ],
+              'context_mapping' => ['entity' => 'layout_builder.entity'],
+              'provider' => 'layout_builder',
+            ]
+          );
+          $media_component->setWeight(-1);
+          $sections[0]->appendComponent($media_component);
+          $node->set('layout_builder__layout', $sections);
+          $node->save();
+        }
+      }
+    }
+    $sandbox['progress']++;
+  }
+
+  $sandbox['#finished'] = $sandbox['progress'] / $sandbox['total'];
+  return (string) t('Checked @done of @total basic page nodes for the missing media carousel field block.', [
+    '@done' => $sandbox['progress'],
+    '@total' => $sandbox['total'],
+  ]);
+}
+
+/**
+ * Flush node_view cache after fixing the related content cache invalidation gap.
+ */
+function mukurtu_core_update_40076(): void {
+  \Drupal\Core\Cache\Cache::invalidateTags(['node_view']);
+}
+
+/**
+ * Remove the orphaned related content teasers display settings.
+ *
+ * These controls were never read anywhere in the codebase, so any value an
+ * admin selected had no effect on the site.
+ */
+function mukurtu_core_update_40077(): void {
+  \Drupal::configFactory()->getEditable('mukurtu.settings')
+    ->clear('mukurtu_related_content_teasers_display_top_right')
+    ->clear('mukurtu_related_content_teasers_display_bottom')
+    ->save();
+}
+
+/**
+ * Show a manually-provided thumbnail image for video, remote_video, and
+ * soundcloud media in the "browse" view mode used by List/Grid/Map cards,
+ * falling back to the native player/embed when no thumbnail is set.
+ */
+function mukurtu_core_update_40078(): void {
+  $config_source = new \Drupal\Core\Config\FileStorage(
+    \Drupal::service('extension.list.profile')->getPath('mukurtu') . '/config/install'
+  );
+  $config_factory = \Drupal::configFactory();
+
+  foreach (['media.video.browse', 'media.remote_video.browse', 'media.soundcloud.browse'] as $name) {
+    $config_name = 'core.entity_view_display.' . $name;
+    $data = $config_source->read($config_name);
+    if ($data) {
+      $config_factory->getEditable($config_name)->setData($data)->save(TRUE);
+    }
+  }
+}
+
+/**
+ * Use the same "browse" media view mode for digital_heritage's Grid Browse
+ * representative media as every other content type, instead of the
+ * unrelated digital_heritage_sidebar mode.
+ */
+function mukurtu_core_update_40079(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.digital_heritage.grid_browse');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_representative_media.settings.view_mode', 'browse')->save();
+}
+
+/**
+ * Enable the Visitors module for built-in, no-external-service analytics.
+ */
+function mukurtu_core_update_40080(): void {
+  \Drupal::service('module_installer')->install(['visitors']);
+
+  $role = \Drupal\user\Entity\Role::load('mukurtu_manager');
+  if ($role) {
+    $role->grantPermission('access visitors')->save();
+  }
+}
+
+/**
+ * Fix the account menu's Dashboard link to point at the current route.
+ *
+ * The /dashboard route was removed in favor of /dashboard/mukurtu_dashboard
+ * (the dashboards module's canonical route), but sites installed before
+ * that change still have a menu_link_content entity pointing at the old,
+ * now-nonexistent /dashboard path, causing an UnexpectedValueException
+ * whenever the account menu is rendered.
+ */
+function mukurtu_core_update_40081(): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('menu_link_content');
+  $ids = $storage->getQuery()
+    ->accessCheck(FALSE)
+    ->condition('menu_name', 'account')
+    ->condition('link.uri', 'internal:/dashboard')
+    ->execute();
+  foreach ($storage->loadMultiple($ids) as $link) {
+    $link->set('link', ['uri' => 'internal:/dashboard/mukurtu_dashboard'])->save();
+  }
+}
+
+/**
+ * Stop linking the Content type column on the manage all content view.
+ */
+function mukurtu_core_update_40082(): void {
+  $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_manage_all_content');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('display.default.display_options.fields.type.settings.link', FALSE)->save();
+}
+
+/**
+ * Reconcile Layout Builder / basic-page block config for sites that already
+ * ran an earlier version of update hooks 40068-40073.
+ *
+ * Drupal marks a hook_update_N() as "done" by number, not by content. This
+ * feature's hooks were renumbered and rewritten several times while it was
+ * in development (see commit 24c08af0e fixing a duplicate 40076), so a site
+ * that ran one of them under its current number at an earlier point would
+ * never re-run it, even though the hook now does more. Every step below uses
+ * the same existence guards as the original hooks, so this is a no-op on
+ * sites where the earlier hooks already fully succeeded, and a catch-up on
+ * any site that is missing something.
+ */
+function mukurtu_core_update_40083(&$sandbox): string {
+  if (!isset($sandbox['progress'])) {
+    $profile_path = \Drupal::service('extension.list.profile')->getPath('mukurtu');
+    $module_path = \Drupal::service('module_handler')->getModule('mukurtu_core')->getPath();
+    $profile_source = new \Drupal\Core\Config\FileStorage($profile_path . '/config/install');
+    $module_source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+    $config_factory = \Drupal::configFactory();
+
+    // Layout Builder field storage + instance on the page bundle.
+    if (!\Drupal\field\Entity\FieldStorageConfig::loadByName('node', 'layout_builder__layout')) {
+      $data = $module_source->read('field.storage.node.layout_builder__layout');
+      if ($data) {
+        unset($data['uuid'], $data['_core']);
+        \Drupal\field\Entity\FieldStorageConfig::create($data)->save();
+      }
+    }
+    if (!\Drupal\field\Entity\FieldConfig::loadByName('node', 'page', 'layout_builder__layout')) {
+      $data = $module_source->read('field.field.node.page.layout_builder__layout');
+      if ($data) {
+        $config_factory->getEditable('field.field.node.page.layout_builder__layout')->setData($data)->save();
+      }
+    }
+
+    // Enable Layout Builder on the page default and full view displays.
+    foreach (['default', 'full'] as $mode) {
+      $display = \Drupal::entityTypeManager()
+        ->getStorage('entity_view_display')
+        ->load('node.page.' . $mode);
+      if ($display && !$display->getThirdPartySetting('layout_builder', 'enabled', FALSE)) {
+        $display->setThirdPartySetting('layout_builder', 'enabled', TRUE);
+        $display->setThirdPartySetting('layout_builder', 'allow_custom', TRUE);
+        foreach (array_keys($display->getComponents()) as $name) {
+          $display->removeComponent($name);
+        }
+        $display->save();
+      }
+    }
+
+    // Block content types.
+    $block_type_configs = [
+      'block_content.type.media_block',
+      'block_content.type.call_to_action',
+      'block_content.type.media_carousel_block',
+      'block_content.type.local_contexts_block',
+      'block_content.type.horizontal_divider',
+    ];
+    foreach ($block_type_configs as $config_name) {
+      if ($config_factory->get($config_name)->isNew()) {
+        $data = $profile_source->read($config_name);
+        if ($data) {
+          $config_factory->getEditable($config_name)->setData($data)->save();
+        }
+      }
+    }
+
+    // Field storages, created via the entity API so a UUID is generated and
+    // FieldStorageDefinitionListener creates the dedicated DB tables.
+    $field_storage_configs = [
+      'field.storage.block_content.field_block_media',
+      'field.storage.block_content.field_cta_link',
+      'field.storage.block_content.field_media_items',
+      'field.storage.block_content.field_lc_labels_and_notices',
+      'field.storage.block_content.field_local_contexts_projects',
+    ];
+    foreach ($field_storage_configs as $config_name) {
+      if ($config_factory->get($config_name)->isNew()) {
+        $data = $profile_source->read($config_name);
+        if ($data) {
+          unset($data['uuid'], $data['_core']);
+          \Drupal\field\Entity\FieldStorageConfig::create($data)->save();
+        }
+      }
+    }
+
+    // Field instances and form/view displays for the 5 new block types.
+    $remaining_configs = [
+      'field.field.block_content.media_block.field_block_media',
+      'field.field.block_content.call_to_action.body',
+      'field.field.block_content.call_to_action.field_cta_link',
+      'field.field.block_content.media_carousel_block.field_media_items',
+      'field.field.block_content.local_contexts_block.field_lc_labels_and_notices',
+      'field.field.block_content.local_contexts_block.field_local_contexts_projects',
+      'core.entity_form_display.block_content.media_block.default',
+      'core.entity_form_display.block_content.call_to_action.default',
+      'core.entity_form_display.block_content.media_carousel_block.default',
+      'core.entity_form_display.block_content.local_contexts_block.default',
+      'core.entity_form_display.block_content.horizontal_divider.default',
+      'core.entity_view_display.block_content.media_block.default',
+      'core.entity_view_display.block_content.call_to_action.default',
+      'core.entity_view_display.block_content.media_carousel_block.default',
+      'core.entity_view_display.block_content.local_contexts_block.default',
+      'core.entity_view_display.block_content.horizontal_divider.default',
+    ];
+    foreach ($remaining_configs as $config_name) {
+      if ($config_factory->get($config_name)->isNew()) {
+        $data = $profile_source->read($config_name);
+        if ($data) {
+          $config_factory->getEditable($config_name)->setData($data)->save();
+        }
+      }
+    }
+
+    // "Basic block" -> "Text" label.
+    $basic_block = $config_factory->getEditable('block_content.type.basic');
+    if (!$basic_block->isNew() && $basic_block->get('label') === 'Basic block') {
+      $basic_block->set('label', 'Text')->save();
+    }
+
+    // Body field on basic; re-applying the form/view displays for basic and
+    // featured_content is safe to repeat since it always targets the same
+    // final state defined in config/install.
+    $data = $profile_source->read('field.field.block_content.basic.body');
+    if ($data && !\Drupal::entityTypeManager()->getStorage('field_config')->load('block_content.basic.body')) {
+      unset($data['uuid'], $data['_core']);
+      \Drupal\field\Entity\FieldConfig::create($data)->save();
+    }
+    $body_field = \Drupal::entityTypeManager()->getStorage('field_config')->load('block_content.featured_content.body');
+    if ($body_field) {
+      $body_field->delete();
+    }
+    foreach ([
+      'core.entity_form_display.block_content.basic.default',
+      'core.entity_view_display.block_content.basic.default',
+      'core.entity_form_display.block_content.featured_content.default',
+      'core.entity_view_display.block_content.featured_content.default',
+    ] as $config_name) {
+      $data = $profile_source->read($config_name);
+      if ($data) {
+        $config_factory->getEditable($config_name)->setData($data)->save();
+      }
+    }
+
+    // Layout Builder restrictions on both page view displays.
+    foreach (['node.page.default', 'node.page.full'] as $display_id) {
+      $display = \Drupal::entityTypeManager()
+        ->getStorage('entity_view_display')
+        ->load($display_id);
+      if ($display) {
+        $restrictions = $display->getThirdPartySetting('layout_builder_restrictions', 'entity_view_mode_restriction', []);
+        $restrictions['restricted_categories'] = [];
+        $display->setThirdPartySetting('layout_builder_restrictions', 'allowed_block_categories', []);
+        $display->setThirdPartySetting('layout_builder_restrictions', 'entity_view_mode_restriction', $restrictions);
+        $display->save();
+      }
+    }
+
+    // Pre-place body and media assets as field blocks in node.page.full.
+    $full_display = \Drupal::entityTypeManager()->getStorage('entity_view_display')->load('node.page.full');
+    if ($full_display) {
+      $hidden = $full_display->get('hidden');
+      unset($hidden['body'], $hidden['field_page_media_assets']);
+      $full_display->set('hidden', $hidden);
+
+      $sections = $full_display->getThirdPartySetting('layout_builder', 'sections');
+      $body_already_placed = FALSE;
+      if (!empty($sections)) {
+        /** @var \Drupal\layout_builder\Section $section */
+        $section = $sections[0];
+        foreach ($section->getComponents() as $comp) {
+          if ($comp->getPlugin()->getPluginId() === 'field_block:node:page:body') {
+            $body_already_placed = TRUE;
+          }
+        }
+        if (!$body_already_placed) {
+          $uuid_gen = new \Drupal\Component\Uuid\Php();
+          $media_comp = new \Drupal\layout_builder\SectionComponent(
+            $uuid_gen->generate(),
+            'content',
+            [
+              'id' => 'field_block:node:page:field_page_media_assets',
+              'label' => '',
+              'label_display' => '0',
+              'formatter' => [
+                'type' => 'entity_reference_entity_view',
+                'settings' => ['view_mode' => 'media_assets', 'link' => FALSE],
+                'label' => 'hidden',
+                'third_party_settings' => [],
+              ],
+              'context_mapping' => ['entity' => 'layout_builder.entity'],
+              'provider' => 'layout_builder',
+            ]
+          );
+          $media_comp->setWeight(-1);
+          $body_comp = new \Drupal\layout_builder\SectionComponent(
+            $uuid_gen->generate(),
+            'content',
+            [
+              'id' => 'field_block:node:page:body',
+              'label' => '',
+              'label_display' => '0',
+              'formatter' => [
+                'type' => 'text_default',
+                'settings' => [],
+                'label' => 'hidden',
+                'third_party_settings' => [],
+              ],
+              'context_mapping' => ['entity' => 'layout_builder.entity'],
+              'provider' => 'layout_builder',
+            ]
+          );
+          $body_comp->setWeight(-2);
+          $section->appendComponent($media_comp);
+          $section->appendComponent($body_comp);
+          $full_display->setThirdPartySetting('layout_builder', 'sections', [$section]);
+        }
+      }
+      $full_display->save();
+    }
+
+    // Layout Builder / custom block permissions for mukurtu_manager.
+    $role = \Drupal\user\Entity\Role::load('mukurtu_manager');
+    if ($role) {
+      $role->grantPermission('configure editable landing_page node layout overrides');
+      $role->grantPermission('configure editable page node layout overrides');
+      $role->grantPermission('create and edit custom blocks');
+      $role->save();
+    }
+
+    // Collect all basic page node IDs for the sandbox migration.
+    $nids = \Drupal::entityQuery('node')
+      ->condition('type', 'page')
+      ->accessCheck(FALSE)
+      ->execute();
+    $sandbox['nids'] = array_values($nids);
+    $sandbox['total'] = count($nids);
+    $sandbox['progress'] = 0;
+  }
+
+  if ($sandbox['total'] === 0) {
+    $sandbox['#finished'] = 1;
+    return 'Reconciled Layout Builder basic-page block config. No existing nodes to migrate.';
+  }
+
+  $batch_size = 25;
+  $nids_batch = array_slice($sandbox['nids'], $sandbox['progress'], $batch_size);
+
+  $account_switcher = \Drupal::service('account_switcher');
+  foreach ($nids_batch as $nid) {
+    try {
+      $node = \Drupal\node\Entity\Node::load($nid);
+      if ($node && $node->hasField('layout_builder__layout') && $node->get('layout_builder__layout')->isEmpty()) {
+        $uuid_generator = new \Drupal\Component\Uuid\Php();
+
+        $body_component = new \Drupal\layout_builder\SectionComponent(
+          $uuid_generator->generate(),
+          'content',
+          [
+            'id' => 'field_block:node:page:body',
+            'label' => '',
+            'label_display' => '0',
+            'formatter' => [
+              'type' => 'text_default',
+              'settings' => [],
+              'label' => 'hidden',
+            ],
+            'context_mapping' => ['entity' => 'layout_builder.entity'],
+            'provider' => 'layout_builder',
+          ]
+        );
+
+        $media_component = new \Drupal\layout_builder\SectionComponent(
+          $uuid_generator->generate(),
+          'content',
+          [
+            'id' => 'field_block:node:page:field_page_media_assets',
+            'label' => '',
+            'label_display' => '0',
+            'formatter' => [
+              'type' => 'entity_reference_entity_view',
+              'settings' => [
+                'view_mode' => 'media_assets',
+                'link' => FALSE,
+              ],
+              'label' => 'hidden',
+            ],
+            'context_mapping' => ['entity' => 'layout_builder.entity'],
+            'provider' => 'layout_builder',
+          ]
+        );
+
+        $section = new \Drupal\layout_builder\Section(
+          'layout_onecol',
+          [],
+          [$body_component, $media_component]
+        );
+
+        $node->set('layout_builder__layout', [$section]);
+
+        $owner = $node->getOwner();
+        if ($owner) {
+          $account_switcher->switchTo($owner);
+        }
+        try {
+          $node->save();
+        }
+        finally {
+          if ($owner) {
+            $account_switcher->switchBack();
+          }
+        }
+      }
+    }
+    catch (\Exception $e) {
+      \Drupal::logger('mukurtu_core')->error('Failed to reconcile node @nid to Layout Builder: @message', [
+        '@nid' => $nid,
+        '@message' => $e->getMessage(),
+      ]);
+    }
+    $sandbox['progress']++;
+  }
+
+  $sandbox['#finished'] = $sandbox['progress'] / $sandbox['total'];
+  return (string) t('Reconciled @done of @total basic page nodes for Layout Builder.', [
+    '@done' => $sandbox['progress'],
+    '@total' => $sandbox['total'],
+  ]);
+}
+
+/**
+ * Install the Mukurtu Bot Protection module and its dependencies (CAPTCHA,
+ * reCAPTCHA, Cloudflare Turnstile, and faceted search crawler blocking).
+ */
+function mukurtu_core_update_40084(): void {
+  if (!\Drupal::moduleHandler()->moduleExists('mukurtu_bot_protection')) {
+    \Drupal::service('module_installer')->install(['mukurtu_bot_protection']);
+  }
+
+  // Protect the feedback contact form and comment form with a CAPTCHA point,
+  // matching what mukurtu_install() sets up on a fresh install.
+  foreach (['contact_message_feedback_form', 'comment_comment_form'] as $form_id) {
+    if (!\Drupal\captcha\Entity\CaptchaPoint::load($form_id)) {
+      \Drupal\captcha\Entity\CaptchaPoint::create([
+        'formId' => $form_id,
+        'captchaType' => 'default',
+        'label' => $form_id,
+        'status' => TRUE,
+      ])->save();
+    }
+  }
+}
+
+/**
+ * Add the Security section to the Mukurtu admin dashboard.
+ */
+function mukurtu_core_update_40085(): void {
+  $config = \Drupal::configFactory()->getEditable('dashboards.dashboard.mukurtu_dashboard');
+  if ($config->isNew()) {
+    return;
+  }
+
+  $uuid = '3f8b6c1a-2e4d-4a9f-9c7b-5d1e8a2f6b3c';
+  $sections = $config->get('sections') ?? [];
+  if (isset($sections[0]['components'][$uuid])) {
+    return;
+  }
+
+  $sections[0]['components'][$uuid] = [
+    'uuid' => $uuid,
+    'region' => 'three',
+    'configuration' => [
+      'id' => 'system_menu_block:dashboard-security',
+      'label' => 'Security',
+      'label_display' => 'visible',
+      'provider' => 'system',
+      'context_mapping' => [],
+      'level' => 1,
+      'depth' => NULL,
+      'expand_all_items' => FALSE,
+    ],
+    'weight' => 9,
+    'additional' => [],
+  ];
+
+  $config->set('sections', $sections)->save();
+}
+
+/**
+ * Install ALTCHA and Honeypot and protect the login form with CAPTCHA.
+ */
+function mukurtu_core_update_40086(): void {
+  $module_installer = \Drupal::service('module_installer');
+  $module_handler = \Drupal::moduleHandler();
+  foreach (['altcha', 'honeypot'] as $module) {
+    if (!$module_handler->moduleExists($module)) {
+      $module_installer->install([$module]);
+    }
+  }
+
+  // The captcha module ships a disabled user_login_form CAPTCHA point by
+  // default; enable it to match the login-form protection mukurtu_bot_
+  // protection_install() sets up on new installs.
+  $point = \Drupal\captcha\Entity\CaptchaPoint::load('user_login_form');
+  if ($point) {
+    $point->setStatus(TRUE)->save();
+  }
+
+  // Protect the same 5 forms with Honeypot, matching mukurtu_bot_protection_
+  // install()'s defaults on new installs.
+  $honeypot_forms = [
+    'user_register_form',
+    'user_pass',
+    'user_login_form',
+    'contact_message_feedback_form',
+    'comment_comment_form',
+  ];
+  $honeypot_config = \Drupal::configFactory()->getEditable('honeypot.settings');
+  $form_settings = $honeypot_config->get('form_settings') ?? [];
+  foreach ($honeypot_forms as $form_id) {
+    $form_settings[$form_id] = TRUE;
+  }
+  $honeypot_config->set('form_settings', $form_settings)->save();
+}
+
+/**
+ * Show communities/category fields in Grid mode for digital_heritage and
+ * person, fix collection's Grid mode to show field_collection_image instead
+ * of the unused field_representative_media, add the collection.map_browse
+ * display, and show field_in_collection in Grid mode for digital_heritage,
+ * person, dictionary_word, and word_list, so Grid/Map mode template
+ * completeness work (#1624) has the field visibility it needs.
+ */
+function mukurtu_core_update_40087(): void {
+  $config_source = new \Drupal\Core\Config\FileStorage(
+    \Drupal::service('extension.list.profile')->getPath('mukurtu') . '/config/install'
+  );
+  $config_factory = \Drupal::configFactory();
+
+  foreach ([
+    'node.digital_heritage.grid_browse',
+    'node.person.grid_browse',
+    'node.collection.grid_browse',
+    'node.collection.map_browse',
+    'node.dictionary_word.grid_browse',
+    'node.word_list.grid_browse',
+  ] as $name) {
+    $config_name = 'core.entity_view_display.' . $name;
+    $data = $config_source->read($config_name);
+    if ($data) {
+      $config_factory->getEditable($config_name)->setData($data)->save(TRUE);
+    }
+  }
+}
+
+/**
+ * Enable Charts and GeoIP so the Visitors analytics reports render fully.
+ */
+function mukurtu_core_update_40088(): void {
+  \Drupal::service('module_installer')->install(['charts', 'charts_chartjs', 'visitors_geoip']);
+
+  \Drupal::configFactory()->getEditable('charts.settings')
+    ->set('charts_default_settings.library', 'chartjs')
+    ->save();
+}
+
+/**
+ * Install the klaro module for GDPR/cookie consent management.
+ */
+function mukurtu_core_update_40089(): void {
+  \Drupal::service('module_installer')->install(['klaro']);
+  \Drupal::configFactory()->getEditable('klaro.settings')
+    ->set('show_toggle_button', TRUE)
+    ->save();
+  // Klaro only shows its consent UI to roles with the "use klaro"
+  // permission; grant it to visitors and logged-in users so the consent
+  // banner actually appears once a site enables any of Klaro's services.
+  user_role_grant_permissions('anonymous', ['use klaro']);
+  user_role_grant_permissions('authenticated', ['use klaro']);
+}
+
+/**
+ * Install the SoundCloud klaro_app config so SoundCloud embeds can be
+ * gated behind cookie consent the same way YouTube/Vimeo embeds already are.
+ */
+function mukurtu_core_update_40090(): void {
+  $config_storage = \Drupal::service('config.storage');
+  $name = 'klaro.klaro_app.soundcloud';
+  if ($config_storage->exists($name)) {
+    return;
+  }
+  $profile_path = \Drupal::service('extension.list.profile')->getPath('mukurtu');
+  $source = new \Drupal\Core\Config\FileStorage(\Drupal::root() . '/' . $profile_path . '/config/install');
+  $data = $source->read($name);
+  if ($data !== FALSE) {
+    $config_storage->write($name, $data);
+  }
+}
+
+/**
+ * Block unknown external resources by default so embeds from domains with
+ * no named klaro_app (e.g. arbitrary External Embed media) are still gated
+ * behind consent under a generic "Other services" prompt, instead of
+ * rendering live until an admin adds a named service for that domain.
+ */
+function mukurtu_core_update_40091(): void {
+  \Drupal::configFactory()->getEditable('klaro.settings')
+    ->set('block_unknown', TRUE)
+    ->set('block_unknown_label', 'Other services')
+    ->set('block_unknown_description', 'Allow loading of external resources from other services')
+    ->save();
 }

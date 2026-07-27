@@ -1,0 +1,49 @@
+{#
+/**
+ * @file
+ * Theme override to display a Personal collection entity, teaser view mode.
+ *
+ * Used as the row template on the "My Personal Collections" listing page.
+ *
+ * Available variables:
+ * - content: All personal collection field items.
+ * - label: The personal collection name.
+ * - url: Direct URL of the current personal collection.
+ * - is_private: Boolean, TRUE if the personal collection privacy setting is
+ *   private.
+ * - item_count: The number of items in the personal collection.
+ *
+ * @see template_preprocess_personal_collection()
+ */
+#}
+{% set item_count_label = item_count ~ " Items" %}
+<div class="collections__content__container">
+  {% if label %}
+    <h2 class="collections__content__title">
+      <a href="{{ url }}" rel="bookmark">{{ label }}</a>
+      {% if is_private %}
+        <span class="privacy-badge privacy-badge--private">{{ 'Private'|t }}</span>
+      {% else %}
+        <span class="privacy-badge privacy-badge--public">{{ 'Public'|t }}</span>
+      {% endif %}
+    </h2>
+  {% endif %}
+  <div class="collections__content__count">
+    {{ item_count_label }}
+  </div>
+
+  <div>
+    {{ content.field_summary }}
+  </div>
+
+  <div class="collections__content__view-collection">
+    <a href="{{ url }}" rel="bookmark" aria-hidden="true" tabindex="-1">
+      {{ 'View Personal Collection'|t }}
+    </a>
+    {% include active_theme_path() ~ '/images/chevron_arrow_right.svg' %}
+  </div>
+</div>
+
+<div class="collections__image__container">
+  {{ content.field_media_assets }}
+</div>

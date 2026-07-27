@@ -1,0 +1,27 @@
+@use "../../00-base/mixins/mixins";
+
+// Grid/list/map switcher for the items in a Collection (node--collection--full).
+.collection-items-browse {
+  .browse-links {
+    margin-block-end: var(--v-space-4xxs);
+    display: flex;
+    gap: var(--v-space-5xs);
+
+    a,
+    button {
+      @include mixins.block-link;
+    }
+
+    .active-toggle {
+      @include mixins.block-link-active;
+    }
+  }
+
+  .grid .views-row,
+  .list .views-row {
+    &:first-of-type {
+      border-block-start: none;
+      margin-block-start: 0;
+    }
+  }
+}

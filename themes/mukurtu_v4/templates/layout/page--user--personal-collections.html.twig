@@ -1,0 +1,29 @@
+{#
+/**
+ * @file
+ * Theme override to display the "My Personal Collections" page.
+ *
+ * Regions:
+ * - page.content: The main content of the current page.
+ *
+ * @see template_preprocess_page()
+ * @see page--collections.html.twig
+ */
+#}
+{% extends "@mukurtu_v4/templates/layout/page.html.twig" %}
+
+{% block page_content %}
+
+  <div class="collections">
+    {% if page.sidebar_first %}
+      <aside class="collections__layout-sidebar-first" role="complementary">
+        {{ page.sidebar_first }}
+      </aside>
+    {% endif %}
+
+    <div class="collections__main-content">
+      {{ page.content }}
+    </div>
+
+  </div>
+{% endblock %}

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_protocol\Kernel;
 
+use PHPUnit\Framework\Attributes\Group;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
@@ -18,9 +19,8 @@ use Drupal\user\Entity\User;
  * is never actually called from the Views Bulk Operations UI. It's kept as
  * a defensive fallback in case the action is ever invoked directly (e.g.
  * programmatically); this test exercises that fallback path.
- *
- * @group mukurtu_protocol
  */
+#[Group('mukurtu_protocol')]
 class MukurtuBlockUserActionTest extends KernelTestBase {
 
   /**

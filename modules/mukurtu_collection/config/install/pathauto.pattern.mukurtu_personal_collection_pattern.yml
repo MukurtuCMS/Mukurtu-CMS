@@ -1,0 +1,11 @@
+langcode: en
+status: true
+dependencies: {  }
+id: mukurtu_personal_collection_pattern
+label: 'Mukurtu Personal Collection Pattern'
+type: 'canonical_entities:personal_collection'
+pattern: 'personal-collection/[personal_collection:name]'
+selection_criteria: {  }
+selection_logic: and
+weight: 0
+relationships: {  }

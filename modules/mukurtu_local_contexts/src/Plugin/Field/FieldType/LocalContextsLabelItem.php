@@ -9,6 +9,7 @@ use Drupal\Core\TypedData\ComplexDataDefinitionInterface;
 use Drupal\Core\TypedData\TypedDataInterface;
 use Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Field\FieldItemListInterface;
 
 /**
  * Defines the 'local_contexts_label_and_notice' field type.
@@ -91,11 +92,53 @@ class LocalContextsLabelItem extends StringItem implements OptionsProviderInterf
   }
 
   /**
+   * Get the project IDs already referenced by this specific field/entity.
+   *
+   * @return string[]
+   */
+  protected function getCurrentlyReferencedProjectIds(): array {
+    $parent = $this->getParent();
+    if (!$parent instanceof FieldItemListInterface) {
+      return [];
+    }
+    $ids = [];
+    foreach ($parent as $item) {
+      if (!empty($item->value)) {
+        // Value format is "{project_id}:{label_id|type}:{display}".
+        [$project_id] = explode(':', $item->value, 2);
+        $ids[] = $project_id;
+      }
+    }
+    return array_unique($ids);
+  }
+
+  /**
+   * Remove legacy-project labels/notices unless already referenced.
+   *
+   * @param array $values
+   *   Label or notice rows keyed by ID, each with a 'project_id' key.
+   *
+   * @return array
+   *   The filtered label/notice list.
+   */
+  protected function excludeUnreferencedLegacyValues(array $values): array {
+    $referenced = $this->getCurrentlyReferencedProjectIds();
+    foreach ($values as $key => $value) {
+      if ($this->localContextsProjectManager->isLegacyProjectId((string) $value['project_id']) && !in_array($value['project_id'], $referenced, TRUE)) {
+        unset($values[$key]);
+      }
+    }
+    return $values;
+  }
+
+  /**
    * {@inheritDoc}
    */
   public function getSettableValues(?AccountInterface $account = NULL) {
     $labels = $account ? $this->localContextsProjectManager->getUserLabels($account) : $this->localContextsProjectManager->getSiteLabels();
     $notices = $account ? $this->localContextsProjectManager->getUserNotices($account) : $this->localContextsProjectManager->getSiteNotices();
+    $labels = $this->excludeUnreferencedLegacyValues($labels);
+    $notices = $this->excludeUnreferencedLegacyValues($notices);
     $values = [];
 
     foreach ($labels as $label) {
@@ -113,6 +156,8 @@ class LocalContextsLabelItem extends StringItem implements OptionsProviderInterf
   public function getSettableOptions(?AccountInterface $account = NULL) {
     $labels = $account ? $this->localContextsProjectManager->getUserLabels($account) : $this->localContextsProjectManager->getSiteLabels();
     $notices = $account ? $this->localContextsProjectManager->getUserNotices($account) : $this->localContextsProjectManager->getSiteNotices();
+    $labels = $this->excludeUnreferencedLegacyValues($labels);
+    $notices = $this->excludeUnreferencedLegacyValues($notices);
     $labelOptions = $this->flattenOptions($labels);
     $noticeOptions = $this->flattenOptions($notices);
     $options = array_merge($labelOptions, $noticeOptions);

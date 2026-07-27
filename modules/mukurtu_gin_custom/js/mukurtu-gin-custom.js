@@ -46,4 +46,35 @@
       });
     },
   };
+  /**
+   * Rename the core "Create content block" button in the Layout Builder block
+   * picker to a friendlier label. The button carries the class
+   * inline-block-create-button regardless of context, so we target that
+   * directly without checking the page or route.
+   */
+  Drupal.behaviors.mukurtuLayoutBuilderAddBlockLabel = {
+    attach(context) {
+      once('mukurtu-lb-add-block-label', '.inline-block-create-button', context).forEach(el => {
+        el.textContent = Drupal.t('Add a block');
+      });
+    },
+  };
+  /**
+   * Style the Back link in the Layout Builder inline block chooser as a button.
+   * ChooseBlockController renders it as a bare a.use-ajax with no button class.
+   */
+  Drupal.behaviors.mukurtuLayoutBuilderBackButtonStyle = {
+    attach(context) {
+      once('lb-back-btn-style', '.inline-block-list', context).forEach(list => {
+        let sibling = list.nextElementSibling;
+        while (sibling) {
+          if (sibling.tagName === 'A' && sibling.classList.contains('use-ajax')) {
+            sibling.classList.add('button', 'button--secondary');
+            break;
+          }
+          sibling = sibling.nextElementSibling;
+        }
+      });
+    },
+  };
 })(Drupal, once);

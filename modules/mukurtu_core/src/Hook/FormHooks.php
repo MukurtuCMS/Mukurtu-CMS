@@ -146,8 +146,9 @@ class FormHooks
      * Sets explicit weights on core node tabs so all content pages display tabs
      * in the order: View, Edit, Delete, Manage Collection Organization,
      * New Sub-collection, Add Community Record, Create Multi-page Item,
-     * Add to Personal Collection, Revisions, Devel. Collection-specific tabs
-     * only appear on collection content types.
+     * Add to Collection, Add to Word List, Add to Personal Collection,
+     * Revisions, Devel. Collection-specific tabs only appear on collection
+     * content types.
      */
     #[Hook("menu_local_tasks_alter")]
     public function menuLocalTasksAlterNodeTabOrder(
@@ -175,8 +176,18 @@ class FormHooks
      *
      * Hides 'Administrator' option from the Roles selection for Mukurtu Managers
      * so that they cannot assign the admin role.
+     *
+     * Must run after the notify_user_default module's form alter
+     * (notify_user_default_form_user_register_form_alter()), which
+     * unconditionally sets the notify checkbox's #default_value to TRUE. This
+     * fix undoes that for anonymous self-registration below.
      */
-    #[Hook("form_user_register_form_alter")]
+    #[
+        Hook(
+            "form_user_register_form_alter",
+            order: new OrderAfter(["notify_user_default"]),
+        ),
+    ]
     public function formUserRegisterFormAlter(
         array &$form,
         FormStateInterface $form_state,
@@ -209,6 +220,18 @@ class FormHooks
                     ':input[name="mail"]' => ["filled" => TRUE],
                 ],
             ];
+            // notify_user_default always defaults this checkbox to checked,
+            // even when core has set #access to FALSE for it (genuine
+            // anonymous self-registration). Because Checkbox::valueCallback()
+            // falls back to #default_value when #access is FALSE, that stray
+            // TRUE default is what actually gets submitted — making core
+            // treat the registration as admin-notified and send the "an
+            // administrator created this account" email instead of the
+            // "no approval required" email. Reset it when the checkbox isn't
+            // actually usable in this form.
+            if (empty($form["account"]["notify"]["#access"])) {
+                $form["account"]["notify"]["#default_value"] = FALSE;
+            }
         }
         if (isset($form["account"]["mail"])) {
             $form["account"]["mail"]["#description"] = t(
@@ -1338,6 +1361,89 @@ class FormHooks
             if (isset($operations["edit"])) {
                 $operations["edit"]["weight"] = -10;
             }
+        }
+    }
+
+    /**
+     * Implements hook_form_FORM_ID_alter() for 'entity_view_display_edit_form'.
+     *
+     * Disables the "Use Layout Builder" option on Manage Display for content
+     * types whose custom full-view templates directly reference fields by
+     * name and are not yet compatible with Layout Builder's section-based
+     * rendering (see issue #1807).
+     */
+    #[Hook("form_entity_view_display_edit_form_alter")]
+    public function formEntityViewDisplayEditFormAlter(
+        array &$form,
+        FormStateInterface $form_state,
+    ): void {
+        if (!isset($form["layout"]["enabled"])) {
+            return;
+        }
+
+        $display = $form_state->getFormObject()->getEntity();
+        if ($display->getTargetEntityTypeId() !== "node") {
+            return;
+        }
+
+        $unsupportedBundles = [
+            "article",
+            "dictionary_word",
+            "word_list",
+            "collection",
+            "digital_heritage",
+            "person",
+            "place",
+        ];
+        if (!in_array($display->getTargetBundle(), $unsupportedBundles, TRUE)) {
+            return;
+        }
+
+        $form["layout"]["enabled"]["#disabled"] = TRUE;
+        $form["layout"]["enabled"]["#description"] = t(
+            "Layout Builder is not yet supported for this content type.",
+        );
+    }
+
+    /**
+     * Implements hook_form_BASE_FORM_ID_alter() for 'taxonomy_term_form'.
+     *
+     * Moves admin-only elements (parent term relations, publishing status)
+     * into the 'advanced' vertical-tabs sidebar that ContentEntityForm
+     * already builds for taxonomy terms (taxonomy_term has
+     * show_revision_ui: TRUE), so they render in Gin's right-hand sidebar
+     * instead of stacked at the bottom of the form. This applies to every
+     * vocabulary since 'taxonomy_term_form' is the base form ID shared by
+     * all of them.
+     *
+     * The 'path' field groups itself into 'advanced' automatically via
+     * \Drupal\path\Plugin\Field\FieldWidget\PathWidget, so it needs no
+     * handling here. 'langcode' is intentionally left in the main content
+     * area, matching NodeForm's own convention.
+     */
+    #[Hook("form_taxonomy_term_form_alter")]
+    public function formTaxonomyTermFormAlter(
+        array &$form,
+        FormStateInterface $form_state,
+    ): void {
+        if (!isset($form["advanced"])) {
+            return;
+        }
+
+        if (isset($form["relations"])) {
+            $form["relations"]["#group"] = "advanced";
+        }
+
+        // 'status' has no wrapper of its own; vertical-tabs children must be
+        // 'details' elements, so give it one.
+        if (isset($form["status"])) {
+            $form["publishing_options"] = [
+                "#type" => "details",
+                "#title" => t("Publishing options"),
+                "#group" => "advanced",
+                "#weight" => 25,
+            ];
+            $form["status"]["#group"] = "publishing_options";
         }
     }
 }

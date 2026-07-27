@@ -17,6 +17,7 @@ use Drupal\Component\Uuid\Php;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\shortcut\Entity\Shortcut;
+use Drupal\captcha\Entity\CaptchaPoint;
 
 /**
  * Implements hook_install().
@@ -373,6 +374,7 @@ function mukurtu_install() {
     'administer message templates',
     'administer messages',
     'administer modules',
+    'administer mukurtu design settings',
     'administer mukurtu_import_strategy',
     'administer multipage item',
     'administer node display',
@@ -476,7 +478,6 @@ function mukurtu_install() {
     'edit any message template',
     'edit any page content',
     'edit behavior plugin settings',
-    'edit design_settings config page entity',
     'edit own comments',
     'edit own landing_page content',
     'edit any article content',
@@ -518,7 +519,6 @@ function mukurtu_install() {
     'use text format full_html',
     'view all community revisions',
     'view any message template',
-    'view design_settings config page entity',
     'view mukurtu_batch_import_report message',
     'view mukurtu_new_item_in_collection message',
     'view mukurtu_new_item_in_community message',
@@ -846,6 +846,50 @@ function mukurtu_install() {
     $config->set('status', FALSE)->save();
   }
 
+  // Protect the feedback contact form and comment form with a CAPTCHA point.
+  // Created here (rather than in mukurtu_bot_protection's own config/install)
+  // because contact.form.feedback and comment.type.comment are not owned by
+  // mukurtu_bot_protection, and the profile's own hook_install() is
+  // guaranteed to run after every module (and the profile's own config) is
+  // fully installed.
+  foreach (['contact_message_feedback_form', 'comment_comment_form'] as $form_id) {
+    if (!CaptchaPoint::load($form_id)) {
+      CaptchaPoint::create([
+        'formId' => $form_id,
+        'captchaType' => 'default',
+        'label' => $form_id,
+        'status' => TRUE,
+      ])->save();
+    }
+  }
+
+}
+
+/**
+ * Repair a malformed mukurtu_roundtrip_manager role.
+ *
+ * mukurtu_import_update_40025() updated this role's label via a raw
+ * configFactory()->getEditable()->set()->save() call, assuming the role
+ * already existed. On sites where it didn't yet (this role's full definition
+ * only ships via this profile's config/install, which Drupal only applies on
+ * a fresh install), getEditable() returned a brand-new empty config object,
+ * and the save() persisted a bare record containing only 'label' - no 'id',
+ * no permissions. Any code that loads or reloads that role through the
+ * entity API (directly, or via a cascading roles reload triggered by saving
+ * any other role) then throws EntityMalformedException("The entity does not
+ * have an ID."). Read the raw config here, never through the entity API, to
+ * avoid triggering that same crash while checking for it.
+ */
+function mukurtu_update_40001(): void {
+  $config = \Drupal::configFactory()->getEditable('user.role.mukurtu_roundtrip_manager');
+  if ($config->isNew() || $config->get('id')) {
+    return;
+  }
+
+  $profile_path = \Drupal::service('extension.list.profile')->getPath('mukurtu');
+  $yaml = file_get_contents($profile_path . '/config/install/user.role.mukurtu_roundtrip_manager.yml');
+  $data = \Drupal\Core\Serialization\Yaml::decode($yaml);
+  $config->setData($data)->save();
 }
 
 

@@ -107,10 +107,6 @@
           {{ content.group_primary_fields.field_all_related_content }}
         </div>
 
-        <div class="full-node__comment">
-          {{ content.group_primary_fields.comment }}
-        </div>
-
       </div>
 
       {# Sidebar. #}
@@ -136,8 +132,13 @@
                 </nav>
               </div>
             {% endif %}
-            {{ content.group_primary_fields.field_citation }}
           </aside>
+        </div>
+      {% endif %}
+
+      {% if content.group_primary_fields.comment is not empty %}
+        <div class="full-node__comment">
+          {{ content.group_primary_fields.comment }}
         </div>
       {% endif %}
 

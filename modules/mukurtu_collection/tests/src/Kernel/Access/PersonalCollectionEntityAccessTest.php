@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_collection\Kernel\Access;
 
+use PHPUnit\Framework\Attributes\Group;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Og;
 use Drupal\og\Entity\OgRole;
@@ -14,7 +15,7 @@ use Drupal\user\Entity\User;
 /**
  * Tests access to personal collections.
  */
-#[\PHPUnit\Framework\Attributes\Group('mukurtu_collection')]
+#[Group('mukurtu_collection')]
 class PersonalCollectionEntityAccessTest extends KernelTestBase
 {
 
