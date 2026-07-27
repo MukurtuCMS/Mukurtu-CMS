@@ -27,6 +27,23 @@ class SubmissionAccessCheck implements AccessInterface {
       return AccessResult::forbidden('Public submissions are not enabled for this content type.');
     }
 
+    // The public form only ever renders whichever fields the target
+    // bundle's "submission" form display explicitly exposes. Without that
+    // display saved as config, EntityDisplayRepository::getFormDisplay()
+    // falls back to the bundle's default add-form display, which could
+    // expose fields never meant to be public - deny access rather than
+    // risk that, even if a reviewer has otherwise enabled this bundle.
+    $form_display_config = \Drupal::config("core.entity_form_display.$entity_type_id.$bundle.submission");
+    if (!$form_display_config->get('id')) {
+      // Add the (currently empty) config as a cacheable dependency too, not
+      // just $setting - Drupal tags a config object's cache tag with its own
+      // name even before it exists, so this 403 gets invalidated the moment
+      // that display is created, rather than lingering until caches expire.
+      return AccessResult::forbidden('This content type has no "submission" form display configured.')
+        ->addCacheableDependency($setting)
+        ->addCacheableDependency($form_display_config);
+    }
+
     return AccessResult::allowedIfHasPermission($account, "submit $entity_type_id $bundle content")
       ->addCacheableDependency($setting);
   }

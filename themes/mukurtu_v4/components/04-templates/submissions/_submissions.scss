@@ -1,0 +1,10 @@
+// Public submission form and thank-you page (/submit/{entity_type}/{bundle}[/thank-you]):
+// constrain content to a readable width, matching the /comment/reply/… pattern.
+.path-submit {
+  .layout-content {
+    max-width: 1280px;
+    margin-inline: auto;
+    padding-inline: var(--layout-padding);
+    padding-block: var(--v-space-2xs);
+  }
+}

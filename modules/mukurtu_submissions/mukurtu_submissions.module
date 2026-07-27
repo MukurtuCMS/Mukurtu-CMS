@@ -14,7 +14,9 @@ use Drupal\message\Entity\Message;
 use Drupal\message_subscribe\Subscribers\DeliveryCandidate;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
 use Drupal\mukurtu_submissions\Entity\SubmissionInterface;
+use Drupal\mukurtu_submissions\Entity\SubmissionSettingsInterface;
 use Drupal\node\NodeInterface;
+use Drupal\path_alias\Entity\PathAlias;
 
 /**
  * Implements hook_views_data_alter().
@@ -307,5 +309,62 @@ function mukurtu_submissions_mail($key, &$message, $params) {
   $message['body'][] = $params['message'];
   if (!empty($params['reply_to'])) {
     $message['headers']['Reply-to'] = $params['reply_to'];
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_insert() for mukurtu_submission_settings.
+ */
+function mukurtu_submissions_mukurtu_submission_settings_insert(EntityInterface $entity) {
+  if ($entity instanceof SubmissionSettingsInterface) {
+    mukurtu_submissions_ensure_path_aliases($entity);
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_update() for mukurtu_submission_settings.
+ */
+function mukurtu_submissions_mukurtu_submission_settings_update(EntityInterface $entity) {
+  if ($entity instanceof SubmissionSettingsInterface) {
+    mukurtu_submissions_ensure_path_aliases($entity);
+  }
+}
+
+/**
+ * Ensures a settings entity's submit/thank-you routes have a hyphenated
+ * public alias (e.g. "/submit/node/digital-heritage" for the underscored
+ * "/submit/node/digital_heritage" system path), so bundle machine names -
+ * which may contain underscores by Drupal convention - never leak into the
+ * public-facing URL. Works for any bundle without per-bundle code, since
+ * the dashed form is just the bundle name with underscores swapped.
+ */
+function mukurtu_submissions_ensure_path_aliases(SubmissionSettingsInterface $settings): void {
+  $entity_type_id = $settings->getTargetEntityTypeId();
+  $bundle = $settings->getTargetBundle();
+  if (!$entity_type_id || !$bundle) {
+    return;
+  }
+
+  $dashed_bundle = str_replace('_', '-', $bundle);
+  if ($dashed_bundle === $bundle) {
+    return;
+  }
+
+  $sources_to_aliases = [
+    "/submit/$entity_type_id/$bundle" => "/submit/$entity_type_id/$dashed_bundle",
+    "/submit/$entity_type_id/$bundle/thank-you" => "/submit/$entity_type_id/$dashed_bundle/thank-you",
+  ];
+
+  $storage = \Drupal::entityTypeManager()->getStorage('path_alias');
+  foreach ($sources_to_aliases as $source => $alias) {
+    $existing = $storage->loadByProperties(['path' => $source]);
+    $path_alias = reset($existing);
+    if ($path_alias) {
+      if ($path_alias->getAlias() !== $alias) {
+        $path_alias->setAlias($alias)->save();
+      }
+      continue;
+    }
+    PathAlias::create(['path' => $source, 'alias' => $alias])->save();
   }
 }

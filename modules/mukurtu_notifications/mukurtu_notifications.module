@@ -264,10 +264,18 @@ function mukurtu_notifications_user_insert($entity) {
       $rids[] = $role->id();
     }
   }
-  $uids = \Drupal::service('entity_type.manager')->getStorage('user')->getQuery()
-    ->accessCheck(FALSE)
-    ->condition('roles', $rids, 'IN')
-    ->execute();
+  // No role has 'administer users' yet - e.g. a module creating a user
+  // (such as mukurtu_submissions' service account) during its own
+  // hook_install(), which can run before the profile's own role
+  // permissions are imported. An empty roles condition is invalid, and
+  // there's nobody to notify anyway.
+  $uids = [];
+  if (!empty($rids)) {
+    $uids = \Drupal::service('entity_type.manager')->getStorage('user')->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('roles', $rids, 'IN')
+      ->execute();
+  }
 
   // Build the options required to send the message to specific
   // uids via message subscribe, rather than querying flags.

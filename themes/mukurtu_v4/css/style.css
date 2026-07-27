@@ -1543,7 +1543,8 @@ details.form-wrapper summary + div {
   }
 }
 
-label.form-required::after {
+label.form-required::after,
+.fieldset-legend.form-required::after {
   display: inline-block;
   -webkit-margin-start: 0.15em;
           margin-inline-start: 0.15em;
@@ -7464,6 +7465,13 @@ header {
   .layout-container .layout-content--404 > .region {
     grid-column: 2/-2;
   }
+}
+
+.path-submit .layout-content {
+  max-width: 1280px;
+  margin-inline: auto;
+  padding-inline: var(--layout-padding);
+  padding-block: var(--v-space-2xs);
 }
 
 .taxonomy-term-page {

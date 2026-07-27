@@ -7,6 +7,9 @@ dependencies:
   module:
     - message
     - node
+  enforced:
+    module:
+      - mukurtu_submissions
 id: message.mukurtu_submission_received.field_item
 field_name: field_item
 entity_type: message

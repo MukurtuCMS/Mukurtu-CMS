@@ -10,6 +10,9 @@ dependencies:
     - options
     - tagify
     - text
+  enforced:
+    module:
+      - mukurtu_submissions
 id: node.digital_heritage.submission
 targetEntityType: node
 bundle: digital_heritage

@@ -9,6 +9,7 @@ use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 use Drupal\mukurtu_submissions\Entity\SubmissionSettingsInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -88,6 +89,22 @@ class SubmissionSettingsForm extends EntityForm {
       '#value' => 'node',
     ];
 
+    // Only shown once a bundle is actually assigned - a new, unsaved entity
+    // has none yet, and there's nothing to link to until it's saved.
+    if (!$this->entity->isNew()) {
+      $manage_form_display_url = Url::fromRoute('entity.entity_form_display.node.form_mode', [
+        'node_type' => $this->entity->getTargetBundle(),
+        'form_mode_name' => 'submission',
+      ]);
+      if ($manage_form_display_url->access($this->currentUser())) {
+        $form['manage_form_display'] = [
+          '#type' => 'link',
+          '#title' => $this->t('Manage fields shown on this form'),
+          '#url' => $manage_form_display_url,
+        ];
+      }
+    }
+
     $form['allowed_media_types'] = [
       '#type' => 'checkboxes',
       '#title' => $this->t('Allowed media types'),
@@ -152,6 +169,10 @@ class SubmissionSettingsForm extends EntityForm {
    */
   public function save(array $form, FormStateInterface $form_state): int {
     $result = parent::save($form, $form_state);
+    if ($result == SAVED_NEW) {
+      $this->ensureSubmissionFormDisplay();
+    }
+
     $message_args = ['%label' => $this->entity->label()];
     $message = $result == SAVED_NEW
       ? $this->t('Created submission settings for %label.', $message_args)
@@ -159,6 +180,33 @@ class SubmissionSettingsForm extends EntityForm {
     $this->messenger()->addStatus($message);
     $form_state->setRedirectUrl($this->entity->toUrl('collection'));
     return $result;
+  }
+
+  /**
+   * Creates a "submission" form display for the target bundle if none
+   * exists yet, so a newly enabled content type is usable immediately
+   * instead of being blocked by SubmissionAccessCheck's missing-display
+   * safeguard. Seeded from whichever fields the bundle already exposes -
+   * EntityDisplayRepository::getFormDisplay() auto-populates a fresh,
+   * unsaved "submission" mode with every field, same as it would for any
+   * other not-yet-configured form mode - minus the fields the public form
+   * never shows regardless of bundle.
+   */
+  protected function ensureSubmissionFormDisplay(): void {
+    assert($this->entity instanceof SubmissionSettingsInterface);
+    $display = $this->entityDisplayRepository->getFormDisplay(
+      $this->entity->getTargetEntityTypeId(),
+      $this->entity->getTargetBundle(),
+      'submission',
+    );
+    if (!$display->isNew()) {
+      return;
+    }
+
+    foreach (PublicSubmissionForm::EXCLUDED_FIELDS as $excluded_field) {
+      $display->removeComponent($excluded_field);
+    }
+    $display->save();
   }
 
 }

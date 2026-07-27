@@ -3134,3 +3134,13 @@ function mukurtu_core_update_40091(): void {
     ->set('block_unknown_description', 'Allow loading of external resources from other services')
     ->save();
 }
+
+/**
+ * Install the Mukurtu Submissions module, which lets site visitors submit
+ * content for review without community/protocol membership.
+ */
+function mukurtu_core_update_40092(): void {
+  if (!\Drupal::moduleHandler()->moduleExists('mukurtu_submissions')) {
+    \Drupal::service('module_installer')->install(['mukurtu_submissions']);
+  }
+}

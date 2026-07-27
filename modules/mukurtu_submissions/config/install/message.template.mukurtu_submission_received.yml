@@ -3,6 +3,9 @@ status: true
 dependencies:
   config:
     - filter.format.mukurtu_html
+  enforced:
+    module:
+      - mukurtu_submissions
 template: mukurtu_submission_received
 label: 'Mukurtu Submission Received'
 description: 'A visitor submitted content awaiting review.'
