@@ -2,16 +2,135 @@
  * Styles for the dismissible UID 1 super admin warning message.
  */
 
+/*
+ * The BCSans font-face is normally declared by the mukurtu_v4 theme's own
+ * stylesheet, which isn't loaded on admin themes (e.g. Gin). Redeclare the
+ * weights this banner uses (regular text, bold dismiss control) so the font
+ * matches the front end regardless of the active theme. Without a matching
+ * @font-face, the browser has no "BCSans" glyph data for that weight at all
+ * on admin pages and silently falls back to whichever weight IS declared
+ * here, so this isn't just cosmetic - omitting a weight means it can't
+ * actually render.
+ */
+@font-face {
+  font-family: BCSans;
+  font-weight: 400;
+  src: url('../../../themes/mukurtu_v4/fonts/BCSans-Regular.woff2') format('woff2'),
+    url('../../../themes/mukurtu_v4/fonts/BCSans-Regular.woff') format('woff');
+}
+
+@font-face {
+  font-family: BCSans;
+  font-weight: 700;
+  src: url('../../../themes/mukurtu_v4/fonts/BCSans-Bold.woff2') format('woff2'),
+    url('../../../themes/mukurtu_v4/fonts/BCSans-Bold.woff') format('woff');
+}
+
+.mukurtu-super-admin-warning-wrapper {
+  /* Fallback values (matching themes/mukurtu_v4/components/00-base) keep the
+   * banner styled on admin themes like Gin, which don't define these custom
+   * properties. This is a warning (not error) message, so it uses the same
+   * warning color tokens as core's real messages--warning boxes: Gin's
+   * --gin-color-warning-light/--gin-bg-warning on admin pages, falling back
+   * to mukurtu_v4's --color-warning-dark/--color-warning-light on the front
+   * end. Matches Gin's real messages--warning treatment on both themes: no
+   * colored border, a larger corner radius, and normal (not bold) text. */
+  box-sizing: border-box;
+  font-family: var(--font-display-face, 'BCSans', 'Noto Sans', verdana, arial, sans-serif);
+  padding: var(--v-space-4xxs, 1rem);
+  margin-block: var(--v-space-4xxs, 1rem);
+  border-radius: var(--gin-border-l, .75rem);
+  line-height: var(--line-height-s, 1.75rem);
+  font-weight: 400;
+  border: 2px solid transparent;
+  color: var(--gin-color-warning-light, var(--color-warning-dark, #54738c));
+  background-color: var(--gin-bg-warning, var(--color-warning-light, #d8edfa));
+}
+
+.gin--dark-mode .mukurtu-super-admin-warning-wrapper {
+  box-shadow: 0 6px 16px var(--gin-border-color-layer);
+}
+
+/* Gin's node edit/add form layout (.page-wrapper__node-edit-form) stretches
+ * the main region full-width and then reins specific elements - including
+ * real messages (.messages-list) - back in with this same constraint. Our
+ * banner isn't rendered through core's status-messages markup so it doesn't
+ * get that rule for free; match it here (see
+ * web/themes/contrib/gin/styles/components/edit_form.scss). */
+.gin--edit-form .page-wrapper__node-edit-form .mukurtu-super-admin-warning-wrapper {
+  width: 100%;
+  max-width: 1280px;
+  margin-inline: auto;
+}
+
+.mukurtu-super-admin-warning__text {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding-inline-start: 2.125rem;
+}
+
+.mukurtu-super-admin-warning__text:before {
+  content: '';
+  display: block;
+  position: absolute;
+  inset-inline-start: 0;
+  inset-block-start: 2px;
+  width: 1.5rem;
+  height: 1.5rem;
+  background-color: currentColor;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cg fill='none' stroke='%23000' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolygon points='7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2'/%3E%3Cline x1='12' y1='8' x2='12' y2='12'/%3E%3Cline x1='12' y1='16' x2='12.01' y2='16'/%3E%3C/g%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cg fill='none' stroke='%23000' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolygon points='7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2'/%3E%3Cline x1='12' y1='8' x2='12' y2='12'/%3E%3Cline x1='12' y1='16' x2='12.01' y2='16'/%3E%3C/g%3E%3C/svg%3E");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+/* mukurtu_v4's global `a` rule sets color and text-decoration-color together
+ * via the `text-decoration` shorthand, and its extlink icon SVGs are colored
+ * with an explicit fill/stroke rather than currentColor - none of that
+ * follows from overriding `color` alone, so each is overridden explicitly.
+ *
+ * This hardcoded white is only safe against Gin's warning background
+ * (--gin-bg-warning, always a dark tone in both light and dark Gin mode) and
+ * would fail contrast against mukurtu_v4's own light warning background if
+ * that were ever the *only* one in play. That fallback-only case isn't
+ * reachable today: this banner only renders for UID 1, and gin_toolbar
+ * loads Gin's color variables globally on every page - front end included -
+ * for any user with toolbar access, so the Gin branch above is always the
+ * one that applies here. */
+.mukurtu-super-admin-warning__text a,
+.mukurtu-super-admin-warning__text a:hover,
+.mukurtu-super-admin-warning__text a:active {
+  color: #fff;
+  text-decoration-color: #fff;
+}
+
+.mukurtu-super-admin-warning-wrapper .mukurtu-super-admin-warning__text a svg.ext,
+.mukurtu-super-admin-warning-wrapper .mukurtu-super-admin-warning__text a svg.mailto,
+.mukurtu-super-admin-warning-wrapper .mukurtu-super-admin-warning__text a svg.tel {
+  fill: #fff;
+}
+
+/* mukurtu_v4's own stroke rule is scoped as
+ * `a:not(.primary-nav__menu-link) svg.ext path`, which out-specifies a plain
+ * `.mukurtu-super-admin-warning__text svg.ext path` selector - match its
+ * shape (element + class chain through `a`) rather than relying on source
+ * order to win the tie. */
+.mukurtu-super-admin-warning-wrapper .mukurtu-super-admin-warning__text a svg.ext path,
+.mukurtu-super-admin-warning-wrapper .mukurtu-super-admin-warning__text a svg.mailto path,
+.mukurtu-super-admin-warning-wrapper .mukurtu-super-admin-warning__text a svg.tel path {
+  stroke: #fff;
+}
+
 .mukurtu-super-admin-warning {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
-}
-
-.mukurtu-super-admin-warning__text {
-  flex: 1 1 auto;
-  min-width: 0;
 }
 
 .mukurtu-super-admin-warning__dismiss {

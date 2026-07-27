@@ -4,11 +4,11 @@
 // Shared styles across carousels.
 .splide {
   &__arrow--prev {
-    inset-inline-start: -2em;
+    inset-inline-start: 0.5em;
   }
 
   &__arrow--next {
-    inset-inline-end: -2em;
+    inset-inline-end: 0.5em;
   }
 
   // Vertically center images inside slides if they are <200px in height.
@@ -73,6 +73,24 @@
 
 // Media Asset Carousels.
 .media-carousel {
+  // Flex/grid descendants default to min-width: auto, which lets a slide's
+  // native image resolution force the carousel wider than its Layout
+  // Builder column. Let the whole chain shrink to fit instead.
+  min-inline-size: 0;
+
+  // Splide's default translucent arrow background (library CSS) relies on
+  // the page background behind it for contrast. These arrows sit on top of
+  // user-uploaded photos of unknown color/luminance, so an opaque background
+  // is needed to keep WCAG 1.4.11 non-text contrast regardless of image.
+  .splide__arrow {
+    background: rgb(0 0 0 / 60%);
+    opacity: 1;
+
+    svg {
+      fill: white;
+    }
+  }
+
   .media {
     margin-block: 0 var(--v-space-s);
     margin-inline: auto;
@@ -83,6 +101,12 @@
     align-items: flex-start;
   }
 
+  .splide__track,
+  .splide__list,
+  .splide__slide {
+    min-inline-size: 0;
+  }
+
   .splide__slide:not(.is-active) {
     block-size: 0;    // or 100vh, or something what fits your case
   }
@@ -90,6 +114,26 @@
 }
 
 .thumbnail-carousel {
+  // Flex/grid descendants default to min-width: auto, which lets many
+  // autoWidth thumbnails force the strip wider than its Layout Builder
+  // column instead of scrolling within .splide__track. Let the whole
+  // chain shrink to fit instead.
+  min-inline-size: 0;
+
+  // Splide's default translucent arrow background (library CSS) relies on
+  // the page background behind it for contrast. These arrows sit on top of
+  // user-uploaded thumbnail photos of unknown color/luminance, so an opaque
+  // background is needed to keep WCAG 1.4.11 non-text contrast regardless of
+  // image.
+  .splide__arrow {
+    background: rgb(0 0 0 / 60%);
+    opacity: 1;
+
+    svg {
+      fill: white;
+    }
+  }
+
   &.splide:not(.is-overflow) .splide__list {
     justify-content: center;
   }
@@ -98,6 +142,12 @@
     inline-size: 85%;
     margin-block: 0;
     margin-inline: auto;
+  }
+
+  .splide__track,
+  .splide__list,
+  .splide__slide {
+    min-inline-size: 0;
   }
 
   img {
@@ -185,9 +235,20 @@
   flex-direction: column;
   inline-size: 100%;
   margin-block-end: var(--v-space-s);
+  // This is the non-carousel fallback (a media block with only one item, no
+  // thumbnail nav) - the .media-carousel/.thumbnail-carousel min-inline-size
+  // guards elsewhere in this file don't apply to this markup, so a single
+  // large image here can still force its Layout Builder region wider than
+  // its flex-basis share the same way the carousel used to. Flex items
+  // default to min-width: auto, so this needs its own guard.
+  min-inline-size: 0;
 
   > .media {
     margin-block-end: 0;
+    // Same min-width: auto default applies one level down: .media is itself
+    // a flex item within this column, and its content (the image) shouldn't
+    // set a floor wider than the region either.
+    min-inline-size: 0;
     // Create a stacking context so the content-warning overlay's z-index: 10
     // is evaluated within .media only and cannot paint above sibling elements
     // (e.g. .media-asset--actions buttons) in the parent stacking context.

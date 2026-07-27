@@ -2,7 +2,9 @@
   {% if project_title %}
     <h3 class="project-title">{{ project_title }}</h3>
   {% endif %}
-  {% for item in items %}
-    {{ item }}
-  {% endfor %}
+  <div class="local-contexts-label-group-items">
+    {% for item in items %}
+      {{ item }}
+    {% endfor %}
+  </div>
 </div>
