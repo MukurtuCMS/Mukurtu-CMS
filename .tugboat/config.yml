@@ -116,6 +116,17 @@ services:
           # Run any pending update hooks introduced by this branch and clear
           # caches so templates and config changes take effect immediately.
           sudo -E -u www-data ./vendor/bin/drush updb -y
+          # Disable Honeypot's time-based submission check and the login
+          # form's CAPTCHA challenge on this preview only. Honeypot's
+          # 5-second default rejects Playwright's near-instant form fills
+          # as spam, and the ALTCHA widget (auto="off") requires an
+          # explicit checkbox click before the browser will submit the
+          # form at all - both would otherwise block every automated
+          # login. Production sites keep the real defaults (see
+          # mukurtu_bot_protection.install / mukurtu_core.install) - these
+          # overrides only ever apply to Tugboat's test/preview database.
+          sudo -E -u www-data ./vendor/bin/drush config:set honeypot.settings time_limit 0 -y
+          sudo -E -u www-data ./vendor/bin/drush config:set captcha.captcha_point.user_login_form status 0 -y
           sudo -E -u www-data ./vendor/bin/drush cr
       update:
         # Ensure settings.php is always present with the correct database
@@ -145,6 +156,10 @@ services:
           cd ~/mukurtu
           if sudo -E -u www-data ./vendor/bin/drush core:status 2>/dev/null; then
             sudo -E -u www-data ./vendor/bin/drush updb -y
+            # See the matching overrides in the build phase above for why
+            # these are disabled only on this preview, not in production.
+            sudo -E -u www-data ./vendor/bin/drush config:set honeypot.settings time_limit 0 -y
+            sudo -E -u www-data ./vendor/bin/drush config:set captcha.captcha_point.user_login_form status 0 -y
             sudo -E -u www-data ./vendor/bin/drush cr
           else
             echo "Drupal not yet installed; updb/cr will run after site-install in the build phase."
