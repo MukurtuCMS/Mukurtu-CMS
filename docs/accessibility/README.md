@@ -1,6 +1,6 @@
 # Mukurtu CMS Accessibility Program
 
-This document is the charter for Mukurtu's ongoing accessibility program. It explains what we are aiming for, what is in scope, how audits run, and the cycle we repeat to keep improving.
+This document is the roadmap for Mukurtu's ongoing accessibility program. It explains what we are aiming for, what is in scope, how audits run, and the cycle we repeat to maintain continual improvements.
 
 For the list of pages and components under audit, see [page-inventory.md](page-inventory.md). For hands-on keyboard and screen reader testing, see [manual-checklist.md](manual-checklist.md). Dated audit results live in [findings/](findings/). The conformance report lives in [acr/](acr/).
 
@@ -10,7 +10,7 @@ For the list of pages and components under audit, see [page-inventory.md](page-i
 
 **WCAG 2.1 Level AA.**
 
-This matches Drupal core's own accessibility commitment and the requirements of Section 508 (US) and most institutional policies that Mukurtu's community partners — universities, libraries, archives, and museums — operate under. WCAG 2.2 criteria are noted informationally when we encounter them but are not yet gating.
+This matches Drupal core's own accessibility commitment and the requirements of Section 508 (US) and most institutional policies that Mukurtu's community partners — universities, libraries, archives, and museums — operate under. WCAG 2.2 criteria are noted informationally when we encounter them but are not yet measuring against.
 
 ## Scope
 
@@ -21,7 +21,7 @@ things:
   renders* — it is the standard for both phases, since visitors and authors
   alike experience rendered pages.
 - **ATAG 2.0** ([Authoring Tool Accessibility Guidelines](https://www.w3.org/TR/ATAG20/))
-  applies to *software used to create web content* — which is what a CMS is. It
+  applies to *software used to create web content* — which is applicable to Mukurtu CMS. It
   has two halves: **Part A** requires the authoring interface itself to be
   accessible (a screen reader or keyboard-only user must be able to *be an
   author* — create items, upload media, manage protocols); **Part B** requires
@@ -29,20 +29,19 @@ things:
   text, preserving accessibility information through workflows, guiding
   authors toward transcripts and captions). Drupal core has committed to
   ATAG 2.0 AA for its administration interface, which sets the precedent
-  Mukurtu follows.
+  Mukurtu CMS follows.
 
 **Phase 1 (current): visitor and logged-in member experiences, against WCAG
 2.1 AA.** Everything an anonymous visitor or an authenticated
 community/protocol member sees: browsing, searching, digital heritage items,
 collections, dictionaries, communities, maps, and account pages.
 
-**Phase 2 (later): the authoring and administrative experience, against WCAG
+**Phase 2 (later/soon): the authoring and administrative experience, against WCAG
 2.1 AA *and* ATAG 2.0.** Content creation forms, bulk media upload,
 import/export, dashboards.
 
 **Why are we doing this in stages:** the visitor/member experience is the smaller, self-contained
-surface with the largest audience, and it is measured against a single
-standard — so it can reach a defensible conformance claim first. The authoring
+surface with the largest audience. The authoring
 experience is a much larger surface (every form, workflow, and admin screen),
 is measured against two standards at once, and much of it is inherited from
 Drupal core and the Gin admin theme — meaning findings there often need
@@ -74,7 +73,7 @@ npm install
 PLAYWRIGHT_BASE_URL=https://mukurtu.ddev.site npx playwright test accessibility --project=chromium
 ```
 
-The scans are **report-only**: violations never fail the tests. Each page's full axe results are written to `test-results/a11y/<page>.json` and attached to the Playwright HTML report. This is deliberate — see "The ratchet" below.
+The scans are **report-only**: violations never fail the tests. Each page's full axe results are written to `test-results/a11y/<page>.json` and attached to the Playwright HTML report.
 
 ### Automated checks beyond axe (reflow, focus, links, keyboard traps)
 
@@ -124,8 +123,8 @@ Axe checks start report-only so a red wall of pre-existing violations doesn't bl
 | Milestone | Status |
 |---|---|
 | Program charter, inventory, checklists | In place (July 2026) |
-| Automated axe scan infrastructure | In place (July 2026); member-view + gated item pages covered |
-| Baseline automated audit | Done — all 15 inventory pages scan clean after first remediations; see [findings/](findings/) |
+| Automated axe scan infrastructure | In place (July 2026); member-view + all discovered item pages covered anonymously and as a member |
+| Baseline automated audit | Done — all 19 inventory pages scan clean (full anonymous + member item-page coverage as of 2026-07-27); see [findings/](findings/) |
 | First remediations | Done (July 2026): Gin accent contrast, page-title landmark, Leaflet marker names |
 | OpenACR report | First triage pass done (v2): 7 web criteria `supports`, authoring-tool 4.1.2 `partially-supports`; rest `not-evaluated` pending manual evidence |
 | Manual audit of high-risk components | Not started — template ready ([findings/manual-findings-template.md](findings/manual-findings-template.md)); axe "incomplete" contrast queue folded in |

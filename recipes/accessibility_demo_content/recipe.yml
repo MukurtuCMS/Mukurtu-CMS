@@ -22,16 +22,3 @@ config:
     og.settings:
       simpleConfigUpdate:
         auto_add_group_owner_membership: false
-    # Works around a pre-existing bug: the profile ships
-    # mukurtu_protocol.community_organization with a placeholder entry
-    # claiming Community ID 1 is already organized, even though no Community
-    # exists yet on a fresh install. That stale entry makes the very first
-    # Community's computed field_child_communities field fail validation
-    # against a nonexistent entity — this happens with or without this
-    # recipe, including through the normal "Add community" UI form. Clearing
-    # it here is safe on the fresh install this recipe assumes, but is not
-    # something to run against a site that already has real communities. See
-    # README.md.
-    mukurtu_protocol.community_organization:
-      simpleConfigUpdate:
-        organization: {  }

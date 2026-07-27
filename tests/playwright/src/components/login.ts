@@ -23,6 +23,18 @@ export class Login {
     // much longer to render the form and to process the login submission.
     await usernameField.fill(username, { timeout: 30000 });
     await passwordField.fill(password);
+
+    // The bot-protection work put an ALTCHA "I'm not a robot" checkbox on
+    // user_login_form for every anonymous visitor (which is everyone
+    // attempting to log in, by definition) and enabled Honeypot's
+    // time-limit check (honeypot.settings:time_limit, 5s by default) on the
+    // same form. Without checking the box and waiting out the time floor,
+    // every automated login here is silently rejected as a bot.
+    const altchaCheckbox = this.page.getByRole('checkbox', { name: /not a robot/i });
+    if (await altchaCheckbox.count() > 0) {
+      await altchaCheckbox.click();
+    }
+    await this.page.waitForTimeout(7000);
     await loginButton.click({ timeout: 30000 });
   }
 

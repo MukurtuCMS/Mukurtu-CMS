@@ -94,16 +94,26 @@ content:
   enough to create the membership with the right role directly. This is a
   global site setting; it stays off after the recipe finishes.
 - Discovered while testing this recipe against a genuinely fresh install (not
-  caused by the recipe, and not worked around here beyond what's needed to
-  unblock it): `config/install/mukurtu_protocol.community_organization.yml`
+  caused by the recipe): `config/install/mukurtu_protocol.community_organization.yml`
   ships with a placeholder entry claiming Community ID 1 is already
   organized, even before any Community exists. That makes the very first
   Community's computed `field_child_communities` field fail validation
   against a nonexistent entity — **through the normal "Add community" UI form
-  too, not just this recipe.** A config action here clears that config before
-  creating content, which is safe on the fresh install this recipe assumes,
-  but isn't something to run against a site that already has real community
-  hierarchy data. Worth a proper fix in `mukurtu_protocol` itself.
+  too, not just this recipe.** On a genuinely fresh install, if you hit
+  `field_child_communities.0.target_id=The referenced entity (community: 1)
+  does not exist`, clear that config once before running this recipe:
+  `drush config:set mukurtu_protocol.community_organization organization '{}' --input-format=yaml`.
+  **This was previously a config action in `recipe.yml`, but that's the wrong
+  place for it: config actions re-apply every time this recipe runs as a
+  prerequisite of another one (`collection_demo_content`,
+  `person_demo_content`, etc.), unlike content, which is skipped once it
+  already exists by UUID. On a site with existing communities, that silently
+  wiped `organization` on every single recipe run, which is what actually
+  backs the `/communities` page listing (`CommunitiesPageController` reads
+  community IDs from this config, not a database query) — so real,
+  already-existing communities would vanish from that page every time a
+  downstream recipe got applied.** Worth a proper fix in `mukurtu_protocol`
+  itself so neither this recipe nor the UI form needs a workaround at all.
 - `field_external_links` only uses external (`https://`) URLs. `internal:`
   and `entity:` URIs reliably fail
   `LinkNotExistingInternalConstraint`'s route-generation check specifically
