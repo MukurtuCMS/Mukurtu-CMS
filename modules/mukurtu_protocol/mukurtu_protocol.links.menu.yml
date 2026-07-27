@@ -95,3 +95,10 @@ mukurtu_protocol.protocol_create:
   description: 'Add a new cultural protocol.'
   route_name: mukurtu_protocol.protocol_create
 
+mukurtu_protocol.my_memberships:
+  title: 'My memberships'
+  description: 'View your community and protocol memberships and roles.'
+  parent: mukurtu_dashboard
+  menu_name: dashboard-my-account
+  route_name: mukurtu_protocol.my_memberships
+
