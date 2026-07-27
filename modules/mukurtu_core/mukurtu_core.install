@@ -2953,10 +2953,193 @@ function mukurtu_core_update_40083(&$sandbox): string {
 }
 
 /**
+ * Install the Mukurtu Bot Protection module and its dependencies (CAPTCHA,
+ * reCAPTCHA, Cloudflare Turnstile, and faceted search crawler blocking).
+ */
+function mukurtu_core_update_40084(): void {
+  if (!\Drupal::moduleHandler()->moduleExists('mukurtu_bot_protection')) {
+    \Drupal::service('module_installer')->install(['mukurtu_bot_protection']);
+  }
+
+  // Protect the feedback contact form and comment form with a CAPTCHA point,
+  // matching what mukurtu_install() sets up on a fresh install.
+  foreach (['contact_message_feedback_form', 'comment_comment_form'] as $form_id) {
+    if (!\Drupal\captcha\Entity\CaptchaPoint::load($form_id)) {
+      \Drupal\captcha\Entity\CaptchaPoint::create([
+        'formId' => $form_id,
+        'captchaType' => 'default',
+        'label' => $form_id,
+        'status' => TRUE,
+      ])->save();
+    }
+  }
+}
+
+/**
+ * Add the Security section to the Mukurtu admin dashboard.
+ */
+function mukurtu_core_update_40085(): void {
+  $config = \Drupal::configFactory()->getEditable('dashboards.dashboard.mukurtu_dashboard');
+  if ($config->isNew()) {
+    return;
+  }
+
+  $uuid = '3f8b6c1a-2e4d-4a9f-9c7b-5d1e8a2f6b3c';
+  $sections = $config->get('sections') ?? [];
+  if (isset($sections[0]['components'][$uuid])) {
+    return;
+  }
+
+  $sections[0]['components'][$uuid] = [
+    'uuid' => $uuid,
+    'region' => 'three',
+    'configuration' => [
+      'id' => 'system_menu_block:dashboard-security',
+      'label' => 'Security',
+      'label_display' => 'visible',
+      'provider' => 'system',
+      'context_mapping' => [],
+      'level' => 1,
+      'depth' => NULL,
+      'expand_all_items' => FALSE,
+    ],
+    'weight' => 9,
+    'additional' => [],
+  ];
+
+  $config->set('sections', $sections)->save();
+}
+
+/**
+ * Install ALTCHA and Honeypot and protect the login form with CAPTCHA.
+ */
+function mukurtu_core_update_40086(): void {
+  $module_installer = \Drupal::service('module_installer');
+  $module_handler = \Drupal::moduleHandler();
+  foreach (['altcha', 'honeypot'] as $module) {
+    if (!$module_handler->moduleExists($module)) {
+      $module_installer->install([$module]);
+    }
+  }
+
+  // The captcha module ships a disabled user_login_form CAPTCHA point by
+  // default; enable it to match the login-form protection mukurtu_bot_
+  // protection_install() sets up on new installs.
+  $point = \Drupal\captcha\Entity\CaptchaPoint::load('user_login_form');
+  if ($point) {
+    $point->setStatus(TRUE)->save();
+  }
+
+  // Protect the same 5 forms with Honeypot, matching mukurtu_bot_protection_
+  // install()'s defaults on new installs.
+  $honeypot_forms = [
+    'user_register_form',
+    'user_pass',
+    'user_login_form',
+    'contact_message_feedback_form',
+    'comment_comment_form',
+  ];
+  $honeypot_config = \Drupal::configFactory()->getEditable('honeypot.settings');
+  $form_settings = $honeypot_config->get('form_settings') ?? [];
+  foreach ($honeypot_forms as $form_id) {
+    $form_settings[$form_id] = TRUE;
+  }
+  $honeypot_config->set('form_settings', $form_settings)->save();
+}
+
+/**
+ * Show communities/category fields in Grid mode for digital_heritage and
+ * person, fix collection's Grid mode to show field_collection_image instead
+ * of the unused field_representative_media, add the collection.map_browse
+ * display, and show field_in_collection in Grid mode for digital_heritage,
+ * person, dictionary_word, and word_list, so Grid/Map mode template
+ * completeness work (#1624) has the field visibility it needs.
+ */
+function mukurtu_core_update_40087(): void {
+  $config_source = new \Drupal\Core\Config\FileStorage(
+    \Drupal::service('extension.list.profile')->getPath('mukurtu') . '/config/install'
+  );
+  $config_factory = \Drupal::configFactory();
+
+  foreach ([
+    'node.digital_heritage.grid_browse',
+    'node.person.grid_browse',
+    'node.collection.grid_browse',
+    'node.collection.map_browse',
+    'node.dictionary_word.grid_browse',
+    'node.word_list.grid_browse',
+  ] as $name) {
+    $config_name = 'core.entity_view_display.' . $name;
+    $data = $config_source->read($config_name);
+    if ($data) {
+      $config_factory->getEditable($config_name)->setData($data)->save(TRUE);
+    }
+  }
+}
+
+/**
+ * Enable Charts and GeoIP so the Visitors analytics reports render fully.
+ */
+function mukurtu_core_update_40088(): void {
+  \Drupal::service('module_installer')->install(['charts', 'charts_chartjs', 'visitors_geoip']);
+
+  \Drupal::configFactory()->getEditable('charts.settings')
+    ->set('charts_default_settings.library', 'chartjs')
+    ->save();
+}
+
+/**
+ * Install the klaro module for GDPR/cookie consent management.
+ */
+function mukurtu_core_update_40089(): void {
+  \Drupal::service('module_installer')->install(['klaro']);
+  \Drupal::configFactory()->getEditable('klaro.settings')
+    ->set('show_toggle_button', TRUE)
+    ->save();
+  // Klaro only shows its consent UI to roles with the "use klaro"
+  // permission; grant it to visitors and logged-in users so the consent
+  // banner actually appears once a site enables any of Klaro's services.
+  user_role_grant_permissions('anonymous', ['use klaro']);
+  user_role_grant_permissions('authenticated', ['use klaro']);
+}
+
+/**
+ * Install the SoundCloud klaro_app config so SoundCloud embeds can be
+ * gated behind cookie consent the same way YouTube/Vimeo embeds already are.
+ */
+function mukurtu_core_update_40090(): void {
+  $config_storage = \Drupal::service('config.storage');
+  $name = 'klaro.klaro_app.soundcloud';
+  if ($config_storage->exists($name)) {
+    return;
+  }
+  $profile_path = \Drupal::service('extension.list.profile')->getPath('mukurtu');
+  $source = new \Drupal\Core\Config\FileStorage(\Drupal::root() . '/' . $profile_path . '/config/install');
+  $data = $source->read($name);
+  if ($data !== FALSE) {
+    $config_storage->write($name, $data);
+  }
+}
+
+/**
+ * Block unknown external resources by default so embeds from domains with
+ * no named klaro_app (e.g. arbitrary External Embed media) are still gated
+ * behind consent under a generic "Other services" prompt, instead of
+ * rendering live until an admin adds a named service for that domain.
+ */
+function mukurtu_core_update_40091(): void {
+  \Drupal::configFactory()->getEditable('klaro.settings')
+    ->set('block_unknown', TRUE)
+    ->set('block_unknown_label', 'Other services')
+    ->set('block_unknown_description', 'Allow loading of external resources from other services')
+    ->save();
+}
+
+/**
  * Grant Language Stewards comment permissions so they can view and approve
  * comments on dictionary words and word lists, matching Protocol Stewards.
  */
-function mukurtu_core_update_40084(): void {
+function mukurtu_core_update_40092(): void {
   /** @var \Drupal\og\Entity\OgRole|null $role */
   $role = \Drupal::entityTypeManager()
     ->getStorage('og_role')
