@@ -1,0 +1,15 @@
+# The facet_bot_blocker module does not ship its own config schema.
+# Defined here so config import/export doesn't warn on the defaults we ship.
+facet_bot_blocker.settings:
+  type: config_object
+  label: 'Facet Bot Blocker settings'
+  mapping:
+    facets_bot_blocker_limit:
+      type: integer
+      label: 'Maximum facet parameters per request'
+    facet_bot_blocker_return_gone:
+      type: boolean
+      label: 'Return a 410 Gone response instead of 403'
+    facet_bot_blocker_html:
+      type: text
+      label: 'Blocked request response message'
