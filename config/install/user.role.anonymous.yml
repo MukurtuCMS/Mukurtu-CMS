@@ -4,6 +4,7 @@ dependencies:
   module:
     - comment
     - contact
+    - klaro
     - media
     - mukurtu_protocol
     - system
@@ -11,3 +12,5 @@ id: anonymous
 label: Visitor
 weight: 0
 is_admin: false
+permissions:
+  - 'use klaro'
