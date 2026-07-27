@@ -73,6 +73,17 @@ class SubmissionSettingsForm extends EntityForm {
       '#default_value' => $this->entity->status(),
     ];
 
+    $form['access_level'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Who can submit'),
+      '#options' => [
+        'anonymous' => $this->t('Visitors and authenticated users.'),
+        'authenticated' => $this->t('Authenticated users only.'),
+      ],
+      '#default_value' => $this->entity->getAccessLevel(),
+      '#required' => TRUE,
+    ];
+
     $bundle_options = $this->getNodeBundleOptions();
     $form['target_bundle'] = [
       '#type' => 'select',

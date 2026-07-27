@@ -43,3 +43,6 @@ mukurtu_submissions.mukurtu_submission_settings.*:
     access_expectations_enabled:
       type: boolean
       label: 'Show access expectations field'
+    access_level:
+      type: string
+      label: 'Who may submit'

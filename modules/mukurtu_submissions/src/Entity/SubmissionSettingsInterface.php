@@ -41,4 +41,13 @@ interface SubmissionSettingsInterface extends ConfigEntityInterface {
    */
   public function accessExpectationsEnabled(): bool;
 
+  /**
+   * Gets who may use the public submission form.
+   *
+   * @return string
+   *   Either "anonymous" (visitors and authenticated users) or
+   *   "authenticated" (authenticated users only).
+   */
+  public function getAccessLevel(): string;
+
 }

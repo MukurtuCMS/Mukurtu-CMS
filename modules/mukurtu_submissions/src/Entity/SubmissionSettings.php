@@ -46,6 +46,7 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
  *     "target_bundle",
  *     "allowed_media_types",
  *     "access_expectations_enabled",
+ *     "access_level",
  *   }
  * )
  */
@@ -94,6 +95,14 @@ class SubmissionSettings extends ConfigEntityBase implements SubmissionSettingsI
   protected $access_expectations_enabled = FALSE;
 
   /**
+   * Who may use the public submission form: "anonymous" (visitors and
+   * authenticated users) or "authenticated" (authenticated users only).
+   *
+   * @var string
+   */
+  protected $access_level = 'anonymous';
+
+  /**
    * {@inheritdoc}
    */
   public function getTargetEntityTypeId(): string {
@@ -119,6 +128,13 @@ class SubmissionSettings extends ConfigEntityBase implements SubmissionSettingsI
    */
   public function accessExpectationsEnabled(): bool {
     return (bool) $this->access_expectations_enabled;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getAccessLevel(): string {
+    return $this->access_level ?? 'anonymous';
   }
 
 }

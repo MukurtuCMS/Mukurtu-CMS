@@ -11,3 +11,4 @@ allowed_media_types:
   - image
   - document
 access_expectations_enabled: true
+access_level: anonymous
