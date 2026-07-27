@@ -1,0 +1,9 @@
+dependencies:
+  enforced:
+    module:
+      - mukurtu_bot_protection
+  module:
+    - facet_bot_blocker
+facets_bot_blocker_limit: 2
+facet_bot_blocker_return_gone: false
+facet_bot_blocker_html: '<h1>Excessive crawling detected</h1><p>We have blocked your request.</p>'
