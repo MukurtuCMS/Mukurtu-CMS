@@ -1,6 +1,7 @@
 local-contexts-dialog:
   js:
     js/local-contexts-dialog.js: {}
+    js/local-contexts-tabs.js: {}
   dependencies:
     - core/drupal
     - core/once
