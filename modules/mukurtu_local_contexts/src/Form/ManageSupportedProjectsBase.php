@@ -6,6 +6,7 @@ use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 use Drupal\mukurtu_local_contexts\LocalContextsApi;
 use Drupal\mukurtu_local_contexts\LocalContextsProject;
 use Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager;
@@ -202,7 +203,7 @@ abstract class ManageSupportedProjectsBase extends FormBase {
     foreach ($all_projects as $project) {
       $id = $project['unique_id'];
       $row = [
-        'title' => $project['title'],
+        'title' => $this->buildProjectTitleLink($id, $project['title']),
         'status' => $this->t('Not added'),
         'last_sync' => '',
         'project_id' => $id,
@@ -221,7 +222,7 @@ abstract class ManageSupportedProjectsBase extends FormBase {
     $missing_projects = array_diff_key($supported_projects, $all_projects);
     foreach ($missing_projects as $id => $project) {
       $row = [
-        'title' => $project['title'],
+        'title' => $this->buildProjectTitleLink($id, $project['title']),
         'status' => [
           'data' => [
             '#type' => 'html_tag',
@@ -320,6 +321,34 @@ abstract class ManageSupportedProjectsBase extends FormBase {
     return $label
       ? $this->t('@label (@key)', ['@label' => $label, '@key' => $this->maskApiKey($api_key)])
       : $this->maskApiKey($api_key);
+  }
+
+  /**
+   * Builds a render array linking a project's title to its Hub page.
+   *
+   * @param string $id
+   *   The Local Contexts project ID.
+   * @param string $title
+   *   The project title.
+   *
+   * @return array
+   *   A render array for the tableselect title column.
+   */
+  protected function buildProjectTitleLink(string $id, string $title): array {
+    return [
+      'data' => [
+        '#type' => 'link',
+        '#title' => $title,
+        '#url' => Url::fromUri(LocalContextsProject::buildUrl($id)),
+        '#options' => [
+          'attributes' => [
+            'target' => '_blank',
+            'rel' => 'noopener noreferrer',
+            'aria-label' => $this->t('@title, (opens in new tab)', ['@title' => $title]),
+          ],
+        ],
+      ],
+    ];
   }
 
   /**
@@ -434,6 +463,17 @@ abstract class ManageSupportedProjectsBase extends FormBase {
   /**
    * {@inheritdoc}
    */
+  public function validateForm(array &$form, FormStateInterface $form_state) {
+    $selected_projects = array_filter($form_state->getValue('projects'));
+    $action = $form_state->getValue('action');
+    if ($selected_projects && !in_array($action, ['add', 'delete'], TRUE)) {
+      $form_state->setErrorByName('action', $this->t('Select an action to apply.'));
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     // Projects render as one tableselect per API key section, so their
     // selections need to be merged back into a single flat list.
@@ -463,8 +503,6 @@ abstract class ManageSupportedProjectsBase extends FormBase {
       case 'delete':
         $this->submitDelete($all_projects, $selected_projects, $group);
         break;
-      default:
-        $form_state->setErrorByName('action', $this->t('Select an action to apply.'));
     }
   }
 
