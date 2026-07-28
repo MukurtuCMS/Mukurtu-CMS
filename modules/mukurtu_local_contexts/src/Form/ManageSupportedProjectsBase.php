@@ -2,6 +2,7 @@
 
 namespace Drupal\mukurtu_local_contexts\Form;
 
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -293,24 +294,51 @@ abstract class ManageSupportedProjectsBase extends FormBase {
    *   A render array for the banner.
    */
   protected function buildPurgeNoticeBanner(array $purge_notices): array {
+    // Mirrors the landmark/heading structure Drupal core's own warning
+    // messages use (see status-messages.html.twig): a role="contentinfo"
+    // region labelled by a heading, so assistive technology users can find
+    // and identify it when navigating by landmarks/headings, not just by
+    // reading page content top to bottom. "Warning message" is the same
+    // generic heading core already uses for every other warning message
+    // sitewide, not new copy specific to this banner.
+    $heading_id = Html::getUniqueId('mukurtu-local-contexts-purge-notice-title');
+
     return [
       '#type' => 'container',
-      '#attributes' => ['class' => ['messages', 'messages--warning']],
-      'heading' => [
-        '#type' => 'html_tag',
-        '#tag' => 'p',
-        '#value' => $this->t('The following project(s) were automatically removed because they were deleted from the Local Contexts Hub. Any content that referenced them has had that reference removed.'),
+      '#attributes' => [
+        'role' => 'contentinfo',
+        'aria-labelledby' => $heading_id,
+        'class' => ['messages', 'messages--warning'],
       ],
-      'list' => [
-        '#theme' => 'item_list',
-        '#items' => array_map(
-          fn($notice) => $this->t('@title (@id) - removed @date', [
-            '@title' => $notice['title'] ?: $notice['project_id'],
-            '@id' => $notice['project_id'],
-            '@date' => \Drupal::service('date.formatter')->format($notice['purged'], 'short'),
-          ]),
-          $purge_notices
-        ),
+      'header' => [
+        '#type' => 'container',
+        '#attributes' => ['class' => ['messages__header']],
+        'title' => [
+          '#type' => 'html_tag',
+          '#tag' => 'h2',
+          '#attributes' => ['id' => $heading_id, 'class' => ['messages__title']],
+          '#value' => $this->t('Warning message'),
+        ],
+      ],
+      'content' => [
+        '#type' => 'container',
+        '#attributes' => ['class' => ['messages__content']],
+        'heading' => [
+          '#type' => 'html_tag',
+          '#tag' => 'p',
+          '#value' => $this->t('The following project(s) were automatically removed because they were deleted from the Local Contexts Hub. Any content that referenced them has had that reference removed.'),
+        ],
+        'list' => [
+          '#theme' => 'item_list',
+          '#items' => array_map(
+            fn($notice) => $this->t('@title (@id) - removed @date', [
+              '@title' => $notice['title'] ?: $notice['project_id'],
+              '@id' => $notice['project_id'],
+              '@date' => \Drupal::service('date.formatter')->format($notice['purged'], 'short'),
+            ]),
+            $purge_notices
+          ),
+        ],
       ],
       'dismiss' => [
         '#type' => 'submit',
