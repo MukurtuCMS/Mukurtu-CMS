@@ -10,3 +10,6 @@ dependencies:
   - drupal:config_translation_po
   - drupal:menu_ui
   - token:token
+  - 'mukurtu_protocol:mukurtu_protocol'
+  - 'mukurtu_collection:mukurtu_collection'
+  - 'mukurtu_multipage_items:mukurtu_multipage_items'
