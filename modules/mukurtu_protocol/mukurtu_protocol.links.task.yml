@@ -8,16 +8,25 @@ entity.protocol.canonical:
   route_name: entity.protocol.canonical
   base_route: entity.protocol.canonical
   title: 'View'
+  weight: 0
 
 entity.protocol.edit_form:
   route_name: entity.protocol.edit_form
   base_route: entity.protocol.canonical
   title: 'Edit'
+  weight: 1
+
+mukurtu_protocol.protocol_members:
+  title: 'Manage users'
+  route_name: mukurtu_protocol.protocol_members
+  base_route: entity.protocol.canonical
+  weight: 2
 
 entity.protocol.version_history:
   route_name: entity.protocol.version_history
   base_route: entity.protocol.canonical
   title: 'Revisions'
+  weight: 4
 
 entity.protocol.delete_form:
   route_name:  entity.protocol.delete_form
@@ -35,37 +44,34 @@ entity.community.canonical:
   route_name: entity.community.canonical
   base_route: entity.community.canonical
   title: 'View'
+  weight: 0
 
 entity.community.edit_form:
   route_name: entity.community.edit_form
   base_route: entity.community.canonical
   title: 'Edit'
+  weight: 1
+
+mukurtu_protocol.create_protocol:
+  title: Create protocol
+  route_name: mukurtu_protocol.community_add_protocol
+  base_route: entity.community.canonical
+  weight: 2
+
+mukurtu_protocol.community_members:
+  title: 'Manage users'
+  route_name: mukurtu_protocol.community_members
+  base_route: entity.community.canonical
+  weight: 3
 
 entity.community.version_history:
   route_name: entity.community.version_history
   base_route: entity.community.canonical
   title: 'Revisions'
+  weight: 5
 
 entity.community.delete_form:
   route_name:  entity.community.delete_form
   base_route:  entity.community.canonical
   title: Delete
   weight: 10
-
-mukurtu_protocol.create_protocol:
-  title: Create Protocol
-  route_name: mukurtu_protocol.community_add_protocol
-  base_route: entity.community.canonical
-  weight: 4
-
-mukurtu_protocol.community_manage:
-  title: Manage
-  route_name: mukurtu_protocol.manage_community_canonical
-  base_route: entity.community.canonical
-  weight: 5
-
-mukurtu_protocol.protocol_manage:
-  title: Manage
-  route_name: mukurtu_protocol.manage_protocol_canonical
-  base_route: entity.protocol.canonical
-  weight: 5

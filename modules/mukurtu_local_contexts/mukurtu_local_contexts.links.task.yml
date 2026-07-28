@@ -16,14 +16,16 @@ mukurtu_local_contexts.site_project_directory_settings:
 ##
 mukurtu_local_contexts.manage_community_supported_projects:
   route_name: mukurtu_local_contexts.manage_community_supported_projects
-  title: 'Manage Projects'
-  base_route: mukurtu_local_contexts.manage_community_supported_projects
+  title: 'Manage Local Contexts projects'
+  base_route: entity.community.canonical
+  weight: 4
 
 ##
 # Local tasks for Contexts:
 ##
 mukurtu_local_contexts.manage_protocol_supported_projects:
   route_name: mukurtu_local_contexts.manage_protocol_supported_projects
-  title: 'Manage Projects'
-  base_route: mukurtu_local_contexts.manage_protocol_supported_projects
+  title: 'Manage Local Contexts projects'
+  base_route: entity.protocol.canonical
+  weight: 3
 

@@ -22,7 +22,8 @@ class ManageSupportedProjectsGroup extends ManageSupportedProjectsBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, ?ContentEntityInterface $group = NULL) {
+  public function buildForm(array $form, FormStateInterface $form_state, ?ContentEntityInterface $group = NULL, ?ContentEntityInterface $community = NULL, ?ContentEntityInterface $protocol = NULL) {
+    $group = $group ?? $community ?? $protocol;
     $form_state->set('group', $group);
     $bundle = $group->bundle();
 

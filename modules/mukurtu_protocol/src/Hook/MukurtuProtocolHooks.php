@@ -174,30 +174,6 @@ class MukurtuProtocolHooks {
           'communities' => NULL,
         ],
       ],
-      'manage_community' => [
-        'variables' => [
-          'community' => NULL,
-          'links' => NULL,
-          'sharing' => NULL,
-          'membership_display' => NULL,
-          'members' => NULL,
-          'description' => NULL,
-          'protocols' => NULL,
-          'notices' => NULL,
-        ],
-      ],
-      'manage_protocol' => [
-        'variables' => [
-          'protocol' => NULL,
-          'links' => NULL,
-          'sharing' => NULL,
-          'membership_display' => NULL,
-          'members' => NULL,
-          'description' => NULL,
-          'communities' => NULL,
-          'comment_status' => NULL,
-        ],
-      ],
       'community_protocol_list' => [
         'variables' => [
           'title' => NULL,

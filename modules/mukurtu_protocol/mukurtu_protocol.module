@@ -224,32 +224,6 @@ function mukurtu_protocol_system_breadcrumb_alter(Breadcrumb &$breadcrumb, Route
  */
 function mukurtu_protocol_menu_local_tasks_alter(&$data, $route_name, \Drupal\Core\Cache\RefinableCacheableDependencyInterface &$cacheability)
 {
-  // On community and protocol pages, only show devel and revisions local tasks
-  // buttons for uid 1.
-  if ($route_name == 'entity.community.canonical' || $route_name == 'entity.protocol.canonical') {
-    if (\Drupal::currentUser()->id() != 1) {
-      // Right now, there are two Revisions local task buttons showing up on
-      // community and protocol pages. Eventually, local task
-      // 'entity.node.version_history' will be replaced by
-      // 'entity.version_history:node.version_history' after
-      // https://www.drupal.org/project/drupal/issues/3153559, but that has been
-      // postponed as of 07-26-2024, hence why two Revisions buttons show up.
-      // (@see node.module)
-
-      // @todo Remove calls to 'entity.node.version_history' once the Drupal
-      // issue mentioned above has been resolved.
-      unset($data['tabs'][0]['entity.community.version_history']);
-      unset($data['tabs'][0]['entity.version_history:community.version_history']);
-
-      unset($data['tabs'][0]['entity.protocol.version_history']);
-      unset($data['tabs'][0]['entity.version_history:protocol.version_history']);
-    } else {
-      // Remove the duplicate Revisions local task on communities and protocols.
-      unset($data['tabs'][0]['entity.protocol.version_history']);
-      unset($data['tabs'][0]['entity.community.version_history']);
-    }
-  }
-
   if ($route_name == "entity.node.canonical") {
     $route_match = \Drupal::routeMatch();
     $currentUser = \Drupal::currentUser();
@@ -1000,7 +974,7 @@ function add_protocol_member_form_validate(&$form, FormStateInterface $form_stat
             $form_state->setErrorByName('uid', t('Cannot add <a href=@user-page>@userName</a>. User is not a member of any of <a href=@protocol-page>@protocolName</a>\'s communities.', [
               '@user-page' => Url::fromRoute('entity.user.canonical', ['user' => $userToAdd->id()])->toString(),
               '@userName' => $userToAdd->label(),
-              '@protocol-page' => Url::fromRoute('mukurtu_protocol.manage_protocol', ['group' => $protocol->id()])->toString(),
+              '@protocol-page' => Url::fromRoute('entity.protocol.canonical', ['protocol' => $protocol->id()])->toString(),
               '@protocolName' => $protocol->getName(),
             ]));
           }

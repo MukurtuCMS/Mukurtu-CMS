@@ -99,51 +99,27 @@ mukurtu_protocol.community_add_protocol:
     _admin_route: TRUE
 
 
-mukurtu_protocol.manage_community:
-  path: 'admin/communities/{group}'
-  defaults:
-    _controller: '\Drupal\mukurtu_protocol\Controller\ManageCommunitiesController::manageCommunity'
-    _title_callback: '\Drupal\mukurtu_protocol\Controller\ManageCommunitiesController::getManageCommunityTitle'
-  options:
-    parameters:
-      group:
-        type: entity:community
-  requirements:
-    _og_membership_add_access: 'TRUE'
-
-mukurtu_protocol.manage_community_canonical:
-  path: '/communities/community/{community}/manage'
+mukurtu_protocol.community_members:
+  path: '/communities/community/{community}/members'
   defaults:
     _controller: '\Drupal\mukurtu_protocol\Controller\ManageCommunitiesController::manageCommunityRedirect'
   options:
     parameters:
-      group:
+      community:
         type: entity:community
   requirements:
-    _custom_access: '\Drupal\mukurtu_protocol\Controller\ManageCommunitiesController::manageCommunityRedirectAccess'
+    _custom_access: '\Drupal\mukurtu_protocol\Controller\MukurtuOgMembersOverviewController::access'
 
-mukurtu_protocol.manage_protocol:
-  path: 'admin/protocols/{group}'
-  defaults:
-    _controller: '\Drupal\mukurtu_protocol\Controller\ManageProtocolsController::manageProtocol'
-    _title_callback: '\Drupal\mukurtu_protocol\Controller\ManageProtocolsController::getManageProtocolTitle'
-  options:
-    parameters:
-      group:
-        type: entity:protocol
-  requirements:
-    _og_membership_add_access: 'TRUE'
-
-mukurtu_protocol.manage_protocol_canonical:
-  path: '/protocols/protocol/{protocol}/manage'
+mukurtu_protocol.protocol_members:
+  path: '/protocols/protocol/{protocol}/members'
   defaults:
     _controller: '\Drupal\mukurtu_protocol\Controller\ManageProtocolsController::manageProtocolRedirect'
   options:
     parameters:
-      group:
+      protocol:
         type: entity:protocol
   requirements:
-    _custom_access: '\Drupal\mukurtu_protocol\Controller\ManageProtocolsController::manageProtocolRedirectAccess'
+    _custom_access: '\Drupal\mukurtu_protocol\Controller\MukurtuOgMembersOverviewController::access'
 
 mukurtu_protocol.community_members_list:
   path: 'admin/communities/{group}/members'
