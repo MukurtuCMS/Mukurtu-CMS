@@ -61,4 +61,38 @@ class LocalContextsHubBase {
     $this->lcApi = new LocalContextsApi();
     $this->requestTime = \Drupal::time()->getRequestTime();
   }
+
+  /**
+   * Indexes a set of translation rows by locale.
+   *
+   * The hub doesn't identify translations, so there is no stable ID to key
+   * on. Locales aren't guaranteed to be unique either (users can have
+   * multiple translations with the same or no locale), so each locale (or
+   * lack thereof) is suffixed with an occurrence count to keep every
+   * translation while still grouping same-locale translations together.
+   *
+   * @param array $rows
+   *   Translation rows, each with at least a 'locale' key.
+   *
+   * @return array
+   *   The rows keyed by a unique locale-based index.
+   */
+  protected function indexTranslations(array $rows): array {
+    $translations = [];
+    $bookkeep = [];
+
+    foreach ($rows as $row) {
+      if (empty($row['locale'])) {
+        $bookkeep['no_locale_count'] = ($bookkeep['no_locale_count'] ?? 0) + 1;
+        $translationIndex = strval($bookkeep['no_locale_count']);
+      }
+      else {
+        $bookkeep[$row['locale']] = ($bookkeep[$row['locale']] ?? 0) + 1;
+        $translationIndex = $row['locale'] . '-' . $bookkeep[$row['locale']];
+      }
+      $translations[$translationIndex] = $row;
+    }
+
+    return $translations;
+  }
 }
