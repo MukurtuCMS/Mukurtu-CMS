@@ -1,0 +1,26 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - klaro
+id: soundcloud
+label: SoundCloud
+description: 'SoundCloud is an online audio distribution platform and music sharing website.'
+default: false
+purposes:
+  - external_content
+cookies: {  }
+required: false
+opt_out: false
+only_once: false
+info_url: 'https://soundcloud.com/'
+privacy_policy_url: 'https://soundcloud.com/pages/privacy'
+javascripts:
+  - soundcloud.com
+callback_code: ''
+on_init: ''
+on_accept: ''
+on_decline: ''
+wrapper_identifier: {  }
+attachments: {  }
+weight: 0

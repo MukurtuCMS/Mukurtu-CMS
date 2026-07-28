@@ -3,3 +3,85 @@
   max-inline-size: 1000px !important;
   border-radius: 5px;
 }
+
+// The Klaro cookie consent banner/modal uses z-index values between 999 and
+// 1001 (see drupal/klaro_js's klaro.css). consent_popup's full-viewport
+// backdrop ships at the same z-index (1000), so ties are resolved by DOM
+// order rather than intent. Raise it above Klaro's range so the protocol
+// consent gate always takes precedence over the cookie banner when both
+// blocks are enabled on a site.
+.block-consent-popup {
+  z-index: 1100;
+}
+
+// Neither module hides the other from the accessibility tree while its own
+// overlay is open, so raising the z-index above would leave Klaro's toggle
+// button (and any open Klaro dialog) visually hidden behind the opaque
+// consent_popup backdrop but still focusable and in tab order (WCAG 2.4.11).
+// Hide Klaro's UI outright while the protocol gate is open; it reappears
+// once consent_popup removes this class from the body. Klaro's toggle
+// button (#klaro_toggle_dialog) is injected as its own direct child of
+// <body>, not nested inside .klaro, so it needs its own selector.
+body.consent-popup-opened .klaro,
+body.consent-popup-opened .klaro_toggle_dialog {
+  display: none;
+}
+
+// Restyle Klaro's blocked-embed placeholder (.context-notice, shown in
+// place of a gated YouTube/Vimeo/SoundCloud embed in browse and full-content
+// views) to match Mukurtu's design system instead of Klaro's unstyled
+// defaults. vendor/drupal/klaro/css/klaro-override.css already defines
+// .context-notice's buttons/links/focus styles entirely in terms of
+// --klaro-* custom properties (see its .klaro.klaro-theme-olivero,
+// .klaro.klaro-theme-claro, and .klaro.klaro-theme-gin blocks for the
+// established pattern this mirrors) -- it was just never given a
+// mukurtu_v4-specific set of values. KlaroHelper::getSettings() appends
+// "klaro-theme-{active theme machine name}" to Klaro's wrapper element, so
+// this selector matches on the front end.
+.klaro.klaro-theme-mukurtu_v4 {
+  --klaro-primary-color: var(--brand-primary-dark);
+  --klaro-link-color-hover: var(--brand-primary-accent);
+  --klaro-button-bg: var(--brand-primary-dark);
+  --klaro-button-text-color: var(--light-text-color);
+  --klaro-button-border: none;
+  --klaro-button-border-radius: var(--v-space-6xs);
+  --klaro-button-padding: var(--v-space-5xs) var(--v-space-2xs);
+  --klaro-button-font-size: var(--font-size-base);
+  --klaro-button-font-weight: var(--text-bold);
+  // Same background as the default (unhovered) state -- matches how every
+  // other button on the site signals hover (see mixins.button/button-tab in
+  // 00-base/mixins/_mixins.scss: background stays brand-primary-dark,
+  // underline added below). --brand-primary-accent here previously dropped
+  // white-text contrast to 3.12:1, failing WCAG 1.4.3's 4.5:1 minimum.
+  --klaro-button-bg-hover: var(--brand-primary-dark);
+  --klaro-button-text-color-hover: var(--light-text-color);
+  --klaro-button-border-hover: none;
+  --klaro-button-focus-outline: 2px solid var(--focus-color);
+  --klaro-button-focus-outline-offset: 2px;
+  --klaro-dialog-focus-outline: 2px solid var(--focus-color);
+
+  // Not covered by the --klaro-* variable contract: klaro-js has no token
+  // for paragraph line-height or spacing between the "Yes (this time)" /
+  // "Always" buttons, and the buttons are wide enough (via
+  // --klaro-button-padding above) that they wrap onto their own lines in a
+  // narrow card, touching each other with no vertical gap.
+  .context-notice p {
+    line-height: 1.3;
+  }
+
+  // No --klaro-* token for hover text-decoration; add the underline
+  // directly to match the site's other buttons' hover treatment.
+  .cm-btn:hover {
+    text-decoration: underline;
+  }
+
+  .context-notice p.cm-buttons {
+    // Klaro's default centering for this paragraph relies on text-align,
+    // which stops applying to the buttons once this is switched to a flex
+    // column for the gap above -- restore centering explicitly.
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--v-space-6xs);
+  }
+}
