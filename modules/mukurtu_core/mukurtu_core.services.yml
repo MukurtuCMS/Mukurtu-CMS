@@ -12,3 +12,7 @@ services:
     class: Drupal\mukurtu_core\EventSubscriber\ConfigSaveCacheInvalidationSubscriber
     tags:
       - { name: event_subscriber }
+  mukurtu_core.representative_media_computation:
+    class: Drupal\mukurtu_core\EventSubscriber\RepresentativeMediaComputationSubscriber
+    tags:
+      - { name: event_subscriber }
