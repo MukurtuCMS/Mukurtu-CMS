@@ -40,11 +40,11 @@ class NodeLocalContextsProjectFilter extends InOperator {
     }
 
     $projects = $this->localContextsProjectManager->getAllProjects();
-    $referencedLegacyIds = $this->localContextsProjectManager->getReferencedLegacyProjectIds();
+    $referencedIds = $this->localContextsProjectManager->getReferencedProjectIds();
 
     $options = [];
     foreach ($projects as $id => $project) {
-      if ($this->localContextsProjectManager->isLegacyProjectId((string) $id) && !in_array($id, $referencedLegacyIds, TRUE)) {
+      if (!in_array($id, $referencedIds, TRUE)) {
         continue;
       }
       $options[$id] = $project['title'] ?: $this->t('Unknown Project');
@@ -64,6 +64,21 @@ class NodeLocalContextsProjectFilter extends InOperator {
       ->fields('p', ['entity_id'])
       ->condition('p.field_local_contexts_projects_value', $this->value, 'IN')
       ->condition('p.deleted', 0);
+
+    // Selecting a Project should also match nodes that only carry one of
+    // that project's individual labels/notices (compound key
+    // "{project_id}:{id}:{label|notice}"), mirroring the reverse union in
+    // NodeLocalContextsLabelFilter::query().
+    $labelSubquery = $this->database->select('node__field_local_contexts_labels_and_notices', 'l')
+      ->fields('l', ['entity_id'])
+      ->condition('l.deleted', 0);
+    $orGroup = $labelSubquery->orConditionGroup();
+    foreach ((array) $this->value as $projectId) {
+      $orGroup->condition('l.field_local_contexts_labels_and_notices_value', $this->database->escapeLike($projectId) . ':%', 'LIKE');
+    }
+    $labelSubquery->condition($orGroup);
+    $subquery->union($labelSubquery, 'UNION');
+
     $this->query->addWhere($this->options['group'], "$this->tableAlias.nid", $subquery, 'IN');
   }
 

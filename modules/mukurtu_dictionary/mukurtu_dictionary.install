@@ -1365,3 +1365,21 @@ function mukurtu_dictionary_update_40038(): void {
     $index->reindex();
   }
 }
+
+/**
+ * Make the LC Project facet also match content via an individually-applied
+ * LC label/notice belonging to that project.
+ */
+function mukurtu_dictionary_update_40039(): void {
+  // Import the updated Search API index configuration (repoints the Local
+  // Contexts Project field at the new effective-projects processor
+  // property).
+  $config_installer = \Drupal::service('config.installer');
+  $config_installer->installDefaultConfig('module', 'mukurtu_dictionary');
+
+  // Reindex so existing content picks up label-inherited projects.
+  $index = \Drupal\search_api\Entity\Index::load('mukurtu_dictionary_index');
+  if ($index) {
+    $index->reindex();
+  }
+}

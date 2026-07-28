@@ -41,27 +41,33 @@ class NodeLocalContextsLabelFilter extends InOperator {
 
     $labels = $this->localContextsProjectManager->getAllLabels();
     $notices = $this->localContextsProjectManager->getAllNotices();
-    $referencedLegacyIds = $this->localContextsProjectManager->getReferencedLegacyProjectIds();
+    $referencedProjectIds = $this->localContextsProjectManager->getReferencedProjectIds();
+    $referencedKeys = $this->localContextsProjectManager->getReferencedLabelAndNoticeKeys();
 
     // Multiple Local Contexts projects can add the same standardized label
     // or notice (e.g. "TK Attribution"), each as its own project-scoped row.
     // Group them by display name so they appear as a single option; the
     // option's key carries every underlying compound key so selecting it
     // still matches content tagged under any of the originating projects.
+    //
+    // An entry is only offered if it (or its owning project) is actually
+    // referenced by content: either the compound key itself was directly
+    // applied, or the whole project was applied directly (which matches
+    // this label/notice too, per NodeLocalContextsLabelFilter::query()).
     $groups = [];
     foreach ($labels as $label) {
-      if ($this->localContextsProjectManager->isLegacyProjectId((string) $label['project_id']) && !in_array($label['project_id'], $referencedLegacyIds, TRUE)) {
+      $key = $label['project_id'] . ':' . $label['id'] . ':' . $label['display'];
+      if (!in_array($key, $referencedKeys, TRUE) && !in_array($label['project_id'], $referencedProjectIds, TRUE)) {
         continue;
       }
-      $key = $label['project_id'] . ':' . $label['id'] . ':' . $label['display'];
       $name = $label['name'] ?: (string) $this->t('Unknown Label');
       $groups[$name][] = $key;
     }
     foreach ($notices as $notice) {
-      if ($this->localContextsProjectManager->isLegacyProjectId((string) $notice['project_id']) && !in_array($notice['project_id'], $referencedLegacyIds, TRUE)) {
+      $key = $notice['project_id'] . ':' . $notice['type'] . ':' . $notice['display'];
+      if (!in_array($key, $referencedKeys, TRUE) && !in_array($notice['project_id'], $referencedProjectIds, TRUE)) {
         continue;
       }
-      $key = $notice['project_id'] . ':' . $notice['type'] . ':' . $notice['display'];
       $name = $notice['name'] ?: (string) $this->t('Unknown Notice');
       $groups[$name][] = $key;
     }

@@ -87,7 +87,7 @@ field_settings:
   field_local_contexts_projects:
     label: 'Local Contexts Project'
     datasource_id: 'entity:node'
-    property_path: field_local_contexts_projects
+    property_path: mukurtu_local_contexts_effective_projects
     type: string
     dependencies:
       module:
@@ -238,6 +238,7 @@ processor_settings:
       - title
   language_with_fallback: {  }
   mukurtu_local_contexts_effective_labels: {  }
+  mukurtu_local_contexts_effective_projects: {  }
   mukurtu_protocol_cultural_protocol_ids: {  }
   rendered_item: {  }
   tokenizer:

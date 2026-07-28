@@ -384,6 +384,47 @@ class LocalContextsSupportedProjectManager {
   }
 
   /**
+   * Get all project IDs that are referenced by existing content.
+   *
+   * A project counts as referenced if it's applied directly via
+   * field_local_contexts_projects, or if any of its individual
+   * labels/notices are applied via field_local_contexts_labels_and_notices
+   * (whose compound keys always start with "{project_id}:").
+   *
+   * @return string[]
+   *   Project IDs referenced by existing nodes.
+   */
+  public function getReferencedProjectIds(): array {
+    $ids = $this->db->select('node__field_local_contexts_projects', 'p')
+      ->fields('p', ['field_local_contexts_projects_value'])
+      ->distinct()
+      ->execute()
+      ->fetchCol();
+
+    foreach ($this->getReferencedLabelAndNoticeKeys() as $value) {
+      [$project_id] = explode(':', $value, 2);
+      $ids[] = $project_id;
+    }
+
+    return array_values(array_unique($ids));
+  }
+
+  /**
+   * Get all label/notice compound keys directly referenced by content.
+   *
+   * @return string[]
+   *   Distinct field_local_contexts_labels_and_notices values on existing
+   *   nodes, in "{project_id}:{id}:{label|notice}" compound key format.
+   */
+  public function getReferencedLabelAndNoticeKeys(): array {
+    return $this->db->select('node__field_local_contexts_labels_and_notices', 'l')
+      ->fields('l', ['field_local_contexts_labels_and_notices_value'])
+      ->distinct()
+      ->execute()
+      ->fetchCol();
+  }
+
+  /**
    * Get legacy project IDs that are referenced by existing content.
    *
    * Legacy projects (see isLegacyProjectId()) should not normally be offered
@@ -395,24 +436,7 @@ class LocalContextsSupportedProjectManager {
    *   field_local_contexts_labels_and_notices on existing nodes.
    */
   public function getReferencedLegacyProjectIds(): array {
-    $ids = $this->db->select('node__field_local_contexts_projects', 'p')
-      ->fields('p', ['field_local_contexts_projects_value'])
-      ->distinct()
-      ->execute()
-      ->fetchCol();
-
-    $label_values = $this->db->select('node__field_local_contexts_labels_and_notices', 'l')
-      ->fields('l', ['field_local_contexts_labels_and_notices_value'])
-      ->distinct()
-      ->execute()
-      ->fetchCol();
-    foreach ($label_values as $value) {
-      [$project_id] = explode(':', $value, 2);
-      $ids[] = $project_id;
-    }
-
-    $legacy_ids = array_filter(array_unique($ids), [$this, 'isLegacyProjectId']);
-    return array_values($legacy_ids);
+    return array_values(array_filter($this->getReferencedProjectIds(), [$this, 'isLegacyProjectId']));
   }
 
   /**
