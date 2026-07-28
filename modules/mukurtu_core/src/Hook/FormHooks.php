@@ -1388,6 +1388,7 @@ class FormHooks
 
         $unsupportedBundles = [
             "article",
+            "page",
             "dictionary_word",
             "word_list",
             "collection",

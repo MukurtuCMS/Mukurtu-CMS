@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_import\Kernel;
 
@@ -10,6 +10,7 @@ use Drupal\migrate\Plugin\MigrationInterface;
 /**
  * Test the import of boolean fields.
  */
+#[\PHPUnit\Framework\Attributes\Group('mukurtu_import')]
 class ImportBooleanTest extends MukurtuImportTestBase {
   protected $node;
 
@@ -49,7 +50,7 @@ class ImportBooleanTest extends MukurtuImportTestBase {
     $result = $this->importCsvFile($import_file, $mapping);
     $this->assertEquals(MigrationInterface::RESULT_COMPLETED, $result);
     $updated_node = $this->entityTypeManager->getStorage('node')->load($this->node->id());
-    $this->assertEquals(FALSE, $updated_node->isPublished());
+    $this->assertFalse($updated_node->isPublished());
 
     // 1.
     $data = [
@@ -60,7 +61,7 @@ class ImportBooleanTest extends MukurtuImportTestBase {
     $result = $this->importCsvFile($import_file, $mapping);
     $this->assertEquals(MigrationInterface::RESULT_COMPLETED, $result);
     $updated_node2 = $this->entityTypeManager->getStorage('node')->load($this->node->id());
-    $this->assertEquals(TRUE, $updated_node2->isPublished());
+    $this->assertTrue($updated_node2->isPublished());
   }
 
 }

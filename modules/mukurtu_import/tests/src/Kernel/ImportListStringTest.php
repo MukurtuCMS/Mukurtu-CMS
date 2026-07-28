@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_import\Kernel;
 
@@ -13,6 +13,7 @@ use Drupal\field\Entity\FieldConfig;
 /**
  * Test the import of list string fields.
  */
+#[\PHPUnit\Framework\Attributes\Group('mukurtu_import')]
 class ImportListStringTest extends MukurtuImportTestBase {
   protected $node;
 

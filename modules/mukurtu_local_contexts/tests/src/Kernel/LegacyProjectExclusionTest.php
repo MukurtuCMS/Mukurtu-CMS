@@ -13,27 +13,13 @@ use Drupal\node\Entity\Node;
 class LegacyProjectExclusionTest extends LocalContextsTestBase {
 
   /**
-   * The Local Contexts supported project manager.
-   *
-   * @var \Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager
-   */
-  protected $manager;
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function setUp(): void {
-    parent::setUp();
-    $this->manager = $this->container->get('mukurtu_local_contexts.supported_project_manager');
-  }
-
-  /**
    * Creates a new, unsaved test node.
    */
   protected function createTestNode(): Node {
     return Node::create([
       'type' => static::TEST_BUNDLE,
       'title' => $this->randomString(),
+      'field_cultural_protocols' => "all({$this->protocol->id()})",
     ]);
   }
 

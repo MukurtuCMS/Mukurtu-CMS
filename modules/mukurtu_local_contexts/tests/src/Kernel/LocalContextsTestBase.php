@@ -1,26 +1,41 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\mukurtu_local_contexts\Kernel;
 
-use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
+use Drupal\Tests\mukurtu_core\Kernel\MukurtuKernelTestBase;
+use Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager;
 use Drupal\node\Entity\NodeType;
 
 /**
- * Base class for mukurtu_local_contexts kernel tests.
+ * Base class for Mukurtu Local Contexts kernel tests.
  */
-abstract class LocalContextsTestBase extends EntityKernelTestBase {
+abstract class LocalContextsTestBase extends MukurtuKernelTestBase {
 
   /**
    * {@inheritdoc}
    */
   protected static $modules = [
     'field',
+    'file',
+    'filter',
+    'image',
+    'media',
     'node',
     'og',
     'options',
+    'path',
+    'path_alias',
     'system',
+    'taxonomy',
+    'text',
     'user',
+    'views',
+    'workflows',
+    'mukurtu_core',
     'mukurtu_local_contexts',
+    'mukurtu_protocol',
     'mukurtu_local_contexts_test',
   ];
 
@@ -30,25 +45,60 @@ abstract class LocalContextsTestBase extends EntityKernelTestBase {
   const TEST_BUNDLE = 'legacy_test_content';
 
   /**
+   * The LocalContextsSupportedProjectManager service under test.
+   *
+   * @var \Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager
+   */
+  protected LocalContextsSupportedProjectManager $manager;
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp(): void {
     parent::setUp();
 
     $this->installEntitySchema('node');
-    $this->installEntitySchema('og_membership');
+    $this->installEntitySchema('path_alias');
     $this->installSchema('node', ['node_access']);
-    $this->installSchema('mukurtu_local_contexts', [
-      'mukurtu_local_contexts_supported_projects',
-      'mukurtu_local_contexts_projects',
-      'mukurtu_local_contexts_labels',
-      'mukurtu_local_contexts_notices',
-    ]);
 
     NodeType::create([
       'type' => static::TEST_BUNDLE,
       'name' => 'Legacy Test Content',
     ])->save();
+
+    $this->manager = $this->container->get('mukurtu_local_contexts.supported_project_manager');
+    $this->entityTypeManager = $this->container->get('entity_type.manager');
+  }
+
+  /**
+   * Insert a minimal project record so foreign key joins work in queries.
+   *
+   * LocalContextsSupportedProjectManager joins supported_projects → projects.
+   * Tests that call getSiteSupportedProjects() / getAllProjects() etc. require
+   * a matching row in mukurtu_local_contexts_projects.
+   *
+   * @param string $project_id
+   *   The project UUID to insert.
+   * @param string $title
+   *   The project title.
+   */
+  protected function insertProjectRecord(string $project_id, string $title = 'Test Project'): void {
+    \Drupal::database()->insert('mukurtu_local_contexts_projects')
+      ->fields([
+        'id' => $project_id,
+        'provider_id' => NULL,
+        'title' => $title,
+        'privacy' => 'public',
+        'updated' => \Drupal::time()->getRequestTime(),
+      ])
+      ->execute();
   }
 
   /**

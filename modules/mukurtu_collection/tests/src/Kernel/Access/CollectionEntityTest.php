@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\mukurtu_collection\Kernel\Access;
 
 use PHPUnit\Framework\Attributes\Group;
@@ -118,7 +120,7 @@ class CollectionEntityTest extends ProtocolAwareEntityTestBase {
     $violationList = $this->collection->validate();
     $itemsViolations = $violationList->getByField('field_items_in_collection');
     $violation = $itemsViolations->get(0);
-    $this->assertStringContainsString('A collection cannot contain itself', $violation->getMessage());
+    $this->assertStringContainsString('A collection cannot contain itself', (string) $violation->getMessage());
   }
 
   /**
@@ -145,22 +147,20 @@ class CollectionEntityTest extends ProtocolAwareEntityTestBase {
     $violationList = $this->collection->validate();
     $itemsViolations = $violationList->getByField('field_items_in_collection');
     $violation = $itemsViolations->get(0);
-    $this->assertStringContainsString('A collection cannot contain duplicates', $violation->getMessage());
+    $this->assertStringContainsString('A collection cannot contain duplicates', (string) $violation->getMessage());
   }
 
   /**
    * Test to check that a collection cannot contain itself as a sub collection.
    */
-   public function testSubCollectionNoSelfReference() {
+  public function testSubCollectionNoSelfReference() {
     $this->collection->addChildCollection($this->collection);
-    //$this->collection->set('field_child_collections', [$this->collection->id()]);
     $violationList = $this->collection->validate();
-    //$this->debugValidationList($violationList);
     $this->assertEquals(1, $violationList->count());
     $itemsViolations = $violationList->getByField('field_child_collections');
     $this->assertCount(1, $itemsViolations);
     $violation = $itemsViolations->get(0);
-    $this->assertStringContainsString('A collection cannot be its own sub-collection', $violation->getMessage());
+    $this->assertStringContainsString('A collection cannot be its own sub-collection', (string) $violation->getMessage());
   }
 
   /**
@@ -190,7 +190,7 @@ class CollectionEntityTest extends ProtocolAwareEntityTestBase {
     $this->assertEquals(1, $violationList->count());
     $itemsViolations = $violationList->getByField('field_child_collections');
     $violation = $itemsViolations->get(0);
-    $this->assertStringContainsString('is already part of a collection hierarchy and cannot be used in another', $violation->getMessage());
+    $this->assertStringContainsString('is already part of a collection hierarchy and cannot be used in another', (string) $violation->getMessage());
 
     // parentCollection can be added as a subCollection.
     $this->collection->set('field_child_collections', []);
