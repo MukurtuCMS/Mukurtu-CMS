@@ -28,6 +28,15 @@ class CommunityAddForm extends ContentEntityForm {
   public function form(array $form, FormStateInterface $form_state) {
     $form = parent::form($form, $form_state);
 
+    // Drupal also routes "add translation" requests through the entity
+    // type's add form handler. Only the genuine new-community creation flow
+    // (a new, unsaved entity) should get the streamlined allow list and
+    // membership UI below; adding a translation to an existing community
+    // should show the full set of fields, same as editing one.
+    if (!$this->entity->isNew()) {
+      return $form;
+    }
+
     // The Add form is a streamlined version of the edit form, hide any fields
     // that are not required using an allow list.
     $allow_list = [
@@ -295,6 +304,14 @@ class CommunityAddForm extends ContentEntityForm {
   public function validateForm(array &$form, FormStateInterface $form_state): void {
     parent::validateForm($form, $form_state);
 
+    // The membership table this validates only exists on the streamlined
+    // new-community form (see the matching check in form()); adding a
+    // translation to an existing community has no membership_wrapper to
+    // validate or attach errors to.
+    if (!$this->entity->isNew()) {
+      return;
+    }
+
     $roles = ['community_member', 'community_affiliate', 'community_manager'];
     $stored_members = $form_state->get('members') ?? [];
     $table_values = $form_state->getValue(['membership_wrapper', 'member_table']) ?? [];
@@ -384,6 +401,21 @@ class CommunityAddForm extends ContentEntityForm {
    * {@inheritdoc}
    */
   public function save(array $form, FormStateInterface $form_state) {
+    // Adding a translation to an existing community should behave like a
+    // normal entity save (see the matching check in form()), not repeat the
+    // new-community member setup and protocol-creation redirect below.
+    if (!$this->entity->isNew()) {
+      $status = parent::save($form, $form_state);
+      // Without an explicit redirect, Drupal defaults to reloading the
+      // current request URL, which for a translation-add is this same
+      // "add translation" route. Reloading it after the translation has
+      // been created throws, since Drupal refuses to add a translation
+      // that already exists. Redirect to the entity instead, matching
+      // CommunityForm::save()'s redirect for the edit-translation path.
+      $form_state->setRedirect('entity.community.canonical', ['community' => $this->entity->id()]);
+      return $status;
+    }
+
     if ($this->entity->save()) {
       /** @var \Drupal\mukurtu_protocol\Entity\Community $community */
       $community = $this->entity;
