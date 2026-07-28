@@ -78,7 +78,10 @@ class ManageProtocolsController extends ControllerBase {
     // has no protocol stewards, but we don't want to allow them all the config
     // options that a protocol steward has.
     if ($currentUser->id() != 1 || ($currentUser->id() == 1 && $protocol->isProtocolSteward(1))) {
-      $manageProjectsUrl = Url::fromRoute('mukurtu_local_contexts.manage_protocol_supported_projects', ['group' => $protocol->id()]);
+      $groupAliasConverter = \Drupal::service('mukurtu_local_contexts.group_alias_param_converter');
+      $protocolSlug = $groupAliasConverter->buildAliasSlug('protocol_alias', $protocol);
+
+      $manageProjectsUrl = Url::fromRoute('mukurtu_local_contexts.manage_protocol_supported_projects', ['group' => $protocolSlug]);
       if ($manageProjectsUrl->access()) {
         $links[] = [
           '#title' => $this->t('Manage Local Contexts Projects'),
@@ -87,21 +90,12 @@ class ManageProtocolsController extends ControllerBase {
         ];
       }
 
-      $protocolProjectDirectoryUrl = Url::fromRoute('mukurtu_local_contexts.protocol_projects_directory', ['group' => $protocol->id()]);
+      $protocolProjectDirectoryUrl = Url::fromRoute('mukurtu_local_contexts.protocol_projects_directory', ['group' => $protocolSlug]);
       if ($protocolProjectDirectoryUrl->access()) {
         $links[] = [
           '#title' => $this->t('Local Contexts Project Directory'),
           '#type' => 'link',
           '#url' => $protocolProjectDirectoryUrl,
-        ];
-      }
-
-      $manageProtocolProjectDirectoryUrl = Url::fromRoute('mukurtu_local_contexts.manage_protocol_project_directory', ['group' => $protocol->id()]);
-      if ($manageProtocolProjectDirectoryUrl->access()) {
-        $links[] = [
-          '#title' => $this->t('Manage Local Contexts Project Directory'),
-          '#type' => 'link',
-          '#url' => $manageProtocolProjectDirectoryUrl,
         ];
       }
     }

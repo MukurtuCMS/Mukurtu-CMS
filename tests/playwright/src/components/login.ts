@@ -35,7 +35,15 @@ export class Login {
       await altchaCheckbox.click();
     }
     await this.page.waitForTimeout(7000);
-    await loginButton.click({ timeout: 30000 });
+
+    // Wait for the post-login redirect to complete before returning:
+    // clicking the button alone doesn't wait for the resulting navigation,
+    // so callers could otherwise navigate away and cancel the login
+    // request before the session cookie is ever set.
+    await Promise.all([
+      this.page.waitForURL((url) => !url.pathname.startsWith('/user/login'), { timeout: 30000 }),
+      loginButton.click({ timeout: 30000 }),
+    ]);
   }
 
   public async logout(): Promise<void> {
