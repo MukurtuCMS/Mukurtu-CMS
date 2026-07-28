@@ -154,6 +154,27 @@ class LocalContextsSupportedProjectManager {
   }
 
   /**
+   * Get a map of Local Contexts label/notice compound keys to display names.
+   *
+   * @return string[]
+   *   Label/notice display names, keyed by their compound
+   *   "{project_id}:{id}:{display}" (labels) or "{project_id}:{type}:{display}"
+   *   (notices) key.
+   */
+  public function getLabelAndNoticeNames(): array {
+    $names = [];
+    foreach ($this->getAllLabels() as $label) {
+      $key = $label['project_id'] . ':' . $label['id'] . ':' . $label['display'];
+      $names[$key] = $label['name'];
+    }
+    foreach ($this->getAllNotices() as $notice) {
+      $key = $notice['project_id'] . ':' . $notice['type'] . ':' . $notice['display'];
+      $names[$key] = $notice['name'];
+    }
+    return $names;
+  }
+
+  /**
    * Get all site projects that have been added.
    *
    * @param bool $exclude_legacy

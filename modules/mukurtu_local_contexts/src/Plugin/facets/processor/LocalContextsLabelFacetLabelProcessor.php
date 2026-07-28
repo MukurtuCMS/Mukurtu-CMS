@@ -25,21 +25,17 @@ class LocalContextsLabelFacetLabelProcessor extends ProcessorPluginBase implemen
    */
   public function build(FacetInterface $facet, array $results) {
     $manager = \Drupal::service('mukurtu_local_contexts.supported_project_manager');
-
-    $names = [];
-    foreach ($manager->getAllLabels() as $label) {
-      $key = $label['project_id'] . ':' . $label['id'] . ':' . $label['display'];
-      $names[$key] = $label['name'] ?: $this->t('Unknown Label');
-    }
-    foreach ($manager->getAllNotices() as $notice) {
-      $key = $notice['project_id'] . ':' . $notice['type'] . ':' . $notice['display'];
-      $names[$key] = $notice['name'] ?: $this->t('Unknown Notice');
-    }
+    $names = $manager->getLabelAndNoticeNames();
 
     /** @var \Drupal\facets\Result\Result $result */
     foreach ($results as $result) {
       $rawValue = $result->getRawValue();
-      $result->setDisplayValue($names[$rawValue] ?? $this->t('Unknown Label'));
+      // Indexed values are already resolved display names (see
+      // LocalContextsEffectiveLabelsProcessor), so the lookup above is
+      // mostly a no-op for current content. Fall back to the raw value
+      // itself, rather than an "unknown" placeholder, since it is already
+      // human-readable text.
+      $result->setDisplayValue($names[$rawValue] ?? $rawValue);
     }
 
     return $results;

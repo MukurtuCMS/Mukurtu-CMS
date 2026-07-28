@@ -466,3 +466,28 @@ function mukurtu_local_contexts_update_40001(): void {
     ]);
   }
 }
+
+/**
+ * Reindex content so Local Contexts labels/notices are deduplicated by name.
+ *
+ * The Local Contexts effective labels Search API property now indexes each
+ * label/notice's display name instead of its raw project-scoped compound
+ * key, so a label added by multiple projects (e.g. "TK Attribution")
+ * facets/filters as a single entry instead of one per project. Existing
+ * indexed content still has the old compound-key values, so the affected
+ * indexes must be reindexed.
+ */
+function mukurtu_local_contexts_update_40002(): void {
+  // search_api is not a hard dependency of this module.
+  if (!\Drupal::moduleHandler()->moduleExists('search_api')) {
+    return;
+  }
+
+  $indexes = ['mukurtu_default_content_index', 'mukurtu_dictionary_index'];
+  foreach ($indexes as $index_id) {
+    $index = \Drupal\search_api\Entity\Index::load($index_id);
+    if ($index) {
+      $index->reindex();
+    }
+  }
+}

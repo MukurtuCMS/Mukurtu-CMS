@@ -6,6 +6,7 @@ use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\mukurtu_local_contexts\LocalContextsProject;
+use Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager;
 use Drupal\search_api\Attribute\SearchApiProcessor;
 use Drupal\search_api\Datasource\DatasourceInterface;
 use Drupal\search_api\Item\ItemInterface;
@@ -38,12 +39,15 @@ class LocalContextsEffectiveLabelsProcessor extends ProcessorPluginBase {
    *   The plugin implementation definition.
    * @param \Drupal\Core\Entity\EntityFieldManagerInterface $entityFieldManager
    *   The entity field manager.
+   * @param \Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager $localContextsProjectManager
+   *   The Local Contexts supported project manager.
    */
   public function __construct(
     array $configuration,
     $plugin_id,
     array $plugin_definition,
     protected readonly EntityFieldManagerInterface $entityFieldManager,
+    protected readonly LocalContextsSupportedProjectManager $localContextsProjectManager,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
   }
@@ -57,6 +61,7 @@ class LocalContextsEffectiveLabelsProcessor extends ProcessorPluginBase {
       $plugin_id,
       $plugin_definition,
       $container->get('entity_field.manager'),
+      $container->get('mukurtu_local_contexts.supported_project_manager'),
     );
   }
 
@@ -147,9 +152,23 @@ class LocalContextsEffectiveLabelsProcessor extends ProcessorPluginBase {
       }
     }
 
+    // Multiple Local Contexts projects can provide the same standardized
+    // label or notice (e.g. "TK Attribution"), each under its own
+    // project-scoped compound key. Index the resolved display name rather
+    // than the raw key so faceting/filtering shows one entry per distinct
+    // label/notice instead of one per project.
+    $names = $this->localContextsProjectManager->getLabelAndNoticeNames();
+    $resolvedNames = [];
     foreach (array_unique($keys) as $key) {
+      $name = $names[$key] ?? NULL;
+      if (!empty($name)) {
+        $resolvedNames[$name] = $name;
+      }
+    }
+
+    foreach ($resolvedNames as $name) {
       foreach ($fields as $field) {
-        $field->addValue($key);
+        $field->addValue($name);
       }
     }
   }

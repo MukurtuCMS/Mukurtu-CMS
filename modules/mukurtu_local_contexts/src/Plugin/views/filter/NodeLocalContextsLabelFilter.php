@@ -43,20 +43,32 @@ class NodeLocalContextsLabelFilter extends InOperator {
     $notices = $this->localContextsProjectManager->getAllNotices();
     $referencedLegacyIds = $this->localContextsProjectManager->getReferencedLegacyProjectIds();
 
-    $options = [];
+    // Multiple Local Contexts projects can add the same standardized label
+    // or notice (e.g. "TK Attribution"), each as its own project-scoped row.
+    // Group them by display name so they appear as a single option; the
+    // option's key carries every underlying compound key so selecting it
+    // still matches content tagged under any of the originating projects.
+    $groups = [];
     foreach ($labels as $label) {
       if ($this->localContextsProjectManager->isLegacyProjectId((string) $label['project_id']) && !in_array($label['project_id'], $referencedLegacyIds, TRUE)) {
         continue;
       }
       $key = $label['project_id'] . ':' . $label['id'] . ':' . $label['display'];
-      $options[$key] = $label['name'] ?: $this->t('Unknown Label');
+      $name = $label['name'] ?: (string) $this->t('Unknown Label');
+      $groups[$name][] = $key;
     }
     foreach ($notices as $notice) {
       if ($this->localContextsProjectManager->isLegacyProjectId((string) $notice['project_id']) && !in_array($notice['project_id'], $referencedLegacyIds, TRUE)) {
         continue;
       }
       $key = $notice['project_id'] . ':' . $notice['type'] . ':' . $notice['display'];
-      $options[$key] = $notice['name'] ?: $this->t('Unknown Notice');
+      $name = $notice['name'] ?: (string) $this->t('Unknown Notice');
+      $groups[$name][] = $key;
+    }
+
+    $options = [];
+    foreach ($groups as $name => $keys) {
+      $options[implode(',', $keys)] = $name;
     }
     asort($options);
     $this->valueOptions = $options;
@@ -70,20 +82,28 @@ class NodeLocalContextsLabelFilter extends InOperator {
 
     $this->ensureMyTable();
 
+    // Each selected value is a comma-joined group of one or more compound
+    // "{project_id}:{id}:{label|notice}" keys (see getValueOptions()), since
+    // the same label/notice can be provided by more than one project.
+    //
     // Selecting an entire Local Contexts Project applies all of that
     // project's labels/notices, so a node should also match if it has the
     // owning project applied directly, even if the label/notice itself was
     // never individually selected. The project ID is always the first
-    // segment of the compound "{project_id}:{id}:{label|notice}" value.
+    // segment of each compound value.
+    $rawValues = [];
     $projectIds = [];
-    foreach ((array) $this->value as $value) {
-      [$projectId] = explode(':', $value, 2);
-      $projectIds[$projectId] = $projectId;
+    foreach ((array) $this->value as $groupKey) {
+      foreach (explode(',', $groupKey) as $value) {
+        $rawValues[$value] = $value;
+        [$projectId] = explode(':', $value, 2);
+        $projectIds[$projectId] = $projectId;
+      }
     }
 
     $subquery = $this->database->select('node__field_local_contexts_labels_and_notices', 'l')
       ->fields('l', ['entity_id'])
-      ->condition('l.field_local_contexts_labels_and_notices_value', $this->value, 'IN')
+      ->condition('l.field_local_contexts_labels_and_notices_value', array_values($rawValues), 'IN')
       ->condition('l.deleted', 0);
 
     $projectSubquery = $this->database->select('node__field_local_contexts_projects', 'p')
