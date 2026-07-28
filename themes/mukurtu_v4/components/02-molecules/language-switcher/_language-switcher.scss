@@ -19,7 +19,10 @@
 }
 
 .language-switcher {
-  .links {
+  // Drupal's language_block plugin names this list dynamically after the
+  // active negotiation method (e.g. "language-switcher-language-url"), so
+  // target it structurally instead of relying on a fixed class name.
+  > ul {
     position: absolute;
     background-color: var(--color-white);
     padding-inline: 2em;
