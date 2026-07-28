@@ -108,7 +108,10 @@ class ManageCommunitiesController extends ControllerBase {
     // has no community managers, but we don't want to allow them all the config
     // options that a community manager has.
     if ($currentUser->id() != 1 || ($currentUser->id() == 1 && $community->isCommunityManager(1))) {
-      $manageProjectsUrl = Url::fromRoute('mukurtu_local_contexts.manage_community_supported_projects', ['group' => $community->id()]);
+      $groupAliasConverter = \Drupal::service('mukurtu_local_contexts.group_alias_param_converter');
+      $communitySlug = $groupAliasConverter->buildAliasSlug('community_alias', $community);
+
+      $manageProjectsUrl = Url::fromRoute('mukurtu_local_contexts.manage_community_supported_projects', ['group' => $communitySlug]);
       if ($manageProjectsUrl->access()) {
         $links[] = [
           '#title' => $this->t('Manage Local Contexts Projects'),
@@ -117,21 +120,12 @@ class ManageCommunitiesController extends ControllerBase {
         ];
       }
 
-      $communityProjectDirectoryUrl = Url::fromRoute('mukurtu_local_contexts.community_projects_directory', ['group' => $community->id()]);
+      $communityProjectDirectoryUrl = Url::fromRoute('mukurtu_local_contexts.community_projects_directory', ['group' => $communitySlug]);
       if ($communityProjectDirectoryUrl->access()) {
         $links[] = [
           '#title' => $this->t('Local Contexts Project Directory'),
           '#type' => 'link',
           '#url' => $communityProjectDirectoryUrl,
-        ];
-      }
-
-      $manageCommunityProjectDirectoryUrl = Url::fromRoute('mukurtu_local_contexts.manage_community_project_directory', ['group' => $community->id()]);
-      if ($manageCommunityProjectDirectoryUrl->access()) {
-        $links[] = [
-          '#title' => $this->t('Manage Local Contexts Project Directory'),
-          '#type' => 'link',
-          '#url' => $manageCommunityProjectDirectoryUrl,
         ];
       }
     }
