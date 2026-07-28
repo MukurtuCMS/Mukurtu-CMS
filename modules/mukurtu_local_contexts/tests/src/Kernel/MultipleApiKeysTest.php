@@ -32,6 +32,7 @@ class MultipleApiKeysTest extends KernelTestBase {
     'content_moderation',
     'workflows',
     'options',
+    'path_alias',
     'system',
     'text',
     'user',
