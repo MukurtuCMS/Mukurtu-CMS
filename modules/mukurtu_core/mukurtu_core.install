@@ -3144,3 +3144,19 @@ function mukurtu_core_update_40092(): void {
     \Drupal::service('module_installer')->install(['mukurtu_submissions']);
   }
 }
+
+/**
+ * Grants the anonymous and authenticated roles Drupal core's generic
+ * "access content" permission.
+ *
+ * Nodes and media already use mukurtu_protocol's own access control instead
+ * of this permission, so it was never granted - but core's unmodified
+ * taxonomy term access handler hard-requires it to view any term, which
+ * silently emptied every taxonomy-referencing entity reference widget
+ * (e.g. the Category field on mukurtu_submissions' public submission form)
+ * for anonymous and authenticated non-admin users.
+ */
+function mukurtu_core_update_40093(): void {
+  user_role_grant_permissions('anonymous', ['access content']);
+  user_role_grant_permissions('authenticated', ['access content']);
+}
