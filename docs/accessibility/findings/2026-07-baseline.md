@@ -155,6 +155,50 @@ First run against the recipe-seeded site surfaced:
 
 **Not yet fixed:** the reflow findings above. Logged for triage.
 
+## New finding (2026-07-28): third-party ALTCHA widget accessibility bugs
+
+Merging `origin/main`'s bot-protection work (ALTCHA/Honeypot/reCAPTCHA/Turnstile/CAPTCHA)
+brought two new WCAG violations, both inside the **ALTCHA** widget's own
+third-party markup, not Mukurtu code:
+
+- **`aria-hidden-focus` (serious):** the widget's "altcha.org" logo link is
+  `aria-hidden="true"` but remains keyboard-focusable — a screen reader user
+  tabs to a link the accessibility tree says doesn't exist.
+- **`color-contrast` (serious):** the widget's footer text and an adjacent
+  "opens in a new window" link fail contrast.
+
+**Where it shows up, and why that's odd:** `/user/login` (expected — it's the
+CAPTCHA), plus the **member**-view digital heritage item, dictionary word, and
+collection pages. Their anonymous counterparts and every other member page
+(my-content, personal-collections, account, home) are unaffected. The pattern
+doesn't point cleanly at "every page with a form" or "every protected route" —
+worth a follow-up to find which specific widget/form on those three content
+types is pulling ALTCHA in for logged-in users, before filing upstream.
+
+Full inventory otherwise still clean: this run also got `community-page`
+scanned anonymously for the first time (previously always skipped — see the
+recipe fix below), and it shows zero violations.
+
+**Not yet fixed** — logged for triage. Likely an upstream ALTCHA/Drupal
+module issue rather than something to patch locally; same "verify upstream
+before overriding" approach as the admin toolbar findings.
+
+## New finding (2026-07-28): recipe fix resolves the `/communities` mystery
+
+The `/communities` anomaly flagged back on 2026-07-23 (a public, published
+community not appearing on the anonymous listing) is now explained and fixed
+upstream, in the same push that merged `origin/main` into this branch: the
+listing's `CommunitiesPageController` reads community IDs from the
+`mukurtu_protocol.community_organization` config, not a database query.
+`accessibility_demo_content`'s recipe used to clear that config as a
+config action to unblock a fresh-install bug (see the recipe's README) — but
+config actions re-apply every time the recipe runs as a prerequisite of
+another one, so it was silently re-wiping `organization` (and therefore the
+`/communities` listing) on every downstream recipe application. Replaced with
+a one-time manual `drush config:set` documented in the recipe README, run
+once before recipes on a fresh install. Verified: `/communities` now lists the
+seeded community anonymously, and `community-page` scans clean (see above).
+
 ## Handed to the manual pass (axe "incomplete" queue)
 
 Contrast checks axe could not compute (backgrounds are images/overlays or
@@ -205,6 +249,11 @@ provide evidence — see the capability-testing section of the
    `.github/workflows/playwright.yml` per the charter's ratchet plan.
 8. **Triage:** fold manual results into the ACR — the remaining `not-evaluated`
    A/AA criteria are the gate for a publishable release ACR.
+9. **Investigate:** find which form/widget pulls the ALTCHA bot-protection
+   widget into the member-view digital heritage item, dictionary word, and
+   collection pages (not their anonymous counterparts, not other member
+   pages) — new finding above. Then decide whether to file the two ALTCHA
+   markup bugs upstream or override locally.
 
 ## Reproducing these scans
 
