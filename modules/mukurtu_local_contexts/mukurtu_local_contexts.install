@@ -94,6 +94,19 @@ function mukurtu_local_contexts_schema() {
         'not null' => TRUE,
         'default' => 0,
       ],
+      'not_found_since' => [
+        'description' => 'The Unix timestamp when the current unbroken run of not_found sync results began. NULL if not currently in such a run.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+      ],
+      'not_found_count' => [
+        'description' => 'Count of consecutive cron sync attempts that have returned not_found for this project. Reset to 0 on any other result.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ],
     ],
     'primary key' => ['id'],
     'indexes' => [
@@ -366,6 +379,74 @@ function mukurtu_local_contexts_schema() {
     ],
   ];
 
+  $schema['mukurtu_local_contexts_purge_log'] = [
+    'description' => 'Record of projects auto-purged after being confirmed deleted from the Local Contexts Hub, one row per scope (site/community/protocol) that supported the project at purge time.',
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => 'Purge log entry ID',
+      ],
+      'project_id' => [
+        'type' => 'varchar',
+        'length' => 36,
+        'not null' => TRUE,
+        'description' => 'Project ID',
+      ],
+      'title' => [
+        'type' => 'text',
+        'not null' => FALSE,
+        'description' => 'The project title, captured before the cache row was deleted.',
+      ],
+      'type' => [
+        'type' => 'varchar',
+        'length' => 256,
+        'not null' => TRUE,
+        'description' => 'Group entity type ID or site',
+      ],
+      'group_id' => [
+        'type' => 'int',
+        'size' => 'normal',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Group entity ID or 0 for site',
+      ],
+      'reason' => [
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => 'not_found',
+        'description' => 'Why the project was purged.',
+      ],
+      'nodes_affected' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Count of nodes queued for reference cleanup.',
+      ],
+      'purged' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'The Unix timestamp when the purge occurred.',
+      ],
+      'dismissed' => [
+        'type' => 'int',
+        'size' => 'tiny',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Whether this notice has been dismissed by an admin/steward.',
+      ],
+    ],
+    'primary key' => ['id'],
+    'indexes' => [
+      'scope' => ['type', 'group_id', 'dismissed'],
+      'project' => ['project_id'],
+    ],
+  ];
+
   return $schema;
 }
 
@@ -461,4 +542,108 @@ function mukurtu_local_contexts_update_10002() {
     'default' => 0,
     'description' => 'Whether the hub has marked this project as archived.',
   ]);
+}
+
+/**
+ * Add not_found streak tracking columns and the purge log table.
+ */
+function mukurtu_local_contexts_update_10003() {
+  $schema = \Drupal::database()->schema();
+
+  $schema->addField('mukurtu_local_contexts_projects', 'not_found_since', [
+    'type' => 'int',
+    'unsigned' => TRUE,
+    'not null' => FALSE,
+    'description' => 'The Unix timestamp when the current unbroken run of not_found sync results began. NULL if not currently in such a run.',
+  ]);
+  $schema->addField('mukurtu_local_contexts_projects', 'not_found_count', [
+    'type' => 'int',
+    'unsigned' => TRUE,
+    'not null' => TRUE,
+    'default' => 0,
+    'description' => 'Count of consecutive cron sync attempts that have returned not_found for this project. Reset to 0 on any other result.',
+  ]);
+
+  if (!$schema->tableExists('mukurtu_local_contexts_purge_log')) {
+    $schema->createTable('mukurtu_local_contexts_purge_log', [
+      'description' => 'Record of projects auto-purged after being confirmed deleted from the Local Contexts Hub, one row per scope (site/community/protocol) that supported the project at purge time.',
+      'fields' => [
+        'id' => [
+          'type' => 'serial',
+          'not null' => TRUE,
+          'description' => 'Purge log entry ID',
+        ],
+        'project_id' => [
+          'type' => 'varchar',
+          'length' => 36,
+          'not null' => TRUE,
+          'description' => 'Project ID',
+        ],
+        'title' => [
+          'type' => 'text',
+          'not null' => FALSE,
+          'description' => 'The project title, captured before the cache row was deleted.',
+        ],
+        'type' => [
+          'type' => 'varchar',
+          'length' => 256,
+          'not null' => TRUE,
+          'description' => 'Group entity type ID or site',
+        ],
+        'group_id' => [
+          'type' => 'int',
+          'size' => 'normal',
+          'not null' => TRUE,
+          'default' => 0,
+          'description' => 'Group entity ID or 0 for site',
+        ],
+        'reason' => [
+          'type' => 'varchar',
+          'length' => 32,
+          'not null' => TRUE,
+          'default' => 'not_found',
+          'description' => 'Why the project was purged.',
+        ],
+        'nodes_affected' => [
+          'type' => 'int',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+          'default' => 0,
+          'description' => 'Count of nodes queued for reference cleanup.',
+        ],
+        'purged' => [
+          'type' => 'int',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+          'description' => 'The Unix timestamp when the purge occurred.',
+        ],
+        'dismissed' => [
+          'type' => 'int',
+          'size' => 'tiny',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+          'default' => 0,
+          'description' => 'Whether this notice has been dismissed by an admin/steward.',
+        ],
+      ],
+      'primary key' => ['id'],
+      'indexes' => [
+        'scope' => ['type', 'group_id', 'dismissed'],
+        'project' => ['project_id'],
+      ],
+    ]);
+  }
+
+  // Set provisional defaults on existing sites. These are placeholders
+  // pending confirmation from the Local Contexts team on how long/how many
+  // consecutive not_found syncs should elapse before a project is treated
+  // as genuinely deleted from the hub.
+  $config = \Drupal::configFactory()->getEditable('mukurtu_local_contexts.settings');
+  if ($config->get('deleted_project_grace_period') === NULL) {
+    $config->set('deleted_project_grace_period', 604800);
+  }
+  if ($config->get('deleted_project_min_consecutive_failures') === NULL) {
+    $config->set('deleted_project_min_consecutive_failures', 3);
+  }
+  $config->save();
 }

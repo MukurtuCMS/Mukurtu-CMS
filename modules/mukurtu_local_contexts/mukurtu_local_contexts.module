@@ -174,6 +174,16 @@ function mukurtu_local_contexts_cron() {
           '@status' => $project->getStatus(),
           '@message' => $project->getStatusMessage(),
         ]);
+
+        // A not_found (404) result that has persisted long enough is
+        // treated as a genuine hub-side deletion, not a transient blip -
+        // purge the local copy. This never fires for unauthorized (401),
+        // forbidden (403), or a generic error - see isConfirmedDeleted().
+        if ($project->getStatus() === LocalContextsProject::STATUS_NOT_FOUND
+          && $project->isConfirmedDeleted()
+          && !$supported_project_manager->isLegacyProjectId($project_id)) {
+          $supported_project_manager->purgeDeletedProject($project_id);
+        }
       }
     }
   }

@@ -72,6 +72,18 @@ class LocalContextsProject extends LocalContextsHubBase {
    */
   protected bool $archived;
 
+  /**
+   * @var int|null Timestamp when the current unbroken run of not_found
+   *   sync results began. NULL if not currently in such a run.
+   */
+  protected ?int $notFoundSince;
+
+  /**
+   * @var int Count of consecutive cron sync attempts that have returned
+   *   not_found for this project.
+   */
+  protected int $notFoundCount;
+
   public function __construct($id) {
     parent::__construct();
     $this->id = $id;
@@ -84,6 +96,8 @@ class LocalContextsProject extends LocalContextsHubBase {
     $this->statusMessage = $project['status_message'] ?? NULL;
     $this->statusUpdated = $project['status_updated'] ?? NULL;
     $this->archived = !empty($project['archived']);
+    $this->notFoundSince = $project['not_found_since'] ?? NULL;
+    $this->notFoundCount = (int) ($project['not_found_count'] ?? 0);
   }
 
   /**
@@ -96,7 +110,7 @@ class LocalContextsProject extends LocalContextsHubBase {
     $query = $this->db
       ->select('mukurtu_local_contexts_projects', 'project')
       ->condition('project.id', $this->id)
-      ->fields('project', ['id', 'provider_id', 'title', 'privacy', 'updated', 'status', 'status_message', 'status_updated', 'archived']);
+      ->fields('project', ['id', 'provider_id', 'title', 'privacy', 'updated', 'status', 'status_message', 'status_updated', 'archived', 'not_found_since', 'not_found_count']);
     $result = $query->execute();
     return $result->fetchAssoc();
   }
@@ -127,6 +141,10 @@ class LocalContextsProject extends LocalContextsHubBase {
       // The exact field name for the hub's archive flag should be confirmed
       // against a live response; both known candidate names are checked.
       $this->archived = (bool) ($project['archived'] ?? $project['is_archived'] ?? FALSE);
+      // A successful fetch means the project is not (or no longer) deleted,
+      // so any not_found streak is over.
+      $this->notFoundSince = NULL;
+      $this->notFoundCount = 0;
 
       // Provider ID seems to sometimes be an array, sometimes a string.
       $provider_id = is_array($project['external_ids']['providers_id']) ? reset($project['external_ids']['providers_id']) : $project['external_ids']['providers_id'];
@@ -142,6 +160,8 @@ class LocalContextsProject extends LocalContextsHubBase {
         'status_message' => $this->statusMessage,
         'status_updated' => $this->statusUpdated,
         'archived' => (int) $this->archived,
+        'not_found_since' => $this->notFoundSince,
+        'not_found_count' => $this->notFoundCount,
       ];
 
       $query = $this->db->update('mukurtu_local_contexts_projects')
@@ -202,12 +222,28 @@ class LocalContextsProject extends LocalContextsHubBase {
     $this->statusMessage = $project['detail'] ?? ($this->lcApi->getErrorMessage() ?: "HTTP {$http_code}");
     $this->statusUpdated = $this->requestTime;
 
+    // Only a not_found (404) result extends the not_found streak used to
+    // confirm a genuine hub-side deletion (see isConfirmedDeleted()). A
+    // 401/403/error result breaks the streak the same way a successful
+    // fetch would - it is a different failure mode, not further evidence
+    // of deletion, so it must never be allowed to accumulate toward one.
+    if ($this->status === self::STATUS_NOT_FOUND) {
+      $this->notFoundSince = $this->notFoundSince ?? $this->requestTime;
+      $this->notFoundCount++;
+    }
+    else {
+      $this->notFoundSince = NULL;
+      $this->notFoundCount = 0;
+    }
+
     $this->db->update('mukurtu_local_contexts_projects')
       ->condition('id', $id)
       ->fields([
         'status' => $this->status,
         'status_message' => $this->statusMessage,
         'status_updated' => $this->statusUpdated,
+        'not_found_since' => $this->notFoundSince,
+        'not_found_count' => $this->notFoundCount,
       ])
       ->execute();
 
@@ -520,6 +556,40 @@ class LocalContextsProject extends LocalContextsHubBase {
    */
   public function isNotAvailable(): bool {
     return $this->status !== NULL && $this->status !== self::STATUS_ACTIVE;
+  }
+
+  public function getNotFoundSince(): ?int {
+    return $this->notFoundSince;
+  }
+
+  public function getNotFoundCount(): int {
+    return $this->notFoundCount;
+  }
+
+  /**
+   * Whether this project has been confirmed as genuinely deleted from the
+   * Local Contexts Hub, as opposed to a transient not_found result.
+   *
+   * This is TRUE only for an unbroken run of not_found (404) sync results
+   * that has lasted at least the configured grace period AND reached the
+   * configured minimum number of consecutive attempts. It is never TRUE for
+   * unauthorized (401), forbidden (403), or a generic error - those are
+   * recoverable states and must never be treated as a deletion signal, no
+   * matter how long they persist.
+   *
+   * @return bool
+   */
+  public function isConfirmedDeleted(): bool {
+    if ($this->status !== self::STATUS_NOT_FOUND || $this->notFoundSince === NULL) {
+      return FALSE;
+    }
+
+    $config = $this->configFactory->get(self::SETTINGS_CONFIG_KEY);
+    $gracePeriod = (int) ($config->get('deleted_project_grace_period') ?? 604800);
+    $minConsecutiveFailures = (int) ($config->get('deleted_project_min_consecutive_failures') ?? 3);
+
+    $elapsed = $this->requestTime - $this->notFoundSince;
+    return $elapsed >= $gracePeriod && $this->notFoundCount >= $minConsecutiveFailures;
   }
 
   public function inUse() : bool {

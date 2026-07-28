@@ -40,6 +40,13 @@ abstract class ManageSupportedProjectsBase extends FormBase {
     $api_key = $form_state->getValue('api_key');
     $group = $form_state->get('group');
 
+    $scope_type = $group ? $group->getEntityTypeId() : 'site';
+    $scope_group_id = $group ? (int) $group->id() : 0;
+    $purge_notices = $this->supportedProjectManager->getUndismissedPurgeNotices($scope_type, $scope_group_id);
+    if ($purge_notices) {
+      $form['purge_notice'] = $this->buildPurgeNoticeBanner($purge_notices);
+    }
+
     // Populate the API key from the group or site settings if available.
     if (empty($api_key)) {
       if ($group) {
@@ -270,6 +277,61 @@ abstract class ManageSupportedProjectsBase extends FormBase {
         '#attributes' => ['title' => $tooltip],
       ],
     ];
+  }
+
+  /**
+   * Build a dismissible warning banner listing projects auto-purged from
+   * this scope because they were confirmed deleted on the Local Contexts
+   * Hub.
+   *
+   * @param array $purge_notices
+   *   Undismissed purge log rows for the current scope, keyed by log entry
+   *   ID (as returned by
+   *   LocalContextsSupportedProjectManager::getUndismissedPurgeNotices()).
+   *
+   * @return array
+   *   A render array for the banner.
+   */
+  protected function buildPurgeNoticeBanner(array $purge_notices): array {
+    return [
+      '#type' => 'container',
+      '#attributes' => ['class' => ['messages', 'messages--warning']],
+      'heading' => [
+        '#type' => 'html_tag',
+        '#tag' => 'p',
+        '#value' => $this->t('The following project(s) were automatically removed because they were deleted from the Local Contexts Hub. Any content that referenced them has had that reference removed.'),
+      ],
+      'list' => [
+        '#theme' => 'item_list',
+        '#items' => array_map(
+          fn($notice) => $this->t('@title (@id) - removed @date', [
+            '@title' => $notice['title'] ?: $notice['project_id'],
+            '@id' => $notice['project_id'],
+            '@date' => \Drupal::service('date.formatter')->format($notice['purged'], 'short'),
+          ]),
+          $purge_notices
+        ),
+      ],
+      'dismiss' => [
+        '#type' => 'submit',
+        '#value' => $this->t('Dismiss'),
+        '#name' => 'dismiss_purge_notice',
+        '#submit' => ['::dismissPurgeNotices'],
+        '#validate' => [],
+        '#limit_validation_errors' => [],
+        '#purge_notice_ids' => array_keys($purge_notices),
+      ],
+    ];
+  }
+
+  /**
+   * Submit handler for dismissing the purge notice banner.
+   */
+  public function dismissPurgeNotices(array &$form, FormStateInterface $form_state) {
+    $element = $form_state->getTriggeringElement();
+    $ids = $element['#purge_notice_ids'] ?? [];
+    $this->supportedProjectManager->dismissPurgeNotices($ids);
+    $form_state->setRebuild();
   }
 
   /**

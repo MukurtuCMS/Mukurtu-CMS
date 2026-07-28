@@ -4,3 +4,8 @@ site_projects_directory_description:
   format: null
 hub_refresh_interval: 86400
 hub_endpoint: 'https://sandbox.localcontextshub.org/api/v2/'
+# Provisional defaults, pending confirmation from the Local Contexts team on
+# how long/how many consecutive not_found syncs should elapse before a
+# project is treated as genuinely (not transiently) deleted from the hub.
+deleted_project_grace_period: 604800
+deleted_project_min_consecutive_failures: 3
