@@ -450,16 +450,25 @@ function mukurtu_local_contexts_update_10001() {
     ->execute()
     ->fetchAll();
 
+  // Read each group's key straight from its data table rather than through
+  // the Entity API. The field's code definition has already moved on to the
+  // unlimited-cardinality shape landed alongside these update hooks, so
+  // loading the entity and calling ->get() would make Drupal query for a
+  // dedicated field table that update_10002() hasn't created yet.
   $entity_type_manager = \Drupal::entityTypeManager();
   foreach ($groups as $row) {
     if (!$entity_type_manager->hasDefinition($row->type)) {
       continue;
     }
-    $group = $entity_type_manager->getStorage($row->type)->load($row->group_id);
-    if (!$group || !$group->hasField('field_local_contexts_api_key')) {
+    $data_table = $entity_type_manager->getDefinition($row->type)->getDataTable();
+    if (!$data_table || !$schema->fieldExists($data_table, 'field_local_contexts_api_key')) {
       continue;
     }
-    $api_key = $group->get('field_local_contexts_api_key')->value;
+    $api_key = $db->select($data_table, 'efd')
+      ->fields('efd', ['field_local_contexts_api_key'])
+      ->condition('id', $row->group_id)
+      ->execute()
+      ->fetchField();
     if (empty($api_key)) {
       continue;
     }
@@ -479,6 +488,8 @@ function mukurtu_local_contexts_update_10001() {
  * as the first (only) item in the new list-based storage.
  */
 function mukurtu_local_contexts_update_10002() {
+  $db = \Drupal::database();
+  $schema = $db->schema();
   $entity_definition_update_manager = \Drupal::entityDefinitionUpdateManager();
   $entity_type_manager = \Drupal::entityTypeManager();
 
@@ -489,14 +500,21 @@ function mukurtu_local_contexts_update_10002() {
     }
 
     // Preserve existing single values before uninstalling the field storage.
+    // This has to be a direct query against the data table rather than the
+    // Entity API: the field's code definition is already the new
+    // unlimited-cardinality one, so loading the entity and calling ->get()
+    // would make Drupal query the dedicated field table that gets created
+    // below, before it exists.
     $storage = $entity_type_manager->getStorage($entity_type_id);
-    $ids = $storage->getQuery()->accessCheck(FALSE)->execute();
+    $data_table = $entity_type_manager->getDefinition($entity_type_id)->getDataTable();
     $existing_values = [];
-    foreach ($storage->loadMultiple($ids) as $entity) {
-      $value = $entity->get('field_local_contexts_api_key')->value;
-      if (!empty($value)) {
-        $existing_values[$entity->id()] = $value;
-      }
+    if ($data_table && $schema->fieldExists($data_table, 'field_local_contexts_api_key')) {
+      $existing_values = $db->select($data_table, 'efd')
+        ->fields('efd', ['id', 'field_local_contexts_api_key'])
+        ->isNotNull('field_local_contexts_api_key')
+        ->condition('field_local_contexts_api_key', '', '<>')
+        ->execute()
+        ->fetchAllKeyed();
     }
 
     $entity_definition_update_manager->uninstallFieldStorageDefinition($storage_definition);
