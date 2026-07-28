@@ -2,6 +2,7 @@
 
 namespace Drupal\mukurtu_local_contexts\ParamConverter;
 
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\ParamConverter\ParamConverterInterface;
 use Drupal\path_alias\AliasManagerInterface;
@@ -70,6 +71,23 @@ class GroupAliasParamConverter implements ParamConverterInterface {
    */
   public function applies($definition, $name, Route $route) {
     return !empty($definition['type']) && isset(static::TYPE_MAP[$definition['type']]);
+  }
+
+  /**
+   * Builds the human-readable alias slug for a community/protocol entity.
+   *
+   * Falls back to a numeric-ID-based slug for an entity that doesn't have an
+   * alias yet, mirroring the fallback used in self::convert().
+   */
+  public function buildAliasSlug(string $type, ContentEntityInterface $entity): string {
+    $info = static::TYPE_MAP[$type] ?? NULL;
+    if (!$info) {
+      return (string) $entity->id();
+    }
+
+    $system_path = $info['canonical_prefix'] . $entity->id();
+    $alias = $this->aliasManager->getAliasByPath($system_path);
+    return ($alias === $system_path) ? $info['alias_prefix'] . $entity->id() : $alias;
   }
 
 }

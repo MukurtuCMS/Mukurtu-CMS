@@ -57,7 +57,7 @@ mukurtu_local_contexts.manage_community_supported_projects:
   options:
     parameters:
       group:
-        type: entity:community
+        type: community_alias
 
 ##
 # Protocol LC projects (front-end):
@@ -87,5 +87,5 @@ mukurtu_local_contexts.manage_protocol_supported_projects:
   options:
     parameters:
       group:
-        type: entity:protocol
+        type: protocol_alias
 

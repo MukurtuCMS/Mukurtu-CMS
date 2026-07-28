@@ -267,6 +267,17 @@ abstract class ManageSupportedProjectsBase extends FormBase {
   /**
    * {@inheritdoc}
    */
+  public function validateForm(array &$form, FormStateInterface $form_state) {
+    $selected_projects = array_filter($form_state->getValue('projects'));
+    $action = $form_state->getValue('action');
+    if ($selected_projects && !in_array($action, ['add', 'delete'], TRUE)) {
+      $form_state->setErrorByName('action', $this->t('Select an action to apply.'));
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $selected_projects = array_filter($form_state->getValue('projects'));
     $api_key = $form_state->getValue('api_key');
@@ -288,8 +299,6 @@ abstract class ManageSupportedProjectsBase extends FormBase {
       case 'delete':
         $this->submitDelete($all_projects, $selected_projects, $group);
         break;
-      default:
-        $form_state->setErrorByName('action', $this->t('Select an action to apply.'));
     }
   }
 
