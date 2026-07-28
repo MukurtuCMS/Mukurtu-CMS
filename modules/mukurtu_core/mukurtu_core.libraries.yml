@@ -73,3 +73,11 @@ account-settings:
   dependencies:
     - core/drupal
     - core/once
+
+user-profile-back-to-site-link:
+  version: 1.x
+  js:
+    js/user-profile-back-to-site-link.js: {}
+  dependencies:
+    - core/drupal
+    - core/once

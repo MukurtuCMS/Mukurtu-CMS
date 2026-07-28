@@ -32,4 +32,24 @@ class ThemeHooks {
     }
   }
 
+  /**
+   * Implements hook_page_attachments().
+   *
+   * Gin's gin_preprocess_breadcrumb() points the "Back to site" link at the
+   * current route's entity canonical URL when accessible. On
+   * entity.user.canonical that URL is this page itself, so when
+   * UserProfileAdminThemeNegotiator forces the admin theme there, the link
+   * becomes a self-referential no-op instead of returning anywhere useful.
+   * Attach a behavior that corrects the href client-side for exactly that
+   * case; see js/user-profile-back-to-site-link.js.
+   */
+  #[Hook('page_attachments')]
+  public function pageAttachments(array &$attachments): void {
+    /** @var \Drupal\mukurtu_core\Theme\UserProfileAdminThemeNegotiator $negotiator */
+    $negotiator = \Drupal::service('mukurtu_core.user_profile_admin_theme_negotiator');
+    if ($negotiator->applies(\Drupal::routeMatch())) {
+      $attachments['#attached']['library'][] = 'mukurtu_core/user-profile-back-to-site-link';
+    }
+  }
+
 }
