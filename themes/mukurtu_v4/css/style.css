@@ -2359,9 +2359,6 @@ label.form-required::after {
 .local-contexts-label-widget__group.is-disabled .form-checkboxes {
   opacity: 0.5;
 }
-.local-contexts-label-widget__group.is-disabled summary {
-  cursor: not-allowed;
-}
 
 .local-tasks {
   display: grid;

@@ -11,10 +11,11 @@
           return;
         }
 
+        // role="status" implies an implicit aria-live="polite" region, so no
+        // explicit aria-live attribute is needed here.
         const status = document.createElement('div');
         status.className = 'visually-hidden';
         status.setAttribute('role', 'status');
-        status.setAttribute('aria-live', 'polite');
         labelsWrapper.insertAdjacentElement('afterbegin', status);
 
         const syncState = (checkbox) => {

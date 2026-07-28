@@ -22,14 +22,11 @@
 
   // Fade only the disabled checkboxes/labels (exempt from AA contrast as
   // inactive UI), not the summary — its title text stays a live, operable
-  // disclosure control and must keep AA-compliant contrast.
+  // disclosure control and must keep AA-compliant contrast and its normal
+  // pointer cursor.
   &.is-disabled {
     .form-checkboxes {
       opacity: 0.5;
-    }
-
-    summary {
-      cursor: not-allowed;
     }
   }
 }
