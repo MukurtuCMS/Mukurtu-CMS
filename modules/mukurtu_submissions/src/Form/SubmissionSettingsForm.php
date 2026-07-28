@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Drupal\mukurtu_submissions\Form;
 
 use Drupal\Core\Entity\EntityDisplayRepositoryInterface;
+use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Url;
 use Drupal\mukurtu_submissions\Entity\SubmissionSettingsInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -30,6 +30,7 @@ class SubmissionSettingsForm extends EntityForm {
     protected EntityTypeBundleInfoInterface $entityBundleInfo,
     protected EntityTypeManagerInterface $entityTypeManagerService,
     protected EntityDisplayRepositoryInterface $entityDisplayRepository,
+    protected EntityFieldManagerInterface $entityFieldManager,
   ) {}
 
   /**
@@ -40,6 +41,7 @@ class SubmissionSettingsForm extends EntityForm {
       $container->get('entity_type.bundle.info'),
       $container->get('entity_type.manager'),
       $container->get('entity_display.repository'),
+      $container->get('entity_field.manager'),
     );
   }
 
@@ -92,7 +94,7 @@ class SubmissionSettingsForm extends EntityForm {
       '#default_value' => $this->entity->get('target_bundle'),
       '#required' => TRUE,
       '#disabled' => !$this->entity->isNew(),
-      '#description' => $this->t('The content type this form submits. Field visibility and widgets are configured via that content type\'s "Submission" form display (Manage Form Display).'),
+      '#description' => $this->t('The content type this form submits.'),
     ];
 
     $form['target_entity_type_id'] = [
@@ -101,19 +103,26 @@ class SubmissionSettingsForm extends EntityForm {
     ];
 
     // Only shown once a bundle is actually assigned - a new, unsaved entity
-    // has none yet, and there's nothing to link to until it's saved.
+    // has none yet, so there's nothing to build this list from until it's
+    // saved (auto-provisioning seeds every field as included at that point;
+    // see ensureSubmissionFormDisplay()).
     if (!$this->entity->isNew()) {
-      $manage_form_display_url = Url::fromRoute('entity.entity_form_display.node.form_mode', [
-        'node_type' => $this->entity->getTargetBundle(),
-        'form_mode_name' => 'submission',
-      ]);
-      if ($manage_form_display_url->access($this->currentUser())) {
-        $form['manage_form_display'] = [
-          '#type' => 'link',
-          '#title' => $this->t('Manage fields shown on this form'),
-          '#url' => $manage_form_display_url,
-        ];
-      }
+      $entity_type_id = $this->entity->getTargetEntityTypeId();
+      $bundle = $this->entity->getTargetBundle();
+      $field_options = $this->getIncludableFieldOptions($entity_type_id, $bundle);
+      $display = $this->entityDisplayRepository->getFormDisplay($entity_type_id, $bundle, 'submission');
+      $included_fields = array_filter(
+        array_keys($field_options),
+        fn (string $field_name) => (bool) $display->getComponent($field_name),
+      );
+
+      $form['included_fields'] = [
+        '#type' => 'checkboxes',
+        '#title' => $this->t('Fields to include on this form'),
+        '#description' => $this->t("Choose which of this content type's fields appear on the public submission form. Widget type and field order can still be adjusted via Manage Form Display if needed."),
+        '#options' => $field_options,
+        '#default_value' => $included_fields,
+      ];
     }
 
     $form['allowed_media_types'] = [
@@ -157,6 +166,28 @@ class SubmissionSettingsForm extends EntityForm {
   }
 
   /**
+   * Gets the target bundle's own fields, keyed by name, that a manager may
+   * choose to include on the public submission form.
+   *
+   * Scoped to "field_"-prefixed fields only - the content type's own custom
+   * fields - excluding PublicSubmissionForm::EXCLUDED_FIELDS (which stay
+   * hidden regardless of this choice). Base/administrative fields like
+   * title, uid, or moderation_state are never offered here: title can't
+   * meaningfully be excluded (Drupal requires it), and the rest are
+   * permanently excluded already.
+   */
+  protected function getIncludableFieldOptions(string $entity_type_id, string $bundle): array {
+    $options = [];
+    foreach ($this->entityFieldManager->getFieldDefinitions($entity_type_id, $bundle) as $field_name => $definition) {
+      if (!str_starts_with($field_name, 'field_') || in_array($field_name, PublicSubmissionForm::EXCLUDED_FIELDS, TRUE)) {
+        continue;
+      }
+      $options[$field_name] = $definition->getLabel();
+    }
+    return $options;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state): void {
@@ -182,6 +213,9 @@ class SubmissionSettingsForm extends EntityForm {
     $result = parent::save($form, $form_state);
     if ($result == SAVED_NEW) {
       $this->ensureSubmissionFormDisplay();
+    }
+    elseif ($form_state->hasValue('included_fields')) {
+      $this->syncIncludedFields($form_state);
     }
 
     $message_args = ['%label' => $this->entity->label()];
@@ -225,6 +259,33 @@ class SubmissionSettingsForm extends EntityForm {
 
     foreach (PublicSubmissionForm::EXCLUDED_FIELDS as $excluded_field) {
       $display->removeComponent($excluded_field);
+    }
+    $display->save();
+  }
+
+  /**
+   * Applies the "Fields to include on this form" checklist to the target
+   * bundle's "submission" form display: a checked field becomes visible
+   * (reusing its widget from the bundle's "default" form display if it
+   * isn't already a component here), an unchecked field is hidden.
+   */
+  protected function syncIncludedFields(FormStateInterface $form_state): void {
+    assert($this->entity instanceof SubmissionSettingsInterface);
+    $entity_type_id = $this->entity->getTargetEntityTypeId();
+    $bundle = $this->entity->getTargetBundle();
+    $display = $this->entityDisplayRepository->getFormDisplay($entity_type_id, $bundle, 'submission');
+    $default_display = $this->entityDisplayRepository->getFormDisplay($entity_type_id, $bundle, 'default');
+    $included = array_filter($form_state->getValue('included_fields') ?? []);
+
+    foreach ($this->getIncludableFieldOptions($entity_type_id, $bundle) as $field_name => $label) {
+      if (isset($included[$field_name])) {
+        if (!$display->getComponent($field_name)) {
+          $display->setComponent($field_name, $default_display->getComponent($field_name) ?: []);
+        }
+      }
+      else {
+        $display->removeComponent($field_name);
+      }
     }
     $display->save();
   }
