@@ -30,9 +30,29 @@ class PublicSubmissionForm extends FormBase {
 
   /**
    * Fields never exposed on the public submission form, regardless of how
-   * the target bundle's "submission" form display is configured.
+   * the target bundle's "submission" form display is configured. Includes
+   * both protocol/group-membership fields a submitter should never set,
+   * and administrative base fields (authoring info, revision log, URL
+   * alias, moderation state) that EntityDisplayBase::init() re-adds with
+   * their own default widget whenever a form mode leaves them unmentioned
+   * in "content"/"hidden" - most of those default widgets are themselves
+   * gated by field-level access checks that hide them from a truly
+   * unprivileged anonymous visitor, but not from an authenticated
+   * submitter or reviewer previewing the form, so they must be stripped
+   * unconditionally here rather than relying on per-user field access.
    */
-  const EXCLUDED_FIELDS = ['field_cultural_protocols', 'og_audience'];
+  const EXCLUDED_FIELDS = [
+    'field_cultural_protocols',
+    'og_audience',
+    'uid',
+    'created',
+    'status',
+    'revision_log',
+    'path',
+    'moderation_state',
+    'langcode',
+    'url_redirects',
+  ];
 
   /**
    * The entity being built by this form.

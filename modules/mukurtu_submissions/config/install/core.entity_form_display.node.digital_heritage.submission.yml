@@ -77,6 +77,14 @@ content:
       parent_selection: 1
     third_party_settings: {  }
 hidden:
+  uid: true
+  created: true
+  status: true
+  revision_log: true
+  path: true
+  moderation_state: true
+  langcode: true
+  url_redirects: true
   field_content_type: true
   field_coverage: true
   field_coverage_description: true

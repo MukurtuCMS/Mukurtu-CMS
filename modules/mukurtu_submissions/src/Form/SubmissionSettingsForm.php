@@ -202,6 +202,15 @@ class SubmissionSettingsForm extends EntityForm {
    * unsaved "submission" mode with every field, same as it would for any
    * other not-yet-configured form mode - minus the fields the public form
    * never shows regardless of bundle.
+   *
+   * Note: "revision_log" doesn't declare itself form-display-configurable
+   * (unlike uid/created/status/path/moderation_state, which do), so Drupal
+   * silently re-adds it as visible on every load regardless of what's
+   * hidden here or in Field UI - PublicSubmissionForm::buildForm() strips
+   * it again at render time, which is what actually keeps it off the
+   * public form; the removeComponent() call here mainly keeps this
+   * display's saved config consistent with what PublicSubmissionForm
+   * enforces for every other excluded field.
    */
   protected function ensureSubmissionFormDisplay(): void {
     assert($this->entity instanceof SubmissionSettingsInterface);
