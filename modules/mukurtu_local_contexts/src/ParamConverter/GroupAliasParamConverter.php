@@ -76,8 +76,10 @@ class GroupAliasParamConverter implements ParamConverterInterface {
   /**
    * Builds the human-readable alias slug for a community/protocol entity.
    *
-   * Falls back to a numeric-ID-based slug for an entity that doesn't have an
-   * alias yet, mirroring the fallback used in self::convert().
+   * Returns the bare slug segment expected as the {group} route parameter
+   * value (self::convert() re-adds the alias prefix itself before doing the
+   * alias lookup) - falls back to the numeric ID for an entity that doesn't
+   * have an alias yet, mirroring the fallback used in self::convert().
    */
   public function buildAliasSlug(string $type, ContentEntityInterface $entity): string {
     $info = static::TYPE_MAP[$type] ?? NULL;
@@ -87,7 +89,11 @@ class GroupAliasParamConverter implements ParamConverterInterface {
 
     $system_path = $info['canonical_prefix'] . $entity->id();
     $alias = $this->aliasManager->getAliasByPath($system_path);
-    return ($alias === $system_path) ? $info['alias_prefix'] . $entity->id() : $alias;
+    if ($alias === $system_path) {
+      return (string) $entity->id();
+    }
+
+    return ltrim(substr($alias, strlen($info['alias_prefix'])), '/');
   }
 
 }
