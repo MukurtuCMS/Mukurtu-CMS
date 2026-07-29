@@ -5,8 +5,10 @@ namespace Drupal\mukurtu_import\Controller;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Datetime\DateFormatterInterface;
+use Drupal\message\Entity\Message;
 use Drupal\message\MessageInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Returns the response for the mukurtu_import.batch_report route.
@@ -32,6 +34,28 @@ class BatchReportController extends ControllerBase {
   }
 
   /**
+   * Loads the message for the given route parameter.
+   *
+   * Deliberately not an upcast entity route parameter (no
+   * `type: entity:message` in the route) -- Gin theme's breadcrumb
+   * preprocessing (includes/breadcrumb.theme's _gin_get_route_entity())
+   * treats any route parameter typed as an entity as "the content this
+   * admin page is about" and points its "Back to site" link straight at
+   * that entity's own canonical page. For a Message entity, that's
+   * /message/{id}, a page no one is meant to browse directly (it renders
+   * every text delta of the template concatenated, which is why it looked
+   * like a duplicated report). Loading manually here keeps that link
+   * working normally instead.
+   */
+  protected function loadMessage(string $message): MessageInterface {
+    $entity = Message::load($message);
+    if (!$entity instanceof MessageInterface || $entity->bundle() !== 'mukurtu_batch_import_report') {
+      throw new NotFoundHttpException();
+    }
+    return $entity;
+  }
+
+  /**
    * Builds the report page for a single batch import, keyed by message ID.
    *
    * The mukurtu_batch_import_report message created at the end of a batch
@@ -40,7 +64,8 @@ class BatchReportController extends ControllerBase {
    * the per-migration breakdown and any error messages on the message's
    * field_import_results field for exactly this purpose.
    */
-  public function build(MessageInterface $message) {
+  public function build(string $message) {
+    $message = $this->loadMessage($message);
     $count = $message->hasField('field_number_imported') ? $message->get('field_number_imported')->value : 0;
 
     $build['summary'] = [
@@ -69,7 +94,8 @@ class BatchReportController extends ControllerBase {
   /**
    * Title callback for the mukurtu_import.batch_report route.
    */
-  public function title(MessageInterface $message) {
+  public function title(string $message) {
+    $message = $this->loadMessage($message);
     return $this->t('Batch import report: @date', [
       '@date' => $this->dateFormatter->format($message->getCreatedTime()),
     ]);
@@ -83,9 +109,10 @@ class BatchReportController extends ControllerBase {
    * entities (which may contain content not everyone should see) just
    * because the visitor has the generic "access mukurtu import" permission.
    */
-  public function access(MessageInterface $message) {
+  public function access(string $message) {
+    $entity = Message::load($message);
     return AccessResult::allowedIf(
-      $message->bundle() === 'mukurtu_batch_import_report' && $this->currentUser()->hasPermission('access mukurtu import')
+      $entity instanceof MessageInterface && $entity->bundle() === 'mukurtu_batch_import_report' && $this->currentUser()->hasPermission('access mukurtu import')
     );
   }
 

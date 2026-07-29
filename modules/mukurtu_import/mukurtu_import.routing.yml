@@ -97,7 +97,6 @@ mukurtu_import.batch_report:
     _title_callback: '\Drupal\mukurtu_import\Controller\BatchReportController::title'
   requirements:
     _custom_access: '\Drupal\mukurtu_import\Controller\BatchReportController::access'
+    message: '\d+'
   options:
-    parameters:
-      message:
-        type: entity:message
+    _admin_route: TRUE
