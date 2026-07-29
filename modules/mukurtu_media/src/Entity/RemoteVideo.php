@@ -24,7 +24,7 @@ class RemoteVideo extends Media implements RemoteVideoInterface, CulturalProtoco
 
     $definitions['field_media_oembed_video'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Video URL'))
-      ->setDescription(t('A video hosted on Vimeo or YouTube. The remote video will stream using Vimeo or YouTube\'s media player, and is not copied to the site. Note that while the media asset will be managed by cultural protocols, the originating website may not have similar privacy settings.	</br>Enter the Vimeo or YouTube URL.'))
+      ->setDescription(t('A video hosted on Vimeo or YouTube. The remote video will stream using Vimeo or YouTube\'s media player, and is not copied to the site. Note that while the media asset will be managed by cultural protocols, the originating website may not have similar privacy settings.	<br />Enter the Vimeo or YouTube URL.'))
       ->setDefaultValue('')
       ->setSettings([
         'max_length' => 255
@@ -38,7 +38,7 @@ class RemoteVideo extends Media implements RemoteVideoInterface, CulturalProtoco
 
     $definitions['field_media_tags'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Media Tags'))
-      ->setDescription(t('Media tags are used to label media assets to help find them within the media library. They are also used to trigger taxonomy based media content warnings.	</br>Include as many media tags as needed. Select from existing media tags or add new ones.'))
+      ->setDescription(t('Media tags are used to label media assets to help find them within the media library. They are also used to trigger taxonomy based media content warnings.	<br />Include as many media tags as needed. Select from existing media tags or add new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -63,7 +63,7 @@ class RemoteVideo extends Media implements RemoteVideoInterface, CulturalProtoco
 
     $definitions['field_people'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('People'))
-      ->setDescription(t('A person or people present or referenced in the document. This is used to trigger deceased person media content warnings.	</br>As you type, names of existing people will be displayed. </br>Include as many media tags as needed. Select from existing media tags or add new ones.'))
+      ->setDescription(t('A person or people present or referenced in the document. This is used to trigger deceased person media content warnings.	<br />As you type, names of existing people will be displayed. <br />Include as many media tags as needed. Select from existing media tags or add new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -88,7 +88,7 @@ class RemoteVideo extends Media implements RemoteVideoInterface, CulturalProtoco
 
     $definitions['field_thumbnail'] = BaseFieldDefinition::create('image')
       ->setLabel(t('Thumbnail'))
-      ->setDescription(t('Videos are usually represented by an interactive video player, with a thumbnail image used in certain contexts. When the thumbnail image is used, you can provide your own image instead of the generic thumbnail. A thumbnail image does not usually need to be provided.	</br>Select "Choose File" to upload a thumbnail image.'))
+      ->setDescription(t('Videos are usually represented by an interactive video player, with a thumbnail image used in certain contexts. When the thumbnail image is used, you can provide your own image instead of the generic thumbnail. A thumbnail image does not usually need to be provided.	<br />Select "Choose File" to upload a thumbnail image.'))
       ->setSettings([
         'alt_field' => TRUE,
         'alt_field_required' => TRUE,
