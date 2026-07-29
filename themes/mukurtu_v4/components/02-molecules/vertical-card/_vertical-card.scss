@@ -116,7 +116,7 @@
       }
 
       .field__label {
-        flex-shrink: 0;
+        min-width: 0;
         font-size: initial;
         font-weight: var(--text-bold);
 

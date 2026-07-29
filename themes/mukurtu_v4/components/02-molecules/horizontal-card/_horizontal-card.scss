@@ -152,7 +152,7 @@
       }
 
       .field__label {
-        flex-shrink: 0;
+        min-width: 0;
         font-weight: var(--text-bold);
 
         &::after {

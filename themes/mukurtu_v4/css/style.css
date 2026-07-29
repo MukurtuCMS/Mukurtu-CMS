@@ -1673,8 +1673,7 @@ label.form-required::after {
           margin-block-end: var(--v-space-5xs);
 }
 .horizontal-card__content-body .field .field__label {
-  -ms-flex-negative: 0;
-      flex-shrink: 0;
+  min-width: 0;
   font-weight: var(--text-bold);
 }
 .horizontal-card__content-body .field .field__label::after {
@@ -4274,8 +4273,7 @@ body.is-fixed {
           margin-block-end: var(--v-space-6xs);
 }
 .vertical-card__content-body .field .field__label {
-  -ms-flex-negative: 0;
-      flex-shrink: 0;
+  min-width: 0;
   font-size: initial;
   font-weight: var(--text-bold);
 }
