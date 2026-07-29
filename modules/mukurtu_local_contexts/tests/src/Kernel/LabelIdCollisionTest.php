@@ -33,7 +33,6 @@ class LabelIdCollisionTest extends LocalContextsTestBase {
   protected function setUp(): void {
     parent::setUp();
     $this->manager = $this->container->get('mukurtu_local_contexts.supported_project_manager');
-    $this->installSchema('mukurtu_local_contexts', ['mukurtu_local_contexts_label_translations']);
   }
 
   /**
