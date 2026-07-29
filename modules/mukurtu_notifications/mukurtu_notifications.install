@@ -1879,3 +1879,84 @@ function mukurtu_notifications_update_40051(): void {
     user_role_revoke_permissions($rid, $permissions);
   }
 }
+
+/**
+ * Adds a display-name snapshot field to 10 user-referencing templates, and
+ * redeploys their text to use the new mukurtu-user-link/mukurtu-user-html-link
+ * tokens in place of the raw [message:field_user:entity:...] chained token.
+ *
+ * Mirrors update_40045's fix for content references: field_user is a live
+ * entity reference, re-resolved on every view rather than a stored snapshot,
+ * so once the referenced account is deleted, the chained
+ * [message:field_user:entity:display-name] token (and its
+ * mukurtu-notification-link/-html-link siblings) has nothing left to resolve
+ * and the recipient's name silently disappears from every past notification
+ * that mentioned them -- not just the "account deleted" notice itself, which
+ * already had its own field_title snapshot (see mukurtu_notifications_user_delete()).
+ * field_title is now populated at send time alongside field_user in every
+ * call site that sets it, and mukurtu_notifications_tokens()'s new
+ * mukurtu-user-link/mukurtu-user-html-link tokens use it as a fallback when
+ * field_user's target no longer loads -- see that function for the full
+ * explanation.
+ */
+function mukurtu_notifications_update_40052(): void {
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  $config_storage = \Drupal::service('config.storage');
+
+  $templates = [
+    'mukurtu_new_user_registration',
+    'mukurtu_user_added_to_protocol',
+    'mukurtu_user_approved',
+    'mukurtu_new_user_account_created',
+    'mukurtu_removed_from_protocol',
+    'mukurtu_user_set_pending',
+    'mukurtu_user_unblocked',
+    'mukurtu_removed_from_community',
+    'mukurtu_user_added_to_community',
+    'mukurtu_user_blocked',
+  ];
+
+  foreach ($templates as $template) {
+    $config_name = 'field.field.message.' . $template . '.field_title';
+    if (!$config_storage->exists($config_name)) {
+      $config_storage->write($config_name, $source->read($config_name));
+    }
+    $config_storage->write('message.template.' . $template, $source->read('message.template.' . $template));
+  }
+}
+
+/**
+ * Adds the missing delta-2 log-page partial to the two deletion templates
+ * update_40048 skipped, whose Notification log "Activity" column has been
+ * blank ever since.
+ *
+ * update_40047's views.view.mukurtu_message_log redeploy made the log
+ * page's "get_text" field always read text delta 2 (see that update's own
+ * comment), and update_40048 added a delta 2 to 21 templates to match --
+ * but mukurtu_user_deleted and mukurtu_single_node_delete were left out,
+ * presumably because neither used the plain-text-safe link token the other
+ * 21 needed fixed (there's no live entity left to link to once the
+ * referenced user/node is deleted). That made them the only two templates
+ * still without a delta 2, so the log page's Activity column has had
+ * nothing to read for either one since that update -- confirmed live: the
+ * email works fine (it only ever used deltas 0/1), but every "User
+ * deleted"/"Content deleted" row's Activity cell is empty. Both templates'
+ * delta 2 is identical to their delta 1 (there's nothing to link to
+ * either way), and partial_2 is hidden on both mail displays exactly like
+ * every other template already fixed in update_40048.
+ */
+function mukurtu_notifications_update_40053(): void {
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  $config_storage = \Drupal::service('config.storage');
+
+  foreach (['mukurtu_user_deleted', 'mukurtu_single_node_delete'] as $template) {
+    $config_storage->write('message.template.' . $template, $source->read('message.template.' . $template));
+
+    foreach (['mail_subject', 'mail_body'] as $view_mode) {
+      $config_name = 'core.entity_view_display.message.' . $template . '.' . $view_mode;
+      $config_storage->write($config_name, $source->read($config_name));
+    }
+  }
+}

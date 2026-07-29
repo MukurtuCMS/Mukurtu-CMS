@@ -7,11 +7,11 @@ template: mukurtu_user_approved
 label: User approved
 description: A pending user account was approved.
 text:
-- value: '[message:field_user:entity:display-name]''s account was approved.'
+- value: '[message:field_title]''s account was approved.'
   format: mukurtu_html
-- value: <p>[message:field_user:entity:mukurtu-notification-link]'s account was approved.</p>
+- value: <p>[message:mukurtu-user-link]'s account was approved.</p>
   format: mukurtu_html
-- value: <p>[message:field_user:entity:mukurtu-notification-html-link]'s account was
+- value: <p>[message:mukurtu-user-html-link]'s account was
     approved.</p>
   format: mukurtu_html
 settings:

@@ -7,13 +7,13 @@ template: mukurtu_new_user_account_created
 label: New user account created
 description: A new user account has been created by an administrator or manager.
 text:
-- value: 'New user account created: [message:field_user:entity:display-name]'
+- value: 'New user account created: [message:field_title]'
   format: mukurtu_html
-- value: "<p>A new user account [message:field_user:entity:mukurtu-notification-link]\
+- value: "<p>A new user account [message:mukurtu-user-link]\
     \ has been created. You may want to add them to more communities or protocols.</p>\r\
     \n"
   format: mukurtu_html
-- value: "<p>A new user account [message:field_user:entity:mukurtu-notification-html-link]\
+- value: "<p>A new user account [message:mukurtu-user-html-link]\
     \ has been created. You may want to add them to more communities or protocols.</p>\r\
     \n"
   format: mukurtu_html

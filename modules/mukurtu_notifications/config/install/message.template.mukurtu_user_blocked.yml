@@ -7,11 +7,11 @@ template: mukurtu_user_blocked
 label: User blocked
 description: A user account was blocked.
 text:
-- value: '[message:field_user:entity:display-name]''s account was blocked.'
+- value: '[message:field_title]''s account was blocked.'
   format: mukurtu_html
-- value: <p>[message:field_user:entity:mukurtu-notification-link]'s account was blocked.</p>
+- value: <p>[message:mukurtu-user-link]'s account was blocked.</p>
   format: mukurtu_html
-- value: <p>[message:field_user:entity:mukurtu-notification-html-link]'s account was
+- value: <p>[message:mukurtu-user-html-link]'s account was
     blocked.</p>
   format: mukurtu_html
 settings:

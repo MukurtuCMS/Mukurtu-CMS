@@ -7,13 +7,13 @@ template: mukurtu_new_user_registration
 label: New user registration
 description: A new user has registered with the site and needs approval.
 text:
-- value: 'New user registration: [message:field_user:entity:display-name] has requested
+- value: 'New user registration: [message:field_title] has requested
     an account and needs review.'
   format: mukurtu_html
-- value: "<p>New user registration: [message:field_user:entity:mukurtu-notification-link]\
+- value: "<p>New user registration: [message:mukurtu-user-link]\
     \ has requested an account and needs review.</p>\r\n"
   format: mukurtu_html
-- value: "<p>New user registration: [message:field_user:entity:mukurtu-notification-html-link]\
+- value: "<p>New user registration: [message:mukurtu-user-html-link]\
     \ has requested an account and needs review.</p>\r\n"
   format: mukurtu_html
 settings:

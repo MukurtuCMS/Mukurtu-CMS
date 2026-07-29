@@ -70,6 +70,14 @@ function mukurtu_notifications_token_info() {
     'name' => t('Content HTML link (deletion-safe)'),
     'description' => t("A real <a> link to a message's referenced content, or falling back to its title text if it's since been deleted. Only safe for non-email rendering -- see mukurtu_notifications_tokens()."),
   ];
+  $info['tokens']['message']['mukurtu-user-link'] = [
+    'name' => t('User link (deletion-safe)'),
+    'description' => t("A message's referenced user, linked if the account still exists, or falling back to its display name text if it's since been deleted."),
+  ];
+  $info['tokens']['message']['mukurtu-user-html-link'] = [
+    'name' => t('User HTML link (deletion-safe)'),
+    'description' => t("A real <a> link to a message's referenced user, or falling back to its display name text if it's since been deleted. Only safe for non-email rendering -- see mukurtu_notifications_tokens()."),
+  ];
   return $info;
 }
 
@@ -180,6 +188,37 @@ function mukurtu_notifications_tokens($type, array $tokens, array $data, array $
       }
       if (isset($tokens['mukurtu-content-html-link'])) {
         $replacements[$tokens['mukurtu-content-html-link']] = Markup::create($label);
+      }
+    }
+  }
+
+  if ($type === 'message' && !empty($data['message']) && (isset($tokens['mukurtu-user-link']) || isset($tokens['mukurtu-user-html-link']))) {
+    $message = $data['message'];
+    $account = ($message->hasField('field_user') && !$message->get('field_user')->isEmpty())
+      ? $message->get('field_user')->entity
+      : NULL;
+
+    if ($account instanceof User) {
+      $bubbleable_metadata->addCacheableDependency($account);
+      $url = $account->toUrl('edit-form', ['absolute' => TRUE])->toString();
+      $label = Html::escape($account->label());
+      if (isset($tokens['mukurtu-user-link'])) {
+        $replacements[$tokens['mukurtu-user-link']] = Markup::create($label . ' (' . Html::escape($url) . ')');
+      }
+      if (isset($tokens['mukurtu-user-html-link'])) {
+        $replacements[$tokens['mukurtu-user-html-link']] = Markup::create('<a href="' . Html::escape($url) . '">' . $label . '</a>');
+      }
+    }
+    elseif ($message->hasField('field_title') && !$message->get('field_title')->isEmpty()) {
+      // The referenced account is gone (deleted) -- fall back to the plain
+      // display-name snapshot taken at send time; there's nothing left to
+      // link to.
+      $label = Html::escape($message->get('field_title')->value);
+      if (isset($tokens['mukurtu-user-link'])) {
+        $replacements[$tokens['mukurtu-user-link']] = Markup::create($label);
+      }
+      if (isset($tokens['mukurtu-user-html-link'])) {
+        $replacements[$tokens['mukurtu-user-html-link']] = Markup::create($label);
       }
     }
   }
@@ -755,10 +794,13 @@ function mukurtu_notifications_node_update(Node $node) {
  * Replaces the old separate mukurtu_new_item_in_protocol/_community
  * templates and triggers: those only fired on the "added via edit" case and
  * missed content that already had a protocol/community set at creation
- * time, and never notified the owner. Reuses the existing
- * mukurtu_single_node_insert template/text ("[content-type] [title] was
- * created.") for both cases -- the message itself doesn't need to name the
- * specific protocol/community.
+ * time, and never notified the owner. Uses the mukurtu_single_node_insert
+ * template/text ("[content-type] [title] was created.") on true insert; on
+ * update, if the content is already published, uses mukurtu_content_published
+ * ("...was published.") instead, since a newly-added steward/manager is
+ * seeing live, published content, not something brand new -- matching what
+ * everyone else already sees for this same item. Neither message needs to
+ * name the specific protocol/community.
  *
  * On update, only fires when a protocol/community was newly added (diffed
  * against $node->original) -- editing already-tagged content doesn't
@@ -814,10 +856,22 @@ function mukurtu_notifications_notify_content_created(Node $node, array $already
   }
 
   $actor_uid = (int) \Drupal::currentUser()->id();
-  _mukurtu_notifications_notify('mukurtu_single_node_insert', [
+
+  // A protocol/community newly associated with already-published content via
+  // edit should read "published" to its newly-added steward/manager, the
+  // same as everyone else already sees for this content -- "created" reads
+  // as if the item is brand new, which it isn't for them either; it's just
+  // newly in their purview.
+  $template = ($is_update && $node->isPublished()) ? 'mukurtu_content_published' : 'mukurtu_single_node_insert';
+  $field_values = [
     'field_item' => $node,
     'field_user' => $actor_uid,
-  ], $recipient_uids, $actor_uid);
+  ];
+  if ($template === 'mukurtu_content_published') {
+    $field_values += _mukurtu_notifications_node_snapshot_fields($node);
+  }
+
+  _mukurtu_notifications_notify($template, $field_values, $recipient_uids, $actor_uid);
 }
 
 /**
@@ -905,6 +959,7 @@ function mukurtu_notifications_user_insert($entity) {
 
   _mukurtu_notifications_notify('mukurtu_new_user_registration', [
     'field_user' => $entity,
+    'field_title' => _mukurtu_notifications_user_display_name($entity),
   ], $manager_uids);
 
   // Visitor self-registration immediately follows this insert with a second,
@@ -947,6 +1002,7 @@ function mukurtu_notifications_notify_new_account_created(User $new_user, array 
 
   _mukurtu_notifications_notify('mukurtu_new_user_account_created', [
     'field_user' => $new_user,
+    'field_title' => _mukurtu_notifications_user_display_name($new_user),
   ], $recipient_uids, (int) \Drupal::currentUser()->id());
 }
 
@@ -1043,7 +1099,22 @@ function mukurtu_notifications_user_update($account) {
   $manager_uids = mukurtu_notifications_resolve_notify_groups(TRUE, [], []);
   _mukurtu_notifications_notify($template, [
     'field_user' => $account->id(),
+    'field_title' => _mukurtu_notifications_user_display_name($account),
   ], $manager_uids, (int) \Drupal::currentUser()->id());
+}
+
+/**
+ * Returns the display name to snapshot for a user-referencing notification.
+ *
+ * Every template that sets field_user also sets field_title to this value,
+ * so mukurtu_notifications_tokens()'s mukurtu-user-link/mukurtu-user-html-link
+ * tokens have a name to fall back to once the referenced account is deleted
+ * and field_user's entity reference no longer resolves.
+ */
+function _mukurtu_notifications_user_display_name(User $account): string {
+  return $account->hasField('field_display_name') && !$account->get('field_display_name')->isEmpty()
+    ? $account->get('field_display_name')->value
+    : $account->getAccountName();
 }
 
 /**
@@ -1055,9 +1126,7 @@ function mukurtu_notifications_user_update($account) {
  * loadable when the message is later viewed.
  */
 function mukurtu_notifications_user_delete($account) {
-  $display_name = $account->hasField('field_display_name') && !$account->get('field_display_name')->isEmpty()
-    ? $account->get('field_display_name')->value
-    : $account->getAccountName();
+  $display_name = _mukurtu_notifications_user_display_name($account);
 
   $manager_uids = mukurtu_notifications_resolve_notify_groups(TRUE, [], []);
   _mukurtu_notifications_notify('mukurtu_user_deleted', [
@@ -1515,7 +1584,10 @@ function mukurtu_notifications_og_membership_insert(OgMembership $membership) {
   }
 
   $added_uid = (int) $added_user->id();
-  $field_values = ['field_user' => $added_uid];
+  $field_values = [
+    'field_user' => $added_uid,
+    'field_title' => _mukurtu_notifications_user_display_name($added_user),
+  ];
 
   if ($group_entity_type === 'community') {
     $template = 'mukurtu_user_added_to_community';
@@ -1564,7 +1636,10 @@ function mukurtu_notifications_og_membership_delete(OgMembership $membership) {
 
   $removed_uid = (int) $removed_user->id();
   $actor_uid = (int) \Drupal::currentUser()->id();
-  $field_values = ['field_user' => $removed_uid];
+  $field_values = [
+    'field_user' => $removed_uid,
+    'field_title' => _mukurtu_notifications_user_display_name($removed_user),
+  ];
   if ($group_entity_type === 'community') {
     $template = 'mukurtu_removed_from_community';
     $field_values['field_community_ref'] = (int) $group->id();
