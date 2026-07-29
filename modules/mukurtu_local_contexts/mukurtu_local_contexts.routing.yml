@@ -2,7 +2,7 @@
 # Site-wide LC projects (front-end):
 ##
 mukurtu_local_contexts.site_project_directory:
-  path: '/local-contexts/projects'
+  path: '/local-contexts'
   defaults:
     _controller: '\Drupal\mukurtu_local_contexts\Controller\ProjectDirectoryController::siteDirectory'
     _title: 'Site-wide Local Contexts projects directory'
@@ -32,14 +32,14 @@ mukurtu_local_contexts.site_project_directory_settings:
 # Community LC projects (front-end):
 ##
 mukurtu_local_contexts.community_projects_directory:
-  path: '/communities/{group}/local-contexts/projects'
+  path: '/community/{group}/local-contexts'
   defaults:
     _title_callback: '\Drupal\mukurtu_local_contexts\Controller\ProjectDirectoryController::title'
     _controller: '\Drupal\mukurtu_local_contexts\Controller\ProjectDirectoryController::communityDirectory'
   options:
     parameters:
       group:
-        type: entity:community
+        type: community_alias
   requirements:
     _custom_access: '\Drupal\mukurtu_local_contexts\Controller\ProjectDirectoryController::groupDirectoryAccess'
 
@@ -63,14 +63,14 @@ mukurtu_local_contexts.manage_community_supported_projects:
 # Protocol LC projects (front-end):
 ##
 mukurtu_local_contexts.protocol_projects_directory:
-  path: '/protocols/{group}/local-contexts/projects'
+  path: '/protocol/{group}/local-contexts'
   defaults:
     _title_callback: '\Drupal\mukurtu_local_contexts\Controller\ProjectDirectoryController::title'
     _controller: '\Drupal\mukurtu_local_contexts\Controller\ProjectDirectoryController::protocolDirectory'
   options:
     parameters:
       group:
-        type: entity:protocol
+        type: protocol_alias
   requirements:
     _custom_access: '\Drupal\mukurtu_local_contexts\Controller\ProjectDirectoryController::groupDirectoryAccess'
 

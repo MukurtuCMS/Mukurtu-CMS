@@ -6,6 +6,7 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\mukurtu_protocol\Entity\MukurtuGroupInterface;
 
 /**
  * Returns responses for Local Contexts routes.
@@ -27,7 +28,20 @@ class ManageGroupSupportedProjectsController extends ControllerBase {
     if (!$group) {
       return AccessResult::forbidden();
     }
-    return $group->access('update', $account, TRUE);
+
+    // Allow uid 1 to manage LC projects no matter their roles.
+    if ($account->id() == 1) {
+      return AccessResult::allowed();
+    }
+
+    if ($group instanceof MukurtuGroupInterface) {
+      $membership = $group->getMembership($account);
+      if ($membership && ($membership->hasRole('community-community-community_manager') || $membership->hasRole('protocol-protocol-protocol_steward'))) {
+        return AccessResult::allowed();
+      }
+    }
+
+    return AccessResult::forbidden();
   }
 
   public function title(?ContentEntityInterface $group = NULL, ?ContentEntityInterface $community = NULL, ?ContentEntityInterface $protocol = NULL) {
