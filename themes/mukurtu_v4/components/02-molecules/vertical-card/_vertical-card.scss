@@ -63,6 +63,12 @@
     video {
       max-block-size: 18rem;
     }
+
+    audio {
+      display: block;
+      inline-size: 100%;
+      max-inline-size: 100%;
+    }
   }
 
   &--no-border {

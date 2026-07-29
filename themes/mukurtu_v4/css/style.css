@@ -4224,6 +4224,11 @@ body.is-fixed {
 .vertical-card__media video {
   max-block-size: 18rem;
 }
+.vertical-card__media audio {
+  display: block;
+  inline-size: 100%;
+  max-inline-size: 100%;
+}
 .vertical-card--no-border {
   -webkit-padding-after: 0;
           padding-block-end: 0;
