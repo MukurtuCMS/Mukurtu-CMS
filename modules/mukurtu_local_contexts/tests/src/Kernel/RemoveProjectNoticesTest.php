@@ -30,7 +30,6 @@ class RemoveProjectNoticesTest extends LocalContextsTestBase {
   protected function setUp(): void {
     parent::setUp();
     $this->manager = $this->container->get('mukurtu_local_contexts.supported_project_manager');
-    $this->installSchema('mukurtu_local_contexts', ['mukurtu_local_contexts_notice_translations']);
   }
 
   protected function seedNotice(string $projectId, string $type, string $name = 'Notice'): void {
