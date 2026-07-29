@@ -56,13 +56,13 @@ mukurtu_protocol.create_protocol:
   title: Create protocol
   route_name: mukurtu_protocol.community_add_protocol
   base_route: entity.community.canonical
-  weight: 2
+  weight: 4
 
 mukurtu_protocol.community_members:
   title: 'Manage users'
   route_name: mukurtu_protocol.community_members
   base_route: entity.community.canonical
-  weight: 3
+  weight: 2
 
 entity.community.version_history:
   route_name: entity.community.version_history

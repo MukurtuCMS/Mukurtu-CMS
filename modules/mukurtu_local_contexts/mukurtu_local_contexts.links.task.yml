@@ -18,7 +18,7 @@ mukurtu_local_contexts.manage_community_supported_projects:
   route_name: mukurtu_local_contexts.manage_community_supported_projects
   title: 'Manage Local Contexts projects'
   base_route: entity.community.canonical
-  weight: 4
+  weight: 3
 
 ##
 # Local tasks for Contexts:
