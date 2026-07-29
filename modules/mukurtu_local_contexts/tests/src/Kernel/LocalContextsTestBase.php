@@ -18,6 +18,7 @@ abstract class LocalContextsTestBase extends EntityKernelTestBase {
     'node',
     'og',
     'options',
+    'path_alias',
     'system',
     'user',
     'mukurtu_local_contexts',
