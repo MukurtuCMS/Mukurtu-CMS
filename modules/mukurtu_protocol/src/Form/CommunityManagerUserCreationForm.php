@@ -420,9 +420,7 @@ class CommunityManagerUserCreationForm extends FormBase {
 
     if (function_exists('mukurtu_notifications_extract_notify_uids')) {
       $notifyUids = mukurtu_notifications_extract_notify_uids($form_state);
-      if (!empty($notifyUids)) {
-        mukurtu_notifications_notify_new_account_created($user, $notifyUids);
-      }
+      mukurtu_notifications_notify_new_account_created($user, $notifyUids);
     }
   }
 
