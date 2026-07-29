@@ -1,5 +1,10 @@
 # Sample portrait media, reusing the Community/Protocol bootstrapped by the
-# accessibility_demo_content recipe (this recipe's prerequisite). See
+# accessibility_demo_content recipe (this recipe's prerequisite). Its
+# field_people matches the "people" term already used in the Sample
+# Person's field_other_names (see the main person node below) and that
+# person is marked deceased, so this media triggers a real People content
+# warning overlay wherever it renders (mukurtu_content_warnings; see the
+# people_warnings.enabled config action in this recipe's recipe.yml). See
 # ../../README.md.
 _meta:
   version: '1.0'
@@ -10,6 +15,7 @@ _meta:
   depends:
     44678f1a-b915-4f40-849b-542984bbc2ef: file
     df5dbc8d-e098-4879-aded-9f4b07031197: community
+    2c7576a3-199d-4f73-9e7d-0c01a4850140: taxonomy_term
 default:
   name:
     -
@@ -35,3 +41,6 @@ default:
   field_identifier:
     -
       value: 'ACC-DEMO-IMG-002'
+  field_people:
+    -
+      entity: 2c7576a3-199d-4f73-9e7d-0c01a4850140

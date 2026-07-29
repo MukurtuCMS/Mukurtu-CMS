@@ -2,9 +2,10 @@
 
 A Drupal recipe that creates one fully-described **Digital Heritage** item —
 plus every supporting entity it needs (a Community, a Protocol, 12 taxonomy
-terms, three media items with real files, a knowledge-keeper paragraph, and
-one related Article) — so the accessibility program has real, rendered pages
-to test on Tugboat previews or local builds, instead of an empty site.
+terms, four media items (three with real files, one a real oEmbed video), a
+knowledge-keeper paragraph, one related Article, and a sample Multipage
+Item) — so the accessibility program has real, rendered pages to test on
+Tugboat previews or local builds, instead of an empty site.
 
 ## Running it
 
@@ -30,16 +31,21 @@ for what that testing surfaced.
 - **Community**: "Sample Community (Accessibility Demo)"
 - **Protocol**: "Public Access (Accessibility Demo)" — access mode `open`, so
   the demo content is visible to anonymous visitors without logging in.
-- **An OG membership** granting the site's admin account (uid 1) the
-  Community Manager role on the Sample Community — see below for why this is
-  needed.
+- **Two OG memberships** granting the site's admin account (uid 1) the
+  Community Manager role on the Sample Community and the Protocol Steward
+  role on the Public Access protocol — see below for why both are needed.
 - **12 taxonomy terms**, one each for Category, Contributor, Creator, Format,
   Language, Location, People, Publisher, Subject, Type, and two Keywords.
-- **3 media items**, each with a real (generated placeholder) file so the
-  page actually renders media instead of broken links:
-  - An image with descriptive **alt text** filled in.
-  - An audio file (a generated tone) with a transcript in `field_transcription`.
-  - A PDF document with extracted text in `field_extracted_text`.
+- **4 media items**:
+  - An image, an audio file, and a PDF document, each with a real (generated
+    placeholder) file so the page actually renders media instead of broken
+    links — the image has descriptive **alt text**, the audio has a
+    transcript in `field_transcription`, and the document has extracted text
+    in `field_extracted_text`.
+  - A **remote video** (`field_media_oembed_video`) pointing at a real
+    Mukurtu support video on Vimeo, so oEmbed video rendering (player
+    controls, captions) has something real to test rather than a generated
+    placeholder.
 - **1 paragraph** (Indigenous Knowledge Keeper) with every field filled in.
 - **1 fully-described Article node** ("Sample Related Story"), with a body
   containing a heading, a list, and a link (useful for testing rich-text
@@ -49,6 +55,14 @@ for what that testing surfaced.
   target for every other recipe in this directory (Digital Heritage,
   Collection, Person, Place, Word List/Dictionary Word), since it needs to
   exist before any of them.
+- **2 lightweight Digital Heritage "page" nodes** ("Sample Multipage Item —
+  Page 1/2 of 2") and **1 Multipage Item** sequencing them, so multipage
+  navigation (priority component #13 in
+  [page-inventory.md](../../docs/accessibility/page-inventory.md)) has real
+  content to test. Digital Heritage is the only node bundle
+  `mukurtu_multipage_items.settings` allows as a page by default, hence the
+  bundle choice. The navigation UI itself renders on the Multipage Item's own
+  page (e.g. `/multipage-item/1`), not on the individual page nodes.
 - **1 Digital Heritage node** with essentially every field populated (see
   "Fields intentionally left empty" below for the exceptions).
 
@@ -93,6 +107,15 @@ content:
   declaratively, so this disables the auto-subscribe behavior just long
   enough to create the membership with the right role directly. This is a
   global site setting; it stays off after the recipe finishes.
+- For the same reason, a second `og_membership` grants uid 1 the Protocol
+  Steward role on the Public Access protocol. This one isn't for Protocol
+  creation — it's because `MultipageValidNodeConstraintValidator` requires
+  whoever adds a page to a Multipage Item to hold `administer multipage
+  item` via membership in one of that page's protocols, and with the
+  auto-subscribe behavior disabled sitewide, uid 1 has no Protocol
+  membership at all unless one is created explicitly, same as Community
+  Manager above. Assumes the Public Access protocol is Protocol ID 1, the
+  same assumption as everything else in this section.
 - Discovered while testing this recipe against a genuinely fresh install (not
   caused by the recipe): `config/install/mukurtu_protocol.community_organization.yml`
   ships with a placeholder entry claiming Community ID 1 is already
@@ -133,8 +156,9 @@ Fields intentionally left empty:
 - External-embed media bundles (`external_embed`, `soundcloud`) and the local
   `video` bundle (an uploaded `.mp4`/`.webm`/`.ogv`) are not created, since
   this environment has no video encoder to produce a valid sample file and we
-  didn't want to guess at an external embed URL. Add one manually if the
-  accessibility review needs to cover video playback.
+  didn't want to guess at an external embed URL. (`remote_video` is covered —
+  see "What it creates" above.) Add one manually if the accessibility review
+  needs to cover local video upload or embed-code playback specifically.
 - `field_all_related_content`, `field_in_collection`, and
   `field_multipage_page_of` are computed/read-only fields (derived from other
   content's relationships) and can't be set directly.
