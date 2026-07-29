@@ -809,3 +809,17 @@ mukurtu_core.access_denied:
     message:
       type: text_format
       label: 'Message'
+
+mukurtu.settings:
+  type: config_object
+  label: 'Mukurtu general settings'
+  mapping:
+    mukurtu_related_content_display:
+      type: string
+      label: 'Related content display method'
+    citation_templates:
+      type: sequence
+      label: 'Citation field templates, keyed by node bundle machine name'
+      sequence:
+        type: string
+        label: 'Citation template'
