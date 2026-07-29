@@ -706,9 +706,23 @@ function mukurtu_notifications_query_message_access_alter(AlterableInterface $qu
 }
 
 /**
- * Implements hook_node_insert().
+ * Implements hook_entity_insert().
+ *
+ * A generic entity hook rather than hook_node_insert() so this runs after
+ * pathauto_entity_insert() -- see mukurtu_notifications_module_implements_alter(),
+ * which reorders implementations of *this* hook. hook_node_insert() and
+ * hook_entity_insert() are separate invocation passes (EntityStorageBase::
+ * invokeHook() always runs all of the former before any of the latter), so
+ * reordering the node_insert implementations list, as this used to do, can
+ * never run mukurtu_notifications after pathauto -- pathauto's alias
+ * creation isn't in that list at all, it's in entity_insert's.
  */
-function mukurtu_notifications_node_insert(Node $node) {
+function mukurtu_notifications_entity_insert(EntityInterface $entity) {
+  if (!$entity instanceof Node) {
+    return;
+  }
+  $node = $entity;
+
   // The editorial workflow's default state for new content is "draft", but
   // a transition like "Submit for Review" is valid straight from "draft" --
   // so brand-new content can be created and submitted for review in a single
@@ -1395,7 +1409,7 @@ function _mukurtu_notifications_node_snapshot_fields(Node $node): array {
  *
  * @return int[]
  *   The uids actually notified, or an empty array if no notification was
- *   sent -- used by mukurtu_notifications_node_insert() to keep
+ *   sent -- used by mukurtu_notifications_entity_insert() to keep
  *   mukurtu_notifications_notify_content_created() from double-notifying
  *   anyone who already got a moderation-state message for this same save.
  */
@@ -1662,18 +1676,25 @@ function mukurtu_notifications_og_membership_delete(OgMembership $membership) {
 /**
  * Implements hook_module_implements_alter().
  *
- * Moves mukurtu_notifications_node_insert() to run after
+ * Moves mukurtu_notifications_entity_insert() to run after
  * pathauto_entity_insert(). A brand-new node can be created and submitted
- * for review in the same save (see mukurtu_notifications_node_insert()'s own
- * comment on this), which sends a mukurtu_content_for_review notification
- * containing a link built from $node->toUrl(). hook_node_insert() otherwise
- * runs before Pathauto's hook_entity_insert() creates the URL alias, so that
- * link would permanently bake in the not-yet-aliased /node/{id} path instead
- * of the friendly URL. Scoped to node_insert only so other hooks this module
- * implements aren't affected.
+ * for review in the same save (see mukurtu_notifications_entity_insert()'s
+ * own comment on this), which sends a mukurtu_content_for_review
+ * notification containing a link built from $node->toUrl(). Without this,
+ * module registration order between the two is unspecified, and if
+ * mukurtu_notifications runs first, that link permanently bakes in the
+ * not-yet-aliased /node/{id} path instead of the friendly URL. Scoped to
+ * entity_insert only so other hooks this module implements aren't affected.
+ *
+ * This previously targeted node_insert instead, which never actually
+ * achieved anything: EntityStorageBase::invokeHook() runs every
+ * hook_ENTITY_TYPE_insert() implementation (node_insert) before any
+ * hook_entity_insert() implementation, as two entirely separate passes, so
+ * no reordering *within* node_insert's list could ever run something after
+ * pathauto_entity_insert() -- that hook isn't in that list at all.
  */
 function mukurtu_notifications_module_implements_alter(&$implementations, $hook): void {
-  if ($hook !== 'node_insert' || !isset($implementations['mukurtu_notifications'], $implementations['pathauto'])) {
+  if ($hook !== 'entity_insert' || !isset($implementations['mukurtu_notifications'], $implementations['pathauto'])) {
     return;
   }
   $group = $implementations['mukurtu_notifications'];
