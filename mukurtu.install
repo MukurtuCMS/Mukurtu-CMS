@@ -36,12 +36,14 @@ function mukurtu_install() {
     'delete own article content',
     'edit own article content',
   ];
-  $content_editor = Role::load('content_editor');
-  if ($content_editor) {
-    foreach ($article_permissions as $permission) {
-      $content_editor->revokePermission($permission);
+  foreach (['content_editor', 'mukurtu_manager'] as $role_name) {
+    $role = Role::load($role_name);
+    if ($role) {
+      foreach ($article_permissions as $permission) {
+        $role->revokePermission($permission);
+      }
+      $role->save();
     }
-    $content_editor->save();
   }
 
   // Uninstall search.
@@ -857,6 +859,25 @@ function mukurtu_update_40002(): void {
       $content_editor->revokePermission($permission);
     }
     $content_editor->save();
+  }
+}
+
+/**
+ * Remove article content permissions from the mukurtu_manager role.
+ */
+function mukurtu_update_40003(): void {
+  $article_permissions = [
+    'create article content',
+    'delete article revisions',
+    'delete own article content',
+    'edit own article content',
+  ];
+  $mukurtu_manager = Role::load('mukurtu_manager');
+  if ($mukurtu_manager) {
+    foreach ($article_permissions as $permission) {
+      $mukurtu_manager->revokePermission($permission);
+    }
+    $mukurtu_manager->save();
   }
 }
 
