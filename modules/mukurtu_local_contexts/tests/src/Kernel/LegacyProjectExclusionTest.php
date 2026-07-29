@@ -175,4 +175,50 @@ class LegacyProjectExclusionTest extends LocalContextsTestBase {
     $this->assertEquals([], $reloaded->get('field_local_contexts_projects')->getValue());
   }
 
+  /**
+   * getReferencedLegacyProjectIds() must stay empty until content actually
+   * references a legacy project, then return exactly that ID.
+   */
+  public function testGetReferencedLegacyProjectIdsFromProjectField() {
+    $this->seedSiteProject('default_tk', 'Default Legacy');
+    $this->seedSiteProject('sitewide_tk', 'Sitewide Legacy');
+
+    $this->assertSame([], $this->manager->getReferencedLegacyProjectIds());
+
+    $entity = $this->createTestNode();
+    $entity->set('field_local_contexts_projects', ['default_tk']);
+    $entity->save();
+
+    $this->assertEquals(['default_tk'], $this->manager->getReferencedLegacyProjectIds());
+  }
+
+  /**
+   * Same as above, but the reference comes from the compound label/notice
+   * field rather than the project field directly.
+   */
+  public function testGetReferencedLegacyProjectIdsFromLabelField() {
+    $this->seedSiteProject('sitewide_tk', 'Sitewide Legacy');
+    $this->seedLabel('sitewide_tk_label', 'sitewide_tk', 'Legacy Label');
+
+    $entity = $this->createTestNode();
+    $entity->set('field_local_contexts_labels_and_notices', ['sitewide_tk:sitewide_tk_label:label']);
+    $entity->save();
+
+    $this->assertEquals(['sitewide_tk'], $this->manager->getReferencedLegacyProjectIds());
+  }
+
+  /**
+   * A referenced real (non-legacy) Hub project must never be reported back
+   * as a "referenced legacy" ID.
+   */
+  public function testGetReferencedLegacyProjectIdsExcludesNonLegacyProjects() {
+    $this->seedSiteProject('4d7d7e1a-0b2b-4b1e-9c3a-1f2e3d4c5b6a', 'Real Hub Project');
+
+    $entity = $this->createTestNode();
+    $entity->set('field_local_contexts_projects', ['4d7d7e1a-0b2b-4b1e-9c3a-1f2e3d4c5b6a']);
+    $entity->save();
+
+    $this->assertSame([], $this->manager->getReferencedLegacyProjectIds());
+  }
+
 }
