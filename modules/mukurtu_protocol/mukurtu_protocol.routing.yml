@@ -256,18 +256,6 @@ mukurtu_protocol.comment_settings:
   requirements:
     _permission: 'administer site configuration,administer comments'
 
-mukurtu_protocol.manage_protocol_comment_settings:
-  path: 'admin/protocols/{group}/comment-settings'
-  defaults:
-    _controller: '\Drupal\mukurtu_protocol\Controller\ProtocolCommentSettingsController::content'
-    _title_callback: '\Drupal\mukurtu_protocol\Controller\ProtocolCommentSettingsController::getTitle'
-  requirements:
-    _custom_access: '\Drupal\mukurtu_protocol\Controller\ProtocolCommentSettingsController::access'
-  options:
-    parameters:
-      group:
-        type: entity:protocol
-
 mukurtu_protocol.manage_protocol_unapproved_comments:
   path: 'admin/protocols/{group}/unapproved-comments'
   defaults:
