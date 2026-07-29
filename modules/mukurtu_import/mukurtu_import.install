@@ -519,3 +519,19 @@ function mukurtu_import_update_40030(): void {
   $data = \Drupal\Core\Serialization\Yaml::decode($yaml);
   \Drupal::configFactory()->getEditable($config_name)->setData($data)->save();
 }
+
+/**
+ * Create the 'User - all fields' import strategy.
+ */
+function mukurtu_import_update_40031(): void {
+  $config_name = 'mukurtu_import.mukurtu_import_strategy.user_all_fields';
+  $config = \Drupal::configFactory()->getEditable($config_name);
+
+  // Only create if it doesn't already exist.
+  if ($config->isNew()) {
+    $path = \Drupal::service('extension.list.module')->getPath('mukurtu_import');
+    $yaml = file_get_contents($path . '/config/install/' . $config_name . '.yml');
+    $data = \Drupal\Core\Serialization\Yaml::decode($yaml);
+    $config->setData($data)->save();
+  }
+}

@@ -183,6 +183,27 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
     }
     $store->set('batch_results_messages', $messages);
 
+    // Summarize created/updated/failed counts per target entity type. Unlike
+    // node/media/community/protocol/taxonomy_term, User entities have no
+    // revision log to filter a results View by, so the results form falls
+    // back to this simple count summary for 'user' migrations.
+    $summary = [];
+    foreach ($results as $migration_id => $data) {
+      if (!is_array($data) || !isset($data['@created'])) {
+        continue;
+      }
+      // Migration IDs are formatted as "{uid}__{fid}__{entity_type}__{bundle}".
+      $parts = explode('__', (string) $migration_id);
+      $entity_type_id = $parts[2] ?? NULL;
+      if (!$entity_type_id) {
+        continue;
+      }
+      $summary[$entity_type_id]['created'] = ($summary[$entity_type_id]['created'] ?? 0) + $data['@created'];
+      $summary[$entity_type_id]['updated'] = ($summary[$entity_type_id]['updated'] ?? 0) + $data['@updated'];
+      $summary[$entity_type_id]['failures'] = ($summary[$entity_type_id]['failures'] ?? 0) + $data['@failures'];
+    }
+    $store->set('batch_results_summary', $summary);
+
     // Clean up ID map tables for all migrations in this batch.
     // These are no longer needed after the import is complete.
     $migration_plugin_manager = \Drupal::service('plugin.manager.migration');

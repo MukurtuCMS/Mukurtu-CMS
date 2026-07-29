@@ -1,0 +1,60 @@
+langcode: en
+status: true
+dependencies: {  }
+id: user_all_fields
+uid: 1
+label: 'User - all fields'
+description: ''
+target_entity_type_id: user
+target_bundle: user
+mapping:
+  -
+    source: Created
+    target: created
+  -
+    source: 'Display Name'
+    target: field_display_name
+  -
+    source: Email
+    target: mail
+  -
+    source: ID
+    target: uid
+  -
+    source: 'Language (langcode)'
+    target: langcode
+  -
+    source: Pending
+    target: field_pending
+  -
+    source: 'Profile Picture Alt Text'
+    target: user_picture/alt
+  -
+    source: 'Profile Picture File'
+    target: user_picture/target_id
+  -
+    source: 'Receive Email Notifications'
+    target: message_subscribe_email
+  -
+    source: Roles
+    target: roles
+  -
+    source: Status
+    target: status
+  -
+    source: Timezone
+    target: timezone
+  -
+    source: Username
+    target: name
+  -
+    source: UUID
+    target: uuid
+configuration:
+  delimiter: ','
+  enclosure: '"'
+  escape: \
+  multivalue_delimiter: ;
+  default_format: basic_html
+  identifier_column: null
+  local_contexts_delimiter: '>'

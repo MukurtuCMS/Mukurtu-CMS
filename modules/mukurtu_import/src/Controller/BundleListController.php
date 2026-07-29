@@ -14,6 +14,9 @@ class BundleListController extends ControllerBase {
   public function bundlesList() {
     $build = [];
     $entity_types = ['node', 'media', 'community', 'protocol', 'paragraph', 'file', 'multipage_item', 'taxonomy_term'];
+    if ($this->currentUser()->hasPermission('import mukurtu users')) {
+      $entity_types[] = 'user';
+    }
     $entity_type_labels = [];
 
     foreach ($entity_types as $entity_type) {

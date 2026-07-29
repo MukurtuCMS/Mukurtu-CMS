@@ -45,7 +45,15 @@ trait ImportFormTrait {
   protected function getEntityTypeIdOptions(): array {
     $definitions = $this->entityTypeManager->getDefinitions();
     $options = [];
-    foreach (['node', 'media', 'community', 'protocol', 'paragraph', 'multipage_item', 'taxonomy_term'] as $entity_type_id) {
+    foreach (['node', 'media', 'community', 'protocol', 'paragraph', 'multipage_item', 'taxonomy_term', 'user'] as $entity_type_id) {
+      // User accounts are more sensitive than other import targets (they can
+      // create accounts, assign roles, etc.), so this option additionally
+      // requires the dedicated 'import mukurtu users' permission on top of
+      // the entity type's own create access.
+      if ($entity_type_id === 'user' && !$this->currentUser()->hasPermission('import mukurtu users')) {
+        continue;
+      }
+
       if (isset($definitions[$entity_type_id]) && $this->userCanCreateAnyBundleForEntityType($entity_type_id)) {
         $options[$entity_type_id] = $definitions[$entity_type_id]->getLabel();
 
@@ -214,6 +222,14 @@ trait ImportFormTrait {
 
         // Remove unwanted 'behavior_settings' paragraph base field.
         if ($entity_type_id === 'paragraph' && $field_name === 'behavior_settings') {
+          unset($field_defs[$field_name]);
+        }
+
+        // Passwords must never be settable via import (plaintext passwords
+        // are never mapped from a CSV; new accounts get a standard account
+        // setup email instead). 'access', 'login', and 'init' are internal
+        // bookkeeping fields not meaningful for an admin-authored import.
+        if ($entity_type_id === 'user' && in_array($field_name, ['pass', 'access', 'login', 'init'], TRUE)) {
           unset($field_defs[$field_name]);
         }
 

@@ -149,6 +149,21 @@ class ImportResultsForm extends ImportBaseForm {
       '#arguments' => [$message->render()],
     ];
     $form['taxonomy_results'] = $taxonomy_block;
+
+    // User accounts have no revision log to filter a results View by (unlike
+    // the entity types above), so their results are shown as a simple count
+    // summary instead.
+    $user_summary = ($this->store->get('batch_results_summary') ?? [])['user'] ?? NULL;
+    if ($user_summary) {
+      $form['user_results'] = [
+        '#type' => 'markup',
+        '#markup' => '<div><strong>' . $this->t('User Accounts') . ':</strong> ' . $this->t('@created created, @updated updated, @failures failed.', [
+          '@created' => $user_summary['created'] ?? 0,
+          '@updated' => $user_summary['updated'] ?? 0,
+          '@failures' => $user_summary['failures'] ?? 0,
+        ]) . '</div>',
+      ];
+    }
   }
 
 }
