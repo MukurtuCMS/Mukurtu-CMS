@@ -12,6 +12,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\Render\Markup;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Url;
 use Drupal\message\Entity\Message;
 use Drupal\message_subscribe\Subscribers\DeliveryCandidate;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
@@ -77,6 +78,14 @@ function mukurtu_notifications_token_info() {
   $info['tokens']['message']['mukurtu-user-html-link'] = [
     'name' => t('User HTML link (deletion-safe)'),
     'description' => t("A real <a> link to a message's referenced user, or falling back to its display name text if it's since been deleted. Only safe for non-email rendering -- see mukurtu_notifications_tokens()."),
+  ];
+  $info['tokens']['message']['mukurtu-batch-report-link'] = [
+    'name' => t('Batch import report link'),
+    'description' => t('"Label (URL)" text linking to the sending message\'s own batch import report page, safe to use inside message template text.'),
+  ];
+  $info['tokens']['message']['mukurtu-batch-report-html-link'] = [
+    'name' => t('Batch import report HTML link'),
+    'description' => t('A real <a> link to the sending message\'s own batch import report page. Only safe for non-email rendering -- see mukurtu_notifications_tokens().'),
   ];
   return $info;
 }
@@ -219,6 +228,33 @@ function mukurtu_notifications_tokens($type, array $tokens, array $data, array $
       }
       if (isset($tokens['mukurtu-user-html-link'])) {
         $replacements[$tokens['mukurtu-user-html-link']] = Markup::create($label);
+      }
+    }
+  }
+
+  if ($type === 'message' && !empty($data['message']) && (isset($tokens['mukurtu-batch-report-link']) || isset($tokens['mukurtu-batch-report-html-link']))) {
+    $message = $data['message'];
+    // message_subscribe clones the message per-recipient before delivery
+    // (Subscribers::sendMessage()'s $message->createDuplicate()), and
+    // createDuplicate() always resets the entity ID to NULL -- the clone
+    // is what's actually rendered/tokenized for sending, not the original
+    // saved entity. The clone keeps a back-reference to that original on
+    // the dynamic $original_message property, which is where the real ID
+    // has to come from during an actual send; outside that flow (e.g. the
+    // notifications log page, which renders the real stored entity
+    // directly) $message->id() is already correct.
+    $mid = $message->id();
+    if ($mid === NULL && isset($message->original_message) && $message->original_message instanceof \Drupal\message\MessageInterface) {
+      $mid = $message->original_message->id();
+    }
+    if ($mid !== NULL) {
+      $url = Url::fromRoute('mukurtu_import.batch_report', ['message' => $mid], ['absolute' => TRUE])->toString();
+      $label = t('View batch import report');
+      if (isset($tokens['mukurtu-batch-report-link'])) {
+        $replacements[$tokens['mukurtu-batch-report-link']] = Markup::create($label . ' (' . Html::escape($url) . ')');
+      }
+      if (isset($tokens['mukurtu-batch-report-html-link'])) {
+        $replacements[$tokens['mukurtu-batch-report-html-link']] = Markup::create('<a href="' . Html::escape($url) . '">' . $label . '</a>');
       }
     }
   }

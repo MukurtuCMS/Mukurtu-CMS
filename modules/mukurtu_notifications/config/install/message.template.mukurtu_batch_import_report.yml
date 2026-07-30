@@ -9,11 +9,11 @@ description: A report containing the results of a batch import.
 text:
 - value: Batch imported [message:field_number_imported] items on [message:created].
   format: mukurtu_html
-- value: Batch imported [message:field_number_imported] items on [message:created]
-    (<a href="/admin/import/report/[message:mid]">View batch import report</a>).
+- value: Batch imported [message:field_number_imported] items on [message:created].
+    [message:mukurtu-batch-report-link]
   format: mukurtu_html
-- value: Batch imported [message:field_number_imported] items on [message:created]
-    (<a href="/admin/import/report/[message:mid]">View batch import report</a>).
+- value: Batch imported [message:field_number_imported] items on [message:created].
+    [message:mukurtu-batch-report-html-link]
   format: mukurtu_html
 settings:
   token options:

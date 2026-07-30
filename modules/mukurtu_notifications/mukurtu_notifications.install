@@ -1960,3 +1960,31 @@ function mukurtu_notifications_update_40053(): void {
     }
   }
 }
+
+/**
+ * Fixes the "View batch import report" link, still dead after update_40040.
+ *
+ * update_40040 pointed the link at the new mukurtu_import.batch_report
+ * route, but left it as a raw <a href="...">, with the message's own ID
+ * filled in via a bare [message:mid] token -- which was never valid to
+ * begin with. Neither the contrib message module nor the token module
+ * registers a "mid"/"id" token for Message entities (message_token_info()
+ * only declares a deprecated "author" token; token module's generic
+ * per-entity ID fallback only applies to entity types whose
+ * @ContentEntityType annotation declares a token_type, which Message's
+ * doesn't). With "token options: clear: false" set on this template, the
+ * unresolved token was left in the output verbatim, so every batch import
+ * report email has shown a literal ".../admin/import/report/[message:mid]"
+ * link instead of a real one. This redeploys the template using the new
+ * mukurtu-batch-report-link/-html-link tokens (see
+ * mukurtu_notifications_tokens()), which build the URL from the message's
+ * real ID in PHP instead of relying on a token that never existed.
+ */
+function mukurtu_notifications_update_40054(): void {
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_notifications') . '/config/install';
+  $source = new FileStorage($config_path);
+  \Drupal::service('config.storage')->write(
+    'message.template.mukurtu_batch_import_report',
+    $source->read('message.template.mukurtu_batch_import_report')
+  );
+}
