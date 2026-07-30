@@ -12,3 +12,8 @@ local-contexts-label-widget:
   dependencies:
     - core/drupal
     - core/once
+
+manage-projects:
+  css:
+    theme:
+      css/manage-projects.css: {}
