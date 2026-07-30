@@ -152,28 +152,34 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
   /**
    * Display the taxonomy term page.
    *
-   * If the term maps to exactly one accessible person record, redirects to
-   * that record instead of rendering the taxonomy term page.
+   * If the term maps to exactly one accessible person or place record,
+   * redirects to that record instead of rendering the taxonomy term page.
    *
    * @param \Drupal\taxonomy\TermInterface $taxonomy_term
    *   The taxonomy term.
    *
    * @return array|\Drupal\Core\Routing\TrustedRedirectResponse
-   *   A redirect to the person record, or the full taxonomy term render array.
+   *   A redirect to the record, or the full taxonomy term render array.
    */
   public function build(TermInterface $taxonomy_term): array|TrustedRedirectResponse {
-    $person = $this->getSinglePersonRecord($taxonomy_term);
-    if ($person) {
-      $url = $person->toUrl()->toString();
+    $record = $this->getSingleRecord($taxonomy_term, 'person', 'field_other_names', 'person_records_enabled_vocabularies')
+      ?? $this->getSingleRecord($taxonomy_term, 'place', 'field_other_place_names', 'place_records_enabled_vocabularies');
+    if ($record) {
+      $url = $record->toUrl()->toString();
       $this->getLogger('mukurtu_taxonomy')->notice(
-        'Taxonomy term %label (tid %tid) redirected to person record nid %nid.',
-        ['%label' => $taxonomy_term->label(), '%tid' => $taxonomy_term->id(), '%nid' => $person->id()]
+        'Taxonomy term %label (tid %tid) redirected to %type record nid %nid.',
+        [
+          '%label' => $taxonomy_term->label(),
+          '%tid' => $taxonomy_term->id(),
+          '%type' => $record->bundle(),
+          '%nid' => $record->id(),
+        ]
       );
       $response = new TrustedRedirectResponse($url);
       $cache = new CacheableMetadata();
       $cache->addCacheContexts(['user.node_grants:view']);
       $cache->addCacheableDependency($taxonomy_term);
-      $cache->addCacheableDependency($person);
+      $cache->addCacheableDependency($record);
       $response->addCacheableDependency($cache);
       return $response;
     }
@@ -254,20 +260,25 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
       ],
     ];
 
-    // When this term's vocabulary is person-records-enabled, this page could
-    // become a redirect if a person node is later created and linked via
-    // field_other_names. Tag the render so that creating or editing any person
-    // node invalidates this cache and re-runs the redirect check.
-    // Trade-off: node_list:person fires on every person node save, so bulk
-    // imports will invalidate all person-vocabulary term pages at once. This
-    // is acceptable for correctness; a term-scoped tag would require a custom
-    // cache tag strategy.
+    // When this term's vocabulary is person- or place-records-enabled, this
+    // page could become a redirect if a matching node is later created and
+    // linked via field_other_names / field_other_place_names. Tag the render
+    // so that creating or editing any person/place node invalidates this
+    // cache and re-runs the redirect check.
+    // Trade-off: node_list:person / node_list:place fire on every save of
+    // that bundle, so bulk imports will invalidate all term pages for that
+    // vocabulary at once. This is acceptable for correctness; a term-scoped
+    // tag would require a custom cache tag strategy.
     $person_vocabularies = $this->mukurtuTaxonomySettings->get('person_records_enabled_vocabularies') ?? [];
+    $place_vocabularies = $this->mukurtuTaxonomySettings->get('place_records_enabled_vocabularies') ?? [];
+    $cache = CacheableMetadata::createFromRenderArray($build);
     if (in_array($taxonomy_term->bundle(), $person_vocabularies)) {
-      $cache = CacheableMetadata::createFromRenderArray($build);
       $cache->addCacheTags(['node_list:person']);
-      $cache->applyTo($build);
     }
+    if (in_array($taxonomy_term->bundle(), $place_vocabularies)) {
+      $cache->addCacheTags(['node_list:place']);
+    }
+    $cache->applyTo($build);
 
     return $build;
   }
@@ -307,27 +318,37 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
   }
 
   /**
-   * Returns the single accessible person record for a term, or NULL.
+   * Returns the single accessible record of the given bundle for a term.
    *
-   * Only redirects when exactly one published, accessible person record has
-   * this term in field_other_names and the term's vocabulary is enabled for
-   * person records. Multiple matches return NULL so the taxonomy page is shown
-   * instead.
+   * Only redirects when exactly one published, accessible record of the given
+   * bundle has this term in the given field and the term's vocabulary is
+   * enabled per the given settings key. Multiple matches return NULL so the
+   * taxonomy page is shown instead.
    *
    * Key edge cases worth covering in tests: vocabulary not enabled (NULL),
    * zero matches (NULL), two or more matches (NULL), draft node excluded by
    * status=1, inaccessible node excluded by accessCheck(TRUE).
+   *
+   * @param \Drupal\taxonomy\TermInterface $taxonomy_term
+   *   The taxonomy term.
+   * @param string $bundle
+   *   The node bundle to search, e.g. 'person' or 'place'.
+   * @param string $field
+   *   The "other names" field on that bundle, e.g. 'field_other_names'.
+   * @param string $vocabularySetting
+   *   The mukurtu_taxonomy.settings key listing enabled vocabularies for
+   *   this bundle.
    */
-  protected function getSinglePersonRecord(TermInterface $taxonomy_term): ?NodeInterface {
-    $person_vocabularies = $this->mukurtuTaxonomySettings->get('person_records_enabled_vocabularies') ?? [];
-    if (!in_array($taxonomy_term->bundle(), $person_vocabularies)) {
+  protected function getSingleRecord(TermInterface $taxonomy_term, string $bundle, string $field, string $vocabularySetting): ?NodeInterface {
+    $vocabularies = $this->mukurtuTaxonomySettings->get($vocabularySetting) ?? [];
+    if (!in_array($taxonomy_term->bundle(), $vocabularies)) {
       return NULL;
     }
 
     $storage = $this->entityTypeManager()->getStorage('node');
     $results = $storage->getQuery()
-      ->condition('type', 'person')
-      ->condition('field_other_names', $taxonomy_term->id())
+      ->condition('type', $bundle)
+      ->condition($field, $taxonomy_term->id())
       ->condition('status', 1)
       ->accessCheck(TRUE)
       ->execute();
@@ -349,19 +370,28 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
     // here.
     $person_vocabularies = $this->mukurtuTaxonomySettings->get('person_records_enabled_vocabularies') ?? [];
     $place_vocabularies = $this->mukurtuTaxonomySettings->get('place_records_enabled_vocabularies') ?? [];
-    $enabled_vocabularies = array_merge($person_vocabularies, $place_vocabularies);
-    // If the term vocabulary is not enabled for taxonomy records, return
-    // an empty array.
-    if (!in_array($taxonomy_term->bundle(), $enabled_vocabularies)) {
-      return [];
-    }
 
     $storage = $this->entityTypeManager()->getStorage('node');
-    $query = $storage->getQuery();
-    $query->condition('field_other_names', $taxonomy_term->id());
-    $query->condition('status', 1, '=');
-    $query->accessCheck();
-    $results = $query->execute();
+    $results = [];
+
+    if (in_array($taxonomy_term->bundle(), $person_vocabularies)) {
+      $results += $storage->getQuery()
+        ->condition('type', 'person')
+        ->condition('field_other_names', $taxonomy_term->id())
+        ->condition('status', 1, '=')
+        ->accessCheck()
+        ->execute();
+    }
+
+    if (in_array($taxonomy_term->bundle(), $place_vocabularies)) {
+      $results += $storage->getQuery()
+        ->condition('type', 'place')
+        ->condition('field_other_place_names', $taxonomy_term->id())
+        ->condition('status', 1, '=')
+        ->accessCheck()
+        ->execute();
+    }
+
     return empty($results) ? [] : $storage->loadMultiple($results);
   }
 
