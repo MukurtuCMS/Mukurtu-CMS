@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\mukurtu_submissions\Form;
 
+use Drupal\Core\Entity\Display\EntityFormDisplayInterface;
 use Drupal\Core\Entity\EntityDisplayRepositoryInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityForm;
@@ -22,6 +23,27 @@ class SubmissionSettingsForm extends EntityForm {
    * Media type bundles selectable for the public submission form.
    */
   const MEDIA_TYPES = ['image', 'video', 'audio', 'document', 'remote_video', 'external_embed', 'soundcloud'];
+
+  /**
+   * Field-type-keyed widget overrides for the public submission form.
+   *
+   * The public form's audience includes keyboard-only and screen reader
+   * visitors, for whom the Leaflet/Geoman map widget (the editorial
+   * default for geofield-type fields) has no accessible equivalent - see
+   * https://github.com/MukurtuCMS/Mukurtu-CMS/issues/1913. Keyed by field
+   * type so it applies to field_coverage (or any other geofield) on every
+   * bundle, regardless of what the bundle's own "default" form display
+   * uses.
+   */
+  const SUBMISSION_WIDGET_OVERRIDES = [
+    'geofield' => [
+      'type' => 'geofield_mukurtu_latlon',
+      'settings' => [
+        'instructions' => '',
+        'show_descriptions' => TRUE,
+      ],
+    ],
+  ];
 
   /**
    * Constructs a SubmissionSettingsForm object.
@@ -260,7 +282,26 @@ class SubmissionSettingsForm extends EntityForm {
     foreach (PublicSubmissionForm::EXCLUDED_FIELDS as $excluded_field) {
       $display->removeComponent($excluded_field);
     }
+    foreach (array_keys($this->getIncludableFieldOptions($this->entity->getTargetEntityTypeId(), $this->entity->getTargetBundle())) as $field_name) {
+      $this->applySubmissionWidgetOverride($display, $this->entity->getTargetEntityTypeId(), $this->entity->getTargetBundle(), $field_name);
+    }
     $display->save();
+  }
+
+  /**
+   * Applies SUBMISSION_WIDGET_OVERRIDES to a form display component, if the
+   * field's type has an override and the display has a component for it.
+   */
+  protected function applySubmissionWidgetOverride(EntityFormDisplayInterface $display, string $entity_type_id, string $bundle, string $field_name): void {
+    $component = $display->getComponent($field_name);
+    if (!$component) {
+      return;
+    }
+    $field_definitions = $this->entityFieldManager->getFieldDefinitions($entity_type_id, $bundle);
+    $field_type = $field_definitions[$field_name]->getType() ?? NULL;
+    if ($field_type !== NULL && isset(self::SUBMISSION_WIDGET_OVERRIDES[$field_type])) {
+      $display->setComponent($field_name, self::SUBMISSION_WIDGET_OVERRIDES[$field_type] + $component);
+    }
   }
 
   /**
@@ -282,6 +323,7 @@ class SubmissionSettingsForm extends EntityForm {
         if (!$display->getComponent($field_name)) {
           $display->setComponent($field_name, $default_display->getComponent($field_name) ?: []);
         }
+        $this->applySubmissionWidgetOverride($display, $entity_type_id, $bundle, $field_name);
       }
       else {
         $display->removeComponent($field_name);

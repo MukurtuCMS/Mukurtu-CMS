@@ -273,6 +273,17 @@ field.widget.settings.geofield_mukurtu:
 #      type: boolean
 #      label: 'Escape output'
 
+field.widget.settings.geofield_mukurtu_latlon:
+  type: mapping
+  label: 'Mukurtu Map Points (latitude/longitude) widget settings'
+  mapping:
+    instructions:
+      type: label
+      label: 'Instructions'
+    show_descriptions:
+      type: boolean
+      label: 'Show a description field for each point'
+
 field.widget.settings.mukurtu_leaflet_formatter:
   type: mapping
   label: 'Mukurtu Leaflet widget settings'
