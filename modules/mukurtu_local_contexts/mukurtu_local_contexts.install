@@ -30,6 +30,12 @@ function mukurtu_local_contexts_schema() {
         'not null' => TRUE,
         'description' => 'Group entity ID or 0 for site',
       ],
+      'api_key' => [
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+        'description' => 'The Local Contexts Hub API key that added/owns this project, if any.',
+      ],
     ],
     'primary key' => ['project_id', 'type', 'group_id'],
   ];
@@ -221,6 +227,12 @@ function mukurtu_local_contexts_schema() {
         'not null' => TRUE,
         'description' => 'Label ID',
       ],
+      'project_id' => [
+        'type' => 'varchar',
+        'length' => 36,
+        'not null' => TRUE,
+        'description' => 'Project ID',
+      ],
       'locale' => [
         'type' => 'varchar',
         'length' => 64,
@@ -254,6 +266,7 @@ function mukurtu_local_contexts_schema() {
     'primary key' => ['id'],
     'indexes' => [
       'label' => ['id', 'label_id'],
+      'project' => ['project_id', 'label_id'],
       'updated' => ['updated'],
     ],
   ];
@@ -326,6 +339,37 @@ function mukurtu_local_contexts_schema() {
       'project' => ['project_id'],
       'updated' => ['updated'],
     ],
+  ];
+
+  $schema['mukurtu_local_contexts_api_key_labels'] = [
+    'description' => 'Admin-provided display labels for Local Contexts Hub API keys',
+    'fields' => [
+      'type' => [
+        'type' => 'varchar',
+        'length' => 256,
+        'not null' => TRUE,
+        'description' => 'Group entity type ID or site',
+      ],
+      'group_id' => [
+        'type' => 'int',
+        'size' => 'normal',
+        'not null' => TRUE,
+        'description' => 'Group entity ID or 0 for site',
+      ],
+      'api_key' => [
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'description' => 'The Local Contexts Hub API key',
+      ],
+      'label' => [
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'description' => 'An admin-provided display label for this key',
+      ],
+    ],
+    'primary key' => ['type', 'group_id', 'api_key'],
   ];
 
   $schema['mukurtu_local_contexts_notice_translations'] = [
@@ -482,9 +526,188 @@ function mukurtu_local_contexts_update_10000() {
 }
 
 /**
- * Add locale/language columns to Local Contexts notices.
+ * Add an api_key column to the supported projects table and backfill it.
+ *
+ * This records which Local Contexts Hub API key added/owns each supported
+ * project, in preparation for supporting multiple API keys per site,
+ * community, or protocol. Backfilled from whichever single key is currently
+ * stored for each scope, since that is the best available approximation of
+ * which key was originally used.
  */
 function mukurtu_local_contexts_update_10001() {
+  $db = \Drupal::database();
+  $schema = $db->schema();
+
+  if (!$schema->fieldExists('mukurtu_local_contexts_supported_projects', 'api_key')) {
+    $schema->addField('mukurtu_local_contexts_supported_projects', 'api_key', [
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+      'description' => 'The Local Contexts Hub API key that added/owns this project, if any.',
+    ]);
+  }
+
+  // Backfill site-scoped rows from the site-wide key.
+  $site_api_key = \Drupal::config('mukurtu_local_contexts.settings')->get('site_api_key');
+  if (!empty($site_api_key)) {
+    $db->update('mukurtu_local_contexts_supported_projects')
+      ->fields(['api_key' => $site_api_key])
+      ->condition('type', 'site')
+      ->condition('group_id', 0)
+      ->execute();
+  }
+
+  // Backfill group-scoped (community/protocol) rows from each group's key.
+  $groups = $db->select('mukurtu_local_contexts_supported_projects', 'sp')
+    ->fields('sp', ['type', 'group_id'])
+    ->condition('sp.type', 'site', '<>')
+    ->distinct()
+    ->execute()
+    ->fetchAll();
+
+  // Read each group's key straight from its data table rather than through
+  // the Entity API. The field's code definition has already moved on to the
+  // unlimited-cardinality shape landed alongside these update hooks, so
+  // loading the entity and calling ->get() would make Drupal query for a
+  // dedicated field table that update_10002() hasn't created yet.
+  $entity_type_manager = \Drupal::entityTypeManager();
+  foreach ($groups as $row) {
+    if (!$entity_type_manager->hasDefinition($row->type)) {
+      continue;
+    }
+    $data_table = $entity_type_manager->getDefinition($row->type)->getDataTable();
+    if (!$data_table || !$schema->fieldExists($data_table, 'field_local_contexts_api_key')) {
+      continue;
+    }
+    $api_key = $db->select($data_table, 'efd')
+      ->fields('efd', ['field_local_contexts_api_key'])
+      ->condition('id', $row->group_id)
+      ->execute()
+      ->fetchField();
+    if (empty($api_key)) {
+      continue;
+    }
+    $db->update('mukurtu_local_contexts_supported_projects')
+      ->fields(['api_key' => $api_key])
+      ->condition('type', $row->type)
+      ->condition('group_id', $row->group_id)
+      ->execute();
+  }
+}
+
+/**
+ * Migrate Local Contexts API key storage from a single value to a list.
+ *
+ * Allows a site, community, or protocol to be connected to more than one
+ * Local Contexts Hub account at once. Existing single values are preserved
+ * as the first (only) item in the new list-based storage.
+ */
+function mukurtu_local_contexts_update_10002() {
+  $db = \Drupal::database();
+  $schema = $db->schema();
+  $entity_definition_update_manager = \Drupal::entityDefinitionUpdateManager();
+  $entity_type_manager = \Drupal::entityTypeManager();
+
+  foreach (['community', 'protocol'] as $entity_type_id) {
+    $storage_definition = $entity_definition_update_manager->getFieldStorageDefinition('field_local_contexts_api_key', $entity_type_id);
+    if (!$storage_definition) {
+      continue;
+    }
+
+    // Preserve existing single values before uninstalling the field storage.
+    // This has to be a direct query against the data table rather than the
+    // Entity API: the field's code definition is already the new
+    // unlimited-cardinality one, so loading the entity and calling ->get()
+    // would make Drupal query the dedicated field table that gets created
+    // below, before it exists.
+    $storage = $entity_type_manager->getStorage($entity_type_id);
+    $data_table = $entity_type_manager->getDefinition($entity_type_id)->getDataTable();
+    $existing_values = [];
+    if ($data_table && $schema->fieldExists($data_table, 'field_local_contexts_api_key')) {
+      $existing_values = $db->select($data_table, 'efd')
+        ->fields('efd', ['id', 'field_local_contexts_api_key'])
+        ->isNotNull('field_local_contexts_api_key')
+        ->condition('field_local_contexts_api_key', '', '<>')
+        ->execute()
+        ->fetchAllKeyed();
+    }
+
+    $entity_definition_update_manager->uninstallFieldStorageDefinition($storage_definition);
+
+    // Reinstall using the (now unlimited-cardinality) definition from code.
+    $entity_type = $entity_type_manager->getDefinition($entity_type_id);
+    $field_class = $entity_type->getClass();
+    $new_storage_definition = $field_class::baseFieldDefinitions($entity_type)['field_local_contexts_api_key'];
+    $entity_definition_update_manager->installFieldStorageDefinition(
+      'field_local_contexts_api_key',
+      $entity_type_id,
+      'mukurtu_protocol',
+      $new_storage_definition
+    );
+
+    foreach ($existing_values as $id => $value) {
+      $entity = $storage->loadUnchanged($id);
+      $entity->set('field_local_contexts_api_key', [$value]);
+      $entity->save();
+    }
+  }
+
+  // Migrate the site-wide key config from a single value to a list.
+  $config = \Drupal::configFactory()->getEditable('mukurtu_local_contexts.settings');
+  $old_key = $config->get('site_api_key');
+  $keys = !empty($old_key) ? [$old_key] : [];
+  $config->set('site_api_keys', $keys);
+  $config->clear('site_api_key');
+  $config->save();
+}
+
+/**
+ * Add a table for admin-provided Local Contexts Hub API key labels.
+ *
+ * Since the Hub only shows the account name a key belongs to on its own
+ * site (not through the API), admins can optionally set their own display
+ * label per key here instead of only seeing the masked key value.
+ */
+function mukurtu_local_contexts_update_10003() {
+  $schema = \Drupal::database()->schema();
+  if (!$schema->tableExists('mukurtu_local_contexts_api_key_labels')) {
+    $schema->createTable('mukurtu_local_contexts_api_key_labels', [
+      'description' => 'Admin-provided display labels for Local Contexts Hub API keys',
+      'fields' => [
+        'type' => [
+          'type' => 'varchar',
+          'length' => 256,
+          'not null' => TRUE,
+          'description' => 'Group entity type ID or site',
+        ],
+        'group_id' => [
+          'type' => 'int',
+          'size' => 'normal',
+          'not null' => TRUE,
+          'description' => 'Group entity ID or 0 for site',
+        ],
+        'api_key' => [
+          'type' => 'varchar',
+          'length' => 255,
+          'not null' => TRUE,
+          'description' => 'The Local Contexts Hub API key',
+        ],
+        'label' => [
+          'type' => 'varchar',
+          'length' => 255,
+          'not null' => TRUE,
+          'description' => 'An admin-provided display label for this key',
+        ],
+      ],
+      'primary key' => ['type', 'group_id', 'api_key'],
+    ]);
+  }
+}
+
+/**
+ * Add locale/language columns to Local Contexts notices.
+ */
+function mukurtu_local_contexts_update_10004() {
   $schema = \Drupal::database()->schema();
 
   $schema->addField(
@@ -510,9 +733,93 @@ function mukurtu_local_contexts_update_10001() {
 }
 
 /**
+ * Add project_id to Local Contexts label translations.
+ *
+ * Label ids are not unique across projects (unlike notices, which have
+ * always stored project_id), so translations could not be reliably scoped
+ * to the project that owns them. This backfills project_id for existing
+ * rows on a best-effort basis: for label ids that are unique across
+ * projects (the common case) it is exact; for the rare label id shared by
+ * more than one project, one project is picked arbitrarily, which is still
+ * strictly better than the previous fully-unscoped state, and self-heals
+ * the next time either project's Local Contexts Hub sync re-runs (saving
+ * translations now always writes the correct project_id).
+ */
+function mukurtu_local_contexts_update_40001(): void {
+  $schema = \Drupal::database()->schema();
+
+  if (!$schema->fieldExists('mukurtu_local_contexts_label_translations', 'project_id')) {
+    $schema->addField('mukurtu_local_contexts_label_translations', 'project_id', [
+      'type' => 'varchar',
+      'length' => 36,
+      'not null' => TRUE,
+      'description' => 'Project ID',
+      'initial' => '',
+    ]);
+  }
+
+  \Drupal::database()->query("
+    UPDATE {mukurtu_local_contexts_label_translations} t
+    INNER JOIN {mukurtu_local_contexts_labels} l ON l.id = t.label_id
+    SET t.project_id = l.project_id
+    WHERE t.project_id = ''
+  ");
+
+  if (!$schema->indexExists('mukurtu_local_contexts_label_translations', 'project')) {
+    $schema->addIndex('mukurtu_local_contexts_label_translations', 'project', ['project_id', 'label_id'], [
+      'fields' => [
+        'id' => [
+          'type' => 'serial',
+          'not null' => TRUE,
+          'description' => 'Translation ID',
+        ],
+        'label_id' => [
+          'type' => 'varchar',
+          'length' => 36,
+          'not null' => TRUE,
+          'description' => 'Label ID',
+        ],
+        'project_id' => [
+          'type' => 'varchar',
+          'length' => 36,
+          'not null' => TRUE,
+          'description' => 'Project ID',
+        ],
+      ],
+      'primary key' => ['id'],
+    ]);
+  }
+}
+
+/**
+ * Reindex content so Local Contexts labels/notices are deduplicated by name.
+ *
+ * The Local Contexts effective labels Search API property now indexes each
+ * label/notice's display name instead of its raw project-scoped compound
+ * key, so a label added by multiple projects (e.g. "TK Attribution")
+ * facets/filters as a single entry instead of one per project. Existing
+ * indexed content still has the old compound-key values, so the affected
+ * indexes must be reindexed.
+ */
+function mukurtu_local_contexts_update_40002(): void {
+  // search_api is not a hard dependency of this module.
+  if (!\Drupal::moduleHandler()->moduleExists('search_api')) {
+    return;
+  }
+
+  $indexes = ['mukurtu_default_content_index', 'mukurtu_dictionary_index'];
+  foreach ($indexes as $index_id) {
+    $index = \Drupal\search_api\Entity\Index::load($index_id);
+    if ($index) {
+      $index->reindex();
+    }
+  }
+}
+
+/**
  * Add project sync status and archived tracking columns.
  */
-function mukurtu_local_contexts_update_10002() {
+function mukurtu_local_contexts_update_40003() {
   $schema = \Drupal::database()->schema();
 
   $schema->addField('mukurtu_local_contexts_projects', 'status', [
@@ -547,7 +854,7 @@ function mukurtu_local_contexts_update_10002() {
 /**
  * Add not_found streak tracking columns and the purge log table.
  */
-function mukurtu_local_contexts_update_10003() {
+function mukurtu_local_contexts_update_40004() {
   $schema = \Drupal::database()->schema();
 
   $schema->addField('mukurtu_local_contexts_projects', 'not_found_since', [
