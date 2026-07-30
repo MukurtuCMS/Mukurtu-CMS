@@ -710,26 +710,105 @@ function mukurtu_local_contexts_update_10003() {
 function mukurtu_local_contexts_update_10004() {
   $schema = \Drupal::database()->schema();
 
-  $schema->addField(
-    'mukurtu_local_contexts_notices',
-    'locale',
-    [
+  if (!$schema->fieldExists('mukurtu_local_contexts_notices', 'locale')) {
+    $schema->addField(
+      'mukurtu_local_contexts_notices',
+      'locale',
+      [
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => FALSE,
+        'description' => 'Language code',
+      ]
+    );
+  }
+  if (!$schema->fieldExists('mukurtu_local_contexts_notices', 'language')) {
+    $schema->addField(
+      'mukurtu_local_contexts_notices',
+      'language',
+      [
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => FALSE,
+        'description' => 'Language',
+      ]
+    );
+  }
+}
+
+/**
+ * Add the api_key column for sites where update_10001() was silently skipped.
+ *
+ * Before update_10001() was rewritten by #1872 to add this column, that same
+ * hook number belonged to the (now update_10004()) locale/language columns
+ * migration. Any site that already ran updates under that older numbering
+ * has its stored schema version at 10001, so Drupal's update system treats
+ * the current, unrelated update_10001() as already applied and never runs
+ * it, leaving the api_key column missing entirely.
+ *
+ * Such a site did still run update_10002() and update_10003() (both greater
+ * than 10001), so by the time this hook runs, update_10001()'s own backfill
+ * sources are gone: update_10002() already moved the site-wide key from the
+ * single 'site_api_key' config value into the 'site_api_keys' list and
+ * migrated each group's field_local_contexts_api_key to unlimited
+ * cardinality, so the old single-column data update_10001() reads from no
+ * longer exists. Simply re-invoking update_10001() would therefore add the
+ * column but backfill nothing. Instead, backfill from the current storage
+ * locations via the existing supported project manager helpers.
+ */
+function mukurtu_local_contexts_update_10005() {
+  $db = \Drupal::database();
+  $schema = $db->schema();
+
+  if (!$schema->fieldExists('mukurtu_local_contexts_supported_projects', 'api_key')) {
+    $schema->addField('mukurtu_local_contexts_supported_projects', 'api_key', [
       'type' => 'varchar',
-      'length' => 64,
+      'length' => 255,
       'not null' => FALSE,
-      'description' => 'Language code',
-    ]
-  );
-  $schema->addField(
-    'mukurtu_local_contexts_notices',
-    'language',
-    [
-      'type' => 'varchar',
-      'length' => 128,
-      'not null' => FALSE,
-      'description' => 'Language',
-    ]
-  );
+      'description' => 'The Local Contexts Hub API key that added/owns this project, if any.',
+    ]);
+  }
+
+  /** @var \Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager $project_manager */
+  $project_manager = \Drupal::service('mukurtu_local_contexts.supported_project_manager');
+
+  $site_api_key = reset($project_manager->getSiteApiKeys()) ?: NULL;
+  if (!empty($site_api_key)) {
+    $db->update('mukurtu_local_contexts_supported_projects')
+      ->fields(['api_key' => $site_api_key])
+      ->condition('type', 'site')
+      ->condition('group_id', 0)
+      ->isNull('api_key')
+      ->execute();
+  }
+
+  $groups = $db->select('mukurtu_local_contexts_supported_projects', 'sp')
+    ->fields('sp', ['type', 'group_id'])
+    ->condition('sp.type', 'site', '<>')
+    ->isNull('sp.api_key')
+    ->distinct()
+    ->execute()
+    ->fetchAll();
+
+  $entity_type_manager = \Drupal::entityTypeManager();
+  foreach ($groups as $row) {
+    if (!$entity_type_manager->hasDefinition($row->type)) {
+      continue;
+    }
+    $group = $entity_type_manager->getStorage($row->type)->load($row->group_id);
+    if (!$group) {
+      continue;
+    }
+    $group_api_key = reset($project_manager->getGroupApiKeys($group)) ?: NULL;
+    if (empty($group_api_key)) {
+      continue;
+    }
+    $db->update('mukurtu_local_contexts_supported_projects')
+      ->fields(['api_key' => $group_api_key])
+      ->condition('type', $row->type)
+      ->condition('group_id', $row->group_id)
+      ->execute();
+  }
 }
 
 /**
