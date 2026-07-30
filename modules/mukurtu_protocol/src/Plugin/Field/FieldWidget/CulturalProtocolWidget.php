@@ -137,7 +137,7 @@ class CulturalProtocolWidget extends WidgetBase {
       '#type' => 'details',
       '#title' => $this->t("Select cultural protocols to apply to the item."),
       '#open' => TRUE,
-      '#description' => $this->t("Cultural protocols determine which users can access this content. Cultural protocols are managed by their parent community, which represents a group of contributors. All content must be assigned at least one cultural protocol. Most content only requires one cultural protocol, but more granular access can be specified by selecting multiple protocols, or even protocols from multiple communities. </br>Select one or more cultural protocols. The relevant community or communities will be automatically applied."),
+      '#description' => $this->t("Cultural protocols determine which users can access this content. Cultural protocols are managed by their parent community, which represents a group of contributors. All content must be assigned at least one cultural protocol. Most content only requires one cultural protocol, but more granular access can be specified by selecting multiple protocols, or even protocols from multiple communities. <br />Select one or more cultural protocols. The relevant community or communities will be automatically applied."),
     ];
     $c_delta = 0;
 
