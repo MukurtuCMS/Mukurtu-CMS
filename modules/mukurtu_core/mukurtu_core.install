@@ -791,12 +791,12 @@ function mukurtu_core_update_40023(): void {
   }
 
   $bundles = [
-    'digital_heritage' => 'A detailed, interactive mapping tool that allows placing and drawing multiple locations related to a digital heritage item. Locations can be single points, paths, rectangles, or free-form polygons. Each location can be given a basic label. This field is also used for the browse by map tools. </br>Note that this mapping data will be shared with the same users or visitors as the rest of the digital heritage item. If the location is sensitive, carefully consider using this field. </br>Use the tools shown on the map to place, draw, edit, and delete points and shapes. Once a point or shape has been placed, select it to add a description if needed.',
-    'collection' => 'A detailed, interactive mapping tool that allows placing and drawing multiple locations related to a collection. Locations can be single points, paths, rectangles, or free-form polygons. Each location can be given a basic label. This field is also used for the browse by map tools. </br>Note that this mapping data will be shared with the same users or visitors as the rest of the collection. If the location is sensitive, carefully consider using this field. </br>Use the tools shown on the map to place, draw, edit, and delete points and shapes. Once a point or shape has been placed, select it to add a description if needed.',
-    'dictionary_word' => 'A detailed, interactive mapping tool that allows placing and drawing multiple locations related to a dictionary word. Locations can be single points, paths, rectangles, or free-form polygons. Each location can be given a basic label. This field is also used for the browse by map tools. Note that this mapping data will be shared with the same users or visitors as the rest of the dictionary word. If the location is sensitive, carefully consider using this field. </br>Use the tools shown on the map to place, draw, edit, and delete points and shapes. Once a point or shape has been placed, select it to add a description if needed.',
+    'digital_heritage' => 'A detailed, interactive mapping tool that allows placing and drawing multiple locations related to a digital heritage item. Locations can be single points, paths, rectangles, or free-form polygons. Each location can be given a basic label. This field is also used for the browse by map tools. <br />Note that this mapping data will be shared with the same users or visitors as the rest of the digital heritage item. If the location is sensitive, carefully consider using this field. <br />Use the tools shown on the map to place, draw, edit, and delete points and shapes. Once a point or shape has been placed, select it to add a description if needed.',
+    'collection' => 'A detailed, interactive mapping tool that allows placing and drawing multiple locations related to a collection. Locations can be single points, paths, rectangles, or free-form polygons. Each location can be given a basic label. This field is also used for the browse by map tools. <br />Note that this mapping data will be shared with the same users or visitors as the rest of the collection. If the location is sensitive, carefully consider using this field. <br />Use the tools shown on the map to place, draw, edit, and delete points and shapes. Once a point or shape has been placed, select it to add a description if needed.',
+    'dictionary_word' => 'A detailed, interactive mapping tool that allows placing and drawing multiple locations related to a dictionary word. Locations can be single points, paths, rectangles, or free-form polygons. Each location can be given a basic label. This field is also used for the browse by map tools. Note that this mapping data will be shared with the same users or visitors as the rest of the dictionary word. If the location is sensitive, carefully consider using this field. <br />Use the tools shown on the map to place, draw, edit, and delete points and shapes. Once a point or shape has been placed, select it to add a description if needed.',
     'word_list' => '',
-    'person' => 'A detailed, interactive mapping tool that allows placing and drawing multiple locations related to a person record. Locations can be single points, paths, rectangles, or free-form polygons. Each location can be given a basic label. This field is also used for the browse by map tools. Note that this mapping data will be shared with the same users or visitors as the rest of the person record. If the location is sensitive, carefully consider using this field. </br>Use the tools shown on the map to place, draw, edit, and delete points and shapes. Once a point or shape has been placed, select it to add a description if needed.',
-    'place' => 'A detailed, interactive mapping tool that allows placing and drawing multiple locations related to a place record. Locations can be single points, paths, rectangles, or free-form polygons. Each location can be given a basic label. This field is also used for the browse by map tools. Note that this mapping data will be shared with the same users or visitors as the rest of the place record. If the location is sensitive, carefully consider using this field. </br>Use the tools shown on the map to place, draw, edit, and delete points and shapes. Once a point or shape has been placed, select it to add a description if needed.',
+    'person' => 'A detailed, interactive mapping tool that allows placing and drawing multiple locations related to a person record. Locations can be single points, paths, rectangles, or free-form polygons. Each location can be given a basic label. This field is also used for the browse by map tools. Note that this mapping data will be shared with the same users or visitors as the rest of the person record. If the location is sensitive, carefully consider using this field. <br />Use the tools shown on the map to place, draw, edit, and delete points and shapes. Once a point or shape has been placed, select it to add a description if needed.',
+    'place' => 'A detailed, interactive mapping tool that allows placing and drawing multiple locations related to a place record. Locations can be single points, paths, rectangles, or free-form polygons. Each location can be given a basic label. This field is also used for the browse by map tools. Note that this mapping data will be shared with the same users or visitors as the rest of the place record. If the location is sensitive, carefully consider using this field. <br />Use the tools shown on the map to place, draw, edit, and delete points and shapes. Once a point or shape has been placed, select it to add a description if needed.',
   ];
   foreach ($bundles as $bundle => $description) {
     if (\Drupal\field\Entity\FieldConfig::loadByName('node', $bundle, 'field_coverage')) {
@@ -3136,13 +3136,70 @@ function mukurtu_core_update_40091(): void {
 }
 
 /**
+ * Add LC Project and LC Label exposed filters to the admin/content view.
+ */
+function mukurtu_core_update_40092(): void {
+  $config_source = new \Drupal\Core\Config\FileStorage(
+    \Drupal::service('extension.list.profile')->getPath('mukurtu') . '/config/install'
+  );
+  $config_factory = \Drupal::configFactory();
+
+  $config_name = 'views.view.mukurtu_manage_all_content';
+  $data = $config_source->read($config_name);
+  if ($data) {
+    $config_factory->getEditable($config_name)->setData($data)->save(TRUE);
+  }
+}
+
+/**
+ * Move citation field templates under a nested 'citation_templates' key.
+ *
+ * Citation templates were previously stored as top-level keys in the
+ * shared mukurtu.settings config object, keyed directly by node bundle
+ * machine name. This risks colliding with other top-level keys in the
+ * same object (e.g. mukurtu_related_content_display) if a bundle
+ * machine name ever matches one. Move all bundle-keyed citation
+ * template values to citation_templates.<bundle> instead. See issue #188.
+ */
+function mukurtu_core_update_40093(): void {
+  $config = \Drupal::configFactory()->getEditable('mukurtu.settings');
+  if ($config->isNew()) {
+    return;
+  }
+
+  // Keys that are known non-bundle settings in mukurtu.settings. A bundle
+  // that happens to share one of these names is skipped defensively, since
+  // we can't otherwise tell the setting apart from a bundle-named template.
+  $reservedKeys = ['mukurtu_related_content_display', 'citation_templates'];
+
+  $bundleInfo = \Drupal::service('entity_type.bundle.info')->getBundleInfo('node');
+  $rawData = $config->getRawData();
+
+  foreach ($bundleInfo as $bundleName => $bundleValue) {
+    if (in_array($bundleName, $reservedKeys, TRUE)) {
+      \Drupal::logger('mukurtu_core')->warning(
+        'Skipped citation template migration for bundle "@bundle" because its machine name collides with a reserved mukurtu.settings key. Re-enter its citation template manually at the Citation Templates settings form.',
+        ['@bundle' => $bundleName]
+      );
+      continue;
+    }
+    if (array_key_exists($bundleName, $rawData)) {
+      $config->set("citation_templates.$bundleName", $rawData[$bundleName]);
+      $config->clear($bundleName);
+    }
+  }
+
+  $config->save();
+}
+
+/**
  * Implements hook_update_requirements_alter().
  *
  * Drupal's own update requirements check runs before any hook_update_N and
  * blocks the whole update run with an Error severity "Missing or invalid
  * modules" requirement if core.extension lists a module whose code no longer
  * exists on disk. Since features and features_ui were removed from the
- * codebase in the same release that mukurtu_core_update_40092() was added to
+ * codebase in the same release that mukurtu_core_update_40094() was added to
  * clean up core.extension, that hook can never run on affected sites -- the
  * site is stuck before update hooks even start. Suppress the error only when
  * the two known-removed modules are the sole cause, so any other genuinely
@@ -3174,7 +3231,7 @@ function mukurtu_core_update_requirements_alter(array &$requirements): void {
  * unlike other module-removal cleanups there are no fields or config
  * entities to remove here.
  */
-function mukurtu_core_update_40092(): void {
+function mukurtu_core_update_40094(): void {
   // Write directly to config.storage (the raw layer) rather than going through
   // configFactory()->save(). The factory dispatches ConfigCrudEvent::SAVE, which
   // triggers a ModuleInstaller subscriber that calls install() on the removed
