@@ -3193,12 +3193,41 @@ function mukurtu_core_update_40093(): void {
 }
 
 /**
+ * Disable contextual/admin links on the Browse by Category block.
+ *
+ * The block display's default show_admin_links (true) causes core's
+ * contextual-links module to inject an unstyled placeholder <div> into
+ * title_suffix for any user with the 'access contextual links' permission
+ * (e.g. Mukurtu Manager). That placeholder is a direct sibling of the view's
+ * rows inside the .category-grid CSS Grid container, so it renders as an
+ * extra, empty first card. The homepage's Layout Builder already provides
+ * an edit affordance for this block, making the contextual link redundant.
+ */
+function mukurtu_core_update_40094(): void {
+  $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_categories');
+  if ($config->isNew()) {
+    return;
+  }
+
+  // Only touch the display if it still exists as expected; a site that has
+  // removed or renamed this block display shouldn't get a partial, malformed
+  // one written back.
+  $display_options = $config->get('display.browse_by_category_block.display_options');
+  if (!is_array($display_options)) {
+    return;
+  }
+
+  $config->set('display.browse_by_category_block.display_options.show_admin_links', FALSE);
+  $config->save();
+}
+
+/**
  * Rename mis-named media view modes to usage-based machine names, relabel
  * the HTML-embed-only large/medium/small modes, update every display and
  * filter format that referenced the old names, and rewrite any already
  * embedded media that stored the old view mode name inline. See #1721.
  */
-function mukurtu_core_update_40094(&$sandbox): string {
+function mukurtu_core_update_40095(&$sandbox): string {
   $mode_renames = [
     'digital_heritage_full' => 'image_with_description',
     'digital_heritage_sidebar' => 'teaser_featured',
