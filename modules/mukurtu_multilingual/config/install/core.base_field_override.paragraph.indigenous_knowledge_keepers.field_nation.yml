@@ -8,7 +8,7 @@ field_name: field_nation
 entity_type: paragraph
 bundle: indigenous_knowledge_keepers
 label: 'Nation or Community'
-description: "Including the Knowledge Keeper's Nation or community foregrounds the importance of relationships when it comes to Indigenous knowledges and recognizes which nations hold which teachings. The  nation/community  element  of  the  citation  not  only  recognizes  the  important  relationship of an Elder or Knowledge Keeper to their nation or community, it helps celebrate the nuances between different community teachings. </br>Maximum 255 characters."
+description: "Including the Knowledge Keeper's Nation or community foregrounds the importance of relationships when it comes to Indigenous knowledges and recognizes which nations hold which teachings. The  nation/community  element  of  the  citation  not  only  recognizes  the  important  relationship of an Elder or Knowledge Keeper to their nation or community, it helps celebrate the nuances between different community teachings. <br />Maximum 255 characters."
 required: false
 translatable: true
 default_value: {  }
