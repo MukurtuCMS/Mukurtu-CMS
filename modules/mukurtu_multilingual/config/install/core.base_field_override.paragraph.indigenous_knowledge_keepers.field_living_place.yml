@@ -8,7 +8,7 @@ field_name: field_living_place
 entity_type: paragraph
 bundle: indigenous_knowledge_keepers
 label: 'City or Community They Live in'
-description: 'Knowledge Keepers may live in places that differ from the origins of their knowledge, nation, or birthplace, and, in some cases, this may be an important relationship they want to recognize. Only used if applicable and indicated by the Knowledge Keeper. </br>Maximum 255 characters.'
+description: 'Knowledge Keepers may live in places that differ from the origins of their knowledge, nation, or birthplace, and, in some cases, this may be an important relationship they want to recognize. Only used if applicable and indicated by the Knowledge Keeper. <br />Maximum 255 characters.'
 required: false
 translatable: true
 default_value: {  }
