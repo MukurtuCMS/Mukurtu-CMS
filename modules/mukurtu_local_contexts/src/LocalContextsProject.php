@@ -628,8 +628,8 @@ class LocalContextsProject extends LocalContextsHubBase {
     }
 
     $config = $this->configFactory->get(self::SETTINGS_CONFIG_KEY);
-    $gracePeriod = (int) ($config->get('deleted_project_grace_period') ?? 604800);
-    $minConsecutiveFailures = (int) ($config->get('deleted_project_min_consecutive_failures') ?? 3);
+    $gracePeriod = (int) ($config->get('deleted_project_grace_period') ?? 2419200);
+    $minConsecutiveFailures = (int) ($config->get('deleted_project_min_consecutive_failures') ?? 4);
 
     $elapsed = $this->requestTime - $this->notFoundSince;
     return $elapsed >= $gracePeriod && $this->notFoundCount >= $minConsecutiveFailures;

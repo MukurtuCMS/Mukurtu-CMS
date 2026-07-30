@@ -413,11 +413,16 @@ abstract class ManageSupportedProjectsBase extends FormBase {
     ];
     $tooltip = $tooltips[$status] ?? $this->t('This project could not be synced with the Local Contexts Hub. @message', ['@message' => $project['status_message'] ?? '']);
 
+    // A not_found result is distinguished from other failure types with its
+    // own label, since it means the project no longer exists on the hub
+    // rather than a recoverable sync issue (bad key, permissions, etc.).
+    $label = $status === LocalContextsProject::STATUS_NOT_FOUND ? $this->t('Deleted') : $this->t('Not available');
+
     return [
       'data' => [
         '#type' => 'html_tag',
         '#tag' => 'strong',
-        '#value' => $this->t('Not available'),
+        '#value' => $label,
         '#attributes' => ['title' => $tooltip],
       ],
     ];

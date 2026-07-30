@@ -954,3 +954,34 @@ function mukurtu_local_contexts_update_40004() {
   }
   $config->save();
 }
+
+/**
+ * Finalize the confirmed-deletion thresholds per Local Contexts team input.
+ *
+ * update_40004() set provisional placeholder values (604800s/7 days grace
+ * period, 3 minimum consecutive not_found syncs) pending confirmation from
+ * the Local Contexts team on the actual intended timing. They've since
+ * confirmed a ~4 week total window from the first not_found result to the
+ * project being purged. Only overwrite sites still sitting at the old
+ * provisional values - if an admin already customized either value, leave
+ * it alone.
+ */
+function mukurtu_local_contexts_update_40005() {
+  $config = \Drupal::configFactory()->getEditable('mukurtu_local_contexts.settings');
+
+  if ((int) $config->get('deleted_project_grace_period') === 604800) {
+    $config->set('deleted_project_grace_period', 2419200);
+  }
+  else {
+    \Drupal::logger('mukurtu_local_contexts')->notice('Skipped updating deleted_project_grace_period to the finalized default (2419200) - a custom value is already set.');
+  }
+
+  if ((int) $config->get('deleted_project_min_consecutive_failures') === 3) {
+    $config->set('deleted_project_min_consecutive_failures', 4);
+  }
+  else {
+    \Drupal::logger('mukurtu_local_contexts')->notice('Skipped updating deleted_project_min_consecutive_failures to the finalized default (4) - a custom value is already set.');
+  }
+
+  $config->save();
+}
