@@ -1,14 +1,57 @@
-// @TODO: explore where this gets applied.
-// .related-content {
-//   &__label {
-//     color: var(--brand-text-color);
-//     font-weight: var(--text-bold);
-//     font-size: var(--font-size-s);
-//     letter-spacing: var(--letter-spacing-label);
-//     margin-block-end: var(--v-space-xs);
+@use "../../../external/include-media";
 
-//     @include media('>=lg') {
-//       font-size: var(--font-size-m);
-//     }
-//   }
-// }
+.related-content {
+  &__label {
+    color: var(--brand-text-color);
+    font-weight: var(--text-bold);
+    font-size: var(--font-size-s);
+    letter-spacing: var(--letter-spacing-label);
+    margin-block-end: var(--v-space-xs);
+
+    @include include-media.media('>=lg') {
+      font-size: var(--font-size-m);
+    }
+  }
+
+  &__filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--v-space-6xs);
+    margin-block-end: var(--v-space-xs);
+  }
+
+  &__filter {
+    background-color: var(--color-white);
+    color: var(--brand-text-color);
+    border: 1px solid var(--brand-text-color);
+    border-radius: var(--v-space-6xs);
+    padding-block: var(--v-space-6xs);
+    padding-inline: var(--v-space-4xs);
+    font-size: var(--font-size-xs);
+    cursor: pointer;
+
+    &:hover {
+      background-color: var(--brand-light);
+      color: var(--brand-text-color);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--focus-color);
+      outline-offset: 2px;
+    }
+
+    &.is-active {
+      background-color: var(--brand-primary-dark);
+      border-color: var(--brand-primary-dark);
+      color: var(--light-text-color);
+
+      &:hover {
+        color: var(--light-text-color);
+      }
+    }
+  }
+
+  .field__item[hidden] {
+    display: none;
+  }
+}
