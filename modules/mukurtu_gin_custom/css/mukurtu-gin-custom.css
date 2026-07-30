@@ -274,6 +274,27 @@ short fields themselves. Shrink it in these dialogs specifically. */
     flex-direction: column !important;
 }
 
+/* Canonical .ui-dialog/.ui-widget-overlay box-chrome fallback (same
+   loaded-everywhere reasoning as the positioning override above). Gin's
+   own dialog background and backdrop rely on --gin-bg-layer/--gin-bg-layer2,
+   custom properties only ever defined by Gin's own root/theme CSS. On a
+   front-end page themed with mukurtu_v4 (not Gin), those properties are
+   undefined, so var() resolves to nothing and the dialog box + backdrop
+   render fully transparent - the box positions correctly but has no
+   visible surface, so its content appears to bleed into the page behind
+   it. The fallback values here only apply when the property is genuinely
+   undefined, so Gin's own admin-side appearance (including dark mode) is
+   unaffected. */
+.ui-dialog:not(.ui-dialog-off-canvas) {
+    background: var(--gin-bg-layer, #fff) !important;
+    border: 1px solid rgba(0, 0, 0, 0.2) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+}
+
+.ui-widget-overlay {
+    background: var(--gin-bg-layer2, rgba(0, 0, 0, 0.5)) !important;
+}
+
 .ui-dialog .ui-dialog-titlebar {
     flex-shrink: 0;
 }

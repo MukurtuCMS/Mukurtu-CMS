@@ -245,6 +245,7 @@ class PublicSubmissionForm extends FormBase {
         && ($element[$key]['#type'] ?? NULL) === 'submit'
         && isset($element[$key]['#value'])
         && (string) $element[$key]['#value'] === (string) $this->t('Remove')
+        && !isset($element[$key]['#attributes']['aria-label'])
       ) {
         $element[$key]['#attributes']['aria-label'] = $child_delta !== NULL
           ? $this->t('Remove @field item @number', ['@field' => $child_label, '@number' => $child_delta + 1])

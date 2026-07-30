@@ -7,4 +7,122 @@
     padding-inline: var(--layout-padding);
     padding-block: var(--v-space-2xs);
   }
+
+  // Group visual rhythm: each field/fieldset/details gets consistent
+  // breathing room, matching the spacing scale used elsewhere in the
+  // theme rather than the browser's default fieldset margins.
+  .form-item,
+  fieldset.form-wrapper,
+  details.form-wrapper {
+    margin-block-end: var(--v-space-3xs);
+  }
+
+  // The rule above is meant to separate whole fields/fieldsets from each
+  // other - applied generically, it also lands on every individual
+  // checkbox/radio *option* within one checkboxes/radios group (e.g. each
+  // Category term), spacing them out as if they were separate fields.
+  // Tighten those back down to a compact list. margin-block-start also
+  // has to be reset here: 02-molecules/form's sitewide ".form-item +
+  // .form-item" rule adds 1rem above every form-item that follows
+  // another - normally correct for separating whole fields, but between
+  // two checkbox/radio options in the same group it re-adds exactly the
+  // gap margin-block-end below is trying to remove (the two margins
+  // collapse to whichever is larger, so the 1rem was winning outright).
+  .form-item.js-form-type-checkbox,
+  .form-item.js-form-type-radio {
+    margin-block-start: 0;
+    margin-block-end: var(--v-space-6xs);
+  }
+
+  // Replace the browser default fieldset box (thin grey border, floating
+  // legend) with a plain section heading + rule - keeps the flat,
+  // borderless look the rest of the theme uses instead of introducing a
+  // new "card" style not seen anywhere else on the site.
+  fieldset.form-wrapper {
+    border: none;
+    padding: 0;
+    margin-inline: 0;
+
+    > legend,
+    > .fieldset-legend {
+      display: block;
+      font-weight: var(--text-bold);
+      font-size: 1.1em;
+      padding-block-end: var(--v-space-6xs);
+      margin-block-end: var(--v-space-5xs);
+      border-block-end: 2px solid var(--brand-light);
+    }
+  }
+
+  // Nested fieldsets (e.g. a paragraph item inside a multi-value field)
+  // get a lighter treatment so they read as sub-groups, not top-level
+  // sections.
+  fieldset.form-wrapper fieldset.form-wrapper {
+    > legend,
+    > .fieldset-legend {
+      font-size: 1em;
+      border-block-end-color: var(--color-greys-alpha-border);
+    }
+  }
+
+  // A paragraph item's title/remove-button row (e.g. "Citing Indigenous
+  // Elders and Knowledge Keepers") isn't a real fieldset/legend - it's a
+  // plain title div + dropbutton wrapper - so it needs the same
+  // section-heading treatment applied directly rather than through the
+  // fieldset selectors above.
+  .paragraph-type-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--v-space-5xs);
+    padding-block-end: var(--v-space-6xs);
+    margin-block-end: var(--v-space-5xs);
+    border-block-end: 2px solid var(--brand-light);
+
+    .paragraph-type-title {
+      font-weight: var(--text-bold);
+      font-size: 1.1em;
+    }
+  }
+
+  // De-emphasize field help text relative to labels/input content, and
+  // tighten its spacing - currently identical in weight/color to the
+  // field's own value, which reads as visual noise at this volume of text.
+  .form-item .description,
+  .field--widget-media-library-widget > .description {
+    color: var(--color-text-secondary);
+    font-size: 0.9em;
+    margin-block-start: var(--v-space-6xs);
+  }
+
+  // The composite date widget (Year/Month/Day) wraps its fields in
+  // Drupal's generic ".container-inline" fieldset class, which (via core
+  // CSS, not this theme) makes each field's own wrapper display:inline-block
+  // - that's what actually put them in a row, not a rule of ours. Now that
+  // the select atom overrides that to display:grid (see _select.scss, for
+  // the dropdown-arrow-alignment fix), the row needs to come from flex
+  // instead. That has to go on .fieldset-wrapper (the actual parent of the
+  // Year/Month/Day items), not .container-inline itself - the fieldset's
+  // own direct children are just <legend> and .fieldset-wrapper, so making
+  // the fieldset the flex container would put the *legend* side-by-side
+  // with the fields instead of above them.
+  .container-inline > .fieldset-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--v-space-5xs);
+    align-items: flex-end;
+
+    .form-item {
+      margin-block-end: 0;
+    }
+  }
+
+  // A native multi-select listbox (e.g. Local Contexts Labels) defaults
+  // to a fixed "size" attribute that can dominate the page height -
+  // cap it and let it scroll instead.
+  select[multiple],
+  select[size] {
+    max-block-size: 12rem;
+  }
 }
