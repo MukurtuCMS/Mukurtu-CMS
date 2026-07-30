@@ -3,6 +3,7 @@
 namespace Drupal\mukurtu_local_contexts;
 
 use PDO;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\og\Og;
@@ -15,8 +16,170 @@ class LocalContextsSupportedProjectManager {
    *
    * @param \Drupal\Core\Database\Connection $db
    *   The database connection.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
+   *   The config factory.
    */
-  public function __construct(protected Connection $db) {
+  public function __construct(protected Connection $db, protected ConfigFactoryInterface $configFactory) {
+  }
+
+  /**
+   * Get all Local Contexts Hub API keys configured for the site.
+   *
+   * @return string[]
+   *   The configured site-wide API keys.
+   */
+  public function getSiteApiKeys(): array {
+    return array_values(array_filter((array) $this->configFactory->get('mukurtu_local_contexts.settings')->get('site_api_keys')));
+  }
+
+  /**
+   * Get all Local Contexts Hub API keys configured for a group.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $group
+   *   The OG group (community or protocol).
+   *
+   * @return string[]
+   *   The configured API keys for the group.
+   */
+  public function getGroupApiKeys(ContentEntityInterface $group): array {
+    if (!$group->hasField('field_local_contexts_api_key')) {
+      return [];
+    }
+    $keys = array_column($group->get('field_local_contexts_api_key')->getValue(), 'value');
+    return array_values(array_filter($keys));
+  }
+
+  /**
+   * Get the admin-provided labels for the site's API keys.
+   *
+   * @return string[]
+   *   Labels keyed by API key.
+   */
+  public function getSiteApiKeyLabels(): array {
+    return $this->getApiKeyLabels('site', 0);
+  }
+
+  /**
+   * Get the admin-provided labels for a group's API keys.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $group
+   *   The OG group (community or protocol).
+   *
+   * @return string[]
+   *   Labels keyed by API key.
+   */
+  public function getGroupApiKeyLabels(ContentEntityInterface $group): array {
+    return $this->getApiKeyLabels($group->getEntityTypeId(), (int) $group->id());
+  }
+
+  /**
+   * Set the admin-provided label for one of the site's API keys.
+   *
+   * @param string $api_key
+   *   The API key.
+   * @param string $label
+   *   The label. An empty label removes any existing label.
+   */
+  public function setSiteApiKeyLabel(string $api_key, string $label): void {
+    $this->setApiKeyLabel('site', 0, $api_key, $label);
+  }
+
+  /**
+   * Set the admin-provided label for one of a group's API keys.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $group
+   *   The OG group (community or protocol).
+   * @param string $api_key
+   *   The API key.
+   * @param string $label
+   *   The label. An empty label removes any existing label.
+   */
+  public function setGroupApiKeyLabel(ContentEntityInterface $group, string $api_key, string $label): void {
+    $this->setApiKeyLabel($group->getEntityTypeId(), (int) $group->id(), $api_key, $label);
+  }
+
+  /**
+   * Remove the admin-provided label for one of the site's API keys.
+   *
+   * @param string $api_key
+   *   The API key.
+   */
+  public function removeSiteApiKeyLabel(string $api_key): void {
+    $this->removeApiKeyLabel('site', 0, $api_key);
+  }
+
+  /**
+   * Remove the admin-provided label for one of a group's API keys.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $group
+   *   The OG group (community or protocol).
+   * @param string $api_key
+   *   The API key.
+   */
+  public function removeGroupApiKeyLabel(ContentEntityInterface $group, string $api_key): void {
+    $this->removeApiKeyLabel($group->getEntityTypeId(), (int) $group->id(), $api_key);
+  }
+
+  /**
+   * Get the admin-provided API key labels for a scope.
+   *
+   * @param string $type
+   *   The group entity type ID, or 'site'.
+   * @param int $group_id
+   *   The group entity ID, or 0 for site-wide.
+   *
+   * @return string[]
+   *   Labels keyed by API key.
+   */
+  private function getApiKeyLabels(string $type, int $group_id): array {
+    return $this->db->select('mukurtu_local_contexts_api_key_labels', 'l')
+      ->condition('type', $type)
+      ->condition('group_id', $group_id)
+      ->fields('l', ['api_key', 'label'])
+      ->execute()
+      ->fetchAllKeyed();
+  }
+
+  /**
+   * Set the admin-provided label for an API key in a scope.
+   *
+   * @param string $type
+   *   The group entity type ID, or 'site'.
+   * @param int $group_id
+   *   The group entity ID, or 0 for site-wide.
+   * @param string $api_key
+   *   The API key.
+   * @param string $label
+   *   The label. An empty label removes any existing label.
+   */
+  private function setApiKeyLabel(string $type, int $group_id, string $api_key, string $label): void {
+    $label = trim($label);
+    if ($label === '') {
+      $this->removeApiKeyLabel($type, $group_id, $api_key);
+      return;
+    }
+    $this->db->merge('mukurtu_local_contexts_api_key_labels')
+      ->keys(['type' => $type, 'group_id' => $group_id, 'api_key' => $api_key])
+      ->fields(['label' => $label])
+      ->execute();
+  }
+
+  /**
+   * Remove the admin-provided label for an API key in a scope.
+   *
+   * @param string $type
+   *   The group entity type ID, or 'site'.
+   * @param int $group_id
+   *   The group entity ID, or 0 for site-wide.
+   * @param string $api_key
+   *   The API key.
+   */
+  private function removeApiKeyLabel(string $type, int $group_id, string $api_key): void {
+    $this->db->delete('mukurtu_local_contexts_api_key_labels')
+      ->condition('type', $type)
+      ->condition('group_id', $group_id)
+      ->condition('api_key', $api_key)
+      ->execute();
   }
 
   /**
@@ -41,15 +204,18 @@ class LocalContextsSupportedProjectManager {
    *
    * @param string $project_id
    *   The project ID to add.
+   * @param string|null $api_key
+   *   The Local Contexts Hub API key used to add this project, if any.
    *
    * @return void
    */
-  public function addSiteProject($project_id) {
+  public function addSiteProject($project_id, ?string $api_key = NULL) {
     if (!$this->isSiteSupportedProject($project_id)) {
       $fields = [
         'project_id' => $project_id,
         'type' => 'site',
         'group_id' => 0,
+        'api_key' => $api_key,
       ];
       $query = $this->db->insert('mukurtu_local_contexts_supported_projects')->fields($fields);
       $query->execute();
@@ -88,7 +254,7 @@ class LocalContextsSupportedProjectManager {
   public function getAllProjects(): array {
     $query = $this->db->select('mukurtu_local_contexts_supported_projects', 'sp');
     $query->join('mukurtu_local_contexts_projects', 'p', 'sp.project_id = p.id');
-    $query->fields('sp', ['type', 'group_id']);
+    $query->fields('sp', ['type', 'group_id', 'api_key']);
     $query->fields('p', ['id', 'provider_id', 'title', 'privacy', 'updated']);
     $query->orderBy('sp.type', 'DESC');
     $query->orderBy('sp.group_id');
@@ -112,7 +278,12 @@ class LocalContextsSupportedProjectManager {
     $query->addField('p', 'id', 'project_id');
 
     $result = $query->execute();
-    $labels = $result->fetchAllAssoc('id', PDO::FETCH_ASSOC);
+    $labels = [];
+    while ($label = $result->fetchAssoc()) {
+      // Label ids are not unique across projects, so key compound to avoid
+      // collisions (mirrors how notices are keyed below).
+      $labels[$label['project_id'] . ':' . $label['id']] = $label;
+    }
     return $labels;
   }
 
@@ -149,6 +320,27 @@ class LocalContextsSupportedProjectManager {
   }
 
   /**
+   * Get a map of Local Contexts label/notice compound keys to display names.
+   *
+   * @return string[]
+   *   Label/notice display names, keyed by their compound
+   *   "{project_id}:{id}:{display}" (labels) or "{project_id}:{type}:{display}"
+   *   (notices) key.
+   */
+  public function getLabelAndNoticeNames(): array {
+    $names = [];
+    foreach ($this->getAllLabels() as $label) {
+      $key = $label['project_id'] . ':' . $label['id'] . ':' . $label['display'];
+      $names[$key] = $label['name'];
+    }
+    foreach ($this->getAllNotices() as $notice) {
+      $key = $notice['project_id'] . ':' . $notice['type'] . ':' . $notice['display'];
+      $names[$key] = $notice['name'];
+    }
+    return $names;
+  }
+
+  /**
    * Get all site projects that have been added.
    *
    * @param bool $exclude_legacy
@@ -163,7 +355,8 @@ class LocalContextsSupportedProjectManager {
     $query
       ->condition('sp.type', 'site')
       ->condition('sp.group_id', 0)
-      ->fields('p', ['id', 'provider_id', 'title', 'privacy', 'updated']);
+      ->fields('p', ['id', 'provider_id', 'title', 'privacy', 'updated'])
+      ->fields('sp', ['api_key']);
     $query->orderBy('p.title');
 
     $result = $query->execute();
@@ -177,6 +370,86 @@ class LocalContextsSupportedProjectManager {
       }
     }
     return $projects;
+  }
+
+  /**
+   * Get the project IDs of site projects added with a given API key.
+   *
+   * @param string $api_key
+   *   The API key.
+   *
+   * @return string[]
+   *   The project IDs.
+   */
+  public function getSiteProjectsByApiKey(string $api_key): array {
+    return $this->db->select('mukurtu_local_contexts_supported_projects', 'sp')
+      ->condition('sp.type', 'site')
+      ->condition('sp.group_id', 0)
+      ->condition('sp.api_key', $api_key)
+      ->fields('sp', ['project_id'])
+      ->execute()
+      ->fetchCol();
+  }
+
+  /**
+   * Get the project IDs of group projects added with a given API key.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $group
+   *   The OG group (community or protocol).
+   * @param string $api_key
+   *   The API key.
+   *
+   * @return string[]
+   *   The project IDs.
+   */
+  public function getGroupProjectsByApiKey(ContentEntityInterface $group, string $api_key): array {
+    return $this->db->select('mukurtu_local_contexts_supported_projects', 'sp')
+      ->condition('sp.type', $group->getEntityTypeId())
+      ->condition('sp.group_id', $group->id())
+      ->condition('sp.api_key', $api_key)
+      ->fields('sp', ['project_id'])
+      ->execute()
+      ->fetchCol();
+  }
+
+  /**
+   * Get the project IDs of site projects with no recorded API key.
+   *
+   * Projects added before per-project key tracking existed, or legacy
+   * v3-migrated projects, can have a NULL api_key. They can't be
+   * attributed to any specific key, so callers checking whether a key is
+   * safe to remove should treat these separately.
+   *
+   * @return string[]
+   *   The project IDs.
+   */
+  public function getSiteProjectsWithoutApiKey(): array {
+    return $this->db->select('mukurtu_local_contexts_supported_projects', 'sp')
+      ->condition('sp.type', 'site')
+      ->condition('sp.group_id', 0)
+      ->isNull('sp.api_key')
+      ->fields('sp', ['project_id'])
+      ->execute()
+      ->fetchCol();
+  }
+
+  /**
+   * Get the project IDs of group projects with no recorded API key.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $group
+   *   The OG group (community or protocol).
+   *
+   * @return string[]
+   *   The project IDs.
+   */
+  public function getGroupProjectsWithoutApiKey(ContentEntityInterface $group): array {
+    return $this->db->select('mukurtu_local_contexts_supported_projects', 'sp')
+      ->condition('sp.type', $group->getEntityTypeId())
+      ->condition('sp.group_id', $group->id())
+      ->isNull('sp.api_key')
+      ->fields('sp', ['project_id'])
+      ->execute()
+      ->fetchCol();
   }
 
   /**
@@ -196,7 +469,8 @@ class LocalContextsSupportedProjectManager {
     $query
       ->condition('sp.type', $group->getEntityTypeId())
       ->condition('sp.group_id', $group->id())
-      ->fields('p', ['id', 'provider_id', 'title', 'privacy', 'updated']);
+      ->fields('p', ['id', 'provider_id', 'title', 'privacy', 'updated'])
+      ->fields('sp', ['api_key']);
     $query->orderBy('p.title');
 
     $result = $query->execute();
@@ -241,15 +515,18 @@ class LocalContextsSupportedProjectManager {
    *   The OG group (community or protocol).
    * @param string $project_id
    *   The project ID to add.
+   * @param string|null $api_key
+   *   The Local Contexts Hub API key used to add this project, if any.
    *
    * @return void
    */
-  public function addGroupProject(ContentEntityInterface $group, string $project_id) {
+  public function addGroupProject(ContentEntityInterface $group, string $project_id, ?string $api_key = NULL) {
     if (!$this->isGroupSupportedProject($group, $project_id)) {
       $fields = [
         'project_id' => $project_id,
         'type' => $group->getEntityTypeId(),
         'group_id' => $group->id(),
+        'api_key' => $api_key,
       ];
       $query = $this->db->insert('mukurtu_local_contexts_supported_projects')->fields($fields);
       $query->execute();
@@ -316,26 +593,32 @@ class LocalContextsSupportedProjectManager {
 
     // Delete labels provided by the project.
     $labels = $this->getAllLabels();
-    foreach ($labels as $label_id => $label) {
+    foreach ($labels as $label) {
       if ($label['project_id'] == $project_id) {
         $query = $this->db->delete('mukurtu_local_contexts_labels')
-          ->condition('id', $label_id);
+          ->condition('id', $label['id'])
+          ->condition('project_id', $project_id);
         $query->execute();
         $query = $this->db->delete('mukurtu_local_contexts_label_translations')
-          ->condition('label_id', $label_id);
+          ->condition('label_id', $label['id'])
+          ->condition('project_id', $project_id);
         $query->execute();
       }
     }
 
-    // Delete notices provided by the project.
+    // Delete notices provided by the project. Notices have a compound
+    // primary key (project_id, type) - there is no 'id' or 'label_id'
+    // column on these tables.
     $notices = $this->getAllNotices();
-    foreach ($notices as $notice_id => $notice) {
+    foreach ($notices as $notice) {
       if ($notice['project_id'] == $project_id) {
         $query = $this->db->delete('mukurtu_local_contexts_notices')
-          ->condition('id', $notice_id);
+          ->condition('project_id', $project_id)
+          ->condition('type', $notice['type']);
         $query->execute();
         $query = $this->db->delete('mukurtu_local_contexts_notice_translations')
-          ->condition('label_id', $notice_id);
+          ->condition('project_id', $project_id)
+          ->condition('type', $notice['type']);
         $query->execute();
       }
     }
@@ -349,6 +632,62 @@ class LocalContextsSupportedProjectManager {
     $query = $this->db->delete('mukurtu_local_contexts_projects')
       ->condition('id', $project_id);
     $query->execute();
+  }
+
+  /**
+   * Get all project IDs that are referenced by existing content.
+   *
+   * A project counts as referenced if it's applied directly via
+   * field_local_contexts_projects, or if any of its individual
+   * labels/notices are applied via field_local_contexts_labels_and_notices
+   * (whose compound keys always start with "{project_id}:").
+   *
+   * @return string[]
+   *   Project IDs referenced by existing nodes.
+   */
+  public function getReferencedProjectIds(): array {
+    $ids = $this->db->select('node__field_local_contexts_projects', 'p')
+      ->fields('p', ['field_local_contexts_projects_value'])
+      ->distinct()
+      ->execute()
+      ->fetchCol();
+
+    foreach ($this->getReferencedLabelAndNoticeKeys() as $value) {
+      [$project_id] = explode(':', $value, 2);
+      $ids[] = $project_id;
+    }
+
+    return array_values(array_unique($ids));
+  }
+
+  /**
+   * Get all label/notice compound keys directly referenced by content.
+   *
+   * @return string[]
+   *   Distinct field_local_contexts_labels_and_notices values on existing
+   *   nodes, in "{project_id}:{id}:{label|notice}" compound key format.
+   */
+  public function getReferencedLabelAndNoticeKeys(): array {
+    return $this->db->select('node__field_local_contexts_labels_and_notices', 'l')
+      ->fields('l', ['field_local_contexts_labels_and_notices_value'])
+      ->distinct()
+      ->execute()
+      ->fetchCol();
+  }
+
+  /**
+   * Get legacy project IDs that are referenced by existing content.
+   *
+   * Legacy projects (see isLegacyProjectId()) should not normally be offered
+   * as selectable options, but if content already references one it must
+   * still appear so that filters/facets can find that content.
+   *
+   * @return string[]
+   *   Legacy project IDs referenced by field_local_contexts_projects or
+   *   field_local_contexts_labels_and_notices on existing nodes.
+   */
+  public function getReferencedLegacyProjectIds(): array {
+    return array_values(array_filter($this->getReferencedProjectIds(), [$this, 'isLegacyProjectId']));
   }
 
   /**
@@ -392,7 +731,13 @@ class LocalContextsSupportedProjectManager {
     $query->addField('p', 'id', 'project_id');
 
     $result = $query->execute();
-    return $result->fetchAllAssoc('id', PDO::FETCH_ASSOC);
+    $labels = [];
+    while ($label = $result->fetchAssoc()) {
+      // Label ids are not unique across projects, so key compound to avoid
+      // collisions (mirrors how notices are keyed below).
+      $labels[$label['project_id'] . ':' . $label['id']] = $label;
+    }
+    return $labels;
   }
 
   /**
@@ -456,7 +801,12 @@ class LocalContextsSupportedProjectManager {
 
     $result = $query->execute();
 
-    $labels = $result->fetchAllAssoc('id', PDO::FETCH_ASSOC);
+    $labels = [];
+    while ($label = $result->fetchAssoc()) {
+      // Label ids are not unique across projects, so key compound to avoid
+      // collisions (mirrors how notices are keyed below).
+      $labels[$label['project_id'] . ':' . $label['id']] = $label;
+    }
     return $labels;
   }
 
