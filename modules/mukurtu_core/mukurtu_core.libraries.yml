@@ -81,3 +81,11 @@ user-profile-back-to-site-link:
   dependencies:
     - core/drupal
     - core/once
+
+related-content-filter:
+  version: 1.x
+  js:
+    js/related-content-filter.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
