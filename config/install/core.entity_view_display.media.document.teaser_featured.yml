@@ -2,43 +2,39 @@ langcode: en
 status: true
 dependencies:
   config:
-    - core.entity_view_mode.media.digital_heritage_full
-    - media.type.video
+    - core.entity_view_mode.media.teaser_featured
+    - image.style.large_900px
+    - media.type.document
   module:
-    - blazy
-    - file
+    - image
     - layout_builder
 third_party_settings:
   layout_builder:
     enabled: false
     allow_custom: false
-id: media.video.digital_heritage_full
+id: media.document.teaser_featured
 targetEntityType: media
-bundle: video
-mode: digital_heritage_full
+bundle: document
+mode: teaser_featured
 content:
-  field_media_video_file:
-    type: file_video
+  thumbnail:
+    type: image
     label: hidden
     settings:
-      controls: true
-      autoplay: false
-      loop: false
-      multiple_file_display_type: tags
-      muted: false
-      width: 640
-      height: 480
-      playsinline: false
-    third_party_settings:
-      blazy:
-        blazy: false
+      image_link: ''
+      image_style: large_900px
+      image_loading:
+        attribute: lazy
+    third_party_settings: {  }
     weight: 0
     region: content
 hidden:
   created: true
   field_communities: true
   field_cultural_protocols: true
+  field_extracted_text: true
   field_identifier: true
+  field_media_document: true
   field_media_tags: true
   field_people: true
   field_thumbnail: true
@@ -46,5 +42,4 @@ hidden:
   langcode: true
   name: true
   search_api_excerpt: true
-  thumbnail: true
   uid: true

@@ -3,8 +3,8 @@ status: true
 dependencies:
   module:
     - media
-id: media.digital_heritage_full
-label: 'Digital Heritage Full'
+id: media.teaser_featured
+label: 'Teaser / Featured Media'
 description: ''
 targetEntityType: media
 cache: true

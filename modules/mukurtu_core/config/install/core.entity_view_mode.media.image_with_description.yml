@@ -3,8 +3,8 @@ status: true
 dependencies:
   module:
     - media
-id: media.digital_heritage_sidebar
-label: 'Digital Heritage Sidebar'
+id: media.image_with_description
+label: 'Image with Description'
 description: ''
 targetEntityType: media
 cache: true

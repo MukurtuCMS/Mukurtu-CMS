@@ -1,7 +1,7 @@
 {#
 /**
  * @file
- * Theme override to present an audio file in digital_heritage_sidebar view mode.
+ * Theme override to present an audio file in teaser_featured view mode.
  *
  * Displays a thumbnail image (or fallback audio icon). When not on a page where
  * skip_player is set, overlays a play/pause button and hides the native audio
@@ -16,14 +16,14 @@
  * - skip_player: TRUE on community/protocol pages where no player is wanted.
  * - audio_fallback_thumbnail_url: URL of the default audio icon image.
  * @see template_preprocess_media()
- * @see mukurtu_v4_preprocess_media__audio__digital_heritage_sidebar()
+ * @see mukurtu_v4_preprocess_media__audio__teaser_featured()
  */
 #}
 {%
   set classes = [
     'media',
     'media--' ~ bundle,
-    'media--digital-heritage-sidebar'
+    'media--teaser-featured'
   ]
 %}
 
