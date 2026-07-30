@@ -312,7 +312,6 @@ hidden:
   field_deceased: true
   field_in_collection: true
   field_multipage_page_of: true
-  field_other_names: true
   field_protocol_control: true
   field_related_content: true
   field_related_people: true

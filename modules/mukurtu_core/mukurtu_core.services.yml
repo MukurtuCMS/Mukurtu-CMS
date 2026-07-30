@@ -16,3 +16,6 @@ services:
     class: Drupal\mukurtu_core\EventSubscriber\RepresentativeMediaComputationSubscriber
     tags:
       - { name: event_subscriber }
+  mukurtu_core.related_content_grouper:
+    class: Drupal\mukurtu_core\Service\RelatedContentGrouper
+    arguments: ['@entity_type.manager', '@config.factory', '@event_dispatcher']
