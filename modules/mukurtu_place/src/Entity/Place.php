@@ -17,7 +17,7 @@ class Place extends Node implements PlaceInterface, CulturalProtocolControlledIn
 
     $definitions['field_keywords'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Keywords'))
-      ->setDescription(t('Keywords are used to tag place records to ensure that they are discoverable when searching or browsing.	</br>Include as many keywords as needed. Select from existing keywords or add new ones.'))
+      ->setDescription(t('Keywords are used to tag place records to ensure that they are discoverable when searching or browsing.	<br />Include as many keywords as needed. Select from existing keywords or add new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -42,7 +42,7 @@ class Place extends Node implements PlaceInterface, CulturalProtocolControlledIn
 
     $definitions['field_place_type'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Place type'))
-      ->setDescription(t('Place types are used to tag place records to indicate different types of locations or places.	</br>Include as many place types as needed. Select from existing place types or add new ones.'))
+      ->setDescription(t('Place types are used to tag place records to indicate different types of locations or places.	<br />Include as many place types as needed. Select from existing place types or add new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -67,7 +67,7 @@ class Place extends Node implements PlaceInterface, CulturalProtocolControlledIn
 
     $definitions['field_media_assets'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Media Assets'))
-      ->setDescription(t('Media assets are a key element of most place records, though they are not required. Supported media types are images, documents, video, audio, and embed code. Place records can include more than one media asset, and each media asset can be a different media type. Media assets can be assigned a different cultural protocol from the place record to allow differential access to the media assets and metadata.	</br>Select "Add media" to select or upload media assets.'))
+      ->setDescription(t('Media assets are a key element of most place records, though they are not required. Supported media types are images, documents, video, audio, and embed code. Place records can include more than one media asset, and each media asset can be a different media type. Media assets can be assigned a different cultural protocol from the place record to allow differential access to the media assets and metadata.	<br />Select "Add media" to select or upload media assets.'))
       ->setSettings([
         'target_type' => 'media',
         'handler' => 'default:media',
@@ -124,7 +124,7 @@ class Place extends Node implements PlaceInterface, CulturalProtocolControlledIn
 
     $definitions['field_related_content'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Related Content'))
-      ->setDescription(t('Place records can be related to any other site content when there is a connection between those items that is important to show. Note that the place record will automatically aggregate all content where the place is referenced based on the representative terms field, and manually managing related content may not be necessary. </br>Select "Select Content" to choose from existing site content.'))
+      ->setDescription(t('Place records can be related to any other site content when there is a connection between those items that is important to show. Note that the place record will automatically aggregate all content where the place is referenced based on the representative terms field, and manually managing related content may not be necessary. <br />Select "Select Content" to choose from existing site content.'))
       ->setSettings([
         'target_type' => 'node',
         'handler' => 'default:node',
@@ -142,7 +142,7 @@ class Place extends Node implements PlaceInterface, CulturalProtocolControlledIn
 
     $definitions['field_other_place_names'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Other Place Names'))
-      ->setDescription(t('Places may be identified by multiple names, monikers, identities, and with inconsistent spellings across different content. This field is used to aggregate and display all content where the place is identified by connecting those disparate names.	</br>Include as many place names as needed. Select from existing place names or add new ones.'))
+      ->setDescription(t('Places may be identified by multiple names, monikers, identities, and with inconsistent spellings across different content. This field is used to aggregate and display all content where the place is identified by connecting those disparate names.	<br />Include as many place names as needed. Select from existing place names or add new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -167,7 +167,7 @@ class Place extends Node implements PlaceInterface, CulturalProtocolControlledIn
 
     $definitions['field_coverage_description'] = BaseFieldDefinition::create('text_long')
       ->setLabel('Location Description')
-      ->setDescription(t('A descriptive field to provide additional context and depth to the location(s) connected to the place record.	</br>This HTML field can support rich text and embedded media assets using the editing toolbar.'))
+      ->setDescription(t('A descriptive field to provide additional context and depth to the location(s) connected to the place record.	<br />This HTML field can support rich text and embedded media assets using the editing toolbar.'))
       ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -177,7 +177,7 @@ class Place extends Node implements PlaceInterface, CulturalProtocolControlledIn
 
     $definitions['field_location'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Location'))
-      ->setDescription(t('A named place, or places, that are closely connected to the place record.	</br>Include as many locations as needed. Select from existing locations or add new ones.'))
+      ->setDescription(t('A named place, or places, that are closely connected to the place record.	<br />Include as many locations as needed. Select from existing locations or add new ones.'))
       ->setSettings([
         'target_type' => 'taxonomy_term',
         'handler' => 'default:taxonomy_term',
@@ -197,7 +197,7 @@ class Place extends Node implements PlaceInterface, CulturalProtocolControlledIn
 
     $definitions['field_local_contexts_projects'] = BaseFieldDefinition::create('local_contexts_project')
       ->setLabel(t('Local Contexts Projects'))
-      ->setDescription(t('This field will apply all of the Labels from the selected Local Contexts Project(s) to the place record.	</br>Select one or more Local Contexts Projects.'))
+      ->setDescription(t('This field will apply all of the Labels from the selected Local Contexts Project(s) to the place record.	<br />Select one or more Local Contexts Projects.'))
       ->setCardinality(-1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
