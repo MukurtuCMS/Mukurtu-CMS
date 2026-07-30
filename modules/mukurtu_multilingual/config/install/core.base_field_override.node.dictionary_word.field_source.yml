@@ -8,7 +8,7 @@ field_name: field_source
 entity_type: node
 bundle: dictionary_word
 label: Source
-description: 'Reference to a resource from which the entry was collected or sourced. Examples include a specific dictionary or language researcher, or the places where the entry is used (in the case of dialectical variation, for example). </br>Maximum 255 characters.'
+description: 'Reference to a resource from which the entry was collected or sourced. Examples include a specific dictionary or language researcher, or the places where the entry is used (in the case of dialectical variation, for example). <br />Maximum 255 characters.'
 required: false
 translatable: true
 default_value:
