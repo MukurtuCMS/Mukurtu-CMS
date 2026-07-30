@@ -295,6 +295,17 @@ function mukurtu_notifications_user_insert($entity) {
     $subscribe_options['uids'][$uid] = new DeliveryCandidate($flags, $notifiers, $uid);
   }
 
+  // Nobody to notify (e.g. no admin role has been granted 'administer
+  // users' yet, such as when a module creates a blocked user of its own
+  // during hook_install(), before the profile's role permissions are
+  // imported). Skip sendMessage() entirely: with an empty uid list and no
+  // explicit context, it falls back to message_subscribe's flag-based
+  // subscriber query, which has no flag matching this context and produces
+  // an invalid empty SQL condition.
+  if (empty($subscribe_options['uids'])) {
+    return;
+  }
+
   // Queue messages to our custom list of admins.
   $subscribers = \Drupal::service('message_subscribe.subscribers');
   try {

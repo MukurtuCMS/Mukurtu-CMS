@@ -3,11 +3,19 @@ status: true
 dependencies:
   config:
     - core.entity_form_mode.node.submission
+    - entity_browser.browser.mukurtu_content_browser
+    - field.field.node.digital_heritage.comment
     - field.field.node.digital_heritage.field_content_type
+    - field.field.node.digital_heritage.field_coverage
     - node.type.digital_heritage
   module:
+    - entity_browser
+    - link
     - media_library
-    - options
+    - mukurtu_core
+    - mukurtu_local_contexts
+    - original_date
+    - paragraphs
     - tagify
     - text
   enforced:
@@ -18,47 +26,116 @@ targetEntityType: node
 bundle: digital_heritage
 mode: submission
 content:
-  title:
-    type: string_textfield
-    weight: -10
-    region: content
-    settings:
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
-  field_summary:
-    type: string_textfield
-    weight: -9
-    region: content
-    settings:
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
-  field_description:
-    type: text_textarea
-    weight: -8
-    region: content
-    settings:
-      rows: 9
-      placeholder: ''
-    third_party_settings: {  }
-  field_media_assets:
-    type: media_library_widget
-    weight: -7
-    region: content
-    settings:
-      media_types:
-        - audio
-        - document
-        - external_embed
-        - image
-        - remote_video
-        - soundcloud
-        - video
-    third_party_settings: {  }
   field_category:
     type: options_buttons
     weight: -6
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_communities:
+    weight: 26
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_contributor:
+    type: tagify_entity_reference_autocomplete_widget
+    weight: 1
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 0
+      placeholder: ''
+      suggestions_dropdown: 0
+      show_entity_id: 0
+      show_info_label: 0
+      info_label: ''
+      parent_selection: 1
+    third_party_settings: {  }
+  field_coverage:
+    type: geofield_mukurtu
+    weight: 31
+    region: content
+    settings:
+      geometry_validation: false
+      map:
+        leaflet_map: 'OSM Mapnik'
+        height: 400
+        auto_center: 1
+        map_position:
+          force: false
+          center:
+            lat: 0.0
+            lon: 0.0
+          zoomControlPosition: topleft
+          zoom: 2
+          minZoom: 1
+          maxZoom: 18
+          zoomFiner: 0
+        scroll_zoom_enabled: 1
+      input:
+        show: false
+        readonly: false
+      toolbar:
+        position: topright
+        marker: defaultMarker
+        drawPolyline: true
+        drawRectangle: true
+        drawPolygon: true
+        drawCircle: false
+        drawText: false
+        editMode: true
+        dragMode: true
+        cutPolygon: false
+        removalMode: true
+        rotateMode: false
+      reset_map:
+        control: false
+        options: '{"position":"topleft","title":"Reset View"}'
+      map_scale:
+        control: false
+        options: '{"position":"bottomright","maxWidth":100,"metric":true,"imperial":false,"updateWhenIdle":false}'
+      fullscreen:
+        control: false
+        options: '{"position":"topleft","pseudoFullscreen":false}'
+      path: '{"color":"#3388ff","opacity":"1.0","stroke":true,"weight":3,"fill":"depends","fillColor":"*","fillOpacity":"0.2","radius":"6"}'
+      feature_properties:
+        values: ''
+      locate:
+        control: true
+        options: '{"position":"topright","setView":"untilPanOrZoom","returnToPrevBounds":true,"strings":{"title":"Locate my position"}}'
+        automatic: true
+      geocoder:
+        control: true
+        settings:
+          popup: false
+          position: topright
+          input_size: 20
+          providers:
+            nominatim:
+              weight: 0
+              checked: true
+          min_terms: 4
+          delay: 800
+          zoom: 16
+          options: ''
+      geojson_overlays:
+        sources:
+          fields: {  }
+        zoom_to_geojson: true
+        path: '{"color":"#f71ed3","opacity":"0.7","stroke":true,"weight":2,"fillColor":"#ffddfe","fillOpacity":"0.1","radius":3,"dashArray":"5, 5"}'
+        snapping: true
+    third_party_settings: {  }
+  field_coverage_description:
+    type: text_textarea
+    weight: 32
+    region: content
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+  field_creative_commons:
+    type: options_select
+    weight: 23
     region: content
     settings: {  }
     third_party_settings: {  }
@@ -76,39 +153,282 @@ content:
       info_label: ''
       parent_selection: 1
     third_party_settings: {  }
+  field_cultural_narrative:
+    type: text_textarea
+    weight: 20
+    region: content
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+  field_date_description:
+    type: string_textfield
+    weight: 3
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_description:
+    type: text_textarea
+    weight: -8
+    region: content
+    settings:
+      rows: 9
+      placeholder: ''
+    third_party_settings: {  }
+  field_external_links:
+    type: link_default
+    weight: 27
+    region: content
+    settings:
+      placeholder_url: ''
+      placeholder_title: ''
+    third_party_settings: {  }
+  field_format:
+    type: tagify_entity_reference_autocomplete_widget
+    weight: 22
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 0
+      placeholder: ''
+      suggestions_dropdown: 0
+      show_entity_id: 0
+      show_info_label: 0
+      info_label: ''
+      parent_selection: 1
+    third_party_settings: {  }
+  field_identifier:
+    type: string_textfield
+    weight: 23
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_keywords:
+    type: tagify_entity_reference_autocomplete_widget
+    weight: 23
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 0
+      placeholder: ''
+      suggestions_dropdown: 0
+      show_entity_id: 0
+      show_info_label: 0
+      info_label: ''
+      parent_selection: 1
+    third_party_settings: {  }
+  field_knowledge_keepers:
+    type: entity_reference_paragraphs
+    weight: 0
+    region: content
+    settings:
+      title: Paragraph
+      title_plural: Paragraphs
+      edit_mode: open
+      add_mode: dropdown
+      form_display_mode: default
+      default_paragraph_type: ''
+    third_party_settings: {  }
+  field_language:
+    type: tagify_entity_reference_autocomplete_widget
+    weight: 24
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 0
+      placeholder: ''
+      suggestions_dropdown: 0
+      show_entity_id: 0
+      show_info_label: 0
+      info_label: ''
+      parent_selection: 1
+    third_party_settings: {  }
+  field_local_contexts_labels_and_notices:
+    type: local_contexts_label_and_notice
+    weight: 1
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_local_contexts_projects:
+    type: local_contexts_project
+    weight: 0
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_location:
+    type: tagify_entity_reference_autocomplete_widget
+    weight: 33
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 0
+      placeholder: ''
+      suggestions_dropdown: 0
+      show_entity_id: 0
+      show_info_label: 0
+      info_label: ''
+      parent_selection: 1
+    third_party_settings: {  }
+  field_media_assets:
+    type: media_library_widget
+    weight: -7
+    region: content
+    settings:
+      media_types:
+        - audio
+        - document
+        - external_embed
+        - image
+        - remote_video
+        - soundcloud
+        - video
+    third_party_settings: {  }
+  field_original_date:
+    type: original_date_text
+    weight: 1
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_people:
+    type: tagify_entity_reference_autocomplete_widget
+    weight: 30
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 0
+      placeholder: ''
+      suggestions_dropdown: 0
+      show_entity_id: 0
+      show_info_label: 0
+      info_label: ''
+      parent_selection: 1
+    third_party_settings: {  }
+  field_publisher:
+    type: tagify_entity_reference_autocomplete_widget
+    weight: 26
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 0
+      placeholder: ''
+      suggestions_dropdown: 0
+      show_entity_id: 0
+      show_info_label: 0
+      info_label: ''
+      parent_selection: 1
+    third_party_settings: {  }
+  field_related_content:
+    type: entity_browser_entity_reference
+    weight: 0
+    region: content
+    settings:
+      entity_browser: mukurtu_content_browser
+      field_widget_display: rendered_entity
+      field_widget_edit: false
+      field_widget_remove: true
+      field_widget_replace: false
+      open: true
+      field_widget_display_settings:
+        view_mode: form_selection
+      selection_mode: selection_append
+    third_party_settings: {  }
+  field_rights_and_usage:
+    type: string_textarea
+    weight: 1
+    region: content
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+  field_rights_statements:
+    type: options_select
+    weight: 2
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_source:
+    type: string_textfield
+    weight: 25
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_subject:
+    type: tagify_entity_reference_autocomplete_widget
+    weight: 28
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 0
+      placeholder: ''
+      suggestions_dropdown: 0
+      show_entity_id: 0
+      show_info_label: 0
+      info_label: ''
+      parent_selection: 1
+    third_party_settings: {  }
+  field_summary:
+    type: string_textfield
+    weight: -9
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_traditional_knowledge:
+    type: text_textarea
+    weight: 21
+    region: content
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+  field_transcription:
+    type: string_textarea
+    weight: 29
+    region: content
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+  field_type:
+    type: tagify_entity_reference_autocomplete_widget
+    weight: 21
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 0
+      placeholder: ''
+      suggestions_dropdown: 0
+      show_entity_id: 0
+      show_info_label: 0
+      info_label: ''
+      parent_selection: 1
+    third_party_settings: {  }
+  title:
+    type: string_textfield
+    weight: -10
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
 hidden:
-  uid: true
+  comment: true
   created: true
-  status: true
-  revision_log: true
-  path: true
-  moderation_state: true
-  langcode: true
-  url_redirects: true
   field_content_type: true
-  field_coverage: true
-  field_coverage_description: true
-  field_cultural_narrative: true
-  field_traditional_knowledge: true
-  field_date_description: true
-  field_source: true
-  field_identifier: true
-  field_rights_and_usage: true
-  field_knowledge_keepers: true
-  field_transcription: true
-  field_related_content: true
-  field_external_links: true
-  field_creative_commons: true
-  field_local_contexts_projects: true
-  field_local_contexts_labels_and_notices: true
-  field_rights_statements: true
-  field_location: true
-  field_original_date: true
-  field_contributor: true
-  field_format: true
-  field_keywords: true
-  field_language: true
-  field_people: true
-  field_publisher: true
-  field_subject: true
-  field_type: true
+  field_cultural_protocols: true
+  field_mukurtu_original_record: true
+  langcode: true
+  moderation_state: true
+  path: true
+  promote: true
+  status: true
+  sticky: true
+  uid: true
+  url_redirects: true

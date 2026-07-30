@@ -10,6 +10,7 @@ use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\Element;
 use Drupal\Core\Session\AccountSwitcherInterface;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
 use Drupal\mukurtu_submissions\Entity\SubmissionSettingsInterface;
@@ -52,6 +53,19 @@ class PublicSubmissionForm extends FormBase {
     'moderation_state',
     'langcode',
     'url_redirects',
+    // Computed/display-only fields - no meaningful editable widget exists
+    // for these regardless of bundle, so they should never be offered as
+    // an includable option.
+    'field_representative_media',
+    'field_citation',
+    'field_multipage_page_of',
+    'field_all_related_content',
+    'field_in_collection',
+    // Real, editable fields excluded by policy: content type is implied by
+    // the submission settings itself, and the original record link isn't
+    // something a submitter should be setting directly.
+    'field_content_type',
+    'field_mukurtu_original_record',
   ];
 
   /**
@@ -101,6 +115,15 @@ class PublicSubmissionForm extends FormBase {
    * Title callback for the submission route.
    */
   public static function title($entity_type_id, $bundle) {
+    $settings_storage = \Drupal::entityTypeManager()->getStorage('mukurtu_submission_settings');
+    $matches = $settings_storage->loadByProperties([
+      'target_entity_type_id' => $entity_type_id,
+      'target_bundle' => $bundle,
+    ]);
+    if ($settings = reset($matches)) {
+      return $settings->label();
+    }
+
     $bundle_info = \Drupal::service('entity_type.bundle.info')->getBundleInfo($entity_type_id);
     $label = $bundle_info[$bundle]['label'] ?? $bundle;
     return t('Submit a @type', ['@type' => $label]);
@@ -134,6 +157,7 @@ class PublicSubmissionForm extends FormBase {
     $form['#bundle'] = $bundle;
 
     $this->display->buildForm($this->entity, $form, $form_state);
+    $this->labelRemoveButtons($form);
 
     $account = $this->currentUser();
     $form['submitter_info'] = [
@@ -197,6 +221,38 @@ class PublicSubmissionForm extends FormBase {
     $current_types = $component['settings']['media_types'] ?? [];
     $component['settings']['media_types'] = array_values(array_intersect($current_types, $allowed));
     $this->display->setComponent('field_media_assets', $component);
+  }
+
+  /**
+   * Gives every multi-value/paragraph field's "Remove" button a distinct
+   * accessible name (e.g. "Remove Related Content item 2") instead of the
+   * bare, indistinguishable "Remove" text such widgets render by default.
+   * Harmless for an editor who can see the surrounding layout, but
+   * ambiguous for a screen reader user hearing "Remove", "Remove" with no
+   * indication of which field or item each button belongs to - and this
+   * form's audience skews toward first-time, untrained visitors more than
+   * the admin content forms these widgets were originally built for.
+   */
+  protected function labelRemoveButtons(array &$element, ?string $field_label = NULL, ?int $delta = NULL): void {
+    foreach (Element::children($element) as $key) {
+      $child_delta = is_int($key) ? $key : $delta;
+      $child_label = $field_label;
+      if ($child_label === NULL && is_string($key) && $this->entity->hasField($key)) {
+        $child_label = (string) $this->entity->get($key)->getFieldDefinition()->getLabel();
+      }
+
+      if ($child_label !== NULL
+        && ($element[$key]['#type'] ?? NULL) === 'submit'
+        && isset($element[$key]['#value'])
+        && (string) $element[$key]['#value'] === (string) $this->t('Remove')
+      ) {
+        $element[$key]['#attributes']['aria-label'] = $child_delta !== NULL
+          ? $this->t('Remove @field item @number', ['@field' => $child_label, '@number' => $child_delta + 1])
+          : $this->t('Remove @field', ['@field' => $child_label]);
+      }
+
+      $this->labelRemoveButtons($element[$key], $child_label, $child_delta);
+    }
   }
 
   /**

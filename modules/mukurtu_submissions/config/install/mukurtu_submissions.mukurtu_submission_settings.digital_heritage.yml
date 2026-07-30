@@ -4,11 +4,16 @@ dependencies:
   config:
     - node.type.digital_heritage
 id: digital_heritage
-label: 'Digital Heritage Item'
+label: 'Submit a Digital Heritage Item'
 target_entity_type_id: node
 target_bundle: digital_heritage
 allowed_media_types:
   - image
+  - video
+  - audio
   - document
+  - remote_video
+  - external_embed
+  - soundcloud
 access_expectations_enabled: true
 access_level: anonymous
