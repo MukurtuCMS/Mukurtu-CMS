@@ -3208,6 +3208,15 @@ function mukurtu_core_update_40094(): void {
   if ($config->isNew()) {
     return;
   }
+
+  // Only touch the display if it still exists as expected; a site that has
+  // removed or renamed this block display shouldn't get a partial, malformed
+  // one written back.
+  $display_options = $config->get('display.browse_by_category_block.display_options');
+  if (!is_array($display_options)) {
+    return;
+  }
+
   $config->set('display.browse_by_category_block.display_options.show_admin_links', FALSE);
   $config->save();
 }
