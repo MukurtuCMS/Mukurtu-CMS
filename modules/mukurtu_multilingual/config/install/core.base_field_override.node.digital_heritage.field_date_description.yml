@@ -8,7 +8,7 @@ field_name: field_date_description
 entity_type: node
 bundle: digital_heritage
 label: 'Date Description'
-description: 'Used to supplement the original date field, or when a precise creation date of the media asset or information represented in the digital heritage item is not known. Examples include "Summer 1995" and "circa 1800s". </br>Maximum 255 characters.'
+description: 'Used to supplement the original date field, or when a precise creation date of the media asset or information represented in the digital heritage item is not known. Examples include "Summer 1995" and "circa 1800s". <br />Maximum 255 characters.'
 required: false
 translatable: true
 default_value:
