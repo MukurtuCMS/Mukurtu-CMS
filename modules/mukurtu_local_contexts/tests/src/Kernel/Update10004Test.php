@@ -30,4 +30,20 @@ class Update10004Test extends LocalContextsTestBase {
     $this->assertTrue($schema->fieldExists('mukurtu_local_contexts_notices', 'language'));
   }
 
+  /**
+   * Tests the update hook still adds the columns when they're missing.
+   */
+  public function testUpdateHookAddsMissingColumns(): void {
+    require_once __DIR__ . '/../../../mukurtu_local_contexts.install';
+
+    $schema = $this->container->get('database')->schema();
+    $schema->dropField('mukurtu_local_contexts_notices', 'locale');
+    $schema->dropField('mukurtu_local_contexts_notices', 'language');
+
+    mukurtu_local_contexts_update_10004();
+
+    $this->assertTrue($schema->fieldExists('mukurtu_local_contexts_notices', 'locale'));
+    $this->assertTrue($schema->fieldExists('mukurtu_local_contexts_notices', 'language'));
+  }
+
 }
