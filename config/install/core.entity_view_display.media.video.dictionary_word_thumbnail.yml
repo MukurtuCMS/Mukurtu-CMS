@@ -2,39 +2,43 @@ langcode: en
 status: true
 dependencies:
   config:
-    - core.entity_view_mode.media.digital_heritage_sidebar
-    - image.style.large_900px
-    - media.type.document
+    - core.entity_view_mode.media.dictionary_word_thumbnail
+    - media.type.video
   module:
-    - image
+    - blazy
+    - file
     - layout_builder
 third_party_settings:
   layout_builder:
     enabled: false
     allow_custom: false
-id: media.document.digital_heritage_sidebar
+id: media.video.dictionary_word_thumbnail
 targetEntityType: media
-bundle: document
-mode: digital_heritage_sidebar
+bundle: video
+mode: dictionary_word_thumbnail
 content:
-  thumbnail:
-    type: image
+  field_media_video_file:
+    type: file_video
     label: hidden
     settings:
-      image_link: ''
-      image_style: large_900px
-      image_loading:
-        attribute: lazy
-    third_party_settings: {  }
+      controls: true
+      autoplay: false
+      loop: false
+      multiple_file_display_type: tags
+      muted: false
+      width: 480
+      height: 270
+      playsinline: false
+    third_party_settings:
+      blazy:
+        blazy: false
     weight: 0
     region: content
 hidden:
   created: true
   field_communities: true
   field_cultural_protocols: true
-  field_extracted_text: true
   field_identifier: true
-  field_media_document: true
   field_media_tags: true
   field_people: true
   field_thumbnail: true
@@ -42,4 +46,5 @@ hidden:
   langcode: true
   name: true
   search_api_excerpt: true
+  thumbnail: true
   uid: true

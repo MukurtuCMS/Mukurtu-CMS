@@ -2,8 +2,8 @@ langcode: en
 status: true
 dependencies:
   config:
-    - core.entity_view_mode.media.small_250px_
-    - media.type.video
+    - core.entity_view_mode.media.teaser_featured
+    - media.type.audio
   module:
     - blazy
     - file
@@ -12,36 +12,44 @@ third_party_settings:
   layout_builder:
     enabled: false
     allow_custom: false
-id: media.video.small_250px_
+id: media.audio.teaser_featured
 targetEntityType: media
-bundle: video
-mode: small_250px_
+bundle: audio
+mode: teaser_featured
 content:
-  field_media_video_file:
-    type: file_video
+  field_thumbnail:
+    type: image
+    label: hidden
+    settings:
+      image_link: ''
+      image_style: carousel_thumbnail
+      image_loading:
+        attribute: lazy
+    third_party_settings: {  }
+    weight: 0
+    region: content
+  field_media_audio_file:
+    type: file_audio
     label: hidden
     settings:
       controls: true
       autoplay: false
       loop: false
       multiple_file_display_type: tags
-      muted: false
-      width: 480
-      height: 270
-      playsinline: false
     third_party_settings:
       blazy:
         blazy: false
-    weight: 0
+    weight: 1
     region: content
 hidden:
   created: true
   field_communities: true
+  field_contributor: true
   field_cultural_protocols: true
   field_identifier: true
   field_media_tags: true
   field_people: true
-  field_thumbnail: true
+  field_transcription: true
   flag_export_media: true
   langcode: true
   name: true
