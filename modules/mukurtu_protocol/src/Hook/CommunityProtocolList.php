@@ -87,7 +87,7 @@ class CommunityProtocolList implements ContainerInjectionInterface {
     }
     return [
       '#theme' => 'community_protocol_list',
-      '#title' => $this->t('Communities and Cultural Protocols'),
+      '#title' => $this->t('Communities and Protocols'),
       '#items' => $items,
     ];
   }
