@@ -602,26 +602,30 @@ function mukurtu_local_contexts_update_10003() {
 function mukurtu_local_contexts_update_10004() {
   $schema = \Drupal::database()->schema();
 
-  $schema->addField(
-    'mukurtu_local_contexts_notices',
-    'locale',
-    [
-      'type' => 'varchar',
-      'length' => 64,
-      'not null' => FALSE,
-      'description' => 'Language code',
-    ]
-  );
-  $schema->addField(
-    'mukurtu_local_contexts_notices',
-    'language',
-    [
-      'type' => 'varchar',
-      'length' => 128,
-      'not null' => FALSE,
-      'description' => 'Language',
-    ]
-  );
+  if (!$schema->fieldExists('mukurtu_local_contexts_notices', 'locale')) {
+    $schema->addField(
+      'mukurtu_local_contexts_notices',
+      'locale',
+      [
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => FALSE,
+        'description' => 'Language code',
+      ]
+    );
+  }
+  if (!$schema->fieldExists('mukurtu_local_contexts_notices', 'language')) {
+    $schema->addField(
+      'mukurtu_local_contexts_notices',
+      'language',
+      [
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => FALSE,
+        'description' => 'Language',
+      ]
+    );
+  }
 }
 
 /**
