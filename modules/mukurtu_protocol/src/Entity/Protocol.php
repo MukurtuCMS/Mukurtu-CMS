@@ -794,12 +794,12 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
       ->setLabel(t('Local Contexts API key'))
       ->setRequired(FALSE)
       ->setTranslatable(FALSE)
+      ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
       ->setSettings([
         'max_length' => 255,
         'is_ascii' => TRUE,
         'case_sensitive' => FALSE,
       ])
-      ->setDefaultValue('')
       // Keep this field out of Form/Display UIs entirely.
       ->setDisplayConfigurable('form', FALSE)
       ->setDisplayConfigurable('view', FALSE);
