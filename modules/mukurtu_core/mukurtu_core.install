@@ -3193,10 +3193,39 @@ function mukurtu_core_update_40093(): void {
 }
 
 /**
+ * Disable contextual/admin links on the Browse by Category block.
+ *
+ * The block display's default show_admin_links (true) causes core's
+ * contextual-links module to inject an unstyled placeholder <div> into
+ * title_suffix for any user with the 'access contextual links' permission
+ * (e.g. Mukurtu Manager). That placeholder is a direct sibling of the view's
+ * rows inside the .category-grid CSS Grid container, so it renders as an
+ * extra, empty first card. The homepage's Layout Builder already provides
+ * an edit affordance for this block, making the contextual link redundant.
+ */
+function mukurtu_core_update_40094(): void {
+  $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_categories');
+  if ($config->isNew()) {
+    return;
+  }
+
+  // Only touch the display if it still exists as expected; a site that has
+  // removed or renamed this block display shouldn't get a partial, malformed
+  // one written back.
+  $display_options = $config->get('display.browse_by_category_block.display_options');
+  if (!is_array($display_options)) {
+    return;
+  }
+
+  $config->set('display.browse_by_category_block.display_options.show_admin_links', FALSE);
+  $config->save();
+}
+
+/**
  * Grant Language Stewards comment permissions so they can view and approve
  * comments on dictionary words and word lists, matching Protocol Stewards.
  */
-function mukurtu_core_update_40094(): void {
+function mukurtu_core_update_40095(): void {
   /** @var \Drupal\og\Entity\OgRole|null $role */
   $role = \Drupal::entityTypeManager()
     ->getStorage('og_role')
