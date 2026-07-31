@@ -3,8 +3,8 @@ status: true
 dependencies:
   module:
     - media
-id: media.collections_3_2_
-label: 'Collections (3:2)'
+id: media.dictionary_word_thumbnail
+label: 'Dictionary Word Thumbnail'
 description: ''
 targetEntityType: media
 cache: true
