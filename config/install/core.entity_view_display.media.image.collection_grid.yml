@@ -2,8 +2,8 @@ langcode: en
 status: true
 dependencies:
   config:
-    - core.entity_view_mode.media.digital_heritage_sidebar
-    - image.style.medium_480px_w_
+    - core.entity_view_mode.media.collection_grid
+    - image.style.browse_collections_3_2_
     - media.type.image
   module:
     - image
@@ -12,17 +12,17 @@ third_party_settings:
   layout_builder:
     enabled: false
     allow_custom: false
-id: media.image.digital_heritage_sidebar
+id: media.image.collection_grid
 targetEntityType: media
 bundle: image
-mode: digital_heritage_sidebar
+mode: collection_grid
 content:
-  field_media_image:
+  thumbnail:
     type: image
     label: hidden
     settings:
       image_link: ''
-      image_style: medium_480px_w_
+      image_style: browse_collections_3_2_
       image_loading:
         attribute: lazy
     third_party_settings: {  }
@@ -33,6 +33,7 @@ hidden:
   field_communities: true
   field_cultural_protocols: true
   field_identifier: true
+  field_media_image: true
   field_media_tags: true
   field_people: true
   field_protocol_control: true
@@ -40,5 +41,4 @@ hidden:
   langcode: true
   name: true
   search_api_excerpt: true
-  thumbnail: true
   uid: true
