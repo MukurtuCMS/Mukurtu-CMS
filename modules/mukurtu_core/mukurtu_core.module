@@ -21,6 +21,7 @@ use Drupal\Core\Ajax\InvokeCommand;
 use Drupal\Core\Ajax\RedirectCommand;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\BubbleableMetadata;
+use Drupal\user\Entity\User;
 use Drupal\user\UserInterface;
 use Drupal\Core\Url;
 use Drupal\Core\Link;
@@ -1396,4 +1397,28 @@ function mukurtu_core_library_info_alter(&$libraries, $extension) {
   if ($extension === 'leaflet_markercluster' && isset($libraries['leaflet-markercluster-drupal'])) {
     $libraries['leaflet-markercluster-drupal']['js']['/' . \Drupal::service('extension.list.module')->getPath('mukurtu_core') . '/js/mukurtu-leaflet-markercluster-grouping-fix.js'] = [];
   }
+}
+
+/**
+ * Returns uids of users with the administrator or mukurtu_manager role.
+ *
+ * Always includes uid 1 (if active) since the superuser implicitly has all
+ * permissions via Drupal core's SuperUserAccessPolicy but typically has no
+ * explicit role assignment, so a role-based query alone silently excludes
+ * it.
+ */
+function mukurtu_core_get_manager_role_uids(): array {
+  $uids = \Drupal::entityQuery('user')
+    ->condition('roles', ['administrator', 'mukurtu_manager'], 'IN')
+    ->condition('status', 1)
+    ->accessCheck(FALSE)
+    ->execute();
+  $uids = array_values($uids);
+
+  $uid_one = User::load(1);
+  if ($uid_one && $uid_one->isActive() && !in_array(1, $uids)) {
+    $uids[] = 1;
+  }
+
+  return $uids;
 }

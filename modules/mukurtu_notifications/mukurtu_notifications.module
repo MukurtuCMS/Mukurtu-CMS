@@ -1316,12 +1316,7 @@ function mukurtu_notifications_resolve_notify_groups(bool $all_managers, array $
   $uids = [];
 
   if ($all_managers) {
-    $manager_uids = \Drupal::entityQuery('user')
-      ->condition('roles', ['administrator', 'mukurtu_manager'], 'IN')
-      ->condition('status', 1)
-      ->accessCheck(FALSE)
-      ->execute();
-    $uids = array_merge($uids, array_values($manager_uids));
+    $uids = array_merge($uids, mukurtu_core_get_manager_role_uids());
   }
 
   if (!empty($community_ids)) {
