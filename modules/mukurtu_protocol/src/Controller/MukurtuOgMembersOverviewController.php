@@ -15,8 +15,13 @@ class MukurtuOgMembersOverviewController extends ControllerBase
   /**
    * Access check for OG membership pages.
    */
-  public function access(AccountInterface $account, MukurtuGroupInterface $group)
+  public function access(AccountInterface $account, ?MukurtuGroupInterface $group = NULL, ?MukurtuGroupInterface $community = NULL, ?MukurtuGroupInterface $protocol = NULL)
   {
+    $group = $group ?? $community ?? $protocol;
+    if (!$group) {
+      return AccessResult::forbidden();
+    }
+
     // Allow uid 1 to view og membership pages no matter their roles.
     if ($account->id() == 1) {
       return AccessResult::allowed();
