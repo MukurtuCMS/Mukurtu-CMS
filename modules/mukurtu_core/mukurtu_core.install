@@ -3193,13 +3193,359 @@ function mukurtu_core_update_40093(): void {
 }
 
 /**
+ * Disable contextual/admin links on the Browse by Category block.
+ *
+ * The block display's default show_admin_links (true) causes core's
+ * contextual-links module to inject an unstyled placeholder <div> into
+ * title_suffix for any user with the 'access contextual links' permission
+ * (e.g. Mukurtu Manager). That placeholder is a direct sibling of the view's
+ * rows inside the .category-grid CSS Grid container, so it renders as an
+ * extra, empty first card. The homepage's Layout Builder already provides
+ * an edit affordance for this block, making the contextual link redundant.
+ */
+function mukurtu_core_update_40094(): void {
+  $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_categories');
+  if ($config->isNew()) {
+    return;
+  }
+
+  // Only touch the display if it still exists as expected; a site that has
+  // removed or renamed this block display shouldn't get a partial, malformed
+  // one written back.
+  $display_options = $config->get('display.browse_by_category_block.display_options');
+  if (!is_array($display_options)) {
+    return;
+  }
+
+  $config->set('display.browse_by_category_block.display_options.show_admin_links', FALSE);
+  $config->save();
+}
+
+/**
+ * Rename mis-named media view modes to usage-based machine names, relabel
+ * the HTML-embed-only large/medium/small modes, update every display and
+ * filter format that referenced the old names, and rewrite any already
+ * embedded media that stored the old view mode name inline. See #1721.
+ */
+function mukurtu_core_update_40095(&$sandbox): string {
+  $mode_renames = [
+    'digital_heritage_full' => 'image_with_description',
+    'digital_heritage_sidebar' => 'teaser_featured',
+    'small_250px_' => 'dictionary_word_thumbnail',
+    'collections_3_2_' => 'collection_grid',
+  ];
+  $mode_labels = [
+    'image_with_description' => 'Image with Description',
+    'teaser_featured' => 'Teaser / Featured Media',
+    'dictionary_word_thumbnail' => 'Dictionary Word Thumbnail',
+    'collection_grid' => 'Collection Grid (3:2)',
+  ];
+
+  if (!isset($sandbox['progress'])) {
+    $config_storage = \Drupal::service('config.storage');
+    $config_factory = \Drupal::configFactory();
+
+    // Rename the entity_view_mode config entities.
+    foreach ($mode_renames as $old => $new) {
+      $old_name = 'core.entity_view_mode.media.' . $old;
+      $new_name = 'core.entity_view_mode.media.' . $new;
+      $data = $config_storage->read($old_name);
+      if ($data !== FALSE) {
+        $data['id'] = 'media.' . $new;
+        $data['label'] = $mode_labels[$new];
+        $config_storage->write($new_name, $data);
+        $config_storage->delete($old_name);
+      }
+    }
+
+    // Rename the entity_view_display config entities whose own ID/mode is
+    // one of the renamed modes.
+    $bundles_by_mode = [
+      'digital_heritage_full' => ['audio', 'document', 'external_embed', 'image', 'remote_video', 'soundcloud', 'video'],
+      'digital_heritage_sidebar' => ['audio', 'document', 'external_embed', 'image', 'remote_video', 'soundcloud', 'video'],
+      'small_250px_' => ['external_embed', 'image', 'video'],
+      'collections_3_2_' => ['image'],
+    ];
+    foreach ($bundles_by_mode as $old => $bundles) {
+      $new = $mode_renames[$old];
+      foreach ($bundles as $bundle) {
+        $old_name = "core.entity_view_display.media.$bundle.$old";
+        $new_name = "core.entity_view_display.media.$bundle.$new";
+        $data = $config_storage->read($old_name);
+        if ($data !== FALSE) {
+          $data['id'] = "media.$bundle.$new";
+          $data['mode'] = $new;
+          if (!empty($data['dependencies']['config'])) {
+            foreach ($data['dependencies']['config'] as &$dependency) {
+              if ($dependency === "core.entity_view_mode.media.$old") {
+                $dependency = "core.entity_view_mode.media.$new";
+              }
+            }
+            unset($dependency);
+          }
+          $config_storage->write($new_name, $data);
+          $config_storage->delete($old_name);
+        }
+      }
+    }
+
+    // Update the view_mode setting on displays that reference these modes
+    // via an entity reference field formatter, without renaming the
+    // display itself.
+    $other_displays = [
+      'core.entity_view_display.block_content.vertical_image_with_description.default',
+      'core.entity_view_display.block_content.full_image_with_description.default',
+      'core.entity_view_display.block_content.image_with_description.default',
+      'core.entity_view_display.node.page.featured',
+      'core.entity_view_display.taxonomy_term.category.teaser',
+      'core.entity_view_display.node.collection.browse_collections',
+      'core.entity_view_display.node.collection.teaser',
+      'core.entity_view_display.node.collection.featured',
+      'core.entity_view_display.personal_collection.personal_collection.teaser',
+      'core.entity_view_display.node.word_list.featured',
+      'core.entity_view_display.node.dictionary_word.featured',
+      'core.entity_view_display.node.dictionary_word.teaser',
+      'core.entity_view_display.node.place.teaser',
+      'core.entity_view_display.node.place.featured',
+      'core.entity_view_display.node.digital_heritage.teaser',
+      'core.entity_view_display.node.digital_heritage.featured',
+      'core.entity_view_display.node.person.featured',
+      'core.entity_view_display.node.person.teaser',
+    ];
+    foreach ($other_displays as $name) {
+      $config = $config_factory->getEditable($name);
+      $data = $config->getRawData();
+      if (empty($data['content']) || !is_array($data['content'])) {
+        continue;
+      }
+      $changed = FALSE;
+      foreach ($data['content'] as &$field) {
+        if (isset($field['settings']['view_mode']) && isset($mode_renames[$field['settings']['view_mode']])) {
+          $field['settings']['view_mode'] = $mode_renames[$field['settings']['view_mode']];
+          $changed = TRUE;
+        }
+      }
+      unset($field);
+      if ($changed) {
+        $config->setData($data)->save(TRUE);
+      }
+    }
+
+    // Update the WYSIWYG media-embed filter format (Basic HTML).
+    $format = $config_factory->getEditable('filter.format.basic_html');
+    $format_data = $format->getRawData();
+    if (!empty($format_data['filters']['media_embed']['settings'])) {
+      $settings = &$format_data['filters']['media_embed']['settings'];
+      if (isset($settings['default_view_mode']) && isset($mode_renames[$settings['default_view_mode']])) {
+        $settings['default_view_mode'] = $mode_renames[$settings['default_view_mode']];
+      }
+      if (!empty($settings['allowed_view_modes'])) {
+        $new_allowed = [];
+        foreach ($settings['allowed_view_modes'] as $key => $value) {
+          $new_key = $mode_renames[$key] ?? $key;
+          $new_allowed[$new_key] = $new_key;
+        }
+        $settings['allowed_view_modes'] = $new_allowed;
+      }
+      unset($settings);
+      if (!empty($format_data['dependencies']['config'])) {
+        foreach ($format_data['dependencies']['config'] as &$dependency) {
+          foreach ($mode_renames as $old => $new) {
+            if ($dependency === "core.entity_view_mode.media.$old") {
+              $dependency = "core.entity_view_mode.media.$new";
+            }
+          }
+        }
+        unset($dependency);
+      }
+      $format->setData($format_data)->save(TRUE);
+    }
+
+    // Relabel the HTML-embed-only view modes; their machine names stay the
+    // same to avoid breaking already-embedded content.
+    $embed_labels = [
+      'large' => 'Large (900px) - HTML Embed',
+      'medium' => 'Medium (480px) - HTML Embed',
+      'small' => 'Small (250px) - HTML Embed',
+    ];
+    foreach ($embed_labels as $mode => $label) {
+      $name = 'core.entity_view_mode.media.' . $mode;
+      if ($config_storage->exists($name)) {
+        $config_factory->getEditable($name)->set('label', $label)->save();
+      }
+    }
+
+    // Migrate the stored content-warnings view mode selection.
+    $warnings_config = $config_factory->getEditable('mukurtu_content_warnings.settings');
+    $warning_modes = $warnings_config->get('warning_view_modes');
+    if (is_array($warning_modes)) {
+      $updated_modes = array_map(
+        fn ($mode) => $mode_renames[$mode] ?? $mode,
+        $warning_modes
+      );
+      if ($updated_modes !== $warning_modes) {
+        $warnings_config->set('warning_view_modes', $updated_modes)->save();
+      }
+    }
+
+    // Collect content entities with a text_long/text_with_summary field for
+    // the batched scan below, since CKEditor media embeds store the chosen
+    // view mode inline as a data-view-mode attribute in the field markup.
+    $entity_field_manager = \Drupal::service('entity_field.manager');
+    $field_map = $entity_field_manager->getFieldMapByFieldType('text_long')
+      + $entity_field_manager->getFieldMapByFieldType('text_with_summary');
+    $targets = [];
+    foreach ($field_map as $entity_type_id => $fields) {
+      $storage = \Drupal::entityTypeManager()->getStorage($entity_type_id);
+      if (!$storage instanceof \Drupal\Core\Entity\Sql\SqlContentEntityStorage) {
+        continue;
+      }
+      $ids = $storage->getQuery()->accessCheck(FALSE)->execute();
+      foreach ($ids as $id) {
+        $targets[] = [$entity_type_id, $id];
+      }
+    }
+    $sandbox['targets'] = $targets;
+    $sandbox['field_map'] = $field_map;
+    $sandbox['total'] = count($targets);
+    $sandbox['progress'] = 0;
+  }
+
+  if ($sandbox['total'] === 0) {
+    $sandbox['#finished'] = 1;
+    return 'Media view modes renamed. No embedded content to migrate.';
+  }
+
+  $batch_size = 25;
+  $batch = array_slice($sandbox['targets'], $sandbox['progress'], $batch_size);
+  $search = [];
+  foreach ($mode_renames as $old => $new) {
+    $search['data-view-mode="' . $old . '"'] = 'data-view-mode="' . $new . '"';
+  }
+  $account_switcher = \Drupal::service('account_switcher');
+
+  foreach ($batch as [$entity_type_id, $id]) {
+    try {
+      $storage = \Drupal::entityTypeManager()->getStorage($entity_type_id);
+      $entity = $storage->load($id);
+      if (!$entity) {
+        continue;
+      }
+      $bundle = $entity->bundle();
+      $changed = FALSE;
+      foreach ($sandbox['field_map'][$entity_type_id] as $field_name => $field_info) {
+        if (!in_array($bundle, $field_info['bundles'], TRUE) || !$entity->hasField($field_name)) {
+          continue;
+        }
+        foreach ($entity->get($field_name) as $item) {
+          if (isset($item->value) && str_contains($item->value, 'data-view-mode="')) {
+            $new_value = strtr($item->value, $search);
+            if ($new_value !== $item->value) {
+              $item->value = $new_value;
+              $changed = TRUE;
+            }
+          }
+        }
+      }
+      if ($changed) {
+        $owner = $entity instanceof \Drupal\user\EntityOwnerInterface ? $entity->getOwner() : NULL;
+        if ($owner) {
+          $account_switcher->switchTo($owner);
+        }
+        try {
+          $entity->save();
+        }
+        finally {
+          if ($owner) {
+            $account_switcher->switchBack();
+          }
+        }
+      }
+    }
+    catch (\Exception $e) {
+      \Drupal::logger('mukurtu_core')->error('Failed to migrate embedded media view modes on @type @id: @message', [
+        '@type' => $entity_type_id,
+        '@id' => $id,
+        '@message' => $e->getMessage(),
+      ]);
+    }
+    $sandbox['progress']++;
+  }
+
+  $sandbox['#finished'] = $sandbox['progress'] / $sandbox['total'];
+  return (string) t('Media view modes renamed. Scanned @done of @total entities for embedded view mode references.', [
+    '@done' => $sandbox['progress'],
+    '@total' => $sandbox['total'],
+  ]);
+}
+
+/**
+ * Defensively ensure the YouTube/Vimeo klaro_app configs exist, in case they
+ * were not picked up when the klaro module was enabled in update 40089.
+ */
+function mukurtu_core_update_40096(): void {
+  $config_storage = \Drupal::service('config.storage');
+  $module_path = \Drupal::service('extension.list.module')->getPath('klaro');
+  $source = new \Drupal\Core\Config\FileStorage(\Drupal::root() . '/' . $module_path . '/config/install');
+  foreach (['klaro.klaro_app.youtube', 'klaro.klaro_app.vimeo'] as $name) {
+    if ($config_storage->exists($name)) {
+      continue;
+    }
+    $data = $source->read($name);
+    if ($data !== FALSE) {
+      $config_storage->write($name, $data);
+    }
+  }
+}
+
+/**
+ * Install the key module, needed for the optional YouTube Data API key
+ * fallback used when the standard oEmbed fetch to YouTube is blocked on a
+ * given host (issue #565).
+ */
+function mukurtu_core_update_40097(): void {
+  \Drupal::service('module_installer')->install(['key']);
+}
+
+/**
+ * Uninstall the unused features and features_ui modules.
+ *
+ * No Mukurtu code depends on Features; it was only ever enabled because
+ * mukurtu_dev declared it as a dependency. Features' own config
+ * (*.features.yml bundle files) is never installed as active config, so
+ * unlike other module-removal cleanups there are no fields or config
+ * entities to remove here.
+ */
+function mukurtu_core_update_40098(): void {
+  // Write directly to config.storage (the raw layer) rather than going through
+  // configFactory()->save(). The factory dispatches ConfigCrudEvent::SAVE, which
+  // triggers a ModuleInstaller subscriber that calls install() on the removed
+  // modules -- a fatal error when the module code no longer exists on disk.
+  $config_storage = \Drupal::service('config.storage');
+  $data = $config_storage->read('core.extension');
+  $changed = FALSE;
+  foreach (['features_ui', 'features'] as $module) {
+    if (isset($data['module'][$module])) {
+      unset($data['module'][$module]);
+      $changed = TRUE;
+    }
+  }
+  if ($changed) {
+    $config_storage->write('core.extension', $data);
+  }
+
+  // Remove orphan schema version entries left when bypassing module_installer.
+  \Drupal::keyValue('system.schema')->deleteMultiple(['features', 'features_ui']);
+}
+
+/**
  * Implements hook_update_requirements_alter().
  *
  * Drupal's own update requirements check runs before any hook_update_N and
  * blocks the whole update run with an Error severity "Missing or invalid
  * modules" requirement if core.extension lists a module whose code no longer
  * exists on disk. Since features and features_ui were removed from the
- * codebase in the same release that mukurtu_core_update_40094() was added to
+ * codebase in the same release that mukurtu_core_update_40098() was added to
  * clean up core.extension, that hook can never run on affected sites -- the
  * site is stuck before update hooks even start. Suppress the error only when
  * the two known-removed modules are the sole cause, so any other genuinely
@@ -3220,35 +3566,4 @@ function mukurtu_core_update_requirements_alter(array &$requirements): void {
   if (empty($still_invalid)) {
     unset($requirements['invalid_module']);
   }
-}
-
-/**
- * Uninstall the unused features and features_ui modules.
- *
- * No Mukurtu code depends on Features; it was only ever enabled because
- * mukurtu_dev declared it as a dependency. Features' own config
- * (*.features.yml bundle files) is never installed as active config, so
- * unlike other module-removal cleanups there are no fields or config
- * entities to remove here.
- */
-function mukurtu_core_update_40094(): void {
-  // Write directly to config.storage (the raw layer) rather than going through
-  // configFactory()->save(). The factory dispatches ConfigCrudEvent::SAVE, which
-  // triggers a ModuleInstaller subscriber that calls install() on the removed
-  // modules -- a fatal error when the module code no longer exists on disk.
-  $config_storage = \Drupal::service('config.storage');
-  $data = $config_storage->read('core.extension');
-  $changed = FALSE;
-  foreach (['features_ui', 'features'] as $module) {
-    if (isset($data['module'][$module])) {
-      unset($data['module'][$module]);
-      $changed = TRUE;
-    }
-  }
-  if ($changed) {
-    $config_storage->write('core.extension', $data);
-  }
-
-  // Remove orphan schema version entries left when bypassing module_installer.
-  \Drupal::keyValue('system.schema')->deleteMultiple(['features', 'features_ui']);
 }
