@@ -1,6 +1,12 @@
 {{ attach_library('mukurtu_local_contexts/local-contexts-dialog') }}
 <div class="local-contexts-project">
   <h3 class="project-title">{{ title }}</h3>
+  {% if not_available %}
+    <div class="local-contexts-status-badge local-contexts-status-badge--unavailable">{{ 'Not available'|t }}</div>
+    <div class="local-contexts-status-note">{{ 'Last synced: @date'|t({'@date': last_synced ? last_synced|format_date('short') : 'never'}) }}</div>
+  {% elseif archived %}
+    <div class="local-contexts-status-badge local-contexts-status-badge--archived">{{ 'Archived on Local Contexts Hub'|t }}</div>
+  {% endif %}
   <div class="local-contexts-projects-container">
     {% if tk_labels %}
 

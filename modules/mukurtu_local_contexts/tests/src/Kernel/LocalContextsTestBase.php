@@ -46,7 +46,12 @@ abstract class LocalContextsTestBase extends EntityKernelTestBase {
       'mukurtu_local_contexts_notices',
       'mukurtu_local_contexts_label_translations',
       'mukurtu_local_contexts_notice_translations',
+      'mukurtu_local_contexts_purge_log',
     ]);
+    // Note: the 'queue' table is deliberately not installed here - core's
+    // DatabaseQueue creates it lazily on first use (ensureTableExists()),
+    // it no longer has a hook_schema() entry to install.
+    $this->installSchema('system', ['sequences']);
 
     NodeType::create([
       'type' => static::TEST_BUNDLE,
@@ -61,8 +66,18 @@ abstract class LocalContextsTestBase extends EntityKernelTestBase {
    *   The project ID.
    * @param string $title
    *   The project title.
+   * @param string $status
+   *   The project's sync status. One of the LocalContextsProject::STATUS_*
+   *   constants. Defaults to active.
+   * @param bool $archived
+   *   Whether the project is archived on the hub.
+   * @param int|null $not_found_since
+   *   Timestamp when the current unbroken run of not_found results began,
+   *   or NULL if not currently in such a run.
+   * @param int $not_found_count
+   *   Count of consecutive not_found sync attempts.
    */
-  protected function seedSiteProject(string $id, string $title = 'Project'): void {
+  protected function seedSiteProject(string $id, string $title = 'Project', string $status = 'active', bool $archived = FALSE, ?int $not_found_since = NULL, int $not_found_count = 0): void {
     $db = $this->container->get('database');
     $db->insert('mukurtu_local_contexts_projects')
       ->fields([
@@ -71,6 +86,11 @@ abstract class LocalContextsTestBase extends EntityKernelTestBase {
         'title' => $title,
         'privacy' => 'public',
         'updated' => 1,
+        'status' => $status,
+        'status_updated' => 1,
+        'archived' => (int) $archived,
+        'not_found_since' => $not_found_since,
+        'not_found_count' => $not_found_count,
       ])
       ->execute();
     $db->insert('mukurtu_local_contexts_supported_projects')
@@ -130,6 +150,17 @@ abstract class LocalContextsTestBase extends EntityKernelTestBase {
         'display' => 'notice',
         'img_url' => '',
         'default_text' => '',
+        'updated' => 1,
+      ])
+      ->execute();
+    $this->container->get('database')->insert('mukurtu_local_contexts_notice_translations')
+      ->fields([
+        'project_id' => $projectId,
+        'type' => $type,
+        'locale' => 'fr',
+        'language' => 'French',
+        'name' => $name . ' (fr)',
+        'text' => '',
         'updated' => 1,
       ])
       ->execute();

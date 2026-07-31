@@ -414,3 +414,28 @@ function mukurtu_export_update_40015(): void {
     }
   }
 }
+
+/**
+ * Remove orphaned pre-1337 export UI: content/media export-list views,
+ * their search indexes, the dead item/format-selection form's route-less
+ * config, and unused export flag actions.
+ */
+function mukurtu_export_update_40016(): void {
+  $entities = [
+    'view' => ['export_list_content', 'export_list_media'],
+    'search_api_index' => ['export_list_content', 'export_list_media'],
+    'action' => [
+      'flag_action.export_content_flag',
+      'flag_action.export_content_unflag',
+      'flag_action.export_media_flag',
+      'flag_action.export_media_unflag',
+    ],
+  ];
+  foreach ($entities as $entity_type => $ids) {
+    $storage = \Drupal::entityTypeManager()->getStorage($entity_type);
+    foreach ($ids as $id) {
+      $entity = $storage->load($id);
+      $entity?->delete();
+    }
+  }
+}

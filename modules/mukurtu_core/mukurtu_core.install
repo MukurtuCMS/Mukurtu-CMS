@@ -3508,10 +3508,71 @@ function mukurtu_core_update_40097(): void {
 }
 
 /**
+ * Uninstall the unused features and features_ui modules.
+ *
+ * No Mukurtu code depends on Features; it was only ever enabled because
+ * mukurtu_dev declared it as a dependency. Features' own config
+ * (*.features.yml bundle files) is never installed as active config, so
+ * unlike other module-removal cleanups there are no fields or config
+ * entities to remove here.
+ */
+function mukurtu_core_update_40098(): void {
+  // Write directly to config.storage (the raw layer) rather than going through
+  // configFactory()->save(). The factory dispatches ConfigCrudEvent::SAVE, which
+  // triggers a ModuleInstaller subscriber that calls install() on the removed
+  // modules -- a fatal error when the module code no longer exists on disk.
+  $config_storage = \Drupal::service('config.storage');
+  $data = $config_storage->read('core.extension');
+  $changed = FALSE;
+  foreach (['features_ui', 'features'] as $module) {
+    if (isset($data['module'][$module])) {
+      unset($data['module'][$module]);
+      $changed = TRUE;
+    }
+  }
+  if ($changed) {
+    $config_storage->write('core.extension', $data);
+  }
+
+  // Remove orphan schema version entries left when bypassing module_installer.
+  \Drupal::keyValue('system.schema')->deleteMultiple(['features', 'features_ui']);
+}
+
+/**
+ * Implements hook_update_requirements_alter().
+ *
+ * Drupal's own update requirements check runs before any hook_update_N and
+ * blocks the whole update run with an Error severity "Missing or invalid
+ * modules" requirement if core.extension lists a module whose code no longer
+ * exists on disk. Since features and features_ui were removed from the
+ * codebase in the same release that mukurtu_core_update_40098() was added to
+ * clean up core.extension, that hook can never run on affected sites -- the
+ * site is stuck before update hooks even start. Suppress the error only when
+ * the two known-removed modules are the sole cause, so any other genuinely
+ * missing module still blocks the update as intended.
+ */
+function mukurtu_core_update_requirements_alter(array &$requirements): void {
+  if (empty($requirements['invalid_module'])) {
+    return;
+  }
+
+  $module_extension_list = \Drupal::service('extension.list.module');
+  $known_removed = ['features', 'features_ui'];
+  $modules = array_keys(\Drupal::config('core.extension')->get('module') ?? []);
+  $still_invalid = array_filter($modules, function ($name) use ($module_extension_list, $known_removed) {
+    return !in_array($name, $known_removed, TRUE) && !$module_extension_list->exists($name);
+  });
+
+  if (empty($still_invalid)) {
+    unset($requirements['invalid_module']);
+  }
+}
+
+/**
  * Grant Language Stewards comment permissions so they can view and approve
  * comments on dictionary words and word lists, matching Protocol Stewards.
  */
-function mukurtu_core_update_40098(): void {
+function mukurtu_core_update_40099(): void {
   /** @var \Drupal\og\Entity\OgRole|null $role */
   $role = \Drupal::entityTypeManager()
     ->getStorage('og_role')
