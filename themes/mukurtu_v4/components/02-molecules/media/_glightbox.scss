@@ -47,6 +47,41 @@
       margin: 0 auto;
     }
 
+    // Click-to-zoom (see setupImageZoom() in media-asset-glightbox.js).
+    // Scoped to .media--image so audio's fallback thumbnail image, which
+    // shares this same img rule above, never becomes zoomable.
+    .media--image img {
+      cursor: zoom-in;
+
+      &:focus-visible {
+        // Layered light+dark outline stays visible against any photo
+        // background, unlike a single fixed color (see .gprev/.gnext/.gclose
+        // above, which can rely on a known button background color instead).
+        outline: 3px solid #fff;
+        outline-offset: 2px;
+        box-shadow: 0 0 0 5px #000;
+      }
+
+      &.media-asset--zoomed {
+        cursor: grab;
+        max-width: none;
+        max-height: none;
+        width: auto;
+        height: auto;
+      }
+
+      &.media-asset--dragging {
+        cursor: grabbing;
+        transition: none;
+      }
+
+      // Drag-to-pan has no touch equivalent here, so zoom is disabled at the
+      // same breakpoint the JS uses (setupImageZoom's MOBILE_BREAKPOINT).
+      @media (max-width: 768px) {
+        cursor: default;
+      }
+    }
+
     audio {
       display: block;
       width: 100%;

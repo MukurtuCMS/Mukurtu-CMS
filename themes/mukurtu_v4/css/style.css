@@ -2860,6 +2860,35 @@ img[class$=-placeholder] {
   max-height: 88vh;
   margin: 0 auto;
 }
+.glightbox-clean .gslide-inline .media--image img {
+  cursor: -webkit-zoom-in;
+  cursor: zoom-in;
+}
+.glightbox-clean .gslide-inline .media--image img:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+  -webkit-box-shadow: 0 0 0 5px #000;
+          box-shadow: 0 0 0 5px #000;
+}
+.glightbox-clean .gslide-inline .media--image img.media-asset--zoomed {
+  cursor: -webkit-grab;
+  cursor: grab;
+  max-width: none;
+  max-height: none;
+  width: auto;
+  height: auto;
+}
+.glightbox-clean .gslide-inline .media--image img.media-asset--dragging {
+  cursor: -webkit-grabbing;
+  cursor: grabbing;
+  -webkit-transition: none;
+  transition: none;
+}
+@media (max-width: 768px) {
+  .glightbox-clean .gslide-inline .media--image img {
+    cursor: default;
+  }
+}
 .glightbox-clean .gslide-inline audio {
   display: block;
   width: 100%;
