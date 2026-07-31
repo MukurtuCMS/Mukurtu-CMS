@@ -2841,6 +2841,9 @@ img[class$=-placeholder] {
   height: auto !important;
   max-width: 100%;
   max-height: 100%;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+  overflow: hidden;
 }
 .glightbox-clean .gslide-inline {
   padding: 1rem;
