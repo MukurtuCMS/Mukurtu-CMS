@@ -47,6 +47,12 @@ class LocalContextsApi {
   protected string $errorMessage;
 
   /**
+   * @var int The HTTP status code of the most recent request, or 0 if the
+   *   request could not be completed (e.g. a connection failure).
+   */
+  protected int $statusCode = 0;
+
+  /**
    * Constructs a LocalContextsHubManager object.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
@@ -78,6 +84,11 @@ class LocalContextsApi {
    *   The result of the API call.
    */
   public function makeRequest($path, $api_key, ?array $query_params = []) {
+    // Reset state so a stale result from a prior call on this instance can't
+    // leak into this call's result.
+    $this->errorMessage = '';
+    $this->statusCode = 0;
+
     $options = [
       // The hub uses 301 redirects.
       'allow_redirects' => TRUE,
@@ -103,6 +114,7 @@ class LocalContextsApi {
       // Send the request.
       $response = $request->request('GET', $url);
       $http_code = $response->getStatusCode();
+      $this->statusCode = $http_code;
       $result = json_decode($response->getBody()->getContents(), TRUE);
       if ($http_code != 200) {
         $this->errorMessage = $result['detail'] ?? 'Unknown error.';
@@ -169,6 +181,17 @@ class LocalContextsApi {
    */
   public function getErrorMessage() {
     return $this->errorMessage;
+  }
+
+  /**
+   * Returns the HTTP status code of the most recent makeRequest() call.
+   *
+   * @return int
+   *   The HTTP status code, or 0 if the request could not be completed
+   *   (e.g. a connection failure).
+   */
+  public function getStatusCode(): int {
+    return $this->statusCode;
   }
 
 }
