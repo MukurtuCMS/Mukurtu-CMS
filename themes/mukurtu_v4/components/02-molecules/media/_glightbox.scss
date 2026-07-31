@@ -4,6 +4,26 @@
 }
 
 .glightbox-clean {
+  // GLightbox sets a fixed width/height (from the init options) directly as
+  // inline styles on .gslide-media and on the cloned .ginlined-content node,
+  // locking every inline slide into that exact box regardless of the media's
+  // own aspect ratio. Override with max- constraints (!important to beat the
+  // inline styles) so content can shrink to its natural proportions instead
+  // of being stretched to fill the box.
+  .gslide-media.gslide-inline {
+    width: auto !important;
+    height: auto !important;
+    max-width: 92vw;
+    max-height: 92vh;
+  }
+
+  .gslide-inline .ginlined-content {
+    width: auto !important;
+    height: auto !important;
+    max-width: 100%;
+    max-height: 100%;
+  }
+
   .gslide-inline {
     padding: 1rem;
     box-sizing: border-box;
@@ -15,6 +35,8 @@
 
     img {
       display: block;
+      width: auto;
+      height: auto;
       max-width: 100%;
       max-height: 88vh;
       margin: 0 auto;

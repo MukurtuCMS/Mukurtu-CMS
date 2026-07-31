@@ -2830,6 +2830,18 @@ img[class$=-placeholder] {
   display: none;
 }
 
+.glightbox-clean .gslide-media.gslide-inline {
+  width: auto !important;
+  height: auto !important;
+  max-width: 92vw;
+  max-height: 92vh;
+}
+.glightbox-clean .gslide-inline .ginlined-content {
+  width: auto !important;
+  height: auto !important;
+  max-width: 100%;
+  max-height: 100%;
+}
 .glightbox-clean .gslide-inline {
   padding: 1rem;
   -webkit-box-sizing: border-box;
@@ -2839,6 +2851,8 @@ img[class$=-placeholder] {
 }
 .glightbox-clean .gslide-inline img {
   display: block;
+  width: auto;
+  height: auto;
   max-width: 100%;
   max-height: 88vh;
   margin: 0 auto;
