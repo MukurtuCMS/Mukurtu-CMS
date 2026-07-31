@@ -2,7 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
-    - core.entity_view_mode.media.digital_heritage_sidebar
+    - core.entity_view_mode.media.teaser_featured
     - media.type.remote_video
   module:
     - layout_builder
@@ -11,10 +11,10 @@ third_party_settings:
   layout_builder:
     enabled: false
     allow_custom: false
-id: media.remote_video.digital_heritage_sidebar
+id: media.remote_video.teaser_featured
 targetEntityType: media
 bundle: remote_video
-mode: digital_heritage_sidebar
+mode: teaser_featured
 content:
   field_media_oembed_video:
     type: oembed
