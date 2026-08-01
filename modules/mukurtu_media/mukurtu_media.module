@@ -14,6 +14,7 @@ use Drupal\Core\Url;
 use Drupal\file\Element\ManagedFile;
 use Drupal\media_library\Form\FileUploadForm;
 use Drupal\media_library\Plugin\Field\FieldWidget\MediaLibraryWidget;
+use Drupal\mukurtu_core\Event\RepresentativeMediaComputationEvent;
 use Drupal\mukurtu_media\Entity\Audio;
 use Drupal\mukurtu_media\Entity\Document;
 use Drupal\mukurtu_media\Entity\Image;
@@ -942,7 +943,11 @@ function mukurtu_media_entity_view_alter(array &$build, \Drupal\Core\Entity\Enti
       // simply absent, so we can pick the correct placeholder.
       $placeholder_file_to_use = $no_media_file;
       if ($field_name === 'field_representative_media' && $restricted_file) {
-        $source_fields = ['field_thumbnail', 'field_media_assets', 'field_collection_image', 'field_word_list_image'];
+        // Get the same candidate source fields RepresentativeMediaItemList
+        // uses, so the two never drift out of sync with each other.
+        $event = new RepresentativeMediaComputationEvent($entity);
+        $event = \Drupal::service('event_dispatcher')->dispatch($event, RepresentativeMediaComputationEvent::EVENT_NAME);
+        $source_fields = $event->getSourceFields();
         // Batch-load all source media to avoid N+1 queries.
         $source_ids = [];
         foreach ($source_fields as $source) {
