@@ -17,3 +17,82 @@ allowed_media_types:
   - soundcloud
 access_expectations_enabled: true
 access_level: anonymous
+field_groups:
+  -
+    id: group_1
+    label: 'Mukurtu Essentials'
+    collapsed: false
+    parent: ''
+  -
+    id: group_2
+    label: 'Mukurtu Core'
+    collapsed: true
+    parent: ''
+  -
+    id: group_10
+    label: 'Permissions and Rights'
+    collapsed: true
+    parent: ''
+  -
+    id: group_3
+    label: 'Local Contexts'
+    collapsed: true
+    parent: group_10
+  -
+    id: group_4
+    label: 'Citing Indigenous Elders and Knowledge Keepers'
+    collapsed: true
+    parent: group_10
+  -
+    id: group_5
+    label: 'Rights and licensing'
+    collapsed: true
+    parent: group_10
+  -
+    id: group_7
+    label: 'Additional Fields'
+    collapsed: true
+    parent: ''
+  -
+    id: group_8
+    label: Locations
+    collapsed: false
+    parent: group_7
+  -
+    id: group_9
+    label: 'Related Content'
+    collapsed: true
+    parent: ''
+field_group_assignments:
+  title: group_1
+  field_summary: group_1
+  field_media_assets: group_1
+  field_category: group_1
+  field_creator: group_1
+  field_contributor: group_1
+  field_original_date: group_1
+  field_date_description: group_1
+  field_cultural_narrative: group_2
+  field_traditional_knowledge: group_2
+  field_description: group_2
+  field_local_contexts_projects: group_3
+  field_local_contexts_labels_and_notices: group_3
+  field_knowledge_keepers: group_4
+  field_rights_and_usage: group_5
+  field_rights_statements: group_5
+  field_creative_commons: group_5
+  field_keywords: group_7
+  field_format: group_7
+  field_type: group_7
+  field_identifier: group_7
+  field_language: group_7
+  field_source: group_7
+  field_publisher: group_7
+  field_external_links: group_7
+  field_subject: group_7
+  field_transcription: group_7
+  field_people: group_7
+  field_coverage: group_8
+  field_coverage_description: group_8
+  field_location: group_8
+  field_related_content: group_9

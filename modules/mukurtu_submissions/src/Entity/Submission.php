@@ -58,10 +58,6 @@ class Submission extends ContentEntityBase implements SubmissionInterface {
       ->setLabel(t('Submitter email'))
       ->setRequired(TRUE);
 
-    $fields['submitter_phone'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Submitter phone'))
-      ->setSetting('max_length', 64);
-
     $fields['access_expectations'] = BaseFieldDefinition::create('string_long')
       ->setLabel(t('Submitter access expectations'));
 
@@ -123,13 +119,6 @@ class Submission extends ContentEntityBase implements SubmissionInterface {
    */
   public function getSubmitterEmail(): ?string {
     return $this->get('submitter_email')->value;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getSubmitterPhone(): ?string {
-    return $this->get('submitter_phone')->value;
   }
 
   /**

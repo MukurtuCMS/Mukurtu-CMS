@@ -28,7 +28,7 @@ mode: submission
 content:
   field_category:
     type: options_buttons
-    weight: -6
+    weight: -7
     region: content
     settings: {  }
     third_party_settings: {  }
@@ -39,7 +39,7 @@ content:
     third_party_settings: {  }
   field_contributor:
     type: tagify_entity_reference_autocomplete_widget
-    weight: 1
+    weight: -5
     region: content
     settings:
       match_operator: CONTAINS
@@ -53,7 +53,7 @@ content:
     third_party_settings: {  }
   field_coverage:
     type: geofield_mukurtu
-    weight: 31
+    weight: 18
     region: content
     settings:
       geometry_validation: false
@@ -127,7 +127,7 @@ content:
     third_party_settings: {  }
   field_coverage_description:
     type: text_textarea
-    weight: 32
+    weight: 19
     region: content
     settings:
       rows: 5
@@ -135,13 +135,13 @@ content:
     third_party_settings: {  }
   field_creative_commons:
     type: options_select
-    weight: 23
+    weight: 6
     region: content
     settings: {  }
     third_party_settings: {  }
   field_creator:
     type: tagify_entity_reference_autocomplete_widget
-    weight: -5
+    weight: -6
     region: content
     settings:
       match_operator: CONTAINS
@@ -155,7 +155,7 @@ content:
     third_party_settings: {  }
   field_cultural_narrative:
     type: text_textarea
-    weight: 20
+    weight: -2
     region: content
     settings:
       rows: 5
@@ -163,7 +163,7 @@ content:
     third_party_settings: {  }
   field_date_description:
     type: string_textfield
-    weight: 3
+    weight: -3
     region: content
     settings:
       size: 60
@@ -171,7 +171,7 @@ content:
     third_party_settings: {  }
   field_description:
     type: text_textarea
-    weight: -8
+    weight: 0
     region: content
     settings:
       rows: 9
@@ -179,7 +179,7 @@ content:
     third_party_settings: {  }
   field_external_links:
     type: link_default
-    weight: 27
+    weight: 14
     region: content
     settings:
       placeholder_url: ''
@@ -187,7 +187,7 @@ content:
     third_party_settings: {  }
   field_format:
     type: tagify_entity_reference_autocomplete_widget
-    weight: 22
+    weight: 8
     region: content
     settings:
       match_operator: CONTAINS
@@ -201,7 +201,7 @@ content:
     third_party_settings: {  }
   field_identifier:
     type: string_textfield
-    weight: 23
+    weight: 10
     region: content
     settings:
       size: 60
@@ -209,7 +209,7 @@ content:
     third_party_settings: {  }
   field_keywords:
     type: tagify_entity_reference_autocomplete_widget
-    weight: 23
+    weight: 7
     region: content
     settings:
       match_operator: CONTAINS
@@ -223,7 +223,7 @@ content:
     third_party_settings: {  }
   field_knowledge_keepers:
     type: entity_reference_paragraphs
-    weight: 0
+    weight: 3
     region: content
     settings:
       title: Paragraph
@@ -235,7 +235,7 @@ content:
     third_party_settings: {  }
   field_language:
     type: tagify_entity_reference_autocomplete_widget
-    weight: 24
+    weight: 11
     region: content
     settings:
       match_operator: CONTAINS
@@ -249,19 +249,19 @@ content:
     third_party_settings: {  }
   field_local_contexts_labels_and_notices:
     type: local_contexts_label_and_notice
-    weight: 1
+    weight: 2
     region: content
     settings: {  }
     third_party_settings: {  }
   field_local_contexts_projects:
     type: local_contexts_project
-    weight: 0
+    weight: 1
     region: content
     settings: {  }
     third_party_settings: {  }
   field_location:
     type: tagify_entity_reference_autocomplete_widget
-    weight: 33
+    weight: 20
     region: content
     settings:
       match_operator: CONTAINS
@@ -274,28 +274,25 @@ content:
       parent_selection: 1
     third_party_settings: {  }
   field_media_assets:
-    type: media_library_widget
-    weight: -7
+    type: mukurtu_simple_media_upload
+    weight: -8
     region: content
     settings:
-      media_types:
+      allowed_bundles:
+        - image
         - audio
         - document
-        - external_embed
-        - image
-        - remote_video
-        - soundcloud
         - video
     third_party_settings: {  }
   field_original_date:
     type: original_date_text
-    weight: 1
+    weight: -4
     region: content
     settings: {  }
     third_party_settings: {  }
   field_people:
     type: tagify_entity_reference_autocomplete_widget
-    weight: 30
+    weight: 17
     region: content
     settings:
       match_operator: CONTAINS
@@ -309,7 +306,7 @@ content:
     third_party_settings: {  }
   field_publisher:
     type: tagify_entity_reference_autocomplete_widget
-    weight: 26
+    weight: 13
     region: content
     settings:
       match_operator: CONTAINS
@@ -321,24 +318,9 @@ content:
       info_label: ''
       parent_selection: 1
     third_party_settings: {  }
-  field_related_content:
-    type: entity_browser_entity_reference
-    weight: 0
-    region: content
-    settings:
-      entity_browser: mukurtu_content_browser
-      field_widget_display: rendered_entity
-      field_widget_edit: false
-      field_widget_remove: true
-      field_widget_replace: false
-      open: true
-      field_widget_display_settings:
-        view_mode: form_selection
-      selection_mode: selection_append
-    third_party_settings: {  }
   field_rights_and_usage:
     type: string_textarea
-    weight: 1
+    weight: 4
     region: content
     settings:
       rows: 5
@@ -346,13 +328,13 @@ content:
     third_party_settings: {  }
   field_rights_statements:
     type: options_select
-    weight: 2
+    weight: 5
     region: content
     settings: {  }
     third_party_settings: {  }
   field_source:
     type: string_textfield
-    weight: 25
+    weight: 12
     region: content
     settings:
       size: 60
@@ -360,7 +342,7 @@ content:
     third_party_settings: {  }
   field_subject:
     type: tagify_entity_reference_autocomplete_widget
-    weight: 28
+    weight: 15
     region: content
     settings:
       match_operator: CONTAINS
@@ -382,7 +364,7 @@ content:
     third_party_settings: {  }
   field_traditional_knowledge:
     type: text_textarea
-    weight: 21
+    weight: -1
     region: content
     settings:
       rows: 5
@@ -390,7 +372,7 @@ content:
     third_party_settings: {  }
   field_transcription:
     type: string_textarea
-    weight: 29
+    weight: 16
     region: content
     settings:
       rows: 5
@@ -398,7 +380,7 @@ content:
     third_party_settings: {  }
   field_type:
     type: tagify_entity_reference_autocomplete_widget
-    weight: 21
+    weight: 9
     region: content
     settings:
       match_operator: CONTAINS
@@ -424,6 +406,7 @@ hidden:
   field_content_type: true
   field_cultural_protocols: true
   field_mukurtu_original_record: true
+  field_related_content: true
   langcode: true
   moderation_state: true
   path: true

@@ -49,13 +49,6 @@ interface SubmissionInterface extends ContentEntityInterface {
   public function getSubmitterEmail(): ?string;
 
   /**
-   * Gets the submitter's phone number.
-   *
-   * @return string|null
-   */
-  public function getSubmitterPhone(): ?string;
-
-  /**
    * Gets the submitter's access expectations hint.
    *
    * @return string|null

@@ -50,4 +50,33 @@ interface SubmissionSettingsInterface extends ConfigEntityInterface {
    */
   public function getAccessLevel(): string;
 
+  /**
+   * Gets the introductory text shown above the Title field on the public
+   * submission form.
+   *
+   * @return array
+   *   A text_format-style array with "value" and "format" keys, or an empty
+   *   array if none is configured.
+   */
+  public function getIntroText(): array;
+
+  /**
+   * Gets the collapsible section definitions for grouping fields on the
+   * public submission form.
+   *
+   * @return array[]
+   *   An array of ["id" => ..., "label" => ..., "collapsed" => bool], in
+   *   display order.
+   */
+  public function getFieldGroups(): array;
+
+  /**
+   * Gets which group (if any) each included field belongs to.
+   *
+   * @return string[]
+   *   Field name => group ID. A field absent from this map renders inline,
+   *   ungrouped.
+   */
+  public function getFieldGroupAssignments(): array;
+
 }

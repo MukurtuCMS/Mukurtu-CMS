@@ -47,6 +47,9 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
  *     "allowed_media_types",
  *     "access_expectations_enabled",
  *     "access_level",
+ *     "intro_text",
+ *     "field_groups",
+ *     "field_group_assignments",
  *   }
  * )
  */
@@ -103,6 +106,32 @@ class SubmissionSettings extends ConfigEntityBase implements SubmissionSettingsI
   protected $access_level = 'anonymous';
 
   /**
+   * Introductory text shown above the Title field on the public submission
+   * form, as a text_format-style ["value" => ..., "format" => ...] array.
+   *
+   * @var array
+   */
+  protected $intro_text = [];
+
+  /**
+   * Collapsible section definitions for grouping fields on the public
+   * submission form, in display order.
+   *
+   * @var array[]
+   *   Each element is ["id" => ..., "label" => ..., "collapsed" => bool].
+   */
+  protected $field_groups = [];
+
+  /**
+   * Which group (if any) each included field belongs to.
+   *
+   * @var string[]
+   *   Field name => group ID. A field absent from this map renders inline,
+   *   ungrouped.
+   */
+  protected $field_group_assignments = [];
+
+  /**
    * {@inheritdoc}
    */
   public function getTargetEntityTypeId(): string {
@@ -135,6 +164,27 @@ class SubmissionSettings extends ConfigEntityBase implements SubmissionSettingsI
    */
   public function getAccessLevel(): string {
     return $this->access_level ?? 'anonymous';
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getIntroText(): array {
+    return $this->intro_text ?? [];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getFieldGroups(): array {
+    return $this->field_groups ?? [];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getFieldGroupAssignments(): array {
+    return $this->field_group_assignments ?? [];
   }
 
 }

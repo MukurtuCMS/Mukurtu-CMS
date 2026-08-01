@@ -1,0 +1,6 @@
+character_counter:
+  js:
+    js/character-counter.js: {}
+  dependencies:
+    - core/once
+    - core/drupal

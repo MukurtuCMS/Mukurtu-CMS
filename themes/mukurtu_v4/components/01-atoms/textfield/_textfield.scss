@@ -5,7 +5,8 @@ $field-border-radius: 0.5rem;
 
 .js-form-type-email,
 .js-form-type-textfield,
-.js-form-type-password {
+.js-form-type-password,
+.js-form-type-url {
   input {
     appearance: none;
     border: none;
