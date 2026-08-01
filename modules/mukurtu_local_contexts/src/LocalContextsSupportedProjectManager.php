@@ -255,7 +255,7 @@ class LocalContextsSupportedProjectManager {
     $query = $this->db->select('mukurtu_local_contexts_supported_projects', 'sp');
     $query->join('mukurtu_local_contexts_projects', 'p', 'sp.project_id = p.id');
     $query->fields('sp', ['type', 'group_id', 'api_key']);
-    $query->fields('p', ['id', 'provider_id', 'title', 'privacy', 'updated']);
+    $query->fields('p', ['id', 'provider_id', 'title', 'privacy', 'updated', 'status', 'archived']);
     $query->orderBy('sp.type', 'DESC');
     $query->orderBy('sp.group_id');
     $query->orderBy('p.title');
@@ -355,7 +355,7 @@ class LocalContextsSupportedProjectManager {
     $query
       ->condition('sp.type', 'site')
       ->condition('sp.group_id', 0)
-      ->fields('p', ['id', 'provider_id', 'title', 'privacy', 'updated'])
+      ->fields('p', ['id', 'provider_id', 'title', 'privacy', 'updated', 'status', 'status_message', 'archived'])
       ->fields('sp', ['api_key']);
     $query->orderBy('p.title');
 
@@ -469,7 +469,7 @@ class LocalContextsSupportedProjectManager {
     $query
       ->condition('sp.type', $group->getEntityTypeId())
       ->condition('sp.group_id', $group->id())
-      ->fields('p', ['id', 'provider_id', 'title', 'privacy', 'updated'])
+      ->fields('p', ['id', 'provider_id', 'title', 'privacy', 'updated', 'status', 'status_message', 'archived'])
       ->fields('sp', ['api_key']);
     $query->orderBy('p.title');
 
@@ -591,6 +591,23 @@ class LocalContextsSupportedProjectManager {
       }
     }
 
+    $this->deleteProjectCacheRows($project_id);
+  }
+
+  /**
+   * Delete all cached data for a project: its labels, notices, and their
+   * translations, its supported-project mapping rows (across every
+   * site/community/protocol scope), and the project row itself.
+   *
+   * Shared by removeProject() (the admin-triggered "un-support this
+   * project" flow, which refuses to delete an in-use project unless
+   * force_delete is set) and purgeDeletedProject() (which always deletes,
+   * because the project has been confirmed deleted on the hub itself).
+   *
+   * @param string $project_id
+   *   The project ID to purge from the local cache.
+   */
+  private function deleteProjectCacheRows(string $project_id): void {
     // Delete labels provided by the project.
     $labels = $this->getAllLabels();
     foreach ($labels as $label) {
@@ -624,14 +641,224 @@ class LocalContextsSupportedProjectManager {
     }
 
     // Delete any project usage tracking.
-    $query = $this->db->delete('mukurtu_local_contexts_supported_projects')
-      ->condition('project_id', $project_id);
-    $query->execute();
+    $this->db->delete('mukurtu_local_contexts_supported_projects')
+      ->condition('project_id', $project_id)
+      ->execute();
 
     // Delete the project itself.
-    $query = $this->db->delete('mukurtu_local_contexts_projects')
-      ->condition('id', $project_id);
-    $query->execute();
+    $this->db->delete('mukurtu_local_contexts_projects')
+      ->condition('id', $project_id)
+      ->execute();
+  }
+
+  /**
+   * Hard-delete a project confirmed deleted from the Local Contexts Hub.
+   *
+   * Unlike removeProject() (the admin-triggered "un-support this project"
+   * flow, which refuses to delete an in-use project and never touches
+   * content), this deletes regardless of use, and also strips references
+   * to the project from any content that has them - leaving those
+   * references dangling once the cache is gone causes silent ghost
+   * rendering and, on the next save, silent loss of the reference from the
+   * entity, so they must be actively cleaned up rather than left behind.
+   *
+   * Must only ever be called after
+   * \Drupal\mukurtu_local_contexts\LocalContextsProject::isConfirmedDeleted()
+   * is TRUE for the given project - never for unauthorized/forbidden/error
+   * statuses, which are recoverable and must never trigger this.
+   *
+   * @param string $project_id
+   *   The confirmed-deleted project ID.
+   * @param string $reason
+   *   Why the project was purged, stored in the purge log.
+   *
+   * @return array{labels: int, notices: int, nodes_queued: int}
+   *   Counts of what was purged/queued, or all zeros if the purge was
+   *   skipped (legacy project ID, lock contention, or the project's
+   *   persisted status is no longer not_found).
+   */
+  public function purgeDeletedProject(string $project_id, string $reason = 'not_found'): array {
+    $empty = ['labels' => 0, 'notices' => 0, 'nodes_queued' => 0];
+
+    // Legacy (v3-migrated) synthetic project IDs are never on the real
+    // hub and will 404 forever - they must never be auto-purged.
+    if ($this->isLegacyProjectId($project_id)) {
+      return $empty;
+    }
+
+    $lock = \Drupal::lock();
+    $lock_name = 'mukurtu_local_contexts_purge_' . $project_id;
+    if (!$lock->acquire($lock_name, 30)) {
+      // Another process is already purging (or otherwise modifying) this
+      // project. Skip quietly; it will be re-evaluated next cron run.
+      return $empty;
+    }
+
+    try {
+      // Defensive re-check: confirm the project is still confirmed-deleted
+      // before doing anything destructive, in case its status changed (or
+      // never actually met the grace period) between the caller's check
+      // and now. This makes the method safe to call on its own rather
+      // than relying solely on the cron caller's gate.
+      $project = new LocalContextsProject($project_id);
+      if (!$project->isConfirmedDeleted()) {
+        return $empty;
+      }
+
+      $title = $project->getTitle();
+      $labels = array_merge($project->getLabels('tk'), $project->getLabels('bc'));
+      $notices = $project->getNotices();
+      $scopes = $this->getSupportedProjectScopes($project_id);
+
+      // Build the compound field values these labels/notices would be
+      // stored as on content, before their cache rows (and the IDs they're
+      // built from) are deleted.
+      $labelAndNoticeValues = array_merge(
+        array_map(fn($label) => $project_id . ':' . $label['id'] . ':label', $labels),
+        array_map(fn($notice_id) => $notice_id . ':notice', array_keys($notices)),
+      );
+
+      $nodesQueued = $this->queueReferenceRemoval($project_id, $labelAndNoticeValues);
+
+      $counts = [
+        'labels' => count($labels),
+        'notices' => count($notices),
+        'nodes_queued' => $nodesQueued,
+      ];
+
+      $this->deleteProjectCacheRows($project_id);
+
+      $now = \Drupal::time()->getRequestTime();
+      foreach ($scopes as $scope) {
+        $this->db->insert('mukurtu_local_contexts_purge_log')->fields([
+          'project_id' => $project_id,
+          'title' => $title,
+          'type' => $scope['type'],
+          'group_id' => $scope['group_id'],
+          'reason' => $reason,
+          'nodes_affected' => $nodesQueued,
+          'purged' => $now,
+          'dismissed' => 0,
+        ])->execute();
+      }
+
+      \Drupal::logger('mukurtu_local_contexts')->notice(
+        'Purged Local Contexts project @title (@id): confirmed deleted from the hub after @count consecutive not_found sync attempts. Removed @labels label(s) and @notices notice(s) from the local cache, and queued reference cleanup on @nodes node(s).',
+        [
+          '@title' => $title ?? $project_id,
+          '@id' => $project_id,
+          '@count' => $project->getNotFoundCount(),
+          '@labels' => $counts['labels'],
+          '@notices' => $counts['notices'],
+          '@nodes' => $nodesQueued,
+        ]
+      );
+
+      return $counts;
+    }
+    finally {
+      $lock->release($lock_name);
+    }
+  }
+
+  /**
+   * Find every node referencing a project (via
+   * field_local_contexts_projects) or any of its labels/notices (via
+   * field_local_contexts_labels_and_notices), and queue each distinct node
+   * for reference cleanup. Queued items are drained by the
+   * mukurtu_local_contexts_reference_cleanup queue worker on subsequent
+   * cron runs.
+   *
+   * @param string $project_id
+   *   The project ID being purged.
+   * @param array $label_and_notice_values
+   *   The full compound field values (e.g. "{project_id}:{label_id}:label")
+   *   belonging to this project, built before its cache rows were deleted.
+   *
+   * @return int
+   *   The number of distinct nodes queued.
+   */
+  public function queueReferenceRemoval(string $project_id, array $label_and_notice_values): int {
+    $nids = \Drupal::entityQuery('node')
+      ->condition('field_local_contexts_projects', $project_id)
+      ->accessCheck(FALSE)
+      ->execute();
+
+    if ($label_and_notice_values) {
+      $nids += \Drupal::entityQuery('node')
+        ->condition('field_local_contexts_labels_and_notices', $label_and_notice_values, 'IN')
+        ->accessCheck(FALSE)
+        ->execute();
+    }
+
+    if (!$nids) {
+      return 0;
+    }
+
+    $queue = \Drupal::queue('mukurtu_local_contexts_reference_cleanup');
+    foreach ($nids as $nid) {
+      $queue->createItem([
+        'nid' => $nid,
+        'project_id' => $project_id,
+        'label_and_notice_values' => $label_and_notice_values,
+      ]);
+    }
+
+    return count($nids);
+  }
+
+  /**
+   * Get every scope (site/community/protocol) currently supporting a
+   * project ID.
+   *
+   * @param string $project_id
+   *   The project ID.
+   *
+   * @return array
+   *   A list of ['type' => ..., 'group_id' => ...] rows.
+   */
+  private function getSupportedProjectScopes(string $project_id): array {
+    $query = $this->db->select('mukurtu_local_contexts_supported_projects', 'sp')
+      ->condition('sp.project_id', $project_id)
+      ->fields('sp', ['type', 'group_id']);
+    return $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  }
+
+  /**
+   * Get undismissed purge log entries for a given scope.
+   *
+   * @param string $type
+   *   'site', 'community', or 'protocol'.
+   * @param int $group_id
+   *   The group entity ID, or 0 for site.
+   *
+   * @return array
+   *   The undismissed purge log rows for this scope.
+   */
+  public function getUndismissedPurgeNotices(string $type, int $group_id): array {
+    $query = $this->db->select('mukurtu_local_contexts_purge_log', 'log')
+      ->condition('type', $type)
+      ->condition('group_id', $group_id)
+      ->condition('dismissed', 0)
+      ->fields('log', ['id', 'project_id', 'title', 'reason', 'nodes_affected', 'purged']);
+    $query->orderBy('purged', 'DESC');
+    return $query->execute()->fetchAllAssoc('id', PDO::FETCH_ASSOC);
+  }
+
+  /**
+   * Mark purge log entries as dismissed.
+   *
+   * @param array $ids
+   *   The purge log entry IDs to dismiss.
+   */
+  public function dismissPurgeNotices(array $ids): void {
+    if (!$ids) {
+      return;
+    }
+    $this->db->update('mukurtu_local_contexts_purge_log')
+      ->condition('id', $ids, 'IN')
+      ->fields(['dismissed' => 1])
+      ->execute();
   }
 
   /**
@@ -727,7 +954,7 @@ class LocalContextsSupportedProjectManager {
       ->condition('sp.type', 'site')
       ->condition('sp.group_id', 0);
     $query->fields('labels', ['id', 'name', 'type', 'display']);
-    $query->fields('p', ['provider_id', 'title', 'privacy', 'updated']);
+    $query->fields('p', ['provider_id', 'title', 'privacy', 'updated', 'status']);
     $query->addField('p', 'id', 'project_id');
 
     $result = $query->execute();
@@ -754,7 +981,7 @@ class LocalContextsSupportedProjectManager {
       ->condition('sp.type', 'site')
       ->condition('sp.group_id', 0);
     $query->fields('notices', ['type', 'name', 'default_text', 'display']);
-    $query->fields('p', ['provider_id', 'title', 'privacy', 'updated']);
+    $query->fields('p', ['provider_id', 'title', 'privacy', 'updated', 'status']);
     $query->addField('p', 'id', 'project_id');
 
     $result = $query->execute();
@@ -770,6 +997,7 @@ class LocalContextsSupportedProjectManager {
         'svg_url' => $notice['svg_url'],
         'text' => $notice['default_text'],
         'display' => $notice['display'],
+        'status' => $notice['status'],
       ];
     }
     return $notices;
@@ -796,7 +1024,7 @@ class LocalContextsSupportedProjectManager {
     $query->condition('project_id', $project_ids, 'IN');
     $query->join('mukurtu_local_contexts_projects', 'p', 'labels.project_id = p.id');
     $query->fields('labels', ['id', 'name', 'type', 'display']);
-    $query->fields('p', ['provider_id', 'title', 'privacy', 'updated']);
+    $query->fields('p', ['provider_id', 'title', 'privacy', 'updated', 'status']);
     $query->addField('p', 'id', 'project_id');
 
     $result = $query->execute();
@@ -831,7 +1059,7 @@ class LocalContextsSupportedProjectManager {
     $query->condition('project_id', $project_ids, 'IN');
     $query->join('mukurtu_local_contexts_projects', 'p', 'notices.project_id = p.id');
     $query->fields('notices', ['project_id', 'type', 'name', 'default_text', 'display', 'svg_url']);
-    $query->fields('p', ['provider_id', 'title', 'privacy', 'updated']);
+    $query->fields('p', ['provider_id', 'title', 'privacy', 'updated', 'status']);
 
     $result = $query->execute();
     $notices = [];
@@ -846,6 +1074,7 @@ class LocalContextsSupportedProjectManager {
         'svg_url' => $notice['svg_url'],
         'text' => $notice['default_text'],
         'display' => $notice['display'],
+        'status' => $notice['status'],
       ];
     }
 

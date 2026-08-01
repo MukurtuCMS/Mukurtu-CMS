@@ -2,10 +2,12 @@
 
 namespace Drupal\mukurtu_local_contexts\Form;
 
+use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\TempStore\PrivateTempStoreFactory;
 use Drupal\Core\Url;
 use Drupal\mukurtu_local_contexts\LocalContextsApi;
 use Drupal\mukurtu_local_contexts\LocalContextsProject;
@@ -22,8 +24,13 @@ abstract class ManageSupportedProjectsBase extends FormBase {
    *
    * @param \Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager $supportedProjectManager
    *   The Local Contexts supported project manager.
+   * @param \Drupal\Core\TempStore\PrivateTempStoreFactory $tempStoreFactory
+   *   The private tempstore factory.
    */
-  public function __construct(protected LocalContextsSupportedProjectManager $supportedProjectManager) {
+  public function __construct(
+    protected LocalContextsSupportedProjectManager $supportedProjectManager,
+    protected PrivateTempStoreFactory $tempStoreFactory,
+  ) {
   }
 
   /**
@@ -32,6 +39,7 @@ abstract class ManageSupportedProjectsBase extends FormBase {
   public static function create(ContainerInterface $container): static {
     return new static(
       $container->get('mukurtu_local_contexts.supported_project_manager'),
+      $container->get('tempstore.private'),
     );
   }
 
@@ -40,6 +48,13 @@ abstract class ManageSupportedProjectsBase extends FormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $group = $form_state->get('group');
+
+    $scope_type = $group ? $group->getEntityTypeId() : 'site';
+    $scope_group_id = $group ? (int) $group->id() : 0;
+    $purge_notices = $this->supportedProjectManager->getUndismissedPurgeNotices($scope_type, $scope_group_id);
+    if ($purge_notices) {
+      $form['purge_notice'] = $this->buildPurgeNoticeBanner($purge_notices);
+    }
 
     // Get the list of API keys currently configured for this scope.
     if ($group) {
@@ -156,13 +171,21 @@ abstract class ManageSupportedProjectsBase extends FormBase {
       '#attributes' => ['class' => ['bulk-action-wrapper', 'container-inline']],
       '#tree' => FALSE,
     ];
+    $action_options = [
+      'add' => $this->t('Add / Sync'),
+      'delete' => $this->t('Delete'),
+    ];
+    $has_legacy_projects = (bool) array_filter(
+      array_keys($supported_projects),
+      fn ($id) => $this->supportedProjectManager->isLegacyProjectId((string) $id)
+    );
+    if ($has_legacy_projects && $this->currentUser()->hasPermission('administer local contexts legacy projects')) {
+      $action_options['decommission'] = $this->t('Decommission');
+    }
     $form['bulk_action_wrapper']['action'] = [
       '#type' => 'select',
       '#title' => $this->t('With selected items'),
-      '#options' => [
-        'add' => $this->t('Add / Sync'),
-        'delete' => $this->t('Delete'),
-      ],
+      '#options' => $action_options,
       '#empty_option' => $this->t('- Select action -'),
     ];
     $form['bulk_action_wrapper']['submit'] = [
@@ -213,26 +236,55 @@ abstract class ManageSupportedProjectsBase extends FormBase {
           $supported_projects[$id]['updated'],
           'short'
         );
-        $row['status'] = $this->t('Active');
+        $row['status'] = $this->buildStatusCell($supported_projects[$id]);
       }
       $rows_by_key[$project['_api_key']][$id] = $row;
     }
 
-    // Loop over any remaining projects that are no longer on the hub.
+    // Loop over any remaining projects that are no longer on the hub as of
+    // this request. Legacy (v3-migrated) projects always fall into this
+    // bucket too, since they were never on the Hub to begin with - show
+    // their actual active/reference status instead of the generic
+    // "no longer on the hub" messaging, which would be misleading for them.
+    // For everything else, this is a live, request-scoped signal (using the
+    // key just submitted in this form) that is separate from the persisted
+    // per-project status (which reflects the last actual cron sync attempt
+    // for the group's/site's configured key) - a project can be missing here
+    // simply because the form's key hasn't caught up to cron yet.
     $missing_projects = array_diff_key($supported_projects, $all_projects);
     foreach ($missing_projects as $id => $project) {
-      $row = [
-        'title' => $this->buildProjectTitleLink($id, $project['title']),
-        'status' => [
-          'data' => [
-            '#type' => 'html_tag',
-            '#tag' => 'strong',
-            '#value' => $this->t('Not available'),
-            '#attributes' => ['title' => $this->t('This project has been deleted from the Local Contexts Hub and can no longer be synced.')],
+      if ($this->supportedProjectManager->isLegacyProjectId((string) $id)) {
+        $row = [
+          'title' => $project['title'],
+          'status' => $this->describeActiveStatus((string) $id),
+          'last_sync' => \Drupal::service('date.formatter')->format($project['updated'], 'short'),
+          'project_id' => $id,
+        ];
+      }
+      // If we already have a persisted status for this project (e.g. a
+      // recorded 401/403/404 from cron), prefer that specific reason.
+      // Otherwise this is the "pending sync" case described below.
+      elseif (($project['status'] ?? LocalContextsProject::STATUS_ACTIVE) !== LocalContextsProject::STATUS_ACTIVE) {
+        $row = [
+          'title' => $this->buildProjectTitleLink($id, $project['title']),
+          'status' => $this->buildStatusCell($project),
+          'project_id' => $id,
+        ];
+      }
+      else {
+        $row = [
+          'title' => $this->buildProjectTitleLink($id, $project['title']),
+          'status' => [
+            'data' => [
+              '#type' => 'html_tag',
+              '#tag' => 'strong',
+              '#value' => $this->t('Not available (pending sync)'),
+              '#attributes' => ['title' => $this->t('This project was not returned by the Local Contexts Hub using the API key currently entered on this form. It may simply be pending the next sync.')],
+            ],
           ],
-        ],
-        'project_id' => $id,
-      ];
+          'project_id' => $id,
+        ];
+      }
       // Group with its originating key if that key is still configured;
       // otherwise it falls into the "No API key" section below alongside
       // legacy/NULL-api_key projects.
@@ -352,6 +404,140 @@ abstract class ManageSupportedProjectsBase extends FormBase {
   }
 
   /**
+   * Build the status column render array for a supported project row.
+   *
+   * @param array $project
+   *   The project info, including 'status', 'archived', and
+   *   'status_message' keys (as returned by
+   *   LocalContextsSupportedProjectManager::getSiteSupportedProjects() /
+   *   getGroupSupportedProjects()).
+   *
+   * @return array|\Drupal\Core\StringTranslation\TranslatableMarkup
+   *   A render array for a warning/informational badge, or a plain
+   *   translated string for the normal active state.
+   */
+  protected function buildStatusCell(array $project) {
+    $status = $project['status'] ?? LocalContextsProject::STATUS_ACTIVE;
+
+    if ($status === LocalContextsProject::STATUS_ACTIVE) {
+      if (!empty($project['archived'])) {
+        return [
+          'data' => [
+            '#type' => 'html_tag',
+            '#tag' => 'em',
+            '#value' => $this->t('Archived'),
+            '#attributes' => ['title' => $this->t('This project has been archived on the Local Contexts Hub. It remains active and usable here.')],
+          ],
+        ];
+      }
+      return $this->t('Active');
+    }
+
+    $tooltips = [
+      LocalContextsProject::STATUS_UNAUTHORIZED => $this->t('The API key used to sync this project was rejected by the Local Contexts Hub. Update the API key to resume syncing.'),
+      LocalContextsProject::STATUS_FORBIDDEN => $this->t('The API key used to sync this project does not have access to it (for example, a private project). Check the project privacy settings on the Hub, or use a different API key.'),
+      LocalContextsProject::STATUS_NOT_FOUND => $this->t('This project has been deleted from the Local Contexts Hub and can no longer be synced.'),
+    ];
+    $tooltip = $tooltips[$status] ?? $this->t('This project could not be synced with the Local Contexts Hub. @message', ['@message' => $project['status_message'] ?? '']);
+
+    // A not_found result is distinguished from other failure types with its
+    // own label, since it means the project no longer exists on the hub
+    // rather than a recoverable sync issue (bad key, permissions, etc.).
+    $label = $status === LocalContextsProject::STATUS_NOT_FOUND ? $this->t('Deleted') : $this->t('Not available');
+
+    return [
+      'data' => [
+        '#type' => 'html_tag',
+        '#tag' => 'strong',
+        '#value' => $label,
+        '#attributes' => ['title' => $tooltip],
+      ],
+    ];
+  }
+
+  /**
+   * Build a dismissible warning banner listing projects auto-purged from
+   * this scope because they were confirmed deleted on the Local Contexts
+   * Hub.
+   *
+   * @param array $purge_notices
+   *   Undismissed purge log rows for the current scope, keyed by log entry
+   *   ID (as returned by
+   *   LocalContextsSupportedProjectManager::getUndismissedPurgeNotices()).
+   *
+   * @return array
+   *   A render array for the banner.
+   */
+  protected function buildPurgeNoticeBanner(array $purge_notices): array {
+    // Mirrors the landmark/heading structure Drupal core's own warning
+    // messages use (see status-messages.html.twig): a role="contentinfo"
+    // region labelled by a heading, so assistive technology users can find
+    // and identify it when navigating by landmarks/headings, not just by
+    // reading page content top to bottom. "Warning message" is the same
+    // generic heading core already uses for every other warning message
+    // sitewide, not new copy specific to this banner.
+    $heading_id = Html::getUniqueId('mukurtu-local-contexts-purge-notice-title');
+
+    return [
+      '#type' => 'container',
+      '#attributes' => [
+        'role' => 'contentinfo',
+        'aria-labelledby' => $heading_id,
+        'class' => ['messages', 'messages--warning'],
+      ],
+      'header' => [
+        '#type' => 'container',
+        '#attributes' => ['class' => ['messages__header']],
+        'title' => [
+          '#type' => 'html_tag',
+          '#tag' => 'h2',
+          '#attributes' => ['id' => $heading_id, 'class' => ['messages__title']],
+          '#value' => $this->t('Warning message'),
+        ],
+      ],
+      'content' => [
+        '#type' => 'container',
+        '#attributes' => ['class' => ['messages__content']],
+        'heading' => [
+          '#type' => 'html_tag',
+          '#tag' => 'p',
+          '#value' => $this->t('The following project(s) were automatically removed because they were deleted from the Local Contexts Hub. Any content that referenced them has had that reference removed.'),
+        ],
+        'list' => [
+          '#theme' => 'item_list',
+          '#items' => array_map(
+            fn($notice) => $this->t('@title (@id) - removed @date', [
+              '@title' => $notice['title'] ?: $notice['project_id'],
+              '@id' => $notice['project_id'],
+              '@date' => \Drupal::service('date.formatter')->format($notice['purged'], 'short'),
+            ]),
+            $purge_notices
+          ),
+        ],
+      ],
+      'dismiss' => [
+        '#type' => 'submit',
+        '#value' => $this->t('Dismiss'),
+        '#name' => 'dismiss_purge_notice',
+        '#submit' => ['::dismissPurgeNotices'],
+        '#validate' => [],
+        '#limit_validation_errors' => [],
+        '#purge_notice_ids' => array_keys($purge_notices),
+      ],
+    ];
+  }
+
+  /**
+   * Submit handler for dismissing the purge notice banner.
+   */
+  public function dismissPurgeNotices(array &$form, FormStateInterface $form_state) {
+    $element = $form_state->getTriggeringElement();
+    $ids = $element['#purge_notice_ids'] ?? [];
+    $this->supportedProjectManager->dismissPurgeNotices($ids);
+    $form_state->setRebuild();
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function validateApiKey(array &$form, FormStateInterface $form_state) {
@@ -466,7 +652,7 @@ abstract class ManageSupportedProjectsBase extends FormBase {
   public function validateForm(array &$form, FormStateInterface $form_state) {
     $selected_projects = array_filter($form_state->getValue('projects'));
     $action = $form_state->getValue('action');
-    if ($selected_projects && !in_array($action, ['add', 'delete'], TRUE)) {
+    if ($selected_projects && !in_array($action, ['add', 'delete', 'decommission'], TRUE)) {
       $form_state->setErrorByName('action', $this->t('Select an action to apply.'));
     }
   }
@@ -503,7 +689,46 @@ abstract class ManageSupportedProjectsBase extends FormBase {
       case 'delete':
         $this->submitDelete($all_projects, $selected_projects, $group);
         break;
+      case 'decommission':
+        $this->submitDecommission($all_projects, $selected_projects, $group, $form_state);
+        break;
     }
+  }
+
+  /**
+   * Count the distinct nodes still referencing a project.
+   *
+   * @param string $id
+   *   The project ID.
+   *
+   * @return int
+   *   The count of distinct nodes referencing the project, via either the
+   *   whole-project field or any of its individual labels/notices.
+   */
+  protected function countProjectReferences(string $id): int {
+    $referencing = (new LocalContextsProject($id))->getReferencingNodeIds();
+    $nids = $referencing['project'];
+    foreach ($referencing['labels_and_notices'] as $label_nids) {
+      $nids = array_merge($nids, $label_nids);
+    }
+    return count(array_unique($nids));
+  }
+
+  /**
+   * Describe an active project's status, including its reference count.
+   *
+   * @param string $id
+   *   The project ID.
+   *
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup
+   *   The status text, e.g. "Active — referenced by 3 nodes".
+   */
+  protected function describeActiveStatus(string $id) {
+    $reference_count = $this->countProjectReferences($id);
+    if ($reference_count === 0) {
+      return $this->t('Active — no remaining references');
+    }
+    return $this->formatPlural($reference_count, 'Active — referenced by 1 node', 'Active — referenced by @count nodes');
   }
 
   /**
@@ -643,6 +868,63 @@ abstract class ManageSupportedProjectsBase extends FormBase {
         }
       }
     }
+  }
+
+  /**
+   * Validate a decommission request and hand off to the confirmation page.
+   *
+   * Unlike submitDelete(), this doesn't delete anything directly - it only
+   * validates the selection (must be legacy projects with zero remaining
+   * content references), stores the validated subset for the confirmation
+   * step, and redirects there. Decommissioning is destructive and permanent,
+   * so it always goes through an explicit confirm step.
+   *
+   * @param array $all_projects
+   *   All projects to which the Local Contexts API key has access.
+   * @param array $selected_projects
+   *   An array of IDs that were selected to be decommissioned.
+   * @param \Drupal\Core\Entity\ContentEntityInterface|null $group
+   *   If decommissioning from a group, the entity object. If NULL,
+   *   decommissioning from the site-wide projects.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state, used to redirect to the confirmation page.
+   *
+   * @return void
+   */
+  protected function submitDecommission(array $all_projects, array $selected_projects, ?ContentEntityInterface $group, FormStateInterface $form_state): void {
+    if (!$this->currentUser()->hasPermission('administer local contexts legacy projects')) {
+      $form_state->setErrorByName('action', $this->t('You do not have permission to decommission legacy projects.'));
+      return;
+    }
+
+    $valid_ids = [];
+    foreach ($selected_projects as $id) {
+      if (!$this->supportedProjectManager->isLegacyProjectId((string) $id)) {
+        $title = $all_projects[$id]['title'] ?? $id;
+        $this->messenger()->addError($this->t('The project %project cannot be decommissioned because it is not a legacy project. Use Delete instead.', ['%project' => $title]));
+        continue;
+      }
+
+      $project = new LocalContextsProject($id);
+      if ($project->inUse()) {
+        $this->messenger()->addError($this->t('The project %project cannot be decommissioned because it is still referenced by content. Use the legacy project remap tool to reassign the remaining content first.', ['%project' => $project->getTitle()]));
+        continue;
+      }
+
+      $valid_ids[] = $id;
+    }
+
+    if (!$valid_ids) {
+      return;
+    }
+
+    $this->tempStoreFactory->get('mukurtu_local_contexts.decommission')->set($this->currentUser()->id(), [
+      'scope' => $group ? $group->getEntityTypeId() : 'site',
+      'group_id' => $group ? (int) $group->id() : NULL,
+      'project_ids' => $valid_ids,
+    ]);
+
+    $form_state->setRedirect('mukurtu_local_contexts.decommission_legacy_projects_confirm');
   }
 
 }
