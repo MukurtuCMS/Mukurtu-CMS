@@ -31,3 +31,8 @@ services:
     arguments:
       - '@mukurtu_collection.menu_rebuild_processor'
       - '@entity_type.manager'
+
+  mukurtu_collection.representative_media_computation:
+    class: Drupal\mukurtu_collection\EventSubscriber\RepresentativeMediaComputationSubscriber
+    tags:
+      - { name: event_subscriber }

@@ -24,6 +24,12 @@ mukurtu_local_contexts.settings:
     hub_endpoint:
       type: string
       label: 'Hub Endpoint'
+    deleted_project_grace_period:
+      type: integer
+      label: 'Deleted Project Grace Period (seconds)'
+    deleted_project_min_consecutive_failures:
+      type: integer
+      label: 'Deleted Project Minimum Consecutive Not-Found Syncs'
 
 field.value.local_contexts_project:
   type: mapping
