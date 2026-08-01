@@ -6,3 +6,10 @@ services:
     class: Drupal\mukurtu_media\Routing\RouteSubscriber
     tags:
       - { name: event_subscriber }
+  mukurtu_media.oembed.resource_fetcher:
+    class: Drupal\mukurtu_media\OEmbed\MukurtuResourceFetcher
+    decorates: media.oembed.resource_fetcher
+    arguments: ['@mukurtu_media.oembed.resource_fetcher.inner', '@http_client', '@key.repository', '@media.oembed.provider_repository', '@logger.channel.mukurtu_media', '@config.factory']
+  logger.channel.mukurtu_media:
+    parent: logger.channel_base
+    arguments: ['mukurtu_media']

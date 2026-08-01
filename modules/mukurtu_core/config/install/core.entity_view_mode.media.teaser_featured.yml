@@ -1,0 +1,10 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - media
+id: media.teaser_featured
+label: 'Teaser / Featured Media'
+description: ''
+targetEntityType: media
+cache: true
