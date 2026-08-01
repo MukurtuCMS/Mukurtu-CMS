@@ -238,11 +238,29 @@
     lightbox.on('close', resetZoom);
   }
 
+  const ZOOM_HINT_ID = 'media-asset-glightbox-zoom-hint';
+
+  // A single shared, visually-hidden hint that every zoomable image points
+  // to via aria-describedby. Using aria-label here instead would replace
+  // each image's own (content-authored) alt text as its accessible name,
+  // leaving screen reader users with a generic "Zoom image" label and no
+  // way to hear the photo's actual description - describedby supplements
+  // the name instead of overwriting it.
+  function ensureZoomHint() {
+    if (document.getElementById(ZOOM_HINT_ID)) return;
+    const hint = document.createElement('span');
+    hint.id = ZOOM_HINT_ID;
+    hint.className = 'visually-hidden';
+    hint.textContent = 'Press Enter to zoom. While zoomed, use arrow keys to pan.';
+    document.body.appendChild(hint);
+  }
+
   // Drupal behavior
   Drupal.behaviors.mediaAssetGLightbox = {
     attach(context) {
       // Initialize GLightbox globally once
       once("mediaGLightboxGlobal", "body", context).forEach(() => {
+        ensureZoomHint();
         // Small delay to ensure media is fully rendered
         setTimeout(() => {
           initGLightbox();
@@ -255,7 +273,7 @@
         img.setAttribute('tabindex', '0');
         img.setAttribute('role', 'button');
         img.setAttribute('aria-pressed', 'false');
-        img.setAttribute('aria-label', 'Zoom image');
+        img.setAttribute('aria-describedby', ZOOM_HINT_ID);
       });
     }
   };
