@@ -20,6 +20,15 @@
 
         const counter = document.createElement('div');
         counter.className = 'submission-character-counter';
+        counter.setAttribute('role', 'status');
+        if (field.id) {
+          counter.id = `${field.id}-counter`;
+          const describedBy = field.getAttribute('aria-describedby');
+          field.setAttribute(
+            'aria-describedby',
+            describedBy ? `${describedBy} ${counter.id}` : counter.id,
+          );
+        }
         field.insertAdjacentElement('afterend', counter);
 
         const update = () => {

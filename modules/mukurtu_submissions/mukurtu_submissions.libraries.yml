@@ -4,3 +4,10 @@ character_counter:
   dependencies:
     - core/once
     - core/drupal
+
+flatten_tables:
+  js:
+    js/flatten-tables.js: {}
+  dependencies:
+    - core/once
+    - core/drupal

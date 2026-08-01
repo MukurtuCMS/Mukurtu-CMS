@@ -81,7 +81,11 @@
       font-weight: var(--text-bold);
       font-size: 1.1em;
       color: var(--color-white);
-      background: var(--brand-primary);
+      // var(--brand-primary) only contrasts white text at ~4:1 - short of
+      // WCAG AA's 4.5:1 for this text (bold at 1.1em doesn't clear the
+      // "large text" threshold that would allow the lower 3:1 minimum).
+      // -dark is the same shade already used elsewhere for a passing ~5:1.
+      background: var(--brand-primary-dark);
       padding: var(--v-space-5xs) var(--v-space-4xs);
       border-radius: 0.5rem;
       border-block-end: none;
@@ -120,7 +124,9 @@
       font-weight: var(--text-bold);
       font-size: 1.1em;
       color: var(--color-white);
-      background: var(--brand-primary);
+      // Same AA contrast fix as .submission-section > legend above - -dark
+      // is needed for white text to clear 4.5:1 at this weight/size.
+      background: var(--brand-primary-dark);
       padding: var(--v-space-5xs) var(--v-space-4xs);
       border-radius: 0.5rem;
       margin-block-end: var(--v-space-4xs);
@@ -144,11 +150,10 @@
         flex-shrink: 0;
       }
 
-      &:hover,
-      &:focus-visible {
-        background: var(--brand-primary-dark);
-      }
-
+      // Background can no longer darken further on hover/focus now that
+      // resting state already uses -dark (see above) - the focus-visible
+      // outline below remains the affordance for keyboard users; a mouse
+      // hover with no visual change is not itself a WCAG violation.
       &:focus-visible {
         outline: 2px solid var(--color-white);
         outline-offset: 2px;

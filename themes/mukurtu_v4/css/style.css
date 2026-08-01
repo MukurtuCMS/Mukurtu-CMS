@@ -7712,7 +7712,7 @@ header {
   font-weight: var(--text-bold);
   font-size: 1.1em;
   color: var(--color-white);
-  background: var(--brand-primary);
+  background: var(--brand-primary-dark);
   padding: var(--v-space-5xs) var(--v-space-4xs);
   border-radius: 0.5rem;
   -webkit-border-after: none;
@@ -7740,7 +7740,7 @@ header {
   font-weight: var(--text-bold);
   font-size: 1.1em;
   color: var(--color-white);
-  background: var(--brand-primary);
+  background: var(--brand-primary-dark);
   padding: var(--v-space-5xs) var(--v-space-4xs);
   border-radius: 0.5rem;
   -webkit-margin-after: var(--v-space-4xs);
@@ -7770,9 +7770,6 @@ header {
   transition: transform 0.15s ease, -webkit-transform 0.15s ease;
   -ms-flex-negative: 0;
       flex-shrink: 0;
-}
-.path-submit details.form-wrapper > summary:hover, .path-submit details.form-wrapper > summary:focus-visible {
-  background: var(--brand-primary-dark);
 }
 .path-submit details.form-wrapper > summary:focus-visible {
   outline: 2px solid var(--color-white);

@@ -190,6 +190,7 @@ class PublicSubmissionForm extends FormBase {
     ];
 
     $form['#attached']['library'][] = 'mukurtu_submissions/character_counter';
+    $form['#attached']['library'][] = 'mukurtu_submissions/flatten_tables';
 
     $account = $this->currentUser();
     $form['submitter_info'] = [
