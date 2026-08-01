@@ -1039,7 +1039,10 @@ function &_mukurtu_notifications_recent_registrations(): array {
  * account is created.
  *
  * Mukurtu managers are unconditional recipients; $notify_uids are additional
- * recipients selected via the account-creation form.
+ * recipients selected via the account-creation form. The new user themselves
+ * is excluded even if they already qualify as a manager (e.g. created with
+ * the mukurtu_manager role) -- they shouldn't be told their own account was
+ * just created; they get a separate "account created for you" email instead.
  *
  * @param \Drupal\user\Entity\User $new_user
  *   The newly created user entity.
@@ -1049,6 +1052,7 @@ function &_mukurtu_notifications_recent_registrations(): array {
 function mukurtu_notifications_notify_new_account_created(User $new_user, array $notify_uids): void {
   $manager_uids = mukurtu_notifications_resolve_notify_groups(TRUE, [], []);
   $recipient_uids = array_values(array_unique(array_merge($manager_uids, $notify_uids)));
+  $recipient_uids = array_values(array_diff($recipient_uids, [(int) $new_user->id()]));
 
   _mukurtu_notifications_notify('mukurtu_new_user_account_created', [
     'field_user' => $new_user,

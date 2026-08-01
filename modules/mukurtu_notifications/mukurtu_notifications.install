@@ -1988,3 +1988,31 @@ function mukurtu_notifications_update_40054(): void {
     $source->read('message.template.mukurtu_batch_import_report')
   );
 }
+
+/**
+ * Opts uid 1 in to "User account" category emails.
+ *
+ * uid 1 is an unconditional recipient of "all managers" notifications (see
+ * mukurtu_core_get_manager_role_uids()), but that only guarantees a feed
+ * entry -- email delivery is still gated by the recipient's own
+ * field_notify_email_categories selection. Installs predating the "all
+ * categories on" default for this field (uid 1 among them) may carry a
+ * narrower selection that excludes 'user_account', silently suppressing
+ * email for new-account-created and related notifications despite uid 1
+ * always being a listed recipient.
+ */
+function mukurtu_notifications_update_40055(): void {
+  $uid_one = \Drupal\user\Entity\User::load(1);
+  if (!$uid_one || !$uid_one->hasField('field_notify_email_categories')) {
+    return;
+  }
+
+  $categories = array_column($uid_one->get('field_notify_email_categories')->getValue(), 'value');
+  if (in_array('user_account', $categories, TRUE)) {
+    return;
+  }
+
+  $categories[] = 'user_account';
+  $uid_one->set('field_notify_email_categories', array_values(array_unique($categories)));
+  $uid_one->save();
+}
