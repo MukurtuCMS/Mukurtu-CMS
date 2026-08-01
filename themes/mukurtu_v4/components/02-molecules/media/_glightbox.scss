@@ -43,7 +43,13 @@
       width: auto;
       height: auto;
       max-width: 100%;
-      max-height: 88vh;
+      // The outer .gslide-inline box caps at 92vh (border-box, including its
+      // own 1rem padding above), and .ginlined-content adds another 20px of
+      // padding (top+bottom) inside that via GLightbox's bundled CSS. A flat
+      // 88vh cap here doesn't account for that ~72px of combined padding, so
+      // on most viewport heights the image renders taller than the actual
+      // space left for it and overflow: hidden clips the bottom edge.
+      max-height: calc(92vh - 2rem - 40px);
       margin: 0 auto;
     }
 
@@ -63,20 +69,15 @@
       }
 
       &.media-asset--zoomed {
-        cursor: grab;
+        cursor: zoom-out;
         max-width: none;
         max-height: none;
         width: auto;
         height: auto;
       }
 
-      &.media-asset--dragging {
-        cursor: grabbing;
-        transition: none;
-      }
-
-      // Drag-to-pan has no touch equivalent here, so zoom is disabled at the
-      // same breakpoint the JS uses (setupImageZoom's MOBILE_BREAKPOINT).
+      // Hover-to-pan has no touch equivalent here, so zoom is disabled at
+      // the same breakpoint the JS uses (setupImageZoom's MOBILE_BREAKPOINT).
       @media (max-width: 768px) {
         cursor: default;
       }

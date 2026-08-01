@@ -15,12 +15,31 @@
   }
 
   function panBounds(img) {
-    const container = img.closest('.ginlined-content');
+    // The visible viewport to pan within is the outer .gslide-inline box
+    // (fixed by max-width/max-height + overflow: hidden, see _glightbox.scss).
+    // .ginlined-content itself is NOT a stable reference: it's auto-sized to
+    // fit its content, so once the image grows to native size on zoom, that
+    // element grows right along with it, making pan bounds computed against
+    // it collapse toward zero and leaving parts of the image unreachable.
+    const container = img.closest('.gslide-inline');
     const cRect = container.getBoundingClientRect();
     const iRect = img.getBoundingClientRect();
+    // The image's untransformed position isn't flush with the container's
+    // edges - .media--image and .ginlined-content each add their own
+    // padding/centering, and the exact offset isn't worth hardcoding here.
+    // Recover it by subtracting the currently-applied pan (translate3d only
+    // shifts position, never size) from the current rect, then measure how
+    // far the image can move in each direction before its edge would pass
+    // the container's edge and start exposing blank space.
+    const x = parseFloat(img.dataset.zoomX) || 0;
+    const y = parseFloat(img.dataset.zoomY) || 0;
+    const naturalLeft = iRect.left - x;
+    const naturalTop = iRect.top - y;
     return {
-      x: Math.max(0, (iRect.width - cRect.width) / 2),
-      y: Math.max(0, (iRect.height - cRect.height) / 2),
+      minX: cRect.right - (naturalLeft + iRect.width),
+      maxX: cRect.left - naturalLeft,
+      minY: cRect.bottom - (naturalTop + iRect.height),
+      maxY: cRect.top - naturalTop,
     };
   }
 
@@ -67,8 +86,8 @@
         else if (e.key === 'ArrowUp') dy = step;
         else if (e.key === 'ArrowDown') dy = -step;
         const bounds = panBounds(focused);
-        const x = clamp((parseFloat(focused.dataset.zoomX) || 0) + dx, -bounds.x, bounds.x);
-        const y = clamp((parseFloat(focused.dataset.zoomY) || 0) + dy, -bounds.y, bounds.y);
+        const x = clamp((parseFloat(focused.dataset.zoomX) || 0) + dx, bounds.minX, bounds.maxX);
+        const y = clamp((parseFloat(focused.dataset.zoomY) || 0) + dy, bounds.minY, bounds.maxY);
         setPan(focused, x, y);
         return;
       }
@@ -141,14 +160,15 @@
   // GLightbox's own zoom only attaches to native `type:"image"` slides.
   // Mukurtu uses `data-type="inline"` for every media type so the content
   // warning overlay can be shared across images/audio/video/documents, so
-  // GLightbox never wires its zoom up here. This reimplements the same
-  // click-to-zoom-to-native-size-then-drag-to-pan interaction, disabled
-  // below the same 768px breakpoint GLightbox itself uses (drag-to-pan has
-  // no touch equivalent here and pinch-zoom isn't implemented).
+  // GLightbox never wires its zoom up here. This reimplements click-to-zoom
+  // to native size; while zoomed, moving the mouse anywhere over the slide
+  // pans proportionally to cursor position (no need to hold a button down).
+  // Disabled below the same 768px breakpoint GLightbox itself uses for zoom,
+  // since hover-to-pan has no touch equivalent and pinch-zoom isn't
+  // implemented.
   function setupImageZoom(lightbox) {
     const MOBILE_BREAKPOINT = 768;
     let zoomed = null;
-    let drag = null;
 
     function zoomIn(img) {
       if (window.innerWidth <= MOBILE_BREAKPOINT) return;
@@ -160,7 +180,7 @@
     }
 
     function zoomOut(img) {
-      img.classList.remove('media-asset--zoomed', 'media-asset--dragging');
+      img.classList.remove('media-asset--zoomed');
       img.style.transform = '';
       delete img.dataset.zoomX;
       delete img.dataset.zoomY;
@@ -177,7 +197,6 @@
     }
 
     document.addEventListener('click', (e) => {
-      if (drag && drag.moved) return;
       const img = e.target.closest(ZOOM_SELECTOR);
       if (!img) return;
       toggleZoom(img);
@@ -194,39 +213,22 @@
       toggleZoom(img);
     });
 
-    document.addEventListener('mousedown', (e) => {
-      const img = e.target.closest('.media-asset--zoomed');
-      if (!img) return;
-      e.preventDefault();
-      drag = {
-        img,
-        startX: e.clientX,
-        startY: e.clientY,
-        originX: parseFloat(img.dataset.zoomX) || 0,
-        originY: parseFloat(img.dataset.zoomY) || 0,
-        moved: false,
-      };
-      img.classList.add('media-asset--dragging');
-    });
-
     document.addEventListener('mousemove', (e) => {
-      if (!drag) return;
-      const dx = e.clientX - drag.startX;
-      const dy = e.clientY - drag.startY;
-      if (Math.abs(dx) > 3 || Math.abs(dy) > 3) drag.moved = true;
-      const bounds = panBounds(drag.img);
-      setPan(drag.img, clamp(drag.originX + dx, -bounds.x, bounds.x), clamp(drag.originY + dy, -bounds.y, bounds.y));
-    });
-
-    document.addEventListener('mouseup', () => {
-      if (!drag) return;
-      drag.img.classList.remove('media-asset--dragging');
-      // Defer clearing so the click handler firing right after mouseup can
-      // still see `moved` and suppress the zoom toggle for that click.
-      const finishedDrag = drag;
-      setTimeout(() => {
-        if (drag === finishedDrag) drag = null;
-      }, 0);
+      if (!zoomed) return;
+      // Map cursor position within the slide's visible viewport to a pan
+      // offset: cursor at the left/top edge aligns the image's left/top edge
+      // with the container (bounds.maxX/maxY), cursor at the right/bottom
+      // edge aligns the image's right/bottom edge (bounds.minX/minY).
+      const container = zoomed.closest('.gslide-inline');
+      const rect = container.getBoundingClientRect();
+      const fracX = clamp((e.clientX - rect.left) / rect.width, 0, 1);
+      const fracY = clamp((e.clientY - rect.top) / rect.height, 0, 1);
+      const bounds = panBounds(zoomed);
+      setPan(
+        zoomed,
+        bounds.maxX - fracX * (bounds.maxX - bounds.minX),
+        bounds.maxY - fracY * (bounds.maxY - bounds.minY)
+      );
     });
 
     function resetZoom() {
