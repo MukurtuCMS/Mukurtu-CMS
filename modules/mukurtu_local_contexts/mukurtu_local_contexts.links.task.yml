@@ -21,8 +21,9 @@ mukurtu_local_contexts.remap_legacy_project_site:
 ##
 mukurtu_local_contexts.manage_community_supported_projects:
   route_name: mukurtu_local_contexts.manage_community_supported_projects
-  title: 'Manage Projects'
-  base_route: mukurtu_local_contexts.manage_community_supported_projects
+  title: 'Manage Local Contexts projects'
+  base_route: entity.community.canonical
+  weight: 3
 
 mukurtu_local_contexts.remap_legacy_project_community:
   route_name: mukurtu_local_contexts.remap_legacy_project_community
@@ -34,8 +35,9 @@ mukurtu_local_contexts.remap_legacy_project_community:
 ##
 mukurtu_local_contexts.manage_protocol_supported_projects:
   route_name: mukurtu_local_contexts.manage_protocol_supported_projects
-  title: 'Manage Projects'
-  base_route: mukurtu_local_contexts.manage_protocol_supported_projects
+  title: 'Manage Local Contexts projects'
+  base_route: entity.protocol.canonical
+  weight: 3
 
 mukurtu_local_contexts.remap_legacy_project_protocol:
   route_name: mukurtu_local_contexts.remap_legacy_project_protocol

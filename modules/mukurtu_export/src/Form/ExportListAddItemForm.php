@@ -318,8 +318,8 @@ class ExportListAddItemForm extends FormBase {
     $list->setItems($items);
     $list->save();
 
-    // Also flag the item for the global flag queue so it appears in the
-    // export list views (export_list_content / export_list_media).
+    // Also flag the item so it's picked up by FlaggedExporterSource, the
+    // fallback export source used when no list or ad-hoc selection is queued.
     $flag_map = ['node' => 'export_content', 'media' => 'export_media'];
     $flag_id = $flag_map[$entity_type] ?? NULL;
     if ($flag_id) {
