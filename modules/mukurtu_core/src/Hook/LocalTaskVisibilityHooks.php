@@ -7,14 +7,13 @@ namespace Drupal\mukurtu_core\Hook;
 use Drupal\Core\Hook\Attribute\Hook;
 
 /**
- * Hides debug/history local tasks on entity view pages.
+ * Hides debug/history local tasks on node view pages.
+ *
+ * Community/protocol get the equivalent Devel/Revisions treatment from
+ * mukurtu_protocol's HideCommunityProtocolLocalTasksOutsideEditView, which
+ * also preserves the uid-1-only restriction on their Revisions tab.
  */
 class LocalTaskVisibilityHooks {
-
-  /**
-   * Entity types that get the Devel/Revisions view-page treatment.
-   */
-  const ENTITY_TYPES = ['node', 'community', 'protocol'];
 
   /**
    * Implements hook_menu_local_tasks_alter().
@@ -26,14 +25,12 @@ class LocalTaskVisibilityHooks {
       unset($data['tabs'][0]['visitors.node_tab']);
     }
 
-    // Devel and Revisions only need to show on the edit page, not the view
-    // page.
-    foreach (self::ENTITY_TYPES as $entity_type_id) {
-      if ($route_name === "entity.$entity_type_id.canonical") {
-        unset($data['tabs'][0]["devel.entities:$entity_type_id.devel_tab"]);
-        unset($data['tabs'][0]["entity.$entity_type_id.version_history"]);
-        unset($data['tabs'][0]["entity.version_history:$entity_type_id.version_history"]);
-      }
+    // Devel and Revisions only need to show on the node edit page, not the
+    // view page.
+    if ($route_name === 'entity.node.canonical') {
+      unset($data['tabs'][0]['devel.entities:node.devel_tab']);
+      unset($data['tabs'][0]['entity.node.version_history']);
+      unset($data['tabs'][0]['entity.version_history:node.version_history']);
     }
   }
 
