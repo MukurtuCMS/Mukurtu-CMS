@@ -38,17 +38,20 @@
     // so the dark overlay backdrop shows through instead.
     background: transparent;
 
-    // Mirrors the zoomed image's own :focus-visible ring (disabled below)
-    // onto this stationary container instead: the image pans via transform
-    // while zoomed, so a ring drawn on the image itself gets clipped away
-    // by this element's own overflow: hidden the moment it isn't at its
-    // resting position. This padding band always shows the dark modal
-    // backdrop (background: transparent, above) rather than photo content,
-    // so a plain white outline is enough here, unlike the layered version
-    // below which has to stay visible against arbitrary photo colors.
-    &:has(.media-asset--zoomed:focus-visible) {
-      outline: 3px solid #fff;
-      outline-offset: -8px;
+    // Mirrors the zoomed image's own :focus-visible ring (disabled below,
+    // same @supports guard) onto this stationary container instead: the
+    // image pans via transform while zoomed, so a ring drawn on the image
+    // itself gets clipped away by this element's own overflow: hidden the
+    // moment it isn't at its resting position. This padding band always
+    // shows the dark modal backdrop (background: transparent, above)
+    // rather than photo content, so a plain white outline is enough here,
+    // unlike the layered version below which has to stay visible against
+    // arbitrary photo colors.
+    @supports selector(:has(a)) {
+      &:has(.media-asset--zoomed:focus-visible) {
+        outline: 3px solid #fff;
+        outline-offset: -8px;
+      }
     }
 
     img {
@@ -89,10 +92,14 @@
         height: auto;
 
         // Suppress the ring above in favor of .gslide-inline's :has() rule
-        // (see above), which stays visible regardless of pan position.
-        &:focus-visible {
-          outline: none;
-          box-shadow: none;
+        // (see above), which stays visible regardless of pan position. Only
+        // where :has() is actually supported - otherwise this ring, however
+        // imperfect once panned, is the only focus indicator available.
+        @supports selector(:has(a)) {
+          &:focus-visible {
+            outline: none;
+            box-shadow: none;
+          }
         }
       }
 
