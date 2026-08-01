@@ -4,3 +4,9 @@ site_projects_directory_description:
   format: null
 hub_refresh_interval: 86400
 hub_endpoint: 'https://sandbox.localcontextshub.org/api/v2/'
+# Confirmed with the Local Contexts team: a project is treated as genuinely
+# (not transiently) deleted from the hub after ~4 weeks of continuous
+# not_found sync results, gated primarily by elapsed time so the outcome
+# doesn't depend on how often cron happens to run.
+deleted_project_grace_period: 2419200
+deleted_project_min_consecutive_failures: 4

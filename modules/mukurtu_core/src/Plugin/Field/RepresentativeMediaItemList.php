@@ -7,6 +7,7 @@ namespace Drupal\mukurtu_core\Plugin\Field;
 use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Field\EntityReferenceFieldItemList;
 use Drupal\Core\TypedData\ComputedItemListTrait;
+use Drupal\mukurtu_core\Event\RepresentativeMediaComputationEvent;
 
 /**
  * RepresentativeMediaItemList class to generate a computed field.
@@ -20,7 +21,12 @@ class RepresentativeMediaItemList extends EntityReferenceFieldItemList {
   protected function computeValue(): void {
     $entity = $this->getEntity();
 
-    $media_fields = ['field_thumbnail', 'field_media_assets', 'field_recording', 'field_collection_image', 'field_word_list_image'];
+    // Get the candidate media source fields via event. Content-type modules
+    // register their own fields as candidates so this class does not need to
+    // know about them directly.
+    $event = new RepresentativeMediaComputationEvent($entity);
+    $event = \Drupal::service('event_dispatcher')->dispatch($event, RepresentativeMediaComputationEvent::EVENT_NAME);
+    $media_fields = $event->getSourceFields();
 
     // Check available media fields. Find the first media item that is
     // accessible to the user and return that. This seems very heavy
