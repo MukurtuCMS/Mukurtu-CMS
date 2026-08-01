@@ -18,6 +18,9 @@ function mukurtu_local_contexts_theme($existing, $type, $theme, $path) {
         'tk_labels' => [],
         'bc_labels' => [],
         'notices' => [],
+        'not_available' => FALSE,
+        'archived' => FALSE,
+        'last_synced' => NULL,
       ],
     ],
     'local_contexts_label' => [
@@ -59,6 +62,9 @@ function mukurtu_local_contexts_theme($existing, $type, $theme, $path) {
       'variables' => [
         'project_title' => NULL,
         'items' => [],
+        'not_available' => FALSE,
+        'archived' => FALSE,
+        'last_synced' => NULL,
       ],
     ],
     'local_contexts_site_project_directory' => [
@@ -82,9 +88,9 @@ function mukurtu_local_contexts_cron() {
   $logger = \Drupal::logger('cron');
   $state = \Drupal::state();
   $now = \Drupal::time()->getCurrentTime();
+  $config = \Drupal::config('mukurtu_local_contexts.settings');
 
-  //$interval = (int) $config->get('hub_refresh_interval') ?: 86400;
-  $interval = 1;
+  $interval = (int) $config->get('hub_refresh_interval') ?: 86400;
   $last_run = (int) $state->get('mukurtu_local_contexts.hub_last_refresh', 0);
 
   // Only run if the configured interval has passed.
@@ -139,6 +145,24 @@ function mukurtu_local_contexts_cron() {
       $lc_project = new LocalContextsProject($project_id);
       if ($lc_project->fetchFromHub($api_key)) {
         $project_count++;
+      }
+      else {
+        $logger->warning('Local Contexts project @title (@id) did not sync (@status): @message', [
+          '@title' => $project->getTitle() ?? $project_id,
+          '@id' => $project_id,
+          '@status' => $project->getStatus(),
+          '@message' => $project->getStatusMessage(),
+        ]);
+
+        // A not_found (404) result that has persisted long enough is
+        // treated as a genuine hub-side deletion, not a transient blip -
+        // purge the local copy. This never fires for unauthorized (401),
+        // forbidden (403), or a generic error - see isConfirmedDeleted().
+        if ($project->getStatus() === LocalContextsProject::STATUS_NOT_FOUND
+          && $project->isConfirmedDeleted()
+          && !$supported_project_manager->isLegacyProjectId($project_id)) {
+          $supported_project_manager->purgeDeletedProject($project_id);
+        }
       }
     }
   }

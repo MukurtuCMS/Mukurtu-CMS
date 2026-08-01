@@ -2,6 +2,7 @@
 
 namespace Drupal\mukurtu_local_contexts\Form;
 
+use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Form\FormBase;
@@ -47,6 +48,13 @@ abstract class ManageSupportedProjectsBase extends FormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $group = $form_state->get('group');
+
+    $scope_type = $group ? $group->getEntityTypeId() : 'site';
+    $scope_group_id = $group ? (int) $group->id() : 0;
+    $purge_notices = $this->supportedProjectManager->getUndismissedPurgeNotices($scope_type, $scope_group_id);
+    if ($purge_notices) {
+      $form['purge_notice'] = $this->buildPurgeNoticeBanner($purge_notices);
+    }
 
     // Get the list of API keys currently configured for this scope.
     if ($group) {
@@ -228,16 +236,21 @@ abstract class ManageSupportedProjectsBase extends FormBase {
           $supported_projects[$id]['updated'],
           'short'
         );
-        $row['status'] = $this->describeActiveStatus($id);
+        $row['status'] = $this->buildStatusCell($supported_projects[$id]);
       }
       $rows_by_key[$project['_api_key']][$id] = $row;
     }
 
-    // Loop over any remaining projects that are no longer on the hub.
-    // Legacy (v3-migrated) projects always fall into this bucket too, since
-    // they were never on the Hub to begin with - show their actual
-    // active/reference status instead of the generic "no longer on the hub"
-    // messaging, which would be misleading for them.
+    // Loop over any remaining projects that are no longer on the hub as of
+    // this request. Legacy (v3-migrated) projects always fall into this
+    // bucket too, since they were never on the Hub to begin with - show
+    // their actual active/reference status instead of the generic
+    // "no longer on the hub" messaging, which would be misleading for them.
+    // For everything else, this is a live, request-scoped signal (using the
+    // key just submitted in this form) that is separate from the persisted
+    // per-project status (which reflects the last actual cron sync attempt
+    // for the group's/site's configured key) - a project can be missing here
+    // simply because the form's key hasn't caught up to cron yet.
     $missing_projects = array_diff_key($supported_projects, $all_projects);
     foreach ($missing_projects as $id => $project) {
       if ($this->supportedProjectManager->isLegacyProjectId((string) $id)) {
@@ -248,6 +261,16 @@ abstract class ManageSupportedProjectsBase extends FormBase {
           'project_id' => $id,
         ];
       }
+      // If we already have a persisted status for this project (e.g. a
+      // recorded 401/403/404 from cron), prefer that specific reason.
+      // Otherwise this is the "pending sync" case described below.
+      elseif (($project['status'] ?? LocalContextsProject::STATUS_ACTIVE) !== LocalContextsProject::STATUS_ACTIVE) {
+        $row = [
+          'title' => $this->buildProjectTitleLink($id, $project['title']),
+          'status' => $this->buildStatusCell($project),
+          'project_id' => $id,
+        ];
+      }
       else {
         $row = [
           'title' => $this->buildProjectTitleLink($id, $project['title']),
@@ -255,8 +278,8 @@ abstract class ManageSupportedProjectsBase extends FormBase {
             'data' => [
               '#type' => 'html_tag',
               '#tag' => 'strong',
-              '#value' => $this->t('Not available'),
-              '#attributes' => ['title' => $this->t('This project has been deleted from the Local Contexts Hub and can no longer be synced.')],
+              '#value' => $this->t('Not available (pending sync)'),
+              '#attributes' => ['title' => $this->t('This project was not returned by the Local Contexts Hub using the API key currently entered on this form. It may simply be pending the next sync.')],
             ],
           ],
           'project_id' => $id,
@@ -378,6 +401,140 @@ abstract class ManageSupportedProjectsBase extends FormBase {
         ],
       ],
     ];
+  }
+
+  /**
+   * Build the status column render array for a supported project row.
+   *
+   * @param array $project
+   *   The project info, including 'status', 'archived', and
+   *   'status_message' keys (as returned by
+   *   LocalContextsSupportedProjectManager::getSiteSupportedProjects() /
+   *   getGroupSupportedProjects()).
+   *
+   * @return array|\Drupal\Core\StringTranslation\TranslatableMarkup
+   *   A render array for a warning/informational badge, or a plain
+   *   translated string for the normal active state.
+   */
+  protected function buildStatusCell(array $project) {
+    $status = $project['status'] ?? LocalContextsProject::STATUS_ACTIVE;
+
+    if ($status === LocalContextsProject::STATUS_ACTIVE) {
+      if (!empty($project['archived'])) {
+        return [
+          'data' => [
+            '#type' => 'html_tag',
+            '#tag' => 'em',
+            '#value' => $this->t('Archived'),
+            '#attributes' => ['title' => $this->t('This project has been archived on the Local Contexts Hub. It remains active and usable here.')],
+          ],
+        ];
+      }
+      return $this->t('Active');
+    }
+
+    $tooltips = [
+      LocalContextsProject::STATUS_UNAUTHORIZED => $this->t('The API key used to sync this project was rejected by the Local Contexts Hub. Update the API key to resume syncing.'),
+      LocalContextsProject::STATUS_FORBIDDEN => $this->t('The API key used to sync this project does not have access to it (for example, a private project). Check the project privacy settings on the Hub, or use a different API key.'),
+      LocalContextsProject::STATUS_NOT_FOUND => $this->t('This project has been deleted from the Local Contexts Hub and can no longer be synced.'),
+    ];
+    $tooltip = $tooltips[$status] ?? $this->t('This project could not be synced with the Local Contexts Hub. @message', ['@message' => $project['status_message'] ?? '']);
+
+    // A not_found result is distinguished from other failure types with its
+    // own label, since it means the project no longer exists on the hub
+    // rather than a recoverable sync issue (bad key, permissions, etc.).
+    $label = $status === LocalContextsProject::STATUS_NOT_FOUND ? $this->t('Deleted') : $this->t('Not available');
+
+    return [
+      'data' => [
+        '#type' => 'html_tag',
+        '#tag' => 'strong',
+        '#value' => $label,
+        '#attributes' => ['title' => $tooltip],
+      ],
+    ];
+  }
+
+  /**
+   * Build a dismissible warning banner listing projects auto-purged from
+   * this scope because they were confirmed deleted on the Local Contexts
+   * Hub.
+   *
+   * @param array $purge_notices
+   *   Undismissed purge log rows for the current scope, keyed by log entry
+   *   ID (as returned by
+   *   LocalContextsSupportedProjectManager::getUndismissedPurgeNotices()).
+   *
+   * @return array
+   *   A render array for the banner.
+   */
+  protected function buildPurgeNoticeBanner(array $purge_notices): array {
+    // Mirrors the landmark/heading structure Drupal core's own warning
+    // messages use (see status-messages.html.twig): a role="contentinfo"
+    // region labelled by a heading, so assistive technology users can find
+    // and identify it when navigating by landmarks/headings, not just by
+    // reading page content top to bottom. "Warning message" is the same
+    // generic heading core already uses for every other warning message
+    // sitewide, not new copy specific to this banner.
+    $heading_id = Html::getUniqueId('mukurtu-local-contexts-purge-notice-title');
+
+    return [
+      '#type' => 'container',
+      '#attributes' => [
+        'role' => 'contentinfo',
+        'aria-labelledby' => $heading_id,
+        'class' => ['messages', 'messages--warning'],
+      ],
+      'header' => [
+        '#type' => 'container',
+        '#attributes' => ['class' => ['messages__header']],
+        'title' => [
+          '#type' => 'html_tag',
+          '#tag' => 'h2',
+          '#attributes' => ['id' => $heading_id, 'class' => ['messages__title']],
+          '#value' => $this->t('Warning message'),
+        ],
+      ],
+      'content' => [
+        '#type' => 'container',
+        '#attributes' => ['class' => ['messages__content']],
+        'heading' => [
+          '#type' => 'html_tag',
+          '#tag' => 'p',
+          '#value' => $this->t('The following project(s) were automatically removed because they were deleted from the Local Contexts Hub. Any content that referenced them has had that reference removed.'),
+        ],
+        'list' => [
+          '#theme' => 'item_list',
+          '#items' => array_map(
+            fn($notice) => $this->t('@title (@id) - removed @date', [
+              '@title' => $notice['title'] ?: $notice['project_id'],
+              '@id' => $notice['project_id'],
+              '@date' => \Drupal::service('date.formatter')->format($notice['purged'], 'short'),
+            ]),
+            $purge_notices
+          ),
+        ],
+      ],
+      'dismiss' => [
+        '#type' => 'submit',
+        '#value' => $this->t('Dismiss'),
+        '#name' => 'dismiss_purge_notice',
+        '#submit' => ['::dismissPurgeNotices'],
+        '#validate' => [],
+        '#limit_validation_errors' => [],
+        '#purge_notice_ids' => array_keys($purge_notices),
+      ],
+    ];
+  }
+
+  /**
+   * Submit handler for dismissing the purge notice banner.
+   */
+  public function dismissPurgeNotices(array &$form, FormStateInterface $form_state) {
+    $element = $form_state->getTriggeringElement();
+    $ids = $element['#purge_notice_ids'] ?? [];
+    $this->supportedProjectManager->dismissPurgeNotices($ids);
+    $form_state->setRebuild();
   }
 
   /**
