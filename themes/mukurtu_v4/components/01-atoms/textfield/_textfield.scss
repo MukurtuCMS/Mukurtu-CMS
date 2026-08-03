@@ -59,10 +59,25 @@ $field-border-radius: 0.5rem;
 // remove those visual states.
 //
 // --tag-bg is Tagify's own custom property for each individual tag chip's
-// background - left at its library default (a light grey) it's nearly
-// indistinguishable from this field's own --brand-light background, so
-// tags visually disappear into the field. Overridden to white, plus an
-// explicit border, so each chip reads as a distinct element.
+// background, filled in via an inset box-shadow on the chip's own
+// ::before pseudo-element rather than a real border - left at its library
+// default (a light grey) it's nearly indistinguishable from this field's
+// own --brand-light background, so tags visually disappeared into the
+// field. Overridden to white below.
+//
+// White fill alone isn't enough of a boundary though: --brand-light
+// (#e5e9e9) is close enough to white that the fill only clears ~1.2:1
+// contrast against it, well under WCAG 1.4.11's 3:1 minimum for a UI
+// component boundary. An earlier version of this rule added a real 1px
+// border on .tagify__tag > div for this, but that box's square corners
+// didn't match the rounded pill shape of Tagify's own inset-shadow fill
+// (sized by --tag-border-radius, forced to 1rem by vendor/drupal/tagify/
+// css/tagify.css), producing exactly the mismatched "inner boundaries"
+// PR #1890's review flagged - and at --color-greys-alpha-border's ~1.3:1,
+// it didn't actually clear 3:1 either. box-shadow (below, on
+// .tagify__tag > div) fixes both problems at once: it follows the div's
+// own border-radius like the fill does (no shape mismatch), and
+// --color-text-secondary clears 3:1 (~5.7:1) against the field background.
 //
 // The search-icon background-image below is the exact icon Drupal's own
 // tagify module ships (vendor/drupal/tagify/css/tagify.css), normally
@@ -77,12 +92,30 @@ $field-border-radius: 0.5rem;
   background-image: url("data:image/svg+xml,%3csvg width='40' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M8 1C3.46.827-.188 5.787 1.313 10.068c1.176 4.384 6.993 6.417 10.637 3.7.326-.39.565.276.846.442l3.74 3.739 1.413-1.414-4.35-4.35c2.811-3.468 1.15-9.247-3.062-10.71A7.003 7.003 0 008 1zm0 2c3.242-.123 5.849 3.42 4.777 6.477-.842 3.132-4.994 4.58-7.6 2.65-2.745-1.73-2.9-6.125-.285-8.044A5.006 5.006 0 018 3z' fill='%23868686'/%3e%3c/svg%3e");
   background-repeat: no-repeat;
   background-position: right var(--v-space-6xs) center;
-  padding-inline-end: var(--v-space-3xs);
+  // vendor/drupal/tagify/css/tagify.css sets "padding: 0 !important" on
+  // .tagify unconditionally (only relaxed for Gin/Claro via a modifier
+  // class that this front-end theme never gets) - without matching
+  // !important here that rule wins outright regardless of source order,
+  // so the icon's reserved gutter never actually applied and tag content
+  // ran flush under the icon and past the field's own edge.
+  padding-inline-end: var(--v-space-3xs) !important;
   --tag-bg: var(--color-white);
   --tag-hover: var(--brand-light-accent);
 
   .tagify__tag > div {
-    border: 1px solid var(--color-greys-alpha-border);
+    box-shadow: 0 0 0 1px var(--color-text-secondary);
+  }
+
+  // Hover/focus should read as more prominent than resting, not less -
+  // Tagify's own hover/focus fill swap (--tag-hover, above) is actually
+  // closer in tone to --brand-light than the resting white fill is, so a
+  // same-weight ring would otherwise get harder to see right when a
+  // keyboard/mouse user interacts with it. Thickening the ring (same
+  // color, so the same ~5.7:1 contrast still applies) compensates without
+  // introducing a second color to verify.
+  .tagify__tag:focus > div,
+  .tagify__tag:hover:not([readonly]) > div {
+    box-shadow: 0 0 0 2px var(--color-text-secondary);
   }
 
   &.tagify--loading {
