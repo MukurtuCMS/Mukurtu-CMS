@@ -2,7 +2,7 @@
   {% if project_title %}
     <h3 class="project-title">
       {%- if project_url -%}
-        <a href="{{ project_url }}" target="_blank" rel="noopener noreferrer">{{ project_title }}</a>
+        <a href="{{ project_url }}" target="_blank" rel="noopener noreferrer" aria-label="{{ '@title, (opens in new tab)'|t({'@title': project_title}) }}">{{ project_title }}</a>
       {%- else -%}
         {{ project_title }}
       {%- endif -%}
