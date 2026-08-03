@@ -9,6 +9,11 @@
   "use strict";
 
   const ZOOM_SELECTOR = '.ginlined-content .media--image img';
+  // Zoom (and, below, keyboard reachability of the zoomable image) is
+  // disabled below this width - matches the breakpoint GLightbox itself
+  // uses for its own native zoom, since hover-to-pan has no touch
+  // equivalent and pinch-zoom isn't implemented here.
+  const MOBILE_BREAKPOINT = 768;
 
   function clamp(value, min, max) {
     return Math.min(max, Math.max(min, value));
@@ -103,6 +108,61 @@
 
     document.addEventListener('keydown', blockArrowsOnMediaSlide, true);
 
+    // GLightbox's own Tab handling (core/keyboard-navigation.js) cycles
+    // focus only through .gnext/.gprev/.gclose - it has no notion of the
+    // zoomable image (reimplemented entirely in our own JS, see
+    // setupImageZoom below) and never checks e.shiftKey, so Shift+Tab
+    // doesn't reverse-cycle either. Rather than patching that one-directional,
+    // image-blind cycle, take over Tab handling for the open lightbox
+    // entirely here, in capture phase, so GLightbox's own window-level
+    // bubble-phase handler never runs (same technique as
+    // blockArrowsOnMediaSlide above).
+    function manageLightboxTabOrder(e) {
+      if (!lightboxOpen || e.key !== 'Tab') return;
+
+      const container = document.querySelector('.glightbox-container');
+      if (!container) return;
+
+      const currentSlide = container.querySelector('.gslide.current');
+      let zoomableImg = (currentSlide && window.innerWidth > MOBILE_BREAKPOINT)
+        ? currentSlide.querySelector(ZOOM_SELECTOR)
+        : null;
+      // An undismissed content warning marks the image inert (see
+      // mukurtu_content_warnings/js/content-warnings.js's setMediaInert()),
+      // which makes .focus() below a silent no-op - the browser doesn't
+      // move focus, so the next Tab press would recompute the same index
+      // and get stuck here forever. This is re-evaluated fresh on every
+      // Tab press, so once the warning is dismissed and inert is removed,
+      // the very next Tab press picks the image back up automatically.
+      if (zoomableImg && zoomableImg.closest('[inert]')) {
+        zoomableImg = null;
+      }
+
+      // Preserves the original gnext/gprev/gclose order for non-image
+      // slides; the image (when present) simply becomes the first stop.
+      const stops = [zoomableImg, container.querySelector('.gnext'), container.querySelector('.gprev'), container.querySelector('.gclose')]
+        .filter((el) => el && !el.classList.contains('disabled'));
+      if (!stops.length) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      const currentIndex = stops.indexOf(document.activeElement);
+      const step = e.shiftKey ? -1 : 1;
+      const nextIndex = currentIndex === -1
+        ? (e.shiftKey ? stops.length - 1 : 0)
+        : (currentIndex + step + stops.length) % stops.length;
+
+      // Replicates GLightbox's own .focused bookkeeping (its CSS gives
+      // .gbtn.focused a visible outline) since we're bypassing its handler.
+      container.querySelectorAll('.focused').forEach((el) => el.classList.remove('focused'));
+      const next = stops[nextIndex];
+      next.classList.add('focused');
+      next.focus();
+    }
+
+    document.addEventListener('keydown', manageLightboxTabOrder, true);
+
     // GLightbox renders nav buttons with SVG only — no text. Inject accessible
     // names so screen readers can identify the controls. Called on both open
     // and slide_changed because some GLightbox builds re-render nav buttons
@@ -167,7 +227,6 @@
   // since hover-to-pan has no touch equivalent and pinch-zoom isn't
   // implemented.
   function setupImageZoom(lightbox) {
-    const MOBILE_BREAKPOINT = 768;
     let zoomed = null;
 
     function zoomIn(img) {
