@@ -254,7 +254,7 @@ class LocalContextsProject extends LocalContextsHubBase {
     $query = $this->db->select('mukurtu_local_contexts_labels', 'l')
       ->condition('l.project_id', $this->id)
       ->condition('l.tk_or_bc', $tk_or_bc)
-      ->fields('l', ['id', 'name', 'img_url', 'svg_url', 'audio_url', 'default_text', 'locale', 'language']);
+      ->fields('l', ['id', 'name', 'img_url', 'svg_url', 'audio_url', 'community', 'default_text', 'locale', 'language']);
     $result = $query->execute();
 
     $labels = [];
@@ -265,6 +265,7 @@ class LocalContextsProject extends LocalContextsHubBase {
         'img_url' => $label['img_url'],
         'svg_url' => $label['svg_url'],
         'audio_url' => $label['audio_url'],
+        'community' => $label['community'],
         'text' => $label['default_text'],
         'locale' => $label['locale'],
         'language' => $label['language'],
@@ -335,6 +336,70 @@ class LocalContextsProject extends LocalContextsHubBase {
     }
 
     return $notices;
+  }
+
+  /**
+   * Builds a themed render array for a label from getLabels().
+   *
+   * @param array $label
+   *   A single label array as returned by getLabels().
+   * @param string|null $projectTitle
+   *   The project title to link to from within the label's dialog, or NULL
+   *   to omit the link.
+   * @param string|null $projectUrl
+   *   The project URL to link to from within the label's dialog, or NULL
+   *   to omit the link.
+   *
+   * @return array
+   *   A '#theme' => 'local_contexts_label' render array.
+   */
+  public static function buildLabelRenderArray(array $label, ?string $projectTitle, ?string $projectUrl): array {
+    return [
+      '#theme' => 'local_contexts_label',
+      '#name' => $label['name'],
+      '#text' => $label['text'],
+      '#svg_url' => $label['svg_url'],
+      '#img_url' => $label['img_url'],
+      '#audio_url' => $label['audio_url'],
+      '#community' => $label['community'] ?? NULL,
+      '#locale' => $label['locale'],
+      '#language' => $label['language'],
+      '#translations' => $label['translations'],
+      '#dialog_id' => $label['dialog_id'],
+      '#project_title' => $projectTitle,
+      '#project_url' => $projectUrl,
+    ];
+  }
+
+  /**
+   * Builds a themed render array for a notice from getNotices().
+   *
+   * @param array $notice
+   *   A single notice array as returned by getNotices().
+   * @param string|null $projectTitle
+   *   The project title to link to from within the notice's dialog, or NULL
+   *   to omit the link.
+   * @param string|null $projectUrl
+   *   The project URL to link to from within the notice's dialog, or NULL
+   *   to omit the link.
+   *
+   * @return array
+   *   A '#theme' => 'local_contexts_notice' render array.
+   */
+  public static function buildNoticeRenderArray(array $notice, ?string $projectTitle, ?string $projectUrl): array {
+    return [
+      '#theme' => 'local_contexts_notice',
+      '#name' => $notice['name'],
+      '#text' => $notice['text'],
+      '#svg_url' => $notice['svg_url'],
+      '#img_url' => $notice['img_url'],
+      '#locale' => $notice['locale'],
+      '#language' => $notice['language'],
+      '#translations' => $notice['translations'],
+      '#dialog_id' => $notice['dialog_id'],
+      '#project_title' => $projectTitle,
+      '#project_url' => $projectUrl,
+    ];
   }
 
   /**

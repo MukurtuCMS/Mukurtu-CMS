@@ -1,6 +1,12 @@
 <div class="local-contexts-label-group">
   {% if project_title %}
-    <h3 class="project-title">{{ project_title }}</h3>
+    <h3 class="project-title">
+      {%- if project_url -%}
+        <a href="{{ project_url }}" target="_blank" rel="noopener noreferrer">{{ project_title }}</a>
+      {%- else -%}
+        {{ project_title }}
+      {%- endif -%}
+    </h3>
   {% endif %}
   {% if not_available %}
     <div class="local-contexts-status-badge local-contexts-status-badge--unavailable">{{ 'Not available'|t }}</div>

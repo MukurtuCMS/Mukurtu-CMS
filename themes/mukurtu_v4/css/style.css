@@ -2248,8 +2248,7 @@ label.form-required::after {
   color: var(--brand-primary);
 }
 
-.local-contexts-label-group .project-title,
-.local-contexts-project .project-title {
+.local-contexts-label-group .project-title {
   font-size: var(--font-size-s);
   font-weight: var(--text-bold);
   color: var(--brand-primary-dark);
@@ -2261,7 +2260,6 @@ label.form-required::after {
   text-align: center;
 }
 
-.local-contexts-project .local-contexts-projects-container,
 .local-contexts-label-group .local-contexts-label-group-items {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(5rem, 1fr));
@@ -2277,7 +2275,6 @@ label.form-required::after {
           border-block-start: 1px solid var(--brand-light);
 }
 
-.local-contexts-project,
 .local-contexts-label-group {
   background-color: var(--brand-light-accent);
   padding-inline: var(--v-space-4xxs);
