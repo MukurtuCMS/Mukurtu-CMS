@@ -22,3 +22,4 @@ permissions:
   - 'create mukurtu_import_strategy'
   - 'delete own mukurtu_import_strategy'
   - 'edit own mukurtu_import_strategy'
+  - 'view any mukurtu_import_log'
