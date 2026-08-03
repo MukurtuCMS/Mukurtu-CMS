@@ -7115,6 +7115,9 @@ header {
 .node--status-banner--archived {
   background: var(--color-gray);
 }
+.node--status-banner--submission {
+  background: var(--brand-primary-dark);
+}
 
 .full-node__list {
   grid-column: 1/span 6;
