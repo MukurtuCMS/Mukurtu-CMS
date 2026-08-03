@@ -260,6 +260,12 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
 
     foreach ($field->getValue() as $value) {
       if ($id = ($value['target_id'] ?? NULL)) {
+        if ($target_type === 'paragraph' && $this->isParagraphEmpty($id)) {
+          // Skip paragraphs auto-created by the Paragraphs widget but never
+          // filled in, so they don't show up as blank rows/sheets on export.
+          continue;
+        }
+
         if ($option && $target_type) {
           if ($option == 'id' || $isShallow) {
             $export[] = $id_format === 'uuid' ? $this->getUUID($target_type, $id) : $id;
@@ -281,6 +287,37 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
       }
     }
     $event->setValue($export);
+  }
+
+  /**
+   * Checks whether a paragraph has no content of its own.
+   *
+   * The Paragraphs widget auto-creates a paragraph of the sole allowed
+   * bundle on new-entity forms even when the editor never fills it in
+   * (see Drupal.org paragraphs module, ParagraphsWidget::formMultipleElements).
+   * Those blank paragraphs are invisible on the front end but confusing on
+   * export, so we treat a paragraph as empty when none of its own content
+   * fields (i.e. fields prefixed "field_") have a value.
+   *
+   * @param int|string $id
+   *   The paragraph entity ID.
+   *
+   * @return bool
+   *   TRUE if the paragraph exists and all of its content fields are empty.
+   */
+  protected function isParagraphEmpty($id): bool {
+    $paragraph = $this->entityTypeManager->getStorage('paragraph')->load($id);
+    if (!$paragraph) {
+      return FALSE;
+    }
+
+    foreach ($paragraph->getFields() as $field_name => $field_item_list) {
+      if (str_starts_with($field_name, 'field_') && !$field_item_list->isEmpty()) {
+        return FALSE;
+      }
+    }
+
+    return TRUE;
   }
 
   /**

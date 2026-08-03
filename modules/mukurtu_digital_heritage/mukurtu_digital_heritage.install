@@ -183,3 +183,20 @@ function mukurtu_digital_heritage_update_40007(): void {
     $config->save();
   }
 }
+
+/**
+ * Stop auto-creating an empty Knowledge Keepers paragraph on new items.
+ */
+function mukurtu_digital_heritage_update_40008(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.digital_heritage.default');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_knowledge_keepers.settings.default_paragraph_type', '_none');
+
+  $content = $config->get('content') ?? [];
+  unset($content['field_indigenous_knowledges']);
+  $config->set('content', $content);
+
+  $config->save();
+}

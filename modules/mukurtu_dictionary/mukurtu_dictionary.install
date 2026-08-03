@@ -1383,3 +1383,36 @@ function mukurtu_dictionary_update_40039(): void {
     $index->reindex();
   }
 }
+
+/**
+ * Stop auto-creating empty Word Entry/Sample Sentence paragraphs.
+ */
+function mukurtu_dictionary_update_40040(): void {
+  $displays = [
+    'core.entity_form_display.node.dictionary_word.default' => [
+      'field_additional_word_entries',
+      'field_sample_sentences',
+    ],
+    'core.entity_form_display.paragraph.dictionary_word_entry.default' => [
+      'field_sample_sentences',
+    ],
+  ];
+
+  foreach ($displays as $display_id => $fields) {
+    $config = \Drupal::configFactory()->getEditable($display_id);
+    if ($config->isNew()) {
+      continue;
+    }
+    foreach ($fields as $field_name) {
+      $config->set("content.$field_name.settings.default_paragraph_type", '_none');
+    }
+    $config->save();
+  }
+
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.dictionary_word.default');
+  if (!$config->isNew()) {
+    $content = $config->get('content') ?? [];
+    unset($content['field_base_word_entry'], $content['field_word_entry']);
+    $config->set('content', $content)->save();
+  }
+}
