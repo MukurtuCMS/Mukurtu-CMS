@@ -5,6 +5,7 @@ namespace Drupal\mukurtu_export\EventSubscriber;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Messenger\MessengerInterface;
+use Drupal\mukurtu_core\Service\ParagraphEmptinessChecker;
 use Drupal\mukurtu_export\Entity\CsvExporter;
 use Drupal\mukurtu_export\Event\EntityFieldExportEvent;
 use InvalidArgumentException;
@@ -27,11 +28,19 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
   protected $entityTypeManager;
 
   /**
+   * The paragraph emptiness checker.
+   *
+   * @var \Drupal\mukurtu_core\Service\ParagraphEmptinessChecker
+   */
+  protected $paragraphEmptinessChecker;
+
+  /**
    * {@inheritDoc}
    */
-  public function __construct(MessengerInterface $messenger, EntityTypeManagerInterface $entity_type_manager) {
+  public function __construct(MessengerInterface $messenger, EntityTypeManagerInterface $entity_type_manager, ParagraphEmptinessChecker $paragraph_emptiness_checker) {
     $this->messenger = $messenger;
     $this->entityTypeManager = $entity_type_manager;
+    $this->paragraphEmptinessChecker = $paragraph_emptiness_checker;
   }
 
   /**
@@ -292,12 +301,11 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
   /**
    * Checks whether a paragraph has no content of its own.
    *
-   * The Paragraphs widget auto-creates a paragraph of the sole allowed
-   * bundle on new-entity forms even when the editor never fills it in
-   * (see Drupal.org paragraphs module, ParagraphsWidget::formMultipleElements).
-   * Those blank paragraphs are invisible on the front end but confusing on
-   * export, so we treat a paragraph as empty when none of its own content
-   * fields (i.e. fields prefixed "field_") have a value.
+   * The Paragraphs widget auto-attaches a paragraph of the sole allowed
+   * bundle on new-entity forms so editors can see what fields it holds.
+   * If left untouched it's normally pruned before save (see
+   * PrunesEmptyParagraphsTrait), but paragraphs created before that fix
+   * shipped may already exist, so this is skipped on export too.
    *
    * @param int|string $id
    *   The paragraph entity ID.
@@ -311,13 +319,7 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
       return FALSE;
     }
 
-    foreach ($paragraph->getFields() as $field_name => $field_item_list) {
-      if (str_starts_with($field_name, 'field_') && !$field_item_list->isEmpty()) {
-        return FALSE;
-      }
-    }
-
-    return TRUE;
+    return $this->paragraphEmptinessChecker->isEmpty($paragraph);
   }
 
   /**

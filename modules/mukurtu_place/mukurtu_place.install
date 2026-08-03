@@ -115,15 +115,3 @@ function mukurtu_place_update_40007(): void {
     \Drupal::configFactory()->getEditable($config_name)->setData($data)->save(TRUE);
   }
 }
-
-/**
- * Stop auto-creating an empty Text Section paragraph on new places.
- */
-function mukurtu_place_update_40008(): void {
-  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.place.default');
-  if ($config->isNew()) {
-    return;
-  }
-  $config->set('content.field_sections.settings.default_paragraph_type', '_none');
-  $config->save();
-}
