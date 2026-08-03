@@ -177,6 +177,12 @@
       setPan(img, 0, 0);
       img.setAttribute('aria-pressed', 'true');
       zoomed = img;
+      // GLightbox's own drag-to-navigate handler calls preventDefault() on
+      // the same mousedown that triggers this click, which suppresses the
+      // browser's default click-to-focus behavior. Focus explicitly so
+      // arrow-key panning (keyed off document.activeElement below) works
+      // immediately after a mouse-driven zoom, not just after Tab+Enter.
+      img.focus();
     }
 
     function zoomOut(img) {
