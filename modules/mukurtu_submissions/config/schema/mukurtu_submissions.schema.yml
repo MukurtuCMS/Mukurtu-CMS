@@ -49,6 +49,9 @@ mukurtu_submissions.mukurtu_submission_settings.*:
     intro_text:
       type: text_format
       label: 'Introductory text'
+    thank_you_text:
+      type: text_format
+      label: 'Thank-you message'
     field_groups:
       type: sequence
       label: 'Field groups'
