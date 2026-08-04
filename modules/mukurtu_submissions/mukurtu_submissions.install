@@ -82,11 +82,11 @@ function mukurtu_submissions_install($is_syncing): void {
 }
 
 /**
- * Creates the blocked "Public Submissions" service account.
+ * Creates the blocked "Submission Forms" service account.
  */
 function mukurtu_submissions_create_service_account(): User {
   $account = User::create([
-    'name' => 'Public Submissions',
+    'name' => 'Submission Forms',
     'mail' => 'public-submissions@' . \Drupal::request()->getHost(),
     'status' => 0,
     'pass' => \Drupal::service('password_generator')->generate(32),
@@ -145,5 +145,22 @@ function mukurtu_submissions_update_40001(): void {
     if ($changed) {
       $role->save();
     }
+  }
+}
+
+/**
+ * Renames the service account from "Public Submissions" to "Submission
+ * Forms", matching the module's naming cleanup - only if a site hasn't
+ * already renamed it to something else.
+ */
+function mukurtu_submissions_update_40002(): void {
+  $uid = \Drupal::config('mukurtu_submissions.settings')->get('service_account_uid');
+  if (!$uid) {
+    return;
+  }
+  $account = User::load($uid);
+  if ($account && $account->getAccountName() === 'Public Submissions') {
+    $account->setUsername('Submission Forms');
+    $account->save();
   }
 }
