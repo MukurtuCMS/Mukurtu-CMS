@@ -119,6 +119,15 @@ class SubmissionSettingsForm extends EntityForm {
       '#format' => $intro_text['format'] ?? NULL,
     ];
 
+    $thank_you_text = $this->entity->getThankYouText();
+    $form['thank_you_text'] = [
+      '#type' => 'text_format',
+      '#title' => $this->t('Thank-you message'),
+      '#description' => $this->t('Optional text shown on the confirmation page after a successful submission. If left blank, a generic message is shown instead.'),
+      '#default_value' => $thank_you_text['value'] ?? '',
+      '#format' => $thank_you_text['format'] ?? NULL,
+    ];
+
     // Only shown once a bundle is actually assigned - a new, unsaved entity
     // has none yet, so there's nothing to build this list from until it's
     // saved (auto-provisioning seeds every field as included at that point;
