@@ -178,6 +178,17 @@ class ProtocolAwareEntityContent extends EntityContentBase {
     }
     $ids = $this->save($entity, $old_destination_id_values);
 
+    if (!empty($media_alt_updates)) {
+      $this->applyMediaEntityAltText($entity, $media_alt_updates);
+    }
+
+    if ($this->isTranslationDestination()) {
+      $ids[] = $entity->language()->getId();
+    }
+
+    // Recorded last, after every step that could still throw for this row,
+    // so a row that fails during post-save processing (e.g. applying media
+    // alt text) isn't also recorded here as a success.
     $this->rowResults[] = [
       'source_id' => implode(':', $row->getSourceIdValues()),
       'status' => $was_new ? 'created' : 'updated',
@@ -187,13 +198,6 @@ class ProtocolAwareEntityContent extends EntityContentBase {
       'url' => $entity->hasLinkTemplate('canonical') ? $entity->toUrl()->toString() : NULL,
     ];
 
-    if (!empty($media_alt_updates)) {
-      $this->applyMediaEntityAltText($entity, $media_alt_updates);
-    }
-
-    if ($this->isTranslationDestination()) {
-      $ids[] = $entity->language()->getId();
-    }
     return $ids;
   }
 
@@ -348,6 +352,11 @@ class ProtocolAwareEntityContent extends EntityContentBase {
    */
   protected function formatViolationMessage(ConstraintViolationInterface $violation, FieldableEntityInterface $entity): string {
     $property_path = $violation->getPropertyPath();
+    if ($property_path === '') {
+      // Entity-level constraints (not tied to a specific field) have no
+      // property path to translate into a field label.
+      return (string) $violation->getMessage();
+    }
     $field_name = strtok($property_path, '.');
     $field_definition = $field_name ? $entity->getFieldDefinition($field_name) : NULL;
     $label = $field_definition ? $field_definition->getLabel() : $property_path;
