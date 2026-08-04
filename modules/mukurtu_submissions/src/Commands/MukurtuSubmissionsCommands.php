@@ -16,6 +16,14 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class MukurtuSubmissionsCommands extends DrushCommands {
 
+  /**
+   * Administrative/scaffolding content types that ship with the profile
+   * for general site-building rather than as community-authored content -
+   * visitor submission doesn't make sense for these, so createDefaultForms()
+   * never generates a form for them.
+   */
+  const EXCLUDED_BUNDLES = ['article', 'page', 'landing_page'];
+
   public function __construct(
     protected EntityTypeManagerInterface $entityTypeManager,
     protected EntityTypeBundleInfoInterface $entityBundleInfo,
@@ -38,14 +46,15 @@ class MukurtuSubmissionsCommands extends DrushCommands {
   /**
    * Bulk-creates a baseline submission form - every field included,
    * ungrouped, disabled - for every content type that doesn't already
-   * have one. Automates exactly the manual steps the module's README
-   * documents for enabling a single bundle, for every remaining bundle at
-   * once. A site builder still reviews, enables, and (optionally)
-   * organizes each one into field groups afterward, the same way Digital
-   * Heritage's own form was refined after it was first created.
+   * have one (excluding EXCLUDED_BUNDLES). Automates exactly the manual
+   * steps the module's README documents for enabling a single bundle, for
+   * every remaining bundle at once. A site builder still reviews,
+   * enables, and (optionally) organizes each one into field groups
+   * afterward, the same way Digital Heritage's own form was refined
+   * after it was first created.
    */
   #[CLI\Command(name: 'mukurtu-submissions:create-default-forms')]
-  #[CLI\Help(description: "Creates a disabled submission form for every content type that doesn't already have one, with every field included by default.")]
+  #[CLI\Help(description: "Creates a disabled submission form for every content type that doesn't already have one (excluding Article, Basic page, and Landing page), with every field included by default.")]
   public function createDefaultForms(): void {
     $storage = $this->entityTypeManager->getStorage('mukurtu_submission_settings');
 
@@ -56,7 +65,7 @@ class MukurtuSubmissionsCommands extends DrushCommands {
 
     $created = [];
     foreach ($this->entityBundleInfo->getBundleInfo('node') as $bundle => $info) {
-      if (isset($existing_bundles[$bundle])) {
+      if (isset($existing_bundles[$bundle]) || in_array($bundle, self::EXCLUDED_BUNDLES, TRUE)) {
         continue;
       }
 

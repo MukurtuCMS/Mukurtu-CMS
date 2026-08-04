@@ -8,6 +8,7 @@ use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\mukurtu_submissions\Commands\MukurtuSubmissionsCommands;
 use Drupal\mukurtu_submissions\Entity\SubmissionSettings;
+use Drupal\node\Entity\NodeType;
 use Drush\Log\DrushLoggerManager;
 
 /**
@@ -68,6 +69,15 @@ class DefaultFormCreationTest extends MukurtuSubmissionsKernelTestBase {
     $matches = $storage->loadByProperties(['target_bundle' => static::TEST_BUNDLE]);
     $this->assertCount(1, $matches);
     $this->assertEquals('Already configured', reset($matches)->label());
+  }
+
+  public function testExcludedBundlesNeverGetAForm(): void {
+    NodeType::create(['type' => 'article', 'name' => 'Article'])->save();
+
+    $this->createCommand()->createDefaultForms();
+
+    $storage = $this->container->get('entity_type.manager')->getStorage('mukurtu_submission_settings');
+    $this->assertEmpty($storage->loadByProperties(['target_bundle' => 'article']));
   }
 
 }
