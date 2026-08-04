@@ -97,7 +97,7 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     $form['identifier_column'] = [
       '#type' => 'select',
       '#title' => $this->t('Identifier Column'),
-      '#description' => $this->t('Optional. Select a column to use as the unique identifier for each row. When set, this takes precedence over entity ID, UUID, and label columns for tracking rows in the import. Use this when importing entities without a natural label (e.g. paragraphs) so they can be referenced by other CSVs in the same import session.'),
+      '#description' => $this->t('Required unless the mapping already identifies rows via an ID, UUID, label, or compatible media source column. Select a column to use as the unique identifier for each row. When set, this takes precedence over entity ID, UUID, and label columns for tracking rows in the import. Use this when importing entities without a natural label (e.g. paragraphs) so they can be referenced by other CSVs in the same import session.'),
       '#options' => $header_options,
       '#default_value' => $this->importConfig->getConfig('identifier_column') ?? '',
     ];

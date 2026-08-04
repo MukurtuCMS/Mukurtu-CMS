@@ -56,6 +56,20 @@ class ProtocolAwareUserContent extends ProtocolAwareEntityContent {
   }
 
   /**
+   * {@inheritdoc}
+   *
+   * The 'import mukurtu users' permission, enforced above, is the intended
+   * full authorization gate for this destination. Without this override,
+   * the parent's generic entity access check would additionally require
+   * Drupal core's broad 'administer users' permission (the user entity
+   * type's admin permission) for any non-uid-1 importer, defeating the
+   * point of a dedicated, more narrowly scoped import permission.
+   */
+  protected function currentUserBypassesAccessChecks(): bool {
+    return parent::currentUserBypassesAccessChecks() || $this->currentUser->hasPermission('import mukurtu users');
+  }
+
+  /**
    * Sends the standard Drupal account-setup email for a newly created user.
    *
    * Only sent when the importing admin opted in for this batch (see

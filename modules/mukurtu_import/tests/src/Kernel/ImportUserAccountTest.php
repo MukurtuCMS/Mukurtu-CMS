@@ -107,6 +107,43 @@ class ImportUserAccountTest extends MukurtuImportTestBase {
   }
 
   /**
+   * Test that a non-uid-1 user with only the import permission can import.
+   *
+   * Regression test: the dedicated 'import mukurtu users' permission,
+   * enforced by ProtocolAwareUserContent, was previously undermined by the
+   * parent destination's generic entity access check, which for the user
+   * entity type requires Drupal core's broad 'administer users' permission
+   * for any account other than uid 1. That silently rejected every row for
+   * an importer who held only the module's scoped permission. All the other
+   * tests in this class run as this test base's uid-1 user, which bypasses
+   * both checks and would not have caught this.
+   */
+  public function testNonSuperuserWithPermissionCanImport() {
+    $importer = $this->createUser();
+    $importer->addRole('import_users');
+    $importer->save();
+    $this->setCurrentUser($importer);
+
+    $data = [
+      ['Username', 'Email', 'Roles'],
+      ['importedbynonadmin', 'importedbynonadmin@example.com', 'editor'],
+    ];
+    $mapping = [
+      ['target' => 'name', 'source' => 'Username'],
+      ['target' => 'mail', 'source' => 'Email'],
+      ['target' => 'roles', 'source' => 'Roles'],
+    ];
+
+    $result = $this->importUserCsv($data, $mapping);
+    $this->assertEquals(MigrationInterface::RESULT_COMPLETED, $result);
+
+    $users = $this->entityTypeManager->getStorage('user')->loadByProperties(['name' => 'importedbynonadmin']);
+    $user = reset($users);
+    $this->assertNotFalse($user, 'A user with only the import mukurtu users permission (not uid 1, not administer users) must be able to create accounts via import.');
+    $this->assertTrue($user->hasRole('editor'));
+  }
+
+  /**
    * Test that importing users requires the dedicated permission.
    *
    * This is enforced at the destination plugin level (not just by hiding the
@@ -161,6 +198,41 @@ class ImportUserAccountTest extends MukurtuImportTestBase {
     $messages = iterator_to_array($this->lastMigration->getIdMap()->getMessages());
     $this->assertNotEmpty($messages);
     $this->assertStringContainsString('Administrator role cannot be assigned', reset($messages)->message);
+  }
+
+  /**
+   * Test that a custom role granting a restricted-access permission is
+   * rejected too, not just the literal Administrator role.
+   *
+   * Regression coverage for a gap noted while fixing the "import mukurtu
+   * users" permission to actually work as scoped: RoleLookup previously only
+   * blocked the literal 'administrator' machine name, so a differently-named
+   * custom role carrying an equivalent admin-only permission (e.g.
+   * 'administer permissions') could sidestep that protection entirely.
+   */
+  public function testRestrictedPermissionRoleRejected() {
+    Role::create(['id' => 'shadow_admin', 'label' => 'Shadow Admin'])
+      ->grantPermission('administer permissions')
+      ->save();
+
+    $data = [
+      ['Username', 'Email', 'Roles'],
+      ['wannabe_shadow_admin', 'wannabe_shadow_admin@example.com', 'Shadow Admin'],
+    ];
+    $mapping = [
+      ['target' => 'name', 'source' => 'Username'],
+      ['target' => 'mail', 'source' => 'Email'],
+      ['target' => 'roles', 'source' => 'Roles'],
+    ];
+
+    $this->importUserCsv($data, $mapping);
+
+    $users = $this->entityTypeManager->getStorage('user')->loadByProperties(['name' => 'wannabe_shadow_admin']);
+    $this->assertEmpty($users, 'A row attempting to grant a role with a restricted-access permission must not create the account.');
+
+    $messages = iterator_to_array($this->lastMigration->getIdMap()->getMessages());
+    $this->assertNotEmpty($messages);
+    $this->assertStringContainsString('restricted-access permission', reset($messages)->message);
   }
 
   /**
