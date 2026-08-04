@@ -10,7 +10,7 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
  * @ConfigEntityType(
  *   id = "mukurtu_submission_settings",
  *   label = @Translation("Submission settings"),
- *   label_collection = @Translation("Public Submissions"),
+ *   label_collection = @Translation("Submission Forms"),
  *   label_singular = @Translation("submission settings"),
  *   label_plural = @Translation("submission settings"),
  *   label_count = @PluralTranslation(
