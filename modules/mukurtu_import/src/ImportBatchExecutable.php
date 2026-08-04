@@ -224,7 +224,9 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
         'count_failed' => $migration_result['@failures'] ?? 0,
         'count_ignored' => $migration_result['@ignored'] ?? 0,
         'messages' => implode("\n", $file_message_texts),
-        'details' => json_encode($details),
+        // Source data can contain malformed UTF-8; substitute rather than
+        // let json_encode() fail outright and lose the whole row's detail.
+        'details' => json_encode($details, JSON_INVALID_UTF8_SUBSTITUTE) ?: '[]',
         'timestamp' => $timestamp,
       ]);
     }
