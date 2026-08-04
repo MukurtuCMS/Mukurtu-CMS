@@ -72,7 +72,7 @@ class SubmissionSettingsForm extends EntityForm {
 
     $form['status'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('Enable public submissions for this content type'),
+      '#title' => $this->t('Enable the submission form for this content type'),
       '#default_value' => $this->entity->status(),
     ];
 
@@ -114,7 +114,7 @@ class SubmissionSettingsForm extends EntityForm {
     $form['intro_text'] = [
       '#type' => 'text_format',
       '#title' => $this->t('Introductory text'),
-      '#description' => $this->t('Optional text shown above the Title field on the public submission form. Use this to explain what belongs here, any restrictions, or how submissions will be reviewed.'),
+      '#description' => $this->t('Optional text shown above the Title field on the submission form. Use this to explain what belongs here, any restrictions, or how submissions will be reviewed.'),
       '#default_value' => $intro_text['value'] ?? '',
       '#format' => $intro_text['format'] ?? NULL,
     ];
@@ -131,7 +131,7 @@ class SubmissionSettingsForm extends EntityForm {
     $form['allowed_media_types'] = [
       '#type' => 'checkboxes',
       '#title' => $this->t('Allowed media types'),
-      '#description' => $this->t('Restrict which kinds of media a visitor may attach on the public submission form. Only applies to content types with a media field configured on their Submission form display.'),
+      '#description' => $this->t('Restrict which kinds of media a visitor may attach on the submission form. Only applies to content types with a media field configured on their Submission form display.'),
       '#options' => $this->getMediaTypeOptions(),
       '#default_value' => $this->entity->getAllowedMediaTypes() ?: self::MEDIA_TYPES,
     ];
@@ -300,7 +300,7 @@ class SubmissionSettingsForm extends EntityForm {
     $form['fields_table_description'] = [
       '#type' => 'html_tag',
       '#tag' => 'p',
-      '#value' => $this->t("Choose which of this content type's fields appear on the public submission form, drag to reorder them, and optionally assign each to a group above."),
+      '#value' => $this->t("Choose which of this content type's fields appear on the submission form, drag to reorder them, and optionally assign each to a group above."),
       '#attributes' => ['class' => ['description']],
     ];
 

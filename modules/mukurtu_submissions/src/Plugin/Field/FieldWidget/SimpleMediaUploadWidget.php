@@ -164,7 +164,7 @@ class SimpleMediaUploadWidget extends WidgetBase {
    *   $form_state->getValue([$field_name, 'upload']).
    * @param int $owner_uid
    *   The uid to own the created Media entities (and, transitively, their
-   *   file usage) - normally the "Public Submissions" service account.
+   *   file usage) - normally the "Submission Forms" service account.
    *
    * @return array
    *   A entity_reference-field-ready array of ['target_id' => media_id].
