@@ -186,3 +186,23 @@ function mukurtu_submissions_update_40003(): void {
     }
   }
 }
+
+/**
+ * Seeds field_groups/field_group_assignments, mirrored from each bundle's
+ * regular "default" edit form, onto any existing settings entity that
+ * doesn't have them yet - matches what
+ * MukurtuSubmissionsCommands::createDefaultForms() now does for newly
+ * created ones. Digital Heritage's groups are hand-curated and never
+ * touched.
+ */
+function mukurtu_submissions_update_40004(): void {
+  $form_display_manager = \Drupal::service('mukurtu_submissions.form_display_manager');
+  foreach (\Drupal::entityTypeManager()->getStorage('mukurtu_submission_settings')->loadMultiple() as $settings) {
+    if ($settings instanceof SubmissionSettingsInterface
+      && $settings->getTargetBundle() !== 'digital_heritage'
+      && !$settings->getFieldGroups()) {
+      $form_display_manager->seedFieldGroupsFromDefaultForm($settings);
+      $settings->save();
+    }
+  }
+}

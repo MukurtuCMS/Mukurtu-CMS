@@ -91,4 +91,55 @@ class DefaultFormCreationTest extends MukurtuSubmissionsKernelTestBase {
     $this->assertEquals('Submit a Place Record', $storage->load('place')->label());
   }
 
+  public function testBackfillsGroupsForExistingUngroupedEntity(): void {
+    $display = $this->container->get('entity_display.repository')->getFormDisplay('node', static::TEST_BUNDLE, 'default');
+    $display->setThirdPartySetting('field_group', 'group_essentials', [
+      'children' => ['title'],
+      'label' => 'Essentials',
+      'parent_name' => '',
+      'format_type' => 'details',
+      'format_settings' => ['open' => TRUE],
+    ]);
+    $display->save();
+
+    SubmissionSettings::create([
+      'id' => static::TEST_BUNDLE,
+      'label' => 'Already configured',
+      'target_entity_type_id' => 'node',
+      'target_bundle' => static::TEST_BUNDLE,
+    ])->save();
+
+    $this->createCommand()->createDefaultForms();
+
+    $storage = $this->container->get('entity_type.manager')->getStorage('mukurtu_submission_settings');
+    $groups = $storage->load(static::TEST_BUNDLE)->getFieldGroups();
+    $this->assertNotEmpty($groups);
+    $this->assertSame('Essentials', reset($groups)['label']);
+  }
+
+  public function testNeverBackfillsDigitalHeritageGroups(): void {
+    NodeType::create(['type' => 'digital_heritage', 'name' => 'Digital Heritage Item'])->save();
+    $display = $this->container->get('entity_display.repository')->getFormDisplay('node', 'digital_heritage', 'default');
+    $display->setThirdPartySetting('field_group', 'group_essentials', [
+      'children' => ['title'],
+      'label' => 'Essentials',
+      'parent_name' => '',
+      'format_type' => 'details',
+      'format_settings' => ['open' => TRUE],
+    ]);
+    $display->save();
+
+    SubmissionSettings::create([
+      'id' => 'digital_heritage',
+      'label' => 'Submit a Digital Heritage Item',
+      'target_entity_type_id' => 'node',
+      'target_bundle' => 'digital_heritage',
+    ])->save();
+
+    $this->createCommand()->createDefaultForms();
+
+    $storage = $this->container->get('entity_type.manager')->getStorage('mukurtu_submission_settings');
+    $this->assertSame([], $storage->load('digital_heritage')->getFieldGroups());
+  }
+
 }

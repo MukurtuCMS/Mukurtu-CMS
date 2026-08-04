@@ -56,53 +56,82 @@ class MukurtuSubmissionsCommands extends DrushCommands {
 
   /**
    * Bulk-creates a baseline submission form - every field included,
-   * ungrouped, disabled - for every content type that doesn't already
-   * have one (excluding EXCLUDED_BUNDLES). Automates exactly the manual
-   * steps the module's README documents for enabling a single bundle, for
-   * every remaining bundle at once. A site builder still reviews,
-   * enables, and (optionally) organizes each one into field groups
-   * afterward, the same way Digital Heritage's own form was refined
-   * after it was first created.
+   * grouped to mirror the content type's own regular edit form, disabled
+   * - for every content type that doesn't already have one (excluding
+   * EXCLUDED_BUNDLES). Automates exactly the manual steps the module's
+   * README documents for enabling a single bundle, for every remaining
+   * bundle at once. Also re-runnable as a backfill: any already-existing
+   * settings entity that still has no field groups gets them seeded too,
+   * except Digital Heritage's, which are hand-curated and never
+   * overwritten. A site builder still reviews and enables each one
+   * afterward.
    */
   #[CLI\Command(name: 'mukurtu-submissions:create-default-forms')]
-  #[CLI\Help(description: "Creates a disabled submission form for every content type that doesn't already have one (excluding Article, Basic page, and Landing page), with every field included by default.")]
+  #[CLI\Help(description: "Creates a disabled submission form for every content type that doesn't already have one (excluding Article, Basic page, and Landing page), with every field included and grouped to match the content type's regular edit form.")]
   public function createDefaultForms(): void {
     $storage = $this->entityTypeManager->getStorage('mukurtu_submission_settings');
 
-    $existing_bundles = [];
+    $existing = [];
     foreach ($storage->loadMultiple() as $settings) {
-      $existing_bundles[$settings->getTargetBundle()] = TRUE;
+      $existing[$settings->getTargetBundle()] = $settings;
     }
 
     $created = [];
+    $grouped = [];
     foreach ($this->entityBundleInfo->getBundleInfo('node') as $bundle => $info) {
-      if (isset($existing_bundles[$bundle]) || in_array($bundle, self::EXCLUDED_BUNDLES, TRUE)) {
+      if (in_array($bundle, self::EXCLUDED_BUNDLES, TRUE)) {
         continue;
       }
 
-      $label = self::LABEL_OVERRIDES[$bundle] ?? $info['label'];
-      $settings = $storage->create([
-        'id' => $bundle,
-        'label' => sprintf('Submit a %s', $label),
-        'target_entity_type_id' => 'node',
-        'target_bundle' => $bundle,
-        'status' => FALSE,
-      ]);
-      $settings->save();
-      $this->formDisplayManager->ensureSubmissionFormDisplay($settings);
-      $created[] = $bundle;
+      $settings = $existing[$bundle] ?? NULL;
+      $is_new = !$settings;
+      if ($is_new) {
+        $label = self::LABEL_OVERRIDES[$bundle] ?? $info['label'];
+        $settings = $storage->create([
+          'id' => $bundle,
+          'label' => sprintf('Submit a %s', $label),
+          'target_entity_type_id' => 'node',
+          'target_bundle' => $bundle,
+          'status' => FALSE,
+        ]);
+      }
+
+      $needs_groups = $bundle !== 'digital_heritage' && !$settings->getFieldGroups();
+      if ($needs_groups) {
+        $this->formDisplayManager->seedFieldGroupsFromDefaultForm($settings);
+      }
+
+      if ($is_new || $needs_groups) {
+        $settings->save();
+      }
+      if ($is_new) {
+        $this->formDisplayManager->ensureSubmissionFormDisplay($settings);
+        $created[] = $bundle;
+      }
+      if ($needs_groups) {
+        $grouped[] = $bundle;
+      }
     }
 
-    if (!$created) {
-      $this->logger()->notice("Every content type already has a submission form; nothing to do.");
+    if (!$created && !$grouped) {
+      $this->logger()->notice("Every content type already has a grouped submission form; nothing to do.");
       return;
     }
 
-    $this->logger()->success(sprintf(
-      "Created %d submission form(s): %s. Each is disabled by default - review and enable at /admin/config/mukurtu/submissions.",
-      count($created),
-      implode(', ', $created)
-    ));
+    if ($created) {
+      $this->logger()->success(sprintf(
+        "Created %d submission form(s): %s. Each is disabled by default - review and enable at /admin/config/mukurtu/submissions.",
+        count($created),
+        implode(', ', $created)
+      ));
+    }
+    if ($grouped) {
+      $this->logger()->success(sprintf(
+        "Seeded field groups for %d existing submission form(s): %s.",
+        count($grouped),
+        implode(', ', $grouped)
+      ));
+    }
   }
 
 }

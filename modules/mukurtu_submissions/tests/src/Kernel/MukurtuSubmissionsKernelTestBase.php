@@ -25,6 +25,7 @@ abstract class MukurtuSubmissionsKernelTestBase extends EntityKernelTestBase {
    */
   protected static $modules = [
     'field',
+    'field_group',
     'file',
     'options',
     'path_alias',
