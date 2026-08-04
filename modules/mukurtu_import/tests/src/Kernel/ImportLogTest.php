@@ -122,15 +122,54 @@ class ImportLogTest extends MukurtuImportTestBase {
     $this->assertEquals('node', $row->entity_type_id);
     $this->assertEquals('protocol_aware_content', $row->bundle);
     $this->assertEquals(1, $row->count_processed);
-    // Migrate's created/updated counters track whether this migration's own
-    // ID map already had a mapping for the source row, not whether the
-    // destination entity pre-existed outside of migrate. Since this is the
-    // migration's first (and only) run, the row counts as "created" even
-    // though it updated an entity that already existed in Drupal.
-    $this->assertEquals(1, $row->count_created);
-    $this->assertEquals(0, $row->count_updated);
+    // This row updates a node that already existed before the import ran.
+    // count_created/count_updated must reflect the destination entity's
+    // true isNew() state, not migrate's own ID-map bookkeeping (which would
+    // otherwise count this as "created" since it's this migration's first
+    // run).
+    $this->assertEquals(0, $row->count_created);
+    $this->assertEquals(1, $row->count_updated);
     $this->assertEquals(0, $row->count_failed);
     $this->assertEmpty($row->messages);
+
+    $details = json_decode((string) $row->details, TRUE);
+    $this->assertCount(1, $details);
+    $this->assertEquals('updated', $details[0]['status']);
+    $this->assertEquals('Updated Title', $details[0]['label']);
+    $this->assertNotEmpty($details[0]['url']);
+  }
+
+  /**
+   * A row that creates a brand new entity (no matching nid) logs it as
+   * created, with a structured detail entry.
+   */
+  public function testCreatingNewEntityLogsCreatedNotUpdated() {
+    $import_id = $this->container->get('uuid')->generate();
+
+    $data = [
+      ['title', 'Sharing Setting', 'Protocols'],
+      ['Brand New Node', 'any', $this->protocol->id()],
+    ];
+    $file = $this->createCsvFile($data);
+    $mapping = [
+      ['target' => 'title', 'source' => 'title'],
+      ['target' => 'field_cultural_protocols/sharing_setting', 'source' => 'Sharing Setting'],
+      ['target' => 'field_cultural_protocols/protocols', 'source' => 'Protocols'],
+    ];
+    $definition = $this->buildDefinition($file, $mapping, $import_id);
+
+    $this->runBatchImport([$definition]);
+
+    $rows = $this->loadLogRowsByFid($import_id);
+    $this->assertCount(1, $rows);
+    $row = reset($rows);
+    $this->assertEquals(1, $row->count_created);
+    $this->assertEquals(0, $row->count_updated);
+
+    $details = json_decode((string) $row->details, TRUE);
+    $this->assertCount(1, $details);
+    $this->assertEquals('created', $details[0]['status']);
+    $this->assertEquals('Brand New Node', $details[0]['label']);
   }
 
   /**
@@ -161,6 +200,17 @@ class ImportLogTest extends MukurtuImportTestBase {
     $this->assertEquals(0, $row->success);
     $this->assertEquals(1, $row->count_failed);
     $this->assertNotEmpty($row->messages);
+
+    // The message should use the field's real label and be free of raw
+    // Drupal property paths / entity locators.
+    $this->assertStringContainsString('Title:', $row->messages);
+    $this->assertStringNotContainsString('title.0.value', $row->messages);
+    $this->assertStringNotContainsString('[node:', $row->messages);
+
+    $details = json_decode((string) $row->details, TRUE);
+    $this->assertCount(1, $details);
+    $this->assertEquals('failed', $details[0]['status']);
+    $this->assertStringContainsString('Title:', $details[0]['message']);
   }
 
   /**

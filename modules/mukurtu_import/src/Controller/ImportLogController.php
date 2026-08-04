@@ -117,8 +117,9 @@ class ImportLogController extends ControllerBase {
           ],
         ];
       }
+      $has_details = !empty($log->messages) || (int) $log->count_created > 0 || (int) $log->count_updated > 0 || (int) $log->count_failed > 0;
       $details_text = $this->t('Details <span class="visually-hidden">for @filename</span>', ['@filename' => $log->filename]);
-      $row[] = !empty($log->messages)
+      $row[] = $has_details
         ? Link::fromTextAndUrl($details_text, Url::fromRoute('mukurtu_import.import_log_detail', ['id' => $log->id]))->toString()
         : '';
       $rows[] = $row;
@@ -160,20 +161,98 @@ class ImportLogController extends ControllerBase {
       ],
     ];
 
-    $build['messages_heading'] = [
-      '#type' => 'html_tag',
-      '#tag' => 'h2',
-      '#value' => $this->t('Messages'),
-    ];
+    $details = $log->details ? (json_decode((string) $log->details, TRUE) ?: []) : [];
+    $created = array_values(array_filter($details, fn(array $entry) => ($entry['status'] ?? NULL) === 'created'));
+    $updated = array_values(array_filter($details, fn(array $entry) => ($entry['status'] ?? NULL) === 'updated'));
+    $failed = array_values(array_filter($details, fn(array $entry) => ($entry['status'] ?? NULL) === 'failed'));
 
-    $message_lines = array_filter(explode("\n", (string) $log->messages));
-    $build['messages'] = [
-      '#theme' => 'item_list',
-      '#items' => $message_lines,
-      '#empty' => $this->t('No messages recorded for this file.'),
-    ];
+    if ($created) {
+      $build['created_heading'] = [
+        '#type' => 'html_tag',
+        '#tag' => 'h2',
+        '#value' => $this->t('Created (@count)', ['@count' => count($created)]),
+      ];
+      $build['created'] = $this->buildEntityList($created);
+    }
+
+    if ($updated) {
+      $build['updated_heading'] = [
+        '#type' => 'html_tag',
+        '#tag' => 'h2',
+        '#value' => $this->t('Updated (@count)', ['@count' => count($updated)]),
+      ];
+      $build['updated'] = $this->buildEntityList($updated);
+    }
+
+    if ($failed) {
+      $build['failed_heading'] = [
+        '#type' => 'html_tag',
+        '#tag' => 'h2',
+        '#value' => $this->t('Failed (@count)', ['@count' => count($failed)]),
+      ];
+      $build['failed'] = $this->buildFailedTable($failed);
+    }
+
+    if (!$created && !$updated && !$failed) {
+      $build['messages_heading'] = [
+        '#type' => 'html_tag',
+        '#tag' => 'h2',
+        '#value' => $this->t('Messages'),
+      ];
+      $message_lines = array_filter(explode("\n", (string) $log->messages));
+      $build['messages'] = [
+        '#theme' => 'item_list',
+        '#items' => $message_lines,
+        '#empty' => $this->t('No messages recorded for this file.'),
+      ];
+    }
 
     return $build;
+  }
+
+  /**
+   * Builds a list of created/updated entities, linked where possible.
+   */
+  protected function buildEntityList(array $entries): array {
+    $items = [];
+    foreach ($entries as $entry) {
+      $label = $entry['label'] ?? $this->t('(unlabeled)');
+      $items[] = !empty($entry['url'])
+        ? Link::fromTextAndUrl($label, Url::fromUserInput($entry['url']))->toString()
+        : $label;
+    }
+    return [
+      '#theme' => 'item_list',
+      '#items' => $items,
+    ];
+  }
+
+  /**
+   * Builds a Row / Message table for failed rows.
+   */
+  protected function buildFailedTable(array $entries): array {
+    $rows = [];
+    foreach ($entries as $entry) {
+      $lines = array_filter(explode("\n", (string) ($entry['message'] ?? '')));
+      $rows[] = [
+        $entry['source_id'] ?? $this->t('(unknown)'),
+        [
+          'data' => [
+            '#theme' => 'item_list',
+            '#items' => $lines,
+          ],
+        ],
+      ];
+    }
+    return [
+      '#type' => 'table',
+      '#caption' => $this->t('Failed rows'),
+      '#header' => [
+        ['data' => $this->t('Row'), 'scope' => 'col'],
+        ['data' => $this->t('Message'), 'scope' => 'col'],
+      ],
+      '#rows' => $rows,
+    ];
   }
 
   /**
