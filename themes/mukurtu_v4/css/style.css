@@ -922,15 +922,6 @@ a:not(.primary-nav__menu-link) svg.tel path {
   --tag-bg: var(--color-white);
   --tag-hover: var(--brand-light-accent);
 }
-.tagify .tagify__tag > div {
-  -webkit-box-shadow: 0 0 0 1px var(--color-text-secondary);
-          box-shadow: 0 0 0 1px var(--color-text-secondary);
-}
-.tagify .tagify__tag:focus > div,
-.tagify .tagify__tag:hover:not([readonly]) > div {
-  -webkit-box-shadow: 0 0 0 2px var(--color-text-secondary);
-          box-shadow: 0 0 0 2px var(--color-text-secondary);
-}
 .tagify:hover:not(.tagify--focus):not(.tagify--invalid) {
   -webkit-box-shadow: 0 0 0 1px var(--color-text-secondary);
           box-shadow: 0 0 0 1px var(--color-text-secondary);
