@@ -1,0 +1,4 @@
+services:
+  mukurtu_submissions.form_display_manager:
+    class: Drupal\mukurtu_submissions\SubmissionFormDisplayManager
+    arguments: ['@entity_display.repository', '@entity_field.manager']
