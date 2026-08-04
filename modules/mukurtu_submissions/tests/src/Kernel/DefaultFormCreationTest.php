@@ -80,4 +80,15 @@ class DefaultFormCreationTest extends MukurtuSubmissionsKernelTestBase {
     $this->assertEmpty($storage->loadByProperties(['target_bundle' => 'article']));
   }
 
+  public function testLabelOverrideAppliesToPersonAndPlace(): void {
+    NodeType::create(['type' => 'person', 'name' => 'Person'])->save();
+    NodeType::create(['type' => 'place', 'name' => 'Place'])->save();
+
+    $this->createCommand()->createDefaultForms();
+
+    $storage = $this->container->get('entity_type.manager')->getStorage('mukurtu_submission_settings');
+    $this->assertEquals('Submit a Person Record', $storage->load('person')->label());
+    $this->assertEquals('Submit a Place Record', $storage->load('place')->label());
+  }
+
 }
