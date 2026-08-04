@@ -439,3 +439,17 @@ function mukurtu_export_update_40016(): void {
     }
   }
 }
+
+/**
+ * Install the "Add to export list" bulk action for /admin/people.
+ */
+function mukurtu_export_update_40017(): void {
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_export');
+  $source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+  $config_storage = \Drupal::service('config.storage');
+
+  $config_name = 'system.action.mukurtu_export_add_to_list_user_action';
+  if (!$config_storage->exists($config_name)) {
+    $config_storage->write($config_name, $source->read($config_name));
+  }
+}

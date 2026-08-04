@@ -9,6 +9,9 @@ target_entity_type_id: user
 target_bundle: user
 mapping:
   -
+    source: Communities
+    target: communities
+  -
     source: Created
     target: created
   -
@@ -32,6 +35,9 @@ mapping:
   -
     source: 'Profile Picture File'
     target: user_picture/target_id
+  -
+    source: Protocols
+    target: protocols
   -
     source: 'Receive Email Notifications'
     target: message_subscribe_email

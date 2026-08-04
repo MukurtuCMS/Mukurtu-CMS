@@ -150,4 +150,27 @@ class ExportList extends ContentEntityBase implements EntityOwnerInterface {
     return $this;
   }
 
+  /**
+   * Adds entity IDs of a given type to this list (read-modify-write).
+   *
+   * Does not save the entity; callers should call save() once after adding
+   * everything they need to.
+   *
+   * @param string $entity_type_id
+   *   The entity type ID the given IDs belong to.
+   * @param array $ids
+   *   The entity IDs to add.
+   *
+   * @return $this
+   */
+  public function addItems(string $entity_type_id, array $ids) {
+    $items = $this->getItems();
+    $items[$entity_type_id] = $items[$entity_type_id] ?? [];
+    foreach ($ids as $id) {
+      $items[$entity_type_id][$id] = $id;
+    }
+    $this->setItems($items);
+    return $this;
+  }
+
 }

@@ -535,3 +535,34 @@ function mukurtu_import_update_40031(): void {
     $config->setData($data)->save();
   }
 }
+
+/**
+ * Add Communities/Protocols columns to the 'User - all fields' strategy.
+ *
+ * Adds the two new mapping entries to sites that already ran update_40031,
+ * without disturbing any other customizations the site may have made to
+ * this strategy (no unconditional overwrite).
+ */
+function mukurtu_import_update_40032(): void {
+  $config_name = 'mukurtu_import.mukurtu_import_strategy.user_all_fields';
+  $config = \Drupal::configFactory()->getEditable($config_name);
+
+  // Sites that haven't created this strategy yet will get the new mapping
+  // entries via update_40031's YAML, which already includes them.
+  if ($config->isNew()) {
+    return;
+  }
+
+  $mapping = $config->get('mapping') ?? [];
+  $existing_targets = array_column($mapping, 'target');
+  $new_entries = [
+    'communities' => 'Communities',
+    'protocols' => 'Protocols',
+  ];
+  foreach ($new_entries as $target => $source) {
+    if (!in_array($target, $existing_targets, TRUE)) {
+      $mapping[] = ['source' => $source, 'target' => $target];
+    }
+  }
+  $config->set('mapping', $mapping)->save();
+}

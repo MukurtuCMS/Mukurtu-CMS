@@ -268,6 +268,21 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
 
       $field_def = $field_defs[$target] ?? NULL;
       if (!$field_def instanceof FieldDefinitionInterface) {
+        // Community/protocol membership isn't a real field on the user
+        // entity (see ImportFormTrait::buildTargetOptions()), so these two
+        // virtual targets need their process pipeline built by hand instead
+        // of through the field-type-keyed MukurtuImportFieldProcess plugins.
+        if ($entity_type_id === 'user' && in_array($target, ['communities', 'protocols'], TRUE)) {
+          $delimiter = $this->getConfig('multivalue_delimiter') ?? ';';
+          $import_process[$target_option] = [
+            ['plugin' => 'explode', 'source' => $source, 'delimiter' => $delimiter],
+            ['plugin' => 'callback', 'callable' => 'trim'],
+            [
+              'plugin' => 'mukurtu_group_membership_lookup',
+              'entity_type' => $target === 'communities' ? 'community' : 'protocol',
+            ],
+          ];
+        }
         continue;
       }
 

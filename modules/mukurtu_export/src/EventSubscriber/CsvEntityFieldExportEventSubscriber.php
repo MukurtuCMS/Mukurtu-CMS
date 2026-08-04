@@ -7,6 +7,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\mukurtu_export\Entity\CsvExporter;
 use Drupal\mukurtu_export\Event\EntityFieldExportEvent;
+use Drupal\og\Og;
 use InvalidArgumentException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -63,6 +64,12 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
     // Virtual field: reverse lookup of nodes that reference this media item.
     if ($entity->getEntityTypeId() === 'media' && $field_name === 'field_found_in') {
       return $this->exportFoundIn($event, $entity, $config);
+    }
+
+    // Virtual fields: community/protocol membership isn't a real field on
+    // the user entity, so it's read directly from the OG membership API.
+    if ($entity->getEntityTypeId() === 'user' && in_array($field_name, ['communities', 'protocols'], TRUE)) {
+      return $this->exportGroupMembership($event, $entity, $field_name);
     }
 
     try {
@@ -614,6 +621,42 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
     }
     else {
       $export = array_values($nids);
+    }
+
+    $event->setValue($export);
+  }
+
+  /**
+   * Exports a user's community or protocol memberships and roles.
+   *
+   * Serializes to the same "Name:role1|role2" format the import side's
+   * GroupMembershipLookup process plugin expects (the CSV::export() plugin
+   * joins the returned array with the exporter's configured
+   * multivalue_delimiter, matching the delimiter import's explode step
+   * reads by default), so an export/re-import round-trip reproduces the
+   * same membership state.
+   *
+   * @protected
+   */
+  protected function exportGroupMembership(EntityFieldExportEvent $event, EntityInterface $entity, string $field_name): void {
+    $bundle = $field_name === 'communities' ? 'community' : 'protocol';
+    $memberships = array_filter(Og::getMemberships($entity), fn($membership) => $membership->getGroupBundle() === $bundle);
+
+    $export = [];
+    foreach ($memberships as $membership) {
+      $group = $membership->getGroup();
+      if (!$group) {
+        continue;
+      }
+      $roles = array_values(array_filter(
+        array_map(fn($role) => $role->getName(), $membership->getRoles()),
+        fn($role_name) => !in_array($role_name, ['member', 'non-member'], TRUE),
+      ));
+      // Strip delimiter characters defensively rather than invent an
+      // escaping scheme, matching exportCulturalProtocol()'s precedent of
+      // stripping conflicting delimiter characters from exported values.
+      $label = str_replace([':', '|', ';'], '', $group->label());
+      $export[] = $roles ? "{$label}:" . implode('|', $roles) : $label;
     }
 
     $event->setValue($export);

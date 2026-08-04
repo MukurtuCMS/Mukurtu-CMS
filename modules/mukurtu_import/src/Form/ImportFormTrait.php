@@ -125,6 +125,17 @@ trait ImportFormTrait {
       }
     }
 
+    // Community/protocol membership isn't a real, writable field on user
+    // accounts (the only related field, field_communities, is computed and
+    // read-only, and there is no field_protocols equivalent), so these
+    // targets can't be discovered through the field-definition loop above.
+    // They're handled as virtual destination properties by
+    // ProtocolAwareUserContent and MukurtuImportStrategy::getProcess().
+    if ($entity_type_id === 'user') {
+      $options['communities'] = $this->t('Communities');
+      $options['protocols'] = $this->t('Protocols');
+    }
+
     // Disambiguate the Language field from the langcode base field.
     if (isset($options[$entity_keys['langcode']])) {
       $options[$entity_keys['langcode']] .= $this->t(' (langcode)');
@@ -154,6 +165,18 @@ trait ImportFormTrait {
     if (!$account) {
       $account = $this->currentUser();
     }
+
+    // User accounts don't have a separate "create" permission of their own
+    // in this module; the dedicated 'import mukurtu users' permission
+    // (already required by getEntityTypeIdOptions()) is the full
+    // authorization gate. Without this override, core's default create
+    // access check for the user entity type would additionally require the
+    // broad 'administer users' permission, defeating the point of a more
+    // narrowly scoped import permission.
+    if ($entity_type_id === 'user') {
+      return $account->hasPermission('import mukurtu users');
+    }
+
     return $this->entityTypeManager->getAccessControlHandler($entity_type_id)->createAccess($bundle, $account);
   }
 
