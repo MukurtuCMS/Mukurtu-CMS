@@ -47,7 +47,7 @@ class SubmissionPermissions implements ContainerInjectionInterface {
       $label = $info[$bundle]['label'] ?? $bundle;
 
       $permissions["submit $entity_type_id $bundle content"] = [
-        'title' => $this->t('Submit %type content via the public submission form', ['%type' => $label]),
+        'title' => $this->t('Submit %type content via the submission form', ['%type' => $label]),
         'dependencies' => [
           $setting->getConfigDependencyKey() => [$setting->getConfigDependencyName()],
         ],

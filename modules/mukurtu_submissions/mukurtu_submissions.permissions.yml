@@ -1,10 +1,10 @@
 administer mukurtu submissions:
-  title: 'Administer public submission settings'
-  description: 'Enable/disable public submissions per content type and configure allowed fields and media.'
+  title: 'Administer submission forms'
+  description: 'Enable/disable submission forms per content type and configure allowed fields and media.'
   restrict access: true
 
 review mukurtu submissions:
-  title: 'Review public submissions'
+  title: 'Review submissions'
   description: 'View the Pending Submissions queue, receive submission notifications, and contact submitters.'
   restrict access: true
 

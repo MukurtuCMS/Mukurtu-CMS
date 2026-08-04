@@ -1,7 +1,7 @@
 entity.mukurtu_submission_settings.collection:
   title: 'Submission Forms'
   route_name: entity.mukurtu_submission_settings.collection
-  description: 'Enable and configure public submission forms per content type.'
+  description: 'Enable and configure submission forms per content type.'
   parent: mukurtu_dashboard
   menu_name: dashboard-site-settings
   weight: 1
