@@ -24,6 +24,17 @@ class MukurtuSubmissionsCommands extends DrushCommands {
    */
   const EXCLUDED_BUNDLES = ['article', 'page', 'landing_page'];
 
+  /**
+   * Overrides the generated settings-entity label for bundles whose own
+   * content type name reads ambiguously as "submit a {label}" - "Submit a
+   * Person" sounds like submitting an actual human, not a record about
+   * one. Any bundle not listed here just uses its own label as-is.
+   */
+  const LABEL_OVERRIDES = [
+    'person' => 'Person Record',
+    'place' => 'Place Record',
+  ];
+
   public function __construct(
     protected EntityTypeManagerInterface $entityTypeManager,
     protected EntityTypeBundleInfoInterface $entityBundleInfo,
@@ -69,9 +80,10 @@ class MukurtuSubmissionsCommands extends DrushCommands {
         continue;
       }
 
+      $label = self::LABEL_OVERRIDES[$bundle] ?? $info['label'];
       $settings = $storage->create([
         'id' => $bundle,
-        'label' => sprintf('Submit a %s', $info['label']),
+        'label' => sprintf('Submit a %s', $label),
         'target_entity_type_id' => 'node',
         'target_bundle' => $bundle,
         'status' => FALSE,
