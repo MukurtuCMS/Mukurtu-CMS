@@ -214,6 +214,104 @@ class ImportLogTest extends MukurtuImportTestBase {
   }
 
   /**
+   * Cultural Protocols is a composite field with two independently validated
+   * sub-properties: "protocols" (the applied protocol IDs, also the field
+   * type's *main* property per CulturalProtocolItem::mainPropertyName()) and
+   * "sharing_setting" (the any/all sharing logic, a non-main sub-property).
+   * Regression test for a bug where violations on either sub-property
+   * rendered identically as "Cultural Protocols: This value should not be
+   * null.", giving no indication of which sub-part actually failed.
+   *
+   * formatViolationMessage() appends a "(Sub-property Label)" suffix for any
+   * sub-property of a field with more than one independently validated
+   * property, regardless of whether it's the main property, so both a
+   * "protocols" violation and a "sharing_setting" violation get their own
+   * distinct label: "Cultural Protocols (Protocols): ..." and
+   * "Cultural Protocols (Sharing Setting): ...". A "protocols" violation
+   * surfaces with no property segment in its raw path at all - Cultural
+   * Protocols is considered empty as a whole whenever *either* required
+   * sub-property is empty (see CulturalProtocolItem::isEmpty()) - so the
+   * fix inspects the entity's actual field value to find which required
+   * sub-property is empty. A plain single-property field failure (e.g.
+   * Title) must remain unaffected by the change.
+   */
+  public function testCulturalProtocolSubPropertyViolationsAreDistinguished() {
+    $import_id = $this->container->get('uuid')->generate();
+
+    // File A: a blank title on an existing node still reads as a plain
+    // "Title:" failure, with no parenthetical sub-property suffix.
+    $node = $this->createNode('Original Title');
+    $data_title = [
+      ['nid', 'title'],
+      [$node->id(), ''],
+    ];
+    $file_title = $this->createCsvFile($data_title);
+    $mapping_title = [
+      ['target' => 'nid', 'source' => 'nid'],
+      ['target' => 'title', 'source' => 'title'],
+    ];
+    $definition_title = $this->buildDefinition($file_title, $mapping_title, $import_id);
+
+    // File B: a value of "sometimes" cleanly fails ValidSharingSettingConstraint
+    // on the "sharing_setting" sub-property without ever touching NotNull,
+    // since "protocols" is validly mapped to a pre-existing protocol.
+    $data_sharing = [
+      ['title', 'Sharing Setting', 'Protocols'],
+      ['Sharing Setting Failure', 'sometimes', $this->protocol->id()],
+    ];
+    $file_sharing = $this->createCsvFile($data_sharing);
+    $mapping_sharing = [
+      ['target' => 'title', 'source' => 'title'],
+      ['target' => 'field_cultural_protocols/sharing_setting', 'source' => 'Sharing Setting'],
+      ['target' => 'field_cultural_protocols/protocols', 'source' => 'Protocols'],
+    ];
+    $definition_sharing = $this->buildDefinition($file_sharing, $mapping_sharing, $import_id);
+
+    // File C: omitting the "protocols" mapping entirely on a brand new node
+    // leaves the field's main property NULL, failing NotNull on "protocols".
+    $data_protocols = [
+      ['title', 'Sharing Setting'],
+      ['Protocols Failure', 'any'],
+    ];
+    $file_protocols = $this->createCsvFile($data_protocols);
+    $mapping_protocols = [
+      ['target' => 'title', 'source' => 'title'],
+      ['target' => 'field_cultural_protocols/sharing_setting', 'source' => 'Sharing Setting'],
+    ];
+    $definition_protocols = $this->buildDefinition($file_protocols, $mapping_protocols, $import_id);
+
+    $this->runBatchImport([$definition_title, $definition_sharing, $definition_protocols]);
+
+    $rows = $this->loadLogRowsByFid($import_id);
+    $this->assertCount(3, $rows);
+
+    $row_title = $rows[$file_title->id()];
+    $row_sharing = $rows[$file_sharing->id()];
+    $row_protocols = $rows[$file_protocols->id()];
+
+    $this->assertEquals(0, $row_title->success);
+    $this->assertEquals(0, $row_sharing->success);
+    $this->assertEquals(0, $row_protocols->success);
+
+    // Plain field failure: no parenthetical sub-property suffix.
+    $this->assertStringContainsString('Title:', (string) $row_title->messages);
+    $this->assertStringNotContainsString('Title (', (string) $row_title->messages);
+
+    $protocols_message = (string) $row_protocols->messages;
+    $sharing_message = (string) $row_sharing->messages;
+
+    // Cultural Protocols has more than one independently validated
+    // sub-property, so both "protocols" and "sharing_setting" violations
+    // are suffixed with their own sub-property label.
+    $this->assertStringContainsString('Cultural Protocols (Protocols):', $protocols_message);
+    $this->assertStringContainsString('Cultural Protocols (Sharing Setting):', $sharing_message);
+
+    // The actual regression being guarded against: the two distinguishable
+    // sub-property failures must not render as identical text.
+    $this->assertNotEquals($protocols_message, $sharing_message);
+  }
+
+  /**
    * Regression test for the fid mis-attribution bug: when two files in the
    * same batch both fail, each file's log row and error messages must stay
    * attributed to that file only, not merged onto the last-failing file.
