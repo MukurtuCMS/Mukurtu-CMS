@@ -67,7 +67,10 @@ class ImportFieldDescriptionListForm extends ImportBaseForm {
       '#value' => $bundle,
     ];
 
-    // Define tableselect.
+    // Define tableselect. All fields default to selected so the primary
+    // "Download CSV Template" action produces a complete template without
+    // requiring the user to manually check every row first; unchecking rows
+    // still allows building a partial/custom template.
     $form['table'] = [
       '#type' => 'tableselect',
       '#header' => [
@@ -76,6 +79,7 @@ class ImportFieldDescriptionListForm extends ImportBaseForm {
         'format' => ['data' => $this->t('Import Format Description'), 'scope' => 'col'],
       ],
       '#options' => $options,
+      '#default_value' => array_combine(array_keys($options), array_keys($options)),
       '#empty' => $this->t('No fields found'),
     ];
 
