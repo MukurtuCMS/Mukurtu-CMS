@@ -344,7 +344,6 @@ display:
         relationships: false
         filters: false
         arguments: false
-        display_extenders: false
       title: 'My notifications'
       use_admin_theme: true
       path: notifications
@@ -675,7 +674,6 @@ display:
           entity_field: field_user
           plugin_id: standard
           required: false
-          label: User
       filters:
         template:
           id: template
@@ -737,8 +735,7 @@ display:
           title_enable: false
           title: ''
           default_argument_type: current_user
-          default_argument_options:
-            user: ''
+          default_argument_options: {  }
           summary_options:
             base_path: ''
             count: true
@@ -754,11 +751,8 @@ display:
             fail: 'access denied'
           validate_options: {}
           limit: false
-          error_buckets: []
           break_phrase: false
           not: false
-          reduce_duplicates: false
-          transform: {  }
       display_extenders: {  }
     cache_metadata:
       max-age: -1
@@ -784,7 +778,6 @@ display:
         relationships: false
         filters: false
         arguments: false
-        display_extenders: false
       title: 'All notifications'
       use_admin_theme: true
       path: admin/notifications
@@ -1180,7 +1173,6 @@ display:
           entity_field: field_user
           plugin_id: standard
           required: false
-          label: User
         uid:
           id: uid
           table: message_field_data

@@ -29,8 +29,12 @@ class NotificationsFeedAccessTest extends KernelTestBase {
   protected static $modules = [
     'comment',
     'field',
+    'file',
+    'filter',
     'flag',
+    'image',
     'layout_builder',
+    'media',
     'message',
     'message_notify',
     'message_subscribe',
@@ -65,7 +69,7 @@ class NotificationsFeedAccessTest extends KernelTestBase {
     $this->installEntitySchema('taxonomy_term');
     $this->installSchema('system', ['sequences']);
 
-    $this->installConfig(['message', 'mukurtu_notifications']);
+    $this->installConfig(['message', 'message_notify', 'mukurtu_notifications']);
 
     // uid 1 is created implicitly and bypasses permission checks -- burn it
     // on a throwaway user first so the real test users below aren't
@@ -105,7 +109,11 @@ class NotificationsFeedAccessTest extends KernelTestBase {
     $view = Views::getView('mukurtu_message_log');
     $view->setDisplay('mukurtu_notifications_page');
     // Attempt to view user B's feed by supplying their uid as the argument.
-    $view->setArguments([(string) $this->userB->id()]);
+    // preExecute() (not setArguments() alone) is used deliberately: it's the
+    // method Drupal's real view-rendering path calls before running the
+    // query, and it's what invokes hook_views_pre_view() -- the hook this
+    // fix depends on. Plain execute() never calls it.
+    $view->preExecute([(string) $this->userB->id()]);
     $view->execute();
 
     // The fix works by rewriting the argument itself before the query is
@@ -136,6 +144,7 @@ class NotificationsFeedAccessTest extends KernelTestBase {
 
     $view = Views::getView('mukurtu_message_log');
     $view->setDisplay('mukurtu_notifications_page');
+    $view->preExecute();
     $view->execute();
 
     $this->assertSame((string) $this->userA->id(), $view->args[0]);
