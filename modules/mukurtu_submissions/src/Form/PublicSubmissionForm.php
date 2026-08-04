@@ -67,6 +67,15 @@ class PublicSubmissionForm extends FormBase {
     // something a submitter should be setting directly.
     'field_content_type',
     'field_mukurtu_original_record',
+    // A first-time visitor has nothing on the site yet to relate their
+    // submission to - cross-referencing other content is a curation step
+    // for after a reviewer publishes it, not something to ask for here.
+    'field_related_content',
+    // Sub-collections are built by adding existing collections as children
+    // from the parent collection's own edit form - not something a first
+    // submission (which doesn't exist as a real node yet) can meaningfully
+    // reference either.
+    'field_child_collections',
   ];
 
   /**
@@ -166,6 +175,7 @@ class PublicSubmissionForm extends FormBase {
 
     $this->display->buildForm($this->entity, $form, $form_state);
     $this->labelRemoveButtons($form);
+    $this->removeDragDropButtons($form);
     $this->groupFields($form);
 
     // Weighted below Title's own weight (-10) in the "submission" form
@@ -419,6 +429,26 @@ class PublicSubmissionForm extends FormBase {
       }
 
       $this->labelRemoveButtons($element[$key], $child_label, $child_delta);
+    }
+  }
+
+  /**
+   * Strips the paragraphs widget's "Drag & drop" bulk-reorder button
+   * (ParagraphsWidget::buildHeaderActions(), always rendered at
+   * $element['header_actions']['dropdown_actions']['dragdrop_mode'] once
+   * there's at least one item, regardless of any widget setting - there's
+   * no per-field way to disable it upstream) from every paragraph field on
+   * this form. A visitor filling out a one-time submission has at most a
+   * handful of items in any repeating field here; reordering tooling built
+   * for content editors managing many rows is unneeded complexity for
+   * them, on every paragraph field this form has, not just one.
+   */
+  protected function removeDragDropButtons(array &$element): void {
+    foreach (Element::children($element) as $key) {
+      if ($key === 'header_actions' && isset($element[$key]['dropdown_actions']['dragdrop_mode'])) {
+        unset($element[$key]['dropdown_actions']['dragdrop_mode']);
+      }
+      $this->removeDragDropButtons($element[$key]);
     }
   }
 

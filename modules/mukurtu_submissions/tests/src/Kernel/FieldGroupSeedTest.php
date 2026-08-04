@@ -126,4 +126,83 @@ class FieldGroupSeedTest extends MukurtuSubmissionsKernelTestBase {
     \Drupal\node\Entity\NodeType::create(['type' => 'ungrouped_test_content', 'name' => 'Ungrouped'])->save();
   }
 
+  public function testPruneExcludedFieldsRemovesDeadAssignmentAndEmptyGroup(): void {
+    $settings = SubmissionSettings::create([
+      'id' => static::TEST_BUNDLE,
+      'label' => 'Test settings',
+      'target_entity_type_id' => 'node',
+      'target_bundle' => static::TEST_BUNDLE,
+      'field_groups' => [
+        ['id' => 'group_essentials', 'label' => 'Essentials', 'collapsed' => FALSE, 'parent' => ''],
+        ['id' => 'group_related', 'label' => 'Related Content', 'collapsed' => TRUE, 'parent' => ''],
+      ],
+      'field_group_assignments' => [
+        'title' => 'group_essentials',
+        // Not a real field on this bundle - pruneExcludedFields() only
+        // needs to recognize the name as EXCLUDED_FIELDS, not that it
+        // exists, since it's cleaning up config that was saved before the
+        // field was added to that list.
+        'field_related_content' => 'group_related',
+      ],
+    ]);
+    $settings->save();
+
+    $changed = $this->container->get('mukurtu_submissions.form_display_manager')->pruneExcludedFields($settings);
+
+    $this->assertTrue($changed);
+    $assignments = $settings->getFieldGroupAssignments();
+    $this->assertArrayNotHasKey('field_related_content', $assignments);
+    $this->assertSame('group_essentials', $assignments['title'] ?? NULL);
+
+    $groups = array_column($settings->getFieldGroups(), NULL, 'id');
+    $this->assertArrayNotHasKey('group_related', $groups, 'Left with no fields once field_related_content is removed - should be pruned.');
+    $this->assertArrayHasKey('group_essentials', $groups);
+  }
+
+  public function testPruneExcludedFieldsNoOpWhenNothingToRemove(): void {
+    $settings = SubmissionSettings::create([
+      'id' => static::TEST_BUNDLE,
+      'label' => 'Test settings',
+      'target_entity_type_id' => 'node',
+      'target_bundle' => static::TEST_BUNDLE,
+      'field_groups' => [
+        ['id' => 'group_essentials', 'label' => 'Essentials', 'collapsed' => FALSE, 'parent' => ''],
+      ],
+      'field_group_assignments' => ['title' => 'group_essentials'],
+    ]);
+    $settings->save();
+
+    $changed = $this->container->get('mukurtu_submissions.form_display_manager')->pruneExcludedFields($settings);
+
+    $this->assertFalse($changed);
+    $this->assertSame('group_essentials', $settings->getFieldGroupAssignments()['title'] ?? NULL);
+  }
+
+  public function testPruneExcludedFieldsPrunesAlreadyEmptyGroupWithNoLiveExcludedAssignment(): void {
+    // The empty group was left behind by some earlier, partial cleanup -
+    // there's no currently-excluded field pointing at it to trigger on,
+    // but it should still go: an empty group is exactly what
+    // pruneExcludedFields() exists to clean up, regardless of how it got
+    // that way.
+    $settings = SubmissionSettings::create([
+      'id' => static::TEST_BUNDLE,
+      'label' => 'Test settings',
+      'target_entity_type_id' => 'node',
+      'target_bundle' => static::TEST_BUNDLE,
+      'field_groups' => [
+        ['id' => 'group_essentials', 'label' => 'Essentials', 'collapsed' => FALSE, 'parent' => ''],
+        ['id' => 'group_empty', 'label' => 'Already Empty', 'collapsed' => TRUE, 'parent' => ''],
+      ],
+      'field_group_assignments' => ['title' => 'group_essentials'],
+    ]);
+    $settings->save();
+
+    $changed = $this->container->get('mukurtu_submissions.form_display_manager')->pruneExcludedFields($settings);
+
+    $this->assertTrue($changed);
+    $groups = array_column($settings->getFieldGroups(), NULL, 'id');
+    $this->assertArrayNotHasKey('group_empty', $groups);
+    $this->assertArrayHasKey('group_essentials', $groups);
+  }
+
 }
