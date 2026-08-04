@@ -61,6 +61,17 @@ interface SubmissionSettingsInterface extends ConfigEntityInterface {
   public function getIntroText(): array;
 
   /**
+   * Gets the text shown on the confirmation page after a successful
+   * submission.
+   *
+   * @return array
+   *   A text_format-style array with "value" and "format" keys, or an empty
+   *   array if none is configured (the confirmation page falls back to a
+   *   generic message in that case).
+   */
+  public function getThankYouText(): array;
+
+  /**
    * Gets the collapsible section definitions for grouping fields on the
    * public submission form.
    *
