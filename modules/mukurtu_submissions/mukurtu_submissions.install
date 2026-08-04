@@ -206,3 +206,22 @@ function mukurtu_submissions_update_40004(): void {
     }
   }
 }
+
+/**
+ * Removes field_related_content and field_child_collections from any
+ * existing settings entity's field_group_assignments (both were just
+ * added to PublicSubmissionForm::EXCLUDED_FIELDS - a visitor's first
+ * submission has nothing yet to cross-reference other content or
+ * existing collections against), pruning any group left empty as a
+ * result. Covers Digital Heritage too, unlike _40004 - excluding a field
+ * everywhere is a correctness fix, not a curation change its "never
+ * overwritten" policy is meant to protect.
+ */
+function mukurtu_submissions_update_40005(): void {
+  $form_display_manager = \Drupal::service('mukurtu_submissions.form_display_manager');
+  foreach (\Drupal::entityTypeManager()->getStorage('mukurtu_submission_settings')->loadMultiple() as $settings) {
+    if ($settings instanceof SubmissionSettingsInterface && $form_display_manager->pruneExcludedFields($settings)) {
+      $settings->save();
+    }
+  }
+}

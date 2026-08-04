@@ -178,11 +178,66 @@ class SubmissionFormDisplayManager {
       }
     }
 
-    // Repeated passes (rather than a single walk) so a group kept only
-    // because a DEEPER descendant (not just a direct child) survives is
-    // still correctly recognized, regardless of iteration order - same
-    // approach PublicSubmissionForm::groupFields() itself uses for
-    // arbitrary nesting depth.
+    $field_groups = $this->pruneEmptyGroups($field_groups, $assignments);
+
+    $settings->set('field_groups', array_values($field_groups));
+    $settings->set('field_group_assignments', $assignments);
+  }
+
+  /**
+   * Removes any currently-EXCLUDED_FIELDS entry from a settings entity's
+   * field_group_assignments, and prunes any group left with nothing in its
+   * subtree as a result - for when a field that was previously assignable
+   * (and already saved into a settings entity's config) gets added to
+   * EXCLUDED_FIELDS later. seedFieldGroupsFromDefaultForm() already keeps
+   * a *freshly generated* arrangement clean of excluded fields; this is
+   * the equivalent cleanup for arrangements that already existed before an
+   * exclusion was added.
+   *
+   * Group pruning always runs, independent of whether an assignment was
+   * actually removed this call - a group can be left with nothing in it
+   * from an earlier partial cleanup (e.g. its one assigned field was
+   * already gone) with no live excluded assignment left to trigger on.
+   * Saves nothing itself - returns whether anything changed, so a caller
+   * only re-saves the entities that actually needed it.
+   */
+  public function pruneExcludedFields(SubmissionSettingsInterface $settings): bool {
+    $assignments = $settings->getFieldGroupAssignments();
+    $changed = FALSE;
+    foreach (array_keys($assignments) as $field_name) {
+      if (in_array($field_name, PublicSubmissionForm::EXCLUDED_FIELDS, TRUE)) {
+        unset($assignments[$field_name]);
+        $changed = TRUE;
+      }
+    }
+
+    $field_groups = [];
+    foreach ($settings->getFieldGroups() as $group) {
+      $field_groups[$group['id']] = $group;
+    }
+    $pruned = $this->pruneEmptyGroups($field_groups, $assignments);
+    if (count($pruned) !== count($field_groups)) {
+      $changed = TRUE;
+    }
+    if (!$changed) {
+      return FALSE;
+    }
+
+    $settings->set('field_group_assignments', $assignments);
+    $settings->set('field_groups', array_values($pruned));
+    return TRUE;
+  }
+
+  /**
+   * Drops any group (keyed by id) with nothing in its subtree - no directly
+   * assigned field (per $assignments) and no surviving child group.
+   * Repeated passes (rather than a single walk) so a group kept only
+   * because a DEEPER descendant (not just a direct child) survives is
+   * still correctly recognized, regardless of iteration order - same
+   * approach PublicSubmissionForm::groupFields() itself uses for arbitrary
+   * nesting depth.
+   */
+  protected function pruneEmptyGroups(array $field_groups, array $assignments): array {
     $has_fields = array_fill_keys(array_values($assignments), TRUE);
     $changed = TRUE;
     while ($changed) {
@@ -203,9 +258,7 @@ class SubmissionFormDisplayManager {
         }
       }
     }
-
-    $settings->set('field_groups', array_values($field_groups));
-    $settings->set('field_group_assignments', $assignments);
+    return $field_groups;
   }
 
   /**

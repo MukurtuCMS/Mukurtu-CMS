@@ -7831,6 +7831,19 @@ header {
   font-weight: var(--text-bold);
   font-size: 1.1em;
 }
+.path-submit .form-wrapper:has(> .paragraph-type-top) {
+  border: 1px solid var(--color-greys-alpha-border);
+  border-radius: 0.5rem;
+  padding: var(--v-space-4xs);
+  -webkit-margin-after: var(--v-space-4xs);
+          margin-block-end: var(--v-space-4xs);
+}
+.path-submit .paragraphs-dropdown-action.button {
+  color: var(--brand-text-color);
+}
+.path-submit .paragraphs-dropdown-action.button:hover, .path-submit .paragraphs-dropdown-action.button:focus {
+  color: var(--brand-text-color);
+}
 .path-submit .form-item .description,
 .path-submit .field--widget-media-library-widget > .description {
   color: var(--color-text-secondary);

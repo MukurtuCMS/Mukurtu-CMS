@@ -223,6 +223,44 @@
     }
   }
 
+  // A repeatable paragraph item (e.g. one "Sample Sentence" of several)
+  // has no distinct wrapper class of its own to hang a card style off of -
+  // ParagraphsWidget renders it as a plain '#type' => 'container', so it
+  // only ever carries the same generic .form-wrapper class every other
+  // field/fieldset/details wrapper on this form already uses. :has() (an
+  // established pattern already used in this file - see
+  // "td:has(.form-submit)" below) scopes this specifically to the wrapper
+  // that directly contains a .paragraph-type-top - i.e. an actual
+  // paragraph item's own boundary, not any of those other .form-wrapper
+  // uses - giving each item a visible card so multiple items in the same
+  // field read as clearly separate entries instead of running together.
+  .form-wrapper:has(> .paragraph-type-top) {
+    border: 1px solid var(--color-greys-alpha-border);
+    border-radius: 0.5rem;
+    padding: var(--v-space-4xs);
+    margin-block-end: var(--v-space-4xs);
+  }
+
+  // Pre-existing contrast bug, not caused by the box above: the "..."
+  // overflow menu a paragraph item shows once it has 2+ actions (e.g.
+  // "Remove" + "Duplicate" on Word Entries - a single-action item like
+  // Sample Sentences renders "Remove" as a plain button instead and never
+  // hits this path) is styled by paragraphs.actions.css, which sets
+  // .paragraphs-dropdown-action.button's background to transparent so the
+  // dropdown's own light panel background (#f9f8f6) shows through, but
+  // never resets `color` - so it's still whatever the generic button
+  // mixin set (01-atoms/button: --light-text-color, i.e. white, meant for
+  // buttons that keep their own solid dark background). White text over
+  // a near-white background is what actually made this unreadable.
+  .paragraphs-dropdown-action.button {
+    color: var(--brand-text-color);
+
+    &:hover,
+    &:focus {
+      color: var(--brand-text-color);
+    }
+  }
+
   // De-emphasize field help text relative to labels/input content, and
   // tighten its spacing - currently identical in weight/color to the
   // field's own value, which reads as visual noise at this volume of text.
