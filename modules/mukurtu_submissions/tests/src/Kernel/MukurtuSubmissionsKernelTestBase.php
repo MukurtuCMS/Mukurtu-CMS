@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_submissions\Kernel;
 
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
+use Drupal\node\Entity\NodeType;
 
 /**
  * Base class for mukurtu_submissions kernel tests.
@@ -32,6 +33,12 @@ abstract class MukurtuSubmissionsKernelTestBase extends EntityKernelTestBase {
   ];
 
   /**
+   * The node bundle used to create mukurtu_submission_settings entities
+   * against, for tests that need one.
+   */
+  const TEST_BUNDLE = 'submission_test_content';
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp(): void {
@@ -39,6 +46,11 @@ abstract class MukurtuSubmissionsKernelTestBase extends EntityKernelTestBase {
 
     $this->installEntitySchema('path_alias');
     $this->installConfig(['user']);
+
+    NodeType::create([
+      'type' => static::TEST_BUNDLE,
+      'name' => 'Submission Test Content',
+    ])->save();
   }
 
 }
