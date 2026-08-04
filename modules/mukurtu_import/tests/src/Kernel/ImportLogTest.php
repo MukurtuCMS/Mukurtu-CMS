@@ -304,6 +304,68 @@ class ImportLogTest extends MukurtuImportTestBase {
   }
 
   /**
+   * A single file mixing rows that update existing nodes (nid present) with
+   * rows that create brand new ones (blank nid) must count and attribute
+   * each row correctly. Regression test for a bug where multiple blank-nid
+   * rows in the same file shared the same blank migrate ID map key: every
+   * row after the first blank one would resolve to the previously-created
+   * entity instead of creating its own, undercounting "created" and
+   * overcounting "updated".
+   */
+  public function testMixedCreateAndUpdateRowsInSingleFile() {
+    $import_id = $this->container->get('uuid')->generate();
+    $node_a = $this->createNode('Existing A');
+    $node_b = $this->createNode('Existing B');
+
+    $data = [
+      ['nid', 'title', 'Sharing Setting', 'Protocols'],
+      [$node_a->id(), 'Existing A Updated', 'any', $this->protocol->id()],
+      [$node_b->id(), 'Existing B Updated', 'any', $this->protocol->id()],
+      ['', 'New Node One', 'any', $this->protocol->id()],
+      ['', 'New Node Two', 'any', $this->protocol->id()],
+      ['', 'New Node Three', 'any', $this->protocol->id()],
+    ];
+    $file = $this->createCsvFile($data);
+    $mapping = [
+      ['target' => 'nid', 'source' => 'nid'],
+      ['target' => 'title', 'source' => 'title'],
+      ['target' => 'field_cultural_protocols/sharing_setting', 'source' => 'Sharing Setting'],
+      ['target' => 'field_cultural_protocols/protocols', 'source' => 'Protocols'],
+    ];
+    $definition = $this->buildDefinition($file, $mapping, $import_id);
+
+    $this->runBatchImport([$definition]);
+
+    $rows = $this->loadLogRowsByFid($import_id);
+    $this->assertCount(1, $rows);
+    $row = reset($rows);
+    $this->assertEquals(5, $row->count_processed);
+    $this->assertEquals(3, $row->count_created);
+    $this->assertEquals(2, $row->count_updated);
+    $this->assertEquals(0, $row->count_failed);
+
+    $details = json_decode((string) $row->details, TRUE);
+    $created = array_values(array_filter($details, fn(array $d) => $d['status'] === 'created'));
+    $updated = array_values(array_filter($details, fn(array $d) => $d['status'] === 'updated'));
+    $this->assertCount(3, $created);
+    $this->assertCount(2, $updated);
+    $this->assertEqualsCanonicalizing(['New Node One', 'New Node Two', 'New Node Three'], array_column($created, 'label'));
+
+    // Each "created" row must be a genuinely distinct entity, not the same
+    // node repeatedly overwritten by successive blank-nid rows.
+    $this->assertCount(3, array_unique(array_column($created, 'url')), 'The three new rows produced three distinct nodes.');
+
+    $node_storage = \Drupal::entityTypeManager()->getStorage('node');
+    $nids = [];
+    foreach (['New Node One', 'New Node Two', 'New Node Three'] as $title) {
+      $matches = $node_storage->loadByProperties(['title' => $title]);
+      $this->assertCount(1, $matches, "Exactly one node exists with title '$title'.");
+      $nids[] = (int) reset($matches)->id();
+    }
+    $this->assertCount(3, array_unique($nids), 'The three new rows produced three distinct node IDs in storage.');
+  }
+
+  /**
    * A mixed batch (one file succeeds, one fails) logs one row of each.
    */
   public function testMixedBatchLogsSuccessAndFailureSeparately() {
