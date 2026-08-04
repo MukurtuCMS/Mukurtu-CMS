@@ -73,6 +73,13 @@ class LeafletHooksPathFillTest extends KernelTestBase {
    * 'geometrycollection' feature whose individual geometries are nested
    * under 'component', rather than a top-level 'linestring'/'multilinestring'
    * type. Mixing a polygon into the same collection must not lose its fill.
+   *
+   * The collection's own 'path' must end up blanked (not merely left as the
+   * original "depends" value): Drupal.Leaflet.create_feature() re-applies a
+   * feature's own path to the whole Leaflet layer it built, and for a
+   * collection that layer is a FeatureGroup whose setStyle() cascades to
+   * every child - so a non-empty collection-level path would silently
+   * re-enable fill on the very components fixed here.
    */
   public function testGeometryCollectionOnlyDisablesFillOnLineComponents(): void {
     $path = '{"color":"#3388ff","fill":"depends"}';
@@ -87,18 +94,21 @@ class LeafletHooksPathFillTest extends KernelTestBase {
 
     (new LeafletHooks())->leafletFormatterFeatureAlter($feature, NULL, NULL);
 
-    // The collection's own path is untouched (it still carries the
-    // 'depends' the polygon component should inherit).
-    $this->assertSame($path, $feature['path']);
+    // The collection's own path is blanked so the client-side cascading
+    // restyle of the whole FeatureGroup becomes a no-op.
+    $this->assertSame('', $feature['path']);
 
     // The linestring component gained its own fill-disabled path.
     $lineDecoded = json_decode($feature['component'][0]['path'], TRUE);
     $this->assertFalse($lineDecoded['fill']);
     $this->assertSame('#3388ff', $lineDecoded['color']);
 
-    // The polygon component was left alone (no own 'path' key), so it keeps
-    // inheriting the collection's original path when rendered.
-    $this->assertArrayNotHasKey('path', $feature['component'][1]);
+    // The polygon component got its own explicit copy of the original path
+    // (fill untouched), so it keeps rendering as configured once the
+    // collection's own path is blanked.
+    $polygonDecoded = json_decode($feature['component'][1]['path'], TRUE);
+    $this->assertSame('depends', $polygonDecoded['fill']);
+    $this->assertSame('#3388ff', $polygonDecoded['color']);
   }
 
   /**
@@ -120,6 +130,10 @@ class LeafletHooksPathFillTest extends KernelTestBase {
     ];
 
     (new LeafletHooks())->leafletFormatterFeatureAlter($feature, NULL, NULL);
+
+    // The nested collection's own path is blanked too, for the same reason
+    // as the outer one.
+    $this->assertSame('', $feature['component'][0]['path']);
 
     $nestedLine = $feature['component'][0]['component'][0];
     $decoded = json_decode($nestedLine['path'], TRUE);

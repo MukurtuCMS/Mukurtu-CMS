@@ -59,54 +59,62 @@ class LeafletHooks {
    * 'linestring' type, so both need their own handling here.
    */
   private function disablePathFillForLines(array &$feature): void {
-    $type = $feature['type'] ?? NULL;
-
-    if (in_array($type, self::COLLECTION_TYPES, TRUE) && is_array($feature['component'] ?? NULL)) {
-      // Give each line sub-component its own 'path' key so it overrides the
-      // shared parent path when rendered (see Drupal.Leaflet.create_collection
-      // in leaflet.drupal.js, which spreads the parent feature's properties
-      // onto each component before applying path style). Non-line siblings
-      // (e.g. a polygon in the same collection) are left untouched so they
-      // keep inheriting the parent's original path.
-      foreach ($feature['component'] as &$component) {
-        $this->disableComponentFillIfLine($component, $feature['path'] ?? NULL);
-      }
-      unset($component);
-      return;
-    }
-
-    if (!in_array($type, self::LINE_TYPES, TRUE)) {
-      return;
-    }
-
-    $feature['path'] = $this->withFillDisabled($feature['path'] ?? NULL);
+    $this->applyLineFillFix($feature, NULL);
   }
 
   /**
-   * Applies the line-fill-disable logic to a single collection component.
+   * Recursively disables fill on line geometries, including inside
+   * geometrycollection/multipoint features.
    *
-   * @param array $component
-   *   The sub-feature, keyed like a top-level feature but without its own
-   *   'path' unless one is set here.
-   * @param string|null $parentPath
-   *   The path JSON inherited from the enclosing collection feature.
+   * For a collection, it is not enough to give each line component its own
+   * fill-disabled 'path' and leave the collection's own 'path' alone:
+   * Drupal.Leaflet.create_feature() (leaflet.drupal.js) builds the
+   * collection's Leaflet FeatureGroup from its individually-styled
+   * components (via create_collection(), which spreads the collection's
+   * properties onto each component before styling it), but then immediately
+   * calls set_feature_path_style() again on the FeatureGroup itself using
+   * the *collection's own* 'path'. L.FeatureGroup.setStyle() cascades that
+   * call to every child (including nested collections), which stomps the
+   * per-component styling just applied with the collection's shared path -
+   * silently re-enabling fill on every line inside it.
+   *
+   * To prevent that, every component (line or not) is given its own
+   * explicit 'path' here, and the collection's own 'path' is then blanked
+   * out so that later cascading setStyle() call resolves to an empty style
+   * object and becomes a no-op, leaving each component's own styling intact.
+   *
+   * @param array $feature
+   *   The feature (or collection component) being processed.
+   * @param string|null $inheritedPath
+   *   The path JSON this feature would otherwise inherit from an enclosing
+   *   collection, used when $feature has no 'path' of its own.
    */
-  private function disableComponentFillIfLine(array &$component, ?string $parentPath): void {
-    $type = $component['type'] ?? NULL;
+  private function applyLineFillFix(array &$feature, ?string $inheritedPath): void {
+    $type = $feature['type'] ?? NULL;
+    $ownPath = $feature['path'] ?? $inheritedPath;
 
-    if (in_array($type, self::COLLECTION_TYPES, TRUE) && is_array($component['component'] ?? NULL)) {
-      foreach ($component['component'] as &$nested) {
-        $this->disableComponentFillIfLine($nested, $parentPath);
+    if (in_array($type, self::COLLECTION_TYPES, TRUE) && is_array($feature['component'] ?? NULL)) {
+      foreach ($feature['component'] as &$component) {
+        $this->applyLineFillFix($component, $ownPath);
       }
-      unset($nested);
+      unset($component);
+      $feature['path'] = '';
       return;
     }
 
-    if (!in_array($type, self::LINE_TYPES, TRUE)) {
+    if (in_array($type, self::LINE_TYPES, TRUE)) {
+      $feature['path'] = $this->withFillDisabled($ownPath);
       return;
     }
 
-    $component['path'] = $this->withFillDisabled($parentPath);
+    // Non-line feature nested in a collection (e.g. a polygon): give it an
+    // explicit copy of whatever path it would otherwise have inherited, so
+    // it keeps rendering as configured once the collection's own path above
+    // is blanked out. A non-line feature that isn't part of any collection
+    // ($inheritedPath === NULL) is left completely untouched.
+    if ($inheritedPath !== NULL && !isset($feature['path'])) {
+      $feature['path'] = $inheritedPath;
+    }
   }
 
   /**
