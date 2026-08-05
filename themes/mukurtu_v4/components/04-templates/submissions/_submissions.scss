@@ -241,6 +241,25 @@
     margin-block-end: var(--v-space-4xs);
   }
 
+  // TODO/unconfirmed: fields inside a paragraph item nested under a
+  // details group (e.g. "Biography section"'s Title/Body, under
+  // "Biography") were reported rendering at roughly half width, unlike
+  // equivalent fields in a paragraph item that isn't nested this way
+  // (e.g. Dictionary Word's "Word Entry"/"Sample Sentence", which render
+  // full width). Nothing in this theme or the paragraphs module's own CSS
+  // sets an explicit width constraint on .paragraphs-subform or its
+  // fields as far as source inspection shows - .js-form-type-textfield
+  // input/.js-form-type-textarea textarea both already assert
+  // inline-size: 100% (01-atoms/textfield). This asserts it again, more
+  // specifically scoped, as a targeted attempt rather than a confirmed
+  // fix - remove this comment once visually confirmed either way.
+  .paragraphs-subform {
+    .js-form-type-textfield input,
+    .js-form-type-textarea textarea {
+      inline-size: 100%;
+    }
+  }
+
   // Pre-existing contrast bug, not caused by the box above: the "..."
   // overflow menu a paragraph item shows once it has 2+ actions (e.g.
   // "Remove" + "Duplicate" on Word Entries - a single-action item like
@@ -264,8 +283,14 @@
   // De-emphasize field help text relative to labels/input content, and
   // tighten its spacing - currently identical in weight/color to the
   // field's own value, which reads as visual noise at this volume of text.
+  // .js-filter-guidelines (a text-format field's "No HTML tags allowed."/
+  // etc. rules) is a separate container next to .description, not inside
+  // it - core renders it there, not merged into the field's own
+  // #description - so it needs listing here explicitly or it stays at
+  // full body-text size/weight despite being the same kind of help text.
   .form-item .description,
-  .field--widget-media-library-widget > .description {
+  .field--widget-media-library-widget > .description,
+  .js-filter-guidelines {
     color: var(--color-text-secondary);
     font-size: 0.9em;
     margin-block-start: var(--v-space-6xs);

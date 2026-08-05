@@ -232,7 +232,7 @@ content:
     weight: 1
     region: content
     settings:
-      rows: 31
+      rows: 5
       placeholder: ''
     third_party_settings: {  }
   field_credit:
