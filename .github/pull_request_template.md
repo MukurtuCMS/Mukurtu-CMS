@@ -7,4 +7,5 @@
 - [ ] I have updated from `main` and resolved any merge conflicts.
 - [ ] I have verified that all expected checks pass.
 - [ ] I have run the pr-expert-review skill and resolved all relevant issues.
+- [ ] If I added a content entity bundle, I added its `language.content_settings` and base field overrides to `mukurtu_multilingual` (see `docs/content-language-policy.md`). If I added or changed a view, I applied the content language policy in that doc.
 
