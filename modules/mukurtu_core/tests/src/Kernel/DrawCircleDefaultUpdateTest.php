@@ -100,7 +100,7 @@ class DrawCircleDefaultUpdateTest extends KernelTestBase {
   /**
    * A field_coverage component using a different widget is left untouched.
    *
-   * geofield_default has no "toolbar" setting at all, so the meaningful
+   * Geofield_default has no "toolbar" setting at all, so the meaningful
    * assertion is that the hook's type guard prevents it from ever writing
    * one in (which would otherwise be a silent no-op change, not a crash).
    */
