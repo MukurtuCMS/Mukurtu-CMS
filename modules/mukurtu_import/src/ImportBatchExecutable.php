@@ -121,6 +121,19 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
       '@name' => $migration->id(),
     ];
 
+    // import() can return RESULT_FAILED before a single row is attempted
+    // (e.g. a source rewind() exception from a misconfigured ID column). It
+    // handles that internally without throwing, so nothing above records a
+    // failure count or message for it, and the batch operation itself still
+    // reports success. Surface it explicitly so the results form doesn't
+    // report a false success.
+    if ($result === MigrationInterface::RESULT_FAILED && empty($context['results'][$migration->id()]['@failures'])) {
+      $context['results'][$migration->id()]['@failures'] = 1;
+      $context['results']['messages'][] = (object) [
+        'message' => (string) t('The import for this file failed before any rows could be processed. Check that your file\'s columns match the selected import template, or use "Customize Settings" to map the columns manually.'),
+      ];
+    }
+
     // Do some housekeeping.
     if ($result !== MigrationInterface::RESULT_INCOMPLETE) {
       $context['finished'] = 1;
