@@ -48,6 +48,7 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
  *     "access_expectations_enabled",
  *     "access_level",
  *     "intro_text",
+ *     "thank_you_text",
  *     "field_groups",
  *     "field_group_assignments",
  *   }
@@ -114,6 +115,15 @@ class SubmissionSettings extends ConfigEntityBase implements SubmissionSettingsI
   protected $intro_text = [];
 
   /**
+   * Text shown on the confirmation page after a successful submission, as
+   * a text_format-style ["value" => ..., "format" => ...] array. Empty
+   * means the controller falls back to a generic message.
+   *
+   * @var array
+   */
+  protected $thank_you_text = [];
+
+  /**
    * Collapsible section definitions for grouping fields on the public
    * submission form, in display order.
    *
@@ -171,6 +181,13 @@ class SubmissionSettings extends ConfigEntityBase implements SubmissionSettingsI
    */
   public function getIntroText(): array {
     return $this->intro_text ?? [];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getThankYouText(): array {
+    return $this->thank_you_text ?? [];
   }
 
   /**
