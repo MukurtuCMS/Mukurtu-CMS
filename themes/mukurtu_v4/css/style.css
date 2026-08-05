@@ -7811,6 +7811,7 @@ header {
 .path-submit details.form-wrapper details.form-wrapper > summary:focus-visible {
   outline-color: var(--brand-primary);
 }
+.path-submit .paragraph-top,
 .path-submit .paragraph-type-top {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -7831,11 +7832,14 @@ header {
   -webkit-border-after: 2px solid var(--brand-light);
           border-block-end: 2px solid var(--brand-light);
 }
+.path-submit .paragraph-top .paragraph-type-label,
+.path-submit .paragraph-top .paragraph-type-title,
+.path-submit .paragraph-type-top .paragraph-type-label,
 .path-submit .paragraph-type-top .paragraph-type-title {
   font-weight: var(--text-bold);
   font-size: 1.1em;
 }
-.path-submit .form-wrapper:has(> .paragraph-type-top) {
+.path-submit .form-wrapper:has(> .paragraph-top, > .paragraph-type-top) {
   border: 1px solid var(--color-greys-alpha-border);
   border-radius: 0.5rem;
   padding: var(--v-space-4xs);
@@ -7917,7 +7921,7 @@ header {
   font-size: 1em;
   font-weight: var(--text-bold);
 }
-.path-submit .field-multiple-table td:not(.field-multiple-drag):not(.delta-order):not(:has(.paragraph-type-top)) {
+.path-submit .field-multiple-table td:not(.field-multiple-drag):not(.delta-order):not(:has(.paragraph-top, .paragraph-type-top)) {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -7929,7 +7933,7 @@ header {
           flex: 1 1 auto;
   min-inline-size: 0;
 }
-.path-submit .field-multiple-table td:not(.field-multiple-drag):not(.delta-order):not(:has(.paragraph-type-top)) .js-form-item {
+.path-submit .field-multiple-table td:not(.field-multiple-drag):not(.delta-order):not(:has(.paragraph-top, .paragraph-type-top)) .js-form-item {
   -webkit-box-flex: 1;
       -ms-flex: 1 1 240px;
           flex: 1 1 240px;
@@ -7937,7 +7941,7 @@ header {
   -webkit-margin-before: 0;
           margin-block-start: 0;
 }
-.path-submit .field-multiple-table td:has(.form-submit):not(:has(.paragraph-type-top)) {
+.path-submit .field-multiple-table td:has(.form-submit):not(:has(.paragraph-top, .paragraph-type-top)) {
   -webkit-box-flex: 0;
       -ms-flex: 0 0 auto;
           flex: 0 0 auto;

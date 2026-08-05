@@ -221,6 +221,20 @@
   // plain title div + dropbutton wrapper - so it needs the same
   // section-heading treatment applied directly rather than through the
   // fieldset selectors above.
+  //
+  // Two different class names needed here, not one: Drupal's paragraphs
+  // module ships two widget plugins with different markup for the same
+  // "top" row - ParagraphsWidget (a field configured with widget "type:
+  // paragraphs", e.g. Person/Place's field_sections, Dictionary Word's
+  // field_additional_word_entries) renders ".paragraph-top" with the
+  // title in a nested ".paragraph-type-label" <span>; the older
+  // InlineParagraphsWidget ("type: entity_reference_paragraphs", e.g.
+  // field_sample_sentences, including the one nested inside a Word
+  // Entry) renders ".paragraph-type-top" with the title in a
+  // ".paragraph-type-title" <div> instead. Confirmed via rendered HTML,
+  // not just widget config - the naming looks like it should be one
+  // consistent convention but isn't.
+  .paragraph-top,
   .paragraph-type-top {
     display: flex;
     flex-wrap: wrap;
@@ -231,6 +245,7 @@
     margin-block-end: var(--v-space-5xs);
     border-block-end: 2px solid var(--brand-light);
 
+    .paragraph-type-label,
     .paragraph-type-title {
       font-weight: var(--text-bold);
       font-size: 1.1em;
@@ -239,16 +254,18 @@
 
   // A repeatable paragraph item (e.g. one "Sample Sentence" of several)
   // has no distinct wrapper class of its own to hang a card style off of -
-  // ParagraphsWidget renders it as a plain '#type' => 'container', so it
-  // only ever carries the same generic .form-wrapper class every other
-  // field/fieldset/details wrapper on this form already uses. :has() (an
-  // established pattern already used in this file - see
-  // "td:has(.form-submit)" below) scopes this specifically to the wrapper
-  // that directly contains a .paragraph-type-top - i.e. an actual
-  // paragraph item's own boundary, not any of those other .form-wrapper
-  // uses - giving each item a visible card so multiple items in the same
-  // field read as clearly separate entries instead of running together.
-  .form-wrapper:has(> .paragraph-type-top) {
+  // both paragraph widgets render it as a plain '#type' => 'container',
+  // so it only ever carries the same generic .form-wrapper class every
+  // other field/fieldset/details wrapper on this form already uses.
+  // :has() (an established pattern already used in this file - see
+  // "td:has(.form-submit)" below) scopes this specifically to the
+  // wrapper that directly contains either widget's own "top" row - i.e.
+  // an actual paragraph item's own boundary, not any of those other
+  // .form-wrapper uses - giving each item a visible card so multiple
+  // items in the same field read as clearly separate entries instead of
+  // running together. See the class-name comment above for why both
+  // ".paragraph-top" and ".paragraph-type-top" are listed.
+  .form-wrapper:has(> .paragraph-top, > .paragraph-type-top) {
     border: 1px solid var(--color-greys-alpha-border);
     border-radius: 0.5rem;
     padding: var(--v-space-4xs);
@@ -441,18 +458,20 @@
     // than my content's own intrinsic width" - without it this cell can't
     // shrink to make room for Remove and forces the row to wrap instead.
     //
-    // :not(:has(.paragraph-type-top)) matters because a paragraph field
-    // (e.g. "Biography section", "Sample Sentence") ALSO renders its
-    // "add another item" list as a .field-multiple-table - one cell per
-    // paragraph item - not just plain multi-value fields like External
-    // Links. Without this exclusion, .js-form-item below (a descendant
-    // selector, reaching arbitrarily deep) also catches a paragraph
-    // item's own nested Title/Body fields inside .paragraphs-subform,
-    // splitting them into side-by-side ~240px columns instead of the
-    // normal stacked, full-width fields they should be - confirmed via
-    // DevTools showing field_sections rendering through this exact table
-    // markup, table header "Biography" included.
-    td:not(.field-multiple-drag):not(.delta-order):not(:has(.paragraph-type-top)) {
+    // :not(:has(.paragraph-top, .paragraph-type-top)) matters because a
+    // paragraph field (e.g. "Biography section", "Sample Sentence") ALSO
+    // renders its "add another item" list as a .field-multiple-table -
+    // one cell per paragraph item - not just plain multi-value fields
+    // like External Links. Without this exclusion, .js-form-item below
+    // (a descendant selector, reaching arbitrarily deep) also catches a
+    // paragraph item's own nested Title/Body fields inside
+    // .paragraphs-subform, splitting them into side-by-side ~240px
+    // columns instead of the normal stacked, full-width fields they
+    // should be - confirmed via DevTools showing field_sections
+    // rendering through this exact table markup, table header
+    // "Biography" included. Both class names are needed - see the
+    // class-name comment further up this file for why.
+    td:not(.field-multiple-drag):not(.delta-order):not(:has(.paragraph-top, .paragraph-type-top)) {
       display: flex;
       flex-wrap: wrap;
       gap: var(--v-space-3xs);
@@ -472,17 +491,16 @@
     }
 
     // Never shrunk or wrapped away - the fields cell above gives up space
-    // first (see min-inline-size above), not this button. Same
-    // :not(:has(.paragraph-type-top)) exclusion as the main rule above:
-    // a paragraph item's own Remove button also matches
-    // ":has(.form-submit)" (it's nested inside .paragraph-type-top,
-    // several levels down) - without the exclusion here too, this becomes
-    // the ONLY rule left matching that td once the main rule stops
-    // applying, and flex: 0 0 auto (no shrink) sizes the cell to its full
-    // intrinsic content width, blowing out the table's width entirely
-    // (measured ~2300px in a ~1280px column) - a WCAG 1.4.10 (Reflow)
-    // regression, not just a cosmetic one.
-    td:has(.form-submit):not(:has(.paragraph-type-top)) {
+    // first (see min-inline-size above), not this button. Same exclusion
+    // as the main rule above: a paragraph item's own Remove button also
+    // matches ":has(.form-submit)" (it's nested inside .paragraph-top/
+    // .paragraph-type-top, several levels down) - without the exclusion
+    // here too, this becomes the ONLY rule left matching that td once the
+    // main rule stops applying, and flex: 0 0 auto (no shrink) sizes the
+    // cell to its full intrinsic content width, blowing out the table's
+    // width entirely (measured ~2300px in a ~1280px column) - a WCAG
+    // 1.4.10 (Reflow) regression, not just a cosmetic one.
+    td:has(.form-submit):not(:has(.paragraph-top, .paragraph-type-top)) {
       flex: 0 0 auto;
     }
   }
