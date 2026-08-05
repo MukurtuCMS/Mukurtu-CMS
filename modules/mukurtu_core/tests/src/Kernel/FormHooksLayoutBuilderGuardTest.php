@@ -70,9 +70,9 @@ class FormHooksLayoutBuilderGuardTest extends KernelTestBase {
   public static function bundleProvider(): array {
     return [
       'unsupported bundle: article' => ['node', 'article', TRUE],
-      'unsupported bundle: page' => ['node', 'page', TRUE],
       'unsupported bundle: digital_heritage' => ['node', 'digital_heritage', TRUE],
       'unsupported bundle: place' => ['node', 'place', TRUE],
+      'supported bundle: page' => ['node', 'page', FALSE],
       'supported node bundle is left alone' => ['node', 'landing_page', FALSE],
       'non-node entity type is left alone' => ['media', 'article', FALSE],
     ];
