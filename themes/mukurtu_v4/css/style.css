@@ -2010,6 +2010,10 @@ label.form-required::after {
   -webkit-transform: translateX(-50%);
           transform: translateX(-50%);
 }
+.language-switcher > ul:dir(rtl) {
+  -webkit-transform: translateX(50%);
+          transform: translateX(50%);
+}
 .language-switcher > ul li {
   list-style-type: none;
 }

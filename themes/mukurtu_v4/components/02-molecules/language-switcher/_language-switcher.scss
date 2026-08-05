@@ -34,7 +34,17 @@
     margin: 0;
     box-shadow: 2px 3px 4px var(--brand-light);
     z-index: 1000;
+    // Centers the dropdown under the icon by shifting it half its own
+    // width toward the edge it's anchored on. With no inset properties
+    // set, the browser's static-position algorithm anchors this block
+    // box on the *inline-start* edge - the left edge in LTR, but the
+    // right edge in RTL - so the shift direction must flip with it.
+    // translateX() is a physical transform and never mirrors on its own.
     transform: translateX(-50%);
+
+    &:dir(rtl) {
+      transform: translateX(50%);
+    }
 
     li {
       list-style-type: none;
