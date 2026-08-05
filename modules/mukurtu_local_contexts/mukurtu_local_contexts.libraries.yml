@@ -6,6 +6,13 @@ local-contexts-dialog:
     - core/drupal
     - core/once
 
+local-contexts-label-widget:
+  js:
+    js/local-contexts-label-widget.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+
 manage-projects:
   css:
     theme:
