@@ -150,18 +150,21 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
   public static function batchFinishedImport(bool $success, array $results, array $operations): void {
     $tempstore = \Drupal::service('tempstore.private');
     $store = $tempstore->get('mukurtu_import');
-    $store->set('batch_results_success', $success);
 
     $messages = [];
     $exception_fid = NULL;
+    $has_row_failures = FALSE;
+    $has_silent_noop = FALSE;
 
     // Find our failure point.
     foreach (array_keys($results) as $migration_id) {
-      if ($migration_id === 'message') {
+      if ($migration_id === 'message' || !isset($results[$migration_id]['@failures'])) {
         continue;
       }
 
-      if (isset($results[$migration_id]['@failures']) && $results[$migration_id]['@failures'] > 0) {
+      $migration_result = $results[$migration_id];
+      if ($migration_result['@failures'] > 0) {
+        $has_row_failures = TRUE;
         preg_match('/^\d+__(\d+)__.*/', $migration_id, $matches);
         $fid = $matches[1] ?? NULL;
         if ($fid) {
@@ -171,7 +174,16 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
           }
         }
       }
+      elseif ($migration_result['@numitems'] > 0 && $migration_result['@created'] === 0 && $migration_result['@updated'] === 0) {
+        // Rows were processed but nothing was actually created or updated
+        // (e.g. every row was ignored), even though migrate reported no
+        // per-row failures. See https://github.com/MukurtuCMS/Mukurtu-CMS/issues/154.
+        $has_silent_noop = TRUE;
+      }
     }
+
+    $store->set('batch_results_success', $success && !$has_row_failures && !$has_silent_noop);
+    $store->set('batch_results_noop', $has_silent_noop && !$has_row_failures);
 
     // Tag the error messages with the fid so we can display it next to the
     // file later.
