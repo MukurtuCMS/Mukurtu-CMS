@@ -452,41 +452,49 @@
       font-weight: var(--text-bold);
     }
 
-    // The remaining visible cell per row (URL + Link text) - let its two
-    // fields sit side by side as one logical entry instead of stacking.
-    // min-inline-size: 0 overrides the flex default of "shrink no smaller
-    // than my content's own intrinsic width" - without it this cell can't
-    // shrink to make room for Remove and forces the row to wrap instead.
-    //
-    // :not(:has(.paragraph-top, .paragraph-type-top)) matters because a
-    // paragraph field (e.g. "Biography section", "Sample Sentence") ALSO
-    // renders its "add another item" list as a .field-multiple-table -
-    // one cell per paragraph item - not just plain multi-value fields
-    // like External Links. Without this exclusion, .js-form-item below
-    // (a descendant selector, reaching arbitrarily deep) also catches a
-    // paragraph item's own nested Title/Body fields inside
-    // .paragraphs-subform, splitting them into side-by-side ~240px
-    // columns instead of the normal stacked, full-width fields they
-    // should be - confirmed via DevTools showing field_sections
-    // rendering through this exact table markup, table header
-    // "Biography" included. Both class names are needed - see the
-    // class-name comment further up this file for why.
-    td:not(.field-multiple-drag):not(.delta-order):not(:has(.paragraph-top, .paragraph-type-top)) {
-      display: flex;
-      flex-wrap: wrap;
-      gap: var(--v-space-3xs);
+    // Every non-drag/non-weight cell needs flex: 1 1 auto regardless of
+    // what's inside it - the row above it is already a flex container
+    // (see "tr" above), so without an explicit flex-grow a cell only
+    // sizes to its own content's intrinsic width and never fills the
+    // row. min-inline-size: 0 overrides the flex default of "shrink no
+    // smaller than my content's own intrinsic width".
+    td:not(.field-multiple-drag):not(.delta-order) {
       flex: 1 1 auto;
       min-inline-size: 0;
 
-      .js-form-item {
-        flex: 1 1 240px;
-        min-inline-size: 0;
-        // Overrides 02-molecules/form's sitewide ".form-item +
-        // .form-item" rule, which adds top margin to the second field
-        // assuming a normal stacked block layout - here URL and Link
-        // text are side-by-side flex siblings, so that margin only
-        // pushed Link text down out of alignment with URL.
-        margin-block-start: 0;
+      // The side-by-side treatment below (splitting this cell's own
+      // .js-form-item children into ~240px flex columns) is for a plain
+      // multi-value field's own value fields - e.g. External Links' URL
+      // + Link text, meant to read as one logical entry instead of
+      // stacking. A paragraph field (e.g. "Biography section", "Sample
+      // Sentence") ALSO renders its "add another item" list as a
+      // .field-multiple-table - one cell per paragraph item - not just
+      // plain multi-value fields, but its own internal Title/Body fields
+      // should stack normally, not split into columns like this. The
+      // exclusion here only turns off the SPLITTING behavior for a
+      // paragraph item's cell - it still gets flex: 1 1 auto above like
+      // every other cell, so it still fills the row; only its internal
+      // layout stays a normal block stack instead of becoming a nested
+      // flex row. Confirmed via DevTools showing field_sections
+      // rendering through this exact table markup, table header
+      // "Biography" included. Both class names are needed - see the
+      // class-name comment further up this file for why - Drupal ships
+      // two different paragraph widget plugins with different markup.
+      &:not(:has(.paragraph-top, .paragraph-type-top)) {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--v-space-3xs);
+
+        .js-form-item {
+          flex: 1 1 240px;
+          min-inline-size: 0;
+          // Overrides 02-molecules/form's sitewide ".form-item +
+          // .form-item" rule, which adds top margin to the second field
+          // assuming a normal stacked block layout - here URL and Link
+          // text are side-by-side flex siblings, so that margin only
+          // pushed Link text down out of alignment with URL.
+          margin-block-start: 0;
+        }
       }
     }
 
