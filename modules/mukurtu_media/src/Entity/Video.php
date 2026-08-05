@@ -166,8 +166,8 @@ class Video extends Media implements VideoInterface, CulturalProtocolControlledI
       ->setDisplayConfigurable('form', TRUE);
 
     $definitions['field_identifier'] = BaseFieldDefinition::create('string')
-      ->setLabel('Identifier')
-      ->setDescription('A unique, unambiguous reference to the media asset. Identifiers are often provided by the contributing institution or organization so the original item can be located. Examples include call numbers or accession numbers. maximum 255 characters.')
+      ->setLabel(t('Identifier'))
+      ->setDescription(t('A unique, unambiguous reference to the media asset. Identifiers are often provided by the contributing institution or organization so the original item can be located. Examples include call numbers or accession numbers. maximum 255 characters.'))
       ->setSettings([
         'max_length' => 255,
       ])
