@@ -75,6 +75,9 @@
     <testsuite name="kernel">
       <directory>web/profiles/mukurtu/modules/mukurtu_local_contexts/tests/src/Kernel</directory>
     </testsuite>
+    <testsuite name="kernel">
+      <directory>web/profiles/mukurtu/modules/mukurtu_migrate/tests/src/Kernel</directory>
+    </testsuite>
     <testsuite name="functional">
       <directory>web/profiles/mukurtu/modules/mukurtu_protocol/tests/src/Functional</directory>
     </testsuite>
