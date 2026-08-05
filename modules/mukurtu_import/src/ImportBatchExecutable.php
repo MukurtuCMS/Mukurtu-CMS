@@ -93,6 +93,7 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
         '@ignored' => 0,
         '@name' => $migration->id(),
         'messages' => [],
+        'row_details' => [],
         'import_id' => $migration_definition['mukurtu_import_id'] ?? NULL,
         'uid' => $migration_definition['mukurtu_import_uid'] ?? NULL,
         'fid' => $migration_definition['mukurtu_import_fid'] ?? NULL,
@@ -122,11 +123,26 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
     // Store the definition for ID map cleanup after the batch completes.
     $context['results']['definitions'][$migration->id()] = $migration_definition;
 
+    // Pull the true per-row created/updated status from the destination
+    // plugin, keyed by whether the destination entity itself already
+    // existed (Entity::isNew()), rather than migrate's own @created/
+    // @updated counters, which track whether *this migration's* ID map had
+    // already seen the source row before, not whether the destination
+    // entity pre-existed.
+    $destination = $migration->getDestinationPlugin();
+    $row_results = method_exists($destination, 'getAndClearRowResults') ? $destination->getAndClearRowResults() : [];
+    $context['results'][$migration->id()]['row_details'] = array_merge(
+      $context['results'][$migration->id()]['row_details'],
+      $row_results
+    );
+    $created_count = count(array_filter($row_results, fn(array $r) => $r['status'] === 'created'));
+    $updated_count = count(array_filter($row_results, fn(array $r) => $r['status'] === 'updated'));
+
     // Accumulate the result across all our iterations without clobbering the
     // metadata already stored above.
     $context['results'][$migration->id()]['@numitems'] += $executable->getProcessedCount();
-    $context['results'][$migration->id()]['@created'] += $executable->getCreatedCount();
-    $context['results'][$migration->id()]['@updated'] += $executable->getUpdatedCount();
+    $context['results'][$migration->id()]['@created'] += $created_count;
+    $context['results'][$migration->id()]['@updated'] += $updated_count;
     $context['results'][$migration->id()]['@failures'] += $executable->getFailedCount();
     $context['results'][$migration->id()]['@ignored'] += $executable->getIgnoredCount();
 
@@ -178,6 +194,7 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
 
       $fid = $migration_result['fid'] ?? NULL;
       $file_message_texts = [];
+      $details = $migration_result['row_details'] ?? [];
       foreach ($migration_result['messages'] ?? [] as $raw_message) {
         $source_id = $raw_message->src_ID ?? NULL;
         $message = $source_id
@@ -185,6 +202,11 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
           : $raw_message->message;
         $messages[] = ['fid' => $fid, 'message' => $message];
         $file_message_texts[] = $message;
+        $details[] = [
+          'source_id' => $source_id,
+          'status' => 'failed',
+          'message' => $raw_message->message,
+        ];
       }
 
       $log_storage->log([
@@ -202,6 +224,9 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
         'count_failed' => $migration_result['@failures'] ?? 0,
         'count_ignored' => $migration_result['@ignored'] ?? 0,
         'messages' => implode("\n", $file_message_texts),
+        // Source data can contain malformed UTF-8; substitute rather than
+        // let json_encode() fail outright and lose the whole row's detail.
+        'details' => json_encode($details, JSON_INVALID_UTF8_SUBSTITUTE) ?: '[]',
         'timestamp' => $timestamp,
       ]);
     }

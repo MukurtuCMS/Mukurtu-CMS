@@ -122,15 +122,54 @@ class ImportLogTest extends MukurtuImportTestBase {
     $this->assertEquals('node', $row->entity_type_id);
     $this->assertEquals('protocol_aware_content', $row->bundle);
     $this->assertEquals(1, $row->count_processed);
-    // Migrate's created/updated counters track whether this migration's own
-    // ID map already had a mapping for the source row, not whether the
-    // destination entity pre-existed outside of migrate. Since this is the
-    // migration's first (and only) run, the row counts as "created" even
-    // though it updated an entity that already existed in Drupal.
-    $this->assertEquals(1, $row->count_created);
-    $this->assertEquals(0, $row->count_updated);
+    // This row updates a node that already existed before the import ran.
+    // count_created/count_updated must reflect the destination entity's
+    // true isNew() state, not migrate's own ID-map bookkeeping (which would
+    // otherwise count this as "created" since it's this migration's first
+    // run).
+    $this->assertEquals(0, $row->count_created);
+    $this->assertEquals(1, $row->count_updated);
     $this->assertEquals(0, $row->count_failed);
     $this->assertEmpty($row->messages);
+
+    $details = json_decode((string) $row->details, TRUE);
+    $this->assertCount(1, $details);
+    $this->assertEquals('updated', $details[0]['status']);
+    $this->assertEquals('Updated Title', $details[0]['label']);
+    $this->assertNotEmpty($details[0]['url']);
+  }
+
+  /**
+   * A row that creates a brand new entity (no matching nid) logs it as
+   * created, with a structured detail entry.
+   */
+  public function testCreatingNewEntityLogsCreatedNotUpdated() {
+    $import_id = $this->container->get('uuid')->generate();
+
+    $data = [
+      ['title', 'Sharing Setting', 'Protocols'],
+      ['Brand New Node', 'any', $this->protocol->id()],
+    ];
+    $file = $this->createCsvFile($data);
+    $mapping = [
+      ['target' => 'title', 'source' => 'title'],
+      ['target' => 'field_cultural_protocols/sharing_setting', 'source' => 'Sharing Setting'],
+      ['target' => 'field_cultural_protocols/protocols', 'source' => 'Protocols'],
+    ];
+    $definition = $this->buildDefinition($file, $mapping, $import_id);
+
+    $this->runBatchImport([$definition]);
+
+    $rows = $this->loadLogRowsByFid($import_id);
+    $this->assertCount(1, $rows);
+    $row = reset($rows);
+    $this->assertEquals(1, $row->count_created);
+    $this->assertEquals(0, $row->count_updated);
+
+    $details = json_decode((string) $row->details, TRUE);
+    $this->assertCount(1, $details);
+    $this->assertEquals('created', $details[0]['status']);
+    $this->assertEquals('Brand New Node', $details[0]['label']);
   }
 
   /**
@@ -161,6 +200,115 @@ class ImportLogTest extends MukurtuImportTestBase {
     $this->assertEquals(0, $row->success);
     $this->assertEquals(1, $row->count_failed);
     $this->assertNotEmpty($row->messages);
+
+    // The message should use the field's real label and be free of raw
+    // Drupal property paths / entity locators.
+    $this->assertStringContainsString('Title:', $row->messages);
+    $this->assertStringNotContainsString('title.0.value', $row->messages);
+    $this->assertStringNotContainsString('[node:', $row->messages);
+
+    $details = json_decode((string) $row->details, TRUE);
+    $this->assertCount(1, $details);
+    $this->assertEquals('failed', $details[0]['status']);
+    $this->assertStringContainsString('Title:', $details[0]['message']);
+  }
+
+  /**
+   * Cultural Protocols is a composite field with two independently validated
+   * sub-properties: "protocols" (the applied protocol IDs, also the field
+   * type's *main* property per CulturalProtocolItem::mainPropertyName()) and
+   * "sharing_setting" (the any/all sharing logic, a non-main sub-property).
+   * Regression test for a bug where violations on either sub-property
+   * rendered identically as "Cultural Protocols: This value should not be
+   * null.", giving no indication of which sub-part actually failed.
+   *
+   * formatViolationMessage() appends a "(Sub-property Label)" suffix for any
+   * sub-property of a field with more than one independently validated
+   * property, regardless of whether it's the main property, so both a
+   * "protocols" violation and a "sharing_setting" violation get their own
+   * distinct label: "Cultural Protocols (Protocols): ..." and
+   * "Cultural Protocols (Sharing Setting): ...". A "protocols" violation
+   * surfaces with no property segment in its raw path at all - Cultural
+   * Protocols is considered empty as a whole whenever *either* required
+   * sub-property is empty (see CulturalProtocolItem::isEmpty()) - so the
+   * fix inspects the entity's actual field value to find which required
+   * sub-property is empty. A plain single-property field failure (e.g.
+   * Title) must remain unaffected by the change.
+   */
+  public function testCulturalProtocolSubPropertyViolationsAreDistinguished() {
+    $import_id = $this->container->get('uuid')->generate();
+
+    // File A: a blank title on an existing node still reads as a plain
+    // "Title:" failure, with no parenthetical sub-property suffix.
+    $node = $this->createNode('Original Title');
+    $data_title = [
+      ['nid', 'title'],
+      [$node->id(), ''],
+    ];
+    $file_title = $this->createCsvFile($data_title);
+    $mapping_title = [
+      ['target' => 'nid', 'source' => 'nid'],
+      ['target' => 'title', 'source' => 'title'],
+    ];
+    $definition_title = $this->buildDefinition($file_title, $mapping_title, $import_id);
+
+    // File B: a value of "sometimes" cleanly fails ValidSharingSettingConstraint
+    // on the "sharing_setting" sub-property without ever touching NotNull,
+    // since "protocols" is validly mapped to a pre-existing protocol.
+    $data_sharing = [
+      ['title', 'Sharing Setting', 'Protocols'],
+      ['Sharing Setting Failure', 'sometimes', $this->protocol->id()],
+    ];
+    $file_sharing = $this->createCsvFile($data_sharing);
+    $mapping_sharing = [
+      ['target' => 'title', 'source' => 'title'],
+      ['target' => 'field_cultural_protocols/sharing_setting', 'source' => 'Sharing Setting'],
+      ['target' => 'field_cultural_protocols/protocols', 'source' => 'Protocols'],
+    ];
+    $definition_sharing = $this->buildDefinition($file_sharing, $mapping_sharing, $import_id);
+
+    // File C: omitting the "protocols" mapping entirely on a brand new node
+    // leaves the field's main property NULL, failing NotNull on "protocols".
+    $data_protocols = [
+      ['title', 'Sharing Setting'],
+      ['Protocols Failure', 'any'],
+    ];
+    $file_protocols = $this->createCsvFile($data_protocols);
+    $mapping_protocols = [
+      ['target' => 'title', 'source' => 'title'],
+      ['target' => 'field_cultural_protocols/sharing_setting', 'source' => 'Sharing Setting'],
+    ];
+    $definition_protocols = $this->buildDefinition($file_protocols, $mapping_protocols, $import_id);
+
+    $this->runBatchImport([$definition_title, $definition_sharing, $definition_protocols]);
+
+    $rows = $this->loadLogRowsByFid($import_id);
+    $this->assertCount(3, $rows);
+
+    $row_title = $rows[$file_title->id()];
+    $row_sharing = $rows[$file_sharing->id()];
+    $row_protocols = $rows[$file_protocols->id()];
+
+    $this->assertEquals(0, $row_title->success);
+    $this->assertEquals(0, $row_sharing->success);
+    $this->assertEquals(0, $row_protocols->success);
+
+    // Plain field failure: no parenthetical sub-property suffix.
+    $this->assertStringContainsString('Title:', (string) $row_title->messages);
+    $this->assertStringNotContainsString('Title (', (string) $row_title->messages);
+
+    $protocols_message = (string) $row_protocols->messages;
+    $sharing_message = (string) $row_sharing->messages;
+
+    // Cultural Protocols has more than one independently validated
+    // sub-property, so both "protocols" and "sharing_setting" violations
+    // are suffixed with their own sub-property label.
+    $this->assertStringContainsString('Cultural Protocols (Protocols):', $protocols_message);
+    $this->assertStringContainsString('Cultural Protocols (Sharing Setting):', $sharing_message);
+
+    // The actual regression being guarded against: the two distinguishable
+    // sub-property failures must not render as identical text.
+    $this->assertNotEquals($protocols_message, $sharing_message);
   }
 
   /**
@@ -251,6 +399,68 @@ class ImportLogTest extends MukurtuImportTestBase {
       $this->assertArrayHasKey('fid', $message);
       $this->assertArrayHasKey('message', $message);
     }
+  }
+
+  /**
+   * A single file mixing rows that update existing nodes (nid present) with
+   * rows that create brand new ones (blank nid) must count and attribute
+   * each row correctly. Regression test for a bug where multiple blank-nid
+   * rows in the same file shared the same blank migrate ID map key: every
+   * row after the first blank one would resolve to the previously-created
+   * entity instead of creating its own, undercounting "created" and
+   * overcounting "updated".
+   */
+  public function testMixedCreateAndUpdateRowsInSingleFile() {
+    $import_id = $this->container->get('uuid')->generate();
+    $node_a = $this->createNode('Existing A');
+    $node_b = $this->createNode('Existing B');
+
+    $data = [
+      ['nid', 'title', 'Sharing Setting', 'Protocols'],
+      [$node_a->id(), 'Existing A Updated', 'any', $this->protocol->id()],
+      [$node_b->id(), 'Existing B Updated', 'any', $this->protocol->id()],
+      ['', 'New Node One', 'any', $this->protocol->id()],
+      ['', 'New Node Two', 'any', $this->protocol->id()],
+      ['', 'New Node Three', 'any', $this->protocol->id()],
+    ];
+    $file = $this->createCsvFile($data);
+    $mapping = [
+      ['target' => 'nid', 'source' => 'nid'],
+      ['target' => 'title', 'source' => 'title'],
+      ['target' => 'field_cultural_protocols/sharing_setting', 'source' => 'Sharing Setting'],
+      ['target' => 'field_cultural_protocols/protocols', 'source' => 'Protocols'],
+    ];
+    $definition = $this->buildDefinition($file, $mapping, $import_id);
+
+    $this->runBatchImport([$definition]);
+
+    $rows = $this->loadLogRowsByFid($import_id);
+    $this->assertCount(1, $rows);
+    $row = reset($rows);
+    $this->assertEquals(5, $row->count_processed);
+    $this->assertEquals(3, $row->count_created);
+    $this->assertEquals(2, $row->count_updated);
+    $this->assertEquals(0, $row->count_failed);
+
+    $details = json_decode((string) $row->details, TRUE);
+    $created = array_values(array_filter($details, fn(array $d) => $d['status'] === 'created'));
+    $updated = array_values(array_filter($details, fn(array $d) => $d['status'] === 'updated'));
+    $this->assertCount(3, $created);
+    $this->assertCount(2, $updated);
+    $this->assertEqualsCanonicalizing(['New Node One', 'New Node Two', 'New Node Three'], array_column($created, 'label'));
+
+    // Each "created" row must be a genuinely distinct entity, not the same
+    // node repeatedly overwritten by successive blank-nid rows.
+    $this->assertCount(3, array_unique(array_column($created, 'url')), 'The three new rows produced three distinct nodes.');
+
+    $node_storage = \Drupal::entityTypeManager()->getStorage('node');
+    $nids = [];
+    foreach (['New Node One', 'New Node Two', 'New Node Three'] as $title) {
+      $matches = $node_storage->loadByProperties(['title' => $title]);
+      $this->assertCount(1, $matches, "Exactly one node exists with title '$title'.");
+      $nids[] = (int) reset($matches)->id();
+    }
+    $this->assertCount(3, array_unique($nids), 'The three new rows produced three distinct node IDs in storage.');
   }
 
   /**
