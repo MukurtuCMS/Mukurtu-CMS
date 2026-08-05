@@ -20,7 +20,6 @@ use Drupal\mukurtu_protocol\Entity\ProtocolInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Url;
-use Drupal\og\Og;
 use Drupal\mukurtu_protocol\Plugin\Action\MukurtuDeleteOgMembershipAction;
 use Drupal\mukurtu_protocol\Plugin\Action\MukurtuUserSetRandomPasswordAction;
 use Drupal\Core\Render\Markup;
@@ -218,61 +217,6 @@ function mukurtu_protocol_system_breadcrumb_alter(Breadcrumb &$breadcrumb, Route
       }
     }
   }
-}
-
-/**
- * Implements hook_menu_local_tasks_alter().
- */
-function mukurtu_protocol_menu_local_tasks_alter(&$data, $route_name, \Drupal\Core\Cache\RefinableCacheableDependencyInterface &$cacheability)
-{
-  if ($route_name == "entity.node.canonical") {
-    $route_match = \Drupal::routeMatch();
-    $currentUser = \Drupal::currentUser();
-    if ($currentUser->id() != 1) {
-      // Only show revisions button if current user has permission to edit the
-      // current node.
-
-      // By default, the revisions button is hidden. We perform checks on all
-      // the node's protocols to see if any of them grant the current user edit
-      // permissions on the node.
-
-      // If the current user is a member of at least one protocol granting edit
-      // access, the revisions button will show up for them.
-
-      // Save the contents of the revisions button just in case our calculations
-      // show that the current user has edit access.
-      $revisionsTab = $data['tabs'][0]['entity.node.version_history'] ?? NULL;
-      unset($data['tabs'][0]['entity.node.version_history']);
-
-      $route_match = \Drupal::routeMatch();
-      $node = $route_match->getParameter('node');
-      $bundleType = $node->getType();
-      $editAny = 'edit any ' . $bundleType . ' content';
-      $editOwn = 'edit own ' . $bundleType . ' content';
-
-      // Do not perform protocol-based permission checks on stock Drupal content
-      // types (article, basic page). Doing so caused an error since these
-      // content types are not protocol-controlled.
-      if ($node instanceof CulturalProtocolControlledInterface) {
-        /** @var \Drupal\mukurtu_protocol\CulturalProtocolControlledInterface $node */
-        $nodeProtocols = $node->getProtocolEntities();
-        $hasEditPermission = FALSE;
-        foreach ($nodeProtocols as $protocol) {
-          $membership = Og::getMembership($protocol, $currentUser);
-          if ($membership) {
-            if ($membership->hasPermission($editAny) || $membership->hasPermission($editOwn)) {
-              $hasEditPermission = TRUE;
-              break;
-            }
-          }
-        }
-        if ($hasEditPermission && $revisionsTab !== NULL) {
-          $data['tabs'][0]['entity.node.version_history'] = $revisionsTab;
-        }
-      }
-    }
-  }
-
 }
 
 /**
