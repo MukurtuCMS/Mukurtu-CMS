@@ -7686,6 +7686,75 @@ header {
   }
 }
 
+:root {
+  --gin-color-primary: var(--brand-primary-dark);
+  --gin-color-primary-light: var(--brand-light);
+  --gin-bg-layer: var(--color-white);
+  --gin-bg-layer2: rgb(0 0 0 / 50%);
+  --gin-color-focus: var(--focus-color);
+}
+
+.entity-browser-form {
+  padding: var(--v-space-4xs);
+}
+.entity-browser-form .views-exposed-form {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+  -webkit-box-align: end;
+      -ms-flex-align: end;
+          align-items: flex-end;
+  gap: var(--v-space-3xs);
+  -webkit-margin-after: var(--v-space-3xs);
+          margin-block-end: var(--v-space-3xs);
+}
+.entity-browser-form .views-exposed-form .js-form-item,
+.entity-browser-form .views-exposed-form .form-actions {
+  -webkit-margin-after: 0;
+          margin-block-end: 0;
+}
+.entity-browser-form .views-exposed-form .form-item-type {
+  display: none !important;
+}
+
+.entity-browser-form table {
+  inline-size: 100%;
+  border-collapse: collapse;
+}
+.entity-browser-form table th {
+  text-align: start;
+  font-weight: var(--text-bold);
+  padding-block: var(--v-space-6xs);
+  padding-inline: var(--v-space-5xs);
+  -webkit-border-after: 2px solid var(--mukurtu-view-row-divider-color);
+          border-block-end: 2px solid var(--mukurtu-view-row-divider-color);
+}
+.entity-browser-form table td {
+  padding-block: var(--v-space-5xs);
+  padding-inline: var(--v-space-5xs);
+  -webkit-border-after: 1px solid var(--mukurtu-view-row-divider-color);
+          border-block-end: 1px solid var(--mukurtu-view-row-divider-color);
+  vertical-align: middle;
+}
+.entity-browser-form table tbody tr:hover {
+  background: var(--brand-light);
+}
+.entity-browser-form table .views-field-uid,
+.entity-browser-form table .views-field-status,
+.entity-browser-form table .views-field-created {
+  display: none;
+}
+
+.eb-form-selection-card__media {
+  border-radius: 0.25rem;
+  background: var(--brand-light);
+}
+.eb-form-selection-card__title {
+  color: var(--text-color);
+}
+
 .path-submit .layout-content {
   max-width: 1280px;
   margin-inline: auto;
@@ -7970,6 +8039,24 @@ header {
   padding-block: var(--v-space-3xs);
   -webkit-border-before: 1px solid var(--color-greys-alpha-border);
           border-block-start: 1px solid var(--color-greys-alpha-border);
+}
+.path-submit .ui-dialog.entity-browser-modal {
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+.path-submit .ui-dialog.entity-browser-modal .ui-dialog-titlebar {
+  background: var(--brand-primary-dark) !important;
+  color: var(--color-white);
+}
+.path-submit .ui-dialog.entity-browser-modal .ui-dialog-title {
+  font-weight: var(--text-bold);
+  margin: 0.625rem;
+}
+.path-submit .ui-dialog.entity-browser-modal .ui-dialog-titlebar-close {
+  background: transparent !important;
+}
+.path-submit .field--widget-entity-browser-entity-reference .ajax-progress.ajax-progress-throbber {
+  display: none;
 }
 
 .taxonomy-term-page {
