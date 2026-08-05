@@ -7698,6 +7698,10 @@ header {
   -webkit-margin-after: var(--v-space-3xs);
           margin-block-end: var(--v-space-3xs);
 }
+.path-submit .js-text-format-wrapper .js-filter-wrapper {
+  -webkit-margin-before: 0;
+          margin-block-start: 0;
+}
 .path-submit .form-item.js-form-type-checkbox,
 .path-submit .form-item.js-form-type-radio {
   -webkit-margin-before: 0;
@@ -7838,10 +7842,6 @@ header {
   -webkit-margin-after: var(--v-space-4xs);
           margin-block-end: var(--v-space-4xs);
 }
-.path-submit .paragraphs-subform .js-form-type-textfield input,
-.path-submit .paragraphs-subform .js-form-type-textarea textarea {
-  inline-size: 100%;
-}
 .path-submit .paragraphs-dropdown-action.button {
   color: var(--brand-text-color);
 }
@@ -7850,9 +7850,11 @@ header {
 }
 .path-submit .form-item .description,
 .path-submit .field--widget-media-library-widget > .description,
-.path-submit .js-filter-guidelines {
+.path-submit .js-filter-guidelines,
+.path-submit [id$="--description"] {
   color: var(--color-text-secondary);
   font-size: 0.9em;
+  line-height: 1.4;
   -webkit-margin-before: var(--v-space-6xs);
           margin-block-start: var(--v-space-6xs);
 }
@@ -7915,7 +7917,7 @@ header {
   font-size: 1em;
   font-weight: var(--text-bold);
 }
-.path-submit .field-multiple-table td:not(.field-multiple-drag):not(.delta-order) {
+.path-submit .field-multiple-table td:not(.field-multiple-drag):not(.delta-order):not(:has(.paragraph-type-top)) {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -7927,7 +7929,7 @@ header {
           flex: 1 1 auto;
   min-inline-size: 0;
 }
-.path-submit .field-multiple-table td:not(.field-multiple-drag):not(.delta-order) .js-form-item {
+.path-submit .field-multiple-table td:not(.field-multiple-drag):not(.delta-order):not(:has(.paragraph-type-top)) .js-form-item {
   -webkit-box-flex: 1;
       -ms-flex: 1 1 240px;
           flex: 1 1 240px;
@@ -7935,7 +7937,7 @@ header {
   -webkit-margin-before: 0;
           margin-block-start: 0;
 }
-.path-submit .field-multiple-table td:has(.form-submit) {
+.path-submit .field-multiple-table td:has(.form-submit):not(:has(.paragraph-type-top)) {
   -webkit-box-flex: 0;
       -ms-flex: 0 0 auto;
           flex: 0 0 auto;

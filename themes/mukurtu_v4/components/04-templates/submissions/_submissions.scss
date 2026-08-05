@@ -17,6 +17,20 @@
     margin-block-end: var(--v-space-3xs);
   }
 
+  // 02-molecules/form's sitewide "* + .form-wrapper { margin-block-start:
+  // 2rem }" rule is meant to separate one field's whole wrapper from the
+  // next one - it also matches .js-filter-wrapper (the filter-guidelines
+  // container), since that's a .form-wrapper too and it follows the
+  // textarea's own wrapper as a sibling inside the same text-format
+  // field. That wedges a large gap between a rich-text field's own
+  // textarea and its "No HTML tags allowed."-style note, which read as
+  // one cohesive unit, not two separate sections. Resetting it to 0 lets
+  // .js-filter-guidelines' own smaller margin-block-start (set below)
+  // become the effective, tighter gap via ordinary margin collapsing.
+  .js-text-format-wrapper .js-filter-wrapper {
+    margin-block-start: 0;
+  }
+
   // The rule above is meant to separate whole fields/fieldsets from each
   // other - applied generically, it also lands on every individual
   // checkbox/radio *option* within one checkboxes/radios group (e.g. each
@@ -241,25 +255,6 @@
     margin-block-end: var(--v-space-4xs);
   }
 
-  // TODO/unconfirmed: fields inside a paragraph item nested under a
-  // details group (e.g. "Biography section"'s Title/Body, under
-  // "Biography") were reported rendering at roughly half width, unlike
-  // equivalent fields in a paragraph item that isn't nested this way
-  // (e.g. Dictionary Word's "Word Entry"/"Sample Sentence", which render
-  // full width). Nothing in this theme or the paragraphs module's own CSS
-  // sets an explicit width constraint on .paragraphs-subform or its
-  // fields as far as source inspection shows - .js-form-type-textfield
-  // input/.js-form-type-textarea textarea both already assert
-  // inline-size: 100% (01-atoms/textfield). This asserts it again, more
-  // specifically scoped, as a targeted attempt rather than a confirmed
-  // fix - remove this comment once visually confirmed either way.
-  .paragraphs-subform {
-    .js-form-type-textfield input,
-    .js-form-type-textarea textarea {
-      inline-size: 100%;
-    }
-  }
-
   // Pre-existing contrast bug, not caused by the box above: the "..."
   // overflow menu a paragraph item shows once it has 2+ actions (e.g.
   // "Remove" + "Duplicate" on Word Entries - a single-action item like
@@ -283,16 +278,35 @@
   // De-emphasize field help text relative to labels/input content, and
   // tighten its spacing - currently identical in weight/color to the
   // field's own value, which reads as visual noise at this volume of text.
-  // .js-filter-guidelines (a text-format field's "No HTML tags allowed."/
-  // etc. rules) is a separate container next to .description, not inside
-  // it - core renders it there, not merged into the field's own
-  // #description - so it needs listing here explicitly or it stays at
-  // full body-text size/weight despite being the same kind of help text.
+  // Two elements need listing on top of the plain ".description" case:
+  // - .js-filter-guidelines (a text-format field's "No HTML tags
+  //   allowed."/etc. rules) is a separate container next to .description,
+  //   not inside it - core renders it there, not merged into the field's
+  //   own #description.
+  // - [id$="--description"] catches a text-format field's #description
+  //   specifically when CKEditor5 is the active format (e.g. Collection's
+  //   "Description" field): core's own aria-describedby ID convention
+  //   always suffixes the description element's id with "--description"
+  //   (double hyphen, vs. "-value" for the field's real content), but
+  //   CKEditor5's host-entity binding replaces the element's class list
+  //   entirely with "js-text-full text-full" - dropping the ".description"
+  //   class this rule would otherwise rely on - so the id suffix is the
+  //   only reliable, format-independent hook. Confirmed via DevTools: this
+  //   is what was actually rendering at full body size/weight, not
+  //   .js-filter-guidelines (already covered, already de-emphasized).
+  //
+  // line-height is set explicitly (not just left to inherit
+  // --line-height-base, a fixed 2rem/32px meant for full-size body copy)
+  // because a FIXED px line-height doesn't shrink along with font-size
+  // dropping to 0.9em here - left alone that pairing reads as excessive
+  // gap between lines, not tighter spacing.
   .form-item .description,
   .field--widget-media-library-widget > .description,
-  .js-filter-guidelines {
+  .js-filter-guidelines,
+  [id$="--description"] {
     color: var(--color-text-secondary);
     font-size: 0.9em;
+    line-height: 1.4;
     margin-block-start: var(--v-space-6xs);
   }
 
@@ -426,7 +440,19 @@
     // min-inline-size: 0 overrides the flex default of "shrink no smaller
     // than my content's own intrinsic width" - without it this cell can't
     // shrink to make room for Remove and forces the row to wrap instead.
-    td:not(.field-multiple-drag):not(.delta-order) {
+    //
+    // :not(:has(.paragraph-type-top)) matters because a paragraph field
+    // (e.g. "Biography section", "Sample Sentence") ALSO renders its
+    // "add another item" list as a .field-multiple-table - one cell per
+    // paragraph item - not just plain multi-value fields like External
+    // Links. Without this exclusion, .js-form-item below (a descendant
+    // selector, reaching arbitrarily deep) also catches a paragraph
+    // item's own nested Title/Body fields inside .paragraphs-subform,
+    // splitting them into side-by-side ~240px columns instead of the
+    // normal stacked, full-width fields they should be - confirmed via
+    // DevTools showing field_sections rendering through this exact table
+    // markup, table header "Biography" included.
+    td:not(.field-multiple-drag):not(.delta-order):not(:has(.paragraph-type-top)) {
       display: flex;
       flex-wrap: wrap;
       gap: var(--v-space-3xs);
@@ -446,8 +472,17 @@
     }
 
     // Never shrunk or wrapped away - the fields cell above gives up space
-    // first (see min-inline-size above), not this button.
-    td:has(.form-submit) {
+    // first (see min-inline-size above), not this button. Same
+    // :not(:has(.paragraph-type-top)) exclusion as the main rule above:
+    // a paragraph item's own Remove button also matches
+    // ":has(.form-submit)" (it's nested inside .paragraph-type-top,
+    // several levels down) - without the exclusion here too, this becomes
+    // the ONLY rule left matching that td once the main rule stops
+    // applying, and flex: 0 0 auto (no shrink) sizes the cell to its full
+    // intrinsic content width, blowing out the table's width entirely
+    // (measured ~2300px in a ~1280px column) - a WCAG 1.4.10 (Reflow)
+    // regression, not just a cosmetic one.
+    td:has(.form-submit):not(:has(.paragraph-type-top)) {
       flex: 0 0 auto;
     }
   }
