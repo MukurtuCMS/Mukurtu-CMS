@@ -320,6 +320,7 @@ function mukurtu_submissions_mukurtu_submission_settings_insert(EntityInterface 
     mukurtu_submissions_ensure_path_aliases($entity);
     mukurtu_submissions_sync_submission_permission($entity);
     mukurtu_submissions_sync_review_permissions($entity);
+    mukurtu_submissions_sync_entity_browser_permissions($entity);
   }
 }
 
@@ -331,6 +332,7 @@ function mukurtu_submissions_mukurtu_submission_settings_update(EntityInterface 
     mukurtu_submissions_ensure_path_aliases($entity);
     mukurtu_submissions_sync_submission_permission($entity);
     mukurtu_submissions_sync_review_permissions($entity);
+    mukurtu_submissions_sync_entity_browser_permissions($entity);
   }
 }
 
@@ -446,6 +448,68 @@ function mukurtu_submissions_sync_review_permissions(SubmissionSettingsInterface
     }
     if ($changed) {
       $role->save();
+    }
+  }
+}
+
+/**
+ * Grants or revokes access to whichever entity browser(s) this bundle's
+ * "submission" form display actually uses (any field using the
+ * "entity_browser_entity_reference" widget - e.g. Collection's "Items in
+ * Collection", Word List's "Words"), mirroring
+ * mukurtu_submissions_sync_submission_permission()'s own anonymous/
+ * authenticated logic exactly, since the same visitor who's allowed to
+ * submit this bundle needs to be able to open whichever content-picker(s)
+ * its fields require, or those fields are unusable.
+ *
+ * Entity Browser gates each browser's own modal route behind a distinct
+ * "access {browser_id} entity browser pages" permission
+ * (EntityBrowser::route(), separate from - and in addition to - the
+ * browser's underlying view's own "access content" access check, which
+ * anonymous/authenticated already hold on this site). Without this, a
+ * visitor hits "Incorrect Permissions" the moment they click a "Select
+ * Content"-style button, even though the field itself renders fine.
+ *
+ * Data-driven rather than hardcoded to any specific bundle/browser, so
+ * any current or future field using this widget is covered automatically.
+ */
+function mukurtu_submissions_sync_entity_browser_permissions(SubmissionSettingsInterface $settings): void {
+  $entity_type_id = $settings->getTargetEntityTypeId();
+  $bundle = $settings->getTargetBundle();
+  if (!$entity_type_id || !$bundle) {
+    return;
+  }
+
+  $display = \Drupal::service('entity_display.repository')->getFormDisplay($entity_type_id, $bundle, 'submission');
+  $browser_ids = [];
+  foreach ($display->getComponents() as $component) {
+    if (($component['type'] ?? NULL) === 'entity_browser_entity_reference' && !empty($component['settings']['entity_browser'])) {
+      $browser_ids[$component['settings']['entity_browser']] = TRUE;
+    }
+  }
+  if (!$browser_ids) {
+    return;
+  }
+
+  $role_storage = \Drupal::entityTypeManager()->getStorage('user_role');
+  $grants = [
+    'anonymous' => $settings->status() && $settings->getAccessLevel() === 'anonymous',
+    'authenticated' => $settings->status(),
+  ];
+  foreach (array_keys($browser_ids) as $browser_id) {
+    $permission = "access $browser_id entity browser pages";
+    foreach ($grants as $role_id => $should_grant) {
+      $role = $role_storage->load($role_id);
+      if (!$role) {
+        continue;
+      }
+      $has_permission = $role->hasPermission($permission);
+      if ($should_grant && !$has_permission) {
+        $role->grantPermission($permission)->save();
+      }
+      elseif (!$should_grant && $has_permission) {
+        $role->revokePermission($permission)->save();
+      }
     }
   }
 }
