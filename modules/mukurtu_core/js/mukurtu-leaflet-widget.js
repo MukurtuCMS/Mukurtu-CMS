@@ -16,7 +16,7 @@
    */
   Drupal.mukurtuPatchCircleToGeoJSON = function (circleLayer) {
     circleLayer.toGeoJSON = function () {
-      const polygon = L.PM.Utils.circleToPolygon(this, 60);
+      const polygon = L.PM.Utils.circleToPolygon(this, 128);
       const geoJson = polygon.toGeoJSON();
       const center = this.getLatLng();
       geoJson.properties = Object.assign(
@@ -121,9 +121,13 @@
     // editable (drag center, resize radius) rather than a vertex outline.
     if (layer.feature && layer.feature.properties && layer.feature.properties.circle_center) {
       const props = layer.feature.properties;
+      // layer.options carries the widget's generic path style, which
+      // includes a radius meant only for circleMarker point styling
+      // (see LeafletDefaultWidget's default 'path' setting). Spread it
+      // first so the real circle_radius always wins.
       const circleLayer = L.circle(props.circle_center, {
-        radius: props.circle_radius,
-        ...layer.options
+        ...layer.options,
+        radius: props.circle_radius
       });
       circleLayer.feature = layer.feature;
       Drupal.mukurtuPatchCircleToGeoJSON(circleLayer);
