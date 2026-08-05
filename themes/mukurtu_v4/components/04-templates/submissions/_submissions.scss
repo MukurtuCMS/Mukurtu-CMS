@@ -1,28 +1,3 @@
-// Entity Browser modal (the "Select Content"/"Select Words" picker behind
-// Collection's field_items_in_collection and Word List's field_words - both
-// entity_browser_entity_reference fields): until the permission fix that
-// grants visitors "access {browser_id} entity browser pages" (see
-// mukurtu_submissions_sync_entity_browser_permissions() in the module's own
-// .module file), only staff ever opened this, always through the Gin admin
-// theme, which ships its own CSS for it (gin/dist/css/components/
-// entity_browser.css, dialog.css) built around Gin-only custom properties
-// like --gin-color-primary/--gin-bg-layer. mukurtu_gin_custom.css (attached
-// sitewide via hook_page_attachments(), not gated to the admin theme)
-// already carries layout/behavior rules for this same markup using those
-// same var(--gin-*, fallback) references, but every one of those variables
-// is undefined outside Gin, so they were silently resolving to Gin's own
-// hardcoded fallback values (generic blue/grey/white) instead of anything
-// on-brand. Defining Mukurtu equivalents for just the ones those existing
-// rules actually reference lets them render on-brand without duplicating
-// their own layout/behavior logic here.
-:root {
-  --gin-color-primary: var(--brand-primary-dark);
-  --gin-color-primary-light: var(--brand-light);
-  --gin-bg-layer: var(--color-white);
-  --gin-bg-layer2: rgb(0 0 0 / 50%);
-  --gin-color-focus: var(--focus-color);
-}
-
 // The browser's own view (mukurtu_content_browser, mukurtu_dictionary_word_browser,
 // etc.) renders its exposed filters and results table as plain, unthemed
 // markup - genuinely new ground for this theme, not a regression: it was
@@ -117,11 +92,16 @@
 }
 
 // mukurtu_gin_custom.css already lays these out as a flex row with a
-// fixed-size media slot (see the --gin-* bridge above) - only the parts it
-// doesn't already set need adding here: a placeholder background for a
-// still-loading/missing thumbnail, and the title's own text color (it
-// otherwise inherits default browser black rather than this theme's body
-// text color).
+// fixed-size media slot - only the parts it doesn't already set need
+// adding here: a placeholder background for a still-loading/missing
+// thumbnail, and the title's own text color (it otherwise inherits
+// default browser black rather than this theme's body text color).
+// Its own selected-row outline/view-toggle button colors still reference
+// Gin's --gin-color-primary (undefined here, so they fall back to Gin's
+// hardcoded blue) rather than this theme's brand color - a deliberate
+// gap, not an oversight: see the --gin-* bridge note in .path-submit
+// below for why it can't be bridged globally, and this iframe page has
+// no other selector to scope a bridge to.
 .eb-form-selection-card {
   &__media {
     border-radius: 0.25rem;
@@ -683,6 +663,24 @@
     padding-block: var(--v-space-3xs);
     border-block-start: 1px solid var(--color-greys-alpha-border);
   }
+
+  // mukurtu_gin_custom.css (attached sitewide, not gated to the admin
+  // theme) styles the entity-browser dialog's own background/overlay
+  // using Gin-only custom properties (--gin-bg-layer/--gin-bg-layer2),
+  // undefined outside Gin, so they were silently resolving to Gin's own
+  // hardcoded fallbacks instead of anything on-brand. This can't be
+  // bridged at :root - Gin's own toolbar (rendered on every front-end
+  // page too, for any user with toolbar access, regardless of active
+  // theme) uses these exact same variable names for its own light/dark
+  // mode; overriding them at :root leaked into the toolbar sitewide,
+  // forcing it to a fixed light background regardless of the user's
+  // OS/toolbar dark-mode preference - a real regression caught live on
+  // the homepage, not just this form. Scoped to .path-submit instead:
+  // the dialog itself is appended inside <body class="path-submit ...">
+  // (confirmed via DevTools), so this still reaches it, without reaching
+  // any other page's toolbar.
+  --gin-bg-layer: var(--color-white);
+  --gin-bg-layer2: rgb(0 0 0 / 50%);
 
   // The entity-browser modal's dialog chrome (jQuery UI's OpenDialogCommand,
   // see Modal.php) renders here in the submission form page itself, not

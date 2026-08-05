@@ -7686,14 +7686,6 @@ header {
   }
 }
 
-:root {
-  --gin-color-primary: var(--brand-primary-dark);
-  --gin-color-primary-light: var(--brand-light);
-  --gin-bg-layer: var(--color-white);
-  --gin-bg-layer2: rgb(0 0 0 / 50%);
-  --gin-color-focus: var(--focus-color);
-}
-
 .entity-browser-form {
   padding: var(--v-space-4xs);
 }
@@ -7755,6 +7747,10 @@ header {
   color: var(--text-color);
 }
 
+.path-submit {
+  --gin-bg-layer: var(--color-white);
+  --gin-bg-layer2: rgb(0 0 0 / 50%);
+}
 .path-submit .layout-content {
   max-width: 1280px;
   margin-inline: auto;
