@@ -19,6 +19,10 @@
 }
 
 .language-switcher {
+  // Establishes the containing block that the .contextual rule below
+  // resolves its percentage insets against.
+  position: relative;
+
   // Drupal's language_block plugin names this list dynamically after the
   // active negotiation method (e.g. "language-switcher-language-url"), so
   // target it structurally instead of relying on a fixed class name.
@@ -49,9 +53,19 @@
     }
   }
 
-  .contextual {
+  // Positioned clear of the toggle icon on its start side (rather than
+  // overlapping inward from the end edge) so the trigger can never cover
+  // the icon regardless of the icon's rendered width or text direction.
+  // The extra `&.contextual-region` compound (Drupal core always adds the
+  // contextual-region class to this same element) raises specificity above
+  // core's own `[dir="rtl"] .contextual` physical-offset override, so this
+  // rule wins deterministically regardless of CSS load order instead of
+  // depending on which stylesheet is aggregated last.
+  &.contextual-region .contextual {
       position: absolute;
-      inset-block-start: 0;
-      inset-inline-end: 20px;
+      inset-block-start: 50%;
+      inset-inline-end: 100%;
+      margin-inline-end: 0.5em;
+      transform: translateY(-50%);
   }
 }
