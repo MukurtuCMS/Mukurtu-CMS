@@ -7,6 +7,7 @@ namespace Drupal\Tests\mukurtu_multilingual\Kernel;
 use Drupal\Core\Field\Entity\BaseFieldOverride;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\language\Entity\ContentLanguageSettings;
+use Drupal\node\Entity\NodeType;
 
 /**
  * Tests _mukurtu_multilingual_apply_translation_overrides().
@@ -49,6 +50,14 @@ class TranslationOverridesTest extends KernelTestBase {
     $this->installEntitySchema('user');
     $this->installEntitySchema('node');
     $this->installConfig(['field', 'node']);
+
+    // The bundles referenced by the overrides under test must exist as
+    // real node_type entities - ConfigEntityBase::calculateDependencies()
+    // (called from BaseFieldOverride/ContentLanguageSettings preSave())
+    // throws a LogicException otherwise.
+    foreach (['dictionary_word', 'landing_page', 'person', 'place', 'word_list'] as $bundle) {
+      NodeType::create(['type' => $bundle, 'name' => $bundle])->save();
+    }
 
     $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_multilingual');
     require_once $module_path . '/mukurtu_multilingual.install';
