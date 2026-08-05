@@ -54,6 +54,9 @@ class PublicSubmissionForm extends FormBase {
     'moderation_state',
     'langcode',
     'url_redirects',
+    'promote',
+    'sticky',
+    'comment',
     // Computed/display-only fields - no meaningful editable widget exists
     // for these regardless of bundle, so they should never be offered as
     // an includable option.
