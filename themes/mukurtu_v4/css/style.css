@@ -7921,6 +7921,12 @@ header {
   font-size: 1em;
   font-weight: var(--text-bold);
 }
+.path-submit .field-multiple-table td:not(.field-multiple-drag):not(.delta-order) {
+  -webkit-box-flex: 1;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
+  min-inline-size: 0;
+}
 .path-submit .field-multiple-table td:not(.field-multiple-drag):not(.delta-order):not(:has(.paragraph-top, .paragraph-type-top)) {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -7928,10 +7934,6 @@ header {
   -ms-flex-wrap: wrap;
       flex-wrap: wrap;
   gap: var(--v-space-3xs);
-  -webkit-box-flex: 1;
-      -ms-flex: 1 1 auto;
-          flex: 1 1 auto;
-  min-inline-size: 0;
 }
 .path-submit .field-multiple-table td:not(.field-multiple-drag):not(.delta-order):not(:has(.paragraph-top, .paragraph-type-top)) .js-form-item {
   -webkit-box-flex: 1;
