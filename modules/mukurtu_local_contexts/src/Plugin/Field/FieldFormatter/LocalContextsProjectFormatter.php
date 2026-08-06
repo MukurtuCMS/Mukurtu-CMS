@@ -37,6 +37,9 @@ class LocalContextsProjectFormatter extends FormatterBase {
         '#tk_labels' => $project->getLabels("tk"),
         '#bc_labels' => $project->getLabels("bc"),
         '#notices' => $project->getNotices(),
+        '#not_available' => $project->isNotAvailable(),
+        '#archived' => $project->isArchived(),
+        '#last_synced' => $project->getUpdated(),
       ];
     }
 
