@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\mukurtu_import;
 
+use Drupal\Core\Utility\Error;
 use Drupal\migrate_tools\MigrateBatchExecutable;
 use Drupal\migrate\MigrateMessage;
 use Drupal\migrate\Plugin\MigrationInterface;
@@ -102,8 +103,29 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
     // Make sure we know our batch context.
     $executable->setBatchContext($context);
 
-    // Do the import.
-    $result = $executable->import();
+    // Do the import. import() only catches MigrateException and
+    // MigrateSkipRowException around row processing; any other \Throwable
+    // (e.g. a TypeError from a process plugin given an unexpected NULL
+    // source value) escapes uncaught and also skips the status reset
+    // import() normally performs on every exit path, leaving the migration
+    // stuck "importing" indefinitely. This method is invoked directly as
+    // Drupal core's batch operation callback, and core's own
+    // _batch_process() has no try/catch around that callable, so an
+    // uncaught \Throwable here crashes the whole AJAX batch request with a
+    // raw HTTP 500 instead of degrading gracefully like every other
+    // row-level error does. Guard against that.
+    $import_crashed = FALSE;
+    try {
+      $result = $executable->import();
+    }
+    catch (\Throwable $e) {
+      // import() never reached its normal completion path, so reset status
+      // ourselves or this migration will refuse to run again.
+      $migration->setStatus(MigrationInterface::STATUS_IDLE);
+      Error::logException(\Drupal::logger('mukurtu_import'), $e);
+      $result = MigrationInterface::RESULT_FAILED;
+      $import_crashed = TRUE;
+    }
 
     // Save the messages.
     $context['results']['messages'] = array_merge($context['results']['messages'], iterator_to_array($executable->getIdMap()->getMessages()));
@@ -120,6 +142,30 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
       '@ignored' => $context['results'][$migration->id()]['@ignored'] + $executable->getIgnoredCount(),
       '@name' => $migration->id(),
     ];
+
+    if ($import_crashed) {
+      // An uncaught error aborted the import partway through; make sure
+      // that's reflected as a failure even if every row processed before
+      // the crash happened to succeed.
+      if (empty($context['results'][$migration->id()]['@failures'])) {
+        $context['results'][$migration->id()]['@failures'] = 1;
+      }
+      $context['results']['messages'][] = (object) [
+        'message' => (string) t('An unexpected error interrupted the import of this file and it could not be completed. Check that your file\'s columns match the selected import template, or use "Customize Settings" to map the columns manually.'),
+      ];
+    }
+    // import() can return RESULT_FAILED before a single row is attempted
+    // (e.g. a source rewind() exception from a misconfigured ID column). It
+    // handles that internally without throwing, so nothing above records a
+    // failure count or message for it, and the batch operation itself still
+    // reports success. Surface it explicitly so the results form doesn't
+    // report a false success.
+    elseif ($result === MigrationInterface::RESULT_FAILED && empty($context['results'][$migration->id()]['@failures'])) {
+      $context['results'][$migration->id()]['@failures'] = 1;
+      $context['results']['messages'][] = (object) [
+        'message' => (string) t('The import for this file failed before any rows could be processed. Check that your file\'s columns match the selected import template, or use "Customize Settings" to map the columns manually.'),
+      ];
+    }
 
     // Do some housekeeping.
     if ($result !== MigrationInterface::RESULT_INCOMPLETE) {
