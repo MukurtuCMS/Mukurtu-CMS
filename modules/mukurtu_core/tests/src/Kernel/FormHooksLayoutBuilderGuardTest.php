@@ -27,6 +27,8 @@ class FormHooksLayoutBuilderGuardTest extends KernelTestBase {
     'field',
     'text',
     'filter',
+    'geofield',
+    'leaflet',
     'node',
     'mukurtu_core',
   ];
