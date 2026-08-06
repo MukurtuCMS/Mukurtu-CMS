@@ -74,8 +74,10 @@ class ImportStrategyMismatchedColumnsTest extends MukurtuImportTestBase {
   }
 
   /**
-   * getUnmatchedIdentifierColumns() should report a mapped nid/uuid source,
-   * or a configured identifier column, that doesn't exist in the file.
+   * getUnmatchedIdentifierColumns() should report a configured identifier
+   * column that doesn't exist in the file, but not a mapped nid/uuid source
+   * going unmatched, since every shipped template maps those by default and
+   * a plain new-content import normally has no ID/UUID columns to match.
    */
   public function testGetUnmatchedIdentifierColumnsDetectsMismatches() {
     $data = [
@@ -84,7 +86,8 @@ class ImportStrategyMismatchedColumnsTest extends MukurtuImportTestBase {
     ];
     $file = $this->createCsvFile($data);
 
-    // Mapped nid source absent from the file.
+    // Mapped nid source absent from the file is not reported: this is the
+    // default template mapping, not a deliberate match attempt.
     $config = MukurtuImportStrategy::create(['uid' => $this->currentUser->id()]);
     $config->setTargetEntityTypeId('node');
     $config->setTargetBundle('protocol_aware_content');
@@ -92,7 +95,7 @@ class ImportStrategyMismatchedColumnsTest extends MukurtuImportTestBase {
       ['target' => 'nid', 'source' => 'ID'],
       ['target' => 'title', 'source' => 'title'],
     ]);
-    $this->assertEquals(['ID'], $config->getUnmatchedIdentifierColumns($file));
+    $this->assertEquals([], $config->getUnmatchedIdentifierColumns($file));
 
     // A configured identifier column absent from the file.
     $config2 = MukurtuImportStrategy::create(['uid' => $this->currentUser->id()]);

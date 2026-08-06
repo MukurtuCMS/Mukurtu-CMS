@@ -406,18 +406,15 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
     $headers = $this->getCSVHeaders($file);
     $unmatched = [];
 
+    // Only a user-configured identifier column (set via "Customize
+    // Settings") represents a deliberate intent to match existing content.
+    // Every shipped template also maps nid/uuid by default for round-trip
+    // export/reimport, but that default mapping going unmatched is the
+    // normal, expected case for a plain new-content import and isn't worth
+    // warning about.
     $identifier_column = $this->getIdentifierColumn();
     if ($identifier_column && !in_array($identifier_column, $headers, TRUE)) {
       $unmatched[] = $identifier_column;
-    }
-
-    $entity_type_id = $this->getTargetEntityTypeId();
-    $entity_type_def = $this->entityTypeManager()->getDefinition($entity_type_id);
-    $id_uuid_keys = array_filter([$entity_type_def->getKey('id'), $entity_type_def->getKey('uuid')]);
-    foreach ($this->getMapping() as $mapping) {
-      if (in_array($mapping['target'], $id_uuid_keys, TRUE) && !in_array($mapping['source'], $headers, TRUE)) {
-        $unmatched[] = $mapping['source'];
-      }
     }
 
     return array_values(array_unique($unmatched));
