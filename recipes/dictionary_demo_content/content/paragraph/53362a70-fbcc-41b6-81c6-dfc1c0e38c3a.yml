@@ -1,0 +1,47 @@
+_meta:
+  version: '1.0'
+  entity_type: paragraph
+  uuid: 53362a70-fbcc-41b6-81c6-dfc1c0e38c3a
+  bundle: dictionary_word_entry
+  default_langcode: en
+  depends:
+    c626c38d-9eca-4428-b1b1-a332fbe0e3f8: paragraph
+    bc25363f-22ef-4bf2-bde0-e65719ef7fa1: taxonomy_term
+    b954ff14-94dd-4ef4-9bde-4e9cdf357abf: taxonomy_term
+    9942587c-1bc3-481a-9f68-264b728c598e: media
+default:
+  field_word_entry_term:
+    -
+      value: 'sample-alternate-entry'
+  field_alternate_spelling:
+    -
+      value: 'sample-alternate-spelling'
+  field_contributor:
+    -
+      entity: b954ff14-94dd-4ef4-9bde-4e9cdf357abf
+  field_definition:
+    -
+      value: 'This is a placeholder definition for an additional (alternate-community) word entry, used only to test accessibility of the rendered page.'
+      format: plain_text
+  field_pronunciation:
+    -
+      value: 'Placeholder pronunciation guide text.'
+      format: plain_text
+  field_recording:
+    -
+      entity: 9942587c-1bc3-481a-9f68-264b728c598e
+  field_sample_sentences:
+    -
+      entity: c626c38d-9eca-4428-b1b1-a332fbe0e3f8
+  field_source:
+    -
+      value: 'Placeholder Source'
+  field_translation:
+    -
+      value: 'placeholder translation'
+  field_word_origin:
+    -
+      value: 'Placeholder word origin'
+  field_word_type:
+    -
+      entity: bc25363f-22ef-4bf2-bde0-e65719ef7fa1
