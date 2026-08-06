@@ -166,7 +166,7 @@ class Place extends Node implements PlaceInterface, CulturalProtocolControlledIn
       ->setDisplayConfigurable('form', TRUE);
 
     $definitions['field_coverage_description'] = BaseFieldDefinition::create('text_long')
-      ->setLabel('Location Description')
+      ->setLabel(t('Location Description'))
       ->setDescription(t('A descriptive field to provide additional context and depth to the location(s) connected to the place record.	<br />This HTML field can support rich text and embedded media assets using the editing toolbar.'))
       ->setCardinality(1)
       ->setRequired(FALSE)
