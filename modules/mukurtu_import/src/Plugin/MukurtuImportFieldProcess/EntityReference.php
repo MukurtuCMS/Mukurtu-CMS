@@ -99,6 +99,7 @@ class EntityReference extends MukurtuImportFieldProcessPluginBase implements Con
       $process[] = [
         'plugin' => 'explode',
         'delimiter' => $multivalue_delimiter,
+        'strict' => FALSE,
       ];
     }
 
