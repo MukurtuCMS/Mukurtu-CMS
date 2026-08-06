@@ -9,11 +9,11 @@ target_entity_type_id: user
 target_bundle: user
 mapping:
   -
+    source: 'Account Status'
+    target: account_status
+  -
     source: Communities
     target: communities
-  -
-    source: Created
-    target: created
   -
     source: 'Display Name'
     target: field_display_name
@@ -24,32 +24,11 @@ mapping:
     source: ID
     target: uid
   -
-    source: 'Language (langcode)'
-    target: langcode
-  -
-    source: Pending
-    target: field_pending
-  -
-    source: 'Profile Picture Alt Text'
-    target: user_picture/alt
-  -
-    source: 'Profile Picture File'
-    target: user_picture/target_id
-  -
     source: Protocols
     target: protocols
   -
-    source: 'Receive Email Notifications'
-    target: message_subscribe_email
-  -
     source: Roles
     target: roles
-  -
-    source: Status
-    target: status
-  -
-    source: Timezone
-    target: timezone
   -
     source: Username
     target: name

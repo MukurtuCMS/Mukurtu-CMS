@@ -25,7 +25,6 @@ class ImportFieldDescriptionListForm extends ImportBaseForm {
     $effective_bundle = ($entity_type === 'taxonomy_term' && $bundle === 'other_taxonomies') ? 'keywords' : $bundle;
 
     $fields = $this->entityFieldManager->getFieldDefinitions($entity_type, $effective_bundle);
-    $options = [];
 
     // Per-entity-type overrides for the Field Description column.
     // Drupal base field descriptions are often missing or too terse for
@@ -42,6 +41,11 @@ class ImportFieldDescriptionListForm extends ImportBaseForm {
         'weight'      => $this->t('Not usually used as most sites will default to alphabetical ordering. The weight of this term in relation to other terms in the taxonomy.'),
       ];
     }
+    elseif ($entity_type === 'user') {
+      $field_description_overrides = [
+        'roles' => $this->t('The roles this user should have. Every user automatically receives the "Authenticated user" role in addition to any roles listed here -- it does not need to be included.'),
+      ];
+    }
 
     $import_field_options = $this->buildTargetOptions($entity_type, $effective_bundle);
     unset($import_field_options[-1]);
@@ -53,17 +57,26 @@ class ImportFieldDescriptionListForm extends ImportBaseForm {
     $virtual_target_descriptions = [
       'communities' => [
         'description' => $this->t('The communities this user is a member of, and their role(s) within each.'),
-        'format' => $this->t('Format: CommunityName:role|role;AnotherCommunity:role. Separate multiple roles for the same community with |. Separate multiple communities with ; (or your configured multi-value delimiter). Roles must be entered as their machine name (e.g. community_manager, member).'),
+        'format' => $this->t('Format: CommunityName>role|role;AnotherCommunity>role. Separate multiple roles for the same community with |. Separate multiple communities with ; (or your configured multi-value delimiter). Roles may be entered as either their label (e.g. Community Manager) or machine name (e.g. community_manager).'),
       ],
       'protocols' => [
         'description' => $this->t('The protocols this user is a member of, and their role(s) within each.'),
-        'format' => $this->t('Format: ProtocolName:role|role;AnotherProtocol:role. Separate multiple roles for the same protocol with |. Separate multiple protocols with ; (or your configured multi-value delimiter). Roles must be entered as their machine name (e.g. protocol_steward, contributor).'),
+        'format' => $this->t('Format: ProtocolName>role|role;AnotherProtocol>role. Separate multiple roles for the same protocol with |. Separate multiple protocols with ; (or your configured multi-value delimiter). Roles may be entered as either their label (e.g. Protocol Steward) or machine name (e.g. protocol_steward).'),
+      ],
+      'account_status' => [
+        'description' => $this->t('Whether the account is active, blocked, or awaiting approval.'),
+        'format' => $this->t('One of Active, Blocked, or Pending (case-insensitive). If left blank, new accounts default to Active; existing accounts being updated keep their current status.'),
       ],
     ];
 
+    $required_options = [];
+    $optional_options = [];
     foreach ($import_field_options as $field_target => $target_label) {
+      // None of the virtual user targets (group membership, account status)
+      // are ever required to import a user, so they always land in the
+      // optional table.
       if ($entity_type === 'user' && isset($virtual_target_descriptions[$field_target])) {
-        $options[$field_target] = [
+        $optional_options[$field_target] = [
           'label' => $target_label,
           'description' => $virtual_target_descriptions[$field_target]['description'],
           'format' => $virtual_target_descriptions[$field_target]['format'],
@@ -75,11 +88,17 @@ class ImportFieldDescriptionListForm extends ImportBaseForm {
       $field_name = $field_components[0];
       $field_property = $field_components[1] ?? NULL;
       $process_plugin = $this->fieldProcessPluginManager->getInstance(['field_definition' => $fields[$field_name]]);
-      $options[$field_target] = [
+      $option = [
         'label' => $target_label,
         'description' => $field_description_overrides[$field_name] ?? ($fields[$field_name]->getDescription() ?? ''),
         'format' => $process_plugin->getFormatDescription($fields[$field_name], $field_property),
       ];
+      if ($fields[$field_name]->isRequired()) {
+        $required_options[$field_target] = $option;
+      }
+      else {
+        $optional_options[$field_target] = $option;
+      }
     }
 
     $form['entity_type_id'] = [
@@ -91,17 +110,58 @@ class ImportFieldDescriptionListForm extends ImportBaseForm {
       '#value' => $bundle,
     ];
 
-    // Define tableselect.
-    $form['table'] = [
-      '#type' => 'tableselect',
-      '#header' => [
-        'label' => ['data' => $this->t('Field'), 'scope' => 'col'],
-        'description' => ['data' => $this->t('Field Description'), 'scope' => 'col'],
-        'format' => ['data' => $this->t('Import Format Description'), 'scope' => 'col'],
-      ],
-      '#options' => $options,
-      '#empty' => $this->t('No fields found'),
+    // Explain the identifier-column rule up front: ID/UUID are individually
+    // optional (blank means "create new content"), but the importer needs
+    // one of ID, UUID, or a unique field like the title or name below to
+    // identify each row, so neither would otherwise show as "required"
+    // below.
+    $form['identifier_note'] = [
+      '#markup' => '<p>' . $this->t('At least one of the following must be mapped to uniquely identify each row: ID, UUID, or a unique field such as the title or name below. If none are mapped, every imported row will be treated as new content.') . '</p>',
     ];
+
+    $table_header = [
+      'label' => ['data' => $this->t('Field'), 'scope' => 'col'],
+      'description' => ['data' => $this->t('Field Description'), 'scope' => 'col'],
+      'format' => ['data' => $this->t('Import Format Description'), 'scope' => 'col'],
+    ];
+
+    if (!$required_options && !$optional_options) {
+      $form['no_fields'] = [
+        '#markup' => '<p>' . $this->t('No fields found') . '</p>',
+      ];
+    }
+
+    if ($required_options) {
+      $form['required_heading'] = [
+        '#type' => 'html_tag',
+        '#tag' => 'h2',
+        '#attributes' => ['id' => 'mukurtu-import-required-fields-heading'],
+        '#value' => $this->t('Required Fields'),
+      ];
+      $form['table_required'] = [
+        '#type' => 'tableselect',
+        '#header' => $table_header,
+        '#options' => $required_options,
+        '#empty' => $this->t('No fields found'),
+        '#attributes' => ['aria-labelledby' => 'mukurtu-import-required-fields-heading'],
+      ];
+    }
+
+    if ($optional_options) {
+      $form['optional_heading'] = [
+        '#type' => 'html_tag',
+        '#tag' => 'h2',
+        '#attributes' => ['id' => 'mukurtu-import-optional-fields-heading'],
+        '#value' => $this->t('Optional Fields'),
+      ];
+      $form['table_optional'] = [
+        '#type' => 'tableselect',
+        '#header' => $table_header,
+        '#options' => $optional_options,
+        '#empty' => $this->t('No fields found'),
+        '#attributes' => ['aria-labelledby' => 'mukurtu-import-optional-fields-heading'],
+      ];
+    }
 
     // Form actions.
     $form['actions'] = [
@@ -132,12 +192,14 @@ class ImportFieldDescriptionListForm extends ImportBaseForm {
       $bundle_label = $bundle && isset($bundle_info[$bundle]) ? $bundle_info[$bundle]['label'] : '';
       $filename = $bundle && $bundle != $entity_type_id ? "{$entity_type_label} - {$bundle_label}.csv" : "{$entity_type_label}.csv";
     }
-    $selected_fields = array_filter($form_state->getValue('table'));
+    $selected_fields = array_filter($form_state->getValue('table_required') ?? [])
+      + array_filter($form_state->getValue('table_optional') ?? []);
+    $options = ($form['table_required']['#options'] ?? []) + ($form['table_optional']['#options'] ?? []);
 
     // Gather the selected field labels.
     $headers = [];
     foreach ($selected_fields as $field_name) {
-      $headers[] = $form['table']['#options'][$field_name]['label'];
+      $headers[] = $options[$field_name]['label'];
     }
 
     // Convert to CSV format.

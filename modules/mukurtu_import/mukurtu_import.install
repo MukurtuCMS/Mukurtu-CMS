@@ -566,3 +566,52 @@ function mukurtu_import_update_40032(): void {
   }
   $config->set('mapping', $mapping)->save();
 }
+
+/**
+ * Simplify the 'User - all fields' strategy mapping: drop fields hidden
+ * from the import target list, and switch Status/Pending to the unified
+ * Account Status target.
+ *
+ * The following targets are no longer offered on the import mapping form
+ * (they aren't exposed on the interactive account registration/admin "add
+ * user" forms either, so listing them there was more confusing than
+ * useful): created, langcode, message_subscribe_email,
+ * user_picture/alt, user_picture/target_id, preferred_langcode,
+ * preferred_admin_langcode, timezone. Status and Pending are superseded by
+ * the single Account Status target (Active/Blocked/Pending). Only touches
+ * this specific default strategy, without disturbing any other
+ * customizations a site may have made to it (no unconditional overwrite),
+ * matching update_40032's precedent.
+ */
+function mukurtu_import_update_40033(): void {
+  $config_name = 'mukurtu_import.mukurtu_import_strategy.user_all_fields';
+  $config = \Drupal::configFactory()->getEditable($config_name);
+
+  // Sites that haven't created this strategy yet will get the simplified
+  // mapping via update_40031's YAML, which already reflects it.
+  if ($config->isNew()) {
+    return;
+  }
+
+  $mapping = $config->get('mapping') ?? [];
+  $removed_targets = [
+    'created',
+    'langcode',
+    'message_subscribe_email',
+    'user_picture/alt',
+    'user_picture/target_id',
+    'preferred_langcode',
+    'preferred_admin_langcode',
+    'timezone',
+    'status',
+    'field_pending',
+  ];
+  $mapping = array_values(array_filter($mapping, fn(array $entry) => !in_array($entry['target'], $removed_targets, TRUE)));
+
+  $existing_targets = array_column($mapping, 'target');
+  if (!in_array('account_status', $existing_targets, TRUE)) {
+    $mapping[] = ['source' => 'Account Status', 'target' => 'account_status'];
+  }
+
+  $config->set('mapping', $mapping)->save();
+}

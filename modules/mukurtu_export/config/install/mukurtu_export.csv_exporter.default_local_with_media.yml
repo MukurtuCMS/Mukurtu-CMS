@@ -363,8 +363,7 @@ entity_fields_export_list:
     uuid: UUID
     name: Username
     mail: Email
-    status: Status
-    field_pending: Pending
+    account_status: 'Account Status'
     field_display_name: 'Display Name'
     roles: Roles
     created: Created

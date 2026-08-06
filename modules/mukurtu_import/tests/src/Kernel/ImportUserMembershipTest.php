@@ -114,7 +114,7 @@ class ImportUserMembershipTest extends MukurtuImportTestBase {
 
     $data = [
       ['Username', 'Email', 'Communities'],
-      ['blockedgrant', 'blockedgrant@example.com', 'Unmanaged Community:community_member'],
+      ['blockedgrant', 'blockedgrant@example.com', 'Unmanaged Community>community_member'],
     ];
     $mapping = [
       ['target' => 'name', 'source' => 'Username'],
@@ -145,6 +145,9 @@ class ImportUserMembershipTest extends MukurtuImportTestBase {
 
   /**
    * Test that a new user's community/protocol memberships and roles are set.
+   *
+   * Also covers role resolution by label ("Protocol Steward"), not just
+   * machine name ("community_manager" below covers the machine-name path).
    */
   public function testNewUserGetsCommunityAndProtocolMembership() {
     $data = [
@@ -152,8 +155,8 @@ class ImportUserMembershipTest extends MukurtuImportTestBase {
       [
         'newmember',
         'newmember@example.com',
-        $this->community->label() . ':community_manager',
-        $this->protocol->label() . ':protocol_steward',
+        $this->community->label() . '>community_manager',
+        $this->protocol->label() . '>Protocol Steward',
       ],
     ];
     $mapping = [
@@ -213,7 +216,7 @@ class ImportUserMembershipTest extends MukurtuImportTestBase {
   public function testReimportWithChangedRoleUpdatesMembership() {
     $create_data = [
       ['Username', 'Email', 'Communities'],
-      ['reimported', 'reimported@example.com', $this->community->label() . ':community_member'],
+      ['reimported', 'reimported@example.com', $this->community->label() . '>community_member'],
     ];
     $create_mapping = [
       ['target' => 'name', 'source' => 'Username'],
@@ -231,7 +234,7 @@ class ImportUserMembershipTest extends MukurtuImportTestBase {
 
     $update_data = [
       ['ID', 'Communities'],
-      [$user->id(), $this->community->label() . ':community_manager'],
+      [$user->id(), $this->community->label() . '>community_manager'],
     ];
     $update_mapping = [
       ['target' => 'uid', 'source' => 'ID'],
@@ -257,7 +260,7 @@ class ImportUserMembershipTest extends MukurtuImportTestBase {
   public function testInvalidRoleNameFailsRow() {
     $data = [
       ['Username', 'Email', 'Communities'],
-      ['typorole', 'typorole@example.com', $this->community->label() . ':comunity_manager'],
+      ['typorole', 'typorole@example.com', $this->community->label() . '>comunity_manager'],
     ];
     $mapping = [
       ['target' => 'name', 'source' => 'Username'],
@@ -285,7 +288,7 @@ class ImportUserMembershipTest extends MukurtuImportTestBase {
   public function testUnresolvableCommunityNameFailsRow() {
     $data = [
       ['Username', 'Email', 'Communities'],
-      ['typocommunity', 'typocommunity@example.com', 'Nonexistent Community:community_member'],
+      ['typocommunity', 'typocommunity@example.com', 'Nonexistent Community>community_member'],
     ];
     $mapping = [
       ['target' => 'name', 'source' => 'Username'],
@@ -311,7 +314,7 @@ class ImportUserMembershipTest extends MukurtuImportTestBase {
 
     $data = [
       ['Username', 'Email', 'Communities'],
-      ['ambiguous', 'ambiguous@example.com', $this->community->label() . ':community_member'],
+      ['ambiguous', 'ambiguous@example.com', $this->community->label() . '>community_member'],
     ];
     $mapping = [
       ['target' => 'name', 'source' => 'Username'],
@@ -338,7 +341,7 @@ class ImportUserMembershipTest extends MukurtuImportTestBase {
       [
         'multimember',
         'multimember@example.com',
-        $this->community->label() . ':community_manager;' . $this->secondCommunity->label() . ':community_affiliate',
+        $this->community->label() . '>community_manager;' . $this->secondCommunity->label() . '>community_affiliate',
       ],
     ];
     $mapping = [
@@ -359,6 +362,65 @@ class ImportUserMembershipTest extends MukurtuImportTestBase {
 
     $second_roles = array_map(fn($role) => $role->getName(), $this->secondCommunity->getMembership($user)->getRoles());
     $this->assertContains('community_affiliate', $second_roles);
+  }
+
+  /**
+   * Test that a role given by its label resolves to the same membership as
+   * the machine name would.
+   */
+  public function testRoleLabelResolvesSameAsMachineName() {
+    $data = [
+      ['Username', 'Email', 'Communities'],
+      ['labeledrole', 'labeledrole@example.com', $this->community->label() . '>Community Manager'],
+    ];
+    $mapping = [
+      ['target' => 'name', 'source' => 'Username'],
+      ['target' => 'mail', 'source' => 'Email'],
+      ['target' => 'communities', 'source' => 'Communities'],
+    ];
+
+    $result = $this->importCsvFile($this->createCsvFile($data), $mapping, 'user', 'user');
+    $this->assertEquals(MigrationInterface::RESULT_COMPLETED, $result);
+
+    $users = $this->entityTypeManager->getStorage('user')->loadByProperties(['name' => 'labeledrole']);
+    $user = reset($users);
+    $this->assertNotFalse($user);
+
+    $membership = $this->community->getMembership($user);
+    $this->assertNotNull($membership);
+    $this->assertContains('community_manager', array_map(fn($role) => $role->getName(), $membership->getRoles()));
+  }
+
+  /**
+   * Test that a community name containing the ">" delimiter character
+   * (escaped) or a colon (no longer a delimiter, so it needs no escaping)
+   * still resolves correctly.
+   */
+  public function testCommunityNameContainingColonIsPreserved() {
+    $community = Community::create(['name' => 'Smith: A Family History']);
+    $community->save();
+    $community->setRoles($this->currentUser, ['community_manager']);
+
+    $data = [
+      ['Username', 'Email', 'Communities'],
+      ['colonname', 'colonname@example.com', 'Smith: A Family History>community_member'],
+    ];
+    $mapping = [
+      ['target' => 'name', 'source' => 'Username'],
+      ['target' => 'mail', 'source' => 'Email'],
+      ['target' => 'communities', 'source' => 'Communities'],
+    ];
+
+    $result = $this->importCsvFile($this->createCsvFile($data), $mapping, 'user', 'user');
+    $this->assertEquals(MigrationInterface::RESULT_COMPLETED, $result);
+
+    $users = $this->entityTypeManager->getStorage('user')->loadByProperties(['name' => 'colonname']);
+    $user = reset($users);
+    $this->assertNotFalse($user);
+
+    $membership = $community->getMembership($user);
+    $this->assertNotNull($membership);
+    $this->assertContains('community_member', array_map(fn($role) => $role->getName(), $membership->getRoles()));
   }
 
 }

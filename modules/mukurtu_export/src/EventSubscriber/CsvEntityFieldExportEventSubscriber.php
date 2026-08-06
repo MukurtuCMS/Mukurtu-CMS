@@ -72,6 +72,13 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
       return $this->exportGroupMembership($event, $entity, $field_name);
     }
 
+    // Virtual field: account status is split across two real fields
+    // (status, field_pending), exported as a single Active/Blocked/Pending
+    // value to match the import side's unified 'account_status' target.
+    if ($entity->getEntityTypeId() === 'user' && $field_name === 'account_status') {
+      return $this->exportAccountStatus($event, $entity);
+    }
+
     try {
       $field = $entity->get($field_name);
     } catch (InvalidArgumentException $e) {
@@ -629,7 +636,7 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
   /**
    * Exports a user's community or protocol memberships and roles.
    *
-   * Serializes to the same "Name:role1|role2" format the import side's
+   * Serializes to the same "Name>role1|role2" format the import side's
    * GroupMembershipLookup process plugin expects (the CSV::export() plugin
    * joins the returned array with the exporter's configured
    * multivalue_delimiter, matching the delimiter import's explode step
@@ -655,11 +662,39 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
       // Strip delimiter characters defensively rather than invent an
       // escaping scheme, matching exportCulturalProtocol()'s precedent of
       // stripping conflicting delimiter characters from exported values.
-      $label = str_replace([':', '|', ';'], '', $group->label());
-      $export[] = $roles ? "{$label}:" . implode('|', $roles) : $label;
+      // ':' is deliberately not stripped -- '>' is the compound-value
+      // delimiter now, and colons are common in real group names.
+      $label = str_replace(['>', '|', ';'], '', $group->label());
+      $export[] = $roles ? "{$label}>" . implode('|', $roles) : $label;
     }
 
     $event->setValue($export);
+  }
+
+  /**
+   * Exports a user's account status as a single Active/Blocked/Pending
+   * value.
+   *
+   * Mirrors the same three-state model the interactive account form
+   * presents (see FormHooks::userStatusPreSaveSubmit()) and
+   * MukurtuUserListBuilder::buildRow()'s admin listing, and matches the
+   * format the import side's AccountStatusLookup process plugin expects,
+   * so an export/re-import round trip reproduces the same account status.
+   *
+   * @protected
+   */
+  protected function exportAccountStatus(EntityFieldExportEvent $event, EntityInterface $entity): void {
+    if ($entity->isActive()) {
+      $status = 'Active';
+    }
+    elseif ($entity->hasField('field_pending') && $entity->get('field_pending')->value) {
+      $status = 'Pending';
+    }
+    else {
+      $status = 'Blocked';
+    }
+
+    $event->setValue([$status]);
   }
 
 }

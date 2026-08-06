@@ -129,11 +129,16 @@ trait ImportFormTrait {
     // accounts (the only related field, field_communities, is computed and
     // read-only, and there is no field_protocols equivalent), so these
     // targets can't be discovered through the field-definition loop above.
-    // They're handled as virtual destination properties by
-    // ProtocolAwareUserContent and MukurtuImportStrategy::getProcess().
+    // Account Status is a real pair of fields (status, field_pending) but is
+    // exposed as a single virtual target instead, since mapping them
+    // separately requires knowing field_pending's non-obvious default and
+    // the Status-overrides-Pending interaction. All three are handled as
+    // virtual destination properties by ProtocolAwareUserContent and
+    // MukurtuImportStrategy::getProcess().
     if ($entity_type_id === 'user') {
       $options['communities'] = $this->t('Communities');
       $options['protocols'] = $this->t('Protocols');
+      $options['account_status'] = $this->t('Account Status');
     }
 
     // Disambiguate the Language field from the langcode base field.
@@ -253,6 +258,24 @@ trait ImportFormTrait {
         // setup email instead). 'access', 'login', and 'init' are internal
         // bookkeeping fields not meaningful for an admin-authored import.
         if ($entity_type_id === 'user' && in_array($field_name, ['pass', 'access', 'login', 'init'], TRUE)) {
+          unset($field_defs[$field_name]);
+        }
+
+        // These fields aren't exposed on the interactive account
+        // registration or admin "add user" forms either, so offering them
+        // here is more confusing than useful for an import audience
+        // mirroring those same forms.
+        if ($entity_type_id === 'user' && in_array($field_name, ['created', 'message_subscribe_email', 'user_picture', 'preferred_admin_langcode', 'preferred_langcode', 'langcode', 'timezone'], TRUE)) {
+          unset($field_defs[$field_name]);
+        }
+
+        // Superseded by the unified 'account_status' virtual target
+        // (Active/Blocked/Pending), which sets both of these under the hood
+        // -- see ProtocolAwareUserContent::applyAccountStatus(). Mapping
+        // them directly requires knowing field_pending's non-obvious
+        // storage default (1) and the Status-overrides-Pending interaction
+        // the interactive account form already hides from the user.
+        if ($entity_type_id === 'user' && in_array($field_name, ['status', 'field_pending'], TRUE)) {
           unset($field_defs[$field_name]);
         }
 

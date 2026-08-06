@@ -39,7 +39,7 @@ class CsvExportUserMembershipTest extends CsvExportFieldTestBase {
   public function testCommunityMembershipExport() {
     $event = new EntityFieldExportEvent('csv', $this->currentUser, 'communities', $this->context);
     $this->fieldExporter->exportField($event);
-    $this->assertEquals([$this->community->label() . ':community_manager'], $event->getValue());
+    $this->assertEquals([$this->community->label() . '>community_manager'], $event->getValue());
   }
 
   /**
@@ -48,7 +48,22 @@ class CsvExportUserMembershipTest extends CsvExportFieldTestBase {
   public function testProtocolMembershipExport() {
     $event = new EntityFieldExportEvent('csv', $this->currentUser, 'protocols', $this->context);
     $this->fieldExporter->exportField($event);
-    $this->assertEquals([$this->protocol->label() . ':protocol_steward'], $event->getValue());
+    $this->assertEquals([$this->protocol->label() . '>protocol_steward'], $event->getValue());
+  }
+
+  /**
+   * Test that a colon in a community's name is preserved on export, since
+   * '>' -- not ':' -- is the compound-value delimiter.
+   */
+  public function testCommunityNameWithColonIsPreservedOnExport() {
+    $community = Community::create(['name' => 'Smith: A Family History']);
+    $community->save();
+    $community->addMember($this->currentUser, ['community_manager']);
+    $community->setRoles($this->currentUser, ['community_manager']);
+
+    $event = new EntityFieldExportEvent('csv', $this->currentUser, 'communities', $this->context);
+    $this->fieldExporter->exportField($event);
+    $this->assertContains('Smith: A Family History>community_manager', $event->getValue());
   }
 
   /**
@@ -79,7 +94,7 @@ class CsvExportUserMembershipTest extends CsvExportFieldTestBase {
     $event = new EntityFieldExportEvent('csv', $this->currentUser, 'communities', $this->context);
     $this->fieldExporter->exportField($event);
     $this->assertEqualsCanonicalizing(
-      [$this->community->label() . ':community_manager', 'Second Community:community_affiliate'],
+      [$this->community->label() . '>community_manager', 'Second Community>community_affiliate'],
       $event->getValue(),
     );
   }

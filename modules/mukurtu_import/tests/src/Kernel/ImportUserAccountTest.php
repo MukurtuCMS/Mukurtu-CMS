@@ -87,13 +87,13 @@ class ImportUserAccountTest extends MukurtuImportTestBase {
    */
   public function testCreateUserWithFieldsAndRole() {
     $data = [
-      ['Username', 'Email', 'Status', 'Roles'],
-      ['newperson', 'newperson@example.com', '1', 'editor'],
+      ['Username', 'Email', 'Account Status', 'Roles'],
+      ['newperson', 'newperson@example.com', 'Active', 'editor'],
     ];
     $mapping = [
       ['target' => 'name', 'source' => 'Username'],
       ['target' => 'mail', 'source' => 'Email'],
-      ['target' => 'status', 'source' => 'Status'],
+      ['target' => 'account_status', 'source' => 'Account Status'],
       ['target' => 'roles', 'source' => 'Roles'],
     ];
 
@@ -369,13 +369,13 @@ class ImportUserAccountTest extends MukurtuImportTestBase {
    */
   public function testSetupEmailOptIn() {
     $data = [
-      ['Username', 'Email', 'Status'],
-      ['optedin', 'optedin@example.com', '1'],
+      ['Username', 'Email', 'Account Status'],
+      ['optedin', 'optedin@example.com', 'Active'],
     ];
     $mapping = [
       ['target' => 'name', 'source' => 'Username'],
       ['target' => 'mail', 'source' => 'Email'],
-      ['target' => 'status', 'source' => 'Status'],
+      ['target' => 'account_status', 'source' => 'Account Status'],
     ];
 
     $this->importUserCsv($data, $mapping, TRUE);
@@ -390,13 +390,13 @@ class ImportUserAccountTest extends MukurtuImportTestBase {
    */
   public function testSetupEmailNotSentByDefault() {
     $data = [
-      ['Username', 'Email', 'Status'],
-      ['notopted', 'notopted@example.com', '1'],
+      ['Username', 'Email', 'Account Status'],
+      ['notopted', 'notopted@example.com', 'Active'],
     ];
     $mapping = [
       ['target' => 'name', 'source' => 'Username'],
       ['target' => 'mail', 'source' => 'Email'],
-      ['target' => 'status', 'source' => 'Status'],
+      ['target' => 'account_status', 'source' => 'Account Status'],
     ];
 
     $this->importUserCsv($data, $mapping, FALSE);
@@ -430,28 +430,28 @@ class ImportUserAccountTest extends MukurtuImportTestBase {
   }
 
   /**
-   * Test that importing a new user as Blocked (Status=0), without mapping
-   * Pending, results in field_pending being cleared rather than left at its
-   * field-storage default of 1.
+   * Test that importing a new user with Account Status=Blocked results in
+   * field_pending being cleared rather than left at its field-storage
+   * default of 1.
    *
    * Regression coverage: field_pending's storage default is 1. The
    * interactive user-edit form explicitly clears it to 0 when "Blocked" is
-   * selected (see FormHooks::userStatusPreSaveSubmit()), but the import
-   * destination previously had no equivalent normalization, so a
-   * Status=0-only import left new accounts looking "Pending" instead of
-   * "Blocked".
+   * selected (see FormHooks::userStatusPreSaveSubmit()); the unified
+   * 'account_status' import target (AccountStatusLookup +
+   * ProtocolAwareUserContent::applyAccountStatus()) mirrors that same
+   * three-state model.
    */
-  public function testBlockedImportClearsFieldPending(): void {
+  public function testBlockedAccountStatusClearsFieldPending(): void {
     $this->installFieldPending();
 
     $data = [
-      ['Username', 'Email', 'Status'],
-      ['blockeduser', 'blockeduser@example.com', '0'],
+      ['Username', 'Email', 'Account Status'],
+      ['blockeduser', 'blockeduser@example.com', 'Blocked'],
     ];
     $mapping = [
       ['target' => 'name', 'source' => 'Username'],
       ['target' => 'mail', 'source' => 'Email'],
-      ['target' => 'status', 'source' => 'Status'],
+      ['target' => 'account_status', 'source' => 'Account Status'],
     ];
 
     $result = $this->importUserCsv($data, $mapping);
@@ -461,25 +461,23 @@ class ImportUserAccountTest extends MukurtuImportTestBase {
     $user = reset($users);
     $this->assertNotFalse($user);
     $this->assertFalse($user->isActive());
-    $this->assertEquals(0, $user->get('field_pending')->value, 'A user imported as Blocked without an explicit Pending value must not default to appearing Pending.');
+    $this->assertEquals(0, $user->get('field_pending')->value, 'A user imported as Blocked must not default to appearing Pending.');
   }
 
   /**
-   * Test that an explicit Pending value in the import row is respected, not
-   * overridden by the Blocked-status normalization.
+   * Test that Account Status=Pending sets both status=0 and field_pending=1.
    */
-  public function testBlockedImportRespectsExplicitPending(): void {
+  public function testPendingAccountStatusSetsFieldPending(): void {
     $this->installFieldPending();
 
     $data = [
-      ['Username', 'Email', 'Status', 'Pending'],
-      ['explicitlypending', 'explicitlypending@example.com', '0', '1'],
+      ['Username', 'Email', 'Account Status'],
+      ['explicitlypending', 'explicitlypending@example.com', 'Pending'],
     ];
     $mapping = [
       ['target' => 'name', 'source' => 'Username'],
       ['target' => 'mail', 'source' => 'Email'],
-      ['target' => 'status', 'source' => 'Status'],
-      ['target' => 'field_pending', 'source' => 'Pending'],
+      ['target' => 'account_status', 'source' => 'Account Status'],
     ];
 
     $result = $this->importUserCsv($data, $mapping);
@@ -488,7 +486,84 @@ class ImportUserAccountTest extends MukurtuImportTestBase {
     $users = $this->entityTypeManager->getStorage('user')->loadByProperties(['name' => 'explicitlypending']);
     $user = reset($users);
     $this->assertNotFalse($user);
-    $this->assertEquals(1, $user->get('field_pending')->value, 'An explicitly mapped Pending value must not be overridden by the Blocked-status normalization.');
+    $this->assertFalse($user->isActive());
+    $this->assertEquals(1, $user->get('field_pending')->value);
+  }
+
+  /**
+   * Test that a new account defaults to Active when Account Status isn't
+   * mapped at all.
+   */
+  public function testUnmappedAccountStatusDefaultsToActiveForNewAccount(): void {
+    $this->installFieldPending();
+
+    $data = [
+      ['Username', 'Email'],
+      ['defaultactive', 'defaultactive@example.com'],
+    ];
+    $mapping = [
+      ['target' => 'name', 'source' => 'Username'],
+      ['target' => 'mail', 'source' => 'Email'],
+    ];
+
+    $result = $this->importUserCsv($data, $mapping);
+    $this->assertEquals(MigrationInterface::RESULT_COMPLETED, $result);
+
+    $users = $this->entityTypeManager->getStorage('user')->loadByProperties(['name' => 'defaultactive']);
+    $user = reset($users);
+    $this->assertNotFalse($user);
+    $this->assertTrue($user->isActive(), 'A new account with no Account Status mapped must default to Active.');
+    $this->assertEquals(0, $user->get('field_pending')->value);
+  }
+
+  /**
+   * Test that re-importing an existing account with Account Status blank
+   * leaves its current status untouched, rather than resetting it to
+   * Active.
+   */
+  public function testBlankAccountStatusLeavesExistingAccountUnchanged(): void {
+    $this->installFieldPending();
+
+    $blocked = $this->createUser([], NULL, FALSE, ['status' => 0]);
+
+    $data = [
+      ['ID', 'Account Status'],
+      [$blocked->id(), ''],
+    ];
+    $mapping = [
+      ['target' => 'uid', 'source' => 'ID'],
+      ['target' => 'account_status', 'source' => 'Account Status'],
+    ];
+
+    $result = $this->importUserCsv($data, $mapping);
+    $this->assertEquals(MigrationInterface::RESULT_COMPLETED, $result);
+
+    $updated = $this->entityTypeManager->getStorage('user')->load($blocked->id());
+    $this->assertFalse($updated->isActive(), 'A blank Account Status on an update row must not reactivate an existing account.');
+  }
+
+  /**
+   * Test that an unrecognized Account Status value fails the row.
+   */
+  public function testInvalidAccountStatusFailsRow(): void {
+    $data = [
+      ['Username', 'Email', 'Account Status'],
+      ['badstatus', 'badstatus@example.com', 'Frobnicated'],
+    ];
+    $mapping = [
+      ['target' => 'name', 'source' => 'Username'],
+      ['target' => 'mail', 'source' => 'Email'],
+      ['target' => 'account_status', 'source' => 'Account Status'],
+    ];
+
+    $this->importUserCsv($data, $mapping);
+
+    $users = $this->entityTypeManager->getStorage('user')->loadByProperties(['name' => 'badstatus']);
+    $this->assertEmpty($users, 'A row with an unrecognized Account Status value must not create the account.');
+
+    $messages = iterator_to_array($this->lastMigration->getIdMap()->getMessages());
+    $this->assertNotEmpty($messages);
+    $this->assertStringContainsString('is not a valid Account Status', reset($messages)->message);
   }
 
 }

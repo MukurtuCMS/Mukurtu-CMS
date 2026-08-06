@@ -283,6 +283,11 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
             ],
           ];
         }
+        elseif ($entity_type_id === 'user' && $target === 'account_status') {
+          $import_process[$target_option] = [
+            ['plugin' => 'mukurtu_account_status_lookup', 'source' => $source],
+          ];
+        }
         continue;
       }
 
@@ -334,6 +339,17 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
       if (!$fieldDef->isReadOnly() && in_array($fieldName, $targets)) {
         $writableFields[] = $fieldName;
       }
+    }
+
+    // 'status'/'field_pending' are no longer directly mappable targets for
+    // the user entity type (superseded by the virtual 'account_status'
+    // target -- see ImportFormTrait::getFieldDefinitions()), so they never
+    // appear in $fieldDefs/$targets above. ProtocolAwareUserContent still
+    // needs to actually persist them on an existing account whenever
+    // 'account_status' is mapped, so whitelist them here too.
+    if ($entity_type_id === 'user' && in_array('account_status', $targets, TRUE)) {
+      $writableFields[] = 'status';
+      $writableFields[] = 'field_pending';
     }
 
     return $writableFields;
@@ -433,6 +449,16 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
     $label_key = $this->entityTypeManager()
       ->getDefinition($entity_type_id)
       ->getKey('label');
+
+    // Unlike every other importable entity type, 'user' has no 'label'
+    // entity key in Drupal core -- User::label() computes the account name
+    // dynamically instead of declaring it. The required 'name' (username)
+    // field plays the same uniquely-identifying-row role that title/name
+    // already play for node/media/taxonomy_term/community/protocol, so
+    // treat it as the label key here.
+    if (!$label_key && $entity_type_id === 'user') {
+      $label_key = 'name';
+    }
 
     if (!$label_key) {
       return NULL;

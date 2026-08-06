@@ -62,16 +62,9 @@ class ProtocolAwareUserContent extends ProtocolAwareEntityContent {
       throw new MigrateException('The site superuser account (uid 1) cannot be created or updated via import.');
     }
 
-    // Mirror FormHooks::userStatusPreSaveSubmit()'s normalization: the
-    // field_pending field's storage default is 1, so a row that sets Status
-    // to blocked (0) without also explicitly mapping/setting Pending would
-    // otherwise save with that default and the account would incorrectly
-    // appear "Pending" rather than "Blocked".
-    if ($row->hasDestinationProperty('status') && !$row->getDestinationProperty('status') && !$row->hasDestinationProperty('field_pending')) {
-      $row->setDestinationProperty('field_pending', 0);
-    }
-
     $is_new = !$existing_id;
+    $this->applyAccountStatus($row, !$is_new);
+
     $ids = parent::import($row, $old_destination_id_values);
 
     if (!empty($ids[0])) {
@@ -83,6 +76,38 @@ class ProtocolAwareUserContent extends ProtocolAwareEntityContent {
     }
 
     return $ids;
+  }
+
+  /**
+   * Resolves the virtual 'account_status' destination property (Active/
+   * Blocked/Pending, produced by AccountStatusLookup) into the real
+   * 'status' and 'field_pending' destination properties, mirroring
+   * FormHooks::userStatusPreSaveSubmit()'s three-state model.
+   *
+   * 'account_status' isn't a real field on the user entity, so it's cleared
+   * from the row the same way extractAndClearGroupMembershipUpdates()
+   * handles the communities/protocols virtual targets.
+   *
+   * @param \Drupal\migrate\Row $row
+   *   The row being imported.
+   * @param bool $is_update
+   *   TRUE if this row is updating an existing account.
+   */
+  protected function applyAccountStatus(Row $row, bool $is_update): void {
+    $resolved = $row->getDestinationProperty('account_status');
+    $row->setDestinationProperty('account_status', NULL);
+
+    if ($resolved === NULL) {
+      // Unmapped, or mapped with a blank cell. New accounts default to
+      // Active; existing accounts being updated keep their current status.
+      if ($is_update) {
+        return;
+      }
+      $resolved = ['status' => 1, 'field_pending' => 0];
+    }
+
+    $row->setDestinationProperty('status', $resolved['status']);
+    $row->setDestinationProperty('field_pending', $resolved['field_pending']);
   }
 
   /**

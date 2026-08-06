@@ -60,12 +60,12 @@ class CsvExportUserFieldsTest extends KernelTestBase {
       $this->assertNotEmpty($headers, "$id must map export fields for user/user, or exporting users produces a blank CSV.");
       $this->assertArrayHasKey('name', $headers);
       $this->assertArrayHasKey('mail', $headers);
-      $this->assertArrayHasKey('status', $headers);
+      $this->assertArrayHasKey('account_status', $headers);
 
       $fields = $exporter->getExportFields('user', 'user');
       $this->assertContains('name', $fields);
       $this->assertContains('mail', $fields);
-      $this->assertContains('status', $fields);
+      $this->assertContains('account_status', $fields);
     }
   }
 
