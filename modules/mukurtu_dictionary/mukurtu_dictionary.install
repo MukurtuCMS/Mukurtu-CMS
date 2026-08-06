@@ -1386,7 +1386,8 @@ function mukurtu_dictionary_update_40039(): void {
 
 /**
  * Move the dictionary word and word list edit form maps' default center off
- * Null Island (#1453).
+ * Null Island, and give them a dedicated zoom for editing a single
+ * already-saved point (#1453).
  */
 function mukurtu_dictionary_update_40040(): void {
   $displays = [
@@ -1401,6 +1402,7 @@ function mukurtu_dictionary_update_40040(): void {
     $config->set('content.field_coverage.settings.map.map_position.zoom', 2);
     $config->set('content.field_coverage.settings.map.map_position.center.lat', 20);
     $config->set('content.field_coverage.settings.map.map_position.center.lon', 10);
+    $config->set('content.field_coverage.settings.map.map_position.singlePointZoom', 12);
     $config->save();
   }
 }

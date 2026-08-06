@@ -170,6 +170,7 @@ content:
           minZoom: '1'
           maxZoom: '18'
           zoomFiner: '0'
+          singlePointZoom: '12'
           force: 0
           center:
             lat: '20'

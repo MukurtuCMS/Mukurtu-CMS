@@ -83,6 +83,126 @@
   };
 
   /**
+   * Update the Leaflet Widget Map from value element.
+   */
+  Drupal.Leaflet_Widget.prototype.update_leaflet_widget_map = function () {
+    const self = this;
+    const value = this.get_json_value();
+
+    /* Copied from leaflet.widget.js begin: */
+
+    // Always clear the layers in drawnItems on map updates.
+    this.drawnItems.clearLayers();
+
+    // Apply styles to pm drawn items.
+    this.map.pm.setGlobalOptions({
+      pathOptions: this.widgetsettings.path_style
+    });
+
+    // Nothing to do if we don't have any data.
+    if (value.length === 0) {
+      // If no layer available, and the Map Center is not forced, locate the user position.
+      if (this.map_settings.locate && this.map_settings.locate.automatic && !this.map_settings.map_position_force) {
+        this.map.locate({setView: true, maxZoom: this.map_settings.zoom});
+      }
+      return;
+    }
+
+    try {
+      const layerOpts = {
+        style: function (feature) {
+          return self.widgetsettings.path_style;
+        }
+      };
+
+      // Use circleMarkers if specified.
+      if (this.widgetsettings.toolbarSettings.marker === "circleMarker") {
+        layerOpts.pointToLayer = function (feature, latlng) {
+          return L.circleMarker(latlng);
+        };
+      }
+
+      const obj = L.geoJson(JSON.parse(value), layerOpts);
+
+      // See https://github.com/Leaflet/Leaflet.draw/issues/398
+      obj.eachLayer(function(layer) {
+        if (typeof layer.getLayers === "function") {
+          const subLayers = layer.getLayers();
+          for (let i = 0; i < subLayers.length; i++) {
+            this.drawnItems.addLayer(subLayers[i]);
+            this.add_layer_listeners(subLayers[i]);
+          }
+        }
+        else {
+          this.drawnItems.addLayer(layer);
+          this.add_layer_listeners(layer);
+        }
+      }, this);
+
+      // Pan the map to the feature
+      if (this.widgetsettings.autoCenter) {
+        let start_zoom;
+        let start_center;
+
+        if (obj.getBounds !== undefined && typeof obj.getBounds === 'function') {
+          // For objects that have defined bounds or a way to get them
+          const bounds = obj.getBounds();
+          this.map.fitBounds(bounds);
+          start_center = bounds.getCenter();
+
+          // In case of Map Bounds collapsed into a Point or Map Zoom Forced,
+          // use the custom Map Start Zoom (if set).
+          if (this.widgetsettings.map_position.zoom &&
+            (bounds.getSouthWest().distanceTo(bounds.getNorthEast()) === 0 || this.widgetsettings.map_position.force)) {
+            /* Copied from leaflet.widget.js end. */
+
+            /* Mukurtu additions begin: */
+
+            // A single saved point should zoom in to a usable level, not
+            // fall back to the empty-map default (deliberately zoomed out
+            // to avoid world-map tiling on add forms - see #1453). An
+            // explicit site-level "Force Map Center & Zoom" still wins,
+            // matching contrib's documented behavior for that flag.
+            start_zoom = (!this.widgetsettings.map_position.force && this.widgetsettings.map_position.singlePointZoom)
+              ? this.widgetsettings.map_position.singlePointZoom
+              : this.widgetsettings.map_position.zoom;
+
+            /* Mukurtu additions end. */
+
+            /* Copied from leaflet.widget.js begin: */
+            this.map.setZoom(start_zoom);
+          }
+          else {
+            // Update the map start zoom and center, for correct working of Map Reset control.
+            start_zoom = this.map.getBoundsZoom(bounds);
+          }
+        } else if (obj.getLatLng !== undefined && typeof obj.getLatLng === 'function') {
+          this.map.panTo(obj.getLatLng());
+          // Update the map start center, for correct working of Map Reset control.
+          start_center = this.map.getCenter();
+          start_zoom = this.map.getZoom();
+        }
+
+        // In case of map initial position not forced, and zoomFiner not null/neutral,
+        // adapt the Map Zoom and the Start Zoom accordingly.
+        if (!this.widgetsettings.map_position.force &&
+            this.widgetsettings.map_position.hasOwnProperty('zoomFiner') &&
+            parseInt(this.widgetsettings.map_position.zoomFiner) !== 0) {
+          start_zoom += parseFloat(this.widgetsettings.map_position.zoomFiner);
+          this.map.setView(start_center, start_zoom);
+        }
+
+        // Reset the StartZoom and StartCenter.
+        this.reset_start_zoom_and_center(this.mapid, start_zoom, start_center);
+      }
+    } catch (error) {
+      if (window.console) console.error(error.message);
+    }
+
+    /* Copied from leaflet.widget.js end. */
+  };
+
+  /**
    * Add/Set Listeners to the Drawn Map Layers.
    */
   Drupal.Leaflet_Widget.prototype.add_layer_listeners = function (layer) {

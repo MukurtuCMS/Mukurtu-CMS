@@ -382,7 +382,8 @@ function mukurtu_collection_update_40017(): void {
 }
 
 /**
- * Move the collection edit form map's default center off Null Island (#1453).
+ * Move the collection edit form map's default center off Null Island, and
+ * give it a dedicated zoom for editing a single already-saved point (#1453).
  */
 function mukurtu_collection_update_40018(): void {
   $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.collection.default');
@@ -392,5 +393,6 @@ function mukurtu_collection_update_40018(): void {
   $config->set('content.field_coverage.settings.map.map_position.zoom', 2);
   $config->set('content.field_coverage.settings.map.map_position.center.lat', 20);
   $config->set('content.field_coverage.settings.map.map_position.center.lon', 10);
+  $config->set('content.field_coverage.settings.map.map_position.singlePointZoom', 12);
   $config->save();
 }
