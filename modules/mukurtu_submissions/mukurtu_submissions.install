@@ -5,8 +5,38 @@
  * Install, update, and uninstall functions for the Mukurtu Submissions module.
  */
 
+use Drupal\mukurtu_media\MediaTypeExtensions;
 use Drupal\mukurtu_submissions\Entity\SubmissionSettingsInterface;
 use Drupal\user\Entity\User;
+
+/**
+ * Permissions "administrator" and "mukurtu_manager" need to review pending
+ * submissions: the submission entity itself, the digital_heritage node
+ * (submissions are created owned by the service account with no cultural
+ * protocol assigned yet - MukurtuProtocolNodeAccessControlHandler's
+ * "empty protocols" fallback requires "edit/delete any digital_heritage
+ * content" to grant access to anyone but the owner), and any media a
+ * visitor uploaded via SimpleMediaUploadWidget (same "empty protocols,
+ * not owner" situation, via MukurtuProtocolMediaAccessControlHandler's
+ * equivalent fallback for "edit/delete any {bundle} media").
+ *
+ * Shared by hook_install() (fresh installs) and
+ * mukurtu_submissions_update_40001() (existing sites), so the two can't
+ * drift out of sync.
+ */
+function mukurtu_submissions_review_permissions(): array {
+  $permissions = [
+    'administer mukurtu submissions',
+    'review mukurtu submissions',
+    'edit any digital_heritage content',
+    'delete any digital_heritage content',
+  ];
+  foreach (array_keys(MediaTypeExtensions::SUPPORTED_TYPES) as $bundle) {
+    $permissions[] = "edit any $bundle media";
+    $permissions[] = "delete any $bundle media";
+  }
+  return $permissions;
+}
 
 /**
  * Implements hook_install().
@@ -28,7 +58,7 @@ function mukurtu_submissions_install($is_syncing): void {
       continue;
     }
     $changed = FALSE;
-    foreach (['administer mukurtu submissions', 'review mukurtu submissions'] as $permission) {
+    foreach (mukurtu_submissions_review_permissions() as $permission) {
       if (!$role->hasPermission($permission)) {
         $role->grantPermission($permission);
         $changed = TRUE;
@@ -90,6 +120,30 @@ function mukurtu_submissions_uninstall(): void {
     $bundle = $settings->getTargetBundle();
     foreach (["/submit/$entity_type_id/$bundle", "/submit/$entity_type_id/$bundle/thank-you"] as $source) {
       $alias_storage->delete($alias_storage->loadByProperties(['path' => $source]));
+    }
+  }
+}
+
+/**
+ * Grants "administrator" and "mukurtu_manager" the permissions needed to
+ * review a pending submission's node and any visitor-uploaded media - see
+ * mukurtu_submissions_review_permissions() for why these are required.
+ */
+function mukurtu_submissions_update_40001(): void {
+  foreach (['administrator', 'mukurtu_manager'] as $role_id) {
+    $role = \Drupal\user\Entity\Role::load($role_id);
+    if (!$role) {
+      continue;
+    }
+    $changed = FALSE;
+    foreach (mukurtu_submissions_review_permissions() as $permission) {
+      if (!$role->hasPermission($permission)) {
+        $role->grantPermission($permission);
+        $changed = TRUE;
+      }
+    }
+    if ($changed) {
+      $role->save();
     }
   }
 }

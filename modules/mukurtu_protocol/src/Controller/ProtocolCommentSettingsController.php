@@ -6,7 +6,6 @@ use Drupal\comment\CommentInterface;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\mukurtu_protocol\Entity\ProtocolInterface;
-use Drupal\Core\Form\FormState;
 use Drupal\Core\Link;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
@@ -15,23 +14,6 @@ use Drupal\Core\Url;
  * Controller for protocol comment management.
  */
 class ProtocolCommentSettingsController extends ControllerBase {
-
-  /**
-   * Page for managing protocol's comment settings.
-   */
-  public function content(ProtocolInterface $group) {
-    $form_state = new FormState();
-    $form_state->set('protocol', $group);
-    $form = $this->formBuilder()->buildForm('Drupal\mukurtu_protocol\Form\ProtocolCommentSettingsForm', $form_state);
-    return $form;
-  }
-
-  /**
-   * Title callback for comment settings page.
-   */
-  public function getTitle(ProtocolInterface $group) {
-    return $this->t("%protocol Comment Settings", ['%protocol' => $group->getName()]);
-  }
 
   /**
    * Title callback for the unapproved comments page.

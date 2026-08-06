@@ -46,3 +46,42 @@ mukurtu_submissions.mukurtu_submission_settings.*:
     access_level:
       type: string
       label: 'Who may submit'
+    intro_text:
+      type: text_format
+      label: 'Introductory text'
+    field_groups:
+      type: sequence
+      label: 'Field groups'
+      sequence:
+        type: mapping
+        label: 'Field group'
+        mapping:
+          id:
+            type: string
+            label: 'Machine name'
+          label:
+            type: label
+            label: 'Label'
+          collapsed:
+            type: boolean
+            label: 'Collapsed by default'
+          parent:
+            type: string
+            label: 'Parent group ID'
+            nullable: true
+    field_group_assignments:
+      type: sequence
+      label: 'Field group assignments'
+      sequence:
+        type: string
+        label: 'Group ID'
+
+field.widget.settings.mukurtu_simple_media_upload:
+  type: mapping
+  label: 'Simple media upload widget settings'
+  mapping:
+    allowed_bundles:
+      type: sequence
+      label: 'Allowed media bundles'
+      sequence:
+        type: string

@@ -6,6 +6,8 @@ core_version_requirement: '^10 || ^11'
 dependencies:
   - 'drupal:content_moderation'
   - 'drupal:field'
+  - 'drupal:file'
+  - 'drupal:media'
   - 'drupal:node'
   - 'drupal:path_alias'
   - 'drupal:user'
@@ -14,6 +16,7 @@ dependencies:
   - 'message_notify:message_notify'
   - 'message_subscribe:message_subscribe'
   - 'mukurtu_core:mukurtu_core'
+  - 'mukurtu_media:mukurtu_media'
   - 'mukurtu_notifications:mukurtu_notifications'
   - 'mukurtu_protocol:mukurtu_protocol'
 version: 4.x-dev

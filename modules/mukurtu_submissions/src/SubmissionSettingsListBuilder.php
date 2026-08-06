@@ -74,7 +74,7 @@ class SubmissionSettingsListBuilder extends ConfigEntityListBuilder {
     if ($entity->status()) {
       $operations['view_form'] = [
         'title' => $this->t('View form'),
-        'weight' => 0,
+        'weight' => 20,
         'url' => Url::fromRoute('mukurtu_submissions.submit', [
           'entity_type_id' => $entity->getTargetEntityTypeId(),
           'bundle' => $entity->getTargetBundle(),

@@ -12,7 +12,6 @@ dependencies:
   - 'drupal:path'
   - 'drupal:text'
   - 'drupal:user'
-  - 'features:features'
   - 'gin_lb:gin_lb'
   - 'layout_builder_restrictions:layout_builder_restrictions'
   - 'mukurtu_core:mukurtu_core'
