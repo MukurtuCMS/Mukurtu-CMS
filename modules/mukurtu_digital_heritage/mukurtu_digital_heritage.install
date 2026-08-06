@@ -185,7 +185,8 @@ function mukurtu_digital_heritage_update_40007(): void {
 }
 
 /**
- * Raise the digital heritage edit form map's default starting zoom to avoid showing duplicate wrapped continents (#1453).
+ * Raise the digital heritage edit form map's default starting zoom and move
+ * its default center off Null Island (#1453).
  */
 function mukurtu_digital_heritage_update_40008(): void {
   $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.digital_heritage.default');
@@ -193,5 +194,7 @@ function mukurtu_digital_heritage_update_40008(): void {
     return;
   }
   $config->set('content.field_coverage.settings.map.map_position.zoom', 4);
+  $config->set('content.field_coverage.settings.map.map_position.center.lat', 20);
+  $config->set('content.field_coverage.settings.map.map_position.center.lon', 10);
   $config->save();
 }

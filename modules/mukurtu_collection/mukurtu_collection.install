@@ -382,7 +382,8 @@ function mukurtu_collection_update_40017(): void {
 }
 
 /**
- * Raise the collection edit form map's default starting zoom to avoid showing duplicate wrapped continents (#1453).
+ * Raise the collection edit form map's default starting zoom and move its
+ * default center off Null Island (#1453).
  */
 function mukurtu_collection_update_40018(): void {
   $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.collection.default');
@@ -390,5 +391,7 @@ function mukurtu_collection_update_40018(): void {
     return;
   }
   $config->set('content.field_coverage.settings.map.map_position.zoom', 4);
+  $config->set('content.field_coverage.settings.map.map_position.center.lat', 20);
+  $config->set('content.field_coverage.settings.map.map_position.center.lon', 10);
   $config->save();
 }
