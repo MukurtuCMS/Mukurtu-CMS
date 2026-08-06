@@ -188,7 +188,7 @@ content:
         auto_center: '1'
         scroll_zoom_enabled: '1'
         map_position:
-          zoom: '4'
+          zoom: '2'
           minZoom: '1'
           maxZoom: '18'
           zoomFiner: '0'
