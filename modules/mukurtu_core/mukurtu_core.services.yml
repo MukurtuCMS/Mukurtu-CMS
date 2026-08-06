@@ -19,3 +19,6 @@ services:
   mukurtu_core.related_content_grouper:
     class: Drupal\mukurtu_core\Service\RelatedContentGrouper
     arguments: ['@entity_type.manager', '@config.factory', '@event_dispatcher']
+  mukurtu_core.entity_translation_resolver:
+    class: Drupal\mukurtu_core\Service\EntityTranslationResolver
+    arguments: ['@entity_type.manager', '@entity.repository']
