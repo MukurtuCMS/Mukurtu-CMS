@@ -46,7 +46,31 @@ class ImportFieldDescriptionListForm extends ImportBaseForm {
     $import_field_options = $this->buildTargetOptions($entity_type, $effective_bundle);
     unset($import_field_options[-1]);
 
+    // Communities/protocols are virtual destination properties for the user
+    // entity type (see ImportFormTrait::buildTargetOptions()), not real
+    // fields, so they have no FieldDefinitionInterface to look up or hand to
+    // the field process plugin manager. Describe their format directly.
+    $virtual_target_descriptions = [
+      'communities' => [
+        'description' => $this->t('The communities this user is a member of, and their role(s) within each.'),
+        'format' => $this->t('Format: CommunityName:role|role;AnotherCommunity:role. Separate multiple roles for the same community with |. Separate multiple communities with ; (or your configured multi-value delimiter). Roles must be entered as their machine name (e.g. community_manager, member).'),
+      ],
+      'protocols' => [
+        'description' => $this->t('The protocols this user is a member of, and their role(s) within each.'),
+        'format' => $this->t('Format: ProtocolName:role|role;AnotherProtocol:role. Separate multiple roles for the same protocol with |. Separate multiple protocols with ; (or your configured multi-value delimiter). Roles must be entered as their machine name (e.g. protocol_steward, contributor).'),
+      ],
+    ];
+
     foreach ($import_field_options as $field_target => $target_label) {
+      if ($entity_type === 'user' && isset($virtual_target_descriptions[$field_target])) {
+        $options[$field_target] = [
+          'label' => $target_label,
+          'description' => $virtual_target_descriptions[$field_target]['description'],
+          'format' => $virtual_target_descriptions[$field_target]['format'],
+        ];
+        continue;
+      }
+
       $field_components = explode('/', $field_target);
       $field_name = $field_components[0];
       $field_property = $field_components[1] ?? NULL;

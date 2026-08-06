@@ -453,3 +453,51 @@ function mukurtu_export_update_40017(): void {
     $config_storage->write($config_name, $source->read($config_name));
   }
 }
+
+/**
+ * Add a user__user field mapping to the four default export presets.
+ *
+ * Without a mapping, getHeaders()/getExportFields() return an empty list for
+ * the user entity type, so exporting users produced a CSV with a header row
+ * and/or data rows but no actual field columns. Mirrors the field list
+ * mukurtu_import's "User - all fields" import strategy already maps, for
+ * import/export parity.
+ */
+function mukurtu_export_update_40018(): void {
+  $ids = [
+    'default_local_metadata_only',
+    'default_local_with_media',
+    'default_external_metadata_only',
+    'default_external_with_media',
+  ];
+  $storage = \Drupal::entityTypeManager()->getStorage('csv_exporter');
+  foreach ($ids as $id) {
+    $entity = $storage->load($id);
+    if (!$entity) {
+      continue;
+    }
+    $list = $entity->get('entity_fields_export_list') ?? [];
+    if (isset($list['user__user'])) {
+      continue;
+    }
+    $list['user__user'] = [
+      'uid' => 'ID',
+      'uuid' => 'UUID',
+      'name' => 'Username',
+      'mail' => 'Email',
+      'status' => 'Status',
+      'field_pending' => 'Pending',
+      'field_display_name' => 'Display Name',
+      'roles' => 'Roles',
+      'created' => 'Created',
+      'langcode' => 'Language (langcode)',
+      'timezone' => 'Timezone',
+      'message_subscribe_email' => 'Receive Email Notifications',
+      'user_picture/target_id' => 'Profile Picture File',
+      'user_picture/alt' => 'Profile Picture Alt Text',
+      'communities' => 'Communities',
+      'protocols' => 'Protocols',
+    ];
+    $entity->set('entity_fields_export_list', $list)->save();
+  }
+}

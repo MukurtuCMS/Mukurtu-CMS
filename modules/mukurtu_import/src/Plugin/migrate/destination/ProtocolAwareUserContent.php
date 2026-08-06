@@ -62,6 +62,15 @@ class ProtocolAwareUserContent extends ProtocolAwareEntityContent {
       throw new MigrateException('The site superuser account (uid 1) cannot be created or updated via import.');
     }
 
+    // Mirror FormHooks::userStatusPreSaveSubmit()'s normalization: the
+    // field_pending field's storage default is 1, so a row that sets Status
+    // to blocked (0) without also explicitly mapping/setting Pending would
+    // otherwise save with that default and the account would incorrectly
+    // appear "Pending" rather than "Blocked".
+    if ($row->hasDestinationProperty('status') && !$row->getDestinationProperty('status') && !$row->hasDestinationProperty('field_pending')) {
+      $row->setDestinationProperty('field_pending', 0);
+    }
+
     $is_new = !$existing_id;
     $ids = parent::import($row, $old_destination_id_values);
 

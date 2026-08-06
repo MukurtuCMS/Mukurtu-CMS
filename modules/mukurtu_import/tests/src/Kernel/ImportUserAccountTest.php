@@ -4,6 +4,8 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\mukurtu_import\Kernel;
 
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\migrate\MigrateMessage;
 use Drupal\migrate\Plugin\MigrationInterface;
 use Drupal\mukurtu_import\Entity\MukurtuImportStrategy;
@@ -201,7 +203,7 @@ class ImportUserAccountTest extends MukurtuImportTestBase {
   }
 
   /**
-   * Test that a custom role granting a restricted-access permission is
+   * Test that a custom role granting a genuinely dangerous permission is
    * rejected too, not just the literal Administrator role.
    *
    * Regression coverage for a gap noted while fixing the "import mukurtu
@@ -210,7 +212,7 @@ class ImportUserAccountTest extends MukurtuImportTestBase {
    * custom role carrying an equivalent admin-only permission (e.g.
    * 'administer permissions') could sidestep that protection entirely.
    */
-  public function testRestrictedPermissionRoleRejected() {
+  public function testDangerousPermissionRoleRejected() {
     Role::create(['id' => 'shadow_admin', 'label' => 'Shadow Admin'])
       ->grantPermission('administer permissions')
       ->save();
@@ -228,11 +230,113 @@ class ImportUserAccountTest extends MukurtuImportTestBase {
     $this->importUserCsv($data, $mapping);
 
     $users = $this->entityTypeManager->getStorage('user')->loadByProperties(['name' => 'wannabe_shadow_admin']);
-    $this->assertEmpty($users, 'A row attempting to grant a role with a restricted-access permission must not create the account.');
+    $this->assertEmpty($users, 'A row attempting to grant a role with a dangerous, site-wide-control permission must not create the account.');
 
     $messages = iterator_to_array($this->lastMigration->getIdMap()->getMessages());
     $this->assertNotEmpty($messages);
-    $this->assertStringContainsString('restricted-access permission', reset($messages)->message);
+    $this->assertStringContainsString('grants the "administer permissions" permission', reset($messages)->message);
+  }
+
+  /**
+   * Test that a role carrying only a scoped, 'restrict access'-flagged
+   * feature-admin permission (not a site-wide-control one) CAN be assigned
+   * via import.
+   *
+   * Regression coverage: RoleLookup previously rejected any role holding
+   * ANY permission Drupal marks 'restrict access', a flag core and Mukurtu's
+   * own modules both apply broadly to mean "trusted roles only" -- not a
+   * reliable signal of site-wide escalation. That wrongly blocked roles like
+   * Mukurtu Manager, which only holds scoped feature-admin permissions such
+   * as 'administer mukurtu access denied page'.
+   */
+  public function testRestrictAccessPermissionAllowedWhenNotDangerous() {
+    Role::create(['id' => 'mukurtu_manager_like', 'label' => 'Mukurtu-Manager-like'])
+      ->grantPermission('administer mukurtu access denied page')
+      ->save();
+
+    $data = [
+      ['Username', 'Email', 'Roles'],
+      ['scopedadmin', 'scopedadmin@example.com', 'Mukurtu-Manager-like'],
+    ];
+    $mapping = [
+      ['target' => 'name', 'source' => 'Username'],
+      ['target' => 'mail', 'source' => 'Email'],
+      ['target' => 'roles', 'source' => 'Roles'],
+    ];
+
+    $result = $this->importUserCsv($data, $mapping);
+    $this->assertEquals(MigrationInterface::RESULT_COMPLETED, $result);
+
+    $users = $this->entityTypeManager->getStorage('user')->loadByProperties(['name' => 'scopedadmin']);
+    $user = reset($users);
+    $this->assertNotFalse($user, 'A role with only a scoped restrict-access permission (not a site-wide-control one) must be importable.');
+    $this->assertTrue($user->hasRole('mukurtu_manager_like'));
+  }
+
+  /**
+   * Test that the real Mukurtu Roundtrip Manager role can be assigned via
+   * import.
+   *
+   * Regression test for the reviewed round-trip testing issue: this role's
+   * only sensitive permission, 'administer mukurtu_import_strategy', is
+   * 'restrict access'-flagged but not a site-wide-control permission.
+   */
+  public function testRoundtripManagerRoleImportable() {
+    Role::create(['id' => 'mukurtu_roundtrip_manager', 'label' => 'Mukurtu Roundtrip Manager'])
+      ->grantPermission('administer mukurtu_import_strategy')
+      ->save();
+
+    $data = [
+      ['Username', 'Email', 'Roles'],
+      ['roundtripmgr', 'roundtripmgr@example.com', 'Mukurtu Roundtrip Manager'],
+    ];
+    $mapping = [
+      ['target' => 'name', 'source' => 'Username'],
+      ['target' => 'mail', 'source' => 'Email'],
+      ['target' => 'roles', 'source' => 'Roles'],
+    ];
+
+    $result = $this->importUserCsv($data, $mapping);
+    $this->assertEquals(MigrationInterface::RESULT_COMPLETED, $result);
+
+    $users = $this->entityTypeManager->getStorage('user')->loadByProperties(['name' => 'roundtripmgr']);
+    $user = reset($users);
+    $this->assertNotFalse($user, 'The Mukurtu Roundtrip Manager role must be importable.');
+    $this->assertTrue($user->hasRole('mukurtu_roundtrip_manager'));
+  }
+
+  /**
+   * Test that a role Drupal itself marks as a full super-admin role
+   * (RoleInterface::isAdmin()) is rejected regardless of its machine name.
+   *
+   * Regression coverage for a gap found alongside the dangerous-permission
+   * allowlist fix: the Administrator check previously only compared against
+   * the literal string 'administrator', so a cloned/renamed super-admin role
+   * (is_admin: true, which grants every permission implicitly and typically
+   * carries no explicit permissions of its own to match against an
+   * allowlist) would have sailed through both checks.
+   */
+  public function testRenamedSuperAdminRoleRejected() {
+    Role::create(['id' => 'site_owner', 'label' => 'Site Owner', 'is_admin' => TRUE])->save();
+
+    $data = [
+      ['Username', 'Email', 'Roles'],
+      ['wannabe_site_owner', 'wannabe_site_owner@example.com', 'Site Owner'],
+    ];
+    $mapping = [
+      ['target' => 'name', 'source' => 'Username'],
+      ['target' => 'mail', 'source' => 'Email'],
+      ['target' => 'roles', 'source' => 'Roles'],
+    ];
+
+    $this->importUserCsv($data, $mapping);
+
+    $users = $this->entityTypeManager->getStorage('user')->loadByProperties(['name' => 'wannabe_site_owner']);
+    $this->assertEmpty($users, 'A row attempting to grant a renamed super-admin (is_admin) role must not create the account.');
+
+    $messages = iterator_to_array($this->lastMigration->getIdMap()->getMessages());
+    $this->assertNotEmpty($messages);
+    $this->assertStringContainsString('Administrator role cannot be assigned', reset($messages)->message);
   }
 
   /**
@@ -300,6 +404,91 @@ class ImportUserAccountTest extends MukurtuImportTestBase {
     $captured = \Drupal::state()->get('system.test_mail_collector', []);
     $sent = array_filter($captured, fn($mail) => ($mail['to'] ?? NULL) === 'notopted@example.com');
     $this->assertEmpty($sent, 'No setup email should be sent unless the importing admin opts in.');
+  }
+
+  /**
+   * Installs the mukurtu_core field_pending field on the user entity,
+   * mirroring its shipped field storage/field config (boolean, defaulting to
+   * 1 for new accounts).
+   */
+  protected function installFieldPending(): void {
+    if (!FieldStorageConfig::loadByName('user', 'field_pending')) {
+      FieldStorageConfig::create([
+        'field_name' => 'field_pending',
+        'entity_type' => 'user',
+        'type' => 'boolean',
+      ])->save();
+    }
+    if (!FieldConfig::loadByName('user', 'user', 'field_pending')) {
+      FieldConfig::create([
+        'field_name' => 'field_pending',
+        'entity_type' => 'user',
+        'bundle' => 'user',
+        'default_value' => [['value' => 1]],
+      ])->save();
+    }
+  }
+
+  /**
+   * Test that importing a new user as Blocked (Status=0), without mapping
+   * Pending, results in field_pending being cleared rather than left at its
+   * field-storage default of 1.
+   *
+   * Regression coverage: field_pending's storage default is 1. The
+   * interactive user-edit form explicitly clears it to 0 when "Blocked" is
+   * selected (see FormHooks::userStatusPreSaveSubmit()), but the import
+   * destination previously had no equivalent normalization, so a
+   * Status=0-only import left new accounts looking "Pending" instead of
+   * "Blocked".
+   */
+  public function testBlockedImportClearsFieldPending(): void {
+    $this->installFieldPending();
+
+    $data = [
+      ['Username', 'Email', 'Status'],
+      ['blockeduser', 'blockeduser@example.com', '0'],
+    ];
+    $mapping = [
+      ['target' => 'name', 'source' => 'Username'],
+      ['target' => 'mail', 'source' => 'Email'],
+      ['target' => 'status', 'source' => 'Status'],
+    ];
+
+    $result = $this->importUserCsv($data, $mapping);
+    $this->assertEquals(MigrationInterface::RESULT_COMPLETED, $result);
+
+    $users = $this->entityTypeManager->getStorage('user')->loadByProperties(['name' => 'blockeduser']);
+    $user = reset($users);
+    $this->assertNotFalse($user);
+    $this->assertFalse($user->isActive());
+    $this->assertEquals(0, $user->get('field_pending')->value, 'A user imported as Blocked without an explicit Pending value must not default to appearing Pending.');
+  }
+
+  /**
+   * Test that an explicit Pending value in the import row is respected, not
+   * overridden by the Blocked-status normalization.
+   */
+  public function testBlockedImportRespectsExplicitPending(): void {
+    $this->installFieldPending();
+
+    $data = [
+      ['Username', 'Email', 'Status', 'Pending'],
+      ['explicitlypending', 'explicitlypending@example.com', '0', '1'],
+    ];
+    $mapping = [
+      ['target' => 'name', 'source' => 'Username'],
+      ['target' => 'mail', 'source' => 'Email'],
+      ['target' => 'status', 'source' => 'Status'],
+      ['target' => 'field_pending', 'source' => 'Pending'],
+    ];
+
+    $result = $this->importUserCsv($data, $mapping);
+    $this->assertEquals(MigrationInterface::RESULT_COMPLETED, $result);
+
+    $users = $this->entityTypeManager->getStorage('user')->loadByProperties(['name' => 'explicitlypending']);
+    $user = reset($users);
+    $this->assertNotFalse($user);
+    $this->assertEquals(1, $user->get('field_pending')->value, 'An explicitly mapped Pending value must not be overridden by the Blocked-status normalization.');
   }
 
 }
