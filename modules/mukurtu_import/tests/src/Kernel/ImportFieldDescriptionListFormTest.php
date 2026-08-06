@@ -6,6 +6,7 @@ namespace Drupal\Tests\mukurtu_import\Kernel;
 
 use Drupal\Core\Form\FormState;
 use Drupal\mukurtu_import\Form\ImportFieldDescriptionListForm;
+use Drupal\node\Entity\NodeType;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
@@ -53,6 +54,35 @@ class ImportFieldDescriptionListFormTest extends MukurtuImportTestBase {
 
     // The identifier note explaining the ID/UUID/label rule is present.
     $this->assertStringContainsString('uniquely identify each row', (string) $form['identifier_note']['#markup']);
+  }
+
+  /**
+   * Landing pages don't expose Cultural Protocols/Sharing Setting to import.
+   *
+   * Landing pages pick up a required field_cultural_protocols base field
+   * from the shared MukurtuNode bundle class, but the field is hidden on
+   * the landing page edit form and isn't part of its editing workflow, so
+   * it should not appear as either required or optional here.
+   */
+  public function testLandingPageExcludesCulturalProtocols(): void {
+    NodeType::create([
+      'type' => 'landing_page',
+      'name' => 'Landing Page',
+    ])->save();
+
+    $form = $this->form->buildForm([], new FormState(), 'node', 'landing_page');
+
+    $required_options = $form['table_required']['#options'] ?? [];
+    $optional_options = $form['table_optional']['#options'] ?? [];
+
+    $this->assertArrayNotHasKey('field_cultural_protocols/protocols', $required_options);
+    $this->assertArrayNotHasKey('field_cultural_protocols/sharing_setting', $required_options);
+    $this->assertArrayNotHasKey('field_cultural_protocols/protocols', $optional_options);
+    $this->assertArrayNotHasKey('field_cultural_protocols/sharing_setting', $optional_options);
+
+    // Title is still required, confirming the bundle's other required
+    // fields are unaffected.
+    $this->assertArrayHasKey('title', $required_options);
   }
 
   /**

@@ -217,6 +217,15 @@ trait ImportFormTrait {
           unset($field_defs[$field_name]);
         }
 
+        // Landing pages inherit a required Cultural Protocols field from the
+        // shared MukurtuNode bundle class (kept there only for its "allow
+        // public view" access override). The field is hidden on the landing
+        // page form and isn't part of the editing workflow, so exclude it
+        // from import field lists.
+        if ($entity_type_id === 'node' && $bundle === 'landing_page' && $field_name === 'field_cultural_protocols') {
+          unset($field_defs[$field_name]);
+        }
+
         if ($field_def->isComputed() || $field_def->isReadOnly() || $field_def->isInternal()) {
           unset($field_defs[$field_name]);
         }
