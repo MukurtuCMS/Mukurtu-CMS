@@ -40,10 +40,32 @@ function mukurtu_multilingual_install() {
   // Clear the cache.discovery bin where field definitions are cached.
   \Drupal::service('cache.discovery')->deleteAll();
 
-  // Make adjustments to language negotiation settings. This will enable
-  // content language detection apart from interface language detection. It
-  // also prioritizes a users' Administration pages language setting, so that
-  // interface text follows their preference rather than the content language.
+  _mukurtu_multilingual_apply_language_negotiation_defaults();
+
+  // Make all comment fields on node bundles untranslatable.
+  $node_types = \Drupal::entityTypeManager()->getStorage('node_type')->loadMultiple();
+  foreach ($node_types as $node_type) {
+    $bundle = $node_type->id();
+    $field_config = FieldConfig::loadByName('node', $bundle, 'comment');
+    if ($field_config) {
+      $field_config->setTranslatable(FALSE);
+      $field_config->save();
+    }
+  }
+
+  _mukurtu_multilingual_apply_translation_overrides();
+}
+
+/**
+ * Adjusts language negotiation settings.
+ *
+ * This enables content language detection apart from interface language
+ * detection. It also prioritizes a users' Administration pages language
+ * setting, so that interface text follows their preference rather than the
+ * content language. Idempotent: safe to call on a site that has already
+ * converged on these settings, or whose settings have drifted.
+ */
+function _mukurtu_multilingual_apply_language_negotiation_defaults(): void {
   $config = \Drupal::configFactory()->getEditable('language.types');
   $config->set('configurable', ['language_interface', 'language_content'])
     ->set('negotiation.language_content.enabled', [
@@ -58,19 +80,6 @@ function mukurtu_multilingual_install() {
       'language-selected' => 12,
     ]);
   $config->save();
-
-  // Make all comment fields on node bundles untranslatable.
-  $node_types = \Drupal::entityTypeManager()->getStorage('node_type')->loadMultiple();
-  foreach ($node_types as $node_type) {
-    $bundle = $node_type->id();
-    $field_config = FieldConfig::loadByName('node', $bundle, 'comment');
-    if ($field_config) {
-      $field_config->setTranslatable(FALSE);
-      $field_config->save();
-    }
-  }
-
-  _mukurtu_multilingual_apply_translation_overrides();
 }
 
 /**
@@ -215,4 +224,14 @@ function mukurtu_multilingual_update_40005(): void {
  */
 function mukurtu_multilingual_update_40006(): void {
   _mukurtu_multilingual_apply_translation_overrides();
+}
+
+/**
+ * Converges language negotiation settings on sites that installed before
+ * this release or whose settings have otherwise drifted from the shipped
+ * defaults (e.g. a site administrator changed them and later wants to reset
+ * to the Mukurtu defaults).
+ */
+function mukurtu_multilingual_update_40007(): void {
+  _mukurtu_multilingual_apply_language_negotiation_defaults();
 }
