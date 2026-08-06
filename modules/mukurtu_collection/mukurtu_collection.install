@@ -380,3 +380,15 @@ function mukurtu_collection_update_40017(): void {
     \Drupal::configFactory()->getEditable($config_name)->setData($data)->save(TRUE);
   }
 }
+
+/**
+ * Raise the collection edit form map's default starting zoom to avoid showing duplicate wrapped continents (#1453).
+ */
+function mukurtu_collection_update_40018(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.collection.default');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_coverage.settings.map.map_position.zoom', 4);
+  $config->save();
+}

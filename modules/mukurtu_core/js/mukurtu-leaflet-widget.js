@@ -1,4 +1,4 @@
-(function ($, Drupal) {
+(function ($, Drupal, once) {
 
   /**
    * Save location description.
@@ -131,4 +131,33 @@
     /* Copied from leaflet.widget.js end. */
   };
 
-})(jQuery, Drupal);
+  /**
+   * Stop the geocoder search input's own clicks/drags from reaching the map.
+   *
+   * The contrib geocoder control never calls Leaflet's own
+   * disableClickPropagation()/disableScrollPropagation() (unlike every
+   * built-in Leaflet control), so double-clicking the input zooms the map
+   * and dragging to select text pans it.
+   */
+  Drupal.behaviors.mukurtuLeafletGeocoderFix = {
+    attach: function (context) {
+      once('mukurtu-leaflet-geocoder-fix', '.leaflet-control-geocoder-container', context).forEach(function (container) {
+        L.DomEvent.disableClickPropagation(container);
+        const input = container.querySelector('input');
+        if (input) {
+          L.DomEvent.disableScrollPropagation(input);
+
+          // Tag this input's own autocomplete dropdown so it can be widened
+          // in CSS without affecting the many other jQuery UI autocomplete
+          // fields (Place type, Location, etc.) sharing the same widget.
+          const $input = $(input);
+          const autocomplete = $input.autocomplete && $input.autocomplete('instance');
+          if (autocomplete && autocomplete.menu) {
+            autocomplete.menu.element.addClass('mukurtu-geocoder-autocomplete-menu');
+          }
+        }
+      });
+    }
+  };
+
+})(jQuery, Drupal, once);
