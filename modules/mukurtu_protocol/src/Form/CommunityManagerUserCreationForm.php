@@ -4,8 +4,10 @@ namespace Drupal\mukurtu_protocol\Form;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\mukurtu_core\Service\EntityTranslationResolver;
 use Drupal\user\Entity\User;
 use Drupal\og\Og;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Form controller for Community Manager user creation form.
@@ -16,6 +18,17 @@ class CommunityManagerUserCreationForm extends FormBase {
 
   // Have a place to save the communities in this entity.
   protected $communities;
+
+  public function __construct(protected EntityTranslationResolver $entityTranslationResolver) {}
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('mukurtu_core.entity_translation_resolver'),
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -65,7 +78,10 @@ class CommunityManagerUserCreationForm extends FormBase {
     $communities = [];
     $communityMemberships = array_filter(Og::getMemberships($currentUser), fn ($m) => $m->getGroupBundle() === 'community');
     $managerMemberships = array_filter($communityMemberships, fn ($m) => $m->hasPermission('manage members'));
-    $managerCommunities = array_filter(array_map(fn ($m) => $m->getGroup(), $managerMemberships));
+    $managerCommunities = array_map(
+      fn ($community) => $this->entityTranslationResolver->translate($community),
+      array_filter(array_map(fn ($m) => $m->getGroup(), $managerMemberships))
+    );
 
     /** @var \Drupal\mukurtu_protocol\Entity\Community $community */
     foreach ($managerCommunities as $community) {
@@ -81,7 +97,10 @@ class CommunityManagerUserCreationForm extends FormBase {
       fn ($m) => $m->getGroupBundle() === 'protocol'
     );
     $stewardMemberships = array_filter($protocolMemberships, fn ($m) => $m->hasPermission('manage members'));
-    $stewardProtocols = array_filter(array_map(fn ($m) => $m->getGroup(), $stewardMemberships));
+    $stewardProtocols = array_map(
+      fn ($protocol) => $this->entityTranslationResolver->translate($protocol),
+      array_filter(array_map(fn ($m) => $m->getGroup(), $stewardMemberships))
+    );
 
     // Group protocols (as objects) by parent community ID, for the membership section.
     $protocolsByCommunity = [];
