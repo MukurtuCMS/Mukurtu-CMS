@@ -78,6 +78,7 @@
         "drupal/term_merge": "^2.0@beta",
         "drupal/term_merge_manager": "^2.0",
         "drupal/token": "*",
+        "drupal/tour": "^3.0",
         "drupal/turnstile": "^1.2",
         "drupal/turnstile_protect": "^1.0",
         "drupal/twig_tweak": "^3.2",
