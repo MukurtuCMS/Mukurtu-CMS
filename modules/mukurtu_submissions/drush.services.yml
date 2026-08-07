@@ -1,6 +1,6 @@
 services:
   mukurtu_submissions.commands:
     class: Drupal\mukurtu_submissions\Commands\MukurtuSubmissionsCommands
-    arguments: ['@entity_type.manager', '@entity_type.bundle.info', '@mukurtu_submissions.form_display_manager']
+    arguments: ['@mukurtu_submissions.form_display_manager']
     tags:
       - { name: drush.command }

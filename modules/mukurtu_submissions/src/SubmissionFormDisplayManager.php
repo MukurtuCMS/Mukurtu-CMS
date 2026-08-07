@@ -6,6 +6,8 @@ namespace Drupal\mukurtu_submissions;
 
 use Drupal\Core\Entity\EntityDisplayRepositoryInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
+use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\mukurtu_media\MediaTypeExtensions;
 use Drupal\mukurtu_submissions\Entity\SubmissionSettingsInterface;
 use Drupal\mukurtu_submissions\Form\PublicSubmissionForm;
@@ -19,10 +21,100 @@ use Drupal\mukurtu_submissions\Form\PublicSubmissionForm;
  */
 class SubmissionFormDisplayManager {
 
+  /**
+   * Administrative/scaffolding content types that ship with the profile
+   * for general site-building rather than as community-authored content -
+   * visitor submission doesn't make sense for these, so createDefaultForms()
+   * never generates a form for them.
+   */
+  const EXCLUDED_BUNDLES = ['article', 'page', 'landing_page'];
+
+  /**
+   * Overrides the generated settings-entity label for bundles whose own
+   * content type name reads ambiguously as "submit a {label}" - "Submit a
+   * Person" sounds like submitting an actual human, not a record about
+   * one. Any bundle not listed here just uses its own label as-is.
+   */
+  const LABEL_OVERRIDES = [
+    'person' => 'Person Record',
+    'place' => 'Place Record',
+  ];
+
   public function __construct(
     protected EntityDisplayRepositoryInterface $entityDisplayRepository,
     protected EntityFieldManagerInterface $entityFieldManager,
+    protected EntityTypeManagerInterface $entityTypeManager,
+    protected EntityTypeBundleInfoInterface $entityBundleInfo,
   ) {}
+
+  /**
+   * Bulk-creates a baseline submission form - every field included,
+   * grouped to mirror the content type's own regular edit form, disabled
+   * - for every content type that doesn't already have one (excluding
+   * EXCLUDED_BUNDLES). Also re-runnable as a backfill: any already-existing
+   * settings entity that still has no field groups gets them seeded too,
+   * except Digital Heritage's, which are hand-curated and never
+   * overwritten. A site builder still reviews and enables each one
+   * afterward.
+   *
+   * Called from mukurtu_submissions_install() (fresh sites),
+   * mukurtu_submissions_update_40007() (existing sites), and
+   * MukurtuSubmissionsCommands::createDefaultForms() (manual re-run/backfill)
+   * so all three stay in sync on what "every content type gets a form"
+   * means.
+   *
+   * @return array
+   *   ['created' => string[], 'grouped' => string[]] - the bundles that got
+   *   a brand-new settings entity, and the bundles (new or pre-existing)
+   *   that got field groups seeded onto them this call.
+   */
+  public function createDefaultForms(): array {
+    $storage = $this->entityTypeManager->getStorage('mukurtu_submission_settings');
+
+    $existing = [];
+    foreach ($storage->loadMultiple() as $settings) {
+      $existing[$settings->getTargetBundle()] = $settings;
+    }
+
+    $created = [];
+    $grouped = [];
+    foreach ($this->entityBundleInfo->getBundleInfo('node') as $bundle => $info) {
+      if (in_array($bundle, self::EXCLUDED_BUNDLES, TRUE)) {
+        continue;
+      }
+
+      $settings = $existing[$bundle] ?? NULL;
+      $is_new = !$settings;
+      if ($is_new) {
+        $label = self::LABEL_OVERRIDES[$bundle] ?? $info['label'];
+        $settings = $storage->create([
+          'id' => $bundle,
+          'label' => sprintf('Submit a %s', $label),
+          'target_entity_type_id' => 'node',
+          'target_bundle' => $bundle,
+          'status' => FALSE,
+        ]);
+      }
+
+      $needs_groups = $bundle !== 'digital_heritage' && !$settings->getFieldGroups();
+      if ($needs_groups) {
+        $this->seedFieldGroupsFromDefaultForm($settings);
+      }
+
+      if ($is_new || $needs_groups) {
+        $settings->save();
+      }
+      if ($is_new) {
+        $this->ensureSubmissionFormDisplay($settings);
+        $created[] = $bundle;
+      }
+      if ($needs_groups) {
+        $grouped[] = $bundle;
+      }
+    }
+
+    return ['created' => $created, 'grouped' => $grouped];
+  }
 
   /**
    * Creates a "submission" form display for the target bundle if none
