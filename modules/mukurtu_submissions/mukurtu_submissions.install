@@ -75,8 +75,16 @@ function mukurtu_submissions_install($is_syncing): void {
     }
   }
 
-  // Ensure shipped settings entities (e.g. digital_heritage) get their
-  // hyphenated public alias and role permissions synced, in case
+  // Provision a disabled default submission form for every content type
+  // that doesn't already have one (see
+  // SubmissionFormDisplayManager::createDefaultForms()), so a fresh site
+  // ends up with every eligible content type ready for a site builder to
+  // review and enable, not just the config-shipped digital_heritage form.
+  \Drupal::service('mukurtu_submissions.form_display_manager')->createDefaultForms();
+
+  // Ensure shipped and newly-created settings entities (e.g.
+  // digital_heritage) get their hyphenated public alias and role
+  // permissions synced, in case
   // hook_mukurtu_submission_settings_insert() doesn't fire for config
   // installed directly from config/install.
   foreach (\Drupal::entityTypeManager()->getStorage('mukurtu_submission_settings')->loadMultiple() as $settings) {
@@ -192,7 +200,7 @@ function mukurtu_submissions_update_40003(): void {
  * Seeds field_groups/field_group_assignments, mirrored from each bundle's
  * regular "default" edit form, onto any existing settings entity that
  * doesn't have them yet - matches what
- * MukurtuSubmissionsCommands::createDefaultForms() now does for newly
+ * SubmissionFormDisplayManager::createDefaultForms() now does for newly
  * created ones. Digital Heritage's groups are hand-curated and never
  * touched.
  */
@@ -243,4 +251,17 @@ function mukurtu_submissions_update_40006(): void {
       mukurtu_submissions_sync_entity_browser_permissions($settings);
     }
   }
+}
+
+/**
+ * Provisions a disabled default submission form for every content type
+ * that doesn't already have one - previously this only happened if a site
+ * builder manually ran `drush mukurtu-submissions:create-default-forms`,
+ * so an existing site applying updates would otherwise never get the
+ * other content types' forms at all. See
+ * SubmissionFormDisplayManager::createDefaultForms(), also now called
+ * from mukurtu_submissions_install() for fresh sites.
+ */
+function mukurtu_submissions_update_40007(): void {
+  \Drupal::service('mukurtu_submissions.form_display_manager')->createDefaultForms();
 }
