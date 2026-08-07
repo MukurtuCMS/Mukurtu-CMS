@@ -183,3 +183,19 @@ function mukurtu_digital_heritage_update_40007(): void {
     $config->save();
   }
 }
+
+/**
+ * Move the digital heritage edit form map's default center off Null Island,
+ * and give it a dedicated zoom for editing a single already-saved point (#1453).
+ */
+function mukurtu_digital_heritage_update_40008(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.digital_heritage.default');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_coverage.settings.map.map_position.zoom', 2);
+  $config->set('content.field_coverage.settings.map.map_position.center.lat', 20);
+  $config->set('content.field_coverage.settings.map.map_position.center.lon', 10);
+  $config->set('content.field_coverage.settings.map.map_position.singlePointZoom', 12);
+  $config->save();
+}

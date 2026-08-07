@@ -1397,3 +1397,18 @@ function mukurtu_core_library_info_alter(&$libraries, $extension) {
     $libraries['leaflet-markercluster-drupal']['js']['/' . \Drupal::service('extension.list.module')->getPath('mukurtu_core') . '/js/mukurtu-leaflet-markercluster-grouping-fix.js'] = [];
   }
 }
+
+/**
+ * Implements hook_geocoder_formatter_info_alter().
+ *
+ * The Map Points address search box falls back to the "default_formatted_address"
+ * formatter whenever no other one is requested (see
+ * \Drupal\geocoder\Controller\GeocoderApiEnpoints::getAddressFormatter()).
+ * Its contrib template never includes state/province and shows the country
+ * twice, so swap in our own formatter for that same plugin ID (see #1453).
+ */
+function mukurtu_core_geocoder_formatter_info_alter(array &$definitions) {
+  if (isset($definitions['default_formatted_address'])) {
+    $definitions['default_formatted_address']['class'] = \Drupal\mukurtu_core\Plugin\Geocoder\Formatter\MukurtuFormattedAddress::class;
+  }
+}
