@@ -343,7 +343,11 @@ class ExecuteImportForm extends ImportBaseForm {
       ->getFieldDefinitions($entity_type_id, $bundle);
 
     foreach ($config->getMapping() as $mapping) {
-      $target = explode('/', $mapping['target'], 2)[0];
+      // A mapping entry's target can be the int -1 "Ignore - Do not
+      // import" sentinel rather than a field name; cast before exploding
+      // so it falls through to the field-lookup miss below instead of
+      // throwing.
+      $target = explode('/', (string) $mapping['target'], 2)[0];
       $field_def = $field_defs[$target] ?? NULL;
       if (!$field_def) {
         continue;
@@ -531,7 +535,7 @@ class ExecuteImportForm extends ImportBaseForm {
         ->getFieldDefinitions($entity_type_id, $bundle);
 
       foreach ($config->getMapping() as $mapping) {
-        $target = explode('/', $mapping['target'], 2)[0];
+        $target = explode('/', (string) $mapping['target'], 2)[0];
         $field_def = $field_defs[$target] ?? NULL;
         if (!$field_def) {
           continue;
