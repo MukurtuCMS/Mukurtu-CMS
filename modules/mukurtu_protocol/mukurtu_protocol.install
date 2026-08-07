@@ -719,3 +719,30 @@ function mukurtu_protocol_update_40040(): void {
     \Drupal::service('module_installer')->install(['mukurtu_protocol_sync']);
   }
 }
+
+/**
+ * Grant 'view media' to protocol roles that gain /admin/media via permission.
+ *
+ * /admin/media access is moving from a hardcoded role list to a permission
+ * check (issue #972). These five protocol roles were previously listed by
+ * role ID but don't hold the underlying 'view media' permission directly;
+ * grant it to preserve existing access. protocol-protocol-curator already
+ * has it.
+ */
+function mukurtu_protocol_update_40041(): void {
+  $role_ids = [
+    'protocol-protocol-community_record_steward',
+    'protocol-protocol-contributor',
+    'protocol-protocol-language_contributor',
+    'protocol-protocol-language_steward',
+    'protocol-protocol-protocol_steward',
+  ];
+  $storage = \Drupal::entityTypeManager()->getStorage('og_role');
+  foreach ($role_ids as $role_id) {
+    $og_role = $storage->load($role_id);
+    if ($og_role && !$og_role->hasPermission('view media')) {
+      $og_role->grantPermission('view media');
+      $og_role->save();
+    }
+  }
+}

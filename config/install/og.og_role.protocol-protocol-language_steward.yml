@@ -52,4 +52,5 @@ permissions:
   - 'update own soundcloud media'
   - 'update own video media'
   - 'view any unpublished content'
+  - 'view media'
 role_type: standard
