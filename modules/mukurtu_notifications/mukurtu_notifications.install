@@ -467,21 +467,12 @@ function mukurtu_notifications_update_40006(): void {
   $config_storage = \Drupal::service('config.storage');
 
   // Deploy field attachments for templates whose storage tables already exist.
-  // Note: field_community uses handler 'default:node' because the underlying
-  // field storage (field.storage.message.field_community) targets node -- this
-  // is intentional for now. Phase 2 will update it to target the community
-  // entity type once the follow-community flag is updated.
   $field_configs = [
     'field.field.message.mukurtu_single_node_insert.field_item',
     'field.field.message.mukurtu_single_node_update.field_item',
     'field.field.message.mukurtu_single_node_delete.field_title',
     'field.field.message.mukurtu_single_node_delete.field_content_type',
     'field.field.message.mukurtu_single_node_delete.field_user',
-    'field.field.message.mukurtu_new_item_in_community.field_item',
-    'field.field.message.mukurtu_new_item_in_community.field_community',
-    'field.field.message.mukurtu_new_item_in_protocol.field_item',
-    'field.field.message.mukurtu_new_item_in_collection.field_item',
-    'field.field.message.mukurtu_new_item_in_collection.field_collection',
     'field.field.message.mukurtu_new_user_registration.field_user',
   ];
 
