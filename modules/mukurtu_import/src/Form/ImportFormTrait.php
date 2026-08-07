@@ -296,4 +296,113 @@ trait ImportFormTrait {
     return $this->fieldDefinitions[$entity_type_id][$bundle];
   }
 
+  /**
+   * Compare field labels against a search string.
+   *
+   * @param string $needle
+   *   The search term.
+   * @param string $entity_type_id
+   *   The entity type id.
+   * @param string|null $bundle
+   *   The bundle.
+   * @return string|null
+   *   The field name of the match or NULL if no matches found.
+   */
+  protected function searchFieldLabels(string $needle, string $entity_type_id, ?string $bundle = NULL): ?string {
+    $field_defs = $this->getFieldDefinitions($entity_type_id, $bundle);
+    $matching_fields = array_filter($field_defs, function($field) use ($needle) {
+      return $needle == mb_strtolower((string) $field->getLabel());
+    });
+
+    // If there are multiple matches, return the first bundle specific match.
+    if (count($matching_fields) > 1) {
+      foreach ($matching_fields as $matched_field_name => $matched_field) {
+        if ($matched_field->getTargetBundle()) {
+          return $matched_field_name;
+        }
+      }
+    }
+
+    // If all are base fields, return the first.
+    if (count($matching_fields) >= 1) {
+      $field_names = array_keys($matching_fields);
+      return reset($field_names);
+    }
+
+    return NULL;
+  }
+
+  /**
+   * Some basic logic to try and auto-map source to target.
+   *
+   * 1. Check for full field label matches (case insensitive).
+   * 2. Check for field name matches (case insensitive).
+   *
+   * @param string $source
+   *   The CSV column header to resolve a target for.
+   * @param string $entity_type_id
+   *   The entity type id.
+   * @param string|null $bundle
+   *   The bundle.
+   * @param array $config_mapping
+   *   An existing mapping (as from MukurtuImportStrategyInterface::getMapping())
+   *   to check first, so an already-configured source/target pairing takes
+   *   precedence over the label/name guessing below.
+   */
+  protected function getAutoMappedTarget($source, $entity_type_id, $bundle = NULL, array $config_mapping = []) {
+    $field_defs = $this->getFieldDefinitions($entity_type_id, $bundle);
+
+    // If the selected config has an existing valid mapping for this field,
+    // it has precedence.
+    foreach ($config_mapping as $mapping) {
+      // Break up any subfields.
+      $subfields = explode('/', $mapping['target'], 2);
+      $target = reset($subfields);
+
+      // Checking if we have a mapping and the root of the target field exists.
+      if ($mapping['source'] == $source && in_array($target, array_keys($field_defs))) {
+        return $mapping['target'];
+      }
+    }
+
+    $needle = mb_strtolower($source);
+
+    // Check if any field has a property, which our import field process plugins
+    // support, matching the source label.
+    foreach ($field_defs as $field_name => $field_definition) {
+      $plugin = $this->fieldProcessPluginManager->getInstance(['field_definition' => $field_definition]);
+      $supported_properties = $plugin->getSupportedProperties($field_definition);
+
+      foreach ($supported_properties as $property_name => $property_info) {
+        if ($needle == mb_strtolower($property_info['label'])) {
+          return "{$field_name}/{$property_name}";
+        }
+      }
+    }
+
+    // Disambiguate the langcode base field. In buildTargetOptions(), its label
+    // gets " (langcode)" appended to distinguish it from other Language fields.
+    // Match against that disambiguated label here so auto-mapping picks it up.
+    $entity_definition = $this->entityTypeManager->getDefinition($entity_type_id);
+    $entity_keys = $entity_definition->getKeys();
+    if (!empty($entity_keys['langcode']) && isset($field_defs[$entity_keys['langcode']])) {
+      $langcode_label = mb_strtolower($field_defs[$entity_keys['langcode']]->getLabel() . ' (langcode)');
+      if ($needle === $langcode_label) {
+        return $entity_keys['langcode'];
+      }
+    }
+
+    // Check for field label matches.
+    if ($field_label_match = $this->searchFieldLabels($needle, $entity_type_id, $bundle)) {
+      return $field_label_match;
+    }
+
+    // Check if we have a (case insensitive) field name match.
+    if (isset($field_defs[$needle])) {
+      return $needle;
+    }
+
+    return -1;
+  }
+
 }

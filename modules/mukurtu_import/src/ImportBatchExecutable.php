@@ -105,6 +105,21 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
     // Do the import.
     $result = $executable->import();
 
+    // A RESULT_FAILED return means the migration aborted before any rows
+    // could be processed (e.g. the source plugin couldn't build a Row at
+    // all -- see MigrateExecutable::import()'s handling of $source->rewind()
+    // exceptions). Unlike a per-row failure, nothing gets recorded in the ID
+    // map for this, so without flagging it here the created/updated/failures
+    // counts all stay at 0 and the results page reports a false success. The
+    // full exception detail is already logged to the 'migrate' watchdog
+    // channel by MigrateExecutable itself.
+    if ($result === MigrationInterface::RESULT_FAILED) {
+      $context['results'][$migration->id()]['@failures']++;
+      $context['results']['messages'][] = (object) [
+        'message' => t('The import failed before any rows could be processed. See the Recent log messages report for details.'),
+      ];
+    }
+
     // Save the messages.
     $context['results']['messages'] = array_merge($context['results']['messages'], iterator_to_array($executable->getIdMap()->getMessages()));
 
