@@ -675,12 +675,28 @@
   // mode; overriding them at :root leaked into the toolbar sitewide,
   // forcing it to a fixed light background regardless of the user's
   // OS/toolbar dark-mode preference - a real regression caught live on
-  // the homepage, not just this form. Scoped to .path-submit instead:
-  // the dialog itself is appended inside <body class="path-submit ...">
-  // (confirmed via DevTools), so this still reaches it, without reaching
-  // any other page's toolbar.
-  --gin-bg-layer: var(--color-white);
-  --gin-bg-layer2: rgb(0 0 0 / 50%);
+  // the homepage, not just this form.
+  //
+  // Scoping to .path-submit alone (an earlier version of this fix) still
+  // wasn't narrow enough: #toolbar-administration is a *sibling* of the
+  // dialog under <body class="path-submit ...">, not a descendant of it,
+  // but custom properties declared at the .path-submit/body level still
+  // cascade down into it - Gin's own toolbar.css/classic_toolbar.css use
+  // this exact --gin-bg-layer variable for the toolbar tray's background,
+  // so every /submit/* page forced the tray white regardless of the
+  // user's dark-mode toolbar preference (while the top bar, styled by a
+  // different variable, stayed dark) - caught live via a screenshot
+  // showing the mismatch, not by source review. Declared directly on the
+  // dialog/overlay elements themselves instead: they're appended straight
+  // to <body> (confirmed via DevTools) as siblings of the toolbar, so
+  // scoping the override to just them still reaches the dialog's own
+  // background and the page-dimming overlay behind it, without ever
+  // being a cascade ancestor of the toolbar.
+  .ui-widget-overlay,
+  .ui-dialog.entity-browser-modal {
+    --gin-bg-layer: var(--color-white);
+    --gin-bg-layer2: rgb(0 0 0 / 50%);
+  }
 
   // The entity-browser modal's dialog chrome (jQuery UI's OpenDialogCommand,
   // see Modal.php) renders here in the submission form page itself, not

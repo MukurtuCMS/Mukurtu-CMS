@@ -265,3 +265,29 @@ function mukurtu_submissions_update_40006(): void {
 function mukurtu_submissions_update_40007(): void {
   \Drupal::service('mukurtu_submissions.form_display_manager')->createDefaultForms();
 }
+
+/**
+ * Retrofits every existing bundle's already-provisioned "submission"
+ * display so a paragraph-nested media (or entity_browser) field gets the
+ * same widget substitution/permission handling a field living directly on
+ * the bundle already gets. Concretely: dictionary_word's sample-sentence
+ * recording (field_sentence_recording, nested inside the sample_sentence
+ * paragraph type via field_sample_sentences) previously kept the plain
+ * core media_library_widget in its inline subform - unusable by an
+ * anonymous visitor (requires "view media" + entity update access neither
+ * role holds), making it impossible to attach a recording to a sample
+ * sentence from the public submission form at all. See
+ * SubmissionFormDisplayManager::retrofitParagraphSubmissionMode()/
+ * ensureSubmissionFormDisplayForBundle(), and
+ * mukurtu_submissions_sync_entity_browser_permissions() in the .module
+ * file for the equivalent permission-sync side of this fix.
+ */
+function mukurtu_submissions_update_40008(): void {
+  $form_display_manager = \Drupal::service('mukurtu_submissions.form_display_manager');
+  foreach (\Drupal::entityTypeManager()->getStorage('mukurtu_submission_settings')->loadMultiple() as $settings) {
+    if ($settings instanceof SubmissionSettingsInterface) {
+      $form_display_manager->retrofitParagraphSubmissionMode($settings->getTargetEntityTypeId(), $settings->getTargetBundle());
+      mukurtu_submissions_sync_entity_browser_permissions($settings);
+    }
+  }
+}

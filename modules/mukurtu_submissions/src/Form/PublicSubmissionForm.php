@@ -6,6 +6,7 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\Display\EntityFormDisplayInterface;
 use Drupal\Core\Entity\EntityDisplayRepositoryInterface;
+use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
@@ -109,6 +110,7 @@ class PublicSubmissionForm extends FormBase {
     protected EntityTypeBundleInfoInterface $entityBundleInfo,
     protected ConfigFactoryInterface $submissionsConfigFactory,
     protected AccountSwitcherInterface $accountSwitcher,
+    protected EntityFieldManagerInterface $entityFieldManager,
   ) {}
 
   /**
@@ -121,6 +123,7 @@ class PublicSubmissionForm extends FormBase {
       $container->get('entity_type.bundle.info'),
       $container->get('config.factory'),
       $container->get('account_switcher'),
+      $container->get('entity_field.manager'),
     );
   }
 
@@ -263,21 +266,61 @@ class PublicSubmissionForm extends FormBase {
       return;
     }
 
-    // Not hardcoded to field_media_assets - applies to any media-reference
-    // field the bundle exposes, whichever widget it ended up with (the
-    // Media Library picker, or our own SimpleMediaUploadWidget).
-    foreach ($this->display->getComponents() as $field_name => $component) {
+    $this->restrictMediaTypesOnDisplay($this->display, $this->entity->getEntityTypeId(), $this->entity->bundle(), $allowed, []);
+  }
+
+  /**
+   * Applies restrictMediaTypes()'s restriction to $display, and recurses
+   * into any paragraph-referencing field's own provisioned "submission"
+   * display, so a paragraph-nested media field (e.g. dictionary_word's
+   * sample-sentence recording) gets the same restriction a field living
+   * directly on the bundle does.
+   *
+   * $display here is always the exact object instance later passed to
+   * EntityFormDisplay::collectRenderDisplay() deeper inside the paragraphs
+   * widget (both fetched via entity_display.repository/entity_type.manager
+   * for the same "$entity_type.$bundle.submission" ID, which Drupal's
+   * per-request entity static cache returns as the same PHP object) - so
+   * mutating it in place here, without saving, is enough for the
+   * restriction to actually apply when the widget builds that item's
+   * subform, exactly as it already does for $this->display itself.
+   *
+   * Not hardcoded to field_media_assets - applies to any media-reference
+   * field the bundle exposes, whichever widget it ended up with (the
+   * Media Library picker, or our own SimpleMediaUploadWidget).
+   */
+  protected function restrictMediaTypesOnDisplay(EntityFormDisplayInterface $display, string $entity_type_id, string $bundle, array $allowed, array $visited): void {
+    $visited_key = $entity_type_id . ':' . $bundle;
+    if (isset($visited[$visited_key])) {
+      return;
+    }
+    $visited[$visited_key] = TRUE;
+
+    foreach ($display->getComponents() as $field_name => $component) {
       switch ($component['type'] ?? NULL) {
         case 'media_library_widget':
           $current_types = $component['settings']['media_types'] ?? [];
           $component['settings']['media_types'] = array_values(array_intersect($current_types, $allowed));
-          $this->display->setComponent($field_name, $component);
+          $display->setComponent($field_name, $component);
           break;
 
         case 'mukurtu_simple_media_upload':
           $current_bundles = $component['settings']['allowed_bundles'] ?? [];
           $component['settings']['allowed_bundles'] = array_values(array_intersect($current_bundles, $allowed));
-          $this->display->setComponent($field_name, $component);
+          $display->setComponent($field_name, $component);
+          break;
+
+        case 'paragraphs':
+        case 'entity_reference_paragraphs':
+          $definition = $this->entityFieldManager->getFieldDefinitions($entity_type_id, $bundle)[$field_name] ?? NULL;
+          if (!$definition) {
+            break;
+          }
+          $target_bundles = array_keys(array_filter($definition->getSetting('handler_settings')['target_bundles'] ?? []));
+          foreach ($target_bundles as $paragraph_bundle) {
+            $paragraph_display = $this->entityDisplayRepository->getFormDisplay('paragraph', $paragraph_bundle, 'submission');
+            $this->restrictMediaTypesOnDisplay($paragraph_display, 'paragraph', $paragraph_bundle, $allowed, $visited);
+          }
           break;
       }
     }
@@ -411,13 +454,30 @@ class PublicSubmissionForm extends FormBase {
    * indication of which field or item each button belongs to - and this
    * form's audience skews toward first-time, untrained visitors more than
    * the admin content forms these widgets were originally built for.
+   *
+   * $entity_type_id/$bundle track whose field definitions a label is
+   * resolved against - the top-level entity's own, until recursion steps
+   * past a paragraph item's "subform" (both "paragraphs" and "entity_
+   * reference_paragraphs" widgets set "#paragraph_type" on that item's own
+   * container), at which point $field_label is reset and every field name
+   * below is resolved against that paragraph's own bundle instead. Without
+   * this, a field nested two-or-more paragraph-levels deep (e.g.
+   * dictionary_word's sample-sentence recording, itself nested inside a
+   * "Word Entries" paragraph) incorrectly inherited its outermost
+   * ancestor's label on every Remove button below it.
    */
-  protected function labelRemoveButtons(array &$element, ?string $field_label = NULL, ?int $delta = NULL): void {
+  protected function labelRemoveButtons(array &$element, ?string $entity_type_id = NULL, ?string $bundle = NULL, ?string $field_label = NULL, ?int $delta = NULL): void {
+    $entity_type_id ??= $this->entity->getEntityTypeId();
+    $bundle ??= $this->entity->bundle();
+
     foreach (Element::children($element) as $key) {
       $child_delta = is_int($key) ? $key : $delta;
       $child_label = $field_label;
-      if ($child_label === NULL && is_string($key) && $this->entity->hasField($key)) {
-        $child_label = (string) $this->entity->get($key)->getFieldDefinition()->getLabel();
+      if (is_string($key)) {
+        $definition = $this->entityFieldManager->getFieldDefinitions($entity_type_id, $bundle)[$key] ?? NULL;
+        if ($definition) {
+          $child_label = (string) $definition->getLabel();
+        }
       }
 
       if ($child_label !== NULL
@@ -431,7 +491,12 @@ class PublicSubmissionForm extends FormBase {
           : $this->t('Remove @field', ['@field' => $child_label]);
       }
 
-      $this->labelRemoveButtons($element[$key], $child_label, $child_delta);
+      if ($key === 'subform' && isset($element['#paragraph_type'])) {
+        $this->labelRemoveButtons($element[$key], 'paragraph', $element['#paragraph_type'], NULL, NULL);
+        continue;
+      }
+
+      $this->labelRemoveButtons($element[$key], $entity_type_id, $bundle, $child_label, $child_delta);
     }
   }
 
@@ -495,16 +560,54 @@ class PublicSubmissionForm extends FormBase {
     $service_account_uid = (int) $this->submissionsConfigFactory->get('mukurtu_submissions.settings')->get('service_account_uid');
     $owner_uid = $service_account_uid ?: 1;
 
-    foreach ($this->display->getComponents() as $field_name => $component) {
-      if (($component['type'] ?? NULL) !== 'mukurtu_simple_media_upload') {
+    $this->createUploadedMediaOnEntity($this->entity, $this->display, [], $form_state, $owner_uid);
+  }
+
+  /**
+   * Does the actual work of createUploadedMedia() for $entity/$display,
+   * and recurses into any paragraph-referencing field's own already-
+   * extracted (unsaved, in-memory) items - by the time submitForm() runs,
+   * validateForm() has already called $this->display->extractFormValues(),
+   * which creates the referenced Paragraph entities and attaches them to
+   * $this->entity, but SimpleMediaUploadWidget::massageFormValues() is
+   * deliberately a no-op (see createMediaFromUpload()'s own docblock), so
+   * a paragraph-nested upload field (e.g. dictionary_word's sample-
+   * sentence recording) needs this same raw-fid-to-real-media conversion
+   * applied to it directly, exactly as the top-level entity does.
+   *
+   * $form_state_parents is the path SimpleMediaUploadWidget's raw "upload"
+   * value lives under in this request's submitted $form_state - [] for
+   * $this->entity itself. Both paragraph widgets this profile uses
+   * ("paragraphs" and "entity_reference_paragraphs") build each item's
+   * inline subform under "$field_name/$delta/subform" (confirmed against
+   * InlineParagraphsWidget/ParagraphsWidget::formElement()), so this
+   * appends that same three-segment path per level of nesting - correct
+   * for arbitrary paragraph-in-paragraph depth, not just one level.
+   */
+  protected function createUploadedMediaOnEntity(ContentEntityInterface $entity, EntityFormDisplayInterface $display, array $form_state_parents, FormStateInterface $form_state, int $owner_uid): void {
+    foreach ($display->getComponents() as $field_name => $component) {
+      $type = $component['type'] ?? NULL;
+
+      if ($type === 'mukurtu_simple_media_upload') {
+        $widget = $display->getRenderer($field_name);
+        if (!$widget instanceof SimpleMediaUploadWidget) {
+          continue;
+        }
+        $fids = $form_state->getValue([...$form_state_parents, $field_name, 'upload'], []);
+        $entity->set($field_name, $widget->createMediaFromUpload($fids, $owner_uid));
         continue;
       }
-      $widget = $this->display->getRenderer($field_name);
-      if (!$widget instanceof SimpleMediaUploadWidget) {
-        continue;
+
+      if (($type === 'paragraphs' || $type === 'entity_reference_paragraphs') && $entity->hasField($field_name)) {
+        foreach ($entity->get($field_name) as $delta => $item) {
+          $paragraph = $item->entity ?? NULL;
+          if (!$paragraph instanceof ContentEntityInterface) {
+            continue;
+          }
+          $paragraph_display = $this->entityDisplayRepository->getFormDisplay($paragraph->getEntityTypeId(), $paragraph->bundle(), 'submission');
+          $this->createUploadedMediaOnEntity($paragraph, $paragraph_display, [...$form_state_parents, $field_name, $delta, 'subform'], $form_state, $owner_uid);
+        }
       }
-      $fids = $form_state->getValue([$field_name, 'upload'], []);
-      $this->entity->set($field_name, $widget->createMediaFromUpload($fids, $owner_uid));
     }
   }
 
