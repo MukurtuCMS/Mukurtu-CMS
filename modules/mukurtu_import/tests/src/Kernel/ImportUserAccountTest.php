@@ -109,6 +109,62 @@ class ImportUserAccountTest extends MukurtuImportTestBase {
   }
 
   /**
+   * Test that a blank Roles cell leaves a clean account with no stray roles.
+   *
+   * Regression test: 'authenticated' is a synthetic role Drupal core never
+   * persists (User::preSave() strips it from storage; getRoles() computes
+   * it at read time from uid > 0), so a blank Roles cell should resolve to
+   * an empty roles field rather than a stray NULL entry.
+   */
+  public function testBlankRolesLeavesCleanAccount() {
+    $data = [
+      ['Username', 'Email', 'Roles'],
+      ['blankrolesperson', 'blankrolesperson@example.com', ''],
+    ];
+    $mapping = [
+      ['target' => 'name', 'source' => 'Username'],
+      ['target' => 'mail', 'source' => 'Email'],
+      ['target' => 'roles', 'source' => 'Roles'],
+    ];
+
+    $result = $this->importUserCsv($data, $mapping);
+    $this->assertEquals(MigrationInterface::RESULT_COMPLETED, $result);
+
+    $users = $this->entityTypeManager->getStorage('user')->loadByProperties(['name' => 'blankrolesperson']);
+    $user = reset($users);
+    $this->assertNotFalse($user);
+    $this->assertTrue($user->hasRole('authenticated'));
+    $this->assertEquals([], $user->getRoles(TRUE));
+    $this->assertSame([], $user->get('roles')->getValue());
+  }
+
+  /**
+   * Test that explicitly listing "Authenticated user" also leaves a clean
+   * account, since Drupal core rejects assigning that synthetic role.
+   */
+  public function testExplicitAuthenticatedRoleLeavesCleanAccount() {
+    $data = [
+      ['Username', 'Email', 'Roles'],
+      ['authrolesperson', 'authrolesperson@example.com', 'Authenticated user'],
+    ];
+    $mapping = [
+      ['target' => 'name', 'source' => 'Username'],
+      ['target' => 'mail', 'source' => 'Email'],
+      ['target' => 'roles', 'source' => 'Roles'],
+    ];
+
+    $result = $this->importUserCsv($data, $mapping);
+    $this->assertEquals(MigrationInterface::RESULT_COMPLETED, $result);
+
+    $users = $this->entityTypeManager->getStorage('user')->loadByProperties(['name' => 'authrolesperson']);
+    $user = reset($users);
+    $this->assertNotFalse($user);
+    $this->assertTrue($user->hasRole('authenticated'));
+    $this->assertEquals([], $user->getRoles(TRUE));
+    $this->assertSame([], $user->get('roles')->getValue());
+  }
+
+  /**
    * Test that a non-uid-1 user with only the import permission can import.
    *
    * Regression test: the dedicated 'import mukurtu users' permission,
