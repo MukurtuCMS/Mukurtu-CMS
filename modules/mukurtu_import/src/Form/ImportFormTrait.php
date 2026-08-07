@@ -141,6 +141,15 @@ trait ImportFormTrait {
       $options['account_status'] = $this->t('Account Status');
     }
 
+    // Some base fields' own definition labels are more generic than what
+    // the site's actual admin forms call them; use the more familiar term
+    // here instead.
+    foreach ($this->getFieldLabelOverrides($entity_type_id) as $field_name => $override_label) {
+      if (isset($options[$field_name])) {
+        $options[$field_name] = $override_label;
+      }
+    }
+
     // Disambiguate the Language field from the langcode base field.
     if (isset($options[$entity_keys['langcode']])) {
       $options[$entity_keys['langcode']] .= $this->t(' (langcode)');
@@ -329,7 +338,40 @@ trait ImportFormTrait {
       return reset($field_names);
     }
 
+    // Also match against this entity type's field label overrides (see
+    // getFieldLabelOverrides()), so a header using the more familiar term
+    // resolves too, alongside the field's own raw definition label.
+    foreach ($this->getFieldLabelOverrides($entity_type_id) as $field_name => $override_label) {
+      if ($needle == mb_strtolower((string) $override_label) && isset($field_defs[$field_name])) {
+        return $field_name;
+      }
+    }
+
     return NULL;
+  }
+
+  /**
+   * Per-entity-type overrides for how a field is labeled/matched in the
+   * import UI.
+   *
+   * Some base fields' own definition labels are more generic, or less
+   * familiar, than what the site's actual admin forms call them. Used by
+   * buildTargetOptions() to display the more familiar term, and by
+   * searchFieldLabels() so a header using either term resolves.
+   *
+   * @param string $entity_type_id
+   *   The entity type id.
+   *
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup[]
+   *   Field name => override label.
+   */
+  protected function getFieldLabelOverrides(string $entity_type_id): array {
+    if ($entity_type_id === 'user') {
+      // The 'name' base field's own definition label is 'Name', but the
+      // actual "Add user" admin form displays it as 'Username'.
+      return ['name' => $this->t('Username')];
+    }
+    return [];
   }
 
   /**

@@ -617,20 +617,24 @@ function mukurtu_import_update_40033(): void {
 }
 
 /**
- * Rename the 'User - all fields' strategy's username source from
- * 'Username' to 'Name'.
- *
- * The Import Format Description page (and its downloadable CSV template)
- * has always labeled this required field 'Name', matching Drupal's actual
- * field label for it. The preset's own mapping used the different,
- * non-matching string 'Username', so a file built from the site's own
- * template didn't strictly match the preset and required a manual
- * "Customize Settings" round trip to import correctly. Only touches this
- * specific default strategy's 'name' target entry, without disturbing any
- * other customizations a site may have made to it (no unconditional
- * overwrite), matching update_40032/40033's precedent.
+ * Superseded by mukurtu_import_update_40035().
  */
 function mukurtu_import_update_40034(): void {
+}
+
+/**
+ * Ensure the 'User - all fields' strategy's username source is 'Username',
+ * matching the label the actual "Add user" admin form uses for this field
+ * (the base field's own definition label is the more generic 'Name',
+ * which import_update_40034() briefly and mistakenly aligned this preset
+ * to before the import UI's displayed/matched label for this field was
+ * itself corrected to 'Username' in ImportFormTrait::buildTargetOptions()/
+ * getFieldLabelOverrides()). Only touches this specific default strategy's
+ * 'name' target entry, without disturbing any other customizations a site
+ * may have made to it (no unconditional overwrite), matching
+ * update_40032/40033's precedent.
+ */
+function mukurtu_import_update_40035(): void {
   $config_name = 'mukurtu_import.mukurtu_import_strategy.user_all_fields';
   $config = \Drupal::configFactory()->getEditable($config_name);
 
@@ -642,8 +646,8 @@ function mukurtu_import_update_40034(): void {
 
   $mapping = $config->get('mapping') ?? [];
   foreach ($mapping as &$entry) {
-    if ($entry['target'] === 'name' && $entry['source'] === 'Username') {
-      $entry['source'] = 'Name';
+    if ($entry['target'] === 'name' && $entry['source'] === 'Name') {
+      $entry['source'] = 'Username';
     }
   }
   unset($entry);
