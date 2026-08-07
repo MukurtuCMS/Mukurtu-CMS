@@ -156,4 +156,71 @@ class ImportProtocolsTest extends MukurtuImportTestBase {
     $this->assertEquals([$this->protocol->id(), $this->protocol2->id(), $this->protocol3->id()], $updated_node->getProtocols());
   }
 
+  /**
+   * Test that update access is checked against the node's current protocols,
+   * not the protocols the import row is trying to set.
+   *
+   * Regression test for ProtocolAwareEntityContent::updateEntity(): the
+   * access check there must run against the original, unmodified entity
+   * before the row's field values are applied. Otherwise an importer with no
+   * update access to a node under its current (restricted) protocol could
+   * grant themselves access simply by re-pointing the node at a different
+   * protocol they do belong to, in the very same row that makes other edits.
+   */
+  public function testCannotBypassAccessByChangingProtocol() {
+    $restricted = Protocol::create([
+      'name' => 'Restricted Protocol',
+      'field_communities' => [$this->community->id()],
+      'field_access_mode' => 'strict',
+    ]);
+    $restricted->save();
+    $restricted->addMember($this->currentUser, ['protocol_steward']);
+
+    $node = Node::create([
+      'title' => 'Restricted Node',
+      'type' => 'protocol_aware_content',
+      'status' => TRUE,
+      'uid' => $this->currentUser->id(),
+    ]);
+    $node->setSharingSetting('any');
+    $node->setProtocols([$restricted]);
+    $node->save();
+
+    // A protocol the outsider does belong to, as an accessible target for
+    // the bypass attempt.
+    $accessible = Protocol::create([
+      'name' => 'Accessible Protocol',
+      'field_communities' => [$this->community->id()],
+      'field_access_mode' => 'strict',
+    ]);
+    $accessible->save();
+
+    $outsider = $this->createUser();
+    $this->community->addMember($outsider);
+    $accessible->addMember($outsider, ['protocol_steward']);
+    $this->setCurrentUser($outsider);
+
+    $data = [
+      ['nid', 'Title', 'Protocols'],
+      [$node->id(), 'Hijacked Title', $accessible->id()],
+    ];
+    $import_file = $this->createCsvFile($data);
+
+    $mapping = [
+      ['target' => 'nid', 'source' => 'nid'],
+      ['target' => 'title', 'source' => 'Title'],
+      ['target' => 'field_cultural_protocols/protocols', 'source' => 'Protocols'],
+    ];
+
+    $this->importCsvFile($import_file, $mapping);
+
+    $updated_node = $this->entityTypeManager->getStorage('node')->load($node->id());
+    $this->assertEquals('Restricted Node', $updated_node->getTitle(), 'A user without update access to the node under its current protocol must not be able to update it by re-pointing it at a protocol they belong to in the same import row.');
+    $this->assertEquals([$restricted->id()], $updated_node->getProtocols());
+
+    $messages = iterator_to_array($this->lastMigration->getIdMap()->getMessages());
+    $this->assertNotEmpty($messages);
+    $this->assertStringContainsString('does not have access to update', reset($messages)->message);
+  }
+
 }

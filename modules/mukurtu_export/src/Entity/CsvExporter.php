@@ -412,6 +412,14 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface {
             'export' => TRUE,
           ];
         }
+        elseif ($entity_type_id === 'user' && in_array($mapped_base_field_name, ['communities', 'protocols'], TRUE)) {
+          $result[] = [
+            'field_name' => $mapped_field_name,
+            'field_label' => $mapped_base_field_name === 'communities' ? t('Communities') : t('Protocols'),
+            'csv_header_label' => $mapped_field_label,
+            'export' => TRUE,
+          ];
+        }
       }
     }
 
@@ -425,12 +433,37 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface {
       ];
     }
 
+    // For user accounts, add the virtual community/protocol membership
+    // columns if not already mapped. Membership isn't a real, writable
+    // field on the user entity (see GroupMembershipLookup on the import
+    // side), so it can't be discovered through the field-definition loop
+    // below.
+    if ($entity_type_id === 'user') {
+      foreach (['communities' => t('Communities'), 'protocols' => t('Protocols')] as $virtual_field_name => $virtual_field_label) {
+        if (!isset($map[$key][$virtual_field_name])) {
+          $result[] = [
+            'field_name' => $virtual_field_name,
+            'field_label' => $virtual_field_label,
+            'csv_header_label' => $virtual_field_label,
+            'export' => $this->isNew() ? TRUE : FALSE,
+          ];
+        }
+      }
+    }
+
     // Add the remaining, unmapped fields to the end of the list.
     /** @var \Drupal\Core\Field\FieldConfigInterface $field_def */
     foreach($all_field_defs as $field_name => $field_def) {
       // Skip computed fields, except for field_multipage_page_of which has an
       // export-compatible implementation via the PageOfItemList plugin.
       if ($field_def->isComputed() && $field_name !== 'field_multipage_page_of') {
+        continue;
+      }
+
+      // Passwords and internal login bookkeeping fields must never be
+      // exportable. Keep in sync with ImportFormTrait::getFieldDefinitions()'s
+      // equivalent exclusion in modules/mukurtu_import.
+      if ($entity_type_id === 'user' && in_array($field_name, ['pass', 'access', 'login', 'init'], TRUE)) {
         continue;
       }
 
@@ -529,7 +562,7 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface {
   }
 
   public function getSupportedEntityTypes() {
-    return ['node', 'media', 'multipage_item', 'community', 'protocol', 'paragraph', 'file', 'taxonomy_term'];
+    return ['node', 'media', 'multipage_item', 'community', 'protocol', 'paragraph', 'file', 'taxonomy_term', 'user'];
   }
 
 }

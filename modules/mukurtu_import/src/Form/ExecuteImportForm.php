@@ -162,6 +162,15 @@ class ExecuteImportForm extends ImportBaseForm {
 
     }
 
+    if ($this->hasUserImports()) {
+      $form['send_setup_emails'] = [
+        '#type' => 'checkbox',
+        '#title' => $this->t('Send account setup emails to newly created users'),
+        '#description' => $this->t('If checked, each newly created user account with an email address will receive the standard "set your password" email. Existing accounts that are updated will never receive this email. No plaintext passwords are ever imported.'),
+        '#default_value' => FALSE,
+      ];
+    }
+
     $binary_files = $this->getBinaryFiles();
     $form['binary_table'] = [
       '#type' => 'table',
@@ -197,6 +206,18 @@ class ExecuteImportForm extends ImportBaseForm {
     ];
 
     return $form;
+  }
+
+  /**
+   * Whether any of the currently configured metadata files target 'user'.
+   */
+  protected function hasUserImports(): bool {
+    foreach ($this->getMetadataFiles() as $fid) {
+      if ($this->getImportConfig((int) $fid)->getTargetEntityTypeId() === 'user') {
+        return TRUE;
+      }
+    }
+    return FALSE;
   }
 
   /**
@@ -256,8 +277,10 @@ class ExecuteImportForm extends ImportBaseForm {
       }
 
       $lookup_columns = $upstream_lookup_columns[$fid] ?? [];
-      $definition = $config->toDefinition($file, $lookup_columns)
-        + ['mukurtu_import_message' => $this->getImportRevisionMessage()];
+      $definition = $config->toDefinition($file, $lookup_columns) + [
+        'mukurtu_import_message' => $this->getImportRevisionMessage(),
+        'mukurtu_import_send_setup_emails' => (bool) $form_state->getValue('send_setup_emails'),
+      ];
 
       $migration_definitions[$fid] = $definition;
     }
@@ -320,7 +343,11 @@ class ExecuteImportForm extends ImportBaseForm {
       ->getFieldDefinitions($entity_type_id, $bundle);
 
     foreach ($config->getMapping() as $mapping) {
-      $target = explode('/', $mapping['target'], 2)[0];
+      // A mapping entry's target can be the int -1 "Ignore - Do not
+      // import" sentinel rather than a field name; cast before exploding
+      // so it falls through to the field-lookup miss below instead of
+      // throwing.
+      $target = explode('/', (string) $mapping['target'], 2)[0];
       $field_def = $field_defs[$target] ?? NULL;
       if (!$field_def) {
         continue;
@@ -508,7 +535,7 @@ class ExecuteImportForm extends ImportBaseForm {
         ->getFieldDefinitions($entity_type_id, $bundle);
 
       foreach ($config->getMapping() as $mapping) {
-        $target = explode('/', $mapping['target'], 2)[0];
+        $target = explode('/', (string) $mapping['target'], 2)[0];
         $field_def = $field_defs[$target] ?? NULL;
         if (!$field_def) {
           continue;

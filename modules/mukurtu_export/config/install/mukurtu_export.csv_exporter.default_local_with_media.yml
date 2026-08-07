@@ -358,6 +358,22 @@ entity_fields_export_list:
     field_local_contexts_api_key: 'Local Contexts API key'
     field_local_contexts_description: 'Local Contexts Description'
     default_langcode: 'Default translation'
+  user__user:
+    uid: ID
+    uuid: UUID
+    name: Username
+    mail: Email
+    account_status: 'Account Status'
+    field_display_name: 'Display Name'
+    roles: Roles
+    created: Created
+    langcode: 'Language (langcode)'
+    timezone: Timezone
+    message_subscribe_email: 'Receive Email Notifications'
+    user_picture/target_id: 'Profile Picture File'
+    user_picture/alt: 'Profile Picture Alt Text'
+    communities: Communities
+    protocols: Protocols
   paragraph__dictionary_word_entry:
     id: ID
     langcode: 'Language code'

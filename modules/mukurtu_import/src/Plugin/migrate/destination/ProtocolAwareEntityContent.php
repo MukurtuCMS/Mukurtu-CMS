@@ -137,7 +137,7 @@ class ProtocolAwareEntityContent extends EntityContentBase {
     // restricted to user 1 (see MukurtuMigrateAccessCheck) and runs before OG
     // memberships are migrated, so protocol/community access checks would
     // incorrectly deny entity creation.
-    if ((int) $this->currentUser->id() !== 1) {
+    if (!$this->currentUserBypassesAccessChecks()) {
       // Determine if this is a create or update operation.
       $operation = $entity->isNew() ? 'create' : 'update';
 
@@ -169,6 +169,18 @@ class ProtocolAwareEntityContent extends EntityContentBase {
       $ids[] = $entity->language()->getId();
     }
     return $ids;
+  }
+
+  /**
+   * Determines whether the current user bypasses entity access checks.
+   *
+   * By default this is only true for user 1 (see the rationale in import()).
+   * Extending classes can override this to grant the bypass to holders of a
+   * module-specific permission that is already enforced elsewhere as the
+   * real gate for that destination.
+   */
+  protected function currentUserBypassesAccessChecks(): bool {
+    return (int) $this->currentUser->id() === 1;
   }
 
   /**
@@ -326,7 +338,7 @@ class ProtocolAwareEntityContent extends EntityContentBase {
   protected function updateEntity(EntityInterface $entity, Row $row) {
     // Skip access checks for user 1. See the corresponding check in import()
     // for rationale.
-    if ((int) $this->currentUser->id() !== 1) {
+    if ($this->currentUserBypassesAccessChecks()) {
       return parent::updateEntity($entity, $row);
     }
 

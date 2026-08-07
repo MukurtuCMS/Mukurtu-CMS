@@ -13,3 +13,7 @@ delete any mukurtu_import_strategy:
   title: 'Delete any Import Templates'
 access mukurtu import:
   title: 'Access Mukurtu Import'
+import mukurtu users:
+  title: 'Import User Accounts'
+  description: 'Allows batch creating and updating user accounts via the import tool, including assigning roles (other than Administrator). Restrict this to trusted administrators.'
+  restrict access: true
