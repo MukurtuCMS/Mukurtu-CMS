@@ -7747,10 +7747,6 @@ header {
   color: var(--text-color);
 }
 
-.path-submit {
-  --gin-bg-layer: var(--color-white);
-  --gin-bg-layer2: rgb(0 0 0 / 50%);
-}
 .path-submit .layout-content {
   max-width: 1280px;
   margin-inline: auto;
@@ -8035,6 +8031,11 @@ header {
   padding-block: var(--v-space-3xs);
   -webkit-border-before: 1px solid var(--color-greys-alpha-border);
           border-block-start: 1px solid var(--color-greys-alpha-border);
+}
+.path-submit .ui-widget-overlay,
+.path-submit .ui-dialog.entity-browser-modal {
+  --gin-bg-layer: var(--color-white);
+  --gin-bg-layer2: rgb(0 0 0 / 50%);
 }
 .path-submit .ui-dialog.entity-browser-modal {
   border-radius: 0.5rem;

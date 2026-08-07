@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Drupal\mukurtu_submissions;
 
+use Drupal\Core\Entity\Entity\EntityFormMode;
 use Drupal\Core\Entity\EntityDisplayRepositoryInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\mukurtu_media\MediaTypeExtensions;
 use Drupal\mukurtu_submissions\Entity\SubmissionSettingsInterface;
 use Drupal\mukurtu_submissions\Form\PublicSubmissionForm;
@@ -136,8 +138,34 @@ class SubmissionFormDisplayManager {
    * enforces for every other excluded field.
    */
   public function ensureSubmissionFormDisplay(SubmissionSettingsInterface $settings): void {
-    $entity_type_id = $settings->getTargetEntityTypeId();
-    $bundle = $settings->getTargetBundle();
+    $this->ensureSubmissionFormDisplayForBundle($settings->getTargetEntityTypeId(), $settings->getTargetBundle());
+  }
+
+  /**
+   * Does the actual work of ensureSubmissionFormDisplay(), factored out so
+   * it can also be called recursively for any paragraph bundle reachable
+   * through an entity_reference_revisions field on the bundle being
+   * provisioned - a paragraph-embedded field (e.g. dictionary_word's
+   * sample-sentence recording, nested inside the sample_sentence paragraph
+   * type) otherwise never gets its own "submission" display at all, so its
+   * inline subform keeps rendering via the paragraph's "default" display -
+   * still the full Media Library picker, unusable by an anonymous visitor -
+   * regardless of how the field looks at the top level.
+   *
+   * $visited (keyed by "$entity_type_id:$bundle") guards against infinite
+   * recursion from a paragraph type that directly or transitively
+   * references itself; also lets the same paragraph bundle be provisioned
+   * once even when reachable from multiple parent bundles/fields.
+   */
+  protected function ensureSubmissionFormDisplayForBundle(string $entity_type_id, string $bundle, array &$visited = []): void {
+    $visited_key = $entity_type_id . ':' . $bundle;
+    if (isset($visited[$visited_key])) {
+      return;
+    }
+    $visited[$visited_key] = TRUE;
+
+    $this->ensureSubmissionFormModeExists($entity_type_id);
+
     $display = $this->entityDisplayRepository->getFormDisplay($entity_type_id, $bundle, 'submission');
     if (!$display->isNew()) {
       return;
@@ -165,14 +193,20 @@ class SubmissionFormDisplayManager {
     // Any entity-reference-to-media field (field_media_assets and its
     // like, on any bundle) gets our own simple upload widget instead of
     // whatever the "default" mode uses (normally the Media Library picker)
-    // - see applySimpleMediaUploadWidget().
+    // - see applySimpleMediaUploadWidget(). Any entity-reference-revisions
+    // field targeting paragraphs gets its own referenced paragraph
+    // bundle(s) recursively provisioned the same way, and is switched to
+    // render them through that provisioned "submission" display - see
+    // applyParagraphSubmissionMode().
     $default_display = $this->entityDisplayRepository->getFormDisplay($entity_type_id, $bundle, 'default');
     foreach ($this->entityFieldManager->getFieldDefinitions($entity_type_id, $bundle) as $field_name => $definition) {
       if (in_array($field_name, PublicSubmissionForm::EXCLUDED_FIELDS, TRUE) || !$definition->isDisplayConfigurable('form')) {
         continue;
       }
       $component = $display->getComponent($field_name) ?: ($default_display->getComponent($field_name) ?: []);
-      $display->setComponent($field_name, $this->applySimpleMediaUploadWidget($field_name, $component, $entity_type_id, $bundle));
+      $component = $this->applySimpleMediaUploadWidget($field_name, $component, $entity_type_id, $bundle);
+      $component = $this->applyParagraphSubmissionMode($field_name, $component, $definition, $visited);
+      $display->setComponent($field_name, $component);
     }
 
     $display->save();
@@ -388,6 +422,108 @@ class SubmissionFormDisplayManager {
     $component['type'] = 'mukurtu_simple_media_upload';
     $component['settings'] = ['allowed_bundles' => $allowed_bundles];
     return $component;
+  }
+
+  /**
+   * If $definition is an entity_reference_revisions field targeting
+   * paragraphs, recursively ensures a "submission" display exists for each
+   * paragraph bundle it can target, and points the field's own widget at
+   * that display mode (the "form_display_mode" setting both of this
+   * module's paragraph widgets - "paragraphs" and "entity_reference_
+   * paragraphs" - read via EntityFormDisplay::collectRenderDisplay() when
+   * rendering each item's inline subform), so nested fields get the exact
+   * same widget substitution as a field living directly on the bundle.
+   *
+   * A field with no explicit target_bundles restriction is left alone:
+   * every paragraph type on the site would be a valid target, so there's
+   * no single bundle (or bounded set of bundles) to provision here, and no
+   * evidence any such field currently exists in this profile.
+   */
+  protected function applyParagraphSubmissionMode(string $field_name, array $component, FieldDefinitionInterface $definition, array &$visited): array {
+    if ($definition->getType() !== 'entity_reference_revisions' || $definition->getSetting('target_type') !== 'paragraph') {
+      return $component;
+    }
+
+    $target_bundles = array_keys(array_filter($definition->getSetting('handler_settings')['target_bundles'] ?? []));
+    if (!$target_bundles) {
+      return $component;
+    }
+
+    foreach ($target_bundles as $paragraph_bundle) {
+      $this->ensureSubmissionFormDisplayForBundle('paragraph', $paragraph_bundle, $visited);
+    }
+
+    $component['settings']['form_display_mode'] = 'submission';
+    return $component;
+  }
+
+  /**
+   * Ensures the "$entity_type_id.submission" entity form mode exists -
+   * EntityDisplayBase::calculateDependencies() loads it by ID whenever a
+   * non-"default"-mode display is saved (to record a config dependency on
+   * it), and fatals on a missing one. For "node", this mode always exists
+   * already - it ships as required config (core.entity_form_mode.node.
+   * submission.yml) since node is a hard dependency of this module. For
+   * "paragraph", nothing ships an equivalent: making paragraphs a hard
+   * module dependency just to ship one more static config file isn't
+   * worth it when this is just as correct and works regardless of module
+   * install order relative to whatever module defines a given paragraph
+   * bundle.
+   */
+  protected function ensureSubmissionFormModeExists(string $entity_type_id): void {
+    $mode_id = $entity_type_id . '.submission';
+    if (EntityFormMode::load($mode_id)) {
+      return;
+    }
+    EntityFormMode::create([
+      'id' => $mode_id,
+      'label' => 'Submission',
+      'targetEntityType' => $entity_type_id,
+      'dependencies' => ['enforced' => ['module' => ['mukurtu_submissions']]],
+    ])->save();
+  }
+
+  /**
+   * Retrofits an EXISTING bundle's already-provisioned "submission"
+   * display with the paragraph-nested-field handling
+   * ensureSubmissionFormDisplayForBundle() now applies to freshly created
+   * ones. That method is deliberately a no-op once a display exists (it
+   * should never clobber an admin's hand-curated field arrangement), so an
+   * already-provisioned display - digital_heritage's, or any bundle a site
+   * enabled before this fix - would otherwise never pick up the paragraph
+   * handling. mukurtu_submissions_update_40008() calls this for every
+   * bundle a site already has a settings entity for.
+   *
+   * Only touches entity_reference_revisions/paragraph components the
+   * display already has - never adds or removes fields, matching this
+   * method's narrow "retrofit the new paragraph handling only" purpose.
+   */
+  public function retrofitParagraphSubmissionMode(string $entity_type_id, string $bundle): void {
+    $display = $this->entityDisplayRepository->getFormDisplay($entity_type_id, $bundle, 'submission');
+    if ($display->isNew()) {
+      // Nothing to retrofit - a not-yet-provisioned bundle gets the
+      // paragraph handling for free the first time
+      // ensureSubmissionFormDisplayForBundle() runs for it.
+      return;
+    }
+
+    $changed = FALSE;
+    $visited = [];
+    foreach ($this->entityFieldManager->getFieldDefinitions($entity_type_id, $bundle) as $field_name => $definition) {
+      $component = $display->getComponent($field_name);
+      if (!$component) {
+        continue;
+      }
+      $updated = $this->applyParagraphSubmissionMode($field_name, $component, $definition, $visited);
+      if ($updated !== $component) {
+        $display->setComponent($field_name, $updated);
+        $changed = TRUE;
+      }
+    }
+
+    if ($changed) {
+      $display->save();
+    }
   }
 
 }

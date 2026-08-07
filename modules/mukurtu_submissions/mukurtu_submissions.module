@@ -482,11 +482,7 @@ function mukurtu_submissions_sync_entity_browser_permissions(SubmissionSettingsI
 
   $display = \Drupal::service('entity_display.repository')->getFormDisplay($entity_type_id, $bundle, 'submission');
   $browser_ids = [];
-  foreach ($display->getComponents() as $component) {
-    if (($component['type'] ?? NULL) === 'entity_browser_entity_reference' && !empty($component['settings']['entity_browser'])) {
-      $browser_ids[$component['settings']['entity_browser']] = TRUE;
-    }
-  }
+  _mukurtu_submissions_collect_entity_browser_ids($display, $entity_type_id, $bundle, $browser_ids, []);
   if (!$browser_ids) {
     return;
   }
@@ -509,6 +505,51 @@ function mukurtu_submissions_sync_entity_browser_permissions(SubmissionSettingsI
       }
       elseif (!$should_grant && $has_permission) {
         $role->revokePermission($permission)->save();
+      }
+    }
+  }
+}
+
+/**
+ * Collects entity_browser IDs from $display's own "entity_browser_entity_
+ * reference" components into $browser_ids (keyed by browser ID), and
+ * recurses into any paragraph-referencing field's own provisioned
+ * "submission" display - a browser field nested inside a paragraph (e.g.
+ * a future content-picker field embedded in some paragraph type) is
+ * otherwise invisible to mukurtu_submissions_sync_entity_browser_
+ * permissions(), which only ever inspected the target bundle's own
+ * top-level components.
+ *
+ * $visited (keyed by "$entity_type_id:$bundle") guards against infinite
+ * recursion from a paragraph type that directly or transitively
+ * references itself.
+ */
+function _mukurtu_submissions_collect_entity_browser_ids($display, string $entity_type_id, string $bundle, array &$browser_ids, array $visited): void {
+  $visited_key = $entity_type_id . ':' . $bundle;
+  if (isset($visited[$visited_key])) {
+    return;
+  }
+  $visited[$visited_key] = TRUE;
+
+  $entity_field_manager = \Drupal::service('entity_field.manager');
+  $entity_display_repository = \Drupal::service('entity_display.repository');
+
+  foreach ($display->getComponents() as $field_name => $component) {
+    $type = $component['type'] ?? NULL;
+    if ($type === 'entity_browser_entity_reference' && !empty($component['settings']['entity_browser'])) {
+      $browser_ids[$component['settings']['entity_browser']] = TRUE;
+      continue;
+    }
+
+    if ($type === 'paragraphs' || $type === 'entity_reference_paragraphs') {
+      $definition = $entity_field_manager->getFieldDefinitions($entity_type_id, $bundle)[$field_name] ?? NULL;
+      if (!$definition) {
+        continue;
+      }
+      $target_bundles = array_keys(array_filter($definition->getSetting('handler_settings')['target_bundles'] ?? []));
+      foreach ($target_bundles as $paragraph_bundle) {
+        $paragraph_display = $entity_display_repository->getFormDisplay('paragraph', $paragraph_bundle, 'submission');
+        _mukurtu_submissions_collect_entity_browser_ids($paragraph_display, 'paragraph', $paragraph_bundle, $browser_ids, $visited);
       }
     }
   }
