@@ -79,6 +79,30 @@
         $('#location-popup-' + event.popup._source._leaflet_id).val(locationDescription);
       }, this);
 
+      // update_leaflet_widget_map() just ran above, but if this map starts
+      // out inside a hidden tab/details pane (e.g. a field_group "Additional
+      // Fields" tab that isn't active yet), its container is still 0x0, so
+      // the fitBounds()/singlePointZoom correction it just computed is
+      // meaningless and gets thrown away. Contrib's own visibility handling
+      // (leaflet.drupal.js) only calls invalidateSize() the first time the
+      // container becomes visible - it never redoes the fit/zoom - so once
+      // the tab is revealed the map is stuck showing the empty-map default
+      // instead of the saved point. Redo our fit/zoom once the container
+      // actually has real dimensions.
+      if ('IntersectionObserver' in window) {
+        const self = this;
+        const visibilityObserver = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.intersectionRatio > 0) {
+              map.invalidateSize();
+              self.update_leaflet_widget_map();
+              visibilityObserver.disconnect();
+            }
+          });
+        });
+        visibilityObserver.observe(map.getContainer());
+      }
+
     }
   };
 
