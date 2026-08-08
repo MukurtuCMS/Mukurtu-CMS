@@ -53,6 +53,12 @@
 
           if ($targetId.length) {
             sessionStorage.setItem('mukurtu_person_target_id_selector', '#' + $targetId.attr('id'));
+            // eslint-disable-next-line no-console
+            console.debug('[mukurtu_person] create-link click: found target_id input', $targetId.attr('id'));
+          }
+          else {
+            // eslint-disable-next-line no-console
+            console.debug('[mukurtu_person] create-link click: target_id input NOT found within', depth, 'ancestor levels');
           }
         });
 
@@ -71,7 +77,12 @@
           const title = event.data && event.data.title;
           const selector = sessionStorage.getItem('mukurtu_person_target_id_selector');
 
+          // eslint-disable-next-line no-console
+          console.debug('[mukurtu_person] broadcast received', { nid: nid, title: title, selector: selector });
+
           if (!nid || !selector) {
+            // eslint-disable-next-line no-console
+            console.debug('[mukurtu_person] aborting: missing nid or no stored selector (create-link was never clicked on this tab, or nothing was found for it)');
             return;
           }
 
@@ -79,8 +90,13 @@
 
           const $targetId = $(selector);
           if (!$targetId.length) {
+            // eslint-disable-next-line no-console
+            console.debug('[mukurtu_person] aborting: no element found for stored selector', selector, '- the form may have been rebuilt (e.g. an AJAX re-render) since the link was clicked, changing the element\'s id');
             return;
           }
+
+          // eslint-disable-next-line no-console
+          console.debug('[mukurtu_person] setting target_id and triggering entity_browser_value_updated', $targetId.attr('id'));
 
           // Announce to screen readers that the new person has been
           // selected. The live region is injected, read aloud, then
@@ -92,6 +108,41 @@
             'text': Drupal.t('@title was created and selected as the related person.', { '@title': title }),
           }).appendTo('body');
           setTimeout(function () { $announcement.remove(); }, 3000);
+
+          // The widget's own re-render (triggered below) will show a
+          // generic "Content <nid>" placeholder instead of the real name:
+          // entity_browser's RenderedEntity field-widget-display plugin
+          // checks $entity->access('view') before rendering, and that's
+          // correctly denied here - a fresh submission has no cultural
+          // protocol assigned yet, so only its owner can view it, same as
+          // any other pending submission. Fixing the access check itself
+          // would mean touching Mukurtu's cultural-protocol access control
+          // broadly for what's ultimately a one-time cosmetic label, so
+          // instead: swap the placeholder for the real title (already
+          // known from the broadcast message) once the widget's AJAX
+          // rebuild actually lands. ajaxComplete is used rather than a
+          // fixed delay since the round-trip time isn't predictable;
+          // capped at 20 attempts (roughly 10s if requests average 500ms)
+          // so this can't listen forever if the rebuild never arrives.
+          const $scope = $targetId.closest('.field--widget-entity-browser-entity-reference');
+          const nidPattern = new RegExp('(^|\\s)' + nid + '($|\\s)');
+          let attemptsLeft = 20;
+          const swapPlaceholderLabel = function () {
+            attemptsLeft--;
+            let replaced = false;
+            if ($scope.length) {
+              $scope.find('*').addBack().contents().each(function () {
+                if (this.nodeType === 3 && nidPattern.test(this.nodeValue)) {
+                  this.nodeValue = title;
+                  replaced = true;
+                }
+              });
+            }
+            if (replaced || attemptsLeft <= 0) {
+              $(document).off('ajaxComplete', swapPlaceholderLabel);
+            }
+          };
+          $(document).on('ajaxComplete', swapPlaceholderLabel);
 
           // Set the widget's value and fire its own AJAX-trigger event -
           // EntityReferenceBrowserWidget deliberately uses a custom event

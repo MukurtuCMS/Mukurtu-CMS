@@ -8052,6 +8052,9 @@ header {
 .path-submit .ui-dialog.entity-browser-modal .ui-dialog-titlebar-close {
   background: transparent !important;
 }
+.path-submit .ui-dialog.entity-browser-modal .ajax-progress.ajax-progress-throbber {
+  display: none;
+}
 .path-submit .field--widget-entity-browser-entity-reference .ajax-progress.ajax-progress-throbber {
   display: none;
 }

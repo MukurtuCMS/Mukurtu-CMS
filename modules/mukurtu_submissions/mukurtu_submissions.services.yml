@@ -4,4 +4,4 @@ services:
     arguments: ['@entity_display.repository', '@entity_field.manager', '@entity_type.manager', '@entity_type.bundle.info']
   mukurtu_submissions.session_created_entities:
     class: Drupal\mukurtu_submissions\SessionCreatedEntities
-    arguments: ['@tempstore.private']
+    arguments: ['@request_stack']
