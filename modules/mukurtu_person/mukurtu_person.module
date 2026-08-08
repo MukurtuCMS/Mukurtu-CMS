@@ -187,7 +187,24 @@ function mukurtu_person_field_widget_single_element_form_alter(&$element, FormSt
     }
   }
 
+  // Prefer the full admin add-content form for anyone who actually has
+  // access to it (staff/reviewers - unchanged from before), falling back to
+  // the public submission form for anyone who only has submission access
+  // (e.g. an anonymous visitor, or an authenticated user on a site where
+  // "person" submissions are open to any logged-in account) - without this
+  // fallback, node.add's own "create person content" permission check
+  // means this link (and the entire quick-create flow) never appears for
+  // that entire audience, even though mukurtu_submissions/mukurtu_person's
+  // per-session tempstore-backed broadcast mechanism (mukurtu_person_node_
+  // insert()/_page_attachments(), mukurtu-person-listener.js) works
+  // identically regardless of which form actually created the node.
   $create_url = Url::fromRoute('node.add', ['node_type' => 'person']);
+  if (!$create_url->access() && \Drupal::moduleHandler()->moduleExists('mukurtu_submissions')) {
+    $submission_url = Url::fromRoute('mukurtu_submissions.submit', ['entity_type_id' => 'node', 'bundle' => 'person']);
+    if ($submission_url->access()) {
+      $create_url = $submission_url;
+    }
+  }
   if ($create_url->access()) {
     $element['create_person_link'] = [
       '#type' => 'link',
