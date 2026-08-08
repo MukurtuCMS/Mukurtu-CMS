@@ -735,6 +735,18 @@
     .ui-dialog-titlebar-close {
       background: transparent !important;
     }
+
+    // Stale throbber left over from the *outer* "Select Content" button's
+    // own AJAX request (the one that opens this dialog) - Drupal's AJAX
+    // system injects it as a sibling of the button/target, but here that
+    // ends up as a sibling of the dialog's own iframe rather than getting
+    // cleaned up when the dialog opens. Once the iframe exists it's
+    // definitely stale (confirmed live, inspected via DevTools) - the
+    // iframe has its own separate loading behavior, unrelated to this
+    // Drupal-AJAX-specific indicator.
+    .ajax-progress.ajax-progress-throbber {
+      display: none;
+    }
   }
 
   // The throbber that appears next to "Select Content"/"Select Words"

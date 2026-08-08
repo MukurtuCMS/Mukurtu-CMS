@@ -8,8 +8,10 @@ use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Validation\Plugin\Validation\Constraint\NotNullConstraint;
 use Drupal\node\NodeInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\Validator\ConstraintViolationInterface;
 
 /**
  * Form for changing a node's moderation state and leaving a review note.
@@ -130,12 +132,38 @@ class ReviewStateForm extends FormBase {
     if ($violations->count() > 0) {
       $messages = [];
       foreach ($violations as $violation) {
-        $messages[] = (string) $violation->getMessage();
+        $messages[] = (string) $this->describeViolation($node, $violation);
       }
       $form_state->setErrorByName('actions', $this->t('Status not updated: @messages', [
         '@messages' => implode(' ', $messages),
       ]));
     }
+  }
+
+  /**
+   * Builds a reviewer-facing description of a validation violation.
+   *
+   * $node->validate()'s own messages are written for developers, not
+   * reviewers - "This value should not be null." (the constraint most
+   * required-but-empty fields use, including Cultural Protocols on a
+   * pending submission) never names which field is actually missing, so
+   * a reviewer trying to publish has no way to tell what's wrong. Named
+   * per field instead: a plain "@label is/are required." for the common
+   * empty-required-field case, or "@label: @message" for anything else,
+   * so the underlying message (already reasonably descriptive on its
+   * own, e.g. an invalid-reference rejection) still comes through with
+   * the field it belongs to.
+   */
+  protected function describeViolation(NodeInterface $node, ConstraintViolationInterface $violation): \Stringable|string {
+    $field_name = explode('.', (string) $violation->getPropertyPath())[0];
+    $label = $node->hasField($field_name) ? (string) $node->getFieldDefinition($field_name)->getLabel() : $field_name;
+
+    if ($violation->getConstraint() instanceof NotNullConstraint) {
+      $verb = str_ends_with(strtolower($label), 's') ? $this->t('are') : $this->t('is');
+      return $this->t('@label @verb required.', ['@label' => $label, '@verb' => $verb]);
+    }
+
+    return $this->t('@label: @message', ['@label' => $label, '@message' => $violation->getMessage()]);
   }
 
   public function submitForm(array &$form, FormStateInterface $form_state): void {

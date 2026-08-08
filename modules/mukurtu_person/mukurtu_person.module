@@ -38,20 +38,32 @@ function mukurtu_person_entity_bundle_info_alter(array &$bundles)
 /**
  * Implements hook_node_insert().
  *
- * Stores the new person's nid and title in private temp store so that
+ * Stores the new person's nid and title in the session so that
  * hook_page_attachments() can attach the broadcast JS on the next page load.
  * Also checks for missing reciprocal relationships on the new record.
+ *
+ * Uses the raw session directly, NOT PrivateTempStore, even though this is
+ * exactly the kind of session-scoped data PrivateTempStore exists for -
+ * PrivateTempStore's own storage key is resolved from the CURRENT USER
+ * ACCOUNT, not the session itself, and a save reaching this hook may be
+ * happening from inside PublicSubmissionForm::submitForm()'s
+ * AccountSwitcher::switchTo(uid 1) wrapper (mukurtu_submissions' public
+ * submission form is the route mukurtu_person's own "Create a new person
+ * record" link now falls back to for a visitor without admin add-content
+ * access - see mukurtu_person_field_widget_single_element_form_alter()).
+ * Storing under PrivateTempStore in that situation would write under UID
+ * 1's identity instead of the real anonymous visitor's, and the
+ * broadcast would never fire - confirmed live, not just a theoretical
+ * risk. A plain session is untouched by account switching.
  */
 function mukurtu_person_node_insert(NodeInterface $node) {
   if ($node->bundle() !== 'person') {
     return;
   }
-  \Drupal::service('tempstore.private')
-    ->get('mukurtu_person')
-    ->set('new_person_broadcast', [
-      'nid' => $node->id(),
-      'title' => $node->label(),
-    ]);
+  \Drupal::request()->getSession()->set('mukurtu_person.new_person_broadcast', [
+    'nid' => $node->id(),
+    'title' => $node->label(),
+  ]);
   // Lets a later submission in this same session reference this node even
   // before it's independently viewable (a fresh submission has no cultural
   // protocol assigned yet) - see PublicSubmissionForm::
@@ -86,6 +98,27 @@ function mukurtu_person_node_update(NodeInterface $node): void {
 function _mukurtu_person_warn_missing_reciprocals(NodeInterface $node): void {
   if ($node->bundle() !== 'person') {
     return;
+  }
+
+  // This is a reviewer-facing prompt (it links to the related person's own
+  // edit form), meaningless - and inappropriate to show at all - for a
+  // pending submission nobody has reviewed yet. \Drupal::currentUser() is
+  // not a reliable "is this a real visitor" check here: a submission's
+  // save happens inside PublicSubmissionForm::submitForm()'s
+  // AccountSwitcher::switchTo(uid 1) wrapper, which hook_node_insert()
+  // fires during, so currentUser() would report the switched-to account,
+  // not the actual visitor. The node's own owner (set by
+  // PublicSubmissionForm::setPendingSubmissionState() to the submissions
+  // service account, regardless of account-switching state) is the
+  // reliable signal - same pattern mukurtu_submissions_node_insert() uses
+  // for its own equivalent check. Confirmed live: without this, the
+  // warning (with the related person's real title and an edit-form link
+  // the visitor can't use) appeared on the public "thank you" page.
+  if (\Drupal::moduleHandler()->moduleExists('mukurtu_submissions')) {
+    $service_account_uid = (int) \Drupal::config('mukurtu_submissions.settings')->get('service_account_uid');
+    if ($service_account_uid && (int) $node->getOwnerId() === $service_account_uid) {
+      return;
+    }
   }
 
   foreach ($node->get('field_related_people') as $item) {
@@ -134,12 +167,22 @@ function _mukurtu_person_warn_missing_reciprocals(NodeInterface $node): void {
  * in any other tab currently editing a related_person paragraph.
  */
 function mukurtu_person_page_attachments(array &$attachments) {
-  $store = \Drupal::service('tempstore.private')->get('mukurtu_person');
-  $data = $store->get('new_person_broadcast');
+  // Raw session, not PrivateTempStore - see mukurtu_person_node_insert()'s
+  // own docblock for why: this has to be readable by the visitor's own,
+  // genuinely-anonymous session, matching exactly how it was written.
+  $session = \Drupal::request()->getSession();
+  $data = $session->get('mukurtu_person.new_person_broadcast');
   if (!$data) {
     return;
   }
-  $store->delete('new_person_broadcast');
+  $session->remove('mukurtu_person.new_person_broadcast');
+
+  // This attachment is entirely session-specific - safe to rely on
+  // hook_page_attachments() actually running for every visitor here
+  // because ThankYouController::view() (the only page this fires on with
+  // anything to attach) marks its own response uncacheable, so Drupal's
+  // anonymous page cache never short-circuits this hook with a stale
+  // response from an earlier, unrelated visitor.
   $attachments['#attached']['library'][] = 'mukurtu_person/person_broadcast';
   $attachments['#attached']['drupalSettings']['mukurtuPerson']['newPerson'] = [
     'nid' => $data['nid'],
