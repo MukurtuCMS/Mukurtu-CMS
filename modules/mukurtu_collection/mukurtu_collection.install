@@ -380,3 +380,19 @@ function mukurtu_collection_update_40017(): void {
     \Drupal::configFactory()->getEditable($config_name)->setData($data)->save(TRUE);
   }
 }
+
+/**
+ * Corrects field_coverage_description's textarea from 31 rows down to the
+ * 5 every other content type uses for the same field - an outlier typo in
+ * this bundle's shipped default form display, not a deliberate size,
+ * making the "Location Description" field render at a comically tall
+ * size on both the regular edit form and (once generalized in #1924) the
+ * submission form. Guarded to skip a site that already customized it away
+ * from the original broken default.
+ */
+function mukurtu_collection_update_40018(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.collection.default');
+  if ((int) $config->get('content.field_coverage_description.settings.rows') === 31) {
+    $config->set('content.field_coverage_description.settings.rows', 5)->save();
+  }
+}
