@@ -1,19 +1,28 @@
 /**
  * @file
- * Listens for a new-person BroadcastChannel message and re-opens the
- * field_related_person entity browser pre-filtered to the new person's title.
+ * Listens for a new-person BroadcastChannel message and directly selects the
+ * new person on the field_related_person entity_browser widget that opened
+ * the "Create a new person record" link.
  *
  * Flow:
  *  1. User clicks the "Create a new person record" link — the click handler
- *     stores the entity browser button's UUID in sessionStorage so we know
- *     which browser to reopen when the message arrives.
+ *     finds the field widget's own hidden "target_id" input and remembers
+ *     its element id in sessionStorage, so we know which field to update
+ *     when the message arrives.
  *  2. User creates the person in the new tab; mukurtu-person-broadcast.js
  *     fires a BroadcastChannel message with { nid, title }.
- *  3. The onmessage handler finds the stored button, appends &title=<name>
- *     to its sibling hidden path input (which becomes the iframe src), and
- *     programmatically clicks the button to open the modal.
- *  4. The entity browser iframe loads with the view pre-filtered, showing
- *     only the newly created person. One click selects them.
+ *  3. The onmessage handler finds the stored target_id input, sets its
+ *     value to "node:<nid>" and fires the widget's own AJAX-trigger event -
+ *     the same mechanism a normal picker selection uses - so the widget
+ *     shows the new person as selected without ever opening the picker.
+ *
+ * The picker itself is deliberately skipped, rather than reopened: a
+ * freshly-submitted person record has no cultural protocol assigned yet, so
+ * it isn't independently viewable, and the picker's own view would show no
+ * results for it. What actually authorizes referencing it despite that is
+ * server-side - see \Drupal\mukurtu_submissions\Form\PublicSubmissionForm::
+ * isReferenceToSessionCreatedEntity() - this only saves the visitor from
+ * having to search a picker for a record they can't see yet.
  */
 (function (Drupal, $, once) {
   'use strict';
@@ -21,27 +30,29 @@
   Drupal.behaviors.mukurtuPersonListener = {
     attach: function (context, settings) {
 
-      // Step 1: when the create-link is clicked, remember which entity browser
-      // it belongs to so we can reopen the right one after the broadcast.
+      // Step 1: when the create-link is clicked, remember which field's
+      // hidden target_id input to update once the broadcast arrives.
       $(once('mukurtu-person-create-link', '.mukurtu-person-create-link', context))
         .on('click', function () {
-          // The create link and entity browser button share a common ancestor
-          // but the exact wrapper class varies by context (paragraph subform,
-          // field item table, etc.). Walk up the DOM until we find an ancestor
-          // that contains a [data-uuid] button, stopping before the full form.
-          let $button = $();
+          // The create link and the field's own hidden target_id input
+          // share a common ancestor (the entity_browser_entity_reference
+          // widget's own wrapper) but the exact wrapper class varies by
+          // context (paragraph subform, field item table, etc.). Walk up
+          // the DOM until we find an ancestor that contains it, stopping
+          // before the full form.
+          let $targetId = $();
           let $ancestor = $(this).parent();
           let depth = 0;
-          while ($ancestor.length && !$button.length && depth < 10) {
-            $button = $ancestor.find('[data-uuid]').first();
-            if (!$button.length) {
+          while ($ancestor.length && !$targetId.length && depth < 10) {
+            $targetId = $ancestor.find('input[type="hidden"][name*="[target_id]"]').first();
+            if (!$targetId.length) {
               $ancestor = $ancestor.parent();
               depth++;
             }
           }
 
-          if ($button.length) {
-            sessionStorage.setItem('mukurtu_person_eb_uuid', $button.attr('data-uuid'));
+          if ($targetId.length) {
+            sessionStorage.setItem('mukurtu_person_target_id_selector', '#' + $targetId.attr('id'));
           }
         });
 
@@ -56,48 +67,39 @@
         const channel = new BroadcastChannel('mukurtu_person_created');
 
         channel.onmessage = function (event) {
+          const nid = event.data && event.data.nid;
           const title = event.data && event.data.title;
-          const uuid = sessionStorage.getItem('mukurtu_person_eb_uuid');
+          const selector = sessionStorage.getItem('mukurtu_person_target_id_selector');
 
-          if (!title || !uuid) {
+          if (!nid || !selector) {
             return;
           }
 
-          sessionStorage.removeItem('mukurtu_person_eb_uuid');
+          sessionStorage.removeItem('mukurtu_person_target_id_selector');
 
-          // Announce to screen readers that the entity browser is opening.
-          // The live region is injected, read aloud, then removed after 3s.
+          const $targetId = $(selector);
+          if (!$targetId.length) {
+            return;
+          }
+
+          // Announce to screen readers that the new person has been
+          // selected. The live region is injected, read aloud, then
+          // removed after 3s.
           const $announcement = $('<div>', {
             'aria-live': 'polite',
             'aria-atomic': 'true',
             'class': 'visually-hidden',
-            'text': Drupal.t('@title was created. Opening the browser to select them.', { '@title': title }),
+            'text': Drupal.t('@title was created and selected as the related person.', { '@title': title }),
           }).appendTo('body');
           setTimeout(function () { $announcement.remove(); }, 3000);
 
-          // Find the entity browser open button by its UUID.
-          const $button = $('[data-uuid="' + uuid + '"]');
-          if (!$button.length) {
-            return;
-          }
-
-          // The entity browser Display/Modal renders a hidden 'path' input and
-          // the open_modal submit button as siblings inside a container div.
-          // Modifying the path value before clicking causes openModal() to use
-          // the updated URL as the iframe src, so Views picks up ?title=... as
-          // an exposed filter GET parameter.
-          const $path = $button.parent().find('input[type="hidden"]').first();
-          if ($path.length) {
-            let src = $path.val();
-            // Strip any existing title param to avoid duplicates. Remove the
-            // leading delimiter with the param so no orphan ? or && is left,
-            // then promote a leading & back to ? if it becomes the first char.
-            src = src.replace(/[?&]title=[^&]*/g, '').replace(/^&/, '?');
-            src += (src.includes('?') ? '&' : '?') + 'title=' + encodeURIComponent(title);
-            $path.val(src);
-          }
-
-          $button.trigger('click');
+          // Set the widget's value and fire its own AJAX-trigger event -
+          // EntityReferenceBrowserWidget deliberately uses a custom event
+          // ("entity_browser_value_updated"), not a plain "change", for
+          // this hidden field (see its own formElement()) - so the widget
+          // rebuilds and shows the new person as the current selection,
+          // exactly as if it had been chosen through the picker.
+          $targetId.val('node:' + nid).trigger('entity_browser_value_updated');
         };
       });
     }
