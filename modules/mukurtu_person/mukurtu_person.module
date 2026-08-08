@@ -52,6 +52,15 @@ function mukurtu_person_node_insert(NodeInterface $node) {
       'nid' => $node->id(),
       'title' => $node->label(),
     ]);
+  // Lets a later submission in this same session reference this node even
+  // before it's independently viewable (a fresh submission has no cultural
+  // protocol assigned yet) - see PublicSubmissionForm::
+  // isReferenceToSessionCreatedEntity(). Optional: mukurtu_submissions
+  // isn't a hard dependency of this module.
+  if (\Drupal::moduleHandler()->moduleExists('mukurtu_submissions')) {
+    \Drupal::service('mukurtu_submissions.session_created_entities')
+      ->record('node', (string) $node->id());
+  }
   _mukurtu_person_warn_missing_reciprocals($node);
 }
 
