@@ -13,6 +13,7 @@ _meta:
     2520bf8f-2993-4c32-9f95-062814b7a2cc: media
     9942587c-1bc3-481a-9f68-264b728c598e: media
     80af4173-fb4b-4640-bbae-55ed5df92de6: media
+    17dec0d4-613e-4778-937a-ae32134d7b7d: media
     86208b8d-8275-4bc5-9f5e-673045d8c739: paragraph
     85761b41-5e78-4f25-b92d-6037efcbf7e9: node
     298c0286-34f6-4b00-8495-bc0e840be802: taxonomy_term
@@ -66,6 +67,8 @@ default:
       entity: 9942587c-1bc3-481a-9f68-264b728c598e
     -
       entity: 80af4173-fb4b-4640-bbae-55ed5df92de6
+    -
+      entity: 17dec0d4-613e-4778-937a-ae32134d7b7d
   field_communities:
     -
       target_id: 1

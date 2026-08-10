@@ -2621,7 +2621,6 @@ function mukurtu_core_update_40082(): void {
   $config->set('display.default.display_options.fields.type.settings.link', FALSE)->save();
 }
 
-
 /**
  * Reconcile Layout Builder / basic-page block config for sites that already
  * ran an earlier version of update hooks 40068-40073.
@@ -3570,28 +3569,6 @@ function mukurtu_core_update_requirements_alter(array &$requirements): void {
 }
 
 /**
- * Grant Language Stewards comment permissions so they can view and approve
- * comments on dictionary words and word lists, matching Protocol Stewards.
- */
-function mukurtu_core_update_40099(): void {
-  /** @var \Drupal\og\Entity\OgRole|null $role */
-  $role = \Drupal::entityTypeManager()
-    ->getStorage('og_role')
-    ->load('protocol-protocol-language_steward');
-  if (!$role) {
-    return;
-  }
-
-  foreach (['administer comments', 'skip comment approval'] as $permission) {
-    if (!$role->hasPermission($permission)) {
-      $role->grantPermission($permission);
-    }
-  }
-
-  $role->save();
-}
-
-/**
  * Switch the Gin admin theme accent to a WCAG AA compliant teal.
  *
  * Gin's "teal" accent preset renders links at #10857f on white, a 4.48:1
@@ -3600,7 +3577,7 @@ function mukurtu_core_update_40099(): void {
  * still on the default preset are moved to a slightly darker custom teal
  * (#0e7873, 5.3:1); sites with their own accent choice are left alone.
  */
-function mukurtu_core_update_40100(): void {
+function mukurtu_core_update_40099(): void {
   $settings = \Drupal::configFactory()->getEditable('gin.settings');
   if ($settings->get('preset_accent_color') === 'teal' && empty($settings->get('accent_color'))) {
     $settings
