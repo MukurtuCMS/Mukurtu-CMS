@@ -1,0 +1,125 @@
+name: "Stale Base Branch Check"
+
+# Detects the "orphaned merge" pattern that has bitten this repo three times
+# (PRs #1811, #1854, #1818): a PR is opened against another PR's head branch
+# (a normal way to stack incremental review), that base PR merges into main
+# first, and the stacked PR is later merged too - but into the now-stale
+# leftover branch instead of main, since nobody retargeted it. It shows
+# "Merged" on GitHub and closes its linked issues, but the code never
+# actually reaches main. See docs/stacked-prs.md.
+#
+# `delete_branch_on_merge` is enabled repo-wide, which makes GitHub natively
+# retarget any open PR based on a branch the moment that branch is deleted
+# on merge - that's the real fix. This workflow is a visibility/backstop
+# layer on top of it: native retargeting is a silent timeline event (easy to
+# miss), and it can't retroactively help a PR that was already open before
+# that setting existed.
+#
+# MUKURTU_STALE_BASE_STRICT below is unset/0 by default (comment only, exit
+# 0) since `main` has no required status checks yet - a failing check here
+# cannot block a merge either way today. Flip to 1 in the env below once
+# branch protection requires this check.
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, closed]
+  schedule:
+    - cron: "0 13 * * 1" # Weekly, Monday 13:00 UTC.
+  workflow_dispatch: {}
+
+env:
+  MUKURTU_STALE_BASE_STRICT: "0"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    # Only the merge (not every close) of a stacked PR can newly orphan a
+    # sibling, so a plain close-without-merge has nothing to check.
+    if: github.event_name != 'pull_request' || github.event.action != 'closed' || github.event.pull_request.merged == true
+    steps:
+      - name: Determine which open PRs to check
+        id: targets
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_ACTION: ${{ github.event.action }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          JUST_MERGED_HEAD: ${{ github.event.pull_request.head.ref }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$EVENT_NAME" == "pull_request" && "$EVENT_ACTION" != "closed" ]]; then
+            # Self-check: just this PR.
+            echo "numbers=$PR_NUMBER" >> "$GITHUB_OUTPUT"
+          elif [[ "$EVENT_NAME" == "pull_request" && "$EVENT_ACTION" == "closed" ]]; then
+            # This PR's own base branch was just merged away. Sweep for any
+            # OTHER open PR that was stacked on it - it's newly stale.
+            numbers=$(gh pr list --search "base:$JUST_MERGED_HEAD" --state open --json number --jq '[.[].number] | join(",")')
+            echo "numbers=$numbers" >> "$GITHUB_OUTPUT"
+          else
+            # schedule / workflow_dispatch: full backstop sweep of every
+            # open PR that isn't already targeting main.
+            numbers=$(gh pr list --state open --json number,baseRefName --jq '[.[] | select(.baseRefName != "main") | .number] | join(",")')
+            echo "numbers=$numbers" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check each target PR's base
+        if: steps.targets.outputs.numbers != ''
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          NUMBERS: ${{ steps.targets.outputs.numbers }}
+          STRICT: ${{ env.MUKURTU_STALE_BASE_STRICT }}
+        run: |
+          set -euo pipefail
+          EXIT_CODE=0
+
+          IFS=',' read -ra PR_NUMBERS <<< "$NUMBERS"
+          for number in "${PR_NUMBERS[@]}"; do
+            pr_json=$(gh pr view "$number" --repo "$REPO" --json baseRefName,createdAt,state)
+            base=$(echo "$pr_json" | jq -r '.baseRefName')
+            created_at=$(echo "$pr_json" | jq -r '.createdAt')
+            state=$(echo "$pr_json" | jq -r '.state')
+
+            if [[ "$base" == "main" || "$state" != "OPEN" ]]; then
+              continue
+            fi
+
+            # A merged PR with head == this PR's base means that base
+            # branch's own review is over and it has already landed
+            # somewhere - this PR needs retargeting regardless of what it
+            # landed into. Guard against branch-name reuse: only count a
+            # match that merged after this PR was opened (a base can't have
+            # "already merged" before the PR stacked on it even existed).
+            merged_match=$(gh pr list --repo "$REPO" --search "head:$base" --state merged --json number,mergedAt \
+              --jq "[.[] | select(.mergedAt > \"$created_at\")] | sort_by(.mergedAt) | last")
+
+            if [[ "$merged_match" != "null" && -n "$merged_match" ]]; then
+              base_pr=$(echo "$merged_match" | jq -r '.number')
+              body="⚠️ **Stale base branch detected.** This PR's base branch \`$base\` was already merged into \`main\` via #$base_pr. If this PR merges as-is, it will land in that now-stale branch instead of \`main\` and its changes will silently never reach \`main\` (see [docs/stacked-prs.md](https://github.com/$REPO/blob/main/docs/stacked-prs.md)). Please retarget this PR's base to \`main\` (or to wherever #$base_pr's changes actually landed) before merging."
+              echo "PR #$number: base '$base' already merged via #$base_pr"
+              gh pr comment "$number" --repo "$REPO" --body "$body" || true
+              if [[ "$STRICT" == "1" ]]; then
+                EXIT_CODE=1
+              fi
+              continue
+            fi
+
+            # Distinct, cheaper-to-check case: the base's own PR was closed
+            # without merging - an abandoned stack, not a stale-merged one.
+            closed_match=$(gh pr list --repo "$REPO" --search "head:$base" --state closed --json number,mergedAt \
+              --jq '[.[] | select(.mergedAt == null)] | last')
+
+            if [[ "$closed_match" != "null" && -n "$closed_match" ]]; then
+              base_pr=$(echo "$closed_match" | jq -r '.number')
+              body="⚠️ This PR's base branch \`$base\` belongs to #$base_pr, which was closed without merging. Confirm this stack is still intentional (see [docs/stacked-prs.md](https://github.com/$REPO/blob/main/docs/stacked-prs.md))."
+              echo "PR #$number: base '$base' closed unmerged via #$base_pr"
+              gh pr comment "$number" --repo "$REPO" --body "$body" || true
+            fi
+          done
+
+          exit $EXIT_CODE
