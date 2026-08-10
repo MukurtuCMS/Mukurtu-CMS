@@ -62,12 +62,12 @@ jobs:
           elif [[ "$EVENT_NAME" == "pull_request" && "$EVENT_ACTION" == "closed" ]]; then
             # This PR's own base branch was just merged away. Sweep for any
             # OTHER open PR that was stacked on it - it's newly stale.
-            numbers=$(gh pr list --repo "$REPO" --search "base:$JUST_MERGED_HEAD" --state open --json number --jq '[.[].number] | join(",")')
+            numbers=$(gh pr list --repo "$REPO" --search "base:$JUST_MERGED_HEAD" --state open --limit 200 --json number --jq '[.[].number] | join(",")')
             echo "numbers=$numbers" >> "$GITHUB_OUTPUT"
           else
             # schedule / workflow_dispatch: full backstop sweep of every
             # open PR that isn't already targeting main.
-            numbers=$(gh pr list --repo "$REPO" --state open --json number,baseRefName --jq '[.[] | select(.baseRefName != "main") | .number] | join(",")')
+            numbers=$(gh pr list --repo "$REPO" --state open --limit 200 --json number,baseRefName --jq '[.[] | select(.baseRefName != "main") | .number] | join(",")')
             echo "numbers=$numbers" >> "$GITHUB_OUTPUT"
           fi
 
@@ -99,7 +99,7 @@ jobs:
             # landed into. Guard against branch-name reuse: only count a
             # match that merged after this PR was opened (a base can't have
             # "already merged" before the PR stacked on it even existed).
-            merged_match=$(gh pr list --repo "$REPO" --search "head:$base" --state merged --json number,mergedAt \
+            merged_match=$(gh pr list --repo "$REPO" --search "head:$base" --state merged --limit 200 --json number,mergedAt \
               --jq "[.[] | select(.mergedAt > \"$created_at\")] | sort_by(.mergedAt) | last")
 
             if [[ "$merged_match" != "null" && -n "$merged_match" ]]; then
@@ -115,7 +115,7 @@ jobs:
 
             # Distinct, cheaper-to-check case: the base's own PR was closed
             # without merging - an abandoned stack, not a stale-merged one.
-            closed_match=$(gh pr list --repo "$REPO" --search "head:$base" --state closed --json number,mergedAt \
+            closed_match=$(gh pr list --repo "$REPO" --search "head:$base" --state closed --limit 200 --json number,mergedAt \
               --jq '[.[] | select(.mergedAt == null)] | last')
 
             if [[ "$closed_match" != "null" && -n "$closed_match" ]]; then
