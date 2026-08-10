@@ -41,10 +41,14 @@ jobs:
     # sibling, so a plain close-without-merge has nothing to check.
     if: github.event_name != 'pull_request' || github.event.action != 'closed' || github.event.pull_request.merged == true
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v5
+
       - name: Determine which open PRs to check
         id: targets
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
           EVENT_NAME: ${{ github.event_name }}
           EVENT_ACTION: ${{ github.event.action }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
@@ -58,12 +62,12 @@ jobs:
           elif [[ "$EVENT_NAME" == "pull_request" && "$EVENT_ACTION" == "closed" ]]; then
             # This PR's own base branch was just merged away. Sweep for any
             # OTHER open PR that was stacked on it - it's newly stale.
-            numbers=$(gh pr list --search "base:$JUST_MERGED_HEAD" --state open --json number --jq '[.[].number] | join(",")')
+            numbers=$(gh pr list --repo "$REPO" --search "base:$JUST_MERGED_HEAD" --state open --json number --jq '[.[].number] | join(",")')
             echo "numbers=$numbers" >> "$GITHUB_OUTPUT"
           else
             # schedule / workflow_dispatch: full backstop sweep of every
             # open PR that isn't already targeting main.
-            numbers=$(gh pr list --state open --json number,baseRefName --jq '[.[] | select(.baseRefName != "main") | .number] | join(",")')
+            numbers=$(gh pr list --repo "$REPO" --state open --json number,baseRefName --jq '[.[] | select(.baseRefName != "main") | .number] | join(",")')
             echo "numbers=$numbers" >> "$GITHUB_OUTPUT"
           fi
 
