@@ -3,15 +3,15 @@
 namespace Drupal\mukurtu_protocol\Plugin\views\field;
 
 use Drupal\Core\Link;
+use Drupal\views\Attribute\ViewsField;
 use Drupal\views\Plugin\views\field\FieldPluginBase;
 use Drupal\views\ResultRow;
 use Drupal\mukurtu_protocol\Entity\MukurtuUser;
 
 /**
  * Provides Community field handler.
- *
- * @ViewsField("user_community")
  */
+#[ViewsField('user_community')]
 class UserCommunity extends FieldPluginBase {
 
   /**
