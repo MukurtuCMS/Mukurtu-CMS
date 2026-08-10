@@ -2,9 +2,12 @@ mukurtu_local_contexts.settings:
   type: config_object
   label: 'Mukurtu Local Contexts Settings'
   mapping:
-    site_api_key:
-      type: string
-      label: 'Site API Key'
+    site_api_keys:
+      type: sequence
+      label: 'Site API Keys'
+      sequence:
+        type: string
+        label: 'Site API Key'
     site_projects_directory_description:
       type: mapping
       label: 'Site Projects Directory Description'
@@ -21,6 +24,12 @@ mukurtu_local_contexts.settings:
     hub_endpoint:
       type: string
       label: 'Hub Endpoint'
+    deleted_project_grace_period:
+      type: integer
+      label: 'Deleted Project Grace Period (seconds)'
+    deleted_project_min_consecutive_failures:
+      type: integer
+      label: 'Deleted Project Minimum Consecutive Not-Found Syncs'
 
 field.value.local_contexts_project:
   type: mapping

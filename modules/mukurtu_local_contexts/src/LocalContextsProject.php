@@ -7,6 +7,26 @@ use Drupal\Component\Utility\Html;
 class LocalContextsProject extends LocalContextsHubBase {
 
   /**
+   * Sync status values.
+   */
+  const STATUS_ACTIVE = 'active';
+  const STATUS_UNAUTHORIZED = 'unauthorized';
+  const STATUS_FORBIDDEN = 'forbidden';
+  const STATUS_NOT_FOUND = 'not_found';
+  const STATUS_ERROR = 'error';
+
+  /**
+   * Statuses that block a project/label from being offered as a NEW
+   * selection in field widgets. A generic STATUS_ERROR (e.g. a transient
+   * network failure) deliberately does not block new selections.
+   */
+  const UNAVAILABLE_STATUSES = [
+    self::STATUS_UNAUTHORIZED,
+    self::STATUS_FORBIDDEN,
+    self::STATUS_NOT_FOUND,
+  ];
+
+  /**
    * @var string The 36 character Local Contexts project ID.
    */
   protected $id;
@@ -32,9 +52,37 @@ class LocalContextsProject extends LocalContextsHubBase {
   protected bool $valid;
 
   /**
-   * @var string|null Any error that occurs during the fetch process.
+   * @var string|null The last known sync status. One of the STATUS_*
+   *   constants.
    */
-  protected ?string $errorMessage;
+  protected ?string $status;
+
+  /**
+   * @var string|null The last error/detail message from the hub, if any.
+   */
+  protected ?string $statusMessage;
+
+  /**
+   * @var int|null Timestamp of the last sync attempt (success or failure).
+   */
+  protected ?int $statusUpdated;
+
+  /**
+   * @var bool Whether the hub has marked this project as archived.
+   */
+  protected bool $archived;
+
+  /**
+   * @var int|null Timestamp when the current unbroken run of not_found
+   *   sync results began. NULL if not currently in such a run.
+   */
+  protected ?int $notFoundSince;
+
+  /**
+   * @var int Count of consecutive cron sync attempts that have returned
+   *   not_found for this project.
+   */
+  protected int $notFoundCount;
 
   public function __construct($id) {
     parent::__construct();
@@ -44,6 +92,12 @@ class LocalContextsProject extends LocalContextsHubBase {
     $this->title = $project['title'] ?? NULL;
     $this->privacy = $project['privacy'] ?? NULL;
     $this->updated = $project['updated'] ?? NULL;
+    $this->status = $project['status'] ?? self::STATUS_ACTIVE;
+    $this->statusMessage = $project['status_message'] ?? NULL;
+    $this->statusUpdated = $project['status_updated'] ?? NULL;
+    $this->archived = !empty($project['archived']);
+    $this->notFoundSince = $project['not_found_since'] ?? NULL;
+    $this->notFoundCount = (int) ($project['not_found_count'] ?? 0);
   }
 
   /**
@@ -56,7 +110,7 @@ class LocalContextsProject extends LocalContextsHubBase {
     $query = $this->db
       ->select('mukurtu_local_contexts_projects', 'project')
       ->condition('project.id', $this->id)
-      ->fields('project', ['id', 'provider_id', 'title', 'privacy', 'updated']);
+      ->fields('project', ['id', 'provider_id', 'title', 'privacy', 'updated', 'status', 'status_message', 'status_updated', 'archived', 'not_found_since', 'not_found_count']);
     $result = $query->execute();
     return $result->fetchAssoc();
   }
@@ -73,16 +127,24 @@ class LocalContextsProject extends LocalContextsHubBase {
    */
   public function fetchFromHub($api_key) {
     $id = $this->id;
-    if ($project = $this->lcApi->makeRequest("projects/{$id}", $api_key)) {
-      if (empty($project['unique_id'])) {
-        $this->errorMessage = $project['detail'] ?? '';
-        return FALSE;
-      }
+    $project = $this->lcApi->makeRequest("projects/{$id}", $api_key);
+    $http_code = $this->lcApi->getStatusCode();
 
+    if (!empty($project['unique_id'])) {
       // Update the object properties.
       $this->title = $project['title'];
       $this->privacy = $project['project_privacy'];
       $this->updated = $this->requestTime;
+      $this->status = self::STATUS_ACTIVE;
+      $this->statusMessage = NULL;
+      $this->statusUpdated = $this->requestTime;
+      // The exact field name for the hub's archive flag should be confirmed
+      // against a live response; both known candidate names are checked.
+      $this->archived = (bool) ($project['archived'] ?? $project['is_archived'] ?? FALSE);
+      // A successful fetch means the project is not (or no longer) deleted,
+      // so any not_found streak is over.
+      $this->notFoundSince = NULL;
+      $this->notFoundCount = 0;
 
       // Provider ID seems to sometimes be an array, sometimes a string.
       $provider_id = is_array($project['external_ids']['providers_id']) ? reset($project['external_ids']['providers_id']) : $project['external_ids']['providers_id'];
@@ -94,6 +156,12 @@ class LocalContextsProject extends LocalContextsHubBase {
         'title' => $this->title,
         'privacy' => $this->privacy,
         'updated' => $this->updated,
+        'status' => $this->status,
+        'status_message' => $this->statusMessage,
+        'status_updated' => $this->statusUpdated,
+        'archived' => (int) $this->archived,
+        'not_found_since' => $this->notFoundSince,
+        'not_found_count' => $this->notFoundCount,
       ];
 
       $query = $this->db->update('mukurtu_local_contexts_projects')
@@ -118,13 +186,13 @@ class LocalContextsProject extends LocalContextsHubBase {
       // Save the tk labels and their translations.
       if (isset($project['tk_labels'])) {
         $this->saveLabels($project['tk_labels'], "tk", $project['unique_id'], $prior_saved_labels);
-        $this->saveLabelTranslations($project['tk_labels']);
+        $this->saveLabelTranslations($project['tk_labels'], $project['unique_id']);
       }
 
       // Save the bc labels and their translations.
       if (isset($project['bc_labels'])) {
         $this->saveLabels($project['bc_labels'], "bc", $project['unique_id'], $prior_saved_labels);
-        $this->saveLabelTranslations($project['bc_labels']);
+        $this->saveLabelTranslations($project['bc_labels'], $project['unique_id']);
       }
 
       // Save the notices and their translations.
@@ -133,12 +201,53 @@ class LocalContextsProject extends LocalContextsHubBase {
       }
 
       // Delete any saved tk, bc labels, notices, and their translations that
-      // no longer exist.
+      // no longer exist. This must only ever happen on a genuinely
+      // successful fetch, never on a failed one (see below).
       $this->deleteSavedLabelsAndTranslations($prior_saved_labels, $project['unique_id']);
       $this->deleteSavedNoticesAndTranslations($prior_saved_notices, $project['unique_id']);
+
+      return TRUE;
     }
 
-    return isset($project['unique_id']);
+    // The fetch failed. Classify the failure by HTTP status and persist only
+    // the status columns, leaving title/privacy/updated/archived at their
+    // last-known-good values so existing content keeps rendering correctly.
+    // Cached labels/notices are deliberately left untouched here.
+    $this->status = match (TRUE) {
+      $http_code === 401 => self::STATUS_UNAUTHORIZED,
+      $http_code === 403 => self::STATUS_FORBIDDEN,
+      $http_code === 404 => self::STATUS_NOT_FOUND,
+      default => self::STATUS_ERROR,
+    };
+    $this->statusMessage = $project['detail'] ?? ($this->lcApi->getErrorMessage() ?: "HTTP {$http_code}");
+    $this->statusUpdated = $this->requestTime;
+
+    // Only a not_found (404) result extends the not_found streak used to
+    // confirm a genuine hub-side deletion (see isConfirmedDeleted()). A
+    // 401/403/error result breaks the streak the same way a successful
+    // fetch would - it is a different failure mode, not further evidence
+    // of deletion, so it must never be allowed to accumulate toward one.
+    if ($this->status === self::STATUS_NOT_FOUND) {
+      $this->notFoundSince = $this->notFoundSince ?? $this->requestTime;
+      $this->notFoundCount++;
+    }
+    else {
+      $this->notFoundSince = NULL;
+      $this->notFoundCount = 0;
+    }
+
+    $this->db->update('mukurtu_local_contexts_projects')
+      ->condition('id', $id)
+      ->fields([
+        'status' => $this->status,
+        'status_message' => $this->statusMessage,
+        'status_updated' => $this->statusUpdated,
+        'not_found_since' => $this->notFoundSince,
+        'not_found_count' => $this->notFoundCount,
+      ])
+      ->execute();
+
+    return FALSE;
   }
 
   public function getLabels($tk_or_bc) {
@@ -228,6 +337,31 @@ class LocalContextsProject extends LocalContextsHubBase {
     return $notices;
   }
 
+  /**
+   * Gets the compound label/notice keys for this project's labels/notices.
+   *
+   * Uses the same "{project_id}:{id}:{label|notice}" compound key format
+   * stored in field_local_contexts_labels_and_notices, so a project's
+   * labels/notices can be matched against selections of that field even
+   * when the individual label/notice was never directly applied and only
+   * the project itself was.
+   *
+   * @return string[]
+   *   The compound label/notice keys belonging to this project.
+   */
+  public function getLabelAndNoticeKeys(): array {
+    $keys = [];
+    foreach (['tk', 'bc'] as $tk_or_bc) {
+      foreach ($this->getLabels($tk_or_bc) as $label) {
+        $keys[] = $this->id . ':' . $label['id'] . ':label';
+      }
+    }
+    foreach ($this->getNotices() as $notice) {
+      $keys[] = $notice['project_id'] . ':' . $notice['notice_type'] . ':notice';
+    }
+    return $keys;
+  }
+
   protected function saveLabels($labels, $tk_or_bc, $id, &$prior_saved_labels) {
     foreach ($labels as $label) {
       $labelFields = [
@@ -266,12 +400,13 @@ class LocalContextsProject extends LocalContextsHubBase {
     }
   }
 
-  protected function saveLabelTranslations($labels) {
+  protected function saveLabelTranslations($labels, $projectId) {
     foreach ($labels as $label) {
       $translations = $label['translations'] ?? [];
       foreach ($translations as $translation) {
         $translationFields = [
           'label_id' => $label['unique_id'],
+          'project_id' => $projectId,
           'locale' => $translation['language_tag'] ?? NULL,
           'language' => $translation['language'] ?? NULL,
           'name' => $translation['translated_name'] ?? '',
@@ -282,9 +417,12 @@ class LocalContextsProject extends LocalContextsHubBase {
         // The label hub doesn't identify translations. Users can
         // alter locale/language as they see fit, so we will delete all
         // translations and insert them all fresh rather than trying to
-        // update.
+        // update. Label ids are not unique across projects, so scope by
+        // project_id too, or this would also delete another project's
+        // translations for a same-id label.
         $query = $this->db->delete('mukurtu_local_contexts_label_translations')
-          ->condition('label_id', $label['unique_id']);
+          ->condition('label_id', $label['unique_id'])
+          ->condition('project_id', $projectId);
         $query->execute();
         $query = $this->db->insert('mukurtu_local_contexts_label_translations')->fields($translationFields);
         $query->execute();
@@ -364,7 +502,8 @@ class LocalContextsProject extends LocalContextsHubBase {
   protected function deleteSavedLabelsAndTranslations(&$prior_saved_labels, $id) {
     foreach ($prior_saved_labels as $deleted_label_id => $deleted_label) {
       $query = $this->db->delete('mukurtu_local_contexts_label_translations')
-        ->condition('label_id', $deleted_label_id);
+        ->condition('label_id', $deleted_label_id)
+        ->condition('project_id', $id);
       $query->execute();
 
       $query = $this->db->delete('mukurtu_local_contexts_labels')
@@ -433,51 +572,140 @@ class LocalContextsProject extends LocalContextsHubBase {
     return $this->valid;
   }
 
-  public function inUse() : bool {
-    // @todo Decide if we should lookup ALL fields of our local contexts types
-    // or if we want to keep things hardwired to just our usage.
+  public function getStatus(): ?string {
+    return $this->status;
+  }
 
-    // Check if any content is using the projects in the projects field.
-    $query = \Drupal::entityQuery('node')
-      ->condition('field_local_contexts_projects', $this->id)
-      ->accessCheck(FALSE);
-    $results = $query->execute();
-    if (!empty($results)) {
+  public function getStatusMessage(): ?string {
+    return $this->statusMessage;
+  }
+
+  public function getStatusUpdated(): ?int {
+    return $this->statusUpdated;
+  }
+
+  public function isArchived(): bool {
+    return $this->archived;
+  }
+
+  /**
+   * Whether this project should be treated as unavailable for new content.
+   *
+   * A project is not available when the last sync attempt failed for any
+   * reason (401/403/404/other). Archived projects are NOT considered
+   * unavailable - they remain fully active and usable on our end.
+   *
+   * @return bool
+   */
+  public function isNotAvailable(): bool {
+    return $this->status !== NULL && $this->status !== self::STATUS_ACTIVE;
+  }
+
+  public function getNotFoundSince(): ?int {
+    return $this->notFoundSince;
+  }
+
+  public function getNotFoundCount(): int {
+    return $this->notFoundCount;
+  }
+
+  /**
+   * Whether this project has been confirmed as genuinely deleted from the
+   * Local Contexts Hub, as opposed to a transient not_found result.
+   *
+   * This is TRUE only for an unbroken run of not_found (404) sync results
+   * that has lasted at least the configured grace period AND reached the
+   * configured minimum number of consecutive attempts. It is never TRUE for
+   * unauthorized (401), forbidden (403), or a generic error - those are
+   * recoverable states and must never be treated as a deletion signal, no
+   * matter how long they persist.
+   *
+   * @return bool
+   */
+  public function isConfirmedDeleted(): bool {
+    if ($this->status !== self::STATUS_NOT_FOUND || $this->notFoundSince === NULL) {
+      return FALSE;
+    }
+
+    $config = $this->configFactory->get(self::SETTINGS_CONFIG_KEY);
+    $gracePeriod = (int) ($config->get('deleted_project_grace_period') ?? 2419200);
+    $minConsecutiveFailures = (int) ($config->get('deleted_project_min_consecutive_failures') ?? 4);
+
+    $elapsed = $this->requestTime - $this->notFoundSince;
+    return $elapsed >= $gracePeriod && $this->notFoundCount >= $minConsecutiveFailures;
+  }
+
+  public function inUse() : bool {
+    $referencing = $this->getReferencingNodeIds();
+
+    if (!empty($referencing['project'])) {
       return TRUE;
     }
 
-    $labels = array_merge($this->getLabels("tk"), $this->getLabels("bc"));
-    $notices = $this->getNotices();
-
-    if (!empty($labels)) {
-      // Build the project ID: label ID: 'label' keys.
-      $values = array_map(fn($v) => $this->id . ':' . $v['id'] . ':' . 'label', $labels);
-
-      // Check if any content is using those keys.
-      $query = \Drupal::entityQuery('node')
-        ->condition('field_local_contexts_labels_and_notices', $values, 'IN')
-        ->accessCheck(FALSE);
-      $results = $query->execute();
-      if (!empty($results)) {
-        return TRUE;
-      }
-    }
-    else if (!empty($notices)) {
-      // Build the project ID: notice type: 'notice' keys.
-      $notices = array_keys($notices);
-      $values = array_map(fn($v) => strval($v) . ':' . 'notice', $notices);
-
-      // Check if any content is using those keys.
-      $query = \Drupal::entityQuery('node')
-        ->condition('field_local_contexts_labels_and_notices', $values, 'IN')
-        ->accessCheck(FALSE);
-      $results = $query->execute();
-      if (!empty($results)) {
+    foreach ($referencing['labels_and_notices'] as $nids) {
+      if (!empty($nids)) {
         return TRUE;
       }
     }
 
     return FALSE;
+  }
+
+  /**
+   * Get the IDs of nodes referencing this project.
+   *
+   * Checks both the whole-project field (field_local_contexts_projects) and
+   * the individual label/notice field (field_local_contexts_labels_and_notices),
+   * independently - a project can be referenced via either or both, and
+   * unlike a simple "is this project in use" check, this needs per-label/
+   * notice granularity so callers can tell exactly which references exist.
+   *
+   * @return array
+   *   An array with keys:
+   *   - 'project': int[] of node IDs referencing this project via the
+   *     whole-project field.
+   *   - 'labels_and_notices': array keyed by label ID or notice type (the
+   *     same identifier that appears as the middle segment of a
+   *     "project_id:label_id_or_type:display" field value), each value an
+   *     int[] of node IDs referencing that specific label/notice.
+   */
+  public function getReferencingNodeIds(): array {
+    $referencing = [
+      'project' => [],
+      'labels_and_notices' => [],
+    ];
+
+    $query = \Drupal::entityQuery('node')
+      ->condition('field_local_contexts_projects', $this->id)
+      ->accessCheck(FALSE);
+    $referencing['project'] = array_values($query->execute());
+
+    $labels = array_merge($this->getLabels('tk'), $this->getLabels('bc'));
+    foreach ($labels as $labelId => $label) {
+      $value = $this->id . ':' . $labelId . ':label';
+      $query = \Drupal::entityQuery('node')
+        ->condition('field_local_contexts_labels_and_notices', $value)
+        ->accessCheck(FALSE);
+      $results = array_values($query->execute());
+      if (!empty($results)) {
+        $referencing['labels_and_notices'][$labelId] = $results;
+      }
+    }
+
+    $notices = $this->getNotices();
+    foreach ($notices as $notice) {
+      $type = $notice['notice_type'];
+      $value = $this->id . ':' . $type . ':notice';
+      $query = \Drupal::entityQuery('node')
+        ->condition('field_local_contexts_labels_and_notices', $value)
+        ->accessCheck(FALSE);
+      $results = array_values($query->execute());
+      if (!empty($results)) {
+        $referencing['labels_and_notices'][$type] = $results;
+      }
+    }
+
+    return $referencing;
   }
 
 }

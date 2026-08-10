@@ -39,7 +39,6 @@
         "drupal/facet_bot_blocker": "^1.0",
         "drupal/facets": "^3.0",
         "drupal/facets_reset_button": "^1.0",
-        "drupal/features": "^3.14",
         "drupal/field_group": "^4.0",
         "drupal/flag": "^4.0",
         "drupal/flat_taxonomy": "^2.0",
@@ -132,9 +131,6 @@
             "drupal/core": {
                 "Fix stale config.installer proxy after nested container rebuild during module install": "web/profiles/mukurtu/patches/module-installer-stale-config-installer-proxy.patch"
             },
-            "drupal/features": {
-                "Issue #2981655: Simple configuration list is incomplete": "https://www.drupal.org/files/issues/2020-05-14/2981655-3.features.Simple-configuration-list-is-incomplete.patch"
-            },
             "drupal/views_combine": {
                 "Fix illegal choice on exposed sort error": "https://www.drupal.org/files/issues/2022-01-17/3259018-6-illegal-sort-choice.patch"
             },
@@ -152,7 +148,9 @@
                 "Fix implicit nullable param deprecation in Glossary::getPropertyDefinitions()": "web/profiles/mukurtu/patches/search_api_glossary-nullable-param-deprecation.patch"
             },
             "drupal/message_ui": {
-                "Fix implicit nullable param deprecation in SaveMessage::access()": "web/profiles/mukurtu/patches/message_ui-nullable-param-deprecation.patch"
+                "Fix implicit nullable param deprecation in SaveMessage::access()": "web/profiles/mukurtu/patches/message_ui-nullable-param-deprecation.patch",
+                "Fix invalid '#group' display option written into entity_form_display config schema": "web/profiles/mukurtu/patches/message_ui-invalid-group-display-option.patch",
+                "Fix invalid 'field_name' component option written into entity_form_display config schema": "web/profiles/mukurtu/patches/message_ui-invalid-field-name-component-option.patch"
             },
             "drupal/admin_theme": {
                 "Fix implicit nullable param deprecation in AdminThemeAdminContext::isAdminRoute()": "web/profiles/mukurtu/patches/admin_theme-nullable-param-deprecation.patch"

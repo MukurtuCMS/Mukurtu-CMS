@@ -42,6 +42,21 @@ function mukurtu_install() {
     'link' => ['uri' => 'internal:/admin/content'],
   ])->save();
 
+  // Remove article content permissions granted by standard_install().
+  $article_permissions = [
+    'create article content',
+    'delete article revisions',
+    'delete own article content',
+    'edit own article content',
+  ];
+  $content_editor = Role::load('content_editor');
+  if ($content_editor) {
+    foreach ($article_permissions as $permission) {
+      $content_editor->revokePermission($permission);
+    }
+    $content_editor->save();
+  }
+
   // Uninstall search.
   \Drupal::service('module_installer')->uninstall(['search']);
 
@@ -52,6 +67,22 @@ function mukurtu_install() {
   node_access_rebuild();
 
   // Install default themes (system.theme.yml is not owned by Mukurtu).
+  //
+  // Gin isn't listed under this profile's `themes:` key, so it's installed
+  // here explicitly rather than by the normal install batch. Drupal's own
+  // install order for a profile's default config versus a manually-invoked
+  // theme install is not guaranteed (see install_profile_modules() in
+  // core) - if config/install/gin.settings.yml has already been written to
+  // active config by this point, installing the theme below would fatal
+  // with a PreExistingConfigException, since gin's own copy of
+  // gin.settings.yml conflicts with what's already active. Deleting any
+  // pre-existing copy first lets the theme install proceed regardless of
+  // ordering; ConfigInstaller substitutes our profile override from
+  // config/install/gin.settings.yml when it recreates the config either
+  // way, so no customization is lost.
+  if (!\Drupal::configFactory()->get('gin.settings')->isNew()) {
+    \Drupal::configFactory()->getEditable('gin.settings')->delete();
+  }
   \Drupal::service('theme_installer')->install(['mukurtu_v4', 'gin']);
   \Drupal::configFactory()
     ->getEditable('system.theme')
@@ -419,9 +450,6 @@ function mukurtu_install() {
     'create landing_page content',
     'create media content warnings',
     'create mukurtu_batch_import_report message',
-    'create mukurtu_new_item_in_collection message',
-    'create mukurtu_new_item_in_community message',
-    'create mukurtu_new_item_in_protocol message',
     'create mukurtu_new_user_registration message',
     'create mukurtu_single_node_delete message',
     'create mukurtu_single_node_insert message',
@@ -448,9 +476,6 @@ function mukurtu_install() {
     'delete any page content',
     'delete community entities',
     'delete mukurtu_batch_import_report message',
-    'delete mukurtu_new_item_in_collection message',
-    'delete mukurtu_new_item_in_community message',
-    'delete mukurtu_new_item_in_protocol message',
     'delete mukurtu_new_user_registration message',
     'delete mukurtu_single_node_delete message',
     'delete mukurtu_single_node_insert message',
@@ -508,9 +533,6 @@ function mukurtu_install() {
     'unflag export_content',
     'unflag export_media',
     'update mukurtu_batch_import_report message',
-    'update mukurtu_new_item_in_collection message',
-    'update mukurtu_new_item_in_community message',
-    'update mukurtu_new_item_in_protocol message',
     'update mukurtu_new_user_registration message',
     'update mukurtu_single_node_delete message',
     'update mukurtu_single_node_insert message',
@@ -520,9 +542,6 @@ function mukurtu_install() {
     'view all community revisions',
     'view any message template',
     'view mukurtu_batch_import_report message',
-    'view mukurtu_new_item_in_collection message',
-    'view mukurtu_new_item_in_community message',
-    'view mukurtu_new_item_in_protocol message',
     'view mukurtu_new_user_registration message',
     'view mukurtu_single_node_delete message',
     'view mukurtu_single_node_insert message',
@@ -633,9 +652,6 @@ function mukurtu_install() {
     'create any message template',
     'create media content warnings',
     'create mukurtu_batch_import_report message',
-    'create mukurtu_new_item_in_collection message',
-    'create mukurtu_new_item_in_community message',
-    'create mukurtu_new_item_in_protocol message',
     'create mukurtu_new_user_registration message',
     'create mukurtu_single_node_delete message',
     'create mukurtu_single_node_insert message',
@@ -658,9 +674,6 @@ function mukurtu_install() {
     'delete any message template',
     'delete community entities',
     'delete mukurtu_batch_import_report message',
-    'delete mukurtu_new_item_in_collection message',
-    'delete mukurtu_new_item_in_community message',
-    'delete mukurtu_new_item_in_protocol message',
     'delete mukurtu_new_user_registration message',
     'delete mukurtu_single_node_delete message',
     'delete mukurtu_single_node_insert message',
@@ -707,9 +720,6 @@ function mukurtu_install() {
     'unflag export_content',
     'unflag export_media',
     'update mukurtu_batch_import_report message',
-    'update mukurtu_new_item_in_collection message',
-    'update mukurtu_new_item_in_community message',
-    'update mukurtu_new_item_in_protocol message',
     'update mukurtu_new_user_registration message',
     'update mukurtu_single_node_delete message',
     'update mukurtu_single_node_insert message',
@@ -719,9 +729,6 @@ function mukurtu_install() {
     'view all community revisions',
     'view any message template',
     'view mukurtu_batch_import_report message',
-    'view mukurtu_new_item_in_collection message',
-    'view mukurtu_new_item_in_community message',
-    'view mukurtu_new_item_in_protocol message',
     'view mukurtu_new_user_registration message',
     'view mukurtu_single_node_delete message',
     'view mukurtu_single_node_insert message',
@@ -890,6 +897,25 @@ function mukurtu_update_40001(): void {
   $yaml = file_get_contents($profile_path . '/config/install/user.role.mukurtu_roundtrip_manager.yml');
   $data = \Drupal\Core\Serialization\Yaml::decode($yaml);
   $config->setData($data)->save();
+}
+
+/**
+ * Remove article content permissions from the content_editor role.
+ */
+function mukurtu_update_40002(): void {
+  $article_permissions = [
+    'create article content',
+    'delete article revisions',
+    'delete own article content',
+    'edit own article content',
+  ];
+  $content_editor = Role::load('content_editor');
+  if ($content_editor) {
+    foreach ($article_permissions as $permission) {
+      $content_editor->revokePermission($permission);
+    }
+    $content_editor->save();
+  }
 }
 
 

@@ -1334,3 +1334,52 @@ function mukurtu_dictionary_update_40036(): void {
   $config->set($prefix . 'word_list', 'map_browse');
   $config->save();
 }
+
+/**
+ * Add LC Project and LC Label facets to /dictionary.
+ */
+function mukurtu_dictionary_update_40037(): void {
+  // Import updated Search API index and Views configurations.
+  $config_installer = \Drupal::service('config.installer');
+  $config_installer->installDefaultConfig('module', 'mukurtu_dictionary');
+
+  // Reindex the affected Search API index.
+  $index = \Drupal\search_api\Entity\Index::load('mukurtu_dictionary_index');
+  if ($index) {
+    $index->reindex();
+  }
+}
+
+/**
+ * Make the LC Label facet also match content via an applied LC Project.
+ */
+function mukurtu_dictionary_update_40038(): void {
+  // Import the updated Search API index configuration (repoints the Local
+  // Contexts Label field at the new effective-labels processor property).
+  $config_installer = \Drupal::service('config.installer');
+  $config_installer->installDefaultConfig('module', 'mukurtu_dictionary');
+
+  // Reindex so existing content picks up project-inherited labels/notices.
+  $index = \Drupal\search_api\Entity\Index::load('mukurtu_dictionary_index');
+  if ($index) {
+    $index->reindex();
+  }
+}
+
+/**
+ * Make the LC Project facet also match content via an individually-applied
+ * LC label/notice belonging to that project.
+ */
+function mukurtu_dictionary_update_40039(): void {
+  // Import the updated Search API index configuration (repoints the Local
+  // Contexts Project field at the new effective-projects processor
+  // property).
+  $config_installer = \Drupal::service('config.installer');
+  $config_installer->installDefaultConfig('module', 'mukurtu_dictionary');
+
+  // Reindex so existing content picks up label-inherited projects.
+  $index = \Drupal\search_api\Entity\Index::load('mukurtu_dictionary_index');
+  if ($index) {
+    $index->reindex();
+  }
+}
