@@ -11,18 +11,25 @@ item pages that anonymous visitors cannot reach.
 
 ## Where we are now
 
-**Every page in the [audit inventory](../page-inventory.md) — 15 pages, anonymous
-and member — scans at 0 WCAG violations and 0 best-practice violations.** Three
-defects were found and fixed during the cycle (below). The only remaining axe
-output is the "incomplete" queue: contrast checks axe cannot compute on its own,
-handed to the manual pass.
+*Last verified 2026-07-28, after merging a 36-commit `origin/main` update
+(notifications, article permissions, Local Contexts overhaul, membership
+management, Layout Builder) — zero new regressions or findings from that
+merge; full re-scan matches the state below exactly.*
+
+**19 of 19 pages in the [audit inventory](../page-inventory.md) scan clean —
+13 with zero findings of any kind, 6 with known, already-triaged issues**
+(the PDF `image-alt` finding and the ALTCHA widget bugs, both below). The
+two automated-checks layers add 23 more findings across the inventory
+(reflow/text-zoom overflow, 4 focus-visible failures, and the audio-player
+"needs manual confirmation" flags) — see the automated-checks section below.
+Nothing here is a regression; all of it is tracked with an owner action in
+"Remaining actions for the next cycle."
 
 | Coverage | Result |
 |---|---|
-| Anonymous: `/`, `/browse`, `/digital-heritage`, `/collections`, `/communities`, `/dictionary`, `/user/login` | Clean |
-| Member: `/`, `/my-content`, `/user/personal-collections`, `/user` | Clean |
-| Member, discovered item pages: digital heritage item, collection, community, dictionary word | Clean |
-| Not yet scanned | Anonymous item pages (test site content is all protocol-gated); admin/authoring UI (later phase) |
+| Anonymous: `/`, `/browse`, `/digital-heritage`, `/collections`, `/communities`, `/dictionary`, `/user/login`, plus discovered digital heritage item, collection, community, and dictionary word pages | Clean, except `login` (ALTCHA), `dictionary-word` and `digital-heritage-item` (PDF `image-alt`) |
+| Member: `/`, `/my-content`, `/user/personal-collections`, `/user`, plus discovered item pages | Clean, except `member-collection-page` (ALTCHA), `member-dictionary-word` and `member-digital-heritage-item` (ALTCHA + PDF `image-alt`) |
+| Not yet scanned | Admin/authoring UI (later phase) |
 
 No manual keyboard/screen-reader testing has happened yet — that is the next
 phase, using [../manual-checklist.md](../manual-checklist.md) and the
