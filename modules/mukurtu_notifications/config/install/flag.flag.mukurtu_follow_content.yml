@@ -29,9 +29,7 @@ unflag_denied_text: ''
 flag_type: 'entity:node'
 link_type: ajax_link
 flagTypeConfig:
-  show_in_links:
-    full: full
-    multipage_full: multipage_full
+  show_in_links: {  }
   show_as_field: true
   show_on_form: false
   show_contextual_link: false
