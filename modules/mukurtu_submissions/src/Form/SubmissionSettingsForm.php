@@ -209,6 +209,7 @@ class SubmissionSettingsForm extends EntityForm {
       '#description' => $this->t('Optional collapsible sections for organizing fields below. A field left unassigned renders inline, outside any group.'),
       '#prefix' => '<div id="field-groups-wrapper">',
       '#suffix' => '</div>',
+      '#attached' => ['library' => ['mukurtu_submissions/field_groups_admin']],
     ];
 
     $form['field_groups_wrapper']['field_groups'] = [
@@ -252,6 +253,7 @@ class SubmissionSettingsForm extends EntityForm {
           '#title_display' => 'invisible',
           '#options' => $own_parent_options,
           '#default_value' => $row['parent'] ?? '',
+          '#attributes' => ['class' => ['mukurtu-submissions-field-group-parent']],
         ],
         'remove' => [
           '#type' => 'submit',

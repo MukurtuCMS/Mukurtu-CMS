@@ -6,7 +6,9 @@
  */
 
 use Drupal\mukurtu_media\MediaTypeExtensions;
+use Drupal\mukurtu_submissions\Entity\SubmissionInterface;
 use Drupal\mukurtu_submissions\Entity\SubmissionSettingsInterface;
+use Drupal\node\NodeInterface;
 use Drupal\user\Entity\User;
 
 /**
@@ -107,6 +109,13 @@ function mukurtu_submissions_create_service_account(): User {
     'status' => 0,
     'pass' => \Drupal::service('password_generator')->generate(32),
   ]);
+  // field_pending defaults to 1 (mukurtu_core's own approval-workflow
+  // field), which would otherwise make this permanently-blocked service
+  // account display as "pending" instead of "blocked" anywhere it's
+  // rendered via MukurtuUserListBuilder.
+  if ($account->hasField('field_pending')) {
+    $account->set('field_pending', 0);
+  }
   $account->save();
   return $account;
 }
@@ -288,6 +297,57 @@ function mukurtu_submissions_update_40008(): void {
     if ($settings instanceof SubmissionSettingsInterface) {
       $form_display_manager->retrofitParagraphSubmissionMode($settings->getTargetEntityTypeId(), $settings->getTargetBundle());
       mukurtu_submissions_sync_entity_browser_permissions($settings);
+    }
+  }
+}
+
+/**
+ * Retrofits the service account's field_pending to 0 on existing sites.
+ *
+ * mukurtu_submissions_create_service_account() previously never set
+ * field_pending, leaving it at the field's own default of 1 - so the
+ * permanently-blocked "Submission Forms" account displayed as "pending"
+ * (mukurtu_core's own approval-workflow status) instead of "blocked"
+ * anywhere it was rendered.
+ */
+function mukurtu_submissions_update_40009(): void {
+  $uid = (int) \Drupal::config('mukurtu_submissions.settings')->get('service_account_uid');
+  if (!$uid) {
+    return;
+  }
+  $account = User::load($uid);
+  if (!$account || !$account->hasField('field_pending') || !$account->get('field_pending')->value) {
+    return;
+  }
+  $account->set('field_pending', 0)->save();
+}
+
+/**
+ * Retrofits review_status on existing submissions whose target node's
+ * moderation state has since moved on without it - see
+ * mukurtu_submissions_node_update(), which fixes this going forward but
+ * can't reach saves that already happened before it existed.
+ */
+function mukurtu_submissions_update_40010(): void {
+  $submission_storage = \Drupal::entityTypeManager()->getStorage('mukurtu_submission');
+  $node_storage = \Drupal::entityTypeManager()->getStorage('node');
+  $ids = $submission_storage->getQuery()
+    ->condition('target_entity_type', 'node')
+    ->accessCheck(FALSE)
+    ->execute();
+
+  foreach ($submission_storage->loadMultiple($ids) as $submission) {
+    $node = $node_storage->load($submission->getTargetId());
+    if (!$node instanceof NodeInterface || !$node->hasField('moderation_state')) {
+      continue;
+    }
+    $new_status = match ($node->get('moderation_state')->value) {
+      'published' => SubmissionInterface::STATUS_APPROVED,
+      'archived' => SubmissionInterface::STATUS_REJECTED,
+      default => SubmissionInterface::STATUS_PENDING,
+    };
+    if ($submission->getReviewStatus() !== $new_status) {
+      $submission->setReviewStatus($new_status)->save();
     }
   }
 }

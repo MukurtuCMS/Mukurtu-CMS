@@ -17,6 +17,9 @@ use Drupal\mukurtu_submissions\Entity\SubmissionInterface;
 use Drupal\mukurtu_submissions\Entity\SubmissionSettingsInterface;
 use Drupal\node\NodeInterface;
 use Drupal\path_alias\Entity\PathAlias;
+use Drupal\views\Plugin\views\query\QueryPluginBase;
+use Drupal\views\Plugin\views\query\Sql;
+use Drupal\views\ViewExecutable;
 
 /**
  * Implements hook_views_data_alter().
@@ -26,8 +29,24 @@ use Drupal\path_alias\Entity\PathAlias;
  * building/instantiating field handlers for the mukurtu_submission base
  * table. Without an entry here, Views has no way to know these plugin IDs
  * are valid for this table and silently substitutes the "Broken" handler.
+ *
+ * Also corrects review_status's auto-generated filter plugin: Drupal maps
+ * a list_string base field to the generic "string" filter by default,
+ * which doesn't support the "in" operator the Pending Submissions view's
+ * filter uses - so the filter silently produced no WHERE clause at all
+ * (not a "broken handler", just a wrong-plugin one that quietly no-ops on
+ * an operator it doesn't recognize). "list_field" (Views' usual plugin
+ * for allowed-values fields) isn't a fit either - it resolves its option
+ * list via a FieldStorageConfig lookup that only exists for configurable
+ * fields, and review_status is a base field. "in_operator" is the plain
+ * Views filter for an arbitrary IN comparison and needs nothing beyond
+ * the value list the display config already provides.
  */
 function mukurtu_submissions_views_data_alter(array &$data) {
+  if (isset($data['mukurtu_submission']['review_status'])) {
+    $data['mukurtu_submission']['review_status']['filter']['id'] = 'in_operator';
+  }
+
   $data['mukurtu_submission']['mukurtu_submission_target'] = [
     'title' => t('Submission target'),
     'help' => t('Links to the entity this submission is about.'),
@@ -42,6 +61,32 @@ function mukurtu_submissions_views_data_alter(array &$data) {
       'id' => 'mukurtu_submission_actions',
     ],
   ];
+}
+
+/**
+ * Views this module hides the mukurtu_submissions service account from -
+ * both are Mukurtu's own admin "People" listings over users_field_data
+ * (/admin/people and /admin/people/list respectively).
+ */
+const MUKURTU_SUBMISSIONS_PEOPLE_VIEWS = ['user_admin_people', 'mukurtu_people'];
+
+/**
+ * Implements hook_views_query_alter().
+ *
+ * Excludes the service account from the "People" admin views - it's a
+ * hidden owner account for anonymous visitor submissions, not a real
+ * person an admin can act on, so it shouldn't clutter either list. The uid
+ * is only known at runtime via config, so a static Views UI filter can't
+ * express this exclusion.
+ */
+function mukurtu_submissions_views_query_alter(ViewExecutable $view, QueryPluginBase $query) {
+  if (!in_array($view->id(), MUKURTU_SUBMISSIONS_PEOPLE_VIEWS, TRUE) || !($query instanceof Sql)) {
+    return;
+  }
+  $service_account_uid = (int) \Drupal::config('mukurtu_submissions.settings')->get('service_account_uid');
+  if ($service_account_uid) {
+    $query->addWhere(0, 'users_field_data.uid', $service_account_uid, '<>');
+  }
 }
 
 /**
@@ -149,6 +194,39 @@ function mukurtu_submissions_get_submission_for_entity(EntityInterface $entity):
     return NULL;
   }
   return $storage->load(reset($ids));
+}
+
+/**
+ * Implements hook_node_update().
+ *
+ * Keeps a submission's review_status in sync with its node's moderation
+ * state. Nothing else in the codebase ever called
+ * Submission::setReviewStatus() - a submission defaulted to "pending" at
+ * creation and stayed that way forever, so it never left the Pending
+ * Submissions view even after a reviewer published or archived it.
+ */
+function mukurtu_submissions_node_update(NodeInterface $node) {
+  if (!$node->hasField('moderation_state')) {
+    return;
+  }
+  $moderation_state = $node->get('moderation_state')->value;
+  if ($node->original instanceof NodeInterface && $node->original->get('moderation_state')->value === $moderation_state) {
+    return;
+  }
+
+  $submission = mukurtu_submissions_get_submission_for_entity($node);
+  if ($submission === NULL) {
+    return;
+  }
+
+  $new_status = match ($moderation_state) {
+    'published' => SubmissionInterface::STATUS_APPROVED,
+    'archived' => SubmissionInterface::STATUS_REJECTED,
+    default => SubmissionInterface::STATUS_PENDING,
+  };
+  if ($submission->getReviewStatus() !== $new_status) {
+    $submission->setReviewStatus($new_status)->save();
+  }
 }
 
 /**
