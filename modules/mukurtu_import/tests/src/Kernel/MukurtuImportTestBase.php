@@ -95,6 +95,7 @@ class MukurtuImportTestBase extends MigrateTestBase {
     'user',
     'views',
     'workflows',
+    'migrate_plus',
     'migrate_source_csv',
     'mukurtu_import',
     'mukurtu_migrate',
