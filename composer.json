@@ -148,7 +148,9 @@
                 "Fix implicit nullable param deprecation in Glossary::getPropertyDefinitions()": "web/profiles/mukurtu/patches/search_api_glossary-nullable-param-deprecation.patch"
             },
             "drupal/message_ui": {
-                "Fix implicit nullable param deprecation in SaveMessage::access()": "web/profiles/mukurtu/patches/message_ui-nullable-param-deprecation.patch"
+                "Fix implicit nullable param deprecation in SaveMessage::access()": "web/profiles/mukurtu/patches/message_ui-nullable-param-deprecation.patch",
+                "Fix invalid '#group' display option written into entity_form_display config schema": "web/profiles/mukurtu/patches/message_ui-invalid-group-display-option.patch",
+                "Fix invalid 'field_name' component option written into entity_form_display config schema": "web/profiles/mukurtu/patches/message_ui-invalid-field-name-component-option.patch"
             },
             "drupal/admin_theme": {
                 "Fix implicit nullable param deprecation in AdminThemeAdminContext::isAdminRoute()": "web/profiles/mukurtu/patches/admin_theme-nullable-param-deprecation.patch"

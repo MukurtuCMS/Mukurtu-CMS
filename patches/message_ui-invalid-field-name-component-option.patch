@@ -1,0 +1,12 @@
+diff --git a/src/MessageUIFieldDisplayManagerService.php b/src/MessageUIFieldDisplayManagerService.php
+--- a/src/MessageUIFieldDisplayManagerService.php
++++ b/src/MessageUIFieldDisplayManagerService.php
+@@ -48,7 +48,7 @@
+         ]);
+
+       foreach (array_keys($form_display->get('hidden')) as $hidden) {
+-        $form_display->setComponent($hidden, ['field_name' => $hidden]);
++        $form_display->setComponent($hidden);
+         $form_display->save();
+       }
+     }
