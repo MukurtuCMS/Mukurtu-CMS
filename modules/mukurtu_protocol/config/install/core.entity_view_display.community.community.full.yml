@@ -155,6 +155,8 @@ content:
 hidden:
   field_access_mode: true
   field_thumbnail_image: true
+  flag_mukurtu_email_community: true
+  flag_mukurtu_follow_community: true
   langcode: true
   search_api_excerpt: true
   user_id: true

@@ -26,7 +26,6 @@ dependencies:
   - 'message:message'
   - 'mukurtu_core:mukurtu_core'
   - 'mukurtu_drafts:mukurtu_drafts'
-  - 'mukurtu_notifications:mukurtu_notifications'
   - 'og:og'
   - 'og_ui:og_ui'
   - 'pathauto:pathauto'
