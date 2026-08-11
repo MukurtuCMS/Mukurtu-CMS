@@ -53,13 +53,9 @@ class MukurtuManagerUserSelection extends UserSelection {
 
     $uids = [];
 
-    // Users with Drupal administrator or mukurtu_manager roles.
-    $role_uids = \Drupal::entityQuery('user')
-      ->condition('roles', ['administrator', 'mukurtu_manager'], 'IN')
-      ->condition('status', 1)
-      ->accessCheck(FALSE)
-      ->execute();
-    $uids = array_merge($uids, array_values($role_uids));
+    // Users with Drupal administrator or mukurtu_manager roles (always
+    // includes uid 1, see mukurtu_core_get_manager_role_uids()).
+    $uids = array_merge($uids, mukurtu_core_get_manager_role_uids());
 
     // Users with the community_manager OG role in any community.
     $cm_ids = \Drupal::entityQuery('og_membership')
