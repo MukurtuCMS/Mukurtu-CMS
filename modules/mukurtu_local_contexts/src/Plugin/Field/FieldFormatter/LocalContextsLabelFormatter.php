@@ -79,6 +79,7 @@ class LocalContextsLabelFormatter extends FormatterBase {
       $element[$delta] = [
         '#theme' => 'local_contexts_label_group',
         '#project_title' => $project_title,
+        '#project_url' => $project_url,
         '#items' => $group_items,
         '#not_available' => $not_available,
         '#archived' => $archived,

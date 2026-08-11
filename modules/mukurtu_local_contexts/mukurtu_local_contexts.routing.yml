@@ -99,6 +99,7 @@ mukurtu_local_contexts.manage_community_supported_projects:
   requirements:
     _custom_access: '\Drupal\mukurtu_local_contexts\Controller\ManageGroupSupportedProjectsController::access'
   options:
+    _admin_route: TRUE
     parameters:
       community:
         type: entity:community
@@ -141,6 +142,7 @@ mukurtu_local_contexts.manage_protocol_supported_projects:
   requirements:
     _custom_access: '\Drupal\mukurtu_local_contexts\Controller\ManageGroupSupportedProjectsController::access'
   options:
+    _admin_route: TRUE
     parameters:
       protocol:
         type: entity:protocol
