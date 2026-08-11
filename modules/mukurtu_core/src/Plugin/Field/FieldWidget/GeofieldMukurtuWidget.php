@@ -2,21 +2,20 @@
 
 namespace Drupal\mukurtu_core\Plugin\Field\FieldWidget;
 
+use Drupal\Core\Field\Attribute\FieldWidget;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\leaflet\Plugin\Field\FieldWidget\LeafletDefaultWidget;
 
 /**
  * Widget implementation of the 'geofield_mukurtu' widget.
- *
- * @FieldWidget(
- *   id = "geofield_mukurtu",
- *   label = @Translation("Mukurtu Leaflet (GeoJSON)"),
- *   field_types = {
- *     "geofield"
- *   }
- * )
  */
+#[FieldWidget(
+  id: 'geofield_mukurtu',
+  label: new TranslatableMarkup('Mukurtu Leaflet (GeoJSON)'),
+  field_types: ['geofield'],
+)]
 class GeofieldMukurtuWidget extends LeafletDefaultWidget {
 
   /**
