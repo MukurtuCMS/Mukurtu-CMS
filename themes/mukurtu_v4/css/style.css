@@ -2248,8 +2248,7 @@ label.form-required::after {
   color: var(--brand-primary);
 }
 
-.local-contexts-label-group .project-title,
-.local-contexts-project .project-title {
+.local-contexts-label-group .project-title {
   font-size: var(--font-size-s);
   font-weight: var(--text-bold);
   color: var(--brand-primary-dark);
@@ -2261,7 +2260,6 @@ label.form-required::after {
   text-align: center;
 }
 
-.local-contexts-project .local-contexts-projects-container,
 .local-contexts-label-group .local-contexts-label-group-items {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(5rem, 1fr));
@@ -2277,7 +2275,6 @@ label.form-required::after {
           border-block-start: 1px solid var(--brand-light);
 }
 
-.local-contexts-project,
 .local-contexts-label-group {
   background-color: var(--brand-light-accent);
   padding-inline: var(--v-space-4xxs);
@@ -2360,6 +2357,33 @@ label.form-required::after {
   font-size: var(--font-size-s);
   line-height: var(--line-height-s);
   color: var(--brand-text-color);
+}
+
+.field--name-field-local-contexts-projects .form-checkboxes,
+.field--name-field-local-contexts-labels-and-notices .form-checkboxes {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  gap: var(--v-space-5xs);
+}
+.field--name-field-local-contexts-projects .form-type--checkbox,
+.field--name-field-local-contexts-labels-and-notices .form-type--checkbox {
+  margin-block: 0;
+}
+
+.local-contexts-label-widget__group {
+  -webkit-margin-after: var(--v-space-4xxs);
+          margin-block-end: var(--v-space-4xxs);
+  padding-inline: var(--v-space-4xxs);
+  padding-block: var(--v-space-5xs) var(--v-space-4xxs);
+  background-color: var(--brand-light-accent);
+}
+.local-contexts-label-widget__group.is-disabled .form-checkboxes {
+  opacity: 0.5;
 }
 
 .local-tasks {
