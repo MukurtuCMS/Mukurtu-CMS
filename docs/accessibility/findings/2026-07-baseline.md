@@ -54,6 +54,16 @@ resolved file's function/hook inventory against both parents, not just
 `php -l` and a duplicate-name grep. A file can lint clean and still be
 silently missing an entire fix.
 
+**2026-08-11:** merged a further 45 `origin/main` commits (a large Local
+Contexts widget-consolidation feature, plus a new stale-base-branch CI check)
+— clean merge, no conflicts, no composer/recipe changes, so a plain
+`drush updb` sufficed instead of a full reinstall. Zero new regressions.
+One automated-checks shuffle worth naming so it isn't mistaken for a new
+defect: `keyboard-focus-not-advancing` (the benign native-control classifier)
+now flags `digital-heritage-browse` instead of the digital-heritage-item
+pages — consistent with the content-order-dependency already logged above,
+not a new bug category.
+
 No manual keyboard/screen-reader testing has happened yet — that is the next
 phase, using [../manual-checklist.md](../manual-checklist.md) and the
 [manual findings template](manual-findings-template.md).
