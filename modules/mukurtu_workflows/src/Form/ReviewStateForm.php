@@ -8,6 +8,7 @@ use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 use Drupal\node\NodeInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -141,7 +142,20 @@ class ReviewStateForm extends FormBase {
       ->execute();
 
     $this->messenger()->addStatus($this->t('Status updated.'));
-    $form_state->setRedirectUrl($node->toUrl());
+
+    // A transition that unpublishes the node (e.g. returning it to draft)
+    // can leave the acting user -- a protocol steward reviewing someone
+    // else's content, say, rather than its owner -- without view access to
+    // the very node they just updated: core's node access grants "view" on
+    // an unpublished node to its owner (with "view own unpublished
+    // content") or to roles with a site-wide bypass, neither of which a
+    // steward necessarily has. Redirecting there anyway would immediately
+    // 403 despite the save having succeeded, so only redirect to the node
+    // if the user can still see it; otherwise send them back to the
+    // review queue this form is embedded in.
+    $form_state->setRedirectUrl($node->access('view')
+      ? $node->toUrl()
+      : Url::fromRoute('view.mukurtu_workflow_overview.review_queue'));
   }
 
 }
