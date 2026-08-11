@@ -11,14 +11,14 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\NodeType;
 
 /**
- * Tests mukurtu_core_update_40099(), which enables drawCircle by default.
+ * Tests mukurtu_core_update_40100(), which enables drawCircle by default.
  *
  * The real content types (place, digital_heritage, etc.) each pull in a
  * heavy module dependency chain, so this exercises the hook's actual
  * config-manipulation logic against a hand-built 'place' node type and
  * field_coverage field rather than installing mukurtu_place itself.
  *
- * @see mukurtu_core_update_40099()
+ * @see mukurtu_core_update_40100()
  * @group mukurtu_core
  */
 class DrawCircleDefaultUpdateTest extends KernelTestBase {
@@ -81,7 +81,7 @@ class DrawCircleDefaultUpdateTest extends KernelTestBase {
     ]);
     $display->save();
 
-    mukurtu_core_update_40099();
+    mukurtu_core_update_40100();
 
     $display = EntityFormDisplay::load('node.place.default');
     $component = $display->getComponent('field_coverage');
@@ -93,7 +93,7 @@ class DrawCircleDefaultUpdateTest extends KernelTestBase {
    */
   public function testUpdateIsNoOpWithoutDisplay(): void {
     $this->assertNull(EntityFormDisplay::load('node.place.default'));
-    mukurtu_core_update_40099();
+    mukurtu_core_update_40100();
     $this->assertNull(EntityFormDisplay::load('node.place.default'));
   }
 
@@ -114,7 +114,7 @@ class DrawCircleDefaultUpdateTest extends KernelTestBase {
     $display->setComponent('field_coverage', ['type' => 'geofield_default']);
     $display->save();
 
-    mukurtu_core_update_40099();
+    mukurtu_core_update_40100();
 
     $display = EntityFormDisplay::load('node.place.default');
     $component = $display->getComponent('field_coverage');

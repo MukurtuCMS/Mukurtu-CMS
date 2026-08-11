@@ -578,13 +578,11 @@ class FormHooks
         FormStateInterface $form_state,
     ): void {
         $notifyUids = mukurtu_notifications_extract_notify_uids($form_state);
-        if (!empty($notifyUids)) {
-            $new_user = $form_state->getFormObject()->getEntity();
-            mukurtu_notifications_notify_new_account_created(
-                $new_user,
-                $notifyUids,
-            );
-        }
+        $new_user = $form_state->getFormObject()->getEntity();
+        mukurtu_notifications_notify_new_account_created(
+            $new_user,
+            $notifyUids,
+        );
     }
 
     /**
