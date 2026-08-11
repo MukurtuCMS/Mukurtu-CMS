@@ -42,6 +42,7 @@ class MukurtuBlockUserActionTest extends KernelTestBase {
     'text',
     'user',
     'views',
+    'views_bulk_operations',
     'workflows',
   ];
 
