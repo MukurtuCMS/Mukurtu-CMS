@@ -102,18 +102,18 @@ function mukurtu_browse_preprocess_node(&$variables) {
     ->addCacheContexts(['route'])
     ->applyTo($variables);
 
-  // The content type label is redundant on /digital-heritage, since every
-  // result there is already a digital heritage item.
-  if (\Drupal::routeMatch()->getRouteName() === 'mukurtu_browse.browse_digital_heritage_page') {
-    return;
-  }
   $node = $variables['node'];
   if (!$node instanceof NodeInterface) {
     return;
   }
-  $node_type = $node->type->entity;
-  if ($node_type instanceof NodeTypeInterface) {
-    $variables['content_type_label'] = $node_type->label();
+
+  // The content type label is redundant on /digital-heritage, since every
+  // result there is already a digital heritage item.
+  if (\Drupal::routeMatch()->getRouteName() !== 'mukurtu_browse.browse_digital_heritage_page') {
+    $node_type = $node->type->entity;
+    if ($node_type instanceof NodeTypeInterface) {
+      $variables['content_type_label'] = $node_type->label();
+    }
   }
 
   $variables['quick_actions'] = mukurtu_browse_build_quick_actions($variables, $node);
