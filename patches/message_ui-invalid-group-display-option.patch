@@ -1,0 +1,11 @@
+diff --git a/message_ui.module b/message_ui.module
+--- a/message_ui.module
++++ b/message_ui.module
+@@ -56,7 +56,6 @@ function message_ui_entity_base_field_info_alter(&$fields, EntityTypeInterface
+       ->setDisplayOptions('form', [
+         'type' => 'entity_reference_autocomplete',
+         'weight' => 5,
+-        '#group' => 'advanced',
+         'settings' => [
+           'match_operator' => 'CONTAINS',
+           'size' => '60',
