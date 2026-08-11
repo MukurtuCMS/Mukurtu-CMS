@@ -351,3 +351,46 @@ function mukurtu_submissions_update_40010(): void {
     }
   }
 }
+
+/**
+ * Fixes the mukurtu_submission_received notification: its link token was
+ * unsafe inside an href (chained tokens there get mangled by the text
+ * format's filters before token replacement ever runs - see
+ * mukurtu_notifications_tokens() from the notifications-phase-2 work for
+ * the full explanation and the safe replacement token this now uses), and
+ * it had no mail_subject/mail_body displays at all, so message_notify's
+ * Email notifier (which renders exactly those two modes for uid-based
+ * recipients) sent an empty body with the template's raw text as the
+ * subject instead. Splits the template into a subject delta and a body
+ * delta and creates the two missing displays - mirrors
+ * mukurtu_dictionary_update_40040()'s existing pattern of fixing up a
+ * display via the repository API rather than importing raw config.
+ */
+function mukurtu_submissions_update_40011(): void {
+  $template = \Drupal::entityTypeManager()->getStorage('message_template')->load('mukurtu_submission_received');
+  if ($template) {
+    $template->set('text', [
+      [
+        'value' => 'New [message:field_item:entity:content-type] submitted for review: [message:field_item:entity:title]',
+        'format' => 'plain_text',
+      ],
+      [
+        'value' => '<p>A new [message:field_item:entity:content-type] was submitted for review: [message:field_item:entity:mukurtu-notification-link].</p>',
+        'format' => 'mukurtu_html',
+      ],
+    ]);
+    $template->save();
+  }
+
+  $repository = \Drupal::service('entity_display.repository');
+
+  $subject_display = $repository->getViewDisplay('message', 'mukurtu_submission_received', 'mail_subject');
+  $subject_display->setComponent('partial_0', ['region' => 'content', 'weight' => 0]);
+  $subject_display->removeComponent('partial_1');
+  $subject_display->save();
+
+  $body_display = $repository->getViewDisplay('message', 'mukurtu_submission_received', 'mail_body');
+  $body_display->setComponent('partial_1', ['region' => 'content', 'weight' => 0]);
+  $body_display->removeComponent('partial_0');
+  $body_display->save();
+}

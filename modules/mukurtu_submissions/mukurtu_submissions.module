@@ -114,33 +114,77 @@ function mukurtu_submissions_node_insert(NodeInterface $node) {
   $message->set('field_item', $node);
   $message->save();
 
+  $email_validator = \Drupal::service('email.validator');
+
   $notify_uids = mukurtu_submissions_get_reviewer_uids();
-  if (empty($notify_uids)) {
-    return;
+  if (!empty($notify_uids)) {
+    $flags = ['subscribe_node'];
+    $notifiers = ['email'];
+    $subscribe_options = [
+      'notify message owner' => FALSE,
+      'uids' => [],
+    ];
+    $recipients = \Drupal::entityTypeManager()->getStorage('user')->loadMultiple($notify_uids);
+    foreach ($recipients as $uid => $recipient) {
+      $email = $recipient->getEmail();
+      if (!$email || !$email_validator->isValid($email)) {
+        continue;
+      }
+      $subscribe_options['uids'][$uid] = new DeliveryCandidate($flags, $notifiers, $uid);
+    }
+
+    if (!empty($subscribe_options['uids'])) {
+      try {
+        \Drupal::service('message_subscribe.subscribers')->sendMessage($message, $message, [], $subscribe_options);
+      }
+      catch (\Exception $e) {
+        \Drupal::logger('mukurtu_submissions')->warning('Failed to send submission notification: @msg', ['@msg' => $e->getMessage()]);
+      }
+    }
   }
 
-  $flags = ['subscribe_node'];
-  $notifiers = ['email'];
-  $subscribe_options = [
-    'notify message owner' => FALSE,
-    'uids' => [],
-  ];
-  $email_validator = \Drupal::service('email.validator');
-  $recipients = \Drupal::entityTypeManager()->getStorage('user')->loadMultiple($notify_uids);
-  foreach ($recipients as $uid => $recipient) {
-    $email = $recipient->getEmail();
-    if (!$email || !$email_validator->isValid($email)) {
+  $notify_emails = \Drupal::config('mukurtu_submissions.settings')->get('notify_emails') ?: [];
+  if (!empty($notify_emails)) {
+    mukurtu_submissions_send_email_notifications($message, $notify_emails, $email_validator);
+  }
+}
+
+/**
+ * Emails the rendered submission-received message directly to addresses
+ * with no Drupal user account - message_subscribe's DeliveryCandidate is
+ * uid-keyed, so it can't reach these. Reuses the same rendered message
+ * (via message's own 'full' view mode, the only one available for this
+ * template) that uid-based recipients see, so content stays consistent
+ * regardless of how a recipient was configured to be notified.
+ */
+function mukurtu_submissions_send_email_notifications(Message $message, array $emails, $email_validator): void {
+  $view_builder = \Drupal::entityTypeManager()->getViewBuilder('message');
+  $renderer = \Drupal::service('renderer');
+  // Rendered the same way message_notify's own Email notifier renders a
+  // message for uid-based recipients (see MessageNotifierBase::send()) -
+  // so every recipient sees identical subject/body content regardless of
+  // how they were configured to be notified.
+  // The rendered view mode output carries theme-wrapper whitespace
+  // (newlines/indentation around the actual text) - harmless in the body,
+  // but a subject line should always collapse to one line.
+  $subject_render = (string) $renderer->renderInIsolation($view_builder->view($message, 'mail_subject'));
+  $subject = trim(preg_replace('/\s+/', ' ', $subject_render));
+  $body = trim((string) $renderer->renderInIsolation($view_builder->view($message, 'mail_body')));
+  $mail_manager = \Drupal::service('plugin.manager.mail');
+  $langcode = \Drupal::languageManager()->getDefaultLanguage()->getId();
+
+  foreach ($emails as $email) {
+    if (!$email_validator->isValid($email)) {
       continue;
     }
-    $subscribe_options['uids'][$uid] = new DeliveryCandidate($flags, $notifiers, $uid);
-  }
-
-  if (!empty($subscribe_options['uids'])) {
     try {
-      \Drupal::service('message_subscribe.subscribers')->sendMessage($message, $message, [], $subscribe_options);
+      $mail_manager->mail('mukurtu_submissions', 'submission_received', $email, $langcode, [
+        'subject' => $subject,
+        'body' => $body,
+      ]);
     }
     catch (\Exception $e) {
-      \Drupal::logger('mukurtu_submissions')->warning('Failed to send submission notification: @msg', ['@msg' => $e->getMessage()]);
+      \Drupal::logger('mukurtu_submissions')->warning('Failed to send submission notification to @email: @msg', ['@email' => $email, '@msg' => $e->getMessage()]);
     }
   }
 }
@@ -380,6 +424,12 @@ function mukurtu_submissions_send_forward_message(string $template, NodeInterfac
  * Implements hook_mail().
  */
 function mukurtu_submissions_mail($key, &$message, $params) {
+  if ($key === 'submission_received') {
+    $message['subject'] = $params['subject'];
+    $message['body'][] = $params['body'];
+    return;
+  }
+
   if ($key !== 'contact_submitter') {
     return;
   }

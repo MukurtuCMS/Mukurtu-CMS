@@ -42,6 +42,25 @@ class SubmissionSettingsCollectionFormTest extends MukurtuSubmissionsKernelTestB
     $this->getFormObject()->submitForm($form, $form_state);
   }
 
+  /**
+   * Runs validateForm() then, only if that added no errors, submitForm() -
+   * needed for notify_emails, which is only checked in validateForm().
+   */
+  protected function runNotifySettingsForm(string $notify_emails_text): FormState {
+    $form_state = (new FormState())->setValues([
+      'notify_uids' => [],
+      'notify_emails' => $notify_emails_text,
+    ]);
+
+    $form_object = $this->getFormObject();
+    $form = [];
+    $form_object->validateForm($form, $form_state);
+    if (!$form_state->getErrors()) {
+      $form_object->submitForm($form, $form_state);
+    }
+    return $form_state;
+  }
+
   public function testBuildFormIncludesTheEmbeddedSettingsList(): void {
     $form_state = new FormState();
     $form = $this->getFormObject()->buildForm([], $form_state);
@@ -83,6 +102,51 @@ class SubmissionSettingsCollectionFormTest extends MukurtuSubmissionsKernelTestB
 
     $notify_uids = \Drupal::config('mukurtu_submissions.settings')->get('notify_uids');
     $this->assertSame([], $notify_uids);
+  }
+
+  public function testValidNotifyEmailsAreSaved(): void {
+    $form_state = $this->runNotifySettingsForm("one@example.com\ntwo@example.com");
+
+    $this->assertEmpty($form_state->getErrors());
+    $this->assertEqualsCanonicalizing(
+      ['one@example.com', 'two@example.com'],
+      \Drupal::config('mukurtu_submissions.settings')->get('notify_emails')
+    );
+  }
+
+  public function testBlankLinesAndWhitespaceAreIgnored(): void {
+    $form_state = $this->runNotifySettingsForm("  one@example.com  \n\n\ntwo@example.com\n");
+
+    $this->assertEmpty($form_state->getErrors());
+    $this->assertEqualsCanonicalizing(
+      ['one@example.com', 'two@example.com'],
+      \Drupal::config('mukurtu_submissions.settings')->get('notify_emails')
+    );
+  }
+
+  public function testInvalidNotifyEmailBlocksSaveWithError(): void {
+    \Drupal::configFactory()->getEditable('mukurtu_submissions.settings')
+      ->set('notify_emails', ['already-there@example.com'])
+      ->save();
+
+    $form_state = $this->runNotifySettingsForm("one@example.com\nnot-an-email");
+
+    $errors = $form_state->getErrors();
+    $this->assertNotEmpty($errors);
+    $this->assertStringContainsString('not-an-email', (string) reset($errors));
+    // The invalid submission must not have overwritten the prior config.
+    $this->assertSame(['already-there@example.com'], \Drupal::config('mukurtu_submissions.settings')->get('notify_emails'));
+  }
+
+  public function testEmptySubmissionClearsNotifyEmails(): void {
+    \Drupal::configFactory()->getEditable('mukurtu_submissions.settings')
+      ->set('notify_emails', ['old@example.com'])
+      ->save();
+
+    $form_state = $this->runNotifySettingsForm('');
+
+    $this->assertEmpty($form_state->getErrors());
+    $this->assertSame([], \Drupal::config('mukurtu_submissions.settings')->get('notify_emails'));
   }
 
 }
