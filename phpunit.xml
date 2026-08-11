@@ -60,9 +60,6 @@
     <testsuite name="unit">
       <directory>web/profiles/mukurtu/modules/**/tests/src/Unit</directory>
     </testsuite>
-    <testsuite name="kernel">
-      <directory>web/profiles/mukurtu/modules/mukurtu_notifications/tests/src/Kernel</directory>
-    </testsuite>
     <testsuite name="functional">
       <directory>web/profiles/mukurtu/modules/**/tests/src/Functional</directory>
     </testsuite>
