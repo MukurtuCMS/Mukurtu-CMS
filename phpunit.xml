@@ -78,6 +78,9 @@
     <testsuite name="kernel">
       <directory>web/profiles/mukurtu/modules/mukurtu_core/tests/src/Kernel</directory>
     </testsuite>
+    <testsuite name="kernel">
+      <directory>web/profiles/mukurtu/modules/mukurtu_notifications/tests/src/Kernel</directory>
+    </testsuite>
     <testsuite name="functional">
       <directory>web/profiles/mukurtu/modules/mukurtu_protocol/tests/src/Functional</directory>
     </testsuite>
