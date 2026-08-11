@@ -11,25 +11,48 @@ item pages that anonymous visitors cannot reach.
 
 ## Where we are now
 
-*Last verified 2026-07-28, after merging a 36-commit `origin/main` update
-(notifications, article permissions, Local Contexts overhaul, membership
-management, Layout Builder) — zero new regressions or findings from that
-merge; full re-scan matches the state below exactly.*
+*Last verified 2026-08-10, after resolving a divergent-history merge conflict
+(see "Merge notes" below) that brought in another 36-commit `origin/main`
+update plus parallel recipe-content work. One new real finding from this
+cycle (`aria-hidden-focus` on browse cards, below); everything else matches
+the prior known state.*
 
-**19 of 19 pages in the [audit inventory](../page-inventory.md) scan clean —
-13 with zero findings of any kind, 6 with known, already-triaged issues**
-(the PDF `image-alt` finding and the ALTCHA widget bugs, both below). The
-two automated-checks layers add 23 more findings across the inventory
-(reflow/text-zoom overflow, 4 focus-visible failures, and the audio-player
-"needs manual confirmation" flags) — see the automated-checks section below.
-Nothing here is a regression; all of it is tracked with an owner action in
-"Remaining actions for the next cycle."
+**19 of 19 pages in the [audit inventory](../page-inventory.md) scan — 12
+with zero findings of any kind, 7 with known, already-triaged issues** (the
+PDF `image-alt` finding, the ALTCHA widget bugs, and the new browse-card
+finding, all below). The two automated-checks layers add roughly 23 more
+findings across the inventory (reflow/text-zoom overflow, 4 focus-visible
+failures, and the audio-player "needs manual confirmation" flags) — see the
+automated-checks section below. Nothing here is a regression; all of it is
+tracked with an owner action in "Remaining actions for the next cycle."
 
 | Coverage | Result |
 |---|---|
-| Anonymous: `/`, `/browse`, `/digital-heritage`, `/collections`, `/communities`, `/dictionary`, `/user/login`, plus discovered digital heritage item, collection, community, and dictionary word pages | Clean, except `login` (ALTCHA), `dictionary-word` and `digital-heritage-item` (PDF `image-alt`) |
+| Anonymous: `/`, `/browse`, `/digital-heritage`, `/collections`, `/communities`, `/dictionary`, `/user/login`, plus discovered digital heritage item, collection, community, and dictionary word pages | Clean, except `browse` (new `aria-hidden-focus`), `login` (ALTCHA), `dictionary-word` (PDF `image-alt`) |
 | Member: `/`, `/my-content`, `/user/personal-collections`, `/user`, plus discovered item pages | Clean, except `member-collection-page` (ALTCHA), `member-dictionary-word` and `member-digital-heritage-item` (ALTCHA + PDF `image-alt`) |
 | Not yet scanned | Admin/authoring UI (later phase) |
+
+### Merge notes (2026-08-10)
+
+This branch's remote (`origin/AM-accessibility-program`) had been updated
+independently of this local checkout — both merged `origin/main` from
+slightly different starting points, so reconciling them produced a real
+conflict in `mukurtu_core.install` (not the usual silent-duplicate-hook kind
+from earlier cycles). Worth recording because the conflict had already been
+"resolved" (staged, ready to commit) before this check ran, and the
+resolution had two real defects that a plain `git commit` would have shipped:
+a stray literal `>>>>>>>>> Temporary merge branch 2` fragment left inside a
+live `if` block (would have been a PHP parse error, breaking every install),
+and this branch's entire Gin-accent WCAG 1.4.3 fix silently missing from the
+merged file (confirmed by diffing function inventories against both merge
+parents — present in both, absent from the "resolved" result). Both fixed
+before completing the merge: removed the stray fragment, restored the missing
+hook (renumbered to `40099` to match the number the other side had
+independently chosen for it, avoiding a needless third renumbering). Lesson:
+after any merge — especially one already marked "conflicts fixed" — diff the
+resolved file's function/hook inventory against both parents, not just
+`php -l` and a duplicate-name grep. A file can lint clean and still be
+silently missing an entire fix.
 
 No manual keyboard/screen-reader testing has happened yet — that is the next
 phase, using [../manual-checklist.md](../manual-checklist.md) and the
@@ -57,7 +80,48 @@ The page-title region (the `<h1>`) rendered in a bare `div.region` between the
 header and main landmarks on every page.
 
 **Fixed:** `{{ page.page_title }}` moved inside `<main>` in
-`themes/mukurtu_v4/templates/layout/page.html.twig` (which all page variants
+`themes/mukurtu_v4/templates/layout/  }
+}
+
+/**
+ * Grant Language Stewards comment permissions so they can view and approve
+ * comments on dictionary words and word lists, matching Protocol Stewards.
+ */
+function mukurtu_core_update_40099(): void {
+  /** @var \Drupal\og\Entity\OgRole|null $role */
+  $role = \Drupal::entityTypeManager()
+    ->getStorage('og_role')
+    ->load('protocol-protocol-language_steward');
+  if (!$role) {
+    return;
+  }
+
+  foreach (['administer comments', 'skip comment approval'] as $permission) {
+    if (!$role->hasPermission($permission)) {
+      $role->grantPermission($permission);
+    }
+  }
+
+  $role->save();
+}
+
+/**
+ * Switch the Gin admin theme accent to a WCAG AA compliant teal.
+ *
+ * Gin's "teal" accent preset renders links at #10857f on white, a 4.48:1
+ * contrast ratio - just under the 4.5:1 required by WCAG 2.1 AA (1.4.3).
+ * This is member-facing on admin-route pages such as /my-content. Sites
+ * still on the default preset are moved to a slightly darker custom teal
+ * (#0e7873, 5.3:1); sites with their own accent choice are left alone.
+ */
+function mukurtu_core_update_40100(): void {
+  $settings = \Drupal::configFactory()->getEditable('gin.settings');
+  if ($settings->get('preset_accent_color') === 'teal' && empty($settings->get('accent_color'))) {
+    $settings
+      ->set('preset_accent_color', 'custom')
+      ->set('accent_color', '#0e7873')
+      ->save();
+page.html.twig` (which all page variants
 extend) and `page--404.html.twig`. Also puts the `<h1>` inside the skip-link
 target.
 
@@ -206,6 +270,31 @@ a one-time manual `drush config:set` documented in the recipe README, run
 once before recipes on a fresh install. Verified: `/communities` now lists the
 seeded community anonymously, and `community-page` scans clean (see above).
 
+## New finding (2026-08-10): unnamed decorative link focusable in horizontal-card component
+
+`browse` (and likely the person/place grid-browse cards that `origin/main`
+added templates for this cycle) shows a new `aria-hidden-focus` (serious)
+violation: `.horizontal-card__media > a[aria-hidden="true"]` — a card's image
+link is marked `aria-hidden="true"` (presumably to avoid a screen reader
+announcing the same destination twice, once for the image and once for the
+title text) but has no `tabindex="-1"` pulling it out of the tab order either,
+so a keyboard/screen-reader user can still land on a link the accessibility
+tree says doesn't exist. **Not yet fixed** — logged for triage.
+
+## Note (2026-08-10): item-page scan coverage is content-order-dependent
+
+The still-open PDF-thumbnail `image-alt` finding (documented above) briefly
+looked "fixed" in this run's `digital-heritage-item` result — it wasn't.
+`discoverItemUrl()` always scans whichever item link appears **first** on the
+listing page, and a new multipage item added by this merge's recipe content
+now sorts before the original `woven-basket-maker-unknown-sample-item` (the
+one with the bug). Confirmed directly: the woven-basket item's PDF thumbnail
+still ships with no `alt` attribute at all — the bug is unchanged, our
+coverage of it just silently lapsed. Logged as a follow-up: either pin
+discovery to a stable, named item per content type, or scan all discovered
+items rather than only the first, so new content can't quietly shrink
+coverage like this again.
+
 ## Handed to the manual pass (axe "incomplete" queue)
 
 Contrast checks axe could not compute (backgrounds are images/overlays or
@@ -261,6 +350,13 @@ provide evidence — see the capability-testing section of the
    collection pages (not their anonymous counterparts, not other member
    pages) — new finding above. Then decide whether to file the two ALTCHA
    markup bugs upstream or override locally.
+10. **Fix:** the `aria-hidden-focus` finding on browse/grid cards — new
+    finding above.
+11. **Test methodology:** stop `discoverItemUrl()` from always picking the
+    first item link on a listing page — new content silently displaces
+    coverage of older items (see the 2026-08-10 note above, which caught the
+    PDF `image-alt` finding almost falling out of coverage). Either pin
+    discovery to named/stable items or scan every discovered item.
 
 ## Reproducing these scans
 
