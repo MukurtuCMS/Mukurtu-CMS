@@ -64,6 +64,21 @@ class MukurtuProtocolNodeAccessControlHandler extends NodeAccessControlHandler {
       case 'view revision':
       case 'revert revision':
       case 'delete revision':
+        // Core's NodeAccessControlHandler::checkAccess() only consults the
+        // node access grants table (where getNodeAccessGrants() grants
+        // protocol members 'view') for published nodes -- for unpublished
+        // ones it only allows the owner (with "view own unpublished
+        // content") or a site-wide bypass permission, ignoring grants
+        // entirely. That leaves protocol/language stewards unable to view
+        // someone else's content the moment it's moved to draft/archived,
+        // even though their role explicitly grants "view any unpublished
+        // content" for exactly this purpose (see
+        // config/install/og.og_role.protocol-protocol-protocol_steward.yml).
+        if ($operation === 'view' && !$entity->isPublished() && CulturalProtocols::hasSiteOrProtocolPermission($entity, 'view any unpublished content', $account)) {
+          return AccessResult::allowed()
+            ->addCacheableDependency($entity)
+            ->addCacheTags(["user:{$account->id()}"]);
+        }
         return parent::checkAccess($entity, $operation, $account);
 
       case 'update':
