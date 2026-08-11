@@ -3,66 +3,67 @@
 namespace Drupal\mukurtu_export\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
+use Drupal\Core\Entity\Attribute\ConfigEntityType;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\user\EntityOwnerInterface;
 use Drupal\user\UserInterface;
 
 /**
  * CSV Exporter Settings Config Entity
- *
- * @ConfigEntityType(
- *   id = "csv_exporter",
- *   label = @Translation("CSV Exporter Setting"),
- *   label_collection = @Translation("CSV Exporter Settings"),
- *   entity_keys = {
- *     "id" = "id",
- *     "label" = "label",
- *   },
- *   config_prefix = "csv_exporter",
- *   config_export = {
- *     "id",
- *     "label",
- *     "uid",
- *     "description",
- *     "site_wide",
- *     "entity_fields_export_list",
- *     "separator",
- *     "enclosure",
- *     "escape",
- *     "eol",
- *     "multivalue_delimiter",
- *     "local_contexts_delimiter",
- *     "default_format",
- *     "field_id",
- *     "field_file",
- *     "field_image",
- *     "entity_reference_node",
- *     "entity_reference_media",
- *     "entity_reference_taxonomy_term",
- *     "entity_reference_user",
- *     "entity_reference_paragraph",
- *     "entity_reference_multipage_item",
- *   },
- *   handlers = {
- *     "access" = "Drupal\mukurtu_export\CsvExporterAccessController",
- *     "list_builder" = "Drupal\mukurtu_export\Controller\CsvExporterListBuilder",
- *     "form" = {
- *       "add" = "Drupal\mukurtu_export\Form\CsvExporterAddForm",
- *       "edit" = "Drupal\mukurtu_export\Form\CsvExporterEditForm",
- *       "delete" = "Drupal\mukurtu_export\Form\CsvExporterDeleteForm",
- *     },
- *     "route_provider" = {
- *       "html" = "Drupal\Core\Entity\Routing\AdminHtmlRouteProvider",
- *     },
- *   },
- *   admin_permission = "access mukurtu export",
- *   links = {
- *     "add-form" = "/admin/export/format/csv/add",
- *     "edit-form" = "/admin/export/format/csv/manage/{csv_exporter}",
- *     "delete-form" = "/admin/export/format/csv/manage/{csv_exporter}/delete",
- *     "collection" = "/admin/export/settings/csv",
- *   }
- * )
  */
+#[ConfigEntityType(
+  id: 'csv_exporter',
+  label: new TranslatableMarkup('CSV Exporter Setting'),
+  label_collection: new TranslatableMarkup('CSV Exporter Settings'),
+  config_prefix: 'csv_exporter',
+  entity_keys: [
+    'id' => 'id',
+    'label' => 'label',
+  ],
+  handlers: [
+    'access' => 'Drupal\mukurtu_export\CsvExporterAccessController',
+    'list_builder' => 'Drupal\mukurtu_export\Controller\CsvExporterListBuilder',
+    'form' => [
+      'add' => 'Drupal\mukurtu_export\Form\CsvExporterAddForm',
+      'edit' => 'Drupal\mukurtu_export\Form\CsvExporterEditForm',
+      'delete' => 'Drupal\mukurtu_export\Form\CsvExporterDeleteForm',
+    ],
+    'route_provider' => [
+      'html' => 'Drupal\Core\Entity\Routing\AdminHtmlRouteProvider',
+    ],
+  ],
+  links: [
+    'add-form' => '/admin/export/format/csv/add',
+    'edit-form' => '/admin/export/format/csv/manage/{csv_exporter}',
+    'delete-form' => '/admin/export/format/csv/manage/{csv_exporter}/delete',
+    'collection' => '/admin/export/settings/csv',
+  ],
+  admin_permission: 'access mukurtu export',
+  config_export: [
+    'id',
+    'label',
+    'uid',
+    'description',
+    'site_wide',
+    'entity_fields_export_list',
+    'separator',
+    'enclosure',
+    'escape',
+    'eol',
+    'multivalue_delimiter',
+    'local_contexts_delimiter',
+    'default_format',
+    'field_id',
+    'field_file',
+    'field_image',
+    'entity_reference_node',
+    'entity_reference_media',
+    'entity_reference_taxonomy_term',
+    'entity_reference_user',
+    'entity_reference_paragraph',
+    'entity_reference_multipage_item',
+  ],
+)]
 class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface {
   protected $uid;
 
