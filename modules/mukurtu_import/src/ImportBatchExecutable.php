@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\mukurtu_import;
 
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\migrate_tools\MigrateBatchExecutable;
 use Drupal\migrate\MigrateMessage;
 use Drupal\migrate\Plugin\MigrationInterface;
@@ -165,16 +166,24 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
     $log_storage = \Drupal::service('mukurtu_import.log_storage');
     $timestamp = \Drupal::time()->getRequestTime();
     $current_uid = (int) \Drupal::currentUser()->id();
+    $imported_count = 0;
+    $per_migration_summary = [];
 
     // Build the tempstore-facing flat message list and persist one log row
     // per migration (i.e. per file), keeping each file's own messages
     // correctly attributed to that file's own fid instead of merging all
-    // messages in the batch under a single file.
+    // messages in the batch under a single file. $results also carries
+    // 'messages' and 'definitions' sibling keys (see
+    // batchProcessImportDefinition() above) that aren't per-migration
+    // results -- only entries with a '@numitems' key are.
     $messages = [];
     foreach ($results as $migration_id => $migration_result) {
       if ($migration_id === 'definitions' || !is_array($migration_result) || !isset($migration_result['@numitems'])) {
         continue;
       }
+
+      $imported_count += ($migration_result['@created'] ?? 0) + ($migration_result['@updated'] ?? 0);
+      $per_migration_summary[] = new FormattableMarkup('@name: @created created, @updated updated, @failures failed, @ignored ignored', $migration_result);
 
       $fid = $migration_result['fid'] ?? NULL;
       $file_message_texts = [];
@@ -207,6 +216,10 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
     }
     $store->set('batch_results_messages', $messages);
 
+    if (\Drupal::moduleHandler()->moduleExists('mukurtu_notifications')) {
+      mukurtu_notifications_notify_batch_import_report($imported_count, static::buildResultsSummary($per_migration_summary, $messages));
+    }
+
     // Clean up ID map tables for all migrations in this batch.
     // These are no longer needed after the import is complete.
     $migration_plugin_manager = \Drupal::service('plugin.manager.migration');
@@ -214,6 +227,38 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
       $migration = $migration_plugin_manager->createStubMigration($definition);
       $migration->getIdMap()->destroy();
     }
+  }
+
+  /**
+   * Builds the HTML summary stored on the batch import report notification.
+   *
+   * @param \Drupal\Component\Render\FormattableMarkup[] $per_migration_summary
+   *   One formatted line per migration in the batch.
+   * @param array $messages
+   *   Error messages collected during the batch, each with a 'message' key.
+   *
+   * @return string
+   *   Rendered HTML for the mukurtu_batch_import_report message's
+   *   field_import_results field.
+   */
+  protected static function buildResultsSummary(array $per_migration_summary, array $messages): string {
+    $build = [
+      '#theme' => 'item_list',
+      '#items' => $per_migration_summary,
+      '#empty' => t('No migrations ran as part of this batch.'),
+    ];
+    $summary = (string) \Drupal::service('renderer')->renderInIsolation($build);
+
+    if (empty($messages)) {
+      return $summary;
+    }
+
+    $error_build = [
+      '#theme' => 'item_list',
+      '#title' => t('Errors'),
+      '#items' => array_map(static fn (array $message) => $message['message'], $messages),
+    ];
+    return $summary . (string) \Drupal::service('renderer')->renderInIsolation($error_build);
   }
 
   /**

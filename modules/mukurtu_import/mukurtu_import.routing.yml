@@ -110,3 +110,14 @@ mukurtu_import.import_log_detail:
     parameters:
       id:
         type: integer
+
+mukurtu_import.batch_report:
+  path: '/admin/import/report/{message}'
+  defaults:
+    _controller: '\Drupal\mukurtu_import\Controller\BatchReportController::build'
+    _title_callback: '\Drupal\mukurtu_import\Controller\BatchReportController::title'
+  requirements:
+    _custom_access: '\Drupal\mukurtu_import\Controller\BatchReportController::access'
+    message: '\d+'
+  options:
+    _admin_route: TRUE
