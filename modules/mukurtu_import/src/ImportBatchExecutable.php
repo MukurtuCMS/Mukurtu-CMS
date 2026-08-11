@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\mukurtu_import;
 
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\migrate_tools\MigrateBatchExecutable;
 use Drupal\migrate\MigrateMessage;
 use Drupal\migrate\Plugin\MigrationInterface;
@@ -155,15 +156,23 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
     $exception_fid = NULL;
     $has_row_failures = FALSE;
     $has_silent_noop = FALSE;
+    $imported_count = 0;
+    $per_migration_summary = [];
 
-    // Find our failure point.
+    // Find our failure point. $results also carries 'messages' and
+    // 'definitions' sibling keys (see batchProcessImportDefinition() above)
+    // that aren't per-migration results -- only entries with an '@name' key
+    // are.
     foreach (array_keys($results) as $migration_id) {
-      if ($migration_id === 'message' || !isset($results[$migration_id]['@failures'])) {
+      if (!is_array($results[$migration_id]) || !isset($results[$migration_id]['@name'])) {
         continue;
       }
 
       $migration_result = $results[$migration_id];
-      if ($migration_result['@failures'] > 0) {
+      $imported_count += ($migration_result['@created'] ?? 0) + ($migration_result['@updated'] ?? 0);
+      $per_migration_summary[] = new FormattableMarkup('@name: @created created, @updated updated, @failures failed, @ignored ignored', $migration_result);
+
+      if (isset($migration_result['@failures']) && $migration_result['@failures'] > 0) {
         $has_row_failures = TRUE;
         preg_match('/^\d+__(\d+)__.*/', $migration_id, $matches);
         $fid = $matches[1] ?? NULL;
@@ -174,7 +183,7 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
           }
         }
       }
-      elseif ($migration_result['@numitems'] > 0 && $migration_result['@created'] === 0 && $migration_result['@updated'] === 0) {
+      elseif (($migration_result['@numitems'] ?? 0) > 0 && ($migration_result['@created'] ?? 0) === 0 && ($migration_result['@updated'] ?? 0) === 0) {
         // Rows were processed but nothing was actually created or updated
         // (e.g. every row was ignored), even though migrate reported no
         // per-row failures. See https://github.com/MukurtuCMS/Mukurtu-CMS/issues/154.
@@ -195,6 +204,10 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
     }
     $store->set('batch_results_messages', $messages);
 
+    if (\Drupal::moduleHandler()->moduleExists('mukurtu_notifications')) {
+      mukurtu_notifications_notify_batch_import_report($imported_count, static::buildResultsSummary($per_migration_summary, $messages));
+    }
+
     // Clean up ID map tables for all migrations in this batch.
     // These are no longer needed after the import is complete.
     $migration_plugin_manager = \Drupal::service('plugin.manager.migration');
@@ -202,6 +215,38 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
       $migration = $migration_plugin_manager->createStubMigration($definition);
       $migration->getIdMap()->destroy();
     }
+  }
+
+  /**
+   * Builds the HTML summary stored on the batch import report notification.
+   *
+   * @param \Drupal\Component\Render\FormattableMarkup[] $per_migration_summary
+   *   One formatted line per migration in the batch.
+   * @param array $messages
+   *   Error messages collected during the batch, each with a 'message' key.
+   *
+   * @return string
+   *   Rendered HTML for the mukurtu_batch_import_report message's
+   *   field_import_results field.
+   */
+  protected static function buildResultsSummary(array $per_migration_summary, array $messages): string {
+    $build = [
+      '#theme' => 'item_list',
+      '#items' => $per_migration_summary,
+      '#empty' => t('No migrations ran as part of this batch.'),
+    ];
+    $summary = (string) \Drupal::service('renderer')->renderInIsolation($build);
+
+    if (empty($messages)) {
+      return $summary;
+    }
+
+    $error_build = [
+      '#theme' => 'item_list',
+      '#title' => t('Errors'),
+      '#items' => array_map(static fn (array $message) => $message['message'], $messages),
+    ];
+    return $summary . (string) \Drupal::service('renderer')->renderInIsolation($error_build);
   }
 
   /**
