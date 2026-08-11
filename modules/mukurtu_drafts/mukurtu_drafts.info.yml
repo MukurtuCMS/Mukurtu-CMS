@@ -10,3 +10,4 @@ dependencies:
   - 'drupal:user'
   - 'drupal:views'
   - 'mukurtu_core:mukurtu_core'
+  - 'mukurtu_protocol:mukurtu_protocol'
