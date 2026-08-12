@@ -24,3 +24,5 @@ services:
   mukurtu_core.related_content_grouper:
     class: Drupal\mukurtu_core\Service\RelatedContentGrouper
     arguments: ['@entity_type.manager', '@config.factory', '@event_dispatcher']
+  mukurtu_core.paragraph_emptiness_checker:
+    class: Drupal\mukurtu_core\Service\ParagraphEmptinessChecker
