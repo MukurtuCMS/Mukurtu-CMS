@@ -96,6 +96,15 @@
       this.update_text();
     }, this);
 
+    // Disable fill for open polylines, same rationale as the display-side
+    // fix in LeafletHooks.php (issue #732): lines aren't areas, only
+    // polygons should keep the configured fill. Circles are out of scope
+    // (issue #849). L.Polygon extends L.Polyline, so it must be excluded
+    // explicitly.
+    if (!(layer instanceof L.Polygon) && layer instanceof L.Polyline) {
+      layer.setStyle({ fill: false });
+    }
+
     /* Mukurtu additions end. */
 
     /* Copied from leaflet.widget.js begin: */
