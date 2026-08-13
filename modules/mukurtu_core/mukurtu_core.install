@@ -3591,26 +3591,6 @@ function mukurtu_core_update_40099(): void {
 }
 
 /**
- * Show the member-since date on the user profile page.
- */
-function mukurtu_core_update_40100(): void {
-  $display = \Drupal::entityTypeManager()
-    ->getStorage('entity_view_display')
-    ->load('user.user.default');
-
-  if ($display) {
-    $display
-      ->setComponent('member_for', [
-        'weight' => 2,
-        'region' => 'content',
-        'settings' => [],
-        'third_party_settings' => [],
-      ])
-      ->save();
-  }
-}
-
-/**
  * Enable the "draw circle" map toolbar button by default (issue #860).
  *
  * The button was previously force-disabled by contrib because GeoJSON has
@@ -3620,7 +3600,7 @@ function mukurtu_core_update_40100(): void {
  * via the updated config/install YAML; this brings existing sites'
  * geofield_mukurtu widgets in line with that new default.
  */
-function mukurtu_core_update_40101(): void {
+function mukurtu_core_update_40100(): void {
   $bundles = [
     'place',
     'digital_heritage',
@@ -3642,5 +3622,26 @@ function mukurtu_core_update_40101(): void {
     $component['settings']['toolbar']['drawCircle'] = TRUE;
     $display->setComponent('field_coverage', $component);
     $display->save();
+  }
+}
+
+/**
+ * Show the member-since date on the user profile page.
+ */
+function mukurtu_core_update_40101(): void
+{
+  $display = \Drupal::entityTypeManager()
+    ->getStorage('entity_view_display')
+    ->load('user.user.default');
+
+  if ($display) {
+    $display
+      ->setComponent('member_for', [
+        'weight' => 2,
+        'region' => 'content',
+        'settings' => [],
+        'third_party_settings' => [],
+      ])
+      ->save();
   }
 }
