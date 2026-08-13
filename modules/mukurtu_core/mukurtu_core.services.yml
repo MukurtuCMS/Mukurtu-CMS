@@ -12,6 +12,11 @@ services:
     class: Drupal\mukurtu_core\EventSubscriber\ConfigSaveCacheInvalidationSubscriber
     tags:
       - { name: event_subscriber }
+  mukurtu_core.user_profile_admin_theme_negotiator:
+    class: Drupal\mukurtu_core\Theme\UserProfileAdminThemeNegotiator
+    arguments: ['@current_user', '@config.factory']
+    tags:
+      - { name: theme_negotiator, priority: 1000 }
   mukurtu_core.representative_media_computation:
     class: Drupal\mukurtu_core\EventSubscriber\RepresentativeMediaComputationSubscriber
     tags:
@@ -23,3 +28,5 @@ services:
     class: Drupal\mukurtu_core\Service\MukurtuLeafletService
     decorates: leaflet.service
     arguments: ['@current_user', '@geofield.geophp', '@module_handler', '@link_generator', '@stream_wrapper_manager', '@request_stack', '@cache.leaflet', '@file_url_generator']
+  mukurtu_core.paragraph_emptiness_checker:
+    class: Drupal\mukurtu_core\Service\ParagraphEmptinessChecker

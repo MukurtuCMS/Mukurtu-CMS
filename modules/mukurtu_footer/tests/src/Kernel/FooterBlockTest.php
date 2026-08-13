@@ -7,12 +7,12 @@ namespace Drupal\Tests\mukurtu_footer\Kernel;
 use Drupal\block_content\Entity\BlockContent;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\paragraphs\Entity\Paragraph;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests the MukurtuFooterBlock plugin and mukurtu_footer_update_40001().
- *
- * @group mukurtu_footer
  */
+#[Group('mukurtu_footer')]
 class FooterBlockTest extends KernelTestBase {
 
   /**

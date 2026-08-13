@@ -13,12 +13,12 @@ use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests ReviewQueueAccessCheck grants access only to stewards and admins.
- *
- * @group mukurtu_workflows
  */
+#[Group('mukurtu_workflows')]
 class ReviewQueueAccessCheckTest extends KernelTestBase {
 
   use OgMembershipCreationTrait;
