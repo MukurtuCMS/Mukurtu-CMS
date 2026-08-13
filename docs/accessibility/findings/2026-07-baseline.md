@@ -64,6 +64,35 @@ now flags `digital-heritage-browse` instead of the digital-heritage-item
 pages — consistent with the content-order-dependency already logged above,
 not a new bug category.
 
+**2026-08-13:** merged a further 80 `origin/main` commits (Leaflet path-fill
+fix, empty-paragraph pruning, browse facet link fix, admin local-task
+visibility, user profile page fixes, and — notably — a round of **lightbox
+keyboard/focus-ring accessibility fixes**, directly relevant to this
+program's own Lightbox component checklist item). This merge is the reason
+the "diff function bodies against both parents" step above exists: git
+reported **zero textual conflicts**, but both branches had independently
+added a differently-named-in-neither-but-same-numbered
+`mukurtu_core_update_40099()` — ours (the Gin accent fix) and main's (grant
+Language Stewards comment permissions) — and git's line-based merge silently
+kept one body under that name and discarded the other, with no conflict
+marker at all. A same-name-different-body collision like this passes both
+"any conflict markers?" and "any duplicate function names?" checks; only
+comparing the actual body content against both parents caught it. Restored
+main's hook under `40099` and moved ours to `40101` (see commit
+`2ebcc9058`). One side effect specific to *this dev site's* database: since
+its schema-version tracking already recorded "hook 40099 has run" (under the
+old, wrong body), a plain `drush updb` silently skipped the real Language
+Stewards hook — worked around with a full reinstall, which doesn't consult
+run-history. Not a defect in the shipped code, purely a local artifact of
+repeated manual conflict resolution on one long-lived dev database.
+
+Scan results otherwise match the prior known state closely: one new
+`region` (best-practice) finding — the new lightbox zoom-hint text
+("Press Enter to zoom...") isn't contained in a landmark — a minor,
+easily-fixed side effect of that positive accessibility improvement, not a
+regression. Everything else, including the automated-checks layer's 27
+findings, matches exactly.
+
 No manual keyboard/screen-reader testing has happened yet — that is the next
 phase, using [../manual-checklist.md](../manual-checklist.md) and the
 [manual findings template](manual-findings-template.md).
@@ -367,6 +396,13 @@ provide evidence — see the capability-testing section of the
     coverage of older items (see the 2026-08-10 note above, which caught the
     PDF `image-alt` finding almost falling out of coverage). Either pin
     discovery to named/stable items or scan every discovered item.
+12. **Fix:** wrap the new lightbox zoom-hint text in a landmark — new finding
+    above (2026-08-13).
+13. **Cross-reference:** the Lightbox component in
+    [../manual-checklist.md](../manual-checklist.md) already has upstream
+    keyboard/focus-ring fixes in progress (see the 2026-08-13 merge note) —
+    re-check that checklist's Lightbox items against current behavior before
+    starting the manual pass there, some may already be resolved.
 
 ## Reproducing these scans
 
