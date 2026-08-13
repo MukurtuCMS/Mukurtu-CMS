@@ -3569,22 +3569,25 @@ function mukurtu_core_update_requirements_alter(array &$requirements): void {
 }
 
 /**
- * Switch the Gin admin theme accent to a WCAG AA compliant teal.
- *
- * Gin's "teal" accent preset renders links at #10857f on white, a 4.48:1
- * contrast ratio - just under the 4.5:1 required by WCAG 2.1 AA (1.4.3).
- * This is member-facing on admin-route pages such as /my-content. Sites
- * still on the default preset are moved to a slightly darker custom teal
- * (#0e7873, 5.3:1); sites with their own accent choice are left alone.
+ * Grant Language Stewards comment permissions so they can view and approve
+ * comments on dictionary words and word lists, matching Protocol Stewards.
  */
 function mukurtu_core_update_40099(): void {
-  $settings = \Drupal::configFactory()->getEditable('gin.settings');
-  if ($settings->get('preset_accent_color') === 'teal' && empty($settings->get('accent_color'))) {
-    $settings
-      ->set('preset_accent_color', 'custom')
-      ->set('accent_color', '#0e7873')
-      ->save();
+  /** @var \Drupal\og\Entity\OgRole|null $role */
+  $role = \Drupal::entityTypeManager()
+    ->getStorage('og_role')
+    ->load('protocol-protocol-language_steward');
+  if (!$role) {
+    return;
   }
+
+  foreach (['administer comments', 'skip comment approval'] as $permission) {
+    if (!$role->hasPermission($permission)) {
+      $role->grantPermission($permission);
+    }
+  }
+
+  $role->save();
 }
 
 /**
@@ -3603,6 +3606,25 @@ function mukurtu_core_update_40100(): void {
         'settings' => [],
         'third_party_settings' => [],
       ])
+      ->save();
+  }
+}
+
+/**
+ * Switch the Gin admin theme accent to a WCAG AA compliant teal.
+ *
+ * Gin's "teal" accent preset renders links at #10857f on white, a 4.48:1
+ * contrast ratio - just under the 4.5:1 required by WCAG 2.1 AA (1.4.3).
+ * This is member-facing on admin-route pages such as /my-content. Sites
+ * still on the default preset are moved to a slightly darker custom teal
+ * (#0e7873, 5.3:1); sites with their own accent choice are left alone.
+ */
+function mukurtu_core_update_40101(): void {
+  $settings = \Drupal::configFactory()->getEditable('gin.settings');
+  if ($settings->get('preset_accent_color') === 'teal' && empty($settings->get('accent_color'))) {
+    $settings
+      ->set('preset_accent_color', 'custom')
+      ->set('accent_color', '#0e7873')
       ->save();
   }
 }
