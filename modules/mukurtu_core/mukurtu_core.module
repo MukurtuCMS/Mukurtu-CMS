@@ -1440,6 +1440,16 @@ function mukurtu_core_library_info_alter(&$libraries, $extension) {
   if ($extension === 'leaflet_markercluster' && isset($libraries['leaflet-markercluster-drupal'])) {
     $libraries['leaflet-markercluster-drupal']['js']['/' . \Drupal::service('extension.list.module')->getPath('mukurtu_core') . '/js/mukurtu-leaflet-markercluster-grouping-fix.js'] = [];
   }
+
+  // Render a drawn circle's 'circle' typed feature (restored by
+  // MukurtuLeafletService) as a true L.circle instead of the faceted
+  // polygon approximation Drupal.Leaflet.prototype.create_geometry would
+  // otherwise build. Appending to leaflet-drupal's own JS list guarantees
+  // this always loads immediately after leaflet.drupal.js, on every page
+  // (view and browse) where that library is already in use.
+  if ($extension === 'leaflet' && isset($libraries['leaflet-drupal'])) {
+    $libraries['leaflet-drupal']['js']['/' . \Drupal::service('extension.list.module')->getPath('mukurtu_core') . '/js/mukurtu-leaflet-circle-display.js'] = [];
+  }
 }
 
 /**
