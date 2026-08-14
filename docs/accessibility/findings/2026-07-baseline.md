@@ -92,6 +92,21 @@ Scan results otherwise match the prior known state closely: one new
 easily-fixed side effect of that positive accessibility improvement, not a
 regression. Everything else, including the automated-checks layer's 27
 findings, matches exactly.
+**Tracked as [#2002](https://github.com/MukurtuCMS/Mukurtu-CMS/issues/2002).**
+
+**2026-08-14:** merged a further 13 `origin/main` commits (Leaflet
+draw-circle map feature, #860). Another hook collision — this time main
+had independently hit and partly self-corrected the *exact same* class of
+problem this program has hit twice before (see their own "Restore previous
+update hook order" commit), which shifted their hook numbering into direct
+collision with this branch's `40101`. Unlike the two prior incidents,
+nothing was silently dropped this time — both bodies survived, just under
+the same function name (`mukurtu_core_update_40101()` declared twice), which
+would have been a PHP fatal "cannot redeclare function" if left as committed.
+Fixed by renumbering the Gin accent hook to `40102` (commit `094a8132b`,
+separate from the merge commit). Re-scan: 39/39, zero new findings — results
+match 2026-08-13 exactly, confirming the draw-circle feature introduced no
+regressions.
 
 No manual keyboard/screen-reader testing has happened yet — that is the next
 phase, using [../manual-checklist.md](../manual-checklist.md) and the
@@ -107,8 +122,10 @@ accent preset in `config/install/gin.settings.yml`, and `/my-content` is an
 admin route rendered in Gin for admin users.
 
 **Fixed:** custom accent `#0e7873` (5.3:1) in the install config, with
-`mukurtu_core_update_40078()` migrating existing sites still on the default
-preset (sites with their own accent choice are untouched). Note: for non-admin
+`mukurtu_core_update_40102()` migrating existing sites still on the default
+preset (sites with their own accent choice are untouched; renumbered several
+times across merges — see "Merge notes" for why — current number is
+`40102`). Note: for non-admin
 members `/my-content` renders in the front-end theme, so regular members never
 saw this — the fix protects admin-theme users and any future admin-route
 exposure.
@@ -119,48 +136,7 @@ The page-title region (the `<h1>`) rendered in a bare `div.region` between the
 header and main landmarks on every page.
 
 **Fixed:** `{{ page.page_title }}` moved inside `<main>` in
-`themes/mukurtu_v4/templates/layout/  }
-}
-
-/**
- * Grant Language Stewards comment permissions so they can view and approve
- * comments on dictionary words and word lists, matching Protocol Stewards.
- */
-function mukurtu_core_update_40099(): void {
-  /** @var \Drupal\og\Entity\OgRole|null $role */
-  $role = \Drupal::entityTypeManager()
-    ->getStorage('og_role')
-    ->load('protocol-protocol-language_steward');
-  if (!$role) {
-    return;
-  }
-
-  foreach (['administer comments', 'skip comment approval'] as $permission) {
-    if (!$role->hasPermission($permission)) {
-      $role->grantPermission($permission);
-    }
-  }
-
-  $role->save();
-}
-
-/**
- * Switch the Gin admin theme accent to a WCAG AA compliant teal.
- *
- * Gin's "teal" accent preset renders links at #10857f on white, a 4.48:1
- * contrast ratio - just under the 4.5:1 required by WCAG 2.1 AA (1.4.3).
- * This is member-facing on admin-route pages such as /my-content. Sites
- * still on the default preset are moved to a slightly darker custom teal
- * (#0e7873, 5.3:1); sites with their own accent choice are left alone.
- */
-function mukurtu_core_update_40100(): void {
-  $settings = \Drupal::configFactory()->getEditable('gin.settings');
-  if ($settings->get('preset_accent_color') === 'teal' && empty($settings->get('accent_color'))) {
-    $settings
-      ->set('preset_accent_color', 'custom')
-      ->set('accent_color', '#0e7873')
-      ->save();
-page.html.twig` (which all page variants
+`themes/mukurtu_v4/templates/layout/page.html.twig` (which all page variants
 extend) and `page--404.html.twig`. Also puts the `<h1>` inside the skip-link
 target.
 
@@ -198,6 +174,7 @@ them:
 [ACR](../acr/mukurtu-acr.yaml) as `partially-supports` (4.1.2). Next step:
 verify against current Drupal core/Gin releases, then file or link upstream
 issues — not Mukurtu code, so no local override until upstream triage says so.
+**Tracked as [#2003](https://github.com/MukurtuCMS/Mukurtu-CMS/issues/2003).**
 
 ## New finding (2026-07-23): unnamed PDF thumbnail in the media carousel
 
@@ -216,7 +193,9 @@ on the Splide carousel's slide elements — lower priority, needs a quick check
 of whether it's a Splide library quirk or Mukurtu markup.
 
 **Not yet fixed** — logged here as a new finding for triage, not remediated in
-this pass.
+this pass. **Tracked as [#1995](https://github.com/MukurtuCMS/Mukurtu-CMS/issues/1995)
+(image-alt) and [#1996](https://github.com/MukurtuCMS/Mukurtu-CMS/issues/1996)
+(carousel aria-allowed-role).**
 
 ## New finding (2026-07-23): second automated-checks layer, first results
 
@@ -264,6 +243,10 @@ First run against the recipe-seeded site surfaced:
   violations anywhere yet.
 
 **Not yet fixed:** the reflow findings above. Logged for triage.
+**Tracked as [#1997](https://github.com/MukurtuCMS/Mukurtu-CMS/issues/1997)
+(reflow), [#1998](https://github.com/MukurtuCMS/Mukurtu-CMS/issues/1998)
+(text-zoom), and [#1999](https://github.com/MukurtuCMS/Mukurtu-CMS/issues/1999)
+(focus-visible).**
 
 ## New finding (2026-07-28): third-party ALTCHA widget accessibility bugs
 
@@ -292,6 +275,7 @@ recipe fix below), and it shows zero violations.
 **Not yet fixed** — logged for triage. Likely an upstream ALTCHA/Drupal
 module issue rather than something to patch locally; same "verify upstream
 before overriding" approach as the admin toolbar findings.
+**Tracked as [#2000](https://github.com/MukurtuCMS/Mukurtu-CMS/issues/2000).**
 
 ## New finding (2026-07-28): recipe fix resolves the `/communities` mystery
 
@@ -319,6 +303,7 @@ announcing the same destination twice, once for the image and once for the
 title text) but has no `tabindex="-1"` pulling it out of the tab order either,
 so a keyboard/screen-reader user can still land on a link the accessibility
 tree says doesn't exist. **Not yet fixed** — logged for triage.
+**Tracked as [#2001](https://github.com/MukurtuCMS/Mukurtu-CMS/issues/2001).**
 
 ## Note (2026-08-10): item-page scan coverage is content-order-dependent
 
@@ -367,7 +352,7 @@ provide evidence — see the capability-testing section of the
    (1.2.x) — transcript rendering, local-video captions (expected gap), remote
    video captions, autoplay.
 3. **Upstream:** verify + file the three toolbar issues; add issue links to the
-   ACR notes.
+   ACR notes. Tracked as [#2003](https://github.com/MukurtuCMS/Mukurtu-CMS/issues/2003).
 4. ~~**Coverage:** extend content so anonymous item pages can be scanned~~ —
    **done 2026-07-23** via `recipes/accessibility_demo_content` and its
    dependents, not a spec change. Still open: check the views-based browse
@@ -376,10 +361,13 @@ provide evidence — see the capability-testing section of the
    browse map view.
 5. **Fix:** the sitewide ~5px reflow overflow at 320px, plus the larger
    content/item-page overflow (up to ~527px) and the `/dictionary` text-zoom
-   overflow — all new findings above, not yet root-caused.
+   overflow — all new findings above, not yet root-caused. Tracked as
+   [#1997](https://github.com/MukurtuCMS/Mukurtu-CMS/issues/1997) and
+   [#1998](https://github.com/MukurtuCMS/Mukurtu-CMS/issues/1998).
 6. **Fix:** PDF thumbnail missing `alt` in the media carousel, and the 4
    focus-visible failures on the dictionary word page — both new findings
-   above.
+   above. Tracked as [#1995](https://github.com/MukurtuCMS/Mukurtu-CMS/issues/1995)
+   and [#1999](https://github.com/MukurtuCMS/Mukurtu-CMS/issues/1999).
 7. **CI:** add the report-only axe job (and the automated-checks job) to
    `.github/workflows/playwright.yml` per the charter's ratchet plan.
 8. **Triage:** fold manual results into the ACR — the remaining `not-evaluated`
@@ -388,21 +376,47 @@ provide evidence — see the capability-testing section of the
    widget into the member-view digital heritage item, dictionary word, and
    collection pages (not their anonymous counterparts, not other member
    pages) — new finding above. Then decide whether to file the two ALTCHA
-   markup bugs upstream or override locally.
+   markup bugs upstream or override locally. Tracked as
+   [#2000](https://github.com/MukurtuCMS/Mukurtu-CMS/issues/2000).
 10. **Fix:** the `aria-hidden-focus` finding on browse/grid cards — new
-    finding above.
+    finding above. Tracked as [#2001](https://github.com/MukurtuCMS/Mukurtu-CMS/issues/2001).
 11. **Test methodology:** stop `discoverItemUrl()` from always picking the
     first item link on a listing page — new content silently displaces
     coverage of older items (see the 2026-08-10 note above, which caught the
     PDF `image-alt` finding almost falling out of coverage). Either pin
     discovery to named/stable items or scan every discovered item.
 12. **Fix:** wrap the new lightbox zoom-hint text in a landmark — new finding
-    above (2026-08-13).
+    above (2026-08-13). Tracked as [#2002](https://github.com/MukurtuCMS/Mukurtu-CMS/issues/2002).
 13. **Cross-reference:** the Lightbox component in
     [../manual-checklist.md](../manual-checklist.md) already has upstream
     keyboard/focus-ring fixes in progress (see the 2026-08-13 merge note) —
     re-check that checklist's Lightbox items against current behavior before
     starting the manual pass there, some may already be resolved.
+
+## Filed as GitHub issues (2026-08-14)
+
+All confirmed, not-yet-fixed defects above are now filed with the `accessibility`
+label, to be tackled independently of this program branch:
+
+| Issue | Finding |
+|---|---|
+| [#1995](https://github.com/MukurtuCMS/Mukurtu-CMS/issues/1995) | PDF thumbnail missing alt text in media carousel |
+| [#1996](https://github.com/MukurtuCMS/Mukurtu-CMS/issues/1996) | Splide carousel slide ARIA role conflict |
+| [#1997](https://github.com/MukurtuCMS/Mukurtu-CMS/issues/1997) | Reflow overflow at 320px width |
+| [#1998](https://github.com/MukurtuCMS/Mukurtu-CMS/issues/1998) | Dictionary browse overflows at 200% text zoom |
+| [#1999](https://github.com/MukurtuCMS/Mukurtu-CMS/issues/1999) | Missing focus indicator, dictionary word page |
+| [#2000](https://github.com/MukurtuCMS/Mukurtu-CMS/issues/2000) | ALTCHA widget: focusable hidden link + contrast |
+| [#2001](https://github.com/MukurtuCMS/Mukurtu-CMS/issues/2001) | Decorative card link focusable despite aria-hidden |
+| [#2002](https://github.com/MukurtuCMS/Mukurtu-CMS/issues/2002) | Lightbox zoom-hint text not in a landmark |
+| [#2003](https://github.com/MukurtuCMS/Mukurtu-CMS/issues/2003) | Admin toolbar: upstream ARIA/naming bugs (verify first) |
+
+**Not filed as issues** (deliberately excluded — not confirmed defects yet):
+the axe "incomplete" contrast queue above (needs a human with a contrast
+tool before it's even confirmed as a defect), and the process/infrastructure
+items in "Remaining actions" (CI wiring, ACR triage, the `discoverItemUrl()`
+test-methodology gap, the manual-pass planning items) — those aren't
+accessibility defects in the product, they're this program's own follow-up
+work.
 
 ## Reproducing these scans
 
