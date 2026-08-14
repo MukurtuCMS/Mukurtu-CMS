@@ -114,6 +114,14 @@ phase, using [../manual-checklist.md](../manual-checklist.md) and the
 
 ## Defects found and fixed this cycle
 
+**2026-08-14:** all three fixes below are also submitted upstream as their own
+small, independent PR —
+[#2004](https://github.com/MukurtuCMS/Mukurtu-CMS/pull/2004), branched fresh
+off `main` (not cherry-picked, since the Gin hook's number has been renumbered
+six times chasing merge collisions on this branch — see "Merge notes" above).
+Once #2004 merges, this branch's copies of these three fixes become identical
+to main's and should stop causing merge friction going forward.
+
 ### 1. Contrast failure on member table sort links — WCAG 1.4.3 (serious)
 
 Table-header sort links on `/my-content` rendered at 4.48:1 (teal `#10857f` on
