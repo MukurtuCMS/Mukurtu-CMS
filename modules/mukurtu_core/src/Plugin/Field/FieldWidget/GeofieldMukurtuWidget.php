@@ -47,6 +47,19 @@ class GeofieldMukurtuWidget extends LeafletDefaultWidget {
   /**
    * {@inheritdoc}
    */
+  public function settingsForm(array $form, FormStateInterface $form_state) {
+    $form = parent::settingsForm($form, $form_state);
+    // Circles drawn in the widget are converted to polygon approximations
+    // before being serialized to GeoJSON (see mukurtu-leaflet-widget.js),
+    // so the contrib module's GeoJSON limitation doesn't apply here.
+    $form['toolbar']['drawCircle']['#disabled'] = FALSE;
+    $form['toolbar']['drawCircle']['#title'] = $this->t('Adds button to draw circle.');
+    return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function formElement(
     FieldItemListInterface $items,
     $delta,

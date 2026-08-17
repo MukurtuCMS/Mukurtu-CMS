@@ -444,7 +444,8 @@ function mukurtu_collection_add_to_x_dialog_ajax(array &$form, FormStateInterfac
 function mukurtu_collection_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
   // Allow viewing of collections. Protocol access checks down the line will
   // catch any forbidden access.
-  if ($operation == 'view') {
+  if ($operation == 'view' && $entity->getEntityTypeId() == 'node' && $entity->bundle() == 'collection') {
     return AccessResult::allowed();
   }
+  return AccessResult::neutral();
 }

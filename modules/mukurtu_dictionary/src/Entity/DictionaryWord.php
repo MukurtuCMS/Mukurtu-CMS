@@ -12,9 +12,11 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
 use Drupal\mukurtu_core\Entity\BundleSpecificCheckCreateAccessInterface;
+use Drupal\mukurtu_core\Entity\PrunesEmptyParagraphsTrait;
 
 class DictionaryWord extends Node implements DictionaryWordInterface, CulturalProtocolControlledInterface, BundleSpecificCheckCreateAccessInterface {
   use CulturalProtocolControlledTrait;
+  use PrunesEmptyParagraphsTrait;
 
   public static function bundleFieldDefinitions(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions)
   {
@@ -439,6 +441,9 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
    */
   public function preSave(EntityStorageInterface $storage) {
     parent::preSave($storage);
+
+    $this->pruneEmptyParagraphs('field_additional_word_entries');
+    $this->pruneEmptyParagraphs('field_sample_sentences');
 
     if ($this->hasField('field_glossary_entry')) {
       if (empty($this->get('field_glossary_entry')->getValue())) {
