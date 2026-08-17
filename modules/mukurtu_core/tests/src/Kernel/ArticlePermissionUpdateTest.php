@@ -6,13 +6,14 @@ namespace Drupal\Tests\mukurtu_core\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\user\Entity\Role;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests mukurtu_update_40002(), which revokes article content permissions.
  *
  * @see mukurtu_update_40002()
- * @group mukurtu_core
  */
+#[Group('mukurtu_core')]
 class ArticlePermissionUpdateTest extends KernelTestBase {
 
   /**

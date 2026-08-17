@@ -7,11 +7,11 @@ namespace Drupal\Tests\mukurtu_digital_heritage\Kernel;
 use Drupal\KernelTests\KernelTestBase;
 
 /**
- * Tests mukurtu_digital_heritage_update_40008(), which moves the digital
+ * Tests mukurtu_digital_heritage_update_40009(), which moves the digital
  * heritage edit form map's default center off Null Island and sets a
  * dedicated zoom for editing a single already-saved point (#1453).
  *
- * @see mukurtu_digital_heritage_update_40008()
+ * @see mukurtu_digital_heritage_update_40009()
  * @group mukurtu_digital_heritage
  */
 class DigitalHeritageMapEditFormDefaultsUpdateTest extends KernelTestBase {
@@ -59,7 +59,7 @@ class DigitalHeritageMapEditFormDefaultsUpdateTest extends KernelTestBase {
       ])
       ->save();
 
-    mukurtu_digital_heritage_update_40008();
+    mukurtu_digital_heritage_update_40009();
 
     $settings = \Drupal::config('core.entity_form_display.node.digital_heritage.default')
       ->get('content.field_coverage.settings.map.map_position');
@@ -74,7 +74,7 @@ class DigitalHeritageMapEditFormDefaultsUpdateTest extends KernelTestBase {
    */
   public function testUpdateIsNoOpWithoutFormDisplay(): void {
     $this->assertTrue(\Drupal::config('core.entity_form_display.node.digital_heritage.default')->isNew());
-    mukurtu_digital_heritage_update_40008();
+    mukurtu_digital_heritage_update_40009();
     $this->assertTrue(\Drupal::config('core.entity_form_display.node.digital_heritage.default')->isNew());
   }
 

@@ -280,7 +280,7 @@ content:
         editMode: '1'
         dragMode: '1'
         removalMode: '1'
-        drawCircle: false
+        drawCircle: true
         drawText: false
         cutPolygon: 0
         rotateMode: 0
@@ -413,18 +413,6 @@ content:
     settings:
       size: 60
       placeholder: ''
-    third_party_settings: {  }
-  field_indigenous_knowledges:
-    type: entity_reference_paragraphs
-    weight: 0
-    region: content
-    settings:
-      title: Paragraph
-      title_plural: Paragraphs
-      edit_mode: open
-      add_mode: dropdown
-      form_display_mode: default
-      default_paragraph_type: ''
     third_party_settings: {  }
   field_keywords:
     type: tagify_entity_reference_autocomplete_widget

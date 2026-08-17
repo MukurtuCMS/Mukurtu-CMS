@@ -4,12 +4,12 @@ namespace Drupal\Tests\mukurtu_local_contexts\Kernel;
 
 use Drupal\mukurtu_local_contexts\LocalContextsProject;
 use Drupal\node\Entity\Node;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests LocalContextsProject::getReferencingNodeIds() and inUse().
- *
- * @group mukurtu_local_contexts
  */
+#[Group('mukurtu_local_contexts')]
 class LegacyProjectReferencingNodeIdsTest extends LocalContextsTestBase {
 
   /**

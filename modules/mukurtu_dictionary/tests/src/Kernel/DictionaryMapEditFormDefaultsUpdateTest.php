@@ -7,11 +7,11 @@ namespace Drupal\Tests\mukurtu_dictionary\Kernel;
 use Drupal\KernelTests\KernelTestBase;
 
 /**
- * Tests mukurtu_dictionary_update_40040(), which moves the dictionary word
+ * Tests mukurtu_dictionary_update_40041(), which moves the dictionary word
  * and word list edit form maps' default center off Null Island and sets a
  * dedicated zoom for editing a single already-saved point (#1453).
  *
- * @see mukurtu_dictionary_update_40040()
+ * @see mukurtu_dictionary_update_40041()
  * @group mukurtu_dictionary
  */
 class DictionaryMapEditFormDefaultsUpdateTest extends KernelTestBase {
@@ -62,7 +62,7 @@ class DictionaryMapEditFormDefaultsUpdateTest extends KernelTestBase {
         ->save();
     }
 
-    mukurtu_dictionary_update_40040();
+    mukurtu_dictionary_update_40041();
 
     foreach (['dictionary_word', 'word_list'] as $bundle) {
       $settings = \Drupal::config("core.entity_form_display.node.$bundle.default")
@@ -98,7 +98,7 @@ class DictionaryMapEditFormDefaultsUpdateTest extends KernelTestBase {
 
     $this->assertTrue(\Drupal::config('core.entity_form_display.node.dictionary_word.default')->isNew());
 
-    mukurtu_dictionary_update_40040();
+    mukurtu_dictionary_update_40041();
 
     $this->assertTrue(\Drupal::config('core.entity_form_display.node.dictionary_word.default')->isNew());
     $this->assertSame(

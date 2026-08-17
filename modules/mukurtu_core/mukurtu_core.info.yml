@@ -33,6 +33,7 @@ dependencies:
   - 'extlink:extlink'
   - 'flag:flag'
   - 'geofield:geofield'
+  - 'leaflet:leaflet'
   - 'media_entity_soundcloud:media_entity_soundcloud'
   - 'original_date:original_date'
   - 'paragraphs:paragraphs'
