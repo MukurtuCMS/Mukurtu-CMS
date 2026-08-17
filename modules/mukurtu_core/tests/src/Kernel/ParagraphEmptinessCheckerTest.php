@@ -28,6 +28,8 @@ class ParagraphEmptinessCheckerTest extends KernelTestBase {
     'text',
     'entity_reference_revisions',
     'paragraphs',
+    'geofield',
+    'leaflet',
     'mukurtu_core',
   ];
 
