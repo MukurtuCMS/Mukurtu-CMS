@@ -2,6 +2,8 @@
 
 namespace Drupal\Tests\mukurtu_local_contexts\Kernel;
 
+use PHPUnit\Framework\Attributes\Group;
+
 /**
  * Tests that removeProject() correctly deletes a project's notices.
  *
@@ -10,9 +12,8 @@ namespace Drupal\Tests\mukurtu_local_contexts\Kernel;
  * column, but removeProject()'s notice-deletion queries were written as if
  * they did, so calling removeProject() on a project with notices would
  * fail with a database error referencing a nonexistent column.
- *
- * @group mukurtu_local_contexts
  */
+#[Group('mukurtu_local_contexts')]
 class RemoveProjectNoticesTest extends LocalContextsTestBase {
 
   const PROJECT_ID = '4d7d7e1a-0b2b-4b1e-9c3a-1f2e3d4c5b6a';
