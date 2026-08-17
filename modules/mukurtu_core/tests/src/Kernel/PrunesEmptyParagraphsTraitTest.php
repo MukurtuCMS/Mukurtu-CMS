@@ -29,6 +29,8 @@ class PrunesEmptyParagraphsTraitTest extends EntityKernelTestBase {
     'text',
     'entity_reference_revisions',
     'paragraphs',
+    'geofield',
+    'leaflet',
     'mukurtu_core',
     'mukurtu_core_paragraph_prune_test',
   ];
