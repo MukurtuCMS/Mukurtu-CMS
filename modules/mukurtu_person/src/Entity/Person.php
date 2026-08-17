@@ -2,15 +2,18 @@
 
 namespace Drupal\mukurtu_person\Entity;
 
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\mukurtu_core\BaseFieldDefinition;
 use Drupal\node\Entity\Node;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\mukurtu_person\PersonInterface;
+use Drupal\mukurtu_core\Entity\PrunesEmptyParagraphsTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
 
 class Person extends Node implements PersonInterface, CulturalProtocolControlledInterface {
   use CulturalProtocolControlledTrait;
+  use PrunesEmptyParagraphsTrait;
 
   public static function bundleFieldDefinitions(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
     $definitions = self::getProtocolFieldDefinitions();
@@ -284,6 +287,14 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
       ->setDisplayConfigurable('form', TRUE);
 
     return $definitions;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function preSave(EntityStorageInterface $storage) {
+    parent::preSave($storage);
+    $this->pruneEmptyParagraphs('field_sections');
   }
 
 }
