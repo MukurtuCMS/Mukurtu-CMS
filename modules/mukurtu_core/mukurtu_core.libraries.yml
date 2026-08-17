@@ -7,7 +7,7 @@ mukurtu-leaflet-widget:
     js/mukurtu-leaflet-widget.js: {}
   dependencies:
     - core/jquery
-    - core/jquery.once
+    - core/once
     - leaflet/leaflet-widget
 
 tagify-override:
