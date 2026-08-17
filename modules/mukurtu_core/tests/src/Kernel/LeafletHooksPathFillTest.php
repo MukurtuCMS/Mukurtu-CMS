@@ -25,6 +25,8 @@ class LeafletHooksPathFillTest extends KernelTestBase {
     'text',
     'filter',
     'node',
+    'geofield',
+    'leaflet',
     'mukurtu_core',
   ];
 
