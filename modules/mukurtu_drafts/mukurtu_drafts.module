@@ -4,6 +4,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Access\AccessResult;
+use Drupal\mukurtu_protocol\CulturalProtocols;
 
 /**
  * Implements hook_entity_access().
@@ -19,11 +20,17 @@ function mukurtu_drafts_entity_access(EntityInterface $entity, $operation, Accou
     return AccessResult::neutral()->addCacheableDependency($entity);
   }
 
-  // Privileged users bypass draft visibility restrictions.
-  if ($account->hasPermission('bypass node access') || $account->hasPermission('administer nodes') || $account->hasPermission('view any unpublished content')) {
+  // Privileged users bypass draft visibility restrictions. "view any
+  // unpublished content" is checked at both site and protocol level --
+  // protocol/language stewards are granted it via their OG role (see
+  // config/install/og.og_role.protocol-protocol-protocol_steward.yml) so
+  // they can review draft content they don't own, not as a site-wide
+  // permission.
+  if ($account->hasPermission('bypass node access') || $account->hasPermission('administer nodes') || CulturalProtocols::hasSiteOrProtocolPermission($entity, 'view any unpublished content', $account)) {
     return AccessResult::neutral()
       ->addCacheableDependency($entity)
-      ->cachePerPermissions();
+      ->cachePerPermissions()
+      ->addCacheTags(["user:{$account->id()}"]);
   }
 
   if (method_exists($entity, 'getOwnerId') && $account->id() == $entity->getOwnerId()) {
@@ -37,7 +44,8 @@ function mukurtu_drafts_entity_access(EntityInterface $entity, $operation, Accou
   if ($operation === 'view') {
     return AccessResult::forbidden()
       ->addCacheableDependency($entity)
-      ->addCacheContexts(['user']);
+      ->addCacheContexts(['user'])
+      ->addCacheTags(["user:{$account->id()}"]);
   }
 
   return AccessResult::neutral()
