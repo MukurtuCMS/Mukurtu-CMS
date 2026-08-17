@@ -9,20 +9,6 @@ use Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager;
  */
 function mukurtu_local_contexts_theme($existing, $type, $theme, $path) {
   return [
-    'local_contexts_project' => [
-      'template' => 'local-contexts-project',
-      'variables' => [
-        'title' => [],
-        'privacy' => [],
-        'project_url' => NULL,
-        'tk_labels' => [],
-        'bc_labels' => [],
-        'notices' => [],
-        'not_available' => FALSE,
-        'archived' => FALSE,
-        'last_synced' => NULL,
-      ],
-    ],
     'local_contexts_label' => [
       'template' => 'local-contexts-item',
       'variables' => [
@@ -61,6 +47,7 @@ function mukurtu_local_contexts_theme($existing, $type, $theme, $path) {
       'template' => 'local-contexts-label-group',
       'variables' => [
         'project_title' => NULL,
+        'project_url' => NULL,
         'items' => [],
         'not_available' => FALSE,
         'archived' => FALSE,

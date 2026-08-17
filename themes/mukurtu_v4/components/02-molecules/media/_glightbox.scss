@@ -4,6 +4,31 @@
 }
 
 .glightbox-clean {
+  // GLightbox sets a fixed width/height (from the init options) directly as
+  // inline styles on .gslide-media and on the cloned .ginlined-content node,
+  // locking every inline slide into that exact box regardless of the media's
+  // own aspect ratio. Override with max- constraints (!important to beat the
+  // inline styles) so content can shrink to its natural proportions instead
+  // of being stretched to fill the box.
+  .gslide-media.gslide-inline {
+    width: auto !important;
+    height: auto !important;
+    max-width: 92vw;
+    max-height: 92vh;
+  }
+
+  .gslide-inline .ginlined-content {
+    width: auto !important;
+    height: auto !important;
+    max-width: 100%;
+    max-height: 100%;
+    // GLightbox's bundled CSS adds 20px of content-box padding here, which
+    // pushes the shrink-to-fit box past the max-width/max-height constraints
+    // above and triggers its own overflow: auto as a spurious scrollbar.
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
   .gslide-inline {
     padding: 1rem;
     box-sizing: border-box;
@@ -13,11 +38,76 @@
     // so the dark overlay backdrop shows through instead.
     background: transparent;
 
+    // Mirrors the zoomed image's own :focus-visible ring (disabled below,
+    // same @supports guard) onto this stationary container instead: the
+    // image pans via transform while zoomed, so a ring drawn on the image
+    // itself gets clipped away by this element's own overflow: hidden the
+    // moment it isn't at its resting position. This padding band always
+    // shows the dark modal backdrop (background: transparent, above)
+    // rather than photo content, so a plain white outline is enough here,
+    // unlike the layered version below which has to stay visible against
+    // arbitrary photo colors.
+    @supports selector(:has(a)) {
+      &:has(.media-asset--zoomed:focus-visible) {
+        outline: 3px solid #fff;
+        outline-offset: -8px;
+      }
+    }
+
     img {
       display: block;
+      width: auto;
+      height: auto;
       max-width: 100%;
-      max-height: 88vh;
+      // The outer .gslide-inline box caps at 92vh (border-box, including its
+      // own 1rem padding above), and .ginlined-content adds another 20px of
+      // padding (top+bottom) inside that via GLightbox's bundled CSS. A flat
+      // 88vh cap here doesn't account for that ~72px of combined padding, so
+      // on most viewport heights the image renders taller than the actual
+      // space left for it and overflow: hidden clips the bottom edge.
+      max-height: calc(92vh - 2rem - 40px);
       margin: 0 auto;
+    }
+
+    // Click-to-zoom (see setupImageZoom() in media-asset-glightbox.js).
+    // Scoped to .media--image so audio's fallback thumbnail image, which
+    // shares this same img rule above, never becomes zoomable.
+    .media--image img {
+      cursor: zoom-in;
+
+      &:focus-visible {
+        // Layered light+dark outline stays visible against any photo
+        // background, unlike a single fixed color (see .gprev/.gnext/.gclose
+        // above, which can rely on a known button background color instead).
+        outline: 3px solid #fff;
+        outline-offset: 2px;
+        box-shadow: 0 0 0 5px #000;
+      }
+
+      &.media-asset--zoomed {
+        cursor: zoom-out;
+        max-width: none;
+        max-height: none;
+        width: auto;
+        height: auto;
+
+        // Suppress the ring above in favor of .gslide-inline's :has() rule
+        // (see above), which stays visible regardless of pan position. Only
+        // where :has() is actually supported - otherwise this ring, however
+        // imperfect once panned, is the only focus indicator available.
+        @supports selector(:has(a)) {
+          &:focus-visible {
+            outline: none;
+            box-shadow: none;
+          }
+        }
+      }
+
+      // Hover-to-pan has no touch equivalent here, so zoom is disabled at
+      // the same breakpoint the JS uses (setupImageZoom's MOBILE_BREAKPOINT).
+      @media (max-width: 768px) {
+        cursor: default;
+      }
     }
 
     audio {
