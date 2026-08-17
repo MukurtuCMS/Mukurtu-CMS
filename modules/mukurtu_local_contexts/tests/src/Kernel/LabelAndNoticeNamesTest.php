@@ -2,6 +2,8 @@
 
 namespace Drupal\Tests\mukurtu_local_contexts\Kernel;
 
+use PHPUnit\Framework\Attributes\Group;
+
 /**
  * Tests LocalContextsSupportedProjectManager::getLabelAndNoticeNames().
  *
@@ -9,9 +11,8 @@ namespace Drupal\Tests\mukurtu_local_contexts\Kernel;
  * notice (e.g. "TK Attribution"), each as its own project-scoped compound
  * key. Filters/facets rely on this lookup to merge those rows into a single
  * option/indexed value by display name.
- *
- * @group mukurtu_local_contexts
  */
+#[Group('mukurtu_local_contexts')]
 class LabelAndNoticeNamesTest extends LocalContextsTestBase {
 
   const PROJECT_A = '4d7d7e1a-0b2b-4b1e-9c3a-1f2e3d4c5b6a';
