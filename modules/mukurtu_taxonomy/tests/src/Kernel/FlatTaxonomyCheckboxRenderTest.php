@@ -8,6 +8,7 @@ use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormState;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests that the flat_taxonomy checkbox guard reaches the rendered HTML.
@@ -25,8 +26,8 @@ use Drupal\KernelTests\KernelTestBase;
  *
  * @see mukurtu_taxonomy_form_taxonomy_vocabulary_form_alter()
  * @see mukurtu_taxonomy_lock_flat_taxonomy_checkbox()
- * @group mukurtu_taxonomy
  */
+#[Group('mukurtu_taxonomy')]
 class FlatTaxonomyCheckboxRenderTest extends KernelTestBase {
 
   /**

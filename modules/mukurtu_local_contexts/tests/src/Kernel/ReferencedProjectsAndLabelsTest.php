@@ -3,15 +3,15 @@
 namespace Drupal\Tests\mukurtu_local_contexts\Kernel;
 
 use Drupal\node\Entity\Node;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests LocalContextsSupportedProjectManager::getReferencedProjectIds() and
  * getReferencedLabelAndNoticeKeys(), which drive both the LC Project/Label
  * exposed filter dropdowns (only offer options actually used by content)
  * and the Project filter/facet's label-inheritance matching.
- *
- * @group mukurtu_local_contexts
  */
+#[Group('mukurtu_local_contexts')]
 class ReferencedProjectsAndLabelsTest extends LocalContextsTestBase {
 
   /**
