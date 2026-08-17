@@ -202,8 +202,7 @@
   }
 }
 
-.local-contexts-label-group,
-.local-contexts-project {
+.local-contexts-label-group {
   .project-title {
     font-size: var(--font-size-s);
     font-weight: var(--text-bold);
@@ -215,7 +214,6 @@
   }
 }
 
-.local-contexts-project .local-contexts-projects-container,
 .local-contexts-label-group .local-contexts-label-group-items {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(5rem, 1fr));
@@ -230,7 +228,6 @@
   }
 }
 
-.local-contexts-project,
 .local-contexts-label-group {
   background-color: var(--brand-light-accent);
   padding-inline: var(--v-space-4xxs);
