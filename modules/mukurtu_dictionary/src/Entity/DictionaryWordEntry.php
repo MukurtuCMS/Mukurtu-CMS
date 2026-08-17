@@ -2,12 +2,16 @@
 
 namespace Drupal\mukurtu_dictionary\Entity;
 
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\mukurtu_core\BaseFieldDefinition;
+use Drupal\mukurtu_core\Entity\PrunesEmptyParagraphsTrait;
 use Drupal\paragraphs\Entity\Paragraph;
 use Drupal\mukurtu_dictionary\Entity\DictionaryWordEntryInterface;
 
 class DictionaryWordEntry extends Paragraph implements DictionaryWordEntryInterface {
+  use PrunesEmptyParagraphsTrait;
+
   public static function bundleFieldDefinitions(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
     $definitions = [];
 
@@ -193,4 +197,13 @@ class DictionaryWordEntry extends Paragraph implements DictionaryWordEntryInterf
 
       return $definitions;
   }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function preSave(EntityStorageInterface $storage) {
+    parent::preSave($storage);
+    $this->pruneEmptyParagraphs('field_sample_sentences');
+  }
+
 }
