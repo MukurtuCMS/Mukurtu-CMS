@@ -33,6 +33,8 @@ class DefaultLandingPageTest extends KernelTestBase {
     'path',
     'path_alias',
     'menu_ui',
+    'geofield',
+    'leaflet',
     'mukurtu_core',
     'mukurtu_landing_page',
   ];
