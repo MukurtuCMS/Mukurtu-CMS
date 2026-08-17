@@ -68,6 +68,9 @@ field.widget.settings.geofield_mukurtu:
             zoomFiner:
               type: integer
               label: 'Zoom finer'
+            singlePointZoom:
+              type: integer
+              label: 'Single point zoom'
         scroll_zoom_enabled:
           type: integer
           label: 'Scroll zoom enabled'

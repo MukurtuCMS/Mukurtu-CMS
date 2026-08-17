@@ -19,3 +19,29 @@
   outline: var(--focus-color) solid 2px;
   outline-offset: 2px;
 }
+
+/* The geocoder search input sets its own text color inline but no
+ * background, so it goes dark-on-dark under a browser/OS dark theme. This
+ * is attached module-wide (not via the mukurtu_v4 theme) because the
+ * geocoder only ever renders on node edit forms, which use the Gin admin
+ * theme, not mukurtu_v4 - so a mukurtu_v4 CSS variable wouldn't be defined
+ * here. #f8f7f7 matches mukurtu_v4's --brand-light-accent token.
+ */
+.leaflet-control-geocoder-container input {
+  background-color: #f8f7f7;
+}
+
+/* The address results are longer now that they include state/province, so
+ * the dropdown (tagged in JS to avoid affecting other autocomplete fields)
+ * needs more room than jQuery UI's default of matching the narrow search
+ * input's width. jQuery UI recalculates and re-sets its own inline "left"
+ * on every open, so !important is needed to keep it anchored to the right
+ * instead of overflowing past the edge of the map/viewport.
+ */
+.mukurtu-geocoder-autocomplete-menu {
+  box-sizing: border-box;
+  min-width: min(22em, calc(100vw - 2em));
+  max-width: min(34em, calc(100vw - 2em));
+  left: auto !important;
+  right: 0.5em;
+}

@@ -1,4 +1,4 @@
-(function ($, Drupal) {
+(function ($, Drupal, once) {
 
   /**
    * Save location description.
@@ -28,6 +28,29 @@
         $(this).attr('aria-label', $(this).attr('title'));
       }
     });
+  };
+
+  /**
+   * GeoJSON has no circle geometry, so a circle layer serializes itself as
+   * a polygon approximating its shape, storing its true center/radius as
+   * custom Feature properties so it can be rebuilt as an editable circle
+   * the next time the widget loads (see add_layer_listeners below).
+   */
+  Drupal.mukurtuPatchCircleToGeoJSON = function (circleLayer) {
+    circleLayer.toGeoJSON = function () {
+      const polygon = L.PM.Utils.circleToPolygon(this, 128);
+      const geoJson = polygon.toGeoJSON();
+      const center = this.getLatLng();
+      geoJson.properties = Object.assign(
+        {},
+        this.feature && this.feature.properties,
+        {
+          circle_center: [center.lat, center.lng],
+          circle_radius: this.getRadius()
+        }
+      );
+      return geoJson;
+    };
   };
 
   /**
@@ -91,6 +114,11 @@
 
       map.on('pm:create', function (event) {
         let layer = event.layer;
+        if (event.shape === 'Circle') {
+          // Keep the drawn layer a true, editable circle; only its
+          // serialized form becomes a polygon approximation.
+          Drupal.mukurtuPatchCircleToGeoJSON(layer);
+        }
         this.drawnItems.addLayer(layer);
         layer.pm.enable({ allowSelfIntersection: false });
         this.update_text();
@@ -139,7 +167,151 @@
           .attr('title', Drupal.t('Close popup'));
       }, this);
 
+      // update_leaflet_widget_map() just ran above, but if this map starts
+      // out inside a hidden tab/details pane (e.g. a field_group "Additional
+      // Fields" tab that isn't active yet), its container is still 0x0, so
+      // the fitBounds()/singlePointZoom correction it just computed is
+      // meaningless and gets thrown away. Contrib's own visibility handling
+      // (leaflet.drupal.js) only calls invalidateSize() the first time the
+      // container becomes visible - it never redoes the fit/zoom - so once
+      // the tab is revealed the map is stuck showing the empty-map default
+      // instead of the saved point. Redo our fit/zoom once the container
+      // actually has real dimensions.
+      if ('IntersectionObserver' in window) {
+        const self = this;
+        const visibilityObserver = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.intersectionRatio > 0) {
+              map.invalidateSize();
+              self.update_leaflet_widget_map();
+              visibilityObserver.disconnect();
+            }
+          });
+        });
+        visibilityObserver.observe(map.getContainer());
+      }
+
     }
+  };
+
+  /**
+   * Update the Leaflet Widget Map from value element.
+   */
+  Drupal.Leaflet_Widget.prototype.update_leaflet_widget_map = function () {
+    const self = this;
+    const value = this.get_json_value();
+
+    /* Copied from leaflet.widget.js begin: */
+
+    // Always clear the layers in drawnItems on map updates.
+    this.drawnItems.clearLayers();
+
+    // Apply styles to pm drawn items.
+    this.map.pm.setGlobalOptions({
+      pathOptions: this.widgetsettings.path_style
+    });
+
+    // Nothing to do if we don't have any data.
+    if (value.length === 0) {
+      // If no layer available, and the Map Center is not forced, locate the user position.
+      if (this.map_settings.locate && this.map_settings.locate.automatic && !this.map_settings.map_position_force) {
+        this.map.locate({setView: true, maxZoom: this.map_settings.zoom});
+      }
+      return;
+    }
+
+    try {
+      const layerOpts = {
+        style: function (feature) {
+          return self.widgetsettings.path_style;
+        }
+      };
+
+      // Use circleMarkers if specified.
+      if (this.widgetsettings.toolbarSettings.marker === "circleMarker") {
+        layerOpts.pointToLayer = function (feature, latlng) {
+          return L.circleMarker(latlng);
+        };
+      }
+
+      const obj = L.geoJson(JSON.parse(value), layerOpts);
+
+      // See https://github.com/Leaflet/Leaflet.draw/issues/398
+      obj.eachLayer(function(layer) {
+        if (typeof layer.getLayers === "function") {
+          const subLayers = layer.getLayers();
+          for (let i = 0; i < subLayers.length; i++) {
+            this.drawnItems.addLayer(subLayers[i]);
+            this.add_layer_listeners(subLayers[i]);
+          }
+        }
+        else {
+          this.drawnItems.addLayer(layer);
+          this.add_layer_listeners(layer);
+        }
+      }, this);
+
+      // Pan the map to the feature
+      if (this.widgetsettings.autoCenter) {
+        let start_zoom;
+        let start_center;
+
+        if (obj.getBounds !== undefined && typeof obj.getBounds === 'function') {
+          // For objects that have defined bounds or a way to get them
+          const bounds = obj.getBounds();
+          this.map.fitBounds(bounds);
+          start_center = bounds.getCenter();
+
+          // In case of Map Bounds collapsed into a Point or Map Zoom Forced,
+          // use the custom Map Start Zoom (if set).
+          if (this.widgetsettings.map_position.zoom &&
+            (bounds.getSouthWest().distanceTo(bounds.getNorthEast()) === 0 || this.widgetsettings.map_position.force)) {
+            /* Copied from leaflet.widget.js end. */
+
+            /* Mukurtu additions begin: */
+
+            // A single saved point should zoom in to a usable level, not
+            // fall back to the empty-map default (deliberately zoomed out
+            // to avoid world-map tiling on add forms - see #1453). An
+            // explicit site-level "Force Map Center & Zoom" still wins,
+            // matching contrib's documented behavior for that flag.
+            start_zoom = (!this.widgetsettings.map_position.force && this.widgetsettings.map_position.singlePointZoom)
+              ? this.widgetsettings.map_position.singlePointZoom
+              : this.widgetsettings.map_position.zoom;
+
+            /* Mukurtu additions end. */
+
+            /* Copied from leaflet.widget.js begin: */
+            this.map.setZoom(start_zoom);
+          }
+          else {
+            // Update the map start zoom and center, for correct working of Map Reset control.
+            start_zoom = this.map.getBoundsZoom(bounds);
+          }
+        } else if (obj.getLatLng !== undefined && typeof obj.getLatLng === 'function') {
+          this.map.panTo(obj.getLatLng());
+          // Update the map start center, for correct working of Map Reset control.
+          start_center = this.map.getCenter();
+          start_zoom = this.map.getZoom();
+        }
+
+        // In case of map initial position not forced, and zoomFiner not null/neutral,
+        // adapt the Map Zoom and the Start Zoom accordingly.
+        if (!this.widgetsettings.map_position.force &&
+            this.widgetsettings.map_position.hasOwnProperty('zoomFiner') &&
+            parseInt(this.widgetsettings.map_position.zoomFiner) !== 0) {
+          start_zoom += parseFloat(this.widgetsettings.map_position.zoomFiner);
+          this.map.setView(start_center, start_zoom);
+        }
+
+        // Reset the StartZoom and StartCenter.
+        this.reset_start_zoom_and_center(this.mapid, start_zoom, start_center);
+      }
+    } catch (error) {
+      if (window.console) console.error(error.message);
+    }
+
+    /* Copied from leaflet.widget.js end. */
   };
 
   /**
@@ -147,6 +319,26 @@
    */
   Drupal.Leaflet_Widget.prototype.add_layer_listeners = function (layer) {
     /* Mukurtu additions begin: */
+
+    // A polygon loaded from storage that carries circle_center/circle_radius
+    // properties was originally drawn as a circle; rebuild it as one so it's
+    // editable (drag center, resize radius) rather than a vertex outline.
+    if (layer.feature && layer.feature.properties && layer.feature.properties.circle_center) {
+      const props = layer.feature.properties;
+      // layer.options carries the widget's generic path style, which
+      // includes a radius meant only for circleMarker point styling
+      // (see LeafletDefaultWidget's default 'path' setting). Spread it
+      // first so the real circle_radius always wins.
+      const circleLayer = L.circle(props.circle_center, {
+        ...layer.options,
+        radius: props.circle_radius
+      });
+      circleLayer.feature = layer.feature;
+      Drupal.mukurtuPatchCircleToGeoJSON(circleLayer);
+      this.drawnItems.removeLayer(layer);
+      this.drawnItems.addLayer(circleLayer);
+      layer = circleLayer;
+    }
 
     // Mukurtu Location Description.
     const popupId = "location-popup-" + layer._leaflet_id;
@@ -172,6 +364,15 @@
         $(layer._icon).trigger('focus');
       }
     }, this);
+
+    // Disable fill for open polylines, same rationale as the display-side
+    // fix in LeafletHooks.php (issue #732): lines aren't areas, only
+    // polygons should keep the configured fill. Circles are out of scope
+    // (issue #849). L.Polygon extends L.Polyline, so it must be excluded
+    // explicitly.
+    if (!(layer instanceof L.Polygon) && layer instanceof L.Polyline) {
+      layer.setStyle({ fill: false });
+    }
 
     /* Mukurtu additions end. */
 
@@ -209,4 +410,33 @@
     /* Copied from leaflet.widget.js end. */
   };
 
-})(jQuery, Drupal);
+  /**
+   * Stop the geocoder search input's own clicks/drags from reaching the map.
+   *
+   * The contrib geocoder control never calls Leaflet's own
+   * disableClickPropagation()/disableScrollPropagation() (unlike every
+   * built-in Leaflet control), so double-clicking the input zooms the map
+   * and dragging to select text pans it.
+   */
+  Drupal.behaviors.mukurtuLeafletGeocoderFix = {
+    attach: function (context) {
+      once('mukurtu-leaflet-geocoder-fix', '.leaflet-control-geocoder-container', context).forEach(function (container) {
+        L.DomEvent.disableClickPropagation(container);
+        const input = container.querySelector('input');
+        if (input) {
+          L.DomEvent.disableScrollPropagation(input);
+
+          // Tag this input's own autocomplete dropdown so it can be widened
+          // in CSS without affecting the many other jQuery UI autocomplete
+          // fields (Place type, Location, etc.) sharing the same widget.
+          const $input = $(input);
+          const autocomplete = $input.autocomplete && $input.autocomplete('instance');
+          if (autocomplete && autocomplete.menu) {
+            autocomplete.menu.element.addClass('mukurtu-geocoder-autocomplete-menu');
+          }
+        }
+      });
+    }
+  };
+
+})(jQuery, Drupal, once);
