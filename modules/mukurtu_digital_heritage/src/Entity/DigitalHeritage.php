@@ -3,17 +3,20 @@
 namespace Drupal\mukurtu_digital_heritage\Entity;
 
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\mukurtu_core\BaseFieldDefinition;
 use Drupal\node\Entity\Node;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\mukurtu_digital_heritage\DigitalHeritageInterface;
+use Drupal\mukurtu_core\Entity\PrunesEmptyParagraphsTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
 use Drupal\mukurtu_core\Entity\BundleSpecificCheckCreateAccessInterface;
 
 class DigitalHeritage extends Node implements DigitalHeritageInterface, CulturalProtocolControlledInterface, BundleSpecificCheckCreateAccessInterface {
   use CulturalProtocolControlledTrait;
+  use PrunesEmptyParagraphsTrait;
 
   public static function bundleFieldDefinitions(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
     $definitions = self::getProtocolFieldDefinitions();
@@ -567,6 +570,14 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
     $categories = $query->condition('vid', 'category')->accessCheck(TRUE)->execute();
     return AccessResult::allowedIf(!empty($categories))
       ->addCacheTags(['taxonomy_term_list:category']);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function preSave(EntityStorageInterface $storage) {
+    parent::preSave($storage);
+    $this->pruneEmptyParagraphs('field_knowledge_keepers');
   }
 
 }

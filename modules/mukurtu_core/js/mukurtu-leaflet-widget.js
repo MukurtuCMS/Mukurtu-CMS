@@ -9,6 +9,29 @@
   };
 
   /**
+   * GeoJSON has no circle geometry, so a circle layer serializes itself as
+   * a polygon approximating its shape, storing its true center/radius as
+   * custom Feature properties so it can be rebuilt as an editable circle
+   * the next time the widget loads (see add_layer_listeners below).
+   */
+  Drupal.mukurtuPatchCircleToGeoJSON = function (circleLayer) {
+    circleLayer.toGeoJSON = function () {
+      const polygon = L.PM.Utils.circleToPolygon(this, 128);
+      const geoJson = polygon.toGeoJSON();
+      const center = this.getLatLng();
+      geoJson.properties = Object.assign(
+        {},
+        this.feature && this.feature.properties,
+        {
+          circle_center: [center.lat, center.lng],
+          circle_radius: this.getRadius()
+        }
+      );
+      return geoJson;
+    };
+  };
+
+  /**
    * Set the leaflet map object.
    */
   Drupal.Leaflet_Widget.prototype.set_leaflet_widget_map = function (map) {
@@ -40,6 +63,11 @@
 
       map.on('pm:create', function (event) {
         let layer = event.layer;
+        if (event.shape === 'Circle') {
+          // Keep the drawn layer a true, editable circle; only its
+          // serialized form becomes a polygon approximation.
+          Drupal.mukurtuPatchCircleToGeoJSON(layer);
+        }
         this.drawnItems.addLayer(layer);
         layer.pm.enable({ allowSelfIntersection: false });
         this.update_text();
@@ -88,6 +116,26 @@
   Drupal.Leaflet_Widget.prototype.add_layer_listeners = function (layer) {
     /* Mukurtu additions begin: */
 
+    // A polygon loaded from storage that carries circle_center/circle_radius
+    // properties was originally drawn as a circle; rebuild it as one so it's
+    // editable (drag center, resize radius) rather than a vertex outline.
+    if (layer.feature && layer.feature.properties && layer.feature.properties.circle_center) {
+      const props = layer.feature.properties;
+      // layer.options carries the widget's generic path style, which
+      // includes a radius meant only for circleMarker point styling
+      // (see LeafletDefaultWidget's default 'path' setting). Spread it
+      // first so the real circle_radius always wins.
+      const circleLayer = L.circle(props.circle_center, {
+        ...layer.options,
+        radius: props.circle_radius
+      });
+      circleLayer.feature = layer.feature;
+      Drupal.mukurtuPatchCircleToGeoJSON(circleLayer);
+      this.drawnItems.removeLayer(layer);
+      this.drawnItems.addLayer(circleLayer);
+      layer = circleLayer;
+    }
+
     // Mukurtu Location Description.
     const containerId = $(layer._map._container).attr('id');
     const popupId = "location-popup-" + layer._leaflet_id;
@@ -95,6 +143,15 @@
     layer.on('popupclose', function (event) {
       this.update_text();
     }, this);
+
+    // Disable fill for open polylines, same rationale as the display-side
+    // fix in LeafletHooks.php (issue #732): lines aren't areas, only
+    // polygons should keep the configured fill. Circles are out of scope
+    // (issue #849). L.Polygon extends L.Polyline, so it must be excluded
+    // explicitly.
+    if (!(layer instanceof L.Polygon) && layer instanceof L.Polyline) {
+      layer.setStyle({ fill: false });
+    }
 
     /* Mukurtu additions end. */
 
