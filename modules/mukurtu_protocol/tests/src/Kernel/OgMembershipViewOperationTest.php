@@ -8,14 +8,15 @@ use Drupal\mukurtu_protocol\Entity\Community;
 use Drupal\mukurtu_protocol\Entity\Protocol;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests that the redundant "View" operation is removed from OG membership
  * rows on the community and protocol member management pages.
  *
  * @see \Drupal\mukurtu_protocol\Hook\MukurtuProtocolHooks::entityOperationAlterOgMembership()
- * @group mukurtu_protocol
  */
+#[Group('mukurtu_protocol')]
 class OgMembershipViewOperationTest extends ProtocolAwareEntityTestBase {
 
   /**

@@ -17,14 +17,15 @@ use Drupal\media\OEmbed\ResourceFetcherInterface;
 use Drupal\mukurtu_media\OEmbed\MukurtuResourceFetcher;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Psr7\Response;
+use PHPUnit\Framework\Attributes\Group;
 use Psr\Log\LoggerInterface;
 
 /**
  * Tests the YouTube privacy rewrite and Data API fallback (issue #565).
  *
  * @see https://github.com/MukurtuCMS/Mukurtu-CMS/issues/565
- * @group mukurtu_media
  */
+#[Group('mukurtu_media')]
 class MukurtuResourceFetcherTest extends UnitTestCase {
 
   /**
