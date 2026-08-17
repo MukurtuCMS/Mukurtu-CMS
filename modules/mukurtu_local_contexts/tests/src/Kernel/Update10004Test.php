@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_local_contexts\Kernel;
 
+use PHPUnit\Framework\Attributes\Group;
+
 /**
  * Tests mukurtu_local_contexts_update_10004().
- *
- * @group mukurtu_local_contexts
  */
+#[Group('mukurtu_local_contexts')]
 class Update10004Test extends LocalContextsTestBase {
 
   /**

@@ -6,12 +6,12 @@ use Drupal\Core\Form\FormState;
 use Drupal\mukurtu_local_contexts\Form\DecommissionLegacyProjectsConfirmForm;
 use Drupal\mukurtu_local_contexts\Form\ManageSupportedProjectsSite;
 use Drupal\node\Entity\Node;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests the legacy project decommission validation and confirm flow.
- *
- * @group mukurtu_local_contexts
  */
+#[Group('mukurtu_local_contexts')]
 class DecommissionLegacyProjectsTest extends LocalContextsTestBase {
 
   /**

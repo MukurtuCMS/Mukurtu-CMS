@@ -3,13 +3,13 @@
 namespace Drupal\Tests\mukurtu_local_contexts\Kernel;
 
 use Drupal\node\Entity\Node;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests that legacy (v3-migrated) TK Labels projects/labels are excluded
  * from new selections but preserved on content that already references them.
- *
- * @group mukurtu_local_contexts
  */
+#[Group('mukurtu_local_contexts')]
 class LegacyProjectExclusionTest extends LocalContextsTestBase {
 
   /**
