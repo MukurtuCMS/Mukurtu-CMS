@@ -85,7 +85,7 @@ class CsvExportFieldTestBase extends ProtocolAwareEntityTestBase {
       ]
     ];
 
-    $this->fieldExporter = new CsvEntityFieldExportEventSubscriber(\Drupal::messenger(), \Drupal::entityTypeManager());
+    $this->fieldExporter = new CsvEntityFieldExportEventSubscriber(\Drupal::messenger(), \Drupal::entityTypeManager(), \Drupal::service('mukurtu_core.paragraph_emptiness_checker'));
   }
 
 }
