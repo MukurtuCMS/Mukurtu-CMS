@@ -192,10 +192,11 @@ content:
           minZoom: '1'
           maxZoom: '18'
           zoomFiner: '0'
+          singlePointZoom: '12'
           force: 0
           center:
-            lat: '0'
-            lon: '0'
+            lat: '20'
+            lon: '10'
           zoomControlPosition: topleft
       toolbar:
         position: topright
@@ -206,7 +207,7 @@ content:
         editMode: '1'
         dragMode: '1'
         removalMode: '1'
-        drawCircle: false
+        drawCircle: true
         drawText: false
         cutPolygon: 0
         rotateMode: 0

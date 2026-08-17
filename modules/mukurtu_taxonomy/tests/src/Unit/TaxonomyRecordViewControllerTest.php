@@ -12,11 +12,17 @@ use Drupal\mukurtu_taxonomy\Controller\TaxonomyRecordViewController;
 use Drupal\node\NodeInterface;
 use Drupal\taxonomy\TermInterface;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversMethod;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
- * @coversDefaultClass \Drupal\mukurtu_taxonomy\Controller\TaxonomyRecordViewController
- * @group mukurtu_taxonomy
+ * Tests TaxonomyRecordViewController.
  */
+#[CoversMethod(TaxonomyRecordViewController::class, 'getSingularVocabularyLabel')]
+#[CoversMethod(TaxonomyRecordViewController::class, 'title')]
+#[CoversMethod(TaxonomyRecordViewController::class, 'getSingleRecord')]
+#[Group('mukurtu_taxonomy')]
 class TaxonomyRecordViewControllerTest extends UnitTestCase {
 
   /**
@@ -102,7 +108,7 @@ class TaxonomyRecordViewControllerTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::VOCABULARY_LABEL_MAP
+   * Tests VOCABULARY_LABEL_MAP contains all built-in vocabularies.
    */
   public function testVocabularyLabelMapCoversAllBuiltInVocabs(): void {
     $expected = [
@@ -118,9 +124,9 @@ class TaxonomyRecordViewControllerTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::getSingularVocabularyLabel
-   * @dataProvider mappedVocabularyProvider
+   * Tests getSingularVocabularyLabel() for mapped vocabularies.
    */
+  #[DataProvider('mappedVocabularyProvider')]
   public function testGetSingularVocabularyLabelMappedValues(string $vocab, string $expected): void {
     $controller = $this->getController();
     $this->assertSame($expected, $this->callGetLabel($controller, $vocab));
@@ -136,7 +142,7 @@ class TaxonomyRecordViewControllerTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::getSingularVocabularyLabel
+   * Tests getSingularVocabularyLabel() falls back to the vocabulary label.
    */
   public function testGetSingularVocabularyLabelUnmappedFallsBackToVocabLabel(): void {
     $vocabulary = $this->createMock(\Drupal\taxonomy\VocabularyInterface::class);
@@ -155,7 +161,7 @@ class TaxonomyRecordViewControllerTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::getSingularVocabularyLabel
+   * Tests getSingularVocabularyLabel() falls back to the machine name.
    */
   public function testGetSingularVocabularyLabelMissingVocabFallsBackToMachineName(): void {
     $storage = $this->createMock(\Drupal\Core\Entity\EntityStorageInterface::class);
@@ -171,7 +177,7 @@ class TaxonomyRecordViewControllerTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::title
+   * Tests title() returns the "Vocab: Term" format.
    */
   public function testTitleReturnsVocabColonTermFormat(): void {
     $term = $this->createMock(TermInterface::class);
@@ -183,7 +189,7 @@ class TaxonomyRecordViewControllerTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::getSingleRecord
+   * Tests getSingleRecord() returns null when the vocabulary isn't enabled.
    */
   public function testGetSingleRecordReturnsNullWhenVocabularyNotEnabled(): void {
     $term = $this->createMock(TermInterface::class);
@@ -198,7 +204,7 @@ class TaxonomyRecordViewControllerTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::getSingleRecord
+   * Tests getSingleRecord() returns null when there are no matches.
    */
   public function testGetSingleRecordReturnsNullWhenNoMatches(): void {
     $term = $this->createMock(TermInterface::class);
@@ -214,7 +220,7 @@ class TaxonomyRecordViewControllerTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::getSingleRecord
+   * Tests getSingleRecord() returns null when there are multiple matches.
    */
   public function testGetSingleRecordReturnsNullWhenMultipleMatches(): void {
     $term = $this->createMock(TermInterface::class);
@@ -230,7 +236,7 @@ class TaxonomyRecordViewControllerTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::getSingleRecord
+   * Tests getSingleRecord() returns the place node on a single accessible match.
    */
   public function testGetSingleRecordReturnsThePlaceNodeOnSingleAccessibleMatch(): void {
     $term = $this->createMock(TermInterface::class);
@@ -250,7 +256,7 @@ class TaxonomyRecordViewControllerTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::getSingleRecord
+   * Tests getSingleRecord() returns null when the single match is inaccessible.
    */
   public function testGetSingleRecordReturnsNullWhenSingleMatchIsInaccessible(): void {
     $term = $this->createMock(TermInterface::class);
@@ -270,7 +276,7 @@ class TaxonomyRecordViewControllerTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::getSingleRecord
+   * Tests getSingleRecord() still works for the person bundle.
    */
   public function testGetSingleRecordStillWorksForPersonBundle(): void {
     $term = $this->createMock(TermInterface::class);

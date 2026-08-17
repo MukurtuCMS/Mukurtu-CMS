@@ -3,6 +3,7 @@
 namespace Drupal\Tests\mukurtu_local_contexts\Kernel;
 
 use Drupal\mukurtu_local_contexts\LocalContextsProject;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests that a Project resolves to the compound keys of its labels/notices.
@@ -11,9 +12,8 @@ use Drupal\mukurtu_local_contexts\LocalContextsProject;
  * project's labels/notices, so filters/facets built on
  * field_local_contexts_labels_and_notices need to match those compound keys
  * even when the label/notice itself was never individually applied.
- *
- * @group mukurtu_local_contexts
  */
+#[Group('mukurtu_local_contexts')]
 class EffectiveLabelsTest extends LocalContextsTestBase {
 
   /**
