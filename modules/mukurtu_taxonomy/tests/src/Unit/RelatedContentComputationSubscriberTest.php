@@ -13,11 +13,14 @@ use Drupal\mukurtu_taxonomy\EventSubscriber\RelatedContentComputationSubscriber;
 use Drupal\node\NodeInterface;
 use Drupal\taxonomy\TermInterface;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversMethod;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
- * @coversDefaultClass \Drupal\mukurtu_taxonomy\EventSubscriber\RelatedContentComputationSubscriber
- * @group mukurtu_taxonomy
+ * Tests RelatedContentComputationSubscriber::onRelatedContentProvenance().
  */
+#[CoversMethod(RelatedContentComputationSubscriber::class, 'onRelatedContentProvenance')]
+#[Group('mukurtu_taxonomy')]
 class RelatedContentComputationSubscriberTest extends UnitTestCase {
 
   /**
@@ -95,7 +98,7 @@ class RelatedContentComputationSubscriberTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::onRelatedContentProvenance
+   * Tests a record with no other-names field leaves provenance empty.
    */
   public function testNoOtherNamesFieldLeavesProvenanceEmpty(): void {
     $subscriber = $this->getSubscriber([]);
@@ -109,7 +112,7 @@ class RelatedContentComputationSubscriberTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::onRelatedContentProvenance
+   * Tests a candidate matching a term is tagged with its vocabulary.
    */
   public function testCandidateMatchingTermIsTaggedWithVocabulary(): void {
     $fields = [
@@ -128,7 +131,7 @@ class RelatedContentComputationSubscriberTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::onRelatedContentProvenance
+   * Tests a candidate referencing the record directly is tagged "other".
    */
   public function testCandidateReferencingRecordDirectlyIsTaggedOther(): void {
     $fields = [
@@ -147,7 +150,7 @@ class RelatedContentComputationSubscriberTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::onRelatedContentProvenance
+   * Tests a candidate embedding the record's UUID is tagged "other".
    */
   public function testCandidateEmbeddingRecordUuidIsTaggedOther(): void {
     $fields = [
@@ -166,7 +169,7 @@ class RelatedContentComputationSubscriberTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::onRelatedContentProvenance
+   * Tests a candidate with no match is left untagged.
    */
   public function testCandidateWithNoMatchIsLeftUntagged(): void {
     $fields = [
@@ -185,7 +188,7 @@ class RelatedContentComputationSubscriberTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::onRelatedContentProvenance
+   * Tests a Place record uses the other-place-names field.
    */
   public function testPlaceRecordUsesOtherPlaceNamesField(): void {
     $fields = [
