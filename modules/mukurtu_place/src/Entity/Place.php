@@ -2,15 +2,18 @@
 
 namespace Drupal\mukurtu_place\Entity;
 
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\mukurtu_core\BaseFieldDefinition;
 use Drupal\node\Entity\Node;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\mukurtu_place\PlaceInterface;
+use Drupal\mukurtu_core\Entity\PrunesEmptyParagraphsTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
 
 class Place extends Node implements PlaceInterface, CulturalProtocolControlledInterface {
   use CulturalProtocolControlledTrait;
+  use PrunesEmptyParagraphsTrait;
 
   public static function bundleFieldDefinitions(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
     $definitions = self::getProtocolFieldDefinitions();
@@ -216,6 +219,14 @@ class Place extends Node implements PlaceInterface, CulturalProtocolControlledIn
       ->setDisplayConfigurable('form', TRUE);
 
     return $definitions;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function preSave(EntityStorageInterface $storage) {
+    parent::preSave($storage);
+    $this->pruneEmptyParagraphs('field_sections');
   }
 
 }
