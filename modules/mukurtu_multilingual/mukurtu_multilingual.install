@@ -67,6 +67,65 @@ function mukurtu_multilingual_install() {
       $field_config->save();
     }
   }
+
+  _mukurtu_multilingual_apply_translation_overrides();
+}
+
+/**
+ * Applies multilingual-specific translation settings to base field / content
+ * translation config already installed by other Mukurtu bundle modules.
+ *
+ * These bundles ship a "pre-multilingual" stub for these fields
+ * (translatable: false, no content_translation settings). This brings them
+ * in line with what Mukurtu Multilingual requires without re-shipping the
+ * full config object, which previously collided with the owning module's
+ * copy in config/install and caused a fatal "already exist in active
+ * configuration" error on install (see #1991). No-op if the owning module's
+ * config doesn't exist yet.
+ */
+function _mukurtu_multilingual_apply_translation_overrides(): void {
+  $overrides = [
+    'core.base_field_override.node.dictionary_word.title' => [
+      'translatable' => TRUE,
+    ],
+    'core.base_field_override.node.word_list.promote' => [
+      'translatable' => TRUE,
+    ],
+    'core.base_field_override.node.landing_page.promote' => [
+      'translatable' => TRUE,
+    ],
+    'core.base_field_override.node.person.title' => [
+      'translatable' => TRUE,
+    ],
+    'core.base_field_override.node.place.title' => [
+      'translatable' => TRUE,
+      'description' => 'The place, as it should be primarily identified. Maximum 255 characters.',
+    ],
+    'language.content_settings.node.landing_page' => [
+      'language_alterable' => TRUE,
+      'third_party_settings.content_translation.enabled' => TRUE,
+      'third_party_settings.content_translation.bundle_settings.untranslatable_fields_hide' => '0',
+    ],
+  ];
+
+  $config_factory = \Drupal::configFactory();
+  foreach ($overrides as $name => $values) {
+    $config = $config_factory->getEditable($name);
+    if ($config->isNew()) {
+      continue;
+    }
+    foreach ($values as $key => $value) {
+      $config->set($key, $value);
+    }
+    if ($name === 'language.content_settings.node.landing_page') {
+      $dependencies = $config->get('dependencies.module') ?? [];
+      if (!in_array('content_translation', $dependencies, TRUE)) {
+        $dependencies[] = 'content_translation';
+        $config->set('dependencies.module', $dependencies);
+      }
+    }
+    $config->save();
+  }
 }
 
 /**
@@ -145,4 +204,14 @@ function mukurtu_multilingual_update_40005(): void {
       }
     }
   }
+}
+
+/**
+ * Apply translation settings to base field / content-translation config
+ * owned by other Mukurtu modules that previously collided during install.
+ *
+ * @see _mukurtu_multilingual_apply_translation_overrides()
+ */
+function mukurtu_multilingual_update_40006(): void {
+  _mukurtu_multilingual_apply_translation_overrides();
 }
