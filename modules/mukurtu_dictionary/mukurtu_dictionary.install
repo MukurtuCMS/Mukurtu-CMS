@@ -1385,6 +1385,42 @@ function mukurtu_dictionary_update_40039(): void {
 }
 
 /**
+ * Remove the dead field_base_word_entry/field_word_entry form display entries.
+ */
+function mukurtu_dictionary_update_40040(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.dictionary_word.default');
+  if ($config->isNew()) {
+    return;
+  }
+  $content = $config->get('content') ?? [];
+  unset($content['field_base_word_entry'], $content['field_word_entry']);
+  $config->set('content', $content)->save();
+}
+
+/**
+ * Move the dictionary word and word list edit form maps' default center off
+ * Null Island, and give them a dedicated zoom for editing a single
+ * already-saved point (#1453).
+ */
+function mukurtu_dictionary_update_40041(): void {
+  $displays = [
+    'core.entity_form_display.node.dictionary_word.default',
+    'core.entity_form_display.node.word_list.default',
+  ];
+  foreach ($displays as $display_id) {
+    $config = \Drupal::configFactory()->getEditable($display_id);
+    if ($config->isNew()) {
+      continue;
+    }
+    $config->set('content.field_coverage.settings.map.map_position.zoom', 2);
+    $config->set('content.field_coverage.settings.map.map_position.center.lat', 20);
+    $config->set('content.field_coverage.settings.map.map_position.center.lon', 10);
+    $config->set('content.field_coverage.settings.map.map_position.singlePointZoom', 12);
+    $config->save();
+  }
+}
+
+/**
  * Points the sample-sentence recording field (field_sentence_recording, on
  * the sample_sentence paragraph type)'s "default"/"teaser" view display
  * formatters at the same "audio_for_dictionary_word"/"browse" media view
@@ -1396,7 +1432,7 @@ function mukurtu_dictionary_update_40039(): void {
  * module's shipped config would be a no-op against config that already
  * exists on any site with this module installed.
  */
-function mukurtu_dictionary_update_40040(): void {
+function mukurtu_dictionary_update_40042(): void {
   $repository = \Drupal::service('entity_display.repository');
 
   $displays = [
