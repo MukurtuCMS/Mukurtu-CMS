@@ -13,5 +13,6 @@ services:
     arguments:
       - '@messenger'
       - '@entity_type.manager'
+      - '@mukurtu_core.paragraph_emptiness_checker'
     tags:
       - { name: event_subscriber }
