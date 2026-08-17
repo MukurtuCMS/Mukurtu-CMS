@@ -6,14 +6,16 @@ namespace Drupal\Tests\mukurtu_taxonomy\Unit;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests the flat_taxonomy checkbox guard on the vocabulary edit form.
  *
  * @see mukurtu_taxonomy_form_taxonomy_vocabulary_form_alter()
  * @see mukurtu_taxonomy_lock_flat_taxonomy_checkbox()
- * @group mukurtu_taxonomy
  */
+#[Group('mukurtu_taxonomy')]
 class FlatTaxonomyGuardTest extends UnitTestCase {
 
   /**
@@ -50,9 +52,8 @@ class FlatTaxonomyGuardTest extends UnitTestCase {
    * Covers both an existing vocabulary (flat already TRUE, matching every
    * stock Mukurtu vocabulary today) and a brand-new vocabulary (flat_taxonomy
    * defaults the checkbox to a falsy value for an unsaved vocabulary).
-   *
-   * @dataProvider defaultValueProvider
    */
+  #[DataProvider('defaultValueProvider')]
   public function testLocksFlatCheckboxOn(bool $initialDefaultValue): void {
     $form = [
       'flat' => [

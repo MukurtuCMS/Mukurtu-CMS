@@ -33,6 +33,8 @@ class ProtocolEntityAccessTest extends KernelTestBase {
     'image',
     'file',
     'filter',
+    'geofield',
+    'leaflet',
     'og',
     'options',
     'system',
