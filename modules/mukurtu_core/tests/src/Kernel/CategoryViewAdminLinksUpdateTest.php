@@ -5,14 +5,15 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_core\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests mukurtu_core_update_40094(), which disables the Browse by Category
  * block's contextual/admin links.
  *
  * @see mukurtu_core_update_40094()
- * @group mukurtu_core
  */
+#[Group('mukurtu_core')]
 class CategoryViewAdminLinksUpdateTest extends KernelTestBase {
 
   /**

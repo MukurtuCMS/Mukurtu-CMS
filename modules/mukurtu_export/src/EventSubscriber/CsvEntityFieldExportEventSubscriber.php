@@ -5,6 +5,7 @@ namespace Drupal\mukurtu_export\EventSubscriber;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Messenger\MessengerInterface;
+use Drupal\mukurtu_core\Service\ParagraphEmptinessChecker;
 use Drupal\mukurtu_export\Entity\CsvExporter;
 use Drupal\mukurtu_export\Event\EntityFieldExportEvent;
 use InvalidArgumentException;
@@ -27,11 +28,19 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
   protected $entityTypeManager;
 
   /**
+   * The paragraph emptiness checker.
+   *
+   * @var \Drupal\mukurtu_core\Service\ParagraphEmptinessChecker
+   */
+  protected $paragraphEmptinessChecker;
+
+  /**
    * {@inheritDoc}
    */
-  public function __construct(MessengerInterface $messenger, EntityTypeManagerInterface $entity_type_manager) {
+  public function __construct(MessengerInterface $messenger, EntityTypeManagerInterface $entity_type_manager, ParagraphEmptinessChecker $paragraph_emptiness_checker) {
     $this->messenger = $messenger;
     $this->entityTypeManager = $entity_type_manager;
+    $this->paragraphEmptinessChecker = $paragraph_emptiness_checker;
   }
 
   /**
@@ -260,6 +269,12 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
 
     foreach ($field->getValue() as $value) {
       if ($id = ($value['target_id'] ?? NULL)) {
+        if ($target_type === 'paragraph' && $this->isParagraphEmpty($id)) {
+          // Skip paragraphs auto-created by the Paragraphs widget but never
+          // filled in, so they don't show up as blank rows/sheets on export.
+          continue;
+        }
+
         if ($option && $target_type) {
           if ($option == 'id' || $isShallow) {
             $export[] = $id_format === 'uuid' ? $this->getUUID($target_type, $id) : $id;
@@ -281,6 +296,30 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
       }
     }
     $event->setValue($export);
+  }
+
+  /**
+   * Checks whether a paragraph has no content of its own.
+   *
+   * The Paragraphs widget auto-attaches a paragraph of the sole allowed
+   * bundle on new-entity forms so editors can see what fields it holds.
+   * If left untouched it's normally pruned before save (see
+   * PrunesEmptyParagraphsTrait), but paragraphs created before that fix
+   * shipped may already exist, so this is skipped on export too.
+   *
+   * @param int|string $id
+   *   The paragraph entity ID.
+   *
+   * @return bool
+   *   TRUE if the paragraph exists and all of its content fields are empty.
+   */
+  protected function isParagraphEmpty($id): bool {
+    $paragraph = $this->entityTypeManager->getStorage('paragraph')->load($id);
+    if (!$paragraph) {
+      return FALSE;
+    }
+
+    return $this->paragraphEmptinessChecker->isEmpty($paragraph);
   }
 
   /**

@@ -418,8 +418,8 @@ class CommunityManagerUserCreationForm extends FormBase {
       $this->messenger()->addMessage($this->t('No email address was provided, so a notification email has not been sent to the new user.'));
     }
 
-    $notifyUids = mukurtu_notifications_extract_notify_uids($form_state);
-    if (!empty($notifyUids)) {
+    if (function_exists('mukurtu_notifications_extract_notify_uids')) {
+      $notifyUids = mukurtu_notifications_extract_notify_uids($form_state);
       mukurtu_notifications_notify_new_account_created($user, $notifyUids);
     }
   }
