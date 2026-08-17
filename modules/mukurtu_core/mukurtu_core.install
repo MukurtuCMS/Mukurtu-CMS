@@ -3589,3 +3589,59 @@ function mukurtu_core_update_40099(): void {
 
   $role->save();
 }
+
+/**
+ * Enable the "draw circle" map toolbar button by default (issue #860).
+ *
+ * The button was previously force-disabled by contrib because GeoJSON has
+ * no circle geometry type. GeofieldMukurtuWidget now re-enables it and the
+ * widget's JS stores drawn circles as polygon approximations, so this
+ * setting is meaningful for the first time. New installs already get it
+ * via the updated config/install YAML; this brings existing sites'
+ * geofield_mukurtu widgets in line with that new default.
+ */
+function mukurtu_core_update_40100(): void {
+  $bundles = [
+    'place',
+    'digital_heritage',
+    'collection',
+    'dictionary_word',
+    'word_list',
+    'person',
+  ];
+
+  foreach ($bundles as $bundle) {
+    $display = \Drupal\Core\Entity\Entity\EntityFormDisplay::load("node.$bundle.default");
+    if (!$display) {
+      continue;
+    }
+    $component = $display->getComponent('field_coverage');
+    if (!$component || ($component['type'] ?? NULL) !== 'geofield_mukurtu') {
+      continue;
+    }
+    $component['settings']['toolbar']['drawCircle'] = TRUE;
+    $display->setComponent('field_coverage', $component);
+    $display->save();
+  }
+}
+
+/**
+ * Show the member-since date on the user profile page.
+ */
+function mukurtu_core_update_40101(): void
+{
+  $display = \Drupal::entityTypeManager()
+    ->getStorage('entity_view_display')
+    ->load('user.user.default');
+
+  if ($display) {
+    $display
+      ->setComponent('member_for', [
+        'weight' => 2,
+        'region' => 'content',
+        'settings' => [],
+        'third_party_settings' => [],
+      ])
+      ->save();
+  }
+}
