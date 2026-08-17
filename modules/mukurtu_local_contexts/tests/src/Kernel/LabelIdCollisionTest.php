@@ -3,6 +3,7 @@
 namespace Drupal\Tests\mukurtu_local_contexts\Kernel;
 
 use Drupal\mukurtu_local_contexts\LocalContextsLabel;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests that a label id shared by two different projects is handled safely.
@@ -11,9 +12,8 @@ use Drupal\mukurtu_local_contexts\LocalContextsLabel;
  * labels table's own primary key is compound: ['id', 'project_id']), so any
  * code that keys on the bare label id alone will silently collide two
  * different projects' labels together.
- *
- * @group mukurtu_local_contexts
  */
+#[Group('mukurtu_local_contexts')]
 class LabelIdCollisionTest extends LocalContextsTestBase {
 
   const PROJECT_A = '4d7d7e1a-0b2b-4b1e-9c3a-1f2e3d4c5b6a';

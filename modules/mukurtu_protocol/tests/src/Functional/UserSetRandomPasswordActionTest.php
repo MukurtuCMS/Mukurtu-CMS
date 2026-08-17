@@ -3,12 +3,12 @@
 namespace Drupal\Tests\mukurtu_protocol\Functional;
 
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests MukurtuUserSetRandomPasswordAction overrides genpass behavior.
- *
- * @group mukurtu_protocol
  */
+#[Group('mukurtu_protocol')]
 class UserSetRandomPasswordActionTest extends BrowserTestBase {
 
   /**
