@@ -56,6 +56,11 @@ class BrowseQuickActionsPreprocessTest extends KernelTestBase {
     $request = Request::create('/test');
     $request->attributes->set(RouteObjectInterface::ROUTE_NAME, $route_name);
     $request->attributes->set(RouteObjectInterface::ROUTE_OBJECT, new Route('/test'));
+    // Mirror DrupalKernel::preHandle(), which attaches a session to the main
+    // request. Without this, KernelTestBase::tearDown() finds this pushed
+    // request still on top of the stack and throws SessionNotFoundException
+    // when it tries to clean up its session.
+    $request->setSession($this->container->get('session'));
     $this->container->get('request_stack')->push($request);
   }
 
