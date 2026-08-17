@@ -9,13 +9,15 @@ use Drupal\Core\Entity\EntityFormInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\mukurtu_core\Hook\FormHooks;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests the Layout Builder guard rail on Manage Display forms.
  *
  * @see \Drupal\mukurtu_core\Hook\FormHooks::formEntityViewDisplayEditFormAlter()
- * @group mukurtu_core
  */
+#[Group('mukurtu_core')]
 class FormHooksLayoutBuilderGuardTest extends KernelTestBase {
 
   /**
@@ -27,15 +29,16 @@ class FormHooksLayoutBuilderGuardTest extends KernelTestBase {
     'field',
     'text',
     'filter',
+    'geofield',
+    'leaflet',
     'node',
     'mukurtu_core',
   ];
 
   /**
    * Tests that the checkbox is disabled only for unsupported node bundles.
-   *
-   * @dataProvider bundleProvider
    */
+  #[DataProvider('bundleProvider')]
   public function testLayoutBuilderCheckboxGuard(string $entityTypeId, string $bundle, bool $expectDisabled): void {
     $display = $this->createMock(EntityViewDisplayInterface::class);
     $display->method('getTargetEntityTypeId')->willReturn($entityTypeId);

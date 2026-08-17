@@ -26,8 +26,14 @@ class RouteSubscriber extends RouteSubscriberBase
   protected function alterRoutes(RouteCollection $collection)
   {
     // Use a custom Mukurtu controller to restrict dashboard access to
-    // authenticated users.
+    // authenticated users. Remove the default permission-gated entity access
+    // requirement so the custom check is the sole gate; otherwise the two
+    // requirements AND together and block any authenticated user who lacks
+    // the dashboards module's per-dashboard view permission.
     if ($route = $collection->get('entity.dashboard.canonical')) {
+      $requirements = $route->getRequirements();
+      unset($requirements['_entity_access']);
+      $route->setRequirements($requirements);
       $route->setRequirement('_custom_access', '\Drupal\mukurtu_core\Controller\MukurtuDashboardController::access');
     }
 
