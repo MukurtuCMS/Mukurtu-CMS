@@ -23,6 +23,9 @@ class UserExportFieldMappingUpdateTest extends KernelTestBase {
   protected static $modules = [
     'system',
     'user',
+    'geofield',
+    'leaflet',
+    'mukurtu_core',
     'mukurtu_export',
     'mukurtu_multipage_items',
   ];
