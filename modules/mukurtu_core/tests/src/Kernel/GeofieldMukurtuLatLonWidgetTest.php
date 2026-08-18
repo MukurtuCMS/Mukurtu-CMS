@@ -35,6 +35,7 @@ class GeofieldMukurtuLatLonWidgetTest extends KernelTestBase {
     'filter',
     'node',
     'geofield',
+    'leaflet',
     'mukurtu_core',
   ];
 
