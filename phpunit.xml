@@ -79,8 +79,23 @@
       <directory>web/profiles/mukurtu/modules/mukurtu_migrate/tests/src/Kernel</directory>
     </testsuite>
     <testsuite name="kernel">
+      <directory>web/profiles/mukurtu/modules/mukurtu_landing_page/tests/src/Kernel</directory>
+    </testsuite>
+    <testsuite name="kernel">
       <directory>web/profiles/mukurtu/modules/mukurtu_browse/tests/src/Kernel</directory>
       <directory>web/profiles/mukurtu/modules/mukurtu_core/tests/src/Kernel</directory>
+    </testsuite>
+    <testsuite name="kernel">
+      <directory>web/profiles/mukurtu/modules/mukurtu_dictionary/tests/src/Kernel</directory>
+    </testsuite>
+    <testsuite name="kernel">
+      <directory>web/profiles/mukurtu/modules/mukurtu_digital_heritage/tests/src/Kernel</directory>
+    </testsuite>
+    <testsuite name="kernel">
+      <directory>web/profiles/mukurtu/modules/mukurtu_person/tests/src/Kernel</directory>
+    </testsuite>
+    <testsuite name="kernel">
+      <directory>web/profiles/mukurtu/modules/mukurtu_place/tests/src/Kernel</directory>
     </testsuite>
     <testsuite name="kernel">
       <directory>web/profiles/mukurtu/modules/mukurtu_notifications/tests/src/Kernel</directory>
