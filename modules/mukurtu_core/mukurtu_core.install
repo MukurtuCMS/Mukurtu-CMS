@@ -2984,6 +2984,17 @@ function mukurtu_core_update_40085(): void {
     return;
   }
 
+  // The block plugin is a menu derivative: it only resolves once the
+  // dashboard-security menu (shipped by mukurtu_bot_protection's default
+  // config) actually exists. If module installation in
+  // mukurtu_core_update_40084() didn't complete, adding the block reference
+  // here would leave a dangling "block is broken or missing" placeholder on
+  // the dashboard instead of failing loudly.
+  if (!\Drupal::entityTypeManager()->getStorage('menu')->load('dashboard-security')) {
+    \Drupal::logger('mukurtu_core')->warning('Skipped adding the Security block to the admin dashboard because the dashboard-security menu does not exist. Install the mukurtu_bot_protection module and its dependencies, then manually re-invoke mukurtu_core_update_40085() (e.g. via `drush php:eval "mukurtu_core_update_40085();"`) to add the block.');
+    return;
+  }
+
   $uuid = '3f8b6c1a-2e4d-4a9f-9c7b-5d1e8a2f6b3c';
   $sections = $config->get('sections') ?? [];
   if (isset($sections[0]['components'][$uuid])) {
