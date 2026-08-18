@@ -412,3 +412,37 @@ function mukurtu_collection_update_40019(): void {
     $config->set('content.field_coverage_description.settings.rows', 5)->save();
   }
 }
+
+/**
+ * Give personal collections the same grid/list/map switcher as collections.
+ *
+ * Re-imports the mukurtu_collection_items view (now with personal-collection
+ * scoped displays) and switches field_items_in_collection on the personal
+ * collection full display to the mukurtu_collection_items_browse formatter,
+ * matching the regular collection page (#1993).
+ */
+function mukurtu_collection_update_40020(): void {
+  $config_source = new \Drupal\Core\Config\FileStorage(
+    \Drupal::service('extension.list.module')->getPath('mukurtu_collection') . '/config/install'
+  );
+
+  $view_name = 'views.view.mukurtu_collection_items';
+  $data = $config_source->read($view_name);
+  if ($data) {
+    \Drupal::configFactory()->getEditable($view_name)->setData($data)->save(TRUE);
+  }
+
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.personal_collection.personal_collection.full');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_items_in_collection', [
+    'type' => 'mukurtu_collection_items_browse',
+    'label' => 'hidden',
+    'settings' => [],
+    'third_party_settings' => [],
+    'weight' => 4,
+    'region' => 'content',
+  ]);
+  $config->save();
+}
