@@ -37,6 +37,19 @@ mukurtu_export.add_item_to_list:
   requirements:
     _permission: 'access mukurtu export'
 
+mukurtu_export.add_node_to_export_list:
+  path: '/node/{node}/export-list/add'
+  defaults:
+    _title_callback: '\Drupal\mukurtu_export\Controller\ExportListAddNodeController::getTitle'
+    _controller: '\Drupal\mukurtu_export\Controller\ExportListAddNodeController::content'
+  options:
+    parameters:
+      node:
+        type: entity:node
+  requirements:
+    _permission: 'access mukurtu export'
+    _custom_access: '\Drupal\mukurtu_export\Controller\ExportListAddNodeController::access'
+
 mukurtu_export.start_adhoc_node:
   path: '/admin/export/start-adhoc/{node}'
   defaults:
