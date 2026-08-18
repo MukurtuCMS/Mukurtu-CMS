@@ -64,6 +64,15 @@ function mukurtu_collection_views_data_alter(array &$data) {
       'real field' => 'nid',
     ],
   ];
+  $data['node_field_data']['mukurtu_personal_collection_items'] = [
+    'title' => t('Items in Personal Collection'),
+    'help' => t('Scope Content to the items referenced by a Personal collection.'),
+    'argument' => [
+      'id' => 'mukurtu_personal_collection_items',
+      'field' => 'nid',
+      'real field' => 'nid',
+    ],
+  ];
 }
 
 /**
