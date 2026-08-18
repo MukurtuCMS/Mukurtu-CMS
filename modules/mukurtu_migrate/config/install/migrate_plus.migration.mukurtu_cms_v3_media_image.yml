@@ -15,6 +15,12 @@ source:
   atom_type: image
 process:
   id: sid
+  uid:
+    plugin: migration_lookup
+    migration:
+      - mukurtu_cms_v3_users
+      - mukurtu_cms_v3_users_uid1
+    source: publisher
   langcode: language
   name: title
   field_people:
@@ -77,6 +83,8 @@ migration_dependencies:
     - mukurtu_cms_v3_terms_type
     - mukurtu_cms_v3_file_private
     - mukurtu_cms_v3_file
+    - mukurtu_cms_v3_users
+    - mukurtu_cms_v3_users_uid1
   optional:
     - d7_field_instance
 include: null

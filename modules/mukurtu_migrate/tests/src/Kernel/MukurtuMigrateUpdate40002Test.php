@@ -7,7 +7,7 @@ use Drupal\KernelTests\KernelTestBase;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests mukurtu_migrate_update_40001().
+ * Tests mukurtu_migrate_update_40002().
  *
  * The update hook re-imports the mukurtu_cms_v3_media_audio migration config
  * from the module's shipped YAML, so that sites which installed this module
@@ -15,11 +15,11 @@ use PHPUnit\Framework\Attributes\Group;
  * process pipeline (the `bundle` process key and `field_media_soundcloud`)
  * without requiring a full config re-export.
  *
- * @see mukurtu_migrate_update_40001()
+ * @see mukurtu_migrate_update_40002()
  * @see modules/mukurtu_migrate/config/install/migrate_plus.migration.mukurtu_cms_v3_media_audio.yml
  */
 #[Group('mukurtu_migrate')]
-class MukurtuMigrateUpdate40001Test extends KernelTestBase {
+class MukurtuMigrateUpdate40002Test extends KernelTestBase {
 
   /**
    * {@inheritdoc}
@@ -36,7 +36,7 @@ class MukurtuMigrateUpdate40001Test extends KernelTestBase {
    * Both the old and new fixture YAML ship `include: null`, which is a
    * pre-existing gap in migrate_plus's own config schema (unrelated to this
    * update hook), but only surfaces when config is written via the raw
-   * config API (as mukurtu_migrate_update_40001() does) rather than through
+   * config API (as mukurtu_migrate_update_40002() does) rather than through
    * the config entity API, which silently drops undeclared properties.
    *
    * {@inheritdoc}
@@ -46,9 +46,11 @@ class MukurtuMigrateUpdate40001Test extends KernelTestBase {
   /**
    * The pre-SoundCloud version of the migration config, as YAML.
    *
-   * This is the version that shipped before this issue's changes (i.e. the
-   * version currently on origin/main): no `bundle` process plugin and no
-   * `field_media_soundcloud` process key.
+   * This is the version that shipped after mukurtu_migrate_update_40001()
+   * (the author-mapping fix from issue #1403) but before this issue's
+   * changes: it has the `uid` process key and the `mukurtu_cms_v3_users`/
+   * `mukurtu_cms_v3_users_uid1` dependencies that 40001 adds, but no
+   * `bundle` process plugin and no `field_media_soundcloud` process key.
    */
   const OLD_YAML = <<<'YAML'
 langcode: en
@@ -68,6 +70,12 @@ source:
   atom_type: audio
 process:
   id: sid
+  uid:
+    plugin: migration_lookup
+    migration:
+      - mukurtu_cms_v3_users
+      - mukurtu_cms_v3_users_uid1
+    source: publisher
   langcode: language
   name: title
   field_media_audio_file:
@@ -88,6 +96,8 @@ migration_dependencies:
     - mukurtu_cms_v3_terms_authors
     - mukurtu_cms_v3_file_private
     - mukurtu_cms_v3_file
+    - mukurtu_cms_v3_users
+    - mukurtu_cms_v3_users_uid1
   optional:
     - d7_field_instance
 include: null
@@ -96,7 +106,7 @@ YAML;
   /**
    * Tests that the update hook overwrites an old config with the new one.
    */
-  public function testUpdate40001OverwritesOldConfig(): void {
+  public function testUpdate40002OverwritesOldConfig(): void {
     // Simulate a site that installed mukurtu_migrate before the SoundCloud
     // bundle switch was added: save the old process pipeline as the live
     // config entity.
@@ -111,7 +121,7 @@ YAML;
 
     // Run the update hook under test.
     \Drupal::moduleHandler()->loadInclude('mukurtu_migrate', 'install');
-    mukurtu_migrate_update_40001();
+    mukurtu_migrate_update_40002();
 
     // Reload the config (update hooks operate on config storage directly, so
     // the immutable config object must be re-fetched, not reused).
