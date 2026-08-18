@@ -12,6 +12,10 @@ libraries-override:
     js:
       js/soft-limit.js: js/facets-soft-limit.js
 
+libraries-extend:
+  core/drupal.message:
+    - mukurtu_v4/drupal.message
+
 regions:
   user_menu: 'User menu'
   header: 'Header'
