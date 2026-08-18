@@ -23,6 +23,7 @@ class MukurtuMigrateImportBatchOnMapSaveTest extends KernelTestBase {
   protected static $modules = [
     'migrate',
     'migrate_drupal_ui',
+    'search_api',
     'mukurtu_migrate',
   ];
 

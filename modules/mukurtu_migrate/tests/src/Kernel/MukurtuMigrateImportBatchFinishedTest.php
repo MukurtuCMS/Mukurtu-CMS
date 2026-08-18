@@ -23,6 +23,7 @@ class MukurtuMigrateImportBatchFinishedTest extends KernelTestBase {
     'user',
     'migrate',
     'migrate_drupal_ui',
+    'search_api',
     'mukurtu_migrate',
   ];
 
