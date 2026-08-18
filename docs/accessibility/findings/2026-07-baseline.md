@@ -108,6 +108,21 @@ separate from the merge commit). Re-scan: 39/39, zero new findings — results
 match 2026-08-13 exactly, confirming the draw-circle feature introduced no
 regressions.
 
+**2026-08-18:** merged a further 17 `origin/main` commits (Search API
+indexing after migration, several security dependency bumps — `drupal/facets`
+pin, `entity_browser`, `guzzle`, `js-yaml`, and others — a Digital Heritage
+browse Playwright timeout hardening fix, quick-action icons on content cards,
+and new map-defaults update hooks across several content-type modules). No
+hook-number collision this time (main's max was `40101`, ours already at
+`40102`, no overlap) — first clean merge of this recurring class of issue in
+a while, verified with the same function-inventory-diff check regardless.
+Composer update pulled in the security bumps cleanly, no advisories. Fresh
+reinstall given the scale of changes. Re-scan: 39/39, zero new findings —
+exact match to 2026-08-14 state, confirming this batch introduced no
+regressions. (PR [#2004](https://github.com/MukurtuCMS/Mukurtu-CMS/pull/2004),
+upstreaming three of this program's fixes, is still open/unmerged as of this
+cycle.)
+
 No manual keyboard/screen-reader testing has happened yet — that is the next
 phase, using [../manual-checklist.md](../manual-checklist.md) and the
 [manual findings template](manual-findings-template.md).
