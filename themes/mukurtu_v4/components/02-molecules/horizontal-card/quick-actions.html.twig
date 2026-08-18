@@ -1,0 +1,36 @@
+{#
+/**
+ * @file
+ * Quick-action icons + overflow menu for a List-mode (browse) card.
+ *
+ * Included from every node--*--browse.html.twig template. Expects a
+ * `quick_actions` variable (built by mukurtu_browse_preprocess_node()) with
+ * `icon_actions` and `overflow_actions` lists, each entry having: title,
+ * url, attributes, and (icon_actions only) icon + accessible_title.
+ *
+ * Also expects `node` (the node being rendered), used to build accessible
+ * names for icon-only buttons.
+ */
+#}
+{% if quick_actions.icon_actions or quick_actions.overflow_actions %}
+<div class="quick-actions">
+  {% for action in quick_actions.icon_actions %}
+    <a{{ create_attribute(action.attributes).addClass('quick-actions__icon-link') }} href="{{ action.url }}" aria-label="{{ (action.accessible_title ?: action.title) }}">
+      {% include active_theme_path() ~ '/images/' ~ action.icon ~ '.svg' %}
+    </a>
+  {% endfor %}
+
+  {% if quick_actions.overflow_actions %}
+    <details class="quick-actions__overflow">
+      <summary class="quick-actions__overflow-toggle" aria-label="{{ 'More actions for @title'|t({'@title': node.label()}) }}">
+        {% include active_theme_path() ~ '/images/more-actions.svg' %}
+      </summary>
+      <ul class="quick-actions__overflow-menu">
+        {% for action in quick_actions.overflow_actions %}
+          <li><a{{ create_attribute(action.attributes) }} href="{{ action.url }}">{{ action.title }}</a></li>
+        {% endfor %}
+      </ul>
+    </details>
+  {% endif %}
+</div>
+{% endif %}
