@@ -100,6 +100,7 @@ class MukurtuImportTestBase extends MigrateTestBase {
     'migrate_source_csv',
     'mukurtu_import',
     'mukurtu_migrate',
+    'search_api',
   ];
 
   /**
