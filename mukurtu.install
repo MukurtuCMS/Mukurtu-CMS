@@ -928,4 +928,25 @@ function mukurtu_update_40002(): void {
   }
 }
 
+/**
+ * Grant the authenticated role permission to view the administration theme.
+ *
+ * Entity Browser's modal routes only render in the Gin admin theme when the
+ * current user has this permission (see AdminNegotiator::applies()).
+ * mukurtu_install() grants it to 'authenticated', but no update hook ever
+ * backfilled it for sites installed before that grant existed - unlike
+ * mukurtu_core_update_40028(), which backfilled the sibling "access ...
+ * entity browser pages" permissions. Sites missing this permission see
+ * entity browser modals (collections, word lists, related content, personal
+ * collections, protocol community-select, featured content) fall back to
+ * the front-end theme, which lacks Gin's ajax-throbber styling.
+ */
+function mukurtu_update_40003(): void {
+  $authenticated = Role::load('authenticated');
+  if ($authenticated) {
+    $authenticated->grantPermission('view the administration theme');
+    $authenticated->save();
+  }
+}
+
 

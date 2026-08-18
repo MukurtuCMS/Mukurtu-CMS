@@ -162,6 +162,14 @@ function mukurtu_collection_preprocess_node(array &$variables): void {
 }
 
 /**
+ * Implements hook_mukurtu_browse_quick_actions_alter().
+ */
+function mukurtu_collection_mukurtu_browse_quick_actions_alter(array &$actions, \Drupal\node\NodeInterface $node): void {
+  \Drupal::service('Drupal\mukurtu_collection\Hook\CollectionPreprocessHooks')
+    ->browseQuickActionsAlter($actions, $node);
+}
+
+/**
  * Implements hook_entity_bundle_info_alter().
  */
 function mukurtu_collection_entity_bundle_info_alter(array &$bundles): void {
@@ -291,6 +299,10 @@ function mukurtu_collection_form_alter(&$form, FormStateInterface $form_state, $
     // which shrinks field description text so it doesn't visually dominate
     // these short forms.
     $form['#attributes']['class'][] = 'mukurtu-quick-create-form';
+
+    // Core's node form only confirms the personal collection itself was
+    // created - add a second message confirming the item was added to it.
+    $form['actions']['submit']['#submit'][] = 'mukurtu_collection_add_item_to_new_target_submit';
   }
 
   // Same trim for the embedded "create a new collection" entity form - keep
@@ -343,6 +355,10 @@ function mukurtu_collection_form_alter(&$form, FormStateInterface $form_state, $
       }
       return $element;
     };
+
+    // Core's node form only confirms the collection itself was created -
+    // add a second message confirming the item was added to it.
+    $form['actions']['submit']['#submit'][] = 'mukurtu_collection_add_item_to_new_target_submit';
   }
 
   // When the "Add to Collection" or "Add to Personal Collection" forms are
@@ -426,6 +442,27 @@ function mukurtu_collection_form_alter(&$form, FormStateInterface $form_state, $
 }
 
 /**
+ * Form submit handler added by mukurtu_collection_form_alter().
+ *
+ * Core's node/entity form only confirms that the embedded "create a new
+ * collection"/"create a new personal collection" form's own entity was
+ * created - the item being added to it is set on that entity in memory
+ * before the form is even built (see MukurtuAddItemToCollectionController),
+ * so it's already saved along with it, but nothing says so. Add a second
+ * message confirming that part too.
+ */
+function mukurtu_collection_add_item_to_new_target_submit(array &$form, FormStateInterface $form_state) {
+  $node = \Drupal::routeMatch()->getParameter('node');
+  $target = $form_state->getFormObject()->getEntity();
+  if ($node instanceof \Drupal\node\NodeInterface && $target) {
+    \Drupal::messenger()->addStatus(t('Added %item to %target.', [
+      '%item' => $node->getTitle(),
+      '%target' => $target->label(),
+    ]));
+  }
+}
+
+/**
  * AJAX callback for the "Add to Collection" / "Add to Personal Collection"
  * forms (including the embedded "create a new personal collection" form)
  * when submitted from a modal dialog.
@@ -435,7 +472,18 @@ function mukurtu_collection_form_alter(&$form, FormStateInterface $form_state, $
  * when there are errors.
  */
 function mukurtu_collection_add_to_x_dialog_ajax(array &$form, FormStateInterface $form_state): AjaxResponse {
-  return mukurtu_core_modal_form_ajax_response($form, $form_state);
+  // mukurtu_stay marks this as opened from a browse-card quick action (see
+  // CollectionPreprocessHooks::browseQuickActionsAlter()) rather than the
+  // full-page tab this callback was originally built for.
+  return mukurtu_core_modal_form_ajax_response($form, $form_state, function ($nodeId, FormStateInterface $form_state) {
+    // "personal_collection_form"/"..._personal_collection_form" cover both
+    // the existing-list picker and the embedded "create new" form for
+    // personal collections; everything else here is the collection
+    // equivalent.
+    $form_id = $form_state->getFormObject()->getFormId();
+    $trigger_prefix = str_contains($form_id, 'personal_collection') ? 'personal-collection-' : 'collection-';
+    return '[data-quick-action-trigger="' . $trigger_prefix . $nodeId . '"]';
+  });
 }
 
 /**
