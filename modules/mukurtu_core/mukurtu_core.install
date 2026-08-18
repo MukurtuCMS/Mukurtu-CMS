@@ -2991,7 +2991,7 @@ function mukurtu_core_update_40085(): void {
   // here would leave a dangling "block is broken or missing" placeholder on
   // the dashboard instead of failing loudly.
   if (!\Drupal::entityTypeManager()->getStorage('menu')->load('dashboard-security')) {
-    \Drupal::logger('mukurtu_core')->warning('Skipped adding the Security block to the admin dashboard because the dashboard-security menu does not exist. Ensure the mukurtu_bot_protection module and its dependencies are installed, then rerun database updates.');
+    \Drupal::logger('mukurtu_core')->warning('Skipped adding the Security block to the admin dashboard because the dashboard-security menu does not exist. Install the mukurtu_bot_protection module and its dependencies, then manually re-invoke mukurtu_core_update_40085() (e.g. via `drush php:eval "mukurtu_core_update_40085();"`) to add the block.');
     return;
   }
 
