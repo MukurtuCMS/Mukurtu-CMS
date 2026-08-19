@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_submissions\Kernel;
 
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
+use Drupal\Core\Entity\Entity\EntityFormMode;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use Drupal\mukurtu_submissions\Access\SubmissionAccessCheck;
 use Drupal\node\Entity\NodeType;
@@ -24,6 +25,7 @@ class SubmissionAccessCheckTest extends EntityKernelTestBase {
     'field',
     'file',
     'node',
+    'path_alias',
     'mukurtu_submissions',
   ];
 
@@ -38,7 +40,25 @@ class SubmissionAccessCheckTest extends EntityKernelTestBase {
   protected function setUp(): void {
     parent::setUp();
 
+    $this->installEntitySchema('path_alias');
+
+    // Claims uid 1 with a harmless account so the "no permission" user
+    // created later in each test doesn't land on uid 1 itself - User::
+    // hasPermission() unconditionally returns TRUE for uid 1, which would
+    // silently defeat testEnabledWithDisplayButNoPermissionIsForbidden().
+    $this->createUser();
+
     NodeType::create(['type' => $this->bundle, 'name' => 'Access check test'])->save();
+
+    // EntityDisplayBase::calculateDependencies() requires this to exist for
+    // any non-default form mode - normally shipped by mukurtu_submissions'
+    // own config/install, not present here since this test only enables a
+    // bare module set rather than installing the module's config.
+    EntityFormMode::create([
+      'id' => 'node.submission',
+      'targetEntityType' => 'node',
+      'label' => 'Submission',
+    ])->save();
   }
 
   /**

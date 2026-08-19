@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_submissions\Kernel;
 
 use Drupal\Core\Form\FormState;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
+use Drupal\message\Entity\MessageTemplate;
 use Drupal\mukurtu_submissions\Form\PublicSubmissionForm;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
@@ -37,6 +40,8 @@ class PublicSubmissionFormUnmoderatedSaveTest extends EntityKernelTestBase {
     'field',
     'file',
     'node',
+    'options',
+    'message',
     'mukurtu_submissions',
   ];
 
@@ -54,8 +59,34 @@ class PublicSubmissionFormUnmoderatedSaveTest extends EntityKernelTestBase {
     parent::setUp();
 
     $this->installEntitySchema('mukurtu_submission');
+    $this->installEntitySchema('message');
 
     NodeType::create(['type' => $this->bundle, 'name' => 'Submission flow test'])->save();
+
+    // hook_node_insert() creates a "mukurtu_submission_received" message once
+    // the saved node is owned by the service account - normally shipped by
+    // mukurtu_submissions' own config/install (which also pulls in a shared
+    // field.storage.message.field_item from mukurtu_notifications and a
+    // filter.format dependency), not present here since this test only
+    // enables a bare module set. Recreated minimally, matching the shape of
+    // field.field.message.mukurtu_submission_received.field_item.yml.
+    MessageTemplate::create([
+      'template' => 'mukurtu_submission_received',
+      'label' => 'Mukurtu Submission Received',
+      'text' => [['value' => 'A new submission was received.', 'format' => 'plain_text']],
+    ])->save();
+    FieldStorageConfig::create([
+      'field_name' => 'field_item',
+      'entity_type' => 'message',
+      'type' => 'entity_reference',
+      'settings' => ['target_type' => 'node'],
+    ])->save();
+    FieldConfig::create([
+      'field_name' => 'field_item',
+      'entity_type' => 'message',
+      'bundle' => 'mukurtu_submission_received',
+      'label' => 'Item',
+    ])->save();
 
     // Created first so it becomes uid 1 - PublicSubmissionForm::asSuperuser()
     // unconditionally loads and impersonates uid 1 during validate()/save(),
