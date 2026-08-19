@@ -554,6 +554,18 @@ function mukurtu_submissions_sync_submission_permission(SubmissionSettingsInterf
  * already reviewed under it, and this only applies to "node" targets -
  * the dynamic "edit/delete any {bundle} content" permissions are a node
  * module concept, not something every entity type has an equivalent of.
+ *
+ * Accepted tradeoff: this grant is bundle-wide ("edit any {bundle}
+ * content"), not scoped to submitted-via-this-form content specifically,
+ * and it is never revoked once made. Enabling public submissions for a
+ * bundle - even briefly, to try it out - permanently grants every
+ * "review mukurtu submissions" role blanket edit/delete over that
+ * bundle's entire content for as long as that role exists. Scoping the
+ * grant down to submitted content only (e.g. via a dedicated access
+ * handler keyed off mukurtu_submission records rather than a site-wide
+ * node permission) would close that gap, but is a larger access-control
+ * change than this generalization - left as a deliberate, known
+ * limitation rather than folded in here.
  */
 function mukurtu_submissions_sync_review_permissions(SubmissionSettingsInterface $settings): void {
   $entity_type_id = $settings->getTargetEntityTypeId();
@@ -616,12 +628,12 @@ function mukurtu_submissions_sync_entity_browser_permissions(SubmissionSettingsI
   }
 
   $role_storage = \Drupal::entityTypeManager()->getStorage('user_role');
-  $grants = [
-    'anonymous' => $settings->status() && $settings->getAccessLevel() === 'anonymous',
-    'authenticated' => $settings->status(),
-  ];
   foreach (array_keys($browser_ids) as $browser_id) {
     $permission = "access $browser_id entity browser pages";
+    $grants = [
+      'anonymous' => _mukurtu_submissions_entity_browser_still_needed($browser_id, 'anonymous'),
+      'authenticated' => _mukurtu_submissions_entity_browser_still_needed($browser_id, 'authenticated'),
+    ];
     foreach ($grants as $role_id => $should_grant) {
       $role = $role_storage->load($role_id);
       if (!$role) {
@@ -636,6 +648,46 @@ function mukurtu_submissions_sync_entity_browser_permissions(SubmissionSettingsI
       }
     }
   }
+}
+
+/**
+ * Whether $role_id should still hold "access $browser_id entity browser
+ * pages", considering every enabled mukurtu_submission_settings entity -
+ * not just the one that triggered this sync.
+ *
+ * Two bundles' "submission" form displays can reference the same entity
+ * browser (e.g. a shared "content picker"). Deciding whether to revoke
+ * based solely on the settings entity being saved would strip that
+ * browser's access the moment either one is disabled, even while the
+ * other bundle's still-enabled form still needs it.
+ */
+function _mukurtu_submissions_entity_browser_still_needed(string $browser_id, string $role_id): bool {
+  $settings_storage = \Drupal::entityTypeManager()->getStorage('mukurtu_submission_settings');
+  $entity_display_repository = \Drupal::service('entity_display.repository');
+
+  foreach ($settings_storage->loadMultiple() as $other_settings) {
+    if (!$other_settings->status()) {
+      continue;
+    }
+    if ($role_id === 'anonymous' && $other_settings->getAccessLevel() !== 'anonymous') {
+      continue;
+    }
+
+    $other_entity_type_id = $other_settings->getTargetEntityTypeId();
+    $other_bundle = $other_settings->getTargetBundle();
+    if (!$other_entity_type_id || !$other_bundle) {
+      continue;
+    }
+
+    $other_display = $entity_display_repository->getFormDisplay($other_entity_type_id, $other_bundle, 'submission');
+    $other_browser_ids = [];
+    _mukurtu_submissions_collect_entity_browser_ids($other_display, $other_entity_type_id, $other_bundle, $other_browser_ids, []);
+    if (isset($other_browser_ids[$browser_id])) {
+      return TRUE;
+    }
+  }
+
+  return FALSE;
 }
 
 /**
