@@ -41,6 +41,7 @@ class MukurtuCmsV3MediaAudioSoundcloudTest extends MigrateTestBase {
     'media_entity_soundcloud',
     'geofield',
     'leaflet',
+    'search_api',
     'mukurtu_core',
     'mukurtu_protocol',
     'mukurtu_media',

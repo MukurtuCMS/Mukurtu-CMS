@@ -27,6 +27,7 @@ class MukurtuMigrateUpdate40002Test extends KernelTestBase {
   protected static $modules = [
     'migrate',
     'migrate_plus',
+    'search_api',
     'mukurtu_migrate',
   ];
 
