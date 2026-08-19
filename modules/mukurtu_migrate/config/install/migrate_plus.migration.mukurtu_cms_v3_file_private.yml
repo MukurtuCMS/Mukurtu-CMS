@@ -34,8 +34,16 @@ process:
   status: status
   created: timestamp
   changed: timestamp
-  uid: uid
+  uid:
+    plugin: migration_lookup
+    migration:
+      - mukurtu_cms_v3_users
+      - mukurtu_cms_v3_users_uid1
+    source: uid
 destination:
   plugin: 'entity:file'
-migration_dependencies: null
+migration_dependencies:
+  required:
+    - mukurtu_cms_v3_users
+    - mukurtu_cms_v3_users_uid1
 include: null
