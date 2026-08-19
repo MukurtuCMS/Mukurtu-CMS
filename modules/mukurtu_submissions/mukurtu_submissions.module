@@ -101,6 +101,42 @@ function mukurtu_submissions_node_insert(NodeInterface $node) {
 }
 
 /**
+ * Implements hook_node_update().
+ *
+ * Keeps the Pending Submissions queue accurate: once a reviewer moves a
+ * submitted node into a published moderation state (the only reviewer
+ * action currently available for accepting a submission - via the full
+ * node edit form or mukurtu_workflows' quick-publish review panel), the
+ * corresponding mukurtu_submission record is marked approved so it drops
+ * out of the queue's "pending" filter. Without this, review_status never
+ * left its default and the queue never emptied.
+ *
+ * Only acts while the submission is still pending, so an explicitly
+ * rejected submission (once that status is settable through some future
+ * UI) is never silently overwritten back to approved by a later save.
+ */
+function mukurtu_submissions_node_update(NodeInterface $node) {
+  if (!$node->hasField('moderation_state')) {
+    return;
+  }
+
+  $submission = mukurtu_submissions_get_submission_for_entity($node);
+  if (!$submission || $submission->getReviewStatus() !== SubmissionInterface::STATUS_PENDING) {
+    return;
+  }
+
+  $workflow = \Drupal::service('content_moderation.moderation_information')->getWorkflowForEntity($node);
+  $moderation_state = $node->get('moderation_state')->value;
+  if (!$workflow || !$workflow->getTypePlugin()->hasState($moderation_state)) {
+    return;
+  }
+
+  if ($workflow->getTypePlugin()->getState($moderation_state)->isPublishedState()) {
+    $submission->setReviewStatus(SubmissionInterface::STATUS_APPROVED)->save();
+  }
+}
+
+/**
  * Gets the uids to notify when a new submission arrives.
  *
  * Users with the "review mukurtu submissions" permission, plus any
