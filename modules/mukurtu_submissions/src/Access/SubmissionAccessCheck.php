@@ -44,7 +44,14 @@ class SubmissionAccessCheck implements AccessInterface {
         ->addCacheableDependency($form_display_config);
     }
 
-    return AccessResult::allowedIfHasPermission($account, "submit $entity_type_id $bundle content")
+    if (!$account->hasPermission("submit $entity_type_id $bundle content")) {
+      return AccessResult::forbidden('You do not have permission to submit content of this type.')
+        ->addCacheContexts(['user.permissions'])
+        ->addCacheableDependency($setting);
+    }
+
+    return AccessResult::allowed()
+      ->addCacheContexts(['user.permissions'])
       ->addCacheableDependency($setting);
   }
 
