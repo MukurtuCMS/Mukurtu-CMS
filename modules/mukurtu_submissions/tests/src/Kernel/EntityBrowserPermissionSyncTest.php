@@ -6,6 +6,7 @@ namespace Drupal\Tests\mukurtu_submissions\Kernel;
 
 use Drupal\entity_browser\Entity\EntityBrowser;
 use Drupal\mukurtu_submissions\Entity\SubmissionSettings;
+use Drupal\node\Entity\NodeType;
 use Drupal\user\Entity\Role;
 
 /**
@@ -136,6 +137,65 @@ class EntityBrowserPermissionSyncTest extends MukurtuSubmissionsKernelTestBase {
     $settings->save();
 
     $this->assertFalse(Role::load('anonymous')->hasPermission(static::PERMISSION), 'Unlike reviewer permissions, entity browser access tracks the submit permission\'s own lifecycle and should be revoked when the form is disabled.');
+  }
+
+  /**
+   * Two bundles can share the same entity browser on their own "submission"
+   * displays. Disabling one bundle's form must not revoke access the
+   * other, still-enabled bundle's form still needs - the sync used to
+   * decide revocation solely from the settings entity being saved, with
+   * no regard for whether some other enabled bundle also depends on the
+   * same browser.
+   */
+  public function testDisablingOneBundleDoesNotRevokeAccessAnotherBundleStillNeeds(): void {
+    $this->addEntityBrowserField();
+
+    $other_bundle = static::TEST_BUNDLE . '_2';
+    NodeType::create(['type' => $other_bundle, 'name' => 'Submission Test Content 2'])->save();
+    $other_display = $this->container->get('entity_display.repository')->getFormDisplay('node', $other_bundle, 'submission');
+    $other_display->setComponent('field_test_thing', [
+      'type' => 'entity_browser_entity_reference',
+      'settings' => ['entity_browser' => 'mukurtu_test_browser'],
+    ]);
+    $other_display->save();
+
+    $settings_a = SubmissionSettings::create([
+      'id' => static::TEST_BUNDLE,
+      'label' => 'Test settings A',
+      'target_entity_type_id' => 'node',
+      'target_bundle' => static::TEST_BUNDLE,
+      'status' => TRUE,
+      'access_level' => 'anonymous',
+    ]);
+    $settings_a->save();
+
+    $settings_b = SubmissionSettings::create([
+      'id' => $other_bundle,
+      'label' => 'Test settings B',
+      'target_entity_type_id' => 'node',
+      'target_bundle' => $other_bundle,
+      'status' => TRUE,
+      'access_level' => 'anonymous',
+    ]);
+    $settings_b->save();
+
+    $this->assertTrue(Role::load('anonymous')->hasPermission(static::PERMISSION));
+
+    // Disabling bundle A's form must not revoke access bundle B's
+    // still-enabled form still needs.
+    $settings_a->set('status', FALSE);
+    $settings_a->save();
+
+    $this->assertTrue(Role::load('anonymous')->hasPermission(static::PERMISSION), "Bundle B still needs this browser - disabling bundle A's form must not revoke it.");
+    $this->assertTrue(Role::load('authenticated')->hasPermission(static::PERMISSION));
+
+    // Now disable B too - nothing needs the browser any more, so it
+    // should finally be revoked.
+    $settings_b->set('status', FALSE);
+    $settings_b->save();
+
+    $this->assertFalse(Role::load('anonymous')->hasPermission(static::PERMISSION));
+    $this->assertFalse(Role::load('authenticated')->hasPermission(static::PERMISSION));
   }
 
   public function testNoEntityBrowserFieldIsANoOp(): void {
