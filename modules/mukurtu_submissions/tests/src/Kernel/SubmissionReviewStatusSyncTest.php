@@ -29,6 +29,7 @@ class SubmissionReviewStatusSyncTest extends EntityKernelTestBase {
     'field',
     'file',
     'node',
+    'options',
     'content_moderation',
     'workflows',
     'text',
@@ -43,6 +44,7 @@ class SubmissionReviewStatusSyncTest extends EntityKernelTestBase {
 
     $this->installEntitySchema('content_moderation_state');
     $this->installEntitySchema('mukurtu_submission');
+    $this->installSchema('node', ['node_access']);
 
     NodeType::create(['type' => 'sync_test', 'name' => 'Sync test'])->save();
 
