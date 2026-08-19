@@ -24,13 +24,17 @@ class CollectionItemsBrowseFormatter extends FormatterBase {
    */
   public function viewElements(FieldItemListInterface $items, $langcode) {
     $collection = $items->getEntity();
-    $nid = $collection->id();
+    $id = $collection->id();
 
-    if (!$nid) {
+    if (!$id) {
       return [];
     }
 
-    $displays = [
+    $displays = $collection->getEntityTypeId() === 'personal_collection' ? [
+      'list_results' => 'mukurtu_personal_collection_items_block',
+      'grid_results' => 'mukurtu_personal_collection_items_block_grid',
+      'map_results' => 'mukurtu_personal_collection_items_block_map',
+    ] : [
       'list_results' => 'mukurtu_collection_items_block',
       'grid_results' => 'mukurtu_collection_items_block_grid',
       'map_results' => 'mukurtu_collection_items_block_map',
@@ -43,7 +47,7 @@ class CollectionItemsBrowseFormatter extends FormatterBase {
         $results[$key] = [];
         continue;
       }
-      $results[$key] = $view->buildRenderable($display_id, [$nid]);
+      $results[$key] = $view->buildRenderable($display_id, [$id]);
     }
 
     return [
