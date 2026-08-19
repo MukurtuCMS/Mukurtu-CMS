@@ -14,6 +14,14 @@ source:
   plugin: d7_scald_atom
   atom_type: audio
 process:
+  bundle:
+    -
+      plugin: static_map
+      source: provider
+      map:
+        scald_soundcloud: soundcloud
+        scald_audio: audio
+      default_value: audio
   id: sid
   uid:
     plugin: migration_lookup
@@ -52,6 +60,7 @@ process:
       - mukurtu_cms_v3_file_private
       - mukurtu_cms_v3_file
     source: base_id
+  field_media_soundcloud: base_id
   thumbnail/target_id:
     plugin: migration_lookup
     migration:
@@ -90,7 +99,6 @@ process:
     source: scald_tags
 destination:
   plugin: 'entity:media'
-  default_bundle: audio
 migration_dependencies:
   required:
     - mukurtu_cms_v3_cultural_protocols
