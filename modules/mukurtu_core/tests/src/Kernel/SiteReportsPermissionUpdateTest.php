@@ -8,10 +8,10 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\user\Entity\Role;
 
 /**
- * Tests mukurtu_core_update_40101(), which grants the Mukurtu Manager role
+ * Tests mukurtu_core_update_40102(), which grants the Mukurtu Manager role
  * permission to view site reports.
  *
- * @see mukurtu_core_update_40101()
+ * @see mukurtu_core_update_40102()
  * @group mukurtu_core
  */
 class SiteReportsPermissionUpdateTest extends KernelTestBase {
@@ -41,7 +41,7 @@ class SiteReportsPermissionUpdateTest extends KernelTestBase {
     $role = Role::create(['id' => 'mukurtu_manager', 'label' => 'Mukurtu Manager']);
     $role->save();
 
-    mukurtu_core_update_40101();
+    mukurtu_core_update_40102();
 
     $role = Role::load('mukurtu_manager');
     $this->assertTrue($role->hasPermission('access site reports'));
@@ -55,7 +55,7 @@ class SiteReportsPermissionUpdateTest extends KernelTestBase {
     $role->grantPermission('access content');
     $role->save();
 
-    mukurtu_core_update_40101();
+    mukurtu_core_update_40102();
 
     $role = Role::load('mukurtu_manager');
     $this->assertTrue($role->hasPermission('access content'));
@@ -69,7 +69,7 @@ class SiteReportsPermissionUpdateTest extends KernelTestBase {
     $role->grantPermission('access site reports');
     $role->save();
 
-    mukurtu_core_update_40101();
+    mukurtu_core_update_40102();
 
     $role = Role::load('mukurtu_manager');
     $this->assertTrue($role->hasPermission('access site reports'));
@@ -80,7 +80,7 @@ class SiteReportsPermissionUpdateTest extends KernelTestBase {
    */
   public function testUpdateIsNoOpWithoutRole(): void {
     $this->assertNull(Role::load('mukurtu_manager'));
-    mukurtu_core_update_40101();
+    mukurtu_core_update_40102();
     $this->assertNull(Role::load('mukurtu_manager'));
   }
 
