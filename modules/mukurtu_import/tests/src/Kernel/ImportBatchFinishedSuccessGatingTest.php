@@ -200,4 +200,74 @@ class ImportBatchFinishedSuccessGatingTest extends MukurtuImportTestBase {
     $this->assertFalse($this->getTempstoreValue('batch_results_success'));
   }
 
+  /**
+   * A migration flagged as fully failed (RESULT_FAILED, e.g. a source
+   * plugin exception at rewind() before any row was processed) is not
+   * reported as a success, even though every row counter is zero and no
+   * per-row failure was ever recorded.
+   */
+  public function testMigrationFailedFlagIsNotReportedAsSuccess(): void {
+    $results = [
+      'test_migration' => [
+        '@numitems' => 0,
+        '@created' => 0,
+        '@updated' => 0,
+        '@failures' => 0,
+        '@ignored' => 0,
+        '@migration_failed' => TRUE,
+        '@name' => 'test_migration',
+      ],
+    ];
+
+    ImportBatchExecutable::batchFinishedImport(TRUE, $results, []);
+
+    $this->assertFalse($this->getTempstoreValue('batch_results_success'));
+    $this->assertFalse((bool) $this->getTempstoreValue('batch_results_noop'));
+  }
+
+  /**
+   * An end-to-end import whose migration aborts entirely at rewind() (a
+   * mapping references an "ID" column that isn't actually in the file,
+   * so the CSV source throws building the first Row) is reported as
+   * unsuccessful, and the real error reaches batch_results_messages with
+   * the "in /path/to/File.php line N" suffix stripped.
+   */
+  public function testEndToEndMigrationFailureYieldsUnsuccessfulResult(): void {
+    $data = [
+      ['title'],
+      ['New Node'],
+    ];
+    $import_file = $this->createCsvFile($data);
+
+    // Mirrors a stale "* - all fields" template: an ID -> nid mapping even
+    // though this file has no ID column.
+    $mapping = [
+      ['target' => 'nid', 'source' => 'ID'],
+      ['target' => 'title', 'source' => 'title'],
+    ];
+
+    $import_config = MukurtuImportStrategy::create(['uid' => $this->currentUser->id()]);
+    $import_config->setTargetEntityTypeId('node');
+    $import_config->setTargetBundle('protocol_aware_content');
+    $import_config->setMapping($mapping);
+    $definition = $import_config->toDefinition($import_file);
+
+    $context = [];
+    ImportBatchExecutable::batchProcessImportDefinition($definition, [], $context);
+
+    ImportBatchExecutable::batchFinishedImport(TRUE, $context['results'], []);
+
+    $this->assertFalse($this->getTempstoreValue('batch_results_success'));
+    $this->assertFalse((bool) $this->getTempstoreValue('batch_results_noop'));
+
+    $messages = $this->getTempstoreValue('batch_results_messages');
+    $this->assertNotEmpty($messages);
+    $combined = implode(' ', array_column($messages, 'message'));
+    // The message text passes through a TranslatableMarkup "@" placeholder,
+    // which HTML-escapes it -- this is correct, since it's later inserted
+    // as raw markup on the results page.
+    $this->assertStringContainsString('is defined as a source ID but has no value.', $combined);
+    $this->assertStringNotContainsString('.php line', $combined);
+  }
+
 }
