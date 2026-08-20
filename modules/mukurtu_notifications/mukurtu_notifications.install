@@ -213,7 +213,7 @@ function mukurtu_notifications_create_field_notify_frequency(): void {
       'bundle' => 'user',
       'label' => 'Email frequency',
       'description' => 'How often you want to receive notification emails.',
-      'required' => FALSE,
+      'required' => TRUE,
       'default_value' => [['value' => 'immediate']],
     ])->save();
   }
@@ -2006,4 +2006,38 @@ function mukurtu_notifications_update_40055(): void {
   $categories[] = 'user_account';
   $uid_one->set('field_notify_email_categories', array_values(array_unique($categories)));
   $uid_one->save();
+}
+
+/**
+ * Adds a real "Do not send emails" option and makes the field required.
+ *
+ * field_notify_frequency previously had no allowed value for opting out --
+ * the "N/A" radio users saw was Drupal's synthetic empty-option placeholder
+ * for optional list fields (OptionsWidgetBase::formElement()), which always
+ * saves as an empty value indistinguishable from "never touched this
+ * field" and cannot suppress email on its own. Adding a real 'none' value
+ * only works once the field stops offering that synthetic placeholder,
+ * which requires marking it required.
+ *
+ * Every existing user currently has an empty stored value (since "N/A"
+ * never actually saved anything different), and empty has always been
+ * treated as immediate sending (see _mukurtu_notifications_user_wants_email()
+ * and _mukurtu_notifications_user_wants_digest()). Backfill those users to
+ * 'immediate' explicitly first, so the required constraint doesn't leave
+ * anyone in a stale empty state and nobody's actual email behavior changes.
+ */
+function mukurtu_notifications_update_40056(): void {
+  $uids = \Drupal::entityQuery('user')->accessCheck(FALSE)->execute();
+  foreach (\Drupal\user\Entity\User::loadMultiple($uids) as $user) {
+    if ($user->hasField('field_notify_frequency') && $user->get('field_notify_frequency')->isEmpty()) {
+      $user->set('field_notify_frequency', 'immediate');
+      $user->save();
+    }
+  }
+
+  $field = \Drupal\field\Entity\FieldConfig::loadByName('user', 'user', 'field_notify_frequency');
+  if ($field && !$field->isRequired()) {
+    $field->setRequired(TRUE);
+    $field->save();
+  }
 }
