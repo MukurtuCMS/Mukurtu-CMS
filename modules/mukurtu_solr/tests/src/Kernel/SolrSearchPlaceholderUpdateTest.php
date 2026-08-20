@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_solr\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests mukurtu_solr_update_40005(), which gives the Solr-backed Browse,
@@ -12,8 +13,8 @@ use Drupal\KernelTests\KernelTestBase;
  * placeholder text as their DB-backed counterparts (#2018).
  *
  * @see mukurtu_solr_update_40005()
- * @group mukurtu_solr
  */
+#[Group('mukurtu_solr')]
 class SolrSearchPlaceholderUpdateTest extends KernelTestBase {
 
   /**

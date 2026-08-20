@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_browse\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests mukurtu_browse_update_40019(), which gives the Browse and Digital
@@ -12,8 +13,8 @@ use Drupal\KernelTests\KernelTestBase;
  * generic "Enter keywords" (#2018).
  *
  * @see mukurtu_browse_update_40019()
- * @group mukurtu_browse
  */
+#[Group('mukurtu_browse')]
 class BrowseSearchPlaceholderUpdateTest extends KernelTestBase {
 
   /**

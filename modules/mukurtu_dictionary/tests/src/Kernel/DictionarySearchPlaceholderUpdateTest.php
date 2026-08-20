@@ -5,14 +5,15 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_dictionary\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests mukurtu_dictionary_update_40043(), which gives the Dictionary search
  * box placeholder text instead of leaving it blank (#2018).
  *
  * @see mukurtu_dictionary_update_40043()
- * @group mukurtu_dictionary
  */
+#[Group('mukurtu_dictionary')]
 class DictionarySearchPlaceholderUpdateTest extends KernelTestBase {
 
   /**
