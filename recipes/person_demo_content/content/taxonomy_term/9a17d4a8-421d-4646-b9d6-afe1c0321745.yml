@@ -1,0 +1,13 @@
+_meta:
+  version: '1.0'
+  entity_type: taxonomy_term
+  uuid: 9a17d4a8-421d-4646-b9d6-afe1c0321745
+  bundle: interpersonal_relationship
+  default_langcode: en
+default:
+  name:
+    -
+      value: Colleague
+  status:
+    -
+      value: true
