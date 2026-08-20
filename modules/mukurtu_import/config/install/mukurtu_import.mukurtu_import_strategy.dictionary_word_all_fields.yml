@@ -45,7 +45,7 @@ mapping:
     source: Language
     target: field_dictionary_word_language
   -
-    source: 'Language (langcode)'
+    source: Locale
     target: langcode
   -
     source: 'Local Contexts Labels and Notices'
@@ -65,6 +65,9 @@ mapping:
   -
     source: 'Media Assets'
     target: field_media_assets
+  -
+    source: 'Multipage parent'
+    target: '-1'
   -
     source: 'Promoted to front page'
     target: promote

@@ -30,7 +30,7 @@ mapping:
     source: Identifier
     target: field_identifier
   -
-    source: 'Language (langcode)'
+    source: Language
     target: langcode
   -
     source: 'Media Tags'

@@ -33,6 +33,9 @@ mapping:
     source: 'Cultural Protocol Type'
     target: field_access_mode
   -
+    source: 'Default translation'
+    target: '-1'
+  -
     source: Description
     target: field_description
   -
@@ -42,7 +45,7 @@ mapping:
     source: ID
     target: id
   -
-    source: 'Language (langcode)'
+    source: Locale
     target: langcode
   -
     source: 'Local Contexts API key'

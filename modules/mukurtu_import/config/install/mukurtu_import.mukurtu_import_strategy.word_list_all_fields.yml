@@ -21,6 +21,9 @@ mapping:
     source: 'Cultural Protocols > Sharing Setting'
     target: field_cultural_protocols/sharing_setting
   -
+    source: 'Default translation'
+    target: '-1'
+  -
     source: Description
     target: field_description
   -
@@ -36,7 +39,7 @@ mapping:
     source: Keywords
     target: field_keywords
   -
-    source: 'Language (langcode)'
+    source: Locale
     target: langcode
   -
     source: 'Local Contexts Labels and Notices'
@@ -53,6 +56,9 @@ mapping:
   -
     source: 'Map Points'
     target: field_coverage
+  -
+    source: 'Multipage parent'
+    target: '-1'
   -
     source: 'Promoted to front page'
     target: promote

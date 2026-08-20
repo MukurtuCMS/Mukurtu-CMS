@@ -21,6 +21,9 @@ mapping:
     source: 'Cultural Protocols > Sharing Setting'
     target: field_cultural_protocols/sharing_setting
   -
+    source: 'Default translation'
+    target: '-1'
+  -
     source: Document
     target: field_media_document
   -
@@ -33,7 +36,7 @@ mapping:
     source: Identifier
     target: field_identifier
   -
-    source: 'Language (langcode)'
+    source: Locale
     target: langcode
   -
     source: 'Media Tags'
