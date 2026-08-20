@@ -53,6 +53,22 @@ class RouteSubscriberMessageSubscribeAccessTest extends UnitTestCase {
     $this->assertNull($route->getRequirement('_custom_access'));
   }
 
+  /**
+   * Both routes are marked as admin routes, so Gin renders them.
+   *
+   * @dataProvider routeNameProvider
+   */
+  public function testRouteUsesAdminTheme(string $routeName): void {
+    $collection = $this->messageSubscribeRouteCollection();
+
+    $subscriber = new RouteSubscriber();
+    $alterRoutes = new \ReflectionMethod($subscriber, 'alterRoutes');
+    $alterRoutes->invoke($subscriber, $collection);
+
+    $route = $collection->get($routeName);
+    $this->assertTrue($route->getOption('_admin_route'));
+  }
+
   public static function routeNameProvider(): array {
     return [
       'subscriptions tab' => ['message_subscribe_ui.tab'],
