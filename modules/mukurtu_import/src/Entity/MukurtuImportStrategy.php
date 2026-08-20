@@ -238,7 +238,7 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
     return \Drupal::service('entity_field.manager')->getBaseFieldDefinitions($entity_type_id);
   }
 
-  protected function getProcess() {
+  protected function getProcess(?FileInterface $file = NULL) {
     $entity_type_id = $this->getTargetEntityTypeId();
     $bundle = $this->getTargetBundle();
     $mapping = $this->getMapping();
@@ -255,6 +255,16 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
     // Remove ignored mappings. This depends on the above dupe collision behavior.
     if (isset($import_process['-1'])) {
       unset($import_process['-1']);
+    }
+
+    // Drop any mapping whose source column isn't actually a header in this
+    // file (e.g. a stale/reused template mapping optional fields the
+    // current file doesn't have). Otherwise migrate passes NULL down that
+    // field's process pipeline, which several process plugins don't handle
+    // (e.g. FormattedTextProcessCallback requires a string).
+    if ($file) {
+      $headers = $this->getCSVHeaders($file);
+      $import_process = array_filter($import_process, fn ($source) => in_array($source, $headers, TRUE));
     }
 
     // @todo Add process plugins as appropriate for the target field type.
@@ -338,7 +348,7 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
     $bundle = $this->getTargetBundle();
     $id_key = $this->entityTypeManager()->getDefinition($entity_type_id)->getKey('id');
     $uuid_key = $this->entityTypeManager()->getDefinition($entity_type_id)->getKey('uuid');
-    $process = $this->getProcess();
+    $process = $this->getProcess($file);
 
     $headers = $this->getCSVHeaders($file);
 
