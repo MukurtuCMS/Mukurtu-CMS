@@ -114,6 +114,28 @@ class NotifyFrequencyTest extends KernelTestBase {
   }
 
   /**
+   * The field-creation function itself backfills empty values too, not
+   * just the update hook.
+   *
+   * This is what actually protects uid 1 on a fresh install: it's commonly
+   * created before mukurtu_notifications_install() runs, so its field
+   * value would otherwise stay empty even though FieldConfig's
+   * default_value is 'immediate' -- that default only applies to entities
+   * created after the field already exists.
+   */
+  public function testFieldCreationBackfillsExistingEmptyValues(): void {
+    $existingAdmin = User::create(['name' => 'existing_admin', 'status' => 1]);
+    $existingAdmin->set('field_notify_frequency', NULL);
+    $existingAdmin->save();
+    $this->assertTrue($existingAdmin->get('field_notify_frequency')->isEmpty());
+
+    mukurtu_notifications_create_field_notify_frequency();
+
+    $existingAdmin = User::load($existingAdmin->id());
+    $this->assertSame('immediate', $existingAdmin->get('field_notify_frequency')->value);
+  }
+
+  /**
    * The update hook backfills only users with an empty stored value.
    *
    * A brand new user picks up field_notify_frequency's 'immediate' default

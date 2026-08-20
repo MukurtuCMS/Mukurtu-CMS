@@ -186,11 +186,16 @@ function mukurtu_notifications_create_field_notify_email_categories(): void {
 
 /**
  * Creates the field_notify_frequency storage and attachment on the user
- * entity if missing.
+ * entity if missing, and backfills any user with an empty value to
+ * 'immediate'.
  *
- * No backfill needed: _mukurtu_notifications_user_wants_digest() already
- * treats an empty/unset value as "immediate" (today's behavior for every
- * existing user), so only the default for brand-new users needs setting.
+ * A user can end up with an empty stored value in more than one way: sites
+ * upgrading from before this field existed, or even a fresh install, since
+ * uid 1 is typically created before this hook runs and FieldConfig's
+ * default_value only populates entities created after the field exists.
+ * Backfilling unconditionally here -- the same way this file's
+ * field_notify_email_categories creation function does above -- covers
+ * every path that calls this function, not just the update-hook path.
  */
 function mukurtu_notifications_create_field_notify_frequency(): void {
   if (!\Drupal\field\Entity\FieldStorageConfig::loadByName('user', 'field_notify_frequency')) {
@@ -219,6 +224,14 @@ function mukurtu_notifications_create_field_notify_frequency(): void {
   }
 
   \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
+
+  $uids = \Drupal::entityQuery('user')->accessCheck(FALSE)->execute();
+  foreach (\Drupal\user\Entity\User::loadMultiple($uids) as $user) {
+    if ($user->hasField('field_notify_frequency') && $user->get('field_notify_frequency')->isEmpty()) {
+      $user->set('field_notify_frequency', 'immediate');
+      $user->save();
+    }
+  }
 }
 
 /**
@@ -2019,21 +2032,14 @@ function mukurtu_notifications_update_40055(): void {
  * only works once the field stops offering that synthetic placeholder,
  * which requires marking it required.
  *
- * Every existing user currently has an empty stored value (since "N/A"
- * never actually saved anything different), and empty has always been
- * treated as immediate sending (see _mukurtu_notifications_user_wants_email()
- * and _mukurtu_notifications_user_wants_digest()). Backfill those users to
- * 'immediate' explicitly first, so the required constraint doesn't leave
- * anyone in a stale empty state and nobody's actual email behavior changes.
+ * mukurtu_notifications_create_field_notify_frequency() already backfills
+ * any user with an empty stored value to 'immediate' (today's actual
+ * behavior for such users; see _mukurtu_notifications_user_wants_email()),
+ * so calling it here first ensures the required constraint below doesn't
+ * leave anyone in a stale empty state before it's enforced.
  */
 function mukurtu_notifications_update_40056(): void {
-  $uids = \Drupal::entityQuery('user')->accessCheck(FALSE)->execute();
-  foreach (\Drupal\user\Entity\User::loadMultiple($uids) as $user) {
-    if ($user->hasField('field_notify_frequency') && $user->get('field_notify_frequency')->isEmpty()) {
-      $user->set('field_notify_frequency', 'immediate');
-      $user->save();
-    }
-  }
+  mukurtu_notifications_create_field_notify_frequency();
 
   $field = \Drupal\field\Entity\FieldConfig::loadByName('user', 'user', 'field_notify_frequency');
   if ($field && !$field->isRequired()) {
