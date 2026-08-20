@@ -35,6 +35,7 @@ dependencies:
   - 'geofield:geofield'
   - 'leaflet:leaflet'
   - 'media_entity_soundcloud:media_entity_soundcloud'
+  - 'message_subscribe:message_subscribe_ui'
   - 'original_date:original_date'
   - 'paragraphs:paragraphs'
   - 'pathauto:pathauto'
