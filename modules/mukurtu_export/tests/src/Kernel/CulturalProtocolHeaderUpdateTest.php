@@ -4,7 +4,6 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\mukurtu_export\Kernel;
 
-use Drupal\KernelTests\KernelTestBase;
 use Drupal\mukurtu_export\Entity\CsvExporter;
 use PHPUnit\Framework\Attributes\Group;
 
@@ -15,15 +14,7 @@ use PHPUnit\Framework\Attributes\Group;
  * @see mukurtu_export_update_40017()
  */
 #[Group('mukurtu_export')]
-class CulturalProtocolHeaderUpdateTest extends KernelTestBase {
-
-  /**
-   * {@inheritdoc}
-   */
-  protected static $modules = [
-    'system',
-    'mukurtu_export',
-  ];
+class CulturalProtocolHeaderUpdateTest extends CsvExportFieldTestBase {
 
   /**
    * {@inheritdoc}
