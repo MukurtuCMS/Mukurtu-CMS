@@ -33,7 +33,7 @@ mapping:
     source: 'Image > File ID'
     target: field_media_image/target_id
   -
-    source: 'Language (langcode)'
+    source: Locale
     target: langcode
   -
     source: 'Media Tags'
