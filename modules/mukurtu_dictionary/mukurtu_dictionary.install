@@ -1424,7 +1424,7 @@ function mukurtu_dictionary_update_40041(): void {
  * Give the Dictionary search box placeholder text instead of leaving it
  * blank (#2018).
  */
-function mukurtu_dictionary_update_40042(): void {
+function mukurtu_dictionary_update_40043(): void {
   $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_dictionary');
   if ($config->isNew()) {
     return;
