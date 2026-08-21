@@ -24,8 +24,8 @@ entity_fields_export_list:
     langcode: Locale
     uid: 'Authored by'
     title: Title
-    field_cultural_protocols/protocols: Protocols
-    field_cultural_protocols/sharing_setting: 'Sharing Setting'
+    field_cultural_protocols/protocols: 'Cultural Protocols > Protocols'
+    field_cultural_protocols/sharing_setting: 'Cultural Protocols > Sharing Setting'
     field_child_collections: Sub-Collections
     field_collection_image/target_id: 'Image > File ID'
     field_collection_image/alt: 'Image > Alternative text'
@@ -48,8 +48,8 @@ entity_fields_export_list:
     langcode: Locale
     uid: 'Authored by'
     title: Title
-    field_cultural_protocols/protocols: Protocols
-    field_cultural_protocols/sharing_setting: 'Sharing Setting'
+    field_cultural_protocols/protocols: 'Cultural Protocols > Protocols'
+    field_cultural_protocols/sharing_setting: 'Cultural Protocols > Sharing Setting'
     field_glossary_entry: 'Glossary Entry'
     field_keywords: Keywords
     field_dictionary_word_language: Language
@@ -81,8 +81,8 @@ entity_fields_export_list:
     uid: 'Authored by'
     title: Title
     default_langcode: 'Default translation'
-    field_cultural_protocols/protocols: Protocols
-    field_cultural_protocols/sharing_setting: 'Sharing Setting'
+    field_cultural_protocols/protocols: 'Cultural Protocols > Protocols'
+    field_cultural_protocols/sharing_setting: 'Cultural Protocols > Sharing Setting'
     field_cultural_narrative: 'Cultural Narrative'
     field_description: Description
     field_coverage_description: 'Location Description'
@@ -138,8 +138,8 @@ entity_fields_export_list:
     langcode: Locale
     uid: 'Authored by'
     title: Title
-    field_cultural_protocols/protocols: Protocols
-    field_cultural_protocols/sharing_setting: 'Sharing Setting'
+    field_cultural_protocols/protocols: 'Cultural Protocols > Protocols'
+    field_cultural_protocols/sharing_setting: 'Cultural Protocols > Sharing Setting'
     field_keywords: Keywords
     field_media_assets: 'Media Assets'
     field_date_born: 'Date Born'
@@ -163,8 +163,8 @@ entity_fields_export_list:
     langcode: Locale
     uid: 'Authored by'
     title: Title
-    field_cultural_protocols/protocols: Protocols
-    field_cultural_protocols/sharing_setting: 'Sharing Setting'
+    field_cultural_protocols/protocols: 'Cultural Protocols > Protocols'
+    field_cultural_protocols/sharing_setting: 'Cultural Protocols > Sharing Setting'
     field_keywords: Keywords
     field_media_assets: 'Media Assets'
     field_sections: 'Text Sections'
@@ -183,8 +183,8 @@ entity_fields_export_list:
     langcode: Locale
     uid: 'Authored by'
     title: Title
-    field_cultural_protocols/protocols: Protocols
-    field_cultural_protocols/sharing_setting: 'Sharing Setting'
+    field_cultural_protocols/protocols: 'Cultural Protocols > Protocols'
+    field_cultural_protocols/sharing_setting: 'Cultural Protocols > Sharing Setting'
     field_description: Description
     field_keywords: Keywords
     field_words: Words
@@ -204,8 +204,8 @@ entity_fields_export_list:
     langcode: Locale
     uid: 'Authored by'
     name: Name
-    field_cultural_protocols/protocols: Protocols
-    field_cultural_protocols/sharing_setting: 'Sharing Setting'
+    field_cultural_protocols/protocols: 'Cultural Protocols > Protocols'
+    field_cultural_protocols/sharing_setting: 'Cultural Protocols > Sharing Setting'
     field_media_audio_file: 'Audio file'
     field_transcription: Transcription
     field_contributor: Contributor
@@ -221,8 +221,8 @@ entity_fields_export_list:
     langcode: Locale
     uid: 'Authored by'
     name: Name
-    field_cultural_protocols/protocols: Protocols
-    field_cultural_protocols/sharing_setting: 'Sharing Setting'
+    field_cultural_protocols/protocols: 'Cultural Protocols > Protocols'
+    field_cultural_protocols/sharing_setting: 'Cultural Protocols > Sharing Setting'
     field_extracted_text: 'Extracted Text'
     field_media_document: Document
     field_people: People
@@ -240,8 +240,8 @@ entity_fields_export_list:
     thumbnail/target_id: 'Thumbnail > File ID'
     thumbnail/alt: 'Thumbnail > Alternative text'
     default_langcode: 'Default translation'
-    field_cultural_protocols/protocols: Protocols
-    field_cultural_protocols/sharing_setting: 'Sharing Setting'
+    field_cultural_protocols/protocols: 'Cultural Protocols > Protocols'
+    field_cultural_protocols/sharing_setting: 'Cultural Protocols > Sharing Setting'
     field_media_external_embed: 'External Embed'
     field_thumbnail/target_id: 'Thumbnail > File ID'
     field_thumbnail/alt: 'Thumbnail > Alternative text'
@@ -253,8 +253,8 @@ entity_fields_export_list:
     langcode: Locale
     uid: 'Authored by'
     name: Name
-    field_cultural_protocols/protocols: Protocols
-    field_cultural_protocols/sharing_setting: 'Sharing Setting'
+    field_cultural_protocols/protocols: 'Cultural Protocols > Protocols'
+    field_cultural_protocols/sharing_setting: 'Cultural Protocols > Sharing Setting'
     field_media_image/target_id: 'Image > File ID'
     field_media_image/alt: 'Image > Alternative text'
     field_people: People
@@ -268,8 +268,8 @@ entity_fields_export_list:
     langcode: Locale
     uid: 'Authored by'
     name: Name
-    field_cultural_protocols/protocols: Protocols
-    field_cultural_protocols/sharing_setting: 'Sharing Setting'
+    field_cultural_protocols/protocols: 'Cultural Protocols > Protocols'
+    field_cultural_protocols/sharing_setting: 'Cultural Protocols > Sharing Setting'
     field_media_oembed_video: 'Video URL'
     field_people: People
     field_thumbnail/target_id: 'Thumbnail > File ID'
@@ -287,8 +287,8 @@ entity_fields_export_list:
     name: Name
     thumbnail/target_id: 'Thumbnail > File ID'
     thumbnail/alt: 'Thumbnail > Alternative text'
-    field_cultural_protocols/protocols: Protocols
-    field_cultural_protocols/sharing_setting: 'Sharing Setting'
+    field_cultural_protocols/protocols: 'Cultural Protocols > Protocols'
+    field_cultural_protocols/sharing_setting: 'Cultural Protocols > Sharing Setting'
     field_media_soundcloud: 'SoundCloud URL'
     field_media_tags: 'Media Tags'
     field_people: People
@@ -302,8 +302,8 @@ entity_fields_export_list:
     langcode: Locale
     uid: 'Authored by'
     name: Name
-    field_cultural_protocols/protocols: Protocols
-    field_cultural_protocols/sharing_setting: 'Sharing Setting'
+    field_cultural_protocols/protocols: 'Cultural Protocols > Protocols'
+    field_cultural_protocols/sharing_setting: 'Cultural Protocols > Sharing Setting'
     field_media_video_file: 'Video file'
     field_people: People
     field_thumbnail/target_id: 'Thumbnail > File ID'
