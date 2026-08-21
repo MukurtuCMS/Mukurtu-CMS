@@ -147,4 +147,23 @@ class ShippedTemplateImportTest extends MukurtuImportTestBase {
     $this->assertEquals('all', $updated_node->getSharingSetting());
   }
 
+  /**
+   * The Cultural Protocols field process plugin's dropdown/template labels
+   * for its two sub-properties must be the bare "Protocols"/"Sharing
+   * Setting" mukurtu_export actually writes, not the generic "{field
+   * label} > {property label}" format the base plugin class falls back to
+   * (which would show as "Cultural Protocols > Protocols" and break the
+   * "Download CSV Template" feature's round trip).
+   */
+  public function testCulturalProtocolsSupportedPropertyLabels() {
+    $field_definitions = \Drupal::service('entity_field.manager')->getFieldDefinitions('node', 'protocol_aware_content');
+    $field_definition = $field_definitions['field_cultural_protocols'];
+
+    $plugin = \Drupal::service('plugin.manager.mukurtu_import_field_process')->getInstance(['field_definition' => $field_definition]);
+    $properties = $plugin->getSupportedProperties($field_definition);
+
+    $this->assertSame('Protocols', (string) $properties['protocols']['label']);
+    $this->assertSame('Sharing Setting', (string) $properties['sharing_setting']['label']);
+  }
+
 }

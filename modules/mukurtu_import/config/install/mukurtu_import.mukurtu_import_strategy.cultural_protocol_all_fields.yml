@@ -15,6 +15,12 @@ mapping:
     source: 'Banner Image'
     target: '-1'
   -
+    source: 'Banner Image > Alternative text'
+    target: field_banner_image/alt
+  -
+    source: 'Banner Image > File ID'
+    target: field_banner_image/target_id
+  -
     source: 'Comments Require Approval'
     target: field_comment_require_approval
   -
@@ -62,6 +68,12 @@ mapping:
   -
     source: 'Thumbnail Image'
     target: '-1'
+  -
+    source: 'Thumbnail Image > Alternative text'
+    target: field_thumbnail_image/alt
+  -
+    source: 'Thumbnail Image > File ID'
+    target: field_thumbnail_image/target_id
   -
     source: UUID
     target: uuid

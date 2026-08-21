@@ -7,7 +7,7 @@ namespace Drupal\Tests\mukurtu_import\Kernel;
 use Drupal\KernelTests\KernelTestBase;
 
 /**
- * Tests mukurtu_import_update_40031()-_40037(), which correct stale source
+ * Tests mukurtu_import_update_40031()-_40038(), which correct stale source
  * header labels and add missing mapping entries to existing sites' saved
  * import strategy configs.
  *
@@ -18,6 +18,7 @@ use Drupal\KernelTests\KernelTestBase;
  * @see mukurtu_import_update_40035()
  * @see mukurtu_import_update_40036()
  * @see mukurtu_import_update_40037()
+ * @see mukurtu_import_update_40038()
  */
 class ImportTemplateMappingUpdateTest extends KernelTestBase {
 
@@ -336,6 +337,41 @@ class ImportTemplateMappingUpdateTest extends KernelTestBase {
   }
 
   /**
+   * The sub-column entries added by mukurtu_export_update_40017() get a
+   * matching mapping entry appended when missing.
+   */
+  public function testSubcolumnMappingEntriesAddedWhenMissing(): void {
+    $this->seedConfig('word_list_all_fields', [
+      ['source' => 'Title', 'target' => 'title'],
+      ['source' => 'Image', 'target' => '-1'],
+    ]);
+
+    mukurtu_import_update_40038();
+
+    $mapping = $this->getMapping('word_list_all_fields');
+    $matches = array_filter($mapping, fn (array $m) => ($m['source'] ?? NULL) === 'Image > File ID');
+    $this->assertCount(1, $matches);
+    $this->assertSame('field_word_list_image/target_id', reset($matches)['target']);
+  }
+
+  /**
+   * An existing entry for one of the newly-added sub-columns is not
+   * duplicated.
+   */
+  public function testSubcolumnMappingEntriesNotDuplicatedWhenPresent(): void {
+    $this->seedConfig('word_list_all_fields', [
+      ['source' => 'Title', 'target' => 'title'],
+      ['source' => 'Image > File ID', 'target' => 'field_word_list_image/target_id'],
+    ]);
+
+    mukurtu_import_update_40038();
+
+    $mapping = $this->getMapping('word_list_all_fields');
+    $matches = array_filter($mapping, fn (array $m) => ($m['source'] ?? NULL) === 'Image > File ID');
+    $this->assertCount(1, $matches);
+  }
+
+  /**
    * A config that was never installed (isNew()) is skipped without error by
    * every hook.
    */
@@ -347,6 +383,7 @@ class ImportTemplateMappingUpdateTest extends KernelTestBase {
     mukurtu_import_update_40035();
     mukurtu_import_update_40036();
     mukurtu_import_update_40037();
+    mukurtu_import_update_40038();
     $this->assertTrue(\Drupal::config('mukurtu_import.mukurtu_import_strategy.audio_all_fields')->isNew());
   }
 

@@ -199,6 +199,8 @@ entity_fields_export_list:
     field_local_contexts_labels_and_notices: 'Local Contexts Labels and Notices'
     field_coverage: 'Map Points'
     field_multipage_page_of: 'Multipage parent'
+    field_word_list_image/target_id: 'Image > File ID'
+    field_word_list_image/alt: 'Image > Alternative text'
   media__audio:
     mid: ID
     langcode: Locale
@@ -358,6 +360,10 @@ entity_fields_export_list:
     field_local_contexts_api_key: 'Local Contexts API key'
     field_local_contexts_description: 'Local Contexts Description'
     default_langcode: 'Default translation'
+    field_banner_image/target_id: 'Banner Image > File ID'
+    field_banner_image/alt: 'Banner Image > Alternative text'
+    field_thumbnail_image/target_id: 'Thumbnail Image > File ID'
+    field_thumbnail_image/alt: 'Thumbnail Image > Alternative text'
   paragraph__dictionary_word_entry:
     id: ID
     langcode: 'Language code'
@@ -421,6 +427,8 @@ entity_fields_export_list:
     field_sentence_recording: Recording
     parent_id: 'Parent ID'
     default_langcode: 'Default translation'
+    field_sentence_recording/target_id: 'Recording > File ID'
+    field_sentence_recording/alt: 'Recording > Alternative text'
   paragraph__text_section_with_title:
     id: ID
     langcode: 'Language code'
