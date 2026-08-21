@@ -103,6 +103,7 @@ trait ImportFormTrait {
   protected function buildTargetOptions(string $entity_type_id, ?string $bundle = NULL): array {
     $entity_definition = $this->entityTypeManager->getDefinition($entity_type_id);
     $entity_keys = $entity_definition->getKeys();
+    $export_overrides = $this->getExportLabelOverrides($entity_type_id, $bundle);
 
     $options = [-1 => $this->t('Ignore - Do not import')];
     foreach ($this->getFieldDefinitions($entity_type_id, $bundle) as $field_name => $field_definition) {
@@ -111,16 +112,19 @@ trait ImportFormTrait {
 
       if (!empty($supported_properties)) {
         foreach ($supported_properties as $property_name => $property_info) {
-          $options["{$field_name}/{$property_name}"] = $property_info['label'];
+          $target_key = "{$field_name}/{$property_name}";
+          $options[$target_key] = $export_overrides[$target_key] ?? $property_info['label'];
         }
       }
       else {
-        $options[$field_name] = $field_definition->getLabel();
+        $options[$field_name] = $export_overrides[$field_name] ?? $field_definition->getLabel();
       }
     }
 
-    // Disambiguate the Language field from the langcode base field.
-    if (isset($options[$entity_keys['langcode']])) {
+    // Disambiguate the Language field from the langcode base field, unless
+    // mukurtu_export's own header for it already disambiguates it (e.g.
+    // "Locale") - see getExportLabelOverrides().
+    if (isset($options[$entity_keys['langcode']]) && !isset($export_overrides[$entity_keys['langcode']])) {
       $options[$entity_keys['langcode']] .= $this->t(' (langcode)');
     }
 
@@ -129,6 +133,48 @@ trait ImportFormTrait {
     unset($options[-1]);
     natcasesort($options);
     return $ignore + $options;
+  }
+
+  /**
+   * Gets the real column headers mukurtu_export writes for a bundle.
+   *
+   * Several columns get a deliberately different header than the field's
+   * own Drupal label when actually exported (e.g. community's "name" field
+   * is labeled "Community name" in its field settings but written as bare
+   * "Name" in the CSV; langcode's real header varies per bundle between
+   * "Locale", "Language", and "Language code"). Since none of that is
+   * derivable generically, this looks it up from whichever installed
+   * csv_exporter config has an entry for this bundle, so the Customize
+   * Settings dropdown, its auto-mapper, and the "Download CSV Template"
+   * feature all show labels consistent with what a real export/reimport
+   * round trip actually uses.
+   *
+   * @param string $entity_type_id
+   *   The entity type ID.
+   * @param string|null $bundle
+   *   The bundle.
+   *
+   * @return array
+   *   An array of target key (field name, or "field_name/property") to real
+   *   export header label. Empty if mukurtu_export isn't installed or has
+   *   no matching entry for this bundle (e.g. a custom bundle not covered
+   *   by any shipped or site-configured exporter).
+   */
+  protected function getExportLabelOverrides(string $entity_type_id, ?string $bundle): array {
+    if (!\Drupal::moduleHandler()->moduleExists('mukurtu_export')) {
+      return [];
+    }
+
+    $lookup_key = "{$entity_type_id}__{$bundle}";
+    $storage = $this->entityTypeManager->getStorage('csv_exporter');
+    foreach ($storage->loadMultiple() as $exporter) {
+      $list = $exporter->get('entity_fields_export_list')[$lookup_key] ?? NULL;
+      if ($list) {
+        return $list;
+      }
+    }
+
+    return [];
   }
 
   /**

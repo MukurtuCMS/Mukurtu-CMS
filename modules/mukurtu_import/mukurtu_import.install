@@ -928,3 +928,52 @@ function mukurtu_import_update_40037(): void {
     }
   }
 }
+
+/**
+ * Add mapping entries for the sub-columns added by
+ * mukurtu_export_update_40017(): word_list's "Image", sample_sentence's
+ * "Recording", and protocol's "Banner Image"/"Thumbnail Image" now have a
+ * real target_id/alt column to map, the same way collection's/community's
+ * always did. Only adds an entry if the config doesn't already have one
+ * for that column; leaves the still-unusable bare column ignored.
+ */
+function mukurtu_import_update_40038(): void {
+  $additions = [
+    'word_list_all_fields' => [
+      ['Image > File ID', 'field_word_list_image/target_id'],
+      ['Image > Alternative text', 'field_word_list_image/alt'],
+    ],
+    'sample_sentence_all_fields' => [
+      ['Recording > File ID', 'field_sentence_recording/target_id'],
+      ['Recording > Alternative text', 'field_sentence_recording/alt'],
+    ],
+    'cultural_protocol_all_fields' => [
+      ['Banner Image > File ID', 'field_banner_image/target_id'],
+      ['Banner Image > Alternative text', 'field_banner_image/alt'],
+      ['Thumbnail Image > File ID', 'field_thumbnail_image/target_id'],
+      ['Thumbnail Image > Alternative text', 'field_thumbnail_image/alt'],
+    ],
+  ];
+
+  foreach ($additions as $id => $entries) {
+    $config_name = "mukurtu_import.mukurtu_import_strategy.{$id}";
+    $config = \Drupal::configFactory()->getEditable($config_name);
+    if ($config->isNew()) {
+      continue;
+    }
+
+    $mapping = $config->get('mapping') ?? [];
+    $changed = FALSE;
+    foreach ($entries as [$source, $target]) {
+      $has_entry = (bool) array_filter($mapping, fn ($entry) => ($entry['source'] ?? NULL) === $source);
+      if (!$has_entry) {
+        $mapping[] = ['source' => $source, 'target' => $target];
+        $changed = TRUE;
+      }
+    }
+
+    if ($changed) {
+      $config->set('mapping', $mapping)->save();
+    }
+  }
+}

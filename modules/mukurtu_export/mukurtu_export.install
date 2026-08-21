@@ -513,3 +513,50 @@ function mukurtu_export_update_40018(): void {
     $node_type->save();
   }
 }
+
+/**
+ * Add missing target_id/alt sub-columns for single-value media reference
+ * fields that were never split out like the rest (word_list's "Image",
+ * sample_sentence's "Recording", and protocol's "Banner Image"/"Thumbnail
+ * Image", which - unlike community's identically-typed fields - never got
+ * these columns added). Without them, those fields have no re-importable
+ * column at all in the CSV round trip.
+ */
+function mukurtu_export_update_40019(): void {
+  $additions = [
+    'node__word_list' => [
+      'field_word_list_image/target_id' => 'Image > File ID',
+      'field_word_list_image/alt' => 'Image > Alternative text',
+    ],
+    'paragraph__sample_sentence' => [
+      'field_sentence_recording/target_id' => 'Recording > File ID',
+      'field_sentence_recording/alt' => 'Recording > Alternative text',
+    ],
+    'protocol__protocol' => [
+      'field_banner_image/target_id' => 'Banner Image > File ID',
+      'field_banner_image/alt' => 'Banner Image > Alternative text',
+      'field_thumbnail_image/target_id' => 'Thumbnail Image > File ID',
+      'field_thumbnail_image/alt' => 'Thumbnail Image > Alternative text',
+    ],
+  ];
+
+  $storage = \Drupal::entityTypeManager()->getStorage('csv_exporter');
+  foreach ($storage->loadMultiple() as $exporter) {
+    $list = $exporter->get('entity_fields_export_list') ?? [];
+    $changed = FALSE;
+    foreach ($additions as $bundle_key => $fields) {
+      if (!isset($list[$bundle_key])) {
+        continue;
+      }
+      foreach ($fields as $field_name => $label) {
+        if (!isset($list[$bundle_key][$field_name])) {
+          $list[$bundle_key][$field_name] = $label;
+          $changed = TRUE;
+        }
+      }
+    }
+    if ($changed) {
+      $exporter->set('entity_fields_export_list', $list)->save();
+    }
+  }
+}

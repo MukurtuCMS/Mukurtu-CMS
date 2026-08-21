@@ -30,6 +30,12 @@ mapping:
     source: Image
     target: '-1'
   -
+    source: 'Image > Alternative text'
+    target: field_word_list_image/alt
+  -
+    source: 'Image > File ID'
+    target: field_word_list_image/target_id
+  -
     source: Keywords
     target: field_keywords
   -
