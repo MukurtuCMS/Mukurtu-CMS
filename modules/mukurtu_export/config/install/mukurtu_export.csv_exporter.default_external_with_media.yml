@@ -35,7 +35,6 @@ entity_fields_export_list:
     field_related_content: 'Related Content'
     field_summary: Summary
     default_langcode: 'Default translation'
-    field_collection_image: Image
     field_source: Source
     field_coverage_description: 'Location Description'
     field_location: Location
@@ -68,7 +67,6 @@ entity_fields_export_list:
     field_translation: Translation
     field_word_origin: 'Word Origin'
     field_word_type: 'Word Type'
-    field_thumbnail: Thumbnail
     field_local_contexts_projects: 'Local Contexts Projects'
     field_local_contexts_labels_and_notices: 'Local Contexts Labels and Notices'
     field_additional_word_entries: 'Word Entries'
@@ -190,7 +188,6 @@ entity_fields_export_list:
     default_langcode: 'Default translation'
     field_summary: Summary
     field_source: Source
-    field_word_list_image: Image
     field_related_content: 'Related Content'
     field_coverage_description: 'Location Description'
     field_location: Location
@@ -334,8 +331,6 @@ entity_fields_export_list:
     field_banner_image/alt: 'Banner Image > Alternative text'
     field_thumbnail_image/target_id: 'Thumbnail Image > File ID'
     field_thumbnail_image/alt: 'Thumbnail Image > Alternative text'
-    field_banner_image: 'Banner Image'
-    field_thumbnail_image: 'Thumbnail Image'
     field_membership_display: 'Membership Display'
     field_local_contexts_api_key: 'Local Contexts API key'
     field_local_contexts_description: 'Local Contexts Description'
@@ -353,8 +348,6 @@ entity_fields_export_list:
     field_comment_view_access: 'Who can view comments'
     field_comment_post_access: 'Who can leave comments'
     field_featured_content: 'Featured Content'
-    field_banner_image: 'Banner Image'
-    field_thumbnail_image: 'Thumbnail Image'
     field_membership_display: 'Membership Display'
     field_local_contexts_api_key: 'Local Contexts API key'
     field_local_contexts_description: 'Local Contexts Description'
@@ -423,7 +416,6 @@ entity_fields_export_list:
   paragraph__sample_sentence:
     langcode: 'Language code'
     field_sentence: 'Sample Sentence'
-    field_sentence_recording: Recording
     parent_id: 'Parent ID'
     default_langcode: 'Default translation'
     uuid: UUID
