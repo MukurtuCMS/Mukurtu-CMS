@@ -1,0 +1,66 @@
+<?php
+
+declare(strict_types = 1);
+
+namespace Drupal\Tests\mukurtu_import\Kernel;
+
+use Drupal\migrate\Plugin\MigrationInterface;
+use Drupal\mukurtu_import\Entity\MukurtuImportStrategy;
+use Drupal\mukurtu_import\ImportBatchExecutable;
+
+/**
+ * Tests that a migration aborting with RESULT_FAILED is honestly reported,
+ * rather than silently showing as a success.
+ *
+ * Regression test: MigrateExecutable::import() catches a source plugin
+ * exception thrown while building the very first Row (e.g. a mapped 'ids'
+ * column that doesn't exist in the file), logs it to the 'migrate' watchdog
+ * channel, and returns MigrationInterface::RESULT_FAILED -- no PHP
+ * exception escapes. ImportBatchExecutable::batchProcessImportDefinition()
+ * only distinguished RESULT_INCOMPLETE from "anything else" and never
+ * recorded this case in the created/updated/failures counts or messages,
+ * so the Import Results page reported "All files imported successfully"
+ * with 0/0/0 counts even though nothing was imported.
+ */
+class ImportBatchFailureReportingTest extends MukurtuImportTestBase {
+
+  /**
+   * Test that a RESULT_FAILED migration is recorded as a failure with an
+   * explanatory message, not a silent success.
+   */
+  public function testFailedMigrationIsReportedAsFailure() {
+    $strategy = MukurtuImportStrategy::create(['uid' => $this->currentUser->id()]);
+    $strategy->setTargetEntityTypeId('user');
+    $strategy->setTargetBundle('user');
+    // Deliberately map a nonexistent 'ID' column to the entity's own ID
+    // key, reproducing the exact condition that makes
+    // MigrateExecutable::import()'s $source->rewind() throw and return
+    // RESULT_FAILED before any row is processed.
+    $strategy->setMapping([
+      ['source' => 'Name', 'target' => 'name'],
+      ['source' => 'ID', 'target' => 'uid'],
+    ]);
+
+    $file = $this->createCsvFile([
+      ['Name'],
+      ['reportingtestuser'],
+    ]);
+    $this->assertNotNull($file);
+
+    $definition = $strategy->toDefinition($file);
+    $options = ['limit' => 0, 'update' => 1, 'force' => 0, 'sync' => FALSE];
+    $context = [];
+
+    ImportBatchExecutable::batchProcessImportDefinition($definition, $options, $context);
+
+    $migration_id = $definition['id'];
+    $this->assertGreaterThan(0, $context['results'][$migration_id]['@failures']);
+    $this->assertEquals(0, $context['results'][$migration_id]['@created']);
+    $this->assertNotEmpty($context['results']['messages']);
+
+    // No user should have been created.
+    $users = $this->entityTypeManager->getStorage('user')->loadByProperties(['name' => 'reportingtestuser']);
+    $this->assertEmpty($users);
+  }
+
+}

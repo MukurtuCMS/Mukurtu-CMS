@@ -106,6 +106,21 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
     // Do the import.
     $result = $executable->import();
 
+    // A RESULT_FAILED return means the migration aborted before any rows
+    // could be processed (e.g. the source plugin couldn't build a Row at
+    // all -- see MigrateExecutable::import()'s handling of $source->rewind()
+    // exceptions). Unlike a per-row failure, nothing gets recorded in the ID
+    // map for this, so without flagging it here the created/updated/failures
+    // counts all stay at 0 and the results page reports a false success. The
+    // full exception detail is already logged to the 'migrate' watchdog
+    // channel by MigrateExecutable itself.
+    if ($result === MigrationInterface::RESULT_FAILED) {
+      $context['results'][$migration->id()]['@failures']++;
+      $context['results']['messages'][] = (object) [
+        'message' => t('The import failed before any rows could be processed. See the Recent log messages report for details.'),
+      ];
+    }
+
     // Save the messages.
     $context['results']['messages'] = array_merge($context['results']['messages'], iterator_to_array($executable->getIdMap()->getMessages()));
 
@@ -192,7 +207,30 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
     }
     $store->set('batch_results_messages', $messages);
 
-    mukurtu_notifications_notify_batch_import_report($imported_count, static::buildResultsSummary($per_migration_summary, $messages));
+    // Summarize created/updated/failed counts per target entity type. Unlike
+    // node/media/community/protocol/taxonomy_term, User entities have no
+    // revision log to filter a results View by, so the results form falls
+    // back to this simple count summary for 'user' migrations.
+    $summary = [];
+    foreach ($results as $migration_id => $data) {
+      if (!is_array($data) || !isset($data['@created'])) {
+        continue;
+      }
+      // Migration IDs are formatted as "{uid}__{fid}__{entity_type}__{bundle}".
+      $parts = explode('__', (string) $migration_id);
+      $entity_type_id = $parts[2] ?? NULL;
+      if (!$entity_type_id) {
+        continue;
+      }
+      $summary[$entity_type_id]['created'] = ($summary[$entity_type_id]['created'] ?? 0) + $data['@created'];
+      $summary[$entity_type_id]['updated'] = ($summary[$entity_type_id]['updated'] ?? 0) + $data['@updated'];
+      $summary[$entity_type_id]['failures'] = ($summary[$entity_type_id]['failures'] ?? 0) + $data['@failures'];
+    }
+    $store->set('batch_results_summary', $summary);
+
+    if (\Drupal::moduleHandler()->moduleExists('mukurtu_notifications')) {
+      mukurtu_notifications_notify_batch_import_report($imported_count, static::buildResultsSummary($per_migration_summary, $messages));
+    }
 
     // Clean up ID map tables for all migrations in this batch.
     // These are no longer needed after the import is complete.

@@ -175,6 +175,17 @@ class EntityReference extends MukurtuImportFieldProcessPluginBase implements Con
       ];
     }
 
+    // User role ref (e.g. the 'roles' field on the user entity). Looked up by
+    // machine name or label; the Administrator role is always rejected.
+    if ($ref_type == 'user_role') {
+      $ref_process = [
+        'plugin' => 'mukurtu_role_lookup',
+        'value_key' => 'label',
+        'ignore_case' => TRUE,
+        'entity_type' => 'user_role',
+      ];
+    }
+
     $process[] = $ref_process;
 
     // Attach source value to the first process.
@@ -190,7 +201,7 @@ class EntityReference extends MukurtuImportFieldProcessPluginBase implements Con
     $refType = $field_config->getSetting('target_type') ?? [];
     // multipage_item intentionally shares the generic mukurtu_entity_lookup
     // path in getProcess() along with community, media, node, and protocol.
-    return in_array($refType, ['community','media','multipage_item','node','protocol','taxonomy_term','user']);
+    return in_array($refType, ['community','media','multipage_item','node','protocol','taxonomy_term','user','user_role']);
   }
 
   /**
@@ -209,6 +220,10 @@ class EntityReference extends MukurtuImportFieldProcessPluginBase implements Con
 
     if ($ref_type == 'user') {
       return $this->formatPlural($multiple, 'The username or user ID.', 'Usernames or User IDs, separated by your selected multi-value delimiter.');
+    }
+
+    if ($ref_type == 'user_role') {
+      return $this->formatPlural($multiple, 'A role machine name or label (e.g. mukurtu_manager or Mukurtu Manager). The Administrator role cannot be assigned via import.', 'Role machine names or labels, separated by your selected multi-value delimiter. The Administrator role cannot be assigned via import.');
     }
 
     if ($ref_type == 'taxonomy_term') {
