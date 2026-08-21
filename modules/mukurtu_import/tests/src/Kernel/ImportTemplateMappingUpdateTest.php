@@ -7,13 +7,16 @@ namespace Drupal\Tests\mukurtu_import\Kernel;
 use Drupal\KernelTests\KernelTestBase;
 
 /**
- * Tests mukurtu_import_update_40031/_40032/_40033(), which correct the
- * langcode source label and add missing "Default translation"/"Multipage
- * parent" ignore mappings to existing sites' saved import strategy configs.
+ * Tests mukurtu_import_update_40031()-_40036(), which correct stale source
+ * header labels and add missing mapping entries to existing sites' saved
+ * import strategy configs.
  *
  * @see mukurtu_import_update_40031()
  * @see mukurtu_import_update_40032()
  * @see mukurtu_import_update_40033()
+ * @see mukurtu_import_update_40034()
+ * @see mukurtu_import_update_40035()
+ * @see mukurtu_import_update_40036()
  */
 class ImportTemplateMappingUpdateTest extends KernelTestBase {
 
@@ -195,6 +198,109 @@ class ImportTemplateMappingUpdateTest extends KernelTestBase {
   }
 
   /**
+   * The Cultural Protocols fix rewrites the stale "Cultural Protocols > "
+   * -prefixed labels to the bare labels mukurtu_export actually writes.
+   */
+  public function testCulturalProtocolsCorrectionRewritesStaleDefault(): void {
+    $this->seedConfig('collection_all_fields', [
+      ['source' => 'Title', 'target' => 'title'],
+      ['source' => 'Cultural Protocols > Protocols', 'target' => 'field_cultural_protocols/protocols'],
+      ['source' => 'Cultural Protocols > Sharing Setting', 'target' => 'field_cultural_protocols/sharing_setting'],
+    ]);
+
+    mukurtu_import_update_40034();
+
+    $mapping = $this->getMapping('collection_all_fields');
+    $protocols_entry = current(array_filter($mapping, fn (array $m) => $m['target'] === 'field_cultural_protocols/protocols'));
+    $sharing_entry = current(array_filter($mapping, fn (array $m) => $m['target'] === 'field_cultural_protocols/sharing_setting'));
+    $this->assertSame('Protocols', $protocols_entry['source']);
+    $this->assertSame('Sharing Setting', $sharing_entry['source']);
+  }
+
+  /**
+   * A site admin's customized Cultural Protocols source is left untouched.
+   */
+  public function testCulturalProtocolsCorrectionLeavesCustomizationAlone(): void {
+    $this->seedConfig('collection_all_fields', [
+      ['source' => 'My Custom Protocols Column', 'target' => 'field_cultural_protocols/protocols'],
+    ]);
+
+    mukurtu_import_update_40034();
+
+    $mapping = $this->getMapping('collection_all_fields');
+    $this->assertSame('My Custom Protocols Column', $mapping[0]['source']);
+  }
+
+  /**
+   * The bundle-specific fix rewrites place_record's stale title/section/
+   * other-names labels to the real export headers.
+   */
+  public function testBundleSpecificLabelCorrectionRewritesStaleDefault(): void {
+    $this->seedConfig('place_record_all_fields', [
+      ['source' => 'Name', 'target' => 'title'],
+      ['source' => 'Text sections', 'target' => 'field_sections'],
+      ['source' => 'Other Names', 'target' => 'field_other_place_names'],
+    ]);
+
+    mukurtu_import_update_40035();
+
+    $mapping = $this->getMapping('place_record_all_fields');
+    $title_entry = current(array_filter($mapping, fn (array $m) => $m['target'] === 'title'));
+    $sections_entry = current(array_filter($mapping, fn (array $m) => $m['target'] === 'field_sections'));
+    $names_entry = current(array_filter($mapping, fn (array $m) => $m['target'] === 'field_other_place_names'));
+    $this->assertSame('Title', $title_entry['source']);
+    $this->assertSame('Text Sections', $sections_entry['source']);
+    $this->assertSame('Other Place Names', $names_entry['source']);
+  }
+
+  /**
+   * A site admin's customized title source is left untouched.
+   */
+  public function testBundleSpecificLabelCorrectionLeavesCustomizationAlone(): void {
+    $this->seedConfig('place_record_all_fields', [
+      ['source' => 'My Custom Title Column', 'target' => 'title'],
+    ]);
+
+    mukurtu_import_update_40035();
+
+    $mapping = $this->getMapping('place_record_all_fields');
+    $this->assertSame('My Custom Title Column', $mapping[0]['source']);
+  }
+
+  /**
+   * Missing mapping entries (e.g. collection's image sub-columns) are
+   * appended when absent.
+   */
+  public function testMissingMappingEntriesAddedWhenMissing(): void {
+    $this->seedConfig('collection_all_fields', [
+      ['source' => 'Title', 'target' => 'title'],
+    ]);
+
+    mukurtu_import_update_40036();
+
+    $mapping = $this->getMapping('collection_all_fields');
+    $matches = array_filter($mapping, fn (array $m) => ($m['source'] ?? NULL) === 'Image > File ID');
+    $this->assertCount(1, $matches);
+    $this->assertSame('field_collection_image/target_id', reset($matches)['target']);
+  }
+
+  /**
+   * An existing entry for one of the newly-added columns is not duplicated.
+   */
+  public function testMissingMappingEntriesNotDuplicatedWhenPresent(): void {
+    $this->seedConfig('collection_all_fields', [
+      ['source' => 'Title', 'target' => 'title'],
+      ['source' => 'Image > File ID', 'target' => 'field_collection_image/target_id'],
+    ]);
+
+    mukurtu_import_update_40036();
+
+    $mapping = $this->getMapping('collection_all_fields');
+    $matches = array_filter($mapping, fn (array $m) => ($m['source'] ?? NULL) === 'Image > File ID');
+    $this->assertCount(1, $matches);
+  }
+
+  /**
    * A config that was never installed (isNew()) is skipped without error by
    * every hook.
    */
@@ -202,6 +308,9 @@ class ImportTemplateMappingUpdateTest extends KernelTestBase {
     mukurtu_import_update_40031();
     mukurtu_import_update_40032();
     mukurtu_import_update_40033();
+    mukurtu_import_update_40034();
+    mukurtu_import_update_40035();
+    mukurtu_import_update_40036();
     $this->assertTrue(\Drupal::config('mukurtu_import.mukurtu_import_strategy.audio_all_fields')->isNew());
   }
 

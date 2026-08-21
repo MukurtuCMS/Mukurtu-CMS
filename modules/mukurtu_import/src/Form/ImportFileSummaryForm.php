@@ -204,25 +204,34 @@ class ImportFileSummaryForm extends ImportBaseForm {
     $file = $this->entityTypeManager->getStorage('file')->load($fid);
     $fileHeaders = $this->getCSVHeaders($file);
 
-    // Compare the import config to the headers.
-    $mappingHeaders = array_column($process, 'source');
-    $diff = array_diff($fileHeaders, $mappingHeaders);
-    $mappedCount = count($fileHeaders) - count($diff);
-    $targets = array_column($process, 'target');
-    $targetCounts = array_count_values($targets);
-    $ignored = $targetCounts[-1] ?? 0;
+    // Map each configured source header to its target field, if any.
+    $targetsBySource = array_column($process, 'target', 'source');
+
+    // A header only counts as mapped if it has a configured target other
+    // than the "ignore" target ('-1'). Anything else - no mapping entry at
+    // all, or an explicit ignore - counts as ignored, so mapped + ignored
+    // always adds up to the total number of headers in the file.
+    $mappedCount = 0;
+    foreach ($fileHeaders as $header) {
+      $target = $targetsBySource[$header] ?? NULL;
+      if ($target !== NULL && (string) $target !== '-1') {
+        $mappedCount++;
+      }
+    }
+    $totalCount = count($fileHeaders);
+    $ignored = $totalCount - $mappedCount;
 
     if ($ignored) {
       return $this->t("@num of @total fields mapped, @ignored ignored", [
         '@num' => $mappedCount,
-        '@total' => count($fileHeaders),
+        '@total' => $totalCount,
         '@ignored' => $ignored,
       ]);
     }
 
     return $this->t("@num of @total import fields mapped", [
       '@num' => $mappedCount,
-      '@total' => count($fileHeaders),
+      '@total' => $totalCount,
     ]);
   }
 

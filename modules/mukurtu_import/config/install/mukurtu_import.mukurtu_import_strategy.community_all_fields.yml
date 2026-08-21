@@ -15,11 +15,11 @@ mapping:
     source: 'Banner Image'
     target: field_banner_image
   -
-    source: 'Community name'
-    target: name
+    source: 'Banner Image > Alternative text'
+    target: field_banner_image/alt
   -
-    source: 'Community page visibility'
-    target: field_access_mode
+    source: 'Banner Image > File ID'
+    target: field_banner_image/target_id
   -
     source: 'Community Type'
     target: field_community_type
@@ -39,23 +39,35 @@ mapping:
     source: ID
     target: id
   -
-    source: Locale
-    target: langcode
-  -
     source: 'Local Contexts API key'
     target: field_local_contexts_api_key
   -
     source: 'Local Contexts Description'
     target: field_local_contexts_description
   -
+    source: Locale
+    target: langcode
+  -
     source: 'Membership Display'
     target: field_membership_display
+  -
+    source: Name
+    target: name
   -
     source: Published
     target: status
   -
+    source: 'Sharing Protocol'
+    target: field_access_mode
+  -
     source: 'Thumbnail Image'
     target: field_thumbnail_image
+  -
+    source: 'Thumbnail Image > Alternative text'
+    target: field_thumbnail_image/alt
+  -
+    source: 'Thumbnail Image > File ID'
+    target: field_thumbnail_image/target_id
   -
     source: UUID
     target: uuid

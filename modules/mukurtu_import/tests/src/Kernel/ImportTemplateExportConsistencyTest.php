@@ -158,4 +158,52 @@ class ImportTemplateExportConsistencyTest extends KernelTestBase {
     }
   }
 
+  /**
+   * Every column a bundle actually exports must have a mapping entry whose
+   * source is that column's real header, pointed at the matching target
+   * field or explicitly ignored ('-1').
+   *
+   * This is deliberately exhaustive (every real CSV header in the export
+   * list, for every template) rather than special-cased to the columns
+   * previously found broken (langcode, default_langcode,
+   * field_multipage_page_of): those three were exactly the kind of gap this
+   * test is meant to catch automatically instead of relying on a human to
+   * spot the next one. It does not object to a template mapping some *other*
+   * label the exporter doesn't emit (e.g. "Draft", "Published", "UUID") -
+   * several templates intentionally support importing fields beyond the
+   * default export set, and that's fine.
+   *
+   * A few bundles (external_embed, remote_video, soundcloud) list the same
+   * header under two different target keys - a base "thumbnail" field and
+   * an explicit "field_thumbnail" field that both happen to carry the same
+   * export label. Since a single real CSV column can only be imported into
+   * one of them, the check is grouped by header label: it's satisfied if
+   * *any* of the targets sharing that label is mapped correctly, not each
+   * one individually.
+   */
+  public function testAllExportedColumnsAreMappedCorrectly(): void {
+    foreach (self::TEMPLATE_BUNDLES as $template_id => $bundle_key) {
+      $mapping = $this->getTemplateMapping($template_id);
+
+      $targets_by_source = [];
+      foreach ($mapping as $entry) {
+        $targets_by_source[$entry['source']][] = $entry['target'];
+      }
+
+      $targets_by_label = [];
+      foreach ($this->exportFieldsList[$bundle_key] as $target => $label) {
+        $targets_by_label[$label][] = $target;
+      }
+
+      foreach ($targets_by_label as $label => $valid_targets) {
+        $entries = $targets_by_source[$label] ?? [];
+        $this->assertNotEmpty($entries, "{$template_id}: exported column '{$label}' has no mapping entry at all.");
+        $this->assertTrue(
+          (bool) array_intersect($valid_targets, $entries) || in_array('-1', $entries, TRUE),
+          "{$template_id}: exported column '{$label}' should map to one of [" . implode(', ', $valid_targets) . "] or be explicitly ignored ('-1'), but maps to: " . implode(', ', $entries)
+        );
+      }
+    }
+  }
+
 }
