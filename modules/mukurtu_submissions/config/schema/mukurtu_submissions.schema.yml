@@ -1,0 +1,87 @@
+mukurtu_submissions.settings:
+  type: config_object
+  label: 'Mukurtu Submissions settings'
+  mapping:
+    service_account_uid:
+      type: integer
+      label: 'Public Submissions service account uid'
+    notify_uids:
+      type: sequence
+      label: 'Additional user IDs to notify on submission'
+      sequence:
+        type: integer
+    notify_emails:
+      type: sequence
+      label: 'Additional email addresses to notify on submission'
+      sequence:
+        type: email
+
+mukurtu_submissions.mukurtu_submission_settings.*:
+  type: config_entity
+  label: 'Submission settings'
+  mapping:
+    id:
+      type: string
+      label: 'ID'
+    label:
+      type: label
+      label: 'Label'
+    status:
+      type: boolean
+      label: 'Enabled'
+    target_entity_type_id:
+      type: string
+      label: 'Target entity type'
+    target_bundle:
+      type: string
+      label: 'Target bundle'
+    allowed_media_types:
+      type: sequence
+      label: 'Allowed media types'
+      sequence:
+        type: string
+    access_expectations_enabled:
+      type: boolean
+      label: 'Show access expectations field'
+    access_level:
+      type: string
+      label: 'Who may submit'
+    intro_text:
+      type: text_format
+      label: 'Introductory text'
+    field_groups:
+      type: sequence
+      label: 'Field groups'
+      sequence:
+        type: mapping
+        label: 'Field group'
+        mapping:
+          id:
+            type: string
+            label: 'Machine name'
+          label:
+            type: label
+            label: 'Label'
+          collapsed:
+            type: boolean
+            label: 'Collapsed by default'
+          parent:
+            type: string
+            label: 'Parent group ID'
+            nullable: true
+    field_group_assignments:
+      type: sequence
+      label: 'Field group assignments'
+      sequence:
+        type: string
+        label: 'Group ID'
+
+field.widget.settings.mukurtu_simple_media_upload:
+  type: mapping
+  label: 'Simple media upload widget settings'
+  mapping:
+    allowed_bundles:
+      type: sequence
+      label: 'Allowed media bundles'
+      sequence:
+        type: string

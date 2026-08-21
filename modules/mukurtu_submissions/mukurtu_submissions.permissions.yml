@@ -1,0 +1,12 @@
+administer mukurtu submissions:
+  title: 'Administer public submission settings'
+  description: 'Enable/disable public submissions per content type and configure allowed fields and media.'
+  restrict access: true
+
+review mukurtu submissions:
+  title: 'Review public submissions'
+  description: 'View the Pending Submissions queue, receive submission notifications, and contact submitters.'
+  restrict access: true
+
+permission_callbacks:
+  - Drupal\mukurtu_submissions\SubmissionPermissions::permissions

@@ -1,0 +1,444 @@
+<?php
+
+/**
+ * @file
+ * Hooks for the Mukurtu Submissions module.
+ */
+
+use Drupal\Component\Utility\Html;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Url;
+use Drupal\message\Entity\Message;
+use Drupal\message_subscribe\Subscribers\DeliveryCandidate;
+use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
+use Drupal\mukurtu_submissions\Entity\SubmissionInterface;
+use Drupal\mukurtu_submissions\Entity\SubmissionSettingsInterface;
+use Drupal\node\NodeInterface;
+use Drupal\path_alias\Entity\PathAlias;
+
+/**
+ * Implements hook_views_data_alter().
+ *
+ * Registers the two virtual (non-column-backed) fields the Pending
+ * Submissions view uses, so Views can resolve their custom plugin IDs when
+ * building/instantiating field handlers for the mukurtu_submission base
+ * table. Without an entry here, Views has no way to know these plugin IDs
+ * are valid for this table and silently substitutes the "Broken" handler.
+ */
+function mukurtu_submissions_views_data_alter(array &$data) {
+  $data['mukurtu_submission']['mukurtu_submission_target'] = [
+    'title' => t('Submission target'),
+    'help' => t('Links to the entity this submission is about.'),
+    'field' => [
+      'id' => 'mukurtu_submission_target',
+    ],
+  ];
+  $data['mukurtu_submission']['mukurtu_submission_actions'] = [
+    'title' => t('Submission operations'),
+    'help' => t('Edit and contact-submitter links for this submission.'),
+    'field' => [
+      'id' => 'mukurtu_submission_actions',
+    ],
+  ];
+}
+
+/**
+ * Implements hook_help().
+ */
+function mukurtu_submissions_help($route_name, RouteMatchInterface $route_match) {
+  if ($route_name === 'help.page.mukurtu_submissions') {
+    return '<p>' . t('Allows site visitors to submit content for review without community/protocol membership.') . '</p>';
+  }
+}
+
+/**
+ * Implements hook_node_insert().
+ */
+function mukurtu_submissions_node_insert(NodeInterface $node) {
+  $service_account_uid = (int) \Drupal::config('mukurtu_submissions.settings')->get('service_account_uid');
+  if (!$service_account_uid || (int) $node->getOwnerId() !== $service_account_uid) {
+    return;
+  }
+
+  $message = Message::create([
+    'template' => 'mukurtu_submission_received',
+    'uid' => $service_account_uid,
+  ]);
+  $message->set('field_item', $node);
+  $message->save();
+
+  $notify_uids = mukurtu_submissions_get_reviewer_uids();
+  if (empty($notify_uids)) {
+    return;
+  }
+
+  $flags = ['subscribe_node'];
+  $notifiers = ['email'];
+  $subscribe_options = [
+    'notify message owner' => FALSE,
+    'uids' => [],
+  ];
+  $email_validator = \Drupal::service('email.validator');
+  $recipients = \Drupal::entityTypeManager()->getStorage('user')->loadMultiple($notify_uids);
+  foreach ($recipients as $uid => $recipient) {
+    $email = $recipient->getEmail();
+    if (!$email || !$email_validator->isValid($email)) {
+      continue;
+    }
+    $subscribe_options['uids'][$uid] = new DeliveryCandidate($flags, $notifiers, $uid);
+  }
+
+  if (!empty($subscribe_options['uids'])) {
+    try {
+      \Drupal::service('message_subscribe.subscribers')->sendMessage($message, $message, [], $subscribe_options);
+    }
+    catch (\Exception $e) {
+      \Drupal::logger('mukurtu_submissions')->warning('Failed to send submission notification: @msg', ['@msg' => $e->getMessage()]);
+    }
+  }
+}
+
+/**
+ * Implements hook_node_update().
+ *
+ * Keeps the Pending Submissions queue accurate: once a reviewer moves a
+ * submitted node into a published moderation state (the only reviewer
+ * action currently available for accepting a submission - via the full
+ * node edit form or mukurtu_workflows' quick-publish review panel), the
+ * corresponding mukurtu_submission record is marked approved so it drops
+ * out of the queue's "pending" filter. Without this, review_status never
+ * left its default and the queue never emptied.
+ *
+ * Only acts while the submission is still pending, so an explicitly
+ * rejected submission (once that status is settable through some future
+ * UI) is never silently overwritten back to approved by a later save.
+ */
+function mukurtu_submissions_node_update(NodeInterface $node) {
+  if (!$node->hasField('moderation_state')) {
+    return;
+  }
+
+  $submission = mukurtu_submissions_get_submission_for_entity($node);
+  if (!$submission || $submission->getReviewStatus() !== SubmissionInterface::STATUS_PENDING) {
+    return;
+  }
+
+  $workflow = \Drupal::service('content_moderation.moderation_information')->getWorkflowForEntity($node);
+  $moderation_state = $node->get('moderation_state')->value;
+  if (!$workflow || !$workflow->getTypePlugin()->hasState($moderation_state)) {
+    return;
+  }
+
+  if ($workflow->getTypePlugin()->getState($moderation_state)->isPublishedState()) {
+    $submission->setReviewStatus(SubmissionInterface::STATUS_APPROVED)->save();
+  }
+}
+
+/**
+ * Gets the uids to notify when a new submission arrives.
+ *
+ * Users with the "review mukurtu submissions" permission, plus any
+ * additionally configured uids/emails.
+ *
+ * @return int[]
+ */
+function mukurtu_submissions_get_reviewer_uids(): array {
+  $role_storage = \Drupal::entityTypeManager()->getStorage('user_role');
+  $rids = [];
+  foreach ($role_storage->loadMultiple() as $role) {
+    if ($role->hasPermission('review mukurtu submissions')) {
+      $rids[] = $role->id();
+    }
+  }
+
+  $uids = [];
+  if (!empty($rids)) {
+    $uids = \Drupal::entityQuery('user')
+      ->condition('roles', $rids, 'IN')
+      ->condition('status', 1)
+      ->accessCheck(FALSE)
+      ->execute();
+    $uids = array_values($uids);
+  }
+
+  $config = \Drupal::config('mukurtu_submissions.settings');
+  $extra_uids = $config->get('notify_uids') ?: [];
+  $uids = array_merge($uids, $extra_uids);
+
+  return array_values(array_unique(array_map('intval', $uids)));
+}
+
+/**
+ * Loads the mukurtu_submission entity for a given content entity, if any.
+ */
+function mukurtu_submissions_get_submission_for_entity(EntityInterface $entity): ?SubmissionInterface {
+  $storage = \Drupal::entityTypeManager()->getStorage('mukurtu_submission');
+  $ids = $storage->getQuery()
+    ->condition('target_entity_type', $entity->getEntityTypeId())
+    ->condition('target_id', $entity->id())
+    ->accessCheck(FALSE)
+    ->range(0, 1)
+    ->execute();
+  if (empty($ids)) {
+    return NULL;
+  }
+  return $storage->load(reset($ids));
+}
+
+/**
+ * Implements hook_form_BASE_FORM_ID_alter() for node_form.
+ */
+function mukurtu_submissions_form_node_form_alter(array &$form, FormStateInterface $form_state) {
+  $node = $form_state->getFormObject()->getEntity();
+  if (!$node instanceof NodeInterface || $node->isNew()) {
+    return;
+  }
+
+  $service_account_uid = (int) \Drupal::config('mukurtu_submissions.settings')->get('service_account_uid');
+  if (!$service_account_uid || (int) $node->getOwnerId() !== $service_account_uid) {
+    return;
+  }
+
+  if (!\Drupal::currentUser()->hasPermission('review mukurtu submissions')) {
+    return;
+  }
+
+  $submission = mukurtu_submissions_get_submission_for_entity($node);
+
+  $form['mukurtu_submissions'] = [
+    '#type' => 'details',
+    '#title' => t('Public submission'),
+    '#open' => TRUE,
+    '#weight' => -10,
+  ];
+
+  if ($submission) {
+    $form['mukurtu_submissions']['info'] = [
+      '#markup' => t('Submitted by %name (%email).', [
+        '%name' => $submission->getSubmitterName(),
+        '%email' => $submission->getSubmitterEmail(),
+      ]),
+    ];
+    if ($submission->getAccessExpectations()) {
+      $form['mukurtu_submissions']['access_expectations'] = [
+        '#type' => 'item',
+        '#title' => t('Submitter access expectations'),
+        '#markup' => nl2br(Html::escape($submission->getAccessExpectations())),
+      ];
+    }
+    $form['mukurtu_submissions']['contact'] = [
+      '#type' => 'link',
+      '#title' => t('Contact submitter'),
+      '#url' => Url::fromRoute('mukurtu_submissions.contact_submitter', ['mukurtu_submission' => $submission->id()]),
+      '#attributes' => ['class' => ['button']],
+    ];
+  }
+
+  if ($node instanceof CulturalProtocolControlledInterface && !empty($node->getProtocols())) {
+    $form['mukurtu_submissions']['forward'] = [
+      '#type' => 'checkbox',
+      '#title' => t('Notify the assigned protocol(s)/community(ies) that this item is available for review'),
+      '#default_value' => FALSE,
+    ];
+    $form['actions']['submit']['#submit'][] = 'mukurtu_submissions_node_form_forward_submit';
+  }
+}
+
+/**
+ * Submit handler: forwards notice of the saved node to relevant stewards/managers.
+ */
+function mukurtu_submissions_node_form_forward_submit(array &$form, FormStateInterface $form_state) {
+  if (!$form_state->getValue(['mukurtu_submissions', 'forward'])) {
+    return;
+  }
+
+  $node = $form_state->getFormObject()->getEntity();
+  if (!$node instanceof CulturalProtocolControlledInterface) {
+    return;
+  }
+
+  mukurtu_submissions_forward_to_stewards($node);
+}
+
+/**
+ * Notifies protocol stewards and community managers that a reviewed
+ * submission has been assigned to their protocol(s)/community(ies).
+ *
+ * Reuses the existing mukurtu_new_item_in_protocol / mukurtu_new_item_in_community
+ * templates rather than introducing a new moderation state - assigning a
+ * protocol already changes the node's grants, this just adds an explicit
+ * notification on top so it works uniformly regardless of which content
+ * moderation workflow the site has active.
+ */
+function mukurtu_submissions_forward_to_stewards(CulturalProtocolControlledInterface $node): void {
+  $protocol_ids = $node->getProtocols();
+  if (empty($protocol_ids)) {
+    return;
+  }
+
+  $subscribers = \Drupal::service('message_subscribe.subscribers');
+  $email_validator = \Drupal::service('email.validator');
+  $user_storage = \Drupal::entityTypeManager()->getStorage('user');
+
+  foreach ($node->getProtocolEntities() as $protocol) {
+    $steward_uids = mukurtu_notifications_resolve_notify_groups(FALSE, [], [$protocol->id()]);
+    mukurtu_submissions_send_forward_message('mukurtu_new_item_in_protocol', $node, ['field_protocol' => $protocol], $steward_uids, $subscribers, $email_validator, $user_storage);
+  }
+
+  foreach ($node->getCommunities() as $community) {
+    $manager_uids = mukurtu_notifications_resolve_notify_groups(FALSE, [$community->id()], []);
+    mukurtu_submissions_send_forward_message('mukurtu_new_item_in_community', $node, ['field_community' => $community], $manager_uids, $subscribers, $email_validator, $user_storage);
+  }
+}
+
+/**
+ * Builds and sends a single forward notification message.
+ */
+function mukurtu_submissions_send_forward_message(string $template, NodeInterface $node, array $extra_fields, array $uids, $subscribers, $email_validator, $user_storage): void {
+  if (empty($uids)) {
+    return;
+  }
+
+  $message = Message::create([
+    'template' => $template,
+    'uid' => $node->getOwnerId(),
+  ]);
+  $message->set('field_item', $node);
+  foreach ($extra_fields as $field_name => $value) {
+    $message->set($field_name, $value);
+  }
+  $message->save();
+
+  $subscribe_options = [
+    'notify message owner' => FALSE,
+    'uids' => [],
+  ];
+  $recipients = $user_storage->loadMultiple($uids);
+  foreach ($recipients as $uid => $recipient) {
+    $email = $recipient->getEmail();
+    if (!$email || !$email_validator->isValid($email)) {
+      continue;
+    }
+    $subscribe_options['uids'][$uid] = new DeliveryCandidate(['subscribe_node'], ['email'], $uid);
+  }
+
+  if (!empty($subscribe_options['uids'])) {
+    try {
+      $subscribers->sendMessage($message, $message, [], $subscribe_options);
+    }
+    catch (\Exception $e) {
+      \Drupal::logger('mukurtu_submissions')->warning('Failed to send forward notification: @msg', ['@msg' => $e->getMessage()]);
+    }
+  }
+}
+
+/**
+ * Implements hook_mail().
+ */
+function mukurtu_submissions_mail($key, &$message, $params) {
+  if ($key !== 'contact_submitter') {
+    return;
+  }
+  $message['subject'] = $params['subject'];
+  $message['body'][] = $params['message'];
+  if (!empty($params['reply_to'])) {
+    $message['headers']['Reply-to'] = $params['reply_to'];
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_insert() for mukurtu_submission_settings.
+ */
+function mukurtu_submissions_mukurtu_submission_settings_insert(EntityInterface $entity) {
+  if ($entity instanceof SubmissionSettingsInterface) {
+    mukurtu_submissions_ensure_path_aliases($entity);
+    mukurtu_submissions_sync_submission_permission($entity);
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_update() for mukurtu_submission_settings.
+ */
+function mukurtu_submissions_mukurtu_submission_settings_update(EntityInterface $entity) {
+  if ($entity instanceof SubmissionSettingsInterface) {
+    mukurtu_submissions_ensure_path_aliases($entity);
+    mukurtu_submissions_sync_submission_permission($entity);
+  }
+}
+
+/**
+ * Ensures a settings entity's submit/thank-you routes have a hyphenated
+ * public alias (e.g. "/submit/node/digital-heritage" for the underscored
+ * "/submit/node/digital_heritage" system path), so bundle machine names -
+ * which may contain underscores by Drupal convention - never leak into the
+ * public-facing URL. Works for any bundle without per-bundle code, since
+ * the dashed form is just the bundle name with underscores swapped.
+ */
+function mukurtu_submissions_ensure_path_aliases(SubmissionSettingsInterface $settings): void {
+  $entity_type_id = $settings->getTargetEntityTypeId();
+  $bundle = $settings->getTargetBundle();
+  if (!$entity_type_id || !$bundle) {
+    return;
+  }
+
+  $dashed_bundle = str_replace('_', '-', $bundle);
+  if ($dashed_bundle === $bundle) {
+    return;
+  }
+
+  $sources_to_aliases = [
+    "/submit/$entity_type_id/$bundle" => "/submit/$entity_type_id/$dashed_bundle",
+    "/submit/$entity_type_id/$bundle/thank-you" => "/submit/$entity_type_id/$dashed_bundle/thank-you",
+  ];
+
+  $storage = \Drupal::entityTypeManager()->getStorage('path_alias');
+  foreach ($sources_to_aliases as $source => $alias) {
+    $existing = $storage->loadByProperties(['path' => $source]);
+    $path_alias = reset($existing);
+    if ($path_alias) {
+      if ($path_alias->getAlias() !== $alias) {
+        $path_alias->setAlias($alias)->save();
+      }
+      continue;
+    }
+    PathAlias::create(['path' => $source, 'alias' => $alias])->save();
+  }
+}
+
+/**
+ * Grants or revokes the anonymous/authenticated roles' dynamically-named
+ * "submit $entity_type_id $bundle content" permission (see
+ * SubmissionPermissions::permissions()) to match a settings entity's
+ * status and access_level, so enabling a bundle here is enough on its
+ * own - a site builder should never need to separately visit
+ * /admin/people/permissions for this to work.
+ */
+function mukurtu_submissions_sync_submission_permission(SubmissionSettingsInterface $settings): void {
+  $entity_type_id = $settings->getTargetEntityTypeId();
+  $bundle = $settings->getTargetBundle();
+  if (!$entity_type_id || !$bundle) {
+    return;
+  }
+
+  $permission = "submit $entity_type_id $bundle content";
+  $role_storage = \Drupal::entityTypeManager()->getStorage('user_role');
+  $grants = [
+    'anonymous' => $settings->status() && $settings->getAccessLevel() === 'anonymous',
+    'authenticated' => $settings->status(),
+  ];
+  foreach ($grants as $role_id => $should_grant) {
+    $role = $role_storage->load($role_id);
+    if (!$role) {
+      continue;
+    }
+    $has_permission = $role->hasPermission($permission);
+    if ($should_grant && !$has_permission) {
+      $role->grantPermission($permission)->save();
+    }
+    elseif (!$should_grant && $has_permission) {
+      $role->revokePermission($permission)->save();
+    }
+  }
+}
