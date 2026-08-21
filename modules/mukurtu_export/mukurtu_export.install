@@ -560,3 +560,51 @@ function mukurtu_export_update_40019(): void {
     }
   }
 }
+
+/**
+ * Remove bare image/thumbnail/recording columns now that their target_id/
+ * alt sub-columns (added in update_40017) carry the same data.
+ *
+ * These bare columns were never re-importable in the first place (see
+ * mukurtu_import_update_40037()) and were purely a redundant markdown-
+ * formatted convenience string once the two real sub-columns exist, so
+ * exporting them just added noise. Only removes an entry if its value
+ * still matches the known shipped default, leaving any site-customized
+ * export list untouched.
+ */
+function mukurtu_export_update_40018(): void {
+  $removals = [
+    'node__collection' => ['field_collection_image' => 'Image'],
+    'node__dictionary_word' => ['field_thumbnail' => 'Thumbnail'],
+    'node__word_list' => ['field_word_list_image' => 'Image'],
+    'community__community' => [
+      'field_banner_image' => 'Banner Image',
+      'field_thumbnail_image' => 'Thumbnail Image',
+    ],
+    'protocol__protocol' => [
+      'field_banner_image' => 'Banner Image',
+      'field_thumbnail_image' => 'Thumbnail Image',
+    ],
+    'paragraph__sample_sentence' => ['field_sentence_recording' => 'Recording'],
+  ];
+
+  $storage = \Drupal::entityTypeManager()->getStorage('csv_exporter');
+  foreach ($storage->loadMultiple() as $exporter) {
+    $list = $exporter->get('entity_fields_export_list') ?? [];
+    $changed = FALSE;
+    foreach ($removals as $bundle_key => $fields) {
+      if (!isset($list[$bundle_key])) {
+        continue;
+      }
+      foreach ($fields as $field_name => $expected_label) {
+        if (($list[$bundle_key][$field_name] ?? NULL) === $expected_label) {
+          unset($list[$bundle_key][$field_name]);
+          $changed = TRUE;
+        }
+      }
+    }
+    if ($changed) {
+      $exporter->set('entity_fields_export_list', $list)->save();
+    }
+  }
+}

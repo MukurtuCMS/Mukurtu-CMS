@@ -207,31 +207,54 @@ class ImportFileSummaryForm extends ImportBaseForm {
     // Map each configured source header to its target field, if any.
     $targetsBySource = array_column($process, 'target', 'source');
 
-    // A header only counts as mapped if it has a configured target other
-    // than the "ignore" target ('-1'). Anything else - no mapping entry at
-    // all, or an explicit ignore - counts as ignored, so mapped + ignored
-    // always adds up to the total number of headers in the file.
+    // Bucket every header into one of three categories:
+    // - mapped: has a real (non "-1") target.
+    // - neverImported: explicitly mapped to "-1" - a column that's always
+    //   ignored by design (e.g. a computed/internal field like default_
+    //   langcode), not something to worry about.
+    // - unrecognized: no mapping entry at all - the template doesn't know
+    //   what to do with this column, which is worth a user's attention.
     $mappedCount = 0;
+    $neverImportedCount = 0;
+    $unrecognizedCount = 0;
     foreach ($fileHeaders as $header) {
       $target = $targetsBySource[$header] ?? NULL;
       if ($target !== NULL && (string) $target !== '-1') {
         $mappedCount++;
       }
+      elseif ($target !== NULL) {
+        $neverImportedCount++;
+      }
+      else {
+        $unrecognizedCount++;
+      }
     }
-    $totalCount = count($fileHeaders);
-    $ignored = $totalCount - $mappedCount;
 
-    if ($ignored) {
-      return $this->t("@num of @total fields mapped, @ignored ignored", [
+    // The "importable" total deliberately excludes fields that are never
+    // imported by design, so a file matching a bundle's real export looks
+    // like a clean full match instead of always appearing short by however
+    // many system/computed columns that bundle happens to have.
+    $importableTotal = $mappedCount + $unrecognizedCount;
+
+    $notes = [];
+    if ($neverImportedCount) {
+      $notes[] = (string) $this->formatPlural($neverImportedCount, '@count field is never imported', '@count fields are never imported');
+    }
+    if ($unrecognizedCount) {
+      $notes[] = (string) $this->formatPlural($unrecognizedCount, '@count column is not recognized', '@count columns are not recognized');
+    }
+
+    if (empty($notes)) {
+      return $this->t('@num of @total importable fields mapped', [
         '@num' => $mappedCount,
-        '@total' => $totalCount,
-        '@ignored' => $ignored,
+        '@total' => $importableTotal,
       ]);
     }
 
-    return $this->t("@num of @total import fields mapped", [
+    return $this->t('@num of @total importable fields mapped (@notes)', [
       '@num' => $mappedCount,
-      '@total' => $totalCount,
+      '@total' => $importableTotal,
+      '@notes' => implode('; ', $notes),
     ]);
   }
 
