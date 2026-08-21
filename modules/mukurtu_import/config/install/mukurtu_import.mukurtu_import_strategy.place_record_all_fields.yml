@@ -15,12 +15,6 @@ mapping:
     source: 'Authored on'
     target: created
   -
-    source: 'Cultural Protocols > Protocols'
-    target: field_cultural_protocols/protocols
-  -
-    source: 'Cultural Protocols > Sharing Setting'
-    target: field_cultural_protocols/sharing_setting
-  -
     source: 'Default translation'
     target: '-1'
   -
@@ -33,14 +27,14 @@ mapping:
     source: Keywords
     target: field_keywords
   -
-    source: Locale
-    target: langcode
-  -
     source: 'Local Contexts Labels and Notices'
     target: field_local_contexts_labels_and_notices
   -
     source: 'Local Contexts Projects'
     target: field_local_contexts_projects
+  -
+    source: Locale
+    target: langcode
   -
     source: Location
     target: field_location
@@ -57,10 +51,7 @@ mapping:
     source: 'Multipage parent'
     target: '-1'
   -
-    source: Name
-    target: title
-  -
-    source: 'Other Names'
+    source: 'Other Place Names'
     target: field_other_place_names
   -
     source: 'Place type'
@@ -69,17 +60,26 @@ mapping:
     source: 'Promoted to front page'
     target: promote
   -
+    source: Protocols
+    target: field_cultural_protocols/protocols
+  -
     source: Published
     target: status
   -
     source: 'Related Content'
     target: field_related_content
   -
+    source: 'Sharing Setting'
+    target: field_cultural_protocols/sharing_setting
+  -
     source: 'Sticky at top of lists'
     target: sticky
   -
-    source: 'Text sections'
+    source: 'Text Sections'
     target: field_sections
+  -
+    source: Title
+    target: title
   -
     source: UUID
     target: uuid
