@@ -238,7 +238,7 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
     return \Drupal::service('entity_field.manager')->getBaseFieldDefinitions($entity_type_id);
   }
 
-  protected function getProcess() {
+  protected function getProcess(?FileInterface $file = NULL) {
     $entity_type_id = $this->getTargetEntityTypeId();
     $bundle = $this->getTargetBundle();
     $mapping = $this->getMapping();
@@ -255,6 +255,16 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
     // Remove ignored mappings. This depends on the above dupe collision behavior.
     if (isset($import_process['-1'])) {
       unset($import_process['-1']);
+    }
+
+    // Drop any mapping whose source column isn't actually a header in this
+    // file (e.g. a stale/reused template mapping optional fields the
+    // current file doesn't have). Otherwise migrate passes NULL down that
+    // field's process pipeline, which several process plugins don't handle
+    // (e.g. FormattedTextProcessCallback requires a string).
+    if ($file) {
+      $headers = $this->getCSVHeaders($file);
+      $import_process = array_filter($import_process, fn ($source) => in_array($source, $headers, TRUE));
     }
 
     // @todo Add process plugins as appropriate for the target field type.
@@ -338,23 +348,29 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
     $bundle = $this->getTargetBundle();
     $id_key = $this->entityTypeManager()->getDefinition($entity_type_id)->getKey('id');
     $uuid_key = $this->entityTypeManager()->getDefinition($entity_type_id)->getKey('uuid');
-    $process = $this->getProcess();
+    $process = $this->getProcess($file);
+
+    $headers = $this->getCSVHeaders($file);
 
     $ids = [];
-    // User-configured identifier column has highest priority.
-    $identifier_column = $this->getIdentifierColumn();
+    // User-configured identifier column has highest priority. It must
+    // actually be a column in this file, otherwise a stale/reused template
+    // would tell migrate to key rows on a column that doesn't exist.
+    $identifier_column = $this->getIdentifierColumn($file);
     if ($identifier_column) {
       $ids = [$identifier_column];
     }
 
-    // Entity ID has next priority.
+    // Entity ID has next priority. Same file-presence requirement applies.
     if (empty($ids) && !empty($process[$id_key])) {
-      $ids = array_filter(array_map(fn($v) => $v['target'] == $id_key ? $v['source'] : NULL, $mapping));
+      $candidates = array_filter(array_map(fn($v) => $v['target'] == $id_key ? $v['source'] : NULL, $mapping));
+      $ids = array_values(array_intersect($candidates, $headers));
     }
 
     // UUID has next priority.
     if (empty($ids) && !empty($process[$uuid_key])) {
-      $ids = array_filter(array_map(fn ($v) => $v['target'] == $uuid_key ? $v['source'] : NULL, $mapping));
+      $candidates = array_filter(array_map(fn ($v) => $v['target'] == $uuid_key ? $v['source'] : NULL, $mapping));
+      $ids = array_values(array_intersect($candidates, $headers));
     }
 
     // If we have no ID or UUID, use the lookup column (for cross-migration
@@ -405,15 +421,21 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
   /**
    * {@inheritdoc}
    */
-  public function getIdentifierColumn(): ?string {
+  public function getIdentifierColumn(?FileInterface $file = NULL): ?string {
     $column = $this->getConfig('identifier_column');
-    return !empty($column) ? $column : NULL;
+    if (empty($column)) {
+      return NULL;
+    }
+    if ($file && !in_array($column, $this->getCSVHeaders($file), TRUE)) {
+      return NULL;
+    }
+    return $column;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getLabelSourceColumn(): ?string {
+  public function getLabelSourceColumn(?FileInterface $file = NULL): ?string {
     $entity_type_id = $this->getTargetEntityTypeId();
     $label_key = $this->entityTypeManager()
       ->getDefinition($entity_type_id)
@@ -423,8 +445,12 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
       return NULL;
     }
 
+    $headers = $file ? $this->getCSVHeaders($file) : [];
     foreach ($this->getMapping() as $mapping) {
       if ($mapping['target'] === $label_key) {
+        if ($file && !in_array($mapping['source'], $headers, TRUE)) {
+          return NULL;
+        }
         return $mapping['source'];
       }
     }
@@ -435,7 +461,7 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
   /**
    * {@inheritdoc}
    */
-  public function getMediaSourceColumn(): ?string {
+  public function getMediaSourceColumn(?FileInterface $file = NULL): ?string {
     if ($this->getTargetEntityTypeId() !== 'media') {
       return NULL;
     }
@@ -479,10 +505,14 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
       }
     }
 
+    $headers = $file ? $this->getCSVHeaders($file) : [];
     foreach ($this->getMapping() as $mapping) {
       $target = $mapping['target'];
       // Match the source field directly or its target_id subfield.
       if ($target === $source_field || $target === $source_field . '/target_id') {
+        if ($file && !in_array($mapping['source'], $headers, TRUE)) {
+          return NULL;
+        }
         return $mapping['source'];
       }
     }
