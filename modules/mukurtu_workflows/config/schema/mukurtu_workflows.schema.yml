@@ -1,0 +1,7 @@
+mukurtu_workflows.settings:
+  type: config_object
+  label: 'Mukurtu Workflows settings'
+  mapping:
+    active_workflow:
+      type: string
+      label: 'Active workflow for protocol-controlled content'

@@ -193,3 +193,56 @@ function mukurtu_workflows_update_40006(): void {
     $default->save();
   }
 }
+
+/**
+ * Split bundle assignment: structural content always on the Default
+ * workflow, protocol-gated content follows the active-workflow selection,
+ * and landing_page is excluded from moderation entirely.
+ */
+function mukurtu_workflows_update_40007(): void {
+  $default = \Drupal::configFactory()->getEditable('workflows.workflow.mukurtu_default_content_workflow');
+  $editorial = \Drupal::configFactory()->getEditable('workflows.workflow.mukurtu_editorial_workflow');
+  if ($default->isNew() || $editorial->isNew()) {
+    return;
+  }
+
+  $protocol_gated = ['collection', 'dictionary_word', 'digital_heritage', 'person', 'place', 'word_list'];
+  $structural = ['article', 'page'];
+  $known = array_merge($structural, $protocol_gated, ['landing_page']);
+
+  $default_bundles = $default->get('type_settings.entity_types.node') ?? [];
+  $editorial_bundles = $editorial->get('type_settings.entity_types.node') ?? [];
+
+  $editorial_has_gated = (bool) array_intersect($protocol_gated, $editorial_bundles);
+  $default_has_gated = (bool) array_intersect($protocol_gated, $default_bundles);
+  $site_manages_gated_bundles = $editorial_has_gated || $default_has_gated;
+  $editorial_active_for_gated = $editorial_has_gated && !$default_has_gated;
+
+  \Drupal::configFactory()->getEditable('mukurtu_workflows.settings')
+    ->set('active_workflow', $editorial_active_for_gated ? 'mukurtu_editorial_workflow' : 'mukurtu_default_content_workflow')
+    ->save();
+
+  $new_default = $structural;
+  $new_editorial = [];
+  if ($site_manages_gated_bundles) {
+    if ($editorial_active_for_gated) {
+      $new_editorial = $protocol_gated;
+    }
+    else {
+      $new_default = array_merge($structural, $protocol_gated);
+    }
+  }
+
+  // Preserve any bundle an admin added manually that isn't one of the
+  // bundles this update recognizes, so hand-customized sites aren't
+  // clobbered. landing_page is deliberately in $known so it is always
+  // dropped, never preserved.
+  $default_custom_extra = array_diff($default_bundles, $known);
+  $editorial_custom_extra = array_diff($editorial_bundles, $known);
+
+  $new_default = array_values(array_unique(array_merge($new_default, $default_custom_extra)));
+  $new_editorial = array_values(array_unique(array_merge($new_editorial, $editorial_custom_extra)));
+
+  $default->set('type_settings.entity_types.node', $new_default)->save();
+  $editorial->set('type_settings.entity_types', $new_editorial ? ['node' => $new_editorial] : [])->save();
+}

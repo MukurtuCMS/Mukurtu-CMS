@@ -5,6 +5,8 @@ namespace Drupal\mukurtu_core\Plugin\views\field;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
+use Drupal\content_moderation\ModerationInformationInterface;
+use Drupal\content_moderation\StateTransitionValidationInterface;
 use Drupal\views\Plugin\views\field\FieldPluginBase;
 use Drupal\views\ResultRow;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -22,6 +24,8 @@ class NodeRowActionsField extends FieldPluginBase {
     $plugin_definition,
     protected readonly EntityTypeManagerInterface $entityTypeManager,
     protected readonly AccountInterface $currentUser,
+    protected readonly ModerationInformationInterface $moderationInfo,
+    protected readonly StateTransitionValidationInterface $stateTransitionValidation,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
   }
@@ -33,6 +37,8 @@ class NodeRowActionsField extends FieldPluginBase {
       $plugin_definition,
       $container->get('entity_type.manager'),
       $container->get('current_user'),
+      $container->get('content_moderation.moderation_information'),
+      $container->get('content_moderation.state_transition_validation'),
     );
   }
 
@@ -66,12 +72,26 @@ class NodeRowActionsField extends FieldPluginBase {
         ];
       }
 
-      // Publish / Unpublish -- hidden when the editorial workflow is active
-      // because state changes go through the moderation widget instead.
-      $editorial_active = \Drupal::moduleHandler()->moduleExists('mukurtu_workflows') &&
-        function_exists('_mukurtu_workflows_editorial_workflow_active') &&
-        _mukurtu_workflows_editorial_workflow_active();
-      if (!$editorial_active && $node->access('update', $this->currentUser)) {
+      // Moderated bundles: one link per transition actually valid for this
+      // node and viewer right now (both the OG-protocol-scoped node access
+      // AND the transition's own legality -- neither check alone suffices).
+      // Non-moderated bundles (e.g. landing_page): no moderation handler is
+      // fighting a direct publish flag, so the plain publish/unpublish
+      // mechanism remains correct there.
+      if ($this->moderationInfo->isModeratedEntity($node)) {
+        if ($node->access('update', $this->currentUser)) {
+          $allowed = [];
+          foreach ($this->stateTransitionValidation->getValidTransitions($node, $this->currentUser) as $transition) {
+            $allowed[$transition->to()->id()] = $transition->label();
+          }
+          foreach ($allowed as $to_state => $label) {
+            $url = Url::fromRoute('mukurtu_core.node.moderation_transition', ['node' => $nid, 'to_state' => $to_state]);
+            $url->setOption('query', ['token' => \Drupal::csrfToken()->get(ltrim($url->getInternalPath(), '/'))]);
+            $links['transition_' . $to_state] = ['title' => $label, 'url' => $url];
+          }
+        }
+      }
+      elseif ($node->access('update', $this->currentUser)) {
         if ($node->isPublished()) {
           $url = Url::fromRoute('mukurtu_core.node.quick_unpublish', ['node' => $nid]);
           $url->setOption('query', ['token' => \Drupal::csrfToken()->get(ltrim($url->getInternalPath(), '/'))]);
