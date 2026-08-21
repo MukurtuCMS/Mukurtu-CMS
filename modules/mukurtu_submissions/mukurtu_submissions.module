@@ -248,6 +248,10 @@ function mukurtu_submissions_get_submission_for_entity(EntityInterface $entity):
  * Submission::setReviewStatus() - a submission defaulted to "pending" at
  * creation and stayed that way forever, so it never left the Pending
  * Submissions view even after a reviewer published or archived it.
+ *
+ * Only acts while the submission is still pending, so an explicit review
+ * decision (approved or rejected) is never silently overwritten back by a
+ * later, unrelated moderation-state change on the node.
  */
 function mukurtu_submissions_node_update(NodeInterface $node) {
   if (!$node->hasField('moderation_state')) {
@@ -259,7 +263,7 @@ function mukurtu_submissions_node_update(NodeInterface $node) {
   }
 
   $submission = mukurtu_submissions_get_submission_for_entity($node);
-  if ($submission === NULL) {
+  if ($submission === NULL || $submission->getReviewStatus() !== SubmissionInterface::STATUS_PENDING) {
     return;
   }
 
