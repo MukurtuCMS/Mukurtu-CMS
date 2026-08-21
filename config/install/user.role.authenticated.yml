@@ -28,6 +28,7 @@ label: 'Authenticated user'
 weight: 1
 is_admin: false
 permissions:
+  - 'access content'
   - 'use klaro'
   - 'use mukurtu_default_content_workflow transition create_new_draft'
   - 'use mukurtu_default_content_workflow transition publish'
