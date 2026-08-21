@@ -3658,10 +3658,25 @@ function mukurtu_core_update_40101(): void
 }
 
 /**
+ * Remove duplicate "Add to export list" bulk action entry (issue #2027).
+ */
+function mukurtu_core_update_40102(): void {
+  $profile_path = \Drupal::service('extension.list.profile')->getPath('mukurtu');
+  $config_source = new \Drupal\Core\Config\FileStorage(\Drupal::root() . '/' . $profile_path . '/config/install');
+  $config_data = $config_source->read('views.view.mukurtu_manage_all_content');
+  if ($config_data) {
+    \Drupal::configFactory()
+      ->getEditable('views.view.mukurtu_manage_all_content')
+      ->setData($config_data)
+      ->save();
+  }
+}
+
+/**
  * Install the Mukurtu Submissions module, which lets site visitors submit
  * content for review without community/protocol membership.
  */
-function mukurtu_core_update_40102(): void {
+function mukurtu_core_update_40103(): void {
   if (!\Drupal::moduleHandler()->moduleExists('mukurtu_submissions')) {
     \Drupal::service('module_installer')->install(['mukurtu_submissions']);
   }
@@ -3678,7 +3693,7 @@ function mukurtu_core_update_40102(): void {
  * (e.g. the Category field on mukurtu_submissions' public submission form)
  * for anonymous and authenticated non-admin users.
  */
-function mukurtu_core_update_40103(): void {
+function mukurtu_core_update_40104(): void {
   user_role_grant_permissions('anonymous', ['access content']);
   user_role_grant_permissions('authenticated', ['access content']);
 }
