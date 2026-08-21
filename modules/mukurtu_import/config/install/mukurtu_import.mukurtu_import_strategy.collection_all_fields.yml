@@ -28,7 +28,7 @@ mapping:
     target: nid
   -
     source: Image
-    target: field_collection_image
+    target: '-1'
   -
     source: 'Image > Alternative text'
     target: field_collection_image/alt

@@ -13,7 +13,7 @@ mapping:
     target: user_id
   -
     source: 'Banner Image'
-    target: field_banner_image
+    target: '-1'
   -
     source: 'Comments Require Approval'
     target: field_comment_require_approval
@@ -61,7 +61,7 @@ mapping:
     target: field_access_mode
   -
     source: 'Thumbnail Image'
-    target: field_thumbnail_image
+    target: '-1'
   -
     source: UUID
     target: uuid

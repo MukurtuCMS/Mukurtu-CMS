@@ -7,7 +7,7 @@ namespace Drupal\Tests\mukurtu_import\Kernel;
 use Drupal\KernelTests\KernelTestBase;
 
 /**
- * Tests mukurtu_import_update_40031()-_40036(), which correct stale source
+ * Tests mukurtu_import_update_40031()-_40037(), which correct stale source
  * header labels and add missing mapping entries to existing sites' saved
  * import strategy configs.
  *
@@ -17,6 +17,7 @@ use Drupal\KernelTests\KernelTestBase;
  * @see mukurtu_import_update_40034()
  * @see mukurtu_import_update_40035()
  * @see mukurtu_import_update_40036()
+ * @see mukurtu_import_update_40037()
  */
 class ImportTemplateMappingUpdateTest extends KernelTestBase {
 
@@ -301,6 +302,40 @@ class ImportTemplateMappingUpdateTest extends KernelTestBase {
   }
 
   /**
+   * The bare-field fix downgrades a stale "Image" -> field_collection_image
+   * mapping to Ignore, since the target field's dropdown option never
+   * actually includes the bare field name (only its /target_id and /alt
+   * sub-properties).
+   */
+  public function testBareFieldCorrectionDowngradesToIgnore(): void {
+    $this->seedConfig('collection_all_fields', [
+      ['source' => 'Title', 'target' => 'title'],
+      ['source' => 'Image', 'target' => 'field_collection_image'],
+    ]);
+
+    mukurtu_import_update_40037();
+
+    $mapping = $this->getMapping('collection_all_fields');
+    $image_entry = current(array_filter($mapping, fn (array $m) => $m['source'] === 'Image'));
+    $this->assertSame('-1', $image_entry['target']);
+  }
+
+  /**
+   * A site admin's customized mapping for that column (pointed at some
+   * other target) is left untouched.
+   */
+  public function testBareFieldCorrectionLeavesCustomizationAlone(): void {
+    $this->seedConfig('collection_all_fields', [
+      ['source' => 'Image', 'target' => 'field_summary'],
+    ]);
+
+    mukurtu_import_update_40037();
+
+    $mapping = $this->getMapping('collection_all_fields');
+    $this->assertSame('field_summary', $mapping[0]['target']);
+  }
+
+  /**
    * A config that was never installed (isNew()) is skipped without error by
    * every hook.
    */
@@ -311,6 +346,7 @@ class ImportTemplateMappingUpdateTest extends KernelTestBase {
     mukurtu_import_update_40034();
     mukurtu_import_update_40035();
     mukurtu_import_update_40036();
+    mukurtu_import_update_40037();
     $this->assertTrue(\Drupal::config('mukurtu_import.mukurtu_import_strategy.audio_all_fields')->isNew());
   }
 

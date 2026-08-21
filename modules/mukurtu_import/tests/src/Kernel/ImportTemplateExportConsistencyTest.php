@@ -206,4 +206,43 @@ class ImportTemplateExportConsistencyTest extends KernelTestBase {
     }
   }
 
+  /**
+   * A field whose only supported dropdown targets are sub-properties (e.g.
+   * "field_x/target_id", "field_x/alt") can never be mapped by its bare
+   * field name - ImportFormTrait::buildTargetOptions() never offers that as
+   * a selectable option, so opening and saving Customize Settings silently
+   * downgrades any such mapping to "Ignore". These are the specific bare
+   * mappings found broken this way; a template must map that column to
+   * '-1' outright rather than to the unusable bare field name.
+   *
+   * @see \Drupal\mukurtu_import\Form\ImportFormTrait::buildTargetOptions()
+   */
+  public function testBareSubpropertyFieldsAreExplicitlyIgnored(): void {
+    $known_bare_fields = [
+      'collection_all_fields' => ['Image' => 'field_collection_image'],
+      'community_all_fields' => [
+        'Banner Image' => 'field_banner_image',
+        'Thumbnail Image' => 'field_thumbnail_image',
+      ],
+      'cultural_protocol_all_fields' => [
+        'Banner Image' => 'field_banner_image',
+        'Thumbnail Image' => 'field_thumbnail_image',
+      ],
+      'dictionary_word_all_fields' => ['Thumbnail' => 'field_thumbnail'],
+      'sample_sentence_all_fields' => ['Recording' => 'field_sentence_recording'],
+      'word_list_all_fields' => ['Image' => 'field_word_list_image'],
+    ];
+
+    foreach ($known_bare_fields as $template_id => $sources) {
+      $mapping = $this->getTemplateMapping($template_id);
+      foreach ($sources as $source => $unusable_bare_target) {
+        $matches = array_filter($mapping, fn (array $m) => ($m['source'] ?? NULL) === $source);
+        $this->assertNotEmpty($matches, "{$template_id}: expected a mapping entry for '{$source}'.");
+        foreach ($matches as $m) {
+          $this->assertNotSame($unusable_bare_target, $m['target'], "{$template_id}: '{$source}' must not map to the bare field '{$unusable_bare_target}' - that target is never offered by Customize Settings, so it silently becomes 'Ignore' the moment the config is resaved through that form.");
+        }
+      }
+    }
+  }
+
 }
