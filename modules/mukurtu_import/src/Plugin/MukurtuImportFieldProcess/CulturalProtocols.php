@@ -34,11 +34,11 @@ class CulturalProtocols extends MukurtuImportFieldProcessPluginBase {
   public function getSupportedProperties(FieldDefinitionInterface $field_definition): array {
     return [
       'protocols' => [
-        'label' => t('Protocols'),
+        'label' => (string) t('Protocols'),
         'description' => $this->getFormatDescription($field_definition, 'protocols'),
       ],
       'sharing_setting' => [
-        'label' => t('Sharing Setting'),
+        'label' => (string) t('Sharing Setting'),
         'description' => $this->getFormatDescription($field_definition, 'sharing_setting'),
       ],
     ];
