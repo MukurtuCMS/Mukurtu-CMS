@@ -869,3 +869,62 @@ function mukurtu_import_update_40036(): void {
     }
   }
 }
+
+/**
+ * Correct bare image/thumbnail/recording fields mapped to a target the
+ * Customize Settings UI can never actually offer.
+ *
+ * ImportFormTrait::buildTargetOptions() only lists a field's sub-properties
+ * (e.g. "field_x/target_id", "field_x/alt") as selectable dropdown targets
+ * whenever MukurtuImportFieldProcessPluginManager reports the field has any
+ * - it never lists the bare field name itself. A handful of shipped
+ * templates mapped a column straight to one of these bare field names
+ * anyway (collection/word_list's "Image", community/cultural_protocol's
+ * "Banner Image"/"Thumbnail Image", dictionary_word's "Thumbnail",
+ * sample_sentence's "Recording"). Since that value never appears in the
+ * dropdown's own option list, simply opening and saving Customize Settings
+ * silently downgrades the mapping to "Ignore" - which is what the field is
+ * actually capable of via this single bare column, so this hook makes the
+ * static template say so up front instead of showing a mapped count that
+ * changes the moment a user looks at Customize Settings. Only rewrites a
+ * config's mapping if its target for that column still equals the known
+ * stale default, leaving any site-customized mapping untouched.
+ */
+function mukurtu_import_update_40037(): void {
+  $corrections = [
+    'collection_all_fields' => ['Image' => 'field_collection_image'],
+    'community_all_fields' => [
+      'Banner Image' => 'field_banner_image',
+      'Thumbnail Image' => 'field_thumbnail_image',
+    ],
+    'cultural_protocol_all_fields' => [
+      'Banner Image' => 'field_banner_image',
+      'Thumbnail Image' => 'field_thumbnail_image',
+    ],
+    'dictionary_word_all_fields' => ['Thumbnail' => 'field_thumbnail'],
+    'sample_sentence_all_fields' => ['Recording' => 'field_sentence_recording'],
+    'word_list_all_fields' => ['Image' => 'field_word_list_image'],
+  ];
+
+  foreach ($corrections as $id => $fixes) {
+    $config_name = "mukurtu_import.mukurtu_import_strategy.{$id}";
+    $config = \Drupal::configFactory()->getEditable($config_name);
+    if ($config->isNew()) {
+      continue;
+    }
+
+    $mapping = $config->get('mapping') ?? [];
+    $changed = FALSE;
+    foreach ($mapping as $delta => $entry) {
+      $source = $entry['source'] ?? NULL;
+      if (isset($fixes[$source]) && ($entry['target'] ?? NULL) === $fixes[$source]) {
+        $mapping[$delta]['target'] = '-1';
+        $changed = TRUE;
+      }
+    }
+
+    if ($changed) {
+      $config->set('mapping', $mapping)->save();
+    }
+  }
+}

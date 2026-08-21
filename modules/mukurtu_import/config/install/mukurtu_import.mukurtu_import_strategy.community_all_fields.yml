@@ -13,7 +13,7 @@ mapping:
     target: user_id
   -
     source: 'Banner Image'
-    target: field_banner_image
+    target: '-1'
   -
     source: 'Banner Image > Alternative text'
     target: field_banner_image/alt
@@ -61,7 +61,7 @@ mapping:
     target: field_access_mode
   -
     source: 'Thumbnail Image'
-    target: field_thumbnail_image
+    target: '-1'
   -
     source: 'Thumbnail Image > Alternative text'
     target: field_thumbnail_image/alt

@@ -34,7 +34,7 @@ mapping:
     target: status
   -
     source: Recording
-    target: field_sentence_recording
+    target: '-1'
   -
     source: 'Sample Sentence'
     target: field_sentence

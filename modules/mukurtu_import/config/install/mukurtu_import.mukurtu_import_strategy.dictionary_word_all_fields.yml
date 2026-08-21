@@ -94,7 +94,7 @@ mapping:
     target: sticky
   -
     source: Thumbnail
-    target: field_thumbnail
+    target: '-1'
   -
     source: 'Thumbnail > Alternative text'
     target: field_thumbnail/alt

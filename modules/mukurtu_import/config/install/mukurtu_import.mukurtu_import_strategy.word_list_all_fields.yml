@@ -28,7 +28,7 @@ mapping:
     target: nid
   -
     source: Image
-    target: field_word_list_image
+    target: '-1'
   -
     source: Keywords
     target: field_keywords
