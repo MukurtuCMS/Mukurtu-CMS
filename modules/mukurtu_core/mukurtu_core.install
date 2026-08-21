@@ -3671,3 +3671,86 @@ function mukurtu_core_update_40102(): void {
       ->save();
   }
 }
+
+/**
+ * Grant Mukurtu Manager the archive/restore transition permissions on both
+ * the Default and Editorial content workflows, matching their existing
+ * edit-any access to article/page. This does not grant reach into
+ * protocol-gated bundles -- MukurtuProtocolNodeAccessControlHandler's
+ * per-node OG-scoped update access check independently blocks that
+ * regardless of this permission.
+ */
+function mukurtu_core_update_40103(): void {
+  $role = \Drupal\user\Entity\Role::load('mukurtu_manager');
+  if (!$role) {
+    return;
+  }
+
+  foreach (['mukurtu_default_content_workflow', 'mukurtu_editorial_workflow'] as $workflow_id) {
+    foreach (['archive', 'restore'] as $transition) {
+      $role->grantPermission("use $workflow_id transition $transition");
+    }
+  }
+
+  $role->save();
+}
+
+/**
+ * Replace the Publish/Unpublish bulk actions on the content admin view
+ * (which silently no-op on moderated content -- content_moderation's own
+ * presave logic overrides a direct setPublished()/setUnpublished() call)
+ * with moderation-aware Draft/Publish/Archive transitions, and add
+ * mukurtu_core as a view dependency now that it references a mukurtu_core
+ * action plugin.
+ */
+function mukurtu_core_update_40104(): void {
+  $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_manage_all_content');
+  if ($config->isNew()) {
+    return;
+  }
+
+  $key = 'display.default.display_options.fields.views_bulk_operations_bulk_form.selected_actions';
+  $selected_actions = $config->get($key) ?? [];
+
+  foreach ($selected_actions as $delta => $action_config) {
+    if (($action_config['action_id'] ?? '') === 'entity:unpublish_action:node') {
+      $selected_actions[$delta] = [
+        'action_id' => 'mukurtu_change_moderation_state_action',
+        'preconfiguration' => [
+          'add_confirmation' => FALSE,
+          'label_override' => 'Restore to Draft',
+          'target_state' => 'draft',
+        ],
+      ];
+    }
+    elseif (($action_config['action_id'] ?? '') === 'entity:publish_action:node') {
+      $selected_actions[$delta] = [
+        'action_id' => 'mukurtu_change_moderation_state_action',
+        'preconfiguration' => [
+          'add_confirmation' => FALSE,
+          'label_override' => 'Publish',
+          'target_state' => 'published',
+        ],
+      ];
+      $selected_actions[max(array_keys($selected_actions)) + 1] = [
+        'action_id' => 'mukurtu_change_moderation_state_action',
+        'preconfiguration' => [
+          'add_confirmation' => FALSE,
+          'label_override' => 'Archive',
+          'target_state' => 'archived',
+        ],
+      ];
+    }
+  }
+
+  $config->set($key, $selected_actions);
+
+  $dependencies = $config->get('dependencies.module') ?? [];
+  if (!in_array('mukurtu_core', $dependencies, TRUE)) {
+    $dependencies[] = 'mukurtu_core';
+    sort($dependencies);
+    $config->set('dependencies.module', $dependencies);
+  }
+
+  $config->save();
+}

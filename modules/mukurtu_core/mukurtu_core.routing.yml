@@ -24,6 +24,19 @@ mukurtu_core.node.quick_unpublish:
     _csrf_token: 'TRUE'
     _node_access: 'node.update'
 
+mukurtu_core.node.moderation_transition:
+  path: '/admin/content/{node}/transition/{to_state}'
+  defaults:
+    _controller: '\Drupal\mukurtu_core\Controller\NodeQuickActionsController::transition'
+    _title: 'Change moderation state'
+  options:
+    parameters:
+      node:
+        type: entity:node
+  requirements:
+    _csrf_token: 'TRUE'
+    _node_access: 'node.update'
+
 mukurtu_core.settings_assorted:
   path: '/admin/config/mukurtu/settings'
   defaults:
