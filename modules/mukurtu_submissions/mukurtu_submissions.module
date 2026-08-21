@@ -209,7 +209,7 @@ function mukurtu_submissions_form_node_form_alter(array &$form, FormStateInterfa
 
   $form['mukurtu_submissions'] = [
     '#type' => 'details',
-    '#title' => t('Public submission'),
+    '#title' => t('Submission'),
     '#open' => TRUE,
     '#weight' => -10,
   ];

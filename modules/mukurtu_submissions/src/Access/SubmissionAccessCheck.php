@@ -24,7 +24,7 @@ class SubmissionAccessCheck implements AccessInterface {
     $setting = reset($settings);
 
     if (!$setting || !$setting->status()) {
-      return AccessResult::forbidden('Public submissions are not enabled for this content type.');
+      return AccessResult::forbidden('The submission form is not enabled for this content type.');
     }
 
     // The public form only ever renders whichever fields the target
