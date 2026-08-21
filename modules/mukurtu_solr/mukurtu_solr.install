@@ -151,3 +151,23 @@ function mukurtu_solr_update_40004(): void {
   $index->save();
   $index->reindex();
 }
+
+/**
+ * Give the Solr-backed Browse, Digital Heritage, and Dictionary search boxes
+ * the same page-specific placeholder text as their DB-backed counterparts
+ * (#2018).
+ */
+function mukurtu_solr_update_40005(): void {
+  $placeholders = [
+    'views.view.mukurtu_browse_solr' => 'Search all content',
+    'views.view.mukurtu_digital_heritage_browse_solr' => 'Search digital heritage items',
+    'views.view.mukurtu_dictionary_solr' => 'Search dictionary entries',
+  ];
+  foreach ($placeholders as $name => $placeholder) {
+    $config = \Drupal::configFactory()->getEditable($name);
+    if ($config->isNew()) {
+      continue;
+    }
+    $config->set('display.default.display_options.filters.search_api_fulltext.expose.placeholder', $placeholder)->save();
+  }
+}

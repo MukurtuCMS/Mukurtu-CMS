@@ -616,3 +616,21 @@ function mukurtu_browse_update_40018(): void {
     $index->reindex();
   }
 }
+
+/**
+ * Give the Browse and Digital Heritage search boxes page-specific
+ * placeholder text instead of the generic "Enter keywords" (#2018).
+ */
+function mukurtu_browse_update_40019(): void {
+  $placeholders = [
+    'views.view.mukurtu_browse' => 'Search all content',
+    'views.view.mukurtu_digital_heritage_browse' => 'Search digital heritage items',
+  ];
+  foreach ($placeholders as $name => $placeholder) {
+    $config = \Drupal::configFactory()->getEditable($name);
+    if ($config->isNew()) {
+      continue;
+    }
+    $config->set('display.default.display_options.filters.search_api_fulltext.expose.placeholder', $placeholder)->save();
+  }
+}

@@ -1419,3 +1419,15 @@ function mukurtu_dictionary_update_40041(): void {
     $config->save();
   }
 }
+
+/**
+ * Give the Dictionary search box placeholder text instead of leaving it
+ * blank (#2018).
+ */
+function mukurtu_dictionary_update_40043(): void {
+  $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_dictionary');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('display.default.display_options.filters.search_api_fulltext.expose.placeholder', 'Search dictionary entries')->save();
+}

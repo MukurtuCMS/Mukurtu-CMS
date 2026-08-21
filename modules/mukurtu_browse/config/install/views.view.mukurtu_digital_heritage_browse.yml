@@ -426,7 +426,7 @@ display:
             remember_roles:
               authenticated: authenticated
             expose_fields: false
-            placeholder: 'Enter keywords'
+            placeholder: 'Search digital heritage items'
             searched_fields_id: search_api_fulltext_searched_fields
             value_maxlength: 128
           is_grouped: false

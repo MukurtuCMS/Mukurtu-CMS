@@ -230,7 +230,7 @@ display:
               anonymous: '0'
               mukurtu_manager: '0'
             expose_fields: false
-            placeholder: ''
+            placeholder: 'Search all content'
             searched_fields_id: search_api_fulltext_searched_fields
           is_grouped: false
           group_info:
