@@ -9,13 +9,19 @@ target_entity_type_id: node
 target_bundle: digital_heritage
 mapping:
   -
+    source: 'Default translation'
+    target: '-1'
+  -
     source: ID
     target: nid
+  -
+    source: 'Multipage parent'
+    target: '-1'
   -
     source: UUID
     target: uuid
   -
-    source: 'Language (langcode)'
+    source: Locale
     target: langcode
   -
     source: Published
@@ -36,10 +42,10 @@ mapping:
     source: 'Sticky at top of lists'
     target: sticky
   -
-    source: 'Cultural Protocols > Protocols'
+    source: Protocols
     target: field_cultural_protocols/protocols
   -
-    source: 'Cultural Protocols > Sharing Setting'
+    source: 'Sharing Setting'
     target: field_cultural_protocols/sharing_setting
   -
     source: Draft

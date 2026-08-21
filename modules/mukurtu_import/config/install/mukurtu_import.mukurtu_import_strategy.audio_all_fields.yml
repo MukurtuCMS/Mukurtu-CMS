@@ -21,11 +21,11 @@ mapping:
     source: Contributor
     target: field_contributor
   -
-    source: 'Cultural Protocols > Protocols'
-    target: field_cultural_protocols/protocols
+    source: 'Default translation'
+    target: '-1'
   -
-    source: 'Cultural Protocols > Sharing Setting'
-    target: field_cultural_protocols/sharing_setting
+    source: 'Found In'
+    target: field_found_in
   -
     source: ID
     target: mid
@@ -33,7 +33,7 @@ mapping:
     source: Identifier
     target: field_identifier
   -
-    source: 'Language (langcode)'
+    source: Locale
     target: langcode
   -
     source: 'Media Tags'
@@ -45,8 +45,14 @@ mapping:
     source: People
     target: field_people
   -
+    source: Protocols
+    target: field_cultural_protocols/protocols
+  -
     source: Published
     target: status
+  -
+    source: 'Sharing Setting'
+    target: field_cultural_protocols/sharing_setting
   -
     source: 'Thumbnail > Alternative text'
     target: field_thumbnail/alt

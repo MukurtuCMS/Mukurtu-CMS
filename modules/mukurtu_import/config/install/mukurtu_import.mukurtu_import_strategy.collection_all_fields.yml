@@ -15,14 +15,8 @@ mapping:
     source: 'Authored on'
     target: created
   -
-    source: 'Collection name'
-    target: title
-  -
-    source: 'Cultural Protocols > Protocols'
-    target: field_cultural_protocols/protocols
-  -
-    source: 'Cultural Protocols > Sharing Setting'
-    target: field_cultural_protocols/sharing_setting
+    source: 'Default translation'
+    target: '-1'
   -
     source: Description
     target: field_description
@@ -34,7 +28,13 @@ mapping:
     target: nid
   -
     source: Image
-    target: field_collection_image
+    target: '-1'
+  -
+    source: 'Image > Alternative text'
+    target: field_collection_image/alt
+  -
+    source: 'Image > File ID'
+    target: field_collection_image/target_id
   -
     source: 'Items in Collection'
     target: field_items_in_collection
@@ -42,14 +42,14 @@ mapping:
     source: Keywords
     target: field_keywords
   -
-    source: 'Language (langcode)'
-    target: langcode
-  -
     source: 'Local Contexts Labels and Notices'
     target: field_local_contexts_labels_and_notices
   -
     source: 'Local Contexts Projects'
     target: field_local_contexts_projects
+  -
+    source: Locale
+    target: langcode
   -
     source: Location
     target: field_location
@@ -60,14 +60,23 @@ mapping:
     source: 'Map Points'
     target: field_coverage
   -
+    source: 'Multipage parent'
+    target: '-1'
+  -
     source: 'Promoted to front page'
     target: promote
+  -
+    source: Protocols
+    target: field_cultural_protocols/protocols
   -
     source: Published
     target: status
   -
     source: 'Related Content'
     target: field_related_content
+  -
+    source: 'Sharing Setting'
+    target: field_cultural_protocols/sharing_setting
   -
     source: Source
     target: field_source
@@ -80,6 +89,9 @@ mapping:
   -
     source: Summary
     target: field_summary
+  -
+    source: Title
+    target: title
   -
     source: UUID
     target: uuid

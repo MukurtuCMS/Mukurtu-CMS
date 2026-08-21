@@ -22,6 +22,30 @@ class CulturalProtocols extends MukurtuImportFieldProcessPluginBase {
 
   /**
    * {@inheritdoc}
+   *
+   * Overrides the base class's generic "{field label} > {property label}"
+   * format. mukurtu_export writes these two columns as bare "Protocols" and
+   * "Sharing Setting" (see CsvEntityFieldExportEventSubscriber::
+   * exportCulturalProtocol()) rather than prefixed with the field's own
+   * label, so the dropdown option text and the "Download CSV Template"
+   * feature need to match that convention to stay usable on the quick
+   * import path.
+   */
+  public function getSupportedProperties(FieldDefinitionInterface $field_definition): array {
+    return [
+      'protocols' => [
+        'label' => (string) t('Protocols'),
+        'description' => $this->getFormatDescription($field_definition, 'protocols'),
+      ],
+      'sharing_setting' => [
+        'label' => (string) t('Sharing Setting'),
+        'description' => $this->getFormatDescription($field_definition, 'sharing_setting'),
+      ],
+    ];
+  }
+
+  /**
+   * {@inheritdoc}
    */
   public function getProcess(FieldDefinitionInterface $field_config, $source, $context = []) {
     $multivalue_delimiter = $context['multivalue_delimiter'] ?? self::MULTIVALUE_DELIMITER;
