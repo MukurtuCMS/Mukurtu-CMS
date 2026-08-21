@@ -55,10 +55,6 @@ class OverviewForm extends MukurtuMigrateFormBase
       '#items' => $info,
     ];
 
-    $form['info_footer'] = [
-      '#markup' => '<p>' . $this->t('The migration can take a long time. It is recommended to migrate from a local copy of your site instead of directly from your live site.'),
-    ];
-
     if ($this->siteHasContent) {
       // Style the error like a classic Drupal error message.
       $form['existing_content_message_wrapper'] = [
