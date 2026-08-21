@@ -86,7 +86,6 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
     if (empty($context['sandbox']['total'])) {
       $context['sandbox']['total'] = $executable->getSource()->count();
       $context['sandbox']['batch_limit'] = $executable->calculateBatchLimit($context);
-      $context['results']['messages'] = $context['results']['messages'] ?? [];
       $context['results'][$migration->id()] = [
         '@numitems' => 0,
         '@created' => 0,
@@ -94,6 +93,13 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
         '@failures' => 0,
         '@ignored' => 0,
         '@name' => $migration->id(),
+        'messages' => [],
+        'import_id' => $migration_definition['mukurtu_import_id'] ?? NULL,
+        'uid' => $migration_definition['mukurtu_import_uid'] ?? NULL,
+        'fid' => $migration_definition['mukurtu_import_fid'] ?? NULL,
+        'filename' => $migration_definition['mukurtu_import_filename'] ?? NULL,
+        'entity_type_id' => $migration_definition['mukurtu_import_entity_type_id'] ?? NULL,
+        'bundle' => $migration_definition['mukurtu_import_bundle'] ?? NULL,
       ];
     }
 
@@ -106,21 +112,24 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
     // Do the import.
     $result = $executable->import();
 
-    // Save the messages.
-    $context['results']['messages'] = array_merge($context['results']['messages'], iterator_to_array($executable->getIdMap()->getMessages()));
+    // Save the messages for this migration only, so errors stay attributed
+    // to the file that produced them rather than being flattened across all
+    // files in the batch.
+    $context['results'][$migration->id()]['messages'] = array_merge(
+      $context['results'][$migration->id()]['messages'],
+      iterator_to_array($executable->getIdMap()->getMessages())
+    );
 
     // Store the definition for ID map cleanup after the batch completes.
     $context['results']['definitions'][$migration->id()] = $migration_definition;
 
-    // Store the result; will need to combine the results of all our iterations.
-    $context['results'][$migration->id()] = [
-      '@numitems' => $context['results'][$migration->id()]['@numitems'] + $executable->getProcessedCount(),
-      '@created' => $context['results'][$migration->id()]['@created'] + $executable->getCreatedCount(),
-      '@updated' => $context['results'][$migration->id()]['@updated'] + $executable->getUpdatedCount(),
-      '@failures' => $context['results'][$migration->id()]['@failures'] + $executable->getFailedCount(),
-      '@ignored' => $context['results'][$migration->id()]['@ignored'] + $executable->getIgnoredCount(),
-      '@name' => $migration->id(),
-    ];
+    // Accumulate the result across all our iterations without clobbering the
+    // metadata already stored above.
+    $context['results'][$migration->id()]['@numitems'] += $executable->getProcessedCount();
+    $context['results'][$migration->id()]['@created'] += $executable->getCreatedCount();
+    $context['results'][$migration->id()]['@updated'] += $executable->getUpdatedCount();
+    $context['results'][$migration->id()]['@failures'] += $executable->getFailedCount();
+    $context['results'][$migration->id()]['@ignored'] += $executable->getIgnoredCount();
 
     // Do some housekeeping.
     if ($result !== MigrationInterface::RESULT_INCOMPLETE) {
@@ -153,46 +162,63 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
     $store = $tempstore->get('mukurtu_import');
     $store->set('batch_results_success', $success);
 
-    $messages = [];
-    $exception_fid = NULL;
+    /** @var \Drupal\mukurtu_import\MukurtuImportLogStorage $log_storage */
+    $log_storage = \Drupal::service('mukurtu_import.log_storage');
+    $timestamp = \Drupal::time()->getRequestTime();
+    $current_uid = (int) \Drupal::currentUser()->id();
     $imported_count = 0;
     $per_migration_summary = [];
 
-    // Find our failure point. $results also carries 'messages' and
-    // 'definitions' sibling keys (see batchProcessImportDefinition() above)
-    // that aren't per-migration results -- only entries with an '@name' key
-    // are.
-    foreach (array_keys($results) as $migration_id) {
-      if (!is_array($results[$migration_id]) || !isset($results[$migration_id]['@name'])) {
+    // Build the tempstore-facing flat message list and persist one log row
+    // per migration (i.e. per file), keeping each file's own messages
+    // correctly attributed to that file's own fid instead of merging all
+    // messages in the batch under a single file. $results also carries
+    // 'messages' and 'definitions' sibling keys (see
+    // batchProcessImportDefinition() above) that aren't per-migration
+    // results -- only entries with a '@numitems' key are.
+    $messages = [];
+    foreach ($results as $migration_id => $migration_result) {
+      if ($migration_id === 'definitions' || !is_array($migration_result) || !isset($migration_result['@numitems'])) {
         continue;
       }
 
-      $imported_count += ($results[$migration_id]['@created'] ?? 0) + ($results[$migration_id]['@updated'] ?? 0);
-      $per_migration_summary[] = new FormattableMarkup('@name: @created created, @updated updated, @failures failed, @ignored ignored', $results[$migration_id]);
+      $imported_count += ($migration_result['@created'] ?? 0) + ($migration_result['@updated'] ?? 0);
+      $per_migration_summary[] = new FormattableMarkup('@name: @created created, @updated updated, @failures failed, @ignored ignored', $migration_result);
 
-      if (isset($results[$migration_id]['@failures']) && $results[$migration_id]['@failures'] > 0) {
-        preg_match('/^\d+__(\d+)__.*/', $migration_id, $matches);
-        $fid = $matches[1] ?? NULL;
-        if ($fid) {
-          $storage = \Drupal::entityTypeManager()->getStorage('file');
-          if ($storage->load(intval($fid))) {
-            $exception_fid = $fid;
-          }
-        }
+      $fid = $migration_result['fid'] ?? NULL;
+      $file_message_texts = [];
+      foreach ($migration_result['messages'] ?? [] as $raw_message) {
+        $source_id = $raw_message->src_ID ?? NULL;
+        $message = $source_id
+          ? (string) t("Problem with ID @source_id: @message", ['@source_id' => $source_id, '@message' => $raw_message->message])
+          : $raw_message->message;
+        $messages[] = ['fid' => $fid, 'message' => $message];
+        $file_message_texts[] = $message;
       }
-    }
 
-    // Tag the error messages with the fid so we can display it next to the
-    // file later.
-    $raw_messages = $results['messages'] ?? [];
-    foreach ($raw_messages as $raw_message) {
-      $source_id = $raw_message->src_ID ?? NULL;
-      $message = $source_id ? t("Problem with ID @source_id: @message", ['@source_id' => $source_id, '@message' => $raw_message->message]) : $raw_message->message;
-      $messages[] = ['fid' => $exception_fid ?? NULL, 'message' => $message];
+      $log_storage->log([
+        'import_id' => $migration_result['import_id'] ?? '',
+        'migration_id' => (string) $migration_id,
+        'uid' => $migration_result['uid'] ?? $current_uid,
+        'fid' => $fid,
+        'filename' => $migration_result['filename'] ?? '',
+        'entity_type_id' => $migration_result['entity_type_id'] ?? '',
+        'bundle' => $migration_result['bundle'] ?? NULL,
+        'success' => empty($migration_result['@failures']) ? 1 : 0,
+        'count_processed' => $migration_result['@numitems'] ?? 0,
+        'count_created' => $migration_result['@created'] ?? 0,
+        'count_updated' => $migration_result['@updated'] ?? 0,
+        'count_failed' => $migration_result['@failures'] ?? 0,
+        'count_ignored' => $migration_result['@ignored'] ?? 0,
+        'messages' => implode("\n", $file_message_texts),
+        'timestamp' => $timestamp,
+      ]);
     }
     $store->set('batch_results_messages', $messages);
 
-    mukurtu_notifications_notify_batch_import_report($imported_count, static::buildResultsSummary($per_migration_summary, $messages));
+    if (\Drupal::moduleHandler()->moduleExists('mukurtu_notifications')) {
+      mukurtu_notifications_notify_batch_import_report($imported_count, static::buildResultsSummary($per_migration_summary, $messages));
+    }
 
     // Clean up ID map tables for all migrations in this batch.
     // These are no longer needed after the import is complete.
