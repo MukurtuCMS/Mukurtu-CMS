@@ -367,6 +367,16 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
         $ids[] = '_record_number';
       }
     }
+    else {
+      // The identifier/ID/UUID column above is legitimately blank for rows
+      // that create new content in a combined "add + update" CSV. Two blank
+      // rows would otherwise hash to the same migrate ID map key, so the
+      // second row would resolve to the first row's just-created entity
+      // instead of creating its own. _record_number is unique per row within
+      // the file, so append it as a tie-breaker to keep every row's map key
+      // distinct regardless of blank values in the primary column(s).
+      $ids[] = '_record_number';
+    }
 
     return [
       'id' => $this->getDefinitionId($file),
