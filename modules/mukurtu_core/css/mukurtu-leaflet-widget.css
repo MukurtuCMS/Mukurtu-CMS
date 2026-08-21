@@ -6,6 +6,20 @@
   margin: 1em auto;
 }
 
+/**
+ * Geoman's only built-in focus affordance is a background-color change,
+ * which isn't visible enough for WCAG 2.4.7/2.4.11. Add a visible outline
+ * for the toolbar buttons, popup close button, and markers.
+ */
+.leaflet-buttons-control-button:focus-visible,
+.leaflet-pm-action:focus-visible,
+.leaflet-popup-close-button:focus-visible,
+.leaflet-marker-icon:focus-visible,
+.leaflet-container:focus-visible {
+  outline: var(--focus-color) solid 2px;
+  outline-offset: 2px;
+}
+
 /* The geocoder search input sets its own text color inline but no
  * background, so it goes dark-on-dark under a browser/OS dark theme. This
  * is attached module-wide (not via the mukurtu_v4 theme) because the
