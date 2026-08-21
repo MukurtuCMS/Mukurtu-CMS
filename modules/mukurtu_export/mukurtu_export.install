@@ -439,3 +439,36 @@ function mukurtu_export_update_40016(): void {
     }
   }
 }
+
+/**
+ * Declare child-reference export fields on collection/word_list node types.
+ *
+ * ExportChildResolver now reads which fields represent child references from
+ * the mukurtu_export.child_reference_fields third-party setting on the node
+ * type, instead of hardcoding the collection/word_list bundle names. Sites
+ * installed before this change need the setting backfilled onto their
+ * existing node type config.
+ *
+ * @see \Drupal\mukurtu_export\ExportChildResolver
+ */
+function mukurtu_export_update_40018(): void {
+  $declarations = [
+    'collection' => [
+      'field_items_in_collection' => [],
+      'field_child_collections' => ['recurse' => TRUE],
+    ],
+    'word_list' => [
+      'field_words' => [],
+    ],
+  ];
+
+  $storage = \Drupal::entityTypeManager()->getStorage('node_type');
+  foreach ($declarations as $bundle => $child_reference_fields) {
+    $node_type = $storage->load($bundle);
+    if (!$node_type) {
+      continue;
+    }
+    $node_type->setThirdPartySetting('mukurtu_export', 'child_reference_fields', $child_reference_fields);
+    $node_type->save();
+  }
+}
