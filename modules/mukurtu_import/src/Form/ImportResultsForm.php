@@ -23,6 +23,7 @@ class ImportResultsForm extends ImportBaseForm {
    */
   public function buildForm(array $form, FormStateInterface $form_state): array {
     $success = $this->store->get('batch_results_success') ?? FALSE;
+    $noop = $this->store->get('batch_results_noop') ?? FALSE;
     $messages = $this->getMessages();
 
     $form['results_message'] = [
@@ -39,6 +40,9 @@ class ImportResultsForm extends ImportBaseForm {
           '#markup' => "<div class=\"messages messages--error\" role=\"alert\" aria-live=\"assertive\">" . $filename . ": ". $message['message'] . "</div>",
         ];
       }
+    }
+    elseif ($noop) {
+      $form['results_message']['#markup'] = "<div class=\"messages messages--warning\" role=\"status\" aria-live=\"polite\">" . $this->t('No content was imported.') . "</div>";
     }
 
     $this->buildTable($form, $form_state);
