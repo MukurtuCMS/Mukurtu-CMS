@@ -2,48 +2,49 @@
 
 namespace Drupal\mukurtu_export\Entity;
 
+use Drupal\Core\Entity\Attribute\ContentEntityType;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\user\EntityOwnerInterface;
 use Drupal\user\UserInterface;
 
 /**
  * Defines the Export List entity.
- *
- * @ContentEntityType(
- *   id = "export_list",
- *   label = @Translation("Export List"),
- *   label_collection = @Translation("Export Lists"),
- *   base_table = "export_list",
- *   entity_keys = {
- *     "id" = "id",
- *     "uuid" = "uuid",
- *     "label" = "label",
- *     "uid" = "uid",
- *   },
- *   handlers = {
- *     "access" = "Drupal\mukurtu_export\ExportListAccessController",
- *     "list_builder" = "Drupal\mukurtu_export\Controller\ExportListListBuilder",
- *     "form" = {
- *       "add" = "Drupal\mukurtu_export\Form\ExportListAddForm",
- *       "edit" = "Drupal\mukurtu_export\Form\ExportListEditForm",
- *       "delete" = "Drupal\mukurtu_export\Form\ExportListDeleteForm",
- *     },
- *     "route_provider" = {
- *       "html" = "Drupal\Core\Entity\Routing\AdminHtmlRouteProvider",
- *     },
- *   },
- *   admin_permission = "access mukurtu export",
- *   links = {
- *     "add-form" = "/admin/export/lists/add",
- *     "edit-form" = "/admin/export/lists/manage/{export_list}",
- *     "delete-form" = "/admin/export/lists/manage/{export_list}/delete",
- *     "collection" = "/admin/export/lists",
- *   }
- * )
  */
+#[ContentEntityType(
+  id: 'export_list',
+  label: new TranslatableMarkup('Export List'),
+  label_collection: new TranslatableMarkup('Export Lists'),
+  entity_keys: [
+    'id' => 'id',
+    'uuid' => 'uuid',
+    'label' => 'label',
+    'uid' => 'uid',
+  ],
+  handlers: [
+    'access' => 'Drupal\mukurtu_export\ExportListAccessController',
+    'list_builder' => 'Drupal\mukurtu_export\Controller\ExportListListBuilder',
+    'form' => [
+      'add' => 'Drupal\mukurtu_export\Form\ExportListAddForm',
+      'edit' => 'Drupal\mukurtu_export\Form\ExportListEditForm',
+      'delete' => 'Drupal\mukurtu_export\Form\ExportListDeleteForm',
+    ],
+    'route_provider' => [
+      'html' => 'Drupal\Core\Entity\Routing\AdminHtmlRouteProvider',
+    ],
+  ],
+  links: [
+    'add-form' => '/admin/export/lists/add',
+    'edit-form' => '/admin/export/lists/manage/{export_list}',
+    'delete-form' => '/admin/export/lists/manage/{export_list}/delete',
+    'collection' => '/admin/export/lists',
+  ],
+  admin_permission: 'access mukurtu export',
+  base_table: 'export_list',
+)]
 class ExportList extends ContentEntityBase implements EntityOwnerInterface {
 
   use EntityChangedTrait;

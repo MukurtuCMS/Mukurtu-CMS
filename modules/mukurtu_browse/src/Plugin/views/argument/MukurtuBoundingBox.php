@@ -3,14 +3,14 @@
 namespace Drupal\mukurtu_browse\Plugin\views\argument;
 
 use Drupal\search_api\Plugin\views\argument\SearchApiStandard;
+use Drupal\views\Attribute\ViewsArgument;
 
 /**
  * Defines a filter for a geographic bounding box.
  *
  * @ingroup views_argument_handlers
- *
- * @ViewsArgument("mukurtu_bounding_box")
  */
+#[ViewsArgument('mukurtu_bounding_box')]
 class MukurtuBoundingBox extends SearchApiStandard {
 
   /**

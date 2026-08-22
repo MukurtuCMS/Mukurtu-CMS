@@ -3,11 +3,13 @@
 namespace Drupal\mukurtu_protocol\Plugin\Field\FieldWidget;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Field\Attribute\FieldWidget;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldFilteredMarkup;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\WidgetBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\mukurtu_protocol\Entity\CommunityInterface;
 use Drupal\mukurtu_protocol\Entity\ProtocolInterface;
 use Drupal\mukurtu_protocol\Plugin\Field\FieldType\CulturalProtocolItem;
@@ -15,15 +17,12 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Mukurtu Cultural Protocol widget.
- *
- * @FieldWidget(
- *   id = "cultural_protocol_widget",
- *   label = @Translation("Cultural Protocol widget"),
- *   field_types = {
- *     "cultural_protocol",
- *   }
- * )
  */
+#[FieldWidget(
+  id: 'cultural_protocol_widget',
+  label: new TranslatableMarkup('Cultural Protocol widget'),
+  field_types: ['cultural_protocol'],
+)]
 class CulturalProtocolWidget extends WidgetBase {
   /**
    * The entity type manager.

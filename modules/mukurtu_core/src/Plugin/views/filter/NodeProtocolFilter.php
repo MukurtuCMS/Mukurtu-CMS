@@ -3,14 +3,14 @@
 namespace Drupal\mukurtu_core\Plugin\views\filter;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\views\Attribute\ViewsFilter;
 use Drupal\views\Plugin\views\filter\InOperator;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Filters content nodes by protocol.
- *
- * @ViewsFilter("mukurtu_node_protocol_filter")
  */
+#[ViewsFilter('mukurtu_node_protocol_filter')]
 class NodeProtocolFilter extends InOperator {
 
   public function __construct(
