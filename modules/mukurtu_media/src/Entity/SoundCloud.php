@@ -173,6 +173,16 @@ class SoundCloud extends Media implements SoundCloudInterface, CulturalProtocolC
     if ($uploadedThumb) {
       $this->thumbnail->target_id = $uploadedThumb;
     }
+
+    // Auto-fill thumbnail alt text from the media name when it is empty.
+    $thumbValue = $this->get('field_thumbnail')->getValue();
+    if (!empty($thumbValue[0]['target_id']) && empty($thumbValue[0]['alt'])) {
+      $this->get('field_thumbnail')->set(0, [
+        'target_id' => $thumbValue[0]['target_id'],
+        'alt' => $this->label(),
+      ]);
+    }
+
     parent::preSave($storage);
   }
 
