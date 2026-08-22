@@ -38,6 +38,7 @@ dependencies:
     - media
     - message
     - message_notify_ui
+    - message_subscribe_ui
     - message_ui
     - mukurtu_collection
     - mukurtu_content_warnings
@@ -72,6 +73,7 @@ permissions:
   - 'access mukurtu import'
   - 'access visitors'
   - 'administer local contexts legacy projects'
+  - 'administer message subscribe'
   - 'administer mukurtu access denied page'
   - 'administer mukurtu_media configuration'
   - 'administer mukurtu media download settings'

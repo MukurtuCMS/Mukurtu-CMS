@@ -939,4 +939,22 @@ function mukurtu_update_40003(): void {
   }
 }
 
+/**
+ * Grant Mukurtu Manager the "administer message subscribe" permission.
+ *
+ * The Message Subscribe UI "Subscriptions" tab/page is now restricted to
+ * that permission (see RouteSubscriber::alterRoutes()), so Mukurtu Managers
+ * need it explicitly to keep the access they previously had via the
+ * self-view bypass in SubscriptionController::tabAccess(). New installs
+ * already get it via the updated config/install YAML; this backfills
+ * existing sites.
+ */
+function mukurtu_update_40004(): void {
+  $mukurtu_manager = Role::load('mukurtu_manager');
+  if ($mukurtu_manager) {
+    $mukurtu_manager->grantPermission('administer message subscribe');
+    $mukurtu_manager->save();
+  }
+}
+
 
