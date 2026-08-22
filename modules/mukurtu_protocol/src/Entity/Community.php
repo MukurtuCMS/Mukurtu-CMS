@@ -652,7 +652,7 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
     $fields['field_parent_community'] = BaseFieldDefinition::create('entity_reference')
       ->setName('field_parent_community')
       ->setLabel(t('Parent Community'))
-      ->setDescription('Displays the parent community, if one exists. This is a read only field. Community organization is managed through the community organization admin page and not through this field.')
+      ->setDescription(t('Displays the parent community, if one exists. This is a read only field. Community organization is managed through the community organization admin page and not through this field.'))
       ->setComputed(TRUE)
       ->setClass('Drupal\mukurtu_protocol\Plugin\Field\CommunityParentCommunityItemList')
       ->setSetting('target_type', 'community')
@@ -667,7 +667,7 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
     $fields['field_child_communities'] = BaseFieldDefinition::create('entity_reference')
       ->setName('field_child_communities')
       ->setLabel(t('Sub-communities'))
-      ->setDescription('Displays any child communities. This is a read only field. Community organization is managed through the community organization admin page and not through this field.')
+      ->setDescription(t('Displays any child communities. This is a read only field. Community organization is managed through the community organization admin page and not through this field.'))
       ->setComputed(TRUE)
       ->setClass('Drupal\mukurtu_protocol\Plugin\Field\CommunityChildCommunitiesItemList')
       ->setSetting('target_type', 'community')
@@ -812,7 +812,7 @@ class Community extends EditorialContentEntityBase implements CommunityInterface
 
     $fields['field_membership_display'] = BaseFieldDefinition::create('list_string')
       ->setLabel(t('Membership Display'))
-      ->setDescription('Select which, if any, community members are displayed on the community page.')
+      ->setDescription(t('Select which, if any, community members are displayed on the community page.'))
       ->setSettings([
         'allowed_values' => [
           'none' => 'Do not display any community members',
