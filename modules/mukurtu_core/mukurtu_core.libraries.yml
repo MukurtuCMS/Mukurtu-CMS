@@ -47,8 +47,15 @@ dialog-aria-modal:
 
 entity_browser_view_decoration:
   version: 1.x
+  css:
+    component:
+      css/entity-browser-view-decoration.css: {}
   js:
     js/entity_browser_view_decoration.js: {}
+  dependencies:
+    - core/drupal
+    - core/jquery
+    - core/once
 
 form-disable-enter-submit:
   version: 1.x
