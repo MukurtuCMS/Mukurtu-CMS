@@ -79,10 +79,15 @@
       <directory>web/profiles/mukurtu/modules/mukurtu_migrate/tests/src/Kernel</directory>
     </testsuite>
     <testsuite name="kernel">
+      <directory>web/profiles/mukurtu/modules/mukurtu_media/tests/src/Kernel</directory>
+    </testsuite>
+    <testsuite name="kernel">
       <directory>web/profiles/mukurtu/modules/mukurtu_landing_page/tests/src/Kernel</directory>
     </testsuite>
     <testsuite name="kernel">
       <directory>web/profiles/mukurtu/modules/mukurtu_browse/tests/src/Kernel</directory>
+    </testsuite>
+    <testsuite name="kernel">
       <directory>web/profiles/mukurtu/modules/mukurtu_core/tests/src/Kernel</directory>
     </testsuite>
     <testsuite name="kernel">
