@@ -83,6 +83,8 @@
     </testsuite>
     <testsuite name="kernel">
       <directory>web/profiles/mukurtu/modules/mukurtu_browse/tests/src/Kernel</directory>
+    </testsuite>
+    <testsuite name="kernel">
       <directory>web/profiles/mukurtu/modules/mukurtu_core/tests/src/Kernel</directory>
     </testsuite>
     <testsuite name="kernel">
