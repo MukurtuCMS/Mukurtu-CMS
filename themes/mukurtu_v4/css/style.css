@@ -7876,6 +7876,67 @@ header {
   }
 }
 
+.entity-browser-form {
+  padding: var(--v-space-4xs);
+}
+.entity-browser-form .views-exposed-form {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+  -webkit-box-align: end;
+      -ms-flex-align: end;
+          align-items: flex-end;
+  gap: var(--v-space-3xs);
+  -webkit-margin-after: var(--v-space-3xs);
+          margin-block-end: var(--v-space-3xs);
+}
+.entity-browser-form .views-exposed-form .js-form-item,
+.entity-browser-form .views-exposed-form .form-actions {
+  -webkit-margin-after: 0;
+          margin-block-end: 0;
+}
+.entity-browser-form .views-exposed-form .form-item-type {
+  display: none !important;
+}
+
+.entity-browser-form table {
+  inline-size: 100%;
+  border-collapse: collapse;
+}
+.entity-browser-form table th {
+  text-align: start;
+  font-weight: var(--text-bold);
+  padding-block: var(--v-space-6xs);
+  padding-inline: var(--v-space-5xs);
+  -webkit-border-after: 2px solid var(--mukurtu-view-row-divider-color);
+          border-block-end: 2px solid var(--mukurtu-view-row-divider-color);
+}
+.entity-browser-form table td {
+  padding-block: var(--v-space-5xs);
+  padding-inline: var(--v-space-5xs);
+  -webkit-border-after: 1px solid var(--mukurtu-view-row-divider-color);
+          border-block-end: 1px solid var(--mukurtu-view-row-divider-color);
+  vertical-align: middle;
+}
+.entity-browser-form table tbody tr:hover {
+  background: var(--brand-light);
+}
+.entity-browser-form table .views-field-uid,
+.entity-browser-form table .views-field-status,
+.entity-browser-form table .views-field-created {
+  display: none;
+}
+
+.eb-form-selection-card__media {
+  border-radius: 0.25rem;
+  background: var(--brand-light);
+}
+.eb-form-selection-card__title {
+  color: var(--text-color);
+}
+
 .path-submit .layout-content {
   max-width: 1280px;
   margin-inline: auto;
@@ -7887,6 +7948,10 @@ header {
 .path-submit details.form-wrapper {
   -webkit-margin-after: var(--v-space-3xs);
           margin-block-end: var(--v-space-3xs);
+}
+.path-submit .js-text-format-wrapper .js-filter-wrapper {
+  -webkit-margin-before: 0;
+          margin-block-start: 0;
 }
 .path-submit .form-item.js-form-type-checkbox,
 .path-submit .form-item.js-form-type-radio {
@@ -7997,6 +8062,7 @@ header {
 .path-submit details.form-wrapper details.form-wrapper > summary:focus-visible {
   outline-color: var(--brand-primary);
 }
+.path-submit .paragraph-top,
 .path-submit .paragraph-type-top {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -8017,14 +8083,33 @@ header {
   -webkit-border-after: 2px solid var(--brand-light);
           border-block-end: 2px solid var(--brand-light);
 }
+.path-submit .paragraph-top .paragraph-type-label,
+.path-submit .paragraph-top .paragraph-type-title,
+.path-submit .paragraph-type-top .paragraph-type-label,
 .path-submit .paragraph-type-top .paragraph-type-title {
   font-weight: var(--text-bold);
   font-size: 1.1em;
 }
+.path-submit .form-wrapper:has(> .paragraph-top, > .paragraph-type-top) {
+  border: 1px solid var(--color-greys-alpha-border);
+  border-radius: 0.5rem;
+  padding: var(--v-space-4xs);
+  -webkit-margin-after: var(--v-space-4xs);
+          margin-block-end: var(--v-space-4xs);
+}
+.path-submit .paragraphs-dropdown-action.button {
+  color: var(--brand-text-color);
+}
+.path-submit .paragraphs-dropdown-action.button:hover, .path-submit .paragraphs-dropdown-action.button:focus {
+  color: var(--brand-text-color);
+}
 .path-submit .form-item .description,
-.path-submit .field--widget-media-library-widget > .description {
+.path-submit .field--widget-media-library-widget > .description,
+.path-submit .js-filter-guidelines,
+.path-submit [id$="--description"] {
   color: var(--color-text-secondary);
   font-size: 0.9em;
+  line-height: 1.4;
   -webkit-margin-before: var(--v-space-6xs);
           margin-block-start: var(--v-space-6xs);
 }
@@ -8088,18 +8173,20 @@ header {
   font-weight: var(--text-bold);
 }
 .path-submit .field-multiple-table td:not(.field-multiple-drag):not(.delta-order) {
+  -webkit-box-flex: 1;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
+  min-inline-size: 0;
+}
+.path-submit .field-multiple-table td:not(.field-multiple-drag):not(.delta-order):not(:has(.paragraph-top, .paragraph-type-top)) {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
   -ms-flex-wrap: wrap;
       flex-wrap: wrap;
   gap: var(--v-space-3xs);
-  -webkit-box-flex: 1;
-      -ms-flex: 1 1 auto;
-          flex: 1 1 auto;
-  min-inline-size: 0;
 }
-.path-submit .field-multiple-table td:not(.field-multiple-drag):not(.delta-order) .js-form-item {
+.path-submit .field-multiple-table td:not(.field-multiple-drag):not(.delta-order):not(:has(.paragraph-top, .paragraph-type-top)) .js-form-item {
   -webkit-box-flex: 1;
       -ms-flex: 1 1 240px;
           flex: 1 1 240px;
@@ -8107,7 +8194,7 @@ header {
   -webkit-margin-before: 0;
           margin-block-start: 0;
 }
-.path-submit .field-multiple-table td:has(.form-submit) {
+.path-submit .field-multiple-table td:has(.form-submit):not(:has(.paragraph-top, .paragraph-type-top)) {
   -webkit-box-flex: 0;
       -ms-flex: 0 0 auto;
           flex: 0 0 auto;
@@ -8134,6 +8221,32 @@ header {
   padding-block: var(--v-space-3xs);
   -webkit-border-before: 1px solid var(--color-greys-alpha-border);
           border-block-start: 1px solid var(--color-greys-alpha-border);
+}
+.path-submit .ui-widget-overlay,
+.path-submit .ui-dialog.entity-browser-modal {
+  --gin-bg-layer: var(--color-white);
+  --gin-bg-layer2: rgb(0 0 0 / 50%);
+}
+.path-submit .ui-dialog.entity-browser-modal {
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+.path-submit .ui-dialog.entity-browser-modal .ui-dialog-titlebar {
+  background: var(--brand-primary-dark) !important;
+  color: var(--color-white);
+}
+.path-submit .ui-dialog.entity-browser-modal .ui-dialog-title {
+  font-weight: var(--text-bold);
+  margin: 0.625rem;
+}
+.path-submit .ui-dialog.entity-browser-modal .ui-dialog-titlebar-close {
+  background: transparent !important;
+}
+.path-submit .ui-dialog.entity-browser-modal .ajax-progress.ajax-progress-throbber {
+  display: none;
+}
+.path-submit .field--widget-entity-browser-entity-reference .ajax-progress.ajax-progress-throbber {
+  display: none;
 }
 
 .taxonomy-term-page {
