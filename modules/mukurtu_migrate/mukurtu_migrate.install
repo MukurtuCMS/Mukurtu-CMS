@@ -1,0 +1,123 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the Mukurtu Migrate module.
+ */
+
+use Drupal\Core\Serialization\Yaml;
+
+/**
+ * Fix migrations that never mapped an original author, and make OG
+ * memberships with an unresolvable source user fail as a clear, readable
+ * skipped-row message instead of an opaque exception (issue #1403).
+ */
+function mukurtu_migrate_update_40001(): void {
+  $config_factory = \Drupal::configFactory();
+  $user_migrations = ['mukurtu_cms_v3_users', 'mukurtu_cms_v3_users_uid1'];
+
+  $lookup = function (string $source) use ($user_migrations): array {
+    return [
+      'plugin' => 'migration_lookup',
+      'migration' => $user_migrations,
+      'source' => $source,
+    ];
+  };
+
+  // Dictionary words never mapped uid at all. Media migrations never mapped
+  // uid at all either -- the D7 Scald atom author lives in a field named
+  // 'publisher', not 'uid'. File/file_private carried the raw D7 uid through
+  // unchanged instead of resolving it to the migrated account.
+  $uid_fixes = [
+    'migrate_plus.migration.mukurtu_cms_v3_dictionary_word' => $lookup('uid'),
+    'migrate_plus.migration.mukurtu_cms_v3_media_image' => $lookup('publisher'),
+    'migrate_plus.migration.mukurtu_cms_v3_media_audio' => $lookup('publisher'),
+    'migrate_plus.migration.mukurtu_cms_v3_media_document' => $lookup('publisher'),
+    'migrate_plus.migration.mukurtu_cms_v3_media_video' => $lookup('publisher'),
+    'migrate_plus.migration.mukurtu_cms_v3_file' => $lookup('uid'),
+    'migrate_plus.migration.mukurtu_cms_v3_file_private' => $lookup('uid'),
+  ];
+  foreach ($uid_fixes as $config_name => $uid_process) {
+    $config = $config_factory->getEditable($config_name);
+    if (!$config->isNew()) {
+      $config->set('process.uid', $uid_process)->save();
+    }
+  }
+
+  // The migrations above now require the user migrations to run first;
+  // append that to each one's required dependencies without clobbering
+  // whatever else is already declared there.
+  $needs_user_dependency = [
+    'migrate_plus.migration.mukurtu_cms_v3_media_image',
+    'migrate_plus.migration.mukurtu_cms_v3_media_audio',
+    'migrate_plus.migration.mukurtu_cms_v3_media_document',
+    'migrate_plus.migration.mukurtu_cms_v3_media_video',
+    'migrate_plus.migration.mukurtu_cms_v3_file',
+    'migrate_plus.migration.mukurtu_cms_v3_file_private',
+  ];
+  foreach ($needs_user_dependency as $config_name) {
+    $config = $config_factory->getEditable($config_name);
+    if ($config->isNew()) {
+      continue;
+    }
+    $required = $config->get('migration_dependencies.required') ?? [];
+    $config->set('migration_dependencies.required', array_values(array_unique(array_merge($required, $user_migrations))))->save();
+  }
+
+  // The user migrations declared mukurtu_cms_v3_file/mukurtu_cms_v3_file_private
+  // as required dependencies, but their user_picture process actually looks up
+  // core's own 'd7_file' migration -- a leftover from adapting core's
+  // d7_user.yml template. That incorrect dependency is also what would turn
+  // the fix above into a cycle (file migrations now require the user
+  // migrations to resolve authorship). Replace it with the same optional
+  // dependency core's own template declares.
+  foreach (['migrate_plus.migration.mukurtu_cms_v3_users', 'migrate_plus.migration.mukurtu_cms_v3_users_uid1'] as $config_name) {
+    $config = $config_factory->getEditable($config_name);
+    if ($config->isNew()) {
+      continue;
+    }
+    $optional = $config->get('migration_dependencies.optional') ?? [];
+    $config->clear('migration_dependencies.required')
+      ->set('migration_dependencies.optional', array_values(array_unique(array_merge($optional, ['d7_file']))))
+      ->save();
+  }
+
+  // OG membership migrations resolve uid via a migration_lookup against the
+  // source etid, but when that lookup can't resolve a migrated user the row
+  // was still saved, and Organic Groups' own OgMembership::preSave() throws a
+  // generic LogicException ("OG membership can not be created for an empty
+  // or anonymous user") -- the "heavily repeated" error from issue #1403.
+  // Skip the row instead, with a message that says what actually happened.
+  $membership_migrations = [
+    'migrate_plus.migration.mukurtu_cms_v3_community_memberships',
+    'migrate_plus.migration.mukurtu_cms_v3_protocol_memberships',
+    'migrate_plus.migration.mukurtu_cms_v3_language_community_community_memberships',
+    'migrate_plus.migration.mukurtu_cms_v3_language_community_protocol_memberships',
+  ];
+  $skip_uid_process = [
+    $lookup('etid'),
+    [
+      'plugin' => 'skip_on_empty',
+      'method' => 'row',
+      'message' => 'Membership not created: source user could not be matched to a migrated account.',
+    ],
+  ];
+  foreach ($membership_migrations as $config_name) {
+    $config = $config_factory->getEditable($config_name);
+    if (!$config->isNew()) {
+      $config->set('process.uid', $skip_uid_process)->save();
+    }
+  }
+}
+
+/**
+ * Re-import the audio migration to add the SoundCloud provider bundle switch.
+ */
+function mukurtu_migrate_update_40002(): void {
+  $config_name = 'migrate_plus.migration.mukurtu_cms_v3_media_audio';
+  $config = \Drupal::configFactory()->getEditable($config_name);
+  $path = \Drupal::service('extension.list.module')->getPath('mukurtu_migrate');
+  $yaml = file_get_contents($path . '/config/install/' . $config_name . '.yml');
+  $data = Yaml::decode($yaml);
+  $config->setData($data)->save();
+}
