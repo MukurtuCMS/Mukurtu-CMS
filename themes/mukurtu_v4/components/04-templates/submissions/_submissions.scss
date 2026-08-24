@@ -1,0 +1,427 @@
+// Public submission form and thank-you page (/submit/{entity_type}/{bundle}[/thank-you]):
+// constrain content to a readable width, matching the /comment/reply/… pattern.
+.path-submit {
+  .layout-content {
+    max-width: 1280px;
+    margin-inline: auto;
+    padding-inline: var(--layout-padding);
+    padding-block: var(--v-space-2xs);
+  }
+
+  // Group visual rhythm: each field/fieldset/details gets consistent
+  // breathing room, matching the spacing scale used elsewhere in the
+  // theme rather than the browser's default fieldset margins.
+  .form-item,
+  fieldset.form-wrapper,
+  details.form-wrapper {
+    margin-block-end: var(--v-space-3xs);
+  }
+
+  // The rule above is meant to separate whole fields/fieldsets from each
+  // other - applied generically, it also lands on every individual
+  // checkbox/radio *option* within one checkboxes/radios group (e.g. each
+  // Category term), spacing them out as if they were separate fields.
+  // Tighten those back down to a compact list. margin-block-start also
+  // has to be reset here: 02-molecules/form's sitewide ".form-item +
+  // .form-item" rule adds 1rem above every form-item that follows
+  // another - normally correct for separating whole fields, but between
+  // two checkbox/radio options in the same group it re-adds exactly the
+  // gap margin-block-end below is trying to remove (the two margins
+  // collapse to whichever is larger, so the 1rem was winning outright).
+  .form-item.js-form-type-checkbox,
+  .form-item.js-form-type-radio {
+    margin-block-start: 0;
+    margin-block-end: var(--v-space-6xs);
+  }
+
+  // Remove the browser default fieldset box (thin grey border, floating
+  // legend) - keeps the flat, borderless look the rest of the theme uses
+  // instead of introducing a new "card" style not seen anywhere else on
+  // the site.
+  //
+  // The only fieldsets left on this form once a field is stripped of
+  // EXCLUDED_FIELDS (see PublicSubmissionForm) are single-field widgets
+  // that merely need a fieldset to group their own sub-parts - Category's
+  // checkboxes, Original Date's Year/Month/Day - not multi-field
+  // "sections" (those are handled separately: paragraph items via
+  // .paragraph-type-top below, admin-configured groups via the
+  // .submission-section/details styling above). So unlike those, a plain
+  // fieldset's legend here should read as an ordinary field label, not a
+  // section heading - same weight/size as every other field's <label>.
+  fieldset.form-wrapper {
+    border: none;
+    padding: 0;
+    margin-inline: 0;
+
+    > legend,
+    > .fieldset-legend {
+      display: block;
+      font-weight: var(--text-bold);
+      margin-block-end: var(--v-space-6xs);
+    }
+  }
+
+  // "Your contact information" isn't a collapsible group (Name/Email are
+  // required - nothing to gain by hiding them) but should carry the same
+  // visual weight as the field group headers below rather than reverting
+  // to the plain fieldset-legend look above.
+  fieldset.submission-section {
+    // The visible text actually lives in a nested <span
+    // class="fieldset-legend"> inside <legend> - but <legend> itself is
+    // the element with real background/padding box behavior, so it gets
+    // the color treatment. It also needs an explicit inline-size: legend
+    // boxes shrink-to-fit their content in every major browser regardless
+    // of display value, so without this the color bar would only ever
+    // wrap tightly around the text instead of spanning the section like
+    // the field group headers below.
+    > legend {
+      display: block;
+      inline-size: 100%;
+      box-sizing: border-box;
+      font-weight: var(--text-bold);
+      font-size: 1.1em;
+      color: var(--color-white);
+      // var(--brand-primary) only contrasts white text at ~4:1 - short of
+      // WCAG AA's 4.5:1 for this text (bold at 1.1em doesn't clear the
+      // "large text" threshold that would allow the lower 3:1 minimum).
+      // -dark is the same shade already used elsewhere for a passing ~5:1.
+      background: var(--brand-primary-dark);
+      padding: var(--v-space-5xs) var(--v-space-4xs);
+      border-radius: 0.5rem;
+      border-block-end: none;
+      margin-block-end: var(--v-space-4xs);
+    }
+
+    // Unlike <details> (see below - no wrapper div exists there in this
+    // theme), a <fieldset>'s children are already wrapped in a single
+    // ".fieldset-wrapper" div, so the matching indent for its fields can
+    // go here directly instead of needing the sibling-combinator
+    // workaround the groups below require.
+    > .fieldset-wrapper {
+      padding-inline-start: 1.4ch;
+    }
+  }
+
+  // Admin-defined field groups (mukurtu_submissions' own collapsible
+  // sections, not field_group) render as native <details>. Unlike the
+  // fieldset legend above - a plain visual heading - a group's <summary>
+  // is genuinely interactive (it toggles the section), so it gets a solid
+  // color bar rather than the fieldset's thin underline: a bare heading
+  // read as too easy to miss/skip past entirely once collapsed, with
+  // nothing else in the section visible to give it weight. Reuses the
+  // same brand-primary-background/white-text pairing already used for the
+  // site navbar, plus a chevron that rotates open/closed since native
+  // ::marker triangles render inconsistently in size and are easy to miss.
+  details.form-wrapper {
+    border: none;
+    padding: 0;
+    margin-inline: 0;
+
+    > summary {
+      display: flex;
+      align-items: center;
+      gap: var(--v-space-5xs);
+      font-weight: var(--text-bold);
+      font-size: 1.1em;
+      color: var(--color-white);
+      // Same AA contrast fix as .submission-section > legend above - -dark
+      // is needed for white text to clear 4.5:1 at this weight/size.
+      background: var(--brand-primary-dark);
+      padding: var(--v-space-5xs) var(--v-space-4xs);
+      border-radius: 0.5rem;
+      margin-block-end: var(--v-space-4xs);
+      cursor: pointer;
+      list-style: none;
+
+      &::-webkit-details-marker {
+        display: none;
+      }
+
+      &::after {
+        content: '';
+        display: block;
+        inline-size: 0.6em;
+        block-size: 0.6em;
+        margin-inline-start: auto;
+        border-inline-end: 2px solid currentColor;
+        border-block-end: 2px solid currentColor;
+        transform: rotate(-45deg);
+        transition: transform 0.15s ease;
+        flex-shrink: 0;
+      }
+
+      // Background can no longer darken further on hover/focus now that
+      // resting state already uses -dark (see above) - the focus-visible
+      // outline below remains the affordance for keyboard users; a mouse
+      // hover with no visual change is not itself a WCAG violation.
+      &:focus-visible {
+        outline: 2px solid var(--color-white);
+        outline-offset: 2px;
+      }
+    }
+
+    &[open] > summary::after {
+      transform: rotate(45deg);
+    }
+
+    // This theme has no base theme (mukurtu_v4.info.yml: "base theme:
+    // false"), so <details> renders via core's absolute default
+    // details.html.twig, which places children directly inside <details>
+    // with no wrapping div to hang a blanket indent off of.
+    //
+    // The sitewide `details.form-wrapper summary + div` rule
+    // (02-molecules/form/_form.scss) only indents the ONE field
+    // immediately after <summary> - the adjacent-sibling combinator only
+    // ever matches a single element - which is why only the first field
+    // in each group appeared indented while the rest sat flush with the
+    // group bar. Extending it to every field via the general sibling
+    // combinator, scoped here rather than changed sitewide since other
+    // uses of details.form-wrapper (e.g. field_group's admin-form details)
+    // haven't been audited against this change.
+    > summary ~ div {
+      margin-inline-start: 1.4ch;
+    }
+  }
+
+  // Nested groups (e.g. "Local Contexts" inside "Permissions and Rights")
+  // get the same lighter-treatment convention as nested fieldsets above -
+  // a subdued bar rather than the full-strength brand color, so hierarchy
+  // reads clearly at a glance.
+  details.form-wrapper details.form-wrapper > summary {
+    font-size: 1em;
+    color: inherit;
+    background: var(--brand-light);
+
+    &:hover,
+    &:focus-visible {
+      background: var(--color-greys-alpha-background);
+    }
+
+    &:focus-visible {
+      outline-color: var(--brand-primary);
+    }
+  }
+
+  // A paragraph item's title/remove-button row (e.g. "Citing Indigenous
+  // Elders and Knowledge Keepers") isn't a real fieldset/legend - it's a
+  // plain title div + dropbutton wrapper - so it needs the same
+  // section-heading treatment applied directly rather than through the
+  // fieldset selectors above.
+  .paragraph-type-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--v-space-5xs);
+    padding-block-end: var(--v-space-6xs);
+    margin-block-end: var(--v-space-5xs);
+    border-block-end: 2px solid var(--brand-light);
+
+    .paragraph-type-title {
+      font-weight: var(--text-bold);
+      font-size: 1.1em;
+    }
+  }
+
+  // De-emphasize field help text relative to labels/input content, and
+  // tighten its spacing - currently identical in weight/color to the
+  // field's own value, which reads as visual noise at this volume of text.
+  .form-item .description,
+  .field--widget-media-library-widget > .description {
+    color: var(--color-text-secondary);
+    font-size: 0.9em;
+    margin-block-start: var(--v-space-6xs);
+  }
+
+  // Two different, unrelated things render as bulleted <ul> lists on this
+  // form, both reading inconsistently against every other field's
+  // plain-text description:
+  // - Multi-value tagify fields (Contributor, Creator, Keywords, etc.) get
+  //   an extra "Drag to re-order X" line appended via a #theme =>
+  //   item_list wrapper around their #description (tagify module's own
+  //   widget behavior).
+  // - Plain-text/textarea fields with a text format (Cultural Narrative,
+  //   Traditional Knowledge, Description, Transcription, Location
+  //   Description, etc.) get filter format guidelines ("No HTML tags
+  //   allowed.", ...) rendered as a <ul> in a *separate*
+  //   ".js-filter-guidelines" container, not inside ".description" at all.
+  // Strip list styling generically for both, scoped to the form itself
+  // (not just .path-submit/body) so this doesn't reach breadcrumbs, nav,
+  // or other page chrome that also happens to use <li> elements.
+  .mukurtu-submissions-public-submission-form {
+    ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    // 00-base/base/_base.scss sets "list-style-type: square" directly on
+    // every <li> sitewide (not on the parent <ul>) - since that's a direct
+    // declaration on the element itself, it wins over list-style:none on
+    // the ancestor <ul> above regardless of specificity (an explicit
+    // declaration on an element always beats an inherited value from an
+    // ancestor). Overriding list-style-type here directly on the <li> is
+    // what actually removes the marker.
+    li {
+      list-style-type: none;
+      margin-block-end: var(--v-space-6xs);
+
+      &:last-child {
+        margin-block-end: 0;
+      }
+    }
+  }
+
+  // Citing Indigenous Elders and Knowledge Keepers (field_knowledge_keepers)
+  // is a single-cardinality, optional paragraph field: there's no "Add"
+  // control (already at its one-item max), so its "Remove" button is the
+  // only paragraph-management affordance shown - removing the one paragraph
+  // would leave the field stuck at zero with no way to bring it back.
+  // Leaving every subfield blank already achieves the same "I don't want to
+  // cite anyone" outcome, so the button is just confusing overhead here.
+  #edit-field-knowledge-keepers-wrapper .paragraphs-dropbutton-wrapper {
+    display: none;
+  }
+
+  // The composite date widget (Year/Month/Day) wraps its fields in
+  // Drupal's generic ".container-inline" fieldset class, which (via core
+  // CSS, not this theme) makes each field's own wrapper display:inline-block
+  // - that's what actually put them in a row, not a rule of ours. Now that
+  // the select atom overrides that to display:grid (see _select.scss, for
+  // the dropdown-arrow-alignment fix), the row needs to come from flex
+  // instead. That has to go on .fieldset-wrapper (the actual parent of the
+  // Year/Month/Day items), not .container-inline itself - the fieldset's
+  // own direct children are just <legend> and .fieldset-wrapper, so making
+  // the fieldset the flex container would put the *legend* side-by-side
+  // with the fields instead of above them.
+  .container-inline > .fieldset-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--v-space-5xs);
+    align-items: flex-end;
+
+    .form-item {
+      margin-block-end: 0;
+    }
+  }
+
+  // A native multi-select listbox (e.g. Local Contexts Labels) defaults
+  // to a fixed "size" attribute that can dominate the page height -
+  // cap it and let it scroll instead.
+  select[multiple],
+  select[size] {
+    max-block-size: 12rem;
+  }
+
+  // A multi-value field with no dedicated widget of its own (e.g. External
+  // Links, using core's plain link_default widget) falls back to Drupal
+  // core's generic field_multiple_value_form: a full drag-to-reorder table
+  // with a weight column and a JS-injected "Show row weights" toggle.
+  // That's built for content editors managing many rows - overkill for a
+  // visitor adding one or two links here - so this simplifies it down to
+  // plain stacked rows: no drag handle, no weight column/toggle, and the
+  // field's own <h4> heading (core's table markup, sized like a page
+  // heading by this theme's typography) brought down to a normal field
+  // label's weight/size.
+  .field-multiple-table {
+    inline-size: 100%;
+
+    // Escapes each row from table layout without having to touch
+    // table/thead/tbody - a <tr> given display:flex stops behaving like a
+    // table row (and its <td> children become plain flex items) while
+    // leaving the rest of the table's default display modes alone. Not
+    // allowed to wrap: the fields cell below shrinks (and wraps its own
+    // URL/Link text pair) before giving up its spot next to Remove, so
+    // Remove stays beside the fields instead of dropping below their
+    // (possibly multi-line) descriptions.
+    tr {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--v-space-3xs);
+    }
+
+    // Core always renders exactly these 3 header cells for a draggable
+    // multi-value field - a wide field-label cell (colspan covering the
+    // drag handle), an empty cell over the remove button, then "Order"
+    // over the weight column - so the last one is reliably the weight
+    // column's header.
+    .field-multiple-drag,
+    .delta-order,
+    thead th:last-child {
+      display: none;
+    }
+
+    .field-label h4.label {
+      margin: 0;
+      font-family: inherit;
+      font-size: 1em;
+      font-weight: var(--text-bold);
+    }
+
+    // The remaining visible cell per row (URL + Link text) - let its two
+    // fields sit side by side as one logical entry instead of stacking.
+    // min-inline-size: 0 overrides the flex default of "shrink no smaller
+    // than my content's own intrinsic width" - without it this cell can't
+    // shrink to make room for Remove and forces the row to wrap instead.
+    td:not(.field-multiple-drag):not(.delta-order) {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--v-space-3xs);
+      flex: 1 1 auto;
+      min-inline-size: 0;
+
+      .js-form-item {
+        flex: 1 1 240px;
+        min-inline-size: 0;
+        // Overrides 02-molecules/form's sitewide ".form-item +
+        // .form-item" rule, which adds top margin to the second field
+        // assuming a normal stacked block layout - here URL and Link
+        // text are side-by-side flex siblings, so that margin only
+        // pushed Link text down out of alignment with URL.
+        margin-block-start: 0;
+      }
+    }
+
+    // Never shrunk or wrapped away - the fields cell above gives up space
+    // first (see min-inline-size above), not this button.
+    td:has(.form-submit) {
+      flex: 0 0 auto;
+    }
+  }
+
+  // JS-injected by core's tabledrag.js alongside the table above - hidden
+  // for the same reason (nothing left to reorder once the weight column
+  // and drag handle are gone).
+  .tabledrag-toggle-weight-wrapper {
+    display: none;
+  }
+
+  // Required-fields legend, same de-emphasized treatment as field
+  // descriptions below.
+  .form-required-legend {
+    color: var(--color-text-secondary);
+    font-size: 0.9em;
+    margin-block-end: var(--v-space-3xs);
+  }
+
+  // Live character-remaining counter (character-counter.js), styled to
+  // match the field description immediately above it rather than
+  // introducing a new visual weight of its own.
+  .submission-character-counter {
+    color: var(--color-text-secondary);
+    font-size: 0.9em;
+    margin-block-start: var(--v-space-6xs);
+  }
+
+  // Keep Submit reachable without scrolling back down through a long,
+  // grouped form - a from-scratch equivalent of Gin's sticky admin action
+  // bar, since that's Gin-theme-only and unavailable on this front-end
+  // theme.
+  .form-actions {
+    position: sticky;
+    inset-block-end: 0;
+    background: var(--color-white);
+    padding-block: var(--v-space-3xs);
+    border-block-start: 1px solid var(--color-greys-alpha-border);
+  }
+}
