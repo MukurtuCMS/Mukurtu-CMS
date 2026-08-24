@@ -121,39 +121,48 @@ class ImportTemplateExportConsistencyTest extends KernelTestBase {
   }
 
   /**
-   * Every template that maps a "created" target must use the same source
-   * label the bundle's real export header uses for that column - not a
-   * stale/copied field-dropdown label that will never match a real file
-   * (see https://github.com/MukurtuCMS/Mukurtu-CMS/pull/2035#issuecomment-5398304518).
+   * Every template that maps one of these base targets must use the same
+   * source label the bundle's real export header uses for that column -
+   * not a stale/copied field-dropdown label that will never match a real
+   * file (see https://github.com/MukurtuCMS/Mukurtu-CMS/pull/2035#issuecomment-5398304518
+   * and the "promote"/"sticky"/"status" follow-up on the same PR).
    *
-   * Unlike langcode, "created" has no core fallback default when left
-   * unset, so a template mapping it from a label the exporter never
-   * actually writes doesn't just undercount the "X of Y mapped" message -
+   * Unlike langcode, these have no core fallback default (created), or are
+   * silently dropped from an update's applied changes and from the "X of Y
+   * mapped" count (status/promote/sticky), when a template maps them from a
+   * label the exporter never actually writes:
    * MukurtuImportStrategy::getProcess() silently drops the mapping when the
-   * uploaded file has no matching header, and the new entity then fails to
-   * save with a NOT NULL constraint violation on the created column.
+   * uploaded file has no matching header. For "created" on a brand new
+   * entity that means a NOT NULL constraint violation; for the others it
+   * means re-importing an unedited exported CSV - or editing one of these
+   * columns before re-importing - silently has no effect.
    */
-  public function testCreatedSourceMatchesExportHeaderWhenMapped(): void {
-    foreach (self::TEMPLATE_BUNDLES as $template_id => $bundle_key) {
-      // Paragraph/taxonomy_term entities have no "created" base field, so
-      // MukurtuImportStrategy::getProcess() harmlessly no-ops any "created"
-      // mapping entry a paragraph template happens to carry - there's no
-      // export header to match against in that case.
-      if (!str_starts_with($bundle_key, 'node__') && !str_starts_with($bundle_key, 'media__') && !str_starts_with($bundle_key, 'multipage_item__') && !str_starts_with($bundle_key, 'community__') && !str_starts_with($bundle_key, 'protocol__')) {
-        continue;
+  public function testBaseFieldSourceMatchesExportHeaderWhenMapped(): void {
+    // Paragraph/taxonomy_term entities have no base field for any of these,
+    // so MukurtuImportStrategy::getProcess() harmlessly no-ops any mapping
+    // entry a template happens to carry for them - there's no export header
+    // to match against in that case.
+    $relevant_prefixes = ['node__', 'media__', 'multipage_item__', 'community__', 'protocol__'];
+
+    foreach (['created', 'status', 'promote', 'sticky'] as $target) {
+      foreach (self::TEMPLATE_BUNDLES as $template_id => $bundle_key) {
+        $is_relevant = array_reduce($relevant_prefixes, fn ($carry, $prefix) => $carry || str_starts_with($bundle_key, $prefix), FALSE);
+        if (!$is_relevant) {
+          continue;
+        }
+
+        $mapping = $this->getTemplateMapping($template_id);
+        $sources = array_column(array_filter($mapping, fn (array $m) => $m['target'] === $target), 'source');
+
+        if (empty($sources)) {
+          continue;
+        }
+
+        $expected = $this->exportFieldsList[$bundle_key][$target] ?? NULL;
+        $this->assertNotNull($expected, "{$template_id} maps a '{$target}' target but {$bundle_key} has no real export header for it.");
+        $this->assertCount(1, $sources, "{$template_id} should have exactly one {$target} mapping entry.");
+        $this->assertSame($expected, $sources[0], "{$template_id}'s {$target} source should match the real export header for {$bundle_key}.");
       }
-
-      $mapping = $this->getTemplateMapping($template_id);
-      $created_sources = array_column(array_filter($mapping, fn (array $m) => $m['target'] === 'created'), 'source');
-
-      if (empty($created_sources)) {
-        continue;
-      }
-
-      $expected = $this->exportFieldsList[$bundle_key]['created'] ?? NULL;
-      $this->assertNotNull($expected, "{$template_id} maps a 'created' target but {$bundle_key} has no real export header for it.");
-      $this->assertCount(1, $created_sources, "{$template_id} should have exactly one created mapping entry.");
-      $this->assertSame($expected, $created_sources[0], "{$template_id}'s created source should match the real export header for {$bundle_key}.");
     }
   }
 

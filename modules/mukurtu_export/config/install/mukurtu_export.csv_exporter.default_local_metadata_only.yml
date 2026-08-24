@@ -12,6 +12,9 @@ entity_fields_export_list:
     langcode: Locale
     uid: 'Authored by'
     created: 'Authored on'
+    status: 'Published'
+    promote: 'Promoted to front page'
+    sticky: 'Sticky at top of lists'
     title: Title
     default_langcode: 'Default translation'
     body: Body
@@ -25,6 +28,9 @@ entity_fields_export_list:
     langcode: Locale
     uid: 'Authored by'
     created: 'Authored on'
+    status: 'Published'
+    promote: 'Promoted to front page'
+    sticky: 'Sticky at top of lists'
     title: Title
     field_cultural_protocols/protocols: 'Cultural Protocols > Protocols'
     field_cultural_protocols/sharing_setting: 'Cultural Protocols > Sharing Setting'
@@ -49,6 +55,9 @@ entity_fields_export_list:
     langcode: Locale
     uid: 'Authored by'
     created: 'Authored on'
+    status: 'Published'
+    promote: 'Promoted to front page'
+    sticky: 'Sticky at top of lists'
     title: Title
     field_cultural_protocols/protocols: 'Cultural Protocols > Protocols'
     field_cultural_protocols/sharing_setting: 'Cultural Protocols > Sharing Setting'
@@ -81,6 +90,9 @@ entity_fields_export_list:
     langcode: Locale
     uid: 'Authored by'
     created: 'Authored on'
+    status: 'Published'
+    promote: 'Promoted to front page'
+    sticky: 'Sticky at top of lists'
     title: Title
     default_langcode: 'Default translation'
     field_cultural_protocols/protocols: 'Cultural Protocols > Protocols'
@@ -123,6 +135,9 @@ entity_fields_export_list:
     langcode: Language
     uid: 'Authored by'
     created: 'Authored on'
+    status: 'Published'
+    promote: 'Promoted to front page'
+    sticky: 'Sticky at top of lists'
     title: Title
     default_langcode: 'Default translation'
     layout_builder__layout: Layout
@@ -132,6 +147,9 @@ entity_fields_export_list:
     langcode: Locale
     uid: 'Authored by'
     created: 'Authored on'
+    status: 'Published'
+    promote: 'Promoted to front page'
+    sticky: 'Sticky at top of lists'
     title: Title
     default_langcode: 'Default translation'
     body: Body
@@ -142,6 +160,9 @@ entity_fields_export_list:
     langcode: Locale
     uid: 'Authored by'
     created: 'Authored on'
+    status: 'Published'
+    promote: 'Promoted to front page'
+    sticky: 'Sticky at top of lists'
     title: Title
     field_cultural_protocols/protocols: 'Cultural Protocols > Protocols'
     field_cultural_protocols/sharing_setting: 'Cultural Protocols > Sharing Setting'
@@ -168,6 +189,9 @@ entity_fields_export_list:
     langcode: Locale
     uid: 'Authored by'
     created: 'Authored on'
+    status: 'Published'
+    promote: 'Promoted to front page'
+    sticky: 'Sticky at top of lists'
     title: Title
     field_cultural_protocols/protocols: 'Cultural Protocols > Protocols'
     field_cultural_protocols/sharing_setting: 'Cultural Protocols > Sharing Setting'
@@ -189,6 +213,9 @@ entity_fields_export_list:
     langcode: Locale
     uid: 'Authored by'
     created: 'Authored on'
+    status: 'Published'
+    promote: 'Promoted to front page'
+    sticky: 'Sticky at top of lists'
     title: Title
     field_cultural_protocols/protocols: 'Cultural Protocols > Protocols'
     field_cultural_protocols/sharing_setting: 'Cultural Protocols > Sharing Setting'
@@ -212,6 +239,7 @@ entity_fields_export_list:
     langcode: Locale
     uid: 'Authored by'
     created: 'Authored on'
+    status: 'Published'
     name: Name
     field_cultural_protocols/protocols: 'Cultural Protocols > Protocols'
     field_cultural_protocols/sharing_setting: 'Cultural Protocols > Sharing Setting'
@@ -230,6 +258,7 @@ entity_fields_export_list:
     langcode: Locale
     uid: 'Authored by'
     created: 'Authored on'
+    status: 'Published'
     name: Name
     field_cultural_protocols/protocols: 'Cultural Protocols > Protocols'
     field_cultural_protocols/sharing_setting: 'Cultural Protocols > Sharing Setting'
@@ -247,6 +276,7 @@ entity_fields_export_list:
     langcode: Language
     uid: 'Authored by'
     created: 'Authored on'
+    status: 'Published'
     name: Name
     thumbnail/target_id: 'Thumbnail > File ID'
     thumbnail/alt: 'Thumbnail > Alternative text'
@@ -264,6 +294,7 @@ entity_fields_export_list:
     langcode: Locale
     uid: 'Authored by'
     created: 'Authored on'
+    status: 'Published'
     name: Name
     field_cultural_protocols/protocols: 'Cultural Protocols > Protocols'
     field_cultural_protocols/sharing_setting: 'Cultural Protocols > Sharing Setting'
@@ -280,6 +311,7 @@ entity_fields_export_list:
     langcode: Locale
     uid: 'Authored by'
     created: 'Authored on'
+    status: 'Published'
     name: Name
     field_cultural_protocols/protocols: 'Cultural Protocols > Protocols'
     field_cultural_protocols/sharing_setting: 'Cultural Protocols > Sharing Setting'
@@ -298,6 +330,7 @@ entity_fields_export_list:
     langcode: Language
     uid: 'Authored by'
     created: 'Authored on'
+    status: 'Published'
     name: Name
     thumbnail/target_id: 'Thumbnail > File ID'
     thumbnail/alt: 'Thumbnail > Alternative text'
@@ -316,6 +349,7 @@ entity_fields_export_list:
     langcode: Locale
     uid: 'Authored by'
     created: 'Authored on'
+    status: 'Published'
     name: Name
     field_cultural_protocols/protocols: 'Cultural Protocols > Protocols'
     field_cultural_protocols/sharing_setting: 'Cultural Protocols > Sharing Setting'
@@ -332,6 +366,7 @@ entity_fields_export_list:
     langcode: Language
     uid: Author
     created: 'Authored on'
+    status: Status
     title: Title
     field_pages: Pages
     default_langcode: 'Default translation'
@@ -340,6 +375,7 @@ entity_fields_export_list:
     langcode: Locale
     user_id: 'Authored by'
     created: Created
+    status: 'Published'
     name: Name
     field_description: Description
     field_access_mode: 'Sharing Protocol'
@@ -358,6 +394,7 @@ entity_fields_export_list:
     langcode: Locale
     user_id: 'Authored by'
     created: Created
+    status: 'Published'
     name: Name
     field_description: Description
     field_comment_status: 'Comments Status'

@@ -653,3 +653,51 @@ function mukurtu_export_update_40019(): void {
     }
   }
 }
+
+/**
+ * Add "status" (and, for node bundles, "promote"/"sticky") columns, matching
+ * the labels every shipped *_all_fields import template already expects.
+ *
+ * Same class of gap as update_40019's "created" column: these targets are
+ * mapped by the shipped templates but were never actually exported, so
+ * re-importing an unedited exported CSV silently dropped any of these
+ * columns from the mapping - and, on the *_all_fields template, editing
+ * publish/promote/sticky status in the sheet before re-importing had no
+ * effect, since the mapping never matched a real header to begin with.
+ */
+function mukurtu_export_update_40020(): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('csv_exporter');
+  foreach ($storage->loadMultiple() as $exporter) {
+    $list = $exporter->get('entity_fields_export_list') ?? [];
+    $changed = FALSE;
+    foreach ($list as $bundle_key => &$fields) {
+      if (!isset($fields['uid']) && !isset($fields['user_id'])) {
+        continue;
+      }
+      if (!isset($fields['status'])) {
+        if (str_starts_with($bundle_key, 'multipage_item__')) {
+          $fields['status'] = 'Status';
+          $changed = TRUE;
+        }
+        elseif (str_starts_with($bundle_key, 'node__') || str_starts_with($bundle_key, 'media__') || str_starts_with($bundle_key, 'community__') || str_starts_with($bundle_key, 'protocol__')) {
+          $fields['status'] = 'Published';
+          $changed = TRUE;
+        }
+      }
+      if (str_starts_with($bundle_key, 'node__')) {
+        if (!isset($fields['promote'])) {
+          $fields['promote'] = 'Promoted to front page';
+          $changed = TRUE;
+        }
+        if (!isset($fields['sticky'])) {
+          $fields['sticky'] = 'Sticky at top of lists';
+          $changed = TRUE;
+        }
+      }
+    }
+    unset($fields);
+    if ($changed) {
+      $exporter->set('entity_fields_export_list', $list)->save();
+    }
+  }
+}
