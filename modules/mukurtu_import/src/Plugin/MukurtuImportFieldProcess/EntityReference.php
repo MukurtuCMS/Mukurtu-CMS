@@ -189,9 +189,12 @@ class EntityReference extends MukurtuImportFieldProcessPluginBase implements Con
    */
   public static function isApplicable(FieldDefinitionInterface $field_config): bool {
     $refType = $field_config->getSetting('target_type') ?? [];
-    // multipage_item intentionally shares the generic mukurtu_entity_lookup
-    // path in getProcess() along with community, media, node, and protocol.
-    return in_array($refType, ['community','media','multipage_item','node','protocol','taxonomy_term','user']);
+    // Custom entity types intentionally share the generic
+    // mukurtu_entity_lookup path in getProcess() along with media, node,
+    // taxonomy_term, and user.
+    $custom_entity_types = \Drupal::service('mukurtu_core.roundtrip_entity_types')->getCustomEntityTypeIds();
+    $supported_types = array_merge(['media', 'node', 'taxonomy_term', 'user'], $custom_entity_types);
+    return in_array($refType, $supported_types);
   }
 
   /**

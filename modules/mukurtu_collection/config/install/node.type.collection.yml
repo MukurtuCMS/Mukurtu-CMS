@@ -8,6 +8,11 @@ third_party_settings:
     available_menus:
       - main
     parent: 'main:'
+  mukurtu_export:
+    child_reference_fields:
+      field_items_in_collection: {  }
+      field_child_collections:
+        recurse: true
 name: Collection
 type: collection
 description: 'A collection of digital heritage items.'
