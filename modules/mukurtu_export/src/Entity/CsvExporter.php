@@ -446,7 +446,7 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface {
           $result[] = [
             'field_name' => $field_name . '/protocols',
             'field_label' => $field_def->getLabel() . ": " . $protocolsSubfieldLabel,
-            'csv_header_label' => $protocolsSubfieldLabel,
+            'csv_header_label' => $field_def->getLabel() . ' > ' . $protocolsSubfieldLabel,
             'export' => $this->isNew() ? (!$field_def->isReadOnly() || in_array($field_name, $id_fields)) : FALSE,
           ];
         }
@@ -455,7 +455,7 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface {
           $result[] = [
             'field_name' => $field_name . '/sharing_setting',
             'field_label' => $field_def->getLabel() . ": " . $sharingSubfieldLabel,
-            'csv_header_label' => $sharingSubfieldLabel,
+            'csv_header_label' => $field_def->getLabel() . ' > ' . $sharingSubfieldLabel,
             'export' => $this->isNew() ? (!$field_def->isReadOnly() || in_array($field_name, $id_fields)) : FALSE,
           ];
         }
@@ -529,7 +529,8 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface {
   }
 
   public function getSupportedEntityTypes() {
-    return ['node', 'media', 'multipage_item', 'community', 'protocol', 'paragraph', 'file', 'taxonomy_term'];
+    $custom_entity_types = \Drupal::service('mukurtu_core.roundtrip_entity_types')->getCustomEntityTypeIds();
+    return array_merge(['node', 'media'], $custom_entity_types, ['paragraph', 'file', 'taxonomy_term']);
   }
 
 }

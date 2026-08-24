@@ -25,7 +25,6 @@ class ImportFieldDescriptionListForm extends ImportBaseForm {
     $effective_bundle = ($entity_type === 'taxonomy_term' && $bundle === 'other_taxonomies') ? 'keywords' : $bundle;
 
     $fields = $this->entityFieldManager->getFieldDefinitions($entity_type, $effective_bundle);
-    $options = [];
 
     // Per-entity-type overrides for the Field Description column.
     // Drupal base field descriptions are often missing or too terse for
@@ -46,16 +45,24 @@ class ImportFieldDescriptionListForm extends ImportBaseForm {
     $import_field_options = $this->buildTargetOptions($entity_type, $effective_bundle);
     unset($import_field_options[-1]);
 
+    $required_options = [];
+    $optional_options = [];
     foreach ($import_field_options as $field_target => $target_label) {
       $field_components = explode('/', $field_target);
       $field_name = $field_components[0];
       $field_property = $field_components[1] ?? NULL;
       $process_plugin = $this->fieldProcessPluginManager->getInstance(['field_definition' => $fields[$field_name]]);
-      $options[$field_target] = [
+      $option = [
         'label' => $target_label,
         'description' => $field_description_overrides[$field_name] ?? ($fields[$field_name]->getDescription() ?? ''),
         'format' => $process_plugin->getFormatDescription($fields[$field_name], $field_property),
       ];
+      if ($fields[$field_name]->isRequired()) {
+        $required_options[$field_target] = $option;
+      }
+      else {
+        $optional_options[$field_target] = $option;
+      }
     }
 
     $form['entity_type_id'] = [
@@ -67,21 +74,63 @@ class ImportFieldDescriptionListForm extends ImportBaseForm {
       '#value' => $bundle,
     ];
 
-    // Define tableselect. All fields default to selected so the primary
-    // "Download CSV Template" action produces a complete template without
-    // requiring the user to manually check every row first; unchecking rows
-    // still allows building a partial/custom template.
-    $form['table'] = [
-      '#type' => 'tableselect',
-      '#header' => [
-        'label' => ['data' => $this->t('Field'), 'scope' => 'col'],
-        'description' => ['data' => $this->t('Field Description'), 'scope' => 'col'],
-        'format' => ['data' => $this->t('Import Format Description'), 'scope' => 'col'],
-      ],
-      '#options' => $options,
-      '#default_value' => array_combine(array_keys($options), array_keys($options)),
-      '#empty' => $this->t('No fields found'),
+    // Explain the identifier-column rule up front: ID/UUID are individually
+    // optional (blank means "create new content"), but the importer needs
+    // one of ID, UUID, or a unique field like the title mapped to identify
+    // each row, so neither would otherwise show as "required" below.
+    $form['identifier_note'] = [
+      '#markup' => '<p>' . $this->t('At least one of the following must be mapped to uniquely identify each row: ID, UUID, or a unique field such as the title or name below. If none are mapped, every imported row will be treated as new content.') . '</p>',
     ];
+
+    $table_header = [
+      'label' => ['data' => $this->t('Field'), 'scope' => 'col'],
+      'description' => ['data' => $this->t('Field Description'), 'scope' => 'col'],
+      'format' => ['data' => $this->t('Import Format Description'), 'scope' => 'col'],
+    ];
+
+    if (!$required_options && !$optional_options) {
+      $form['no_fields'] = [
+        '#markup' => '<p>' . $this->t('No fields found') . '</p>',
+      ];
+    }
+
+    // Both tables default to fully checked so the primary "Download CSV
+    // Template" action produces a complete template without requiring the
+    // user to manually check every row first; unchecking rows still allows
+    // building a partial/custom template.
+    if ($required_options) {
+      $form['required_heading'] = [
+        '#type' => 'html_tag',
+        '#tag' => 'h2',
+        '#attributes' => ['id' => 'mukurtu-import-required-fields-heading'],
+        '#value' => $this->t('Required Fields'),
+      ];
+      $form['table_required'] = [
+        '#type' => 'tableselect',
+        '#header' => $table_header,
+        '#options' => $required_options,
+        '#default_value' => array_combine(array_keys($required_options), array_keys($required_options)),
+        '#empty' => $this->t('No fields found'),
+        '#attributes' => ['aria-labelledby' => 'mukurtu-import-required-fields-heading'],
+      ];
+    }
+
+    if ($optional_options) {
+      $form['optional_heading'] = [
+        '#type' => 'html_tag',
+        '#tag' => 'h2',
+        '#attributes' => ['id' => 'mukurtu-import-optional-fields-heading'],
+        '#value' => $this->t('Optional Fields'),
+      ];
+      $form['table_optional'] = [
+        '#type' => 'tableselect',
+        '#header' => $table_header,
+        '#options' => $optional_options,
+        '#default_value' => array_combine(array_keys($optional_options), array_keys($optional_options)),
+        '#empty' => $this->t('No fields found'),
+        '#attributes' => ['aria-labelledby' => 'mukurtu-import-optional-fields-heading'],
+      ];
+    }
 
     // Form actions.
     $form['actions'] = [
@@ -112,12 +161,14 @@ class ImportFieldDescriptionListForm extends ImportBaseForm {
       $bundle_label = $bundle && isset($bundle_info[$bundle]) ? $bundle_info[$bundle]['label'] : '';
       $filename = $bundle && $bundle != $entity_type_id ? "{$entity_type_label} - {$bundle_label}.csv" : "{$entity_type_label}.csv";
     }
-    $selected_fields = array_filter($form_state->getValue('table'));
+    $selected_fields = array_filter($form_state->getValue('table_required') ?? [])
+      + array_filter($form_state->getValue('table_optional') ?? []);
+    $options = ($form['table_required']['#options'] ?? []) + ($form['table_optional']['#options'] ?? []);
 
     // Gather the selected field labels.
     $headers = [];
     foreach ($selected_fields as $field_name) {
-      $headers[] = $form['table']['#options'][$field_name]['label'];
+      $headers[] = $options[$field_name]['label'];
     }
 
     // Convert to CSV format.

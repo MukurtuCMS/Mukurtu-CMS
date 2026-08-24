@@ -6,19 +6,29 @@
  */
 
 use Drupal\mukurtu_media\MediaTypeExtensions;
+use Drupal\mukurtu_submissions\Entity\SubmissionInterface;
 use Drupal\mukurtu_submissions\Entity\SubmissionSettingsInterface;
+use Drupal\node\NodeInterface;
 use Drupal\user\Entity\User;
 
 /**
  * Permissions "administrator" and "mukurtu_manager" need to review pending
- * submissions: the submission entity itself, the digital_heritage node
- * (submissions are created owned by the service account with no cultural
- * protocol assigned yet - MukurtuProtocolNodeAccessControlHandler's
- * "empty protocols" fallback requires "edit/delete any digital_heritage
- * content" to grant access to anyone but the owner), and any media a
- * visitor uploaded via SimpleMediaUploadWidget (same "empty protocols,
- * not owner" situation, via MukurtuProtocolMediaAccessControlHandler's
- * equivalent fallback for "edit/delete any {bundle} media").
+ * submissions: the submission entity itself, and any media a visitor
+ * uploaded via SimpleMediaUploadWidget (submissions are created owned by
+ * the service account with no cultural protocol assigned yet -
+ * MukurtuProtocolMediaAccessControlHandler's "empty protocols" fallback
+ * requires "edit/delete any {bundle} media" to grant access to anyone but
+ * the owner).
+ *
+ * The equivalent per-node-bundle grants ("edit/delete any {bundle}
+ * content", for the same "empty protocols, not owner" reason via
+ * MukurtuProtocolNodeAccessControlHandler) are NOT listed here - they
+ * depend on which bundles actually have an enabled settings entity, so
+ * they're granted dynamically by mukurtu_submissions_sync_review_permissions()
+ * instead, called whenever a settings entity is saved (see
+ * mukurtu_submissions_mukurtu_submission_settings_insert()/_update() in the
+ * .module file) and backfilled for existing entities below and in
+ * mukurtu_submissions_update_40003().
  *
  * Shared by hook_install() (fresh installs) and
  * mukurtu_submissions_update_40001() (existing sites), so the two can't
@@ -28,8 +38,6 @@ function mukurtu_submissions_review_permissions(): array {
   $permissions = [
     'administer mukurtu submissions',
     'review mukurtu submissions',
-    'edit any digital_heritage content',
-    'delete any digital_heritage content',
   ];
   foreach (array_keys(MediaTypeExtensions::SUPPORTED_TYPES) as $bundle) {
     $permissions[] = "edit any $bundle media";
@@ -69,14 +77,24 @@ function mukurtu_submissions_install($is_syncing): void {
     }
   }
 
-  // Ensure shipped settings entities (e.g. digital_heritage) get their
-  // hyphenated public alias and role permissions synced, in case
+  // Provision a disabled default submission form for every content type
+  // that doesn't already have one (see
+  // SubmissionFormDisplayManager::createDefaultForms()), so a fresh site
+  // ends up with every eligible content type ready for a site builder to
+  // review and enable, not just the config-shipped digital_heritage form.
+  \Drupal::service('mukurtu_submissions.form_display_manager')->createDefaultForms();
+
+  // Ensure shipped and newly-created settings entities (e.g.
+  // digital_heritage) get their hyphenated public alias and role
+  // permissions synced, in case
   // hook_mukurtu_submission_settings_insert() doesn't fire for config
   // installed directly from config/install.
   foreach (\Drupal::entityTypeManager()->getStorage('mukurtu_submission_settings')->loadMultiple() as $settings) {
     if ($settings instanceof SubmissionSettingsInterface) {
       mukurtu_submissions_ensure_path_aliases($settings);
       mukurtu_submissions_sync_submission_permission($settings);
+      mukurtu_submissions_sync_review_permissions($settings);
+      mukurtu_submissions_sync_entity_browser_permissions($settings);
     }
   }
 }
@@ -91,6 +109,13 @@ function mukurtu_submissions_create_service_account(): User {
     'status' => 0,
     'pass' => \Drupal::service('password_generator')->generate(32),
   ]);
+  // field_pending defaults to 1 (mukurtu_core's own approval-workflow
+  // field), which would otherwise make this permanently-blocked service
+  // account display as "pending" instead of "blocked" anywhere it's
+  // rendered via MukurtuUserListBuilder.
+  if ($account->hasField('field_pending')) {
+    $account->set('field_pending', 0);
+  }
   $account->save();
   return $account;
 }
@@ -163,4 +188,209 @@ function mukurtu_submissions_update_40002(): void {
     $account->setUsername('Submission Forms');
     $account->save();
   }
+}
+
+/**
+ * Backfills the dynamic "edit/delete any {bundle} content" reviewer grants
+ * for every existing settings entity - previously only digital_heritage
+ * got this (hardcoded in mukurtu_submissions_review_permissions()); any
+ * other bundle a site had already enabled was missing it entirely. See
+ * mukurtu_submissions_sync_review_permissions() in the .module file.
+ */
+function mukurtu_submissions_update_40003(): void {
+  foreach (\Drupal::entityTypeManager()->getStorage('mukurtu_submission_settings')->loadMultiple() as $settings) {
+    if ($settings instanceof SubmissionSettingsInterface) {
+      mukurtu_submissions_sync_review_permissions($settings);
+    }
+  }
+}
+
+/**
+ * Seeds field_groups/field_group_assignments, mirrored from each bundle's
+ * regular "default" edit form, onto any existing settings entity that
+ * doesn't have them yet - matches what
+ * SubmissionFormDisplayManager::createDefaultForms() now does for newly
+ * created ones. Digital Heritage's groups are hand-curated and never
+ * touched.
+ */
+function mukurtu_submissions_update_40004(): void {
+  $form_display_manager = \Drupal::service('mukurtu_submissions.form_display_manager');
+  foreach (\Drupal::entityTypeManager()->getStorage('mukurtu_submission_settings')->loadMultiple() as $settings) {
+    if ($settings instanceof SubmissionSettingsInterface
+      && $settings->getTargetBundle() !== 'digital_heritage'
+      && !$settings->getFieldGroups()) {
+      $form_display_manager->seedFieldGroupsFromDefaultForm($settings);
+      $settings->save();
+    }
+  }
+}
+
+/**
+ * Removes field_related_content and field_child_collections from any
+ * existing settings entity's field_group_assignments (both were just
+ * added to PublicSubmissionForm::EXCLUDED_FIELDS - a visitor's first
+ * submission has nothing yet to cross-reference other content or
+ * existing collections against), pruning any group left empty as a
+ * result. Covers Digital Heritage too, unlike _40004 - excluding a field
+ * everywhere is a correctness fix, not a curation change its "never
+ * overwritten" policy is meant to protect.
+ */
+function mukurtu_submissions_update_40005(): void {
+  $form_display_manager = \Drupal::service('mukurtu_submissions.form_display_manager');
+  foreach (\Drupal::entityTypeManager()->getStorage('mukurtu_submission_settings')->loadMultiple() as $settings) {
+    if ($settings instanceof SubmissionSettingsInterface && $form_display_manager->pruneExcludedFields($settings)) {
+      $settings->save();
+    }
+  }
+}
+
+/**
+ * Grants access to whichever entity browser(s) each existing settings
+ * entity's fields actually use (e.g. Collection's "Items in Collection",
+ * Word List's "Words") - previously a visitor hit "Incorrect Permissions"
+ * clicking a "Select Content"-style button, since Entity Browser gates
+ * each browser's own modal route behind a distinct
+ * "access {browser_id} entity browser pages" permission that nothing
+ * granted. See mukurtu_submissions_sync_entity_browser_permissions() in
+ * the .module file.
+ */
+function mukurtu_submissions_update_40006(): void {
+  foreach (\Drupal::entityTypeManager()->getStorage('mukurtu_submission_settings')->loadMultiple() as $settings) {
+    if ($settings instanceof SubmissionSettingsInterface) {
+      mukurtu_submissions_sync_entity_browser_permissions($settings);
+    }
+  }
+}
+
+/**
+ * Provisions a disabled default submission form for every content type
+ * that doesn't already have one - previously this only happened if a site
+ * builder manually ran `drush mukurtu-submissions:create-default-forms`,
+ * so an existing site applying updates would otherwise never get the
+ * other content types' forms at all. See
+ * SubmissionFormDisplayManager::createDefaultForms(), also now called
+ * from mukurtu_submissions_install() for fresh sites.
+ */
+function mukurtu_submissions_update_40007(): void {
+  \Drupal::service('mukurtu_submissions.form_display_manager')->createDefaultForms();
+}
+
+/**
+ * Retrofits every existing bundle's already-provisioned "submission"
+ * display so a paragraph-nested media (or entity_browser) field gets the
+ * same widget substitution/permission handling a field living directly on
+ * the bundle already gets. Concretely: dictionary_word's sample-sentence
+ * recording (field_sentence_recording, nested inside the sample_sentence
+ * paragraph type via field_sample_sentences) previously kept the plain
+ * core media_library_widget in its inline subform - unusable by an
+ * anonymous visitor (requires "view media" + entity update access neither
+ * role holds), making it impossible to attach a recording to a sample
+ * sentence from the public submission form at all. See
+ * SubmissionFormDisplayManager::retrofitParagraphSubmissionMode()/
+ * ensureSubmissionFormDisplayForBundle(), and
+ * mukurtu_submissions_sync_entity_browser_permissions() in the .module
+ * file for the equivalent permission-sync side of this fix.
+ */
+function mukurtu_submissions_update_40008(): void {
+  $form_display_manager = \Drupal::service('mukurtu_submissions.form_display_manager');
+  foreach (\Drupal::entityTypeManager()->getStorage('mukurtu_submission_settings')->loadMultiple() as $settings) {
+    if ($settings instanceof SubmissionSettingsInterface) {
+      $form_display_manager->retrofitParagraphSubmissionMode($settings->getTargetEntityTypeId(), $settings->getTargetBundle());
+      mukurtu_submissions_sync_entity_browser_permissions($settings);
+    }
+  }
+}
+
+/**
+ * Retrofits the service account's field_pending to 0 on existing sites.
+ *
+ * mukurtu_submissions_create_service_account() previously never set
+ * field_pending, leaving it at the field's own default of 1 - so the
+ * permanently-blocked "Submission Forms" account displayed as "pending"
+ * (mukurtu_core's own approval-workflow status) instead of "blocked"
+ * anywhere it was rendered.
+ */
+function mukurtu_submissions_update_40009(): void {
+  $uid = (int) \Drupal::config('mukurtu_submissions.settings')->get('service_account_uid');
+  if (!$uid) {
+    return;
+  }
+  $account = User::load($uid);
+  if (!$account || !$account->hasField('field_pending') || !$account->get('field_pending')->value) {
+    return;
+  }
+  $account->set('field_pending', 0)->save();
+}
+
+/**
+ * Retrofits review_status on existing submissions whose target node's
+ * moderation state has since moved on without it - see
+ * mukurtu_submissions_node_update(), which fixes this going forward but
+ * can't reach saves that already happened before it existed.
+ */
+function mukurtu_submissions_update_40010(): void {
+  $submission_storage = \Drupal::entityTypeManager()->getStorage('mukurtu_submission');
+  $node_storage = \Drupal::entityTypeManager()->getStorage('node');
+  $ids = $submission_storage->getQuery()
+    ->condition('target_entity_type', 'node')
+    ->accessCheck(FALSE)
+    ->execute();
+
+  foreach ($submission_storage->loadMultiple($ids) as $submission) {
+    $node = $node_storage->load($submission->getTargetId());
+    if (!$node instanceof NodeInterface || !$node->hasField('moderation_state')) {
+      continue;
+    }
+    $new_status = match ($node->get('moderation_state')->value) {
+      'published' => SubmissionInterface::STATUS_APPROVED,
+      'archived' => SubmissionInterface::STATUS_REJECTED,
+      default => SubmissionInterface::STATUS_PENDING,
+    };
+    if ($submission->getReviewStatus() !== $new_status) {
+      $submission->setReviewStatus($new_status)->save();
+    }
+  }
+}
+
+/**
+ * Fixes the mukurtu_submission_received notification: its link token was
+ * unsafe inside an href (chained tokens there get mangled by the text
+ * format's filters before token replacement ever runs - see
+ * mukurtu_notifications_tokens() from the notifications-phase-2 work for
+ * the full explanation and the safe replacement token this now uses), and
+ * it had no mail_subject/mail_body displays at all, so message_notify's
+ * Email notifier (which renders exactly those two modes for uid-based
+ * recipients) sent an empty body with the template's raw text as the
+ * subject instead. Splits the template into a subject delta and a body
+ * delta and creates the two missing displays - mirrors
+ * mukurtu_dictionary_update_40040()'s existing pattern of fixing up a
+ * display via the repository API rather than importing raw config.
+ */
+function mukurtu_submissions_update_40011(): void {
+  $template = \Drupal::entityTypeManager()->getStorage('message_template')->load('mukurtu_submission_received');
+  if ($template) {
+    $template->set('text', [
+      [
+        'value' => 'New [message:field_item:entity:content-type] submitted for review: [message:field_item:entity:title]',
+        'format' => 'plain_text',
+      ],
+      [
+        'value' => '<p>A new [message:field_item:entity:content-type] was submitted for review: [message:field_item:entity:mukurtu-notification-link].</p>',
+        'format' => 'mukurtu_html',
+      ],
+    ]);
+    $template->save();
+  }
+
+  $repository = \Drupal::service('entity_display.repository');
+
+  $subject_display = $repository->getViewDisplay('message', 'mukurtu_submission_received', 'mail_subject');
+  $subject_display->setComponent('partial_0', ['region' => 'content', 'weight' => 0]);
+  $subject_display->removeComponent('partial_1');
+  $subject_display->save();
+
+  $body_display = $repository->getViewDisplay('message', 'mukurtu_submission_received', 'mail_body');
+  $body_display->setComponent('partial_1', ['region' => 'content', 'weight' => 0]);
+  $body_display->removeComponent('partial_0');
+  $body_display->save();
 }

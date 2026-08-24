@@ -104,6 +104,31 @@ class ReviewStateFormTest extends ProtocolAwareEntityTestBase {
   }
 
   /**
+   * The validation error must name the actual missing field - $node->
+   * validate()'s own message for an empty required field ("This value
+   * should not be null.") never says which field, leaving a reviewer with
+   * no way to tell what's wrong. Confirmed live: this exact scenario
+   * (publishing a pending submission with no protocol assigned) was the
+   * bug report this fix addresses.
+   */
+  public function testPublishWithoutProtocolNamesTheMissingField(): void {
+    $node = Node::create([
+      'type' => 'protocol_aware_content',
+      'title' => $this->randomString(),
+      'uid' => $this->currentUser->id(),
+      'moderation_state' => 'draft',
+    ]);
+    $node->save();
+
+    $form_state = $this->runReviewStateForm($node, 'published');
+
+    $errors = $form_state->getErrors();
+    $this->assertNotEmpty($errors);
+    $this->assertStringContainsString('Cultural Protocols are required.', (string) reset($errors));
+    $this->assertStringNotContainsString('This value should not be null.', (string) reset($errors));
+  }
+
+  /**
    * A node with a Cultural Protocol assigned publishes normally through the
    * same review panel - the new validation must not block legitimate,
    * fully-populated content.

@@ -7,6 +7,7 @@ use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\RevisionableContentEntityBase;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\mukurtu_core\Entity\RoundtripEntityInterface;
 use Drupal\mukurtu_multipage_items\MultipageItemInterface;
 use Drupal\node\NodeInterface;
 use Drupal\user\UserInterface;
@@ -61,7 +62,7 @@ use Drupal\user\UserInterface;
  *   field_ui_base_route = "entity.multipage_item.settings"
  * )
  */
-class MultipageItem extends RevisionableContentEntityBase implements MultipageItemInterface {
+class MultipageItem extends RevisionableContentEntityBase implements MultipageItemInterface, RoundtripEntityInterface {
 
   use EntityChangedTrait;
 
