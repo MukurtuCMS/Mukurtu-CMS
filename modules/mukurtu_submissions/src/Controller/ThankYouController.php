@@ -54,6 +54,28 @@ class ThankYouController extends ControllerBase {
       $build['#cache']['tags'] = $settings->getCacheTags();
     }
 
+    // This page is inherently a one-time, personalized landing page - the
+    // same URL is shared by every submission of a given bundle, but each
+    // visitor's own request may carry session-specific follow-up behavior
+    // (e.g. mukurtu_person's broadcast to a still-open tab after a "create
+    // a new person record" quick-create). max-age here covers the render/
+    // dynamic-page-cache layer and browser Cache-Control, but core's own
+    // anonymous page_cache module deliberately ignores max-age for its own
+    // storage decision (see PageCache::storeResponse()'s own comment - it
+    // relies on cache tags for invalidation instead, treating responses as
+    // effectively permanent otherwise) - only an explicit kill-switch
+    // trigger stops it from storing this response. That still isn't
+    // enough on its own: the kill switch only affects whether *this*
+    // request's response gets written, not whether an earlier, unrelated
+    // visitor's response is read back for a later request - so it has to
+    // run on every visit, unconditionally, not just when there happens to
+    // be something session-specific to attach this time. Confirmed live:
+    // an earlier, unrelated visit here got cached, silently breaking the
+    // broadcast for every later visitor (including ones who legitimately
+    // needed it) until the stale entry was manually cleared.
+    \Drupal::service('page_cache_kill_switch')->trigger();
+    $build['#cache']['max-age'] = 0;
+
     return $build;
   }
 
