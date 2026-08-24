@@ -529,7 +529,8 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface {
   }
 
   public function getSupportedEntityTypes() {
-    return ['node', 'media', 'multipage_item', 'community', 'protocol', 'paragraph', 'file', 'taxonomy_term'];
+    $custom_entity_types = \Drupal::service('mukurtu_core.roundtrip_entity_types')->getCustomEntityTypeIds();
+    return array_merge(['node', 'media'], $custom_entity_types, ['paragraph', 'file', 'taxonomy_term']);
   }
 
 }

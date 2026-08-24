@@ -355,6 +355,13 @@
           const autocomplete = $input.autocomplete && $input.autocomplete('instance');
           if (autocomplete && autocomplete.menu) {
             autocomplete.menu.element.addClass('mukurtu-geocoder-autocomplete-menu');
+
+            // jQuery UI appends the dropdown to <body> by default (no
+            // ancestor here has a .ui-front/dialog class), so it positions
+            // itself relative to the browser window instead of the map.
+            // Re-parent it into this control so it stays inside the map's
+            // own (overflow: hidden) container.
+            $input.autocomplete('option', 'appendTo', container);
           }
         }
       });

@@ -13,6 +13,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\media\MediaInterface;
+use Drupal\mukurtu_core\Entity\RoundtripEntityInterface;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\og\OgMembershipInterface;
@@ -86,7 +87,7 @@ use Exception;
  *   field_ui_base_route = "community.settings"
  * )
  */
-class Community extends EditorialContentEntityBase implements CommunityInterface {
+class Community extends EditorialContentEntityBase implements CommunityInterface, RoundtripEntityInterface {
 
   use EntityChangedTrait;
   use EntityPublishedTrait;

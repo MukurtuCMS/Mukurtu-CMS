@@ -23,22 +23,37 @@ class ImportResultsForm extends ImportBaseForm {
    */
   public function buildForm(array $form, FormStateInterface $form_state): array {
     $success = $this->store->get('batch_results_success') ?? FALSE;
+    $noop = $this->store->get('batch_results_noop') ?? FALSE;
     $messages = $this->getMessages();
+    $warnings = $this->getWarnings();
 
     $form['results_message'] = [
       '#type' => 'markup',
-      '#markup' => "<div class=\"messages messages--status\" role=\"status\" aria-live=\"polite\">" . $this->t('All files imported successfully.') . "</div>",
+      '#markup' => '<div class="messages messages--status" role="status" aria-live="polite">' . $this->t('All files imported successfully.') . '</div>',
     ];
 
     if (!empty($messages)) {
-      $form['results_message']['#markup'] = "<div class=\"messages messages--error\" role=\"alert\" aria-live=\"assertive\">" . $this->t('Some files failed to import.') . "</div>";
+      $form['results_message']['#markup'] = '<div class="messages messages--error" role="alert" aria-live="assertive">' . $this->t('Some files failed to import.') . '</div>';
       foreach ($messages as $message) {
-        $filename = $this->getImportFilename($message['fid']) ?? '';
-        $form["file_messages"][] = [
+        $filename = $this->getImportFilename($message['fid']) ?? $this->t('Unknown file');
+        $form['file_messages'][] = [
           '#type' => 'markup',
-          '#markup' => "<div class=\"messages messages--error\" role=\"alert\" aria-live=\"assertive\">" . $filename . ": ". $message['message'] . "</div>",
+          '#markup' => '<div class="messages messages--error" role="alert" aria-live="assertive">' . $this->t('@filename: @message', ['@filename' => $filename, '@message' => $message['message']]) . '</div>',
         ];
       }
+    }
+
+    if (!empty($warnings)) {
+      foreach ($warnings as $warning) {
+        $filename = $this->getImportFilename($warning['fid']) ?? $this->t('Unknown file');
+        $form['file_warnings'][] = [
+          '#type' => 'markup',
+          '#markup' => '<div class="messages messages--warning" role="status" aria-live="polite">' . $this->t('@filename: @message', ['@filename' => $filename, '@message' => $warning['message']]) . '</div>',
+        ];
+      }
+    }
+    elseif ($noop) {
+      $form['results_message']['#markup'] = "<div class=\"messages messages--warning\" role=\"status\" aria-live=\"polite\">" . $this->t('No content was imported.') . "</div>";
     }
 
     $this->buildTable($form, $form_state);

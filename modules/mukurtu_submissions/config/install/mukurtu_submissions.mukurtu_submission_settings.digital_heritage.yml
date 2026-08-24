@@ -58,11 +58,6 @@ field_groups:
     label: Locations
     collapsed: false
     parent: group_7
-  -
-    id: group_9
-    label: 'Related Content'
-    collapsed: true
-    parent: ''
 field_group_assignments:
   title: group_1
   field_summary: group_1
@@ -95,4 +90,3 @@ field_group_assignments:
   field_coverage: group_8
   field_coverage_description: group_8
   field_location: group_8
-  field_related_content: group_9
