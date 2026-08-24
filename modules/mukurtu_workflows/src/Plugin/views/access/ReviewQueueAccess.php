@@ -4,6 +4,7 @@ namespace Drupal\mukurtu_workflows\Plugin\views\access;
 
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Cache\CacheableDependencyInterface;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\MembershipManagerInterface;
 use Drupal\views\Plugin\views\access\AccessPluginBase;
@@ -13,6 +14,10 @@ use Symfony\Component\Routing\Route;
 /**
  * Grants access to the review queue for protocol stewards, language stewards,
  * and site administrators.
+ *
+ * Access additionally requires the Mukurtu Editorial Workflow to be the
+ * active workflow -- otherwise no content can ever reach a review state
+ * and the page is always empty.
  *
  * @ingroup views_access_plugins
  *
@@ -32,11 +37,19 @@ class ReviewQueueAccess extends AccessPluginBase implements CacheableDependencyI
   protected MembershipManagerInterface $membershipManager;
 
   /**
+   * The config factory.
+   *
+   * @var \Drupal\Core\Config\ConfigFactoryInterface
+   */
+  protected ConfigFactoryInterface $configFactory;
+
+  /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, MembershipManagerInterface $membership_manager) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, MembershipManagerInterface $membership_manager, ConfigFactoryInterface $config_factory) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->membershipManager = $membership_manager;
+    $this->configFactory = $config_factory;
   }
 
   /**
@@ -47,7 +60,8 @@ class ReviewQueueAccess extends AccessPluginBase implements CacheableDependencyI
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('og.membership_manager')
+      $container->get('og.membership_manager'),
+      $container->get('config.factory')
     );
   }
 
@@ -62,6 +76,10 @@ class ReviewQueueAccess extends AccessPluginBase implements CacheableDependencyI
    * {@inheritdoc}
    */
   public function access(AccountInterface $account) {
+    if ($this->configFactory->get('mukurtu_workflows.settings')->get('active_workflow') !== 'mukurtu_editorial_workflow') {
+      return FALSE;
+    }
+
     if ($account->hasPermission('bypass node access') || $account->hasPermission('administer nodes')) {
       return TRUE;
     }
@@ -103,7 +121,7 @@ class ReviewQueueAccess extends AccessPluginBase implements CacheableDependencyI
    * {@inheritdoc}
    */
   public function getCacheTags() {
-    return [];
+    return $this->configFactory->get('mukurtu_workflows.settings')->getCacheTags();
   }
 
 }
