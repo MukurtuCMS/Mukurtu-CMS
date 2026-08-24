@@ -101,6 +101,44 @@ class ReviewStateForm extends FormBase {
     return $form;
   }
 
+  public function validateForm(array &$form, FormStateInterface $form_state): void {
+    $nid = (int) $form_state->getValue('node_id');
+    $triggering = $form_state->getTriggeringElement();
+    $to_state = $triggering['#mukurtu_to_state'] ?? NULL;
+    if ($to_state === NULL) {
+      return;
+    }
+
+    /** @var \Drupal\node\NodeInterface $node */
+    $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
+    if ($node === NULL) {
+      return;
+    }
+
+    // A plain $node->save() never validates on its own - entity-level
+    // required-field constraints (e.g. Cultural Protocol) are only enforced
+    // by ContentEntityForm::validateForm(), which this quick-publish path
+    // never goes through. Validate explicitly, against the state this
+    // transition would produce, so it can't silently skip the same
+    // requirements the full node edit form already enforces. This has to
+    // live in validateForm() rather than submitForm() - setErrorByName()
+    // puts Drupal on its normal failed-validation path (form redisplayed
+    // with the note text intact, no redirect), whereas failing inside
+    // submitForm() would look like success to Form API and silently
+    // discard whatever the reviewer had typed into the note field.
+    $node->set('moderation_state', $to_state);
+    $violations = $node->validate();
+    if ($violations->count() > 0) {
+      $messages = [];
+      foreach ($violations as $violation) {
+        $messages[] = (string) $violation->getMessage();
+      }
+      $form_state->setErrorByName('actions', $this->t('Status not updated: @messages', [
+        '@messages' => implode(' ', $messages),
+      ]));
+    }
+  }
+
   public function submitForm(array &$form, FormStateInterface $form_state): void {
     $nid = (int) $form_state->getValue('node_id');
     $from_state = $form_state->getValue('from_state');

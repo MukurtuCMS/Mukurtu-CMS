@@ -5,6 +5,8 @@
  * Install, update and uninstall functions for the Mukurtu Migrate module.
  */
 
+use Drupal\Core\Serialization\Yaml;
+
 /**
  * Fix migrations that never mapped an original author, and make OG
  * memberships with an unresolvable source user fail as a clear, readable
@@ -106,4 +108,16 @@ function mukurtu_migrate_update_40001(): void {
       $config->set('process.uid', $skip_uid_process)->save();
     }
   }
+}
+
+/**
+ * Re-import the audio migration to add the SoundCloud provider bundle switch.
+ */
+function mukurtu_migrate_update_40002(): void {
+  $config_name = 'migrate_plus.migration.mukurtu_cms_v3_media_audio';
+  $config = \Drupal::configFactory()->getEditable($config_name);
+  $path = \Drupal::service('extension.list.module')->getPath('mukurtu_migrate');
+  $yaml = file_get_contents($path . '/config/install/' . $config_name . '.yml');
+  $data = Yaml::decode($yaml);
+  $config->setData($data)->save();
 }
