@@ -1421,33 +1421,22 @@ function mukurtu_dictionary_update_40041(): void {
 }
 
 /**
- * Points the sample-sentence recording field (field_sentence_recording, on
- * the sample_sentence paragraph type)'s "default"/"teaser" view display
- * formatters at the same "audio_for_dictionary_word"/"browse" media view
- * modes field_recording already uses, instead of the generic "default"
- * media view mode - previously the two fields rendered through different
- * Twig templates with materially different markup (e.g. the download
- * button ignored the site-wide download-button toggle). Directly mutates
- * the already-installed display config entities - reinstalling the
- * module's shipped config would be a no-op against config that already
- * exists on any site with this module installed.
+ * Point the sample sentence recording field at the same media view modes
+ * used by the dictionary word's own Recording field, so it renders with the
+ * same "Download audio" button instead of a plain download icon (#2019).
  */
 function mukurtu_dictionary_update_40042(): void {
-  $repository = \Drupal::service('entity_display.repository');
-
   $displays = [
-    'default' => 'audio_for_dictionary_word',
-    'teaser' => 'browse',
+    'core.entity_view_display.paragraph.sample_sentence.default' => 'audio_for_dictionary_word',
+    'core.entity_view_display.paragraph.sample_sentence.teaser' => 'browse',
   ];
-  foreach ($displays as $mode => $view_mode) {
-    $display = $repository->getViewDisplay('paragraph', 'sample_sentence', $mode);
-    $component = $display->getComponent('field_sentence_recording');
-    if (!$component || $component['type'] !== 'entity_reference_entity_view') {
+  foreach ($displays as $display_id => $view_mode) {
+    $config = \Drupal::configFactory()->getEditable($display_id);
+    if ($config->isNew()) {
       continue;
     }
-    $component['settings']['view_mode'] = $view_mode;
-    $component['settings']['link'] = FALSE;
-    $display->setComponent('field_sentence_recording', $component);
-    $display->save();
+    $config->set('content.field_sentence_recording.settings.view_mode', $view_mode);
+    $config->set('content.field_sentence_recording.settings.link', FALSE);
+    $config->save();
   }
 }
