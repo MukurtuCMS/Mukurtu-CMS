@@ -8,11 +8,11 @@ use Drupal\KernelTests\KernelTestBase;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests mukurtu_browse_update_40019(), which gives the Browse and Digital
+ * Tests mukurtu_browse_update_40020(), which gives the Browse and Digital
  * Heritage search boxes page-specific placeholder text instead of the
  * generic "Enter keywords" (#2018).
  *
- * @see mukurtu_browse_update_40019()
+ * @see mukurtu_browse_update_40020()
  */
 #[Group('mukurtu_browse')]
 class BrowseSearchPlaceholderUpdateTest extends KernelTestBase {
@@ -72,7 +72,7 @@ class BrowseSearchPlaceholderUpdateTest extends KernelTestBase {
       ->setData($this->fulltextFilterFixture('Enter keywords'))
       ->save();
 
-    mukurtu_browse_update_40019();
+    mukurtu_browse_update_40020();
 
     $this->assertSame(
       'Search all content',
@@ -96,7 +96,7 @@ class BrowseSearchPlaceholderUpdateTest extends KernelTestBase {
 
     $this->assertTrue(\Drupal::config('views.view.mukurtu_digital_heritage_browse')->isNew());
 
-    mukurtu_browse_update_40019();
+    mukurtu_browse_update_40020();
 
     $this->assertTrue(\Drupal::config('views.view.mukurtu_digital_heritage_browse')->isNew());
     $this->assertSame(

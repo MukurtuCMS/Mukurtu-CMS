@@ -569,6 +569,29 @@ function mukurtu_browse_update_40015(): void {
 }
 
 /**
+ * NOTE on installDefaultConfig('module', 'mukurtu_browse') below:
+ *
+ * config/install/search_api.index.mukurtu_default_content_index.yml
+ * intentionally omits the mukurtu_multipage_page_index /
+ * mukurtu_community_record_flag processors and their is_additional_mpi_page /
+ * is_community_record fields (they cause an UnmetDependenciesException on
+ * fresh installs, since mukurtu_multipage_items/mukurtu_community_records
+ * install after mukurtu_browse). Existing sites instead get them via
+ * mukurtu_browse_update_40009()/_40010(), _mukurtu_browse_ensure_processor_on_index(),
+ * or mukurtu_install().
+ *
+ * installDefaultConfig() does not merge into the live index config, it
+ * overwrites it wholesale from that YAML (see
+ * ConfigInstaller::createConfiguration()). update_40016-_40018 below did
+ * exactly that and silently stripped both fields/processors back off
+ * mukurtu_default_content_index on every already-updated site, which is what
+ * broke the MPI/CR browse toggles (issue #2022, fixed forward in
+ * update_40019). Any *new* update hook that reinstalls this module's default
+ * config must re-apply both via _mukurtu_browse_ensure_processor_on_index()
+ * afterward, the same way update_40019 does.
+ */
+
+/**
  * Add LC Project and LC Label facets to /browse and /digital-heritage.
  */
 function mukurtu_browse_update_40016(): void {
@@ -618,10 +641,45 @@ function mukurtu_browse_update_40018(): void {
 }
 
 /**
+ * Restore the MPI/CR search index fields stripped by update_40016-_40018.
+ *
+ * Those hooks each called installDefaultConfig('module', 'mukurtu_browse'),
+ * which overwrites mukurtu_default_content_index wholesale from
+ * config/install and silently removed the mukurtu_multipage_page_index /
+ * mukurtu_community_record_flag processors and their is_additional_mpi_page /
+ * is_community_record fields, breaking the "Show all pages" and community
+ * record browse toggles (issue #2022). Re-applies both via the same helper
+ * the CR/MPI settings forms already use; a no-op on sites where they're
+ * already present.
+ */
+function mukurtu_browse_update_40019(): void {
+  $index = \Drupal\search_api\Entity\Index::load('mukurtu_default_content_index');
+  if (!$index) {
+    return;
+  }
+
+  _mukurtu_browse_ensure_processor_on_index(
+    $index,
+    'mukurtu_multipage_page_index',
+    'is_additional_mpi_page',
+    'Is additional multipage item page',
+    'boolean'
+  );
+
+  _mukurtu_browse_ensure_processor_on_index(
+    $index,
+    'mukurtu_community_record_flag',
+    'is_community_record',
+    'Is community record',
+    'boolean'
+  );
+}
+
+/**
  * Give the Browse and Digital Heritage search boxes page-specific
  * placeholder text instead of the generic "Enter keywords" (#2018).
  */
-function mukurtu_browse_update_40019(): void {
+function mukurtu_browse_update_40020(): void {
   $placeholders = [
     'views.view.mukurtu_browse' => 'Search all content',
     'views.view.mukurtu_digital_heritage_browse' => 'Search digital heritage items',

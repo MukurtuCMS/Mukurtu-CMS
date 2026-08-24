@@ -105,6 +105,7 @@
     </testsuite>
     <testsuite name="kernel">
       <directory>web/profiles/mukurtu/modules/mukurtu_solr/tests/src/Kernel</directory>
+      <directory>web/profiles/mukurtu/modules/mukurtu_submissions/tests/src/Kernel</directory>
     </testsuite>
     <testsuite name="functional">
       <directory>web/profiles/mukurtu/modules/mukurtu_protocol/tests/src/Functional</directory>
