@@ -148,6 +148,41 @@ class ShippedTemplateImportTest extends MukurtuImportTestBase {
   }
 
   /**
+   * Reproduces the QA-reported crash: importing a new entity through a
+   * mapping with no "created" target (exactly what
+   * MukurtuImportStrategy::getProcess() produces when a template maps
+   * "created" from a source column absent in the uploaded file, as every
+   * shipped *_all_fields template did before mukurtu_export started
+   * exporting a matching column) must not fail with a NOT NULL constraint
+   * violation on the created column.
+   *
+   * @see https://github.com/MukurtuCMS/Mukurtu-CMS/pull/2035#issuecomment-5398304518
+   * @see \Drupal\mukurtu_import\Plugin\migrate\destination\ProtocolAwareEntityContent::import()
+   */
+  public function testNewEntityWithoutCreatedMappingStillSaves() {
+    $mapping = [
+      ['source' => 'Title', 'target' => 'title'],
+      ['source' => 'Protocols', 'target' => 'field_cultural_protocols/protocols'],
+      ['source' => 'Sharing Setting', 'target' => 'field_cultural_protocols/sharing_setting'],
+    ];
+
+    $data = [
+      ['Title', 'Protocols', 'Sharing Setting'],
+      ['Brand New Node', (string) $this->protocol->id(), 'all'],
+    ];
+    $import_file = $this->createCsvFile($data);
+
+    $before = \Drupal::time()->getRequestTime();
+    $result = $this->importCsvFile($import_file, $mapping);
+    $this->assertEquals(MigrationInterface::RESULT_COMPLETED, $result);
+
+    $nodes = $this->entityTypeManager->getStorage('node')->loadByProperties(['title' => 'Brand New Node']);
+    $new_node = reset($nodes);
+    $this->assertNotEmpty($new_node, 'The new node should have been created.');
+    $this->assertGreaterThanOrEqual($before, $new_node->getCreatedTime());
+  }
+
+  /**
    * The Cultural Protocols field process plugin's dropdown/template labels
    * for its two sub-properties must be the bare "Protocols"/"Sharing
    * Setting" mukurtu_export actually writes, not the generic "{field

@@ -608,3 +608,48 @@ function mukurtu_export_update_40018(): void {
     }
   }
 }
+
+/**
+ * Add a "created" column, matching the label every shipped *_all_fields
+ * import template already expects, to every exportable bundle that has
+ * an "Authored by" column but never actually exported its creation date.
+ *
+ * Without this, re-importing a CSV produced by these exporters through
+ * the corresponding quick-path template drops the already-dead created
+ * mapping (see MukurtuImportStrategy::getProcess()'s file-header filter)
+ * and the new entity fails to save with a NOT NULL constraint violation
+ * on the created column, since Node/Media/etc. have no fallback default
+ * for a never-set created time.
+ */
+function mukurtu_export_update_40019(): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('csv_exporter');
+  foreach ($storage->loadMultiple() as $exporter) {
+    $list = $exporter->get('entity_fields_export_list') ?? [];
+    $changed = FALSE;
+    foreach ($list as $bundle_key => &$fields) {
+      if (isset($fields['created'])) {
+        continue;
+      }
+      if (str_starts_with($bundle_key, 'community__') || str_starts_with($bundle_key, 'protocol__')) {
+        $label = 'Created';
+      }
+      elseif (str_starts_with($bundle_key, 'node__') || str_starts_with($bundle_key, 'media__') || str_starts_with($bundle_key, 'multipage_item__')) {
+        $label = 'Authored on';
+      }
+      else {
+        // Paragraph/taxonomy_term/file bundles either have no created field
+        // (paragraph, taxonomy_term) or already export one (file).
+        continue;
+      }
+      if (!isset($fields['uid']) && !isset($fields['user_id'])) {
+        continue;
+      }
+      $fields['created'] = $label;
+      $changed = TRUE;
+    }
+    unset($fields);
+    if ($changed) {
+      $exporter->set('entity_fields_export_list', $list)->save();
+    }
+  }
+}

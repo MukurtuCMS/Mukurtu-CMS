@@ -121,6 +121,43 @@ class ImportTemplateExportConsistencyTest extends KernelTestBase {
   }
 
   /**
+   * Every template that maps a "created" target must use the same source
+   * label the bundle's real export header uses for that column - not a
+   * stale/copied field-dropdown label that will never match a real file
+   * (see https://github.com/MukurtuCMS/Mukurtu-CMS/pull/2035#issuecomment-5398304518).
+   *
+   * Unlike langcode, "created" has no core fallback default when left
+   * unset, so a template mapping it from a label the exporter never
+   * actually writes doesn't just undercount the "X of Y mapped" message -
+   * MukurtuImportStrategy::getProcess() silently drops the mapping when the
+   * uploaded file has no matching header, and the new entity then fails to
+   * save with a NOT NULL constraint violation on the created column.
+   */
+  public function testCreatedSourceMatchesExportHeaderWhenMapped(): void {
+    foreach (self::TEMPLATE_BUNDLES as $template_id => $bundle_key) {
+      // Paragraph/taxonomy_term entities have no "created" base field, so
+      // MukurtuImportStrategy::getProcess() harmlessly no-ops any "created"
+      // mapping entry a paragraph template happens to carry - there's no
+      // export header to match against in that case.
+      if (!str_starts_with($bundle_key, 'node__') && !str_starts_with($bundle_key, 'media__') && !str_starts_with($bundle_key, 'multipage_item__') && !str_starts_with($bundle_key, 'community__') && !str_starts_with($bundle_key, 'protocol__')) {
+        continue;
+      }
+
+      $mapping = $this->getTemplateMapping($template_id);
+      $created_sources = array_column(array_filter($mapping, fn (array $m) => $m['target'] === 'created'), 'source');
+
+      if (empty($created_sources)) {
+        continue;
+      }
+
+      $expected = $this->exportFieldsList[$bundle_key]['created'] ?? NULL;
+      $this->assertNotNull($expected, "{$template_id} maps a 'created' target but {$bundle_key} has no real export header for it.");
+      $this->assertCount(1, $created_sources, "{$template_id} should have exactly one created mapping entry.");
+      $this->assertSame($expected, $created_sources[0], "{$template_id}'s created source should match the real export header for {$bundle_key}.");
+    }
+  }
+
+  /**
    * A template must carry an explicit "Ignore" mapping for default_langcode
    * ("Default translation") exactly when its bundle exports that column, and
    * must not carry one when the bundle doesn't export it.

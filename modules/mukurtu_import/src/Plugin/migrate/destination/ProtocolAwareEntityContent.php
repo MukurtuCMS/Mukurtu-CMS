@@ -139,6 +139,14 @@ class ProtocolAwareEntityContent extends EntityContentBase {
     }
     assert($entity instanceof ContentEntityInterface);
 
+    // A new entity with no mapped/available "created" value is left with an
+    // empty created field: unlike "changed", core has no fallback default
+    // for it, so it would otherwise fail to save with a NOT NULL constraint
+    // violation on the created column.
+    if ($entity->isNew() && $entity->hasField('created') && $entity->get('created')->isEmpty()) {
+      $entity->set('created', $this->time->getRequestTime());
+    }
+
     // For media entities, call prepareSave() before validation to allow
     // auto-population of the name field from the filename (for file-based
     // media) or remote title/URL (for remote media).
