@@ -46,8 +46,9 @@ class OriginalDateWidget extends WidgetBase {
     $element['month'] = [
       '#type' => 'select',
       '#title' => t('Month'),
+      '#title_display' => 'invisible',
       '#options' => $monthOptions,
-      '#empty_option' => $this->t('- Select -'),
+      '#empty_option' => $this->t('Month'),
       '#default_value' => isset($items[$delta]->month) ? $items[$delta]->month : NULL,
     ];
 
@@ -60,8 +61,9 @@ class OriginalDateWidget extends WidgetBase {
     $element['day'] = [
       '#type' => 'select',
       '#title' => t('Day'),
+      '#title_display' => 'invisible',
       '#options' => $dayOptions,
-      '#empty_option' => $this->t('- Select -'),
+      '#empty_option' => $this->t('Day'),
       '#default_value' => isset($items[$delta]->day) ? $items[$delta]->day : NULL,
     ];
 
