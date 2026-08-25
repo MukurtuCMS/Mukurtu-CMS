@@ -11,6 +11,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldTypePluginManagerInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\Session\AccountSwitcherInterface;
@@ -22,8 +23,8 @@ use Drupal\migrate\Plugin\MigrateIdMapInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\RevisionLogInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
-use Drupal\migrate\Exception\EntityValidationException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\Validator\ConstraintViolationInterface;
 
 /**
  * Provides a protocol-aware entity content migrate destination plugin.
@@ -61,6 +62,19 @@ class ProtocolAwareEntityContent extends EntityContentBase {
    * @var \Drupal\Component\Datetime\TimeInterface
    */
   protected TimeInterface $time;
+
+  /**
+   * Per-row created/updated details accumulated since the last drain.
+   *
+   * Drained by getAndClearRowResults() so ImportBatchExecutable can log
+   * true entity-level created/updated status (see import()) instead of
+   * relying on migrate's own ID-map bookkeeping, which tracks whether this
+   * migration has seen the source row before, not whether the destination
+   * entity itself pre-existed.
+   *
+   * @var array
+   */
+  protected array $rowResults = [];
 
   /**
    * Constructs a ProtocolAwareEntityContent.
@@ -154,13 +168,17 @@ class ProtocolAwareEntityContent extends EntityContentBase {
       $entity->prepareSave();
     }
 
+    // Determine if this is a create or update operation. Captured
+    // unconditionally (not just for the access check below) so it reflects
+    // ground truth for row-result reporting regardless of the uid-1 bypass.
+    $was_new = $entity->isNew();
+
     // Skip access checks for user 1. The initial v3-to-v4 site migration is
     // restricted to user 1 (see MukurtuMigrateAccessCheck) and runs before OG
     // memberships are migrated, so protocol/community access checks would
     // incorrectly deny entity creation.
     if ((int) $this->currentUser->id() !== 1) {
-      // Determine if this is a create or update operation.
-      $operation = $entity->isNew() ? 'create' : 'update';
+      $operation = $was_new ? 'create' : 'update';
 
       // Check entity access for the current user.
       $access = $entity->access($operation, $this->currentUser, TRUE);
@@ -170,7 +188,7 @@ class ProtocolAwareEntityContent extends EntityContentBase {
           sprintf('The current user does not have %s access for this %s (ID: %s).%s',
             $operation,
             mb_strtolower((string)$entity->getEntityType()->getLabel()),
-            $entity->isNew() ? 'new' : $entity->id(),
+            $was_new ? 'new' : $entity->id(),
             $reason ? ' ' . $reason : '',
           )
         );
@@ -189,7 +207,35 @@ class ProtocolAwareEntityContent extends EntityContentBase {
     if ($this->isTranslationDestination()) {
       $ids[] = $entity->language()->getId();
     }
+
+    // Recorded last, after every step that could still throw for this row,
+    // so a row that fails during post-save processing (e.g. applying media
+    // alt text) isn't also recorded here as a success.
+    $this->rowResults[] = [
+      'source_id' => implode(':', $row->getSourceIdValues()),
+      'status' => $was_new ? 'created' : 'updated',
+      'entity_type_id' => $entity->getEntityTypeId(),
+      'bundle' => $entity->bundle(),
+      'label' => (string) $entity->label(),
+      'url' => $entity->hasLinkTemplate('canonical') ? $entity->toUrl()->toString() : NULL,
+    ];
+
     return $ids;
+  }
+
+  /**
+   * Returns and clears the created/updated details recorded since the last
+   * call.
+   *
+   * @return array
+   *   A list of associative arrays, each with keys: source_id, status
+   *   ('created' or 'updated'), entity_type_id, bundle, label, and url
+   *   (nullable).
+   */
+  public function getAndClearRowResults(): array {
+    $row_results = $this->rowResults;
+    $this->rowResults = [];
+    return $row_results;
   }
 
   /**
@@ -310,8 +356,105 @@ class ProtocolAwareEntityContent extends EntityContentBase {
     $violations = $entity->validate();
 
     if (count($violations) > 0) {
-      throw new EntityValidationException($violations);
+      $lines = [];
+      foreach ($violations as $violation) {
+        $lines[] = $this->formatViolationMessage($violation, $entity);
+      }
+      throw new MigrateException(implode("\n", $lines));
     }
+  }
+
+  /**
+   * Formats a single validation violation using the field's actual label.
+   *
+   * Replaces core's raw "field_name.delta.column=message" property path
+   * with the human-readable field label, e.g. "Title: This value should
+   * not be null." instead of "title.0.value=This value should not be
+   * null.". For composite fields with more than one independently
+   * validated sub-property (e.g. Cultural Protocols' "protocols" and
+   * "sharing_setting" columns), the sub-property's own label is appended
+   * so two different failures on the same field aren't reported
+   * identically, e.g. "Cultural Protocols (Sharing Setting): ...".
+   */
+  protected function formatViolationMessage(ConstraintViolationInterface $violation, FieldableEntityInterface $entity): string {
+    $property_path = $violation->getPropertyPath();
+    if ($property_path === '') {
+      // Entity-level constraints (not tied to a specific field) have no
+      // property path to translate into a field label.
+      return (string) $violation->getMessage();
+    }
+    $parts = explode('.', $property_path);
+    $field_name = $parts[0];
+    $field_definition = $field_name ? $entity->getFieldDefinition($field_name) : NULL;
+    $label = $field_definition ? $field_definition->getLabel() : $property_path;
+
+    if ($field_definition && $this->hasMultipleValidatedProperties($field_definition)) {
+      // A violation on a specific sub-property names it directly in its
+      // path (field_name.delta.property). A violation on the field/item as
+      // a whole - e.g. a composite field's own required-empty check, which
+      // for a field like Cultural Protocols fires whenever ANY of its
+      // required sub-properties is empty, not just its main one - carries
+      // no property segment, so the entity's current value has to be
+      // inspected to find which required sub-property is actually empty.
+      $property_name = $parts[2] ?? $this->findEmptyRequiredProperty($entity, $field_name, $field_definition);
+      $property_definition = $property_name ? $field_definition->getItemDefinition()->getPropertyDefinition($property_name) : NULL;
+      if ($property_definition) {
+        $label = sprintf('%s (%s)', $label, $property_definition->getLabel());
+      }
+    }
+
+    return sprintf('%s: %s', $label, $violation->getMessage());
+  }
+
+  /**
+   * Finds which required sub-property of a field's first item is empty.
+   *
+   * Used when a violation is reported against a composite field as a whole
+   * rather than one of its sub-properties by name. Falls back to the
+   * field's main property if no item exists yet or none of its required
+   * properties are empty.
+   */
+  protected function findEmptyRequiredProperty(FieldableEntityInterface $entity, string $field_name, FieldDefinitionInterface $field_definition): ?string {
+    $item_definition = $field_definition->getItemDefinition();
+    $items = $entity->get($field_name);
+    $item = $items->count() > 0 ? $items->get(0) : NULL;
+    if ($item) {
+      foreach ($item_definition->getPropertyDefinitions() as $property_name => $property_definition) {
+        if ($property_definition->isComputed() || !$property_definition->isRequired()) {
+          continue;
+        }
+        $value = $item->get($property_name)->getValue();
+        if ($value === NULL || $value === '') {
+          return $property_name;
+        }
+      }
+    }
+    return $item_definition->getMainPropertyName();
+  }
+
+  /**
+   * Determines whether a field's item type has more than one independently
+   * validated sub-property.
+   *
+   * Most field types (string, entity_reference, etc.) have only one
+   * property that is actually required or constrained - entity_reference's
+   * "entity" property, for instance, is computed from "target_id" rather
+   * than validated on its own. Fields like Cultural Protocols
+   * (CulturalProtocolItem), whose "protocols" and "sharing_setting" columns
+   * are each independently required/constrained, are the ones where a bare
+   * field label doesn't say which sub-property actually failed.
+   */
+  protected function hasMultipleValidatedProperties(FieldDefinitionInterface $field_definition): bool {
+    $validated_count = 0;
+    foreach ($field_definition->getItemDefinition()->getPropertyDefinitions() as $property_definition) {
+      if ($property_definition->isComputed()) {
+        continue;
+      }
+      if ($property_definition->isRequired() || $property_definition->getConstraints()) {
+        $validated_count++;
+      }
+    }
+    return $validated_count > 1;
   }
 
   /**

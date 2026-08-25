@@ -3699,6 +3699,17 @@ function mukurtu_core_update_40104(): void {
 }
 
 /**
+ * Grant Mukurtu Manager role permission to view site reports.
+ */
+function mukurtu_core_update_40105(): void {
+  $role = \Drupal\user\Entity\Role::load('mukurtu_manager');
+  if ($role && !$role->hasPermission('access site reports')) {
+    $role->grantPermission('access site reports');
+    $role->save();
+  }
+}
+
+/**
  * Grant Mukurtu Manager the archive/restore transition permissions on both
  * the Default and Editorial content workflows, matching their existing
  * edit-any access to article/page. This does not grant reach into
@@ -3706,7 +3717,7 @@ function mukurtu_core_update_40104(): void {
  * per-node OG-scoped update access check independently blocks that
  * regardless of this permission.
  */
-function mukurtu_core_update_40105(): void {
+function mukurtu_core_update_40106(): void {
   $role = \Drupal\user\Entity\Role::load('mukurtu_manager');
   if (!$role) {
     return;
@@ -3729,7 +3740,7 @@ function mukurtu_core_update_40105(): void {
  * mukurtu_core as a view dependency now that it references a mukurtu_core
  * action plugin.
  */
-function mukurtu_core_update_40106(): void {
+function mukurtu_core_update_40107(): void {
   $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_manage_all_content');
   if ($config->isNew()) {
     return;
@@ -3791,10 +3802,10 @@ function mukurtu_core_update_40106(): void {
  * mukurtu_drafts_entity_access()) -- without this, Mukurtu Manager would
  * lose the ability to even see, let alone restore, protocol-gated content
  * they archived themselves while only a plain protocol member (the exact
- * reach mukurtu_core_update_40105() granted them via workflow transition
+ * reach mukurtu_core_update_40106() granted them via workflow transition
  * permissions).
  */
-function mukurtu_core_update_40107(): void {
+function mukurtu_core_update_40108(): void {
   $role = \Drupal\user\Entity\Role::load('mukurtu_manager');
   if (!$role) {
     return;

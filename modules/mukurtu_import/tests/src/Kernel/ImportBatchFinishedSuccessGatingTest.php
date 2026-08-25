@@ -21,6 +21,14 @@ use Drupal\node\Entity\Node;
 class ImportBatchFinishedSuccessGatingTest extends MukurtuImportTestBase {
 
   /**
+   * {@inheritdoc}
+   */
+  protected function setUp(): void {
+    parent::setUp();
+    $this->installSchema('mukurtu_import', ['mukurtu_import_log']);
+  }
+
+  /**
    * Reads a key from the mukurtu_import private tempstore.
    */
   protected function getTempstoreValue(string $key) {
