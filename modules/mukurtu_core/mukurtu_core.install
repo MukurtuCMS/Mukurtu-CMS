@@ -3780,22 +3780,3 @@ function mukurtu_core_update_40106(): void {
 
   $config->save();
 }
-
-/**
- * Switches the content admin view's bulk-form field to a plugin that only
- * lists actions the current viewer can actually perform (e.g. "Archive"
- * no longer appears for viewers who can't archive anything), instead of
- * views_bulk_operations' own field, which lists every configured action
- * unconditionally regardless of the viewer's real access.
- */
-function mukurtu_core_update_40107(): void {
-  $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_manage_all_content');
-  if ($config->isNew()) {
-    return;
-  }
-
-  $key = 'display.default.display_options.fields.views_bulk_operations_bulk_form.plugin_id';
-  if ($config->get($key) === 'views_bulk_operations_bulk_form') {
-    $config->set($key, 'mukurtu_access_filtered_bulk_form')->save();
-  }
-}
