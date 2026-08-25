@@ -114,6 +114,12 @@ function mukurtu_import_schema(): array {
         'not null' => FALSE,
         'description' => 'Newline-joined error/warning text for this file.',
       ],
+      'details' => [
+        'type' => 'text',
+        'size' => 'big',
+        'not null' => FALSE,
+        'description' => 'JSON-encoded per-row created/updated/failed detail for this file.',
+      ],
       'timestamp' => [
         'type' => 'int',
         'unsigned' => TRUE,
@@ -647,7 +653,6 @@ function mukurtu_import_update_40030(): void {
   \Drupal::configFactory()->getEditable($config_name)->setData($data)->save();
 }
 
-/**
 /**
  * Correct the langcode column's source header label in default templates.
  *
@@ -1199,4 +1204,24 @@ function mukurtu_import_update_40040(): void {
     $role->grantPermission('administer mukurtu_import_strategy');
     $role->save();
   }
+}
+
+/**
+ * Add the 'details' column to mukurtu_import_log.
+ *
+ * Stores JSON-encoded per-row detail (created/updated entity label + link,
+ * or failed row messages) so the log detail page can show a structured
+ * Created/Updated/Failed breakdown instead of just counts.
+ */
+function mukurtu_import_update_40041(): void {
+  $schema = \Drupal::database()->schema();
+  if ($schema->fieldExists('mukurtu_import_log', 'details')) {
+    return;
+  }
+  $schema->addField('mukurtu_import_log', 'details', [
+    'type' => 'text',
+    'size' => 'big',
+    'not null' => FALSE,
+    'description' => 'JSON-encoded per-row created/updated/failed detail for this file.',
+  ]);
 }
