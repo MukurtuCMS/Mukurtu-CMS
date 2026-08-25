@@ -64,6 +64,9 @@
       <directory>web/profiles/mukurtu/modules/mukurtu_import/tests/src/Kernel</directory>
     </testsuite>
     <testsuite name="kernel">
+      <directory>web/profiles/mukurtu/modules/mukurtu_migrate/tests/src/Kernel</directory>
+    </testsuite>
+    <testsuite name="kernel">
       <directory>web/profiles/mukurtu/modules/mukurtu_export/tests/src/Kernel</directory>
     </testsuite>
     <testsuite name="kernel">
@@ -74,9 +77,6 @@
     </testsuite>
     <testsuite name="kernel">
       <directory>web/profiles/mukurtu/modules/mukurtu_local_contexts/tests/src/Kernel</directory>
-    </testsuite>
-    <testsuite name="kernel">
-      <directory>web/profiles/mukurtu/modules/mukurtu_migrate/tests/src/Kernel</directory>
     </testsuite>
     <testsuite name="kernel">
       <directory>web/profiles/mukurtu/modules/mukurtu_landing_page/tests/src/Kernel</directory>

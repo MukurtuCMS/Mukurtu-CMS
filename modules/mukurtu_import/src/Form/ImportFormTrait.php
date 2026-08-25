@@ -45,7 +45,9 @@ trait ImportFormTrait {
   protected function getEntityTypeIdOptions(): array {
     $definitions = $this->entityTypeManager->getDefinitions();
     $options = [];
-    foreach (['node', 'media', 'community', 'protocol', 'paragraph', 'multipage_item', 'taxonomy_term'] as $entity_type_id) {
+    $custom_entity_type_ids = \Drupal::service('mukurtu_core.roundtrip_entity_types')->getCustomEntityTypeIds();
+    $entity_type_ids = array_merge(['node', 'media'], $custom_entity_type_ids, ['paragraph', 'taxonomy_term']);
+    foreach ($entity_type_ids as $entity_type_id) {
       if (isset($definitions[$entity_type_id]) && $this->userCanCreateAnyBundleForEntityType($entity_type_id)) {
         $options[$entity_type_id] = $definitions[$entity_type_id]->getLabel();
 
@@ -214,6 +216,15 @@ trait ImportFormTrait {
 
         // Remove unwanted 'behavior_settings' paragraph base field.
         if ($entity_type_id === 'paragraph' && $field_name === 'behavior_settings') {
+          unset($field_defs[$field_name]);
+        }
+
+        // Landing pages inherit a required Cultural Protocols field from the
+        // shared MukurtuNode bundle class (kept there only for its "allow
+        // public view" access override). The field is hidden on the landing
+        // page form and isn't part of the editing workflow, so exclude it
+        // from import field lists.
+        if ($entity_type_id === 'node' && $bundle === 'landing_page' && $field_name === 'field_cultural_protocols') {
           unset($field_defs[$field_name]);
         }
 
