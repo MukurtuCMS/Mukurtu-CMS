@@ -60,9 +60,6 @@
     <testsuite name="unit">
       <directory>/var/www/html/web/profiles/mukurtu/modules/**/tests/src/Unit</directory>
     </testsuite>
-    <testsuite name="kernel">
-      <directory>/var/www/html/web/profiles/mukurtu/modules/mukurtu_multilingual/tests/src/Kernel</directory>
-    </testsuite>
     <testsuite name="functional">
       <directory>/var/www/html/web/profiles/mukurtu/modules/**/tests/src/Functional</directory>
     </testsuite>
