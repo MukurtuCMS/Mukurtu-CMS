@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Drupal\mukurtu_import\Plugin\migrate\destination;
 
+use Drupal\Component\Datetime\TimeInterface;
+use Drupal\Core\Entity\EntityChangedInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
@@ -55,6 +57,13 @@ class ProtocolAwareEntityContent extends EntityContentBase {
   protected EntityTypeManagerInterface $entityTypeManager;
 
   /**
+   * The time service.
+   *
+   * @var \Drupal\Component\Datetime\TimeInterface
+   */
+  protected TimeInterface $time;
+
+  /**
    * Per-row created/updated details accumulated since the last drain.
    *
    * Drained by getAndClearRowResults() so ImportBatchExecutable can log
@@ -90,15 +99,18 @@ class ProtocolAwareEntityContent extends EntityContentBase {
    *   The current user.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
+   * @param \Drupal\Component\Datetime\TimeInterface $time
+   *   The time service.
    * @param \Drupal\Core\Session\AccountSwitcherInterface|null $account_switcher
    *   The account switcher service.
    * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface|null $entity_type_bundle_info
    *   The entity type bundle info service.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, MigrationInterface $migration, EntityStorageInterface $storage, array $bundles, EntityFieldManagerInterface $entity_field_manager, FieldTypePluginManagerInterface $field_type_manager, AccountProxyInterface $current_user, EntityTypeManagerInterface $entity_type_manager, ?AccountSwitcherInterface $account_switcher = NULL, ?EntityTypeBundleInfoInterface $entity_type_bundle_info = NULL) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, MigrationInterface $migration, EntityStorageInterface $storage, array $bundles, EntityFieldManagerInterface $entity_field_manager, FieldTypePluginManagerInterface $field_type_manager, AccountProxyInterface $current_user, EntityTypeManagerInterface $entity_type_manager, TimeInterface $time, ?AccountSwitcherInterface $account_switcher = NULL, ?EntityTypeBundleInfoInterface $entity_type_bundle_info = NULL) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $migration, $storage, $bundles, $entity_field_manager, $field_type_manager, $account_switcher, $entity_type_bundle_info);
     $this->currentUser = $current_user;
     $this->entityTypeManager = $entity_type_manager;
+    $this->time = $time;
   }
 
   /**
@@ -118,6 +130,7 @@ class ProtocolAwareEntityContent extends EntityContentBase {
       $container->get('plugin.manager.field.field_type'),
       $container->get('current_user'),
       $entity_type_manager,
+      $container->get('datetime.time'),
       $container->get('account_switcher'),
       $container->get('entity_type.bundle.info'),
     );
@@ -139,6 +152,14 @@ class ProtocolAwareEntityContent extends EntityContentBase {
       throw new MigrateException('Unable to get entity');
     }
     assert($entity instanceof ContentEntityInterface);
+
+    // A new entity with no mapped/available "created" value is left with an
+    // empty created field: unlike "changed", core has no fallback default
+    // for it, so it would otherwise fail to save with a NOT NULL constraint
+    // violation on the created column.
+    if ($entity->isNew() && $entity->hasField('created') && $entity->get('created')->isEmpty()) {
+      $entity->set('created', $this->time->getRequestTime());
+    }
 
     // For media entities, call prepareSave() before validation to allow
     // auto-population of the name field from the filename (for file-based
@@ -498,11 +519,23 @@ class ProtocolAwareEntityContent extends EntityContentBase {
    * {@inheritdoc}
    */
   protected function save(ContentEntityInterface $entity, array $old_destination_id_values = []): array {
+    $is_update = !$entity->isNew();
     if ($entity instanceof RevisionLogInterface) {
       $message = $this->migration->pluginDefinition["mukurtu_import_message"] ?? '';
       $entity->setRevisionUserId($this->currentUser->id());
       $entity->setNewRevision();
       $entity->setRevisionLogMessage($message);
+    }
+    // EntityContentBase::save() sets the entity as syncing before saving,
+    // which suppresses ChangedItem::preSave()'s automatic bump of the
+    // "changed" timestamp on update. Set it explicitly so imported edits are
+    // treated the same as manual edits (e.g. for "recent content" sorting).
+    if ($is_update && $entity instanceof EntityChangedInterface) {
+      // Use the current wall-clock time rather than the request time so
+      // each row in a multi-row import batch gets a distinct, monotonically
+      // increasing "changed" value, matching the relative order they were
+      // actually processed in.
+      $entity->setChangedTime($this->time->getCurrentTime());
     }
     return parent::save($entity, $old_destination_id_values);
   }

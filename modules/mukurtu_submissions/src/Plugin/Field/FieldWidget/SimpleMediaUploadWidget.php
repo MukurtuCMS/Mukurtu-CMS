@@ -129,6 +129,13 @@ class SimpleMediaUploadWidget extends WidgetBase {
       '#upload_validators' => [
         'FileExtension' => ['extensions' => $extensions],
       ],
+      // Restricts the OS/browser's own file picker to matching files too -
+      // #upload_validators alone only enforces this after a file is
+      // already selected and submitted. ManagedFile::processManagedFile()
+      // (core) copies #accept verbatim onto the underlying <input
+      // type="file">'s accept attribute - same mechanism core's own
+      // ImageWidget uses (#accept => 'image/*').
+      '#accept' => implode(',', array_map(fn (string $extension): string => ".$extension", explode(' ', $extensions))),
       // Same private upload location every supported bundle's own add form
       // uses (see MediaTypeExtensions::SUPPORTED_TYPES). Files stay
       // temporary (and thus reusable by their anonymous uploader across

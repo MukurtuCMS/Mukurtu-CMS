@@ -26,13 +26,16 @@ class FormattedTextProcessCallback {
   /**
    * Callback to use with migration callback process plugin.
    *
-   * @param string $value
-   *   The import field value for a formatted text field target field.
+   * @param mixed $value
+   *   The import field value for a formatted text field target field. May
+   *   be NULL when the field's mapped CSV column is missing from the
+   *   uploaded file.
    *
    * @return array
    *   An array containing the value and format for the formatted text field.
    */
-  public function __invoke(string $value): array {
+  public function __invoke($value): array {
+    $value = (string) $value;
     return ['value' => $value, 'format' => $this->context['default_format'] ?? MukurtuImportStrategy::DEFAULT_FORMAT];
   }
 
