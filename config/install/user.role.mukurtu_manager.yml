@@ -102,6 +102,7 @@ permissions:
   - 'select account cancellation method'
   - 'unflag export_content'
   - 'unflag export_media'
+  - 'view any unpublished content'
   - 'use mukurtu_default_content_workflow transition archive'
   - 'use mukurtu_default_content_workflow transition restore'
   - 'use mukurtu_editorial_workflow transition archive'

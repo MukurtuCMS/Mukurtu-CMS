@@ -115,6 +115,7 @@ class MukurtuManagerArchiveRestoreTest extends KernelTestBase {
 
     $role = Role::create(['id' => 'mukurtu_manager', 'label' => 'Mukurtu Manager']);
     $role->grantPermission('edit any article content');
+    $role->grantPermission('view any unpublished content');
     $role->grantPermission('use mukurtu_default_content_workflow transition archive');
     $role->grantPermission('use mukurtu_default_content_workflow transition restore');
     $role->grantPermission('use mukurtu_editorial_workflow transition archive');

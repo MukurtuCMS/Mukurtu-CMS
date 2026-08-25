@@ -273,18 +273,55 @@ class MukurtuDraftsEntityTest extends KernelTestBase {
   }
 
   /**
-   * View and delete on an owned archived node are untouched -- this hook
-   * only narrows 'update'.
+   * Delete on an owned archived node is untouched -- this hook only
+   * narrows 'update' and 'view'.
    */
-  public function testViewAndDeleteOnOwnedArchivedAreUntouched(): void {
+  public function testDeleteOnOwnedArchivedIsUntouched(): void {
     $owner = $this->createPlainUser();
     $node = $this->createModeratedNode('archived', (int) $owner->id());
 
-    $view_result = mukurtu_drafts_entity_access($node, 'view', $owner);
     $delete_result = mukurtu_drafts_entity_access($node, 'delete', $owner);
-
-    $this->assertTrue($view_result->isNeutral(), 'View on archived content is untouched.');
     $this->assertTrue($delete_result->isNeutral(), 'Delete on archived content is untouched.');
+  }
+
+  /**
+   * An owner can no longer view their own archived structural content --
+   * archived means unpublished, and only genuinely privileged accounts
+   * should still have access, the same way non-owners are already
+   * blocked from viewing another user's draft.
+   */
+  public function testOwnerCannotViewOwnArchivedStructuralContent(): void {
+    $owner = $this->createPlainUser();
+    $node = $this->createModeratedNode('archived', (int) $owner->id());
+
+    $result = mukurtu_drafts_entity_access($node, 'view', $owner);
+    $this->assertTrue($result->isForbidden(), 'Owner cannot view their own archived content.');
+  }
+
+  /**
+   * A user holding "view any unpublished content" (e.g. Mukurtu Manager)
+   * is unaffected even if they happen to also own the archived node.
+   */
+  public function testOwnerWithViewAnyUnpublishedPermissionIsUnaffectedOnArchived(): void {
+    $owner = $this->createUserWithPermission('view any unpublished content');
+    $node = $this->createModeratedNode('archived', (int) $owner->id());
+
+    $result = mukurtu_drafts_entity_access($node, 'view', $owner);
+    $this->assertTrue($result->isNeutral(), 'A privileged view-any-unpublished user is unaffected, even as the owner.');
+  }
+
+  /**
+   * A non-owner's view access to archived content is untouched (neutral)
+   * by this hook -- core's own unpublished-content rules already deny a
+   * non-owner, non-privileged viewer without any help from here.
+   */
+  public function testNonOwnerViewOnArchivedIsNeutral(): void {
+    $owner = $this->createPlainUser();
+    $node = $this->createModeratedNode('archived', (int) $owner->id());
+    $other = $this->createPlainUser();
+
+    $result = mukurtu_drafts_entity_access($node, 'view', $other);
+    $this->assertTrue($result->isNeutral(), 'Non-owner view on archived content is neutral, unaffected by this hook.');
   }
 
   /**
