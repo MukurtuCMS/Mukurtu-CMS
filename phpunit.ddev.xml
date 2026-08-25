@@ -78,6 +78,15 @@
     <testsuite name="kernel">
       <directory>/var/www/html/web/profiles/mukurtu/modules/mukurtu_place/tests/src/Kernel</directory>
     </testsuite>
+    <testsuite name="kernel">
+      <directory>/var/www/html/web/profiles/mukurtu/modules/mukurtu_dictionary/tests/src/Kernel</directory>
+    </testsuite>
+    <testsuite name="kernel">
+      <directory>/var/www/html/web/profiles/mukurtu/modules/mukurtu_media/tests/src/Kernel</directory>
+    </testsuite>
+    <testsuite name="kernel">
+      <directory>/var/www/html/web/profiles/mukurtu/modules/mukurtu_digital_heritage/tests/src/Kernel</directory>
+    </testsuite>
     <testsuite name="functional">
       <directory>/var/www/html/web/profiles/mukurtu/modules/mukurtu_protocol/tests/src/Functional</directory>
     </testsuite>
