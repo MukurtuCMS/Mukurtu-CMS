@@ -11,7 +11,10 @@ label: 'Mukurtu Submission Received'
 description: 'A visitor submitted content awaiting review.'
 text:
   -
-    value: '<p>A new [message:field_item:entity:content-type] was submitted for review: <a href="[message:field_item:entity:url]">[message:field_item:entity:title]</a>.</p>'
+    value: 'New [message:field_item:entity:content-type] submitted for review: [message:field_item:entity:title]'
+    format: plain_text
+  -
+    value: '<p>A new [message:field_item:entity:content-type] was submitted for review: [message:field_item:entity:mukurtu-notification-link].</p>'
     format: mukurtu_html
 settings:
   'token options':

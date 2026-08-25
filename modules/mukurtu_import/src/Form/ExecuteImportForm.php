@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\mukurtu_import\Form;
 
 use Drupal\Component\Datetime\TimeInterface;
+use Drupal\Component\Utility\Html;
 use Drupal\Component\Uuid\UuidInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
@@ -117,7 +118,7 @@ class ExecuteImportForm extends ImportBaseForm {
       // Filename.
       $form['table'][$fid]['filename'] = [
         '#type' => 'markup',
-        '#markup' => "<div>$filename</div>",
+        '#markup' => '<div>' . Html::escape($filename ?? '') . '</div>',
       ];
 
       // Import Configuration.
@@ -179,7 +180,7 @@ class ExecuteImportForm extends ImportBaseForm {
       $filename = $this->getImportFilename($fid);
       $form['binary_table'][$fid]['filename'] = [
         '#type' => 'markup',
-        '#markup' => "<div>$filename</div>",
+        '#markup' => '<div>' . Html::escape($filename ?? '') . '</div>',
       ];
     }
 
@@ -239,6 +240,7 @@ class ExecuteImportForm extends ImportBaseForm {
       $this->detectUpstreamDependencies(
         $config,
         $entity_type_index,
+        $files_by_fid,
         $upstream_lookup_columns
       );
     }
@@ -248,6 +250,7 @@ class ExecuteImportForm extends ImportBaseForm {
 
     // Phase 3: Build the final migration definitions.
     $migration_definitions = [];
+    $identifier_warnings = [];
     foreach ($metadata_files as $fid) {
       $config = $configs_by_fid[$fid];
       $file = $files_by_fid[$fid];
@@ -260,7 +263,16 @@ class ExecuteImportForm extends ImportBaseForm {
         + ['mukurtu_import_message' => $this->getImportRevisionMessage()];
 
       $migration_definitions[$fid] = $definition;
+
+      $unmatched_columns = $config->getUnmatchedIdentifierColumns($file);
+      if (!empty($unmatched_columns)) {
+        $identifier_warnings[] = [
+          'fid' => $fid,
+          'message' => $this->t("The following identifier column(s) could not be found in this file, so rows were imported as new content instead of matched by them: @columns. Check that your import template's identifier column matches this file's actual headers.", ['@columns' => implode(', ', $unmatched_columns)]),
+        ];
+      }
     }
+    $this->store->set('batch_results_warnings', $identifier_warnings);
 
     // Phase 4: Inject import_migration_lookup into downstream definitions.
     $this->injectCrossMigrationLookups(
@@ -306,12 +318,16 @@ class ExecuteImportForm extends ImportBaseForm {
    *   The import config to scan.
    * @param \Drupal\mukurtu_import\MukurtuImportStrategyInterface[] $entity_type_index
    *   Index of entity_type => [fid => config].
+   * @param \Drupal\file\FileInterface[] $files_by_fid
+   *   Index of fid => file, so upstream lookup columns can be validated
+   *   against the upstream file's actual headers.
    * @param array &$upstream_lookup_columns
    *   Accumulator: fid => array of source column names (label, media source).
    */
   protected function detectUpstreamDependencies(
     MukurtuImportStrategyInterface $config,
     array $entity_type_index,
+    array $files_by_fid,
     array &$upstream_lookup_columns
   ): void {
     $entity_type_id = $config->getTargetEntityTypeId();
@@ -347,7 +363,8 @@ class ExecuteImportForm extends ImportBaseForm {
         if (!$upstream_config instanceof MukurtuImportStrategyInterface) {
           continue;
         }
-        $identifier_column = $upstream_config->getIdentifierColumn();
+        $upstream_file = $files_by_fid[$upstream_fid] ?? NULL;
+        $identifier_column = $upstream_file ? $upstream_config->getIdentifierColumn($upstream_file) : NULL;
         if ($identifier_column) {
           // User-configured identifier column takes exclusive precedence.
           $existing = $upstream_lookup_columns[$upstream_fid] ?? [];
@@ -358,11 +375,11 @@ class ExecuteImportForm extends ImportBaseForm {
         else {
           // Fall back to label and media source columns.
           $columns = [];
-          $label_column = $upstream_config->getLabelSourceColumn();
+          $label_column = $upstream_file ? $upstream_config->getLabelSourceColumn($upstream_file) : NULL;
           if ($label_column) {
             $columns[] = $label_column;
           }
-          $media_source_column = $upstream_config->getMediaSourceColumn();
+          $media_source_column = $upstream_file ? $upstream_config->getMediaSourceColumn($upstream_file) : NULL;
           if ($media_source_column && !in_array($media_source_column, $columns)) {
             $columns[] = $media_source_column;
           }

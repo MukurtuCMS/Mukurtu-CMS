@@ -10,8 +10,8 @@ use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\mukurtu_media\MediaTypeExtensions;
 use Drupal\mukurtu_submissions\Entity\SubmissionSettingsInterface;
+use Drupal\mukurtu_submissions\SubmissionFormDisplayManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -32,6 +32,7 @@ class SubmissionSettingsForm extends EntityForm {
     protected EntityTypeManagerInterface $entityTypeManagerService,
     protected EntityDisplayRepositoryInterface $entityDisplayRepository,
     protected EntityFieldManagerInterface $entityFieldManager,
+    protected SubmissionFormDisplayManager $formDisplayManager,
   ) {}
 
   /**
@@ -43,6 +44,7 @@ class SubmissionSettingsForm extends EntityForm {
       $container->get('entity_type.manager'),
       $container->get('entity_display.repository'),
       $container->get('entity_field.manager'),
+      $container->get('mukurtu_submissions.form_display_manager'),
     );
   }
 
@@ -131,7 +133,7 @@ class SubmissionSettingsForm extends EntityForm {
     // Only shown once a bundle is actually assigned - a new, unsaved entity
     // has none yet, so there's nothing to build this list from until it's
     // saved (auto-provisioning seeds every field as included at that point;
-    // see ensureSubmissionFormDisplay()).
+    // see SubmissionFormDisplayManager::ensureSubmissionFormDisplay()).
     if (!$this->entity->isNew()) {
       $this->buildFieldGroupsElement($form, $form_state);
       $this->buildFieldsTableElement($form, $form_state);
@@ -207,6 +209,7 @@ class SubmissionSettingsForm extends EntityForm {
       '#description' => $this->t('Optional collapsible sections for organizing fields below. A field left unassigned renders inline, outside any group.'),
       '#prefix' => '<div id="field-groups-wrapper">',
       '#suffix' => '</div>',
+      '#attached' => ['library' => ['mukurtu_submissions/field_groups_admin']],
     ];
 
     $form['field_groups_wrapper']['field_groups'] = [
@@ -250,6 +253,7 @@ class SubmissionSettingsForm extends EntityForm {
           '#title_display' => 'invisible',
           '#options' => $own_parent_options,
           '#default_value' => $row['parent'] ?? '',
+          '#attributes' => ['class' => ['mukurtu-submissions-field-group-parent']],
         ],
         'remove' => [
           '#type' => 'submit',
@@ -523,7 +527,8 @@ class SubmissionSettingsForm extends EntityForm {
   public function save(array $form, FormStateInterface $form_state): int {
     $result = parent::save($form, $form_state);
     if ($result == SAVED_NEW) {
-      $this->ensureSubmissionFormDisplay();
+      assert($this->entity instanceof SubmissionSettingsInterface);
+      $this->formDisplayManager->ensureSubmissionFormDisplay($this->entity);
     }
     elseif ($form_state->hasValue('fields_table')) {
       $this->syncIncludedFields($form_state);
@@ -536,76 +541,6 @@ class SubmissionSettingsForm extends EntityForm {
     $this->messenger()->addStatus($message);
     $form_state->setRedirectUrl($this->entity->toUrl('collection'));
     return $result;
-  }
-
-  /**
-   * Creates a "submission" form display for the target bundle if none
-   * exists yet, so a newly enabled content type is usable immediately
-   * instead of being blocked by SubmissionAccessCheck's missing-display
-   * safeguard. Seeded from whichever fields the bundle already exposes -
-   * EntityDisplayRepository::getFormDisplay() auto-populates a fresh,
-   * unsaved "submission" mode with every field, same as it would for any
-   * other not-yet-configured form mode - minus the fields the public form
-   * never shows regardless of bundle.
-   *
-   * Note: "revision_log" doesn't declare itself form-display-configurable
-   * (unlike uid/created/status/path/moderation_state, which do), so Drupal
-   * silently re-adds it as visible on every load regardless of what's
-   * hidden here or in Field UI - PublicSubmissionForm::buildForm() strips
-   * it again at render time, which is what actually keeps it off the
-   * public form; the removeComponent() call here mainly keeps this
-   * display's saved config consistent with what PublicSubmissionForm
-   * enforces for every other excluded field.
-   */
-  protected function ensureSubmissionFormDisplay(): void {
-    assert($this->entity instanceof SubmissionSettingsInterface);
-    $entity_type_id = $this->entity->getTargetEntityTypeId();
-    $bundle = $this->entity->getTargetBundle();
-    $display = $this->entityDisplayRepository->getFormDisplay($entity_type_id, $bundle, 'submission');
-    if (!$display->isNew()) {
-      return;
-    }
-
-    foreach (PublicSubmissionForm::EXCLUDED_FIELDS as $excluded_field) {
-      $display->removeComponent($excluded_field);
-    }
-
-    // Any entity-reference-to-media field (field_media_assets and its
-    // like, on any bundle) gets our own simple upload widget instead of
-    // whatever the "default" mode uses (normally the Media Library picker)
-    // - see applySimpleMediaUploadWidget().
-    foreach ($this->entityFieldManager->getFieldDefinitions($entity_type_id, $bundle) as $field_name => $definition) {
-      $component = $display->getComponent($field_name);
-      if ($component) {
-        $display->setComponent($field_name, $this->applySimpleMediaUploadWidget($field_name, $component, $entity_type_id, $bundle));
-      }
-    }
-
-    $display->save();
-  }
-
-  /**
-   * If $field_name is an entity-reference field targeting media, overrides
-   * $component to use our own simple upload widget (SimpleMediaUploadWidget)
-   * instead of whatever widget it would otherwise have (normally the Media
-   * Library picker, copied from the bundle's "default" display) - the
-   * Media Library's per-type tabs and searchable existing-media grid are
-   * more than a one-time anonymous visitor needs. Fields targeting
-   * anything else are returned unchanged.
-   */
-  protected function applySimpleMediaUploadWidget(string $field_name, array $component, string $entity_type_id, string $bundle): array {
-    $definition = $this->entityFieldManager->getFieldDefinitions($entity_type_id, $bundle)[$field_name] ?? NULL;
-    if (!$definition || $definition->getType() !== 'entity_reference' || $definition->getSetting('target_type') !== 'media') {
-      return $component;
-    }
-
-    $target_bundles = array_keys(array_filter($definition->getSetting('handler_settings')['target_bundles'] ?? []));
-    $supported = array_keys(MediaTypeExtensions::SUPPORTED_TYPES);
-    $allowed_bundles = $target_bundles ? array_values(array_intersect($supported, $target_bundles)) : $supported;
-
-    $component['type'] = 'mukurtu_simple_media_upload';
-    $component['settings'] = ['allowed_bundles' => $allowed_bundles];
-    return $component;
   }
 
   /**
@@ -638,7 +573,7 @@ class SubmissionSettingsForm extends EntityForm {
       if ($row && ($always_included || !empty($row['include']))) {
         $component = $display->getComponent($field_name) ?: ($default_display->getComponent($field_name) ?: []);
         $component['weight'] = (int) $row['weight'];
-        $component = $this->applySimpleMediaUploadWidget($field_name, $component, $entity_type_id, $bundle);
+        $component = $this->formDisplayManager->applySimpleMediaUploadWidget($field_name, $component, $entity_type_id, $bundle);
         $display->setComponent($field_name, $component);
         if (!empty($row['group'])) {
           $assignments[$field_name] = $row['group'];

@@ -11,6 +11,7 @@ use Drupal\Core\Entity\RevisionableInterface;
 use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityPublishedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\mukurtu_core\Entity\RoundtripEntityInterface;
 use Drupal\user\UserInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Og;
@@ -86,7 +87,7 @@ use Exception;
  *   field_ui_base_route = "protocol.settings"
  * )
  */
-class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
+class Protocol extends EditorialContentEntityBase implements ProtocolInterface, RoundtripEntityInterface {
 
   use EntityChangedTrait;
   use EntityPublishedTrait;

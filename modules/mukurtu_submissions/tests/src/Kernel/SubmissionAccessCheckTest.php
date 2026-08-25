@@ -4,133 +4,161 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_submissions\Kernel;
 
-use Drupal\Core\Entity\Entity\EntityFormDisplay;
-use Drupal\Core\Entity\Entity\EntityFormMode;
-use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
+use Drupal\Core\Session\AnonymousUserSession;
 use Drupal\mukurtu_submissions\Access\SubmissionAccessCheck;
-use Drupal\node\Entity\NodeType;
+use Drupal\mukurtu_submissions\Entity\SubmissionSettings;
+use Drupal\user\Entity\Role;
+use Drupal\user\UserInterface;
 
 /**
- * Tests SubmissionAccessCheck::access(), the gate in front of the public
- * submission form route (/submit/{entity_type_id}/{bundle}).
+ * Tests SubmissionAccessCheck::access() directly against every branch -
+ * none of this module's other kernel tests exercise this class at all,
+ * they only cover the role-permission layer one step removed from it
+ * (e.g. ReviewerPermissionSyncTest, EntityBrowserPermissionSyncTest).
  *
  * @group mukurtu_submissions
  */
-class SubmissionAccessCheckTest extends EntityKernelTestBase {
+class SubmissionAccessCheckTest extends MukurtuSubmissionsKernelTestBase {
+
+  const PERMISSION = 'submit node ' . self::TEST_BUNDLE . ' content';
+
+  protected function accessCheck(): SubmissionAccessCheck {
+    return new SubmissionAccessCheck();
+  }
 
   /**
-   * {@inheritdoc}
+   * The first $this->createUser() call in any kernel test becomes uid 1,
+   * which Drupal treats as the superuser - bypassing every permission
+   * check regardless of role, making it useless as an "authenticated user
+   * without permission X" test subject. Burns uid 1 on a throwaway user
+   * first so the returned user is a genuine, permission-respecting uid 2+.
    */
-  protected static $modules = [
-    'field',
-    'file',
-    'node',
-    'path_alias',
-    'mukurtu_submissions',
-  ];
-
-  /**
-   * The bundle used throughout - created fresh per test.
-   */
-  protected string $bundle = 'access_check_test';
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function setUp(): void {
-    parent::setUp();
-
-    $this->installEntitySchema('path_alias');
-
-    // Claims uid 1 with a harmless account so the "no permission" user
-    // created later in each test doesn't land on uid 1 itself - User::
-    // hasPermission() unconditionally returns TRUE for uid 1, which would
-    // silently defeat testEnabledWithDisplayButNoPermissionIsForbidden().
+  protected function createNonAdminUser(): UserInterface {
     $this->createUser();
-
-    NodeType::create(['type' => $this->bundle, 'name' => 'Access check test'])->save();
-
-    // EntityDisplayBase::calculateDependencies() requires this to exist for
-    // any non-default form mode - normally shipped by mukurtu_submissions'
-    // own config/install, not present here since this test only enables a
-    // bare module set rather than installing the module's config.
-    EntityFormMode::create([
-      'id' => 'node.submission',
-      'targetEntityType' => 'node',
-      'label' => 'Submission',
-    ])->save();
-  }
-
-  /**
-   * Saves a mukurtu_submission_settings entity for $this->bundle.
-   */
-  protected function createSettings(bool $enabled): void {
-    $this->entityTypeManager->getStorage('mukurtu_submission_settings')->create([
-      'id' => $this->bundle,
-      'label' => 'Access check test',
-      'status' => $enabled,
-      'target_entity_type_id' => 'node',
-      'target_bundle' => $this->bundle,
-    ])->save();
-  }
-
-  /**
-   * Saves a "submission" entity form display for $this->bundle, mirroring
-   * what SubmissionAccessCheck requires to exist before granting access.
-   */
-  protected function createSubmissionFormDisplay(): void {
-    EntityFormDisplay::create([
-      'targetEntityType' => 'node',
-      'bundle' => $this->bundle,
-      'mode' => 'submission',
-      'status' => TRUE,
-    ])->save();
+    return $this->createUser();
   }
 
   public function testNoSettingsEntityIsForbidden(): void {
-    $access_check = \Drupal::classResolver(SubmissionAccessCheck::class);
-    $result = $access_check->access($this->createUser(), 'node', $this->bundle);
-    $this->assertTrue($result->isForbidden());
+    $result = $this->accessCheck()->access(new AnonymousUserSession(), 'node', static::TEST_BUNDLE);
+    $this->assertFalse($result->isAllowed());
   }
 
   public function testDisabledSettingsIsForbidden(): void {
-    $this->createSettings(FALSE);
-    $this->createSubmissionFormDisplay();
+    SubmissionSettings::create([
+      'id' => static::TEST_BUNDLE,
+      'label' => 'Test settings',
+      'target_entity_type_id' => 'node',
+      'target_bundle' => static::TEST_BUNDLE,
+      'status' => FALSE,
+      'access_level' => 'anonymous',
+    ])->save();
 
-    $access_check = \Drupal::classResolver(SubmissionAccessCheck::class);
-    $result = $access_check->access($this->createUser(), 'node', $this->bundle);
-    $this->assertTrue($result->isForbidden());
+    $result = $this->accessCheck()->access(new AnonymousUserSession(), 'node', static::TEST_BUNDLE);
+    $this->assertFalse($result->isAllowed());
   }
 
-  public function testEnabledWithoutSubmissionDisplayIsForbidden(): void {
-    $this->createSettings(TRUE);
+  public function testEnabledSettingsWithoutSubmissionDisplayIsForbidden(): void {
+    // Deliberately no getFormDisplay()->save() call - the "submission" form
+    // display for this bundle has never been saved as config, matching a
+    // settings entity created but never actually configured with fields.
+    SubmissionSettings::create([
+      'id' => static::TEST_BUNDLE,
+      'label' => 'Test settings',
+      'target_entity_type_id' => 'node',
+      'target_bundle' => static::TEST_BUNDLE,
+      'status' => TRUE,
+      'access_level' => 'anonymous',
+    ])->save();
 
-    $access_check = \Drupal::classResolver(SubmissionAccessCheck::class);
-    $account = $this->createUser(["submit node $this->bundle content"]);
-    $result = $access_check->access($account, 'node', $this->bundle);
-    $this->assertTrue($result->isForbidden());
+    $anonymous = new AnonymousUserSession();
+    Role::load('anonymous')->grantPermission(static::PERMISSION)->save();
+
+    $result = $this->accessCheck()->access($anonymous, 'node', static::TEST_BUNDLE);
+    $this->assertFalse($result->isAllowed(), 'Even with the permission granted, no saved "submission" form display must still deny access.');
   }
 
-  public function testEnabledWithDisplayButNoPermissionIsForbidden(): void {
-    $this->createSettings(TRUE);
-    $this->createSubmissionFormDisplay();
-
-    $access_check = \Drupal::classResolver(SubmissionAccessCheck::class);
-    // A user with no permissions at all - not even the dynamic
-    // "submit node {bundle} content" permission granted in the success
-    // case below.
-    $account = $this->createUser();
-    $result = $access_check->access($account, 'node', $this->bundle);
-    $this->assertTrue($result->isForbidden());
+  protected function saveSubmissionFormDisplay(): void {
+    $this->container->get('entity_display.repository')
+      ->getFormDisplay('node', static::TEST_BUNDLE, 'submission')
+      ->save();
   }
 
-  public function testEnabledWithDisplayAndPermissionIsAllowed(): void {
-    $this->createSettings(TRUE);
-    $this->createSubmissionFormDisplay();
+  public function testEnabledSettingsWithDisplayButNoPermissionIsForbidden(): void {
+    SubmissionSettings::create([
+      'id' => static::TEST_BUNDLE,
+      'label' => 'Test settings',
+      'target_entity_type_id' => 'node',
+      'target_bundle' => static::TEST_BUNDLE,
+      'status' => TRUE,
+      'access_level' => 'anonymous',
+    ])->save();
+    $this->saveSubmissionFormDisplay();
 
-    $access_check = \Drupal::classResolver(SubmissionAccessCheck::class);
-    $account = $this->createUser(["submit node $this->bundle content"]);
-    $result = $access_check->access($account, 'node', $this->bundle);
+    // mukurtu_submissions_sync_submission_permission() (fired by the insert
+    // hook above, since status=TRUE and access_level=anonymous) already
+    // auto-grants this permission to anonymous - explicitly revoking it
+    // simulates a site where that grant was manually undone, the one way
+    // "enabled settings + saved display + no permission" can actually
+    // occur, since SubmissionAccessCheck's own permission check doesn't
+    // care why the account lacks it.
+    Role::load('anonymous')->revokePermission(static::PERMISSION)->save();
+
+    $result = $this->accessCheck()->access(new AnonymousUserSession(), 'node', static::TEST_BUNDLE);
+    $this->assertFalse($result->isAllowed());
+  }
+
+  public function testEnabledSettingsWithDisplayAndPermissionIsAllowedForAnonymous(): void {
+    SubmissionSettings::create([
+      'id' => static::TEST_BUNDLE,
+      'label' => 'Test settings',
+      'target_entity_type_id' => 'node',
+      'target_bundle' => static::TEST_BUNDLE,
+      'status' => TRUE,
+      'access_level' => 'anonymous',
+    ])->save();
+    $this->saveSubmissionFormDisplay();
+
+    $anonymous = new AnonymousUserSession();
+    Role::load('anonymous')->grantPermission(static::PERMISSION)->save();
+
+    $result = $this->accessCheck()->access($anonymous, 'node', static::TEST_BUNDLE);
+    $this->assertTrue($result->isAllowed());
+  }
+
+  public function testAuthenticatedWithoutPermissionIsForbidden(): void {
+    SubmissionSettings::create([
+      'id' => static::TEST_BUNDLE,
+      'label' => 'Test settings',
+      'target_entity_type_id' => 'node',
+      'target_bundle' => static::TEST_BUNDLE,
+      'status' => TRUE,
+      'access_level' => 'authenticated',
+    ])->save();
+    $this->saveSubmissionFormDisplay();
+
+    // Same auto-grant as testEnabledSettingsWithDisplayButNoPermissionIsForbidden
+    // above - undo it to actually exercise the "lacks permission" branch.
+    Role::load('authenticated')->revokePermission(static::PERMISSION)->save();
+
+    $account = $this->createNonAdminUser();
+    $result = $this->accessCheck()->access($account, 'node', static::TEST_BUNDLE);
+    $this->assertFalse($result->isAllowed());
+  }
+
+  public function testAuthenticatedWithPermissionIsAllowed(): void {
+    SubmissionSettings::create([
+      'id' => static::TEST_BUNDLE,
+      'label' => 'Test settings',
+      'target_entity_type_id' => 'node',
+      'target_bundle' => static::TEST_BUNDLE,
+      'status' => TRUE,
+      'access_level' => 'authenticated',
+    ])->save();
+    $this->saveSubmissionFormDisplay();
+    Role::load('authenticated')->grantPermission(static::PERMISSION)->save();
+
+    $account = $this->createNonAdminUser();
+    $result = $this->accessCheck()->access($account, 'node', static::TEST_BUNDLE);
     $this->assertTrue($result->isAllowed());
   }
 
