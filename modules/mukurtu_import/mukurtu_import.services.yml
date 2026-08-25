@@ -2,3 +2,6 @@ services:
   plugin.manager.mukurtu_import_field_process:
     class: Drupal\mukurtu_import\MukurtuImportFieldProcessPluginManager
     parent: default_plugin_manager
+  mukurtu_import.log_storage:
+    class: Drupal\mukurtu_import\MukurtuImportLogStorage
+    arguments: ['@database']

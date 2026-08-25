@@ -52,4 +52,34 @@ class ImportTimestampTest extends MukurtuImportTestBase {
     $this->assertEquals($new_created_time, $updated_node->getCreatedTime());
   }
 
+  /**
+   * Test that importing an update to an existing node bumps "changed".
+   *
+   * @see https://github.com/MukurtuCMS/Mukurtu-CMS/issues/1574
+   */
+  public function testChangedTimeAdvancesOnUpdate() {
+    $original_changed_time = $this->node->getChangedTime();
+
+    // Guarantee the next request time differs from the original "changed"
+    // value so the assertion below is meaningful.
+    sleep(1);
+
+    $data = [
+      ['nid', 'title'],
+      [$this->node->id(), 'Updated via spreadsheet'],
+    ];
+    $import_file = $this->createCsvFile($data);
+
+    $mapping = [
+      ['target' => 'nid', 'source' => 'nid'],
+      ['target' => 'title', 'source' => 'title'],
+    ];
+
+    $result = $this->importCsvFile($import_file, $mapping);
+    $this->assertEquals(MigrationInterface::RESULT_COMPLETED, $result);
+    $updated_node = $this->entityTypeManager->getStorage('node')->load($this->node->id());
+    $this->assertEquals('Updated via spreadsheet', $updated_node->getTitle());
+    $this->assertGreaterThan($original_changed_time, $updated_node->getChangedTime());
+  }
+
 }
