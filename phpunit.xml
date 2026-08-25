@@ -55,64 +55,13 @@
   </extensions>
   <testsuites>
     <testsuite name="kernel">
-      <directory>web/profiles/mukurtu/modules/mukurtu_protocol/tests/src/Kernel</directory>
+      <directory>web/profiles/mukurtu/modules/**/tests/src/Kernel</directory>
     </testsuite>
-    <testsuite name="kernel">
-      <directory>web/profiles/mukurtu/modules/mukurtu_collection/tests/src/Kernel</directory>
-    </testsuite>
-    <testsuite name="kernel">
-      <directory>web/profiles/mukurtu/modules/mukurtu_import/tests/src/Kernel</directory>
-    </testsuite>
-    <testsuite name="kernel">
-      <directory>web/profiles/mukurtu/modules/mukurtu_migrate/tests/src/Kernel</directory>
-    </testsuite>
-    <testsuite name="kernel">
-      <directory>web/profiles/mukurtu/modules/mukurtu_export/tests/src/Kernel</directory>
-    </testsuite>
-    <testsuite name="kernel">
-      <directory>web/profiles/mukurtu/modules/mukurtu_drafts/tests/src/Kernel</directory>
-    </testsuite>
-    <testsuite name="kernel">
-      <directory>web/profiles/mukurtu/modules/original_date/tests/src/Kernel</directory>
-    </testsuite>
-    <testsuite name="kernel">
-      <directory>web/profiles/mukurtu/modules/mukurtu_local_contexts/tests/src/Kernel</directory>
-    </testsuite>
-    <testsuite name="kernel">
-      <directory>web/profiles/mukurtu/modules/mukurtu_media/tests/src/Kernel</directory>
-    </testsuite>
-    <testsuite name="kernel">
-      <directory>web/profiles/mukurtu/modules/mukurtu_landing_page/tests/src/Kernel</directory>
-    </testsuite>
-    <testsuite name="kernel">
-      <directory>web/profiles/mukurtu/modules/mukurtu_browse/tests/src/Kernel</directory>
-    </testsuite>
-    <testsuite name="kernel">
-      <directory>web/profiles/mukurtu/modules/mukurtu_core/tests/src/Kernel</directory>
-    </testsuite>
-    <testsuite name="kernel">
-      <directory>web/profiles/mukurtu/modules/mukurtu_dictionary/tests/src/Kernel</directory>
-    </testsuite>
-    <testsuite name="kernel">
-      <directory>web/profiles/mukurtu/modules/mukurtu_digital_heritage/tests/src/Kernel</directory>
-    </testsuite>
-    <testsuite name="kernel">
-      <directory>web/profiles/mukurtu/modules/mukurtu_person/tests/src/Kernel</directory>
-    </testsuite>
-    <testsuite name="kernel">
-      <directory>web/profiles/mukurtu/modules/mukurtu_place/tests/src/Kernel</directory>
-    </testsuite>
-    <testsuite name="kernel">
-      <directory>web/profiles/mukurtu/modules/mukurtu_notifications/tests/src/Kernel</directory>
-    </testsuite>
-    <testsuite name="kernel">
-      <directory>web/profiles/mukurtu/modules/mukurtu_gin_custom/tests/src/Kernel</directory>
-    </testsuite>
-    <testsuite name="kernel">
-      <directory>web/profiles/mukurtu/modules/mukurtu_submissions/tests/src/Kernel</directory>
+    <testsuite name="unit">
+      <directory>web/profiles/mukurtu/modules/**/tests/src/Unit</directory>
     </testsuite>
     <testsuite name="functional">
-      <directory>web/profiles/mukurtu/modules/mukurtu_protocol/tests/src/Functional</directory>
+      <directory>web/profiles/mukurtu/modules/**/tests/src/Functional</directory>
     </testsuite>
   </testsuites>
   <!-- Settings for coverage reports. -->
