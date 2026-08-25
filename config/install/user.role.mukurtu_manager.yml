@@ -70,6 +70,7 @@ is_admin: null
 permissions:
   - 'access mukurtu export'
   - 'access mukurtu import'
+  - 'access site reports'
   - 'access visitors'
   - 'administer local contexts legacy projects'
   - 'administer mukurtu access denied page'
@@ -94,4 +95,3 @@ permissions:
   - 'edit own landing_page content'
   - 'edit own page content'
   - 'select account cancellation method'
-  - 'access mukurtu export'
