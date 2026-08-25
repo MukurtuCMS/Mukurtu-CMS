@@ -54,3 +54,27 @@ function mukurtu_protocol_sync_install(): void {
     }
   }
 }
+
+/**
+ * Backfills protocol sync for existing dictionary words' sample-sentence
+ * recordings (field_sentence_recording, nested inside each
+ * field_sample_sentences paragraph) - _mukurtu_protocol_sync_sync_media_
+ * from_node() previously only ever checked a fixed list of top-level node
+ * fields, so this paragraph-nested field never inherited its parent
+ * word's cultural protocols the way field_recording's media already does.
+ * Going forward this is handled automatically on every node save (see
+ * mukurtu_protocol_sync_entity_insert()/_update()); this hook re-runs
+ * that same sync once for content saved before the fix.
+ */
+function mukurtu_protocol_sync_update_40001(): void {
+  $node_storage = \Drupal::entityTypeManager()->getStorage('node');
+  $nids = \Drupal::entityQuery('node')
+    ->condition('type', 'dictionary_word')
+    ->condition('field_sample_sentences', NULL, 'IS NOT NULL')
+    ->accessCheck(FALSE)
+    ->execute();
+
+  foreach ($node_storage->loadMultiple($nids) as $node) {
+    _mukurtu_protocol_sync_sync_media_from_node($node);
+  }
+}

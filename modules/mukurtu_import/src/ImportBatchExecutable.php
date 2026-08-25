@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Drupal\mukurtu_import;
 
 use Drupal\Component\Render\FormattableMarkup;
+use Drupal\Core\Utility\Error;
 use Drupal\migrate_tools\MigrateBatchExecutable;
-use Drupal\migrate\MigrateMessage;
 use Drupal\migrate\Plugin\MigrationInterface;
 
 /**
@@ -66,7 +66,7 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
       $context['sandbox']['batch_limit'] = 0;
       $context['sandbox']['operation'] = self::BATCH_IMPORT;
     }
-    $message = new MigrateMessage();
+    $message = new ImportBatchMessage();
 
     $migration_plugin_manager = \Drupal::service('plugin.manager.migration');
     $migration = $migration_plugin_manager->createStubMigration($migration_definition);
@@ -92,6 +92,7 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
         '@updated' => 0,
         '@failures' => 0,
         '@ignored' => 0,
+        '@migration_failed' => FALSE,
         '@name' => $migration->id(),
         'messages' => [],
         'import_id' => $migration_definition['mukurtu_import_id'] ?? NULL,
@@ -109,8 +110,29 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
     // Make sure we know our batch context.
     $executable->setBatchContext($context);
 
-    // Do the import.
-    $result = $executable->import();
+    // Do the import. import() only catches MigrateException and
+    // MigrateSkipRowException around row processing; any other \Throwable
+    // (e.g. a TypeError from a process plugin given an unexpected NULL
+    // source value) escapes uncaught and also skips the status reset
+    // import() normally performs on every exit path, leaving the migration
+    // stuck "importing" indefinitely. This method is invoked directly as
+    // Drupal core's batch operation callback, and core's own
+    // _batch_process() has no try/catch around that callable, so an
+    // uncaught \Throwable here crashes the whole AJAX batch request with a
+    // raw HTTP 500 instead of degrading gracefully like every other
+    // row-level error does. Guard against that.
+    $import_crashed = FALSE;
+    try {
+      $result = $executable->import();
+    }
+    catch (\Throwable $e) {
+      // import() never reached its normal completion path, so reset status
+      // ourselves or this migration will refuse to run again.
+      $migration->setStatus(MigrationInterface::STATUS_IDLE);
+      Error::logException(\Drupal::logger('mukurtu_import'), $e);
+      $result = MigrationInterface::RESULT_FAILED;
+      $import_crashed = TRUE;
+    }
 
     // Save the messages for this migration only, so errors stay attributed
     // to the file that produced them rather than being flattened across all
@@ -119,6 +141,9 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
       $context['results'][$migration->id()]['messages'],
       iterator_to_array($executable->getIdMap()->getMessages())
     );
+    foreach ($message->getErrorMessages() as $error_message) {
+      $context['results'][$migration->id()]['messages'][] = (object) ['message' => $error_message, 'src_ID' => NULL];
+    }
 
     // Store the definition for ID map cleanup after the batch completes.
     $context['results']['definitions'][$migration->id()] = $migration_definition;
@@ -130,6 +155,35 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
     $context['results'][$migration->id()]['@updated'] += $executable->getUpdatedCount();
     $context['results'][$migration->id()]['@failures'] += $executable->getFailedCount();
     $context['results'][$migration->id()]['@ignored'] += $executable->getIgnoredCount();
+    // RESULT_FAILED means the migration aborted outright (e.g. a source
+    // plugin exception at rewind()), possibly before processing a single
+    // row -- distinct from @failures, which only counts rows that were
+    // actually attempted. See https://github.com/MukurtuCMS/Mukurtu-CMS/issues/154.
+    $context['results'][$migration->id()]['@migration_failed'] = $context['results'][$migration->id()]['@migration_failed'] || $result === MigrationInterface::RESULT_FAILED;
+
+    if ($import_crashed) {
+      // An uncaught error aborted the import partway through; make sure
+      // that's reflected as a failure even if every row processed before
+      // the crash happened to succeed.
+      if (empty($context['results'][$migration->id()]['@failures'])) {
+        $context['results'][$migration->id()]['@failures'] = 1;
+      }
+      $context['results'][$migration->id()]['messages'][] = (object) [
+        'message' => (string) t('An unexpected error interrupted the import of this file and it could not be completed. Check that your file\'s columns match the selected import template, or use "Customize Settings" to map the columns manually.'),
+      ];
+    }
+    // import() can return RESULT_FAILED before a single row is attempted
+    // (e.g. a source rewind() exception from a misconfigured ID column). It
+    // handles that internally without throwing, so nothing above records a
+    // failure count or message for it, and the batch operation itself still
+    // reports success. Surface it explicitly so the results form doesn't
+    // report a false success.
+    elseif ($result === MigrationInterface::RESULT_FAILED && empty($context['results'][$migration->id()]['@failures'])) {
+      $context['results'][$migration->id()]['@failures'] = 1;
+      $context['results'][$migration->id()]['messages'][] = (object) [
+        'message' => (string) t('The import for this file failed before any rows could be processed. Check that your file\'s columns match the selected import template, or use "Customize Settings" to map the columns manually.'),
+      ];
+    }
 
     // Do some housekeeping.
     if ($result !== MigrationInterface::RESULT_INCOMPLETE) {
@@ -160,12 +214,14 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
   public static function batchFinishedImport(bool $success, array $results, array $operations): void {
     $tempstore = \Drupal::service('tempstore.private');
     $store = $tempstore->get('mukurtu_import');
-    $store->set('batch_results_success', $success);
 
     /** @var \Drupal\mukurtu_import\MukurtuImportLogStorage $log_storage */
     $log_storage = \Drupal::service('mukurtu_import.log_storage');
     $timestamp = \Drupal::time()->getRequestTime();
     $current_uid = (int) \Drupal::currentUser()->id();
+    $has_row_failures = FALSE;
+    $has_migration_failure = FALSE;
+    $has_silent_noop = FALSE;
     $imported_count = 0;
     $per_migration_summary = [];
 
@@ -184,6 +240,17 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
 
       $imported_count += ($migration_result['@created'] ?? 0) + ($migration_result['@updated'] ?? 0);
       $per_migration_summary[] = new FormattableMarkup('@name: @created created, @updated updated, @failures failed, @ignored ignored', $migration_result);
+
+      $row_failures = isset($migration_result['@failures']) && $migration_result['@failures'] > 0;
+      $migration_failed = !empty($migration_result['@migration_failed']);
+      $has_row_failures = $has_row_failures || $row_failures;
+      $has_migration_failure = $has_migration_failure || $migration_failed;
+      if (!$row_failures && !$migration_failed && ($migration_result['@numitems'] ?? 0) > 0 && ($migration_result['@created'] ?? 0) === 0 && ($migration_result['@updated'] ?? 0) === 0) {
+        // Rows were processed but nothing was actually created or updated
+        // (e.g. every row was ignored), even though migrate reported no
+        // per-row failures. See https://github.com/MukurtuCMS/Mukurtu-CMS/issues/154.
+        $has_silent_noop = TRUE;
+      }
 
       $fid = $migration_result['fid'] ?? NULL;
       $file_message_texts = [];
@@ -214,6 +281,9 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
         'timestamp' => $timestamp,
       ]);
     }
+
+    $store->set('batch_results_success', $success && !$has_row_failures && !$has_migration_failure && !$has_silent_noop);
+    $store->set('batch_results_noop', $has_silent_noop && !$has_row_failures && !$has_migration_failure);
     $store->set('batch_results_messages', $messages);
 
     if (\Drupal::moduleHandler()->moduleExists('mukurtu_notifications')) {
