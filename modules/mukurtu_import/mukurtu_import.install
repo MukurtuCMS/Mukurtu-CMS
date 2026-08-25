@@ -684,64 +684,6 @@ function mukurtu_import_update_40033(): void {
 }
 
 /**
- * Correct the Cultural Protocols columns' source header labels.
- *
- * The shipped 'all fields' import strategies mapped these two columns using
- * the "Cultural Protocols > "-prefixed label copied from the target field
- * dropdown group (e.g. "Cultural Protocols > Protocols") instead of the bare
- * label mukurtu_export actually writes as the CSV header ("Protocols"). This
- * wasn't just a cosmetic miss: field_cultural_protocols/protocols is
- * processed by core's strict-mode Explode plugin, so an unresolved column
- * resolves to NULL and throws a hard MigrateException on any populated row.
- * Only rewrites a config's mapping if its source still equals the known
- * stale default, leaving any site-customized mapping untouched.
- */
-function mukurtu_import_update_40034(): void {
-  $ids = [
-    'audio_all_fields',
-    'collection_all_fields',
-    'dictionary_word_all_fields',
-    'digital_heritage_item_all_fields',
-    'document_all_fields',
-    'external_embed_all_fields',
-    'image_all_fields',
-    'person_record_all_fields',
-    'place_record_all_fields',
-    'remote_video_all_fields',
-    'soundcloud_all_fields',
-    'video_all_fields',
-    'word_list_all_fields',
-  ];
-  $corrections = [
-    ['field_cultural_protocols/protocols', 'Cultural Protocols > Protocols', 'Protocols'],
-    ['field_cultural_protocols/sharing_setting', 'Cultural Protocols > Sharing Setting', 'Sharing Setting'],
-  ];
-
-  foreach ($ids as $id) {
-    $config_name = "mukurtu_import.mukurtu_import_strategy.{$id}";
-    $config = \Drupal::configFactory()->getEditable($config_name);
-    if ($config->isNew()) {
-      continue;
-    }
-
-    $mapping = $config->get('mapping') ?? [];
-    $changed = FALSE;
-    foreach ($mapping as $delta => $entry) {
-      foreach ($corrections as [$target, $old_source, $new_source]) {
-        if (($entry['target'] ?? NULL) === $target && ($entry['source'] ?? NULL) === $old_source) {
-          $mapping[$delta]['source'] = $new_source;
-          $changed = TRUE;
-        }
-      }
-    }
-
-    if ($changed) {
-      $config->set('mapping', $mapping)->save();
-    }
-  }
-}
-
-/**
  * Correct several other bundle-specific stale source header labels.
  *
  * A handful of the shipped 'all fields' import strategies mapped their
@@ -755,7 +697,7 @@ function mukurtu_import_update_40034(): void {
  * rewrites a config's mapping if its source still equals the known stale
  * default, leaving any site-customized mapping untouched.
  */
-function mukurtu_import_update_40035(): void {
+function mukurtu_import_update_40034(): void {
   $corrections = [
     'collection_all_fields' => ['title' => ['Collection name', 'Title']],
     'dictionary_word_all_fields' => ['title' => ['Term', 'Title']],
@@ -813,7 +755,7 @@ function mukurtu_import_update_40035(): void {
  * default_langcode). Only adds an entry if the config doesn't already have
  * one for that column.
  */
-function mukurtu_import_update_40036(): void {
+function mukurtu_import_update_40035(): void {
   $additions = [
     'collection_all_fields' => [
       ['Image > File ID', 'field_collection_image/target_id'],
@@ -890,7 +832,7 @@ function mukurtu_import_update_40036(): void {
  * config's mapping if its target for that column still equals the known
  * stale default, leaving any site-customized mapping untouched.
  */
-function mukurtu_import_update_40037(): void {
+function mukurtu_import_update_40036(): void {
   $corrections = [
     'collection_all_fields' => ['Image' => 'field_collection_image'],
     'community_all_fields' => [
@@ -931,13 +873,13 @@ function mukurtu_import_update_40037(): void {
 
 /**
  * Add mapping entries for the sub-columns added by
- * mukurtu_export_update_40017(): word_list's "Image", sample_sentence's
+ * mukurtu_export_update_40019(): word_list's "Image", sample_sentence's
  * "Recording", and protocol's "Banner Image"/"Thumbnail Image" now have a
  * real target_id/alt column to map, the same way collection's/community's
  * always did. Only adds an entry if the config doesn't already have one
  * for that column; leaves the still-unusable bare column ignored.
  */
-function mukurtu_import_update_40038(): void {
+function mukurtu_import_update_40037(): void {
   $additions = [
     'word_list_all_fields' => [
       ['Image > File ID', 'field_word_list_image/target_id'],

@@ -69,7 +69,7 @@ mapping:
     source: Pronunciation
     target: field_pronunciation
   -
-    source: Protocols
+    source: 'Cultural Protocols > Protocols'
     target: field_cultural_protocols/protocols
   -
     source: Published
@@ -84,7 +84,7 @@ mapping:
     source: 'Sample Sentences'
     target: field_sample_sentences
   -
-    source: 'Sharing Setting'
+    source: 'Cultural Protocols > Sharing Setting'
     target: field_cultural_protocols/sharing_setting
   -
     source: Source

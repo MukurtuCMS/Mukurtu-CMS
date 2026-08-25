@@ -563,16 +563,17 @@ function mukurtu_export_update_40019(): void {
 
 /**
  * Remove bare image/thumbnail/recording columns now that their target_id/
- * alt sub-columns (added in update_40017) carry the same data.
+ * alt sub-columns (added in update_40019, or already present for
+ * community/collection/dictionary_word) carry the same data.
  *
  * These bare columns were never re-importable in the first place (see
- * mukurtu_import_update_40037()) and were purely a redundant markdown-
+ * mukurtu_import_update_40036()) and were purely a redundant markdown-
  * formatted convenience string once the two real sub-columns exist, so
  * exporting them just added noise. Only removes an entry if its value
  * still matches the known shipped default, leaving any site-customized
  * export list untouched.
  */
-function mukurtu_export_update_40018(): void {
+function mukurtu_export_update_40020(): void {
   $removals = [
     'node__collection' => ['field_collection_image' => 'Image'],
     'node__dictionary_word' => ['field_thumbnail' => 'Thumbnail'],
@@ -621,7 +622,7 @@ function mukurtu_export_update_40018(): void {
  * on the created column, since Node/Media/etc. have no fallback default
  * for a never-set created time.
  */
-function mukurtu_export_update_40019(): void {
+function mukurtu_export_update_40021(): void {
   $storage = \Drupal::entityTypeManager()->getStorage('csv_exporter');
   foreach ($storage->loadMultiple() as $exporter) {
     $list = $exporter->get('entity_fields_export_list') ?? [];
@@ -665,7 +666,7 @@ function mukurtu_export_update_40019(): void {
  * publish/promote/sticky status in the sheet before re-importing had no
  * effect, since the mapping never matched a real header to begin with.
  */
-function mukurtu_export_update_40020(): void {
+function mukurtu_export_update_40022(): void {
   $storage = \Drupal::entityTypeManager()->getStorage('csv_exporter');
   foreach ($storage->loadMultiple() as $exporter) {
     $list = $exporter->get('entity_fields_export_list') ?? [];

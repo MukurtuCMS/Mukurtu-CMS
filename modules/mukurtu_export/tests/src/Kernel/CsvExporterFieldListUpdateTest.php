@@ -8,7 +8,7 @@ use Drupal\mukurtu_export\Entity\CsvExporter;
 use Drupal\Tests\mukurtu_protocol\Kernel\ProtocolAwareEntityTestBase;
 
 /**
- * Tests mukurtu_export_update_40017()/_40018(), which add the target_id/alt
+ * Tests mukurtu_export_update_40019()/_40020(), which add the target_id/alt
  * sub-columns for a handful of single-value media reference fields that
  * never had them, then remove the now-redundant bare column now that the
  * sub-columns carry the same data.
@@ -20,8 +20,8 @@ use Drupal\Tests\mukurtu_protocol\Kernel\ProtocolAwareEntityTestBase;
  * resolve once that base's full module list - the same combination
  * CsvExportFieldTestBase already relies on - is enabled.
  *
- * @see mukurtu_export_update_40017()
- * @see mukurtu_export_update_40018()
+ * @see mukurtu_export_update_40019()
+ * @see mukurtu_export_update_40020()
  */
 class CsvExporterFieldListUpdateTest extends ProtocolAwareEntityTestBase {
 
@@ -73,7 +73,7 @@ class CsvExporterFieldListUpdateTest extends ProtocolAwareEntityTestBase {
       'node__word_list' => ['field_word_list_image' => 'Image'],
     ]);
 
-    mukurtu_export_update_40017();
+    mukurtu_export_update_40019();
 
     $list = $this->getList('test_exporter');
     $this->assertSame('Image > File ID', $list['node__word_list']['field_word_list_image/target_id']);
@@ -91,7 +91,7 @@ class CsvExporterFieldListUpdateTest extends ProtocolAwareEntityTestBase {
       ],
     ]);
 
-    mukurtu_export_update_40017();
+    mukurtu_export_update_40019();
 
     $list = $this->getList('test_exporter');
     $this->assertSame('Custom Label', $list['node__word_list']['field_word_list_image/target_id']);
@@ -110,7 +110,7 @@ class CsvExporterFieldListUpdateTest extends ProtocolAwareEntityTestBase {
       ],
     ]);
 
-    mukurtu_export_update_40018();
+    mukurtu_export_update_40020();
 
     $list = $this->getList('test_exporter');
     $this->assertArrayNotHasKey('field_word_list_image', $list['node__word_list']);
@@ -125,7 +125,7 @@ class CsvExporterFieldListUpdateTest extends ProtocolAwareEntityTestBase {
       'node__word_list' => ['field_word_list_image' => 'My Custom Image Label'],
     ]);
 
-    mukurtu_export_update_40018();
+    mukurtu_export_update_40020();
 
     $list = $this->getList('test_exporter');
     $this->assertSame('My Custom Image Label', $list['node__word_list']['field_word_list_image']);
@@ -140,8 +140,8 @@ class CsvExporterFieldListUpdateTest extends ProtocolAwareEntityTestBase {
       'node__collection' => ['title' => 'Title'],
     ]);
 
-    mukurtu_export_update_40017();
-    mukurtu_export_update_40018();
+    mukurtu_export_update_40019();
+    mukurtu_export_update_40020();
 
     $list = $this->getList('test_exporter');
     $this->assertSame(['title' => 'Title'], $list['node__collection']);

@@ -39,13 +39,13 @@ mapping:
     source: People
     target: field_people
   -
-    source: Protocols
+    source: 'Cultural Protocols > Protocols'
     target: field_cultural_protocols/protocols
   -
     source: Published
     target: status
   -
-    source: 'Sharing Setting'
+    source: 'Cultural Protocols > Sharing Setting'
     target: field_cultural_protocols/sharing_setting
   -
     source: 'SoundCloud URL'

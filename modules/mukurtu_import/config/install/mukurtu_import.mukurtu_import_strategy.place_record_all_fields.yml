@@ -60,7 +60,7 @@ mapping:
     source: 'Promoted to front page'
     target: promote
   -
-    source: Protocols
+    source: 'Cultural Protocols > Protocols'
     target: field_cultural_protocols/protocols
   -
     source: Published
@@ -69,7 +69,7 @@ mapping:
     source: 'Related Content'
     target: field_related_content
   -
-    source: 'Sharing Setting'
+    source: 'Cultural Protocols > Sharing Setting'
     target: field_cultural_protocols/sharing_setting
   -
     source: 'Sticky at top of lists'

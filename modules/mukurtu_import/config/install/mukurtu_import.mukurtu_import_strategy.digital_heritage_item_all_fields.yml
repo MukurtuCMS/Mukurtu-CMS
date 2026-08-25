@@ -42,10 +42,10 @@ mapping:
     source: 'Sticky at top of lists'
     target: sticky
   -
-    source: Protocols
+    source: 'Cultural Protocols > Protocols'
     target: field_cultural_protocols/protocols
   -
-    source: 'Sharing Setting'
+    source: 'Cultural Protocols > Sharing Setting'
     target: field_cultural_protocols/sharing_setting
   -
     source: Draft
