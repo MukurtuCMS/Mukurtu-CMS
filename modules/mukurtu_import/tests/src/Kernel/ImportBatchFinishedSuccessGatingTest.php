@@ -227,10 +227,20 @@ class ImportBatchFinishedSuccessGatingTest extends MukurtuImportTestBase {
 
   /**
    * An end-to-end import whose migration aborts entirely at rewind() (a
-   * mapping references an "ID" column that isn't actually in the file,
-   * so the CSV source throws building the first Row) is reported as
+   * cross-migration lookup column doesn't actually exist in the file, so
+   * the CSV source throws building the first Row) is reported as
    * unsuccessful, and the real error reaches batch_results_messages with
    * the "in /path/to/File.php line N" suffix stripped.
+   *
+   * This used to reproduce via a stale template's own "ID" column mapping
+   * to a file with no such column, but #1573 intentionally changed that
+   * case to fall back to record numbers instead of failing (see
+   * ImportStrategyMismatchedColumnsTest). A lookup column passed in from
+   * ExecuteImportForm::detectUpstreamDependencies() (used to correlate a
+   * row with an upstream migration's real source IDs when importing
+   * dependent entity types from separate files) bypasses that fallback,
+   * since it's expected to already be validated by the caller rather than
+   * user-editable mapping.
    */
   public function testEndToEndMigrationFailureYieldsUnsuccessfulResult(): void {
     $data = [
@@ -239,10 +249,7 @@ class ImportBatchFinishedSuccessGatingTest extends MukurtuImportTestBase {
     ];
     $import_file = $this->createCsvFile($data);
 
-    // Mirrors a stale "* - all fields" template: an ID -> nid mapping even
-    // though this file has no ID column.
     $mapping = [
-      ['target' => 'nid', 'source' => 'ID'],
       ['target' => 'title', 'source' => 'title'],
     ];
 
@@ -250,7 +257,7 @@ class ImportBatchFinishedSuccessGatingTest extends MukurtuImportTestBase {
     $import_config->setTargetEntityTypeId('node');
     $import_config->setTargetBundle('protocol_aware_content');
     $import_config->setMapping($mapping);
-    $definition = $import_config->toDefinition($import_file);
+    $definition = $import_config->toDefinition($import_file, ['Reference Number']);
 
     $context = [];
     ImportBatchExecutable::batchProcessImportDefinition($definition, [], $context);
