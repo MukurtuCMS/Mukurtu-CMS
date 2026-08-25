@@ -9,8 +9,14 @@ target_entity_type_id: taxonomy_term
 target_bundle: format
 mapping:
   -
-    source: 'Term ID'
-    target: tid
+    source: 'Default revision'
+    target: '-1'
+  -
+    source: 'Default translation'
+    target: '-1'
+  -
+    source: Description
+    target: description
   -
     source: Locale
     target: langcode
@@ -18,11 +24,11 @@ mapping:
     source: Name
     target: name
   -
-    source: Description
-    target: description
-  -
     source: Parent
     target: parent
+  -
+    source: 'Term ID'
+    target: tid
 configuration:
   delimiter: ','
   enclosure: '"'
