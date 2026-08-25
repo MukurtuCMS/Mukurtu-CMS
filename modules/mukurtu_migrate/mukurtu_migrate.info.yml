@@ -11,4 +11,5 @@ dependencies:
   - 'drupal:user'
   - 'drupal:views'
   - 'migrate_plus:migrate_plus'
+  - 'search_api:search_api'
 version: 4.x-dev
