@@ -1,7 +1,7 @@
 entity.mukurtu_submission_settings.collection:
   path: '/admin/config/mukurtu/submissions'
   defaults:
-    _entity_list: 'mukurtu_submission_settings'
+    _form: '\Drupal\mukurtu_submissions\Form\SubmissionSettingsCollectionForm'
     _title: 'Submission Forms'
   requirements:
     _permission: 'administer mukurtu submissions'

@@ -6,8 +6,10 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\Display\EntityFormDisplayInterface;
 use Drupal\Core\Entity\EntityDisplayRepositoryInterface;
+use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Entity\Plugin\Validation\Constraint\ValidReferenceConstraint;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
@@ -15,9 +17,11 @@ use Drupal\Core\Session\AccountSwitcherInterface;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
 use Drupal\mukurtu_submissions\Entity\SubmissionSettingsInterface;
 use Drupal\mukurtu_submissions\Plugin\Field\FieldWidget\SimpleMediaUploadWidget;
+use Drupal\mukurtu_submissions\SessionCreatedEntities;
 use Drupal\node\NodeInterface;
 use Drupal\user\EntityOwnerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\Validator\ConstraintViolationInterface;
 
 /**
  * Public, bundle-agnostic content submission form.
@@ -54,6 +58,9 @@ class PublicSubmissionForm extends FormBase {
     'moderation_state',
     'langcode',
     'url_redirects',
+    'promote',
+    'sticky',
+    'comment',
     // Computed/display-only fields - no meaningful editable widget exists
     // for these regardless of bundle, so they should never be offered as
     // an includable option.
@@ -67,6 +74,15 @@ class PublicSubmissionForm extends FormBase {
     // something a submitter should be setting directly.
     'field_content_type',
     'field_mukurtu_original_record',
+    // A first-time visitor has nothing on the site yet to relate their
+    // submission to - cross-referencing other content is a curation step
+    // for after a reviewer publishes it, not something to ask for here.
+    'field_related_content',
+    // Sub-collections are built by adding existing collections as children
+    // from the parent collection's own edit form - not something a first
+    // submission (which doesn't exist as a real node yet) can meaningfully
+    // reference either.
+    'field_child_collections',
   ];
 
   /**
@@ -97,6 +113,8 @@ class PublicSubmissionForm extends FormBase {
     protected EntityTypeBundleInfoInterface $entityBundleInfo,
     protected ConfigFactoryInterface $submissionsConfigFactory,
     protected AccountSwitcherInterface $accountSwitcher,
+    protected EntityFieldManagerInterface $entityFieldManager,
+    protected SessionCreatedEntities $sessionCreatedEntities,
   ) {}
 
   /**
@@ -109,6 +127,8 @@ class PublicSubmissionForm extends FormBase {
       $container->get('entity_type.bundle.info'),
       $container->get('config.factory'),
       $container->get('account_switcher'),
+      $container->get('entity_field.manager'),
+      $container->get('mukurtu_submissions.session_created_entities'),
     );
   }
 
@@ -166,6 +186,7 @@ class PublicSubmissionForm extends FormBase {
 
     $this->display->buildForm($this->entity, $form, $form_state);
     $this->labelRemoveButtons($form);
+    $this->removeDragDropButtons($form);
     $this->groupFields($form);
 
     // Weighted below Title's own weight (-10) in the "submission" form
@@ -250,21 +271,61 @@ class PublicSubmissionForm extends FormBase {
       return;
     }
 
-    // Not hardcoded to field_media_assets - applies to any media-reference
-    // field the bundle exposes, whichever widget it ended up with (the
-    // Media Library picker, or our own SimpleMediaUploadWidget).
-    foreach ($this->display->getComponents() as $field_name => $component) {
+    $this->restrictMediaTypesOnDisplay($this->display, $this->entity->getEntityTypeId(), $this->entity->bundle(), $allowed, []);
+  }
+
+  /**
+   * Applies restrictMediaTypes()'s restriction to $display, and recurses
+   * into any paragraph-referencing field's own provisioned "submission"
+   * display, so a paragraph-nested media field (e.g. dictionary_word's
+   * sample-sentence recording) gets the same restriction a field living
+   * directly on the bundle does.
+   *
+   * $display here is always the exact object instance later passed to
+   * EntityFormDisplay::collectRenderDisplay() deeper inside the paragraphs
+   * widget (both fetched via entity_display.repository/entity_type.manager
+   * for the same "$entity_type.$bundle.submission" ID, which Drupal's
+   * per-request entity static cache returns as the same PHP object) - so
+   * mutating it in place here, without saving, is enough for the
+   * restriction to actually apply when the widget builds that item's
+   * subform, exactly as it already does for $this->display itself.
+   *
+   * Not hardcoded to field_media_assets - applies to any media-reference
+   * field the bundle exposes, whichever widget it ended up with (the
+   * Media Library picker, or our own SimpleMediaUploadWidget).
+   */
+  protected function restrictMediaTypesOnDisplay(EntityFormDisplayInterface $display, string $entity_type_id, string $bundle, array $allowed, array $visited): void {
+    $visited_key = $entity_type_id . ':' . $bundle;
+    if (isset($visited[$visited_key])) {
+      return;
+    }
+    $visited[$visited_key] = TRUE;
+
+    foreach ($display->getComponents() as $field_name => $component) {
       switch ($component['type'] ?? NULL) {
         case 'media_library_widget':
           $current_types = $component['settings']['media_types'] ?? [];
           $component['settings']['media_types'] = array_values(array_intersect($current_types, $allowed));
-          $this->display->setComponent($field_name, $component);
+          $display->setComponent($field_name, $component);
           break;
 
         case 'mukurtu_simple_media_upload':
           $current_bundles = $component['settings']['allowed_bundles'] ?? [];
           $component['settings']['allowed_bundles'] = array_values(array_intersect($current_bundles, $allowed));
-          $this->display->setComponent($field_name, $component);
+          $display->setComponent($field_name, $component);
+          break;
+
+        case 'paragraphs':
+        case 'entity_reference_paragraphs':
+          $definition = $this->entityFieldManager->getFieldDefinitions($entity_type_id, $bundle)[$field_name] ?? NULL;
+          if (!$definition) {
+            break;
+          }
+          $target_bundles = array_keys(array_filter($definition->getSetting('handler_settings')['target_bundles'] ?? []));
+          foreach ($target_bundles as $paragraph_bundle) {
+            $paragraph_display = $this->entityDisplayRepository->getFormDisplay('paragraph', $paragraph_bundle, 'submission');
+            $this->restrictMediaTypesOnDisplay($paragraph_display, 'paragraph', $paragraph_bundle, $allowed, $visited);
+          }
           break;
       }
     }
@@ -398,13 +459,30 @@ class PublicSubmissionForm extends FormBase {
    * indication of which field or item each button belongs to - and this
    * form's audience skews toward first-time, untrained visitors more than
    * the admin content forms these widgets were originally built for.
+   *
+   * $entity_type_id/$bundle track whose field definitions a label is
+   * resolved against - the top-level entity's own, until recursion steps
+   * past a paragraph item's "subform" (both "paragraphs" and "entity_
+   * reference_paragraphs" widgets set "#paragraph_type" on that item's own
+   * container), at which point $field_label is reset and every field name
+   * below is resolved against that paragraph's own bundle instead. Without
+   * this, a field nested two-or-more paragraph-levels deep (e.g.
+   * dictionary_word's sample-sentence recording, itself nested inside a
+   * "Word Entries" paragraph) incorrectly inherited its outermost
+   * ancestor's label on every Remove button below it.
    */
-  protected function labelRemoveButtons(array &$element, ?string $field_label = NULL, ?int $delta = NULL): void {
+  protected function labelRemoveButtons(array &$element, ?string $entity_type_id = NULL, ?string $bundle = NULL, ?string $field_label = NULL, ?int $delta = NULL): void {
+    $entity_type_id ??= $this->entity->getEntityTypeId();
+    $bundle ??= $this->entity->bundle();
+
     foreach (Element::children($element) as $key) {
       $child_delta = is_int($key) ? $key : $delta;
       $child_label = $field_label;
-      if ($child_label === NULL && is_string($key) && $this->entity->hasField($key)) {
-        $child_label = (string) $this->entity->get($key)->getFieldDefinition()->getLabel();
+      if (is_string($key)) {
+        $definition = $this->entityFieldManager->getFieldDefinitions($entity_type_id, $bundle)[$key] ?? NULL;
+        if ($definition) {
+          $child_label = (string) $definition->getLabel();
+        }
       }
 
       if ($child_label !== NULL
@@ -418,7 +496,32 @@ class PublicSubmissionForm extends FormBase {
           : $this->t('Remove @field', ['@field' => $child_label]);
       }
 
-      $this->labelRemoveButtons($element[$key], $child_label, $child_delta);
+      if ($key === 'subform' && isset($element['#paragraph_type'])) {
+        $this->labelRemoveButtons($element[$key], 'paragraph', $element['#paragraph_type'], NULL, NULL);
+        continue;
+      }
+
+      $this->labelRemoveButtons($element[$key], $entity_type_id, $bundle, $child_label, $child_delta);
+    }
+  }
+
+  /**
+   * Strips the paragraphs widget's "Drag & drop" bulk-reorder button
+   * (ParagraphsWidget::buildHeaderActions(), always rendered at
+   * $element['header_actions']['dropdown_actions']['dragdrop_mode'] once
+   * there's at least one item, regardless of any widget setting - there's
+   * no per-field way to disable it upstream) from every paragraph field on
+   * this form. A visitor filling out a one-time submission has at most a
+   * handful of items in any repeating field here; reordering tooling built
+   * for content editors managing many rows is unneeded complexity for
+   * them, on every paragraph field this form has, not just one.
+   */
+  protected function removeDragDropButtons(array &$element): void {
+    foreach (Element::children($element) as $key) {
+      if ($key === 'header_actions' && isset($element[$key]['dropdown_actions']['dragdrop_mode'])) {
+        unset($element[$key]['dropdown_actions']['dragdrop_mode']);
+      }
+      $this->removeDragDropButtons($element[$key]);
     }
   }
 
@@ -462,16 +565,54 @@ class PublicSubmissionForm extends FormBase {
     $service_account_uid = (int) $this->submissionsConfigFactory->get('mukurtu_submissions.settings')->get('service_account_uid');
     $owner_uid = $service_account_uid ?: 1;
 
-    foreach ($this->display->getComponents() as $field_name => $component) {
-      if (($component['type'] ?? NULL) !== 'mukurtu_simple_media_upload') {
+    $this->createUploadedMediaOnEntity($this->entity, $this->display, [], $form_state, $owner_uid);
+  }
+
+  /**
+   * Does the actual work of createUploadedMedia() for $entity/$display,
+   * and recurses into any paragraph-referencing field's own already-
+   * extracted (unsaved, in-memory) items - by the time submitForm() runs,
+   * validateForm() has already called $this->display->extractFormValues(),
+   * which creates the referenced Paragraph entities and attaches them to
+   * $this->entity, but SimpleMediaUploadWidget::massageFormValues() is
+   * deliberately a no-op (see createMediaFromUpload()'s own docblock), so
+   * a paragraph-nested upload field (e.g. dictionary_word's sample-
+   * sentence recording) needs this same raw-fid-to-real-media conversion
+   * applied to it directly, exactly as the top-level entity does.
+   *
+   * $form_state_parents is the path SimpleMediaUploadWidget's raw "upload"
+   * value lives under in this request's submitted $form_state - [] for
+   * $this->entity itself. Both paragraph widgets this profile uses
+   * ("paragraphs" and "entity_reference_paragraphs") build each item's
+   * inline subform under "$field_name/$delta/subform" (confirmed against
+   * InlineParagraphsWidget/ParagraphsWidget::formElement()), so this
+   * appends that same three-segment path per level of nesting - correct
+   * for arbitrary paragraph-in-paragraph depth, not just one level.
+   */
+  protected function createUploadedMediaOnEntity(ContentEntityInterface $entity, EntityFormDisplayInterface $display, array $form_state_parents, FormStateInterface $form_state, int $owner_uid): void {
+    foreach ($display->getComponents() as $field_name => $component) {
+      $type = $component['type'] ?? NULL;
+
+      if ($type === 'mukurtu_simple_media_upload') {
+        $widget = $display->getRenderer($field_name);
+        if (!$widget instanceof SimpleMediaUploadWidget) {
+          continue;
+        }
+        $fids = $form_state->getValue([...$form_state_parents, $field_name, 'upload'], []);
+        $entity->set($field_name, $widget->createMediaFromUpload($fids, $owner_uid));
         continue;
       }
-      $widget = $this->display->getRenderer($field_name);
-      if (!$widget instanceof SimpleMediaUploadWidget) {
-        continue;
+
+      if (($type === 'paragraphs' || $type === 'entity_reference_paragraphs') && $entity->hasField($field_name)) {
+        foreach ($entity->get($field_name) as $delta => $item) {
+          $paragraph = $item->entity ?? NULL;
+          if (!$paragraph instanceof ContentEntityInterface) {
+            continue;
+          }
+          $paragraph_display = $this->entityDisplayRepository->getFormDisplay($paragraph->getEntityTypeId(), $paragraph->bundle(), 'submission');
+          $this->createUploadedMediaOnEntity($paragraph, $paragraph_display, [...$form_state_parents, $field_name, $delta, 'subform'], $form_state, $owner_uid);
+        }
       }
-      $fids = $form_state->getValue([$field_name, 'upload'], []);
-      $this->entity->set($field_name, $widget->createMediaFromUpload($fids, $owner_uid));
     }
   }
 
@@ -506,6 +647,17 @@ class PublicSubmissionForm extends FormBase {
     // this form does - re-applying here is cheap and idempotent.
     $this->setPendingSubmissionState($this->entity);
     $this->display->extractFormValues($this->entity, $form, $form_state);
+
+    // Paragraph widgets (ParagraphsWidget/InlineParagraphsWidget) validate
+    // their own paragraph entity's fields as part of their own
+    // extractFormValues() - calling $display->validateFormValues() and
+    // flagging errors onto $form_state directly - rather than surfacing as
+    // violations on $this->entity->validate() below, which only ever sees
+    // the TOP-LEVEL entity's own fields. A paragraph-nested reference to a
+    // session-created entity (e.g. dictionary_word's "related person" link)
+    // needs its own pass over $form_state's errors for exactly that reason.
+    $this->suppressSessionCreatedEntityErrors($form_state);
+
     $violations = $this->asSuperuser(fn () => $this->entity->validate());
     foreach ($violations as $violation) {
       $property_path = $violation->getPropertyPath();
@@ -518,6 +670,18 @@ class PublicSubmissionForm extends FormBase {
       // same tradeoff rather than requiring a fabricated placeholder
       // protocol just to satisfy validation.
       if ($property_path === 'field_cultural_protocols') {
+        continue;
+      }
+      // A reference to an entity this same session legitimately just
+      // created via a "quick create" flow (e.g. mukurtu_person's inline
+      // "Create a new person record" link) - the entity is real, but isn't
+      // independently viewable yet (a fresh submission has no cultural
+      // protocol assigned, so node_access denies everyone but its owner),
+      // which core's own reference validation otherwise flags as invalid.
+      // See SessionCreatedEntities for why this is safe to trust. Covers
+      // any TOP-LEVEL entity-reference field with this same issue - the
+      // paragraph-nested case is handled above, before this loop even runs.
+      if ($this->isReferenceToSessionCreatedEntity($violation)) {
         continue;
       }
       // Map the violation back to its actual widget (e.g. "field_foo.0.value"
@@ -534,6 +698,91 @@ class PublicSubmissionForm extends FormBase {
       $group_id = $this->settings?->getFieldGroupAssignments()[$field_name] ?? NULL;
       if ($group_id !== NULL) {
         $this->openGroupChain($form, $group_id);
+      }
+    }
+  }
+
+  /**
+   * Whether $violation is a ValidReferenceConstraint rejection (core's
+   * own entity-reference validation, which independently re-checks the
+   * current user's view access on whatever target_id was submitted,
+   * regardless of how it got into the form) whose target matches an
+   * entity SessionCreatedEntities recorded this same session as having
+   * legitimately just created.
+   *
+   * Reads the target type/id from the violation's own message parameters
+   * (set explicitly by ValidReferenceConstraintValidator via setParameter()
+   * as '%type'/'%id') rather than trying to resolve them from the
+   * violation's property path - the path for a paragraph-nested field
+   * (e.g. field_related_people.0.entity.field_related_person.0.target_id)
+   * doesn't cleanly reduce to "the first segment" the way a flat top-level
+   * field's does, and the parameters are already exactly the values that
+   * were checked, unambiguously, regardless of nesting depth.
+   */
+  protected function isReferenceToSessionCreatedEntity(ConstraintViolationInterface $violation): bool {
+    if (!$violation->getConstraint() instanceof ValidReferenceConstraint) {
+      return FALSE;
+    }
+    $parameters = $violation->getParameters();
+    $target_type = $parameters['%type'] ?? NULL;
+    $target_id = $parameters['%id'] ?? NULL;
+    if (!$target_type || $target_id === NULL || $target_id === '') {
+      return FALSE;
+    }
+    return $this->sessionCreatedEntities->wasCreatedThisSession((string) $target_type, (string) $target_id);
+  }
+
+  /**
+   * Removes any $form_state error matching a ValidReferenceConstraint
+   * rejection whose target matches an entity SessionCreatedEntities
+   * recorded this session as having legitimately just created - the
+   * paragraph-widget-level equivalent of isReferenceToSessionCreatedEntity(),
+   * needed because those errors are flagged directly onto $form_state (via
+   * EntityFormDisplay::validateFormValues()/flagWidgetsErrorsFromViolations(),
+   * called from within the paragraph widget's own extractFormValues()) and
+   * never appear as violations on $this->entity->validate().
+   *
+   * Matches by message text, built from the constraint's own raw message
+   * template rather than a hardcoded string, since $form_state->getErrors()
+   * only ever exposes the final rendered message, not the structured
+   * violation/parameters isReferenceToSessionCreatedEntity() reads - stays
+   * correct if a site (or a future core version) translates or otherwise
+   * customizes that template. Drupal's %-placeholder rendering
+   * (FormattableMarkup) wraps each substitution in
+   * '<em class="placeholder">...</em>', which the pattern accounts for.
+   */
+  protected function suppressSessionCreatedEntityErrors(FormStateInterface $form_state): void {
+    $errors = $form_state->getErrors();
+    if (!$errors) {
+      return;
+    }
+
+    // '#', not '/', as the delimiter - the replacement text below contains
+    // literal '/' (in "</em>"), which would otherwise be misread as an
+    // early close of the pattern.
+    $pattern = preg_quote((new ValidReferenceConstraint())->message, '#');
+    $pattern = str_replace(
+      ['%type', '%id'],
+      ['<em class="placeholder">(?<type>[^<]+)</em>', '<em class="placeholder">(?<id>[^<]+)</em>'],
+      $pattern
+    );
+    $pattern = '#^' . $pattern . '$#';
+
+    $remaining = [];
+    $changed = FALSE;
+    foreach ($errors as $name => $message) {
+      if (preg_match($pattern, (string) $message, $matches)
+        && $this->sessionCreatedEntities->wasCreatedThisSession($matches['type'], $matches['id'])) {
+        $changed = TRUE;
+        continue;
+      }
+      $remaining[$name] = $message;
+    }
+
+    if ($changed) {
+      $form_state->clearErrors();
+      foreach ($remaining as $name => $message) {
+        $form_state->setErrorByName((string) $name, $message);
       }
     }
   }

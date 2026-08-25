@@ -519,3 +519,403 @@ function mukurtu_import_update_40030(): void {
   $data = \Drupal\Core\Serialization\Yaml::decode($yaml);
   \Drupal::configFactory()->getEditable($config_name)->setData($data)->save();
 }
+
+/**
+ * Correct the langcode column's source header label in default templates.
+ *
+ * The shipped 'all fields' import strategies mapped the langcode column
+ * using the "(langcode)"-suffixed label from the target field dropdown
+ * (e.g. "Language (langcode)") instead of the label mukurtu_export actually
+ * writes as the CSV header (e.g. "Locale"), so the quick-path import wizard
+ * never matched that column and showed it as unmapped. Only rewrites a
+ * config's langcode mapping if its source still equals the known stale
+ * default, leaving any site-customized mapping untouched.
+ */
+function mukurtu_import_update_40031(): void {
+  $corrections = [
+    'audio_all_fields' => ['Language (langcode)', 'Locale'],
+    'collection_all_fields' => ['Language (langcode)', 'Locale'],
+    'community_all_fields' => ['Language (langcode)', 'Locale'],
+    'cultural_protocol_all_fields' => ['Language (langcode)', 'Locale'],
+    'dictionary_word_all_fields' => ['Language (langcode)', 'Locale'],
+    'digital_heritage_item_all_fields' => ['Language (langcode)', 'Locale'],
+    'document_all_fields' => ['Language (langcode)', 'Locale'],
+    'image_all_fields' => ['Language (langcode)', 'Locale'],
+    'person_record_all_fields' => ['Language (langcode)', 'Locale'],
+    'place_record_all_fields' => ['Language (langcode)', 'Locale'],
+    'remote_video_all_fields' => ['Language (langcode)', 'Locale'],
+    'video_all_fields' => ['Language (langcode)', 'Locale'],
+    'word_list_all_fields' => ['Language (langcode)', 'Locale'],
+    'multipage_item_all_fields' => ['Language (langcode)', 'Language'],
+    'external_embed_all_fields' => ['Language (langcode)', 'Language'],
+    'soundcloud_all_fields' => ['Language (langcode)', 'Language'],
+    'biography_section_all_fields' => ['Language code (langcode)', 'Language code'],
+    'indigenous_knowledge_keepers_all_fields' => ['Language code (langcode)', 'Language code'],
+    'related_person_all_fields' => ['Language code (langcode)', 'Language code'],
+    'sample_sentence_all_fields' => ['Language code (langcode)', 'Language code'],
+    'text_section_all_fields' => ['Language code (langcode)', 'Language code'],
+    'word_entry_all_fields' => ['Language code (langcode)', 'Language code'],
+  ];
+
+  foreach ($corrections as $id => [$old_source, $new_source]) {
+    $config_name = "mukurtu_import.mukurtu_import_strategy.{$id}";
+    $config = \Drupal::configFactory()->getEditable($config_name);
+    if ($config->isNew()) {
+      continue;
+    }
+
+    $mapping = $config->get('mapping') ?? [];
+    $changed = FALSE;
+    foreach ($mapping as $delta => $entry) {
+      if (($entry['target'] ?? NULL) === 'langcode' && ($entry['source'] ?? NULL) === $old_source) {
+        $mapping[$delta]['source'] = $new_source;
+        $changed = TRUE;
+      }
+    }
+
+    if ($changed) {
+      $config->set('mapping', $mapping)->save();
+    }
+  }
+}
+
+/**
+ * Add missing "Default translation" ignore mappings to default templates.
+ *
+ * default_langcode is excluded as a valid import target (see
+ * ImportFormTrait::getFieldDefinitions()), so a column exported for it
+ * should be explicitly mapped to "Ignore" like the Customize Settings
+ * auto-mapper would derive. The shipped templates never had this entry at
+ * all, which made the quick-path "X of Y fields mapped" count look
+ * incomplete even though the column was already harmless. Only adds the
+ * entry if the config doesn't already have one for this column.
+ */
+function mukurtu_import_update_40032(): void {
+  $ids = [
+    'audio_all_fields',
+    'collection_all_fields',
+    'community_all_fields',
+    'cultural_protocol_all_fields',
+    'digital_heritage_item_all_fields',
+    'document_all_fields',
+    'external_embed_all_fields',
+    'multipage_item_all_fields',
+    'person_record_all_fields',
+    'place_record_all_fields',
+    'remote_video_all_fields',
+    'video_all_fields',
+    'word_list_all_fields',
+    'biography_section_all_fields',
+    'indigenous_knowledge_keepers_all_fields',
+    'related_person_all_fields',
+    'sample_sentence_all_fields',
+    'text_section_all_fields',
+    'word_entry_all_fields',
+    'taxonomy_category_all_fields',
+    'taxonomy_community_type_all_fields',
+    'taxonomy_contributor_all_fields',
+    'taxonomy_creator_all_fields',
+    'taxonomy_format_all_fields',
+    'taxonomy_interpersonal_relationship_all_fields',
+    'taxonomy_keywords_all_fields',
+    'taxonomy_language_all_fields',
+    'taxonomy_location_all_fields',
+    'taxonomy_media_tag_all_fields',
+    'taxonomy_people_all_fields',
+    'taxonomy_place_type_all_fields',
+    'taxonomy_publisher_all_fields',
+    'taxonomy_subject_all_fields',
+    'taxonomy_type_all_fields',
+    'taxonomy_word_type_all_fields',
+  ];
+
+  foreach ($ids as $id) {
+    $config_name = "mukurtu_import.mukurtu_import_strategy.{$id}";
+    $config = \Drupal::configFactory()->getEditable($config_name);
+    if ($config->isNew()) {
+      continue;
+    }
+
+    $mapping = $config->get('mapping') ?? [];
+    $has_entry = (bool) array_filter($mapping, fn ($entry) => ($entry['source'] ?? NULL) === 'Default translation');
+
+    if (!$has_entry) {
+      $mapping[] = ['source' => 'Default translation', 'target' => '-1'];
+      $config->set('mapping', $mapping)->save();
+    }
+  }
+}
+
+/**
+ * Add missing "Multipage parent" ignore mappings to default templates.
+ *
+ * field_multipage_page_of is a computed, read-only base field (see
+ * mukurtu_multipage_items.module) and is excluded as a valid import target,
+ * so an exported "Multipage parent" column should be explicitly mapped to
+ * "Ignore". Only adds the entry to the node-bundle templates whose
+ * corresponding csv_exporter config actually exports this column, and only
+ * if the config doesn't already have an entry for it.
+ */
+function mukurtu_import_update_40033(): void {
+  $ids = [
+    'collection_all_fields',
+    'dictionary_word_all_fields',
+    'digital_heritage_item_all_fields',
+    'person_record_all_fields',
+    'place_record_all_fields',
+    'word_list_all_fields',
+  ];
+
+  foreach ($ids as $id) {
+    $config_name = "mukurtu_import.mukurtu_import_strategy.{$id}";
+    $config = \Drupal::configFactory()->getEditable($config_name);
+    if ($config->isNew()) {
+      continue;
+    }
+
+    $mapping = $config->get('mapping') ?? [];
+    $has_entry = (bool) array_filter($mapping, fn ($entry) => ($entry['source'] ?? NULL) === 'Multipage parent');
+
+    if (!$has_entry) {
+      $mapping[] = ['source' => 'Multipage parent', 'target' => '-1'];
+      $config->set('mapping', $mapping)->save();
+    }
+  }
+}
+
+/**
+ * Correct several other bundle-specific stale source header labels.
+ *
+ * A handful of the shipped 'all fields' import strategies mapped their
+ * title/name field, or another specific column, using an incorrect label -
+ * a bundle-specific alias that was never the actual CSV header
+ * mukurtu_export writes (e.g. place_record's "Name" vs. the real "Title"),
+ * or a label copy-pasted from an unrelated bundle (e.g. place_record's
+ * "Other Names", person_record's actual label, instead of "Other Place
+ * Names"). Since title/name is a required base field, this meant every
+ * quick-path import left the field blank and failed entity validation. Only
+ * rewrites a config's mapping if its source still equals the known stale
+ * default, leaving any site-customized mapping untouched.
+ */
+function mukurtu_import_update_40034(): void {
+  $corrections = [
+    'collection_all_fields' => ['title' => ['Collection name', 'Title']],
+    'dictionary_word_all_fields' => ['title' => ['Term', 'Title']],
+    'person_record_all_fields' => [
+      'title' => ['Name', 'Title'],
+      'field_sections' => ['Biography', 'Biographical Information Sections'],
+    ],
+    'place_record_all_fields' => [
+      'title' => ['Name', 'Title'],
+      'field_sections' => ['Text sections', 'Text Sections'],
+      'field_other_place_names' => ['Other Names', 'Other Place Names'],
+    ],
+    'word_list_all_fields' => ['title' => ['Word list name', 'Title']],
+    'community_all_fields' => [
+      'name' => ['Community name', 'Name'],
+      'field_access_mode' => ['Community page visibility', 'Sharing Protocol'],
+    ],
+    'cultural_protocol_all_fields' => [
+      'name' => ['Cultural protocol name', 'Name'],
+      'field_access_mode' => ['Cultural Protocol Type', 'Sharing Protocol'],
+    ],
+  ];
+
+  foreach ($corrections as $id => $fixes) {
+    $config_name = "mukurtu_import.mukurtu_import_strategy.{$id}";
+    $config = \Drupal::configFactory()->getEditable($config_name);
+    if ($config->isNew()) {
+      continue;
+    }
+
+    $mapping = $config->get('mapping') ?? [];
+    $changed = FALSE;
+    foreach ($mapping as $delta => $entry) {
+      $target = $entry['target'] ?? NULL;
+      if (isset($fixes[$target]) && ($entry['source'] ?? NULL) === $fixes[$target][0]) {
+        $mapping[$delta]['source'] = $fixes[$target][1];
+        $changed = TRUE;
+      }
+    }
+
+    if ($changed) {
+      $config->set('mapping', $mapping)->save();
+    }
+  }
+}
+
+/**
+ * Add mapping entries the original template audit missed entirely.
+ *
+ * Several exported columns had no mapping entry at all in the shipped 'all
+ * fields' templates - not even an explicit "Ignore" - covering computed
+ * image/thumbnail sub-columns (e.g. collection's "Image > File ID"), media's
+ * "Found In" field, cultural protocol's comment-access settings, and
+ * taxonomy format's internal "Default revision" flag (ignored, like
+ * default_langcode). Only adds an entry if the config doesn't already have
+ * one for that column.
+ */
+function mukurtu_import_update_40035(): void {
+  $additions = [
+    'collection_all_fields' => [
+      ['Image > File ID', 'field_collection_image/target_id'],
+      ['Image > Alternative text', 'field_collection_image/alt'],
+    ],
+    'community_all_fields' => [
+      ['Banner Image > File ID', 'field_banner_image/target_id'],
+      ['Banner Image > Alternative text', 'field_banner_image/alt'],
+      ['Thumbnail Image > File ID', 'field_thumbnail_image/target_id'],
+      ['Thumbnail Image > Alternative text', 'field_thumbnail_image/alt'],
+    ],
+    'cultural_protocol_all_fields' => [
+      ['Who can view comments', 'field_comment_view_access'],
+      ['Who can leave comments', 'field_comment_post_access'],
+    ],
+    'dictionary_word_all_fields' => [
+      ['Thumbnail > File ID', 'field_thumbnail/target_id'],
+      ['Thumbnail > Alternative text', 'field_thumbnail/alt'],
+    ],
+    'image_all_fields' => [
+      ['Thumbnail > File ID', 'thumbnail/target_id'],
+      ['Thumbnail > Alternative text', 'thumbnail/alt'],
+      ['Found In', 'field_found_in'],
+    ],
+    'audio_all_fields' => [['Found In', 'field_found_in']],
+    'document_all_fields' => [['Found In', 'field_found_in']],
+    'external_embed_all_fields' => [['Found In', 'field_found_in']],
+    'remote_video_all_fields' => [['Found In', 'field_found_in']],
+    'soundcloud_all_fields' => [['Found In', 'field_found_in']],
+    'video_all_fields' => [['Found In', 'field_found_in']],
+    'taxonomy_format_all_fields' => [['Default revision', '-1']],
+  ];
+
+  foreach ($additions as $id => $entries) {
+    $config_name = "mukurtu_import.mukurtu_import_strategy.{$id}";
+    $config = \Drupal::configFactory()->getEditable($config_name);
+    if ($config->isNew()) {
+      continue;
+    }
+
+    $mapping = $config->get('mapping') ?? [];
+    $changed = FALSE;
+    foreach ($entries as [$source, $target]) {
+      $has_entry = (bool) array_filter($mapping, fn ($entry) => ($entry['source'] ?? NULL) === $source);
+      if (!$has_entry) {
+        $mapping[] = ['source' => $source, 'target' => $target];
+        $changed = TRUE;
+      }
+    }
+
+    if ($changed) {
+      $config->set('mapping', $mapping)->save();
+    }
+  }
+}
+
+/**
+ * Correct bare image/thumbnail/recording fields mapped to a target the
+ * Customize Settings UI can never actually offer.
+ *
+ * ImportFormTrait::buildTargetOptions() only lists a field's sub-properties
+ * (e.g. "field_x/target_id", "field_x/alt") as selectable dropdown targets
+ * whenever MukurtuImportFieldProcessPluginManager reports the field has any
+ * - it never lists the bare field name itself. A handful of shipped
+ * templates mapped a column straight to one of these bare field names
+ * anyway (collection/word_list's "Image", community/cultural_protocol's
+ * "Banner Image"/"Thumbnail Image", dictionary_word's "Thumbnail",
+ * sample_sentence's "Recording"). Since that value never appears in the
+ * dropdown's own option list, simply opening and saving Customize Settings
+ * silently downgrades the mapping to "Ignore" - which is what the field is
+ * actually capable of via this single bare column, so this hook makes the
+ * static template say so up front instead of showing a mapped count that
+ * changes the moment a user looks at Customize Settings. Only rewrites a
+ * config's mapping if its target for that column still equals the known
+ * stale default, leaving any site-customized mapping untouched.
+ */
+function mukurtu_import_update_40036(): void {
+  $corrections = [
+    'collection_all_fields' => ['Image' => 'field_collection_image'],
+    'community_all_fields' => [
+      'Banner Image' => 'field_banner_image',
+      'Thumbnail Image' => 'field_thumbnail_image',
+    ],
+    'cultural_protocol_all_fields' => [
+      'Banner Image' => 'field_banner_image',
+      'Thumbnail Image' => 'field_thumbnail_image',
+    ],
+    'dictionary_word_all_fields' => ['Thumbnail' => 'field_thumbnail'],
+    'sample_sentence_all_fields' => ['Recording' => 'field_sentence_recording'],
+    'word_list_all_fields' => ['Image' => 'field_word_list_image'],
+  ];
+
+  foreach ($corrections as $id => $fixes) {
+    $config_name = "mukurtu_import.mukurtu_import_strategy.{$id}";
+    $config = \Drupal::configFactory()->getEditable($config_name);
+    if ($config->isNew()) {
+      continue;
+    }
+
+    $mapping = $config->get('mapping') ?? [];
+    $changed = FALSE;
+    foreach ($mapping as $delta => $entry) {
+      $source = $entry['source'] ?? NULL;
+      if (isset($fixes[$source]) && ($entry['target'] ?? NULL) === $fixes[$source]) {
+        $mapping[$delta]['target'] = '-1';
+        $changed = TRUE;
+      }
+    }
+
+    if ($changed) {
+      $config->set('mapping', $mapping)->save();
+    }
+  }
+}
+
+/**
+ * Add mapping entries for the sub-columns added by
+ * mukurtu_export_update_40019(): word_list's "Image", sample_sentence's
+ * "Recording", and protocol's "Banner Image"/"Thumbnail Image" now have a
+ * real target_id/alt column to map, the same way collection's/community's
+ * always did. Only adds an entry if the config doesn't already have one
+ * for that column; leaves the still-unusable bare column ignored.
+ */
+function mukurtu_import_update_40037(): void {
+  $additions = [
+    'word_list_all_fields' => [
+      ['Image > File ID', 'field_word_list_image/target_id'],
+      ['Image > Alternative text', 'field_word_list_image/alt'],
+    ],
+    'sample_sentence_all_fields' => [
+      ['Recording > File ID', 'field_sentence_recording/target_id'],
+      ['Recording > Alternative text', 'field_sentence_recording/alt'],
+    ],
+    'cultural_protocol_all_fields' => [
+      ['Banner Image > File ID', 'field_banner_image/target_id'],
+      ['Banner Image > Alternative text', 'field_banner_image/alt'],
+      ['Thumbnail Image > File ID', 'field_thumbnail_image/target_id'],
+      ['Thumbnail Image > Alternative text', 'field_thumbnail_image/alt'],
+    ],
+  ];
+
+  foreach ($additions as $id => $entries) {
+    $config_name = "mukurtu_import.mukurtu_import_strategy.{$id}";
+    $config = \Drupal::configFactory()->getEditable($config_name);
+    if ($config->isNew()) {
+      continue;
+    }
+
+    $mapping = $config->get('mapping') ?? [];
+    $changed = FALSE;
+    foreach ($entries as [$source, $target]) {
+      $has_entry = (bool) array_filter($mapping, fn ($entry) => ($entry['source'] ?? NULL) === $source);
+      if (!$has_entry) {
+        $mapping[] = ['source' => $source, 'target' => $target];
+        $changed = TRUE;
+      }
+    }
+
+    if ($changed) {
+      $config->set('mapping', $mapping)->save();
+    }
+  }
+}
