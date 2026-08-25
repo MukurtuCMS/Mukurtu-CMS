@@ -90,6 +90,27 @@ mukurtu_import.execute_import:
   requirements:
     _permission: 'access mukurtu import'
 
+mukurtu_import.import_logs:
+  path: '/admin/import/logs'
+  defaults:
+    _title: 'Import Logs'
+    _controller: '\Drupal\mukurtu_import\Controller\ImportLogController::overview'
+  requirements:
+    _permission: 'access mukurtu import'
+
+mukurtu_import.import_log_detail:
+  path: '/admin/import/logs/{id}'
+  defaults:
+    _title_callback: '\Drupal\mukurtu_import\Controller\ImportLogController::detailTitle'
+    _controller: '\Drupal\mukurtu_import\Controller\ImportLogController::detail'
+  requirements:
+    _permission: 'access mukurtu import'
+    _custom_access: '\Drupal\mukurtu_import\Controller\ImportLogController::access'
+  options:
+    parameters:
+      id:
+        type: integer
+
 mukurtu_import.batch_report:
   path: '/admin/import/report/{message}'
   defaults:
