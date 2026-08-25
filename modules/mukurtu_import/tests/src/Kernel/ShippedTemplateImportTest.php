@@ -87,7 +87,7 @@ class ShippedTemplateImportTest extends MukurtuImportTestBase {
     $mapping[] = ['source' => 'nid', 'target' => 'nid'];
 
     $data = [
-      ['nid', 'Title', 'Protocols'],
+      ['nid', 'Title', 'Cultural Protocols > Protocols'],
       [$this->node->id(), 'Updated Place Title', (string) $this->protocol2->id()],
     ];
     $import_file = $this->createCsvFile($data);
@@ -134,7 +134,7 @@ class ShippedTemplateImportTest extends MukurtuImportTestBase {
     $mapping[] = ['source' => 'nid', 'target' => 'nid'];
 
     $data = [
-      ['nid', 'Title', 'Sharing Setting'],
+      ['nid', 'Title', 'Cultural Protocols > Sharing Setting'],
       [$this->node->id(), 'Updated Collection Title', 'all'],
     ];
     $import_file = $this->createCsvFile($data);
@@ -184,11 +184,11 @@ class ShippedTemplateImportTest extends MukurtuImportTestBase {
 
   /**
    * The Cultural Protocols field process plugin's dropdown/template labels
-   * for its two sub-properties must be the bare "Protocols"/"Sharing
-   * Setting" mukurtu_export actually writes, not the generic "{field
-   * label} > {property label}" format the base plugin class falls back to
-   * (which would show as "Cultural Protocols > Protocols" and break the
-   * "Download CSV Template" feature's round trip).
+   * for its two sub-properties must match what mukurtu_export actually
+   * writes: the generic "{field label} > {property label}" format every
+   * other multi-part field uses (#2029), i.e. "Cultural Protocols >
+   * Protocols" / "Cultural Protocols > Sharing Setting". No plugin-specific
+   * override is needed; this is the base plugin class's default format.
    */
   public function testCulturalProtocolsSupportedPropertyLabels() {
     $field_definitions = \Drupal::service('entity_field.manager')->getFieldDefinitions('node', 'protocol_aware_content');
@@ -197,8 +197,8 @@ class ShippedTemplateImportTest extends MukurtuImportTestBase {
     $plugin = \Drupal::service('plugin.manager.mukurtu_import_field_process')->getInstance(['field_definition' => $field_definition]);
     $properties = $plugin->getSupportedProperties($field_definition);
 
-    $this->assertSame('Protocols', (string) $properties['protocols']['label']);
-    $this->assertSame('Sharing Setting', (string) $properties['sharing_setting']['label']);
+    $this->assertSame('Cultural Protocols > Protocols', (string) $properties['protocols']['label']);
+    $this->assertSame('Cultural Protocols > Sharing Setting', (string) $properties['sharing_setting']['label']);
   }
 
 }
