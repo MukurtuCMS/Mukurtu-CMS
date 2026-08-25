@@ -15,10 +15,13 @@ mapping:
     source: Body
     target: field_body
   -
+    source: 'Default translation'
+    target: '-1'
+  -
     source: ID
     target: id
   -
-    source: 'Language code (langcode)'
+    source: 'Language code'
     target: langcode
   -
     source: 'Parent field name'
