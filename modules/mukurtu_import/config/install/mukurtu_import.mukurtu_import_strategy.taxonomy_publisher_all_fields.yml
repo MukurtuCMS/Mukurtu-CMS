@@ -23,6 +23,9 @@ mapping:
   -
     source: Parent
     target: parent
+  -
+    source: 'Default translation'
+    target: '-1'
 configuration:
   delimiter: ','
   enclosure: '"'

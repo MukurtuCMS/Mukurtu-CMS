@@ -11,3 +11,8 @@ flatten_tables:
   dependencies:
     - core/once
     - core/drupal
+
+field_groups_admin:
+  css:
+    theme:
+      css/field-groups-admin.css: {}
