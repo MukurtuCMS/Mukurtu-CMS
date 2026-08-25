@@ -61,12 +61,23 @@ class NodeQuickActionsControllerTest extends KernelTestBase {
 
     $this->installSchema('node', ['node_access']);
     $this->installSchema('system', ['sequences']);
+    $this->installSchema('mukurtu_protocol', 'mukurtu_protocol_map');
+    $this->installSchema('mukurtu_protocol', 'mukurtu_protocol_access');
     $this->installEntitySchema('node');
     $this->installEntitySchema('user');
     $this->installEntitySchema('content_moderation_state');
+    $this->installEntitySchema('community');
+    $this->installEntitySchema('protocol');
     $this->installEntitySchema('og_membership');
     $this->installMukurtuWorkflowsConfig();
     $this->installMinimalManageContentViewRoute();
+
+    // mukurtu_protocol's hook_node_grants()/hook_node_access_records()
+    // are invoked for every 'view' access check once the module is
+    // enabled, even for a plain non-protocol node -- ModerationTransitionAccessResolver
+    // now checks 'view' for archive/restore, so this schema/rebuild is
+    // needed even though this test has no protocol-gated content.
+    node_access_rebuild();
 
     // article is structural and moderated; landing_page is deliberately
     // never attached to any workflow, matching this session's earlier
@@ -184,6 +195,67 @@ class NodeQuickActionsControllerTest extends KernelTestBase {
     $node = Node::load($node->id());
     $this->assertEquals('archived', $node->moderation_state->value);
     $this->assertNotEquals($original_revision_id, $node->getRevisionId());
+  }
+
+  /**
+   * A user with only 'view' access (no update) but holding the archive
+   * transition permission can still archive via the controller -- the
+   * route only requires 'view' now, and the controller's own
+   * re-validation uses the same view-based carve-out for archive/restore.
+   */
+  public function testTransitionAppliesArchiveForViewOnlyUser(): void {
+    // The shared setUp() grants 'edit any article content' to
+    // 'authenticated' broadly (every user, including the viewer below,
+    // gets that role) -- revoke it here so this test's "view only, no
+    // update" premise actually holds.
+    $authenticated = \Drupal\user\Entity\Role::load('authenticated');
+    $authenticated->revokePermission('edit any article content');
+    $authenticated->save();
+
+    $viewer_role = \Drupal\user\Entity\Role::create(['id' => 'viewer', 'label' => 'Viewer']);
+    $viewer_role->grantPermission('access content');
+    $viewer_role->grantPermission('use mukurtu_default_content_workflow transition archive');
+    $viewer_role->save();
+    $viewer = User::create(['name' => $this->randomMachineName(), 'roles' => ['viewer']]);
+    $viewer->save();
+
+    $node = $this->createModeratedArticle('published');
+    $this->container->get('current_user')->setAccount($viewer);
+
+    $controller = NodeQuickActionsController::create($this->container);
+    $controller->transition($node, 'archived', new Request());
+
+    $node = Node::load($node->id());
+    $this->assertEquals('archived', $node->moderation_state->value);
+  }
+
+  /**
+   * The same view-only user is rejected for a non-archive/restore
+   * transition, which still requires real 'update' access.
+   */
+  public function testTransitionRejectsNonArchiveTransitionForViewOnlyUser(): void {
+    // See testTransitionAppliesArchiveForViewOnlyUser() -- same reason.
+    $authenticated = \Drupal\user\Entity\Role::load('authenticated');
+    $authenticated->revokePermission('edit any article content');
+    $authenticated->save();
+
+    $viewer_role = \Drupal\user\Entity\Role::create(['id' => 'viewer', 'label' => 'Viewer']);
+    $viewer_role->grantPermission('access content');
+    $viewer_role->grantPermission('use mukurtu_default_content_workflow transition create_new_draft');
+    $viewer_role->save();
+    $viewer = User::create(['name' => $this->randomMachineName(), 'roles' => ['viewer']]);
+    $viewer->save();
+
+    $node = $this->createModeratedArticle('published');
+    $original_revision_id = $node->getRevisionId();
+    $this->container->get('current_user')->setAccount($viewer);
+
+    $controller = NodeQuickActionsController::create($this->container);
+    $controller->transition($node, 'draft', new Request());
+
+    $node = Node::load($node->id());
+    $this->assertEquals('published', $node->moderation_state->value);
+    $this->assertEquals($original_revision_id, $node->getRevisionId());
   }
 
   /**

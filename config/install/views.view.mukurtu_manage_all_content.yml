@@ -35,7 +35,7 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          plugin_id: views_bulk_operations_bulk_form
+          plugin_id: mukurtu_access_filtered_bulk_form
           label: Operations
           exclude: false
           alter:

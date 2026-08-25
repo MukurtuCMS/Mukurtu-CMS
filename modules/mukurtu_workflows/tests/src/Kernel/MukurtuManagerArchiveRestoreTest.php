@@ -6,6 +6,7 @@ namespace Drupal\Tests\mukurtu_workflows\Kernel;
 
 use Drupal\Core\Config\FileStorage;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\mukurtu_core\Service\ModerationTransitionAccessResolver;
 use Drupal\mukurtu_protocol\Entity\Community;
 use Drupal\mukurtu_protocol\Entity\Protocol;
 use Drupal\node\Entity\Node;
@@ -256,6 +257,53 @@ class MukurtuManagerArchiveRestoreTest extends KernelTestBase {
     $node->save();
 
     $this->assertFalse($node->access('update', $this->manager));
+  }
+
+  /**
+   * A manager who is only a plain protocol MEMBER (empty OG permissions --
+   * matching the real og.og_role.protocol-protocol-protocol_member.yml)
+   * still can't update protocol-gated content, but CAN now archive/restore
+   * it: those two transitions are gated on 'view' access (granted via
+   * node grants to any member), not 'update', since they're pure
+   * moderation decisions rather than content edits. Every other
+   * transition still requires 'update' and stays blocked.
+   */
+  public function testManagerCanArchiveProtocolGatedContentAsPlainMember(): void {
+    // Og::addGroup() already auto-creates a default 'member' role (empty
+    // permissions) for every group bundle -- matching the real shipped
+    // og.og_role.protocol-protocol-protocol_member.yml's empty permission
+    // set, so no need to create another one here.
+    $this->protocol->addMember($this->manager, ['member']);
+
+    $published = Node::create([
+      'type' => 'thing',
+      'title' => $this->randomString(),
+      'uid' => $this->owner->id(),
+      'moderation_state' => 'published',
+    ]);
+    $published->setSharingSetting('any');
+    $published->setProtocols([$this->protocol]);
+    $published->save();
+
+    $this->assertFalse($published->access('update', $this->manager), 'Plain member still cannot update protocol-gated content.');
+    $this->assertTrue($published->access('view', $this->manager), 'Plain member can view content in their own protocol.');
+
+    $resolver = new ModerationTransitionAccessResolver($this->container->get('content_moderation.state_transition_validation'));
+    $accessible = $resolver->getAccessibleTransitions($published, $this->manager);
+    $this->assertArrayHasKey('archive', $accessible, 'Archive is accessible via view access + transition permission.');
+
+    $archived = Node::create([
+      'type' => 'thing',
+      'title' => $this->randomString(),
+      'uid' => $this->owner->id(),
+      'moderation_state' => 'archived',
+    ]);
+    $archived->setSharingSetting('any');
+    $archived->setProtocols([$this->protocol]);
+    $archived->save();
+
+    $accessible = $resolver->getAccessibleTransitions($archived, $this->manager);
+    $this->assertArrayHasKey('restore', $accessible, 'Restore is accessible via view access + transition permission.');
   }
 
 }

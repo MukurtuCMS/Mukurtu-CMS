@@ -12,7 +12,10 @@ use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\content_moderation\ModerationInformationInterface;
 use Drupal\content_moderation\StateTransitionValidationInterface;
+use Drupal\mukurtu_core\Service\ModerationTransitionAccessResolver;
+use Drupal\mukurtu_core\Service\ModerationTransitionAccessResolverInterface;
 use Drupal\views_bulk_operations\Action\ViewsBulkOperationsActionBase;
+use Drupal\workflows\Transition;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -40,6 +43,7 @@ class ChangeModerationStateAction extends ViewsBulkOperationsActionBase implemen
     $plugin_definition,
     protected readonly ModerationInformationInterface $moderationInfo,
     protected readonly StateTransitionValidationInterface $stateTransitionValidation,
+    protected readonly ModerationTransitionAccessResolverInterface $transitionAccess,
     protected readonly AccountProxyInterface $currentUser,
     protected readonly TimeInterface $time,
     protected readonly LoggerInterface $logger,
@@ -57,6 +61,9 @@ class ChangeModerationStateAction extends ViewsBulkOperationsActionBase implemen
       $plugin_definition,
       $container->get('content_moderation.moderation_information'),
       $container->get('content_moderation.state_transition_validation'),
+      // Not a services.yml entry -- see NodeRowActionsField::create() for
+      // why this stays a lazy, plugin-local instantiation.
+      new ModerationTransitionAccessResolver($container->get('content_moderation.state_transition_validation')),
       $container->get('current_user'),
       $container->get('datetime.time'),
       $container->get('logger.factory')->get('mukurtu_core'),
@@ -71,19 +78,20 @@ class ChangeModerationStateAction extends ViewsBulkOperationsActionBase implemen
   }
 
   /**
-   * Finds the target state among an entity's valid transitions.
+   * Finds the transition (if any) among an entity's valid transitions that
+   * leads to this action's configured target state.
    */
-  protected function targetStateIsValid(ContentEntityInterface $entity, AccountInterface $account): bool {
+  protected function findTransitionToTargetState(ContentEntityInterface $entity, AccountInterface $account): ?Transition {
     $target_state = $this->configuration['target_state'] ?? '';
     if ($target_state === '') {
-      return FALSE;
+      return NULL;
     }
     foreach ($this->stateTransitionValidation->getValidTransitions($entity, $account) as $transition) {
       if ($transition->to()->id() === $target_state) {
-        return TRUE;
+        return $transition;
       }
     }
-    return FALSE;
+    return NULL;
   }
 
   /**
@@ -108,19 +116,24 @@ class ChangeModerationStateAction extends ViewsBulkOperationsActionBase implemen
       return AccessResult::forbidden("This item isn't under content moderation.")->addCacheableDependency($object);
     }
 
+    $transition = $this->findTransitionToTargetState($object, $account);
+    if (!$transition) {
+      return AccessResult::forbidden("That state change isn't available for this item.")->addCacheableDependency($object);
+    }
+
     // Real per-node sovereignty gate (OG-scoped, walks the node's own
     // protocols). getValidTransitions() alone only checks whether the user
     // holds the permission in ANY protocol, not THIS node's protocol.
-    $update_access = $object->access('update', $account, TRUE);
-    if (!$update_access->isAllowed()) {
-      return AccessResult::forbidden('You do not have permission to edit this content.')->inheritCacheability($update_access);
+    // Archive/restore only require 'view' access (pure moderation
+    // decisions, not content edits); every other transition still
+    // requires 'update' -- see ModerationTransitionAccessResolver.
+    $operation = $this->transitionAccess->baseOperationForTransition($transition->id());
+    $access = $object->access($operation, $account, TRUE);
+    if (!$access->isAllowed()) {
+      return AccessResult::forbidden('You do not have permission to edit this content.')->inheritCacheability($access);
     }
 
-    if (!$this->targetStateIsValid($object, $account)) {
-      return AccessResult::forbidden("That state change isn't available for this item.")->inheritCacheability($update_access)->addCacheableDependency($object);
-    }
-
-    return AccessResult::allowed()->inheritCacheability($update_access)->addCacheableDependency($object);
+    return AccessResult::allowed()->inheritCacheability($access)->addCacheableDependency($object);
   }
 
   /**
@@ -135,7 +148,7 @@ class ChangeModerationStateAction extends ViewsBulkOperationsActionBase implemen
     // Defensive re-check: state may have changed between selection and
     // processing (VBO batches). Skip + log rather than force an invalid
     // transition.
-    if (!$this->targetStateIsValid($entity, $this->currentUser)) {
+    if (!$this->findTransitionToTargetState($entity, $this->currentUser)) {
       $this->logger->warning('Skipped moderation transition to @state for node @nid: transition no longer valid.', [
         '@state' => $target_state,
         '@nid' => $entity->id(),

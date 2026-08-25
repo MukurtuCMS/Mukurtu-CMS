@@ -6,7 +6,8 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
 use Drupal\content_moderation\ModerationInformationInterface;
-use Drupal\content_moderation\StateTransitionValidationInterface;
+use Drupal\mukurtu_core\Service\ModerationTransitionAccessResolver;
+use Drupal\mukurtu_core\Service\ModerationTransitionAccessResolverInterface;
 use Drupal\views\Plugin\views\field\FieldPluginBase;
 use Drupal\views\ResultRow;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -25,7 +26,7 @@ class NodeRowActionsField extends FieldPluginBase {
     protected readonly EntityTypeManagerInterface $entityTypeManager,
     protected readonly AccountInterface $currentUser,
     protected readonly ModerationInformationInterface $moderationInfo,
-    protected readonly StateTransitionValidationInterface $stateTransitionValidation,
+    protected readonly ModerationTransitionAccessResolverInterface $transitionAccess,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
   }
@@ -38,7 +39,13 @@ class NodeRowActionsField extends FieldPluginBase {
       $container->get('entity_type.manager'),
       $container->get('current_user'),
       $container->get('content_moderation.moderation_information'),
-      $container->get('content_moderation.state_transition_validation'),
+      // Not a services.yml entry: mukurtu_core has no formal dependency on
+      // content_moderation, and other content_moderation-consuming code
+      // here follows the same lazy, plugin-local instantiation pattern
+      // rather than an eagerly-compiled container service, so mukurtu_core
+      // stays usable in contexts (including many existing Kernel tests)
+      // that never enable content_moderation.
+      new ModerationTransitionAccessResolver($container->get('content_moderation.state_transition_validation')),
     );
   }
 
@@ -73,22 +80,20 @@ class NodeRowActionsField extends FieldPluginBase {
       }
 
       // Moderated bundles: one link per transition actually valid for this
-      // node and viewer right now (both the OG-protocol-scoped node access
-      // AND the transition's own legality -- neither check alone suffices).
+      // node and viewer right now (both the real per-transition entity
+      // access AND the transition's own legality -- neither check alone
+      // suffices). Archive/restore only require 'view' (they're pure
+      // moderation decisions, not content edits); every other transition
+      // still requires 'update' -- see ModerationTransitionAccessResolver.
       // Non-moderated bundles (e.g. landing_page): no moderation handler is
       // fighting a direct publish flag, so the plain publish/unpublish
       // mechanism remains correct there.
       if ($this->moderationInfo->isModeratedEntity($node)) {
-        if ($node->access('update', $this->currentUser)) {
-          $allowed = [];
-          foreach ($this->stateTransitionValidation->getValidTransitions($node, $this->currentUser) as $transition) {
-            $allowed[$transition->to()->id()] = $transition->label();
-          }
-          foreach ($allowed as $to_state => $label) {
-            $url = Url::fromRoute('mukurtu_core.node.moderation_transition', ['node' => $nid, 'to_state' => $to_state]);
-            $url->setOption('query', ['token' => \Drupal::csrfToken()->get(ltrim($url->getInternalPath(), '/'))]);
-            $links['transition_' . $to_state] = ['title' => $label, 'url' => $url];
-          }
+        foreach ($this->transitionAccess->getAccessibleTransitions($node, $this->currentUser) as $transition) {
+          $to_state = $transition->to()->id();
+          $url = Url::fromRoute('mukurtu_core.node.moderation_transition', ['node' => $nid, 'to_state' => $to_state]);
+          $url->setOption('query', ['token' => \Drupal::csrfToken()->get(ltrim($url->getInternalPath(), '/'))]);
+          $links['transition_' . $to_state] = ['title' => $transition->label(), 'url' => $url];
         }
       }
       elseif ($node->access('update', $this->currentUser)) {

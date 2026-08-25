@@ -64,11 +64,22 @@ class NodeRowActionsFieldTest extends KernelTestBase {
 
     $this->installSchema('node', ['node_access']);
     $this->installSchema('system', ['sequences']);
+    $this->installSchema('mukurtu_protocol', 'mukurtu_protocol_map');
+    $this->installSchema('mukurtu_protocol', 'mukurtu_protocol_access');
     $this->installEntitySchema('node');
     $this->installEntitySchema('user');
     $this->installEntitySchema('content_moderation_state');
+    $this->installEntitySchema('community');
+    $this->installEntitySchema('protocol');
     $this->installEntitySchema('og_membership');
     $this->installMukurtuWorkflowsConfig();
+
+    // mukurtu_protocol's hook_node_grants()/hook_node_access_records()
+    // are invoked for every 'view' access check once the module is
+    // enabled, even for a plain non-protocol node -- ModerationTransitionAccessResolver
+    // now checks 'view' for archive/restore, so this schema/rebuild is
+    // needed even though this test has no protocol-gated content.
+    node_access_rebuild();
 
     NodeType::create(['type' => 'article', 'name' => 'Article'])->save();
     NodeType::create(['type' => 'landing_page', 'name' => 'Landing Page'])->save();
@@ -145,6 +156,82 @@ class NodeRowActionsFieldTest extends KernelTestBase {
     $this->assertContains('transition_archived', $keys);
     $this->assertNotContains('publish', $keys);
     $this->assertNotContains('unpublish', $keys);
+  }
+
+  /**
+   * A user with only 'view' access (no update, no edit-any) but holding
+   * the archive/restore transition permissions still sees those two
+   * links -- they're gated on 'view', not 'update', since they're pure
+   * moderation decisions. The Edit link, which requires real 'update'
+   * access, is correctly absent.
+   */
+  public function testViewOnlyUserSeesArchiveRestoreLinks(): void {
+    // The shared setUp() grants 'edit any article content' to
+    // 'authenticated' broadly (every user, including the viewer below,
+    // gets that role) -- revoke it here so this test's "view only, no
+    // update" premise actually holds.
+    $authenticated = Role::load('authenticated');
+    $authenticated->revokePermission('edit any article content');
+    $authenticated->save();
+
+    $viewer_role = Role::create(['id' => 'viewer', 'label' => 'Viewer']);
+    $viewer_role->grantPermission('access content');
+    $viewer_role->grantPermission('use mukurtu_default_content_workflow transition archive');
+    $viewer_role->grantPermission('use mukurtu_default_content_workflow transition restore');
+    $viewer_role->save();
+    $viewer = User::create(['name' => $this->randomMachineName(), 'roles' => ['viewer']]);
+    $viewer->save();
+
+    $published = Node::create([
+      'type' => 'article',
+      'title' => $this->randomString(),
+      'uid' => $this->owner->id(),
+      'moderation_state' => 'published',
+    ]);
+    $published->save();
+
+    $this->container->get('current_user')->setAccount($viewer);
+    $field = $this->createField();
+    $build = $field->render(new ResultRow(['nid' => $published->id()]));
+
+    $keys = array_keys($build['#links']);
+    $this->assertContains('transition_archived', $keys);
+    $this->assertNotContains('edit', $keys);
+  }
+
+  /**
+   * The same view-only user does NOT see a non-archive/restore transition
+   * link even when they hold that transition's permission -- the
+   * view-based carve-out is narrow to archive/restore, not a general
+   * loosening of the update requirement.
+   */
+  public function testViewOnlyUserDoesNotSeeNonArchiveTransitionLink(): void {
+    // See testViewOnlyUserSeesArchiveRestoreLinks() -- same reason.
+    $authenticated = Role::load('authenticated');
+    $authenticated->revokePermission('edit any article content');
+    $authenticated->save();
+
+    $viewer_role = Role::create(['id' => 'viewer', 'label' => 'Viewer']);
+    $viewer_role->grantPermission('access content');
+    $viewer_role->grantPermission('use mukurtu_default_content_workflow transition create_new_draft');
+    $viewer_role->save();
+    $viewer = User::create(['name' => $this->randomMachineName(), 'roles' => ['viewer']]);
+    $viewer->save();
+
+    $published = Node::create([
+      'type' => 'article',
+      'title' => $this->randomString(),
+      'uid' => $this->owner->id(),
+      'moderation_state' => 'published',
+    ]);
+    $published->save();
+
+    $this->container->get('current_user')->setAccount($viewer);
+    $field = $this->createField();
+    $build = $field->render(new ResultRow(['nid' => $published->id()]));
+
+    $keys = is_array($build) ? array_keys($build['#links'] ?? []) : [];
+    $this->assertNotContains('transition_draft', $keys);
   }
 
   /**

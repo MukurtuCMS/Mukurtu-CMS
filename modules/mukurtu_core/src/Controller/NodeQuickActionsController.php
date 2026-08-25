@@ -4,9 +4,10 @@ namespace Drupal\mukurtu_core\Controller;
 
 use Drupal\Component\Datetime\TimeInterface;
 use Drupal\content_moderation\ModerationInformationInterface;
-use Drupal\content_moderation\StateTransitionValidationInterface;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\RevisionLogInterface;
+use Drupal\mukurtu_core\Service\ModerationTransitionAccessResolver;
+use Drupal\mukurtu_core\Service\ModerationTransitionAccessResolverInterface;
 use Drupal\node\NodeInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -19,14 +20,16 @@ class NodeQuickActionsController extends ControllerBase {
 
   public function __construct(
     protected readonly ModerationInformationInterface $moderationInfo,
-    protected readonly StateTransitionValidationInterface $stateTransitionValidation,
+    protected readonly ModerationTransitionAccessResolverInterface $transitionAccess,
     protected readonly TimeInterface $time,
   ) {}
 
   public static function create(ContainerInterface $container): static {
     return new static(
       $container->get('content_moderation.moderation_information'),
-      $container->get('content_moderation.state_transition_validation'),
+      // Not a services.yml entry -- see NodeRowActionsField::create() for
+      // why this stays a lazy, plugin-local instantiation.
+      new ModerationTransitionAccessResolver($container->get('content_moderation.state_transition_validation')),
       $container->get('datetime.time'),
     );
   }
@@ -59,13 +62,13 @@ class NodeQuickActionsController extends ControllerBase {
 
     // Defense in depth: never trust the route parameter alone -- re-validate
     // against the node's actual current state and the viewer's actual
-    // permissions, in case the URL is stale, bookmarked, or tampered with.
+    // permissions (including the correct per-transition base operation --
+    // archive/restore only need 'view', every other transition needs
+    // 'update' -- see ModerationTransitionAccessResolver), in case the URL
+    // is stale, bookmarked, or tampered with.
     $account = $this->currentUser();
-    $allowed = [];
-    foreach ($this->stateTransitionValidation->getValidTransitions($node, $account) as $transition) {
-      $allowed[$transition->to()->id()] = $transition->to()->label();
-    }
-    if (!isset($allowed[$to_state])) {
+    $transition = $this->transitionAccess->findAccessibleTransitionToState($node, $account, $to_state);
+    if (!$transition) {
       $this->messenger()->addError($this->t('That state change is no longer available for %title.', ['%title' => $node->label()]));
       return $this->redirect('view.mukurtu_manage_all_content.mukurtu_manage_content');
     }
@@ -81,7 +84,7 @@ class NodeQuickActionsController extends ControllerBase {
 
     $this->messenger()->addStatus($this->t('%title has been moved to %state.', [
       '%title' => $node->label(),
-      '%state' => $allowed[$to_state],
+      '%state' => $transition->to()->label(),
     ]));
     return $this->redirect('view.mukurtu_manage_all_content.mukurtu_manage_content');
   }

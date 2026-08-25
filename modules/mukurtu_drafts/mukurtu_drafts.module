@@ -4,6 +4,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Access\AccessResult;
+use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
 use Drupal\mukurtu_protocol\CulturalProtocols;
 
 /**
@@ -16,6 +17,43 @@ function mukurtu_drafts_entity_access(EntityInterface $entity, $operation, Accou
   }
 
   $state = $entity->get('moderation_state')->value;
+
+  // Once a manager archives content, its author's ordinary "edit own
+  // $bundle content" permission must not let them silently republish it --
+  // that would undo the manager's decision. Scoped to content with no
+  // protocol assigned (structural bundles, or a protocol-gated bundle
+  // before a protocol is set): once a protocol is assigned,
+  // MukurtuProtocolNodeAccessControlHandler/OG fully governs (and already
+  // denies) ownership-based update access there, and hook_entity_access
+  // results combine via orIf() where forbidden always wins -- a blanket
+  // forbidden here could wrongly veto a real Protocol Steward grant if
+  // they happen to also own the node.
+  if ($state === 'archived' && $operation === 'update') {
+    if ($entity instanceof CulturalProtocolControlledInterface && !empty($entity->getProtocols())) {
+      return AccessResult::neutral()->addCacheableDependency($entity);
+    }
+
+    $bundle = $entity->bundle();
+    if ($account->hasPermission('bypass node access')
+      || $account->hasPermission('administer nodes')
+      || $account->hasPermission("edit any $bundle content")) {
+      return AccessResult::neutral()
+        ->addCacheableDependency($entity)
+        ->cachePerPermissions();
+    }
+
+    if (method_exists($entity, 'getOwnerId') && $account->id() == $entity->getOwnerId()) {
+      return AccessResult::forbidden()
+        ->addCacheableDependency($entity)
+        ->addCacheContexts(['user'])
+        ->addCacheTags(["user:{$account->id()}"]);
+    }
+
+    return AccessResult::neutral()
+      ->addCacheableDependency($entity)
+      ->addCacheContexts(['user']);
+  }
+
   if ($state !== 'draft') {
     return AccessResult::neutral()->addCacheableDependency($entity);
   }

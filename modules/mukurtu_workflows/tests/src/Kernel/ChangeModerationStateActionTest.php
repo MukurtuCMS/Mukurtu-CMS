@@ -250,6 +250,66 @@ class ChangeModerationStateActionTest extends KernelTestBase {
   }
 
   /**
+   * A plain OG member (empty permissions, matching the real
+   * og.og_role.protocol-protocol-protocol_member.yml) can archive
+   * protocol-gated content they can view, holding only the site-wide
+   * transition permission -- archive/restore are gated on 'view', not
+   * 'update', since they're pure moderation decisions.
+   */
+  public function testAccessAllowedForPlainMemberOnArchiveTransition(): void {
+    // Og::addGroup() already auto-creates a default 'member' role (empty
+    // permissions) for every group bundle -- matching the real shipped
+    // og.og_role.protocol-protocol-protocol_member.yml's empty permission
+    // set, so no need to create another one here.
+    $this->protocol->addMember($this->manager, ['member']);
+
+    $node = Node::create([
+      'type' => 'thing',
+      'title' => $this->randomString(),
+      'uid' => $this->owner->id(),
+      'moderation_state' => 'published',
+    ]);
+    $node->setSharingSetting('any');
+    $node->setProtocols([$this->protocol]);
+    $node->save();
+
+    $this->assertFalse($node->access('update', $this->manager), 'Sanity check: plain member still lacks update access.');
+
+    $action = $this->createAction('archived');
+    $this->assertTrue($action->access($node, $this->manager));
+  }
+
+  /**
+   * The same plain OG member is still denied a non-archive/restore
+   * transition, which stays gated on 'update' -- the view-based carve-out
+   * is narrow, not a general loosening.
+   */
+  public function testAccessDeniedForPlainMemberOnNonArchiveTransition(): void {
+    $role = Role::load('mukurtu_manager');
+    $role->grantPermission('use mukurtu_default_content_workflow transition create_new_draft');
+    $role->save();
+
+    // Og::addGroup() already auto-creates a default 'member' role (empty
+    // permissions) for every group bundle -- matching the real shipped
+    // og.og_role.protocol-protocol-protocol_member.yml's empty permission
+    // set, so no need to create another one here.
+    $this->protocol->addMember($this->manager, ['member']);
+
+    $node = Node::create([
+      'type' => 'thing',
+      'title' => $this->randomString(),
+      'uid' => $this->owner->id(),
+      'moderation_state' => 'published',
+    ]);
+    $node->setSharingSetting('any');
+    $node->setProtocols([$this->protocol]);
+    $node->save();
+
+    $action = $this->createAction('draft');
+    $this->assertFalse($action->access($node, $this->manager));
+  }
+
+  /**
    * Access is denied outright for a non-moderated bundle.
    */
   public function testAccessDeniedForNonModeratedNode(): void {

@@ -35,7 +35,13 @@ mukurtu_core.node.moderation_transition:
         type: entity:node
   requirements:
     _csrf_token: 'TRUE'
-    _node_access: 'node.update'
+    # Archive/restore only require 'view' access; every other transition
+    # still requires 'update'. That per-transition distinction can't be
+    # expressed statically here, so the controller itself re-validates via
+    # ModerationTransitionAccessResolver before applying anything -- this
+    # requirement is only the coarse floor (must be able to see the node
+    # at all).
+    _node_access: 'node.view'
 
 mukurtu_core.settings_assorted:
   path: '/admin/config/mukurtu/settings'

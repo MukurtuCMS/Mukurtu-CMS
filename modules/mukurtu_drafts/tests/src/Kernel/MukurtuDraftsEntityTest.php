@@ -7,8 +7,12 @@ namespace Drupal\Tests\mukurtu_drafts\Kernel;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\Tests\content_moderation\Traits\ContentModerationTestTrait;
 use Drupal\drafts_entity_test\Entity\TestDraftEntity;
+use Drupal\mukurtu_protocol\Entity\Community;
+use Drupal\mukurtu_protocol\Entity\Protocol;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
+use Drupal\og\Entity\OgRole;
+use Drupal\og\Og;
 use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
 use PHPUnit\Framework\Attributes\Group;
@@ -31,6 +35,7 @@ class MukurtuDraftsEntityTest extends KernelTestBase {
     'file',
     'image',
     'media',
+    'mukurtu_protocol',
     'mukurtu_workflows',
     'node',
     'og',
@@ -58,15 +63,27 @@ class MukurtuDraftsEntityTest extends KernelTestBase {
 
     $this->installSchema('node', ['node_access']);
     $this->installSchema('system', ['sequences']);
+    $this->installSchema('mukurtu_protocol', 'mukurtu_protocol_map');
+    $this->installSchema('mukurtu_protocol', 'mukurtu_protocol_access');
     $this->installEntitySchema('node');
     $this->installEntitySchema('user');
     $this->installEntitySchema('content_moderation_state');
     $this->installEntitySchema('drafts_entity_test');
+    $this->installEntitySchema('community');
+    $this->installEntitySchema('protocol');
+    $this->installEntitySchema('og_membership');
+    $this->installConfig(['og']);
+
+    node_access_rebuild();
+    Og::addGroup('community', 'community');
+    Og::addGroup('protocol', 'protocol');
 
     NodeType::create(['type' => 'page', 'name' => 'Page'])->save();
+    NodeType::create(['type' => 'thing', 'name' => 'Protocol Controlled Thing'])->save();
 
     $workflow = $this->createEditorialWorkflow();
     $this->addEntityTypeAndBundleToWorkflow($workflow, 'node', 'page');
+    $this->addEntityTypeAndBundleToWorkflow($workflow, 'node', 'thing');
 
     // The first user saved in a fresh kernel DB becomes uid 1, which bypasses
     // every permission check via SuperUserAccessPolicy. Burn it here so the
@@ -215,6 +232,104 @@ class MukurtuDraftsEntityTest extends KernelTestBase {
 
     $this->assertTrue($update_result->isNeutral(), 'Update on a draft should be neutral, not forbidden.');
     $this->assertTrue($delete_result->isNeutral(), 'Delete on a draft should be neutral, not forbidden.');
+  }
+
+  /**
+   * An owner can no longer update their own archived structural content --
+   * closes the loophole where "edit own X content" would otherwise let an
+   * author silently undo a manager's archive decision.
+   */
+  public function testOwnerCannotUpdateOwnArchivedStructuralContent(): void {
+    $owner = $this->createPlainUser();
+    $node = $this->createModeratedNode('archived', (int) $owner->id());
+
+    $result = mukurtu_drafts_entity_access($node, 'update', $owner);
+    $this->assertTrue($result->isForbidden(), 'Owner cannot update their own archived content.');
+  }
+
+  /**
+   * A user holding "edit any page content" (e.g. Mukurtu Manager) is
+   * unaffected even if they happen to also own the archived node.
+   */
+  public function testOwnerWithEditAnyPermissionIsUnaffectedOnArchived(): void {
+    $owner = $this->createUserWithPermission('edit any page content');
+    $node = $this->createModeratedNode('archived', (int) $owner->id());
+
+    $result = mukurtu_drafts_entity_access($node, 'update', $owner);
+    $this->assertTrue($result->isNeutral(), 'A privileged edit-any user is unaffected, even as the owner.');
+  }
+
+  /**
+   * A non-owner's update access to archived content is untouched (neutral),
+   * consistent with the draft-state behavior above.
+   */
+  public function testNonOwnerUpdateOnArchivedIsNeutral(): void {
+    $owner = $this->createPlainUser();
+    $node = $this->createModeratedNode('archived', (int) $owner->id());
+    $other = $this->createPlainUser();
+
+    $result = mukurtu_drafts_entity_access($node, 'update', $other);
+    $this->assertTrue($result->isNeutral(), 'Non-owner update on archived content is neutral, unaffected by this hook.');
+  }
+
+  /**
+   * View and delete on an owned archived node are untouched -- this hook
+   * only narrows 'update'.
+   */
+  public function testViewAndDeleteOnOwnedArchivedAreUntouched(): void {
+    $owner = $this->createPlainUser();
+    $node = $this->createModeratedNode('archived', (int) $owner->id());
+
+    $view_result = mukurtu_drafts_entity_access($node, 'view', $owner);
+    $delete_result = mukurtu_drafts_entity_access($node, 'delete', $owner);
+
+    $this->assertTrue($view_result->isNeutral(), 'View on archived content is untouched.');
+    $this->assertTrue($delete_result->isNeutral(), 'Delete on archived content is untouched.');
+  }
+
+  /**
+   * An owner of archived content WITH a protocol assigned is entirely
+   * unaffected by this hook (neutral) -- that case is fully governed by
+   * MukurtuProtocolNodeAccessControlHandler/OG, and this hook must defer
+   * to it rather than risk vetoing a real Protocol Steward grant.
+   */
+  public function testOwnerOfArchivedProtocolGatedContentIsUnaffected(): void {
+    $owner = $this->createPlainUser();
+    $this->container->get('current_user')->setAccount($owner);
+
+    $community = Community::create(['name' => 'Community 1']);
+    $community->save();
+    $community->addMember($owner);
+
+    $protocol = Protocol::create([
+      'name' => 'Strict Protocol',
+      'field_communities' => [$community->id()],
+      'field_access_mode' => 'strict',
+    ]);
+    $protocol->save();
+
+    $contributorRole = OgRole::create([
+      'name' => 'contributor',
+      'label' => 'Contributor',
+      'permissions' => ['apply protocol', 'create thing node'],
+    ]);
+    $contributorRole->setGroupType('protocol');
+    $contributorRole->setGroupBundle('protocol');
+    $contributorRole->save();
+    $protocol->addMember($owner, ['contributor']);
+
+    $node = Node::create([
+      'type' => 'thing',
+      'title' => $this->randomString(),
+      'uid' => $owner->id(),
+      'moderation_state' => 'archived',
+    ]);
+    $node->setSharingSetting('any');
+    $node->setProtocols([$protocol]);
+    $node->save();
+
+    $result = mukurtu_drafts_entity_access($node, 'update', $owner);
+    $this->assertTrue($result->isNeutral(), 'Protocol-gated archived content is deferred entirely to the protocol access handler.');
   }
 
 }
