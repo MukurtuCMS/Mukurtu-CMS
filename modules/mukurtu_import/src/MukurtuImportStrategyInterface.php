@@ -67,12 +67,16 @@ interface MukurtuImportStrategyInterface extends ConfigEntityInterface, EntityOw
    * cross-migration lookups by arbitrary user-defined values (e.g. for
    * paragraph entities that have no natural label).
    *
+   * @param \Drupal\file\FileInterface|null $file
+   *   Optional file to validate the configured column against. When given,
+   *   returns NULL instead of a column absent from the file's own headers.
+   *
    * @return string|null
    *   The CSV column name, or NULL if not configured.
    */
-  public function getIdentifierColumn(): ?string;
+  public function getIdentifierColumn(?FileInterface $file = NULL): ?string;
 
-  public function getLabelSourceColumn(): ?string;
+  public function getLabelSourceColumn(?FileInterface $file = NULL): ?string;
 
   /**
    * Get the source column mapped to the media source field (e.g., filename).
@@ -81,10 +85,14 @@ interface MukurtuImportStrategyInterface extends ConfigEntityInterface, EntityOw
    * source field (e.g., field_media_image for Image media). Returns NULL for
    * non-media entity types or if the source field is not mapped.
    *
+   * @param \Drupal\file\FileInterface|null $file
+   *   Optional file to validate the mapped column against. When given,
+   *   returns NULL instead of a column absent from the file's own headers.
+   *
    * @return string|null
    *   The CSV column name mapped to the media source field, or NULL.
    */
-  public function getMediaSourceColumn(): ?string;
+  public function getMediaSourceColumn(?FileInterface $file = NULL): ?string;
 
   /**
    * Get the mapped target field name for a given source column.

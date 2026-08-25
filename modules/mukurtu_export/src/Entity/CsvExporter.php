@@ -461,9 +461,15 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface {
         }
       }
 
-      // Break image fields into target_id and alt sub-fields to match the
-      // two-column format expected by the import system.
-      if ($field_def->getType() === 'image') {
+      // Break image fields, and single-value media entity reference fields
+      // (which the import system also treats as having target_id/alt
+      // sub-properties - see EntityReference::getSupportedProperties()),
+      // into target_id and alt sub-fields to match the two-column format
+      // expected by the import system.
+      $is_single_media_reference = $field_def->getType() === 'entity_reference'
+        && $field_def->getSetting('target_type') === 'media'
+        && $field_def->getFieldStorageDefinition()->getCardinality() === 1;
+      if ($field_def->getType() === 'image' || $is_single_media_reference) {
         $fileIdLabel = t('File ID');
         $altLabel = t('Alternative text');
         $exportDefault = $this->isNew() ? (!$field_def->isReadOnly() || in_array($field_name, $id_fields)) : FALSE;

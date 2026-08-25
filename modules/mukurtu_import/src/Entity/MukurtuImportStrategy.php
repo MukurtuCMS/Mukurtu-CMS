@@ -374,6 +374,16 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
         $ids[] = '_record_number';
       }
     }
+    else {
+      // The identifier/ID/UUID column above is legitimately blank for rows
+      // that create new content in a combined "add + update" CSV. Two blank
+      // rows would otherwise hash to the same migrate ID map key, so the
+      // second row would resolve to the first row's just-created entity
+      // instead of creating its own. _record_number is unique per row within
+      // the file, so append it as a tie-breaker to keep every row's map key
+      // distinct regardless of blank values in the primary column(s).
+      $ids[] = '_record_number';
+    }
 
     return [
       'id' => $this->getDefinitionId($file),
@@ -433,15 +443,21 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
   /**
    * {@inheritdoc}
    */
-  public function getIdentifierColumn(): ?string {
+  public function getIdentifierColumn(?FileInterface $file = NULL): ?string {
     $column = $this->getConfig('identifier_column');
-    return !empty($column) ? $column : NULL;
+    if (empty($column)) {
+      return NULL;
+    }
+    if ($file && !in_array($column, $this->getCSVHeaders($file), TRUE)) {
+      return NULL;
+    }
+    return $column;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getLabelSourceColumn(): ?string {
+  public function getLabelSourceColumn(?FileInterface $file = NULL): ?string {
     $entity_type_id = $this->getTargetEntityTypeId();
     $label_key = $this->entityTypeManager()
       ->getDefinition($entity_type_id)
@@ -451,8 +467,12 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
       return NULL;
     }
 
+    $headers = $file ? $this->getCSVHeaders($file) : [];
     foreach ($this->getMapping() as $mapping) {
       if ($mapping['target'] === $label_key) {
+        if ($file && !in_array($mapping['source'], $headers, TRUE)) {
+          return NULL;
+        }
         return $mapping['source'];
       }
     }
@@ -463,7 +483,7 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
   /**
    * {@inheritdoc}
    */
-  public function getMediaSourceColumn(): ?string {
+  public function getMediaSourceColumn(?FileInterface $file = NULL): ?string {
     if ($this->getTargetEntityTypeId() !== 'media') {
       return NULL;
     }
@@ -507,10 +527,14 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
       }
     }
 
+    $headers = $file ? $this->getCSVHeaders($file) : [];
     foreach ($this->getMapping() as $mapping) {
       $target = $mapping['target'];
       // Match the source field directly or its target_id subfield.
       if ($target === $source_field || $target === $source_field . '/target_id') {
+        if ($file && !in_array($mapping['source'], $headers, TRUE)) {
+          return NULL;
+        }
         return $mapping['source'];
       }
     }

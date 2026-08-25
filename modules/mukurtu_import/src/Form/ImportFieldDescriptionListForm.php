@@ -94,6 +94,10 @@ class ImportFieldDescriptionListForm extends ImportBaseForm {
       ];
     }
 
+    // Both tables default to fully checked so the primary "Download CSV
+    // Template" action produces a complete template without requiring the
+    // user to manually check every row first; unchecking rows still allows
+    // building a partial/custom template.
     if ($required_options) {
       $form['required_heading'] = [
         '#type' => 'html_tag',
@@ -105,6 +109,7 @@ class ImportFieldDescriptionListForm extends ImportBaseForm {
         '#type' => 'tableselect',
         '#header' => $table_header,
         '#options' => $required_options,
+        '#default_value' => array_combine(array_keys($required_options), array_keys($required_options)),
         '#empty' => $this->t('No fields found'),
         '#attributes' => ['aria-labelledby' => 'mukurtu-import-required-fields-heading'],
       ];
@@ -121,6 +126,7 @@ class ImportFieldDescriptionListForm extends ImportBaseForm {
         '#type' => 'tableselect',
         '#header' => $table_header,
         '#options' => $optional_options,
+        '#default_value' => array_combine(array_keys($optional_options), array_keys($optional_options)),
         '#empty' => $this->t('No fields found'),
         '#attributes' => ['aria-labelledby' => 'mukurtu-import-optional-fields-heading'],
       ];
