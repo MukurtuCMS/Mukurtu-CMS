@@ -85,7 +85,7 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
 
     $definitions['field_date_died'] = BaseFieldDefinition::create('original_date')
       ->setLabel(t('Date Died'))
-      ->setDescription('The date the person died.	<br />Enter the year and, if known, select the month and day.')
+      ->setDescription(t('The date the person died.	<br />Enter the year and, if known, select the month and day.'))
       ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)
@@ -95,7 +95,7 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
 
     $definitions['field_deceased'] = BaseFieldDefinition::create('boolean')
       ->setLabel(t('Deceased'))
-      ->setDescription('Indicates if the person is deceased or not. If the deceased person media content warning is configured, warnings will be displayed based on this field.	<br />Select the slider to indicate that the person is deceased. ')
+      ->setDescription(t('Indicates if the person is deceased or not. If the deceased person media content warning is configured, warnings will be displayed based on this field.	<br />Select the slider to indicate that the person is deceased. '))
       ->setDefaultValue(FALSE)
       ->setRevisionable(TRUE)
       ->setDisplayConfigurable('form', TRUE)
@@ -197,7 +197,7 @@ class Person extends Node implements PersonInterface, CulturalProtocolControlled
       ->setDisplayConfigurable('form', TRUE);
 
     $definitions['field_coverage_description'] = BaseFieldDefinition::create('text_long')
-      ->setLabel('Location Description')
+      ->setLabel(t('Location Description'))
       ->setDescription(t('A descriptive field to provide additional context and depth to the location(s) connected to the person record.	<br />This HTML field can support rich text and embedded media assets using the editing toolbar.'))
       ->setCardinality(1)
       ->setRequired(FALSE)
