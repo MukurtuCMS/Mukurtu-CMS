@@ -439,3 +439,266 @@ function mukurtu_export_update_40016(): void {
     }
   }
 }
+
+/**
+ * Fix Cultural Protocols CSV export headers so they match what the CSV
+ * importer's auto-mapper expects (#2029).
+ *
+ * The "protocols" and "sharing_setting" sub-fields were exported under the
+ * bare headers "Protocols" and "Sharing Setting" instead of being prefixed
+ * with the parent field's label, like every other multi-part field (e.g.
+ * "Image > File ID"). This left the auto-mapper unable to match the column
+ * on re-import. Only rewrite entries that still hold the old default label,
+ * so any header a user deliberately customized is left alone.
+ */
+function mukurtu_export_update_40017(): void {
+  $old_labels = [
+    'protocols' => 'Protocols',
+    'sharing_setting' => 'Sharing Setting',
+  ];
+  $new_labels = [
+    'protocols' => 'Cultural Protocols > Protocols',
+    'sharing_setting' => 'Cultural Protocols > Sharing Setting',
+  ];
+
+  $storage = \Drupal::entityTypeManager()->getStorage('csv_exporter');
+  foreach ($storage->loadMultiple() as $exporter) {
+    $list = $exporter->get('entity_fields_export_list') ?? [];
+    $changed = FALSE;
+    foreach ($list as &$fields) {
+      foreach ($old_labels as $subfield => $old_label) {
+        $field_key = "field_cultural_protocols/{$subfield}";
+        if (isset($fields[$field_key]) && $fields[$field_key] === $old_label) {
+          $fields[$field_key] = $new_labels[$subfield];
+          $changed = TRUE;
+        }
+      }
+    }
+    unset($fields);
+    if ($changed) {
+      $exporter->set('entity_fields_export_list', $list)->save();
+    }
+  }
+}
+
+/**
+ * Declare child-reference export fields on collection/word_list node types.
+ *
+ * ExportChildResolver now reads which fields represent child references from
+ * the mukurtu_export.child_reference_fields third-party setting on the node
+ * type, instead of hardcoding the collection/word_list bundle names. Sites
+ * installed before this change need the setting backfilled onto their
+ * existing node type config.
+ *
+ * @see \Drupal\mukurtu_export\ExportChildResolver
+ */
+function mukurtu_export_update_40018(): void {
+  $declarations = [
+    'collection' => [
+      'field_items_in_collection' => [],
+      'field_child_collections' => ['recurse' => TRUE],
+    ],
+    'word_list' => [
+      'field_words' => [],
+    ],
+  ];
+
+  $storage = \Drupal::entityTypeManager()->getStorage('node_type');
+  foreach ($declarations as $bundle => $child_reference_fields) {
+    $node_type = $storage->load($bundle);
+    if (!$node_type) {
+      continue;
+    }
+    $node_type->setThirdPartySetting('mukurtu_export', 'child_reference_fields', $child_reference_fields);
+    $node_type->save();
+  }
+}
+
+/**
+ * Add missing target_id/alt sub-columns for single-value media reference
+ * fields that were never split out like the rest (word_list's "Image",
+ * sample_sentence's "Recording", and protocol's "Banner Image"/"Thumbnail
+ * Image", which - unlike community's identically-typed fields - never got
+ * these columns added). Without them, those fields have no re-importable
+ * column at all in the CSV round trip.
+ */
+function mukurtu_export_update_40019(): void {
+  $additions = [
+    'node__word_list' => [
+      'field_word_list_image/target_id' => 'Image > File ID',
+      'field_word_list_image/alt' => 'Image > Alternative text',
+    ],
+    'paragraph__sample_sentence' => [
+      'field_sentence_recording/target_id' => 'Recording > File ID',
+      'field_sentence_recording/alt' => 'Recording > Alternative text',
+    ],
+    'protocol__protocol' => [
+      'field_banner_image/target_id' => 'Banner Image > File ID',
+      'field_banner_image/alt' => 'Banner Image > Alternative text',
+      'field_thumbnail_image/target_id' => 'Thumbnail Image > File ID',
+      'field_thumbnail_image/alt' => 'Thumbnail Image > Alternative text',
+    ],
+  ];
+
+  $storage = \Drupal::entityTypeManager()->getStorage('csv_exporter');
+  foreach ($storage->loadMultiple() as $exporter) {
+    $list = $exporter->get('entity_fields_export_list') ?? [];
+    $changed = FALSE;
+    foreach ($additions as $bundle_key => $fields) {
+      if (!isset($list[$bundle_key])) {
+        continue;
+      }
+      foreach ($fields as $field_name => $label) {
+        if (!isset($list[$bundle_key][$field_name])) {
+          $list[$bundle_key][$field_name] = $label;
+          $changed = TRUE;
+        }
+      }
+    }
+    if ($changed) {
+      $exporter->set('entity_fields_export_list', $list)->save();
+    }
+  }
+}
+
+/**
+ * Remove bare image/thumbnail/recording columns now that their target_id/
+ * alt sub-columns (added in update_40019, or already present for
+ * community/collection/dictionary_word) carry the same data.
+ *
+ * These bare columns were never re-importable in the first place (see
+ * mukurtu_import_update_40036()) and were purely a redundant markdown-
+ * formatted convenience string once the two real sub-columns exist, so
+ * exporting them just added noise. Only removes an entry if its value
+ * still matches the known shipped default, leaving any site-customized
+ * export list untouched.
+ */
+function mukurtu_export_update_40020(): void {
+  $removals = [
+    'node__collection' => ['field_collection_image' => 'Image'],
+    'node__dictionary_word' => ['field_thumbnail' => 'Thumbnail'],
+    'node__word_list' => ['field_word_list_image' => 'Image'],
+    'community__community' => [
+      'field_banner_image' => 'Banner Image',
+      'field_thumbnail_image' => 'Thumbnail Image',
+    ],
+    'protocol__protocol' => [
+      'field_banner_image' => 'Banner Image',
+      'field_thumbnail_image' => 'Thumbnail Image',
+    ],
+    'paragraph__sample_sentence' => ['field_sentence_recording' => 'Recording'],
+  ];
+
+  $storage = \Drupal::entityTypeManager()->getStorage('csv_exporter');
+  foreach ($storage->loadMultiple() as $exporter) {
+    $list = $exporter->get('entity_fields_export_list') ?? [];
+    $changed = FALSE;
+    foreach ($removals as $bundle_key => $fields) {
+      if (!isset($list[$bundle_key])) {
+        continue;
+      }
+      foreach ($fields as $field_name => $expected_label) {
+        if (($list[$bundle_key][$field_name] ?? NULL) === $expected_label) {
+          unset($list[$bundle_key][$field_name]);
+          $changed = TRUE;
+        }
+      }
+    }
+    if ($changed) {
+      $exporter->set('entity_fields_export_list', $list)->save();
+    }
+  }
+}
+
+/**
+ * Add a "created" column, matching the label every shipped *_all_fields
+ * import template already expects, to every exportable bundle that has
+ * an "Authored by" column but never actually exported its creation date.
+ *
+ * Without this, re-importing a CSV produced by these exporters through
+ * the corresponding quick-path template drops the already-dead created
+ * mapping (see MukurtuImportStrategy::getProcess()'s file-header filter)
+ * and the new entity fails to save with a NOT NULL constraint violation
+ * on the created column, since Node/Media/etc. have no fallback default
+ * for a never-set created time.
+ */
+function mukurtu_export_update_40021(): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('csv_exporter');
+  foreach ($storage->loadMultiple() as $exporter) {
+    $list = $exporter->get('entity_fields_export_list') ?? [];
+    $changed = FALSE;
+    foreach ($list as $bundle_key => &$fields) {
+      if (isset($fields['created'])) {
+        continue;
+      }
+      if (str_starts_with($bundle_key, 'community__') || str_starts_with($bundle_key, 'protocol__')) {
+        $label = 'Created';
+      }
+      elseif (str_starts_with($bundle_key, 'node__') || str_starts_with($bundle_key, 'media__') || str_starts_with($bundle_key, 'multipage_item__')) {
+        $label = 'Authored on';
+      }
+      else {
+        // Paragraph/taxonomy_term/file bundles either have no created field
+        // (paragraph, taxonomy_term) or already export one (file).
+        continue;
+      }
+      if (!isset($fields['uid']) && !isset($fields['user_id'])) {
+        continue;
+      }
+      $fields['created'] = $label;
+      $changed = TRUE;
+    }
+    unset($fields);
+    if ($changed) {
+      $exporter->set('entity_fields_export_list', $list)->save();
+    }
+  }
+}
+
+/**
+ * Add "status" (and, for node bundles, "promote"/"sticky") columns, matching
+ * the labels every shipped *_all_fields import template already expects.
+ *
+ * Same class of gap as update_40019's "created" column: these targets are
+ * mapped by the shipped templates but were never actually exported, so
+ * re-importing an unedited exported CSV silently dropped any of these
+ * columns from the mapping - and, on the *_all_fields template, editing
+ * publish/promote/sticky status in the sheet before re-importing had no
+ * effect, since the mapping never matched a real header to begin with.
+ */
+function mukurtu_export_update_40022(): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('csv_exporter');
+  foreach ($storage->loadMultiple() as $exporter) {
+    $list = $exporter->get('entity_fields_export_list') ?? [];
+    $changed = FALSE;
+    foreach ($list as $bundle_key => &$fields) {
+      if (!isset($fields['uid']) && !isset($fields['user_id'])) {
+        continue;
+      }
+      if (!isset($fields['status'])) {
+        if (str_starts_with($bundle_key, 'multipage_item__')) {
+          $fields['status'] = 'Status';
+          $changed = TRUE;
+        }
+        elseif (str_starts_with($bundle_key, 'node__') || str_starts_with($bundle_key, 'media__') || str_starts_with($bundle_key, 'community__') || str_starts_with($bundle_key, 'protocol__')) {
+          $fields['status'] = 'Published';
+          $changed = TRUE;
+        }
+      }
+      if (str_starts_with($bundle_key, 'node__')) {
+        if (!isset($fields['promote'])) {
+          $fields['promote'] = 'Promoted to front page';
+          $changed = TRUE;
+        }
+        if (!isset($fields['sticky'])) {
+          $fields['sticky'] = 'Sticky at top of lists';
+          $changed = TRUE;
+        }
+      }
+    }
+    unset($fields);
+    if ($changed) {
+      $exporter->set('entity_fields_export_list', $list)->save();
+    }
+  }
+}

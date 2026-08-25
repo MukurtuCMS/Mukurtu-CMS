@@ -104,4 +104,45 @@ class ImportFieldDescriptionListFormTest extends MukurtuImportTestBase {
     $this->assertStringContainsString((string) $form['table_optional']['#options']['uuid']['label'], $response->getContent());
   }
 
+  /**
+   * Every field option in both tables should be checked by default.
+   *
+   * Regression test for issue #1933: the "Download CSV Template" button
+   * produced a CSV with no header row because the field tableselects never
+   * pre-checked any rows.
+   */
+  public function testAllFieldsCheckedByDefaultInBothTables(): void {
+    $form = $this->form->buildForm([], new FormState(), 'node', 'protocol_aware_content');
+
+    $required_keys = array_keys($form['table_required']['#options']);
+    $optional_keys = array_keys($form['table_optional']['#options']);
+    $this->assertNotEmpty($required_keys, 'The required tableselect has at least one option to select from.');
+    $this->assertNotEmpty($optional_keys, 'The optional tableselect has at least one option to select from.');
+
+    $this->assertSame(array_combine($required_keys, $required_keys), $form['table_required']['#default_value'], 'Every required field option is checked by default.');
+    $this->assertSame(array_combine($optional_keys, $optional_keys), $form['table_optional']['#default_value'], 'Every optional field option is checked by default.');
+  }
+
+  /**
+   * Submitting the form untouched should download a CSV with every header.
+   */
+  public function testDefaultSubmissionProducesFullCsvHeaders(): void {
+    $form = $this->form->buildForm([], new FormState(), 'node', 'protocol_aware_content');
+    $expected_headers = array_map(fn ($option) => (string) $option['label'], $form['table_required']['#options'] + $form['table_optional']['#options']);
+
+    $form_state = new FormState();
+    $form_state->setValues([
+      'entity_type_id' => 'node',
+      'bundle' => 'protocol_aware_content',
+      'table_required' => $form['table_required']['#default_value'],
+      'table_optional' => $form['table_optional']['#default_value'],
+    ]);
+    $this->form->submitForm($form, $form_state);
+
+    $response = $form_state->getResponse();
+    $this->assertNotNull($response, 'Submitting the form produces a downloadable response.');
+    $headers = str_getcsv(rtrim($response->getContent(), "\r\n"));
+    $this->assertSame(array_values($expected_headers), $headers, 'The downloaded CSV contains a header for every field in both sections.');
+  }
+
 }
