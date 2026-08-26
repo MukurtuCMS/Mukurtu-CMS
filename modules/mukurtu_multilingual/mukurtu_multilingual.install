@@ -5,7 +5,9 @@
  * Install, update and uninstall functions for the Mukurtu Multilingual module.
  */
 
+use Drupal\Core\Field\Entity\BaseFieldOverride;
 use Drupal\field\Entity\FieldConfig;
+use Drupal\language\Entity\ContentLanguageSettings;
 use Drupal\user\Entity\Role;
 
 /**
@@ -66,6 +68,55 @@ function mukurtu_multilingual_install() {
       $field_config->setTranslatable(FALSE);
       $field_config->save();
     }
+  }
+
+  _mukurtu_multilingual_apply_translation_overrides();
+}
+
+/**
+ * Applies translation overrides for config already owned by other modules.
+ *
+ * A handful of base field overrides and one content language settings
+ * object are shipped (with different values) by the content-type module
+ * that owns the bundle, so this module can't ship its own
+ * config/install/*.yml for them: Drupal's ConfigInstaller refuses to
+ * install a module whose config/install ships a config name that already
+ * exists in active storage, which blocks the entire module install, not
+ * just that one file. Apply the intended overrides imperatively instead,
+ * after the owning module's config already exists.
+ *
+ * Title and promote are administrative/computed fields on these bundles
+ * (the real translatable content lives in bundle-specific fields), so they
+ * should not fork per translation the way the owning module's own default
+ * assumes on a non-multilingual site.
+ */
+function _mukurtu_multilingual_apply_translation_overrides(): void {
+  $untranslatable_fields = [
+    ['node', 'dictionary_word', 'title'],
+    ['node', 'landing_page', 'promote'],
+    ['node', 'person', 'title'],
+    ['node', 'place', 'title'],
+    ['node', 'word_list', 'promote'],
+  ];
+  foreach ($untranslatable_fields as [$entity_type_id, $bundle, $field_name]) {
+    $override = BaseFieldOverride::loadByName($entity_type_id, $bundle, $field_name);
+    if ($override && $override->isTranslatable()) {
+      $override->setTranslatable(FALSE)->save();
+    }
+  }
+
+  // Landing pages need content translation enabled like every other node
+  // bundle; the owning module's default ships language_alterable: false
+  // with no content_translation settings at all.
+  /** @var \Drupal\content_translation\ContentTranslationManagerInterface $content_translation_manager */
+  $content_translation_manager = \Drupal::service('content_translation.manager');
+  $content_translation_manager->setEnabled('node', 'landing_page', TRUE);
+  $content_translation_manager->setBundleTranslationSettings('node', 'landing_page', [
+    'untranslatable_fields_hide' => '0',
+  ]);
+  $landing_page_settings = ContentLanguageSettings::loadByEntityTypeBundle('node', 'landing_page');
+  if ($landing_page_settings && !$landing_page_settings->isLanguageAlterable()) {
+    $landing_page_settings->setLanguageAlterable(TRUE)->save();
   }
 }
 
@@ -145,4 +196,23 @@ function mukurtu_multilingual_update_40005(): void {
       }
     }
   }
+}
+
+/**
+ * Reconcile translation overrides on sites that worked around the
+ * install-blocking config collision fixed by this release.
+ *
+ * mukurtu_multilingual used to ship its own config/install/*.yml for a
+ * handful of base field overrides and one content language settings
+ * object that are actually owned by the bundle's content-type module,
+ * which meant the module could never actually be installed on a stock
+ * Mukurtu site (Drupal's ConfigInstaller refuses to install a module
+ * whose config/install ships a config name that already exists in active
+ * storage). Any site that got past that by some other means never
+ * received the intended overrides, since the colliding files were never
+ * actually applied. Converge them now via the same helper hook_install()
+ * calls.
+ */
+function mukurtu_multilingual_update_40006(): void {
+  _mukurtu_multilingual_apply_translation_overrides();
 }
