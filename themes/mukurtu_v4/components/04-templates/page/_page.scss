@@ -54,6 +54,15 @@
     }
   }
 
+  // A long, single-word (unbreakable) title - a place or person name
+  // without spaces, for example - can exceed the narrow mobile viewport at
+  // this font size; allow a mid-word break as a last resort rather than
+  // overflowing horizontally (issue #1997).
+  .page__title h1 {
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
+
   // Basic pages use Layout Builder; the page title shadow would appear as an
   // unwanted divider between the title and the first Layout Builder block.
   .page-node-type-page & .page__title {
