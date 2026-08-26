@@ -13,14 +13,15 @@ use Drupal\mukurtu_import\ImportBatchExecutable;
  * rather than silently showing as a success.
  *
  * Regression test: MigrateExecutable::import() catches a source plugin
- * exception thrown while building the very first Row (e.g. the CSV source
- * file being unreadable), logs it to the 'migrate' watchdog channel, and
- * returns MigrationInterface::RESULT_FAILED -- no PHP exception escapes.
- * ImportBatchExecutable::batchProcessImportDefinition() only distinguished
- * RESULT_INCOMPLETE from "anything else" and never recorded this case in
- * the created/updated/failures counts or messages, so the Import Results
- * page reported "All files imported successfully" with 0/0/0 counts even
- * though nothing was imported.
+ * exception thrown while building the very first Row (e.g. an 'ids' column
+ * that doesn't exist in the file, which fails Row::__construct()'s "defined
+ * as a source ID but has no value" check), logs it to the 'migrate'
+ * watchdog channel, and returns MigrationInterface::RESULT_FAILED -- no PHP
+ * exception escapes. ImportBatchExecutable::batchProcessImportDefinition()
+ * only distinguished RESULT_INCOMPLETE from "anything else" and never
+ * recorded this case in the created/updated/failures counts or messages,
+ * so the Import Results page reported "All files imported successfully"
+ * with 0/0/0 counts even though nothing was imported.
  */
 class ImportBatchFailureReportingTest extends MukurtuImportTestBase {
 
@@ -43,10 +44,16 @@ class ImportBatchFailureReportingTest extends MukurtuImportTestBase {
     $this->assertNotNull($file);
 
     $definition = $strategy->toDefinition($file);
-    // Point the CSV source at a nonexistent path, reproducing the exact
+    // MukurtuImportStrategy::toDefinition() now validates any mapped ID
+    // column against the file's real headers before trusting it (see
+    // issue #2032 / #1573), so it can no longer produce a definition with
+    // a bad 'ids' column itself. Force the condition directly instead: a
+    // source ID column absent from the file, reproducing the exact
     // condition that makes MigrateExecutable::import()'s $source->rewind()
-    // throw and return RESULT_FAILED before any row is processed.
-    $definition['source']['path'] .= '-nonexistent';
+    // throw and return RESULT_FAILED before any row is processed. count()
+    // doesn't validate 'ids' the same way, so this only breaks import(),
+    // matching the bug's original failure point.
+    $definition['source']['ids'] = ['NonexistentSourceIdColumn'];
     $options = ['limit' => 0, 'update' => 1, 'force' => 0, 'sync' => FALSE];
     $context = [];
 
