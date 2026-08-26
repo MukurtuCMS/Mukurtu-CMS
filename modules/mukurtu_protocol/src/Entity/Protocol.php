@@ -13,6 +13,7 @@ use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityPublishedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\mukurtu_core\Entity\RoundtripEntityInterface;
 use Drupal\user\UserInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Og;
@@ -86,7 +87,7 @@ use Exception;
     'revision_log_message' => 'revision_log',
   ],
 )]
-class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
+class Protocol extends EditorialContentEntityBase implements ProtocolInterface, RoundtripEntityInterface {
 
   use EntityChangedTrait;
   use EntityPublishedTrait;
@@ -728,7 +729,7 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
 
     $fields['field_access_mode'] = BaseFieldDefinition::create('list_string')
       ->setLabel(t('Cultural Protocol Type'))
-      ->setDescription('Strict - Content that uses this cultural protocol is only visible to members of this cultural protocol. The cultural protocol page is also only visible to cultural protocol members.<br>Open - Content that uses this cultural protocol is visible to all site members and visitors, with no login required. The cultural protocol page is also public.')
+      ->setDescription(t('Strict - Content that uses this cultural protocol is only visible to members of this cultural protocol. The cultural protocol page is also only visible to cultural protocol members.<br>Open - Content that uses this cultural protocol is visible to all site members and visitors, with no login required. The cultural protocol page is also public.'))
       ->setSettings([
         'allowed_values' => [
           'strict' => 'Strict',

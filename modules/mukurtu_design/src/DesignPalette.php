@@ -7,8 +7,8 @@ namespace Drupal\mukurtu_design;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
-use Drupal\Core\Routing\AdminContext;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Core\Theme\ThemeManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -50,30 +50,30 @@ final class DesignPalette implements ContainerInjectionInterface {
   protected ConfigFactoryInterface $configFactory;
 
   /**
-   * The Admin Context service.
+   * The theme manager service.
    *
-   * @var \Drupal\Core\Routing\AdminContext
+   * @var \Drupal\Core\Theme\ThemeManagerInterface
    */
-  protected AdminContext $adminContext;
+  protected ThemeManagerInterface $themeManager;
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
     $configFactory = $container->get('config.factory');
-    $adminContext = $container->get('router.admin_context');
+    $themeManager = $container->get('theme.manager');
 
     assert($configFactory instanceof ConfigFactoryInterface);
-    assert($adminContext instanceof AdminContext);
-    return new self($configFactory, $adminContext);
+    assert($themeManager instanceof ThemeManagerInterface);
+    return new self($configFactory, $themeManager);
   }
 
   /**
    * Constructor for DesignPalette.
    */
-  public function __construct(ConfigFactoryInterface $configFactory, AdminContext $admin_context) {
+  public function __construct(ConfigFactoryInterface $configFactory, ThemeManagerInterface $theme_manager) {
     $this->configFactory = $configFactory;
-    $this->adminContext = $admin_context;
+    $this->themeManager = $theme_manager;
   }
 
   /**
@@ -92,7 +92,18 @@ final class DesignPalette implements ContainerInjectionInterface {
     // @see mukurtu_v4_design_library_info_alter().
     // When https://www.drupal.org/project/drupal/issues/1945262 is solved it
     // will be even better with declarative dependencies.
-    if ($this->adminContext->isAdminRoute()) {
+    //
+    // Checking the route's own admin flag (as this used to) isn't the same
+    // thing as checking which theme is actually rendering: an _admin_route
+    // only renders with the configured admin theme for users holding "view
+    // the administration theme" - anonymous/most authenticated visitors
+    // don't, so an admin-flagged route (e.g. Entity Browser's own modal
+    // route, EntityBrowser::route()) can still render with this site's
+    // default front-end theme for them. Comparing against the actual active
+    // theme covers that case correctly, while still skipping when a genuine
+    // admin-theme render (e.g. Gin) is what's actually on the page.
+    $default_theme = $this->configFactory->get('system.theme')->get('default');
+    if ($this->themeManager->getActiveTheme()->getName() !== $default_theme) {
       return;
     }
 

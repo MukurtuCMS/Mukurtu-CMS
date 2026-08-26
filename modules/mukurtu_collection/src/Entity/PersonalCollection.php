@@ -332,7 +332,7 @@ class PersonalCollection extends EditorialContentEntityBase implements PersonalC
       ->setDisplayConfigurable('form', TRUE);
 
     $fields['field_description'] = BaseFieldDefinition::create('text_long')
-      ->setLabel('Description')
+      ->setLabel(t('Description'))
       ->setDescription(t('A longer description or explanation of the personal collection if needed.	<br />This HTML field can support rich text and embedded media assets using the editing toolbar.'))
       ->setCardinality(1)
       ->setRequired(FALSE)

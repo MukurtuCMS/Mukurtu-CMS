@@ -17,6 +17,9 @@ use Drupal\mukurtu_submissions\Entity\SubmissionInterface;
 use Drupal\mukurtu_submissions\Entity\SubmissionSettingsInterface;
 use Drupal\node\NodeInterface;
 use Drupal\path_alias\Entity\PathAlias;
+use Drupal\views\Plugin\views\query\QueryPluginBase;
+use Drupal\views\Plugin\views\query\Sql;
+use Drupal\views\ViewExecutable;
 
 /**
  * Implements hook_views_data_alter().
@@ -26,8 +29,24 @@ use Drupal\path_alias\Entity\PathAlias;
  * building/instantiating field handlers for the mukurtu_submission base
  * table. Without an entry here, Views has no way to know these plugin IDs
  * are valid for this table and silently substitutes the "Broken" handler.
+ *
+ * Also corrects review_status's auto-generated filter plugin: Drupal maps
+ * a list_string base field to the generic "string" filter by default,
+ * which doesn't support the "in" operator the Pending Submissions view's
+ * filter uses - so the filter silently produced no WHERE clause at all
+ * (not a "broken handler", just a wrong-plugin one that quietly no-ops on
+ * an operator it doesn't recognize). "list_field" (Views' usual plugin
+ * for allowed-values fields) isn't a fit either - it resolves its option
+ * list via a FieldStorageConfig lookup that only exists for configurable
+ * fields, and review_status is a base field. "in_operator" is the plain
+ * Views filter for an arbitrary IN comparison and needs nothing beyond
+ * the value list the display config already provides.
  */
 function mukurtu_submissions_views_data_alter(array &$data) {
+  if (isset($data['mukurtu_submission']['review_status'])) {
+    $data['mukurtu_submission']['review_status']['filter']['id'] = 'in_operator';
+  }
+
   $data['mukurtu_submission']['mukurtu_submission_target'] = [
     'title' => t('Submission target'),
     'help' => t('Links to the entity this submission is about.'),
@@ -42,6 +61,32 @@ function mukurtu_submissions_views_data_alter(array &$data) {
       'id' => 'mukurtu_submission_actions',
     ],
   ];
+}
+
+/**
+ * Views this module hides the mukurtu_submissions service account from -
+ * both are Mukurtu's own admin "People" listings over users_field_data
+ * (/admin/people and /admin/people/list respectively).
+ */
+const MUKURTU_SUBMISSIONS_PEOPLE_VIEWS = ['user_admin_people', 'mukurtu_people'];
+
+/**
+ * Implements hook_views_query_alter().
+ *
+ * Excludes the service account from the "People" admin views - it's a
+ * hidden owner account for anonymous visitor submissions, not a real
+ * person an admin can act on, so it shouldn't clutter either list. The uid
+ * is only known at runtime via config, so a static Views UI filter can't
+ * express this exclusion.
+ */
+function mukurtu_submissions_views_query_alter(ViewExecutable $view, QueryPluginBase $query) {
+  if (!in_array($view->id(), MUKURTU_SUBMISSIONS_PEOPLE_VIEWS, TRUE) || !($query instanceof Sql)) {
+    return;
+  }
+  $service_account_uid = (int) \Drupal::config('mukurtu_submissions.settings')->get('service_account_uid');
+  if ($service_account_uid) {
+    $query->addWhere(0, 'users_field_data.uid', $service_account_uid, '<>');
+  }
 }
 
 /**
@@ -69,70 +114,78 @@ function mukurtu_submissions_node_insert(NodeInterface $node) {
   $message->set('field_item', $node);
   $message->save();
 
-  $notify_uids = mukurtu_submissions_get_reviewer_uids();
-  if (empty($notify_uids)) {
-    return;
-  }
-
-  $flags = ['subscribe_node'];
-  $notifiers = ['email'];
-  $subscribe_options = [
-    'notify message owner' => FALSE,
-    'uids' => [],
-  ];
   $email_validator = \Drupal::service('email.validator');
-  $recipients = \Drupal::entityTypeManager()->getStorage('user')->loadMultiple($notify_uids);
-  foreach ($recipients as $uid => $recipient) {
-    $email = $recipient->getEmail();
-    if (!$email || !$email_validator->isValid($email)) {
-      continue;
+
+  $notify_uids = mukurtu_submissions_get_reviewer_uids();
+  if (!empty($notify_uids)) {
+    $flags = ['subscribe_node'];
+    $notifiers = ['email'];
+    $subscribe_options = [
+      'notify message owner' => FALSE,
+      'uids' => [],
+    ];
+    $recipients = \Drupal::entityTypeManager()->getStorage('user')->loadMultiple($notify_uids);
+    foreach ($recipients as $uid => $recipient) {
+      $email = $recipient->getEmail();
+      if (!$email || !$email_validator->isValid($email)) {
+        continue;
+      }
+      $subscribe_options['uids'][$uid] = new DeliveryCandidate($flags, $notifiers, $uid);
     }
-    $subscribe_options['uids'][$uid] = new DeliveryCandidate($flags, $notifiers, $uid);
+
+    if (!empty($subscribe_options['uids'])) {
+      try {
+        \Drupal::service('message_subscribe.subscribers')->sendMessage($message, $message, [], $subscribe_options);
+      }
+      catch (\Exception $e) {
+        \Drupal::logger('mukurtu_submissions')->warning('Failed to send submission notification: @msg', ['@msg' => $e->getMessage()]);
+      }
+    }
   }
 
-  if (!empty($subscribe_options['uids'])) {
-    try {
-      \Drupal::service('message_subscribe.subscribers')->sendMessage($message, $message, [], $subscribe_options);
-    }
-    catch (\Exception $e) {
-      \Drupal::logger('mukurtu_submissions')->warning('Failed to send submission notification: @msg', ['@msg' => $e->getMessage()]);
-    }
+  $notify_emails = \Drupal::config('mukurtu_submissions.settings')->get('notify_emails') ?: [];
+  if (!empty($notify_emails)) {
+    mukurtu_submissions_send_email_notifications($message, $notify_emails, $email_validator);
   }
 }
 
 /**
- * Implements hook_node_update().
- *
- * Keeps the Pending Submissions queue accurate: once a reviewer moves a
- * submitted node into a published moderation state (the only reviewer
- * action currently available for accepting a submission - via the full
- * node edit form or mukurtu_workflows' quick-publish review panel), the
- * corresponding mukurtu_submission record is marked approved so it drops
- * out of the queue's "pending" filter. Without this, review_status never
- * left its default and the queue never emptied.
- *
- * Only acts while the submission is still pending, so an explicitly
- * rejected submission (once that status is settable through some future
- * UI) is never silently overwritten back to approved by a later save.
+ * Emails the rendered submission-received message directly to addresses
+ * with no Drupal user account - message_subscribe's DeliveryCandidate is
+ * uid-keyed, so it can't reach these. Reuses the same rendered message
+ * (via message's own 'full' view mode, the only one available for this
+ * template) that uid-based recipients see, so content stays consistent
+ * regardless of how a recipient was configured to be notified.
  */
-function mukurtu_submissions_node_update(NodeInterface $node) {
-  if (!$node->hasField('moderation_state')) {
-    return;
-  }
+function mukurtu_submissions_send_email_notifications(Message $message, array $emails, $email_validator): void {
+  $view_builder = \Drupal::entityTypeManager()->getViewBuilder('message');
+  $renderer = \Drupal::service('renderer');
+  // Rendered the same way message_notify's own Email notifier renders a
+  // message for uid-based recipients (see MessageNotifierBase::send()) -
+  // so every recipient sees identical subject/body content regardless of
+  // how they were configured to be notified.
+  // The rendered view mode output carries theme-wrapper whitespace
+  // (newlines/indentation around the actual text) - harmless in the body,
+  // but a subject line should always collapse to one line.
+  $subject_render = (string) $renderer->renderInIsolation($view_builder->view($message, 'mail_subject'));
+  $subject = trim(preg_replace('/\s+/', ' ', $subject_render));
+  $body = trim((string) $renderer->renderInIsolation($view_builder->view($message, 'mail_body')));
+  $mail_manager = \Drupal::service('plugin.manager.mail');
+  $langcode = \Drupal::languageManager()->getDefaultLanguage()->getId();
 
-  $submission = mukurtu_submissions_get_submission_for_entity($node);
-  if (!$submission || $submission->getReviewStatus() !== SubmissionInterface::STATUS_PENDING) {
-    return;
-  }
-
-  $workflow = \Drupal::service('content_moderation.moderation_information')->getWorkflowForEntity($node);
-  $moderation_state = $node->get('moderation_state')->value;
-  if (!$workflow || !$workflow->getTypePlugin()->hasState($moderation_state)) {
-    return;
-  }
-
-  if ($workflow->getTypePlugin()->getState($moderation_state)->isPublishedState()) {
-    $submission->setReviewStatus(SubmissionInterface::STATUS_APPROVED)->save();
+  foreach ($emails as $email) {
+    if (!$email_validator->isValid($email)) {
+      continue;
+    }
+    try {
+      $mail_manager->mail('mukurtu_submissions', 'submission_received', $email, $langcode, [
+        'subject' => $subject,
+        'body' => $body,
+      ]);
+    }
+    catch (\Exception $e) {
+      \Drupal::logger('mukurtu_submissions')->warning('Failed to send submission notification to @email: @msg', ['@email' => $email, '@msg' => $e->getMessage()]);
+    }
   }
 }
 
@@ -185,6 +238,43 @@ function mukurtu_submissions_get_submission_for_entity(EntityInterface $entity):
     return NULL;
   }
   return $storage->load(reset($ids));
+}
+
+/**
+ * Implements hook_node_update().
+ *
+ * Keeps a submission's review_status in sync with its node's moderation
+ * state. Nothing else in the codebase ever called
+ * Submission::setReviewStatus() - a submission defaulted to "pending" at
+ * creation and stayed that way forever, so it never left the Pending
+ * Submissions view even after a reviewer published or archived it.
+ *
+ * Only acts while the submission is still pending, so an explicit review
+ * decision (approved or rejected) is never silently overwritten back by a
+ * later, unrelated moderation-state change on the node.
+ */
+function mukurtu_submissions_node_update(NodeInterface $node) {
+  if (!$node->hasField('moderation_state')) {
+    return;
+  }
+  $moderation_state = $node->get('moderation_state')->value;
+  if ($node->original instanceof NodeInterface && $node->original->get('moderation_state')->value === $moderation_state) {
+    return;
+  }
+
+  $submission = mukurtu_submissions_get_submission_for_entity($node);
+  if ($submission === NULL || $submission->getReviewStatus() !== SubmissionInterface::STATUS_PENDING) {
+    return;
+  }
+
+  $new_status = match ($moderation_state) {
+    'published' => SubmissionInterface::STATUS_APPROVED,
+    'archived' => SubmissionInterface::STATUS_REJECTED,
+    default => SubmissionInterface::STATUS_PENDING,
+  };
+  if ($submission->getReviewStatus() !== $new_status) {
+    $submission->setReviewStatus($new_status)->save();
+  }
 }
 
 /**
@@ -338,6 +428,12 @@ function mukurtu_submissions_send_forward_message(string $template, NodeInterfac
  * Implements hook_mail().
  */
 function mukurtu_submissions_mail($key, &$message, $params) {
+  if ($key === 'submission_received') {
+    $message['subject'] = $params['subject'];
+    $message['body'][] = $params['body'];
+    return;
+  }
+
   if ($key !== 'contact_submitter') {
     return;
   }
@@ -355,6 +451,8 @@ function mukurtu_submissions_mukurtu_submission_settings_insert(EntityInterface 
   if ($entity instanceof SubmissionSettingsInterface) {
     mukurtu_submissions_ensure_path_aliases($entity);
     mukurtu_submissions_sync_submission_permission($entity);
+    mukurtu_submissions_sync_review_permissions($entity);
+    mukurtu_submissions_sync_entity_browser_permissions($entity);
   }
 }
 
@@ -365,6 +463,8 @@ function mukurtu_submissions_mukurtu_submission_settings_update(EntityInterface 
   if ($entity instanceof SubmissionSettingsInterface) {
     mukurtu_submissions_ensure_path_aliases($entity);
     mukurtu_submissions_sync_submission_permission($entity);
+    mukurtu_submissions_sync_review_permissions($entity);
+    mukurtu_submissions_sync_entity_browser_permissions($entity);
   }
 }
 
@@ -439,6 +539,202 @@ function mukurtu_submissions_sync_submission_permission(SubmissionSettingsInterf
     }
     elseif (!$should_grant && $has_permission) {
       $role->revokePermission($permission)->save();
+    }
+  }
+}
+
+/**
+ * Grants "edit any {bundle} content" and "delete any {bundle} content" to
+ * every role that holds "review mukurtu submissions", when a settings
+ * entity for that bundle is enabled: a submission is created owned by the
+ * blocked service account with no cultural protocol assigned yet, and
+ * MukurtuProtocolNodeAccessControlHandler's "empty protocols" fallback
+ * requires these permissions to let a reviewer access it (see
+ * mukurtu_submissions_review_permissions() in the .install file for the
+ * equivalent reasoning about the static, install-time grants).
+ *
+ * Deliberately grant-only: disabling or deleting a settings entity does
+ * not revoke these, so a reviewer never loses access to content they
+ * already reviewed under it, and this only applies to "node" targets -
+ * the dynamic "edit/delete any {bundle} content" permissions are a node
+ * module concept, not something every entity type has an equivalent of.
+ *
+ * Accepted tradeoff: this grant is bundle-wide ("edit any {bundle}
+ * content"), not scoped to submitted-via-this-form content specifically,
+ * and it is never revoked once made. Enabling public submissions for a
+ * bundle - even briefly, to try it out - permanently grants every
+ * "review mukurtu submissions" role blanket edit/delete over that
+ * bundle's entire content for as long as that role exists. Scoping the
+ * grant down to submitted content only (e.g. via a dedicated access
+ * handler keyed off mukurtu_submission records rather than a site-wide
+ * node permission) would close that gap, but is a larger access-control
+ * change than this generalization - left as a deliberate, known
+ * limitation rather than folded in here.
+ */
+function mukurtu_submissions_sync_review_permissions(SubmissionSettingsInterface $settings): void {
+  $entity_type_id = $settings->getTargetEntityTypeId();
+  $bundle = $settings->getTargetBundle();
+  if ($entity_type_id !== 'node' || !$bundle || !$settings->status()) {
+    return;
+  }
+
+  $permissions = ["edit any $bundle content", "delete any $bundle content"];
+  foreach (\Drupal::entityTypeManager()->getStorage('user_role')->loadMultiple() as $role) {
+    if (!$role->hasPermission('review mukurtu submissions')) {
+      continue;
+    }
+    $changed = FALSE;
+    foreach ($permissions as $permission) {
+      if (!$role->hasPermission($permission)) {
+        $role->grantPermission($permission);
+        $changed = TRUE;
+      }
+    }
+    if ($changed) {
+      $role->save();
+    }
+  }
+}
+
+/**
+ * Grants or revokes access to whichever entity browser(s) this bundle's
+ * "submission" form display actually uses (any field using the
+ * "entity_browser_entity_reference" widget - e.g. Collection's "Items in
+ * Collection", Word List's "Words"), mirroring
+ * mukurtu_submissions_sync_submission_permission()'s own anonymous/
+ * authenticated logic exactly, since the same visitor who's allowed to
+ * submit this bundle needs to be able to open whichever content-picker(s)
+ * its fields require, or those fields are unusable.
+ *
+ * Entity Browser gates each browser's own modal route behind a distinct
+ * "access {browser_id} entity browser pages" permission
+ * (EntityBrowser::route(), separate from - and in addition to - the
+ * browser's underlying view's own "access content" access check, which
+ * anonymous/authenticated already hold on this site). Without this, a
+ * visitor hits "Incorrect Permissions" the moment they click a "Select
+ * Content"-style button, even though the field itself renders fine.
+ *
+ * Data-driven rather than hardcoded to any specific bundle/browser, so
+ * any current or future field using this widget is covered automatically.
+ */
+function mukurtu_submissions_sync_entity_browser_permissions(SubmissionSettingsInterface $settings): void {
+  $entity_type_id = $settings->getTargetEntityTypeId();
+  $bundle = $settings->getTargetBundle();
+  if (!$entity_type_id || !$bundle) {
+    return;
+  }
+
+  $display = \Drupal::service('entity_display.repository')->getFormDisplay($entity_type_id, $bundle, 'submission');
+  $browser_ids = [];
+  _mukurtu_submissions_collect_entity_browser_ids($display, $entity_type_id, $bundle, $browser_ids, []);
+  if (!$browser_ids) {
+    return;
+  }
+
+  $role_storage = \Drupal::entityTypeManager()->getStorage('user_role');
+  foreach (array_keys($browser_ids) as $browser_id) {
+    $permission = "access $browser_id entity browser pages";
+    $grants = [
+      'anonymous' => _mukurtu_submissions_entity_browser_still_needed($browser_id, 'anonymous'),
+      'authenticated' => _mukurtu_submissions_entity_browser_still_needed($browser_id, 'authenticated'),
+    ];
+    foreach ($grants as $role_id => $should_grant) {
+      $role = $role_storage->load($role_id);
+      if (!$role) {
+        continue;
+      }
+      $has_permission = $role->hasPermission($permission);
+      if ($should_grant && !$has_permission) {
+        $role->grantPermission($permission)->save();
+      }
+      elseif (!$should_grant && $has_permission) {
+        $role->revokePermission($permission)->save();
+      }
+    }
+  }
+}
+
+/**
+ * Whether $role_id should still hold "access $browser_id entity browser
+ * pages", considering every enabled mukurtu_submission_settings entity -
+ * not just the one that triggered this sync.
+ *
+ * Two bundles' "submission" form displays can reference the same entity
+ * browser (e.g. a shared "content picker"). Deciding whether to revoke
+ * based solely on the settings entity being saved would strip that
+ * browser's access the moment either one is disabled, even while the
+ * other bundle's still-enabled form still needs it.
+ */
+function _mukurtu_submissions_entity_browser_still_needed(string $browser_id, string $role_id): bool {
+  $settings_storage = \Drupal::entityTypeManager()->getStorage('mukurtu_submission_settings');
+  $entity_display_repository = \Drupal::service('entity_display.repository');
+
+  foreach ($settings_storage->loadMultiple() as $other_settings) {
+    if (!$other_settings->status()) {
+      continue;
+    }
+    if ($role_id === 'anonymous' && $other_settings->getAccessLevel() !== 'anonymous') {
+      continue;
+    }
+
+    $other_entity_type_id = $other_settings->getTargetEntityTypeId();
+    $other_bundle = $other_settings->getTargetBundle();
+    if (!$other_entity_type_id || !$other_bundle) {
+      continue;
+    }
+
+    $other_display = $entity_display_repository->getFormDisplay($other_entity_type_id, $other_bundle, 'submission');
+    $other_browser_ids = [];
+    _mukurtu_submissions_collect_entity_browser_ids($other_display, $other_entity_type_id, $other_bundle, $other_browser_ids, []);
+    if (isset($other_browser_ids[$browser_id])) {
+      return TRUE;
+    }
+  }
+
+  return FALSE;
+}
+
+/**
+ * Collects entity_browser IDs from $display's own "entity_browser_entity_
+ * reference" components into $browser_ids (keyed by browser ID), and
+ * recurses into any paragraph-referencing field's own provisioned
+ * "submission" display - a browser field nested inside a paragraph (e.g.
+ * a future content-picker field embedded in some paragraph type) is
+ * otherwise invisible to mukurtu_submissions_sync_entity_browser_
+ * permissions(), which only ever inspected the target bundle's own
+ * top-level components.
+ *
+ * $visited (keyed by "$entity_type_id:$bundle") guards against infinite
+ * recursion from a paragraph type that directly or transitively
+ * references itself.
+ */
+function _mukurtu_submissions_collect_entity_browser_ids($display, string $entity_type_id, string $bundle, array &$browser_ids, array $visited): void {
+  $visited_key = $entity_type_id . ':' . $bundle;
+  if (isset($visited[$visited_key])) {
+    return;
+  }
+  $visited[$visited_key] = TRUE;
+
+  $entity_field_manager = \Drupal::service('entity_field.manager');
+  $entity_display_repository = \Drupal::service('entity_display.repository');
+
+  foreach ($display->getComponents() as $field_name => $component) {
+    $type = $component['type'] ?? NULL;
+    if ($type === 'entity_browser_entity_reference' && !empty($component['settings']['entity_browser'])) {
+      $browser_ids[$component['settings']['entity_browser']] = TRUE;
+      continue;
+    }
+
+    if ($type === 'paragraphs' || $type === 'entity_reference_paragraphs') {
+      $definition = $entity_field_manager->getFieldDefinitions($entity_type_id, $bundle)[$field_name] ?? NULL;
+      if (!$definition) {
+        continue;
+      }
+      $target_bundles = array_keys(array_filter($definition->getSetting('handler_settings')['target_bundles'] ?? []));
+      foreach ($target_bundles as $paragraph_bundle) {
+        $paragraph_display = $entity_display_repository->getFormDisplay('paragraph', $paragraph_bundle, 'submission');
+        _mukurtu_submissions_collect_entity_browser_ids($paragraph_display, 'paragraph', $paragraph_bundle, $browser_ids, $visited);
+      }
     }
   }
 }

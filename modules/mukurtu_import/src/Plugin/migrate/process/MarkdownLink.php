@@ -15,8 +15,11 @@ use Drupal\migrate\Row;
 #[MigrateProcess('markdown_link')]
 class MarkdownLink extends ProcessPluginBase {
   public function transform($value, MigrateExecutableInterface $migrate_executable, Row $row, $destination_property) {
+    if (!is_string($value) || $value === '') {
+      return $value;
+    }
     preg_match('/\[(.*?)\]\s*?\\((.*)\)/', $value, $matches, PREG_UNMATCHED_AS_NULL);
-    if ($matches[1] && $matches[2]) {
+    if (!empty($matches[1]) && !empty($matches[2])) {
       return ['title' => $matches[1], 'uri' => $matches[2]];
     }
     return $value;

@@ -1,3 +1,118 @@
+// The browser's own view (mukurtu_content_browser, mukurtu_dictionary_word_browser,
+// etc.) renders its exposed filters and results table as plain, unthemed
+// markup - genuinely new ground for this theme, not a regression: it was
+// never reachable by anonymous visitors before the permission fix above,
+// and staff only ever saw it dressed up by Gin. This markup is loaded via
+// the entity browser's own bare-page route rendered inside an <iframe>
+// (see EntityBrowser::route(), Modal.php's openModal()), which has no
+// .path-submit (or any other) body class to scope off of - every selector
+// below is deliberately unscoped, keyed off entity_browser's own generic
+// classes instead, so it applies inside that iframe regardless of which
+// front-end page opened it.
+.entity-browser-form {
+  padding: var(--v-space-4xs);
+
+  // Scoped under .entity-browser-form, not bare ".views-exposed-form" -
+  // that class isn't unique to entity_browser (browse pages use it too),
+  // and this layout/hidden-filter treatment is specific to the picker
+  // context, not something every exposed-filter form sitewide should get.
+  .views-exposed-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: var(--v-space-3xs);
+    margin-block-end: var(--v-space-3xs);
+
+    .js-form-item,
+    .form-actions {
+      margin-block-end: 0;
+    }
+
+    // Content Type isn't a useful narrowing filter here: a visitor adding
+    // items to a Collection or words to a Word List is choosing from
+    // whatever content already exists, and most of these browsers only
+    // ever list one or two bundles anyway - one less control between the
+    // visitor and the Title search that actually matters. !important is
+    // required: 01-atoms/select's own ".js-form-type-select { display:
+    // grid !important }" (added for its dropdown-arrow alignment fix)
+    // otherwise wins over plain "display: none" regardless of this
+    // selector's specificity - confirmed live, the filter stayed visible
+    // without it.
+    .form-item-type {
+      display: none !important;
+    }
+  }
+}
+
+// entity_browser's views field plugin (EntityBrowserSelect) always wraps
+// every browser's results in a form carrying this class, regardless of
+// which view/bundle it lists - scoping the table styling off it (rather
+// than the view's own result markup, e.g. "table.cols-7", which varies
+// per browser's own column count) covers any current or future browser
+// automatically.
+.entity-browser-form table {
+  inline-size: 100%;
+  border-collapse: collapse;
+
+  th {
+    text-align: start;
+    font-weight: var(--text-bold);
+    padding-block: var(--v-space-6xs);
+    padding-inline: var(--v-space-5xs);
+    border-block-end: 2px solid var(--mukurtu-view-row-divider-color);
+  }
+
+  td {
+    padding-block: var(--v-space-5xs);
+    padding-inline: var(--v-space-5xs);
+    border-block-end: 1px solid var(--mukurtu-view-row-divider-color);
+    vertical-align: middle;
+  }
+
+  // --brand-light-accent (#f8f7f7) measured ~1.02:1 against the table's
+  // white background - imperceptible in practice, confirmed via live
+  // screenshot. --brand-light is the theme's next step up the neutral
+  // scale and reads as an actual, visible hover state instead.
+  tbody tr:hover {
+    background: var(--brand-light);
+  }
+
+  // Author/Status/Updated aren't meaningful to a visitor picking existing
+  // content to add to their own collection/word list - CMS-internal detail
+  // a submitter has no use for and no context to interpret (e.g. "Status:
+  // Published" reads as a strange thing to be asked about their own
+  // submission). Hidden with CSS rather than removed from the view itself,
+  // so staff (who reach this same view/modal through the Gin admin theme,
+  // not this one) keep seeing them for content moderation/curation.
+  .views-field-uid,
+  .views-field-status,
+  .views-field-created {
+    display: none;
+  }
+}
+
+// mukurtu_gin_custom.css already lays these out as a flex row with a
+// fixed-size media slot - only the parts it doesn't already set need
+// adding here: a placeholder background for a still-loading/missing
+// thumbnail, and the title's own text color (it otherwise inherits
+// default browser black rather than this theme's body text color).
+// Its own selected-row outline/view-toggle button colors still reference
+// Gin's --gin-color-primary (undefined here, so they fall back to Gin's
+// hardcoded blue) rather than this theme's brand color - a deliberate
+// gap, not an oversight: see the --gin-* bridge note in .path-submit
+// below for why it can't be bridged globally, and this iframe page has
+// no other selector to scope a bridge to.
+.eb-form-selection-card {
+  &__media {
+    border-radius: 0.25rem;
+    background: var(--brand-light);
+  }
+
+  &__title {
+    color: var(--text-color);
+  }
+}
+
 // Public submission form and thank-you page (/submit/{entity_type}/{bundle}[/thank-you]):
 // constrain content to a readable width, matching the /comment/reply/… pattern.
 .path-submit {
@@ -15,6 +130,20 @@
   fieldset.form-wrapper,
   details.form-wrapper {
     margin-block-end: var(--v-space-3xs);
+  }
+
+  // 02-molecules/form's sitewide "* + .form-wrapper { margin-block-start:
+  // 2rem }" rule is meant to separate one field's whole wrapper from the
+  // next one - it also matches .js-filter-wrapper (the filter-guidelines
+  // container), since that's a .form-wrapper too and it follows the
+  // textarea's own wrapper as a sibling inside the same text-format
+  // field. That wedges a large gap between a rich-text field's own
+  // textarea and its "No HTML tags allowed."-style note, which read as
+  // one cohesive unit, not two separate sections. Resetting it to 0 lets
+  // .js-filter-guidelines' own smaller margin-block-start (set below)
+  // become the effective, tighter gap via ordinary margin collapsing.
+  .js-text-format-wrapper .js-filter-wrapper {
+    margin-block-start: 0;
   }
 
   // The rule above is meant to separate whole fields/fieldsets from each
@@ -207,6 +336,20 @@
   // plain title div + dropbutton wrapper - so it needs the same
   // section-heading treatment applied directly rather than through the
   // fieldset selectors above.
+  //
+  // Two different class names needed here, not one: Drupal's paragraphs
+  // module ships two widget plugins with different markup for the same
+  // "top" row - ParagraphsWidget (a field configured with widget "type:
+  // paragraphs", e.g. Person/Place's field_sections, Dictionary Word's
+  // field_additional_word_entries) renders ".paragraph-top" with the
+  // title in a nested ".paragraph-type-label" <span>; the older
+  // InlineParagraphsWidget ("type: entity_reference_paragraphs", e.g.
+  // field_sample_sentences, including the one nested inside a Word
+  // Entry) renders ".paragraph-type-top" with the title in a
+  // ".paragraph-type-title" <div> instead. Confirmed via rendered HTML,
+  // not just widget config - the naming looks like it should be one
+  // consistent convention but isn't.
+  .paragraph-top,
   .paragraph-type-top {
     display: flex;
     flex-wrap: wrap;
@@ -217,19 +360,85 @@
     margin-block-end: var(--v-space-5xs);
     border-block-end: 2px solid var(--brand-light);
 
+    .paragraph-type-label,
     .paragraph-type-title {
       font-weight: var(--text-bold);
       font-size: 1.1em;
     }
   }
 
+  // A repeatable paragraph item (e.g. one "Sample Sentence" of several)
+  // has no distinct wrapper class of its own to hang a card style off of -
+  // both paragraph widgets render it as a plain '#type' => 'container',
+  // so it only ever carries the same generic .form-wrapper class every
+  // other field/fieldset/details wrapper on this form already uses.
+  // :has() (an established pattern already used in this file - see
+  // "td:has(.form-submit)" below) scopes this specifically to the
+  // wrapper that directly contains either widget's own "top" row - i.e.
+  // an actual paragraph item's own boundary, not any of those other
+  // .form-wrapper uses - giving each item a visible card so multiple
+  // items in the same field read as clearly separate entries instead of
+  // running together. See the class-name comment above for why both
+  // ".paragraph-top" and ".paragraph-type-top" are listed.
+  .form-wrapper:has(> .paragraph-top, > .paragraph-type-top) {
+    border: 1px solid var(--color-greys-alpha-border);
+    border-radius: 0.5rem;
+    padding: var(--v-space-4xs);
+    margin-block-end: var(--v-space-4xs);
+  }
+
+  // Pre-existing contrast bug, not caused by the box above: the "..."
+  // overflow menu a paragraph item shows once it has 2+ actions (e.g.
+  // "Remove" + "Duplicate" on Word Entries - a single-action item like
+  // Sample Sentences renders "Remove" as a plain button instead and never
+  // hits this path) is styled by paragraphs.actions.css, which sets
+  // .paragraphs-dropdown-action.button's background to transparent so the
+  // dropdown's own light panel background (#f9f8f6) shows through, but
+  // never resets `color` - so it's still whatever the generic button
+  // mixin set (01-atoms/button: --light-text-color, i.e. white, meant for
+  // buttons that keep their own solid dark background). White text over
+  // a near-white background is what actually made this unreadable.
+  .paragraphs-dropdown-action.button {
+    color: var(--brand-text-color);
+
+    &:hover,
+    &:focus {
+      color: var(--brand-text-color);
+    }
+  }
+
   // De-emphasize field help text relative to labels/input content, and
   // tighten its spacing - currently identical in weight/color to the
   // field's own value, which reads as visual noise at this volume of text.
+  // Two elements need listing on top of the plain ".description" case:
+  // - .js-filter-guidelines (a text-format field's "No HTML tags
+  //   allowed."/etc. rules) is a separate container next to .description,
+  //   not inside it - core renders it there, not merged into the field's
+  //   own #description.
+  // - [id$="--description"] catches a text-format field's #description
+  //   specifically when CKEditor5 is the active format (e.g. Collection's
+  //   "Description" field): core's own aria-describedby ID convention
+  //   always suffixes the description element's id with "--description"
+  //   (double hyphen, vs. "-value" for the field's real content), but
+  //   CKEditor5's host-entity binding replaces the element's class list
+  //   entirely with "js-text-full text-full" - dropping the ".description"
+  //   class this rule would otherwise rely on - so the id suffix is the
+  //   only reliable, format-independent hook. Confirmed via DevTools: this
+  //   is what was actually rendering at full body size/weight, not
+  //   .js-filter-guidelines (already covered, already de-emphasized).
+  //
+  // line-height is set explicitly (not just left to inherit
+  // --line-height-base, a fixed 2rem/32px meant for full-size body copy)
+  // because a FIXED px line-height doesn't shrink along with font-size
+  // dropping to 0.9em here - left alone that pairing reads as excessive
+  // gap between lines, not tighter spacing.
   .form-item .description,
-  .field--widget-media-library-widget > .description {
+  .field--widget-media-library-widget > .description,
+  .js-filter-guidelines,
+  [id$="--description"] {
     color: var(--color-text-secondary);
     font-size: 0.9em;
+    line-height: 1.4;
     margin-block-start: var(--v-space-6xs);
   }
 
@@ -358,33 +567,63 @@
       font-weight: var(--text-bold);
     }
 
-    // The remaining visible cell per row (URL + Link text) - let its two
-    // fields sit side by side as one logical entry instead of stacking.
-    // min-inline-size: 0 overrides the flex default of "shrink no smaller
-    // than my content's own intrinsic width" - without it this cell can't
-    // shrink to make room for Remove and forces the row to wrap instead.
+    // Every non-drag/non-weight cell needs flex: 1 1 auto regardless of
+    // what's inside it - the row above it is already a flex container
+    // (see "tr" above), so without an explicit flex-grow a cell only
+    // sizes to its own content's intrinsic width and never fills the
+    // row. min-inline-size: 0 overrides the flex default of "shrink no
+    // smaller than my content's own intrinsic width".
     td:not(.field-multiple-drag):not(.delta-order) {
-      display: flex;
-      flex-wrap: wrap;
-      gap: var(--v-space-3xs);
       flex: 1 1 auto;
       min-inline-size: 0;
 
-      .js-form-item {
-        flex: 1 1 240px;
-        min-inline-size: 0;
-        // Overrides 02-molecules/form's sitewide ".form-item +
-        // .form-item" rule, which adds top margin to the second field
-        // assuming a normal stacked block layout - here URL and Link
-        // text are side-by-side flex siblings, so that margin only
-        // pushed Link text down out of alignment with URL.
-        margin-block-start: 0;
+      // The side-by-side treatment below (splitting this cell's own
+      // .js-form-item children into ~240px flex columns) is for a plain
+      // multi-value field's own value fields - e.g. External Links' URL
+      // + Link text, meant to read as one logical entry instead of
+      // stacking. A paragraph field (e.g. "Biography section", "Sample
+      // Sentence") ALSO renders its "add another item" list as a
+      // .field-multiple-table - one cell per paragraph item - not just
+      // plain multi-value fields, but its own internal Title/Body fields
+      // should stack normally, not split into columns like this. The
+      // exclusion here only turns off the SPLITTING behavior for a
+      // paragraph item's cell - it still gets flex: 1 1 auto above like
+      // every other cell, so it still fills the row; only its internal
+      // layout stays a normal block stack instead of becoming a nested
+      // flex row. Confirmed via DevTools showing field_sections
+      // rendering through this exact table markup, table header
+      // "Biography" included. Both class names are needed - see the
+      // class-name comment further up this file for why - Drupal ships
+      // two different paragraph widget plugins with different markup.
+      &:not(:has(.paragraph-top, .paragraph-type-top)) {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--v-space-3xs);
+
+        .js-form-item {
+          flex: 1 1 240px;
+          min-inline-size: 0;
+          // Overrides 02-molecules/form's sitewide ".form-item +
+          // .form-item" rule, which adds top margin to the second field
+          // assuming a normal stacked block layout - here URL and Link
+          // text are side-by-side flex siblings, so that margin only
+          // pushed Link text down out of alignment with URL.
+          margin-block-start: 0;
+        }
       }
     }
 
     // Never shrunk or wrapped away - the fields cell above gives up space
-    // first (see min-inline-size above), not this button.
-    td:has(.form-submit) {
+    // first (see min-inline-size above), not this button. Same exclusion
+    // as the main rule above: a paragraph item's own Remove button also
+    // matches ":has(.form-submit)" (it's nested inside .paragraph-top/
+    // .paragraph-type-top, several levels down) - without the exclusion
+    // here too, this becomes the ONLY rule left matching that td once the
+    // main rule stops applying, and flex: 0 0 auto (no shrink) sizes the
+    // cell to its full intrinsic content width, blowing out the table's
+    // width entirely (measured ~2300px in a ~1280px column) - a WCAG
+    // 1.4.10 (Reflow) regression, not just a cosmetic one.
+    td:has(.form-submit):not(:has(.paragraph-top, .paragraph-type-top)) {
       flex: 0 0 auto;
     }
   }
@@ -423,5 +662,102 @@
     background: var(--color-white);
     padding-block: var(--v-space-3xs);
     border-block-start: 1px solid var(--color-greys-alpha-border);
+  }
+
+  // mukurtu_gin_custom.css (attached sitewide, not gated to the admin
+  // theme) styles the entity-browser dialog's own background/overlay
+  // using Gin-only custom properties (--gin-bg-layer/--gin-bg-layer2),
+  // undefined outside Gin, so they were silently resolving to Gin's own
+  // hardcoded fallbacks instead of anything on-brand. This can't be
+  // bridged at :root - Gin's own toolbar (rendered on every front-end
+  // page too, for any user with toolbar access, regardless of active
+  // theme) uses these exact same variable names for its own light/dark
+  // mode; overriding them at :root leaked into the toolbar sitewide,
+  // forcing it to a fixed light background regardless of the user's
+  // OS/toolbar dark-mode preference - a real regression caught live on
+  // the homepage, not just this form.
+  //
+  // Scoping to .path-submit alone (an earlier version of this fix) still
+  // wasn't narrow enough: #toolbar-administration is a *sibling* of the
+  // dialog under <body class="path-submit ...">, not a descendant of it,
+  // but custom properties declared at the .path-submit/body level still
+  // cascade down into it - Gin's own toolbar.css/classic_toolbar.css use
+  // this exact --gin-bg-layer variable for the toolbar tray's background,
+  // so every /submit/* page forced the tray white regardless of the
+  // user's dark-mode toolbar preference (while the top bar, styled by a
+  // different variable, stayed dark) - caught live via a screenshot
+  // showing the mismatch, not by source review. Declared directly on the
+  // dialog/overlay elements themselves instead: they're appended straight
+  // to <body> (confirmed via DevTools) as siblings of the toolbar, so
+  // scoping the override to just them still reaches the dialog's own
+  // background and the page-dimming overlay behind it, without ever
+  // being a cascade ancestor of the toolbar.
+  .ui-widget-overlay,
+  .ui-dialog.entity-browser-modal {
+    --gin-bg-layer: var(--color-white);
+    --gin-bg-layer2: rgb(0 0 0 / 50%);
+  }
+
+  // The entity-browser modal's dialog chrome (jQuery UI's OpenDialogCommand,
+  // see Modal.php) renders here in the submission form page itself, not
+  // inside the <iframe> - the --gin-bg-layer/--gin-bg-layer2 bridge above
+  // already brand-colors the dialog's own background and the page-dimming
+  // overlay behind it. The titlebar is the one part that doesn't go through
+  // that bridge: DevTools confirms its background is a hardcoded
+  // rgb(27, 27, 29), not a var(--gin-*, ...) fallback, and its source
+  // doesn't resolve to any rule in core, entity_browser, or this theme's own
+  // CSS - it's coming from a stylesheet created dynamically at runtime
+  // (likely part of the Gin/CKEditor5 integration this site also loads),
+  // which loads after this theme's own and so wins the cascade at equal
+  // specificity regardless of source order; !important is needed to
+  // reliably override it. Scoped to .entity-browser-modal - the modifier
+  // class EntityBrowser's Modal display itself adds to the dialog - rather
+  // than bare .ui-dialog, so this doesn't reach any other dialog on the site.
+  .ui-dialog.entity-browser-modal {
+    border-radius: 0.5rem;
+    overflow: hidden;
+
+    .ui-dialog-titlebar {
+      background: var(--brand-primary-dark) !important;
+      color: var(--color-white);
+    }
+
+    .ui-dialog-title {
+      font-weight: var(--text-bold);
+      margin: 0.625rem;
+    }
+
+    // The visible "X" itself is a separate nested .ui-icon element with
+    // its own hardcoded background-image (an inline SVG, already legible
+    // against the maroon titlebar - confirmed live) - color has no effect
+    // on it, so this only clears whatever background the button element
+    // itself would otherwise get (e.g. a hover-state circle).
+    .ui-dialog-titlebar-close {
+      background: transparent !important;
+    }
+
+    // Stale throbber left over from the *outer* "Select Content" button's
+    // own AJAX request (the one that opens this dialog) - Drupal's AJAX
+    // system injects it as a sibling of the button/target, but here that
+    // ends up as a sibling of the dialog's own iframe rather than getting
+    // cleaned up when the dialog opens. Once the iframe exists it's
+    // definitely stale (confirmed live, inspected via DevTools) - the
+    // iframe has its own separate loading behavior, unrelated to this
+    // Drupal-AJAX-specific indicator.
+    .ajax-progress.ajax-progress-throbber {
+      display: none;
+    }
+  }
+
+  // The throbber that appears next to "Select Content"/"Select Words"
+  // while the modal's own AJAX request is in flight - that request opens
+  // fast enough (single lightweight view, no thumbnails to wait on) that
+  // the spinner just flashes past, reading as visual noise rather than
+  // useful loading feedback. Scoped to entity_browser's own field-widget
+  // wrapper class, not ".path-submit" generally - ".ajax-progress-throbber"
+  // is Drupal's generic AJAX spinner, reused by every other AJAX operation
+  // on this form too (e.g. media upload progress), which still needs it.
+  .field--widget-entity-browser-entity-reference .ajax-progress.ajax-progress-throbber {
+    display: none;
   }
 }

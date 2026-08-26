@@ -9,6 +9,7 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\RevisionableContentEntityBase;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\mukurtu_core\Entity\RoundtripEntityInterface;
 use Drupal\mukurtu_multipage_items\MultipageItemInterface;
 use Drupal\node\NodeInterface;
 use Drupal\user\UserInterface;
@@ -62,7 +63,7 @@ use Drupal\user\UserInterface;
     'revision_log_message' => 'revision_log',
   ],
 )]
-class MultipageItem extends RevisionableContentEntityBase implements MultipageItemInterface {
+class MultipageItem extends RevisionableContentEntityBase implements MultipageItemInterface, RoundtripEntityInterface {
 
   use EntityChangedTrait;
 
