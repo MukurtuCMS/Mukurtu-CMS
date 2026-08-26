@@ -22,6 +22,12 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class SubmissionSettingsCollectionForm extends ConfigFormBase {
 
+  /**
+   * Role granted to (and revoked from) users as they're added to/removed
+   * from notify_uids - see syncNotifyReviewerRoles().
+   */
+  const REVIEWER_ROLE = 'mukurtu_submission_reviewer';
+
   public function __construct(
     ConfigFactoryInterface $config_factory,
     TypedConfigManagerInterface $typed_config_manager,
@@ -74,7 +80,7 @@ class SubmissionSettingsCollectionForm extends ConfigFormBase {
       '#selection_handler' => 'mukurtu_submissions_notify_reviewer',
       '#tags' => TRUE,
       '#title' => $this->t('Additional reviewers to notify'),
-      '#description' => $this->t('These users will be notified in addition to Administrators and Mukurtu Managers whenever a visitor submits new content for review.'),
+      '#description' => $this->t('These users will be granted the Submission Reviewer role, and will be notified in addition to Administrators and Mukurtu Managers, whenever a visitor submits new content for review.'),
       '#default_value' => User::loadMultiple($config->get('notify_uids') ?: []),
     ];
     $form['notifications']['notify_emails'] = [
@@ -121,14 +127,52 @@ class SubmissionSettingsCollectionForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state): void {
-    $uids = array_map('intval', array_column($form_state->getValue('notify_uids') ?: [], 'target_id'));
+    $config = $this->config('mukurtu_submissions.settings');
+    $old_uids = array_map('intval', $config->get('notify_uids') ?: []);
+    $new_uids = array_map('intval', array_column($form_state->getValue('notify_uids') ?: [], 'target_id'));
 
-    $this->config('mukurtu_submissions.settings')
-      ->set('notify_uids', array_values($uids))
+    $config
+      ->set('notify_uids', array_values($new_uids))
       ->set('notify_emails', $this->extractNotifyEmails($form_state))
       ->save();
 
+    $this->syncNotifyReviewerRoles($old_uids, $new_uids);
+
     parent::submitForm($form, $form_state);
+  }
+
+  /**
+   * Keeps notify_uids membership and the Submission Reviewer role in sync:
+   * a user newly added to the list is granted the role, a user removed
+   * from it has the role revoked. This never touches any other role a
+   * user holds - only this dedicated role is granted/revoked here. If a
+   * site admin has also assigned this specific role to a notify_uids
+   * member some other way (e.g. directly via /admin/people), removing
+   * them from this list will still revoke it.
+   */
+  protected function syncNotifyReviewerRoles(array $old_uids, array $new_uids): void {
+    $user_storage = $this->entityTypeManager->getStorage('user');
+    $added = array_diff($new_uids, $old_uids);
+    $removed = array_diff($old_uids, $new_uids);
+
+    foreach ($user_storage->loadMultiple($added) as $user) {
+      if (!$user->hasRole(static::REVIEWER_ROLE)) {
+        $user->addRole(static::REVIEWER_ROLE)->save();
+      }
+    }
+    foreach ($user_storage->loadMultiple($removed) as $user) {
+      if ($user->hasRole(static::REVIEWER_ROLE)) {
+        $user->removeRole(static::REVIEWER_ROLE)->save();
+      }
+    }
+
+    if ($added) {
+      $this->messenger()->addStatus($this->formatPlural(
+        count($added),
+        'Granted the Submission Reviewer role to 1 newly added reviewer.',
+        'Granted the Submission Reviewer role to @count newly added reviewers.'
+      ));
+    }
   }
 
 }

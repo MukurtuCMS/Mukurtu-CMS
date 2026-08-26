@@ -49,6 +49,7 @@ dependencies:
     - mukurtu_media
     - mukurtu_multipage_items
     - mukurtu_protocol
+    - mukurtu_submissions
     - node
     - og
     - paragraphs
@@ -77,6 +78,7 @@ permissions:
   - 'administer mukurtu_import_strategy'
   - 'administer mukurtu_media configuration'
   - 'administer mukurtu media download settings'
+  - 'administer mukurtu submissions'
   - 'configure editable landing_page node layout overrides'
   - 'configure editable page node layout overrides'
   - 'create and edit custom blocks'
@@ -95,5 +97,6 @@ permissions:
   - 'edit own article content'
   - 'edit own landing_page content'
   - 'edit own page content'
+  - 'review mukurtu submissions'
   - 'select account cancellation method'
   - 'view any mukurtu_import_log'

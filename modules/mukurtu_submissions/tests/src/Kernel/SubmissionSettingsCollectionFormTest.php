@@ -149,4 +149,69 @@ class SubmissionSettingsCollectionFormTest extends MukurtuSubmissionsKernelTestB
     $this->assertSame([], \Drupal::config('mukurtu_submissions.settings')->get('notify_emails'));
   }
 
+  public function testAddingNotifyUidGrantsReviewerRole(): void {
+    $alice = User::create(['name' => 'alice', 'status' => 1]);
+    $alice->save();
+
+    $this->submitNotifyUids([(int) $alice->id()]);
+
+    $alice = User::load($alice->id());
+    $this->assertTrue($alice->hasRole(SubmissionSettingsCollectionForm::REVIEWER_ROLE));
+  }
+
+  public function testRemovingNotifyUidRevokesOnlyTheReviewerRole(): void {
+    $alice = User::create(['name' => 'alice', 'status' => 1]);
+    $alice->addRole(SubmissionSettingsCollectionForm::REVIEWER_ROLE);
+    $alice->addRole('other_role_marker');
+    $alice->save();
+
+    \Drupal::configFactory()->getEditable('mukurtu_submissions.settings')
+      ->set('notify_uids', [(int) $alice->id()])
+      ->save();
+
+    $this->submitNotifyUids([]);
+
+    $alice = User::load($alice->id());
+    $this->assertFalse($alice->hasRole(SubmissionSettingsCollectionForm::REVIEWER_ROLE));
+    $this->assertTrue($alice->hasRole('other_role_marker'));
+  }
+
+  public function testResubmittingSameListDoesNotDuplicateRoleOrError(): void {
+    $alice = User::create(['name' => 'alice', 'status' => 1]);
+    $alice->save();
+
+    $this->submitNotifyUids([(int) $alice->id()]);
+    $this->submitNotifyUids([(int) $alice->id()]);
+
+    $alice = User::load($alice->id());
+    $this->assertCount(1, array_filter($alice->getRoles(), fn ($r) => $r === SubmissionSettingsCollectionForm::REVIEWER_ROLE));
+  }
+
+  /**
+   * ConfigFormBase::submitForm() always adds its own generic "configuration
+   * saved" status message, so this checks for the specific reviewer-grant
+   * message rather than "any status message present".
+   */
+  protected function hasReviewerGrantMessage(): bool {
+    foreach (\Drupal::messenger()->all()['status'] ?? [] as $message) {
+      if (str_contains((string) $message, 'Submission Reviewer role')) {
+        return TRUE;
+      }
+    }
+    return FALSE;
+  }
+
+  public function testStatusMessageShownOnlyWhenUidsAdded(): void {
+    $alice = User::create(['name' => 'alice', 'status' => 1]);
+    $alice->save();
+
+    $this->submitNotifyUids([(int) $alice->id()]);
+    $this->assertTrue($this->hasReviewerGrantMessage());
+
+    \Drupal::messenger()->deleteAll();
+
+    $this->submitNotifyUids([(int) $alice->id()]);
+    $this->assertFalse($this->hasReviewerGrantMessage());
+  }
+
 }
