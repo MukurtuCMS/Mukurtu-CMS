@@ -371,21 +371,28 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
     $uuid_key = $this->entityTypeManager()->getDefinition($entity_type_id)->getKey('uuid');
     $process = $this->getProcess();
 
+    // A saved template's mapping can reference columns that don't exist in
+    // this particular file (e.g. a stale template applied without going
+    // through "Customize Settings"). Candidate ID columns are only usable if
+    // they're actually present in the file, otherwise the CSV source plugin
+    // fails every row instead of falling back to record numbers.
+    $headers = $this->getCSVHeaders($file);
+
     $ids = [];
     // User-configured identifier column has highest priority.
     $identifier_column = $this->getIdentifierColumn();
-    if ($identifier_column) {
+    if ($identifier_column && in_array($identifier_column, $headers, TRUE)) {
       $ids = [$identifier_column];
     }
 
     // Entity ID has next priority.
     if (empty($ids) && !empty($process[$id_key])) {
-      $ids = array_filter(array_map(fn($v) => $v['target'] == $id_key ? $v['source'] : NULL, $mapping));
+      $ids = array_filter(array_map(fn($v) => $v['target'] == $id_key && in_array($v['source'], $headers, TRUE) ? $v['source'] : NULL, $mapping));
     }
 
     // UUID has next priority.
     if (empty($ids) && !empty($process[$uuid_key])) {
-      $ids = array_filter(array_map(fn ($v) => $v['target'] == $uuid_key ? $v['source'] : NULL, $mapping));
+      $ids = array_filter(array_map(fn ($v) => $v['target'] == $uuid_key && in_array($v['source'], $headers, TRUE) ? $v['source'] : NULL, $mapping));
     }
 
     // If we have no ID or UUID, use the lookup column (for cross-migration
@@ -397,6 +404,16 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
       else {
         $ids[] = '_record_number';
       }
+    }
+    else {
+      // The identifier/ID/UUID column above is legitimately blank for rows
+      // that create new content in a combined "add + update" CSV. Two blank
+      // rows would otherwise hash to the same migrate ID map key, so the
+      // second row would resolve to the first row's just-created entity
+      // instead of creating its own. _record_number is unique per row within
+      // the file, so append it as a tie-breaker to keep every row's map key
+      // distinct regardless of blank values in the primary column(s).
+      $ids[] = '_record_number';
     }
 
     return [
@@ -423,6 +440,27 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
     ];
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function getUnmatchedIdentifierColumns(FileInterface $file): array {
+    $headers = $this->getCSVHeaders($file);
+    $unmatched = [];
+
+    // Only a user-configured identifier column (set via "Customize
+    // Settings") represents a deliberate intent to match existing content.
+    // Every shipped template also maps nid/uuid by default for round-trip
+    // export/reimport, but that default mapping going unmatched is the
+    // normal, expected case for a plain new-content import and isn't worth
+    // warning about.
+    $identifier_column = $this->getIdentifierColumn();
+    if ($identifier_column && !in_array($identifier_column, $headers, TRUE)) {
+      $unmatched[] = $identifier_column;
+    }
+
+    return array_values(array_unique($unmatched));
+  }
+
   public function mappedFieldsCount(FileInterface $file) {
     $fileHeaders = $this->getCSVHeaders($file);
     $process = $this->getMapping();
@@ -436,15 +474,21 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
   /**
    * {@inheritdoc}
    */
-  public function getIdentifierColumn(): ?string {
+  public function getIdentifierColumn(?FileInterface $file = NULL): ?string {
     $column = $this->getConfig('identifier_column');
-    return !empty($column) ? $column : NULL;
+    if (empty($column)) {
+      return NULL;
+    }
+    if ($file && !in_array($column, $this->getCSVHeaders($file), TRUE)) {
+      return NULL;
+    }
+    return $column;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getLabelSourceColumn(): ?string {
+  public function getLabelSourceColumn(?FileInterface $file = NULL): ?string {
     $entity_type_id = $this->getTargetEntityTypeId();
     $label_key = $this->entityTypeManager()
       ->getDefinition($entity_type_id)
@@ -464,8 +508,12 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
       return NULL;
     }
 
+    $headers = $file ? $this->getCSVHeaders($file) : [];
     foreach ($this->getMapping() as $mapping) {
       if ($mapping['target'] === $label_key) {
+        if ($file && !in_array($mapping['source'], $headers, TRUE)) {
+          return NULL;
+        }
         return $mapping['source'];
       }
     }
@@ -476,7 +524,7 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
   /**
    * {@inheritdoc}
    */
-  public function getMediaSourceColumn(): ?string {
+  public function getMediaSourceColumn(?FileInterface $file = NULL): ?string {
     if ($this->getTargetEntityTypeId() !== 'media') {
       return NULL;
     }
@@ -520,10 +568,14 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
       }
     }
 
+    $headers = $file ? $this->getCSVHeaders($file) : [];
     foreach ($this->getMapping() as $mapping) {
       $target = $mapping['target'];
       // Match the source field directly or its target_id subfield.
       if ($target === $source_field || $target === $source_field . '/target_id') {
+        if ($file && !in_array($mapping['source'], $headers, TRUE)) {
+          return NULL;
+        }
         return $mapping['source'];
       }
     }

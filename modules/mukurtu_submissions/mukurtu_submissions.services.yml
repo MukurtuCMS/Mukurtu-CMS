@@ -1,0 +1,7 @@
+services:
+  mukurtu_submissions.form_display_manager:
+    class: Drupal\mukurtu_submissions\SubmissionFormDisplayManager
+    arguments: ['@entity_display.repository', '@entity_field.manager', '@entity_type.manager', '@entity_type.bundle.info']
+  mukurtu_submissions.session_created_entities:
+    class: Drupal\mukurtu_submissions\SessionCreatedEntities
+    arguments: ['@request_stack']

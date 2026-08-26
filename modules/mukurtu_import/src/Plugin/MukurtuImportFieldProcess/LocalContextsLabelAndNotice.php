@@ -33,6 +33,7 @@ class LocalContextsLabelAndNotice extends MukurtuImportFieldProcessPluginBase {
       $process[] = [
         'plugin' => 'explode',
         'delimiter' => $multivalue_delimiter,
+        'strict' => FALSE,
       ];
     }
     $process[] = [

@@ -9,11 +9,11 @@ use Drupal\mukurtu_export\Entity\CsvExporter;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests mukurtu_export_update_40019(), which replaces the separate Status/
+ * Tests mukurtu_export_update_40025(), which replaces the separate Status/
  * Pending export columns with a single Account Status column in existing
  * sites' default CSV exporter presets.
  *
- * @see mukurtu_export_update_40019()
+ * @see mukurtu_export_update_40025()
  */
 #[Group('mukurtu_export')]
 class AccountStatusExportFieldMappingUpdateTest extends KernelTestBase {
@@ -58,7 +58,7 @@ class AccountStatusExportFieldMappingUpdateTest extends KernelTestBase {
       ],
     ])->save();
 
-    mukurtu_export_update_40019();
+    mukurtu_export_update_40025();
 
     $exporter = CsvExporter::load('default_local_metadata_only');
     $headers = $exporter->getHeaders('user', 'user');
@@ -81,7 +81,7 @@ class AccountStatusExportFieldMappingUpdateTest extends KernelTestBase {
       ],
     ])->save();
 
-    mukurtu_export_update_40019();
+    mukurtu_export_update_40025();
 
     $exporter = CsvExporter::load('default_local_metadata_only');
     $this->assertEquals(['account_status' => 'Custom Account Status Label'], $exporter->getHeaders('user', 'user'));
@@ -89,7 +89,7 @@ class AccountStatusExportFieldMappingUpdateTest extends KernelTestBase {
 
   /**
    * The update hook is a no-op for a preset with no user__user mapping at
-   * all (predates mukurtu_export_update_40018()).
+   * all (predates mukurtu_export_update_40024()).
    */
   public function testUpdateIsNoOpForMissingUserMapping(): void {
     CsvExporter::create([
@@ -100,7 +100,7 @@ class AccountStatusExportFieldMappingUpdateTest extends KernelTestBase {
       ],
     ])->save();
 
-    mukurtu_export_update_40019();
+    mukurtu_export_update_40025();
 
     $exporter = CsvExporter::load('default_local_metadata_only');
     $this->assertEquals(['title' => 'Title'], $exporter->getHeaders('node', 'article'));
@@ -112,7 +112,7 @@ class AccountStatusExportFieldMappingUpdateTest extends KernelTestBase {
    */
   public function testUpdateIsNoOpForMissingPreset(): void {
     $this->assertNull(CsvExporter::load('default_local_metadata_only'));
-    mukurtu_export_update_40019();
+    mukurtu_export_update_40025();
     $this->assertNull(CsvExporter::load('default_local_metadata_only'));
   }
 

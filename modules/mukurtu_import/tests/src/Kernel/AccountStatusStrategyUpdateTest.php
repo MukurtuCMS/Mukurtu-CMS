@@ -9,12 +9,12 @@ use Drupal\mukurtu_import\Entity\MukurtuImportStrategy;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests mukurtu_import_update_40033(), which simplifies the 'User - all
+ * Tests mukurtu_import_update_40044(), which simplifies the 'User - all
  * fields' strategy mapping on existing sites: drops fields hidden from the
  * import target list, and replaces Status/Pending with the unified Account
  * Status target.
  *
- * @see mukurtu_import_update_40033()
+ * @see mukurtu_import_update_40044()
  */
 #[Group('mukurtu_import')]
 class AccountStatusStrategyUpdateTest extends KernelTestBase {
@@ -67,7 +67,7 @@ class AccountStatusStrategyUpdateTest extends KernelTestBase {
       ],
     ])->save();
 
-    mukurtu_import_update_40033();
+    mukurtu_import_update_40044();
 
     $strategy = MukurtuImportStrategy::load('user_all_fields');
     $targets = array_column($strategy->getMapping(), 'target');
@@ -105,7 +105,7 @@ class AccountStatusStrategyUpdateTest extends KernelTestBase {
       ],
     ])->save();
 
-    mukurtu_import_update_40033();
+    mukurtu_import_update_40044();
 
     $strategy = MukurtuImportStrategy::load('user_all_fields');
     $this->assertEquals(
@@ -119,7 +119,7 @@ class AccountStatusStrategyUpdateTest extends KernelTestBase {
    */
   public function testUpdateIsNoOpForMissingStrategy(): void {
     $this->assertNull(MukurtuImportStrategy::load('user_all_fields'));
-    mukurtu_import_update_40033();
+    mukurtu_import_update_40044();
     $this->assertNull(MukurtuImportStrategy::load('user_all_fields'));
   }
 

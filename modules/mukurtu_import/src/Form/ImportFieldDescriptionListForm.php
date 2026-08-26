@@ -112,9 +112,8 @@ class ImportFieldDescriptionListForm extends ImportBaseForm {
 
     // Explain the identifier-column rule up front: ID/UUID are individually
     // optional (blank means "create new content"), but the importer needs
-    // one of ID, UUID, or a unique field like the title or name below to
-    // identify each row, so neither would otherwise show as "required"
-    // below.
+    // one of ID, UUID, or a unique field like the title mapped to identify
+    // each row, so neither would otherwise show as "required" below.
     $form['identifier_note'] = [
       '#markup' => '<p>' . $this->t('At least one of the following must be mapped to uniquely identify each row: ID, UUID, or a unique field such as the title or name below. If none are mapped, every imported row will be treated as new content.') . '</p>',
     ];
@@ -131,6 +130,10 @@ class ImportFieldDescriptionListForm extends ImportBaseForm {
       ];
     }
 
+    // Both tables default to fully checked so the primary "Download CSV
+    // Template" action produces a complete template without requiring the
+    // user to manually check every row first; unchecking rows still allows
+    // building a partial/custom template.
     if ($required_options) {
       $form['required_heading'] = [
         '#type' => 'html_tag',
@@ -142,6 +145,7 @@ class ImportFieldDescriptionListForm extends ImportBaseForm {
         '#type' => 'tableselect',
         '#header' => $table_header,
         '#options' => $required_options,
+        '#default_value' => array_combine(array_keys($required_options), array_keys($required_options)),
         '#empty' => $this->t('No fields found'),
         '#attributes' => ['aria-labelledby' => 'mukurtu-import-required-fields-heading'],
       ];
@@ -158,6 +162,7 @@ class ImportFieldDescriptionListForm extends ImportBaseForm {
         '#type' => 'tableselect',
         '#header' => $table_header,
         '#options' => $optional_options,
+        '#default_value' => array_combine(array_keys($optional_options), array_keys($optional_options)),
         '#empty' => $this->t('No fields found'),
         '#attributes' => ['aria-labelledby' => 'mukurtu-import-optional-fields-heading'],
       ];

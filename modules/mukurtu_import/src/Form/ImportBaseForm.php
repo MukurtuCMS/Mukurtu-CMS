@@ -145,6 +145,7 @@ class ImportBaseForm extends FormBase {
     $this->store->set('import_config', []);
     $this->store->set('batch_results_messages', []);
     $this->store->set('batch_results_summary', []);
+    $this->store->set('batch_results_warnings', []);
     $this->store->set('metadata_file_weights', []);
   }
 
@@ -303,6 +304,20 @@ class ImportBaseForm extends FormBase {
 
   public function getMessages() {
     return $this->store->get('batch_results_messages') ?? [];
+  }
+
+  /**
+   * Get the non-blocking import warnings for the current import.
+   *
+   * Unlike getMessages(), these describe successful imports that may not
+   * have behaved exactly as configured (e.g. a template's identifier column
+   * didn't match the file), rather than failures.
+   *
+   * @return array
+   *   Array of ['fid' => int, 'message' => TranslatableMarkup] entries.
+   */
+  public function getWarnings(): array {
+    return $this->store->get('batch_results_warnings') ?? [];
   }
 
   /**

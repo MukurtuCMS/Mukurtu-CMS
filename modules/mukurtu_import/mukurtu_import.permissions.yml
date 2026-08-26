@@ -17,3 +17,6 @@ import mukurtu users:
   title: 'Import User Accounts'
   description: 'Allows batch creating and updating user accounts via the import tool, including assigning roles (other than Administrator). Restrict this to trusted administrators.'
   restrict access: true
+view any mukurtu_import_log:
+  title: 'View any Import Logs'
+  restrict access: true
