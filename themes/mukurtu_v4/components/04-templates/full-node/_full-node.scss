@@ -151,6 +151,16 @@
   &--archived {
     background: var(--color-gray);
   }
+
+  // Content from mukurtu_submissions' public submission form - overrides
+  // the state-specific modifiers above for as long as it's awaiting/under
+  // review (see mukurtu_drafts_preprocess_node()). --brand-primary-dark
+  // isn't used by any other banner state and, against this shared white
+  // text, clears WCAG AA's 4.5:1 (this text doesn't meet the "large text"
+  // threshold, so the lower 3:1 minimum doesn't apply).
+  &--submission {
+    background: var(--brand-primary-dark);
+  }
 }
 
 .full-node {

@@ -25,7 +25,7 @@ class ExternalEmbed extends Media implements ExternalEmbedInterface, CulturalPro
     $definitions = self::getProtocolFieldDefinitions();
 
     $definitions['field_media_external_embed'] = BaseFieldDefinition::create('text_long')
-      ->setLabel('External Embed')
+      ->setLabel(t('External Embed'))
       ->setDescription(t('Embed code from an external website. Note that while the media asset will be managed by cultural protocols, the originating website may not have similar privacy settings. External embeds are usually some kind of code wrapped in &lt;iframe&gt;&lt;/iframe&gt; tags.'))
       ->setCardinality(1)
       ->setRequired(TRUE)
@@ -118,8 +118,8 @@ class ExternalEmbed extends Media implements ExternalEmbedInterface, CulturalPro
       ->setDisplayConfigurable('form', TRUE);
 
     $definitions['field_identifier'] = BaseFieldDefinition::create('string')
-      ->setLabel('Identifier')
-      ->setDescription('A unique, unambiguous reference to the media asset. Identifiers are often provided by the contributing institution or organization so the original item can be located. Examples include call numbers or accession numbers. Maximum 255 characters.')
+      ->setLabel(t('Identifier'))
+      ->setDescription(t('A unique, unambiguous reference to the media asset. Identifiers are often provided by the contributing institution or organization so the original item can be located. Examples include call numbers or accession numbers. Maximum 255 characters.'))
       ->setSettings([
         'max_length' => 255,
       ])

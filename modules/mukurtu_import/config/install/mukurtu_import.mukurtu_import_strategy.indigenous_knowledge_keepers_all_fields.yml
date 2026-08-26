@@ -21,10 +21,13 @@ mapping:
     source: Date
     target: field_original_date
   -
+    source: 'Default translation'
+    target: '-1'
+  -
     source: ID
     target: id
   -
-    source: 'Language code (langcode)'
+    source: 'Language code'
     target: langcode
   -
     source: 'Name of the Elder or Knowledge Keeper'

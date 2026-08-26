@@ -398,6 +398,22 @@ function mukurtu_collection_update_40018(): void {
 }
 
 /**
+ * Corrects field_coverage_description's textarea from 31 rows down to the
+ * 5 every other content type uses for the same field - an outlier typo in
+ * this bundle's shipped default form display, not a deliberate size,
+ * making the "Location Description" field render at a comically tall
+ * size on both the regular edit form and (once generalized in #1924) the
+ * submission form. Guarded to skip a site that already customized it away
+ * from the original broken default.
+ */
+function mukurtu_collection_update_40019(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.collection.default');
+  if ((int) $config->get('content.field_coverage_description.settings.rows') === 31) {
+    $config->set('content.field_coverage_description.settings.rows', 5)->save();
+  }
+}
+
+/**
  * Give personal collections the same grid/list/map switcher as collections.
  *
  * Re-imports the mukurtu_collection_items view (now with personal-collection
@@ -405,7 +421,7 @@ function mukurtu_collection_update_40018(): void {
  * collection full display to the mukurtu_collection_items_browse formatter,
  * matching the regular collection page (#1993).
  */
-function mukurtu_collection_update_40019(): void {
+function mukurtu_collection_update_40020(): void {
   $config_source = new \Drupal\Core\Config\FileStorage(
     \Drupal::service('extension.list.module')->getPath('mukurtu_collection') . '/config/install'
   );
