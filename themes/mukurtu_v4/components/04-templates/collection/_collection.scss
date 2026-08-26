@@ -130,7 +130,8 @@
   &__default {
     &__header {
       display: flex;
-      flex-flow: column wrap;
+      // nowrap: same reasoning as .collection__header above (issue #1997).
+      flex-flow: column nowrap;
       column-gap: var(--v-space-xs);
 
       @include include-media.media('>=md') {
