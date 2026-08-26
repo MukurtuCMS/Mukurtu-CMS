@@ -6,6 +6,139 @@
  */
 
 /**
+ * Implements hook_schema().
+ */
+function mukurtu_import_schema(): array {
+  $schema['mukurtu_import_log'] = [
+    'description' => 'Persistent record of each file processed by the Mukurtu import wizard.',
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'Primary key.',
+      ],
+      'import_id' => [
+        'type' => 'varchar_ascii',
+        'length' => 36,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Wizard session UUID grouping all files from one import run.',
+      ],
+      'migration_id' => [
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'The stub migration ID for this file.',
+      ],
+      'uid' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The user who ran the import.',
+      ],
+      'fid' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+        'description' => 'The source file id, if it still exists.',
+      ],
+      'filename' => [
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Snapshot of the source filename at import time.',
+      ],
+      'entity_type_id' => [
+        'type' => 'varchar_ascii',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'The destination entity type.',
+      ],
+      'bundle' => [
+        'type' => 'varchar_ascii',
+        'length' => 64,
+        'not null' => FALSE,
+        'description' => 'The destination bundle.',
+      ],
+      'success' => [
+        'type' => 'int',
+        'size' => 'tiny',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => '1 if the file imported with zero failures, else 0.',
+      ],
+      'count_processed' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Total rows processed.',
+      ],
+      'count_created' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Rows that created a new entity.',
+      ],
+      'count_updated' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Rows that updated an existing entity.',
+      ],
+      'count_failed' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Rows that failed to import.',
+      ],
+      'count_ignored' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Rows that were ignored.',
+      ],
+      'messages' => [
+        'type' => 'text',
+        'size' => 'big',
+        'not null' => FALSE,
+        'description' => 'Newline-joined error/warning text for this file.',
+      ],
+      'details' => [
+        'type' => 'text',
+        'size' => 'big',
+        'not null' => FALSE,
+        'description' => 'JSON-encoded per-row created/updated/failed detail for this file.',
+      ],
+      'timestamp' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'When this file finished processing.',
+      ],
+    ],
+    'primary key' => ['id'],
+    'indexes' => [
+      'import_id' => ['import_id'],
+      'uid_timestamp' => ['uid', 'timestamp'],
+      'timestamp' => ['timestamp'],
+    ],
+  ];
+  return $schema;
+}
+
+/**
  * Add granular import template permissions to roles with administer permission.
  */
 function mukurtu_import_update_40001(): void {
@@ -918,4 +1051,177 @@ function mukurtu_import_update_40037(): void {
       $config->set('mapping', $mapping)->save();
     }
   }
+}
+
+/**
+ * Create the mukurtu_import_log table.
+ */
+function mukurtu_import_update_40038(): void {
+  $schema = \Drupal::database()->schema();
+  if ($schema->tableExists('mukurtu_import_log')) {
+    return;
+  }
+  $table = [
+    'description' => 'Persistent record of each file processed by the Mukurtu import wizard.',
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'Primary key.',
+      ],
+      'import_id' => [
+        'type' => 'varchar_ascii',
+        'length' => 36,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Wizard session UUID grouping all files from one import run.',
+      ],
+      'migration_id' => [
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'The stub migration ID for this file.',
+      ],
+      'uid' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The user who ran the import.',
+      ],
+      'fid' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+        'description' => 'The source file id, if it still exists.',
+      ],
+      'filename' => [
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Snapshot of the source filename at import time.',
+      ],
+      'entity_type_id' => [
+        'type' => 'varchar_ascii',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'The destination entity type.',
+      ],
+      'bundle' => [
+        'type' => 'varchar_ascii',
+        'length' => 64,
+        'not null' => FALSE,
+        'description' => 'The destination bundle.',
+      ],
+      'success' => [
+        'type' => 'int',
+        'size' => 'tiny',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => '1 if the file imported with zero failures, else 0.',
+      ],
+      'count_processed' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Total rows processed.',
+      ],
+      'count_created' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Rows that created a new entity.',
+      ],
+      'count_updated' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Rows that updated an existing entity.',
+      ],
+      'count_failed' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Rows that failed to import.',
+      ],
+      'count_ignored' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Rows that were ignored.',
+      ],
+      'messages' => [
+        'type' => 'text',
+        'size' => 'big',
+        'not null' => FALSE,
+        'description' => 'Newline-joined error/warning text for this file.',
+      ],
+      'timestamp' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'When this file finished processing.',
+      ],
+    ],
+    'primary key' => ['id'],
+    'indexes' => [
+      'import_id' => ['import_id'],
+      'uid_timestamp' => ['uid', 'timestamp'],
+      'timestamp' => ['timestamp'],
+    ],
+  ];
+  $schema->createTable('mukurtu_import_log', $table);
+}
+
+/**
+ * Grant 'view any mukurtu_import_log' to the mukurtu_manager role.
+ */
+function mukurtu_import_update_40039(): void {
+  $role = \Drupal::entityTypeManager()->getStorage('user_role')->load('mukurtu_manager');
+  if ($role) {
+    $role->grantPermission('view any mukurtu_import_log');
+    $role->save();
+  }
+}
+
+/**
+ * Grant 'administer mukurtu_import_strategy' to the mukurtu_manager role.
+ */
+function mukurtu_import_update_40040(): void {
+  $role = \Drupal::entityTypeManager()->getStorage('user_role')->load('mukurtu_manager');
+  if ($role) {
+    $role->grantPermission('administer mukurtu_import_strategy');
+    $role->save();
+  }
+}
+
+/**
+ * Add the 'details' column to mukurtu_import_log.
+ *
+ * Stores JSON-encoded per-row detail (created/updated entity label + link,
+ * or failed row messages) so the log detail page can show a structured
+ * Created/Updated/Failed breakdown instead of just counts.
+ */
+function mukurtu_import_update_40041(): void {
+  $schema = \Drupal::database()->schema();
+  if ($schema->fieldExists('mukurtu_import_log', 'details')) {
+    return;
+  }
+  $schema->addField('mukurtu_import_log', 'details', [
+    'type' => 'text',
+    'size' => 'big',
+    'not null' => FALSE,
+    'description' => 'JSON-encoded per-row created/updated/failed detail for this file.',
+  ]);
 }

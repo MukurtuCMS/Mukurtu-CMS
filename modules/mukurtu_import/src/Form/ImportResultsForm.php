@@ -34,13 +34,7 @@ class ImportResultsForm extends ImportBaseForm {
 
     if (!empty($messages)) {
       $form['results_message']['#markup'] = '<div class="messages messages--error" role="alert" aria-live="assertive">' . $this->t('Some files failed to import.') . '</div>';
-      foreach ($messages as $message) {
-        $filename = $this->getImportFilename($message['fid']) ?? $this->t('Unknown file');
-        $form['file_messages'][] = [
-          '#type' => 'markup',
-          '#markup' => '<div class="messages messages--error" role="alert" aria-live="assertive">' . $this->t('@filename: @message', ['@filename' => $filename, '@message' => $message['message']]) . '</div>',
-        ];
-      }
+      $form['file_messages'] = $this->buildMessagesTable($messages);
     }
 
     if (!empty($warnings)) {
@@ -97,6 +91,45 @@ class ImportResultsForm extends ImportBaseForm {
    */
   public function submitReturnToFiles(array &$form, FormStateInterface $form_state): void {
     $form_state->setRedirect('mukurtu_import.file_upload');
+  }
+
+  /**
+   * Builds a File / Message table of failures, one row per failing file.
+   *
+   * Replaces stacking one raw alert div per message -- with many failures
+   * that produced a wall of near-identical, redundant role="alert" banners
+   * instead of a single scannable table.
+   *
+   * @param array $messages
+   *   A list of ['fid' => ..., 'message' => ...] arrays, as returned by
+   *   getMessages(). A message may itself contain multiple newline-joined
+   *   lines (e.g. several validation violations on one failing row).
+   */
+  protected function buildMessagesTable(array $messages): array {
+    $rows = [];
+    foreach ($messages as $message) {
+      $filename = $this->getImportFilename($message['fid']) ?? $this->t('(unknown file)');
+      $lines = array_filter(explode("\n", (string) $message['message']));
+      $rows[] = [
+        $filename,
+        [
+          'data' => [
+            '#theme' => 'item_list',
+            '#items' => $lines,
+          ],
+        ],
+      ];
+    }
+    return [
+      '#type' => 'table',
+      '#caption' => $this->t('Failed files'),
+      '#header' => [
+        ['data' => $this->t('File'), 'scope' => 'col'],
+        ['data' => $this->t('Message'), 'scope' => 'col'],
+      ],
+      '#rows' => $rows,
+      '#attributes' => ['class' => ['mukurtu-import-file-messages']],
+    ];
   }
 
   /**
