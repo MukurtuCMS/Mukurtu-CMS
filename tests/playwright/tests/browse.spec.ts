@@ -14,3 +14,16 @@ test('Browse tests - Digital Heritage', async ({ page, browserName }) => {
   //await page.getByText('Map', { exact: true }).click();
   // @todo Check default content within each tab.
 });
+
+/**
+ * Regression test for issue #2001: decorative card media links are marked
+ * aria-hidden="true" to avoid a screen reader announcing the card's
+ * destination twice (once for the image, once for the title text), so they
+ * must also carry tabindex="-1" to stay out of the tab order. See
+ * themes/mukurtu_v4/templates/content/_card-media.html.twig.
+ */
+test('Browse tests - decorative card links are not keyboard-focusable', async ({ page }) => {
+  await page.goto('/browse');
+  const untabbableAriaHiddenLinks = page.locator('a[aria-hidden="true"]:not([tabindex="-1"])');
+  await expect(untabbableAriaHiddenLinks).toHaveCount(0);
+});
