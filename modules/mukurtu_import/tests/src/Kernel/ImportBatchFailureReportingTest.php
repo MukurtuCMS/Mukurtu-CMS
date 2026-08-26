@@ -62,7 +62,7 @@ class ImportBatchFailureReportingTest extends MukurtuImportTestBase {
     $migration_id = $definition['id'];
     $this->assertGreaterThan(0, $context['results'][$migration_id]['@failures']);
     $this->assertEquals(0, $context['results'][$migration_id]['@created']);
-    $this->assertNotEmpty($context['results']['messages']);
+    $this->assertNotEmpty($context['results'][$migration_id]['messages']);
 
     // No user should have been created.
     $users = $this->entityTypeManager->getStorage('user')->loadByProperties(['name' => 'reportingtestuser']);
