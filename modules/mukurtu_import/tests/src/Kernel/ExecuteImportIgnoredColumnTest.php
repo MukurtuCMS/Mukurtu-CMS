@@ -45,11 +45,12 @@ class ExecuteImportIgnoredColumnTest extends MukurtuImportTestBase {
     $method->setAccessible(TRUE);
 
     $entity_type_index = ['user' => [1 => $strategy]];
+    $files_by_fid = [];
     $upstream_lookup_columns = [];
 
     // No TypeError should be thrown. $upstream_lookup_columns is an
     // out-param, so invoke via invokeArgs() with an explicit reference.
-    $method->invokeArgs($form, [$strategy, $entity_type_index, &$upstream_lookup_columns]);
+    $method->invokeArgs($form, [$strategy, $entity_type_index, $files_by_fid, &$upstream_lookup_columns]);
     $this->assertTrue(TRUE);
 
     $sortMethod = $reflection->getMethod('sortByDependencies');

@@ -77,7 +77,7 @@ class PresetMappingResolutionTest extends MukurtuImportTestBase {
     $setImportConfigMethod->setAccessible(TRUE);
     $setImportConfigMethod->invoke($form, $file->id(), $strategy);
     $message = (string) $messageMethod->invoke($form, $file->id());
-    $this->assertEquals('2 of 2 import fields mapped', $message);
+    $this->assertEquals('2 of 2 importable fields mapped', $message);
 
     // Confirm the resolved mapping also produces a working import: the
     // migration built from it must actually read the 'Name' column, since
