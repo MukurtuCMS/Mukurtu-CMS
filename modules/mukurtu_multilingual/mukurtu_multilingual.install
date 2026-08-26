@@ -235,3 +235,50 @@ function mukurtu_multilingual_update_40006(): void {
 function mukurtu_multilingual_update_40007(): void {
   _mukurtu_multilingual_apply_language_negotiation_defaults();
 }
+
+/**
+ * Enables content translation for 12 bundles that were never covered by any
+ * language.content_settings.* config: the 7 media bundles (audio, document,
+ * external_embed, image, remote_video, soundcloud, video - meaning media
+ * names, alt text, and other translatable fields could not be translated on
+ * a multilingual site), the place_type taxonomy vocabulary, the
+ * mukurtu_footer block type, and 2 footer paragraph types
+ * (footer_logo, footer_social_link). A 12th bundle, the
+ * text_section_with_title paragraph type, already had its base field
+ * overrides shipped but was missing the content_settings file that actually
+ * enables translation for the bundle.
+ *
+ * Guarded by isNew() so this is a no-op if the config already exists (e.g.
+ * on a site that installed after this fix shipped, which already got these
+ * via config/install).
+ */
+function mukurtu_multilingual_update_40008(): void {
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_multilingual');
+  $config_source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+  $config_factory = \Drupal::configFactory();
+
+  $bundles = [
+    ['media', 'audio'],
+    ['media', 'document'],
+    ['media', 'external_embed'],
+    ['media', 'image'],
+    ['media', 'remote_video'],
+    ['media', 'soundcloud'],
+    ['media', 'video'],
+    ['taxonomy_term', 'place_type'],
+    ['block_content', 'mukurtu_footer'],
+    ['paragraph', 'footer_logo'],
+    ['paragraph', 'footer_social_link'],
+    ['paragraph', 'text_section_with_title'],
+  ];
+
+  foreach ($bundles as [$entity_type_id, $bundle]) {
+    $config_name = "language.content_settings.$entity_type_id.$bundle";
+    if ($config_factory->get($config_name)->isNew()) {
+      $data = $config_source->read($config_name);
+      if ($data) {
+        $config_factory->getEditable($config_name)->setData($data)->save();
+      }
+    }
+  }
+}
