@@ -113,6 +113,11 @@ class ChangeModerationStateActionTest extends KernelTestBase {
     // Baseline permission every authenticated user has on a real site.
     $authenticated = Role::create(['id' => 'authenticated', 'label' => 'Authenticated user']);
     $authenticated->grantPermission('access content');
+    // Matches the real config/install/user.role.authenticated.yml grant
+    // that makes 'publish' a technically-valid transition for everyone,
+    // including straight out of 'archived' -- see
+    // testAccessDeniedForContributorPublishingOwnArchivedContent().
+    $authenticated->grantPermission('use mukurtu_default_content_workflow transition publish');
     $authenticated->save();
 
     $role = Role::create(['id' => 'mukurtu_manager', 'label' => 'Mukurtu Manager']);
@@ -307,6 +312,47 @@ class ChangeModerationStateActionTest extends KernelTestBase {
 
     $action = $this->createAction('draft');
     $this->assertFalse($action->access($node, $this->manager));
+  }
+
+  /**
+   * End-to-end reproduction of the PR #2036 QA bug: a Contributor holding
+   * only real per-protocol "update own" permission (no archive/restore
+   * transition rights) must not be able to bulk-publish their own content
+   * straight out of 'archived', even though the site-wide
+   * 'use mukurtu_default_content_workflow transition publish' permission
+   * (granted to every authenticated user) makes 'publish' a technically
+   * valid transition per getValidTransitions() alone.
+   */
+  public function testAccessDeniedForContributorPublishingOwnArchivedContent(): void {
+    $contributorRole = OgRole::create([
+      'name' => 'contributor_editor',
+      'label' => 'Contributor',
+      'permissions' => ['apply protocol', 'create thing node', 'edit own thing content'],
+    ]);
+    $contributorRole->setGroupType('protocol');
+    $contributorRole->setGroupBundle('protocol');
+    $contributorRole->save();
+
+    $contributor = User::create(['name' => $this->randomMachineName()]);
+    $contributor->save();
+    $this->protocol->addMember($contributor, ['contributor_editor']);
+
+    $node = Node::create([
+      'type' => 'thing',
+      'title' => $this->randomString(),
+      'uid' => $contributor->id(),
+      'moderation_state' => 'archived',
+    ]);
+    $node->setSharingSetting('any');
+    $node->setProtocols([$this->protocol]);
+    $node->save();
+
+    $transitions = \Drupal::service('content_moderation.state_transition_validation')
+      ->getValidTransitions($node, $contributor);
+    $this->assertArrayHasKey('publish', $transitions, 'Sanity check: transition-permission alone says yes.');
+
+    $action = $this->createAction('published');
+    $this->assertFalse($action->access($node, $contributor));
   }
 
   /**

@@ -102,6 +102,16 @@ class MukurtuProtocolNodeAccessControlHandlerArchivedTest extends KernelTestBase
 
     $authenticated = Role::create(['id' => 'authenticated', 'label' => 'Authenticated user']);
     $authenticated->grantPermission('access content');
+    // Matches the real config/install/user.role.authenticated.yml grants:
+    // content_moderation denies 'update' outright ("No valid transitions
+    // exist for given account") unless the account has at least one valid
+    // transition, regardless of mukurtu_protocol's own access logic. Both
+    // grants are needed so that gate is satisfied for draft (create_new_draft)
+    // and archived (publish, per this workflow's from: [draft, published,
+    // archived]) content, isolating the tests below to mukurtu_protocol's
+    // own archived-state carve-out rather than this unrelated core gate.
+    $authenticated->grantPermission('use mukurtu_default_content_workflow transition create_new_draft');
+    $authenticated->grantPermission('use mukurtu_default_content_workflow transition publish');
     $authenticated->save();
 
     User::create(['name' => $this->randomMachineName()])->save();
@@ -148,19 +158,46 @@ class MukurtuProtocolNodeAccessControlHandlerArchivedTest extends KernelTestBase
   }
 
   /**
-   * Creates a protocol-gated node in the given state, owned by $this->owner.
+   * Creates a protocol-gated node in the given state, owned by $this->owner
+   * unless a different $owner is given.
    */
-  protected function createProtocolNode(string $moderation_state): Node {
+  protected function createProtocolNode(string $moderation_state, ?User $owner = NULL): Node {
     $node = Node::create([
       'type' => 'thing',
       'title' => $this->randomString(),
-      'uid' => $this->owner->id(),
+      'uid' => ($owner ?? $this->owner)->id(),
       'moderation_state' => $moderation_state,
     ]);
     $node->setSharingSetting('any');
     $node->setProtocols([$this->protocol]);
     $node->save();
     return $node;
+  }
+
+  /**
+   * Creates a Contributor-equivalent user: a plain protocol member who can
+   * create/update/delete their own content, but holds none of the
+   * archive/restore transition permissions Managers and Stewards have.
+   */
+  protected function createContributor(): User {
+    $contributorRole = OgRole::create([
+      'name' => 'contributor',
+      'label' => 'Contributor',
+      'permissions' => [
+        'apply protocol',
+        'create thing node',
+        'edit own thing content',
+        'delete own thing content',
+      ],
+    ]);
+    $contributorRole->setGroupType('protocol');
+    $contributorRole->setGroupBundle('protocol');
+    $contributorRole->save();
+
+    $contributor = User::create(['name' => $this->randomMachineName()]);
+    $contributor->save();
+    $this->protocol->addMember($contributor, ['contributor']);
+    return $contributor;
   }
 
   /**
@@ -239,6 +276,75 @@ class MukurtuProtocolNodeAccessControlHandlerArchivedTest extends KernelTestBase
     $anonymous = new AnonymousUserSession();
 
     $this->assertFalse($node->access('view', $anonymous), 'Anonymous has no reach into archived content.');
+  }
+
+  /**
+   * A Contributor's ordinary "update own" protocol permission no longer
+   * reaches update access on their own content once it's archived -- this
+   * is the actual bug reported in PR #2036 QA: without this carve-out, a
+   * Contributor could bulk-publish straight out of archived, because
+   * ChangeModerationStateAction gates the 'publish' transition on real
+   * 'update' access, which this handler was granting regardless of
+   * moderation state.
+   */
+  public function testOwnerCannotUpdateOwnArchivedContentWithoutSiteWidePrivilege(): void {
+    $contributor = $this->createContributor();
+    $node = $this->createProtocolNode('archived', $contributor);
+
+    $this->assertFalse($node->access('update', $contributor), 'Owner loses update access to their own archived content.');
+  }
+
+  /**
+   * Same as above for 'delete' -- archiving is meant to fully take content
+   * down until deliberately restored, so an owner shouldn't be able to
+   * delete their own archived content either.
+   */
+  public function testOwnerCannotDeleteOwnArchivedContentWithoutSiteWidePrivilege(): void {
+    $contributor = $this->createContributor();
+    $node = $this->createProtocolNode('archived', $contributor);
+
+    $this->assertFalse($node->access('delete', $contributor), 'Owner loses delete access to their own archived content.');
+  }
+
+  /**
+   * The same Contributor CAN still update their own draft content --
+   * confirms the carve-out is scoped to archived specifically.
+   */
+  public function testOwnerCanStillUpdateOwnDraftContent(): void {
+    $contributor = $this->createContributor();
+    $node = $this->createProtocolNode('draft', $contributor);
+
+    $this->assertTrue($node->access('update', $contributor), 'Owner still has update access to their own draft content.');
+  }
+
+  /**
+   * A site-wide privileged account (e.g. Mukurtu Manager) who also holds
+   * real per-protocol update permission still gets update access to
+   * archived content -- the site-wide permission alone doesn't grant
+   * update, it only re-opens eligibility for the normal protocol-based
+   * grant to apply, same as the 'view' carve-out's intent.
+   */
+  public function testSiteWidePrivilegedUserCanUpdateArchivedContent(): void {
+    $manager_role = Role::create(['id' => 'manager', 'label' => 'Manager']);
+    $manager_role->grantPermission('access content');
+    $manager_role->grantPermission('view any unpublished content');
+    $manager_role->save();
+    $manager = User::create(['name' => $this->randomMachineName(), 'roles' => ['manager']]);
+    $manager->save();
+
+    $contributorRole = OgRole::create([
+      'name' => 'contributor',
+      'label' => 'Contributor',
+      'permissions' => ['apply protocol', 'create thing node', 'edit own thing content'],
+    ]);
+    $contributorRole->setGroupType('protocol');
+    $contributorRole->setGroupBundle('protocol');
+    $contributorRole->save();
+    $this->protocol->addMember($manager, ['contributor']);
+
+    $node = $this->createProtocolNode('archived', $manager);
+
+    $this->assertTrue($node->access('update', $manager), 'Site-wide "view any unpublished content" plus real per-protocol update permission reaches archived content.');
   }
 
 }

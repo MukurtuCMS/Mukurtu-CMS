@@ -111,6 +111,25 @@ class MukurtuProtocolNodeAccessControlHandler extends NodeAccessControlHandler {
 
       case 'update':
       case 'delete':
+        // Once content is archived, update/delete access is restricted to
+        // genuine site-wide privilege only -- the same carve-out as 'view'
+        // above, and for the same reason: an owner's ordinary "edit own
+        // <bundle> content" protocol permission doesn't care about
+        // moderation state, so without this it can be used to route around
+        // the archive/restore transition gate entirely (e.g. bulk-publishing
+        // straight out of archived). Archiving is meant to fully take
+        // content down until deliberately restored.
+        if ($entity->hasField('moderation_state')
+          && $entity->get('moderation_state')->value === 'archived'
+          && !$account->hasPermission('bypass node access')
+          && !$account->hasPermission('administer nodes')
+          && !$account->hasPermission('view any unpublished content')) {
+          return AccessResult::forbidden()
+            ->addCacheableDependency($entity)
+            ->addCacheContexts(['user.permissions'])
+            ->addCacheTags(["user:{$account->id()}"]);
+        }
+
         // Ask each member OG group about specific permissions.
         $ogAccessService = \Drupal::service('og.access');
         $protocols = $entity->getMemberProtocols($account);
