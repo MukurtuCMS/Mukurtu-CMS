@@ -55,7 +55,7 @@ class ImportBatchExecutableFailureReportingTest extends MukurtuImportTestBase {
     ImportBatchExecutable::batchProcessImportDefinition($definition, [], $context);
 
     $this->assertGreaterThan(0, $context['results']['test_bad_ids_migration']['@failures']);
-    $this->assertNotEmpty($context['results']['messages']);
+    $this->assertNotEmpty($context['results']['test_bad_ids_migration']['messages']);
   }
 
   /**
@@ -102,7 +102,7 @@ class ImportBatchExecutableFailureReportingTest extends MukurtuImportTestBase {
 
     $this->assertSame(1, $context['finished']);
     $this->assertGreaterThan(0, $context['results']['test_throwable_migration']['@failures']);
-    $this->assertNotEmpty($context['results']['messages']);
+    $this->assertNotEmpty($context['results']['test_throwable_migration']['messages']);
 
     $migration_plugin_manager = \Drupal::service('plugin.manager.migration');
     $migration = $migration_plugin_manager->createStubMigration($definition);

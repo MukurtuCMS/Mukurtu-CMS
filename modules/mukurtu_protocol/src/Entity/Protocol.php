@@ -729,7 +729,7 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface, 
 
     $fields['field_access_mode'] = BaseFieldDefinition::create('list_string')
       ->setLabel(t('Cultural Protocol Type'))
-      ->setDescription('Strict - Content that uses this cultural protocol is only visible to members of this cultural protocol. The cultural protocol page is also only visible to cultural protocol members.<br>Open - Content that uses this cultural protocol is visible to all site members and visitors, with no login required. The cultural protocol page is also public.')
+      ->setDescription(t('Strict - Content that uses this cultural protocol is only visible to members of this cultural protocol. The cultural protocol page is also only visible to cultural protocol members.<br>Open - Content that uses this cultural protocol is visible to all site members and visitors, with no login required. The cultural protocol page is also public.'))
       ->setSettings([
         'allowed_values' => [
           'strict' => 'Strict',

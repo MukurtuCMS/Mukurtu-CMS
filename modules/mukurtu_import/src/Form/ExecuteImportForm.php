@@ -259,8 +259,15 @@ class ExecuteImportForm extends ImportBaseForm {
       }
 
       $lookup_columns = $upstream_lookup_columns[$fid] ?? [];
-      $definition = $config->toDefinition($file, $lookup_columns)
-        + ['mukurtu_import_message' => $this->getImportRevisionMessage()];
+      $definition = $config->toDefinition($file, $lookup_columns) + [
+        'mukurtu_import_message' => $this->getImportRevisionMessage(),
+        'mukurtu_import_id' => $this->getImportId(),
+        'mukurtu_import_fid' => (int) $fid,
+        'mukurtu_import_filename' => $file->getFilename(),
+        'mukurtu_import_entity_type_id' => $config->getTargetEntityTypeId(),
+        'mukurtu_import_bundle' => $config->getTargetBundle(),
+        'mukurtu_import_uid' => (int) $this->currentUser()->id(),
+      ];
 
       $migration_definitions[$fid] = $definition;
 

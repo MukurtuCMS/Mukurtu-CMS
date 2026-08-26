@@ -2092,6 +2092,9 @@ label.form-required::after,
   block-size: 1em;
 }
 
+.language-switcher {
+  position: relative;
+}
 .language-switcher > ul {
   position: absolute;
   background-color: var(--color-white);
@@ -2103,6 +2106,10 @@ label.form-required::after,
   z-index: 1000;
   -webkit-transform: translateX(-50%);
           transform: translateX(-50%);
+}
+.language-switcher > ul:dir(rtl) {
+  -webkit-transform: translateX(50%);
+          transform: translateX(50%);
 }
 .language-switcher > ul li {
   list-style-type: none;
@@ -2136,10 +2143,14 @@ label.form-required::after,
 .language-switcher > ul a.is-active:hover {
   background-color: var(--brand-primary-accent);
 }
-.language-switcher .contextual {
+.language-switcher.contextual-region .contextual {
   position: absolute;
-  inset-block-start: 0;
-  inset-inline-end: 20px;
+  inset-block-start: 50%;
+  inset-inline-end: 100%;
+  -webkit-margin-end: 0.5em;
+          margin-inline-end: 0.5em;
+  -webkit-transform: translateY(-50%);
+          transform: translateY(-50%);
 }
 
 .local-contexts-dialog {
