@@ -1,0 +1,12 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+  enforced:
+    module:
+      - mukurtu_submissions
+id: node.submission
+label: Submission
+targetEntityType: node
+cache: true

@@ -21,3 +21,9 @@ mukurtu_import.bundles_list:
   menu_name: dashboard-roundtrip
   parent: mukurtu_dashboard
   route_name: mukurtu_import.bundles_list
+mukurtu_import.import_logs:
+  title: 'Import Logs'
+  description: 'View the history of previous import runs.'
+  menu_name: dashboard-roundtrip
+  parent: mukurtu_dashboard
+  route_name: mukurtu_import.import_logs
