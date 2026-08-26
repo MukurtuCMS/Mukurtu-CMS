@@ -128,4 +128,26 @@ class ImportListStringTest extends MukurtuImportTestBase {
     $this->assertEquals("https://creativecommons.org/licenses/by-nc-nd/4.0/", $list[2]['value']);
   }
 
+  /**
+   * Test importing a file whose header row doesn't include the mapped source column.
+   */
+  public function testMissingColumnListImport() {
+    $data = [
+      ['nid'],
+      [$this->node->id()],
+    ];
+    $import_file = $this->createCsvFile($data);
+
+    $mapping = [
+      ['target' => 'nid', 'source' => 'nid'],
+      ['target' => 'field_list', 'source' => 'List'],
+    ];
+
+    $result = $this->importCsvFile($import_file, $mapping);
+    $this->assertEquals(MigrationInterface::RESULT_COMPLETED, $result);
+    $updated_node = $this->entityTypeManager->getStorage('node')->load($this->node->id());
+    $list = $updated_node->get('field_list')->getValue();
+    $this->assertEmpty($list);
+  }
+
 }
