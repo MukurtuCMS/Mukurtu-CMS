@@ -69,7 +69,7 @@ function mukurtu_search_rebuild_index() {
     $field = $index->getField('entity_type') ?? new Field($index, 'entity_type');
     $field->setType('string');
     $field->setPropertyPath("search_api_entity_type");
-    $field->setLabel("Entity type");
+    $field->setLabel(t("Entity type"));
     $index->addField($field);
     $index->save();
   }
