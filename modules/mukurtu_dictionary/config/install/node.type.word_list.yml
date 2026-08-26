@@ -8,6 +8,9 @@ third_party_settings:
     available_menus:
       - main
     parent: 'main:'
+  mukurtu_export:
+    child_reference_fields:
+      field_words: {  }
 name: 'Word List'
 type: word_list
 description: 'A collection of dictionary words.'

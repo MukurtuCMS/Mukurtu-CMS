@@ -13,7 +13,13 @@ mapping:
     target: user_id
   -
     source: 'Banner Image'
-    target: field_banner_image
+    target: '-1'
+  -
+    source: 'Banner Image > Alternative text'
+    target: field_banner_image/alt
+  -
+    source: 'Banner Image > File ID'
+    target: field_banner_image/target_id
   -
     source: 'Comments Require Approval'
     target: field_comment_require_approval
@@ -27,11 +33,8 @@ mapping:
     source: Created
     target: created
   -
-    source: 'Cultural protocol name'
-    target: name
-  -
-    source: 'Cultural Protocol Type'
-    target: field_access_mode
+    source: 'Default translation'
+    target: '-1'
   -
     source: Description
     target: field_description
@@ -42,26 +45,44 @@ mapping:
     source: ID
     target: id
   -
-    source: 'Language (langcode)'
-    target: langcode
-  -
     source: 'Local Contexts API key'
     target: field_local_contexts_api_key
   -
     source: 'Local Contexts Description'
     target: field_local_contexts_description
   -
+    source: Locale
+    target: langcode
+  -
     source: 'Membership Display'
     target: field_membership_display
+  -
+    source: Name
+    target: name
   -
     source: Published
     target: status
   -
+    source: 'Sharing Protocol'
+    target: field_access_mode
+  -
     source: 'Thumbnail Image'
-    target: field_thumbnail_image
+    target: '-1'
+  -
+    source: 'Thumbnail Image > Alternative text'
+    target: field_thumbnail_image/alt
+  -
+    source: 'Thumbnail Image > File ID'
+    target: field_thumbnail_image/target_id
   -
     source: UUID
     target: uuid
+  -
+    source: 'Who can leave comments'
+    target: field_comment_post_access
+  -
+    source: 'Who can view comments'
+    target: field_comment_view_access
 configuration:
   delimiter: ','
   enclosure: '"'
