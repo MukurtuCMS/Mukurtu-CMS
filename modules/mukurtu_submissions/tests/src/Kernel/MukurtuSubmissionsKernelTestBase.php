@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_submissions\Kernel;
 
+use Drupal\Core\Entity\Entity\EntityFormMode;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use Drupal\node\Entity\NodeType;
 
@@ -24,6 +25,7 @@ abstract class MukurtuSubmissionsKernelTestBase extends EntityKernelTestBase {
    */
   protected static $modules = [
     'field',
+    'field_group',
     'file',
     'options',
     'path_alias',
@@ -51,6 +53,24 @@ abstract class MukurtuSubmissionsKernelTestBase extends EntityKernelTestBase {
       'type' => static::TEST_BUNDLE,
       'name' => 'Submission Test Content',
     ])->save();
+
+    // mukurtu_submissions ships this as default config
+    // (config/install/core.entity_form_mode.node.submission.yml), installed
+    // automatically on a real site the moment the module itself is
+    // installed. This base class deliberately doesn't do a full
+    // installConfig(['mukurtu_submissions']) - that would also pull in the
+    // digital_heritage settings entity and the message/view config that
+    // depend on modules excluded above - so the one piece of shared,
+    // non-optional config that SubmissionFormDisplayManager's
+    // getFormDisplay('submission') calls always need is created directly
+    // here instead, same as NodeType above.
+    if (!EntityFormMode::load('node.submission')) {
+      EntityFormMode::create([
+        'id' => 'node.submission',
+        'label' => 'Submission',
+        'targetEntityType' => 'node',
+      ])->save();
+    }
   }
 
 }

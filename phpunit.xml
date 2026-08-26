@@ -55,7 +55,7 @@
   </extensions>
   <testsuites>
     <testsuite name="kernel">
-      <directory>web/profiles/mukurtu/modules/mukurtu_protocol/tests/src/Kernel</directory>
+      <directory>web/profiles/mukurtu/modules/**/tests/src/Kernel</directory>
     </testsuite>
     <testsuite name="kernel">
       <directory>web/profiles/mukurtu/modules/mukurtu_collection/tests/src/Kernel</directory>
@@ -107,8 +107,11 @@
       <directory>web/profiles/mukurtu/modules/mukurtu_solr/tests/src/Kernel</directory>
       <directory>web/profiles/mukurtu/modules/mukurtu_submissions/tests/src/Kernel</directory>
     </testsuite>
+    <testsuite name="unit">
+      <directory>web/profiles/mukurtu/modules/**/tests/src/Unit</directory>
+    </testsuite>
     <testsuite name="functional">
-      <directory>web/profiles/mukurtu/modules/mukurtu_protocol/tests/src/Functional</directory>
+      <directory>web/profiles/mukurtu/modules/**/tests/src/Functional</directory>
     </testsuite>
   </testsuites>
   <!-- Settings for coverage reports. -->

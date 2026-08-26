@@ -15,14 +15,8 @@ mapping:
     source: 'Authored on'
     target: created
   -
-    source: Biography
+    source: 'Biographical Information Sections'
     target: field_sections
-  -
-    source: 'Cultural Protocols > Protocols'
-    target: field_cultural_protocols/protocols
-  -
-    source: 'Cultural Protocols > Sharing Setting'
-    target: field_cultural_protocols/sharing_setting
   -
     source: 'Date Born'
     target: field_date_born
@@ -33,6 +27,9 @@ mapping:
     source: Deceased
     target: field_deceased
   -
+    source: 'Default translation'
+    target: '-1'
+  -
     source: Draft
     target: draft
   -
@@ -42,14 +39,14 @@ mapping:
     source: Keywords
     target: field_keywords
   -
-    source: 'Language (langcode)'
-    target: langcode
-  -
     source: 'Local Contexts Labels and Notices'
     target: field_local_contexts_labels_and_notices
   -
     source: 'Local Contexts Projects'
     target: field_local_contexts_projects
+  -
+    source: Locale
+    target: langcode
   -
     source: Location
     target: field_location
@@ -63,8 +60,8 @@ mapping:
     source: 'Media Assets'
     target: field_media_assets
   -
-    source: Name
-    target: title
+    source: 'Multipage parent'
+    target: '-1'
   -
     source: 'Other Names'
     target: field_other_names
@@ -78,6 +75,9 @@ mapping:
     source: 'Promoted to front page'
     target: promote
   -
+    source: 'Cultural Protocols > Protocols'
+    target: field_cultural_protocols/protocols
+  -
     source: Published
     target: status
   -
@@ -87,8 +87,14 @@ mapping:
     source: 'Related People'
     target: field_related_people
   -
+    source: 'Cultural Protocols > Sharing Setting'
+    target: field_cultural_protocols/sharing_setting
+  -
     source: 'Sticky at top of lists'
     target: sticky
+  -
+    source: Title
+    target: title
   -
     source: UUID
     target: uuid
