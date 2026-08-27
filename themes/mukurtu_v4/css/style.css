@@ -1091,6 +1091,21 @@ a:not(.primary-nav__menu-link) svg.tel path {
   max-block-size: 100px;
   inline-size: auto;
 }
+.thumbnail-carousel__slide-button {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  text-align: inherit;
+  cursor: pointer;
+}
+.thumbnail-carousel__slide-button:focus-visible {
+  outline: var(--brand-primary-dark) solid 2px;
+  outline-offset: 2px;
+}
 
 #cboxClose {
   color: var(--light-text-color);
