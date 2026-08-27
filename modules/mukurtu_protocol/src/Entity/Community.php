@@ -3,6 +3,7 @@
 namespace Drupal\mukurtu_protocol\Entity;
 
 use Drupal\Core\Cache\Cache;
+use Drupal\Core\Entity\Attribute\ContentEntityType;
 use Drupal\Core\Entity\EditorialContentEntityBase;
 use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityPublishedTrait;
@@ -12,6 +13,7 @@ use Drupal\Core\Entity\RevisionableInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\media\MediaInterface;
 use Drupal\mukurtu_core\Entity\RoundtripEntityInterface;
 use Drupal\og\Entity\OgRole;
@@ -24,69 +26,68 @@ use Exception;
  * Defines the Community entity.
  *
  * @ingroup mukurtu_protocol
- *
- * @ContentEntityType(
- *   id = "community",
- *   label = @Translation("Community"),
- *   label_collection = @Translation("Communities"),
- *   label_singular = @Translation("Community"),
- *   label_plural = @Translation("Communities"),
- *   label_count = @PluralTranslation(
- *     singular = "@count community",
- *     plural = "@count communities",
- *   ),
- *   handlers = {
- *     "storage" = "Drupal\mukurtu_protocol\CommunityStorage",
- *     "view_builder" = "Drupal\mukurtu_protocol\Entity\CommunityViewBuilder",
- *     "list_builder" = "Drupal\mukurtu_protocol\CommunityListBuilder",
- *     "views_data" = "Drupal\mukurtu_protocol\Entity\CommunityViewsData",
- *     "translation" = "Drupal\mukurtu_protocol\CommunityTranslationHandler",
- *     "form" = {
- *       "default" = "Drupal\mukurtu_protocol\Form\CommunityForm",
- *       "add" = "Drupal\mukurtu_protocol\Form\CommunityAddForm",
- *       "edit" = "Drupal\mukurtu_protocol\Form\CommunityForm",
- *       "delete" = "Drupal\mukurtu_protocol\Form\CommunityDeleteForm",
- *     },
- *     "route_provider" = {
- *       "html" = "Drupal\mukurtu_protocol\CommunityHtmlRouteProvider",
- *     },
- *     "access" = "Drupal\mukurtu_protocol\CommunityAccessControlHandler",
- *   },
- *   base_table = "community",
- *   data_table = "community_field_data",
- *   revision_table = "community_revision",
- *   revision_data_table = "community_field_revision",
- *   translatable = TRUE,
- *   admin_permission = "administer community entities",
- *   entity_keys = {
- *     "id" = "id",
- *     "revision" = "vid",
- *     "label" = "name",
- *     "uuid" = "uuid",
- *     "uid" = "user_id",
- *     "langcode" = "langcode",
- *     "published" = "status",
- *   },
- *   revision_metadata_keys = {
- *     "revision_user" = "revision_user",
- *     "revision_created" = "revision_created",
- *     "revision_log_message" = "revision_log"
- *   },
- *   links = {
- *     "canonical" = "/communities/community/{community}",
- *     "add-form" = "/communities/community/add",
- *     "edit-form" = "/communities/community/{community}/edit",
- *     "delete-form" = "/communities/community/{community}/delete",
- *     "version-history" = "/communities/community/{community}/revisions",
- *     "revision" = "/communities/community/{community}/revisions/{community_revision}/view",
- *     "revision_revert" = "/communities/community/{community}/revisions/{community_revision}/revert",
- *     "revision_delete" = "/communities/community/{community}/revisions/{community_revision}/delete",
- *     "translation_revert" = "/communities/community/{community}/revisions/{community_revision}/revert/{langcode}",
- *     "collection" = "/admin/communities",
- *   },
- *   field_ui_base_route = "community.settings"
- * )
  */
+#[ContentEntityType(
+  id: 'community',
+  label: new TranslatableMarkup('Community'),
+  label_collection: new TranslatableMarkup('Communities'),
+  label_singular: new TranslatableMarkup('Community'),
+  label_plural: new TranslatableMarkup('Communities'),
+  entity_keys: [
+    'id' => 'id',
+    'revision' => 'vid',
+    'label' => 'name',
+    'uuid' => 'uuid',
+    'uid' => 'user_id',
+    'langcode' => 'langcode',
+    'published' => 'status',
+  ],
+  handlers: [
+    'storage' => 'Drupal\mukurtu_protocol\CommunityStorage',
+    'view_builder' => 'Drupal\mukurtu_protocol\Entity\CommunityViewBuilder',
+    'list_builder' => 'Drupal\mukurtu_protocol\CommunityListBuilder',
+    'views_data' => 'Drupal\mukurtu_protocol\Entity\CommunityViewsData',
+    'translation' => 'Drupal\mukurtu_protocol\CommunityTranslationHandler',
+    'form' => [
+      'default' => 'Drupal\mukurtu_protocol\Form\CommunityForm',
+      'add' => 'Drupal\mukurtu_protocol\Form\CommunityAddForm',
+      'edit' => 'Drupal\mukurtu_protocol\Form\CommunityForm',
+      'delete' => 'Drupal\mukurtu_protocol\Form\CommunityDeleteForm',
+    ],
+    'route_provider' => [
+      'html' => 'Drupal\mukurtu_protocol\CommunityHtmlRouteProvider',
+    ],
+    'access' => 'Drupal\mukurtu_protocol\CommunityAccessControlHandler',
+  ],
+  links: [
+    'canonical' => '/communities/community/{community}',
+    'add-form' => '/communities/community/add',
+    'edit-form' => '/communities/community/{community}/edit',
+    'delete-form' => '/communities/community/{community}/delete',
+    'version-history' => '/communities/community/{community}/revisions',
+    'revision' => '/communities/community/{community}/revisions/{community_revision}/view',
+    'revision_revert' => '/communities/community/{community}/revisions/{community_revision}/revert',
+    'revision_delete' => '/communities/community/{community}/revisions/{community_revision}/delete',
+    'translation_revert' => '/communities/community/{community}/revisions/{community_revision}/revert/{langcode}',
+    'collection' => '/admin/communities',
+  ],
+  admin_permission: 'administer community entities',
+  base_table: 'community',
+  data_table: 'community_field_data',
+  revision_table: 'community_revision',
+  revision_data_table: 'community_field_revision',
+  translatable: TRUE,
+  label_count: [
+    'singular' => '@count community',
+    'plural' => '@count communities',
+  ],
+  field_ui_base_route: 'community.settings',
+  revision_metadata_keys: [
+    'revision_user' => 'revision_user',
+    'revision_created' => 'revision_created',
+    'revision_log_message' => 'revision_log',
+  ],
+)]
 class Community extends EditorialContentEntityBase implements CommunityInterface, RoundtripEntityInterface {
 
   use EntityChangedTrait;

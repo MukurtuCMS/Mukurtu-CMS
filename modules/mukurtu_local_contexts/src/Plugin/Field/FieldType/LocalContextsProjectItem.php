@@ -2,6 +2,7 @@
 
 namespace Drupal\mukurtu_local_contexts\Plugin\Field\FieldType;
 
+use Drupal\Core\Field\Attribute\FieldType;
 Use Drupal\Core\Field\Plugin\Field\FieldType\StringItem;
 use Drupal\mukurtu_local_contexts\Event\LocalContextsProjectReferenceUpdatedEvent;
 use Drupal\mukurtu_local_contexts\LocalContextsProject;
@@ -11,17 +12,17 @@ use Drupal\Core\TypedData\TypedDataInterface;
 use Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Defines the 'local_contexts_project' field type.
- *
- * @FieldType(
- *   id = "local_contexts_project",
- *   label = @Translation("Local Contexts Project"),
- *   default_widget = "local_contexts_project",
- *   default_formatter = "local_contexts_project"
- * )
  */
+#[FieldType(
+  id: 'local_contexts_project',
+  label: new TranslatableMarkup('Local Contexts Project'),
+  default_widget: 'local_contexts_project',
+  default_formatter: 'local_contexts_project',
+)]
 class LocalContextsProjectItem extends StringItem implements OptionsProviderInterface {
 
   protected $localContextsProjectManager;

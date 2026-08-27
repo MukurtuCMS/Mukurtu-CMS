@@ -4,8 +4,10 @@ namespace Drupal\mukurtu_protocol\Plugin\Action;
 
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Action\ActionBase;
+use Drupal\Core\Action\Attribute\Action;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\TempStore\PrivateTempStoreFactory;
 use Drupal\og\OgAccessInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -15,14 +17,13 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *
  * Stages the selected membership IDs in a private tempstore, then redirects
  * to a per-user role management form via confirm_form_route_name.
- *
- * @Action(
- *   id = "mukurtu_manage_protocol_roles_action",
- *   label = @Translation("Manage user roles in protocol"),
- *   type = "og_membership",
- *   confirm_form_route_name = "mukurtu_protocol.protocol_manage_roles_form",
- * )
  */
+#[Action(
+  id: 'mukurtu_manage_protocol_roles_action',
+  label: new TranslatableMarkup('Manage user roles in protocol'),
+  confirm_form_route_name: 'mukurtu_protocol.protocol_manage_roles_form',
+  type: 'og_membership',
+)]
 class MukurtuManageProtocolRolesAction extends ActionBase implements ContainerFactoryPluginInterface {
 
   /**
