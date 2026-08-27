@@ -22,7 +22,7 @@ class NotificationsViewsLanguageFallbackTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['system', 'views'];
+  protected static $modules = ['system', 'views', 'message', 'node', 'user'];
 
   /**
    * {@inheritdoc}

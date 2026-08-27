@@ -22,7 +22,7 @@ class CategoriesViewLanguageFallbackTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['system', 'views'];
+  protected static $modules = ['system', 'views', 'taxonomy', 'user'];
 
   /**
    * {@inheritdoc}

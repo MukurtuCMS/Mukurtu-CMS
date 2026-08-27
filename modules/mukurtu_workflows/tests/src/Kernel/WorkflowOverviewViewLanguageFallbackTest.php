@@ -22,7 +22,7 @@ class WorkflowOverviewViewLanguageFallbackTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['system', 'views'];
+  protected static $modules = ['system', 'views', 'mukurtu_workflows', 'content_moderation', 'node', 'user'];
 
   /**
    * {@inheritdoc}

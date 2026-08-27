@@ -22,7 +22,7 @@ class CommunityViewsLanguageFallbackTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['system', 'views'];
+  protected static $modules = ['system', 'views', 'mukurtu_protocol', 'entity_browser', 'user'];
 
   /**
    * {@inheritdoc}

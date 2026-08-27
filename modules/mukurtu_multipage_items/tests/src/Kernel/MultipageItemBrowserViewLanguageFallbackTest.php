@@ -22,7 +22,7 @@ class MultipageItemBrowserViewLanguageFallbackTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['system', 'views'];
+  protected static $modules = ['system', 'views', 'entity_browser', 'node', 'user'];
 
   /**
    * {@inheritdoc}
