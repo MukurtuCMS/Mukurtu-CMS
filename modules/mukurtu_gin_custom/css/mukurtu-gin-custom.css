@@ -503,37 +503,40 @@ short fields themselves. Shrink it in these dialogs specifically. */
     background-color: var(--gin-color-text, #222330) !important;
 }
 
-.ui-sortable-helper {
+.layout-builder__section .ui-sortable-helper {
     background-color: var(--gin-bg-layer, #fff) !important;
 }
 
-/* Fill the "Add section"/"Add block"/"Add a block" buttons with Gin's solid
-   primary-button style instead of gin_lb's default teal-text-on-transparent
+/* Fill the "Add section"/"Add block"/"Add a block" buttons with a solid
+   background instead of gin_lb's default teal-text-on-transparent
    treatment. gin_lb colors them with --gin-color-primary (the site's teal
    accent) on a transparent background, so they render on whatever's behind
    the canvas - here, the block-content preview area, which stays white by
    design (see .layout-builder__link--configure above; it's a live front-end
    preview, not admin chrome, so it doesn't follow Gin dark mode).
    --gin-color-primary text vs. white computes to ~4.48:1, just under the
-   4.5:1 WCAG 1.4.3 minimum for this text size. Reuse Gin's own filled
-   .button--primary recipe (background: var(--gin-color-primary), text:
-   var(--gin-color-button-text) - white in light mode, near-black in dark
-   mode, both AA-safe against the teal fill) instead of inventing a new
-   color pairing. gin_lb's own :hover rule already switches to this same
-   filled look (background-color: var(--gin-color-primary-hover) plus
-   color: var(--gin-color-button-text)), so this just makes the default
-   state match hover instead of only differing by border. Scoped under each
-   button's real ancestor - #layout-builder for the "Add section"/"Add
-   block" canvas links, #drupal-off-canvas for "Add a block" in the block
-   picker dialog - so this outranks gin_lb's own plain single-class
-   selector on specificity: a same-specificity !important tie goes to
-   whichever rule loads later in the cascade, and gin_lb's own CSS happens
-   to load after this file's. */
+   4.5:1 WCAG 1.4.3 minimum for this text size - and contrast is symmetric
+   under a foreground/background swap, so simply filling with
+   --gin-color-primary and flipping the text to white does not fix that
+   ratio (it's the same ~4.48:1 either way). Fill with
+   --gin-color-primary-active instead - a darker shade of the same teal
+   accent Gin already defines for this button's own :active state - which
+   computes to ~7:1 against white text in light mode and ~12.8:1 against
+   --gin-color-button-text's near-black in dark mode. gin_lb's own :hover
+   rule already switches to a filled look (background-color:
+   var(--gin-color-primary-hover) plus color: var(--gin-color-button-text)),
+   so this makes the default state filled too, just with a darker shade for
+   contrast. Scoped under each button's real ancestor - #layout-builder for
+   the "Add section"/"Add block" canvas links, #drupal-off-canvas for "Add a
+   block" in the block picker dialog - so this outranks gin_lb's own plain
+   single-class selector on specificity: a same-specificity !important tie
+   goes to whichever rule loads later in the cascade, and gin_lb's own CSS
+   happens to load after this file's. */
 #layout-builder .layout-builder__link--add,
 #drupal-off-canvas .inline-block-create-button {
     color: var(--gin-color-button-text, #fff) !important;
-    background-color: var(--gin-color-primary, #10857f) !important;
-    border-color: var(--gin-color-primary, #10857f) !important;
+    background-color: var(--gin-color-primary-active, #0c645f) !important;
+    border-color: var(--gin-color-primary-active, #0c645f) !important;
 }
 
 .layout-builder .contextual {

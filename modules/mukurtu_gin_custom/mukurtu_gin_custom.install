@@ -22,7 +22,8 @@ use Drupal\Core\Serialization\Yaml;
  * which is why add/move/configure/save silently stop working.
  *
  * Registering Toastify as a required, opt-out Klaro service (the same
- * pattern already used for the built-in "cms"/"klaro" services) tells
+ * required: true / opt_out: true pairing already used for the "stripe"
+ * service definition that ships with the klaro contrib module) tells
  * Klaro's hook_js_alter() to leave the script alone, matching how this is
  * meant to work for essential, non-tracking UI dependencies.
  */
