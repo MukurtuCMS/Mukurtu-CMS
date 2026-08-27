@@ -35,6 +35,8 @@ class AccessByProtocolTest extends KernelTestBase {
     'content_moderation',
     'workflows',
     'field',
+    'geofield',
+    'leaflet',
     'node',
     'node_access_test',
     'media',
@@ -44,6 +46,7 @@ class AccessByProtocolTest extends KernelTestBase {
     'text',
     'user',
     'taxonomy',
+    'mukurtu_core',
     'mukurtu_protocol',
   ];
 
