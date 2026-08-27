@@ -3,22 +3,23 @@
 namespace Drupal\mukurtu_export\Plugin\Action;
 
 use Drupal\views_bulk_operations\Action\ViewsBulkOperationsActionBase;
+use Drupal\Core\Action\Attribute\Action;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Exports selected content directly without adding it to a named list.
  *
  * VBO redirects to AdHocExportStartController::startBulk() which reads the
  * VBO tempstore, stores ad_hoc_items, and redirects to export settings.
- *
- * @Action(
- *   id = "mukurtu_export_adhoc_export_action",
- *   label = @Translation("Export"),
- *   type = "node",
- *   confirm_form_route_name = "mukurtu_export.start_adhoc_bulk",
- * )
  */
+#[Action(
+  id: 'mukurtu_export_adhoc_export_action',
+  label: new TranslatableMarkup('Export'),
+  confirm_form_route_name: 'mukurtu_export.start_adhoc_bulk',
+  type: 'node',
+)]
 class AdHocExportAction extends ViewsBulkOperationsActionBase {
 
   /**

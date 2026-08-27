@@ -2,24 +2,25 @@
 
 namespace Drupal\mukurtu_local_contexts\Plugin\Field\FieldWidget;
 
+use Drupal\Core\Field\Attribute\FieldWidget;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\Plugin\Field\FieldWidget\OptionsWidgetBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Defines the 'local_contexts_project' field widget.
- *
- * @FieldWidget(
- *   id = "local_contexts_project",
- *   label = @Translation("Local Contexts Project Widget"),
- *   field_types = {"local_contexts_project"},
- *   multiple_values = TRUE
- * )
  */
+#[FieldWidget(
+  id: 'local_contexts_project',
+  label: new TranslatableMarkup('Local Contexts Project Widget'),
+  field_types: ['local_contexts_project'],
+  multiple_values: TRUE,
+)]
 class LocalContextsProjectWidget extends OptionsWidgetBase {
 
   /**

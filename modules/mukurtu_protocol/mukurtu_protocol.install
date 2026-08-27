@@ -720,6 +720,32 @@ function mukurtu_protocol_update_40040(): void {
   }
 }
 
+/**
+ * Grant 'view media' to protocol roles that gain /admin/media via permission.
+ *
+ * /admin/media access is moving from a hardcoded role list to a permission
+ * check (issue #972). These five protocol roles were previously listed by
+ * role ID but don't hold the underlying 'view media' permission directly;
+ * grant it to preserve existing access. protocol-protocol-curator already
+ * has it.
+ */
+function mukurtu_protocol_update_40041(): void {
+  $role_ids = [
+    'protocol-protocol-community_record_steward',
+    'protocol-protocol-contributor',
+    'protocol-protocol-language_contributor',
+    'protocol-protocol-language_steward',
+    'protocol-protocol-protocol_steward',
+  ];
+  $storage = \Drupal::entityTypeManager()->getStorage('og_role');
+  foreach ($role_ids as $role_id) {
+    $og_role = $storage->load($role_id);
+    if ($og_role && !$og_role->hasPermission('view media')) {
+      $og_role->grantPermission('view media');
+      $og_role->save();
+    }
+  }
+}
 
 /**
  * Adds the language-fallback default_langcode filter and rendering_language
@@ -728,7 +754,7 @@ function mukurtu_protocol_update_40040(): void {
  * this replaced in shipped config is left alone on customized sites; this
  * hook only fills in what's genuinely missing.
  */
-function mukurtu_protocol_update_40041(): void {
+function mukurtu_protocol_update_40042(): void {
   $config_browse_by_community = \Drupal::configFactory()->getEditable('views.view.browse_by_community');
   if (!$config_browse_by_community->isNew()) {
     $filters_browse_by_community_default = $config_browse_by_community->get('display.default.display_options.filters') ?? [];

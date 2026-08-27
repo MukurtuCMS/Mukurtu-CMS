@@ -5,15 +5,15 @@ namespace Drupal\mukurtu_core\Plugin\views\field;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
+use Drupal\views\Attribute\ViewsField;
 use Drupal\views\Plugin\views\field\FieldPluginBase;
 use Drupal\views\ResultRow;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Renders a per-row operations dropbutton for the content admin view.
- *
- * @ViewsField("mukurtu_node_row_actions")
  */
+#[ViewsField('mukurtu_node_row_actions')]
 class NodeRowActionsField extends FieldPluginBase {
 
   public function __construct(
