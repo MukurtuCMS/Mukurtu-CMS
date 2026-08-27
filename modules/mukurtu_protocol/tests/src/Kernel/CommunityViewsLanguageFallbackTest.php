@@ -8,13 +8,13 @@ use Drupal\Core\Config\FileStorage;
 use Drupal\KernelTests\KernelTestBase;
 
 /**
- * Tests mukurtu_protocol_update_40042().
+ * Tests mukurtu_protocol_update_40043().
  *
  * Loads each view's real shipped config, strips the fields the hook adds
  * to simulate a site that installed before this fix, runs the hook, and
  * confirms it fills them back in - and that running it twice is a no-op.
  *
- * @see \mukurtu_protocol_update_40042()
+ * @see \mukurtu_protocol_update_40043()
  * @group mukurtu_protocol
  */
 class CommunityViewsLanguageFallbackTest extends KernelTestBase {
@@ -53,7 +53,7 @@ class CommunityViewsLanguageFallbackTest extends KernelTestBase {
     $this->assertArrayNotHasKey('default_langcode', $this->config('views.view.browse_by_community')->get('display.default.display_options.filters') ?? []);
     $this->assertArrayNotHasKey('default_langcode', $this->config('views.view.mukurtu_community_select')->get('display.default.display_options.filters') ?? []);
 
-    mukurtu_protocol_update_40042();
+    mukurtu_protocol_update_40043();
 
     $this->assertArrayHasKey('default_langcode', $this->config('views.view.browse_by_community')->get('display.default.display_options.filters'));
     $this->assertSame('***LANGUAGE_language_content***', $this->config('views.view.browse_by_community')->get('display.community_browse_block.display_options.rendering_language'));
@@ -65,8 +65,8 @@ class CommunityViewsLanguageFallbackTest extends KernelTestBase {
    * Running the hook twice does not error.
    */
   public function testIsIdempotent(): void {
-    mukurtu_protocol_update_40042();
-    mukurtu_protocol_update_40042();
+    mukurtu_protocol_update_40043();
+    mukurtu_protocol_update_40043();
 
     $this->assertArrayHasKey('default_langcode', $this->config('views.view.browse_by_community')->get('display.default.display_options.filters'));
     $this->assertArrayHasKey('default_langcode', $this->config('views.view.mukurtu_community_select')->get('display.default.display_options.filters'));
