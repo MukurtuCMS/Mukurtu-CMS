@@ -26,6 +26,7 @@ class SearchApiLanguageFallbackFieldTest extends KernelTestBase {
   protected static $modules = [
     'system',
     'user',
+    'node',
     'search_api',
     'search_api_db',
   ];
@@ -39,6 +40,7 @@ class SearchApiLanguageFallbackFieldTest extends KernelTestBase {
     $this->installSchema('search_api', ['search_api_item']);
     $this->installEntitySchema('search_api_task');
     $this->installEntitySchema('user');
+    $this->installEntitySchema('node');
     $this->installConfig('search_api');
 
     Server::create([
