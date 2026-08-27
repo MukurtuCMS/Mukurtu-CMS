@@ -17,17 +17,58 @@
   background-color: #f8f7f7;
 }
 
+/* Leaflet's own Control.addTo() adds the "leaflet-control" class to this
+ * container (z-index: 800, and position: relative - which makes it a
+ * stacking context of its own). The JS re-parents the address results
+ * dropdown into this container so it stays inside the map instead of
+ * <body> (see .mukurtu-geocoder-autocomplete-menu below) - but that traps
+ * the dropdown's own z-index inside this container's stacking context, so
+ * it can only ever paint as high as this container does. The draw
+ * toolbar is a sibling "leaflet-control" in the same corner, also at
+ * z-index: 800, and wins ties by DOM order - so this container needs a
+ * higher z-index of its own for the dropdown to appear above the toolbar.
+ */
+.leaflet-control-geocoder-container {
+  z-index: 1001 !important;
+}
+
 /* The address results are longer now that they include state/province, so
  * the dropdown (tagged in JS to avoid affecting other autocomplete fields)
  * needs more room than jQuery UI's default of matching the narrow search
  * input's width. jQuery UI recalculates and re-sets its own inline "left"
  * on every open, so !important is needed to keep it anchored to the right
- * instead of overflowing past the edge of the map/viewport.
+ * instead of overflowing past the edge of the map.
+ *
+ * The JS also re-parents this dropdown from <body> into the geocoder's own
+ * map control, so "right" here resolves against that control's corner
+ * (the same corner the search box itself is anchored to), not the browser
+ * window - and the map's own overflow: hidden keeps it from spilling out.
+ *
+ * That containment cuts both ways though: unlike when it was body-anchored,
+ * a long result list can now be clipped by the map's overflow: hidden with
+ * no way to scroll down to the rest, including whichever item is currently
+ * arrow-key-highlighted. max-height + overflow-y keeps it reachable.
  */
 .mukurtu-geocoder-autocomplete-menu {
   box-sizing: border-box;
   min-width: min(22em, calc(100vw - 2em));
   max-width: min(34em, calc(100vw - 2em));
+  max-height: 14em;
+  overflow-y: auto;
   left: auto !important;
   right: 0.5em;
+}
+
+/**
+ * Geoman's only built-in focus affordance is a background-color change,
+ * which isn't visible enough for WCAG 2.4.7/2.4.11. Add a visible outline
+ * for the toolbar buttons, popup close button, and markers.
+ */
+.leaflet-buttons-control-button:focus-visible,
+.leaflet-pm-action:focus-visible,
+.leaflet-popup-close-button:focus-visible,
+.leaflet-marker-icon:focus-visible,
+.leaflet-container:focus-visible {
+  outline: var(--focus-color) solid 2px;
+  outline-offset: 2px;
 }

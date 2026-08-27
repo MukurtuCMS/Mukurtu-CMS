@@ -3,6 +3,7 @@
 namespace Drupal\mukurtu_protocol\Entity;
 
 use Drupal\Core\Cache\Cache;
+use Drupal\Core\Entity\Attribute\ContentEntityType;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
@@ -11,6 +12,8 @@ use Drupal\Core\Entity\RevisionableInterface;
 use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityPublishedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\mukurtu_core\Entity\RoundtripEntityInterface;
 use Drupal\user\UserInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Og;
@@ -22,71 +25,69 @@ use Exception;
  * Defines the Protocol entity.
  *
  * @ingroup mukurtu_protocol
- *
- * @ContentEntityType(
- *   id = "protocol",
- *   label = @Translation("Cultural Protocol"),
- *   label_collection = @Translation("Communities and Cultural Protocols"),
- *   label_singular = @Translation("Cultural Protocol"),
- *   label_plural = @Translation("Cultural Protocols"),
- *   label_count = @PluralTranslation(
- *     singular = "@count cultural protocols",
- *     plural = "@count cultural protocols",
- *   ),
- *   handlers = {
- *     "storage" = "Drupal\mukurtu_protocol\ProtocolStorage",
- *     "view_builder" = "Drupal\mukurtu_protocol\Entity\ProtocolViewBuilder",
- *     "list_builder" = "Drupal\mukurtu_protocol\ProtocolListBuilder",
- *     "views_data" = "Drupal\mukurtu_protocol\Entity\ProtocolViewsData",
- *     "translation" = "Drupal\mukurtu_protocol\ProtocolTranslationHandler",
- *
- *     "form" = {
- *       "default" = "Drupal\mukurtu_protocol\Form\ProtocolForm",
- *       "add" = "Drupal\mukurtu_protocol\Form\ProtocolForm",
- *       "edit" = "Drupal\mukurtu_protocol\Form\ProtocolForm",
- *       "delete" = "Drupal\mukurtu_protocol\Form\ProtocolDeleteForm",
- *     },
- *     "route_provider" = {
- *       "html" = "Drupal\mukurtu_protocol\ProtocolHtmlRouteProvider",
- *     },
- *     "access" = "Drupal\mukurtu_protocol\ProtocolAccessControlHandler",
- *   },
- *   base_table = "protocol",
- *   data_table = "protocol_field_data",
- *   revision_table = "protocol_revision",
- *   revision_data_table = "protocol_field_revision",
- *   translatable = TRUE,
- *   admin_permission = "administer protocol entities",
- *   entity_keys = {
- *     "id" = "id",
- *     "revision" = "vid",
- *     "label" = "name",
- *     "uuid" = "uuid",
- *     "uid" = "user_id",
- *     "langcode" = "langcode",
- *     "published" = "status",
- *   },
- *   revision_metadata_keys = {
- *     "revision_user" = "revision_user",
- *     "revision_created" = "revision_created",
- *     "revision_log_message" = "revision_log"
- *   },
- *   links = {
- *     "canonical" = "/protocols/protocol/{protocol}",
- *     "add-form" = "/protocols/protocol/add",
- *     "edit-form" = "/protocols/protocol/{protocol}/edit",
- *     "delete-form" = "/protocols/protocol/{protocol}/delete",
- *     "version-history" = "/protocols/protocol/{protocol}/revisions",
- *     "revision" = "/protocols/protocol/{protocol}/revisions/{protocol_revision}/view",
- *     "revision_revert" = "/protocols/protocol/{protocol}/revisions/{protocol_revision}/revert",
- *     "revision_delete" = "/protocols/protocol/{protocol}/revisions/{protocol_revision}/delete",
- *     "translation_revert" = "/protocols/protocol/{protocol}/revisions/{protocol_revision}/revert/{langcode}",
- *     "collection" = "/admin/communities-protocols",
- *   },
- *   field_ui_base_route = "protocol.settings"
- * )
  */
-class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
+#[ContentEntityType(
+  id: 'protocol',
+  label: new TranslatableMarkup('Cultural Protocol'),
+  label_collection: new TranslatableMarkup('Communities and Cultural Protocols'),
+  label_singular: new TranslatableMarkup('Cultural Protocol'),
+  label_plural: new TranslatableMarkup('Cultural Protocols'),
+  entity_keys: [
+    'id' => 'id',
+    'revision' => 'vid',
+    'label' => 'name',
+    'uuid' => 'uuid',
+    'uid' => 'user_id',
+    'langcode' => 'langcode',
+    'published' => 'status',
+  ],
+  handlers: [
+    'storage' => 'Drupal\mukurtu_protocol\ProtocolStorage',
+    'view_builder' => 'Drupal\mukurtu_protocol\Entity\ProtocolViewBuilder',
+    'list_builder' => 'Drupal\mukurtu_protocol\ProtocolListBuilder',
+    'views_data' => 'Drupal\mukurtu_protocol\Entity\ProtocolViewsData',
+    'translation' => 'Drupal\mukurtu_protocol\ProtocolTranslationHandler',
+    'form' => [
+      'default' => 'Drupal\mukurtu_protocol\Form\ProtocolForm',
+      'add' => 'Drupal\mukurtu_protocol\Form\ProtocolForm',
+      'edit' => 'Drupal\mukurtu_protocol\Form\ProtocolForm',
+      'delete' => 'Drupal\mukurtu_protocol\Form\ProtocolDeleteForm',
+    ],
+    'route_provider' => [
+      'html' => 'Drupal\mukurtu_protocol\ProtocolHtmlRouteProvider',
+    ],
+    'access' => 'Drupal\mukurtu_protocol\ProtocolAccessControlHandler',
+  ],
+  links: [
+    'canonical' => '/protocols/protocol/{protocol}',
+    'add-form' => '/protocols/protocol/add',
+    'edit-form' => '/protocols/protocol/{protocol}/edit',
+    'delete-form' => '/protocols/protocol/{protocol}/delete',
+    'version-history' => '/protocols/protocol/{protocol}/revisions',
+    'revision' => '/protocols/protocol/{protocol}/revisions/{protocol_revision}/view',
+    'revision_revert' => '/protocols/protocol/{protocol}/revisions/{protocol_revision}/revert',
+    'revision_delete' => '/protocols/protocol/{protocol}/revisions/{protocol_revision}/delete',
+    'translation_revert' => '/protocols/protocol/{protocol}/revisions/{protocol_revision}/revert/{langcode}',
+    'collection' => '/admin/communities-protocols',
+  ],
+  admin_permission: 'administer protocol entities',
+  base_table: 'protocol',
+  data_table: 'protocol_field_data',
+  revision_table: 'protocol_revision',
+  revision_data_table: 'protocol_field_revision',
+  translatable: TRUE,
+  label_count: [
+    'singular' => '@count cultural protocols',
+    'plural' => '@count cultural protocols',
+  ],
+  field_ui_base_route: 'protocol.settings',
+  revision_metadata_keys: [
+    'revision_user' => 'revision_user',
+    'revision_created' => 'revision_created',
+    'revision_log_message' => 'revision_log',
+  ],
+)]
+class Protocol extends EditorialContentEntityBase implements ProtocolInterface, RoundtripEntityInterface {
 
   use EntityChangedTrait;
   use EntityPublishedTrait;
@@ -728,7 +729,7 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface {
 
     $fields['field_access_mode'] = BaseFieldDefinition::create('list_string')
       ->setLabel(t('Cultural Protocol Type'))
-      ->setDescription('Strict - Content that uses this cultural protocol is only visible to members of this cultural protocol. The cultural protocol page is also only visible to cultural protocol members.<br>Open - Content that uses this cultural protocol is visible to all site members and visitors, with no login required. The cultural protocol page is also public.')
+      ->setDescription(t('Strict - Content that uses this cultural protocol is only visible to members of this cultural protocol. The cultural protocol page is also only visible to cultural protocol members.<br>Open - Content that uses this cultural protocol is visible to all site members and visitors, with no login required. The cultural protocol page is also public.'))
       ->setSettings([
         'allowed_values' => [
           'strict' => 'Strict',

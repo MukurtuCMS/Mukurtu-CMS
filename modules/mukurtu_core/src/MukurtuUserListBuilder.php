@@ -13,6 +13,30 @@ use Drupal\og\Og;
 class MukurtuUserListBuilder extends \Drupal\user\UserListBuilder {
   /**
    * {@inheritdoc}
+   *
+   * Excludes the mukurtu_submissions service account (if any) - it's a
+   * hidden owner account for anonymous visitor submissions, not a real
+   * person an admin can act on, so it shouldn't clutter this list.
+   */
+  public function load() {
+    $entity_query = $this->storage->getQuery();
+    $entity_query->accessCheck(TRUE);
+    $entity_query->condition('uid', 0, '<>');
+    if (\Drupal::moduleHandler()->moduleExists('mukurtu_submissions')) {
+      $service_account_uid = (int) \Drupal::config('mukurtu_submissions.settings')->get('service_account_uid');
+      if ($service_account_uid) {
+        $entity_query->condition('uid', $service_account_uid, '<>');
+      }
+    }
+    $entity_query->pager(50);
+    $header = $this->buildHeader();
+    $entity_query->tableSort($header);
+    $uids = $entity_query->execute();
+    return $this->storage->loadMultiple($uids);
+  }
+
+  /**
+   * {@inheritdoc}
    */
   public function buildHeader() {
     $header = [

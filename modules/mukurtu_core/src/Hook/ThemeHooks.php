@@ -52,4 +52,23 @@ class ThemeHooks {
     }
   }
 
+  /**
+   * Implements hook_page_attachments_alter().
+   *
+   * Entity browser modals (mukurtu_content_browser, etc.) render as a
+   * separate full page inside an iframe, so Klaro's hook_page_attachments()
+   * attaches its floating "Manage consents" toggle button there too,
+   * duplicating the one already on the parent page. Suppress just the
+   * button for these routes; leave Klaro's consent enforcement itself
+   * untouched, since browser results can still surface consent-gated
+   * external content.
+   */
+  #[Hook('page_attachments_alter')]
+  public function pageAttachmentsAlter(array &$attachments): void {
+    $route_name = \Drupal::routeMatch()->getRouteName();
+    if ($route_name !== NULL && str_starts_with($route_name, 'entity_browser.') && isset($attachments['#attached']['drupalSettings']['klaro'])) {
+      $attachments['#attached']['drupalSettings']['klaro']['show_toggle_button'] = FALSE;
+    }
+  }
+
 }

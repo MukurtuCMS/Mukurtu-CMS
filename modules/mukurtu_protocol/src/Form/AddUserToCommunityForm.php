@@ -7,8 +7,10 @@ use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
+use Drupal\mukurtu_core\Service\EntityTranslationResolver;
 use Drupal\og\Og;
 use Drupal\user\Entity\User;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Two-step form to enrol a user in communities and their child protocols.
@@ -18,6 +20,17 @@ use Drupal\user\Entity\User;
  *           have child protocols; skipped automatically otherwise).
  */
 class AddUserToCommunityForm extends FormBase {
+
+  public function __construct(protected EntityTranslationResolver $entityTranslationResolver) {}
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('mukurtu_core.entity_translation_resolver'),
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -103,6 +116,10 @@ class AddUserToCommunityForm extends FormBase {
       }
     }
 
+    $communities = array_map(
+      fn ($community) => $this->entityTranslationResolver->translate($community),
+      $communities
+    );
     uasort($communities, fn($a, $b) => strcmp($a->getName(), $b->getName()));
     return $communities;
   }
@@ -154,7 +171,9 @@ class AddUserToCommunityForm extends FormBase {
       if (!$community) {
         continue;
       }
+      $community = $this->entityTranslationResolver->translate($community);
       foreach ($community->getProtocols() as $protocol) {
+        $protocol = $this->entityTranslationResolver->translate($protocol);
         // Skip if current user cannot manage this protocol.
         if ($manageable_protocol_ids !== NULL && !in_array($protocol->id(), $manageable_protocol_ids)) {
           continue;
@@ -478,7 +497,7 @@ class AddUserToCommunityForm extends FormBase {
       $community = \Drupal::entityTypeManager()->getStorage('community')->load($cid);
       if ($community) {
         $community->addMember($user, $selected_roles);
-        $added[] = $community->getName();
+        $added[] = $this->entityTranslationResolver->translate($community)->getName();
       }
     }
 
@@ -510,7 +529,7 @@ class AddUserToCommunityForm extends FormBase {
       $protocol = \Drupal::entityTypeManager()->getStorage('protocol')->load($pid);
       if ($protocol) {
         $protocol->addMember($user, $selected_roles);
-        $added[] = $protocol->getName();
+        $added[] = $this->entityTranslationResolver->translate($protocol)->getName();
       }
     }
 

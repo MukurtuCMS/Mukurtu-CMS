@@ -4,21 +4,22 @@ declare(strict_types = 1);
 
 namespace Drupal\mukurtu_protocol\Plugin\EntityReferenceSelection;
 
+use Drupal\Core\Entity\Attribute\EntityReferenceSelection;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\og\OgRoleInterface;
 use Drupal\og\Plugin\EntityReferenceSelection\OgUserSelection;
 use Drupal\mukurtu_protocol\Entity\Protocol;
 
 /**
  * Provide Mukurtu User selection handler for memberships.
- *
- * @EntityReferenceSelection(
- *   id = "mukurtu_user_selection",
- *   label = @Translation("Mukurtu Membership user selection"),
- *   group = "mukurtu_user_selection",
- *   entity_types = {"user"},
- *   weight = 10
- * )
  */
+#[EntityReferenceSelection(
+  id: 'mukurtu_user_selection',
+  label: new TranslatableMarkup('Mukurtu Membership user selection'),
+  group: 'mukurtu_user_selection',
+  weight: 10,
+  entity_types: ['user'],
+)]
 class ProtocolUserSelection extends OgUserSelection {
 
   /**

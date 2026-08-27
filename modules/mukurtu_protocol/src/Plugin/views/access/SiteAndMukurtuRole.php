@@ -5,8 +5,10 @@ namespace Drupal\mukurtu_protocol\Plugin\views\access;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Cache\CacheableDependencyInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\user\Entity\Role;
 use Drupal\user\RoleStorageInterface;
+use Drupal\views\Attribute\ViewsAccess;
 use Drupal\views\Plugin\views\access\AccessPluginBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Routing\Route;
@@ -19,13 +21,12 @@ use Drupal\og\MembershipManagerInterface;
  * Access plugin that provides permission-based access control.
  *
  * @ingroup views_access_plugins
- *
- * @ViewsAccess(
- *   id = "site_and_mukurtu_role",
- *   title = @Translation("Site and Mukurtu Role"),
- *   help = @Translation("Access will be granted to users with the specified site or Mukurtu community/protocol role.")
- * )
  */
+#[ViewsAccess(
+  id: 'site_and_mukurtu_role',
+  title: new TranslatableMarkup('Site and Mukurtu Role'),
+  help: new TranslatableMarkup('Access will be granted to users with the specified site or Mukurtu community/protocol role.'),
+)]
 class SiteAndMukurtuRole extends AccessPluginBase implements CacheableDependencyInterface {
 
   /**

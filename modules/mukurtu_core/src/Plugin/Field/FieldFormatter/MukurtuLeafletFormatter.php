@@ -2,23 +2,22 @@
 
 namespace Drupal\mukurtu_core\Plugin\Field\FieldFormatter;
 
+use Drupal\Core\Field\Attribute\FieldFormatter;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\leaflet\Plugin\Field\FieldFormatter\LeafletDefaultFormatter;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Plugin implementation of the 'mukurtu_leaflet_formatter' formatter.
- *
- * @FieldFormatter(
- *   id = "mukurtu_leaflet_formatter",
- *   label = @Translation("Mukurtu Leaflet Map"),
- *   field_types = {
- *     "geofield"
- *   }
- * )
  */
+#[FieldFormatter(
+  id: 'mukurtu_leaflet_formatter',
+  label: new TranslatableMarkup('Mukurtu Leaflet Map'),
+  field_types: ['geofield'],
+)]
 class MukurtuLeafletFormatter extends LeafletDefaultFormatter implements ContainerFactoryPluginInterface {
   /**
    * {@inheritdoc}
@@ -126,10 +125,22 @@ class MukurtuLeafletFormatter extends LeafletDefaultFormatter implements Contain
       }
     }
 
-    // Update the values used in the $items object, which we can then let
-    // LeafletDefaultFormatter render as normal.
-    $items->setValue($new_values);
-    $render = parent::viewElements($items, $langcode);
+    // Render from a clone, never the live $items passed in. $items is the
+    // actual FieldItemList attached to the entity (ContentEntityBase::get()
+    // returns it by reference, not a copy) - calling setValue() directly on
+    // it permanently mutates the entity's real field_coverage in memory,
+    // splitting one multi-feature value into several single-feature deltas.
+    // That's fine for this render, but field_coverage's storage cardinality
+    // is 1: if the same (now 3-delta) entity object is reloaded from
+    // storage's static cache and saved later in the same request - e.g. the
+    // moderation "quick publish" review-panel form, embedded on this same
+    // node view page - everything past delta 0 is silently truncated on
+    // save. ItemList::__clone() deep-clones each item while preserving
+    // entity/field-definition context, so the clone is safe to hand to
+    // LeafletDefaultFormatter in place of $items.
+    $items_for_render = clone $items;
+    $items_for_render->setValue($new_values);
+    $render = parent::viewElements($items_for_render, $langcode);
 
     // Now take the finished render object and modify the JavaScript settings
     // for the Leaflet map to render the descriptions in each popup, rather than

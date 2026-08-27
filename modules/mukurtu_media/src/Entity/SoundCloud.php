@@ -124,8 +124,8 @@ class SoundCloud extends Media implements SoundCloudInterface, CulturalProtocolC
       ->setDisplayConfigurable('form', TRUE);
 
     $definitions['field_identifier'] = BaseFieldDefinition::create('string')
-      ->setLabel('Identifier')
-      ->setDescription('A unique, unambiguous reference to the media asset. Identifiers are often provided by the contributing institution or organization so the original item can be located. Examples include call numbers or accession numbers. Maximum 255 characters.')
+      ->setLabel(t('Identifier'))
+      ->setDescription(t('A unique, unambiguous reference to the media asset. Identifiers are often provided by the contributing institution or organization so the original item can be located. Examples include call numbers or accession numbers. Maximum 255 characters.'))
       ->setSettings([
         'max_length' => 255,
       ])
@@ -173,6 +173,16 @@ class SoundCloud extends Media implements SoundCloudInterface, CulturalProtocolC
     if ($uploadedThumb) {
       $this->thumbnail->target_id = $uploadedThumb;
     }
+
+    // Auto-fill thumbnail alt text from the media name when it is empty.
+    $thumbValue = $this->get('field_thumbnail')->getValue();
+    if (!empty($thumbValue[0]['target_id']) && empty($thumbValue[0]['alt'])) {
+      $this->get('field_thumbnail')->set(0, [
+        'target_id' => $thumbValue[0]['target_id'],
+        'alt' => $this->label(),
+      ]);
+    }
+
     parent::preSave($storage);
   }
 

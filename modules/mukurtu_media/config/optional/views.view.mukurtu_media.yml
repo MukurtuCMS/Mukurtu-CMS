@@ -585,20 +585,14 @@ display:
           sort_asc_label: Asc
           sort_desc_label: Desc
       access:
-        type: site_and_mukurtu_role
+        type: mukurtu_permission
         options:
-          site-role:
-            administrator: administrator
-            mukurtu_manager: mukurtu_manager
-            mukurtu_roundtrip_manager: mukurtu_roundtrip_manager
-          community-role: {  }
-          protocol-role:
-            protocol-protocol-community_record_steward: protocol-protocol-community_record_steward
-            protocol-protocol-contributor: protocol-protocol-contributor
-            protocol-protocol-curator: protocol-protocol-curator
-            protocol-protocol-language_contributor: protocol-protocol-language_contributor
-            protocol-protocol-language_steward: protocol-protocol-language_steward
-            protocol-protocol-protocol_steward: protocol-protocol-protocol_steward
+          site:
+            'access media overview': 'access media overview'
+          community: {  }
+          protocol:
+            'view media': 'view media'
+          conjunction: or
       cache:
         type: tag
         options: {  }

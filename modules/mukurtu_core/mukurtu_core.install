@@ -3658,6 +3658,58 @@ function mukurtu_core_update_40101(): void
 }
 
 /**
+ * Remove duplicate "Add to export list" bulk action entry (issue #2027).
+ */
+function mukurtu_core_update_40102(): void {
+  $profile_path = \Drupal::service('extension.list.profile')->getPath('mukurtu');
+  $config_source = new \Drupal\Core\Config\FileStorage(\Drupal::root() . '/' . $profile_path . '/config/install');
+  $config_data = $config_source->read('views.view.mukurtu_manage_all_content');
+  if ($config_data) {
+    \Drupal::configFactory()
+      ->getEditable('views.view.mukurtu_manage_all_content')
+      ->setData($config_data)
+      ->save();
+  }
+}
+
+/**
+ * Install the Mukurtu Submissions module, which lets site visitors submit
+ * content for review without community/protocol membership.
+ */
+function mukurtu_core_update_40103(): void {
+  if (!\Drupal::moduleHandler()->moduleExists('mukurtu_submissions')) {
+    \Drupal::service('module_installer')->install(['mukurtu_submissions']);
+  }
+}
+
+/**
+ * Grants the anonymous and authenticated roles Drupal core's generic
+ * "access content" permission.
+ *
+ * Nodes and media already use mukurtu_protocol's own access control instead
+ * of this permission, so it was never granted - but core's unmodified
+ * taxonomy term access handler hard-requires it to view any term, which
+ * silently emptied every taxonomy-referencing entity reference widget
+ * (e.g. the Category field on mukurtu_submissions' public submission form)
+ * for anonymous and authenticated non-admin users.
+ */
+function mukurtu_core_update_40104(): void {
+  user_role_grant_permissions('anonymous', ['access content']);
+  user_role_grant_permissions('authenticated', ['access content']);
+}
+
+/**
+ * Grant Mukurtu Manager role permission to view site reports.
+ */
+function mukurtu_core_update_40105(): void {
+  $role = \Drupal\user\Entity\Role::load('mukurtu_manager');
+  if ($role && !$role->hasPermission('access site reports')) {
+    $role->grantPermission('access site reports');
+    $role->save();
+  }
+}
+
+/**
  * Switch the Gin admin theme accent to a WCAG AA compliant teal.
  *
  * Gin's "teal" accent preset renders links at #10857f on white, a 4.48:1
@@ -3666,7 +3718,7 @@ function mukurtu_core_update_40101(): void
  * still on the default preset are moved to a slightly darker custom teal
  * (#0e7873, 5.3:1); sites with their own accent choice are left alone.
  */
-function mukurtu_core_update_40102(): void {
+function mukurtu_core_update_40106(): void {
   $settings = \Drupal::configFactory()->getEditable('gin.settings');
   if ($settings->get('preset_accent_color') === 'teal' && empty($settings->get('accent_color'))) {
     $settings

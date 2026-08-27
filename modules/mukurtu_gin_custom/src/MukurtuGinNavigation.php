@@ -11,8 +11,8 @@ use Drupal\gin\GinNavigation;
  * Gin hardcodes view.media.media_page_list (core) for the "Media" sidebar
  * link, requiring the 'access media overview' Drupal permission. Mukurtu
  * replaces that view with view.mukurtu_media.media_page_list, controlled via
- * _mukurtu_role. This override redirects the check to Mukurtu's route and
- * gracefully handles the case where the core view has been disabled.
+ * _mukurtu_permission. This override redirects the check to Mukurtu's route
+ * and gracefully handles the case where the core view has been disabled.
  */
 class MukurtuGinNavigation extends GinNavigation {
 

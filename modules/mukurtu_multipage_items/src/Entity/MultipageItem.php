@@ -2,66 +2,68 @@
 
 namespace Drupal\mukurtu_multipage_items\Entity;
 
+use Drupal\Core\Entity\Attribute\ContentEntityType;
 use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\RevisionableContentEntityBase;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\mukurtu_core\Entity\RoundtripEntityInterface;
 use Drupal\mukurtu_multipage_items\MultipageItemInterface;
 use Drupal\node\NodeInterface;
 use Drupal\user\UserInterface;
 
 /**
  * Defines the multipage item entity class.
- *
- * @ContentEntityType(
- *   id = "multipage_item",
- *   label = @Translation("Multipage Item"),
- *   label_collection = @Translation("Multipage Items"),
- *   handlers = {
- *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
- *     "list_builder" = "Drupal\mukurtu_multipage_items\MultipageItemListBuilder",
- *     "views_data" = "Drupal\views\EntityViewsData",
- *     "form" = {
- *       "add" = "Drupal\mukurtu_multipage_items\Form\MultipageItemForm",
- *       "edit" = "Drupal\mukurtu_multipage_items\Form\MultipageItemForm",
- *       "delete" = "Drupal\Core\Entity\ContentEntityDeleteForm"
- *     },
- *     "route_provider" = {
- *       "html" = "Drupal\Core\Entity\Routing\AdminHtmlRouteProvider",
- *     },
- *     "access" = "Drupal\mukurtu_multipage_items\MultipageItemAccessControlHandler",
- *   },
- *   base_table = "multipage_item",
- *   data_table = "multipage_item_field_data",
- *   revision_table = "multipage_item_revision",
- *   revision_data_table = "multipage_item_field_revision",
- *   show_revision_ui = TRUE,
- *   translatable = TRUE,
- *   admin_permission = "administer multipage item",
- *   entity_keys = {
- *     "id" = "id",
- *     "revision" = "revision_id",
- *     "langcode" = "langcode",
- *     "label" = "title",
- *     "uuid" = "uuid"
- *   },
- *   revision_metadata_keys = {
- *     "revision_user" = "revision_uid",
- *     "revision_created" = "revision_timestamp",
- *     "revision_log_message" = "revision_log"
- *   },
- *   links = {
- *     "add-form" = "/admin/content/multipage-item/add",
- *     "canonical" = "/multipage-item/{multipage_item}",
- *     "edit-form" = "/admin/content/multipage-item/{multipage_item}/edit",
- *     "delete-form" = "/admin/content/multipage-item/{multipage_item}/delete",
- *     "collection" = "/admin/content/multipage-item"
- *   },
- *   field_ui_base_route = "entity.multipage_item.settings"
- * )
  */
-class MultipageItem extends RevisionableContentEntityBase implements MultipageItemInterface {
+#[ContentEntityType(
+  id: 'multipage_item',
+  label: new TranslatableMarkup('Multipage Item'),
+  label_collection: new TranslatableMarkup('Multipage Items'),
+  entity_keys: [
+    'id' => 'id',
+    'revision' => 'revision_id',
+    'langcode' => 'langcode',
+    'label' => 'title',
+    'uuid' => 'uuid',
+  ],
+  handlers: [
+    'view_builder' => 'Drupal\Core\Entity\EntityViewBuilder',
+    'list_builder' => 'Drupal\mukurtu_multipage_items\MultipageItemListBuilder',
+    'views_data' => 'Drupal\views\EntityViewsData',
+    'form' => [
+      'add' => 'Drupal\mukurtu_multipage_items\Form\MultipageItemForm',
+      'edit' => 'Drupal\mukurtu_multipage_items\Form\MultipageItemForm',
+      'delete' => 'Drupal\Core\Entity\ContentEntityDeleteForm',
+    ],
+    'route_provider' => [
+      'html' => 'Drupal\Core\Entity\Routing\AdminHtmlRouteProvider',
+    ],
+    'access' => 'Drupal\mukurtu_multipage_items\MultipageItemAccessControlHandler',
+  ],
+  links: [
+    'add-form' => '/admin/content/multipage-item/add',
+    'canonical' => '/multipage-item/{multipage_item}',
+    'edit-form' => '/admin/content/multipage-item/{multipage_item}/edit',
+    'delete-form' => '/admin/content/multipage-item/{multipage_item}/delete',
+    'collection' => '/admin/content/multipage-item',
+  ],
+  admin_permission: 'administer multipage item',
+  base_table: 'multipage_item',
+  data_table: 'multipage_item_field_data',
+  revision_table: 'multipage_item_revision',
+  revision_data_table: 'multipage_item_field_revision',
+  show_revision_ui: TRUE,
+  translatable: TRUE,
+  field_ui_base_route: 'entity.multipage_item.settings',
+  revision_metadata_keys: [
+    'revision_user' => 'revision_uid',
+    'revision_created' => 'revision_timestamp',
+    'revision_log_message' => 'revision_log',
+  ],
+)]
+class MultipageItem extends RevisionableContentEntityBase implements MultipageItemInterface, RoundtripEntityInterface {
 
   use EntityChangedTrait;
 

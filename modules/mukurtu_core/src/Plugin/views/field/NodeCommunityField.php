@@ -4,15 +4,15 @@ namespace Drupal\mukurtu_core\Plugin\views\field;
 
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\views\Attribute\ViewsField;
 use Drupal\views\Plugin\views\field\FieldPluginBase;
 use Drupal\views\ResultRow;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Displays the communities associated with a node via its protocols.
- *
- * @ViewsField("mukurtu_node_community_field")
  */
+#[ViewsField('mukurtu_node_community_field')]
 class NodeCommunityField extends FieldPluginBase {
 
   public function __construct(

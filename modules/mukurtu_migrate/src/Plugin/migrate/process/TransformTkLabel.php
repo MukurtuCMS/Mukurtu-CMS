@@ -2,6 +2,7 @@
 
 namespace Drupal\mukurtu_migrate\Plugin\migrate\process;
 
+use Drupal\migrate\Attribute\MigrateProcess;
 use Drupal\migrate\MigrateExecutableInterface;
 use Drupal\migrate\ProcessPluginBase;
 use Drupal\migrate\Row;
@@ -9,12 +10,11 @@ use \Drupal\Core\Database\Database;
 
 /**
  * Given a v3 TK label, transform it into a v4 TK label.
- *
- * @MigrateProcessPlugin(
- *   id = "transform_tk_label",
- *   handle_multiples = TRUE
- * )
  */
+#[MigrateProcess(
+  id: 'transform_tk_label',
+  handle_multiples: TRUE,
+)]
 class TransformTkLabel extends ProcessPluginBase
 {
   public function transform($value, MigrateExecutableInterface $migrate_executable, Row $row, $destination_property)
