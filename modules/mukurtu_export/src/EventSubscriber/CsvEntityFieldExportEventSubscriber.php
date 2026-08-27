@@ -8,6 +8,7 @@ use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\mukurtu_core\Service\ParagraphEmptinessChecker;
 use Drupal\mukurtu_export\Entity\CsvExporter;
 use Drupal\mukurtu_export\Event\EntityFieldExportEvent;
+use Drupal\og\Og;
 use InvalidArgumentException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -72,6 +73,19 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
     // Virtual field: reverse lookup of nodes that reference this media item.
     if ($entity->getEntityTypeId() === 'media' && $field_name === 'field_found_in') {
       return $this->exportFoundIn($event, $entity, $config);
+    }
+
+    // Virtual fields: community/protocol membership isn't a real field on
+    // the user entity, so it's read directly from the OG membership API.
+    if ($entity->getEntityTypeId() === 'user' && in_array($field_name, ['communities', 'protocols'], TRUE)) {
+      return $this->exportGroupMembership($event, $entity, $field_name);
+    }
+
+    // Virtual field: account status is split across two real fields
+    // (status, field_pending), exported as a single Active/Blocked/Pending
+    // value to match the import side's unified 'account_status' target.
+    if ($entity->getEntityTypeId() === 'user' && $field_name === 'account_status') {
+      return $this->exportAccountStatus($event, $entity);
     }
 
     try {
@@ -684,6 +698,70 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
     }
 
     $event->setValue($export);
+  }
+
+  /**
+   * Exports a user's community or protocol memberships and roles.
+   *
+   * Serializes to the same "Name>role1|role2" format the import side's
+   * GroupMembershipLookup process plugin expects (the CSV::export() plugin
+   * joins the returned array with the exporter's configured
+   * multivalue_delimiter, matching the delimiter import's explode step
+   * reads by default), so an export/re-import round-trip reproduces the
+   * same membership state.
+   *
+   * @protected
+   */
+  protected function exportGroupMembership(EntityFieldExportEvent $event, EntityInterface $entity, string $field_name): void {
+    $bundle = $field_name === 'communities' ? 'community' : 'protocol';
+    $memberships = array_filter(Og::getMemberships($entity), fn($membership) => $membership->getGroupBundle() === $bundle);
+
+    $export = [];
+    foreach ($memberships as $membership) {
+      $group = $membership->getGroup();
+      if (!$group) {
+        continue;
+      }
+      $roles = array_values(array_filter(
+        array_map(fn($role) => $role->getName(), $membership->getRoles()),
+        fn($role_name) => !in_array($role_name, ['member', 'non-member'], TRUE),
+      ));
+      // Strip delimiter characters defensively rather than invent an
+      // escaping scheme, matching exportCulturalProtocol()'s precedent of
+      // stripping conflicting delimiter characters from exported values.
+      // ':' is deliberately not stripped -- '>' is the compound-value
+      // delimiter now, and colons are common in real group names.
+      $label = str_replace(['>', '|', ';'], '', $group->label());
+      $export[] = $roles ? "{$label}>" . implode('|', $roles) : $label;
+    }
+
+    $event->setValue($export);
+  }
+
+  /**
+   * Exports a user's account status as a single Active/Blocked/Pending
+   * value.
+   *
+   * Mirrors the same three-state model the interactive account form
+   * presents (see FormHooks::userStatusPreSaveSubmit()) and
+   * MukurtuUserListBuilder::buildRow()'s admin listing, and matches the
+   * format the import side's AccountStatusLookup process plugin expects,
+   * so an export/re-import round trip reproduces the same account status.
+   *
+   * @protected
+   */
+  protected function exportAccountStatus(EntityFieldExportEvent $event, EntityInterface $entity): void {
+    if ($entity->isActive()) {
+      $status = 'Active';
+    }
+    elseif ($entity->hasField('field_pending') && $entity->get('field_pending')->value) {
+      $status = 'Pending';
+    }
+    else {
+      $status = 'Blocked';
+    }
+
+    $event->setValue([$status]);
   }
 
 }
