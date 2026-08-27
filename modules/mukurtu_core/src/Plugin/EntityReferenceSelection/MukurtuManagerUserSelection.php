@@ -2,6 +2,8 @@
 
 namespace Drupal\mukurtu_core\Plugin\EntityReferenceSelection;
 
+use Drupal\Core\Entity\Attribute\EntityReferenceSelection;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\user\Plugin\EntityReferenceSelection\UserSelection;
 
 /**
@@ -10,15 +12,14 @@ use Drupal\user\Plugin\EntityReferenceSelection\UserSelection;
  * Returns users with Drupal roles administrator or mukurtu_manager, OG
  * community_manager role in any community, or OG protocol_steward role in any
  * protocol.
- *
- * @EntityReferenceSelection(
- *   id = "mukurtu_manager_users",
- *   label = @Translation("Mukurtu privileged users"),
- *   entity_types = {"user"},
- *   group = "mukurtu_manager_users",
- *   weight = 1
- * )
  */
+#[EntityReferenceSelection(
+  id: 'mukurtu_manager_users',
+  label: new TranslatableMarkup('Mukurtu privileged users'),
+  group: 'mukurtu_manager_users',
+  weight: 1,
+  entity_types: ['user'],
+)]
 class MukurtuManagerUserSelection extends UserSelection {
 
   /**

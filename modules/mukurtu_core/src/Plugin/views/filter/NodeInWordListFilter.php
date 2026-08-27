@@ -4,14 +4,14 @@ namespace Drupal\mukurtu_core\Plugin\views\filter;
 
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\views\Attribute\ViewsFilter;
 use Drupal\views\Plugin\views\filter\InOperator;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Filters dictionary word nodes by word list membership.
- *
- * @ViewsFilter("mukurtu_node_in_word_list")
  */
+#[ViewsFilter('mukurtu_node_in_word_list')]
 class NodeInWordListFilter extends InOperator {
 
   public function __construct(

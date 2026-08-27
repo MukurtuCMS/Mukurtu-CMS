@@ -2,23 +2,21 @@
 
 namespace Drupal\original_date\Plugin\Field\FieldFormatter;
 
+use Drupal\Core\Field\Attribute\FieldFormatter;
 use Drupal\Core\Field\FormatterBase;
 use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Plugin implementation of the 'month_day_year_original_date_formatter'
  * formatter. Supports partial dates for "Month, Year" and "Year".
- *
- * @FieldFormatter(
- *   id = "month_day_year_original_date_formatter",
- *   module = "original_date",
- *   description = "Displays Original Date in Month, Day Year format.",
- *   label = @Translation("Original Date display: Month Day, Year"),
- *   field_types = {
- *     "original_date"
- *   }
- * )
  */
+#[FieldFormatter(
+  id: 'month_day_year_original_date_formatter',
+  label: new TranslatableMarkup('Original Date display: Month Day, Year'),
+  description: new TranslatableMarkup('Displays Original Date in Month, Day Year format.'),
+  field_types: ['original_date'],
+)]
 class OriginalDateFormatterMonthDayYear extends FormatterBase
 {
   /**
