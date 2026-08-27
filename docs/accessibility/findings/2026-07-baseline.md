@@ -123,6 +123,26 @@ regressions. (PR [#2004](https://github.com/MukurtuCMS/Mukurtu-CMS/pull/2004),
 upstreaming three of this program's fixes, is still open/unmerged as of this
 cycle.)
 
+**2026-08-27:** merged a further 44 `origin/main` commits — multilingual
+config/negotiation fixes, a large import/CSV-export reliability pass, the new
+visitor submission-forms workflow, and two items directly relevant to this
+program's own backlog: an **accessible keyboard/screen-reader alternative for
+the Map Points widget (#1913)**, and a **Gin dark-mode contrast fix (#2030)**
+that likely resolves or narrows the ACR's "needs live testing" dark-mode item
+(`#1786`, referenced from issue #1975). Both are worth re-checking against the
+manual checklist's Leaflet-maps item and the dark-mode live-test item before
+starting that work, in case they're already substantially addressed. Real
+merge conflict in `mukurtu_core.install` again (main added 4 new hooks
+`40102`-`40105`, colliding with this branch's `40102`) — resolved with the
+established renumber-to-`40106` + verify-both-parents'-function-inventory
+approach, no content lost. `MukurtuLeafletFormatter.php` also textually
+overlapped (main fixed a real live-entity-mutation bug there — cloning
+`$items` before rendering instead of mutating the entity's actual field data
+in place) but merged automatically and correctly: both fixes coexist in
+non-overlapping regions of the same method, confirmed by reading the merged
+file directly. No composer/recipe changes; fresh reinstall given the scale.
+Re-scan: 39/39, zero new findings, exact match to 2026-08-18 state.
+
 No manual keyboard/screen-reader testing has happened yet — that is the next
 phase, using [../manual-checklist.md](../manual-checklist.md) and the
 [manual findings template](manual-findings-template.md).
