@@ -16,6 +16,8 @@ jobs:
 
       - name: Check for untranslated UI strings
         run: ./scripts/lint/multilingual-guardrails.sh
+        env:
+          MUKURTU_LINT_STRICT: '1'
 
   testing:
     name: Mukurtu v4 - PHP ${{ matrix.php-versions }}
