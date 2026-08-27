@@ -3,7 +3,9 @@
 namespace Drupal\mukurtu_import\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
+use Drupal\Core\Entity\Attribute\ConfigEntityType;
 use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\mukurtu_import\MukurtuImportFieldProcessInterface;
 use Drupal\mukurtu_import\MukurtuImportFieldProcessPluginManager;
 use Drupal\mukurtu_import\MukurtuImportStrategyInterface;
@@ -14,51 +16,50 @@ use Exception;
 
 /**
  * Defines the mukurtu_import_strategy entity type.
- *
- * @ConfigEntityType(
- *   id = "mukurtu_import_strategy",
- *   label = @Translation("Import Templates"),
- *   label_collection = @Translation("Import Templates"),
- *   label_singular = @Translation("Import Template"),
- *   label_plural = @Translation("Import Templates"),
- *   label_count = @PluralTranslation(
- *     singular = "@count Import Template",
- *     plural = "@count Import Templates",
- *   ),
- *   handlers = {
- *     "access" = "Drupal\mukurtu_import\MukurtuImportStrategyAccessControlHandler",
- *     "list_builder" = "Drupal\mukurtu_import\MukurtuImportStrategyListBuilder",
- *     "form" = {
- *       "add" = "Drupal\mukurtu_import\Form\MukurtuImportStrategyForm",
- *       "edit" = "Drupal\mukurtu_import\Form\MukurtuImportStrategyForm",
- *       "delete" = "Drupal\Core\Entity\EntityDeleteForm"
- *     }
- *   },
- *   config_prefix = "mukurtu_import_strategy",
- *   admin_permission = "administer mukurtu_import_strategy",
- *   links = {
- *     "collection" = "/admin/import-templates",
- *     "add-form" = "/admin/import-templates/add",
- *     "edit-form" = "/admin/import-templates/{mukurtu_import_strategy}",
- *     "delete-form" = "/admin/import-templates/{mukurtu_import_strategy}/delete"
- *   },
- *   entity_keys = {
- *     "id" = "id",
- *     "label" = "label",
- *     "uuid" = "uuid"
- *   },
- *   config_export = {
- *     "id",
- *     "uid",
- *     "label",
- *     "description",
- *     "target_entity_type_id",
- *     "target_bundle",
- *     "mapping",
- *     "configuration",
- *   }
- * )
  */
+#[ConfigEntityType(
+  id: 'mukurtu_import_strategy',
+  label: new TranslatableMarkup('Import Templates'),
+  label_collection: new TranslatableMarkup('Import Templates'),
+  label_singular: new TranslatableMarkup('Import Template'),
+  label_plural: new TranslatableMarkup('Import Templates'),
+  config_prefix: 'mukurtu_import_strategy',
+  entity_keys: [
+    'id' => 'id',
+    'label' => 'label',
+    'uuid' => 'uuid',
+  ],
+  handlers: [
+    'access' => 'Drupal\mukurtu_import\MukurtuImportStrategyAccessControlHandler',
+    'list_builder' => 'Drupal\mukurtu_import\MukurtuImportStrategyListBuilder',
+    'form' => [
+      'add' => 'Drupal\mukurtu_import\Form\MukurtuImportStrategyForm',
+      'edit' => 'Drupal\mukurtu_import\Form\MukurtuImportStrategyForm',
+      'delete' => 'Drupal\Core\Entity\EntityDeleteForm',
+    ],
+  ],
+  links: [
+    'collection' => '/admin/import-templates',
+    'add-form' => '/admin/import-templates/add',
+    'edit-form' => '/admin/import-templates/{mukurtu_import_strategy}',
+    'delete-form' => '/admin/import-templates/{mukurtu_import_strategy}/delete',
+  ],
+  admin_permission: 'administer mukurtu_import_strategy',
+  label_count: [
+    'singular' => '@count Import Template',
+    'plural' => '@count Import Templates',
+  ],
+  config_export: [
+    'id',
+    'uid',
+    'label',
+    'description',
+    'target_entity_type_id',
+    'target_bundle',
+    'mapping',
+    'configuration',
+  ],
+)]
 class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStrategyInterface {
 
   /**
