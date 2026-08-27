@@ -4286,6 +4286,7 @@ body:not(.is-always-mobile-nav) {
   -webkit-box-flex: 1;
       -ms-flex: 1 1 auto;
           flex: 1 1 auto;
+  min-inline-size: 0;
   padding-block: var(--v-space-5xs);
   padding-inline: var(--v-space-5xs);
   border: 1.5px solid var(--color-text-neutral-medium, #767676);
@@ -4659,6 +4660,10 @@ body.is-fixed {
   display: flex;
   -ms-flex-wrap: wrap;
       flex-wrap: wrap;
+}
+.page__breadcrumbs .breadcrumb__list-item {
+  overflow-wrap: anywhere;
+  word-break: normal;
 }
 .page__breadcrumbs .breadcrumb__list-item:not(:last-of-type) a {
   -webkit-padding-end: var(--v-space-5xs);
@@ -5056,8 +5061,8 @@ header {
   display: flex;
   -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
-      -ms-flex-flow: column wrap;
-          flex-flow: column wrap;
+      -ms-flex-flow: column nowrap;
+          flex-flow: column nowrap;
   -webkit-column-gap: var(--v-space-xs);
      -moz-column-gap: var(--v-space-xs);
           column-gap: var(--v-space-xs);
@@ -5832,8 +5837,8 @@ header {
   display: flex;
   -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
-      -ms-flex-flow: column wrap;
-          flex-flow: column wrap;
+      -ms-flex-flow: column nowrap;
+          flex-flow: column nowrap;
   -webkit-margin-after: var(--v-space-xs);
           margin-block-end: var(--v-space-xs);
 }
@@ -5888,6 +5893,8 @@ header {
           margin-block-end: var(--v-space-2xl);
   color: var(--color-white);
   font-size: var(--font-size-heading-2xl);
+  overflow-wrap: anywhere;
+  word-break: normal;
 }
 .collection__header__text h2::after {
   content: "";
@@ -5943,8 +5950,8 @@ header {
   display: flex;
   -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
-      -ms-flex-flow: column wrap;
-          flex-flow: column wrap;
+      -ms-flex-flow: column nowrap;
+          flex-flow: column nowrap;
   -webkit-column-gap: var(--v-space-xs);
      -moz-column-gap: var(--v-space-xs);
           column-gap: var(--v-space-xs);
@@ -7786,6 +7793,10 @@ header {
 }
 .layout-container .page__title h1 {
   margin-block: 0;
+}
+.layout-container .page__title h1 {
+  overflow-wrap: anywhere;
+  word-break: normal;
 }
 .page-node-type-page .layout-container .page__title {
   -webkit-box-shadow: none;
