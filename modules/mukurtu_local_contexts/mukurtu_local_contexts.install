@@ -772,7 +772,8 @@ function mukurtu_local_contexts_update_10005() {
   /** @var \Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager $project_manager */
   $project_manager = \Drupal::service('mukurtu_local_contexts.supported_project_manager');
 
-  $site_api_key = reset($project_manager->getSiteApiKeys()) ?: NULL;
+  $site_api_keys = $project_manager->getSiteApiKeys();
+  $site_api_key = reset($site_api_keys) ?: NULL;
   if (!empty($site_api_key)) {
     $db->update('mukurtu_local_contexts_supported_projects')
       ->fields(['api_key' => $site_api_key])
@@ -799,7 +800,8 @@ function mukurtu_local_contexts_update_10005() {
     if (!$group) {
       continue;
     }
-    $group_api_key = reset($project_manager->getGroupApiKeys($group)) ?: NULL;
+    $group_api_keys = $project_manager->getGroupApiKeys($group);
+    $group_api_key = reset($group_api_keys) ?: NULL;
     if (empty($group_api_key)) {
       continue;
     }

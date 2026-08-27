@@ -59,3 +59,39 @@ function mukurtu_search_update_40004(): void {
   }
   $config->save();
 }
+
+/**
+ * Restore string (facet) taxonomy name fields dropped by update_40001().
+ *
+ * mukurtu_search_update_40001() called mukurtu_search_rebuild_index(),
+ * which wiped every field on mukurtu_browse_auto_index and only restored
+ * the fulltext "__name__text" variants for taxonomy reference fields, not
+ * the plain string "__name" variants that facets (e.g. Category, Format,
+ * Language) use as their field_identifier. This left those facets unable
+ * to resolve a query type. Re-add whichever of the fields are missing.
+ */
+function mukurtu_search_update_40005(): void {
+  $index = \Drupal\search_api\Entity\Index::load('mukurtu_browse_auto_index');
+  if (!$index) {
+    return;
+  }
+
+  $missing = FALSE;
+  foreach (mukurtu_search_static_taxonomy_name_fields() as $field_id => $definition) {
+    if ($index->getField($field_id)) {
+      continue;
+    }
+    $missing = TRUE;
+    $field = new \Drupal\search_api\Item\Field($index, $field_id);
+    $field->setType('string');
+    $field->setDatasourceId('entity:node');
+    $field->setPropertyPath($definition['property_path']);
+    $field->setLabel($definition['label']);
+    $index->addField($field);
+  }
+
+  if ($missing) {
+    $index->save();
+    $index->reindex();
+  }
+}
