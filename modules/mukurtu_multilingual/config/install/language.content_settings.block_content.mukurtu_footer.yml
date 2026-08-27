@@ -2,7 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
-    - node.type.landing_page
+    - block_content.type.mukurtu_footer
   module:
     - content_translation
 third_party_settings:
@@ -10,8 +10,8 @@ third_party_settings:
     enabled: true
     bundle_settings:
       untranslatable_fields_hide: '0'
-id: node.landing_page
-target_entity_type_id: node
-target_bundle: landing_page
+id: block_content.mukurtu_footer
+target_entity_type_id: block_content
+target_bundle: mukurtu_footer
 default_langcode: site_default
 language_alterable: true
