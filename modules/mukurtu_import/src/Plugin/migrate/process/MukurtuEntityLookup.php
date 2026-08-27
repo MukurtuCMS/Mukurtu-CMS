@@ -5,16 +5,14 @@ declare(strict_types = 1);
 namespace Drupal\mukurtu_import\Plugin\migrate\process;
 
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
+use Drupal\migrate\Attribute\MigrateProcess;
 use Drupal\migrate\MigrateException;
 use Drupal\migrate_plus\Plugin\migrate\process\EntityLookup;
 
 /**
  * This plugin looks for existing entities.
- *
- * @MigrateProcessPlugin(
- *   id = "mukurtu_entity_lookup"
- * )
  */
+#[MigrateProcess('mukurtu_entity_lookup')]
 class MukurtuEntityLookup extends EntityLookup {
 
   /**

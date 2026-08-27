@@ -3,10 +3,12 @@
 namespace Drupal\mukurtu_protocol\Plugin\Action;
 
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Action\Attribute\Action;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\og\Og;
 use Drupal\user\Entity\User;
 use Drupal\views_bulk_operations\Action\ViewsBulkOperationsActionBase;
@@ -14,17 +16,12 @@ use Drupal\views\ViewExecutable;
 
 /**
  * VBO for adding users to a community.
- *
- * @Action(
- *   id = "mukurtu_add_community_membership_action",
- *   label = @Translation("Add user(s) to a community"),
- *   type = "user",
- *   confirm = TRUE,
- *   requirements = {
- *     "_custom_access" = TRUE,
- *   },
- * )
  */
+#[Action(
+  id: 'mukurtu_add_community_membership_action',
+  label: new TranslatableMarkup('Add user(s) to a community'),
+  type: 'user',
+)]
 class MukurtuAddCommunityMembershipAction extends ViewsBulkOperationsActionBase implements PluginFormInterface {
 
   use StringTranslationTrait;
