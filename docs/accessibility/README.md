@@ -2,7 +2,7 @@
 
 This document is the roadmap for Mukurtu's ongoing accessibility program. It explains what we are aiming for, what is in scope, how audits run, and the cycle we repeat to maintain continual improvements.
 
-For the list of pages and components under audit, see [page-inventory.md](page-inventory.md). For hands-on keyboard and screen reader testing, see [manual-checklist.md](manual-checklist.md). Dated audit results live in [findings/](findings/). The conformance report lives in [acr/](acr/).
+For the list of pages and components under audit, see [page-inventory.md](page-inventory.md) (Phase 1: visitor/member/manage-adjacent) and [page-inventory-admin.md](page-inventory-admin.md) (Phase 2: admin/authoring). For hands-on keyboard and screen reader testing, see [manual-checklist.md](manual-checklist.md). Dated audit results live in [findings/](findings/). The conformance report lives in [acr/](acr/).
 
 ---
 
@@ -88,6 +88,18 @@ Also report-only; results land in `test-results/a11y-extra/<page>-<check>.json`.
 
 Between the two layers, automated scanning now catches roughly 30–40% of WCAG issues outright (missing alt text, form labels, contrast, ARIA misuse, duplicate landmarks) plus smoke-test coverage of several more (reflow, focus visibility, keyboard traps). The rest requires manual testing.
 
+### Phase 2 (admin/authoring) automated scans
+
+`tests/accessibility-admin.spec.ts` and `tests/accessibility-automated-checks-admin.spec.ts` are the admin-routes equivalents of the two suites above, run against the curated set in [page-inventory-admin.md](page-inventory-admin.md):
+
+```bash
+cd tests/playwright
+PLAYWRIGHT_BASE_URL=https://mukurtu.ddev.site npx playwright test accessibility-admin --project=chromium
+PLAYWRIGHT_BASE_URL=https://mukurtu.ddev.site npx playwright test accessibility-automated-checks-admin --project=chromium
+```
+
+Note: Playwright's `test` CLI filters by substring match on filename, so the bare `accessibility`/`accessibility-automated-checks` commands above now also pick up these admin spec files (all four filenames contain those substrings) — use the full `-admin` suffix to run Phase 2 in isolation, or the bare prefix to run everything together.
+
 ### Manual testing (keyboard + screen reader)
 
 Interactive components — maps, carousels, lightboxes, dialogs, tab panels, autocompletes — need a human at the keyboard and a screen reader running. [manual-checklist.md](manual-checklist.md) walks through what to verify for each component type. Record results in a dated findings document.
@@ -129,4 +141,4 @@ Axe checks start report-only so a red wall of pre-existing violations doesn't bl
 | OpenACR report | First triage pass done (v2): 7 web criteria `supports`, authoring-tool 4.1.2 `partially-supports`; rest `not-evaluated` pending manual evidence |
 | Manual audit of high-risk components | Not started — template ready ([findings/manual-findings-template.md](findings/manual-findings-template.md)); axe "incomplete" contrast queue folded in |
 | CI integration (report-only) | Not started |
-| Admin/authoring (ATAG) scope | **Underway independently** — [issue #1975](https://github.com/MukurtuCMS/Mukurtu-CMS/issues/1975) audited all 135 custom admin form classes (131 clean, 4 defects filed: [#1976](https://github.com/MukurtuCMS/Mukurtu-CMS/issues/1976)/[#1977](https://github.com/MukurtuCMS/Mukurtu-CMS/issues/1977)/[#1978](https://github.com/MukurtuCMS/Mukurtu-CMS/issues/1978)/[#1979](https://github.com/MukurtuCMS/Mukurtu-CMS/issues/1979), fixed by PRs [#1981](https://github.com/MukurtuCMS/Mukurtu-CMS/pull/1981)/[#1983](https://github.com/MukurtuCMS/Mukurtu-CMS/pull/1983)/[#1984](https://github.com/MukurtuCMS/Mukurtu-CMS/pull/1984)) plus admin-facing JS widgets. Two items need live testing rather than code review: Gin dark-mode contrast ([#1786](https://github.com/MukurtuCMS/Mukurtu-CMS/issues/1786)) and a keyboard-efficiency pass on the CSV exporter's field-mapping screen. This program (Phase 1) continues to own the visitor/member scope; #1975 owns building the Phase 2 equivalent of `page-inventory.md` + a Playwright spec against admin routes. |
+| Admin/authoring (ATAG) scope | **Underway independently** — [issue #1975](https://github.com/MukurtuCMS/Mukurtu-CMS/issues/1975) audited all 135 custom admin form classes (131 clean, 4 defects filed: [#1976](https://github.com/MukurtuCMS/Mukurtu-CMS/issues/1976)/[#1977](https://github.com/MukurtuCMS/Mukurtu-CMS/issues/1977)/[#1978](https://github.com/MukurtuCMS/Mukurtu-CMS/issues/1978)/[#1979](https://github.com/MukurtuCMS/Mukurtu-CMS/issues/1979), fixed by PRs [#1981](https://github.com/MukurtuCMS/Mukurtu-CMS/pull/1981)/[#1983](https://github.com/MukurtuCMS/Mukurtu-CMS/pull/1983)/[#1984](https://github.com/MukurtuCMS/Mukurtu-CMS/pull/1984)) plus admin-facing JS widgets. Two items still need live testing rather than code review: Gin dark-mode contrast ([#1786](https://github.com/MukurtuCMS/Mukurtu-CMS/issues/1786)) and a keyboard-efficiency pass on the CSV exporter's field-mapping screen. Phase 1's 9 own coverage gaps (pages reachable by anonymous/member/manage-adjacent roles that were missing from the original inventory) are now filled in `page-inventory.md`. The Phase 2 equivalent — [page-inventory-admin.md](page-inventory-admin.md) + `accessibility-admin.spec.ts`/`accessibility-automated-checks-admin.spec.ts` — is scaffolded with a curated representative set of admin pages (not an exhaustive scan; #1975's form-by-form code read already covers correctness). This program (Phase 1) continues to own the visitor/member/manage-adjacent scope; #1975 owns the Phase 2 admin-routes inventory and spec. |
