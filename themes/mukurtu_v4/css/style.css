@@ -938,6 +938,10 @@ a:not(.primary-nav__menu-link) svg.tel path {
   background-image: none;
 }
 
+.altcha-footer {
+  opacity: 1 !important;
+}
+
 .community__sidebar > .field,
 .protocol__sidebar > .field,
 .callout {
