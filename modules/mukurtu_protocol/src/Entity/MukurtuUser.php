@@ -13,6 +13,8 @@ class MukurtuUser extends User implements MukurtuUserInterface {
    * {@inheritDoc}
    */
   public function preSave(EntityStorageInterface $storage) {
+    parent::preSave($storage);
+
     // Use the account name as the display name by default.
     if ($this->hasField('field_display_name') && empty($this->get('field_display_name')->getValue())) {
       $this->set('field_display_name', $this->getAccountName());
