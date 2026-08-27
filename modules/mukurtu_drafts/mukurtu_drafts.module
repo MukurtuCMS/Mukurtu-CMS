@@ -87,14 +87,30 @@ function mukurtu_drafts_preprocess_node(array &$variables): void {
     return;
   }
 
+  $label = $banner_states[$state];
+  $modifier = str_replace('_', '-', $state);
+
+  // Content that arrived through mukurtu_submissions' public submission form
+  // starts out with no Cultural Protocol and unverified data - reviewers
+  // need that reminder throughout the whole pre-publish review lifecycle,
+  // not just at the moment it first arrives, so this overrides the generic
+  // state label for as long as an associated submission record exists
+  // rather than only for the initial 'draft' state.
+  $submission_states = ['draft', 'needs_review', 'revision_requested'];
+  if (in_array($state, $submission_states, TRUE)
+    && \Drupal::moduleHandler()->moduleExists('mukurtu_submissions')
+    && mukurtu_submissions_get_submission_for_entity($node)) {
+    $label = t('Submission');
+    $modifier = 'submission';
+  }
+
   // Inject a real DOM element so assistive technology announces the state.
   // CSS ::before content is unreliable in screen readers. role="status" causes
   // AT to announce the banner as a status message without moving focus.
-  $modifier = str_replace('_', '-', $state);
   $variables['title_prefix']['status_banner'] = [
     '#type' => 'html_tag',
     '#tag' => 'div',
-    '#value' => $banner_states[$state],
+    '#value' => $label,
     '#attributes' => [
       'class' => ['node--status-banner', 'node--status-banner--' . $modifier],
       'role' => 'status',

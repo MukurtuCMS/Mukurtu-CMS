@@ -42,7 +42,7 @@ class MukurtuSettingsForm extends ConfigFormBase {
     $defaultRelatedContentOption = $config->get('mukurtu_related_content_display') ?? 'computed';
 
     $form['mukurtu_related_content_display'] = [
-      '#title' => 'Related Content Display',
+      '#title' => $this->t('Related Content Display'),
       '#description' => $this->t('Select what content should be displayed for the related content field.'),
       '#type' => 'radios',
       '#default_value' => $defaultRelatedContentOption,

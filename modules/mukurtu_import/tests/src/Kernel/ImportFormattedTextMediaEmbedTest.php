@@ -481,4 +481,26 @@ class ImportFormattedTextMediaEmbedTest extends MukurtuImportTestBase {
     $this->assertStringNotContainsString('data-entity-uuid=', $body);
   }
 
+  /**
+   * Tests that a missing mapped CSV column for a single-value formatted
+   * text field leaves the field empty instead of crashing the import.
+   */
+  public function testMissingColumnFormattedTextImport(): void {
+    $data = [
+      ['nid'],
+      [$this->node->id()],
+    ];
+    $import_file = $this->createCsvFile($data);
+    $mapping = [
+      ['target' => 'nid', 'source' => 'nid'],
+      ['target' => 'field_body', 'source' => 'body'],
+    ];
+
+    $result = $this->importCsvFile($import_file, $mapping);
+    $this->assertEquals(MigrationInterface::RESULT_COMPLETED, $result);
+
+    $updated_node = $this->entityTypeManager->getStorage('node')->load($this->node->id());
+    $this->assertTrue($updated_node->get('field_body')->isEmpty());
+  }
+
 }

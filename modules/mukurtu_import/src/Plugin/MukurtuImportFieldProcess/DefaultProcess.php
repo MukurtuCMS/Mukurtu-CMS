@@ -30,6 +30,7 @@ class DefaultProcess extends MukurtuImportFieldProcessPluginBase {
           'plugin' => 'explode',
           'source' => $source,
           'delimiter' => $multivalue_delimiter,
+          'strict' => FALSE,
         ],
         // Trim whitespace, e.g. from a delimiter followed by a space.
         [

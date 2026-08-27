@@ -7,10 +7,33 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\migrate_drupal_ui\Batch\MigrateMessageCapture;
 use Drupal\migrate_drupal_ui\Batch\MigrateUpgradeImportBatch;
 use Drupal\migrate\Event\MigrateEvents;
+use Drupal\migrate\Event\MigrateMapSaveEvent;
 use Drupal\migrate\MigrateExecutable;
+use Drupal\migrate\Plugin\MigrateIdMapInterface;
 use Drupal\migrate\Plugin\MigrationInterface;
 
 class MukurtuMigrateImportBatch extends MigrateUpgradeImportBatch {
+
+  /**
+   * Number of rows created or updated by the migration task in progress.
+   *
+   * @var int
+   */
+  protected static $rowCreatedOrUpdatedCount = 0;
+
+  /**
+   * Number of rows that failed within the migration task in progress.
+   *
+   * @var int
+   */
+  protected static $rowFailedCount = 0;
+
+  /**
+   * Number of rows ignored within the migration task in progress.
+   *
+   * @var int
+   */
+  protected static $rowIgnoredCount = 0;
 
   /**
    * {@inheritdoc}
@@ -54,10 +77,16 @@ class MukurtuMigrateImportBatch extends MigrateUpgradeImportBatch {
       $context['sandbox']['messages'] = [];
       $context['results']['failures'] = 0;
       $context['results']['successes'] = 0;
+      $context['results']['row_created_or_updated'] = 0;
+      $context['results']['row_failures'] = 0;
+      $context['results']['row_ignored'] = 0;
     }
 
     // Number processed in this batch.
     static::$numProcessed = 0;
+    static::$rowCreatedOrUpdatedCount = 0;
+    static::$rowFailedCount = 0;
+    static::$rowIgnoredCount = 0;
 
     $migration_id = reset($context['sandbox']['migration_ids']);
     $definition = \Drupal::service('plugin.manager.migration')->getDefinition($migration_id);
@@ -93,6 +122,13 @@ class MukurtuMigrateImportBatch extends MigrateUpgradeImportBatch {
         \Drupal::logger('mukurtu_migrate')->error($e->getMessage());
         $migration_status = MigrationInterface::RESULT_FAILED;
       }
+
+      // Roll up row-level outcomes regardless of the overall migration
+      // task status: a task can report RESULT_COMPLETED while individual
+      // rows failed. See https://github.com/MukurtuCMS/Mukurtu-CMS/issues/154.
+      $context['results']['row_created_or_updated'] += static::$rowCreatedOrUpdatedCount;
+      $context['results']['row_failures'] += static::$rowFailedCount;
+      $context['results']['row_ignored'] += static::$rowIgnoredCount;
 
       switch ($migration_status) {
         case MigrationInterface::RESULT_COMPLETED:
@@ -197,6 +233,27 @@ class MukurtuMigrateImportBatch extends MigrateUpgradeImportBatch {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public static function onMapSave(MigrateMapSaveEvent $event) {
+    parent::onMapSave($event);
+    switch ((int) ($event->getFields()['source_row_status'] ?? -1)) {
+      case MigrateIdMapInterface::STATUS_FAILED:
+        static::$rowFailedCount++;
+        break;
+
+      case MigrateIdMapInterface::STATUS_IMPORTED:
+      case MigrateIdMapInterface::STATUS_NEEDS_UPDATE:
+        static::$rowCreatedOrUpdatedCount++;
+        break;
+
+      case MigrateIdMapInterface::STATUS_IGNORED:
+        static::$rowIgnoredCount++;
+        break;
+    }
+  }
+
+  /**
    * Callback executed when the Mukurtu migrate batch process completes.
    *
    * @param bool $success
@@ -211,6 +268,9 @@ class MukurtuMigrateImportBatch extends MigrateUpgradeImportBatch {
   public static function finished($success, $results, $operations, $elapsed) {
     $successes = $results['successes'];
     $failures = $results['failures'];
+    $row_created_or_updated = $results['row_created_or_updated'] ?? 0;
+    $row_failures = $results['row_failures'] ?? 0;
+    $row_ignored = $results['row_ignored'] ?? 0;
 
     if ($successes > 0) {
       \Drupal::messenger()->addStatus(\Drupal::translation()
@@ -221,6 +281,17 @@ class MukurtuMigrateImportBatch extends MigrateUpgradeImportBatch {
         ->formatPlural($failures, '1 migration failed', '@count migrations failed'));
       \Drupal::messenger()->addError(t('Migration process not completed'));
     }
+
+    // A migration task can report RESULT_COMPLETED while individual rows
+    // within it failed; surface that separately from task-level failures.
+    // See https://github.com/MukurtuCMS/Mukurtu-CMS/issues/154.
+    if ($row_failures > 0) {
+      \Drupal::messenger()->addError(t('Some items failed to migrate.'));
+    }
+    elseif ($row_failures === 0 && $row_created_or_updated === 0 && ($row_created_or_updated + $row_failures + $row_ignored) > 0) {
+      \Drupal::messenger()->addWarning(t('No content was created or updated for this migration task.'));
+    }
+
     // Turn transliteration setting back on.
     \Drupal::service('config.factory')
       ->getEditable('pathauto.settings')
@@ -232,7 +303,7 @@ class MukurtuMigrateImportBatch extends MigrateUpgradeImportBatch {
     // be set to an arbitraty migrated node.
     $store = \Drupal::service('tempstore.private')->get('mukurtu_migrate');
     $create_landing_page = $store->get('create_landing_page');
-    if ($success && $failures == 0) {
+    if ($success && $failures == 0 && $row_failures == 0) {
       if ($create_landing_page) {
         try {
           $landing_page_service = \Drupal::service('mukurtu_landing_page.default_landing_page');

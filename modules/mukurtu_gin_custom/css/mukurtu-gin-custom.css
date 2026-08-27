@@ -24,6 +24,28 @@ on any one class. */
   max-width: 100% !important;
 }
 
+/* The password confirm widget's "Passwords match: yes/no" message
+(.password-match-message / .password-match-message__text, built at runtime
+by core's user.js) is styled by Claro's own form--password-confirm.css using
+Claro-specific --progress-bar-label-color/--progress-bar-description-color
+variables, which are either undefined or resolve to a static dark value
+outside Claro's own theme, rendering as unreadable dark text on Gin's dark
+background. Gin re-themes the password strength meter directly above this
+message (.password-strength__title/__text) but never this selector, so
+there's no Gin rule to win the cascade on its own. Verified via computed
+styles that Claro's theme CSS loads after this module's CSS at equal
+specificity, so - same reasoning as the other Claro/Gin cascade-order
+overrides in this file (e.g. .ui-dialog further down) - !important is
+required to reliably win regardless of load order. Matches the title/text
+color pattern
+Gin already uses for .password-strength__title/__text. */
+.password-match-message {
+  color: var(--gin-color-text-light) !important;
+}
+.password-match-message__text {
+  color: var(--gin-color-title) !important;
+}
+
 /* The "create a new collection/word list/personal collection" quick-create
 dialogs (see the "mukurtu-quick-create-form" class added in
 mukurtu_collection.module / mukurtu_dictionary.module) keep only a couple of
@@ -298,6 +320,27 @@ short fields themselves. Shrink it in these dialogs specifically. */
     max-height: 90vh !important;
     display: flex !important;
     flex-direction: column !important;
+}
+
+/* Canonical .ui-dialog/.ui-widget-overlay box-chrome fallback (same
+   loaded-everywhere reasoning as the positioning override above). Gin's
+   own dialog background and backdrop rely on --gin-bg-layer/--gin-bg-layer2,
+   custom properties only ever defined by Gin's own root/theme CSS. On a
+   front-end page themed with mukurtu_v4 (not Gin), those properties are
+   undefined, so var() resolves to nothing and the dialog box + backdrop
+   render fully transparent - the box positions correctly but has no
+   visible surface, so its content appears to bleed into the page behind
+   it. The fallback values here only apply when the property is genuinely
+   undefined, so Gin's own admin-side appearance (including dark mode) is
+   unaffected. */
+.ui-dialog:not(.ui-dialog-off-canvas) {
+    background: var(--gin-bg-layer, #fff) !important;
+    border: 1px solid rgba(0, 0, 0, 0.2) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+}
+
+.ui-widget-overlay {
+    background: var(--gin-bg-layer2, rgba(0, 0, 0, 0.5)) !important;
 }
 
 .ui-dialog .ui-dialog-titlebar {

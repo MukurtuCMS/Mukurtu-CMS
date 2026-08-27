@@ -1,34 +1,83 @@
-.js-form-type-select,
+// Shared arrow shape/color, positioning handled separately below since
+// .js-form-type-select and .select-wrapper have different internal
+// structure (see comment on .js-form-type-select).
+@mixin select-arrow {
+  content: '';
+  inline-size: 0;
+  block-size: 0;
+  border-style: solid;
+  border-width: var(--v-space-5xs) var(--v-space-5xs) 0 var(--v-space-5xs);
+  border-color: var(--brand-primary-accent) transparent transparent transparent;
+  pointer-events: none;
+}
+
+@mixin select-field {
+  appearance: none;
+  border: none;
+  // Matches Gin admin theme's standard form-element radius (--gin-border-m).
+  border-radius: 0.5rem;
+  background: var(--brand-light);
+  padding-block: var(--v-space-4xxs) var(--v-space-4xxs);
+  padding-inline: var(--v-space-5xs) var(--v-space-2xs);
+  inline-size: 100%;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  font-weight: var(--text-bold);
+}
+
+// .select-wrapper (e.g. the facets dropdown) wraps only the select/list
+// itself with no label sibling, so centering the arrow at 50% of the
+// wrapper's own height correctly centers it on the select.
 .select-wrapper {
   position: relative;
 
   &::after {
-    content: '';
+    @include select-arrow;
     display: inline-block;
     position: absolute;
     inset-inline-end: 15px;
     margin: auto;
     inset-block-start: 50%;
     transform: translateY(-50%);
-    inline-size: 0;
-    block-size: 0;
-    border-style: solid;
-    border-width: var(--v-space-5xs) var(--v-space-5xs) 0 var(--v-space-5xs);
-    border-color: var(--brand-primary-accent) transparent transparent transparent;
   }
 
   select,
   .form-select {
-    appearance: none;
-    border: none;
-    background: var(--brand-light-accent);
-    padding-block: var(--v-space-4xxs) var(--v-space-4xxs);
-    padding-inline: var(--v-space-5xs) var(--v-space-2xs);
+    @include select-field;
     margin-inline-start: var(--v-space-6xs);
-    inline-size: 100%;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space: nowrap;
-    font-weight: var(--text-bold);
+  }
+}
+
+// .js-form-type-select wraps a <label> AND the <select> as siblings, so
+// centering the arrow at 50% of the wrapper's height (the old approach,
+// still used by .select-wrapper above) centers it across label+select
+// combined instead of on the select alone - the arrow ends up floating
+// somewhere over the label instead of the field. Grid lets the arrow and
+// the select share one cell (row 2, after the label's implicit row 1),
+// so centering it only ever accounts for the select's own height.
+//
+// !important on display is required for fields inside a Drupal
+// ".container-inline" wrapper (e.g. the Year/Month/Day date combo):
+// core's own ".container-inline div, .container-inline label" rule has
+// higher specificity (a class plus an element) than a single class
+// selector like this one, and silently wins without it.
+.js-form-type-select {
+  display: grid !important;
+
+  &::after {
+    @include select-arrow;
+    grid-row: 2;
+    grid-column: 1;
+    align-self: center;
+    justify-self: end;
+    margin-inline-end: 15px;
+  }
+
+  select,
+  .form-select {
+    @include select-field;
+    grid-row: 2;
+    grid-column: 1;
   }
 }

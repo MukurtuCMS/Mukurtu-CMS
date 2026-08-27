@@ -10,8 +10,8 @@ class FormattedTextWithTitle extends Paragraph {
   public static function bundleFieldDefinitions(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
     $definitions = [];
     $definitions['field_title'] = BaseFieldDefinition::create('string')
-      ->setLabel('Title')
-      ->setDescription('The title of the section. Maximum 255 characters.')
+      ->setLabel(t('Title'))
+      ->setDescription(t('The title of the section. Maximum 255 characters.'))
       ->setSettings([
         'max_length' => 255,
       ])
@@ -24,8 +24,8 @@ class FormattedTextWithTitle extends Paragraph {
       ->setDisplayConfigurable('form', TRUE);
 
     $definitions['field_body'] = BaseFieldDefinition::create('text_long')
-      ->setLabel('Body')
-      ->setDescription('The body of the section.	<br />This rich text field can support HTML and embedded media assets using the editing toolbar.')
+      ->setLabel(t('Body'))
+      ->setDescription(t('The body of the section.	<br />This rich text field can support HTML and embedded media assets using the editing toolbar.'))
       ->setCardinality(1)
       ->setRequired(FALSE)
       ->setRevisionable(TRUE)

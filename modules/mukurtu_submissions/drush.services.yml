@@ -1,0 +1,6 @@
+services:
+  mukurtu_submissions.commands:
+    class: Drupal\mukurtu_submissions\Commands\MukurtuSubmissionsCommands
+    arguments: ['@mukurtu_submissions.form_display_manager']
+    tags:
+      - { name: drush.command }

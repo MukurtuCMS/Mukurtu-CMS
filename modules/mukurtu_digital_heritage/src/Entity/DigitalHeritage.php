@@ -22,7 +22,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
     $definitions = self::getProtocolFieldDefinitions();
 
     $definitions['field_cultural_narrative'] = BaseFieldDefinition::create('text_long')
-      ->setLabel('Cultural Narrative')
+      ->setLabel(t('Cultural Narrative'))
       ->setDescription(t('Cultural narratives include historical or social context, expert community knowledge, community stories, and other relevant cultural context for the digital heritage item. For example, if the item is a basket this field may contain a narrative from the basket­ maker about their technique, or it may tell a story contrasting how the baskets were used by previous generations and how they are used today. <br />This HTML field can support rich text and embedded media assets using the editing toolbar.'))
       ->setCardinality(1)
       ->setRequired(FALSE)
@@ -32,7 +32,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
       ->setDisplayConfigurable('form', TRUE);
 
     $definitions['field_description'] = BaseFieldDefinition::create('text_long')
-      ->setLabel('Description')
+      ->setLabel(t('Description'))
       ->setDescription(t('Descriptions provide an account, explanation, or description of the digital heritage item or media asset. This may include physical characteristics, content information, an explanation of what is depicted, digitization and processing information, general notes, and any other relevant information that does not fit into a more structured field. <br />This HTML field can support rich text and embedded media assets using the editing toolbar.'))
       ->setCardinality(1)
       ->setRequired(FALSE)
@@ -42,7 +42,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
       ->setDisplayConfigurable('form', TRUE);
 
     $definitions['field_coverage_description'] = BaseFieldDefinition::create('text_long')
-      ->setLabel('Location Description')
+      ->setLabel(t('Location Description'))
       ->setDescription(t('A descriptive field to provide additional context and depth to the location(s) connected to the digital heritage item. <br />This HTML field can support rich text and embedded media assets using the editing toolbar.'))
       ->setCardinality(1)
       ->setRequired(FALSE)
@@ -52,7 +52,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
       ->setDisplayConfigurable('form', TRUE);
 
     $definitions['field_traditional_knowledge'] = BaseFieldDefinition::create('text_long')
-      ->setLabel('Traditional Knowledge')
+      ->setLabel(t('Traditional Knowledge'))
       ->setDescription(t('Traditional knowledge includes in-­depth community-specific knowledge about the digital heritage item. It is often used to provide information of social, spiritual, or esoteric significance. For example, if the item is a basket, this field may contain community, tribe, or clan-specific knowledge about the significance of design that is not widely known or that is specific that that community. <br />This HTML field can support rich text and embedded media assets using the editing toolbar.'))
       ->setCardinality(1)
       ->setRequired(FALSE)
@@ -62,7 +62,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
       ->setDisplayConfigurable('form', TRUE);
 
     $definitions['field_date_description'] = BaseFieldDefinition::create('string')
-      ->setLabel('Date Description')
+      ->setLabel(t('Date Description'))
       ->setDescription(t('Used to supplement the original date field, or when a precise creation date of the media asset or information represented in the digital heritage item is not known. Examples include "Summer 1995" and "circa 1800s". <br />Maximum 255 characters.'))
       ->setSettings([
         'max_length' => 255,
@@ -76,7 +76,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
       ->setDisplayConfigurable('form', TRUE);
 
     $definitions['field_source'] = BaseFieldDefinition::create('string')
-      ->setLabel('Source')
+      ->setLabel(t('Source'))
       ->setDescription(t('Source provides a reference to the resource, collection, or institution where the digital heritage item is held, described, originated, or contributed. Examples include collections (e.g., “McWhorter Collection”), institutions (e.g.,: “Library of Congress, American Folklife Center), or donors (e.g.,: “Donated by John Smith”). <br />Maximum 255 characters.'))
       ->setSettings([
         'max_length' => 255,
@@ -90,7 +90,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
       ->setDisplayConfigurable('form', TRUE);
 
     $definitions['field_summary'] = BaseFieldDefinition::create('string')
-      ->setLabel('Summary')
+      ->setLabel(t('Summary'))
       ->setDescription(t('A short summary of the digital heritage item. The summary should supplement the title and help distinguish between similar items. The summary is displayed as part of the item preview when browsing the site. <br />Maximum 255 characters.'))
       ->setSettings([
         'max_length' => 255,
@@ -104,7 +104,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
       ->setDisplayConfigurable('form', TRUE);
 
     $definitions['field_identifier'] = BaseFieldDefinition::create('string')
-      ->setLabel('Identifier')
+      ->setLabel(t('Identifier'))
       ->setDescription(t('A unique, unambiguous reference to the digital heritage item or media asset Identifiers are often provided by the contributing institution or organization so the original item can be located. Examples include call numbers or accession numbers. <br />Maximum 255 characters.'))
       ->setSettings([
         'max_length' => 255,
@@ -118,7 +118,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
       ->setDisplayConfigurable('form', TRUE);
 
     $definitions['field_rights_and_usage'] = BaseFieldDefinition::create('string_long')
-      ->setLabel('Rights and Usage')
+      ->setLabel(t('Rights and Usage'))
       ->setDescription(t('A statement about the appropriate rights and usage regarding the digital heritage item, media asset, or presented knowledge. This may include identifying the legal or traditional rights holder. If the rights holder should be contacted for permission to use, reproduce, circulate, reference, or cite the item, provide their contact information. <br />Maximum 255 characters.'))
       ->setSettings([
         'max_length' => 255,
@@ -132,7 +132,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
       ->setDisplayConfigurable('form', TRUE);
 
     $definitions['field_knowledge_keepers'] = BaseFieldDefinition::create('entity_reference_revisions')
-      ->setLabel('Citing Indigenous Elders and Knowledge Keepers')
+      ->setLabel(t('Citing Indigenous Elders and Knowledge Keepers'))
       ->setDescription(t(''))
       ->setSettings([
         'max_length' => 255,
@@ -159,7 +159,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
       ->setDisplayConfigurable('form', TRUE);
 
     $definitions['field_transcription'] = BaseFieldDefinition::create('text_long')
-      ->setLabel('Transcription')
+      ->setLabel(t('Transcription'))
       ->setDescription(t('A basic text transcription of an audio or video recording, or of text in an image or document. Including a transcription allows the text to be discoverable when searching for digital heritage items.'))
       ->setDefaultValue('')
       ->setCardinality(1)

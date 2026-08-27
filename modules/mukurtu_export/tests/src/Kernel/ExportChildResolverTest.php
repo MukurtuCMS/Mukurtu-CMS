@@ -32,8 +32,17 @@ class ExportChildResolverTest extends ProtocolAwareEntityTestBase {
 
     $this->installEntitySchema('export_list');
 
-    NodeType::create(['type' => 'collection', 'name' => 'Collection'])->save();
-    NodeType::create(['type' => 'word_list', 'name' => 'Word List'])->save();
+    NodeType::create(['type' => 'collection', 'name' => 'Collection'])
+      ->setThirdPartySetting('mukurtu_export', 'child_reference_fields', [
+        'field_items_in_collection' => [],
+        'field_child_collections' => ['recurse' => TRUE],
+      ])
+      ->save();
+    NodeType::create(['type' => 'word_list', 'name' => 'Word List'])
+      ->setThirdPartySetting('mukurtu_export', 'child_reference_fields', [
+        'field_words' => [],
+      ])
+      ->save();
 
     // field_items_in_collection: node references on collection bundle.
     FieldStorageConfig::create([
@@ -242,6 +251,97 @@ class ExportChildResolverTest extends ProtocolAwareEntityTestBase {
     $list = $this->createNode('word_list');
     $result = $this->resolver->getChildEntitiesRecursive($list);
     $this->assertSame([], $result);
+  }
+
+  // --- Declarative config-driven bundles (not named collection/word_list) ---
+
+  /**
+   * A bundle with no child_reference_fields declared has no children,
+   * regardless of its name — proving the resolver isn't hardcoded to
+   * recognize 'collection'/'word_list' by name.
+   */
+  public function testUndeclaredBundleReturnsEmpty(): void {
+    NodeType::create(['type' => 'gallery', 'name' => 'Gallery'])->save();
+    $item = $this->createNode('protocol_aware_content');
+    $gallery = $this->createNode('gallery');
+
+    $result = $this->resolver->getChildEntities($gallery);
+    $this->assertSame([], $result);
+  }
+
+  /**
+   * A brand-new bundle that declares child_reference_fields via config gets
+   * "export with children" support with no code change to ExportChildResolver.
+   */
+  public function testNewBundleWithDeclaredFieldGetsChildren(): void {
+    NodeType::create(['type' => 'gallery', 'name' => 'Gallery'])
+      ->setThirdPartySetting('mukurtu_export', 'child_reference_fields', [
+        'field_gallery_items' => [],
+      ])
+      ->save();
+
+    FieldStorageConfig::create([
+      'field_name' => 'field_gallery_items',
+      'entity_type' => 'node',
+      'type' => 'entity_reference',
+      'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
+      'settings' => ['target_type' => 'node'],
+    ])->save();
+    FieldConfig::create([
+      'field_name' => 'field_gallery_items',
+      'entity_type' => 'node',
+      'bundle' => 'gallery',
+      'label' => 'Gallery Items',
+    ])->save();
+
+    $item1 = $this->createNode('protocol_aware_content');
+    $item2 = $this->createNode('protocol_aware_content');
+    $gallery = $this->createNode('gallery', [
+      'field_gallery_items' => [
+        ['target_id' => $item1->id()],
+        ['target_id' => $item2->id()],
+      ],
+    ]);
+
+    $result = $this->resolver->getChildEntities($gallery);
+    $this->assertArrayHasKey('node', $result);
+    $this->assertArrayHasKey((int) $item1->id(), $result['node']);
+    $this->assertArrayHasKey((int) $item2->id(), $result['node']);
+    $this->assertCount(2, $result['node']);
+  }
+
+  /**
+   * A new bundle that declares its own field as recursive gets full nested
+   * traversal, without ExportChildResolver knowing its bundle name.
+   */
+  public function testNewBundleWithRecursiveFieldTraversesNested(): void {
+    NodeType::create(['type' => 'gallery', 'name' => 'Gallery'])
+      ->setThirdPartySetting('mukurtu_export', 'child_reference_fields', [
+        'field_sub_galleries' => ['recurse' => TRUE],
+      ])
+      ->save();
+
+    FieldStorageConfig::create([
+      'field_name' => 'field_sub_galleries',
+      'entity_type' => 'node',
+      'type' => 'entity_reference',
+      'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
+      'settings' => ['target_type' => 'node'],
+    ])->save();
+    FieldConfig::create([
+      'field_name' => 'field_sub_galleries',
+      'entity_type' => 'node',
+      'bundle' => 'gallery',
+      'label' => 'Sub-galleries',
+    ])->save();
+
+    $sub = $this->createNode('gallery');
+    $parent = $this->createNode('gallery', [
+      'field_sub_galleries' => [['target_id' => $sub->id()]],
+    ]);
+
+    $result = $this->resolver->getChildEntitiesRecursive($parent);
+    $this->assertArrayHasKey((int) $sub->id(), $result['node']);
   }
 
 }

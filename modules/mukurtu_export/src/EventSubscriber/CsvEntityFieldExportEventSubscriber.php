@@ -352,19 +352,20 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
         continue;
       }
 
-      $protocols = str_replace('|', '', $value['protocols']);
+      $protocol_ids = explode(',', str_replace('|', '', $value['protocols']));
       if ($id_format === 'uuid') {
-        $ids = explode(',', $protocols);
-        $uuids = array_map(fn($p) => $this->getUUID('protocol', $p), $ids);
-        $protocols = implode(',', $uuids);
+        $protocol_ids = array_map(fn($p) => $this->getUUID('protocol', $p), $protocol_ids);
       }
 
+      // The combined "sharing_setting(protocols)" string is parsed back by
+      // CulturalProtocolItem::setValue(), which expects a comma regardless
+      // of the exporter's configured multi-value delimiter.
       if (!$event->sub_field_name) {
-        $export[] = "{$value['sharing_setting']}({$protocols})";
+        $export[] = "{$value['sharing_setting']}(" . implode(',', $protocol_ids) . ")";
       }
 
       if ($event->sub_field_name == "protocols") {
-        $export[] = $protocols;
+        $export[] = implode($config->getMultivalueDelimiter(), $protocol_ids);
       }
     }
     $event->setValue($export);

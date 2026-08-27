@@ -156,4 +156,20 @@ class ImportProtocolsTest extends MukurtuImportTestBase {
     $this->assertEquals([$this->protocol->id(), $this->protocol2->id(), $this->protocol3->id()], $updated_node->getProtocols());
   }
 
+  /**
+   * The exported CSV header labels must match what auto-mapping expects,
+   * so a re-imported export doesn't require manual column mapping (#2029).
+   */
+  public function testExportedHeaderMatchesAutoMapLabel() {
+    $field_definitions = \Drupal::service('entity_field.manager')->getFieldDefinitions('node', 'protocol_aware_content');
+    $field_definition = $field_definitions['field_cultural_protocols'];
+
+    $plugin_manager = \Drupal::service('plugin.manager.mukurtu_import_field_process');
+    $plugin = $plugin_manager->createInstance('cultural_protocol');
+    $supported_properties = $plugin->getSupportedProperties($field_definition);
+
+    $this->assertEquals('Cultural Protocols > Protocols', $supported_properties['protocols']['label']);
+    $this->assertEquals('Cultural Protocols > Sharing Setting', $supported_properties['sharing_setting']['label']);
+  }
+
 }

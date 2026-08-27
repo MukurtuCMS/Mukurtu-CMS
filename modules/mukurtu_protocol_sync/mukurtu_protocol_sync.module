@@ -10,6 +10,7 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
+use Drupal\media\MediaInterface;
 use Drupal\node\NodeInterface;
 
 /**
@@ -281,37 +282,68 @@ function _mukurtu_protocol_sync_sync_media_from_node(NodeInterface $node): void 
     }
 
     foreach ($node->get($field_name)->referencedEntities() as $media) {
-      $media_id = $media->id();
-      if (in_array($media_id, $processed_ids)) {
+      _mukurtu_protocol_sync_sync_media_item($media, $node, $protocol_value, $processed_ids);
+    }
+  }
+
+  // Dictionary word's sample-sentence recording (field_sentence_recording)
+  // lives one level deeper than every field above - nested inside each
+  // field_sample_sentences paragraph item, rather than directly on the
+  // node - so the flat $media_fields loop can't reach it; without this,
+  // audio attached only via a sample sentence never inherited the word's
+  // cultural protocols the way field_recording's media already does. A
+  // targeted extra pass rather than generalizing the loop above to
+  // recurse into arbitrary paragraph fields, since this is currently the
+  // only paragraph-nested media field protocol sync needs to reach.
+  if ($node->hasField('field_sample_sentences')) {
+    foreach ($node->get('field_sample_sentences')->referencedEntities() as $paragraph) {
+      if (!$paragraph->hasField('field_sentence_recording')) {
         continue;
       }
-
-      if (!$media->hasField('field_sync_protocols') || !$media->get('field_sync_protocols')->value) {
-        continue;
-      }
-      if (!$media->hasField('field_protocol_parent')) {
-        continue;
-      }
-
-      $parent_ref = $media->get('field_protocol_parent')->entity;
-      $parent_id = $parent_ref ? (int) $parent_ref->id() : NULL;
-
-      if ($parent_id === NULL) {
-        $media->set('field_protocol_parent', $node->id());
-        $media->set('field_cultural_protocols', $protocol_value);
-        $media->save();
-        $processed_ids[] = $media_id;
-      }
-      elseif ($parent_id === (int) $node->id()) {
-        // Skip the save when protocols already match to avoid an extra
-        // media revision on every node save that doesn't touch protocols.
-        if ($media->get('field_cultural_protocols')->getValue() !== $protocol_value) {
-          $media->set('field_cultural_protocols', $protocol_value);
-          $media->save();
-        }
-        $processed_ids[] = $media_id;
+      foreach ($paragraph->get('field_sentence_recording')->referencedEntities() as $media) {
+        _mukurtu_protocol_sync_sync_media_item($media, $node, $protocol_value, $processed_ids);
       }
     }
+  }
+}
+
+/**
+ * Syncs a single media item's protocols from $node - "claim it if
+ * unparented, sync it if we're already its parent, skip it if it belongs
+ * to a different node" - shared by every call site in
+ * _mukurtu_protocol_sync_sync_media_from_node() so a paragraph-nested
+ * field (field_sentence_recording) gets identical handling to a flat one.
+ */
+function _mukurtu_protocol_sync_sync_media_item(MediaInterface $media, NodeInterface $node, array $protocol_value, array &$processed_ids): void {
+  $media_id = $media->id();
+  if (in_array($media_id, $processed_ids)) {
+    return;
+  }
+
+  if (!$media->hasField('field_sync_protocols') || !$media->get('field_sync_protocols')->value) {
+    return;
+  }
+  if (!$media->hasField('field_protocol_parent')) {
+    return;
+  }
+
+  $parent_ref = $media->get('field_protocol_parent')->entity;
+  $parent_id = $parent_ref ? (int) $parent_ref->id() : NULL;
+
+  if ($parent_id === NULL) {
+    $media->set('field_protocol_parent', $node->id());
+    $media->set('field_cultural_protocols', $protocol_value);
+    $media->save();
+    $processed_ids[] = $media_id;
+  }
+  elseif ($parent_id === (int) $node->id()) {
+    // Skip the save when protocols already match to avoid an extra media
+    // revision on every node save that doesn't touch protocols.
+    if ($media->get('field_cultural_protocols')->getValue() !== $protocol_value) {
+      $media->set('field_cultural_protocols', $protocol_value);
+      $media->save();
+    }
+    $processed_ids[] = $media_id;
   }
 }
 

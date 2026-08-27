@@ -1419,3 +1419,24 @@ function mukurtu_dictionary_update_40041(): void {
     $config->save();
   }
 }
+
+/**
+ * Point the sample sentence recording field at the same media view modes
+ * used by the dictionary word's own Recording field, so it renders with the
+ * same "Download audio" button instead of a plain download icon (#2019).
+ */
+function mukurtu_dictionary_update_40042(): void {
+  $displays = [
+    'core.entity_view_display.paragraph.sample_sentence.default' => 'audio_for_dictionary_word',
+    'core.entity_view_display.paragraph.sample_sentence.teaser' => 'browse',
+  ];
+  foreach ($displays as $display_id => $view_mode) {
+    $config = \Drupal::configFactory()->getEditable($display_id);
+    if ($config->isNew()) {
+      continue;
+    }
+    $config->set('content.field_sentence_recording.settings.view_mode', $view_mode);
+    $config->set('content.field_sentence_recording.settings.link', FALSE);
+    $config->save();
+  }
+}

@@ -20,6 +20,6 @@ class NonAdminUser extends User {
   public function query() {
     return $this->select('users', 'u')
       ->fields('u')
-      ->condition('u.uid', 2, '>');
+      ->condition('u.uid', 1, '>');
   }
 }

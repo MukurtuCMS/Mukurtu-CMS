@@ -92,6 +92,21 @@ class GeofieldMukurtuWidget extends LeafletDefaultWidget {
     // LeafletDefaultWidget smashes our default value. We want to keep
     // our GeoJSON untouched.
     $element['value']['#default_value'] = $items[$delta]->value ?: NULL;
+
+    // Visually-hidden instructions for keyboard/screen reader users,
+    // referenced by the map container's aria-describedby (set in
+    // mukurtu-leaflet-widget.js) - placing a new point still requires a
+    // pointing device, so this points to the accessible alternative.
+    if (!empty($element['map']['#map_id'])) {
+      $element['keyboard_instructions'] = [
+        '#type' => 'markup',
+        '#markup' => '<p id="' . $element['map']['#map_id'] . '-keyboard-instructions" class="visually-hidden">'
+          . $this->t('Use the arrow keys to pan the map and the plus and minus keys to zoom. Tab reaches the toolbar buttons. While drawing, press Escape to cancel or Enter to finish a shape. Existing points are reachable by Tab; press Enter to open a point and edit its description. Placing a new point requires a pointing device - use the "Mukurtu Map Points (latitude/longitude)" widget for a keyboard-only alternative.')
+          . '</p>',
+        '#weight' => -1,
+      ];
+    }
+
     return $element;
   }
 

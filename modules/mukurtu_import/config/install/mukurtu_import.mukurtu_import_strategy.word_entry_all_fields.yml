@@ -18,13 +18,16 @@ mapping:
     source: Contributor
     target: field_contributor
   -
+    source: 'Default translation'
+    target: '-1'
+  -
     source: Definition
     target: field_definition
   -
     source: ID
     target: id
   -
-    source: 'Language code (langcode)'
+    source: 'Language code'
     target: langcode
   -
     source: 'Parent field name'

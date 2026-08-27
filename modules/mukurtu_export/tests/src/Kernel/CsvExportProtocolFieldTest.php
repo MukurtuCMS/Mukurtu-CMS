@@ -72,6 +72,33 @@ class CsvExportProtocolFieldTest extends CsvExportFieldTestBase {
   }
 
   /**
+   * Test exporting the protocols sub-field with multiple protocols honors
+   * the exporter's configured multi-value delimiter (issue #2029).
+   */
+  public function testProtocolFieldMultivalueDelimiter() {
+    $this->node->setSharingSetting('all');
+    $this->node->setProtocols([$this->protocol, $this->protocol2, $this->protocol3]);
+    $this->node->save();
+
+    $event = new EntityFieldExportEvent('csv', $this->node, 'field_cultural_protocols/protocols', $this->context);
+
+    // Default delimiter is ';', matching the importer's default.
+    $this->fieldExporter->exportField($event);
+    $expected = implode(';', $this->node->getProtocols());
+    $this->assertCount(1, $event->getValue());
+    $this->assertEquals($expected, $event->getValue()[0]);
+
+    // A custom delimiter should also be honored.
+    $this->export_config->setMultivalueDelimiter('|');
+    $this->export_config->save();
+    $event = new EntityFieldExportEvent('csv', $this->node, 'field_cultural_protocols/protocols', $this->context);
+    $this->fieldExporter->exportField($event);
+    $expected = implode('|', $this->node->getProtocols());
+    $this->assertCount(1, $event->getValue());
+    $this->assertEquals($expected, $event->getValue()[0]);
+  }
+
+  /**
    * Test exporting a protocol field as UUIDs.
    */
   public function testProtocolFieldUuidExport() {

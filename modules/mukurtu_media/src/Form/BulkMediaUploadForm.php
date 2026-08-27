@@ -12,6 +12,7 @@ use Drupal\Core\StringTranslation\ByteSizeMarkup;
 use Drupal\Core\Url;
 use Drupal\file\Entity\File;
 use Drupal\media\Entity\Media;
+use Drupal\mukurtu_media\MediaTypeExtensions;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -25,29 +26,7 @@ class BulkMediaUploadForm extends FormBase implements ContainerInjectionInterfac
   /**
    * File-based media types supported by this form.
    */
-  protected const SUPPORTED_TYPES = [
-    'image' => [
-      'field' => 'field_media_image',
-      'extensions' => 'png gif jpg jpeg webp',
-      'uri_scheme' => 'private',
-      'alt' => TRUE,
-    ],
-    'audio' => [
-      'field' => 'field_media_audio_file',
-      'extensions' => 'mp3 wav aac m4a ogg',
-      'uri_scheme' => 'private',
-    ],
-    'document' => [
-      'field' => 'field_media_document',
-      'extensions' => 'txt rtf doc docx ppt pptx xls xlsx pdf odf odg odp ods odt fodt fods fodp fodg key numbers pages csv sxw zip rar gz 7z tar',
-      'uri_scheme' => 'private',
-    ],
-    'video' => [
-      'field' => 'field_media_video_file',
-      'extensions' => 'mp4 webm ogv',
-      'uri_scheme' => 'private',
-    ],
-  ];
+  protected const SUPPORTED_TYPES = MediaTypeExtensions::SUPPORTED_TYPES;
 
   protected EntityTypeManagerInterface $entityTypeManager;
   protected AccountInterface $currentUser;

@@ -8,6 +8,7 @@ use Drupal\Core\Field\FieldFilteredMarkup;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\WidgetBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\mukurtu_core\Service\EntityTranslationResolver;
 use Drupal\mukurtu_protocol\Entity\CommunityInterface;
 use Drupal\mukurtu_protocol\Entity\ProtocolInterface;
 use Drupal\mukurtu_protocol\Plugin\Field\FieldType\CulturalProtocolItem;
@@ -33,18 +34,26 @@ class CulturalProtocolWidget extends WidgetBase {
   protected $entityTypeManager;
 
   /**
+   * The entity translation resolver.
+   *
+   * @var \Drupal\mukurtu_core\Service\EntityTranslationResolver
+   */
+  protected $entityTranslationResolver;
+
+  /**
    * {@inheritdoc}
    */
-  public function __construct($plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, array $third_party_settings, EntityTypeManagerInterface $entityTypeManager) {
+  public function __construct($plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, array $third_party_settings, EntityTypeManagerInterface $entityTypeManager, EntityTranslationResolver $entityTranslationResolver) {
     parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings, $third_party_settings);
     $this->entityTypeManager = $entityTypeManager;
+    $this->entityTranslationResolver = $entityTranslationResolver;
   }
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    return new static($plugin_id, $plugin_definition, $configuration['field_definition'], $configuration['settings'], $configuration['third_party_settings'], $container->get('entity_type.manager'));
+    return new static($plugin_id, $plugin_definition, $configuration['field_definition'], $configuration['settings'], $configuration['third_party_settings'], $container->get('entity_type.manager'), $container->get('mukurtu_core.entity_translation_resolver'));
   }
 
   /**
@@ -70,13 +79,21 @@ class CulturalProtocolWidget extends WidgetBase {
 
     /** @var \Drupal\mukurtu_protocol\Entity\ProtocolInterface[] $protocols */
     if (!empty($protocol_ids)) {
-      $protocols = $this->entityTypeManager->getStorage('protocol')->loadMultiple($protocol_ids);
+      $protocols = array_map(
+        fn ($protocol) => $this->entityTranslationResolver->translate($protocol),
+        $this->entityTypeManager->getStorage('protocol')->loadMultiple($protocol_ids)
+      );
     }
 
     $multipleCommunities['#title'] = $this->t('Multiple Communities');
     $multipleCommunities['#id'] = 'protocols-with-multiple-communities';
     foreach ($protocols as $protocol) {
-      $communities = $protocol->getCommunities();
+      // getCommunities() loads its own (untranslated) copies via the field's
+      // referencedEntities(), so translate them here too.
+      $communities = array_map(
+        fn ($community) => $this->entityTranslationResolver->translate($community),
+        $protocol->getCommunities()
+      );
 
       // Handle orphaned protocols, even though that shouldn't happen...
       if (empty($communities)) {
@@ -247,7 +264,10 @@ class CulturalProtocolWidget extends WidgetBase {
     }
 
     // Fetch the communities for all the protocols the user is not able to see.
-    $protocols = $this->entityTypeManager->getStorage('protocol')->loadMultiple($missing_protocol_ids);
+    $protocols = array_map(
+      fn ($protocol) => $this->entityTranslationResolver->translate($protocol),
+      $this->entityTypeManager->getStorage('protocol')->loadMultiple($missing_protocol_ids)
+    );
     $user_can_view_all_communities = TRUE;
     $visible_missing_protocol_names = [];
     $missing_protocol_communities = [];
@@ -260,8 +280,13 @@ class CulturalProtocolWidget extends WidgetBase {
 
       // Check if the user can see the community. If they can, we want to
       // show them the name so they have some idea who to talk to if they need
-      // to get these inaccessible protocols changed.
-      $communities = $protocol->getCommunities();
+      // to get these inaccessible protocols changed. getCommunities() loads
+      // its own (untranslated) copies via the field's referencedEntities(),
+      // so translate them here too.
+      $communities = array_map(
+        fn ($community) => $this->entityTranslationResolver->translate($community),
+        $protocol->getCommunities()
+      );
       foreach ($communities as $community) {
         if ($community->access('view')) {
           $missing_protocol_communities[$community->id()] = $community->getName();

@@ -1,0 +1,26 @@
+/**
+ * @file
+ * Keeps the "Parent group" select on the submission settings form's field
+ * groups table a consistent width. Native <select> elements auto-size to
+ * their widest option, and each row excludes its own group from its own
+ * options list (a group can't be its own parent) - so whichever group
+ * happens to have the longest label ends up with a visibly narrower
+ * select than every other row, since it's the only row missing that long
+ * option from its own list.
+ *
+ * A fixed width (not just a min-width floor) is needed: other rows'
+ * option lists still include whichever group has the longest label as an
+ * available (if not selected) option, so they'd keep auto-sizing wider
+ * than any floor we set here. A native <select>'s closed box clips
+ * overflowing option text, so a fixed width doesn't lose information -
+ * the full text is still visible once the dropdown is opened.
+ *
+ * !important is needed here: the Gin admin theme's own CSS sets
+ * "width: max-content; min-width: 100%" on
+ * ".form-item > .form-element--type-select" inside .container-inline rows
+ * (three class-level selectors), which otherwise beats a plain
+ * single-class rule on specificity alone.
+ */
+.mukurtu-submissions-field-group-parent {
+  width: 300px !important;
+}

@@ -13,3 +13,6 @@ delete any mukurtu_import_strategy:
   title: 'Delete any Import Templates'
 access mukurtu import:
   title: 'Access Mukurtu Import'
+view any mukurtu_import_log:
+  title: 'View any Import Logs'
+  restrict access: true

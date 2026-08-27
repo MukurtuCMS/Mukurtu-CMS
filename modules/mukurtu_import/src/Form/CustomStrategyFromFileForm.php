@@ -549,6 +549,18 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
 
     $needle = mb_strtolower($source);
 
+    // Match against the real mukurtu_export header for this bundle when
+    // known - see getExportLabelOverrides(). This takes precedence over the
+    // generic property-label matching below since it's authoritative for
+    // exactly what a real export/reimport round trip uses (e.g. langcode's
+    // per-bundle "Locale"/"Language"/"Language code" header, or a field
+    // whose real header differs from its own configured Drupal label).
+    foreach ($this->getExportLabelOverrides($entity_type_id, $bundle) as $target_key => $label) {
+      if ($needle === mb_strtolower($label)) {
+        return $target_key;
+      }
+    }
+
     // Check if any field has a property, which our import field process plugins
     // support, matching the source label.
     foreach ($field_defs as $field_name => $field_definition) {
@@ -562,9 +574,8 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
       }
     }
 
-    // Disambiguate the langcode base field. In buildTargetOptions(), its label
-    // gets " (langcode)" appended to distinguish it from other Language fields.
-    // Match against that disambiguated label here so auto-mapping picks it up.
+    // Disambiguate the langcode base field from other Language-labeled
+    // fields when no export-header override applies.
     $entity_definition = $this->entityTypeManager->getDefinition($entity_type_id);
     $entity_keys = $entity_definition->getKeys();
     if (!empty($entity_keys['langcode']) && isset($field_defs[$entity_keys['langcode']])) {

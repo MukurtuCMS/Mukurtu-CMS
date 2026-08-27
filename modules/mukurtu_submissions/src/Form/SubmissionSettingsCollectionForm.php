@@ -1,0 +1,134 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Drupal\mukurtu_submissions\Form;
+
+use Drupal\Component\Utility\EmailValidatorInterface;
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Config\TypedConfigManagerInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Form\ConfigFormBase;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\user\Entity\User;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+
+/**
+ * The "Submission Forms" collection page - the notify_uids setting plus
+ * the existing per-content-type submission settings list, on one page
+ * (entity.mukurtu_submission_settings.collection used to be a plain
+ * _entity_list route; this replaces it so the two don't need separate
+ * paths).
+ */
+class SubmissionSettingsCollectionForm extends ConfigFormBase {
+
+  public function __construct(
+    ConfigFactoryInterface $config_factory,
+    TypedConfigManagerInterface $typed_config_manager,
+    protected EntityTypeManagerInterface $entityTypeManager,
+    protected EmailValidatorInterface $emailValidator,
+  ) {
+    parent::__construct($config_factory, $typed_config_manager);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): static {
+    return new static(
+      $container->get('config.factory'),
+      $container->get('config.typed'),
+      $container->get('entity_type.manager'),
+      $container->get('email.validator'),
+    );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getFormId(): string {
+    return 'mukurtu_submissions_settings_collection_form';
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getEditableConfigNames(): array {
+    return ['mukurtu_submissions.settings'];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function buildForm(array $form, FormStateInterface $form_state): array {
+    $form = parent::buildForm($form, $form_state);
+    $config = $this->config('mukurtu_submissions.settings');
+
+    $form['notifications'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Notifications'),
+    ];
+    $form['notifications']['notify_uids'] = [
+      '#type' => 'entity_autocomplete',
+      '#target_type' => 'user',
+      '#selection_handler' => 'mukurtu_submissions_notify_reviewer',
+      '#tags' => TRUE,
+      '#title' => $this->t('Additional reviewers to notify'),
+      '#description' => $this->t('These users will be notified in addition to Administrators and Mukurtu Managers whenever a visitor submits new content for review.'),
+      '#default_value' => User::loadMultiple($config->get('notify_uids') ?: []),
+    ];
+    $form['notifications']['notify_emails'] = [
+      '#type' => 'textarea',
+      '#title' => $this->t('Additional email addresses to notify'),
+      '#description' => $this->t('One email address per line. These addresses will be notified in addition to Administrators, Mukurtu Managers, and any additional reviewers above whenever a visitor submits new content for review.'),
+      '#default_value' => implode("\n", $config->get('notify_emails') ?: []),
+    ];
+
+    $form['list'] = $this->entityTypeManager->getListBuilder('mukurtu_submission_settings')->render();
+
+    return $form;
+  }
+
+  /**
+   * Splits the notify_emails textarea into a trimmed, non-empty list of
+   * lines - shared by validateForm() (to check validity) and submitForm()
+   * (to persist), so the two can never disagree on what counts as an
+   * address worth checking.
+   */
+  protected function extractNotifyEmails(FormStateInterface $form_state): array {
+    $lines = preg_split('/[\r\n]+/', (string) $form_state->getValue('notify_emails'), -1, PREG_SPLIT_NO_EMPTY);
+    return array_values(array_filter(array_map('trim', $lines ?: [])));
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function validateForm(array &$form, FormStateInterface $form_state): void {
+    parent::validateForm($form, $form_state);
+
+    $invalid = array_filter(
+      $this->extractNotifyEmails($form_state),
+      fn(string $email) => !$this->emailValidator->isValid($email)
+    );
+    if ($invalid) {
+      $form_state->setErrorByName('notify_emails', $this->t('The following are not valid email addresses: @list.', [
+        '@list' => implode(', ', $invalid),
+      ]));
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function submitForm(array &$form, FormStateInterface $form_state): void {
+    $uids = array_map('intval', array_column($form_state->getValue('notify_uids') ?: [], 'target_id'));
+
+    $this->config('mukurtu_submissions.settings')
+      ->set('notify_uids', array_values($uids))
+      ->set('notify_emails', $this->extractNotifyEmails($form_state))
+      ->save();
+
+    parent::submitForm($form, $form_state);
+  }
+
+}

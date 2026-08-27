@@ -1,0 +1,24 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - filter.format.mukurtu_html
+  enforced:
+    module:
+      - mukurtu_submissions
+template: mukurtu_submission_received
+label: 'Mukurtu Submission Received'
+description: 'A visitor submitted content awaiting review.'
+text:
+  -
+    value: 'New [message:field_item:entity:content-type] submitted for review: [message:field_item:entity:title]'
+    format: plain_text
+  -
+    value: '<p>A new [message:field_item:entity:content-type] was submitted for review: [message:field_item:entity:mukurtu-notification-link].</p>'
+    format: mukurtu_html
+settings:
+  'token options':
+    clear: true
+    'token replace': true
+  purge_override: false
+  purge_methods: {  }

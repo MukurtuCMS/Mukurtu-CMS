@@ -27,6 +27,11 @@ class ExportChildResolver {
   /**
    * Returns child entity IDs for the given entity, keyed by entity type.
    *
+   * Which fields count as "child references" for a bundle is declared via
+   * the `mukurtu_export.child_reference_fields` third-party setting on its
+   * node type config entity, rather than hardcoded here. See
+   * getChildReferenceFieldNames().
+   *
    * @param \Drupal\Core\Entity\EntityInterface $entity
    *   The parent entity to resolve children for.
    *
@@ -40,30 +45,35 @@ class ExportChildResolver {
     }
 
     $children = [];
-
-    switch ($entity->bundle()) {
-      case 'collection':
-        foreach (['field_items_in_collection', 'field_child_collections'] as $field_name) {
-          if ($entity->hasField($field_name)) {
-            foreach ($entity->get($field_name)->referencedEntities() as $child) {
-              $id = (int) $child->id();
-              $children['node'][$id] = $id;
-            }
-          }
+    foreach ($this->getChildReferenceFieldNames($entity->bundle()) as $field_name => $settings) {
+      if ($entity->hasField($field_name)) {
+        foreach ($entity->get($field_name)->referencedEntities() as $child) {
+          $id = (int) $child->id();
+          $children['node'][$id] = $id;
         }
-        break;
-
-      case 'word_list':
-        if ($entity->hasField('field_words')) {
-          foreach ($entity->get('field_words')->referencedEntities() as $child) {
-            $id = (int) $child->id();
-            $children['node'][$id] = $id;
-          }
-        }
-        break;
+      }
     }
 
     return $children;
+  }
+
+  /**
+   * Returns the child-reference field declarations for a node bundle.
+   *
+   * @param string $bundle
+   *   The node bundle.
+   *
+   * @return array
+   *   Array of field_name => settings (e.g. ['recurse' => TRUE]), as declared
+   *   in the bundle's `mukurtu_export.child_reference_fields` third-party
+   *   setting. Empty array if the bundle declares none.
+   */
+  protected function getChildReferenceFieldNames(string $bundle): array {
+    $node_type = $this->entityTypeManager->getStorage('node_type')->load($bundle);
+    if (!$node_type) {
+      return [];
+    }
+    return $node_type->getThirdPartySetting('mukurtu_export', 'child_reference_fields', []);
   }
 
   /**
@@ -191,7 +201,22 @@ class ExportChildResolver {
    * Internal recursive helper for getChildEntitiesRecursive().
    */
   private function collectChildEntitiesRecursive(EntityInterface $entity, array &$visited): array {
-    if ($entity->getEntityTypeId() !== 'node' || $entity->bundle() !== 'collection') {
+    if ($entity->getEntityTypeId() !== 'node') {
+      return [];
+    }
+
+    $child_reference_fields = $this->getChildReferenceFieldNames($entity->bundle());
+    $has_recursive_field = FALSE;
+    foreach ($child_reference_fields as $settings) {
+      if (!empty($settings['recurse'])) {
+        $has_recursive_field = TRUE;
+        break;
+      }
+    }
+    // Bundles with no recursive field (e.g. word lists) aren't eligible for
+    // recursive traversal at all, matching getChildEntities() being the only
+    // supported operation for them.
+    if (!$has_recursive_field) {
       return [];
     }
 
@@ -202,7 +227,7 @@ class ExportChildResolver {
     $visited[$entity_id] = TRUE;
 
     $children = [];
-    foreach (['field_items_in_collection', 'field_child_collections'] as $field_name) {
+    foreach ($child_reference_fields as $field_name => $settings) {
       if (!$entity->hasField($field_name)) {
         continue;
       }
@@ -212,7 +237,7 @@ class ExportChildResolver {
           continue;
         }
         $children['node'][$id] = $id;
-        if ($field_name === 'field_child_collections') {
+        if (!empty($settings['recurse'])) {
           foreach ($this->collectChildEntitiesRecursive($child, $visited) as $type => $ids) {
             $children[$type] = ($children[$type] ?? []) + $ids;
           }

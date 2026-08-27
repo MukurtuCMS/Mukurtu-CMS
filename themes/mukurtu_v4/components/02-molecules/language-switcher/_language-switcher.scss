@@ -19,6 +19,10 @@
 }
 
 .language-switcher {
+  // Establishes the containing block that the .contextual rule below
+  // resolves its percentage insets against.
+  position: relative;
+
   // Drupal's language_block plugin names this list dynamically after the
   // active negotiation method (e.g. "language-switcher-language-url"), so
   // target it structurally instead of relying on a fixed class name.
@@ -30,7 +34,17 @@
     margin: 0;
     box-shadow: 2px 3px 4px var(--brand-light);
     z-index: 1000;
+    // Centers the dropdown under the icon by shifting it half its own
+    // width toward the edge it's anchored on. With no inset properties
+    // set, the browser's static-position algorithm anchors this block
+    // box on the *inline-start* edge - the left edge in LTR, but the
+    // right edge in RTL - so the shift direction must flip with it.
+    // translateX() is a physical transform and never mirrors on its own.
     transform: translateX(-50%);
+
+    &:dir(rtl) {
+      transform: translateX(50%);
+    }
 
     li {
       list-style-type: none;
@@ -49,9 +63,19 @@
     }
   }
 
-  .contextual {
+  // Positioned clear of the toggle icon on its start side (rather than
+  // overlapping inward from the end edge) so the trigger can never cover
+  // the icon regardless of the icon's rendered width or text direction.
+  // The extra `&.contextual-region` compound (Drupal core always adds the
+  // contextual-region class to this same element) raises specificity above
+  // core's own `[dir="rtl"] .contextual` physical-offset override, so this
+  // rule wins deterministically regardless of CSS load order instead of
+  // depending on which stylesheet is aggregated last.
+  &.contextual-region .contextual {
       position: absolute;
-      inset-block-start: 0;
-      inset-inline-end: 20px;
+      inset-block-start: 50%;
+      inset-inline-end: 100%;
+      margin-inline-end: 0.5em;
+      transform: translateY(-50%);
   }
 }
