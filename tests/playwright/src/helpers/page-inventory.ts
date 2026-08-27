@@ -15,6 +15,8 @@ export const anonymousPages = [
   { slug: 'communities', path: '/communities' },
   { slug: 'dictionary-browse', path: '/dictionary' },
   { slug: 'login', path: '/user/login' },
+  { slug: 'local-contexts', path: '/local-contexts' },
+  { slug: 'access-denied', path: '/mukurtu/access-denied' },
 ];
 
 /**
@@ -42,6 +44,12 @@ export const discoveredPages = [
     listPath: '/dictionary',
     itemLink: 'main a[href*="/dictionary-word"]',
   },
+  {
+    slug: 'community-local-contexts',
+    listPath: '/communities',
+    itemLink: '.communities__item a',
+    pathSuffix: '/local-contexts',
+  },
 ];
 
 /**
@@ -54,6 +62,8 @@ export const memberPages = [
   { slug: 'member-my-content', path: '/my-content' },
   { slug: 'member-personal-collections', path: '/user/personal-collections' },
   { slug: 'member-account', path: '/user' },
+  { slug: 'member-dashboard', path: '/dashboard/mukurtu_dashboard' },
+  { slug: 'member-notifications', path: '/notifications' },
 ];
 
 /**
@@ -85,14 +95,71 @@ export const memberDiscoveredPages = [
 ];
 
 /**
- * Find the first item link on a listing page and return its URL.
+ * Pages reachable by non-admin community/protocol roles (Community
+ * Managers, protocol contributors/curators/stewards) that are neither a
+ * plain member page nor part of the admin/authoring (ATAG) surface --
+ * a Phase 1 coverage gap, not Phase 2 scope. Override the account with
+ * A11Y_MANAGER_USERNAME/A11Y_MANAGER_PASSWORD; the admin/admin fallback
+ * can reach these routes but adds Drupal-toolbar noise and isn't
+ * representative of the actual non-admin roles that use them.
  */
-export async function discoverItemUrl(page: Page, listPath: string, itemLink: string): Promise<string | null> {
+export const managePages = [
+  { slug: 'manage-content', path: '/admin/content' },
+  { slug: 'manage-people-list', path: '/admin/people/list' },
+  { slug: 'manage-create-user', path: '/admin/communities/create-user' },
+];
+
+/**
+ * Find the first item link on a listing page and return its URL. An
+ * optional pathSuffix is appended to the discovered URL -- used to reach a
+ * sub-page of the discovered item (e.g. a community's Local Contexts
+ * directory) rather than the item itself.
+ */
+export async function discoverItemUrl(
+  page: Page,
+  listPath: string,
+  itemLink: string,
+  pathSuffix?: string,
+): Promise<string | null> {
   await page.goto(listPath);
   const hrefs = await page.locator(itemLink).evaluateAll(
     (links) => links.map((link) => link.getAttribute('href')),
   );
   // Protocol-protected items can render as login links; those audit the
   // login page instead of the item, so skip them.
-  return hrefs.find((href) => href && !href.includes('/user/login')) ?? null;
+  const href = hrefs.find((href) => href && !href.includes('/user/login')) ?? null;
+  if (!href) return null;
+  return pathSuffix ? `${href}${pathSuffix}` : href;
+}
+
+/**
+ * Discover a community's machine name/slug (from its public page URL,
+ * e.g. /community/some-slug) and build a manage-scoped URL from it --
+ * used for pages like /communities/community/{community}/... that share
+ * no path prefix with the public community page, so a simple pathSuffix
+ * isn't enough.
+ */
+export async function discoverCommunityManageUrl(page: Page, buildPath: (slug: string) => string): Promise<string | null> {
+  const communityUrl = await discoverItemUrl(page, '/communities', '.communities__item a');
+  const slug = communityUrl?.split('/').filter(Boolean).pop();
+  return slug ? buildPath(slug) : null;
+}
+
+/**
+ * Discover a protocol's slug and build a URL from it, by navigating to a
+ * community first (there's no public protocol listing page), then finding
+ * a protocol link on that community's page. Returns null if the
+ * discovered community has no protocols -- callers should skip the test
+ * in that case, same as any other discovery miss.
+ */
+export async function discoverProtocolUrl(page: Page, buildPath: (slug: string) => string): Promise<string | null> {
+  const communityUrl = await discoverItemUrl(page, '/communities', '.communities__item a');
+  if (!communityUrl) return null;
+  await page.goto(communityUrl);
+  const hrefs = await page.locator('a[href*="/protocols/protocol/"]').evaluateAll(
+    (links) => links.map((link) => link.getAttribute('href')),
+  );
+  const protocolUrl = hrefs.find((href) => href && !href.includes('/add') && !href.includes('/user/login')) ?? null;
+  const slug = protocolUrl?.split('/').filter(Boolean).pop();
+  return slug ? buildPath(slug) : null;
 }
