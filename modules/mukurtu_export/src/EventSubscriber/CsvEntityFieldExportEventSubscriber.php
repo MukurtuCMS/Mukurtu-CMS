@@ -105,6 +105,10 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
       return $this->exportLink($event, $field, $config);
     }
 
+    if ($fieldType == 'created' || $fieldType == 'changed') {
+      return $this->exportTimestamp($event, $field);
+    }
+
     // Default handling.
     $values = $entity->get($field_name)->getValue();
     $exportValue = [];
@@ -540,6 +544,29 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
         $uri = $link['uri'];
         $exportValue[] = "[$title]($uri)";
       }
+    }
+    $event->setValue($exportValue);
+  }
+
+  /**
+   * Exports created/changed field values as a human-readable UTC timestamp.
+   *
+   * The raw values are Unix timestamps; formatting them here keeps the
+   * exported CSV readable while remaining unambiguous to parse back on
+   * import (see the 'timestamp' MukurtuImportFieldProcess plugin).
+   *
+   * @param EntityFieldExportEvent $event
+   *   The export event object which provides the context and the necessary
+   *   environment for the current export operation.
+   * @param \Drupal\Core\Field\FieldItemListInterface $field
+   *   The field items list containing the timestamp data to be exported.
+   *
+   * @protected
+   */
+  protected function exportTimestamp(EntityFieldExportEvent $event, $field) {
+    $exportValue = [];
+    foreach ($field->getValue() as $value) {
+      $exportValue[] = gmdate('Y-m-d H:i:s', $value['value']);
     }
     $event->setValue($exportValue);
   }
