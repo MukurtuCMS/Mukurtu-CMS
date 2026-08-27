@@ -36,6 +36,7 @@ class NotYetTranslatedIndicatorTest extends EntityKernelTestBase {
     parent::setUp();
 
     $this->installEntitySchema('node');
+    $this->installSchema('node', ['node_access']);
     $this->installConfig(['node']);
 
     NodeType::create(['type' => 'article', 'name' => 'Article'])->save();

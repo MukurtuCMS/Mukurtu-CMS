@@ -42,21 +42,12 @@ class NotYetTranslatedIndicatorHooks implements ContainerInjectionInterface {
   }
 
   /**
-   * Implements hook_theme().
-   */
-  #[Hook('theme')]
-  public function theme(): array {
-    return [
-      'mukurtu_not_yet_translated_indicator' => [
-        'variables' => [
-          'language_name' => NULL,
-        ],
-      ],
-    ];
-  }
-
-  /**
    * Implements hook_preprocess_HOOK() for node.html.twig.
+   *
+   * The 'mukurtu_not_yet_translated_indicator' theme hook this renders is
+   * declared in mukurtu_core_theme() in mukurtu_core.module - a module
+   * can't implement hook_theme() a second time here without Drupal
+   * throwing a LogicException.
    */
   #[Hook('preprocess_node')]
   public function preprocessNode(array &$variables): void {
