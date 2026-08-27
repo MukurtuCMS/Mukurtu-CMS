@@ -5,7 +5,9 @@
  * Install, update and uninstall functions for the Mukurtu Multilingual module.
  */
 
+use Drupal\Core\Field\Entity\BaseFieldOverride;
 use Drupal\field\Entity\FieldConfig;
+use Drupal\language\Entity\ContentLanguageSettings;
 use Drupal\user\Entity\Role;
 
 /**
@@ -38,10 +40,32 @@ function mukurtu_multilingual_install() {
   // Clear the cache.discovery bin where field definitions are cached.
   \Drupal::service('cache.discovery')->deleteAll();
 
-  // Make adjustments to language negotiation settings. This will enable
-  // content language detection apart from interface language detection. It
-  // also prioritizes a users' Administration pages language setting, so that
-  // interface text follows their preference rather than the content language.
+  _mukurtu_multilingual_apply_language_negotiation_defaults();
+
+  // Make all comment fields on node bundles untranslatable.
+  $node_types = \Drupal::entityTypeManager()->getStorage('node_type')->loadMultiple();
+  foreach ($node_types as $node_type) {
+    $bundle = $node_type->id();
+    $field_config = FieldConfig::loadByName('node', $bundle, 'comment');
+    if ($field_config) {
+      $field_config->setTranslatable(FALSE);
+      $field_config->save();
+    }
+  }
+
+  _mukurtu_multilingual_apply_translation_overrides();
+}
+
+/**
+ * Adjusts language negotiation settings.
+ *
+ * This enables content language detection apart from interface language
+ * detection. It also prioritizes a users' Administration pages language
+ * setting, so that interface text follows their preference rather than the
+ * content language. Idempotent: safe to call on a site that has already
+ * converged on these settings, or whose settings have drifted.
+ */
+function _mukurtu_multilingual_apply_language_negotiation_defaults(): void {
   $config = \Drupal::configFactory()->getEditable('language.types');
   $config->set('configurable', ['language_interface', 'language_content'])
     ->set('negotiation.language_content.enabled', [
@@ -56,16 +80,52 @@ function mukurtu_multilingual_install() {
       'language-selected' => 12,
     ]);
   $config->save();
+}
 
-  // Make all comment fields on node bundles untranslatable.
-  $node_types = \Drupal::entityTypeManager()->getStorage('node_type')->loadMultiple();
-  foreach ($node_types as $node_type) {
-    $bundle = $node_type->id();
-    $field_config = FieldConfig::loadByName('node', $bundle, 'comment');
-    if ($field_config) {
-      $field_config->setTranslatable(FALSE);
-      $field_config->save();
+/**
+ * Applies translation overrides for config already owned by other modules.
+ *
+ * A handful of base field overrides and one content language settings
+ * object are shipped (with different values) by the content-type module
+ * that owns the bundle, so this module can't ship its own
+ * config/install/*.yml for them: Drupal's ConfigInstaller refuses to
+ * install a module whose config/install ships a config name that already
+ * exists in active storage, which blocks the entire module install, not
+ * just that one file. Apply the intended overrides imperatively instead,
+ * after the owning module's config already exists.
+ *
+ * Title and promote are administrative/computed fields on these bundles
+ * (the real translatable content lives in bundle-specific fields), so they
+ * should not fork per translation the way the owning module's own default
+ * assumes on a non-multilingual site.
+ */
+function _mukurtu_multilingual_apply_translation_overrides(): void {
+  $untranslatable_fields = [
+    ['node', 'dictionary_word', 'title'],
+    ['node', 'landing_page', 'promote'],
+    ['node', 'person', 'title'],
+    ['node', 'place', 'title'],
+    ['node', 'word_list', 'promote'],
+  ];
+  foreach ($untranslatable_fields as [$entity_type_id, $bundle, $field_name]) {
+    $override = BaseFieldOverride::loadByName($entity_type_id, $bundle, $field_name);
+    if ($override && $override->isTranslatable()) {
+      $override->setTranslatable(FALSE)->save();
     }
+  }
+
+  // Landing pages need content translation enabled like every other node
+  // bundle; the owning module's default ships language_alterable: false
+  // with no content_translation settings at all.
+  /** @var \Drupal\content_translation\ContentTranslationManagerInterface $content_translation_manager */
+  $content_translation_manager = \Drupal::service('content_translation.manager');
+  $content_translation_manager->setEnabled('node', 'landing_page', TRUE);
+  $content_translation_manager->setBundleTranslationSettings('node', 'landing_page', [
+    'untranslatable_fields_hide' => '0',
+  ]);
+  $landing_page_settings = ContentLanguageSettings::loadByEntityTypeBundle('node', 'landing_page');
+  if ($landing_page_settings && !$landing_page_settings->isLanguageAlterable()) {
+    $landing_page_settings->setLanguageAlterable(TRUE)->save();
   }
 }
 
@@ -142,6 +202,82 @@ function mukurtu_multilingual_update_40005(): void {
         if ($data) {
           $config_factory->getEditable($config_name)->setData($data)->save();
         }
+      }
+    }
+  }
+}
+
+/**
+ * Reconcile translation overrides on sites that worked around the
+ * install-blocking config collision fixed by this release.
+ *
+ * mukurtu_multilingual used to ship its own config/install/*.yml for a
+ * handful of base field overrides and one content language settings
+ * object that are actually owned by the bundle's content-type module,
+ * which meant the module could never actually be installed on a stock
+ * Mukurtu site (Drupal's ConfigInstaller refuses to install a module
+ * whose config/install ships a config name that already exists in active
+ * storage). Any site that got past that by some other means never
+ * received the intended overrides, since the colliding files were never
+ * actually applied. Converge them now via the same helper hook_install()
+ * calls.
+ */
+function mukurtu_multilingual_update_40006(): void {
+  _mukurtu_multilingual_apply_translation_overrides();
+}
+
+/**
+ * Converges language negotiation settings on sites that installed before
+ * this release or whose settings have otherwise drifted from the shipped
+ * defaults (e.g. a site administrator changed them and later wants to reset
+ * to the Mukurtu defaults).
+ */
+function mukurtu_multilingual_update_40007(): void {
+  _mukurtu_multilingual_apply_language_negotiation_defaults();
+}
+
+/**
+ * Enables content translation for 12 bundles that were never covered by any
+ * language.content_settings.* config: the 7 media bundles (audio, document,
+ * external_embed, image, remote_video, soundcloud, video - meaning media
+ * names, alt text, and other translatable fields could not be translated on
+ * a multilingual site), the place_type taxonomy vocabulary, the
+ * mukurtu_footer block type, and 2 footer paragraph types
+ * (footer_logo, footer_social_link). A 12th bundle, the
+ * text_section_with_title paragraph type, already had its base field
+ * overrides shipped but was missing the content_settings file that actually
+ * enables translation for the bundle.
+ *
+ * Guarded by isNew() so this is a no-op if the config already exists (e.g.
+ * on a site that installed after this fix shipped, which already got these
+ * via config/install).
+ */
+function mukurtu_multilingual_update_40008(): void {
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_multilingual');
+  $config_source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+  $config_factory = \Drupal::configFactory();
+
+  $bundles = [
+    ['media', 'audio'],
+    ['media', 'document'],
+    ['media', 'external_embed'],
+    ['media', 'image'],
+    ['media', 'remote_video'],
+    ['media', 'soundcloud'],
+    ['media', 'video'],
+    ['taxonomy_term', 'place_type'],
+    ['block_content', 'mukurtu_footer'],
+    ['paragraph', 'footer_logo'],
+    ['paragraph', 'footer_social_link'],
+    ['paragraph', 'text_section_with_title'],
+  ];
+
+  foreach ($bundles as [$entity_type_id, $bundle]) {
+    $config_name = "language.content_settings.$entity_type_id.$bundle";
+    if ($config_factory->get($config_name)->isNew()) {
+      $data = $config_source->read($config_name);
+      if ($data) {
+        $config_factory->getEditable($config_name)->setData($data)->save();
       }
     }
   }
