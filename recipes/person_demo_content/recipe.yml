@@ -1,0 +1,28 @@
+name: 'Person demo content'
+description: >-
+  Creates one fully-described Person item (plus a second, lightweight Person
+  used only as a "related people" target) so the accessibility program has a
+  real, rendered Person page to test against on Tugboat and local builds.
+  See README.md in this directory for the assumptions this recipe makes and
+  what it intentionally leaves out.
+type: 'Content'
+recipes:
+  - accessibility_demo_content
+install: []
+config:
+  actions:
+    # Enables the People content-warning overlay (mukurtu_content_warnings)
+    # so the Sample Portrait's People-term match against the deceased
+    # Sample Person actually renders a warning. Unlike the module's other
+    # mechanism (taxonomy_warnings, keyed by numeric term ID in config,
+    # which would need the same fragile assumed-ID pattern documented in
+    # accessibility_demo_content/README.md), this is a plain boolean with
+    # no ID dependency, so it's safe to set unconditionally here.
+    mukurtu_content_warnings.settings:
+      simpleConfigUpdate:
+        # Dot notation, not a nested "people_warnings: {enabled: true}" map:
+        # simpleConfigUpdate calls Config::set() per top-level key it's
+        # given, and Config::set() replaces a whole branch rather than
+        # deep-merging it — a nested map here would have wiped
+        # warning_single/warning_multiple's default text.
+        people_warnings.enabled: true

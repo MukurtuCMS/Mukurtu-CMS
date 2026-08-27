@@ -1,0 +1,13 @@
+_meta:
+  version: '1.0'
+  entity_type: taxonomy_term
+  uuid: 893ab887-eb7d-477b-964d-470e848e5544
+  bundle: keywords
+  default_langcode: en
+default:
+  name:
+    -
+      value: 'sample-item'
+  status:
+    -
+      value: true
