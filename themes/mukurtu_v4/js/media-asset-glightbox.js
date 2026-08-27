@@ -317,7 +317,7 @@
     hint.id = ZOOM_HINT_ID;
     hint.className = 'visually-hidden';
     hint.textContent = 'Press Enter to zoom. While zoomed, use arrow keys to pan.';
-    document.body.appendChild(hint);
+    (document.getElementById('main-content') || document.body).appendChild(hint);
   }
 
   // Drupal behavior

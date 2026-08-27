@@ -1827,7 +1827,7 @@ label.form-required::after,
   position: relative;
 }
 :is(#extra-specificity-hack, .horizontal-tabs) *:focus {
-  outline: var(--admin-toolbar-size-focus) solid var(--admin-toolbar-color-focus);
+  outline: var(--admin-toolbar-size-focus, 2px) solid var(--admin-toolbar-color-focus, var(--focus-color));
 }
 :is(#extra-specificity-hack, .horizontal-tabs) *:not(:where(svg, svg *, .horizontal-tabs-panes, .horizontal-tabs-panes *)) {
   all: revert;
