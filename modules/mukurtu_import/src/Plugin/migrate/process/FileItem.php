@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Drupal\mukurtu_import\Plugin\migrate\process;
 
+use Drupal\migrate\Attribute\MigrateProcess;
 use Drupal\migrate\MigrateExecutableInterface;
 use Drupal\migrate\ProcessPluginBase;
 use Drupal\migrate\Row;
 
 /**
- * @MigrateProcessPlugin(
- *   id = "mukurtu_fileitem"
- * )
+ * Resolves an incoming file value to a managed file ID.
  */
+#[MigrateProcess('mukurtu_fileitem')]
 class FileItem extends ProcessPluginBase {
   public function transform($value, MigrateExecutableInterface $migrate_executable, Row $row, $destination_property) {
     $importUriBase = $this->configuration['upload_location'] ?? "private://";

@@ -5,7 +5,9 @@ namespace Drupal\mukurtu_workflows\Plugin\views\access;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Cache\CacheableDependencyInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\og\MembershipManagerInterface;
+use Drupal\views\Attribute\ViewsAccess;
 use Drupal\views\Plugin\views\access\AccessPluginBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Routing\Route;
@@ -15,13 +17,12 @@ use Symfony\Component\Routing\Route;
  * and site administrators.
  *
  * @ingroup views_access_plugins
- *
- * @ViewsAccess(
- *   id = "review_queue_access",
- *   title = @Translation("Review queue access"),
- *   help = @Translation("Access is granted to protocol stewards, language stewards, and site administrators.")
- * )
  */
+#[ViewsAccess(
+  id: 'review_queue_access',
+  title: new TranslatableMarkup('Review queue access'),
+  help: new TranslatableMarkup('Access is granted to protocol stewards, language stewards, and site administrators.'),
+)]
 class ReviewQueueAccess extends AccessPluginBase implements CacheableDependencyInterface {
 
   /**

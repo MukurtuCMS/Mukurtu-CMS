@@ -2,6 +2,7 @@
 
 namespace Drupal\mukurtu_migrate\Plugin\migrate\process;
 
+use Drupal\migrate\Attribute\MigrateProcess;
 use Drupal\migrate\MigrateExecutableInterface;
 use Drupal\migrate\ProcessPluginBase;
 use Drupal\migrate\Row;
@@ -9,12 +10,11 @@ use Drupal\mukurtu_protocol\Plugin\Field\FieldType\CulturalProtocolItem;
 
 /**
  * Set protocols.
- *
- * @MigrateProcessPlugin(
- *   id = "mukurtu_migrate_set_protocols",
- *   handle_multiples = TRUE
- * )
  */
+#[MigrateProcess(
+  id: 'mukurtu_migrate_set_protocols',
+  handle_multiples: TRUE,
+)]
 class SetProtocols extends ProcessPluginBase {
   public function transform($value, MigrateExecutableInterface $migrate_executable, Row $row, $destination_property) {
     if (!$value || empty($value) || !is_array($value)) {

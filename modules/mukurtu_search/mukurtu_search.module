@@ -50,6 +50,42 @@ function mukurtu_search_entity_bundle_create($entity_type_id, $bundle) {
 }
 
 /**
+ * Static string (facet) variants for common taxonomy reference fields.
+ *
+ * These field IDs are re-added explicitly because
+ * BaseFieldsSearchIndexSubscriber::defaultFieldIndex() only dynamically
+ * indexes the fulltext "__name__text" variant for taxonomy reference
+ * fields, not the plain string "__name" variant that facets use as their
+ * field_identifier. This fixed set is already accounted for in the
+ * mukurtu_browse_auto_index's static field budget, so restoring it here
+ * does not risk MySQL's 64-index-per-table limit the way dynamically
+ * adding a string variant for every taxonomy reference field would.
+ *
+ * @return array
+ *   Field ID keyed array of ['label' => ..., 'property_path' => ...].
+ */
+function mukurtu_search_static_taxonomy_name_fields() {
+  return [
+    'node__field_article_category__name' => ['label' => 'Article Category', 'property_path' => 'field_article_category:entity:name'],
+    'node__field_article_keywords__name' => ['label' => 'Article Keywords', 'property_path' => 'field_article_keywords:entity:name'],
+    'node__field_category__name' => ['label' => 'Category', 'property_path' => 'field_category:entity:name'],
+    'node__field_contributor__name' => ['label' => 'Contributor', 'property_path' => 'field_contributor:entity:name'],
+    'node__field_creator__name' => ['label' => 'Creator', 'property_path' => 'field_creator:entity:name'],
+    'node__field_dictionary_word_language__name' => ['label' => 'Dictionary Word Language', 'property_path' => 'field_dictionary_word_language:entity:name'],
+    'node__field_format__name' => ['label' => 'Format', 'property_path' => 'field_format:entity:name'],
+    'node__field_keywords__name' => ['label' => 'Keywords', 'property_path' => 'field_keywords:entity:name'],
+    'node__field_language__name' => ['label' => 'Language', 'property_path' => 'field_language:entity:name'],
+    'node__field_location__name' => ['label' => 'Location', 'property_path' => 'field_location:entity:name'],
+    'node__field_other_names__name' => ['label' => 'Other Names', 'property_path' => 'field_other_names:entity:name'],
+    'node__field_people__name' => ['label' => 'People', 'property_path' => 'field_people:entity:name'],
+    'node__field_publisher__name' => ['label' => 'Publisher', 'property_path' => 'field_publisher:entity:name'],
+    'node__field_subject__name' => ['label' => 'Subject', 'property_path' => 'field_subject:entity:name'],
+    'node__field_type__name' => ['label' => 'Type', 'property_path' => 'field_type:entity:name'],
+    'node__field_word_type__name' => ['label' => 'Word Type', 'property_path' => 'field_word_type:entity:name'],
+  ];
+}
+
+/**
  * Index all fields for search.
  */
 function mukurtu_search_rebuild_index() {
@@ -71,6 +107,18 @@ function mukurtu_search_rebuild_index() {
     $field->setPropertyPath("search_api_entity_type");
     $field->setLabel(t("Entity type"));
     $index->addField($field);
+
+    // Restore the static string (facet) variants dropped by the clear
+    // above; the dynamic FieldAvailableForIndexing pass below only adds
+    // their fulltext "__name__text" counterparts.
+    foreach (mukurtu_search_static_taxonomy_name_fields() as $field_id => $definition) {
+      $field = $index->getField($field_id) ?? new Field($index, $field_id);
+      $field->setType('string');
+      $field->setDatasourceId('entity:node');
+      $field->setPropertyPath($definition['property_path']);
+      $field->setLabel($definition['label']);
+      $index->addField($field);
+    }
     $index->save();
   }
 
