@@ -111,13 +111,39 @@ class CsvExportUserMembershipTest extends CsvExportFieldTestBase {
   }
 
   /**
-   * Test that the virtual communities/protocols columns are offered.
+   * Test that the virtual communities/protocols/account_status columns are
+   * offered when no user__user mapping exists yet.
    */
   public function testMembershipColumnsInMapping() {
     $mapped = $this->export_config->getMappedFields('user', 'user');
     $field_names = array_column($mapped, 'field_name');
     $this->assertContains('communities', $field_names);
     $this->assertContains('protocols', $field_names);
+    $this->assertContains('account_status', $field_names);
+  }
+
+  /**
+   * Test that a preset already migrated to the unified account_status
+   * mapping (see mukurtu_export_update_40025()) is reflected correctly in
+   * the settings form: the account_status row is shown as mapped/exported,
+   * and the raw status/field_pending fields it supersedes never reappear
+   * as unmapped rows.
+   */
+  public function testMigratedAccountStatusMappingIsReflectedInForm() {
+    $this->export_config->set('entity_fields_export_list', [
+      'user__user' => ['account_status' => 'Account Status'],
+    ])->save();
+
+    $mapped = $this->export_config->getMappedFields('user', 'user');
+    $field_names = array_column($mapped, 'field_name');
+    $this->assertNotContains('status', $field_names);
+    $this->assertNotContains('field_pending', $field_names);
+
+    $account_status_rows = array_filter($mapped, fn($row) => $row['field_name'] === 'account_status');
+    $this->assertCount(1, $account_status_rows);
+    $account_status_row = reset($account_status_rows);
+    $this->assertTrue($account_status_row['export']);
+    $this->assertEquals('Account Status', $account_status_row['csv_header_label']);
   }
 
 }
