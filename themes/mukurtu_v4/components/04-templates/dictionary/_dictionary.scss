@@ -73,13 +73,16 @@
       form {
         @include include-media.media('>=md') {
           display: grid;
-          grid-template-columns: repeat(3, 1fr);
+          // auto-fit + a minmax floor, not a fixed repeat(N, 1fr): a fixed
+          // column count can't shrink past each item's content size (e.g. a
+          // long dropdown label), forcing the whole form wider than the
+          // viewport at larger text sizes. auto-fit instead drops to fewer
+          // columns once they'd go below the floor, with no media query
+          // needed, so this also holds up under text-only zoom (which
+          // doesn't re-trigger width-based breakpoints).
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
           gap: var(--gutter);
           row-gap: 1rem;
-        }
-
-        @include include-media.media('>=lg') {
-          grid-template-columns: repeat(4, 1fr);
         }
 
         .js-form-type-select {
@@ -124,6 +127,7 @@
       margin-block-end: 0;
       padding-inline: var(--v-space-4xxs);
       padding-block: var(--v-space-5xs);
+      overflow-wrap: break-word;
     }
   }
 

@@ -6370,14 +6370,9 @@ header {
 @media (min-width: 48rem) {
   .dictionary .browse-facets .views-exposed-form form {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: var(--gutter);
     row-gap: 1rem;
-  }
-}
-@media (min-width: 60rem) {
-  .dictionary .browse-facets .views-exposed-form form {
-    grid-template-columns: repeat(4, 1fr);
   }
 }
 .dictionary .browse-facets .views-exposed-form form .js-form-type-select::after {
@@ -6415,6 +6410,7 @@ header {
           margin-block-end: 0;
   padding-inline: var(--v-space-4xxs);
   padding-block: var(--v-space-5xs);
+  overflow-wrap: break-word;
 }
 .dictionary .search-collapse-toggle {
   background-color: var(--mukurtu-panel-pane-content-background-color);
