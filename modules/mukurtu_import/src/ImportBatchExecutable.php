@@ -308,7 +308,12 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
     }
 
     $store->set('batch_results_success', $success && !$has_row_failures && !$has_migration_failure && !$has_silent_noop);
-    $store->set('batch_results_noop', $has_silent_noop && !$has_row_failures && !$has_migration_failure);
+    // A single migration in the batch being a silent no-op shouldn't imply
+    // the whole batch imported nothing -- other migrations in the same
+    // batch (e.g. a separate file/entity type) may have created or updated
+    // content. Only warn when nothing was created or updated anywhere in
+    // the batch.
+    $store->set('batch_results_noop', $has_silent_noop && !$has_row_failures && !$has_migration_failure && $imported_count === 0);
     $store->set('batch_results_messages', $messages);
 
     if (\Drupal::moduleHandler()->moduleExists('mukurtu_notifications')) {
