@@ -154,6 +154,32 @@
     max-block-size: 100px;
     inline-size: auto;
   }
+
+  // The real <button> media-asset-carousel.js wraps each thumbnail's
+  // content in (see wrapThumbnailSlidesInButtons()) -- reset it back to
+  // looking like plain content, not a browser-default button.
+  &__slide-button {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+    padding: 0;
+    border: none;
+    background: none;
+    font: inherit;
+    text-align: inherit;
+    cursor: pointer;
+
+    // These buttons sit on top of user-uploaded thumbnail photos of unknown
+    // color/luminance (same reasoning as the arrow contrast fix above): the
+    // global --focus-color (#66afe9) is only ~2.4:1 against a white/near-
+    // white background, short of WCAG 1.4.11's 3:1 minimum. Use the same
+    // --brand-primary-dark fix already established for this in
+    // _full-node.scss, _local-contexts.scss, and _glightbox.scss.
+    &:focus-visible {
+      outline: var(--brand-primary-dark) solid 2px;
+      outline-offset: 2px;
+    }
+  }
 }
 
 // stylelint-disable-next-line
