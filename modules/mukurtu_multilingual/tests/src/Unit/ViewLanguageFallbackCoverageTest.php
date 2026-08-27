@@ -89,11 +89,11 @@ class ViewLanguageFallbackCoverageTest extends UnitTestCase {
     // directly contradicts the "never silently disappear" policy.
     'browse_by_community' => 'has a langcode filter that HIDES untranslated communities instead of falling back - violates the policy, not just unmigrated - #1159/#1188',
 
-    // Ambiguous audience - flagged here for reviewer judgment rather than
-    // silently decided by this test.
-    'my_personal_collections' => "REVIEW: per-user saved-items list, not shared/public content - unclear if in the policy's scope",
-    'mukurtu_message_log' => "REVIEW: has both a personal-inbox page (notifications, visitor-facing) and an admin/notifications page in one view - mixed audience, needs per-display treatment this test doesn't attempt",
-    'mukurtu_workflow_overview' => "REVIEW: staff review-queue tool at path review-queue (not under /admin), so it isn't visitor-facing, but it's also not purely administrative",
+    // Audience resolved by human review (2026-08-26) - all three ruled in
+    // scope for the fallback policy, not yet migrated.
+    'my_personal_collections' => 'visitor-facing (a user\'s own saved items still deserve fallback, not just shared/public content), not yet migrated - #1159/#1188',
+    'mukurtu_message_log' => 'visitor-facing - only the /notifications display is in scope (admin/notifications is legitimately admin-only within the same view); not yet migrated - #1159/#1188',
+    'mukurtu_workflow_overview' => 'staff review-queue at /review-queue - reviewers are ruled in scope (may work in a non-default language too), not just visitors; not yet migrated - #1159/#1188',
   ];
 
   /**
