@@ -14,7 +14,11 @@ class BundleListController extends ControllerBase {
   public function bundlesList() {
     $build = [];
     $custom_entity_types = \Drupal::service('mukurtu_core.roundtrip_entity_types')->getCustomEntityTypeIds();
-    $entity_types = array_merge(['node', 'media'], $custom_entity_types, ['paragraph', 'file', 'taxonomy_term']);
+    $base_entity_types = ['node', 'media'];
+    if ($this->currentUser()->hasPermission('import mukurtu users')) {
+      $base_entity_types[] = 'user';
+    }
+    $entity_types = array_merge($base_entity_types, $custom_entity_types, ['paragraph', 'file', 'taxonomy_term']);
     $entity_type_labels = [];
 
     foreach ($entity_types as $entity_type) {

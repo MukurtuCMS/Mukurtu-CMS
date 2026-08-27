@@ -746,3 +746,14 @@ function mukurtu_protocol_update_40041(): void {
     }
   }
 }
+
+/**
+ * Update /admin/people Site roles column to show "Authenticated user" for
+ * accounts with no other roles, instead of a blank cell.
+ */
+function mukurtu_protocol_update_40042(): void {
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_protocol');
+  $view_file = $module_path . '/config/install/views.view.user_admin_people.yml';
+  $view_data = \Symfony\Component\Yaml\Yaml::parseFile($view_file);
+  \Drupal::configFactory()->getEditable('views.view.user_admin_people')->setData($view_data)->save(TRUE);
+}

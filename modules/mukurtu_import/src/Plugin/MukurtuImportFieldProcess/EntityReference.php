@@ -176,6 +176,17 @@ class EntityReference extends MukurtuImportFieldProcessPluginBase implements Con
       ];
     }
 
+    // User role ref (e.g. the 'roles' field on the user entity). Looked up by
+    // machine name or label; the Administrator role is always rejected.
+    if ($ref_type == 'user_role') {
+      $ref_process = [
+        'plugin' => 'mukurtu_role_lookup',
+        'value_key' => 'label',
+        'ignore_case' => TRUE,
+        'entity_type' => 'user_role',
+      ];
+    }
+
     $process[] = $ref_process;
 
     // Attach source value to the first process.
@@ -191,9 +202,9 @@ class EntityReference extends MukurtuImportFieldProcessPluginBase implements Con
     $refType = $field_config->getSetting('target_type') ?? [];
     // Custom entity types intentionally share the generic
     // mukurtu_entity_lookup path in getProcess() along with media, node,
-    // taxonomy_term, and user.
+    // taxonomy_term, user, and user_role.
     $custom_entity_types = \Drupal::service('mukurtu_core.roundtrip_entity_types')->getCustomEntityTypeIds();
-    $supported_types = array_merge(['media', 'node', 'taxonomy_term', 'user'], $custom_entity_types);
+    $supported_types = array_merge(['media', 'node', 'taxonomy_term', 'user', 'user_role'], $custom_entity_types);
     return in_array($refType, $supported_types);
   }
 
@@ -213,6 +224,10 @@ class EntityReference extends MukurtuImportFieldProcessPluginBase implements Con
 
     if ($ref_type == 'user') {
       return $this->formatPlural($multiple, 'The username or user ID.', 'Usernames or User IDs, separated by your selected multi-value delimiter.');
+    }
+
+    if ($ref_type == 'user_role') {
+      return $this->formatPlural($multiple, 'A role machine name or label (e.g. mukurtu_manager or Mukurtu Manager). The Administrator role cannot be assigned via import.', 'Role machine names or labels, separated by your selected multi-value delimiter. The Administrator role cannot be assigned via import.');
     }
 
     if ($ref_type == 'taxonomy_term') {

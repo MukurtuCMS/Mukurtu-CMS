@@ -26,6 +26,8 @@ class MultipleApiKeysTest extends KernelTestBase {
    */
   protected static $modules = [
     'field',
+    'geofield',
+    'leaflet',
     'node',
     'media',
     'taxonomy',
@@ -37,6 +39,7 @@ class MultipleApiKeysTest extends KernelTestBase {
     'text',
     'user',
     'og',
+    'mukurtu_core',
     'mukurtu_protocol',
     'mukurtu_local_contexts',
   ];
