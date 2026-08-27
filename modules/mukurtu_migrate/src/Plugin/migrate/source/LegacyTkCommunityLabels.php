@@ -2,16 +2,15 @@
 
 namespace Drupal\mukurtu_migrate\Plugin\migrate\source;
 
+use Drupal\migrate\Attribute\MigrateSource;
 use Drupal\migrate\Plugin\migrate\source\SourcePluginBase;
 use Drupal\migrate\Plugin\migrate\source\SqlBase;
 use Drupal\migrate\Row;
 
 /**
  *
- * @MigrateSource(
- *   id = "mukurtu_v3_legacy_tk_community_labels"
- * )
  */
+#[MigrateSource('mukurtu_v3_legacy_tk_community_labels')]
 class LegacyTkCommunityLabels extends SqlBase {
 
   protected $communityNames;

@@ -4,16 +4,15 @@ namespace Drupal\mukurtu_search\Plugin\search_api\datasource;
 
 use Drupal\search_api\Plugin\search_api\datasource\ContentEntity;
 use Drupal\Core\Plugin\PluginFormInterface;
-
+use Drupal\search_api\Attribute\SearchApiDatasource;
 
 /**
  * Represents a datasource which exposes the content entities.
- *
- * @SearchApiDatasource(
- *   id = "entity",
- *   deriver = "Drupal\search_api\Plugin\search_api\datasource\ContentEntityDeriver"
- * )
  */
+#[SearchApiDatasource(
+  id: 'entity',
+  deriver: 'Drupal\search_api\Plugin\search_api\datasource\ContentEntityDeriver',
+)]
 class FlaggingContentEntity extends ContentEntity implements PluginFormInterface {
   /**
    * {@inheritdoc}
