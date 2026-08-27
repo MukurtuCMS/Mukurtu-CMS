@@ -3,6 +3,8 @@
 namespace Drupal\mukurtu_core\Plugin\views\filter;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Language\LanguageInterface;
+use Drupal\mukurtu_core\Service\EntityTranslationResolver;
 use Drupal\views\Plugin\views\filter\InOperator;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -18,6 +20,7 @@ class NodeProtocolFilter extends InOperator {
     $plugin_id,
     $plugin_definition,
     protected readonly EntityTypeManagerInterface $entityTypeManager,
+    protected readonly EntityTranslationResolver $entityTranslationResolver,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
   }
@@ -28,6 +31,7 @@ class NodeProtocolFilter extends InOperator {
       $plugin_id,
       $plugin_definition,
       $container->get('entity_type.manager'),
+      $container->get('mukurtu_core.entity_translation_resolver'),
     );
   }
 
@@ -38,6 +42,7 @@ class NodeProtocolFilter extends InOperator {
     $protocols = $this->entityTypeManager->getStorage('protocol')->loadMultiple();
     $options = [];
     foreach ($protocols as $protocol) {
+      $protocol = $this->entityTranslationResolver->translate($protocol);
       $options[$protocol->id()] = $protocol->label();
     }
     asort($options);
@@ -57,6 +62,17 @@ class NodeProtocolFilter extends InOperator {
     foreach ($this->value as $pid) {
       $this->query->addWhere($or_group, "$this->tableAlias.field_cultural_protocols__protocols", '%|' . $pid . '|%', 'LIKE');
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * The exposed filter's option labels now vary on the active content
+   * language (see getValueOptions()), so the cached render output must vary
+   * on it too.
+   */
+  public function getCacheContexts() {
+    return array_merge(parent::getCacheContexts(), ['languages:' . LanguageInterface::TYPE_CONTENT]);
   }
 
 }
