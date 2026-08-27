@@ -3,15 +3,15 @@
 namespace Drupal\mukurtu_protocol\Plugin\views\field;
 
 use Drupal\Component\Utility\Html;
+use Drupal\views\Attribute\ViewsField;
 use Drupal\views\Plugin\views\field\FieldPluginBase;
 use Drupal\views\ResultRow;
 use Drupal\user\Entity\Role;
 
 /**
  * Provides a Site Roles field handler that renders roles as plain text.
- *
- * @ViewsField("user_roles_plain")
  */
+#[ViewsField('user_roles_plain')]
 class UserRoles extends FieldPluginBase {
 
   /**

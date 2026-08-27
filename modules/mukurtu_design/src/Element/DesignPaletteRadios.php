@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace Drupal\mukurtu_design\Element;
 
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\Attribute\FormElement;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Render\Element\Radios;
 
 /**
  * DesignPaletteRadios form element.
- *
- * @FormElement("mukurtu_palette_radios")
  */
+#[FormElement('mukurtu_palette_radios')]
 class DesignPaletteRadios extends Radios {
 
   /**
