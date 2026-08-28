@@ -327,6 +327,8 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
     // Get the field definitions for the target.
     $fieldDefs = $this->getFieldDefinitions($entity_type_id, $bundle);
 
+    $isTranslationImport = $this->isTranslationImport($targets);
+
     $writableFields = [];
     foreach ($fieldDefs as $fieldName => $fieldDef) {
       if (in_array($fieldName,['default_langcode'])) {
@@ -338,6 +340,20 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
       // we get around this by only specifying what is absolutely necessary for
       // the given import input.
       if (!$fieldDef->isReadOnly() && in_array($fieldName, $targets)) {
+        // A translation-targeting import updates whichever translation a
+        // row resolves to. Non-translatable fields share one value across
+        // every translation of an entity, so writing one through a
+        // translation object would silently overwrite it for every other
+        // translation too - core has no guard against this. Excluding
+        // them here only affects updates to already-existing entities
+        // (Entity::getEntity() only calls updateEntity(), which reads
+        // overwrite_properties, when a matching entity already exists;
+        // brand-new entities are built via storage->create() with every
+        // mapped field, unaffected by this list). See
+        // docs/import-translation.md.
+        if ($isTranslationImport && !$fieldDef->isTranslatable()) {
+          continue;
+        }
         $writableFields[] = $fieldName;
       }
     }
@@ -354,6 +370,44 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
     }
 
     return $writableFields;
+  }
+
+  /**
+   * Whether this definition targets translations rather than always the
+   * default/original-language entity.
+   *
+   * Gated on both a column being mapped to the entity type's langcode
+   * field AND the target bundle actually supporting content translation -
+   * an unmapped or non-translatable-bundle strategy is completely
+   * unaffected, byte-identical to before this existed.
+   *
+   * @param array|null $targets
+   *   The mapping's target field names (without subfield suffixes), or
+   *   NULL to compute them from the current mapping.
+   *
+   * @return bool
+   *   TRUE if imports using this definition should target translations.
+   */
+  protected function isTranslationImport(?array $targets = NULL): bool {
+    $entity_type_id = $this->getTargetEntityTypeId();
+    $bundle = $this->getTargetBundle();
+    $entity_type = $this->entityTypeManager()->getDefinition($entity_type_id);
+    $langcode_key = $entity_type->getKey('langcode');
+    if (!$langcode_key) {
+      return FALSE;
+    }
+
+    if ($targets === NULL) {
+      $targets = array_map(fn($t) => explode('/', $t, 2)[0], array_column($this->getMapping(), 'target'));
+    }
+    if (!in_array($langcode_key, $targets, TRUE)) {
+      return FALSE;
+    }
+
+    if (!$bundle) {
+      return FALSE;
+    }
+    return \Drupal::service('content_translation.manager')->isEnabled($entity_type_id, $bundle);
   }
 
   /**
@@ -417,6 +471,16 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
       $ids[] = '_record_number';
     }
 
+    $destination = [
+      'plugin' => "entity:$entity_type_id",
+      'default_bundle' => $bundle,
+      'overwrite_properties' => $this->getOverwriteProperties(),
+      'validate' => TRUE,
+    ];
+    if ($this->isTranslationImport()) {
+      $destination['translations'] = TRUE;
+    }
+
     return [
       'id' => $this->getDefinitionId($file),
       'label' => $this->getDefinitionLabel($file),
@@ -432,12 +496,7 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
         'record_number_field' => '_record_number',
       ],
       'process' => $process,
-      'destination' => [
-        'plugin' => "entity:$entity_type_id",
-        'default_bundle' => $bundle,
-        'overwrite_properties' => $this->getOverwriteProperties(),
-        'validate' => TRUE,
-      ],
+      'destination' => $destination,
     ];
   }
 
