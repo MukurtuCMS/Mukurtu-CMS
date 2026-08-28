@@ -9,9 +9,9 @@ use Drupal\mukurtu_submissions\Form\SubmissionSettingsCollectionForm;
 use Drupal\user\Entity\User;
 
 /**
- * Tests the "Submission Forms" collection page, which now combines the
- * per-content-type submission settings list with the notify_uids setting
- * on one page/route instead of two.
+ * Tests the "Submission Forms" collection page, which combines the
+ * per-content-type submission settings list with the reviewer-notification
+ * settings on one page/route.
  *
  * @group mukurtu_submissions
  */
@@ -29,17 +29,35 @@ class SubmissionSettingsCollectionFormTest extends MukurtuSubmissionsKernelTestB
   }
 
   /**
-   * Calls submitForm() directly (see SubmissionNotifySettingsFormTest's
-   * removed equivalent, and ReviewStateFormTest, for why this codebase
-   * prefers testing submitForm() logic directly over re-exercising
-   * entity_autocomplete's own core string-parsing pipeline).
+   * Sets the starting notify_uids list directly in config (the reviewers
+   * table is built from this).
    */
-  protected function submitNotifyUids(array $uids): void {
-    $value = array_map(fn(int $uid) => ['target_id' => $uid], $uids);
-    $form_state = (new FormState())->setValues(['notify_uids' => $value]);
+  protected function seedNotifyUids(array $uids): void {
+    \Drupal::configFactory()->getEditable('mukurtu_submissions.settings')
+      ->set('notify_uids', array_map('intval', $uids))
+      ->save();
+  }
 
+  /**
+   * Submits the form: the single "add" pick plus the set of table rows
+   * whose "remove" box is ticked. Calls submitForm() directly, as the rest
+   * of this suite does, rather than re-exercising entity_autocomplete's
+   * own string-parsing pipeline.
+   */
+  protected function submitReviewers(?int $add = NULL, array $remove = [], string $notify_emails = ''): void {
+    $rows = [];
+    foreach ($remove as $uid) {
+      $rows[(int) $uid] = ['remove' => 1];
+    }
+    $values = [
+      'reviewers' => $rows,
+      'notify_emails' => $notify_emails,
+    ];
+    if ($add !== NULL) {
+      $values['add_reviewer'] = (string) $add;
+    }
     $form = [];
-    $this->getFormObject()->submitForm($form, $form_state);
+    $this->getFormObject()->submitForm($form, (new FormState())->setValues($values));
   }
 
   /**
@@ -48,7 +66,7 @@ class SubmissionSettingsCollectionFormTest extends MukurtuSubmissionsKernelTestB
    */
   protected function runNotifySettingsForm(string $notify_emails_text): FormState {
     $form_state = (new FormState())->setValues([
-      'notify_uids' => [],
+      'reviewers' => [],
       'notify_emails' => $notify_emails_text,
     ]);
 
@@ -61,71 +79,112 @@ class SubmissionSettingsCollectionFormTest extends MukurtuSubmissionsKernelTestB
     return $form_state;
   }
 
-  public function testBuildFormIncludesTheEmbeddedSettingsList(): void {
-    $form_state = new FormState();
-    $form = $this->getFormObject()->buildForm([], $form_state);
+  public function testBuildFormIncludesTheReviewerControlsAndSettingsList(): void {
+    $form = $this->getFormObject()->buildForm([], new FormState());
 
     $this->assertArrayHasKey('notifications', $form);
-    $this->assertArrayHasKey('notify_uids', $form['notifications']);
+    $this->assertArrayHasKey('reviewers', $form['notifications']);
+    $this->assertArrayHasKey('add_reviewer', $form['notifications']);
     $this->assertArrayHasKey('list', $form);
     $this->assertNotEmpty($form['list']);
   }
 
-  public function testCurrentReviewersListShowsConfiguredUsers(): void {
+  public function testReviewerTableRowsAConfiguredUser(): void {
     $alice = User::create(['name' => 'alice', 'status' => 1]);
     $alice->save();
-    \Drupal::configFactory()->getEditable('mukurtu_submissions.settings')
-      ->set('notify_uids', [(int) $alice->id()])
-      ->save();
+    $this->seedNotifyUids([$alice->id()]);
 
     $form = $this->getFormObject()->buildForm([], new FormState());
+    $row = $form['notifications']['reviewers'][(int) $alice->id()];
 
-    $this->assertArrayHasKey('current_reviewers', $form['notifications']);
-    $this->assertSame('item_list', $form['notifications']['current_reviewers'][0]['#theme']);
-    $this->assertContains('alice', $form['notifications']['current_reviewers'][0]['#items']);
+    $this->assertSame('alice', $row['name']['#plain_text']);
+    $this->assertSame('checkbox', $row['remove']['#type']);
   }
 
-  public function testCurrentReviewersListEmptyState(): void {
+  public function testReviewerTableEmptyState(): void {
     $form = $this->getFormObject()->buildForm([], new FormState());
 
-    $this->assertArrayHasKey('current_reviewers', $form['notifications']);
     $this->assertSame(
       'No additional reviewers have been added yet.',
-      (string) $form['notifications']['current_reviewers'][0]['#markup']
+      (string) $form['notifications']['reviewers']['#empty']
     );
   }
 
-  public function testSubmittingSavesNotifyUids(): void {
+  public function testAddingAReviewerSavesTheUidAndGrantsTheRole(): void {
+    $alice = User::create(['name' => 'alice', 'status' => 1]);
+    $alice->save();
+
+    $this->submitReviewers(add: (int) $alice->id());
+
+    $this->assertSame([(int) $alice->id()], \Drupal::config('mukurtu_submissions.settings')->get('notify_uids'));
+    $this->assertTrue(User::load($alice->id())->hasRole(SubmissionSettingsCollectionForm::REVIEWER_ROLE));
+  }
+
+  public function testAddingASecondReviewerKeepsTheFirst(): void {
     $alice = User::create(['name' => 'alice', 'status' => 1]);
     $alice->save();
     $bob = User::create(['name' => 'bob', 'status' => 1]);
     $bob->save();
 
-    $this->submitNotifyUids([(int) $alice->id(), (int) $bob->id()]);
+    $this->submitReviewers(add: (int) $alice->id());
+    $this->submitReviewers(add: (int) $bob->id());
 
-    $notify_uids = \Drupal::config('mukurtu_submissions.settings')->get('notify_uids');
-    $this->assertEqualsCanonicalizing([(int) $alice->id(), (int) $bob->id()], $notify_uids);
+    $this->assertEqualsCanonicalizing(
+      [(int) $alice->id(), (int) $bob->id()],
+      \Drupal::config('mukurtu_submissions.settings')->get('notify_uids')
+    );
   }
 
-  public function testSavedUidsAreMergedByGetReviewerUids(): void {
+  public function testAddedUidIsMergedByGetReviewerUids(): void {
     $alice = User::create(['name' => 'alice', 'status' => 1]);
     $alice->save();
 
-    $this->submitNotifyUids([(int) $alice->id()]);
+    $this->submitReviewers(add: (int) $alice->id());
 
-    $reviewer_uids = mukurtu_submissions_get_reviewer_uids();
-    $this->assertContains((int) $alice->id(), $reviewer_uids);
+    $this->assertContains((int) $alice->id(), mukurtu_submissions_get_reviewer_uids());
   }
 
-  public function testEmptySubmissionClearsNotifyUids(): void {
-    \Drupal::configFactory()->getEditable('mukurtu_submissions.settings')
-      ->set('notify_uids', [999])
-      ->save();
+  public function testRemovingAReviewerRevokesOnlyTheReviewerRole(): void {
+    $alice = User::create(['name' => 'alice', 'status' => 1]);
+    $alice->addRole(SubmissionSettingsCollectionForm::REVIEWER_ROLE);
+    $alice->addRole('other_role_marker');
+    $alice->save();
+    $this->seedNotifyUids([$alice->id()]);
 
-    $this->submitNotifyUids([]);
+    $this->submitReviewers(remove: [(int) $alice->id()]);
 
-    $notify_uids = \Drupal::config('mukurtu_submissions.settings')->get('notify_uids');
-    $this->assertSame([], $notify_uids);
+    $alice = User::load($alice->id());
+    $this->assertSame([], \Drupal::config('mukurtu_submissions.settings')->get('notify_uids'));
+    $this->assertFalse($alice->hasRole(SubmissionSettingsCollectionForm::REVIEWER_ROLE));
+    $this->assertTrue($alice->hasRole('other_role_marker'));
+  }
+
+  public function testAddAndRemoveInOneSubmit(): void {
+    $alice = User::create(['name' => 'alice', 'status' => 1]);
+    $alice->save();
+    $bob = User::create(['name' => 'bob', 'status' => 1]);
+    $bob->save();
+    $this->seedNotifyUids([$alice->id()]);
+
+    $this->submitReviewers(add: (int) $bob->id(), remove: [(int) $alice->id()]);
+
+    $this->assertSame([(int) $bob->id()], \Drupal::config('mukurtu_submissions.settings')->get('notify_uids'));
+    $this->assertFalse(User::load($alice->id())->hasRole(SubmissionSettingsCollectionForm::REVIEWER_ROLE));
+    $this->assertTrue(User::load($bob->id())->hasRole(SubmissionSettingsCollectionForm::REVIEWER_ROLE));
+  }
+
+  public function testAddingAnAlreadyListedReviewerIsANoOp(): void {
+    $alice = User::create(['name' => 'alice', 'status' => 1]);
+    $alice->save();
+
+    $this->submitReviewers(add: (int) $alice->id());
+    $this->submitReviewers(add: (int) $alice->id());
+
+    $this->assertSame([(int) $alice->id()], \Drupal::config('mukurtu_submissions.settings')->get('notify_uids'));
+    $this->assertCount(1, array_filter(
+      User::load($alice->id())->getRoles(),
+      fn ($r) => $r === SubmissionSettingsCollectionForm::REVIEWER_ROLE
+    ));
   }
 
   public function testValidNotifyEmailsAreSaved(): void {
@@ -173,44 +232,6 @@ class SubmissionSettingsCollectionFormTest extends MukurtuSubmissionsKernelTestB
     $this->assertSame([], \Drupal::config('mukurtu_submissions.settings')->get('notify_emails'));
   }
 
-  public function testAddingNotifyUidGrantsReviewerRole(): void {
-    $alice = User::create(['name' => 'alice', 'status' => 1]);
-    $alice->save();
-
-    $this->submitNotifyUids([(int) $alice->id()]);
-
-    $alice = User::load($alice->id());
-    $this->assertTrue($alice->hasRole(SubmissionSettingsCollectionForm::REVIEWER_ROLE));
-  }
-
-  public function testRemovingNotifyUidRevokesOnlyTheReviewerRole(): void {
-    $alice = User::create(['name' => 'alice', 'status' => 1]);
-    $alice->addRole(SubmissionSettingsCollectionForm::REVIEWER_ROLE);
-    $alice->addRole('other_role_marker');
-    $alice->save();
-
-    \Drupal::configFactory()->getEditable('mukurtu_submissions.settings')
-      ->set('notify_uids', [(int) $alice->id()])
-      ->save();
-
-    $this->submitNotifyUids([]);
-
-    $alice = User::load($alice->id());
-    $this->assertFalse($alice->hasRole(SubmissionSettingsCollectionForm::REVIEWER_ROLE));
-    $this->assertTrue($alice->hasRole('other_role_marker'));
-  }
-
-  public function testResubmittingSameListDoesNotDuplicateRoleOrError(): void {
-    $alice = User::create(['name' => 'alice', 'status' => 1]);
-    $alice->save();
-
-    $this->submitNotifyUids([(int) $alice->id()]);
-    $this->submitNotifyUids([(int) $alice->id()]);
-
-    $alice = User::load($alice->id());
-    $this->assertCount(1, array_filter($alice->getRoles(), fn ($r) => $r === SubmissionSettingsCollectionForm::REVIEWER_ROLE));
-  }
-
   /**
    * ConfigFormBase::submitForm() always adds its own generic "configuration
    * saved" status message, so this checks for the specific reviewer-grant
@@ -225,16 +246,16 @@ class SubmissionSettingsCollectionFormTest extends MukurtuSubmissionsKernelTestB
     return FALSE;
   }
 
-  public function testStatusMessageShownOnlyWhenUidsAdded(): void {
+  public function testStatusMessageShownOnlyWhenAReviewerIsAdded(): void {
     $alice = User::create(['name' => 'alice', 'status' => 1]);
     $alice->save();
 
-    $this->submitNotifyUids([(int) $alice->id()]);
+    $this->submitReviewers(add: (int) $alice->id());
     $this->assertTrue($this->hasReviewerGrantMessage());
 
     \Drupal::messenger()->deleteAll();
 
-    $this->submitNotifyUids([(int) $alice->id()]);
+    $this->submitReviewers();
     $this->assertFalse($this->hasReviewerGrantMessage());
   }
 

@@ -77,42 +77,37 @@ class SubmissionSettingsCollectionForm extends ConfigFormBase {
       '#title' => $this->t('Notifications'),
     ];
 
-    // Read-only summary of who currently holds the Submission Reviewer role,
-    // so the pre-filled autocomplete below reads as "add another" rather than
-    // as a field that failed to clear after saving. notify_uids is the same
-    // source syncNotifyReviewerRoles() keeps the role in step with.
+    // Current reviewers: a table with a per-row "remove" checkbox, plus a
+    // single-user autocomplete to add one. Both the removals and the
+    // addition are applied together when the form is saved.
+    // notify_uids is the same source syncNotifyReviewerRoles() keeps the
+    // Submission Reviewer role in step with.
     $reviewers = $this->entityTypeManager->getStorage('user')
       ->loadMultiple($config->get('notify_uids') ?: []);
-    $names = [];
-    foreach ($reviewers as $reviewer) {
-      $names[] = $this->entityRepository->getTranslationFromContext($reviewer)->getDisplayName();
-    }
-    $form['notifications']['current_reviewers'] = [
-      '#type' => 'item',
-      '#title' => $this->t('Current Submission Reviewers'),
-      // #type item renders a <label for> pointing at an id no control owns,
-      // so name the block explicitly for assistive tech. The aria-label
-      // reuses the visible #title string verbatim.
-      '#wrapper_attributes' => [
-        'role' => 'group',
-        'aria-label' => $this->t('Current Submission Reviewers'),
-      ],
-      $names ? [
-        '#theme' => 'item_list',
-        '#items' => $names,
-      ] : [
-        '#markup' => $this->t('No additional reviewers have been added yet.'),
-      ],
+    $form['notifications']['reviewers'] = [
+      '#type' => 'table',
+      '#caption' => $this->t('Submission reviewers'),
+      '#header' => [$this->t('Name'), $this->t('Remove')],
+      '#empty' => $this->t('No additional reviewers have been added yet.'),
     ];
+    foreach ($reviewers as $uid => $reviewer) {
+      $name = $this->entityRepository->getTranslationFromContext($reviewer)->getDisplayName();
+      $form['notifications']['reviewers'][$uid]['name'] = ['#plain_text' => $name];
+      $form['notifications']['reviewers'][$uid]['remove'] = [
+        '#type' => 'checkbox',
+        // Named per row so a screen reader reading the column of checkboxes
+        // out of context can still tell them apart.
+        '#title' => $this->t('Remove @name', ['@name' => $name]),
+        '#title_display' => 'invisible',
+      ];
+    }
 
-    $form['notifications']['notify_uids'] = [
+    $form['notifications']['add_reviewer'] = [
       '#type' => 'entity_autocomplete',
       '#target_type' => 'user',
       '#selection_handler' => 'mukurtu_submissions_notify_reviewer',
-      '#tags' => TRUE,
-      '#title' => $this->t('Additional reviewers to notify'),
-      '#description' => $this->t('These users will be granted the Submission Reviewer role, and will be notified in addition to Administrators and Mukurtu Managers, whenever a visitor submits new content for review. To publish a submission after assigning it to protocols, a reviewer also needs to be a steward of those protocols.'),
-      '#default_value' => $reviewers,
+      '#title' => $this->t('Add a reviewer'),
+      '#description' => $this->t('They are granted the Submission Reviewer role and notified whenever a visitor submits content for review, alongside Administrators and Mukurtu Managers. To publish a submission after assigning it to protocols, a reviewer also needs to be a steward of those protocols. Changes apply when you save.'),
     ];
     $form['notifications']['notify_emails'] = [
       '#type' => 'textarea',
@@ -160,10 +155,24 @@ class SubmissionSettingsCollectionForm extends ConfigFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state): void {
     $config = $this->config('mukurtu_submissions.settings');
     $old_uids = array_map('intval', $config->get('notify_uids') ?: []);
-    $new_uids = array_map('intval', array_column($form_state->getValue('notify_uids') ?: [], 'target_id'));
+
+    // Drop rows whose "remove" box is checked, then append the one picked in
+    // the add field (if any, and not already present).
+    $removed = [];
+    foreach ((array) $form_state->getValue('reviewers') as $uid => $row) {
+      if (!empty($row['remove'])) {
+        $removed[] = (int) $uid;
+      }
+    }
+    $new_uids = array_values(array_diff($old_uids, $removed));
+
+    $added = $form_state->getValue('add_reviewer');
+    if ($added !== NULL && $added !== '' && !in_array((int) $added, $new_uids, TRUE)) {
+      $new_uids[] = (int) $added;
+    }
 
     $config
-      ->set('notify_uids', array_values($new_uids))
+      ->set('notify_uids', $new_uids)
       ->set('notify_emails', $this->extractNotifyEmails($form_state))
       ->save();
 
