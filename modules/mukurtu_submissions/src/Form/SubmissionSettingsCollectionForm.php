@@ -7,6 +7,7 @@ namespace Drupal\mukurtu_submissions\Form;
 use Drupal\Component\Utility\EmailValidatorInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Config\TypedConfigManagerInterface;
+use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -33,6 +34,7 @@ class SubmissionSettingsCollectionForm extends ConfigFormBase {
     TypedConfigManagerInterface $typed_config_manager,
     protected EntityTypeManagerInterface $entityTypeManager,
     protected EmailValidatorInterface $emailValidator,
+    protected EntityRepositoryInterface $entityRepository,
   ) {
     parent::__construct($config_factory, $typed_config_manager);
   }
@@ -46,6 +48,7 @@ class SubmissionSettingsCollectionForm extends ConfigFormBase {
       $container->get('config.typed'),
       $container->get('entity_type.manager'),
       $container->get('email.validator'),
+      $container->get('entity.repository'),
     );
   }
 
@@ -74,6 +77,28 @@ class SubmissionSettingsCollectionForm extends ConfigFormBase {
       '#type' => 'fieldset',
       '#title' => $this->t('Notifications'),
     ];
+
+    // Read-only summary of who currently holds the Submission Reviewer role,
+    // so the pre-filled autocomplete below reads as "add another" rather than
+    // as a field that failed to clear after saving. notify_uids is the same
+    // source syncNotifyReviewerRoles() keeps the role in step with.
+    $reviewers = $this->entityTypeManager->getStorage('user')
+      ->loadMultiple($config->get('notify_uids') ?: []);
+    $names = [];
+    foreach ($reviewers as $reviewer) {
+      $names[] = $this->entityRepository->getTranslationFromContext($reviewer)->getDisplayName();
+    }
+    $form['notifications']['current_reviewers'] = [
+      '#type' => 'item',
+      '#title' => $this->t('Current Submission Reviewers'),
+      $names ? [
+        '#theme' => 'item_list',
+        '#items' => $names,
+      ] : [
+        '#markup' => $this->t('No additional reviewers have been added yet.'),
+      ],
+    ];
+
     $form['notifications']['notify_uids'] = [
       '#type' => 'entity_autocomplete',
       '#target_type' => 'user',

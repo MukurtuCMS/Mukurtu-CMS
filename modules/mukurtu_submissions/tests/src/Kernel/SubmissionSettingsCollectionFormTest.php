@@ -71,6 +71,30 @@ class SubmissionSettingsCollectionFormTest extends MukurtuSubmissionsKernelTestB
     $this->assertNotEmpty($form['list']);
   }
 
+  public function testCurrentReviewersListShowsConfiguredUsers(): void {
+    $alice = User::create(['name' => 'alice', 'status' => 1]);
+    $alice->save();
+    \Drupal::configFactory()->getEditable('mukurtu_submissions.settings')
+      ->set('notify_uids', [(int) $alice->id()])
+      ->save();
+
+    $form = $this->getFormObject()->buildForm([], new FormState());
+
+    $this->assertArrayHasKey('current_reviewers', $form['notifications']);
+    $this->assertSame('item_list', $form['notifications']['current_reviewers'][0]['#theme']);
+    $this->assertContains('alice', $form['notifications']['current_reviewers'][0]['#items']);
+  }
+
+  public function testCurrentReviewersListEmptyState(): void {
+    $form = $this->getFormObject()->buildForm([], new FormState());
+
+    $this->assertArrayHasKey('current_reviewers', $form['notifications']);
+    $this->assertSame(
+      'No additional reviewers have been added yet.',
+      (string) $form['notifications']['current_reviewers'][0]['#markup']
+    );
+  }
+
   public function testSubmittingSavesNotifyUids(): void {
     $alice = User::create(['name' => 'alice', 'status' => 1]);
     $alice->save();

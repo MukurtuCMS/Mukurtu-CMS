@@ -15,6 +15,7 @@ use Drupal\message_subscribe\Subscribers\DeliveryCandidate;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
 use Drupal\mukurtu_submissions\Entity\SubmissionInterface;
 use Drupal\mukurtu_submissions\Entity\SubmissionSettingsInterface;
+use Drupal\mukurtu_submissions\Form\SubmissionSettingsCollectionForm;
 use Drupal\node\NodeInterface;
 use Drupal\path_alias\Entity\PathAlias;
 use Drupal\views\Plugin\views\query\QueryPluginBase;
@@ -275,6 +276,34 @@ function mukurtu_submissions_node_update(NodeInterface $node) {
   if ($submission->getReviewStatus() !== $new_status) {
     $submission->setReviewStatus($new_status)->save();
   }
+}
+
+/**
+ * Removes the Submission Reviewer role option from a user role checkboxes
+ * element.
+ *
+ * The role is managed solely from the Submission Forms settings page
+ * (SubmissionSettingsCollectionForm keeps it in sync with notify_uids), so
+ * it should not be hand-assignable on the user add/edit forms.
+ */
+function _mukurtu_submissions_hide_reviewer_role(array &$form): void {
+  if (isset($form['account']['roles']['#options'][SubmissionSettingsCollectionForm::REVIEWER_ROLE])) {
+    unset($form['account']['roles']['#options'][SubmissionSettingsCollectionForm::REVIEWER_ROLE]);
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for user_form.
+ */
+function mukurtu_submissions_form_user_form_alter(array &$form, FormStateInterface $form_state) {
+  _mukurtu_submissions_hide_reviewer_role($form);
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for user_register_form.
+ */
+function mukurtu_submissions_form_user_register_form_alter(array &$form, FormStateInterface $form_state) {
+  _mukurtu_submissions_hide_reviewer_role($form);
 }
 
 /**
