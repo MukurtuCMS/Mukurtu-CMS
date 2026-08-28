@@ -22,7 +22,7 @@ class CollectionViewsLanguageFallbackTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['system', 'views', 'mukurtu_collection', 'geofield', 'leaflet', 'leaflet_views', 'mukurtu_core', 'node', 'options', 'text', 'user'];
+  protected static $modules = ['system', 'views', 'mukurtu_collection', 'geofield', 'leaflet', 'leaflet_views', 'mukurtu_core', 'node', 'media', 'file', 'image', 'options', 'text', 'user'];
 
   /**
    * {@inheritdoc}
