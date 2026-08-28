@@ -1,0 +1,5 @@
+# Schema for the views plugins of the Mukurtu Workflows module.
+
+views.access.review_queue_access:
+  type: mapping
+  label: 'Review queue access'
