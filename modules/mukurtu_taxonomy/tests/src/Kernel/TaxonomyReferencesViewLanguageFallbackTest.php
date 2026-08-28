@@ -24,7 +24,7 @@ class TaxonomyReferencesViewLanguageFallbackTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['system', 'views'];
+  protected static $modules = ['system', 'views', 'search_api'];
 
   /**
    * {@inheritdoc}
