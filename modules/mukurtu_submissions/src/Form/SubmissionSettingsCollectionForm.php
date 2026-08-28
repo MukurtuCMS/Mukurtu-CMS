@@ -11,7 +11,6 @@ use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\user\Entity\User;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -91,6 +90,13 @@ class SubmissionSettingsCollectionForm extends ConfigFormBase {
     $form['notifications']['current_reviewers'] = [
       '#type' => 'item',
       '#title' => $this->t('Current Submission Reviewers'),
+      // #type item renders a <label for> pointing at an id no control owns,
+      // so name the block explicitly for assistive tech. The aria-label
+      // reuses the visible #title string verbatim.
+      '#wrapper_attributes' => [
+        'role' => 'group',
+        'aria-label' => $this->t('Current Submission Reviewers'),
+      ],
       $names ? [
         '#theme' => 'item_list',
         '#items' => $names,
@@ -105,8 +111,8 @@ class SubmissionSettingsCollectionForm extends ConfigFormBase {
       '#selection_handler' => 'mukurtu_submissions_notify_reviewer',
       '#tags' => TRUE,
       '#title' => $this->t('Additional reviewers to notify'),
-      '#description' => $this->t('These users will be granted the Submission Reviewer role, and will be notified in addition to Administrators and Mukurtu Managers, whenever a visitor submits new content for review.'),
-      '#default_value' => User::loadMultiple($config->get('notify_uids') ?: []),
+      '#description' => $this->t('These users will be granted the Submission Reviewer role, and will be notified in addition to Administrators and Mukurtu Managers, whenever a visitor submits new content for review. To publish a submission after assigning it to protocols, a reviewer also needs to be a steward of those protocols.'),
+      '#default_value' => $reviewers,
     ];
     $form['notifications']['notify_emails'] = [
       '#type' => 'textarea',
