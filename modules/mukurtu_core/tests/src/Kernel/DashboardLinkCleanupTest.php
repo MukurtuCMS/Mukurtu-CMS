@@ -13,6 +13,7 @@ use Symfony\Component\Yaml\Yaml;
  * - mukurtu_core_update_40107() orders Security before Site information.
  * - The Configure Community/Protocol Permissions links are gone.
  * - The Visitors "Analytics" / "Visitor settings" links are present.
+ * - The Multilingual section no longer has a duplicate "Manage site languages".
  *
  * @see mukurtu_core_update_40107()
  * @see mukurtu_protocol_update_40044()
@@ -169,6 +170,21 @@ class DashboardLinkCleanupTest extends KernelTestBase {
       $this->assertSame('dashboard-site-settings', $links[$id]['menu_name']);
       $this->assertSame('mukurtu_dashboard', $links[$id]['parent']);
     }
+  }
+
+  /**
+   * The Multilingual section has exactly one "Manage site languages" link, and
+   * it points at the languages overview page (#1787 part 3).
+   */
+  public function testMultilingualSectionHasNoDuplicateLanguagesLink(): void {
+    $links = $this->menuLinks('mukurtu_multilingual');
+
+    $languages_links = array_filter($links, static fn(array $link): bool => ($link['title'] ?? '') === 'Manage site languages');
+    $this->assertCount(1, $languages_links);
+
+    $link = reset($languages_links);
+    $this->assertSame('internal:/admin/config/regional/language', $link['url']);
+    $this->assertArrayNotHasKey('entity.configurable_language.edit_form', $links);
   }
 
 }
