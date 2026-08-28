@@ -54,26 +54,21 @@ class ViewLanguageFallbackCoverageTest extends UnitTestCase {
     'mukurtu_migrate_results' => 'lists watchdog log entries, not translatable content',
     'og_members_overview' => 'og_membership has no routable display and is not translatable content',
 
-    // Authoring-tool entity_browser pickers (modal widgets used while
-    // editing, not a visitor-facing browse/search surface).
-    'mukurtu_content_browser' => 'entity_browser picker widget used in editing forms, not a public browse page',
-    'multipage_item_browser' => 'entity_browser picker widget used in editing forms, not a public browse page',
-    'mukurtu_community_select' => 'entity_browser picker widget used in editing forms, not a public browse page',
-
     // Genuinely visitor-facing, not yet migrated to the fallback pattern.
     // Tracked under #1159 / #1188 (Phase 4 of the #1260 multilingual
-    // roadmap). Remove each line as its view is migrated.
-    'mukurtu_categories' => 'visitor-facing, not yet migrated - #1159/#1188',
+    // roadmap). Remove each line as its view is migrated. (The 11
+    // plain-entity views - mukurtu_categories, mukurtu_collection_items,
+    // mukurtu_recent_content, browse_by_community, taxonomy_term, the 3
+    // entity_browser pickers, and the 3 audience-resolved views - were
+    // migrated in #2053; the remaining 14 below are Search API-backed and
+    // depend on the language_with_fallback index field from #2049.)
     'mukurtu_browse' => 'visitor-facing, not yet migrated - #1159/#1188',
     'mukurtu_browse_by_map' => 'visitor-facing, not yet migrated - #1159/#1188',
     'mukurtu_browse_collections' => 'visitor-facing, not yet migrated - #1159/#1188',
     'mukurtu_browse_map' => 'visitor-facing, not yet migrated - #1159/#1188',
     'mukurtu_digital_heritage_browse' => 'visitor-facing, not yet migrated - #1159/#1188',
     'mukurtu_dictionary' => 'visitor-facing, not yet migrated - #1159/#1188',
-    'mukurtu_collection_items' => 'visitor-facing, not yet migrated - #1159/#1188',
-    'mukurtu_recent_content' => 'visitor-facing, not yet migrated - #1159/#1188',
     'mukurtu_taxonomy_references' => 'visitor-facing, not yet migrated - #1159/#1188',
-    'taxonomy_term' => 'visitor-facing, not yet migrated - #1159/#1188',
     // The mukurtu_solr module is not installed by default (see mukurtu.install)
     // - these are a dormant alternate-backend copy of the views above.
     'dictionary_browse_solr_new_index' => 'visitor-facing, not yet migrated - #1159/#1188 (mukurtu_solr, not installed by default)',
@@ -83,17 +78,6 @@ class ViewLanguageFallbackCoverageTest extends UnitTestCase {
     'mukurtu_dictionary_solr' => 'visitor-facing, not yet migrated - #1159/#1188 (mukurtu_solr, not installed by default)',
     'mukurtu_digital_heritage_browse_solr' => 'visitor-facing, not yet migrated - #1159/#1188 (mukurtu_solr, not installed by default)',
     'mukurtu_taxonomy_references_solr' => 'visitor-facing, not yet migrated - #1159/#1188 (mukurtu_solr, not installed by default)',
-
-    // Active violation, not just "not yet migrated": its langcode filter
-    // excludes untranslated content instead of falling back to it, which
-    // directly contradicts the "never silently disappear" policy.
-    'browse_by_community' => 'has a langcode filter that HIDES untranslated communities instead of falling back - violates the policy, not just unmigrated - #1159/#1188',
-
-    // Audience resolved by human review (2026-08-26) - all three ruled in
-    // scope for the fallback policy, not yet migrated.
-    'my_personal_collections' => 'visitor-facing (a user\'s own saved items still deserve fallback, not just shared/public content), not yet migrated - #1159/#1188',
-    'mukurtu_message_log' => 'visitor-facing - only the /notifications display is in scope (admin/notifications is legitimately admin-only within the same view); not yet migrated - #1159/#1188',
-    'mukurtu_workflow_overview' => 'staff review-queue at /review-queue - reviewers are ruled in scope (may work in a non-default language too), not just visitors; not yet migrated - #1159/#1188',
   ];
 
   /**
