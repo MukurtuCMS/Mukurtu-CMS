@@ -22,6 +22,7 @@ class ExportListItemLanguageTest extends ProtocolAwareEntityTestBase {
    */
   protected static $modules = [
     'mukurtu_export',
+    'mukurtu_multipage_items',
   ];
 
   protected ExportList $list;

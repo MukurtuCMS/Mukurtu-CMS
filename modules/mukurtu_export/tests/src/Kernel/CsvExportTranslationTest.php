@@ -45,10 +45,10 @@ class CsvExportTranslationTest extends CsvExportFieldTestBase {
     ConfigurableLanguage::createFromLangcode('en')->save();
     ConfigurableLanguage::createFromLangcode('es')->save();
     \Drupal::service('content_translation.manager')->setEnabled('node', 'protocol_aware_content', TRUE);
-    \Drupal::service('content_translation.manager')->setEnabled('taxonomy_term', 'keywords', TRUE);
 
     $vocabulary = Vocabulary::create(['vid' => 'keywords', 'name' => 'Keywords']);
     $vocabulary->save();
+    \Drupal::service('content_translation.manager')->setEnabled('taxonomy_term', 'keywords', TRUE);
 
     FieldStorageConfig::create([
       'field_name' => 'field_keywords',
