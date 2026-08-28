@@ -8,6 +8,8 @@
 use Drupal\Core\Field\Entity\BaseFieldOverride;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\language\Entity\ContentLanguageSettings;
+use Drupal\search_api\Entity\Index;
+use Drupal\search_api\Item\Field as SearchApiField;
 use Drupal\user\Entity\Role;
 
 /**
@@ -280,5 +282,52 @@ function mukurtu_multilingual_update_40008(): void {
         $config_factory->getEditable($config_name)->setData($data)->save();
       }
     }
+  }
+}
+
+/**
+ * Wires the already-enabled LanguageWithFallback Search API processor to an
+ * indexed field on all 6 profile-owned indexes, so views/facets can filter
+ * on it to fall back to default-language content instead of hiding
+ * untranslated items (docs/content-language-policy.md).
+ *
+ * The `language_with_fallback` processor is already enabled (locked,
+ * hidden) on every index shipped by this profile - it just isn't wired to
+ * a field yet, so nothing can filter/facet on it. This only adds the
+ * field; it doesn't change any view's filters, so it has no visible
+ * behavior change on its own (that's Phase 4's per-view follow-up work).
+ *
+ * Triggers a full reindex on each affected index, since a newly-added
+ * field has no value for already-indexed items until they're re-crawled.
+ * On a large Solr install this can take a while - flag this in release
+ * notes, not just as a silent update hook.
+ */
+function mukurtu_multilingual_update_40009(): void {
+  $index_ids = [
+    'mukurtu_default_content_index',
+    'mukurtu_collection_index',
+    'mukurtu_dictionary_index',
+    'mukurtu_browse_auto_index',
+    'mukurtu_default_solr_index',
+    'mukurtu_dictionary_solr_index',
+  ];
+
+  foreach ($index_ids as $index_id) {
+    $index = Index::load($index_id);
+    if (!$index) {
+      continue;
+    }
+
+    if ($index->getField('language_with_fallback')) {
+      continue;
+    }
+
+    $field = new SearchApiField($index, 'language_with_fallback');
+    $field->setType('string');
+    $field->setPropertyPath('language_with_fallback');
+    $field->setLabel(t('Language (with fallback)'));
+    $index->addField($field);
+    $index->save();
+    $index->reindex();
   }
 }

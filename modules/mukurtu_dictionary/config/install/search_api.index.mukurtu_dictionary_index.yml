@@ -15,6 +15,10 @@ name: 'Mukurtu Dictionary Index'
 description: 'Index for the Mukurtu dictionary.'
 read_only: false
 field_settings:
+  language_with_fallback:
+    label: 'Language (with fallback)'
+    property_path: language_with_fallback
+    type: string
   changed:
     label: Changed
     datasource_id: 'entity:node'

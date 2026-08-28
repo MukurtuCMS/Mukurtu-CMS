@@ -296,6 +296,14 @@ class ImportFileSummaryForm extends ImportBaseForm {
         // A new import config has been selected.
         $new_config = $this->entityTypeManager->getStorage('mukurtu_import_strategy')->load($new_config_id);
         if ($new_config instanceof MukurtuImportStrategyInterface) {
+          // A preset's mapping is keyed by canonical source names (e.g.
+          // 'Username'), which may not exactly match this file's actual
+          // headers (e.g. 'Name', Drupal's real field label for that
+          // target). Resolve it against the real headers now, the same way
+          // "Customize Settings" would, so both the "mapped fields" count
+          // below and the migration built at import time see a mapping
+          // that actually matches this file.
+          $this->resolveMappingForFile($new_config, $fid);
           $this->setImportConfig($fid, $new_config);
         }
       }
@@ -312,6 +320,48 @@ class ImportFileSummaryForm extends ImportBaseForm {
     $response->addCommand(new ReplaceCommand("#mapping-summary-{$fid}", "<div id=\"mapping-summary-{$fid}\"><div>{$type_message}</div><div>{$msg}</div></div>"));
 
     return $response;
+  }
+
+  /**
+   * Resolve a config's mapping against a file's actual CSV headers.
+   *
+   * A preset's stored mapping pairs canonical source names (e.g.
+   * 'Username') with targets, but an uploaded file's real header text may
+   * differ from those canonical names while still being an unambiguous
+   * match (e.g. 'Name', which is Drupal's actual field label for that
+   * target). This rebuilds the mapping to have one entry per real header
+   * in the file, resolving each via the config's existing mapping first
+   * and falling back to the same label/name-based auto-matching
+   * "Customize Settings" uses, so a preset works correctly on its own
+   * without requiring a manual customize-and-save round trip.
+   *
+   * @param \Drupal\mukurtu_import\MukurtuImportStrategyInterface $config
+   *   The import config to update in place.
+   * @param int $fid
+   *   The file id.
+   */
+  protected function resolveMappingForFile(MukurtuImportStrategyInterface $config, $fid): void {
+    $file = $this->entityTypeManager->getStorage('file')->load($fid);
+    if (!$file instanceof FileInterface) {
+      return;
+    }
+    $headers = $this->getCSVHeaders($file);
+    if (empty($headers)) {
+      return;
+    }
+
+    $entity_type_id = $config->getTargetEntityTypeId();
+    $bundle = $config->getTargetBundle();
+    $existing_mapping = $config->getMapping();
+
+    $mapping = [];
+    foreach ($headers as $header) {
+      $mapping[] = [
+        'source' => $header,
+        'target' => $config->getMappedTarget($header) ?? $this->getAutoMappedTarget($header, $entity_type_id, $bundle, $existing_mapping),
+      ];
+    }
+    $config->setMapping($mapping);
   }
 
   /**

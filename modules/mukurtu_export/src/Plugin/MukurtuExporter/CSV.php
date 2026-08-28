@@ -2,24 +2,25 @@
 
 namespace Drupal\mukurtu_export\Plugin\MukurtuExporter;
 
+use Drupal\mukurtu_export\Attribute\MukurtuExporter;
 use Drupal\mukurtu_export\Plugin\ExporterBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\mukurtu_export\Event\EntityFieldExportEvent;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\Core\Link;
 use Exception;
 
 /**
  * Plugin implementation of MukurtuExporter for CSV.
- *
- * @MukurtuExporter(
- *   id = "csv",
- *   label = @Translation("CSV"),
- *   description = @Translation("Export to CSV."),
- * )
  */
+#[MukurtuExporter(
+  id: 'csv',
+  label: new TranslatableMarkup('CSV'),
+  description: new TranslatableMarkup('Export to CSV.'),
+)]
 class CSV extends ExporterBase {
   /**
    * {@inheritdoc}
