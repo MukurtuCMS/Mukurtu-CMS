@@ -1,0 +1,10 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - mukurtu_export
+id: mukurtu_export_add_to_list_user_action
+label: 'Add to export list'
+type: user
+plugin: mukurtu_export_add_to_list_user_action
+configuration: {  }

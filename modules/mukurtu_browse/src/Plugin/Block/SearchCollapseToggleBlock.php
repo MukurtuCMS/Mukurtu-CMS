@@ -2,22 +2,23 @@
 
 namespace Drupal\mukurtu_browse\Plugin\Block;
 
+use Drupal\Core\Block\Attribute\Block;
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * Provides toggle links for collapsing multipage items and community records.
- *
- * @Block(
- *   id = "mukurtu_search_collapse_toggle",
- *   admin_label = @Translation("Search collapse toggle"),
- *   category = @Translation("Mukurtu")
- * )
  */
+#[Block(
+  id: 'mukurtu_search_collapse_toggle',
+  admin_label: new TranslatableMarkup('Search collapse toggle'),
+  category: new TranslatableMarkup('Mukurtu'),
+)]
 class SearchCollapseToggleBlock extends BlockBase implements ContainerFactoryPluginInterface {
 
   public function __construct(

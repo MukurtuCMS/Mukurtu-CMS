@@ -4,26 +4,24 @@ namespace Drupal\mukurtu_community_records\Plugin\Field\FieldFormatter;
 
 use Drupal\Component\Utility\Html;
 use Drupal\Field\FieldConfigInterface;
+use Drupal\Core\Field\Attribute\FieldFormatter;
 use Drupal\Core\Field\FieldItemInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FormatterBase;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Plugin implementation of the 'entity_reference_community_record_formatter' formatter.
- *
- * @FieldFormatter(
- *   id = "entity_reference_community_record_formatter",
- *   label = @Translation("Mukurtu tabbed entity reference formatter"),
- *   field_types = {
- *     "entity_reference",
- *     "entity_reference_revisions"
- *   }
- * )
  */
+#[FieldFormatter(
+  id: 'entity_reference_community_record_formatter',
+  label: new TranslatableMarkup('Mukurtu tabbed entity reference formatter'),
+  field_types: ['entity_reference', 'entity_reference_revisions'],
+)]
 class EntityReferenceCommunityRecordFormatter extends FormatterBase {
   protected $entityTypeManager;
 
