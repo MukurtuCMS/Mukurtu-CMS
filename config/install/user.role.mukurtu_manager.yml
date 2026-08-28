@@ -72,6 +72,7 @@ label: 'Mukurtu Manager'
 weight: 2
 is_admin: null
 permissions:
+  - 'access media overview'
   - 'access mukurtu export'
   - 'access mukurtu import'
   - 'access site reports'

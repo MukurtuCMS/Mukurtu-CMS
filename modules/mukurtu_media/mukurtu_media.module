@@ -201,6 +201,17 @@ function mukurtu_media_preprocess_entity_add_list(&$variables) {
  */
 function mukurtu_media_form_media_external_embed_add_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   $form['actions']['submit']['#submit'][] = 'mukurtu_media_external_embed_add_redirect';
+  $form['field_thumbnail']['widget'][0]['#process'][] = 'mukurtu_media_thumbnail_alt_process';
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Re-attaches the thumbnail alt auto-fill so that replacing the thumbnail
+ * on an existing external embed also fills in its alt text.
+ */
+function mukurtu_media_form_media_external_embed_edit_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  $form['field_thumbnail']['widget'][0]['#process'][] = 'mukurtu_media_thumbnail_alt_process';
 }
 
 /**
@@ -443,6 +454,73 @@ function mukurtu_media_refresh_media_process(&$element, FormStateInterface $form
 }
 
 /**
+ * Process callback: attaches our thumbnail alt auto-fill AJAX callback.
+ *
+ * Used for bundles (external embed, remote video, SoundCloud) where the
+ * thumbnail field is itself the only file upload on the form, so there is
+ * no separate "primary media file" upload to hang mukurtu_media_refresh_media_process()
+ * off of.
+ */
+function mukurtu_media_thumbnail_alt_process(&$element, FormStateInterface $form_state, &$complete_form) {
+  if (isset($element['upload_button']['#ajax'])) {
+    $element['upload_button']['#ajax']['callback'] = 'mukurtu_media_thumbnail_upload_ajax_callback';
+  }
+
+  return $element;
+}
+
+/**
+ * Fills in the thumbnail's alt text from the media name, or failing that,
+ * the thumbnail's own filename, if alt text isn't already set.
+ *
+ * Locates the thumbnail widget generically via the request's element_parents
+ * (the same mechanism ManagedFile::processManagedFile() uses to build its own
+ * AJAX callback URL), so this works unmodified both on the standalone
+ * /admin/media/add(edit) forms and inside the media library modal, where the
+ * thumbnail field is nested under media/{delta}/fields/ instead of being at
+ * the top level of the form.
+ */
+function mukurtu_media_thumbnail_autofill_alt(array &$form, FormStateInterface $form_state, Request $request) {
+  $formParents = explode('/', $request->query->get('element_parents'));
+  $formParents = array_filter($formParents, [Element::class, 'child']);
+  $widget = &NestedArray::getValue($form, $formParents);
+
+  if (!empty($widget['alt']['#value'])) {
+    return;
+  }
+
+  // The widget's own parents end in [..., 'field_thumbnail', 'widget', 0].
+  // Its siblings (including 'name') live one level up.
+  $containerParents = array_slice($formParents, 0, -3);
+  $altValue = trim($form_state->getValue(array_merge($containerParents, ['name', 0, 'value'])) ?? '');
+
+  if (!$altValue) {
+    $fid = $widget['#value']['fids'][0] ?? NULL;
+    if ($fid) {
+      $file = \Drupal::entityTypeManager()->getStorage('file')->load($fid);
+      if ($file) {
+        $filename = $file->getFilename();
+        $extPos = strrpos($filename, '.');
+        $altValue = $extPos ? substr($filename, 0, $extPos) : $filename;
+      }
+    }
+  }
+
+  if ($altValue) {
+    $widget['alt']['#value'] = $altValue;
+  }
+}
+
+/**
+ * AJAX callback for the thumbnail upload button on bundles where the
+ * thumbnail is the only file upload on the form.
+ */
+function mukurtu_media_thumbnail_upload_ajax_callback(array &$form, FormStateInterface $form_state, Request $request) {
+  mukurtu_media_thumbnail_autofill_alt($form, $form_state, $request);
+  return ManagedFile::uploadAjaxCallback($form, $form_state, $request);
+}
+
+/**
  * Process callback for the thumbnail field to generate a thumbnail from the
  * media file.
  */
@@ -621,6 +699,7 @@ function mukurtu_media_ext_embed_thumb_disable_refocus(&$element, FormStateInter
  * the user was when they clicked the upload/remove button.
  */
 function mukurtu_media_ext_embed_thumb_ajax(array &$form, FormStateInterface $form_state, Request $request) {
+  mukurtu_media_thumbnail_autofill_alt($form, $form_state, $request);
   $response = ManagedFile::uploadAjaxCallback($form, $form_state, $request);
   // An invoke+focus command sets focusChanged=true in ajax.js, suppressing the
   // ancestor-focus walk. The selector targets the thumbnail wrapper, which is
@@ -628,6 +707,23 @@ function mukurtu_media_ext_embed_thumb_ajax(array &$form, FormStateInterface $fo
   // actually scrolls or moves focus.
   $response->addCommand(new InvokeCommand('[id*="field-thumbnail"]', 'focus'));
   return $response;
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Attaches the thumbnail alt auto-fill for remote video (oEmbed) media added
+ * via the media library modal, matching the standalone add/edit forms.
+ */
+function mukurtu_media_form_media_library_add_form_oembed_alter(&$form, FormStateInterface $form_state, $form_id) {
+  if (!isset($form['media'])) {
+    return;
+  }
+  foreach (Element::children($form['media']) as $delta) {
+    if (isset($form['media'][$delta]['fields']['field_thumbnail']['widget'][0])) {
+      $form['media'][$delta]['fields']['field_thumbnail']['widget'][0]['#process'][] = 'mukurtu_media_thumbnail_alt_process';
+    }
+  }
 }
 
 /**
@@ -645,6 +741,17 @@ function mukurtu_media_form_media_soundcloud_add_form_alter(&$form, FormStateInt
     'progress' => ['type' => 'throbber', 'message' => NULL],
   ];
   array_unshift($form['actions']['submit']['#submit'], 'mukurtu_media_soundcloud_admin_name_submit');
+  $form['field_thumbnail']['widget'][0]['#process'][] = 'mukurtu_media_thumbnail_alt_process';
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Re-attaches the thumbnail alt auto-fill so that replacing the thumbnail
+ * on an existing SoundCloud item also fills in its alt text.
+ */
+function mukurtu_media_form_media_soundcloud_edit_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  $form['field_thumbnail']['widget'][0]['#process'][] = 'mukurtu_media_thumbnail_alt_process';
 }
 
 /**
@@ -696,6 +803,17 @@ function mukurtu_media_form_media_remote_video_add_form_alter(&$form, FormStateI
     'progress' => ['type' => 'throbber', 'message' => NULL],
   ];
   array_unshift($form['actions']['submit']['#submit'], 'mukurtu_media_remote_video_admin_name_submit');
+  $form['field_thumbnail']['widget'][0]['#process'][] = 'mukurtu_media_thumbnail_alt_process';
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Re-attaches the thumbnail alt auto-fill so that replacing the thumbnail
+ * on an existing remote video also fills in its alt text.
+ */
+function mukurtu_media_form_media_remote_video_edit_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  $form['field_thumbnail']['widget'][0]['#process'][] = 'mukurtu_media_thumbnail_alt_process';
 }
 
 /**
@@ -757,7 +875,7 @@ function mukurtu_media_remote_video_admin_name_submit(array &$form, FormStateInt
  */
 function mukurtu_media_entity_base_field_info_alter(&$fields, EntityTypeInterface $entity_type) {
   if ($entity_type->id() == 'media') {
-    $fields['name']->setDescription('Most media names will auto-fill from the filename or external source. This field is not usually shown to end users. While the media name can be changed, we generally recommend using the auto-filled names so that they match your other records and systems.');
+    $fields['name']->setDescription(t('Most media names will auto-fill from the filename or external source. This field is not usually shown to end users. While the media name can be changed, we generally recommend using the auto-filled names so that they match your other records and systems.'));
   }
 }
 
@@ -871,14 +989,32 @@ function mukurtu_media_edit_dialog_ajax(array &$form, FormStateInterface $form_s
 }
 
 /**
- * Implements hook_form_FORM_ID_alter() for soundcloud_media_add_form.
+ * Implements hook_form_FORM_ID_alter() for media_library_add_form_soundcloud.
+ *
+ * SoundCloudAddForm::getFormId() returns 'media_library_add_form_soundcloud'
+ * (media_library_add_form + its own bundle suffix), not the contrib
+ * SoundcloudForm's hardcoded 'soundcloud_media_add_form' that this hook name
+ * would otherwise suggest; that literal form ID is never actually built once
+ * SoundCloudAddForm is swapped in via hook_media_source_info_alter().
  *
  * Adds a class to the URL input container so CSS can put the field and Add
- * button on the same row.
+ * button on the same row, and attaches the thumbnail alt auto-fill once the
+ * URL has been submitted and the per-item fields (including field_thumbnail)
+ * are shown for review, matching mukurtu_media_form_media_library_add_form_oembed_alter().
  */
-function mukurtu_media_form_soundcloud_media_add_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
+function mukurtu_media_form_media_library_add_form_soundcloud_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
   if (isset($form['container'])) {
     $form['container']['#attributes']['class'][] = 'media-library-url-input-row';
+  }
+
+  // Attach the thumbnail alt auto-fill once the URL(s) have been submitted
+  // and the per-item fields (including field_thumbnail) are shown for review.
+  if (isset($form['media'])) {
+    foreach (Element::children($form['media']) as $delta) {
+      if (isset($form['media'][$delta]['fields']['field_thumbnail']['widget'][0])) {
+        $form['media'][$delta]['fields']['field_thumbnail']['widget'][0]['#process'][] = 'mukurtu_media_thumbnail_alt_process';
+      }
+    }
   }
 }
 

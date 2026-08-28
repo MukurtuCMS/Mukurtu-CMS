@@ -8,15 +8,15 @@ use Drupal\Core\Url;
 use Drupal\content_moderation\ModerationInformationInterface;
 use Drupal\mukurtu_core\Service\ModerationTransitionAccessResolver;
 use Drupal\mukurtu_core\Service\ModerationTransitionAccessResolverInterface;
+use Drupal\views\Attribute\ViewsField;
 use Drupal\views\Plugin\views\field\FieldPluginBase;
 use Drupal\views\ResultRow;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Renders a per-row operations dropbutton for the content admin view.
- *
- * @ViewsField("mukurtu_node_row_actions")
  */
+#[ViewsField('mukurtu_node_row_actions')]
 class NodeRowActionsField extends FieldPluginBase {
 
   public function __construct(

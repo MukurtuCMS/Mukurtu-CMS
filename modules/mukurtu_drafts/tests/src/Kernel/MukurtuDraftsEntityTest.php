@@ -31,6 +31,7 @@ class MukurtuDraftsEntityTest extends KernelTestBase {
   protected static $modules = [
     'content_moderation',
     'drafts_entity_test',
+    'entity_test',
     'field',
     'file',
     'image',

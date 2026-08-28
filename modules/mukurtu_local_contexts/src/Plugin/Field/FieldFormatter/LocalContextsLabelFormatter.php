@@ -2,24 +2,23 @@
 
 namespace Drupal\mukurtu_local_contexts\Plugin\Field\FieldFormatter;
 
+use Drupal\Core\Field\Attribute\FieldFormatter;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FormatterBase;
 use Drupal\Component\Utility\Html;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\mukurtu_local_contexts\LocalContextsLabel;
 use Drupal\mukurtu_local_contexts\LocalContextsNotice;
 use Drupal\mukurtu_local_contexts\LocalContextsProject;
 
 /**
  * Plugin implementation of the 'Local Contexts Label and Notice' formatter.
- *
- * @FieldFormatter(
- *   id = "local_contexts_label_and_notice",
- *   label = @Translation("Local Contexts Label and Notice"),
- *   field_types = {
- *     "local_contexts_label_and_notice"
- *   }
- * )
  */
+#[FieldFormatter(
+  id: 'local_contexts_label_and_notice',
+  label: new TranslatableMarkup('Local Contexts Label and Notice'),
+  field_types: ['local_contexts_label_and_notice'],
+)]
 class LocalContextsLabelFormatter extends FormatterBase {
   /**
    * {@inheritdoc}

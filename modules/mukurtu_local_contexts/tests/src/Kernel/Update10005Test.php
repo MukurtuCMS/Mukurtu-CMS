@@ -28,6 +28,8 @@ class Update10005Test extends KernelTestBase {
    */
   protected static $modules = [
     'field',
+    'geofield',
+    'leaflet',
     'node',
     'media',
     'taxonomy',
@@ -39,6 +41,7 @@ class Update10005Test extends KernelTestBase {
     'text',
     'user',
     'og',
+    'mukurtu_core',
     'mukurtu_protocol',
     'mukurtu_local_contexts',
   ];

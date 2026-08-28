@@ -4,14 +4,14 @@ namespace Drupal\mukurtu_core\Plugin\views\filter;
 
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\views\Attribute\ViewsFilter;
 use Drupal\views\Plugin\views\filter\InOperator;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Filters media entities by media tag taxonomy term.
- *
- * @ViewsFilter("mukurtu_media_tag_filter")
  */
+#[ViewsFilter('mukurtu_media_tag_filter')]
 class MediaTagFilter extends InOperator {
 
   public function __construct(

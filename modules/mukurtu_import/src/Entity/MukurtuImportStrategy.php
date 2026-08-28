@@ -3,7 +3,9 @@
 namespace Drupal\mukurtu_import\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
+use Drupal\Core\Entity\Attribute\ConfigEntityType;
 use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\mukurtu_import\MukurtuImportFieldProcessInterface;
 use Drupal\mukurtu_import\MukurtuImportFieldProcessPluginManager;
 use Drupal\mukurtu_import\MukurtuImportStrategyInterface;
@@ -14,51 +16,50 @@ use Exception;
 
 /**
  * Defines the mukurtu_import_strategy entity type.
- *
- * @ConfigEntityType(
- *   id = "mukurtu_import_strategy",
- *   label = @Translation("Import Templates"),
- *   label_collection = @Translation("Import Templates"),
- *   label_singular = @Translation("Import Template"),
- *   label_plural = @Translation("Import Templates"),
- *   label_count = @PluralTranslation(
- *     singular = "@count Import Template",
- *     plural = "@count Import Templates",
- *   ),
- *   handlers = {
- *     "access" = "Drupal\mukurtu_import\MukurtuImportStrategyAccessControlHandler",
- *     "list_builder" = "Drupal\mukurtu_import\MukurtuImportStrategyListBuilder",
- *     "form" = {
- *       "add" = "Drupal\mukurtu_import\Form\MukurtuImportStrategyForm",
- *       "edit" = "Drupal\mukurtu_import\Form\MukurtuImportStrategyForm",
- *       "delete" = "Drupal\Core\Entity\EntityDeleteForm"
- *     }
- *   },
- *   config_prefix = "mukurtu_import_strategy",
- *   admin_permission = "administer mukurtu_import_strategy",
- *   links = {
- *     "collection" = "/admin/import-templates",
- *     "add-form" = "/admin/import-templates/add",
- *     "edit-form" = "/admin/import-templates/{mukurtu_import_strategy}",
- *     "delete-form" = "/admin/import-templates/{mukurtu_import_strategy}/delete"
- *   },
- *   entity_keys = {
- *     "id" = "id",
- *     "label" = "label",
- *     "uuid" = "uuid"
- *   },
- *   config_export = {
- *     "id",
- *     "uid",
- *     "label",
- *     "description",
- *     "target_entity_type_id",
- *     "target_bundle",
- *     "mapping",
- *     "configuration",
- *   }
- * )
  */
+#[ConfigEntityType(
+  id: 'mukurtu_import_strategy',
+  label: new TranslatableMarkup('Import Templates'),
+  label_collection: new TranslatableMarkup('Import Templates'),
+  label_singular: new TranslatableMarkup('Import Template'),
+  label_plural: new TranslatableMarkup('Import Templates'),
+  config_prefix: 'mukurtu_import_strategy',
+  entity_keys: [
+    'id' => 'id',
+    'label' => 'label',
+    'uuid' => 'uuid',
+  ],
+  handlers: [
+    'access' => 'Drupal\mukurtu_import\MukurtuImportStrategyAccessControlHandler',
+    'list_builder' => 'Drupal\mukurtu_import\MukurtuImportStrategyListBuilder',
+    'form' => [
+      'add' => 'Drupal\mukurtu_import\Form\MukurtuImportStrategyForm',
+      'edit' => 'Drupal\mukurtu_import\Form\MukurtuImportStrategyForm',
+      'delete' => 'Drupal\Core\Entity\EntityDeleteForm',
+    ],
+  ],
+  links: [
+    'collection' => '/admin/import-templates',
+    'add-form' => '/admin/import-templates/add',
+    'edit-form' => '/admin/import-templates/{mukurtu_import_strategy}',
+    'delete-form' => '/admin/import-templates/{mukurtu_import_strategy}/delete',
+  ],
+  admin_permission: 'administer mukurtu_import_strategy',
+  label_count: [
+    'singular' => '@count Import Template',
+    'plural' => '@count Import Templates',
+  ],
+  config_export: [
+    'id',
+    'uid',
+    'label',
+    'description',
+    'target_entity_type_id',
+    'target_bundle',
+    'mapping',
+    'configuration',
+  ],
+)]
 class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStrategyInterface {
 
   /**
@@ -268,6 +269,26 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
 
       $field_def = $field_defs[$target] ?? NULL;
       if (!$field_def instanceof FieldDefinitionInterface) {
+        // Community/protocol membership isn't a real field on the user
+        // entity (see ImportFormTrait::buildTargetOptions()), so these two
+        // virtual targets need their process pipeline built by hand instead
+        // of through the field-type-keyed MukurtuImportFieldProcess plugins.
+        if ($entity_type_id === 'user' && in_array($target, ['communities', 'protocols'], TRUE)) {
+          $delimiter = $this->getConfig('multivalue_delimiter') ?? ';';
+          $import_process[$target_option] = [
+            ['plugin' => 'explode', 'source' => $source, 'delimiter' => $delimiter],
+            ['plugin' => 'callback', 'callable' => 'trim'],
+            [
+              'plugin' => 'mukurtu_group_membership_lookup',
+              'entity_type' => $target === 'communities' ? 'community' : 'protocol',
+            ],
+          ];
+        }
+        elseif ($entity_type_id === 'user' && $target === 'account_status') {
+          $import_process[$target_option] = [
+            ['plugin' => 'mukurtu_account_status_lookup', 'source' => $source],
+          ];
+        }
         continue;
       }
 
@@ -319,6 +340,17 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
       if (!$fieldDef->isReadOnly() && in_array($fieldName, $targets)) {
         $writableFields[] = $fieldName;
       }
+    }
+
+    // 'status'/'field_pending' are no longer directly mappable targets for
+    // the user entity type (superseded by the virtual 'account_status'
+    // target -- see ImportFormTrait::getFieldDefinitions()), so they never
+    // appear in $fieldDefs/$targets above. ProtocolAwareUserContent still
+    // needs to actually persist them on an existing account whenever
+    // 'account_status' is mapped, so whitelist them here too.
+    if ($entity_type_id === 'user' && in_array('account_status', $targets, TRUE)) {
+      $writableFields[] = 'status';
+      $writableFields[] = 'field_pending';
     }
 
     return $writableFields;
@@ -462,6 +494,16 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
     $label_key = $this->entityTypeManager()
       ->getDefinition($entity_type_id)
       ->getKey('label');
+
+    // Unlike every other importable entity type, 'user' has no 'label'
+    // entity key in Drupal core -- User::label() computes the account name
+    // dynamically instead of declaring it. The required 'name' (username)
+    // field plays the same uniquely-identifying-row role that title/name
+    // already play for node/media/taxonomy_term/community/protocol, so
+    // treat it as the label key here.
+    if (!$label_key && $entity_type_id === 'user') {
+      $label_key = 'name';
+    }
 
     if (!$label_key) {
       return NULL;

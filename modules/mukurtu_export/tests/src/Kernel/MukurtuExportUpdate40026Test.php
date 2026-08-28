@@ -10,14 +10,14 @@ use Drupal\user\Entity\Role;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests mukurtu_export_update_40023(), which grants Mukurtu Manager the
+ * Tests mukurtu_export_update_40026(), which grants Mukurtu Manager the
  * flag/unflag export-list permissions already held by Mukurtu Roundtrip
  * Manager.
  *
- * @see mukurtu_export_update_40023()
+ * @see mukurtu_export_update_40026()
  */
 #[Group('mukurtu_export')]
-class MukurtuExportUpdate40023Test extends KernelTestBase {
+class MukurtuExportUpdate40026Test extends KernelTestBase {
 
   /**
    * {@inheritdoc}
@@ -71,7 +71,7 @@ class MukurtuExportUpdate40023Test extends KernelTestBase {
    * The update hook grants all 4 flag/unflag permissions.
    */
   public function testUpdateGrantsFlagPermissions(): void {
-    mukurtu_export_update_40023();
+    mukurtu_export_update_40026();
 
     $role = Role::load('mukurtu_manager');
     foreach (['flag export_content', 'unflag export_content', 'flag export_media', 'unflag export_media'] as $permission) {
@@ -84,7 +84,7 @@ class MukurtuExportUpdate40023Test extends KernelTestBase {
    */
   public function testUpdateIsNoOpWhenRoleMissing(): void {
     Role::load('mukurtu_manager')->delete();
-    mukurtu_export_update_40023();
+    mukurtu_export_update_40026();
     $this->assertNull(Role::load('mukurtu_manager'));
   }
 
