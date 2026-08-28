@@ -16,13 +16,7 @@ mukurtu_core.manage_content:
   parent: mukurtu_dashboard
   menu_name: dashboard-content
   route_name: view.mukurtu_manage_all_content.mukurtu_manage_content
-mukurtu_core.site_configuration:
-  title: 'Site configuration'
-  description: 'Links to site configuration pages.'
-  parent: mukurtu_dashboard
-  menu_name: dashboard-site-settings
-  route_name: system.admin_config
-  expanded: TRUE
+  weight: 0
 mukurtu_core.settings_assorted:
   title: "Related content settings"
   parent: mukurtu_dashboard
@@ -35,10 +29,11 @@ mukurtu_core.citation_templates:
   menu_name: dashboard-site-settings
   description: "Configure citation field templates."
   route_name: mukurtu_core.citation_templates
+  weight: 3
 mukurtu_core.access_denied_settings:
   title: "Access Denied Page"
   parent: mukurtu_dashboard
-  menu_name: dashboard-site-settings
+  menu_name: dashboard-look-feel
   description: "Edit the title and message shown on the access denied (403) page."
   route_name: mukurtu_core.access_denied_settings
   expanded: TRUE
@@ -55,50 +50,49 @@ mukurtu_core.user_settings:
   parent: mukurtu_dashboard
   menu_name: dashboard-users
   route_name: mukurtu_core.user_settings
+  weight: 3
 mukurtu_core.people:
   title: 'Manage users'
   description: 'Manage users'
   parent: mukurtu_dashboard
   menu_name: dashboard-users
   route_name: view.mukurtu_people.page_1
+  weight: 0
 mukurtu_core.create_user:
   title: 'Add user'
   description: 'Create a new user account.'
   parent: mukurtu_dashboard
   menu_name: dashboard-users
   url: 'internal:/admin/people/create'
+  weight: 1
 mukurtu_core.appearance_settings:
   title: 'Change logo'
   description: 'Change logo and favicon'
   parent: mukurtu_dashboard
   menu_name: dashboard-look-feel
   route_name: system.theme_settings
+  weight: 1
 mukurtu_core.entity.google_tag_container.collection:
   title: 'Google Tag Settings'
   description: 'Configure the website integration with Google Tag and Google Tag Manager.'
   route_name: entity.google_tag_container.single_form
   parent: mukurtu_dashboard
   menu_name: dashboard-site-settings
-mukurtu_core.create_basic_page_dashboard:
-  title: 'Add a basic page'
-  description: 'Add a new basic page.'
-  parent: mukurtu_dashboard
-  menu_name: dashboard-look-feel
-  route_name: mukurtu_core.add
-  route_parameters:
-    node_type: page
+  weight: 5
 mukurtu_core.site_information_settings:
   title: 'Site name and email'
   description: 'Change site name, logo, and administrative email'
   parent: mukurtu_dashboard
   menu_name: dashboard-site-settings
   route_name: system.site_information_settings
+  weight: 1
 mukurtu_core.notification_messages:
   title: 'Notification messages'
   description: 'Manage notification email templates.'
   parent: mukurtu_dashboard
   menu_name: dashboard-site-settings
   route_name: message.overview_templates
+  weight: 7
 mukurtu_core.my_account:
   title: 'Manage my account'
   description: 'User account page'
@@ -111,27 +105,32 @@ mukurtu_core.entity.menu.edit_form:
   parent: mukurtu_dashboard
   menu_name: dashboard-look-feel
   url: 'internal:/admin/structure/menu/manage/main'
+  weight: 4
 mukurtu_core.consent_popup:
   title: 'Configure consent popup'
   description: 'Configure consent popup'
   parent: mukurtu_dashboard
   menu_name: dashboard-look-feel
   url: 'internal:/admin/structure/block/manage/mukurtu_v4_consentpopup'
+  weight: 3
 mukurtu_core.klaro_settings:
   title: 'Cookie & Consent Settings'
   description: 'Configure the Klaro cookie and consent manager.'
   route_name: klaro.admin
   parent: mukurtu_dashboard
   menu_name: dashboard-site-settings
+  weight: 4
 mukurtu_core.visitors_analytics:
   title: 'Analytics'
   description: 'View web analytics reports.'
   route_name: visitors.index
   parent: mukurtu_dashboard
   menu_name: dashboard-site-settings
+  weight: 8
 mukurtu_core.visitors_settings:
-  title: 'Visitor settings'
+  title: 'Analytics settings'
   description: 'Configure visitor analytics.'
   route_name: visitors.settings
   parent: mukurtu_dashboard
   menu_name: dashboard-site-settings
+  weight: 9

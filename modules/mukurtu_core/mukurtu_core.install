@@ -3920,3 +3920,13 @@ function mukurtu_core_update_40108(): void {
 
   \Drupal::service('plugin.manager.menu.link')->rebuild();
 }
+
+/**
+ * Apply custom link ordering within the dashboard sections, move "Access Denied
+ * Page" to Look and feel, drop the "Add a basic page" and "Site configuration"
+ * dashboard links, and relabel "Visitor settings" to "Analytics settings"
+ * (#1787).
+ */
+function mukurtu_core_update_40109(): void {
+  \Drupal::service('plugin.manager.menu.link')->rebuild();
+}

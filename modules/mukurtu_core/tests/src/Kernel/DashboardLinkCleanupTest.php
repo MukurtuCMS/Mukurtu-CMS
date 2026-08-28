@@ -92,6 +92,29 @@ class DashboardLinkCleanupTest extends KernelTestBase {
   }
 
   /**
+   * The render order of a dashboard menu, from every module's *.links.menu.yml.
+   *
+   * Mirrors how system_menu_block sorts: by weight, then by title. Dynamic
+   * links added in hook_menu_links_discovered_alter() are not included.
+   *
+   * @return string[]
+   *   Link titles in render order.
+   */
+  protected function dashboardMenuOrder(string $menu_name): array {
+    $root = \Drupal::root();
+    $items = [];
+    foreach (glob($root . '/' . dirname(\Drupal::service('extension.list.module')->getPath('mukurtu_core'), 1) . '/*/*.links.menu.yml') as $file) {
+      foreach (Yaml::parseFile($file) ?? [] as $link) {
+        if (($link['menu_name'] ?? NULL) === $menu_name) {
+          $items[] = [(int) ($link['weight'] ?? 0), (string) ($link['title'] ?? '')];
+        }
+      }
+    }
+    usort($items, static fn(array $a, array $b): int => [$a[0], mb_strtolower($a[1])] <=> [$b[0], mb_strtolower($b[1])]);
+    return array_map(static fn(array $i): string => $i[1], $items);
+  }
+
+  /**
    * The update hook swaps the Security and Site information weights.
    */
   public function testUpdateReordersSecurityBeforeSiteInfo(): void {
@@ -261,8 +284,8 @@ class DashboardLinkCleanupTest extends KernelTestBase {
   }
 
   /**
-   * Publication-tools links (workflow + submissions) point at the new menu with
-   * no leftover weight overrides (#1787).
+   * Publication-tools links (workflow + submissions) point at the new menu
+   * (#1787).
    */
   public function testPublicationToolsLinksMoved(): void {
     $expected = [
@@ -274,7 +297,6 @@ class DashboardLinkCleanupTest extends KernelTestBase {
       foreach ($ids as $id) {
         $this->assertArrayHasKey($id, $links);
         $this->assertSame('dashboard-publication-tools', $links[$id]['menu_name']);
-        $this->assertArrayNotHasKey('weight', $links[$id]);
       }
     }
   }
@@ -342,6 +364,116 @@ class DashboardLinkCleanupTest extends KernelTestBase {
       $regions['two']['system_menu_block:dashboard-migration'],
       $regions['two']['system_menu_block:dashboard-roundtrip'],
     );
+  }
+
+  /**
+   * Links within each dashboard section render in the curated order (#1787).
+   * Dynamic links (Landing Page, Mukurtu Version) are appended by
+   * hook_menu_links_discovered_alter() and are not asserted here.
+   */
+  public function testLinkOrderWithinBlocks(): void {
+    $expected = [
+      'dashboard-3Cs' => [
+        'Manage communities and cultural protocols',
+        'Community organization',
+        'Add a community',
+        'Add a cultural protocol',
+        'Manage categories',
+      ],
+      'dashboard-users' => [
+        'Manage users',
+        'Add user',
+        'Create user with community membership',
+        'Manage user settings and registration',
+      ],
+      'dashboard-content' => [
+        'Manage Content',
+        'Add collection',
+        'Add dictionary word',
+        'Add digital heritage item',
+        'Add person record',
+        'Add place record',
+        'Add word list',
+      ],
+      'dashboard-media' => [
+        'Manage Media',
+        'Add Media',
+        'Manage media tags',
+        'Media download settings',
+        'Media content warnings',
+        'Default media thumbnails',
+        'Media settings',
+      ],
+      'dashboard-local-contexts' => [
+        'Manage site-wide Local Contexts projects',
+        'View site-wide Local Contexts projects',
+        'Remap Legacy Projects',
+      ],
+      'dashboard-publication-tools' => [
+        'Publishing workflow',
+        'Review queue',
+        'Submission Forms',
+        'Pending Submissions',
+      ],
+      'dashboard-multilingual' => [
+        'Manage site languages',
+        'Configure content translation',
+        'Translate configuration',
+        'Translate interface',
+      ],
+      'dashboard-roundtrip' => [
+        'Export Lists',
+        'Export Taxonomy',
+        'Export Settings',
+        'Import',
+        'Import Logs',
+        'Import format information.',
+        'Manage Import Templates',
+      ],
+      'dashboard-look-feel' => [
+        'Access Denied Page',
+        'Change logo',
+        'Color settings',
+        'Configure consent popup',
+        'Main navigation menu',
+      ],
+      'dashboard-site-settings' => [
+        'Site Setup',
+        'All notifications',
+        'Site name and email',
+        'Site-wide comment settings',
+        'Citation templates',
+        'Cookie & Consent Settings',
+        'Google Tag Settings',
+        'Mukurtu search settings',
+        'Notification messages',
+        'Analytics',
+        'Analytics settings',
+      ],
+    ];
+    foreach ($expected as $menu_name => $titles) {
+      $this->assertSame($titles, $this->dashboardMenuOrder($menu_name), "Order for $menu_name");
+    }
+  }
+
+  /**
+   * "Add a basic page" and "Site configuration" are dropped from the dashboard,
+   * and "Access Denied Page" moves to the Look and feel section (#1787).
+   */
+  public function testLinksDroppedAndMoved(): void {
+    $links = $this->menuLinks('mukurtu_core');
+    $this->assertArrayNotHasKey('mukurtu_core.create_basic_page_dashboard', $links);
+    $this->assertArrayNotHasKey('mukurtu_core.site_configuration', $links);
+    $this->assertSame('dashboard-look-feel', $links['mukurtu_core.access_denied_settings']['menu_name']);
+  }
+
+  /**
+   * The visitors.settings dashboard link is relabelled "Analytics settings"
+   * (#1787).
+   */
+  public function testVisitorSettingsRelabelled(): void {
+    $links = $this->menuLinks('mukurtu_core');
+    $this->assertSame('Analytics settings', $links['mukurtu_core.visitors_settings']['title']);
   }
 
 }

@@ -4,6 +4,7 @@ mukurtu_multilingual.manage_site_languages_dashboard:
   parent: mukurtu_dashboard
   menu_name: dashboard-multilingual
   url: 'internal:/admin/config/regional/language'
+  weight: 0
 
 mukurtu_multilingual.translate_interface_dashboard:
   title: 'Translate interface'
@@ -11,6 +12,7 @@ mukurtu_multilingual.translate_interface_dashboard:
   parent: mukurtu_dashboard
   menu_name: dashboard-multilingual
   url: 'internal:/admin/config/regional/translate'
+  weight: 3
 
 mukurtu_multilingual.configure_content_translation_dashboard:
   title: 'Configure content translation'
@@ -18,6 +20,7 @@ mukurtu_multilingual.configure_content_translation_dashboard:
   parent: mukurtu_dashboard
   menu_name: dashboard-multilingual
   url: 'internal:/admin/config/regional/content-language'
+  weight: 1
 
 mukurtu_multilingual.translate_configuration_dashboard:
   title: 'Translate configuration'
@@ -25,5 +28,6 @@ mukurtu_multilingual.translate_configuration_dashboard:
   parent: mukurtu_dashboard
   menu_name: dashboard-multilingual
   url: 'internal:/admin/config/regional/config-translation'
+  weight: 2
 
 # todo: translated content list (create a view for it)

@@ -9,3 +9,4 @@ mukurtu_notifications.all_notifications:
   parent: mukurtu_dashboard
   menu_name: dashboard-site-settings
   route_name: view.mukurtu_message_log.mukurtu_notifications_admin_page
+  weight: 0

@@ -14,6 +14,7 @@ mukurtu_dictionary.create_dictionary_word_dashboard:
   route_name: mukurtu_core.add
   route_parameters:
     node_type: dictionary_word
+  weight: 2
 mukurtu_dictionary.create_word_list:
   title: 'Word list'
   description: 'Add a word list'
@@ -30,6 +31,7 @@ mukurtu_dictionary.create_word_list_dashboard:
   route_name: mukurtu_core.add
   route_parameters:
     node_type: word_list    
+  weight: 6
 mukurtu_dictionary.configure_dictionary_languages:
   title: "Dictionary language settings"
   menu_name: dashboard-content-settings

@@ -4,6 +4,7 @@ entity.mukurtu_submission_settings.collection:
   description: 'Enable and configure submission forms per content type.'
   parent: mukurtu_dashboard
   menu_name: dashboard-publication-tools
+  weight: 2
 
 mukurtu_submissions.pending_queue:
   title: 'Pending Submissions'
@@ -11,3 +12,4 @@ mukurtu_submissions.pending_queue:
   description: 'Content submitted by site visitors awaiting review.'
   parent: mukurtu_dashboard
   menu_name: dashboard-publication-tools
+  weight: 3

@@ -27,6 +27,7 @@ mukurtu_protocol.community_organization:
   parent: mukurtu_dashboard
   menu_name: dashboard-3Cs
   route_name: mukurtu_protocol.community_organization
+  weight: 1
 
 mukurtu_protocol.community_manager_create_user:
   title: 'Create user with community membership'
@@ -34,6 +35,7 @@ mukurtu_protocol.community_manager_create_user:
   parent: mukurtu_dashboard
   menu_name: dashboard-users
   route_name: mukurtu_protocol.community_manager_create_user
+  weight: 2
 
 mukurtu_protocol.manage_protocols:
   title: 'Manage communities and cultural protocols'
@@ -41,6 +43,7 @@ mukurtu_protocol.manage_protocols:
   parent: mukurtu_dashboard
   menu_name: dashboard-3Cs
   route_name: entity.protocol.collection
+  weight: 0
 
 # Community menu items definition
 entity.community.collection:
@@ -62,6 +65,7 @@ mukurtu_protocol.comment_settings:
   parent: mukurtu_dashboard
   description: "Configuration form for side wide commenting options."
   route_name: mukurtu_protocol.comment_settings
+  weight: 2
 
 mukurtu_protocol.community_create:
   title: 'Add a community'
@@ -69,6 +73,7 @@ mukurtu_protocol.community_create:
   parent: mukurtu_dashboard
   description: 'Add a new community.'
   route_name: mukurtu_protocol.community_create
+  weight: 2
 
 mukurtu_protocol.protocol_create:
   title: 'Add a cultural protocol'
@@ -76,6 +81,7 @@ mukurtu_protocol.protocol_create:
   parent: mukurtu_dashboard
   description: 'Add a new cultural protocol.'
   route_name: mukurtu_protocol.protocol_create
+  weight: 3
 
 mukurtu_protocol.my_memberships:
   title: 'My memberships'
