@@ -166,7 +166,7 @@ display:
           admin_label: ''
           entity_type: node
           entity_field: type
-          plugin_id: content_type
+          plugin_id: field
           label: Type
           exclude: false
           alter:
@@ -377,8 +377,7 @@ display:
           title_enable: false
           title: ''
           default_argument_type: current_user
-          default_argument_options:
-            user: 0
+          default_argument_options: {  }
           summary_options:
             base_path: ''
             count: true
@@ -537,7 +536,7 @@ display:
           admin_label: ''
           entity_type: node
           entity_field: type
-          plugin_id: content_type
+          plugin_id: field
           label: Type
           exclude: false
           alter:
@@ -742,8 +741,7 @@ display:
           title_enable: false
           title: ''
           default_argument_type: current_user
-          default_argument_options:
-            user: 0
+          default_argument_options: {  }
           summary_options:
             base_path: ''
             count: true
@@ -901,7 +899,7 @@ display:
           admin_label: ''
           entity_type: node
           entity_field: type
-          plugin_id: content_type
+          plugin_id: field
           label: Type
           exclude: false
           alter:
