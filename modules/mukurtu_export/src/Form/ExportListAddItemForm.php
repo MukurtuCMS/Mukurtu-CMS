@@ -4,7 +4,9 @@ namespace Drupal\mukurtu_export\Form;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\TypedData\TranslatableInterface;
 use Drupal\Core\Url;
+use Drupal\mukurtu_core\Service\EntityTranslationResolver;
 use Drupal\mukurtu_export\ExportChildResolver;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -19,10 +21,12 @@ class ExportListAddItemForm extends FormBase {
 
   protected EntityTypeManagerInterface $entityTypeManager;
   protected ExportChildResolver $childResolver;
+  protected EntityTranslationResolver $entityTranslationResolver;
 
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, ExportChildResolver $child_resolver) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, ExportChildResolver $child_resolver, EntityTranslationResolver $entity_translation_resolver) {
     $this->entityTypeManager = $entity_type_manager;
     $this->childResolver = $child_resolver;
+    $this->entityTranslationResolver = $entity_translation_resolver;
   }
 
   /**
@@ -32,6 +36,7 @@ class ExportListAddItemForm extends FormBase {
     return new static(
       $container->get('entity_type.manager'),
       $container->get('mukurtu_export.child_resolver'),
+      $container->get('mukurtu_core.entity_translation_resolver'),
     );
   }
 
@@ -59,6 +64,26 @@ class ExportListAddItemForm extends FormBase {
       '#type' => 'item',
       '#markup' => $this->t('Adding <em>@label</em> to an export list.', ['@label' => $entity->label()]),
     ];
+
+    // Only offer a language choice when the entity actually has more than
+    // one translation - otherwise there's nothing to choose between.
+    if ($entity instanceof TranslatableInterface) {
+      $translations = $entity->getTranslationLanguages();
+      if (count($translations) > 1) {
+        $current = $this->entityTranslationResolver->translate($entity);
+        $options = [];
+        foreach ($translations as $langcode => $language) {
+          $options[$langcode] = $language->getName();
+        }
+        $form['export_langcode'] = [
+          '#type' => 'select',
+          '#title' => $this->t('Export language'),
+          '#description' => $this->t('Which translation of this item should be added to the list? Defaults to the version you\'re currently viewing.'),
+          '#options' => $options,
+          '#default_value' => $current->language()->getId(),
+        ];
+      }
+    }
 
     // Load accessible lists for this user.
     $uid = $this->currentUser()->id();
@@ -316,6 +341,16 @@ class ExportListAddItemForm extends FormBase {
 
     $this->childResolver->addMpiEntitiesForNodes($items);
     $list->setItems($items);
+
+    // Only the item the user explicitly chose a language for is tagged -
+    // child/related items pulled in above stay in their original language.
+    // No entry is stored when the choice matches the entity's own original
+    // language, keeping item_languages free of no-op entries.
+    $selected_langcode = $form_state->getValue('export_langcode');
+    if ($selected_langcode && $entity && $selected_langcode !== $entity->language()->getId()) {
+      $list->setItemLanguage($entity_type, $entity_id, $selected_langcode);
+    }
+
     $list->save();
 
     // Also flag the item so it's picked up by FlaggedExporterSource, the

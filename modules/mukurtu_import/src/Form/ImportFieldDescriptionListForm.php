@@ -26,14 +26,23 @@ class ImportFieldDescriptionListForm extends ImportBaseForm {
 
     $fields = $this->entityFieldManager->getFieldDefinitions($entity_type, $effective_bundle);
 
+    // Applies to every entity type that has a langcode field - mapping a
+    // column to it can target a translation of existing content instead
+    // of creating/overwriting it, once #1260's import track lands (see
+    // docs/import-translation.md).
+    $field_description_overrides = [
+      'langcode' => $this->t("The content's language, encoded (e.g. en, es). On a bundle with translation enabled, mapping a column here targets a translation of matching content instead of creating or overwriting it."),
+    ];
+    $field_format_overrides = [
+      'langcode' => $this->t("A language code, e.g. es. Fields that aren't translatable (like Cultural Protocols) won't be updated when this import targets a translation - update those in a separate, non-translation import."),
+    ];
+
     // Per-entity-type overrides for the Field Description column.
     // Drupal base field descriptions are often missing or too terse for
     // end users; these replace them on import format pages only.
-    $field_description_overrides = [];
     if ($entity_type === 'taxonomy_term') {
-      $field_description_overrides = [
+      $field_description_overrides += [
         'description' => $this->t('The description is not normally shown to end users. It may be used for internal documentation to clarify or define the content that should reference this term, or to provide additional details about the term.'),
-        'langcode'    => $this->t('The encoded language. Used for translation and localization.'),
         'name'        => $this->t('The taxonomy term name.'),
         'tid'         => $this->t('Identifier number assigned by the system.'),
         'parent'      => $this->t('Not currently supported in Mukurtu. Used if a site supports hierarchical taxonomies.'),
@@ -91,7 +100,7 @@ class ImportFieldDescriptionListForm extends ImportBaseForm {
       $option = [
         'label' => $target_label,
         'description' => $field_description_overrides[$field_name] ?? ($fields[$field_name]->getDescription() ?? ''),
-        'format' => $process_plugin->getFormatDescription($fields[$field_name], $field_property),
+        'format' => $field_format_overrides[$field_name] ?? $process_plugin->getFormatDescription($fields[$field_name], $field_property),
       ];
       if ($fields[$field_name]->isRequired()) {
         $required_options[$field_target] = $option;
