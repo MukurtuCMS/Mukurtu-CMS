@@ -63,6 +63,12 @@ class CsvExportTranslationTest extends CsvExportFieldTestBase {
       'entity_type' => 'node',
       'bundle' => 'protocol_aware_content',
       'label' => 'Keywords',
+      // Translatable fields are per-translation and addTranslation() doesn't
+      // copy values into the new translation object - a reference to the
+      // same term(s) should apply across every translation regardless, so
+      // this matches how reference fields are typically configured on real
+      // Mukurtu content.
+      'translatable' => FALSE,
       'settings' => [
         'handler' => 'default:taxonomy_term',
         'handler_settings' => ['target_bundles' => ['keywords' => 'keywords']],
@@ -183,6 +189,7 @@ class CsvExportTranslationTest extends CsvExportFieldTestBase {
         ],
       ],
       'results' => [
+        'config_id' => $this->export_config->id(),
         'csv' => ['separator' => ',', 'enclosure' => '"', 'escape' => '\\'],
         'entities' => [
           'node' => [
