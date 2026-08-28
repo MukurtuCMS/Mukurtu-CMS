@@ -3,7 +3,9 @@
 namespace Drupal\mukurtu_protocol\Plugin\Action;
 
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Action\Attribute\Action;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\mukurtu_core\Controller\MukurtuUserController;
 use Drupal\og\Og;
 use Drupal\user\Entity\User;
@@ -12,16 +14,12 @@ use Drupal\views_bulk_operations\Action\ViewsBulkOperationsActionBase;
 
 /**
  * VBO for unblocking a user, scoped to community manager permissions.
- *
- * @Action(
- *   id = "mukurtu_unblock_user_action",
- *   label = @Translation("Unblock or approve user(s)"),
- *   type = "user",
- *   requirements = {
- *     "_custom_access" = TRUE,
- *   },
- * )
  */
+#[Action(
+  id: 'mukurtu_unblock_user_action',
+  label: new TranslatableMarkup('Unblock or approve user(s)'),
+  type: 'user',
+)]
 class MukurtuUnblockUserAction extends ViewsBulkOperationsActionBase {
 
   /**

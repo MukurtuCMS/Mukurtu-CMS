@@ -3,8 +3,10 @@
 namespace Drupal\mukurtu_collection\Plugin\Action;
 
 use Drupal\views_bulk_operations\Action\ViewsBulkOperationsActionBase;
+use Drupal\Core\Action\Attribute\Action;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\views\ViewExecutable;
 use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -18,17 +20,12 @@ use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 
 /**
  * VBO for adding content to collections.
- *
- * @Action(
- *   id = "mukurtu_add_to_collection_action",
- *   label = @Translation("Add to Collection"),
- *   type = "",
- *   confirm = TRUE,
- *   requirements = {
- *     "_custom_access" = FALSE,
- *   },
- * )
  */
+#[Action(
+  id: 'mukurtu_add_to_collection_action',
+  label: new TranslatableMarkup('Add to Collection'),
+  type: '',
+)]
 class MukurtuAddToCollectionAction extends ViewsBulkOperationsActionBase implements ContainerFactoryPluginInterface, PluginFormInterface {
 
   use StringTranslationTrait;

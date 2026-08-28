@@ -4,6 +4,7 @@ namespace Drupal\mukurtu_core\Plugin\views\filter;
 
 use Drupal\Core\Database\Query\SelectInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\views\Attribute\ViewsFilter;
 
 /**
  * Filters content nodes by multipage item page position.
@@ -11,9 +12,8 @@ use Drupal\Core\Form\FormStateInterface;
  * "First page only" limits results to nodes that appear as the first page
  * (delta = 0) of a multipage item, de-duplicating multi-page content in
  * admin lists.
- *
- * @ViewsFilter("mukurtu_node_is_multipage_item")
  */
+#[ViewsFilter('mukurtu_node_is_multipage_item')]
 class NodeIsMultipageItemFilter extends NodeBooleanExistsFilterBase {
 
   protected function getSubquery(): SelectInterface {

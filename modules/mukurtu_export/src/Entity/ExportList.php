@@ -2,48 +2,49 @@
 
 namespace Drupal\mukurtu_export\Entity;
 
+use Drupal\Core\Entity\Attribute\ContentEntityType;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\user\EntityOwnerInterface;
 use Drupal\user\UserInterface;
 
 /**
  * Defines the Export List entity.
- *
- * @ContentEntityType(
- *   id = "export_list",
- *   label = @Translation("Export List"),
- *   label_collection = @Translation("Export Lists"),
- *   base_table = "export_list",
- *   entity_keys = {
- *     "id" = "id",
- *     "uuid" = "uuid",
- *     "label" = "label",
- *     "uid" = "uid",
- *   },
- *   handlers = {
- *     "access" = "Drupal\mukurtu_export\ExportListAccessController",
- *     "list_builder" = "Drupal\mukurtu_export\Controller\ExportListListBuilder",
- *     "form" = {
- *       "add" = "Drupal\mukurtu_export\Form\ExportListAddForm",
- *       "edit" = "Drupal\mukurtu_export\Form\ExportListEditForm",
- *       "delete" = "Drupal\mukurtu_export\Form\ExportListDeleteForm",
- *     },
- *     "route_provider" = {
- *       "html" = "Drupal\Core\Entity\Routing\AdminHtmlRouteProvider",
- *     },
- *   },
- *   admin_permission = "access mukurtu export",
- *   links = {
- *     "add-form" = "/admin/export/lists/add",
- *     "edit-form" = "/admin/export/lists/manage/{export_list}",
- *     "delete-form" = "/admin/export/lists/manage/{export_list}/delete",
- *     "collection" = "/admin/export/lists",
- *   }
- * )
  */
+#[ContentEntityType(
+  id: 'export_list',
+  label: new TranslatableMarkup('Export List'),
+  label_collection: new TranslatableMarkup('Export Lists'),
+  entity_keys: [
+    'id' => 'id',
+    'uuid' => 'uuid',
+    'label' => 'label',
+    'uid' => 'uid',
+  ],
+  handlers: [
+    'access' => 'Drupal\mukurtu_export\ExportListAccessController',
+    'list_builder' => 'Drupal\mukurtu_export\Controller\ExportListListBuilder',
+    'form' => [
+      'add' => 'Drupal\mukurtu_export\Form\ExportListAddForm',
+      'edit' => 'Drupal\mukurtu_export\Form\ExportListEditForm',
+      'delete' => 'Drupal\mukurtu_export\Form\ExportListDeleteForm',
+    ],
+    'route_provider' => [
+      'html' => 'Drupal\Core\Entity\Routing\AdminHtmlRouteProvider',
+    ],
+  ],
+  links: [
+    'add-form' => '/admin/export/lists/add',
+    'edit-form' => '/admin/export/lists/manage/{export_list}',
+    'delete-form' => '/admin/export/lists/manage/{export_list}/delete',
+    'collection' => '/admin/export/lists',
+  ],
+  admin_permission: 'access mukurtu export',
+  base_table: 'export_list',
+)]
 class ExportList extends ContentEntityBase implements EntityOwnerInterface {
 
   use EntityChangedTrait;
@@ -147,6 +148,29 @@ class ExportList extends ContentEntityBase implements EntityOwnerInterface {
     // MapItem expects ['value' => $array]; wrapping ensures FieldItemList
     // treats this as a single item rather than iterating over the array keys.
     $this->set('items', ['value' => $items]);
+    return $this;
+  }
+
+  /**
+   * Adds entity IDs of a given type to this list (read-modify-write).
+   *
+   * Does not save the entity; callers should call save() once after adding
+   * everything they need to.
+   *
+   * @param string $entity_type_id
+   *   The entity type ID the given IDs belong to.
+   * @param array $ids
+   *   The entity IDs to add.
+   *
+   * @return $this
+   */
+  public function addItems(string $entity_type_id, array $ids) {
+    $items = $this->getItems();
+    $items[$entity_type_id] = $items[$entity_type_id] ?? [];
+    foreach ($ids as $id) {
+      $items[$entity_type_id][$id] = $id;
+    }
+    $this->setItems($items);
     return $this;
   }
 

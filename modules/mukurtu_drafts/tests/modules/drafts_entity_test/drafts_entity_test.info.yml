@@ -4,6 +4,7 @@ description: ''
 package: Testing
 version: '8.x-1.x-dev'
 dependencies:
+  - drupal:entity_test
   - drupal:field
   - drupal:text
   - drupal:system
