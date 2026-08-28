@@ -122,7 +122,7 @@ class MukurtuImportFieldProcessPluginBase extends PluginBase implements MukurtuI
         return t('Decimal number');
       case 'created':
       case 'changed':
-        return t('Unix timestamp');
+        return t('Date and time in the format YYYY-MM-DD HH:MM:SS (UTC), e.g. 2026-08-27 14:40:14.');
       case 'datetime':
         if (isset($settings['datetime_type']) && $settings['datetime_type'] === 'date') {
           return t('ISO 8601 date only (e.g., YYYY-MM-DD)');
