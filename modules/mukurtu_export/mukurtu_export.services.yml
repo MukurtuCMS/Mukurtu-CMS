@@ -14,5 +14,6 @@ services:
       - '@messenger'
       - '@entity_type.manager'
       - '@mukurtu_core.paragraph_emptiness_checker'
+      - '@mukurtu_core.entity_translation_resolver'
     tags:
       - { name: event_subscriber }
