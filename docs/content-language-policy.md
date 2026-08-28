@@ -43,6 +43,24 @@ Admin-only views that intentionally list content across all languages for editor
 
 `modules/mukurtu_multilingual/tests/src/Unit/ViewLanguageFallbackCoverageTest.php` runs in CI on every PR. It scans every shipped `views.view.*.yml` (`config/install` and `config/optional`, profile-wide) and fails the build if a view implements neither fallback mechanism above **and** has no entry in its `EXEMPTIONS` list. Adding a new view (or editing an existing one's language handling) that doesn't satisfy either condition breaks CI — either implement the fallback pattern, or add a keyed, reasoned entry to `EXEMPTIONS`.
 
+## Known contrib limitation: locale_string_is_safe() false positives (#1901)
+
+Drupal's `locale_string_is_safe()` scans every string in a `translatable`-
+typed config schema value and rejects it if it contains disallowed HTML
+(e.g. a `<div>` wrapping a machine-readable token, not visible text).
+Klaro and Captcha (both contrib, no Mukurtu-owned code in either) ship
+config strings that trip this check - see #1901. That's a contrib
+packaging issue, not something fixable in this profile; it needs a patch
+or an upstream fix in Klaro/Captcha itself.
+
+When the same false positive shows up in **Mukurtu-owned** config
+instead, it usually means a schema type is marked `translatable` for
+content that was never meant to be translated (e.g. a machine-readable
+token, not visible text). See #1638 for a real instance and its fix:
+`mukurtu_multilingual/src/Hook/ViewsSchemaHooks.php` overrides the
+offending schema type via `hook_config_schema_info_alter()` rather than
+patching contrib or silencing the check.
+
 ## Checklist for new views/facets
 
 - [ ] Does this view show content to site visitors (not just admins/editors)? If yes, it needs the fallback policy above.
