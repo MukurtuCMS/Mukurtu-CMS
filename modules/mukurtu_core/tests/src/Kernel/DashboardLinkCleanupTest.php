@@ -130,16 +130,20 @@ class DashboardLinkCleanupTest extends KernelTestBase {
   }
 
   /**
-   * The shipped dashboard config already orders Security before Site info, so a
-   * fresh install matches what the update hook produces (issue #1787 part 2).
+   * The shipped dashboard config orders Security before Site information in the
+   * Right column, so a fresh install matches the rebalanced layout (#1787).
    */
   public function testShippedDashboardConfigOrdersSecurityBeforeSiteInfo(): void {
     $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core');
     $profile_path = \Drupal::root() . '/' . dirname($module_path, 2);
     $data = Yaml::parseFile($profile_path . '/config/install/dashboards.dashboard.mukurtu_dashboard.yml');
     $components = $data['sections'][0]['components'];
-    $this->assertSame(8, $components[self::SECURITY_UUID]['weight']);
-    $this->assertSame(9, $components[self::SITE_INFO_UUID]['weight']);
+    $this->assertSame('three', $components[self::SECURITY_UUID]['region']);
+    $this->assertSame('three', $components[self::SITE_INFO_UUID]['region']);
+    $this->assertLessThan(
+      $components[self::SITE_INFO_UUID]['weight'],
+      $components[self::SECURITY_UUID]['weight'],
+    );
   }
 
   /**
@@ -191,10 +195,10 @@ class DashboardLinkCleanupTest extends KernelTestBase {
   }
 
   /**
-   * mukurtu_core_update_40108() creates the two new dashboard menus and adds
-   * their section blocks to the Right column, re-weighted into order (#1787).
+   * mukurtu_core_update_40108() creates the two new dashboard menus and places
+   * every block into the rebalanced three-column layout (#1787).
    */
-  public function testUpdate40108SplitsSiteSettingsSection(): void {
+  public function testUpdate40108SplitsAndRebalances(): void {
     $this->saveDashboardConfig(8, 9);
 
     mukurtu_core_update_40108();
@@ -208,14 +212,13 @@ class DashboardLinkCleanupTest extends KernelTestBase {
     foreach ($components as $component) {
       $by_id[$component['configuration']['id']] = $component;
     }
-    $this->assertArrayHasKey('system_menu_block:dashboard-publication-tools', $by_id);
-    $this->assertArrayHasKey('system_menu_block:dashboard-local-contexts', $by_id);
-    $this->assertSame('three', $by_id['system_menu_block:dashboard-publication-tools']['region']);
-    $this->assertSame(5, $by_id['system_menu_block:dashboard-publication-tools']['weight']);
-    $this->assertSame(6, $by_id['system_menu_block:dashboard-local-contexts']['weight']);
-    // Existing Right-column blocks are re-weighted around the new ones.
-    $this->assertSame(8, $by_id['system_menu_block:dashboard-security']['weight']);
-    $this->assertSame(9, $by_id['system_menu_block:dashboard-site-info']['weight']);
+    // The two new blocks land in their rebalanced homes: Local Contexts in the
+    // Left column, Publication tools in the Middle column.
+    $this->assertSame(['one', 6], [$by_id['system_menu_block:dashboard-local-contexts']['region'], $by_id['system_menu_block:dashboard-local-contexts']['weight']]);
+    $this->assertSame(['two', 4], [$by_id['system_menu_block:dashboard-publication-tools']['region'], $by_id['system_menu_block:dashboard-publication-tools']['weight']]);
+    // Existing blocks in the fixture are re-homed too.
+    $this->assertSame(['three', 4], [$by_id['system_menu_block:dashboard-security']['region'], $by_id['system_menu_block:dashboard-security']['weight']]);
+    $this->assertSame(['three', 5], [$by_id['system_menu_block:dashboard-site-info']['region'], $by_id['system_menu_block:dashboard-site-info']['weight']]);
   }
 
   /**
@@ -242,12 +245,13 @@ class DashboardLinkCleanupTest extends KernelTestBase {
     $profile_path = \Drupal::root() . '/' . dirname($module_path, 2);
     $data = Yaml::parseFile($profile_path . '/config/install/dashboards.dashboard.mukurtu_dashboard.yml');
 
-    $ids = [];
+    $placement = [];
     foreach ($data['sections'][0]['components'] as $component) {
-      $ids[$component['configuration']['id']] = $component['weight'];
+      $placement[$component['configuration']['id']] = [$component['region'], $component['weight']];
     }
-    $this->assertSame(5, $ids['system_menu_block:dashboard-publication-tools']);
-    $this->assertSame(6, $ids['system_menu_block:dashboard-local-contexts']);
+    // Rebalanced homes: Local Contexts in Left, Publication tools in Middle.
+    $this->assertSame(['one', 6], $placement['system_menu_block:dashboard-local-contexts']);
+    $this->assertSame(['two', 4], $placement['system_menu_block:dashboard-publication-tools']);
 
     foreach (['dashboard-publication-tools' => 'Publication tools', 'dashboard-local-contexts' => 'Local Contexts'] as $id => $label) {
       $menu = Yaml::parseFile($profile_path . "/config/install/system.menu.$id.yml");
@@ -283,6 +287,54 @@ class DashboardLinkCleanupTest extends KernelTestBase {
     $this->assertNotEmpty($links);
     foreach ($links as $link) {
       $this->assertSame('dashboard-local-contexts', $link['menu_name']);
+    }
+  }
+
+  /**
+   * The shipped dashboard config spreads blocks across the three columns per the
+   * rebalanced layout: Left = content & community, Middle = editorial & data,
+   * Right = site administration (#1787).
+   */
+  public function testShippedDashboardColumnsAreBalanced(): void {
+    $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core');
+    $profile_path = \Drupal::root() . '/' . dirname($module_path, 2);
+    $data = Yaml::parseFile($profile_path . '/config/install/dashboards.dashboard.mukurtu_dashboard.yml');
+
+    $regions = ['one' => [], 'two' => [], 'three' => []];
+    foreach ($data['sections'][0]['components'] as $component) {
+      $regions[$component['region']][$component['configuration']['id']] = $component['weight'];
+    }
+
+    $this->assertEqualsCanonicalizing([
+      'system_menu_block:dashboard-3Cs',
+      'system_menu_block:dashboard-users',
+      'system_menu_block:dashboard-content',
+      'system_menu_block:dashboard-media',
+      'system_menu_block:dashboard-taxonomies',
+      'system_menu_block:dashboard-local-contexts',
+    ], array_keys($regions['one']));
+
+    $this->assertEqualsCanonicalizing([
+      'mukurtu_setup_checklist',
+      'views_block:content_recent-block_1',
+      'system_menu_block:dashboard-content-settings',
+      'system_menu_block:dashboard-publication-tools',
+      'system_menu_block:dashboard-multilingual',
+      'system_menu_block:dashboard-migration',
+      'system_menu_block:dashboard-roundtrip',
+    ], array_keys($regions['two']));
+
+    $this->assertEqualsCanonicalizing([
+      'system_menu_block:dashboard-my-account',
+      'system_menu_block:dashboard-look-feel',
+      'system_menu_block:dashboard-site-settings',
+      'system_menu_block:dashboard-security',
+      'system_menu_block:dashboard-site-info',
+    ], array_keys($regions['three']));
+
+    // Weights within each column are unique so ordering is deterministic.
+    foreach ($regions as $blocks) {
+      $this->assertSame(array_values($blocks), array_unique(array_values($blocks)));
     }
   }
 

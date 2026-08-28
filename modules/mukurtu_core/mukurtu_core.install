@@ -3817,8 +3817,10 @@ function mukurtu_core_update_40107(): void {
 }
 
 /**
- * Split the crowded Site settings dashboard section into dedicated
- * "Publication tools" and "Local Contexts" sections (#1787).
+ * Split the crowded Site settings dashboard section into "Publication tools"
+ * and "Local Contexts", and rebalance the three dashboard columns so each has
+ * a clear identity: Left = content & community, Middle = editorial & data
+ * operations, Right = site administration (#1787).
  */
 function mukurtu_core_update_40108(): void {
   // Create the two new dashboard menus if they don't exist yet.
@@ -3844,32 +3846,45 @@ function mukurtu_core_update_40108(): void {
     }
   }
 
-  // Re-weight the Right column and add the two new section blocks so the order
-  // reads: My account, Roundtrip, Look and feel, Site settings, Publication
-  // tools, Local Contexts, Multilingual, Security, Site information.
   $config = \Drupal::configFactory()->getEditable('dashboards.dashboard.mukurtu_dashboard');
   if (!$config->isNew()) {
     $sections = $config->get('sections') ?? [];
     $components = $sections[0]['components'] ?? [];
 
-    $weights = [
-      'system_menu_block:dashboard-my-account' => 1,
-      'system_menu_block:dashboard-roundtrip' => 2,
-      'system_menu_block:dashboard-look-feel' => 3,
-      'system_menu_block:dashboard-site-settings' => 4,
-      'system_menu_block:dashboard-publication-tools' => 5,
-      'system_menu_block:dashboard-local-contexts' => 6,
-      'system_menu_block:dashboard-multilingual' => 7,
-      'system_menu_block:dashboard-security' => 8,
-      'system_menu_block:dashboard-site-info' => 9,
+    // Target [region, weight] for every dashboard block, keyed by block id.
+    // region one = Left, two = Middle, three = Right.
+    $layout = [
+      // Left: content & community.
+      'system_menu_block:dashboard-3Cs' => ['one', 1],
+      'system_menu_block:dashboard-users' => ['one', 2],
+      'system_menu_block:dashboard-content' => ['one', 3],
+      'system_menu_block:dashboard-media' => ['one', 4],
+      'system_menu_block:dashboard-taxonomies' => ['one', 5],
+      'system_menu_block:dashboard-local-contexts' => ['one', 6],
+      // Middle: editorial & data operations.
+      'mukurtu_setup_checklist' => ['two', 1],
+      'views_block:content_recent-block_1' => ['two', 2],
+      'system_menu_block:dashboard-content-settings' => ['two', 3],
+      'system_menu_block:dashboard-publication-tools' => ['two', 4],
+      'system_menu_block:dashboard-multilingual' => ['two', 5],
+      'system_menu_block:dashboard-migration' => ['two', 6],
+      'system_menu_block:dashboard-roundtrip' => ['two', 7],
+      // Right: site administration.
+      'system_menu_block:dashboard-my-account' => ['three', 1],
+      'system_menu_block:dashboard-look-feel' => ['three', 2],
+      'system_menu_block:dashboard-site-settings' => ['three', 3],
+      'system_menu_block:dashboard-security' => ['three', 4],
+      'system_menu_block:dashboard-site-info' => ['three', 5],
     ];
 
     $present = [];
     foreach ($components as $uuid => $component) {
       $id = $component['configuration']['id'] ?? '';
       $present[$id] = TRUE;
-      if (isset($weights[$id])) {
-        $components[$uuid]['weight'] = $weights[$id];
+      if (isset($layout[$id])) {
+        [$region, $weight] = $layout[$id];
+        $components[$uuid]['region'] = $region;
+        $components[$uuid]['weight'] = $weight;
       }
     }
 
@@ -3879,9 +3894,10 @@ function mukurtu_core_update_40108(): void {
     ];
     foreach ($new_blocks as $uuid => $block) {
       if (empty($present[$block['id']])) {
+        [$region, $weight] = $layout[$block['id']];
         $components[$uuid] = [
           'uuid' => $uuid,
-          'region' => 'three',
+          'region' => $region,
           'configuration' => [
             'id' => $block['id'],
             'label' => $block['label'],
@@ -3892,7 +3908,7 @@ function mukurtu_core_update_40108(): void {
             'depth' => NULL,
             'expand_all_items' => FALSE,
           ],
-          'weight' => $weights[$block['id']],
+          'weight' => $weight,
           'additional' => [],
         ];
       }
