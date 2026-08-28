@@ -87,7 +87,10 @@ class SubmissionSettingsCollectionForm extends ConfigFormBase {
     $form['notifications']['reviewers'] = [
       '#type' => 'table',
       '#caption' => $this->t('Submission reviewers'),
-      '#header' => [$this->t('Name'), $this->t('Remove')],
+      '#header' => [
+        ['data' => $this->t('Name'), 'scope' => 'col'],
+        ['data' => $this->t('Remove'), 'scope' => 'col'],
+      ],
       '#empty' => $this->t('No additional reviewers have been added yet.'),
     ];
     foreach ($reviewers as $uid => $reviewer) {
