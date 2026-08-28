@@ -22,7 +22,7 @@ class TaxonomyTermViewLanguageFallbackTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['system', 'views', 'node', 'taxonomy', 'user'];
+  protected static $modules = ['system', 'views', 'node', 'taxonomy', 'text', 'user'];
 
   /**
    * {@inheritdoc}
