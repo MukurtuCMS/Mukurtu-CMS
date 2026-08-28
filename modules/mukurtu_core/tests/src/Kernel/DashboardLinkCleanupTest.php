@@ -336,6 +336,12 @@ class DashboardLinkCleanupTest extends KernelTestBase {
     foreach ($regions as $blocks) {
       $this->assertSame(array_values($blocks), array_unique(array_values($blocks)));
     }
+
+    // Roundtrip sits above Migration in the Middle column.
+    $this->assertLessThan(
+      $regions['two']['system_menu_block:dashboard-migration'],
+      $regions['two']['system_menu_block:dashboard-roundtrip'],
+    );
   }
 
 }

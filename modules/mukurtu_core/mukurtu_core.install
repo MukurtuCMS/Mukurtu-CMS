@@ -3867,8 +3867,8 @@ function mukurtu_core_update_40108(): void {
       'system_menu_block:dashboard-content-settings' => ['two', 3],
       'system_menu_block:dashboard-publication-tools' => ['two', 4],
       'system_menu_block:dashboard-multilingual' => ['two', 5],
-      'system_menu_block:dashboard-migration' => ['two', 6],
-      'system_menu_block:dashboard-roundtrip' => ['two', 7],
+      'system_menu_block:dashboard-roundtrip' => ['two', 6],
+      'system_menu_block:dashboard-migration' => ['two', 7],
       // Right: site administration.
       'system_menu_block:dashboard-my-account' => ['three', 1],
       'system_menu_block:dashboard-look-feel' => ['three', 2],

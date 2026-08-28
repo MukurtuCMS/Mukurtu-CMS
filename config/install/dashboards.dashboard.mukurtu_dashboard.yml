@@ -189,7 +189,7 @@ sections:
           level: 1
           depth: null
           expand_all_items: false
-        weight: 6
+        weight: 7
         additional: {  }
       6952fdbe-035a-4ccc-af26-e0dcd691187e:
         uuid: 6952fdbe-035a-4ccc-af26-e0dcd691187e
@@ -203,7 +203,7 @@ sections:
           level: 1
           depth: null
           expand_all_items: false
-        weight: 7
+        weight: 6
         additional: {  }
       177c8838-ecba-43f7-9acb-813187ae16f3:
         uuid: 177c8838-ecba-43f7-9acb-813187ae16f3
