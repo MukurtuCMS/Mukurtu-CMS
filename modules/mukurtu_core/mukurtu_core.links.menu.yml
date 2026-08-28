@@ -123,3 +123,15 @@ mukurtu_core.klaro_settings:
   route_name: klaro.admin
   parent: mukurtu_dashboard
   menu_name: dashboard-site-settings
+mukurtu_core.visitors_analytics:
+  title: 'Analytics'
+  description: 'View web analytics reports: hits, top pages, hosts, referrers, locations, devices.'
+  route_name: visitors.index
+  parent: mukurtu_dashboard
+  menu_name: dashboard-site-settings
+mukurtu_core.visitors_settings:
+  title: 'Visitor settings'
+  description: 'Configure the Visitors analytics module.'
+  route_name: visitors.settings
+  parent: mukurtu_dashboard
+  menu_name: dashboard-site-settings

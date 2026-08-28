@@ -189,7 +189,7 @@ sections:
           level: 1
           depth: null
           expand_all_items: false
-        weight: 8
+        weight: 9
         additional: {  }
       02ce0aa5-8aec-43f3-b2e0-62d5dbf8efce:
         uuid: 02ce0aa5-8aec-43f3-b2e0-62d5dbf8efce
@@ -217,7 +217,7 @@ sections:
           level: 1
           depth: null
           expand_all_items: false
-        weight: 9
+        weight: 8
         additional: {  }
       a663f15a-8760-424c-9433-c3f97fa8b623:
         uuid: a663f15a-8760-424c-9433-c3f97fa8b623

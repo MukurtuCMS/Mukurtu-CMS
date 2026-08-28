@@ -3788,3 +3788,30 @@ function mukurtu_core_update_40106(): void {
     }
   }
 }
+
+/**
+ * Order Security before Site information on the dashboard, and rebuild menu
+ * links so the new Visitors links appear (#1787, #2057).
+ */
+function mukurtu_core_update_40107(): void {
+  $config = \Drupal::configFactory()->getEditable('dashboards.dashboard.mukurtu_dashboard');
+  if (!$config->isNew()) {
+    $sections = $config->get('sections') ?? [];
+    $changed = FALSE;
+    foreach ($sections[0]['components'] ?? [] as $uuid => $component) {
+      $id = $component['configuration']['id'] ?? '';
+      if ($id === 'system_menu_block:dashboard-security' && ($component['weight'] ?? NULL) !== 8) {
+        $sections[0]['components'][$uuid]['weight'] = 8;
+        $changed = TRUE;
+      }
+      if ($id === 'system_menu_block:dashboard-site-info' && ($component['weight'] ?? NULL) !== 9) {
+        $sections[0]['components'][$uuid]['weight'] = 9;
+        $changed = TRUE;
+      }
+    }
+    if ($changed) {
+      $config->set('sections', $sections)->save();
+    }
+  }
+  \Drupal::service('plugin.manager.menu.link')->rebuild();
+}
