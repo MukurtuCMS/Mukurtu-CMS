@@ -204,34 +204,38 @@ display:
             default_group: All
             default_group_multiple: {  }
             group_items: {  }
-        search_api_language:
-          id: search_api_language
+        language_with_fallback:
+          id: language_with_fallback
           table: search_api_index_mukurtu_collection_index
-          field: search_api_language
+          field: language_with_fallback
           relationship: none
           group_type: group
           admin_label: ''
-          plugin_id: search_api_language
-          operator: in
+          plugin_id: search_api_string
+          operator: '='
           value:
-            '***LANGUAGE_language_interface***': '***LANGUAGE_language_interface***'
+            min: ''
+            max: ''
+            value: '***LANGUAGE_language_content***'
           group: 1
           exposed: false
           expose:
-            operator_id: search_api_language_op
-            label: 'Item language'
-            description: null
+            operator_id: ''
+            label: ''
+            description: ''
             use_operator: false
-            operator: search_api_language_op
+            operator: ''
             operator_limit_selection: false
             operator_list: {  }
-            identifier: search_api_language
+            identifier: ''
             required: false
             remember: false
             multiple: false
             remember_roles:
               authenticated: authenticated
-            reduce: false
+            min_placeholder: ''
+            max_placeholder: ''
+            placeholder: ''
           is_grouped: false
           group_info:
             label: ''
