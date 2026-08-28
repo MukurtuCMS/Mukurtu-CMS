@@ -810,13 +810,29 @@ function mukurtu_export_update_40025(): void {
 }
 
 /**
+ * Add the item_languages field so export list items can carry a
+ * requested-translation langcode (#1260 Phase 5 export track).
+ *
+ * Additive only - existing lists have no entries in this field, so every
+ * existing item keeps exporting in its original language exactly as
+ * before.
+ */
+function mukurtu_export_update_40026(): void {
+  $definition = \Drupal\Core\Field\BaseFieldDefinition::create('map')
+    ->setLabel(t('Item languages'))
+    ->setDescription(t('Serialized map of "entity_type:id" => langcode pairs, for items whose export should use a specific translation instead of their original language. Additive to items - an item with no entry here exports in its original language, unchanged from before this field existed.'));
+  \Drupal::entityDefinitionUpdateManager()
+    ->installFieldStorageDefinition('item_languages', 'export_list', 'mukurtu_export', $definition);
+}
+
+/**
  * Grants Mukurtu Manager the flag/unflag export-list permissions already
  * held by Mukurtu Roundtrip Manager. 'access mukurtu export' covers the
  * action-plugin access() checks and the row-action dropdown links, but not
  * the flag-based "Add/Remove from export list" browse-card link, which is
  * gated by flag.flag.export_content.yml's own permissions.
  */
-function mukurtu_export_update_40026(): void {
+function mukurtu_export_update_40027(): void {
   $role = \Drupal\user\Entity\Role::load('mukurtu_manager');
   if (!$role) {
     return;
