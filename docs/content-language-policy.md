@@ -45,13 +45,47 @@ Admin-only views that intentionally list content across all languages for editor
 
 ## Known contrib limitation: locale_string_is_safe() false positives (#1901)
 
-Drupal's `locale_string_is_safe()` scans every string in a `translatable`-
-typed config schema value and rejects it if it contains disallowed HTML
-(e.g. a `<div>` wrapping a machine-readable token, not visible text).
-Klaro and Captcha (both contrib, no Mukurtu-owned code in either) ship
-config strings that trip this check - see #1901. That's a contrib
-packaging issue, not something fixable in this profile; it needs a patch
-or an upstream fix in Klaro/Captcha itself.
+Drupal core's `locale_string_is_safe()` (`core/includes/locale.inc`) runs
+every translatable string through an HTML allowlist and rejects any that
+contains markup it can't verify as safe. It has no hook, no allowed-tags
+setting, and no alter, so it can't be reconfigured or bypassed from a
+module without patching core.
+
+It fires in two places:
+
+- **config-schema scanning**, when a `translatable`-typed schema leaf
+  wraps a machine token in markup (e.g. a hidden `<div>`), and
+- **`.po` file import**, when adding a language, running
+  `drush locale:update`, or the cron translation-update job pulls a
+  contrib module's interface translations.
+
+The `.po`-import case produces the admin warning "N translation strings
+were skipped because of disallowed or malformed HTML" plus a `locale`
+dblog entry naming the files. It is admin-only, shown once per language
+import, and never seen by site visitors; the only user-visible effect is
+that those specific strings render untranslated for that language.
+
+Two modules Mukurtu ships (via `mukurtu_bot_protection`) trip this on
+import. Both are genuine upstream false positives, tracked upstream,
+neither fixable in this profile:
+
+- **Klaro** - the privacy-policy URL config string `internal:/<front>`
+  (`<front>` reads as an unknown HTML tag). drupal.org/project/klaro
+  issue #3538882 (open at time of writing).
+- **CAPTCHA** (`image_captcha` submodule) - a font-preview string
+  embedding `<img src="@font_preview_url" alt="@title" title="@title">`.
+  drupal.org/project/captcha issue #3398914 (open at time of writing).
+
+Do not suppress the warning by intercepting the messenger/logger, or by
+removing these modules from the translation-update project list via
+`hook_locale_translation_projects_alter()`: the first hides a real signal
+for every future import in every language, the second drops all
+translations for those modules in all languages. Track the upstream
+issues instead.
+
+To see which strings were skipped on a given site, run
+`drush watchdog:show --type=locale`, or open Reports > Recent log
+messages filtered to type "locale".
 
 When the same false positive shows up in **Mukurtu-owned** config
 instead, it usually means a schema type is marked `translatable` for
