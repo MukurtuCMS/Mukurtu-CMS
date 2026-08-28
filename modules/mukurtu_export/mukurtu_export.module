@@ -50,7 +50,7 @@ function mukurtu_export_preprocess_flag(&$variables) {
  * Adds "Add to export list" to the operations dropdown on node/media rows.
  */
 function mukurtu_export_entity_operation(\Drupal\Core\Entity\EntityInterface $entity) {
-  $supported = ['node', 'media'];
+  $supported = ['node', 'media', 'user'];
   if (!in_array($entity->getEntityTypeId(), $supported)) {
     return [];
   }

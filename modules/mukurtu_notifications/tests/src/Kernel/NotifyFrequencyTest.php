@@ -14,13 +14,13 @@ use Drupal\user\Entity\User;
  *
  * "N/A" used to be Drupal's synthetic empty-option placeholder for this
  * optional list field, which always saved as an empty value and could
- * never actually suppress email. mukurtu_notifications_update_40056() adds
+ * never actually suppress email. mukurtu_notifications_update_40057() adds
  * a real 'none' allowed value and makes the field required so that
  * placeholder can no longer appear.
  *
  * @see mukurtu_notifications_notification_frequency_allowed_values()
  * @see _mukurtu_notifications_user_wants_email()
- * @see mukurtu_notifications_update_40056()
+ * @see mukurtu_notifications_update_40057()
  * @group mukurtu_notifications
  */
 class NotifyFrequencyTest extends KernelTestBase {
@@ -154,7 +154,7 @@ class NotifyFrequencyTest extends KernelTestBase {
     $optedOut->set('field_notify_frequency', 'none');
     $optedOut->save();
 
-    mukurtu_notifications_update_40056();
+    mukurtu_notifications_update_40057();
 
     $untouched = User::load($untouched->id());
     $this->assertSame('immediate', $untouched->get('field_notify_frequency')->value);
@@ -175,7 +175,7 @@ class NotifyFrequencyTest extends KernelTestBase {
     $field = FieldConfig::loadByName('user', 'user', 'field_notify_frequency');
     $field->setRequired(FALSE)->save();
 
-    mukurtu_notifications_update_40056();
+    mukurtu_notifications_update_40057();
 
     $field = FieldConfig::loadByName('user', 'user', 'field_notify_frequency');
     $this->assertTrue($field->isRequired());
@@ -185,8 +185,8 @@ class NotifyFrequencyTest extends KernelTestBase {
    * Running the update hook again once required and backfilled is a no-op.
    */
   public function testUpdateIsIdempotent(): void {
-    mukurtu_notifications_update_40056();
-    mukurtu_notifications_update_40056();
+    mukurtu_notifications_update_40057();
+    mukurtu_notifications_update_40057();
 
     $field = FieldConfig::loadByName('user', 'user', 'field_notify_frequency');
     $this->assertTrue($field->isRequired());

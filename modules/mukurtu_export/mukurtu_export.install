@@ -702,3 +702,109 @@ function mukurtu_export_update_40022(): void {
     }
   }
 }
+
+/**
+ * Install the "Add to export list" bulk action for /admin/people.
+ */
+function mukurtu_export_update_40023(): void {
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_export');
+  $source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+  $config_storage = \Drupal::service('config.storage');
+
+  $config_name = 'system.action.mukurtu_export_add_to_list_user_action';
+  if (!$config_storage->exists($config_name)) {
+    $config_storage->write($config_name, $source->read($config_name));
+  }
+}
+
+/**
+ * Add a user__user field mapping to the four default export presets.
+ *
+ * Without a mapping, getHeaders()/getExportFields() return an empty list for
+ * the user entity type, so exporting users produced a CSV with a header row
+ * and/or data rows but no actual field columns. Mirrors the field list
+ * mukurtu_import's "User - all fields" import strategy already maps, for
+ * import/export parity.
+ */
+function mukurtu_export_update_40024(): void {
+  $ids = [
+    'default_local_metadata_only',
+    'default_local_with_media',
+    'default_external_metadata_only',
+    'default_external_with_media',
+  ];
+  $storage = \Drupal::entityTypeManager()->getStorage('csv_exporter');
+  foreach ($ids as $id) {
+    $entity = $storage->load($id);
+    if (!$entity) {
+      continue;
+    }
+    $list = $entity->get('entity_fields_export_list') ?? [];
+    if (isset($list['user__user'])) {
+      continue;
+    }
+    $list['user__user'] = [
+      'uid' => 'ID',
+      'uuid' => 'UUID',
+      'name' => 'Username',
+      'mail' => 'Email',
+      'status' => 'Status',
+      'field_pending' => 'Pending',
+      'field_display_name' => 'Display Name',
+      'roles' => 'Roles',
+      'created' => 'Created',
+      'langcode' => 'Language (langcode)',
+      'timezone' => 'Timezone',
+      'message_subscribe_email' => 'Receive Email Notifications',
+      'user_picture/target_id' => 'Profile Picture File',
+      'user_picture/alt' => 'Profile Picture Alt Text',
+      'communities' => 'Communities',
+      'protocols' => 'Protocols',
+    ];
+    $entity->set('entity_fields_export_list', $list)->save();
+  }
+}
+
+/**
+ * Replace the separate Status/Pending export columns with a single Account
+ * Status column.
+ *
+ * The import side's 'status'/'field_pending' targets were replaced with a
+ * unified 'account_status' target (Active/Blocked/Pending), so a CSV
+ * exported with the old two-column format could no longer be re-imported
+ * without manually merging them by hand. Mirrors the field name/label the
+ * new mukurtu_account_status_lookup import process plugin expects, for
+ * export/re-import round-trip parity.
+ */
+function mukurtu_export_update_40025(): void {
+  $ids = [
+    'default_local_metadata_only',
+    'default_local_with_media',
+    'default_external_metadata_only',
+    'default_external_with_media',
+  ];
+  $storage = \Drupal::entityTypeManager()->getStorage('csv_exporter');
+  foreach ($ids as $id) {
+    $entity = $storage->load($id);
+    if (!$entity) {
+      continue;
+    }
+    $list = $entity->get('entity_fields_export_list') ?? [];
+    if (!isset($list['user__user']) || isset($list['user__user']['account_status'])) {
+      continue;
+    }
+    $reordered = [];
+    foreach ($list['user__user'] as $field_name => $label) {
+      if ($field_name === 'status') {
+        $reordered['account_status'] = 'Account Status';
+        continue;
+      }
+      if ($field_name === 'field_pending') {
+        continue;
+      }
+      $reordered[$field_name] = $label;
+    }
+    $list['user__user'] = $reordered;
+    $entity->set('entity_fields_export_list', $list)->save();
+  }
+}

@@ -10,16 +10,18 @@ This is implemented with two different, existing Drupal/contrib mechanisms depen
 
 ### Search API-backed views and facets
 
-Use the `language_with_fallback` property. It's provided by Search API's `LanguageWithFallback` processor, which is already enabled (locked/hidden) on every Mukurtu index — it just isn't wired to an indexed field yet on most indexes. For each indexed item, this property resolves to the item's own language plus every language that falls back to it, so filtering `language_with_fallback = <current interface language>` returns exactly one item per entity: the translation if one exists, otherwise the fallback (default-language) item.
+Use the `language_with_fallback` property. It's provided by Search API's `LanguageWithFallback` processor, which is already enabled (locked/hidden) on every Mukurtu index and shipped as a `string`-typed field in each index's `config/install`. For each indexed item, this property resolves to the item's own language plus every language that falls back to it, so filtering `language_with_fallback = <current content language>` returns exactly one item per entity: the translation if one exists, otherwise the fallback (default-language) item.
 
-To use it on an index that doesn't have it yet: add a field with `property_path: language_with_fallback` (no `datasource_id` — it's a processor-derived property, not a datasource field), then filter/facet on that field instead of the raw `search_api_language` property.
+**Use `language_content`, not `language_interface`, for the same reason as the plain-entity recipe below** — `mukurtu_multilingual.install` deliberately negotiates it as a separate type. Filter on the field with `plugin_id: search_api_string`, `operator: '='`, `value: {min: '', max: '', value: '***LANGUAGE_language_content***'}` (a plain `string` field uses Search API's generic string filter, not a dedicated language one — see `mukurtu_taxonomy_references.yml`'s `entity_type` filter for the same plugin's shape on a different field) — instead of the raw `search_api_language` property, which doesn't fall back and hides untranslated content outright.
 
 ### Plain-entity views (no Search API)
 
-Use core's own recipe, the same one `core/modules/media_library` ships:
+Use core's own recipe, the same structural pattern `core/modules/media_library` ships:
 
 - A `default_langcode = 1` filter, so each entity contributes exactly one row (its original/default translation) — no duplicate rows per translation.
 - The display's `rendering_language` set to `***LANGUAGE_language_content***`.
+
+**Use `language_content`, not `language_interface`, even though `media_library`'s own filter uses `language_interface`.** `mukurtu_multilingual.install` deliberately configures `language_content` as a separately-negotiated language type from `language_interface` (so an admin's interface-language preference doesn't also silently override which content translation renders) — copying `media_library`'s literal token would bypass that.
 
 `EntityViewBuilder` resolves the actual rendered translation via `entity.repository`'s `getTranslationFromContext()`, which already implements "current translation if it exists, else the default" — so this combination gives fallback behavior for free, no custom code.
 
@@ -35,10 +37,14 @@ Implemented once, in `mukurtu_core` via `hook_entity_view_alter()`, rather than 
 
 ## Exemptions
 
-Admin-only views that intentionally list content across all languages for editorial/management purposes (not visitor-facing browse/search) may skip this policy. Document the reason with a comment where the view is defined.
+Admin-only views that intentionally list content across all languages for editorial/management purposes (not visitor-facing browse/search) may skip this policy. Document the reason in `ViewLanguageFallbackCoverageTest::EXEMPTIONS` (below) — not as a YAML comment, since a normal Drupal config export/import cycle strips comments from `.yml` files and they won't survive it.
+
+## Automated check
+
+`modules/mukurtu_multilingual/tests/src/Unit/ViewLanguageFallbackCoverageTest.php` runs in CI on every PR. It scans every shipped `views.view.*.yml` (`config/install` and `config/optional`, profile-wide) and fails the build if a view implements neither fallback mechanism above **and** has no entry in its `EXEMPTIONS` list. Adding a new view (or editing an existing one's language handling) that doesn't satisfy either condition breaks CI — either implement the fallback pattern, or add a keyed, reasoned entry to `EXEMPTIONS`.
 
 ## Checklist for new views/facets
 
 - [ ] Does this view show content to site visitors (not just admins/editors)? If yes, it needs the fallback policy above.
 - [ ] Does it sort or filter on translatable field values? If yes, use the Search API path even if a plain-entity view would otherwise be simpler.
-- [ ] If it's exempt, is the reason documented at the point of definition?
+- [ ] If it's exempt, is the reason documented in `ViewLanguageFallbackCoverageTest::EXEMPTIONS`?
