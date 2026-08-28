@@ -808,3 +808,19 @@ function mukurtu_export_update_40025(): void {
     $entity->set('entity_fields_export_list', $list)->save();
   }
 }
+
+/**
+ * Add the item_languages field so export list items can carry a
+ * requested-translation langcode (#1260 Phase 5 export track).
+ *
+ * Additive only - existing lists have no entries in this field, so every
+ * existing item keeps exporting in its original language exactly as
+ * before.
+ */
+function mukurtu_export_update_40026(): void {
+  $definition = \Drupal\Core\Field\BaseFieldDefinition::create('map')
+    ->setLabel(t('Item languages'))
+    ->setDescription(t('Serialized map of "entity_type:id" => langcode pairs, for items whose export should use a specific translation instead of their original language. Additive to items - an item with no entry here exports in its original language, unchanged from before this field existed.'));
+  \Drupal::entityDefinitionUpdateManager()
+    ->installFieldStorageDefinition('item_languages', 'export_list', 'mukurtu_export', $definition);
+}
