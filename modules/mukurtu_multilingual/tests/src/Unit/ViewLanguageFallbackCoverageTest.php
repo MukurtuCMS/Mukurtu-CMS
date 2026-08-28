@@ -64,25 +64,9 @@ class ViewLanguageFallbackCoverageTest extends UnitTestCase {
     // Tracked under #1159 / #1188 (Phase 4 of the #1260 multilingual
     // roadmap). Remove each line as its view is migrated.
     'mukurtu_categories' => 'visitor-facing, not yet migrated - #1159/#1188',
-    'mukurtu_browse' => 'visitor-facing, not yet migrated - #1159/#1188',
-    'mukurtu_browse_by_map' => 'visitor-facing, not yet migrated - #1159/#1188',
-    'mukurtu_browse_collections' => 'visitor-facing, not yet migrated - #1159/#1188',
-    'mukurtu_browse_map' => 'visitor-facing, not yet migrated - #1159/#1188',
-    'mukurtu_digital_heritage_browse' => 'visitor-facing, not yet migrated - #1159/#1188',
-    'mukurtu_dictionary' => 'visitor-facing, not yet migrated - #1159/#1188',
     'mukurtu_collection_items' => 'visitor-facing, not yet migrated - #1159/#1188',
     'mukurtu_recent_content' => 'visitor-facing, not yet migrated - #1159/#1188',
-    'mukurtu_taxonomy_references' => 'visitor-facing, not yet migrated - #1159/#1188',
     'taxonomy_term' => 'visitor-facing, not yet migrated - #1159/#1188',
-    // The mukurtu_solr module is not installed by default (see mukurtu.install)
-    // - these are a dormant alternate-backend copy of the views above.
-    'dictionary_browse_solr_new_index' => 'visitor-facing, not yet migrated - #1159/#1188 (mukurtu_solr, not installed by default)',
-    'mukurtu_browse_by_map_solr' => 'visitor-facing, not yet migrated - #1159/#1188 (mukurtu_solr, not installed by default)',
-    'mukurtu_browse_collections_solr' => 'visitor-facing, not yet migrated - #1159/#1188 (mukurtu_solr, not installed by default)',
-    'mukurtu_browse_solr' => 'visitor-facing, not yet migrated - #1159/#1188 (mukurtu_solr, not installed by default)',
-    'mukurtu_dictionary_solr' => 'visitor-facing, not yet migrated - #1159/#1188 (mukurtu_solr, not installed by default)',
-    'mukurtu_digital_heritage_browse_solr' => 'visitor-facing, not yet migrated - #1159/#1188 (mukurtu_solr, not installed by default)',
-    'mukurtu_taxonomy_references_solr' => 'visitor-facing, not yet migrated - #1159/#1188 (mukurtu_solr, not installed by default)',
 
     // Active violation, not just "not yet migrated": its langcode filter
     // excludes untranslated content instead of falling back to it, which

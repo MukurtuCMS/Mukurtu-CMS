@@ -10,9 +10,9 @@ This is implemented with two different, existing Drupal/contrib mechanisms depen
 
 ### Search API-backed views and facets
 
-Use the `language_with_fallback` property. It's provided by Search API's `LanguageWithFallback` processor, which is already enabled (locked/hidden) on every Mukurtu index — it just isn't wired to an indexed field yet on most indexes. For each indexed item, this property resolves to the item's own language plus every language that falls back to it, so filtering `language_with_fallback = <current interface language>` returns exactly one item per entity: the translation if one exists, otherwise the fallback (default-language) item.
+Use the `language_with_fallback` property. It's provided by Search API's `LanguageWithFallback` processor, which is already enabled (locked/hidden) on every Mukurtu index and shipped as a `string`-typed field in each index's `config/install`. For each indexed item, this property resolves to the item's own language plus every language that falls back to it, so filtering `language_with_fallback = <current content language>` returns exactly one item per entity: the translation if one exists, otherwise the fallback (default-language) item.
 
-To use it on an index that doesn't have it yet: add a field with `property_path: language_with_fallback` (no `datasource_id` — it's a processor-derived property, not a datasource field), then filter/facet on that field instead of the raw `search_api_language` property.
+**Use `language_content`, not `language_interface`, for the same reason as the plain-entity recipe below** — `mukurtu_multilingual.install` deliberately negotiates it as a separate type. Filter on the field with `plugin_id: search_api_string`, `operator: '='`, `value: {min: '', max: '', value: '***LANGUAGE_language_content***'}` (a plain `string` field uses Search API's generic string filter, not a dedicated language one — see `mukurtu_taxonomy_references.yml`'s `entity_type` filter for the same plugin's shape on a different field) — instead of the raw `search_api_language` property, which doesn't fall back and hides untranslated content outright.
 
 ### Plain-entity views (no Search API)
 
