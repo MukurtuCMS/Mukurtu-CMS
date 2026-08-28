@@ -239,17 +239,19 @@ display:
             default_group: All
             default_group_multiple: {  }
             group_items: {  }
-        search_api_language:
-          id: search_api_language
+        language_with_fallback:
+          id: language_with_fallback
           table: search_api_index_mukurtu_default_content_index
-          field: search_api_language
+          field: language_with_fallback
           relationship: none
           group_type: group
           admin_label: ''
-          plugin_id: search_api_language
-          operator: in
+          plugin_id: search_api_string
+          operator: '='
           value:
-            '***LANGUAGE_language_interface***': '***LANGUAGE_language_interface***'
+            min: ''
+            max: ''
+            value: '***LANGUAGE_language_content***'
           group: 1
           exposed: false
           expose:
@@ -266,7 +268,9 @@ display:
             multiple: false
             remember_roles:
               authenticated: authenticated
-            reduce: false
+            min_placeholder: ''
+            max_placeholder: ''
+            placeholder: ''
           is_grouped: false
           group_info:
             label: ''

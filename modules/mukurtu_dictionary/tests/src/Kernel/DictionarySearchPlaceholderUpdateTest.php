@@ -8,10 +8,10 @@ use Drupal\KernelTests\KernelTestBase;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests mukurtu_dictionary_update_40043(), which gives the Dictionary search
+ * Tests mukurtu_dictionary_update_40044(), which gives the Dictionary search
  * box placeholder text instead of leaving it blank (#2018).
  *
- * @see mukurtu_dictionary_update_40043()
+ * @see mukurtu_dictionary_update_40044()
  */
 #[Group('mukurtu_dictionary')]
 class DictionarySearchPlaceholderUpdateTest extends KernelTestBase {
@@ -60,7 +60,7 @@ class DictionarySearchPlaceholderUpdateTest extends KernelTestBase {
       ])
       ->save();
 
-    mukurtu_dictionary_update_40043();
+    mukurtu_dictionary_update_40044();
 
     $this->assertSame(
       'Search dictionary entries',
@@ -75,7 +75,7 @@ class DictionarySearchPlaceholderUpdateTest extends KernelTestBase {
   public function testUpdateSkipsMissingView(): void {
     $this->assertTrue(\Drupal::config('views.view.mukurtu_dictionary')->isNew());
 
-    mukurtu_dictionary_update_40043();
+    mukurtu_dictionary_update_40044();
 
     $this->assertTrue(\Drupal::config('views.view.mukurtu_dictionary')->isNew());
   }

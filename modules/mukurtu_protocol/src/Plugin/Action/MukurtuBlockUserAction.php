@@ -3,7 +3,9 @@
 namespace Drupal\mukurtu_protocol\Plugin\Action;
 
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Action\Attribute\Action;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\mukurtu_core\Controller\MukurtuUserController;
 use Drupal\og\Og;
 use Drupal\user\Entity\User;
@@ -12,17 +14,13 @@ use Drupal\views_bulk_operations\Action\ViewsBulkOperationsActionBase;
 
 /**
  * VBO for blocking a user, scoped to community manager permissions.
- *
- * @Action(
- *   id = "mukurtu_block_user_action",
- *   label = @Translation("Block user(s)"),
- *   type = "user",
- *   confirm_form_route_name = "mukurtu_protocol.user_cancel_confirm",
- *   requirements = {
- *     "_custom_access" = TRUE,
- *   },
- * )
  */
+#[Action(
+  id: 'mukurtu_block_user_action',
+  label: new TranslatableMarkup('Block user(s)'),
+  confirm_form_route_name: 'mukurtu_protocol.user_cancel_confirm',
+  type: 'user',
+)]
 class MukurtuBlockUserAction extends ViewsBulkOperationsActionBase {
 
   /**

@@ -8,11 +8,11 @@ use Drupal\KernelTests\KernelTestBase;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests mukurtu_solr_update_40005(), which gives the Solr-backed Browse,
+ * Tests mukurtu_solr_update_40006(), which gives the Solr-backed Browse,
  * Digital Heritage, and Dictionary search boxes the same page-specific
  * placeholder text as their DB-backed counterparts (#2018).
  *
- * @see mukurtu_solr_update_40005()
+ * @see mukurtu_solr_update_40006()
  */
 #[Group('mukurtu_solr')]
 class SolrSearchPlaceholderUpdateTest extends KernelTestBase {
@@ -76,7 +76,7 @@ class SolrSearchPlaceholderUpdateTest extends KernelTestBase {
         ->save();
     }
 
-    mukurtu_solr_update_40005();
+    mukurtu_solr_update_40006();
 
     foreach ($expected as $name => $placeholder) {
       $this->assertSame(
@@ -96,7 +96,7 @@ class SolrSearchPlaceholderUpdateTest extends KernelTestBase {
     $this->assertTrue(\Drupal::config('views.view.mukurtu_digital_heritage_browse_solr')->isNew());
     $this->assertTrue(\Drupal::config('views.view.mukurtu_dictionary_solr')->isNew());
 
-    mukurtu_solr_update_40005();
+    mukurtu_solr_update_40006();
 
     $this->assertTrue(\Drupal::config('views.view.mukurtu_browse_solr')->isNew());
     $this->assertTrue(\Drupal::config('views.view.mukurtu_digital_heritage_browse_solr')->isNew());

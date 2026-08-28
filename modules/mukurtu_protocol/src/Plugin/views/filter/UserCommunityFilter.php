@@ -4,14 +4,14 @@ namespace Drupal\mukurtu_protocol\Plugin\views\filter;
 
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\views\Attribute\ViewsFilter;
 use Drupal\views\Plugin\views\filter\InOperator;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Filters users by community membership.
- *
- * @ViewsFilter("user_community_filter")
  */
+#[ViewsFilter('user_community_filter')]
 class UserCommunityFilter extends InOperator {
 
   public function __construct(

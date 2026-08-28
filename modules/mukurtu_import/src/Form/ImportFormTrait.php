@@ -46,8 +46,16 @@ trait ImportFormTrait {
     $definitions = $this->entityTypeManager->getDefinitions();
     $options = [];
     $custom_entity_type_ids = \Drupal::service('mukurtu_core.roundtrip_entity_types')->getCustomEntityTypeIds();
-    $entity_type_ids = array_merge(['node', 'media'], $custom_entity_type_ids, ['paragraph', 'taxonomy_term']);
+    $entity_type_ids = array_merge(['node', 'media'], $custom_entity_type_ids, ['paragraph', 'taxonomy_term', 'user']);
     foreach ($entity_type_ids as $entity_type_id) {
+      // User accounts are more sensitive than other import targets (they can
+      // create accounts, assign roles, etc.), so this option additionally
+      // requires the dedicated 'import mukurtu users' permission on top of
+      // the entity type's own create access.
+      if ($entity_type_id === 'user' && !$this->currentUser()->hasPermission('import mukurtu users')) {
+        continue;
+      }
+
       if (isset($definitions[$entity_type_id]) && $this->userCanCreateAnyBundleForEntityType($entity_type_id)) {
         $options[$entity_type_id] = $definitions[$entity_type_id]->getLabel();
 
@@ -118,6 +126,31 @@ trait ImportFormTrait {
       }
       else {
         $options[$field_name] = $export_overrides[$field_name] ?? $field_definition->getLabel();
+      }
+    }
+
+    // Community/protocol membership isn't a real, writable field on user
+    // accounts (the only related field, field_communities, is computed and
+    // read-only, and there is no field_protocols equivalent), so these
+    // targets can't be discovered through the field-definition loop above.
+    // Account Status is a real pair of fields (status, field_pending) but is
+    // exposed as a single virtual target instead, since mapping them
+    // separately requires knowing field_pending's non-obvious default and
+    // the Status-overrides-Pending interaction. All three are handled as
+    // virtual destination properties by ProtocolAwareUserContent and
+    // MukurtuImportStrategy::getProcess().
+    if ($entity_type_id === 'user') {
+      $options['communities'] = $this->t('Communities');
+      $options['protocols'] = $this->t('Protocols');
+      $options['account_status'] = $this->t('Account Status');
+    }
+
+    // Some base fields' own definition labels are more generic than what
+    // the site's actual admin forms call them; use the more familiar term
+    // here instead.
+    foreach ($this->getFieldLabelOverrides($entity_type_id) as $field_name => $override_label) {
+      if (isset($options[$field_name])) {
+        $options[$field_name] = $override_label;
       }
     }
 
@@ -194,6 +227,18 @@ trait ImportFormTrait {
     if (!$account) {
       $account = $this->currentUser();
     }
+
+    // User accounts don't have a separate "create" permission of their own
+    // in this module; the dedicated 'import mukurtu users' permission
+    // (already required by getEntityTypeIdOptions()) is the full
+    // authorization gate. Without this override, core's default create
+    // access check for the user entity type would additionally require the
+    // broad 'administer users' permission, defeating the point of a more
+    // narrowly scoped import permission.
+    if ($entity_type_id === 'user') {
+      return $account->hasPermission('import mukurtu users');
+    }
+
     return $this->entityTypeManager->getAccessControlHandler($entity_type_id)->createAccess($bundle, $account);
   }
 
@@ -265,6 +310,32 @@ trait ImportFormTrait {
           unset($field_defs[$field_name]);
         }
 
+        // Passwords must never be settable via import (plaintext passwords
+        // are never mapped from a CSV; new accounts get a standard account
+        // setup email instead). 'access', 'login', and 'init' are internal
+        // bookkeeping fields not meaningful for an admin-authored import.
+        if ($entity_type_id === 'user' && in_array($field_name, ['pass', 'access', 'login', 'init'], TRUE)) {
+          unset($field_defs[$field_name]);
+        }
+
+        // These fields aren't exposed on the interactive account
+        // registration or admin "add user" forms either, so offering them
+        // here is more confusing than useful for an import audience
+        // mirroring those same forms.
+        if ($entity_type_id === 'user' && in_array($field_name, ['created', 'message_subscribe_email', 'user_picture', 'preferred_admin_langcode', 'preferred_langcode', 'langcode', 'timezone'], TRUE)) {
+          unset($field_defs[$field_name]);
+        }
+
+        // Superseded by the unified 'account_status' virtual target
+        // (Active/Blocked/Pending), which sets both of these under the hood
+        // -- see ProtocolAwareUserContent::applyAccountStatus(). Mapping
+        // them directly requires knowing field_pending's non-obvious
+        // storage default (1) and the Status-overrides-Pending interaction
+        // the interactive account form already hides from the user.
+        if ($entity_type_id === 'user' && in_array($field_name, ['status', 'field_pending'], TRUE)) {
+          unset($field_defs[$field_name]);
+        }
+
         // Landing pages inherit a required Cultural Protocols field from the
         // shared MukurtuNode bundle class (kept there only for its "allow
         // public view" access override). The field is hidden on the landing
@@ -289,6 +360,159 @@ trait ImportFormTrait {
     }
 
     return $this->fieldDefinitions[$entity_type_id][$bundle];
+  }
+
+  /**
+   * Compare field labels against a search string.
+   *
+   * @param string $needle
+   *   The search term.
+   * @param string $entity_type_id
+   *   The entity type id.
+   * @param string|null $bundle
+   *   The bundle.
+   * @return string|null
+   *   The field name of the match or NULL if no matches found.
+   */
+  protected function searchFieldLabels(string $needle, string $entity_type_id, ?string $bundle = NULL): ?string {
+    $field_defs = $this->getFieldDefinitions($entity_type_id, $bundle);
+    $matching_fields = array_filter($field_defs, function($field) use ($needle) {
+      return $needle == mb_strtolower((string) $field->getLabel());
+    });
+
+    // If there are multiple matches, return the first bundle specific match.
+    if (count($matching_fields) > 1) {
+      foreach ($matching_fields as $matched_field_name => $matched_field) {
+        if ($matched_field->getTargetBundle()) {
+          return $matched_field_name;
+        }
+      }
+    }
+
+    // If all are base fields, return the first.
+    if (count($matching_fields) >= 1) {
+      $field_names = array_keys($matching_fields);
+      return reset($field_names);
+    }
+
+    // Also match against this entity type's field label overrides (see
+    // getFieldLabelOverrides()), so a header using the more familiar term
+    // resolves too, alongside the field's own raw definition label.
+    foreach ($this->getFieldLabelOverrides($entity_type_id) as $field_name => $override_label) {
+      if ($needle == mb_strtolower((string) $override_label) && isset($field_defs[$field_name])) {
+        return $field_name;
+      }
+    }
+
+    return NULL;
+  }
+
+  /**
+   * Per-entity-type overrides for how a field is labeled/matched in the
+   * import UI.
+   *
+   * Some base fields' own definition labels are more generic, or less
+   * familiar, than what the site's actual admin forms call them. Used by
+   * buildTargetOptions() to display the more familiar term, and by
+   * searchFieldLabels() so a header using either term resolves.
+   *
+   * @param string $entity_type_id
+   *   The entity type id.
+   *
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup[]
+   *   Field name => override label.
+   */
+  protected function getFieldLabelOverrides(string $entity_type_id): array {
+    if ($entity_type_id === 'user') {
+      // The 'name' base field's own definition label is 'Name', but the
+      // actual "Add user" admin form displays it as 'Username'.
+      return ['name' => $this->t('Username')];
+    }
+    return [];
+  }
+
+  /**
+   * Some basic logic to try and auto-map source to target.
+   *
+   * 1. Check for full field label matches (case insensitive).
+   * 2. Check for field name matches (case insensitive).
+   *
+   * @param string $source
+   *   The CSV column header to resolve a target for.
+   * @param string $entity_type_id
+   *   The entity type id.
+   * @param string|null $bundle
+   *   The bundle.
+   * @param array $config_mapping
+   *   An existing mapping (as from MukurtuImportStrategyInterface::getMapping())
+   *   to check first, so an already-configured source/target pairing takes
+   *   precedence over the label/name guessing below.
+   */
+  protected function getAutoMappedTarget($source, $entity_type_id, $bundle = NULL, array $config_mapping = []) {
+    $field_defs = $this->getFieldDefinitions($entity_type_id, $bundle);
+
+    // If the selected config has an existing valid mapping for this field,
+    // it has precedence.
+    foreach ($config_mapping as $mapping) {
+      // Break up any subfields.
+      $subfields = explode('/', $mapping['target'], 2);
+      $target = reset($subfields);
+
+      // Checking if we have a mapping and the root of the target field exists.
+      if ($mapping['source'] == $source && in_array($target, array_keys($field_defs))) {
+        return $mapping['target'];
+      }
+    }
+
+    $needle = mb_strtolower($source);
+
+    // Match against the real mukurtu_export header for this bundle when
+    // known - see getExportLabelOverrides(). This takes precedence over the
+    // generic property-label matching below since it's authoritative for
+    // exactly what a real export/reimport round trip uses (e.g. langcode's
+    // per-bundle "Locale"/"Language"/"Language code" header, or a field
+    // whose real header differs from its own configured Drupal label).
+    foreach ($this->getExportLabelOverrides($entity_type_id, $bundle) as $target_key => $label) {
+      if ($needle === mb_strtolower($label)) {
+        return $target_key;
+      }
+    }
+
+    // Check if any field has a property, which our import field process plugins
+    // support, matching the source label.
+    foreach ($field_defs as $field_name => $field_definition) {
+      $plugin = $this->fieldProcessPluginManager->getInstance(['field_definition' => $field_definition]);
+      $supported_properties = $plugin->getSupportedProperties($field_definition);
+
+      foreach ($supported_properties as $property_name => $property_info) {
+        if ($needle == mb_strtolower($property_info['label'])) {
+          return "{$field_name}/{$property_name}";
+        }
+      }
+    }
+
+    // Disambiguate the langcode base field from other Language-labeled
+    // fields when no export-header override applies.
+    $entity_definition = $this->entityTypeManager->getDefinition($entity_type_id);
+    $entity_keys = $entity_definition->getKeys();
+    if (!empty($entity_keys['langcode']) && isset($field_defs[$entity_keys['langcode']])) {
+      $langcode_label = mb_strtolower($field_defs[$entity_keys['langcode']]->getLabel() . ' (langcode)');
+      if ($needle === $langcode_label) {
+        return $entity_keys['langcode'];
+      }
+    }
+
+    // Check for field label matches.
+    if ($field_label_match = $this->searchFieldLabels($needle, $entity_type_id, $bundle)) {
+      return $field_label_match;
+    }
+
+    // Check if we have a (case insensitive) field name match.
+    if (isset($field_defs[$needle])) {
+      return $needle;
+    }
+
+    return -1;
   }
 
 }

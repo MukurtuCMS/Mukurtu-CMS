@@ -676,10 +676,337 @@ function mukurtu_browse_update_40019(): void {
 }
 
 /**
+ * Adds the language-fallback default_langcode... language_with_fallback filter
+ * to the 5 mukurtu_browse-owned Search API views, per
+ * docs/content-language-policy.md, and defensively removes the old
+ * search_api_language filter from the 4 that had one - only if it still
+ * matches the exact shape originally shipped, so a site's own
+ * customization of that filter is never clobbered. Additive/defensive
+ * only, never forces a change a site doesn't already match.
+ */
+function mukurtu_browse_update_40020(): void {
+  $config_mukurtu_browse = \Drupal::configFactory()->getEditable('views.view.mukurtu_browse');
+  if (!$config_mukurtu_browse->isNew()) {
+    $filters_mukurtu_browse = $config_mukurtu_browse->get('display.default.display_options.filters') ?? [];
+    $changed_mukurtu_browse = FALSE;
+    if (!isset($filters_mukurtu_browse['language_with_fallback'])) {
+      $filters_mukurtu_browse['language_with_fallback'] = [
+        'id' => 'language_with_fallback',
+        'table' => 'search_api_index_mukurtu_default_content_index',
+        'field' => 'language_with_fallback',
+        'relationship' => 'none',
+        'group_type' => 'group',
+        'admin_label' => '',
+        'plugin_id' => 'search_api_string',
+        'operator' => '=',
+        'value' => ['min' => '', 'max' => '', 'value' => '***LANGUAGE_language_content***'],
+        'group' => 1,
+        'exposed' => FALSE,
+        'expose' => [
+          'operator_id' => '',
+          'label' => '',
+          'description' => '',
+          'use_operator' => FALSE,
+          'operator' => '',
+          'operator_limit_selection' => FALSE,
+          'operator_list' => [],
+          'identifier' => '',
+          'required' => FALSE,
+          'remember' => FALSE,
+          'multiple' => FALSE,
+          'remember_roles' => ['authenticated' => 'authenticated'],
+          'min_placeholder' => '',
+          'max_placeholder' => '',
+          'placeholder' => '',
+        ],
+        'is_grouped' => FALSE,
+        'group_info' => [
+          'label' => '',
+          'description' => '',
+          'identifier' => '',
+          'optional' => TRUE,
+          'widget' => 'select',
+          'multiple' => FALSE,
+          'remember' => FALSE,
+          'default_group' => 'All',
+          'default_group_multiple' => [],
+          'group_items' => [],
+        ],
+      ];
+      $changed_mukurtu_browse = TRUE;
+    }
+    $old_mukurtu_browse = $filters_mukurtu_browse['search_api_language'] ?? NULL;
+    if ($old_mukurtu_browse
+      && ($old_mukurtu_browse['plugin_id'] ?? NULL) === 'search_api_language'
+      && ($old_mukurtu_browse['operator'] ?? NULL) === 'in'
+      && array_key_exists('***LANGUAGE_language_interface***', $old_mukurtu_browse['value'] ?? [])
+    ) {
+      unset($filters_mukurtu_browse['search_api_language']);
+      $changed_mukurtu_browse = TRUE;
+    }
+    if ($changed_mukurtu_browse) {
+      $config_mukurtu_browse->set('display.default.display_options.filters', $filters_mukurtu_browse);
+      $config_mukurtu_browse->save();
+    }
+  }
+
+  $config_mukurtu_browse_collections = \Drupal::configFactory()->getEditable('views.view.mukurtu_browse_collections');
+  if (!$config_mukurtu_browse_collections->isNew()) {
+    $filters_mukurtu_browse_collections = $config_mukurtu_browse_collections->get('display.default.display_options.filters') ?? [];
+    $changed_mukurtu_browse_collections = FALSE;
+    if (!isset($filters_mukurtu_browse_collections['language_with_fallback'])) {
+      $filters_mukurtu_browse_collections['language_with_fallback'] = [
+        'id' => 'language_with_fallback',
+        'table' => 'search_api_index_mukurtu_collection_index',
+        'field' => 'language_with_fallback',
+        'relationship' => 'none',
+        'group_type' => 'group',
+        'admin_label' => '',
+        'plugin_id' => 'search_api_string',
+        'operator' => '=',
+        'value' => ['min' => '', 'max' => '', 'value' => '***LANGUAGE_language_content***'],
+        'group' => 1,
+        'exposed' => FALSE,
+        'expose' => [
+          'operator_id' => '',
+          'label' => '',
+          'description' => '',
+          'use_operator' => FALSE,
+          'operator' => '',
+          'operator_limit_selection' => FALSE,
+          'operator_list' => [],
+          'identifier' => '',
+          'required' => FALSE,
+          'remember' => FALSE,
+          'multiple' => FALSE,
+          'remember_roles' => ['authenticated' => 'authenticated'],
+          'min_placeholder' => '',
+          'max_placeholder' => '',
+          'placeholder' => '',
+        ],
+        'is_grouped' => FALSE,
+        'group_info' => [
+          'label' => '',
+          'description' => '',
+          'identifier' => '',
+          'optional' => TRUE,
+          'widget' => 'select',
+          'multiple' => FALSE,
+          'remember' => FALSE,
+          'default_group' => 'All',
+          'default_group_multiple' => [],
+          'group_items' => [],
+        ],
+      ];
+      $changed_mukurtu_browse_collections = TRUE;
+    }
+    $old_mukurtu_browse_collections = $filters_mukurtu_browse_collections['search_api_language'] ?? NULL;
+    if ($old_mukurtu_browse_collections
+      && ($old_mukurtu_browse_collections['plugin_id'] ?? NULL) === 'search_api_language'
+      && ($old_mukurtu_browse_collections['operator'] ?? NULL) === 'in'
+      && array_key_exists('***LANGUAGE_language_interface***', $old_mukurtu_browse_collections['value'] ?? [])
+    ) {
+      unset($filters_mukurtu_browse_collections['search_api_language']);
+      $changed_mukurtu_browse_collections = TRUE;
+    }
+    if ($changed_mukurtu_browse_collections) {
+      $config_mukurtu_browse_collections->set('display.default.display_options.filters', $filters_mukurtu_browse_collections);
+      $config_mukurtu_browse_collections->save();
+    }
+  }
+
+  $config_mukurtu_browse_map = \Drupal::configFactory()->getEditable('views.view.mukurtu_browse_map');
+  if (!$config_mukurtu_browse_map->isNew()) {
+    $filters_mukurtu_browse_map = $config_mukurtu_browse_map->get('display.default.display_options.filters') ?? [];
+    $changed_mukurtu_browse_map = FALSE;
+    if (!isset($filters_mukurtu_browse_map['language_with_fallback'])) {
+      $filters_mukurtu_browse_map['language_with_fallback'] = [
+        'id' => 'language_with_fallback',
+        'table' => 'search_api_index_mukurtu_default_content_index',
+        'field' => 'language_with_fallback',
+        'relationship' => 'none',
+        'group_type' => 'group',
+        'admin_label' => '',
+        'plugin_id' => 'search_api_string',
+        'operator' => '=',
+        'value' => ['min' => '', 'max' => '', 'value' => '***LANGUAGE_language_content***'],
+        'group' => 1,
+        'exposed' => FALSE,
+        'expose' => [
+          'operator_id' => '',
+          'label' => '',
+          'description' => '',
+          'use_operator' => FALSE,
+          'operator' => '',
+          'operator_limit_selection' => FALSE,
+          'operator_list' => [],
+          'identifier' => '',
+          'required' => FALSE,
+          'remember' => FALSE,
+          'multiple' => FALSE,
+          'remember_roles' => ['authenticated' => 'authenticated'],
+          'min_placeholder' => '',
+          'max_placeholder' => '',
+          'placeholder' => '',
+        ],
+        'is_grouped' => FALSE,
+        'group_info' => [
+          'label' => '',
+          'description' => '',
+          'identifier' => '',
+          'optional' => TRUE,
+          'widget' => 'select',
+          'multiple' => FALSE,
+          'remember' => FALSE,
+          'default_group' => 'All',
+          'default_group_multiple' => [],
+          'group_items' => [],
+        ],
+      ];
+      $changed_mukurtu_browse_map = TRUE;
+    }
+    $old_mukurtu_browse_map = $filters_mukurtu_browse_map['search_api_language'] ?? NULL;
+    if ($old_mukurtu_browse_map
+      && ($old_mukurtu_browse_map['plugin_id'] ?? NULL) === 'search_api_language'
+      && ($old_mukurtu_browse_map['operator'] ?? NULL) === 'in'
+      && array_key_exists('***LANGUAGE_language_interface***', $old_mukurtu_browse_map['value'] ?? [])
+    ) {
+      unset($filters_mukurtu_browse_map['search_api_language']);
+      $changed_mukurtu_browse_map = TRUE;
+    }
+    if ($changed_mukurtu_browse_map) {
+      $config_mukurtu_browse_map->set('display.default.display_options.filters', $filters_mukurtu_browse_map);
+      $config_mukurtu_browse_map->save();
+    }
+  }
+
+  $config_mukurtu_digital_heritage_browse = \Drupal::configFactory()->getEditable('views.view.mukurtu_digital_heritage_browse');
+  if (!$config_mukurtu_digital_heritage_browse->isNew()) {
+    $filters_mukurtu_digital_heritage_browse = $config_mukurtu_digital_heritage_browse->get('display.default.display_options.filters') ?? [];
+    $changed_mukurtu_digital_heritage_browse = FALSE;
+    if (!isset($filters_mukurtu_digital_heritage_browse['language_with_fallback'])) {
+      $filters_mukurtu_digital_heritage_browse['language_with_fallback'] = [
+        'id' => 'language_with_fallback',
+        'table' => 'search_api_index_mukurtu_default_content_index',
+        'field' => 'language_with_fallback',
+        'relationship' => 'none',
+        'group_type' => 'group',
+        'admin_label' => '',
+        'plugin_id' => 'search_api_string',
+        'operator' => '=',
+        'value' => ['min' => '', 'max' => '', 'value' => '***LANGUAGE_language_content***'],
+        'group' => 1,
+        'exposed' => FALSE,
+        'expose' => [
+          'operator_id' => '',
+          'label' => '',
+          'description' => '',
+          'use_operator' => FALSE,
+          'operator' => '',
+          'operator_limit_selection' => FALSE,
+          'operator_list' => [],
+          'identifier' => '',
+          'required' => FALSE,
+          'remember' => FALSE,
+          'multiple' => FALSE,
+          'remember_roles' => ['authenticated' => 'authenticated'],
+          'min_placeholder' => '',
+          'max_placeholder' => '',
+          'placeholder' => '',
+        ],
+        'is_grouped' => FALSE,
+        'group_info' => [
+          'label' => '',
+          'description' => '',
+          'identifier' => '',
+          'optional' => TRUE,
+          'widget' => 'select',
+          'multiple' => FALSE,
+          'remember' => FALSE,
+          'default_group' => 'All',
+          'default_group_multiple' => [],
+          'group_items' => [],
+        ],
+      ];
+      $changed_mukurtu_digital_heritage_browse = TRUE;
+    }
+    $old_mukurtu_digital_heritage_browse = $filters_mukurtu_digital_heritage_browse['search_api_language'] ?? NULL;
+    if ($old_mukurtu_digital_heritage_browse
+      && ($old_mukurtu_digital_heritage_browse['plugin_id'] ?? NULL) === 'search_api_language'
+      && ($old_mukurtu_digital_heritage_browse['operator'] ?? NULL) === 'in'
+      && array_key_exists('***LANGUAGE_language_interface***', $old_mukurtu_digital_heritage_browse['value'] ?? [])
+    ) {
+      unset($filters_mukurtu_digital_heritage_browse['search_api_language']);
+      $changed_mukurtu_digital_heritage_browse = TRUE;
+    }
+    if ($changed_mukurtu_digital_heritage_browse) {
+      $config_mukurtu_digital_heritage_browse->set('display.default.display_options.filters', $filters_mukurtu_digital_heritage_browse);
+      $config_mukurtu_digital_heritage_browse->save();
+    }
+  }
+
+  $config_mukurtu_browse_by_map = \Drupal::configFactory()->getEditable('views.view.mukurtu_browse_by_map');
+  if (!$config_mukurtu_browse_by_map->isNew()) {
+    $filters_mukurtu_browse_by_map = $config_mukurtu_browse_by_map->get('display.default.display_options.filters') ?? [];
+    $changed_mukurtu_browse_by_map = FALSE;
+    if (!isset($filters_mukurtu_browse_by_map['language_with_fallback'])) {
+      $filters_mukurtu_browse_by_map['language_with_fallback'] = [
+        'id' => 'language_with_fallback',
+        'table' => 'search_api_index_mukurtu_default_content_index',
+        'field' => 'language_with_fallback',
+        'relationship' => 'none',
+        'group_type' => 'group',
+        'admin_label' => '',
+        'plugin_id' => 'search_api_string',
+        'operator' => '=',
+        'value' => ['min' => '', 'max' => '', 'value' => '***LANGUAGE_language_content***'],
+        'group' => 1,
+        'exposed' => FALSE,
+        'expose' => [
+          'operator_id' => '',
+          'label' => '',
+          'description' => '',
+          'use_operator' => FALSE,
+          'operator' => '',
+          'operator_limit_selection' => FALSE,
+          'operator_list' => [],
+          'identifier' => '',
+          'required' => FALSE,
+          'remember' => FALSE,
+          'multiple' => FALSE,
+          'remember_roles' => ['authenticated' => 'authenticated'],
+          'min_placeholder' => '',
+          'max_placeholder' => '',
+          'placeholder' => '',
+        ],
+        'is_grouped' => FALSE,
+        'group_info' => [
+          'label' => '',
+          'description' => '',
+          'identifier' => '',
+          'optional' => TRUE,
+          'widget' => 'select',
+          'multiple' => FALSE,
+          'remember' => FALSE,
+          'default_group' => 'All',
+          'default_group_multiple' => [],
+          'group_items' => [],
+        ],
+      ];
+      $changed_mukurtu_browse_by_map = TRUE;
+    }
+    if ($changed_mukurtu_browse_by_map) {
+      $config_mukurtu_browse_by_map->set('display.default.display_options.filters', $filters_mukurtu_browse_by_map);
+      $config_mukurtu_browse_by_map->save();
+    }
+  }
+}
+
+/**
  * Give the Browse and Digital Heritage search boxes page-specific
  * placeholder text instead of the generic "Enter keywords" (#2018).
  */
-function mukurtu_browse_update_40020(): void {
+function mukurtu_browse_update_40021(): void {
   $placeholders = [
     'views.view.mukurtu_browse' => 'Search all content',
     'views.view.mukurtu_digital_heritage_browse' => 'Search digital heritage items',

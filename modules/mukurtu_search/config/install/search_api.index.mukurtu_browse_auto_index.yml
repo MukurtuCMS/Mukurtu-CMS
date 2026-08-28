@@ -14,6 +14,10 @@ name: 'Mukurtu Browse Auto Content Index'
 description: ''
 read_only: false
 field_settings:
+  language_with_fallback:
+    label: 'Language (with fallback)'
+    property_path: language_with_fallback
+    type: string
   entity_type:
     label: 'Entity type'
     property_path: search_api_entity_type

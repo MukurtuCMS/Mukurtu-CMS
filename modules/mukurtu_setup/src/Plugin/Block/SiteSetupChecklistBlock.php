@@ -4,21 +4,22 @@ declare(strict_types=1);
 
 namespace Drupal\mukurtu_setup\Plugin\Block;
 
+use Drupal\Core\Block\Attribute\Block;
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\mukurtu_setup\SiteSetupTaskManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides the Site Setup Checklist dashboard block.
- *
- * @Block(
- *   id = "mukurtu_setup_checklist",
- *   admin_label = @Translation("Setup Checklist"),
- *   category = "Mukurtu CMS"
- * )
  */
+#[Block(
+  id: 'mukurtu_setup_checklist',
+  admin_label: new TranslatableMarkup('Setup Checklist'),
+  category: new TranslatableMarkup('Mukurtu CMS'),
+)]
 class SiteSetupChecklistBlock extends BlockBase implements ContainerFactoryPluginInterface {
 
   public function __construct(
