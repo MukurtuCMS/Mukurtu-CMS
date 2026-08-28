@@ -11,11 +11,14 @@ use Symfony\Component\Yaml\Yaml;
 /**
  * Tests the dashboard link cleanup for issues #1787 and #2057:
  * - mukurtu_core_update_40107() orders Security before Site information.
+ * - mukurtu_core_update_40108() splits Site settings into "Publication tools"
+ *   and "Local Contexts" sections.
  * - The Configure Community/Protocol Permissions links are gone.
  * - The Visitors "Analytics" / "Visitor settings" links are present.
  * - The Multilingual section no longer has a duplicate "Manage site languages".
  *
  * @see mukurtu_core_update_40107()
+ * @see mukurtu_core_update_40108()
  * @see mukurtu_protocol_update_40044()
  */
 #[Group('mukurtu_core')]
@@ -185,6 +188,102 @@ class DashboardLinkCleanupTest extends KernelTestBase {
     $link = reset($languages_links);
     $this->assertSame('internal:/admin/config/regional/language', $link['url']);
     $this->assertArrayNotHasKey('entity.configurable_language.edit_form', $links);
+  }
+
+  /**
+   * mukurtu_core_update_40108() creates the two new dashboard menus and adds
+   * their section blocks to the Right column, re-weighted into order (#1787).
+   */
+  public function testUpdate40108SplitsSiteSettingsSection(): void {
+    $this->saveDashboardConfig(8, 9);
+
+    mukurtu_core_update_40108();
+
+    $menu_storage = \Drupal::entityTypeManager()->getStorage('menu');
+    $this->assertNotNull($menu_storage->load('dashboard-publication-tools'));
+    $this->assertNotNull($menu_storage->load('dashboard-local-contexts'));
+
+    $components = \Drupal::config('dashboards.dashboard.mukurtu_dashboard')->get('sections.0.components');
+    $by_id = [];
+    foreach ($components as $component) {
+      $by_id[$component['configuration']['id']] = $component;
+    }
+    $this->assertArrayHasKey('system_menu_block:dashboard-publication-tools', $by_id);
+    $this->assertArrayHasKey('system_menu_block:dashboard-local-contexts', $by_id);
+    $this->assertSame('three', $by_id['system_menu_block:dashboard-publication-tools']['region']);
+    $this->assertSame(5, $by_id['system_menu_block:dashboard-publication-tools']['weight']);
+    $this->assertSame(6, $by_id['system_menu_block:dashboard-local-contexts']['weight']);
+    // Existing Right-column blocks are re-weighted around the new ones.
+    $this->assertSame(8, $by_id['system_menu_block:dashboard-security']['weight']);
+    $this->assertSame(9, $by_id['system_menu_block:dashboard-site-info']['weight']);
+  }
+
+  /**
+   * Running mukurtu_core_update_40108() twice does not duplicate blocks.
+   */
+  public function testUpdate40108IsIdempotent(): void {
+    $this->saveDashboardConfig(8, 9);
+
+    mukurtu_core_update_40108();
+    mukurtu_core_update_40108();
+
+    $components = \Drupal::config('dashboards.dashboard.mukurtu_dashboard')->get('sections.0.components');
+    $ids = array_map(static fn(array $c): string => $c['configuration']['id'], array_values($components));
+    $this->assertSame(1, count(array_keys($ids, 'system_menu_block:dashboard-publication-tools', TRUE)));
+    $this->assertSame(1, count(array_keys($ids, 'system_menu_block:dashboard-local-contexts', TRUE)));
+  }
+
+  /**
+   * The shipped dashboard config carries the Publication tools / Local Contexts
+   * section blocks for fresh installs (#1787).
+   */
+  public function testShippedDashboardConfigHasNewSectionBlocks(): void {
+    $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core');
+    $profile_path = \Drupal::root() . '/' . dirname($module_path, 2);
+    $data = Yaml::parseFile($profile_path . '/config/install/dashboards.dashboard.mukurtu_dashboard.yml');
+
+    $ids = [];
+    foreach ($data['sections'][0]['components'] as $component) {
+      $ids[$component['configuration']['id']] = $component['weight'];
+    }
+    $this->assertSame(5, $ids['system_menu_block:dashboard-publication-tools']);
+    $this->assertSame(6, $ids['system_menu_block:dashboard-local-contexts']);
+
+    foreach (['dashboard-publication-tools' => 'Publication tools', 'dashboard-local-contexts' => 'Local Contexts'] as $id => $label) {
+      $menu = Yaml::parseFile($profile_path . "/config/install/system.menu.$id.yml");
+      $this->assertSame($id, $menu['id']);
+      $this->assertSame($label, $menu['label']);
+    }
+  }
+
+  /**
+   * Publication-tools links (workflow + submissions) point at the new menu with
+   * no leftover weight overrides (#1787).
+   */
+  public function testPublicationToolsLinksMoved(): void {
+    $expected = [
+      'mukurtu_workflows' => ['mukurtu_workflows.settings', 'mukurtu_workflows.review_queue'],
+      'mukurtu_submissions' => ['entity.mukurtu_submission_settings.collection', 'mukurtu_submissions.pending_queue'],
+    ];
+    foreach ($expected as $module => $ids) {
+      $links = $this->menuLinks($module);
+      foreach ($ids as $id) {
+        $this->assertArrayHasKey($id, $links);
+        $this->assertSame('dashboard-publication-tools', $links[$id]['menu_name']);
+        $this->assertArrayNotHasKey('weight', $links[$id]);
+      }
+    }
+  }
+
+  /**
+   * All three Local Contexts links move to the new Local Contexts menu (#1787).
+   */
+  public function testLocalContextsLinksMoved(): void {
+    $links = $this->menuLinks('mukurtu_local_contexts');
+    $this->assertNotEmpty($links);
+    foreach ($links as $link) {
+      $this->assertSame('dashboard-local-contexts', $link['menu_name']);
+    }
   }
 
 }

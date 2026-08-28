@@ -39,7 +39,7 @@ sections:
           level: 1
           depth: null
           expand_all_items: false
-        weight: 2
+        weight: 1
         additional: {  }
       08fde6c5-ad7d-4e16-a742-b2ed6f52b6a6:
         uuid: 08fde6c5-ad7d-4e16-a742-b2ed6f52b6a6
@@ -106,7 +106,7 @@ sections:
           level: 1
           depth: null
           expand_all_items: false
-        weight: 4
+        weight: 2
         additional: {  }
       58ca9634-095d-4720-9aed-76c640314ac4:
         uuid: 58ca9634-095d-4720-9aed-76c640314ac4
@@ -175,7 +175,7 @@ sections:
           level: 1
           depth: null
           expand_all_items: false
-        weight: 6
+        weight: 4
         additional: {  }
       7ea8f4fe-f816-4b62-80ed-597ea6d8d39a:
         uuid: 7ea8f4fe-f816-4b62-80ed-597ea6d8d39a
@@ -203,7 +203,7 @@ sections:
           level: 1
           depth: null
           expand_all_items: false
-        weight: 5
+        weight: 3
         additional: {  }
       3f8b6c1a-2e4d-4a9f-9c7b-5d1e8a2f6b3c:
         uuid: 3f8b6c1a-2e4d-4a9f-9c7b-5d1e8a2f6b3c
@@ -239,6 +239,34 @@ sections:
         configuration:
           id: 'system_menu_block:dashboard-content-settings'
           label: 'Content settings'
+          label_display: visible
+          provider: system
+          context_mapping: {  }
+          level: 1
+          depth: null
+          expand_all_items: false
+        weight: 6
+        additional: {  }
+      b2d7e4c1-9a3f-4e58-8c26-1f7a0d5b6e94:
+        uuid: b2d7e4c1-9a3f-4e58-8c26-1f7a0d5b6e94
+        region: three
+        configuration:
+          id: 'system_menu_block:dashboard-publication-tools'
+          label: 'Publication tools'
+          label_display: visible
+          provider: system
+          context_mapping: {  }
+          level: 1
+          depth: null
+          expand_all_items: false
+        weight: 5
+        additional: {  }
+      c4f1a8e6-2b90-4d37-9e15-3a6c8f2b7d40:
+        uuid: c4f1a8e6-2b90-4d37-9e15-3a6c8f2b7d40
+        region: three
+        configuration:
+          id: 'system_menu_block:dashboard-local-contexts'
+          label: 'Local Contexts'
           label_display: visible
           provider: system
           context_mapping: {  }

@@ -3815,3 +3815,92 @@ function mukurtu_core_update_40107(): void {
   }
   \Drupal::service('plugin.manager.menu.link')->rebuild();
 }
+
+/**
+ * Split the crowded Site settings dashboard section into dedicated
+ * "Publication tools" and "Local Contexts" sections (#1787).
+ */
+function mukurtu_core_update_40108(): void {
+  // Create the two new dashboard menus if they don't exist yet.
+  $menu_storage = \Drupal::entityTypeManager()->getStorage('menu');
+  $new_menus = [
+    'dashboard-publication-tools' => [
+      'label' => 'Publication tools',
+      'description' => 'Publishing workflow and submissions.',
+    ],
+    'dashboard-local-contexts' => [
+      'label' => 'Local Contexts',
+      'description' => 'Site-wide Local Contexts projects.',
+    ],
+  ];
+  foreach ($new_menus as $id => $info) {
+    if (!$menu_storage->load($id)) {
+      $menu_storage->create([
+        'id' => $id,
+        'label' => $info['label'],
+        'description' => $info['description'],
+        'locked' => FALSE,
+      ])->save();
+    }
+  }
+
+  // Re-weight the Right column and add the two new section blocks so the order
+  // reads: My account, Roundtrip, Look and feel, Site settings, Publication
+  // tools, Local Contexts, Multilingual, Security, Site information.
+  $config = \Drupal::configFactory()->getEditable('dashboards.dashboard.mukurtu_dashboard');
+  if (!$config->isNew()) {
+    $sections = $config->get('sections') ?? [];
+    $components = $sections[0]['components'] ?? [];
+
+    $weights = [
+      'system_menu_block:dashboard-my-account' => 1,
+      'system_menu_block:dashboard-roundtrip' => 2,
+      'system_menu_block:dashboard-look-feel' => 3,
+      'system_menu_block:dashboard-site-settings' => 4,
+      'system_menu_block:dashboard-publication-tools' => 5,
+      'system_menu_block:dashboard-local-contexts' => 6,
+      'system_menu_block:dashboard-multilingual' => 7,
+      'system_menu_block:dashboard-security' => 8,
+      'system_menu_block:dashboard-site-info' => 9,
+    ];
+
+    $present = [];
+    foreach ($components as $uuid => $component) {
+      $id = $component['configuration']['id'] ?? '';
+      $present[$id] = TRUE;
+      if (isset($weights[$id])) {
+        $components[$uuid]['weight'] = $weights[$id];
+      }
+    }
+
+    $new_blocks = [
+      'b2d7e4c1-9a3f-4e58-8c26-1f7a0d5b6e94' => ['id' => 'system_menu_block:dashboard-publication-tools', 'label' => 'Publication tools'],
+      'c4f1a8e6-2b90-4d37-9e15-3a6c8f2b7d40' => ['id' => 'system_menu_block:dashboard-local-contexts', 'label' => 'Local Contexts'],
+    ];
+    foreach ($new_blocks as $uuid => $block) {
+      if (empty($present[$block['id']])) {
+        $components[$uuid] = [
+          'uuid' => $uuid,
+          'region' => 'three',
+          'configuration' => [
+            'id' => $block['id'],
+            'label' => $block['label'],
+            'label_display' => 'visible',
+            'provider' => 'system',
+            'context_mapping' => [],
+            'level' => 1,
+            'depth' => NULL,
+            'expand_all_items' => FALSE,
+          ],
+          'weight' => $weights[$block['id']],
+          'additional' => [],
+        ];
+      }
+    }
+
+    $sections[0]['components'] = $components;
+    $config->set('sections', $sections)->save();
+  }
+
+  \Drupal::service('plugin.manager.menu.link')->rebuild();
+}
