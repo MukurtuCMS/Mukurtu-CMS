@@ -44,6 +44,8 @@ class SiteSetupChecklistBlock extends BlockBase implements ContainerFactoryPlugi
     $cache = [
       'tags' => ['config:system.site', 'community_list', 'protocol_list', 'taxonomy_term_list', 'block_content_list', 'mukurtu_setup:tasks'],
       'contexts' => ['user.roles'],
+      // "Site operations" checks read untagged state/settings; refresh hourly.
+      'max-age' => 3600,
     ];
     $counts = $this->taskManager->getCounts();
     if ($counts['total'] > 0 && $counts['complete'] === $counts['total']) {

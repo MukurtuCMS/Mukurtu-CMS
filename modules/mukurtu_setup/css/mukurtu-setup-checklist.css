@@ -1,11 +1,12 @@
 .mukurtu-setup-checklist__columns {
   display: flex;
+  flex-wrap: wrap;
   gap: 2rem;
   align-items: flex-start;
 }
 
 .mukurtu-setup-checklist__columns .mukurtu-setup-checklist__group {
-  flex: 1;
+  flex: 1 1 260px;
   min-width: 0;
 }
 
