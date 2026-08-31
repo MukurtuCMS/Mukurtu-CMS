@@ -5,9 +5,11 @@ namespace Drupal\mukurtu_protocol\Controller;
 use Drupal\comment\CommentInterface;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\mukurtu_core\Service\EntityTranslationResolver;
 use Drupal\mukurtu_protocol\Entity\ProtocolInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\og\MembershipManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -25,11 +27,19 @@ class ProtocolCommentSettingsController extends ControllerBase {
   protected MembershipManagerInterface $membershipManager;
 
   /**
+   * The entity translation resolver.
+   *
+   * @var \Drupal\mukurtu_core\Service\EntityTranslationResolver
+   */
+  protected EntityTranslationResolver $entityTranslationResolver;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
     $instance = parent::create($container);
     $instance->membershipManager = $container->get('og.membership_manager');
+    $instance->entityTranslationResolver = $container->get('mukurtu_core.entity_translation_resolver');
     return $instance;
   }
 
@@ -49,7 +59,7 @@ class ProtocolCommentSettingsController extends ControllerBase {
       ->accessCheck(FALSE)
       ->execute();
 
-    return $this->buildUnapprovedCommentsTable($node_ids);
+    return $this->buildUnapprovedCommentsTable($node_ids, $this->t('No comments awaiting approval for this protocol.'));
   }
 
   /**
@@ -57,10 +67,11 @@ class ProtocolCommentSettingsController extends ControllerBase {
    * has the 'administer comments' permission in.
    */
   public function myUnapprovedComments() {
+    $empty_message = $this->t('No comments awaiting approval for your protocols.');
     $protocol_ids = $this->getStewardedProtocolIds($this->currentUser());
 
     if (empty($protocol_ids)) {
-      return ['#markup' => $this->t('No comments awaiting approval for your protocols.')];
+      return ['#markup' => $empty_message];
     }
 
     $node_storage = $this->entityTypeManager()->getStorage('node');
@@ -73,15 +84,15 @@ class ProtocolCommentSettingsController extends ControllerBase {
       ->accessCheck(FALSE)
       ->execute();
 
-    return $this->buildUnapprovedCommentsTable($node_ids);
+    return $this->buildUnapprovedCommentsTable($node_ids, $empty_message);
   }
 
   /**
    * Builds the unapproved comments table for a set of node IDs.
    */
-  protected function buildUnapprovedCommentsTable(array $node_ids) {
+  protected function buildUnapprovedCommentsTable(array $node_ids, TranslatableMarkup $empty_message) {
     if (empty($node_ids)) {
-      return ['#markup' => $this->t('No comments awaiting approval.')];
+      return ['#markup' => $empty_message];
     }
 
     $comment_ids = $this->entityTypeManager()->getStorage('comment')->getQuery()
@@ -94,7 +105,7 @@ class ProtocolCommentSettingsController extends ControllerBase {
       ->execute();
 
     if (empty($comment_ids)) {
-      return ['#markup' => $this->t('No comments awaiting approval.')];
+      return ['#markup' => $empty_message];
     }
 
     $comments = $this->entityTypeManager()->getStorage('comment')->loadMultiple($comment_ids);
@@ -104,7 +115,7 @@ class ProtocolCommentSettingsController extends ControllerBase {
     foreach ($comments as $comment) {
       $commented_entity = $comment->getCommentedEntity();
       $entity_link = $commented_entity
-        ? Link::fromTextAndUrl($commented_entity->label(), $commented_entity->toUrl())->toString()
+        ? Link::fromTextAndUrl($this->entityTranslationResolver->translate($commented_entity)->label(), $commented_entity->toUrl())->toString()
         : $this->t('(deleted)');
 
       $operations = [];
@@ -145,9 +156,9 @@ class ProtocolCommentSettingsController extends ControllerBase {
         $this->t('Operations'),
       ],
       '#rows' => $rows,
-      '#empty' => $this->t('No comments awaiting approval.'),
+      '#empty' => $empty_message,
       '#cache' => [
-        'contexts' => ['user'],
+        'contexts' => ['user', 'languages:language_content'],
         'tags' => ['comment_list'],
       ],
     ];
