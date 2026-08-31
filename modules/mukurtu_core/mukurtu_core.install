@@ -3788,3 +3788,111 @@ function mukurtu_core_update_40106(): void {
     }
   }
 }
+
+/**
+ * Add the custom 404 not found page, permission, and default config (#1761).
+ */
+function mukurtu_core_update_40107(): void {
+  // Point the site's 404 page at the new custom not-found route
+  // (system.site.yml is not owned by Mukurtu).
+  \Drupal::configFactory()
+    ->getEditable('system.site')
+    ->set('page.404', '/mukurtu/not-found')
+    ->save();
+
+  // Grant the new permission to the Mukurtu Manager role.
+  user_role_grant_permissions('mukurtu_manager', ['administer mukurtu not found page']);
+
+  // Install the default mukurtu_core.not_found config if it doesn't already
+  // exist.
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core');
+  $config_source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+  $config_factory = \Drupal::configFactory();
+
+  if ($config_factory->get('mukurtu_core.not_found')->isNew()) {
+    $data = $config_source->read('mukurtu_core.not_found');
+    if ($data) {
+      $config_factory->getEditable('mukurtu_core.not_found')->setData($data)->save();
+    }
+  }
+
+  \Drupal::service('plugin.manager.menu.link')->rebuild();
+}
+
+/**
+ * Hide the ALTCHA widget's logo and footer credit (#1761).
+ */
+function mukurtu_core_update_40108(): void {
+  $config = \Drupal::configFactory()->getEditable('altcha.settings');
+  if (!$config->isNew()) {
+    $config->set('hide_logo', TRUE)->set('hide_footer', TRUE)->save();
+  }
+}
+
+/**
+ * Fix the Klaro "Stripe" app's default/required flags to match its
+ * disabled status (#1761).
+ */
+function mukurtu_core_update_40109(): void {
+  $config = \Drupal::configFactory()->getEditable('klaro.klaro_app.stripe');
+  if (!$config->isNew()) {
+    $config->set('default', FALSE)->set('required', FALSE)->save();
+  }
+}
+
+/**
+ * Lower the automated cron fallback interval from 3 hours to 1 hour (#1761).
+ *
+ * Only touches sites still on the shipped 3-hour default -- an admin who has
+ * already customized this is left alone.
+ */
+function mukurtu_core_update_40110(): void {
+  $config = \Drupal::configFactory()->getEditable('automated_cron.settings');
+  if (!$config->isNew() && (int) $config->get('interval') === 10800) {
+    $config->set('interval', 3600)->save();
+  }
+}
+
+/**
+ * Expand the Visitors entity view counter beyond nodes (#1761).
+ *
+ * Only touches sites still on the shipped node-only default -- an admin who
+ * has already customized this is left alone.
+ */
+function mukurtu_core_update_40111(): void {
+  $config = \Drupal::configFactory()->getEditable('visitors.config');
+  if ($config->isNew()) {
+    return;
+  }
+  $entity_types = $config->get('counter.entity_types') ?? [];
+  if ($entity_types === ['node']) {
+    $config->set('counter.entity_types', [
+      'node',
+      'media',
+      'community',
+      'protocol',
+      'personal_collection',
+      'multipage_item',
+      'taxonomy_term',
+    ])->save();
+  }
+}
+
+/**
+ * Revoke "use text format full_html" from the authenticated role, if
+ * present (#1761).
+ *
+ * Full HTML is meant to be an editorial/admin format; the shipped
+ * authenticated role has never granted it, but sites that drifted from an
+ * older install or had it toggled on manually get it revoked here so
+ * ordinary logged-in users fall back to Basic HTML (which already covers
+ * their normal iframe/media-embed needs) rather than gaining
+ * object/embed/video tags.
+ */
+function mukurtu_core_update_40112(): void {
+  $role = \Drupal\user\Entity\Role::load('authenticated');
+  if ($role && $role->hasPermission('use text format full_html')) {
+    $role->revokePermission('use text format full_html');
+    $role->save();
+  }
+}

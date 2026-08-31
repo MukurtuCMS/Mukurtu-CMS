@@ -1,4 +1,7 @@
 administer mukurtu access denied page:
   title: 'Administer access denied page'
   description: 'Edit the title and message shown on the custom 403 (access denied) page.'
+administer mukurtu not found page:
+  title: 'Administer not found page'
+  description: 'Edit the title and message shown on the custom 404 (not found) page.'
   restrict access: true
