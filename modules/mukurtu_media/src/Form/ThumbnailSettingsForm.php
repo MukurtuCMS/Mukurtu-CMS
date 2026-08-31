@@ -49,6 +49,7 @@ class ThumbnailSettingsForm extends ConfigFormBase
         '#upload_validators' => [
           'FileExtension' => ['extensions' => 'png gif jpg jpeg'],
         ],
+        '#preview_image_style' => 'thumbnail',
         '#default_value' => $config->get($configKey) ?? NULL,
       ];
     }
