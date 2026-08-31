@@ -467,7 +467,7 @@ display:
             remember_roles:
               authenticated: authenticated
             expose_fields: false
-            placeholder: ''
+            placeholder: 'Search dictionary entries'
             searched_fields_id: ''
             value_maxlength: 128
           is_grouped: false
