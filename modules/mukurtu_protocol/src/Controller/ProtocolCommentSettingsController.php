@@ -71,7 +71,7 @@ class ProtocolCommentSettingsController extends ControllerBase {
     $protocol_ids = $this->getStewardedProtocolIds($this->currentUser());
 
     if (empty($protocol_ids)) {
-      return ['#markup' => $empty_message];
+      return ['#markup' => $empty_message, '#cache' => ['contexts' => ['user']]];
     }
 
     $node_storage = $this->entityTypeManager()->getStorage('node');
