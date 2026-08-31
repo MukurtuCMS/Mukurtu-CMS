@@ -11,5 +11,5 @@ mukurtu_workflows.review_queue:
   route_name: view.mukurtu_workflow_overview.review_queue
   description: 'Content submitted for your review as a Protocol Steward.'
   parent: mukurtu_dashboard
-  menu_name: dashboard-publication-tools
-  weight: 1
+  menu_name: dashboard-notifications-review
+  weight: 2

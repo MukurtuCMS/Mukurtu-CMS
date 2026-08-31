@@ -73,6 +73,7 @@ permissions:
   - 'access mukurtu import'
   - 'access site reports'
   - 'access visitors'
+  - 'administer comments'
   - 'administer local contexts legacy projects'
   - 'administer mukurtu access denied page'
   - 'administer mukurtu_import_strategy'

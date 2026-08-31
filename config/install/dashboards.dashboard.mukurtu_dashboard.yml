@@ -219,6 +219,20 @@ sections:
           expand_all_items: false
         weight: 1
         additional: {  }
+      f4a1d9c2-6b3e-4c8f-9a7d-2e5b8f1c3d64:
+        uuid: f4a1d9c2-6b3e-4c8f-9a7d-2e5b8f1c3d64
+        region: three
+        configuration:
+          id: 'system_menu_block:dashboard-notifications-review'
+          label: 'Notifications & Review'
+          label_display: visible
+          provider: system
+          context_mapping: {  }
+          level: 1
+          depth: null
+          expand_all_items: false
+        weight: 2
+        additional: {  }
       02ce0aa5-8aec-43f3-b2e0-62d5dbf8efce:
         uuid: 02ce0aa5-8aec-43f3-b2e0-62d5dbf8efce
         region: three
@@ -231,7 +245,7 @@ sections:
           level: 1
           depth: null
           expand_all_items: false
-        weight: 2
+        weight: 3
         additional: {  }
       0339943d-08c4-45a9-9f08-052ad308db5e:
         uuid: 0339943d-08c4-45a9-9f08-052ad308db5e
@@ -245,7 +259,7 @@ sections:
           level: 1
           depth: null
           expand_all_items: false
-        weight: 3
+        weight: 4
         additional: {  }
       3f8b6c1a-2e4d-4a9f-9c7b-5d1e8a2f6b3c:
         uuid: 3f8b6c1a-2e4d-4a9f-9c7b-5d1e8a2f6b3c
@@ -259,7 +273,7 @@ sections:
           level: 1
           depth: null
           expand_all_items: false
-        weight: 4
+        weight: 5
         additional: {  }
       7ea8f4fe-f816-4b62-80ed-597ea6d8d39a:
         uuid: 7ea8f4fe-f816-4b62-80ed-597ea6d8d39a
@@ -273,6 +287,6 @@ sections:
           level: 1
           depth: null
           expand_all_items: false
-        weight: 5
+        weight: 6
         additional: {  }
     third_party_settings: {  }

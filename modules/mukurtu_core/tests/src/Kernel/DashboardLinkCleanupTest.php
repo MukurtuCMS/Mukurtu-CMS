@@ -13,12 +13,17 @@ use Symfony\Component\Yaml\Yaml;
  * - mukurtu_core_update_40107() orders Security before Site information.
  * - mukurtu_core_update_40108() splits Site settings into "Publication tools"
  *   and "Local Contexts" sections.
+ * - mukurtu_core_update_40110() moves "Site-wide comment settings" into
+ *   Publication tools and creates a "Notifications & Review" section for
+ *   comment review, the review queue, pending submissions, and
+ *   notifications.
  * - The Configure Community/Protocol Permissions links are gone.
  * - The Visitors "Analytics" / "Visitor settings" links are present.
  * - The Multilingual section no longer has a duplicate "Manage site languages".
  *
  * @see mukurtu_core_update_40107()
  * @see mukurtu_core_update_40108()
+ * @see mukurtu_core_update_40110()
  * @see mukurtu_protocol_update_40044()
  */
 #[Group('mukurtu_core')]
@@ -29,6 +34,7 @@ class DashboardLinkCleanupTest extends KernelTestBase {
    */
   protected static $modules = [
     'system',
+    'user',
   ];
 
   /**
@@ -260,6 +266,93 @@ class DashboardLinkCleanupTest extends KernelTestBase {
   }
 
   /**
+   * mukurtu_core_update_40110() creates the "Notifications & Review" menu,
+   * inserts its block into the Right column directly after "My account", and
+   * shifts the remaining Right-column blocks down (#2090).
+   */
+  public function testUpdate40110CreatesNotificationsReviewSection(): void {
+    \Drupal::configFactory()->getEditable('dashboards.dashboard.mukurtu_dashboard')
+      ->setData([
+        'id' => 'mukurtu_dashboard',
+        'sections' => [
+          [
+            'components' => [
+              'my-account-uuid' => [
+                'uuid' => 'my-account-uuid',
+                'region' => 'three',
+                'configuration' => ['id' => 'system_menu_block:dashboard-my-account'],
+                'weight' => 1,
+              ],
+              'look-feel-uuid' => [
+                'uuid' => 'look-feel-uuid',
+                'region' => 'three',
+                'configuration' => ['id' => 'system_menu_block:dashboard-look-feel'],
+                'weight' => 2,
+              ],
+              self::SECURITY_UUID => [
+                'uuid' => self::SECURITY_UUID,
+                'region' => 'three',
+                'configuration' => ['id' => 'system_menu_block:dashboard-security'],
+                'weight' => 4,
+              ],
+              self::SITE_INFO_UUID => [
+                'uuid' => self::SITE_INFO_UUID,
+                'region' => 'three',
+                'configuration' => ['id' => 'system_menu_block:dashboard-site-info'],
+                'weight' => 5,
+              ],
+            ],
+          ],
+        ],
+      ])
+      ->save();
+
+    mukurtu_core_update_40110();
+
+    $menu_storage = \Drupal::entityTypeManager()->getStorage('menu');
+    $this->assertNotNull($menu_storage->load('dashboard-notifications-review'));
+
+    $components = \Drupal::config('dashboards.dashboard.mukurtu_dashboard')->get('sections.0.components');
+    $by_id = [];
+    foreach ($components as $component) {
+      $by_id[$component['configuration']['id']] = $component;
+    }
+    $this->assertSame(['three', 1], [$by_id['system_menu_block:dashboard-my-account']['region'], $by_id['system_menu_block:dashboard-my-account']['weight']]);
+    $this->assertSame(['three', 2], [$by_id['system_menu_block:dashboard-notifications-review']['region'], $by_id['system_menu_block:dashboard-notifications-review']['weight']]);
+    $this->assertSame(['three', 3], [$by_id['system_menu_block:dashboard-look-feel']['region'], $by_id['system_menu_block:dashboard-look-feel']['weight']]);
+    $this->assertSame(['three', 5], [$by_id['system_menu_block:dashboard-security']['region'], $by_id['system_menu_block:dashboard-security']['weight']]);
+    $this->assertSame(['three', 6], [$by_id['system_menu_block:dashboard-site-info']['region'], $by_id['system_menu_block:dashboard-site-info']['weight']]);
+  }
+
+  /**
+   * Running mukurtu_core_update_40110() twice does not duplicate the new
+   * block (#2090).
+   */
+  public function testUpdate40110IsIdempotent(): void {
+    $this->saveDashboardConfig();
+
+    mukurtu_core_update_40110();
+    mukurtu_core_update_40110();
+
+    $components = \Drupal::config('dashboards.dashboard.mukurtu_dashboard')->get('sections.0.components');
+    $ids = array_map(static fn(array $c): string => $c['configuration']['id'], array_values($components));
+    $this->assertSame(1, count(array_keys($ids, 'system_menu_block:dashboard-notifications-review', TRUE)));
+  }
+
+  /**
+   * mukurtu_core_update_40110() grants "administer comments" to the Mukurtu
+   * Manager role so it can use the new comment moderation links (#2090).
+   */
+  public function testUpdate40110GrantsAdministerCommentsToManager(): void {
+    \Drupal\user\Entity\Role::create(['id' => 'mukurtu_manager', 'label' => 'Mukurtu Manager'])->save();
+    $this->assertFalse(\Drupal\user\Entity\Role::load('mukurtu_manager')->hasPermission('administer comments'));
+
+    mukurtu_core_update_40110();
+
+    $this->assertTrue(\Drupal\user\Entity\Role::load('mukurtu_manager')->hasPermission('administer comments'));
+  }
+
+  /**
    * The shipped dashboard config carries the Publication tools / Local Contexts
    * section blocks for fresh installs (#1787).
    */
@@ -284,19 +377,53 @@ class DashboardLinkCleanupTest extends KernelTestBase {
   }
 
   /**
-   * Publication-tools links (workflow + submissions) point at the new menu
-   * (#1787).
+   * Publication-tools links (workflow settings, submission forms, and
+   * site-wide comment settings) point at the new menu (#1787, #2090).
    */
   public function testPublicationToolsLinksMoved(): void {
     $expected = [
-      'mukurtu_workflows' => ['mukurtu_workflows.settings', 'mukurtu_workflows.review_queue'],
-      'mukurtu_submissions' => ['entity.mukurtu_submission_settings.collection', 'mukurtu_submissions.pending_queue'],
+      'mukurtu_workflows' => ['mukurtu_workflows.settings'],
+      'mukurtu_submissions' => ['entity.mukurtu_submission_settings.collection'],
+      'mukurtu_protocol' => ['mukurtu_protocol.comment_settings'],
     ];
     foreach ($expected as $module => $ids) {
       $links = $this->menuLinks($module);
       foreach ($ids as $id) {
         $this->assertArrayHasKey($id, $links);
         $this->assertSame('dashboard-publication-tools', $links[$id]['menu_name']);
+      }
+    }
+  }
+
+  /**
+   * The review/notification links land in the new "Notifications & Review"
+   * section, and the new "Comment reviews" / "Protocol comment reviews"
+   * links exist and point at the right routes (#2090).
+   */
+  public function testNotificationsAndReviewLinksMoved(): void {
+    $expected = [
+      'mukurtu_protocol' => [
+        'mukurtu_protocol.comment_admin' => 'comment.admin',
+        'mukurtu_protocol.my_unapproved_comments' => 'mukurtu_protocol.my_unapproved_comments',
+      ],
+      'mukurtu_workflows' => [
+        'mukurtu_workflows.review_queue' => 'view.mukurtu_workflow_overview.review_queue',
+      ],
+      'mukurtu_submissions' => [
+        'mukurtu_submissions.pending_queue' => 'view.mukurtu_pending_submissions.page',
+      ],
+      'mukurtu_notifications' => [
+        'mukurtu_notifications.my_notifications' => 'view.mukurtu_message_log.mukurtu_notifications_page',
+        'mukurtu_notifications.all_notifications' => 'view.mukurtu_message_log.mukurtu_notifications_admin_page',
+      ],
+    ];
+    foreach ($expected as $module => $ids) {
+      $links = $this->menuLinks($module);
+      foreach ($ids as $id => $route_name) {
+        $this->assertArrayHasKey($id, $links);
+        $this->assertSame('dashboard-notifications-review', $links[$id]['menu_name']);
+        $this->assertSame('mukurtu_dashboard', $links[$id]['parent']);
+        $this->assertSame($route_name, $links[$id]['route_name']);
       }
     }
   }
@@ -348,6 +475,7 @@ class DashboardLinkCleanupTest extends KernelTestBase {
 
     $this->assertEqualsCanonicalizing([
       'system_menu_block:dashboard-my-account',
+      'system_menu_block:dashboard-notifications-review',
       'system_menu_block:dashboard-look-feel',
       'system_menu_block:dashboard-site-settings',
       'system_menu_block:dashboard-security',
@@ -421,9 +549,16 @@ class DashboardLinkCleanupTest extends KernelTestBase {
       ],
       'dashboard-publication-tools' => [
         'Publishing workflow',
-        'Review queue',
         'Submission Forms',
+        'Site-wide comment settings',
+      ],
+      'dashboard-notifications-review' => [
+        'Comment reviews',
+        'Protocol comment reviews',
+        'Review queue',
         'Pending Submissions',
+        'My notifications',
+        'All notifications',
       ],
       'dashboard-multilingual' => [
         'Manage site languages',
@@ -449,9 +584,7 @@ class DashboardLinkCleanupTest extends KernelTestBase {
       ],
       'dashboard-site-settings' => [
         'Site Setup',
-        'All notifications',
         'Site name and email',
-        'Site-wide comment settings',
         'Citation templates',
         'Cookie & Consent Settings',
         'Google Tag Settings',
