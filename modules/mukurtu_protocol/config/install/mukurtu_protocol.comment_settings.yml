@@ -1,0 +1,3 @@
+site_comments_enabled: false
+site_comments_require_approval: true
+anonymous_comments_require_email: true
