@@ -194,9 +194,9 @@ class BrowseAutoIndexKeyBudgetTest extends ProtocolAwareEntityTestBase {
   }
 
   /**
-   * Update hook 40006 strips stale per-field variants and reindexes.
+   * Update hook 40007 strips stale per-field variants and reindexes.
    */
-  public function testUpdate40006ConvergesExistingSite(): void {
+  public function testUpdate40007ConvergesExistingSite(): void {
     require_once \Drupal::service('extension.list.module')->getPath('mukurtu_search') . '/mukurtu_search.install';
 
     FieldStorageConfig::create([
@@ -233,7 +233,7 @@ class BrowseAutoIndexKeyBudgetTest extends ProtocolAwareEntityTestBase {
     $index->setProcessors($processors);
     $index->save();
 
-    mukurtu_search_update_40006();
+    mukurtu_search_update_40007();
 
     $index = $this->reloadIndex();
     $field_ids = array_keys($index->getFields());
@@ -246,7 +246,7 @@ class BrowseAutoIndexKeyBudgetTest extends ProtocolAwareEntityTestBase {
     $this->assertContains('all_taxonomy_term_names', $tokenizer_fields, 'Aggregate field added to processor list.');
 
     // Idempotent.
-    mukurtu_search_update_40006();
+    mukurtu_search_update_40007();
     $this->assertLessThan(self::MAX_KEYS, count($this->reloadIndex()->getFields()));
   }
 

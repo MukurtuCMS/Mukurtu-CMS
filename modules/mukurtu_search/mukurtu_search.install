@@ -100,6 +100,17 @@ function mukurtu_search_update_40005(): void {
 }
 
 /**
+ * Reset the search backend to "db" for sites left on the removed "solr" option.
+ */
+function mukurtu_search_update_40006(): void {
+  $config = \Drupal::configFactory()->getEditable('mukurtu_search.settings');
+  if ($config->get('backend') === 'solr') {
+    $config->set('backend', 'db');
+    $config->save();
+  }
+}
+
+/**
  * Swap per-field taxonomy index variants for shared aggregate fields.
  *
  * `search_api_db` adds one database key per indexed field and MySQL caps a
@@ -114,7 +125,7 @@ function mukurtu_search_update_40005(): void {
  * all_taxonomy_term_names / all_taxonomy_term_uuids fields. The same end state
  * ships in this module's config/install for fresh installs.
  */
-function mukurtu_search_update_40006(): void {
+function mukurtu_search_update_40007(): void {
   $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_search');
   require_once $module_path . '/mukurtu_search.module';
 
