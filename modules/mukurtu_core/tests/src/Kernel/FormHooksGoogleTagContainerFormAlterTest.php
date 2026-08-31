@@ -70,4 +70,25 @@ class FormHooksGoogleTagContainerFormAlterTest extends KernelTestBase {
     $this->assertSame(['conditions' => ['request_path' => ['#type' => 'details']]], $form);
   }
 
+  /**
+   * Tests that Drupal's hook system actually discovers and invokes this
+   * alter for the 'google_tag_container_form' form ID, not just that the
+   * method body works when called directly.
+   */
+  public function testHookIsWiredIntoModuleHandlerAlter(): void {
+    $form = [
+      'conditions' => [
+        'og_group_type' => ['#type' => 'details'],
+        'request_path' => ['#type' => 'details'],
+      ],
+    ];
+    $formState = new FormState();
+    $formId = 'google_tag_container_form';
+
+    \Drupal::moduleHandler()->alter('form_google_tag_container_form', $form, $formState, $formId);
+
+    $this->assertArrayNotHasKey('og_group_type', $form['conditions']);
+    $this->assertArrayHasKey('request_path', $form['conditions']);
+  }
+
 }

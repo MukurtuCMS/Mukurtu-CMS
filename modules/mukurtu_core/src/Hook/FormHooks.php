@@ -1454,6 +1454,20 @@ class FormHooks
      * satisfies it, so it renders with no option pre-selected while still
      * being required, which blocks saving the container entirely regardless
      * of the actual Tag ID(s) entered.
+     *
+     * Scoped to just this one condition plugin (not a general "drop any
+     * condition whose context can't be satisfied" check) since it's the
+     * only one currently reachable here with this problem; other og_*
+     * condition plugins would need the same treatment if they're ever
+     * added to this form and hit the same unsatisfiable-context issue.
+     *
+     * Unconditional removal is safe here (not just for new/unconfigured
+     * containers): mukurtu_core_update_40107() strips any og_group_type
+     * condition that was already saved in an existing container's config
+     * before this fix shipped, so no container can retain one going
+     * forward.
+     *
+     * @see mukurtu_core_update_40107()
      */
     #[Hook("form_google_tag_container_form_alter")]
     public function formGoogleTagContainerFormAlter(
