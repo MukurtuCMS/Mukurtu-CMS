@@ -95,3 +95,14 @@ function mukurtu_search_update_40005(): void {
     $index->reindex();
   }
 }
+
+/**
+ * Reset the search backend to "db" for sites left on the removed "solr" option.
+ */
+function mukurtu_search_update_40006(): void {
+  $config = \Drupal::configFactory()->getEditable('mukurtu_search.settings');
+  if ($config->get('backend') === 'solr') {
+    $config->set('backend', 'db');
+    $config->save();
+  }
+}
