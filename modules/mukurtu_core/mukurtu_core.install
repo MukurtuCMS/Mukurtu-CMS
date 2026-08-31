@@ -3790,10 +3790,34 @@ function mukurtu_core_update_40106(): void {
 }
 
 /**
+ * Removes any saved og_group_type insertion condition from Google Tag
+ * containers.
+ *
+ * That condition's required context-mapping select has no option that
+ * meaningfully resolves on the container admin form, which normally blocks
+ * saving the form entirely (see FormHooks::formGoogleTagContainerFormAlter(),
+ * which now hides the condition from the form going forward). This only
+ * matters for a container that was saved with the condition already
+ * configured before that fix, which would otherwise be stuck permanently
+ * enforcing it with no UI left to remove it.
+ */
+function mukurtu_core_update_40107(): void {
+  $config_factory = \Drupal::configFactory();
+  foreach ($config_factory->listAll('google_tag.container.') as $config_name) {
+    $config = $config_factory->getEditable($config_name);
+    $conditions = $config->get('conditions') ?? [];
+    if (isset($conditions['og_group_type'])) {
+      unset($conditions['og_group_type']);
+      $config->set('conditions', $conditions)->save();
+    }
+  }
+}
+
+/**
  * Order Security before Site information on the dashboard, and rebuild menu
  * links so the new Visitors links appear (#1787, #2057).
  */
-function mukurtu_core_update_40107(): void {
+function mukurtu_core_update_40108(): void {
   $config = \Drupal::configFactory()->getEditable('dashboards.dashboard.mukurtu_dashboard');
   if (!$config->isNew()) {
     $sections = $config->get('sections') ?? [];
@@ -3822,7 +3846,7 @@ function mukurtu_core_update_40107(): void {
  * a clear identity: Left = content & community, Middle = editorial & data
  * operations, Right = site administration (#1787).
  */
-function mukurtu_core_update_40108(): void {
+function mukurtu_core_update_40109(): void {
   // Create the two new dashboard menus if they don't exist yet.
   $menu_storage = \Drupal::entityTypeManager()->getStorage('menu');
   $new_menus = [
@@ -3927,7 +3951,7 @@ function mukurtu_core_update_40108(): void {
  * dashboard links, and relabel "Visitor settings" to "Analytics settings"
  * (#1787).
  */
-function mukurtu_core_update_40109(): void {
+function mukurtu_core_update_40110(): void {
   \Drupal::service('plugin.manager.menu.link')->rebuild();
 }
 
@@ -3938,7 +3962,7 @@ function mukurtu_core_update_40109(): void {
  * "administer comments" to the Mukurtu Manager role so it can use the new
  * comment moderation links.
  */
-function mukurtu_core_update_40110(): void {
+function mukurtu_core_update_40111(): void {
   $menu_storage = \Drupal::entityTypeManager()->getStorage('menu');
   if (!$menu_storage->load('dashboard-notifications-review')) {
     $menu_storage->create([
