@@ -50,3 +50,17 @@ function mukurtu_bot_protection_install($is_syncing) {
   }
   $honeypot_config->set('form_settings', $form_settings)->save();
 }
+
+/**
+ * Raise the facet crawler-block limit from 2 to 4 (#1761).
+ *
+ * At 2, a legitimate visitor narrowing a browse by 3+ facets (format +
+ * category + community, say) was getting blocked. Only touches sites still
+ * on the shipped default of 2.
+ */
+function mukurtu_bot_protection_update_40001(): void {
+  $config = \Drupal::configFactory()->getEditable('facet_bot_blocker.settings');
+  if (!$config->isNew() && (int) $config->get('facets_bot_blocker_limit') === 2) {
+    $config->set('facets_bot_blocker_limit', 4)->save();
+  }
+}
