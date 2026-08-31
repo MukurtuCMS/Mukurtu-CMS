@@ -1444,4 +1444,22 @@ class FormHooks
             $form["status"]["#group"] = "publishing_options";
         }
     }
+
+    /**
+     * Implements hook_form_FORM_ID_alter() for 'google_tag_container_form'.
+     *
+     * Removes the Organic Groups "Group type" condition from the Google Tag
+     * container's Insertion conditions tab. That condition's context-mapping
+     * "Group" select has no context on this admin route that meaningfully
+     * satisfies it, so it renders with no option pre-selected while still
+     * being required, which blocks saving the container entirely regardless
+     * of the actual Tag ID(s) entered.
+     */
+    #[Hook("form_google_tag_container_form_alter")]
+    public function formGoogleTagContainerFormAlter(
+        array &$form,
+        FormStateInterface $form_state,
+    ): void {
+        unset($form["conditions"]["og_group_type"]);
+    }
 }
