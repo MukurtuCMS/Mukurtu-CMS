@@ -147,7 +147,7 @@ sections:
           level: 1
           depth: null
           expand_all_items: false
-        weight: 3
+        weight: 4
         additional: {  }
       b2d7e4c1-9a3f-4e58-8c26-1f7a0d5b6e94:
         uuid: b2d7e4c1-9a3f-4e58-8c26-1f7a0d5b6e94
@@ -161,7 +161,7 @@ sections:
           level: 1
           depth: null
           expand_all_items: false
-        weight: 4
+        weight: 5
         additional: {  }
       a663f15a-8760-424c-9433-c3f97fa8b623:
         uuid: a663f15a-8760-424c-9433-c3f97fa8b623
@@ -175,7 +175,7 @@ sections:
           level: 1
           depth: null
           expand_all_items: false
-        weight: 5
+        weight: 6
         additional: {  }
       7750a799-df47-49a4-883f-e4b0f8342104:
         uuid: 7750a799-df47-49a4-883f-e4b0f8342104
@@ -203,7 +203,7 @@ sections:
           level: 1
           depth: null
           expand_all_items: false
-        weight: 6
+        weight: 3
         additional: {  }
       177c8838-ecba-43f7-9acb-813187ae16f3:
         uuid: 177c8838-ecba-43f7-9acb-813187ae16f3

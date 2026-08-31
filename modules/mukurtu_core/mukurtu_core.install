@@ -3864,10 +3864,10 @@ function mukurtu_core_update_40108(): void {
       // Middle: editorial & data operations.
       'mukurtu_setup_checklist' => ['two', 1],
       'views_block:content_recent-block_1' => ['two', 2],
-      'system_menu_block:dashboard-content-settings' => ['two', 3],
-      'system_menu_block:dashboard-publication-tools' => ['two', 4],
-      'system_menu_block:dashboard-multilingual' => ['two', 5],
-      'system_menu_block:dashboard-roundtrip' => ['two', 6],
+      'system_menu_block:dashboard-roundtrip' => ['two', 3],
+      'system_menu_block:dashboard-content-settings' => ['two', 4],
+      'system_menu_block:dashboard-publication-tools' => ['two', 5],
+      'system_menu_block:dashboard-multilingual' => ['two', 6],
       'system_menu_block:dashboard-migration' => ['two', 7],
       // Right: site administration.
       'system_menu_block:dashboard-my-account' => ['three', 1],

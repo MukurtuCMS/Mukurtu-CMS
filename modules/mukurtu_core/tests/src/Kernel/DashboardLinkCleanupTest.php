@@ -238,7 +238,7 @@ class DashboardLinkCleanupTest extends KernelTestBase {
     // The two new blocks land in their rebalanced homes: Local Contexts in the
     // Left column, Publication tools in the Middle column.
     $this->assertSame(['one', 6], [$by_id['system_menu_block:dashboard-local-contexts']['region'], $by_id['system_menu_block:dashboard-local-contexts']['weight']]);
-    $this->assertSame(['two', 4], [$by_id['system_menu_block:dashboard-publication-tools']['region'], $by_id['system_menu_block:dashboard-publication-tools']['weight']]);
+    $this->assertSame(['two', 5], [$by_id['system_menu_block:dashboard-publication-tools']['region'], $by_id['system_menu_block:dashboard-publication-tools']['weight']]);
     // Existing blocks in the fixture are re-homed too.
     $this->assertSame(['three', 4], [$by_id['system_menu_block:dashboard-security']['region'], $by_id['system_menu_block:dashboard-security']['weight']]);
     $this->assertSame(['three', 5], [$by_id['system_menu_block:dashboard-site-info']['region'], $by_id['system_menu_block:dashboard-site-info']['weight']]);
@@ -274,7 +274,7 @@ class DashboardLinkCleanupTest extends KernelTestBase {
     }
     // Rebalanced homes: Local Contexts in Left, Publication tools in Middle.
     $this->assertSame(['one', 6], $placement['system_menu_block:dashboard-local-contexts']);
-    $this->assertSame(['two', 4], $placement['system_menu_block:dashboard-publication-tools']);
+    $this->assertSame(['two', 5], $placement['system_menu_block:dashboard-publication-tools']);
 
     foreach (['dashboard-publication-tools' => 'Publication tools', 'dashboard-local-contexts' => 'Local Contexts'] as $id => $label) {
       $menu = Yaml::parseFile($profile_path . "/config/install/system.menu.$id.yml");
@@ -339,11 +339,11 @@ class DashboardLinkCleanupTest extends KernelTestBase {
     $this->assertEqualsCanonicalizing([
       'mukurtu_setup_checklist',
       'views_block:content_recent-block_1',
+      'system_menu_block:dashboard-roundtrip',
       'system_menu_block:dashboard-content-settings',
       'system_menu_block:dashboard-publication-tools',
       'system_menu_block:dashboard-multilingual',
       'system_menu_block:dashboard-migration',
-      'system_menu_block:dashboard-roundtrip',
     ], array_keys($regions['two']));
 
     $this->assertEqualsCanonicalizing([
@@ -359,11 +359,21 @@ class DashboardLinkCleanupTest extends KernelTestBase {
       $this->assertSame(array_values($blocks), array_unique(array_values($blocks)));
     }
 
-    // Roundtrip sits above Migration in the Middle column.
+    // Roundtrip sits directly below Recent Content, above the one-time
+    // setup sections (Content settings, Publication tools, Multilingual)
+    // and above Migration.
     $this->assertLessThan(
-      $regions['two']['system_menu_block:dashboard-migration'],
       $regions['two']['system_menu_block:dashboard-roundtrip'],
+      $regions['two']['views_block:content_recent-block_1'],
     );
+    foreach ([
+      'system_menu_block:dashboard-content-settings',
+      'system_menu_block:dashboard-publication-tools',
+      'system_menu_block:dashboard-multilingual',
+      'system_menu_block:dashboard-migration',
+    ] as $id) {
+      $this->assertLessThan($regions['two'][$id], $regions['two']['system_menu_block:dashboard-roundtrip']);
+    }
   }
 
   /**
