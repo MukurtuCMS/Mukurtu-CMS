@@ -150,7 +150,7 @@ class SiteSetupTaskManager {
         (string) $this->t('Connect Google Analytics or Google Tag Manager to see how visitors use your site. Mukurtu also includes a built-in Visitors report.'),
         self::GROUP_SITE_OPERATIONS,
         TRUE,
-        '/admin/config/services/google-tag/containers',
+        '/admin/config/services/google-tag',
         (string) $this->t('Set up Google Tag'),
       ),
       new SiteSetupTask(
