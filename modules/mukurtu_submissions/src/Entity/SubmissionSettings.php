@@ -104,7 +104,7 @@ class SubmissionSettings extends ConfigEntityBase implements SubmissionSettingsI
    *
    * @var string
    */
-  protected $access_level = 'anonymous';
+  protected $access_level = 'authenticated';
 
   /**
    * Introductory text shown above the Title field on the public submission
@@ -173,7 +173,7 @@ class SubmissionSettings extends ConfigEntityBase implements SubmissionSettingsI
    * {@inheritdoc}
    */
   public function getAccessLevel(): string {
-    return $this->access_level ?? 'anonymous';
+    return $this->access_level ?? 'authenticated';
   }
 
   /**
