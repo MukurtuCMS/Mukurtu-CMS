@@ -566,6 +566,51 @@ function mukurtu_core_user_login_form_submit($form, FormStateInterface $form_sta
   }
 }
 
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Core's theme settings form only shows the logo/favicon as a path textfield,
+ * with no visual preview. Add an image preview of the currently active
+ * logo/favicon next to each field.
+ */
+function mukurtu_core_form_system_theme_settings_alter(&$form, FormStateInterface $form_state, $form_id) {
+  $theme = $form_state->getBuildInfo()['args'][0] ?? \Drupal::config('system.theme')->get('default');
+
+  if (isset($form['logo']['settings'])) {
+    $logo_url = theme_get_setting('logo.url', $theme);
+    if ($logo_url) {
+      $form['logo']['settings']['logo_preview'] = [
+        '#type' => 'html_tag',
+        '#tag' => 'img',
+        '#attributes' => [
+          'src' => $logo_url,
+          'alt' => t('Current logo'),
+          'class' => ['mukurtu-theme-settings-preview'],
+          'style' => 'max-height: 100px; max-width: 300px; display: block; margin-bottom: 0.5em;',
+        ],
+        '#weight' => -10,
+      ];
+    }
+  }
+
+  if (isset($form['favicon']['settings'])) {
+    $favicon_url = theme_get_setting('favicon.url', $theme);
+    if ($favicon_url) {
+      $form['favicon']['settings']['favicon_preview'] = [
+        '#type' => 'html_tag',
+        '#tag' => 'img',
+        '#attributes' => [
+          'src' => $favicon_url,
+          'alt' => t('Current favicon'),
+          'class' => ['mukurtu-theme-settings-preview'],
+          'style' => 'max-height: 100px; max-width: 300px; display: block; margin-bottom: 0.5em;',
+        ],
+        '#weight' => -10,
+      ];
+    }
+  }
+}
+
 
 /**
  * Prepares variables for list of available node type templates.
