@@ -263,7 +263,7 @@ display:
               anonymous: '0'
               mukurtu_manager: '0'
             expose_fields: false
-            placeholder: 'Search digital heritage items'
+            placeholder: ''
             searched_fields_id: search_api_fulltext_searched_fields
           is_grouped: false
           group_info:
