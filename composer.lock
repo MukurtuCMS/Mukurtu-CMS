@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a1de3d6e1ccd6695b155bf61ca4b7a04",
+    "content-hash": "23921ef35229b9b6968ebf6822d7183a",
     "packages": [
         {
             "name": "altcha-org/altcha",
@@ -2645,26 +2645,29 @@
         },
         {
             "name": "drupal/extlink",
-            "version": "2.0.5",
+            "version": "3.0.0",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/extlink.git",
-                "reference": "2.0.5"
+                "reference": "3.0.0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/extlink-2.0.5.zip",
-                "reference": "2.0.5",
-                "shasum": "3b2f73f60483ebf6e7f374f7340b19f228386cca"
+                "url": "https://ftp.drupal.org/files/projects/extlink-3.0.0.zip",
+                "reference": "3.0.0",
+                "shasum": "b0e072b24d7517773ae48b9d1ea3abe498b65b69"
             },
             "require": {
-                "drupal/core": "^10 || ^11"
+                "drupal/core": "^11.3 || ^12"
+            },
+            "require-dev": {
+                "drupal/ui_icons": "1.1.x-dev"
             },
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "2.0.5",
-                    "datestamp": "1757349140",
+                    "version": "3.0.0",
+                    "datestamp": "1782867655",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
