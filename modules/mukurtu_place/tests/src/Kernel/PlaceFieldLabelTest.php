@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_place\Kernel;
 
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\mukurtu_place\Entity\Place;
 use Drupal\Tests\mukurtu_protocol\Kernel\ProtocolAwareEntityTestBase;
+use Drupal\mukurtu_place\Entity\Place;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests that Place's "Location Description" field label is translatable.
- *
- * @group mukurtu_place
  */
+#[Group('mukurtu_place')]
 class PlaceFieldLabelTest extends ProtocolAwareEntityTestBase {
 
   public function testCoverageDescriptionFieldLabelIsTranslatable(): void {

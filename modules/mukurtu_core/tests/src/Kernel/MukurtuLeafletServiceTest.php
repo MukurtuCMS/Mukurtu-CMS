@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_core\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests that leaflet.service restores circle_center/circle_radius on display.
@@ -18,8 +19,8 @@ use Drupal\KernelTests\KernelTestBase;
  * leaflet.service to restore them as a 'circle' typed feature instead.
  *
  * @see \Drupal\mukurtu_core\Service\MukurtuLeafletService
- * @group mukurtu_core
  */
+#[Group('mukurtu_core')]
 class MukurtuLeafletServiceTest extends KernelTestBase {
 
   /**

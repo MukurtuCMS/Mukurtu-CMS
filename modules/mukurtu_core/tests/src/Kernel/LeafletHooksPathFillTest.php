@@ -6,13 +6,15 @@ namespace Drupal\Tests\mukurtu_core\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\mukurtu_core\Hook\LeafletHooks;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests removal of path fill for line geometries on Leaflet maps.
  *
  * @see \Drupal\mukurtu_core\Hook\LeafletHooks
- * @group mukurtu_core
  */
+#[Group('mukurtu_core')]
 class LeafletHooksPathFillTest extends KernelTestBase {
 
   /**
@@ -32,9 +34,8 @@ class LeafletHooksPathFillTest extends KernelTestBase {
 
   /**
    * Tests that fill is disabled only for line-type features.
-   *
-   * @dataProvider featureProvider
    */
+  #[DataProvider('featureProvider')]
   public function testFillRemovedForLinesOnly(string $type, ?string $path, ?bool $expectedFill): void {
     $feature = ['type' => $type];
     if ($path !== NULL) {
