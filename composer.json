@@ -42,7 +42,7 @@
         "drupal/field_group": "^4.0",
         "drupal/flag": "^5.1@beta",
         "drupal/flat_taxonomy": "^2.0",
-        "drupal/genpass": "^2.1",
+        "drupal/genpass": "^3.0",
         "drupal/geocoder": "^4.30",
         "drupal/geofield": "^1.59",
         "drupal/gin": "^5.0",
