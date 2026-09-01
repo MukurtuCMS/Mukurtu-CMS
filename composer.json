@@ -44,7 +44,7 @@
         "drupal/flat_taxonomy": "^2.0",
         "drupal/genpass": "^2.1",
         "drupal/geocoder": "^4.30",
-        "drupal/geofield": "^1.59",
+        "drupal/geofield": "^10.3",
         "drupal/gin": "^5.0",
         "drupal/gin_lb": "^3.0@beta",
         "drupal/gin_toolbar": "^3.0",
