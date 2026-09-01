@@ -6,6 +6,7 @@ namespace Drupal\Tests\mukurtu_protocol\Kernel;
 
 use Drupal\Core\Config\FileStorage;
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests mukurtu_protocol_update_40043().
@@ -15,8 +16,8 @@ use Drupal\KernelTests\KernelTestBase;
  * confirms it fills them back in - and that running it twice is a no-op.
  *
  * @see \mukurtu_protocol_update_40043()
- * @group mukurtu_protocol
  */
+#[Group('mukurtu_protocol')]
 class CommunityViewsLanguageFallbackTest extends KernelTestBase {
 
   /**

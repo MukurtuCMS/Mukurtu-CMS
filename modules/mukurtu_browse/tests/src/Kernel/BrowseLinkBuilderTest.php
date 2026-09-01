@@ -6,16 +6,16 @@ namespace Drupal\Tests\mukurtu_browse\Kernel;
 
 use Drupal\Core\Url;
 use Drupal\KernelTests\KernelTestBase;
-use Drupal\mukurtu_browse\Service\BrowseLinkBuilder;
 use Drupal\facets\Entity\Facet;
+use Drupal\mukurtu_browse\Service\BrowseLinkBuilder;
+use PHPUnit\Framework\Attributes\Group;
 use Symfony\Component\Yaml\Yaml;
 
 /**
  * Tests BrowseLinkBuilder, which links to /browse and /digital-heritage
  * pre-filtered by community, category or cultural protocol.
- *
- * @group mukurtu_browse
  */
+#[Group('mukurtu_browse')]
 class BrowseLinkBuilderTest extends KernelTestBase {
 
   /**
