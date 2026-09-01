@@ -4,17 +4,17 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\mukurtu_export\Kernel;
 
+use Drupal\Tests\mukurtu_protocol\Kernel\ProtocolAwareEntityTestBase;
 use Drupal\mukurtu_export\Entity\ExportList;
 use Drupal\mukurtu_export\ExportItemIdentity;
 use Drupal\mukurtu_export\ExportListSource;
-use Drupal\Tests\mukurtu_protocol\Kernel\ProtocolAwareEntityTestBase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests ExportList's item_languages field and ExportListSource's key
  * building (#1260 Phase 5 export track).
- *
- * @group mukurtu_export
  */
+#[Group('mukurtu_export')]
 class ExportListItemLanguageTest extends ProtocolAwareEntityTestBase {
 
   /**

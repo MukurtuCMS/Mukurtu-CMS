@@ -6,6 +6,7 @@ namespace Drupal\Tests\mukurtu_collection\Kernel;
 
 use Drupal\Core\Config\FileStorage;
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests mukurtu_collection_update_40027().
@@ -15,8 +16,8 @@ use Drupal\KernelTests\KernelTestBase;
  * confirms it fills them back in - and that running it twice is a no-op.
  *
  * @see \mukurtu_collection_update_40027()
- * @group mukurtu_collection
  */
+#[Group('mukurtu_collection')]
 class CollectionViewsLanguageFallbackTest extends KernelTestBase {
 
   /**

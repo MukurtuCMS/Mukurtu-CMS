@@ -6,6 +6,7 @@ namespace Drupal\Tests\mukurtu_taxonomy\Kernel;
 
 use Drupal\Core\Config\FileStorage;
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests mukurtu_taxonomy_update_40020().
@@ -17,8 +18,8 @@ use Drupal\KernelTests\KernelTestBase;
  * and that running it twice is a no-op.
  *
  * @see \mukurtu_taxonomy_update_40020()
- * @group mukurtu_taxonomy
  */
+#[Group('mukurtu_taxonomy')]
 class TaxonomyReferencesViewLanguageFallbackTest extends KernelTestBase {
 
   /**

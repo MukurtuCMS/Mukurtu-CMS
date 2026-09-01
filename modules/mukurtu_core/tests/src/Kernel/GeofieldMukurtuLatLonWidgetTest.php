@@ -8,6 +8,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Form\FormState;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\mukurtu_core\Plugin\Field\FieldWidget\GeofieldMukurtuLatLonWidget;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests GeofieldMukurtuLatLonWidget's GeoJSON FeatureCollection round trip.
@@ -20,8 +21,8 @@ use Drupal\mukurtu_core\Plugin\Field\FieldWidget\GeofieldMukurtuLatLonWidget;
  * holes, legacy WKT).
  *
  * @see \Drupal\mukurtu_core\Plugin\Field\FieldWidget\GeofieldMukurtuLatLonWidget
- * @group mukurtu_core
  */
+#[Group('mukurtu_core')]
 class GeofieldMukurtuLatLonWidgetTest extends KernelTestBase {
 
   /**

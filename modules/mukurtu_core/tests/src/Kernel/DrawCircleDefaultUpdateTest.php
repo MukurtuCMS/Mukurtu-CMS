@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_core\Kernel;
 
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
+use Drupal\KernelTests\KernelTestBase;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
-use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\NodeType;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests mukurtu_core_update_40100(), which enables drawCircle by default.
@@ -19,8 +20,8 @@ use Drupal\node\Entity\NodeType;
  * field_coverage field rather than installing mukurtu_place itself.
  *
  * @see mukurtu_core_update_40100()
- * @group mukurtu_core
  */
+#[Group('mukurtu_core')]
 class DrawCircleDefaultUpdateTest extends KernelTestBase {
 
   /**

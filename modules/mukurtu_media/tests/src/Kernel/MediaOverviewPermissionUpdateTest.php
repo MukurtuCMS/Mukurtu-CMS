@@ -6,13 +6,14 @@ namespace Drupal\Tests\mukurtu_media\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\user\Entity\Role;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests mukurtu_media_update_40021(), which grants a media permission.
  *
  * @see mukurtu_media_update_40021()
- * @group mukurtu_media
  */
+#[Group('mukurtu_media')]
 class MediaOverviewPermissionUpdateTest extends KernelTestBase {
 
   /**
