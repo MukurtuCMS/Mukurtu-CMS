@@ -218,7 +218,7 @@ class ImportFieldDescriptionListForm extends ImportBaseForm {
 
     // Convert to CSV format.
     $handle = fopen('php://memory', 'r+');
-    fputcsv($handle, $headers);
+    fputcsv($handle, $headers, ',', '"', '\\');
     rewind($handle);
     $csv = stream_get_contents($handle);
     fclose($handle);

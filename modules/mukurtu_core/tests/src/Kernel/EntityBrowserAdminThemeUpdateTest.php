@@ -9,9 +9,9 @@ use Drupal\KernelTests\KernelTestBase;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests mukurtu_update_40004(), which flags entity browsers admin-themed.
+ * Tests mukurtu_core_update_40108(), which flags entity browsers admin-themed.
  *
- * @see mukurtu_update_40004()
+ * @see mukurtu_core_update_40108()
  */
 #[Group('mukurtu_core')]
 class EntityBrowserAdminThemeUpdateTest extends KernelTestBase {
@@ -32,8 +32,8 @@ class EntityBrowserAdminThemeUpdateTest extends KernelTestBase {
     parent::setUp();
     $this->installConfig(['entity_browser']);
 
-    $profile_path = \Drupal::service('extension.list.profile')->getPath('mukurtu');
-    require_once $profile_path . '/mukurtu.install';
+    $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core');
+    require_once $module_path . '/mukurtu_core.install';
   }
 
   /**
@@ -60,7 +60,7 @@ class EntityBrowserAdminThemeUpdateTest extends KernelTestBase {
     $this->createBrowser('mukurtu_content_browser');
     $this->createBrowser('mukurtu_collection_browser');
 
-    mukurtu_update_40004();
+    mukurtu_core_update_40108();
 
     $content_browser = EntityBrowser::load('mukurtu_content_browser');
     $this->assertTrue($content_browser->display_configuration['use_admin_theme']);
@@ -75,7 +75,7 @@ class EntityBrowserAdminThemeUpdateTest extends KernelTestBase {
   public function testUpdateIsIdempotent(): void {
     $this->createBrowser('mukurtu_content_browser', TRUE);
 
-    mukurtu_update_40004();
+    mukurtu_core_update_40108();
 
     $browser = EntityBrowser::load('mukurtu_content_browser');
     $this->assertTrue($browser->display_configuration['use_admin_theme']);
@@ -87,7 +87,7 @@ class EntityBrowserAdminThemeUpdateTest extends KernelTestBase {
   public function testUpdateIgnoresUnlistedBrowsers(): void {
     $this->createBrowser('some_other_browser');
 
-    mukurtu_update_40004();
+    mukurtu_core_update_40108();
 
     $browser = EntityBrowser::load('some_other_browser');
     $this->assertFalse($browser->display_configuration['use_admin_theme']);
@@ -97,7 +97,7 @@ class EntityBrowserAdminThemeUpdateTest extends KernelTestBase {
    * The update hook is a no-op when none of the shipped browsers exist.
    */
   public function testUpdateIsNoOpWithoutBrowsers(): void {
-    mukurtu_update_40004();
+    mukurtu_core_update_40108();
     $this->assertNull(EntityBrowser::load('mukurtu_content_browser'));
   }
 

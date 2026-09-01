@@ -6,12 +6,12 @@ namespace Drupal\Tests\mukurtu_landing_page\Kernel;
 
 use Drupal\Core\Config\FileStorage;
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests DefaultLandingPage::createDefaultLandingPage() block reuse.
- *
- * @group mukurtu_landing_page
  */
+#[Group('mukurtu_landing_page')]
 class DefaultLandingPageTest extends KernelTestBase {
 
   protected static $modules = [
