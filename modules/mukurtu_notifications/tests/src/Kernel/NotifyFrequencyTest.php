@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_notifications\Kernel;
 
+use Drupal\KernelTests\KernelTestBase;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
-use Drupal\KernelTests\KernelTestBase;
 use Drupal\user\Entity\User;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests the field_notify_frequency 'none' option and its update hook.
@@ -21,8 +22,8 @@ use Drupal\user\Entity\User;
  * @see mukurtu_notifications_notification_frequency_allowed_values()
  * @see _mukurtu_notifications_user_wants_email()
  * @see mukurtu_notifications_update_40057()
- * @group mukurtu_notifications
  */
+#[Group('mukurtu_notifications')]
 class NotifyFrequencyTest extends KernelTestBase {
 
   /**

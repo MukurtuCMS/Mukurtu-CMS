@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_core\Unit;
 
-use Drupal\mukurtu_core\Routing\RouteSubscriber;
 use Drupal\Tests\UnitTestCase;
+use Drupal\mukurtu_core\Routing\RouteSubscriber;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
@@ -38,9 +39,8 @@ class RouteSubscriberMessageSubscribeAccessTest extends UnitTestCase {
 
   /**
    * Both routes end up permission-gated with the custom access check gone.
-   *
-   * @dataProvider routeNameProvider
    */
+  #[DataProvider('routeNameProvider')]
   public function testRouteRequiresPermission(string $routeName): void {
     $collection = $this->messageSubscribeRouteCollection();
 
@@ -55,9 +55,8 @@ class RouteSubscriberMessageSubscribeAccessTest extends UnitTestCase {
 
   /**
    * Both routes are marked as admin routes, so Gin renders them.
-   *
-   * @dataProvider routeNameProvider
    */
+  #[DataProvider('routeNameProvider')]
   public function testRouteUsesAdminTheme(string $routeName): void {
     $collection = $this->messageSubscribeRouteCollection();
 
