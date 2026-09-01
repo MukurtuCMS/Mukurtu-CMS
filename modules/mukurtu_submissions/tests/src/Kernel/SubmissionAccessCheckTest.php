@@ -9,15 +9,15 @@ use Drupal\mukurtu_submissions\Access\SubmissionAccessCheck;
 use Drupal\mukurtu_submissions\Entity\SubmissionSettings;
 use Drupal\user\Entity\Role;
 use Drupal\user\UserInterface;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests SubmissionAccessCheck::access() directly against every branch -
  * none of this module's other kernel tests exercise this class at all,
  * they only cover the role-permission layer one step removed from it
  * (e.g. ReviewerPermissionSyncTest, EntityBrowserPermissionSyncTest).
- *
- * @group mukurtu_submissions
  */
+#[Group('mukurtu_submissions')]
 class SubmissionAccessCheckTest extends MukurtuSubmissionsKernelTestBase {
 
   const PERMISSION = 'submit node ' . self::TEST_BUNDLE . ' content';
