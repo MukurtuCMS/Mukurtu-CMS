@@ -5,14 +5,15 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_core\Kernel;
 
 use Drupal\Tests\mukurtu_protocol\Kernel\ProtocolAwareEntityTestBase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests RoundtripEntityTypeRegistry discovers custom entity types by interface.
  *
  * @see \Drupal\mukurtu_core\Service\RoundtripEntityTypeRegistry
  * @see \Drupal\mukurtu_core\Entity\RoundtripEntityInterface
- * @group mukurtu_core
  */
+#[Group('mukurtu_core')]
 class RoundtripEntityTypeRegistryTest extends ProtocolAwareEntityTestBase {
 
   /**

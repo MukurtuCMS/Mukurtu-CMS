@@ -7,14 +7,14 @@ namespace Drupal\Tests\mukurtu_submissions\Kernel;
 use Drupal\Core\Form\FormState;
 use Drupal\mukurtu_submissions\Form\SubmissionSettingsCollectionForm;
 use Drupal\user\Entity\User;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests the "Submission Forms" collection page, which now combines the
  * per-content-type submission settings list with the notify_uids setting
  * on one page/route instead of two.
- *
- * @group mukurtu_submissions
  */
+#[Group('mukurtu_submissions')]
 class SubmissionSettingsCollectionFormTest extends MukurtuSubmissionsKernelTestBase {
 
   /**

@@ -5,14 +5,15 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_submissions\Kernel;
 
 use Drupal\Core\Form\FormState;
+use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
-use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use Drupal\message\Entity\MessageTemplate;
 use Drupal\mukurtu_submissions\Form\PublicSubmissionForm;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\user\Entity\User;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Covers PublicSubmissionForm's save path: the resulting node ends up
@@ -28,9 +29,8 @@ use Drupal\user\Entity\User;
  * automatically. The moderation-state pinning itself, and the Cultural
  * Protocol field's exclusion from the built form, are covered separately
  * by PublicSubmissionFormTest.
- *
- * @group mukurtu_submissions
  */
+#[Group('mukurtu_submissions')]
 class PublicSubmissionFormUnmoderatedSaveTest extends EntityKernelTestBase {
 
   /**
