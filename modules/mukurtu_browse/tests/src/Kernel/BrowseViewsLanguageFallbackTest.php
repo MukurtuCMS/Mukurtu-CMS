@@ -6,6 +6,7 @@ namespace Drupal\Tests\mukurtu_browse\Kernel;
 
 use Drupal\Core\Config\FileStorage;
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests mukurtu_browse_update_40020().
@@ -17,8 +18,8 @@ use Drupal\KernelTests\KernelTestBase;
  * and that running it twice is a no-op.
  *
  * @see \mukurtu_browse_update_40020()
- * @group mukurtu_browse
  */
+#[Group('mukurtu_browse')]
 class BrowseViewsLanguageFallbackTest extends KernelTestBase {
 
   /**

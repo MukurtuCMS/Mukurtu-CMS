@@ -6,6 +6,7 @@ namespace Drupal\Tests\mukurtu_multilingual\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\media\Entity\MediaType;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests mukurtu_multilingual_update_40008(), which closes the 12 bundle
@@ -21,8 +22,8 @@ use Drupal\media\Entity\MediaType;
  *
  * @see mukurtu_multilingual_update_40008()
  * @see ConfigTranslationCoverageTest
- * @group mukurtu_multilingual
  */
+#[Group('mukurtu_multilingual')]
 class BundleTranslationEnablementTest extends KernelTestBase {
 
   /**

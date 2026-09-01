@@ -8,6 +8,7 @@ use Drupal\Core\Field\Entity\BaseFieldOverride;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\language\Entity\ContentLanguageSettings;
 use Drupal\node\Entity\NodeType;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests _mukurtu_multilingual_apply_translation_overrides().
@@ -25,8 +26,8 @@ use Drupal\node\Entity\NodeType;
  * instead.
  *
  * @see _mukurtu_multilingual_apply_translation_overrides()
- * @group mukurtu_multilingual
  */
+#[Group('mukurtu_multilingual')]
 class TranslationOverridesTest extends KernelTestBase {
 
   /**

@@ -6,6 +6,7 @@ namespace Drupal\Tests\mukurtu_dictionary\Kernel;
 
 use Drupal\Core\Config\FileStorage;
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests mukurtu_dictionary_update_40043().
@@ -17,8 +18,8 @@ use Drupal\KernelTests\KernelTestBase;
  * and that running it twice is a no-op.
  *
  * @see \mukurtu_dictionary_update_40043()
- * @group mukurtu_dictionary
  */
+#[Group('mukurtu_dictionary')]
 class DictionaryViewLanguageFallbackTest extends KernelTestBase {
 
   /**

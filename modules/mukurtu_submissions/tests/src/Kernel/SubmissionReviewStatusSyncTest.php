@@ -5,19 +5,19 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_submissions\Kernel;
 
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
+use Drupal\Tests\content_moderation\Traits\ContentModerationTestTrait;
 use Drupal\mukurtu_submissions\Entity\SubmissionInterface;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
-use Drupal\Tests\content_moderation\Traits\ContentModerationTestTrait;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests mukurtu_submissions_node_update(), which keeps a mukurtu_submission
  * entity's review_status in sync with its node's moderation state so the
  * Pending Submissions queue (filtered on review_status = pending) actually
  * empties once a reviewer publishes the submission.
- *
- * @group mukurtu_submissions
  */
+#[Group('mukurtu_submissions')]
 class SubmissionReviewStatusSyncTest extends EntityKernelTestBase {
 
   use ContentModerationTestTrait;

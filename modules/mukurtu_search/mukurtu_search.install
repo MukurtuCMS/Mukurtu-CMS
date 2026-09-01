@@ -5,6 +5,9 @@
  * Install, update and uninstall functions for the Mukurtu Search module.
  */
 
+use Drupal\search_api\Item\Field;
+use Drupal\search_api\Entity\Index;
+
 function mukurtu_search_install() {
   mukurtu_search_rebuild_index();
 }
@@ -18,7 +21,7 @@ function mukurtu_search_install() {
  */
 function mukurtu_search_update_40001() {
   mukurtu_search_rebuild_index();
-  if ($index = \Drupal\search_api\Entity\Index::load('mukurtu_browse_auto_index')) {
+  if ($index = Index::load('mukurtu_browse_auto_index')) {
     $index->reindex();
   }
 }
@@ -63,7 +66,7 @@ function mukurtu_search_update_40004(): void {
 /**
  * Restore string (facet) taxonomy name fields dropped by update_40001().
  *
- * mukurtu_search_update_40001() called mukurtu_search_rebuild_index(),
+ * Mukurtu_search_update_40001() called mukurtu_search_rebuild_index(),
  * which wiped every field on mukurtu_browse_auto_index and only restored
  * the fulltext "__name__text" variants for taxonomy reference fields, not
  * the plain string "__name" variants that facets (e.g. Category, Format,
@@ -71,7 +74,7 @@ function mukurtu_search_update_40004(): void {
  * to resolve a query type. Re-add whichever of the fields are missing.
  */
 function mukurtu_search_update_40005(): void {
-  $index = \Drupal\search_api\Entity\Index::load('mukurtu_browse_auto_index');
+  $index = Index::load('mukurtu_browse_auto_index');
   if (!$index) {
     return;
   }
@@ -82,7 +85,7 @@ function mukurtu_search_update_40005(): void {
       continue;
     }
     $missing = TRUE;
-    $field = new \Drupal\search_api\Item\Field($index, $field_id);
+    $field = new Field($index, $field_id);
     $field->setType('string');
     $field->setDatasourceId('entity:node');
     $field->setPropertyPath($definition['property_path']);
@@ -105,4 +108,69 @@ function mukurtu_search_update_40006(): void {
     $config->set('backend', 'db');
     $config->save();
   }
+}
+
+/**
+ * Swap per-field taxonomy index variants for shared aggregate fields.
+ *
+ * `search_api_db` adds one database key per indexed field and MySQL caps a
+ * table at 64 keys. Older releases added a `__name__text` and `__uuid` field
+ * for every taxonomy reference field on every node bundle, which overflows the
+ * limit on sites with content-type-specific vocabularies (Place, Person, ...)
+ * and logs "1069 Too many keys specified" during install/update.
+ *
+ * This converges existing sites onto the new model: strip the per-field
+ * variants that are not part of the shipped static set, enable the
+ * taxonomy_term_aggregates processor, and add the shared
+ * all_taxonomy_term_names / all_taxonomy_term_uuids fields. The same end state
+ * ships in this module's config/install for fresh installs.
+ */
+function mukurtu_search_update_40007(): void {
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_search');
+  require_once $module_path . '/mukurtu_search.module';
+
+  $index = Index::load('mukurtu_browse_auto_index');
+  if (!$index) {
+    return;
+  }
+
+  // Snapshot the field IDs so we can scrub processor field lists afterwards.
+  $before = array_keys($index->getFields());
+
+  // Reconcile the field set: keep-list strip of stale per-field variants, plus
+  // (re)add of the static taxonomy name fields and the aggregate fields and
+  // processor.
+  mukurtu_search_rebuild_index();
+
+  $index = \Drupal::entityTypeManager()
+    ->getStorage('search_api_index')
+    ->loadUnchanged('mukurtu_browse_auto_index');
+
+  $after = array_keys($index->getFields());
+  $removed = array_diff($before, $after);
+
+  // Scrub removed field IDs from every processor's field list, and make sure
+  // the aggregate fulltext field is processed like the other name fields.
+  $text_processors = ['html_filter', 'ignorecase', 'tokenizer', 'transliteration'];
+  $changed = FALSE;
+  foreach ($index->getProcessors() as $processor_id => $processor) {
+    $config = $processor->getConfiguration();
+    if (!isset($config['fields']) || !is_array($config['fields'])) {
+      continue;
+    }
+    $fields = array_values(array_diff($config['fields'], $removed));
+    if (in_array($processor_id, $text_processors, TRUE) && !in_array('all_taxonomy_term_names', $fields, TRUE)) {
+      $fields[] = 'all_taxonomy_term_names';
+    }
+    if ($fields !== $config['fields']) {
+      $config['fields'] = $fields;
+      $processor->setConfiguration($config);
+      $changed = TRUE;
+    }
+  }
+
+  if ($changed) {
+    $index->save();
+  }
+  $index->reindex();
 }
