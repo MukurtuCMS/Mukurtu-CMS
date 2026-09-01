@@ -1511,17 +1511,17 @@
         },
         {
             "name": "drupal/blazy",
-            "version": "3.0.17",
+            "version": "3.0.19",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/blazy.git",
-                "reference": "3.0.17"
+                "reference": "3.0.19"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/blazy-3.0.17.zip",
-                "reference": "3.0.17",
-                "shasum": "3bbafe86ed2114a4d99431919a9ea13b3faa15f3"
+                "url": "https://ftp.drupal.org/files/projects/blazy-3.0.19.zip",
+                "reference": "3.0.19",
+                "shasum": "2306986b2d8227a8fe45adcd59f4d6b332abc0b7"
             },
             "require": {
                 "drupal/core": ">=9.4"
@@ -1532,8 +1532,8 @@
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "3.0.17",
-                    "datestamp": "1768032942",
+                    "version": "3.0.19",
+                    "datestamp": "1787772242",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
