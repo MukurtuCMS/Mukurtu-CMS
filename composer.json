@@ -40,7 +40,7 @@
         "drupal/facets": ">=3.0 <3.0.4",
         "drupal/facets_reset_button": "^1.0",
         "drupal/field_group": "^4.0",
-        "drupal/flag": "^4.0",
+        "drupal/flag": "^5.1@beta",
         "drupal/flat_taxonomy": "^2.0",
         "drupal/genpass": "^3.0",
         "drupal/geocoder": "^4.30",
