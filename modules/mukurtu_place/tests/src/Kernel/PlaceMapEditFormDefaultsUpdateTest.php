@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_place\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests mukurtu_place_update_40009(), which moves the place edit form map's
@@ -12,8 +13,8 @@ use Drupal\KernelTests\KernelTestBase;
  * single already-saved point (#1453).
  *
  * @see mukurtu_place_update_40009()
- * @group mukurtu_place
  */
+#[Group('mukurtu_place')]
 class PlaceMapEditFormDefaultsUpdateTest extends KernelTestBase {
 
   /**
