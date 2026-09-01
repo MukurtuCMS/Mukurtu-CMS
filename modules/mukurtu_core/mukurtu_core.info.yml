@@ -32,6 +32,7 @@ dependencies:
   - 'entity_browser:entity_browser'
   - 'extlink:extlink'
   - 'flag:flag'
+  - 'genpass:genpass'
   - 'geofield:geofield'
   - 'leaflet:leaflet'
   - 'media_entity_soundcloud:media_entity_soundcloud'
