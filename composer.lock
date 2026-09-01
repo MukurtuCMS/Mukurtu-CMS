@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ca412f65400c8cf8777d680045f8e7b7",
+    "content-hash": "eb40d837822afc4e8d58108ef01255bd",
     "packages": [
         {
             "name": "altcha-org/altcha",
@@ -3165,26 +3165,26 @@
         },
         {
             "name": "drupal/genpass",
-            "version": "2.3.0",
+            "version": "3.0.0",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/genpass.git",
-                "reference": "2.3.0"
+                "reference": "3.0.0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/genpass-2.3.0.zip",
-                "reference": "2.3.0",
-                "shasum": "7752d86684cf1fb044dbe7f5e42762d6174a9efb"
+                "url": "https://ftp.drupal.org/files/projects/genpass-3.0.0.zip",
+                "reference": "3.0.0",
+                "shasum": "abd802efff7636739e6676d6fd364322e87cd1d9"
             },
             "require": {
-                "drupal/core": "^10.3 || ^11"
+                "drupal/core": "^11.3 || ^12"
             },
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "2.3.0",
-                    "datestamp": "1782101388",
+                    "version": "3.0.0",
+                    "datestamp": "1774620752",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
