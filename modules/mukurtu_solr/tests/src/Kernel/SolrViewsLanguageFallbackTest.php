@@ -6,6 +6,7 @@ namespace Drupal\Tests\mukurtu_solr\Kernel;
 
 use Drupal\Core\Config\FileStorage;
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests mukurtu_solr_update_40005().
@@ -17,8 +18,8 @@ use Drupal\KernelTests\KernelTestBase;
  * and that running it twice is a no-op.
  *
  * @see \mukurtu_solr_update_40005()
- * @group mukurtu_solr
  */
+#[Group('mukurtu_solr')]
 class SolrViewsLanguageFallbackTest extends KernelTestBase {
 
   /**
