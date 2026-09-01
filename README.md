@@ -83,7 +83,7 @@ sudo apt install poppler-utils
 ### Updating if you are only one version behind
 
 1. Backup your site and database.
-2. Run the update commands.
+2. From your Mukurtu 4 directory, run the update commands.
 ```
     # put the site into offline mode
     drush state:set system.maintenance_mode 1
@@ -108,7 +108,7 @@ sudo apt install poppler-utils
 We recommend iterating through each skipped version rather than jumping versions.
 
 1. Backup your site and database.
-2. Put your site into offline mode.
+2. From your Mukurtu 4 directory, put your site into offline mode.
     - `drush state:set system.maintenance_mode 0`
     - `drush cr`
 2. Edit your composer.json file.
