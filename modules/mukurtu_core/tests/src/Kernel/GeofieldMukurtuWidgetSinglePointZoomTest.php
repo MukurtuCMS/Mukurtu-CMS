@@ -6,6 +6,7 @@ namespace Drupal\Tests\mukurtu_core\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\mukurtu_core\Plugin\Field\FieldWidget\GeofieldMukurtuWidget;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests the Map Points widget's dedicated single-point zoom setting (#1453).
@@ -15,9 +16,8 @@ use Drupal\mukurtu_core\Plugin\Field\FieldWidget\GeofieldMukurtuWidget;
  * deliberately zoomed out to avoid world-map tiling on add forms). See
  * modules/mukurtu_core/js/mukurtu-leaflet-widget.js for the client-side
  * half of this fix.
- *
- * @group mukurtu_core
  */
+#[Group('mukurtu_core')]
 class GeofieldMukurtuWidgetSinglePointZoomTest extends KernelTestBase {
 
   /**

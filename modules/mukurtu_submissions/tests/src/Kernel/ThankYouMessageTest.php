@@ -6,14 +6,14 @@ namespace Drupal\Tests\mukurtu_submissions\Kernel;
 
 use Drupal\mukurtu_submissions\Controller\ThankYouController;
 use Drupal\mukurtu_submissions\Entity\SubmissionSettings;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests that the thank-you page renders a configured custom message when
  * one is set, falls back to the generic message otherwise, and carries the
  * settings entity's cache tags so edits to it invalidate the cached page.
- *
- * @group mukurtu_submissions
  */
+#[Group('mukurtu_submissions')]
 class ThankYouMessageTest extends MukurtuSubmissionsKernelTestBase {
 
   protected function viewThankYouPage(): array {
