@@ -340,6 +340,20 @@
         img.setAttribute('aria-pressed', 'false');
         img.setAttribute('aria-describedby', ZOOM_HINT_ID);
       });
+
+      // Set an explicit aspect-ratio on the source oEmbed iframe (remote
+      // video) so GLightbox's cloneNode(true) carries it into the lightbox
+      // clone, same mechanism as the zoomable marking above. Unlike <img>
+      // and <video>, browsers don't derive an intrinsic aspect ratio from
+      // an <iframe>'s width/height attributes, so a CSS width:100%/
+      // height:auto pairing alone collapses to a fixed fallback height
+      // instead of scaling proportionally - this supplies the ratio
+      // explicitly from the same attributes.
+      once('mediaAssetOembedRatio', '.media-asset--glightbox-inline iframe.media-oembed-content[width][height]', context).forEach((iframe) => {
+        const width = iframe.getAttribute('width');
+        const height = iframe.getAttribute('height');
+        iframe.style.aspectRatio = `${width} / ${height}`;
+      });
     }
   };
 

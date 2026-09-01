@@ -123,17 +123,23 @@
     }
 
     // The oEmbed formatter's iframe (remote-video) already carries width/
-    // height HTML attributes matching the video's real aspect ratio. The
-    // generic rule above is sized for external-embed's arbitrary webpage
-    // embeds, which have no meaningful intrinsic ratio; forcing that same
-    // near-full-viewport height onto an oEmbed video iframe stretches a
-    // 16:9 video into a tall, narrow box. Let it shrink to fit instead,
-    // same as the image treatment above. A class selector's specificity
-    // beats the plain-element rule above regardless of source order.
+    // height HTML attributes matching the video's real aspect ratio (e.g.
+    // 900x506 for a 16:9 embed), but those attributes are sized for the
+    // small inline page preview, not a full lightbox. The generic rule
+    // above is sized for external-embed's arbitrary webpage embeds, which
+    // have no meaningful intrinsic ratio, so forcing that same near-full-
+    // viewport fixed height onto an oEmbed video iframe stretched it into
+    // a tall, narrow box. Fill the available width instead and leave
+    // height unset: modern browsers derive an intrinsic aspect ratio from
+    // an iframe's width/height HTML attributes (the same mechanism that
+    // keeps an <img width height> from distorting when its CSS width
+    // changes), so the browser computes a proportional height on its own
+    // as this scales up to fill the lightbox. A class selector's
+    // specificity beats the plain-element rule above regardless of
+    // source order.
     iframe.media-oembed-content {
-      width: auto;
+      width: 100%;
       height: auto;
-      max-width: 100%;
       max-height: calc(92vh - 2rem - 40px);
       margin: 0 auto;
     }
