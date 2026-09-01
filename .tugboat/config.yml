@@ -64,6 +64,23 @@ services:
           chown www-data:www-data web/sites/default/settings.php
           # Update composer dependencies.
           rm composer.lock
+          # Force a fresh install of every patched package, not just an
+          # incremental update. Tugboat previews run in a persistent
+          # container that carries vendor/ forward across every build on
+          # the same PR, so composer only reinstalls (and re-patches) a
+          # package when its *locked version* changes. A package whose
+          # version never changes across the PR's lifetime - most notably
+          # drupal/core, which stays pinned below - never gets its patches
+          # (re)applied, silently drifting from whatever composer.json's
+          # extra.patches currently specifies. Removing vendor/ here makes
+          # every build fully reinstall from the freshly written lock file,
+          # so patches are always verified and reapplied regardless of
+          # whether this is a brand-new preview or one that has been
+          # rebuilding the same PR for weeks (see
+          # patches/module-installer-stale-config-installer-proxy.patch,
+          # which sat un-reapplied on one long-lived preview for exactly
+          # this reason).
+          rm -rf vendor
           # Patch the template's composer.json to require Drupal 11.4.x and
           # ignore the symfony/polyfill-intl-idn advisory. composer config
           # does not support setting audit.ignore keys, so patch directly.
