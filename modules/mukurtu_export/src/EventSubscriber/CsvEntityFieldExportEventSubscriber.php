@@ -132,11 +132,25 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
       return $this->exportTimestamp($event, $field);
     }
 
+    // Layout Builder's per-entity section field stores structured Section
+    // objects with no meaningful flat CSV representation. New export
+    // configs no longer offer this field (see CsvExporter::getMappedFields()),
+    // but a config saved before that exclusion existed may still have it
+    // mapped, so guard here too rather than letting it reach the default
+    // handling below.
+    if ($fieldType == 'layout_section') {
+      $event->setValue([]);
+      return;
+    }
+
     // Default handling.
     $values = $entity->get($field_name)->getValue();
     $exportValue = [];
     foreach ($values as $value) {
-      $exportValue[] = is_array($value) ? reset($value) : $value;
+      $extracted = is_array($value) ? reset($value) : $value;
+      // Guard against field types whose getValue() returns a non-scalar
+      // (e.g. an object) that implode() in CSV::export() cannot stringify.
+      $exportValue[] = is_scalar($extracted) ? $extracted : '';
     }
     $event->setValue($exportValue);
   }
