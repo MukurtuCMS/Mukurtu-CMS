@@ -9,7 +9,13 @@
 # kernel" errors when ClassResolver tries to resolve OOP hook classes.
 #
 # Fix: re-fetch \Drupal::service('config.installer') each loop iteration so a
-# fresh proxy from the current container is always used.
+# fresh proxy from the current container is always used. This must cover the
+# Optional and SiteOptional passes too, not just InstallEntities: they run after
+# the same per-module hook_install() invocations that can trigger a rebuild, and
+# reusing the single $config_installer fetched before InstallEntities left them
+# just as exposed to a stale proxy (in fact, with $config_installer's only
+# assignment removed by this patch's own InstallEntities fix, leaving these two
+# loops unpatched would reference an undefined variable entirely).
 #
 # Upstream: this fix should be filed against Drupal core at
 # https://www.drupal.org/project/drupal/issues — search for
@@ -33,7 +39,7 @@
 
        // Set the schema version to the number of the last update provided by
        // the module, or the minimum core schema version.
-@@ -442,10 +441,11 @@
+@@ -439,30 +438,33 @@
      // requires the library discovery cache to be rebuilt.
      \Drupal::service('library.discovery')->clear();
 
@@ -48,11 +54,18 @@
 
        // Allow the module to perform install tasks.
        $this->invoke($module, 'install', [$sync_status]);
-@@ -458,14 +458,14 @@
+
+       // Record the fact that it was installed.
+       \Drupal::logger('system')->info('%module module installed.', ['%module' => $module]);
+     }
+
+     // Install optional configuration from modules once all the modules have
      // been properly installed. This is often where soft dependencies lie.
      // @todo This code fixes \Drupal\Tests\help\Functional\HelpTest::testHelp().
      foreach ($module_list as $module) {
 -      $config_installer->installDefaultConfig('module', $module, DefaultConfigMode::Optional);
++      // Re-fetch config.installer each iteration; see the InstallEntities pass
++      // above for why a cached proxy is unsafe here too.
 +      \Drupal::service('config.installer')->installDefaultConfig('module', $module, DefaultConfigMode::Optional);
      }
      // Install optional configuration from other modules once all the modules
@@ -63,5 +76,3 @@
 -      $config_installer->installDefaultConfig('module', $module, DefaultConfigMode::SiteOptional);
 +      \Drupal::service('config.installer')->installDefaultConfig('module', $module, DefaultConfigMode::SiteOptional);
      }
-
-     if (count($module_list) > 1) {
