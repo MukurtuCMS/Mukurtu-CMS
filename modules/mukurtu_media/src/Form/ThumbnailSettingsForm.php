@@ -41,6 +41,17 @@ class ThumbnailSettingsForm extends ConfigFormBase
         continue;
       }
       $configKey = $this->getConfigKey($key);
+      $fids = $config->get($configKey) ?? [];
+      $fid = reset($fids) ?: NULL;
+      if ($fid && ($file = File::load($fid)) && str_starts_with($file->getMimeType(), 'image/')) {
+        $form["default_thumbnail"][$key . '_preview'] = [
+          '#theme' => 'image_style',
+          '#style_name' => 'thumbnail',
+          '#uri' => $file->getFileUri(),
+          '#alt' => $this->t("{$value['label']} default thumbnail preview"),
+          '#weight' => -1,
+        ];
+      }
       $form["default_thumbnail"][$key] = [
         '#type' => 'managed_file',
         '#title' => $this->t("{$value['label']} default thumbnail"),
@@ -49,8 +60,7 @@ class ThumbnailSettingsForm extends ConfigFormBase
         '#upload_validators' => [
           'FileExtension' => ['extensions' => 'png gif jpg jpeg'],
         ],
-        '#preview_image_style' => 'thumbnail',
-        '#default_value' => $config->get($configKey) ?? NULL,
+        '#default_value' => $fids,
       ];
     }
     return parent::buildForm($form, $form_state);
