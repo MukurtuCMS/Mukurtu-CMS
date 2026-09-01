@@ -9,6 +9,7 @@ use Drupal\message\Entity\Message;
 use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
 use Drupal\views\Views;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests that the personal notifications feed cannot leak another user's
@@ -18,9 +19,8 @@ use Drupal\views\Views;
  * had no validation, so /notifications/<uid> would use whatever uid was
  * supplied in the URL instead of the current user -- see
  * mukurtu_notifications_views_pre_view().
- *
- * @group mukurtu_notifications
  */
+#[Group('mukurtu_notifications')]
 class NotificationsFeedAccessTest extends KernelTestBase {
 
   /**
