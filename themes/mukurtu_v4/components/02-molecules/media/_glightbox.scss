@@ -122,6 +122,22 @@
       min-height: 400px;
     }
 
+    // The oEmbed formatter's iframe (remote-video) already carries width/
+    // height HTML attributes matching the video's real aspect ratio. The
+    // generic rule above is sized for external-embed's arbitrary webpage
+    // embeds, which have no meaningful intrinsic ratio; forcing that same
+    // near-full-viewport height onto an oEmbed video iframe stretches a
+    // 16:9 video into a tall, narrow box. Let it shrink to fit instead,
+    // same as the image treatment above. A class selector's specificity
+    // beats the plain-element rule above regardless of source order.
+    iframe.media-oembed-content {
+      width: auto;
+      height: auto;
+      max-width: 100%;
+      max-height: calc(92vh - 2rem - 40px);
+      margin: 0 auto;
+    }
+
     .media-asset--document-viewer {
       display: block;
       width: 100%;
