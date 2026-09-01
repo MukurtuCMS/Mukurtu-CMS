@@ -12,6 +12,7 @@ use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests the permission string that gates /admin/media (issue #972).
@@ -22,9 +23,8 @@ use Drupal\user\Entity\User;
  * permission string ('site:access media overview+protocol:view media', OR
  * conjunction), so exercising that shared method here covers both entry
  * points.
- *
- * @group mukurtu_protocol
  */
+#[Group('mukurtu_protocol')]
 class MukurtuMediaAccessTest extends KernelTestBase {
 
   /**

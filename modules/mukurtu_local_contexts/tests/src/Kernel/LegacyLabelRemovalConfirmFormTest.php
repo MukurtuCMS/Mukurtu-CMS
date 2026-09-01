@@ -5,12 +5,12 @@ namespace Drupal\Tests\mukurtu_local_contexts\Kernel;
 use Drupal\Core\Form\FormState;
 use Drupal\mukurtu_local_contexts\Form\LegacyLabelRemovalConfirmForm;
 use Drupal\node\Entity\Node;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests LegacyLabelRemovalConfirmForm.
- *
- * @group mukurtu_local_contexts
  */
+#[Group('mukurtu_local_contexts')]
 class LegacyLabelRemovalConfirmFormTest extends LocalContextsTestBase {
 
   /**
