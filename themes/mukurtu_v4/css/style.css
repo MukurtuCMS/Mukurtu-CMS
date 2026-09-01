@@ -3089,8 +3089,11 @@ img[class$=-placeholder] {
   min-height: 400px;
 }
 .glightbox-clean .gslide-inline iframe.media-oembed-content {
-  width: 100%;
+  display: block;
+  width: auto;
   height: auto;
+  min-height: 0;
+  max-width: 100%;
   max-height: calc(92vh - 2rem - 40px);
   margin: 0 auto;
 }

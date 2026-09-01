@@ -129,17 +129,36 @@
     // above is sized for external-embed's arbitrary webpage embeds, which
     // have no meaningful intrinsic ratio, so forcing that same near-full-
     // viewport fixed height onto an oEmbed video iframe stretched it into
-    // a tall, narrow box. Fill the available width instead and leave
-    // height unset: modern browsers derive an intrinsic aspect ratio from
-    // an iframe's width/height HTML attributes (the same mechanism that
-    // keeps an <img width height> from distorting when its CSS width
-    // changes), so the browser computes a proportional height on its own
-    // as this scales up to fill the lightbox. A class selector's
-    // specificity beats the plain-element rule above regardless of
-    // source order.
+    // a tall, narrow box.
+    //
+    // .gslide-media (GLightbox's own bundled CSS) is `display: flex;
+    // width: auto` and is itself a flex item of .gslide, so it shrinks to
+    // whatever "natural" size its content contributes rather than
+    // stretching to fill the available space. A percentage width (100%)
+    // on the iframe can't contribute a natural size to that shrink-wrap
+    // chain, which collapsed the whole thing down to the 400px min-height
+    // floor below. width: auto instead lets the iframe's own intrinsic
+    // HTML width/height act as that natural size (same as the img rule
+    // above), which then grows or shrinks against the max-width/
+    // max-height cap to actually fill the lightbox like every other
+    // media type.
+    //
+    // aspect-ratio is set explicitly via JS (see mediaAssetOembedRatio in
+    // media-asset-glightbox.js): browsers don't derive an intrinsic ratio
+    // from an iframe's width/height attributes the way they do for
+    // img/video, so without it, scaling the iframe up from its small
+    // inline-preview size would distort instead of scaling proportionally.
+    //
+    // min-height: 0 resets the generic rule's fixed 400px floor above -
+    // cascade resolves per property, not per rule, so that declaration
+    // would otherwise still apply here even though this more specific
+    // selector wins on width/height/max-height.
     iframe.media-oembed-content {
-      width: 100%;
+      display: block;
+      width: auto;
       height: auto;
+      min-height: 0;
+      max-width: 100%;
       max-height: calc(92vh - 2rem - 40px);
       margin: 0 auto;
     }

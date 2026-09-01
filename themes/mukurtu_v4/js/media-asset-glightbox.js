@@ -341,18 +341,33 @@
         img.setAttribute('aria-describedby', ZOOM_HINT_ID);
       });
 
-      // Set an explicit aspect-ratio on the source oEmbed iframe (remote
-      // video) so GLightbox's cloneNode(true) carries it into the lightbox
-      // clone, same mechanism as the zoomable marking above. Unlike <img>
-      // and <video>, browsers don't derive an intrinsic aspect ratio from
-      // an <iframe>'s width/height attributes, so a CSS width:100%/
-      // height:auto pairing alone collapses to a fixed fallback height
-      // instead of scaling proportionally - this supplies the ratio
-      // explicitly from the same attributes.
-      once('mediaAssetOembedRatio', '.media-asset--glightbox-inline iframe.media-oembed-content[width][height]', context).forEach((iframe) => {
+      // Size the source oEmbed iframe (remote video) explicitly so
+      // GLightbox's cloneNode(true) carries it into the lightbox clone,
+      // same mechanism as the zoomable marking above.
+      //
+      // Unlike <img>/<video>, browsers don't derive an intrinsic aspect
+      // ratio from an <iframe>'s width/height attributes, so aspect-ratio
+      // is set explicitly from those same attributes - without it, a
+      // width:auto/height:auto pairing wouldn't scale proportionally.
+      //
+      // A computed width is also needed, not just the ratio: .gslide-media
+      // (GLightbox's own bundled CSS) is `display: flex; width: auto` and
+      // is itself a flex item of .gslide, so it shrinks to whatever
+      // "natural" size its content contributes rather than stretching to
+      // fill the available space - and neither a percentage width (can't
+      // contribute a natural size to a shrink-wrap chain) nor width: auto
+      // (nothing left to resolve against once height is also auto) gives
+      // it one; both collapse instead of filling the lightbox. Compute an
+      // explicit width directly: whichever is smaller of the 92vw cap
+      // used elsewhere in this file, or the width implied by the 92vh cap
+      // at this video's own aspect ratio (mirroring the max-height
+      // formula in _glightbox.scss: 2rem for .gslide-inline's own
+      // padding, 40px for GLightbox's .ginlined-content padding).
+      once('mediaAssetOembedSize', '.media-asset--glightbox-inline iframe.media-oembed-content[width][height]', context).forEach((iframe) => {
         const width = iframe.getAttribute('width');
         const height = iframe.getAttribute('height');
         iframe.style.aspectRatio = `${width} / ${height}`;
+        iframe.style.width = `min(92vw, calc((92vh - 2rem - 40px) * ${width} / ${height}))`;
       });
     }
   };
