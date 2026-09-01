@@ -592,7 +592,15 @@ function mukurtu_core_form_system_theme_settings_alter(&$form, FormStateInterfac
   if (isset($form['logo']['settings'])) {
     $logo_url = $theme_settings_provider->getSetting('logo.url', $theme);
     if ($logo_url) {
-      $form['logo']['settings']['logo_preview'] = [
+      // Added as a sibling of 'default_logo'/'settings' (not nested inside
+      // 'settings') because core wraps 'settings' in '#states' =>
+      // ['invisible' => ['default_logo' checked]], and 'logo.use_default'
+      // (which drives that checkbox's default state) itself defaults to
+      // TRUE. Nesting the preview inside 'settings' would hide it via
+      // display:none on every untouched/default site - the exact case
+      // where showing the currently active (theme-supplied) logo is most
+      // useful.
+      $form['logo']['logo_preview'] = [
         '#type' => 'html_tag',
         '#tag' => 'img',
         '#attributes' => [
@@ -609,7 +617,9 @@ function mukurtu_core_form_system_theme_settings_alter(&$form, FormStateInterfac
   if (isset($form['favicon']['settings'])) {
     $favicon_url = $theme_settings_provider->getSetting('favicon.url', $theme);
     if ($favicon_url) {
-      $form['favicon']['settings']['favicon_preview'] = [
+      // See the logo_preview comment above; same reasoning applies to
+      // 'favicon.use_default' defaulting to TRUE.
+      $form['favicon']['favicon_preview'] = [
         '#type' => 'html_tag',
         '#tag' => 'img',
         '#attributes' => [

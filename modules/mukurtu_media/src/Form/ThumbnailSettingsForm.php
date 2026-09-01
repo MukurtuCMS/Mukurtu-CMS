@@ -65,7 +65,7 @@ class ThumbnailSettingsForm extends ConfigFormBase
           '#theme' => 'image_style',
           '#style_name' => 'thumbnail',
           '#uri' => $file->getFileUri(),
-          '#alt' => $this->t("{$value['label']} default thumbnail preview"),
+          '#alt' => $this->t('@label default thumbnail preview', ['@label' => $value['label']]),
           '#weight' => -20,
         ];
       }

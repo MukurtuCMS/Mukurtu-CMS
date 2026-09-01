@@ -50,12 +50,18 @@ class ThemeSettingsAlterLogoFaviconPreviewTest extends KernelTestBase {
   /**
    * Builds a synthetic $form array shaped like core's ThemeSettingsForm.
    *
+   * Includes the '#states' => ['invisible' => ...] core puts on 'settings'
+   * (visible only once "Use the logo/favicon supplied by the theme" is
+   * unchecked), so tests can assert the injected preview lands outside
+   * that gated container rather than merely proving the key exists.
+   *
    * @see \Drupal\system\Form\ThemeSettingsForm::buildForm()
    */
   protected function coreShapedForm(): array {
+    $states = ['invisible' => ['input[name="default_logo"]' => ['checked' => TRUE]]];
     return [
-      'logo' => ['settings' => []],
-      'favicon' => ['settings' => []],
+      'logo' => ['default_logo' => [], 'settings' => ['#states' => $states]],
+      'favicon' => ['default_favicon' => [], 'settings' => ['#states' => $states]],
     ];
   }
 
@@ -78,13 +84,31 @@ class ThemeSettingsAlterLogoFaviconPreviewTest extends KernelTestBase {
 
     mukurtu_core_form_system_theme_settings_alter($form, $form_state, 'system_theme_settings');
 
-    $this->assertArrayHasKey('logo_preview', $form['logo']['settings']);
-    $this->assertSame('img', $form['logo']['settings']['logo_preview']['#tag']);
-    $this->assertStringContainsString('logo.svg', $form['logo']['settings']['logo_preview']['#attributes']['src']);
+    $this->assertArrayHasKey('logo_preview', $form['logo']);
+    $this->assertSame('img', $form['logo']['logo_preview']['#tag']);
+    $this->assertStringContainsString('logo.svg', $form['logo']['logo_preview']['#attributes']['src']);
 
-    $this->assertArrayHasKey('favicon_preview', $form['favicon']['settings']);
-    $this->assertSame('img', $form['favicon']['settings']['favicon_preview']['#tag']);
-    $this->assertStringContainsString('favicon.ico', $form['favicon']['settings']['favicon_preview']['#attributes']['src']);
+    $this->assertArrayHasKey('favicon_preview', $form['favicon']);
+    $this->assertSame('img', $form['favicon']['favicon_preview']['#tag']);
+    $this->assertStringContainsString('favicon.ico', $form['favicon']['favicon_preview']['#attributes']['src']);
+  }
+
+  /**
+   * The preview must NOT be nested inside 'settings': core wraps that
+   * container in '#states' => ['invisible' => [default_logo checked]],
+   * and 'logo.use_default'/'favicon.use_default' default to TRUE on a
+   * fresh site, so a preview nested there would be display:none on every
+   * untouched install - precisely the case where showing the currently
+   * active (theme-supplied) logo/favicon is most useful.
+   */
+  public function testPreviewNotHiddenInsideStatesGatedContainer(): void {
+    $form = $this->coreShapedForm();
+    $form_state = $this->formStateWithArgs(['']);
+
+    mukurtu_core_form_system_theme_settings_alter($form, $form_state, 'system_theme_settings');
+
+    $this->assertArrayNotHasKey('logo_preview', $form['logo']['settings']);
+    $this->assertArrayNotHasKey('favicon_preview', $form['favicon']['settings']);
   }
 
   /**
@@ -104,8 +128,8 @@ class ThemeSettingsAlterLogoFaviconPreviewTest extends KernelTestBase {
 
     mukurtu_core_form_system_theme_settings_alter($form, $form_state, 'system_theme_settings');
 
-    $this->assertStringContainsString('druplicon.png', $form['logo']['settings']['logo_preview']['#attributes']['src']);
-    $this->assertStringContainsString('favicon.ico', $form['favicon']['settings']['favicon_preview']['#attributes']['src']);
+    $this->assertStringContainsString('druplicon.png', $form['logo']['logo_preview']['#attributes']['src']);
+    $this->assertStringContainsString('favicon.ico', $form['favicon']['favicon_preview']['#attributes']['src']);
   }
 
   /**
@@ -119,9 +143,9 @@ class ThemeSettingsAlterLogoFaviconPreviewTest extends KernelTestBase {
 
     mukurtu_core_form_system_theme_settings_alter($form, $form_state, 'system_theme_settings_theme_form');
 
-    $this->assertArrayHasKey('logo_preview', $form['logo']['settings']);
-    $this->assertStringContainsString('logo.svg', $form['logo']['settings']['logo_preview']['#attributes']['src']);
-    $this->assertArrayHasKey('favicon_preview', $form['favicon']['settings']);
+    $this->assertArrayHasKey('logo_preview', $form['logo']);
+    $this->assertStringContainsString('logo.svg', $form['logo']['logo_preview']['#attributes']['src']);
+    $this->assertArrayHasKey('favicon_preview', $form['favicon']);
   }
 
   /**
