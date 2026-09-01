@@ -533,6 +533,7 @@ function mukurtu_notifications_notification_frequency_allowed_values(FieldStorag
     'immediate' => 'Immediate',
     'daily' => 'Daily',
     'weekly' => 'Weekly',
+    'none' => 'Do not send emails',
   ];
 }
 
@@ -580,12 +581,16 @@ function _mukurtu_notifications_user_wants_email(int $uid, string $template): bo
     return TRUE;
   }
 
+  $user = User::load($uid);
+  if ($user && $user->hasField('field_notify_frequency') && $user->get('field_notify_frequency')->value === 'none') {
+    return FALSE;
+  }
+
   $category = _mukurtu_notifications_template_category($template);
   if ($category === NULL) {
     return TRUE;
   }
 
-  $user = User::load($uid);
   if (!$user || !$user->hasField('field_notify_email_categories')) {
     return TRUE;
   }

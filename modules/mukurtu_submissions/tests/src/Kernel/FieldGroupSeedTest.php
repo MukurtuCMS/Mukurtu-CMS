@@ -7,14 +7,14 @@ namespace Drupal\Tests\mukurtu_submissions\Kernel;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\mukurtu_submissions\Entity\SubmissionSettings;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests SubmissionFormDisplayManager::seedFieldGroupsFromDefaultForm():
  * converts a bundle's regular "default" form's field_group arrangement
  * into this module's simpler field_groups/field_group_assignments schema.
- *
- * @group mukurtu_submissions
  */
+#[Group('mukurtu_submissions')]
 class FieldGroupSeedTest extends MukurtuSubmissionsKernelTestBase {
 
   protected function setUp(): void {

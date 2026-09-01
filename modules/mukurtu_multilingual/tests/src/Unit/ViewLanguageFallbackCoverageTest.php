@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_multilingual\Unit;
 
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Group;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -23,9 +24,8 @@ use Symfony\Component\Yaml\Yaml;
  * of scope.
  *
  * A pure filesystem/YAML check - no Drupal bootstrap needed.
- *
- * @group mukurtu_multilingual
  */
+#[Group('mukurtu_multilingual')]
 class ViewLanguageFallbackCoverageTest extends UnitTestCase {
 
   /**
