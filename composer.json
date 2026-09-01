@@ -133,6 +133,11 @@
                     "description": "Fix stale config.installer proxy after nested container rebuild during module install",
                     "url": "web/profiles/mukurtu/patches/module-installer-stale-config-installer-proxy.patch",
                     "depth": 1
+                },
+                {
+                    "description": "Fix stale module_handler proxy in ModuleInstaller::install()'s trailing hook_modules_installed() invocation",
+                    "url": "web/profiles/mukurtu/patches/module-installer-stale-module-handler-modules-installed.patch",
+                    "depth": 1
                 }
             ],
             "drupal/views_combine": {

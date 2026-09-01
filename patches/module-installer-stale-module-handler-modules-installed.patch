@@ -1,0 +1,56 @@
+# Fixes stale module_handler proxy in ModuleInstaller::install()'s trailing
+# hook_modules_installed() invocation.
+#
+# Root cause: install() ends by calling
+# $this->moduleHandler->invokeAll('modules_installed', ...) using the
+# $moduleHandler property injected when this ModuleInstaller instance was
+# constructed. install() explicitly anticipates a module's hook_install()
+# rebuilding the container mid-loop (see the $module_groups/
+# container_rebuild_required logic earlier in this method), but never
+# re-fetches $this->moduleHandler afterward. If any module installed in this
+# batch triggers such a rebuild, the cached $this->moduleHandler still
+# belongs to the discarded container. Resolving an OOP #[Hook] class for
+# 'modules_installed' through that stale proxy's ClassResolver then requests
+# the container's synthetic "kernel" service, which was never set on the new
+# container (only Drupal's real bootstrap sets it), producing:
+#   "You have requested a synthetic service ("kernel"). The DIC does not
+#   know how to construct this service."
+#
+# This stayed dormant until a module implementing hook_modules_installed()
+# via #[Hook] (rather than a plain procedural function, which needs no
+# ClassResolver/container at all) was first installed alongside something
+# that rebuilds the container - e.g. drupal/extlink 3.0.0's
+# Drupal\extlink\Hook\ExtlinkHooks::modulesInstalled(), added to show a
+# post-install status message.
+#
+# Fix: fetch a fresh module handler from the current container instead of
+# reusing the constructor-injected property, mirroring the fix already
+# applied to config.installer in
+# patches/module-installer-stale-config-installer-proxy.patch.
+#
+# Upstream: this fix should be filed against Drupal core at
+# https://www.drupal.org/project/drupal/issues - search for
+# "ModuleInstaller stale module_handler modules_installed synthetic service
+# kernel". Once a core issue is filed, replace this comment with the issue
+# URL so the patch can be removed when the fix lands in a Drupal release.
+#
+# Reproducer: enable a module that both (a) triggers a container rebuild
+# from its own or a co-installed module's hook_install(), and (b) implements
+# hook_modules_installed() via #[Hook] - e.g. `drush en extlink` alongside
+# any module whose install triggers a rebuild, or a full `drush site-install
+# mukurtu` where extlink is one of the profile's dependencies.
+--- a/lib/Drupal/Core/Extension/ModuleInstaller.php
++++ b/lib/Drupal/Core/Extension/ModuleInstaller.php
+@@ -254,6 +254,11 @@
+       }
+     }
+
+-    $this->moduleHandler->invokeAll('modules_installed', [$module_list, $sync_status]);
++    // Re-fetch the module handler fresh from the current container rather
++    // than using $this->moduleHandler, which was injected at construction
++    // and can be stale if any module's hook_install() above triggered a
++    // container rebuild (see the analogous config.installer fix in
++    // patches/module-installer-stale-config-installer-proxy.patch).
++    \Drupal::moduleHandler()->invokeAll('modules_installed', [$module_list, $sync_status]);
+     return TRUE;
+   }
