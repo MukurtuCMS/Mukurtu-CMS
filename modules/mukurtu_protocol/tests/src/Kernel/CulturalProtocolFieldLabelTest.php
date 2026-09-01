@@ -6,13 +6,14 @@ namespace Drupal\Tests\mukurtu_protocol\Kernel;
 
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\mukurtu_protocol\Entity\MukurtuNode;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests that the "Cultural Protocols" field label is translatable.
  *
  * @see \Drupal\mukurtu_protocol\CulturalProtocolControlledTrait::getProtocolFieldDefinitions()
- * @group mukurtu_protocol
  */
+#[Group('mukurtu_protocol')]
 class CulturalProtocolFieldLabelTest extends ProtocolAwareEntityTestBase {
 
   /**

@@ -10,14 +10,14 @@ use Drupal\mukurtu_submissions\Commands\MukurtuSubmissionsCommands;
 use Drupal\mukurtu_submissions\Entity\SubmissionSettings;
 use Drupal\node\Entity\NodeType;
 use Drush\Log\DrushLoggerManager;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests the "create-default-forms" Drush command: bulk-creates a disabled,
  * all-fields-included settings entity for every bundle lacking one, and
  * leaves already-configured bundles untouched.
- *
- * @group mukurtu_submissions
  */
+#[Group('mukurtu_submissions')]
 class DefaultFormCreationTest extends MukurtuSubmissionsKernelTestBase {
 
   protected function createCommand(): MukurtuSubmissionsCommands {

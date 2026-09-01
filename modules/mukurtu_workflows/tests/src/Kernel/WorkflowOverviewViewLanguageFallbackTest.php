@@ -6,6 +6,7 @@ namespace Drupal\Tests\mukurtu_workflows\Kernel;
 
 use Drupal\Core\Config\FileStorage;
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests mukurtu_workflows_update_40007().
@@ -15,8 +16,8 @@ use Drupal\KernelTests\KernelTestBase;
  * confirms it fills them back in - and that running it twice is a no-op.
  *
  * @see \mukurtu_workflows_update_40007()
- * @group mukurtu_workflows
  */
+#[Group('mukurtu_workflows')]
 class WorkflowOverviewViewLanguageFallbackTest extends KernelTestBase {
 
   /**

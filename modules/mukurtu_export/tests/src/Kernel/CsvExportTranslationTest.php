@@ -14,13 +14,13 @@ use Drupal\mukurtu_export\Plugin\MukurtuExporter\CSV;
 use Drupal\node\Entity\Node;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\taxonomy\Entity\Vocabulary;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests that a translated export row pulls referenced-entity names from
  * the same translation, not their own default language (#1260 Phase 5).
- *
- * @group mukurtu_export
  */
+#[Group('mukurtu_export')]
 class CsvExportTranslationTest extends CsvExportFieldTestBase {
 
   /**
@@ -211,8 +211,8 @@ class CsvExportTranslationTest extends CsvExportFieldTestBase {
     $this->assertArrayHasKey($key, $context['results']['exported_entities']['node']);
 
     $output = fopen("{$basepath}/Content - Protocol Aware Content.csv", 'r');
-    $header = fgetcsv($output);
-    $row = fgetcsv($output);
+    $header = fgetcsv($output, NULL, ',', '"', '\\');
+    $row = fgetcsv($output, NULL, ',', '"', '\\');
     fclose($output);
 
     $titleColumn = array_search('Title', $header, TRUE);
