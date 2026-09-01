@@ -73,15 +73,61 @@ Or, if hosting your own server with:
 sudo apt install poppler-utils
 ```
 
-### Set up cookie and consent management (Klaro)
+## Updating Mukurtu CMS
 
-Mukurtu ships the [Klaro](https://www.drupal.org/project/klaro) module (enabled by default) for GDPR/cookie consent management, configurable at `admin/config/user-interface/klaro` (also linked from the dashboard as "Cookie & Consent Settings"). It ships with all of its pre-built services (Google Analytics, YouTube, Google Maps, etc.) disabled, so it has no effect until a site enables what it actually uses.
+1. Go to https://github.com/MukurtuCMS/Mukurtu-CMS to see what is the latest release.
+2. Compare that to the version your site is on.
+    -  Go to the  "Mukurtu Dashboard" Link in your site. Look for the "Site information" block.
+3. Note how many (if any) versions your site is behind.
+ 
+### Updating if you are only one version behind
 
-If you configure a Google Tag Manager container via the existing Google Tag module (`admin/config/services/google-tag/containers`), also enable Klaro's `gtm_consent_mode`, `ga_consent_mode`, and/or `google_ads_consent_mode` services (Klaro admin > Manage > Services) so those tags respect visitor consent via Google Consent Mode v2. Klaro also ships a `google_consent_mode` recipe that does this in one step: `ddev drush recipe web/modules/contrib/klaro/recipes/google_consent_mode`.
+1. Backup your site and database.
+2. Run the update commands.
+```
+    # put the site into offline mode
+    drush state:set system.maintenance_mode 1
+    drush cr
 
-### Updates
+    # Make sure everything looks correct
+    composer update mukurtu/* -W --dry-run
 
-To update your local DDEV environment to a newer version of main, run `ddev composer upgrade`. Note that there may be data changes, so use at your own risk.
+    # If everything looks correct run it for real
+    composer update mukurtu/* -W
+
+    # update the database
+    drush updb
+
+    # take the site out of offline mode
+    drush state:set system.maintenance_mode 0
+    drush cr
+
+```
+### Updating if you are more than one version behind
+
+We recommend iterating through each skipped version rather than jumping versions.
+
+1. Backup your site and database.
+2. Put your site into offline mode.
+    - `drush state:set system.maintenance_mode 0`
+    - `drush cr`
+2. Edit your composer.json file.
+3. Look for this line: `"mukurtu/mukurtu": "*"`
+4. Change the asterisk to the next mukurtu version.
+    - For example if you are running 4.0.0-beta31 and the latest version is 4.0.0-beta35 change the asterisk to 4.0.0-beta32 (`"mukurtu/mukurtu": "4.0.0-beta32"`).
+5. Then run the update commands.
+    - Run a test update to make sure everything looks good.
+        - `composer update mukurtu/* -W --dry-run`
+    -  If everything looks correct run it for real.
+        - `composer update mukurtu/* -W`
+    - Update the database.
+        - `drush updb`
+6. Take the site out of offline mode.
+    - `drush state:set system.maintenance_mode 0`
+    - `drush cr`
+7. Test your site. If everything looks good repeat steps 1-6, the only thing that will change is that will update the line in composer.json to reflect the next beta version
+    - If there is an issue restore from the last backup.
+8. When you have caught the site up to the latest release, change the version number in composer.json back to an asterisk `(*)`.
 
 ## Contributing
 Mukurtu CMS v4 is under active development. Code contribution and feedback is welcome, and can be submitted in [our issues](https://github.com/MukurtuCMS/Mukurtu-CMS/issues) or you can contact us at [support@mukurtu.org](mailto:support@mukurtu.org).
