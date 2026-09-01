@@ -16,9 +16,11 @@ use PHPUnit\Framework\Attributes\Group;
  *
  * '#preview_image_style' is a Field-API ImageWidget property that plain
  * '#type' => 'managed_file' elements silently ignore, so it was a no-op on
- * this form. The fix builds a sibling 'image_style' themed render element
- * instead, mirroring how core's ImageWidget::process() builds its own
- * preview key.
+ * this form. The fix builds an 'image_style' themed render element nested
+ * inside each field's own managed_file element (so it renders inside that
+ * field's widget box, alongside its filename/remove button, rather than
+ * grouped with every other field's preview elsewhere on the page),
+ * mirroring how core's ImageWidget::process() builds its own preview key.
  *
  * @see \Drupal\mukurtu_media\Form\ThumbnailSettingsForm::buildForm()
  */
@@ -148,18 +150,12 @@ class ThumbnailSettingsFormPreviewTest extends KernelTestBase {
 
     $form = $this->buildThumbnailSettingsForm();
 
-    $this->assertArrayHasKey('audio_preview', $form['default_thumbnail']);
-    $preview = $form['default_thumbnail']['audio_preview'];
+    $this->assertSame('managed_file', $form['default_thumbnail']['audio']['#type']);
+    $this->assertArrayHasKey('preview', $form['default_thumbnail']['audio']);
+    $preview = $form['default_thumbnail']['audio']['preview'];
     $this->assertSame('image_style', $preview['#theme']);
     $this->assertSame('thumbnail', $preview['#style_name']);
     $this->assertSame($file->getFileUri(), $preview['#uri']);
-
-    // The preview must sit above the managed_file element so it visually
-    // renders as a preview of the current value.
-    $this->assertLessThan(
-      $form['default_thumbnail']['audio']['#weight'] ?? 0,
-      $preview['#weight']
-    );
   }
 
   /**
@@ -168,10 +164,11 @@ class ThumbnailSettingsFormPreviewTest extends KernelTestBase {
   public function testNoPreviewWhenNoFileConfigured(): void {
     $form = $this->buildThumbnailSettingsForm();
 
-    $this->assertArrayNotHasKey('video_preview', $form['default_thumbnail']);
-    // The managed_file element itself is still present.
+    // The managed_file element itself is still present, just with no
+    // nested preview child.
     $this->assertArrayHasKey('video', $form['default_thumbnail']);
     $this->assertSame('managed_file', $form['default_thumbnail']['video']['#type']);
+    $this->assertArrayNotHasKey('preview', $form['default_thumbnail']['video']);
   }
 
   /**
@@ -186,7 +183,7 @@ class ThumbnailSettingsFormPreviewTest extends KernelTestBase {
 
     $form = $this->buildThumbnailSettingsForm();
 
-    $this->assertArrayNotHasKey('document_preview', $form['default_thumbnail']);
+    $this->assertArrayNotHasKey('preview', $form['default_thumbnail']['document']);
   }
 
   /**
@@ -200,7 +197,7 @@ class ThumbnailSettingsFormPreviewTest extends KernelTestBase {
 
     $form = $this->buildThumbnailSettingsForm();
 
-    $this->assertArrayNotHasKey('video_preview', $form['default_thumbnail']);
+    $this->assertArrayNotHasKey('preview', $form['default_thumbnail']['video']);
   }
 
   /**
@@ -216,8 +213,8 @@ class ThumbnailSettingsFormPreviewTest extends KernelTestBase {
 
     $form = $this->buildThumbnailSettingsForm();
 
-    $this->assertArrayHasKey('video_preview', $form['default_thumbnail']);
-    $this->assertSame($file->getFileUri(), $form['default_thumbnail']['video_preview']['#uri']);
+    $this->assertArrayHasKey('preview', $form['default_thumbnail']['video']);
+    $this->assertSame($file->getFileUri(), $form['default_thumbnail']['video']['preview']['#uri']);
     $this->assertSame([$file->id()], $form['default_thumbnail']['video']['#default_value']);
   }
 

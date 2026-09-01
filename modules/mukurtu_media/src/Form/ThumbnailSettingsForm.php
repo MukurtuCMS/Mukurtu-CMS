@@ -43,15 +43,6 @@ class ThumbnailSettingsForm extends ConfigFormBase
       $configKey = $this->getConfigKey($key);
       $fids = $config->get($configKey) ?? [];
       $fid = reset($fids) ?: NULL;
-      if ($fid && ($file = File::load($fid)) && str_starts_with($file->getMimeType(), 'image/')) {
-        $form["default_thumbnail"][$key . '_preview'] = [
-          '#theme' => 'image_style',
-          '#style_name' => 'thumbnail',
-          '#uri' => $file->getFileUri(),
-          '#alt' => $this->t("{$value['label']} default thumbnail preview"),
-          '#weight' => -1,
-        ];
-      }
       $form["default_thumbnail"][$key] = [
         '#type' => 'managed_file',
         '#title' => $this->t("{$value['label']} default thumbnail"),
@@ -62,6 +53,22 @@ class ThumbnailSettingsForm extends ConfigFormBase
         ],
         '#default_value' => $fids,
       ];
+      if ($fid && ($file = File::load($fid)) && str_starts_with($file->getMimeType(), 'image/')) {
+        // Nested inside the managed_file element as a 'preview' key, the
+        // same convention core's ImageWidget::process() uses for its own
+        // preview element: Claro's file-managed-file.html.twig (and Gin,
+        // which extends it) specifically recognizes 'preview' and renders
+        // it in the widget's built-in image-preview area next to the
+        // filename/remove button, rather than an arbitrary weight-sorted
+        // position.
+        $form["default_thumbnail"][$key]['preview'] = [
+          '#theme' => 'image_style',
+          '#style_name' => 'thumbnail',
+          '#uri' => $file->getFileUri(),
+          '#alt' => $this->t("{$value['label']} default thumbnail preview"),
+          '#weight' => -20,
+        ];
+      }
     }
     return parent::buildForm($form, $form_state);
   }
