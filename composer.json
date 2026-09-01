@@ -35,7 +35,7 @@
         "drupal/entity_browser": "*",
         "drupal/entity_embed": "*",
         "drupal/entity_reference_revisions": "*",
-        "drupal/extlink": "^2.0",
+        "drupal/extlink": "^3.0",
         "drupal/facet_bot_blocker": "^1.0",
         "drupal/facets": ">=3.0 <3.0.4",
         "drupal/facets_reset_button": "^1.0",
@@ -132,6 +132,11 @@
                 {
                     "description": "Fix stale config.installer proxy after nested container rebuild during module install",
                     "url": "web/profiles/mukurtu/patches/module-installer-stale-config-installer-proxy.patch",
+                    "depth": 1
+                },
+                {
+                    "description": "Fix stale module_handler proxy in ModuleInstaller::install()'s trailing hook_modules_installed() invocation",
+                    "url": "web/profiles/mukurtu/patches/module-installer-stale-module-handler-modules-installed.patch",
                     "depth": 1
                 }
             ],
