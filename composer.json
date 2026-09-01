@@ -16,7 +16,7 @@
     ],
     "require": {
         "composer/installers": "^2.0",
-        "cweagans/composer-patches": "^1.7",
+        "cweagans/composer-patches": "^2.0",
         "drupal/admin_theme": "^1.1",
         "drupal/altcha": "^1.2",
         "drupal/better_exposed_filters": "^7.1.1",
@@ -35,16 +35,16 @@
         "drupal/entity_browser": "*",
         "drupal/entity_embed": "*",
         "drupal/entity_reference_revisions": "*",
-        "drupal/extlink": "^2.0",
+        "drupal/extlink": "^3.0",
         "drupal/facet_bot_blocker": "^1.0",
         "drupal/facets": ">=3.0 <3.0.4",
         "drupal/facets_reset_button": "^1.0",
         "drupal/field_group": "^4.0",
         "drupal/flag": "^4.0",
         "drupal/flat_taxonomy": "^2.0",
-        "drupal/genpass": "^2.1",
+        "drupal/genpass": "^3.0",
         "drupal/geocoder": "^4.30",
-        "drupal/geofield": "^1.59",
+        "drupal/geofield": "^10.3",
         "drupal/gin": "^5.0",
         "drupal/gin_lb": "^3.0@beta",
         "drupal/gin_toolbar": "^3.0",
@@ -74,7 +74,7 @@
         "drupal/search_api": "*",
         "drupal/search_api_glossary": "*",
         "drupal/search_api_solr": "^4.3",
-        "drupal/tagify": "^1.2",
+        "drupal/tagify": "^2.0",
         "drupal/term_merge": "^2.0@beta",
         "drupal/term_merge_manager": "^2.0",
         "drupal/token": "*",
@@ -92,7 +92,7 @@
         "drupal/devel": "*",
         "drupal/core-dev": "*",
         "drupal/coder": "*",
-        "dealerdirect/phpcodesniffer-composer-installer": "^0.7.0"
+        "dealerdirect/phpcodesniffer-composer-installer": "^1.2"
     },
     "config": {
         "sort-packages": true,
@@ -128,9 +128,18 @@
             "drush/Commands/contrib/{$name}": ["type:drupal-drush"]
         },
         "patches": {
-            "drupal/core": {
-                "Fix stale config.installer proxy after nested container rebuild during module install": "web/profiles/mukurtu/patches/module-installer-stale-config-installer-proxy.patch"
-            },
+            "drupal/core": [
+                {
+                    "description": "Fix stale config.installer proxy after nested container rebuild during module install",
+                    "url": "web/profiles/mukurtu/patches/module-installer-stale-config-installer-proxy.patch",
+                    "depth": 1
+                },
+                {
+                    "description": "Fix stale module_handler proxy in ModuleInstaller::install()'s trailing hook_modules_installed() invocation",
+                    "url": "web/profiles/mukurtu/patches/module-installer-stale-module-handler-modules-installed.patch",
+                    "depth": 1
+                }
+            ],
             "drupal/views_combine": {
                 "Fix illegal choice on exposed sort error": "https://www.drupal.org/files/issues/2022-01-17/3259018-6-illegal-sort-choice.patch"
             },
@@ -138,7 +147,7 @@
                 "Ensure empty paragraphs register as empty": "web/profiles/mukurtu/patches/paragraphs-118.patch"
             },
             "drupal/media_entity_soundcloud": {
-                "Add support for secret URL embeds": "https://www.drupal.org/files/issues/2022-03-28/3272077-2.patch"
+                "Add support for secret URL embeds": "web/profiles/mukurtu/patches/media_entity_soundcloud-secret-token-3272077.patch"
             },
             "drupal/og": {
                 "Remove bulk option to remove a user's roles": "web/profiles/mukurtu/patches/832-disallow-og-role-removal.patch"
