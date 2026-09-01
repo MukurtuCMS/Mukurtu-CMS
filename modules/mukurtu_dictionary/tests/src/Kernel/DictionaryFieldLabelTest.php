@@ -5,18 +5,19 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_dictionary\Kernel;
 
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\Tests\mukurtu_protocol\Kernel\ProtocolAwareEntityTestBase;
 use Drupal\mukurtu_dictionary\Entity\DictionaryWord;
 use Drupal\mukurtu_dictionary\Entity\DictionaryWordEntry;
 use Drupal\mukurtu_dictionary\Entity\SampleSentence;
 use Drupal\mukurtu_dictionary\Entity\WordList;
-use Drupal\Tests\mukurtu_protocol\Kernel\ProtocolAwareEntityTestBase;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests that mukurtu_dictionary field labels and descriptions are
  * translatable.
- *
- * @group mukurtu_dictionary
  */
+#[Group('mukurtu_dictionary')]
 class DictionaryFieldLabelTest extends ProtocolAwareEntityTestBase {
 
   /**
@@ -28,8 +29,8 @@ class DictionaryFieldLabelTest extends ProtocolAwareEntityTestBase {
   ];
 
   /**
-   * @dataProvider dictionaryWordFieldProvider
    */
+  #[DataProvider('dictionaryWordFieldProvider')]
   public function testDictionaryWordFieldIsTranslatable(string $fieldName, string $property): void {
     $entityType = \Drupal::entityTypeManager()->getDefinition('node');
     $definitions = DictionaryWord::bundleFieldDefinitions($entityType, '', []);
@@ -50,8 +51,8 @@ class DictionaryFieldLabelTest extends ProtocolAwareEntityTestBase {
   }
 
   /**
-   * @dataProvider wordListFieldProvider
    */
+  #[DataProvider('wordListFieldProvider')]
   public function testWordListFieldLabelIsTranslatable(string $fieldName): void {
     $entityType = \Drupal::entityTypeManager()->getDefinition('node');
     $definitions = WordList::bundleFieldDefinitions($entityType, '', []);
@@ -68,8 +69,8 @@ class DictionaryFieldLabelTest extends ProtocolAwareEntityTestBase {
   }
 
   /**
-   * @dataProvider dictionaryWordEntryFieldProvider
    */
+  #[DataProvider('dictionaryWordEntryFieldProvider')]
   public function testDictionaryWordEntryFieldDescriptionIsTranslatable(string $fieldName): void {
     $entityType = \Drupal::entityTypeManager()->getDefinition('paragraph');
     $definitions = DictionaryWordEntry::bundleFieldDefinitions($entityType, '', []);

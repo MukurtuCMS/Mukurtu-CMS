@@ -8,12 +8,12 @@ use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\migrate\Plugin\MigrationInterface;
 use Drupal\mukurtu_import\Entity\MukurtuImportStrategy;
 use Drupal\node\Entity\Node;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests translation-targeting CSV import (#1260 Phase 5, import track).
- *
- * @group mukurtu_import
  */
+#[Group('mukurtu_import')]
 class ImportTranslationTest extends MukurtuImportTestBase {
 
   /**
