@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_digital_heritage\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests mukurtu_digital_heritage_update_40009(), which moves the digital
@@ -12,8 +13,8 @@ use Drupal\KernelTests\KernelTestBase;
  * dedicated zoom for editing a single already-saved point (#1453).
  *
  * @see mukurtu_digital_heritage_update_40009()
- * @group mukurtu_digital_heritage
  */
+#[Group('mukurtu_digital_heritage')]
 class DigitalHeritageMapEditFormDefaultsUpdateTest extends KernelTestBase {
 
   /**

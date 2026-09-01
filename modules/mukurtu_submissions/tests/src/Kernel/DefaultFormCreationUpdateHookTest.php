@@ -6,6 +6,7 @@ namespace Drupal\Tests\mukurtu_submissions\Kernel;
 
 use Drupal\mukurtu_submissions\Entity\SubmissionSettings;
 use Drupal\node\Entity\NodeType;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests mukurtu_submissions_update_40007(): backfills a disabled default
@@ -14,9 +15,8 @@ use Drupal\node\Entity\NodeType;
  * "drush mukurtu-submissions:create-default-forms" command, which nothing
  * in hook_install()/the update path ever invoked, so an upgrading site's
  * other content types never got a form at all.
- *
- * @group mukurtu_submissions
  */
+#[Group('mukurtu_submissions')]
 class DefaultFormCreationUpdateHookTest extends MukurtuSubmissionsKernelTestBase {
 
   /**

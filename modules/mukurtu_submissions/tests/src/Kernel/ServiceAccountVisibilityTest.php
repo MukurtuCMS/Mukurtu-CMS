@@ -9,6 +9,8 @@ use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\mukurtu_core\MukurtuUserListBuilder;
 use Drupal\user\Entity\User;
 use Drupal\views\Entity\View;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests that the "Submission Forms" service account never confuses an
@@ -27,9 +29,8 @@ use Drupal\views\Entity\View;
  * hard dependencies MukurtuSubmissionsKernelTestBase deliberately
  * excludes; the field's *behavior*, not the rest of mukurtu_core, is what's
  * under test.
- *
- * @group mukurtu_submissions
  */
+#[Group('mukurtu_submissions')]
 class ServiceAccountVisibilityTest extends MukurtuSubmissionsKernelTestBase {
 
   /**
@@ -101,8 +102,8 @@ class ServiceAccountVisibilityTest extends MukurtuSubmissionsKernelTestBase {
   }
 
   /**
-   * @dataProvider providePeopleViewIds
    */
+  #[DataProvider('providePeopleViewIds')]
   public function testViewsQueryAlterExcludesServiceAccount(string $view_id): void {
     $service_account = User::create(['name' => 'Submission Forms', 'status' => 0]);
     $service_account->save();

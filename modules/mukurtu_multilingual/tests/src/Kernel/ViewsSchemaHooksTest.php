@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_multilingual\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests ViewsSchemaHooks::configSchemaInfoAlter() (issue #1638).
  *
  * @see \Drupal\mukurtu_multilingual\Hook\ViewsSchemaHooks
- * @group mukurtu_multilingual
  */
+#[Group('mukurtu_multilingual')]
 class ViewsSchemaHooksTest extends KernelTestBase {
 
   /**
