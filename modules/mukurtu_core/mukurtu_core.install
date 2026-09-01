@@ -3788,3 +3788,27 @@ function mukurtu_core_update_40106(): void {
     }
   }
 }
+
+/**
+ * Removes any saved og_group_type insertion condition from Google Tag
+ * containers.
+ *
+ * That condition's required context-mapping select has no option that
+ * meaningfully resolves on the container admin form, which normally blocks
+ * saving the form entirely (see FormHooks::formGoogleTagContainerFormAlter(),
+ * which now hides the condition from the form going forward). This only
+ * matters for a container that was saved with the condition already
+ * configured before that fix, which would otherwise be stuck permanently
+ * enforcing it with no UI left to remove it.
+ */
+function mukurtu_core_update_40107(): void {
+  $config_factory = \Drupal::configFactory();
+  foreach ($config_factory->listAll('google_tag.container.') as $config_name) {
+    $config = $config_factory->getEditable($config_name);
+    $conditions = $config->get('conditions') ?? [];
+    if (isset($conditions['og_group_type'])) {
+      unset($conditions['og_group_type']);
+      $config->set('conditions', $conditions)->save();
+    }
+  }
+}

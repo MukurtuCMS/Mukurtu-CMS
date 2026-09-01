@@ -167,9 +167,11 @@ function mukurtu_submissions_send_email_notifications(Message $message, array $e
   // The rendered view mode output carries theme-wrapper whitespace
   // (newlines/indentation around the actual text) - harmless in the body,
   // but a subject line should always collapse to one line.
-  $subject_render = (string) $renderer->renderInIsolation($view_builder->view($message, 'mail_subject'));
+  $subject_build = $view_builder->view($message, 'mail_subject');
+  $subject_render = (string) $renderer->renderInIsolation($subject_build);
   $subject = trim(preg_replace('/\s+/', ' ', $subject_render));
-  $body = trim((string) $renderer->renderInIsolation($view_builder->view($message, 'mail_body')));
+  $body_build = $view_builder->view($message, 'mail_body');
+  $body = trim((string) $renderer->renderInIsolation($body_build));
   $mail_manager = \Drupal::service('plugin.manager.mail');
   $langcode = \Drupal::languageManager()->getDefaultLanguage()->getId();
 
