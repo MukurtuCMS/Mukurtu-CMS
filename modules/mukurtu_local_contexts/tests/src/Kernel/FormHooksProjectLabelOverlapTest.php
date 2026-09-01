@@ -8,13 +8,14 @@ use Drupal\Core\Entity\ContentEntityFormInterface;
 use Drupal\Core\Form\FormState;
 use Drupal\mukurtu_local_contexts\Hook\FormHooks;
 use Drupal\node\Entity\Node;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests the project/label overlap validation added by FormHooks.
  *
  * @see \Drupal\mukurtu_local_contexts\Hook\FormHooks::validateNoProjectLabelOverlap()
- * @group mukurtu_local_contexts
  */
+#[Group('mukurtu_local_contexts')]
 class FormHooksProjectLabelOverlapTest extends LocalContextsTestBase {
 
   /**
