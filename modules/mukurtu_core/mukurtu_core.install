@@ -3812,3 +3812,16 @@ function mukurtu_core_update_40107(): void {
     }
   }
 }
+
+/**
+ * Enable "Open external links in a new window or tab" by default.
+ *
+ * New installs already get this via mukurtu_install(); this backfills
+ * existing sites, which have been running on extlink's own disabled
+ * default since the module was first installed.
+ */
+function mukurtu_core_update_40108(): void {
+  \Drupal::configFactory()->getEditable('extlink.settings')
+    ->set('extlink_target', TRUE)
+    ->save();
+}

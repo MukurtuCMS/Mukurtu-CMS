@@ -122,6 +122,47 @@
       min-height: 400px;
     }
 
+    // The oEmbed formatter's iframe (remote-video) already carries width/
+    // height HTML attributes matching the video's real aspect ratio (e.g.
+    // 900x506 for a 16:9 embed), but those attributes are sized for the
+    // small inline page preview, not a full lightbox. The generic rule
+    // above is sized for external-embed's arbitrary webpage embeds, which
+    // have no meaningful intrinsic ratio, so forcing that same near-full-
+    // viewport fixed height onto an oEmbed video iframe stretched it into
+    // a tall, narrow box.
+    //
+    // .gslide-media (GLightbox's own bundled CSS) is `display: flex;
+    // width: auto` and is itself a flex item of .gslide, so it shrinks to
+    // whatever "natural" size its content contributes rather than
+    // stretching to fill the available space. A percentage width (100%)
+    // on the iframe can't contribute a natural size to that shrink-wrap
+    // chain, which collapsed the whole thing down to the 400px min-height
+    // floor below. width: auto instead lets the iframe's own intrinsic
+    // HTML width/height act as that natural size (same as the img rule
+    // above), which then grows or shrinks against the max-width/
+    // max-height cap to actually fill the lightbox like every other
+    // media type.
+    //
+    // aspect-ratio is set explicitly via JS (see mediaAssetOembedRatio in
+    // media-asset-glightbox.js): browsers don't derive an intrinsic ratio
+    // from an iframe's width/height attributes the way they do for
+    // img/video, so without it, scaling the iframe up from its small
+    // inline-preview size would distort instead of scaling proportionally.
+    //
+    // min-height: 0 resets the generic rule's fixed 400px floor above -
+    // cascade resolves per property, not per rule, so that declaration
+    // would otherwise still apply here even though this more specific
+    // selector wins on width/height/max-height.
+    iframe.media-oembed-content {
+      display: block;
+      width: auto;
+      height: auto;
+      min-height: 0;
+      max-width: 100%;
+      max-height: calc(92vh - 2rem - 40px);
+      margin: 0 auto;
+    }
+
     .media-asset--document-viewer {
       display: block;
       width: 100%;

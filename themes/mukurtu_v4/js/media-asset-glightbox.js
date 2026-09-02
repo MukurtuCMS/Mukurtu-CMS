@@ -98,10 +98,13 @@
       }
 
       if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
-      // Only block when a video/iframe element actually has focus.
-      // For native <video>, document.activeElement is the video itself.
-      // For cross-origin <iframe>, document.activeElement is the iframe.
-      if (focused.tagName === 'VIDEO' || focused.tagName === 'IFRAME') {
+      // Only block when a video/audio/iframe element actually has focus.
+      // For native <video>/<audio>, document.activeElement is the element
+      // itself, and native controls already use the left/right arrows to
+      // seek. For cross-origin <iframe>, document.activeElement is the
+      // iframe. Without this, arrow keys would both seek/pan the focused
+      // media and change slides at the same time.
+      if (focused.tagName === 'VIDEO' || focused.tagName === 'AUDIO' || focused.tagName === 'IFRAME') {
         e.stopPropagation();
       }
     }
@@ -138,9 +141,25 @@
         zoomableImg = null;
       }
 
-      // Preserves the original gnext/gprev/gclose order for non-image
-      // slides; the image (when present) simply becomes the first stop.
-      const stops = [zoomableImg, container.querySelector('.gnext'), container.querySelector('.gprev'), container.querySelector('.gclose')]
+      // The active slide's own playable element (native <video>/<audio>
+      // controls, or a remote-video/external-embed <iframe>) was previously
+      // left out of the tab cycle entirely: Tab could never move focus onto
+      // it, only a mouse click could, leaving keyboard users with no way to
+      // play/pause, seek, or reach captions once the lightbox is open. Same
+      // inert guard as the zoomable image above - an undismissed content
+      // warning marks it inert too (see content-warnings.js's
+      // setMediaInert(), which targets audio/video/object/iframe broadly).
+      let mediaEl = currentSlide ? currentSlide.querySelector('video, audio, iframe') : null;
+      if (mediaEl && mediaEl.closest('[inert]')) {
+        mediaEl = null;
+      }
+
+      // Preserves the original gnext/gprev/gclose order for other slides;
+      // the zoomable image or the slide's own media element (when present -
+      // mutually exclusive, since only image slides have the former and
+      // only video/audio/remote-video/external-embed slides have the
+      // latter) simply becomes the first stop.
+      const stops = [zoomableImg, mediaEl, container.querySelector('.gnext'), container.querySelector('.gprev'), container.querySelector('.gclose')]
         .filter((el) => el && !el.classList.contains('disabled'));
       if (!stops.length) return;
 
@@ -339,6 +358,35 @@
         img.setAttribute('role', 'button');
         img.setAttribute('aria-pressed', 'false');
         img.setAttribute('aria-describedby', ZOOM_HINT_ID);
+      });
+
+      // Size the source oEmbed iframe (remote video) explicitly so
+      // GLightbox's cloneNode(true) carries it into the lightbox clone,
+      // same mechanism as the zoomable marking above.
+      //
+      // Unlike <img>/<video>, browsers don't derive an intrinsic aspect
+      // ratio from an <iframe>'s width/height attributes, so aspect-ratio
+      // is set explicitly from those same attributes - without it, a
+      // width:auto/height:auto pairing wouldn't scale proportionally.
+      //
+      // A computed width is also needed, not just the ratio: .gslide-media
+      // (GLightbox's own bundled CSS) is `display: flex; width: auto` and
+      // is itself a flex item of .gslide, so it shrinks to whatever
+      // "natural" size its content contributes rather than stretching to
+      // fill the available space - and neither a percentage width (can't
+      // contribute a natural size to a shrink-wrap chain) nor width: auto
+      // (nothing left to resolve against once height is also auto) gives
+      // it one; both collapse instead of filling the lightbox. Compute an
+      // explicit width directly: whichever is smaller of the 92vw cap
+      // used elsewhere in this file, or the width implied by the 92vh cap
+      // at this video's own aspect ratio (mirroring the max-height
+      // formula in _glightbox.scss: 2rem for .gslide-inline's own
+      // padding, 40px for GLightbox's .ginlined-content padding).
+      once('mediaAssetOembedSize', '.media-asset--glightbox-inline iframe.media-oembed-content[width][height]', context).forEach((iframe) => {
+        const width = iframe.getAttribute('width');
+        const height = iframe.getAttribute('height');
+        iframe.style.aspectRatio = `${width} / ${height}`;
+        iframe.style.width = `min(92vw, calc((92vh - 2rem - 40px) * ${width} / ${height}))`;
       });
     }
   };
