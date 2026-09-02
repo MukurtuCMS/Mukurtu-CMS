@@ -66,6 +66,7 @@ class CsvExporterSettingsOrderTest extends KernelTestBase {
       'id' => 'aaa_custom_setting',
       'label' => 'AAA Custom Setting',
       'site_wide' => TRUE,
+      'entity_fields_export_list' => [],
     ])->save();
 
     $plugin = \Drupal::service('plugin.manager.mukurtu_exporter')->createInstance('csv');
