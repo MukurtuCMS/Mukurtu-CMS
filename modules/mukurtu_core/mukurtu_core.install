@@ -3825,3 +3825,30 @@ function mukurtu_core_update_40108(): void {
     ->set('extlink_target', TRUE)
     ->save();
 }
+
+/**
+ * Adds an "All content" link to the end of the dashboard's "Recent content"
+ * block, linking to /admin/content.
+ *
+ * New installs already get this via mukurtu_install(); this backfills
+ * existing sites, which have been running on node's own content_recent view
+ * defaults since the module was first installed.
+ */
+function mukurtu_core_update_40109(): void {
+  $config = \Drupal::configFactory()->getEditable('views.view.content_recent');
+  if ($config->isNew()) {
+    return;
+  }
+
+  $display_options = $config->get('display.block_1.display_options');
+  if (!is_array($display_options)) {
+    return;
+  }
+
+  $config->set('display.block_1.display_options.use_more', TRUE);
+  $config->set('display.block_1.display_options.use_more_always', TRUE);
+  $config->set('display.block_1.display_options.use_more_text', 'All content');
+  $config->set('display.block_1.display_options.link_display', 'custom_url');
+  $config->set('display.block_1.display_options.link_url', '/admin/content');
+  $config->save();
+}

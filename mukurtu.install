@@ -853,6 +853,20 @@ function mukurtu_install() {
     $config->set('status', FALSE)->save();
   }
 
+  // Add an "All content" link to the end of the dashboard's "Recent content"
+  // block. content_recent is node's view (not owned by any Mukurtu module),
+  // and the profile's hook_install() is guaranteed to run after node/views
+  // have installed it, so this reliably sets it for new installs.
+  $config = \Drupal::configFactory()->getEditable('views.view.content_recent');
+  if (!$config->isNew()) {
+    $config->set('display.block_1.display_options.use_more', TRUE);
+    $config->set('display.block_1.display_options.use_more_always', TRUE);
+    $config->set('display.block_1.display_options.use_more_text', 'All content');
+    $config->set('display.block_1.display_options.link_display', 'custom_url');
+    $config->set('display.block_1.display_options.link_url', '/admin/content');
+    $config->save();
+  }
+
   // Enable "Open external links in a new window or tab" by default.
   // extlink ships this disabled; the profile's hook_install() is guaranteed
   // to run after extlink is installed, so this reliably overrides its
