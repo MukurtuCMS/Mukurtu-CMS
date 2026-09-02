@@ -854,6 +854,14 @@ function mukurtu_install() {
     $config->set('status', FALSE)->save();
   }
 
+  // Enable "Open external links in a new window or tab" by default.
+  // extlink ships this disabled; the profile's hook_install() is guaranteed
+  // to run after extlink is installed, so this reliably overrides its
+  // default for new installs.
+  \Drupal::configFactory()->getEditable('extlink.settings')
+    ->set('extlink_target', TRUE)
+    ->save();
+
   // Protect the feedback contact form and comment form with a CAPTCHA point.
   // Created here (rather than in mukurtu_bot_protection's own config/install)
   // because contact.form.feedback and comment.type.comment are not owned by
