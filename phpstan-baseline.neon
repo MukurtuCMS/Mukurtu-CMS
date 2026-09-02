@@ -1,0 +1,848 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Variable \$nids in empty\(\) always exists and is not falsy\.$#'
+			identifier: empty.variable
+			count: 1
+			path: modules/mukurtu_browse/src/ParamConverter/MukurtuMapNodesParamConverter.php
+
+		-
+			message: '#^Call to an undefined method Drupal\\mukurtu_collection\\Controller\\PersonalCollectionController\:\:l\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: modules/mukurtu_collection/src/Controller/PersonalCollectionController.php
+
+		-
+			message: '#^Method Drupal\\mukurtu_collection\\Form\\PersonalCollectionForm\:\:save\(\) should return int but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: modules/mukurtu_collection/src/Form/PersonalCollectionForm.php
+
+		-
+			message: '#^Access to an undefined property Drupal\\mukurtu_collection\\Form\\PersonalCollectionRevisionDeleteForm\:\:\$PersonalCollectionStorage\.$#'
+			identifier: property.notFound
+			count: 2
+			path: modules/mukurtu_collection/src/Form/PersonalCollectionRevisionDeleteForm.php
+
+		-
+			message: '#^Access to an undefined property Drupal\\mukurtu_collection\\Form\\PersonalCollectionRevisionRevertForm\:\:\$PersonalCollectionStorage\.$#'
+			identifier: property.notFound
+			count: 1
+			path: modules/mukurtu_collection/src/Form/PersonalCollectionRevisionRevertForm.php
+
+		-
+			message: '#^Access to an undefined property Drupal\\mukurtu_collection\\Form\\PersonalCollectionRevisionRevertTranslationForm\:\:\$PersonalCollectionStorage\.$#'
+			identifier: property.notFound
+			count: 1
+			path: modules/mukurtu_collection/src/Form/PersonalCollectionRevisionRevertTranslationForm.php
+
+		-
+			message: '#^Variable \$options might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: modules/mukurtu_collection/src/Plugin/Action/MukurtuAddToCollectionAction.php
+
+		-
+			message: '#^Interface Drupal\\field\\FieldConfigInterface referenced with incorrect case\: Drupal\\Field\\FieldConfigInterface\.$#'
+			identifier: interface.nameCase
+			count: 1
+			path: modules/mukurtu_community_records/src/Plugin/Field/FieldFormatter/EntityReferenceCommunityRecordFormatter.php
+
+		-
+			message: '#^Avoid calling Symfony\\Component\\Yaml\\Yaml\:\:parse\(\) directly\. Use \\Drupal\\Component\\Serialization\\Yaml\:\:decode\(\) instead, which handles exceptions consistently and applies the correct parse flags\.$#'
+			identifier: drupal.symfonyYamlParse
+			count: 1
+			path: modules/mukurtu_core/mukurtu_core.install
+
+		-
+			message: '''
+				#^Call to deprecated function node_type_get_names\(\)\:
+				in drupal\:11\.3\.0 and is removed from drupal\:13\.0\.0\. Use \\Drupal\:\:service\('entity_type\.bundle\.info'\)\-\>getBundleLabels\('node'\) instead\.$#
+			'''
+			identifier: function.deprecated
+			count: 1
+			path: modules/mukurtu_core/mukurtu_core.install
+
+		-
+			message: '#^Function mukurtu_core_entity_operation\(\) implements hook_entity_operation but is missing the CacheableMetadata parameter added in Drupal 11\.3\. Update the signature to\: mukurtu_core_entity_operation\(\\Drupal\\Core\\Entity\\EntityInterface \$entity, \\Drupal\\Core\\Cache\\CacheableMetadata \$cacheability\)\.$#'
+			identifier: drupal.proceduralHookEntityOperationMissingCacheabilityParameter
+			count: 1
+			path: modules/mukurtu_core/mukurtu_core.module
+
+		-
+			message: '#^Variable \$version_file might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: modules/mukurtu_core/mukurtu_core.module
+
+		-
+			message: '#^Instantiated class Drupal\\mukurtu_core\\Controller\\MessageCommand not found\.$#'
+			identifier: class.notFound
+			count: 4
+			path: modules/mukurtu_core/src/Controller/MukurtuUserController.php
+
+		-
+			message: '#^Method Drupal\\mukurtu_core\\Hook\\FormHooks\:\:entityOperationAlter\(\) implements hook_entity_operation_alter but is missing the CacheableMetadata parameter added in Drupal 11\.3\. Update the signature to include \\Drupal\\Core\\Cache\\CacheableMetadata \$cacheability as the third parameter\.$#'
+			identifier: drupal.hookEntityOperationAlterMissingCacheabilityParameter
+			count: 1
+			path: modules/mukurtu_core/src/Hook/FormHooks.php
+
+		-
+			message: '#^Direct injection of entity storage via \$storage_controller is not recommended\. Inject Drupal\\Core\\Entity\\EntityTypeManagerInterface and call getStorage\(\) at the call\-site instead\.$#'
+			identifier: drupal.entityStorageDirectInjection
+			count: 1
+			path: modules/mukurtu_core/src/MukurtuEntityViewsData.php
+
+		-
+			message: '#^Storing entity storage as a class property is not recommended\. Call Drupal\\Core\\Entity\\EntityTypeManagerInterface\:\:getStorage\(\) at the call\-site instead\.$#'
+			identifier: drupal.entityStoragePropertyAssignment
+			count: 1
+			path: modules/mukurtu_core/src/MukurtuEntityViewsData.php
+
+		-
+			message: '#^Method Drupal\\mukurtu_core\\MukurtuUserListBuilder\:\:getOperations\(\) is missing the CacheableMetadata parameter added in Drupal 11\.3\. Update the signature to\: getOperations\(\\Drupal\\Core\\Entity\\EntityInterface \$entity, \?\\Drupal\\Core\\Cache\\CacheableMetadata \$cacheability \= NULL\)\.$#'
+			identifier: drupal.entityListBuilderMissingCacheabilityParameter
+			count: 1
+			path: modules/mukurtu_core/src/MukurtuUserListBuilder.php
+
+		-
+			message: '#^Method Drupal\\mukurtu_core\\Plugin\\media\\Source\\ExternalEmbed\:\:getMetadataAttributes\(\) should return array but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: modules/mukurtu_core/src/Plugin/media/Source/ExternalEmbed.php
+
+		-
+			message: '#^Class Geometry not found\.$#'
+			identifier: class.notFound
+			count: 2
+			path: modules/mukurtu_core/tests/src/Kernel/GeofieldMukurtuLatLonWidgetTest.php
+
+		-
+			message: '''
+				#^Call to deprecated function template_preprocess_form_element\(\)\:
+				in drupal\:11\.3\.0 and is removed from drupal\:12\.0\.0\. Initial
+				  template_preprocess functions are registered directly in hook_theme\(\)\.$#
+			'''
+			identifier: function.deprecated
+			count: 1
+			path: modules/mukurtu_design/mukurtu_design.module
+
+		-
+			message: '''
+				#^Call to deprecated function template_preprocess_radios\(\)\:
+				in drupal\:11\.3\.0 and is removed from drupal\:12\.0\.0\. Initial
+				  template_preprocess functions are registered directly in hook_theme\(\)\.$#
+			'''
+			identifier: function.deprecated
+			count: 1
+			path: modules/mukurtu_design/mukurtu_design.module
+
+		-
+			message: '#^Avoid calling Symfony\\Component\\Yaml\\Yaml\:\:parse\(\) directly\. Use \\Drupal\\Component\\Serialization\\Yaml\:\:decode\(\) instead, which handles exceptions consistently and applies the correct parse flags\.$#'
+			identifier: drupal.symfonyYamlParse
+			count: 1
+			path: modules/mukurtu_dictionary/mukurtu_dictionary.install
+
+		-
+			message: '#^Interface Drupal\\Core\\Entity\\EntityTypeInterface referenced with incorrect case\: Drupal\\core\\Entity\\EntityTypeInterface\.$#'
+			identifier: interface.nameCase
+			count: 1
+			path: modules/mukurtu_dictionary/mukurtu_dictionary.module
+
+		-
+			message: '#^Relying on entity queries to check access by default is deprecated in drupal\:9\.2\.0 and an error will be thrown from drupal\:10\.0\.0\. Call \\Drupal\\Core\\Entity\\Query\\QueryInterface\:\:accessCheck\(\) with TRUE or FALSE to specify whether access should be checked\.$#'
+			identifier: entityQueryHasAccessCheck.noAccessCheck
+			count: 1
+			path: modules/mukurtu_dictionary/src/Form/MukurtuDictionaryGlossaryOrderForm.php
+
+		-
+			message: '#^Variable \$a_raw on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.variable
+			count: 1
+			path: modules/mukurtu_dictionary/src/Plugin/views/sort/GlossaryCustomOrder.php
+
+		-
+			message: '#^Variable \$b_raw on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.variable
+			count: 1
+			path: modules/mukurtu_dictionary/src/Plugin/views/sort/GlossaryCustomOrder.php
+
+		-
+			message: '#^Function mukurtu_export_entity_operation\(\) implements hook_entity_operation but is missing the CacheableMetadata parameter added in Drupal 11\.3\. Update the signature to\: mukurtu_export_entity_operation\(\\Drupal\\Core\\Entity\\EntityInterface \$entity, \\Drupal\\Core\\Cache\\CacheableMetadata \$cacheability\)\.$#'
+			identifier: drupal.proceduralHookEntityOperationMissingCacheabilityParameter
+			count: 1
+			path: modules/mukurtu_export/mukurtu_export.module
+
+		-
+			message: '#^Method Drupal\\mukurtu_export\\Controller\\CsvExporterListBuilder\:\:buildRow\(\) should return array but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: modules/mukurtu_export/src/Controller/CsvExporterListBuilder.php
+
+		-
+			message: '#^Method Drupal\\mukurtu_export\\Controller\\CsvExporterListBuilder\:\:getDefaultOperations\(\) is missing the CacheableMetadata parameter added in Drupal 11\.3\. Update the signature to\: getDefaultOperations\(\\Drupal\\Core\\Entity\\EntityInterface \$entity, \?\\Drupal\\Core\\Cache\\CacheableMetadata \$cacheability \= NULL\)\.$#'
+			identifier: drupal.entityListBuilderMissingCacheabilityParameter
+			count: 1
+			path: modules/mukurtu_export/src/Controller/CsvExporterListBuilder.php
+
+		-
+			message: '#^Method Drupal\\mukurtu_export\\Controller\\ExportListListBuilder\:\:getDefaultOperations\(\) is missing the CacheableMetadata parameter added in Drupal 11\.3\. Update the signature to\: getDefaultOperations\(\\Drupal\\Core\\Entity\\EntityInterface \$entity, \?\\Drupal\\Core\\Cache\\CacheableMetadata \$cacheability \= NULL\)\.$#'
+			identifier: drupal.entityListBuilderMissingCacheabilityParameter
+			count: 1
+			path: modules/mukurtu_export/src/Controller/ExportListListBuilder.php
+
+		-
+			message: '#^Method Drupal\\mukurtu_export\\EventSubscriber\\CsvEntityFieldExportEventSubscriber\:\:exportLink\(\) invoked with 3 parameters, 2 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: modules/mukurtu_export/src/EventSubscriber/CsvEntityFieldExportEventSubscriber.php
+
+		-
+			message: '#^Result of method Drupal\\mukurtu_export\\EventSubscriber\\CsvEntityFieldExportEventSubscriber\:\:exportAccountStatus\(\) \(void\) is used\.$#'
+			identifier: method.void
+			count: 1
+			path: modules/mukurtu_export/src/EventSubscriber/CsvEntityFieldExportEventSubscriber.php
+
+		-
+			message: '#^Result of method Drupal\\mukurtu_export\\EventSubscriber\\CsvEntityFieldExportEventSubscriber\:\:exportGroupMembership\(\) \(void\) is used\.$#'
+			identifier: method.void
+			count: 1
+			path: modules/mukurtu_export/src/EventSubscriber/CsvEntityFieldExportEventSubscriber.php
+
+		-
+			message: '''
+				#^Call to deprecated function filter_formats\(\)\:
+				in drupal\:11\.4\.0 and is removed from drupal\:13\.0\.0\. Use the
+				  Drupal\\filter\\FilterFormatRepositoryInterface service with the
+				  \:\:getAllFormats\(\) method to get all formats, or with the
+				  \:\:getFormatsForAccount\(\) method to get all formats that a user is able to
+				  access\.$#
+			'''
+			identifier: function.deprecated
+			count: 1
+			path: modules/mukurtu_export/src/Form/CsvExporterFormBase.php
+
+		-
+			message: '#^Direct injection of entity storage via \$entity_storage is not recommended\. Inject Drupal\\Core\\Entity\\EntityTypeManagerInterface and call getStorage\(\) at the call\-site instead\.$#'
+			identifier: drupal.entityStorageDirectInjection
+			count: 1
+			path: modules/mukurtu_export/src/Form/CsvExporterFormBase.php
+
+		-
+			message: '#^Method Drupal\\mukurtu_export\\Form\\CsvExporterFormBase\:\:save\(\) should return int but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: modules/mukurtu_export/src/Form/CsvExporterFormBase.php
+
+		-
+			message: '#^Storing entity storage as a class property is not recommended\. Call Drupal\\Core\\Entity\\EntityTypeManagerInterface\:\:getStorage\(\) at the call\-site instead\.$#'
+			identifier: drupal.entityStoragePropertyAssignment
+			count: 1
+			path: modules/mukurtu_export/src/Form/CsvExporterFormBase.php
+
+		-
+			message: '#^Call to an undefined method Drupal\\mukurtu_export\\Form\\ExportListRemoveMediaForm\:\:requestStack\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: modules/mukurtu_export/src/Form/ExportListRemoveMediaForm.php
+
+		-
+			message: '#^Variable \$entity in isset\(\) always exists and is not nullable\.$#'
+			identifier: isset.variable
+			count: 1
+			path: modules/mukurtu_export/src/Plugin/views/field/FlaggedRenderedEntity.php
+
+		-
+			message: '#^Non\-abstract test classes names should always have the suffix "Test", found incorrect class name "CsvExportEntityReference"\.$#'
+			identifier: nonAbstractTestClass.NameNoSuffixTest
+			count: 1
+			path: modules/mukurtu_export/tests/src/Kernel/CsvExportEntityReference.php
+
+		-
+			message: '#^Non\-abstract test classes names should always have the suffix "Test", found incorrect class name "CsvExportEntityReferenceRevisions"\.$#'
+			identifier: nonAbstractTestClass.NameNoSuffixTest
+			count: 1
+			path: modules/mukurtu_export/tests/src/Kernel/CsvExportEntityReferenceRevisions.php
+
+		-
+			message: '#^Non\-abstract test classes names should always have the suffix "Test", found incorrect class name "CsvExportFieldTestBase"\.$#'
+			identifier: nonAbstractTestClass.NameNoSuffixTest
+			count: 1
+			path: modules/mukurtu_export/tests/src/Kernel/CsvExportFieldTestBase.php
+
+		-
+			message: '#^Non\-abstract test classes names should always have the suffix "Test", found incorrect class name "CsvExportTaxonomyTerms"\.$#'
+			identifier: nonAbstractTestClass.NameNoSuffixTest
+			count: 1
+			path: modules/mukurtu_export/tests/src/Kernel/CsvExportTaxonomyTerms.php
+
+		-
+			message: '#^Non\-abstract test classes names should always have the suffix "Test", found incorrect class name "CsvExportUsername"\.$#'
+			identifier: nonAbstractTestClass.NameNoSuffixTest
+			count: 1
+			path: modules/mukurtu_export/tests/src/Kernel/CsvExportUsername.php
+
+		-
+			message: '''
+				#^Call to deprecated function filter_formats\(\)\:
+				in drupal\:11\.4\.0 and is removed from drupal\:13\.0\.0\. Use the
+				  Drupal\\filter\\FilterFormatRepositoryInterface service with the
+				  \:\:getAllFormats\(\) method to get all formats, or with the
+				  \:\:getFormatsForAccount\(\) method to get all formats that a user is able to
+				  access\.$#
+			'''
+			identifier: function.deprecated
+			count: 1
+			path: modules/mukurtu_import/src/Form/ImportBaseForm.php
+
+		-
+			message: '''
+				#^Call to deprecated function filter_formats\(\)\:
+				in drupal\:11\.4\.0 and is removed from drupal\:13\.0\.0\. Use the
+				  Drupal\\filter\\FilterFormatRepositoryInterface service with the
+				  \:\:getAllFormats\(\) method to get all formats, or with the
+				  \:\:getFormatsForAccount\(\) method to get all formats that a user is able to
+				  access\.$#
+			'''
+			identifier: function.deprecated
+			count: 1
+			path: modules/mukurtu_import/src/Form/MukurtuImportStrategyForm.php
+
+		-
+			message: '#^Direct injection of entity storage via \$storage is not recommended\. Inject Drupal\\Core\\Entity\\EntityTypeManagerInterface and call getStorage\(\) at the call\-site instead\.$#'
+			identifier: drupal.entityStorageDirectInjection
+			count: 1
+			path: modules/mukurtu_import/src/MukurtuImportStrategyListBuilder.php
+
+		-
+			message: '#^Direct injection of entity storage via \$storage is not recommended\. Inject Drupal\\Core\\Entity\\EntityTypeManagerInterface and call getStorage\(\) at the call\-site instead\.$#'
+			identifier: drupal.entityStorageDirectInjection
+			count: 1
+			path: modules/mukurtu_import/src/Plugin/migrate/destination/ProtocolAwareEntityContent.php
+
+		-
+			message: '#^Method Drupal\\Tests\\mukurtu_import\\Kernel\\MukurtuImportTestBase\:\:createUser\(\) invoked with 4 parameters, 0\-2 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: modules/mukurtu_import/tests/src/Kernel/ImportUserAccountTest.php
+
+		-
+			message: '#^Non\-abstract test classes names should always have the suffix "Test", found incorrect class name "MukurtuImportTestBase"\.$#'
+			identifier: nonAbstractTestClass.NameNoSuffixTest
+			count: 1
+			path: modules/mukurtu_import/tests/src/Kernel/MukurtuImportTestBase.php
+
+		-
+			message: '''
+				#^Call to deprecated function node_access_rebuild\(\)\:
+				in drupal\:11\.4\.0 and is removed from drupal\:13\.0\.0\. Use \\Drupal\:\:service\('\\Drupal\\node\\NodeAccessRebuild'\)\-\>rebuild\(\$batch_mode\) instead\.$#
+			'''
+			identifier: function.deprecated
+			count: 2
+			path: modules/mukurtu_landing_page/mukurtu_landing_page.install
+
+		-
+			message: '#^Method Drupal\\mukurtu_local_contexts\\Plugin\\Field\\FieldType\\LocalContextsLabelItem\:\:postSave\(\) should return bool but return statement is missing\.$#'
+			identifier: return.missing
+			count: 2
+			path: modules/mukurtu_local_contexts/src/Plugin/Field/FieldType/LocalContextsLabelItem.php
+
+		-
+			message: '#^Method Drupal\\mukurtu_local_contexts\\Plugin\\Field\\FieldType\\LocalContextsProjectItem\:\:postSave\(\) should return bool but return statement is missing\.$#'
+			identifier: return.missing
+			count: 2
+			path: modules/mukurtu_local_contexts/src/Plugin/Field/FieldType/LocalContextsProjectItem.php
+
+		-
+			message: '''
+				#^Fetching deprecated class constant EXISTS_REPLACE of interface Drupal\\Core\\File\\FileSystemInterface\:
+				in drupal\:10\.3\.0 and is removed from drupal\:12\.0\.0\. Use
+				\\Drupal\\Core\\File\\FileExists\:\:Replace instead\.$#
+			'''
+			identifier: classConstant.deprecated
+			count: 1
+			path: modules/mukurtu_media/mukurtu_media.install
+
+		-
+			message: '#^Function mukurtu_media_entity_operation\(\) implements hook_entity_operation but is missing the CacheableMetadata parameter added in Drupal 11\.3\. Update the signature to\: mukurtu_media_entity_operation\(\\Drupal\\Core\\Entity\\EntityInterface \$entity, \\Drupal\\Core\\Cache\\CacheableMetadata \$cacheability\)\.$#'
+			identifier: drupal.proceduralHookEntityOperationMissingCacheabilityParameter
+			count: 1
+			path: modules/mukurtu_media/mukurtu_media.module
+
+		-
+			message: '#^Drupal\\Core\\DependencyInjection\\DependencySerializationTrait does not support private properties\.$#'
+			identifier: dependencySerializationTraitProperty.unsupportedPrivateProperty
+			count: 1
+			path: modules/mukurtu_media/src/Form/SoundCloudAddForm.php
+
+		-
+			message: '#^Variable \$media_id_array in empty\(\) always exists and is not falsy\.$#'
+			identifier: empty.variable
+			count: 1
+			path: modules/mukurtu_migrate/src/Plugin/migrate/process/MediaEmbed.php
+
+		-
+			message: '#^Variable \$value in empty\(\) always exists and is not falsy\.$#'
+			identifier: empty.variable
+			count: 1
+			path: modules/mukurtu_migrate/src/Plugin/migrate/process/SetProtocols.php
+
+		-
+			message: '#^Variable \$isSitewide might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: modules/mukurtu_migrate/src/Plugin/migrate/process/TransformTkLabel.php
+
+		-
+			message: '#^Variable \$label_id might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: modules/mukurtu_migrate/src/Plugin/migrate/process/TransformTkLabel.php
+
+		-
+			message: '#^Variable \$project_id might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: modules/mukurtu_migrate/src/Plugin/migrate/process/TransformTkLabel.php
+
+		-
+			message: '#^Variable \$sitewideLabelValue might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: modules/mukurtu_migrate/src/Plugin/migrate/process/TransformTkLabel.php
+
+		-
+			message: '#^Variable \$unserialized might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: modules/mukurtu_migrate/src/Plugin/migrate/process/TransformTkLabel.php
+
+		-
+			message: '#^Variable \$additionalWordEntries might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: modules/mukurtu_migrate/src/Plugin/migrate/source/DictionaryWord.php
+
+		-
+			message: '#^Variable \$fetched in isset\(\) always exists and is not nullable\.$#'
+			identifier: isset.variable
+			count: 1
+			path: modules/mukurtu_migrate/src/Plugin/migrate/source/DictionaryWord.php
+
+		-
+			message: '#^Method Drupal\\mukurtu_migrate\\Plugin\\migrate\\source\\LegacyTkCommunityLabels\:\:query\(\) should return Drupal\\Core\\Database\\Query\\SelectInterface but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: modules/mukurtu_migrate/src/Plugin/migrate/source/LegacyTkCommunityLabels.php
+
+		-
+			message: '#^Method Drupal\\mukurtu_migrate\\Plugin\\migrate\\source\\LegacyTkCommunityProjects\:\:query\(\) should return Drupal\\Core\\Database\\Query\\SelectInterface but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: modules/mukurtu_migrate/src/Plugin/migrate/source/LegacyTkCommunityProjects.php
+
+		-
+			message: '#^Method Drupal\\mukurtu_migrate\\Plugin\\migrate\\source\\LegacyTkCommunityProjectsGroupSupported\:\:query\(\) should return Drupal\\Core\\Database\\Query\\SelectInterface but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: modules/mukurtu_migrate/src/Plugin/migrate/source/LegacyTkCommunityProjectsGroupSupported.php
+
+		-
+			message: '#^Method Drupal\\mukurtu_migrate\\Plugin\\migrate\\source\\LegacyTkSitewideLabels\:\:query\(\) should return Drupal\\Core\\Database\\Query\\SelectInterface but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: modules/mukurtu_migrate/src/Plugin/migrate/source/LegacyTkSitewideLabels.php
+
+		-
+			message: '#^Storing entity storage as a class property is not recommended\. Call Drupal\\Core\\Entity\\EntityTypeManagerInterface\:\:getStorage\(\) at the call\-site instead\.$#'
+			identifier: drupal.entityStoragePropertyAssignment
+			count: 1
+			path: modules/mukurtu_migrate/tests/src/Kernel/SearchApiIndexerTest.php
+
+		-
+			message: '#^Variable \$node on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.variable
+			count: 1
+			path: modules/mukurtu_multipage_items/src/Controller/MultipageItemPageController.php
+
+		-
+			message: '#^Relying on entity queries to check access by default is deprecated in drupal\:9\.2\.0 and an error will be thrown from drupal\:10\.0\.0\. Call \\Drupal\\Core\\Entity\\Query\\QueryInterface\:\:accessCheck\(\) with TRUE or FALSE to specify whether access should be checked\.$#'
+			identifier: entityQueryHasAccessCheck.noAccessCheck
+			count: 1
+			path: modules/mukurtu_multipage_items/src/Entity/MultipageItem.php
+
+		-
+			message: '#^Method Drupal\\mukurtu_multipage_items\\Form\\MultipageItemForm\:\:save\(\) should return int but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: modules/mukurtu_multipage_items/src/Form/MultipageItemForm.php
+
+		-
+			message: '#^Direct injection of entity storage via \$storage is not recommended\. Inject Drupal\\Core\\Entity\\EntityTypeManagerInterface and call getStorage\(\) at the call\-site instead\.$#'
+			identifier: drupal.entityStorageDirectInjection
+			count: 1
+			path: modules/mukurtu_multipage_items/src/MultipageItemListBuilder.php
+
+		-
+			message: '#^Method Drupal\\mukurtu_multipage_items\\MultipageItemListBuilder\:\:getDefaultOperations\(\) is missing the CacheableMetadata parameter added in Drupal 11\.3\. Update the signature to\: getDefaultOperations\(\\Drupal\\Core\\Entity\\EntityInterface \$entity, \?\\Drupal\\Core\\Cache\\CacheableMetadata \$cacheability \= NULL\)\.$#'
+			identifier: drupal.entityListBuilderMissingCacheabilityParameter
+			count: 1
+			path: modules/mukurtu_multipage_items/src/MultipageItemListBuilder.php
+
+		-
+			message: '#^Relying on entity queries to check access by default is deprecated in drupal\:9\.2\.0 and an error will be thrown from drupal\:10\.0\.0\. Call \\Drupal\\Core\\Entity\\Query\\QueryInterface\:\:accessCheck\(\) with TRUE or FALSE to specify whether access should be checked\.$#'
+			identifier: entityQueryHasAccessCheck.noAccessCheck
+			count: 1
+			path: modules/mukurtu_multipage_items/src/Plugin/Validation/Constraint/MultipageValidNodeConstraintValidator.php
+
+		-
+			message: '#^Parameter \$event of method Drupal\\mukurtu_notifications\\EventSubscriber\\QueryAccessSubscriber\:\:onQueryAccess\(\) has invalid type Drupal\\entity\\QueryAccess\\QueryAccessEvent\.$#'
+			identifier: class.notFound
+			count: 1
+			path: modules/mukurtu_notifications/src/EventSubscriber/QueryAccessSubscriber.php
+
+		-
+			message: '''
+				#^Call to deprecated function node_access_rebuild\(\)\:
+				in drupal\:11\.4\.0 and is removed from drupal\:13\.0\.0\. Use \\Drupal\:\:service\('\\Drupal\\node\\NodeAccessRebuild'\)\-\>rebuild\(\$batch_mode\) instead\.$#
+			'''
+			identifier: function.deprecated
+			count: 1
+			path: modules/mukurtu_protocol/mukurtu_protocol.install
+
+		-
+			message: '#^Method Drupal\\mukurtu_protocol\\CommunityListBuilder\:\:getDefaultOperations\(\) is missing the CacheableMetadata parameter added in Drupal 11\.3\. Update the signature to\: getDefaultOperations\(\\Drupal\\Core\\Entity\\EntityInterface \$entity, \?\\Drupal\\Core\\Cache\\CacheableMetadata \$cacheability \= NULL\)\.$#'
+			identifier: drupal.entityListBuilderMissingCacheabilityParameter
+			count: 1
+			path: modules/mukurtu_protocol/src/CommunityListBuilder.php
+
+		-
+			message: '#^Variable \$communityOgMemberships might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: modules/mukurtu_protocol/src/Entity/Community.php
+
+		-
+			message: '#^Direct injection of entity storage via \$storage is not recommended\. Inject Drupal\\Core\\Entity\\EntityTypeManagerInterface and call getStorage\(\) at the call\-site instead\.$#'
+			identifier: drupal.entityStorageDirectInjection
+			count: 1
+			path: modules/mukurtu_protocol/src/Entity/MukurtuOgRoleListBuilder.php
+
+		-
+			message: '#^Method Drupal\\mukurtu_protocol\\Entity\\MukurtuOgRoleListBuilder\:\:getDefaultOperations\(\) is missing the CacheableMetadata parameter added in Drupal 11\.3\. Update the signature to\: getDefaultOperations\(\\Drupal\\Core\\Entity\\EntityInterface \$entity, \?\\Drupal\\Core\\Cache\\CacheableMetadata \$cacheability \= NULL\)\.$#'
+			identifier: drupal.entityListBuilderMissingCacheabilityParameter
+			count: 1
+			path: modules/mukurtu_protocol/src/Entity/MukurtuOgRoleListBuilder.php
+
+		-
+			message: '#^Relying on entity queries to check access by default is deprecated in drupal\:9\.2\.0 and an error will be thrown from drupal\:10\.0\.0\. Call \\Drupal\\Core\\Entity\\Query\\QueryInterface\:\:accessCheck\(\) with TRUE or FALSE to specify whether access should be checked\.$#'
+			identifier: entityQueryHasAccessCheck.noAccessCheck
+			count: 1
+			path: modules/mukurtu_protocol/src/Entity/Protocol.php
+
+		-
+			message: '#^Variable \$protocolOgMemberships might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: modules/mukurtu_protocol/src/Entity/Protocol.php
+
+		-
+			message: '#^Method Drupal\\mukurtu_protocol\\Form\\CommunityAddForm\:\:save\(\) should return int but return statement is missing\.$#'
+			identifier: return.missing
+			count: 2
+			path: modules/mukurtu_protocol/src/Form/CommunityAddForm.php
+
+		-
+			message: '#^Method Drupal\\mukurtu_protocol\\Form\\CommunityForm\:\:save\(\) should return int but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: modules/mukurtu_protocol/src/Form/CommunityForm.php
+
+		-
+			message: '#^Variable \$parent on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.variable
+			count: 1
+			path: modules/mukurtu_protocol/src/Form/CommunityOrganizationForm.php
+
+		-
+			message: '#^Variable \$weight on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.variable
+			count: 1
+			path: modules/mukurtu_protocol/src/Form/CommunityOrganizationForm.php
+
+		-
+			message: '#^Access to an undefined property Drupal\\mukurtu_protocol\\Form\\CommunityRevisionRevertTranslationForm\:\:\$CommunityStorage\.$#'
+			identifier: property.notFound
+			count: 1
+			path: modules/mukurtu_protocol/src/Form/CommunityRevisionRevertTranslationForm.php
+
+		-
+			message: '''
+				#^Call to deprecated function node_access_rebuild\(\)\:
+				in drupal\:11\.4\.0 and is removed from drupal\:13\.0\.0\. Use \\Drupal\:\:service\('\\Drupal\\node\\NodeAccessRebuild'\)\-\>rebuild\(\$batch_mode\) instead\.$#
+			'''
+			identifier: function.deprecated
+			count: 1
+			path: modules/mukurtu_protocol/src/Form/MukurtuOgMembershipBlockForm.php
+
+		-
+			message: '''
+				#^Call to deprecated function node_access_rebuild\(\)\:
+				in drupal\:11\.4\.0 and is removed from drupal\:13\.0\.0\. Use \\Drupal\:\:service\('\\Drupal\\node\\NodeAccessRebuild'\)\-\>rebuild\(\$batch_mode\) instead\.$#
+			'''
+			identifier: function.deprecated
+			count: 1
+			path: modules/mukurtu_protocol/src/Form/MukurtuOgMembershipUnblockForm.php
+
+		-
+			message: '#^Method Drupal\\mukurtu_protocol\\Form\\ProtocolAddForm\:\:save\(\) should return int but return statement is missing\.$#'
+			identifier: return.missing
+			count: 2
+			path: modules/mukurtu_protocol/src/Form/ProtocolAddForm.php
+
+		-
+			message: '#^Method Drupal\\mukurtu_protocol\\Form\\ProtocolForm\:\:save\(\) should return int but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: modules/mukurtu_protocol/src/Form/ProtocolForm.php
+
+		-
+			message: '#^Access to an undefined property Drupal\\mukurtu_protocol\\Form\\ProtocolRevisionRevertTranslationForm\:\:\$ProtocolStorage\.$#'
+			identifier: property.notFound
+			count: 1
+			path: modules/mukurtu_protocol/src/Form/ProtocolRevisionRevertTranslationForm.php
+
+		-
+			message: '#^Method Drupal\\mukurtu_protocol\\Hook\\MukurtuProtocolHooks\:\:entityOperation\(\) implements hook_entity_operation but is missing the CacheableMetadata parameter added in Drupal 11\.3\. Update the signature to include \\Drupal\\Core\\Cache\\CacheableMetadata \$cacheability as the second parameter\.$#'
+			identifier: drupal.hookEntityOperationMissingCacheabilityParameter
+			count: 1
+			path: modules/mukurtu_protocol/src/Hook/MukurtuProtocolHooks.php
+
+		-
+			message: '#^Method Drupal\\mukurtu_protocol\\Hook\\MukurtuProtocolHooks\:\:entityOperationAlterOgMembership\(\) implements hook_entity_operation_alter but is missing the CacheableMetadata parameter added in Drupal 11\.3\. Update the signature to include \\Drupal\\Core\\Cache\\CacheableMetadata \$cacheability as the third parameter\.$#'
+			identifier: drupal.hookEntityOperationAlterMissingCacheabilityParameter
+			count: 1
+			path: modules/mukurtu_protocol/src/Hook/MukurtuProtocolHooks.php
+
+		-
+			message: '#^Method Drupal\\mukurtu_protocol\\Hook\\MukurtuProtocolHooks\:\:entityOperationOgMembership\(\) implements hook_entity_operation but is missing the CacheableMetadata parameter added in Drupal 11\.3\. Update the signature to include \\Drupal\\Core\\Cache\\CacheableMetadata \$cacheability as the second parameter\.$#'
+			identifier: drupal.hookEntityOperationMissingCacheabilityParameter
+			count: 1
+			path: modules/mukurtu_protocol/src/Hook/MukurtuProtocolHooks.php
+
+		-
+			message: '''
+				#^Fetching deprecated class constant ANONYMOUS_MAYNOT_CONTACT of interface Drupal\\comment\\CommentInterface\:
+				in drupal\:11\.4\.0 and is removed from drupal\:13\.0\.0\.
+				  Use \\Drupal\\comment\\AnonymousContact\:\:Forbidden instead\.$#
+			'''
+			identifier: classConstant.deprecated
+			count: 1
+			path: modules/mukurtu_protocol/src/MukurtuCommentAccessControlHandler.php
+
+		-
+			message: '''
+				#^Fetching deprecated class constant ANONYMOUS_MAYNOT_CONTACT of interface Drupal\\comment\\CommentInterface\:
+				in drupal\:11\.4\.0 and is removed from drupal\:13\.0\.0\.
+				  Use \\Drupal\\comment\\AnonymousContact\:\:Forbidden instead\.$#
+			'''
+			identifier: classConstant.deprecated
+			count: 3
+			path: modules/mukurtu_protocol/src/MukurtuCommentForm.php
+
+		-
+			message: '''
+				#^Fetching deprecated class constant ANONYMOUS_MUST_CONTACT of interface Drupal\\comment\\CommentInterface\:
+				in drupal\:11\.4\.0 and is removed from drupal\:13\.0\.0\.
+				  Use \\Drupal\\comment\\AnonymousContact\:\:Required instead\.$#
+			'''
+			identifier: classConstant.deprecated
+			count: 3
+			path: modules/mukurtu_protocol/src/MukurtuCommentForm.php
+
+		-
+			message: '''
+				#^Fetching deprecated class constant OPEN of interface Drupal\\comment\\Plugin\\Field\\FieldType\\CommentItemInterface\:
+				in drupal\:11\.4\.0 and is removed from drupal\:13\.0\.0\.
+				  Use \\Drupal\\comment\\CommentingStatus\:\:Open instead\.$#
+			'''
+			identifier: classConstant.deprecated
+			count: 1
+			path: modules/mukurtu_protocol/src/MukurtuCommentForm.php
+
+		-
+			message: '#^Method Drupal\\Core\\Entity\\ContentEntityForm\:\:form\(\) invoked with 3 parameters, 2 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: modules/mukurtu_protocol/src/MukurtuCommentForm.php
+
+		-
+			message: '#^Method Drupal\\mukurtu_protocol\\MukurtuCommentForm\:\:save\(\) should return int but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: modules/mukurtu_protocol/src/MukurtuCommentForm.php
+
+		-
+			message: '''
+				#^in drupal\:11\.3\.0 and is removed from drupal\:13\.0\.0\.
+				  Instead, use the enums provided by the relevant modules\.$#
+			'''
+			identifier: constant.deprecated
+			count: 1
+			path: modules/mukurtu_protocol/src/MukurtuCommentForm.php
+
+		-
+			message: '''
+				#^Call to deprecated function node_access_rebuild\(\)\:
+				in drupal\:11\.4\.0 and is removed from drupal\:13\.0\.0\. Use \\Drupal\:\:service\('\\Drupal\\node\\NodeAccessRebuild'\)\-\>rebuild\(\$batch_mode\) instead\.$#
+			'''
+			identifier: function.deprecated
+			count: 1
+			path: modules/mukurtu_protocol/src/Plugin/Action/MukurtuApproveUserFromMembershipAction.php
+
+		-
+			message: '''
+				#^Fetching deprecated class constant FORM_BELOW of interface Drupal\\comment\\Plugin\\Field\\FieldType\\CommentItemInterface\:
+				in drupal\:11\.4\.0 and is removed from drupal\:13\.0\.0\.
+				Use \\Drupal\\comment\\FormLocation\:\:Below instead\.$#
+			'''
+			identifier: classConstant.deprecated
+			count: 1
+			path: modules/mukurtu_protocol/src/Plugin/Field/FieldFormatter/MukurtuCommentDefaultFormatter.php
+
+		-
+			message: '''
+				#^Fetching deprecated class constant HIDDEN of interface Drupal\\comment\\Plugin\\Field\\FieldType\\CommentItemInterface\:
+				in drupal\:11\.4\.0 and is removed from drupal\:13\.0\.0\.
+				  Use \\Drupal\\comment\\CommentingStatus\:\:Hidden instead\.$#
+			'''
+			identifier: classConstant.deprecated
+			count: 1
+			path: modules/mukurtu_protocol/src/Plugin/Field/FieldFormatter/MukurtuCommentDefaultFormatter.php
+
+		-
+			message: '''
+				#^Fetching deprecated class constant OPEN of interface Drupal\\comment\\Plugin\\Field\\FieldType\\CommentItemInterface\:
+				in drupal\:11\.4\.0 and is removed from drupal\:13\.0\.0\.
+				  Use \\Drupal\\comment\\CommentingStatus\:\:Open instead\.$#
+			'''
+			identifier: classConstant.deprecated
+			count: 1
+			path: modules/mukurtu_protocol/src/Plugin/Field/FieldFormatter/MukurtuCommentDefaultFormatter.php
+
+		-
+			message: '#^Access to an undefined property Drupal\\mukurtu_protocol\\Plugin\\Field\\FieldType\\CulturalProtocolItem\:\:\$protocol_set_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: modules/mukurtu_protocol/src/Plugin/Field/FieldType/CulturalProtocolItem.php
+
+		-
+			message: '#^Access to an undefined property Drupal\\mukurtu_protocol\\Plugin\\Field\\FieldType\\CulturalProtocolItem\:\:\$protocols\.$#'
+			identifier: property.notFound
+			count: 2
+			path: modules/mukurtu_protocol/src/Plugin/Field/FieldType/CulturalProtocolItem.php
+
+		-
+			message: '#^Variable \$missing_protocol_communities in empty\(\) always exists and is not falsy\.$#'
+			identifier: empty.variable
+			count: 1
+			path: modules/mukurtu_protocol/src/Plugin/Field/FieldWidget/CulturalProtocolWidget.php
+
+		-
+			message: '#^Direct injection of entity storage via \$role_storage is not recommended\. Inject Drupal\\Core\\Entity\\EntityTypeManagerInterface and call getStorage\(\) at the call\-site instead\.$#'
+			identifier: drupal.entityStorageDirectInjection
+			count: 1
+			path: modules/mukurtu_protocol/src/Plugin/views/access/MukurtuPermission.php
+
+		-
+			message: '#^Storing entity storage as a class property is not recommended\. Call Drupal\\Core\\Entity\\EntityTypeManagerInterface\:\:getStorage\(\) at the call\-site instead\.$#'
+			identifier: drupal.entityStoragePropertyAssignment
+			count: 1
+			path: modules/mukurtu_protocol/src/Plugin/views/access/MukurtuPermission.php
+
+		-
+			message: '#^Direct injection of entity storage via \$role_storage is not recommended\. Inject Drupal\\Core\\Entity\\EntityTypeManagerInterface and call getStorage\(\) at the call\-site instead\.$#'
+			identifier: drupal.entityStorageDirectInjection
+			count: 1
+			path: modules/mukurtu_protocol/src/Plugin/views/access/SiteAndMukurtuRole.php
+
+		-
+			message: '#^Storing entity storage as a class property is not recommended\. Call Drupal\\Core\\Entity\\EntityTypeManagerInterface\:\:getStorage\(\) at the call\-site instead\.$#'
+			identifier: drupal.entityStoragePropertyAssignment
+			count: 1
+			path: modules/mukurtu_protocol/src/Plugin/views/access/SiteAndMukurtuRole.php
+
+		-
+			message: '#^Direct injection of entity storage via \$storage is not recommended\. Inject Drupal\\Core\\Entity\\EntityTypeManagerInterface and call getStorage\(\) at the call\-site instead\.$#'
+			identifier: drupal.entityStorageDirectInjection
+			count: 1
+			path: modules/mukurtu_protocol/src/ProtocolListBuilder.php
+
+		-
+			message: '#^Non\-abstract test classes names should always have the suffix "Test", found incorrect class name "ProtocolAwareFunctionalTestBase"\.$#'
+			identifier: nonAbstractTestClass.NameNoSuffixTest
+			count: 1
+			path: modules/mukurtu_protocol/tests/src/Functional/ProtocolAwareFunctionalTestBase.php
+
+		-
+			message: '''
+				#^Call to deprecated function node_access_rebuild\(\)\:
+				in drupal\:11\.4\.0 and is removed from drupal\:13\.0\.0\. Use \\Drupal\:\:service\('\\Drupal\\node\\NodeAccessRebuild'\)\-\>rebuild\(\$batch_mode\) instead\.$#
+			'''
+			identifier: function.deprecated
+			count: 1
+			path: modules/mukurtu_protocol/tests/src/Kernel/Access/AccessByProtocolTest.php
+
+		-
+			message: '#^Non\-abstract test classes names should always have the suffix "Test", found incorrect class name "ProtocolAwareEntityTestBase"\.$#'
+			identifier: nonAbstractTestClass.NameNoSuffixTest
+			count: 1
+			path: modules/mukurtu_protocol/tests/src/Kernel/ProtocolAwareEntityTestBase.php
+
+		-
+			message: '#^Direct injection of entity storage via \$storage is not recommended\. Inject Drupal\\Core\\Entity\\EntityTypeManagerInterface and call getStorage\(\) at the call\-site instead\.$#'
+			identifier: drupal.entityStorageDirectInjection
+			count: 1
+			path: modules/mukurtu_submissions/src/SubmissionSettingsListBuilder.php
+
+		-
+			message: '#^Method Drupal\\mukurtu_submissions\\SubmissionSettingsListBuilder\:\:getDefaultOperations\(\) is missing the CacheableMetadata parameter added in Drupal 11\.3\. Update the signature to\: getDefaultOperations\(\\Drupal\\Core\\Entity\\EntityInterface \$entity, \?\\Drupal\\Core\\Cache\\CacheableMetadata \$cacheability \= NULL\)\.$#'
+			identifier: drupal.entityListBuilderMissingCacheabilityParameter
+			count: 1
+			path: modules/mukurtu_submissions/src/SubmissionSettingsListBuilder.php
+
+		-
+			message: '''
+				#^Fetching deprecated class constant EXISTS_REPLACE of interface Drupal\\Core\\File\\FileSystemInterface\:
+				in drupal\:10\.3\.0 and is removed from drupal\:12\.0\.0\. Use
+				\\Drupal\\Core\\File\\FileExists\:\:Replace instead\.$#
+			'''
+			identifier: classConstant.deprecated
+			count: 1
+			path: modules/mukurtu_submissions/tests/src/Kernel/ParagraphSubmissionFormTest.php
+
+		-
+			message: '''
+				#^Call to deprecated function check_markup\(\)\:
+				in drupal\:11\.4\.0 and is removed from drupal\:13\.0\.0\. There is no
+				  direct replacement\. It's recommended to always return a renderable array
+				  without flattening as markup to pass the cacheability metadata\.$#
+			'''
+			identifier: function.deprecated
+			count: 1
+			path: modules/mukurtu_taxonomy/src/Controller/TaxonomyRecordViewController.php
+
+		-
+			message: '#^Call to an undefined static method Drupal\:\:t\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: modules/mukurtu_workflows/mukurtu_workflows.module
+
+		-
+			message: '''
+				#^Call to deprecated function node_access_rebuild\(\)\:
+				in drupal\:11\.4\.0 and is removed from drupal\:13\.0\.0\. Use \\Drupal\:\:service\('\\Drupal\\node\\NodeAccessRebuild'\)\-\>rebuild\(\$batch_mode\) instead\.$#
+			'''
+			identifier: function.deprecated
+			count: 1
+			path: mukurtu.install

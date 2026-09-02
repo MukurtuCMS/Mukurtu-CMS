@@ -1,0 +1,56 @@
+# Configuration file for PHPStan static analysis of the Mukurtu profile.
+# See https://phpstan.org. Modelled on web/core/phpstan.neon.dist.
+#
+# Run from the profile directory:
+#
+#   composer run lint:phpstan
+#
+# Level 1 matches what Drupal core itself enforces. Levels 2+ mostly surface
+# entity bundle-class type debt (Node::setProtocols() and friends) rather than
+# defects; raising the level is a deliberate project, not a config tweak.
+
+includes:
+  - phpstan-baseline.neon
+
+parameters:
+
+  tmpDir: .phpstan-tmp
+
+  level: 1
+
+  paths:
+    - modules
+    - themes
+    - mukurtu.profile
+    - mukurtu.install
+
+  fileExtensions:
+    - php
+    - module
+    - inc
+    - install
+    - profile
+    - theme
+
+  bootstrapFiles:
+    # Load class aliases, e.g. Drupal\Core\Serialization\Yaml. Without this,
+    # aliased core classes are reported as unknown. Mirrors core's config.
+    - ../../core/lib/Drupal/Core/Serialization/Yaml.php
+
+  excludePaths:
+    - */node_modules/*
+    - */vendor/*
+    - libraries/*
+    - patches/*
+    - .phpstan-tmp/*
+
+  ignoreErrors:
+    # The three below are ignored by Drupal core itself, for the reasons given
+    # in web/core/phpstan.neon.dist. Kept in sync with core deliberately.
+    #
+    # new static() is a best practice in Drupal, so we cannot fix that.
+    - "#^Unsafe usage of new static#"
+    - "#Drupal calls should be avoided in classes, use dependency injection instead#"
+    - "#^Class .* extends @internal class#"
+    # Core also ignores `identifier: missingType.iterableValue`, but that only
+    # fires at level 6+. Re-add it if the level is ever raised that far.

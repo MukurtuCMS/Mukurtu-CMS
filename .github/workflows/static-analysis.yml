@@ -1,0 +1,148 @@
+name: Static Analysis
+
+# Pull requests only. This workflow deliberately does not run on pushes to
+# main or develop, so it is only ever exercised against feature branches.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+# Read-only. These jobs check out the code and run linters; nothing here
+# writes to the repository, comments, or pushes a branch.
+permissions:
+  contents: read
+
+jobs:
+  # Dependency advisories. Reads composer.lock only, so this needs no install
+  # and no Drupal build. Kept separate from the analysis job because it is fast
+  # and because its failures mean something quite different.
+  #
+  # This is not redundant with Dependabot: the GitHub Advisory Database carries
+  # advisories for only a handful of our drupal/* dependencies, whereas
+  # `composer audit` also reads drupal.org's own security advisory feed via the
+  # packages.drupal.org repository. It is also a gate rather than a notification.
+  composer-audit:
+    name: Composer audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: composer:v2
+
+      - name: Audit locked dependencies
+        run: composer audit --locked --no-interaction
+
+  static-analysis:
+    name: PHPCS + PHPStan
+    runs-on: ubuntu-latest
+    # Both checks below are REPORT-ONLY while the large stacked PRs land, so
+    # they give per-PR visibility without ever blocking that work. Flipping this
+    # single value to '1' turns both into gates. Same convention as
+    # scripts/lint/multilingual-guardrails.sh.
+    #
+    # Intended order: land this wiring -> land the phpcbf sweep -> flip to '1'.
+    # PHPStan is already clean against its baseline, so it could be gated first
+    # if the sweep drags on; PHPCS cannot be until the sweep lands.
+    env:
+      MUKURTU_LINT_STRICT: '0'
+    steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: composer:v2
+
+      - name: Get composer cache directory
+        id: composercache
+        run: echo "COMPCACHE=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache composer dependencies
+        uses: actions/cache@v5
+        with:
+          path: $COMPCACHE
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      # PHPStan needs a real docroot to resolve core and contrib namespaces, so
+      # the profile is analysed inside a full template build. Mirrors the setup
+      # in build-and-test.yml.
+      - name: Install Mukurtu Template
+        run: |
+          composer create mukurtu/mukurtu-template:dev-main . --no-install --no-interaction
+          rm web/profiles/mukurtu -rf
+
+      # fetch-depth: 0 so the PR base commit is available for diff scoping.
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          path: web/profiles/mukurtu
+          fetch-depth: 0
+
+      - name: Install Mukurtu
+        run: |
+          composer config repositories.local-dev path web/profiles/mukurtu
+          composer install --no-interaction --optimize-autoloader
+
+      # PHPCS is scoped to the files a PR touches. The tree carries ~4,900
+      # pre-existing errors (3,633 of them auto-fixable by phpcbf), dense
+      # enough that a five-file PR can inherit ~160. Gating on that would tax
+      # every author for debt they did not create, which is why the sweep has
+      # to land before MUKURTU_LINT_STRICT flips.
+      - name: PHPCS (changed files)
+        working-directory: web/profiles/mukurtu
+        run: |
+          set -uo pipefail
+          # fetch-depth: 0 above should already provide this; fetching again
+          # is cheap insurance against a shallow or pruned base ref.
+          git fetch --no-tags --quiet origin "${{ github.base_ref }}" || true
+          BASE=$(git merge-base "origin/${{ github.base_ref }}" HEAD)
+          echo "Diffing against $BASE"
+          # ACMR: added/copied/modified/renamed. Deleted files must not be linted.
+          mapfile -t FILES < <(git diff --name-only --diff-filter=ACMR "$BASE" HEAD \
+            -- '*.php' '*.module' '*.inc' '*.install' '*.profile' '*.theme')
+          if [ ${#FILES[@]} -eq 0 ]; then
+            echo "No PHP files changed; nothing to check."
+            exit 0
+          fi
+          printf 'Checking %s changed file(s):\n' "${#FILES[@]}"
+          printf '  %s\n' "${FILES[@]}"
+          ../../../vendor/bin/phpcs --standard=phpcs.xml.dist \
+            --warning-severity=0 --report=full "${FILES[@]}"
+          STATUS=$?
+          if [ "$STATUS" -ne 0 ]; then
+            echo
+            echo "PHPCS reported violations. Most are auto-fixable:"
+            echo "    composer run lint:phpcs:fix"
+            if [ "${MUKURTU_LINT_STRICT}" = "1" ]; then
+              exit "$STATUS"
+            fi
+            echo "MUKURTU_LINT_STRICT is not 1, so this is reported without failing."
+          fi
+
+      # PHPStan runs whole-tree against a committed baseline of 144 known
+      # errors, so anything it reports is NEWLY introduced by the PR. It is
+      # already clean, so this reports nothing until someone adds an error.
+      - name: PHPStan
+        working-directory: web/profiles/mukurtu
+        run: |
+          set -uo pipefail
+          ../../../vendor/bin/phpstan analyse -c phpstan.neon.dist \
+            --no-progress --memory-limit=-1
+          STATUS=$?
+          if [ "$STATUS" -ne 0 ]; then
+            echo
+            echo "The errors above are NOT in phpstan-baseline.neon, meaning this"
+            echo "branch introduced them. Reproduce locally with:"
+            echo "    composer run lint:phpstan"
+            echo
+            echo "Fix them rather than regenerating the baseline to silence them -"
+            echo "the baseline is meant to shrink over time, never grow."
+            if [ "${MUKURTU_LINT_STRICT}" = "1" ]; then
+              exit "$STATUS"
+            fi
+            echo "MUKURTU_LINT_STRICT is not 1, so this is reported without failing."
+          fi

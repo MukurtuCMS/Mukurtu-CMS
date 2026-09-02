@@ -3,3 +3,8 @@ test-results/
 vendor/
 web/
 **/.DS_Store
+
+# Static analysis caches. The configs (phpcs.xml.dist, phpstan.neon.dist) and
+# the PHPStan baseline are tracked; their scratch dirs are not.
+.phpcs-cache
+.phpstan-tmp/

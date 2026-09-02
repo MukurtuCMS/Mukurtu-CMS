@@ -94,6 +94,28 @@
         "drupal/coder": "*",
         "dealerdirect/phpcodesniffer-composer-installer": "^1.2"
     },
+    "scripts": {
+        "lint": [
+            "@lint:audit",
+            "@lint:phpcs",
+            "@lint:phpstan"
+        ],
+        "lint:audit": "composer audit --locked",
+        "lint:phpcs": "../../../vendor/bin/phpcs --standard=phpcs.xml.dist --warning-severity=0",
+        "lint:phpcs:all": "../../../vendor/bin/phpcs --standard=phpcs.xml.dist",
+        "lint:phpcs:fix": "../../../vendor/bin/phpcbf --standard=phpcs.xml.dist",
+        "lint:phpstan": "../../../vendor/bin/phpstan analyse -c phpstan.neon.dist --no-progress --memory-limit=-1",
+        "lint:phpstan:baseline": "rm -rf .phpstan-tmp && ../../../vendor/bin/phpstan analyse -c phpstan.neon.dist --no-progress --memory-limit=-1 --generate-baseline=phpstan-baseline.neon"
+    },
+    "scripts-descriptions": {
+        "lint": "Run every static analysis check CI runs (audit, PHPCS errors, PHPStan).",
+        "lint:audit": "Check composer.lock against security advisories, including drupal.org SAs.",
+        "lint:phpcs": "PHPCS errors only - matches the CI gate.",
+        "lint:phpcs:all": "PHPCS errors and warnings - the full backlog view.",
+        "lint:phpcs:fix": "Apply the auto-fixable subset of PHPCS violations via phpcbf.",
+        "lint:phpstan": "PHPStan level 1 against the committed baseline.",
+        "lint:phpstan:baseline": "Regenerate phpstan-baseline.neon. It should shrink, never grow."
+    },
     "config": {
         "sort-packages": true,
         "audit": {
