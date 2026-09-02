@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\mukurtu_export\Kernel;
 
+use Drupal\Core\Config\FileStorage;
 use Drupal\Core\Form\FormState;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\mukurtu_export\Entity\CsvExporter;
@@ -42,18 +43,22 @@ class CsvExporterSettingsOrderTest extends KernelTestBase {
   ];
 
   /**
-   * {@inheritdoc}
-   */
-  protected function setUp(): void {
-    parent::setUp();
-    $this->installConfig(['mukurtu_export']);
-  }
-
-  /**
    * Tests that the shipped defaults sort local-first, and other site-wide
    * settings still fall back to alphabetical order after them.
    */
   public function testDefaultPresetsSortLocalBeforeExternal(): void {
+    // Save the four shipped default presets from their install config,
+    // rather than installing all of mukurtu_export's config (which would
+    // also pull in config depending on modules, like flag, this test
+    // doesn't enable).
+    $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_export');
+    $source = new FileStorage($module_path . '/config/install');
+    foreach (self::PRESET_IDS as $id) {
+      $data = $source->read("mukurtu_export.csv_exporter.$id");
+      $this->assertNotFalse($data, "mukurtu_export.csv_exporter.$id should exist.");
+      CsvExporter::create($data)->save();
+    }
+
     // A custom site-wide setting whose label would otherwise sort
     // alphabetically ahead of all four defaults, to confirm it still lands
     // after them rather than jumping the explicit order.
