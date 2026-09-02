@@ -44,9 +44,16 @@
     <div class="media-asset--content">
       {{ content|without('media_content_warnings') }}
     </div>
+
+    <div id="remote-video-{{ media.id }}" class="media-asset--glightbox-inline">
+      <div class="media media--remote-video">
+        {{ content.media_content_warnings }}
+        {{ content.field_media_oembed_video }}
+      </div>
+    </div>
   </div>
 
   <div class="media-asset--actions">
-    <a href="{{ media.field_media_oembed_video.value }}" data-extlink class="media-asset--link button" aria-label="Expand {{ name }} video">Expand +</a>
+    <a href="#remote-video-{{ media.id }}" data-type="inline" class="media-asset--link button" aria-label="Expand {{ name }} video">Expand +</a>
   </div>
 </div>
