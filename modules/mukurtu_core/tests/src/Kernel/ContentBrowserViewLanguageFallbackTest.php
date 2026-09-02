@@ -6,17 +6,18 @@ namespace Drupal\Tests\mukurtu_core\Kernel;
 
 use Drupal\Core\Config\FileStorage;
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests mukurtu_core_update_40109().
+ * Tests mukurtu_core_update_40106().
  *
  * Loads each view's real shipped config, strips the fields the hook adds
  * to simulate a site that installed before this fix, runs the hook, and
  * confirms it fills them back in - and that running it twice is a no-op.
  *
- * @see \mukurtu_core_update_40109()
- * @group mukurtu_core
+ * @see \mukurtu_core_update_40106()
  */
+#[Group('mukurtu_core')]
 class ContentBrowserViewLanguageFallbackTest extends KernelTestBase {
 
   /**
@@ -47,7 +48,7 @@ class ContentBrowserViewLanguageFallbackTest extends KernelTestBase {
   public function testAddsFallbackWhenMissing(): void {
     $this->assertArrayNotHasKey('default_langcode', $this->config('views.view.mukurtu_content_browser')->get('display.default.display_options.filters') ?? []);
 
-    mukurtu_core_update_40109();
+    mukurtu_core_update_40106();
 
     $this->assertArrayHasKey('default_langcode', $this->config('views.view.mukurtu_content_browser')->get('display.default.display_options.filters'));
     $this->assertSame('***LANGUAGE_language_content***', $this->config('views.view.mukurtu_content_browser')->get('display.entity_browser.display_options.rendering_language'));
@@ -57,8 +58,8 @@ class ContentBrowserViewLanguageFallbackTest extends KernelTestBase {
    * Running the hook twice does not error.
    */
   public function testIsIdempotent(): void {
-    mukurtu_core_update_40109();
-    mukurtu_core_update_40109();
+    mukurtu_core_update_40106();
+    mukurtu_core_update_40106();
 
     $this->assertArrayHasKey('default_langcode', $this->config('views.view.mukurtu_content_browser')->get('display.default.display_options.filters'));
   }

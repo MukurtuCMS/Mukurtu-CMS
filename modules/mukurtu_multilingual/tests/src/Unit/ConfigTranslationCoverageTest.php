@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_multilingual\Unit;
 
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Guards against a bundle silently shipping with no translation support.
@@ -19,9 +20,8 @@ use Drupal\Tests\UnitTestCase;
  * translation support fails CI instead of shipping silently.
  *
  * A pure filesystem check - no Drupal bootstrap needed.
- *
- * @group mukurtu_multilingual
  */
+#[Group('mukurtu_multilingual')]
 class ConfigTranslationCoverageTest extends UnitTestCase {
 
   /**

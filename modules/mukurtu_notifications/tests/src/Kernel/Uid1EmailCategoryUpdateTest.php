@@ -6,14 +6,15 @@ namespace Drupal\Tests\mukurtu_notifications\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\user\Entity\User;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests mukurtu_notifications_update_40055(), which opts uid 1 in to
  * "User account" category emails.
  *
  * @see mukurtu_notifications_update_40055()
- * @group mukurtu_notifications
  */
+#[Group('mukurtu_notifications')]
 class Uid1EmailCategoryUpdateTest extends KernelTestBase {
 
   /**

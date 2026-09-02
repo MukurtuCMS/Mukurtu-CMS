@@ -11,13 +11,14 @@ use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\mukurtu_core\Hook\NotYetTranslatedIndicatorHooks;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests NotYetTranslatedIndicatorHooks::preprocessNode().
  *
  * @see \Drupal\mukurtu_core\Hook\NotYetTranslatedIndicatorHooks
- * @group mukurtu_core
  */
+#[Group('mukurtu_core')]
 class NotYetTranslatedIndicatorTest extends EntityKernelTestBase {
 
   /**

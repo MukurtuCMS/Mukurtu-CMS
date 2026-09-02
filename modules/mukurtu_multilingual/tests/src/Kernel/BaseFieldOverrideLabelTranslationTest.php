@@ -7,6 +7,7 @@ namespace Drupal\Tests\mukurtu_multilingual\Kernel;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\locale\SourceString;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Confirms that Drupal core's own locale config-sync mechanism, not any
@@ -40,9 +41,8 @@ use Drupal\locale\SourceString;
  * rather than mukurtu_multilingual itself, whose real base field
  * overrides all live behind a heavy dependency chain (mukurtu_protocol,
  * mukurtu_collection, mukurtu_multipage_items).
- *
- * @group mukurtu_multilingual
  */
+#[Group('mukurtu_multilingual')]
 class BaseFieldOverrideLabelTranslationTest extends KernelTestBase {
 
   /**
