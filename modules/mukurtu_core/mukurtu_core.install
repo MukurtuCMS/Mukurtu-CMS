@@ -3814,10 +3814,23 @@ function mukurtu_core_update_40107(): void {
 }
 
 /**
+ * Enable "Open external links in a new window or tab" by default.
+ *
+ * New installs already get this via mukurtu_install(); this backfills
+ * existing sites, which have been running on extlink's own disabled
+ * default since the module was first installed.
+ */
+function mukurtu_core_update_40108(): void {
+  \Drupal::configFactory()->getEditable('extlink.settings')
+    ->set('extlink_target', TRUE)
+    ->save();
+}
+
+/**
  * Order Security before Site information on the dashboard, and rebuild menu
  * links so the new Visitors links appear (#1787, #2057).
  */
-function mukurtu_core_update_40108(): void {
+function mukurtu_core_update_40109(): void {
   $config = \Drupal::configFactory()->getEditable('dashboards.dashboard.mukurtu_dashboard');
   if (!$config->isNew()) {
     $sections = $config->get('sections') ?? [];
@@ -3846,7 +3859,7 @@ function mukurtu_core_update_40108(): void {
  * a clear identity: Left = content & community, Middle = editorial & data
  * operations, Right = site administration (#1787).
  */
-function mukurtu_core_update_40109(): void {
+function mukurtu_core_update_40110(): void {
   // Create the two new dashboard menus if they don't exist yet.
   $menu_storage = \Drupal::entityTypeManager()->getStorage('menu');
   $new_menus = [
@@ -3951,7 +3964,7 @@ function mukurtu_core_update_40109(): void {
  * dashboard links, and relabel "Visitor settings" to "Analytics settings"
  * (#1787).
  */
-function mukurtu_core_update_40110(): void {
+function mukurtu_core_update_40111(): void {
   \Drupal::service('plugin.manager.menu.link')->rebuild();
 }
 
@@ -3962,7 +3975,7 @@ function mukurtu_core_update_40110(): void {
  * "administer comments" to the Mukurtu Manager role so it can use the new
  * comment moderation links.
  */
-function mukurtu_core_update_40111(): void {
+function mukurtu_core_update_40112(): void {
   $menu_storage = \Drupal::entityTypeManager()->getStorage('menu');
   if (!$menu_storage->load('dashboard-notifications-review')) {
     $menu_storage->create([
