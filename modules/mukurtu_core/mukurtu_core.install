@@ -3814,6 +3814,19 @@ function mukurtu_core_update_40107(): void {
 }
 
 /**
+ * Enable "Open external links in a new window or tab" by default.
+ *
+ * New installs already get this via mukurtu_install(); this backfills
+ * existing sites, which have been running on extlink's own disabled
+ * default since the module was first installed.
+ */
+function mukurtu_core_update_40108(): void {
+  \Drupal::configFactory()->getEditable('extlink.settings')
+    ->set('extlink_target', TRUE)
+    ->save();
+}
+
+/**
  * Flag Mukurtu's shipped entity browsers to use the admin theme.
  *
  * mukurtu_update_40003() backfilled the "view the administration theme"
@@ -3825,7 +3838,7 @@ function mukurtu_core_update_40107(): void {
  * content (as opposed to the host page that opens it) still renders in the
  * front-end theme regardless of the user's permissions. See #2039.
  */
-function mukurtu_core_update_40108(): void {
+function mukurtu_core_update_40109(): void {
   $browser_ids = [
     'mukurtu_content_browser',
     'mukurtu_collection_browser',

@@ -39,10 +39,13 @@
 
        // Set the schema version to the number of the last update provided by
        // the module, or the minimum core schema version.
-@@ -439,30 +438,33 @@
+@@ -439,31 +438,34 @@
+ 
+     // Modules may provide single directory components which are added to
+     // the core library definitions rather than the module itself, this
      // requires the library discovery cache to be rebuilt.
      \Drupal::service('library.discovery')->clear();
-
+ 
 -    $config_installer = \Drupal::service('config.installer');
      foreach ($module_list as $module) {
 -      // Create config entities a module has in the /install directory.
@@ -51,14 +54,14 @@
 +      // config.installer each iteration: hook_install can trigger a container
 +      // rebuild, which resets the old container and makes any cached proxy stale.
 +      \Drupal::service('config.installer')->installDefaultConfig('module', $module, DefaultConfigMode::InstallEntities);
-
+ 
        // Allow the module to perform install tasks.
        $this->invoke($module, 'install', [$sync_status]);
-
+ 
        // Record the fact that it was installed.
        \Drupal::logger('system')->info('%module module installed.', ['%module' => $module]);
      }
-
+ 
      // Install optional configuration from modules once all the modules have
      // been properly installed. This is often where soft dependencies lie.
      // @todo This code fixes \Drupal\Tests\help\Functional\HelpTest::testHelp().
@@ -76,3 +79,4 @@
 -      $config_installer->installDefaultConfig('module', $module, DefaultConfigMode::SiteOptional);
 +      \Drupal::service('config.installer')->installDefaultConfig('module', $module, DefaultConfigMode::SiteOptional);
      }
+
