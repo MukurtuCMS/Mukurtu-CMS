@@ -7,12 +7,13 @@ namespace Drupal\Tests\mukurtu_protocol\Kernel;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\mukurtu_protocol\Entity\Community;
 use Drupal\mukurtu_protocol\Entity\Protocol;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests that Protocol/Community field descriptions are translatable.
- *
- * @group mukurtu_protocol
  */
+#[Group('mukurtu_protocol')]
 class ProtocolCommunityFieldDescriptionTest extends ProtocolAwareEntityTestBase {
 
   public function testProtocolAccessModeDescriptionIsTranslatable(): void {
@@ -23,8 +24,8 @@ class ProtocolCommunityFieldDescriptionTest extends ProtocolAwareEntityTestBase 
   }
 
   /**
-   * @dataProvider communityFieldProvider
    */
+  #[DataProvider('communityFieldProvider')]
   public function testCommunityFieldDescriptionIsTranslatable(string $fieldName): void {
     $entityType = \Drupal::entityTypeManager()->getDefinition('community');
     $fields = Community::baseFieldDefinitions($entityType);

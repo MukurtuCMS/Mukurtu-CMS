@@ -7,6 +7,7 @@ namespace Drupal\Tests\mukurtu_multilingual\Kernel;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\search_api\Entity\Index;
 use Drupal\search_api\Entity\Server;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests mukurtu_multilingual_update_40009().
@@ -16,8 +17,8 @@ use Drupal\search_api\Entity\Server;
  * filter on it (docs/content-language-policy.md).
  *
  * @see mukurtu_multilingual_update_40009()
- * @group mukurtu_multilingual
  */
+#[Group('mukurtu_multilingual')]
 class SearchApiLanguageFallbackFieldTest extends KernelTestBase {
 
   /**

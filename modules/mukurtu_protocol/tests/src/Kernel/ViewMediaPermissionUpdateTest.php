@@ -6,6 +6,7 @@ namespace Drupal\Tests\mukurtu_protocol\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Entity\OgRole;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests mukurtu_protocol_update_40041(), which grants 'view media' to
@@ -13,8 +14,8 @@ use Drupal\og\Entity\OgRole;
  * /admin/media access.
  *
  * @see mukurtu_protocol_update_40041()
- * @group mukurtu_protocol
  */
+#[Group('mukurtu_protocol')]
 class ViewMediaPermissionUpdateTest extends KernelTestBase {
 
   /**
