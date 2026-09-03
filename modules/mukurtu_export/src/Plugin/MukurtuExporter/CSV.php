@@ -25,6 +25,17 @@ use Exception;
 )]
 class CSV extends ExporterBase {
   /**
+   * Entity IDs of the shipped default CSV export settings, in the order
+   * they should be listed ahead of any other site-wide settings.
+   */
+  protected const DEFAULT_EXPORTER_ORDER = [
+    'default_local_metadata_only',
+    'default_local_with_media',
+    'default_external_metadata_only',
+    'default_external_with_media',
+  ];
+
+  /**
    * {@inheritdoc}
    */
   public function defaultConfiguration() {
@@ -57,6 +68,10 @@ class CSV extends ExporterBase {
       ->execute();
     if (!empty($result)) {
       $entities = $storage->loadMultiple($result);
+      $order = array_flip(static::DEFAULT_EXPORTER_ORDER);
+      uksort($entities, function ($a, $b) use ($order) {
+        return ($order[$a] ?? count($order)) <=> ($order[$b] ?? count($order));
+      });
       foreach ($entities as $id => $entity) {
         $element['#options'][$id] = $entity->label();
         $links = [];
