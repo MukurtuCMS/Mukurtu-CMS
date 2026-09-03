@@ -90,3 +90,10 @@ related-content-filter:
   dependencies:
     - core/drupal
     - core/once
+
+modal-click-guard-ready:
+  version: 1.x
+  js:
+    js/modal-click-guard-ready.js: {}
+  dependencies:
+    - core/drupal
