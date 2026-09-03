@@ -1457,6 +1457,26 @@ function mukurtu_core_preprocess_views_view(&$variables)
   if (in_array($variables['view']->id(), $affected_views)) {
     $variables['view_array']['#attached']['library'][] = 'mukurtu_core/entity_browser_view_decoration';
   }
+
+  // Add an "All content" link to the end of the dashboard's "Recent content"
+  // block. Views' own "more link" custom-URL option always resolves through
+  // Url::fromUserInput() (raw path matching), which doesn't reliably reach
+  // the Mukurtu-role-gated route this site uses for /admin/content (see
+  // RouteSubscriber::alterRoutes()). Build the link against the named route
+  // directly instead, matching how the dashboard's "Manage Content" link
+  // resolves it.
+  if ($variables['view']->id() === 'content_recent' && $variables['view']->current_display === 'block_1') {
+    $url = Url::fromRoute('view.mukurtu_manage_all_content.mukurtu_manage_content');
+    $access = $url->access(NULL, TRUE);
+    $variables['more'] = [
+      '#type' => 'more_link',
+      '#url' => $url,
+      '#title' => t('All content'),
+      '#view' => $variables['view'],
+      '#access' => $access->isAllowed(),
+    ];
+    CacheableMetadata::createFromObject($access)->applyTo($variables['more']);
+  }
 }
 
 /**
