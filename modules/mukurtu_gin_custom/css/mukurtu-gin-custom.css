@@ -837,6 +837,20 @@ short fields themselves. Shrink it in these dialogs specifically. */
   transform: translateX(-50%) !important;
 }
 
+/* Entity Browser's own Modal display hardcodes its sticky form-actions bar
+   (the "Add Content"/"Add Sub-Collection"/etc. submit button row) to a solid
+   white background (var(--color-white, white)) - see entity_browser's own
+   entity_browser.theme.css. That's jarring against Gin's dark modal chrome
+   now that entity browser modals correctly render in Gin (see #2039).
+   Reuse Gin's own --gin-bg-layer surface color, the same variable
+   .ui-dialog .ui-dialog-content uses above, so the sticky bar blends with
+   the rest of the dialog instead of standing out as a separate white strip.
+   !important: entity_browser's own rule sets this property at equal
+   selector specificity, later in the cascade, which would otherwise win. */
+.entity-browser-form:not(.entity-browser-form--multi-step-display) > .form-actions {
+  background-color: var(--gin-bg-layer, #fff) !important;
+}
+
 /* Fix #1825: on /admin/export/settings, each saved export setting's
    (Edit, Duplicate, Delete) action links are rendered via #suffix
    (see CSV.php), placing them as a sibling immediately before the next
