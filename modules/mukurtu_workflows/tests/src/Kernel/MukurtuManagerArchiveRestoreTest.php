@@ -178,7 +178,15 @@ class MukurtuManagerArchiveRestoreTest extends KernelTestBase {
       'workflows.workflow.mukurtu_editorial_workflow',
       'mukurtu_workflows.settings',
     ] as $name) {
-      \Drupal::configFactory()->getEditable($name)->setData($storage->read($name))->save();
+      $data = $storage->read($name);
+      if ($data === FALSE) {
+        throw new \RuntimeException(sprintf(
+          'Could not read config "%s" from %s -- confirm this local checkout of mukurtu_workflows is up to date with the branch under test.',
+          $name,
+          $storage->getFilePath($name),
+        ));
+      }
+      \Drupal::configFactory()->getEditable($name)->setData($data)->save();
     }
   }
 

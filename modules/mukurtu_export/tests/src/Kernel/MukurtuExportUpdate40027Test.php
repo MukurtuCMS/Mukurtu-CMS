@@ -57,7 +57,15 @@ class MukurtuExportUpdate40027Test extends KernelTestBase {
     $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_export');
     $storage = new FileStorage($module_path . '/config/install');
     foreach (['flag.flag.export_content', 'flag.flag.export_media'] as $name) {
-      \Drupal::configFactory()->getEditable($name)->setData($storage->read($name))->save();
+      $data = $storage->read($name);
+      if ($data === FALSE) {
+        throw new \RuntimeException(sprintf(
+          'Could not read config "%s" from %s -- confirm this local checkout of mukurtu_export is up to date with the branch under test.',
+          $name,
+          $storage->getFilePath($name),
+        ));
+      }
+      \Drupal::configFactory()->getEditable($name)->setData($data)->save();
     }
 
     require_once $module_path . '/mukurtu_export.install';
