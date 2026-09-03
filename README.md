@@ -129,5 +129,19 @@ We recommend iterating through each skipped version rather than jumping versions
     - If there is an issue restore from the last backup.
 8. When you have caught the site up to the latest release, change the version number in composer.json back to an asterisk `(*)`.
 
+### Troubleshooting: "patch file could not be downloaded" during an update
+
+If `composer update mukurtu/* -W` fails with an error like:
+```
+The "web/profiles/mukurtu/patches/<some-patch>.patch" file could not be downloaded: Failed to open stream: No such file or directory
+```
+the release you're updating to added a new patch file that isn't present in your site's current (older) copy of the profile yet. Composer needs that file to patch an existing package before it finishes updating the Mukurtu profile itself, so it can't find it on disk.
+
+To resolve it:
+1. Note the patch filename from the error message.
+2. Download that file from the `patches/` directory of the [release tag you're updating to](https://github.com/MukurtuCMS/Mukurtu-CMS/tags) on GitHub.
+3. Save it into `web/profiles/mukurtu/patches/` in your site, keeping the same filename.
+4. Re-run `composer install`. If a different patch file is reported missing, repeat steps 1-3 for it.
+
 ## Contributing
 Mukurtu CMS v4 is under active development. Code contribution and feedback is welcome, and can be submitted in [our issues](https://github.com/MukurtuCMS/Mukurtu-CMS/issues) or you can contact us at [support@mukurtu.org](mailto:support@mukurtu.org).
