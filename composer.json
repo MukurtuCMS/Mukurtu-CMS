@@ -131,12 +131,12 @@
             "drupal/core": [
                 {
                     "description": "Fix stale config.installer proxy after nested container rebuild during module install",
-                    "url": "web/profiles/mukurtu/patches/module-installer-stale-config-installer-proxy.patch",
+                    "url": "https://raw.githubusercontent.com/MukurtuCMS/Mukurtu-CMS/03c3074c9cfaef093456c2a0072ea4c772862bc9/patches/module-installer-stale-config-installer-proxy.patch",
                     "depth": 1
                 },
                 {
                     "description": "Fix stale module_handler proxy in ModuleInstaller::install()'s trailing hook_modules_installed() invocation",
-                    "url": "web/profiles/mukurtu/patches/module-installer-stale-module-handler-modules-installed.patch",
+                    "url": "https://raw.githubusercontent.com/MukurtuCMS/Mukurtu-CMS/877a97b4446a887fcbfeb7cd1fb5b867cc0fa034/patches/module-installer-stale-module-handler-modules-installed.patch",
                     "depth": 1
                 }
             ],
@@ -144,34 +144,34 @@
                 "Fix illegal choice on exposed sort error": "https://www.drupal.org/files/issues/2022-01-17/3259018-6-illegal-sort-choice.patch"
             },
             "drupal/paragraphs": {
-                "Ensure empty paragraphs register as empty": "web/profiles/mukurtu/patches/paragraphs-118.patch"
+                "Ensure empty paragraphs register as empty": "https://raw.githubusercontent.com/MukurtuCMS/Mukurtu-CMS/03c3074c9cfaef093456c2a0072ea4c772862bc9/patches/paragraphs-118.patch"
             },
             "drupal/media_entity_soundcloud": {
-                "Add support for secret URL embeds": "web/profiles/mukurtu/patches/media_entity_soundcloud-secret-token-3272077.patch"
+                "Add support for secret URL embeds": "https://raw.githubusercontent.com/MukurtuCMS/Mukurtu-CMS/03c3074c9cfaef093456c2a0072ea4c772862bc9/patches/media_entity_soundcloud-secret-token-3272077.patch"
             },
             "drupal/og": {
-                "Remove bulk option to remove a user's roles": "web/profiles/mukurtu/patches/832-disallow-og-role-removal.patch"
+                "Remove bulk option to remove a user's roles": "https://raw.githubusercontent.com/MukurtuCMS/Mukurtu-CMS/b9cc77302d1a471dbc1d5c5eb6921285d2da0806/patches/832-disallow-og-role-removal.patch"
             },
             "drupal/search_api_glossary": {
-                "TypeError: Cannot access offset of type string on string": "web/profiles/mukurtu/patches/search_api_glossary_type-error-3492668-8.patch",
-                "Fix implicit nullable param deprecation in Glossary::getPropertyDefinitions()": "web/profiles/mukurtu/patches/search_api_glossary-nullable-param-deprecation.patch"
+                "TypeError: Cannot access offset of type string on string": "https://raw.githubusercontent.com/MukurtuCMS/Mukurtu-CMS/b9cc77302d1a471dbc1d5c5eb6921285d2da0806/patches/search_api_glossary_type-error-3492668-8.patch",
+                "Fix implicit nullable param deprecation in Glossary::getPropertyDefinitions()": "https://raw.githubusercontent.com/MukurtuCMS/Mukurtu-CMS/b9cc77302d1a471dbc1d5c5eb6921285d2da0806/patches/search_api_glossary-nullable-param-deprecation.patch"
             },
             "drupal/message_ui": {
-                "Fix implicit nullable param deprecation in SaveMessage::access()": "web/profiles/mukurtu/patches/message_ui-nullable-param-deprecation.patch",
-                "Fix invalid '#group' display option written into entity_form_display config schema": "web/profiles/mukurtu/patches/message_ui-invalid-group-display-option.patch",
-                "Fix invalid 'field_name' component option written into entity_form_display config schema": "web/profiles/mukurtu/patches/message_ui-invalid-field-name-component-option.patch"
+                "Fix implicit nullable param deprecation in SaveMessage::access()": "https://raw.githubusercontent.com/MukurtuCMS/Mukurtu-CMS/b9cc77302d1a471dbc1d5c5eb6921285d2da0806/patches/message_ui-nullable-param-deprecation.patch",
+                "Fix invalid '#group' display option written into entity_form_display config schema": "https://raw.githubusercontent.com/MukurtuCMS/Mukurtu-CMS/af7ea5f9c535dbcc685e785d8fd7168d464563a9/patches/message_ui-invalid-group-display-option.patch",
+                "Fix invalid 'field_name' component option written into entity_form_display config schema": "https://raw.githubusercontent.com/MukurtuCMS/Mukurtu-CMS/af7ea5f9c535dbcc685e785d8fd7168d464563a9/patches/message_ui-invalid-field-name-component-option.patch"
             },
             "drupal/admin_theme": {
-                "Fix implicit nullable param deprecation in AdminThemeAdminContext::isAdminRoute()": "web/profiles/mukurtu/patches/admin_theme-nullable-param-deprecation.patch"
+                "Fix implicit nullable param deprecation in AdminThemeAdminContext::isAdminRoute()": "https://raw.githubusercontent.com/MukurtuCMS/Mukurtu-CMS/b9cc77302d1a471dbc1d5c5eb6921285d2da0806/patches/admin_theme-nullable-param-deprecation.patch"
             },
             "drupal/field_group": {
-                "Fix EntityViewDisplay/EntityFormDisplay::load() incompatibility with Drupal 11.3.x": "web/profiles/mukurtu/patches/field_group-entity-load-11-3.patch"
+                "Fix EntityViewDisplay/EntityFormDisplay::load() incompatibility with Drupal 11.3.x": "https://raw.githubusercontent.com/MukurtuCMS/Mukurtu-CMS/b9cc77302d1a471dbc1d5c5eb6921285d2da0806/patches/field_group-entity-load-11-3.patch"
             },
             "drupal/flat_taxonomy": {
-                "Fix null vocabulary crash in presave hook during migration": "web/profiles/mukurtu/patches/flat-taxonomy-null-vocabulary-presave.patch"
+                "Fix null vocabulary crash in presave hook during migration": "https://raw.githubusercontent.com/MukurtuCMS/Mukurtu-CMS/b9cc77302d1a471dbc1d5c5eb6921285d2da0806/patches/flat-taxonomy-null-vocabulary-presave.patch"
             },
             "drupal/migrate_source_csv": {
-                "Replace deprecated createFromStream() with from() for league/csv 9.27+": "web/profiles/mukurtu/patches/migrate_source_csv-createFromStream-deprecated-9.27.patch"
+                "Replace deprecated createFromStream() with from() for league/csv 9.27+": "https://raw.githubusercontent.com/MukurtuCMS/Mukurtu-CMS/b9cc77302d1a471dbc1d5c5eb6921285d2da0806/patches/migrate_source_csv-createFromStream-deprecated-9.27.patch"
             }
         }
     }
