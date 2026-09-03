@@ -3827,9 +3827,43 @@ function mukurtu_core_update_40108(): void {
 }
 
 /**
- * Add the custom 404 not found page, permission, and default config (#1761).
+ * Flag Mukurtu's shipped entity browsers to use the admin theme.
+ *
+ * mukurtu_update_40003() backfilled the "view the administration theme"
+ * permission, but that only matters for routes actually flagged
+ * '_admin_route: TRUE'. Entity Browser's Modal display registers its own
+ * route per browser (see EntityBrowser::route()), and derives that flag from
+ * each browser's own 'use_admin_theme' display setting - which none of
+ * Mukurtu's shipped entity browsers ever set. That gap means the modal's own
+ * content (as opposed to the host page that opens it) still renders in the
+ * front-end theme regardless of the user's permissions. See #2039.
  */
 function mukurtu_core_update_40109(): void {
+  $browser_ids = [
+    'mukurtu_content_browser',
+    'mukurtu_collection_browser',
+    'mukurtu_person_browser',
+    'mukurtu_community_select',
+    'mukurtu_community_and_protocol_user_browser',
+    'mukurtu_taxonomy_record_term_browser',
+    'mukurtu_taxonomy_record_place_term_browser',
+    'mukurtu_dictionary_word_browser',
+    'multipage_item_entity_browser',
+  ];
+
+  $storage = \Drupal::entityTypeManager()->getStorage('entity_browser');
+  foreach ($storage->loadMultiple($browser_ids) as $browser) {
+    if (empty($browser->display_configuration['use_admin_theme'])) {
+      $browser->display_configuration['use_admin_theme'] = TRUE;
+      $browser->save();
+    }
+  }
+}
+
+/**
+ * Add the custom 404 not found page, permission, and default config (#1761).
+ */
+function mukurtu_core_update_40110(): void {
   // Point the site's 404 page at the new custom not-found route
   // (system.site.yml is not owned by Mukurtu).
   \Drupal::configFactory()
@@ -3859,7 +3893,7 @@ function mukurtu_core_update_40109(): void {
 /**
  * Hide the ALTCHA widget's logo and footer credit (#1761).
  */
-function mukurtu_core_update_40110(): void {
+function mukurtu_core_update_40111(): void {
   $config = \Drupal::configFactory()->getEditable('altcha.settings');
   if (!$config->isNew()) {
     $config->set('hide_logo', TRUE)->set('hide_footer', TRUE)->save();
@@ -3870,7 +3904,7 @@ function mukurtu_core_update_40110(): void {
  * Fix the Klaro "Stripe" app's default/required flags to match its
  * disabled status (#1761).
  */
-function mukurtu_core_update_40111(): void {
+function mukurtu_core_update_40112(): void {
   $config = \Drupal::configFactory()->getEditable('klaro.klaro_app.stripe');
   if (!$config->isNew()) {
     $config->set('default', FALSE)->set('required', FALSE)->save();
@@ -3883,7 +3917,7 @@ function mukurtu_core_update_40111(): void {
  * Only touches sites still on the shipped 3-hour default -- an admin who has
  * already customized this is left alone.
  */
-function mukurtu_core_update_40112(): void {
+function mukurtu_core_update_40113(): void {
   $config = \Drupal::configFactory()->getEditable('automated_cron.settings');
   if (!$config->isNew() && (int) $config->get('interval') === 10800) {
     $config->set('interval', 3600)->save();
@@ -3896,7 +3930,7 @@ function mukurtu_core_update_40112(): void {
  * Only touches sites still on the shipped node-only default -- an admin who
  * has already customized this is left alone.
  */
-function mukurtu_core_update_40113(): void {
+function mukurtu_core_update_40114(): void {
   $config = \Drupal::configFactory()->getEditable('visitors.config');
   if ($config->isNew()) {
     return;
@@ -3926,7 +3960,7 @@ function mukurtu_core_update_40113(): void {
  * their normal iframe/media-embed needs) rather than gaining
  * object/embed/video tags.
  */
-function mukurtu_core_update_40114(): void {
+function mukurtu_core_update_40115(): void {
   $role = \Drupal\user\Entity\Role::load('authenticated');
   if ($role && $role->hasPermission('use text format full_html')) {
     $role->revokePermission('use text format full_html');
