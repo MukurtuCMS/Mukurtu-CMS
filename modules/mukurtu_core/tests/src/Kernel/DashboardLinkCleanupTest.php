@@ -10,10 +10,10 @@ use Symfony\Component\Yaml\Yaml;
 
 /**
  * Tests the dashboard link cleanup for issues #1787 and #2057:
- * - mukurtu_core_update_40108() orders Security before Site information.
- * - mukurtu_core_update_40109() splits Site settings into "Publication tools"
+ * - mukurtu_core_update_40109() orders Security before Site information.
+ * - mukurtu_core_update_40110() splits Site settings into "Publication tools"
  *   and "Local Contexts" sections.
- * - mukurtu_core_update_40111() moves "Site-wide comment settings" into
+ * - mukurtu_core_update_40112() moves "Site-wide comment settings" into
  *   Publication tools and creates a "Notifications & Review" section for
  *   comment review, the review queue, pending submissions, and
  *   notifications.
@@ -21,9 +21,9 @@ use Symfony\Component\Yaml\Yaml;
  * - The Visitors "Analytics" / "Visitor settings" links are present.
  * - The Multilingual section no longer has a duplicate "Manage site languages".
  *
- * @see mukurtu_core_update_40108()
  * @see mukurtu_core_update_40109()
- * @see mukurtu_core_update_40111()
+ * @see mukurtu_core_update_40110()
+ * @see mukurtu_core_update_40112()
  * @see mukurtu_protocol_update_40044()
  */
 #[Group('mukurtu_core')]
@@ -126,7 +126,7 @@ class DashboardLinkCleanupTest extends KernelTestBase {
   public function testUpdateReordersSecurityBeforeSiteInfo(): void {
     $this->saveDashboardConfig();
 
-    mukurtu_core_update_40108();
+    mukurtu_core_update_40109();
 
     $components = \Drupal::config('dashboards.dashboard.mukurtu_dashboard')->get('sections.0.components');
     $this->assertSame(8, $components[self::SECURITY_UUID]['weight']);
@@ -139,8 +139,8 @@ class DashboardLinkCleanupTest extends KernelTestBase {
   public function testReorderIsIdempotent(): void {
     $this->saveDashboardConfig(8, 9);
 
-    mukurtu_core_update_40108();
-    mukurtu_core_update_40108();
+    mukurtu_core_update_40109();
+    mukurtu_core_update_40109();
 
     $components = \Drupal::config('dashboards.dashboard.mukurtu_dashboard')->get('sections.0.components');
     $this->assertSame(8, $components[self::SECURITY_UUID]['weight']);
@@ -153,7 +153,7 @@ class DashboardLinkCleanupTest extends KernelTestBase {
   public function testUpdateIsNoOpWithoutDashboardConfig(): void {
     $this->assertTrue(\Drupal::config('dashboards.dashboard.mukurtu_dashboard')->isNew());
 
-    mukurtu_core_update_40108();
+    mukurtu_core_update_40109();
 
     $this->assertTrue(\Drupal::config('dashboards.dashboard.mukurtu_dashboard')->isNew());
   }
@@ -224,13 +224,13 @@ class DashboardLinkCleanupTest extends KernelTestBase {
   }
 
   /**
-   * mukurtu_core_update_40109() creates the two new dashboard menus and places
+   * mukurtu_core_update_40110() creates the two new dashboard menus and places
    * every block into the rebalanced three-column layout (#1787).
    */
   public function testUpdate40108SplitsAndRebalances(): void {
     $this->saveDashboardConfig(8, 9);
 
-    mukurtu_core_update_40109();
+    mukurtu_core_update_40110();
 
     $menu_storage = \Drupal::entityTypeManager()->getStorage('menu');
     $this->assertNotNull($menu_storage->load('dashboard-publication-tools'));
@@ -251,13 +251,13 @@ class DashboardLinkCleanupTest extends KernelTestBase {
   }
 
   /**
-   * Running mukurtu_core_update_40109() twice does not duplicate blocks.
+   * Running mukurtu_core_update_40110() twice does not duplicate blocks.
    */
   public function testUpdate40108IsIdempotent(): void {
     $this->saveDashboardConfig(8, 9);
 
-    mukurtu_core_update_40109();
-    mukurtu_core_update_40109();
+    mukurtu_core_update_40110();
+    mukurtu_core_update_40110();
 
     $components = \Drupal::config('dashboards.dashboard.mukurtu_dashboard')->get('sections.0.components');
     $ids = array_map(static fn(array $c): string => $c['configuration']['id'], array_values($components));
@@ -266,7 +266,7 @@ class DashboardLinkCleanupTest extends KernelTestBase {
   }
 
   /**
-   * mukurtu_core_update_40111() creates the "Notifications & Review" menu,
+   * mukurtu_core_update_40112() creates the "Notifications & Review" menu,
    * inserts its block into the Right column directly after "My account", and
    * shifts the remaining Right-column blocks down (#2090).
    */
@@ -307,7 +307,7 @@ class DashboardLinkCleanupTest extends KernelTestBase {
       ])
       ->save();
 
-    mukurtu_core_update_40111();
+    mukurtu_core_update_40112();
 
     $menu_storage = \Drupal::entityTypeManager()->getStorage('menu');
     $this->assertNotNull($menu_storage->load('dashboard-notifications-review'));
@@ -325,14 +325,14 @@ class DashboardLinkCleanupTest extends KernelTestBase {
   }
 
   /**
-   * Running mukurtu_core_update_40111() twice does not duplicate the new
+   * Running mukurtu_core_update_40112() twice does not duplicate the new
    * block (#2090).
    */
   public function testUpdate40110IsIdempotent(): void {
     $this->saveDashboardConfig();
 
-    mukurtu_core_update_40111();
-    mukurtu_core_update_40111();
+    mukurtu_core_update_40112();
+    mukurtu_core_update_40112();
 
     $components = \Drupal::config('dashboards.dashboard.mukurtu_dashboard')->get('sections.0.components');
     $ids = array_map(static fn(array $c): string => $c['configuration']['id'], array_values($components));
@@ -340,14 +340,14 @@ class DashboardLinkCleanupTest extends KernelTestBase {
   }
 
   /**
-   * mukurtu_core_update_40111() grants "administer comments" to the Mukurtu
+   * mukurtu_core_update_40112() grants "administer comments" to the Mukurtu
    * Manager role so it can use the new comment moderation links (#2090).
    */
   public function testUpdate40110GrantsAdministerCommentsToManager(): void {
     \Drupal\user\Entity\Role::create(['id' => 'mukurtu_manager', 'label' => 'Mukurtu Manager'])->save();
     $this->assertFalse(\Drupal\user\Entity\Role::load('mukurtu_manager')->hasPermission('administer comments'));
 
-    mukurtu_core_update_40111();
+    mukurtu_core_update_40112();
 
     $this->assertTrue(\Drupal\user\Entity\Role::load('mukurtu_manager')->hasPermission('administer comments'));
   }
@@ -572,7 +572,7 @@ class DashboardLinkCleanupTest extends KernelTestBase {
         'Export Settings',
         'Import',
         'Import Logs',
-        'Import format information.',
+        'Import format information',
         'Manage Import Templates',
       ],
       'dashboard-look-feel' => [
