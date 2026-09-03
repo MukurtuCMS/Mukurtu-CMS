@@ -15,8 +15,14 @@ class MukurtuCategoryManageController extends ControllerBase {
     $vocabulary = $this->entityTypeManager()->getStorage('taxonomy_vocabulary')->load('category');
 
     if ($vocabulary) {
-      // Render the taxonomy overview form.
-      $build[] = $this->formBuilder()->getForm('Drupal\taxonomy\Form\OverviewTerms', $vocabulary);
+      // Render the taxonomy overview form. OverviewTerms is the vocabulary
+      // entity type's "overview" form handler, so it needs the vocabulary set
+      // as its entity (for getFormId()/getBaseFormId()) as well as passed
+      // through as a build argument (for its buildForm() signature).
+      $overviewForm = $this->entityTypeManager()
+        ->getFormObject('taxonomy_vocabulary', 'overview')
+        ->setEntity($vocabulary);
+      $build[] = $this->formBuilder()->getForm($overviewForm, $vocabulary);
 
       // Render the form to add a new category.
       $newCategoryTerm = Term::create([
