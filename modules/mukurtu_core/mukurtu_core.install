@@ -3825,3 +3825,37 @@ function mukurtu_core_update_40108(): void {
     ->set('extlink_target', TRUE)
     ->save();
 }
+
+/**
+ * Flag Mukurtu's shipped entity browsers to use the admin theme.
+ *
+ * mukurtu_update_40003() backfilled the "view the administration theme"
+ * permission, but that only matters for routes actually flagged
+ * '_admin_route: TRUE'. Entity Browser's Modal display registers its own
+ * route per browser (see EntityBrowser::route()), and derives that flag from
+ * each browser's own 'use_admin_theme' display setting - which none of
+ * Mukurtu's shipped entity browsers ever set. That gap means the modal's own
+ * content (as opposed to the host page that opens it) still renders in the
+ * front-end theme regardless of the user's permissions. See #2039.
+ */
+function mukurtu_core_update_40109(): void {
+  $browser_ids = [
+    'mukurtu_content_browser',
+    'mukurtu_collection_browser',
+    'mukurtu_person_browser',
+    'mukurtu_community_select',
+    'mukurtu_community_and_protocol_user_browser',
+    'mukurtu_taxonomy_record_term_browser',
+    'mukurtu_taxonomy_record_place_term_browser',
+    'mukurtu_dictionary_word_browser',
+    'multipage_item_entity_browser',
+  ];
+
+  $storage = \Drupal::entityTypeManager()->getStorage('entity_browser');
+  foreach ($storage->loadMultiple($browser_ids) as $browser) {
+    if (empty($browser->display_configuration['use_admin_theme'])) {
+      $browser->display_configuration['use_admin_theme'] = TRUE;
+      $browser->save();
+    }
+  }
+}
