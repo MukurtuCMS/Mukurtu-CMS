@@ -268,6 +268,14 @@ mukurtu_protocol.manage_protocol_unapproved_comments:
       group:
         type: entity:protocol
 
+mukurtu_protocol.my_unapproved_comments:
+  path: 'admin/protocols/unapproved-comments'
+  defaults:
+    _controller: '\Drupal\mukurtu_protocol\Controller\ProtocolCommentSettingsController::myUnapprovedComments'
+    _title: 'Protocol Comments Awaiting Approval'
+  requirements:
+    _custom_access: '\Drupal\mukurtu_protocol\Controller\ProtocolCommentSettingsController::myAccess'
+
 mukurtu_protocol.community_organization:
   path: '/admin/community-organization'
   defaults:

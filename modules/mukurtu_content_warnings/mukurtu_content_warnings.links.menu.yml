@@ -4,3 +4,4 @@ mukurtu_content_warnings.mukurtu_content_warnings_settings_dashboard:
   description: "Configure media content warnings."
   route_name: mukurtu_content_warnings.settings
   parent: mukurtu_dashboard
+  weight: 4

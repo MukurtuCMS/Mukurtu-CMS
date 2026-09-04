@@ -4072,3 +4072,223 @@ function mukurtu_core_update_40118(): void {
     $role->save();
   }
 }
+
+/**
+ * Order Security before Site information on the dashboard, and rebuild menu
+ * links so the new Visitors links appear (#1787, #2057).
+ */
+function mukurtu_core_update_40119(): void {
+  $config = \Drupal::configFactory()->getEditable('dashboards.dashboard.mukurtu_dashboard');
+  if (!$config->isNew()) {
+    $sections = $config->get('sections') ?? [];
+    $changed = FALSE;
+    foreach ($sections[0]['components'] ?? [] as $uuid => $component) {
+      $id = $component['configuration']['id'] ?? '';
+      if ($id === 'system_menu_block:dashboard-security' && ($component['weight'] ?? NULL) !== 8) {
+        $sections[0]['components'][$uuid]['weight'] = 8;
+        $changed = TRUE;
+      }
+      if ($id === 'system_menu_block:dashboard-site-info' && ($component['weight'] ?? NULL) !== 9) {
+        $sections[0]['components'][$uuid]['weight'] = 9;
+        $changed = TRUE;
+      }
+    }
+    if ($changed) {
+      $config->set('sections', $sections)->save();
+    }
+  }
+  \Drupal::service('plugin.manager.menu.link')->rebuild();
+}
+
+/**
+ * Split the crowded Site settings dashboard section into "Publication tools"
+ * and "Local Contexts", and rebalance the three dashboard columns so each has
+ * a clear identity: Left = content & community, Middle = editorial & data
+ * operations, Right = site administration (#1787).
+ */
+function mukurtu_core_update_40120(): void {
+  // Create the two new dashboard menus if they don't exist yet.
+  $menu_storage = \Drupal::entityTypeManager()->getStorage('menu');
+  $new_menus = [
+    'dashboard-publication-tools' => [
+      'label' => 'Publication tools',
+      'description' => 'Publishing workflow and submissions.',
+    ],
+    'dashboard-local-contexts' => [
+      'label' => 'Local Contexts',
+      'description' => 'Site-wide Local Contexts projects.',
+    ],
+  ];
+  foreach ($new_menus as $id => $info) {
+    if (!$menu_storage->load($id)) {
+      $menu_storage->create([
+        'id' => $id,
+        'label' => $info['label'],
+        'description' => $info['description'],
+        'locked' => FALSE,
+      ])->save();
+    }
+  }
+
+  $config = \Drupal::configFactory()->getEditable('dashboards.dashboard.mukurtu_dashboard');
+  if (!$config->isNew()) {
+    $sections = $config->get('sections') ?? [];
+    $components = $sections[0]['components'] ?? [];
+
+    // Target [region, weight] for every dashboard block, keyed by block id.
+    // region one = Left, two = Middle, three = Right.
+    $layout = [
+      // Left: content & community.
+      'system_menu_block:dashboard-3Cs' => ['one', 1],
+      'system_menu_block:dashboard-users' => ['one', 2],
+      'system_menu_block:dashboard-content' => ['one', 3],
+      'system_menu_block:dashboard-media' => ['one', 4],
+      'system_menu_block:dashboard-taxonomies' => ['one', 5],
+      'system_menu_block:dashboard-local-contexts' => ['one', 6],
+      // Middle: editorial & data operations.
+      'mukurtu_setup_checklist' => ['two', 1],
+      'views_block:content_recent-block_1' => ['two', 2],
+      'system_menu_block:dashboard-roundtrip' => ['two', 3],
+      'system_menu_block:dashboard-content-settings' => ['two', 4],
+      'system_menu_block:dashboard-publication-tools' => ['two', 5],
+      'system_menu_block:dashboard-multilingual' => ['two', 6],
+      'system_menu_block:dashboard-migration' => ['two', 7],
+      // Right: site administration.
+      'system_menu_block:dashboard-my-account' => ['three', 1],
+      'system_menu_block:dashboard-look-feel' => ['three', 2],
+      'system_menu_block:dashboard-site-settings' => ['three', 3],
+      'system_menu_block:dashboard-security' => ['three', 4],
+      'system_menu_block:dashboard-site-info' => ['three', 5],
+    ];
+
+    $present = [];
+    foreach ($components as $uuid => $component) {
+      $id = $component['configuration']['id'] ?? '';
+      $present[$id] = TRUE;
+      if (isset($layout[$id])) {
+        [$region, $weight] = $layout[$id];
+        $components[$uuid]['region'] = $region;
+        $components[$uuid]['weight'] = $weight;
+      }
+    }
+
+    $new_blocks = [
+      'b2d7e4c1-9a3f-4e58-8c26-1f7a0d5b6e94' => ['id' => 'system_menu_block:dashboard-publication-tools', 'label' => 'Publication tools'],
+      'c4f1a8e6-2b90-4d37-9e15-3a6c8f2b7d40' => ['id' => 'system_menu_block:dashboard-local-contexts', 'label' => 'Local Contexts'],
+    ];
+    foreach ($new_blocks as $uuid => $block) {
+      if (empty($present[$block['id']])) {
+        [$region, $weight] = $layout[$block['id']];
+        $components[$uuid] = [
+          'uuid' => $uuid,
+          'region' => $region,
+          'configuration' => [
+            'id' => $block['id'],
+            'label' => $block['label'],
+            'label_display' => 'visible',
+            'provider' => 'system',
+            'context_mapping' => [],
+            'level' => 1,
+            'depth' => NULL,
+            'expand_all_items' => FALSE,
+          ],
+          'weight' => $weight,
+          'additional' => [],
+        ];
+      }
+    }
+
+    $sections[0]['components'] = $components;
+    $config->set('sections', $sections)->save();
+  }
+
+  \Drupal::service('plugin.manager.menu.link')->rebuild();
+}
+
+/**
+ * Apply custom link ordering within the dashboard sections, move "Access Denied
+ * Page" to Look and feel, drop the "Add a basic page" and "Site configuration"
+ * dashboard links, and relabel "Visitor settings" to "Analytics settings"
+ * (#1787).
+ */
+function mukurtu_core_update_40121(): void {
+  \Drupal::service('plugin.manager.menu.link')->rebuild();
+}
+
+/**
+ * Move "Site-wide comment settings" into Publication tools, split the
+ * review-queue and notification links out of Publication tools and Site
+ * settings into a new "Notifications & Review" section, and grant
+ * "administer comments" to the Mukurtu Manager role so it can use the new
+ * comment moderation links.
+ */
+function mukurtu_core_update_40122(): void {
+  $menu_storage = \Drupal::entityTypeManager()->getStorage('menu');
+  if (!$menu_storage->load('dashboard-notifications-review')) {
+    $menu_storage->create([
+      'id' => 'dashboard-notifications-review',
+      'label' => 'Notifications & Review',
+      'description' => 'Comment moderation, review queues, and system notifications.',
+      'locked' => FALSE,
+    ])->save();
+  }
+
+  $config = \Drupal::configFactory()->getEditable('dashboards.dashboard.mukurtu_dashboard');
+  if (!$config->isNew()) {
+    $sections = $config->get('sections') ?? [];
+    $components = $sections[0]['components'] ?? [];
+
+    // Target weight for every region-three dashboard block, keyed by block
+    // id, after inserting the new "Notifications & Review" block.
+    $layout = [
+      'system_menu_block:dashboard-my-account' => 1,
+      'system_menu_block:dashboard-notifications-review' => 2,
+      'system_menu_block:dashboard-look-feel' => 3,
+      'system_menu_block:dashboard-site-settings' => 4,
+      'system_menu_block:dashboard-security' => 5,
+      'system_menu_block:dashboard-site-info' => 6,
+    ];
+
+    $present = FALSE;
+    foreach ($components as $uuid => $component) {
+      $id = $component['configuration']['id'] ?? '';
+      if ($id === 'system_menu_block:dashboard-notifications-review') {
+        $present = TRUE;
+      }
+      if (isset($layout[$id])) {
+        $components[$uuid]['region'] = 'three';
+        $components[$uuid]['weight'] = $layout[$id];
+      }
+    }
+
+    if (!$present) {
+      $uuid = 'f4a1d9c2-6b3e-4c8f-9a7d-2e5b8f1c3d64';
+      $components[$uuid] = [
+        'uuid' => $uuid,
+        'region' => 'three',
+        'configuration' => [
+          'id' => 'system_menu_block:dashboard-notifications-review',
+          'label' => 'Notifications & Review',
+          'label_display' => 'visible',
+          'provider' => 'system',
+          'context_mapping' => [],
+          'level' => 1,
+          'depth' => NULL,
+          'expand_all_items' => FALSE,
+        ],
+        'weight' => $layout['system_menu_block:dashboard-notifications-review'],
+        'additional' => [],
+      ];
+    }
+
+    $sections[0]['components'] = $components;
+    $config->set('sections', $sections)->save();
+  }
+
+  $role = \Drupal\user\Entity\Role::load('mukurtu_manager');
+  if ($role && !$role->hasPermission('administer comments')) {
+    $role->grantPermission('administer comments')->save();
+  }
+
+  \Drupal::service('plugin.manager.menu.link')->rebuild();
+}

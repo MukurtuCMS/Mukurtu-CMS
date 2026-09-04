@@ -1166,7 +1166,7 @@ function mukurtu_core_menu_links_discovered_alter(&$links) {
     'url' => 'internal:' . $homepagePath . '/layout',
     'menu_name' => 'dashboard-look-feel',
     'parent' => 'mukurtu_dashboard',
-    'weight' => 3,
+    'weight' => 5,
   ];
 
   // Add the Mukurtu Version link in the dashboard. Cannot be defined in a

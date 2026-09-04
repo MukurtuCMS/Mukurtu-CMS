@@ -894,3 +894,10 @@ function mukurtu_protocol_update_40044(): void {
       ->save();
   }
 }
+
+/**
+ * Remove the Configure Community/Protocol Permissions dashboard links (#1787).
+ */
+function mukurtu_protocol_update_40045(): void {
+  \Drupal::service('plugin.manager.menu.link')->rebuild();
+}
