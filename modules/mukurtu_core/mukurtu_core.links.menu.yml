@@ -44,6 +44,7 @@ mukurtu_core.not_found_settings:
   menu_name: dashboard-site-settings
   description: "Edit the title and message shown on the not found (404) page."
   route_name: mukurtu_core.not_found_settings
+  weight: 2
 mukurtu_core.manual:
   title: 'Mukurtu User Manual'
   description: 'Mukurtu 4 user manual.'

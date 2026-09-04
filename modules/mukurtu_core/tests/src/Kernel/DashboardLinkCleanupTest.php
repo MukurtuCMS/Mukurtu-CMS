@@ -589,6 +589,7 @@ class DashboardLinkCleanupTest extends KernelTestBase {
       'dashboard-site-settings' => [
         'Site Setup',
         'Site name and email',
+        'Not Found Page',
         'Citation templates',
         'Cookie & Consent Settings',
         'Google Tag Settings',
