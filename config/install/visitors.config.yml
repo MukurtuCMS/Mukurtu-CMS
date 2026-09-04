@@ -1,0 +1,26 @@
+flush_log_timer: 0
+bot_retention_log: 0
+items_per_page: 10
+theme: admin
+disable_tracking: false
+track:
+  userid: true
+counter:
+  enabled: true
+  entity_types:
+    - 'node'
+    - 'media'
+    - 'community'
+    - 'protocol'
+    - 'personal_collection'
+    - 'multipage_item'
+    - 'taxonomy_term'
+  display_max_age: 3600
+visibility:
+  request_path_mode: 0
+  request_path_pages: "/admin\n/admin/*\n/batch\n/node/add*\n/node/*/*\n/user/*/*"
+  user_role_mode: 0
+  user_role_roles: {}
+  user_account_mode: 1
+  exclude_user1: false
+script_type: minified
