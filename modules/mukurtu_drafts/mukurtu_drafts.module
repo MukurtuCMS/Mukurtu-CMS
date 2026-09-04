@@ -80,6 +80,25 @@ function mukurtu_drafts_entity_access(EntityInterface $entity, $operation, Accou
       ->addCacheContexts(['user']);
   }
 
+  // A user who can review public submissions must be able to open a
+  // submission that is still in draft while they work through it, even
+  // though they are not its owner and hold no "view any unpublished
+  // content". This only lifts the draft-visibility veto for a node that
+  // actually has a submission record - the per-bundle grant that admits
+  // them to the node itself is still enforced downstream by
+  // MukurtuProtocolNodeAccessControlHandler (mirrors the optional
+  // mukurtu_submissions lookup already used in
+  // mukurtu_drafts_preprocess_node()).
+  if ($operation === 'view'
+    && $account->hasPermission('review mukurtu submissions')
+    && \Drupal::moduleHandler()->moduleExists('mukurtu_submissions')
+    && mukurtu_submissions_get_submission_for_entity($entity)) {
+    return AccessResult::neutral()
+      ->addCacheableDependency($entity)
+      ->cachePerPermissions()
+      ->addCacheTags(["user:{$account->id()}", 'mukurtu_submission_list']);
+  }
+
   // Non-owners are blocked from viewing drafts; edit and delete are governed
   // by workflow transition permissions.
   if ($operation === 'view') {

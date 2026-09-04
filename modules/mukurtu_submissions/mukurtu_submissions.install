@@ -47,6 +47,20 @@ function mukurtu_submissions_review_permissions(): array {
 }
 
 /**
+ * Same set as mukurtu_submissions_review_permissions() minus "administer
+ * mukurtu submissions" - that one is settings-page access, not needed to
+ * review a submission. Used for the "mukurtu_submission_reviewer" role
+ * that notify_uids members are auto-enrolled into (see
+ * SubmissionSettingsCollectionForm::syncNotifyReviewerRoles()), so that
+ * role and the yml it's shipped as (config/install/
+ * user.role.mukurtu_submission_reviewer.yml) can't drift from what
+ * administrator/mukurtu_manager already get.
+ */
+function mukurtu_submissions_reviewer_role_permissions(): array {
+  return array_diff(mukurtu_submissions_review_permissions(), ['administer mukurtu submissions']);
+}
+
+/**
  * Implements hook_install().
  */
 function mukurtu_submissions_install($is_syncing): void {
@@ -396,6 +410,83 @@ function mukurtu_submissions_update_40011(): void {
 }
 
 /**
+ * Re-grants "administrator" and "mukurtu_manager" the review permissions
+ * from mukurtu_submissions_review_permissions() - a repeat of
+ * mukurtu_submissions_update_40001(), needed because that hook never ran
+ * for every site: hook_install() skips the same grant when $is_syncing is
+ * TRUE (the config-sync/"existing config" install path most Mukurtu sites
+ * use), and a site that installed this module at a schema version past
+ * 40001 never passes through that update either. Safe to run on any site
+ * since it's the same hasPermission()-guarded grant as _40001.
+ */
+function mukurtu_submissions_update_40012(): void {
+  foreach (['administrator', 'mukurtu_manager'] as $role_id) {
+    $role = \Drupal\user\Entity\Role::load($role_id);
+    if (!$role) {
+      continue;
+    }
+    $changed = FALSE;
+    foreach (mukurtu_submissions_review_permissions() as $permission) {
+      if (!$role->hasPermission($permission)) {
+        $role->grantPermission($permission);
+        $changed = TRUE;
+      }
+    }
+    if ($changed) {
+      $role->save();
+    }
+  }
+}
+
+/**
+ * Creates the "mukurtu_submission_reviewer" role for existing sites (new
+ * installs get it from config/install/user.role.mukurtu_submission_reviewer.yml
+ * directly), backfills the per-bundle "edit/delete any {bundle} content"
+ * grants every other reviewer role already gets via
+ * mukurtu_submissions_sync_review_permissions() - re-running that here
+ * for every enabled settings entity also re-syncs "administrator"/
+ * "mukurtu_manager" in case *their* per-bundle grants were missed the
+ * same way (a config-sync install never fires the settings entity's
+ * insert/update hooks) - and enrolls anyone already in notify_uids so an
+ * existing site doesn't need its settings form re-saved to get the fix.
+ * See SubmissionSettingsCollectionForm::syncNotifyReviewerRoles() for the
+ * ongoing (post-update) grant/revoke path.
+ */
+function mukurtu_submissions_update_40013(): void {
+  $role = \Drupal\user\Entity\Role::load('mukurtu_submission_reviewer');
+  $changed = FALSE;
+  if (!$role) {
+    $role = \Drupal\user\Entity\Role::create([
+      'id' => 'mukurtu_submission_reviewer',
+      'label' => 'Submission Reviewer',
+    ]);
+    $changed = TRUE;
+  }
+  foreach (mukurtu_submissions_reviewer_role_permissions() as $permission) {
+    if (!$role->hasPermission($permission)) {
+      $role->grantPermission($permission);
+      $changed = TRUE;
+    }
+  }
+  if ($changed) {
+    $role->save();
+  }
+
+  foreach (\Drupal::entityTypeManager()->getStorage('mukurtu_submission_settings')->loadMultiple() as $settings) {
+    if ($settings instanceof SubmissionSettingsInterface) {
+      mukurtu_submissions_sync_review_permissions($settings);
+    }
+  }
+
+  $uids = \Drupal::config('mukurtu_submissions.settings')->get('notify_uids') ?: [];
+  foreach (User::loadMultiple($uids) as $user) {
+    if (!$user->hasRole('mukurtu_submission_reviewer')) {
+      $user->addRole('mukurtu_submission_reviewer')->save();
+    }
+  }
+}
+
+/**
  * Default new/never-enabled submission forms to authenticated-only access
  * instead of fully anonymous (#1761).
  *
@@ -404,7 +495,7 @@ function mukurtu_submissions_update_40011(): void {
  * enabled while anonymous is left alone, since that's a live, deliberately
  * public form.
  */
-function mukurtu_submissions_update_40012(): void {
+function mukurtu_submissions_update_40014(): void {
   $storage = \Drupal::entityTypeManager()->getStorage('mukurtu_submission_settings');
   foreach ($storage->loadMultiple() as $settings) {
     if (!$settings->status() && $settings->getAccessLevel() === 'anonymous') {
