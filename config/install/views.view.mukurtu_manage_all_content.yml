@@ -7,6 +7,7 @@ dependencies:
     - user.role.mukurtu_roundtrip_manager
   module:
     - content_moderation
+    - mukurtu_core
     - mukurtu_local_contexts
     - mukurtu_protocol
     - node
@@ -89,15 +90,23 @@ display:
             5:
               action_id: mukurtu_export_remove_from_list_action
             37:
-              action_id: 'entity:unpublish_action:node'
+              action_id: mukurtu_change_moderation_state_action
               preconfiguration:
                 add_confirmation: false
-                label_override: Unpublish
-            39:
-              action_id: 'entity:publish_action:node'
+                label_override: 'Restore to Draft'
+                target_state: draft
+            38:
+              action_id: mukurtu_change_moderation_state_action
               preconfiguration:
                 add_confirmation: false
                 label_override: Publish
+                target_state: published
+            39:
+              action_id: mukurtu_change_moderation_state_action
+              preconfiguration:
+                add_confirmation: false
+                label_override: Archive
+                target_state: archived
             41:
               action_id: views_bulk_operations_delete_entity
               preconfiguration:

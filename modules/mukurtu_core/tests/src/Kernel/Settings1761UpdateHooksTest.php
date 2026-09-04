@@ -12,12 +12,12 @@ use PHPUnit\Framework\Attributes\Group;
  * Tests the mukurtu_core update hooks added by the #1761 default-settings
  * review.
  *
- * @see mukurtu_core_update_40110()
- * @see mukurtu_core_update_40111()
- * @see mukurtu_core_update_40112()
  * @see mukurtu_core_update_40113()
  * @see mukurtu_core_update_40114()
  * @see mukurtu_core_update_40115()
+ * @see mukurtu_core_update_40116()
+ * @see mukurtu_core_update_40117()
+ * @see mukurtu_core_update_40118()
  */
 #[Group('mukurtu_core')]
 class Settings1761UpdateHooksTest extends KernelTestBase {
@@ -53,7 +53,7 @@ class Settings1761UpdateHooksTest extends KernelTestBase {
     \Drupal::configFactory()->getEditable('system.site')->set('page.404', '')->save();
     Role::create(['id' => 'mukurtu_manager', 'label' => 'Mukurtu Manager'])->save();
 
-    mukurtu_core_update_40110();
+    mukurtu_core_update_40113();
 
     $this->assertSame('/mukurtu/not-found', \Drupal::config('system.site')->get('page.404'));
     $this->assertSame('Page Not Found', \Drupal::config('mukurtu_core.not_found')->get('title'));
@@ -68,7 +68,7 @@ class Settings1761UpdateHooksTest extends KernelTestBase {
       ->set('title', 'Custom title')
       ->save();
 
-    mukurtu_core_update_40110();
+    mukurtu_core_update_40113();
 
     $this->assertSame('Custom title', \Drupal::config('mukurtu_core.not_found')->get('title'));
   }
@@ -82,7 +82,7 @@ class Settings1761UpdateHooksTest extends KernelTestBase {
       ->set('hide_footer', FALSE)
       ->save();
 
-    mukurtu_core_update_40111();
+    mukurtu_core_update_40114();
 
     $config = \Drupal::config('altcha.settings');
     $this->assertTrue($config->get('hide_logo'));
@@ -99,7 +99,7 @@ class Settings1761UpdateHooksTest extends KernelTestBase {
       ->set('required', TRUE)
       ->save();
 
-    mukurtu_core_update_40112();
+    mukurtu_core_update_40115();
 
     $config = \Drupal::config('klaro.klaro_app.stripe');
     $this->assertFalse($config->get('default'));
@@ -112,7 +112,7 @@ class Settings1761UpdateHooksTest extends KernelTestBase {
    */
   public function testCronIntervalUpdate(): void {
     \Drupal::configFactory()->getEditable('automated_cron.settings')->set('interval', 10800)->save();
-    mukurtu_core_update_40113();
+    mukurtu_core_update_40116();
     $this->assertSame(3600, \Drupal::config('automated_cron.settings')->get('interval'));
   }
 
@@ -121,7 +121,7 @@ class Settings1761UpdateHooksTest extends KernelTestBase {
    */
   public function testCronIntervalUpdateLeavesCustomValue(): void {
     \Drupal::configFactory()->getEditable('automated_cron.settings')->set('interval', 300)->save();
-    mukurtu_core_update_40113();
+    mukurtu_core_update_40116();
     $this->assertSame(300, \Drupal::config('automated_cron.settings')->get('interval'));
   }
 
@@ -134,7 +134,7 @@ class Settings1761UpdateHooksTest extends KernelTestBase {
       ->set('counter.entity_types', ['node'])
       ->save();
 
-    mukurtu_core_update_40114();
+    mukurtu_core_update_40117();
 
     $entity_types = \Drupal::config('visitors.config')->get('counter.entity_types');
     $this->assertContains('media', $entity_types);
@@ -153,7 +153,7 @@ class Settings1761UpdateHooksTest extends KernelTestBase {
       ->set('counter.entity_types', ['node', 'user'])
       ->save();
 
-    mukurtu_core_update_40114();
+    mukurtu_core_update_40117();
 
     $this->assertSame(['node', 'user'], \Drupal::config('visitors.config')->get('counter.entity_types'));
   }
@@ -166,7 +166,7 @@ class Settings1761UpdateHooksTest extends KernelTestBase {
     $role->grantPermission('use text format full_html');
     $role->save();
 
-    mukurtu_core_update_40115();
+    mukurtu_core_update_40118();
 
     $this->assertFalse(Role::load('authenticated')->hasPermission('use text format full_html'));
   }
@@ -177,7 +177,7 @@ class Settings1761UpdateHooksTest extends KernelTestBase {
   public function testFullHtmlRevokeIsNoOpWhenAbsent(): void {
     Role::create(['id' => 'authenticated', 'label' => 'Authenticated user'])->save();
 
-    mukurtu_core_update_40115();
+    mukurtu_core_update_40118();
 
     $this->assertFalse(Role::load('authenticated')->hasPermission('use text format full_html'));
   }

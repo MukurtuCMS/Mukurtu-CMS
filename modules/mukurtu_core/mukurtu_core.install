@@ -3709,7 +3709,6 @@ function mukurtu_core_update_40105(): void {
   }
 }
 
-
 /**
  * Adds the language-fallback default_langcode filter and rendering_language
  * setting to mukurtu_content_browser, per docs/content-language-policy.md.
@@ -3861,9 +3860,115 @@ function mukurtu_core_update_40109(): void {
 }
 
 /**
- * Add the custom 404 not found page, permission, and default config (#1761).
+ * Grant Mukurtu Manager the archive/restore transition permissions on both
+ * the Default and Editorial content workflows, matching their existing
+ * edit-any access to article/page. This does not grant reach into
+ * protocol-gated bundles -- MukurtuProtocolNodeAccessControlHandler's
+ * per-node OG-scoped update access check independently blocks that
+ * regardless of this permission.
  */
 function mukurtu_core_update_40110(): void {
+  $role = \Drupal\user\Entity\Role::load('mukurtu_manager');
+  if (!$role) {
+    return;
+  }
+
+  foreach (['mukurtu_default_content_workflow', 'mukurtu_editorial_workflow'] as $workflow_id) {
+    foreach (['archive', 'restore'] as $transition) {
+      $role->grantPermission("use $workflow_id transition $transition");
+    }
+  }
+
+  $role->save();
+}
+
+/**
+ * Replace the Publish/Unpublish bulk actions on the content admin view
+ * (which silently no-op on moderated content -- content_moderation's own
+ * presave logic overrides a direct setPublished()/setUnpublished() call)
+ * with moderation-aware Draft/Publish/Archive transitions, and add
+ * mukurtu_core as a view dependency now that it references a mukurtu_core
+ * action plugin.
+ */
+function mukurtu_core_update_40111(): void {
+  $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_manage_all_content');
+  if ($config->isNew()) {
+    return;
+  }
+
+  $key = 'display.default.display_options.fields.views_bulk_operations_bulk_form.selected_actions';
+  $selected_actions = $config->get($key) ?? [];
+
+  foreach ($selected_actions as $delta => $action_config) {
+    if (($action_config['action_id'] ?? '') === 'entity:unpublish_action:node') {
+      $selected_actions[$delta] = [
+        'action_id' => 'mukurtu_change_moderation_state_action',
+        'preconfiguration' => [
+          'add_confirmation' => FALSE,
+          'label_override' => 'Restore to Draft',
+          'target_state' => 'draft',
+        ],
+      ];
+    }
+    elseif (($action_config['action_id'] ?? '') === 'entity:publish_action:node') {
+      $selected_actions[$delta] = [
+        'action_id' => 'mukurtu_change_moderation_state_action',
+        'preconfiguration' => [
+          'add_confirmation' => FALSE,
+          'label_override' => 'Publish',
+          'target_state' => 'published',
+        ],
+      ];
+      $selected_actions[max(array_keys($selected_actions)) + 1] = [
+        'action_id' => 'mukurtu_change_moderation_state_action',
+        'preconfiguration' => [
+          'add_confirmation' => FALSE,
+          'label_override' => 'Archive',
+          'target_state' => 'archived',
+        ],
+      ];
+    }
+  }
+
+  $config->set($key, $selected_actions);
+
+  $dependencies = $config->get('dependencies.module') ?? [];
+  if (!in_array('mukurtu_core', $dependencies, TRUE)) {
+    $dependencies[] = 'mukurtu_core';
+    sort($dependencies);
+    $config->set('dependencies.module', $dependencies);
+  }
+
+  $config->save();
+}
+
+/**
+ * Grants Mukurtu Manager the core "view any unpublished content"
+ * permission, site-wide.
+ *
+ * Archived content's view access is now restricted to genuine site-wide
+ * privilege only, trumping protocol-based access (see
+ * MukurtuProtocolNodeAccessControlHandler and
+ * mukurtu_drafts_entity_access()) -- without this, Mukurtu Manager would
+ * lose the ability to even see, let alone restore, protocol-gated content
+ * they archived themselves while only a plain protocol member (the exact
+ * reach mukurtu_core_update_40110() granted them via workflow transition
+ * permissions).
+ */
+function mukurtu_core_update_40112(): void {
+  $role = \Drupal\user\Entity\Role::load('mukurtu_manager');
+  if (!$role) {
+    return;
+  }
+
+  $role->grantPermission('view any unpublished content');
+  $role->save();
+}
+
+/**
+ * Add the custom 404 not found page, permission, and default config (#1761).
+ */
+function mukurtu_core_update_40113(): void {
   // Point the site's 404 page at the new custom not-found route
   // (system.site.yml is not owned by Mukurtu).
   \Drupal::configFactory()
@@ -3893,7 +3998,7 @@ function mukurtu_core_update_40110(): void {
 /**
  * Hide the ALTCHA widget's logo and footer credit (#1761).
  */
-function mukurtu_core_update_40111(): void {
+function mukurtu_core_update_40114(): void {
   $config = \Drupal::configFactory()->getEditable('altcha.settings');
   if (!$config->isNew()) {
     $config->set('hide_logo', TRUE)->set('hide_footer', TRUE)->save();
@@ -3904,7 +4009,7 @@ function mukurtu_core_update_40111(): void {
  * Fix the Klaro "Stripe" app's default/required flags to match its
  * disabled status (#1761).
  */
-function mukurtu_core_update_40112(): void {
+function mukurtu_core_update_40115(): void {
   $config = \Drupal::configFactory()->getEditable('klaro.klaro_app.stripe');
   if (!$config->isNew()) {
     $config->set('default', FALSE)->set('required', FALSE)->save();
@@ -3917,7 +4022,7 @@ function mukurtu_core_update_40112(): void {
  * Only touches sites still on the shipped 3-hour default -- an admin who has
  * already customized this is left alone.
  */
-function mukurtu_core_update_40113(): void {
+function mukurtu_core_update_40116(): void {
   $config = \Drupal::configFactory()->getEditable('automated_cron.settings');
   if (!$config->isNew() && (int) $config->get('interval') === 10800) {
     $config->set('interval', 3600)->save();
@@ -3930,7 +4035,7 @@ function mukurtu_core_update_40113(): void {
  * Only touches sites still on the shipped node-only default -- an admin who
  * has already customized this is left alone.
  */
-function mukurtu_core_update_40114(): void {
+function mukurtu_core_update_40117(): void {
   $config = \Drupal::configFactory()->getEditable('visitors.config');
   if ($config->isNew()) {
     return;
@@ -3960,7 +4065,7 @@ function mukurtu_core_update_40114(): void {
  * their normal iframe/media-embed needs) rather than gaining
  * object/embed/video tags.
  */
-function mukurtu_core_update_40115(): void {
+function mukurtu_core_update_40118(): void {
   $role = \Drupal\user\Entity\Role::load('authenticated');
   if ($role && $role->hasPermission('use text format full_html')) {
     $role->revokePermission('use text format full_html');
