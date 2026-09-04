@@ -38,6 +38,18 @@ class MukurtuProtocolNodeAccessControlHandler extends NodeAccessControlHandler {
       // Role-based node type permissions are sufficient when no protocols are
       // set -- same intent as checkCreateAccess(), which also honors them.
       $bundle = $entity->bundle();
+      // Mirrors MukurtuProtocolMediaAccessControlHandler's empty-protocol
+      // branch: "edit any {bundle} content" is sufficient proof of trust to
+      // view a protocol-less node the account doesn't own -- e.g. a pending
+      // public submission owned by the submissions service account, linked
+      // from the Pending Submissions queue. Core's node access ties
+      // unpublished view strictly to ownership with no per-bundle "view any"
+      // permission to fall back on, so a reviewer who isn't the owner would
+      // otherwise never be able to open it.
+      if ($operation === 'view' && $account->hasPermission("edit any $bundle content")) {
+        return AccessResult::allowedIfHasPermission($account, "edit any $bundle content")
+          ->addCacheableDependency($entity);
+      }
       if ($operation === 'update' && $account->hasPermission("edit any $bundle content")) {
         return AccessResult::allowedIfHasPermission($account, "edit any $bundle content")
           ->addCacheableDependency($entity);
