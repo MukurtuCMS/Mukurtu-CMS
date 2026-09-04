@@ -1,11 +1,14 @@
 mukurtu_notifications.my_notifications:
   title: 'My notifications'
   description: 'View your notifications.'
-  menu_name: dashboard-my-account
+  parent: mukurtu_dashboard
+  menu_name: dashboard-notifications-review
   route_name: view.mukurtu_message_log.mukurtu_notifications_page
+  weight: 4
 mukurtu_notifications.all_notifications:
   title: 'All notifications'
   description: 'View every notification in the system.'
   parent: mukurtu_dashboard
-  menu_name: dashboard-site-settings
+  menu_name: dashboard-notifications-review
   route_name: view.mukurtu_message_log.mukurtu_notifications_admin_page
+  weight: 5

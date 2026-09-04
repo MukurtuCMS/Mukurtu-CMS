@@ -1,0 +1,7 @@
+langcode: en
+status: true
+dependencies: {  }
+id: dashboard-local-contexts
+label: 'Local Contexts'
+description: 'Site-wide Local Contexts projects.'
+locked: false

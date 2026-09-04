@@ -5,15 +5,43 @@ namespace Drupal\mukurtu_protocol\Controller;
 use Drupal\comment\CommentInterface;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\mukurtu_core\Service\EntityTranslationResolver;
 use Drupal\mukurtu_protocol\Entity\ProtocolInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
+use Drupal\og\MembershipManagerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Controller for protocol comment management.
  */
 class ProtocolCommentSettingsController extends ControllerBase {
+
+  /**
+   * The OG membership manager.
+   *
+   * @var \Drupal\og\MembershipManagerInterface
+   */
+  protected MembershipManagerInterface $membershipManager;
+
+  /**
+   * The entity translation resolver.
+   *
+   * @var \Drupal\mukurtu_core\Service\EntityTranslationResolver
+   */
+  protected EntityTranslationResolver $entityTranslationResolver;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    $instance = parent::create($container);
+    $instance->membershipManager = $container->get('og.membership_manager');
+    $instance->entityTranslationResolver = $container->get('mukurtu_core.entity_translation_resolver');
+    return $instance;
+  }
 
   /**
    * Title callback for the unapproved comments page.
@@ -31,8 +59,40 @@ class ProtocolCommentSettingsController extends ControllerBase {
       ->accessCheck(FALSE)
       ->execute();
 
+    return $this->buildUnapprovedCommentsTable($node_ids, $this->t('No comments awaiting approval for this protocol.'));
+  }
+
+  /**
+   * Page listing unapproved comments across every protocol the current user
+   * has the 'administer comments' permission in.
+   */
+  public function myUnapprovedComments() {
+    $empty_message = $this->t('No comments awaiting approval for your protocols.');
+    $protocol_ids = $this->getStewardedProtocolIds($this->currentUser());
+
+    if (empty($protocol_ids)) {
+      return ['#markup' => $empty_message, '#cache' => ['contexts' => ['user']]];
+    }
+
+    $node_storage = $this->entityTypeManager()->getStorage('node');
+    $or = $node_storage->getQuery()->accessCheck(FALSE)->orConditionGroup();
+    foreach ($protocol_ids as $protocol_id) {
+      $or->condition('field_cultural_protocols.protocols', "|{$protocol_id}|", 'CONTAINS');
+    }
+    $node_ids = $node_storage->getQuery()
+      ->condition($or)
+      ->accessCheck(FALSE)
+      ->execute();
+
+    return $this->buildUnapprovedCommentsTable($node_ids, $empty_message);
+  }
+
+  /**
+   * Builds the unapproved comments table for a set of node IDs.
+   */
+  protected function buildUnapprovedCommentsTable(array $node_ids, TranslatableMarkup $empty_message) {
     if (empty($node_ids)) {
-      return ['#markup' => $this->t('No comments awaiting approval for this protocol.')];
+      return ['#markup' => $empty_message];
     }
 
     $comment_ids = $this->entityTypeManager()->getStorage('comment')->getQuery()
@@ -45,7 +105,7 @@ class ProtocolCommentSettingsController extends ControllerBase {
       ->execute();
 
     if (empty($comment_ids)) {
-      return ['#markup' => $this->t('No comments awaiting approval for this protocol.')];
+      return ['#markup' => $empty_message];
     }
 
     $comments = $this->entityTypeManager()->getStorage('comment')->loadMultiple($comment_ids);
@@ -55,7 +115,7 @@ class ProtocolCommentSettingsController extends ControllerBase {
     foreach ($comments as $comment) {
       $commented_entity = $comment->getCommentedEntity();
       $entity_link = $commented_entity
-        ? Link::fromTextAndUrl($commented_entity->label(), $commented_entity->toUrl())->toString()
+        ? Link::fromTextAndUrl($this->entityTranslationResolver->translate($commented_entity)->label(), $commented_entity->toUrl())->toString()
         : $this->t('(deleted)');
 
       $operations = [];
@@ -96,13 +156,35 @@ class ProtocolCommentSettingsController extends ControllerBase {
         $this->t('Operations'),
       ],
       '#rows' => $rows,
-      '#empty' => $this->t('No comments awaiting approval for this protocol.'),
-      '#cache' => ['tags' => ['comment_list']],
+      '#empty' => $empty_message,
+      '#cache' => [
+        'contexts' => ['user', 'languages:language_content'],
+        'tags' => ['comment_list'],
+      ],
     ];
   }
 
   /**
-   * Access check for redirect to management page.
+   * Gets the IDs of every protocol the given account has the
+   * 'administer comments' permission in.
+   *
+   * @return int[]
+   */
+  protected function getStewardedProtocolIds(AccountInterface $account): array {
+    $protocol_ids = [];
+    foreach ($this->membershipManager->getMemberships($account->id()) as $membership) {
+      if ($membership->getGroupEntityType() !== 'protocol') {
+        continue;
+      }
+      if ($membership->hasPermission('administer comments')) {
+        $protocol_ids[] = (int) $membership->getGroupId();
+      }
+    }
+    return $protocol_ids;
+  }
+
+  /**
+   * Access check for the per-protocol unapproved comments page.
    */
   public function access(AccountInterface $account, ProtocolInterface $group) {
     $membership = $group->getMembership($account);
@@ -111,6 +193,17 @@ class ProtocolCommentSettingsController extends ControllerBase {
     }
 
     return AccessResult::forbidden();
+  }
+
+  /**
+   * Access check for the aggregated "my protocols" unapproved comments page.
+   */
+  public function myAccess(AccountInterface $account): AccessResult {
+    if (!empty($this->getStewardedProtocolIds($account))) {
+      return AccessResult::allowed()->addCacheContexts(['user']);
+    }
+
+    return AccessResult::forbidden()->addCacheContexts(['user']);
   }
 
 }
