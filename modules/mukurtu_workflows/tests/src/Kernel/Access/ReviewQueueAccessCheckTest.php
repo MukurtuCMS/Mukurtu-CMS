@@ -92,8 +92,13 @@ class ReviewQueueAccessCheckTest extends KernelTestBase {
     ]);
     $this->protocol->save();
 
+    $this->config('mukurtu_workflows.settings')
+      ->set('active_workflow', 'mukurtu_editorial_workflow')
+      ->save();
+
     $this->accessCheck = new ReviewQueueAccessCheck(
-      $this->container->get('og.membership_manager')
+      $this->container->get('og.membership_manager'),
+      $this->container->get('config.factory')
     );
   }
 
@@ -184,6 +189,22 @@ class ReviewQueueAccessCheckTest extends KernelTestBase {
 
     $result = $this->accessCheck->access($user);
     $this->assertTrue($result->isForbidden(), 'protocol member without steward role is denied');
+  }
+
+  public function testAccessDeniedWhenEditorialWorkflowInactive(): void {
+    $this->config('mukurtu_workflows.settings')
+      ->set('active_workflow', 'mukurtu_default_content_workflow')
+      ->save();
+
+    $user = $this->createNamedUser('admin');
+    $admin_role = Role::create(['id' => 'administrator', 'label' => 'Administrator']);
+    $admin_role->grantPermission('bypass node access');
+    $admin_role->save();
+    $user->addRole('administrator');
+    $user->save();
+
+    $result = $this->accessCheck->access($user);
+    $this->assertTrue($result->isForbidden(), 'review queue is inaccessible, even to an admin, when the Editorial Workflow is not active');
   }
 
 }
