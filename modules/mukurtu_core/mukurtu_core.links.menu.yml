@@ -43,6 +43,12 @@ mukurtu_core.access_denied_settings:
   route_name: mukurtu_core.access_denied_settings
   expanded: TRUE
   weight: 0
+mukurtu_core.not_found_settings:
+  title: "Not Found Page"
+  parent: mukurtu_dashboard
+  menu_name: dashboard-site-settings
+  description: "Edit the title and message shown on the not found (404) page."
+  route_name: mukurtu_core.not_found_settings
 mukurtu_core.manual:
   title: 'Mukurtu User Manual'
   description: 'Mukurtu 4 user manual.'
