@@ -559,6 +559,7 @@ class DashboardLinkCleanupTest extends KernelTestBase {
       'dashboard-notifications-review' => [
         'Comment reviews',
         'Protocol comment reviews',
+        'Protocol comments',
         'Review queue',
         'Pending Submissions',
         'My notifications',

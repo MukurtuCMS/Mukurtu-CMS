@@ -83,6 +83,14 @@ mukurtu_protocol.my_unapproved_comments:
   route_name: mukurtu_protocol.my_unapproved_comments
   weight: 1
 
+mukurtu_protocol.my_comments:
+  title: "Protocol comments"
+  menu_name: dashboard-notifications-review
+  parent: mukurtu_dashboard
+  description: "Review and manage all comments on content in the protocols you steward."
+  route_name: mukurtu_protocol.my_comments
+  weight: 2
+
 mukurtu_protocol.community_create:
   title: 'Add a community'
   menu_name: dashboard-3Cs

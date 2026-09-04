@@ -257,7 +257,7 @@ mukurtu_protocol.comment_settings:
     _permission: 'administer site configuration,administer comments'
 
 mukurtu_protocol.manage_protocol_unapproved_comments:
-  path: 'admin/protocols/{group}/unapproved-comments'
+  path: 'admin/protocols/{protocol}/unapproved-comments'
   defaults:
     _controller: '\Drupal\mukurtu_protocol\Controller\ProtocolCommentSettingsController::unapprovedComments'
     _title_callback: '\Drupal\mukurtu_protocol\Controller\ProtocolCommentSettingsController::getUnapprovedTitle'
@@ -265,7 +265,7 @@ mukurtu_protocol.manage_protocol_unapproved_comments:
     _custom_access: '\Drupal\mukurtu_protocol\Controller\ProtocolCommentSettingsController::access'
   options:
     parameters:
-      group:
+      protocol:
         type: entity:protocol
 
 mukurtu_protocol.my_unapproved_comments:
@@ -273,6 +273,24 @@ mukurtu_protocol.my_unapproved_comments:
   defaults:
     _controller: '\Drupal\mukurtu_protocol\Controller\ProtocolCommentSettingsController::myUnapprovedComments'
     _title: 'Protocol Comments Awaiting Approval'
+  requirements:
+    _custom_access: '\Drupal\mukurtu_protocol\Controller\ProtocolCommentSettingsController::myAccess'
+
+mukurtu_protocol.comment_unpublish:
+  path: '/comment/{comment}/unpublish'
+  defaults:
+    _title: 'Unpublish'
+    _controller: '\Drupal\mukurtu_protocol\Controller\ProtocolCommentSettingsController::unpublishComment'
+  requirements:
+    _entity_access: 'comment.update'
+    _csrf_token: 'TRUE'
+    comment: \d+
+
+mukurtu_protocol.my_comments:
+  path: 'admin/protocols/comments'
+  defaults:
+    _controller: '\Drupal\mukurtu_protocol\Controller\ProtocolCommentSettingsController::myComments'
+    _title: 'Protocol Comments'
   requirements:
     _custom_access: '\Drupal\mukurtu_protocol\Controller\ProtocolCommentSettingsController::myAccess'
 
