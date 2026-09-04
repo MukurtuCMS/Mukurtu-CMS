@@ -100,11 +100,12 @@ function mukurtu_install() {
     ->set('use_admin_theme', TRUE)
     ->save();
 
-  // Set the custom 403 (access denied) page (system.site.yml is not owned by
-  // Mukurtu).
+  // Set the custom 403 (access denied) and 404 (not found) pages
+  // (system.site.yml is not owned by Mukurtu).
   \Drupal::configFactory()
     ->getEditable('system.site')
     ->set('page.403', '/mukurtu/access-denied')
+    ->set('page.404', '/mukurtu/not-found')
     ->save();
 
   // Create the default landing page using the service.
@@ -852,6 +853,14 @@ function mukurtu_install() {
   if (!$config->isNew()) {
     $config->set('status', FALSE)->save();
   }
+
+  // Enable "Open external links in a new window or tab" by default.
+  // extlink ships this disabled; the profile's hook_install() is guaranteed
+  // to run after extlink is installed, so this reliably overrides its
+  // default for new installs.
+  \Drupal::configFactory()->getEditable('extlink.settings')
+    ->set('extlink_target', TRUE)
+    ->save();
 
   // Protect the feedback contact form and comment form with a CAPTCHA point.
   // Created here (rather than in mukurtu_bot_protection's own config/install)

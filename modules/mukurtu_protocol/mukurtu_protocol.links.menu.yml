@@ -27,6 +27,7 @@ mukurtu_protocol.community_organization:
   parent: mukurtu_dashboard
   menu_name: dashboard-3Cs
   route_name: mukurtu_protocol.community_organization
+  weight: 1
 
 mukurtu_protocol.community_manager_create_user:
   title: 'Create user with community membership'
@@ -34,6 +35,7 @@ mukurtu_protocol.community_manager_create_user:
   parent: mukurtu_dashboard
   menu_name: dashboard-users
   route_name: mukurtu_protocol.community_manager_create_user
+  weight: 2
 
 mukurtu_protocol.manage_protocols:
   title: 'Manage communities and cultural protocols'
@@ -41,6 +43,7 @@ mukurtu_protocol.manage_protocols:
   parent: mukurtu_dashboard
   menu_name: dashboard-3Cs
   route_name: entity.protocol.collection
+  weight: 0
 
 # Community menu items definition
 entity.community.collection:
@@ -56,30 +59,37 @@ community.admin.structure.settings:
   route_name: community.settings
   parent: system.admin_structure
 
-mukurtu_protocol.config_community_permissions:
-  title: 'Configure Community Permissions'
-  description: 'Manage roles and permissions for all communities.'
-  parent: mukurtu_dashboard
-  menu_name: dashboard-3Cs
-  route_name: mukurtu_protocol.permissions_overview
-  route_parameters: { entity_type_id: 'community', bundle_id: 'community'}
-  weight: 800
-
-mukurtu_protocol.config_protocol_permissions:
-  title: 'Configure Protocol Permissions'
-  description: 'Manage roles and permissions for all protocols.'
-  parent: mukurtu_dashboard
-  menu_name: dashboard-3Cs
-  route_name: mukurtu_protocol.permissions_overview
-  route_parameters: { entity_type_id: 'protocol', bundle_id: 'protocol'}
-  weight: 810
-
 mukurtu_protocol.comment_settings:
   title: "Site-wide comment settings"
-  menu_name: dashboard-site-settings
+  menu_name: dashboard-publication-tools
   parent: mukurtu_dashboard
   description: "Configuration form for side wide commenting options."
   route_name: mukurtu_protocol.comment_settings
+  weight: 2
+
+mukurtu_protocol.comment_admin:
+  title: "Comment reviews"
+  menu_name: dashboard-notifications-review
+  parent: mukurtu_dashboard
+  description: "Review and moderate comments across the entire site."
+  route_name: comment.admin
+  weight: 0
+
+mukurtu_protocol.my_unapproved_comments:
+  title: "Protocol comment reviews"
+  menu_name: dashboard-notifications-review
+  parent: mukurtu_dashboard
+  description: "Review comments awaiting approval on content in the protocols you steward."
+  route_name: mukurtu_protocol.my_unapproved_comments
+  weight: 1
+
+mukurtu_protocol.my_comments:
+  title: "Protocol comments"
+  menu_name: dashboard-notifications-review
+  parent: mukurtu_dashboard
+  description: "Review and manage all comments on content in the protocols you steward."
+  route_name: mukurtu_protocol.my_comments
+  weight: 2
 
 mukurtu_protocol.community_create:
   title: 'Add a community'
@@ -87,6 +97,7 @@ mukurtu_protocol.community_create:
   parent: mukurtu_dashboard
   description: 'Add a new community.'
   route_name: mukurtu_protocol.community_create
+  weight: 2
 
 mukurtu_protocol.protocol_create:
   title: 'Add a cultural protocol'
@@ -94,6 +105,7 @@ mukurtu_protocol.protocol_create:
   parent: mukurtu_dashboard
   description: 'Add a new cultural protocol.'
   route_name: mukurtu_protocol.protocol_create
+  weight: 3
 
 mukurtu_protocol.my_memberships:
   title: 'My memberships'

@@ -15,3 +15,4 @@ mukurtu_place.create_place_dashboard:
   route_name: mukurtu_core.add
   route_parameters:
     node_type: place
+  weight: 5

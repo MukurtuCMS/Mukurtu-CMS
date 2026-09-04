@@ -824,3 +824,23 @@ function mukurtu_export_update_40026(): void {
   \Drupal::entityDefinitionUpdateManager()
     ->installFieldStorageDefinition('item_languages', 'export_list', 'mukurtu_export', $definition);
 }
+
+/**
+ * Grants Mukurtu Manager the flag/unflag export-list permissions already
+ * held by Mukurtu Roundtrip Manager. 'access mukurtu export' covers the
+ * action-plugin access() checks and the row-action dropdown links, but not
+ * the flag-based "Add/Remove from export list" browse-card link, which is
+ * gated by flag.flag.export_content.yml's own permissions.
+ */
+function mukurtu_export_update_40027(): void {
+  $role = \Drupal\user\Entity\Role::load('mukurtu_manager');
+  if (!$role) {
+    return;
+  }
+
+  foreach (['flag export_content', 'unflag export_content', 'flag export_media', 'unflag export_media'] as $permission) {
+    $role->grantPermission($permission);
+  }
+
+  $role->save();
+}

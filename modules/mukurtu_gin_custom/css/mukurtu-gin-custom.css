@@ -468,6 +468,77 @@ short fields themselves. Shrink it in these dialogs specifically. */
     max-width: 100%;
 }
 
+/* Fix hardcoded white backgrounds on the Layout Builder canvas in Gin Dark
+   Mode. gin_lb's own CSS never themes these two elements: the per-section
+   "Configure" pill (.layout-builder__link--configure) hardcodes
+   background: #fff, and jQuery UI's drag placeholder
+   (.ui-sortable-helper, shown while dragging a block to reorder it) hardcodes
+   background-color: #fff. Both stay white regardless of Gin's dark-mode
+   class, standing out against the surrounding dark canvas. Swap them to
+   Gin's own surface-color variable, matching how gin_lb themes its other
+   canvas chrome (e.g. .layout-builder-browser-block-item uses
+   var(--gin-bg-layer) the same way). !important is required to win over
+   gin_lb's own same-specificity, later-loaded rule.
+
+   gin_lb's own text/icon color for this pill (--gin-border-color-form-element)
+   was tuned against its original white background: on dark mode's
+   --gin-bg-layer that pairing drops to ~3.4:1, below the 4.5:1 WCAG 1.4.3
+   requires for this size of text. Repoint both to --gin-color-text, the same
+   background-paired text variable already used elsewhere in this file (e.g.
+   .ui-dialog .ui-dialog-content below), which is tuned against
+   --gin-bg-layer in both modes. */
+.layout-builder__link--configure {
+    background: var(--gin-bg-layer, #fff) !important;
+    color: var(--gin-color-text, #222330) !important;
+    /* gin_lb sizes this pill's label at font-size: .75em (12px on a 16px
+       base) / line-height: 19px / top: -19px. Bump the text up for
+       legibility and grow line-height/top to match so the pill still sits
+       flush above the section edge instead of clipping the taller text. */
+    font-size: .875em !important;
+    line-height: 22px !important;
+    top: -22px !important;
+}
+
+.layout-builder__link--configure::after {
+    background-color: var(--gin-color-text, #222330) !important;
+}
+
+.layout-builder__section .ui-sortable-helper {
+    background-color: var(--gin-bg-layer, #fff) !important;
+}
+
+/* Fill the "Add section"/"Add block"/"Add a block" buttons with a solid
+   background instead of gin_lb's default teal-text-on-transparent
+   treatment. gin_lb colors them with --gin-color-primary (the site's teal
+   accent) on a transparent background, so they render on whatever's behind
+   the canvas - here, the block-content preview area, which stays white by
+   design (see .layout-builder__link--configure above; it's a live front-end
+   preview, not admin chrome, so it doesn't follow Gin dark mode).
+   --gin-color-primary text vs. white computes to ~4.48:1, just under the
+   4.5:1 WCAG 1.4.3 minimum for this text size - and contrast is symmetric
+   under a foreground/background swap, so simply filling with
+   --gin-color-primary and flipping the text to white does not fix that
+   ratio (it's the same ~4.48:1 either way). Fill with
+   --gin-color-primary-active instead - a darker shade of the same teal
+   accent Gin already defines for this button's own :active state - which
+   computes to ~7:1 against white text in light mode and ~12.8:1 against
+   --gin-color-button-text's near-black in dark mode. gin_lb's own :hover
+   rule already switches to a filled look (background-color:
+   var(--gin-color-primary-hover) plus color: var(--gin-color-button-text)),
+   so this makes the default state filled too, just with a darker shade for
+   contrast. Scoped under each button's real ancestor - #layout-builder for
+   the "Add section"/"Add block" canvas links, #drupal-off-canvas for "Add a
+   block" in the block picker dialog - so this outranks gin_lb's own plain
+   single-class selector on specificity: a same-specificity !important tie
+   goes to whichever rule loads later in the cascade, and gin_lb's own CSS
+   happens to load after this file's. */
+#layout-builder .layout-builder__link--add,
+#drupal-off-canvas .inline-block-create-button {
+    color: var(--gin-color-button-text, #fff) !important;
+    background-color: var(--gin-color-primary-active, #0c645f) !important;
+    border-color: var(--gin-color-primary-active, #0c645f) !important;
+}
+
 .layout-builder .contextual {
     z-index: 600;
     right: auto;
@@ -764,6 +835,20 @@ short fields themselves. Shrink it in these dialogs specifically. */
   left: 50% !important;
   right: auto !important;
   transform: translateX(-50%) !important;
+}
+
+/* Entity Browser's own Modal display hardcodes its sticky form-actions bar
+   (the "Add Content"/"Add Sub-Collection"/etc. submit button row) to a solid
+   white background (var(--color-white, white)) - see entity_browser's own
+   entity_browser.theme.css. That's jarring against Gin's dark modal chrome
+   now that entity browser modals correctly render in Gin (see #2039).
+   Reuse Gin's own --gin-bg-layer surface color, the same variable
+   .ui-dialog .ui-dialog-content uses above, so the sticky bar blends with
+   the rest of the dialog instead of standing out as a separate white strip.
+   !important: entity_browser's own rule sets this property at equal
+   selector specificity, later in the cascade, which would otherwise win. */
+.entity-browser-form:not(.entity-browser-form--multi-step-display) > .form-actions {
+  background-color: var(--gin-bg-layer, #fff) !important;
 }
 
 /* Fix #1825: on /admin/export/settings, each saved export setting's

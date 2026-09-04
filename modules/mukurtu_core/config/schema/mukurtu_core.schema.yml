@@ -824,6 +824,17 @@ mukurtu_core.access_denied:
       type: text_format
       label: 'Message'
 
+mukurtu_core.not_found:
+  type: config_object
+  label: 'Not found page settings'
+  mapping:
+    title:
+      type: label
+      label: 'Title'
+    message:
+      type: text_format
+      label: 'Message'
+
 mukurtu.settings:
   type: config_object
   label: 'Mukurtu general settings'

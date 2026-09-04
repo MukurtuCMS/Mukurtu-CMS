@@ -3088,6 +3088,15 @@ img[class$=-placeholder] {
   height: calc(88vh - 2rem);
   min-height: 400px;
 }
+.glightbox-clean .gslide-inline iframe.media-oembed-content {
+  display: block;
+  width: auto;
+  height: auto;
+  min-height: 0;
+  max-width: 100%;
+  max-height: calc(92vh - 2rem - 40px);
+  margin: 0 auto;
+}
 .glightbox-clean .gslide-inline .media-asset--document-viewer {
   display: block;
   width: 100%;

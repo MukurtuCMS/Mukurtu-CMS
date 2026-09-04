@@ -1,0 +1,7 @@
+langcode: en
+status: true
+dependencies: {  }
+id: dashboard-notifications-review
+label: 'Notifications & Review'
+description: 'Comment moderation, review queues, and system notifications.'
+locked: false

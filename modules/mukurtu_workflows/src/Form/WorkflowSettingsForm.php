@@ -2,10 +2,12 @@
 
 namespace Drupal\mukurtu_workflows\Form;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
+use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
 use Drupal\workflows\Entity\Workflow;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -14,36 +16,65 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class WorkflowSettingsForm extends FormBase {
 
+  /**
+   * Node bundles that are never subject to content moderation.
+   */
+  protected const EXCLUDED_BUNDLES = ['landing_page'];
+
+  protected const DEFAULT_WORKFLOW_ID = 'mukurtu_default_content_workflow';
+
+  protected const EDITORIAL_WORKFLOW_ID = 'mukurtu_editorial_workflow';
+
   public function __construct(
     protected EntityTypeManagerInterface $entityTypeManager,
+    protected ConfigFactoryInterface $workflowConfigFactory,
   ) {}
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container): static {
-    return new static($container->get('entity_type.manager'));
+    return new static(
+      $container->get('entity_type.manager'),
+      $container->get('config.factory'),
+    );
   }
 
   /**
-   * Node bundles that Mukurtu manages via content moderation.
+   * Node bundles under Mukurtu's cultural protocol / OG access gating.
    */
-  protected function getManagedBundles(): array {
-    $types = $this->entityTypeManager->getStorage('node_type')->loadMultiple();
-    return array_keys($types);
-  }
-
-  /**
-   * Returns the ID of the workflow currently assigned to node bundles.
-   */
-  protected function getActiveWorkflowId(): ?string {
-    foreach (Workflow::loadMultiple() as $workflow) {
-      $type_settings = $workflow->get('type_settings');
-      if (!empty($type_settings['entity_types']['node'])) {
-        return $workflow->id();
+  protected function getProtocolGatedBundles(): array {
+    $node_storage = $this->entityTypeManager->getStorage('node');
+    $bundles = array_keys($this->entityTypeManager->getStorage('node_type')->loadMultiple());
+    $gated = [];
+    foreach ($bundles as $bundle) {
+      if (in_array($bundle, self::EXCLUDED_BUNDLES, TRUE)) {
+        continue;
+      }
+      $class = $node_storage->getEntityClass($bundle);
+      if ($class && in_array(CulturalProtocolControlledInterface::class, class_implements($class), TRUE)) {
+        $gated[] = $bundle;
       }
     }
-    return NULL;
+    return $gated;
+  }
+
+  /**
+   * Node bundles that always use the Default workflow.
+   *
+   * These are structural, non-protocol-gated bundles (e.g. article, page).
+   */
+  protected function getStructuralBundles(): array {
+    $bundles = array_keys($this->entityTypeManager->getStorage('node_type')->loadMultiple());
+    $excluded = array_merge(self::EXCLUDED_BUNDLES, $this->getProtocolGatedBundles());
+    return array_values(array_diff($bundles, $excluded));
+  }
+
+  /**
+   * Returns the ID of the workflow currently selected for protocol-gated content.
+   */
+  protected function getActiveWorkflowId(): ?string {
+    return $this->workflowConfigFactory->get('mukurtu_workflows.settings')->get('active_workflow');
   }
 
   /**
@@ -59,6 +90,10 @@ class WorkflowSettingsForm extends FormBase {
   public function buildForm(array $form, FormStateInterface $form_state): array {
     $active_id = $this->getActiveWorkflowId();
     $workflows = Workflow::loadMultiple();
+
+    $form['protocol_gated_description'] = [
+      '#markup' => '<p>' . $this->t("The workflow selected as active below controls Mukurtu's protocol-controlled content (collections, dictionary words, digital heritage, people, and places). Articles and pages always use the Default Content Workflow.") . '</p>',
+    ];
 
     $form['workflow_table'] = [
       '#type' => 'table',
@@ -147,11 +182,28 @@ class WorkflowSettingsForm extends FormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state): void {
     $active_id = $form_state->getValue('active_workflow');
-    $bundles = $this->getManagedBundles();
+
+    $this->workflowConfigFactory->getEditable('mukurtu_workflows.settings')
+      ->set('active_workflow', $active_id)
+      ->save();
+
+    $structural = $this->getStructuralBundles();
+    $protocol_gated = $this->getProtocolGatedBundles();
 
     foreach (Workflow::loadMultiple() as $id => $workflow) {
+      if ($id === self::DEFAULT_WORKFLOW_ID) {
+        $bundles = $active_id === self::EDITORIAL_WORKFLOW_ID ? $structural : array_merge($structural, $protocol_gated);
+      }
+      elseif ($id === self::EDITORIAL_WORKFLOW_ID) {
+        $bundles = $active_id === self::EDITORIAL_WORKFLOW_ID ? $protocol_gated : [];
+      }
+      else {
+        // Custom/duplicated workflows are not managed by this form.
+        continue;
+      }
+
       $type_settings = $workflow->get('type_settings');
-      $type_settings['entity_types'] = ($id === $active_id) ? ['node' => $bundles] : [];
+      $type_settings['entity_types'] = $bundles ? ['node' => $bundles] : [];
       $workflow->set('type_settings', $type_settings);
       $workflow->save();
     }

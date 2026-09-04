@@ -166,6 +166,48 @@ class DefaultLandingPageTest extends KernelTestBase {
   }
 
   /**
+   * Extracts inline block component configurations from a landing page layout.
+   *
+   * @param \Drupal\node\NodeInterface $node
+   *   The landing page node.
+   *
+   * @return array
+   *   Component configuration arrays for every 'inline_block:*' component,
+   *   keyed by component UUID.
+   */
+  protected function getInlineComponentsFromLayout($node): array {
+    $components = [];
+    /** @var \Drupal\layout_builder\Section[] $sections */
+    $sections = $node->get('layout_builder__layout')->getSections();
+    foreach ($sections as $section) {
+      foreach ($section->getComponents() as $component) {
+        $configuration = $component->get('configuration');
+        if (str_starts_with($configuration['id'] ?? '', 'inline_block:')) {
+          $components[$component->getUuid()] = $configuration;
+        }
+      }
+    }
+    return $components;
+  }
+
+  /**
+   * Resolves the block_content UUID behind an inline block component.
+   *
+   * @param array $configuration
+   *   An 'inline_block:*' component configuration array.
+   *
+   * @return string
+   *   The referenced block_content entity's UUID.
+   */
+  protected function resolveInlineBlockUuid(array $configuration): string {
+    /** @var \Drupal\block_content\BlockContentInterface $revision */
+    $revision = $this->container->get('entity_type.manager')
+      ->getStorage('block_content')
+      ->loadRevision($configuration['block_revision_id']);
+    return $revision->uuid();
+  }
+
+  /**
    * Tests that a second call reuses the same block_content entities.
    */
   public function testSecondCallReusesBlocks(): void {
@@ -197,11 +239,40 @@ class DefaultLandingPageTest extends KernelTestBase {
     $second_block_uuids = $this->getBlockUuidsFromLayout($second_node);
     $this->assertNotEmpty($second_block_uuids);
 
-    // The set of block_content UUIDs referenced must be identical - the
-    // same blocks are reused, not new ones created.
+    // The set of reusable block_content UUIDs referenced must be identical -
+    // the same blocks are reused, not new ones created.
     sort($first_block_uuids);
     sort($second_block_uuids);
     $this->assertSame($first_block_uuids, $second_block_uuids);
+
+    // Featured Content is placed as a non-reusable inline block, so its
+    // "Configure" dialog embeds the block form (the "Select Content" browser).
+    $first_inline = $this->getInlineComponentsFromLayout($first_node);
+    $this->assertCount(1, $first_inline);
+    $featured_config = reset($first_inline);
+    $this->assertSame('inline_block:featured_content', $featured_config['id']);
+    $this->assertSame('full', $featured_config['view_mode']);
+    $this->assertNotEmpty($featured_config['block_revision_id']);
+
+    $state_uuids = \Drupal::state()->get('mukurtu_landing_page.default_blocks', []);
+    $featured_uuid = $this->resolveInlineBlockUuid($featured_config);
+    $this->assertSame($state_uuids['featured'], $featured_uuid);
+
+    /** @var \Drupal\block_content\BlockContentInterface $featured_revision */
+    $featured_revision = $second_block_storage->loadRevision($featured_config['block_revision_id']);
+    $this->assertSame('featured_content', $featured_revision->bundle());
+    $this->assertFalse($featured_revision->isReusable());
+
+    // The second call reuses the same featured block.
+    $second_inline = $this->getInlineComponentsFromLayout($second_node);
+    $this->assertCount(1, $second_inline);
+    $this->assertSame($featured_uuid, $this->resolveInlineBlockUuid(reset($second_inline)));
+
+    // The inline block's usage is recorded against the landing page node.
+    $usage = \Drupal::service('inline_block.usage')->getUsage($featured_revision->id());
+    $this->assertNotNull($usage);
+    $this->assertEquals($second_node->id(), $usage->layout_entity_id);
+    $this->assertSame('node', $usage->layout_entity_type);
   }
 
   /**
@@ -235,7 +306,7 @@ class DefaultLandingPageTest extends KernelTestBase {
 
     $second_block_uuids = $this->getBlockUuidsFromLayout($second_node);
 
-    // The 3 untouched blocks kept their original UUIDs (reused).
+    // The untouched reusable blocks kept their original UUIDs (reused).
     $untouched_first = array_diff($first_block_uuids, [$deleted_uuid]);
     foreach ($untouched_first as $uuid) {
       $this->assertContains($uuid, $second_block_uuids, 'Untouched blocks should keep their original UUID.');
@@ -246,7 +317,12 @@ class DefaultLandingPageTest extends KernelTestBase {
     $this->assertCount(1, $new_featured_blocks);
     $new_featured_block = reset($new_featured_blocks);
     $this->assertNotSame($deleted_uuid, $new_featured_block->uuid(), 'The recreated block must have a new UUID, not the deleted one.');
-    $this->assertContains($new_featured_block->uuid(), $second_block_uuids, 'The layout should reference the newly recreated block.');
+    $this->assertFalse($new_featured_block->isReusable(), 'The recreated Featured Content block must be non-reusable.');
+
+    // The layout's inline Featured Content component references the new block.
+    $second_inline = $this->getInlineComponentsFromLayout($second_node);
+    $this->assertCount(1, $second_inline);
+    $this->assertSame($new_featured_block->uuid(), $this->resolveInlineBlockUuid(reset($second_inline)));
   }
 
 }

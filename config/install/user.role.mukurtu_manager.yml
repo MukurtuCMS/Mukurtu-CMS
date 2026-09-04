@@ -19,11 +19,14 @@ dependencies:
     - taxonomy.vocabulary.subject
     - taxonomy.vocabulary.type
     - taxonomy.vocabulary.word_type
+    - workflows.workflow.mukurtu_default_content_workflow
+    - workflows.workflow.mukurtu_editorial_workflow
   module:
     - block
     - block_content
     - comment
     - contact
+    - content_moderation
     - contextual
     - devel
     - embed
@@ -50,6 +53,7 @@ dependencies:
     - mukurtu_media
     - mukurtu_multipage_items
     - mukurtu_protocol
+    - mukurtu_submissions
     - node
     - og
     - paragraphs
@@ -64,6 +68,7 @@ dependencies:
     - term_merge
     - toolbar
     - visitors
+    - workflows
 id: mukurtu_manager
 label: 'Mukurtu Manager'
 weight: 2
@@ -74,12 +79,14 @@ permissions:
   - 'access mukurtu import'
   - 'access site reports'
   - 'access visitors'
+  - 'administer comments'
   - 'administer local contexts legacy projects'
   - 'administer message subscribe'
   - 'administer mukurtu access denied page'
   - 'administer mukurtu_import_strategy'
   - 'administer mukurtu_media configuration'
   - 'administer mukurtu media download settings'
+  - 'administer mukurtu submissions'
   - 'configure editable landing_page node layout overrides'
   - 'configure editable page node layout overrides'
   - 'create and edit custom blocks'
@@ -98,5 +105,15 @@ permissions:
   - 'edit own article content'
   - 'edit own landing_page content'
   - 'edit own page content'
+  - 'flag export_content'
+  - 'flag export_media'
+  - 'review mukurtu submissions'
   - 'select account cancellation method'
+  - 'unflag export_content'
+  - 'unflag export_media'
+  - 'use mukurtu_default_content_workflow transition archive'
+  - 'use mukurtu_default_content_workflow transition restore'
+  - 'use mukurtu_editorial_workflow transition archive'
+  - 'use mukurtu_editorial_workflow transition restore'
   - 'view any mukurtu_import_log'
+  - 'view any unpublished content'
