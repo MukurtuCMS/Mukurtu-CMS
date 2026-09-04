@@ -13,6 +13,7 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\State\StateInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\layout_builder\InlineBlockUsageInterface;
 use Drupal\node\NodeInterface;
 
 /**
@@ -36,11 +37,14 @@ class DefaultLandingPage {
    *   The entity type manager.
    * @param \Drupal\Core\State\StateInterface $state
    *   The state service.
+   * @param \Drupal\layout_builder\InlineBlockUsageInterface $inlineBlockUsage
+   *   The inline block usage service.
    */
   public function __construct(
     protected ConfigFactoryInterface $configFactory,
     protected EntityTypeManagerInterface $entityTypeManager,
     protected StateInterface $state,
+    protected InlineBlockUsageInterface $inlineBlockUsage,
   ) {
   }
 
@@ -57,21 +61,34 @@ class DefaultLandingPage {
    *   The block_content bundle expected for this block.
    * @param array $values
    *   Field values to use if the block needs to be created.
+   * @param bool $reusable
+   *   Whether the block should be reusable. Blocks placed as Layout Builder
+   *   inline blocks (e.g. Featured Content) must be non-reusable; blocks
+   *   referenced by the layout as reusable "Content block" plugins keep the
+   *   default TRUE.
    *
    * @return \Drupal\block_content\Entity\BlockContent
    *   The existing or newly created block.
    */
-  protected function getOrCreateBlock(string $key, string $bundle, array $values): BlockContent {
+  protected function getOrCreateBlock(string $key, string $bundle, array $values, bool $reusable = TRUE): BlockContent {
     $uuids = $this->state->get(self::STATE_KEY, []);
     if (!empty($uuids[$key])) {
       $existing = $this->entityTypeManager->getStorage('block_content')
         ->loadByProperties(['uuid' => $uuids[$key]]);
       $block = reset($existing);
       if ($block instanceof BlockContent && $block->bundle() === $bundle) {
+        // Reconcile the reusable flag in case an earlier install or migration
+        // created this block with the wrong value.
+        if ($block->isReusable() !== $reusable) {
+          $block->set('reusable', $reusable);
+          $block->setNewRevision(TRUE);
+          $block->save();
+        }
         return $block;
       }
     }
 
+    $values['reusable'] = $reusable;
     $block = BlockContent::create($values);
     $block->save();
     $uuids[$key] = $block->uuid();
@@ -139,9 +156,7 @@ class DefaultLandingPage {
       'theme' => 'mukurtu_v4',
       // Initialize the featured content field to avoid issues.
       'field_featured_content' => [],
-    ]);
-    // Store UUID for Layout Builder reference
-    $featured_block_uuid = $featured_block_content->uuid();
+    ], reusable: FALSE);
 
     // Full Image with Description block content.
     $this->getOrCreateBlock('full_image', 'full_image_with_description', [
@@ -191,14 +206,22 @@ class DefaultLandingPage {
     );
     $hero_component->setWeight(0); // First block
 
+    // Placed as a Layout Builder inline block (not a reusable "Content block")
+    // so its "Configure" dialog embeds the block entity form, exposing the
+    // "Select Content" entity browser. Reusable placements only expose the
+    // title/label.
     $featured_component = new SectionComponent(
       $uuid_generator->generate(),
       'content',
       [
-        'id' => 'block_content:' . $featured_block_uuid,
+        'id' => 'inline_block:featured_content',
         'label' => 'Featured Content',
         'label_display' => 1,
-        'provider' => 'block_content',
+        'provider' => 'layout_builder',
+        'view_mode' => 'full',
+        'block_id' => (int) $featured_block_content->id(),
+        'block_revision_id' => (int) $featured_block_content->getRevisionId(),
+        'block_serialized' => NULL,
       ]
     );
     $featured_component->setWeight(1); // Second block
@@ -253,6 +276,11 @@ class DefaultLandingPage {
     // Set the layout on the node
     $homepage_node->set('layout_builder__layout', [$section]);
     $homepage_node->save();
+
+    // Record the inline block's usage against the homepage node. The layout
+    // config already carries a block_revision_id, so Layout Builder's own
+    // pre-save handler will not add this for us.
+    $this->inlineBlockUsage->addUsage((int) $featured_block_content->id(), $homepage_node);
 
     // Set the homepage to the new landing page node (system.site.yml is not owned by Mukurtu).
     $this->configFactory
