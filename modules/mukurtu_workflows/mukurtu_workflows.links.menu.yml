@@ -12,4 +12,4 @@ mukurtu_workflows.review_queue:
   description: 'Content submitted for your review as a Protocol Steward.'
   parent: mukurtu_dashboard
   menu_name: dashboard-notifications-review
-  weight: 2
+  weight: 3
