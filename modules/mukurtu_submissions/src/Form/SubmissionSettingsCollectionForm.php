@@ -7,10 +7,10 @@ namespace Drupal\mukurtu_submissions\Form;
 use Drupal\Component\Utility\EmailValidatorInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Config\TypedConfigManagerInterface;
+use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\user\Entity\User;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -22,11 +22,18 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class SubmissionSettingsCollectionForm extends ConfigFormBase {
 
+  /**
+   * Role granted to (and revoked from) users as they're added to/removed
+   * from notify_uids - see syncNotifyReviewerRoles().
+   */
+  const REVIEWER_ROLE = 'mukurtu_submission_reviewer';
+
   public function __construct(
     ConfigFactoryInterface $config_factory,
     TypedConfigManagerInterface $typed_config_manager,
     protected EntityTypeManagerInterface $entityTypeManager,
     protected EmailValidatorInterface $emailValidator,
+    protected EntityRepositoryInterface $entityRepository,
   ) {
     parent::__construct($config_factory, $typed_config_manager);
   }
@@ -40,6 +47,7 @@ class SubmissionSettingsCollectionForm extends ConfigFormBase {
       $container->get('config.typed'),
       $container->get('entity_type.manager'),
       $container->get('email.validator'),
+      $container->get('entity.repository'),
     );
   }
 
@@ -68,14 +76,41 @@ class SubmissionSettingsCollectionForm extends ConfigFormBase {
       '#type' => 'fieldset',
       '#title' => $this->t('Notifications'),
     ];
-    $form['notifications']['notify_uids'] = [
+
+    // Current reviewers: a table with a per-row "remove" checkbox, plus a
+    // single-user autocomplete to add one. Both the removals and the
+    // addition are applied together when the form is saved.
+    // notify_uids is the same source syncNotifyReviewerRoles() keeps the
+    // Submission Reviewer role in step with.
+    $reviewers = $this->entityTypeManager->getStorage('user')
+      ->loadMultiple($config->get('notify_uids') ?: []);
+    $form['notifications']['reviewers'] = [
+      '#type' => 'table',
+      '#caption' => $this->t('Submission reviewers'),
+      '#header' => [
+        ['data' => $this->t('Name'), 'scope' => 'col'],
+        ['data' => $this->t('Remove'), 'scope' => 'col'],
+      ],
+      '#empty' => $this->t('No additional reviewers have been added yet.'),
+    ];
+    foreach ($reviewers as $uid => $reviewer) {
+      $name = $this->entityRepository->getTranslationFromContext($reviewer)->getDisplayName();
+      $form['notifications']['reviewers'][$uid]['name'] = ['#plain_text' => $name];
+      $form['notifications']['reviewers'][$uid]['remove'] = [
+        '#type' => 'checkbox',
+        // Named per row so a screen reader reading the column of checkboxes
+        // out of context can still tell them apart.
+        '#title' => $this->t('Remove @name', ['@name' => $name]),
+        '#title_display' => 'invisible',
+      ];
+    }
+
+    $form['notifications']['add_reviewer'] = [
       '#type' => 'entity_autocomplete',
       '#target_type' => 'user',
       '#selection_handler' => 'mukurtu_submissions_notify_reviewer',
-      '#tags' => TRUE,
-      '#title' => $this->t('Additional reviewers to notify'),
-      '#description' => $this->t('These users will be notified in addition to Administrators and Mukurtu Managers whenever a visitor submits new content for review.'),
-      '#default_value' => User::loadMultiple($config->get('notify_uids') ?: []),
+      '#title' => $this->t('Add a reviewer'),
+      '#description' => $this->t('They are granted the Submission Reviewer role and notified whenever a visitor submits content for review, alongside Administrators and Mukurtu Managers. To publish a submission after assigning it to protocols, a reviewer also needs to be a steward of those protocols. Changes apply when you save.'),
     ];
     $form['notifications']['notify_emails'] = [
       '#type' => 'textarea',
@@ -121,14 +156,66 @@ class SubmissionSettingsCollectionForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state): void {
-    $uids = array_map('intval', array_column($form_state->getValue('notify_uids') ?: [], 'target_id'));
+    $config = $this->config('mukurtu_submissions.settings');
+    $old_uids = array_map('intval', $config->get('notify_uids') ?: []);
 
-    $this->config('mukurtu_submissions.settings')
-      ->set('notify_uids', array_values($uids))
+    // Drop rows whose "remove" box is checked, then append the one picked in
+    // the add field (if any, and not already present).
+    $removed = [];
+    foreach ((array) $form_state->getValue('reviewers') as $uid => $row) {
+      if (!empty($row['remove'])) {
+        $removed[] = (int) $uid;
+      }
+    }
+    $new_uids = array_values(array_diff($old_uids, $removed));
+
+    $added = $form_state->getValue('add_reviewer');
+    if ($added !== NULL && $added !== '' && !in_array((int) $added, $new_uids, TRUE)) {
+      $new_uids[] = (int) $added;
+    }
+
+    $config
+      ->set('notify_uids', $new_uids)
       ->set('notify_emails', $this->extractNotifyEmails($form_state))
       ->save();
 
+    $this->syncNotifyReviewerRoles($old_uids, $new_uids);
+
     parent::submitForm($form, $form_state);
+  }
+
+  /**
+   * Keeps notify_uids membership and the Submission Reviewer role in sync:
+   * a user newly added to the list is granted the role, a user removed
+   * from it has the role revoked. This never touches any other role a
+   * user holds - only this dedicated role is granted/revoked here. If a
+   * site admin has also assigned this specific role to a notify_uids
+   * member some other way (e.g. directly via /admin/people), removing
+   * them from this list will still revoke it.
+   */
+  protected function syncNotifyReviewerRoles(array $old_uids, array $new_uids): void {
+    $user_storage = $this->entityTypeManager->getStorage('user');
+    $added = array_diff($new_uids, $old_uids);
+    $removed = array_diff($old_uids, $new_uids);
+
+    foreach ($user_storage->loadMultiple($added) as $user) {
+      if (!$user->hasRole(static::REVIEWER_ROLE)) {
+        $user->addRole(static::REVIEWER_ROLE)->save();
+      }
+    }
+    foreach ($user_storage->loadMultiple($removed) as $user) {
+      if ($user->hasRole(static::REVIEWER_ROLE)) {
+        $user->removeRole(static::REVIEWER_ROLE)->save();
+      }
+    }
+
+    if ($added) {
+      $this->messenger()->addStatus($this->formatPlural(
+        count($added),
+        'Granted the Submission Reviewer role to 1 newly added reviewer.',
+        'Granted the Submission Reviewer role to @count newly added reviewers.'
+      ));
+    }
   }
 
 }
