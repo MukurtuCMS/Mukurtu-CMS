@@ -65,7 +65,7 @@
         "drupal/notify_user_default": "^1.0",
         "drupal/og": "^1.x-dev",
         "drupal/paragraphs": "^1.21",
-        "drupal/pathauto": "^1.14",
+        "drupal/pathauto": "~1.14.0",
         "drupal/readonly_field_widget": "^2.1",
         "drupal/rebuild_cache_access": "^1.12",
         "drupal/recaptcha": "^3.4",
@@ -166,9 +166,6 @@
             },
             "drupal/field_group": {
                 "Fix EntityViewDisplay/EntityFormDisplay::load() incompatibility with Drupal 11.3.x": "https://raw.githubusercontent.com/MukurtuCMS/Mukurtu-CMS/b9cc77302d1a471dbc1d5c5eb6921285d2da0806/patches/field_group-entity-load-11-3.patch"
-            },
-            "drupal/pathauto": {
-                "Fix missing source_module on PHP 8 MigrateSource attribute": "https://raw.githubusercontent.com/MukurtuCMS/Mukurtu-CMS/03c3074c9cfaef093456c2a0072ea4c772862bc9/patches/pathauto-source-module-missing-php8-attribute.patch"
             },
             "drupal/flat_taxonomy": {
                 "Fix null vocabulary crash in presave hook during migration": "https://raw.githubusercontent.com/MukurtuCMS/Mukurtu-CMS/b9cc77302d1a471dbc1d5c5eb6921285d2da0806/patches/flat-taxonomy-null-vocabulary-presave.patch"
