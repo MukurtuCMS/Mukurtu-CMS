@@ -8,6 +8,7 @@ use Drupal\Core\Cache\Cache;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Render\Markup;
+use Drupal\Core\Site\Settings;
 use Drupal\Core\State\StateInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 
@@ -23,6 +24,12 @@ class SiteSetupTaskManager {
 
   const GROUP_REQUIRED = 'required';
   const GROUP_RECOMMENDED = 'recommended';
+  const GROUP_SITE_OPERATIONS = 'site_operations';
+
+  /**
+   * Consider cron healthy if it has run within this many seconds.
+   */
+  const CRON_MAX_AGE = 86400;
 
   public function __construct(
     protected EntityTypeManagerInterface $entityTypeManager,
@@ -128,6 +135,60 @@ class SiteSetupTaskManager {
         '/admin/content/block/1',
         (string) $this->t('Edit footer content'),
       ),
+      new SiteSetupTask(
+        'set_cron',
+        (string) $this->t('Set up automated cron'),
+        (string) $this->t("Cron runs scheduled background work: search indexing, notifications, and cleanup. On a live site, have your server run Mukurtu's cron every 15 to 60 minutes instead of relying on visitor traffic."),
+        self::GROUP_SITE_OPERATIONS,
+        TRUE,
+        '/admin/config/system/cron',
+        (string) $this->t('Configure cron'),
+      ),
+      new SiteSetupTask(
+        'web_analytics',
+        (string) $this->t('Set up web analytics'),
+        (string) $this->t('Connect Google Analytics or Google Tag Manager to see how visitors use your site. Mukurtu also includes a built-in Visitors report.'),
+        self::GROUP_SITE_OPERATIONS,
+        TRUE,
+        '/admin/config/services/google-tag',
+        (string) $this->t('Set up Google Tag'),
+      ),
+      new SiteSetupTask(
+        'private_files',
+        (string) $this->t('Set the private file system path'),
+        (string) $this->t('Protected media and restricted downloads are served from the private file system. If the private file path is not set, protected files cannot be served safely. This is set in settings.php by whoever hosts your site.'),
+        self::GROUP_SITE_OPERATIONS,
+        TRUE,
+        '/admin/config/media/file-system',
+        (string) $this->t('View file system settings'),
+      ),
+      new SiteSetupTask(
+        'trusted_hosts',
+        (string) $this->t('Set trusted host patterns'),
+        (string) $this->t("Trusted host patterns tell Drupal which domains may serve your site, blocking Host header spoofing. Set this in settings.php to match your site's real domain instead of leaving it open."),
+        self::GROUP_SITE_OPERATIONS,
+        TRUE,
+        '/admin/reports/status',
+        (string) $this->t('View status report'),
+      ),
+      new SiteSetupTask(
+        'cookie_consent',
+        (string) $this->t('Review the cookie consent banner'),
+        (string) $this->t('Mukurtu uses Klaro to ask visitors for consent before loading third-party embeds and trackers. Review the consent categories and services so the banner matches what your site actually loads.'),
+        self::GROUP_SITE_OPERATIONS,
+        FALSE,
+        '/admin/config/user-interface/klaro',
+        (string) $this->t('Open Klaro settings'),
+      ),
+      new SiteSetupTask(
+        'bot_protection',
+        (string) $this->t('Review spam and bot protection'),
+        (string) $this->t('Mukurtu ships with CAPTCHA and Honeypot enabled. Review the settings and add reCAPTCHA or Cloudflare Turnstile keys if you want a stronger challenge on public forms.'),
+        self::GROUP_SITE_OPERATIONS,
+        FALSE,
+        '/admin/config/people/captcha/mukurtu-bot-protection',
+        (string) $this->t('Open bot protection settings'),
+      ),
     ];
   }
 
@@ -140,6 +201,7 @@ class SiteSetupTaskManager {
     $groups = [
       self::GROUP_REQUIRED => [],
       self::GROUP_RECOMMENDED => [],
+      self::GROUP_SITE_OPERATIONS => [],
     ];
     foreach ($this->getTasks() as $task) {
       $groups[$task->getGroup()][$task->getId()] = $task;
@@ -162,6 +224,10 @@ class SiteSetupTaskManager {
         'create_mukurtu_manager' => $this->mukurtuManagerExists(),
         'site_logo' => $this->isSiteLogoSet(),
         'site_footer' => $this->isFooterSet(),
+        'set_cron' => $this->isCronRecent(),
+        'web_analytics' => $this->isAnalyticsConfigured(),
+        'private_files' => $this->isPrivateFilePathSet(),
+        'trusted_hosts' => $this->areTrustedHostsSet(),
         default => FALSE,
       };
     }
@@ -312,6 +378,49 @@ class SiteSetupTaskManager {
       ->range(0, 1)
       ->execute();
     return !empty($ids);
+  }
+
+  /**
+   * Whether cron has run within self::CRON_MAX_AGE seconds.
+   */
+  private function isCronRecent(): bool {
+    $last = (int) $this->state->get('system.cron_last', 0);
+    return $last > 0 && (time() - $last) < self::CRON_MAX_AGE;
+  }
+
+  /**
+   * Whether at least one Google Tag container is configured.
+   */
+  private function isAnalyticsConfigured(): bool {
+    if (!$this->entityTypeManager->hasDefinition('google_tag_container')) {
+      return FALSE;
+    }
+    $count = $this->entityTypeManager
+      ->getStorage('google_tag_container')
+      ->getQuery()
+      ->accessCheck(FALSE)
+      ->count()
+      ->execute();
+    return $count > 0;
+  }
+
+  /**
+   * Whether the private file system path is configured in settings.php.
+   */
+  private function isPrivateFilePathSet(): bool {
+    return trim((string) Settings::get('file_private_path', '')) !== '';
+  }
+
+  /**
+   * Whether trusted host patterns are set to something other than a catch-all.
+   */
+  private function areTrustedHostsSet(): bool {
+    $patterns = array_filter(array_map('trim', (array) Settings::get('trusted_host_patterns', [])));
+    if (empty($patterns)) {
+      return FALSE;
+    }
+    $catch_all = ['.*', '^.*$', '^.+$', '.+'];
+    return (bool) array_diff($patterns, $catch_all);
   }
 
 }
