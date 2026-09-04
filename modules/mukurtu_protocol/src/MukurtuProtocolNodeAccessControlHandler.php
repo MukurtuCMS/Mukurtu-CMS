@@ -64,15 +64,43 @@ class MukurtuProtocolNodeAccessControlHandler extends NodeAccessControlHandler {
       case 'view revision':
       case 'revert revision':
       case 'delete revision':
+        // Once content is archived, view access is restricted to genuine
+        // site-wide privilege only -- this deliberately trumps protocol
+        // access (including a Protocol Steward's own OG-level "view any
+        // unpublished content" grant, honored by the branch below for
+        // every other unpublished state, and including ownership: an
+        // archived item's own author loses reach too). Archiving is meant
+        // to fully take content down until deliberately restored, the
+        // same as core node grants already do for a plain unpublished
+        // node with no special-cased state, and the same as
+        // mukurtu_drafts_entity_access() enforces for non-protocol-gated
+        // content.
+        if ($operation === 'view'
+          && $entity->hasField('moderation_state')
+          && $entity->get('moderation_state')->value === 'archived') {
+          if ($account->hasPermission('bypass node access')
+            || $account->hasPermission('administer nodes')
+            || $account->hasPermission('view any unpublished content')) {
+            return AccessResult::allowed()
+              ->addCacheableDependency($entity)
+              ->addCacheContexts(['user.permissions'])
+              ->addCacheTags(["user:{$account->id()}"]);
+          }
+          return AccessResult::forbidden()
+            ->addCacheableDependency($entity)
+            ->addCacheContexts(['user.permissions'])
+            ->addCacheTags(["user:{$account->id()}"]);
+        }
+
         // Core's NodeAccessControlHandler::checkAccess() only consults the
         // node access grants table (where getNodeAccessGrants() grants
         // protocol members 'view') for published nodes -- for unpublished
         // ones it only allows the owner (with "view own unpublished
         // content") or a site-wide bypass permission, ignoring grants
         // entirely. That leaves protocol/language stewards unable to view
-        // someone else's content the moment it's moved to draft/archived,
-        // even though their role explicitly grants "view any unpublished
-        // content" for exactly this purpose (see
+        // someone else's content the moment it's moved to draft/needs
+        // review/etc, even though their role explicitly grants "view any
+        // unpublished content" for exactly this purpose (see
         // config/install/og.og_role.protocol-protocol-protocol_steward.yml).
         if ($operation === 'view' && !$entity->isPublished() && CulturalProtocols::hasSiteOrProtocolPermission($entity, 'view any unpublished content', $account)) {
           return AccessResult::allowed()
@@ -83,6 +111,25 @@ class MukurtuProtocolNodeAccessControlHandler extends NodeAccessControlHandler {
 
       case 'update':
       case 'delete':
+        // Once content is archived, update/delete access is restricted to
+        // genuine site-wide privilege only -- the same carve-out as 'view'
+        // above, and for the same reason: an owner's ordinary "edit own
+        // <bundle> content" protocol permission doesn't care about
+        // moderation state, so without this it can be used to route around
+        // the archive/restore transition gate entirely (e.g. bulk-publishing
+        // straight out of archived). Archiving is meant to fully take
+        // content down until deliberately restored.
+        if ($entity->hasField('moderation_state')
+          && $entity->get('moderation_state')->value === 'archived'
+          && !$account->hasPermission('bypass node access')
+          && !$account->hasPermission('administer nodes')
+          && !$account->hasPermission('view any unpublished content')) {
+          return AccessResult::forbidden()
+            ->addCacheableDependency($entity)
+            ->addCacheContexts(['user.permissions'])
+            ->addCacheTags(["user:{$account->id()}"]);
+        }
+
         // Ask each member OG group about specific permissions.
         $ogAccessService = \Drupal::service('og.access');
         $protocols = $entity->getMemberProtocols($account);
