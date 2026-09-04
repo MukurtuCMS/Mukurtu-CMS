@@ -16,7 +16,7 @@ allowed_media_types:
   - external_embed
   - soundcloud
 access_expectations_enabled: true
-access_level: anonymous
+access_level: authenticated
 field_groups:
   -
     id: group_1

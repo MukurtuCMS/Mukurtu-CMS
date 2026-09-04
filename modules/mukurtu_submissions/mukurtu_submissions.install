@@ -485,3 +485,22 @@ function mukurtu_submissions_update_40013(): void {
     }
   }
 }
+
+/**
+ * Default new/never-enabled submission forms to authenticated-only access
+ * instead of fully anonymous (#1761).
+ *
+ * Only touches settings entities that are still disabled (status: false) and
+ * still on the shipped anonymous default -- a form an admin has already
+ * enabled while anonymous is left alone, since that's a live, deliberately
+ * public form.
+ */
+function mukurtu_submissions_update_40014(): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('mukurtu_submission_settings');
+  foreach ($storage->loadMultiple() as $settings) {
+    if (!$settings->status() && $settings->getAccessLevel() === 'anonymous') {
+      $settings->set('access_level', 'authenticated');
+      $settings->save();
+    }
+  }
+}

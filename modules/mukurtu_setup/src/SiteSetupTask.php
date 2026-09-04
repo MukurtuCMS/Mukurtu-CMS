@@ -19,7 +19,7 @@ final class SiteSetupTask {
    * @param string|\Drupal\Component\Render\MarkupInterface $description
    *   Longer description explaining why the task matters. May contain markup.
    * @param string $group
-   *   One of: 'required', 'recommended', 'optional'.
+   *   One of: 'required', 'recommended', 'site_operations'.
    * @param bool $canAutoDetect
    *   TRUE if completion can be detected automatically.
    * @param string|null $actionUrl
