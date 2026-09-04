@@ -35,6 +35,10 @@ class DashboardLinkCleanupTest extends KernelTestBase {
   protected static $modules = [
     'system',
     'user',
+    // Required so the "administer comments" permission granted by
+    // mukurtu_core_update_40116() is registered -- Role::calculateDependencies()
+    // silently strips any permission not defined by an enabled module.
+    'comment',
   ];
 
   /**
