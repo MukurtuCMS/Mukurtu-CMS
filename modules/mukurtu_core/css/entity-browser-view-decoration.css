@@ -1,0 +1,31 @@
+/**
+ * @file
+ * Visually hides the entity_browser_select checkbox/radio column on the
+ * generic content and multipage-item entity browsers.
+ *
+ * Visually hidden (not display:none) so the input stays in the DOM and
+ * usable, but out of the way visually - the row itself is the primary
+ * interactive element (role="checkbox"/"radio", set by
+ * entity_browser_view_decoration.js). Without this, the input would remain
+ * a visible, mouse-clickable control even though JS marks it
+ * aria-hidden/tabindex="-1", which is incoherent for assistive technology.
+ * Mirrors the same technique already used for the community browser in
+ * mukurtu_gin_custom/css/mukurtu-gin-custom.css - but unlike that view
+ * (list-format div rows), these two views render as tables, so the target
+ * is a <td>: the theme's own `td { box-sizing: border-box; padding: ... }`
+ * base rule otherwise keeps the cell's rendered box at least as wide as its
+ * padding, so padding/border have to be reset here too for width/height:1px
+ * to actually take effect.
+ */
+.view-mukurtu-content-browser .views-field-entity-browser-select,
+.view-multipage-item-browser .views-field-entity-browser-select {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  min-height: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
