@@ -1,0 +1,4 @@
+Keeps this directory in git so phpunit.xml's <directory> entry for it resolves.
+PHPUnit fails the whole testsuite with `Test directory "..." not found` if a
+configured directory is missing, so the profile-root Unit and Functional
+directories have to exist even while they are empty.
