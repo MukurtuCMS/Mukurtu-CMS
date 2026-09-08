@@ -98,3 +98,107 @@ function mukurtu_landing_page_update_40005(): void {
 
   node_access_rebuild();
 }
+
+/**
+ * Widen the landing page inline block allowlist; make Featured Content inline.
+ *
+ * Part A widens the landing page inline block allowlist to the full curated
+ * set (see \Drupal\mukurtu_core\Hook\LayoutBuilderHooks). Part B converts the
+ * default homepage's Featured Content component from a reusable "Content block"
+ * plugin (whose Configure dialog only exposes the title) to a Layout Builder
+ * inline block (whose Configure dialog embeds the block form, including the
+ * "Select Content" entity browser).
+ *
+ * The same end state ships in config/install and
+ * \Drupal\mukurtu_landing_page\DefaultLandingPage for fresh installs; this
+ * hook only migrates sites that already installed.
+ */
+function mukurtu_landing_page_update_40006(): void {
+  $curated_inline = [
+    'inline_block:basic',
+    'inline_block:call_to_action',
+    'inline_block:featured_content',
+    'inline_block:horizontal_divider',
+    'inline_block:local_contexts_block',
+    'inline_block:media_carousel_block',
+  ];
+
+  // Part A: widen the allowlist (mirrors update hooks 40003 and 40005).
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.landing_page.default');
+  if (!$config->isNew()) {
+    $allowlisted = $config->get('third_party_settings.layout_builder_restrictions.entity_view_mode_restriction.allowlisted_blocks') ?? [];
+    $allowlisted['Inline blocks'] = $curated_inline;
+    $config->set('third_party_settings.layout_builder_restrictions.entity_view_mode_restriction.allowlisted_blocks', $allowlisted);
+
+    $restricted = $config->get('third_party_settings.layout_builder_restrictions.entity_view_mode_restriction.restricted_categories') ?? [];
+    $restricted = array_values(array_filter($restricted, fn($c) => $c !== 'Inline blocks'));
+    $config->set('third_party_settings.layout_builder_restrictions.entity_view_mode_restriction.restricted_categories', $restricted);
+
+    $config->save();
+  }
+
+  // Part B: convert the default homepage's Featured Content component.
+  $uuids = \Drupal::state()->get('mukurtu_landing_page.default_blocks', []);
+  $featured_uuid = $uuids['featured'] ?? NULL;
+  if (!$featured_uuid) {
+    return;
+  }
+
+  $front = (string) \Drupal::config('system.site')->get('page.front');
+  if (!preg_match('#^/node/(\d+)$#', $front, $matches)) {
+    return;
+  }
+
+  $node = \Drupal::entityTypeManager()->getStorage('node')->load($matches[1]);
+  if (!$node instanceof \Drupal\node\NodeInterface || !$node->hasField('layout_builder__layout')) {
+    return;
+  }
+
+  $blocks = \Drupal::entityTypeManager()->getStorage('block_content')
+    ->loadByProperties(['uuid' => $featured_uuid]);
+  $block = $blocks ? reset($blocks) : NULL;
+  if (!$block instanceof \Drupal\block_content\BlockContentInterface) {
+    return;
+  }
+
+  /** @var \Drupal\layout_builder\Field\LayoutSectionItemList $field */
+  $field = $node->get('layout_builder__layout');
+  $sections = $field->getSections();
+  $changed = FALSE;
+
+  foreach ($sections as $section) {
+    foreach ($section->getComponents() as $component) {
+      $configuration = $component->get('configuration');
+      if (($configuration['id'] ?? '') !== 'block_content:' . $featured_uuid) {
+        continue;
+      }
+
+      if ($block->isReusable()) {
+        $block->set('reusable', FALSE);
+        $block->setNewRevision(TRUE);
+        $block->save();
+      }
+
+      $component->setConfiguration([
+        'id' => 'inline_block:featured_content',
+        'provider' => 'layout_builder',
+        'label' => $configuration['label'] ?? 'Featured Content',
+        'label_display' => $configuration['label_display'] ?? 1,
+        'view_mode' => 'full',
+        'block_id' => (int) $block->id(),
+        'block_revision_id' => (int) $block->getRevisionId(),
+        'block_serialized' => NULL,
+      ]);
+      $changed = TRUE;
+    }
+  }
+
+  if (!$changed) {
+    return;
+  }
+
+  $field->setValue($sections);
+  $node->save();
+
+  \Drupal::service('inline_block.usage')->addUsage((int) $block->id(), $node);
+}

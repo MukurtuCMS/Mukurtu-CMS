@@ -8,6 +8,7 @@ use DOMDocument;
 use DOMXPath;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\migrate\Attribute\MigrateProcess;
 use Drupal\migrate\MigrateException;
 use Drupal\migrate\MigrateExecutableInterface;
 use Drupal\migrate\ProcessPluginBase;
@@ -49,11 +50,11 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * attributes/shortcodes are removed before the content is saved. Existing
  * data-entity-uuid tags are passed through unchanged.
  *
- * @MigrateProcessPlugin(
- *   id = "mukurtu_resolve_media_embeds",
- *   handle_multiples = FALSE
- * )
  */
+#[MigrateProcess(
+  id: 'mukurtu_resolve_media_embeds',
+  handle_multiples: FALSE,
+)]
 class ResolveMediaEmbeds extends ProcessPluginBase implements ContainerFactoryPluginInterface {
 
   /**

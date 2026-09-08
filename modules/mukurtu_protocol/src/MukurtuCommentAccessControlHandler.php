@@ -28,30 +28,44 @@ class MukurtuCommentAccessControlHandler extends CommentAccessControlHandler {
     assert($entity instanceof CommentInterface);
     assert($entity instanceof EntityPublishedInterface);
 
-    // For view, allow protocol-level comment admins to see unpublished comments.
+    // For view, allow protocol-level comment admins to see unpublished
+    // comments, but only if they can also view the commented content itself -
+    // 'administer comments' must never leak access to a comment on content
+    // the account otherwise cannot view. Note this decision is returned
+    // directly rather than falling back to parent::checkAccess() when denied:
+    // core's own handler grants update/delete/approve unconditionally to any
+    // account with the *global* 'administer comments' permission, so falling
+    // back to it here would silently reopen the exact bypass this check
+    // exists to close for site-wide admins and Managers.
     if ($operation === 'view') {
       $commented_entity = $entity->getCommentedEntity();
       if ($commented_entity && CulturalProtocols::hasSiteOrProtocolPermission($commented_entity, 'administer comments', $account, FALSE)) {
         return AccessResult::allowed()
           ->cachePerPermissions()
           ->addCacheableDependency($entity)
-          ->addCacheableDependency($commented_entity);
+          ->addCacheableDependency($commented_entity)
+          ->andIf($commented_entity->access('view', $account, TRUE));
       }
       return parent::checkAccess($entity, $operation, $account);
     }
 
     // For update/delete, grant access to protocol-level comment admins on the
-    // entity being commented on. This intentionally allows protocol stewards to
-    // edit or delete any comment (including published ones by other users) on
-    // their protocol's content. Site-wide admins fall through to parent(), which
-    // grants them access via the 'administer comments' permission.
+    // entity being commented on, provided they can also view that entity.
+    // This intentionally allows protocol stewards to edit or delete any
+    // comment (including published ones by other users) on their protocol's
+    // content. As with 'view' above, this decision is returned directly
+    // rather than falling back to parent::checkAccess() when denied, since
+    // core's own handler would otherwise unconditionally allow any account
+    // holding the global 'administer comments' permission regardless of
+    // content-view access.
     if (in_array($operation, ['update', 'delete'])) {
       $commented_entity = $entity->getCommentedEntity();
       if ($commented_entity && CulturalProtocols::hasSiteOrProtocolPermission($commented_entity, 'administer comments', $account, FALSE)) {
         return AccessResult::allowed()
           ->cachePerPermissions()
           ->addCacheableDependency($entity)
-          ->addCacheableDependency($commented_entity);
+          ->addCacheableDependency($commented_entity)
+          ->andIf($commented_entity->access('view', $account, TRUE));
       }
       return parent::checkAccess($entity, $operation, $account);
     }
@@ -63,14 +77,17 @@ class MukurtuCommentAccessControlHandler extends CommentAccessControlHandler {
     }
 
     // For approve, allow protocol-level comment admins to approve unpublished
-    // comments on content they manage.
+    // comments on content they manage, again gated on being able to view that
+    // content and, for the same reason as above, returned directly rather
+    // than falling back to parent::checkAccess() when denied.
     if (!$entity->isPublished()) {
       $commented_entity = $entity->getCommentedEntity();
       if ($commented_entity && CulturalProtocols::hasSiteOrProtocolPermission($commented_entity, 'administer comments', $account, FALSE)) {
         return AccessResult::allowed()
           ->cachePerPermissions()
           ->addCacheableDependency($entity)
-          ->addCacheableDependency($commented_entity);
+          ->addCacheableDependency($commented_entity)
+          ->andIf($commented_entity->access('view', $account, TRUE));
       }
     }
 

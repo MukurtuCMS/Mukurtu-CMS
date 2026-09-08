@@ -6,15 +6,15 @@ namespace Drupal\Tests\mukurtu_submissions\Kernel;
 
 use Drupal\mukurtu_submissions\Entity\SubmissionSettings;
 use Drupal\user\Entity\Role;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests that "edit any {bundle} content" / "delete any {bundle} content"
  * are granted dynamically to reviewer roles when a settings entity for
  * that bundle is enabled - previously this only ever happened for
  * digital_heritage, hardcoded at install time.
- *
- * @group mukurtu_submissions
  */
+#[Group('mukurtu_submissions')]
 class ReviewerPermissionSyncTest extends MukurtuSubmissionsKernelTestBase {
 
   protected function createReviewerRole(): Role {

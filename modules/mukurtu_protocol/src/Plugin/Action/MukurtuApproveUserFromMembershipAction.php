@@ -4,21 +4,22 @@ namespace Drupal\mukurtu_protocol\Plugin\Action;
 
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Action\ActionBase;
+use Drupal\Core\Action\Attribute\Action;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\og\Entity\OgMembership;
 use Drupal\og\OgAccessInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Approves the Drupal user account of the selected pending community/protocol members.
- *
- * @Action(
- *   id = "mukurtu_approve_user_from_membership_action",
- *   label = @Translation("Approve pending user account(s)"),
- *   type = "og_membership"
- * )
  */
+#[Action(
+  id: 'mukurtu_approve_user_from_membership_action',
+  label: new TranslatableMarkup('Approve pending user account(s)'),
+  type: 'og_membership',
+)]
 class MukurtuApproveUserFromMembershipAction extends ActionBase implements ContainerFactoryPluginInterface {
 
   protected OgAccessInterface $ogAccess;

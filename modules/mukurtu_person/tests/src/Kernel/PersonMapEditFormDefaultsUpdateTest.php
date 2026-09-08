@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_person\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests mukurtu_person_update_40009(), which moves the person edit form
@@ -12,8 +13,8 @@ use Drupal\KernelTests\KernelTestBase;
  * editing a single already-saved point (#1453).
  *
  * @see mukurtu_person_update_40009()
- * @group mukurtu_person
  */
+#[Group('mukurtu_person')]
 class PersonMapEditFormDefaultsUpdateTest extends KernelTestBase {
 
   /**

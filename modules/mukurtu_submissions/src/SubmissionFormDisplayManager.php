@@ -24,6 +24,27 @@ use Drupal\mukurtu_submissions\Form\PublicSubmissionForm;
 class SubmissionFormDisplayManager {
 
   /**
+   * Field-type-keyed widget overrides for the public submission form.
+   *
+   * The public form's audience includes keyboard-only and screen reader
+   * visitors, for whom the Leaflet/Geoman map widget (the editorial
+   * default for geofield-type fields) has no accessible equivalent - see
+   * https://github.com/MukurtuCMS/Mukurtu-CMS/issues/1913. Keyed by field
+   * type so it applies to field_coverage (or any other geofield) on every
+   * bundle, regardless of what the bundle's own "default" form display
+   * uses.
+   */
+  const SUBMISSION_WIDGET_OVERRIDES = [
+    'geofield' => [
+      'type' => 'geofield_mukurtu_latlon',
+      'settings' => [
+        'instructions' => '',
+        'show_descriptions' => TRUE,
+      ],
+    ],
+  ];
+
+  /**
    * Administrative/scaffolding content types that ship with the profile
    * for general site-building rather than as community-authored content -
    * visitor submission doesn't make sense for these, so createDefaultForms()
@@ -205,6 +226,7 @@ class SubmissionFormDisplayManager {
       }
       $component = $display->getComponent($field_name) ?: ($default_display->getComponent($field_name) ?: []);
       $component = $this->applySimpleMediaUploadWidget($field_name, $component, $entity_type_id, $bundle);
+      $component = $this->applySubmissionWidgetOverride($field_name, $component, $entity_type_id, $bundle);
       $component = $this->applyParagraphSubmissionMode($field_name, $component, $definition, $visited);
       $display->setComponent($field_name, $component);
     }
@@ -421,6 +443,23 @@ class SubmissionFormDisplayManager {
 
     $component['type'] = 'mukurtu_simple_media_upload';
     $component['settings'] = ['allowed_bundles' => $allowed_bundles];
+    return $component;
+  }
+
+  /**
+   * Applies SUBMISSION_WIDGET_OVERRIDES to a form display component, if the
+   * field's type has an override and the component exists. Leaves the
+   * component alone (does not create one) for a field that isn't yet
+   * included on the display.
+   */
+  public function applySubmissionWidgetOverride(string $field_name, array $component, string $entity_type_id, string $bundle): array {
+    if (!$component) {
+      return $component;
+    }
+    $field_type = $this->entityFieldManager->getFieldDefinitions($entity_type_id, $bundle)[$field_name]?->getType();
+    if ($field_type !== NULL && isset(self::SUBMISSION_WIDGET_OVERRIDES[$field_type])) {
+      return self::SUBMISSION_WIDGET_OVERRIDES[$field_type] + $component;
+    }
     return $component;
   }
 

@@ -4,14 +4,14 @@ namespace Drupal\mukurtu_local_contexts\Plugin\views\filter;
 
 use Drupal\Core\Database\Connection;
 use Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager;
+use Drupal\views\Attribute\ViewsFilter;
 use Drupal\views\Plugin\views\filter\InOperator;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Filters content nodes by Local Contexts label or notice.
- *
- * @ViewsFilter("mukurtu_node_local_contexts_label_filter")
  */
+#[ViewsFilter('mukurtu_node_local_contexts_label_filter')]
 class NodeLocalContextsLabelFilter extends InOperator {
 
   public function __construct(

@@ -4,15 +4,13 @@ declare(strict_types = 1);
 
 namespace Drupal\mukurtu_import\Plugin\migrate\process;
 
+use Drupal\migrate\Attribute\MigrateProcess;
 use Drupal\migrate_plus\Plugin\migrate\process\EntityGenerate;
 
 /**
  * This plugin looks for existing entities.
- *
- * @MigrateProcessPlugin(
- *   id = "mukurtu_entity_generate"
- * )
  */
+#[MigrateProcess('mukurtu_entity_generate')]
 class MukurtuEntityGenerate extends EntityGenerate {
 
   /**

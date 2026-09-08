@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_notifications\Kernel;
 
+use Drupal\KernelTests\KernelTestBase;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
-use Drupal\KernelTests\KernelTestBase;
 use Drupal\message\Entity\Message;
 use Drupal\message\Entity\MessageTemplate;
 use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests mukurtu_notifications_notify_new_account_created()'s recipient list.
@@ -19,9 +20,8 @@ use Drupal\user\Entity\User;
  * qualified as a recipient of their own "new account created" notification,
  * since the manager-role lookup runs after the account is saved. See
  * mukurtu_notifications_notify_new_account_created().
- *
- * @group mukurtu_notifications
  */
+#[Group('mukurtu_notifications')]
 class NewAccountCreatedRecipientsTest extends KernelTestBase {
 
   /**

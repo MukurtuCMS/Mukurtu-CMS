@@ -1,6 +1,7 @@
 <?php
 
 use Drupal\mukurtu_import\Plugin\migrate\destination\ProtocolAwareEntityContent;
+use Drupal\mukurtu_import\Plugin\migrate\destination\ProtocolAwareUserContent;
 
 /**
  * Implements hook_migrate_destination_info_alter().
@@ -25,6 +26,9 @@ function mukurtu_import_migrate_destination_info_alter(array &$definitions) {
   }
   if (isset($definitions['entity:taxonomy_term'])) {
     $definitions['entity:taxonomy_term']['class'] = ProtocolAwareEntityContent::class;
+  }
+  if (isset($definitions['entity:user'])) {
+    $definitions['entity:user']['class'] = ProtocolAwareUserContent::class;
   }
 }
 

@@ -574,6 +574,7 @@ class SubmissionSettingsForm extends EntityForm {
         $component = $display->getComponent($field_name) ?: ($default_display->getComponent($field_name) ?: []);
         $component['weight'] = (int) $row['weight'];
         $component = $this->formDisplayManager->applySimpleMediaUploadWidget($field_name, $component, $entity_type_id, $bundle);
+        $component = $this->formDisplayManager->applySubmissionWidgetOverride($field_name, $component, $entity_type_id, $bundle);
         $display->setComponent($field_name, $component);
         if (!empty($row['group'])) {
           $assignments[$field_name] = $row['group'];
