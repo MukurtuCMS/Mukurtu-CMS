@@ -6,6 +6,7 @@ namespace Drupal\Tests\mukurtu_multipage_items\Kernel;
 
 use Drupal\Core\Config\FileStorage;
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests mukurtu_multipage_items_update_40011().
@@ -15,8 +16,8 @@ use Drupal\KernelTests\KernelTestBase;
  * confirms it fills them back in - and that running it twice is a no-op.
  *
  * @see \mukurtu_multipage_items_update_40011()
- * @group mukurtu_multipage_items
  */
+#[Group('mukurtu_multipage_items')]
 class MultipageItemBrowserViewLanguageFallbackTest extends KernelTestBase {
 
   /**

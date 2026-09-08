@@ -5,6 +5,7 @@ namespace Drupal\mukurtu_export\EventSubscriber;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Messenger\MessengerInterface;
+use Drupal\mukurtu_core\Service\EntityTranslationResolver;
 use Drupal\mukurtu_core\Service\ParagraphEmptinessChecker;
 use Drupal\mukurtu_export\Entity\CsvExporter;
 use Drupal\mukurtu_export\Event\EntityFieldExportEvent;
@@ -36,12 +37,20 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
   protected $paragraphEmptinessChecker;
 
   /**
+   * The entity translation resolver.
+   *
+   * @var \Drupal\mukurtu_core\Service\EntityTranslationResolver
+   */
+  protected $entityTranslationResolver;
+
+  /**
    * {@inheritDoc}
    */
-  public function __construct(MessengerInterface $messenger, EntityTypeManagerInterface $entity_type_manager, ParagraphEmptinessChecker $paragraph_emptiness_checker) {
+  public function __construct(MessengerInterface $messenger, EntityTypeManagerInterface $entity_type_manager, ParagraphEmptinessChecker $paragraph_emptiness_checker, EntityTranslationResolver $entity_translation_resolver) {
     $this->messenger = $messenger;
     $this->entityTypeManager = $entity_type_manager;
     $this->paragraphEmptinessChecker = $paragraph_emptiness_checker;
+    $this->entityTranslationResolver = $entity_translation_resolver;
   }
 
   /**
@@ -123,11 +132,25 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
       return $this->exportTimestamp($event, $field);
     }
 
+    // Layout Builder's per-entity section field stores structured Section
+    // objects with no meaningful flat CSV representation. New export
+    // configs no longer offer this field (see CsvExporter::getMappedFields()),
+    // but a config saved before that exclusion existed may still have it
+    // mapped, so guard here too rather than letting it reach the default
+    // handling below.
+    if ($fieldType == 'layout_section') {
+      $event->setValue([]);
+      return;
+    }
+
     // Default handling.
     $values = $entity->get($field_name)->getValue();
     $exportValue = [];
     foreach ($values as $value) {
-      $exportValue[] = is_array($value) ? reset($value) : $value;
+      $extracted = is_array($value) ? reset($value) : $value;
+      // Guard against field types whose getValue() returns a non-scalar
+      // (e.g. an object) that implode() in CSV::export() cannot stringify.
+      $exportValue[] = is_scalar($extracted) ? $extracted : '';
     }
     $event->setValue($exportValue);
   }
@@ -155,6 +178,25 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
    *
    * @protected
    */
+  /**
+   * Loads an entity for export, honoring the row's requested translation.
+   *
+   * When the row entity ($event->entity) is being exported in a specific
+   * translation (not its own original language), referenced entities
+   * should resolve to that same translation where one exists. Otherwise
+   * this is a plain load, unchanged from before - deliberately not routed
+   * through EntityTranslationResolver's active-content-language fallback,
+   * which would silently pull in the *current request's* language instead
+   * of the referenced entity's own default one.
+   */
+  protected function loadForExport(string $entity_type_id, $id, EntityFieldExportEvent $event): ?EntityInterface {
+    $langcode = $event->getLangcode();
+    if ($langcode) {
+      return $this->entityTranslationResolver->loadTranslated($entity_type_id, $id, $langcode);
+    }
+    return $this->entityTypeManager->getStorage($entity_type_id)->load($id);
+  }
+
   protected function getUUID($entity_type_id, $id) {
     if ($entity = $this->entityTypeManager->getStorage($entity_type_id)->load($id)) {
       return $entity->uuid();
@@ -246,7 +288,7 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
           }
 
           if ($target_type == 'taxonomy_term' && $option == 'name') {
-            if ($term = $this->entityTypeManager->getStorage($target_type)->load($id)) {
+            if ($term = $this->loadForExport($target_type, $id, $event)) {
               /** @var \Drupal\taxonomy\TermInterface $term */
               $export[] = $term->getName();
               continue;
@@ -610,7 +652,7 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
    * @protected
    */
   protected function exportEntityById(EntityFieldExportEvent $event, $entity_type_id, $id): EntityInterface|null {
-    if ($entity = $this->entityTypeManager->getStorage($entity_type_id)->load($id)) {
+    if ($entity = $this->loadForExport($entity_type_id, $id, $event)) {
       $event->exportAdditionalEntity($entity);
       return $entity;
     }
@@ -624,7 +666,7 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
    * exported as identifiers only -- their references will not be followed further.
    */
   protected function exportEntityByIdShallow(EntityFieldExportEvent $event, $entity_type_id, $id): EntityInterface|null {
-    if ($entity = $this->entityTypeManager->getStorage($entity_type_id)->load($id)) {
+    if ($entity = $this->loadForExport($entity_type_id, $id, $event)) {
       $event->exportAdditionalEntity($entity);
       $event->context['results']['shallow_entity_ids'][$entity_type_id][$id] = $id;
       return $entity;

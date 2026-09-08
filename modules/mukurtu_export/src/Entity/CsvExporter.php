@@ -471,6 +471,13 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface {
         continue;
       }
 
+      // Layout Builder's per-entity section field stores structured
+      // Section objects, not exportable scalar/reference data -- skip it
+      // like a computed field rather than offering it as a mappable column.
+      if ($field_def->getType() === 'layout_section') {
+        continue;
+      }
+
       // Passwords and internal login bookkeeping fields must never be
       // exportable. Keep in sync with ImportFormTrait::getFieldDefinitions()'s
       // equivalent exclusion in modules/mukurtu_import.

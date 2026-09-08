@@ -85,6 +85,10 @@ class ExportList extends ContentEntityBase implements EntityOwnerInterface {
       ->setLabel(t('Items'))
       ->setDescription(t('Serialized map of entity_type_id => [id => id] pairs.'));
 
+    $fields['item_languages'] = BaseFieldDefinition::create('map')
+      ->setLabel(t('Item languages'))
+      ->setDescription(t('Serialized map of "entity_type:id" => langcode pairs, for items whose export should use a specific translation instead of their original language. Additive to items - an item with no entry here exports in its original language, unchanged from before this field existed.'));
+
     $fields['created'] = BaseFieldDefinition::create('created')
       ->setLabel(t('Created'));
 
@@ -171,6 +175,55 @@ class ExportList extends ContentEntityBase implements EntityOwnerInterface {
       $items[$entity_type_id][$id] = $id;
     }
     $this->setItems($items);
+    return $this;
+  }
+
+  /**
+   * Gets the requested-translation langcode for a list item, if one is set.
+   *
+   * @param string $entity_type_id
+   *   The entity type ID.
+   * @param int|string $id
+   *   The entity ID.
+   *
+   * @return string|null
+   *   The langcode, or NULL if the item should export in its original
+   *   language (the default, and the only option before this field
+   *   existed).
+   */
+  public function getItemLanguage(string $entity_type_id, int|string $id): ?string {
+    $first = $this->get('item_languages')->first();
+    $languages = $first ? ($first->value ?? []) : [];
+    return $languages["{$entity_type_id}:{$id}"] ?? NULL;
+  }
+
+  /**
+   * Sets (or clears) the requested-translation langcode for a list item.
+   *
+   * Does not save the entity; callers should call save() once after
+   * making all the changes they need.
+   *
+   * @param string $entity_type_id
+   *   The entity type ID.
+   * @param int|string $id
+   *   The entity ID.
+   * @param string|null $langcode
+   *   The langcode to export this item in, or NULL to clear any previously
+   *   set langcode and export it in its original language.
+   *
+   * @return $this
+   */
+  public function setItemLanguage(string $entity_type_id, int|string $id, ?string $langcode) {
+    $first = $this->get('item_languages')->first();
+    $languages = $first ? ($first->value ?? []) : [];
+    $key = "{$entity_type_id}:{$id}";
+    if ($langcode) {
+      $languages[$key] = $langcode;
+    }
+    else {
+      unset($languages[$key]);
+    }
+    $this->set('item_languages', ['value' => $languages]);
     return $this;
   }
 

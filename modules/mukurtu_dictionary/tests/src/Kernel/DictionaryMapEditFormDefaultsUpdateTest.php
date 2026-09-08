@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_dictionary\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests mukurtu_dictionary_update_40041(), which moves the dictionary word
@@ -12,8 +13,8 @@ use Drupal\KernelTests\KernelTestBase;
  * dedicated zoom for editing a single already-saved point (#1453).
  *
  * @see mukurtu_dictionary_update_40041()
- * @group mukurtu_dictionary
  */
+#[Group('mukurtu_dictionary')]
 class DictionaryMapEditFormDefaultsUpdateTest extends KernelTestBase {
 
   /**

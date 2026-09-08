@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_dictionary\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests mukurtu_dictionary_update_40042(), which points the sample sentence
@@ -13,8 +14,8 @@ use Drupal\KernelTests\KernelTestBase;
  * button instead of a plain download icon (#2019).
  *
  * @see mukurtu_dictionary_update_40042()
- * @group mukurtu_dictionary
  */
+#[Group('mukurtu_dictionary')]
 class SampleSentenceRecordingDisplayUpdateTest extends KernelTestBase {
 
   /**

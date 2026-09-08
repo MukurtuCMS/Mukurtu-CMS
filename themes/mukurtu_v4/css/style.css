@@ -80,8 +80,7 @@ video {
 
 a {
   color: var(--brand-primary-dark);
-  -webkit-text-decoration: underline solid 2px var(--brand-primary-dark);
-          text-decoration: underline solid 2px var(--brand-primary-dark);
+  text-decoration: underline solid 2px var(--brand-primary-dark);
   -webkit-transition: color 0.12s ease-in, text-decoration-color 0.12s ease-in;
   transition: color 0.12s ease-in, text-decoration-color 0.12s ease-in;
 }
@@ -3089,6 +3088,15 @@ img[class$=-placeholder] {
   height: calc(88vh - 2rem);
   min-height: 400px;
 }
+.glightbox-clean .gslide-inline iframe.media-oembed-content {
+  display: block;
+  width: auto;
+  height: auto;
+  min-height: 0;
+  max-width: 100%;
+  max-height: calc(92vh - 2rem - 40px);
+  margin: 0 auto;
+}
 .glightbox-clean .gslide-inline .media-asset--document-viewer {
   display: block;
   width: 100%;
@@ -4188,8 +4196,7 @@ body.is-always-mobile-nav .header-nav::before {
 .account-menu__menu-link {
   color: var(--light-text-color);
   font-weight: var(--text-bold);
-  -webkit-text-decoration: underline solid 2px var(--color-transparent);
-          text-decoration: underline solid 2px var(--color-transparent);
+  text-decoration: underline solid 2px var(--color-transparent);
   text-underline-offset: 2px;
   -webkit-transition: color 0.12s ease-in, text-decoration-color 0.12s ease-in;
   transition: color 0.12s ease-in, text-decoration-color 0.12s ease-in;
@@ -4669,8 +4676,7 @@ body.is-fixed {
 }
 .page__breadcrumbs a {
   color: var(--brand-text-color);
-  -webkit-text-decoration: underline solid 2px var(--brand-text-color);
-          text-decoration: underline solid 2px var(--brand-text-color);
+  text-decoration: underline solid 2px var(--brand-text-color);
   -webkit-transition: color 0.12s ease-in, text-decoration-color 0.12s ease-in;
   transition: color 0.12s ease-in, text-decoration-color 0.12s ease-in;
 }
@@ -5658,12 +5664,10 @@ header {
 }
 .collections__content__container h2 a {
   color: var(--brand-primary);
-  -webkit-text-decoration: underline solid 2px var(--brand-secondary);
-          text-decoration: underline solid 2px var(--brand-secondary);
+  text-decoration: underline solid 2px var(--brand-secondary);
 }
 .collections__content__container h2 a:hover {
-  -webkit-text-decoration: underline solid 2px var(--brand-primary-dark);
-          text-decoration: underline solid 2px var(--brand-primary-dark);
+  text-decoration: underline solid 2px var(--brand-primary-dark);
 }
 .collections__content__container h2::after {
   content: "";
@@ -5705,14 +5709,12 @@ header {
   font-weight: var(--text-bold);
   letter-spacing: var(--letter-spacing-label);
   color: var(--brand-primary);
-  -webkit-text-decoration: underline solid 2px var(--brand-secondary);
-          text-decoration: underline solid 2px var(--brand-secondary);
+  text-decoration: underline solid 2px var(--brand-secondary);
 }
 .collections__content__view-collection a:hover {
   -webkit-margin-end: var(--v-space-6xs);
           margin-inline-end: var(--v-space-6xs);
-  -webkit-text-decoration: underline solid 2px var(--brand-primary-dark);
-          text-decoration: underline solid 2px var(--brand-primary-dark);
+  text-decoration: underline solid 2px var(--brand-primary-dark);
   -webkit-transition: -webkit-margin-end 0.1s ease-out;
   transition: -webkit-margin-end 0.1s ease-out;
   transition: margin-inline-end 0.1s ease-out;

@@ -8,6 +8,7 @@ use Drupal\entity_browser\Entity\EntityBrowser;
 use Drupal\mukurtu_submissions\Entity\SubmissionSettings;
 use Drupal\node\Entity\NodeType;
 use Drupal\user\Entity\Role;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests that access to whichever entity browser(s) a bundle's submission
@@ -17,9 +18,8 @@ use Drupal\user\Entity\Role;
  * permission()'s own logic exactly, since Entity Browser gates each
  * browser's modal route behind a distinct "access {id} entity browser
  * pages" permission separate from the field's own rendering.
- *
- * @group mukurtu_submissions
  */
+#[Group('mukurtu_submissions')]
 class EntityBrowserPermissionSyncTest extends MukurtuSubmissionsKernelTestBase {
 
   /**

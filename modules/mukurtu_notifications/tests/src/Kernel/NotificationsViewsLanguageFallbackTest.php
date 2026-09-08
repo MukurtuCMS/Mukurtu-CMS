@@ -6,6 +6,7 @@ namespace Drupal\Tests\mukurtu_notifications\Kernel;
 
 use Drupal\Core\Config\FileStorage;
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests mukurtu_notifications_update_40056().
@@ -15,8 +16,8 @@ use Drupal\KernelTests\KernelTestBase;
  * confirms it fills them back in - and that running it twice is a no-op.
  *
  * @see \mukurtu_notifications_update_40056()
- * @group mukurtu_notifications
  */
+#[Group('mukurtu_notifications')]
 class NotificationsViewsLanguageFallbackTest extends KernelTestBase {
 
   /**

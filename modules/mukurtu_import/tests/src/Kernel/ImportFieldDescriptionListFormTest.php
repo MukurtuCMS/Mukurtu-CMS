@@ -154,7 +154,7 @@ class ImportFieldDescriptionListFormTest extends MukurtuImportTestBase {
 
     $response = $form_state->getResponse();
     $this->assertNotNull($response, 'Submitting the form produces a downloadable response.');
-    $headers = str_getcsv(rtrim($response->getContent(), "\r\n"));
+    $headers = str_getcsv(rtrim($response->getContent(), "\r\n"), ',', '"', '\\');
     $this->assertSame(array_values($expected_headers), $headers, 'The downloaded CSV contains a header for every field in both sections.');
   }
 

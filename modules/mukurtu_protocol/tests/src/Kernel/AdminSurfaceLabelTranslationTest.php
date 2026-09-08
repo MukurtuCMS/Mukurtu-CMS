@@ -12,14 +12,14 @@ use Drupal\mukurtu_protocol\Entity\Protocol;
 use Drupal\mukurtu_protocol\Form\AddMemberToCommunityForm;
 use Drupal\mukurtu_protocol\Form\AddUserToCommunityForm;
 use Drupal\mukurtu_protocol\ProtocolListBuilder;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests that admin/editor-facing surfaces show protocol/community names in
  * the active content language, covering the same anti-pattern fixed for
  * visitor-facing surfaces in #1671 (see ProtocolLabelTranslationTest).
- *
- * @group mukurtu_protocol
  */
+#[Group('mukurtu_protocol')]
 class AdminSurfaceLabelTranslationTest extends ProtocolAwareEntityTestBase {
 
   /**

@@ -6,6 +6,7 @@ namespace Drupal\Tests\mukurtu_core\Kernel;
 
 use Drupal\Core\Config\FileStorage;
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests mukurtu_core_update_40106().
@@ -15,8 +16,8 @@ use Drupal\KernelTests\KernelTestBase;
  * confirms it fills them back in - and that running it twice is a no-op.
  *
  * @see \mukurtu_core_update_40106()
- * @group mukurtu_core
  */
+#[Group('mukurtu_core')]
 class ContentBrowserViewLanguageFallbackTest extends KernelTestBase {
 
   /**

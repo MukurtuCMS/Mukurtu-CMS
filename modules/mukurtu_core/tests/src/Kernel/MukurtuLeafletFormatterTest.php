@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_core\Kernel;
 
+use Drupal\KernelTests\KernelTestBase;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
-use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests that rendering a mukurtu_leaflet_formatter field never mutates the
@@ -23,9 +24,8 @@ use Drupal\KernelTests\KernelTestBase;
  * multi-delta) entity object were later reloaded from Drupal's per-request
  * entity cache and saved, everything past delta 0 would be silently
  * truncated on save.
- *
- * @group mukurtu_core
  */
+#[Group('mukurtu_core')]
 class MukurtuLeafletFormatterTest extends KernelTestBase {
 
   /**

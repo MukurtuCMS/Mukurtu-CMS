@@ -186,11 +186,16 @@ function mukurtu_notifications_create_field_notify_email_categories(): void {
 
 /**
  * Creates the field_notify_frequency storage and attachment on the user
- * entity if missing.
+ * entity if missing, and backfills any user with an empty value to
+ * 'immediate'.
  *
- * No backfill needed: _mukurtu_notifications_user_wants_digest() already
- * treats an empty/unset value as "immediate" (today's behavior for every
- * existing user), so only the default for brand-new users needs setting.
+ * A user can end up with an empty stored value in more than one way: sites
+ * upgrading from before this field existed, or even a fresh install, since
+ * uid 1 is typically created before this hook runs and FieldConfig's
+ * default_value only populates entities created after the field exists.
+ * Backfilling unconditionally here -- the same way this file's
+ * field_notify_email_categories creation function does above -- covers
+ * every path that calls this function, not just the update-hook path.
  */
 function mukurtu_notifications_create_field_notify_frequency(): void {
   if (!\Drupal\field\Entity\FieldStorageConfig::loadByName('user', 'field_notify_frequency')) {
@@ -213,12 +218,20 @@ function mukurtu_notifications_create_field_notify_frequency(): void {
       'bundle' => 'user',
       'label' => 'Email frequency',
       'description' => 'How often you want to receive notification emails.',
-      'required' => FALSE,
+      'required' => TRUE,
       'default_value' => [['value' => 'immediate']],
     ])->save();
   }
 
   \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
+
+  $uids = \Drupal::entityQuery('user')->accessCheck(FALSE)->execute();
+  foreach (\Drupal\user\Entity\User::loadMultiple($uids) as $user) {
+    if ($user->hasField('field_notify_frequency') && $user->get('field_notify_frequency')->isEmpty()) {
+      $user->set('field_notify_frequency', 'immediate');
+      $user->save();
+    }
+  }
 }
 
 /**
@@ -2008,7 +2021,6 @@ function mukurtu_notifications_update_40055(): void {
   $uid_one->save();
 }
 
-
 /**
  * Adds the language-fallback default_langcode filter and rendering_language
  * setting to mukurtu_recent_content and mukurtu_message_log's visitor-facing
@@ -2128,5 +2140,32 @@ function mukurtu_notifications_update_40056(): void {
       $config_mukurtu_message_log->set('display.mukurtu_notifications_page.display_options.rendering_language', '***LANGUAGE_language_content***');
       $config_mukurtu_message_log->save();
     }
+  }
+}
+
+/**
+ * Adds a real "Do not send emails" option and makes the field required.
+ *
+ * field_notify_frequency previously had no allowed value for opting out --
+ * the "N/A" radio users saw was Drupal's synthetic empty-option placeholder
+ * for optional list fields (OptionsWidgetBase::formElement()), which always
+ * saves as an empty value indistinguishable from "never touched this
+ * field" and cannot suppress email on its own. Adding a real 'none' value
+ * only works once the field stops offering that synthetic placeholder,
+ * which requires marking it required.
+ *
+ * mukurtu_notifications_create_field_notify_frequency() already backfills
+ * any user with an empty stored value to 'immediate' (today's actual
+ * behavior for such users; see _mukurtu_notifications_user_wants_email()),
+ * so calling it here first ensures the required constraint below doesn't
+ * leave anyone in a stale empty state before it's enforced.
+ */
+function mukurtu_notifications_update_40057(): void {
+  mukurtu_notifications_create_field_notify_frequency();
+
+  $field = \Drupal\field\Entity\FieldConfig::loadByName('user', 'user', 'field_notify_frequency');
+  if ($field && !$field->isRequired()) {
+    $field->setRequired(TRUE);
+    $field->save();
   }
 }

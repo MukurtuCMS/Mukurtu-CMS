@@ -7,6 +7,8 @@ namespace Drupal\Tests\mukurtu_submissions\Kernel;
 use Drupal\Core\Entity\Entity\EntityFormMode;
 use Drupal\Core\Form\FormState;
 use Drupal\Core\Serialization\Yaml;
+use Drupal\Tests\content_moderation\Traits\ContentModerationTestTrait;
+use Drupal\Tests\mukurtu_protocol\Kernel\ProtocolAwareEntityTestBase;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\mukurtu_protocol\Plugin\Field\FieldType\CulturalProtocolItem;
@@ -14,10 +16,9 @@ use Drupal\mukurtu_submissions\Entity\SubmissionSettings;
 use Drupal\mukurtu_submissions\Form\PublicSubmissionForm;
 use Drupal\mukurtu_workflows\Form\ReviewStateForm;
 use Drupal\node\Entity\Node;
-use Drupal\Tests\content_moderation\Traits\ContentModerationTestTrait;
-use Drupal\Tests\mukurtu_protocol\Kernel\ProtocolAwareEntityTestBase;
 use Drupal\user\Entity\Role;
 use Drupal\workflows\Entity\Workflow;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Verifies a visitor's submission can actually be driven end to end -
@@ -35,9 +36,8 @@ use Drupal\workflows\Entity\Workflow;
  * unconnected to mukurtu_submissions - this test is the missing link: the
  * same logic, reached via PublicSubmissionForm's own node creation, using
  * the actual config a site ships with.
- *
- * @group mukurtu_submissions
  */
+#[Group('mukurtu_submissions')]
 class PublishingWorkflowIntegrationTest extends ProtocolAwareEntityTestBase {
 
   use ContentModerationTestTrait;

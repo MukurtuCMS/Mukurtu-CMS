@@ -6,14 +6,15 @@ namespace Drupal\Tests\mukurtu_core\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\user\Entity\Role;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests mukurtu_core_update_40105(), which grants the Mukurtu Manager role
  * permission to view site reports.
  *
  * @see mukurtu_core_update_40105()
- * @group mukurtu_core
  */
+#[Group('mukurtu_core')]
 class SiteReportsPermissionUpdateTest extends KernelTestBase {
 
   /**
