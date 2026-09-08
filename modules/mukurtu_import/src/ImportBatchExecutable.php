@@ -308,8 +308,34 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
     }
 
     $store->set('batch_results_success', $success && !$has_row_failures && !$has_migration_failure && !$has_silent_noop);
-    $store->set('batch_results_noop', $has_silent_noop && !$has_row_failures && !$has_migration_failure);
+    // A single migration in the batch being a silent no-op shouldn't imply
+    // the whole batch imported nothing -- other migrations in the same
+    // batch (e.g. a separate file/entity type) may have created or updated
+    // content. Only warn when nothing was created or updated anywhere in
+    // the batch.
+    $store->set('batch_results_noop', $has_silent_noop && !$has_row_failures && !$has_migration_failure && $imported_count === 0);
     $store->set('batch_results_messages', $messages);
+
+    // Summarize created/updated/failed counts per target entity type. Unlike
+    // node/media/community/protocol/taxonomy_term, User entities have no
+    // revision log to filter a results View by, so the results form falls
+    // back to this simple count summary for 'user' migrations.
+    $summary = [];
+    foreach ($results as $migration_id => $data) {
+      if (!is_array($data) || !isset($data['@created'])) {
+        continue;
+      }
+      // Migration IDs are formatted as "{uid}__{fid}__{entity_type}__{bundle}".
+      $parts = explode('__', (string) $migration_id);
+      $entity_type_id = $parts[2] ?? NULL;
+      if (!$entity_type_id) {
+        continue;
+      }
+      $summary[$entity_type_id]['created'] = ($summary[$entity_type_id]['created'] ?? 0) + $data['@created'];
+      $summary[$entity_type_id]['updated'] = ($summary[$entity_type_id]['updated'] ?? 0) + $data['@updated'];
+      $summary[$entity_type_id]['failures'] = ($summary[$entity_type_id]['failures'] ?? 0) + $data['@failures'];
+    }
+    $store->set('batch_results_summary', $summary);
 
     if (\Drupal::moduleHandler()->moduleExists('mukurtu_notifications')) {
       mukurtu_notifications_notify_batch_import_report($imported_count, static::buildResultsSummary($per_migration_summary, $messages));

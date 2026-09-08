@@ -11,6 +11,7 @@ display_configuration:
   height: '800'
   link_text: 'Select Terms'
   auto_open: false
+  use_admin_theme: true
 selection_display: multi_step_display
 selection_display_configuration:
   entity_type: taxonomy_term

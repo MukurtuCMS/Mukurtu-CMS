@@ -35,9 +35,10 @@ class ImportTimestampTest extends MukurtuImportTestBase {
    */
   public function testTimestamp() {
     $new_created_time = '1682017200';
+    $new_created_time_human_readable = '2023-04-20 19:00:00';
     $data = [
       ['nid', 'created'],
-      [$this->node->id(), $new_created_time],
+      [$this->node->id(), $new_created_time_human_readable],
     ];
     $import_file = $this->createCsvFile($data);
 

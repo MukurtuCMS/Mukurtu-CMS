@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_submissions\Kernel;
 
 use Drupal\user\Entity\User;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests that the "Additional reviewers to notify" autocomplete never
  * offers Anonymous or the hidden submissions service account - neither
  * is a real reviewer a site builder would ever want to notify.
- *
- * @group mukurtu_submissions
  */
+#[Group('mukurtu_submissions')]
 class NotifyReviewerUserSelectionTest extends MukurtuSubmissionsKernelTestBase {
 
   /**

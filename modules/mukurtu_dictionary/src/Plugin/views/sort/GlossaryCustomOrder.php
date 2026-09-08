@@ -17,8 +17,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * This sort plugin works with Search API views to sort results based on
  * user-defined glossary entry weights configured in the
  * mukurtu_dictionary_glossary_order.settings config object.
- *
- * @ViewsSort("glossary_custom_order")
  */
 #[ViewsSort("glossary_custom_order")]
 class GlossaryCustomOrder extends SortPluginBase {

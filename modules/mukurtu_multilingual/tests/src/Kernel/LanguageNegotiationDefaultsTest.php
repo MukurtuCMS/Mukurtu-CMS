@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_multilingual\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests _mukurtu_multilingual_apply_language_negotiation_defaults().
  *
  * @see _mukurtu_multilingual_apply_language_negotiation_defaults()
- * @group mukurtu_multilingual
  */
+#[Group('mukurtu_multilingual')]
 class LanguageNegotiationDefaultsTest extends KernelTestBase {
 
   /**

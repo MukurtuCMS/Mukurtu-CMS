@@ -97,7 +97,7 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     $form['identifier_column'] = [
       '#type' => 'select',
       '#title' => $this->t('Identifier Column'),
-      '#description' => $this->t('Optional. Select a column to use as the unique identifier for each row. When set, this takes precedence over entity ID, UUID, and label columns for tracking rows in the import. Use this when importing entities without a natural label (e.g. paragraphs) so they can be referenced by other CSVs in the same import session.'),
+      '#description' => $this->t('Required unless the mapping already identifies rows via an ID, UUID, label, or compatible media source column. Select a column to use as the unique identifier for each row. When set, this takes precedence over entity ID, UUID, and label columns for tracking rows in the import. Use this when importing entities without a natural label (e.g. paragraphs) so they can be referenced by other CSVs in the same import session.'),
       '#options' => $header_options,
       '#default_value' => $this->importConfig->getConfig('identifier_column') ?? '',
     ];
@@ -254,7 +254,7 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
       $form['mappings'][$delta]['target'] = [
         '#type' => 'select',
         '#options' => $this->buildTargetOptions($entity_type_id, $bundle),
-        '#default_value' => $this->importConfig->getMappedTarget($header) ?? $this->getAutoMappedTarget($header, $entity_type_id, $bundle),
+        '#default_value' => $this->importConfig->getMappedTarget($header) ?? $this->getAutoMappedTarget($header, $entity_type_id, $bundle, $this->importConfig ? $this->importConfig->getMapping() : []),
         '#prefix' => "<div id=\"edit-mappings-{$delta}-target-options\">",
         '#suffix' => "</div>",
         '#validated' => TRUE,
@@ -382,8 +382,8 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     $headers = $this->getCSVHeaders($file);
     foreach ($headers as $delta => $header) {
       $form['mappings'][$delta]['target']['#options'] = $this->buildTargetOptions($entity_type_id, $bundle);
-      $form['mappings'][$delta]['target']['#default_value'] = $this->getAutoMappedTarget($header, $entity_type_id, $bundle);
-      $form['mappings'][$delta]['target']['#value'] = $this->getAutoMappedTarget($header, $entity_type_id, $bundle);
+      $form['mappings'][$delta]['target']['#default_value'] = $this->getAutoMappedTarget($header, $entity_type_id, $bundle, $this->importConfig ? $this->importConfig->getMapping() : []);
+      $form['mappings'][$delta]['target']['#value'] = $this->getAutoMappedTarget($header, $entity_type_id, $bundle, $this->importConfig ? $this->importConfig->getMapping() : []);
       $form['mappings']['#value'][$delta]['target'] = $form['mappings'][$delta]['target']['#default_value'];
       $userInput['mappings'][$delta]['target'] = $form['mappings'][$delta]['target']['#default_value'];
       $response->addCommand(new ReplaceCommand("#edit-mappings-{$delta}-target-options", $form['mappings'][$delta]['target']));
@@ -404,8 +404,8 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     $headers = $this->getCSVHeaders($file);
     foreach ($headers as $delta => $header) {
       $form['mappings'][$delta]['target']['#options'] = $this->buildTargetOptions($entity_type_id, $bundle);
-      $form['mappings'][$delta]['target']['#default_value'] = $this->getAutoMappedTarget($header, $entity_type_id, $bundle);
-      $form['mappings'][$delta]['target']['#value'] = $this->getAutoMappedTarget($header, $entity_type_id, $bundle);
+      $form['mappings'][$delta]['target']['#default_value'] = $this->getAutoMappedTarget($header, $entity_type_id, $bundle, $this->importConfig ? $this->importConfig->getMapping() : []);
+      $form['mappings'][$delta]['target']['#value'] = $this->getAutoMappedTarget($header, $entity_type_id, $bundle, $this->importConfig ? $this->importConfig->getMapping() : []);
       $form['mappings']['#value'][$delta]['target'] = $form['mappings'][$delta]['target']['#default_value'];
       $userInput['mappings'][$delta]['target'] = $form['mappings'][$delta]['target']['#default_value'];
       $response->addCommand(new ReplaceCommand("#edit-mappings-{$delta}-target-options", $form['mappings'][$delta]['target']));
@@ -459,42 +459,6 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
   }
 
   /**
-   * Compare field labels against a search string.
-   *
-   * @param string $needle
-   *   The search term.
-   * @param string $entity_type_id
-   *   The entity type id.
-   * @param string|null $bundle
-   *   The bundle.
-   * @return string|null
-   *   The field name of the match or NULL if no matches found.
-   */
-  protected function searchFieldLabels(string $needle, string $entity_type_id, ?string $bundle = NULL): ?string {
-    $field_defs = $this->getFieldDefinitions($entity_type_id, $bundle);
-    $matching_fields = array_filter($field_defs, function($field) use ($needle) {
-      return $needle == mb_strtolower((string) $field->getLabel());
-    });
-
-    // If there are multiple matches, return the first bundle specific match.
-    if (count($matching_fields) > 1) {
-      foreach ($matching_fields as $matched_field_name => $matched_field) {
-        if ($matched_field->getTargetBundle()) {
-          return $matched_field_name;
-        }
-      }
-    }
-
-    // If all are base fields, return the first.
-    if (count($matching_fields) >= 1) {
-      $field_names = array_keys($matching_fields);
-      return reset($field_names);
-    }
-
-    return NULL;
-  }
-
-  /**
    * Search for a cultural_protocol field for a given entity/bundle.
    */
   protected function getProtocolField($entity_type_id, $bundle = NULL) {
@@ -522,80 +486,6 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     }
 
     return NULL;
-  }
-
-  /**
-   * Some basic logic to try and auto-map source to target.
-   *
-   * 1. Check for full field label matches (case insensitive).
-   * 2. Check for field name matches (case insensitive).
-   */
-  protected function getAutoMappedTarget($source, $entity_type_id, $bundle = NULL) {
-    $field_defs = $this->getFieldDefinitions($entity_type_id, $bundle);
-    $config_mapping = $this->importConfig ? $this->importConfig->getMapping() : [];
-
-    // If the selected config has an existing valid mapping for this field,
-    // it has precedence.
-    foreach ($config_mapping as $mapping) {
-      // Break up any subfields.
-      $subfields = explode('/', $mapping['target'], 2);
-      $target = reset($subfields);
-
-      // Checking if we have a mapping and the root of the target field exists.
-      if ($mapping['source'] == $source && in_array($target, array_keys($field_defs))) {
-        return $mapping['target'];
-      }
-    }
-
-    $needle = mb_strtolower($source);
-
-    // Match against the real mukurtu_export header for this bundle when
-    // known - see getExportLabelOverrides(). This takes precedence over the
-    // generic property-label matching below since it's authoritative for
-    // exactly what a real export/reimport round trip uses (e.g. langcode's
-    // per-bundle "Locale"/"Language"/"Language code" header, or a field
-    // whose real header differs from its own configured Drupal label).
-    foreach ($this->getExportLabelOverrides($entity_type_id, $bundle) as $target_key => $label) {
-      if ($needle === mb_strtolower($label)) {
-        return $target_key;
-      }
-    }
-
-    // Check if any field has a property, which our import field process plugins
-    // support, matching the source label.
-    foreach ($field_defs as $field_name => $field_definition) {
-      $plugin = $this->fieldProcessPluginManager->getInstance(['field_definition' => $field_definition]);
-      $supported_properties = $plugin->getSupportedProperties($field_definition);
-
-      foreach ($supported_properties as $property_name => $property_info) {
-        if ($needle == mb_strtolower($property_info['label'])) {
-          return "{$field_name}/{$property_name}";
-        }
-      }
-    }
-
-    // Disambiguate the langcode base field from other Language-labeled
-    // fields when no export-header override applies.
-    $entity_definition = $this->entityTypeManager->getDefinition($entity_type_id);
-    $entity_keys = $entity_definition->getKeys();
-    if (!empty($entity_keys['langcode']) && isset($field_defs[$entity_keys['langcode']])) {
-      $langcode_label = mb_strtolower($field_defs[$entity_keys['langcode']]->getLabel() . ' (langcode)');
-      if ($needle === $langcode_label) {
-        return $entity_keys['langcode'];
-      }
-    }
-
-    // Check for field label matches.
-    if ($field_label_match = $this->searchFieldLabels($needle, $entity_type_id, $bundle)) {
-      return $field_label_match;
-    }
-
-    // Check if we have a (case insensitive) field name match.
-    if (isset($field_defs[$needle])) {
-      return $needle;
-    }
-
-    return -1;
   }
 
 }

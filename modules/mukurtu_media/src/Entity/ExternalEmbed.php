@@ -144,6 +144,16 @@ class ExternalEmbed extends Media implements ExternalEmbedInterface, CulturalPro
     if ($thumb) {
       $this->thumbnail->target_id = $thumb;
     }
+
+    // Auto-fill thumbnail alt text from the media name when it is empty.
+    $thumbValue = $this->get('field_thumbnail')->getValue();
+    if (!empty($thumbValue[0]['target_id']) && empty($thumbValue[0]['alt'])) {
+      $this->get('field_thumbnail')->set(0, [
+        'target_id' => $thumbValue[0]['target_id'],
+        'alt' => $this->label(),
+      ]);
+    }
+
     parent::preSave($storage);
   }
 
