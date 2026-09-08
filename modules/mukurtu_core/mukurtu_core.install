@@ -5,6 +5,7 @@
  * Install, update and uninstall functions for the mukurtu_core module.
  */
 
+use Drupal\Core\Utility\UpdateException;
 use Drupal\field\Entity\FieldStorageConfig;
 
 /**
@@ -4319,14 +4320,7 @@ function mukurtu_core_update_40122(): void {
  */
 function mukurtu_core_update_40123(): void {
   $installed = array_keys(\Drupal::config('core.extension')->get('module') ?? []);
-
-  // Presence on disk is checked via getAllAvailableInfo() rather than
-  // ExtensionList::exists(). exists() consults getList(), which only scans the
-  // active profile's modules directory, so it reports FALSE for a
-  // profile-nested module such as mukurtu_dev whenever no install profile is
-  // active (notably inside kernel tests). getAllAvailableInfo() reflects what
-  // is actually on disk, which is the question being asked here.
-  $available = \Drupal::service('extension.list.module')->getAllAvailableInfo();
+  $module_extension_list = \Drupal::service('extension.list.module');
 
   // Uninstall the dependent wrapper before the modules it depends on. Only
   // touch modules that are both installed and still present on disk; a module
@@ -4334,16 +4328,32 @@ function mukurtu_core_update_40123(): void {
   // module_installer. (Such a site is already blocked by core's own
   // invalid_module requirement before update hooks run, but the guard costs
   // nothing.)
+  //
+  // Presence is deliberately tested with ExtensionList::exists(), which is
+  // backed by getList() -- the very set ModuleInstaller::uninstall() gates on.
+  // Using a different source such as getAllAvailableInfo() lets the two
+  // disagree, and uninstall() responds to an unrecognised entry by returning
+  // FALSE for the whole list and uninstalling nothing at all.
   $candidates = ['mukurtu_dev', 'devel_generate', 'devel'];
   $to_uninstall = [];
   foreach ($candidates as $module) {
-    if (in_array($module, $installed, TRUE) && isset($available[$module])) {
+    if (in_array($module, $installed, TRUE) && $module_extension_list->exists($module)) {
       $to_uninstall[] = $module;
     }
   }
 
-  if (!empty($to_uninstall)) {
-    \Drupal::service('module_installer')->uninstall($to_uninstall);
+  if (empty($to_uninstall)) {
+    return;
+  }
+
+  // uninstall() reports failure by returning FALSE rather than throwing, and
+  // in that case it has uninstalled nothing. Fail the update loudly instead of
+  // reporting success while leaving the modules in place.
+  if (!\Drupal::service('module_installer')->uninstall($to_uninstall)) {
+    throw new UpdateException(sprintf(
+      'Could not uninstall the development modules: %s. Uninstall them at /admin/modules/uninstall, then run database updates again.',
+      implode(', ', $to_uninstall)
+    ));
   }
 }
 
