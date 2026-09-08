@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_submissions\Kernel;
 
 use Drupal\Core\Test\AssertMailTrait;
-use Drupal\message\Entity\Message;
 use Drupal\Tests\message\Kernel\MessageTemplateCreateTrait;
+use Drupal\message\Entity\Message;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests mukurtu_submissions_send_email_notifications() - the notify_emails
@@ -21,9 +22,8 @@ use Drupal\Tests\message\Kernel\MessageTemplateCreateTrait;
  * heavier message_subscribe/mukurtu_notifications stack
  * MukurtuSubmissionsKernelTestBase deliberately excludes; this send path
  * only needs 'message' itself.
- *
- * @group mukurtu_submissions
  */
+#[Group('mukurtu_submissions')]
 class NotifyEmailNotificationTest extends MukurtuSubmissionsKernelTestBase {
 
   use AssertMailTrait;

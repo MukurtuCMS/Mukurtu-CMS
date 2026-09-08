@@ -17,7 +17,7 @@ class LocalContextsHubBase {
    *
    * @var string
    */
-  const DEFAULT_HUB_URL = 'https://sandbox.localcontextshub.org/api/v2/';
+  const DEFAULT_HUB_URL = 'https://localcontextshub.org/api/v2/';
 
   /**
    * The config factory.

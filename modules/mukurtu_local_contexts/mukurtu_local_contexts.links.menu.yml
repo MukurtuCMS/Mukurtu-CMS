@@ -2,19 +2,22 @@ mukurtu_local_contexts.manage_projects:
   title: 'Manage site-wide Local Contexts projects'
   description: 'Manage site-wide Local Contexts projects and directory.'
   parent: mukurtu_dashboard
-  menu_name: dashboard-site-settings
+  menu_name: dashboard-local-contexts
   route_name: mukurtu_local_contexts.manage_site_supported_projects
+  weight: 0
 
 mukurtu_local_contexts.site_projects_directory:
   title: 'View site-wide Local Contexts projects'
   description: 'View the directory of site-wide Local Contexts projects.'
   parent: mukurtu_dashboard
-  menu_name: dashboard-site-settings
+  menu_name: dashboard-local-contexts
   route_name: mukurtu_local_contexts.site_project_directory
+  weight: 1
 
 mukurtu_local_contexts.remap_legacy_project_site:
   title: 'Remap Legacy Projects'
   description: 'Reassign content off legacy (v3-migrated) Local Contexts projects onto real Local Contexts Hub projects, in bulk.'
   parent: mukurtu_dashboard
-  menu_name: dashboard-site-settings
+  menu_name: dashboard-local-contexts
   route_name: mukurtu_local_contexts.remap_legacy_project_site
+  weight: 2

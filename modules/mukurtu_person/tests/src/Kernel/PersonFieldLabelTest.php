@@ -5,16 +5,16 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_person\Kernel;
 
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\Tests\mukurtu_protocol\Kernel\ProtocolAwareEntityTestBase;
 use Drupal\mukurtu_person\Entity\Person;
 use Drupal\mukurtu_person\Entity\RelatedPerson;
-use Drupal\Tests\mukurtu_protocol\Kernel\ProtocolAwareEntityTestBase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests that Person/RelatedPerson field labels and descriptions are
  * translatable.
- *
- * @group mukurtu_person
  */
+#[Group('mukurtu_person')]
 class PersonFieldLabelTest extends ProtocolAwareEntityTestBase {
 
   /**

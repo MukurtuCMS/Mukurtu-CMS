@@ -6,6 +6,7 @@ use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\TempStore\PrivateTempStoreFactory;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Url;
 use Drupal\mukurtu_export\ExportChildResolver;
 use Drupal\views_bulk_operations\Service\ViewsBulkOperationsActionProcessorInterface;
 use Drupal\views_bulk_operations\Traits\ViewsBulkOperationsFormTrait;
@@ -245,14 +246,13 @@ class ExportListAddItemsForm extends FormBase {
       $by_type[$entity_type][$entity_id] = $entity_id;
     }
 
-    // Add entities to the export list (read-modify-write).
-    $items = $list->getItems();
+    // Add entities to the export list.
     foreach ($by_type as $entity_type => $ids) {
-      $items[$entity_type] = $items[$entity_type] ?? [];
-      foreach ($ids as $id) {
-        $items[$entity_type][$id] = $id;
-      }
+      $list->addItems($entity_type, $ids);
     }
+    // The optional child-inclusion logic below needs to keep mutating the
+    // items array locally before a single final save() call.
+    $items = $list->getItems();
 
     // Optionally include child items from collections and word lists.
     if ($form_state->getValue('include_children_recursive')) {

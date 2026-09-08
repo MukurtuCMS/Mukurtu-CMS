@@ -868,3 +868,15 @@ function mukurtu_media_update_40022(): void {
     ->setData($data)
     ->save(TRUE);
 }
+
+/**
+ * Default the media download button to off (#1761).
+ *
+ * Only touches sites still on the shipped enabled-by-default value.
+ */
+function mukurtu_media_update_40023(): void {
+  $config = \Drupal::configFactory()->getEditable('mukurtu_media.settings');
+  if (!$config->isNew() && $config->get('mukurtu_media_download_enabled') === TRUE) {
+    $config->set('mukurtu_media_download_enabled', FALSE)->save();
+  }
+}
