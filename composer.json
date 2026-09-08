@@ -2,6 +2,7 @@
     "name": "mukurtu/mukurtu",
     "description": "Mukurtu CMS Drupal Installation Profile",
     "type": "drupal-profile",
+    "license": "GPL-2.0-or-later",
     "minimum-stability": "dev",
     "prefer-stable": true,
     "repositories": [

@@ -2,7 +2,7 @@ name: 'Mukurtu CMS'
 type: profile
 description: 'Mukurtu CMS Installation Profile'
 core_version_requirement: '^10 || ^11'
-version: 4.x-dev
+version: 4.0.0
 package: 'Mukurtu CMS'
 distribution:
   name: 'Mukurtu CMS'
