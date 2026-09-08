@@ -26,14 +26,23 @@ class ImportFieldDescriptionListForm extends ImportBaseForm {
 
     $fields = $this->entityFieldManager->getFieldDefinitions($entity_type, $effective_bundle);
 
+    // Applies to every entity type that has a langcode field - mapping a
+    // column to it can target a translation of existing content instead
+    // of creating/overwriting it, once #1260's import track lands (see
+    // docs/import-translation.md).
+    $field_description_overrides = [
+      'langcode' => $this->t("The content's language, encoded (e.g. en, es). On a bundle with translation enabled, mapping a column here targets a translation of matching content instead of creating or overwriting it."),
+    ];
+    $field_format_overrides = [
+      'langcode' => $this->t("A language code, e.g. es. Fields that aren't translatable (like Cultural Protocols) won't be updated when this import targets a translation - update those in a separate, non-translation import."),
+    ];
+
     // Per-entity-type overrides for the Field Description column.
     // Drupal base field descriptions are often missing or too terse for
     // end users; these replace them on import format pages only.
-    $field_description_overrides = [];
     if ($entity_type === 'taxonomy_term') {
-      $field_description_overrides = [
+      $field_description_overrides += [
         'description' => $this->t('The description is not normally shown to end users. It may be used for internal documentation to clarify or define the content that should reference this term, or to provide additional details about the term.'),
-        'langcode'    => $this->t('The encoded language. Used for translation and localization.'),
         'name'        => $this->t('The taxonomy term name.'),
         'tid'         => $this->t('Identifier number assigned by the system.'),
         'parent'      => $this->t('Not currently supported in Mukurtu. Used if a site supports hierarchical taxonomies.'),
@@ -41,13 +50,49 @@ class ImportFieldDescriptionListForm extends ImportBaseForm {
         'weight'      => $this->t('Not usually used as most sites will default to alphabetical ordering. The weight of this term in relation to other terms in the taxonomy.'),
       ];
     }
+    elseif ($entity_type === 'user') {
+      $field_description_overrides = [
+        'roles' => $this->t('The roles this user should have. Every user automatically receives the "Authenticated user" role in addition to any roles listed here -- it does not need to be included.'),
+      ];
+    }
 
     $import_field_options = $this->buildTargetOptions($entity_type, $effective_bundle);
     unset($import_field_options[-1]);
 
+    // Communities/protocols are virtual destination properties for the user
+    // entity type (see ImportFormTrait::buildTargetOptions()), not real
+    // fields, so they have no FieldDefinitionInterface to look up or hand to
+    // the field process plugin manager. Describe their format directly.
+    $virtual_target_descriptions = [
+      'communities' => [
+        'description' => $this->t('The communities this user is a member of, and their role(s) within each.'),
+        'format' => $this->t('Format: CommunityName>role|role;AnotherCommunity>role. Separate multiple roles for the same community with |. Separate multiple communities with ; (or your configured multi-value delimiter). Roles may be entered as either their label (e.g. Community Manager) or machine name (e.g. community_manager).'),
+      ],
+      'protocols' => [
+        'description' => $this->t('The protocols this user is a member of, and their role(s) within each.'),
+        'format' => $this->t('Format: ProtocolName>role|role;AnotherProtocol>role. Separate multiple roles for the same protocol with |. Separate multiple protocols with ; (or your configured multi-value delimiter). Roles may be entered as either their label (e.g. Protocol Steward) or machine name (e.g. protocol_steward).'),
+      ],
+      'account_status' => [
+        'description' => $this->t('Whether the account is active, blocked, or awaiting approval.'),
+        'format' => $this->t('One of Active, Blocked, or Pending (case-insensitive). If left blank, new accounts default to Active; existing accounts being updated keep their current status.'),
+      ],
+    ];
+
     $required_options = [];
     $optional_options = [];
     foreach ($import_field_options as $field_target => $target_label) {
+      // None of the virtual user targets (group membership, account status)
+      // are ever required to import a user, so they always land in the
+      // optional table.
+      if ($entity_type === 'user' && isset($virtual_target_descriptions[$field_target])) {
+        $optional_options[$field_target] = [
+          'label' => $target_label,
+          'description' => $virtual_target_descriptions[$field_target]['description'],
+          'format' => $virtual_target_descriptions[$field_target]['format'],
+        ];
+        continue;
+      }
+
       $field_components = explode('/', $field_target);
       $field_name = $field_components[0];
       $field_property = $field_components[1] ?? NULL;
@@ -55,7 +100,7 @@ class ImportFieldDescriptionListForm extends ImportBaseForm {
       $option = [
         'label' => $target_label,
         'description' => $field_description_overrides[$field_name] ?? ($fields[$field_name]->getDescription() ?? ''),
-        'format' => $process_plugin->getFormatDescription($fields[$field_name], $field_property),
+        'format' => $field_format_overrides[$field_name] ?? $process_plugin->getFormatDescription($fields[$field_name], $field_property),
       ];
       if ($fields[$field_name]->isRequired()) {
         $required_options[$field_target] = $option;
@@ -173,7 +218,7 @@ class ImportFieldDescriptionListForm extends ImportBaseForm {
 
     // Convert to CSV format.
     $handle = fopen('php://memory', 'r+');
-    fputcsv($handle, $headers);
+    fputcsv($handle, $headers, ',', '"', '\\');
     rewind($handle);
     $csv = stream_get_contents($handle);
     fclose($handle);
