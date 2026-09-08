@@ -319,6 +319,36 @@ function mukurtu_core_page_attachments(array &$attachments) {
   // local tasks) work without depending on some other module happening to
   // load it first.
   $attachments['#attached']['library'][] = 'core/drupal.dialog.ajax';
+
+  // Guard those same "use-ajax" modal links against being clicked before the
+  // dialog.ajax library above has actually attached (e.g. page still
+  // loading): without this, the browser just follows the link's plain href
+  // and lands on the modal route as a full page instead of opening a modal.
+  //
+  // This has to be genuine inline <script>/<style> tags, not a library -
+  // with JS/CSS aggregation on, a library-based guard would get bundled
+  // into the same aggregated file as other header-region assets and could
+  // end up just as delayed as the JS it's meant to guard against, since the
+  // whole bundle has to finish downloading before any script inside it
+  // (ours included) can run.
+  $module_path = \Drupal::root() . '/' . \Drupal::service('extension.list.module')->getPath('mukurtu_core');
+  $attachments['#attached']['html_head'][] = [
+    [
+      '#tag' => 'style',
+      '#value' => Markup::create(file_get_contents($module_path . '/css/modal-click-guard.css')),
+      '#weight' => -1000,
+    ],
+    'mukurtu_core_modal_click_guard_css',
+  ];
+  $attachments['#attached']['html_head'][] = [
+    [
+      '#tag' => 'script',
+      '#value' => Markup::create(file_get_contents($module_path . '/js/modal-click-guard.js')),
+      '#weight' => -1000,
+    ],
+    'mukurtu_core_modal_click_guard_js',
+  ];
+  $attachments['#attached']['library'][] = 'mukurtu_core/modal-click-guard-ready';
 }
 
 /**
