@@ -86,7 +86,7 @@
         "drupal/visitors": "^2.0",
         "drush/drush": "^13",
         "geocoder-php/nominatim-provider": "^5.8",
-        "sibyx/phpgpx": "@RC"
+        "sibyx/phpgpx": "^1.3"
     },
     "require-dev": {
         "composer/composer": "^2.10.2",
