@@ -20,4 +20,4 @@ dependencies:
   - 'paragraphs:paragraphs'
   - 'pathauto:pathauto'
   - 'search_api:search_api'
-version: 4.x-dev
+version: 4.0.0
