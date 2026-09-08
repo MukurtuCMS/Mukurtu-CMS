@@ -10,6 +10,8 @@
 #
 # Usage: scripts/set-version.sh 4.0.1
 #
+# Full release checklist: docs/releasing.md
+#
 # Test fixture modules under tests/ are deliberately left alone: they are not
 # part of the distribution and carry their own unrelated versions.
 
@@ -17,6 +19,7 @@ set -euo pipefail
 
 if [ $# -ne 1 ]; then
   echo "Usage: $0 <version>   e.g. $0 4.0.1" >&2
+  echo "See docs/releasing.md for the full release checklist." >&2
   exit 1
 fi
 
