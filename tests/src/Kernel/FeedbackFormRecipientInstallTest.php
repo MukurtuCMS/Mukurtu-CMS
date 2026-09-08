@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Drupal\Tests\mukurtu_core\Kernel;
+namespace Drupal\Tests\mukurtu\Kernel;
 
 use Drupal\Core\Form\FormState;
 use Drupal\KernelTests\KernelTestBase;
@@ -17,14 +17,10 @@ use PHPUnit\Framework\Attributes\Group;
  * system.site:mail is still empty while mukurtu_install() executes. The
  * behaviour therefore hangs off install_configure_form's submit handler.
  *
- * This test lives in mukurtu_core rather than at the profile root because
- * phpunit.xml's testsuites only scan modules/&#42;&#42;/tests/src, so a
- * profile-level test directory would never run in CI.
- *
  * @see mukurtu_install_configure_form_submit()
  * @see mukurtu_core_update_40124()
  */
-#[Group('mukurtu_core')]
+#[Group('mukurtu')]
 class FeedbackFormRecipientInstallTest extends KernelTestBase {
 
   /**
@@ -42,12 +38,11 @@ class FeedbackFormRecipientInstallTest extends KernelTestBase {
   protected function setUp(): void {
     parent::setUp();
 
-    // Derive the profile directory from a known module inside it. The profile
-    // extension list is not reliable here: kernel tests run with no active
-    // install profile.
-    $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core');
-    $profile_path = dirname($module_path, 2);
-    require_once \Drupal::root() . '/' . $profile_path . '/mukurtu.profile';
+    // This test file lives at <profile>/tests/src/Kernel, so the profile root
+    // is four levels up. Resolved from __DIR__ rather than through the profile
+    // extension list, which is not reliable here: kernel tests run with no
+    // active install profile.
+    require_once dirname(__DIR__, 3) . '/mukurtu.profile';
 
     $this->installConfig(['system']);
   }
