@@ -24,6 +24,14 @@ function mukurtu_footer_install() {
       'status' => TRUE,
       'field_footer_contact_email_label' => 'Email us at',
       'field_footer_copyright' => '© [current-date:html_year] Mukurtu CMS',
+      // Without this the site-wide contact form at /contact is unreachable by
+      // navigation. Core ships a footer menu link for it but disabled, and the
+      // block that renders the core footer menu is disabled too, so the form is
+      // only findable by typing the URL. Editable and removable like any other
+      // footer link.
+      'field_footer_other_links' => [
+        ['uri' => 'internal:/contact', 'title' => 'Contact'],
+      ],
     ]);
     $footer->save();
   }
@@ -148,4 +156,37 @@ function mukurtu_footer_update_40001(): void {
  */
 function mukurtu_footer_update_40002(): void {
   \Drupal::service('config.installer')->installDefaultConfig('module', 'mukurtu_footer');
+}
+
+/**
+ * Add a Contact link to the footer.
+ *
+ * The site-wide contact form at /contact has always been installed and
+ * permitted for anonymous users, but nothing ever linked to it: core's footer
+ * menu link for the route ships disabled, and the block that renders the core
+ * footer menu is disabled as well, so the form was only reachable by typing the
+ * URL.
+ *
+ * Only sites whose Other links field is still empty are touched, so a curated
+ * footer is never reordered or added to. Sites skipped here can add the link
+ * themselves by editing the footer block.
+ */
+function mukurtu_footer_update_40003(): void {
+  $footers = \Drupal::entityTypeManager()
+    ->getStorage('block_content')
+    ->loadByProperties(['type' => 'mukurtu_footer']);
+
+  foreach ($footers as $footer) {
+    if (!$footer->hasField('field_footer_other_links')) {
+      continue;
+    }
+    if (!$footer->get('field_footer_other_links')->isEmpty()) {
+      continue;
+    }
+
+    $footer->set('field_footer_other_links', [
+      ['uri' => 'internal:/contact', 'title' => 'Contact'],
+    ]);
+    $footer->save();
+  }
 }
