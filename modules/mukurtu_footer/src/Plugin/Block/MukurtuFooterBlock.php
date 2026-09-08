@@ -7,11 +7,13 @@
 
 namespace Drupal\mukurtu_footer\Plugin\Block;
 
+use Drupal\Core\Block\Attribute\Block;
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\File\FileUrlGeneratorInterface;
 use Drupal\Core\Logger\LoggerChannelTrait;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Utility\Token;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -20,13 +22,12 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *
  * Renders the first block_content entity of type 'mukurtu_footer'. Content
  * is edited via the standard block content UI at /admin/content/block-content.
- *
- * @Block(
- *   id = "mukurtu_footer",
- *   admin_label = @Translation("Mukurtu Footer"),
- *   category = "Custom"
- * )
  */
+#[Block(
+  id: 'mukurtu_footer',
+  admin_label: new TranslatableMarkup('Mukurtu Footer'),
+  category: new TranslatableMarkup('Custom'),
+)]
 class MukurtuFooterBlock extends BlockBase implements ContainerFactoryPluginInterface {
 
   use LoggerChannelTrait;

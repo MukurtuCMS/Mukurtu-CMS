@@ -2,23 +2,22 @@
 
 namespace Drupal\mukurtu_protocol\Plugin\Field\FieldFormatter;
 
+use Drupal\Core\Field\Attribute\FieldFormatter;
 use Drupal\Core\Field\FormatterBase;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Entity\Exception\UndefinedLinkTemplateException;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\TypedData\TranslatableInterface;
 
 /**
  * Plugin implementation of the 'cultural_protocol' formatter.
- *
- * @FieldFormatter(
- *   id = "cultural_protocol_formatter",
- *   label = @Translation("Cultural Protocol Formatter"),
- *   field_types = {
- *     "cultural_protocol"
- *   }
- * )
  */
+#[FieldFormatter(
+  id: 'cultural_protocol_formatter',
+  label: new TranslatableMarkup('Cultural Protocol Formatter'),
+  field_types: ['cultural_protocol'],
+)]
 class CulturalProtocolFormatter extends FormatterBase {
   /**
    * {@inheritdoc}

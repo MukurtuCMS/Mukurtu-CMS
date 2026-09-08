@@ -71,6 +71,10 @@ name: 'Mukurtu Default Solr Content Index'
 description: 'The default Mukurtu Solr search index that provides search for most "browse" pages.'
 read_only: false
 field_settings:
+  language_with_fallback:
+    label: 'Language (with fallback)'
+    property_path: language_with_fallback
+    type: string
   node__body:
     label: Body
     datasource_id: 'entity:node'

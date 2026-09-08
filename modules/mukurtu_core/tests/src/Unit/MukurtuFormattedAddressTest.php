@@ -4,16 +4,17 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_core\Unit;
 
-use Drupal\mukurtu_core\Plugin\Geocoder\Formatter\MukurtuFormattedAddress;
 use Drupal\Tests\UnitTestCase;
+use Drupal\mukurtu_core\Plugin\Geocoder\Formatter\MukurtuFormattedAddress;
 use Geocoder\Model\Address;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests the address search result formatting (issue #1453).
  *
  * @see https://github.com/MukurtuCMS/Mukurtu-CMS/issues/1453
- * @group mukurtu_core
  */
+#[Group('mukurtu_core')]
 class MukurtuFormattedAddressTest extends UnitTestCase {
 
   /**

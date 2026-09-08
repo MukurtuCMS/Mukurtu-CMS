@@ -7,6 +7,7 @@ namespace Drupal\Tests\mukurtu_design\Kernel;
 use Drupal\Core\Theme\ActiveTheme;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\mukurtu_design\DesignPalette;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests that DesignPalette::enablePalette() attaches the palette library
@@ -16,9 +17,8 @@ use Drupal\mukurtu_design\DesignPalette;
  * renders with this site's default front-end theme for anonymous/most
  * authenticated visitors (they lack "view the administration theme"), so
  * a route-based check alone would incorrectly skip it.
- *
- * @group mukurtu_design
  */
+#[Group('mukurtu_design')]
 class DesignPaletteThemeTest extends KernelTestBase {
 
   /**

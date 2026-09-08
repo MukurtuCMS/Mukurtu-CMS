@@ -32,6 +32,28 @@
   };
 
   /**
+   * Copies Geoman toolbar buttons' existing (but non-focusable-element)
+   * "title" text onto the actual focusable button as an aria-label, since
+   * Geoman puts the title on a wrapping div rather than the focusable
+   * a[role="button"] inside it. Re-run whenever Geoman rebuilds/toggles
+   * the toolbar, since it re-renders buttons on mode changes.
+   */
+  Drupal.mukurtuLabelGeomanToolbar = function (map) {
+    const $container = $(map.getContainer());
+    $container.find('.button-container[title]').each(function () {
+      const $button = $(this).find('a.leaflet-buttons-control-button, a.leaflet-pm-action').first();
+      if ($button.length && !$button.attr('aria-label')) {
+        $button.attr('aria-label', $(this).attr('title'));
+      }
+    });
+    $container.find('a.leaflet-pm-action[title]').each(function () {
+      if (!$(this).attr('aria-label')) {
+        $(this).attr('aria-label', $(this).attr('title'));
+      }
+    });
+  };
+
+  /**
    * Set the leaflet map object.
    */
   Drupal.Leaflet_Widget.prototype.set_leaflet_widget_map = function (map) {
@@ -61,6 +83,35 @@
       }
       map.pm.addControls(this.widgetsettings.toolbarSettings);
 
+      /* Mukurtu accessibility additions begin: */
+
+      // Geoman ships Escape-to-exit and Enter-to-finish keyboard support,
+      // but both default to off. setGlobalOptions() deep-merges, so this
+      // survives the later pathOptions-setting call elsewhere.
+      map.pm.setGlobalOptions({ exitModeOnEscape: true, finishOnEnter: true });
+
+      const containerId = $(map.getContainer()).attr('id');
+      const instructionsId = containerId + '-keyboard-instructions';
+      map.getContainer().setAttribute('aria-label', Drupal.t('Interactive location map'));
+      if ($('#' + instructionsId).length) {
+        map.getContainer().setAttribute('aria-describedby', instructionsId);
+      }
+
+      Drupal.mukurtuLabelGeomanToolbar(map);
+      map.on('pm:globaldrawmodetoggled pm:globaleditmodetoggled pm:globaldragmodetoggled pm:globalremovalmodetoggled pm:globalcutmodetoggled pm:globalrotatemodetoggled', function () {
+        Drupal.mukurtuLabelGeomanToolbar(map);
+      });
+
+      // Move the location-description input's onblur handler to a
+      // delegated listener (CSP-friendlier than an inline attribute, and
+      // avoids re-attaching it for every marker).
+      $(map.getContainer()).on('focusout', '.mukurtu-leaflet-description-field', function () {
+        const popupId = $(this).attr('id').replace('location-popup-', '');
+        Drupal.mukurtuSetLocationDescription(containerId, popupId);
+      });
+
+      /* Mukurtu accessibility additions end. */
+
       map.on('pm:create', function (event) {
         let layer = event.layer;
         if (event.shape === 'Circle') {
@@ -73,6 +124,7 @@
         this.update_text();
         // Listen to changes on the new layer
         this.add_layer_listeners(layer);
+        Drupal.announce(Drupal.t('Shape added to the map.'));
       }, this);
 
       // Start updating the Leaflet Map.
@@ -104,7 +156,15 @@
         }
         // Populate the location description text box from the GeoJSON feature property.
         const locationDescription = event.popup._source.feature.properties['location_description'] ?? '';
-        $('#location-popup-' + event.popup._source._leaflet_id).val(locationDescription);
+        const $input = $('#location-popup-' + event.popup._source._leaflet_id);
+        $input.val(locationDescription);
+        // Move focus into the popup for keyboard users - Leaflet opens it
+        // without moving focus off the marker.
+        $input.trigger('focus');
+        // Translate Leaflet's hardcoded English close-button label.
+        $(event.popup._container).find('.leaflet-popup-close-button')
+          .attr('aria-label', Drupal.t('Close popup'))
+          .attr('title', Drupal.t('Close popup'));
       }, this);
 
       // update_leaflet_widget_map() just ran above, but if this map starts
@@ -281,11 +341,28 @@
     }
 
     // Mukurtu Location Description.
-    const containerId = $(layer._map._container).attr('id');
     const popupId = "location-popup-" + layer._leaflet_id;
-    layer.bindPopup('<label for="' + popupId + '">' + Drupal.t('Map point description') + '</label><input class="mukurtu-leaflet-description-field" type="text" size="60" maxlength="255" id="' + popupId + '" onblur="Drupal.mukurtuSetLocationDescription(\'' + containerId + '\',' + layer._leaflet_id + ')"></input>');
+
+    // Give the marker icon a meaningful accessible name instead of
+    // Leaflet's hardcoded, untranslated alt="Marker".
+    const updateMarkerLabel = function () {
+      const description = (layer.feature && layer.feature.properties) ? layer.feature.properties['location_description'] : '';
+      if (layer._icon) {
+        layer._icon.setAttribute('alt', description || Drupal.t('Map point'));
+        layer._icon.setAttribute('aria-label', description || Drupal.t('Map point'));
+      }
+    };
+    updateMarkerLabel();
+
+    layer.bindPopup('<label for="' + popupId + '">' + Drupal.t('Map point description') + '</label><input class="mukurtu-leaflet-description-field" type="text" size="60" maxlength="255" id="' + popupId + '"></input>');
     layer.on('popupclose', function (event) {
       this.update_text();
+      updateMarkerLabel();
+      // Return focus to the marker so keyboard users aren't dropped
+      // somewhere unexpected when the popup closes.
+      if (layer._icon) {
+        $(layer._icon).trigger('focus');
+      }
     }, this);
 
     // Disable fill for open polylines, same rationale as the display-side
@@ -327,6 +404,7 @@
     layer.on('pm:remove', function (event) {
       this.drawnItems.removeLayer(event.layer);
       this.update_text();
+      Drupal.announce(Drupal.t('Shape removed from the map.'));
     }, this);
 
     /* Copied from leaflet.widget.js end. */

@@ -10,6 +10,7 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Url;
+use Drupal\mukurtu_core\Service\EntityTranslationResolver;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -23,10 +24,13 @@ class ProtocolListBuilder extends EntityListBuilder {
 
   protected EntityTypeManagerInterface $entityTypeManager;
 
-  public function __construct(EntityTypeInterface $entity_type, EntityStorageInterface $storage, AccessManagerInterface $access_manager, EntityTypeManagerInterface $entity_type_manager) {
+  protected EntityTranslationResolver $entityTranslationResolver;
+
+  public function __construct(EntityTypeInterface $entity_type, EntityStorageInterface $storage, AccessManagerInterface $access_manager, EntityTypeManagerInterface $entity_type_manager, EntityTranslationResolver $entity_translation_resolver) {
     parent::__construct($entity_type, $storage);
     $this->accessManager = $access_manager;
     $this->entityTypeManager = $entity_type_manager;
+    $this->entityTranslationResolver = $entity_translation_resolver;
   }
 
   /**
@@ -37,7 +41,8 @@ class ProtocolListBuilder extends EntityListBuilder {
       $entity_type,
       $container->get('entity_type.manager')->getStorage($entity_type->id()),
       $container->get('access_manager'),
-      $container->get('entity_type.manager')
+      $container->get('entity_type.manager'),
+      $container->get('mukurtu_core.entity_translation_resolver'),
     );
   }
 
@@ -51,7 +56,10 @@ class ProtocolListBuilder extends EntityListBuilder {
       ->accessCheck(TRUE)
       ->sort('name')
       ->execute();
-    $communities = $this->entityTypeManager->getStorage('community')->loadMultiple($community_ids);
+    $communities = array_map(
+      fn (EntityInterface $community) => $this->entityTranslationResolver->translate($community),
+      $this->entityTypeManager->getStorage('community')->loadMultiple($community_ids)
+    );
 
     // Load all accessible protocols and index by community ID using field
     // values (IDs only) to avoid re-loading already-loaded community entities.
@@ -60,7 +68,10 @@ class ProtocolListBuilder extends EntityListBuilder {
       ->accessCheck(TRUE)
       ->sort('name')
       ->execute();
-    $all_protocols = $this->entityTypeManager->getStorage('protocol')->loadMultiple($protocol_ids);
+    $all_protocols = array_map(
+      fn (EntityInterface $protocol) => $this->entityTranslationResolver->translate($protocol),
+      $this->entityTypeManager->getStorage('protocol')->loadMultiple($protocol_ids)
+    );
 
     $protocols_by_community = [];
     $orphan_protocols = [];
@@ -172,10 +183,13 @@ class ProtocolListBuilder extends EntityListBuilder {
       'no_striping' => TRUE,
     ];
 
-    // Recurse into accessible child communities.
+    // Recurse into accessible child communities. getChildCommunities() loads
+    // its own (untranslated) copies via the field's referencedEntities(), so
+    // look the child up in $all_communities - already translated above - by
+    // ID instead of passing the untranslated one along.
     foreach ($community->getChildCommunities() as $child) {
       if (isset($all_communities[$child->id()])) {
-        $this->addCommunityRows($child, $all_communities, $protocols_by_community, $rows, $depth + 1, $visited);
+        $this->addCommunityRows($all_communities[$child->id()], $all_communities, $protocols_by_community, $rows, $depth + 1, $visited);
       }
     }
   }

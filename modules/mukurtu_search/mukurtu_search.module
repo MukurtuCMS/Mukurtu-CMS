@@ -1,16 +1,17 @@
 <?php
 
+/**
+ * @file
+ * Primary module hooks for Mukurtu Search module.
+ */
+
+use Drupal\Core\Config\FileStorage;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\field\FieldConfigInterface;
 use Drupal\mukurtu_search\Event\FieldAvailableForIndexing;
 use Drupal\search_api\Entity\Index;
 use Drupal\search_api\Item\Field;
 use Drupal\search_api\SearchApiException;
-
-/**
- * @file
- * Primary module hooks for Mukurtu Search module.
- */
 
 /**
  * Implements hook_entity_insert().
@@ -50,17 +51,75 @@ function mukurtu_search_entity_bundle_create($entity_type_id, $bundle) {
 }
 
 /**
- * Index all fields for search.
+ * Static taxonomy reference fields that mukurtu_browse_auto_index always keeps.
+ *
+ * Each entry gets two fields on mukurtu_browse_auto_index: a plain string
+ * "__name" variant used by facets as their field_identifier, and a fulltext
+ * "__name__text" variant used by search. This fixed set is part of the index's
+ * static field budget and is re-added explicitly by
+ * mukurtu_search_rebuild_index().
+ *
+ * Content-type-specific taxonomy reference fields outside this list are NOT
+ * given per-field variants (that would exceed MySQL's 64-index-per-table
+ * limit); their term names and UUIDs are aggregated into the index-wide
+ * all_taxonomy_term_names / all_taxonomy_term_uuids fields by
+ * \Drupal\mukurtu_search\Plugin\search_api\processor\TaxonomyTermAggregates.
+ *
+ * @return array
+ *   Field ID keyed array of ['label' => ..., 'property_path' => ...].
+ */
+function mukurtu_search_static_taxonomy_name_fields() {
+  return [
+    'node__field_article_category__name' => ['label' => 'Article Category', 'property_path' => 'field_article_category:entity:name'],
+    'node__field_article_keywords__name' => ['label' => 'Article Keywords', 'property_path' => 'field_article_keywords:entity:name'],
+    'node__field_category__name' => ['label' => 'Category', 'property_path' => 'field_category:entity:name'],
+    'node__field_contributor__name' => ['label' => 'Contributor', 'property_path' => 'field_contributor:entity:name'],
+    'node__field_creator__name' => ['label' => 'Creator', 'property_path' => 'field_creator:entity:name'],
+    'node__field_dictionary_word_language__name' => ['label' => 'Dictionary Word Language', 'property_path' => 'field_dictionary_word_language:entity:name'],
+    'node__field_format__name' => ['label' => 'Format', 'property_path' => 'field_format:entity:name'],
+    'node__field_keywords__name' => ['label' => 'Keywords', 'property_path' => 'field_keywords:entity:name'],
+    'node__field_language__name' => ['label' => 'Language', 'property_path' => 'field_language:entity:name'],
+    'node__field_location__name' => ['label' => 'Location', 'property_path' => 'field_location:entity:name'],
+    'node__field_other_names__name' => ['label' => 'Other Names', 'property_path' => 'field_other_names:entity:name'],
+    'node__field_people__name' => ['label' => 'People', 'property_path' => 'field_people:entity:name'],
+    'node__field_publisher__name' => ['label' => 'Publisher', 'property_path' => 'field_publisher:entity:name'],
+    'node__field_subject__name' => ['label' => 'Subject', 'property_path' => 'field_subject:entity:name'],
+    'node__field_type__name' => ['label' => 'Type', 'property_path' => 'field_type:entity:name'],
+    'node__field_word_type__name' => ['label' => 'Word Type', 'property_path' => 'field_word_type:entity:name'],
+  ];
+}
+
+/**
+ * Rebuild the search indexes' dynamically-managed fields.
+ *
+ * Mukurtu_browse_auto_index (the database browse index) is restored to a fixed
+ * field set: everything shipped in this module's config/install copy is kept,
+ * anything added outside it (e.g. stale per-field taxonomy "__uuid" variants
+ * from older releases) is stripped, and the static taxonomy name fields plus
+ * the shared taxonomy-term aggregate fields are (re)added. Per-field variants
+ * for content-type-specific taxonomy reference fields are deliberately NOT
+ * added here - they would exceed MySQL's 64-index-per-table limit; the
+ * taxonomy_term_aggregates processor covers them instead.
+ *
+ * The FieldAvailableForIndexing pass below still runs so Solr indexes (which
+ * have no key limit) pick up per-field taxonomy term name/uuid variants.
  */
 function mukurtu_search_rebuild_index() {
-  // Index taxonomy term references for fields that already exist.
   if ($index = Index::load('mukurtu_browse_auto_index')) {
-    // Clear old fields.
-    $fields = $index->getFields();
-    foreach($fields as $field) {
+    // The fields shipped in config/install are the canonical set. Strip only
+    // fields added outside it.
+    $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_search');
+    $shipped = (new FileStorage(\Drupal::root() . '/' . $module_path . '/config/install'))
+      ->read('search_api.index.mukurtu_browse_auto_index');
+    $keep = array_keys($shipped['field_settings'] ?? []);
+    foreach ($index->getFields() as $field) {
+      if (in_array($field->getFieldIdentifier(), $keep, TRUE)) {
+        continue;
+      }
       try {
         $index->removeField($field->getFieldIdentifier());
-      } catch (SearchApiException $e) {
+      }
+      catch (SearchApiException $e) {
         // Locked field, that's fine.
       }
     }
@@ -69,8 +128,54 @@ function mukurtu_search_rebuild_index() {
     $field = $index->getField('entity_type') ?? new Field($index, 'entity_type');
     $field->setType('string');
     $field->setPropertyPath("search_api_entity_type");
-    $field->setLabel("Entity type");
+    $field->setLabel(t("Entity type"));
     $index->addField($field);
+
+    // Restore the static string (facet) and fulltext variants for the common
+    // taxonomy reference fields.
+    foreach (mukurtu_search_static_taxonomy_name_fields() as $field_id => $definition) {
+      $string_field = $index->getField($field_id) ?? new Field($index, $field_id);
+      $string_field->setType('string');
+      $string_field->setDatasourceId('entity:node');
+      $string_field->setPropertyPath($definition['property_path']);
+      $string_field->setLabel($definition['label']);
+      $index->addField($string_field);
+
+      $text_id = $field_id . '__text';
+      $text_field = $index->getField($text_id) ?? new Field($index, $text_id);
+      $text_field->setType('text');
+      $text_field->setDatasourceId('entity:node');
+      $text_field->setPropertyPath($definition['property_path']);
+      $text_field->setLabel($definition['label']);
+      $index->addField($text_field);
+    }
+
+    // Shared taxonomy-term aggregate fields (index-wide processor properties).
+    // Guarded: the processor plugin may be undiscoverable in a narrow test
+    // context where mukurtu_search is not fully enabled.
+    try {
+      $processors = $index->getProcessors();
+      if (!isset($processors['taxonomy_term_aggregates'])) {
+        $processor = \Drupal::service('search_api.plugin_helper')
+          ->createProcessorPlugin($index, 'taxonomy_term_aggregates');
+        $index->addProcessor($processor);
+      }
+      $names_field = $index->getField('all_taxonomy_term_names') ?? new Field($index, 'all_taxonomy_term_names');
+      $names_field->setType('text');
+      $names_field->setPropertyPath('all_taxonomy_term_names');
+      $names_field->setLabel(t('All taxonomy term names'));
+      $index->addField($names_field);
+
+      $uuids_field = $index->getField('all_taxonomy_term_uuids') ?? new Field($index, 'all_taxonomy_term_uuids');
+      $uuids_field->setType('string');
+      $uuids_field->setPropertyPath('all_taxonomy_term_uuids');
+      $uuids_field->setLabel(t('All taxonomy term UUIDs'));
+      $index->addField($uuids_field);
+    }
+    catch (\Exception $e) {
+      \Drupal::logger('mukurtu_search')->warning('Could not add taxonomy term aggregate fields to mukurtu_browse_auto_index: @message', ['@message' => $e->getMessage()]);
+    }
+
     $index->save();
   }
 

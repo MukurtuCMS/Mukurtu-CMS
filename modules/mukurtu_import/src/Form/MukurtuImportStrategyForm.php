@@ -112,7 +112,7 @@ class MukurtuImportStrategyForm extends EntityForm {
     $form['identifier_column'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Identifier Column'),
-      '#description' => $this->t('Optional. Enter the column name to use as the unique identifier for each row. When set, this takes precedence over entity ID, UUID, and label columns for tracking rows in the import. Use this when importing entities without a natural label (e.g. paragraphs) so they can be referenced by other CSVs in the same import session.'),
+      '#description' => $this->t('Required unless the mapping already identifies rows via an ID, UUID, label, or compatible media source column. Enter the column name to use as the unique identifier for each row. When set, this takes precedence over entity ID, UUID, and label columns for tracking rows in the import. Use this when importing entities without a natural label (e.g. paragraphs) so they can be referenced by other CSVs in the same import session.'),
       '#default_value' => $configuration['identifier_column'] ?? '',
     ];
 

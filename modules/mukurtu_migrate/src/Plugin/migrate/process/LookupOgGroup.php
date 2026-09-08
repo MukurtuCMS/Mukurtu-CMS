@@ -2,6 +2,7 @@
 
 namespace Drupal\mukurtu_migrate\Plugin\migrate\process;
 
+use Drupal\migrate\Attribute\MigrateProcess;
 use Drupal\migrate\MigrateExecutableInterface;
 use Drupal\migrate\ProcessPluginBase;
 use Drupal\migrate\Row;
@@ -10,11 +11,8 @@ use \Drupal\Core\Database\Database;
 
 /**
  * Lookup an entity's OG groups.
- *
- * @MigrateProcessPlugin(
- *   id = "mukurtu_migrate_lookup_og_group"
- * )
  */
+#[MigrateProcess('mukurtu_migrate_lookup_og_group')]
 class LookupOgGroup extends ProcessPluginBase {
   public function transform($value, MigrateExecutableInterface $migrate_executable, Row $row, $destination_property) {
     // This is serious cheating. We need to know which database source to
