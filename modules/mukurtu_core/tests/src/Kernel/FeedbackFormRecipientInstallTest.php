@@ -10,7 +10,7 @@ use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests mukurtu_install_configure_form_submit(), the fresh-install counterpart
- * to mukurtu_core_update_40124().
+ * to mukurtu_core_update_40123().
  *
  * The profile's own hook_install() cannot do this work, because
  * install_install_profile runs before install_configure_form and so
@@ -22,7 +22,7 @@ use PHPUnit\Framework\Attributes\Group;
  * profile-level test directory would never run in CI.
  *
  * @see mukurtu_install_configure_form_submit()
- * @see mukurtu_core_update_40124()
+ * @see mukurtu_core_update_40123()
  */
 #[Group('mukurtu_core')]
 class FeedbackFormRecipientInstallTest extends KernelTestBase {
