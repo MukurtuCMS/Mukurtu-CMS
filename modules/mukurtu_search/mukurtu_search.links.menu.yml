@@ -4,3 +4,4 @@ mukurtu_search.settings:
   menu_name: dashboard-site-settings
   description: "Configure Mukurtu search options"
   route_name: mukurtu_search.settings
+  weight: 6

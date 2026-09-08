@@ -8,6 +8,8 @@
 use Drupal\Core\Field\Entity\BaseFieldOverride;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\language\Entity\ContentLanguageSettings;
+use Drupal\search_api\Entity\Index;
+use Drupal\search_api\Item\Field as SearchApiField;
 use Drupal\user\Entity\Role;
 
 /**
@@ -40,10 +42,32 @@ function mukurtu_multilingual_install() {
   // Clear the cache.discovery bin where field definitions are cached.
   \Drupal::service('cache.discovery')->deleteAll();
 
-  // Make adjustments to language negotiation settings. This will enable
-  // content language detection apart from interface language detection. It
-  // also prioritizes a users' Administration pages language setting, so that
-  // interface text follows their preference rather than the content language.
+  _mukurtu_multilingual_apply_language_negotiation_defaults();
+
+  // Make all comment fields on node bundles untranslatable.
+  $node_types = \Drupal::entityTypeManager()->getStorage('node_type')->loadMultiple();
+  foreach ($node_types as $node_type) {
+    $bundle = $node_type->id();
+    $field_config = FieldConfig::loadByName('node', $bundle, 'comment');
+    if ($field_config) {
+      $field_config->setTranslatable(FALSE);
+      $field_config->save();
+    }
+  }
+
+  _mukurtu_multilingual_apply_translation_overrides();
+}
+
+/**
+ * Adjusts language negotiation settings.
+ *
+ * This enables content language detection apart from interface language
+ * detection. It also prioritizes a users' Administration pages language
+ * setting, so that interface text follows their preference rather than the
+ * content language. Idempotent: safe to call on a site that has already
+ * converged on these settings, or whose settings have drifted.
+ */
+function _mukurtu_multilingual_apply_language_negotiation_defaults(): void {
   $config = \Drupal::configFactory()->getEditable('language.types');
   $config->set('configurable', ['language_interface', 'language_content'])
     ->set('negotiation.language_content.enabled', [
@@ -58,19 +82,6 @@ function mukurtu_multilingual_install() {
       'language-selected' => 12,
     ]);
   $config->save();
-
-  // Make all comment fields on node bundles untranslatable.
-  $node_types = \Drupal::entityTypeManager()->getStorage('node_type')->loadMultiple();
-  foreach ($node_types as $node_type) {
-    $bundle = $node_type->id();
-    $field_config = FieldConfig::loadByName('node', $bundle, 'comment');
-    if ($field_config) {
-      $field_config->setTranslatable(FALSE);
-      $field_config->save();
-    }
-  }
-
-  _mukurtu_multilingual_apply_translation_overrides();
 }
 
 /**
@@ -215,4 +226,108 @@ function mukurtu_multilingual_update_40005(): void {
  */
 function mukurtu_multilingual_update_40006(): void {
   _mukurtu_multilingual_apply_translation_overrides();
+}
+
+/**
+ * Converges language negotiation settings on sites that installed before
+ * this release or whose settings have otherwise drifted from the shipped
+ * defaults (e.g. a site administrator changed them and later wants to reset
+ * to the Mukurtu defaults).
+ */
+function mukurtu_multilingual_update_40007(): void {
+  _mukurtu_multilingual_apply_language_negotiation_defaults();
+}
+
+/**
+ * Enables content translation for 12 bundles that were never covered by any
+ * language.content_settings.* config: the 7 media bundles (audio, document,
+ * external_embed, image, remote_video, soundcloud, video - meaning media
+ * names, alt text, and other translatable fields could not be translated on
+ * a multilingual site), the place_type taxonomy vocabulary, the
+ * mukurtu_footer block type, and 2 footer paragraph types
+ * (footer_logo, footer_social_link). A 12th bundle, the
+ * text_section_with_title paragraph type, already had its base field
+ * overrides shipped but was missing the content_settings file that actually
+ * enables translation for the bundle.
+ *
+ * Guarded by isNew() so this is a no-op if the config already exists (e.g.
+ * on a site that installed after this fix shipped, which already got these
+ * via config/install).
+ */
+function mukurtu_multilingual_update_40008(): void {
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_multilingual');
+  $config_source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
+  $config_factory = \Drupal::configFactory();
+
+  $bundles = [
+    ['media', 'audio'],
+    ['media', 'document'],
+    ['media', 'external_embed'],
+    ['media', 'image'],
+    ['media', 'remote_video'],
+    ['media', 'soundcloud'],
+    ['media', 'video'],
+    ['taxonomy_term', 'place_type'],
+    ['block_content', 'mukurtu_footer'],
+    ['paragraph', 'footer_logo'],
+    ['paragraph', 'footer_social_link'],
+    ['paragraph', 'text_section_with_title'],
+  ];
+
+  foreach ($bundles as [$entity_type_id, $bundle]) {
+    $config_name = "language.content_settings.$entity_type_id.$bundle";
+    if ($config_factory->get($config_name)->isNew()) {
+      $data = $config_source->read($config_name);
+      if ($data) {
+        $config_factory->getEditable($config_name)->setData($data)->save();
+      }
+    }
+  }
+}
+
+/**
+ * Wires the already-enabled LanguageWithFallback Search API processor to an
+ * indexed field on all 6 profile-owned indexes, so views/facets can filter
+ * on it to fall back to default-language content instead of hiding
+ * untranslated items (docs/content-language-policy.md).
+ *
+ * The `language_with_fallback` processor is already enabled (locked,
+ * hidden) on every index shipped by this profile - it just isn't wired to
+ * a field yet, so nothing can filter/facet on it. This only adds the
+ * field; it doesn't change any view's filters, so it has no visible
+ * behavior change on its own (that's Phase 4's per-view follow-up work).
+ *
+ * Triggers a full reindex on each affected index, since a newly-added
+ * field has no value for already-indexed items until they're re-crawled.
+ * On a large Solr install this can take a while - flag this in release
+ * notes, not just as a silent update hook.
+ */
+function mukurtu_multilingual_update_40009(): void {
+  $index_ids = [
+    'mukurtu_default_content_index',
+    'mukurtu_collection_index',
+    'mukurtu_dictionary_index',
+    'mukurtu_browse_auto_index',
+    'mukurtu_default_solr_index',
+    'mukurtu_dictionary_solr_index',
+  ];
+
+  foreach ($index_ids as $index_id) {
+    $index = Index::load($index_id);
+    if (!$index) {
+      continue;
+    }
+
+    if ($index->getField('language_with_fallback')) {
+      continue;
+    }
+
+    $field = new SearchApiField($index, 'language_with_fallback');
+    $field->setType('string');
+    $field->setPropertyPath('language_with_fallback');
+    $field->setLabel(t('Language (with fallback)'));
+    $index->addField($field);
+    $index->save();
+    $index->reindex();
+  }
 }

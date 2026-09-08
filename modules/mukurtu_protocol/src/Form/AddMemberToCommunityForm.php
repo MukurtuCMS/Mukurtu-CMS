@@ -6,9 +6,11 @@ use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\mukurtu_core\Service\EntityTranslationResolver;
 use Drupal\og\Og;
 use Drupal\mukurtu_protocol\Entity\Community;
 use Drupal\user\Entity\User;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Two-step form to enrol a user in a community and its child protocols.
@@ -22,6 +24,17 @@ use Drupal\user\Entity\User;
  * in the form.
  */
 class AddMemberToCommunityForm extends FormBase {
+
+  public function __construct(protected EntityTranslationResolver $entityTranslationResolver) {}
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('mukurtu_core.entity_translation_resolver'),
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -85,6 +98,7 @@ class AddMemberToCommunityForm extends FormBase {
    *   'community_name', 'protocol_name', 'protocol' (entity).
    */
   protected function getProtocolsForCommunity(Community $community, User $target): array {
+    $community = $this->entityTranslationResolver->translate($community);
     $rows = [];
     $current_user = User::load($this->currentUser()->id());
     $is_admin = $this->currentUser()->hasPermission('administer users');
@@ -103,6 +117,7 @@ class AddMemberToCommunityForm extends FormBase {
     }
 
     foreach ($community->getProtocols() as $protocol) {
+      $protocol = $this->entityTranslationResolver->translate($protocol);
       if ($manageable_protocol_ids !== NULL && !in_array($protocol->id(), $manageable_protocol_ids)) {
         continue;
       }
@@ -192,6 +207,7 @@ class AddMemberToCommunityForm extends FormBase {
     if (!$group) {
       return $form;
     }
+    $group = $this->entityTranslationResolver->translate($group);
 
     $form_state->set('community_id', $group->id());
     $step = $form_state->get('step') ?? 1;
@@ -442,7 +458,7 @@ class AddMemberToCommunityForm extends FormBase {
       $community = \Drupal::entityTypeManager()->getStorage('community')->load($cid);
       if ($community) {
         $community->addMember($user, $selected_roles);
-        $added[] = $community->getName();
+        $added[] = $this->entityTranslationResolver->translate($community)->getName();
       }
     }
 
@@ -474,7 +490,7 @@ class AddMemberToCommunityForm extends FormBase {
       $protocol = \Drupal::entityTypeManager()->getStorage('protocol')->load($pid);
       if ($protocol) {
         $protocol->addMember($user, $selected_roles);
-        $added[] = $protocol->getName();
+        $added[] = $this->entityTranslationResolver->translate($protocol)->getName();
       }
     }
 

@@ -12,15 +12,15 @@ use Drupal\views\Entity\Render\EntityTranslationRenderTrait;
 use Drupal\views\ResultRow;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Cache\Cache;
+use Drupal\views\Attribute\ViewsField;
 use Drupal\views\Plugin\views\field\FieldPluginBase;
 
 /**
  * Provides a field handler which renders a flagged entity in a certain view mode.
  *
  * @ingroup views_field_handlers
- *
- * @ViewsField("flagged_rendered_entity")
  */
+#[ViewsField('flagged_rendered_entity')]
 class FlaggedRenderedEntity extends FieldPluginBase implements CacheableDependencyInterface {
 
   use EntityTranslationRenderTrait;

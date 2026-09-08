@@ -1,0 +1,17 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.mlt_test
+id: node.mlt_test.title
+field_name: title
+entity_type: node
+bundle: mlt_test
+label: 'MLT Test Label'
+description: 'MLT Test Description'
+required: true
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

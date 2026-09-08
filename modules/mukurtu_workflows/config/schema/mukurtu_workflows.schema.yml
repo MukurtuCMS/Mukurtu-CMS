@@ -1,0 +1,13 @@
+# Schema for the Mukurtu Workflows module.
+
+mukurtu_workflows.settings:
+  type: config_object
+  label: 'Mukurtu Workflows settings'
+  mapping:
+    active_workflow:
+      type: string
+      label: 'Active workflow for protocol-controlled content'
+
+views.access.review_queue_access:
+  type: mapping
+  label: 'Review queue access'

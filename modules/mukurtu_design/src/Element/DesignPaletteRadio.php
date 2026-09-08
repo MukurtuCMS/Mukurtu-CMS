@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Drupal\mukurtu_design\Element;
 
+use Drupal\Core\Render\Attribute\FormElement;
 use Drupal\Core\Render\Element\Radio;
 
 /**
  * DesignPaletteRadio form element.
- *
- * @FormElement("mukurtu_palette_radio")
  */
+#[FormElement('mukurtu_palette_radio')]
 class DesignPaletteRadio extends Radio {
 
   /**

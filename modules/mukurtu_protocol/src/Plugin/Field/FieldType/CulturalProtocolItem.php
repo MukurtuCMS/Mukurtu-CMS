@@ -2,22 +2,23 @@
 
 namespace Drupal\mukurtu_protocol\Plugin\Field\FieldType;
 
+use Drupal\Core\Field\Attribute\FieldType;
 use Drupal\Core\Field\FieldItemBase;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\TypedData\DataDefinition;
 use Drupal\mukurtu_protocol\CulturalProtocols;
 
 /**
  * Provides a field type of CulturalProtocol.
- *
- * @FieldType(
- *   id = "cultural_protocol",
- *   label = @Translation("Cultural Protocols"),
- *   default_formatter = "cultural_protocol_formatter",
- *   default_widget = "cultural_protocol_widget",
- * )
  */
+#[FieldType(
+  id: 'cultural_protocol',
+  label: new TranslatableMarkup('Cultural Protocols'),
+  default_widget: 'cultural_protocol_widget',
+  default_formatter: 'cultural_protocol_formatter',
+)]
 class CulturalProtocolItem extends FieldItemBase {
 
   /**

@@ -19,7 +19,14 @@ class ExportListSource implements MukurtuExporterSourceInterface {
    * {@inheritdoc}
    */
   public function getEntities(): array {
-    return $this->exportList->getItems();
+    $entities = [];
+    foreach ($this->exportList->getItems() as $entity_type_id => $ids) {
+      foreach ($ids as $id) {
+        $key = ExportItemIdentity::encode($id, $this->exportList->getItemLanguage($entity_type_id, $id));
+        $entities[$entity_type_id][$key] = $key;
+      }
+    }
+    return $entities;
   }
 
 }

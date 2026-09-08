@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_collection\Kernel;
 
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\mukurtu_collection\Entity\Collection;
 use Drupal\Tests\mukurtu_protocol\Kernel\ProtocolAwareEntityTestBase;
+use Drupal\mukurtu_collection\Entity\Collection;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests that Collection field labels are translatable.
@@ -19,9 +20,8 @@ use Drupal\Tests\mukurtu_protocol\Kernel\ProtocolAwareEntityTestBase;
  * transitive dependencies - disproportionate kernel test setup for a
  * mechanical one-line string wrap that's otherwise identical in shape and
  * risk to the covered fixes in this same PR.
- *
- * @group mukurtu_collection
  */
+#[Group('mukurtu_collection')]
 class CollectionFieldLabelTest extends ProtocolAwareEntityTestBase {
 
   public function testCollectionFieldLabelsAreTranslatable(): void {

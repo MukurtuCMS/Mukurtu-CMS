@@ -5,9 +5,11 @@ namespace Drupal\mukurtu_export\EventSubscriber;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Messenger\MessengerInterface;
+use Drupal\mukurtu_core\Service\EntityTranslationResolver;
 use Drupal\mukurtu_core\Service\ParagraphEmptinessChecker;
 use Drupal\mukurtu_export\Entity\CsvExporter;
 use Drupal\mukurtu_export\Event\EntityFieldExportEvent;
+use Drupal\og\Og;
 use InvalidArgumentException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -35,12 +37,20 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
   protected $paragraphEmptinessChecker;
 
   /**
+   * The entity translation resolver.
+   *
+   * @var \Drupal\mukurtu_core\Service\EntityTranslationResolver
+   */
+  protected $entityTranslationResolver;
+
+  /**
    * {@inheritDoc}
    */
-  public function __construct(MessengerInterface $messenger, EntityTypeManagerInterface $entity_type_manager, ParagraphEmptinessChecker $paragraph_emptiness_checker) {
+  public function __construct(MessengerInterface $messenger, EntityTypeManagerInterface $entity_type_manager, ParagraphEmptinessChecker $paragraph_emptiness_checker, EntityTranslationResolver $entity_translation_resolver) {
     $this->messenger = $messenger;
     $this->entityTypeManager = $entity_type_manager;
     $this->paragraphEmptinessChecker = $paragraph_emptiness_checker;
+    $this->entityTranslationResolver = $entity_translation_resolver;
   }
 
   /**
@@ -74,6 +84,19 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
       return $this->exportFoundIn($event, $entity, $config);
     }
 
+    // Virtual fields: community/protocol membership isn't a real field on
+    // the user entity, so it's read directly from the OG membership API.
+    if ($entity->getEntityTypeId() === 'user' && in_array($field_name, ['communities', 'protocols'], TRUE)) {
+      return $this->exportGroupMembership($event, $entity, $field_name);
+    }
+
+    // Virtual field: account status is split across two real fields
+    // (status, field_pending), exported as a single Active/Blocked/Pending
+    // value to match the import side's unified 'account_status' target.
+    if ($entity->getEntityTypeId() === 'user' && $field_name === 'account_status') {
+      return $this->exportAccountStatus($event, $entity);
+    }
+
     try {
       $field = $entity->get($field_name);
     } catch (InvalidArgumentException $e) {
@@ -105,11 +128,29 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
       return $this->exportLink($event, $field, $config);
     }
 
+    if ($fieldType == 'created' || $fieldType == 'changed') {
+      return $this->exportTimestamp($event, $field);
+    }
+
+    // Layout Builder's per-entity section field stores structured Section
+    // objects with no meaningful flat CSV representation. New export
+    // configs no longer offer this field (see CsvExporter::getMappedFields()),
+    // but a config saved before that exclusion existed may still have it
+    // mapped, so guard here too rather than letting it reach the default
+    // handling below.
+    if ($fieldType == 'layout_section') {
+      $event->setValue([]);
+      return;
+    }
+
     // Default handling.
     $values = $entity->get($field_name)->getValue();
     $exportValue = [];
     foreach ($values as $value) {
-      $exportValue[] = is_array($value) ? reset($value) : $value;
+      $extracted = is_array($value) ? reset($value) : $value;
+      // Guard against field types whose getValue() returns a non-scalar
+      // (e.g. an object) that implode() in CSV::export() cannot stringify.
+      $exportValue[] = is_scalar($extracted) ? $extracted : '';
     }
     $event->setValue($exportValue);
   }
@@ -137,6 +178,25 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
    *
    * @protected
    */
+  /**
+   * Loads an entity for export, honoring the row's requested translation.
+   *
+   * When the row entity ($event->entity) is being exported in a specific
+   * translation (not its own original language), referenced entities
+   * should resolve to that same translation where one exists. Otherwise
+   * this is a plain load, unchanged from before - deliberately not routed
+   * through EntityTranslationResolver's active-content-language fallback,
+   * which would silently pull in the *current request's* language instead
+   * of the referenced entity's own default one.
+   */
+  protected function loadForExport(string $entity_type_id, $id, EntityFieldExportEvent $event): ?EntityInterface {
+    $langcode = $event->getLangcode();
+    if ($langcode) {
+      return $this->entityTranslationResolver->loadTranslated($entity_type_id, $id, $langcode);
+    }
+    return $this->entityTypeManager->getStorage($entity_type_id)->load($id);
+  }
+
   protected function getUUID($entity_type_id, $id) {
     if ($entity = $this->entityTypeManager->getStorage($entity_type_id)->load($id)) {
       return $entity->uuid();
@@ -228,7 +288,7 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
           }
 
           if ($target_type == 'taxonomy_term' && $option == 'name') {
-            if ($term = $this->entityTypeManager->getStorage($target_type)->load($id)) {
+            if ($term = $this->loadForExport($target_type, $id, $event)) {
               /** @var \Drupal\taxonomy\TermInterface $term */
               $export[] = $term->getName();
               continue;
@@ -545,6 +605,29 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
   }
 
   /**
+   * Exports created/changed field values as a human-readable UTC timestamp.
+   *
+   * The raw values are Unix timestamps; formatting them here keeps the
+   * exported CSV readable while remaining unambiguous to parse back on
+   * import (see the 'timestamp' MukurtuImportFieldProcess plugin).
+   *
+   * @param EntityFieldExportEvent $event
+   *   The export event object which provides the context and the necessary
+   *   environment for the current export operation.
+   * @param \Drupal\Core\Field\FieldItemListInterface $field
+   *   The field items list containing the timestamp data to be exported.
+   *
+   * @protected
+   */
+  protected function exportTimestamp(EntityFieldExportEvent $event, $field) {
+    $exportValue = [];
+    foreach ($field->getValue() as $value) {
+      $exportValue[] = gmdate('Y-m-d H:i:s', $value['value']);
+    }
+    $event->setValue($exportValue);
+  }
+
+  /**
    * Loads an entity by its ID and triggers its export if found.
    *
    * This method attempts to load an entity of the specified type and ID. If the entity
@@ -569,7 +652,7 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
    * @protected
    */
   protected function exportEntityById(EntityFieldExportEvent $event, $entity_type_id, $id): EntityInterface|null {
-    if ($entity = $this->entityTypeManager->getStorage($entity_type_id)->load($id)) {
+    if ($entity = $this->loadForExport($entity_type_id, $id, $event)) {
       $event->exportAdditionalEntity($entity);
       return $entity;
     }
@@ -583,7 +666,7 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
    * exported as identifiers only -- their references will not be followed further.
    */
   protected function exportEntityByIdShallow(EntityFieldExportEvent $event, $entity_type_id, $id): EntityInterface|null {
-    if ($entity = $this->entityTypeManager->getStorage($entity_type_id)->load($id)) {
+    if ($entity = $this->loadForExport($entity_type_id, $id, $event)) {
       $event->exportAdditionalEntity($entity);
       $event->context['results']['shallow_entity_ids'][$entity_type_id][$id] = $id;
       return $entity;
@@ -657,6 +740,70 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
     }
 
     $event->setValue($export);
+  }
+
+  /**
+   * Exports a user's community or protocol memberships and roles.
+   *
+   * Serializes to the same "Name>role1|role2" format the import side's
+   * GroupMembershipLookup process plugin expects (the CSV::export() plugin
+   * joins the returned array with the exporter's configured
+   * multivalue_delimiter, matching the delimiter import's explode step
+   * reads by default), so an export/re-import round-trip reproduces the
+   * same membership state.
+   *
+   * @protected
+   */
+  protected function exportGroupMembership(EntityFieldExportEvent $event, EntityInterface $entity, string $field_name): void {
+    $bundle = $field_name === 'communities' ? 'community' : 'protocol';
+    $memberships = array_filter(Og::getMemberships($entity), fn($membership) => $membership->getGroupBundle() === $bundle);
+
+    $export = [];
+    foreach ($memberships as $membership) {
+      $group = $membership->getGroup();
+      if (!$group) {
+        continue;
+      }
+      $roles = array_values(array_filter(
+        array_map(fn($role) => $role->getName(), $membership->getRoles()),
+        fn($role_name) => !in_array($role_name, ['member', 'non-member'], TRUE),
+      ));
+      // Strip delimiter characters defensively rather than invent an
+      // escaping scheme, matching exportCulturalProtocol()'s precedent of
+      // stripping conflicting delimiter characters from exported values.
+      // ':' is deliberately not stripped -- '>' is the compound-value
+      // delimiter now, and colons are common in real group names.
+      $label = str_replace(['>', '|', ';'], '', $group->label());
+      $export[] = $roles ? "{$label}>" . implode('|', $roles) : $label;
+    }
+
+    $event->setValue($export);
+  }
+
+  /**
+   * Exports a user's account status as a single Active/Blocked/Pending
+   * value.
+   *
+   * Mirrors the same three-state model the interactive account form
+   * presents (see FormHooks::userStatusPreSaveSubmit()) and
+   * MukurtuUserListBuilder::buildRow()'s admin listing, and matches the
+   * format the import side's AccountStatusLookup process plugin expects,
+   * so an export/re-import round trip reproduces the same account status.
+   *
+   * @protected
+   */
+  protected function exportAccountStatus(EntityFieldExportEvent $event, EntityInterface $entity): void {
+    if ($entity->isActive()) {
+      $status = 'Active';
+    }
+    elseif ($entity->hasField('field_pending') && $entity->get('field_pending')->value) {
+      $status = 'Pending';
+    }
+    else {
+      $status = 'Blocked';
+    }
+
+    $event->setValue([$status]);
   }
 
 }

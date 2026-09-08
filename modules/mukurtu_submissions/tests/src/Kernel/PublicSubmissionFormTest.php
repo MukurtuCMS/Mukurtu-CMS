@@ -5,16 +5,16 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_submissions\Kernel;
 
 use Drupal\Core\Form\FormState;
-use Drupal\mukurtu_submissions\Form\PublicSubmissionForm;
 use Drupal\Tests\content_moderation\Traits\ContentModerationTestTrait;
 use Drupal\Tests\mukurtu_protocol\Kernel\ProtocolAwareEntityTestBase;
+use Drupal\mukurtu_submissions\Form\PublicSubmissionForm;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests PublicSubmissionForm, the public/anonymous-facing form behind
  * /submit/{entity_type_id}/{bundle}.
- *
- * @group mukurtu_submissions
  */
+#[Group('mukurtu_submissions')]
 class PublicSubmissionFormTest extends ProtocolAwareEntityTestBase {
 
   use ContentModerationTestTrait;

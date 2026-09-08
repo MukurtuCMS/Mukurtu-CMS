@@ -2,23 +2,24 @@
 
 namespace Drupal\original_date\Plugin\Field\FieldType;
 
+use Drupal\Core\Field\Attribute\FieldType;
 use Drupal\Core\Field\FieldItemBase;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\TypedData\DataDefinition;
 use InvalidArgumentException;
 
 /**
  * Plugin implementation of the 'original_date' field type.
- *
- * @FieldType(
- * id = "original_date",
- * label = @Translation("Original Date"),
- * module = "original_date",
- * description = @Translation("Date the item was originally published."),
- * default_widget = "original_date_text",
- * default_formatter = "yyyy_mm_dd_original_date_formatter"
- * )
  */
+#[FieldType(
+  id: 'original_date',
+  label: new TranslatableMarkup('Original Date'),
+  description: new TranslatableMarkup('Date the item was originally published.'),
+  default_widget: 'original_date_text',
+  default_formatter: 'yyyy_mm_dd_original_date_formatter',
+  module: 'original_date',
+)]
 class OriginalDateField extends FieldItemBase {
 
   /**

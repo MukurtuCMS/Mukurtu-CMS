@@ -1,0 +1,8 @@
+name: 'Mukurtu Multilingual translation testing module'
+type: module
+description: 'Ships a real config/install base field override, so BaseFieldOverrideLabelTranslationTest can exercise Drupal core''s locale config-sync path against actually-shipped default configuration rather than a programmatically-created entity.'
+package: Testing
+version: '8.x-1.x-dev'
+dependencies:
+  - drupal:node
+  - drupal:field
