@@ -11,6 +11,7 @@ use Drupal\facets\Result\Result;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\mukurtu_protocol\Entity\Protocol;
 use Drupal\mukurtu_protocol\Plugin\facets\processor\CulturalProtocolFacetLabelProcessor;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests that protocol names shown to visitors respect the active content
@@ -22,9 +23,8 @@ use Drupal\mukurtu_protocol\Plugin\facets\processor\CulturalProtocolFacetLabelPr
  * bypassing entity.repository's translation context. The same anti-pattern
  * existed in MediaProtocolFilter/NodeProtocolFilter's exposed-filter option
  * lists.
- *
- * @group mukurtu_protocol
  */
+#[Group('mukurtu_protocol')]
 class ProtocolLabelTranslationTest extends ProtocolAwareEntityTestBase {
 
   /**

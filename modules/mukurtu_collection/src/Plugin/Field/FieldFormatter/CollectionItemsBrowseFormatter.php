@@ -2,21 +2,20 @@
 
 namespace Drupal\mukurtu_collection\Plugin\Field\FieldFormatter;
 
+use Drupal\Core\Field\Attribute\FieldFormatter;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FormatterBase;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\views\Views;
 
 /**
  * Renders the items in a collection with a grid/list/map view switcher.
- *
- * @FieldFormatter(
- *   id = "mukurtu_collection_items_browse",
- *   label = @Translation("Collection items grid/list/map"),
- *   field_types = {
- *     "entity_reference"
- *   }
- * )
  */
+#[FieldFormatter(
+  id: 'mukurtu_collection_items_browse',
+  label: new TranslatableMarkup('Collection items grid/list/map'),
+  field_types: ['entity_reference'],
+)]
 class CollectionItemsBrowseFormatter extends FormatterBase {
 
   /**

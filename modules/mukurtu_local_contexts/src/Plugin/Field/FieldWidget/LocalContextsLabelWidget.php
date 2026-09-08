@@ -2,9 +2,11 @@
 
 namespace Drupal\mukurtu_local_contexts\Plugin\Field\FieldWidget;
 
+use Drupal\Core\Field\Attribute\FieldWidget;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\Plugin\Field\FieldWidget\OptionsWidgetBase;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Field\FieldItemListInterface;
@@ -12,14 +14,13 @@ use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Defines the 'local_contexts_label_and_notice' field widget.
- *
- * @FieldWidget(
- *   id = "local_contexts_label_and_notice",
- *   label = @Translation("Local Contexts Label and Notice Widget"),
- *   field_types = {"local_contexts_label_and_notice"},
- *   multiple_values = TRUE
- * )
  */
+#[FieldWidget(
+  id: 'local_contexts_label_and_notice',
+  label: new TranslatableMarkup('Local Contexts Label and Notice Widget'),
+  field_types: ['local_contexts_label_and_notice'],
+  multiple_values: TRUE,
+)]
 class LocalContextsLabelWidget extends OptionsWidgetBase {
 
   /**

@@ -14,6 +14,7 @@ use Drupal\mukurtu_protocol\Entity\Protocol;
 use Drupal\node\Entity\Node;
 use Drupal\paragraphs\Entity\Paragraph;
 use Drupal\paragraphs\Entity\ParagraphsType;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests that media attached only through a sample-sentence recording
@@ -26,9 +27,8 @@ use Drupal\paragraphs\Entity\ParagraphsType;
  * checked a fixed list of top-level node fields, so a dictionary word's
  * sample-sentence recording never got a protocol-parent claim or protocol
  * sync at all, regardless of its own "sync protocols" setting.
- *
- * @group mukurtu_protocol_sync
  */
+#[Group('mukurtu_protocol_sync')]
 class SampleSentenceProtocolSyncTest extends ProtocolAwareEntityTestBase {
 
   /**

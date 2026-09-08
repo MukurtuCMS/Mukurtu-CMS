@@ -8,12 +8,14 @@ use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\mukurtu_protocol\Access\MukurtuPermissionAccessCheck;
 use Drupal\og\MembershipManagerInterface;
 use Drupal\og\OgRoleManagerInterface;
 use Drupal\og\PermissionManagerInterface;
 use Drupal\user\PermissionHandlerInterface;
 use Drupal\user\RoleStorageInterface;
+use Drupal\views\Attribute\ViewsAccess;
 use Drupal\views\Plugin\views\access\AccessPluginBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Routing\Route;
@@ -22,13 +24,12 @@ use Symfony\Component\Routing\Route;
  * Access plugin that provides permission-based access control.
  *
  * @ingroup views_access_plugins
- *
- * @ViewsAccess(
- *   id = "mukurtu_permission",
- *   title = @Translation("Site/Mukurtu Permission(s)"),
- *   help = @Translation("Access will be granted to users with the specified site or Mukurtu permission(s).")
- * )
  */
+#[ViewsAccess(
+  id: 'mukurtu_permission',
+  title: new TranslatableMarkup('Site/Mukurtu Permission(s)'),
+  help: new TranslatableMarkup('Access will be granted to users with the specified site or Mukurtu permission(s).'),
+)]
 class MukurtuPermission extends AccessPluginBase implements CacheableDependencyInterface {
   /**
    * {@inheritdoc}

@@ -2,6 +2,7 @@
 
 namespace Drupal\mukurtu_collection\Entity;
 
+use Drupal\Core\Entity\Attribute\ContentEntityType;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
@@ -10,6 +11,7 @@ use Drupal\Core\Entity\RevisionableInterface;
 use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityPublishedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\user\UserInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 
@@ -17,64 +19,64 @@ use Drupal\Core\Field\FieldDefinitionInterface;
  * Defines the Personal collection entity.
  *
  * @ingroup mukurtu_collection
- *
- * @ContentEntityType(
- *   id = "personal_collection",
- *   label = @Translation("Personal collection"),
- *   handlers = {
- *     "storage" = "Drupal\mukurtu_collection\PersonalCollectionStorage",
- *     "view_builder" = "Drupal\mukurtu_collection\Entity\PersonalCollectionViewBuilder",
- *     "list_builder" = "Drupal\mukurtu_collection\PersonalCollectionListBuilder",
- *     "views_data" = "Drupal\mukurtu_collection\Entity\PersonalCollectionViewsData",
- *     "translation" = "Drupal\mukurtu_collection\PersonalCollectionTranslationHandler",
- *
- *     "form" = {
- *       "default" = "Drupal\mukurtu_collection\Form\PersonalCollectionForm",
- *       "add" = "Drupal\mukurtu_collection\Form\PersonalCollectionForm",
- *       "edit" = "Drupal\mukurtu_collection\Form\PersonalCollectionForm",
- *       "delete" = "Drupal\mukurtu_collection\Form\PersonalCollectionDeleteForm",
- *     },
- *     "route_provider" = {
- *       "html" = "Drupal\mukurtu_collection\PersonalCollectionHtmlRouteProvider",
- *     },
- *     "access" = "Drupal\mukurtu_collection\PersonalCollectionAccessControlHandler",
- *   },
- *   base_table = "personal_collection",
- *   data_table = "personal_collection_field_data",
- *   revision_table = "personal_collection_revision",
- *   revision_data_table = "personal_collection_field_revision",
- *   translatable = TRUE,
- *   admin_permission = "administer personal collection entities",
- *   entity_keys = {
- *     "id" = "id",
- *     "revision" = "vid",
- *     "label" = "name",
- *     "uuid" = "uuid",
- *     "uid" = "user_id",
- *     "langcode" = "langcode",
- *     "published" = "status",
- *   },
- *   revision_metadata_keys = {
- *     "revision_user" = "revision_user",
- *     "revision_created" = "revision_created",
- *     "revision_log_message" = "revision_log"
- *   },
- *   links = {
- *     "canonical" = "/personal-collection/{personal_collection}",
- *     "add-form" = "/personal-collection/add",
- *     "edit-form" = "/personal-collection/{personal_collection}/edit",
- *     "delete-form" = "/personal-collection/{personal_collection}/delete",
- *     "version-history" = "/personal-collection/{personal_collection}/revisions",
- *     "revision" = "/personal-collection/{personal_collection}/revisions/{personal_collection_revision}/view",
- *     "revision_revert" = "/personal-collection/{personal_collection}/revisions/{personal_collection_revision}/revert",
- *     "revision_delete" = "/personal-collection/{personal_collection}/revisions/{personal_collection_revision}/delete",
- *     "translation_revert" = "/personal-collection/{personal_collection}/revisions/{personal_collection_revision}/revert/{langcode}",
- *     "collection" = "/admin/structure/personal_collection",
- *   },
- *   field_ui_base_route = "personal_collection.settings",
- *   enable_page_title_template = TRUE
- * )
  */
+#[ContentEntityType(
+  id: 'personal_collection',
+  label: new TranslatableMarkup('Personal collection'),
+  entity_keys: [
+    'id' => 'id',
+    'revision' => 'vid',
+    'label' => 'name',
+    'uuid' => 'uuid',
+    'uid' => 'user_id',
+    'langcode' => 'langcode',
+    'published' => 'status',
+  ],
+  handlers: [
+    'storage' => 'Drupal\mukurtu_collection\PersonalCollectionStorage',
+    'view_builder' => 'Drupal\mukurtu_collection\Entity\PersonalCollectionViewBuilder',
+    'list_builder' => 'Drupal\mukurtu_collection\PersonalCollectionListBuilder',
+    'views_data' => 'Drupal\mukurtu_collection\Entity\PersonalCollectionViewsData',
+    'translation' => 'Drupal\mukurtu_collection\PersonalCollectionTranslationHandler',
+    'form' => [
+      'default' => 'Drupal\mukurtu_collection\Form\PersonalCollectionForm',
+      'add' => 'Drupal\mukurtu_collection\Form\PersonalCollectionForm',
+      'edit' => 'Drupal\mukurtu_collection\Form\PersonalCollectionForm',
+      'delete' => 'Drupal\mukurtu_collection\Form\PersonalCollectionDeleteForm',
+    ],
+    'route_provider' => [
+      'html' => 'Drupal\mukurtu_collection\PersonalCollectionHtmlRouteProvider',
+    ],
+    'access' => 'Drupal\mukurtu_collection\PersonalCollectionAccessControlHandler',
+  ],
+  links: [
+    'canonical' => '/personal-collection/{personal_collection}',
+    'add-form' => '/personal-collection/add',
+    'edit-form' => '/personal-collection/{personal_collection}/edit',
+    'delete-form' => '/personal-collection/{personal_collection}/delete',
+    'version-history' => '/personal-collection/{personal_collection}/revisions',
+    'revision' => '/personal-collection/{personal_collection}/revisions/{personal_collection_revision}/view',
+    'revision_revert' => '/personal-collection/{personal_collection}/revisions/{personal_collection_revision}/revert',
+    'revision_delete' => '/personal-collection/{personal_collection}/revisions/{personal_collection_revision}/delete',
+    'translation_revert' => '/personal-collection/{personal_collection}/revisions/{personal_collection_revision}/revert/{langcode}',
+    'collection' => '/admin/structure/personal_collection',
+  ],
+  admin_permission: 'administer personal collection entities',
+  base_table: 'personal_collection',
+  data_table: 'personal_collection_field_data',
+  revision_table: 'personal_collection_revision',
+  revision_data_table: 'personal_collection_field_revision',
+  translatable: TRUE,
+  field_ui_base_route: 'personal_collection.settings',
+  revision_metadata_keys: [
+    'revision_user' => 'revision_user',
+    'revision_created' => 'revision_created',
+    'revision_log_message' => 'revision_log',
+  ],
+  additional: [
+    'enable_page_title_template' => TRUE,
+  ],
+)]
 class PersonalCollection extends EditorialContentEntityBase implements PersonalCollectionInterface {
 
   use EntityChangedTrait;

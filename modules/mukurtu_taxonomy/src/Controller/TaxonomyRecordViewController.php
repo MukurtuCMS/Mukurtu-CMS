@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace Drupal\mukurtu_taxonomy\Controller;
 
-use Drupal\Core\Block\BlockManagerInterface;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Config\Config;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Plugin\PluginBase;
 use Drupal\Core\Routing\TrustedRedirectResponse;
 use Drupal\node\NodeInterface;
 use Drupal\taxonomy\TermInterface;
@@ -22,13 +20,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * Controller for taxonomy record view.
  */
 class TaxonomyRecordViewController extends ControllerBase implements ContainerInjectionInterface {
-
-  /**
-   * The search backend.
-   *
-   * @var string
-   */
-  protected string $backend;
 
   /**
    * The mukurtu taxonomy settings.
@@ -42,11 +33,8 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
    *
    * @param \Drupal\Core\Entity\EntityFieldManagerInterface $entityFieldManager
    *   The entity field manager service.
-   * @param \Drupal\Core\Block\BlockManagerInterface $blockManager
-   *   The block manager service.
    */
-  public function __construct(protected EntityFieldManagerInterface $entityFieldManager, protected BlockManagerInterface $blockManager) {
-    $this->backend = $this->config('mukurtu_search.settings')->get('backend') ?? 'db';
+  public function __construct(protected EntityFieldManagerInterface $entityFieldManager) {
     $this->mukurtuTaxonomySettings = $this->config('mukurtu_taxonomy.settings');
   }
 
@@ -55,8 +43,7 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
    */
   public static function create(ContainerInterface $container): static {
     return new static(
-      $container->get('entity_field.manager'),
-      $container->get('plugin.manager.block')
+      $container->get('entity_field.manager')
     );
   }
 
@@ -109,44 +96,6 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
    */
   public function title(TermInterface $taxonomy_term): string {
     return $this->getSingularVocabularyLabel($taxonomy_term->bundle()) . ': ' . $taxonomy_term->label();
-  }
-
-  /**
-   * Return the machine name of the view to use based on the search backend config.
-   *
-   * @return string
-   *   The machine name of the view.
-   */
-  protected function getViewName(): string {
-    $views = [
-      'db' => 'mukurtu_taxonomy_references',
-      'solr' => 'mukurtu_taxonomy_references_solr',
-    ];
-
-    return $views[$this->backend];
-  }
-
-  /**
-   * Return the facet source ID to use based on the search backend config.
-   *
-   * @return string
-   *   The facet source ID.
-   *
-   * @todo Facets are currently non-functional on taxonomy term pages.
-   *   Referenced content now comes from the core taxonomy_term SQL view
-   *   (taxonomy_index), not from Search API. The facets module integrates
-   *   with Search API, not core Views, so any facets configured for these
-   *   source IDs will load but won't filter the displayed content. Facet
-   *   support requires either re-adding a Search API-backed view or a custom
-   *   facet source plugin for the taxonomy_term view.
-   */
-  protected function getFacetSourceId(): string {
-    $views = [
-      'db' => 'search_api:views_block__mukurtu_taxonomy_references__content_block',
-      'solr' => 'search_api:views_block__mukurtu_taxonomy_references_solr__content_block',
-    ];
-
-    return $views[$this->backend];
   }
 
   /**
@@ -227,30 +176,11 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
     ]);
     $referencedContent = $view->buildRenderable('default');
 
-    // Facets.
-    // Load all facets configured to use our browse block as a datasource.
-    $facetEntities = $this->entityTypeManager()
-      ->getStorage('facets_facet')
-      ->loadByProperties(['facet_source_id' => $this->getFacetSourceId()]);
-
-    // Render the facet block for each of them.
-    $facets = [];
-    if ($facetEntities) {
-      foreach ($facetEntities as $facet_id => $facetEntity) {
-        $config = [];
-        $block_plugin = $this->blockManager->createInstance('facet_block' . PluginBase::DERIVATIVE_SEPARATOR . $facet_id, $config);
-        if ($block_plugin && $block_plugin->access($this->currentUser())) {
-            $facets[$facet_id] = $block_plugin->build();
-        }
-      }
-    }
-
     $build['records'] = [
       '#theme' => 'taxonomy_records',
       '#active' => 1,
       '#records' => $records,
       '#referenced_content' => $referencedContent,
-      '#facets' => $facets,
       '#term_description' => $this->getTermDescription($taxonomy_term),
       '#attached' => [
         'library' => [

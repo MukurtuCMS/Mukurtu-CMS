@@ -4,6 +4,7 @@ namespace Drupal\mukurtu_core\Plugin\views\filter;
 
 use Drupal\Core\Database\Query\SelectInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\views\Attribute\ViewsFilter;
 
 /**
  * Filters content nodes by whether they are a community record.
@@ -11,9 +12,8 @@ use Drupal\Core\Form\FormStateInterface;
  * A node is a community record when it has a value in
  * node__field_mukurtu_original_record (i.e. it was created as a community
  * record version of an original digital heritage item).
- *
- * @ViewsFilter("mukurtu_node_is_community_record")
  */
+#[ViewsFilter('mukurtu_node_is_community_record')]
 class NodeIsCommunityRecordFilter extends NodeBooleanExistsFilterBase {
 
   protected function getSubquery(): SelectInterface {

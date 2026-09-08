@@ -4,3 +4,4 @@ mukurtu_site_settings.design_settings:
   description: 'Switch the color palette or set custom colors.'
   parent: mukurtu_dashboard
   menu_name: dashboard-look-feel
+  weight: 2

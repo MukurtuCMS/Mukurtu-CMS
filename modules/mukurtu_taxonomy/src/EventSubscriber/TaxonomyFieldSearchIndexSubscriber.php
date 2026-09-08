@@ -31,14 +31,21 @@ class TaxonomyFieldSearchIndexSubscriber implements EventSubscriberInterface {
   /**
    * Field search indexing event handler.
    *
-   * This is responsible for indexing the UUIDs of taxonomy fields. This is how
-   * we display/browse referenced content on the canonical taxonomy term pages.
+   * Indexes a per-field `__uuid` variant for every taxonomy reference field so
+   * canonical taxonomy term pages can browse the content that references them.
+   *
+   * Solr only: the `search_api_db` browse index (`mukurtu_browse_auto_index`)
+   * cannot carry a key per taxonomy field without exceeding MySQL's
+   * 64-index-per-table limit, so on the database backend referenced taxonomy
+   * terms are aggregated into the index-wide `all_taxonomy_term_uuids` field by
+   * \Drupal\mukurtu_search\Plugin\search_api\processor\TaxonomyTermAggregates
+   * instead.
    *
    * @param \Drupal\mukurtu_search\Event\FieldAvailableForIndexing $event
    *   Response event.
    */
   public function indexTaxonomyField(FieldAvailableForIndexing $event) {
-    $indexes = ['mukurtu_browse_auto_index', 'mukurtu_default_solr_index'];
+    $indexes = ['mukurtu_default_solr_index'];
     if ($event->entity_type_id == 'node' && $event->field_definition->getType() == 'entity_reference' && $event->field_definition->getSetting('target_type') == 'taxonomy_term') {
       $field_name = $event->field_definition->getName();
       $field_id = "{$event->entity_type_id}__{$field_name}__uuid";
