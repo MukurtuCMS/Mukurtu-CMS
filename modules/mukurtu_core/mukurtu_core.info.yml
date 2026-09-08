@@ -3,7 +3,7 @@ type: module
 description: 'Provides the base level functionality needed by more specific Mukurtu modules.'
 core_version_requirement: '^10 || ^11'
 package: 'Mukurtu CMS'
-version: 4.x-dev
+version: 4.0.0
 libraries:
   - mukurtu_core/mukurtu-leaflet-widget
   - mukurtu_core/form-disable-enter-submit
