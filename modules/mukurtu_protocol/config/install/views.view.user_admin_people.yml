@@ -309,12 +309,12 @@ display:
             format_custom_true: Active
         roles_target_id:
           id: roles_target_id
-          table: user__roles
-          field: roles_target_id
+          table: users
+          field: roles_plain
           relationship: none
           group_type: group
           admin_label: ''
-          plugin_id: user_roles
+          plugin_id: user_roles_plain
           label: 'Site roles'
           exclude: false
           alter:
@@ -356,8 +356,6 @@ display:
           hide_empty: false
           empty_zero: false
           hide_alter_empty: true
-          type: separator
-          separator: ', '
         communities:
           id: communities
           table: users

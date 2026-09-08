@@ -8,6 +8,7 @@ mukurtu-leaflet-widget:
   dependencies:
     - core/jquery
     - core/once
+    - core/drupal.announce
     - leaflet/leaflet-widget
 
 tagify-override:

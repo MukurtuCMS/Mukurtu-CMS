@@ -2,23 +2,21 @@
 
 namespace Drupal\mukurtu_core\Plugin\Field\FieldFormatter;
 
+use Drupal\Core\Field\Attribute\FieldFormatter;
 use Drupal\Core\Field\FormatterBase;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\OptGroup;
 use Drupal\Core\Field\FieldFilteredMarkup;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Plugin implementation of the 'mukurtu_creative_commons_formatter' formatter.
- *
- * @FieldFormatter(
- *   id = "mukurtu_creative_commons_formatter",
- *   module = "mukurtu_core",
- *   label = @Translation("Creative Commons Formatter"),
- *   field_types = {
- *     "list_string"
- *   }
- * )
  */
+#[FieldFormatter(
+  id: 'mukurtu_creative_commons_formatter',
+  label: new TranslatableMarkup('Creative Commons Formatter'),
+  field_types: ['list_string'],
+)]
 class CreativeCommonsFieldFormatter extends FormatterBase {
   const LICENSEHTML = [
     'https://creativecommons.org/licenses/by/4.0/' => '

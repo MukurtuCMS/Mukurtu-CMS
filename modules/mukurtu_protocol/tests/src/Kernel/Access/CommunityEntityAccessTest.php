@@ -26,6 +26,8 @@ class CommunityEntityAccessTest extends KernelTestBase {
     'content_moderation',
     'workflows',
     'field',
+    'geofield',
+    'leaflet',
     'node',
     'node_access_test',
     'media',
@@ -35,6 +37,7 @@ class CommunityEntityAccessTest extends KernelTestBase {
     'text',
     'taxonomy',
     'user',
+    'mukurtu_core',
     'mukurtu_protocol',
   ];
 

@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_core\Kernel;
 
+use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Form\FormState;
+use Drupal\KernelTests\KernelTestBase;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
-use Drupal\Core\Entity\Entity\EntityFormDisplay;
-use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests circle support in the Mukurtu Leaflet geofield widget.
@@ -22,8 +23,8 @@ use Drupal\KernelTests\KernelTestBase;
  * setting is actually enable-able (contrib force-disables it).
  *
  * @see \Drupal\mukurtu_core\Plugin\Field\FieldWidget\GeofieldMukurtuWidget
- * @group mukurtu_core
  */
+#[Group('mukurtu_core')]
 class GeofieldMukurtuCircleTest extends KernelTestBase {
 
   /**

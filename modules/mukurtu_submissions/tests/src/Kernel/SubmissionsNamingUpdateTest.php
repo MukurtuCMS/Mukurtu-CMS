@@ -5,15 +5,15 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_submissions\Kernel;
 
 use Drupal\user\Entity\User;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests the "Public Submissions" -> "Submission Forms" naming cleanup:
  * permission titles still resolve under their unchanged machine names, and
  * mukurtu_submissions_update_40002() only renames a service account whose
  * name still matches the old default.
- *
- * @group mukurtu_submissions
  */
+#[Group('mukurtu_submissions')]
 class SubmissionsNamingUpdateTest extends MukurtuSubmissionsKernelTestBase {
 
   /**

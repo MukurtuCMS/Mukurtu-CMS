@@ -2,22 +2,20 @@
 
 namespace Drupal\original_date\Plugin\Field\FieldWidget;
 
+use Drupal\Core\Field\Attribute\FieldWidget;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\WidgetBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Plugin implementation of the 'original_date_text' widget.
- *
- * @FieldWidget(
- *   id = "original_date_text",
- *   module = "original_date",
- *   label = @Translation("Original date text fields"),
- *   field_types = {
- *     "original_date"
- *   }
- * )
  */
+#[FieldWidget(
+  id: 'original_date_text',
+  label: new TranslatableMarkup('Original date text fields'),
+  field_types: ['original_date'],
+)]
 class OriginalDateWidget extends WidgetBase {
   /**
    * {@inheritdoc}

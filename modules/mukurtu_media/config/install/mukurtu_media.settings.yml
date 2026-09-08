@@ -1,4 +1,4 @@
-mukurtu_media_download_enabled: true
+mukurtu_media_download_enabled: false
 youtube_api_key: ''
 restricted_media_placeholder: []
 no_media_placeholder: []

@@ -2,25 +2,39 @@
 
 namespace Drupal\mukurtu_export\Plugin\MukurtuExporter;
 
+use Drupal\mukurtu_export\Attribute\MukurtuExporter;
+use Drupal\mukurtu_export\ExportItemIdentity;
 use Drupal\mukurtu_export\Plugin\ExporterBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\File\FileSystemInterface;
+use Drupal\Core\TypedData\TranslatableInterface;
 use Drupal\mukurtu_export\Event\EntityFieldExportEvent;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\Core\Link;
 use Exception;
 
 /**
  * Plugin implementation of MukurtuExporter for CSV.
- *
- * @MukurtuExporter(
- *   id = "csv",
- *   label = @Translation("CSV"),
- *   description = @Translation("Export to CSV."),
- * )
  */
+#[MukurtuExporter(
+  id: 'csv',
+  label: new TranslatableMarkup('CSV'),
+  description: new TranslatableMarkup('Export to CSV.'),
+)]
 class CSV extends ExporterBase {
+  /**
+   * Entity IDs of the shipped default CSV export settings, in the order
+   * they should be listed ahead of any other site-wide settings.
+   */
+  protected const DEFAULT_EXPORTER_ORDER = [
+    'default_local_metadata_only',
+    'default_local_with_media',
+    'default_external_metadata_only',
+    'default_external_with_media',
+  ];
+
   /**
    * {@inheritdoc}
    */
@@ -54,6 +68,10 @@ class CSV extends ExporterBase {
       ->execute();
     if (!empty($result)) {
       $entities = $storage->loadMultiple($result);
+      $order = array_flip(static::DEFAULT_EXPORTER_ORDER);
+      uksort($entities, function ($a, $b) use ($order) {
+        return ($order[$a] ?? count($order)) <=> ($order[$b] ?? count($order));
+      });
       foreach ($entities as $id => $entity) {
         $element['#options'][$id] = $entity->label();
         $links = [];
@@ -293,17 +311,24 @@ class CSV extends ExporterBase {
     $entities = $context['sandbox']['batch']['entities'];
     $storage = \Drupal::entityTypeManager()->getStorage($entity_type_id);
 
-    foreach ($entities as $id) {
-      $alreadyExported = $context['results']['exported_entities'][$entity_type_id][$id] ?? FALSE;
+    foreach ($entities as $key) {
+      $alreadyExported = $context['results']['exported_entities'][$entity_type_id][$key] ?? FALSE;
       if (!$alreadyExported) {
+        [$id, $langcode] = ExportItemIdentity::decode($key);
         $entity = $storage->load($id);
 
         // Regardless of the result, remove entity from the list.
-        unset($context['results']['entities'][$entity_type_id][$id]);
+        unset($context['results']['entities'][$entity_type_id][$key]);
 
         if (!$entity) {
           // @todo what do we do on this failure?
           continue;
+        }
+
+        // Resolve to the requested translation, falling back to the
+        // entity's own language if that translation doesn't exist.
+        if ($langcode && $entity instanceof TranslatableInterface && $entity->hasTranslation($langcode)) {
+          $entity = $entity->getTranslation($langcode);
         }
 
         // Confirm user has access to view this entity.
@@ -326,7 +351,7 @@ class CSV extends ExporterBase {
         fputcsv($output, $result, $context['results']['csv']['separator'], $context['results']['csv']['enclosure'], $context['results']['csv']['escape']);
 
         // Record export of this entity.
-        $context['results']['exported_entities'][$entity_type_id][$id] = $id;
+        $context['results']['exported_entities'][$entity_type_id][$key] = $key;
         $context['results']['exported_entities_count']++;
       }
 

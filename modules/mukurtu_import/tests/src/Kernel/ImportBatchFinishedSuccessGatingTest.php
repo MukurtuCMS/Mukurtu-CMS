@@ -104,6 +104,37 @@ class ImportBatchFinishedSuccessGatingTest extends MukurtuImportTestBase {
   }
 
   /**
+   * A batch made up of multiple migrations (e.g. one file/entity type each)
+   * where one migration is a silent no-op but another genuinely created
+   * content is not reported as a no-op: content WAS imported, even though
+   * not every migration in the batch contributed something.
+   */
+  public function testSilentNoopInOneMigrationIsNotReportedWhenAnotherMigrationSucceeds(): void {
+    $results = [
+      'content_migration' => [
+        '@numitems' => 3,
+        '@created' => 0,
+        '@updated' => 0,
+        '@failures' => 0,
+        '@ignored' => 3,
+        '@name' => 'content_migration',
+      ],
+      'media_migration' => [
+        '@numitems' => 15,
+        '@created' => 15,
+        '@updated' => 0,
+        '@failures' => 0,
+        '@ignored' => 0,
+        '@name' => 'media_migration',
+      ],
+    ];
+
+    ImportBatchExecutable::batchFinishedImport(TRUE, $results, []);
+
+    $this->assertFalse((bool) $this->getTempstoreValue('batch_results_noop'));
+  }
+
+  /**
    * An end-to-end import that engineers a real row failure (an ambiguous
    * mukurtu_entity_lookup match, which throws a MigrateException) results
    * in getFailedCount() > 0 on the executable, and feeding the executable's

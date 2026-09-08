@@ -24,6 +24,25 @@ mukurtu_core.node.quick_unpublish:
     _csrf_token: 'TRUE'
     _node_access: 'node.update'
 
+mukurtu_core.node.moderation_transition:
+  path: '/admin/content/{node}/transition/{to_state}'
+  defaults:
+    _controller: '\Drupal\mukurtu_core\Controller\NodeQuickActionsController::transition'
+    _title: 'Change moderation state'
+  options:
+    parameters:
+      node:
+        type: entity:node
+  requirements:
+    _csrf_token: 'TRUE'
+    # Archive/restore only require 'view' access; every other transition
+    # still requires 'update'. That per-transition distinction can't be
+    # expressed statically here, so the controller itself re-validates via
+    # ModerationTransitionAccessResolver before applying anything -- this
+    # requirement is only the coarse floor (must be able to see the node
+    # at all).
+    _node_access: 'node.view'
+
 mukurtu_core.settings_assorted:
   path: '/admin/config/mukurtu/settings'
   defaults:
@@ -155,6 +174,22 @@ mukurtu_core.access_denied_settings:
     _title: 'Access Denied Page Settings'
   requirements:
     _permission: 'administer mukurtu access denied page'
+
+mukurtu_core.not_found:
+  path: '/mukurtu/not-found'
+  defaults:
+    _controller: '\Drupal\mukurtu_core\Controller\NotFoundPageController::build'
+    _title_callback: '\Drupal\mukurtu_core\Controller\NotFoundPageController::getTitle'
+  requirements:
+    _access: 'TRUE'
+
+mukurtu_core.not_found_settings:
+  path: '/admin/config/mukurtu/not-found'
+  defaults:
+    _form: '\Drupal\mukurtu_core\Form\NotFoundSettingsForm'
+    _title: 'Not Found Page Settings'
+  requirements:
+    _permission: 'administer mukurtu not found page'
 
 mukurtu_core.dismiss_super_admin_warning:
   path: '/admin/mukurtu/dismiss-super-admin-warning'

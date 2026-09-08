@@ -10,6 +10,7 @@ mukurtu_taxonomy.manage_categories:
   parent: mukurtu_dashboard
   menu_name: dashboard-3Cs
   url: 'internal:/admin/structure/taxonomy/manage/category/overview'
+  weight: 4
 mukurtu_taxonomy.person_record_settings_dashboard:
   title: "Person record settings"
   menu_name: dashboard-content-settings
