@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "be5bff3159fac244d4757fceb94a879b",
+    "content-hash": "2772be3d3c00d92c7e524dc4272a78b8",
     "packages": [
         {
             "name": "altcha-org/altcha",
@@ -18571,13 +18571,11 @@
         }
     ],
     "aliases": [],
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "stability-flags": {
-        "drupal/flag": 10,
         "drupal/gin_lb": 10,
-        "drupal/message_ui": 10,
         "drupal/og": 20,
-        "drupal/term_merge": 10
+        "drupal/term_reference_change": 10
     },
     "prefer-stable": true,
     "prefer-lowest": false,
