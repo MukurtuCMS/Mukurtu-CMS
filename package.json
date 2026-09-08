@@ -11,7 +11,7 @@
     "type": "git",
     "url": "git+https://github.com/MukurtuCMS/Mukurtu-CMS.git"
   },
-  "license": "GPL-2.0-or-later",
+  "license": "GPL-3.0-or-later",
   "author": "",
   "type": "commonjs",
   "main": "index.js",
