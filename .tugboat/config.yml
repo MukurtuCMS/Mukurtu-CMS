@@ -81,6 +81,14 @@ services:
           # which sat un-reapplied on one long-lived preview for exactly
           # this reason).
           rm -rf vendor
+          # composer-patches 2.0 caches its resolved patch set in
+          # patches.lock.json at the project root (not inside vendor/), so it
+          # survives the rm -rf above and persists across every build on this
+          # same preview. If a branch removes or changes a patch, the stale
+          # lock file can keep insisting on the old (now-inapplicable) patch
+          # even though composer.json no longer references it, hard-failing
+          # the build. Remove it so it's always recomputed fresh.
+          rm -f patches.lock.json
           # Patch the template's composer.json to require Drupal 11.4.x and
           # ignore the symfony/polyfill-intl-idn advisory. composer config
           # does not support setting audit.ignore keys, so patch directly.

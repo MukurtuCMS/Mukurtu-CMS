@@ -1190,6 +1190,89 @@ class FormHooks
     }
 
     /**
+     * Implements hook_form_alter().
+     *
+     * Views Bulk Operations builds its bulk-action dropdown from static
+     * per-view config, filtered only by entity type -- it never consults an
+     * action plugin's own access() to decide whether an option should be
+     * listed at all for the current user (unlike the per-row operations
+     * dropbutton on this same view, which computes real per-node access at
+     * render time). That's why, e.g., "Archive" or "Add to export list"
+     * show up in the dropdown for viewers who can't actually use them on
+     * anything. This strips any option none of the current page's visible
+     * rows are actually accessible for.
+     *
+     * A UI-quality fix scoped to the current page of results, not a
+     * security boundary: the real per-row access() check
+     * ViewsBulkOperationsActionProcessor::process() already runs at
+     * execution time is unaffected and remains the real gate.
+     */
+    #[Hook("form_alter")]
+    public function formAlterFilterManageContentBulkActions(
+        array &$form,
+        FormStateInterface $form_state,
+        string $form_id,
+    ): void {
+        if (!str_starts_with($form_id, "views_form_mukurtu_manage_all_content_")) {
+            return;
+        }
+
+        $field_id = "views_bulk_operations_bulk_form";
+        if (empty($form["header"][$field_id]["action"]["#options"])) {
+            return;
+        }
+
+        $view = $form_state->getBuildInfo()["args"][0] ?? null;
+        if (!$view instanceof ViewExecutable || empty($view->field[$field_id])) {
+            return;
+        }
+
+        $entities = [];
+        foreach ($view->result as $row) {
+            $entity = $view->field[$field_id]->getEntity($row);
+            if ($entity) {
+                $entities[] = $entity;
+            }
+        }
+        // Fail open on an empty/unresolvable result set -- nothing to
+        // sample against, so don't spuriously hide every action.
+        if (empty($entities)) {
+            return;
+        }
+
+        $selected_actions = $view->field[$field_id]->options["selected_actions"] ?? [];
+        $action_manager = \Drupal::service("plugin.manager.views_bulk_operations_action");
+        $account = \Drupal::currentUser();
+
+        foreach (array_keys($form["header"][$field_id]["action"]["#options"]) as $key) {
+            $selected_action_data = $selected_actions[$key] ?? null;
+            if ($selected_action_data === null) {
+                continue;
+            }
+
+            $configuration = $selected_action_data["preconfiguration"] ?? [];
+            try {
+                $action = $action_manager->createInstance($selected_action_data["action_id"], $configuration);
+            } catch (\Exception $e) {
+                // Fail open: leave the option as-is rather than break the
+                // form over a plugin that can't even be instantiated.
+                continue;
+            }
+
+            $accessible = false;
+            foreach ($entities as $entity) {
+                if ($action->access($entity, $account)) {
+                    $accessible = true;
+                    break;
+                }
+            }
+            if (!$accessible) {
+                unset($form["header"][$field_id]["action"]["#options"][$key]);
+            }
+        }
+    }
+
+    /**
      * Implements hook_form_views_exposed_form_alter().
      *
      * Filters the exposed Type dropdown in the mukurtu_content_browser view:

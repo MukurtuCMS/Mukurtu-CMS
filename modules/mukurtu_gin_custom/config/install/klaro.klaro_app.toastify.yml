@@ -1,0 +1,26 @@
+langcode: en
+status: true
+dependencies: {  }
+id: toastify
+label: 'Layout Builder notifications'
+description: 'Provides pop-up notification messages within the Layout Builder interface (required to use Layout Builder).'
+default: true
+purposes:
+  - cms
+cookies: {  }
+required: true
+opt_out: true
+only_once: false
+contextual_consent_only: false
+contextual_consent_text: ''
+info_url: 'https://www.drupal.org/project/gin_lb'
+privacy_policy_url: ''
+javascripts:
+  - 'cdn.jsdelivr.net/npm/toastify-js'
+callback_code: ''
+on_init: ''
+on_accept: ''
+on_decline: ''
+wrapper_identifier: {  }
+attachments: {  }
+weight: 0
