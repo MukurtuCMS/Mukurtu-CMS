@@ -2,6 +2,7 @@
 
 namespace Drupal\mukurtu_submissions\Form;
 
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\Display\EntityFormDisplayInterface;
@@ -185,6 +186,39 @@ class PublicSubmissionForm extends FormBase {
     $form['#bundle'] = $bundle;
 
     $this->display->buildForm($this->entity, $form, $form_state);
+
+    // Newly-created or removed taxonomy terms must invalidate this cached form
+    // so option-list widgets (e.g. field_category's checkboxes) stay current.
+    // The core options widget -> selection handler -> term storage chain
+    // bubbles no list cache tag, so bubble it here for every taxonomy-term
+    // reference field the submission display exposes.
+    $term_tags = [];
+    foreach (array_keys($this->display->getComponents()) as $field_name) {
+      if (!$this->entity->hasField($field_name)) {
+        continue;
+      }
+      $field_definition = $this->entity->getFieldDefinition($field_name);
+      if (!$field_definition || !in_array($field_definition->getType(), ['entity_reference', 'entity_reference_revisions'], TRUE)) {
+        continue;
+      }
+      if ($field_definition->getSetting('target_type') !== 'taxonomy_term') {
+        continue;
+      }
+      $handler_settings = $field_definition->getSetting('handler_settings') ?? [];
+      $target_bundles = array_keys($handler_settings['target_bundles'] ?? []);
+      if ($target_bundles) {
+        foreach ($target_bundles as $vid) {
+          $term_tags[] = 'taxonomy_term_list:' . $vid;
+        }
+      }
+      else {
+        $term_tags[] = 'taxonomy_term_list';
+      }
+    }
+    if ($term_tags) {
+      $form['#cache']['tags'] = Cache::mergeTags($form['#cache']['tags'] ?? [], array_unique($term_tags));
+    }
+
     $this->labelRemoveButtons($form);
     $this->removeDragDropButtons($form);
     $this->groupFields($form);

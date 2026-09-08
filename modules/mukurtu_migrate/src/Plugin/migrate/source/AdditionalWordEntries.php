@@ -2,15 +2,13 @@
 
 namespace Drupal\mukurtu_migrate\Plugin\migrate\source;
 
+use Drupal\migrate\Attribute\MigrateSource;
 use Drupal\paragraphs\Plugin\migrate\source\d7\ParagraphsItem;
 
 /**
  * Get all dictionary word entry paragraphs that are NOT the base entry.
- *
- * @MigrateSource(
- *   id = "additional_word_entries"
- * )
  */
+#[MigrateSource('additional_word_entries')]
 class AdditionalWordEntries extends ParagraphsItem {
 
   /**

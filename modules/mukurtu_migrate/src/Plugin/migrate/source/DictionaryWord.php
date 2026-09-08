@@ -2,6 +2,7 @@
 
 namespace Drupal\mukurtu_migrate\Plugin\migrate\source;
 
+use Drupal\migrate\Attribute\MigrateSource;
 use Drupal\migrate\Row;
 use Drupal\node\Plugin\migrate\source\d7\Node;
 
@@ -24,10 +25,8 @@ use Drupal\node\Plugin\migrate\source\d7\Node;
  * migrates them into v4 dictionary word base fields. All subsequent dictionary
  * word entries are migrated to the Additional Entries field.
  *
- * @MigrateSource(
- *   id = "dictionary_word"
- * )
  */
+#[MigrateSource('dictionary_word')]
 class DictionaryWord extends Node {
 
   /**

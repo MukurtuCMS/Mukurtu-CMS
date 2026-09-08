@@ -5,3 +5,8 @@ services:
   mukurtu_submissions.session_created_entities:
     class: Drupal\mukurtu_submissions\SessionCreatedEntities
     arguments: ['@request_stack']
+  mukurtu_submissions.public_submission_entity_browser_theme_negotiator:
+    class: Drupal\mukurtu_submissions\Theme\PublicSubmissionEntityBrowserThemeNegotiator
+    arguments: ['@request_stack', '@config.factory']
+    tags:
+      - { name: theme_negotiator, priority: 1000 }

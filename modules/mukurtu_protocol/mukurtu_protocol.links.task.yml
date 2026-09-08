@@ -22,6 +22,12 @@ mukurtu_protocol.protocol_members:
   base_route: entity.protocol.canonical
   weight: 2
 
+mukurtu_protocol.manage_protocol_unapproved_comments:
+  title: 'Unapproved comments'
+  route_name: mukurtu_protocol.manage_protocol_unapproved_comments
+  base_route: entity.protocol.canonical
+  weight: 3
+
 entity.protocol.version_history:
   route_name: entity.protocol.version_history
   base_route: entity.protocol.canonical

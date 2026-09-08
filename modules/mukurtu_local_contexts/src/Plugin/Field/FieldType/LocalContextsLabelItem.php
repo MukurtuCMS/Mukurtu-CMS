@@ -2,6 +2,7 @@
 
 namespace Drupal\mukurtu_local_contexts\Plugin\Field\FieldType;
 
+use Drupal\Core\Field\Attribute\FieldType;
 Use Drupal\Core\Field\Plugin\Field\FieldType\StringItem;
 use Drupal\mukurtu_local_contexts\Event\LocalContextsProjectReferenceUpdatedEvent;
 use Drupal\Core\TypedData\OptionsProviderInterface;
@@ -11,17 +12,17 @@ use Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager;
 use Drupal\mukurtu_local_contexts\LocalContextsProject;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Defines the 'local_contexts_label_and_notice' field type.
- *
- * @FieldType(
- *   id = "local_contexts_label_and_notice",
- *   label = @Translation("Local Contexts Label and Notice"),
- *   default_widget = "local_contexts_label_and_notice",
- *   default_formatter = "local_contexts_label_and_notice"
- * )
  */
+#[FieldType(
+  id: 'local_contexts_label_and_notice',
+  label: new TranslatableMarkup('Local Contexts Label and Notice'),
+  default_widget: 'local_contexts_label_and_notice',
+  default_formatter: 'local_contexts_label_and_notice',
+)]
 class LocalContextsLabelItem extends StringItem implements OptionsProviderInterface {
 
   protected $localContextsProjectManager;

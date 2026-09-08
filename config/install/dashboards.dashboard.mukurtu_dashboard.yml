@@ -27,12 +27,26 @@ sections:
       label: 'main content'
       context_mapping: {  }
     components:
-      177c8838-ecba-43f7-9acb-813187ae16f3:
-        uuid: 177c8838-ecba-43f7-9acb-813187ae16f3
-        region: three
+      50f4bbbe-2fa6-4b11-b0c5-221705fb726c:
+        uuid: 50f4bbbe-2fa6-4b11-b0c5-221705fb726c
+        region: one
         configuration:
-          id: 'system_menu_block:dashboard-my-account'
-          label: 'My account'
+          id: 'system_menu_block:dashboard-3Cs'
+          label: 'Communities, cultural protocols, categories'
+          label_display: visible
+          provider: system
+          context_mapping: {  }
+          level: 1
+          depth: null
+          expand_all_items: false
+        weight: 1
+        additional: {  }
+      4baf6b8d-6deb-4742-aac9-5a4ca97be575:
+        uuid: 4baf6b8d-6deb-4742-aac9-5a4ca97be575
+        region: one
+        configuration:
+          id: 'system_menu_block:dashboard-users'
+          label: Users
           label_display: visible
           provider: system
           context_mapping: {  }
@@ -40,31 +54,6 @@ sections:
           depth: null
           expand_all_items: false
         weight: 2
-        additional: {  }
-      08fde6c5-ad7d-4e16-a742-b2ed6f52b6a6:
-        uuid: 08fde6c5-ad7d-4e16-a742-b2ed6f52b6a6
-        region: two
-        configuration:
-          id: mukurtu_setup_checklist
-          label: 'Setup Checklist'
-          label_display: visible
-          provider: mukurtu_setup
-          context_mapping: {  }
-        weight: 1
-        additional: {  }
-      7750a799-df47-49a4-883f-e4b0f8342104:
-        uuid: 7750a799-df47-49a4-883f-e4b0f8342104
-        region: two
-        configuration:
-          id: 'system_menu_block:dashboard-migration'
-          label: Migration
-          label_display: visible
-          provider: system
-          context_mapping: {  }
-          level: 1
-          depth: null
-          expand_all_items: false
-        weight: 7
         additional: {  }
       8e52ecf9-f13d-4974-b4e5-9ecff8af170a:
         uuid: 8e52ecf9-f13d-4974-b4e5-9ecff8af170a
@@ -94,20 +83,6 @@ sections:
           expand_all_items: false
         weight: 4
         additional: {  }
-      6952fdbe-035a-4ccc-af26-e0dcd691187e:
-        uuid: 6952fdbe-035a-4ccc-af26-e0dcd691187e
-        region: three
-        configuration:
-          id: 'system_menu_block:dashboard-roundtrip'
-          label: Roundtrip
-          label_display: visible
-          provider: system
-          context_mapping: {  }
-          level: 1
-          depth: null
-          expand_all_items: false
-        weight: 4
-        additional: {  }
       58ca9634-095d-4720-9aed-76c640314ac4:
         uuid: 58ca9634-095d-4720-9aed-76c640314ac4
         region: one
@@ -120,35 +95,32 @@ sections:
           level: 1
           depth: null
           expand_all_items: false
+        weight: 5
+        additional: {  }
+      c4f1a8e6-2b90-4d37-9e15-3a6c8f2b7d40:
+        uuid: c4f1a8e6-2b90-4d37-9e15-3a6c8f2b7d40
+        region: one
+        configuration:
+          id: 'system_menu_block:dashboard-local-contexts'
+          label: 'Local Contexts'
+          label_display: visible
+          provider: system
+          context_mapping: {  }
+          level: 1
+          depth: null
+          expand_all_items: false
         weight: 6
         additional: {  }
-      50f4bbbe-2fa6-4b11-b0c5-221705fb726c:
-        uuid: 50f4bbbe-2fa6-4b11-b0c5-221705fb726c
-        region: one
+      08fde6c5-ad7d-4e16-a742-b2ed6f52b6a6:
+        uuid: 08fde6c5-ad7d-4e16-a742-b2ed6f52b6a6
+        region: two
         configuration:
-          id: 'system_menu_block:dashboard-3Cs'
-          label: 'Communities, cultural protocols, categories'
+          id: mukurtu_setup_checklist
+          label: 'Setup Checklist'
           label_display: visible
-          provider: system
+          provider: mukurtu_setup
           context_mapping: {  }
-          level: 1
-          depth: null
-          expand_all_items: false
         weight: 1
-        additional: {  }
-      4baf6b8d-6deb-4742-aac9-5a4ca97be575:
-        uuid: 4baf6b8d-6deb-4742-aac9-5a4ca97be575
-        region: one
-        configuration:
-          id: 'system_menu_block:dashboard-users'
-          label: Users
-          label_display: visible
-          provider: system
-          context_mapping: {  }
-          level: 1
-          depth: null
-          expand_all_items: false
-        weight: 2
         additional: {  }
       0d6f9095-ddc7-4e04-b102-a47eab86f9dc:
         uuid: 0d6f9095-ddc7-4e04-b102-a47eab86f9dc
@@ -163,12 +135,40 @@ sections:
           items_per_page: null
         weight: 2
         additional: {  }
-      0339943d-08c4-45a9-9f08-052ad308db5e:
-        uuid: 0339943d-08c4-45a9-9f08-052ad308db5e
-        region: three
+      bb1a29d8-00e8-4229-b1b0-20d69ca33db7:
+        uuid: bb1a29d8-00e8-4229-b1b0-20d69ca33db7
+        region: two
         configuration:
-          id: 'system_menu_block:dashboard-site-settings'
-          label: 'Site settings'
+          id: 'system_menu_block:dashboard-content-settings'
+          label: 'Content settings'
+          label_display: visible
+          provider: system
+          context_mapping: {  }
+          level: 1
+          depth: null
+          expand_all_items: false
+        weight: 4
+        additional: {  }
+      b2d7e4c1-9a3f-4e58-8c26-1f7a0d5b6e94:
+        uuid: b2d7e4c1-9a3f-4e58-8c26-1f7a0d5b6e94
+        region: two
+        configuration:
+          id: 'system_menu_block:dashboard-publication-tools'
+          label: 'Publication tools'
+          label_display: visible
+          provider: system
+          context_mapping: {  }
+          level: 1
+          depth: null
+          expand_all_items: false
+        weight: 5
+        additional: {  }
+      a663f15a-8760-424c-9433-c3f97fa8b623:
+        uuid: a663f15a-8760-424c-9433-c3f97fa8b623
+        region: two
+        configuration:
+          id: 'system_menu_block:dashboard-multilingual'
+          label: Multilingual
           label_display: visible
           provider: system
           context_mapping: {  }
@@ -177,19 +177,61 @@ sections:
           expand_all_items: false
         weight: 6
         additional: {  }
-      7ea8f4fe-f816-4b62-80ed-597ea6d8d39a:
-        uuid: 7ea8f4fe-f816-4b62-80ed-597ea6d8d39a
-        region: three
+      7750a799-df47-49a4-883f-e4b0f8342104:
+        uuid: 7750a799-df47-49a4-883f-e4b0f8342104
+        region: two
         configuration:
-          id: 'system_menu_block:dashboard-site-info'
-          label: 'Site information'
+          id: 'system_menu_block:dashboard-migration'
+          label: Migration
           label_display: visible
           provider: system
           context_mapping: {  }
           level: 1
           depth: null
           expand_all_items: false
-        weight: 8
+        weight: 7
+        additional: {  }
+      6952fdbe-035a-4ccc-af26-e0dcd691187e:
+        uuid: 6952fdbe-035a-4ccc-af26-e0dcd691187e
+        region: two
+        configuration:
+          id: 'system_menu_block:dashboard-roundtrip'
+          label: Roundtrip
+          label_display: visible
+          provider: system
+          context_mapping: {  }
+          level: 1
+          depth: null
+          expand_all_items: false
+        weight: 3
+        additional: {  }
+      177c8838-ecba-43f7-9acb-813187ae16f3:
+        uuid: 177c8838-ecba-43f7-9acb-813187ae16f3
+        region: three
+        configuration:
+          id: 'system_menu_block:dashboard-my-account'
+          label: 'My account'
+          label_display: visible
+          provider: system
+          context_mapping: {  }
+          level: 1
+          depth: null
+          expand_all_items: false
+        weight: 1
+        additional: {  }
+      f4a1d9c2-6b3e-4c8f-9a7d-2e5b8f1c3d64:
+        uuid: f4a1d9c2-6b3e-4c8f-9a7d-2e5b8f1c3d64
+        region: three
+        configuration:
+          id: 'system_menu_block:dashboard-notifications-review'
+          label: 'Notifications & Review'
+          label_display: visible
+          provider: system
+          context_mapping: {  }
+          level: 1
+          depth: null
+          expand_all_items: false
+        weight: 2
         additional: {  }
       02ce0aa5-8aec-43f3-b2e0-62d5dbf8efce:
         uuid: 02ce0aa5-8aec-43f3-b2e0-62d5dbf8efce
@@ -203,7 +245,21 @@ sections:
           level: 1
           depth: null
           expand_all_items: false
-        weight: 5
+        weight: 3
+        additional: {  }
+      0339943d-08c4-45a9-9f08-052ad308db5e:
+        uuid: 0339943d-08c4-45a9-9f08-052ad308db5e
+        region: three
+        configuration:
+          id: 'system_menu_block:dashboard-site-settings'
+          label: 'Site settings'
+          label_display: visible
+          provider: system
+          context_mapping: {  }
+          level: 1
+          depth: null
+          expand_all_items: false
+        weight: 4
         additional: {  }
       3f8b6c1a-2e4d-4a9f-9c7b-5d1e8a2f6b3c:
         uuid: 3f8b6c1a-2e4d-4a9f-9c7b-5d1e8a2f6b3c
@@ -217,28 +273,14 @@ sections:
           level: 1
           depth: null
           expand_all_items: false
-        weight: 9
+        weight: 5
         additional: {  }
-      a663f15a-8760-424c-9433-c3f97fa8b623:
-        uuid: a663f15a-8760-424c-9433-c3f97fa8b623
+      7ea8f4fe-f816-4b62-80ed-597ea6d8d39a:
+        uuid: 7ea8f4fe-f816-4b62-80ed-597ea6d8d39a
         region: three
         configuration:
-          id: 'system_menu_block:dashboard-multilingual'
-          label: Multilingual
-          label_display: visible
-          provider: system
-          context_mapping: {  }
-          level: 1
-          depth: null
-          expand_all_items: false
-        weight: 7
-        additional: {  }
-      bb1a29d8-00e8-4229-b1b0-20d69ca33db7:
-        uuid: bb1a29d8-00e8-4229-b1b0-20d69ca33db7
-        region: two
-        configuration:
-          id: 'system_menu_block:dashboard-content-settings'
-          label: 'Content settings'
+          id: 'system_menu_block:dashboard-site-info'
+          label: 'Site information'
           label_display: visible
           provider: system
           context_mapping: {  }

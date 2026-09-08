@@ -98,7 +98,6 @@ class SearchSettingsForm extends ConfigFormBase {
       '#type'          => 'radios',
       '#options' => [
         'db' => $this->t('Search API Database'),
-        'solr' => $this->t('Search API Solr'),
       ],
       '#default_value' => $backend,
     ];

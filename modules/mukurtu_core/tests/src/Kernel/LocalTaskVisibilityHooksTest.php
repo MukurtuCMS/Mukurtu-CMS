@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_core\Kernel;
 
-use PHPUnit\Framework\Attributes\Group;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\mukurtu_core\Hook\LocalTaskVisibilityHooks;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests node Visitors/Devel/Revisions local task visibility.
@@ -41,9 +42,8 @@ class LocalTaskVisibilityHooksTest extends KernelTestBase {
 
   /**
    * The Visitors tab is hidden on both the node view and edit pages.
-   *
-   * @dataProvider visitorsHiddenRouteProvider
    */
+  #[DataProvider('visitorsHiddenRouteProvider')]
   public function testVisitorsTabHidden(string $routeName): void {
     $data = $this->tabsWithEverythingPresent();
     (new LocalTaskVisibilityHooks())->menuLocalTasksAlter($data, $routeName);
@@ -91,9 +91,8 @@ class LocalTaskVisibilityHooksTest extends KernelTestBase {
    * Guards against scope creep: that job now belongs to
    * HideCommunityProtocolLocalTasksOutsideEditView, which (unlike this
    * class) preserves the uid-1-only restriction on their Revisions tab.
-   *
-   * @dataProvider communityProtocolRouteProvider
    */
+  #[DataProvider('communityProtocolRouteProvider')]
   public function testCommunityAndProtocolTabsUntouched(string $routeName, string $entityTypeId): void {
     $data = [
       'tabs' => [

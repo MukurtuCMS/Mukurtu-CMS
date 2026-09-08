@@ -3,7 +3,9 @@
 namespace Drupal\mukurtu_protocol\Plugin\Action;
 
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Action\Attribute\Action;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\mukurtu_core\Controller\MukurtuUserController;
 use Drupal\og\Og;
 use Drupal\user\Entity\User;
@@ -12,16 +14,12 @@ use Drupal\views_bulk_operations\Action\ViewsBulkOperationsActionBase;
 
 /**
  * VBO for setting a user to Pending status, scoped to community manager permissions.
- *
- * @Action(
- *   id = "mukurtu_set_pending_user_action",
- *   label = @Translation("Set user(s) pending"),
- *   type = "user",
- *   requirements = {
- *     "_custom_access" = TRUE,
- *   },
- * )
  */
+#[Action(
+  id: 'mukurtu_set_pending_user_action',
+  label: new TranslatableMarkup('Set user(s) pending'),
+  type: 'user',
+)]
 class MukurtuSetPendingUserAction extends ViewsBulkOperationsActionBase {
 
   /**

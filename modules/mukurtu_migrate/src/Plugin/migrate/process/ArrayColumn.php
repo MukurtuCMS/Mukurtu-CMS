@@ -2,18 +2,18 @@
 
 namespace Drupal\mukurtu_migrate\Plugin\migrate\process;
 
+use Drupal\migrate\Attribute\MigrateProcess;
 use Drupal\migrate\MigrateExecutableInterface;
 use Drupal\migrate\ProcessPluginBase;
 use Drupal\migrate\Row;
 
 /**
  * Return the array column for the given key.
- *
- * @MigrateProcessPlugin(
- *   id = "array_column",
- *   handle_multiples = TRUE
- * )
  */
+#[MigrateProcess(
+  id: 'array_column',
+  handle_multiples: TRUE,
+)]
 class ArrayColumn extends ProcessPluginBase {
   /**
    * {@inheritDoc}

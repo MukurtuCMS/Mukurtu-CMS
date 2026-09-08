@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_collection\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests mukurtu_collection_update_40018(), which moves the collection edit
@@ -12,8 +13,8 @@ use Drupal\KernelTests\KernelTestBase;
  * editing a single already-saved point (#1453).
  *
  * @see mukurtu_collection_update_40018()
- * @group mukurtu_collection
  */
+#[Group('mukurtu_collection')]
 class CollectionMapEditFormDefaultsUpdateTest extends KernelTestBase {
 
   /**

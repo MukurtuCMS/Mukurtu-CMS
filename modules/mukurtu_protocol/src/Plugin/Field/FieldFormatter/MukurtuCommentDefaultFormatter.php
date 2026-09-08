@@ -4,20 +4,19 @@ namespace Drupal\mukurtu_protocol\Plugin\Field\FieldFormatter;
 
 use Drupal\comment\Plugin\Field\FieldFormatter\CommentDefaultFormatter;
 use Drupal\comment\Plugin\Field\FieldType\CommentItemInterface;
+use Drupal\Core\Field\Attribute\FieldFormatter;
 use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\mukurtu_protocol\CulturalProtocols;
 
 /**
  * Provides a default comment formatter for Mukurtu.
- *
- * @FieldFormatter(
- *   id = "mukurtu_comment_default",
- *   label = @Translation("Comment list for Mukurtu"),
- *   field_types = {
- *     "comment"
- *   }
- * )
  */
+#[FieldFormatter(
+  id: 'mukurtu_comment_default',
+  label: new TranslatableMarkup('Comment list for Mukurtu'),
+  field_types: ['comment'],
+)]
 class MukurtuCommentDefaultFormatter extends CommentDefaultFormatter {
 
   /**

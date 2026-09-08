@@ -5,6 +5,7 @@ namespace Drupal\mukurtu_export;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\DefaultPluginManager;
+use Drupal\mukurtu_export\Attribute\MukurtuExporter as MukurtuExporterAttribute;
 
 /**
  * MukurtuExport plugin manager.
@@ -28,6 +29,7 @@ class MukurtuExporterPluginManager extends DefaultPluginManager {
       $namespaces,
       $module_handler,
       'Drupal\mukurtu_export\MukurtuExporterInterface',
+      MukurtuExporterAttribute::class,
       'Drupal\mukurtu_export\Annotation\MukurtuExporter'
     );
     $this->alterInfo('mukurtu_exporter_info');

@@ -5,16 +5,17 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_digital_heritage\Kernel;
 
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\Tests\mukurtu_protocol\Kernel\ProtocolAwareEntityTestBase;
 use Drupal\mukurtu_digital_heritage\Entity\DigitalHeritage;
 use Drupal\mukurtu_digital_heritage\Entity\IndigenousKnowledgeKeepers;
-use Drupal\Tests\mukurtu_protocol\Kernel\ProtocolAwareEntityTestBase;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests that DigitalHeritage/IndigenousKnowledgeKeepers field labels and
  * descriptions are translatable.
- *
- * @group mukurtu_digital_heritage
  */
+#[Group('mukurtu_digital_heritage')]
 class DigitalHeritageFieldLabelTest extends ProtocolAwareEntityTestBase {
 
   /**
@@ -26,8 +27,8 @@ class DigitalHeritageFieldLabelTest extends ProtocolAwareEntityTestBase {
   ];
 
   /**
-   * @dataProvider digitalHeritageFieldProvider
    */
+  #[DataProvider('digitalHeritageFieldProvider')]
   public function testDigitalHeritageFieldLabelIsTranslatable(string $fieldName, string $expectedLabel): void {
     $entityType = \Drupal::entityTypeManager()->getDefinition('node');
     $definitions = DigitalHeritage::bundleFieldDefinitions($entityType, '', []);
@@ -54,8 +55,8 @@ class DigitalHeritageFieldLabelTest extends ProtocolAwareEntityTestBase {
   }
 
   /**
-   * @dataProvider knowledgeKeeperDescriptionProvider
    */
+  #[DataProvider('knowledgeKeeperDescriptionProvider')]
   public function testKnowledgeKeeperDescriptionIsTranslatable(string $fieldName): void {
     $entityType = \Drupal::entityTypeManager()->getDefinition('paragraph');
     $definitions = IndigenousKnowledgeKeepers::bundleFieldDefinitions($entityType, '', []);

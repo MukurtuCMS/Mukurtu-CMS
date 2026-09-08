@@ -2,23 +2,22 @@
 
 namespace Drupal\mukurtu_core\Plugin\Field\FieldFormatter;
 
+use Drupal\Core\Field\Attribute\FieldFormatter;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\leaflet\Plugin\Field\FieldFormatter\LeafletDefaultFormatter;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Plugin implementation of the 'mukurtu_leaflet_formatter' formatter.
- *
- * @FieldFormatter(
- *   id = "mukurtu_leaflet_formatter",
- *   label = @Translation("Mukurtu Leaflet Map"),
- *   field_types = {
- *     "geofield"
- *   }
- * )
  */
+#[FieldFormatter(
+  id: 'mukurtu_leaflet_formatter',
+  label: new TranslatableMarkup('Mukurtu Leaflet Map'),
+  field_types: ['geofield'],
+)]
 class MukurtuLeafletFormatter extends LeafletDefaultFormatter implements ContainerFactoryPluginInterface {
   /**
    * {@inheritdoc}
