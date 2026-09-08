@@ -5,6 +5,7 @@ namespace Drupal\mukurtu_migrate\Plugin\migrate\process;
 use DOMDocument;
 use DOMXPath;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\migrate\Attribute\MigrateProcess;
 use Drupal\migrate\MigrateExecutableInterface;
 use Drupal\migrate\MigrateLookupInterface;
 use Drupal\migrate\MigrateStubInterface;
@@ -56,11 +57,11 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * A little more processing is done to strip the <html> and <body> tags that are
  * added automatically after saving the HTML.
  *
- * @MigrateProcessPlugin(
- *   id = "media_embed",
- *   handle_multiples = FALSE
- * )
  */
+#[MigrateProcess(
+  id: 'media_embed',
+  handle_multiples: FALSE,
+)]
 class MediaEmbed extends MigrationLookup {
 
   /**

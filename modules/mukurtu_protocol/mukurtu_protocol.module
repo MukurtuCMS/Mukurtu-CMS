@@ -831,7 +831,7 @@ function mukurtu_protocol_form_protocol_edit_form_alter(&$form, FormStateInterfa
   }
 
   if ($commentsRequireApproval) {
-    $unapprovedUrl = Url::fromRoute('mukurtu_protocol.manage_protocol_unapproved_comments', ['group' => $protocol->id()]);
+    $unapprovedUrl = Url::fromRoute('mukurtu_protocol.manage_protocol_unapproved_comments', ['protocol' => $protocol->id()]);
     $form['comment_settings']['unapproved_link'] = [
       '#type' => 'markup',
       '#markup' => '<p>' . t('<a href=":url">View comments awaiting approval</a> for this protocol.', [':url' => $unapprovedUrl->toString()]) . '</p>',

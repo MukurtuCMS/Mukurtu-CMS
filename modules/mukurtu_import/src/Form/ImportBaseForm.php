@@ -144,6 +144,7 @@ class ImportBaseForm extends FormBase {
     $this->metadataFilesImportConfig = [];
     $this->store->set('import_config', []);
     $this->store->set('batch_results_messages', []);
+    $this->store->set('batch_results_summary', []);
     $this->store->set('batch_results_warnings', []);
     $this->store->set('metadata_file_weights', []);
   }

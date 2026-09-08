@@ -2,23 +2,21 @@
 
 namespace Drupal\original_date\Plugin\Field\FieldFormatter;
 
+use Drupal\Core\Field\Attribute\FieldFormatter;
 use Drupal\Core\Field\FormatterBase;
 use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Plugin implementation of the 'yyyy_mm_dd_original_date_formatter'
  * formatter.
- *
- * @FieldFormatter(
- *   id = "yyyy_mm_dd_original_date_formatter",
- *   module = "original_date",
- *   description = "Displays original date in YYYY-MM-DD format.",
- *   label = @Translation("Original Date display: YYYY-MM-DD"),
- *   field_types = {
- *     "original_date"
- *   }
- * )
  */
+#[FieldFormatter(
+  id: 'yyyy_mm_dd_original_date_formatter',
+  label: new TranslatableMarkup('Original Date display: YYYY-MM-DD'),
+  description: new TranslatableMarkup('Displays original date in YYYY-MM-DD format.'),
+  field_types: ['original_date'],
+)]
 class OriginalDateFormatter_YYYY_MM_DD extends FormatterBase
 {
   /**

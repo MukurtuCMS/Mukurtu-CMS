@@ -10,6 +10,7 @@ use Drupal\filter\Entity\FilterFormat;
 use Drupal\message\Entity\Message;
 use Drupal\message\Entity\MessageTemplate;
 use Drupal\node\Entity\Node;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Regression guard for the mukurtu_submission_received template's link
@@ -39,9 +40,8 @@ use Drupal\node\Entity\Node;
  * the bug is in core's own filter_html behavior, not anything
  * mukurtu_html-specific, so this stays independent of that format's own
  * config.
- *
- * @group mukurtu_submissions
  */
+#[Group('mukurtu_submissions')]
 class SubmissionReceivedNotificationRenderingTest extends MukurtuSubmissionsKernelTestBase {
 
   /**

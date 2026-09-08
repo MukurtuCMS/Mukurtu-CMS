@@ -1,0 +1,25 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - media.type.audio
+    - media.type.document
+    - media.type.image
+    - media.type.video
+  module:
+    - media
+    - mukurtu_submissions
+id: mukurtu_submission_reviewer
+label: 'Submission Reviewer'
+weight: 4
+is_admin: false
+permissions:
+  - 'delete any audio media'
+  - 'delete any document media'
+  - 'delete any image media'
+  - 'delete any video media'
+  - 'edit any audio media'
+  - 'edit any document media'
+  - 'edit any image media'
+  - 'edit any video media'
+  - 'review mukurtu submissions'

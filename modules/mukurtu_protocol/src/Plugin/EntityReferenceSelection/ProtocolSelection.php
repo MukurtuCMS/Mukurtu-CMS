@@ -2,6 +2,7 @@
 
 namespace Drupal\mukurtu_protocol\Plugin\EntityReferenceSelection;
 
+use Drupal\Core\Entity\Attribute\EntityReferenceSelection;
 use Drupal\Core\Entity\Plugin\EntityReferenceSelection\DefaultSelection;
 use Drupal\og\Og;
 use Drupal\og\OgRoleManagerInterface;
@@ -11,21 +12,19 @@ use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides an entity reference selection for protocols.
- *
- * @EntityReferenceSelection(
- *   id = "default:protocol",
- *   label = @Translation("Protocol Selection for Protocol Control"),
- *   entity_types = {
- *     "protocol"
- *   },
- *   group = "default",
- *   weight = 1
- * )
  */
+#[EntityReferenceSelection(
+  id: 'default:protocol',
+  label: new TranslatableMarkup('Protocol Selection for Protocol Control'),
+  group: 'default',
+  weight: 1,
+  entity_types: ['protocol'],
+)]
 class ProtocolSelection extends DefaultSelection {
 
   /**

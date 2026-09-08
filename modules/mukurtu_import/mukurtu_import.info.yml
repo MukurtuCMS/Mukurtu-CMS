@@ -4,6 +4,7 @@ description: 'Provides import functionality for Mukurtu.'
 package: 'Mukurtu CMS'
 core_version_requirement: '^10 || ^11'
 dependencies:
+  - 'drupal:content_translation'
   - 'drupal:history'
   - 'drupal:layout_builder'
   - 'drupal:media'

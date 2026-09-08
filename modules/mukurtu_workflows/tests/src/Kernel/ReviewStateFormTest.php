@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_workflows\Kernel;
 
 use Drupal\Core\Form\FormState;
-use Drupal\mukurtu_protocol\Plugin\Field\FieldType\CulturalProtocolItem;
-use Drupal\node\Entity\Node;
 use Drupal\Tests\content_moderation\Traits\ContentModerationTestTrait;
 use Drupal\Tests\mukurtu_protocol\Kernel\ProtocolAwareEntityTestBase;
+use Drupal\mukurtu_protocol\Plugin\Field\FieldType\CulturalProtocolItem;
+use Drupal\node\Entity\Node;
 use Drupal\user\Entity\Role;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests that ReviewStateForm enforces the same required-field validation
@@ -20,9 +21,8 @@ use Drupal\user\Entity\Role;
  * bypassing EntityFormDisplay entirely - a plain save never validates on
  * its own, so without an explicit validate() call, a node could reach the
  * "published" moderation state without a required Cultural Protocol.
- *
- * @group mukurtu_workflows
  */
+#[Group('mukurtu_workflows')]
 class ReviewStateFormTest extends ProtocolAwareEntityTestBase {
 
   use ContentModerationTestTrait;
