@@ -4292,3 +4292,32 @@ function mukurtu_core_update_40122(): void {
 
   \Drupal::service('plugin.manager.menu.link')->rebuild();
 }
+
+
+/**
+ * Point the website feedback form at the site email address.
+ *
+ * The profile shipped contact.form.feedback with recipients set to
+ * admin@example.com and Drupal does not substitute it during installation, so
+ * feedback submissions went to an address nobody reads. Only sites still using
+ * the placeholder are changed.
+ */
+function mukurtu_core_update_40123(): void {
+  $site_mail = \Drupal::config('system.site')->get('mail');
+  if (empty($site_mail)) {
+    return;
+  }
+
+  $feedback_form = \Drupal::configFactory()->getEditable('contact.form.feedback');
+  if ($feedback_form->isNew()) {
+    return;
+  }
+
+  // Leave any site that set its own recipients alone; only replace the
+  // untouched placeholder.
+  if ($feedback_form->get('recipients') !== ['admin@example.com']) {
+    return;
+  }
+
+  $feedback_form->set('recipients', [$site_mail])->save();
+}
