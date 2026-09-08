@@ -6,11 +6,13 @@ namespace Drupal\mukurtu_protocol\Plugin\Field\FieldFormatter;
 
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Field\Attribute\FieldFormatter;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FormatterBase;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\og\OgAccessInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -18,16 +20,14 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * Custom Mukurtu plugin implementation for the OG subscribe formatter.
  * This plugin copies OgGroupSubscribeFormatter, but removes the subscribe links.
  *
- * @FieldFormatter(
- *   id = "mukurtu_og_group_subscribe",
- *   label = @Translation("Mukurtu OG Group subscribe"),
- *   description = @Translation("Display OG Group subscribe and un-subscribe links."),
- *   field_types = {
- *     "og_group"
- *   }
- * )
  * @todo remove this formatter once we have group subscription working.
  */
+#[FieldFormatter(
+  id: 'mukurtu_og_group_subscribe',
+  label: new TranslatableMarkup('Mukurtu OG Group subscribe'),
+  description: new TranslatableMarkup('Display OG Group subscribe and un-subscribe links.'),
+  field_types: ['og_group'],
+)]
 class MukurtuOgGroupSubscribeFormatter extends FormatterBase implements ContainerFactoryPluginInterface
 {
   /**

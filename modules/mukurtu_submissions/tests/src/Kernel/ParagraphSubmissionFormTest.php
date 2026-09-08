@@ -16,6 +16,7 @@ use Drupal\node\Entity\Node;
 use Drupal\paragraphs\Entity\Paragraph;
 use Drupal\paragraphs\Entity\ParagraphsType;
 use Drupal\user\Entity\Role;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests that a media (or entity_browser) field nested inside a paragraph -
@@ -32,9 +33,8 @@ use Drupal\user\Entity\Role;
  * the target bundle's own top-level fields, so a paragraph-nested field kept
  * whatever its "default" display used (normally the full Media Library
  * modal) - unusable by an anonymous visitor, who lacks "view media" access.
- *
- * @group mukurtu_submissions
  */
+#[Group('mukurtu_submissions')]
 class ParagraphSubmissionFormTest extends MukurtuSubmissionsKernelTestBase {
 
   /**

@@ -45,6 +45,7 @@ class ManageBulkRolesFormTest extends KernelTestBase {
     'mukurtu_core',
     'mukurtu_protocol',
     'views',
+    'views_bulk_operations',
   ];
 
   /**

@@ -40,7 +40,11 @@ third_party_settings:
       allowlisted_blocks:
         'Inline blocks':
           - 'inline_block:basic'
+          - 'inline_block:call_to_action'
+          - 'inline_block:featured_content'
+          - 'inline_block:horizontal_divider'
           - 'inline_block:local_contexts_block'
+          - 'inline_block:media_carousel_block'
         'Lists (Views)':
           - 'views_block:browse_by_community-community_browse_block'
           - 'views_block:mukurtu_browse_by_map-map_block'

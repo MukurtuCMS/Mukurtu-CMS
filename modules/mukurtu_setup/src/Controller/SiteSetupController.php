@@ -29,6 +29,7 @@ class SiteSetupController extends ControllerBase {
     $group_labels = [
       SiteSetupTaskManager::GROUP_REQUIRED => $this->t('Required'),
       SiteSetupTaskManager::GROUP_RECOMMENDED => $this->t('Recommended'),
+      SiteSetupTaskManager::GROUP_SITE_OPERATIONS => $this->t('Site operations'),
     ];
 
     $rendered_groups = [];
@@ -66,6 +67,9 @@ class SiteSetupController extends ControllerBase {
           'mukurtu_setup:tasks',
         ],
         'contexts' => ['user.roles'],
+        // The "Site operations" checks read state (cron_last) and settings.php,
+        // which have no cache tags; bound staleness to an hour.
+        'max-age' => 3600,
       ],
     ];
   }

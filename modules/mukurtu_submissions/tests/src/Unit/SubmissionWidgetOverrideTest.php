@@ -11,6 +11,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Tests\UnitTestCase;
 use Drupal\mukurtu_submissions\SubmissionFormDisplayManager;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests that the public submission form always gets an accessible widget
@@ -18,8 +19,8 @@ use Drupal\mukurtu_submissions\SubmissionFormDisplayManager;
  * form display uses.
  *
  * @see \Drupal\mukurtu_submissions\SubmissionFormDisplayManager::applySubmissionWidgetOverride()
- * @group mukurtu_submissions
  */
+#[Group('mukurtu_submissions')]
 class SubmissionWidgetOverrideTest extends UnitTestCase {
 
   /**
