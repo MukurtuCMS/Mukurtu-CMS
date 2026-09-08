@@ -15,11 +15,16 @@ source:
   group_bundle: community
 process:
   uid:
-    plugin: migration_lookup
-    migration:
-      - mukurtu_cms_v3_users
-      - mukurtu_cms_v3_users_uid1
-    source: etid
+    -
+      plugin: migration_lookup
+      migration:
+        - mukurtu_cms_v3_users
+        - mukurtu_cms_v3_users_uid1
+      source: etid
+    -
+      plugin: skip_on_empty
+      method: row
+      message: 'Membership not created: source user could not be matched to a migrated account.'
   entity_type:
     plugin: default_value
     default_value: community

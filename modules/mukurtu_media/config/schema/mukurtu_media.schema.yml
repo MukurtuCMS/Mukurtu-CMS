@@ -5,6 +5,9 @@ mukurtu_media.settings:
     mukurtu_media_download_enabled:
       type: boolean
       label: 'Enable media download button'
+    youtube_api_key:
+      type: string
+      label: 'YouTube Data API key (Key module key ID)'
     restricted_media_placeholder:
       type: sequence
       label: 'Restricted media placeholder image.'

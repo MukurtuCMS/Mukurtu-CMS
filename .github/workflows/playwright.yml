@@ -72,18 +72,30 @@ jobs:
           fi
 
           # The comment can appear before the preview site has finished
-          # booting, so poll the URL itself until it responds successfully.
-          READY_MAX_WAIT=300
+          # booting. A bare status-code check isn't enough here: Tugboat
+          # serves its own "Preview is resuming" holding page (while a
+          # suspended/idle preview container wakes back up) with a 200,
+          # so that alone looks "ready" while Drupal underneath is still
+          # down. Poll /user/login instead and only accept a response that
+          # is actually the rendered Drupal login form.
+          READY_MAX_WAIT=600
           READY_INTERVAL=15
           READY_ELAPSED=0
           while [ $READY_ELAPSED -lt $READY_MAX_WAIT ]; do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$PREVIEW_URL" || true)
-            if [[ "$STATUS" =~ ^(2|3)[0-9][0-9]$ ]]; then
+            RESULT=$(curl -s -L -o /tmp/tugboat-preview-check.html -w "%{http_code} %{url_effective}" "$PREVIEW_URL/user/login" || true)
+            STATUS="${RESULT%% *}"
+            EFFECTIVE_URL="${RESULT#* }"
+
+            if [[ "$STATUS" == "200" ]] \
+              && [[ "$EFFECTIVE_URL" != *"/core/install.php"* ]] \
+              && ! grep -q "Preview is resuming" /tmp/tugboat-preview-check.html \
+              && grep -qi ">Username<" /tmp/tugboat-preview-check.html; then
               echo "Preview is ready: $PREVIEW_URL"
               echo "preview_url=$PREVIEW_URL" >> "$GITHUB_OUTPUT"
               exit 0
             fi
-            echo "Waiting for Tugboat preview to respond (last status: $STATUS)..."
+
+            echo "Waiting for Tugboat preview to serve the real Drupal site (status: $STATUS, url: $EFFECTIVE_URL)..."
             sleep $READY_INTERVAL
             READY_ELAPSED=$((READY_ELAPSED + READY_INTERVAL))
           done

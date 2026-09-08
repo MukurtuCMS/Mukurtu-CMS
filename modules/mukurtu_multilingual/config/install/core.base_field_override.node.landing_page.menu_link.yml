@@ -3,6 +3,9 @@ status: true
 dependencies:
   config:
     - node.type.landing_page
+  module:
+    - menu_ui
+    - token
 id: node.landing_page.menu_link
 field_name: menu_link
 entity_type: node

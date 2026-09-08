@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Drupal\mukurtu_protocol\Plugin\Block;
 
+use Drupal\Core\Block\Attribute\Block;
 use Drupal\Core\Block\BlockBase;
-use Drupal\Core\Plugin\Context\ContextDefinition;
+use Drupal\Core\Plugin\Context\EntityContextDefinition;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
 use Drupal\mukurtu_protocol\Hook\CommunityProtocolList;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -18,16 +20,18 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * Layout Builder-managed displays. Reuses the same rendering logic as
  * \Drupal\mukurtu_protocol\Hook\CommunityProtocolList, which injects this
  * list directly for content types not yet using Layout Builder.
- *
- * @Block(
- *   id = "mukurtu_community_protocol_list",
- *   admin_label = @Translation("Communities and Cultural Protocols"),
- *   category = @Translation("Mukurtu"),
- *   context_definitions = {
- *     "node" = @ContextDefinition("entity:node", label = @Translation("Node"))
- *   }
- * )
  */
+#[Block(
+  id: 'mukurtu_community_protocol_list',
+  admin_label: new TranslatableMarkup('Communities and Cultural Protocols'),
+  category: new TranslatableMarkup('Mukurtu'),
+  context_definitions: [
+    'node' => new EntityContextDefinition(
+      data_type: 'entity:node',
+      label: new TranslatableMarkup('Node'),
+    ),
+  ],
+)]
 class CommunityProtocolListBlock extends BlockBase implements ContainerFactoryPluginInterface {
 
   public function __construct(

@@ -18,13 +18,17 @@ use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\CloseModalDialogCommand;
 use Drupal\Core\Ajax\HtmlCommand;
 use Drupal\Core\Ajax\InvokeCommand;
+use Drupal\Core\Ajax\MessageCommand;
 use Drupal\Core\Ajax\RedirectCommand;
+use Drupal\Core\Extension\ThemeSettingsProvider;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\BubbleableMetadata;
+use Drupal\user\Entity\User;
 use Drupal\user\UserInterface;
 use Drupal\Core\Url;
 use Drupal\Core\Link;
 use Drupal\Core\Cache\Cache;
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Render\Markup;
 use Drupal\Component\Render\FormattableMarkup;
 
@@ -37,6 +41,13 @@ function mukurtu_core_theme($existing, $type, $theme, $path) {
       'template' => 'mukurtu-node-add-list',
       'variables' => ['content' => NULL],
     ],
+    'mukurtu_related_content_grouped' => [
+      'template' => 'mukurtu-related-content-grouped',
+      'variables' => ['title' => NULL, 'items' => [], 'filters' => [], 'has_filters' => FALSE],
+    ],
+    'mukurtu_not_yet_translated_indicator' => [
+      'variables' => ['language_name' => NULL],
+    ],
   ];
 }
 
@@ -45,14 +56,16 @@ function mukurtu_core_theme($existing, $type, $theme, $path) {
  */
 function mukurtu_core_entity_type_build(array &$entity_types) {
   // Prefix media URLs with 'dashboard'.
-  $entity_types['media']->setLinkTemplate('add-page', '/admin/media/add');
-  $entity_types['media']->setLinkTemplate('add-form', '/admin/media/add/{media_type}');
-  $entity_types['media']->setLinkTemplate('canonical', '/admin/media/{media}/edit');
-  $entity_types['media']->setLinkTemplate('delete-form', '/admin/media/{media}/delete');
-  $entity_types['media']->setLinkTemplate('delete-multiple-form', '/admin/media/delete');
-  $entity_types['media']->setLinkTemplate('edit-form', '/admin/media/{media}/edit');
-  $entity_types['media']->setLinkTemplate('revision', '/admin/media/{media}/revisions/{media_revision}/view');
-  //$entity_types['media']->setLinkTemplate('collection', '/admin/content/media');
+  if (isset($entity_types['media'])) {
+    $entity_types['media']->setLinkTemplate('add-page', '/admin/media/add');
+    $entity_types['media']->setLinkTemplate('add-form', '/admin/media/add/{media_type}');
+    $entity_types['media']->setLinkTemplate('canonical', '/admin/media/{media}/edit');
+    $entity_types['media']->setLinkTemplate('delete-form', '/admin/media/{media}/delete');
+    $entity_types['media']->setLinkTemplate('delete-multiple-form', '/admin/media/delete');
+    $entity_types['media']->setLinkTemplate('edit-form', '/admin/media/{media}/edit');
+    $entity_types['media']->setLinkTemplate('revision', '/admin/media/{media}/revisions/{media_revision}/view');
+    //$entity_types['media']->setLinkTemplate('collection', '/admin/content/media');
+  }
 
   /** @var $entity_types \Drupal\Core\Entity\EntityTypeInterface[] */
   foreach (['media', 'paragraph', 'node'] as $entity_type_id) {
@@ -266,7 +279,7 @@ function mukurtu_core_preprocess_page(array &$variables) {
       $dismiss_link = Link::fromTextAndUrl(Markup::create('<span aria-hidden="true">&times;</span>'), $dismiss_url)->toString();
       $manager_link = Link::fromTextAndUrl(t('Mukurtu Manager'), Url::fromUri('https://docs.mukurtu.org/users/user-role-types/'))->toString();
       $message = new FormattableMarkup('<div class="mukurtu-super-admin-warning"><div class="mukurtu-super-admin-warning__text">@text</div>@dismiss</div>', [
-        '@text' => t('You are logged in as an Administrator (UID 1), which gives you the ability to take actions that can break the site and corrupt your data. We strongly recommended using a @manager_link account instead for most site management.', [
+        '@text' => t('You are logged in as an Administrator (UID 1), which gives you the ability to take actions that can break the site and corrupt your data. We strongly recommend using a @manager_link account instead for most site management.', [
           '@manager_link' => $manager_link,
         ]),
         '@dismiss' => $dismiss_link,
@@ -324,15 +337,44 @@ function mukurtu_core_page_attachments(array &$attachments) {
  *
  * Expects the form to have a "node" or "mukurtu_return_node" hidden value
  * identifying the item to redirect back to on success.
+ *
+ * $quickActionFocusSelector opts a caller into the browse-card quick-action
+ * flow: when the request carries a "mukurtu_stay" query param (set when the
+ * dialog was opened from a quick-action icon rather than the full-page tab),
+ * stay on the listing instead of redirecting - relay any messenger()
+ * messages as MessageCommands (since there's no redirect for them to ride
+ * along with) and return focus to the triggering icon. The callable receives
+ * ($nodeId, $form_state) and must return the CSS selector for that icon.
  */
-function mukurtu_core_modal_form_ajax_response(array &$form, FormStateInterface $form_state): AjaxResponse {
+function mukurtu_core_modal_form_ajax_response(array &$form, FormStateInterface $form_state, ?callable $quickActionFocusSelector = NULL): AjaxResponse {
   $response = new AjaxResponse();
   if ($form_state->isExecuted()) {
     $nodeId = $form_state->getValue('node') ?? $form_state->getValue('mukurtu_return_node');
-    $node = $nodeId ? \Drupal::entityTypeManager()->getStorage('node')->load($nodeId) : NULL;
     $response->addCommand(new CloseModalDialogCommand());
-    if ($node) {
-      $response->addCommand(new RedirectCommand($node->toUrl()->toString()));
+
+    if ($quickActionFocusSelector && \Drupal::request()->query->get('mukurtu_stay')) {
+      // MessageCommand clears any previously displayed messages by default -
+      // only the first command in this response should do that; the rest
+      // must pass clear_previous=FALSE or they'd wipe out each other,
+      // leaving only the last message visible.
+      $first = TRUE;
+      foreach (\Drupal::messenger()->all() as $type => $messages) {
+        foreach ($messages as $message) {
+          $response->addCommand(new MessageCommand($message, NULL, ['type' => $type], $first));
+          $first = FALSE;
+        }
+      }
+      \Drupal::messenger()->deleteAll();
+
+      if ($nodeId) {
+        $response->addCommand(new InvokeCommand($quickActionFocusSelector($nodeId, $form_state), 'focus'));
+      }
+    }
+    else {
+      $node = $nodeId ? \Drupal::entityTypeManager()->getStorage('node')->load($nodeId) : NULL;
+      if ($node) {
+        $response->addCommand(new RedirectCommand($node->toUrl()->toString()));
+      }
     }
     return $response;
   }
@@ -525,6 +567,73 @@ function mukurtu_core_user_login_form_submit($form, FormStateInterface $form_sta
   }
 }
 
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Core's theme settings form only shows the logo/favicon as a path textfield,
+ * with no visual preview. Add an image preview of the currently active
+ * logo/favicon next to each field.
+ */
+function mukurtu_core_form_system_theme_settings_alter(&$form, FormStateInterface $form_state, $form_id) {
+  // On the global settings form (/admin/appearance/settings), core's
+  // \Drupal\system\Form\ThemeSettingsForm::buildForm() is invoked with no
+  // theme argument, so its $theme parameter default of '' (not NULL) is
+  // what ends up in the build info args. An empty string is "set" as far
+  // as ThemeSettingsProvider::getSetting()'s `!isset($theme)` check is
+  // concerned, so it is passed through rather than falling back to the
+  // active theme, and since no theme is named '', the computed logo.url/
+  // favicon.url values are never populated. Use the Elvis operator (which
+  // also treats '' as absent) instead of ?? so this falls back correctly
+  // on the global form; on the per-theme form (/admin/appearance/settings/
+  // {theme}) args[0] is always a real, non-empty theme machine name.
+  $theme = $form_state->getBuildInfo()['args'][0] ?: \Drupal::config('system.theme')->get('default');
+  $theme_settings_provider = \Drupal::service(ThemeSettingsProvider::class);
+
+  if (isset($form['logo']['settings'])) {
+    $logo_url = $theme_settings_provider->getSetting('logo.url', $theme);
+    if ($logo_url) {
+      // Added as a sibling of 'default_logo'/'settings' (not nested inside
+      // 'settings') because core wraps 'settings' in '#states' =>
+      // ['invisible' => ['default_logo' checked]], and 'logo.use_default'
+      // (which drives that checkbox's default state) itself defaults to
+      // TRUE. Nesting the preview inside 'settings' would hide it via
+      // display:none on every untouched/default site - the exact case
+      // where showing the currently active (theme-supplied) logo is most
+      // useful.
+      $form['logo']['logo_preview'] = [
+        '#type' => 'html_tag',
+        '#tag' => 'img',
+        '#attributes' => [
+          'src' => $logo_url,
+          'alt' => t('Current logo'),
+          'class' => ['mukurtu-theme-settings-preview'],
+          'style' => 'max-height: 100px; max-width: 300px; display: block; margin-bottom: 0.5em;',
+        ],
+        '#weight' => -10,
+      ];
+    }
+  }
+
+  if (isset($form['favicon']['settings'])) {
+    $favicon_url = $theme_settings_provider->getSetting('favicon.url', $theme);
+    if ($favicon_url) {
+      // See the logo_preview comment above; same reasoning applies to
+      // 'favicon.use_default' defaulting to TRUE.
+      $form['favicon']['favicon_preview'] = [
+        '#type' => 'html_tag',
+        '#tag' => 'img',
+        '#attributes' => [
+          'src' => $favicon_url,
+          'alt' => t('Current favicon'),
+          'class' => ['mukurtu-theme-settings-preview'],
+          'style' => 'max-height: 100px; max-width: 300px; display: block; margin-bottom: 0.5em;',
+        ],
+        '#weight' => -10,
+      ];
+    }
+  }
+}
+
 
 /**
  * Prepares variables for list of available node type templates.
@@ -647,6 +756,17 @@ function mukurtu_core_node_view(array &$build, EntityInterface $entity, EntityVi
   if ($display->getComponent('field_title')) {
     $build['field_title'] = $entity->title->view();
   }
+
+  // field_all_related_content is computed by querying all nodes system-wide
+  // for references back to this entity (see AllRelatedContentItemList). That
+  // result can change when any node elsewhere is saved, so tag the render
+  // array to invalidate on any node list change rather than relying on this
+  // entity's own cache tags, which only fire when this entity itself is saved.
+  if ($display->getComponent('field_all_related_content')) {
+    $cache = CacheableMetadata::createFromRenderArray($build);
+    $cache->addCacheTags(['node_list']);
+    $cache->applyTo($build);
+  }
 }
 
 /**
@@ -659,6 +779,31 @@ function mukurtu_core_user_view(array &$build, EntityInterface $entity, EntityVi
     $status = $entity->status->value;
     $is_pending = $entity->hasField('field_pending') && (bool) $entity->get('field_pending')->value;
     $links = [];
+
+    if ($status == 1) {
+      $status_label = t('Active');
+    }
+    elseif ($is_pending) {
+      $status_label = t('Pending');
+    }
+    else {
+      $status_label = t('Blocked');
+    }
+    $build['mukurtu_user_status_and_actions'] = [
+      '#type' => 'container',
+      '#weight' => -3,
+      '#attributes' => [
+        'class' => ['mukurtu-user-status-and-actions'],
+        'role' => 'group',
+        'aria-label' => t('Account status and actions'),
+      ],
+    ];
+    $build['mukurtu_user_status_and_actions']['status'] = [
+      '#type' => 'markup',
+      '#markup' => t('Account status: @status', ['@status' => $status_label]),
+      '#prefix' => '<div class="mukurtu-user-status">',
+      '#suffix' => '</div>',
+    ];
 
     if ($status == 1) {
       // Active: offer Block and Set to Pending.
@@ -700,12 +845,28 @@ function mukurtu_core_user_view(array &$build, EntityInterface $entity, EntityVi
       ];
     }
 
-    $build['mukurtu_toggle_user_approval'] = [
+    $build['mukurtu_user_status_and_actions']['links'] = [
       '#theme' => 'links',
-      '#weight' => -2,
       '#links' => $links,
       '#attached' => ['library' => ['core/drupal.ajax']],
     ];
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_view_alter().
+ *
+ * Core's "Member for" pseudo-field hardcodes an <h4>, which becomes a stray
+ * heading-level skip on this page (no other headings sit between the page
+ * title and it). Render it as plain text instead.
+ */
+function mukurtu_core_user_view_alter(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display) {
+  if (isset($build['member_for']['#markup'])) {
+    $build['member_for']['#markup'] = str_replace(
+      ['<h4 class="label">', '</h4>'],
+      ['', ':'],
+      $build['member_for']['#markup']
+    );
   }
 }
 
@@ -1005,7 +1166,7 @@ function mukurtu_core_menu_links_discovered_alter(&$links) {
     'url' => 'internal:' . $homepagePath . '/layout',
     'menu_name' => 'dashboard-look-feel',
     'parent' => 'mukurtu_dashboard',
-    'weight' => 3,
+    'weight' => 5,
   ];
 
   // Add the Mukurtu Version link in the dashboard. Cannot be defined in a
@@ -1301,6 +1462,22 @@ function mukurtu_core_views_data_alter(array &$data)
         'real field' => 'nid',
       ],
     ];
+    $data['node_field_data']['mukurtu_lc_project_filter'] = [
+      'title' => t('Local Contexts Project'),
+      'filter' => [
+        'id' => 'mukurtu_node_local_contexts_project_filter',
+        'field' => 'nid',
+        'real field' => 'nid',
+      ],
+    ];
+    $data['node_field_data']['mukurtu_lc_label_filter'] = [
+      'title' => t('Local Contexts Label'),
+      'filter' => [
+        'id' => 'mukurtu_node_local_contexts_label_filter',
+        'field' => 'nid',
+        'real field' => 'nid',
+      ],
+    ];
   }
 
   if (isset($data['media_field_data'])) {
@@ -1348,6 +1525,26 @@ function mukurtu_core_preprocess_views_view(&$variables)
   if (in_array($variables['view']->id(), $affected_views)) {
     $variables['view_array']['#attached']['library'][] = 'mukurtu_core/entity_browser_view_decoration';
   }
+
+  // Add an "All content" link to the end of the dashboard's "Recent content"
+  // block. Views' own "more link" custom-URL option always resolves through
+  // Url::fromUserInput() (raw path matching), which doesn't reliably reach
+  // the Mukurtu-role-gated route this site uses for /admin/content (see
+  // RouteSubscriber::alterRoutes()). Build the link against the named route
+  // directly instead, matching how the dashboard's "Manage Content" link
+  // resolves it.
+  if ($variables['view']->id() === 'content_recent' && $variables['view']->current_display === 'block_1') {
+    $url = Url::fromRoute('view.mukurtu_manage_all_content.mukurtu_manage_content');
+    $access = $url->access(NULL, TRUE);
+    $variables['more'] = [
+      '#type' => 'more_link',
+      '#url' => $url,
+      '#title' => t('All content'),
+      '#view' => $variables['view'],
+      '#access' => $access->isAllowed(),
+    ];
+    CacheableMetadata::createFromObject($access)->applyTo($variables['more']);
+  }
 }
 
 /**
@@ -1364,4 +1561,53 @@ function mukurtu_core_library_info_alter(&$libraries, $extension) {
   if ($extension === 'leaflet_markercluster' && isset($libraries['leaflet-markercluster-drupal'])) {
     $libraries['leaflet-markercluster-drupal']['js']['/' . \Drupal::service('extension.list.module')->getPath('mukurtu_core') . '/js/mukurtu-leaflet-markercluster-grouping-fix.js'] = [];
   }
+
+  // Render a drawn circle's 'circle' typed feature (restored by
+  // MukurtuLeafletService) as a true L.circle instead of the faceted
+  // polygon approximation Drupal.Leaflet.prototype.create_geometry would
+  // otherwise build. Appending to leaflet-drupal's own JS list guarantees
+  // this always loads immediately after leaflet.drupal.js, on every page
+  // (view and browse) where that library is already in use.
+  if ($extension === 'leaflet' && isset($libraries['leaflet-drupal'])) {
+    $libraries['leaflet-drupal']['js']['/' . \Drupal::service('extension.list.module')->getPath('mukurtu_core') . '/js/mukurtu-leaflet-circle-display.js'] = [];
+  }
+}
+
+/**
+ * Implements hook_geocoder_formatter_info_alter().
+ *
+ * The Map Points address search box falls back to the "default_formatted_address"
+ * formatter whenever no other one is requested (see
+ * \Drupal\geocoder\Controller\GeocoderApiEnpoints::getAddressFormatter()).
+ * Its contrib template never includes state/province and shows the country
+ * twice, so swap in our own formatter for that same plugin ID (see #1453).
+ */
+function mukurtu_core_geocoder_formatter_info_alter(array &$definitions) {
+  if (isset($definitions['default_formatted_address'])) {
+    $definitions['default_formatted_address']['class'] = \Drupal\mukurtu_core\Plugin\Geocoder\Formatter\MukurtuFormattedAddress::class;
+  }
+}
+
+/**
+ * Returns uids of users with the administrator or mukurtu_manager role.
+ *
+ * Always includes uid 1 (if active) since the superuser implicitly has all
+ * permissions via Drupal core's SuperUserAccessPolicy but typically has no
+ * explicit role assignment, so a role-based query alone silently excludes
+ * it.
+ */
+function mukurtu_core_get_manager_role_uids(): array {
+  $uids = \Drupal::entityQuery('user')
+    ->condition('roles', ['administrator', 'mukurtu_manager'], 'IN')
+    ->condition('status', 1)
+    ->accessCheck(FALSE)
+    ->execute();
+  $uids = array_values($uids);
+
+  $uid_one = User::load(1);
+  if ($uid_one && $uid_one->isActive() && !in_array(1, $uids)) {
+    $uids[] = 1;
+  }
+
+  return $uids;
 }

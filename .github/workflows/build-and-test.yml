@@ -7,6 +7,18 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 jobs:
+  lint:
+    name: Multilingual guardrails
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Check for untranslated UI strings
+        run: ./scripts/lint/multilingual-guardrails.sh
+        env:
+          MUKURTU_LINT_STRICT: '1'
+
   testing:
     name: Mukurtu v4 - PHP ${{ matrix.php-versions }}
     runs-on: ubuntu-latest
@@ -14,7 +26,7 @@ jobs:
       fail-fast: false
       matrix:
         php-versions: ['8.4']
-        test-suite: ["kernel"]
+        test-suite: ["kernel", "unit"]
     services:
       mariadb:
         image: mariadb:10.6

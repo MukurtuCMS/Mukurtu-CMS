@@ -20,7 +20,14 @@ export class Login {
     const loginButton = this.page.getByRole('button', { name: 'Log in' });
     await usernameField.fill(username);
     await passwordField.fill(password);
-    await loginButton.click();
+    // Wait for the post-login redirect to complete before returning:
+    // clicking the button alone doesn't wait for the resulting navigation,
+    // so callers could otherwise navigate away and cancel the login
+    // request before the session cookie is ever set.
+    await Promise.all([
+      this.page.waitForURL((url) => !url.pathname.startsWith('/user/login')),
+      loginButton.click(),
+    ]);
   }
 
   public async logout(): Promise<void> {

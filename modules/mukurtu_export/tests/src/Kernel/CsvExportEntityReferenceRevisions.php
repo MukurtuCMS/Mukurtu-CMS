@@ -167,4 +167,45 @@ class CsvExportEntityReferenceRevisions extends CsvExportFieldTestBase {
     $this->assertContains($this->paragraphs[2]->id(), $this->event->context['results']['entities']['paragraph']);
   }
 
+  /**
+   * Test that a paragraph with none of its own fields filled in is excluded
+   * from export, whether exporting the referenced entity or just its ID.
+   */
+  public function testEntityRevisionsFieldSkipsEmptyParagraph() {
+    $emptyParagraph = Paragraph::create(['type' => 'text_paragraph']);
+    $emptyParagraph->save();
+
+    $node = Node::create([
+      'title' => 'Testing Empty Paragraph Export',
+      'type' => 'protocol_aware_content',
+      'status' => TRUE,
+      'uid' => $this->currentUser->id(),
+      'field_paragraph' => [
+        ['target_id' => $this->paragraphs[0]->id(), 'target_revision_id' => $this->paragraphs[0]->getRevisionId()],
+        ['target_id' => $emptyParagraph->id(), 'target_revision_id' => $emptyParagraph->getRevisionId()],
+      ],
+    ]);
+    $node->setSharingSetting('any');
+    $node->setProtocols([$this->protocol]);
+    $node->save();
+
+    $event = new EntityFieldExportEvent('csv', $node, 'field_paragraph', $this->context);
+
+    // ID-only export: the empty paragraph's ID should not appear.
+    $this->fieldExporter->exportField($event);
+    $this->assertEquals([$this->paragraphs[0]->id()], $event->getValue());
+
+    // Full entity export: the empty paragraph should not be queued either.
+    $this->export_config->setEntityReferenceSetting('paragraph', 'entity');
+    $this->export_config->save();
+
+    $event = new EntityFieldExportEvent('csv', $node, 'field_paragraph', $this->context);
+    $this->fieldExporter->exportField($event);
+
+    $this->assertEquals([$this->paragraphs[0]->id()], $event->getValue());
+    $this->assertCount(1, $event->context['results']['entities']['paragraph']);
+    $this->assertContains($this->paragraphs[0]->id(), $event->context['results']['entities']['paragraph']);
+    $this->assertNotContains($emptyParagraph->id(), $event->context['results']['entities']['paragraph']);
+  }
+
 }

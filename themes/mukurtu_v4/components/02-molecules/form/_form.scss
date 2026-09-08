@@ -32,7 +32,11 @@ details.form-wrapper {
   @include layout.layout--full-width-grid-item;
 }
 
-label.form-required::after {
+// Drupal core renders the required marker on a <label> for individual
+// fields, but on a <span class="fieldset-legend"> for a required fieldset's
+// legend (e.g. the Category checkbox group) - cover both.
+label.form-required::after,
+.fieldset-legend.form-required::after {
   display: inline-block;
   margin-inline-start: 0.15em;
   content: "*";

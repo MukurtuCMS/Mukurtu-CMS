@@ -32,7 +32,7 @@
     attach(context) {
       once('audio-thumbnail-player', '.audio-play-button', context)
         .forEach(function (button) {
-          const wrapper = button.closest('.media--digital-heritage-sidebar');
+          const wrapper = button.closest('.media--teaser-featured');
           const audioEl = wrapper && wrapper.querySelector('audio');
           if (!audioEl) return;
 

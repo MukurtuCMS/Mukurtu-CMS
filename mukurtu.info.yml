@@ -63,6 +63,7 @@ install:
   - notify_user_default
   - readonly_field_widget
   - mukurtu_bot_protection
+  - mukurtu_submissions
 
 dependencies:
   - 'altcha:altcha'

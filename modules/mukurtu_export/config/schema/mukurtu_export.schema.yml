@@ -1,0 +1,14 @@
+node.type.*.third_party.mukurtu_export:
+  type: mapping
+  label: 'Export with children field settings'
+  mapping:
+    child_reference_fields:
+      type: sequence
+      label: 'Child reference fields'
+      sequence:
+        type: mapping
+        label: 'Field settings'
+        mapping:
+          recurse:
+            type: boolean
+            label: 'Recurse into referenced entities of this field when resolving nested children'

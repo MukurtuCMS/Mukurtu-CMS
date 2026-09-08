@@ -14,6 +14,7 @@ use Drupal\migrate\Plugin\MigrationPluginManagerInterface;
 use Drupal\migrate_drupal\MigrationState;
 use Drupal\migrate_drupal_ui\Batch\MigrateUpgradeImportBatch;
 use Drupal\mukurtu_migrate\Batch\MukurtuMigrateImportBatch;
+use Drupal\mukurtu_migrate\SearchApiIndexerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Exception;
 
@@ -62,6 +63,13 @@ class ReviewForm extends MukurtuMigrateFormBase {
   protected $systemData;
 
   /**
+   * Search API indexer service.
+   *
+   * @var \Drupal\mukurtu_migrate\SearchApiIndexerInterface
+   */
+  protected $searchApiIndexer;
+
+  /**
    * ReviewForm constructor.
    *
    * @param \Drupal\Core\State\StateInterface $state
@@ -74,14 +82,17 @@ class ReviewForm extends MukurtuMigrateFormBase {
    *   Migration state service.
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The config factory service.
+   * @param \Drupal\mukurtu_migrate\SearchApiIndexerInterface $search_api_indexer
+   *   Search API indexer service.
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
    *   The module handler service.
    * @param \Drupal\Core\Extension\ModuleExtensionList $module_extension_list
    *   The module extension list service.
    */
-  public function __construct(StateInterface $state, MigrationPluginManagerInterface $migration_plugin_manager, PrivateTempStoreFactory $tempstore_private, MigrationState $migrationState, ConfigFactoryInterface $config_factory, ?ModuleHandlerInterface $module_handler = NULL, ?ModuleExtensionList $module_extension_list = NULL) {
+  public function __construct(StateInterface $state, MigrationPluginManagerInterface $migration_plugin_manager, PrivateTempStoreFactory $tempstore_private, MigrationState $migrationState, ConfigFactoryInterface $config_factory, SearchApiIndexerInterface $search_api_indexer, ?ModuleHandlerInterface $module_handler = NULL, ?ModuleExtensionList $module_extension_list = NULL) {
     parent::__construct($config_factory, $migration_plugin_manager, $state, $tempstore_private);
     $this->migrationState = $migrationState;
+    $this->searchApiIndexer = $search_api_indexer;
     if (!$module_handler) {
       @trigger_error('Calling ' . __METHOD__ . ' without the $module_handler argument is deprecated in drupal:9.1.0 and will be required in drupal:10.0.0. See https://www.drupal.org/node/3136769', E_USER_DEPRECATED);
       $module_handler = \Drupal::service('module_handler');
@@ -100,6 +111,7 @@ class ReviewForm extends MukurtuMigrateFormBase {
       $container->get('tempstore.private'),
       $container->get('migrate_drupal.migration_state'),
       $container->get('config.factory'),
+      $container->get('mukurtu_migrate.search_api_indexer'),
       $container->get('module_handler'),
       $container->get('extension.list.module')
     );
@@ -176,6 +188,11 @@ class ReviewForm extends MukurtuMigrateFormBase {
       ], [array_keys($this->migrations), $config])
       ->setFinishCallback([MukurtuMigrateImportBatch::class, 'finished']);
     batch_set($batch_builder->toArray());
+
+    // Queue Search API indexing to run once the migration batch above
+    // finishes, so migrated content is searchable without waiting for cron.
+    $this->searchApiIndexer->queueIndexingForAllIndexes();
+
     $this->store->set('step', 'results');
     $this->store->set('mukurtu_migrate.performed', \Drupal::time()->getRequestTime());
     $form_state->setRedirect('mukurtu_migrate.results');

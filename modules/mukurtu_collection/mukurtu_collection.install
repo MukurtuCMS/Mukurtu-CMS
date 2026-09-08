@@ -380,3 +380,207 @@ function mukurtu_collection_update_40017(): void {
     \Drupal::configFactory()->getEditable($config_name)->setData($data)->save(TRUE);
   }
 }
+
+/**
+ * Move the collection edit form map's default center off Null Island, and
+ * give it a dedicated zoom for editing a single already-saved point (#1453).
+ */
+function mukurtu_collection_update_40018(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.collection.default');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_coverage.settings.map.map_position.zoom', 2);
+  $config->set('content.field_coverage.settings.map.map_position.center.lat', 20);
+  $config->set('content.field_coverage.settings.map.map_position.center.lon', 10);
+  $config->set('content.field_coverage.settings.map.map_position.singlePointZoom', 12);
+  $config->save();
+}
+
+/**
+ * Corrects field_coverage_description's textarea from 31 rows down to the
+ * 5 every other content type uses for the same field - an outlier typo in
+ * this bundle's shipped default form display, not a deliberate size,
+ * making the "Location Description" field render at a comically tall
+ * size on both the regular edit form and (once generalized in #1924) the
+ * submission form. Guarded to skip a site that already customized it away
+ * from the original broken default.
+ */
+function mukurtu_collection_update_40019(): void {
+  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.node.collection.default');
+  if ((int) $config->get('content.field_coverage_description.settings.rows') === 31) {
+    $config->set('content.field_coverage_description.settings.rows', 5)->save();
+  }
+}
+
+/**
+ * Give personal collections the same grid/list/map switcher as collections.
+ *
+ * Re-imports the mukurtu_collection_items view (now with personal-collection
+ * scoped displays) and switches field_items_in_collection on the personal
+ * collection full display to the mukurtu_collection_items_browse formatter,
+ * matching the regular collection page (#1993).
+ */
+function mukurtu_collection_update_40020(): void {
+  $config_source = new \Drupal\Core\Config\FileStorage(
+    \Drupal::service('extension.list.module')->getPath('mukurtu_collection') . '/config/install'
+  );
+
+  $view_name = 'views.view.mukurtu_collection_items';
+  $data = $config_source->read($view_name);
+  if ($data) {
+    \Drupal::configFactory()->getEditable($view_name)->setData($data)->save(TRUE);
+  }
+
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.personal_collection.personal_collection.full');
+  if ($config->isNew()) {
+    return;
+  }
+  $config->set('content.field_items_in_collection', [
+    'type' => 'mukurtu_collection_items_browse',
+    'label' => 'hidden',
+    'settings' => [],
+    'third_party_settings' => [],
+    'weight' => 4,
+    'region' => 'content',
+  ]);
+  $config->save();
+}
+
+
+/**
+ * Adds the language-fallback default_langcode filter and rendering_language
+ * setting to mukurtu_collection_items and my_personal_collections, per
+ * docs/content-language-policy.md. Additive only.
+ */
+function mukurtu_collection_update_40027(): void {
+  $config_mukurtu_collection_items = \Drupal::configFactory()->getEditable('views.view.mukurtu_collection_items');
+  if (!$config_mukurtu_collection_items->isNew()) {
+    $filters_mukurtu_collection_items_default = $config_mukurtu_collection_items->get('display.default.display_options.filters') ?? [];
+    if (!isset($filters_mukurtu_collection_items_default['default_langcode'])) {
+      $filters_mukurtu_collection_items_default['default_langcode'] = [
+        'id' => 'default_langcode',
+        'table' => 'node_field_data',
+        'field' => 'default_langcode',
+        'relationship' => 'none',
+        'group_type' => 'group',
+        'admin_label' => '',
+        'entity_type' => 'node',
+        'entity_field' => 'default_langcode',
+        'plugin_id' => 'boolean',
+        'operator' => '=',
+        'value' => '1',
+        'group' => 1,
+        'exposed' => FALSE,
+        'expose' => [
+          'operator_id' => '',
+          'label' => '',
+          'description' => '',
+          'use_operator' => FALSE,
+          'operator' => '',
+          'operator_limit_selection' => FALSE,
+          'operator_list' => [],
+          'identifier' => '',
+          'required' => FALSE,
+          'remember' => FALSE,
+          'multiple' => FALSE,
+          'remember_roles' => ['authenticated' => 'authenticated'],
+        ],
+        'is_grouped' => FALSE,
+        'group_info' => [
+          'label' => '',
+          'description' => '',
+          'identifier' => '',
+          'optional' => TRUE,
+          'widget' => 'select',
+          'multiple' => FALSE,
+          'remember' => FALSE,
+          'default_group' => 'All',
+          'default_group_multiple' => [],
+          'group_items' => [],
+        ],
+      ];
+      $config_mukurtu_collection_items->set('display.default.display_options.filters', $filters_mukurtu_collection_items_default);
+      $config_mukurtu_collection_items->save();
+    }
+    if (!$config_mukurtu_collection_items->get('display.mukurtu_collection_items_block.display_options.rendering_language')) {
+      $config_mukurtu_collection_items->set('display.mukurtu_collection_items_block.display_options.rendering_language', '***LANGUAGE_language_content***');
+      $config_mukurtu_collection_items->save();
+    }
+    if (!$config_mukurtu_collection_items->get('display.mukurtu_collection_items_block_grid.display_options.rendering_language')) {
+      $config_mukurtu_collection_items->set('display.mukurtu_collection_items_block_grid.display_options.rendering_language', '***LANGUAGE_language_content***');
+      $config_mukurtu_collection_items->save();
+    }
+    if (!$config_mukurtu_collection_items->get('display.mukurtu_personal_collection_items_block.display_options.rendering_language')) {
+      $config_mukurtu_collection_items->set('display.mukurtu_personal_collection_items_block.display_options.rendering_language', '***LANGUAGE_language_content***');
+      $config_mukurtu_collection_items->save();
+    }
+    if (!$config_mukurtu_collection_items->get('display.mukurtu_personal_collection_items_block_grid.display_options.rendering_language')) {
+      $config_mukurtu_collection_items->set('display.mukurtu_personal_collection_items_block_grid.display_options.rendering_language', '***LANGUAGE_language_content***');
+      $config_mukurtu_collection_items->save();
+    }
+    if (!$config_mukurtu_collection_items->get('display.mukurtu_collection_items_block_map.display_options.rendering_language')) {
+      $config_mukurtu_collection_items->set('display.mukurtu_collection_items_block_map.display_options.rendering_language', '***LANGUAGE_language_content***');
+      $config_mukurtu_collection_items->save();
+    }
+    if (!$config_mukurtu_collection_items->get('display.mukurtu_personal_collection_items_block_map.display_options.rendering_language')) {
+      $config_mukurtu_collection_items->set('display.mukurtu_personal_collection_items_block_map.display_options.rendering_language', '***LANGUAGE_language_content***');
+      $config_mukurtu_collection_items->save();
+    }
+  }
+
+  $config_my_personal_collections = \Drupal::configFactory()->getEditable('views.view.my_personal_collections');
+  if (!$config_my_personal_collections->isNew()) {
+    $filters_my_personal_collections_default = $config_my_personal_collections->get('display.default.display_options.filters') ?? [];
+    if (!isset($filters_my_personal_collections_default['default_langcode'])) {
+      $filters_my_personal_collections_default['default_langcode'] = [
+        'id' => 'default_langcode',
+        'table' => 'personal_collection_field_data',
+        'field' => 'default_langcode',
+        'relationship' => 'none',
+        'group_type' => 'group',
+        'admin_label' => '',
+        'entity_type' => 'personal_collection',
+        'entity_field' => 'default_langcode',
+        'plugin_id' => 'boolean',
+        'operator' => '=',
+        'value' => '1',
+        'group' => 1,
+        'exposed' => FALSE,
+        'expose' => [
+          'operator_id' => '',
+          'label' => '',
+          'description' => '',
+          'use_operator' => FALSE,
+          'operator' => '',
+          'operator_limit_selection' => FALSE,
+          'operator_list' => [],
+          'identifier' => '',
+          'required' => FALSE,
+          'remember' => FALSE,
+          'multiple' => FALSE,
+          'remember_roles' => ['authenticated' => 'authenticated'],
+        ],
+        'is_grouped' => FALSE,
+        'group_info' => [
+          'label' => '',
+          'description' => '',
+          'identifier' => '',
+          'optional' => TRUE,
+          'widget' => 'select',
+          'multiple' => FALSE,
+          'remember' => FALSE,
+          'default_group' => 'All',
+          'default_group_multiple' => [],
+          'group_items' => [],
+        ],
+      ];
+      $config_my_personal_collections->set('display.default.display_options.filters', $filters_my_personal_collections_default);
+      $config_my_personal_collections->save();
+    }
+    if (!$config_my_personal_collections->get('display.my_personal_collections_block.display_options.rendering_language')) {
+      $config_my_personal_collections->set('display.my_personal_collections_block.display_options.rendering_language', '***LANGUAGE_language_content***');
+      $config_my_personal_collections->save();
+    }
+  }
+}

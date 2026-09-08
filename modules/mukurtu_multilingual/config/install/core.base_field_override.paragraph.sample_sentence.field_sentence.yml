@@ -8,7 +8,7 @@ field_name: field_sentence
 entity_type: paragraph
 bundle: sample_sentence
 label: 'Sample Sentence'
-description: 'Text entry of the sample sentence. </br>Maximum 255 characters.'
+description: 'Text entry of the sample sentence. <br />Maximum 255 characters.'
 required: false
 translatable: true
 default_value: {  }

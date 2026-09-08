@@ -23,22 +23,31 @@ class ImportResultsForm extends ImportBaseForm {
    */
   public function buildForm(array $form, FormStateInterface $form_state): array {
     $success = $this->store->get('batch_results_success') ?? FALSE;
+    $noop = $this->store->get('batch_results_noop') ?? FALSE;
     $messages = $this->getMessages();
+    $warnings = $this->getWarnings();
 
     $form['results_message'] = [
       '#type' => 'markup',
-      '#markup' => "<div class=\"messages messages--status\" role=\"status\" aria-live=\"polite\">" . $this->t('All files imported successfully.') . "</div>",
+      '#markup' => '<div class="messages messages--status" role="status" aria-live="polite">' . $this->t('All files imported successfully.') . '</div>',
     ];
 
     if (!empty($messages)) {
-      $form['results_message']['#markup'] = "<div class=\"messages messages--error\" role=\"alert\" aria-live=\"assertive\">" . $this->t('Some files failed to import.') . "</div>";
-      foreach ($messages as $message) {
-        $filename = $this->getImportFilename($message['fid']) ?? '';
-        $form["file_messages"][] = [
+      $form['results_message']['#markup'] = '<div class="messages messages--error" role="alert" aria-live="assertive">' . $this->t('Some files failed to import.') . '</div>';
+      $form['file_messages'] = $this->buildMessagesTable($messages);
+    }
+
+    if (!empty($warnings)) {
+      foreach ($warnings as $warning) {
+        $filename = $this->getImportFilename($warning['fid']) ?? $this->t('Unknown file');
+        $form['file_warnings'][] = [
           '#type' => 'markup',
-          '#markup' => "<div class=\"messages messages--error\" role=\"alert\" aria-live=\"assertive\">" . $filename . ": ". $message['message'] . "</div>",
+          '#markup' => '<div class="messages messages--warning" role="status" aria-live="polite">' . $this->t('@filename: @message', ['@filename' => $filename, '@message' => $warning['message']]) . '</div>',
         ];
       }
+    }
+    elseif ($noop) {
+      $form['results_message']['#markup'] = "<div class=\"messages messages--warning\" role=\"status\" aria-live=\"polite\">" . $this->t('No content was imported.') . "</div>";
     }
 
     $this->buildTable($form, $form_state);
@@ -82,6 +91,45 @@ class ImportResultsForm extends ImportBaseForm {
    */
   public function submitReturnToFiles(array &$form, FormStateInterface $form_state): void {
     $form_state->setRedirect('mukurtu_import.file_upload');
+  }
+
+  /**
+   * Builds a File / Message table of failures, one row per failing file.
+   *
+   * Replaces stacking one raw alert div per message -- with many failures
+   * that produced a wall of near-identical, redundant role="alert" banners
+   * instead of a single scannable table.
+   *
+   * @param array $messages
+   *   A list of ['fid' => ..., 'message' => ...] arrays, as returned by
+   *   getMessages(). A message may itself contain multiple newline-joined
+   *   lines (e.g. several validation violations on one failing row).
+   */
+  protected function buildMessagesTable(array $messages): array {
+    $rows = [];
+    foreach ($messages as $message) {
+      $filename = $this->getImportFilename($message['fid']) ?? $this->t('(unknown file)');
+      $lines = array_filter(explode("\n", (string) $message['message']));
+      $rows[] = [
+        $filename,
+        [
+          'data' => [
+            '#theme' => 'item_list',
+            '#items' => $lines,
+          ],
+        ],
+      ];
+    }
+    return [
+      '#type' => 'table',
+      '#caption' => $this->t('Failed files'),
+      '#header' => [
+        ['data' => $this->t('File'), 'scope' => 'col'],
+        ['data' => $this->t('Message'), 'scope' => 'col'],
+      ],
+      '#rows' => $rows,
+      '#attributes' => ['class' => ['mukurtu-import-file-messages']],
+    ];
   }
 
   /**
@@ -149,6 +197,21 @@ class ImportResultsForm extends ImportBaseForm {
       '#arguments' => [$message->render()],
     ];
     $form['taxonomy_results'] = $taxonomy_block;
+
+    // User accounts have no revision log to filter a results View by (unlike
+    // the entity types above), so their results are shown as a simple count
+    // summary instead.
+    $user_summary = ($this->store->get('batch_results_summary') ?? [])['user'] ?? NULL;
+    if ($user_summary) {
+      $form['user_results'] = [
+        '#type' => 'markup',
+        '#markup' => '<div><strong>' . $this->t('User Accounts') . ':</strong> ' . $this->t('@created created, @updated updated, @failures failed.', [
+          '@created' => $user_summary['created'] ?? 0,
+          '@updated' => $user_summary['updated'] ?? 0,
+          '@failures' => $user_summary['failures'] ?? 0,
+        ]) . '</div>',
+      ];
+    }
   }
 
 }

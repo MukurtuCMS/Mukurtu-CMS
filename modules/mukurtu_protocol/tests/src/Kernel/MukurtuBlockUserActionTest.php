@@ -30,7 +30,9 @@ class MukurtuBlockUserActionTest extends KernelTestBase {
     'content_moderation',
     'field',
     'file',
+    'geofield',
     'image',
+    'leaflet',
     'media',
     'mukurtu_core',
     'mukurtu_protocol',
@@ -42,6 +44,7 @@ class MukurtuBlockUserActionTest extends KernelTestBase {
     'text',
     'user',
     'views',
+    'views_bulk_operations',
     'workflows',
   ];
 

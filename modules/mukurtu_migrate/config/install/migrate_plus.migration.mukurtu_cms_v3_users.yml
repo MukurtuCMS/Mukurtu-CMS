@@ -56,7 +56,6 @@ process:
 destination:
   plugin: 'entity:user'
 migration_dependencies:
-  required:
-    - mukurtu_cms_v3_file_private
-    - mukurtu_cms_v3_file
+  optional:
+    - d7_file
 include: null

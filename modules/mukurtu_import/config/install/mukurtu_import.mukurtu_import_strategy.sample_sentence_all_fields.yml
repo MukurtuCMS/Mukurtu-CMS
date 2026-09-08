@@ -12,10 +12,13 @@ mapping:
     source: 'Authored on'
     target: created
   -
+    source: 'Default translation'
+    target: '-1'
+  -
     source: ID
     target: id
   -
-    source: 'Language code (langcode)'
+    source: 'Language code'
     target: langcode
   -
     source: 'Parent field name'
@@ -31,7 +34,13 @@ mapping:
     target: status
   -
     source: Recording
-    target: field_sentence_recording
+    target: '-1'
+  -
+    source: 'Recording > Alternative text'
+    target: field_sentence_recording/alt
+  -
+    source: 'Recording > File ID'
+    target: field_sentence_recording/target_id
   -
     source: 'Sample Sentence'
     target: field_sentence

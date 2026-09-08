@@ -1,0 +1,17 @@
+{#
+/**
+ * @file
+ * Default theme implementation for the "not yet translated" indicator.
+ *
+ * Shown when the current content language has no translation for the
+ * entity being rendered, so its default-language version is shown instead.
+ *
+ * Available variables:
+ * - language_name: The human-readable name of the language actually being
+ *   shown (the entity's own language, not the visitor's active one).
+ */
+#}
+<span class="translation-status-badge translation-status-badge--not-translated">
+  {{ 'Not yet translated'|t }}
+  <span class="translation-status-badge-note">{{ 'Showing the original @language version'|t({'@language': language_name}) }}</span>
+</span>

@@ -26,9 +26,17 @@ class DefaultProcess extends MukurtuImportFieldProcessPluginBase {
 
     if ($this->isMultiple($field_config)) {
       return [
-        'plugin' => 'explode',
-        'source' => $source,
-        'delimiter' => $multivalue_delimiter,
+        [
+          'plugin' => 'explode',
+          'source' => $source,
+          'delimiter' => $multivalue_delimiter,
+          'strict' => FALSE,
+        ],
+        // Trim whitespace, e.g. from a delimiter followed by a space.
+        [
+          'plugin' => 'callback',
+          'callable' => 'trim',
+        ],
       ];
     }
 

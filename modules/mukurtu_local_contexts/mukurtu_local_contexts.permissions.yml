@@ -1,0 +1,4 @@
+administer local contexts legacy projects:
+  title: 'Administer legacy Local Contexts project remapping'
+  description: 'Reassign content off legacy (v3-migrated) Local Contexts projects onto real Local Contexts Hub projects, in bulk.'
+  restrict access: true

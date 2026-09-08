@@ -3,66 +3,67 @@
 namespace Drupal\mukurtu_export\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
+use Drupal\Core\Entity\Attribute\ConfigEntityType;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\user\EntityOwnerInterface;
 use Drupal\user\UserInterface;
 
 /**
  * CSV Exporter Settings Config Entity
- *
- * @ConfigEntityType(
- *   id = "csv_exporter",
- *   label = @Translation("CSV Exporter Setting"),
- *   label_collection = @Translation("CSV Exporter Settings"),
- *   entity_keys = {
- *     "id" = "id",
- *     "label" = "label",
- *   },
- *   config_prefix = "csv_exporter",
- *   config_export = {
- *     "id",
- *     "label",
- *     "uid",
- *     "description",
- *     "site_wide",
- *     "entity_fields_export_list",
- *     "separator",
- *     "enclosure",
- *     "escape",
- *     "eol",
- *     "multivalue_delimiter",
- *     "local_contexts_delimiter",
- *     "default_format",
- *     "field_id",
- *     "field_file",
- *     "field_image",
- *     "entity_reference_node",
- *     "entity_reference_media",
- *     "entity_reference_taxonomy_term",
- *     "entity_reference_user",
- *     "entity_reference_paragraph",
- *     "entity_reference_multipage_item",
- *   },
- *   handlers = {
- *     "access" = "Drupal\mukurtu_export\CsvExporterAccessController",
- *     "list_builder" = "Drupal\mukurtu_export\Controller\CsvExporterListBuilder",
- *     "form" = {
- *       "add" = "Drupal\mukurtu_export\Form\CsvExporterAddForm",
- *       "edit" = "Drupal\mukurtu_export\Form\CsvExporterEditForm",
- *       "delete" = "Drupal\mukurtu_export\Form\CsvExporterDeleteForm",
- *     },
- *     "route_provider" = {
- *       "html" = "Drupal\Core\Entity\Routing\AdminHtmlRouteProvider",
- *     },
- *   },
- *   admin_permission = "access mukurtu export",
- *   links = {
- *     "add-form" = "/admin/export/format/csv/add",
- *     "edit-form" = "/admin/export/format/csv/manage/{csv_exporter}",
- *     "delete-form" = "/admin/export/format/csv/manage/{csv_exporter}/delete",
- *     "collection" = "/admin/export/settings/csv",
- *   }
- * )
  */
+#[ConfigEntityType(
+  id: 'csv_exporter',
+  label: new TranslatableMarkup('CSV Exporter Setting'),
+  label_collection: new TranslatableMarkup('CSV Exporter Settings'),
+  config_prefix: 'csv_exporter',
+  entity_keys: [
+    'id' => 'id',
+    'label' => 'label',
+  ],
+  handlers: [
+    'access' => 'Drupal\mukurtu_export\CsvExporterAccessController',
+    'list_builder' => 'Drupal\mukurtu_export\Controller\CsvExporterListBuilder',
+    'form' => [
+      'add' => 'Drupal\mukurtu_export\Form\CsvExporterAddForm',
+      'edit' => 'Drupal\mukurtu_export\Form\CsvExporterEditForm',
+      'delete' => 'Drupal\mukurtu_export\Form\CsvExporterDeleteForm',
+    ],
+    'route_provider' => [
+      'html' => 'Drupal\Core\Entity\Routing\AdminHtmlRouteProvider',
+    ],
+  ],
+  links: [
+    'add-form' => '/admin/export/format/csv/add',
+    'edit-form' => '/admin/export/format/csv/manage/{csv_exporter}',
+    'delete-form' => '/admin/export/format/csv/manage/{csv_exporter}/delete',
+    'collection' => '/admin/export/settings/csv',
+  ],
+  admin_permission: 'access mukurtu export',
+  config_export: [
+    'id',
+    'label',
+    'uid',
+    'description',
+    'site_wide',
+    'entity_fields_export_list',
+    'separator',
+    'enclosure',
+    'escape',
+    'eol',
+    'multivalue_delimiter',
+    'local_contexts_delimiter',
+    'default_format',
+    'field_id',
+    'field_file',
+    'field_image',
+    'entity_reference_node',
+    'entity_reference_media',
+    'entity_reference_taxonomy_term',
+    'entity_reference_user',
+    'entity_reference_paragraph',
+    'entity_reference_multipage_item',
+  ],
+)]
 class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface {
   protected $uid;
 
@@ -412,6 +413,22 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface {
             'export' => TRUE,
           ];
         }
+        elseif ($entity_type_id === 'user' && in_array($mapped_base_field_name, ['communities', 'protocols'], TRUE)) {
+          $result[] = [
+            'field_name' => $mapped_field_name,
+            'field_label' => $mapped_base_field_name === 'communities' ? t('Communities') : t('Protocols'),
+            'csv_header_label' => $mapped_field_label,
+            'export' => TRUE,
+          ];
+        }
+        elseif ($entity_type_id === 'user' && $mapped_base_field_name === 'account_status') {
+          $result[] = [
+            'field_name' => $mapped_field_name,
+            'field_label' => t('Account Status'),
+            'csv_header_label' => $mapped_field_label,
+            'export' => TRUE,
+          ];
+        }
       }
     }
 
@@ -425,12 +442,57 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface {
       ];
     }
 
+    // For user accounts, add the virtual community/protocol membership and
+    // account status columns if not already mapped. None of these are
+    // real, writable fields on the user entity (see GroupMembershipLookup
+    // on the import side for community/protocol; account_status is a
+    // unified virtual target for the status/field_pending pair, see
+    // ProtocolAwareUserContent::applyAccountStatus()), so they can't be
+    // discovered through the field-definition loop below.
+    if ($entity_type_id === 'user') {
+      foreach (['communities' => t('Communities'), 'protocols' => t('Protocols'), 'account_status' => t('Account Status')] as $virtual_field_name => $virtual_field_label) {
+        if (!isset($map[$key][$virtual_field_name])) {
+          $result[] = [
+            'field_name' => $virtual_field_name,
+            'field_label' => $virtual_field_label,
+            'csv_header_label' => $virtual_field_label,
+            'export' => $this->isNew() ? TRUE : FALSE,
+          ];
+        }
+      }
+    }
+
     // Add the remaining, unmapped fields to the end of the list.
     /** @var \Drupal\Core\Field\FieldConfigInterface $field_def */
     foreach($all_field_defs as $field_name => $field_def) {
       // Skip computed fields, except for field_multipage_page_of which has an
       // export-compatible implementation via the PageOfItemList plugin.
       if ($field_def->isComputed() && $field_name !== 'field_multipage_page_of') {
+        continue;
+      }
+
+      // Layout Builder's per-entity section field stores structured
+      // Section objects, not exportable scalar/reference data -- skip it
+      // like a computed field rather than offering it as a mappable column.
+      if ($field_def->getType() === 'layout_section') {
+        continue;
+      }
+
+      // Passwords and internal login bookkeeping fields must never be
+      // exportable. Keep in sync with ImportFormTrait::getFieldDefinitions()'s
+      // equivalent exclusion in modules/mukurtu_import.
+      if ($entity_type_id === 'user' && in_array($field_name, ['pass', 'access', 'login', 'init'], TRUE)) {
+        continue;
+      }
+
+      // Superseded by the unified 'account_status' virtual target
+      // (Active/Blocked/Pending), which sets both of these under the hood
+      // -- see ProtocolAwareUserContent::applyAccountStatus(). Mapping
+      // them directly requires knowing field_pending's non-obvious
+      // storage default (1) and the Status-overrides-Pending interaction.
+      // Keep in sync with ImportFormTrait::getFieldDefinitions()'s
+      // equivalent exclusion in modules/mukurtu_import.
+      if ($entity_type_id === 'user' && in_array($field_name, ['status', 'field_pending'], TRUE)) {
         continue;
       }
 
@@ -446,7 +508,7 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface {
           $result[] = [
             'field_name' => $field_name . '/protocols',
             'field_label' => $field_def->getLabel() . ": " . $protocolsSubfieldLabel,
-            'csv_header_label' => $protocolsSubfieldLabel,
+            'csv_header_label' => $field_def->getLabel() . ' > ' . $protocolsSubfieldLabel,
             'export' => $this->isNew() ? (!$field_def->isReadOnly() || in_array($field_name, $id_fields)) : FALSE,
           ];
         }
@@ -455,15 +517,21 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface {
           $result[] = [
             'field_name' => $field_name . '/sharing_setting',
             'field_label' => $field_def->getLabel() . ": " . $sharingSubfieldLabel,
-            'csv_header_label' => $sharingSubfieldLabel,
+            'csv_header_label' => $field_def->getLabel() . ' > ' . $sharingSubfieldLabel,
             'export' => $this->isNew() ? (!$field_def->isReadOnly() || in_array($field_name, $id_fields)) : FALSE,
           ];
         }
       }
 
-      // Break image fields into target_id and alt sub-fields to match the
-      // two-column format expected by the import system.
-      if ($field_def->getType() === 'image') {
+      // Break image fields, and single-value media entity reference fields
+      // (which the import system also treats as having target_id/alt
+      // sub-properties - see EntityReference::getSupportedProperties()),
+      // into target_id and alt sub-fields to match the two-column format
+      // expected by the import system.
+      $is_single_media_reference = $field_def->getType() === 'entity_reference'
+        && $field_def->getSetting('target_type') === 'media'
+        && $field_def->getFieldStorageDefinition()->getCardinality() === 1;
+      if ($field_def->getType() === 'image' || $is_single_media_reference) {
         $fileIdLabel = t('File ID');
         $altLabel = t('Alternative text');
         $exportDefault = $this->isNew() ? (!$field_def->isReadOnly() || in_array($field_name, $id_fields)) : FALSE;
@@ -529,7 +597,8 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface {
   }
 
   public function getSupportedEntityTypes() {
-    return ['node', 'media', 'multipage_item', 'community', 'protocol', 'paragraph', 'file', 'taxonomy_term'];
+    $custom_entity_types = \Drupal::service('mukurtu_core.roundtrip_entity_types')->getCustomEntityTypeIds();
+    return array_merge(['node', 'media', 'user'], $custom_entity_types, ['paragraph', 'file', 'taxonomy_term']);
   }
 
 }

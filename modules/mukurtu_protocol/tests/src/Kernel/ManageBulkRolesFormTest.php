@@ -30,7 +30,9 @@ class ManageBulkRolesFormTest extends KernelTestBase {
     'field',
     'file',
     'filter',
+    'geofield',
     'image',
+    'leaflet',
     'node',
     'node_access_test',
     'media',
@@ -43,6 +45,7 @@ class ManageBulkRolesFormTest extends KernelTestBase {
     'mukurtu_core',
     'mukurtu_protocol',
     'views',
+    'views_bulk_operations',
   ];
 
   /**

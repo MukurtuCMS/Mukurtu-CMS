@@ -13,4 +13,5 @@ label: Visitor
 weight: 0
 is_admin: false
 permissions:
+  - 'access content'
   - 'use klaro'

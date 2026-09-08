@@ -15,10 +15,13 @@ mapping:
     source: 'Authored on'
     target: created
   -
+    source: 'Default translation'
+    target: '-1'
+  -
     source: ID
     target: id
   -
-    source: 'Language (langcode)'
+    source: Language
     target: langcode
   -
     source: Pages

@@ -10,6 +10,7 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Url;
+use Drupal\mukurtu_core\Service\EntityTranslationResolver;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -23,10 +24,13 @@ class ProtocolListBuilder extends EntityListBuilder {
 
   protected EntityTypeManagerInterface $entityTypeManager;
 
-  public function __construct(EntityTypeInterface $entity_type, EntityStorageInterface $storage, AccessManagerInterface $access_manager, EntityTypeManagerInterface $entity_type_manager) {
+  protected EntityTranslationResolver $entityTranslationResolver;
+
+  public function __construct(EntityTypeInterface $entity_type, EntityStorageInterface $storage, AccessManagerInterface $access_manager, EntityTypeManagerInterface $entity_type_manager, EntityTranslationResolver $entity_translation_resolver) {
     parent::__construct($entity_type, $storage);
     $this->accessManager = $access_manager;
     $this->entityTypeManager = $entity_type_manager;
+    $this->entityTranslationResolver = $entity_translation_resolver;
   }
 
   /**
@@ -37,7 +41,8 @@ class ProtocolListBuilder extends EntityListBuilder {
       $entity_type,
       $container->get('entity_type.manager')->getStorage($entity_type->id()),
       $container->get('access_manager'),
-      $container->get('entity_type.manager')
+      $container->get('entity_type.manager'),
+      $container->get('mukurtu_core.entity_translation_resolver'),
     );
   }
 
@@ -51,7 +56,10 @@ class ProtocolListBuilder extends EntityListBuilder {
       ->accessCheck(TRUE)
       ->sort('name')
       ->execute();
-    $communities = $this->entityTypeManager->getStorage('community')->loadMultiple($community_ids);
+    $communities = array_map(
+      fn (EntityInterface $community) => $this->entityTranslationResolver->translate($community),
+      $this->entityTypeManager->getStorage('community')->loadMultiple($community_ids)
+    );
 
     // Load all accessible protocols and index by community ID using field
     // values (IDs only) to avoid re-loading already-loaded community entities.
@@ -60,7 +68,10 @@ class ProtocolListBuilder extends EntityListBuilder {
       ->accessCheck(TRUE)
       ->sort('name')
       ->execute();
-    $all_protocols = $this->entityTypeManager->getStorage('protocol')->loadMultiple($protocol_ids);
+    $all_protocols = array_map(
+      fn (EntityInterface $protocol) => $this->entityTranslationResolver->translate($protocol),
+      $this->entityTypeManager->getStorage('protocol')->loadMultiple($protocol_ids)
+    );
 
     $protocols_by_community = [];
     $orphan_protocols = [];
@@ -129,7 +140,7 @@ class ProtocolListBuilder extends EntityListBuilder {
     $visited[$community->id()] = TRUE;
 
     $community_protocols = $protocols_by_community[$community->id()] ?? [];
-    $can_manage = $this->accessManager->checkNamedRoute('mukurtu_protocol.manage_community', ['group' => $community->id()]);
+    $can_manage = $this->accessManager->checkNamedRoute('mukurtu_protocol.community_members', ['community' => $community->id()]);
 
     if (!$can_manage && empty($community_protocols)) {
       return;
@@ -138,8 +149,8 @@ class ProtocolListBuilder extends EntityListBuilder {
     if ($can_manage) {
       $label = Link::createFromRoute(
         $community->label(),
-        'mukurtu_protocol.manage_community',
-        ['group' => $community->id()]
+        'entity.community.canonical',
+        ['community' => $community->id()]
       )->toRenderable();
     }
     else {
@@ -172,10 +183,13 @@ class ProtocolListBuilder extends EntityListBuilder {
       'no_striping' => TRUE,
     ];
 
-    // Recurse into accessible child communities.
+    // Recurse into accessible child communities. getChildCommunities() loads
+    // its own (untranslated) copies via the field's referencedEntities(), so
+    // look the child up in $all_communities - already translated above - by
+    // ID instead of passing the untranslated one along.
     foreach ($community->getChildCommunities() as $child) {
       if (isset($all_communities[$child->id()])) {
-        $this->addCommunityRows($child, $all_communities, $protocols_by_community, $rows, $depth + 1, $visited);
+        $this->addCommunityRows($all_communities[$child->id()], $all_communities, $protocols_by_community, $rows, $depth + 1, $visited);
       }
     }
   }
@@ -194,11 +208,11 @@ class ProtocolListBuilder extends EntityListBuilder {
     $items = [];
 
     foreach ($protocols as $protocol) {
-      if ($this->accessManager->checkNamedRoute('mukurtu_protocol.manage_protocol', ['group' => $protocol->id()])) {
+      if ($this->accessManager->checkNamedRoute('mukurtu_protocol.protocol_members', ['protocol' => $protocol->id()])) {
         $name = Link::createFromRoute(
           $protocol->label(),
-          'mukurtu_protocol.manage_protocol',
-          ['group' => $protocol->id()]
+          'entity.protocol.canonical',
+          ['protocol' => $protocol->id()]
         )->toRenderable();
       }
       else {
@@ -234,14 +248,6 @@ class ProtocolListBuilder extends EntityListBuilder {
         'weight' => 10,
         'url' => Url::fromRoute('entity.community.canonical', ['community' => $community->id()]),
         'attributes' => ['aria-label' => $this->t('View @name', ['@name' => $label])],
-      ];
-    }
-    if ($this->accessManager->checkNamedRoute('mukurtu_protocol.manage_community', ['group' => $community->id()])) {
-      $operations['manage'] = [
-        'title' => $this->t('Manage Community'),
-        'weight' => 20,
-        'url' => Url::fromRoute('mukurtu_protocol.manage_community', ['group' => $community->id()]),
-        'attributes' => ['aria-label' => $this->t('Manage Community: @name', ['@name' => $label])],
       ];
     }
     if ($this->accessManager->checkNamedRoute('mukurtu_protocol.community_members_list', ['group' => $community->id()])) {
@@ -280,14 +286,6 @@ class ProtocolListBuilder extends EntityListBuilder {
         'weight' => 10,
         'url' => Url::fromRoute('entity.protocol.canonical', ['protocol' => $protocol->id()]),
         'attributes' => ['aria-label' => $this->t('View @name', ['@name' => $label])],
-      ];
-    }
-    if ($this->accessManager->checkNamedRoute('mukurtu_protocol.manage_protocol', ['group' => $protocol->id()])) {
-      $operations['manage'] = [
-        'title' => $this->t('Manage Protocol'),
-        'weight' => 20,
-        'url' => Url::fromRoute('mukurtu_protocol.manage_protocol', ['group' => $protocol->id()]),
-        'attributes' => ['aria-label' => $this->t('Manage Protocol: @name', ['@name' => $label])],
       ];
     }
     if ($this->accessManager->checkNamedRoute('mukurtu_protocol.protocol_members_list', ['group' => $protocol->id()])) {

@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+  - filter.format.mukurtu_html
+template: mukurtu_user_blocked
+label: User blocked
+description: A user account was blocked.
+text:
+- value: '[message:field_title]''s account was blocked.'
+  format: mukurtu_html
+- value: <p>[message:mukurtu-user-link]'s account was blocked.</p>
+  format: mukurtu_html
+- value: <p>[message:mukurtu-user-html-link]'s account was
+    blocked.</p>
+  format: mukurtu_html
+settings:
+  token options:
+    clear: false
+    token replace: true
+  purge_override: false
+  purge_methods: {}

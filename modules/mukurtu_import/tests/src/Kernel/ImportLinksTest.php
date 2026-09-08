@@ -105,4 +105,50 @@ class ImportLinksTest extends MukurtuImportTestBase {
     $this->assertEquals("https://mukurtu.org", $links[1]['uri']);
   }
 
+  /**
+   * Test importing a file whose header row doesn't include the mapped source column.
+   */
+  public function testMissingColumnLinkImport() {
+    $data = [
+      ['nid'],
+      [$this->node->id()],
+    ];
+    $import_file = $this->createCsvFile($data);
+
+    $mapping = [
+      ['target' => 'nid', 'source' => 'nid'],
+      ['target' => 'field_links', 'source' => 'Links'],
+    ];
+
+    $result = $this->importCsvFile($import_file, $mapping);
+    $this->assertEquals(MigrationInterface::RESULT_COMPLETED, $result);
+    $updated_node = $this->entityTypeManager->getStorage('node')->load($this->node->id());
+    $links = $updated_node->get('field_links')->getValue();
+    $this->assertEmpty($links);
+  }
+
+  /**
+   * Test importing a value with a trailing delimiter, which produces an empty segment.
+   */
+  public function testLinkWithEmptySegmentImport() {
+    $data = [
+      ['nid', 'Links'],
+      [$this->node->id(), "[WSU](https://www.wsu.edu);"],
+    ];
+    $import_file = $this->createCsvFile($data);
+
+    $mapping = [
+      ['target' => 'nid', 'source' => 'nid'],
+      ['target' => 'field_links', 'source' => 'Links'],
+    ];
+
+    $result = $this->importCsvFile($import_file, $mapping);
+    $this->assertEquals(MigrationInterface::RESULT_COMPLETED, $result);
+    $updated_node = $this->entityTypeManager->getStorage('node')->load($this->node->id());
+    $links = $updated_node->get('field_links')->getValue();
+    $this->assertCount(1, $links);
+    $this->assertEquals("WSU", $links[0]['title']);
+    $this->assertEquals("https://www.wsu.edu", $links[0]['uri']);
+  }
+
 }

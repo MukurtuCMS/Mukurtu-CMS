@@ -1,0 +1,20 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.message.field_title
+    - message.template.mukurtu_single_node_update
+  module:
+    - message
+id: message.mukurtu_single_node_update.field_title
+field_name: field_title
+entity_type: message
+bundle: mukurtu_single_node_update
+label: Title
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

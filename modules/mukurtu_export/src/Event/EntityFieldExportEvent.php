@@ -4,6 +4,8 @@ namespace Drupal\mukurtu_export\Event;
 
 use Drupal\Component\EventDispatcher\Event;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\TypedData\TranslatableInterface;
+use Drupal\mukurtu_export\ExportItemIdentity;
 
 /**
  * Event when an entity field is being exported.
@@ -79,6 +81,21 @@ class EntityFieldExportEvent extends Event {
   }
 
   /**
+   * The langcode of the row entity being exported, or NULL if it's being
+   * exported in its own original language.
+   *
+   * Referenced-entity lookups (taxonomy terms, protocols, usernames, etc.)
+   * should resolve to this same language so a translated export doesn't
+   * mix in default-language names for the entities it references.
+   */
+  public function getLangcode(): ?string {
+    if ($this->entity instanceof TranslatableInterface && !$this->entity->isDefaultTranslation()) {
+      return $this->entity->language()->getId();
+    }
+    return NULL;
+  }
+
+  /**
    * Package a binary file for export.
    *
    * @param string $uri
@@ -101,7 +118,11 @@ class EntityFieldExportEvent extends Event {
    *   The entity to export.
    */
   public function exportAdditionalEntity(EntityInterface $entity) {
-    $this->context['results']['entities'][$entity->getEntityTypeId()][$entity->id()] = $entity->id();
+    $langcode = $entity instanceof TranslatableInterface && !$entity->isDefaultTranslation()
+      ? $entity->language()->getId()
+      : NULL;
+    $key = ExportItemIdentity::encode($entity->id(), $langcode);
+    $this->context['results']['entities'][$entity->getEntityTypeId()][$key] = $key;
   }
 
 }

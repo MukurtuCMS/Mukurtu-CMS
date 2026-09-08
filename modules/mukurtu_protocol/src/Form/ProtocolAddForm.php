@@ -680,7 +680,7 @@ class ProtocolAddForm extends EntityForm {
       $community = $this->entity->field_communities->first()->entity;
     }
     if ($community) {
-      $form_state->setRedirect('mukurtu_protocol.manage_community', ['group' => $community->id()]);
+      $form_state->setRedirect('entity.community.canonical', ['community' => $community->id()]);
     }
   }
 

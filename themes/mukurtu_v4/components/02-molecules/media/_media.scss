@@ -56,7 +56,7 @@
 // centered box instead of matching the full width the embed would have
 // occupied. Card-specific contexts (horizontal-card, vertical-card) already
 // handle this themselves; this covers the plain full-content-item case
-// (e.g. digital_heritage_full view mode), which has no card wrapper.
+// (e.g. image_with_description view mode), which has no card wrapper.
 .media--remote_video,
 .media--external_embed,
 .media--soundcloud {

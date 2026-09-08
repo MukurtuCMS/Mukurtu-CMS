@@ -86,6 +86,8 @@ hidden:
   field_members_list: true
   field_parent_community: true
   field_thumbnail_image: true
+  flag_mukurtu_email_community: true
+  flag_mukurtu_follow_community: true
   langcode: true
   og_group: true
   search_api_excerpt: true

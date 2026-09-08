@@ -1,7 +1,9 @@
 services:
   mukurtu_local_contexts.supported_project_manager:
     class: Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager
-    arguments: ['@database']
+    arguments: ['@database', '@config.factory']
+  mukurtu_local_contexts.legacy_project_remap_preview_builder:
+    class: Drupal\mukurtu_local_contexts\LegacyProjectRemapPreviewBuilder
   mukurtu_local_contexts.event_subscriber:
     class: Drupal\mukurtu_local_contexts\EventSubscriber\MukurtuLocalContextsProjectReferenceUpdatedSubscriber
     arguments: ['@messenger']
@@ -16,3 +18,8 @@ services:
       - '@entity_type.manager'
     tags:
       - { name: cron }
+  mukurtu_local_contexts.group_alias_param_converter:
+    class: Drupal\mukurtu_local_contexts\ParamConverter\GroupAliasParamConverter
+    arguments: ['@path_alias.manager', '@entity_type.manager']
+    tags:
+      - { name: paramconverter }

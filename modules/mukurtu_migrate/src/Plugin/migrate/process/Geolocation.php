@@ -2,18 +2,18 @@
 
 namespace Drupal\mukurtu_migrate\Plugin\migrate\process;
 
+use Drupal\migrate\Attribute\MigrateProcess;
 use Drupal\migrate\MigrateExecutableInterface;
 use Drupal\migrate\ProcessPluginBase;
 use Drupal\migrate\Row;
 
 /**
  * Converts a v3 geolocation value to its v4 geolocation value.
- *
- * @MigrateProcessPlugin(
- *   id = "geolocation",
- *   handle_multiples = TRUE
- * )
  */
+#[MigrateProcess(
+  id: 'geolocation',
+  handle_multiples: TRUE,
+)]
 class Geolocation extends ProcessPluginBase
 {
   /**

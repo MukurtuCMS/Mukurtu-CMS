@@ -7,12 +7,12 @@ use Drupal\node\Entity\Node;
 use Drupal\mukurtu_protocol\Entity\Community;
 use Drupal\mukurtu_protocol\Entity\Protocol;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Functional test base for protocol aware content.
- *
- * @group mukurtu_protocol
  */
+#[Group('mukurtu_protocol')]
 class ProtocolAwareFunctionalTestBase extends BrowserTestBase {
 
   /**

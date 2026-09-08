@@ -2,22 +2,20 @@
 
 namespace Drupal\original_date\Plugin\Field\FieldWidget;
 
+use Drupal\Core\Field\Attribute\FieldWidget;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\WidgetBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Plugin implementation of the 'original_date_text' widget.
- *
- * @FieldWidget(
- *   id = "original_date_text",
- *   module = "original_date",
- *   label = @Translation("Original date text fields"),
- *   field_types = {
- *     "original_date"
- *   }
- * )
  */
+#[FieldWidget(
+  id: 'original_date_text',
+  label: new TranslatableMarkup('Original date text fields'),
+  field_types: ['original_date'],
+)]
 class OriginalDateWidget extends WidgetBase {
   /**
    * {@inheritdoc}
@@ -48,8 +46,9 @@ class OriginalDateWidget extends WidgetBase {
     $element['month'] = [
       '#type' => 'select',
       '#title' => t('Month'),
+      '#title_display' => 'invisible',
       '#options' => $monthOptions,
-      '#empty_option' => $this->t('- Select -'),
+      '#empty_option' => $this->t('Month'),
       '#default_value' => isset($items[$delta]->month) ? $items[$delta]->month : NULL,
     ];
 
@@ -62,8 +61,9 @@ class OriginalDateWidget extends WidgetBase {
     $element['day'] = [
       '#type' => 'select',
       '#title' => t('Day'),
+      '#title_display' => 'invisible',
       '#options' => $dayOptions,
-      '#empty_option' => $this->t('- Select -'),
+      '#empty_option' => $this->t('Day'),
       '#default_value' => isset($items[$delta]->day) ? $items[$delta]->day : NULL,
     ];
 

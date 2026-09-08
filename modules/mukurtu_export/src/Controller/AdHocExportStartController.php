@@ -5,6 +5,7 @@ namespace Drupal\mukurtu_export\Controller;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\TempStore\PrivateTempStoreFactory;
 use Drupal\media\MediaInterface;
+use Drupal\mukurtu_export\ExportItemIdentity;
 use Drupal\node\NodeInterface;
 use Drupal\views_bulk_operations\Traits\ViewsBulkOperationsFormTrait;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -61,9 +62,11 @@ class AdHocExportStartController extends ControllerBase {
     // Each VBO list item is [base_field_value, langcode, entity_type, entity_id, ...].
     $by_type = [];
     foreach ($form_data['list'] as $item) {
+      $langcode = $item[1] ?: NULL;
       $entity_type = $item[2];
       $entity_id = (int) $item[3];
-      $by_type[$entity_type][$entity_id] = $entity_id;
+      $key = ExportItemIdentity::encode($entity_id, $langcode);
+      $by_type[$entity_type][$key] = $key;
     }
 
     $store = $this->tempStoreFactory->get('mukurtu_import');

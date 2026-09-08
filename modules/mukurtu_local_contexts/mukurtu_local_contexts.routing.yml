@@ -2,7 +2,7 @@
 # Site-wide LC projects (front-end):
 ##
 mukurtu_local_contexts.site_project_directory:
-  path: '/local-contexts/projects'
+  path: '/local-contexts'
   defaults:
     _controller: '\Drupal\mukurtu_local_contexts\Controller\ProjectDirectoryController::siteDirectory'
     _title: 'Site-wide Local Contexts projects directory'
@@ -20,6 +20,14 @@ mukurtu_local_contexts.manage_site_supported_projects:
   requirements:
     _permission: 'administer site configuration'
 
+mukurtu_local_contexts.decommission_legacy_projects_confirm:
+  path: '/admin/local-contexts/projects/decommission-confirm'
+  defaults:
+    _form: 'Drupal\mukurtu_local_contexts\Form\DecommissionLegacyProjectsConfirmForm'
+    _title_callback: '\Drupal\mukurtu_local_contexts\Form\DecommissionLegacyProjectsConfirmForm::title'
+  requirements:
+    _custom_access: '\Drupal\mukurtu_local_contexts\Form\DecommissionLegacyProjectsConfirmForm::access'
+
 mukurtu_local_contexts.site_project_directory_settings:
   path: '/admin/local-contexts/projects/settings'
   defaults:
@@ -28,18 +36,54 @@ mukurtu_local_contexts.site_project_directory_settings:
   requirements:
     _permission: 'administer site configuration'
 
+mukurtu_local_contexts.legacy_project_label_breakdown:
+  path: '/admin/local-contexts/legacy-projects/{project_id}/breakdown'
+  defaults:
+    _controller: '\Drupal\mukurtu_local_contexts\Controller\LegacyProjectLabelBreakdownController::build'
+    _title_callback: '\Drupal\mukurtu_local_contexts\Controller\LegacyProjectLabelBreakdownController::title'
+  requirements:
+    _custom_access: '\Drupal\mukurtu_local_contexts\Controller\LegacyProjectLabelBreakdownController::access'
+    project_id: '[^/]+'
+
+mukurtu_local_contexts.legacy_label_removal_review:
+  path: '/admin/local-contexts/legacy-projects/{project_id}/labels-notices/{ref_type}/{ref_id}/review'
+  defaults:
+    _form: 'Drupal\mukurtu_local_contexts\Form\LegacyLabelRemovalReviewForm'
+    _title_callback: '\Drupal\mukurtu_local_contexts\Form\LegacyLabelRemovalReviewForm::title'
+  requirements:
+    _custom_access: '\Drupal\mukurtu_local_contexts\Form\LegacyLabelRemovalReviewForm::access'
+    project_id: '[^/]+'
+    ref_type: 'label|notice'
+    ref_id: '[^/]+'
+
+mukurtu_local_contexts.legacy_label_removal_confirm:
+  path: '/admin/local-contexts/legacy-projects/label-removal-confirm'
+  defaults:
+    _form: 'Drupal\mukurtu_local_contexts\Form\LegacyLabelRemovalConfirmForm'
+    _title_callback: '\Drupal\mukurtu_local_contexts\Form\LegacyLabelRemovalConfirmForm::title'
+  requirements:
+    _custom_access: '\Drupal\mukurtu_local_contexts\Form\LegacyLabelRemovalConfirmForm::access'
+
+mukurtu_local_contexts.remap_legacy_project_site:
+  path: '/admin/local-contexts/legacy-projects/remap'
+  defaults:
+    _title: 'Reassign legacy Local Contexts project'
+    _form: 'Drupal\mukurtu_local_contexts\Form\RemapLegacyProjectSite'
+  requirements:
+    _permission: 'administer local contexts legacy projects'
+
 ##
 # Community LC projects (front-end):
 ##
 mukurtu_local_contexts.community_projects_directory:
-  path: '/communities/{group}/local-contexts/projects'
+  path: '/community/{group}/local-contexts'
   defaults:
     _title_callback: '\Drupal\mukurtu_local_contexts\Controller\ProjectDirectoryController::title'
     _controller: '\Drupal\mukurtu_local_contexts\Controller\ProjectDirectoryController::communityDirectory'
   options:
     parameters:
       group:
-        type: entity:community
+        type: community_alias
   requirements:
     _custom_access: '\Drupal\mukurtu_local_contexts\Controller\ProjectDirectoryController::groupDirectoryAccess'
 
@@ -48,12 +92,25 @@ mukurtu_local_contexts.community_projects_directory:
 # Community LC projects (admin pages):
 ##
 mukurtu_local_contexts.manage_community_supported_projects:
-  path: '/admin/communities/{group}/local-contexts/projects'
+  path: '/communities/community/{community}/local-contexts/projects'
   defaults:
     _title_callback: '\Drupal\mukurtu_local_contexts\Controller\ManageGroupSupportedProjectsController::title'
     _form: 'Drupal\mukurtu_local_contexts\Form\ManageSupportedProjectsGroup'
   requirements:
     _custom_access: '\Drupal\mukurtu_local_contexts\Controller\ManageGroupSupportedProjectsController::access'
+  options:
+    _admin_route: TRUE
+    parameters:
+      community:
+        type: entity:community
+
+mukurtu_local_contexts.remap_legacy_project_community:
+  path: '/admin/communities/{group}/local-contexts/legacy-projects/remap'
+  defaults:
+    _title: 'Reassign legacy Local Contexts project'
+    _form: 'Drupal\mukurtu_local_contexts\Form\RemapLegacyProjectGroup'
+  requirements:
+    _permission: 'administer local contexts legacy projects'
   options:
     parameters:
       group:
@@ -63,14 +120,14 @@ mukurtu_local_contexts.manage_community_supported_projects:
 # Protocol LC projects (front-end):
 ##
 mukurtu_local_contexts.protocol_projects_directory:
-  path: '/protocols/{group}/local-contexts/projects'
+  path: '/protocol/{group}/local-contexts'
   defaults:
     _title_callback: '\Drupal\mukurtu_local_contexts\Controller\ProjectDirectoryController::title'
     _controller: '\Drupal\mukurtu_local_contexts\Controller\ProjectDirectoryController::protocolDirectory'
   options:
     parameters:
       group:
-        type: entity:protocol
+        type: protocol_alias
   requirements:
     _custom_access: '\Drupal\mukurtu_local_contexts\Controller\ProjectDirectoryController::groupDirectoryAccess'
 
@@ -78,12 +135,25 @@ mukurtu_local_contexts.protocol_projects_directory:
 # Protocol LC projects (admin pages):
 ##
 mukurtu_local_contexts.manage_protocol_supported_projects:
-  path: '/admin/protocols/{group}/local-contexts/projects'
+  path: '/protocols/protocol/{protocol}/local-contexts/projects'
   defaults:
     _title_callback: '\Drupal\mukurtu_local_contexts\Controller\ManageGroupSupportedProjectsController::title'
     _form: 'Drupal\mukurtu_local_contexts\Form\ManageSupportedProjectsGroup'
   requirements:
     _custom_access: '\Drupal\mukurtu_local_contexts\Controller\ManageGroupSupportedProjectsController::access'
+  options:
+    _admin_route: TRUE
+    parameters:
+      protocol:
+        type: entity:protocol
+
+mukurtu_local_contexts.remap_legacy_project_protocol:
+  path: '/admin/protocols/{group}/local-contexts/legacy-projects/remap'
+  defaults:
+    _title: 'Reassign legacy Local Contexts project'
+    _form: 'Drupal\mukurtu_local_contexts\Form\RemapLegacyProjectGroup'
+  requirements:
+    _permission: 'administer local contexts legacy projects'
   options:
     parameters:
       group:

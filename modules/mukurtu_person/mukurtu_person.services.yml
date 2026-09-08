@@ -1,0 +1,5 @@
+services:
+  Drupal\mukurtu_person\Hook\PersonPreprocessHooks:
+    class: Drupal\mukurtu_person\Hook\PersonPreprocessHooks
+    arguments:
+      - '@mukurtu_core.related_content_grouper'

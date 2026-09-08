@@ -81,7 +81,9 @@ class MukurtuImportTestBase extends MigrateTestBase {
     'field',
     'file',
     'filter',
+    'geofield',
     'image',
+    'leaflet',
     'media',
     'mukurtu_core',
     'mukurtu_protocol',
@@ -95,9 +97,11 @@ class MukurtuImportTestBase extends MigrateTestBase {
     'user',
     'views',
     'workflows',
+    'migrate_plus',
     'migrate_source_csv',
     'mukurtu_import',
     'mukurtu_migrate',
+    'search_api',
   ];
 
   /**

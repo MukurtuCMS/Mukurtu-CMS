@@ -1,0 +1,10 @@
+name: 'Mukurtu Core Paragraph Prune Test'
+type: module
+description: 'Test fixtures for PrunesEmptyParagraphsTrait.'
+package: Testing
+dependencies:
+  - drupal:node
+  - drupal:field
+  - entity_reference_revisions:entity_reference_revisions
+  - paragraphs:paragraphs
+  - mukurtu_core:mukurtu_core

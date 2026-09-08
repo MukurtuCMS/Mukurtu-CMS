@@ -118,7 +118,7 @@ third_party_settings:
         show_empty_fields: false
         id: ''
         formatter: open
-        description: "\"The Local Contexts Traditional Knowledge (TK) and Biocultural (BC) Labels are tools for Indigenous communities and local organizations. Developed through sustained partnership and testing within Indigenous communities across multiple countries, the Labels allow communities to express local and specific conditions for sharing and engaging in future research and relationships in ways that are consistent with already existing community rules, governance, and protocols for using, sharing, and circulating knowledge and data.\" For more information, visit <a href=\"https://localcontexts.org\">localcontexts.org</a>.\t</br>You must first customize your TK and BC Labels using the Local Contexts Hub and import your Project(s) before you can apply Projects or Labels to place records."
+        description: "\"The Local Contexts Traditional Knowledge (TK) and Biocultural (BC) Labels are tools for Indigenous communities and local organizations. Developed through sustained partnership and testing within Indigenous communities across multiple countries, the Labels allow communities to express local and specific conditions for sharing and engaging in future research and relationships in ways that are consistent with already existing community rules, governance, and protocols for using, sharing, and circulating knowledge and data.\" For more information, visit <a href=\"https://localcontexts.org\">localcontexts.org</a>.\t<br />You must first customize your TK and BC Labels using the Local Contexts Hub and import your Project(s) before you can apply Projects or Labels to place records."
         required_fields: true
     group_locations:
       children:
@@ -170,10 +170,11 @@ content:
           minZoom: '1'
           maxZoom: '18'
           zoomFiner: '0'
+          singlePointZoom: '12'
           force: 0
           center:
-            lat: '0'
-            lon: '0'
+            lat: '20'
+            lon: '10'
           zoomControlPosition: topleft
       toolbar:
         position: topright
@@ -184,7 +185,7 @@ content:
         editMode: '1'
         dragMode: '1'
         removalMode: '1'
-        drawCircle: false
+        drawCircle: true
         drawText: false
         cutPolygon: 0
         rotateMode: 0

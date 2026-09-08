@@ -1,0 +1,5 @@
+services:
+  mukurtu_dictionary.representative_media_computation:
+    class: Drupal\mukurtu_dictionary\EventSubscriber\RepresentativeMediaComputationSubscriber
+    tags:
+      - { name: event_subscriber }

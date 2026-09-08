@@ -5,3 +5,4 @@ core_version_requirement: '^9.4 || ^10 || ^11'
 package: 'Mukurtu CMS'
 dependencies:
   - mukurtu_protocol
+  - 'drupal:path_alias'

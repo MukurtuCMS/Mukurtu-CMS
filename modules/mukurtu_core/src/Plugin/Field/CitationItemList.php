@@ -21,16 +21,7 @@ class CitationItemList extends FieldItemList
     $entity = $this->getEntity();
     $targetBundle = $entity->bundle();
 
-    $templates = [];
-
-    $bundleInfo = \Drupal::service('entity_type.bundle.info')->getBundleInfo('node');
-
-    // Gather all bundles dynamically.
-    foreach ($bundleInfo as $bundleName => $bundleValue) {
-      $templates[$bundleName] = $config->get($bundleName);
-    }
-
-    $targetTemplate = $templates[$targetBundle];
+    $targetTemplate = $config->get("citation_templates.$targetBundle") ?? '';
 
     $tokenService = \Drupal::service("token");
 
@@ -48,8 +39,38 @@ class CitationItemList extends FieldItemList
     ];
 
     $citation = $tokenService->replace($targetTemplate, $data, $options);
+    $citation = $this->cleanCitationArtifacts($citation);
 
     $this->list[0] = $this->createItem(0, ['value' => $citation, 'format' => 'basic_html']);
+  }
+
+  /**
+   * Collapses stray punctuation/whitespace left behind by empty tokens.
+   *
+   * Empty tokens are cleared to '' by Token::replace(), but the literal
+   * separator punctuation an admin placed around the token in the
+   * template (commas, periods, semicolons, colons) is left behind,
+   * producing artifacts like "Title, , 2020." or "Title. .".
+   */
+  private function cleanCitationArtifacts(string $citation): string
+  {
+    // Collapse whitespace runs to a single space.
+    $citation = preg_replace('/\s+/', ' ', $citation);
+
+    // Drop whitespace immediately before punctuation.
+    $citation = preg_replace('/\s+([,;:.])/', '$1', $citation);
+
+    // Collapse runs of adjacent separator punctuation down to the last
+    // mark in the run (an empty token typically leaves its neighboring
+    // separator behind, e.g. ", ," or ". .").
+    do {
+      $citation = preg_replace('/[,;:.]\s*(?=[,;:.])/', '', $citation, -1, $count);
+    } while ($count > 0);
+
+    // Strip a stray leading separator left when the first token is empty.
+    $citation = preg_replace('/^[\s,;:.]+/', '', $citation);
+
+    return trim($citation);
   }
 
 }

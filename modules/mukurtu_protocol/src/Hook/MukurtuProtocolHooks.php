@@ -90,7 +90,9 @@ class MukurtuProtocolHooks {
    * Implements hook_entity_operation_alter() for OG memberships.
    *
    * Renames the default OG membership "Edit" and "Delete" operations to use
-   * Mukurtu-appropriate labels on community and protocol member pages.
+   * Mukurtu-appropriate labels on community and protocol member pages, and
+   * removes the redundant "View" operation, whose canonical link points to
+   * the same page as "Manage roles".
    */
   #[Hook('entity_operation_alter')]
   public function entityOperationAlterOgMembership(array &$operations, EntityInterface $entity): void {
@@ -116,6 +118,8 @@ class MukurtuProtocolHooks {
         : t('Remove @name from protocol', ['@name' => $name]);
       $operations['delete']['title'] = $label;
     }
+
+    unset($operations['view']);
   }
 
   /**
@@ -172,30 +176,6 @@ class MukurtuProtocolHooks {
       'browse_by_community_block' => [
         'variables' => [
           'communities' => NULL,
-        ],
-      ],
-      'manage_community' => [
-        'variables' => [
-          'community' => NULL,
-          'links' => NULL,
-          'sharing' => NULL,
-          'membership_display' => NULL,
-          'members' => NULL,
-          'description' => NULL,
-          'protocols' => NULL,
-          'notices' => NULL,
-        ],
-      ],
-      'manage_protocol' => [
-        'variables' => [
-          'protocol' => NULL,
-          'links' => NULL,
-          'sharing' => NULL,
-          'membership_display' => NULL,
-          'members' => NULL,
-          'description' => NULL,
-          'communities' => NULL,
-          'comment_status' => NULL,
         ],
       ],
       'community_protocol_list' => [

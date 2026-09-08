@@ -17,3 +17,4 @@
 -)]
  // phpcs:ignore Drupal.Commenting.ClassComment.WrongStyle @phpstan-ignore class.extendsDeprecatedClass
  class PathautoPattern extends DrupalSqlBase {
+

@@ -1,0 +1,45 @@
+langcode: en
+status: true
+dependencies: {  }
+id: user_all_fields
+uid: 1
+label: 'User - all fields'
+description: ''
+target_entity_type_id: user
+target_bundle: user
+mapping:
+  -
+    source: 'Account Status'
+    target: account_status
+  -
+    source: Communities
+    target: communities
+  -
+    source: 'Display Name'
+    target: field_display_name
+  -
+    source: Email
+    target: mail
+  -
+    source: ID
+    target: uid
+  -
+    source: Protocols
+    target: protocols
+  -
+    source: Roles
+    target: roles
+  -
+    source: Username
+    target: name
+  -
+    source: UUID
+    target: uuid
+configuration:
+  delimiter: ','
+  enclosure: '"'
+  escape: \
+  multivalue_delimiter: ;
+  default_format: basic_html
+  identifier_column: null
+  local_contexts_delimiter: '>'

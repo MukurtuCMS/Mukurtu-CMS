@@ -1,0 +1,20 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.message.field_title
+    - message.template.mukurtu_removed_from_protocol
+  module:
+    - message
+id: message.mukurtu_removed_from_protocol.field_title
+field_name: field_title
+entity_type: message
+bundle: mukurtu_removed_from_protocol
+label: Title
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

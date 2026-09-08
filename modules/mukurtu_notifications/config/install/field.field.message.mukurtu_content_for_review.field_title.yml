@@ -1,0 +1,20 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.message.field_title
+    - message.template.mukurtu_content_for_review
+  module:
+    - message
+id: message.mukurtu_content_for_review.field_title
+field_name: field_title
+entity_type: message
+bundle: mukurtu_content_for_review
+label: Title
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

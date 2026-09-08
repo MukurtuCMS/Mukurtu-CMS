@@ -6,6 +6,16 @@ use Drupal\Core\Cache\Cache;
 use Drupal\file\Entity\File;
 use Drupal\mukurtu_collection\Entity\Collection;
 use Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager;
+use Drupal\mukurtu_v4\MukurtuV4PreRender;
+
+/**
+ * Implements hook_element_info_alter().
+ */
+function mukurtu_v4_element_info_alter(array &$info) {
+  if (isset($info['status_messages'])) {
+    $info['status_messages']['#pre_render'][] = [MukurtuV4PreRender::class, 'messagePlaceholder'];
+  }
+}
 
 /**
  * Implements hook_preprocess_breadcrumb().
@@ -269,7 +279,7 @@ function mukurtu_v4_preprocess_media(array &$variables) {
   // form_selection) may also set these, but doing it here ensures the
   // variables are always available regardless of which hook fires first.
   $view_mode = $variables['elements']['#view_mode'] ?? '';
-  $thumbnail_view_modes = ['carousel_thumbnail', 'media_assets', 'digital_heritage_sidebar'];
+  $thumbnail_view_modes = ['carousel_thumbnail', 'media_assets', 'teaser_featured'];
   if (in_array($view_mode, $thumbnail_view_modes)) {
     $bundle = $media->bundle();
     if ($bundle === 'audio') {
@@ -340,9 +350,9 @@ function mukurtu_v4_preprocess_media__audio__browse(array &$variables): void {
 }
 
 /**
- * Implements template_preprocess_media__audio__digital_heritage_sidebar().
+ * Implements template_preprocess_media__audio__teaser_featured().
  */
-function mukurtu_v4_preprocess_media__audio__digital_heritage_sidebar(array &$variables): void {
+function mukurtu_v4_preprocess_media__audio__teaser_featured(array &$variables): void {
   $route = \Drupal::routeMatch()->getRouteName();
   $variables['skip_player'] = in_array($route, [
     'entity.community.canonical',
@@ -371,6 +381,14 @@ function mukurtu_v4_preprocess_field_group_html_element__group_community_sidebar
   }
   $variables['community_name'] = $community->get('name')->value;
   $variables['community_id'] = $community->get('id')->value;
+  $variables['browse_url'] = \Drupal::service('mukurtu_browse.browse_link_builder')->getCommunityBrowseUrl($variables['community_name']);
+  $community_system_path = '/communities/community/' . $community->id();
+  $community_alias = \Drupal::service('path_alias.manager')->getAliasByPath($community_system_path);
+  // If the community has no alias yet, getAliasByPath() returns the system
+  // path unchanged; fall back to the numeric ID the LC directory route also
+  // accepts, instead of building a path no route matches.
+  $community_lc_slug = ($community_alias === $community_system_path) ? '/community/' . $community->id() : $community_alias;
+  $variables['community_lc_url'] = $community_lc_slug . '/local-contexts';
   $local_contexts_projects_manager = \Drupal::service('mukurtu_local_contexts.supported_project_manager');
   assert($local_contexts_projects_manager instanceof LocalContextsSupportedProjectManager);
   $variables['has_lc_projects'] = (bool) $local_contexts_projects_manager->getGroupSupportedProjects($community);
@@ -387,9 +405,25 @@ function mukurtu_v4_preprocess_field_group_html_element__group_protocol_sidebar(
   }
   $variables['protocol_name'] = $protocol->get('name')->value;
   $variables['protocol_id'] = $protocol->get('id')->value;
+  $variables['browse_url'] = \Drupal::service('mukurtu_browse.browse_link_builder')->getProtocolBrowseUrl((string) $protocol->id());
+  $protocol_system_path = '/protocols/protocol/' . $protocol->id();
+  $protocol_alias = \Drupal::service('path_alias.manager')->getAliasByPath($protocol_system_path);
+  // If the protocol has no alias yet, getAliasByPath() returns the system
+  // path unchanged; fall back to the numeric ID the LC directory route also
+  // accepts, instead of building a path no route matches.
+  $protocol_lc_slug = ($protocol_alias === $protocol_system_path) ? '/protocol/' . $protocol->id() : $protocol_alias;
+  $variables['protocol_lc_url'] = $protocol_lc_slug . '/local-contexts';
   $local_contexts_projects_manager = \Drupal::service('mukurtu_local_contexts.supported_project_manager');
   assert($local_contexts_projects_manager instanceof LocalContextsSupportedProjectManager);
   $variables['has_lc_projects'] = (bool) $local_contexts_projects_manager->getGroupSupportedProjects($protocol);
+}
+
+/**
+ * Implements hook_preprocess_taxonomy_term__category().
+ */
+function mukurtu_v4_preprocess_taxonomy_term__category(array &$variables): void {
+  $term = $variables['term'];
+  $variables['browse_url'] = \Drupal::service('mukurtu_browse.browse_link_builder')->getCategoryBrowseUrl($term->label());
 }
 
 /**

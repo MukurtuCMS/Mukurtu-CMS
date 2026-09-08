@@ -193,3 +193,221 @@ function mukurtu_workflows_update_40006(): void {
     $default->save();
   }
 }
+
+/**
+ * Split bundle assignment: structural content always on the Default
+ * workflow, protocol-gated content follows the active-workflow selection,
+ * and landing_page is excluded from moderation entirely.
+ */
+function mukurtu_workflows_update_40008(): void {
+  $default = \Drupal::configFactory()->getEditable('workflows.workflow.mukurtu_default_content_workflow');
+  $editorial = \Drupal::configFactory()->getEditable('workflows.workflow.mukurtu_editorial_workflow');
+  if ($default->isNew() || $editorial->isNew()) {
+    return;
+  }
+
+  $protocol_gated = ['collection', 'dictionary_word', 'digital_heritage', 'person', 'place', 'word_list'];
+  $structural = ['article', 'page'];
+  $known = array_merge($structural, $protocol_gated, ['landing_page']);
+
+  $default_bundles = $default->get('type_settings.entity_types.node') ?? [];
+  $editorial_bundles = $editorial->get('type_settings.entity_types.node') ?? [];
+
+  $editorial_has_gated = (bool) array_intersect($protocol_gated, $editorial_bundles);
+  $default_has_gated = (bool) array_intersect($protocol_gated, $default_bundles);
+  $site_manages_gated_bundles = $editorial_has_gated || $default_has_gated;
+  $editorial_active_for_gated = $editorial_has_gated && !$default_has_gated;
+
+  \Drupal::configFactory()->getEditable('mukurtu_workflows.settings')
+    ->set('active_workflow', $editorial_active_for_gated ? 'mukurtu_editorial_workflow' : 'mukurtu_default_content_workflow')
+    ->save();
+
+  $new_default = $structural;
+  $new_editorial = [];
+  if ($site_manages_gated_bundles) {
+    if ($editorial_active_for_gated) {
+      $new_editorial = $protocol_gated;
+    }
+    else {
+      $new_default = array_merge($structural, $protocol_gated);
+    }
+  }
+
+  // Preserve any bundle an admin added manually that isn't one of the
+  // bundles this update recognizes, so hand-customized sites aren't
+  // clobbered. landing_page is deliberately in $known so it is always
+  // dropped, never preserved.
+  $default_custom_extra = array_diff($default_bundles, $known);
+  $editorial_custom_extra = array_diff($editorial_bundles, $known);
+
+  $new_default = array_values(array_unique(array_merge($new_default, $default_custom_extra)));
+  $new_editorial = array_values(array_unique(array_merge($new_editorial, $editorial_custom_extra)));
+
+  $default->set('type_settings.entity_types.node', $new_default)->save();
+  $editorial->set('type_settings.entity_types', $new_editorial ? ['node' => $new_editorial] : [])->save();
+}
+
+/**
+ * Adds the language-fallback default_langcode filter and rendering_language
+ * setting to mukurtu_workflow_overview's 3 real displays (each overrides
+ * its own filters, none inherit from 'default'), per
+ * docs/content-language-policy.md. Additive only.
+ */
+function mukurtu_workflows_update_40007(): void {
+  $config_mukurtu_workflow_overview = \Drupal::configFactory()->getEditable('views.view.mukurtu_workflow_overview');
+  if (!$config_mukurtu_workflow_overview->isNew()) {
+    $filters_mukurtu_workflow_overview_my_content_in_progress = $config_mukurtu_workflow_overview->get('display.my_content_in_progress.display_options.filters') ?? [];
+    if (!isset($filters_mukurtu_workflow_overview_my_content_in_progress['default_langcode'])) {
+      $filters_mukurtu_workflow_overview_my_content_in_progress['default_langcode'] = [
+        'id' => 'default_langcode',
+        'table' => 'node_field_data',
+        'field' => 'default_langcode',
+        'relationship' => 'none',
+        'group_type' => 'group',
+        'admin_label' => '',
+        'entity_type' => 'node',
+        'entity_field' => 'default_langcode',
+        'plugin_id' => 'boolean',
+        'operator' => '=',
+        'value' => '1',
+        'group' => 1,
+        'exposed' => FALSE,
+        'expose' => [
+          'operator_id' => '',
+          'label' => '',
+          'description' => '',
+          'use_operator' => FALSE,
+          'operator' => '',
+          'operator_limit_selection' => FALSE,
+          'operator_list' => [],
+          'identifier' => '',
+          'required' => FALSE,
+          'remember' => FALSE,
+          'multiple' => FALSE,
+          'remember_roles' => ['authenticated' => 'authenticated'],
+        ],
+        'is_grouped' => FALSE,
+        'group_info' => [
+          'label' => '',
+          'description' => '',
+          'identifier' => '',
+          'optional' => TRUE,
+          'widget' => 'select',
+          'multiple' => FALSE,
+          'remember' => FALSE,
+          'default_group' => 'All',
+          'default_group_multiple' => [],
+          'group_items' => [],
+        ],
+      ];
+      $config_mukurtu_workflow_overview->set('display.my_content_in_progress.display_options.filters', $filters_mukurtu_workflow_overview_my_content_in_progress);
+      $config_mukurtu_workflow_overview->save();
+    }
+    $filters_mukurtu_workflow_overview_my_content_published = $config_mukurtu_workflow_overview->get('display.my_content_published.display_options.filters') ?? [];
+    if (!isset($filters_mukurtu_workflow_overview_my_content_published['default_langcode'])) {
+      $filters_mukurtu_workflow_overview_my_content_published['default_langcode'] = [
+        'id' => 'default_langcode',
+        'table' => 'node_field_data',
+        'field' => 'default_langcode',
+        'relationship' => 'none',
+        'group_type' => 'group',
+        'admin_label' => '',
+        'entity_type' => 'node',
+        'entity_field' => 'default_langcode',
+        'plugin_id' => 'boolean',
+        'operator' => '=',
+        'value' => '1',
+        'group' => 1,
+        'exposed' => FALSE,
+        'expose' => [
+          'operator_id' => '',
+          'label' => '',
+          'description' => '',
+          'use_operator' => FALSE,
+          'operator' => '',
+          'operator_limit_selection' => FALSE,
+          'operator_list' => [],
+          'identifier' => '',
+          'required' => FALSE,
+          'remember' => FALSE,
+          'multiple' => FALSE,
+          'remember_roles' => ['authenticated' => 'authenticated'],
+        ],
+        'is_grouped' => FALSE,
+        'group_info' => [
+          'label' => '',
+          'description' => '',
+          'identifier' => '',
+          'optional' => TRUE,
+          'widget' => 'select',
+          'multiple' => FALSE,
+          'remember' => FALSE,
+          'default_group' => 'All',
+          'default_group_multiple' => [],
+          'group_items' => [],
+        ],
+      ];
+      $config_mukurtu_workflow_overview->set('display.my_content_published.display_options.filters', $filters_mukurtu_workflow_overview_my_content_published);
+      $config_mukurtu_workflow_overview->save();
+    }
+    $filters_mukurtu_workflow_overview_review_queue = $config_mukurtu_workflow_overview->get('display.review_queue.display_options.filters') ?? [];
+    if (!isset($filters_mukurtu_workflow_overview_review_queue['default_langcode'])) {
+      $filters_mukurtu_workflow_overview_review_queue['default_langcode'] = [
+        'id' => 'default_langcode',
+        'table' => 'node_field_data',
+        'field' => 'default_langcode',
+        'relationship' => 'none',
+        'group_type' => 'group',
+        'admin_label' => '',
+        'entity_type' => 'node',
+        'entity_field' => 'default_langcode',
+        'plugin_id' => 'boolean',
+        'operator' => '=',
+        'value' => '1',
+        'group' => 1,
+        'exposed' => FALSE,
+        'expose' => [
+          'operator_id' => '',
+          'label' => '',
+          'description' => '',
+          'use_operator' => FALSE,
+          'operator' => '',
+          'operator_limit_selection' => FALSE,
+          'operator_list' => [],
+          'identifier' => '',
+          'required' => FALSE,
+          'remember' => FALSE,
+          'multiple' => FALSE,
+          'remember_roles' => ['authenticated' => 'authenticated'],
+        ],
+        'is_grouped' => FALSE,
+        'group_info' => [
+          'label' => '',
+          'description' => '',
+          'identifier' => '',
+          'optional' => TRUE,
+          'widget' => 'select',
+          'multiple' => FALSE,
+          'remember' => FALSE,
+          'default_group' => 'All',
+          'default_group_multiple' => [],
+          'group_items' => [],
+        ],
+      ];
+      $config_mukurtu_workflow_overview->set('display.review_queue.display_options.filters', $filters_mukurtu_workflow_overview_review_queue);
+      $config_mukurtu_workflow_overview->save();
+    }
+    if (!$config_mukurtu_workflow_overview->get('display.my_content_in_progress.display_options.rendering_language')) {
+      $config_mukurtu_workflow_overview->set('display.my_content_in_progress.display_options.rendering_language', '***LANGUAGE_language_content***');
+      $config_mukurtu_workflow_overview->save();
+    }
+    if (!$config_mukurtu_workflow_overview->get('display.my_content_published.display_options.rendering_language')) {
+      $config_mukurtu_workflow_overview->set('display.my_content_published.display_options.rendering_language', '***LANGUAGE_language_content***');
+      $config_mukurtu_workflow_overview->save();
+    }
+    if (!$config_mukurtu_workflow_overview->get('display.review_queue.display_options.rendering_language')) {
+      $config_mukurtu_workflow_overview->set('display.review_queue.display_options.rendering_language', '***LANGUAGE_language_content***');
+      $config_mukurtu_workflow_overview->save();
+    }
+  }
+}

@@ -3,6 +3,9 @@ status: true
 dependencies:
   config:
     - node.type.digital_heritage
+  module:
+    - menu_ui
+    - token
 id: node.digital_heritage.menu_link
 field_name: menu_link
 entity_type: node

@@ -26,8 +26,14 @@ class RouteSubscriber extends RouteSubscriberBase
   protected function alterRoutes(RouteCollection $collection)
   {
     // Use a custom Mukurtu controller to restrict dashboard access to
-    // authenticated users.
+    // authenticated users. Remove the default permission-gated entity access
+    // requirement so the custom check is the sole gate; otherwise the two
+    // requirements AND together and block any authenticated user who lacks
+    // the dashboards module's per-dashboard view permission.
     if ($route = $collection->get('entity.dashboard.canonical')) {
+      $requirements = $route->getRequirements();
+      unset($requirements['_entity_access']);
+      $route->setRequirements($requirements);
       $route->setRequirement('_custom_access', '\Drupal\mukurtu_core\Controller\MukurtuDashboardController::access');
     }
 
@@ -48,6 +54,23 @@ class RouteSubscriber extends RouteSubscriberBase
       $route->setRequirements($requirements);
       $route->setDefault('view_id', 'mukurtu_manage_all_content');
       $route->setDefault('display_id', 'mukurtu_manage_content');
+    }
+
+    // Restrict the Message Subscribe UI "Subscriptions" page/tab to admins,
+    // and render it in the admin theme like the rest of Mukurtu's admin
+    // tooling. SubscriptionController::tabAccess() otherwise lets any
+    // authenticated user view their own /user/{uid}/message-subscribe page
+    // regardless of the 'administer message subscribe' permission, via a
+    // self-view bypass. That page is internal admin tooling, not end-user
+    // facing.
+    foreach (['message_subscribe_ui.tab', 'message_subscribe_ui.tab.flag'] as $route_name) {
+      if ($route = $collection->get($route_name)) {
+        $requirements = $route->getRequirements();
+        unset($requirements['_custom_access']);
+        $requirements['_permission'] = 'administer message subscribe';
+        $route->setRequirements($requirements);
+        $route->setOption('_admin_route', TRUE);
+      }
     }
   }
 }

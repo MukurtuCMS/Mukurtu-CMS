@@ -2,24 +2,23 @@
 
 namespace Drupal\mukurtu_local_contexts\Plugin\Field\FieldFormatter;
 
+use Drupal\Core\Field\Attribute\FieldFormatter;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FormatterBase;
 use Drupal\Component\Utility\Html;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\mukurtu_local_contexts\LocalContextsLabel;
 use Drupal\mukurtu_local_contexts\LocalContextsNotice;
 use Drupal\mukurtu_local_contexts\LocalContextsProject;
 
 /**
  * Plugin implementation of the 'Local Contexts Label and Notice' formatter.
- *
- * @FieldFormatter(
- *   id = "local_contexts_label_and_notice",
- *   label = @Translation("Local Contexts Label and Notice"),
- *   field_types = {
- *     "local_contexts_label_and_notice"
- *   }
- * )
  */
+#[FieldFormatter(
+  id: 'local_contexts_label_and_notice',
+  label: new TranslatableMarkup('Local Contexts Label and Notice'),
+  field_types: ['local_contexts_label_and_notice'],
+)]
 class LocalContextsLabelFormatter extends FormatterBase {
   /**
    * {@inheritdoc}
@@ -40,6 +39,8 @@ class LocalContextsLabelFormatter extends FormatterBase {
           '#img_url' => $label->img_url,
           '#audio_url' => $label->audio_url,
           '#community' => $label->community,
+          '#locale' => $label->locale,
+          '#language' => $label->language,
           '#translations' => $label->translations,
           '#dialog_id' => Html::getUniqueId('lc-label'),
         ];
@@ -52,6 +53,8 @@ class LocalContextsLabelFormatter extends FormatterBase {
           '#text' => $notice->default_text,
           '#svg_url' => $notice->svg_url,
           '#img_url' => $notice->img_url,
+          '#locale' => $notice->locale,
+          '#language' => $notice->language,
           '#translations' => $notice->translations,
           '#dialog_id' => Html::getUniqueId('lc-notice'),
         ];
@@ -64,6 +67,9 @@ class LocalContextsLabelFormatter extends FormatterBase {
       $project = new LocalContextsProject($project_id);
       $project_title = $project->isValid() ? $project->getTitle() : null;
       $project_url = $project->isValid() ? $project->getUrl() : null;
+      $not_available = $project->isValid() && $project->isNotAvailable();
+      $archived = $project->isValid() && $project->isArchived();
+      $last_synced = $project->isValid() ? $project->getUpdated() : null;
       $group_items = array_map(function ($item) use ($project_title, $project_url) {
         $item['#project_title'] = $project_title;
         $item['#project_url'] = $project_url;
@@ -72,7 +78,11 @@ class LocalContextsLabelFormatter extends FormatterBase {
       $element[$delta] = [
         '#theme' => 'local_contexts_label_group',
         '#project_title' => $project_title,
+        '#project_url' => $project_url,
         '#items' => $group_items,
+        '#not_available' => $not_available,
+        '#archived' => $archived,
+        '#last_synced' => $last_synced,
       ];
       $delta++;
     }

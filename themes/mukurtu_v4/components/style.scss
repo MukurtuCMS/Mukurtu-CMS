@@ -22,7 +22,9 @@ documentation on how to use @include media(). */
 @use '01-atoms/link/link';
 @use '01-atoms/privacy-badge/privacy-badge';
 @use '01-atoms/select/select';
+@use '01-atoms/status-badge/status-badge';
 @use '01-atoms/textfield/textfield';
+@use '01-atoms/translation-status-badge/translation-status-badge';
 @use '02-molecules/callout/callout';
 @use '02-molecules/carousels/carousels';
 @use '02-molecules/consent-popup/consent-popup';
@@ -34,10 +36,12 @@ documentation on how to use @include media(). */
 @use '02-molecules/image-w-description/image-w-description';
 @use '02-molecules/language-switcher/language-switcher';
 @use '02-molecules/local-contexts/local-contexts';
+@use '02-molecules/local-contexts/local-contexts-form';
 @use '02-molecules/local-tasks/local-tasks';
 @use '02-molecules/media/media';
 @use '02-molecules/media/glightbox';
 @use '02-molecules/menus/menu';
+@use '02-molecules/quick-actions/quick-actions';
 @use '02-molecules/vertical-card/vertical-card';
 @use '03-organisms/breadcrumbs/breadcrumbs';
 @use '03-organisms/footer/footer';
@@ -61,5 +65,6 @@ documentation on how to use @include media(). */
 @use '04-templates/local-contexts/local-contexts-directory';
 @use '04-templates/layout/layout-builder';
 @use '04-templates/page/page';
+@use '04-templates/submissions/submissions';
 @use '04-templates/taxonomy-term/taxonomy-term';
 @use '04-templates/word-list/word-list';

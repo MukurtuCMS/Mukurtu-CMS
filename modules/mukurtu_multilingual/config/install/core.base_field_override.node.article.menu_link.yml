@@ -3,6 +3,9 @@ status: true
 dependencies:
   config:
     - node.type.article
+  module:
+    - menu_ui
+    - token
 id: node.article.menu_link
 field_name: menu_link
 entity_type: node

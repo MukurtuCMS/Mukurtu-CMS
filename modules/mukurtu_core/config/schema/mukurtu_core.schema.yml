@@ -68,6 +68,9 @@ field.widget.settings.geofield_mukurtu:
             zoomFiner:
               type: integer
               label: 'Zoom finer'
+            singlePointZoom:
+              type: integer
+              label: 'Single point zoom'
         scroll_zoom_enabled:
           type: integer
           label: 'Scroll zoom enabled'
@@ -272,6 +275,17 @@ field.widget.settings.geofield_mukurtu:
 #    output_escape:
 #      type: boolean
 #      label: 'Escape output'
+
+field.widget.settings.geofield_mukurtu_latlon:
+  type: mapping
+  label: 'Mukurtu Map Points (latitude/longitude) widget settings'
+  mapping:
+    instructions:
+      type: label
+      label: 'Instructions'
+    show_descriptions:
+      type: boolean
+      label: 'Show a description field for each point'
 
 field.widget.settings.mukurtu_leaflet_formatter:
   type: mapping
@@ -809,3 +823,28 @@ mukurtu_core.access_denied:
     message:
       type: text_format
       label: 'Message'
+
+mukurtu_core.not_found:
+  type: config_object
+  label: 'Not found page settings'
+  mapping:
+    title:
+      type: label
+      label: 'Title'
+    message:
+      type: text_format
+      label: 'Message'
+
+mukurtu.settings:
+  type: config_object
+  label: 'Mukurtu general settings'
+  mapping:
+    mukurtu_related_content_display:
+      type: string
+      label: 'Related content display method'
+    citation_templates:
+      type: sequence
+      label: 'Citation field templates, keyed by node bundle machine name'
+      sequence:
+        type: string
+        label: 'Citation template'

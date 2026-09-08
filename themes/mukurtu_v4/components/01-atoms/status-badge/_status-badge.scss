@@ -1,0 +1,30 @@
+.local-contexts-status-badge {
+  display: inline-block;
+  font-size: var(--font-size-s);
+  font-weight: var(--text-bold);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+  padding-block: var(--v-space-6xs);
+  padding-inline: var(--v-space-4xs);
+  border-radius: var(--v-space-6xs);
+
+  &--unavailable {
+    background-color: var(--color-warning-light);
+    // --color-warning-dark only reaches 4.14:1 against --color-warning-light,
+    // short of the 4.5:1 AA minimum for this badge's 16px bold text. This
+    // darker shade is scoped to the badge only, the shared token is
+    // untouched to avoid regressions elsewhere it's used.
+    color: #3f5a73;
+  }
+
+  &--archived {
+    background-color: var(--color-status-light);
+    color: var(--color-status-dark);
+  }
+}
+
+.local-contexts-status-note {
+  display: block;
+  font-size: var(--font-size-2xs);
+  color: var(--color-text-secondary);
+}

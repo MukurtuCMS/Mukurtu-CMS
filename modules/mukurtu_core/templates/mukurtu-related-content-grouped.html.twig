@@ -1,0 +1,47 @@
+{#
+/**
+ * @file
+ * Theme override to display a filterable, grouped referenced content list.
+ *
+ * Available variables:
+ * - title: (optional) The section heading.
+ * - items: A list of rendered content items, each with:
+ *   - content: The rendered entity (featured view mode).
+ *   - attributes: HTML attributes for the item wrapper, carrying
+ *     data-source and data-vocabulary tokens used by the filter behavior.
+ * - filters: A list of filter buttons, each with:
+ *   - id: The filter value ('all', 'manual', or a vocabulary machine name).
+ *   - label: The button's display label.
+ * - has_filters: Whether more than one real bucket is present, i.e. whether
+ *   the filter bar should render at all.
+ *
+ * @see \Drupal\mukurtu_core\Service\RelatedContentGrouper
+ * @ingroup themeable
+ */
+#}
+<div class="related-content">
+  {% if title %}
+    <h3 class="related-content__label">{{ title }}</h3>
+  {% endif %}
+  {% if has_filters %}
+    <div class="related-content__filters" data-related-content-filter role="radiogroup" aria-label="{{ 'Filter referenced content'|t }}">
+      {% for filter in filters %}
+        <button type="button" class="related-content__filter{{ loop.first ? ' is-active' : '' }}" data-filter-value="{{ filter.id }}" role="radio" aria-checked="{{ loop.first ? 'true' : 'false' }}">{{ filter.label }}</button>
+      {% endfor %}
+    </div>
+    <div class="related-content__status visually-hidden" data-related-content-status role="status"></div>
+  {% endif %}
+  {# Reuses the field--name-field-all-related-content / field__items /
+     field__item classes from the default field formatter output so the
+     existing featured-item card grid styling (_featured-items.scss)
+     continues to apply unchanged. #}
+  <div class="field--name-field-all-related-content">
+    <div class="field__items">
+      {% for item in items %}
+        <div class="field__item"{{ item.attributes }}>
+          {{ item.content }}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>

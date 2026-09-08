@@ -9,3 +9,7 @@ services:
     class: Drupal\mukurtu_browse\EventSubscriber\MediaTypeIndexingItemsSubscriber
     tags:
       - { name: event_subscriber }
+
+  mukurtu_browse.browse_link_builder:
+    class: Drupal\mukurtu_browse\Service\BrowseLinkBuilder
+    arguments: ['@config.factory', '@entity_type.manager']

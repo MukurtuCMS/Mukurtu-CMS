@@ -39,14 +39,6 @@ class CommunityListBuilder extends EntityListBuilder {
       ];
     }
 
-    if ($access_manager->checkNamedRoute('mukurtu_protocol.manage_community', ['group' => $entity->id()])) {
-      $operations['manage'] = [
-        'title' => $this->t('Manage Community'),
-        'weight' => 100,
-        'url' => Url::fromRoute('mukurtu_protocol.manage_community', ['group' => $entity->id()]),
-      ];
-    }
-
     if ($access_manager->checkNamedRoute('mukurtu_protocol.community_members_list', ['group' => $entity->id()])) {
       $operations['members'] = [
         'title' => $this->t('Manage Members'),
@@ -72,11 +64,11 @@ class CommunityListBuilder extends EntityListBuilder {
     /** @var \Drupal\mukurtu_protocol\Entity\Community $entity */
 
     // Name.
-    if ($access_manager->checkNamedRoute('mukurtu_protocol.manage_community', ['group' => $entity->id()])) {
+    if ($access_manager->checkNamedRoute('entity.community.canonical', ['community' => $entity->id()])) {
       $row['name'] = Link::createFromRoute(
         $entity->label(),
-        'mukurtu_protocol.manage_community',
-        ['group' => $entity->id()]
+        'entity.community.canonical',
+        ['community' => $entity->id()]
       );
     } else {
       $row['name'] = $entity->label();

@@ -3,7 +3,9 @@
 namespace Drupal\mukurtu_import\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
+use Drupal\Core\Entity\Attribute\ConfigEntityType;
 use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\mukurtu_import\MukurtuImportFieldProcessInterface;
 use Drupal\mukurtu_import\MukurtuImportFieldProcessPluginManager;
 use Drupal\mukurtu_import\MukurtuImportStrategyInterface;
@@ -14,51 +16,50 @@ use Exception;
 
 /**
  * Defines the mukurtu_import_strategy entity type.
- *
- * @ConfigEntityType(
- *   id = "mukurtu_import_strategy",
- *   label = @Translation("Import Templates"),
- *   label_collection = @Translation("Import Templates"),
- *   label_singular = @Translation("Import Template"),
- *   label_plural = @Translation("Import Templates"),
- *   label_count = @PluralTranslation(
- *     singular = "@count Import Template",
- *     plural = "@count Import Templates",
- *   ),
- *   handlers = {
- *     "access" = "Drupal\mukurtu_import\MukurtuImportStrategyAccessControlHandler",
- *     "list_builder" = "Drupal\mukurtu_import\MukurtuImportStrategyListBuilder",
- *     "form" = {
- *       "add" = "Drupal\mukurtu_import\Form\MukurtuImportStrategyForm",
- *       "edit" = "Drupal\mukurtu_import\Form\MukurtuImportStrategyForm",
- *       "delete" = "Drupal\Core\Entity\EntityDeleteForm"
- *     }
- *   },
- *   config_prefix = "mukurtu_import_strategy",
- *   admin_permission = "administer mukurtu_import_strategy",
- *   links = {
- *     "collection" = "/admin/import-templates",
- *     "add-form" = "/admin/import-templates/add",
- *     "edit-form" = "/admin/import-templates/{mukurtu_import_strategy}",
- *     "delete-form" = "/admin/import-templates/{mukurtu_import_strategy}/delete"
- *   },
- *   entity_keys = {
- *     "id" = "id",
- *     "label" = "label",
- *     "uuid" = "uuid"
- *   },
- *   config_export = {
- *     "id",
- *     "uid",
- *     "label",
- *     "description",
- *     "target_entity_type_id",
- *     "target_bundle",
- *     "mapping",
- *     "configuration",
- *   }
- * )
  */
+#[ConfigEntityType(
+  id: 'mukurtu_import_strategy',
+  label: new TranslatableMarkup('Import Templates'),
+  label_collection: new TranslatableMarkup('Import Templates'),
+  label_singular: new TranslatableMarkup('Import Template'),
+  label_plural: new TranslatableMarkup('Import Templates'),
+  config_prefix: 'mukurtu_import_strategy',
+  entity_keys: [
+    'id' => 'id',
+    'label' => 'label',
+    'uuid' => 'uuid',
+  ],
+  handlers: [
+    'access' => 'Drupal\mukurtu_import\MukurtuImportStrategyAccessControlHandler',
+    'list_builder' => 'Drupal\mukurtu_import\MukurtuImportStrategyListBuilder',
+    'form' => [
+      'add' => 'Drupal\mukurtu_import\Form\MukurtuImportStrategyForm',
+      'edit' => 'Drupal\mukurtu_import\Form\MukurtuImportStrategyForm',
+      'delete' => 'Drupal\Core\Entity\EntityDeleteForm',
+    ],
+  ],
+  links: [
+    'collection' => '/admin/import-templates',
+    'add-form' => '/admin/import-templates/add',
+    'edit-form' => '/admin/import-templates/{mukurtu_import_strategy}',
+    'delete-form' => '/admin/import-templates/{mukurtu_import_strategy}/delete',
+  ],
+  admin_permission: 'administer mukurtu_import_strategy',
+  label_count: [
+    'singular' => '@count Import Template',
+    'plural' => '@count Import Templates',
+  ],
+  config_export: [
+    'id',
+    'uid',
+    'label',
+    'description',
+    'target_entity_type_id',
+    'target_bundle',
+    'mapping',
+    'configuration',
+  ],
+)]
 class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStrategyInterface {
 
   /**
@@ -268,6 +269,26 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
 
       $field_def = $field_defs[$target] ?? NULL;
       if (!$field_def instanceof FieldDefinitionInterface) {
+        // Community/protocol membership isn't a real field on the user
+        // entity (see ImportFormTrait::buildTargetOptions()), so these two
+        // virtual targets need their process pipeline built by hand instead
+        // of through the field-type-keyed MukurtuImportFieldProcess plugins.
+        if ($entity_type_id === 'user' && in_array($target, ['communities', 'protocols'], TRUE)) {
+          $delimiter = $this->getConfig('multivalue_delimiter') ?? ';';
+          $import_process[$target_option] = [
+            ['plugin' => 'explode', 'source' => $source, 'delimiter' => $delimiter],
+            ['plugin' => 'callback', 'callable' => 'trim'],
+            [
+              'plugin' => 'mukurtu_group_membership_lookup',
+              'entity_type' => $target === 'communities' ? 'community' : 'protocol',
+            ],
+          ];
+        }
+        elseif ($entity_type_id === 'user' && $target === 'account_status') {
+          $import_process[$target_option] = [
+            ['plugin' => 'mukurtu_account_status_lookup', 'source' => $source],
+          ];
+        }
         continue;
       }
 
@@ -306,6 +327,8 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
     // Get the field definitions for the target.
     $fieldDefs = $this->getFieldDefinitions($entity_type_id, $bundle);
 
+    $isTranslationImport = $this->isTranslationImport($targets);
+
     $writableFields = [];
     foreach ($fieldDefs as $fieldName => $fieldDef) {
       if (in_array($fieldName,['default_langcode'])) {
@@ -317,11 +340,74 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
       // we get around this by only specifying what is absolutely necessary for
       // the given import input.
       if (!$fieldDef->isReadOnly() && in_array($fieldName, $targets)) {
+        // A translation-targeting import updates whichever translation a
+        // row resolves to. Non-translatable fields share one value across
+        // every translation of an entity, so writing one through a
+        // translation object would silently overwrite it for every other
+        // translation too - core has no guard against this. Excluding
+        // them here only affects updates to already-existing entities
+        // (Entity::getEntity() only calls updateEntity(), which reads
+        // overwrite_properties, when a matching entity already exists;
+        // brand-new entities are built via storage->create() with every
+        // mapped field, unaffected by this list). See
+        // docs/import-translation.md.
+        if ($isTranslationImport && !$fieldDef->isTranslatable()) {
+          continue;
+        }
         $writableFields[] = $fieldName;
       }
     }
 
+    // 'status'/'field_pending' are no longer directly mappable targets for
+    // the user entity type (superseded by the virtual 'account_status'
+    // target -- see ImportFormTrait::getFieldDefinitions()), so they never
+    // appear in $fieldDefs/$targets above. ProtocolAwareUserContent still
+    // needs to actually persist them on an existing account whenever
+    // 'account_status' is mapped, so whitelist them here too.
+    if ($entity_type_id === 'user' && in_array('account_status', $targets, TRUE)) {
+      $writableFields[] = 'status';
+      $writableFields[] = 'field_pending';
+    }
+
     return $writableFields;
+  }
+
+  /**
+   * Whether this definition targets translations rather than always the
+   * default/original-language entity.
+   *
+   * Gated on both a column being mapped to the entity type's langcode
+   * field AND the target bundle actually supporting content translation -
+   * an unmapped or non-translatable-bundle strategy is completely
+   * unaffected, byte-identical to before this existed.
+   *
+   * @param array|null $targets
+   *   The mapping's target field names (without subfield suffixes), or
+   *   NULL to compute them from the current mapping.
+   *
+   * @return bool
+   *   TRUE if imports using this definition should target translations.
+   */
+  protected function isTranslationImport(?array $targets = NULL): bool {
+    $entity_type_id = $this->getTargetEntityTypeId();
+    $bundle = $this->getTargetBundle();
+    $entity_type = $this->entityTypeManager()->getDefinition($entity_type_id);
+    $langcode_key = $entity_type->getKey('langcode');
+    if (!$langcode_key) {
+      return FALSE;
+    }
+
+    if ($targets === NULL) {
+      $targets = array_map(fn($t) => explode('/', $t, 2)[0], array_column($this->getMapping(), 'target'));
+    }
+    if (!in_array($langcode_key, $targets, TRUE)) {
+      return FALSE;
+    }
+
+    if (!$bundle) {
+      return FALSE;
+    }
+    return \Drupal::service('content_translation.manager')->isEnabled($entity_type_id, $bundle);
   }
 
   /**
@@ -340,21 +426,28 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
     $uuid_key = $this->entityTypeManager()->getDefinition($entity_type_id)->getKey('uuid');
     $process = $this->getProcess();
 
+    // A saved template's mapping can reference columns that don't exist in
+    // this particular file (e.g. a stale template applied without going
+    // through "Customize Settings"). Candidate ID columns are only usable if
+    // they're actually present in the file, otherwise the CSV source plugin
+    // fails every row instead of falling back to record numbers.
+    $headers = $this->getCSVHeaders($file);
+
     $ids = [];
     // User-configured identifier column has highest priority.
     $identifier_column = $this->getIdentifierColumn();
-    if ($identifier_column) {
+    if ($identifier_column && in_array($identifier_column, $headers, TRUE)) {
       $ids = [$identifier_column];
     }
 
     // Entity ID has next priority.
     if (empty($ids) && !empty($process[$id_key])) {
-      $ids = array_filter(array_map(fn($v) => $v['target'] == $id_key ? $v['source'] : NULL, $mapping));
+      $ids = array_filter(array_map(fn($v) => $v['target'] == $id_key && in_array($v['source'], $headers, TRUE) ? $v['source'] : NULL, $mapping));
     }
 
     // UUID has next priority.
     if (empty($ids) && !empty($process[$uuid_key])) {
-      $ids = array_filter(array_map(fn ($v) => $v['target'] == $uuid_key ? $v['source'] : NULL, $mapping));
+      $ids = array_filter(array_map(fn ($v) => $v['target'] == $uuid_key && in_array($v['source'], $headers, TRUE) ? $v['source'] : NULL, $mapping));
     }
 
     // If we have no ID or UUID, use the lookup column (for cross-migration
@@ -366,6 +459,26 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
       else {
         $ids[] = '_record_number';
       }
+    }
+    else {
+      // The identifier/ID/UUID column above is legitimately blank for rows
+      // that create new content in a combined "add + update" CSV. Two blank
+      // rows would otherwise hash to the same migrate ID map key, so the
+      // second row would resolve to the first row's just-created entity
+      // instead of creating its own. _record_number is unique per row within
+      // the file, so append it as a tie-breaker to keep every row's map key
+      // distinct regardless of blank values in the primary column(s).
+      $ids[] = '_record_number';
+    }
+
+    $destination = [
+      'plugin' => "entity:$entity_type_id",
+      'default_bundle' => $bundle,
+      'overwrite_properties' => $this->getOverwriteProperties(),
+      'validate' => TRUE,
+    ];
+    if ($this->isTranslationImport()) {
+      $destination['translations'] = TRUE;
     }
 
     return [
@@ -383,13 +496,29 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
         'record_number_field' => '_record_number',
       ],
       'process' => $process,
-      'destination' => [
-        'plugin' => "entity:$entity_type_id",
-        'default_bundle' => $bundle,
-        'overwrite_properties' => $this->getOverwriteProperties(),
-        'validate' => TRUE,
-      ],
+      'destination' => $destination,
     ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getUnmatchedIdentifierColumns(FileInterface $file): array {
+    $headers = $this->getCSVHeaders($file);
+    $unmatched = [];
+
+    // Only a user-configured identifier column (set via "Customize
+    // Settings") represents a deliberate intent to match existing content.
+    // Every shipped template also maps nid/uuid by default for round-trip
+    // export/reimport, but that default mapping going unmatched is the
+    // normal, expected case for a plain new-content import and isn't worth
+    // warning about.
+    $identifier_column = $this->getIdentifierColumn();
+    if ($identifier_column && !in_array($identifier_column, $headers, TRUE)) {
+      $unmatched[] = $identifier_column;
+    }
+
+    return array_values(array_unique($unmatched));
   }
 
   public function mappedFieldsCount(FileInterface $file) {
@@ -405,26 +534,46 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
   /**
    * {@inheritdoc}
    */
-  public function getIdentifierColumn(): ?string {
+  public function getIdentifierColumn(?FileInterface $file = NULL): ?string {
     $column = $this->getConfig('identifier_column');
-    return !empty($column) ? $column : NULL;
+    if (empty($column)) {
+      return NULL;
+    }
+    if ($file && !in_array($column, $this->getCSVHeaders($file), TRUE)) {
+      return NULL;
+    }
+    return $column;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getLabelSourceColumn(): ?string {
+  public function getLabelSourceColumn(?FileInterface $file = NULL): ?string {
     $entity_type_id = $this->getTargetEntityTypeId();
     $label_key = $this->entityTypeManager()
       ->getDefinition($entity_type_id)
       ->getKey('label');
 
+    // Unlike every other importable entity type, 'user' has no 'label'
+    // entity key in Drupal core -- User::label() computes the account name
+    // dynamically instead of declaring it. The required 'name' (username)
+    // field plays the same uniquely-identifying-row role that title/name
+    // already play for node/media/taxonomy_term/community/protocol, so
+    // treat it as the label key here.
+    if (!$label_key && $entity_type_id === 'user') {
+      $label_key = 'name';
+    }
+
     if (!$label_key) {
       return NULL;
     }
 
+    $headers = $file ? $this->getCSVHeaders($file) : [];
     foreach ($this->getMapping() as $mapping) {
       if ($mapping['target'] === $label_key) {
+        if ($file && !in_array($mapping['source'], $headers, TRUE)) {
+          return NULL;
+        }
         return $mapping['source'];
       }
     }
@@ -435,7 +584,7 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
   /**
    * {@inheritdoc}
    */
-  public function getMediaSourceColumn(): ?string {
+  public function getMediaSourceColumn(?FileInterface $file = NULL): ?string {
     if ($this->getTargetEntityTypeId() !== 'media') {
       return NULL;
     }
@@ -479,10 +628,14 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
       }
     }
 
+    $headers = $file ? $this->getCSVHeaders($file) : [];
     foreach ($this->getMapping() as $mapping) {
       $target = $mapping['target'];
       // Match the source field directly or its target_id subfield.
       if ($target === $source_field || $target === $source_field . '/target_id') {
+        if ($file && !in_array($mapping['source'], $headers, TRUE)) {
+          return NULL;
+        }
         return $mapping['source'];
       }
     }

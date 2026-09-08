@@ -9,12 +9,12 @@ use Drupal\Tests\content_moderation\Traits\ContentModerationTestTrait;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\user\Entity\User;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests that hook_user_cancel() only archives currently-published content.
- *
- * @group mukurtu_workflows
  */
+#[Group('mukurtu_workflows')]
 class UserCancelArchiveTest extends KernelTestBase {
 
   use ContentModerationTestTrait;

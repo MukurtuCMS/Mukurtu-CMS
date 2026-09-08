@@ -1,0 +1,20 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.message.field_number_imported
+    - message.template.mukurtu_batch_import_report
+  module:
+    - message
+id: message.mukurtu_batch_import_report.field_number_imported
+field_name: field_number_imported
+entity_type: message
+bundle: mukurtu_batch_import_report
+label: 'Number imported'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: integer

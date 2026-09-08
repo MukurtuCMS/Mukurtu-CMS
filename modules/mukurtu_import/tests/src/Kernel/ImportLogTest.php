@@ -1,0 +1,494 @@
+<?php
+
+declare(strict_types = 1);
+
+namespace Drupal\Tests\mukurtu_import\Kernel;
+
+use Drupal\file\FileInterface;
+use Drupal\mukurtu_import\Entity\MukurtuImportStrategy;
+use Drupal\mukurtu_import\ImportBatchExecutable;
+use Drupal\node\Entity\Node;
+
+/**
+ * Tests persistent logging of import runs (issue #1417).
+ */
+class ImportLogTest extends MukurtuImportTestBase {
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp(): void {
+    parent::setUp();
+    $this->installSchema('mukurtu_import', ['mukurtu_import_log']);
+  }
+
+  /**
+   * Create a protocol-aware node ready to be updated by an import row.
+   */
+  protected function createNode(string $title): Node {
+    $node = Node::create([
+      'title' => $title,
+      'type' => 'protocol_aware_content',
+      'status' => TRUE,
+      'uid' => $this->currentUser->id(),
+    ]);
+    $node->setSharingSetting('any');
+    $node->setProtocols([$this->protocol]);
+    $node->save();
+    return $node;
+  }
+
+  /**
+   * Build a migration definition the way ExecuteImportForm does, with the
+   * mukurtu_import_* metadata keys the batch executable and log storage
+   * depend on.
+   */
+  protected function buildDefinition(FileInterface $file, array $mapping, string $import_id, string $entity_type_id = 'node', string $bundle = 'protocol_aware_content'): array {
+    $config = MukurtuImportStrategy::create(['uid' => $this->currentUser->id()]);
+    $config->setTargetEntityTypeId($entity_type_id);
+    $config->setTargetBundle($bundle);
+    $config->setMapping($mapping);
+
+    return $config->toDefinition($file) + [
+      'mukurtu_import_id' => $import_id,
+      'mukurtu_import_fid' => (int) $file->id(),
+      'mukurtu_import_filename' => $file->getFilename(),
+      'mukurtu_import_entity_type_id' => $entity_type_id,
+      'mukurtu_import_bundle' => $bundle,
+      'mukurtu_import_uid' => (int) $this->currentUser->id(),
+    ];
+  }
+
+  /**
+   * Drive the batch import callbacks the way Drupal's batch API would,
+   * without needing a real batch run. Mirrors _batch_process()'s handling
+   * of $context['sandbox'] between operations.
+   */
+  protected function runBatchImport(array $definitions): array {
+    $context = ['results' => [], 'sandbox' => []];
+    foreach ($definitions as $definition) {
+      do {
+        $context['finished'] = 1;
+        ImportBatchExecutable::batchProcessImportDefinition($definition, [], $context);
+      } while ($context['finished'] < 1);
+      $context['sandbox'] = [];
+    }
+    ImportBatchExecutable::batchFinishedImport(TRUE, $context['results'], []);
+    return $context['results'];
+  }
+
+  /**
+   * Load all mukurtu_import_log rows for a given import_id, keyed by fid.
+   */
+  protected function loadLogRowsByFid(string $import_id): array {
+    $rows = \Drupal::database()->select('mukurtu_import_log', 'l')
+      ->fields('l')
+      ->condition('l.import_id', $import_id)
+      ->execute()
+      ->fetchAll();
+    $by_fid = [];
+    foreach ($rows as $row) {
+      $by_fid[$row->fid] = $row;
+    }
+    return $by_fid;
+  }
+
+  /**
+   * A single file that imports cleanly produces one successful log row.
+   */
+  public function testSingleSuccessfulFileLogsSuccess() {
+    $import_id = $this->container->get('uuid')->generate();
+    $node = $this->createNode('Original Title');
+
+    $data = [
+      ['nid', 'title'],
+      [$node->id(), 'Updated Title'],
+    ];
+    $file = $this->createCsvFile($data);
+    $mapping = [
+      ['target' => 'nid', 'source' => 'nid'],
+      ['target' => 'title', 'source' => 'title'],
+    ];
+    $definition = $this->buildDefinition($file, $mapping, $import_id);
+
+    $this->runBatchImport([$definition]);
+
+    $rows = $this->loadLogRowsByFid($import_id);
+    $this->assertCount(1, $rows);
+    $row = reset($rows);
+    $this->assertEquals(1, $row->success);
+    $this->assertEquals($file->id(), $row->fid);
+    $this->assertEquals($file->getFilename(), $row->filename);
+    $this->assertEquals('node', $row->entity_type_id);
+    $this->assertEquals('protocol_aware_content', $row->bundle);
+    $this->assertEquals(1, $row->count_processed);
+    // This row updates a node that already existed before the import ran.
+    // count_created/count_updated must reflect the destination entity's
+    // true isNew() state, not migrate's own ID-map bookkeeping (which would
+    // otherwise count this as "created" since it's this migration's first
+    // run).
+    $this->assertEquals(0, $row->count_created);
+    $this->assertEquals(1, $row->count_updated);
+    $this->assertEquals(0, $row->count_failed);
+    $this->assertEmpty($row->messages);
+
+    $details = json_decode((string) $row->details, TRUE);
+    $this->assertCount(1, $details);
+    $this->assertEquals('updated', $details[0]['status']);
+    $this->assertEquals('Updated Title', $details[0]['label']);
+    $this->assertNotEmpty($details[0]['url']);
+  }
+
+  /**
+   * A row that creates a brand new entity (no matching nid) logs it as
+   * created, with a structured detail entry.
+   */
+  public function testCreatingNewEntityLogsCreatedNotUpdated() {
+    $import_id = $this->container->get('uuid')->generate();
+
+    $data = [
+      ['title', 'Sharing Setting', 'Protocols'],
+      ['Brand New Node', 'any', $this->protocol->id()],
+    ];
+    $file = $this->createCsvFile($data);
+    $mapping = [
+      ['target' => 'title', 'source' => 'title'],
+      ['target' => 'field_cultural_protocols/sharing_setting', 'source' => 'Sharing Setting'],
+      ['target' => 'field_cultural_protocols/protocols', 'source' => 'Protocols'],
+    ];
+    $definition = $this->buildDefinition($file, $mapping, $import_id);
+
+    $this->runBatchImport([$definition]);
+
+    $rows = $this->loadLogRowsByFid($import_id);
+    $this->assertCount(1, $rows);
+    $row = reset($rows);
+    $this->assertEquals(1, $row->count_created);
+    $this->assertEquals(0, $row->count_updated);
+
+    $details = json_decode((string) $row->details, TRUE);
+    $this->assertCount(1, $details);
+    $this->assertEquals('created', $details[0]['status']);
+    $this->assertEquals('Brand New Node', $details[0]['label']);
+  }
+
+  /**
+   * A file with a failing row (blanking out the required title) logs the
+   * failure with readable error text.
+   */
+  public function testSingleFailingFileLogsFailure() {
+    $import_id = $this->container->get('uuid')->generate();
+    $node = $this->createNode('Original Title');
+
+    // An empty title fails Node's required title validation.
+    $data = [
+      ['nid', 'title'],
+      [$node->id(), ''],
+    ];
+    $file = $this->createCsvFile($data);
+    $mapping = [
+      ['target' => 'nid', 'source' => 'nid'],
+      ['target' => 'title', 'source' => 'title'],
+    ];
+    $definition = $this->buildDefinition($file, $mapping, $import_id);
+
+    $this->runBatchImport([$definition]);
+
+    $rows = $this->loadLogRowsByFid($import_id);
+    $this->assertCount(1, $rows);
+    $row = reset($rows);
+    $this->assertEquals(0, $row->success);
+    $this->assertEquals(1, $row->count_failed);
+    $this->assertNotEmpty($row->messages);
+
+    // The message should use the field's real label and be free of raw
+    // Drupal property paths / entity locators.
+    $this->assertStringContainsString('Title:', $row->messages);
+    $this->assertStringNotContainsString('title.0.value', $row->messages);
+    $this->assertStringNotContainsString('[node:', $row->messages);
+
+    $details = json_decode((string) $row->details, TRUE);
+    $this->assertCount(1, $details);
+    $this->assertEquals('failed', $details[0]['status']);
+    $this->assertStringContainsString('Title:', $details[0]['message']);
+  }
+
+  /**
+   * Cultural Protocols is a composite field with two independently validated
+   * sub-properties: "protocols" (the applied protocol IDs, also the field
+   * type's *main* property per CulturalProtocolItem::mainPropertyName()) and
+   * "sharing_setting" (the any/all sharing logic, a non-main sub-property).
+   * Regression test for a bug where violations on either sub-property
+   * rendered identically as "Cultural Protocols: This value should not be
+   * null.", giving no indication of which sub-part actually failed.
+   *
+   * formatViolationMessage() appends a "(Sub-property Label)" suffix for any
+   * sub-property of a field with more than one independently validated
+   * property, regardless of whether it's the main property, so both a
+   * "protocols" violation and a "sharing_setting" violation get their own
+   * distinct label: "Cultural Protocols (Protocols): ..." and
+   * "Cultural Protocols (Sharing Setting): ...". A "protocols" violation
+   * surfaces with no property segment in its raw path at all - Cultural
+   * Protocols is considered empty as a whole whenever *either* required
+   * sub-property is empty (see CulturalProtocolItem::isEmpty()) - so the
+   * fix inspects the entity's actual field value to find which required
+   * sub-property is empty. A plain single-property field failure (e.g.
+   * Title) must remain unaffected by the change.
+   */
+  public function testCulturalProtocolSubPropertyViolationsAreDistinguished() {
+    $import_id = $this->container->get('uuid')->generate();
+
+    // File A: a blank title on an existing node still reads as a plain
+    // "Title:" failure, with no parenthetical sub-property suffix.
+    $node = $this->createNode('Original Title');
+    $data_title = [
+      ['nid', 'title'],
+      [$node->id(), ''],
+    ];
+    $file_title = $this->createCsvFile($data_title);
+    $mapping_title = [
+      ['target' => 'nid', 'source' => 'nid'],
+      ['target' => 'title', 'source' => 'title'],
+    ];
+    $definition_title = $this->buildDefinition($file_title, $mapping_title, $import_id);
+
+    // File B: a value of "sometimes" cleanly fails ValidSharingSettingConstraint
+    // on the "sharing_setting" sub-property without ever touching NotNull,
+    // since "protocols" is validly mapped to a pre-existing protocol.
+    $data_sharing = [
+      ['title', 'Sharing Setting', 'Protocols'],
+      ['Sharing Setting Failure', 'sometimes', $this->protocol->id()],
+    ];
+    $file_sharing = $this->createCsvFile($data_sharing);
+    $mapping_sharing = [
+      ['target' => 'title', 'source' => 'title'],
+      ['target' => 'field_cultural_protocols/sharing_setting', 'source' => 'Sharing Setting'],
+      ['target' => 'field_cultural_protocols/protocols', 'source' => 'Protocols'],
+    ];
+    $definition_sharing = $this->buildDefinition($file_sharing, $mapping_sharing, $import_id);
+
+    // File C: omitting the "protocols" mapping entirely on a brand new node
+    // leaves the field's main property NULL, failing NotNull on "protocols".
+    $data_protocols = [
+      ['title', 'Sharing Setting'],
+      ['Protocols Failure', 'any'],
+    ];
+    $file_protocols = $this->createCsvFile($data_protocols);
+    $mapping_protocols = [
+      ['target' => 'title', 'source' => 'title'],
+      ['target' => 'field_cultural_protocols/sharing_setting', 'source' => 'Sharing Setting'],
+    ];
+    $definition_protocols = $this->buildDefinition($file_protocols, $mapping_protocols, $import_id);
+
+    $this->runBatchImport([$definition_title, $definition_sharing, $definition_protocols]);
+
+    $rows = $this->loadLogRowsByFid($import_id);
+    $this->assertCount(3, $rows);
+
+    $row_title = $rows[$file_title->id()];
+    $row_sharing = $rows[$file_sharing->id()];
+    $row_protocols = $rows[$file_protocols->id()];
+
+    $this->assertEquals(0, $row_title->success);
+    $this->assertEquals(0, $row_sharing->success);
+    $this->assertEquals(0, $row_protocols->success);
+
+    // Plain field failure: no parenthetical sub-property suffix.
+    $this->assertStringContainsString('Title:', (string) $row_title->messages);
+    $this->assertStringNotContainsString('Title (', (string) $row_title->messages);
+
+    $protocols_message = (string) $row_protocols->messages;
+    $sharing_message = (string) $row_sharing->messages;
+
+    // Cultural Protocols has more than one independently validated
+    // sub-property, so both "protocols" and "sharing_setting" violations
+    // are suffixed with their own sub-property label.
+    $this->assertStringContainsString('Cultural Protocols (Protocols):', $protocols_message);
+    $this->assertStringContainsString('Cultural Protocols (Sharing Setting):', $sharing_message);
+
+    // The actual regression being guarded against: the two distinguishable
+    // sub-property failures must not render as identical text.
+    $this->assertNotEquals($protocols_message, $sharing_message);
+  }
+
+  /**
+   * Regression test for the fid mis-attribution bug: when two files in the
+   * same batch both fail, each file's log row and error messages must stay
+   * attributed to that file only, not merged onto the last-failing file.
+   */
+  public function testMultiFileBatchAttributesFailuresPerFile() {
+    $import_id = $this->container->get('uuid')->generate();
+    $mapping = [
+      ['target' => 'nid', 'source' => 'nid'],
+      ['target' => 'title', 'source' => 'title'],
+    ];
+
+    // File A: two failing rows (two nodes, both blanked out).
+    $node_a1 = $this->createNode('A1');
+    $node_a2 = $this->createNode('A2');
+    $data_a = [
+      ['nid', 'title'],
+      [$node_a1->id(), ''],
+      [$node_a2->id(), ''],
+    ];
+    $file_a = $this->createCsvFile($data_a);
+    $definition_a = $this->buildDefinition($file_a, $mapping, $import_id);
+
+    // File B: one failing row.
+    $node_b1 = $this->createNode('B1');
+    $data_b = [
+      ['nid', 'title'],
+      [$node_b1->id(), ''],
+    ];
+    $file_b = $this->createCsvFile($data_b);
+    $definition_b = $this->buildDefinition($file_b, $mapping, $import_id);
+
+    $this->runBatchImport([$definition_a, $definition_b]);
+
+    $rows = $this->loadLogRowsByFid($import_id);
+    $this->assertCount(2, $rows, 'Each file gets its own log row.');
+
+    $row_a = $rows[$file_a->id()];
+    $row_b = $rows[$file_b->id()];
+
+    $this->assertEquals($file_a->getFilename(), $row_a->filename);
+    $this->assertEquals(2, $row_a->count_failed, "File A's own two failures, not merged with file B's.");
+    $this->assertCount(2, array_filter(explode("\n", (string) $row_a->messages)));
+
+    $this->assertEquals($file_b->getFilename(), $row_b->filename);
+    $this->assertEquals(1, $row_b->count_failed, "File B's own single failure, not inflated by file A's.");
+    $this->assertCount(1, array_filter(explode("\n", (string) $row_b->messages)));
+  }
+
+  /**
+   * The tempstore-facing batch_results_messages shape consumed by
+   * ImportFileUploadForm/ImportResultsForm must remain a flat list of
+   * ['fid' => ..., 'message' => ...], with each entry now correctly
+   * attributed to its own file.
+   */
+  public function testTempstoreMessageShapePreservedAndCorrectlyAttributed() {
+    $import_id = $this->container->get('uuid')->generate();
+    $mapping = [
+      ['target' => 'nid', 'source' => 'nid'],
+      ['target' => 'title', 'source' => 'title'],
+    ];
+
+    $node_a = $this->createNode('A');
+    $data_a = [['nid', 'title'], [$node_a->id(), '']];
+    $file_a = $this->createCsvFile($data_a);
+    $definition_a = $this->buildDefinition($file_a, $mapping, $import_id);
+
+    $node_b = $this->createNode('B');
+    $data_b = [['nid', 'title'], [$node_b->id(), '']];
+    $file_b = $this->createCsvFile($data_b);
+    $definition_b = $this->buildDefinition($file_b, $mapping, $import_id);
+
+    $this->runBatchImport([$definition_a, $definition_b]);
+
+    $store = $this->container->get('tempstore.private')->get('mukurtu_import');
+    $messages = $store->get('batch_results_messages');
+
+    $this->assertIsArray($messages);
+    $this->assertCount(2, $messages);
+    $fids = array_column($messages, 'fid');
+    sort($fids);
+    $expected = [$file_a->id(), $file_b->id()];
+    sort($expected);
+    $this->assertEquals($expected, $fids);
+    foreach ($messages as $message) {
+      $this->assertArrayHasKey('fid', $message);
+      $this->assertArrayHasKey('message', $message);
+    }
+  }
+
+  /**
+   * A single file mixing rows that update existing nodes (nid present) with
+   * rows that create brand new ones (blank nid) must count and attribute
+   * each row correctly. Regression test for a bug where multiple blank-nid
+   * rows in the same file shared the same blank migrate ID map key: every
+   * row after the first blank one would resolve to the previously-created
+   * entity instead of creating its own, undercounting "created" and
+   * overcounting "updated".
+   */
+  public function testMixedCreateAndUpdateRowsInSingleFile() {
+    $import_id = $this->container->get('uuid')->generate();
+    $node_a = $this->createNode('Existing A');
+    $node_b = $this->createNode('Existing B');
+
+    $data = [
+      ['nid', 'title', 'Sharing Setting', 'Protocols'],
+      [$node_a->id(), 'Existing A Updated', 'any', $this->protocol->id()],
+      [$node_b->id(), 'Existing B Updated', 'any', $this->protocol->id()],
+      ['', 'New Node One', 'any', $this->protocol->id()],
+      ['', 'New Node Two', 'any', $this->protocol->id()],
+      ['', 'New Node Three', 'any', $this->protocol->id()],
+    ];
+    $file = $this->createCsvFile($data);
+    $mapping = [
+      ['target' => 'nid', 'source' => 'nid'],
+      ['target' => 'title', 'source' => 'title'],
+      ['target' => 'field_cultural_protocols/sharing_setting', 'source' => 'Sharing Setting'],
+      ['target' => 'field_cultural_protocols/protocols', 'source' => 'Protocols'],
+    ];
+    $definition = $this->buildDefinition($file, $mapping, $import_id);
+
+    $this->runBatchImport([$definition]);
+
+    $rows = $this->loadLogRowsByFid($import_id);
+    $this->assertCount(1, $rows);
+    $row = reset($rows);
+    $this->assertEquals(5, $row->count_processed);
+    $this->assertEquals(3, $row->count_created);
+    $this->assertEquals(2, $row->count_updated);
+    $this->assertEquals(0, $row->count_failed);
+
+    $details = json_decode((string) $row->details, TRUE);
+    $created = array_values(array_filter($details, fn(array $d) => $d['status'] === 'created'));
+    $updated = array_values(array_filter($details, fn(array $d) => $d['status'] === 'updated'));
+    $this->assertCount(3, $created);
+    $this->assertCount(2, $updated);
+    $this->assertEqualsCanonicalizing(['New Node One', 'New Node Two', 'New Node Three'], array_column($created, 'label'));
+
+    // Each "created" row must be a genuinely distinct entity, not the same
+    // node repeatedly overwritten by successive blank-nid rows.
+    $this->assertCount(3, array_unique(array_column($created, 'url')), 'The three new rows produced three distinct nodes.');
+
+    $node_storage = \Drupal::entityTypeManager()->getStorage('node');
+    $nids = [];
+    foreach (['New Node One', 'New Node Two', 'New Node Three'] as $title) {
+      $matches = $node_storage->loadByProperties(['title' => $title]);
+      $this->assertCount(1, $matches, "Exactly one node exists with title '$title'.");
+      $nids[] = (int) reset($matches)->id();
+    }
+    $this->assertCount(3, array_unique($nids), 'The three new rows produced three distinct node IDs in storage.');
+  }
+
+  /**
+   * A mixed batch (one file succeeds, one fails) logs one row of each.
+   */
+  public function testMixedBatchLogsSuccessAndFailureSeparately() {
+    $import_id = $this->container->get('uuid')->generate();
+    $mapping = [
+      ['target' => 'nid', 'source' => 'nid'],
+      ['target' => 'title', 'source' => 'title'],
+    ];
+
+    $node_success = $this->createNode('Success Node');
+    $data_success = [['nid', 'title'], [$node_success->id(), 'Updated']];
+    $file_success = $this->createCsvFile($data_success);
+    $definition_success = $this->buildDefinition($file_success, $mapping, $import_id);
+
+    $node_failure = $this->createNode('Failure Node');
+    $data_failure = [['nid', 'title'], [$node_failure->id(), '']];
+    $file_failure = $this->createCsvFile($data_failure);
+    $definition_failure = $this->buildDefinition($file_failure, $mapping, $import_id);
+
+    $this->runBatchImport([$definition_success, $definition_failure]);
+
+    $rows = $this->loadLogRowsByFid($import_id);
+    $this->assertCount(2, $rows);
+    $this->assertEquals(1, $rows[$file_success->id()]->success);
+    $this->assertEquals(0, $rows[$file_failure->id()]->success);
+  }
+
+}

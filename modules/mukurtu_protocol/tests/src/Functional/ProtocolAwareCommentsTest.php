@@ -3,12 +3,12 @@
 namespace Drupal\Tests\mukurtu_protocol\Functional;
 
 use Drupal\Tests\mukurtu_protocol\Functional\ProtocolAwareFunctionalTestBase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests Mukurtu protocol aware comments.
- *
- * @group mukurtu_protocol
  */
+#[Group('mukurtu_protocol')]
 class ProtocolAwareCommentsTest extends ProtocolAwareFunctionalTestBase {
 
   /**

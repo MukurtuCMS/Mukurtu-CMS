@@ -25,6 +25,7 @@ class CollectionEntityTest extends ProtocolAwareEntityTestBase {
   protected static $modules = [
     'mukurtu_collection',
     'geofield',
+    'path_alias',
     'mukurtu_local_contexts'
   ];
 

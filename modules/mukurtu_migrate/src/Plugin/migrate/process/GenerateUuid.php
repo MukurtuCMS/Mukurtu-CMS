@@ -2,18 +2,18 @@
 
 namespace Drupal\mukurtu_migrate\Plugin\migrate\process;
 
+use Drupal\migrate\Attribute\MigrateProcess;
 use Drupal\migrate\MigrateExecutableInterface;
 use Drupal\migrate\ProcessPluginBase;
 use Drupal\migrate\Row;
 
 /**
  * Generate a uuid.
- *
- * @MigrateProcessPlugin(
- *   id = "generate_uuid",
- *   handle_multiples = FALSE
- * )
  */
+#[MigrateProcess(
+  id: 'generate_uuid',
+  handle_multiples: FALSE,
+)]
 class GenerateUuid extends ProcessPluginBase
 {
   /**

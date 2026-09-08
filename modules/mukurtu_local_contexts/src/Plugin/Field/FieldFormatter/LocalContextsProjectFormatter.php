@@ -2,21 +2,20 @@
 
 namespace Drupal\mukurtu_local_contexts\Plugin\Field\FieldFormatter;
 
+use Drupal\Core\Field\Attribute\FieldFormatter;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FormatterBase;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\mukurtu_local_contexts\LocalContextsProject;
 
 /**
  * Plugin implementation of the 'Local Contexts Project' formatter.
- *
- * @FieldFormatter(
- *   id = "local_contexts_project",
- *   label = @Translation("Local Contexts Project"),
- *   field_types = {
- *     "local_contexts_project"
- *   }
- * )
  */
+#[FieldFormatter(
+  id: 'local_contexts_project',
+  label: new TranslatableMarkup('Local Contexts Project'),
+  field_types: ['local_contexts_project'],
+)]
 class LocalContextsProjectFormatter extends FormatterBase {
 
   /**
@@ -30,13 +29,25 @@ class LocalContextsProjectFormatter extends FormatterBase {
       if (!$project->isValid()) {
         continue;
       }
+      $projectUrl = $project->getUrl();
+
+      $labelItems = array_map(
+        fn (array $label) => LocalContextsProject::buildLabelRenderArray($label, $project->getTitle(), $projectUrl),
+        array_merge($project->getLabels("tk"), $project->getLabels("bc"))
+      );
+      $noticeItems = array_map(
+        fn (array $notice) => LocalContextsProject::buildNoticeRenderArray($notice, $project->getTitle(), $projectUrl),
+        $project->getNotices()
+      );
+
       $element[$delta] = [
-        '#theme' => 'local_contexts_project',
-        '#title' => $project->getTitle(),
-        '#project_url' => $project->getUrl(),
-        '#tk_labels' => $project->getLabels("tk"),
-        '#bc_labels' => $project->getLabels("bc"),
-        '#notices' => $project->getNotices(),
+        '#theme' => 'local_contexts_label_group',
+        '#project_title' => $project->getTitle(),
+        '#project_url' => $projectUrl,
+        '#items' => array_merge($labelItems, $noticeItems),
+        '#not_available' => $project->isNotAvailable(),
+        '#archived' => $project->isArchived(),
+        '#last_synced' => $project->getUpdated(),
       ];
     }
 

@@ -1,7 +1,19 @@
 /* todo: when Claro is officially replaced by Gin (see https://www.drupal.org/about/core/blog/drupal-core-will-adopt-gin-admin-theme-to-replace-claro),
 remove the .claro-details__description class and replace it with its Gin
-counterpart, if one exists. */
-.form-item__description, .fieldset__description, .claro-details__description {
+counterpart, if one exists.
+[id$="--description"] covers the same text when the form renders through
+core's default (non-Claro) theming instead - the case for front-end users,
+whose dialogs don't get Claro/Gin's form theming at all. Core's own
+description wrapper markup always ends its id in "--description" (see
+FormElementBase/DetailsElementForm's #description handling), but only
+carries an actual class (.description) for a plain form item's description -
+a <details>/fieldset's own description (e.g. "Cultural Protocols") has no
+class at all outside Claro/Gin, so match on the id suffix instead of relying
+on any one class. */
+.form-item__description,
+.fieldset__description,
+.claro-details__description,
+[id$="--description"] {
   /* For form description text, force the line length to fill the width of its
   container. */
 
@@ -12,6 +24,28 @@ counterpart, if one exists. */
   max-width: 100% !important;
 }
 
+/* The password confirm widget's "Passwords match: yes/no" message
+(.password-match-message / .password-match-message__text, built at runtime
+by core's user.js) is styled by Claro's own form--password-confirm.css using
+Claro-specific --progress-bar-label-color/--progress-bar-description-color
+variables, which are either undefined or resolve to a static dark value
+outside Claro's own theme, rendering as unreadable dark text on Gin's dark
+background. Gin re-themes the password strength meter directly above this
+message (.password-strength__title/__text) but never this selector, so
+there's no Gin rule to win the cascade on its own. Verified via computed
+styles that Claro's theme CSS loads after this module's CSS at equal
+specificity, so - same reasoning as the other Claro/Gin cascade-order
+overrides in this file (e.g. .ui-dialog further down) - !important is
+required to reliably win regardless of load order. Matches the title/text
+color pattern
+Gin already uses for .password-strength__title/__text. */
+.password-match-message {
+  color: var(--gin-color-text-light) !important;
+}
+.password-match-message__text {
+  color: var(--gin-color-title) !important;
+}
+
 /* The "create a new collection/word list/personal collection" quick-create
 dialogs (see the "mukurtu-quick-create-form" class added in
 mukurtu_collection.module / mukurtu_dictionary.module) keep only a couple of
@@ -20,7 +54,8 @@ color, it doesn't shrink the size) ends up more visually prominent than the
 short fields themselves. Shrink it in these dialogs specifically. */
 .mukurtu-quick-create-form .form-item__description,
 .mukurtu-quick-create-form .fieldset__description,
-.mukurtu-quick-create-form .claro-details__description {
+.mukurtu-quick-create-form .claro-details__description,
+.mukurtu-quick-create-form [id$="--description"] {
   font-size: 0.75rem;
   line-height: 1.3;
 }
@@ -255,14 +290,27 @@ short fields themselves. Shrink it in these dialogs specifically. */
 }
 
 
-/* Canonical .ui-dialog positioning override (loaded on every page via
-   hook_page_attachments, covering both front-end and Gin admin contexts).
-   Gin sets .ui-dialog { position: absolute } which causes modal dialogs to
-   drift down the page as the user scrolls. Override to fixed + viewport-center
-   so the dialog always appears in the center of the viewport regardless of
-   scroll position. Uses flexbox so long forms scroll internally rather than
-   extending beyond the viewport. */
+/* Canonical .ui-dialog positioning/background override (loaded on every
+   page via hook_page_attachments, covering both front-end and Gin admin
+   contexts).
+   - Position: Gin sets .ui-dialog { position: absolute } which causes modal
+     dialogs to drift down the page as the user scrolls. Override to fixed +
+     viewport-center so the dialog always appears in the center of the
+     viewport regardless of scroll position. Uses flexbox so long forms
+     scroll internally rather than extending beyond the viewport.
+   - Background/text color: Gin's own rules for these key off its
+     --gin-bg-layer/--gin-color-text custom properties, which are only
+     defined when Gin's own base CSS loads - true for logged-in users with
+     the admin toolbar (it pulls Gin's CSS in as a side effect) but not for
+     other front-end users, who otherwise get a fully transparent, unreadable
+     dialog. Supply the same light-mode defaults Gin itself uses as
+     fallbacks, so the dialog looks the same regardless of which users
+     happen to trigger a Gin CSS load - real Gin dark-mode values (defined
+     when its CSS does load) still take precedence over these fallbacks. */
 .ui-dialog {
+    /* !important: core's own dialog CSS sets background: transparent at the
+       same specificity, later in the cascade, which would otherwise win. */
+    background: var(--gin-bg-layer, #fff) !important;
     position: fixed !important;
     top: 50vh !important;
     left: 50vw !important;
@@ -274,25 +322,83 @@ short fields themselves. Shrink it in these dialogs specifically. */
     flex-direction: column !important;
 }
 
+/* Canonical .ui-dialog/.ui-widget-overlay box-chrome fallback (same
+   loaded-everywhere reasoning as the positioning override above). Gin's
+   own dialog background and backdrop rely on --gin-bg-layer/--gin-bg-layer2,
+   custom properties only ever defined by Gin's own root/theme CSS. On a
+   front-end page themed with mukurtu_v4 (not Gin), those properties are
+   undefined, so var() resolves to nothing and the dialog box + backdrop
+   render fully transparent - the box positions correctly but has no
+   visible surface, so its content appears to bleed into the page behind
+   it. The fallback values here only apply when the property is genuinely
+   undefined, so Gin's own admin-side appearance (including dark mode) is
+   unaffected. */
+.ui-dialog:not(.ui-dialog-off-canvas) {
+    background: var(--gin-bg-layer, #fff) !important;
+    border: 1px solid rgba(0, 0, 0, 0.2) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+}
+
+.ui-widget-overlay {
+    background: var(--gin-bg-layer2, rgba(0, 0, 0, 0.5)) !important;
+}
+
 .ui-dialog .ui-dialog-titlebar {
     flex-shrink: 0;
+    /* Padding fallback: same reasoning as .ui-dialog-content below. Matches
+       Gin's own --gin-spacing-m/--gin-spacing-l values. */
+    padding: var(--gin-spacing-m, 1rem) var(--gin-spacing-l, 1.5rem) !important;
+}
+
+.ui-widget-overlay {
+    /* Background fallback: Gin's own dialog.css sets this same property on
+       this same selector, so ours only applies when Gin's variables.css
+       doesn't load - same reasoning as the other fallbacks in this file.
+       Without it the modal backdrop is fully transparent (opacity .9 of
+       nothing), so the page behind the dialog never dims. Matches Gin's own
+       --gin-bg-layer2 light-mode value. */
+    background: var(--gin-bg-layer2, #edeff5) !important;
 }
 
 .ui-dialog .ui-dialog-content {
+    /* !important: core's own dialog CSS sets background: none at the same
+       specificity, later in the cascade, which would otherwise win. */
+    background: var(--gin-bg-layer, #fff) !important;
+    color: var(--gin-color-text, #222330) !important;
     flex: 1 1 auto !important;
     overflow-y: auto !important;
+    /* Padding fallback: Gin's own padding rule lives on a more specific
+       .ui-widget-content.ui-dialog-content selector, so it wins the cascade
+       whenever Gin's dialog.css component loads - but that can happen
+       *without* Gin's base variables.css also loading (observed on at least
+       one environment), in which case Gin's own rule resolves --gin-spacing-l
+       to nothing and collapses to 0 padding, and our lower-specificity
+       fallback never gets a chance to run. !important forces this fallback
+       to win regardless of which partial combination of Gin's CSS happens to
+       load, the same reasoning as the background/color !important above.
+       This fallback matches Gin's own --gin-spacing-l value. */
+    padding-inline: var(--gin-spacing-l, 1.5rem) !important;
 }
 
 .ui-dialog .ui-dialog-buttonpane {
     flex-shrink: 0;
+    /* Padding fallback: same reasoning as .ui-dialog-content above. Matches
+       Gin's own --gin-spacing-s/--gin-spacing-l values. */
+    padding: var(--gin-spacing-s, .75rem) var(--gin-spacing-l, 1.5rem) !important;
 }
 
-/* Widen the Layout Builder off-canvas dialogs (layout picker, block picker, block
-   config forms). Each dialog link carries data-dialog-options='{"width":450}' which
-   jQuery UI applies as an inline style; !important is required to override it. */
-.ui-dialog.ui-dialog-off-canvas {
-    width: 650px !important;
-    max-width: 90vw !important;
+.tagify__dropdown {
+    /* Background fallback: tagify's own gin.css skin (web/modules/contrib/
+       tagify/css/gin.css) defines --tagify-dd-bg-color from Gin's
+       --gin-bg-layer2, but never actually applies it to this selector -
+       .tagify__dropdown has no background rule at all in that stylesheet.
+       On an admin (Gin) page it happens to sit over Gin's own themed canvas,
+       but on the front end there's nothing behind it, so the floating
+       dropdown panel is fully transparent and whatever's underneath (e.g.
+       the dialog's own submit button) shows through. Matches Gin's own
+       --gin-bg-layer2 light-mode value, same pattern as the other fallbacks
+       in this file. */
+    background: var(--gin-bg-layer2, #edeff5) !important;
 }
 
 /* Fix the titlebar close icon drifting off-center. Gin's own dialog CSS
@@ -332,6 +438,14 @@ short fields themselves. Shrink it in these dialogs specifically. */
     border-top-color: var(--gin-color-focus, rgba(0, 125, 250, .6));
 }
 
+/* Widen the Layout Builder off-canvas dialogs (layout picker, block picker, block
+   config forms). Each dialog link carries data-dialog-options='{"width":450}' which
+   jQuery UI applies as an inline style; !important is required to override it. */
+.ui-dialog.ui-dialog-off-canvas {
+    width: 650px !important;
+    max-width: 90vw !important;
+}
+
 /* Fix Layout Builder settings menu blocking block contextual/edit links (#1385).
    gin_lb removes core's layout-builder.css and replaces it with its own, which
    positions section configure/remove links and region labels absolutely at
@@ -352,6 +466,77 @@ short fields themselves. Shrink it in these dialogs specifically. */
 .layout-builder-block {
     min-width: 0;
     max-width: 100%;
+}
+
+/* Fix hardcoded white backgrounds on the Layout Builder canvas in Gin Dark
+   Mode. gin_lb's own CSS never themes these two elements: the per-section
+   "Configure" pill (.layout-builder__link--configure) hardcodes
+   background: #fff, and jQuery UI's drag placeholder
+   (.ui-sortable-helper, shown while dragging a block to reorder it) hardcodes
+   background-color: #fff. Both stay white regardless of Gin's dark-mode
+   class, standing out against the surrounding dark canvas. Swap them to
+   Gin's own surface-color variable, matching how gin_lb themes its other
+   canvas chrome (e.g. .layout-builder-browser-block-item uses
+   var(--gin-bg-layer) the same way). !important is required to win over
+   gin_lb's own same-specificity, later-loaded rule.
+
+   gin_lb's own text/icon color for this pill (--gin-border-color-form-element)
+   was tuned against its original white background: on dark mode's
+   --gin-bg-layer that pairing drops to ~3.4:1, below the 4.5:1 WCAG 1.4.3
+   requires for this size of text. Repoint both to --gin-color-text, the same
+   background-paired text variable already used elsewhere in this file (e.g.
+   .ui-dialog .ui-dialog-content below), which is tuned against
+   --gin-bg-layer in both modes. */
+.layout-builder__link--configure {
+    background: var(--gin-bg-layer, #fff) !important;
+    color: var(--gin-color-text, #222330) !important;
+    /* gin_lb sizes this pill's label at font-size: .75em (12px on a 16px
+       base) / line-height: 19px / top: -19px. Bump the text up for
+       legibility and grow line-height/top to match so the pill still sits
+       flush above the section edge instead of clipping the taller text. */
+    font-size: .875em !important;
+    line-height: 22px !important;
+    top: -22px !important;
+}
+
+.layout-builder__link--configure::after {
+    background-color: var(--gin-color-text, #222330) !important;
+}
+
+.layout-builder__section .ui-sortable-helper {
+    background-color: var(--gin-bg-layer, #fff) !important;
+}
+
+/* Fill the "Add section"/"Add block"/"Add a block" buttons with a solid
+   background instead of gin_lb's default teal-text-on-transparent
+   treatment. gin_lb colors them with --gin-color-primary (the site's teal
+   accent) on a transparent background, so they render on whatever's behind
+   the canvas - here, the block-content preview area, which stays white by
+   design (see .layout-builder__link--configure above; it's a live front-end
+   preview, not admin chrome, so it doesn't follow Gin dark mode).
+   --gin-color-primary text vs. white computes to ~4.48:1, just under the
+   4.5:1 WCAG 1.4.3 minimum for this text size - and contrast is symmetric
+   under a foreground/background swap, so simply filling with
+   --gin-color-primary and flipping the text to white does not fix that
+   ratio (it's the same ~4.48:1 either way). Fill with
+   --gin-color-primary-active instead - a darker shade of the same teal
+   accent Gin already defines for this button's own :active state - which
+   computes to ~7:1 against white text in light mode and ~12.8:1 against
+   --gin-color-button-text's near-black in dark mode. gin_lb's own :hover
+   rule already switches to a filled look (background-color:
+   var(--gin-color-primary-hover) plus color: var(--gin-color-button-text)),
+   so this makes the default state filled too, just with a darker shade for
+   contrast. Scoped under each button's real ancestor - #layout-builder for
+   the "Add section"/"Add block" canvas links, #drupal-off-canvas for "Add a
+   block" in the block picker dialog - so this outranks gin_lb's own plain
+   single-class selector on specificity: a same-specificity !important tie
+   goes to whichever rule loads later in the cascade, and gin_lb's own CSS
+   happens to load after this file's. */
+#layout-builder .layout-builder__link--add,
+#drupal-off-canvas .inline-block-create-button {
+    color: var(--gin-color-button-text, #fff) !important;
+    background-color: var(--gin-color-primary-active, #0c645f) !important;
+    border-color: var(--gin-color-primary-active, #0c645f) !important;
 }
 
 .layout-builder .contextual {
@@ -650,6 +835,20 @@ short fields themselves. Shrink it in these dialogs specifically. */
   left: 50% !important;
   right: auto !important;
   transform: translateX(-50%) !important;
+}
+
+/* Entity Browser's own Modal display hardcodes its sticky form-actions bar
+   (the "Add Content"/"Add Sub-Collection"/etc. submit button row) to a solid
+   white background (var(--color-white, white)) - see entity_browser's own
+   entity_browser.theme.css. That's jarring against Gin's dark modal chrome
+   now that entity browser modals correctly render in Gin (see #2039).
+   Reuse Gin's own --gin-bg-layer surface color, the same variable
+   .ui-dialog .ui-dialog-content uses above, so the sticky bar blends with
+   the rest of the dialog instead of standing out as a separate white strip.
+   !important: entity_browser's own rule sets this property at equal
+   selector specificity, later in the cascade, which would otherwise win. */
+.entity-browser-form:not(.entity-browser-form--multi-step-display) > .form-actions {
+  background-color: var(--gin-bg-layer, #fff) !important;
 }
 
 /* Fix #1825: on /admin/export/settings, each saved export setting's

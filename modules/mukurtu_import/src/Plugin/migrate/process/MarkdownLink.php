@@ -4,19 +4,22 @@ declare(strict_types = 1);
 
 namespace Drupal\mukurtu_import\Plugin\migrate\process;
 
+use Drupal\migrate\Attribute\MigrateProcess;
 use Drupal\migrate\MigrateExecutableInterface;
 use Drupal\migrate\ProcessPluginBase;
 use Drupal\migrate\Row;
 
 /**
- * @MigrateProcessPlugin(
- *   id = "markdown_link"
- * )
+ * Parses a Markdown link into a link field value.
  */
+#[MigrateProcess('markdown_link')]
 class MarkdownLink extends ProcessPluginBase {
   public function transform($value, MigrateExecutableInterface $migrate_executable, Row $row, $destination_property) {
+    if (!is_string($value) || $value === '') {
+      return $value;
+    }
     preg_match('/\[(.*?)\]\s*?\\((.*)\)/', $value, $matches, PREG_UNMATCHED_AS_NULL);
-    if ($matches[1] && $matches[2]) {
+    if (!empty($matches[1]) && !empty($matches[2])) {
       return ['title' => $matches[1], 'uri' => $matches[2]];
     }
     return $value;

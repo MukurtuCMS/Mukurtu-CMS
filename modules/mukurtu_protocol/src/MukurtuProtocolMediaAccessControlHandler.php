@@ -35,6 +35,24 @@ class MukurtuProtocolMediaAccessControlHandler extends MediaAccessControlHandler
         return parent::checkAccess($entity, $operation, $account)
           ->addCacheableDependency($entity);
       }
+      // Role-based media type permissions are sufficient when no protocols
+      // are set - same intent as MukurtuProtocolNodeAccessControlHandler's
+      // equivalent fallback for nodes. Unlike that handler, this also
+      // covers 'view': core's own media access (see parent::checkAccess())
+      // ties unpublished view strictly to ownership with no per-bundle "view
+      // any" permission to fall back on, so a reviewer who isn't the owner
+      // of a pending, protocol-less submission (e.g. visitor-uploaded media)
+      // would otherwise never be able to see it at all. "Edit any X media"
+      // is treated as sufficient proof of trust to view it too.
+      $bundle = $entity->bundle();
+      if (($operation === 'view' || $operation === 'update') && $account->hasPermission("edit any $bundle media")) {
+        return AccessResult::allowedIfHasPermission($account, "edit any $bundle media")
+          ->addCacheableDependency($entity);
+      }
+      if ($operation === 'delete' && $account->hasPermission("delete any $bundle media")) {
+        return AccessResult::allowedIfHasPermission($account, "delete any $bundle media")
+          ->addCacheableDependency($entity);
+      }
       return AccessResult::forbidden()->addCacheableDependency($entity);
     }
 

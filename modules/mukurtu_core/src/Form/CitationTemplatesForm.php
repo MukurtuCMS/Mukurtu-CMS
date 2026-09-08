@@ -51,7 +51,7 @@ class CitationTemplatesForm extends ConfigFormBase {
         '#type' => 'textarea',
         '#title' => $this->t('@label Citation Template', ['@label' => $bundleValue['label']]),
         '#description' => $this->t('Manage citation template for @label.', ['@label' => $bundleValue['label']]),
-        '#default_value' => $config->get($bundleName) ?? '',
+        '#default_value' => $config->get("citation_templates.$bundleName") ?? '',
       ];
 
       // Add the token tree UI.
@@ -78,7 +78,7 @@ class CitationTemplatesForm extends ConfigFormBase {
     $bundleInfo = \Drupal::service('entity_type.bundle.info')->getBundleInfo('node');
 
     foreach ($bundleInfo as $bundle => $bundleValue) {
-      $config->set($bundle, $form_state->getValue($bundle));
+      $config->set("citation_templates.$bundle", $form_state->getValue($bundle));
     }
 
     $config->save();

@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Drupal\mukurtu_protocol\Plugin\Block;
 
+use Drupal\Core\Block\Attribute\Block;
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\og\Og;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -17,13 +19,12 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *
  * Displays only top-level (non-sub) communities, ordered by the weight
  * configured at /admin/community-organization.
- *
- * @Block(
- *   id = "mukurtu_browse_by_community",
- *   admin_label = @Translation("Browse by Community"),
- *   category = @Translation("Mukurtu")
- * )
  */
+#[Block(
+  id: 'mukurtu_browse_by_community',
+  admin_label: new TranslatableMarkup('Browse by Community'),
+  category: new TranslatableMarkup('Mukurtu'),
+)]
 class BrowseByCommunityBlock extends BlockBase implements ContainerFactoryPluginInterface {
 
   public function __construct(

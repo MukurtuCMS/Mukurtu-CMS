@@ -3,6 +3,9 @@ status: true
 dependencies:
   config:
     - node.type.collection
+  module:
+    - menu_ui
+    - token
 id: node.collection.menu_link
 field_name: menu_link
 entity_type: node

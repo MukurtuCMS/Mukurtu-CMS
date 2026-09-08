@@ -5,6 +5,7 @@ dependencies:
     - search_api.server.mukurtu_database_server
   module:
     - mukurtu_dictionary
+    - mukurtu_local_contexts
     - mukurtu_protocol
     - node
     - search_api_glossary
@@ -14,6 +15,10 @@ name: 'Mukurtu Dictionary Index'
 description: 'Index for the Mukurtu dictionary.'
 read_only: false
 field_settings:
+  language_with_fallback:
+    label: 'Language (with fallback)'
+    property_path: language_with_fallback
+    type: string
   changed:
     label: Changed
     datasource_id: 'entity:node'
@@ -83,6 +88,22 @@ field_settings:
     indexed_locked: true
     type_locked: true
     hidden: true
+  field_local_contexts_projects:
+    label: 'Local Contexts Project'
+    datasource_id: 'entity:node'
+    property_path: mukurtu_local_contexts_effective_projects
+    type: string
+    dependencies:
+      module:
+        - mukurtu_local_contexts
+  field_local_contexts_labels_and_notices:
+    label: 'Local Contexts Label'
+    datasource_id: 'entity:node'
+    property_path: mukurtu_local_contexts_effective_labels
+    type: string
+    dependencies:
+      module:
+        - mukurtu_local_contexts
   keyword:
     label: Keywords
     datasource_id: 'entity:node'
@@ -220,6 +241,8 @@ processor_settings:
       - dictionary_fulltext
       - title
   language_with_fallback: {  }
+  mukurtu_local_contexts_effective_labels: {  }
+  mukurtu_local_contexts_effective_projects: {  }
   mukurtu_protocol_cultural_protocol_ids: {  }
   rendered_item: {  }
   tokenizer:
@@ -241,6 +264,8 @@ processor_settings:
     fields:
       - community_title
       - dictionary_fulltext
+      - field_local_contexts_projects
+      - field_local_contexts_labels_and_notices
       - keyword
       - language
       - title

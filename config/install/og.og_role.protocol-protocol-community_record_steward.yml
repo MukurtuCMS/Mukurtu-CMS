@@ -34,4 +34,5 @@ permissions:
   - 'update own remote_video media'
   - 'update own soundcloud media'
   - 'update own video media'
+  - 'view media'
 role_type: standard

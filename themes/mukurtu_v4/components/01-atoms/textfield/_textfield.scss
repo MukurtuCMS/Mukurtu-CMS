@@ -1,10 +1,17 @@
+// 0.5rem matches Gin admin theme's standard form-element radius
+// (--gin-border-m), so field styling reads consistently whichever theme
+// a user happens to be in.
+$field-border-radius: 0.5rem;
+
 .js-form-type-email,
 .js-form-type-textfield,
-.js-form-type-password {
+.js-form-type-password,
+.js-form-type-url {
   input {
     appearance: none;
     border: none;
-    background: var(--brand-light-accent);
+    border-radius: $field-border-radius;
+    background: var(--brand-light);
     padding-block: var(--v-space-4xxs) var(--v-space-4xxs);
     padding-inline: var(--v-space-5xs) var(--v-space-2xs);
     inline-size: 100%;
@@ -12,5 +19,108 @@
     overflow: hidden;
     white-space: nowrap;
     font-weight: var(--text-bold);
+  }
+}
+
+// Number inputs (e.g. the Year field next to a Month/Day select pair)
+// don't share a wrapper class with the text/email/password inputs above.
+// inline-size is deliberately left at its default (rather than 100% like
+// the text inputs) since number fields like Year sit narrow, side-by-side
+// with other fields in a row, and shouldn't stretch to fill it.
+.js-form-type-number input {
+  appearance: none;
+  border: none;
+  border-radius: $field-border-radius;
+  background: var(--brand-light);
+  padding-block: var(--v-space-4xxs) var(--v-space-4xxs);
+  padding-inline: var(--v-space-5xs) var(--v-space-2xs);
+  font-weight: var(--text-bold);
+}
+
+// Textareas don't share a wrapper class with the single-line inputs above,
+// but should still read as the same family of field.
+.js-form-type-textarea textarea {
+  appearance: none;
+  border: none;
+  border-radius: $field-border-radius;
+  background: var(--brand-light);
+  padding-block: var(--v-space-6xs);
+  padding-inline: var(--v-space-5xs) var(--v-space-2xs);
+  inline-size: 100%;
+}
+
+// Tagify (tag-style entity reference autocomplete widgets) replaces the
+// input it's attached to with its own custom element and hides the
+// original, so the input rule above has no visible effect on it - match
+// the same background directly on Tagify's own wrapper, and set border:
+// none like the plain inputs above so it reads as the same borderless
+// field family at rest. Tagify's own vendor CSS otherwise keeps a 1px
+// border visible at all times (via --tags-border-color) and only swaps
+// its color for hover/focus/invalid - that resting border is what made
+// this field look outlined next to its borderless siblings. The
+// hover/focus/invalid states below replace that border-swap with
+// box-shadow rings, shown only while that state is active, so none of
+// the state feedback is lost.
+//
+// --tag-bg is Tagify's own custom property for each individual tag chip's
+// background, filled in via an inset box-shadow on the chip's own
+// ::before pseudo-element rather than a real border - left at its library
+// default (a light grey) it's nearly indistinguishable from this field's
+// own --brand-light background, so tags visually disappeared into the
+// field. Overridden to white below.
+//
+// White fill alone doesn't clear WCAG 1.4.11's 3:1 contrast minimum for
+// a UI component boundary against --brand-light (~1.2:1) - earlier
+// revisions of this rule added a visible ring (first a real border, then
+// a box-shadow) on .tagify__tag > div to compensate. Per explicit design
+// direction, that ring has been removed even though it reopens the 1.4.11
+// gap: tags are only distinguished by their white fill now, not a
+// boundary. Revisit if this needs to be reconciled with WCAG compliance.
+//
+// The search-icon background-image below is the exact icon Drupal's own
+// tagify module ships (vendor/drupal/tagify/css/tagify.css), normally
+// only applied when Claro/Gin's input preprocessing adds a
+// "form-element--api-entity-autocomplete-tagify" class - mukurtu_v4 has
+// no equivalent preprocessing, so the icon never appeared here. Applied
+// directly so autocomplete fields get the same affordance regardless of
+// theme.
+.tagify {
+  border: none;
+  border-radius: $field-border-radius;
+  background: var(--brand-light);
+  background-image: url("data:image/svg+xml,%3csvg width='40' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M8 1C3.46.827-.188 5.787 1.313 10.068c1.176 4.384 6.993 6.417 10.637 3.7.326-.39.565.276.846.442l3.74 3.739 1.413-1.414-4.35-4.35c2.811-3.468 1.15-9.247-3.062-10.71A7.003 7.003 0 008 1zm0 2c3.242-.123 5.849 3.42 4.777 6.477-.842 3.132-4.994 4.58-7.6 2.65-2.745-1.73-2.9-6.125-.285-8.044A5.006 5.006 0 018 3z' fill='%23868686'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right var(--v-space-6xs) center;
+  // vendor/drupal/tagify/css/tagify.css sets "padding: 0 !important" on
+  // .tagify unconditionally (only relaxed for Gin/Claro via a modifier
+  // class that this front-end theme never gets) - without matching
+  // !important here that rule wins outright regardless of source order,
+  // so the icon's reserved gutter never actually applied and tag content
+  // ran flush under the icon and past the field's own edge.
+  padding-inline-end: var(--v-space-3xs) !important;
+  --tag-bg: var(--color-white);
+  --tag-hover: var(--brand-light-accent);
+
+  // Container-level state feedback, now that the resting border above is
+  // gone: --color-text-secondary (already used at 3:1+ contrast elsewhere
+  // in this file) for hover, the site-wide input/select focus treatment
+  // (--focus-color, see _base.scss) for focus, and the theme's existing
+  // error token for invalid, so a validation error here looks the same
+  // as elsewhere on the site.
+  &:hover:not(.tagify--focus):not(.tagify--invalid) {
+    box-shadow: 0 0 0 1px var(--color-text-secondary);
+  }
+
+  &.tagify--focus {
+    outline: var(--focus-color) solid 2px;
+    outline-offset: 2px;
+  }
+
+  &.tagify--invalid {
+    box-shadow: 0 0 0 1px var(--color-error-dark);
+  }
+
+  &.tagify--loading {
+    background-image: none;
   }
 }

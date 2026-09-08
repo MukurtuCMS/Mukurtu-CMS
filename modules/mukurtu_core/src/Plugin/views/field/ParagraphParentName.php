@@ -2,15 +2,15 @@
 
 namespace Drupal\mukurtu_core\Plugin\views\field;
 
+use Drupal\views\Attribute\ViewsField;
 use Drupal\views\Plugin\views\field\FieldPluginBase;
 use Drupal\views\ResultRow;
 use Drupal\node\Entity\Node;
 
 /**
  * Provides Paragraph Parent Name field handler.
- *
- * @ViewsField("paragraph_parent_name")
  */
+#[ViewsField('paragraph_parent_name')]
 class ParagraphParentName extends FieldPluginBase
 {
 

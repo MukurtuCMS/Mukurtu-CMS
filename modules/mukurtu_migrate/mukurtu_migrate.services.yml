@@ -1,0 +1,8 @@
+services:
+  mukurtu_migrate.search_api_indexer:
+    class: Drupal\mukurtu_migrate\SearchApiIndexer
+    arguments:
+      - '@entity_type.manager'
+      - '@search_api.indexing_batch_helper'
+      - '@logger.factory'
+  Drupal\mukurtu_migrate\SearchApiIndexerInterface: '@mukurtu_migrate.search_api_indexer'

@@ -27,7 +27,7 @@
     <div class="field__label">{{ 'Browse content'|t }}</div>
     <div class="field__items">
       <div class="field__item">
-        <a href="/browse?f[0]=cultural_protocols_dh_browse%3A|{{ protocol_id }}|">
+        <a href="{{ browse_url }}">
           {{ 'Browse all content in '|t ~ protocol_name }}
         </a>
       </div>
@@ -38,7 +38,7 @@
       <div class="field__label">{{ 'Local Contexts'|t }}</div>
       <div class="field__items">
         <div class="field__item">
-          <a href="/protocols/{{ protocol_id }}/local-contexts/projects">
+          <a href="{{ protocol_lc_url }}">
             {{ 'View '|t ~ protocol_name ~ '\'s Local Contexts projects'|t}}
           </a>
         </div>

@@ -7,7 +7,7 @@
   Drupal.behaviors.languageSwitcherPosition = {
     attach(context) {
       once("language-switcher", ".language-switcher", context).forEach((wrapper) => {
-        const dropdown = wrapper.querySelector(".links");
+        const dropdown = wrapper.querySelector("ul");
         if (!dropdown) return;
 
         const details = wrapper.closest("details") || wrapper;

@@ -33,6 +33,7 @@ class CulturalProtocols extends MukurtuImportFieldProcessPluginBase {
         'plugin' => 'explode',
         'source' => $source,
         'delimiter' => $multivalue_delimiter,
+        'strict' => FALSE,
       ];
       // Trim whitespace.
       $process[] = [

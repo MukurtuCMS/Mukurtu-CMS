@@ -123,6 +123,8 @@ hidden:
   field_access_mode: true
   field_comment_require_approval: true
   field_comment_status: true
+  flag_mukurtu_email_protocol: true
+  flag_mukurtu_follow_protocol: true
   langcode: true
   search_api_excerpt: true
   user_id: true

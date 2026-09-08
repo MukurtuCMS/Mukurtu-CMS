@@ -20,7 +20,6 @@
     // navigation items always causes the primary navigation to wrap, and the
     // page is loaded at a narrower viewport and then widened, the mobile nav
     // may not be enabled.
-    console.log(navWrapper.clientHeight, navItem.clientHeight);
     if (navWrapper.clientHeight > navItem.clientHeight) {
       document.body.classList.add('is-always-mobile-nav');
     }
@@ -64,9 +63,19 @@
    *
    * @param {Element} primaryNav - The primary navigation's top-level <ul> element.
    */
-  function init(primaryNav) { console.log('init');
+  function init(primaryNav) {
     const resizeObserver = new ResizeObserver(checkIfDesktopNavigationWraps);
-    resizeObserver.observe(primaryNav);
+
+    // Wait for web fonts to finish loading before taking the first
+    // measurement. Fallback font metrics can render wider/narrower than the
+    // final font, causing a transient wrap that this observer would
+    // otherwise lock in as "always mobile nav" for the rest of the page
+    // view, even though the nav fits fine once the real font is in place.
+    if (document.fonts) {
+      document.fonts.ready.then(() => resizeObserver.observe(primaryNav));
+    } else {
+      resizeObserver.observe(primaryNav);
+    }
   }
 
   /**

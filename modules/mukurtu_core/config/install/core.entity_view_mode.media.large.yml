@@ -4,7 +4,7 @@ dependencies:
   module:
     - media
 id: media.large
-label: 'Large (900px)'
+label: 'Large (900px) - HTML Embed'
 description: ''
 targetEntityType: media
 cache: true

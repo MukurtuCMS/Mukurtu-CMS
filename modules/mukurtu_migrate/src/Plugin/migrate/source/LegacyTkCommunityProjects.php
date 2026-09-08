@@ -2,6 +2,7 @@
 
 namespace Drupal\mukurtu_migrate\Plugin\migrate\source;
 
+use Drupal\migrate\Attribute\MigrateSource;
 use Drupal\migrate\Plugin\migrate\source\SourcePluginBase;
 use Drupal\migrate\Plugin\migrate\source\SqlBase;
 use Drupal\migrate\Row;
@@ -9,11 +10,8 @@ use Drupal\migrate\Row;
 /**
  * Source plugin for retrieving community IDs from the variable table for
  * communities that have customized TK Labels in Mukurtu CMS v3.
- *
- * @MigrateSource(
- *   id = "mukurtu_v3_legacy_tk_community_projects"
- * )
  */
+#[MigrateSource('mukurtu_v3_legacy_tk_community_projects')]
 class LegacyTkCommunityProjects extends SqlBase
 {
   protected $communityIds;
