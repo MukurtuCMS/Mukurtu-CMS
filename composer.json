@@ -15,6 +15,7 @@
         }
     ],
     "require": {
+        "php": ">=8.4",
         "composer/installers": "^2.0",
         "cweagans/composer-patches": "^2.0",
         "drupal/admin_theme": "^1.1",
@@ -29,15 +30,15 @@
         "drupal/core-composer-scaffold": "~11.4.0",
         "drupal/core-project-message": "~11.4.0",
         "drupal/core-recommended": "~11.4.0",
-        "drupal/ctools": "*",
+        "drupal/ctools": "^4.1",
         "drupal/dashboards": "^2.1",
-        "drupal/embed": "*",
-        "drupal/entity_browser": "*",
-        "drupal/entity_embed": "*",
-        "drupal/entity_reference_revisions": "*",
+        "drupal/embed": "^1.10",
+        "drupal/entity_browser": "^2.17",
+        "drupal/entity_embed": "^1.7",
+        "drupal/entity_reference_revisions": "^1.14",
         "drupal/extlink": "^3.0",
         "drupal/facet_bot_blocker": "^1.0",
-        "drupal/facets": ">=3.0 <3.0.4",
+        "drupal/facets": "^3.0.7",
         "drupal/facets_reset_button": "^1.0",
         "drupal/field_group": "^4.0",
         "drupal/flag": "^5.1@beta",
@@ -69,22 +70,22 @@
         "drupal/readonly_field_widget": "^2.1",
         "drupal/rebuild_cache_access": "^1.12",
         "drupal/recaptcha": "^3.4",
-        "drupal/redirect": "*",
-        "drupal/restui": "*",
-        "drupal/search_api": "*",
-        "drupal/search_api_glossary": "*",
+        "drupal/redirect": "^1.13",
+        "drupal/restui": "^1.22",
+        "drupal/search_api": "^1.41",
+        "drupal/search_api_glossary": "^4.2",
         "drupal/search_api_solr": "^4.3",
         "drupal/tagify": "^2.0",
         "drupal/term_merge": "^2.0@beta",
         "drupal/term_merge_manager": "^2.0",
-        "drupal/token": "*",
+        "drupal/token": "^1.17",
         "drupal/turnstile": "^1.2",
         "drupal/turnstile_protect": "^1.0",
         "drupal/twig_tweak": "^3.2",
-        "drupal/views_bulk_operations": "*",
+        "drupal/views_bulk_operations": "^4.4",
         "drupal/visitors": "^2.0",
         "drush/drush": "^13",
-        "geocoder-php/nominatim-provider": "*",
+        "geocoder-php/nominatim-provider": "^5.8",
         "sibyx/phpgpx": "@RC"
     },
     "require-dev": {
@@ -140,9 +141,6 @@
                     "depth": 1
                 }
             ],
-            "drupal/views_combine": {
-                "Fix illegal choice on exposed sort error": "https://www.drupal.org/files/issues/2022-01-17/3259018-6-illegal-sort-choice.patch"
-            },
             "drupal/paragraphs": {
                 "Ensure empty paragraphs register as empty": "https://raw.githubusercontent.com/MukurtuCMS/Mukurtu-CMS/03c3074c9cfaef093456c2a0072ea4c772862bc9/patches/paragraphs-118.patch"
             },
