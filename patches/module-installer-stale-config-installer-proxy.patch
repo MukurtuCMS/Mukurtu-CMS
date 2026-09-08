@@ -17,11 +17,9 @@
 # assignment removed by this patch's own InstallEntities fix, leaving these two
 # loops unpatched would reference an undefined variable entirely).
 #
-# Upstream: this fix should be filed against Drupal core at
-# https://www.drupal.org/project/drupal/issues — search for
-# "ModuleInstaller stale config.installer synthetic service kernel".
-# Once a core issue is filed, replace this comment with the issue URL so the
-# patch can be removed when the fix lands in a Drupal release.
+# Upstream: filed against Drupal core at
+# https://www.drupal.org/project/drupal/issues/3621889
+# This patch can be removed once that issue's fix lands in a Drupal release.
 #
 # Reproducer: any module whose hook_install() uses \Drupal::entityTypeManager()
 # (e.g. to load a config entity) triggers a container rebuild; any subsequent
