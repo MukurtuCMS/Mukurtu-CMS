@@ -5,7 +5,6 @@
  * Install, update and uninstall functions for the mukurtu_core module.
  */
 
-use Drupal\Core\Utility\UpdateException;
 use Drupal\field\Entity\FieldStorageConfig;
 
 /**
@@ -4294,83 +4293,6 @@ function mukurtu_core_update_40122(): void {
   \Drupal::service('plugin.manager.menu.link')->rebuild();
 }
 
-/**
- * Uninstall the devel, devel_generate and mukurtu_dev modules.
- *
- * Devel and Devel Generate were enabled on every Mukurtu site because the
- * install profile declared them as dependencies. They expose developer output,
- * user switching and content generation, none of which belong on a production
- * site. Sites that still want them can reinstall them at /admin/modules.
- *
- * Unlike mukurtu_core_update_40098(), which had to edit core.extension by hand
- * because the features modules were deleted from the codebase in the same
- * release, all three modules here are still present on disk, so the normal
- * module_installer API applies. mukurtu_dev is retained in the codebase (marked
- * hidden) and devel remains available via composer.
- *
- * The devel:devel and mukurtu_dev:mukurtu_dev entries are removed from
- * mukurtu.info.yml in this same release. That ordering matters: the profile is
- * itself a module, so module_installer would refuse to uninstall devel while
- * the profile on disk still declared a dependency on it.
- *
- * No separate permission cleanup is needed. Uninstalling devel makes Drupal
- * call Role::onDependencyRemoval(), which strips 'access devel information'
- * from the administrator role and drops the stale devel module dependency from
- * user.role.mukurtu_manager.
- */
-function mukurtu_core_update_40123(): void {
-  $installed = array_keys(\Drupal::config('core.extension')->get('module') ?? []);
-  $module_extension_list = \Drupal::service('extension.list.module');
-
-  // Drop the cached extension list before doing anything with it.
-  //
-  // Nothing invalidates that cache when an .info.yml changes on disk, and this
-  // release removes devel:devel and mukurtu_dev:mukurtu_dev from the profile's
-  // dependencies. Against a stale cache the profile still looks like it
-  // requires them, and ModuleInstaller::uninstall() throws
-  // ModuleUninstallValidatorException ("The 'Mukurtu CMS' install profile
-  // requires 'Devel'"), aborting the whole update run.
-  //
-  // This is reachable through the upgrade procedure documented in README.md,
-  // which runs `drush cr` *before* `composer update` and then `drush updb`, so
-  // the cache is rebuilt from the pre-update .info.yml and is stale by the time
-  // updates run.
-  $module_extension_list->reset();
-
-  // Uninstall the dependent wrapper before the modules it depends on. Only
-  // touch modules that are both installed and still present on disk; a module
-  // listed in core.extension but missing from disk would fatal
-  // module_installer. (Such a site is already blocked by core's own
-  // invalid_module requirement before update hooks run, but the guard costs
-  // nothing.)
-  //
-  // Presence is deliberately tested with ExtensionList::exists(), which is
-  // backed by getList() -- the very set ModuleInstaller::uninstall() gates on.
-  // Using a different source such as getAllAvailableInfo() lets the two
-  // disagree, and uninstall() responds to an unrecognised entry by returning
-  // FALSE for the whole list and uninstalling nothing at all.
-  $candidates = ['mukurtu_dev', 'devel_generate', 'devel'];
-  $to_uninstall = [];
-  foreach ($candidates as $module) {
-    if (in_array($module, $installed, TRUE) && $module_extension_list->exists($module)) {
-      $to_uninstall[] = $module;
-    }
-  }
-
-  if (empty($to_uninstall)) {
-    return;
-  }
-
-  // uninstall() reports failure by returning FALSE rather than throwing, and
-  // in that case it has uninstalled nothing. Fail the update loudly instead of
-  // reporting success while leaving the modules in place.
-  if (!\Drupal::service('module_installer')->uninstall($to_uninstall)) {
-    throw new UpdateException(sprintf(
-      'Could not uninstall the development modules: %s. Uninstall them at /admin/modules/uninstall, then run database updates again.',
-      implode(', ', $to_uninstall)
-    ));
-  }
-}
 
 /**
  * Point the website feedback form at the site email address.
@@ -4380,7 +4302,7 @@ function mukurtu_core_update_40123(): void {
  * feedback submissions went to an address nobody reads. Only sites still using
  * the placeholder are changed.
  */
-function mukurtu_core_update_40124(): void {
+function mukurtu_core_update_40123(): void {
   $site_mail = \Drupal::config('system.site')->get('mail');
   if (empty($site_mail)) {
     return;

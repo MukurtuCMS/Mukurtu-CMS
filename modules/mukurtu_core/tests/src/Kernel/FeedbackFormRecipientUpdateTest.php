@@ -8,10 +8,10 @@ use Drupal\KernelTests\KernelTestBase;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests mukurtu_core_update_40124(), which replaces the admin@example.com
+ * Tests mukurtu_core_update_40123(), which replaces the admin@example.com
  * placeholder on the website feedback form with the site email address.
  *
- * @see mukurtu_core_update_40124()
+ * @see mukurtu_core_update_40123()
  */
 #[Group('mukurtu_core')]
 class FeedbackFormRecipientUpdateTest extends KernelTestBase {
@@ -75,7 +75,7 @@ class FeedbackFormRecipientUpdateTest extends KernelTestBase {
     $this->setSiteMail('admin@mukurtu.example');
     $this->createFeedbackForm(['admin@example.com']);
 
-    mukurtu_core_update_40124();
+    mukurtu_core_update_40123();
 
     $this->assertSame(['admin@mukurtu.example'], $this->recipients());
   }
@@ -87,7 +87,7 @@ class FeedbackFormRecipientUpdateTest extends KernelTestBase {
     $this->setSiteMail('admin@mukurtu.example');
     $this->createFeedbackForm(['someone@community.example']);
 
-    mukurtu_core_update_40124();
+    mukurtu_core_update_40123();
 
     $this->assertSame(['someone@community.example'], $this->recipients());
   }
@@ -99,7 +99,7 @@ class FeedbackFormRecipientUpdateTest extends KernelTestBase {
     $this->setSiteMail('admin@mukurtu.example');
     $this->createFeedbackForm(['admin@example.com', 'someone@community.example']);
 
-    mukurtu_core_update_40124();
+    mukurtu_core_update_40123();
 
     $this->assertSame(
       ['admin@example.com', 'someone@community.example'],
@@ -114,7 +114,7 @@ class FeedbackFormRecipientUpdateTest extends KernelTestBase {
     $this->setSiteMail('');
     $this->createFeedbackForm(['admin@example.com']);
 
-    mukurtu_core_update_40124();
+    mukurtu_core_update_40123();
 
     $this->assertSame(['admin@example.com'], $this->recipients());
   }
@@ -126,7 +126,7 @@ class FeedbackFormRecipientUpdateTest extends KernelTestBase {
     $this->setSiteMail('admin@mukurtu.example');
     $this->assertTrue(\Drupal::config('contact.form.feedback')->isNew());
 
-    mukurtu_core_update_40124();
+    mukurtu_core_update_40123();
 
     $this->assertTrue(\Drupal::config('contact.form.feedback')->isNew());
   }
@@ -138,8 +138,8 @@ class FeedbackFormRecipientUpdateTest extends KernelTestBase {
     $this->setSiteMail('admin@mukurtu.example');
     $this->createFeedbackForm(['admin@example.com']);
 
-    mukurtu_core_update_40124();
-    mukurtu_core_update_40124();
+    mukurtu_core_update_40123();
+    mukurtu_core_update_40123();
 
     $this->assertSame(['admin@mukurtu.example'], $this->recipients());
   }
