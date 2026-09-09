@@ -1,7 +1,8 @@
 {
-  "name": "gulp",
-  "version": "1.0.0",
-  "description": "[![Mukurtu CI Tests](https://github.com/MukurtuCMS/Mukurtu-CMS/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/MukurtuCMS/Mukurtu-CMS/actions/workflows/build-and-test.yml)",
+  "name": "mukurtu-cms",
+  "private": true,
+  "version": "4.0.0",
+  "description": "Build tooling for the Mukurtu CMS installation profile.",
   "homepage": "https://github.com/MukurtuCMS/Mukurtu-CMS#readme",
   "bugs": {
     "url": "https://github.com/MukurtuCMS/Mukurtu-CMS/issues"
@@ -10,7 +11,7 @@
     "type": "git",
     "url": "git+https://github.com/MukurtuCMS/Mukurtu-CMS.git"
   },
-  "license": "ISC",
+  "license": "GPL-3.0-or-later",
   "author": "",
   "type": "commonjs",
   "main": "index.js",

@@ -1,0 +1,24 @@
+# Files a site installing this profile as a composer package does not need.
+#
+# `export-ignore` applies to `git archive`, which is what composer uses to build
+# the dist archive it downloads from Packagist. Path and source installs are
+# unaffected, so CI still sees everything: it adds the profile as a path
+# repository rather than downloading a dist.
+#
+# patches/ is deliberately NOT excluded. composer.json references those files by
+# path while installing dependencies, and a missing patch file breaks the update
+# outright - see the "patch file could not be downloaded" section in README.md.
+
+/.github            export-ignore
+/.tugboat           export-ignore
+/.vscode            export-ignore
+/.gitattributes     export-ignore
+/.gitignore         export-ignore
+/docs               export-ignore
+/scripts            export-ignore
+/tests              export-ignore
+/phpunit.xml        export-ignore
+/phpunit.ddev.xml   export-ignore
+
+# Per-module PHPUnit suites.
+modules/*/tests     export-ignore
