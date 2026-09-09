@@ -25,7 +25,7 @@
     "stylelint-use-logical-spec": "^5.0.1"
   },
   "dependencies": {
-    "@bcgov/bc-sans": "^2.1.0",
+    "@bcgov/bc-sans": "^2.1.2",
     "@splidejs/splide": "^4.1.4",
     "bricks.js": "^1.8.0",
     "glightbox": "^3.3.1",
