@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Check for untranslated UI strings
         run: ./scripts/lint/multilingual-guardrails.sh
@@ -71,7 +71,7 @@ jobs:
       # Usually checkout is the first action, but we set up the mukurtu-template
       # first, then put the checkout inside of it.
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           path: web/profiles/mukurtu
 
