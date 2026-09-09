@@ -48,106 +48,15 @@ function mukurtu_multipage_items_install(): void {
 }
 
 /**
- * Reset MPI _controller config cleared by Drupal 11.3.x RouteSubscriber.
+ * Implements hook_update_last_removed().
  *
- * In Drupal 11.3.x, entity.node.canonical uses _entity_view instead of
- * _controller. The RouteSubscriber read null from that route and wrote it
- * to config, leaving _controller null. Reset it to the NodeViewController
- * fallback so viewRedirect() works correctly.
+ * Every mukurtu_multipage_items update hook was removed in 4.0.1. 40011 is the
+ * highest number 4.0.0 shipped, so a fresh install is seeded there and a site
+ * that already ran the 4.0.0 updates has nothing left to do.
+ *
+ * Sites below 4.0.0 must update to 4.0.0 first. Core does not enforce that on
+ * its own, so mukurtu_core_update_requirements() blocks them explicitly.
  */
-function mukurtu_multipage_items_update_40002(): void {
-  $config = \Drupal::configFactory()->getEditable('mukurtu_multipage_items.settings');
-  if (empty($config->get('_controller'))) {
-    $config->set('_controller', '\Drupal\node\Controller\NodeViewController::view')->save();
-  }
-}
-
-/**
- * Switch field_pages on Multipage Item to rendered_entity (form_selection view mode).
- */
-function mukurtu_multipage_items_update_40001(): void {
-  $config = \Drupal::configFactory()->getEditable('core.entity_form_display.multipage_item.multipage_item.default');
-  if ($config->isNew()) {
-    return;
-  }
-  $config->set('content.field_pages.settings.field_widget_display', 'rendered_entity');
-  $config->set('content.field_pages.settings.field_widget_display_settings', ['view_mode' => 'form_selection']);
-  $config->save();
-}
-
-/**
- * Switch field_pages entity browser from mukurtu_content_browser to
- * multipage_item_entity_browser to apply MPI-specific content filters.
- */
-function mukurtu_multipage_items_update_40003(): void {
-  $config = \Drupal::configFactory()->getEditable(
-    'core.entity_form_display.multipage_item.multipage_item.default'
-  );
-  if ($config->isNew()) {
-    return;
-  }
-  $config->set('content.field_pages.settings.entity_browser', 'multipage_item_entity_browser')->save();
-}
-
-
-/**
- * Adds the language-fallback default_langcode filter and rendering_language
- * setting to multipage_item_browser, per docs/content-language-policy.md.
- * Additive only.
- */
-function mukurtu_multipage_items_update_40011(): void {
-  $config_multipage_item_browser = \Drupal::configFactory()->getEditable('views.view.multipage_item_browser');
-  if (!$config_multipage_item_browser->isNew()) {
-    $filters_multipage_item_browser_default = $config_multipage_item_browser->get('display.default.display_options.filters') ?? [];
-    if (!isset($filters_multipage_item_browser_default['default_langcode'])) {
-      $filters_multipage_item_browser_default['default_langcode'] = [
-        'id' => 'default_langcode',
-        'table' => 'node_field_data',
-        'field' => 'default_langcode',
-        'relationship' => 'none',
-        'group_type' => 'group',
-        'admin_label' => '',
-        'entity_type' => 'node',
-        'entity_field' => 'default_langcode',
-        'plugin_id' => 'boolean',
-        'operator' => '=',
-        'value' => '1',
-        'group' => 1,
-        'exposed' => FALSE,
-        'expose' => [
-          'operator_id' => '',
-          'label' => '',
-          'description' => '',
-          'use_operator' => FALSE,
-          'operator' => '',
-          'operator_limit_selection' => FALSE,
-          'operator_list' => [],
-          'identifier' => '',
-          'required' => FALSE,
-          'remember' => FALSE,
-          'multiple' => FALSE,
-          'remember_roles' => ['authenticated' => 'authenticated'],
-        ],
-        'is_grouped' => FALSE,
-        'group_info' => [
-          'label' => '',
-          'description' => '',
-          'identifier' => '',
-          'optional' => TRUE,
-          'widget' => 'select',
-          'multiple' => FALSE,
-          'remember' => FALSE,
-          'default_group' => 'All',
-          'default_group_multiple' => [],
-          'group_items' => [],
-        ],
-      ];
-      $config_multipage_item_browser->set('display.default.display_options.filters', $filters_multipage_item_browser_default);
-      $config_multipage_item_browser->save();
-    }
-    if (!$config_multipage_item_browser->get('display.entity_browser.display_options.rendering_language')) {
-      $config_multipage_item_browser->set('display.entity_browser.display_options.rendering_language', '***LANGUAGE_language_content***');
-      $config_multipage_item_browser->save();
-    }
-  }
+function mukurtu_multipage_items_update_last_removed(): int {
+  return 40011;
 }

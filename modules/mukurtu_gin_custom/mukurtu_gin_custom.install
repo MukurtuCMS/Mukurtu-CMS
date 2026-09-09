@@ -6,34 +6,16 @@
  */
 
 use Drupal\Core\Serialization\Yaml;
-
 /**
- * Add a Klaro service entry for gin_lb's Toastify script so it isn't blocked.
+ * Implements hook_update_last_removed().
  *
- * Layout Builder's "Toastify" status/warning/error toasts are loaded from a
- * CDN as an external script. With the site's Klaro "Block unknown external
- * resources" setting enabled, Klaro rewrites that script tag to a
- * consent-gated placeholder, so `Toastify` is never defined. Every Layout
- * Builder page renders a Toastify-driven message, so
- * gin_lb_toastify.js throws "Toastify is not defined" on load. Because
- * Drupal.attachBehaviors() does not isolate failures between behaviors, that
- * uncaught error aborts attachment of every behavior queued after it in the
- * same pass -- including Layout Builder's drag/move and AJAX save bindings,
- * which is why add/move/configure/save silently stop working.
+ * Every mukurtu_gin_custom update hook was removed in 4.0.1. 10000 is the
+ * highest number 4.0.0 shipped, so a fresh install is seeded there and a site
+ * that already ran the 4.0.0 updates has nothing left to do.
  *
- * Registering Toastify as a required, opt-out Klaro service (the same
- * required: true / opt_out: true pairing already used for the "stripe"
- * service definition that ships with the klaro contrib module) tells
- * Klaro's hook_js_alter() to leave the script alone, matching how this is
- * meant to work for essential, non-tracking UI dependencies.
+ * Sites below 4.0.0 must update to 4.0.0 first. Core does not enforce that on
+ * its own, so mukurtu_core_update_requirements() blocks them explicitly.
  */
-function mukurtu_gin_custom_update_10000(): void {
-  $storage = \Drupal::entityTypeManager()->getStorage('klaro_app');
-  if ($storage->load('toastify')) {
-    return;
-  }
-
-  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_gin_custom') . '/config/install/klaro.klaro_app.toastify.yml';
-  $values = Yaml::decode(file_get_contents($config_path));
-  $storage->create($values)->save();
+function mukurtu_gin_custom_update_last_removed(): int {
+  return 10000;
 }
