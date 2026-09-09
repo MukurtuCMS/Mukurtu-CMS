@@ -232,3 +232,31 @@ function mukurtu_taxonomy_update_40020(): void {
     }
   }
 }
+
+/**
+ * Remove the non-functional taxonomy term page facets.
+ *
+ * The taxonomy term page renders its referenced-content list from core's
+ * taxonomy_term (taxonomy_index) view, not from Search API, so these facets
+ * loaded but never filtered anything. The controller and template no longer
+ * render them; this deletes the orphaned config on existing sites. Covers both
+ * the database and Solr variants. Idempotent.
+ */
+function mukurtu_taxonomy_update_40021(): void {
+  $facet_ids = [
+    'facets.facet.taxonomy_reference_category',
+    'facets.facet.taxonomy_reference_keywords',
+    'facets.facet.taxonomy_reference_community',
+    'facets.facet.taxonomy_reference_category_solr',
+    'facets.facet.taxonomy_reference_keywords_solr',
+    'facets.facet.taxonomy_reference_community_solr',
+  ];
+
+  $config_factory = \Drupal::configFactory();
+  foreach ($facet_ids as $facet_id) {
+    $config = $config_factory->getEditable($facet_id);
+    if (!$config->isNew()) {
+      $config->delete();
+    }
+  }
+}

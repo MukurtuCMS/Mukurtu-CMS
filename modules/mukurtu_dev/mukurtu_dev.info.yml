@@ -1,9 +1,13 @@
 name: 'Mukurtu Dev'
 description: 'Provides functionality to assist with development of Mukurtu CMS.'
 type: module
+# Not installed by default and not listed in the profile's dependencies, so it
+# is hidden from the module list on production sites. Enable it manually (after
+# requiring drupal/devel) when working on Mukurtu itself.
+hidden: true
 core_version_requirement: '^9.4 || ^10 || ^11'
 dependencies:
   - 'devel:devel'
   - 'devel:devel_generate'
-version: 4.x-dev
+version: 4.0.0
 package: 'Mukurtu CMS'

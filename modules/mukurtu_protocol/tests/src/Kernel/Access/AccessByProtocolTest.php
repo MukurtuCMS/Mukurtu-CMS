@@ -330,6 +330,51 @@ class AccessByProtocolTest extends KernelTestBase {
   }
 
   /**
+   * A non-owner holding "edit any {bundle} content" can view (and update) a
+   * protocol-less node - this is how a submissions reviewer reaches a
+   * pending public submission that has no protocols assigned yet and is
+   * owned by the submissions service account. "delete" still needs its own
+   * "delete any" grant.
+   */
+  public function testEmptyProtocolsEditAnyPermissionGrantsView() {
+    $role = Role::create(['id' => 'thing_editor', 'label' => 'Thing editor']);
+    $role->grantPermission('access content');
+    $role->grantPermission('edit any thing content');
+    $role->save();
+
+    $owner = User::create(['name' => $this->randomString()]);
+    $owner->save();
+
+    $editor = User::create(['name' => $this->randomString()]);
+    $editor->addRole('thing_editor');
+    $editor->save();
+
+    $plain = User::create(['name' => $this->randomString()]);
+    $plain->save();
+
+    $content = Node::create([
+      'title' => $this->randomString(),
+      'type' => 'thing',
+      'uid' => $owner->id(),
+      'status' => FALSE,
+    ]);
+    assert($content instanceof CulturalProtocolControlledInterface);
+    $content->setSharingSetting('any');
+    $content->setProtocols([]);
+    $content->save();
+
+    // Non-owner with "edit any thing content": view + update allowed even
+    // though the node is unpublished; delete still denied.
+    $this->assertEquals(TRUE, $content->access('view', $editor));
+    $this->assertEquals(TRUE, $content->access('update', $editor));
+    $this->assertEquals(FALSE, $content->access('delete', $editor));
+
+    // Plain non-owner: still nothing.
+    $this->assertEquals(FALSE, $content->access('view', $plain));
+    $this->assertEquals(FALSE, $content->access('update', $plain));
+  }
+
+  /**
    * Tests access for a single open protocol.
    */
   public function testSingleOpenProtocol() {

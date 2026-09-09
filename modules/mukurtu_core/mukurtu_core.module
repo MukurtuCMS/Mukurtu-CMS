@@ -20,6 +20,7 @@ use Drupal\Core\Ajax\HtmlCommand;
 use Drupal\Core\Ajax\InvokeCommand;
 use Drupal\Core\Ajax\MessageCommand;
 use Drupal\Core\Ajax\RedirectCommand;
+use Drupal\Core\Extension\ThemeSettingsProvider;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\user\Entity\User;
@@ -318,6 +319,36 @@ function mukurtu_core_page_attachments(array &$attachments) {
   // local tasks) work without depending on some other module happening to
   // load it first.
   $attachments['#attached']['library'][] = 'core/drupal.dialog.ajax';
+
+  // Guard those same "use-ajax" modal links against being clicked before the
+  // dialog.ajax library above has actually attached (e.g. page still
+  // loading): without this, the browser just follows the link's plain href
+  // and lands on the modal route as a full page instead of opening a modal.
+  //
+  // This has to be genuine inline <script>/<style> tags, not a library -
+  // with JS/CSS aggregation on, a library-based guard would get bundled
+  // into the same aggregated file as other header-region assets and could
+  // end up just as delayed as the JS it's meant to guard against, since the
+  // whole bundle has to finish downloading before any script inside it
+  // (ours included) can run.
+  $module_path = \Drupal::root() . '/' . \Drupal::service('extension.list.module')->getPath('mukurtu_core');
+  $attachments['#attached']['html_head'][] = [
+    [
+      '#tag' => 'style',
+      '#value' => Markup::create(file_get_contents($module_path . '/css/modal-click-guard.css')),
+      '#weight' => -1000,
+    ],
+    'mukurtu_core_modal_click_guard_css',
+  ];
+  $attachments['#attached']['html_head'][] = [
+    [
+      '#tag' => 'script',
+      '#value' => Markup::create(file_get_contents($module_path . '/js/modal-click-guard.js')),
+      '#weight' => -1000,
+    ],
+    'mukurtu_core_modal_click_guard_js',
+  ];
+  $attachments['#attached']['library'][] = 'mukurtu_core/modal-click-guard-ready';
 }
 
 /**
@@ -563,6 +594,73 @@ function mukurtu_core_form_user_login_form_alter(&$form, FormStateInterface $for
 function mukurtu_core_user_login_form_submit($form, FormStateInterface $form_state) {
   if (!\Drupal::request()->query->has('destination')) {
     $form_state->setRedirectUrl(Url::fromRoute('<front>'));
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Core's theme settings form only shows the logo/favicon as a path textfield,
+ * with no visual preview. Add an image preview of the currently active
+ * logo/favicon next to each field.
+ */
+function mukurtu_core_form_system_theme_settings_alter(&$form, FormStateInterface $form_state, $form_id) {
+  // On the global settings form (/admin/appearance/settings), core's
+  // \Drupal\system\Form\ThemeSettingsForm::buildForm() is invoked with no
+  // theme argument, so its $theme parameter default of '' (not NULL) is
+  // what ends up in the build info args. An empty string is "set" as far
+  // as ThemeSettingsProvider::getSetting()'s `!isset($theme)` check is
+  // concerned, so it is passed through rather than falling back to the
+  // active theme, and since no theme is named '', the computed logo.url/
+  // favicon.url values are never populated. Use the Elvis operator (which
+  // also treats '' as absent) instead of ?? so this falls back correctly
+  // on the global form; on the per-theme form (/admin/appearance/settings/
+  // {theme}) args[0] is always a real, non-empty theme machine name.
+  $theme = $form_state->getBuildInfo()['args'][0] ?: \Drupal::config('system.theme')->get('default');
+  $theme_settings_provider = \Drupal::service(ThemeSettingsProvider::class);
+
+  if (isset($form['logo']['settings'])) {
+    $logo_url = $theme_settings_provider->getSetting('logo.url', $theme);
+    if ($logo_url) {
+      // Added as a sibling of 'default_logo'/'settings' (not nested inside
+      // 'settings') because core wraps 'settings' in '#states' =>
+      // ['invisible' => ['default_logo' checked]], and 'logo.use_default'
+      // (which drives that checkbox's default state) itself defaults to
+      // TRUE. Nesting the preview inside 'settings' would hide it via
+      // display:none on every untouched/default site - the exact case
+      // where showing the currently active (theme-supplied) logo is most
+      // useful.
+      $form['logo']['logo_preview'] = [
+        '#type' => 'html_tag',
+        '#tag' => 'img',
+        '#attributes' => [
+          'src' => $logo_url,
+          'alt' => t('Current logo'),
+          'class' => ['mukurtu-theme-settings-preview'],
+          'style' => 'max-height: 100px; max-width: 300px; display: block; margin-bottom: 0.5em;',
+        ],
+        '#weight' => -10,
+      ];
+    }
+  }
+
+  if (isset($form['favicon']['settings'])) {
+    $favicon_url = $theme_settings_provider->getSetting('favicon.url', $theme);
+    if ($favicon_url) {
+      // See the logo_preview comment above; same reasoning applies to
+      // 'favicon.use_default' defaulting to TRUE.
+      $form['favicon']['favicon_preview'] = [
+        '#type' => 'html_tag',
+        '#tag' => 'img',
+        '#attributes' => [
+          'src' => $favicon_url,
+          'alt' => t('Current favicon'),
+          'class' => ['mukurtu-theme-settings-preview'],
+          'style' => 'max-height: 100px; max-width: 300px; display: block; margin-bottom: 0.5em;',
+        ],
+        '#weight' => -10,
+      ];
+    }
   }
 }
 
@@ -1098,7 +1196,7 @@ function mukurtu_core_menu_links_discovered_alter(&$links) {
     'url' => 'internal:' . $homepagePath . '/layout',
     'menu_name' => 'dashboard-look-feel',
     'parent' => 'mukurtu_dashboard',
-    'weight' => 3,
+    'weight' => 5,
   ];
 
   // Add the Mukurtu Version link in the dashboard. Cannot be defined in a
@@ -1106,14 +1204,18 @@ function mukurtu_core_menu_links_discovered_alter(&$links) {
   // must be generated dynamically.
 
   // Get the version number from the VERSION.md file.
-  $version = "";
+  //
+  // fclose() has to stay inside the guard. Called outside it, a missing or
+  // unreadable VERSION.md leaves $version_file undefined and fclose(NULL)
+  // raises a TypeError on PHP 8, fataling the whole dashboard menu build.
+  $version = '';
   $version_path = \Drupal::service('extension.list.profile')->getPath('mukurtu') . '/VERSION.md';
   if (file_exists($version_path)) {
     if ($version_file = fopen($version_path, 'r')) {
       $version = trim(fgets($version_file));
+      fclose($version_file);
     }
   }
-  fclose($version_file);
 
   $links['mukurtu_core.mukurtu_version_dashboard'] = [
     'title' => t('Mukurtu Version: @version', ['@version' => $version]),

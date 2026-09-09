@@ -1,6 +1,8 @@
 {
   "name": "mukurtu_v4",
-  "version": "1.0.0",
+  "version": "4.0.0",
+  "private": true,
+  "license": "GPL-3.0-or-later",
   "description": "The base theme for Mukurtu Version 4",
   "main": "gulpfile.js",
   "scripts": {
@@ -35,6 +37,8 @@
     "browserslist": "^4.28.7",
     "postcss-selector-parser": "^7.1.3",
     "decode-uri-component": "^0.5.0",
-    "nanoid": "^3.3.18"
+    "nanoid": "^3.3.18",
+    "fast-uri": "^3.1.6",
+    "js-yaml": "^4.3.2"
   }
 }

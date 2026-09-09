@@ -876,3 +876,28 @@ function mukurtu_protocol_update_40043(): void {
     }
   }
 }
+
+/**
+ * Ship an explicit mukurtu_protocol.comment_settings default: comments off,
+ * approval required, visitor email required (#1761).
+ *
+ * Only installs the config if the site has never saved this form -- an admin
+ * who already made an explicit choice here is left alone.
+ */
+function mukurtu_protocol_update_40044(): void {
+  $config = \Drupal::configFactory()->getEditable('mukurtu_protocol.comment_settings');
+  if ($config->isNew()) {
+    $config
+      ->set('site_comments_enabled', FALSE)
+      ->set('site_comments_require_approval', TRUE)
+      ->set('anonymous_comments_require_email', TRUE)
+      ->save();
+  }
+}
+
+/**
+ * Remove the Configure Community/Protocol Permissions dashboard links (#1787).
+ */
+function mukurtu_protocol_update_40045(): void {
+  \Drupal::service('plugin.manager.menu.link')->rebuild();
+}

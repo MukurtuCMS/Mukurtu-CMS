@@ -1,8 +1,8 @@
 name: 'Mukurtu CMS'
 type: profile
 description: 'Mukurtu CMS Installation Profile'
-core_version_requirement: '^10 || ^11'
-version: 4.x-dev
+core_version_requirement: '^11'
+version: 4.0.0
 package: 'Mukurtu CMS'
 distribution:
   name: 'Mukurtu CMS'
@@ -70,7 +70,6 @@ dependencies:
   - 'blazy:blazy'
   - 'captcha:captcha'
   - 'ctools:ctools'
-  - 'devel:devel'
   - 'drupal:automated_cron'
   - 'drupal:block'
   - 'drupal:block_content'
@@ -133,7 +132,6 @@ dependencies:
   - 'mukurtu_content_warnings:mukurtu_content_warnings'
   - 'mukurtu_core:mukurtu_core'
   - 'mukurtu_design:mukurtu_design'
-  - 'mukurtu_dev:mukurtu_dev'
   - 'mukurtu_dictionary:mukurtu_dictionary'
   - 'mukurtu_digital_heritage:mukurtu_digital_heritage'
   - 'mukurtu_drafts:mukurtu_drafts'

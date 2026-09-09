@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "98a21146457fe1cba7135e17a6ec3c09",
+    "content-hash": "2772be3d3c00d92c7e524dc4272a78b8",
     "packages": [
         {
             "name": "altcha-org/altcha",
@@ -2845,17 +2845,17 @@
         },
         {
             "name": "drupal/facets",
-            "version": "3.0.3",
+            "version": "3.0.7",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/facets.git",
-                "reference": "3.0.3"
+                "reference": "3.0.7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/facets-3.0.3.zip",
-                "reference": "3.0.3",
-                "shasum": "0536c2526477cfce770e1d5710d64efd9360fb0f"
+                "url": "https://ftp.drupal.org/files/projects/facets-3.0.7.zip",
+                "reference": "3.0.7",
+                "shasum": "a301cd8bc12afdcf130be5704da33bb505146d58"
             },
             "require": {
                 "drupal/core": "^10.1 || ^11"
@@ -2883,8 +2883,8 @@
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "3.0.3",
-                    "datestamp": "1777035187",
+                    "version": "3.0.7",
+                    "datestamp": "1788649823",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -2903,6 +2903,10 @@
                 {
                     "name": "drunken monkey",
                     "homepage": "https://www.drupal.org/user/205582"
+                },
+                {
+                    "name": "joelpittet",
+                    "homepage": "https://www.drupal.org/user/160302"
                 },
                 {
                     "name": "mkalkbrenner",
@@ -4872,20 +4876,20 @@
         },
         {
             "name": "drupal/pathauto",
-            "version": "1.15.0",
+            "version": "1.14.0",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/pathauto.git",
-                "reference": "8.x-1.15"
+                "reference": "8.x-1.14"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/pathauto-8.x-1.15.zip",
-                "reference": "8.x-1.15",
-                "shasum": "de86fb2c00bb78a449ea5ae2249a5eb96367f05c"
+                "url": "https://ftp.drupal.org/files/projects/pathauto-8.x-1.14.zip",
+                "reference": "8.x-1.14",
+                "shasum": "07f0d2efcf0bfb450e2ab69a43921fa39dc5f25b"
             },
             "require": {
-                "drupal/core": "^10.2 || ^11",
+                "drupal/core": "^10 || ^11",
                 "drupal/ctools": "*",
                 "drupal/token": "*"
             },
@@ -4901,8 +4905,8 @@
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "8.x-1.15",
-                    "datestamp": "1778049296",
+                    "version": "8.x-1.14",
+                    "datestamp": "1759838097",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -18567,18 +18571,17 @@
         }
     ],
     "aliases": [],
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "stability-flags": {
-        "drupal/flag": 10,
         "drupal/gin_lb": 10,
-        "drupal/message_ui": 10,
         "drupal/og": 20,
-        "drupal/term_merge": 10,
-        "sibyx/phpgpx": 5
+        "drupal/term_reference_change": 10
     },
     "prefer-stable": true,
     "prefer-lowest": false,
-    "platform": {},
+    "platform": {
+        "php": ">=8.4"
+    },
     "platform-dev": {},
     "plugin-api-version": "2.9.0"
 }
