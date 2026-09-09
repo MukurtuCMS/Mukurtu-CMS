@@ -1,0 +1,39 @@
+version: 2
+updates:
+  # Composer: security updates only.
+  #
+  # open-pull-requests-limit: 0 disables version-update pull requests while
+  # leaving security updates enabled. That is deliberate: several constraints
+  # here are pinned on purpose against known-broken releases (drupal/facets is
+  # held below 3.0.4, drupal/pathauto at ~1.14.0), and routine version PRs would
+  # fight those pins. Security advisories still surface.
+  - package-ecosystem: composer
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0
+
+  # npm: build tooling only, no runtime code, so version updates are welcome.
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: npm
+    directory: "/themes/mukurtu_v4"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: npm
+    directory: "/tests/playwright"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5

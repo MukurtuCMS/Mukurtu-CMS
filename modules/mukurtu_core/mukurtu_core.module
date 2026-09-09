@@ -1204,14 +1204,18 @@ function mukurtu_core_menu_links_discovered_alter(&$links) {
   // must be generated dynamically.
 
   // Get the version number from the VERSION.md file.
-  $version = "";
+  //
+  // fclose() has to stay inside the guard. Called outside it, a missing or
+  // unreadable VERSION.md leaves $version_file undefined and fclose(NULL)
+  // raises a TypeError on PHP 8, fataling the whole dashboard menu build.
+  $version = '';
   $version_path = \Drupal::service('extension.list.profile')->getPath('mukurtu') . '/VERSION.md';
   if (file_exists($version_path)) {
     if ($version_file = fopen($version_path, 'r')) {
       $version = trim(fgets($version_file));
+      fclose($version_file);
     }
   }
-  fclose($version_file);
 
   $links['mukurtu_core.mukurtu_version_dashboard'] = [
     'title' => t('Mukurtu Version: @version', ['@version' => $version]),
