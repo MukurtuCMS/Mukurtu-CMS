@@ -253,4 +253,38 @@ class FooterBlockTest extends KernelTestBase {
     $this->assertStringContainsString('profile page', $updated->getDescription());
   }
 
+  /**
+   * Field widget descriptions are always run through token replacement
+   * (\Drupal\Core\Field\WidgetBase::getFilteredDescription()), so a literal
+   * "[current-date:html_year]" in the copyright field's help text would be
+   * silently evaluated into the actual year instead of shown as typed. The
+   * shipped description escapes the brackets as HTML entities so the token
+   * scanner leaves it alone.
+   */
+  public function testCopyrightFieldDescriptionSurvivesTokenReplacement(): void {
+    $field = FieldConfig::loadByName('block_content', 'mukurtu_footer', 'field_footer_copyright');
+    $this->assertNotNull($field);
+
+    $description = $field->getDescription();
+    $this->assertStringContainsString('&#91;current-date:html_year&#93;', $description);
+
+    $replaced = \Drupal::token()->replace($description);
+    $this->assertSame($description, $replaced, 'Token replacement must not alter the escaped description.');
+  }
+
+  /**
+   * mukurtu_footer_update_40006() re-escapes the token brackets on sites that
+   * installed before it existed.
+   */
+  public function testUpdate40006EscapesCopyrightTokenBrackets(): void {
+    $field = FieldConfig::loadByName('block_content', 'mukurtu_footer', 'field_footer_copyright');
+    $field->setDescription('Use the token [current-date:html_year] for the current year. Leave empty to hide.')->save();
+
+    require_once __DIR__ . '/../../../mukurtu_footer.install';
+    mukurtu_footer_update_40006();
+
+    $updated = FieldConfig::loadByName('block_content', 'mukurtu_footer', 'field_footer_copyright');
+    $this->assertStringContainsString('&#91;current-date:html_year&#93;', $updated->getDescription());
+  }
+
 }

@@ -217,3 +217,20 @@ function mukurtu_footer_update_40005(): void {
     $field->setDescription(t("Enter the URL of the organization's profile page for the platform selected above, for example https://www.facebook.com/yourorganization."))->save();
   }
 }
+
+/**
+ * Escape the token brackets in the copyright field's description.
+ *
+ * Field widget descriptions are always run through token replacement
+ * (\Drupal\Core\Field\WidgetBase::getFilteredDescription()), so the literal
+ * "[current-date:html_year]" in the help text was being evaluated into the
+ * actual current year instead of shown as the token name to type. HTML
+ * entities for the brackets aren't matched by the token scanner but still
+ * render as literal "[" "]" in the browser.
+ */
+function mukurtu_footer_update_40006(): void {
+  $field = \Drupal\field\Entity\FieldConfig::loadByName('block_content', 'mukurtu_footer', 'field_footer_copyright');
+  if ($field) {
+    $field->setDescription('Use the token &#91;current-date:html_year&#93; for the current year. Leave empty to hide.')->save();
+  }
+}
