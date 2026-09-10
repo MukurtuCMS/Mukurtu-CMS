@@ -6,9 +6,7 @@
  */
 
 use Drupal\mukurtu_media\MediaTypeExtensions;
-use Drupal\mukurtu_submissions\Entity\SubmissionInterface;
 use Drupal\mukurtu_submissions\Entity\SubmissionSettingsInterface;
-use Drupal\node\NodeInterface;
 use Drupal\user\Entity\User;
 
 /**

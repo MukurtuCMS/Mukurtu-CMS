@@ -5,9 +5,6 @@
  * Install, update and uninstall functions for the Mukurtu Design module.
  */
 
-use Drupal\field\Entity\FieldConfig;
-use Drupal\mukurtu_design\DesignPalette;
-use Drupal\user\Entity\Role;
 /**
  * Implements hook_update_last_removed().
  *

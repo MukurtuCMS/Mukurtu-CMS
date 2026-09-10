@@ -7,8 +7,6 @@
 
 use Drupal\og\Og;
 use Drupal\og\Entity\OgRole;
-use Drupal\mukurtu_protocol\Entity\MukurtuNode;
-use Drupal\mukurtu_protocol\CulturalProtocolControlledTrait;
 
 /**
  * Implements hook_schema().

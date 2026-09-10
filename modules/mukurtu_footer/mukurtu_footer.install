@@ -6,7 +6,6 @@
  */
 
 use Drupal\block_content\Entity\BlockContent;
-use Drupal\paragraphs\Entity\Paragraph;
 
 /**
  * Implements hook_install().

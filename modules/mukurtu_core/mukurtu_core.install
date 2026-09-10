@@ -5,7 +5,9 @@
  * Install, update and uninstall functions for the mukurtu_core module.
  */
 
+use Drupal\Core\Extension\Requirement\RequirementSeverity;
 use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\mukurtu_core\Hook\UpdatePathRequirements;
 
 /**
  * Implements hook_install().
@@ -37,4 +39,50 @@ function mukurtu_core_install() {
  */
 function mukurtu_core_update_last_removed(): int {
   return 40123;
+}
+
+/**
+ * Implements hook_update_requirements().
+ *
+ * Blocks a site that never finished the 4.0.0 updates from updating to 4.0.1,
+ * because the updates it still needs no longer exist to run.
+ *
+ * This has to exist. hook_update_last_removed() does not stop anyone: core
+ * reads it only to seed a fresh install and to repair a missing schema entry,
+ * while update_get_update_list() just lists updates above the installed
+ * version and finds none once the hooks are deleted. Without this the site
+ * would report "no pending updates" and quietly run on stale configuration.
+ *
+ * update_check_requirements() invokes this from both update.php and
+ * drush updb, and an error severity stops both.
+ *
+ * Stays procedural rather than moving to the #[Hook] class alongside the
+ * runtime check. hook_update_requirements() is not on core's attribute deny
+ * list, so an attribute would be legal, but update-phase code runs while the
+ * container may not reflect the code on disk, and a .install file is the one
+ * place guaranteed to be loaded by the update system itself.
+ *
+ * @see \Drupal\mukurtu_core\Hook\UpdatePathRequirements
+ * @see update_check_requirements()
+ */
+function mukurtu_core_update_requirements(): array {
+  $behind = UpdatePathRequirements::modulesBehind(
+    \Drupal::moduleHandler(),
+    \Drupal::service('update.update_hook_registry'),
+  );
+
+  if (empty($behind)) {
+    return [];
+  }
+
+  return [
+    'mukurtu_core_update_path' => [
+      'title' => t('Mukurtu update path'),
+      'value' => t('Update to Mukurtu 4.0.0 first'),
+      'description' => t('This site still has database updates to run from before Mukurtu 4.0.0. Mukurtu 4.0.1 removed those updates, so they can no longer run, and updating directly would leave parts of the site using out-of-date configuration. To update safely: install Mukurtu 4.0.0, run all database updates, then install Mukurtu 4.0.1. Modules waiting on 4.0.0 updates: @modules.', [
+        '@modules' => UpdatePathRequirements::formatModuleList($behind),
+      ]),
+      'severity' => RequirementSeverity::Error,
+    ],
+  ];
 }

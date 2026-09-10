@@ -8,8 +8,6 @@
 use Drupal\Core\Field\Entity\BaseFieldOverride;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\language\Entity\ContentLanguageSettings;
-use Drupal\search_api\Entity\Index;
-use Drupal\search_api\Item\Field as SearchApiField;
 use Drupal\user\Entity\Role;
 
 /**
