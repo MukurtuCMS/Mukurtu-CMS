@@ -129,7 +129,7 @@ class SiteSetupTaskManager {
       new SiteSetupTask(
         'site_footer',
         (string) $this->t('Configure site footer'),
-        (string) $this->t('Update your site footer with contact information, logos, links, and other information. Learn more at LINK TBD.'),
+        Markup::create((string) $this->t('Update your site footer with contact information, logos, links, and other information. Learn more at <a href="https://docs.mukurtu.org/look-and-feel/ConfigureFooter/">Configure Footer</a>.')),
         self::GROUP_RECOMMENDED,
         TRUE,
         '/admin/content/mukurtu-footer/edit',
