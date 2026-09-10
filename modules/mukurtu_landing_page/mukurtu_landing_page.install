@@ -6,8 +6,10 @@
  * highest number 4.0.0 shipped, so a fresh install is seeded there and a site
  * that already ran the 4.0.0 updates has nothing left to do.
  *
- * Sites below 4.0.0 must update to 4.0.0 first. Core does not enforce that on
- * its own, so mukurtu_core_update_requirements() blocks them explicitly.
+ * Sites below 4.0.0 must update to 4.0.0 first. Core reports that as an error
+ * during the update, and mukurtu_core_update_requirements() adds a message
+ * naming 4.0.0 specifically. Note that neither actually halts `drush updb -y`,
+ * which prompts and proceeds; see docs/update-hooks.md.
  */
 function mukurtu_landing_page_update_last_removed(): int {
   return 40006;

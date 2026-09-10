@@ -13,25 +13,29 @@ use Drupal\Core\Update\UpdateHookRegistry;
 /**
  * Reports a site that reached 4.0.1 without finishing the 4.0.0 updates.
  *
- * 4.0.1 removed every update hook the 4.0.x betas accumulated and replaced
- * them with hook_update_last_removed(). Core reads that value in only two
- * places, neither of which stops a site that is too far behind:
- * ModuleInstaller::install() uses it to seed a fresh install, and
- * _update_fix_missing_schema() uses it to repair a missing schema entry.
- * update_get_update_list() simply lists updates above the installed version,
- * and once the hooks are deleted there is nothing left to list.
+ * 4.0.1 removed every update hook the 4.0.x betas accumulated and replaced them
+ * with hook_update_last_removed() baselines.
  *
- * The practical consequence is that a site several releases behind reports
- * "no pending updates" and carries on running against stale configuration,
- * rather than being stopped. Detecting that is left entirely to us.
+ * This is the half core does not cover. Core's own
+ * SystemRequirementsHooks::checkRequirements() does compare each module's
+ * installed schema version against its hook_update_last_removed() and reports
+ * an error for any that are behind, so the update phase is already handled
+ * without us. But that check is gated on $phase == 'update', so it is invisible
+ * on the status report.
  *
- * Two implementations cover the two ways an operator arrives here. The update
- * phase one in mukurtu_core.install blocks update.php and drush updb before
- * anything runs. This one covers the site that never ran updates at all, and
- * so would never have seen that message.
+ * That gap matters because running updates is a separate act from deploying the
+ * code. An operator who updates the code and never runs updb sees nothing at
+ * all: no pending updates to run, no warning anywhere in the admin UI, and a
+ * site quietly operating against stale configuration. This surfaces it there,
+ * and keeps surfacing it until the site is actually brought up to date.
+ *
+ * Worth knowing when reasoning about the update-phase counterpart: an
+ * error-severity requirement does not hard-stop drush. It is raised as a
+ * confirmable prompt, so `drush updb -y` prints the error and proceeds. See
+ * docs/update-hooks.md for the verified behaviour.
  *
  * @see mukurtu_core_update_requirements()
- * @see \Drupal\Core\Extension\ModuleInstaller::install()
+ * @see \Drupal\system\Hook\SystemRequirementsHooks::checkRequirements()
  */
 final class UpdatePathRequirements {
 

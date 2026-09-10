@@ -34,8 +34,10 @@ function mukurtu_core_install() {
  * highest number 4.0.0 shipped, so a fresh install is seeded there and a site
  * that already ran the 4.0.0 updates has nothing left to do.
  *
- * Sites below 4.0.0 must update to 4.0.0 first. Core does not enforce that on
- * its own, so mukurtu_core_update_requirements() blocks them explicitly.
+ * Sites below 4.0.0 must update to 4.0.0 first. Core reports that as an error
+ * during the update, and mukurtu_core_update_requirements() adds a message
+ * naming 4.0.0 specifically. Note that neither actually halts `drush updb -y`,
+ * which prompts and proceeds; see docs/update-hooks.md.
  */
 function mukurtu_core_update_last_removed(): int {
   return 40123;
@@ -44,17 +46,22 @@ function mukurtu_core_update_last_removed(): int {
 /**
  * Implements hook_update_requirements().
  *
- * Blocks a site that never finished the 4.0.0 updates from updating to 4.0.1,
- * because the updates it still needs no longer exist to run.
+ * Warns a site that never finished the 4.0.0 updates that it cannot go straight
+ * to 4.0.1, because the updates it still needs no longer exist to run.
  *
- * This has to exist. hook_update_last_removed() does not stop anyone: core
- * reads it only to seed a fresh install and to repair a missing schema entry,
- * while update_get_update_list() just lists updates above the installed
- * version and finds none once the hooks are deleted. Without this the site
- * would report "no pending updates" and quietly run on stale configuration.
+ * Core already detects this on its own.
+ * SystemRequirementsHooks::checkRequirements() compares every module's
+ * installed schema version against its hook_update_last_removed() and reports
+ * an error per module that is behind. What this adds is a single message that
+ * names the release to install first, which core's generic "update to an
+ * intermediate version first" cannot.
  *
- * update_check_requirements() invokes this from both update.php and
- * drush updb, and an error severity stops both.
+ * Neither this nor core's version actually blocks an automated update. Drush
+ * raises a requirements error as a confirmable prompt, so `drush updb -y`
+ * prints it and proceeds, exiting 0 with "No pending updates". Only an explicit
+ * `--no` aborts. Treat this as a loud warning; the thing that keeps the problem
+ * visible afterwards is the runtime check, which core does not do at all. See
+ * docs/update-hooks.md for the verified behaviour.
  *
  * Stays procedural rather than moving to the #[Hook] class alongside the
  * runtime check. hook_update_requirements() is not on core's attribute deny
@@ -63,7 +70,7 @@ function mukurtu_core_update_last_removed(): int {
  * place guaranteed to be loaded by the update system itself.
  *
  * @see \Drupal\mukurtu_core\Hook\UpdatePathRequirements
- * @see update_check_requirements()
+ * @see \Drupal\system\Hook\SystemRequirementsHooks::checkRequirements()
  */
 function mukurtu_core_update_requirements(): array {
   $behind = UpdatePathRequirements::modulesBehind(
