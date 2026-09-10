@@ -190,3 +190,15 @@ function mukurtu_footer_update_40003(): void {
     $footer->save();
   }
 }
+
+/**
+ * Add the "Edit footer content" dashboard link (Look and feel section).
+ *
+ * Footer content editing previously had no permanent dashboard entry point;
+ * the only path in was the one-time Setup Checklist task, which is hidden
+ * once every task is complete and pointed at a hardcoded block_content ID
+ * that isn't guaranteed to be 1.
+ */
+function mukurtu_footer_update_40004(): void {
+  \Drupal::service('plugin.manager.menu.link')->rebuild();
+}

@@ -6,6 +6,7 @@ namespace Drupal\Tests\mukurtu_footer\Kernel;
 
 use Drupal\block_content\Entity\BlockContent;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\mukurtu_footer\Controller\FooterEditRedirectController;
 use Drupal\paragraphs\Entity\Paragraph;
 use PHPUnit\Framework\Attributes\Group;
 
@@ -190,6 +191,39 @@ class FooterBlockTest extends KernelTestBase {
     $this->assertCount(1, $social_links, 'Only the non-empty Twitter account should be migrated.');
     $this->assertEquals('twitter', $social_links[0]->get('field_footer_social_platform')->value);
     $this->assertStringContainsString('mukurtucms', $social_links[0]->get('field_footer_social_url')->uri);
+  }
+
+  /**
+   * FooterEditRedirectController redirects to the footer's actual edit form,
+   * regardless of its block_content entity ID.
+   */
+  public function testEditContentRedirectsToFooterEditForm(): void {
+    // Create and delete an unrelated block_content entity first so the
+    // footer's ID is not 1, guarding against the hardcoded-path regression
+    // this controller replaces.
+    $decoy = BlockContent::create(['type' => 'mukurtu_footer', 'info' => 'Decoy']);
+    $decoy->save();
+    $decoy->delete();
+
+    $footer = BlockContent::create(['type' => 'mukurtu_footer', 'info' => 'Test Footer']);
+    $footer->save();
+    $this->assertNotSame(1, (int) $footer->id());
+
+    $controller = FooterEditRedirectController::create($this->container);
+    $response = $controller->edit();
+
+    $this->assertStringEndsWith('/admin/content/block/' . $footer->id(), $response->getTargetUrl());
+  }
+
+  /**
+   * FooterEditRedirectController falls back to the block library when no
+   * footer block_content entity exists.
+   */
+  public function testEditContentRedirectsToCollectionWhenNoFooterExists(): void {
+    $controller = FooterEditRedirectController::create($this->container);
+    $response = $controller->edit();
+
+    $this->assertStringEndsWith('/admin/content/block', $response->getTargetUrl());
   }
 
 }

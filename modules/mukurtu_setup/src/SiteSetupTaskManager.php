@@ -132,7 +132,7 @@ class SiteSetupTaskManager {
         (string) $this->t('Update your site footer with contact information, logos, links, and other information. Learn more at LINK TBD.'),
         self::GROUP_RECOMMENDED,
         TRUE,
-        '/admin/content/block/1',
+        '/admin/content/mukurtu-footer/edit',
         (string) $this->t('Edit footer content'),
       ),
       new SiteSetupTask(
