@@ -61,10 +61,12 @@ class ShippedExportImportContractTest extends UnitTestCase {
    * cannot be mapped on import, which is precisely the round trip external
    * export exists to support.
    *
-   * This is a pre-existing defect, not a deliberate exemption. It is enumerated
-   * here so the rest of the contract can be enforced strictly, and so the list
-   * shrinks visibly when the gap is closed. Do not add entries to this list to
-   * make a new failure go away.
+   * This is a pre-existing defect, not a deliberate exemption, tracked in
+   * issue #2156. It is enumerated here so the rest of the contract can be
+   * enforced strictly, and so the list shrinks visibly when the gap is closed.
+   * Do not add entries to this list to make a new failure go away.
+   *
+   * @see https://github.com/MukurtuCMS/Mukurtu-CMS/issues/2156
    */
   private const KNOWN_UNMAPPABLE = [
     'taxonomy_term__category' => ['UUID'],
