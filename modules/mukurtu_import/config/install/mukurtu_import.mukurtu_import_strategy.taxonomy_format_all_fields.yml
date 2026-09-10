@@ -29,6 +29,9 @@ mapping:
   -
     source: 'Term ID'
     target: tid
+  -
+    source: UUID
+    target: uuid
 configuration:
   delimiter: ','
   enclosure: '"'
