@@ -40,13 +40,40 @@ jobs:
           INTERVAL=30
           ELAPSED=0
           PREVIEW_URL=""
+          # A single error reading is not trusted. The Tugboat status has been
+          # observed to report "error" and then recover to "success" on the same
+          # commit, which made this job fail in 7 seconds while the Tugboat
+          # check itself went on to pass. Twice that was mistaken for a real
+          # build failure, once for a stacked-PR problem that did not exist.
+          #
+          # Note the asymmetry this fixes: an early *success* reading was
+          # already distrusted, per the comment above, but an early *error* was
+          # taken as final. Requiring two consecutive readings costs one extra
+          # interval on a genuine failure and removes the false one.
+          #
+          # A status that alternates error/pending indefinitely never reaches
+          # two in a row, so it falls through to the MAX_WAIT timeout instead of
+          # failing fast. That is the accepted trade: it still fails, just
+          # slowly, and it is a state that has never been observed.
+          ERROR_STREAK=0
+          ERROR_STREAK_REQUIRED=2
           while [ $ELAPSED -lt $MAX_WAIT ]; do
             TUGBOAT_STATE=$(gh api "repos/${{ github.repository }}/commits/${{ github.event.pull_request.head.sha }}/status" --jq '[.statuses[] | select(.context=="Tugboat")][0].state // "pending"' 2>/dev/null || echo "pending")
 
             if [[ "$TUGBOAT_STATE" == "failure" || "$TUGBOAT_STATE" == "error" ]]; then
-              echo "Tugboat build failed (status: $TUGBOAT_STATE). See the Tugboat commit status check for details."
-              exit 1
+              ERROR_STREAK=$((ERROR_STREAK + 1))
+              if [ "$ERROR_STREAK" -ge "$ERROR_STREAK_REQUIRED" ]; then
+                echo "Tugboat build failed (status: $TUGBOAT_STATE on $ERROR_STREAK consecutive checks). See the Tugboat commit status check for details."
+                exit 1
+              fi
+              echo "Tugboat status is $TUGBOAT_STATE; re-checking before treating that as a real build failure..."
+              sleep $INTERVAL
+              ELAPSED=$((ELAPSED + INTERVAL))
+              continue
             fi
+
+            # Any non-error reading means the previous one was a blip.
+            ERROR_STREAK=0
 
             if [[ "$TUGBOAT_STATE" == "success" ]]; then
               # --paginate is required: without it this call silently only
