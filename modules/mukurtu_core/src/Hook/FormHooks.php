@@ -1559,4 +1559,23 @@ class FormHooks
     ): void {
         unset($form["conditions"]["og_group_type"]);
     }
+
+    /**
+     * Implements hook_form_FORM_ID_alter() for 'system_cron_settings'.
+     *
+     * Pushes the "To run cron from outside the site" URL down below the
+     * Cron settings fieldset and Save configuration button. It's an
+     * advanced/rarely-needed detail (most sites use Automated Cron or a
+     * hosting-managed cron job instead), so it doesn't need to be the first
+     * thing an admin sees on this page.
+     */
+    #[Hook("form_system_cron_settings_alter")]
+    public function formSystemCronSettingsAlter(
+        array &$form,
+        FormStateInterface $form_state,
+    ): void {
+        if (isset($form["cron_url"])) {
+            $form["cron_url"]["#weight"] = 100;
+        }
+    }
 }
