@@ -234,7 +234,7 @@ class FooterBlockTest extends KernelTestBase {
   public function testSocialUrlFieldHasPlatformGuidance(): void {
     $field = FieldConfig::loadByName('paragraph', 'footer_social_link', 'field_footer_social_url');
     $this->assertNotNull($field);
-    $this->assertStringContainsString('profile page', $field->getDescription());
+    $this->assertStringStartsWith('Profile URL:', $field->getDescription());
   }
 
   /**
@@ -250,7 +250,7 @@ class FooterBlockTest extends KernelTestBase {
     mukurtu_footer_update_40005();
 
     $updated = FieldConfig::loadByName('paragraph', 'footer_social_link', 'field_footer_social_url');
-    $this->assertStringContainsString('profile page', $updated->getDescription());
+    $this->assertStringStartsWith('Profile URL:', $updated->getDescription());
   }
 
   /**
@@ -285,6 +285,40 @@ class FooterBlockTest extends KernelTestBase {
 
     $updated = FieldConfig::loadByName('block_content', 'mukurtu_footer', 'field_footer_copyright');
     $this->assertStringContainsString('&#91;current-date:html_year&#93;', $updated->getDescription());
+  }
+
+  /**
+   * The shipped "Other links" and footer logo link fields also carry
+   * URL-specific guidance rather than only the generic link-field help text
+   * (#2159).
+   */
+  public function testOtherLinksAndLogoLinkFieldsHaveGuidance(): void {
+    $other_links = FieldConfig::loadByName('block_content', 'mukurtu_footer', 'field_footer_other_links');
+    $this->assertNotNull($other_links);
+    $this->assertStringStartsWith('URL:', $other_links->getDescription());
+
+    $logo_link = FieldConfig::loadByName('paragraph', 'footer_logo', 'field_footer_logo_link');
+    $this->assertNotNull($logo_link);
+    $this->assertStringStartsWith('Link URL:', $logo_link->getDescription());
+  }
+
+  /**
+   * mukurtu_footer_update_40007() adds the descriptions to sites that
+   * installed before it existed.
+   */
+  public function testUpdate40007AddsOtherLinksAndLogoLinkDescriptions(): void {
+    $other_links = FieldConfig::loadByName('block_content', 'mukurtu_footer', 'field_footer_other_links');
+    $other_links->setDescription('')->save();
+    $logo_link = FieldConfig::loadByName('paragraph', 'footer_logo', 'field_footer_logo_link');
+    $logo_link->setDescription('')->save();
+
+    require_once __DIR__ . '/../../../mukurtu_footer.install';
+    mukurtu_footer_update_40007();
+
+    $updated_other_links = FieldConfig::loadByName('block_content', 'mukurtu_footer', 'field_footer_other_links');
+    $this->assertStringStartsWith('URL:', $updated_other_links->getDescription());
+    $updated_logo_link = FieldConfig::loadByName('paragraph', 'footer_logo', 'field_footer_logo_link');
+    $this->assertStringStartsWith('Link URL:', $updated_logo_link->getDescription());
   }
 
 }

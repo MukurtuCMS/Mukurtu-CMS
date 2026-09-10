@@ -11,7 +11,7 @@ field_name: field_footer_other_links
 entity_type: block_content
 bundle: mukurtu_footer
 label: 'Other links'
-description: 'Links to organizational pages, partners, privacy policy, etc. The link title is used as the display label.'
+description: 'URL: link to organizational pages, partners, privacy policy, etc., for example https://example.org/privacy-policy. The link title above is used as the display label.'
 required: false
 translatable: true
 default_value: {}
