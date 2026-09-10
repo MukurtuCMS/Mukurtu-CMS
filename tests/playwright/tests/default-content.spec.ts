@@ -353,7 +353,13 @@ test('Default Content: Dictionary Word', async ({ page, browserName }) => {
       const modal = page.getByRole('dialog', { name: 'Add or select media' });
       if (sentence.upload) {
         const uploadFilePath = path.join(__dirname, '../resources', sentence.upload);
-        await modal.getByRole('textbox', { name: 'Add file' }).setInputFiles(uploadFilePath);
+        // Target the file input directly rather than by role. An
+        // <input type="file"> has no textbox role - Claro renders it behind a
+        // styled "Add file" button, and the accessibility tree exposes it as a
+        // button - so getByRole('textbox') never matched and this step has
+        // never actually run in CI. See setInputFiles' own documentation, which
+        // recommends locating file inputs this way.
+        await modal.locator('input[type="file"]').setInputFiles(uploadFilePath);
         await waitForAjax(page);
 
         // Sharing settings copy from the parent word access control.
