@@ -9,23 +9,18 @@ use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
 
 /**
- * Tests mukurtu_submissions_update_40013(): creates the
- * "mukurtu_submission_reviewer" role for existing sites (new installs get
- * it from config/install/user.role.mukurtu_submission_reviewer.yml
- * directly), backfills its per-bundle content permissions via
- * mukurtu_submissions_sync_review_permissions(), and enrolls anyone
- * already in notify_uids - see
- * SubmissionSettingsCollectionForm::syncNotifyReviewerRoles() for the
- * ongoing (post-update) grant/revoke path this backfills for existing
- * sites.
+ * Tests the permission set behind the "mukurtu_submission_reviewer" role.
+ *
+ * The role itself ships as config/install/user.role.mukurtu_submission_reviewer
+ * .yml, and ShippedRolePermissionsTest asserts what that file grants.
+ * mukurtu_submissions_reviewer_role_permissions() is the computed set the
+ * shipped file must not drift from, so it is asserted here directly.
+ *
+ * @see SubmissionSettingsCollectionForm::syncNotifyReviewerRoles()
  *
  * @group mukurtu_submissions
  */
 class SubmissionReviewerRoleUpdateTest extends MukurtuSubmissionsKernelTestBase {
-  
-
-  
-
   /**
    * The media edit/delete permissions themselves are exercised via
    * mukurtu_submissions_reviewer_role_permissions()'s return value rather
@@ -46,13 +41,4 @@ class SubmissionReviewerRoleUpdateTest extends MukurtuSubmissionsKernelTestBase 
     $this->assertContains('delete any video media', $permissions);
     $this->assertNotContains('administer mukurtu submissions', $permissions);
   }
-
-  
-
-  
-
-  
-
-  
-
 }

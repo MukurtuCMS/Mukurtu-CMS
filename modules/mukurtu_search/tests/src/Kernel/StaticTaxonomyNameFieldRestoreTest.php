@@ -20,21 +20,18 @@ use PHPUnit\Framework\Attributes\Group;
  * FieldAvailableForIndexing pass (see
  * BaseFieldsSearchIndexSubscriber::defaultFieldIndex()). It never restored
  * the plain string "__name" variant that facets (Category, Format,
- * Language, etc.) use as their field_identifier, so every facet built on
- * one of those 16 fields broke with "No available query types were found"
- * once mukurtu_search_update_40001() ran on an already-installed site.
- * mukurtu_search_update_40005() repairs already-affected sites, and
- * mukurtu_search_rebuild_index() itself now re-adds those 16 fields so the
- * problem cannot recur on a future rebuild.
+ * Language, etc.) use as their field_identifier, so every facet built on one
+ * of those 16 fields broke with "No available query types were found".
+ * mukurtu_search_rebuild_index() now re-adds those 16 fields itself, so the
+ * problem cannot recur on a future rebuild. That is what this asserts, since
+ * a rebuild is something a live site does routinely.
  *
  * mukurtu_search itself is not enabled here: its declared dependency chain
- * (mukurtu_collection, paragraphs, media, search_api_glossary, token)
- * isn't needed to exercise mukurtu_search_rebuild_index() and
- * mukurtu_search_update_40005() directly. Both files are required
- * directly instead, mirroring BrowseCollapseIndexRestoreTest.
+ * (mukurtu_collection, paragraphs, media, search_api_glossary, token) is not
+ * needed to exercise mukurtu_search_rebuild_index() directly, so the file is
+ * required directly instead.
  *
  * @see mukurtu_search_rebuild_index()
- * @see mukurtu_search_update_40005()
  * @see mukurtu_search_static_taxonomy_name_fields()
  */
 #[Group('mukurtu_search')]
@@ -135,9 +132,4 @@ class StaticTaxonomyNameFieldRestoreTest extends ProtocolAwareEntityTestBase {
       $this->assertSame($definition['property_path'], $field->getPropertyPath());
     }
   }
-
-  
-
-  
-
 }

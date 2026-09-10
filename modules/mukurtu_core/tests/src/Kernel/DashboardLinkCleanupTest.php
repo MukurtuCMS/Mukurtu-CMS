@@ -9,22 +9,23 @@ use PHPUnit\Framework\Attributes\Group;
 use Symfony\Component\Yaml\Yaml;
 
 /**
- * Tests the dashboard link cleanup for issues #1787 and #2057:
- * - mukurtu_core_update_40119() orders Security before Site information.
- * - mukurtu_core_update_40120() splits Site settings into "Publication tools"
- *   and "Local Contexts" sections.
- * - mukurtu_core_update_40122() moves "Site-wide comment settings" into
- *   Publication tools and creates a "Notifications & Review" section for
- *   comment review, the review queue, pending submissions, and
- *   notifications.
- * - The Configure Community/Protocol Permissions links are gone.
- * - The Visitors "Analytics" / "Visitor settings" links are present.
- * - The Multilingual section no longer has a duplicate "Manage site languages".
+ * Tests the shipped dashboard's sections and links (#1787, #2057).
  *
- * @see mukurtu_core_update_40119()
- * @see mukurtu_core_update_40120()
- * @see mukurtu_core_update_40122()
- * @see mukurtu_protocol_update_40045()
+ * Asserts the end state directly, against the shipped dashboard config and the
+ * *.links.menu.yml files that populate it:
+ * - Security is ordered before Site information, and the columns are balanced.
+ * - Site settings is split into "Publication tools" and "Local Contexts".
+ * - A "Notifications & Review" section exists, holding comment review, the
+ *   review queue, pending submissions and notifications.
+ * - The Configure Community/Protocol Permissions links are gone, while the
+ *   route one of them pointed at still exists.
+ * - The Visitors "Analytics" and "Visitor settings" links are present.
+ * - The Multilingual section has no duplicate "Manage site languages".
+ *
+ * The update hooks that produced this state were removed in 4.0.1, along with
+ * the tests that ran them. What remains is worth keeping because a dashboard
+ * with a missing or misplaced section still renders fine, so nothing else would
+ * catch it.
  */
 #[Group('mukurtu_core')]
 class DashboardLinkCleanupTest extends KernelTestBase {
@@ -34,9 +35,9 @@ class DashboardLinkCleanupTest extends KernelTestBase {
   protected static $modules = [
     'system',
     'user',
-    // Required so the "administer comments" permission granted by
-    // mukurtu_core_update_40122() is registered -- Role::calculateDependencies()
-    // silently strips any permission not defined by an enabled module.
+    // Required so the "administer comments" permission is registered --
+    // Role::calculateDependencies() silently strips any permission not
+    // defined by an enabled module.
     'comment',
   ];
 
@@ -62,8 +63,6 @@ class DashboardLinkCleanupTest extends KernelTestBase {
     $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core');
     require_once $module_path . '/mukurtu_core.install';
   }
-
-  
 
   /**
    * Reads a menu links YAML file for the given module.
@@ -95,12 +94,6 @@ class DashboardLinkCleanupTest extends KernelTestBase {
     usort($items, static fn(array $a, array $b): int => [$a[0], mb_strtolower($a[1])] <=> [$b[0], mb_strtolower($b[1])]);
     return array_map(static fn(array $i): string => $i[1], $items);
   }
-
-  
-
-  
-
-  
 
   /**
    * The shipped dashboard config orders Security before Site information in the
@@ -166,16 +159,6 @@ class DashboardLinkCleanupTest extends KernelTestBase {
     $this->assertSame('internal:/admin/config/regional/language', $link['url']);
     $this->assertArrayNotHasKey('entity.configurable_language.edit_form', $links);
   }
-
-  
-
-  
-
-  
-
-  
-
-  
 
   /**
    * The shipped dashboard config carries the Publication tools / Local Contexts
@@ -445,5 +428,4 @@ class DashboardLinkCleanupTest extends KernelTestBase {
     $links = $this->menuLinks('mukurtu_core');
     $this->assertSame('Analytics settings', $links['mukurtu_core.visitors_settings']['title']);
   }
-
 }

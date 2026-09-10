@@ -11,8 +11,8 @@
  * Adds the is_additional_mpi_page field and mukurtu_multipage_page_index
  * processor to the default content index. mukurtu_browse installs before this
  * module, so these items cannot be declared in mukurtu_browse's config/install;
- * they are added here so fresh installs match sites that ran
- * mukurtu_browse_update_40009() and mukurtu_browse_update_40010().
+ * they are added here, so a fresh install matches the state the 4.0.0 update
+ * hooks produced on existing sites.
  */
 function mukurtu_multipage_items_install(): void {
   $index = \Drupal\search_api\Entity\Index::load('mukurtu_default_content_index');

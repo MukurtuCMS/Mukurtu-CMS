@@ -12,7 +12,6 @@ use Drupal\og\Entity\OgRole;
  * Tests exporting user community/protocol memberships.
  */
 class CsvExportUserMembershipTest extends CsvExportFieldTestBase {
-
   /**
    * {@inheritdoc}
    */
@@ -124,7 +123,7 @@ class CsvExportUserMembershipTest extends CsvExportFieldTestBase {
 
   /**
    * Test that a preset already migrated to the unified account_status
-   * mapping (see mukurtu_export_update_40025()) is reflected correctly in
+   * mapping is reflected correctly in
    * the settings form: the account_status row is shown as mapped/exported,
    * and the raw status/field_pending fields it supersedes never reappear
    * as unmapped rows.
@@ -145,5 +144,4 @@ class CsvExportUserMembershipTest extends CsvExportFieldTestBase {
     $this->assertTrue($account_status_row['export']);
     $this->assertEquals('Account Status', $account_status_row['csv_header_label']);
   }
-
 }

@@ -8,10 +8,12 @@ use Drupal\user\Entity\User;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests the "Public Submissions" -> "Submission Forms" naming cleanup:
- * permission titles still resolve under their unchanged machine names, and
- * mukurtu_submissions_update_40002() only renames a service account whose
- * name still matches the old default.
+ * Tests the "Public Submissions" to "Submission Forms" naming cleanup.
+ *
+ * The rename changed the human-readable titles only. The permission machine
+ * names deliberately did not change, since renaming those would silently
+ * revoke them from every role that held them, so this asserts the titles
+ * resolve under the unchanged machine names.
  */
 #[Group('mukurtu_submissions')]
 class SubmissionsNamingUpdateTest extends MukurtuSubmissionsKernelTestBase {
@@ -29,13 +31,4 @@ class SubmissionsNamingUpdateTest extends MukurtuSubmissionsKernelTestBase {
     $this->assertArrayHasKey('review mukurtu submissions', $permissions);
     $this->assertEquals('Review submissions', (string) $permissions['review mukurtu submissions']['title']);
   }
-
-  
-
-  
-
-  
-
-  
-
 }

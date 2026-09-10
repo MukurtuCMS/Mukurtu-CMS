@@ -25,12 +25,10 @@ use Drupal\user\Entity\User;
  * they're granted dynamically by mukurtu_submissions_sync_review_permissions()
  * instead, called whenever a settings entity is saved (see
  * mukurtu_submissions_mukurtu_submission_settings_insert()/_update() in the
- * .module file) and backfilled for existing entities below and in
- * mukurtu_submissions_update_40003().
+ * .module file) and backfilled for existing entities below.
  *
- * Shared by hook_install() (fresh installs) and
- * mukurtu_submissions_update_40001() (existing sites), so the two can't
- * drift out of sync.
+ * Used by hook_install() so a fresh install and the ongoing dynamic grants
+ * cannot drift out of sync.
  */
 function mukurtu_submissions_review_permissions(): array {
   $permissions = [

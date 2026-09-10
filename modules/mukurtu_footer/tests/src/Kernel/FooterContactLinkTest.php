@@ -17,7 +17,6 @@ use PHPUnit\Framework\Attributes\Group;
  * menu is disabled too.
  *
  * @see mukurtu_footer_install()
- * @see mukurtu_footer_update_40003()
  */
 #[Group('mukurtu_footer')]
 class FooterContactLinkTest extends KernelTestBase {
@@ -82,8 +81,6 @@ class FooterContactLinkTest extends KernelTestBase {
     return $links;
   }
 
-  
-
   /**
    * A fresh install gets the Contact link.
    */
@@ -102,13 +99,4 @@ class FooterContactLinkTest extends KernelTestBase {
     $item = $this->loadFooter()->get('field_footer_other_links')->first();
     $this->assertSame('/contact', $item->getUrl()->toString());
   }
-
-  
-
-  
-
-  
-
-  
-
 }

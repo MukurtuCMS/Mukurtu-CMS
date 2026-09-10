@@ -10,22 +10,10 @@ use Drupal\paragraphs\Entity\Paragraph;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests the MukurtuFooterBlock plugin and mukurtu_footer_update_40001().
+ * Tests the MukurtuFooterBlock plugin's render output.
  */
 #[Group('mukurtu_footer')]
 class FooterBlockTest extends KernelTestBase {
-  /**
-   * testUpdateHookMigratesBlockSettings() seeds a legacy pre-migration block
-   * settings fixture (social_media, contact_email_address, etc.) that the
-   * current block.settings.mukurtu_footer schema no longer declares, since
-   * the plugin's settings moved into a block_content entity. Production code
-   * only ever reads that legacy config, never re-saves it, so this is a
-   * test-fixture concern, not a real schema gap.
-   *
-   * {@inheritdoc}
-   */
-  protected $strictConfigSchema = FALSE;
-
   protected static $modules = [
     'system',
     'field',
@@ -102,9 +90,4 @@ class FooterBlockTest extends KernelTestBase {
 
     $this->assertSame([], $build);
   }
-
-  
-
-  
-
 }
