@@ -22,7 +22,6 @@ use Drupal\mukurtu_submissions\Form\PublicSubmissionForm;
  * use" means for a freshly enabled bundle.
  */
 class SubmissionFormDisplayManager {
-
   /**
    * Field-type-keyed widget overrides for the public submission form.
    *
@@ -80,10 +79,9 @@ class SubmissionFormDisplayManager {
    * overwritten. A site builder still reviews and enables each one
    * afterward.
    *
-   * Called from mukurtu_submissions_install() (fresh sites),
-   * mukurtu_submissions_update_40007() (existing sites), and
-   * MukurtuSubmissionsCommands::createDefaultForms() (manual re-run/backfill)
-   * so all three stay in sync on what "every content type gets a form"
+   * Called from mukurtu_submissions_install() (fresh sites) and
+   * MukurtuSubmissionsCommands::createDefaultForms() (manual re-run or
+   * backfill) so both stay in sync on what "every content type gets a form"
    * means.
    *
    * @return array
@@ -530,8 +528,8 @@ class SubmissionFormDisplayManager {
    * should never clobber an admin's hand-curated field arrangement), so an
    * already-provisioned display - digital_heritage's, or any bundle a site
    * enabled before this fix - would otherwise never pick up the paragraph
-   * handling. mukurtu_submissions_update_40008() calls this for every
-   * bundle a site already has a settings entity for.
+   * handling. A 4.0.0 update hook called this for every bundle a site already
+   * had a settings entity for.
    *
    * Only touches entity_reference_revisions/paragraph components the
    * display already has - never adds or removes fields, matching this
@@ -564,5 +562,4 @@ class SubmissionFormDisplayManager {
       $display->save();
     }
   }
-
 }

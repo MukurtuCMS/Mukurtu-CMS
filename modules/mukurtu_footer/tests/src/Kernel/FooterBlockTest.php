@@ -10,23 +10,10 @@ use Drupal\paragraphs\Entity\Paragraph;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests the MukurtuFooterBlock plugin and mukurtu_footer_update_40001().
+ * Tests the MukurtuFooterBlock plugin's render output.
  */
 #[Group('mukurtu_footer')]
 class FooterBlockTest extends KernelTestBase {
-
-  /**
-   * testUpdateHookMigratesBlockSettings() seeds a legacy pre-migration block
-   * settings fixture (social_media, contact_email_address, etc.) that the
-   * current block.settings.mukurtu_footer schema no longer declares, since
-   * the plugin's settings moved into a block_content entity. Production code
-   * only ever reads that legacy config, never re-saves it, so this is a
-   * test-fixture concern, not a real schema gap.
-   *
-   * {@inheritdoc}
-   */
-  protected $strictConfigSchema = FALSE;
-
   protected static $modules = [
     'system',
     'field',
@@ -103,93 +90,4 @@ class FooterBlockTest extends KernelTestBase {
 
     $this->assertSame([], $build);
   }
-
-  /**
-   * Tests mukurtu_footer_update_40001() skips when an entity already exists.
-   */
-  public function testUpdateHookSkipsWhenEntityExists(): void {
-    $footer = BlockContent::create([
-      'type' => 'mukurtu_footer',
-      'info' => 'Existing Footer',
-      'status' => TRUE,
-    ]);
-    $footer->save();
-
-    require_once __DIR__ . '/../../../mukurtu_footer.install';
-    mukurtu_footer_update_40001();
-
-    $entities = \Drupal::entityTypeManager()
-      ->getStorage('block_content')
-      ->loadByProperties(['type' => 'mukurtu_footer']);
-
-    // Still exactly one entity — the hook did not create a duplicate.
-    $this->assertCount(1, $entities);
-    $this->assertEquals($footer->id(), reset($entities)->id());
-  }
-
-  /**
-   * Tests mukurtu_footer_update_40001() migrates data from block settings.
-   */
-  public function testUpdateHookMigratesBlockSettings(): void {
-    // Write a block config directly with the old plugin settings format.
-    \Drupal::configFactory()
-      ->getEditable('block.block.mukurtu_v4_footer_test')
-      ->setData([
-        'langcode' => 'en',
-        'status' => TRUE,
-        'id' => 'mukurtu_v4_footer_test',
-        'theme' => 'stark',
-        'region' => 'footer',
-        'weight' => 0,
-        'provider' => NULL,
-        'plugin' => 'mukurtu_footer',
-        'settings' => [
-          'id' => 'mukurtu_footer',
-          'label' => 'Mukurtu Footer',
-          'social_media' => [
-            'twitter' => [
-              'account_1' => 'mukurtucms',
-              'account_2' => '',
-              'account_3' => '',
-            ],
-            'facebook' => [
-              'account_1' => '',
-              'account_2' => '',
-              'account_3' => '',
-            ],
-            'instagram' => [
-              'account_1' => '',
-              'account_2' => '',
-              'account_3' => '',
-            ],
-          ],
-          'contact_email_address' => 'info@mukurtu.org',
-          'email_us_text' => 'Contact us',
-          'copyright_message' => '© 2024 Mukurtu CMS',
-          'logo_upload' => [],
-        ],
-        'visibility' => [],
-      ])
-      ->save();
-
-    require_once __DIR__ . '/../../../mukurtu_footer.install';
-    mukurtu_footer_update_40001();
-
-    $entities = \Drupal::entityTypeManager()
-      ->getStorage('block_content')
-      ->loadByProperties(['type' => 'mukurtu_footer']);
-
-    $this->assertCount(1, $entities);
-    $footer = reset($entities);
-
-    $this->assertEquals('info@mukurtu.org', $footer->get('field_footer_contact_email')->value);
-    $this->assertEquals('Contact us', $footer->get('field_footer_contact_email_label')->value);
-    $this->assertEquals('© 2024 Mukurtu CMS', $footer->get('field_footer_copyright')->value);
-
-    $social_links = $footer->get('field_footer_social_links')->referencedEntities();
-    $this->assertCount(1, $social_links, 'Only the non-empty Twitter account should be migrated.');
-    $this->assertEquals('twitter', $social_links[0]->get('field_footer_social_platform')->value);
-    $this->assertStringContainsString('mukurtucms', $social_links[0]->get('field_footer_social_url')->uri);
-  }
-
 }

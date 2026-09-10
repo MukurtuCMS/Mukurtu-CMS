@@ -8,8 +8,6 @@
 use Drupal\Core\Field\Entity\BaseFieldOverride;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\language\Entity\ContentLanguageSettings;
-use Drupal\search_api\Entity\Index;
-use Drupal\search_api\Item\Field as SearchApiField;
 use Drupal\user\Entity\Role;
 
 /**
@@ -132,202 +130,17 @@ function _mukurtu_multilingual_apply_translation_overrides(): void {
 }
 
 /**
- * Update the description for the keywords field on dictionary words.
- */
-function mukurtu_multilingual_update_40001() {
-  $config = \Drupal::configFactory()->getEditable('core.base_field_override.node.dictionary_word.field_keywords');
-  $config->set('description', 'Keywords are used to tag dictionary words to ensure that they are discoverable when searching or browsing.<br>Include as many keywords as needed. Select from existing keywords or add new ones.');
-  $config->save();
-}
-
-/**
- * Update the description for the keywords field on person records.
- */
-function mukurtu_multilingual_update_40002() {
-  $config = \Drupal::configFactory()->getEditable('core.base_field_override.node.person.field_keywords');
-  $config->set('description', 'Keywords are used to tag person records to ensure that they are discoverable when searching or browsing.<br>Include as many keywords as needed. Select from existing keywords or add new ones.');
-  $config->save();
-}
-
-/**
- * Update the description for the keywords field on place records.
- */
-function mukurtu_multilingual_update_40003() {
-  $config = \Drupal::configFactory()->getEditable('core.base_field_override.node.place.field_keywords');
-  $config->set('description', 'Keywords are used to tag place records to ensure that they are discoverable when searching or browsing.<br>Include as many keywords as needed. Select from existing keywords or add new ones.');
-  $config->save();
-}
-
-/**
- * Update the description for the relationship type field in person records.
- */
-function mukurtu_multilingual_update_40004() {
-  $config = \Drupal::configFactory()->getEditable('core.base_field_override.paragraph.related_person.field_relationship_type');
-  $config->set('description', 'The type of relationship between the related person and the subject of the person record. <br />Select from existing relationship types or add a new one.');
-  $config->save();
-}
-
-/**
- * Add content translation settings for the 5 Layout Builder block types
- * added by the basic-page Layout Builder feature (PR #1770).
+ * Implements hook_update_last_removed().
  *
- * These block types (call_to_action, horizontal_divider,
- * local_contexts_block, media_block, media_carousel_block) never shipped
- * with base field overrides or content_translation settings the way every
- * other block_content bundle does, so on a multilingual site they were
- * missing translation support entirely. Guarded by isNew() so this is a
- * no-op if the config already exists.
- */
-function mukurtu_multilingual_update_40005(): void {
-  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_multilingual');
-  $config_source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
-  $config_factory = \Drupal::configFactory();
-
-  $bundles = [
-    'call_to_action',
-    'horizontal_divider',
-    'local_contexts_block',
-    'media_block',
-    'media_carousel_block',
-  ];
-
-  foreach ($bundles as $bundle) {
-    $config_names = [
-      "core.base_field_override.block_content.$bundle.status",
-      "core.base_field_override.block_content.$bundle.info",
-      "core.base_field_override.block_content.$bundle.changed",
-      "language.content_settings.block_content.$bundle",
-    ];
-    foreach ($config_names as $config_name) {
-      if ($config_factory->get($config_name)->isNew()) {
-        $data = $config_source->read($config_name);
-        if ($data) {
-          $config_factory->getEditable($config_name)->setData($data)->save();
-        }
-      }
-    }
-  }
-}
-
-/**
- * Reconcile translation overrides on sites that worked around the
- * install-blocking config collision fixed by this release.
+ * Every mukurtu_multilingual update hook was removed in 4.0.1. 40009 is the
+ * highest number 4.0.0 shipped, so a fresh install is seeded there and a site
+ * that already ran the 4.0.0 updates has nothing left to do.
  *
- * mukurtu_multilingual used to ship its own config/install/*.yml for a
- * handful of base field overrides and one content language settings
- * object that are actually owned by the bundle's content-type module,
- * which meant the module could never actually be installed on a stock
- * Mukurtu site (Drupal's ConfigInstaller refuses to install a module
- * whose config/install ships a config name that already exists in active
- * storage). Any site that got past that by some other means never
- * received the intended overrides, since the colliding files were never
- * actually applied. Converge them now via the same helper hook_install()
- * calls.
+ * Sites below 4.0.0 must update to 4.0.0 first. Core reports that as an error
+ * during the update, and mukurtu_core_update_requirements() adds a message
+ * naming 4.0.0 specifically. Note that neither actually halts `drush updb -y`,
+ * which prompts and proceeds; see docs/update-hooks.md.
  */
-function mukurtu_multilingual_update_40006(): void {
-  _mukurtu_multilingual_apply_translation_overrides();
-}
-
-/**
- * Converges language negotiation settings on sites that installed before
- * this release or whose settings have otherwise drifted from the shipped
- * defaults (e.g. a site administrator changed them and later wants to reset
- * to the Mukurtu defaults).
- */
-function mukurtu_multilingual_update_40007(): void {
-  _mukurtu_multilingual_apply_language_negotiation_defaults();
-}
-
-/**
- * Enables content translation for 12 bundles that were never covered by any
- * language.content_settings.* config: the 7 media bundles (audio, document,
- * external_embed, image, remote_video, soundcloud, video - meaning media
- * names, alt text, and other translatable fields could not be translated on
- * a multilingual site), the place_type taxonomy vocabulary, the
- * mukurtu_footer block type, and 2 footer paragraph types
- * (footer_logo, footer_social_link). A 12th bundle, the
- * text_section_with_title paragraph type, already had its base field
- * overrides shipped but was missing the content_settings file that actually
- * enables translation for the bundle.
- *
- * Guarded by isNew() so this is a no-op if the config already exists (e.g.
- * on a site that installed after this fix shipped, which already got these
- * via config/install).
- */
-function mukurtu_multilingual_update_40008(): void {
-  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_multilingual');
-  $config_source = new \Drupal\Core\Config\FileStorage($module_path . '/config/install');
-  $config_factory = \Drupal::configFactory();
-
-  $bundles = [
-    ['media', 'audio'],
-    ['media', 'document'],
-    ['media', 'external_embed'],
-    ['media', 'image'],
-    ['media', 'remote_video'],
-    ['media', 'soundcloud'],
-    ['media', 'video'],
-    ['taxonomy_term', 'place_type'],
-    ['block_content', 'mukurtu_footer'],
-    ['paragraph', 'footer_logo'],
-    ['paragraph', 'footer_social_link'],
-    ['paragraph', 'text_section_with_title'],
-  ];
-
-  foreach ($bundles as [$entity_type_id, $bundle]) {
-    $config_name = "language.content_settings.$entity_type_id.$bundle";
-    if ($config_factory->get($config_name)->isNew()) {
-      $data = $config_source->read($config_name);
-      if ($data) {
-        $config_factory->getEditable($config_name)->setData($data)->save();
-      }
-    }
-  }
-}
-
-/**
- * Wires the already-enabled LanguageWithFallback Search API processor to an
- * indexed field on all 6 profile-owned indexes, so views/facets can filter
- * on it to fall back to default-language content instead of hiding
- * untranslated items (docs/content-language-policy.md).
- *
- * The `language_with_fallback` processor is already enabled (locked,
- * hidden) on every index shipped by this profile - it just isn't wired to
- * a field yet, so nothing can filter/facet on it. This only adds the
- * field; it doesn't change any view's filters, so it has no visible
- * behavior change on its own (that's Phase 4's per-view follow-up work).
- *
- * Triggers a full reindex on each affected index, since a newly-added
- * field has no value for already-indexed items until they're re-crawled.
- * On a large Solr install this can take a while - flag this in release
- * notes, not just as a silent update hook.
- */
-function mukurtu_multilingual_update_40009(): void {
-  $index_ids = [
-    'mukurtu_default_content_index',
-    'mukurtu_collection_index',
-    'mukurtu_dictionary_index',
-    'mukurtu_browse_auto_index',
-    'mukurtu_default_solr_index',
-    'mukurtu_dictionary_solr_index',
-  ];
-
-  foreach ($index_ids as $index_id) {
-    $index = Index::load($index_id);
-    if (!$index) {
-      continue;
-    }
-
-    if ($index->getField('language_with_fallback')) {
-      continue;
-    }
-
-    $field = new SearchApiField($index, 'language_with_fallback');
-    $field->setType('string');
-    $field->setPropertyPath('language_with_fallback');
-    $field->setLabel(t('Language (with fallback)'));
-    $index->addField($field);
-    $index->save();
-    $index->reindex();
-  }
+function mukurtu_multilingual_update_last_removed(): int {
+  return 40009;
 }
