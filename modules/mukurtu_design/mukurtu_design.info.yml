@@ -3,7 +3,7 @@ type: module
 description: 'Contains custom design options for Mukurtu distributions.'
 core_version_requirement: '^9.4 || ^10 || ^11'
 package: 'Mukurtu CMS'
-version: 4.0.0
+version: 4.0.1
 dependencies:
   - 'drupal:field'
   - 'drupal:mukurtu_core'
