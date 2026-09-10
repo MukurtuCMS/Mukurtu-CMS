@@ -337,7 +337,13 @@ function mukurtu_install() {
     'unflag mukurtu_follow_community',
     'unflag mukurtu_follow_content',
     'use text format basic_html',
-    'use text format full_html',
+    // Full HTML is deliberately not granted here. It adds object, embed and
+    // video tags over Basic HTML, which already covers the iframe and media
+    // embedding an ordinary logged-in user needs. mukurtu_core_update_40118()
+    // revoked this from existing sites in 4.0.0 on exactly that reasoning, but
+    // its docblock assumed "the shipped authenticated role has never granted
+    // it", which was true of user.role.authenticated.yml and untrue here.
+    // Fresh installs therefore kept getting it. See ShippedRolePermissionsTest.
     'view the administration theme',
     'view media',
     'view all revisions',

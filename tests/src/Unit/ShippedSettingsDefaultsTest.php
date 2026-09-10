@@ -168,23 +168,6 @@ class ShippedSettingsDefaultsTest extends UnitTestCase {
   }
 
   /**
-   * Authenticated users do not get the full HTML text format.
-   *
-   * Full HTML permits script tags, so granting it to every logged in user is
-   * an privilege escalation path. This is a negative that has regressed
-   * before, which is why it is pinned.
-   */
-  public function testAuthenticatedUsersDoNotGetFullHtml(): void {
-    $role = Yaml::parseFile($this->profileRoot() . '/config/install/user.role.authenticated.yml');
-
-    $this->assertNotContains(
-      'use text format full_html',
-      $role['permissions'] ?? [],
-      'The authenticated role must not be able to use the full HTML text format.'
-    );
-  }
-
-  /**
    * The custom 404 path resolves to a route that actually exists.
    *
    * mukurtu_install() points system.site page.404 at /mukurtu/not-found. If
