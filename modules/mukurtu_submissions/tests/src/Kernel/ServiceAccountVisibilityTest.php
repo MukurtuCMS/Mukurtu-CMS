@@ -32,7 +32,6 @@ use PHPUnit\Framework\Attributes\Group;
  */
 #[Group('mukurtu_submissions')]
 class ServiceAccountVisibilityTest extends MukurtuSubmissionsKernelTestBase {
-
   /**
    * {@inheritdoc}
    */
@@ -161,34 +160,10 @@ class ServiceAccountVisibilityTest extends MukurtuSubmissionsKernelTestBase {
     $this->assertEquals(0, (int) $account->get('field_pending')->value);
   }
 
-  public function testUpdateHookClearsExistingPendingServiceAccount(): void {
-    $this->installPendingField();
-    $account = User::create(['name' => 'Submission Forms', 'status' => 0, 'field_pending' => 1]);
-    $account->save();
-    \Drupal::configFactory()->getEditable('mukurtu_submissions.settings')
-      ->set('service_account_uid', (int) $account->id())
-      ->save();
+  
 
-    mukurtu_submissions_update_40009();
+  
 
-    $account = User::load($account->id());
-    $this->assertEquals(0, (int) $account->get('field_pending')->value);
-  }
-
-  public function testUpdateHookNoOpWithoutServiceAccountConfigured(): void {
-    mukurtu_submissions_update_40009();
-    $this->assertTrue(TRUE);
-  }
-
-  public function testUpdateHookNoOpWhenFieldMissing(): void {
-    $account = User::create(['name' => 'Submission Forms', 'status' => 0]);
-    $account->save();
-    \Drupal::configFactory()->getEditable('mukurtu_submissions.settings')
-      ->set('service_account_uid', (int) $account->id())
-      ->save();
-
-    mukurtu_submissions_update_40009();
-    $this->assertTrue(TRUE);
-  }
+  
 
 }

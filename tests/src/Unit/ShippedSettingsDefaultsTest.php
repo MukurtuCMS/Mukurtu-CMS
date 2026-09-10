@@ -168,6 +168,57 @@ class ShippedSettingsDefaultsTest extends UnitTestCase {
   }
 
   /**
+   * Search ships without selecting a Solr backend.
+   *
+   * mukurtu_solr is not installed by default and the settings form offers only
+   * the database backend, so a shipped 'solr' value would point every site at a
+   * backend that is neither installed nor selectable in the UI. An update hook
+   * used to reset exactly that; what protects a fresh install is the shipped
+   * config not naming it in the first place.
+   */
+  public function testSearchDoesNotShipASolrBackend(): void {
+    $root = $this->profileRoot();
+    $settings = Yaml::parseFile("$root/modules/mukurtu_search/config/install/mukurtu_search.settings.yml");
+
+    if (array_key_exists('backend', $settings)) {
+      $this->assertSame('db', $settings['backend'], 'The shipped search backend must be the database backend.');
+    }
+    else {
+      $this->addToAssertionCount(1);
+    }
+
+    // The form is the other half: a value it cannot offer must never ship.
+    $form = file_get_contents("$root/modules/mukurtu_search/src/Form/SearchSettingsForm.php");
+    $this->assertIsString($form);
+    $this->assertStringNotContainsString(
+      "'solr' =>",
+      $form,
+      'The search settings form offers a Solr backend again; the shipped default needs revisiting with it.'
+    );
+  }
+
+  /**
+   * Submission forms ship switched off.
+   *
+   * A submission form accepts content from visitors, so it must be something a
+   * site turns on deliberately rather than something that is live the moment
+   * the site installs.
+   */
+  public function testShippedSubmissionFormsAreDisabled(): void {
+    $pattern = $this->profileRoot() . '/modules/mukurtu_submissions/config/install/mukurtu_submissions.mukurtu_submission_settings.*.yml';
+    $files = glob($pattern) ?: [];
+    $this->assertNotEmpty($files, 'No shipped submission settings were found at all.');
+
+    foreach ($files as $path) {
+      $settings = Yaml::parseFile($path);
+      $this->assertFalse(
+        $settings['status'] ?? NULL,
+        basename($path) . ' ships enabled, so a fresh site would accept visitor submissions immediately.'
+      );
+    }
+  }
+
+  /**
    * The custom 404 path resolves to a route that actually exists.
    *
    * mukurtu_install() points system.site page.404 at /mukurtu/not-found. If

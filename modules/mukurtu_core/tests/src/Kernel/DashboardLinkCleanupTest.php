@@ -28,7 +28,6 @@ use Symfony\Component\Yaml\Yaml;
  */
 #[Group('mukurtu_core')]
 class DashboardLinkCleanupTest extends KernelTestBase {
-
   /**
    * {@inheritdoc}
    */
@@ -64,34 +63,7 @@ class DashboardLinkCleanupTest extends KernelTestBase {
     require_once $module_path . '/mukurtu_core.install';
   }
 
-  /**
-   * Saves a dashboard config fixture with the pre-#1787 Right-column weights.
-   */
-  protected function saveDashboardConfig(int $security_weight = 9, int $site_info_weight = 8): void {
-    \Drupal::configFactory()->getEditable('dashboards.dashboard.mukurtu_dashboard')
-      ->setData([
-        'id' => 'mukurtu_dashboard',
-        'sections' => [
-          [
-            'components' => [
-              self::SECURITY_UUID => [
-                'uuid' => self::SECURITY_UUID,
-                'region' => 'three',
-                'configuration' => ['id' => 'system_menu_block:dashboard-security'],
-                'weight' => $security_weight,
-              ],
-              self::SITE_INFO_UUID => [
-                'uuid' => self::SITE_INFO_UUID,
-                'region' => 'three',
-                'configuration' => ['id' => 'system_menu_block:dashboard-site-info'],
-                'weight' => $site_info_weight,
-              ],
-            ],
-          ],
-        ],
-      ])
-      ->save();
-  }
+  
 
   /**
    * Reads a menu links YAML file for the given module.
@@ -124,43 +96,11 @@ class DashboardLinkCleanupTest extends KernelTestBase {
     return array_map(static fn(array $i): string => $i[1], $items);
   }
 
-  /**
-   * The update hook swaps the Security and Site information weights.
-   */
-  public function testUpdateReordersSecurityBeforeSiteInfo(): void {
-    $this->saveDashboardConfig();
+  
 
-    mukurtu_core_update_40119();
+  
 
-    $components = \Drupal::config('dashboards.dashboard.mukurtu_dashboard')->get('sections.0.components');
-    $this->assertSame(8, $components[self::SECURITY_UUID]['weight']);
-    $this->assertSame(9, $components[self::SITE_INFO_UUID]['weight']);
-  }
-
-  /**
-   * Running the reorder twice leaves the weights untouched.
-   */
-  public function testReorderIsIdempotent(): void {
-    $this->saveDashboardConfig(8, 9);
-
-    mukurtu_core_update_40119();
-    mukurtu_core_update_40119();
-
-    $components = \Drupal::config('dashboards.dashboard.mukurtu_dashboard')->get('sections.0.components');
-    $this->assertSame(8, $components[self::SECURITY_UUID]['weight']);
-    $this->assertSame(9, $components[self::SITE_INFO_UUID]['weight']);
-  }
-
-  /**
-   * The update hook is a no-op when the dashboard config doesn't exist.
-   */
-  public function testUpdateIsNoOpWithoutDashboardConfig(): void {
-    $this->assertTrue(\Drupal::config('dashboards.dashboard.mukurtu_dashboard')->isNew());
-
-    mukurtu_core_update_40119();
-
-    $this->assertTrue(\Drupal::config('dashboards.dashboard.mukurtu_dashboard')->isNew());
-  }
+  
 
   /**
    * The shipped dashboard config orders Security before Site information in the
@@ -227,134 +167,15 @@ class DashboardLinkCleanupTest extends KernelTestBase {
     $this->assertArrayNotHasKey('entity.configurable_language.edit_form', $links);
   }
 
-  /**
-   * mukurtu_core_update_40120() creates the two new dashboard menus and places
-   * every block into the rebalanced three-column layout (#1787).
-   */
-  public function testUpdate40108SplitsAndRebalances(): void {
-    $this->saveDashboardConfig(8, 9);
+  
 
-    mukurtu_core_update_40120();
+  
 
-    $menu_storage = \Drupal::entityTypeManager()->getStorage('menu');
-    $this->assertNotNull($menu_storage->load('dashboard-publication-tools'));
-    $this->assertNotNull($menu_storage->load('dashboard-local-contexts'));
+  
 
-    $components = \Drupal::config('dashboards.dashboard.mukurtu_dashboard')->get('sections.0.components');
-    $by_id = [];
-    foreach ($components as $component) {
-      $by_id[$component['configuration']['id']] = $component;
-    }
-    // The two new blocks land in their rebalanced homes: Local Contexts in the
-    // Left column, Publication tools in the Middle column.
-    $this->assertSame(['one', 6], [$by_id['system_menu_block:dashboard-local-contexts']['region'], $by_id['system_menu_block:dashboard-local-contexts']['weight']]);
-    $this->assertSame(['two', 5], [$by_id['system_menu_block:dashboard-publication-tools']['region'], $by_id['system_menu_block:dashboard-publication-tools']['weight']]);
-    // Existing blocks in the fixture are re-homed too.
-    $this->assertSame(['three', 4], [$by_id['system_menu_block:dashboard-security']['region'], $by_id['system_menu_block:dashboard-security']['weight']]);
-    $this->assertSame(['three', 5], [$by_id['system_menu_block:dashboard-site-info']['region'], $by_id['system_menu_block:dashboard-site-info']['weight']]);
-  }
+  
 
-  /**
-   * Running mukurtu_core_update_40120() twice does not duplicate blocks.
-   */
-  public function testUpdate40108IsIdempotent(): void {
-    $this->saveDashboardConfig(8, 9);
-
-    mukurtu_core_update_40120();
-    mukurtu_core_update_40120();
-
-    $components = \Drupal::config('dashboards.dashboard.mukurtu_dashboard')->get('sections.0.components');
-    $ids = array_map(static fn(array $c): string => $c['configuration']['id'], array_values($components));
-    $this->assertSame(1, count(array_keys($ids, 'system_menu_block:dashboard-publication-tools', TRUE)));
-    $this->assertSame(1, count(array_keys($ids, 'system_menu_block:dashboard-local-contexts', TRUE)));
-  }
-
-  /**
-   * mukurtu_core_update_40122() creates the "Notifications & Review" menu,
-   * inserts its block into the Right column directly after "My account", and
-   * shifts the remaining Right-column blocks down (#2090).
-   */
-  public function testUpdate40110CreatesNotificationsReviewSection(): void {
-    \Drupal::configFactory()->getEditable('dashboards.dashboard.mukurtu_dashboard')
-      ->setData([
-        'id' => 'mukurtu_dashboard',
-        'sections' => [
-          [
-            'components' => [
-              'my-account-uuid' => [
-                'uuid' => 'my-account-uuid',
-                'region' => 'three',
-                'configuration' => ['id' => 'system_menu_block:dashboard-my-account'],
-                'weight' => 1,
-              ],
-              'look-feel-uuid' => [
-                'uuid' => 'look-feel-uuid',
-                'region' => 'three',
-                'configuration' => ['id' => 'system_menu_block:dashboard-look-feel'],
-                'weight' => 2,
-              ],
-              self::SECURITY_UUID => [
-                'uuid' => self::SECURITY_UUID,
-                'region' => 'three',
-                'configuration' => ['id' => 'system_menu_block:dashboard-security'],
-                'weight' => 4,
-              ],
-              self::SITE_INFO_UUID => [
-                'uuid' => self::SITE_INFO_UUID,
-                'region' => 'three',
-                'configuration' => ['id' => 'system_menu_block:dashboard-site-info'],
-                'weight' => 5,
-              ],
-            ],
-          ],
-        ],
-      ])
-      ->save();
-
-    mukurtu_core_update_40122();
-
-    $menu_storage = \Drupal::entityTypeManager()->getStorage('menu');
-    $this->assertNotNull($menu_storage->load('dashboard-notifications-review'));
-
-    $components = \Drupal::config('dashboards.dashboard.mukurtu_dashboard')->get('sections.0.components');
-    $by_id = [];
-    foreach ($components as $component) {
-      $by_id[$component['configuration']['id']] = $component;
-    }
-    $this->assertSame(['three', 1], [$by_id['system_menu_block:dashboard-my-account']['region'], $by_id['system_menu_block:dashboard-my-account']['weight']]);
-    $this->assertSame(['three', 2], [$by_id['system_menu_block:dashboard-notifications-review']['region'], $by_id['system_menu_block:dashboard-notifications-review']['weight']]);
-    $this->assertSame(['three', 3], [$by_id['system_menu_block:dashboard-look-feel']['region'], $by_id['system_menu_block:dashboard-look-feel']['weight']]);
-    $this->assertSame(['three', 5], [$by_id['system_menu_block:dashboard-security']['region'], $by_id['system_menu_block:dashboard-security']['weight']]);
-    $this->assertSame(['three', 6], [$by_id['system_menu_block:dashboard-site-info']['region'], $by_id['system_menu_block:dashboard-site-info']['weight']]);
-  }
-
-  /**
-   * Running mukurtu_core_update_40122() twice does not duplicate the new
-   * block (#2090).
-   */
-  public function testUpdate40110IsIdempotent(): void {
-    $this->saveDashboardConfig();
-
-    mukurtu_core_update_40122();
-    mukurtu_core_update_40122();
-
-    $components = \Drupal::config('dashboards.dashboard.mukurtu_dashboard')->get('sections.0.components');
-    $ids = array_map(static fn(array $c): string => $c['configuration']['id'], array_values($components));
-    $this->assertSame(1, count(array_keys($ids, 'system_menu_block:dashboard-notifications-review', TRUE)));
-  }
-
-  /**
-   * mukurtu_core_update_40122() grants "administer comments" to the Mukurtu
-   * Manager role so it can use the new comment moderation links (#2090).
-   */
-  public function testUpdate40110GrantsAdministerCommentsToManager(): void {
-    \Drupal\user\Entity\Role::create(['id' => 'mukurtu_manager', 'label' => 'Mukurtu Manager'])->save();
-    $this->assertFalse(\Drupal\user\Entity\Role::load('mukurtu_manager')->hasPermission('administer comments'));
-
-    mukurtu_core_update_40122();
-
-    $this->assertTrue(\Drupal\user\Entity\Role::load('mukurtu_manager')->hasPermission('administer comments'));
-  }
+  
 
   /**
    * The shipped dashboard config carries the Publication tools / Local Contexts

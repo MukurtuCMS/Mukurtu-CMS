@@ -25,7 +25,6 @@ use PHPUnit\Framework\Attributes\Group;
  */
 #[Group('mukurtu_multilingual')]
 class BundleTranslationEnablementTest extends KernelTestBase {
-
   /**
    * {@inheritdoc}
    */
@@ -66,23 +65,8 @@ class BundleTranslationEnablementTest extends KernelTestBase {
     $this->assertFalse(\Drupal::service('content_translation.manager')->isEnabled('media', 'image'));
   }
 
-  /**
-   * The update hook enables content translation for the bundle.
-   */
-  public function testUpdateEnablesMediaImageTranslation(): void {
-    mukurtu_multilingual_update_40008();
+  
 
-    $this->assertTrue(\Drupal::service('content_translation.manager')->isEnabled('media', 'image'));
-  }
-
-  /**
-   * Running the update twice does not error and stays converged.
-   */
-  public function testUpdateIsIdempotent(): void {
-    mukurtu_multilingual_update_40008();
-    mukurtu_multilingual_update_40008();
-
-    $this->assertTrue(\Drupal::service('content_translation.manager')->isEnabled('media', 'image'));
-  }
+  
 
 }

@@ -39,7 +39,6 @@ use PHPUnit\Framework\Attributes\Group;
  */
 #[Group('mukurtu_search')]
 class StaticTaxonomyNameFieldRestoreTest extends ProtocolAwareEntityTestBase {
-
   /**
    * {@inheritdoc}
    */
@@ -137,47 +136,8 @@ class StaticTaxonomyNameFieldRestoreTest extends ProtocolAwareEntityTestBase {
     }
   }
 
-  /**
-   * Tests that the update hook restores fields missing after the rebuild bug.
-   */
-  public function testUpdate40005RestoresMissingStaticFields(): void {
-    /** @var \Drupal\search_api\IndexInterface $index */
-    $index = Index::load('mukurtu_browse_auto_index');
-    foreach (mukurtu_search_static_taxonomy_name_fields() as $field_id => $definition) {
-      $this->assertNull($index->getField($field_id));
-    }
+  
 
-    mukurtu_search_update_40005();
-
-    /** @var \Drupal\search_api\IndexInterface $index */
-    $index = \Drupal::entityTypeManager()
-      ->getStorage('search_api_index')
-      ->loadUnchanged('mukurtu_browse_auto_index');
-
-    foreach (mukurtu_search_static_taxonomy_name_fields() as $field_id => $definition) {
-      $field = $index->getField($field_id);
-      $this->assertNotNull($field, "Update hook did not restore $field_id.");
-      $this->assertSame('string', $field->getType());
-      $this->assertSame('entity:node', $field->getDatasourceId());
-      $this->assertSame($definition['property_path'], $field->getPropertyPath());
-    }
-  }
-
-  /**
-   * Tests that running the update hook twice does not error or duplicate.
-   */
-  public function testUpdate40005IsIdempotent(): void {
-    mukurtu_search_update_40005();
-    mukurtu_search_update_40005();
-
-    /** @var \Drupal\search_api\IndexInterface $index */
-    $index = \Drupal::entityTypeManager()
-      ->getStorage('search_api_index')
-      ->loadUnchanged('mukurtu_browse_auto_index');
-
-    foreach (mukurtu_search_static_taxonomy_name_fields() as $field_id => $definition) {
-      $this->assertNotNull($index->getField($field_id));
-    }
-  }
+  
 
 }
