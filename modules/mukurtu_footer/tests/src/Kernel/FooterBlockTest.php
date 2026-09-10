@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_footer\Kernel;
 
 use Drupal\block_content\Entity\BlockContent;
+use Drupal\field\Entity\FieldConfig;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\mukurtu_footer\Controller\FooterEditRedirectController;
 use Drupal\paragraphs\Entity\Paragraph;
@@ -224,6 +225,32 @@ class FooterBlockTest extends KernelTestBase {
     $response = $controller->edit();
 
     $this->assertStringEndsWith('/admin/content/block', $response->getTargetUrl());
+  }
+
+  /**
+   * The shipped social link URL field carries platform-specific guidance
+   * rather than relying solely on the generic link-field help text (#2159).
+   */
+  public function testSocialUrlFieldHasPlatformGuidance(): void {
+    $field = FieldConfig::loadByName('paragraph', 'footer_social_link', 'field_footer_social_url');
+    $this->assertNotNull($field);
+    $this->assertStringContainsString('profile page', $field->getDescription());
+  }
+
+  /**
+   * mukurtu_footer_update_40005() adds the description to sites that
+   * installed before it existed.
+   */
+  public function testUpdate40005AddsSocialUrlFieldDescription(): void {
+    $field = FieldConfig::loadByName('paragraph', 'footer_social_link', 'field_footer_social_url');
+    $field->setDescription('')->save();
+    $this->assertSame('', FieldConfig::loadByName('paragraph', 'footer_social_link', 'field_footer_social_url')->getDescription());
+
+    require_once __DIR__ . '/../../../mukurtu_footer.install';
+    mukurtu_footer_update_40005();
+
+    $updated = FieldConfig::loadByName('paragraph', 'footer_social_link', 'field_footer_social_url');
+    $this->assertStringContainsString('profile page', $updated->getDescription());
   }
 
 }

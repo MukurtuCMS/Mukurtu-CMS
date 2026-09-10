@@ -202,3 +202,18 @@ function mukurtu_footer_update_40003(): void {
 function mukurtu_footer_update_40004(): void {
   \Drupal::service('plugin.manager.menu.link')->rebuild();
 }
+
+/**
+ * Add social-platform-specific guidance to the footer social link URL field.
+ *
+ * Previously the field had no description of its own, so admins only saw the
+ * generic link-field help text (internal path / <front> / <nolink> /
+ * <button>), which doesn't hint that this field wants a social profile URL
+ * (#2159).
+ */
+function mukurtu_footer_update_40005(): void {
+  $field = \Drupal\field\Entity\FieldConfig::loadByName('paragraph', 'footer_social_link', 'field_footer_social_url');
+  if ($field) {
+    $field->setDescription(t("Enter the URL of the organization's profile page for the platform selected above, for example https://www.facebook.com/yourorganization."))->save();
+  }
+}
