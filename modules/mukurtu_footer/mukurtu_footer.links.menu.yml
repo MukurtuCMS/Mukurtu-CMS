@@ -1,5 +1,5 @@
 mukurtu_footer.edit_content:
-  title: 'Edit footer content'
+  title: 'Edit footer'
   description: 'Update contact info, logos, links, and copyright in the site footer.'
   parent: mukurtu_dashboard
   menu_name: dashboard-look-feel

@@ -192,7 +192,7 @@ function mukurtu_footer_update_40003(): void {
 }
 
 /**
- * Add the "Edit footer content" dashboard link (Look and feel section).
+ * Add the "Edit footer" dashboard link (Look and feel section).
  *
  * Footer content editing previously had no permanent dashboard entry point;
  * the only path in was the one-time Setup Checklist task, which is hidden

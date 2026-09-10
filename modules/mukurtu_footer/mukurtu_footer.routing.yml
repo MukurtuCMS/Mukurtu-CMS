@@ -2,6 +2,6 @@ mukurtu_footer.edit_content:
   path: '/admin/content/mukurtu-footer/edit'
   defaults:
     _controller: '\Drupal\mukurtu_footer\Controller\FooterEditRedirectController::edit'
-    _title: 'Edit footer content'
+    _title: 'Edit footer'
   requirements:
     _permission: 'administer site configuration'

@@ -586,7 +586,7 @@ class DashboardLinkCleanupTest extends KernelTestBase {
         'Color settings',
         'Configure consent popup',
         'Main navigation menu',
-        'Edit footer content',
+        'Edit footer',
       ],
       'dashboard-site-settings' => [
         'Site Setup',
