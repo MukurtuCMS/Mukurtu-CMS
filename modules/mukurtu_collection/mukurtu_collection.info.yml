@@ -33,4 +33,4 @@ dependencies:
   - 'mukurtu_taxonomy:mukurtu_taxonomy'
   - 'pathauto:pathauto'
   - 'search_api:search_api'
-version: 4.0.0
+version: 4.0.1

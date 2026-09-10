@@ -2,7 +2,7 @@ name: 'Mukurtu Export'
 type: module
 description: 'Export functionality for Mukurtu CMS.'
 package: 'Mukurtu CMS'
-version: 4.0.0
+version: 4.0.1
 core_version_requirement: '^10 || ^11'
 dependencies:
   - 'drupal:media'
