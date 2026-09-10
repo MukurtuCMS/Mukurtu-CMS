@@ -75,25 +75,61 @@ already past everything the removed hooks did.
 Sites must reach the predecessor release before they can take the release that
 removed the hooks, since the intervening updates no longer exist to run.
 
-### Core does not enforce this
+### What core does and does not do about a site that is too far behind
 
-This is the part that surprises people, so it is worth stating plainly.
-`hook_update_last_removed()` does **not** stop a site that is too far behind.
+Core reports it, but does not reliably stop it. Both halves matter, and the
+difference is easy to get wrong.
 
-Core reads it in only two places: `ModuleInstaller::install()`, to seed a fresh
-install, and `_update_fix_missing_schema()`, when a schema entry is missing
-entirely. `update_get_update_list()` simply lists updates above the site's
-installed version, and once the hooks are gone there is nothing to list. A site
-several releases behind therefore reports **"no pending updates"** and carries
-on running against stale configuration, rather than being stopped.
+**Core does detect it, in the update phase.**
+`SystemRequirementsHooks::checkRequirements()` walks every installed module,
+calls its `hook_update_last_removed()`, and returns an error-severity
+requirement for each one whose installed schema version is lower:
 
-Blocking such a site needs an explicit `hook_update_requirements()` returning
-`REQUIREMENT_ERROR`. That one core does honour, from both `update.php` and
-`drush updb`, via `update_check_requirements()`.
+> Unsupported schema version: Mukurtu Core
+> The installed version of the Mukurtu Core module is too old to update. Update
+> to an intermediate version first (last removed version: 40123, installed
+> version: 40122).
 
-Note also that `requirements` is on core's deny list for attribute-based hooks
-and must stay procedural in a `.install` file, while `runtime_requirements` is
-not and can be a `#[Hook]` class under `src/Hook/`.
+So a project does not need its own hook to get this detected. What a project's
+own `hook_update_requirements()` adds is a single consolidated message that can
+name the specific release to update to first, which core's generic wording
+cannot.
+
+**Core does not detect it at runtime.** That check is gated on
+`$phase == 'update'`, so nothing appears on the status report. A site that
+updates its code and never runs `updb` gets no indication at all. Covering that
+needs a `hook_runtime_requirements()` of your own.
+
+**An error-severity requirement does not stop `drush updb -y`.** This is the
+one that bites in practice. Drush treats it as a confirmable prompt, not a
+failure (`UpdateDBCommands.php`):
+
+```php
+if (!$this->updateCheckRequirements()) {
+    if (!$this->io()->confirm(dt('Requirements check reports errors. Do you wish to continue?'))) {
+        throw new UserAbortException();
+    }
+}
+```
+
+Verified behaviour on a real site left behind by a strip:
+
+| Command | Outcome |
+| --- | --- |
+| `drush updatedb -y` | errors printed, then "No pending updates", exit 0 |
+| `drush updatedb` non-interactive | same |
+| `drush updatedb --no` | "Cancelled", exit 1 |
+
+Since `-y` is what every deployment script and our own `.tugboat/config.yml`
+use, treat the requirement as a loud warning rather than a gate, and rely on the
+runtime check to keep the problem visible afterwards.
+
+**Attribute-hook rules.** `requirements` is on core's deny list for
+attribute-based hooks (`HookCollectorPass::checkForProceduralOnlyHooks()` throws
+a `LogicException`) and must stay procedural in a `.install` file. Neither
+`update_requirements` nor `runtime_requirements` is on that list, so both may be
+`#[Hook]` classes under `src/Hook/`. Update-phase code is still safer left
+procedural, since it runs while the container may not reflect the code on disk.
 
 ## Further reading
 
