@@ -8,7 +8,7 @@ on:
     types: [opened, synchronize, reopened]
 jobs:
   lint:
-    name: Multilingual guardrails
+    name: Lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -16,6 +16,11 @@ jobs:
 
       - name: Check for untranslated UI strings
         run: ./scripts/lint/multilingual-guardrails.sh
+        env:
+          MUKURTU_LINT_STRICT: '1'
+
+      - name: Check update hook numbering
+        run: ./scripts/lint/update-hook-numbering.sh
         env:
           MUKURTU_LINT_STRICT: '1'
 

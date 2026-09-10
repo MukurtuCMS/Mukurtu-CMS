@@ -5,6 +5,20 @@ a tagged release; see the
 [releases page](https://github.com/MukurtuCMS/Mukurtu-CMS/releases) for the tags
 themselves.
 
+## 4.0.1
+
+A maintenance release with no new features. It removes the database updates that
+accumulated during the 4.0.x beta period, so new sites start from a clean
+baseline.
+
+**Sites must update to 4.0.0 before updating to 4.0.1.** The updates 4.0.0
+shipped no longer exist in 4.0.1, so a site that skips it will report no pending
+updates while continuing to run against out-of-date configuration. See the
+instructions for passing through a version in [README.md](README.md).
+
+For sites already on 4.0.0, updating to 4.0.1 changes nothing and runs no
+database updates.
+
 ## 4.0.0
 
 The first public release of Mukurtu CMS 4.
