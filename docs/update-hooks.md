@@ -43,15 +43,25 @@ convention: the module name, then a number whose first three digits are the
 major/minor/patch version and whose last two increment per hook within that
 module. The first `mukurtu_core` hook for 4.0.0 was `mukurtu_core_update_40001`.
 
-Two rules constrain the number, both enforced by
+Three rules are enforced by
 [`scripts/lint/update-hook-numbering.sh`](../scripts/lint/update-hook-numbering.sh)
 in CI:
 
-1. **It must not repeat a number already in the file.** Drupal runs only one of
+1. **A number must not repeat within a file.** Drupal runs only one of
    a duplicated pair, so the other silently never executes.
-2. **It must be greater than the module's `hook_update_last_removed()`**, if the
-   module has one. Anything at or below that value is dead code that looks
-   live, for the reasons in the next section.
+2. **A number must be greater than the module's `hook_update_last_removed()`**,
+   if the module has one. Anything at or below that value is dead code that
+   looks live, for the reasons in the next section.
+3. **Each `hook_update_last_removed()` must be declared once and return a
+   positive integer.** These baselines are what rule 2 measures against, so a
+   malformed one disables rule 2 for that module without any visible sign.
+
+Since 4.0.1 removed every update hook, rules 1 and 2 currently have nothing to
+inspect and stay quiet until someone adds a hook, which is the point of them.
+Rule 3 is what keeps the script honest in the meantime: it checks the 28
+baselines, and fails outright if it finds neither hooks nor baselines anywhere,
+on the grounds that matching nothing at all means the script has stopped
+matching the tree rather than that the tree is clean.
 
 ### The two-digit sequence can overflow
 
