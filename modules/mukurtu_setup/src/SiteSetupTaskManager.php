@@ -138,7 +138,7 @@ class SiteSetupTaskManager {
       new SiteSetupTask(
         'set_cron',
         (string) $this->t('Set up automated cron'),
-        (string) $this->t("Cron runs scheduled background work: search indexing, notifications, and cleanup. On a live site, have your server run Mukurtu's cron every 15 to 60 minutes instead of relying on visitor traffic."),
+        (string) $this->t('Cron runs scheduled background work: search indexing, notifications, and cleanup.'),
         self::GROUP_SITE_OPERATIONS,
         TRUE,
         '/admin/config/system/cron',
