@@ -103,7 +103,50 @@ while IFS= read -r file; do
   fi
 done < <(install_files)
 
+# Rule 3: every hook_update_last_removed() is well formed.
+#
+# After the 4.0.1 strip there are no update hooks left, so rules 1 and 2 have
+# nothing to check and stay silent until someone adds a hook. That is the
+# intent, but it would leave this script reporting success while inspecting
+# nothing at all, which is how a lint quietly stops being a lint. The baselines
+# themselves are checkable, so they are checked: they are what every future
+# hook number is measured against, and a malformed one would take rule 2 down
+# with it.
+BASELINE_COUNT=0
+
+while IFS= read -r file; do
+  declarations=$(grep -cE "$LAST_REMOVED_PATTERN" "$file" 2>/dev/null || true)
+  [ "$declarations" = "0" ] && continue
+
+  if [ "$declarations" -gt 1 ]; then
+    report "DUPLICATE last_removed in $file: declared $declarations times, only one takes effect"
+  fi
+
+  value=$(awk '
+    /^function [a-z_]+_update_last_removed\(/ { inside = 1; next }
+    inside && match($0, /return[[:space:]]+[0-9]+/) {
+      s = substr($0, RSTART, RLENGTH); gsub(/[^0-9]/, "", s); print s; exit
+    }
+    inside && /^}/ { exit }
+  ' "$file")
+
+  if [ -z "$value" ]; then
+    report "UNREADABLE last_removed in $file: no integer return value found"
+    continue
+  fi
+  if [ "$value" -le 0 ]; then
+    report "INVALID last_removed in $file: $value is not a positive update number"
+    continue
+  fi
+
+  BASELINE_COUNT=$((BASELINE_COUNT + 1))
+done < <(install_files)
+
 echo "Checked $CHECKED file(s) containing update hooks."
+echo "Checked $BASELINE_COUNT last_removed baseline(s)."
+if [ "$CHECKED" = "0" ] && [ "$BASELINE_COUNT" = "0" ]; then
+  report "NOTHING CHECKED: no update hooks and no last_removed baselines were found at all, which almost certainly means this script stopped matching the tree rather than that the tree is clean"
+fi
 if [ "$DUPLICATE_VIOLATIONS" = "0" ]; then
   echo "OK: no duplicate hook numbers within a file."
 fi
@@ -113,8 +156,10 @@ fi
 
 if [ "$EXIT_CODE" != "0" ]; then
   echo >&2
-  echo "Renumber the hooks above. A new hook must be higher than every existing" >&2
-  echo "number in its file and higher than the module's last_removed()." >&2
+  echo "A new update hook must be numbered higher than every existing number in" >&2
+  echo "its file and higher than that module's hook_update_last_removed()." >&2
+  echo "Each .install file declares last_removed at most once, returning the" >&2
+  echo "highest update number the previous release shipped." >&2
   echo "See docs/update-hooks.md." >&2
 fi
 
