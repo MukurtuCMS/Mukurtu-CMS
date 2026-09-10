@@ -11,7 +11,7 @@ field_name: field_footer_social_url
 entity_type: paragraph
 bundle: footer_social_link
 label: 'Profile URL'
-description: "Profile URL: enter the organization's page for the platform selected above, for example https://www.facebook.com/yourorganization."
+description: ''
 required: true
 translatable: false
 default_value: {}

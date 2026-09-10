@@ -204,22 +204,24 @@ function mukurtu_footer_update_40004(): void {
 }
 
 /**
- * Add social-platform-specific guidance to the footer social link URL field.
+ * Clear the footer social link URL field's config-level description.
  *
  * Previously the field had no description of its own, so admins only saw the
  * generic link-field help text (internal path / <front> / <nolink> /
  * <button>), which doesn't hint that this field wants a social profile URL
- * (#2159).
- *
- * The description is prefixed with "Profile URL:" because this field's
- * "Link text" sub-field is enabled, so core's LinkWidget attaches the
- * description to the outer fieldset wrapping the whole widget rather than to
- * the URL input itself - it renders after "Link text", not next to "URL".
+ * (#2159). A config-level description isn't the right fix here though: this
+ * field's "Link text" sub-field is enabled, so core's LinkWidget attaches
+ * any #description to the outer fieldset wrapping the whole widget rather
+ * than to the URL input itself - it would render after "Link text", not
+ * next to "URL". mukurtu_footer_hook_field_widget_single_element_form_alter()
+ * (src/Hook/FormHooks.php) replaces the URL input's description directly
+ * instead, so the config-level description is cleared to avoid dead,
+ * never-shown duplicate text.
  */
 function mukurtu_footer_update_40005(): void {
   $field = \Drupal\field\Entity\FieldConfig::loadByName('paragraph', 'footer_social_link', 'field_footer_social_url');
   if ($field) {
-    $field->setDescription(t("Profile URL: enter the organization's page for the platform selected above, for example https://www.facebook.com/yourorganization."))->save();
+    $field->setDescription('')->save();
   }
 }
 
@@ -241,20 +243,22 @@ function mukurtu_footer_update_40006(): void {
 }
 
 /**
- * Add URL-specific guidance to the remaining link fields on the footer form.
+ * Clear the other footer link fields' config-level descriptions.
  *
- * Same underlying gap as mukurtu_footer_update_40005(): admins saw only the
- * generic link-field help text, with no hint of what kind of URL each field
- * wants (#2159).
+ * Same reasoning as mukurtu_footer_update_40005(): the guidance now comes
+ * from mukurtu_footer_hook_field_widget_single_element_form_alter()
+ * (src/Hook/FormHooks.php), which replaces the URL input's description
+ * directly for these fields too, so their config-level descriptions are
+ * cleared to avoid dead, never-shown duplicate text (#2159).
  */
 function mukurtu_footer_update_40007(): void {
   $other_links = \Drupal\field\Entity\FieldConfig::loadByName('block_content', 'mukurtu_footer', 'field_footer_other_links');
   if ($other_links) {
-    $other_links->setDescription(t('URL: link to organizational pages, partners, privacy policy, etc., for example https://example.org/privacy-policy. The link title above is used as the display label.'))->save();
+    $other_links->setDescription('')->save();
   }
 
   $logo_link = \Drupal\field\Entity\FieldConfig::loadByName('paragraph', 'footer_logo', 'field_footer_logo_link');
   if ($logo_link) {
-    $logo_link->setDescription(t("Link URL: wrap the logo in a link to this URL, for example your organization's homepage."))->save();
+    $logo_link->setDescription('')->save();
   }
 }

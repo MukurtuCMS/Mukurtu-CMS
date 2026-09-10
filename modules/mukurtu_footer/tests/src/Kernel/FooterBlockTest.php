@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_footer\Kernel;
 
 use Drupal\block_content\Entity\BlockContent;
+use Drupal\Core\Form\FormState;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\mukurtu_footer\Controller\FooterEditRedirectController;
+use Drupal\mukurtu_footer\Hook\FormHooks;
 use Drupal\paragraphs\Entity\Paragraph;
 use PHPUnit\Framework\Attributes\Group;
 
@@ -228,29 +230,80 @@ class FooterBlockTest extends KernelTestBase {
   }
 
   /**
-   * The shipped social link URL field carries platform-specific guidance
-   * rather than relying solely on the generic link-field help text (#2159).
+   * The shipped social link URL field has no config-level description; the
+   * guidance is supplied by FormHooks::fieldWidgetSingleElementFormAlter()
+   * instead, since core's LinkWidget would otherwise attach a config-level
+   * description to the outer fieldset (after "Link text") rather than the
+   * URL input itself (#2159).
    */
-  public function testSocialUrlFieldHasPlatformGuidance(): void {
+  public function testSocialUrlFieldHasNoConfigLevelDescription(): void {
     $field = FieldConfig::loadByName('paragraph', 'footer_social_link', 'field_footer_social_url');
     $this->assertNotNull($field);
-    $this->assertStringStartsWith('Profile URL:', $field->getDescription());
+    $this->assertSame('', $field->getDescription());
   }
 
   /**
-   * mukurtu_footer_update_40005() adds the description to sites that
-   * installed before it existed.
+   * mukurtu_footer_update_40005() clears a stale config-level description on
+   * sites that installed before the hook-based approach existed.
    */
-  public function testUpdate40005AddsSocialUrlFieldDescription(): void {
+  public function testUpdate40005ClearsSocialUrlFieldDescription(): void {
     $field = FieldConfig::loadByName('paragraph', 'footer_social_link', 'field_footer_social_url');
-    $field->setDescription('')->save();
-    $this->assertSame('', FieldConfig::loadByName('paragraph', 'footer_social_link', 'field_footer_social_url')->getDescription());
+    $field->setDescription('Start typing the title of a piece of content...')->save();
 
     require_once __DIR__ . '/../../../mukurtu_footer.install';
     mukurtu_footer_update_40005();
 
     $updated = FieldConfig::loadByName('paragraph', 'footer_social_link', 'field_footer_social_url');
-    $this->assertStringStartsWith('Profile URL:', $updated->getDescription());
+    $this->assertSame('', $updated->getDescription());
+  }
+
+  /**
+   * FormHooks::fieldWidgetSingleElementFormAlter() replaces the URL input's
+   * description directly for all three footer link fields, since core's
+   * placement of a config-level description is either detached from the URL
+   * input (title-enabled link fields) or, for multi-value fields, shown only
+   * once below every row (#2159).
+   */
+  public function testFieldWidgetFormAlterReplacesUrlDescription(): void {
+    $social = Paragraph::create(['type' => 'footer_social_link']);
+    $social->save();
+    $logo = Paragraph::create(['type' => 'footer_logo']);
+    $logo->save();
+    $footer = BlockContent::create(['type' => 'mukurtu_footer', 'info' => 'Test Footer']);
+    $footer->save();
+
+    $cases = [
+      [$social->get('field_footer_social_url'), 'platform selected above'],
+      [$logo->get('field_footer_logo_link'), 'Wrap the logo'],
+      [$footer->get('field_footer_other_links'), 'organizational pages'],
+    ];
+
+    $hook = new FormHooks();
+    $form_state = new FormState();
+    foreach ($cases as [$items, $expected_substring]) {
+      $element = ['uri' => ['#description' => 'Start typing the title of a piece of content to select it...']];
+      $context = ['items' => $items];
+      $hook->fieldWidgetSingleElementFormAlter($element, $form_state, $context);
+      $this->assertStringContainsString($expected_substring, (string) $element['uri']['#description']);
+      $this->assertStringNotContainsString('Start typing the title', (string) $element['uri']['#description']);
+    }
+  }
+
+  /**
+   * The hook leaves unrelated link fields' descriptions untouched.
+   */
+  public function testFieldWidgetFormAlterIgnoresUnrelatedFields(): void {
+    $footer = BlockContent::create(['type' => 'mukurtu_footer', 'info' => 'Test Footer']);
+    $footer->save();
+
+    $element = ['uri' => ['#description' => 'Start typing the title of a piece of content to select it...']];
+    $context = ['items' => $footer->get('field_footer_copyright')];
+
+    $hook = new FormHooks();
+    $form_state = new FormState();
+    $hook->fieldWidgetSingleElementFormAlter($element, $form_state, $context);
+
+    $this->assertSame('Start typing the title of a piece of content to select it...', $element['uri']['#description']);
   }
 
   /**
@@ -288,37 +341,37 @@ class FooterBlockTest extends KernelTestBase {
   }
 
   /**
-   * The shipped "Other links" and footer logo link fields also carry
-   * URL-specific guidance rather than only the generic link-field help text
+   * The shipped "Other links" and footer logo link fields also have no
+   * config-level description, for the same reason as the social URL field
    * (#2159).
    */
-  public function testOtherLinksAndLogoLinkFieldsHaveGuidance(): void {
+  public function testOtherLinksAndLogoLinkFieldsHaveNoConfigLevelDescription(): void {
     $other_links = FieldConfig::loadByName('block_content', 'mukurtu_footer', 'field_footer_other_links');
     $this->assertNotNull($other_links);
-    $this->assertStringStartsWith('URL:', $other_links->getDescription());
+    $this->assertSame('', $other_links->getDescription());
 
     $logo_link = FieldConfig::loadByName('paragraph', 'footer_logo', 'field_footer_logo_link');
     $this->assertNotNull($logo_link);
-    $this->assertStringStartsWith('Link URL:', $logo_link->getDescription());
+    $this->assertSame('', $logo_link->getDescription());
   }
 
   /**
-   * mukurtu_footer_update_40007() adds the descriptions to sites that
-   * installed before it existed.
+   * mukurtu_footer_update_40007() clears stale config-level descriptions on
+   * sites that installed before the hook-based approach existed.
    */
-  public function testUpdate40007AddsOtherLinksAndLogoLinkDescriptions(): void {
+  public function testUpdate40007ClearsOtherLinksAndLogoLinkDescriptions(): void {
     $other_links = FieldConfig::loadByName('block_content', 'mukurtu_footer', 'field_footer_other_links');
-    $other_links->setDescription('')->save();
+    $other_links->setDescription('Links to organizational pages, partners, privacy policy, etc.')->save();
     $logo_link = FieldConfig::loadByName('paragraph', 'footer_logo', 'field_footer_logo_link');
-    $logo_link->setDescription('')->save();
+    $logo_link->setDescription('Wrap the logo in a link to this URL.')->save();
 
     require_once __DIR__ . '/../../../mukurtu_footer.install';
     mukurtu_footer_update_40007();
 
     $updated_other_links = FieldConfig::loadByName('block_content', 'mukurtu_footer', 'field_footer_other_links');
-    $this->assertStringStartsWith('URL:', $updated_other_links->getDescription());
+    $this->assertSame('', $updated_other_links->getDescription());
     $updated_logo_link = FieldConfig::loadByName('paragraph', 'footer_logo', 'field_footer_logo_link');
-    $this->assertStringStartsWith('Link URL:', $updated_logo_link->getDescription());
+    $this->assertSame('', $updated_logo_link->getDescription());
   }
 
 }
