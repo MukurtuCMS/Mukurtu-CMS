@@ -165,6 +165,7 @@ jobs:
       # The pull request path already does this, in wait-for-tugboat, for the
       # same reason. This is the same readiness check applied to the push path.
       - name: Check the base preview is serving Drupal
+        id: base-preview
         env:
           TUGBOAT_MAIN_URL: ${{ vars.TUGBOAT_MAIN_URL }}
         run: |
@@ -197,6 +198,10 @@ jobs:
               && ! grep -q "Preview is resuming" /tmp/tugboat-main-check.html \
               && grep -qi ">Username<" /tmp/tugboat-main-check.html; then
               echo "Base preview is ready: $BASE_URL"
+              # Hand the normalised URL on, so Playwright uses the same one
+              # this check validated. The variable is currently stored with a
+              # trailing slash, which would otherwise reach baseURL untouched.
+              echo "base_url=$BASE_URL" >> "$GITHUB_OUTPUT"
               exit 0
             fi
 
@@ -211,7 +216,8 @@ jobs:
       - name: Run Playwright Tests
         working-directory: tests/playwright
         run: npx playwright test
-        # TUGBOAT_MAIN_URL is a GitHub Actions variable set to the stable
-        # Tugboat base preview URL for the main branch.
+        # The URL comes from the readiness check above rather than straight
+        # from the TUGBOAT_MAIN_URL variable, so the suite runs against the
+        # exact URL that was just confirmed to be serving Drupal.
         env:
-          PLAYWRIGHT_BASE_URL: ${{ vars.TUGBOAT_MAIN_URL }}
+          PLAYWRIGHT_BASE_URL: ${{ steps.base-preview.outputs.base_url }}
