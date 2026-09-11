@@ -11,21 +11,18 @@ use Drupal\user\Entity\User;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests the field_notify_frequency 'none' option and its update hook.
+ * Tests the field_notify_frequency 'none' option.
  *
  * "N/A" used to be Drupal's synthetic empty-option placeholder for this
- * optional list field, which always saved as an empty value and could
- * never actually suppress email. mukurtu_notifications_update_40057() adds
- * a real 'none' allowed value and makes the field required so that
- * placeholder can no longer appear.
+ * optional list field, which always saved as an empty value and could never
+ * actually suppress email. The field now ships with a real 'none' allowed
+ * value and is required, so that placeholder can no longer appear.
  *
  * @see mukurtu_notifications_notification_frequency_allowed_values()
  * @see _mukurtu_notifications_user_wants_email()
- * @see mukurtu_notifications_update_40057()
  */
 #[Group('mukurtu_notifications')]
 class NotifyFrequencyTest extends KernelTestBase {
-
   /**
    * {@inheritdoc}
    */
@@ -135,62 +132,4 @@ class NotifyFrequencyTest extends KernelTestBase {
     $existingAdmin = User::load($existingAdmin->id());
     $this->assertSame('immediate', $existingAdmin->get('field_notify_frequency')->value);
   }
-
-  /**
-   * The update hook backfills only users with an empty stored value.
-   *
-   * A brand new user picks up field_notify_frequency's 'immediate' default
-   * value automatically, so the empty-value scenario this update hook
-   * exists for -- an account that predates the field, or one saved before
-   * "N/A" (the synthetic empty-option placeholder) stopped being offered --
-   * has to be forced explicitly here.
-   */
-  public function testUpdateBackfillsEmptyValuesToImmediate(): void {
-    $untouched = User::create(['name' => 'untouched', 'status' => 1]);
-    $untouched->set('field_notify_frequency', NULL);
-    $untouched->save();
-    $this->assertTrue($untouched->get('field_notify_frequency')->isEmpty());
-
-    $optedOut = User::create(['name' => 'already_opted_out', 'status' => 1]);
-    $optedOut->set('field_notify_frequency', 'none');
-    $optedOut->save();
-
-    mukurtu_notifications_update_40057();
-
-    $untouched = User::load($untouched->id());
-    $this->assertSame('immediate', $untouched->get('field_notify_frequency')->value);
-
-    $optedOut = User::load($optedOut->id());
-    $this->assertSame('none', $optedOut->get('field_notify_frequency')->value);
-  }
-
-  /**
-   * The update hook marks the field required.
-   *
-   * A fresh call to mukurtu_notifications_create_field_notify_frequency()
-   * already creates the field as required, so an existing pre-update site
-   * -- the scenario this hook exists for -- is simulated by explicitly
-   * reverting that here first.
-   */
-  public function testUpdateMakesFieldRequired(): void {
-    $field = FieldConfig::loadByName('user', 'user', 'field_notify_frequency');
-    $field->setRequired(FALSE)->save();
-
-    mukurtu_notifications_update_40057();
-
-    $field = FieldConfig::loadByName('user', 'user', 'field_notify_frequency');
-    $this->assertTrue($field->isRequired());
-  }
-
-  /**
-   * Running the update hook again once required and backfilled is a no-op.
-   */
-  public function testUpdateIsIdempotent(): void {
-    mukurtu_notifications_update_40057();
-    mukurtu_notifications_update_40057();
-
-    $field = FieldConfig::loadByName('user', 'user', 'field_notify_frequency');
-    $this->assertTrue($field->isRequired());
-  }
-
 }

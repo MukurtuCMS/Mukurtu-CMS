@@ -46,10 +46,10 @@
               <div class="mukurtu-setup-checklist__task-content">
                 <div class="mukurtu-setup-checklist__task-header">
                   <strong class="mukurtu-setup-checklist__task-label">
-                    {% if task.action_url and not task.complete %}
-                      <a href="{{ task.action_url }}">{{ task.label }}</a>
+                    {% if task.action_url %}
+                      <a href="{{ task.action_url }}">{{ task.label }}{% if task.complete %} <span class="visually-hidden">{{ '(completed)'|t }}</span>{% endif %}</a>
                     {% else %}
-                      {{ task.label }}
+                      {{ task.label }}{% if task.complete %} <span class="visually-hidden">{{ '(completed)'|t }}</span>{% endif %}
                     {% endif %}
                   </strong>
                   {% if task.complete_url %}
