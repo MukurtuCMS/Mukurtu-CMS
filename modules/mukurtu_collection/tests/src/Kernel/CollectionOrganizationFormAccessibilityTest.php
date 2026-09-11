@@ -24,6 +24,7 @@ class CollectionOrganizationFormAccessibilityTest extends ProtocolAwareEntityTes
   protected static $modules = [
     'mukurtu_collection',
     'geofield',
+    'leaflet',
     'path_alias',
     'mukurtu_local_contexts',
   ];

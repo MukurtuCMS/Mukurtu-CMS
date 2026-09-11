@@ -24,6 +24,7 @@ class MukurtuContentWarningsSettingsFormAccessibilityTest extends KernelTestBase
     'file',
     'filter',
     'image',
+    'leaflet',
     'media',
     'mukurtu_content_warnings',
     'mukurtu_core',
