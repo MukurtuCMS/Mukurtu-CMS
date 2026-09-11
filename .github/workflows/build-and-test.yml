@@ -8,7 +8,7 @@ on:
     types: [opened, synchronize, reopened]
 jobs:
   lint:
-    name: Multilingual guardrails
+    name: Lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -16,6 +16,11 @@ jobs:
 
       - name: Check for untranslated UI strings
         run: ./scripts/lint/multilingual-guardrails.sh
+        env:
+          MUKURTU_LINT_STRICT: '1'
+
+      - name: Check update hook numbering
+        run: ./scripts/lint/update-hook-numbering.sh
         env:
           MUKURTU_LINT_STRICT: '1'
 
@@ -65,7 +70,7 @@ jobs:
       # version of mukurtu-cms, which will be replaced by the git checkout.
       - name: Install Mukurtu Template
         run: |
-          composer create mukurtu/mukurtu-template:dev-main . --no-install --no-interaction
+          composer create mukurtu/mukurtu-template:^4.0 . --no-install --no-interaction
           rm web/profiles/mukurtu -rf
 
       # Usually checkout is the first action, but we set up the mukurtu-template
@@ -77,7 +82,15 @@ jobs:
 
       - name: Install Mukurtu
         run: |
-          composer config repositories.local-dev path web/profiles/mukurtu
+          # The path repo must declare a version. mukurtu-template requires
+          # mukurtu/mukurtu ^4.0, and composer derives a path package's version
+          # from its git branch, giving dev-<branch> for a PR checkout. That
+          # cannot satisfy ^4.0, and a path repo is canonical, so composer
+          # refuses to fall back to the released package on Packagist and the
+          # whole install fails. The alias is a placeholder standing for "the
+          # 4.x checkout under test", high enough never to need bumping within
+          # this major.
+          composer config repositories.local-dev '{"type":"path","url":"web/profiles/mukurtu","options":{"versions":{"mukurtu/mukurtu":"4.9999.9999"}}}'
           composer install --no-interaction --optimize-autoloader
           cp ./web/profiles/mukurtu/phpunit.xml ./phpunit.xml
 
