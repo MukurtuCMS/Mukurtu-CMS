@@ -963,6 +963,10 @@ a:not(.primary-nav__menu-link) svg.tel path {
   color: var(--color-text-secondary);
 }
 
+.altcha-footer {
+  opacity: 1 !important;
+}
+
 .community__sidebar > .field,
 .protocol__sidebar > .field,
 .callout {
