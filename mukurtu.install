@@ -723,3 +723,32 @@ function mukurtu_install() {
 function mukurtu_update_last_removed(): int {
   return 40029;
 }
+
+/**
+ * Default new full-background hero blocks to dark text so they stay legible.
+ */
+function mukurtu_update_40030(): string {
+  $name = 'field.field.block_content.full_image_with_description.field_text_color';
+  $config = \Drupal::configFactory()->getEditable($name);
+
+  if ($config->isNew()) {
+    return (string) t('The full-background hero block is not installed on this site; nothing to change.');
+  }
+
+  // The image on this bundle is optional, so a block created with only a title
+  // rendered white text on the white page background - 1:1 contrast, a WCAG
+  // 1.4.3 failure produced by the shipped default rather than by anything the
+  // author did. Dark is legible on the bare background and remains a sensible
+  // starting point over a light image.
+  //
+  // Only rewrite the value this profile shipped. A site that deliberately set
+  // its own default keeps it, and existing blocks are never touched - their
+  // stored value is the author's choice.
+  if ($config->get('default_value') !== [['value' => 'light']]) {
+    return (string) t('The full-background hero text colour default has already been changed; leaving it alone.');
+  }
+
+  $config->set('default_value', [['value' => 'dark']])->save();
+
+  return (string) t('New full-background hero blocks now default to dark text.');
+}
