@@ -131,6 +131,22 @@ class LandingPageRestrictionsUpdateTest extends KernelTestBase {
   }
 
   /**
+   * An updated site must land on exactly what a fresh install ships.
+   *
+   * The hook and config/install are maintained separately, so they can drift.
+   * This pins them together: whatever a 4.0.1 site ends up with after the
+   * update has to equal the allowlists in the shipped display.
+   */
+  public function testPostUpdateStateMatchesShippedConfig(): void {
+    $this->writePreFixDisplay();
+
+    mukurtu_landing_page_update_40007();
+
+    $shipped = $this->shipped['third_party_settings']['layout_builder_restrictions']['entity_view_mode_restriction']['allowlisted_blocks'];
+    $this->assertSame($shipped, $this->allowlists());
+  }
+
+  /**
    * A site that already dropped the legacy view is not disturbed.
    */
   public function testLeavesAnAlreadyCleanViewsAllowlistAlone(): void {
