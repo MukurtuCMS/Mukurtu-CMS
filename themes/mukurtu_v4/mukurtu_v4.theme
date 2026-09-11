@@ -312,6 +312,17 @@ function mukurtu_v4_preprocess_media__audio__carousel_thumbnail(array &$variable
 }
 
 /**
+ * Implements template_preprocess_media__document__carousel_thumbnail().
+ */
+function mukurtu_v4_preprocess_media__document__carousel_thumbnail(array &$variables): void {
+  if (empty($variables['content']['thumbnail'][0])) {
+    return;
+  }
+  $translated_media = \Drupal::service('entity.repository')->getTranslationFromContext($variables['media']);
+  $variables['content']['thumbnail'][0]['#attributes']['alt'] = $translated_media->label();
+}
+
+/**
  * Implements template_preprocess_media__audio__media_assets().
  */
 function mukurtu_v4_preprocess_media__audio__media_assets(array &$variables): void {

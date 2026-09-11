@@ -8,7 +8,7 @@
   position: relative;
 
   *:focus {
-    outline: var(--admin-toolbar-size-focus) solid var(--admin-toolbar-color-focus);
+    outline: var(--admin-toolbar-size-focus, 2px) solid var(--admin-toolbar-color-focus, var(--focus-color));
   }
 
   // Style reset hack to shield us from field group module and Gin's styling of
