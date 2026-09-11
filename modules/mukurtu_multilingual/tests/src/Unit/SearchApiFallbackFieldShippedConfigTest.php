@@ -10,25 +10,19 @@ use Symfony\Component\Yaml\Yaml;
 
 /**
  * Confirms the language_with_fallback Search API field ships in every
- * profile-owned index's config/install, not just added via an update
- * hook.
+ * profile-owned index's config/install.
  *
- * mukurtu_multilingual_update_40009() (added in #2049) only converges
- * *existing* sites - update hooks never run on a fresh install, and this
- * profile's hook_install() implementations never called that logic
- * either, so a fresh install got none of the 6 indexes wired at all until
- * this test's own fix shipped the field directly in each owning module's
- * config/install/search_api.index.*.yml. That's the same "ship it in
- * config/install AND provide an update hook for upgraders" pattern
- * already used for other field/config additions in this codebase.
+ * The update hook added in #2049 only converged *existing* sites. Update hooks
+ * never run on a fresh install, and this profile's hook_install()
+ * implementations never called that logic either, so a fresh install got none
+ * of the 6 indexes wired at all until the field was shipped directly in each
+ * owning module's config/install/search_api.index.*.yml.
  *
  * A pure filesystem/YAML check - no Drupal bootstrap needed.
  *
- * @see mukurtu_multilingual_update_40009()
  */
 #[Group('mukurtu_multilingual')]
 class SearchApiFallbackFieldShippedConfigTest extends UnitTestCase {
-
   /**
    * Every profile-owned index config file, relative to the profile root.
    */
@@ -66,5 +60,4 @@ class SearchApiFallbackFieldShippedConfigTest extends UnitTestCase {
       $this->assertArrayHasKey('language_with_fallback', $index['processor_settings'] ?? [], "$relativePath: language_with_fallback processor is not enabled.");
     }
   }
-
 }
