@@ -8,6 +8,7 @@
 use Drupal\Core\Extension\Requirement\RequirementSeverity;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\mukurtu_core\Hook\UpdatePathRequirements;
+use Drupal\user\Entity\Role;
 
 /**
  * Implements hook_install().
@@ -92,4 +93,49 @@ function mukurtu_core_update_requirements(): array {
       'severity' => RequirementSeverity::Error,
     ],
   ];
+}
+
+/**
+ * Revoke the Full HTML text format from logged-in users (#2160).
+ */
+function mukurtu_core_update_40201(): ?string {
+  // Keep the docblock above to one line. Drupal renders it verbatim as this
+  // update's description on update.php and in `drush updatedb:status`, so
+  // implementation rationale there becomes a wall of text an operator has to
+  // read past. It belongs here instead.
+  //
+  // Full HTML adds object, embed and video tags over Basic HTML, which already
+  // permits iframes and media embeds. It is meant to be an editorial format, so
+  // mukurtu_core_update_40118() revoked it from the authenticated role in
+  // 4.0.0.
+  //
+  // That hook missed a whole class of site. Its docblock reasoned that "the
+  // shipped authenticated role has never granted it", which was true of
+  // config/install/user.role.authenticated.yml and untrue of mukurtu_install(),
+  // which granted it programmatically. Worse, 40118 could only ever help sites
+  // already below 40118 that then updated: mukurtu_core reached 40122 by
+  // 4.0.0-beta37, and a fresh install is seeded at the highest available number
+  // without running anything, so any site installed from a late beta skipped it
+  // and kept the grant.
+  //
+  // 4.0.1 stopped mukurtu_install() granting it, which fixes new installs. This
+  // is the other half: the sites that were already wrong.
+  //
+  // Revoked unconditionally rather than guarded on some notion of "was this
+  // deliberate". There is no signal to guard on: a site that meant to grant
+  // Full HTML looks identical to one that got it from the bug, because 4.0.1
+  // seeded every site's schema at 40123 and the installed version no longer
+  // says anything about which betas were run. For a permission that widens what
+  // ordinary logged-in users can put in a page, failing closed and telling the
+  // operator how to restore it is the safer default, and is what 4.0.0 did with
+  // the devel permissions.
+  $role = Role::load('authenticated');
+  if (!$role || !$role->hasPermission('use text format full_html')) {
+    return NULL;
+  }
+
+  $role->revokePermission('use text format full_html');
+  $role->save();
+
+  return (string) t('Full HTML was revoked from the authenticated role. Logged-in users now use Basic HTML, which still allows iframes and media embeds. If this site granted Full HTML to all logged-in users deliberately, you can re-grant it on the Permissions page.');
 }
