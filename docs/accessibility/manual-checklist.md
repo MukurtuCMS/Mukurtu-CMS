@@ -75,6 +75,12 @@ Walk the page with the screen reader's reading commands (not just Tab). Landmark
 
 ### Maps (Leaflet — browse map, item location)
 
+**Before testing:** `origin/main` merged "Add accessible keyboard/screen-reader
+alternative to the Map Points widget" (#1913) on 2026-08-27 — check what it
+actually covers (which widget/route, editing vs. viewing) before assuming any
+of the checks below still need first-time testing; some may already be
+resolved.
+
 - [ ] Map container is reachable and escapable with the keyboard
 - [ ] Zoom controls are real buttons with labels, keyboard-operable
 - [ ] Markers/popups can be opened via keyboard and are announced
