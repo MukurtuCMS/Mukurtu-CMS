@@ -173,7 +173,6 @@ class LandingPageBlockRestrictionsTest extends KernelTestBase {
    */
   public function testHomepageViewsBlocksAreAvailable(): void {
     $definitions = [
-      'views_block:browse_by_community-community_browse_block' => ['category' => 'Lists (Views)', 'provider' => 'views'],
       'views_block:mukurtu_browse_by_map-map_block' => ['category' => 'Lists (Views)', 'provider' => 'views'],
       'views_block:mukurtu_categories-browse_by_category_block' => ['category' => 'Lists (Views)', 'provider' => 'views'],
       'views_block:content_recent-block_1' => ['category' => 'Lists (Views)', 'provider' => 'views'],
@@ -181,8 +180,28 @@ class LandingPageBlockRestrictionsTest extends KernelTestBase {
 
     $allowed = $this->filterDefinitions($definitions);
 
-    $this->assertCount(3, $allowed);
+    $this->assertCount(2, $allowed);
     $this->assertNotContains('views_block:content_recent-block_1', $allowed);
+  }
+
+  /**
+   * The legacy community view must not be offered alongside the block plugin.
+   *
+   * views.view.browse_by_community filters on published status and langcode
+   * only. It has no visibility filter, so it lists communities whose sharing
+   * setting is "community-only" to everyone - the bug fixed for the block
+   * plugin in issue #1005. Offering both also put two identically labelled
+   * "Browse by Community" entries in the Add block list.
+   */
+  public function testLegacyCommunityViewIsNotOffered(): void {
+    $definitions = [
+      'views_block:browse_by_community-community_browse_block' => ['category' => 'Lists (Views)', 'provider' => 'views'],
+      'mukurtu_browse_by_community' => ['category' => 'Mukurtu', 'provider' => 'mukurtu_protocol'],
+    ];
+
+    $allowed = $this->filterDefinitions($definitions);
+
+    $this->assertSame(['mukurtu_browse_by_community'], $allowed, 'Only the visibility-aware block plugin should be offered.');
   }
 
 }

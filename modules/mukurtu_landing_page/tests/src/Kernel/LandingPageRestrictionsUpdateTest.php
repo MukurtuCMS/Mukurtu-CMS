@@ -21,6 +21,8 @@ class LandingPageRestrictionsUpdateTest extends KernelTestBase {
 
   protected const DISPLAY = 'core.entity_view_display.node.landing_page.default';
 
+  protected const LEGACY_VIEW = 'views_block:browse_by_community-community_browse_block';
+
   protected const HEROES = [
     'inline_block:full_image_with_description',
     'inline_block:image_with_description',
@@ -101,9 +103,10 @@ class LandingPageRestrictionsUpdateTest extends KernelTestBase {
    */
   protected function writePreFixDisplay(): void {
     $this->writeDisplay(static function (array &$restrictions): void {
-      $inline = &$restrictions['entity_view_mode_restriction']['allowlisted_blocks']['Inline blocks'];
-      $inline = array_values(array_diff($inline, self::HEROES));
-      unset($restrictions['entity_view_mode_restriction']['allowlisted_blocks']['Mukurtu']);
+      $allowlists = &$restrictions['entity_view_mode_restriction']['allowlisted_blocks'];
+      $allowlists['Inline blocks'] = array_values(array_diff($allowlists['Inline blocks'], self::HEROES));
+      unset($allowlists['Mukurtu']);
+      array_unshift($allowlists['Lists (Views)'], self::LEGACY_VIEW);
     });
   }
 
@@ -128,7 +131,26 @@ class LandingPageRestrictionsUpdateTest extends KernelTestBase {
     // The blocks that were already allowlisted must survive untouched.
     $this->assertContains('inline_block:basic', $after['Inline blocks']);
     $this->assertContains('inline_block:featured_content', $after['Inline blocks']);
-    $this->assertSame($before['Lists (Views)'], $after['Lists (Views)']);
+
+    // The legacy community view goes, the other views blocks stay.
+    $this->assertContains(self::LEGACY_VIEW, $before['Lists (Views)']);
+    $this->assertNotContains(self::LEGACY_VIEW, $after['Lists (Views)']);
+    $this->assertContains('views_block:mukurtu_browse_by_map-map_block', $after['Lists (Views)']);
+    $this->assertContains('views_block:mukurtu_categories-browse_by_category_block', $after['Lists (Views)']);
+  }
+
+  /**
+   * A site that already dropped the legacy view is not disturbed.
+   */
+  public function testLeavesAnAlreadyCleanViewsAllowlistAlone(): void {
+    $this->writeDisplay(static function (array &$restrictions): void {
+      unset($restrictions['entity_view_mode_restriction']['allowlisted_blocks']['Mukurtu']);
+    });
+
+    $before = $this->allowlists()['Lists (Views)'];
+    mukurtu_landing_page_update_40007();
+
+    $this->assertSame($before, $this->allowlists()['Lists (Views)']);
   }
 
   /**

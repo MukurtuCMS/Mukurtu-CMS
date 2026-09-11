@@ -16,7 +16,7 @@ function mukurtu_landing_page_update_last_removed(): int {
 }
 
 /**
- * Let landing pages use the hero blocks and re-add the Browse by Community block.
+ * Correct which blocks landing pages offer in Layout Builder.
  */
 function mukurtu_landing_page_update_40007(): string {
   $config = \Drupal::configFactory()
@@ -64,6 +64,23 @@ function mukurtu_landing_page_update_40007(): string {
   if (!isset($settings['allowlisted_blocks']['Mukurtu']) && !in_array('Mukurtu', $categories, TRUE)) {
     $settings['allowlisted_blocks']['Mukurtu'] = ['mukurtu_browse_by_community'];
     $changes[] = (string) t('Restored the Browse by Community block for landing pages.');
+  }
+
+  // The legacy browse_by_community view filters on published status and
+  // langcode only - it has no visibility filter, so it lists communities whose
+  // sharing setting is "community-only" to everyone. The
+  // mukurtu_browse_by_community block plugin allowlisted above is the fixed
+  // implementation (see issue #1005) and is what the default homepage places.
+  // Stop offering the view so authors cannot build that disclosure path.
+  //
+  // This only changes what the Layout UI offers. Restrictions are not applied
+  // retroactively, so a landing page that already has the view block keeps
+  // rendering it.
+  $views = $settings['allowlisted_blocks']['Lists (Views)'] ?? NULL;
+  $legacy = 'views_block:browse_by_community-community_browse_block';
+  if (is_array($views) && in_array($legacy, $views, TRUE)) {
+    $settings['allowlisted_blocks']['Lists (Views)'] = array_values(array_diff($views, [$legacy]));
+    $changes[] = (string) t('Stopped offering the legacy Browse by Community view, which ignored community visibility.');
   }
 
   if (!$changes) {
