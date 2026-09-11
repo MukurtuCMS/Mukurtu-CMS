@@ -60,6 +60,45 @@
     }
 
     /**
+     * Wraps each thumbnail slide's existing content in a real <button>,
+     * mirroring the button-in-presentation-li pattern Splide's own
+     * Pagination component uses for its dot indicators (see
+     * createPagination() in Splide's Pagination component). Splide's
+     * isNavigation feature instead puts role="button" directly on the <li>
+     * itself, which is invalid ARIA -- a <li> whose <ul> parent has the
+     * implicit list role must not carry a role override (ARIA-in-HTML
+     * spec). slideFocus: false (below) stops Splide from doing that; this
+     * fills in the equivalent real-button markup afterward. No slides are
+     * cloned for this carousel (clones only exist for type: 'loop', and
+     * this uses rewind instead), so every slide is handled exactly once.
+     */
+    function wrapThumbnailSlidesInButtons(thumbEl) {
+      thumbEl.querySelectorAll('.splide__slide').forEach((slide) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'thumbnail-carousel__slide-button';
+
+        const ariaControls = slide.getAttribute('aria-controls');
+        const ariaLabel = slide.getAttribute('aria-label');
+        if (ariaControls) button.setAttribute('aria-controls', ariaControls);
+        if (ariaLabel) button.setAttribute('aria-label', ariaLabel);
+
+        while (slide.firstChild) {
+          button.appendChild(slide.firstChild);
+        }
+        slide.appendChild(button);
+
+        // Splide's own focusableNodes handling (default: 'a, button, ...')
+        // keeps managing this button's tabindex on move/hide the same as
+        // it would for any other interactive element found inside a slide.
+        slide.setAttribute('role', 'presentation');
+        slide.removeAttribute('aria-controls');
+        slide.removeAttribute('aria-label');
+        slide.removeAttribute('aria-roledescription');
+      });
+    }
+
+    /**
      * Initialize the carousels.
      */
     function init(el) {
@@ -81,6 +120,7 @@
         rewind: true,
         pagination: false,
         isNavigation: true,
+        slideFocus: false,
         breakpoints: {
           600: {
             fixedWidth : 60,
@@ -94,6 +134,8 @@
       main.sync( thumbnails );
       main.mount();
       thumbnails.mount();
+
+      wrapThumbnailSlidesInButtons(thumbEl);
 
       alignArrowsToImage(main, thumbnails);
     }
