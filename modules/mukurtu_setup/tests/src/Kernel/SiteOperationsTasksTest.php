@@ -60,6 +60,19 @@ class SiteOperationsTasksTest extends KernelTestBase {
   }
 
   /**
+   * The site_footer task points at the stable footer-edit redirect route,
+   * not a hardcoded block_content ID (see mukurtu_footer.edit_content).
+   */
+  public function testFooterTaskActionUrlIsStable(): void {
+    $tasks = [];
+    foreach ($this->taskManager()->getTasks() as $task) {
+      $tasks[$task->getId()] = $task;
+    }
+    $this->assertArrayHasKey('site_footer', $tasks);
+    $this->assertSame('/admin/content/mukurtu-footer/edit', $tasks['site_footer']->getActionUrl());
+  }
+
+  /**
    * Cron is complete only when it has run within the last day.
    */
   public function testCronDetection(): void {
