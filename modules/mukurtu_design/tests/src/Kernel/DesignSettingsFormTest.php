@@ -11,10 +11,10 @@ use PHPUnit\Framework\Attributes\Group;
 /**
  * Tests that the Design Settings form can actually be built.
  *
- * The header settings were added with a create() that type-hinted the wrong
+ * The background settings were added with a create() that type-hinted the wrong
  * FileUsageInterface - Drupal\Core\File\FileUsage\FileUsageInterface, which
  * does not exist; the service implements Drupal\file\FileUsage. Every test
- * exercised the HeaderBackground service directly, so nothing instantiated the
+ * exercised the PageBackground service directly, so nothing instantiated the
  * form and /admin/config/color-settings fataled on a TypeError. These tests
  * cover the wiring itself.
  */
@@ -49,17 +49,17 @@ class DesignSettingsFormTest extends KernelTestBase {
   }
 
   /**
-   * The form builds, and offers every control the header settings need.
+   * The form builds, and offers every control the background settings need.
    */
   public function testFormBuilds(): void {
     $build = \Drupal::formBuilder()->getForm(MukurtuDesignSettingsForm::class);
 
-    $this->assertSame('managed_file', $build['header']['image']['#type']);
-    $this->assertSame('checkbox', $build['header']['show_on_front']['#type']);
-    $this->assertSame('radios', $build['header']['text_treatment']['#type']);
+    $this->assertSame('managed_file', $build['background']['image']['#type']);
+    $this->assertSame('checkbox', $build['background']['show_on_front']['#type']);
+    $this->assertSame('radios', $build['background']['text_treatment']['#type']);
     $this->assertSame(
       ['light', 'dark'],
-      array_keys($build['header']['text_treatment']['#options'])
+      array_keys($build['background']['text_treatment']['#options'])
     );
 
     // The palette controls must survive alongside the new fieldset.
@@ -72,14 +72,14 @@ class DesignSettingsFormTest extends KernelTestBase {
    */
   public function testFormReflectsStoredSettings(): void {
     $this->config('mukurtu_design.settings')
-      ->set('header.show_on_front', FALSE)
-      ->set('header.text_treatment', 'dark')
+      ->set('background.show_on_front', FALSE)
+      ->set('background.text_treatment', 'dark')
       ->save();
 
     $build = \Drupal::formBuilder()->getForm(MukurtuDesignSettingsForm::class);
 
-    $this->assertFalse((bool) $build['header']['show_on_front']['#default_value']);
-    $this->assertSame('dark', $build['header']['text_treatment']['#default_value']);
+    $this->assertFalse((bool) $build['background']['show_on_front']['#default_value']);
+    $this->assertSame('dark', $build['background']['text_treatment']['#default_value']);
   }
 
 }

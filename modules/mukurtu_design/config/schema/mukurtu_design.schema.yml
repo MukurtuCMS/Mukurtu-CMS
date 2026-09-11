@@ -27,9 +27,9 @@ mukurtu_design.settings:
         brand_secondary_accent:
           type: string
           label: 'Brand Secondary Accent'
-    header:
+    background:
       type: mapping
-      label: 'Header background'
+      label: 'Page background'
       mapping:
         image:
           type: integer
@@ -37,7 +37,7 @@ mukurtu_design.settings:
           nullable: true
         show_on_front:
           type: boolean
-          label: 'Show the header background on the front page'
+          label: 'Show the page background on the front page'
         text_treatment:
           type: string
-          label: 'Header text treatment'
+          label: 'Page text treatment'

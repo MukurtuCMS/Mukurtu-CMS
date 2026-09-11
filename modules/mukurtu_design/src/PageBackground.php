@@ -11,21 +11,21 @@ use Drupal\Core\File\FileUrlGeneratorInterface;
 use Drupal\Core\Path\PathMatcherInterface;
 
 /**
- * Resolves the configured header background image for the current page.
+ * Resolves the configured page background image for the current request.
  */
-final class HeaderBackground {
+final class PageBackground {
 
   /**
-   * The file usage id the settings form registers the header image under.
+   * The file usage id the settings form registers the background image under.
    */
-  public const USAGE_ID = 'header_background';
+  public const USAGE_ID = 'page_background';
 
   /**
    * The text treatments a site can choose between.
    *
    * Each one pairs a scrim with a text colour in the theme, so the contrast of
    * the header does not depend on how light or dark the uploaded image happens
-   * to be. See _header.scss.
+   * to be. See _layout.scss.
    */
   public const TREATMENTS = [
     'light' => 'Light text on a darkened image',
@@ -40,7 +40,7 @@ final class HeaderBackground {
   ) {}
 
   /**
-   * Returns the header background to render, if any.
+   * Returns the page background to render, if any.
    *
    * @return array
    *   Either an empty array when no background applies, or:
@@ -50,14 +50,14 @@ final class HeaderBackground {
   public function resolve(): array {
     $config = $this->configFactory->get(DesignPalette::SETTINGS);
 
-    $fid = $config->get('header.image');
+    $fid = $config->get('background.image');
     if (empty($fid)) {
       return [];
     }
 
     // A site whose front page already carries a full-width hero block can turn
-    // the header background off there without losing it everywhere else.
-    if ($this->pathMatcher->isFrontPage() && !$config->get('header.show_on_front')) {
+    // the page background off there without losing it everywhere else.
+    if ($this->pathMatcher->isFrontPage() && !$config->get('background.show_on_front')) {
       return [];
     }
 
@@ -66,7 +66,7 @@ final class HeaderBackground {
       return [];
     }
 
-    $treatment = $config->get('header.text_treatment');
+    $treatment = $config->get('background.text_treatment');
 
     return [
       'url' => $this->fileUrlGenerator->generateString($file->getFileUri()),

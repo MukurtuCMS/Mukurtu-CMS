@@ -13,18 +13,16 @@
  */
 #}
 
-<div class="layout-container">
+{% set page_background = page_background_image_url|default('') %}
+<div class="layout-container{{ page_background ? ' page--has-background page--text-' ~ page_background_treatment }}"
+  {%- if page_background %} style="--mukurtu-page-background-image: url('{{ page_background }}');"{% endif %}>
   {# Account menu that displays when logged in. #}
   <div class="page__account-menu">
     {{ page.user_menu }}
   </div>
 
 
-  {% set header_background = header_background_image_url|default('') %}
-  <header id="header"
-    class="site-header header{{ header_background ? ' site-header--has-background site-header--text-' ~ header_background_treatment }}"
-    {%- if header_background %} style="--mukurtu-header-background-image: url('{{ header_background }}');"{% endif %}
-    data-drupal-selector="site-header" role="banner">
+  <header id="header" class="site-header header" data-drupal-selector="site-header" role="banner">
     {# Site branding and main menu. #}
     {{ page.header }}
   </header>

@@ -11,7 +11,7 @@ use PHPUnit\Framework\Attributes\Group;
  * Tests mukurtu_design_update_40005().
  */
 #[Group('mukurtu_design')]
-class HeaderSettingsUpdateTest extends KernelTestBase {
+class PageBackgroundSettingsUpdateTest extends KernelTestBase {
 
   /**
    * {@inheritdoc}
@@ -29,17 +29,17 @@ class HeaderSettingsUpdateTest extends KernelTestBase {
   }
 
   /**
-   * Removes the header settings, as a site upgrading from 4.0.1 would have.
+   * Removes the background settings, as a site upgrading from 4.0.1 would have.
    */
   protected function writePreUpdateState(): void {
-    $this->config('mukurtu_design.settings')->clear('header')->save();
+    $this->config('mukurtu_design.settings')->clear('background')->save();
   }
 
   /**
-   * Returns the stored header settings.
+   * Returns the stored background settings.
    */
-  protected function header() {
-    return \Drupal::config('mukurtu_design.settings')->get('header');
+  protected function background() {
+    return \Drupal::config('mukurtu_design.settings')->get('background');
   }
 
   /**
@@ -47,13 +47,13 @@ class HeaderSettingsUpdateTest extends KernelTestBase {
    */
   public function testSeedsTheSettings(): void {
     $this->writePreUpdateState();
-    $this->assertNull($this->header());
+    $this->assertNull($this->background());
 
     mukurtu_design_update_40005();
 
     $this->assertSame(
       ['image' => NULL, 'show_on_front' => TRUE, 'text_treatment' => 'light'],
-      $this->header()
+      $this->background()
     );
   }
 
@@ -64,57 +64,57 @@ class HeaderSettingsUpdateTest extends KernelTestBase {
     $this->writePreUpdateState();
 
     mukurtu_design_update_40005();
-    $after_first = $this->header();
+    $after_first = $this->background();
 
     $message = mukurtu_design_update_40005();
 
-    $this->assertSame($after_first, $this->header());
+    $this->assertSame($after_first, $this->background());
     $this->assertStringContainsString('already present', $message);
   }
 
   /**
-   * A configured header survives the update untouched.
+   * A configured background survives the update untouched.
    *
    * The shipped default for image is NULL, so a naive isset()/get() check
    * would treat a configured site as unconfigured and reset it.
    */
-  public function testDoesNotResetConfiguredHeader(): void {
+  public function testDoesNotResetConfiguredBackground(): void {
     $this->config('mukurtu_design.settings')
-      ->set('header', ['image' => 7, 'show_on_front' => FALSE, 'text_treatment' => 'dark'])
+      ->set('background', ['image' => 7, 'show_on_front' => FALSE, 'text_treatment' => 'dark'])
       ->save();
 
     mukurtu_design_update_40005();
 
     $this->assertSame(
       ['image' => 7, 'show_on_front' => FALSE, 'text_treatment' => 'dark'],
-      $this->header()
+      $this->background()
     );
   }
 
   /**
    * A partially seeded site is completed rather than overwritten.
    */
-  public function testCompletesPartialHeader(): void {
-    $this->config('mukurtu_design.settings')->set('header', ['text_treatment' => 'dark'])->save();
+  public function testCompletesPartialBackground(): void {
+    $this->config('mukurtu_design.settings')->set('background', ['text_treatment' => 'dark'])->save();
 
     mukurtu_design_update_40005();
 
-    $header = $this->header();
-    $this->assertSame('dark', $header['text_treatment'], 'The existing choice is kept.');
-    $this->assertArrayHasKey('image', $header);
-    $this->assertTrue($header['show_on_front']);
+    $background = $this->background();
+    $this->assertSame('dark', $background['text_treatment'], 'The existing choice is kept.');
+    $this->assertArrayHasKey('image', $background);
+    $this->assertTrue($background['show_on_front']);
   }
 
   /**
    * A fresh install must match what the update hook produces.
    */
   public function testFreshInstallMatchesTheHook(): void {
-    $fresh = $this->header();
+    $fresh = $this->background();
 
     $this->writePreUpdateState();
     mukurtu_design_update_40005();
 
-    $this->assertSame($fresh, $this->header());
+    $this->assertSame($fresh, $this->background());
   }
 
 }

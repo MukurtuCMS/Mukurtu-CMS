@@ -1,6 +1,6 @@
 services:
-  mukurtu_design.header_background:
-    class: Drupal\mukurtu_design\HeaderBackground
+  mukurtu_design.page_background:
+    class: Drupal\mukurtu_design\PageBackground
     arguments:
       - '@config.factory'
       - '@entity_type.manager'

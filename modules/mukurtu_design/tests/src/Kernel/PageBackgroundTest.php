@@ -7,14 +7,14 @@ namespace Drupal\Tests\mukurtu_design\Kernel;
 use Drupal\Core\Path\PathMatcherInterface;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\file\Entity\File;
-use Drupal\mukurtu_design\HeaderBackground;
+use Drupal\mukurtu_design\PageBackground;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests which header background a page gets, if any.
+ * Tests which page background a request gets, if any.
  */
 #[Group('mukurtu_design')]
-class HeaderBackgroundTest extends KernelTestBase {
+class PageBackgroundTest extends KernelTestBase {
 
   /**
    * {@inheritdoc}
@@ -35,11 +35,11 @@ class HeaderBackgroundTest extends KernelTestBase {
   /**
    * Returns the service, with isFrontPage() forced to the given answer.
    */
-  protected function headerBackground(bool $is_front = FALSE): HeaderBackground {
+  protected function pageBackground(bool $is_front = FALSE): PageBackground {
     $matcher = $this->createMock(PathMatcherInterface::class);
     $matcher->method('isFrontPage')->willReturn($is_front);
 
-    return new HeaderBackground(
+    return new PageBackground(
       $this->container->get('config.factory'),
       $this->container->get('entity_type.manager'),
       $this->container->get('file_url_generator'),
@@ -50,11 +50,11 @@ class HeaderBackgroundTest extends KernelTestBase {
   /**
    * Creates a file entity and points the config at it.
    */
-  protected function setHeaderImage(): File {
-    $file = File::create(['uri' => 'public://header.png', 'status' => 1]);
+  protected function setBackgroundImage(): File {
+    $file = File::create(['uri' => 'public://background.png', 'status' => 1]);
     $file->save();
 
-    $this->config('mukurtu_design.settings')->set('header.image', (int) $file->id())->save();
+    $this->config('mukurtu_design.settings')->set('background.image', (int) $file->id())->save();
 
     return $file;
   }
@@ -63,18 +63,18 @@ class HeaderBackgroundTest extends KernelTestBase {
    * A site that has not chosen an image gets no background.
    */
   public function testNoImageMeansNoBackground(): void {
-    $this->assertSame([], $this->headerBackground()->resolve());
+    $this->assertSame([], $this->pageBackground()->resolve());
   }
 
   /**
    * A configured image is returned with its treatment.
    */
   public function testReturnsTheConfiguredImage(): void {
-    $this->setHeaderImage();
+    $this->setBackgroundImage();
 
-    $result = $this->headerBackground()->resolve();
+    $result = $this->pageBackground()->resolve();
 
-    $this->assertStringEndsWith('/header.png', $result['url']);
+    $this->assertStringEndsWith('/background.png', $result['url']);
     $this->assertSame('light', $result['treatment']);
   }
 
@@ -82,20 +82,20 @@ class HeaderBackgroundTest extends KernelTestBase {
    * The front page opt-out suppresses the background only on the front page.
    */
   public function testFrontPageOptOut(): void {
-    $this->setHeaderImage();
-    $this->config('mukurtu_design.settings')->set('header.show_on_front', FALSE)->save();
+    $this->setBackgroundImage();
+    $this->config('mukurtu_design.settings')->set('background.show_on_front', FALSE)->save();
 
-    $this->assertSame([], $this->headerBackground(TRUE)->resolve(), 'The front page opts out.');
-    $this->assertNotSame([], $this->headerBackground(FALSE)->resolve(), 'Other pages keep the background.');
+    $this->assertSame([], $this->pageBackground(TRUE)->resolve(), 'The front page opts out.');
+    $this->assertNotSame([], $this->pageBackground(FALSE)->resolve(), 'Other pages keep the background.');
   }
 
   /**
    * With the opt-out off, the front page keeps the background.
    */
   public function testFrontPageKeepsBackgroundWhenEnabled(): void {
-    $this->setHeaderImage();
+    $this->setBackgroundImage();
 
-    $this->assertNotSame([], $this->headerBackground(TRUE)->resolve());
+    $this->assertNotSame([], $this->pageBackground(TRUE)->resolve());
   }
 
   /**
@@ -105,20 +105,20 @@ class HeaderBackgroundTest extends KernelTestBase {
    * would otherwise leave a dangling fid in config.
    */
   public function testDanglingFileIdIsIgnored(): void {
-    $file = $this->setHeaderImage();
+    $file = $this->setBackgroundImage();
     $file->delete();
 
-    $this->assertSame([], $this->headerBackground()->resolve());
+    $this->assertSame([], $this->pageBackground()->resolve());
   }
 
   /**
    * An unrecognised treatment falls back to the readable default.
    */
   public function testUnknownTreatmentFallsBackToLight(): void {
-    $this->setHeaderImage();
-    $this->config('mukurtu_design.settings')->set('header.text_treatment', 'chartreuse')->save();
+    $this->setBackgroundImage();
+    $this->config('mukurtu_design.settings')->set('background.text_treatment', 'chartreuse')->save();
 
-    $this->assertSame('light', $this->headerBackground()->resolve()['treatment']);
+    $this->assertSame('light', $this->pageBackground()->resolve()['treatment']);
   }
 
   /**
@@ -128,7 +128,7 @@ class HeaderBackgroundTest extends KernelTestBase {
    * one page's answer onto the other.
    */
   public function testCacheability(): void {
-    $metadata = $this->headerBackground()->getCacheableMetadata();
+    $metadata = $this->pageBackground()->getCacheableMetadata();
 
     $this->assertContains('config:mukurtu_design.settings', $metadata->getCacheTags());
     $this->assertContains('url.path.is_front', $metadata->getCacheContexts());
