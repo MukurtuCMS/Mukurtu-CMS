@@ -21,7 +21,7 @@ jobs:
       preview_url: ${{ steps.wait-for-preview.outputs.preview_url }}
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Wait for Tugboat Preview
         id: wait-for-preview
@@ -40,13 +40,40 @@ jobs:
           INTERVAL=30
           ELAPSED=0
           PREVIEW_URL=""
+          # A single error reading is not trusted. The Tugboat status has been
+          # observed to report "error" and then recover to "success" on the same
+          # commit, which made this job fail in 7 seconds while the Tugboat
+          # check itself went on to pass. Twice that was mistaken for a real
+          # build failure, once for a stacked-PR problem that did not exist.
+          #
+          # Note the asymmetry this fixes: an early *success* reading was
+          # already distrusted, per the comment above, but an early *error* was
+          # taken as final. Requiring two consecutive readings costs one extra
+          # interval on a genuine failure and removes the false one.
+          #
+          # A status that alternates error/pending indefinitely never reaches
+          # two in a row, so it falls through to the MAX_WAIT timeout instead of
+          # failing fast. That is the accepted trade: it still fails, just
+          # slowly, and it is a state that has never been observed.
+          ERROR_STREAK=0
+          ERROR_STREAK_REQUIRED=2
           while [ $ELAPSED -lt $MAX_WAIT ]; do
             TUGBOAT_STATE=$(gh api "repos/${{ github.repository }}/commits/${{ github.event.pull_request.head.sha }}/status" --jq '[.statuses[] | select(.context=="Tugboat")][0].state // "pending"' 2>/dev/null || echo "pending")
 
             if [[ "$TUGBOAT_STATE" == "failure" || "$TUGBOAT_STATE" == "error" ]]; then
-              echo "Tugboat build failed (status: $TUGBOAT_STATE). See the Tugboat commit status check for details."
-              exit 1
+              ERROR_STREAK=$((ERROR_STREAK + 1))
+              if [ "$ERROR_STREAK" -ge "$ERROR_STREAK_REQUIRED" ]; then
+                echo "Tugboat build failed (status: $TUGBOAT_STATE on $ERROR_STREAK consecutive checks). See the Tugboat commit status check for details."
+                exit 1
+              fi
+              echo "Tugboat status is $TUGBOAT_STATE; re-checking before treating that as a real build failure..."
+              sleep $INTERVAL
+              ELAPSED=$((ELAPSED + INTERVAL))
+              continue
             fi
+
+            # Any non-error reading means the previous one was a blip.
+            ERROR_STREAK=0
 
             if [[ "$TUGBOAT_STATE" == "success" ]]; then
               # --paginate is required: without it this call silently only
@@ -111,7 +138,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
@@ -139,7 +166,7 @@ jobs:
     if: github.event_name == 'push'
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
@@ -154,10 +181,70 @@ jobs:
         working-directory: tests/playwright
         run: npx playwright install chromium --with-deps
 
+      # Confirm the base preview is actually serving Drupal before handing the
+      # URL to Playwright. Without this the job runs the full suite against
+      # whatever the URL happens to return, and every test fails on a missing
+      # login field, which reads as an application bug rather than as missing
+      # infrastructure. That is not hypothetical: this job failed on all 100 of
+      # its most recent runs because TUGBOAT_MAIN_URL pointed at a preview that
+      # had been deleted, and the symptom was 6 login timeouts a few minutes in.
+      #
+      # The pull request path already does this, in wait-for-tugboat, for the
+      # same reason. This is the same readiness check applied to the push path.
+      - name: Check the base preview is serving Drupal
+        id: base-preview
+        env:
+          TUGBOAT_MAIN_URL: ${{ vars.TUGBOAT_MAIN_URL }}
+        run: |
+          if [ -z "${TUGBOAT_MAIN_URL:-}" ]; then
+            echo "::error::The TUGBOAT_MAIN_URL repository variable is not set, so there is no base preview to test against. Set it to the main branch base preview URL in Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+
+          BASE_URL="${TUGBOAT_MAIN_URL%/}"
+          MAX_WAIT=600
+          INTERVAL=15
+          ELAPSED=0
+
+          while [ "$ELAPSED" -lt "$MAX_WAIT" ]; do
+            RESULT=$(curl -s -L -o /tmp/tugboat-main-check.html -w "%{http_code} %{url_effective}" "$BASE_URL/user/login" || true)
+            STATUS="${RESULT%% *}"
+            EFFECTIVE_URL="${RESULT#* }"
+
+            # A deleted or renamed preview will never become ready, so say so
+            # immediately rather than burning the full timeout on it. Tugboat
+            # serves its own branded 404 for this, which is why the body is
+            # checked and not just the status code.
+            if grep -qi "Preview Not Found" /tmp/tugboat-main-check.html; then
+              echo "::error::TUGBOAT_MAIN_URL ($BASE_URL) returns a Tugboat 'Preview Not Found' page. The base preview has been deleted or its hostname has changed. Update the TUGBOAT_MAIN_URL repository variable to the current main base preview URL."
+              exit 1
+            fi
+
+            if [ "$STATUS" = "200" ] \
+              && [[ "$EFFECTIVE_URL" != *"/core/install.php"* ]] \
+              && ! grep -q "Preview is resuming" /tmp/tugboat-main-check.html \
+              && grep -qi ">Username<" /tmp/tugboat-main-check.html; then
+              echo "Base preview is ready: $BASE_URL"
+              # Hand the normalised URL on, so Playwright uses the same one
+              # this check validated. The variable is currently stored with a
+              # trailing slash, which would otherwise reach baseURL untouched.
+              echo "base_url=$BASE_URL" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+
+            echo "Waiting for the base preview to serve the real Drupal site (status: $STATUS, url: $EFFECTIVE_URL)..."
+            sleep "$INTERVAL"
+            ELAPSED=$((ELAPSED + INTERVAL))
+          done
+
+          echo "::error::The base preview at $BASE_URL did not serve the Drupal login form within ${MAX_WAIT}s (last status: $STATUS). It may still be building, suspended, or misconfigured."
+          exit 1
+
       - name: Run Playwright Tests
         working-directory: tests/playwright
         run: npx playwright test
-        # TUGBOAT_MAIN_URL is a GitHub Actions variable set to the stable
-        # Tugboat base preview URL for the main branch.
+        # The URL comes from the readiness check above rather than straight
+        # from the TUGBOAT_MAIN_URL variable, so the suite runs against the
+        # exact URL that was just confirmed to be serving Drupal.
         env:
-          PLAYWRIGHT_BASE_URL: ${{ vars.TUGBOAT_MAIN_URL }}
+          PLAYWRIGHT_BASE_URL: ${{ steps.base-preview.outputs.base_url }}

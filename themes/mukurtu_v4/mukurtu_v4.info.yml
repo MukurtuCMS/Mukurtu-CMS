@@ -2,7 +2,7 @@ name: Mukurtu CMS 4 Theme
 type: theme
 description: 'The default theme for Mukurtu CMS.'
 core_version_requirement: '^9.4 || ^10 || ^11'
-version: 4.0.0
+version: 4.0.1
 base theme: false
 logo: logo.png
 libraries:

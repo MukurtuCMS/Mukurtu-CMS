@@ -6,7 +6,6 @@
  */
 
 use Drupal\block_content\Entity\BlockContent;
-use Drupal\paragraphs\Entity\Paragraph;
 
 /**
  * Implements hook_install().
@@ -38,155 +37,89 @@ function mukurtu_footer_install() {
 }
 
 /**
- * Migrate footer data from block plugin configuration to block_content entity.
+ * Implements hook_update_last_removed().
  *
- * Prior to this change, footer content (logos, social links, contact email,
- * and copyright) was stored directly in the mukurtu_footer block plugin's
- * settings array. This hook creates the new mukurtu_footer block_content
- * entity and migrates existing data into its fields.
+ * Every mukurtu_footer update hook was removed in 4.0.1. 40003 is the
+ * highest number 4.0.0 shipped, so a fresh install is seeded there and a site
+ * that already ran the 4.0.0 updates has nothing left to do.
+ *
+ * Sites below 4.0.0 must update to 4.0.0 first. Core reports that as an error
+ * during the update, and mukurtu_core_update_requirements() adds a message
+ * naming 4.0.0 specifically. Note that neither actually halts `drush updb -y`,
+ * which prompts and proceeds; see docs/update-hooks.md.
  */
-function mukurtu_footer_update_40001(): void {
-  // Ensure all config/install configs (block content type, paragraph types,
-  // fields) exist before trying to create entities that use them. On existing
-  // sites, config/install YAMLs are only applied during a fresh module install,
-  // not during updates, so this call fills the gap.
-  \Drupal::service('config.installer')->installDefaultConfig('module', 'mukurtu_footer');
+function mukurtu_footer_update_last_removed(): int {
+  return 40003;
+}
 
-  // If a mukurtu_footer block_content entity already exists, nothing to do.
-  $existing = \Drupal::entityTypeManager()
-    ->getStorage('block_content')
-    ->loadByProperties(['type' => 'mukurtu_footer']);
+/**
+ * Add the "Edit footer" dashboard link (Look and feel section).
+ *
+ * Footer content editing previously had no permanent dashboard entry point;
+ * the only path in was the one-time Setup Checklist task, which is hidden
+ * once every task is complete and pointed at a hardcoded block_content ID
+ * that isn't guaranteed to be 1.
+ */
+function mukurtu_footer_update_40004(): void {
+  \Drupal::service('plugin.manager.menu.link')->rebuild();
+}
 
-  if (!empty($existing)) {
-    return;
-  }
-
-  // Read existing block plugin settings from whichever block instance uses the
-  // mukurtu_footer plugin — avoids hardcoding the theme-specific block ID.
-  $block_storage = \Drupal::entityTypeManager()->getStorage('block');
-  $footer_blocks = $block_storage->loadByProperties(['plugin' => 'mukurtu_footer']);
-  $block_settings = $footer_blocks
-    ? reset($footer_blocks)->get('settings') ?? []
-    : [];
-
-  // Wrap the migration in a transaction so a failure partway through (e.g. a
-  // duplicate-key conflict on the final save, possibly from an orphaned
-  // field-data row left by a prior partial update run) doesn't leave stray
-  // paragraph entities behind.
-  $transaction = \Drupal::database()->startTransaction();
-  try {
-    // Build footer_logo paragraph entities from old fid array.
-    $logo_paragraphs = [];
-    foreach (array_filter((array) ($block_settings['logo_upload'] ?? [])) as $fid) {
-      if ((int) $fid > 0) {
-        $paragraph = Paragraph::create([
-          'type' => 'footer_logo',
-          'field_footer_logo_image' => [
-            'target_id' => (int) $fid,
-            'alt' => '',
-            'title' => '',
-          ],
-        ]);
-        $paragraph->save();
-        $logo_paragraphs[] = [
-          'target_id' => $paragraph->id(),
-          'target_revision_id' => $paragraph->getRevisionId(),
-        ];
-      }
-    }
-
-    // Build footer_social_link paragraph entities from old per-platform slots.
-    $social_paragraphs = [];
-    $platform_base_urls = [
-      'twitter' => 'https://x.com/',
-      'facebook' => 'https://facebook.com/',
-      'instagram' => 'https://instagram.com/',
-    ];
-    $old_social = $block_settings['social_media'] ?? [];
-    foreach ($platform_base_urls as $platform => $base_url) {
-      for ($i = 1; $i <= 3; $i++) {
-        $account = trim($old_social[$platform]['account_' . $i] ?? '');
-        if (!empty($account)) {
-          $paragraph = Paragraph::create([
-            'type' => 'footer_social_link',
-            'field_footer_social_platform' => $platform,
-            'field_footer_social_url' => [
-              'uri' => $base_url . ltrim($account, '@/'),
-              'title' => $account,
-            ],
-          ]);
-          $paragraph->save();
-          $social_paragraphs[] = [
-            'target_id' => $paragraph->id(),
-            'target_revision_id' => $paragraph->getRevisionId(),
-          ];
-        }
-      }
-    }
-
-    // Create the block_content entity with migrated data.
-    BlockContent::create([
-      'type' => 'mukurtu_footer',
-      'info' => 'Mukurtu Footer',
-      'status' => TRUE,
-      'field_footer_logos' => $logo_paragraphs,
-      'field_footer_social_links' => $social_paragraphs,
-      'field_footer_contact_email' => $block_settings['contact_email_address'] ?? '',
-      'field_footer_contact_email_label' => $block_settings['email_us_text'] ?? 'Email us at',
-      'field_footer_copyright' => $block_settings['copyright_message'] ?? '© [current-date:html_year] Mukurtu CMS',
-    ])->save();
-  }
-  catch (\Drupal\Core\Database\IntegrityConstraintViolationException $e) {
-    $transaction->rollBack();
-    \Drupal::logger('mukurtu_footer')->warning('mukurtu_footer_update_40001 hit a duplicate-key conflict, likely from a prior partial update run; treating footer as already migrated. %message', ['%message' => $e->getMessage()]);
-    return;
-  }
-  catch (\Exception $e) {
-    $transaction->rollBack();
-    throw $e;
+/**
+ * Clear the footer social link URL field's config-level description.
+ *
+ * Previously the field had no description of its own, so admins only saw the
+ * generic link-field help text (internal path / <front> / <nolink> /
+ * <button>), which doesn't hint that this field wants a social profile URL
+ * (#2159). A config-level description isn't the right fix here though: this
+ * field's "Link text" sub-field is enabled, so core's LinkWidget attaches
+ * any #description to the outer fieldset wrapping the whole widget rather
+ * than to the URL input itself - it would render after "Link text", not
+ * next to "URL". mukurtu_footer_hook_field_widget_single_element_form_alter()
+ * (src/Hook/FormHooks.php) replaces the URL input's description directly
+ * instead, so the config-level description is cleared to avoid dead,
+ * never-shown duplicate text.
+ */
+function mukurtu_footer_update_40005(): void {
+  $field = \Drupal\field\Entity\FieldConfig::loadByName('paragraph', 'footer_social_link', 'field_footer_social_url');
+  if ($field) {
+    $field->setDescription('')->save();
   }
 }
 
 /**
- * Install missing mukurtu_footer configuration on existing sites.
+ * Escape the token brackets in the copyright field's description.
  *
- * Sites that ran mukurtu_footer_update_40001() before the config installer
- * call was added need this hook to create the field storage and field instance
- * configs that config/install only provides on a fresh module install.
+ * Field widget descriptions are always run through token replacement
+ * (\Drupal\Core\Field\WidgetBase::getFilteredDescription()), so the literal
+ * "[current-date:html_year]" in the help text was being evaluated into the
+ * actual current year instead of shown as the token name to type. HTML
+ * entities for the brackets aren't matched by the token scanner but still
+ * render as literal "[" "]" in the browser.
  */
-function mukurtu_footer_update_40002(): void {
-  \Drupal::service('config.installer')->installDefaultConfig('module', 'mukurtu_footer');
+function mukurtu_footer_update_40006(): void {
+  $field = \Drupal\field\Entity\FieldConfig::loadByName('block_content', 'mukurtu_footer', 'field_footer_copyright');
+  if ($field) {
+    $field->setDescription('Use the token &#91;current-date:html_year&#93; for the current year. Leave empty to hide.')->save();
+  }
 }
 
 /**
- * Add a Contact link to the footer.
+ * Clear the other footer link fields' config-level descriptions.
  *
- * The site-wide contact form at /contact has always been installed and
- * permitted for anonymous users, but nothing ever linked to it: core's footer
- * menu link for the route ships disabled, and the block that renders the core
- * footer menu is disabled as well, so the form was only reachable by typing the
- * URL.
- *
- * Only sites whose Other links field is still empty are touched, so a curated
- * footer is never reordered or added to. Sites skipped here can add the link
- * themselves by editing the footer block.
+ * Same reasoning as mukurtu_footer_update_40005(): the guidance now comes
+ * from mukurtu_footer_hook_field_widget_single_element_form_alter()
+ * (src/Hook/FormHooks.php), which replaces the URL input's description
+ * directly for these fields too, so their config-level descriptions are
+ * cleared to avoid dead, never-shown duplicate text (#2159).
  */
-function mukurtu_footer_update_40003(): void {
-  $footers = \Drupal::entityTypeManager()
-    ->getStorage('block_content')
-    ->loadByProperties(['type' => 'mukurtu_footer']);
+function mukurtu_footer_update_40007(): void {
+  $other_links = \Drupal\field\Entity\FieldConfig::loadByName('block_content', 'mukurtu_footer', 'field_footer_other_links');
+  if ($other_links) {
+    $other_links->setDescription('')->save();
+  }
 
-  foreach ($footers as $footer) {
-    if (!$footer->hasField('field_footer_other_links')) {
-      continue;
-    }
-    if (!$footer->get('field_footer_other_links')->isEmpty()) {
-      continue;
-    }
-
-    $footer->set('field_footer_other_links', [
-      ['uri' => 'internal:/contact', 'title' => 'Contact'],
-    ]);
-    $footer->save();
+  $logo_link = \Drupal\field\Entity\FieldConfig::loadByName('paragraph', 'footer_logo', 'field_footer_logo_link');
+  if ($logo_link) {
+    $logo_link->setDescription('')->save();
   }
 }
