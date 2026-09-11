@@ -1,0 +1,8 @@
+/**
+ * @file
+ * Wait-cursor affordance while modal-click-guard.js is blocking clicks.
+ */
+
+html[data-mukurtu-modal-guard="pending"] .use-ajax[data-dialog-type] {
+  cursor: progress;
+}

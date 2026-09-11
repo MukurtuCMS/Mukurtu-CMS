@@ -5,8 +5,6 @@
 # Mukurtu CMS
 To learn more about Mukurtu CMS and the larger Mukurtu community, visit [mukurtu.org](https://mukurtu.org/).
 
-**Note: This version of Mukurtu CMS is currently under active development and is subject to daily change. Only use for testing and feedback purposes.**
-
 ## Requirements
 
 * The necessary database server, web server, and PHP installed that meet [modern Drupal requirements](https://www.drupal.org/docs/system-requirements)
@@ -40,7 +38,7 @@ mv composer.phar composer
 ```
 mkdir mukurtu
 cd mukurtu
-composer create-project mukurtu/mukurtu-template:dev-main .
+composer create-project mukurtu/mukurtu-template:^4.0 .
 ```
 * Set your web server to serve the "web" folder (e.g. `mukurtu4/web`)
 * Install Drupal as normal by opening the site in your web browser, the Mukurtu profile distribution will automatically be used.
@@ -75,59 +73,51 @@ sudo apt install poppler-utils
 
 ## Updating Mukurtu CMS
 
-1. Go to https://github.com/MukurtuCMS/Mukurtu-CMS to see what is the latest release.
-2. Compare that to the version your site is on.
-    -  Go to the  "Mukurtu Dashboard" Link in your site. Look for the "Site information" block.
-3. Note how many (if any) versions your site is behind.
- 
-### Updating if you are only one version behind
+1. Check the [latest release](https://github.com/MukurtuCMS/Mukurtu-CMS/releases).
+2. Compare it to the version your site is on. Follow the "Mukurtu Dashboard" link in your site and look for the "Site information" block.
+3. Read the release notes for each version between yours and the latest. Most releases can be applied directly, but some must be passed through rather than skipped, and the release notes will say so.
 
-1. Backup your site and database.
-2. From your Mukurtu 4 directory, run the update commands.
+### Updating
+
+Back up your site and database first. Then, from your Mukurtu directory:
+
 ```
-    # put the site into offline mode
+    # Put the site into maintenance mode.
     drush state:set system.maintenance_mode 1
     drush cr
 
-    # Make sure everything looks correct
+    # Check what will change.
     composer update mukurtu/* -W --dry-run
 
-    # If everything looks correct run it for real
+    # If everything looks correct, run it for real.
     composer update mukurtu/* -W
 
-    # update the database
+    # Apply any database updates.
     drush updb
 
-    # take the site out of offline mode
+    # Bring the site back online.
     drush state:set system.maintenance_mode 0
     drush cr
 
 ```
-### Updating if you are more than one version behind
 
-We recommend iterating through each skipped version rather than jumping versions.
+Test the site before announcing it is back. If anything is wrong, restore your backup.
 
-1. Backup your site and database.
-2. From your Mukurtu 4 directory, put your site into offline mode.
-    - `drush state:set system.maintenance_mode 0`
+### Updating through a specific version
+
+When the release notes say a version must be passed through, update to that version first rather than straight to the latest.
+
+1. Back up your site and database.
+2. Put the site into maintenance mode.
+    - `drush state:set system.maintenance_mode 1`
     - `drush cr`
-2. Edit your composer.json file.
-3. Look for this line: `"mukurtu/mukurtu": "*"`
-4. Change the asterisk to the next mukurtu version.
-    - For example if you are running 4.0.0-beta31 and the latest version is 4.0.0-beta35 change the asterisk to 4.0.0-beta32 (`"mukurtu/mukurtu": "4.0.0-beta32"`).
-5. Then run the update commands.
-    - Run a test update to make sure everything looks good.
-        - `composer update mukurtu/* -W --dry-run`
-    -  If everything looks correct run it for real.
-        - `composer update mukurtu/* -W`
-    - Update the database.
-        - `drush updb`
-6. Take the site out of offline mode.
-    - `drush state:set system.maintenance_mode 0`
-    - `drush cr`
-7. Test your site. If everything looks good repeat steps 1-6, the only thing that will change is that will update the line in composer.json to reflect the next beta version
-    - If there is an issue restore from the last backup.
-8. When you have caught the site up to the latest release, change the version number in composer.json back to an asterisk `(*)`.
+3. In your project's `composer.json`, pin the version you need to pass through.
+    - Look for the line `"mukurtu/mukurtu": "^4.0"`.
+    - Replace the constraint with that exact version, for example `"mukurtu/mukurtu": "4.0.0"`.
+4. Run the update commands from the section above.
+5. Test your site. If there is a problem, restore from your backup.
+6. Repeat steps 3 to 5 for each version you need to pass through.
+7. When your site has caught up, restore the constraint to `"mukurtu/mukurtu": "^4.0"` and update once more to reach the latest release.
 
 ### Troubleshooting: "patch file could not be downloaded" during an update
 
@@ -148,4 +138,8 @@ To resolve it:
 Mukurtu CMS uses PHPUnit kernel tests and unit tests. See [`docs/testing/coverage.md`](docs/testing/coverage.md) for a full breakdown of test infrastructure and coverage by module. A plain-language summary of what each test verifies is available at [`docs/testing/coverage-plain-language.md`](docs/testing/coverage-plain-language.md).
 
 ## Contributing
-Mukurtu CMS v4 is under active development. Code contribution and feedback is welcome, and can be submitted in [our issues](https://github.com/MukurtuCMS/Mukurtu-CMS/issues) or you can contact us at [support@mukurtu.org](mailto:support@mukurtu.org).
+Code contributions and feedback are welcome, and can be submitted in [our issues](https://github.com/MukurtuCMS/Mukurtu-CMS/issues) or you can contact us at [support@mukurtu.org](mailto:support@mukurtu.org).
+
+## License
+
+Mukurtu CMS is licensed under the [GNU General Public License v3 or later](LICENSE.txt).

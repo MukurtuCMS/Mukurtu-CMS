@@ -25,7 +25,6 @@ use PHPUnit\Framework\Attributes\Group;
  */
 #[Group('mukurtu_submissions')]
 class NotifyEmailNotificationTest extends MukurtuSubmissionsKernelTestBase {
-
   use AssertMailTrait;
   use MessageTemplateCreateTrait;
 
@@ -50,8 +49,8 @@ class NotifyEmailNotificationTest extends MukurtuSubmissionsKernelTestBase {
     $this->installEntitySchema('message');
 
     // Two deltas (subject, body) + matching mail_subject/mail_body
-    // displays - mirrors mukurtu_submissions_update_40011()'s real
-    // production setup for mukurtu_submission_received, so this test
+    // displays - mirrors the real production setup for
+    // mukurtu_submission_received, so this test
     // exercises the same "isolate one delta per mode" mechanism
     // send_email_notifications() now depends on.
     $this->createMessageTemplate('test_submission_received', 'Test', 'Test template', [
@@ -113,5 +112,4 @@ class NotifyEmailNotificationTest extends MukurtuSubmissionsKernelTestBase {
       array_column($mails, 'to')
     );
   }
-
 }
