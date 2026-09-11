@@ -20,3 +20,40 @@
 function mukurtu_design_update_last_removed(): int {
   return 40004;
 }
+
+/**
+ * Add the header background settings, switched off until an image is chosen.
+ */
+function mukurtu_design_update_40005(): string {
+  $config = \Drupal::configFactory()
+    ->getEditable(\Drupal\mukurtu_design\DesignPalette::SETTINGS);
+
+  $header = (array) $config->get('header');
+
+  // Seed only the keys that are genuinely absent, so re-running cannot reset a
+  // site that has since configured a header, and a partially seeded site is
+  // completed rather than overwritten. Checking the sub-array by key matters:
+  // $config->get('header.image') returns NULL both when the key is missing and
+  // when it is set to NULL, which is the shipped default.
+  $defaults = [
+    'image' => NULL,
+    'show_on_front' => TRUE,
+    'text_treatment' => 'light',
+  ];
+
+  $added = [];
+  foreach ($defaults as $key => $value) {
+    if (!array_key_exists($key, $header)) {
+      $header[$key] = $value;
+      $added[] = $key;
+    }
+  }
+
+  if (!$added) {
+    return (string) t('The header background settings are already present.');
+  }
+
+  $config->set('header', $header)->save();
+
+  return (string) t('Added the header background settings. No image is set, so the header is unchanged until one is uploaded.');
+}

@@ -27,3 +27,17 @@ mukurtu_design.settings:
         brand_secondary_accent:
           type: string
           label: 'Brand Secondary Accent'
+    header:
+      type: mapping
+      label: 'Header background'
+      mapping:
+        image:
+          type: integer
+          label: 'Background image file ID'
+          nullable: true
+        show_on_front:
+          type: boolean
+          label: 'Show the header background on the front page'
+        text_treatment:
+          type: string
+          label: 'Header text treatment'

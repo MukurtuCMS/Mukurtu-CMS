@@ -1,0 +1,8 @@
+services:
+  mukurtu_design.header_background:
+    class: Drupal\mukurtu_design\HeaderBackground
+    arguments:
+      - '@config.factory'
+      - '@entity_type.manager'
+      - '@file_url_generator'
+      - '@path.matcher'

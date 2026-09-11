@@ -42,3 +42,47 @@ header {
 
   }
 }
+
+/* Optional header background image.
+ *
+ * The URL arrives as --mukurtu-header-background-image, set inline on the
+ * header element by mukurtu_design_preprocess_page(). The scrim is a flat
+ * colour layer stacked over the image, so the contrast of the logo and menu is
+ * decided here rather than by whichever photograph a site happens to upload.
+ *
+ * The treatment classes redefine the tokens the header's children already
+ * consume, rather than overriding their rules. That keeps the menu's own
+ * styling in charge of layout and states, and means anything added to the
+ * header later inherits a legible colour without further work.
+ */
+.site-header--has-background {
+  background-image:
+    linear-gradient(var(--mukurtu-header-scrim), var(--mukurtu-header-scrim)),
+    var(--mukurtu-header-background-image);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+
+  /* Without this the image is barely visible behind the logo. */
+  padding-block: var(--v-space-xs);
+}
+
+.site-header--text-light {
+  --mukurtu-header-scrim: rgb(0 0 0 / 60%);
+  --color-text-neutral-loud: var(--color-white);
+
+  /* The primary nav uses this for both its hover colour and its underline.
+   * Flattening it to the text colour keeps hover legible on the scrim; the
+   * state stays perceivable because the underline still appears on hover. */
+  --brand-secondary-dark: var(--color-white);
+
+  color: var(--color-white);
+}
+
+.site-header--text-dark {
+  --mukurtu-header-scrim: rgb(255 255 255 / 75%);
+  --color-text-neutral-loud: var(--color-black);
+  --brand-secondary-dark: var(--color-black);
+
+  color: var(--color-black);
+}
