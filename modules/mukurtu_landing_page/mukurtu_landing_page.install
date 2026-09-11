@@ -14,3 +14,65 @@
 function mukurtu_landing_page_update_last_removed(): int {
   return 40006;
 }
+
+/**
+ * Let landing pages use the hero blocks and re-add the Browse by Community block.
+ */
+function mukurtu_landing_page_update_40007(): string {
+  $config = \Drupal::configFactory()
+    ->getEditable('core.entity_view_display.node.landing_page.default');
+  $settings = $config->get('third_party_settings.layout_builder_restrictions.entity_view_mode_restriction');
+
+  // Nothing to widen if this site never had the restrictions in the first
+  // place: with no settings at all, Layout Builder Restrictions bails out and
+  // every block is already available.
+  if (empty($settings)) {
+    return (string) t('Landing page block restrictions are not configured on this site; nothing to change.');
+  }
+
+  $changes = [];
+
+  // The three image-with-description bundles were missing from the "Inline
+  // blocks" allowlist, so a site builder could place the pre-created hero
+  // blocks but never build a new one. Only extend an allowlist that already
+  // exists - if the key is absent the category is unrestricted, and adding it
+  // would take availability away instead of granting it.
+  $inline = $settings['allowlisted_blocks']['Inline blocks'] ?? NULL;
+  if (is_array($inline)) {
+    $heroes = [
+      'inline_block:full_image_with_description',
+      'inline_block:image_with_description',
+      'inline_block:vertical_image_with_description',
+    ];
+    $added = array_diff($heroes, $inline);
+    if ($added) {
+      $inline = array_merge($inline, $added);
+      sort($inline);
+      $settings['allowlisted_blocks']['Inline blocks'] = array_values($inline);
+      $changes[] = (string) t('Added the hero blocks to the landing page inline block allowlist.');
+    }
+  }
+
+  // "Mukurtu" is absent from allowed_block_categories, which Layout Builder
+  // Restrictions enforces as a fallback, so every block in that category was
+  // stripped from the Layout UI - including Browse by Community, which ships
+  // on the default homepage and could not be re-added once removed. Allowlist
+  // that one block rather than opening the whole category: the others are a
+  // node-context sidebar block, a search-page toggle, and the dashboard setup
+  // checklist, none of which belong on a landing page.
+  $categories = $config->get('third_party_settings.layout_builder_restrictions.allowed_block_categories') ?? [];
+  if (!isset($settings['allowlisted_blocks']['Mukurtu']) && !in_array('Mukurtu', $categories, TRUE)) {
+    $settings['allowlisted_blocks']['Mukurtu'] = ['mukurtu_browse_by_community'];
+    $changes[] = (string) t('Restored the Browse by Community block for landing pages.');
+  }
+
+  if (!$changes) {
+    return (string) t('Landing page block restrictions were already up to date.');
+  }
+
+  $config
+    ->set('third_party_settings.layout_builder_restrictions.entity_view_mode_restriction', $settings)
+    ->save();
+
+  return implode(' ', $changes);
+}
