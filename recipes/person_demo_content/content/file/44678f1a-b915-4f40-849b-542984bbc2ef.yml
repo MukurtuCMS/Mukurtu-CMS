@@ -1,0 +1,24 @@
+_meta:
+  version: '1.0'
+  entity_type: file
+  uuid: 44678f1a-b915-4f40-849b-542984bbc2ef
+  default_langcode: en
+default:
+  uid:
+    -
+      target_id: 1
+  filename:
+    -
+      value: sample-portrait.jpg
+  uri:
+    -
+      value: 'private://accessibility-demo/sample-portrait.jpg'
+  filemime:
+    -
+      value: image/jpeg
+  filesize:
+    -
+      value: 43467
+  status:
+    -
+      value: true

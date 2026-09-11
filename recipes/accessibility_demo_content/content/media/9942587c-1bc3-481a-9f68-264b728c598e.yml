@@ -1,0 +1,38 @@
+# Sample audio media. field_transcription is filled in so the accessibility
+# program can verify how an audio transcript renders alongside the player.
+_meta:
+  version: '1.0'
+  entity_type: media
+  uuid: 9942587c-1bc3-481a-9f68-264b728c598e
+  bundle: audio
+  default_langcode: en
+  depends:
+    b058a880-1e43-41b9-b091-dcacf339aeb9: file
+    df5dbc8d-e098-4879-aded-9f4b07031197: community
+    1008afed-c70c-419e-bc55-eb37451a1b69: protocol
+default:
+  name:
+    -
+      value: 'Sample Audio Recording (placeholder)'
+  status:
+    -
+      value: true
+  uid:
+    -
+      target_id: 1
+  field_communities:
+    -
+      entity: df5dbc8d-e098-4879-aded-9f4b07031197
+  field_cultural_protocols:
+    -
+      sharing_setting: all
+      protocols: '|1|'
+  field_media_audio_file:
+    -
+      entity: b058a880-1e43-41b9-b091-dcacf339aeb9
+  field_transcription:
+    -
+      value: 'This is a generated 440Hz tone used as placeholder audio. Sample transcript text for accessibility testing.'
+  field_identifier:
+    -
+      value: 'ACC-DEMO-AUD-001'

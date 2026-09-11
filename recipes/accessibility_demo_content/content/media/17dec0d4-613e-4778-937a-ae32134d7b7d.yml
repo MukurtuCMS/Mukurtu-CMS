@@ -1,0 +1,35 @@
+# Remote video media pointing at a real Mukurtu support video on Vimeo, so
+# the accessibility program can test oEmbed video rendering (captions,
+# player controls) rather than a generated placeholder. Reuses the
+# Community/Protocol bootstrapped earlier in this recipe. See ../../README.md.
+_meta:
+  version: '1.0'
+  entity_type: media
+  uuid: 17dec0d4-613e-4778-937a-ae32134d7b7d
+  bundle: remote_video
+  default_langcode: en
+  depends:
+    df5dbc8d-e098-4879-aded-9f4b07031197: community
+default:
+  name:
+    -
+      value: 'Mukurtu Support Video'
+  status:
+    -
+      value: true
+  uid:
+    -
+      target_id: 1
+  field_communities:
+    -
+      entity: df5dbc8d-e098-4879-aded-9f4b07031197
+  field_cultural_protocols:
+    -
+      sharing_setting: all
+      protocols: '|1|'
+  field_media_oembed_video:
+    -
+      value: 'https://vimeo.com/490544410?fl=pl&fe=cm'
+  field_identifier:
+    -
+      value: 'ACC-DEMO-VIDEO-001'

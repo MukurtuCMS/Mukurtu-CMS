@@ -1,0 +1,13 @@
+_meta:
+  version: '1.0'
+  entity_type: taxonomy_term
+  uuid: 27422e7b-032e-4894-8c2f-fc015710a980
+  bundle: creator
+  default_langcode: en
+default:
+  name:
+    -
+      value: 'Sample Creator'
+  status:
+    -
+      value: true

@@ -1,0 +1,24 @@
+_meta:
+  version: '1.0'
+  entity_type: file
+  uuid: 4bcaac48-ddf0-4dab-87ae-27edd59c03bb
+  default_langcode: en
+default:
+  uid:
+    -
+      target_id: 1
+  filename:
+    -
+      value: basket-sample.jpg
+  uri:
+    -
+      value: 'private://accessibility-demo/basket-sample.jpg'
+  filemime:
+    -
+      value: image/jpeg
+  filesize:
+    -
+      value: 55615
+  status:
+    -
+      value: true

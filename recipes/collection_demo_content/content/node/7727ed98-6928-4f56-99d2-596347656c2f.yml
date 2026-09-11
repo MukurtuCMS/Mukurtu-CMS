@@ -1,0 +1,81 @@
+# The "fully-described" Collection item for the accessibility program.
+# Reuses the Community/Protocol bootstrapped by the accessibility_demo_content
+# recipe (see this recipe's own recipe.yml "recipes:" prerequisite) rather
+# than creating a second one. See ../../README.md for the same
+# assumed-ID caveats documented in accessibility_demo_content/README.md.
+_meta:
+  version: '1.0'
+  entity_type: node
+  uuid: 7727ed98-6928-4f56-99d2-596347656c2f
+  bundle: collection
+  default_langcode: en
+  depends:
+    6f2e8bda-3424-40de-87c4-b453e1f69e8a: node
+    85761b41-5e78-4f25-b92d-6037efcbf7e9: node
+    2520bf8f-2993-4c32-9f95-062814b7a2cc: media
+    a153b9f5-f2ab-4d27-8306-aea67943618b: taxonomy_term
+    9b7c9130-61a7-4ee7-9fd9-3d23a0e68904: taxonomy_term
+default:
+  title:
+    -
+      value: 'Sample Collection (Accessibility Demo)'
+  status:
+    -
+      value: true
+  promote:
+    -
+      value: false
+  sticky:
+    -
+      value: false
+  uid:
+    -
+      target_id: 1
+  revision_uid:
+    -
+      target_id: 1
+  moderation_state:
+    -
+      value: published
+  path:
+    -
+      alias: '/accessibility-demo/sample-collection'
+      langcode: en
+  field_cultural_protocols:
+    -
+      sharing_setting: all
+      protocols: '|1|'
+  field_collection_image:
+    -
+      entity: 2520bf8f-2993-4c32-9f95-062814b7a2cc
+  field_items_in_collection:
+    -
+      entity: 6f2e8bda-3424-40de-87c4-b453e1f69e8a
+  field_related_content:
+    -
+      entity: 85761b41-5e78-4f25-b92d-6037efcbf7e9
+  field_keywords:
+    -
+      entity: a153b9f5-f2ab-4d27-8306-aea67943618b
+  field_location:
+    -
+      entity: 9b7c9130-61a7-4ee7-9fd9-3d23a0e68904
+  field_source:
+    -
+      value: 'Placeholder Source'
+  field_summary:
+    -
+      value: 'A short placeholder summary of this sample Collection, for accessibility testing.'
+  field_description:
+    -
+      value: |
+        <h2>About this collection</h2>
+        <p>This is placeholder description text for a sample Collection, created only to test accessibility of the rendered page &mdash; headings, paragraphs, and the collection items list.</p>
+      format: basic_html
+  field_coverage_description:
+    -
+      value: 'Placeholder coverage description: a generic, non-specific location used only for accessibility testing.'
+      format: plain_text
+  field_coverage:
+    -
+      value: 'POINT (-98.5795 39.828175)'

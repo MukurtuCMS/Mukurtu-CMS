@@ -1,0 +1,11 @@
+name: 'Dictionary demo content'
+description: >-
+  Creates one fully-described Word List containing one fully-described
+  Dictionary Word, so the accessibility program has real, rendered
+  dictionary pages to test against on Tugboat and local builds. See
+  README.md in this directory for the assumptions this recipe makes and
+  what it intentionally leaves out.
+type: 'Content'
+recipes:
+  - accessibility_demo_content
+install: []

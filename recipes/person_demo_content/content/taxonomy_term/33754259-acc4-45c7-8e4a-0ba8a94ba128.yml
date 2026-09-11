@@ -1,0 +1,13 @@
+_meta:
+  version: '1.0'
+  entity_type: taxonomy_term
+  uuid: 33754259-acc4-45c7-8e4a-0ba8a94ba128
+  bundle: location
+  default_langcode: en
+default:
+  name:
+    -
+      value: 'Another Example Location (placeholder)'
+  status:
+    -
+      value: true

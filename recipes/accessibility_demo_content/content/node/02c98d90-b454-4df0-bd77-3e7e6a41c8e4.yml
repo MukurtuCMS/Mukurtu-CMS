@@ -1,0 +1,49 @@
+# Second page of the sample multipage item. See ../../README.md.
+_meta:
+  version: '1.0'
+  entity_type: node
+  uuid: 02c98d90-b454-4df0-bd77-3e7e6a41c8e4
+  bundle: digital_heritage
+  default_langcode: en
+  depends:
+    298c0286-34f6-4b00-8495-bc0e840be802: taxonomy_term
+default:
+  title:
+    -
+      value: 'Sample Multipage Item — Page 2 of 2 (placeholder)'
+  status:
+    -
+      value: true
+  promote:
+    -
+      value: false
+  sticky:
+    -
+      value: false
+  uid:
+    -
+      target_id: 1
+  revision_uid:
+    -
+      target_id: 1
+  moderation_state:
+    -
+      value: published
+  path:
+    -
+      alias: '/accessibility-demo/sample-multipage-page-2'
+      langcode: en
+  field_content_type:
+    -
+      value: 'Digital Heritage'
+  field_cultural_protocols:
+    -
+      sharing_setting: all
+      protocols: '|1|'
+  field_category:
+    -
+      entity: 298c0286-34f6-4b00-8495-bc0e840be802
+  field_description:
+    -
+      value: 'Placeholder content for page 2 of a sample multipage item, used only to test multipage navigation for accessibility review.'
+      format: plain_text

@@ -1,0 +1,59 @@
+# The "fully-described" Basic page item for the accessibility program.
+# Basic page has no cultural-protocol or community fields, so this only
+# reuses media from the accessibility_demo_content recipe (this recipe's
+# prerequisite) rather than any Community/Protocol content. See ../../README.md.
+_meta:
+  version: '1.0'
+  entity_type: node
+  uuid: ae2fcfea-02e4-4d15-ad9b-77f5ba31dffe
+  bundle: page
+  default_langcode: en
+  depends:
+    2520bf8f-2993-4c32-9f95-062814b7a2cc: media
+    9942587c-1bc3-481a-9f68-264b728c598e: media
+    80af4173-fb4b-4640-bbae-55ed5df92de6: media
+default:
+  title:
+    -
+      value: 'Sample Basic Page (Accessibility Demo)'
+  status:
+    -
+      value: true
+  promote:
+    -
+      value: false
+  sticky:
+    -
+      value: false
+  uid:
+    -
+      target_id: 1
+  revision_uid:
+    -
+      target_id: 1
+  moderation_state:
+    -
+      value: published
+  path:
+    -
+      alias: '/accessibility-demo/sample-basic-page'
+      langcode: en
+  body:
+    -
+      value: |
+        <h2>A sample heading</h2>
+        <p>This is placeholder body text for a sample Basic page, created only to test accessibility of headings, paragraphs, lists, and links.</p>
+        <ul>
+          <li>Sample list item one</li>
+          <li>Sample list item two</li>
+        </ul>
+        <p>Here is a <a href="https://www.w3.org/WAI/">sample external link (Web Content Accessibility Guidelines)</a> for link-text testing.</p>
+      format: basic_html
+      summary: 'Placeholder Basic page created for accessibility testing.'
+  field_page_media_assets:
+    -
+      entity: 2520bf8f-2993-4c32-9f95-062814b7a2cc
+    -
+      entity: 9942587c-1bc3-481a-9f68-264b728c598e
+    -
+      entity: 80af4173-fb4b-4640-bbae-55ed5df92de6
