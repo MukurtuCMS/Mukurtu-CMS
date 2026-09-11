@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Drupal\mukurtu_design\Form;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\File\FileUsage\FileUsageInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\file\FileUsage\FileUsageInterface;
 use Drupal\mukurtu_design\DesignPalette;
 use Drupal\mukurtu_design\HeaderBackground;
 use Symfony\Component\DependencyInjection\ContainerInterface;
