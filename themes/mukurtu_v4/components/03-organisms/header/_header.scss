@@ -91,17 +91,55 @@ header {
   color: var(--color-black);
 }
 
-/* Stop the treatment colour at the nav.
+/* The nav sits on the image at desktop.
  *
- * .header-nav carries its own opaque background (a white bar at desktop, the
- * slide-out drawer on mobile) and its links inherit rather than set a colour,
- * so without this the header's light treatment renders white text on that
- * white bar. Re-anchoring to the body text token keeps the nav looking exactly
- * as it does on a site with no header image.
+ * .header-nav is the same element in two guises: a static bar at >=lg, and the
+ * slide-out drawer below that, which overlays page content and must keep its
+ * own white background and dark text. So the transparency is scoped to exactly
+ * the desktop state the theme itself defines, and only when an image is set.
  *
- * Note _nav-primary.scss reads --color-text-neutral-loud, which this theme
- * never defines; that declaration is invalid, which is why these links inherit
- * in the first place. Filed separately rather than fixed here. */
+ * Below that breakpoint, and on any site with no header image, nothing here
+ * applies and the nav renders exactly as it always has.
+ */
 .site-header--has-background .header-nav {
+  /* Covers the drawer, and stops the header's treatment colour cascading into
+   * it. Nav links inherit rather than set a colour, so without this the light
+   * treatment would paint white text onto the drawer's white background.
+   *
+   * _nav-primary.scss reads --color-text-neutral-loud, which this theme never
+   * defines anywhere, so that declaration is invalid and those links have
+   * always inherited. Filed separately rather than fixed here. */
   color: var(--brand-text-color);
+}
+
+body:not(.is-always-mobile-nav) .site-header--has-background .header-nav {
+  @include include-media.media('>=lg') {
+    background-color: transparent;
+
+    /* Take the treatment colour from the header again. */
+    color: inherit;
+  }
+}
+
+/* Retune the nav's interactive tokens for the scrim.
+ *
+ * --brand-secondary-dark drives the hover colour, the hover underline and the
+ * focus outline, so it has to stay legible against the scrim or focus fails
+ * 1.4.11. Flattening it to the text colour keeps all three visible; hover is
+ * still distinguishable because the underline appears. Palette accents are not
+ * usable here - red-bone's --brand-secondary-accent lands at 3.22:1 on the
+ * light scrim, under the 4.5:1 this text size needs.
+ */
+body:not(.is-always-mobile-nav) .site-header--has-background.site-header--text-light .header-nav {
+  @include include-media.media('>=lg') {
+    --brand-secondary-dark: var(--color-white);
+    --main-nav-divider: rgb(255 255 255 / 45%);
+  }
+}
+
+body:not(.is-always-mobile-nav) .site-header--has-background.site-header--text-dark .header-nav {
+  @include include-media.media('>=lg') {
+    --brand-secondary-dark: var(--color-black);
+    --main-nav-divider: rgb(0 0 0 / 35%);
+  }
 }
