@@ -18,8 +18,7 @@ use PHPUnit\Framework\Attributes\Group;
  * ("<a href=\"[message:field_item:entity:url]\">") gets mangled by the
  * text format's filters before token replacement ever runs (see
  * mukurtu_notifications_tokens() for the full explanation) - the fixed
- * template uses the safe mukurtu-notification-link token instead (see
- * mukurtu_submissions_update_40011()).
+ * template uses the safe mukurtu-notification-link token instead.
  *
  * Calls Message::getText($langcode, $delta) directly rather than
  * rendering through the entity view builder ('mail_subject'/'mail_body'
@@ -43,7 +42,6 @@ use PHPUnit\Framework\Attributes\Group;
  */
 #[Group('mukurtu_submissions')]
 class SubmissionReceivedNotificationRenderingTest extends MukurtuSubmissionsKernelTestBase {
-
   /**
    * {@inheritdoc}
    */
@@ -158,5 +156,4 @@ class SubmissionReceivedNotificationRenderingTest extends MukurtuSubmissionsKern
     $this->assertStringContainsString('Regression Guard Node', $rendered);
     $this->assertStringNotContainsString('<a', $rendered);
   }
-
 }
