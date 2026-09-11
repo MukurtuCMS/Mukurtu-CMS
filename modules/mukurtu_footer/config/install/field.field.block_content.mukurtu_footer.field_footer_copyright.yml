@@ -9,7 +9,7 @@ field_name: field_footer_copyright
 entity_type: block_content
 bundle: mukurtu_footer
 label: 'Copyright message'
-description: 'Use the token [current-date:html_year] for the current year. Leave empty to hide.'
+description: 'Use the token &#91;current-date:html_year&#93; for the current year. Leave empty to hide.'
 required: false
 translatable: true
 default_value:

@@ -51,3 +51,75 @@ function mukurtu_footer_install() {
 function mukurtu_footer_update_last_removed(): int {
   return 40003;
 }
+
+/**
+ * Add the "Edit footer" dashboard link (Look and feel section).
+ *
+ * Footer content editing previously had no permanent dashboard entry point;
+ * the only path in was the one-time Setup Checklist task, which is hidden
+ * once every task is complete and pointed at a hardcoded block_content ID
+ * that isn't guaranteed to be 1.
+ */
+function mukurtu_footer_update_40004(): void {
+  \Drupal::service('plugin.manager.menu.link')->rebuild();
+}
+
+/**
+ * Clear the footer social link URL field's config-level description.
+ *
+ * Previously the field had no description of its own, so admins only saw the
+ * generic link-field help text (internal path / <front> / <nolink> /
+ * <button>), which doesn't hint that this field wants a social profile URL
+ * (#2159). A config-level description isn't the right fix here though: this
+ * field's "Link text" sub-field is enabled, so core's LinkWidget attaches
+ * any #description to the outer fieldset wrapping the whole widget rather
+ * than to the URL input itself - it would render after "Link text", not
+ * next to "URL". mukurtu_footer_hook_field_widget_single_element_form_alter()
+ * (src/Hook/FormHooks.php) replaces the URL input's description directly
+ * instead, so the config-level description is cleared to avoid dead,
+ * never-shown duplicate text.
+ */
+function mukurtu_footer_update_40005(): void {
+  $field = \Drupal\field\Entity\FieldConfig::loadByName('paragraph', 'footer_social_link', 'field_footer_social_url');
+  if ($field) {
+    $field->setDescription('')->save();
+  }
+}
+
+/**
+ * Escape the token brackets in the copyright field's description.
+ *
+ * Field widget descriptions are always run through token replacement
+ * (\Drupal\Core\Field\WidgetBase::getFilteredDescription()), so the literal
+ * "[current-date:html_year]" in the help text was being evaluated into the
+ * actual current year instead of shown as the token name to type. HTML
+ * entities for the brackets aren't matched by the token scanner but still
+ * render as literal "[" "]" in the browser.
+ */
+function mukurtu_footer_update_40006(): void {
+  $field = \Drupal\field\Entity\FieldConfig::loadByName('block_content', 'mukurtu_footer', 'field_footer_copyright');
+  if ($field) {
+    $field->setDescription('Use the token &#91;current-date:html_year&#93; for the current year. Leave empty to hide.')->save();
+  }
+}
+
+/**
+ * Clear the other footer link fields' config-level descriptions.
+ *
+ * Same reasoning as mukurtu_footer_update_40005(): the guidance now comes
+ * from mukurtu_footer_hook_field_widget_single_element_form_alter()
+ * (src/Hook/FormHooks.php), which replaces the URL input's description
+ * directly for these fields too, so their config-level descriptions are
+ * cleared to avoid dead, never-shown duplicate text (#2159).
+ */
+function mukurtu_footer_update_40007(): void {
+  $other_links = \Drupal\field\Entity\FieldConfig::loadByName('block_content', 'mukurtu_footer', 'field_footer_other_links');
+  if ($other_links) {
+    $other_links->setDescription('')->save();
+  }
+
+  $logo_link = \Drupal\field\Entity\FieldConfig::loadByName('paragraph', 'footer_logo', 'field_footer_logo_link');
+  if ($logo_link) {
+    $logo_link->setDescription('')->save();
+  }
+}
