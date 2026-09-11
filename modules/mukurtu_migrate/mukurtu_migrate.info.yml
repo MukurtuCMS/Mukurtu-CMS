@@ -13,4 +13,4 @@ dependencies:
   - 'migrate_plus:migrate_plus'
   - 'paragraphs:paragraphs'
   - 'search_api:search_api'
-version: 4.0.0
+version: 4.0.1
