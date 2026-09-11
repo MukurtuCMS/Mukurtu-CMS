@@ -18,4 +18,4 @@ dependencies:
   - 'mukurtu_core:mukurtu_core'
   - 'mukurtu_protocol:mukurtu_protocol'
   - 'views_bulk_operations:views_bulk_operations'
-version: 4.x-dev
+version: 4.0.1

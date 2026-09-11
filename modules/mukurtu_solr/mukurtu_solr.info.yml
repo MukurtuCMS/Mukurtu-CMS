@@ -3,7 +3,7 @@ type: module
 description: 'Enables support for search provided by Solr.'
 core_version_requirement: '^9.4 || ^10 || ^11'
 package: 'Mukurtu CMS'
-version: 4.x-dev
+version: 4.0.1
 dependencies:
   - 'drupal:media'
   - 'drupal:menu_link_content'
