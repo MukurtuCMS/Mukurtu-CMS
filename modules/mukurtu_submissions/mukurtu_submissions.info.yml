@@ -19,4 +19,4 @@ dependencies:
   - 'mukurtu_media:mukurtu_media'
   - 'mukurtu_notifications:mukurtu_notifications'
   - 'mukurtu_protocol:mukurtu_protocol'
-version: 4.x-dev
+version: 4.0.1

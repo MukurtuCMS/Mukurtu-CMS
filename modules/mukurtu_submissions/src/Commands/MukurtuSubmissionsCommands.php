@@ -13,7 +13,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * Drush commands for the Mukurtu Submissions module.
  */
 class MukurtuSubmissionsCommands extends DrushCommands {
-
   public function __construct(
     protected SubmissionFormDisplayManager $formDisplayManager,
   ) {
@@ -34,9 +33,8 @@ class MukurtuSubmissionsCommands extends DrushCommands {
    * grouped to mirror the content type's own regular edit form, disabled
    * - for every content type that doesn't already have one. Automates a
    * manual re-run/backfill of the same provisioning that
-   * mukurtu_submissions_install() and mukurtu_submissions_update_40007()
-   * already apply automatically on install/update - see
-   * SubmissionFormDisplayManager::createDefaultForms(). A site builder
+   * mukurtu_submissions_install() already applies automatically on install -
+   * see SubmissionFormDisplayManager::createDefaultForms(). A site builder
    * still reviews and enables each one afterward.
    */
   #[CLI\Command(name: 'mukurtu-submissions:create-default-forms')]
@@ -66,5 +64,4 @@ class MukurtuSubmissionsCommands extends DrushCommands {
       ));
     }
   }
-
 }
