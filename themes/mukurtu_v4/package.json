@@ -1,6 +1,6 @@
 {
   "name": "mukurtu_v4",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "private": true,
   "license": "GPL-3.0-or-later",
   "description": "The base theme for Mukurtu Version 4",
@@ -21,7 +21,7 @@
     "sass": "^1.86.0",
     "stylelint": "^16.16.0",
     "stylelint-config-standard": "^37.0.0",
-    "stylelint-config-standard-scss": "^14.0.0",
+    "stylelint-config-standard-scss": "^17.0.0",
     "stylelint-use-logical-spec": "^5.0.1"
   },
   "dependencies": {

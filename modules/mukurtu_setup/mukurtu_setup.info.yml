@@ -3,7 +3,7 @@ type: module
 description: 'Provides a site setup checklist for administrators and Mukurtu Managers.'
 core_version_requirement: '^10 || ^11'
 package: 'Mukurtu CMS'
-version: 4.0.0
+version: 4.0.1
 dependencies:
   - 'drupal:block'
   - 'drupal:block_content'

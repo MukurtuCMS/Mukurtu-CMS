@@ -228,17 +228,19 @@ class Video extends Media implements VideoInterface, CulturalProtocolControlledI
     $uri = $videoFile->getFileUri();
     $mediaRealPath = $fileSystem->realpath($uri);
 
-    // Compute the thumbnail name.
+    // Compute the thumbnail name. This derives from the uploaded filename, so
+    // it is attacker-controlled: basename() keeps a crafted name from steering
+    // either the ffmpeg destination below or the saved file URI at the end of
+    // this method outside their intended directories.
     $filename = $videoFile->getFilename();
     $videoNameNoExt = substr($filename, 0, strrpos($filename, "."));
-    $thumbnailName = $videoNameNoExt . "_thumbnail.png";
+    $thumbnailName = basename($videoNameNoExt . "_thumbnail.png");
 
-    // Verify that ffmpeg is installed.
+    // Verify that ffmpeg is installed. The command is a fixed string, so there
+    // is nothing to escape.
     $resultCode = -1;
     $output = [];
-    $cmd = "ffmpeg -version";
-    $escapedCmd = escapeshellcmd($cmd);
-    exec($escapedCmd, $output, $resultCode);
+    exec('ffmpeg -version 2>/dev/null', $output, $resultCode);
     if ($resultCode == 127) {
       return NULL;
     }
@@ -248,10 +250,16 @@ class Video extends Media implements VideoInterface, CulturalProtocolControlledI
 
     // Use ffmpeg to extract the first frame of the video as a screenshot,
     // downloading the resulting thumbnail into the /tmp directory.
+    //
+    // Both paths derive from the uploaded filename, so each is passed through
+    // escapeshellarg() and concatenated rather than interpolated into the
+    // command string. escapeshellcmd() is not a substitute here: it leaves
+    // quote characters intact and so cannot prevent argument breakout. This
+    // matches Document.php::generateThumbnailFromFile().
     $resultCode = -1;
     $output = [];
-    $cmd = "ffmpeg -ss 00:00:00 -i '{$mediaRealPath}' -frames:v 1 '{$tempThumbnailDest}'";
-    $escapedCmd = escapeshellcmd($cmd);
+    $cmd = 'ffmpeg -ss 00:00:00 -i ' . escapeshellarg($mediaRealPath)
+      . ' -frames:v 1 ' . escapeshellarg($tempThumbnailDest);
     exec($cmd, $output, $resultCode);
     if ($resultCode == 127) {
       return NULL;
