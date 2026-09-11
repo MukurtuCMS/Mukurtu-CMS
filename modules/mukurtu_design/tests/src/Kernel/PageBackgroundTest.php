@@ -34,8 +34,11 @@ class PageBackgroundTest extends KernelTestBase {
 
   /**
    * Returns the service, with isFrontPage() forced to the given answer.
+   *
+   * Defaults to the front page, since that is the only place a background
+   * applies at all.
    */
-  protected function pageBackground(bool $is_front = FALSE): PageBackground {
+  protected function pageBackground(bool $is_front = TRUE): PageBackground {
     $matcher = $this->createMock(PathMatcherInterface::class);
     $matcher->method('isFrontPage')->willReturn($is_front);
 
@@ -79,23 +82,18 @@ class PageBackgroundTest extends KernelTestBase {
   }
 
   /**
-   * The front page opt-out suppresses the background only on the front page.
+   * Interior pages get no background, however it is configured.
+   *
+   * Behind an interior page the image sits under content laid out for a plain
+   * ground and mostly shows as empty space. The Plateau Peoples' Web Portal,
+   * the reference for this feature, carries no background on its interior
+   * pages either.
    */
-  public function testFrontPageOptOut(): void {
-    $this->setBackgroundImage();
-    $this->config('mukurtu_design.settings')->set('background.show_on_front', FALSE)->save();
-
-    $this->assertSame([], $this->pageBackground(TRUE)->resolve(), 'The front page opts out.');
-    $this->assertNotSame([], $this->pageBackground(FALSE)->resolve(), 'Other pages keep the background.');
-  }
-
-  /**
-   * With the opt-out off, the front page keeps the background.
-   */
-  public function testFrontPageKeepsBackgroundWhenEnabled(): void {
+  public function testInteriorPagesGetNoBackground(): void {
     $this->setBackgroundImage();
 
-    $this->assertNotSame([], $this->pageBackground(TRUE)->resolve());
+    $this->assertNotSame([], $this->pageBackground(TRUE)->resolve(), 'The front page has it.');
+    $this->assertSame([], $this->pageBackground(FALSE)->resolve(), 'Interior pages do not.');
   }
 
   /**
@@ -124,8 +122,8 @@ class PageBackgroundTest extends KernelTestBase {
   /**
    * The result must be cacheable per config and per front-page-ness.
    *
-   * Without the url.path.is_front context the front page opt-out would leak
-   * one page's answer onto the other.
+   * Without the url.path.is_front context the front page's answer would be
+   * cached and served for interior pages, and the other way round.
    */
   public function testCacheability(): void {
     $metadata = $this->pageBackground()->getCacheableMetadata();

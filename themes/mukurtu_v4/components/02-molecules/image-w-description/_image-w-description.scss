@@ -19,6 +19,13 @@
 
     .block-wrapper__second {
       background-color: var(--brand-secondary);
+
+      /* A component that paints its own ground has to own its text colour too.
+       * Without this the text inherits from whatever is behind the block, which
+       * is fine on the plain page but renders white on tan once a page
+       * background is set. No visual change on a site with no background: this
+       * is the colour the text already inherited from body. */
+      color: var(--brand-text-color);
     }
 
     @include include-media.media('>=md') {

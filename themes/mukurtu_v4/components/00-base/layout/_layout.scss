@@ -237,6 +237,43 @@
   color: var(--color-black);
 }
 
+/* Let text take the treatment colour.
+ *
+ * Headings and body copy set their colour explicitly for a white ground, so
+ * they do not inherit and would keep dark text over the image - block titles
+ * measured 1.65:1 before this. `inherit` is self-correcting rather than a flat
+ * override: inside the footer it picks up --footer-text-color, inside a block
+ * that paints its own ground it picks up that block's colour, and only where
+ * text really does sit on the image does it pick up the treatment.
+ *
+ * This only ever applies on the front page, where the background lives. */
+.page--has-background {
+  h1,
+  h2,
+  h3,
+  h4,
+  p,
+  li,
+  dt,
+  dd {
+    color: inherit;
+  }
+}
+
+/* Drop the block separator shadow over the image.
+ *
+ * .layout--onecol .block-wrapper carries a pale grey drop shadow to separate
+ * blocks on a white page. Over a photograph it reads as a glowing bar across
+ * the full width. The image already separates the blocks, so the shadow has no
+ * job here.
+ *
+ * The layout class is in the selector to win on specificity: the rule in
+ * _landing-page.scss is also two classes, and 04-templates is imported after
+ * 00-base, so an equally specific selector here would silently lose. */
+.page--has-background .layout--onecol .block-wrapper {
+  box-shadow: none;
+}
+
 /* Stop the treatment colour at the nav.
  *
  * .header-nav carries its own opaque background - a white bar at desktop, the

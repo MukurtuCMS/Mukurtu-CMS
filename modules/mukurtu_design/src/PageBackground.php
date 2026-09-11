@@ -55,9 +55,11 @@ final class PageBackground {
       return [];
     }
 
-    // A site whose front page already carries a full-width hero block can turn
-    // the page background off there without losing it everywhere else.
-    if ($this->pathMatcher->isFrontPage() && !$config->get('background.show_on_front')) {
+    // Front page only. Behind an interior page the image sits under content
+    // laid out for a plain ground and mostly shows as empty space, which is
+    // also what the Plateau Peoples' Web Portal does - its interior pages
+    // carry no background image at all.
+    if (!$this->pathMatcher->isFrontPage()) {
       return [];
     }
 
@@ -77,8 +79,7 @@ final class PageBackground {
   /**
    * Returns the cacheability of a resolve() result.
    *
-   * The result varies by config and, because of the front page opt-out, by
-   * whether the current request is the front page.
+   * The result varies by config and by whether this request is the front page.
    */
   public function getCacheableMetadata(): CacheableMetadata {
     $metadata = CacheableMetadata::createFromObject(

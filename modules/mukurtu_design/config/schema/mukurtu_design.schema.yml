@@ -35,9 +35,6 @@ mukurtu_design.settings:
           type: integer
           label: 'Background image file ID'
           nullable: true
-        show_on_front:
-          type: boolean
-          label: 'Show the page background on the front page'
         text_treatment:
           type: string
           label: 'Page text treatment'

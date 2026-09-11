@@ -37,7 +37,6 @@ function mukurtu_design_update_40005(): string {
   // and when it is set to NULL, which is the shipped default.
   $defaults = [
     'image' => NULL,
-    'show_on_front' => TRUE,
     'text_treatment' => 'light',
   ];
 

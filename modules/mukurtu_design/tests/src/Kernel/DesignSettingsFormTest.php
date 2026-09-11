@@ -55,7 +55,6 @@ class DesignSettingsFormTest extends KernelTestBase {
     $build = \Drupal::formBuilder()->getForm(MukurtuDesignSettingsForm::class);
 
     $this->assertSame('managed_file', $build['background']['image']['#type']);
-    $this->assertSame('checkbox', $build['background']['show_on_front']['#type']);
     $this->assertSame('radios', $build['background']['text_treatment']['#type']);
     $this->assertSame(
       ['light', 'dark'],
@@ -72,13 +71,11 @@ class DesignSettingsFormTest extends KernelTestBase {
    */
   public function testFormReflectsStoredSettings(): void {
     $this->config('mukurtu_design.settings')
-      ->set('background.show_on_front', FALSE)
       ->set('background.text_treatment', 'dark')
       ->save();
 
     $build = \Drupal::formBuilder()->getForm(MukurtuDesignSettingsForm::class);
 
-    $this->assertFalse((bool) $build['background']['show_on_front']['#default_value']);
     $this->assertSame('dark', $build['background']['text_treatment']['#default_value']);
   }
 

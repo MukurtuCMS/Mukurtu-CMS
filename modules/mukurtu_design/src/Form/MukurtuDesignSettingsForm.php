@@ -114,19 +114,12 @@ class MukurtuDesignSettingsForm extends ConfigFormBase {
     $form['background']['image'] = [
       '#type' => 'managed_file',
       '#title' => $this->t('Background image'),
-      '#description' => $this->t('Optional. Shown behind the whole page. A large image works best, around 2000 pixels wide. Leave empty for a plain background.'),
+      '#description' => $this->t('Optional. Shown behind your home page. A large image works best, around 2000 pixels wide. Leave empty for a plain background.'),
       '#upload_location' => 'public://mukurtu-design/',
       '#upload_validators' => [
         'FileExtension' => ['extensions' => 'png jpg jpeg webp svg'],
       ],
       '#default_value' => ($fid = $config->get('background.image')) ? [$fid] : [],
-    ];
-
-    $form['background']['show_on_front'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Show on the home page'),
-      '#description' => $this->t('Turn this off if your home page already uses a full-width hero image.'),
-      '#default_value' => $config->get('background.show_on_front'),
     ];
 
     $form['background']['text_treatment'] = [
@@ -157,7 +150,6 @@ class MukurtuDesignSettingsForm extends ConfigFormBase {
     $old_fid = $config->get('background.image');
     $new_fid = $values['background']['image'][0] ?? NULL;
     $config->set('background.image', $new_fid ? (int) $new_fid : NULL);
-    $config->set('background.show_on_front', (bool) $values['background']['show_on_front']);
     $config->set('background.text_treatment', $values['background']['text_treatment']);
     $config->save();
 

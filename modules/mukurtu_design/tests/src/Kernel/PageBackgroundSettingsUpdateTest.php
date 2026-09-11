@@ -52,7 +52,7 @@ class PageBackgroundSettingsUpdateTest extends KernelTestBase {
     mukurtu_design_update_40005();
 
     $this->assertSame(
-      ['image' => NULL, 'show_on_front' => TRUE, 'text_treatment' => 'light'],
+      ['image' => NULL, 'text_treatment' => 'light'],
       $this->background()
     );
   }
@@ -80,13 +80,13 @@ class PageBackgroundSettingsUpdateTest extends KernelTestBase {
    */
   public function testDoesNotResetConfiguredBackground(): void {
     $this->config('mukurtu_design.settings')
-      ->set('background', ['image' => 7, 'show_on_front' => FALSE, 'text_treatment' => 'dark'])
+      ->set('background', ['image' => 7, 'text_treatment' => 'dark'])
       ->save();
 
     mukurtu_design_update_40005();
 
     $this->assertSame(
-      ['image' => 7, 'show_on_front' => FALSE, 'text_treatment' => 'dark'],
+      ['image' => 7, 'text_treatment' => 'dark'],
       $this->background()
     );
   }
@@ -102,7 +102,6 @@ class PageBackgroundSettingsUpdateTest extends KernelTestBase {
     $background = $this->background();
     $this->assertSame('dark', $background['text_treatment'], 'The existing choice is kept.');
     $this->assertArrayHasKey('image', $background);
-    $this->assertTrue($background['show_on_front']);
   }
 
   /**
