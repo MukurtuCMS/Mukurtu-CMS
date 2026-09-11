@@ -9,7 +9,10 @@
   &__default {
     &__header {
       display: flex;
-      flex-flow: column wrap;
+      // nowrap: same auto-height column-wrap overflow bug as
+      // .collection__header (issue #1997) - exactly 2 children (image,
+      // text), never a reason to wrap.
+      flex-flow: column nowrap;
       column-gap: var(--v-space-xs);
 
       @include include-media.media('>=md') {
