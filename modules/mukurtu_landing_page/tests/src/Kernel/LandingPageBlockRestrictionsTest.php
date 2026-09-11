@@ -11,7 +11,7 @@ use Drupal\layout_builder\SectionStorageInterface;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests which blocks the landing page display actually offers in Layout Builder.
+ * Tests which blocks the landing page display offers in Layout Builder.
  *
  * Asserting that the shipped YAML contains the right allowlist entries is not
  * enough: Layout Builder Restrictions decides availability from a combination
@@ -26,9 +26,9 @@ class LandingPageBlockRestrictionsTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    *
-   * block_content is deliberately absent. EntityViewModeRestriction only
-   * queries the block_content tables when that module is installed, so leaving
-   * it out keeps this test off the database without changing any of the
+   * The block_content module is deliberately absent. EntityViewModeRestriction
+   * only queries the block_content tables when that module is installed, so
+   * leaving it out keeps this test off the database without changing any of the
    * code paths exercised here.
    */
   protected static $modules = [
@@ -174,7 +174,10 @@ class LandingPageBlockRestrictionsTest extends KernelTestBase {
   public function testHomepageViewsBlocksAreAvailable(): void {
     $definitions = [
       'views_block:mukurtu_browse_by_map-map_block' => ['category' => 'Lists (Views)', 'provider' => 'views'],
-      'views_block:mukurtu_categories-browse_by_category_block' => ['category' => 'Lists (Views)', 'provider' => 'views'],
+      'views_block:mukurtu_categories-browse_by_category_block' => [
+        'category' => 'Lists (Views)',
+        'provider' => 'views',
+      ],
       'views_block:content_recent-block_1' => ['category' => 'Lists (Views)', 'provider' => 'views'],
     ];
 
@@ -187,7 +190,7 @@ class LandingPageBlockRestrictionsTest extends KernelTestBase {
   /**
    * The legacy community view must not be offered alongside the block plugin.
    *
-   * views.view.browse_by_community filters on published status and langcode
+   * The browse_by_community view filters on published status and langcode
    * only. It has no visibility filter, so it lists communities whose sharing
    * setting is "community-only" to everyone - the bug fixed for the block
    * plugin in issue #1005. Offering both also put two identically labelled

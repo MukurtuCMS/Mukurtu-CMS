@@ -28,14 +28,6 @@ class HeroTextColourDefaultUpdateTest extends KernelTestBase {
 
   /**
    * {@inheritdoc}
-   *
-   * The field config is written straight into active storage, without the
-   * block_content bundle and field storage it depends on.
-   */
-  protected $strictConfigSchema = FALSE;
-
-  /**
-   * {@inheritdoc}
    */
   protected function setUp(): void {
     parent::setUp();
@@ -76,7 +68,7 @@ class HeroTextColourDefaultUpdateTest extends KernelTestBase {
   /**
    * A site that picked its own default keeps it.
    */
-  public function testLeavesACustomisedDefaultAlone(): void {
+  public function testLeavesCustomisedDefaultAlone(): void {
     $this->writeField([]);
 
     mukurtu_update_40030();

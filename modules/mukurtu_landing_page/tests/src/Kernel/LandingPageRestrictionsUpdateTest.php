@@ -46,15 +46,6 @@ class LandingPageRestrictionsUpdateTest extends KernelTestBase {
   ];
 
   /**
-   * {@inheritdoc}
-   *
-   * The display is written straight into active storage rather than installed
-   * as an entity, so its full dependency tail (pathauto, language, the
-   * block_content bundles) is not present to validate against.
-   */
-  protected $strictConfigSchema = FALSE;
-
-  /**
    * The shipped display config, used as the starting shape for each scenario.
    */
   protected array $shipped;
@@ -113,7 +104,7 @@ class LandingPageRestrictionsUpdateTest extends KernelTestBase {
   /**
    * On a 4.0.1 site the hook grants both sets of blocks.
    */
-  public function testUpdatesAPreFixSite(): void {
+  public function testUpdatesPreFixSite(): void {
     $this->writePreFixDisplay();
 
     $before = $this->allowlists();
@@ -174,7 +165,7 @@ class LandingPageRestrictionsUpdateTest extends KernelTestBase {
    * Writing the key here would restrict a site that currently offers every
    * inline block down to the three the hook knows about.
    */
-  public function testDoesNotRestrictASiteWithNoInlineAllowlist(): void {
+  public function testDoesNotRestrictSiteWithNoInlineAllowlist(): void {
     $this->writeDisplay(static function (array &$restrictions): void {
       unset($restrictions['entity_view_mode_restriction']['allowlisted_blocks']['Inline blocks']);
       unset($restrictions['entity_view_mode_restriction']['allowlisted_blocks']['Mukurtu']);
