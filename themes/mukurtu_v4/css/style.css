@@ -2101,6 +2101,76 @@ label.form-required::after,
   min-block-size: 600px;
 }
 
+/* Text-only hero: a full-width block with no image.
+ *
+ * field_image is optional, so an author can build a text-only hero by leaving
+ * it empty - which is how a site gets a plain homepage title (#1035). Two
+ * things have to change when there is no image.
+ *
+ * First, the 600px min-block-size exists to give text room over a full-bleed
+ * photograph. With no image it reserves roughly 640px for about 150px of
+ * content, so it is dropped.
+ *
+ * Second, field_text_color is meaningless here: "Light" is white text on the
+ * white page. So the ground comes from field_hero_background instead, and the
+ * text colour is set alongside it rather than chosen separately. Every pairing
+ * below was measured against all three shipped palettes and clears 4.5:1;
+ * the worst case is Soft on Blue and gold at 4.62:1. A custom palette is six
+ * author-chosen colours, so it cannot carry the same guarantee - see #2179.
+ */
+.block--image-with-description--full.block--image-with-description--no-image {
+  /* No image element to lay out. */
+  /* The with-image styling sets `* { color }` on every descendant, and a rule
+   * that matches an element directly always beats an inherited colour, however
+   * specific the inherited one is. So each preset has to match descendants the
+   * same way rather than setting colour on a wrapper; the extra classes are
+   * what win. Without this the body copy kept the brand red and the Brand
+   * preset rendered red on red at 1:1. */
+  /* Plain: the page's own ground. Body copy takes the normal reading colour
+   * instead of inheriting the heading's brand red. */
+}
+.block--image-with-description--full.block--image-with-description--no-image .block-wrapper__second {
+  /* The 600px floor exists to give text room over a full-bleed photograph.
+   * With no image it reserves roughly 640px for about 150px of content. */
+  min-block-size: 0;
+  /* The with-image layout is a wrapping row, which relies on the image's
+   * height to push the heading and body onto separate lines. Without an
+   * image they sit side by side, so state the stacking explicitly. */
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -ms-flex-wrap: nowrap;
+      flex-wrap: nowrap;
+  /* Otherwise the body and link stay left-aligned under a centred title. */
+  text-align: center;
+}
+.block--image-with-description--full.block--image-with-description--no-image .block-wrapper__first {
+  display: none;
+}
+.block--image-with-description--full.block--image-with-description--no-image.hero-ground-none * {
+  color: var(--brand-text-color);
+  text-shadow: none;
+}
+.block--image-with-description--full.block--image-with-description--no-image.hero-ground-none h1,
+.block--image-with-description--full.block--image-with-description--no-image.hero-ground-none h2 {
+  color: var(--brand-primary-dark);
+}
+.block--image-with-description--full.block--image-with-description--no-image.hero-ground-brand {
+  background-color: var(--brand-primary-dark);
+}
+.block--image-with-description--full.block--image-with-description--no-image.hero-ground-brand * {
+  color: var(--color-white);
+  text-shadow: none;
+}
+.block--image-with-description--full.block--image-with-description--no-image.hero-ground-soft {
+  background-color: var(--brand-secondary);
+}
+.block--image-with-description--full.block--image-with-description--no-image.hero-ground-soft * {
+  color: var(--brand-text-color);
+  text-shadow: none;
+}
+
 .language-switcher__summary {
   cursor: pointer;
   font-size: 1.5em;
