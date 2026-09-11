@@ -20,8 +20,7 @@ use PHPUnit\Framework\Attributes\Group;
  * MukurtuUserListBuilder::load() (the underlying entity-type list builder,
  * in case anything else ever uses it), and if it's ever surfaced another
  * way its status reads as "blocked" rather than "pending" (see
- * mukurtu_submissions_create_service_account() and
- * mukurtu_submissions_update_40009()).
+ * mukurtu_submissions_create_service_account()).
  *
  * field_pending is mukurtu_core's own approval-workflow field (DB default
  * 1) - this test defines an equivalent field directly on the user entity
@@ -32,7 +31,6 @@ use PHPUnit\Framework\Attributes\Group;
  */
 #[Group('mukurtu_submissions')]
 class ServiceAccountVisibilityTest extends MukurtuSubmissionsKernelTestBase {
-
   /**
    * {@inheritdoc}
    */
@@ -43,9 +41,7 @@ class ServiceAccountVisibilityTest extends MukurtuSubmissionsKernelTestBase {
   }
 
   /**
-   * Only called by tests that need field_pending to actually exist -
-   * testUpdateHookNoOpWhenFieldMissing deliberately skips this to simulate
-   * a site without mukurtu_core's field.
+   * Creates the field_pending field for tests that need it to exist.
    */
   protected function installPendingField(): void {
     FieldStorageConfig::create([
@@ -101,8 +97,6 @@ class ServiceAccountVisibilityTest extends MukurtuSubmissionsKernelTestBase {
     $this->assertArrayHasKey($ordinary_blocked_user->id(), $entities);
   }
 
-  /**
-   */
   #[DataProvider('providePeopleViewIds')]
   public function testViewsQueryAlterExcludesServiceAccount(string $view_id): void {
     $service_account = User::create(['name' => 'Submission Forms', 'status' => 0]);
@@ -160,35 +154,4 @@ class ServiceAccountVisibilityTest extends MukurtuSubmissionsKernelTestBase {
     $account = mukurtu_submissions_create_service_account();
     $this->assertEquals(0, (int) $account->get('field_pending')->value);
   }
-
-  public function testUpdateHookClearsExistingPendingServiceAccount(): void {
-    $this->installPendingField();
-    $account = User::create(['name' => 'Submission Forms', 'status' => 0, 'field_pending' => 1]);
-    $account->save();
-    \Drupal::configFactory()->getEditable('mukurtu_submissions.settings')
-      ->set('service_account_uid', (int) $account->id())
-      ->save();
-
-    mukurtu_submissions_update_40009();
-
-    $account = User::load($account->id());
-    $this->assertEquals(0, (int) $account->get('field_pending')->value);
-  }
-
-  public function testUpdateHookNoOpWithoutServiceAccountConfigured(): void {
-    mukurtu_submissions_update_40009();
-    $this->assertTrue(TRUE);
-  }
-
-  public function testUpdateHookNoOpWhenFieldMissing(): void {
-    $account = User::create(['name' => 'Submission Forms', 'status' => 0]);
-    $account->save();
-    \Drupal::configFactory()->getEditable('mukurtu_submissions.settings')
-      ->set('service_account_uid', (int) $account->id())
-      ->save();
-
-    mukurtu_submissions_update_40009();
-    $this->assertTrue(TRUE);
-  }
-
 }

@@ -32,4 +32,4 @@ dependencies:
   - 'search_api:search_api'
   - 'search_api:search_api_db'
   - 'search_api_glossary:search_api_glossary'
-version: 4.0.0
+version: 4.0.1
