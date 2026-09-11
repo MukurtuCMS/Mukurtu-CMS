@@ -4,3 +4,4 @@ vendor/
 web/
 **/.DS_Store
 docs/accessibility/acr/mukurtu-acr.markdown
+.claude/
