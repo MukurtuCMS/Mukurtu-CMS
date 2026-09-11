@@ -21,10 +21,18 @@ use Symfony\Component\Yaml\Yaml;
  *
  * Six kernel tests each pinned one corner of this by running an update hook and
  * asserting the mapping it produced. Between them they never stated the actual
- * contract, which turns out to hold almost everywhere: of the 39 bundles present
- * in both an exporter and an import strategy, 38 have every export header
- * matched by an import source. user__user is the single exception, and its
- * unmatched headers are enumerated below rather than left implicit.
+ * contract, which now holds for every one of the 39 bundles present in both an
+ * exporter and an import strategy.
+ *
+ * It did not when this test was written. The 16 taxonomy term strategies could
+ * not map the UUID column the external exporters emit, so a taxonomy export
+ * from one site created duplicate terms on another instead of matching them.
+ * Those were enumerated here as a known gap, deliberately shaped so that
+ * closing the gap forced the list to shrink. #2156 closed it and the list is
+ * gone, which is what that mechanism was for.
+ *
+ * The one remaining exemption is user__user, whose export-only columns are
+ * read-only or system-managed properties an import has no business setting.
  *
  * A pure filesystem and YAML check, so no Drupal bootstrap is needed.
  */
@@ -47,44 +55,6 @@ class ShippedExportImportContractTest extends UnitTestCase {
     'Receive Email Notifications',
     'Profile Picture File',
     'Profile Picture Alt Text',
-  ];
-
-  /**
-   * A known gap, listed so it is visible rather than silently tolerated.
-   *
-   * The external exporters emit a UUID column for 45 bundles, because UUID is
-   * the identifier that survives moving content between sites, which is what
-   * those exporters are for. The local exporters emit it for user__user only.
-   *
-   * Every import strategy accepts a UUID source except the 16 taxonomy term
-   * ones. So an external export of taxonomy terms produces a UUID column that
-   * cannot be mapped on import, which is precisely the round trip external
-   * export exists to support.
-   *
-   * This is a pre-existing defect, not a deliberate exemption, tracked in
-   * issue #2156. It is enumerated here so the rest of the contract can be
-   * enforced strictly, and so the list shrinks visibly when the gap is closed.
-   * Do not add entries to this list to make a new failure go away.
-   *
-   * @see https://github.com/MukurtuCMS/Mukurtu-CMS/issues/2156
-   */
-  private const KNOWN_UNMAPPABLE = [
-    'taxonomy_term__category' => ['UUID'],
-    'taxonomy_term__community_type' => ['UUID'],
-    'taxonomy_term__contributor' => ['UUID'],
-    'taxonomy_term__creator' => ['UUID'],
-    'taxonomy_term__format' => ['UUID'],
-    'taxonomy_term__interpersonal_relationship' => ['UUID'],
-    'taxonomy_term__keywords' => ['UUID'],
-    'taxonomy_term__language' => ['UUID'],
-    'taxonomy_term__location' => ['UUID'],
-    'taxonomy_term__media_tag' => ['UUID'],
-    'taxonomy_term__people' => ['UUID'],
-    'taxonomy_term__place_type' => ['UUID'],
-    'taxonomy_term__publisher' => ['UUID'],
-    'taxonomy_term__subject' => ['UUID'],
-    'taxonomy_term__type' => ['UUID'],
-    'taxonomy_term__word_type' => ['UUID'],
   ];
 
   /**
@@ -165,7 +135,6 @@ class ShippedExportImportContractTest extends UnitTestCase {
 
       $sources = array_column($strategies[$bundleKey]['mapping'], 'source');
       $allowed = $bundleKey === 'user__user' ? self::USER_EXPORT_ONLY_HEADERS : [];
-      $allowed = array_merge($allowed, self::KNOWN_UNMAPPABLE[$bundleKey] ?? []);
 
       foreach (array_unique($headers) as $header) {
         if (in_array($header, $allowed, TRUE)) {
@@ -180,30 +149,6 @@ class ShippedExportImportContractTest extends UnitTestCase {
     }
 
     $this->assertGreaterThan(30, $compared, "Only $compared bundles were compared; the exporter and strategy keys have stopped lining up.");
-  }
-
-  /**
-   * The known-gap list still describes reality.
-   *
-   * An exception list nobody revisits becomes permission. This fails if an
-   * entry is no longer unmappable, so closing the taxonomy UUID gap forces the
-   * list to shrink instead of quietly outliving the bug.
-   */
-  public function testTheKnownGapListIsStillAccurate(): void {
-    $strategies = self::strategies();
-
-    foreach (self::KNOWN_UNMAPPABLE as $bundleKey => $headers) {
-      $this->assertArrayHasKey($bundleKey, $strategies, "$bundleKey no longer has an import strategy, so its entry in KNOWN_UNMAPPABLE is stale.");
-      $sources = array_column($strategies[$bundleKey]['mapping'], 'source');
-
-      foreach ($headers as $header) {
-        $this->assertNotContains(
-          $header,
-          $sources,
-          "$bundleKey can now import '$header'. Remove it from KNOWN_UNMAPPABLE so the contract is enforced for it."
-        );
-      }
-    }
   }
 
   /**

@@ -1645,3 +1645,52 @@ function mukurtu_core_get_manager_role_uids(): array {
 
   return $uids;
 }
+
+/**
+ * Implements hook_entity_base_field_info_alter().
+ *
+ * Makes a user's email address optional (#2163).
+ *
+ * Core's UserMailRequired constraint requires the address unless the account
+ * already has none and the editor holds 'administer users'. That is why
+ * /admin/people/create lets you omit an address while the edit form refuses to
+ * let you remove one. Mukurtu supports community members who have no email, so
+ * the constraint is dropped and the two forms behave the same.
+ *
+ * This has to be done at the field level as well as on the form.
+ * FormHooks::formUserFormAlter() clears #required so the form stops asking,
+ * but the constraint runs at validation time, so on its own the form change
+ * would only move the failure from "this field is required" to a validation
+ * error on save.
+ *
+ * Note what is deliberately left alone: UserMailUnique still applies, so two
+ * accounts cannot share an address, and an address that is given still has to
+ * be a valid one.
+ */
+function mukurtu_core_entity_base_field_info_alter(&$fields, EntityTypeInterface $entity_type) {
+  if ($entity_type->id() !== 'user' || !isset($fields['mail'])) {
+    return;
+  }
+
+  $constraints = $fields['mail']->getConstraints();
+  unset($constraints['UserMailRequired']);
+  $fields['mail']->setConstraints($constraints);
+}
+
+/**
+ * Submit callback warning that an account has been left without an email.
+ *
+ * Registered by FormHooks::formUserFormAlter(). Deliberately a warning rather
+ * than a validation error: an account with no address is a supported state,
+ * but it is one with consequences the person saving the form should not have
+ * to already know.
+ *
+ * @see \Drupal\mukurtu_core\Hook\FormHooks::formUserFormAlter()
+ */
+function mukurtu_core_warn_on_missing_email(array $form, FormStateInterface $form_state): void {
+  if (trim((string) $form_state->getValue('mail')) !== '') {
+    return;
+  }
+
+  \Drupal::messenger()->addWarning(t('This account has no email address. It will not receive notifications, and it cannot be used to reset the password. Add an address if either is needed.'));
+}
