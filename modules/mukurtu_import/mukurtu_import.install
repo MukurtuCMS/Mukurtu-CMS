@@ -153,3 +153,83 @@ function mukurtu_import_schema(): array {
 function mukurtu_import_update_last_removed(): int {
   return 40046;
 }
+
+/**
+ * Let taxonomy imports map the UUID column that exports produce (#2156).
+ */
+function mukurtu_import_update_40201(): ?string {
+  // Keep the docblock above to one line: Drupal renders it verbatim as this
+  // update's description on update.php and in `drush updatedb:status`.
+  //
+  // The external CSV exporters emit a UUID column for 45 bundles, because UUID
+  // is the identifier that survives moving content between sites, which is
+  // what those exporters are for. Every import strategy accepted a UUID source
+  // except the 16 taxonomy term ones, so a taxonomy export taken from one site
+  // could not be mapped back in on another: terms were matched by name or
+  // created fresh instead of being recognised as the same term, and
+  // vocabularies silently diverged. Both the export and the import reported
+  // success.
+  //
+  // 4.0.2 ships the mapping in config/install, which fixes new sites. This
+  // adds it to the strategies an existing site already has.
+  //
+  // Only the shipped strategies are touched, by id. Discovering every
+  // taxonomy strategy on the site would also reach ones a site built itself,
+  // and editing config somebody else authored is a bigger liberty than fixing
+  // our own. A site with its own taxonomy strategy can add the row in the UI.
+  $ids = [
+    'taxonomy_category_all_fields',
+    'taxonomy_community_type_all_fields',
+    'taxonomy_contributor_all_fields',
+    'taxonomy_creator_all_fields',
+    'taxonomy_format_all_fields',
+    'taxonomy_interpersonal_relationship_all_fields',
+    'taxonomy_keywords_all_fields',
+    'taxonomy_language_all_fields',
+    'taxonomy_location_all_fields',
+    'taxonomy_media_tag_all_fields',
+    'taxonomy_people_all_fields',
+    'taxonomy_place_type_all_fields',
+    'taxonomy_publisher_all_fields',
+    'taxonomy_subject_all_fields',
+    'taxonomy_type_all_fields',
+    'taxonomy_word_type_all_fields',
+  ];
+
+  $storage = \Drupal::entityTypeManager()->getStorage('mukurtu_import_strategy');
+  $updated = [];
+
+  foreach ($ids as $id) {
+    /** @var \Drupal\mukurtu_import\Entity\MukurtuImportStrategy|null $strategy */
+    $strategy = $storage->load($id);
+    if (!$strategy) {
+      // The vocabulary's strategy was deleted, or never existed on this site.
+      continue;
+    }
+
+    $mapping = $strategy->getMapping() ?? [];
+
+    // Leave a site that already has a UUID row alone, whether it came from a
+    // re-import of the shipped config or was added by hand. Matching on the
+    // source string rather than the target, because the source is what the
+    // exporter writes as the column header and so is what has to line up.
+    foreach ($mapping as $row) {
+      if (($row['source'] ?? NULL) === 'UUID') {
+        continue 2;
+      }
+    }
+
+    $mapping[] = ['source' => 'UUID', 'target' => 'uuid'];
+    $strategy->setMapping($mapping);
+    $strategy->save();
+    $updated[] = $id;
+  }
+
+  if (empty($updated)) {
+    return NULL;
+  }
+
+  return (string) t('Added the UUID column to @count taxonomy import template(s), so a taxonomy export from another Mukurtu site can now be imported without creating duplicate terms.', [
+    '@count' => count($updated),
+  ]);
+}
