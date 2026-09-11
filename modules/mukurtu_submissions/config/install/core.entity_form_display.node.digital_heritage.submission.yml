@@ -64,10 +64,11 @@ content:
         map_position:
           force: false
           center:
-            lat: 0.0
-            lon: 0.0
+            lat: '20'
+            lon: '10'
           zoomControlPosition: topleft
           zoom: 2
+          singlePointZoom: '12'
           minZoom: 1
           maxZoom: 18
           zoomFiner: 0
@@ -81,7 +82,7 @@ content:
         drawPolyline: true
         drawRectangle: true
         drawPolygon: true
-        drawCircle: false
+        drawCircle: true
         drawText: false
         editMode: true
         dragMode: true

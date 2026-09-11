@@ -26,7 +26,6 @@ use PHPUnit\Framework\Attributes\Group;
  */
 #[Group('mukurtu_protocol')]
 class MukurtuMediaAccessTest extends KernelTestBase {
-
   /**
    * {@inheritdoc}
    */
@@ -189,8 +188,8 @@ class MukurtuMediaAccessTest extends KernelTestBase {
   }
 
   public function testNewlyGrantedProtocolRoleIsAllowed(): void {
-    // Represents one of the five roles migrated by
-    // mukurtu_protocol_update_40041() to hold 'view media' directly.
+    // Represents one of the protocol roles that ship holding 'view media'
+    // directly. ShippedRolePermissionsTest asserts which ones do and do not.
     $this->createOgRole('protocol-protocol-contributor', 'Contributor')->grantPermission('view media')->save();
     $user = $this->createNamedUser('contributor');
     $this->addProtocolMember($user, 'protocol-protocol-contributor');
@@ -237,5 +236,4 @@ class MukurtuMediaAccessTest extends KernelTestBase {
     $result = $this->accessCheck->hasMukurtuPermissions($user, self::MEDIA_PERMISSIONS, 'OR');
     $this->assertFalse($result->isAllowed(), 'a community-level view media grant does not satisfy the protocol-scoped check');
   }
-
 }
