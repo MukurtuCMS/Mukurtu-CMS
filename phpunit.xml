@@ -56,12 +56,15 @@
   <testsuites>
     <testsuite name="kernel">
       <directory>web/profiles/mukurtu/modules/**/tests/src/Kernel</directory>
+      <directory>web/profiles/mukurtu/tests/src/Kernel</directory>
     </testsuite>
     <testsuite name="unit">
       <directory>web/profiles/mukurtu/modules/**/tests/src/Unit</directory>
+      <directory>web/profiles/mukurtu/tests/src/Unit</directory>
     </testsuite>
     <testsuite name="functional">
       <directory>web/profiles/mukurtu/modules/**/tests/src/Functional</directory>
+      <directory>web/profiles/mukurtu/tests/src/Functional</directory>
     </testsuite>
   </testsuites>
   <!-- Settings for coverage reports. -->
