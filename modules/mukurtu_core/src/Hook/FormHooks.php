@@ -1544,13 +1544,11 @@ class FormHooks
      * condition plugins would need the same treatment if they're ever
      * added to this form and hit the same unsatisfiable-context issue.
      *
-     * Unconditional removal is safe here (not just for new/unconfigured
-     * containers): mukurtu_core_update_40107() strips any og_group_type
-     * condition that was already saved in an existing container's config
-     * before this fix shipped, so no container can retain one going
-     * forward.
+     * Unconditional removal is safe here, not just for new or unconfigured
+     * containers: a 4.0.0 update hook stripped any og_group_type condition
+     * already saved in an existing container's config before this fix
+     * shipped, so no container can retain one going forward.
      *
-     * @see mukurtu_core_update_40107()
      */
     #[Hook("form_google_tag_container_form_alter")]
     public function formGoogleTagContainerFormAlter(
@@ -1558,5 +1556,24 @@ class FormHooks
         FormStateInterface $form_state,
     ): void {
         unset($form["conditions"]["og_group_type"]);
+    }
+
+    /**
+     * Implements hook_form_FORM_ID_alter() for 'system_cron_settings'.
+     *
+     * Pushes the "To run cron from outside the site" URL down below the
+     * Cron settings fieldset and Save configuration button. It's an
+     * advanced/rarely-needed detail (most sites use Automated Cron or a
+     * hosting-managed cron job instead), so it doesn't need to be the first
+     * thing an admin sees on this page.
+     */
+    #[Hook("form_system_cron_settings_alter")]
+    public function formSystemCronSettingsAlter(
+        array &$form,
+        FormStateInterface $form_state,
+    ): void {
+        if (isset($form["cron_url"])) {
+            $form["cron_url"]["#weight"] = 100;
+        }
     }
 }
