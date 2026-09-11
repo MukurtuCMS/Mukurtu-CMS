@@ -28,7 +28,6 @@ dependencies:
     - contact
     - content_moderation
     - contextual
-    - devel
     - embed
     - entity_reference_revisions
     - facets

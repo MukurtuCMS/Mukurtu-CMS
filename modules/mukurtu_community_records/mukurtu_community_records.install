@@ -11,8 +11,8 @@
  * Adds the is_community_record field and mukurtu_community_record_flag processor
  * to the default content index. mukurtu_browse installs before this module,
  * so these items cannot be declared in mukurtu_browse's config/install; they
- * are added here instead so fresh installs get the same state as sites that
- * ran mukurtu_browse_update_40009().
+ * are added here instead, so a fresh install ends up in the same state the
+ * 4.0.0 update hooks produced on existing sites.
  *
  * Note: during a full profile install, the search index is not yet created
  * when this hook fires (the index has cross-module config dependencies that
