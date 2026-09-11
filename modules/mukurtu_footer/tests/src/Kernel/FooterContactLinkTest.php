@@ -17,11 +17,9 @@ use PHPUnit\Framework\Attributes\Group;
  * menu is disabled too.
  *
  * @see mukurtu_footer_install()
- * @see mukurtu_footer_update_40003()
  */
 #[Group('mukurtu_footer')]
 class FooterContactLinkTest extends KernelTestBase {
-
   /**
    * {@inheritdoc}
    */
@@ -84,21 +82,6 @@ class FooterContactLinkTest extends KernelTestBase {
   }
 
   /**
-   * Creates a footer with the given other links.
-   */
-  protected function createFooter(array $other_links): BlockContent {
-    $footer = BlockContent::create([
-      'type' => 'mukurtu_footer',
-      'info' => 'Mukurtu Footer',
-      'status' => TRUE,
-      'field_footer_other_links' => $other_links,
-    ]);
-    $footer->save();
-
-    return $footer;
-  }
-
-  /**
    * A fresh install gets the Contact link.
    */
   public function testInstallAddsContactLink(): void {
@@ -116,61 +99,4 @@ class FooterContactLinkTest extends KernelTestBase {
     $item = $this->loadFooter()->get('field_footer_other_links')->first();
     $this->assertSame('/contact', $item->getUrl()->toString());
   }
-
-  /**
-   * The update hook adds the link when Other links is empty.
-   */
-  public function testUpdateAddsLinkWhenOtherLinksEmpty(): void {
-    $this->createFooter([]);
-    $this->assertSame([], $this->otherLinks());
-
-    mukurtu_footer_update_40003();
-
-    $this->assertSame(['internal:/contact' => 'Contact'], $this->otherLinks());
-  }
-
-  /**
-   * A curated footer is left completely alone.
-   */
-  public function testUpdateLeavesCuratedLinksUntouched(): void {
-    $curated = [
-      ['uri' => 'https://example.com/about', 'title' => 'About us'],
-      ['uri' => 'internal:/privacy', 'title' => 'Privacy'],
-    ];
-    $this->createFooter($curated);
-
-    mukurtu_footer_update_40003();
-
-    $this->assertSame(
-      [
-        'https://example.com/about' => 'About us',
-        'internal:/privacy' => 'Privacy',
-      ],
-      $this->otherLinks()
-    );
-  }
-
-  /**
-   * The update hook is idempotent.
-   */
-  public function testUpdateIsIdempotent(): void {
-    $this->createFooter([]);
-
-    mukurtu_footer_update_40003();
-    mukurtu_footer_update_40003();
-
-    $this->assertSame(['internal:/contact' => 'Contact'], $this->otherLinks());
-  }
-
-  /**
-   * The update hook is a no-op when there is no footer entity.
-   */
-  public function testUpdateIsNoOpWithoutFooter(): void {
-    $this->assertNull($this->loadFooter());
-
-    mukurtu_footer_update_40003();
-
-    $this->assertNull($this->loadFooter());
-  }
-
 }

@@ -16,7 +16,6 @@ use PHPUnit\Framework\Attributes\Group;
  */
 #[Group('mukurtu_submissions')]
 class ReviewerPermissionSyncTest extends MukurtuSubmissionsKernelTestBase {
-
   protected function createReviewerRole(): Role {
     $role = Role::create(['id' => 'reviewer', 'label' => 'Reviewer']);
     $role->grantPermission('review mukurtu submissions');
@@ -76,26 +75,6 @@ class ReviewerPermissionSyncTest extends MukurtuSubmissionsKernelTestBase {
     $this->assertTrue($role->hasPermission('delete any ' . static::TEST_BUNDLE . ' content'));
   }
 
-  public function testUpdateHookBackfillsExistingEntitiesWithoutDoubleGranting(): void {
-    $this->createReviewerRole();
-
-    SubmissionSettings::create([
-      'id' => static::TEST_BUNDLE,
-      'label' => 'Test settings',
-      'target_entity_type_id' => 'node',
-      'target_bundle' => static::TEST_BUNDLE,
-      'status' => TRUE,
-    ])->save();
-
-    $this->container->get('module_handler')->loadInclude('mukurtu_submissions', 'install');
-    // Calling it twice must be a safe no-op the second time, not an error
-    // or a duplicate grant.
-    mukurtu_submissions_update_40003();
-    mukurtu_submissions_update_40003();
-
-    $role = Role::load('reviewer');
-    $permissions = $role->getPermissions();
-    $this->assertCount(1, array_filter($permissions, fn ($p) => $p === 'edit any ' . static::TEST_BUNDLE . ' content'));
-  }
+  
 
 }

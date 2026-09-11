@@ -28,11 +28,9 @@
 # applied to config.installer in
 # patches/module-installer-stale-config-installer-proxy.patch.
 #
-# Upstream: this fix should be filed against Drupal core at
-# https://www.drupal.org/project/drupal/issues - search for
-# "ModuleInstaller stale module_handler modules_installed synthetic service
-# kernel". Once a core issue is filed, replace this comment with the issue
-# URL so the patch can be removed when the fix lands in a Drupal release.
+# Upstream: filed against Drupal core at
+# https://www.drupal.org/project/drupal/issues/3621889
+# This patch can be removed once that issue's fix lands in a Drupal release.
 #
 # Reproducer: enable a module that both (a) triggers a container rebuild
 # from its own or a co-installed module's hook_install(), and (b) implements

@@ -52,15 +52,17 @@ function mukurtu_bot_protection_install($is_syncing) {
 }
 
 /**
- * Raise the facet crawler-block limit from 2 to 4 (#1761).
+ * Implements hook_update_last_removed().
  *
- * At 2, a legitimate visitor narrowing a browse by 3+ facets (format +
- * category + community, say) was getting blocked. Only touches sites still
- * on the shipped default of 2.
+ * Every mukurtu_bot_protection update hook was removed in 4.0.1. 40001 is the
+ * highest number 4.0.0 shipped, so a fresh install is seeded there and a site
+ * that already ran the 4.0.0 updates has nothing left to do.
+ *
+ * Sites below 4.0.0 must update to 4.0.0 first. Core reports that as an error
+ * during the update, and mukurtu_core_update_requirements() adds a message
+ * naming 4.0.0 specifically. Note that neither actually halts `drush updb -y`,
+ * which prompts and proceeds; see docs/update-hooks.md.
  */
-function mukurtu_bot_protection_update_40001(): void {
-  $config = \Drupal::configFactory()->getEditable('facet_bot_blocker.settings');
-  if (!$config->isNew() && (int) $config->get('facets_bot_blocker_limit') === 2) {
-    $config->set('facets_bot_blocker_limit', 4)->save();
-  }
+function mukurtu_bot_protection_update_last_removed(): int {
+  return 40001;
 }

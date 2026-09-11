@@ -33,7 +33,6 @@ use Symfony\Component\Yaml\Yaml;
  */
 #[Group('mukurtu_search')]
 class BrowseAutoIndexKeyBudgetTest extends ProtocolAwareEntityTestBase {
-
   /**
    * The hard MySQL/MariaDB limit on indexes per table.
    */
@@ -193,61 +192,6 @@ class BrowseAutoIndexKeyBudgetTest extends ProtocolAwareEntityTestBase {
     $this->assertNotNull($index->getField('all_taxonomy_term_uuids'));
   }
 
-  /**
-   * Update hook 40007 strips stale per-field variants and reindexes.
-   */
-  public function testUpdate40007ConvergesExistingSite(): void {
-    require_once \Drupal::service('extension.list.module')->getPath('mukurtu_search') . '/mukurtu_search.install';
-
-    FieldStorageConfig::create([
-      'field_name' => 'field_place_type',
-      'entity_type' => 'node',
-      'type' => 'entity_reference',
-      'settings' => ['target_type' => 'taxonomy_term'],
-    ])->save();
-    FieldConfig::create([
-      'field_name' => 'field_place_type',
-      'entity_type' => 'node',
-      'bundle' => 'protocol_aware_content',
-      'label' => 'Place type',
-    ])->save();
-
-    // Seed the pre-fix state: per-field variants on the index and referenced
-    // by a text processor's field list.
-    $index = $this->reloadIndex();
-    foreach ([
-      'node__field_place_type__uuid' => ['text', 'field_place_type:entity:uuid'],
-      'node__field_place_type__name__text' => ['text', 'field_place_type:entity:name'],
-    ] as $id => [$type, $path]) {
-      $field = new Field($index, $id);
-      $field->setType($type);
-      $field->setDatasourceId('entity:node');
-      $field->setPropertyPath($path);
-      $field->setLabel($id);
-      $index->addField($field);
-    }
-    $processors = $index->getProcessors();
-    $tokenizer = $processors['tokenizer']->getConfiguration();
-    $tokenizer['fields'][] = 'node__field_place_type__name__text';
-    $processors['tokenizer']->setConfiguration($tokenizer);
-    $index->setProcessors($processors);
-    $index->save();
-
-    mukurtu_search_update_40007();
-
-    $index = $this->reloadIndex();
-    $field_ids = array_keys($index->getFields());
-    $this->assertNotContains('node__field_place_type__uuid', $field_ids);
-    $this->assertNotContains('node__field_place_type__name__text', $field_ids);
-    $this->assertLessThan(self::MAX_KEYS, count($field_ids));
-
-    $tokenizer_fields = $index->getProcessor('tokenizer')->getConfiguration()['fields'];
-    $this->assertNotContains('node__field_place_type__name__text', $tokenizer_fields, 'Stale field scrubbed from processor list.');
-    $this->assertContains('all_taxonomy_term_names', $tokenizer_fields, 'Aggregate field added to processor list.');
-
-    // Idempotent.
-    mukurtu_search_update_40007();
-    $this->assertLessThan(self::MAX_KEYS, count($this->reloadIndex()->getFields()));
-  }
+  
 
 }
