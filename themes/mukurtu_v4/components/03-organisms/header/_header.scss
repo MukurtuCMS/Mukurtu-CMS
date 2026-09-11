@@ -67,22 +67,41 @@ header {
   padding-block: var(--v-space-xs);
 }
 
+/* Scrim opacities are measured, not guessed. Against a full white-to-black
+ * gradient (the worst case any photograph can present) these give 5.74:1 for
+ * light and 7.37:1 for dark on 18-20px text, both clear of the 4.5:1 that size
+ * requires. Light has little room to spare: below about 54% the white text
+ * drops under 4.5:1 over a white region.
+ *
+ * Only `color` is set, never the shared palette tokens. The nav inside the
+ * header (.header-nav) is an opaque white bar at desktop and the slide-out
+ * drawer on mobile, and its links read --color-text-neutral-loud; redefining
+ * that token here painted white text onto that white bar and made the menu
+ * disappear. Anything with its own background keeps its own colours, and only
+ * text sitting directly on the image inherits the treatment. */
 .site-header--text-light {
   --mukurtu-header-scrim: rgb(0 0 0 / 60%);
-  --color-text-neutral-loud: var(--color-white);
-
-  /* The primary nav uses this for both its hover colour and its underline.
-   * Flattening it to the text colour keeps hover legible on the scrim; the
-   * state stays perceivable because the underline still appears on hover. */
-  --brand-secondary-dark: var(--color-white);
 
   color: var(--color-white);
 }
 
 .site-header--text-dark {
-  --mukurtu-header-scrim: rgb(255 255 255 / 75%);
-  --color-text-neutral-loud: var(--color-black);
-  --brand-secondary-dark: var(--color-black);
+  --mukurtu-header-scrim: rgb(255 255 255 / 60%);
 
   color: var(--color-black);
+}
+
+/* Stop the treatment colour at the nav.
+ *
+ * .header-nav carries its own opaque background (a white bar at desktop, the
+ * slide-out drawer on mobile) and its links inherit rather than set a colour,
+ * so without this the header's light treatment renders white text on that
+ * white bar. Re-anchoring to the body text token keeps the nav looking exactly
+ * as it does on a site with no header image.
+ *
+ * Note _nav-primary.scss reads --color-text-neutral-loud, which this theme
+ * never defines; that declaration is invalid, which is why these links inherit
+ * in the first place. Filed separately rather than fixed here. */
+.site-header--has-background .header-nav {
+  color: var(--brand-text-color);
 }
