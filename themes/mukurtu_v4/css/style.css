@@ -5224,19 +5224,31 @@ header {
             align-items: center;
     gap: var(--gutter);
     padding-inline: var(--layout-padding-xs);
+    /* .header sets justify-content: center for the grid. In a flex row that
+     * centres the whole lot and pulls the wordmark away from the page edge. */
+    -webkit-box-pack: justify;
+        -ms-flex-pack: justify;
+            justify-content: space-between;
   }
   .site-header:has(.header__logo-text) .header__logo {
-    /* Takes the remainder. min-inline-size lets it shrink below its content
-     * width instead of forcing the nav to wrap. */
+    /* Sized to the wordmark, but able to shrink so it never pushes the nav
+     * off the row. */
+    -webkit-box-flex: 0;
+        -ms-flex: 0 1 auto;
+            flex: 0 1 auto;
+    min-inline-size: 0;
+  }
+  .site-header:has(.header__logo-text) .header-nav {
+    /* Takes the remaining space and stays shrinkable. That matters more than
+     * it looks: nav-resize.js collapses to the mobile menu by watching the
+     * primary nav <ul> wrap onto a second line. Pinned at flex: 0 0 auto the
+     * nav can never wrap, so instead of collapsing it overflowed the header
+     * and ran off the side of the page.
+     */
     -webkit-box-flex: 1;
         -ms-flex: 1 1 auto;
             flex: 1 1 auto;
     min-inline-size: 0;
-  }
-  .site-header:has(.header__logo-text) .header-nav {
-    -webkit-box-flex: 0;
-        -ms-flex: 0 0 auto;
-            flex: 0 0 auto;
     /* The drawer sets a full width for its mobile guise, which in a flex row
      * makes it claim the whole header and leaves branding nothing. */
     inline-size: auto;
@@ -5246,6 +5258,25 @@ header {
     -webkit-margin-before: 0;
             margin-block-start: 0;
   }
+}
+
+/* The mobile menu button sits on the image too.
+ *
+ * .mobile-nav-button__label is brand red, which is fine on the plain header it
+ * was designed for but measures 1.25:1 on the scrim. It becomes reachable at
+ * desktop widths once branding is wide enough to push the nav into collapsing,
+ * so it needs the treatment colour like everything else on the image. The
+ * icon's bars are drawn with background-color, so they are set too. */
+.site-header--has-background .mobile-nav-button__label {
+  color: inherit;
+}
+.site-header--has-background {
+  /* The bars are border-block-start, not a background. */
+}
+.site-header--has-background .mobile-nav-button__icon,
+.site-header--has-background .mobile-nav-button__icon::before,
+.site-header--has-background .mobile-nav-button__icon::after {
+  border-block-start-color: currentcolor;
 }
 
 /* Text branding takes the treatment colour over an image.
