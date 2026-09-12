@@ -132,6 +132,21 @@ header {
 
   .header-search--mobile {
     grid-row: 2;
+
+    /* Spans to the last column and sits at its end, so it lines up under the
+     * menu button rather than stopping short of it. justify-self also stops
+     * the grid stretching it, so it keeps its own width instead of growing to
+     * fill the row - 544px at 928px before this. */
+    grid-column: 1 / -1;
+    justify-self: end;
+    max-inline-size: 100%;
+
+    /* The same basis the desktop instance uses, so the box is the size people
+     * see everywhere else. */
+    .header-search__input {
+      flex: 0 0 200px;
+      max-inline-size: 100%;
+    }
   }
 
   /* .site-header and .header are the same element, not nested, so the flex
