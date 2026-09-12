@@ -5130,7 +5130,7 @@ header {
   /* Scales with the viewport so a long name keeps fitting instead of
    * wrapping into a tall stack. The ceiling is the 28px this is designed
    * at; the floor keeps it legible on a phone. */
-  font-size: clamp(1.125rem, 1.9vw, 1.75rem);
+  font-size: clamp(1.125rem, 1.5vw, 1.75rem);
   font-weight: 700;
   line-height: 1.15;
 }
@@ -5191,42 +5191,60 @@ header {
  * text sitting directly on the image inherits the treatment. */
 /* Text branding needs room a logo does not.
  *
- * .header__logo is one column of a grid sized for a ~100px logo image, so a
- * wordmark stacks into several lines. Widening it means taking columns from
- * the nav, and the nav collapses to the mobile menu once it is squeezed:
- * measured, three columns collapses it at 1280px and two at 1100px. So the
- * extra width is only taken at 2xl, where there is room to spare, and the
- * nav's own grid area is never touched - moving it is what forced the
- * collapse.
+ * The header is a 12-column grid built around a ~100px logo. At 1280px that
+ * leaves the branding cell 65px - narrower than the word "Peoples'" - so a
+ * wordmark breaks one word per line whatever the font size, and 31% of the row
+ * goes to gutters.
  *
- * :has() rather than a class plumbed through preprocess: the header template
- * does not know how the branding block is configured, and the theme already
- * uses :has() elsewhere.
+ * Taking more columns is not the fix: the nav collapses to the mobile menu
+ * once squeezed, measured at three columns by 1280px. But the nav's content is
+ * a fixed 931px, so the real problem is that column rounding and 72px of
+ * padding leave only 173px for branding at that width.
+ *
+ * So from lg the header becomes a flex row: the nav claims its natural width
+ * and branding takes exactly what is left, with no rounding to columns and
+ * less padding. At 1280px that turns 173px into 269px, enough for one line.
+ * Below lg the nav is the slide-out drawer, so the grid stays and branding
+ * simply spans the row.
  */
-.site-header:has(.header__logo-text) {
-  /* Below lg the nav is the slide-out drawer, so the header row is the
-   * wordmark's alone and the width costs nothing. */
-}
 .site-header:has(.header__logo-text) .header__logo {
   grid-column: 1/span 5;
 }
 .site-header:has(.header__logo-text) {
-  /* From lg the desktop nav shares the row, so the cell goes back to its
-   * single column: two columns collapses the nav at 1100px and three at
-   * 1280px. A wordmark does not fit two lines in one column, so it stacks
-   * here - the alternative is losing the menu. */
+  /* .site-header and .header are the same element, not nested, so the flex
+   * properties go here rather than on a descendant selector. */
 }
 @media (min-width: 60rem) {
-  .site-header:has(.header__logo-text) .header__logo {
-    grid-column: 1/span 1;
+  .site-header:has(.header__logo-text) {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    gap: var(--gutter);
+    padding-inline: var(--layout-padding-xs);
   }
-}
-.site-header:has(.header__logo-text) {
-  /* At 2xl there is room to spare. */
-}
-@media (min-width: 90rem) {
   .site-header:has(.header__logo-text) .header__logo {
-    grid-column: 2/span 3;
+    /* Takes the remainder. min-inline-size lets it shrink below its content
+     * width instead of forcing the nav to wrap. */
+    -webkit-box-flex: 1;
+        -ms-flex: 1 1 auto;
+            flex: 1 1 auto;
+    min-inline-size: 0;
+  }
+  .site-header:has(.header__logo-text) .header-nav {
+    -webkit-box-flex: 0;
+        -ms-flex: 0 0 auto;
+            flex: 0 0 auto;
+    /* The drawer sets a full width for its mobile guise, which in a flex row
+     * makes it claim the whole header and leaves branding nothing. */
+    inline-size: auto;
+    /* The nav sets margin-block-start: auto to sit at the bottom of its grid
+     * cell. In a flex row that overrides align-items and drops it below the
+     * wordmark's baseline. */
+    -webkit-margin-before: 0;
+            margin-block-start: 0;
   }
 }
 

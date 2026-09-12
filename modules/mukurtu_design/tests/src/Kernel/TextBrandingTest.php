@@ -81,27 +81,54 @@ class TextBrandingTest extends KernelTestBase {
   }
 
   /**
-   * Text branding gets a wider grid cell than a logo image does.
+   * Text branding turns the header into a flex row from lg.
    *
-   * .header__logo is one column of a grid sized for a ~100px logo, so a
-   * wordmark wrapped into a four-line stack and pushed the header to 176px.
-   * Widening the cell means moving where the nav starts, so both are keyed
-   * off the same :has() condition and have to stay in step.
+   * The header is a 12-column grid built around a ~100px logo. At 1280px that
+   * leaves branding 65px, narrower than the word "Peoples'", so a wordmark
+   * breaks one word per line whatever the font size. Taking more columns
+   * collapses the nav to the mobile menu instead. The nav's content is a fixed
+   * 931px, so a flex row lets it claim that and gives branding the remainder -
+   * 269px at 1280px, which is enough for one line.
    */
-  public function testTextBrandingWidensTheGridCell(): void {
+  public function testTextBrandingUsesFlexFromLg(): void {
     $css = $this->css();
 
-    $this->assertStringContainsString('.site-header:has(.header__logo-text)', $css);
     $this->assertMatchesRegularExpression(
-      '/\.site-header:has\(\.header__logo-text\)[^{]*\.header__logo\s*\{[^}]*grid-column/',
+      '/\.site-header:has\(\.header__logo-text\)\s*\{[^}]*display:\s*flex/',
       $css,
-      'The branding cell spans more columns.'
+      'The header becomes a flex row when the branding is text.'
     );
     $this->assertMatchesRegularExpression(
-      '/:has\(\.header__logo-text\)\s+\.header-nav\s*\{[^}]*grid-column/',
+      '/:has\(\.header__logo-text\)[^{]*\.header-nav\s*\{[^}]*inline-size:\s*auto/',
       $css,
-      'The nav starts after the widened branding cell.'
+      "The nav's mobile full width is cleared, or it claims the whole row."
     );
+  }
+
+  /**
+   * The rules never touch the logo-image case.
+   *
+   * Every one is scoped by :has(.header__logo-text). Verified on a real site:
+   * with a logo the header measures 142px, exactly as it does on main.
+   */
+  public function testLogoImageCaseIsUntouched(): void {
+    $css = $this->css();
+
+    preg_match_all('/(^|\})([^{}]*header__logo[^{}]*)\{/m', $css, $m);
+    foreach ($m[2] as $selector) {
+      $selector = trim($selector);
+      if ($selector === '' || str_starts_with($selector, '@')) {
+        continue;
+      }
+      if (str_contains($selector, 'header__logo-text')) {
+        continue;
+      }
+      $this->assertStringNotContainsString(
+        'display: flex',
+        $selector,
+        "Layout changes must be behind :has(.header__logo-text): $selector"
+      );
+    }
   }
 
   /**
