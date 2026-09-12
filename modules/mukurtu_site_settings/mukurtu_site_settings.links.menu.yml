@@ -1,7 +1,7 @@
 mukurtu_site_settings.design_settings:
-  title: 'Color settings'
+  title: 'Design settings'
   route_name: mukurtu_design.settings
-  description: 'Switch the color palette or set custom colors.'
+  description: 'Set the color palette and background images.'
   parent: mukurtu_dashboard
   menu_name: dashboard-look-feel
   weight: 2

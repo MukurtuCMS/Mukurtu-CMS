@@ -42,3 +42,104 @@ header {
 
   }
 }
+
+/* Optional header background image.
+ *
+ * The URL arrives as --mukurtu-header-background-image, set inline on the
+ * header element by mukurtu_design_preprocess_page(). The scrim is a flat
+ * colour layer stacked over the image, so the contrast of the logo and menu is
+ * decided here rather than by whichever photograph a site happens to upload.
+ *
+ * The treatment classes redefine the tokens the header's children already
+ * consume, rather than overriding their rules. That keeps the menu's own
+ * styling in charge of layout and states, and means anything added to the
+ * header later inherits a legible colour without further work.
+ */
+.site-header--has-background {
+  background-image:
+    linear-gradient(var(--mukurtu-header-scrim), var(--mukurtu-header-scrim)),
+    var(--mukurtu-header-background-image);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+
+  /* Without this the image is barely visible behind the logo. */
+  padding-block: var(--v-space-xs);
+}
+
+/* Scrim opacities are measured, not guessed. Against a full white-to-black
+ * gradient (the worst case any photograph can present) these give 5.74:1 for
+ * light and 7.37:1 for dark on 18-20px text, both clear of the 4.5:1 that size
+ * requires. Light has little room to spare: below about 54% the white text
+ * drops under 4.5:1 over a white region.
+ *
+ * Only `color` is set, never the shared palette tokens. The nav inside the
+ * header (.header-nav) is an opaque white bar at desktop and the slide-out
+ * drawer on mobile, and its links read --color-text-neutral-loud; redefining
+ * that token here painted white text onto that white bar and made the menu
+ * disappear. Anything with its own background keeps its own colours, and only
+ * text sitting directly on the image inherits the treatment. */
+.site-header--text-light {
+  --mukurtu-header-scrim: rgb(0 0 0 / 60%);
+
+  color: var(--color-white);
+}
+
+.site-header--text-dark {
+  --mukurtu-header-scrim: rgb(255 255 255 / 60%);
+
+  color: var(--color-black);
+}
+
+/* The nav sits on the image at desktop.
+ *
+ * .header-nav is the same element in two guises: a static bar at >=lg, and the
+ * slide-out drawer below that, which overlays page content and must keep its
+ * own white background and dark text. So the transparency is scoped to exactly
+ * the desktop state the theme itself defines, and only when an image is set.
+ *
+ * Below that breakpoint, and on any site with no header image, nothing here
+ * applies and the nav renders exactly as it always has.
+ */
+.site-header--has-background .header-nav {
+  /* Covers the drawer, and stops the header's treatment colour cascading into
+   * it. Nav links inherit rather than set a colour, so without this the light
+   * treatment would paint white text onto the drawer's white background.
+   *
+   * _nav-primary.scss reads --color-text-neutral-loud, which this theme never
+   * defines anywhere, so that declaration is invalid and those links have
+   * always inherited - see #2186. */
+  color: var(--brand-text-color);
+}
+
+body:not(.is-always-mobile-nav) .site-header--has-background .header-nav {
+  @include include-media.media('>=lg') {
+    background-color: transparent;
+
+    /* Take the treatment colour from the header again. */
+    color: inherit;
+  }
+}
+
+/* Retune the nav's interactive tokens for the scrim.
+ *
+ * --brand-secondary-dark drives the hover colour, the hover underline and the
+ * focus outline, so it has to stay legible against the scrim or focus fails
+ * 1.4.11. Flattening it to the text colour keeps all three visible; hover is
+ * still distinguishable because the underline appears. Palette accents are not
+ * usable here - red-bone's --brand-secondary-accent lands at 3.22:1 on the
+ * light scrim, under the 4.5:1 this text size needs.
+ */
+body:not(.is-always-mobile-nav) .site-header--has-background.site-header--text-light .header-nav {
+  @include include-media.media('>=lg') {
+    --brand-secondary-dark: var(--color-white);
+    --main-nav-divider: rgb(255 255 255 / 45%);
+  }
+}
+
+body:not(.is-always-mobile-nav) .site-header--has-background.site-header--text-dark .header-nav {
+  @include include-media.media('>=lg') {
+    --brand-secondary-dark: var(--color-black);
+    --main-nav-divider: rgb(0 0 0 / 35%);
+  }
+}
