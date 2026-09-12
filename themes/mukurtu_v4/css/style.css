@@ -318,129 +318,6 @@ Those files are injected by Drupal so they shouldn't be bundled to style.css. */
   padding-inline: calc(var(--gutter) / 2);
 }
 
-/* Optional page background image.
- *
- * The URL arrives as --mukurtu-page-background-image, set inline on the page
- * container by mukurtu_design_preprocess_page(). Nothing is written to a
- * stylesheet, so there is no cached artifact to fall out of step with the
- * configuration.
- *
- * The image sits behind the whole page - header, content and footer - the way
- * the Plateau Peoples' Web Portal uses it. The scrim is a flat colour layer
- * stacked over it, so anything sitting directly on the image has a known
- * contrast rather than one that depends on the photograph.
- *
- * The treatment sets `color` only. It deliberately does not touch the shared
- * palette tokens: components that carry their own background (the nav's white
- * bar, cards, the footer) keep their own colours, and only text that actually
- * sits on the image inherits the treatment. Recolouring everything is what
- * made the main menu render white-on-white during development.
- */
-.page--has-background {
-  background-image: -webkit-gradient(linear, left top, left bottom, from(var(--mukurtu-page-scrim)), to(var(--mukurtu-page-scrim))), var(--mukurtu-page-background-image);
-  background-image: linear-gradient(var(--mukurtu-page-scrim), var(--mukurtu-page-scrim)), var(--mukurtu-page-background-image);
-  background-attachment: scroll;
-  background-position: top center;
-  background-repeat: no-repeat;
-  background-size: cover;
-}
-
-/* Scrim opacities are measured, not guessed. Against a full white-to-black
- * gradient - the worst case any photograph can present - these give 5.74:1 for
- * light and 7.37:1 for dark on 18-20px text, both clear of the 4.5:1 that size
- * requires. Light has the least room: below about 54% the white text drops
- * under 4.5:1 over a white region of the image. */
-.page--text-light {
-  --mukurtu-page-scrim: rgb(0 0 0 / 60%);
-  color: var(--color-white);
-}
-
-.page--text-dark {
-  --mukurtu-page-scrim: rgb(255 255 255 / 60%);
-  color: var(--color-black);
-}
-
-/* Let text take the treatment colour.
- *
- * Headings and body copy set their colour explicitly for a white ground, so
- * they do not inherit and would keep dark text over the image - block titles
- * measured 1.65:1 before this. `inherit` is self-correcting rather than a flat
- * override: inside the footer it picks up --footer-text-color, inside a block
- * that paints its own ground it picks up that block's colour, and only where
- * text really does sit on the image does it pick up the treatment.
- *
- * This only ever applies on the front page, where the background lives. */
-.page--has-background h1,
-.page--has-background h2,
-.page--has-background h3,
-.page--has-background h4,
-.page--has-background p,
-.page--has-background li,
-.page--has-background dt,
-.page--has-background dd {
-  color: inherit;
-}
-
-/* Drop the block separator shadow over the image.
- *
- * .layout--onecol .block-wrapper carries a pale grey drop shadow to separate
- * blocks on a white page. Over a photograph it reads as a glowing bar across
- * the full width. The image already separates the blocks, so the shadow has no
- * job here.
- *
- * The layout class is in the selector to win on specificity: the rule in
- * _landing-page.scss is also two classes, and 04-templates is imported after
- * 00-base, so an equally specific selector here would silently lose. */
-.page--has-background .layout--onecol .block-wrapper {
-  -webkit-box-shadow: none;
-          box-shadow: none;
-}
-
-/* Stop the treatment colour at the nav.
- *
- * .header-nav carries its own opaque background - a white bar at desktop, the
- * slide-out drawer on mobile - and its links inherit their colour rather than
- * setting it, so without this the light treatment paints white text onto that
- * white bar. Only elements that actually inherit need this: the footer sets
- * --footer-text-color on its own dark ground, and forcing a colour there would
- * render it invisible.
- *
- * Note _nav-primary.scss reads --color-text-neutral-loud, which this theme
- * never defines anywhere, so that declaration is invalid and those links have
- * always inherited - see #2186. */
-.page--has-background .header-nav {
-  color: var(--brand-text-color);
-}
-
-/* At desktop the nav sits on the image rather than on its own bar, so it takes
- * the treatment colour. Scoped to exactly the desktop state the theme defines,
- * leaving the mobile drawer - which overlays page content - untouched.
- *
- * --brand-secondary-dark drives the hover colour, the hover underline and the
- * focus outline together, so it is retuned per treatment or focus fails 1.4.11.
- * Palette accents are not usable here: red-bone's --brand-secondary-accent
- * measures 3.22:1 on the light scrim, under the 4.5:1 this text size needs. */
-@media (min-width: 60rem) {
-  body:not(.is-always-mobile-nav) .page--has-background .header-nav {
-    background-color: transparent;
-    color: inherit;
-  }
-}
-
-@media (min-width: 60rem) {
-  body:not(.is-always-mobile-nav) .page--has-background.page--text-light .header-nav {
-    --brand-secondary-dark: var(--color-white);
-    --main-nav-divider: rgb(255 255 255 / 45%);
-  }
-}
-
-@media (min-width: 60rem) {
-  body:not(.is-always-mobile-nav) .page--has-background.page--text-dark .header-nav {
-    --brand-secondary-dark: var(--color-black);
-    --main-nav-divider: rgb(0 0 0 / 35%);
-  }
-}
-
 div.palette-demo {
   position: relative;
   display: -webkit-box;
@@ -586,7 +463,7 @@ div.palette-demo--custom {
 @font-face {
   font-family: BCSans;
   font-style: normal;
-  src: url("../fonts/BCSans-Regular.woff2") format("woff2"), url("..fonts/BCSans-Regular.woff") format("woff");
+  src: url("../fonts/BCSans-Regular.woff2") format("woff2"), url("../fonts/BCSans-Regular.woff") format("woff");
 }
 @font-face {
   font-family: BCSans;
@@ -653,8 +530,8 @@ div.palette-demo--custom {
      "Times New Roman",
      Times,
      serif; */
-  --font-display-face: "BCSans",
-  "Noto Sans",
+  --font-display-face: 'BCSans',
+  'Noto Sans',
   verdana,
   arial,
   sans-serif;
@@ -1403,6 +1280,13 @@ body.consent-popup-opened .klaro_toggle_dialog {
       -ms-flex-pack: center;
           justify-content: center;
   background-color: rgba(0, 0, 0, 0.7);
+}
+@supports not (backdrop-filter: blur()) {
+  .mukurtu-content-warnings {
+    background-color: rgba(0, 0, 0, 0.9);
+  }
+}
+.mukurtu-content-warnings {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   color: white;
@@ -1410,11 +1294,6 @@ body.consent-popup-opened .klaro_toggle_dialog {
   line-height: var(--line-height-xs);
   cursor: pointer;
   text-align: center;
-}
-@supports not (backdrop-filter: blur()) {
-  .mukurtu-content-warnings {
-    background-color: rgba(0, 0, 0, 0.9);
-  }
 }
 .mukurtu-content-warnings:hover {
   text-decoration: underline;
@@ -2137,12 +2016,6 @@ label.form-required::after,
 }
 .block--image-with-description--horizontal .block-wrapper__second {
   background-color: var(--brand-secondary);
-  /* A component that paints its own ground has to own its text colour too.
-   * Without this the text inherits from whatever is behind the block, which
-   * is fine on the plain page but renders white on tan once a page
-   * background is set. No visual change on a site with no background: this
-   * is the colour the text already inherited from body. */
-  color: var(--brand-text-color);
 }
 @media (min-width: 48rem) {
   .block--image-with-description--horizontal {
@@ -2703,6 +2576,13 @@ label.form-required::after,
 }
 .local-tasks__inner {
   grid-column: 1/-1;
+}
+@media (min-width: 90rem) {
+  .local-tasks__inner {
+    grid-column: 2/-2;
+  }
+}
+.local-tasks__inner {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -2710,11 +2590,6 @@ label.form-required::after,
       -ms-flex-align: center;
           align-items: center;
   gap: var(--gutter);
-}
-@media (min-width: 90rem) {
-  .local-tasks__inner {
-    grid-column: 2/-2;
-  }
 }
 @media (min-width: 60rem) {
   .local-tasks__inner {
@@ -3379,10 +3254,12 @@ img[class$=-placeholder] {
   border: 0;
   background: transparent;
   font-weight: normal;
-  /* Plus icon for mobile navigation. */
 }
 .primary-nav__menu-link--button:hover, .primary-nav__menu-link--button:focus, .primary-nav__menu-link--button:active {
   background-color: transparent;
+}
+.primary-nav__menu-link--button {
+  /* Plus icon for mobile navigation. */
 }
 .primary-nav__menu-link--button.primary-nav__menu-link--has-children {
   -webkit-padding-end: var(--v-space-s);
@@ -3661,9 +3538,6 @@ html:not(.js) .primary-nav__menu--level-2 {
   -webkit-appearance: none;
      -moz-appearance: none;
           appearance: none;
-  /* aria-hidden attribute is removed by JS. Button is non-functional
-     until JS is enabled.
-  */
 }
 .primary-nav__button-toggle:focus, .primary-nav__button-toggle:hover {
   background-color: transparent;
@@ -3707,6 +3581,11 @@ html:not(.js) .primary-nav__menu--level-2 {
 .primary-nav__button-toggle[aria-expanded=true] .icon--menu-toggle::after {
   opacity: 0;
 }
+.primary-nav__button-toggle {
+  /* aria-hidden attribute is removed by JS. Button is non-functional
+     until JS is enabled.
+  */
+}
 .primary-nav__button-toggle[aria-hidden=true] {
   pointer-events: none;
 }
@@ -3722,7 +3601,6 @@ html:not(.js) .primary-nav__menu--level-2 {
     margin: 0;
     -webkit-margin-end: var(--v-space-4xxs);
             margin-inline-end: var(--v-space-4xxs);
-    /* stylelint-disable-next-line no-descending-specificity */
   }
   body:not(.is-always-mobile-nav) .primary-nav__button-toggle:focus, body:not(.is-always-mobile-nav) .primary-nav__button-toggle:hover {
     border: 0;
@@ -3739,6 +3617,9 @@ html:not(.js) .primary-nav__menu--level-2 {
   body:not(.is-always-mobile-nav) .primary-nav__button-toggle[aria-expanded=true] .icon--menu-toggle::after {
     opacity: 0.8;
   }
+  body:not(.is-always-mobile-nav) .primary-nav__button-toggle {
+    /* stylelint-disable-next-line no-descending-specificity */
+  }
   body:not(.is-always-mobile-nav) .primary-nav__button-toggle .icon--menu-toggle {
     size: 19px;
     border-radius: 4px;
@@ -3754,10 +3635,12 @@ html:not(.js) .primary-nav__menu--level-2 {
     -webkit-box-pack: center;
         -ms-flex-pack: center;
             justify-content: center;
-    /* stylelint-disable-next-line no-descending-specificity */
   }
   body:not(.is-always-mobile-nav) .primary-nav__button-toggle .icon--menu-toggle::before {
     content: none;
+  }
+  body:not(.is-always-mobile-nav) .primary-nav__button-toggle .icon--menu-toggle {
+    /* stylelint-disable-next-line no-descending-specificity */
   }
   body:not(.is-always-mobile-nav) .primary-nav__button-toggle .icon--menu-toggle::after {
     inline-size: 8px;
@@ -3786,16 +3669,6 @@ html:not(.js) .primary-nav__menu--level-2 {
  * Nav Primary (wide widths).
  */
 @media (min-width: 60rem) {
-  body:not(.is-always-mobile-nav) {
-    /**
-     * Arrow is placed outside of submenu because the submenu has the
-     * `overflow: hidden` CSS rule applied.
-     */
-    /**
-     * When ensuring that long menus don't overflow viewport, we can give a
-     * little extra room when the toolbar is fixed (and is shorter).
-     */
-  }
   body:not(.is-always-mobile-nav) .primary-nav__menu-link-inner {
     padding-inline: 0;
   }
@@ -3833,7 +3706,6 @@ html:not(.js) .primary-nav__menu--level-2 {
             padding-inline-end: 1rem;
     -webkit-margin-end: var(--v-space-3xs);
             margin-inline-end: var(--v-space-3xs);
-    /* Chevron icon for desktop navigation. */
   }
   body:not(.is-always-mobile-nav) .primary-nav__menu-link--button.primary-nav__menu-link--has-children::before {
     content: none;
@@ -3845,6 +3717,9 @@ html:not(.js) .primary-nav__menu--level-2 {
   body:not(.is-always-mobile-nav) .primary-nav__menu-link--button.primary-nav__menu-link--has-children:focus, body:not(.is-always-mobile-nav) .primary-nav__menu-link--button.primary-nav__menu-link--has-children:hover {
     border-block-end-color: transparent;
     background-color: transparent;
+  }
+  body:not(.is-always-mobile-nav) .primary-nav__menu-link--button.primary-nav__menu-link--has-children {
+    /* Chevron icon for desktop navigation. */
   }
   body:not(.is-always-mobile-nav) .primary-nav__menu-link--button.primary-nav__menu-link--has-children::after {
     position: absolute;
@@ -3970,6 +3845,12 @@ html:not(.js) .primary-nav__menu--level-2 {
     padding-block: var(--v-space-5xs);
     padding-inline: 0;
   }
+  body:not(.is-always-mobile-nav) {
+    /**
+     * Arrow is placed outside of submenu because the submenu has the
+     * `overflow: hidden` CSS rule applied.
+     */
+  }
   body:not(.is-always-mobile-nav) .primary-nav__menu-caret {
     position: absolute;
     z-index: 105; /* Match level 2 menus. */
@@ -3997,6 +3878,12 @@ html:not(.js) .primary-nav__menu--level-2 {
     -webkit-transform: translate(-50%, 0);
             transform: translate(-50%, 0);
     opacity: 1;
+  }
+  body:not(.is-always-mobile-nav) {
+    /**
+     * When ensuring that long menus don't overflow viewport, we can give a
+     * little extra room when the toolbar is fixed (and is shorter).
+     */
   }
   body:not(.is-always-mobile-nav) .is-fixed .primary-nav__menu--level-2 {
     max-block-size: calc(100vh - var(--site-header-height-wide) - var(--drupal-displace-offset-top, 0px) - var(--drupal-displace-offset-bottom, 0px) - var(--v-space-4xxs) + var(--v-space-4xl));
@@ -4045,9 +3932,6 @@ html:not(.js) .primary-nav__menu--level-2 {
   background-color: var(--color-white);
   -webkit-box-shadow: 0 0 72px rgba(0, 0, 0, 0.1);
           box-shadow: 0 0 72px rgba(0, 0, 0, 0.1);
-  /*
-   * Ensure top border has the same color as the background when in forced colors.
-   */
 }
 .header-nav.is-active {
   visibility: visible;
@@ -4070,6 +3954,11 @@ html:not(.js) .primary-nav__menu--level-2 {
   .header-nav {
     grid-column: 5/14;
   }
+}
+.header-nav {
+  /*
+   * Ensure top border has the same color as the background when in forced colors.
+   */
 }
 @media (forced-colors: active) {
   .header-nav {
@@ -4380,7 +4269,6 @@ body.is-always-mobile-nav .header-nav::before {
 body:not(.is-always-mobile-nav) {
   /* Mobile: search sits in the middle columns (2-4) of the header row,
    * between the logo (col 1) and the hamburger button (cols 5-6). */
-  /* Desktop: hide the mobile bar; show the instance inside the nav bar. */
 }
 @media (max-width: 59.9rem) {
   body:not(.is-always-mobile-nav) .header-search--mobile {
@@ -4392,10 +4280,10 @@ body:not(.is-always-mobile-nav) {
     background: transparent;
   }
 }
+body:not(.is-always-mobile-nav) {
+  /* Desktop: hide the mobile bar; show the instance inside the nav bar. */
+}
 @media (min-width: 60rem) {
-  body:not(.is-always-mobile-nav) {
-    /* Fixed width on desktop so the nav items have room. */
-  }
   body:not(.is-always-mobile-nav) .header__main-nav {
     display: -webkit-box;
     display: -ms-flexbox;
@@ -4416,6 +4304,9 @@ body:not(.is-always-mobile-nav) {
             align-items: center;
     -webkit-padding-start: var(--v-space-4xs);
             padding-inline-start: var(--v-space-4xs);
+  }
+  body:not(.is-always-mobile-nav) {
+    /* Fixed width on desktop so the nav items have room. */
   }
   body:not(.is-always-mobile-nav) .header-search__input {
     -webkit-box-flex: 0;
@@ -4458,12 +4349,14 @@ body:not(.is-always-mobile-nav) {
   color: var(--color-text-neutral-loud);
   background: var(--color-white);
   line-height: 1.4;
-  /* Remove the browser-native X clear button on type=search. */
 }
 .header-search__input:focus {
   outline: 2px solid var(--brand-secondary-dark);
   outline-offset: 2px;
   border-color: var(--brand-secondary-dark);
+}
+.header-search__input {
+  /* Remove the browser-native X clear button on type=search. */
 }
 .header-search__input::-webkit-search-cancel-button {
   -webkit-appearance: none;
@@ -5108,102 +5001,6 @@ header {
   }
   .header__logo img {
     inline-size: 100px;
-  }
-}
-
-/* Optional header background image.
- *
- * The URL arrives as --mukurtu-header-background-image, set inline on the
- * header element by mukurtu_design_preprocess_page(). The scrim is a flat
- * colour layer stacked over the image, so the contrast of the logo and menu is
- * decided here rather than by whichever photograph a site happens to upload.
- *
- * The treatment classes redefine the tokens the header's children already
- * consume, rather than overriding their rules. That keeps the menu's own
- * styling in charge of layout and states, and means anything added to the
- * header later inherits a legible colour without further work.
- */
-.site-header--has-background {
-  background-image: -webkit-gradient(linear, left top, left bottom, from(var(--mukurtu-header-scrim)), to(var(--mukurtu-header-scrim))), var(--mukurtu-header-background-image);
-  background-image: linear-gradient(var(--mukurtu-header-scrim), var(--mukurtu-header-scrim)), var(--mukurtu-header-background-image);
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
-  /* Without this the image is barely visible behind the logo. */
-  padding-block: var(--v-space-xs);
-}
-
-/* Scrim opacities are measured, not guessed. Against a full white-to-black
- * gradient (the worst case any photograph can present) these give 5.74:1 for
- * light and 7.37:1 for dark on 18-20px text, both clear of the 4.5:1 that size
- * requires. Light has little room to spare: below about 54% the white text
- * drops under 4.5:1 over a white region.
- *
- * Only `color` is set, never the shared palette tokens. The nav inside the
- * header (.header-nav) is an opaque white bar at desktop and the slide-out
- * drawer on mobile, and its links read --color-text-neutral-loud; redefining
- * that token here painted white text onto that white bar and made the menu
- * disappear. Anything with its own background keeps its own colours, and only
- * text sitting directly on the image inherits the treatment. */
-.site-header--text-light {
-  --mukurtu-header-scrim: rgb(0 0 0 / 60%);
-  color: var(--color-white);
-}
-
-.site-header--text-dark {
-  --mukurtu-header-scrim: rgb(255 255 255 / 60%);
-  color: var(--color-black);
-}
-
-/* The nav sits on the image at desktop.
- *
- * .header-nav is the same element in two guises: a static bar at >=lg, and the
- * slide-out drawer below that, which overlays page content and must keep its
- * own white background and dark text. So the transparency is scoped to exactly
- * the desktop state the theme itself defines, and only when an image is set.
- *
- * Below that breakpoint, and on any site with no header image, nothing here
- * applies and the nav renders exactly as it always has.
- */
-.site-header--has-background .header-nav {
-  /* Covers the drawer, and stops the header's treatment colour cascading into
-   * it. Nav links inherit rather than set a colour, so without this the light
-   * treatment would paint white text onto the drawer's white background.
-   *
-   * _nav-primary.scss reads --color-text-neutral-loud, which this theme never
-   * defines anywhere, so that declaration is invalid and those links have
-   * always inherited - see #2186. */
-  color: var(--brand-text-color);
-}
-
-@media (min-width: 60rem) {
-  body:not(.is-always-mobile-nav) .site-header--has-background .header-nav {
-    background-color: transparent;
-    /* Take the treatment colour from the header again. */
-    color: inherit;
-  }
-}
-
-/* Retune the nav's interactive tokens for the scrim.
- *
- * --brand-secondary-dark drives the hover colour, the hover underline and the
- * focus outline, so it has to stay legible against the scrim or focus fails
- * 1.4.11. Flattening it to the text colour keeps all three visible; hover is
- * still distinguishable because the underline appears. Palette accents are not
- * usable here - red-bone's --brand-secondary-accent lands at 3.22:1 on the
- * light scrim, under the 4.5:1 this text size needs.
- */
-@media (min-width: 60rem) {
-  body:not(.is-always-mobile-nav) .site-header--has-background.site-header--text-light .header-nav {
-    --brand-secondary-dark: var(--color-white);
-    --main-nav-divider: rgb(255 255 255 / 45%);
-  }
-}
-
-@media (min-width: 60rem) {
-  body:not(.is-always-mobile-nav) .site-header--has-background.site-header--text-dark .header-nav {
-    --brand-secondary-dark: var(--color-black);
-    --main-nav-divider: rgb(0 0 0 / 35%);
   }
 }
 
@@ -6400,10 +6197,6 @@ header {
   padding-block: var(--v-space-5xs);
   padding-inline: var(--v-space-2xs);
   cursor: pointer;
-  padding-inline: var(--v-space-4xs);
-  overflow-wrap: break-word;
-  line-height: normal;
-  text-wrap: balance;
 }
 .communities__item .field--name-name a:hover, .communities__item .field--name-name a:active, .communities__item .field--name-name a:focus {
   color: var(--light-text-color);
@@ -6432,6 +6225,12 @@ header {
 .communities__item .field--name-name a:hover {
   background-color: var(--brand-primary);
   text-decoration: underline;
+}
+.communities__item .field--name-name a {
+  padding-inline: var(--v-space-4xs);
+  overflow-wrap: break-word;
+  line-height: normal;
+  text-wrap: balance;
 }
 .communities__item .media--image {
   display: block;
@@ -6778,6 +6577,18 @@ header {
   padding-block: var(--v-space-6xs);
   padding-inline: var(--v-space-5xs);
   letter-spacing: normal;
+}
+.dictionary .browse-links a:hover,
+.dictionary .browse-links button:hover {
+  background-color: var(--brand-primary-dark);
+  color: var(--color-white);
+}
+.dictionary .browse-links a:focus,
+.dictionary .browse-links button:focus {
+  outline-offset: 1px;
+}
+.dictionary .browse-links a,
+.dictionary .browse-links button {
   -webkit-box-flex: 1;
       -ms-flex: 1;
           flex: 1;
@@ -6791,15 +6602,6 @@ header {
       -ms-flex-pack: center;
           justify-content: center;
   padding: var(--v-space-6xs) var(--v-space-5xs);
-}
-.dictionary .browse-links a:hover,
-.dictionary .browse-links button:hover {
-  background-color: var(--brand-primary-dark);
-  color: var(--color-white);
-}
-.dictionary .browse-links a:focus,
-.dictionary .browse-links button:focus {
-  outline-offset: 1px;
 }
 .dictionary .browse-links a:focus-visible,
 .dictionary .browse-links button:focus-visible {
@@ -7252,6 +7054,15 @@ header {
   -webkit-margin-before: var(--v-space-s);
           margin-block-start: var(--v-space-s);
 }
+.page-node-type-dictionary-word .full-node__content .field--name-title .field__label,
+.page-node-type-dictionary-word .full-node__content .field--name-field-word-entry-term .field__label {
+  position: absolute !important;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  inline-size: 0.063rem;
+  block-size: 0.063rem;
+  word-wrap: normal;
+}
 .page-node-type-dictionary-word .full-node__content .field--name-title,
 .page-node-type-dictionary-word .full-node__content .field--name-field-word-entry-term {
   background-color: var(--brand-primary-dark);
@@ -7263,15 +7074,6 @@ header {
   padding-block: var(--v-space-2xs);
   padding-inline: var(--v-space-xs) var(--v-space-2xs);
   margin-block: 0 var(--v-space-s);
-}
-.page-node-type-dictionary-word .full-node__content .field--name-title .field__label,
-.page-node-type-dictionary-word .full-node__content .field--name-field-word-entry-term .field__label {
-  position: absolute !important;
-  overflow: hidden;
-  clip: rect(1px, 1px, 1px, 1px);
-  inline-size: 0.063rem;
-  block-size: 0.063rem;
-  word-wrap: normal;
 }
 .page-node-type-dictionary-word .full-node__content .field--name-title::after,
 .page-node-type-dictionary-word .full-node__content .field--name-field-word-entry-term::after {
@@ -7760,7 +7562,6 @@ header {
   padding-block: var(--v-space-6xs);
   padding-inline: var(--v-space-5xs);
   letter-spacing: normal;
-  font-size: var(--font-size-s);
 }
 .comment__actions a:hover {
   background-color: var(--brand-primary-dark);
@@ -7768,6 +7569,9 @@ header {
 }
 .comment__actions a:focus {
   outline-offset: 1px;
+}
+.comment__actions a {
+  font-size: var(--font-size-s);
 }
 .comment__actions a:focus-visible {
   outline: 2px solid var(--brand-primary-dark);
@@ -7834,11 +7638,6 @@ header {
   padding-block: var(--v-space-6xs);
   padding-inline: var(--v-space-5xs);
   letter-spacing: normal;
-  display: inline-block;
-  border-width: 2px;
-  padding-block: var(--v-space-3xs);
-  padding-inline: var(--v-space-4xxs);
-  font-size: var(--font-size-m);
 }
 .block--call-to-action__link a:hover {
   background-color: var(--brand-primary-dark);
@@ -7846,6 +7645,13 @@ header {
 }
 .block--call-to-action__link a:focus {
   outline-offset: 1px;
+}
+.block--call-to-action__link a {
+  display: inline-block;
+  border-width: 2px;
+  padding-block: var(--v-space-3xs);
+  padding-inline: var(--v-space-4xxs);
+  font-size: var(--font-size-m);
 }
 
 .block--media-carousel-block .button--download,
@@ -8108,7 +7914,6 @@ header {
   -webkit-column-gap: var(--gutter);
      -moz-column-gap: var(--gutter);
           column-gap: var(--gutter);
-  text-align: center;
 }
 @media (min-width: 60rem) {
   .layout-container .layout-content--404 {
@@ -8119,6 +7924,9 @@ header {
   .layout-container .layout-content--404 {
     grid-template-columns: minmax(0, auto) var(--grid-12col-max-width) minmax(0, auto);
   }
+}
+.layout-container .layout-content--404 {
+  text-align: center;
 }
 .layout-container .layout-content--404 > .region {
   grid-column: 1/-1;
