@@ -12,6 +12,81 @@ third_party_settings:
   layout_builder:
     enabled: true
     allow_custom: true
+    sections:
+      -
+        layout_id: layout_onecol
+        layout_settings: {  }
+        components:
+          bccc8859-099e-4a39-9abc-59fceae3a7d0:
+            uuid: bccc8859-099e-4a39-9abc-59fceae3a7d0
+            region: content
+            configuration:
+              # The 'block_content:' UUID suffix is patched to the real hero
+              # block_content entity at install time, same as the featured
+              # component's block_id/block_revision_id below.
+              id: 'block_content:00000000-0000-0000-0000-000000000000'
+              label: 'Welcome to Your Mukurtu CMS Site'
+              label_display: '1'
+              provider: block_content
+            weight: 0
+            additional: {  }
+          ac4c7245-7c5e-4384-98bb-73dd2ff5d505:
+            uuid: ac4c7245-7c5e-4384-98bb-73dd2ff5d505
+            region: content
+            configuration:
+              id: 'inline_block:featured_content'
+              label: 'Featured Content'
+              label_display: '1'
+              provider: layout_builder
+              view_mode: full
+              # 0 is never a real entity/revision ID, so this can't collide
+              # with an existing block_content entity before it's patched to
+              # the real featured_content block at install time by
+              # DefaultLandingPage::createDefaultLandingPage() (and by the
+              # mukurtu_landing_page update hook for existing sites) - see
+              # InlineBlockEntityOperations::removeUnusedForEntityOnSave(),
+              # which treats a stale, colliding revision_id as an orphaned
+              # inline block to garbage-collect on the next display save.
+              block_id: 0
+              block_revision_id: 0
+              block_serialized: null
+            weight: 1
+            additional: {  }
+          24dc6e76-d1de-4736-8b2c-f58331932643:
+            uuid: 24dc6e76-d1de-4736-8b2c-f58331932643
+            region: content
+            configuration:
+              id: 'views_block:mukurtu_categories-browse_by_category_block'
+              label: 'Browse by Category'
+              label_display: '1'
+              provider: views
+              views_label: ''
+              items_per_page: none
+            weight: 2
+            additional: {  }
+          21fa15de-16b2-4e28-8d1d-4eba8e1edc27:
+            uuid: 21fa15de-16b2-4e28-8d1d-4eba8e1edc27
+            region: content
+            configuration:
+              id: mukurtu_browse_by_community
+              label: 'Browse by Community'
+              label_display: '1'
+              provider: mukurtu_protocol
+            weight: 3
+            additional: {  }
+          74f31657-bb6b-44d1-b100-3b2f8c945509:
+            uuid: 74f31657-bb6b-44d1-b100-3b2f8c945509
+            region: content
+            configuration:
+              id: 'views_block:mukurtu_browse_by_map-map_block'
+              label: 'Browse by Map'
+              label_display: '1'
+              provider: views
+              views_label: ''
+              items_per_page: none
+            weight: 4
+            additional: {  }
+        third_party_settings: {  }
   layout_builder_restrictions:
     allowed_block_categories:
       - 'Chaos Tools'
