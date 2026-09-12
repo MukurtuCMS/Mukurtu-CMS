@@ -5108,9 +5108,33 @@ header {
 }
 .header__logo {
   grid-column: 1/span 1;
+  /* Text branding.
+   *
+   * Core's branding block can show the site name instead of an uploaded
+   * logo - the toggles are on the block itself - but nothing styled it, so
+   * it fell back to ordinary link styling: 16px, regular weight, brand red,
+   * underlined. Sized and weighted here so it reads as a wordmark.
+   *
+   * The colour and the underline sit on the link, which wraps the name; the
+   * size sits on the name itself. Dropping the underline is deliberate: the
+   * site name is an identity, not a body-copy link, and it keeps the base
+   * focus outline either way.
+   */
 }
 .header__logo a {
   display: inline-block;
+  color: var(--brand-primary-dark);
+  text-decoration: none;
+}
+.header__logo-text {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  line-height: 1.1;
+}
+@media (min-width: 60rem) {
+  .header__logo-text {
+    font-size: var(--font-size-2xl);
+  }
 }
 .header__logo img {
   inline-size: 100px;
@@ -5167,6 +5191,15 @@ header {
  * that token here painted white text onto that white bar and made the menu
  * disappear. Anything with its own background keeps its own colours, and only
  * text sitting directly on the image inherits the treatment. */
+/* Text branding takes the treatment colour over an image.
+ *
+ * The link sets its own colour, so it would otherwise stay brand red on the
+ * scrim. `inherit` picks up whichever treatment is in force, and the same rule
+ * covers both because the treatment classes set `color` on the header. */
+.site-header--has-background .header__logo a {
+  color: inherit;
+}
+
 .site-header--text-light {
   --mukurtu-header-scrim: rgb(0 0 0 / 60%);
   color: var(--color-white);

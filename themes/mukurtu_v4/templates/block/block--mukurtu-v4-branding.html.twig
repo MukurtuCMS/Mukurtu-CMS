@@ -29,9 +29,25 @@
 <div{{ attributes.addClass("header__logo") }}>
   {{ title_prefix }}
   {{ title_suffix }}
+  {#
+    Render the branding parts by name, the way core's own branding template
+    does, rather than printing content as one blob. The site name needs a hook
+    of its own: with the logo toggled off it was emitted as a bare text node
+    and fell back to ordinary link styling - 16px, regular weight, underlined.
+  #}
   {% block content %}
     <a href="{{ path('<front>') }}" rel="home">
-      {{ content }}
+      {{ content.site_logo }}
+      {#
+        Test the rendered output, not the render array: content.site_name is
+        present and truthy even when the block has the site name switched off,
+        which emitted an empty span alongside the logo.
+      #}
+      {% set site_name = content.site_name|render|trim %}
+      {% if site_name %}
+        <span class="header__logo-text">{{ site_name }}</span>
+      {% endif %}
     </a>
+    {{ content.site_slogan }}
   {% endblock %}
 </div>
