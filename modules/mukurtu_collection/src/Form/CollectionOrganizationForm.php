@@ -184,6 +184,7 @@ class CollectionOrganizationForm extends FormBase {
           ],
           '#attributes' => [
             'class' => ['button--small'],
+            'aria-label' => $this->t('Remove @title', ['@title' => $collection->getTitle()]),
           ],
         ];
       }
@@ -226,6 +227,9 @@ class CollectionOrganizationForm extends FormBase {
     $form['add'] = [
       '#type' => 'submit',
       '#value' => $this->t('Add to Collection'),
+      '#attributes' => [
+        'id' => 'collections-table-add-button',
+      ],
       '#submit' => ['::addCollectionToOrganizationAjax'],
       '#ajax' => [
         'callback' => '::addCollectionToTableCallback',
@@ -234,6 +238,22 @@ class CollectionOrganizationForm extends FormBase {
     ];
 
     $form['collections'] = $this->buildCollectionsTable($collections_organization, $collection->id());
+
+    // Live region announcing table changes to screen reader users. Kept
+    // outside the #prefix/#suffix wrapper on $form['collections'] above so
+    // it survives the AJAX wrapper replacement instead of being reset by it.
+    $form['collections_status'] = [
+      '#type' => 'html_tag',
+      '#tag' => 'div',
+      '#attributes' => [
+        'id' => 'collections-table-status',
+        'class' => ['visually-hidden'],
+        'aria-live' => 'polite',
+        'aria-atomic' => 'true',
+      ],
+    ];
+
+    $form['#attached']['library'][] = 'mukurtu_collection/collection-organization-form';
 
     $form['actions'] = [
       '#type' => 'actions',
@@ -247,6 +267,14 @@ class CollectionOrganizationForm extends FormBase {
   }
 
   public function addCollectionToTableCallback(array &$form, FormStateInterface $form_state) {
+    // Marks the table so the collections-status JS behavior can find it as
+    // a descendant of the #collections-table wrapper once() is scoped to -
+    // Drupal.attachBehaviors() runs with that wrapper itself as context
+    // after the AJAX replace, and context.querySelectorAll() can never
+    // match context itself, only descendants. Also absent during the
+    // initial page load, since it's only ever set here.
+    $form['collections']['#attributes']['data-collections-just-changed'] = 'true';
+
     $response = new AjaxResponse();
     $response->addCommand(new ReplaceCommand('#collections-table', $form['collections']));
     return $response;

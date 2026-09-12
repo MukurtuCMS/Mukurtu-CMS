@@ -119,6 +119,20 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase {
       '#suffix' => '</div>',
     ];
 
+    // Live region announcing warning row changes to screen reader users.
+    // Kept outside the #prefix/#suffix wrapper above so it survives the
+    // AJAX wrapper replacement instead of being reset by it.
+    $form['taxonomy_warnings_status'] = [
+      '#type' => 'html_tag',
+      '#tag' => 'div',
+      '#attributes' => [
+        'id' => 'taxonomy-warnings-status',
+        'class' => ['visually-hidden'],
+        'aria-live' => 'polite',
+        'aria-atomic' => 'true',
+      ],
+    ];
+
     $availableTerms = $this->getTerms();
 
     // Note: $i here functions as a sort of id for the taxonomy warning widget.
@@ -193,10 +207,22 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase {
         '#default_value' => $text,
       ];
 
+      // Label the Remove button with the selected term, when there is one,
+      // rather than a row number - $i is a permanent per-slot index that
+      // removeCallback() never renumbers, so after removing a row the
+      // remaining rows' numbers would have a gap (e.g. "row 1", "row 3"),
+      // which would be misleading read aloud.
+      $remove_label = isset($availableTerms[$id])
+        ? $this->t('Remove taxonomy warning for @term', ['@term' => $availableTerms[$id]])
+        : $this->t('Remove empty taxonomy warning row');
+
       $form['taxonomy_warnings'][$i]['actions'] = [
         '#type' => 'submit',
         '#value' => $this->t('Remove'),
         '#name' => $i,
+        '#attributes' => [
+          'aria-label' => $remove_label,
+        ],
         '#submit' => ['::removeCallback'],
         '#ajax' => [
           'callback' => '::addMoreCallback',
@@ -212,12 +238,17 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase {
     $form['taxonomy_warnings']['actions']['add_taxonomy_warning'] = [
       '#type' => 'submit',
       '#value' => $this->t('Add taxonomy warning'),
+      '#attributes' => [
+        'id' => 'taxonomy-warnings-add-button',
+      ],
       '#submit' => ['::addOne'],
       '#ajax' => [
         'callback' => '::addMoreCallback',
         'wrapper' => 'taxonomy-warnings-fieldset-wrapper',
       ],
     ];
+
+    $form['#attached']['library'][] = 'mukurtu_content_warnings/content-warnings-settings-form';
 
     // Warning media settings — view mode selection.
     $view_mode_options = $this->getMediaViewModes();
@@ -268,6 +299,13 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase {
    * Selects and returns the fieldset with the names in it.
    */
   public function addMoreCallback(array &$form, FormStateInterface $form_state) {
+    // Marks the fieldset so the warnings-status JS behavior can find it as
+    // a descendant of the #taxonomy-warnings-fieldset-wrapper once() is
+    // scoped to - Drupal.attachBehaviors() runs with that wrapper itself as
+    // context after the AJAX replace, and context.querySelectorAll() can
+    // never match context itself, only descendants. Also absent during the
+    // initial page load, since it's only ever set here.
+    $form['taxonomy_warnings']['#attributes']['data-warnings-just-changed'] = 'true';
     return $form['taxonomy_warnings'];
   }
 
