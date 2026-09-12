@@ -318,6 +318,129 @@ Those files are injected by Drupal so they shouldn't be bundled to style.css. */
   padding-inline: calc(var(--gutter) / 2);
 }
 
+/* Optional page background image.
+ *
+ * The URL arrives as --mukurtu-page-background-image, set inline on the page
+ * container by mukurtu_design_preprocess_page(). Nothing is written to a
+ * stylesheet, so there is no cached artifact to fall out of step with the
+ * configuration.
+ *
+ * The image sits behind the whole page - header, content and footer - the way
+ * the Plateau Peoples' Web Portal uses it. The scrim is a flat colour layer
+ * stacked over it, so anything sitting directly on the image has a known
+ * contrast rather than one that depends on the photograph.
+ *
+ * The treatment sets `color` only. It deliberately does not touch the shared
+ * palette tokens: components that carry their own background (the nav's white
+ * bar, cards, the footer) keep their own colours, and only text that actually
+ * sits on the image inherits the treatment. Recolouring everything is what
+ * made the main menu render white-on-white during development.
+ */
+.page--has-background {
+  background-image: -webkit-gradient(linear, left top, left bottom, from(var(--mukurtu-page-scrim)), to(var(--mukurtu-page-scrim))), var(--mukurtu-page-background-image);
+  background-image: linear-gradient(var(--mukurtu-page-scrim), var(--mukurtu-page-scrim)), var(--mukurtu-page-background-image);
+  background-attachment: scroll;
+  background-position: top center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+/* Scrim opacities are measured, not guessed. Against a full white-to-black
+ * gradient - the worst case any photograph can present - these give 5.74:1 for
+ * light and 7.37:1 for dark on 18-20px text, both clear of the 4.5:1 that size
+ * requires. Light has the least room: below about 54% the white text drops
+ * under 4.5:1 over a white region of the image. */
+.page--text-light {
+  --mukurtu-page-scrim: rgb(0 0 0 / 60%);
+  color: var(--color-white);
+}
+
+.page--text-dark {
+  --mukurtu-page-scrim: rgb(255 255 255 / 60%);
+  color: var(--color-black);
+}
+
+/* Let text take the treatment colour.
+ *
+ * Headings and body copy set their colour explicitly for a white ground, so
+ * they do not inherit and would keep dark text over the image - block titles
+ * measured 1.65:1 before this. `inherit` is self-correcting rather than a flat
+ * override: inside the footer it picks up --footer-text-color, inside a block
+ * that paints its own ground it picks up that block's colour, and only where
+ * text really does sit on the image does it pick up the treatment.
+ *
+ * This only ever applies on the front page, where the background lives. */
+.page--has-background h1,
+.page--has-background h2,
+.page--has-background h3,
+.page--has-background h4,
+.page--has-background p,
+.page--has-background li,
+.page--has-background dt,
+.page--has-background dd {
+  color: inherit;
+}
+
+/* Drop the block separator shadow over the image.
+ *
+ * .layout--onecol .block-wrapper carries a pale grey drop shadow to separate
+ * blocks on a white page. Over a photograph it reads as a glowing bar across
+ * the full width. The image already separates the blocks, so the shadow has no
+ * job here.
+ *
+ * The layout class is in the selector to win on specificity: the rule in
+ * _landing-page.scss is also two classes, and 04-templates is imported after
+ * 00-base, so an equally specific selector here would silently lose. */
+.page--has-background .layout--onecol .block-wrapper {
+  -webkit-box-shadow: none;
+          box-shadow: none;
+}
+
+/* Stop the treatment colour at the nav.
+ *
+ * .header-nav carries its own opaque background - a white bar at desktop, the
+ * slide-out drawer on mobile - and its links inherit their colour rather than
+ * setting it, so without this the light treatment paints white text onto that
+ * white bar. Only elements that actually inherit need this: the footer sets
+ * --footer-text-color on its own dark ground, and forcing a colour there would
+ * render it invisible.
+ *
+ * Note _nav-primary.scss reads --color-text-neutral-loud, which this theme
+ * never defines anywhere, so that declaration is invalid and those links have
+ * always inherited - see #2186. */
+.page--has-background .header-nav {
+  color: var(--brand-text-color);
+}
+
+/* At desktop the nav sits on the image rather than on its own bar, so it takes
+ * the treatment colour. Scoped to exactly the desktop state the theme defines,
+ * leaving the mobile drawer - which overlays page content - untouched.
+ *
+ * --brand-secondary-dark drives the hover colour, the hover underline and the
+ * focus outline together, so it is retuned per treatment or focus fails 1.4.11.
+ * Palette accents are not usable here: red-bone's --brand-secondary-accent
+ * measures 3.22:1 on the light scrim, under the 4.5:1 this text size needs. */
+@media (min-width: 60rem) {
+  body:not(.is-always-mobile-nav) .page--has-background .header-nav {
+    background-color: transparent;
+    color: inherit;
+  }
+}
+
+@media (min-width: 60rem) {
+  body:not(.is-always-mobile-nav) .page--has-background.page--text-light .header-nav {
+    --brand-secondary-dark: var(--color-white);
+    --main-nav-divider: rgb(255 255 255 / 45%);
+  }
+}
+
+@media (min-width: 60rem) {
+  body:not(.is-always-mobile-nav) .page--has-background.page--text-dark .header-nav {
+    --brand-secondary-dark: var(--color-black);
+    --main-nav-divider: rgb(0 0 0 / 35%);
+  }
+}
+
 div.palette-demo {
   position: relative;
   display: -webkit-box;
@@ -2016,6 +2139,12 @@ label.form-required::after,
 }
 .block--image-with-description--horizontal .block-wrapper__second {
   background-color: var(--brand-secondary);
+  /* A component that paints its own ground has to own its text colour too.
+   * Without this the text inherits from whatever is behind the block, which
+   * is fine on the plain page but renders white on tan once a page
+   * background is set. No visual change on a site with no background: this
+   * is the colour the text already inherited from body. */
+  color: var(--brand-text-color);
 }
 @media (min-width: 48rem) {
   .block--image-with-description--horizontal {
@@ -5001,6 +5130,102 @@ header {
   }
   .header__logo img {
     inline-size: 100px;
+  }
+}
+
+/* Optional header background image.
+ *
+ * The URL arrives as --mukurtu-header-background-image, set inline on the
+ * header element by mukurtu_design_preprocess_page(). The scrim is a flat
+ * colour layer stacked over the image, so the contrast of the logo and menu is
+ * decided here rather than by whichever photograph a site happens to upload.
+ *
+ * The treatment classes redefine the tokens the header's children already
+ * consume, rather than overriding their rules. That keeps the menu's own
+ * styling in charge of layout and states, and means anything added to the
+ * header later inherits a legible colour without further work.
+ */
+.site-header--has-background {
+  background-image: -webkit-gradient(linear, left top, left bottom, from(var(--mukurtu-header-scrim)), to(var(--mukurtu-header-scrim))), var(--mukurtu-header-background-image);
+  background-image: linear-gradient(var(--mukurtu-header-scrim), var(--mukurtu-header-scrim)), var(--mukurtu-header-background-image);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  /* Without this the image is barely visible behind the logo. */
+  padding-block: var(--v-space-xs);
+}
+
+/* Scrim opacities are measured, not guessed. Against a full white-to-black
+ * gradient (the worst case any photograph can present) these give 5.74:1 for
+ * light and 7.37:1 for dark on 18-20px text, both clear of the 4.5:1 that size
+ * requires. Light has little room to spare: below about 54% the white text
+ * drops under 4.5:1 over a white region.
+ *
+ * Only `color` is set, never the shared palette tokens. The nav inside the
+ * header (.header-nav) is an opaque white bar at desktop and the slide-out
+ * drawer on mobile, and its links read --color-text-neutral-loud; redefining
+ * that token here painted white text onto that white bar and made the menu
+ * disappear. Anything with its own background keeps its own colours, and only
+ * text sitting directly on the image inherits the treatment. */
+.site-header--text-light {
+  --mukurtu-header-scrim: rgb(0 0 0 / 60%);
+  color: var(--color-white);
+}
+
+.site-header--text-dark {
+  --mukurtu-header-scrim: rgb(255 255 255 / 60%);
+  color: var(--color-black);
+}
+
+/* The nav sits on the image at desktop.
+ *
+ * .header-nav is the same element in two guises: a static bar at >=lg, and the
+ * slide-out drawer below that, which overlays page content and must keep its
+ * own white background and dark text. So the transparency is scoped to exactly
+ * the desktop state the theme itself defines, and only when an image is set.
+ *
+ * Below that breakpoint, and on any site with no header image, nothing here
+ * applies and the nav renders exactly as it always has.
+ */
+.site-header--has-background .header-nav {
+  /* Covers the drawer, and stops the header's treatment colour cascading into
+   * it. Nav links inherit rather than set a colour, so without this the light
+   * treatment would paint white text onto the drawer's white background.
+   *
+   * _nav-primary.scss reads --color-text-neutral-loud, which this theme never
+   * defines anywhere, so that declaration is invalid and those links have
+   * always inherited - see #2186. */
+  color: var(--brand-text-color);
+}
+
+@media (min-width: 60rem) {
+  body:not(.is-always-mobile-nav) .site-header--has-background .header-nav {
+    background-color: transparent;
+    /* Take the treatment colour from the header again. */
+    color: inherit;
+  }
+}
+
+/* Retune the nav's interactive tokens for the scrim.
+ *
+ * --brand-secondary-dark drives the hover colour, the hover underline and the
+ * focus outline, so it has to stay legible against the scrim or focus fails
+ * 1.4.11. Flattening it to the text colour keeps all three visible; hover is
+ * still distinguishable because the underline appears. Palette accents are not
+ * usable here - red-bone's --brand-secondary-accent lands at 3.22:1 on the
+ * light scrim, under the 4.5:1 this text size needs.
+ */
+@media (min-width: 60rem) {
+  body:not(.is-always-mobile-nav) .site-header--has-background.site-header--text-light .header-nav {
+    --brand-secondary-dark: var(--color-white);
+    --main-nav-divider: rgb(255 255 255 / 45%);
+  }
+}
+
+@media (min-width: 60rem) {
+  body:not(.is-always-mobile-nav) .site-header--has-background.site-header--text-dark .header-nav {
+    --brand-secondary-dark: var(--color-black);
+    --main-nav-divider: rgb(0 0 0 / 35%);
   }
 }
 
