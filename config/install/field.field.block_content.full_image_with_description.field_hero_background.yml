@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - block_content.type.full_image_with_description
+    - field.storage.block_content.field_hero_background
+  module:
+    - options
+id: block_content.full_image_with_description.field_hero_background
+field_name: field_hero_background
+entity_type: block_content
+bundle: full_image_with_description
+label: Background
+description: 'Used when no image is chosen. With an image, the image is the background and Text Color applies instead.'
+required: true
+translatable: false
+default_value:
+  -
+    value: none
+default_value_callback: ''
+settings: {  }
+field_type: list_string

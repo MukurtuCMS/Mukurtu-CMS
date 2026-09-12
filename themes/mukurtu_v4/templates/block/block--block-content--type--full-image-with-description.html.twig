@@ -27,14 +27,32 @@
  */
 #}
 
+{% set block_entity = content['#block_content'] %}
+{#
+  Test the rendered field rather than the entity reference. Twig's sandbox
+  restricts entity access, and an empty reference list does not report itself
+  as empty the way it reads. No striptags here - an image renders as <img>
+  with no text content, which striptags would flatten to nothing.
+#}
+{% set has_image = content.field_image|render|trim is not empty %}
+
+{#
+  With an image the image is the background and field_text_color decides the
+  text treatment over it. With no image there is nothing to contrast against -
+  "Light" would be white on the white page - so field_hero_background picks a
+  ground instead and the text colour follows from it in _image-w-description.scss.
+#}
 {% set attributes = attributes.addClass([
   'block-wrapper',
   'block--image-with-description',
   'block--image-with-description--full',
-   'text-' ~ content.field_text_color|render|striptags|trim,
+  has_image
+    ? 'text-' ~ content.field_text_color|render|striptags|trim
+    : 'block--image-with-description--no-image',
+  has_image
+    ? ''
+    : 'hero-ground-' ~ content.field_hero_background|render|striptags|trim,
 ]) %}
-
-{% set block_entity = content['#block_content'] %}
 {% set title_tag = is_front ? 'h1' : 'h2' %}
 <div{{ attributes }}>
   <div class="block-wrapper__first">

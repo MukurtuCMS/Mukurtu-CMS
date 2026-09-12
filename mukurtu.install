@@ -723,3 +723,58 @@ function mukurtu_install() {
 function mukurtu_update_last_removed(): int {
   return 40029;
 }
+
+/**
+ * Add the Background option for hero blocks that have no image.
+ */
+function mukurtu_update_40031(): string {
+  $storage_name = 'field.storage.block_content.field_hero_background';
+  $field_name = 'field.field.block_content.full_image_with_description.field_hero_background';
+
+  if (\Drupal::configFactory()->get('block_content.type.full_image_with_description')->isNew()) {
+    return (string) t('The full-background hero block is not installed on this site; nothing to change.');
+  }
+
+  if (\Drupal::entityTypeManager()->getStorage('field_config')->load('block_content.full_image_with_description.field_hero_background')) {
+    return (string) t('The hero Background option is already present.');
+  }
+
+  // Import the shipped definitions rather than rebuilding them here, so the
+  // update and a fresh install cannot drift apart.
+  $source = new \Drupal\Core\Config\FileStorage(\Drupal::service('extension.list.profile')->getPath('mukurtu') . '/config/install');
+
+  // config/install states allowed_values in the documented [{value, label}]
+  // form, but FieldStorageConfig stores the older value-keyed map, and saving
+  // an entity casts against the stored shape. Installing config never hits
+  // this because the installer writes trusted data and skips the cast. Convert
+  // here rather than changing the YAML, so the shipped file stays canonical.
+  $storage_data = $source->read($storage_name);
+  $storage_data['settings']['allowed_values'] = array_column(
+    $storage_data['settings']['allowed_values'], 'label', 'value'
+  );
+
+  \Drupal\field\Entity\FieldStorageConfig::create($storage_data)->save();
+  \Drupal\field\Entity\FieldConfig::create($source->read($field_name))->save();
+
+  // Surface it on the form, and render it so the template can read it.
+  foreach ([
+    'core.entity_form_display.block_content.full_image_with_description.default' => ['type' => 'options_select', 'weight' => 29],
+    'core.entity_view_display.block_content.full_image_with_description.default' => ['type' => 'list_key', 'label' => 'hidden', 'weight' => 4],
+  ] as $display_id => $component) {
+    $display = \Drupal::configFactory()->getEditable($display_id);
+    if ($display->isNew()) {
+      continue;
+    }
+    $content = $display->get('content') ?? [];
+    $content['field_hero_background'] = $component + ['region' => 'content', 'settings' => [], 'third_party_settings' => []];
+    $dependencies = $display->get('dependencies.config') ?? [];
+    $dependencies[] = $field_name;
+    sort($dependencies);
+    $display
+      ->set('content', $content)
+      ->set('dependencies.config', array_values(array_unique($dependencies)))
+      ->save();
+  }
+
+  return (string) t('Added the Background option to the full-background hero block. Existing blocks keep their current appearance.');
+}
