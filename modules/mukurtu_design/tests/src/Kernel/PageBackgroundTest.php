@@ -120,6 +120,97 @@ class PageBackgroundTest extends KernelTestBase {
   }
 
   /**
+   * Creates a header image file and points the config at it.
+   */
+  protected function setHeaderImage(): File {
+    $file = File::create(['uri' => 'public://header.png', 'status' => 1]);
+    $file->save();
+
+    $this->config('mukurtu_design.settings')->set('header.image', (int) $file->id())->save();
+
+    return $file;
+  }
+
+  /**
+   * The header image applies on interior pages, where the page one does not.
+   */
+  public function testHeaderImageAppliesToInteriorPages(): void {
+    $this->setHeaderImage();
+
+    $result = $this->pageBackground(FALSE)->resolveHeader();
+
+    $this->assertStringEndsWith('/header.png', $result['url']);
+    $this->assertSame('light', $result['treatment']);
+  }
+
+  /**
+   * With no page background, the header image covers the front page too.
+   */
+  public function testHeaderImageAppliesToFrontPageWhenNoPageBackground(): void {
+    $this->setHeaderImage();
+
+    $this->assertNotSame([], $this->pageBackground(TRUE)->resolveHeader());
+  }
+
+  /**
+   * The page background wins on the front page.
+   *
+   * It already covers the header, so a header image there would sit on top of
+   * it. This is the rule that lets a site use one tall image on the home page
+   * and a separate short one everywhere else, which is what the Plateau
+   * Peoples' Web Portal does with bg.jpg and bg_interior.jpg.
+   */
+  public function testPageBackgroundSuppressesTheHeaderImageOnTheFrontPage(): void {
+    $this->setBackgroundImage();
+    $this->setHeaderImage();
+
+    $this->assertSame([], $this->pageBackground(TRUE)->resolveHeader(), 'Front page: page background only.');
+    $this->assertNotSame([], $this->pageBackground(TRUE)->resolve(), 'Front page still has the page background.');
+    $this->assertNotSame([], $this->pageBackground(FALSE)->resolveHeader(), 'Interior pages keep the header image.');
+    $this->assertSame([], $this->pageBackground(FALSE)->resolve(), 'Interior pages have no page background.');
+  }
+
+  /**
+   * No header image configured means no header background.
+   */
+  public function testNoHeaderImageMeansNoHeaderBackground(): void {
+    $this->assertSame([], $this->pageBackground(FALSE)->resolveHeader());
+  }
+
+  /**
+   * A deleted header file must not fatal.
+   */
+  public function testDanglingHeaderFileIsIgnored(): void {
+    $file = $this->setHeaderImage();
+    $file->delete();
+
+    $this->assertSame([], $this->pageBackground(FALSE)->resolveHeader());
+  }
+
+  /**
+   * The header treatment is independent of the page one.
+   */
+  public function testHeaderTreatmentIsSeparate(): void {
+    $this->setHeaderImage();
+    $this->config('mukurtu_design.settings')
+      ->set('background.text_treatment', 'light')
+      ->set('header.text_treatment', 'dark')
+      ->save();
+
+    $this->assertSame('dark', $this->pageBackground(FALSE)->resolveHeader()['treatment']);
+  }
+
+  /**
+   * An unrecognised header treatment falls back to the readable default.
+   */
+  public function testUnknownHeaderTreatmentFallsBackToLight(): void {
+    $this->setHeaderImage();
+    $this->config('mukurtu_design.settings')->set('header.text_treatment', 'chartreuse')->save();
+
+    $this->assertSame('light', $this->pageBackground(FALSE)->resolveHeader()['treatment']);
+  }
+
+  /**
    * The result must be cacheable per config and per front-page-ness.
    *
    * Without the url.path.is_front context the front page's answer would be

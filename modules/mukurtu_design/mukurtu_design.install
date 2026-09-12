@@ -22,13 +22,14 @@ function mukurtu_design_update_last_removed(): int {
 }
 
 /**
- * Add the page background settings, switched off until an image is chosen.
+ * Add the page and header background settings, off until images are chosen.
  */
 function mukurtu_design_update_40005(): string {
   $config = \Drupal::configFactory()
     ->getEditable(\Drupal\mukurtu_design\DesignPalette::SETTINGS);
 
   $background = (array) $config->get('background');
+  $header = (array) $config->get('header');
 
   // Seed only the keys that are genuinely absent, so re-running cannot reset a
   // site that has since configured a background, and a partially seeded site is
@@ -46,13 +47,17 @@ function mukurtu_design_update_40005(): string {
       $background[$key] = $value;
       $added[] = $key;
     }
+    if (!array_key_exists($key, $header)) {
+      $header[$key] = $value;
+      $added[] = $key;
+    }
   }
 
   if (!$added) {
-    return (string) t('The page background settings are already present.');
+    return (string) t('The background settings are already present.');
   }
 
-  $config->set('background', $background)->save();
+  $config->set('background', $background)->set('header', $header)->save();
 
-  return (string) t('Added the page background settings. No image is set, so the site is unchanged until one is uploaded.');
+  return (string) t('Added the page and header background settings. No images are set, so the site is unchanged until one is uploaded.');
 }

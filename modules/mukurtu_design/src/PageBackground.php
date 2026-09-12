@@ -21,6 +21,11 @@ final class PageBackground {
   public const USAGE_ID = 'page_background';
 
   /**
+   * The file usage id the settings form registers the header image under.
+   */
+  public const HEADER_USAGE_ID = 'header_background';
+
+  /**
    * The text treatments a site can choose between.
    *
    * Each one pairs a scrim with a text colour in the theme, so the contrast of
@@ -69,6 +74,42 @@ final class PageBackground {
     }
 
     $treatment = $config->get('background.text_treatment');
+
+    return [
+      'url' => $this->fileUrlGenerator->generateString($file->getFileUri()),
+      'treatment' => isset(self::TREATMENTS[$treatment]) ? $treatment : 'light',
+    ];
+  }
+
+  /**
+   * Returns the header background to render, if any.
+   *
+   * Unlike the page background this applies on every page, with one exception:
+   * where the front page has its own full background, that image already
+   * covers the header and a second one would sit on top of it.
+   *
+   * @return array
+   *   Either an empty array, or url and treatment as resolve() returns.
+   */
+  public function resolveHeader(): array {
+    $config = $this->configFactory->get(DesignPalette::SETTINGS);
+
+    $fid = $config->get('header.image');
+    if (empty($fid)) {
+      return [];
+    }
+
+    // The page background wins on the front page: it already covers the header.
+    if ($this->pathMatcher->isFrontPage() && !empty($config->get('background.image'))) {
+      return [];
+    }
+
+    $file = $this->entityTypeManager->getStorage('file')->load($fid);
+    if (!$file) {
+      return [];
+    }
+
+    $treatment = $config->get('header.text_treatment');
 
     return [
       'url' => $this->fileUrlGenerator->generateString($file->getFileUri()),

@@ -9,3 +9,6 @@ colors:
 background:
   image: null
   text_treatment: light
+header:
+  image: null
+  text_treatment: light

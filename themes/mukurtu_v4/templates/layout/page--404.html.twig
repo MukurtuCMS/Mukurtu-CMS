@@ -22,7 +22,11 @@
   </div>
 
 
-  <header id="header" class="site-header header" data-drupal-selector="site-header" role="banner">
+  {% set header_background = header_background_image_url|default('') %}
+  <header id="header"
+    class="site-header header{{ header_background ? ' site-header--has-background site-header--text-' ~ header_background_treatment }}"
+    {%- if header_background %} style="--mukurtu-header-background-image: url('{{ header_background }}');"{% endif %}
+    data-drupal-selector="site-header" role="banner">
     {# Site branding and main menu. #}
     {{ page.header }}
   </header>
