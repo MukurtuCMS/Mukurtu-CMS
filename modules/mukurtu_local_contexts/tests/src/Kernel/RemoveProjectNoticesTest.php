@@ -19,13 +19,6 @@ class RemoveProjectNoticesTest extends LocalContextsTestBase {
   const PROJECT_ID = '4d7d7e1a-0b2b-4b1e-9c3a-1f2e3d4c5b6a';
 
   /**
-   * The Local Contexts supported project manager.
-   *
-   * @var \Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager
-   */
-  protected $manager;
-
-  /**
    * {@inheritdoc}
    */
   protected function setUp(): void {

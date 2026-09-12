@@ -21,13 +21,6 @@ class LabelIdCollisionTest extends LocalContextsTestBase {
   const SHARED_LABEL_ID = 'shared_label';
 
   /**
-   * The Local Contexts supported project manager.
-   *
-   * @var \Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager
-   */
-  protected $manager;
-
-  /**
    * {@inheritdoc}
    */
   protected function setUp(): void {
