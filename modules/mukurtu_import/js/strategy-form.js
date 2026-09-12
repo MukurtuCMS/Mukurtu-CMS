@@ -105,6 +105,50 @@
   };
 
   /**
+   * Announces mapping table changes and restores focus after AJAX rebuilds.
+   *
+   * Add/Remove buttons partially replace the table via #ajax, which destroys
+   * the clicked Remove button and silently drops focus to <body>. This
+   * restores focus to a stable control and reports the change via a live
+   * region for screen reader users.
+   *
+   * The table element itself is what mappingTableAjaxCallback() marks with
+   * [data-mapping-just-changed] (see MukurtuImportStrategyForm.php) - not
+   * the wrapper div - because once()'s context is that wrapper div itself
+   * when Drupal.attachBehaviors() runs after the AJAX swap, and
+   * context.querySelectorAll() only matches descendants of context, never
+   * context itself. Scoping to the marked table also means this never fires
+   * for the entity type/bundle AJAX callbacks, which replace the same
+   * wrapper for an unrelated reason and don't set that attribute.
+   */
+  Drupal.behaviors.mukurtuImportStrategyMappingStatus = {
+    attach: function (context) {
+      once(
+        'mukurtu-strategy-mapping-status',
+        'table[data-mapping-just-changed]',
+        context
+      ).forEach(function (table) {
+        table.removeAttribute('data-mapping-just-changed');
+
+        const statusRegion = document.getElementById('import-field-mapping-status');
+        if (statusRegion) {
+          const rowCount = table.querySelectorAll('tbody tr').length;
+          statusRegion.textContent = Drupal.formatPlural(
+            rowCount,
+            'Mapping table updated. 1 mapping row.',
+            'Mapping table updated. @count mapping rows.'
+          );
+        }
+
+        const addButton = document.getElementById('import-add-mapping-button');
+        if (addButton) {
+          addButton.focus();
+        }
+      });
+    }
+  };
+
+  /**
    * Rebuilds the options on the identifier column select.
    *
    * @param {HTMLSelectElement} select

@@ -204,6 +204,20 @@ class MukurtuImportStrategyForm extends EntityForm {
       '#suffix' => "</div>",
     ];
 
+    // Live region announcing table changes to screen reader users. Kept
+    // outside the #prefix/#suffix wrapper above so it survives the AJAX
+    // wrapper replacement instead of being reset by it.
+    $form['mapping_status'] = [
+      '#type' => 'html_tag',
+      '#tag' => 'div',
+      '#attributes' => [
+        'id' => 'import-field-mapping-status',
+        'class' => ['visually-hidden'],
+        'aria-live' => 'polite',
+        'aria-atomic' => 'true',
+      ],
+    ];
+
     for ($delta = 0; $delta < $num_mappings; $delta++) {
       $default_source = $existing_mapping[$delta]['source'] ?? '';
       $default_target = $existing_mapping[$delta]['target'] ?? -1;
@@ -231,6 +245,9 @@ class MukurtuImportStrategyForm extends EntityForm {
         '#name' => "mapping_{$delta}_remove_button",
         '#type' => 'submit',
         '#value' => $this->t('Remove'),
+        '#attributes' => [
+          'aria-label' => $this->t('Remove mapping row @number', ['@number' => $delta + 1]),
+        ],
         '#validate' => [],
         '#submit' => ['::removeMappingSubmit'],
         '#limit_validation_errors' => [],
@@ -244,6 +261,9 @@ class MukurtuImportStrategyForm extends EntityForm {
     $form['add_mapping'] = [
       '#type' => 'submit',
       '#value' => $this->t('Add mapping'),
+      '#attributes' => [
+        'id' => 'import-add-mapping-button',
+      ],
       '#submit' => ['::addMappingCallback'],
       '#ajax' => [
         'callback' => '::mappingTableAjaxCallback',
@@ -286,6 +306,11 @@ class MukurtuImportStrategyForm extends EntityForm {
    * AJAX callback that returns the mapping table.
    */
   public function mappingTableAjaxCallback(array &$form, FormStateInterface $form_state): array {
+    // Marks the table so the mapping-status JS behavior knows this rebuild
+    // came from Add/Remove specifically, not from the entity type/bundle
+    // AJAX callbacks below, which replace the same wrapper for an unrelated
+    // reason and shouldn't steal focus or announce a table change.
+    $form['mapping']['#attributes']['data-mapping-just-changed'] = 'true';
     return $form['mapping'];
   }
 
