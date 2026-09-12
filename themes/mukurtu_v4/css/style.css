@@ -5207,8 +5207,18 @@ header {
  * Below lg the nav is the slide-out drawer, so the grid stays and branding
  * simply spans the row.
  */
+.site-header:has(.header__logo-text) {
+  /* Below lg the mobile search is pinned to grid-row 1 across columns 2 to -2,
+   * so a wide branding cell collided with it and got pushed below - putting
+   * the search above the site name. Branding takes row 1 up to the menu
+   * button, and the search moves to row 2 underneath, at its normal width. */
+}
 .site-header:has(.header__logo-text) .header__logo {
-  grid-column: 1/span 5;
+  grid-column: 1/-2;
+  grid-row: 1;
+}
+.site-header:has(.header__logo-text) .header-search--mobile {
+  grid-row: 2;
 }
 .site-header:has(.header__logo-text) {
   /* .site-header and .header are the same element, not nested, so the flex
@@ -5260,6 +5270,11 @@ header {
     -webkit-box-flex: 0;
         -ms-flex: 0 0 auto;
             flex: 0 0 auto;
+    /* Pushes the nav right. space-between already does that while the two
+     * sit side by side, but once the header wraps the nav is alone on its
+     * row and would otherwise sit hard left. */
+    -webkit-margin-start: auto;
+            margin-inline-start: auto;
     /* The drawer sets a full width for its mobile guise, which in a flex row
      * makes it claim the whole header and leaves branding nothing. */
     inline-size: auto;
