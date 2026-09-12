@@ -5191,38 +5191,42 @@ header {
  * text sitting directly on the image inherits the treatment. */
 /* Text branding needs room a logo does not.
  *
- * .header__logo is one column of a grid sized for a ~100px logo image - 77px
- * at desktop - so a wordmark wrapped into a four-line stack and pushed the
- * header to 176px tall. Widening the cell means moving where the nav starts,
- * so both are keyed off the same condition.
+ * .header__logo is one column of a grid sized for a ~100px logo image, so a
+ * wordmark stacks into several lines. Widening it means taking columns from
+ * the nav, and the nav collapses to the mobile menu once it is squeezed:
+ * measured, three columns collapses it at 1280px and two at 1100px. So the
+ * extra width is only taken at 2xl, where there is room to spare, and the
+ * nav's own grid area is never touched - moving it is what forced the
+ * collapse.
  *
  * :has() rather than a class plumbed through preprocess: the header template
  * does not know how the branding block is configured, and the theme already
- * uses :has() elsewhere. A browser without it falls back to the old narrow
- * cell, which wraps but still works.
+ * uses :has() elsewhere.
  */
+.site-header:has(.header__logo-text) {
+  /* Below lg the nav is the slide-out drawer, so the header row is the
+   * wordmark's alone and the width costs nothing. */
+}
 .site-header:has(.header__logo-text) .header__logo {
   grid-column: 1/span 5;
 }
+.site-header:has(.header__logo-text) {
+  /* From lg the desktop nav shares the row, so the cell goes back to its
+   * single column: two columns collapses the nav at 1100px and three at
+   * 1280px. A wordmark does not fit two lines in one column, so it stacks
+   * here - the alternative is losing the menu. */
+}
 @media (min-width: 60rem) {
   .site-header:has(.header__logo-text) .header__logo {
-    grid-column: 1/span 4;
+    grid-column: 1/span 1;
   }
+}
+.site-header:has(.header__logo-text) {
+  /* At 2xl there is room to spare. */
 }
 @media (min-width: 90rem) {
   .site-header:has(.header__logo-text) .header__logo {
-    grid-column: 2/span 4;
-  }
-}
-
-@media (min-width: 60rem) {
-  body:not(.is-always-mobile-nav) .site-header:has(.header__logo-text) .header-nav {
-    grid-column: 5/-1;
-  }
-}
-@media (min-width: 90rem) {
-  body:not(.is-always-mobile-nav) .site-header:has(.header__logo-text) .header-nav {
-    grid-column: 6/-1;
+    grid-column: 2/span 3;
   }
 }
 
