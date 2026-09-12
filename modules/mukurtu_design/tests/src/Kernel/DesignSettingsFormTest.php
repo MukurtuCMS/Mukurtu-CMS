@@ -67,6 +67,24 @@ class DesignSettingsFormTest extends KernelTestBase {
   }
 
   /**
+   * The colour pickers collapse unless the site is on the custom palette.
+   *
+   * Six colour inputs are a lot of form for something most sites never touch,
+   * but a site actually using the custom palette should not have to open a
+   * disclosure to reach the settings it cares about.
+   */
+  public function testColourPickersCollapseUnlessCustom(): void {
+    $build = \Drupal::formBuilder()->getForm(MukurtuDesignSettingsForm::class);
+    $this->assertSame('details', $build['colors']['#type']);
+    $this->assertFalse($build['colors']['#open'], 'Closed on a shipped palette.');
+
+    $this->config('mukurtu_design.settings')->set('palette', 'custom')->save();
+
+    $build = \Drupal::formBuilder()->getForm(MukurtuDesignSettingsForm::class);
+    $this->assertTrue($build['colors']['#open'], 'Open when the custom palette is in use.');
+  }
+
+  /**
    * The form defaults reflect stored configuration.
    */
   public function testFormReflectsStoredSettings(): void {

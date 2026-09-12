@@ -83,10 +83,14 @@ class MukurtuDesignSettingsForm extends ConfigFormBase {
       ],
     ];
 
+    // Six colour pickers are a lot of form for something most sites never
+    // touch, so this collapses out of the way - unless the site is actually on
+    // the custom palette, in which case these are the settings it cares about.
     $form['colors'] = [
-      '#type' => 'fieldset',
+      '#type' => 'details',
       '#title' => $this->t('Custom palette colors'),
       '#description' => $this->t('These colors are used when the "Custom" palette is selected above.'),
+      '#open' => $config->get('palette') === 'custom',
       '#tree' => TRUE,
     ];
     $color_labels = [
