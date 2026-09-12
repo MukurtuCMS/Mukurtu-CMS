@@ -30,7 +30,7 @@
   {{ title_prefix }}
   {{ title_suffix }}
   {% block content %}
-    <a href="/" title="Link to Home.">
+    <a href="{{ path('<front>') }}" rel="home">
       {{ content }}
     </a>
   {% endblock %}
