@@ -81,6 +81,40 @@ class TextBrandingTest extends KernelTestBase {
   }
 
   /**
+   * Text branding gets a wider grid cell than a logo image does.
+   *
+   * .header__logo is one column of a grid sized for a ~100px logo, so a
+   * wordmark wrapped into a four-line stack and pushed the header to 176px.
+   * Widening the cell means moving where the nav starts, so both are keyed
+   * off the same :has() condition and have to stay in step.
+   */
+  public function testTextBrandingWidensTheGridCell(): void {
+    $css = $this->css();
+
+    $this->assertStringContainsString('.site-header:has(.header__logo-text)', $css);
+    $this->assertMatchesRegularExpression(
+      '/\.site-header:has\(\.header__logo-text\)[^{]*\.header__logo\s*\{[^}]*grid-column/',
+      $css,
+      'The branding cell spans more columns.'
+    );
+    $this->assertMatchesRegularExpression(
+      '/:has\(\.header__logo-text\)\s+\.header-nav\s*\{[^}]*grid-column/',
+      $css,
+      'The nav starts after the widened branding cell.'
+    );
+  }
+
+  /**
+   * The name scales with the viewport rather than wrapping.
+   */
+  public function testTheNameScalesToFit(): void {
+    $this->assertMatchesRegularExpression(
+      '/\.header__logo-text\s*\{[^}]*font-size:\s*clamp\(/',
+      $this->css()
+    );
+  }
+
+  /**
    * Text branding follows the header treatment over a background image.
    *
    * The link sets its own colour, so without this it stays brand red on the

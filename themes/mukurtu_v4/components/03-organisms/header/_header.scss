@@ -34,13 +34,12 @@ header {
     }
 
     &-text {
-      font-size: var(--font-size-xl);
+      /* Scales with the viewport so a long name keeps fitting instead of
+       * wrapping into a tall stack. The ceiling is the 28px this is designed
+       * at; the floor keeps it legible on a phone. */
+      font-size: clamp(1.125rem, 1.9vw, 1.75rem);
       font-weight: 700;
-      line-height: 1.1;
-
-      @include include-media.media('>=lg') {
-        font-size: var(--font-size-2xl);
-      }
+      line-height: 1.15;
     }
 
     img {
@@ -103,6 +102,46 @@ header {
  * that token here painted white text onto that white bar and made the menu
  * disappear. Anything with its own background keeps its own colours, and only
  * text sitting directly on the image inherits the treatment. */
+/* Text branding needs room a logo does not.
+ *
+ * .header__logo is one column of a grid sized for a ~100px logo image - 77px
+ * at desktop - so a wordmark wrapped into a four-line stack and pushed the
+ * header to 176px tall. Widening the cell means moving where the nav starts,
+ * so both are keyed off the same condition.
+ *
+ * :has() rather than a class plumbed through preprocess: the header template
+ * does not know how the branding block is configured, and the theme already
+ * uses :has() elsewhere. A browser without it falls back to the old narrow
+ * cell, which wraps but still works.
+ */
+.site-header:has(.header__logo-text) {
+  .header__logo {
+    grid-column: 1 / span 5;
+  }
+
+  @include include-media.media('>=lg') {
+    .header__logo {
+      grid-column: 1 / span 4;
+    }
+  }
+
+  @include include-media.media('>=2xl') {
+    .header__logo {
+      grid-column: 2 / span 4;
+    }
+  }
+}
+
+body:not(.is-always-mobile-nav) .site-header:has(.header__logo-text) .header-nav {
+  @include include-media.media('>=lg') {
+    grid-column: 5 / -1;
+  }
+
+  @include include-media.media('>=2xl') {
+    grid-column: 6 / -1;
+  }
+}
+
 /* Text branding takes the treatment colour over an image.
  *
  * The link sets its own colour, so it would otherwise stay brand red on the
