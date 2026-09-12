@@ -5127,10 +5127,19 @@ header {
   text-decoration: none;
 }
 .header__logo-text {
-  /* Scales with the viewport so a long name keeps fitting instead of
-   * wrapping into a tall stack. The ceiling is the 28px this is designed
-   * at; the floor keeps it legible on a phone. */
-  font-size: clamp(0.875rem, 1.5vw, 1.75rem);
+  /* Two scales, because the branding cell is a very different share of the
+   * row either side of lg. Below lg the nav is a drawer, so branding has
+   * most of the width - 688px at 928px - and can run near full size. From
+   * lg it shares the row with the menu and has to be far more modest.
+   * The ceiling is the 28px this is designed at. */
+  font-size: clamp(1.25rem, 3.2vw, 1.75rem);
+}
+@media (min-width: 60rem) {
+  .header__logo-text {
+    font-size: clamp(0.875rem, 1.5vw, 1.75rem);
+  }
+}
+.header__logo-text {
   font-weight: 700;
   line-height: 1.15;
 }
