@@ -5130,7 +5130,7 @@ header {
   /* Scales with the viewport so a long name keeps fitting instead of
    * wrapping into a tall stack. The ceiling is the 28px this is designed
    * at; the floor keeps it legible on a phone. */
-  font-size: clamp(1.125rem, 1.5vw, 1.75rem);
+  font-size: clamp(0.875rem, 1.5vw, 1.75rem);
   font-weight: 700;
   line-height: 1.15;
 }
@@ -5229,26 +5229,37 @@ header {
     -webkit-box-pack: justify;
         -ms-flex-pack: justify;
             justify-content: space-between;
+    /* When the wordmark and the menu cannot sit side by side, they stack onto
+     * two rows rather than the wordmark being crushed into a narrow column.
+     * The menu stays expanded either way, which matters more than the header
+     * staying one row high. */
+    -ms-flex-wrap: wrap;
+        flex-wrap: wrap;
   }
   .site-header:has(.header__logo-text) .header__logo {
-    /* Sized to the wordmark, but able to shrink so it never pushes the nav
-     * off the row. */
-    -webkit-box-flex: 0;
-        -ms-flex: 0 1 auto;
-            flex: 0 1 auto;
-    min-inline-size: 0;
-  }
-  .site-header:has(.header__logo-text) .header-nav {
-    /* Takes the remaining space and stays shrinkable. That matters more than
-     * it looks: nav-resize.js collapses to the mobile menu by watching the
-     * primary nav <ul> wrap onto a second line. Pinned at flex: 0 0 auto the
-     * nav can never wrap, so instead of collapsing it overflowed the header
-     * and ran off the side of the page.
-     */
+    /* Takes whatever the nav leaves and wraps into it. Keeping the menu
+     * expanded matters more than keeping the wordmark on one line, so the
+     * branding is what gives way. min-inline-size lets it shrink past its
+     * content width, and break-word stops a long word forcing the row wider
+     * than the viewport. */
     -webkit-box-flex: 1;
         -ms-flex: 1 1 auto;
             flex: 1 1 auto;
-    min-inline-size: 0;
+    overflow-wrap: break-word;
+    /* Enough room for the longest word. Below this the header wraps and the
+     * wordmark gets a row of its own rather than being crushed. */
+    min-inline-size: 12rem;
+  }
+  .site-header:has(.header__logo-text) .header-nav {
+    /* Holds its natural width so it never wraps, and so nav-resize.js - which
+     * collapses to the mobile menu when the primary nav <ul> wraps onto a
+     * second line - is never triggered by branding taking room. The wordmark
+     * wraps instead. Overflow is avoided by the branding cell being able to
+     * shrink to nothing, not by squeezing the menu.
+     */
+    -webkit-box-flex: 0;
+        -ms-flex: 0 0 auto;
+            flex: 0 0 auto;
     /* The drawer sets a full width for its mobile guise, which in a flex row
      * makes it claim the whole header and leaves branding nothing. */
     inline-size: auto;

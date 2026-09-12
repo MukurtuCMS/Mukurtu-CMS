@@ -103,6 +103,11 @@ class TextBrandingTest extends KernelTestBase {
       $css,
       "The nav's mobile full width is cleared, or it claims the whole row."
     );
+    $this->assertMatchesRegularExpression(
+      '/\\.site-header:has\\(\\.header__logo-text\\)\\s*\\{[^}]*flex-wrap:\\s*wrap/',
+      $css,
+      'The header stacks rather than crushing the wordmark or dropping the menu.'
+    );
   }
 
   /**
