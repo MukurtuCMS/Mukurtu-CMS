@@ -5125,8 +5125,28 @@ header {
   display: inline-block;
   color: var(--brand-primary-dark);
   text-decoration: none;
+  /* The colour above outsells the base `a:hover` rule on specificity, so
+   * without these the wordmark had no hover affordance at all and the
+   * focus outline was its only interactive signal. The underline comes
+   * back on hover and focus so the cue is not colour alone (1.4.1). */
+}
+.header__logo a:hover, .header__logo a:focus, .header__logo a:focus-visible, .header__logo a:active {
+  color: var(--brand-secondary-dark);
+  text-decoration: underline solid 2px currentcolor;
 }
 .header__logo-text {
+  /* A long single word - a site name with no spaces, or a compound in a
+   * language that does not break - otherwise forces the header wider than
+   * the viewport. Below lg branding spans the row, so there is no flex
+   * rule to catch it; this has to apply at every width (1.4.10).
+   *
+   * `anywhere` rather than `break-word`: the two break lines identically,
+   * but only `anywhere` is taken into account when the browser works out
+   * the element's min-content width. Branding is a grid item with the
+   * default `min-width: auto`, so under `break-word` the cell was still
+   * sized to the whole unbreakable word and the page scrolled sideways -
+   * measured at 123px past a 320px viewport. */
+  overflow-wrap: anywhere;
   /* Two scales, because the branding cell is a very different share of the
    * row either side of lg. Below lg the nav is a drawer, so branding has
    * most of the width - 688px at 928px - and can run near full size. From
@@ -5136,7 +5156,17 @@ header {
 }
 @media (min-width: 60rem) {
   .header__logo-text {
-    font-size: clamp(0.875rem, 1.5vw, 1.75rem);
+    /* The floor is 18px, not 14px. Between lg and about 1200px the header
+     * has already wrapped, so branding has the whole row to itself and
+     * nothing is gained by shrinking: 1.5vw put the wordmark at 14.4px at
+     * 960px, smaller than the 16px nav links beside it, which reads as a
+     * caption rather than the site's name.
+     *
+     * 18px rather than 20px because 1.5vw passes 18px at about 1200px, so
+     * the floor stops applying before the width where branding and the nav
+     * share a row. A 20px floor was still in force at 1280px and pushed a
+     * header that fits on one line there onto two. */
+    font-size: clamp(1.125rem, 1.5vw, 1.75rem);
   }
 }
 .header__logo-text {
@@ -5279,21 +5309,28 @@ header {
     -webkit-box-flex: 1;
         -ms-flex: 1 1 auto;
             flex: 1 1 auto;
-    overflow-wrap: break-word;
     /* Enough room for the longest word. Below this the header wraps and the
      * wordmark gets a row of its own rather than being crushed. */
     min-inline-size: 12rem;
   }
   .site-header:has(.header__logo-text) .header-nav {
-    /* Holds its natural width so it never wraps, and so nav-resize.js - which
-     * collapses to the mobile menu when the primary nav <ul> wraps onto a
-     * second line - is never triggered by branding taking room. The wordmark
-     * wraps instead. Overflow is avoided by the branding cell being able to
-     * shrink to nothing, not by squeezing the menu.
+    /* Basis auto, so the nav asks for its natural width and the header wraps
+     * around it rather than squeezing it: nav-resize.js collapses to the
+     * mobile menu when the primary nav <ul> wraps onto a second line, and
+     * branding taking room should not be what triggers that. The wordmark
+     * gives way first.
+     *
+     * But shrink stays at 1. Pinned at `flex: 0 0 auto` the nav kept its
+     * 931px even when the row was narrower, so at lg (960px) it ran 19px
+     * past the viewport and the page scrolled sideways - and a text-spacing
+     * override (1.4.12) or a longer set of translated labels widened that
+     * further. Allowed to shrink, the <ul> wraps instead, which is exactly
+     * the signal nav-resize.js watches for, so the menu collapses to the
+     * drawer the way it does at any other too-narrow width (1.4.10).
      */
     -webkit-box-flex: 0;
-        -ms-flex: 0 0 auto;
-            flex: 0 0 auto;
+        -ms-flex: 0 1 auto;
+            flex: 0 1 auto;
     /* Pushes the nav right. space-between already does that while the two
      * sit side by side, but once the header wraps the nav is alone on its
      * row and would otherwise sit hard left. */
@@ -5321,6 +5358,23 @@ header {
   color: inherit;
 }
 .site-header--has-background {
+  /* The button's own outline is --brand-primary-dark, which measures 1.16:1 on
+   * the light scrim. currentcolor is the treatment colour, picked for contrast
+   * against that scrim, so the focus ring is as legible as the label it
+   * surrounds (1.4.11).
+   *
+   * `color: inherit` has to come first. A <button> does not inherit colour -
+   * the UA stylesheet gives it `buttontext` - so without this currentcolor
+   * resolved to white under both treatments, and the dark treatment drew a
+   * white ring on the white scrim at 1:1. */
+}
+.site-header--has-background .mobile-nav-button {
+  color: inherit;
+}
+.site-header--has-background .mobile-nav-button:focus, .site-header--has-background .mobile-nav-button:focus-visible {
+  outline-color: currentcolor;
+}
+.site-header--has-background {
   /* The bars are border-block-start, not a background. */
 }
 .site-header--has-background .mobile-nav-button__icon,
@@ -5336,6 +5390,11 @@ header {
  * covers both because the treatment classes set `color` on the header. */
 .site-header--has-background .header__logo a {
   color: inherit;
+  /* Same reason as the menu button: --focus-color is too light for either
+   * scrim, and currentcolor is the one value known to contrast with it. */
+}
+.site-header--has-background .header__logo a:focus, .site-header--has-background .header__logo a:focus-visible, .site-header--has-background .header__logo a:active {
+  outline-color: currentcolor;
 }
 
 .site-header--text-light {

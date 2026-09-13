@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_design\Kernel;
 
+use Drupal\Core\Render\RenderContext;
+use Drupal\Core\Template\Attribute;
 use Drupal\KernelTests\KernelTestBase;
 use PHPUnit\Framework\Attributes\Group;
 
@@ -37,12 +39,18 @@ class TextBrandingTest extends KernelTestBase {
   }
 
   /**
-   * Returns the compiled stylesheet.
+   * Returns the compiled stylesheet, with comments stripped.
+   *
+   * Sass keeps /* ... *\/ comments in the output, so a comment that quotes a
+   * declaration - "pinned at `flex: 0 0 auto` the nav kept its width" - is
+   * indistinguishable from the declaration itself to a regex. Every assertion
+   * here is about what the stylesheet does, so the prose goes first.
    */
   protected function css(): string {
     $path = \Drupal::service('extension.list.theme')->getPath('mukurtu_v4');
+    $css = file_get_contents($path . '/css/style.css');
 
-    return file_get_contents($path . '/css/style.css');
+    return preg_replace('#/\*.*?\*/#s', '', $css);
   }
 
   /**
@@ -54,6 +62,64 @@ class TextBrandingTest extends KernelTestBase {
   }
 
   /**
+   * Renders the branding template with the given parts switched on.
+   *
+   * The template is loaded by path rather than through a placed block. The
+   * theme lives inside the install profile, and a kernel test has no active
+   * profile, so theme_installer cannot reach it: core leaves $theme_list
+   * undefined in ExtensionInstallStorage and the next config save dies in
+   * schema discovery. Naming the profile instead pulls in the profile's whole
+   * config override set, which fails on unrelated keys. Rendering the file
+   * directly exercises the same Twig with none of that.
+   *
+   * The values mirror what SystemBrandingBlock::build() produces: a render
+   * array per part, with the disabled ones set to NULL.
+   */
+  protected function renderBranding(bool $logo, bool $name, bool $slogan, string $site_name = 'Test site'): string {
+    // The template calls path('<front>'), which needs a built router. Kernel
+    // tests do not build one.
+    $this->container->get('router.builder')->rebuild();
+
+    // createTemplate() rather than load(): Drupal's Twig loader only serves
+    // registered theme and module namespaces, and nothing registers a theme
+    // that has not been installed.
+    $template = $this->container->get('twig')->createTemplate($this->template());
+
+    $variables = [
+      'attributes' => new Attribute(),
+      'title_prefix' => [],
+      'title_suffix' => [],
+      'content' => [
+        'site_logo' => $logo ? ['#type' => 'html_tag', '#tag' => 'img', '#attributes' => ['src' => '/logo.svg', 'alt' => '']] : NULL,
+        'site_name' => $name ? ['#markup' => $site_name] : NULL,
+        'site_slogan' => $slogan ? ['#markup' => 'A slogan'] : NULL,
+      ],
+    ];
+
+    // The template's |render filter needs a render context to collect
+    // bubbleable metadata into, the same as any other render call.
+    return (string) $this->container->get('renderer')->executeInRenderContext(
+      new RenderContext(),
+      static fn() => $template->render($variables),
+    );
+  }
+
+  /**
+   * The site name is escaped exactly once.
+   *
+   * The template tests emptiness with |render|trim, which returns a plain
+   * string and drops the Markup wrapper. Printing that value escaped a second
+   * time, so a site called "Arts & Culture" rendered as "Arts &amp;amp;
+   * Culture". The fix is to test the rendered copy but print the original.
+   */
+  public function testTheSiteNameIsEscapedOnce(): void {
+    $markup = $this->renderBranding(FALSE, TRUE, FALSE, "Peoples' Portal & Archive");
+
+    $this->assertStringContainsString("Peoples' Portal &amp; Archive", $markup);
+    $this->assertStringNotContainsString('&amp;amp;', $markup);
+  }
+
+  /**
    * The wrapper is skipped when the site name is switched off.
    *
    * The content.site_name value is present and truthy even when the block has
@@ -61,10 +127,23 @@ class TextBrandingTest extends KernelTestBase {
    * logo. The template has to test the rendered output instead.
    */
   public function testTheWrapperIsSkippedWhenEmpty(): void {
-    $template = $this->template();
+    $markup = $this->renderBranding(TRUE, FALSE, FALSE);
 
-    $this->assertStringContainsString('content.site_name|render|trim', $template);
-    $this->assertStringNotContainsString('{% if content.site_name %}', $template);
+    $this->assertStringNotContainsString('header__logo-text', $markup);
+    $this->assertStringNotContainsString('{% if content.site_name %}', $this->template());
+  }
+
+  /**
+   * No empty link when every branding part is switched off.
+   *
+   * An <a> with no logo and no name is still a tab stop, with no accessible
+   * name and nothing to see when it takes focus (WCAG 2.4.4, 4.1.2).
+   */
+  public function testNoEmptyLinkWhenNothingIsEnabled(): void {
+    $markup = $this->renderBranding(FALSE, FALSE, FALSE);
+
+    $this->assertStringNotContainsString('<a ', $markup);
+    $this->assertStringNotContainsString('rel="home"', $markup);
   }
 
   /**
@@ -143,6 +222,91 @@ class TextBrandingTest extends KernelTestBase {
     $this->assertMatchesRegularExpression(
       '/\.header__logo-text\s*\{[^}]*font-size:\s*clamp\(/',
       $this->css()
+    );
+  }
+
+  /**
+   * A long unbreakable word cannot force the page sideways.
+   *
+   * `break-word` is not enough: it breaks lines but is ignored when the
+   * browser computes min-content width, and branding is a grid item with the
+   * default `min-width: auto`, so the cell stayed as wide as the whole word.
+   * Measured at 123px past a 320px viewport before this (WCAG 1.4.10).
+   */
+  public function testTheWordmarkCanBreakALongWord(): void {
+    $this->assertMatchesRegularExpression(
+      '/\.header__logo-text\s*\{[^}]*overflow-wrap:\s*anywhere/',
+      $this->css(),
+      'break-word does not reduce min-content width; anywhere does.'
+    );
+  }
+
+  /**
+   * The nav can shrink, so it collapses instead of overflowing.
+   *
+   * nav-resize.js swaps in the mobile drawer when the primary nav <ul> wraps.
+   * Pinned at `flex: 0 0 auto` the nav kept its 931px on a narrower row, so it
+   * ran past the viewport instead - 19px at lg, and further again under a
+   * text-spacing override (1.4.12) or a longer set of translated labels.
+   */
+  public function testTheNavCanShrinkSoItCollapses(): void {
+    $css = $this->css();
+
+    $this->assertMatchesRegularExpression(
+      '/:has\(\.header__logo-text\)[^{]*\.header-nav\s*\{[^}]*flex:\s*0\s+1\s+auto/',
+      $css,
+      'A nav that cannot shrink overflows rather than collapsing.'
+    );
+    $this->assertDoesNotMatchRegularExpression(
+      '/:has\(\.header__logo-text\)[^{]*\.header-nav\s*\{[^}]*flex:\s*0\s+0\s+auto/',
+      $css
+    );
+  }
+
+  /**
+   * Focus rings over a background image take the treatment colour.
+   *
+   * --focus-color is a light blue and --brand-primary-dark a red; both measure
+   * under 3:1 against one or other scrim, so the focus indicator failed 1.4.11
+   * exactly where the text around it passed. currentcolor is the treatment
+   * colour, which is chosen for contrast against that scrim.
+   *
+   * The menu button also needs `color: inherit`: a <button> takes `buttontext`
+   * from the UA stylesheet rather than inheriting, so currentcolor resolved to
+   * white under both treatments and drew a white ring on the white scrim.
+   */
+  public function testFocusRingsFollowTheHeaderTreatment(): void {
+    $css = $this->css();
+
+    $this->assertMatchesRegularExpression(
+      '/\.site-header--has-background\s+\.header__logo\s+a:focus[^{]*\{[^}]*outline-color:\s*currentcolor/',
+      $css,
+      "The branding link's focus ring must contrast with the scrim."
+    );
+    $this->assertMatchesRegularExpression(
+      '/\.site-header--has-background\s+\.mobile-nav-button\s*\{[^}]*color:\s*inherit/',
+      $css,
+      'Without this currentcolor on the button is not the treatment colour.'
+    );
+    $this->assertMatchesRegularExpression(
+      '/\.site-header--has-background\s+\.mobile-nav-button:focus[^{]*\{[^}]*outline-color:\s*currentcolor/',
+      $css,
+      "The menu button's focus ring must contrast with the scrim."
+    );
+  }
+
+  /**
+   * The wordmark keeps a hover and focus affordance.
+   *
+   * `.header__logo a { color }` outsells the base `a:hover` rule on
+   * specificity, so the wordmark had no hover state at all and the focus
+   * outline was its only interactive signal.
+   */
+  public function testTheWordmarkHasAHoverAffordance(): void {
+    $this->assertMatchesRegularExpression(
+      '/\.header__logo a:hover[^{]*\{[^}]*text-decoration:\s*underline/',
+      $this->css(),
+      'The cue must not be colour alone (WCAG 1.4.1).'
     );
   }
 
