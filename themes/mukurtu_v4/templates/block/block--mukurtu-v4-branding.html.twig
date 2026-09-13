@@ -3,35 +3,54 @@
  * @file
  * Theme override to display branding block.
  *
+ * Renders the branding parts by name, the way core's own branding template
+ * does, rather than printing content as one blob. The site name needs a hook
+ * of its own: with the logo toggled off it was emitted as a bare text node and
+ * fell back to ordinary link styling - 16px, regular weight, underlined.
+ *
  * Available variables:
  * - plugin_id: The ID of the block implementation.
  * - label: The configured label of the block if visible.
  * - configuration: A list of the block's configuration values.
- *   - label: The configured label for the block.
- *   - label_display: The display settings for the label.
- *   - provider: The module or other provider that provided this block plugin.
- *   - Block plugin specific settings will also be stored here.
  * - in_preview: Whether the plugin is being rendered in preview mode.
  * - content: The content of this block.
- * - attributes: array of HTML attributes populated by modules, intended to
- *   be added to the main container tag of this template.
- *   - id: A valid HTML ID and guaranteed unique.
- * - title_attributes: Same as attributes, except applied to the main title
- *   tag that appears in the template.
- * - title_prefix: Additional output populated by modules, intended to be
- *   displayed in front of the main title tag that appears in the template.
- * - title_suffix: Additional output populated by modules, intended to be
- *   displayed after the main title tag that appears in the template.
+ * - attributes: array of HTML attributes populated by modules.
+ * - title_attributes: Same as attributes, except applied to the main title tag.
+ * - title_prefix: Additional output populated by modules.
+ * - title_suffix: Additional output populated by modules.
  *
  * @see template_preprocess_block()
  */
 #}
+{#
+  Test emptiness on the rendered output, but print the original: content.*
+  is present and truthy even when the block has that part switched off, while
+  |render|trim returns a plain string and loses the Markup wrapper, so
+  printing it would escape a second time - a site name like "Arts & Culture"
+  came out as "Arts &amp;amp; Culture".
+#}
+{% set has_logo = content.site_logo|render|trim is not empty %}
+{% set has_name = content.site_name|render|trim is not empty %}
+{% set has_slogan = content.site_slogan|render|trim is not empty %}
+
 <div{{ attributes.addClass("header__logo") }}>
   {{ title_prefix }}
   {{ title_suffix }}
   {% block content %}
-    <a href="{{ path('<front>') }}" rel="home">
-      {{ content }}
-    </a>
+    {#
+      Only emit the link when it has something to name it. Without this an
+      empty <a> is still a tab stop with no accessible name and no size.
+    #}
+    {% if has_logo or has_name %}
+      <a href="{{ path('<front>') }}" rel="home">
+        {{ content.site_logo }}
+        {% if has_name %}
+          <span class="header__logo-text">{{ content.site_name }}</span>
+        {% endif %}
+      </a>
+    {% endif %}
+    {% if has_slogan %}
+      <span class="header__logo-slogan">{{ content.site_slogan }}</span>
+    {% endif %}
   {% endblock %}
 </div>
