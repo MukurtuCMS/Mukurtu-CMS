@@ -1,0 +1,82 @@
+# The main "fully-described" Place item for the accessibility program.
+# Reuses the Community/Protocol bootstrapped by the accessibility_demo_content
+# recipe (see this recipe's own recipe.yml "recipes:" prerequisite), and
+# reuses several taxonomy terms and media from that recipe and the person
+# demo recipe rather than creating near-duplicates. See ../../README.md.
+_meta:
+  version: '1.0'
+  entity_type: node
+  uuid: 833ea7b3-8646-45e5-8493-a0932b5d18de
+  bundle: place
+  default_langcode: en
+  depends:
+    f994153d-2ad5-4824-bd96-47880b1a1dea: media
+    9942587c-1bc3-481a-9f68-264b728c598e: media
+    80af4173-fb4b-4640-bbae-55ed5df92de6: media
+    8a542133-c71a-46b9-9590-d60d7d724ab0: paragraph
+    85761b41-5e78-4f25-b92d-6037efcbf7e9: node
+    438477b0-5348-4c2d-a2dd-4effa784398a: taxonomy_term
+    a153b9f5-f2ab-4d27-8306-aea67943618b: taxonomy_term
+    9b7c9130-61a7-4ee7-9fd9-3d23a0e68904: taxonomy_term
+default:
+  title:
+    -
+      value: 'Sample Place (Accessibility Demo)'
+  status:
+    -
+      value: true
+  promote:
+    -
+      value: false
+  sticky:
+    -
+      value: false
+  uid:
+    -
+      target_id: 1
+  revision_uid:
+    -
+      target_id: 1
+  moderation_state:
+    -
+      value: published
+  path:
+    -
+      alias: '/accessibility-demo/sample-place'
+      langcode: en
+  field_cultural_protocols:
+    -
+      sharing_setting: all
+      protocols: '|1|'
+  field_media_assets:
+    -
+      entity: f994153d-2ad5-4824-bd96-47880b1a1dea
+    -
+      entity: 9942587c-1bc3-481a-9f68-264b728c598e
+    -
+      entity: 80af4173-fb4b-4640-bbae-55ed5df92de6
+  field_keywords:
+    -
+      entity: a153b9f5-f2ab-4d27-8306-aea67943618b
+  field_place_type:
+    -
+      entity: 438477b0-5348-4c2d-a2dd-4effa784398a
+  field_location:
+    -
+      entity: 9b7c9130-61a7-4ee7-9fd9-3d23a0e68904
+  field_other_place_names:
+    -
+      entity: 9b7c9130-61a7-4ee7-9fd9-3d23a0e68904
+  field_sections:
+    -
+      entity: 8a542133-c71a-46b9-9590-d60d7d724ab0
+  field_related_content:
+    -
+      entity: 85761b41-5e78-4f25-b92d-6037efcbf7e9
+  field_coverage_description:
+    -
+      value: 'Placeholder coverage description: a generic, non-specific location used only for accessibility testing.'
+      format: plain_text
+  field_coverage:
+    -
+      value: 'POINT (-98.5795 39.828175)'
