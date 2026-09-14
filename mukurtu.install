@@ -10,6 +10,7 @@ use Drupal\block_content\Entity\BlockContent;
 use Drupal\user\Entity\Role;
 use Drupal\menu_link_content\Entity\MenuLinkContent;
 use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\shortcut\Entity\Shortcut;
 use Drupal\captcha\Entity\CaptchaPoint;
 
@@ -706,6 +707,93 @@ function mukurtu_install() {
     }
   }
 
+}
+
+/**
+ * Add the Display style field to Featured Content blocks.
+ */
+function mukurtu_update_40032(): string {
+  $messages = [];
+
+  // The config/install copy writes allowed_values as a list of value/label
+  // pairs, which is what the config schema expects. FieldStorageConfig stores
+  // the same data as a value-keyed map and casts on save, so passing the
+  // config/install shape here throws. The two are not interchangeable; see
+  // docs/update-hooks.md.
+  if (!FieldStorageConfig::loadByName('block_content', 'field_display_style')) {
+    FieldStorageConfig::create([
+      'field_name' => 'field_display_style',
+      'entity_type' => 'block_content',
+      'type' => 'list_string',
+      'cardinality' => 1,
+      'translatable' => TRUE,
+      'settings' => [
+        'allowed_values' => [
+          'grid' => 'Grid',
+          'carousel' => 'Carousel',
+        ],
+        'allowed_values_function' => '',
+      ],
+    ])->save();
+    $messages[] = 'created the field_display_style storage';
+  }
+
+  if (!FieldConfig::loadByName('block_content', 'featured_content', 'field_display_style')) {
+    FieldConfig::create([
+      'field_name' => 'field_display_style',
+      'entity_type' => 'block_content',
+      'bundle' => 'featured_content',
+      'label' => 'Display style',
+      'description' => 'Choose how featured items are arranged.',
+      'required' => TRUE,
+      'translatable' => FALSE,
+      // Existing blocks keep rendering exactly as they do now. Only a site
+      // that deliberately switches a block over gets the carousel.
+      'default_value' => [['value' => 'grid']],
+    ])->save();
+    $messages[] = 'added Display style to Featured Content';
+  }
+
+  // Existing blocks have no value for a field that did not exist when they
+  // were saved, and an empty required list field renders nothing rather than
+  // falling back to the default. Backfill so they stay grids.
+  $storage = \Drupal::entityTypeManager()->getStorage('block_content');
+  $ids = $storage->getQuery()
+    ->accessCheck(FALSE)
+    ->condition('type', 'featured_content')
+    ->notExists('field_display_style')
+    ->execute();
+  if ($ids) {
+    foreach ($storage->loadMultiple($ids) as $block) {
+      $block->set('field_display_style', 'grid');
+      $block->save();
+    }
+    $messages[] = sprintf('set %d existing block(s) to Grid', count($ids));
+  }
+
+  $form_display = \Drupal::entityTypeManager()
+    ->getStorage('entity_form_display')
+    ->load('block_content.featured_content.default');
+  if ($form_display && !$form_display->getComponent('field_display_style')) {
+    $form_display->setComponent('field_display_style', [
+      'type' => 'options_buttons',
+      'weight' => 2,
+      'region' => 'content',
+    ])->save();
+    $messages[] = 'showed the field on the block form';
+  }
+
+  // The value drives the wrapper markup, so it must not also render as a
+  // field inside the block.
+  $view_display = \Drupal::entityTypeManager()
+    ->getStorage('entity_view_display')
+    ->load('block_content.featured_content.default');
+  if ($view_display && $view_display->getComponent('field_display_style')) {
+    $view_display->removeComponent('field_display_style')->save();
+    $messages[] = 'hid the field from the block display';
+  }
+
+  return $messages ? ucfirst(implode('; ', $messages)) . '.' : 'Display style was already present; nothing to do.';
 }
 
 /**

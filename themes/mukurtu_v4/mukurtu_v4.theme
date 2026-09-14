@@ -150,6 +150,59 @@ function mukurtu_v4_preprocess_block__inline_block__media_carousel_block(array &
 }
 
 /**
+ * Implements hook_preprocess_HOOK() for featured content blocks.
+ *
+ * The block can render as a grid (the default, and what every existing block
+ * keeps) or as a carousel. Splide needs a
+ * .splide__track > .splide__list > .splide__slide structure and will not mount
+ * without it, so the referenced entities are rendered one at a time here and
+ * the template wraps each in its own slide. That mirrors
+ * mukurtu_v4_preprocess_block__inline_block__media_carousel_block() above.
+ *
+ * Rendering is skipped entirely for a grid, so the default path costs nothing.
+ */
+function mukurtu_v4_preprocess_block__block_content__type__featured_content(array &$variables): void {
+  /** @var \Drupal\block_content\BlockContentInterface|null $block_content */
+  $block_content = $variables['content']['#block_content'] ?? NULL;
+  $variables['display_style'] = 'grid';
+
+  if (!$block_content || !$block_content->hasField('field_display_style')) {
+    return;
+  }
+
+  $style = $block_content->get('field_display_style')->value;
+  if ($style !== 'carousel') {
+    return;
+  }
+
+  if (!$block_content->hasField('field_featured_content') || $block_content->get('field_featured_content')->isEmpty()) {
+    return;
+  }
+
+  $items = [];
+  $view_builder = \Drupal::entityTypeManager()->getViewBuilder('node');
+  $repository = \Drupal::service('entity.repository');
+  foreach ($block_content->get('field_featured_content')->referencedEntities() as $entity) {
+    if (!$entity->access('view')) {
+      continue;
+    }
+    // Show the translation matching the current page, not whichever language
+    // the reference happens to resolve to.
+    $items[] = $view_builder->view($repository->getTranslationFromContext($entity), 'featured');
+  }
+
+  // A carousel of one is just an item. Leaving it as a grid avoids shipping
+  // controls that have nowhere to go.
+  if (count($items) < 2) {
+    return;
+  }
+
+  $variables['display_style'] = 'carousel';
+  $variables['featured_items'] = $items;
+  $variables['#attached']['library'][] = 'mukurtu_v4/featured-content-carousel';
+}
+
+/**
  * Implements hook_theme_suggestions_page_alter().
  */
 function mukurtu_v4_theme_suggestions_page_alter(array &$suggestions, array $variables) {

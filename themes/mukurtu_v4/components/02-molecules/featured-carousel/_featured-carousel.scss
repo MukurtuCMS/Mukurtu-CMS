@@ -1,0 +1,99 @@
+@use "../../../external/include-media";
+
+/**
+ * Carousel display for the Featured Content block.
+ *
+ * The cards themselves are styled in _featured-items.scss, shared with the
+ * grid display. Everything here is the carousel shell: the track, and the
+ * controls that sit under it.
+ */
+
+.featured-carousel {
+  max-inline-size: 80rem; // Matches the grid's cap, so both styles line up.
+  margin-inline: auto;
+
+  // Splide measures the track before its CSS has necessarily applied, and an
+  // unmounted .splide__list is a plain <ul>. Without this the slides stack
+  // vertically for a frame and the block jumps on load.
+  .splide__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .featured-carousel__slide {
+    // One card per slide, centred, and capped at the same width the grid caps
+    // its cards at. Without the cap the card stretches to the full block width
+    // and its 4:3 media well becomes about 1280x960 on a desktop - a single
+    // item taller than the viewport.
+    display: flex;
+    justify-content: center;
+
+    article {
+      inline-size: 100%;
+      max-inline-size: 24rem;
+    }
+  }
+}
+
+.featured-carousel__controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--v-space-5xs);
+  margin-block-start: var(--v-space-5xs);
+  flex-wrap: wrap;
+}
+
+.featured-carousel__status {
+  // Tabular figures stop the row shifting as the number changes.
+  font-variant-numeric: tabular-nums;
+  font-size: var(--font-size-s);
+  color: var(--color-text-neutral-medium, #565656);
+  margin: 0;
+  min-inline-size: 8ch;
+  text-align: center;
+}
+
+.featured-carousel__button {
+  // 44px, so the controls clear the WCAG 2.5.5 target size on touch.
+  min-inline-size: 2.75rem;
+  min-block-size: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding-inline: var(--v-space-5xs);
+  border: 1.5px solid var(--brand-primary);
+  border-radius: 4px;
+  background: var(--color-white);
+  color: var(--brand-primary-dark);
+  font-size: var(--font-size-m);
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 0.12s ease-in, color 0.12s ease-in;
+
+  &:hover {
+    background: var(--brand-primary);
+    color: var(--color-white);
+  }
+
+  &:focus-visible {
+    // --focus-color is too light to meet 1.4.11 on a white ground; see #2199.
+    // currentcolor is the button's own text colour, already chosen to contrast
+    // with its fill.
+    outline: 2px solid currentcolor;
+    outline-offset: 2px;
+  }
+
+  @media (forced-colors: active) {
+    border: 2px solid buttontext;
+  }
+}
+
+.featured-carousel__button--toggle {
+  // Wider than the arrows, because it holds a word rather than a glyph, and
+  // the word changes length between Pause and Play.
+  padding-inline: var(--v-space-4xxs);
+  font-size: var(--font-size-s);
+}
