@@ -1,0 +1,34 @@
+# Grants the admin account (uid 1, the owner of the Sample Community) the
+# "community_manager" OG role on that community. Creating a Community
+# through this recipe's content API does not automatically grant that role
+# the way the Community-add form's submit handler does, but the Protocol
+# entity below requires its creator to hold it (see
+# ProtocolCommunitySelection). Assumes the Sample Community gets ID 1 on a
+# fresh install; see ../../README.md.
+_meta:
+  version: '1.0'
+  entity_type: og_membership
+  uuid: 98ad8da0-05e3-4689-8615-be599517ebd2
+  bundle: default
+  default_langcode: en
+  depends:
+    df5dbc8d-e098-4879-aded-9f4b07031197: community
+default:
+  uid:
+    -
+      target_id: 1
+  entity_type:
+    -
+      value: community
+  entity_bundle:
+    -
+      value: community
+  entity_id:
+    -
+      value: '1'
+  state:
+    -
+      value: active
+  roles:
+    -
+      target_id: 'community-community-community_manager'
