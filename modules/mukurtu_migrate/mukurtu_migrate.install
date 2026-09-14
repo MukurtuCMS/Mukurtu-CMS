@@ -20,3 +20,24 @@
 function mukurtu_migrate_update_last_removed(): int {
   return 40002;
 }
+
+/**
+ * Stop the user migration from overwriting the submission service account.
+ */
+function mukurtu_migrate_update_40201(): ?string {
+  // Only touch the config if it still holds the old plain "uid: uid"
+  // pipeline; a site that has already customized this migration's process
+  // pipeline is left alone.
+  $config = \Drupal::configFactory()->getEditable('migrate_plus.migration.mukurtu_cms_v3_users');
+  if ($config->isNew() || $config->get('process.uid') !== 'uid') {
+    return NULL;
+  }
+
+  $config->set('process.uid', [
+    'plugin' => 'skip_service_account_uid',
+    'source' => 'uid',
+  ]);
+  $config->save();
+
+  return (string) t('Updated the mukurtu_cms_v3_users migration so it can no longer merge a legacy user onto the Submission Forms service account when their uids collide.');
+}
