@@ -20,7 +20,9 @@ abstract class LocalContextsTestBase extends MukurtuKernelTestBase {
     'field',
     'file',
     'filter',
+    'geofield',
     'image',
+    'leaflet',
     'media',
     'node',
     'og',
@@ -67,20 +69,15 @@ abstract class LocalContextsTestBase extends MukurtuKernelTestBase {
     $this->installEntitySchema('node');
     $this->installEntitySchema('path_alias');
     $this->installSchema('node', ['node_access']);
+    // The other mukurtu_local_contexts tables are already installed by
+    // MukurtuKernelTestBase::setUp().
     $this->installSchema('mukurtu_local_contexts', [
-      'mukurtu_local_contexts_supported_projects',
-      'mukurtu_local_contexts_projects',
-      'mukurtu_local_contexts_labels',
-      'mukurtu_local_contexts_notices',
-      'mukurtu_local_contexts_label_translations',
-      'mukurtu_local_contexts_notice_translations',
       'mukurtu_local_contexts_purge_log',
     ]);
     // Note: the 'queue' table is deliberately not installed here - core's
-    // DatabaseQueue creates it lazily on first use (ensureTableExists()),
-    // it no longer has a hook_schema() entry to install.
-    $this->installSchema('system', ['sequences']);
-
+    // DatabaseQueue creates it lazily on first use (ensureTableExists()), it
+    // no longer has a hook_schema() entry to install. 'system.sequences' is
+    // already installed by MukurtuKernelTestBase::setUp().
     NodeType::create([
       'type' => static::TEST_BUNDLE,
       'name' => 'Legacy Test Content',

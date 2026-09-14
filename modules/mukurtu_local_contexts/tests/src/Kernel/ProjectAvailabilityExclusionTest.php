@@ -29,6 +29,7 @@ class ProjectAvailabilityExclusionTest extends LocalContextsTestBase {
     return Node::create([
       'type' => static::TEST_BUNDLE,
       'title' => $this->randomString(),
+      'field_cultural_protocols' => "all({$this->protocol->id()})",
     ]);
   }
 

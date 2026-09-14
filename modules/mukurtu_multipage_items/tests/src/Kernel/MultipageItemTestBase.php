@@ -23,6 +23,7 @@ abstract class MultipageItemTestBase extends CollectionTestBase {
     'filter',
     'geofield',
     'image',
+    'leaflet',
     'media',
     'node',
     'node_access_test',

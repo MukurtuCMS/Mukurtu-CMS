@@ -33,6 +33,7 @@ abstract class PlaceTestBase extends MukurtuKernelTestBase {
     'geofield',
     'image',
     'layout_builder',
+    'leaflet',
     'link',
     'media',
     'media_library',
