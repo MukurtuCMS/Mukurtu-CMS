@@ -1,0 +1,6 @@
+collection-organization-form:
+  js:
+    js/collection-organization-form.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
