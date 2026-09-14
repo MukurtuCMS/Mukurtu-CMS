@@ -19,6 +19,10 @@ When a new page type or interactive component ships, add it here and to the spec
 | Collection page | first collection from browse | Sub-collection nav |
 | Community page | first community from list | |
 | Dictionary word | first word from browse | Tab panels, audio player |
+| Local Contexts directory | `/local-contexts` | Site-wide LC projects directory, no permission check |
+| Access denied | `/mukurtu/access-denied` | Custom 403 page visitors land on from protocol-gated links |
+| Community Local Contexts directory | discovered from `/communities` | Per-community LC directory |
+| Protocol Local Contexts directory | discovered via a community's protocol link | Per-protocol LC directory; no public protocol listing page exists, so this is found by visiting a discovered community first |
 
 Item pages are discovered from the browse listings at run time so the spec works against any site with default content seeded (`default-content.spec.ts`).
 
@@ -34,8 +38,24 @@ Item pages are discovered from the browse listings at run time so the spec works
 | Collection page (member view) | discovered from `/collections` | |
 | Community page (member view) | discovered from `/communities` | |
 | Dictionary word (member view) | discovered from `/dictionary` | Tabs, audio |
+| Member dashboard | `/dashboard/mukurtu_dashboard` | Default dashboard config entity, any logged-in member |
+| Notifications | `/notifications` | Views page (`mukurtu_notifications_page`), any authenticated user |
 
 Member scans use the account in `A11Y_USERNAME`/`A11Y_PASSWORD` (default `admin`/`admin`). Use a regular community/protocol member account for representative results — admin accounts add Drupal-toolbar noise, and on protocol-heavy sites only members can reach the gated item pages.
+
+## Pages — manage-adjacent (non-admin roles)
+
+Pages reachable by non-admin community/protocol roles (Community Managers, protocol contributors/curators/stewards via a custom `_mukurtu_role` requirement or OG permissions) — not a plain member page, and not part of the admin/authoring (ATAG) surface excluded below.
+
+| Page | Path | Notes |
+|---|---|---|
+| Content (VBO dashboard) | `/admin/content` | Reachable by protocol contributor/curator/steward roles, not just admins |
+| People list | `/admin/people/list` | Community Managers, via OG `manage members` permission |
+| Create user | `/admin/communities/create-user` | Community Managers |
+| Community Local Contexts projects | discovered from `/communities` | Community Managers/Protocol Stewards |
+| Protocol Local Contexts projects | discovered via a community's protocol link | Community Managers/Protocol Stewards |
+
+Manage scans use the account in `A11Y_MANAGER_USERNAME`/`A11Y_MANAGER_PASSWORD` (default `admin`/`admin`). As with member scans, a real Community Manager account gives more representative results than the admin fallback.
 
 ## High-risk interactive components
 
