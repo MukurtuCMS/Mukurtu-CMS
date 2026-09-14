@@ -6,6 +6,10 @@
 ((Drupal, once) => {
   'use strict';
 
+  // Mirrors the `lg` breakpoint in _breakpoints.scss, where this menu
+  // switches from a stacked/accordion layout to an inline row.
+  const isDesktopViewport = window.matchMedia('(min-width: 60rem)');
+
   /**
    * Updates the aria-expanded attribute and visual state.
    *
@@ -88,14 +92,14 @@
     if (!('ontouchstart' in window)) {
       // Handle hover on the entire menu item (desktop only)
       menuItem.addEventListener('mouseover', () => {
-        if (!wasOpenedByClick) {
+        if (!wasOpenedByClick && isDesktopViewport.matches) {
           updateDropdownState(toggleButton, menuItem, true);
         }
       });
 
       // Handle mouse leave on the entire menu item (desktop only)
       menuItem.addEventListener('mouseout', () => {
-        if (!wasOpenedByClick) {
+        if (!wasOpenedByClick && isDesktopViewport.matches) {
           updateDropdownState(toggleButton, menuItem, false);
         }
       });

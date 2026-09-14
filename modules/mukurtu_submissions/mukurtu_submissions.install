@@ -174,3 +174,85 @@ function mukurtu_submissions_uninstall(): void {
 function mukurtu_submissions_update_last_removed(): int {
   return 40014;
 }
+
+/**
+ * Match the submission coverage map to the other content types (#2153).
+ */
+function mukurtu_submissions_update_40201(): ?string {
+  // Keep the docblock above to one line: Drupal renders it verbatim as this
+  // update's description on update.php and in `drush updatedb:status`.
+  //
+  // The submission form's coverage map had drifted from the six other
+  // geofield_mukurtu displays: no circle drawing tool, centred on 0,0 in the
+  // Gulf of Guinea rather than the shared 20,10 world view, and missing
+  // singlePointZoom. The update hooks that set those values only ever touched
+  // the bundles that existed when each was written, and every test named the
+  // same six, so nothing ever looked at the seventh.
+  //
+  // 4.0.1 corrected the shipped config, which fixes new installs. This is the
+  // other half.
+  //
+  // Each value is only changed where it still holds the old default, which
+  // protects a site that moved its map somewhere meaningful. Be clear about
+  // the limit of that, though: it only distinguishes intent where the
+  // deliberate value differs from the old default.
+  //
+  // A centre of 45,-100 is obviously chosen and is left alone. A centre of 0,0
+  // is indistinguishable from the old default, and drawCircle is worse still,
+  // because FALSE is both the old default and the only way to express a
+  // deliberate "off". Those cases are set to the shipped value regardless of
+  // intent, on the same reasoning as #2160: converge on the documented default
+  // and tell the operator what changed so they can put it back.
+  $display = \Drupal::entityTypeManager()
+    ->getStorage('entity_form_display')
+    ->load('node.digital_heritage.submission');
+  if (!$display) {
+    return NULL;
+  }
+
+  $component = $display->getComponent('field_coverage');
+  if (!$component || ($component['type'] ?? NULL) !== 'geofield_mukurtu') {
+    // A site that swapped the widget has made a deliberate choice about this
+    // field; nothing here applies to it.
+    return NULL;
+  }
+
+  // YAML gives these back as floats, ints or strings depending on how they
+  // were written, and the shipped files quote them. Compare loosely so an
+  // unquoted 0.0 and a quoted '0' both count as the old default.
+  $isOldDefault = static function ($value, $old): bool {
+    return $value !== NULL && (string) (float) $value === (string) (float) $old;
+  };
+
+  $changed = [];
+  $position = &$component['settings']['map']['map_position'];
+  $toolbar = &$component['settings']['toolbar'];
+
+  if ($isOldDefault($position['center']['lat'] ?? NULL, 0)) {
+    $position['center']['lat'] = '20';
+    $changed[] = 'centre latitude';
+  }
+  if ($isOldDefault($position['center']['lon'] ?? NULL, 0)) {
+    $position['center']['lon'] = '10';
+    $changed[] = 'centre longitude';
+  }
+  if (!isset($position['singlePointZoom'])) {
+    $position['singlePointZoom'] = '12';
+    $changed[] = 'single point zoom';
+  }
+  if (isset($toolbar['drawCircle']) && !$toolbar['drawCircle']) {
+    $toolbar['drawCircle'] = TRUE;
+    $changed[] = 'circle drawing tool';
+  }
+  unset($position, $toolbar);
+
+  if (empty($changed)) {
+    return NULL;
+  }
+
+  $display->setComponent('field_coverage', $component)->save();
+
+  return (string) t('Updated the submission form coverage map to match the other content types: @changed. Any of these a site had already customised were left alone.', [
+    '@changed' => implode(', ', $changed),
+  ]);
+}
