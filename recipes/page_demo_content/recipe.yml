@@ -1,0 +1,10 @@
+name: 'Basic page demo content'
+description: >-
+  Creates one fully-described Basic page item so the accessibility program
+  has a real, rendered Basic page to test against on Tugboat and local
+  builds. See README.md in this directory for what this recipe reuses and
+  what it intentionally leaves out.
+type: 'Content'
+recipes:
+  - accessibility_demo_content
+install: []

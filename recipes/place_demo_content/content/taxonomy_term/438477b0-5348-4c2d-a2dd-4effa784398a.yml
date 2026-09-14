@@ -1,0 +1,13 @@
+_meta:
+  version: '1.0'
+  entity_type: taxonomy_term
+  uuid: 438477b0-5348-4c2d-a2dd-4effa784398a
+  bundle: place_type
+  default_langcode: en
+default:
+  name:
+    -
+      value: 'Sample Place Type'
+  status:
+    -
+      value: true
