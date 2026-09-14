@@ -4,8 +4,15 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_landing_page\Kernel;
 
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Config\FileStorage;
+use Drupal\Core\Plugin\Context\Context;
+use Drupal\Core\Plugin\Context\ContextDefinition;
+use Drupal\Core\Plugin\Context\EntityContext;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\language\Entity\ConfigurableLanguage;
+use Drupal\mukurtu_landing_page\DefaultLandingPage;
+use Drupal\node\Entity\Node;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
@@ -29,7 +36,9 @@ class DefaultLandingPageTest extends KernelTestBase {
     'block',
     'block_content',
     'layout_builder',
+    'layout_builder_restrictions',
     'layout_discovery',
+    'views',
     'path',
     'path_alias',
     'menu_ui',
@@ -110,6 +119,11 @@ class DefaultLandingPageTest extends KernelTestBase {
     $landing_page_storage = new FileStorage($this->root . '/profiles/mukurtu/modules/mukurtu_landing_page/config/install');
     $this->importConfigEntity($landing_page_storage, 'node.type.landing_page', 'node_type');
     $this->importConfigEntity($landing_page_storage, 'field.field.node.landing_page.layout_builder__layout', 'field_config');
+
+    // The display carries the shipped Layout Builder default section (the
+    // block headings this test suite is about) - createDefaultLandingPage()
+    // patches its hero/featured components rather than writing to the node.
+    $this->importConfigEntity($landing_page_storage, 'core.entity_view_display.node.landing_page.default', 'entity_view_display');
   }
 
   /**
@@ -141,20 +155,32 @@ class DefaultLandingPageTest extends KernelTestBase {
   }
 
   /**
-   * Extracts block_content UUIDs referenced by a landing page's layout.
+   * Loads the landing page display's shipped Layout Builder sections.
    *
-   * @param \Drupal\node\NodeInterface $node
-   *   The landing page node.
+   * @return \Drupal\layout_builder\Section[]
+   *   The display's 'layout_builder.sections' third-party setting, hydrated
+   *   into Section objects (as the entity API returns them at runtime -
+   *   unlike \Drupal\Core\Config\Config::get(), which would return the raw
+   *   array form actually stored in config).
+   */
+  protected function getDisplaySections(): array {
+    $storage = $this->container->get('entity_type.manager')->getStorage('entity_view_display');
+    $storage->resetCache(['node.landing_page.default']);
+    /** @var \Drupal\layout_builder\Entity\LayoutBuilderEntityViewDisplay $display */
+    $display = $storage->load('node.landing_page.default');
+    return $display->getSections();
+  }
+
+  /**
+   * Extracts block_content UUIDs referenced by the landing page display.
    *
    * @return array
-   *   The block_content UUIDs referenced by the node's Layout Builder
-   *   section, keyed by component UUID.
+   *   The block_content UUIDs referenced by the display's shipped Layout
+   *   Builder section, keyed by component UUID.
    */
-  protected function getBlockUuidsFromLayout($node): array {
+  protected function getBlockUuidsFromLayout(): array {
     $uuids = [];
-    /** @var \Drupal\layout_builder\Section[] $sections */
-    $sections = $node->get('layout_builder__layout')->getSections();
-    foreach ($sections as $section) {
+    foreach ($this->getDisplaySections() as $section) {
       foreach ($section->getComponents() as $component) {
         $id = $component->get('configuration')['id'] ?? '';
         if (str_starts_with($id, 'block_content:')) {
@@ -166,20 +192,15 @@ class DefaultLandingPageTest extends KernelTestBase {
   }
 
   /**
-   * Extracts inline block component configurations from a landing page layout.
-   *
-   * @param \Drupal\node\NodeInterface $node
-   *   The landing page node.
+   * Extracts inline block component configurations from the display.
    *
    * @return array
    *   Component configuration arrays for every 'inline_block:*' component,
    *   keyed by component UUID.
    */
-  protected function getInlineComponentsFromLayout($node): array {
+  protected function getInlineComponentsFromLayout(): array {
     $components = [];
-    /** @var \Drupal\layout_builder\Section[] $sections */
-    $sections = $node->get('layout_builder__layout')->getSections();
-    foreach ($sections as $section) {
+    foreach ($this->getDisplaySections() as $section) {
       foreach ($section->getComponents() as $component) {
         $configuration = $component->get('configuration');
         if (str_starts_with($configuration['id'] ?? '', 'inline_block:')) {
@@ -217,7 +238,7 @@ class DefaultLandingPageTest extends KernelTestBase {
     $first_node = $service->createDefaultLandingPage();
     $this->assertNotNull($first_node);
 
-    $first_block_uuids = $this->getBlockUuidsFromLayout($first_node);
+    $first_block_uuids = $this->getBlockUuidsFromLayout();
     $this->assertNotEmpty($first_block_uuids);
 
     $first_block_storage = $this->container->get('entity_type.manager')->getStorage('block_content');
@@ -227,7 +248,9 @@ class DefaultLandingPageTest extends KernelTestBase {
     $second_node = $service->createDefaultLandingPage();
     $this->assertNotNull($second_node);
 
-    // A new landing page node is created each time - that is expected.
+    // A new landing page node is created each time - that is expected. The
+    // shared display's Layout Builder defaults are patched in place, not
+    // duplicated, regardless of how many homepage nodes get created.
     $this->assertNotSame($first_node->id(), $second_node->id());
 
     $second_block_storage = $this->container->get('entity_type.manager')->getStorage('block_content');
@@ -236,7 +259,7 @@ class DefaultLandingPageTest extends KernelTestBase {
     $second_count = count($second_block_storage->loadMultiple());
     $this->assertSame(4, $second_count, 'The second call must not create duplicate block_content entities.');
 
-    $second_block_uuids = $this->getBlockUuidsFromLayout($second_node);
+    $second_block_uuids = $this->getBlockUuidsFromLayout();
     $this->assertNotEmpty($second_block_uuids);
 
     // The set of reusable block_content UUIDs referenced must be identical -
@@ -245,9 +268,12 @@ class DefaultLandingPageTest extends KernelTestBase {
     sort($second_block_uuids);
     $this->assertSame($first_block_uuids, $second_block_uuids);
 
+    // The display's shipped section is never duplicated across calls.
+    $this->assertCount(1, $this->getDisplaySections());
+
     // Featured Content is placed as a non-reusable inline block, so its
     // "Configure" dialog embeds the block form (the "Select Content" browser).
-    $first_inline = $this->getInlineComponentsFromLayout($first_node);
+    $first_inline = $this->getInlineComponentsFromLayout();
     $this->assertCount(1, $first_inline);
     $featured_config = reset($first_inline);
     $this->assertSame('inline_block:featured_content', $featured_config['id']);
@@ -264,7 +290,7 @@ class DefaultLandingPageTest extends KernelTestBase {
     $this->assertFalse($featured_revision->isReusable());
 
     // The second call reuses the same featured block.
-    $second_inline = $this->getInlineComponentsFromLayout($second_node);
+    $second_inline = $this->getInlineComponentsFromLayout();
     $this->assertCount(1, $second_inline);
     $this->assertSame($featured_uuid, $this->resolveInlineBlockUuid(reset($second_inline)));
 
@@ -282,8 +308,8 @@ class DefaultLandingPageTest extends KernelTestBase {
     /** @var \Drupal\mukurtu_landing_page\DefaultLandingPage $service */
     $service = \Drupal::service('mukurtu_landing_page.default_landing_page');
 
-    $first_node = $service->createDefaultLandingPage();
-    $first_block_uuids = $this->getBlockUuidsFromLayout($first_node);
+    $service->createDefaultLandingPage();
+    $first_block_uuids = $this->getBlockUuidsFromLayout();
 
     /** @var \Drupal\block_content\BlockContentStorageInterface $block_storage */
     $block_storage = $this->container->get('entity_type.manager')->getStorage('block_content');
@@ -298,13 +324,13 @@ class DefaultLandingPageTest extends KernelTestBase {
     $block_storage->resetCache();
     $this->assertCount(3, $block_storage->loadMultiple());
 
-    $second_node = $service->createDefaultLandingPage();
+    $service->createDefaultLandingPage();
     $block_storage->resetCache();
 
     // The deleted block was recreated, not duplicated - back to 4 total.
     $this->assertCount(4, $block_storage->loadMultiple());
 
-    $second_block_uuids = $this->getBlockUuidsFromLayout($second_node);
+    $second_block_uuids = $this->getBlockUuidsFromLayout();
 
     // The untouched reusable blocks kept their original UUIDs (reused).
     $untouched_first = array_diff($first_block_uuids, [$deleted_uuid]);
@@ -320,9 +346,73 @@ class DefaultLandingPageTest extends KernelTestBase {
     $this->assertFalse($new_featured_block->isReusable(), 'The recreated Featured Content block must be non-reusable.');
 
     // The layout's inline Featured Content component references the new block.
-    $second_inline = $this->getInlineComponentsFromLayout($second_node);
+    $second_inline = $this->getInlineComponentsFromLayout();
     $this->assertCount(1, $second_inline);
     $this->assertSame($new_featured_block->uuid(), $this->resolveInlineBlockUuid(reset($second_inline)));
+  }
+
+  /**
+   * Tests that the display's block headings are reachable by Config Translation.
+   */
+  public function testDisplayLabelsAreTranslatable(): void {
+    $this->container->get('module_installer')->install(['language', 'config_translation']);
+    ConfigurableLanguage::createFromLangcode('fr')->save();
+
+    /** @var \Drupal\mukurtu_landing_page\DefaultLandingPage $service */
+    $service = \Drupal::service('mukurtu_landing_page.default_landing_page');
+    $service->createDefaultLandingPage();
+
+    \Drupal::languageManager()->getLanguageConfigOverride('fr', 'core.entity_view_display.node.landing_page.default')
+      ->set('third_party_settings.layout_builder.sections.0.components.' . DefaultLandingPage::FEATURED_COMPONENT_UUID . '.configuration.label', 'Contenu en vedette')
+      ->save();
+
+    $storage = \Drupal::entityTypeManager()->getStorage('entity_view_display');
+    $original_language = \Drupal::languageManager()->getConfigOverrideLanguage();
+    \Drupal::languageManager()->setConfigOverrideLanguage(\Drupal::languageManager()->getLanguage('fr'));
+    $storage->resetCache(['node.landing_page.default']);
+    /** @var \Drupal\layout_builder\Entity\LayoutBuilderEntityViewDisplay $translated_display */
+    $translated_display = $storage->load('node.landing_page.default');
+    $translated_label = $translated_display->getSection(0)
+      ->getComponent(DefaultLandingPage::FEATURED_COMPONENT_UUID)
+      ->get('configuration')['label'] ?? NULL;
+    \Drupal::languageManager()->setConfigOverrideLanguage($original_language);
+    $storage->resetCache(['node.landing_page.default']);
+
+    $this->assertSame('Contenu en vedette', $translated_label, 'A language config override for the display changes the rendered label.');
+  }
+
+  /**
+   * Tests that a fresh, un-overridden landing_page node shows the defaults.
+   */
+  public function testUnoverriddenNodeUsesDisplayDefaults(): void {
+    /** @var \Drupal\mukurtu_landing_page\DefaultLandingPage $service */
+    $service = \Drupal::service('mukurtu_landing_page.default_landing_page');
+    // Populate the display's defaults (and their block_content references)
+    // without creating a node via the service, by calling it once and then
+    // creating an entirely separate, plain landing_page node.
+    $service->createDefaultLandingPage();
+
+    $plain_node = Node::create([
+      'type' => 'landing_page',
+      'title' => 'A custom landing page',
+      'status' => TRUE,
+      'uid' => 1,
+    ]);
+    $plain_node->save();
+
+    // The node's own override field is empty - it was never written to.
+    $this->assertTrue($plain_node->get('layout_builder__layout')->isEmpty());
+
+    $display = \Drupal::entityTypeManager()->getStorage('entity_view_display')->load('node.landing_page.default');
+    $section_storage = \Drupal::service('plugin.manager.layout_builder.section_storage')
+      ->findByContext([
+        'entity' => EntityContext::fromEntity($plain_node),
+        'display' => EntityContext::fromEntity($display),
+        'view_mode' => new Context(new ContextDefinition('string'), 'default'),
+      ], new CacheableMetadata());
+    $this->assertNotNull($section_storage, 'A section storage is found for an un-overridden landing_page node.');
+    $this->assertGreaterThan(0, $section_storage->count(), 'The un-overridden node falls back to the display defaults rather than showing a blank layout.');
+    $this->assertSame('Featured Content', $section_storage->getSection(0)->getComponent(DefaultLandingPage::FEATURED_COMPONENT_UUID)->get('configuration')['label']);
   }
 
 }

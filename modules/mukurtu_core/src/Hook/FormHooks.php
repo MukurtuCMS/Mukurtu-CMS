@@ -3,6 +3,7 @@
 namespace Drupal\mukurtu_core\Hook;
 
 use Drupal\Core\Block\BlockPluginInterface;
+use Drupal\Core\Entity\EntityFormInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Hook\Attribute\Hook;
@@ -730,7 +731,8 @@ class FormHooks
      * Implements hook_form_FORM_ID_alter() for 'user-form'.
      *
      * Hides 'Administrator' option from the Roles selection for Mukurtu Managers
-     * so that they cannot assign the admin role.
+     * so that they cannot assign the admin role, and makes the email address
+     * optional (#2163).
      */
     #[Hook("form_user_form_alter")]
     public function formUserFormAlter(
@@ -742,6 +744,43 @@ class FormHooks
         if ($currentUser->hasRole("mukurtu_manager")) {
             if (isset($form["account"]["roles"]["#options"]["administrator"])) {
                 unset($form["account"]["roles"]["#options"]["administrator"]);
+            }
+        }
+
+        // Email is optional on this form (#2163). Core requires it here unless
+        // the account already has none and the editor can administer users, so
+        // /admin/people/create lets you omit it while the edit form will not
+        // let you remove it. Mukurtu supports community members who have no
+        // email address, so the two forms should agree.
+        //
+        // This is only half the change: the mail base field also carries core's
+        // UserMailRequired constraint, which re-applies the same rule at
+        // validation time. Clearing #required alone would move the failure from
+        // the form to the save. See
+        // mukurtu_core_entity_base_field_info_alter().
+        //
+        // Deliberately scoped to the edit operation. "user_form" is the *base*
+        // form id for RegisterForm as well as UserForm, so this hook also fires
+        // for /user/register, and without this guard anonymous signup would
+        // stop asking for an address at all. That would leave self-registered
+        // accounts with no way to reset a password and no way to be contacted.
+        $operation = $form_state->getFormObject() instanceof EntityFormInterface
+            ? $form_state->getFormObject()->getOperation()
+            : NULL;
+        if ($operation !== "register" && isset($form["account"]["mail"])) {
+            $form["account"]["mail"]["#required"] = FALSE;
+
+            // Warn rather than block. Losing the address costs the account its
+            // password reset and every notification, which is a real choice a
+            // site may still want to make deliberately.
+            foreach (
+                array_keys($form["actions"] ?? []) as $action
+            ) {
+                if (isset($form["actions"][$action]["#type"])
+                    && $form["actions"][$action]["#type"] === "submit") {
+                    $form["actions"][$action]["#submit"][] =
+                        "mukurtu_core_warn_on_missing_email";
+                }
             }
         }
 
