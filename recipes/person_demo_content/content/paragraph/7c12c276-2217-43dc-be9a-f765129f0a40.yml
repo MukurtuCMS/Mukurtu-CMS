@@ -1,0 +1,15 @@
+_meta:
+  version: '1.0'
+  entity_type: paragraph
+  uuid: 7c12c276-2217-43dc-be9a-f765129f0a40
+  bundle: formatted_text_with_title
+  default_langcode: en
+default:
+  field_title:
+    -
+      value: 'Biography (placeholder)'
+  field_body:
+    -
+      value: |
+        <p>This is placeholder biography text for a sample Person, created only to test accessibility of the rendered page &mdash; section titles, paragraphs, and reading order.</p>
+      format: basic_html
