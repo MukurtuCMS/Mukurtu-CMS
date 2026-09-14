@@ -1,0 +1,10 @@
+name: 'Place demo content'
+description: >-
+  Creates one fully-described Place item so the accessibility program has a
+  real, rendered Place page (including a populated map field) to test
+  against on Tugboat and local builds. See README.md in this directory for
+  the assumptions this recipe makes and what it intentionally leaves out.
+type: 'Content'
+recipes:
+  - accessibility_demo_content
+install: []

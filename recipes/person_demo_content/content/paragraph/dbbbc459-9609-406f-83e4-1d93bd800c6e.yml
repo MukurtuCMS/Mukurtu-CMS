@@ -1,0 +1,16 @@
+_meta:
+  version: '1.0'
+  entity_type: paragraph
+  uuid: dbbbc459-9609-406f-83e4-1d93bd800c6e
+  bundle: related_person
+  default_langcode: en
+  depends:
+    6adc222f-763e-4dba-8e9d-49196dd79630: node
+    9a17d4a8-421d-4646-b9d6-afe1c0321745: taxonomy_term
+default:
+  field_related_person:
+    -
+      entity: 6adc222f-763e-4dba-8e9d-49196dd79630
+  field_relationship_type:
+    -
+      entity: 9a17d4a8-421d-4646-b9d6-afe1c0321745

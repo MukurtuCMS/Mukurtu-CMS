@@ -1,0 +1,67 @@
+# The "fully-described" Article item for the accessibility program. Also
+# used as a target for other recipes' "Related content" fields (Digital
+# Heritage, Collection, Person, Place, Dictionary Word) so those
+# relationships render as real links for accessibility testing.
+# See ../../README.md.
+_meta:
+  version: '1.0'
+  entity_type: node
+  uuid: 85761b41-5e78-4f25-b92d-6037efcbf7e9
+  bundle: article
+  default_langcode: en
+  depends:
+    4bcaac48-ddf0-4dab-87ae-27edd59c03bb: file
+    298c0286-34f6-4b00-8495-bc0e840be802: taxonomy_term
+    a153b9f5-f2ab-4d27-8306-aea67943618b: taxonomy_term
+    893ab887-eb7d-477b-964d-470e848e5544: taxonomy_term
+default:
+  title:
+    -
+      value: 'Sample Related Story (placeholder)'
+  status:
+    -
+      value: true
+  promote:
+    -
+      value: false
+  sticky:
+    -
+      value: false
+  uid:
+    -
+      target_id: 1
+  revision_uid:
+    -
+      target_id: 1
+  moderation_state:
+    -
+      value: published
+  path:
+    -
+      alias: '/accessibility-demo/sample-related-story'
+      langcode: en
+  body:
+    -
+      value: |
+        <h2>A sample heading</h2>
+        <p>This is placeholder body text used only to test accessibility of headings, paragraphs, lists, and links on a related content page.</p>
+        <ul>
+          <li>Sample list item one</li>
+          <li>Sample list item two</li>
+        </ul>
+        <p>Here is a <a href="/">sample link back to the homepage</a> for link-text testing.</p>
+      format: basic_html
+      summary: 'Placeholder article created for accessibility testing.'
+  field_article_category:
+    -
+      entity: 298c0286-34f6-4b00-8495-bc0e840be802
+  field_article_keywords:
+    -
+      entity: a153b9f5-f2ab-4d27-8306-aea67943618b
+    -
+      entity: 893ab887-eb7d-477b-964d-470e848e5544
+  field_article_image:
+    -
+      entity: 4bcaac48-ddf0-4dab-87ae-27edd59c03bb
+      alt: 'A generated placeholder photograph of a woven basket with a brown gradient background, used only for accessibility testing.'
+      title: ''
