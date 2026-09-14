@@ -463,7 +463,7 @@ div.palette-demo--custom {
 @font-face {
   font-family: BCSans;
   font-style: normal;
-  src: url("../fonts/BCSans-Regular.woff2") format("woff2"), url("..fonts/BCSans-Regular.woff") format("woff");
+  src: url("../fonts/BCSans-Regular.woff2") format("woff2"), url("../fonts/BCSans-Regular.woff") format("woff");
 }
 @font-face {
   font-family: BCSans;
@@ -4049,7 +4049,7 @@ body.is-always-mobile-nav .header-nav::before {
           column-gap: var(--v-space-2xs);
   inline-size: 100%;
   margin: 0;
-  margin-block: var(--v-space-2xs);
+  margin-block: var(--v-space-4xxs);
   -webkit-padding-start: 0;
           padding-inline-start: 0;
 }
@@ -4069,12 +4069,17 @@ body.is-always-mobile-nav .header-nav::before {
 .account-menu__menu-item {
   position: relative;
   list-style: none;
-  min-inline-size: 100%;
 }
-@media (max-width: 59.9rem) {
-  .account-menu__menu-item * {
-    float: inline-start;
-  }
+.account-menu__menu-item.account-menu__menu-item--has-children {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  gap: var(--v-space-5xs);
 }
 .account-menu__menu-item .menu__account-submenu {
   display: none;
@@ -4084,24 +4089,14 @@ body.is-always-mobile-nav .header-nav::before {
   -webkit-padding-start: var(--v-space-3xs);
           padding-inline-start: var(--v-space-3xs);
   inline-size: 100%;
+  -ms-flex-preferred-size: 100%;
+      flex-basis: 100%;
 }
 @media (min-width: 60rem) {
-  .account-menu__menu-item {
-    min-inline-size: auto;
-  }
   .account-menu__menu-item.account-menu__menu-item--level-1 .account-menu__menu-link--level-1 {
     padding: var(--v-space-5xs);
     display: block;
     min-block-size: 100%;
-  }
-  .account-menu__menu-item.account-menu__menu-item--has-children {
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    -webkit-box-align: center;
-        -ms-flex-align: center;
-            align-items: center;
-    gap: var(--v-space-5xs);
   }
   .account-menu__menu-item.account-menu__menu-item--has-children .menu__account-submenu {
     position: absolute;
@@ -4117,6 +4112,12 @@ body.is-always-mobile-nav .header-nav::before {
   }
   .account-menu__menu-item.account-menu__menu-item--has-children .menu__account-submenu .account-menu__menu-item {
     display: block;
+  }
+}
+@media (max-width: 59.9rem) {
+  .account-menu__menu-item.account-menu__menu-item--expanded {
+    -ms-flex-preferred-size: 100%;
+        flex-basis: 100%;
   }
 }
 @media (min-width: 60rem) {
@@ -4147,14 +4148,10 @@ body.is-always-mobile-nav .header-nav::before {
           justify-content: center;
   -webkit-transition: all 0.12s ease-in;
   transition: all 0.12s ease-in;
-  -webkit-margin-start: var(--v-space-5xs);
-          margin-inline-start: var(--v-space-5xs);
 }
 @media (min-width: 60rem) {
   .account-menu__button-toggle {
     min-block-size: 100%;
-    -webkit-margin-start: 0;
-            margin-inline-start: 0;
   }
 }
 .account-menu__button-toggle:hover, .account-menu__button-toggle:focus {
@@ -7788,12 +7785,38 @@ header {
      -moz-column-gap: var(--v-space-2xs);
           column-gap: var(--v-space-2xs);
 }
-.layout-container .page__account-menu .region > *:first-child {
-  grid-column: 2;
+@media (max-width: 59.9rem) {
+  .layout-container .page__account-menu .region {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-wrap: wrap;
+        flex-wrap: wrap;
+  }
+}
+@media (max-width: 59.9rem) {
+  .layout-container .page__account-menu .region > *:first-child {
+    -webkit-box-flex: 1;
+        -ms-flex: 1 1 auto;
+            flex: 1 1 auto;
+    min-inline-size: 0;
+  }
+}
+@media (min-width: 60rem) {
+  .layout-container .page__account-menu .region > *:first-child {
+    grid-column: 2;
+  }
 }
 .layout-container .page__account-menu .region .language-switcher {
   grid-column: 3;
   justify-self: end;
+}
+@media (max-width: 59.9rem) {
+  .layout-container .page__account-menu .region .language-switcher {
+    -webkit-box-flex: 0;
+        -ms-flex: 0 0 auto;
+            flex: 0 0 auto;
+  }
 }
 .layout-container .page__account-menu .region .language-switcher svg path {
   fill: var(--color-white);
