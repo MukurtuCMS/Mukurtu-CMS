@@ -4,3 +4,10 @@ content-warnings:
   dependencies:
     - core/drupal
     - core/once
+
+content-warnings-settings-form:
+  js:
+    js/content-warnings-settings-form.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
