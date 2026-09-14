@@ -5,6 +5,11 @@ a tagged release; see the
 [releases page](https://github.com/MukurtuCMS/Mukurtu-CMS/releases) for the tags
 themselves.
 
+## 4.0.2
+
+A maintenance release with bug fixes and accessibility improvements. No
+special upgrade steps are required; update as usual.
+
 ## 4.0.1
 
 A maintenance release with no new features. It removes the database updates that
