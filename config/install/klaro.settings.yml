@@ -1,7 +1,8 @@
 langcode: en
 deletable_cookie_domains: {  }
 exclude_urls: {  }
-disable_urls: {  }
+disable_urls:
+  - '^\/visitors'
 styles:
   - light
 dialog_mode: silent

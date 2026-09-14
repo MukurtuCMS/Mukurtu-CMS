@@ -113,6 +113,39 @@ class EnableChartsForVisitorsUpdateTest extends KernelTestBase {
   }
 
   /**
+   * Visitors report pages are added to Klaro's disable_urls.
+   *
+   * Registering the klaro_app alone is not enough - klaro's hook_js_alter()
+   * still rewrites a required app's script into a placeholder, and nothing
+   * re-triggers Drupal.attachBehaviors() for the AJAX-inserted placeholder to
+   * resolve it. disable_urls is what actually stops the rewriting.
+   */
+  public function testAddsVisitorsToKlaroDisabledUrls(): void {
+    \Drupal::service('module_installer')->install(['visitors', 'klaro']);
+
+    mukurtu_core_update_40202();
+
+    $this->assertContains(
+      '^\/visitors',
+      \Drupal::config('klaro.settings')->get('disable_urls'),
+      'Klaro will still block scripts on the Visitors report pages.'
+    );
+  }
+
+  /**
+   * Running it twice does not duplicate the disable_urls entry.
+   */
+  public function testDisabledUrlsEntryNotDuplicated(): void {
+    \Drupal::service('module_installer')->install(['visitors', 'klaro']);
+
+    mukurtu_core_update_40202();
+    mukurtu_core_update_40202();
+
+    $disable_urls = \Drupal::config('klaro.settings')->get('disable_urls');
+    $this->assertCount(1, array_keys($disable_urls, '^\/visitors', TRUE));
+  }
+
+  /**
    * A site without Klaro is not touched, and does not error.
    */
   public function testSkipsKlaroWhenNotEnabled(): void {

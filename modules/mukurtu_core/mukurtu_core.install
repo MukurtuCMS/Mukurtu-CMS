@@ -178,18 +178,38 @@ function mukurtu_core_update_40202(): ?string {
 
   // Separately: Klaro (block_unknown: true) treats charts_chartjs's
   // CDN-loaded Chart.js scripts as an unrecognized third-party resource and
-  // silently blocks them, since nothing registers a Klaro service for them.
-  // config/install/klaro.klaro_app.charts_chartjs.yml covers a fresh install,
-  // but an existing site never replays config/install, so create the same
-  // config entity here if it's missing. Guarded on klaro being enabled too:
-  // getStorage('klaro_app') throws if the entity type doesn't exist.
+  // rewrites them into inert placeholders via hook_js_alter(). Registering a
+  // required klaro_app (config/install/klaro.klaro_app.charts_chartjs.yml)
+  // is not enough on its own: hook_js_alter() still substitutes a placeholder
+  // for any matched app, required or not, and Klaro's client-side JS never
+  // gets a chance to auto-load it, because the Views AJAX response that
+  // inserts these scripts (visitors' "chart" report link) never re-triggers
+  // Drupal.attachBehaviors() for the new placeholders the way a normal page
+  // load would. The klaro_app entity is still created below (useful bookkeeping
+  // if Chart.js is ever used somewhere Klaro does process normally), but what
+  // actually fixes the report page is klaro.settings:disable_urls, which
+  // hook_js_alter() checks before doing any rewriting at all
+  // (KlaroHelper::onDisabledUri(), matched against the current request URI -
+  // which for this AJAX endpoint is /visitors/_report/..., not
+  // /visitors/location, so the pattern has to match on a "/visitors" prefix
+  // rather than that one specific page). Guarded on klaro being enabled:
+  // getStorage('klaro_app') throws if the entity type doesn't exist, and
+  // klaro.settings wouldn't mean anything without the module either.
   if ($module_handler->moduleExists('klaro')) {
     $klaro_app_storage = \Drupal::entityTypeManager()->getStorage('klaro_app');
     if (!$klaro_app_storage->load('charts_chartjs')) {
       $config_path = \Drupal::service('extension.list.profile')->getPath('mukurtu') . '/config/install/klaro.klaro_app.charts_chartjs.yml';
       $values = \Drupal\Core\Serialization\Yaml::decode(file_get_contents($config_path));
       $klaro_app_storage->create($values)->save();
-      $messages[] = (string) t('Registered Chart.js as a required Klaro service so it is no longer blocked as an unknown third-party resource.');
+      $messages[] = (string) t('Registered Chart.js as a required Klaro service.');
+    }
+
+    $klaro_settings = \Drupal::configFactory()->getEditable('klaro.settings');
+    $disable_urls = $klaro_settings->get('disable_urls') ?? [];
+    if (!in_array('^\/visitors', $disable_urls, TRUE)) {
+      $disable_urls[] = '^\/visitors';
+      $klaro_settings->set('disable_urls', $disable_urls)->save();
+      $messages[] = (string) t('Stopped Klaro from blocking scripts on Visitors report pages.');
     }
   }
 
