@@ -23,6 +23,7 @@ class MukurtuContentWarningsSettingsFormAccessibilityTest extends KernelTestBase
     'field',
     'file',
     'filter',
+    'geofield',
     'image',
     'leaflet',
     'media',
