@@ -14,7 +14,9 @@ label: 'User accounts'
 source:
   plugin: d7_non_admin_user
 process:
-  uid: uid
+  uid:
+    plugin: skip_service_account_uid
+    source: uid
   name: name
   pass: pass
   mail: mail

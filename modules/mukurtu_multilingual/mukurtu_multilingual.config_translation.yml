@@ -1,0 +1,7 @@
+mukurtu_landing_page_layout:
+  title: 'Landing page layout'
+  class: '\Drupal\mukurtu_multilingual\LandingPageLayoutConfigMapper'
+  base_route_name: 'entity.entity_view_display.node.default'
+  names:
+    - core.entity_view_display.node.landing_page.default
+  weight: 20
