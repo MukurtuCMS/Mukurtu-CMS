@@ -32,6 +32,9 @@ mapping:
   -
     source: 'Default translation'
     target: '-1'
+  -
+    source: UUID
+    target: uuid
 configuration:
   delimiter: ','
   enclosure: '"'
