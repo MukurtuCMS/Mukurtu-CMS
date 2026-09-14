@@ -1,0 +1,11 @@
+// Overrides for the third-party ALTCHA bot-protection widget's own bundled
+// styles (modules/contrib/altcha), which we don't control.
+
+// ALTCHA's own CSS sets opacity: .7 on the "Protected by ALTCHA" footer,
+// which drops its rgb(70, 70, 70) text (a fine 9.44:1 against white on its
+// own) to an effective ~4.06:1 -- below WCAG 1.4.3's 4.5:1 minimum for
+// normal-size text. The color itself has plenty of margin; only the
+// opacity is the problem, so removing it is the minimal fix.
+.altcha-footer {
+  opacity: 1 !important;
+}
