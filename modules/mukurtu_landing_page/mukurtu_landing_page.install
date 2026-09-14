@@ -1,4 +1,7 @@
 <?php
+
+use Drupal\Core\Config\FileStorage;
+
 /**
  * Implements hook_update_last_removed().
  *
@@ -13,4 +16,58 @@
  */
 function mukurtu_landing_page_update_last_removed(): int {
   return 40006;
+}
+
+/**
+ * Ships translatable landing page block headings; existing homepages keep their current layout until reverted to defaults.
+ */
+function mukurtu_landing_page_update_40201(): string {
+  $config_factory = \Drupal::configFactory();
+  $display_config = $config_factory->getEditable('core.entity_view_display.' . \Drupal\mukurtu_landing_page\DefaultLandingPage::DISPLAY_ID);
+  if ($display_config->isNew()) {
+    return t('No landing_page default display found; nothing to update.');
+  }
+
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_landing_page');
+  $shipped = (new FileStorage($module_path . '/config/install'))
+    ->read('core.entity_view_display.node.landing_page.default');
+  $sections = $shipped['third_party_settings']['layout_builder']['sections'] ?? [];
+  if (empty($sections[0]['components'])) {
+    return t('Shipped landing_page display config has no Layout Builder sections; nothing to update.');
+  }
+
+  // Point the shipped hero/featured components at this site's own blocks
+  // (tracked since the original install), not the fresh-install placeholders.
+  $state_uuids = \Drupal::state()->get('mukurtu_landing_page.default_blocks', []);
+  $block_storage = \Drupal::entityTypeManager()->getStorage('block_content');
+  $unresolved = [];
+
+  $hero_uuid = $state_uuids['hero'] ?? NULL;
+  $hero_block = $hero_uuid ? current($block_storage->loadByProperties(['uuid' => $hero_uuid])) : NULL;
+  if ($hero_block) {
+    $sections[0]['components'][\Drupal\mukurtu_landing_page\DefaultLandingPage::HERO_COMPONENT_UUID]['configuration']['id'] = 'block_content:' . $hero_block->uuid();
+  }
+  else {
+    $unresolved[] = 'hero';
+  }
+
+  $featured_uuid = $state_uuids['featured'] ?? NULL;
+  $featured_block = $featured_uuid ? current($block_storage->loadByProperties(['uuid' => $featured_uuid])) : NULL;
+  if ($featured_block) {
+    $sections[0]['components'][\Drupal\mukurtu_landing_page\DefaultLandingPage::FEATURED_COMPONENT_UUID]['configuration']['block_id'] = (int) $featured_block->id();
+    $sections[0]['components'][\Drupal\mukurtu_landing_page\DefaultLandingPage::FEATURED_COMPONENT_UUID]['configuration']['block_revision_id'] = (int) $featured_block->getRevisionId();
+  }
+  else {
+    $unresolved[] = 'featured';
+  }
+
+  $display_config
+    ->set('third_party_settings.layout_builder.sections', $sections)
+    ->save();
+
+  if ($unresolved) {
+    return t('Landing page display defaults updated, but could not resolve this site\'s own %blocks block(s) - check core.entity_view_display.node.landing_page.default manually. Existing homepage nodes are unaffected; use "Revert to defaults" on a node\'s Layout tab to pick up the new translatable headings.', ['%blocks' => implode(', ', $unresolved)]);
+  }
+
+  return t('Landing page display defaults updated with translatable block headings. Existing homepage nodes keep their current layout; use "Revert to defaults" on a node\'s Layout tab to pick up the change.');
 }

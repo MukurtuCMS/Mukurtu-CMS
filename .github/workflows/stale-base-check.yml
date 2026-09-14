@@ -42,7 +42,7 @@ jobs:
     if: github.event_name != 'pull_request' || github.event.action != 'closed' || github.event.pull_request.merged == true
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Determine which open PRs to check
         id: targets
