@@ -4,14 +4,22 @@ dependencies:
   config:
     - block_content.type.featured_content
     - entity_browser.browser.mukurtu_content_browser
+    - field.field.block_content.featured_content.field_display_style
     - field.field.block_content.featured_content.field_featured_content
   module:
     - entity_browser
+    - options
 id: block_content.featured_content.default
 targetEntityType: block_content
 bundle: featured_content
 mode: default
 content:
+  field_display_style:
+    type: options_buttons
+    weight: 2
+    region: content
+    settings: {  }
+    third_party_settings: {  }
   field_featured_content:
     type: entity_browser_entity_reference
     weight: 1
@@ -37,7 +45,7 @@ content:
     third_party_settings: {  }
   langcode:
     type: language_select
-    weight: 2
+    weight: 3
     region: content
     settings:
       include_locked: true

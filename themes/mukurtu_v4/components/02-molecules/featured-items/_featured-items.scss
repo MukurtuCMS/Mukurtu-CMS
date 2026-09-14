@@ -11,13 +11,29 @@
   padding-block-end: var(--v-space-s);
 }
 
+// Grid layout. Kept separate from the card styling below, which is shared
+// with the carousel display - a carousel's slides are laid out by Splide, so
+// it must not inherit `display: grid`.
 .field--name-field-featured-content,
 .field--name-field-all-related-content .field__items {
   margin-block: var(--v-space-4xxs);
   display: grid;
   gap: var(--gutter);
+}
 
-  .field__item {
+// Card styling, shared by both display styles. The Featured Content block can
+// render as a grid (the default) or as a carousel, and a card looks the same
+// either way - only the container differs.
+//
+// stylelint-disable no-descending-specificity -- one declaration block serving
+// selectors of different specificity is exactly what sharing means here, and
+// the rule fires once per nested selector for every pair of them. This block
+// already tripped it 7 times before the carousel selector was added.
+.field--name-field-featured-content,
+.field--name-field-all-related-content .field__items,
+.featured-carousel {
+  .field__item,
+  .featured-carousel__slide {
     position: relative;
 
     article {
@@ -50,7 +66,6 @@
     .media--image {
       block-size: 100%;
 
-      // stylelint-disable-next-line no-descending-specificity
       .field,
       .field__item,
       a {
@@ -58,7 +73,6 @@
         block-size: 100%;
       }
 
-      // stylelint-disable-next-line no-descending-specificity
       img {
         block-size: 100%;
         inline-size: 100%;
@@ -86,7 +100,6 @@
       inline-size: 100%;
       block-size: 100%;
 
-      // stylelint-disable-next-line no-descending-specificity
       .field, iframe {
         inline-size: 100%;
         block-size: 100%;
@@ -116,7 +129,6 @@
         min-block-size: 0;
         overflow: hidden;
 
-        // stylelint-disable-next-line no-descending-specificity
         img {
           block-size: 100%;
           inline-size: 100%;
@@ -130,7 +142,6 @@
           align-items: center;
           background: var(--brand-secondary-accent);
 
-          // stylelint-disable-next-line no-descending-specificity
           img {
             block-size: auto;
             max-block-size: 100%;
@@ -245,13 +256,11 @@
         inset: 0;
       }
 
-      // stylelint-disable-next-line no-descending-specificity
       &:focus-visible {
         outline: 2px solid var(--focus-color);
         outline-offset: 2px;
       }
 
-      // stylelint-disable-next-line no-descending-specificity
       &:hover {
         text-decoration: underline;
       }
@@ -259,6 +268,8 @@
   }
 
 }
+
+// stylelint-enable no-descending-specificity
 
 // Featured Content block (Layout Builder inline block): size columns
 // against the block's own rendered width instead of viewport width, so a
