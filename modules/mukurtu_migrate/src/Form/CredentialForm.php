@@ -254,7 +254,7 @@ class CredentialForm extends MukurtuMigrateFormBase {
       '#type' => 'checkbox',
       '#title' => $this->t('Create default landing page'),
       '#description' => $this->t('When the migration finishes, create a default landing page with welcome content and set it as the homepage.'),
-      '#default_value' => FALSE,
+      '#default_value' => TRUE,
     ];
 
     return $form;
