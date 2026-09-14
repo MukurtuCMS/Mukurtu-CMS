@@ -5,7 +5,13 @@
 .collection {
   &__header {
     display: flex;
-    flex-flow: column wrap;
+    // nowrap: with exactly 2 children (image, text) there's never a reason
+    // to wrap. Wrapping a column-direction flex container with an
+    // indefinite (auto) height causes each item to land on its own
+    // cross-axis line and size to its own content instead of stretching to
+    // the container's width - the image item was overflowing horizontally
+    // as a result (issue #1997).
+    flex-flow: column nowrap;
     margin-block-end: var(--v-space-xs);
 
     @include include-media.media('>=lg') {
@@ -59,6 +65,12 @@
         margin-block-end: var(--v-space-2xl);
         color: var(--color-white);
         font-size: var(--font-size-heading-2xl);
+        // A long, single-word (unbreakable) collection title can exceed
+        // the narrow mobile column width at this font size; allow a
+        // mid-word break as a last resort rather than overflowing
+        // horizontally (issue #1997).
+        overflow-wrap: anywhere;
+        word-break: normal;
 
         &::after {
           content: '';
@@ -118,7 +130,8 @@
   &__default {
     &__header {
       display: flex;
-      flex-flow: column wrap;
+      // nowrap: same reasoning as .collection__header above (issue #1997).
+      flex-flow: column nowrap;
       column-gap: var(--v-space-xs);
 
       @include include-media.media('>=md') {
