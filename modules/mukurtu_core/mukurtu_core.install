@@ -139,3 +139,59 @@ function mukurtu_core_update_40201(): ?string {
 
   return (string) t('Full HTML was revoked from the authenticated role. Logged-in users now use Basic HTML, which still allows iframes and media embeds. If this site granted Full HTML to all logged-in users deliberately, you can re-grant it on the Permissions page.');
 }
+
+/**
+ * Fix the Visitors module's chart report links doing nothing.
+ */
+function mukurtu_core_update_40202(): ?string {
+  // mukurtu_core_update_40088() installed charts, charts_chartjs and
+  // visitors_geoip so the Visitors module's chart displays would work, but
+  // 4.0.1's blanket update-hook strip deleted it along with every other hook.
+  // A site that had already run 40088 is unaffected (ModuleInstaller::install()
+  // is a no-op for an already-enabled module), but a site that updated
+  // straight through the strip without ever reaching 40088 is left with
+  // visitors enabled and no charting backend at all, so its "chart" report
+  // links quietly do nothing. This re-does that half of 40088's work.
+  //
+  // Guarded on visitors itself: a site that deliberately uninstalled it
+  // shouldn't have charting infrastructure or a Klaro service re-added on
+  // its behalf.
+  $module_handler = \Drupal::moduleHandler();
+  if (!$module_handler->moduleExists('visitors')) {
+    return NULL;
+  }
+
+  $messages = [];
+
+  $to_install = array_filter(
+    ['charts', 'charts_chartjs', 'visitors_geoip'],
+    fn (string $module): bool => !$module_handler->moduleExists($module),
+  );
+
+  if ($to_install) {
+    \Drupal::service('module_installer')->install($to_install);
+    \Drupal::configFactory()->getEditable('charts.settings')
+      ->set('charts_default_settings.library', 'chartjs')
+      ->save();
+    $messages[] = (string) t('Installed: @modules.', ['@modules' => implode(', ', $to_install)]);
+  }
+
+  // Separately: Klaro (block_unknown: true) treats charts_chartjs's
+  // CDN-loaded Chart.js scripts as an unrecognized third-party resource and
+  // silently blocks them, since nothing registers a Klaro service for them.
+  // config/install/klaro.klaro_app.charts_chartjs.yml covers a fresh install,
+  // but an existing site never replays config/install, so create the same
+  // config entity here if it's missing. Guarded on klaro being enabled too:
+  // getStorage('klaro_app') throws if the entity type doesn't exist.
+  if ($module_handler->moduleExists('klaro')) {
+    $klaro_app_storage = \Drupal::entityTypeManager()->getStorage('klaro_app');
+    if (!$klaro_app_storage->load('charts_chartjs')) {
+      $config_path = \Drupal::service('extension.list.profile')->getPath('mukurtu') . '/config/install/klaro.klaro_app.charts_chartjs.yml';
+      $values = \Drupal\Core\Serialization\Yaml::decode(file_get_contents($config_path));
+      $klaro_app_storage->create($values)->save();
+      $messages[] = (string) t('Registered Chart.js as a required Klaro service so it is no longer blocked as an unknown third-party resource.');
+    }
+  }
+
+  return $messages ? implode(' ', $messages) : NULL;
+}

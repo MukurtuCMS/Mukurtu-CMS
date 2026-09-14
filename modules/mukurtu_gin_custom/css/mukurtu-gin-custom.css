@@ -862,3 +862,51 @@ short fields themselves. Shrink it in these dialogs specifically. */
   margin-inline-start: var(--input--label-spacing);
   margin-block-end: 1.5rem;
 }
+
+/* Visitors report (/visitors/*): the "Unique visitors" count column stretches
+   to take up most of the table's width even though its content ("3", "12")
+   is far shorter than the place-name column next to it, because Views'
+   table style leaves both columns free to grow and the sortable column's
+   link/arrow markup ends up widest. width: 1% with white-space: nowrap is
+   the standard table trick to make a column shrink-to-fit its content, so
+   the remaining width goes to the place-name column instead. Matches both
+   the "visitors" view (Continent/Country/Language tables) and the
+   "visitors_geoip" view (Region/City tables) via a "starts with" selector,
+   since core doesn't clean the underscore out of view-id-visitors_geoip. */
+[class*="view-id-visitors"] .views-field-visitor-id {
+  width: 1%;
+  white-space: nowrap;
+}
+
+/* Visitors report: the "chart" (and language-table's "Language Code")
+   footer links are plain, unstyled <a> tags from the Views footer area
+   handler (visitors_display_link) with no Gin theming applied at all.
+   Style them as small secondary buttons, reusing the same visual language
+   as .eb-view-toggle__btn above, so they read as an actionable control
+   rather than stray body text. */
+[class*="view-id-visitors"] .view-footer a {
+  display: inline-block;
+  margin-block-start: 0.5rem;
+  padding: 0.35rem 0.75rem;
+  border: 2px solid currentColor;
+  border-radius: 3px;
+  font-size: 0.85rem;
+  line-height: 1.2;
+  text-decoration: none;
+}
+
+/* --gin-color-button-text (not --gin-color-primary's own #fff fallback used
+   elsewhere in this file) because Gin flips it to #111 in dark mode, where
+   the accent color itself shifts lighter -- white text on a light accent is
+   what dropped this exact pairing to ~1.5:1 in dark mode before this fix. */
+[class*="view-id-visitors"] .view-footer a:hover {
+  background: var(--gin-color-primary-hover, #002a8c);
+  color: var(--gin-color-button-text, #fff);
+  border-color: var(--gin-color-primary-hover, #002a8c);
+}
+
+/* 2.4.7: explicit focus indicator that survives Gin's focus reset. */
+[class*="view-id-visitors"] .view-footer a:focus-visible {
+  outline: 3px solid var(--gin-color-primary, #0036b1);
+  outline-offset: 2px;
+}
