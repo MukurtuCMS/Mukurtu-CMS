@@ -36,6 +36,17 @@
       flex-wrap: wrap;
     }
 
+    // A long, single-word (unbreakable) page title - e.g. a person or place
+    // name without spaces - can exceed the viewport on its own as a
+    // breadcrumb label, even though the list itself wraps. Applied to the
+    // list item (not just `a`) because the current/final crumb renders as
+    // plain text, not a link (see mukurtu_v4_preprocess_breadcrumb()).
+    // Issue #1997.
+    &__list-item {
+      overflow-wrap: anywhere;
+      word-break: normal;
+    }
+
     &__list-item:not(:last-of-type) {
       a {
         padding-inline-end: var(--v-space-5xs);
