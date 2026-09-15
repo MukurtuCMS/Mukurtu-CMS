@@ -49,6 +49,16 @@ class VisitorsCountryMap {
   protected const MAP_ID = 'openstreetmap';
 
   /**
+   * The DOM id given to the rendered map element.
+   *
+   * Fixed rather than auto-generated so mukurtu_core_preprocess_leaflet_map()
+   * can tell this map apart from any other Leaflet map on the site.
+   *
+   * @see mukurtu_core_preprocess_leaflet_map()
+   */
+  public const MAP_ELEMENT_ID = 'visitors-country-map';
+
+  /**
    * The database connection.
    *
    * @var \Drupal\Core\Database\Connection
@@ -114,7 +124,13 @@ class VisitorsCountryMap {
     if (!$features) {
       return [
         '#type' => 'container',
-        '#attributes' => ['class' => ['visitors-country-map', 'visitors-country-map--empty']],
+        '#attributes' => [
+          'class' => ['visitors-country-map', 'visitors-country-map--empty'],
+          // Same role and name as the populated branch, so this card still
+          // announces as the map rather than as a stray sentence.
+          'role' => 'figure',
+          'aria-label' => $this->t('Visitor locations'),
+        ],
         'message' => ['#markup' => $this->t('No location data for the selected dates.')],
         '#cache' => ['contexts' => ['visitors_date_range']],
       ];
@@ -131,6 +147,7 @@ class VisitorsCountryMap {
 
     // Leaflet's own behaviour calls fitBounds() on load, so the view frames
     // whichever countries are in range without a hardcoded centre or zoom.
+    $map['id'] = self::MAP_ELEMENT_ID;
     $build = $this->leaflet->leafletRenderMap($map, $features, self::MAP_HEIGHT);
 
     return [
@@ -203,16 +220,23 @@ class VisitorsCountryMap {
 
       $count = (int) ($row['unique_visitors'] ?? 0);
       $label = $this->location->getCountryLabel($row['country'] ?? '');
-      $text = $this->t('@country: @count', [
+      $text = $this->t('@country: @visitors', [
         '@country' => $label,
-        '@count' => $this->formatPlural($count, '1 unique visitor', '@count unique visitors'),
+        // Not '@count': that is formatPlural()'s own reserved placeholder, and
+        // reusing it in a non-plural t() confuses translators and extraction.
+        '@visitors' => $this->formatPlural($count, '1 unique visitor', '@count unique visitors'),
       ]);
 
+      // Tooltip only, deliberately no popup. Leaflet shows the tooltip on
+      // focus as well as hover and wires it up with aria-describedby, and it
+      // carries the same text a popup would. A popup adds a dialog whose
+      // close button sits several tab stops away, behind every other marker,
+      // and which Escape does not close while focus is still on the marker
+      // that opened it. Nothing is lost by leaving it out.
       $features[] = [
         'type' => 'point',
         'lat' => (float) $lat,
         'lon' => (float) $lng,
-        'popup' => ['value' => $text],
         'tooltip' => ['value' => $text],
       ];
     }

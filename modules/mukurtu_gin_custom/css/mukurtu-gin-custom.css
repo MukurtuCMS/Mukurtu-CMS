@@ -886,6 +886,14 @@ short fields themselves. Shrink it in these dialogs specifically. */
    rather than stray body text. */
 [class*="view-id-visitors"] .view-footer a {
   display: inline-block;
+  /* Explicit rather than inheriting Gin's teal link colour: that measures
+     4.48:1 against the card these buttons now sit on, missing 1.4.3's 4.5:1
+     for text this size. Gin's darker "primary hover" token is the accent one
+     step down and clears it at 5.84:1 in light mode and 9.3:1 in dark. It is
+     used here as the resting colour, not just on hover, which is why the
+     hover rule below can reuse the same token as a background. The border
+     follows via currentColor. */
+  color: var(--gin-color-primary-hover, #0e716c);
   margin-block-start: 0.5rem;
   padding: 0.35rem 0.75rem;
   border: 2px solid currentColor;
@@ -900,9 +908,9 @@ short fields themselves. Shrink it in these dialogs specifically. */
    the accent color itself shifts lighter -- white text on a light accent is
    what dropped this exact pairing to ~1.5:1 in dark mode before this fix. */
 [class*="view-id-visitors"] .view-footer a:hover {
-  background: var(--gin-color-primary-hover, #002a8c);
+  background: var(--gin-color-primary-hover, #0e716c);
   color: var(--gin-color-button-text, #fff);
-  border-color: var(--gin-color-primary-hover, #002a8c);
+  border-color: var(--gin-color-primary-hover, #0e716c);
 }
 
 /* 2.4.7: explicit focus indicator that survives Gin's focus reset. */
@@ -1057,4 +1065,11 @@ short fields themselves. Shrink it in these dialogs specifically. */
   padding: var(--gin-spacing-s);
   background: #fff;
   border-radius: var(--gin-border-m);
+  /* Forced-colors mode would otherwise repaint this plate as Canvas (black on
+     a dark HCM theme) while leaving the title and legend untouched, because
+     those are painted into a <canvas> and forced-colors cannot recolour
+     bitmap content -- which puts back exactly the black-on-black the plate is
+     here to prevent. Opting one element out is the sanctioned escape hatch
+     for author-supplied bitmaps. */
+  forced-color-adjust: none;
 }
