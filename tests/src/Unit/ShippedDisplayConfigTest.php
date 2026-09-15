@@ -84,12 +84,83 @@ class ShippedDisplayConfigTest extends UnitTestCase {
    * links are both useless and a hint at the editing UI.
    */
   public function testCategoryBlockHidesAdminLinks(): void {
-    $view = $this->shipped('config/install/views.view.mukurtu_categories.yml');
+    $view = $this->shipped('modules/mukurtu_core/config/install/views.view.mukurtu_categories.yml');
 
     $this->assertFalse(
       $view['display']['browse_by_category_block']['display_options']['show_admin_links'] ?? NULL,
       'The category browse block would render contextual admin links.'
     );
+  }
+
+  /**
+   * Every real plugin in the landing page's default layout ships before it.
+   *
+   * The display's Layout Builder section places an inline block and a views
+   * block. BlockManager logs "The ... block plugin was not found" whenever a
+   * display is saved while a component's plugin does not exist yet, and both
+   * derivatives only exist once their config (a block_content bundle, a view)
+   * has been created. Module config installs before profile config, so those
+   * providers must ship from mukurtu_landing_page itself or from a module it
+   * depends on, and the display must declare them so the installer creates
+   * them first within the batch. Both were once in the profile, which is why
+   * every fresh install used to log those warnings six times.
+   *
+   * Code-provided plugins (the Browse by Community block from
+   * mukurtu_protocol) need their module enabled first, which the display's
+   * declared module dependencies enforce at install time.
+   *
+   * The hero component is exempt from the config check: it references a
+   * reusable block_content entity by UUID, which cannot exist before config
+   * imports, so it ships as a placeholder that DefaultLandingPage patches in
+   * code.
+   */
+  public function testLandingPageLayoutPluginsShipBeforeTheDisplay(): void {
+    $display = $this->shipped('modules/mukurtu_landing_page/config/install/core.entity_view_display.node.landing_page.default.yml');
+    $declared = $display['dependencies']['config'] ?? [];
+    $declared_modules = $display['dependencies']['module'] ?? [];
+    // Config the installer has already created by the time this display
+    // imports: this module's own batch, and every Mukurtu module it declares
+    // a dependency on (those install first). Derived from the info file so
+    // the list cannot drift from what the installer actually orders by.
+    $info = $this->shipped('modules/mukurtu_landing_page/mukurtu_landing_page.info.yml');
+    $available = ['modules/mukurtu_landing_page/config/install'];
+    foreach ($info['dependencies'] as $dependency) {
+      [$project, $module] = explode(':', $dependency, 2) + [1 => $dependency];
+      if (str_starts_with($module, 'mukurtu_')) {
+        $available[] = "modules/$module/config/install";
+      }
+    }
+
+    $sections = $display['third_party_settings']['layout_builder']['sections'] ?? [];
+    $this->assertNotEmpty($sections, 'The landing page display no longer ships a default section.');
+
+    foreach ($sections as $section) {
+      foreach ($section['components'] as $uuid => $component) {
+        $id = $component['configuration']['id'];
+        $provider = $component['configuration']['provider'];
+        // The installer refuses to install mukurtu_landing_page until every
+        // module named here is enabled, so declaring the provider is what
+        // guarantees a code-provided plugin exists when the display imports.
+        $this->assertContains($provider, $declared_modules, "Component '$id' is provided by $provider, but the display does not declare that module, so nothing stops it importing before $provider is enabled.");
+
+        // Derivative plugins additionally need the config they derive from.
+        [$base, $derivative] = explode(':', $id, 2) + [1 => NULL];
+        $required = match ($base) {
+          'inline_block' => "block_content.type.$derivative",
+          'views_block' => 'views.view.' . explode('-', $derivative, 2)[0],
+          default => NULL,
+        };
+        if ($required === NULL) {
+          continue;
+        }
+
+        $this->assertContains($required, $declared, "Component '$id' needs $required, but the display does not declare it, so the installer may import the display first.");
+
+        $shipped = array_filter($available, fn (string $dir): bool => file_exists($this->profileRoot() . "/$dir/$required.yml"));
+        $this->assertNotEmpty($shipped, "$required.yml is not shipped by mukurtu_landing_page or a Mukurtu module it depends on, so it will not exist when the display imports.");
+        $this->assertFileDoesNotExist($this->profileRoot() . "/config/install/$required.yml", "$required.yml is shipped by the profile as well; the profile's copy would override the module's on install.");
+      }
+    }
   }
 
   /**

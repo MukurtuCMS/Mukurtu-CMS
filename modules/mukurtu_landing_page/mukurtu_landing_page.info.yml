@@ -4,6 +4,7 @@ type: module
 core_version_requirement: '^9.4 || ^10 || ^11'
 package: 'Mukurtu CMS'
 dependencies:
+  - 'drupal:block_content'
   - 'drupal:field'
   - 'drupal:language'
   - 'drupal:layout_builder'
@@ -14,5 +15,7 @@ dependencies:
   - 'drupal:user'
   - 'gin_lb:gin_lb'
   - 'layout_builder_restrictions:layout_builder_restrictions'
+  - 'mukurtu_browse:mukurtu_browse'
   - 'mukurtu_core:mukurtu_core'
+  - 'mukurtu_protocol:mukurtu_protocol'
   - 'pathauto:pathauto'
