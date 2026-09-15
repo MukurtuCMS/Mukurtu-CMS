@@ -142,8 +142,10 @@ abstract class MukurtuCmsV3UsersMigrationTestBase extends MigrateTestBase {
    * @param int[] $rids
    *   The D7 role ids to store in {users_roles}. Pass an empty array for a
    *   plain member with no extra roles.
+   * @param int $status
+   *   The D7 account status: 1 for active (the default), 0 for blocked.
    */
-  protected function addSourceUser(int $uid, string $name, array $rids = []): void {
+  protected function addSourceUser(int $uid, string $name, array $rids = [], int $status = 1): void {
     $mail = strtolower(str_replace(' ', '.', $name)) . '@example.com';
     $this->sourceDatabase->insert('users')->fields([
       'uid' => $uid,
@@ -155,7 +157,7 @@ abstract class MukurtuCmsV3UsersMigrationTestBase extends MigrateTestBase {
       'created' => 1000000000,
       'access' => 1000000001,
       'login' => 1000000001,
-      'status' => 1,
+      'status' => $status,
       'timezone' => 'America/New_York',
       'language' => '',
       'picture' => 0,
@@ -198,7 +200,15 @@ abstract class MukurtuCmsV3UsersMigrationTestBase extends MigrateTestBase {
     $this->startCollectingMessages();
     $this->executeMigration($id);
     $this->assertEmpty($this->migrateMessages['error'] ?? [], print_r($this->migrateMessages['error'] ?? [], TRUE));
-    $this->assertSame(0, $this->getMigration($id)->getIdMap()->errorCount(), "Migration $id recorded failed rows in its id map.");
+
+    // A row the destination plugin rejects is recorded in the id map rather
+    // than surfacing through the collected messages, so quote those too.
+    $id_map = $this->getMigration($id)->getIdMap();
+    $row_messages = array_map(
+      static fn (object $message): string => (string) $message->message,
+      iterator_to_array($id_map->getMessages(), FALSE)
+    );
+    $this->assertSame(0, $id_map->errorCount(), "Migration $id recorded failed rows in its id map:\n" . implode("\n", $row_messages));
   }
 
 }
