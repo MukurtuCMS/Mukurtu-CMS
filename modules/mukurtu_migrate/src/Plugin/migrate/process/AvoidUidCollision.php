@@ -80,11 +80,11 @@ class AvoidUidCollision extends ProcessPluginBase implements ContainerFactoryPlu
     // was given the first time, colliding or not.
     $mapped = $this->migration->getIdMap()->lookupDestinationIds($row->getSourceIdValues());
     if (!empty($mapped[0])) {
-      return (int) reset($mapped[0]);
+      return (string) reset($mapped[0]);
     }
 
     if (!$this->entityTypeManager->getStorage('user')->load($uid)) {
-      return $uid;
+      return (string) $uid;
     }
 
     return $this->allocateUid();
@@ -92,8 +92,13 @@ class AvoidUidCollision extends ProcessPluginBase implements ContainerFactoryPlu
 
   /**
    * Returns a uid above every existing destination uid and every source uid.
+   *
+   * Returned as a string, the way an untouched uid arrives from the source
+   * database: mukurtu_import narrows getEntityId() to ?string on the
+   * destination class it substitutes for entity:user, so an int destination
+   * property makes the migration fatal with a TypeError.
    */
-  protected function allocateUid(): int {
+  protected function allocateUid(): string {
     $result = $this->entityTypeManager->getStorage('user')->getAggregateQuery()
       ->accessCheck(FALSE)
       ->aggregate('uid', 'MAX')
@@ -108,7 +113,7 @@ class AvoidUidCollision extends ProcessPluginBase implements ContainerFactoryPlu
         ->fetchField();
     }
 
-    return max($destination_max, $source_max) + 1;
+    return (string) (max($destination_max, $source_max) + 1);
   }
 
 }

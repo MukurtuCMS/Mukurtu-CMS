@@ -2,6 +2,9 @@
 
 namespace Drupal\Tests\mukurtu_migrate\Kernel;
 
+use Drupal\migrate\MigrateExecutable;
+use Drupal\migrate\MigrateMessage;
+use Drupal\migrate\Row;
 use Drupal\user\Entity\User;
 use PHPUnit\Framework\Attributes\Group;
 
@@ -115,6 +118,35 @@ class MukurtuCmsV3UsersUidCollisionTest extends MukurtuCmsV3UsersMigrationTestBa
 
     // Four source users became four distinct destination accounts.
     $this->assertCount(4, array_unique([3, 5, $legacy_uid, $other_legacy_uid]));
+  }
+
+  /**
+   * Tests that every uid the plugin returns is a string.
+   *
+   * The uid arrives from the source database as a string, and mukurtu_import
+   * substitutes a destination class for entity:user whose getEntityId() is
+   * narrowed to ?string. Returning an int made the whole migration fatal
+   * with a TypeError on sites with that module installed.
+   *
+   * @see \Drupal\mukurtu_import\Plugin\migrate\destination\ProtocolAwareEntityContent::getEntityId()
+   */
+  public function testReturnsStringUids(): void {
+    $migration = $this->getMigration('mukurtu_cms_v3_users');
+    $executable = new MigrateExecutable($migration, new MigrateMessage());
+    $plugin = $this->container->get('plugin.manager.migrate.process')
+      ->createInstance('avoid_uid_collision', [], $migration);
+
+    // A colliding uid (reallocated), and one that is left alone.
+    foreach ([2, 3] as $source_uid) {
+      $row = new Row(['uid' => (string) $source_uid], ['uid' => ['type' => 'integer']]);
+      $value = $plugin->transform((string) $source_uid, $executable, $row, 'uid');
+      $this->assertIsString($value, "The plugin returned a non-string uid for source uid $source_uid.");
+    }
+
+    // And after the migration has run, so does the id map branch.
+    $this->executeMigrationWithoutErrors('mukurtu_cms_v3_users');
+    $row = new Row(['uid' => '2'], ['uid' => ['type' => 'integer']]);
+    $this->assertIsString($plugin->transform('2', $executable, $row, 'uid'), 'The plugin returned a non-string uid for an already migrated user.');
   }
 
   /**
