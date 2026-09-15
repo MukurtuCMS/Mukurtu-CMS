@@ -46,6 +46,20 @@ final class VisitorsLocationReportController implements ContainerInjectionInterf
   public const ROUTE_NAME = 'visitors.location';
 
   /**
+   * The view the report is built from.
+   */
+  public const VIEW_ID = 'visitors';
+
+  /**
+   * Displays dropped from the report as redundant.
+   *
+   * distinct_countries_list is a one-line "N distinct countries" count, which
+   * the Country table beside it already tells you by listing them. It took a
+   * full report card to restate a number you can read off the table.
+   */
+  public const REMOVED_DISPLAYS = ['distinct_countries_list'];
+
+  /**
    * The contrib controller whose output is being extended.
    */
   private const DELEGATE = '\Drupal\visitors\Controller\Report\ReportController';
@@ -98,7 +112,58 @@ final class VisitorsLocationReportController implements ContainerInjectionInterf
     // visitors keeps ownership of its constructor.
     $delegate = $this->classResolver->getInstanceFromDefinition(self::DELEGATE);
 
-    return static::addMapRow($delegate->location(), $this->countryMap->build());
+    $build = $delegate->location();
+    foreach (self::REMOVED_DISPLAYS as $display_id) {
+      $build = static::removeDisplay($build, $display_id);
+    }
+
+    return static::addMapRow($build, $this->countryMap->build());
+  }
+
+  /**
+   * Drops one embedded display from the report build.
+   *
+   * Whatever is left in that row keeps report.css's flex: 1 1 45%, so a row
+   * reduced to a single block grows to fill the width rather than leaving a
+   * hole in the grid. A row emptied completely is removed, so it does not
+   * contribute a stray wrapper and its row gap.
+   *
+   * @param array $build
+   *   The render array returned by the contrib controller.
+   * @param string $display_id
+   *   The display to remove.
+   *
+   * @return array
+   *   The render array without that display.
+   */
+  public static function removeDisplay(array $build, string $display_id): array {
+    if (!isset($build['main']) || !is_array($build['main'])) {
+      return $build;
+    }
+
+    foreach (Element::children($build['main']) as $row) {
+      foreach (Element::children($build['main'][$row]) as $index) {
+        $blocks = $build['main'][$row][$index]['blocks'] ?? NULL;
+        if (!is_array($blocks)) {
+          continue;
+        }
+
+        foreach ($blocks as $key => $block) {
+          // views_embed_view() returns a '#type' => 'view' element, so the
+          // view and display it renders are readable straight off the block.
+          if (($block['#name'] ?? NULL) === self::VIEW_ID && ($block['#display_id'] ?? NULL) === $display_id) {
+            unset($build['main'][$row][$index]['blocks'][$key]);
+          }
+        }
+
+        if (empty($build['main'][$row][$index]['blocks'])) {
+          unset($build['main'][$row]);
+          break;
+        }
+      }
+    }
+
+    return $build;
   }
 
   /**

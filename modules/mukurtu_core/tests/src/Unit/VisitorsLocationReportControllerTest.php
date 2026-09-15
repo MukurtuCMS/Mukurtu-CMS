@@ -36,8 +36,18 @@ class VisitorsLocationReportControllerTest extends UnitTestCase {
    * the detail the weighting in addMapRow() exists to work around.
    */
   private function contribBuild(): array {
-    $row = fn(string $label): array => [
-      ['#prefix' => '<div class="layout-row">', 'blocks' => [$label], '#suffix' => '</div>'],
+    $embed = fn(string $display): array => [
+      '#type' => 'view',
+      '#name' => 'visitors',
+      '#display_id' => $display,
+      '#arguments' => [],
+    ];
+    $row = fn(array $displays): array => [
+      [
+        '#prefix' => '<div class="layout-row">',
+        'blocks' => array_map($embed, $displays),
+        '#suffix' => '</div>',
+      ],
     ];
 
     return [
@@ -45,12 +55,88 @@ class VisitorsLocationReportControllerTest extends UnitTestCase {
       'main' => [
         '#type' => 'container',
         '#attributes' => ['class' => ['visitors-main']],
-        '1' => $row('continent+country'),
-        '2' => $row('distinct+region'),
-        '3' => $row('language+city'),
+        '1' => $row(['continent_table', 'country_table']),
+        '2' => $row(['distinct_countries_list', 'region_table']),
+        '3' => $row(['language_table', 'city_table']),
       ],
       '#attached' => ['library' => ['visitors/visitors.report']],
     ];
+  }
+
+  /**
+   * Returns the display ids embedded in a build, row by row.
+   */
+  private function displayIds(array $build): array {
+    $out = [];
+    foreach (Element::children($build['main'], TRUE) as $row) {
+      foreach (Element::children($build['main'][$row]) as $index) {
+        foreach ($build['main'][$row][$index]['blocks'] ?? [] as $block) {
+          $out[] = $block['#display_id'] ?? '(not a view)';
+        }
+      }
+    }
+    return $out;
+  }
+
+  /**
+   * The redundant distinct-countries card is dropped.
+   */
+  public function testRemoveDisplayDropsTheRequestedDisplay(): void {
+    $build = VisitorsLocationReportController::removeDisplay($this->contribBuild(), 'distinct_countries_list');
+
+    $this->assertSame(
+      ['continent_table', 'country_table', 'region_table', 'language_table', 'city_table'],
+      $this->displayIds($build),
+    );
+  }
+
+  /**
+   * Its row survives, so the table left behind keeps its place in the grid.
+   */
+  public function testRemoveDisplayKeepsARowThatStillHasBlocks(): void {
+    $build = VisitorsLocationReportController::removeDisplay($this->contribBuild(), 'distinct_countries_list');
+
+    $this->assertArrayHasKey('2', $build['main']);
+    $this->assertCount(1, $build['main']['2'][0]['blocks']);
+  }
+
+  /**
+   * A row emptied by the removal is dropped rather than left behind.
+   */
+  public function testRemoveDisplayDropsAnEmptiedRow(): void {
+    $build = $this->contribBuild();
+    $build['main']['4'] = [
+      [
+        '#prefix' => '<div class="layout-row">',
+        'blocks' => [['#type' => 'view', '#name' => 'visitors', '#display_id' => 'lonely_table']],
+        '#suffix' => '</div>',
+      ],
+    ];
+
+    $build = VisitorsLocationReportController::removeDisplay($build, 'lonely_table');
+
+    $this->assertArrayNotHasKey('4', $build['main']);
+  }
+
+  /**
+   * A display that is not on the page leaves the build alone.
+   */
+  public function testRemoveDisplayIgnoresAnAbsentDisplay(): void {
+    $before = $this->contribBuild();
+
+    $this->assertSame($before, VisitorsLocationReportController::removeDisplay($before, 'not_on_this_page'));
+  }
+
+  /**
+   * A display id belonging to another view is left alone.
+   */
+  public function testRemoveDisplayOnlyMatchesItsOwnView(): void {
+    $before = $this->contribBuild();
+    $before['main']['2'][0]['blocks'][0]['#name'] = 'visitors_geoip';
+
+    $after = VisitorsLocationReportController::removeDisplay($before, 'distinct_countries_list');
+
+    $this->assertContains('distinct_countries_list', $this->displayIds($after));
   }
 
   /**
