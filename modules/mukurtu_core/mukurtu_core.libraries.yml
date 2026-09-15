@@ -104,3 +104,11 @@ modal-click-guard-ready:
     js/modal-click-guard-ready.js: {}
   dependencies:
     - core/drupal
+
+ajax-row-table-status:
+  version: 1.x
+  js:
+    js/ajax-row-table-status.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
