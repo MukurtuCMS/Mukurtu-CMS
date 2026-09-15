@@ -1011,10 +1011,11 @@ short fields themselves. Shrink it in these dialogs specifically. */
    this once a Gin release restores the names.
 
    .admin-toolbar is added to the selector so this outranks Gin's rule
-   (0,4,2 vs 0,3,2) regardless of stylesheet order. It deliberately does
-   NOT cover the related aria-toolbar-link__labelledby typo (3 further
-   axe failures): that is a Twig attribute, not fixable from CSS, and its
-   upstream fix (Gin !809) is already RTBC. */
+   (0,4,2 vs 0,3,2) regardless of stylesheet order. The related
+   aria-toolbar-link__labelledby typo on the toolbar <ul>s (3 further
+   axe failures) is a Twig attribute, not reachable from CSS; that one is
+   carried as a composer patch of Gin's RTBC fix instead - see
+   patches/gin-aria-labelledby-toolbar-menus-3598613.patch. */
 html:not(.admin-toolbar-expanded) .admin-toolbar .toolbar-menu__item--level-1 > .toolbar-link span {
   display: inline;
   position: absolute !important;
