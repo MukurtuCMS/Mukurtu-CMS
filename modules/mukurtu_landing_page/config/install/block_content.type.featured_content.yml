@@ -1,0 +1,16 @@
+# Shipped by mukurtu_landing_page rather than the install profile because the
+# landing page's default Layout Builder section (see
+# core.entity_view_display.node.landing_page.default.yml) places an
+# 'inline_block:featured_content' component, and that plugin derivative only
+# exists once this bundle does. Module config installs before profile config,
+# so if the bundle lived in the profile the display would import first and
+# BlockManager would log 'The "inline_block:featured_content" block plugin was
+# not found' on every fresh install. The bundle's field instances and displays
+# stay in the profile: they depend on profile-level node and media types.
+langcode: en
+status: true
+dependencies: {  }
+id: featured_content
+label: 'Featured Content'
+revision: 0
+description: ''

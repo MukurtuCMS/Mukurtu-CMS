@@ -42,6 +42,8 @@ process:
         4: mukurtu_manager
         6: mukurtu_manager
       default_value: authenticated
+    -
+      plugin: array_unique
   user_picture:
     -
       plugin: default_value
