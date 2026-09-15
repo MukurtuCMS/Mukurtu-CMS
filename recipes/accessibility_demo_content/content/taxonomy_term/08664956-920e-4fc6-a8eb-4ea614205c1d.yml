@@ -1,0 +1,13 @@
+_meta:
+  version: '1.0'
+  entity_type: taxonomy_term
+  uuid: 08664956-920e-4fc6-a8eb-4ea614205c1d
+  bundle: format
+  default_langcode: en
+default:
+  name:
+    -
+      value: 'Textile'
+  status:
+    -
+      value: true

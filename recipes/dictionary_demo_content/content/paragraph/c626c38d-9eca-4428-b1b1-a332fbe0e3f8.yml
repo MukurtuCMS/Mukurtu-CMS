@@ -1,0 +1,18 @@
+# A second sample sentence paragraph (a separate entity from the one above,
+# since a paragraph belongs to a single parent) used inside the nested
+# Additional Word Entry paragraph below.
+_meta:
+  version: '1.0'
+  entity_type: paragraph
+  uuid: c626c38d-9eca-4428-b1b1-a332fbe0e3f8
+  bundle: sample_sentence
+  default_langcode: en
+  depends:
+    9942587c-1bc3-481a-9f68-264b728c598e: media
+default:
+  field_sentence:
+    -
+      value: 'This is a second placeholder sample sentence, nested inside the additional word entry, used only to test accessibility of the rendered page.'
+  field_sentence_recording:
+    -
+      entity: 9942587c-1bc3-481a-9f68-264b728c598e

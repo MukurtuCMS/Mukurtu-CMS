@@ -2,11 +2,12 @@ name: Mukurtu CMS 4 Theme
 type: theme
 description: 'The default theme for Mukurtu CMS.'
 core_version_requirement: '^9.4 || ^10 || ^11'
-version: 4.0.1
+version: 4.0.2
 base theme: false
 logo: logo.png
 libraries:
   - mukurtu_v4/global-styling
+  - mukurtu_v4/altcha-accessibility-fix
 
 libraries-override:
   facets/soft-limit:

@@ -1,0 +1,53 @@
+# First page of the sample multipage item (see the multipage_item entity in
+# this same content directory). Digital Heritage is the only node bundle
+# mukurtu_multipage_items.settings allows as a page by default, so this is a
+# lightweight Digital Heritage item rather than a dedicated "page" content
+# type. See ../../README.md.
+_meta:
+  version: '1.0'
+  entity_type: node
+  uuid: a2d485da-5a7d-4e36-880e-336c2521d2b8
+  bundle: digital_heritage
+  default_langcode: en
+  depends:
+    298c0286-34f6-4b00-8495-bc0e840be802: taxonomy_term
+default:
+  title:
+    -
+      value: 'Sample Multipage Item — Page 1 of 2 (placeholder)'
+  status:
+    -
+      value: true
+  promote:
+    -
+      value: false
+  sticky:
+    -
+      value: false
+  uid:
+    -
+      target_id: 1
+  revision_uid:
+    -
+      target_id: 1
+  moderation_state:
+    -
+      value: published
+  path:
+    -
+      alias: '/accessibility-demo/sample-multipage-page-1'
+      langcode: en
+  field_content_type:
+    -
+      value: 'Digital Heritage'
+  field_cultural_protocols:
+    -
+      sharing_setting: all
+      protocols: '|1|'
+  field_category:
+    -
+      entity: 298c0286-34f6-4b00-8495-bc0e840be802
+  field_description:
+    -
+      value: 'Placeholder content for page 1 of a sample multipage item, used only to test multipage navigation for accessibility review.'
+      format: plain_text

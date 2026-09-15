@@ -1,0 +1,166 @@
+# Accessibility demo content
+
+A Drupal recipe that creates one fully-described **Digital Heritage** item —
+plus every supporting entity it needs (a Community, a Protocol, 12 taxonomy
+terms, four media items (three with real files, one a real oEmbed video), a
+knowledge-keeper paragraph, one related Article, and a sample Multipage
+Item) — so the accessibility program has real, rendered pages to test on
+Tugboat previews or local builds, instead of an empty site.
+
+## Running it
+
+After a fresh `drush site-install mukurtu` (or on Tugboat, after the site is
+built):
+
+```
+drush recipe web/profiles/mukurtu/recipes/accessibility_demo_content
+drush cr
+```
+
+The Digital Heritage node's title is "Woven Basket, Maker Unknown (Sample
+Item)" — find it at `/admin/content`, or its URL alias, which pathauto
+generates automatically (something like
+`/digital-heritage/woven-basket-maker-unknown-sample-item`).
+
+Verified end-to-end (recipe apply + full page render with no errors) against
+a throwaway, freshly-installed site; see "Assumptions and limitations" below
+for what that testing surfaced.
+
+## What it creates
+
+- **Community**: "Sample Community (Accessibility Demo)"
+- **Protocol**: "Public Access (Accessibility Demo)" — access mode `open`, so
+  the demo content is visible to anonymous visitors without logging in.
+- **Two OG memberships** granting the site's admin account (uid 1) the
+  Community Manager role on the Sample Community and the Protocol Steward
+  role on the Public Access protocol — see below for why both are needed.
+- **12 taxonomy terms**, one each for Category, Contributor, Creator, Format,
+  Language, Location, People, Publisher, Subject, Type, and two Keywords.
+- **4 media items**:
+  - An image, an audio file, and a PDF document, each with a real (generated
+    placeholder) file so the page actually renders media instead of broken
+    links — the image has descriptive **alt text**, the audio has a
+    transcript in `field_transcription`, and the document has extracted text
+    in `field_extracted_text`.
+  - A **remote video** (`field_media_oembed_video`) pointing at a real
+    Mukurtu support video on Vimeo, so oEmbed video rendering (player
+    controls, captions) has something real to test rather than a generated
+    placeholder.
+- **1 paragraph** (Indigenous Knowledge Keeper) with every field filled in.
+- **1 fully-described Article node** ("Sample Related Story"), with a body
+  containing a heading, a list, and a link (useful for testing rich-text
+  accessibility), plus `field_article_category`, `field_article_keywords`,
+  and `field_article_image` (with alt text) — all reusing terms/files created
+  above rather than duplicating them. Also used as the "Related content"
+  target for every other recipe in this directory (Digital Heritage,
+  Collection, Person, Place, Word List/Dictionary Word), since it needs to
+  exist before any of them.
+- **2 lightweight Digital Heritage "page" nodes** ("Sample Multipage Item —
+  Page 1/2 of 2") and **1 Multipage Item** sequencing them, so multipage
+  navigation (priority component #13 in
+  [page-inventory.md](../../docs/accessibility/page-inventory.md)) has real
+  content to test. Digital Heritage is the only node bundle
+  `mukurtu_multipage_items.settings` allows as a page by default, hence the
+  bundle choice. The navigation UI itself renders on the Multipage Item's own
+  page (e.g. `/multipage-item/1`), not on the individual page nodes.
+- **1 Digital Heritage node** with essentially every field populated (see
+  "Fields intentionally left empty" below for the exceptions).
+
+All text content is clearly labeled as placeholder/sample data (titles,
+descriptions, and the paragraph's "Sample Knowledge Keeper" fields are
+fictional) rather than invented Indigenous cultural or traditional-knowledge
+content, since this is demo/test data rather than a real collection record.
+
+## Assumptions and limitations
+
+**This recipe is meant to be run once, on a freshly installed site.** It
+makes a few simplifying assumptions that hold true on a fresh install, but
+that you should double check if you're applying it to a site that already has
+content:
+
+- `field_communities` on the Digital Heritage node and the Article's "related
+  content" concept both assume the profile's default landing page (created by
+  `mukurtu_install()`) is node ID `1`, which is always true on a fresh
+  install since it's the first node created.
+- `field_cultural_protocols.protocols` on the node and on each media item is
+  set to `'|1|'` (i.e. Protocol ID 1). The `cultural_protocol` field type
+  stores raw protocol IDs as a delimited string rather than a real entity
+  reference, so Drupal recipes' UUID-to-ID dependency resolution doesn't apply
+  to it — there's no declarative way to reference "the Protocol this recipe
+  just created" other than assuming its ID. On a fresh install this recipe's
+  own "Public Access (Accessibility Demo)" Protocol will be the first one
+  created, so it gets ID 1. **If your site already has Communities or
+  Protocols, edit `protocols: '|1|'` in `content/node/*.yml` and
+  `content/media/*.yml` to the correct ID after checking
+  `/admin/mukurtu-protocol/protocol` — otherwise the demo content will
+  silently attach itself to whatever protocol already has ID 1.** The same
+  applies to `content/og_membership/*.yml`'s `entity_id: '1'`, which assumes
+  the Sample Community is Community ID 1.
+- This recipe turns off `og.settings:auto_add_group_owner_membership` (a
+  config action in `recipe.yml`) and separately creates an `og_membership`
+  content entity granting Community Manager. Organic Groups normally
+  auto-subscribes a new group's owner as a plain member the instant a
+  Community is saved, and a Protocol can't be created unless its creator
+  already holds Community Manager on the parent Community (see
+  `ProtocolCommunitySelection`) — the real "Add community" admin form works
+  around this with a form-submit step that recipes can't replicate
+  declaratively, so this disables the auto-subscribe behavior just long
+  enough to create the membership with the right role directly. This is a
+  global site setting; it stays off after the recipe finishes.
+- For the same reason, a second `og_membership` grants uid 1 the Protocol
+  Steward role on the Public Access protocol. This one isn't for Protocol
+  creation — it's because `MultipageValidNodeConstraintValidator` requires
+  whoever adds a page to a Multipage Item to hold `administer multipage
+  item` via membership in one of that page's protocols, and with the
+  auto-subscribe behavior disabled sitewide, uid 1 has no Protocol
+  membership at all unless one is created explicitly, same as Community
+  Manager above. Assumes the Public Access protocol is Protocol ID 1, the
+  same assumption as everything else in this section.
+- Discovered while testing this recipe against a genuinely fresh install (not
+  caused by the recipe): `config/install/mukurtu_protocol.community_organization.yml`
+  ships with a placeholder entry claiming Community ID 1 is already
+  organized, even before any Community exists. That makes the very first
+  Community's computed `field_child_communities` field fail validation
+  against a nonexistent entity — **through the normal "Add community" UI form
+  too, not just this recipe.** On a genuinely fresh install, if you hit
+  `field_child_communities.0.target_id=The referenced entity (community: 1)
+  does not exist`, clear that config once before running this recipe:
+  `drush config:set mukurtu_protocol.community_organization organization '{}' --input-format=yaml`.
+  **This was previously a config action in `recipe.yml`, but that's the wrong
+  place for it: config actions re-apply every time this recipe runs as a
+  prerequisite of another one (`collection_demo_content`,
+  `person_demo_content`, etc.), unlike content, which is skipped once it
+  already exists by UUID. On a site with existing communities, that silently
+  wiped `organization` on every single recipe run, which is what actually
+  backs the `/communities` page listing (`CommunitiesPageController` reads
+  community IDs from this config, not a database query) — so real,
+  already-existing communities would vanish from that page every time a
+  downstream recipe got applied.** Worth a proper fix in `mukurtu_protocol`
+  itself so neither this recipe nor the UI form needs a workaround at all.
+- `field_external_links` only uses external (`https://`) URLs. `internal:`
+  and `entity:` URIs reliably fail
+  `LinkNotExistingInternalConstraint`'s route-generation check specifically
+  while running inside `drush recipe` — the identical URI resolves fine both
+  before and after, e.g. in a plain `drush php:script` run against the same
+  site state — which points to some transient routing/container state in that
+  command's execution context rather than anything about the URI itself.
+  Also worth investigating separately; not worked around here since the field
+  doesn't need an internal link to be useful for accessibility testing.
+
+Fields intentionally left empty:
+
+- `field_local_contexts_projects` / `field_local_contexts_labels_and_notices`
+  — these widgets pull live data from the Local Contexts Hub API, which isn't
+  available offline/in CI. Populate these manually through the UI if you need
+  to test that specific widget.
+- External-embed media bundles (`external_embed`, `soundcloud`) and the local
+  `video` bundle (an uploaded `.mp4`/`.webm`/`.ogv`) are not created, since
+  this environment has no video encoder to produce a valid sample file and we
+  didn't want to guess at an external embed URL. (`remote_video` is covered —
+  see "What it creates" above.) Add one manually if the accessibility review
+  needs to cover local video upload or embed-code playback specifically.
+- `field_all_related_content`, `field_in_collection`, and
+  `field_multipage_page_of` are computed/read-only fields (derived from other
+  content's relationships) and can't be set directly.
+- `field_mukurtu_original_record` is a system-managed field used for
+  cross-community record copies; it isn't meant to be set by hand.
