@@ -862,3 +862,49 @@ short fields themselves. Shrink it in these dialogs specifically. */
   margin-inline-start: var(--input--label-spacing);
   margin-block-end: 1.5rem;
 }
+
+/* Gin dark-mode custom accent color: replace Gin's own auto-generated
+   dark-mode variant with a properly contrast-checked one.
+
+   Gin's own accent.js (setCustomAccentColor()) derives a dark-mode
+   counterpart for a custom accent color by mixing it with 65% white
+   (mixColor('ffffff', hex, 65)), which for this site's custom accent
+   #0e7873 (see config/install/gin.settings.yml for why it's custom rather
+   than Gin's own "teal" preset) produces rgb(170, 207, 206) - a washed-out,
+   low-saturation pale mint that reads as nearly greyscale against Gin's
+   dark surfaces. Gin's own PRESET colors (e.g. "teal") avoid this because
+   their dark-mode counterparts are hand-picked and baked into Gin's
+   compiled CSS at build time (accent.scss's $ginDarkmodeColors); only
+   custom colors go through this generic runtime formula.
+
+   Values below keep the light-mode brand teal's hue (177deg) and
+   saturation (79%), just re-lightened for Gin's dark-mode surfaces instead
+   of mixed toward white. Verified against both of Gin's dark-mode
+   surfaces - --gin-bg-app-rgb: 27, 27, 29 (#1b1b1d) and --gin-bg-layer-rgb:
+   42, 42, 45 (#2a2a2d), the harder of the two to clear - #15b7af (primary)
+   measures 6.90:1 / 5.74:1 against them, both above the 4.5:1 WCAG 1.4.3
+   minimum for text. That's the binding requirement here: --gin-color-
+   primary is used as heading/link/icon text color in Gin's dark mode, not
+   as a white-text button fill (Gin's own dark-mode hover/active values
+   lighten rather than darken toward black, confirming that usage - a
+   white-fill button would do the opposite).
+
+   Hover/active follow Gin's own dark-mode mixing convention (mix toward
+   white, matching accent.scss's $ginDarkmodeColors formula of 10%/15%) and
+   clear 6:1+ against both backgrounds. --gin-bg-header uses Gin's own
+   header-tint formula (mix(#2A2A2D, base, 87.5%), matching accent.js's own
+   --gin-bg-header calculation for custom colors).
+
+   !important: needed to reliably win over BOTH (a) Gin's own compiled
+   fallback for [data-gin-accent="custom"] in its dist CSS, and (b) Gin's
+   own accent.js, which appends its own <style class="gin-custom-colors">
+   directly to <body> at runtime - later in the DOM than this file's
+   <link>-loaded stylesheet, so it would otherwise win the same-specificity
+   tie regardless of source order here. */
+.gin--dark-mode[data-gin-accent="custom"],
+.gin--dark-mode [data-gin-accent="custom"] {
+  --gin-color-primary-rgb: 21, 183, 175 !important;
+  --gin-color-primary-hover: #2cbeb7 !important;
+  --gin-color-primary-active: #38c2bb !important;
+  --gin-bg-header: #273c3d !important;
+}
