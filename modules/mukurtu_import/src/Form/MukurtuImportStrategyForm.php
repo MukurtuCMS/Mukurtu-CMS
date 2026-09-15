@@ -11,6 +11,8 @@ use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
+use Drupal\Core\Render\Element;
+use Drupal\mukurtu_core\Form\AjaxRowTableAccessibilityTrait;
 use Drupal\mukurtu_import\Entity\MukurtuImportStrategy;
 use Drupal\mukurtu_import\MukurtuImportFieldProcessPluginManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -20,6 +22,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class MukurtuImportStrategyForm extends EntityForm {
   use ImportFormTrait;
+  use AjaxRowTableAccessibilityTrait;
 
   /**
    * Constructs a MukurtuImportStrategyForm object.
@@ -54,6 +57,7 @@ class MukurtuImportStrategyForm extends EntityForm {
   public function form(array $form, FormStateInterface $form_state): array {
     $form = parent::form($form, $form_state);
     $form['#attached']['library'][] = 'mukurtu_import/strategy_form';
+    $this->attachAjaxRowTableStatusLibrary($form);
 
     $form['label'] = [
       '#type' => 'textfield',
@@ -207,16 +211,7 @@ class MukurtuImportStrategyForm extends EntityForm {
     // Live region announcing table changes to screen reader users. Kept
     // outside the #prefix/#suffix wrapper above so it survives the AJAX
     // wrapper replacement instead of being reset by it.
-    $form['mapping_status'] = [
-      '#type' => 'html_tag',
-      '#tag' => 'div',
-      '#attributes' => [
-        'id' => 'import-field-mapping-status',
-        'class' => ['visually-hidden'],
-        'aria-live' => 'polite',
-        'aria-atomic' => 'true',
-      ],
-    ];
+    $form['mapping_status'] = $this->buildAjaxRowTableStatusRegion('import-field-mapping-status');
 
     for ($delta = 0; $delta < $num_mappings; $delta++) {
       $default_source = $existing_mapping[$delta]['source'] ?? '';
@@ -306,11 +301,14 @@ class MukurtuImportStrategyForm extends EntityForm {
    * AJAX callback that returns the mapping table.
    */
   public function mappingTableAjaxCallback(array &$form, FormStateInterface $form_state): array {
-    // Marks the table so the mapping-status JS behavior knows this rebuild
-    // came from Add/Remove specifically, not from the entity type/bundle
-    // AJAX callbacks below, which replace the same wrapper for an unrelated
-    // reason and shouldn't steal focus or announce a table change.
-    $form['mapping']['#attributes']['data-mapping-just-changed'] = 'true';
+    // Marks the table so the shared ajax-row-table-status JS behavior knows
+    // this rebuild came from Add/Remove specifically, not from the entity
+    // type/bundle AJAX callbacks below, which replace the same wrapper for
+    // an unrelated reason and shouldn't steal focus or announce a table
+    // change.
+    $count = count(Element::children($form['mapping']));
+    $message = $this->formatPlural($count, 'Mapping table updated. 1 mapping row.', 'Mapping table updated. @count mapping rows.');
+    $this->markAjaxRowTableChanged($form['mapping'], $message, 'import-field-mapping-status', 'import-add-mapping-button');
     return $form['mapping'];
   }
 

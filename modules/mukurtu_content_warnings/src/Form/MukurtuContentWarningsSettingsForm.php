@@ -4,11 +4,15 @@ namespace Drupal\mukurtu_content_warnings\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\Element;
+use Drupal\mukurtu_core\Form\AjaxRowTableAccessibilityTrait;
 
 /**
  * Configure Mukurtu content warnings settings for this site.
  */
 class MukurtuContentWarningsSettingsForm extends ConfigFormBase {
+
+  use AjaxRowTableAccessibilityTrait;
 
   /**
    * Config settings.
@@ -122,16 +126,7 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase {
     // Live region announcing warning row changes to screen reader users.
     // Kept outside the #prefix/#suffix wrapper above so it survives the
     // AJAX wrapper replacement instead of being reset by it.
-    $form['taxonomy_warnings_status'] = [
-      '#type' => 'html_tag',
-      '#tag' => 'div',
-      '#attributes' => [
-        'id' => 'taxonomy-warnings-status',
-        'class' => ['visually-hidden'],
-        'aria-live' => 'polite',
-        'aria-atomic' => 'true',
-      ],
-    ];
+    $form['taxonomy_warnings_status'] = $this->buildAjaxRowTableStatusRegion('taxonomy-warnings-status');
 
     $availableTerms = $this->getTerms();
 
@@ -248,7 +243,7 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase {
       ],
     ];
 
-    $form['#attached']['library'][] = 'mukurtu_content_warnings/content-warnings-settings-form';
+    $this->attachAjaxRowTableStatusLibrary($form);
 
     // Warning media settings — view mode selection.
     $view_mode_options = $this->getMediaViewModes();
@@ -299,13 +294,14 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase {
    * Selects and returns the fieldset with the names in it.
    */
   public function addMoreCallback(array &$form, FormStateInterface $form_state) {
-    // Marks the fieldset so the warnings-status JS behavior can find it as
-    // a descendant of the #taxonomy-warnings-fieldset-wrapper once() is
-    // scoped to - Drupal.attachBehaviors() runs with that wrapper itself as
-    // context after the AJAX replace, and context.querySelectorAll() can
-    // never match context itself, only descendants. Also absent during the
-    // initial page load, since it's only ever set here.
-    $form['taxonomy_warnings']['#attributes']['data-warnings-just-changed'] = 'true';
+    // Marks the fieldset so the shared ajax-row-table-status JS behavior can
+    // find it as a descendant of the #taxonomy-warnings-fieldset-wrapper
+    // once() is scoped to - Drupal.attachBehaviors() runs with that wrapper
+    // itself as context after the AJAX replace, and context.querySelectorAll()
+    // can never match context itself, only descendants.
+    $count = count(array_filter(Element::children($form['taxonomy_warnings']), 'is_int'));
+    $message = $this->formatPlural($count, 'Taxonomy warnings updated. 1 warning configured.', 'Taxonomy warnings updated. @count warnings configured.');
+    $this->markAjaxRowTableChanged($form['taxonomy_warnings'], $message, 'taxonomy-warnings-status', 'taxonomy-warnings-add-button');
     return $form['taxonomy_warnings'];
   }
 
