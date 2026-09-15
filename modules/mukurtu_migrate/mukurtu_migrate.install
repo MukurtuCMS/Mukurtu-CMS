@@ -72,3 +72,19 @@ function mukurtu_migrate_update_40202(): ?string {
     '@migrations' => implode(', ', $updated),
   ]);
 }
+
+/**
+ * Stop the user migration from merging legacy users onto pre-existing accounts.
+ */
+function mukurtu_migrate_update_40203(): ?string {
+  // Only touch the config if it still holds the plugin 40201 put there; a
+  // site that has customized this migration's uid pipeline is left alone.
+  $config = \Drupal::configFactory()->getEditable('migrate_plus.migration.mukurtu_cms_v3_users');
+  if ($config->isNew() || $config->get('process.uid.plugin') !== 'skip_service_account_uid') {
+    return NULL;
+  }
+
+  $config->set('process.uid.plugin', 'avoid_uid_collision')->save();
+
+  return (string) t('Updated the mukurtu_cms_v3_users migration so a legacy user whose uid is already taken by any account on this site (not only the Submission Forms service account) is given a new uid that no later legacy user can claim, instead of being merged onto that account.');
+}
