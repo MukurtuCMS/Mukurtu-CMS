@@ -166,7 +166,9 @@ class CollectionOrganizationFormAccessibilityTest extends ProtocolAwareEntityTes
       }
     }
     $this->assertIsString($rendered);
-    $this->assertStringContainsString('data-collections-just-changed', $rendered);
+    $this->assertStringContainsString('data-mukurtu-ajax-row-table-changed', $rendered);
+    $this->assertStringContainsString('data-mukurtu-status-target="collections-table-status"', $rendered);
+    $this->assertStringContainsString('data-mukurtu-focus-target="collections-table-add-button"', $rendered);
   }
 
 }

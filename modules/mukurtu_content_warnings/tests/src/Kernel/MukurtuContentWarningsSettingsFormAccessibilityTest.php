@@ -131,7 +131,10 @@ class MukurtuContentWarningsSettingsFormAccessibilityTest extends KernelTestBase
     $form = \Drupal::formBuilder()->buildForm($form_object, $form_state);
 
     $result = $form_object->addMoreCallback($form, $form_state);
-    $this->assertSame('true', $result['#attributes']['data-warnings-just-changed'] ?? NULL);
+    $this->assertSame('true', $result['#attributes']['data-mukurtu-ajax-row-table-changed'] ?? NULL);
+    $this->assertSame('taxonomy-warnings-status', $result['#attributes']['data-mukurtu-status-target'] ?? NULL);
+    $this->assertSame('taxonomy-warnings-add-button', $result['#attributes']['data-mukurtu-focus-target'] ?? NULL);
+    $this->assertNotSame('', (string) ($result['#attributes']['data-mukurtu-status-message'] ?? ''));
   }
 
 }
