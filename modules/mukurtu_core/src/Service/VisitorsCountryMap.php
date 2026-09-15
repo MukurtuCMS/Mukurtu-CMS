@@ -119,6 +119,15 @@ class VisitorsCountryMap {
       return [];
     }
 
+    // visitors_geoip is what adds the coordinate columns, and it can be
+    // uninstalled independently of visitors. Bail out entirely rather than
+    // fall through to the empty state below: with no coordinates anywhere,
+    // "no location data for the selected dates" would blame the date filter
+    // for something no date range can fix.
+    if (!$this->database->schema()->fieldExists('visitors', 'location_latitude')) {
+      return [];
+    }
+
     $features = $this->buildFeatures($this->getCountryTotals());
 
     if (!$features) {
@@ -173,15 +182,15 @@ class VisitorsCountryMap {
    *   Rows with country, unique_visitors, lat and lng keys.
    */
   protected function getCountryTotals(): array {
-    if (!$this->database->schema()->fieldExists('visitors', 'location_latitude')) {
-      // visitors_geoip is what adds the coordinate columns, and it can be
-      // uninstalled independently of visitors.
-      return [];
-    }
-
     $query = $this->database->select('visitors', 'v');
     $query->addField('v', 'location_country', 'country');
     $query->addExpression('COUNT(DISTINCT v.visitor_id)', 'unique_visitors');
+    // A plain mean, not a circular one: for a country whose visits straddle
+    // the antimeridian (Fiji, Kiribati, and Russia or the US at their
+    // extremes) averaging longitudes of +179 and -179 yields 0 and drops the
+    // marker in the Atlantic. Accepted rather than solved, because the marker
+    // is a visual summary and the Country table beside it is the authority on
+    // the numbers; a wrong pin for Fiji misleads no one about the count.
     $query->addExpression('AVG(v.location_latitude)', 'lat');
     $query->addExpression('AVG(v.location_longitude)', 'lng');
     // Matches the Country table's own filters: real visitors only, inside the
@@ -202,13 +211,16 @@ class VisitorsCountryMap {
   /**
    * Turns country totals into Leaflet point features.
    *
+   * Public so it can be unit tested on its own; the database and Leaflet work
+   * around it cannot be exercised without a full site.
+   *
    * @param array $rows
    *   Rows as returned by getCountryTotals().
    *
    * @return array
    *   Leaflet feature definitions.
    */
-  protected function buildFeatures(array $rows): array {
+  public function buildFeatures(array $rows): array {
     $features = [];
 
     foreach ($rows as $row) {
