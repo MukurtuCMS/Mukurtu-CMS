@@ -55,7 +55,11 @@ class AltchaCaptchaBackendTest extends KernelTestBase {
 
     $widget = $challenge['form']['captcha_response'];
     $this->assertSame('altcha_widget', $widget['#theme']);
-    $this->assertArrayHasKey('challenge', $widget['#attributes']);
+    // Deliberately the 1.x attribute name. altcha 2.x renamed this to
+    // 'challenge' for the v3 widget, so this assertion fails loudly if the
+    // module is upgraded without revisiting what mukurtu_bot_protection and
+    // the mukurtu_v4 theme's altcha overrides expect from the widget markup.
+    $this->assertArrayHasKey('challengeurl', $widget['#attributes']);
   }
 
 }
