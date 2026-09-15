@@ -991,3 +991,36 @@ short fields themselves. Shrink it in these dialogs specifically. */
   --gin-color-primary-active: #38c2bb !important;
   --gin-bg-header: #273c3d !important;
 }
+
+/* Fix #2003 (WCAG 4.1.2 Name, Role, Value / 2.4.4 Link Purpose): give the
+   collapsed admin toolbar's links and buttons back their accessible names.
+
+   In the icon-only (collapsed) state - which gin-collapsed-defaults.js
+   makes the default for every new admin here - Gin hides each level-1
+   link/button label with display: none (gin/styles/navigation/
+   toolbar-menu.scss, "Collapsed styles"). display: none removes the text
+   from the accessibility tree, not just the screen, so every level-1
+   control loses its name: axe reports 7 button-name and 8 link-name
+   violations on /admin/content. The fix is the standard visually-hidden
+   technique instead, which takes no layout space (so the icon-only rail
+   is unchanged) but leaves the text for assistive technology.
+
+   Local workaround for an upstream Gin bug, tracked at
+   https://git.drupalcode.org/project/gin/-/work_items/3539420 with a
+   merge request (!655) that has sat at "needs work" since 2025-08. Remove
+   this once a Gin release restores the names.
+
+   .admin-toolbar is added to the selector so this outranks Gin's rule
+   (0,4,2 vs 0,3,2) regardless of stylesheet order. It deliberately does
+   NOT cover the related aria-toolbar-link__labelledby typo (3 further
+   axe failures): that is a Twig attribute, not fixable from CSS, and its
+   upstream fix (Gin !809) is already RTBC. */
+html:not(.admin-toolbar-expanded) .admin-toolbar .toolbar-menu__item--level-1 > .toolbar-link span {
+  display: inline;
+  position: absolute !important;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  width: 1px;
+  height: 1px;
+  word-wrap: normal;
+}
