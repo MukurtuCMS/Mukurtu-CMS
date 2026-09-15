@@ -58,7 +58,7 @@ class ShippedViewsLanguageFallbackTest extends UnitTestCase {
   private static function expectations(): array {
     return [
       'mukurtu_categories' => [
-        'file' => 'config/install/views.view.mukurtu_categories.yml',
+        'file' => 'modules/mukurtu_core/config/install/views.view.mukurtu_categories.yml',
         'language_with_fallback' => [],
         'default_langcode' => ['default'],
         'rendering_language' => ['default', 'browse_by_category_block', 'categories_page'],
