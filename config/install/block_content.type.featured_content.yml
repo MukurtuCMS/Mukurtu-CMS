@@ -1,7 +1,0 @@
-langcode: en
-status: true
-dependencies: {  }
-id: featured_content
-label: 'Featured Content'
-revision: 0
-description: ''

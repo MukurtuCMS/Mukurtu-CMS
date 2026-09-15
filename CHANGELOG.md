@@ -5,6 +5,14 @@ a tagged release; see the
 [releases page](https://github.com/MukurtuCMS/Mukurtu-CMS/releases) for the tags
 themselves.
 
+## 4.0.3
+
+A maintenance release with bug fixes and accessibility improvements. Sites
+migrating from Mukurtu 3 should update to this release before running the
+migration: it fixes legacy users being skipped or merged onto existing
+accounts, and the administrator account (user 1) not being migrated. No
+special upgrade steps are required; update as usual.
+
 ## 4.0.2
 
 A maintenance release with bug fixes and accessibility improvements. No
