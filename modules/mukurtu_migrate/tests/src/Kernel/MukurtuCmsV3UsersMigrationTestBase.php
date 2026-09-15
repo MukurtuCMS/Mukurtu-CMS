@@ -26,13 +26,6 @@ abstract class MukurtuCmsV3UsersMigrationTestBase extends MigrateTestBase {
     'migrate_plus',
     'search_api',
     'mukurtu_migrate',
-    // Only needed for its config schema (mukurtu_submissions.settings), which
-    // the skip_service_account_uid process plugin reads. hook_install() never
-    // runs from a Kernel test's $modules list, so its hard dependencies
-    // (mukurtu_core, mukurtu_media, etc.) are never pulled in and don't need
-    // to be listed here either. See MukurtuSubmissionsKernelTestBase's
-    // docblock for the same reasoning.
-    'mukurtu_submissions',
   ];
 
   /**

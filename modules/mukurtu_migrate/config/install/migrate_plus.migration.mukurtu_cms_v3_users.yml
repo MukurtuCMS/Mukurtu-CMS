@@ -15,7 +15,7 @@ source:
   plugin: d7_non_admin_user
 process:
   uid:
-    plugin: skip_service_account_uid
+    plugin: avoid_uid_collision
     source: uid
   name: name
   pass: pass
