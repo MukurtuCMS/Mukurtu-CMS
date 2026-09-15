@@ -887,18 +887,33 @@ short fields themselves. Shrink it in these dialogs specifically. */
    setCustomAccentColor() output for '#0e7873' exactly), not
    re-derived - keep them in sync if accent_color ever changes.
 
+   Deliberately NOT included: --gin-bg-app-rgb / --gin-color-sticky-rgb.
+   accent.js sets these too, but Gin's own compiled fallback mixes any base
+   color with 97% white for them, which washes out hue differences almost
+   entirely - #111111 and #0e7873 both land within a couple of RGB values
+   of each other, so there's no visible flash there worth fixing. More
+   importantly, dark mode does NOT redeclare either property itself; its
+   values come solely from Gin's own generic, non-important
+   ".gin--dark-mode[data-gin-accent]" rule (accent.scss). Adding them here
+   with !important, as an earlier version of this rule did, unconditionally
+   beat that non-important dark-mode rule regardless of specificity (an
+   !important declaration always wins over a non-important one) and turned
+   the dark-mode app background white. Only override properties that (a)
+   actually flash and (b) dark mode redeclares for itself elsewhere in this
+   file - --gin-bg-header qualifies on both counts.
+
    !important: same reasoning as the dark-mode block below - needed to
    reliably win over both Gin's own compiled fallback and its later,
    non-important JS-injected override (identical values, so this is purely
    about winning the FIRST paint; harmless once JS re-asserts the same
-   numbers). */
+   numbers). Safe here specifically because every property below is also
+   redeclared, with higher selector specificity, in the dark-mode block -
+   so dark mode still correctly wins the tie between two !important rules. */
 [data-gin-accent="custom"] {
   --gin-color-primary-rgb: 14, 120, 115 !important;
   --gin-color-primary-hover: #005f5a !important;
   --gin-color-primary-active: #00524d !important;
-  --gin-bg-app-rgb: 247, 250, 250 !important;
   --gin-bg-header: #daeaea !important;
-  --gin-color-sticky-rgb: 235, 244, 243 !important;
 }
 
 /* Gin dark-mode custom accent color: replace Gin's own auto-generated
