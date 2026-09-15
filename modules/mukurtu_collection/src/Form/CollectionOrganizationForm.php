@@ -7,13 +7,17 @@ use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\Element;
 use Drupal\mukurtu_collection\Entity\Collection;
+use Drupal\mukurtu_core\Form\AjaxRowTableAccessibilityTrait;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a Mukurtu Collections form.
  */
 class CollectionOrganizationForm extends FormBase {
+
+  use AjaxRowTableAccessibilityTrait;
 
   /**
    * Constructs a new CollectionOrganizationForm object.
@@ -242,18 +246,9 @@ class CollectionOrganizationForm extends FormBase {
     // Live region announcing table changes to screen reader users. Kept
     // outside the #prefix/#suffix wrapper on $form['collections'] above so
     // it survives the AJAX wrapper replacement instead of being reset by it.
-    $form['collections_status'] = [
-      '#type' => 'html_tag',
-      '#tag' => 'div',
-      '#attributes' => [
-        'id' => 'collections-table-status',
-        'class' => ['visually-hidden'],
-        'aria-live' => 'polite',
-        'aria-atomic' => 'true',
-      ],
-    ];
+    $form['collections_status'] = $this->buildAjaxRowTableStatusRegion('collections-table-status');
 
-    $form['#attached']['library'][] = 'mukurtu_collection/collection-organization-form';
+    $this->attachAjaxRowTableStatusLibrary($form);
 
     $form['actions'] = [
       '#type' => 'actions',
@@ -267,13 +262,14 @@ class CollectionOrganizationForm extends FormBase {
   }
 
   public function addCollectionToTableCallback(array &$form, FormStateInterface $form_state) {
-    // Marks the table so the collections-status JS behavior can find it as
-    // a descendant of the #collections-table wrapper once() is scoped to -
-    // Drupal.attachBehaviors() runs with that wrapper itself as context
-    // after the AJAX replace, and context.querySelectorAll() can never
-    // match context itself, only descendants. Also absent during the
-    // initial page load, since it's only ever set here.
-    $form['collections']['#attributes']['data-collections-just-changed'] = 'true';
+    // Marks the table so the shared ajax-row-table-status JS behavior can
+    // find it as a descendant of the #collections-table wrapper once() is
+    // scoped to - Drupal.attachBehaviors() runs with that wrapper itself as
+    // context after the AJAX replace, and context.querySelectorAll() can
+    // never match context itself, only descendants.
+    $count = count(Element::children($form['collections']));
+    $message = $this->formatPlural($count, 'Collection organization updated. 1 item in the collection.', 'Collection organization updated. @count items in the collection.');
+    $this->markAjaxRowTableChanged($form['collections'], $message, 'collections-table-status', 'collections-table-add-button');
 
     $response = new AjaxResponse();
     $response->addCommand(new ReplaceCommand('#collections-table', $form['collections']));
