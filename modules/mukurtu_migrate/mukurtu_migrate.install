@@ -41,3 +41,34 @@ function mukurtu_migrate_update_40201(): ?string {
 
   return (string) t('Updated the mukurtu_cms_v3_users migration so it can no longer merge a legacy user onto the Submission Forms service account when their uids collide.');
 }
+
+/**
+ * Stop the user migrations from skipping users who had several unmapped roles.
+ */
+function mukurtu_migrate_update_40202(): ?string {
+  $updated = [];
+  foreach (['mukurtu_cms_v3_users', 'mukurtu_cms_v3_users_uid1'] as $id) {
+    $config = \Drupal::configFactory()->getEditable('migrate_plus.migration.' . $id);
+    if ($config->isNew()) {
+      continue;
+    }
+    // Only touch the config if it still holds the shipped single static_map
+    // pipeline; a site that has already customized this migration's roles
+    // pipeline is left alone.
+    $roles = $config->get('process.roles');
+    if (!is_array($roles) || count($roles) !== 1 || ($roles[0]['plugin'] ?? NULL) !== 'static_map') {
+      continue;
+    }
+
+    $roles[] = ['plugin' => 'array_unique'];
+    $config->set('process.roles', $roles)->save();
+    $updated[] = $id;
+  }
+
+  if (!$updated) {
+    return NULL;
+  }
+  return (string) t('Updated the @migrations migration(s) so a legacy user with several roles the migration does not map no longer fails with "Unable to remove item at non-existing index" and gets skipped.', [
+    '@migrations' => implode(', ', $updated),
+  ]);
+}
