@@ -910,3 +910,123 @@ short fields themselves. Shrink it in these dialogs specifically. */
   outline: 3px solid var(--gin-color-primary, #0036b1);
   outline-offset: 2px;
 }
+
+/* Visitors report: the report rows sit 24px wider than the page content on
+   each side, so every card hangs outside the date-range box above it. The
+   visitors module names its report rows "layout-row", which is also Claro's
+   class for the two-column admin layout, and Claro's
+   css/layout/system-admin--layout.css pulls .layout-row out by -1.5em on both
+   sides to let its columns bleed past their container. Nothing in the visitors
+   module sets that margin; it is a class-name collision. Undo it here only,
+   scoped to the report container.
+
+   The class is repeated to reach (0,3,0): Claro's selector is
+   "body:not(.toolbar-tray-open) .layout-row", which is (0,2,1) and so beats a
+   plain .visitors-main .layout-row. This file is attached in the CSS "base"
+   group, the earliest one, so it can never win a tie on source order -- every
+   override here has to win on specificity alone. */
+.visitors-main .layout-row.layout-row {
+  margin-inline: 0;
+}
+
+/* Visitors report: the date filter is a <details> inside a form, and both pick
+   up a card -- Gin cards .block-system-main-block > form, Claro cards
+   .claro-details -- so the visible date box is the inner one, indented by the
+   outer card's padding and narrower than every report card below it. Drop the
+   outer card so the details is the box, at the same width as the reports.
+
+   Prefixed with .block-system-main-block to beat Gin's own
+   ".block-system-main-block > form" (0,1,1); the attribute selector alone only
+   ties, and this file loads first. */
+.block-system-main-block > form[data-drupal-selector="visitors-date-filter-form"] {
+  padding: 0;
+  background: none;
+  border: 0;
+  box-shadow: none;
+}
+
+/* Visitors report: Gin's views-view.html.twig hardcodes its card class
+   (gin-layer-wrapper) on .view-content, leaving .view-header and .view-footer
+   as siblings outside it -- which is why the footer buttons styled above float
+   on the page background instead of sitting in the card they belong to. The
+   class is in a contrib template and cannot be moved from CSS, so strip the
+   card from .view-content and rebuild it one level out, on the
+   .views-element-container wrapper that Drupal\views\Element\View adds around
+   every embedded view.
+
+   Scoped to .visitors-main rather than the view-id classes because those sit
+   on the inner .view div, which the report's AJAX toggles replace wholesale --
+   the wrapper and its card survive a swap. Values mirror
+   gin/styles/base/_layers.scss so the two stay in step. */
+.visitors-main .views-element-container {
+  box-sizing: border-box;
+  width: 100%;
+  padding: var(--gin-spacing-s);
+  background: var(--gin-bg-layer);
+  border: 1px solid var(--gin-border-color-layer);
+  border-radius: var(--gin-border-l);
+  box-shadow: var(--gin-shadow-l1);
+}
+
+/* Gin's mq(small) breakpoint. */
+@media (min-width: 48rem) {
+  .visitors-main .views-element-container {
+    padding: var(--gin-spacing-l);
+  }
+}
+
+.gin--dark-mode .visitors-main .views-element-container {
+  box-shadow: 0 6px 16px var(--gin-border-color-layer);
+}
+
+.gin--high-contrast-mode .visitors-main .views-element-container {
+  box-shadow: none;
+}
+
+/* Un-card the inner element now that the wrapper carries the card. (0,3,0)
+   beats Gin's .gin-layer-wrapper (0,1,0) and its mode variants (0,2,0), so no
+   !important is needed. */
+.visitors-main .view-content.gin-layer-wrapper {
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* The chart is the only block in its row, so report.css's flex: 1 1 45% grows
+   it to the full page width. Pin it to the width a column actually gets in the
+   two-up rows instead: those share the row between two items with report.css's
+   1rem gap, so each settles at calc(50% - 0.5rem) rather than the 45% basis.
+   Matching that keeps the chart's right edge flush with the Continent table
+   directly above it. Carries both column classes to outweigh report.css's own
+   (0,3,0) rule, which would otherwise win on source order.
+
+   Confined to the wide breakpoint on purpose. report.css stacks every column
+   to flex: 1 1 100% below 768px, and this selector is specific enough that it
+   would override that too and leave the chart at half width on a phone, so it
+   complements that max-width query rather than competing with it. */
+@media (min-width: 769px) {
+  .visitors-main .layout-column--chart.layout-column--half.views-element-container {
+    flex: 0 1 calc(50% - 0.5rem);
+  }
+}
+
+/* Visitors report, Gin dark mode: keep the chart on a light plate.
+
+   charts_chartjs paints its title and legend onto the <canvas>, and neither
+   colour follows the theme -- the title is written into the per-chart JSON as
+   #000 by the charts module, and the legend falls back to Chart.js's own #666
+   default. Against Gin's dark card (#2a2a2d) that measures 1.47:1 and 2.49:1,
+   both well short of the 4.5:1 WCAG 1.4.3 wants for text this size. The
+   colours come from contrib config and contrib JS, so rather than fight them
+   from here, give the canvas the light background it was drawn for and let it
+   read as a deliberate plate inside the dark card.
+
+   Applies to every visitors report, not just Locations: the same chart text is
+   drawn the same way on /visitors/software once its own chart is toggled on. */
+.gin--dark-mode .visitors-main .charts-figure {
+  padding: var(--gin-spacing-s);
+  background: #fff;
+  border-radius: var(--gin-border-m);
+}
