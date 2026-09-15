@@ -59,12 +59,13 @@ class MukurtuImportStrategyFormAccessibilityTest extends MukurtuImportTestBase {
   /**
    * Tests that only the Add/Remove AJAX callback marks the table as changed.
    *
-   * The mapping-status JS behavior (strategy-form.js) relies on
+   * The shared mukurtu_core/ajax-row-table-status JS behavior relies on
    * mappingTableAjaxCallback() marking its returned table with
-   * data-mapping-just-changed so it can tell a genuine Add/Remove rebuild
-   * apart from the unrelated entity-type/bundle-change AJAX callbacks, which
-   * replace the same #import-field-mapping-config wrapper for a different
-   * reason and must not trigger the status announcement or focus move.
+   * data-mukurtu-ajax-row-table-changed so it can tell a genuine Add/Remove
+   * rebuild apart from the unrelated entity-type/bundle-change AJAX
+   * callbacks, which replace the same #import-field-mapping-config wrapper
+   * for a different reason and must not trigger the status announcement or
+   * focus move.
    */
   public function testMappingTableAjaxMarkerScoping(): void {
     $entity = MukurtuImportStrategy::create([
@@ -96,10 +97,14 @@ class MukurtuImportStrategyFormAccessibilityTest extends MukurtuImportTestBase {
       return [$form_object, $form, $form_state];
     };
 
-    // The Add/Remove callback marks the table it returns.
+    // The Add/Remove callback marks the table it returns, and includes the
+    // status message/target and focus target the shared JS behavior reads.
     [$form_object, $form, $form_state] = $build();
     $mapping_result = $form_object->mappingTableAjaxCallback($form, $form_state);
-    $this->assertSame('true', $mapping_result['#attributes']['data-mapping-just-changed'] ?? NULL);
+    $this->assertSame('true', $mapping_result['#attributes']['data-mukurtu-ajax-row-table-changed'] ?? NULL);
+    $this->assertSame('import-field-mapping-status', $mapping_result['#attributes']['data-mukurtu-status-target'] ?? NULL);
+    $this->assertSame('import-add-mapping-button', $mapping_result['#attributes']['data-mukurtu-focus-target'] ?? NULL);
+    $this->assertNotSame('', (string) ($mapping_result['#attributes']['data-mukurtu-status-message'] ?? ''));
 
     // The entity-type-change callback replaces the same wrapper, but must
     // not carry the marker.
@@ -107,14 +112,14 @@ class MukurtuImportStrategyFormAccessibilityTest extends MukurtuImportTestBase {
     $response = $form_object->entityTypeChangeAjaxCallback($form, $form_state);
     $rendered = $this->getReplaceCommandDataForSelector($response, '#import-field-mapping-config');
     $this->assertIsString($rendered);
-    $this->assertStringNotContainsString('data-mapping-just-changed', $rendered);
+    $this->assertStringNotContainsString('data-mukurtu-ajax-row-table-changed', $rendered);
 
     // Same for the bundle-change callback.
     [$form_object, $form, $form_state] = $build();
     $response = $form_object->bundleChangeAjaxCallback($form, $form_state);
     $rendered = $this->getReplaceCommandDataForSelector($response, '#import-field-mapping-config');
     $this->assertIsString($rendered);
-    $this->assertStringNotContainsString('data-mapping-just-changed', $rendered);
+    $this->assertStringNotContainsString('data-mukurtu-ajax-row-table-changed', $rendered);
   }
 
   /**
