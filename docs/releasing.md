@@ -61,6 +61,59 @@ them from drifting apart again.
    (`4.0.0-beta37`, `4.0.0-rc`, `4.0.0`).
 7. **Publish release notes.** Call out anything that changes the upgrade
    procedure, and any release that must be passed through rather than skipped.
+8. **Check whether `mukurtu-template` needs a release.** See [Releasing
+   alongside mukurtu-template](#releasing-alongside-mukurtu-template). If it
+   does, release it *after* this tag is published, never before.
+
+## Releasing alongside mukurtu-template
+
+[mukurtu-template](https://github.com/MukurtuCMS/mukurtu-template) is the root
+project sites install from. It requires `"mukurtu/mukurtu": "^4.0"`, so it does
+**not** need a release for every profile release: template `4.0.0` installs the
+newest 4.x profile on its own.
+
+A template release is needed only when the root `composer.json` itself must
+change. Composer honours these keys **only** in the root project, so the profile
+cannot declare them for itself:
+
+- stability flags (`@beta`, `@dev`, `@alpha`), and `minimum-stability` /
+  `prefer-stable`
+- `config.allow-plugins`
+- `repositories`
+- `extra.installer-paths` and `extra.installer-types`
+
+**When a release needs both, tag the profile first and the template second.**
+The template can only require a profile version that already exists. Releasing
+it first leaves `^4.0` resolving to tags that predate the matching profile
+change, and every fresh install fails.
+
+That is what happened on 2026-09-14. Template `4.0.1` pinned `drupal/altcha` to
+`2.0.0-beta1@beta` as the companion to #2075, which was never tagged, so every
+released `mukurtu/mukurtu` still required `drupal/altcha ^1.2`:
+
+```
+- mukurtu/mukurtu[4.0.0, ..., 4.0.2] require drupal/altcha ^1.2 -> found
+  drupal/altcha[1.2.0] but it conflicts with your root composer.json
+  require (2.0.0-beta1@beta).
+```
+
+Both halves were reverted (#2210, mukurtu-template#7, released as template
+`4.0.2`); the re-land is tracked in #2211. The template repo now resolves
+against live Packagist on every pull request, which fails a root requirement no
+released profile can satisfy.
+
+Two further consequences worth knowing:
+
+- **Merging a template fix is not enough; it must be tagged.** Packagist serves
+  the newest matching tag, so `^4.0` keeps resolving to the broken release until
+  a new one is cut.
+- **A profile PR's CI resolves against the released template.**
+  `.github/workflows/build-and-test.yml` and `.tugboat/config.yml` both scaffold
+  with `composer create mukurtu/mukurtu-template:^4.0`, then overlay the branch
+  as a path repo, so a profile change needing a template change stays red until
+  the template is released. Tugboat runs its `composer create` in the `init:`
+  phase, which is cached in the base preview, so it also needs a base preview
+  rebuild.
 
 ## Releases that remove update hooks
 
