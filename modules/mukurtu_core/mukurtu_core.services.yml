@@ -30,6 +30,12 @@ services:
   mukurtu_core.roundtrip_entity_types:
     class: Drupal\mukurtu_core\Service\RoundtripEntityTypeRegistry
     arguments: ['@entity_type.manager']
+  mukurtu_core.visitors_country_map:
+    class: Drupal\mukurtu_core\Service\VisitorsCountryMap
+    # The visitors services are optional (@?) on purpose: mukurtu_core does not
+    # depend on the visitors module, and a hard reference would break the
+    # container on a site without it.
+    arguments: ['@database', '@leaflet.service', '@string_translation', '@?visitors.date_range', '@?visitors.location']
   mukurtu_core.leaflet_service:
     class: Drupal\mukurtu_core\Service\MukurtuLeafletService
     decorates: leaflet.service

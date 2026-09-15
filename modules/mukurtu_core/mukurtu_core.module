@@ -963,45 +963,6 @@ function mukurtu_core_views_pre_build(\Drupal\views\ViewExecutable $view) {
 }
 
 /**
- * Implements hook_views_pre_render().
- *
- * Drops the redundant chart/table toggle links on /visitors/location.
- *
- * VisitorsLocationReportController renders the Continent pie chart on that
- * page alongside the Continent table, so the reciprocal "chart" and "table"
- * footer links there no longer switch between two views - they duplicate one.
- * Clicking "chart" would swap the table for a second pie, and "table" would
- * swap the pie for a second table.
- *
- * Scoped to the visitors.location route so the same displays keep their links
- * everywhere else, including /visitors/location/continent and the
- * visitors.report AJAX endpoint the links themselves hit. The Language table's
- * "Language Code" link is untouched: it points at another table, not a chart.
- *
- * $view->footer is bound by reference to the display handler's own footer
- * handlers (ViewExecutable::_initHandler() assigns from the by-reference
- * DisplayPluginBase::getHandlers()), and this hook runs before theming calls
- * renderArea('footer'), so unsetting here really does remove the link.
- *
- * Procedural rather than a #[Hook] attribute, for the reason recorded in
- * \Drupal\mukurtu_core\Hook\ViewsHooks.
- *
- * @see \Drupal\mukurtu_core\Controller\VisitorsLocationReportController
- */
-function mukurtu_core_views_pre_render(\Drupal\views\ViewExecutable $view) {
-  $suppress = \Drupal\mukurtu_core\Controller\VisitorsLocationReportController::suppressesDisplayLink(
-    (string) \Drupal::routeMatch()->getRouteName(),
-    (string) $view->id(),
-    (string) $view->current_display,
-  );
-  if (!$suppress) {
-    return;
-  }
-
-  unset($view->footer['visitors_display_link']);
-}
-
-/**
  * Implements hook_views_query_alter().
  *
  * For pending: adds status=0 AND field_pending=1.

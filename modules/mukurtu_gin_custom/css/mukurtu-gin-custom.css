@@ -929,6 +929,15 @@ short fields themselves. Shrink it in these dialogs specifically. */
   margin-inline: 0;
 }
 
+/* Visitors report: the rows are plain divs with nothing between them, so the
+   cards touch vertically while sitting 1rem apart horizontally (report.css
+   puts a 1rem gap between the columns inside a row, but nothing between the
+   rows themselves). Match the two so the grid reads evenly in both
+   directions. */
+.visitors-main .layout-row + .layout-row {
+  margin-block-start: 1rem;
+}
+
 /* Visitors report: the date filter is a <details> inside a form, and both pick
    up a card -- Gin cards .block-system-main-block > form, Claro cards
    .claro-details -- so the visible date box is the inner one, indented by the
@@ -994,22 +1003,41 @@ short fields themselves. Shrink it in these dialogs specifically. */
   box-shadow: none;
 }
 
-/* The chart is the only block in its row, so report.css's flex: 1 1 45% grows
-   it to the full page width. Pin it to the width a column actually gets in the
-   two-up rows instead: those share the row between two items with report.css's
-   1rem gap, so each settles at calc(50% - 0.5rem) rather than the 45% basis.
-   Matching that keeps the chart's right edge flush with the Continent table
-   directly above it. Carries both column classes to outweigh report.css's own
-   (0,3,0) rule, which would otherwise win on source order.
+/* The country map is the only block in its row and, unlike a table, reads
+   better the wider it gets, so it spans the full row rather than sitting in
+   one column. .visitors-country-map is a plain container, not a views embed,
+   so it does not pick up report.css's column rules at all; it only needs a
+   card of its own to match the report blocks around it. */
+.visitors-main .visitors-country-map {
+  box-sizing: border-box;
+  width: 100%;
+  padding: var(--gin-spacing-s);
+  background: var(--gin-bg-layer);
+  border: 1px solid var(--gin-border-color-layer);
+  border-radius: var(--gin-border-l);
+  box-shadow: var(--gin-shadow-l1);
+}
 
-   Confined to the wide breakpoint on purpose. report.css stacks every column
-   to flex: 1 1 100% below 768px, and this selector is specific enough that it
-   would override that too and leave the chart at half width on a phone, so it
-   complements that max-width query rather than competing with it. */
-@media (min-width: 769px) {
-  .visitors-main .layout-column--chart.layout-column--half.views-element-container {
-    flex: 0 1 calc(50% - 0.5rem);
+@media (min-width: 48rem) {
+  .visitors-main .visitors-country-map {
+    padding: var(--gin-spacing-l);
   }
+}
+
+.gin--dark-mode .visitors-main .visitors-country-map {
+  box-shadow: 0 6px 16px var(--gin-border-color-layer);
+}
+
+.gin--high-contrast-mode .visitors-main .visitors-country-map {
+  box-shadow: none;
+}
+
+/* Leaflet draws its own controls and attribution over the tiles, so the map
+   needs a stacking context it cannot escape, and rounded corners to sit in
+   the card cleanly. */
+.visitors-main .visitors-country-map .leaflet-container {
+  width: 100%;
+  border-radius: var(--gin-border-m);
 }
 
 /* Visitors report, Gin dark mode: keep the chart on a light plate.

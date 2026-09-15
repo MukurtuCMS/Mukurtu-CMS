@@ -11,12 +11,12 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests the render-array work behind the /visitors/location chart.
+ * Tests the render-array work behind the /visitors/location map.
  *
  * Unit rather than Kernel on purpose: mukurtu_core depends on ~30 modules
  * (blazy, leaflet, paragraphs, search_api, message_subscribe_ui and more), so
  * enabling it in a Kernel test to reach one render array is not worth the
- * cost. The controller keeps this logic in container-free static methods
+ * cost. The controller keeps this logic in a container-free static method
  * precisely so it can be covered here instead.
  *
  * @see \Drupal\mukurtu_core\Controller\VisitorsLocationReportController
@@ -25,10 +25,15 @@ use PHPUnit\Framework\Attributes\Group;
 class VisitorsLocationReportControllerTest extends UnitTestCase {
 
   /**
+   * A stand-in for the map render array.
+   */
+  private const MAP = ['#markup' => 'map'];
+
+  /**
    * A build shaped like the one ReportController::location() returns.
    *
    * Rows are keyed '1', '2', '3' by contrib, which PHP stores as integers -
-   * the detail the weighting in addChartRow() exists to work around.
+   * the detail the weighting in addMapRow() exists to work around.
    */
   private function contribBuild(): array {
     $row = fn(string $label): array => [
@@ -49,32 +54,29 @@ class VisitorsLocationReportControllerTest extends UnitTestCase {
   }
 
   /**
-   * The chart row embeds the continent pie display.
+   * The map row carries the map and its own row modifier class.
    */
-  public function testChartRowEmbedsTheContinentPieDisplay(): void {
-    $build = VisitorsLocationReportController::addChartRow($this->contribBuild());
+  public function testMapRowCarriesTheMap(): void {
+    $build = VisitorsLocationReportController::addMapRow($this->contribBuild(), self::MAP);
 
-    $embed = $build['main']['continent_chart'][0]['blocks'][0];
-    $this->assertSame('view', $embed['#type']);
-    $this->assertSame('visitors', $embed['#name']);
-    $this->assertSame('continent_pie', $embed['#display_id']);
-    $this->assertContains('layout-column--half', $embed['#attributes']['class']);
-    $this->assertContains('layout-column--chart', $embed['#attributes']['class']);
+    $row = $build['main']['country_map'][0];
+    $this->assertSame([self::MAP], $row['blocks']);
+    $this->assertStringContainsString('layout-row--map', $row['#prefix']);
   }
 
   /**
-   * The chart lands after the Continent/Country row, not at the end.
+   * The map lands after the Continent/Country row, not at the end.
    *
    * This is the regression that matters: appending a string key to an array
-   * whose other keys are integers puts the new row last, so the chart would
-   * render below the Language and City tables instead of below the table it
-   * plots.
+   * whose other keys are integers puts the new row last, so the map would
+   * render below the Language and City tables instead of below the countries
+   * it plots.
    */
-  public function testChartRowSortsDirectlyAfterTheFirstRow(): void {
-    $build = VisitorsLocationReportController::addChartRow($this->contribBuild());
+  public function testMapRowSortsDirectlyAfterTheFirstRow(): void {
+    $build = VisitorsLocationReportController::addMapRow($this->contribBuild(), self::MAP);
 
     $this->assertSame(
-      ['1', 'continent_chart', '2', '3'],
+      ['1', 'country_map', '2', '3'],
       array_map('strval', Element::children($build['main'], TRUE)),
     );
   }
@@ -84,7 +86,7 @@ class VisitorsLocationReportControllerTest extends UnitTestCase {
    */
   public function testContribRowsAreOtherwiseUnchanged(): void {
     $before = $this->contribBuild();
-    $after = VisitorsLocationReportController::addChartRow($before);
+    $after = VisitorsLocationReportController::addMapRow($before, self::MAP);
 
     foreach (['1', '2', '3'] as $row) {
       $this->assertArrayHasKey('#weight', $after['main'][$row]);
@@ -95,62 +97,36 @@ class VisitorsLocationReportControllerTest extends UnitTestCase {
   }
 
   /**
-   * The route cache context is added, since the toggle links are route-scoped.
+   * With no map to show, the report is handed back exactly as contrib built it.
+   *
+   * VisitorsCountryMap returns an empty array when the visitors services are
+   * missing, so this is the "visitors uninstalled" path.
    */
-  public function testRouteCacheContextIsAdded(): void {
-    $build = VisitorsLocationReportController::addChartRow($this->contribBuild());
+  public function testEmptyMapLeavesTheReportAlone(): void {
+    $build = $this->contribBuild();
 
-    $this->assertContains('route', $build['#cache']['contexts']);
+    $this->assertSame($build, VisitorsLocationReportController::addMapRow($build, []));
   }
 
   /**
    * A build this code does not recognise is handed back untouched.
    *
-   * If contrib restructures the report, the page should lose the chart, not
+   * If contrib restructures the report, the page should lose the map, not
    * white-screen.
    */
   #[DataProvider('unrecognisedBuildProvider')]
   public function testUnrecognisedBuildIsReturnedUnchanged(array $build): void {
-    $this->assertSame($build, VisitorsLocationReportController::addChartRow($build));
+    $this->assertSame($build, VisitorsLocationReportController::addMapRow($build, self::MAP));
   }
 
   /**
-   * Builds that addChartRow() must decline to touch.
+   * Builds that addMapRow() must decline to touch.
    */
   public static function unrecognisedBuildProvider(): array {
     return [
       'no main container' => [['visitors_date_filter_form' => ['#markup' => 'x']]],
       'main is not an array' => [['main' => 'unexpected']],
       'main has no rows' => [['main' => ['#type' => 'container']]],
-    ];
-  }
-
-  /**
-   * Only the two redundant displays lose their toggle link.
-   */
-  #[DataProvider('displayLinkProvider')]
-  public function testSuppressesDisplayLink(string $route, string $view, string $display, bool $expected): void {
-    $this->assertSame(
-      $expected,
-      VisitorsLocationReportController::suppressesDisplayLink($route, $view, $display),
-    );
-  }
-
-  /**
-   * Cases for the toggle-link suppression rule.
-   */
-  public static function displayLinkProvider(): array {
-    return [
-      'continent table on the locations report' => ['visitors.location', 'visitors', 'continent_table', TRUE],
-      'continent pie on the locations report' => ['visitors.location', 'visitors', 'continent_pie', TRUE],
-      // The "Language Code" link points at another table, not a chart, so it
-      // is still doing something and must survive.
-      'language table keeps its link' => ['visitors.location', 'visitors', 'language_table', FALSE],
-      // The AJAX endpoint the links themselves hit, and the drilldown page,
-      // both still show a table on its own, so their toggles stay.
-      'ajax report endpoint' => ['visitors.report', 'visitors', 'continent_table', FALSE],
-      'continent drilldown page' => ['visitors.location.continent', 'visitors', 'continent_table', FALSE],
-      'a different view' => ['visitors.location', 'visitors_geoip', 'region_table', FALSE],
     ];
   }
 
