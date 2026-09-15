@@ -15,13 +15,6 @@ use PHPUnit\Framework\Attributes\Group;
 class ReferencedProjectsAndLabelsTest extends LocalContextsTestBase {
 
   /**
-   * The Local Contexts supported project manager.
-   *
-   * @var \Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager
-   */
-  protected $manager;
-
-  /**
    * {@inheritdoc}
    */
   protected function setUp(): void {
