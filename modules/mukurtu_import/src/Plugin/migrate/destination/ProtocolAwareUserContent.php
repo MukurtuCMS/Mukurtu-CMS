@@ -82,7 +82,7 @@ class ProtocolAwareUserContent extends ProtocolAwareEntityContent {
 
     $existing_id = $this->getEntityId($row);
     if ($existing_id && (int) $existing_id === 1) {
-      throw new MigrateException('The site superuser account (uid 1) cannot be created or updated via import.');
+      throw new MigrateException('The main administrator account (user 1) is protected and cannot be changed by import. Edit the account directly under People instead.');
     }
 
     $is_new = !$existing_id;
