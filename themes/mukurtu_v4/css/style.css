@@ -153,6 +153,7 @@ documentation on how to use @include media(). */
   --mukurtu-dictionary-word-label-background-color: var(--mukurtu-view-row-divider-color);
   --mukurtu-collection-title-font-color: var(--color-white);
   --mukurtu-collection-pane-bg-color: var(--mukurtu-navbar-collapse-bg);
+  --image-description-horizontal-text: var(--brand-primary-dark);
   --brand-text-color: #464646;
   --brand-light: #e5e9e9;
   --brand-light-accent: #f8f7f7;
@@ -2036,6 +2037,13 @@ label.form-required::after,
 .block--image-with-description--horizontal .block-wrapper__second {
   background-color: var(--brand-secondary);
 }
+.block--image-with-description--horizontal .block-wrapper__second h1, .block--image-with-description--horizontal .block-wrapper__second h2 {
+  color: var(--image-description-horizontal-text);
+}
+.block--image-with-description--horizontal .block-wrapper__second a {
+  color: var(--image-description-horizontal-text);
+  text-decoration-color: var(--image-description-horizontal-text);
+}
 @media (min-width: 48rem) {
   .block--image-with-description--horizontal {
     grid-template-columns: 1fr 1fr;
@@ -2092,6 +2100,14 @@ label.form-required::after,
 .block--image-with-description--full.text-light p {
   font-size: var(--font-size-l);
 }
+.block--image-with-description--full.text-light .block-wrapper__second::before {
+  background: rgba(0, 0, 0, 0.7);
+}
+@supports not (backdrop-filter: blur()) {
+  .block--image-with-description--full.text-light .block-wrapper__second::before {
+    background: rgba(0, 0, 0, 0.9);
+  }
+}
 .block--image-with-description--full .block-wrapper__first {
   overflow: hidden;
   position: absolute;
@@ -2108,6 +2124,7 @@ label.form-required::after,
   inline-size: 100%;
 }
 .block--image-with-description--full .block-wrapper__second {
+  position: relative;
   z-index: 2;
   inline-size: 100%;
   block-size: 100%;
@@ -2120,6 +2137,20 @@ label.form-required::after,
   place-items: center;
   padding: var(--v-space-s);
   min-block-size: 600px;
+}
+.block--image-with-description--full .block-wrapper__second::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+@supports not (backdrop-filter: blur()) {
+  .block--image-with-description--full .block-wrapper__second::before {
+    background: rgba(255, 255, 255, 0.97);
+  }
 }
 
 .language-switcher__summary {

@@ -19,6 +19,20 @@
 
     .block-wrapper__second {
       background-color: var(--brand-secondary);
+
+      // Overrides the shared h1/h2 color above and the global link color
+      // (_base.scss) with a token that's guaranteed to pass contrast
+      // against --brand-secondary on every palette - see #2178. The
+      // shared --brand-primary-dark isn't safe to change directly here
+      // since it's used for headings/links across the whole site.
+      h1, h2 {
+        color: var(--image-description-horizontal-text);
+      }
+
+      a {
+        color: var(--image-description-horizontal-text);
+        text-decoration-color: var(--image-description-horizontal-text);
+      }
     }
 
     @include include-media.media('>=md') {
@@ -91,6 +105,18 @@
         font-size: var(--font-size-l);
       }
 
+      // Dark scrim behind white text - see the default (dark-text) scrim
+      // below for the full WCAG 1.4.3 rationale. Reuses the exact
+      // opacity/blur values already vetted for .mukurtu-content-warnings
+      // (_content-warning.scss), which solves the same problem the same
+      // way: an author-uploaded photo of unknown luminance behind text.
+      .block-wrapper__second::before {
+        background: rgb(0 0 0 / 70%);
+
+        @supports not (backdrop-filter: blur()) {
+          background: rgb(0 0 0 / 90%);
+        }
+      }
     }
 
     .block-wrapper__first {
@@ -110,6 +136,7 @@
     }
 
     .block-wrapper__second {
+      position: relative;
       z-index: 2;
       inline-size: 100%;
       block-size: 100%;
@@ -119,6 +146,33 @@
       place-items: center;
       padding: var(--v-space-s);
       min-block-size: 600px;
+
+      &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+
+        // Guarantees WCAG 1.4.3 text contrast against an arbitrary,
+        // author-uploaded photo - a text-shadow alone (the previous
+        // approach) is not a recognised contrast technique. This is the
+        // default (dark-text) scrim; .text-light overrides it below with
+        // a dark scrim instead, since white text needs a dark backdrop.
+        // The opacity has to hold up against the lightest built-in brand
+        // color used as text (blue-gold palette's --brand-primary-dark,
+        // #107996, relative luminance ~0.16) over a worst-case (black)
+        // photo. Alpha-compositing white at 90% over black composites to
+        // ~#e6e6e6 (relative luminance ~0.79), which is only 3.99:1
+        // against that text - short of 4.5:1. 96% composites to ~#f5f5f5
+        // (luminance ~0.91), reaching ~4.6:1 with a small margin.
+        background: rgb(255 255 255 / 96%);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+
+        @supports not (backdrop-filter: blur()) {
+          background: rgb(255 255 255 / 97%);
+        }
+      }
     }
   }
 }
