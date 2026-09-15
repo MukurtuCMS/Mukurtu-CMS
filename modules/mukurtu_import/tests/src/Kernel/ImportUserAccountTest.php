@@ -396,7 +396,7 @@ class ImportUserAccountTest extends MukurtuImportTestBase {
   }
 
   /**
-   * Test that the site superuser (uid 1) can never be updated via import.
+   * Test that the main administrator account (user 1) is never updated.
    */
   public function testSuperuserCannotBeUpdated() {
     $data = [
@@ -417,7 +417,7 @@ class ImportUserAccountTest extends MukurtuImportTestBase {
 
     $messages = iterator_to_array($this->lastMigration->getIdMap()->getMessages());
     $this->assertNotEmpty($messages);
-    $this->assertStringContainsString('superuser account (uid 1)', reset($messages)->message);
+    $this->assertStringContainsString('main administrator account (user 1)', reset($messages)->message);
   }
 
   /**
