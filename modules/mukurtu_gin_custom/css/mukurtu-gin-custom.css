@@ -1055,14 +1055,24 @@ short fields themselves. Shrink it in these dialogs specifically. */
    css/layout/system-admin--layout.css pulls .layout-row out by -1.5em on both
    sides to let its columns bleed past their container. Nothing in the visitors
    module sets that margin; it is a class-name collision. Undo it here only,
-   scoped to the report container.
+   scoped to visitors report pages.
 
-   The class is repeated to reach (0,3,0): Claro's selector is
-   "body:not(.toolbar-tray-open) .layout-row", which is (0,2,1) and so beats a
-   plain .visitors-main .layout-row. This file is attached in the CSS "base"
-   group, the earliest one, so it can never win a tie on source order -- every
-   override here has to win on specificity alone. */
-.visitors-main .layout-row.layout-row {
+   Scoped to body.path-visitors rather than .visitors-main: ReportController's
+   performance()/performance($sequence) actions (the /visitors/performance,
+   /performance/day and /performance/hour pages) never wrap their content in
+   the "visitors-main" container the other report actions add, so a
+   .visitors-main-scoped rule silently never reaches them and this same bleed
+   shows there too. Drupal adds "path-visitors" from the first path segment
+   to every /visitors/* page regardless of which controller action renders
+   it, so it covers all of them, performance included, without depending on
+   a wrapper each action has to remember to add.
+
+   The class is repeated to reach (0,3,0), now (0,3,1) with the body type
+   selector: Claro's selector is "body:not(.toolbar-tray-open) .layout-row",
+   which is (0,2,1) and so beats a plain .layout-row. This file is attached
+   in the CSS "base" group, the earliest one, so it can never win a tie on
+   source order -- every override here has to win on specificity alone. */
+body.path-visitors .layout-row.layout-row {
   margin-inline: 0;
 }
 
