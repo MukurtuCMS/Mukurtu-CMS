@@ -863,6 +863,135 @@ short fields themselves. Shrink it in these dialogs specifically. */
   margin-block-end: 1.5rem;
 }
 
+/* Gin light-mode custom accent color: eliminate the flash-of-black on page
+   load.
+
+   Gin's compiled CSS bakes a fallback of custom: #111111 (near-black) into
+   [data-gin-accent="custom"] for use before its own JS runs. The correct
+   accent color is only applied once Gin's accent.js (a Drupal behavior)
+   attaches and injects its own corrected <style> block into <body> - which
+   happens after the browser has already painted the page once. That gap
+   between first paint and JS attaching is visible as a brief flash of the
+   near-black fallback before the real teal appears.
+
+   Since accent.js computes this site's actual light-mode values from a
+   fixed config value (gin.settings:accent_color, #0e7873 - see
+   config/install/gin.settings.yml), hardcode those same computed values
+   here instead of waiting for JS to supply them. This file's stylesheet is
+   already present at first paint (attached via hook_page_attachments(),
+   like every other override in this file), so with these values in place
+   before JS ever runs, there is no incorrect state to flash - accent.js
+   still runs and re-asserts the identical values, just with no visible
+   change. Values below were read directly from accent.js's own injected
+   <style> block via DevTools on a live page (matches its
+   setCustomAccentColor() output for '#0e7873' exactly), not derived from a
+   formula this file could recompute. THESE VALUES ARE NOT AUTOMATICALLY
+   KEPT IN SYNC WITH gin.settings:accent_color - if that config value ever
+   changes, every hardcoded value in both this block and the dark-mode
+   block below must be recalculated by hand (via accent.js's own
+   hexToRgb/mixColor/shadeColor formulas, or by reading the live
+   .gin-custom-colors <style> block accent.js still injects) and updated
+   here, or the flash-of-black fix silently stops matching the real accent
+   color and the WCAG contrast figures in the dark-mode block's comment no
+   longer apply to what's actually configured. Nothing in CI enforces this.
+
+   Deliberately NOT included: --gin-bg-app-rgb / --gin-color-sticky-rgb.
+   accent.js sets these too, but Gin's own compiled fallback mixes any base
+   color with 97% white for them, which washes out hue differences almost
+   entirely - #111111 and #0e7873 both land within a couple of RGB values
+   of each other, so there's no visible flash there worth fixing. More
+   importantly, dark mode does NOT redeclare either property itself; its
+   values come solely from Gin's own generic, non-important
+   ".gin--dark-mode[data-gin-accent]" rule (accent.scss). Adding them here
+   with !important, as an earlier version of this rule did, unconditionally
+   beat that non-important dark-mode rule regardless of specificity (an
+   !important declaration always wins over a non-important one) and turned
+   the dark-mode app background white. Only override properties that (a)
+   actually flash and (b) dark mode redeclares for itself elsewhere in this
+   file - --gin-bg-header qualifies on both counts.
+
+   NOT a complete inventory of every custom-color gap: --gin-color-primary-
+   light-rgb (Gin's tint for e.g. --color-gray-050 in navigation.css) is
+   left at Gin's compiled custom fallback (~rgb(207,207,207), a plain gray
+   mixed from #111111) PERMANENTLY, in both light and dark mode - unlike
+   the properties above, accent.js never corrects this one for a custom
+   color at all, at any point, so there's no "post-JS" correct value to
+   preempt here. That's a pre-existing Gin limitation this PR doesn't
+   introduce and the reported bugs (dark-mode desaturation, light-mode
+   flash) didn't surface, so it's left alone rather than expanding this
+   fix's scope; worth a separate follow-up if that gray tint is ever
+   noticed as a visible issue.
+
+   !important: same reasoning as the dark-mode block below - needed to
+   reliably win over both Gin's own compiled fallback and its later,
+   non-important JS-injected override (identical values, so this is purely
+   about winning the FIRST paint; harmless once JS re-asserts the same
+   numbers). Safe here specifically because every property below is also
+   redeclared, with higher selector specificity, in the dark-mode block -
+   so dark mode still correctly wins the tie between two !important rules. */
+[data-gin-accent="custom"] {
+  --gin-color-primary-rgb: 14, 120, 115 !important;
+  --gin-color-primary-hover: #005f5a !important;
+  --gin-color-primary-active: #00524d !important;
+  --gin-bg-header: #daeaea !important;
+}
+
+/* Gin dark-mode custom accent color: replace Gin's own auto-generated
+   dark-mode variant with a properly contrast-checked one.
+
+   Gin's own accent.js (setCustomAccentColor()) derives a dark-mode
+   counterpart for a custom accent color by mixing it with 65% white
+   (mixColor('ffffff', hex, 65)), which for this site's custom accent
+   #0e7873 (see config/install/gin.settings.yml for why it's custom rather
+   than Gin's own "teal" preset) produces rgb(170, 207, 206) - a washed-out,
+   low-saturation pale mint that reads as nearly greyscale against Gin's
+   dark surfaces. Gin's own PRESET colors (e.g. "teal") avoid this because
+   their dark-mode counterparts are hand-picked and baked into Gin's
+   compiled CSS at build time (accent.scss's $ginDarkmodeColors); only
+   custom colors go through this generic runtime formula.
+
+   Values below keep the light-mode brand teal's hue (177deg) and
+   saturation (79%), just re-lightened for Gin's dark-mode surfaces instead
+   of mixed toward white. Verified against both of Gin's dark-mode
+   surfaces - --gin-bg-app-rgb: 27, 27, 29 (#1b1b1d) and --gin-bg-layer-rgb:
+   42, 42, 45 (#2a2a2d), the harder of the two to clear - #15b7af (primary)
+   measures 6.90:1 / 5.74:1 against them, both above the 4.5:1 WCAG 1.4.3
+   minimum for text - the binding requirement here, since --gin-color-
+   primary is used as heading/link/icon text color in Gin's dark mode.
+
+   --gin-color-primary-hover/-active are ALSO used as button fill
+   backgrounds in Gin's own compiled CSS (e.g. .button:hover/:active,
+   dialog buttons, tableselect bulk-action buttons), not just as text
+   color. That's still safe: Gin's dark mode swaps --gin-color-button-text
+   from #fff to #111 (dist/css/theme/variables.css), and every such button
+   rule pairs its background with that token rather than a hardcoded
+   white, so the actual pairing is near-black text on these fills - #111
+   on #2cbeb7/#38c2bb measures 8.2:1/8.6:1, comfortably clearing 4.5:1. If
+   that --gin-color-button-text swap is ever removed or changed, re-check
+   this pairing; it's the reason these particular hover/active values are
+   safe as fills, not their contrast against the dark app background.
+
+   Hover/active follow Gin's own dark-mode mixing convention (mix toward
+   white, matching accent.scss's $ginDarkmodeColors formula of 10%/15%) and
+   clear 6:1+ against both backgrounds as text/icon color, and 8:1+ against
+   --gin-color-button-text as a fill. --gin-bg-header uses Gin's own
+   header-tint formula (mix(#2A2A2D, base, 87.5%), matching accent.js's own
+   --gin-bg-header calculation for custom colors).
+
+   !important: needed to reliably win over BOTH (a) Gin's own compiled
+   fallback for [data-gin-accent="custom"] in its dist CSS, and (b) Gin's
+   own accent.js, which appends its own <style class="gin-custom-colors">
+   directly to <body> at runtime - later in the DOM than this file's
+   <link>-loaded stylesheet, so it would otherwise win the same-specificity
+   tie regardless of source order here. */
+.gin--dark-mode[data-gin-accent="custom"],
+.gin--dark-mode [data-gin-accent="custom"] {
+  --gin-color-primary-rgb: 21, 183, 175 !important;
+  --gin-color-primary-hover: #2cbeb7 !important;
+  --gin-color-primary-active: #38c2bb !important;
+  --gin-bg-header: #273c3d !important;
+}
+
 /* Visitors report (/visitors/*): the "Unique visitors" count column stretches
    to take up most of the table's width even though its content ("3", "12")
    is far shorter than the place-name column next to it, because Views'
