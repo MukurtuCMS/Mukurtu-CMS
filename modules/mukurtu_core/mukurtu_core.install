@@ -158,3 +158,79 @@ function mukurtu_core_update_40201(): ?string {
 
   return (string) t('Full HTML was revoked from the authenticated role. Logged-in users now use Basic HTML, which still allows iframes and media embeds. If this site granted Full HTML to all logged-in users deliberately, you can re-grant it on the Permissions page.');
 }
+
+/**
+ * Fix the Visitors module's chart report links doing nothing.
+ */
+function mukurtu_core_update_40202(): ?string {
+  // mukurtu_core_update_40088() installed charts, charts_chartjs and
+  // visitors_geoip so the Visitors module's chart displays would work, but
+  // 4.0.1's blanket update-hook strip deleted it along with every other hook.
+  // A site that had already run 40088 is unaffected (ModuleInstaller::install()
+  // is a no-op for an already-enabled module), but a site that updated
+  // straight through the strip without ever reaching 40088 is left with
+  // visitors enabled and no charting backend at all, so its "chart" report
+  // links quietly do nothing. This re-does that half of 40088's work.
+  //
+  // Guarded on visitors itself: a site that deliberately uninstalled it
+  // shouldn't have charting infrastructure or a Klaro service re-added on
+  // its behalf.
+  $module_handler = \Drupal::moduleHandler();
+  if (!$module_handler->moduleExists('visitors')) {
+    return NULL;
+  }
+
+  $messages = [];
+
+  $to_install = array_filter(
+    ['charts', 'charts_chartjs', 'visitors_geoip'],
+    fn (string $module): bool => !$module_handler->moduleExists($module),
+  );
+
+  if ($to_install) {
+    \Drupal::service('module_installer')->install($to_install);
+    \Drupal::configFactory()->getEditable('charts.settings')
+      ->set('charts_default_settings.library', 'chartjs')
+      ->save();
+    $messages[] = (string) t('Installed: @modules.', ['@modules' => implode(', ', $to_install)]);
+  }
+
+  // Separately: Klaro (block_unknown: true) treats charts_chartjs's
+  // CDN-loaded Chart.js scripts as an unrecognized third-party resource and
+  // rewrites them into inert placeholders via hook_js_alter(). Registering a
+  // required klaro_app (config/install/klaro.klaro_app.charts_chartjs.yml)
+  // is not enough on its own: hook_js_alter() still substitutes a placeholder
+  // for any matched app, required or not, and Klaro's client-side JS never
+  // gets a chance to auto-load it, because the Views AJAX response that
+  // inserts these scripts (visitors' "chart" report link) never re-triggers
+  // Drupal.attachBehaviors() for the new placeholders the way a normal page
+  // load would. The klaro_app entity is still created below (useful bookkeeping
+  // if Chart.js is ever used somewhere Klaro does process normally), but what
+  // actually fixes the report page is klaro.settings:disable_urls, which
+  // hook_js_alter() checks before doing any rewriting at all
+  // (KlaroHelper::onDisabledUri(), matched against the current request URI -
+  // which for this AJAX endpoint is /visitors/_report/..., not
+  // /visitors/location, so the pattern has to match on a "/visitors" prefix
+  // rather than that one specific page). Guarded on klaro being enabled:
+  // getStorage('klaro_app') throws if the entity type doesn't exist, and
+  // klaro.settings wouldn't mean anything without the module either.
+  if ($module_handler->moduleExists('klaro')) {
+    $klaro_app_storage = \Drupal::entityTypeManager()->getStorage('klaro_app');
+    if (!$klaro_app_storage->load('charts_chartjs')) {
+      $config_path = \Drupal::service('extension.list.profile')->getPath('mukurtu') . '/config/install/klaro.klaro_app.charts_chartjs.yml';
+      $values = \Drupal\Core\Serialization\Yaml::decode(file_get_contents($config_path));
+      $klaro_app_storage->create($values)->save();
+      $messages[] = (string) t('Registered Chart.js as a required Klaro service.');
+    }
+
+    $klaro_settings = \Drupal::configFactory()->getEditable('klaro.settings');
+    $disable_urls = $klaro_settings->get('disable_urls') ?? [];
+    if (!in_array('^\/visitors', $disable_urls, TRUE)) {
+      $disable_urls[] = '^\/visitors';
+      $klaro_settings->set('disable_urls', $disable_urls)->save();
+      $messages[] = (string) t('Stopped Klaro from blocking scripts on Visitors report pages.');
+    }
+  }
+
+  return $messages ? implode(' ', $messages) : NULL;
+}
