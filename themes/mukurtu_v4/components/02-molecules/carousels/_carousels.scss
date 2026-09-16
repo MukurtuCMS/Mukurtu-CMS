@@ -201,7 +201,11 @@
   }
 
   &:focus {
-    outline: 2px solid var(--focus-color);
+    /* Same inverted-fill case as the button mixin: this control's label is
+    white on a dark fill, so currentcolor would draw a white ring onto the
+    page. Ring in the fill colour, offset (#2199). */
+    outline: 2px solid var(--brand-primary-dark);
+    outline-offset: 2px;
   }
 
   &:disabled {
