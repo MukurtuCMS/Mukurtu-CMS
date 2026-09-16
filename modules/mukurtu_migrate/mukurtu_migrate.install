@@ -120,3 +120,22 @@ function mukurtu_migrate_update_40204(): ?string {
     '@removed' => implode(' and ', array_reverse($removed)),
   ]);
 }
+
+/**
+ * Stop migrated users being dropped when their username is already taken.
+ */
+function mukurtu_migrate_update_40205(): ?string {
+  // Only touch the config if it still holds the shipped plain "name: name"
+  // mapping; a site that has customized it is left alone.
+  $config = \Drupal::configFactory()->getEditable('migrate_plus.migration.mukurtu_cms_v3_users');
+  if ($config->isNew() || $config->get('process.name') !== 'name') {
+    return NULL;
+  }
+
+  $config->set('process.name', [
+    'plugin' => 'avoid_username_collision',
+    'source' => 'name',
+  ])->save();
+
+  return (string) t('Updated the mukurtu_cms_v3_users migration so a Mukurtu 3 user whose username is already taken by an account on this site is migrated under a numbered name instead of being dropped with a duplicate-username error.');
+}

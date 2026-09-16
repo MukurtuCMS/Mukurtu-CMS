@@ -17,7 +17,9 @@ process:
   uid:
     plugin: avoid_uid_collision
     source: uid
-  name: name
+  name:
+    plugin: avoid_username_collision
+    source: name
   pass: pass
   mail: mail
   created: created
