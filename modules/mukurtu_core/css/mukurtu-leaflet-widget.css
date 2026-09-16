@@ -64,11 +64,16 @@
  * which isn't visible enough for WCAG 2.4.7/2.4.11. Add a visible outline
  * for the toolbar buttons, popup close button, and markers.
  */
+/* Hard-coded rather than var(--focus-color): that token is currentcolor
+ * theme-wide (see mukurtu_v4 _colors.scss and #2199), which is only safe
+ * where the element's text colour is known to contrast with what's behind
+ * it. These sit on map tiles of unknown colour, so they take the same
+ * fixed treatment the theme uses elsewhere over uploaded imagery. */
 .leaflet-buttons-control-button:focus-visible,
 .leaflet-pm-action:focus-visible,
 .leaflet-popup-close-button:focus-visible,
 .leaflet-marker-icon:focus-visible,
 .leaflet-container:focus-visible {
-  outline: var(--focus-color) solid 2px;
+  outline: var(--brand-primary-dark) solid 2px;
   outline-offset: 2px;
 }

@@ -42,7 +42,10 @@
     }
 
     &:focus-visible {
-      outline: 2px solid var(--focus-color);
+      /* A <button>: the global button:focus rule turns its label white, so
+      var(--focus-color) (currentcolor) would ring white on the white page
+      behind it. Ring in the focused fill colour instead (#2199). */
+      outline: 2px solid var(--brand-primary-dark);
       outline-offset: 2px;
     }
   }
@@ -90,7 +93,8 @@
     }
 
     &:focus-visible {
-      outline: 2px solid var(--focus-color);
+      /* Same <button> case as __trigger above (#2199). */
+      outline: 2px solid var(--brand-primary-dark);
       outline-offset: 2px;
     }
   }
