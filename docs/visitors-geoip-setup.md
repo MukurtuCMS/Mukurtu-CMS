@@ -30,15 +30,19 @@ tables were effectively always empty in practice.
   "City Lite" database (<https://db-ip.com>, licensed CC BY 4.0 — genuinely
   redistributable, unlike MaxMind's GeoLite2, whose EULA prohibits third-party
   redistribution outright) to `private://mukurtu_core_geoip/dbip-city-lite.mmdb`
-  (or `public://mukurtu_core_geoip/…` if `private://` is not configured) —
+  when `private://` is configured, else `public://mukurtu_core_geoip/…` —
   `Drupal\mukurtu_core\Service\DbIpDatabaseLocator` resolves which. Deliberately
   not `visitors_geoip.settings:geoip_path` (where a manually-run MaxMind download
   lands): that is an admin-configured path outside the web root with no
   guarantee of being writable by whatever user runs PHP, and on at least one real
   hosting model — Tugboat's previews, where the codebase is root-owned from the
   build phase but `drush updb -y` and cron both run as `www-data` — it is not.
-  Drupal's own file directories are: every working site needs `public://`
-  writable by whatever runs PHP as a basic operating requirement.
+  If `private://` itself turns out unwritable (its own permissions are only
+  admin-guaranteed, not Drupal-guaranteed the way `public://` is — again seen
+  live on a Tugboat preview, where only the *update* phase, not the *build*
+  phase, re-chowns it, so a stale ownership from an earlier build can persist),
+  the download falls back to `public://` automatically, which a successful
+  Drupal install always guarantees is writable.
 - The download runs automatically: immediately when `visitors_geoip` is installed
   or re-installed (`hook_modules_installed()`); via an update hook
   (`mukurtu_core_update_40203`) for a site that already has `visitors_geoip`

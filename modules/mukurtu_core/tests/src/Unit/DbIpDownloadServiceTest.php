@@ -51,13 +51,13 @@ class DbIpDownloadServiceTest extends UnitTestCase {
    *
    * @param \Drupal\Core\File\FileSystemInterface|null $file_system
    *   A pre-configured file system mock, or NULL for a simple default.
-   * @param string|null $destination_uri
-   *   The URI DbIpDatabaseLocator::uri() should report, or NULL for a
-   *   simple placeholder unused by the test.
+   * @param string[] $candidate_uris
+   *   The URIs DbIpDatabaseLocator::candidateUris() should report, tried in
+   *   order.
    */
-  private function downloadService(ClientInterface $http_client, ?FileSystemInterface $file_system = NULL, ?string $destination_uri = 'private://mukurtu_core_geoip/dbip-city-lite.mmdb'): DbIpDownloadService {
+  private function downloadService(ClientInterface $http_client, ?FileSystemInterface $file_system = NULL, array $candidate_uris = ['private://mukurtu_core_geoip/dbip-city-lite.mmdb']): DbIpDownloadService {
     $locator = $this->createMock(DbIpDatabaseLocator::class);
-    $locator->method('uri')->willReturn($destination_uri);
+    $locator->method('candidateUris')->willReturn($candidate_uris);
 
     $file_system ??= $this->createMock(FileSystemInterface::class);
     $logger = $this->createMock(LoggerInterface::class);
@@ -168,7 +168,7 @@ class DbIpDownloadServiceTest extends UnitTestCase {
     $file_system->method('realpath')->willReturnArgument(0);
     $file_system->method('tempnam')->willReturnCallback(fn () => $this->tempPath('_download.gz'));
 
-    $service = $this->downloadService($http_client, $file_system, $destination);
+    $service = $this->downloadService($http_client, $file_system, [$destination]);
 
     $this->assertTrue($service->download());
     $this->assertSame($original, file_get_contents($destination));
@@ -201,23 +201,73 @@ class DbIpDownloadServiceTest extends UnitTestCase {
   /**
    * A destination directory that cannot be created or made writable fails cleanly.
    *
-   * The exact failure found live on this PR's own Tugboat preview: the
-   * project root was root-owned from the build phase, but `drush updb -y`
-   * (and cron) run as www-data, which could not write there. Confirms the
-   * fix -- checking prepareDirectory()'s own result rather than assuming
-   * success -- actually reports failure instead of proceeding to a doomed
-   * write.
+   * A version of the exact failure found live on this PR's own Tugboat
+   * preview, where the only storage candidate at the time was
+   * root-owned while `drush updb -y` (and cron) run as www-data. Confirms
+   * the fix -- checking prepareDirectory()'s own result rather than
+   * assuming success -- actually reports failure instead of proceeding to a
+   * doomed write, when there is no other candidate left to try.
    */
-  public function testUnwritableDestinationDirectoryFailsCleanlyWithoutAttemptingADownload(): void {
+  public function testUnwritableDestinationDirectoryFailsCleanlyWhenNoOtherCandidateExists(): void {
     $http_client = $this->createMock(ClientInterface::class);
-    $http_client->expects($this->never())->method('request');
+    $http_client->method('request')->willReturnCallback(function (string $method, string $uri, array $options) {
+      file_put_contents($options['sink'], gzencode(str_repeat('a', 11 * 1024 * 1024)));
+      return $this->createMock(\Psr\Http\Message\ResponseInterface::class);
+    });
 
     $file_system = $this->createMock(FileSystemInterface::class);
     $file_system->method('prepareDirectory')->willReturn(FALSE);
+    $file_system->method('realpath')->willReturnArgument(0);
+    $file_system->method('tempnam')->willReturnCallback(fn () => $this->tempPath('_download.gz'));
 
     $service = $this->downloadService($http_client, $file_system);
 
     $this->assertFalse($service->download());
+  }
+
+  /**
+   * A second storage candidate is tried when the first cannot be written to.
+   *
+   * This is the actual fix for the Tugboat failure: private:// (the first
+   * candidate, when configured) is not guaranteed to already be writable by
+   * whatever user runs PHP the way public:// is, since only Tugboat's
+   * update phase -- not its build phase -- re-chowns it, so a stale
+   * ownership from an earlier build on the same persistent preview can
+   * block the first candidate specifically without blocking every
+   * candidate.
+   */
+  public function testFallsBackToTheNextStorageCandidateWhenTheFirstIsUnwritable(): void {
+    $original = "this stands in for a real MMDB file's bytes" . str_repeat('a', 11 * 1024 * 1024);
+    $gz_payload = gzencode($original);
+
+    $unwritable_destination = 'private://mukurtu_core_geoip/dbip-city-lite.mmdb';
+
+    $writable_dir = $this->tempPath('_dir');
+    mkdir($writable_dir);
+    $writable_destination = $writable_dir . '/dbip-city-lite.mmdb';
+    $this->tempFiles[] = $writable_destination;
+
+    $http_client = $this->createMock(ClientInterface::class);
+    $http_client->method('request')->willReturnCallback(function (string $method, string $uri, array $options) use ($gz_payload) {
+      file_put_contents($options['sink'], $gz_payload);
+      return $this->createMock(\Psr\Http\Message\ResponseInterface::class);
+    });
+
+    $file_system = $this->createMock(FileSystemInterface::class);
+    $file_system->method('prepareDirectory')->willReturnCallback(
+      fn (string $directory) => $directory !== dirname($unwritable_destination)
+    );
+    $file_system->method('move')->willReturnCallback(function (string $source, string $dest) {
+      rename($source, $dest);
+      return $dest;
+    });
+    $file_system->method('realpath')->willReturnArgument(0);
+    $file_system->method('tempnam')->willReturnCallback(fn () => $this->tempPath('_download.gz'));
+
+    $service = $this->downloadService($http_client, $file_system, [$unwritable_destination, $writable_destination]);
+
+    $this->assertTrue($service->download());
+    $this->assertSame($original, file_get_contents($writable_destination));
   }
 
 }

@@ -79,29 +79,34 @@ class DbIpDownloadService {
    *   TRUE if a database was downloaded and installed.
    */
   public function download(): bool {
-    $destination = $this->locator->uri();
-    $directory = dirname($destination);
-
-    if (!$this->fileSystem->prepareDirectory($directory, FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS)) {
-      $this->logger->warning('Cannot download the DB-IP fallback geolocation database: %directory could not be created or made writable.', ['%directory' => $directory]);
-      return FALSE;
-    }
-
     foreach ($this->candidateMonths() as $month) {
       $gz_path = $this->fetch(self::URL_PREFIX . $month . '.mmdb.gz');
       if ($gz_path === NULL) {
         continue;
       }
 
-      $installed = $this->installDecompressed($gz_path, $destination);
-      @unlink($gz_path);
+      // One download, tried against every storage candidate in order --
+      // not one download per candidate: a month that fails to fetch at all
+      // should not be retried per-candidate, and a candidate whose
+      // directory cannot be prepared should not stop the next candidate
+      // (or the next month) from being tried.
+      foreach ($this->locator->candidateUris() as $destination) {
+        $directory = dirname($destination);
+        if (!$this->fileSystem->prepareDirectory($directory, FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS)) {
+          $this->logger->notice('Cannot prepare %directory for the DB-IP fallback database; trying the next storage location.', ['%directory' => $directory]);
+          continue;
+        }
 
-      if ($installed) {
-        return TRUE;
+        if ($this->installDecompressed($gz_path, $destination)) {
+          @unlink($gz_path);
+          return TRUE;
+        }
       }
+
+      @unlink($gz_path);
     }
 
-    $this->logger->warning('Could not download a DB-IP fallback geolocation database for the current or previous month. Visitor locations will keep relying on browser-language guesses (or MaxMind, if configured) until this succeeds.');
+    $this->logger->warning('Could not download a DB-IP fallback geolocation database for the current or previous month, at any available storage location. Visitor locations will keep relying on browser-language guesses (or MaxMind, if configured) until this succeeds.');
     return FALSE;
   }
 

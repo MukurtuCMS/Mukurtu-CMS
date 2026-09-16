@@ -19,15 +19,19 @@ use Drupal\Core\StreamWrapper\StreamWrapperManagerInterface;
  * live, where writing here failed with a permissions error while the
  * download itself succeeded.
  *
- * Drupal's own public:// and private:// file systems do not have that
- * problem: every working Drupal site needs at least public:// writable by
- * whatever user runs PHP as a basic operating requirement (file uploads,
- * caching, and so on), and Tugboat's own build script already explicitly
- * chowns both to www-data. private:// is preferred when configured -- the
- * database is not sensitive, but there is no reason to put a 100MB+ binary
- * in the web-accessible public files directory when an alternative exists
- * -- and public:// otherwise, since a fresh site may not have configured
- * $settings['file_private_path'] yet.
+ * Drupal's own public:// and private:// file systems are both better bets,
+ * but neither is unconditionally safe either: public:// is the one Drupal's
+ * own installer requires be writable by whatever user runs PHP before it
+ * will even complete an install, so a *successful* install always
+ * guarantees it. private:// is only used if $settings['file_private_path']
+ * is configured, and while Tugboat does configure one, nothing guarantees a
+ * previously-created private files directory (persisting across builds on
+ * the same preview) is still owned correctly if only Tugboat's *update*
+ * phase -- not its build phase -- explicitly re-chowns it. So this is not a
+ * single fixed choice: DbIpDownloadService tries every candidate in order
+ * and uses whichever one it can actually write to, and a read checks every
+ * candidate too, since a previously-installed database could be sitting at
+ * any of them.
  *
  * @see \Drupal\mukurtu_core\Service\DbIpDownloadService
  * @see \Drupal\mukurtu_core\Service\DbIpFallbackGeoIpService
@@ -48,20 +52,41 @@ class DbIpDatabaseLocator {
   ) {}
 
   /**
-   * The stream-wrapper URI the database is (or will be) stored at.
+   * Candidate storage URIs, most preferred first.
+   *
+   * private:// first when configured -- the database is not sensitive, but
+   * there is no reason to put a 100MB+ binary in the web-accessible public
+   * files directory when a non-public alternative is available and working
+   * -- then public:// always, as the fallback a successful Drupal install
+   * already guarantees is writable.
+   *
+   * @return string[]
    */
-  public function uri(): string {
-    $scheme = $this->streamWrapperManager->isValidScheme('private') ? 'private' : 'public';
-    return $scheme . '://mukurtu_core_geoip/' . self::FILENAME;
+  public function candidateUris(): array {
+    $uris = [];
+    if ($this->streamWrapperManager->isValidScheme('private')) {
+      $uris[] = 'private://mukurtu_core_geoip/' . self::FILENAME;
+    }
+    $uris[] = 'public://mukurtu_core_geoip/' . self::FILENAME;
+    return $uris;
   }
 
   /**
    * A real filesystem path to the database, if it is actually present.
    *
    * GeoIp2\Database\Reader needs a real path, not a stream-wrapper URI.
+   * Checks every candidate location: whichever one download() last
+   * succeeded in writing to is where this needs to look.
    */
   public function realpath(): ?string {
-    return $this->fileSystem->realpath($this->uri()) ?: NULL;
+    foreach ($this->candidateUris() as $uri) {
+      $path = $this->fileSystem->realpath($uri);
+      if ($path) {
+        return $path;
+      }
+    }
+
+    return NULL;
   }
 
 }
