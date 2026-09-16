@@ -19,13 +19,6 @@ class LabelAndNoticeNamesTest extends LocalContextsTestBase {
   const PROJECT_B = '5e8e8f2b-1c3c-5c2f-ad4b-2f3f4e5d6c7b';
 
   /**
-   * The Local Contexts supported project manager.
-   *
-   * @var \Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager
-   */
-  protected $manager;
-
-  /**
    * {@inheritdoc}
    */
   protected function setUp(): void {
