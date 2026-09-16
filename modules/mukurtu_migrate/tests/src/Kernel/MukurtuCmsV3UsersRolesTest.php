@@ -113,7 +113,12 @@ class MukurtuCmsV3UsersRolesTest extends MukurtuCmsV3UsersMigrationTestBase {
   }
 
   /**
-   * Tests the uid 1 migration, which shares the same 'roles' pipeline.
+   * Tests that the uid 1 migration ignores the source roles entirely.
+   *
+   * It no longer maps roles at all, so a source user 1 with any number of
+   * unmapped roles is migrated without touching this site's administrator.
+   *
+   * @see \Drupal\Tests\mukurtu_migrate\Kernel\MukurtuCmsV3UsersAccountFieldsTest::testAdminKeepsItsOwnRoles()
    */
   public function testAdminUserWithSeveralUnmappedRolesIsMigrated(): void {
     // The uid 1 migration updates the site's existing admin account rather
@@ -123,6 +128,7 @@ class MukurtuCmsV3UsersRolesTest extends MukurtuCmsV3UsersMigrationTestBase {
       'name' => 'admin',
       'mail' => 'admin@example.com',
       'status' => 1,
+      'roles' => ['mukurtu_manager'],
     ]);
     $admin->enforceIsNew();
     $admin->save();
@@ -132,7 +138,7 @@ class MukurtuCmsV3UsersRolesTest extends MukurtuCmsV3UsersMigrationTestBase {
 
     $this->executeMigrationWithoutErrors('mukurtu_cms_v3_users_uid1');
 
-    $this->assertSame([], $this->storedRoles(1));
+    $this->assertSame(['mukurtu_manager'], $this->storedRoles(1), 'The uid 1 migration changed this site\'s administrator roles.');
     $this->assertSame(1000000000, (int) User::load(1)->getCreatedTime(), 'The uid 1 row was not actually processed.');
   }
 
