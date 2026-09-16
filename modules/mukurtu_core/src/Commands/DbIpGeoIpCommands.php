@@ -27,11 +27,12 @@ class DbIpGeoIpCommands extends DrushCommands {
   /**
    * Downloads DB-IP's free City Lite geolocation database.
    *
-   * Installed to the same directory MaxMind's own database would use
-   * (Visitors > GeoIP settings), under a different filename, so a site with
-   * both keeps using MaxMind's better precision and only falls back to this
-   * one when MaxMind has nothing. Unlike MaxMind's GeoLite2, DB-IP's City
-   * Lite data (CC BY 4.0) needs no account or license key.
+   * Installed under Drupal's own private:// (or public://, if private:// is
+   * not configured) files directory -- see DbIpDatabaseLocator -- so a site
+   * with a MaxMind key configured keeps using MaxMind's better precision and
+   * only falls back to this one when MaxMind has nothing. Unlike MaxMind's
+   * GeoLite2, DB-IP's City Lite data (CC BY 4.0) needs no account or license
+   * key.
    *
    * @command mukurtu:geoip:download-dbip
    * @aliases mukurtu-geoip-download-dbip

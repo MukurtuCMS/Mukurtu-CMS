@@ -29,14 +29,25 @@ tables were effectively always empty in practice.
 - `Drupal\mukurtu_core\Service\DbIpDownloadService` downloads DB-IP's monthly
   "City Lite" database (<https://db-ip.com>, licensed CC BY 4.0 — genuinely
   redistributable, unlike MaxMind's GeoLite2, whose EULA prohibits third-party
-  redistribution outright) to the same directory MaxMind's own database would use
-  (`visitors_geoip.settings:geoip_path`), under a different filename
-  (`dbip-city-lite.mmdb`) so the two never collide.
+  redistribution outright) to `private://mukurtu_core_geoip/dbip-city-lite.mmdb`
+  (or `public://mukurtu_core_geoip/…` if `private://` is not configured) —
+  `Drupal\mukurtu_core\Service\DbIpDatabaseLocator` resolves which. Deliberately
+  not `visitors_geoip.settings:geoip_path` (where a manually-run MaxMind download
+  lands): that is an admin-configured path outside the web root with no
+  guarantee of being writable by whatever user runs PHP, and on at least one real
+  hosting model — Tugboat's previews, where the codebase is root-owned from the
+  build phase but `drush updb -y` and cron both run as `www-data` — it is not.
+  Drupal's own file directories are: every working site needs `public://`
+  writable by whatever runs PHP as a basic operating requirement.
 - The download runs automatically: immediately when `visitors_geoip` is installed
-  or re-installed (`hook_modules_installed()`), and as a monthly-ish safety net on
-  cron (`hook_cron()`) that also catches a site that enabled `visitors_geoip`
-  before this feature existed. Neither ever fails an install or a cron run over a
-  network hiccup — failures are logged, not thrown.
+  or re-installed (`hook_modules_installed()`); via an update hook
+  (`mukurtu_core_update_40203`) for a site that already has `visitors_geoip`
+  installed and is updating to a mukurtu_core version carrying this feature — the
+  case `hook_modules_installed()` cannot reach, since the module is not being
+  freshly installed; and as a monthly-ish safety net on cron (`hook_cron()`).
+  None of the three ever fails an install, an update run, or a cron run over a
+  network hiccup or a filesystem permission problem — failures are logged, not
+  thrown.
 - To force it immediately (a fresh DDEV site, or right after deploying this
   feature to an existing site) rather than waiting for the next cron run:
   ```
@@ -57,7 +68,9 @@ Mukurtu site, with no setup step.
    (`/admin/config/system/visitors/geoip`) and enter:
    - **MaxMind License Key** — the key from step 1.
    - **GeoIP Database path** — a directory, relative to the Drupal root, that the
-     web server can write to. Both MaxMind's and DB-IP's database files live here.
+     web server can write to. MaxMind's database file lives here (DB-IP's lives
+     elsewhere — see above — since it is downloaded automatically rather than by
+     an admin).
 3. Download the database:
    ```
    drush visitors:download:city

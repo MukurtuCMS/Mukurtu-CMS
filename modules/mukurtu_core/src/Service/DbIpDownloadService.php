@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Drupal\mukurtu_core\Service;
 
-use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\File\Exception\FileException;
+use Drupal\Core\File\FileExists;
 use Drupal\Core\File\FileSystemInterface;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\GuzzleException;
@@ -14,6 +15,7 @@ use Psr\Log\LoggerInterface;
  * Downloads DB-IP's free "City Lite" database as a MaxMind fallback.
  *
  * @see \Drupal\mukurtu_core\Service\DbIpFallbackGeoIpService
+ * @see \Drupal\mukurtu_core\Service\DbIpDatabaseLocator
  * @see docs/visitors-geoip-setup.md
  */
 class DbIpDownloadService {
@@ -37,17 +39,17 @@ class DbIpDownloadService {
    *
    * @param \GuzzleHttp\ClientInterface $httpClient
    *   The HTTP client.
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
-   *   The config factory.
    * @param \Drupal\Core\File\FileSystemInterface $fileSystem
    *   The file system service.
+   * @param \Drupal\mukurtu_core\Service\DbIpDatabaseLocator $locator
+   *   Resolves where the database is stored.
    * @param \Psr\Log\LoggerInterface $logger
    *   The mukurtu_core logger channel.
    */
   public function __construct(
     private readonly ClientInterface $httpClient,
-    private readonly ConfigFactoryInterface $configFactory,
     private readonly FileSystemInterface $fileSystem,
+    private readonly DbIpDatabaseLocator $locator,
     private readonly LoggerInterface $logger,
   ) {}
 
@@ -55,7 +57,7 @@ class DbIpDownloadService {
    * Whether the bundled database is missing or old enough to refresh.
    */
   public function isStale(): bool {
-    $path = $this->destinationRealPath();
+    $path = $this->locator->realpath();
     if (!$path) {
       return TRUE;
     }
@@ -68,19 +70,20 @@ class DbIpDownloadService {
    * Downloads and installs the current (or most recent) monthly database.
    *
    * Safe to call unconditionally: failures are logged, not thrown, since
-   * this runs from contexts -- cron, module install -- that must not fail a
-   * page request or a site install over a network hiccup or DB-IP being
-   * temporarily unreachable. A site can always retry via
-   * `drush mukurtu:geoip:download-dbip`.
+   * this runs from contexts -- cron, module install, an update hook -- that
+   * must not fail a page request, a site install or an update run over a
+   * network hiccup or DB-IP being temporarily unreachable. A site can
+   * always retry via `drush mukurtu:geoip:download-dbip`.
    *
    * @return bool
    *   TRUE if a database was downloaded and installed.
    */
   public function download(): bool {
-    $geoip_path = (string) ($this->configFactory->get('visitors_geoip.settings')->get('geoip_path') ?? '');
-    $directory = $this->fileSystem->realpath(rtrim($geoip_path, '/'));
-    if (!$directory) {
-      $this->logger->warning('Cannot download the DB-IP fallback geolocation database: the configured GeoIP path (%path, see /admin/config/system/visitors/geoip) does not exist or is not accessible.', ['%path' => $geoip_path]);
+    $destination = $this->locator->uri();
+    $directory = dirname($destination);
+
+    if (!$this->fileSystem->prepareDirectory($directory, FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS)) {
+      $this->logger->warning('Cannot download the DB-IP fallback geolocation database: %directory could not be created or made writable.', ['%directory' => $directory]);
       return FALSE;
     }
 
@@ -90,7 +93,7 @@ class DbIpDownloadService {
         continue;
       }
 
-      $installed = $this->installDecompressed($gz_path, $directory . '/' . DbIpFallbackGeoIpService::FILENAME);
+      $installed = $this->installDecompressed($gz_path, $destination);
       @unlink($gz_path);
 
       if ($installed) {
@@ -133,6 +136,7 @@ class DbIpDownloadService {
       return $temp_path;
     }
     catch (GuzzleException $e) {
+      $this->logger->notice('DB-IP fallback database fetch of %url failed: %message', ['%url' => $url, '%message' => $e->getMessage()]);
       @unlink($temp_path);
       return NULL;
     }
@@ -145,9 +149,18 @@ class DbIpDownloadService {
    * database is well over 100MB, more than comfortable to hold twice over
    * (compressed and decompressed) in a PHP process's memory limit.
    *
-   * Writes to a temporary path alongside the destination first and renames
-   * it into place, so a request racing this one (or a crashed download)
-   * never sees a half-written database file.
+   * Writes to a temporary URI alongside the destination first and moves it
+   * into place, so a request racing this one (or a crashed download) never
+   * sees a half-written database file.
+   *
+   * @param string $gz_path
+   *   A real filesystem path to the downloaded gzip file.
+   * @param string $destination
+   *   A stream-wrapper URI (private:// or public://), not a plain path --
+   *   this is what makes the write land somewhere the process actually has
+   *   permission to write, on hosting that runs the codebase and PHP as
+   *   different users. gzopen() and fopen() both handle stream-wrapper URIs
+   *   transparently.
    */
   private function installDecompressed(string $gz_path, string $destination): bool {
     $gz = @gzopen($gz_path, 'rb');
@@ -156,9 +169,10 @@ class DbIpDownloadService {
       return FALSE;
     }
 
-    // Suffixed with a unique id, not just '.tmp': cron and a manually-run
-    // drush command could in principle overlap, and two downloads writing
-    // through the same temp path at once would corrupt both.
+    // Suffixed with a unique id, not just '.tmp': cron, a manually-run
+    // drush command and an update hook could in principle overlap, and two
+    // downloads writing through the same temp URI at once would corrupt
+    // both.
     $temp_destination = $destination . '.' . uniqid() . '.tmp';
     $out = @fopen($temp_destination, 'wb');
     if ($out === FALSE) {
@@ -178,31 +192,26 @@ class DbIpDownloadService {
     // body (an error page saved as if it were the file, say), not a usable
     // database. Cheap insurance since DB-IP does not publish a checksum for
     // the free tier to verify against instead.
-    if (filesize($temp_destination) < 10 * 1024 * 1024) {
+    $size = filesize($temp_destination);
+    if ($size < 10 * 1024 * 1024) {
       $this->logger->warning('Downloaded DB-IP database at %path is implausibly small (%size bytes); discarding it rather than installing a likely-truncated file.', [
         '%path' => $temp_destination,
-        '%size' => filesize($temp_destination),
+        '%size' => $size,
       ]);
-      @unlink($temp_destination);
+      $this->fileSystem->delete($temp_destination);
       return FALSE;
     }
 
-    if (!@rename($temp_destination, $destination)) {
-      @unlink($temp_destination);
-      $this->logger->warning('Could not move the downloaded DB-IP database into place at %path.', ['%path' => $destination]);
+    try {
+      $this->fileSystem->move($temp_destination, $destination, FileExists::Replace);
+    }
+    catch (FileException $e) {
+      $this->fileSystem->delete($temp_destination);
+      $this->logger->warning('Could not move the downloaded DB-IP database into place at %path: %message', ['%path' => $destination, '%message' => $e->getMessage()]);
       return FALSE;
     }
 
     return TRUE;
-  }
-
-  /**
-   * The real path to where the database would already be, if present.
-   */
-  private function destinationRealPath(): ?string {
-    $geoip_path = (string) ($this->configFactory->get('visitors_geoip.settings')->get('geoip_path') ?? '');
-    $path = $this->fileSystem->realpath(rtrim($geoip_path, '/') . '/' . DbIpFallbackGeoIpService::FILENAME);
-    return $path ?: NULL;
   }
 
 }

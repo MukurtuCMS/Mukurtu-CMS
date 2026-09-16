@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_core\Unit;
 
-use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\Core\Config\ImmutableConfig;
-use Drupal\Core\File\FileSystemInterface;
 use Drupal\Tests\UnitTestCase;
+use Drupal\mukurtu_core\Service\DbIpDatabaseLocator;
 use Drupal\mukurtu_core\Service\DbIpFallbackGeoIpService;
 use Drupal\visitors_geoip\VisitorsGeoIpInterface;
 use PHPUnit\Framework\Attributes\Group;
@@ -29,21 +27,16 @@ use PHPUnit\Framework\Attributes\Group;
 class DbIpFallbackGeoIpServiceTest extends UnitTestCase {
 
   /**
-   * Builds the service with a given inner service and geoip_path.
+   * Builds the service with a given inner service.
+   *
+   * The locator reports no DB-IP file present in any of these tests,
+   * matching a site that has not downloaded one (yet).
    */
-  private function fallbackService(VisitorsGeoIpInterface $inner, ?string $geoip_path = '/geoip'): DbIpFallbackGeoIpService {
-    $config = $this->createMock(ImmutableConfig::class);
-    $config->method('get')->with('geoip_path')->willReturn($geoip_path);
+  private function fallbackService(VisitorsGeoIpInterface $inner): DbIpFallbackGeoIpService {
+    $locator = $this->createMock(DbIpDatabaseLocator::class);
+    $locator->method('realpath')->willReturn(NULL);
 
-    $config_factory = $this->createMock(ConfigFactoryInterface::class);
-    $config_factory->method('get')->with('visitors_geoip.settings')->willReturn($config);
-
-    $file_system = $this->createMock(FileSystemInterface::class);
-    // No real DB-IP file in any of these tests: realpath() reports nothing
-    // there, matching a site that has not downloaded one (yet).
-    $file_system->method('realpath')->willReturn(FALSE);
-
-    return new DbIpFallbackGeoIpService($inner, $config_factory, $file_system);
+    return new DbIpFallbackGeoIpService($inner, $locator);
   }
 
   /**

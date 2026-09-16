@@ -33,8 +33,7 @@ class MukurtuCoreServiceProvider extends ServiceProviderBase {
     $container->register('mukurtu_core.dbip_geoip_fallback', DbIpFallbackGeoIpService::class)
       ->setDecoratedService('visitors_geoip.lookup')
       ->addArgument(new Reference('mukurtu_core.dbip_geoip_fallback.inner'))
-      ->addArgument(new Reference('config.factory'))
-      ->addArgument(new Reference('file_system'));
+      ->addArgument(new Reference('mukurtu_core.dbip_locator'));
   }
 
 }

@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\mukurtu_core\Service;
 
-use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\Core\File\FileSystemInterface;
 use Drupal\visitors_geoip\VisitorsGeoIpInterface;
 use GeoIp2\Database\Reader;
 use GeoIp2\Exception\GeoIp2Exception;
@@ -38,11 +36,6 @@ use GeoIp2\Exception\GeoIp2Exception;
 final class DbIpFallbackGeoIpService implements VisitorsGeoIpInterface {
 
   /**
-   * The filename DbIpDownloadService saves the database under.
-   */
-  public const FILENAME = 'dbip-city-lite.mmdb';
-
-  /**
    * The lazily-constructed DB-IP reader, or FALSE once known unavailable.
    *
    * @var \GeoIp2\Database\Reader|false|null
@@ -54,15 +47,12 @@ final class DbIpFallbackGeoIpService implements VisitorsGeoIpInterface {
    *
    * @param \Drupal\visitors_geoip\VisitorsGeoIpInterface $inner
    *   The decorated visitors_geoip.lookup service (MaxMind-backed).
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
-   *   The config factory.
-   * @param \Drupal\Core\File\FileSystemInterface $fileSystem
-   *   The file system service.
+   * @param \Drupal\mukurtu_core\Service\DbIpDatabaseLocator $locator
+   *   Resolves where the DB-IP database is stored.
    */
   public function __construct(
     private readonly VisitorsGeoIpInterface $inner,
-    private readonly ConfigFactoryInterface $configFactory,
-    private readonly FileSystemInterface $fileSystem,
+    private readonly DbIpDatabaseLocator $locator,
   ) {}
 
   /**
@@ -138,9 +128,8 @@ final class DbIpFallbackGeoIpService implements VisitorsGeoIpInterface {
    */
   private function dbIpReader(): ?Reader {
     if ($this->dbIpReader === NULL) {
-      $geoip_path = $this->configFactory->get('visitors_geoip.settings')->get('geoip_path') ?? '';
-      $real_path = $this->fileSystem->realpath(rtrim((string) $geoip_path, '/') . '/' . self::FILENAME);
-      // realpath() on a missing file returns FALSE; only construct a Reader
+      $real_path = $this->locator->realpath();
+      // realpath() on a missing file returns NULL; only construct a Reader
       // once, and remember there was nothing to read rather than re-checking
       // the filesystem on every single visit this process handles.
       $this->dbIpReader = $real_path ? new Reader($real_path) : FALSE;
