@@ -15,13 +15,6 @@ use PHPUnit\Framework\Attributes\Group;
 class ProjectAvailabilityExclusionTest extends LocalContextsTestBase {
 
   /**
-   * The Local Contexts supported project manager.
-   *
-   * @var \Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager
-   */
-  protected $manager;
-
-  /**
    * {@inheritdoc}
    */
   protected function setUp(): void {
@@ -36,6 +29,7 @@ class ProjectAvailabilityExclusionTest extends LocalContextsTestBase {
     return Node::create([
       'type' => static::TEST_BUNDLE,
       'title' => $this->randomString(),
+      'field_cultural_protocols' => "all({$this->protocol->id()})",
     ]);
   }
 
