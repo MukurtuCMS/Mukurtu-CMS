@@ -40,11 +40,13 @@
   </div>
 
   <div class="block-wrapper__second">
-    {{ title_prefix }}
-    {% if label %}
-      <h2{{ title_attributes }}>{{ label }}</h2>
-    {% endif %}
-    {{ title_suffix }}
-    {{content.body}}
+    <div class="block-wrapper__second-card">
+      {{ title_prefix }}
+      {% if label %}
+        <h2{{ title_attributes }}>{{ label }}</h2>
+      {% endif %}
+      {{ title_suffix }}
+      {{content.body}}
+    </div>
   </div>
 </div>

@@ -75,13 +75,62 @@
 
     * {
       color: var(--brand-primary-dark);
-      text-shadow: 1px 1px 0 rgb(255 255 255 / 80%);
+    }
+
+    // Solid outline traced directly around each glyph instead of a scrim
+    // panel/box - these blocks are almost always a short H1/H2-style site
+    // name, so this leaves the photo fully visible everywhere except the
+    // text itself. Unlike a translucent scrim (whose composited result
+    // depends on the photo behind it) or the old single-direction
+    // text-shadow (which leaves 3 sides of every glyph touching the photo
+    // directly), an opaque stroke fully separates the fill color from the
+    // photo on all sides, so its contrast against the fill is fixed and
+    // provable independent of whatever image is uploaded, for the two
+    // built-in palettes this was checked against (see below) - a site
+    // running a Custom palette with an unusually light "Brand Primary
+    // Dark" color shares the same risk every other use of that color
+    // sitewide already carries, not a gap specific to this component.
+    // White is used here (not black) because it's the only one of the two
+    // that clears 4.5:1 against both built-in --brand-primary-dark values
+    // (#107996 - 5.0:1 vs white, 4.2:1 vs black; #9a1134 - 8.39:1 vs
+    // white, 2.5:1 vs black).
+    h1, h2, p, a {
+      -webkit-text-stroke: 0.08em var(--color-white);
+      paint-order: stroke fill;
+    }
+
+    // content.body can include links. They'd otherwise inherit the
+    // sitewide --focus-color ring (_base.scss), which is only ~2.4:1
+    // against a light background and falls further against a photo of
+    // unknown color - the same WCAG 1.4.11 gap already fixed the same way
+    // in _full-node.scss, _carousels.scss, and _local-contexts.scss, but
+    // those all sit on a known background color. This hero sits on an
+    // arbitrary uploaded photo instead, so it needs the layered light+dark
+    // ring from _glightbox.scss's zoomed-image focus state instead: white
+    // and black together stay visible regardless of what's directly
+    // behind the link, in either text-color variant.
+    a:focus-visible {
+      outline: 3px solid #fff;
+      outline-offset: 2px;
+      box-shadow: 0 0 0 5px #000;
+    }
+
+    // Fallback for browsers without text-stroke support: layered
+    // single-pixel shadows in all 8 directions approximate the same solid
+    // ring (a single-direction shadow, the pre-#2207 approach, does not).
+    @supports not (-webkit-text-stroke: 1px solid) {
+      h1, h2, p, a {
+        text-shadow:
+          1px 0 0 var(--color-white), -1px 0 0 var(--color-white),
+          0 1px 0 var(--color-white), 0 -1px 0 var(--color-white),
+          1px 1px 0 var(--color-white), -1px -1px 0 var(--color-white),
+          1px -1px 0 var(--color-white), -1px 1px 0 var(--color-white);
+      }
     }
 
     &.text-light {
       * {
         color: var(--color-white);
-        text-shadow: 1px 1px 0 rgb(0 0 0 / 80%);
       }
 
       a {
@@ -105,16 +154,20 @@
         font-size: var(--font-size-l);
       }
 
-      // Dark scrim behind white text - see the default (dark-text) scrim
-      // below for the full WCAG 1.4.3 rationale. Reuses the exact
-      // opacity/blur values already vetted for .mukurtu-content-warnings
-      // (_content-warning.scss), which solves the same problem the same
-      // way: an author-uploaded photo of unknown luminance behind text.
-      .block-wrapper__second::before {
-        background: rgb(0 0 0 / 70%);
+      // White text needs a dark ring instead; black clears 21:1 against
+      // white regardless of palette, so it doesn't need per-palette values
+      // the way the default (dark-text) stroke above does.
+      h1, h2, p, a {
+        -webkit-text-stroke-color: #000;
+      }
 
-        @supports not (backdrop-filter: blur()) {
-          background: rgb(0 0 0 / 90%);
+      @supports not (-webkit-text-stroke: 1px solid) {
+        h1, h2, p, a {
+          text-shadow:
+            1px 0 0 #000, -1px 0 0 #000,
+            0 1px 0 #000, 0 -1px 0 #000,
+            1px 1px 0 #000, -1px -1px 0 #000,
+            1px -1px 0 #000, -1px 1px 0 #000;
         }
       }
     }
@@ -144,35 +197,11 @@
       flex-wrap: wrap;
       place-content: center;
       place-items: center;
-      padding: var(--v-space-s);
       min-block-size: 600px;
+    }
 
-      &::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        z-index: -1;
-
-        // Guarantees WCAG 1.4.3 text contrast against an arbitrary,
-        // author-uploaded photo - a text-shadow alone (the previous
-        // approach) is not a recognised contrast technique. This is the
-        // default (dark-text) scrim; .text-light overrides it below with
-        // a dark scrim instead, since white text needs a dark backdrop.
-        // The opacity has to hold up against the lightest built-in brand
-        // color used as text (blue-gold palette's --brand-primary-dark,
-        // #107996, relative luminance ~0.16) over a worst-case (black)
-        // photo. Alpha-compositing white at 90% over black composites to
-        // ~#e6e6e6 (relative luminance ~0.79), which is only 3.99:1
-        // against that text - short of 4.5:1. 96% composites to ~#f5f5f5
-        // (luminance ~0.91), reaching ~4.6:1 with a small margin.
-        background: rgb(255 255 255 / 96%);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-
-        @supports not (backdrop-filter: blur()) {
-          background: rgb(255 255 255 / 97%);
-        }
-      }
+    .block-wrapper__second-card {
+      max-inline-size: min(90%, 640px);
     }
   }
 }
