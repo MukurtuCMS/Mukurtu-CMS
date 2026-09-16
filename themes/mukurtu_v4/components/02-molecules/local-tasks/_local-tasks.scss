@@ -24,6 +24,16 @@
         color: var(--color-white);
       }
 
+      &:focus {
+        /* This tab turns white-on-brand while focused, so the inherited
+        var(--focus-color) (currentcolor) would draw a white ring onto the
+        white page behind it. Ring in the fill colour instead, offset so it
+        reads against the page (#2199). Applies to .is-active too, which
+        only re-declares background and colour below. */
+        outline: 2px solid var(--brand-primary);
+        outline-offset: 2px;
+      }
+
       &.is-active {
         background: var(--brand-light);
         font-weight: var(--text-bold);
@@ -133,7 +143,9 @@
         background-color: var(--brand-primary-dark);
         color: var(--color-white);
         box-shadow: none;
-        outline: 3px solid var(--focus-color);
+        /* Same inverted-fill case as the tabs above: white label on a dark
+        fill, so ring in the fill colour rather than currentcolor (#2199). */
+        outline: 3px solid var(--brand-primary-dark);
         outline-offset: 2px;
       }
     }

@@ -53,7 +53,13 @@
   }
 
   &:focus {
-    outline: 2px solid var(--focus-color);
+    /* Not var(--focus-color) (currentcolor) here: this button's label is
+    white *because* its fill is dark, but an outline draws outside the
+    fill, onto the page - a white ring on a white page is invisible. Ring
+    in the fill colour instead, offset so the page shows through the gap
+    and the ring reads against it (#2199). */
+    outline: 2px solid var(--brand-primary-dark);
+    outline-offset: 2px;
   }
 
   &:disabled {
@@ -113,6 +119,13 @@
 @mixin block-link-active {
   background-color: var(--brand-primary-dark);
   color: var(--color-white);
+
+  &:focus {
+    /* Active state is white-on-dark, so the inherited var(--focus-color)
+    (currentcolor) ring would be white and block-link's outline-offset
+    puts it on the light surface behind. Ring in the fill colour (#2199). */
+    outline: 2px solid var(--brand-primary-dark);
+  }
 
   &:hover {
     background-color: var(--brand-primary-accent);
