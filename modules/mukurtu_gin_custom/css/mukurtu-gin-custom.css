@@ -1129,6 +1129,28 @@ short fields themselves. Shrink it in these dialogs specifically. */
   box-shadow: none;
 }
 
+/* The wrapper above does survive an AJAX toggle -- but it is not the only
+   one. visitors_display_link's Replace command targets only the inner
+   `.view-id-*.view-display-id-*` div (see the footer-link rule below), and
+   the AJAX response it swaps in is itself a fresh views_embed_view() render,
+   which core wraps in its OWN `.views-element-container` before handing it
+   back. Replacing the inner div leaves that new wrapper nested one level
+   inside the original one instead of alongside it, so every toggle -- chart
+   to table, table to chart, this applies across every /visitors/* report --
+   adds one more nested `.views-element-container` and card to the pile. Undo
+   the card on every nested one, so however many accumulate, only the
+   outermost still reads as one panel. This is a bug in visitors' own AJAX
+   handler (Drupal\visitors\Controller\Report\ReportController::report()),
+   not something fixable from this theme override; it was invisible before
+   this file gave `.views-element-container` a visible card to stack. */
+.visitors-main .views-element-container .views-element-container {
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
 /* Un-card the inner element now that the wrapper carries the card. (0,3,0)
    beats Gin's .gin-layer-wrapper (0,1,0) and its mode variants (0,2,0), so no
    !important is needed. */
