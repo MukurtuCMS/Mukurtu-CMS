@@ -14,5 +14,13 @@
   --mukurtu-mejs-time-rail-current-color: #d1cbcb;
   --mukurtu-dictionary-word-label-background-color: var(--mukurtu-view-row-divider-color);
   --mukurtu-collection-title-font-color: var(--color-white);
-  --mukurtu-collection-pane-bg-color: var(--mukurtu-navbar-collapse-bg)
+  --mukurtu-collection-pane-bg-color: var(--mukurtu-navbar-collapse-bg);
+
+  // #107996 (this palette's --brand-primary-dark) only reaches 2.45:1
+  // against --brand-secondary (#e6ab49), failing WCAG 1.4.3 on the
+  // horizontal image-with-description block's text panel - see #2178.
+  // This darker, still-blue value clears ~4.8:1 against the same
+  // background. Re-check this whenever --brand-secondary changes for
+  // this palette.
+  --image-description-horizontal-text: #0d4a5c;
 }

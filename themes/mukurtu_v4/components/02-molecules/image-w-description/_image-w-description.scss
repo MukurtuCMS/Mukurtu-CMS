@@ -19,6 +19,20 @@
 
     .block-wrapper__second {
       background-color: var(--brand-secondary);
+
+      // Overrides the shared h1/h2 color above and the global link color
+      // (_base.scss) with a token that's guaranteed to pass contrast
+      // against --brand-secondary on every palette - see #2178. The
+      // shared --brand-primary-dark isn't safe to change directly here
+      // since it's used for headings/links across the whole site.
+      h1, h2 {
+        color: var(--image-description-horizontal-text);
+      }
+
+      a {
+        color: var(--image-description-horizontal-text);
+        text-decoration-color: var(--image-description-horizontal-text);
+      }
     }
 
     @include include-media.media('>=md') {
@@ -61,13 +75,80 @@
 
     * {
       color: var(--brand-primary-dark);
-      text-shadow: 1px 1px 0 rgb(255 255 255 / 80%);
+    }
+
+    // Solid outline traced directly around each glyph instead of a scrim
+    // panel/box - these blocks are almost always a short H1/H2-style site
+    // name, so this leaves the photo fully visible everywhere except the
+    // text itself. Unlike a translucent scrim (whose composited result
+    // depends on the photo behind it) or the old single-direction
+    // text-shadow (which leaves 3 sides of every glyph touching the photo
+    // directly), an opaque stroke fully separates the fill color from the
+    // photo on all sides, so its contrast against the fill is fixed and
+    // provable independent of whatever image is uploaded, for the two
+    // built-in palettes this was checked against (see below) - a site
+    // running a Custom palette with an unusually light "Brand Primary
+    // Dark" color shares the same risk every other use of that color
+    // sitewide already carries, not a gap specific to this component.
+    // White is used here (not black) because it's the only one of the two
+    // that clears 4.5:1 against both built-in --brand-primary-dark values
+    // (#107996 - 5.0:1 vs white, 4.2:1 vs black; #9a1134 - 8.39:1 vs
+    // white, 2.5:1 vs black).
+    h1, h2, p, a {
+      -webkit-text-stroke: 0.08em var(--color-white);
+      paint-order: stroke fill;
+    }
+
+    // The stroke above only outlines glyph paths - it doesn't touch a
+    // link's underline or an appended svg.ext/.mailto/.tel icon, both of
+    // which would otherwise sit flat against the photo with no guaranteed
+    // contrast. drop-shadow (unlike text-shadow) follows the whole
+    // rendered element - text, decoration line, and child SVG together -
+    // so a layered ring here covers all three in one rule, matching the
+    // icon into the anchor rather than needing a separate fix.
+    a {
+      filter:
+        drop-shadow(1px 0 0 var(--color-white)) drop-shadow(-1px 0 0 var(--color-white))
+        drop-shadow(0 1px 0 var(--color-white)) drop-shadow(0 -1px 0 var(--color-white))
+        drop-shadow(1px 1px 0 var(--color-white)) drop-shadow(-1px -1px 0 var(--color-white))
+        drop-shadow(1px -1px 0 var(--color-white)) drop-shadow(-1px 1px 0 var(--color-white));
+    }
+
+    // content.body can include links. They'd otherwise inherit the
+    // sitewide --focus-color ring (_base.scss), which is only ~2.4:1
+    // against a light background and falls further against a photo of
+    // unknown color - the same WCAG 1.4.11 gap already fixed the same way
+    // in _full-node.scss, _carousels.scss, and _local-contexts.scss, but
+    // those all sit on a known background color. This hero sits on an
+    // arbitrary uploaded photo instead, so it needs the layered light+dark
+    // ring from _glightbox.scss's zoomed-image focus state instead: white
+    // and black together stay visible regardless of what's directly
+    // behind the link, in either text-color variant.
+    a:focus-visible {
+      outline: 3px solid #fff;
+      outline-offset: 2px;
+      box-shadow: 0 0 0 5px #000;
+    }
+
+    // Fallback for browsers without text-stroke support: layered shadows
+    // in all 8 directions approximate the same solid ring (a
+    // single-direction shadow, the pre-#2207 approach, does not). Offsets
+    // are em-based, like the stroke width above, so the fallback ring
+    // stays proportional at the much larger .text-light heading size
+    // instead of thinning out relative to the glyphs.
+    @supports not (-webkit-text-stroke: 1px solid) {
+      h1, h2, p, a {
+        text-shadow:
+          0.05em 0 0 var(--color-white), -0.05em 0 0 var(--color-white),
+          0 0.05em 0 var(--color-white), 0 -0.05em 0 var(--color-white),
+          0.05em 0.05em 0 var(--color-white), -0.05em -0.05em 0 var(--color-white),
+          0.05em -0.05em 0 var(--color-white), -0.05em 0.05em 0 var(--color-white);
+      }
     }
 
     &.text-light {
       * {
         color: var(--color-white);
-        text-shadow: 1px 1px 0 rgb(0 0 0 / 80%);
       }
 
       a {
@@ -91,6 +172,53 @@
         font-size: var(--font-size-l);
       }
 
+      // White text needs a dark ring instead; black clears 21:1 against
+      // white regardless of palette, so it doesn't need per-palette values
+      // the way the default (dark-text) stroke above does.
+      h1, h2, p, a {
+        -webkit-text-stroke-color: #000;
+      }
+
+      // Same underline/icon coverage as the default variant above, in the
+      // dark ring color this variant needs.
+      a {
+        filter:
+          drop-shadow(1px 0 0 #000) drop-shadow(-1px 0 0 #000)
+          drop-shadow(0 1px 0 #000) drop-shadow(0 -1px 0 #000)
+          drop-shadow(1px 1px 0 #000) drop-shadow(-1px -1px 0 #000)
+          drop-shadow(1px -1px 0 #000) drop-shadow(-1px 1px 0 #000);
+      }
+
+      @supports not (-webkit-text-stroke: 1px solid) {
+        h1, h2, p, a {
+          text-shadow:
+            0.05em 0 0 #000, -0.05em 0 0 #000,
+            0 0.05em 0 #000, 0 -0.05em 0 #000,
+            0.05em 0.05em 0 #000, -0.05em -0.05em 0 #000,
+            0.05em -0.05em 0 #000, -0.05em 0.05em 0 #000;
+        }
+      }
+    }
+
+    // This template renders title_suffix (Drupal core's "Configure / Move
+    // / Remove block" contextual links, for anyone with edit access)
+    // inside .block-wrapper__second-card, right alongside the real
+    // heading/body content the rules above target - so without this,
+    // every rule above (color, stroke, drop-shadow, focus ring) leaks
+    // onto that admin-only menu too. revert (not none/initial) restores
+    // whatever Drupal core's own contextual CSS would have applied had
+    // this file's rules never run. Placed last so it also wins the
+    // specificity tie against &.text-light's `* { color }` above.
+    .contextual, .contextual * {
+      color: revert;
+      -webkit-text-stroke: revert;
+      text-shadow: revert;
+      filter: revert;
+    }
+
+    .contextual a:focus-visible {
+      outline: revert;
+      box-shadow: revert;
     }
 
     .block-wrapper__first {
@@ -110,6 +238,7 @@
     }
 
     .block-wrapper__second {
+      position: relative;
       z-index: 2;
       inline-size: 100%;
       block-size: 100%;
@@ -117,8 +246,11 @@
       flex-wrap: wrap;
       place-content: center;
       place-items: center;
-      padding: var(--v-space-s);
       min-block-size: 600px;
+    }
+
+    .block-wrapper__second-card {
+      max-inline-size: min(90%, 640px);
     }
   }
 }
