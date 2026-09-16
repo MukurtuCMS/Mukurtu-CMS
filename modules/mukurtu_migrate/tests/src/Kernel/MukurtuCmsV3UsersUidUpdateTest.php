@@ -91,4 +91,29 @@ class MukurtuCmsV3UsersUidUpdateTest extends MukurtuCmsV3UsersMigrationTestBase 
     $this->assertTrue(\Drupal::configFactory()->get(static::CONFIG)->isNew(), 'The hook created config out of nothing.');
   }
 
+  /**
+   * Tests that update 40205 swaps the plain name mapping for the plugin.
+   */
+  public function testNameMappingIsSwapped(): void {
+    $config = \Drupal::configFactory()->getEditable(static::CONFIG);
+    $shipped = $config->get('process.name');
+    $this->assertSame('avoid_username_collision', $shipped['plugin'], 'Precondition: shipped config should already use the new plugin.');
+
+    // Shipped config is already updated, so the hook is a no-op.
+    $this->assertNull(mukurtu_migrate_update_40205());
+    $this->assertSame($shipped, \Drupal::configFactory()->get(static::CONFIG)->get('process.name'));
+
+    // An existing site still carries the plain mapping.
+    $config->set('process.name', 'name')->save();
+    $this->assertNotNull(mukurtu_migrate_update_40205());
+    $this->assertSame($shipped, \Drupal::configFactory()->get(static::CONFIG)->get('process.name'));
+    $this->assertNull(mukurtu_migrate_update_40205(), 'The hook is not idempotent.');
+
+    // A customized mapping is left alone.
+    $custom = ['plugin' => 'callback', 'callable' => 'strtolower', 'source' => 'name'];
+    $config->set('process.name', $custom)->save();
+    $this->assertNull(mukurtu_migrate_update_40205());
+    $this->assertSame($custom, \Drupal::configFactory()->get(static::CONFIG)->get('process.name'));
+  }
+
 }

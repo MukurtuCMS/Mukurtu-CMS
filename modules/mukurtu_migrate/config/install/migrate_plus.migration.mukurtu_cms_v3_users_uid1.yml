@@ -18,7 +18,6 @@ process:
   created: created
   access: access
   login: login
-  status: status
   timezone: timezone
   langcode:
     plugin: user_langcode
@@ -33,17 +32,6 @@ process:
     source: language
     fallback_to_site_default: true
   init: init
-  roles:
-    -
-      plugin: static_map
-      source: roles
-      map:
-        2: authenticated
-        4: mukurtu_manager
-        6: mukurtu_manager
-      default_value: authenticated
-    -
-      plugin: array_unique
   user_picture:
     -
       plugin: default_value
