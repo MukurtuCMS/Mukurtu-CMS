@@ -42,3 +42,13 @@ services:
     arguments: ['@current_user', '@geofield.geophp', '@module_handler', '@link_generator', '@stream_wrapper_manager', '@request_stack', '@cache.leaflet', '@file_url_generator']
   mukurtu_core.paragraph_emptiness_checker:
     class: Drupal\mukurtu_core\Service\ParagraphEmptinessChecker
+  mukurtu_core.dbip_download:
+    class: Drupal\mukurtu_core\Service\DbIpDownloadService
+    arguments: ['@http_client', '@config.factory', '@file_system', '@logger.channel.mukurtu_core']
+  # Aliased by class so GeoIpFallbackHooks, discovered and autowired by
+  # Drupal's OOP hook system rather than declared as a service itself, can
+  # be constructed with this by type-hint alone.
+  Drupal\mukurtu_core\Service\DbIpDownloadService: '@mukurtu_core.dbip_download'
+  logger.channel.mukurtu_core:
+    parent: logger.channel_base
+    arguments: ['mukurtu_core']
