@@ -103,6 +103,17 @@
             color: var(--light-text-color);
             background-color: var(--brand-primary-dark);
           }
+
+          &:focus {
+            /* This tab is white-on-brand-primary-dark, so the ring is
+            white (currentcolor) and drawn outward it spills onto the light
+            tab strip above. Inset it so it lands on the tab's own dark
+            fill (#2199). Has to live here rather than in _link.scss: the
+            :is(#extra-specificity-hack, ...) wrapper at the top of this
+            file gives these rules ID-level specificity, so a class-based
+            rule elsewhere can never win. */
+            outline-offset: -4px;
+          }
         }
 
         &::after {

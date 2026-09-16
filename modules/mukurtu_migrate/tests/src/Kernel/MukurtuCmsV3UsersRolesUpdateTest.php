@@ -12,6 +12,11 @@ use PHPUnit\Framework\Attributes\Group;
  * to the user migrations' 'roles' pipeline keeps the old, crashing pipeline
  * until the update hook appends it.
  *
+ * The hook also covers mukurtu_cms_v3_users_uid1, which mapped roles when
+ * the hook was written. Shipped config no longer does (see
+ * mukurtu_migrate_update_40204()), so only the migration that still maps
+ * roles is exercised here; the hook skips a migration without the mapping.
+ *
  * @see mukurtu_migrate_update_40202()
  * @see \Drupal\Tests\mukurtu_migrate\Kernel\MukurtuCmsV3UsersRolesTest
  */
@@ -21,7 +26,7 @@ class MukurtuCmsV3UsersRolesUpdateTest extends MukurtuCmsV3UsersMigrationTestBas
   /**
    * The migrations the hook updates.
    */
-  const MIGRATIONS = ['mukurtu_cms_v3_users', 'mukurtu_cms_v3_users_uid1'];
+  const MIGRATIONS = ['mukurtu_cms_v3_users'];
 
   /**
    * {@inheritdoc}
@@ -67,7 +72,7 @@ class MukurtuCmsV3UsersRolesUpdateTest extends MukurtuCmsV3UsersMigrationTestBas
   }
 
   /**
-   * Tests that the hook appends array_unique to both shipped pipelines.
+   * Tests that the hook appends array_unique to the shipped pipeline.
    */
   public function testAppendsArrayUniqueToAnExistingSite(): void {
     $before = [];
