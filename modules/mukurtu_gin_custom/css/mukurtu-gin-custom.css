@@ -1221,8 +1221,13 @@ body.path-visitors .layout-row.layout-row {
    read as a deliberate plate inside the dark card.
 
    Applies to every visitors report, not just Locations: the same chart text is
-   drawn the same way on /visitors/software once its own chart is toggled on. */
-.gin--dark-mode .visitors-main .charts-figure {
+   drawn the same way on /visitors/software once its own chart is toggled on,
+   and on /visitors/performance and its /day and /hour variants, whose
+   ReportController action never wraps its content in .visitors-main the way
+   the other report actions do -- scoped to body.path-visitors, which Drupal
+   adds to every /visitors/* page regardless of which action renders it, so
+   this reaches performance's chart too. */
+.gin--dark-mode body.path-visitors .charts-figure {
   padding: var(--gin-spacing-s);
   background: #fff;
   border-radius: var(--gin-border-m);
