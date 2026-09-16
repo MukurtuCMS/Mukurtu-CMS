@@ -133,6 +133,10 @@ To resolve it:
 3. Save it into `web/profiles/mukurtu/patches/` in your site, keeping the same filename.
 4. Re-run `composer install`. If a different patch file is reported missing, repeat steps 1-3 for it.
 
+## Testing
+
+Mukurtu CMS uses PHPUnit kernel tests and unit tests. See [`docs/testing/coverage.md`](docs/testing/coverage.md) for a full breakdown of test infrastructure and coverage by module. A plain-language summary of what each test verifies is available at [`docs/testing/coverage-plain-language.md`](docs/testing/coverage-plain-language.md).
+
 ## Contributing
 Code contributions and feedback are welcome, and can be submitted in [our issues](https://github.com/MukurtuCMS/Mukurtu-CMS/issues) or you can contact us at [support@mukurtu.org](mailto:support@mukurtu.org).
 
