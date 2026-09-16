@@ -200,6 +200,27 @@
       }
     }
 
+    // This template renders title_suffix (Drupal core's "Configure / Move
+    // / Remove block" contextual links, for anyone with edit access)
+    // inside .block-wrapper__second-card, right alongside the real
+    // heading/body content the rules above target - so without this,
+    // every rule above (color, stroke, drop-shadow, focus ring) leaks
+    // onto that admin-only menu too. revert (not none/initial) restores
+    // whatever Drupal core's own contextual CSS would have applied had
+    // this file's rules never run. Placed last so it also wins the
+    // specificity tie against &.text-light's `* { color }` above.
+    .contextual, .contextual * {
+      color: revert;
+      -webkit-text-stroke: revert;
+      text-shadow: revert;
+      filter: revert;
+    }
+
+    .contextual a:focus-visible {
+      outline: revert;
+      box-shadow: revert;
+    }
+
     .block-wrapper__first {
       overflow: hidden;
       position: absolute;

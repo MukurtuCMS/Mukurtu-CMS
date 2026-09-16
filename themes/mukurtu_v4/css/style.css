@@ -2129,6 +2129,18 @@ label.form-required::after,
     text-shadow: 0.05em 0 0 #000, -0.05em 0 0 #000, 0 0.05em 0 #000, 0 -0.05em 0 #000, 0.05em 0.05em 0 #000, -0.05em -0.05em 0 #000, 0.05em -0.05em 0 #000, -0.05em 0.05em 0 #000;
   }
 }
+.block--image-with-description--full .contextual, .block--image-with-description--full .contextual * {
+  color: revert;
+  -webkit-text-stroke: revert;
+  text-shadow: revert;
+  -webkit-filter: revert;
+          filter: revert;
+}
+.block--image-with-description--full .contextual a:focus-visible {
+  outline: revert;
+  -webkit-box-shadow: revert;
+          box-shadow: revert;
+}
 .block--image-with-description--full .block-wrapper__first {
   overflow: hidden;
   position: absolute;
