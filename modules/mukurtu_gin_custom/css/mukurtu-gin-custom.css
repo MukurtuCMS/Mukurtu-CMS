@@ -1202,3 +1202,26 @@ short fields themselves. Shrink it in these dialogs specifically. */
      for author-supplied bitmaps. */
   forced-color-adjust: none;
 }
+
+/* Visitors report: several of the "table" displays these charts toggle into
+   (visitors_display_link, above) carry a Views table <caption> so the
+   report keeps its title once switched away from the chart -- e.g.
+   local_hour_table's caption is "Visitor's time". Gin's own sticky-table-
+   header JS (themes/gin/js/tableheader.js) clones just the <thead> into a
+   pinned duplicate for scroll, and sizes/positions that clone from the
+   <thead>'s own height alone, with no allowance for a <caption> sitting
+   above it in the same table. Against a captioned table the clone (opaque,
+   z-index: 97) ends up tall enough to cover the caption but not the real
+   header below it, so the caption is hidden behind the clone and the real
+   header peeks out beneath it, reading as a duplicated "Hour / Unique
+   visitors" row with the title gone. These reports max out at 31 rows
+   (hour_table's 00-23), so the sticky-on-scroll behaviour isn't worth
+   fixing Gin's clone math for; simplest is to drop the clone entirely here
+   and let the real, single header render as normal.
+
+   !important: Gin's own tableheader.js sets `style.display = 'block'`
+   directly on this element (inline styles), which otherwise outranks any
+   stylesheet rule regardless of selector specificity. */
+.visitors-main .gin--sticky-table-header {
+  display: none !important;
+}
