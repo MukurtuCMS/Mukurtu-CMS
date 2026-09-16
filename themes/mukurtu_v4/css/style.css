@@ -2083,6 +2083,10 @@ label.form-required::after,
   -webkit-text-stroke: 0.08em var(--color-white);
   paint-order: stroke fill;
 }
+.block--image-with-description--full a {
+  -webkit-filter: drop-shadow(1px 0 0 var(--color-white)) drop-shadow(-1px 0 0 var(--color-white)) drop-shadow(0 1px 0 var(--color-white)) drop-shadow(0 -1px 0 var(--color-white)) drop-shadow(1px 1px 0 var(--color-white)) drop-shadow(-1px -1px 0 var(--color-white)) drop-shadow(1px -1px 0 var(--color-white)) drop-shadow(-1px 1px 0 var(--color-white));
+          filter: drop-shadow(1px 0 0 var(--color-white)) drop-shadow(-1px 0 0 var(--color-white)) drop-shadow(0 1px 0 var(--color-white)) drop-shadow(0 -1px 0 var(--color-white)) drop-shadow(1px 1px 0 var(--color-white)) drop-shadow(-1px -1px 0 var(--color-white)) drop-shadow(1px -1px 0 var(--color-white)) drop-shadow(-1px 1px 0 var(--color-white));
+}
 .block--image-with-description--full a:focus-visible {
   outline: 3px solid #fff;
   outline-offset: 2px;
@@ -2091,7 +2095,7 @@ label.form-required::after,
 }
 @supports not (-webkit-text-stroke: 1px solid) {
   .block--image-with-description--full h1, .block--image-with-description--full h2, .block--image-with-description--full p, .block--image-with-description--full a {
-    text-shadow: 1px 0 0 var(--color-white), -1px 0 0 var(--color-white), 0 1px 0 var(--color-white), 0 -1px 0 var(--color-white), 1px 1px 0 var(--color-white), -1px -1px 0 var(--color-white), 1px -1px 0 var(--color-white), -1px 1px 0 var(--color-white);
+    text-shadow: 0.05em 0 0 var(--color-white), -0.05em 0 0 var(--color-white), 0 0.05em 0 var(--color-white), 0 -0.05em 0 var(--color-white), 0.05em 0.05em 0 var(--color-white), -0.05em -0.05em 0 var(--color-white), 0.05em -0.05em 0 var(--color-white), -0.05em 0.05em 0 var(--color-white);
   }
 }
 .block--image-with-description--full.text-light * {
@@ -2116,9 +2120,13 @@ label.form-required::after,
 .block--image-with-description--full.text-light h1, .block--image-with-description--full.text-light h2, .block--image-with-description--full.text-light p, .block--image-with-description--full.text-light a {
   -webkit-text-stroke-color: #000;
 }
+.block--image-with-description--full.text-light a {
+  -webkit-filter: drop-shadow(1px 0 0 #000) drop-shadow(-1px 0 0 #000) drop-shadow(0 1px 0 #000) drop-shadow(0 -1px 0 #000) drop-shadow(1px 1px 0 #000) drop-shadow(-1px -1px 0 #000) drop-shadow(1px -1px 0 #000) drop-shadow(-1px 1px 0 #000);
+          filter: drop-shadow(1px 0 0 #000) drop-shadow(-1px 0 0 #000) drop-shadow(0 1px 0 #000) drop-shadow(0 -1px 0 #000) drop-shadow(1px 1px 0 #000) drop-shadow(-1px -1px 0 #000) drop-shadow(1px -1px 0 #000) drop-shadow(-1px 1px 0 #000);
+}
 @supports not (-webkit-text-stroke: 1px solid) {
   .block--image-with-description--full.text-light h1, .block--image-with-description--full.text-light h2, .block--image-with-description--full.text-light p, .block--image-with-description--full.text-light a {
-    text-shadow: 1px 0 0 #000, -1px 0 0 #000, 0 1px 0 #000, 0 -1px 0 #000, 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
+    text-shadow: 0.05em 0 0 #000, -0.05em 0 0 #000, 0 0.05em 0 #000, 0 -0.05em 0 #000, 0.05em 0.05em 0 #000, -0.05em -0.05em 0 #000, 0.05em -0.05em 0 #000, -0.05em 0.05em 0 #000;
   }
 }
 .block--image-with-description--full .block-wrapper__first {

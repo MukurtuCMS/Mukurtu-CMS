@@ -99,6 +99,21 @@
       paint-order: stroke fill;
     }
 
+    // The stroke above only outlines glyph paths - it doesn't touch a
+    // link's underline or an appended svg.ext/.mailto/.tel icon, both of
+    // which would otherwise sit flat against the photo with no guaranteed
+    // contrast. drop-shadow (unlike text-shadow) follows the whole
+    // rendered element - text, decoration line, and child SVG together -
+    // so a layered ring here covers all three in one rule, matching the
+    // icon into the anchor rather than needing a separate fix.
+    a {
+      filter:
+        drop-shadow(1px 0 0 var(--color-white)) drop-shadow(-1px 0 0 var(--color-white))
+        drop-shadow(0 1px 0 var(--color-white)) drop-shadow(0 -1px 0 var(--color-white))
+        drop-shadow(1px 1px 0 var(--color-white)) drop-shadow(-1px -1px 0 var(--color-white))
+        drop-shadow(1px -1px 0 var(--color-white)) drop-shadow(-1px 1px 0 var(--color-white));
+    }
+
     // content.body can include links. They'd otherwise inherit the
     // sitewide --focus-color ring (_base.scss), which is only ~2.4:1
     // against a light background and falls further against a photo of
@@ -115,16 +130,19 @@
       box-shadow: 0 0 0 5px #000;
     }
 
-    // Fallback for browsers without text-stroke support: layered
-    // single-pixel shadows in all 8 directions approximate the same solid
-    // ring (a single-direction shadow, the pre-#2207 approach, does not).
+    // Fallback for browsers without text-stroke support: layered shadows
+    // in all 8 directions approximate the same solid ring (a
+    // single-direction shadow, the pre-#2207 approach, does not). Offsets
+    // are em-based, like the stroke width above, so the fallback ring
+    // stays proportional at the much larger .text-light heading size
+    // instead of thinning out relative to the glyphs.
     @supports not (-webkit-text-stroke: 1px solid) {
       h1, h2, p, a {
         text-shadow:
-          1px 0 0 var(--color-white), -1px 0 0 var(--color-white),
-          0 1px 0 var(--color-white), 0 -1px 0 var(--color-white),
-          1px 1px 0 var(--color-white), -1px -1px 0 var(--color-white),
-          1px -1px 0 var(--color-white), -1px 1px 0 var(--color-white);
+          0.05em 0 0 var(--color-white), -0.05em 0 0 var(--color-white),
+          0 0.05em 0 var(--color-white), 0 -0.05em 0 var(--color-white),
+          0.05em 0.05em 0 var(--color-white), -0.05em -0.05em 0 var(--color-white),
+          0.05em -0.05em 0 var(--color-white), -0.05em 0.05em 0 var(--color-white);
       }
     }
 
@@ -161,13 +179,23 @@
         -webkit-text-stroke-color: #000;
       }
 
+      // Same underline/icon coverage as the default variant above, in the
+      // dark ring color this variant needs.
+      a {
+        filter:
+          drop-shadow(1px 0 0 #000) drop-shadow(-1px 0 0 #000)
+          drop-shadow(0 1px 0 #000) drop-shadow(0 -1px 0 #000)
+          drop-shadow(1px 1px 0 #000) drop-shadow(-1px -1px 0 #000)
+          drop-shadow(1px -1px 0 #000) drop-shadow(-1px 1px 0 #000);
+      }
+
       @supports not (-webkit-text-stroke: 1px solid) {
         h1, h2, p, a {
           text-shadow:
-            1px 0 0 #000, -1px 0 0 #000,
-            0 1px 0 #000, 0 -1px 0 #000,
-            1px 1px 0 #000, -1px -1px 0 #000,
-            1px -1px 0 #000, -1px 1px 0 #000;
+            0.05em 0 0 #000, -0.05em 0 0 #000,
+            0 0.05em 0 #000, 0 -0.05em 0 #000,
+            0.05em 0.05em 0 #000, -0.05em -0.05em 0 #000,
+            0.05em -0.05em 0 #000, -0.05em 0.05em 0 #000;
         }
       }
     }
