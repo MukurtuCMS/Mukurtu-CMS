@@ -3495,6 +3495,31 @@ html:not(.js) .primary-nav__menu--level-2 {
  */
 .mobile-buttons {
   grid-column: -2/-1;
+  /* From >=sm the label below un-hides and .mobile-nav-button switches to
+  inline-size: auto, growing from 32px to ~83px. That is wider than one
+  column of the header's 6-column grid until about 525px, so the button
+  overhung the right edge and dragged the document into horizontal
+  scrolling between 480px and 520px, failing WCAG 1.4.10 (#2197). Give it
+  two columns from the same breakpoint the label appears at, so the
+  labelled state always has room.
+
+  The button right-aligns itself with margin-inline-start: auto, but that
+  only works while it is block-level: at >=sm it also becomes
+  inline-flex, and an auto margin computes to 0 on an inline-level box.
+  That went unnoticed while the button was wider than its column (it had
+  nowhere to move), so right-align here explicitly rather than leaving it
+  to the auto margin. */
+}
+@media (min-width: 30rem) {
+  .mobile-buttons {
+    grid-column: -3/-1;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: end;
+        -ms-flex-pack: end;
+            justify-content: flex-end;
+  }
 }
 @media (min-width: 60rem) {
   body:not(.is-always-mobile-nav) .mobile-buttons {
