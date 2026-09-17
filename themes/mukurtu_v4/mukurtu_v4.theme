@@ -198,9 +198,38 @@ function mukurtu_v4_preprocess_block(&$variables) {
   // mukurtu-footer.html.twig. Otherwise, it would use the default template,
   // block.html.twig, and our footer would not display.
   $variables['plugin_id'] = 'mukurtu_footer';
+}
 
-  // Add is_front variable for block templates.
-  $variables['is_front'] = \Drupal::service('path.matcher')->isFrontPage();
+/**
+ * Implements template_preprocess_page().
+ *
+ * The real page-title block (block.block.mukurtu_v4_page_title.yml) is
+ * deliberately hidden on the front page, since Layout Builder hero blocks
+ * serve as the visual title instead. That leaves the page with zero <h1>s
+ * unless an author happens to place a hero block - and even then, multiple
+ * hero blocks would each emit their own <h1> (see #2176). This guarantees
+ * exactly one, visually-hidden, whenever the front page is hiding its own.
+ *
+ * Keyed on is_front rather than the landing_page bundle deliberately: the
+ * title block's visibility condition is path-based (<front> plus a
+ * /landing/* pattern that, as of this writing, no route or pathauto
+ * pattern actually produces - see pathauto.pattern.landing_pages.yml, which
+ * targets the "page" bundle, not "landing_page"). Keying this hook on
+ * bundle instead of is_front would add a hidden <h1> to every landing_page
+ * node regardless of route - including the non-front-page ones
+ * DefaultLandingPage::createDefaultLandingPage() orphans on every reinstall
+ * - producing a second, duplicate <h1> alongside their still-visible real
+ * title. If the title block's visibility condition ever actually starts
+ * matching non-front routes, this needs to be revisited in lockstep.
+ */
+function mukurtu_v4_preprocess_page(array &$variables): void {
+  if (!\Drupal::service('path.matcher')->isFrontPage()) {
+    return;
+  }
+  $node = \Drupal::routeMatch()->getParameter('node');
+  if ($node instanceof \Drupal\node\NodeInterface) {
+    $variables['hidden_front_page_title'] = $node->label();
+  }
 }
 
 /**

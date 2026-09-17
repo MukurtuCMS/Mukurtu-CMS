@@ -68,6 +68,14 @@
   <main id="main-content" role="main" tabindex="-1">
   {# link is in html.html.twig #}
 
+    {# The front page hides the real page-title block in favor of a hero
+       block acting as the visual title; this guarantees an accessible
+       <h1> still exists regardless of which blocks an author places
+       (see mukurtu_v4_preprocess_page() and issue #2176). #}
+    {% if hidden_front_page_title %}
+      <h1 class="visually-hidden">{{ hidden_front_page_title }}</h1>
+    {% endif %}
+
     {{ page.page_title }}
 
     {% block page_content %}
