@@ -1025,3 +1025,274 @@ html:not(.admin-toolbar-expanded) .admin-toolbar .toolbar-menu__item--level-1 > 
   height: 1px;
   word-wrap: normal;
 }
+
+/* Visitors report (/visitors/*): the "Unique visitors" count column stretches
+   to take up most of the table's width even though its content ("3", "12")
+   is far shorter than the place-name column next to it, because Views'
+   table style leaves both columns free to grow and the sortable column's
+   link/arrow markup ends up widest. width: 1% with white-space: nowrap is
+   the standard table trick to make a column shrink-to-fit its content, so
+   the remaining width goes to the place-name column instead. Matches both
+   the "visitors" view (Continent/Country/Language tables) and the
+   "visitors_geoip" view (Region/City tables) via a "starts with" selector,
+   since core doesn't clean the underscore out of view-id-visitors_geoip. */
+[class*="view-id-visitors"] .views-field-visitor-id {
+  width: 1%;
+  white-space: nowrap;
+}
+
+/* Visitors report: the "chart" (and language-table's "Language Code")
+   footer links are plain, unstyled <a> tags from the Views footer area
+   handler (visitors_display_link) with no Gin theming applied at all.
+   Style them as small secondary buttons, reusing the same visual language
+   as .eb-view-toggle__btn above, so they read as an actionable control
+   rather than stray body text. */
+[class*="view-id-visitors"] .view-footer a {
+  display: inline-block;
+  /* Explicit rather than inheriting Gin's teal link colour: that measures
+     4.48:1 against the card these buttons now sit on, missing 1.4.3's 4.5:1
+     for text this size. Gin's darker "primary hover" token is the accent one
+     step down and clears it at 5.84:1 in light mode and 9.3:1 in dark. It is
+     used here as the resting colour, not just on hover, which is why the
+     hover rule below can reuse the same token as a background. The border
+     follows via currentColor. */
+  color: var(--gin-color-primary-hover, #0e716c);
+  margin-block-start: 0.5rem;
+  padding: 0.35rem 0.75rem;
+  border: 2px solid currentColor;
+  border-radius: 3px;
+  font-size: 0.85rem;
+  line-height: 1.2;
+  text-decoration: none;
+}
+
+/* --gin-color-button-text (not --gin-color-primary's own #fff fallback used
+   elsewhere in this file) because Gin flips it to #111 in dark mode, where
+   the accent color itself shifts lighter -- white text on a light accent is
+   what dropped this exact pairing to ~1.5:1 in dark mode before this fix. */
+[class*="view-id-visitors"] .view-footer a:hover {
+  background: var(--gin-color-primary-hover, #0e716c);
+  color: var(--gin-color-button-text, #fff);
+  border-color: var(--gin-color-primary-hover, #0e716c);
+}
+
+/* 2.4.7: explicit focus indicator that survives Gin's focus reset. */
+[class*="view-id-visitors"] .view-footer a:focus-visible {
+  outline: 3px solid var(--gin-color-primary, #0036b1);
+  outline-offset: 2px;
+}
+
+/* Visitors report: the report rows sit 24px wider than the page content on
+   each side, so every card hangs outside the date-range box above it. The
+   visitors module names its report rows "layout-row", which is also Claro's
+   class for the two-column admin layout, and Claro's
+   css/layout/system-admin--layout.css pulls .layout-row out by -1.5em on both
+   sides to let its columns bleed past their container. Nothing in the visitors
+   module sets that margin; it is a class-name collision. Undo it here only,
+   scoped to visitors report pages.
+
+   Scoped to body.path-visitors rather than .visitors-main: ReportController's
+   performance()/performance($sequence) actions (the /visitors/performance,
+   /performance/day and /performance/hour pages) never wrap their content in
+   the "visitors-main" container the other report actions add, so a
+   .visitors-main-scoped rule silently never reaches them and this same bleed
+   shows there too. Drupal adds "path-visitors" from the first path segment
+   to every /visitors/* page regardless of which controller action renders
+   it, so it covers all of them, performance included, without depending on
+   a wrapper each action has to remember to add.
+
+   The class is repeated to reach (0,3,0), now (0,3,1) with the body type
+   selector: Claro's selector is "body:not(.toolbar-tray-open) .layout-row",
+   which is (0,2,1) and so beats a plain .layout-row. This file is attached
+   in the CSS "base" group, the earliest one, so it can never win a tie on
+   source order -- every override here has to win on specificity alone. */
+body.path-visitors .layout-row.layout-row {
+  margin-inline: 0;
+}
+
+/* Visitors report: the rows are plain divs with nothing between them, so the
+   cards touch vertically while sitting 1rem apart horizontally (report.css
+   puts a 1rem gap between the columns inside a row, but nothing between the
+   rows themselves). Match the two so the grid reads evenly in both
+   directions. */
+.visitors-main .layout-row + .layout-row {
+  margin-block-start: 1rem;
+}
+
+/* Visitors report: the date filter is a <details> inside a form, and both pick
+   up a card -- Gin cards .block-system-main-block > form, Claro cards
+   .claro-details -- so the visible date box is the inner one, indented by the
+   outer card's padding and narrower than every report card below it. Drop the
+   outer card so the details is the box, at the same width as the reports.
+
+   Prefixed with .block-system-main-block to beat Gin's own
+   ".block-system-main-block > form" (0,1,1); the attribute selector alone only
+   ties, and this file loads first. */
+.block-system-main-block > form[data-drupal-selector="visitors-date-filter-form"] {
+  padding: 0;
+  background: none;
+  border: 0;
+  box-shadow: none;
+}
+
+/* Visitors report: Gin's views-view.html.twig hardcodes its card class
+   (gin-layer-wrapper) on .view-content, leaving .view-header and .view-footer
+   as siblings outside it -- which is why the footer buttons styled above float
+   on the page background instead of sitting in the card they belong to. The
+   class is in a contrib template and cannot be moved from CSS, so strip the
+   card from .view-content and rebuild it one level out, on the
+   .views-element-container wrapper that Drupal\views\Element\View adds around
+   every embedded view.
+
+   Scoped to .visitors-main rather than the view-id classes because those sit
+   on the inner .view div, which the report's AJAX toggles replace wholesale --
+   the wrapper and its card survive a swap. Values mirror
+   gin/styles/base/_layers.scss so the two stay in step. */
+.visitors-main .views-element-container {
+  box-sizing: border-box;
+  width: 100%;
+  padding: var(--gin-spacing-s);
+  background: var(--gin-bg-layer);
+  border: 1px solid var(--gin-border-color-layer);
+  border-radius: var(--gin-border-l);
+  box-shadow: var(--gin-shadow-l1);
+}
+
+/* Gin's mq(small) breakpoint. */
+@media (min-width: 48rem) {
+  .visitors-main .views-element-container {
+    padding: var(--gin-spacing-l);
+  }
+}
+
+.gin--dark-mode .visitors-main .views-element-container {
+  box-shadow: 0 6px 16px var(--gin-border-color-layer);
+}
+
+.gin--high-contrast-mode .visitors-main .views-element-container {
+  box-shadow: none;
+}
+
+/* The wrapper above does survive an AJAX toggle -- but it is not the only
+   one. visitors_display_link's Replace command targets only the inner
+   `.view-id-*.view-display-id-*` div (see the footer-link rule below), and
+   the AJAX response it swaps in is itself a fresh views_embed_view() render,
+   which core wraps in its OWN `.views-element-container` before handing it
+   back. Replacing the inner div leaves that new wrapper nested one level
+   inside the original one instead of alongside it, so every toggle -- chart
+   to table, table to chart, this applies across every /visitors/* report --
+   adds one more nested `.views-element-container` and card to the pile. Undo
+   the card on every nested one, so however many accumulate, only the
+   outermost still reads as one panel. This is a bug in visitors' own AJAX
+   handler (Drupal\visitors\Controller\Report\ReportController::report()),
+   not something fixable from this theme override; it was invisible before
+   this file gave `.views-element-container` a visible card to stack. */
+.visitors-main .views-element-container .views-element-container {
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* Un-card the inner element now that the wrapper carries the card. (0,3,0)
+   beats Gin's .gin-layer-wrapper (0,1,0) and its mode variants (0,2,0), so no
+   !important is needed. */
+.visitors-main .view-content.gin-layer-wrapper {
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* The country map is the only block in its row and, unlike a table, reads
+   better the wider it gets, so it spans the full row rather than sitting in
+   one column. .visitors-country-map is a plain container, not a views embed,
+   so it does not pick up report.css's column rules at all; it only needs a
+   card of its own to match the report blocks around it. */
+.visitors-main .visitors-country-map {
+  box-sizing: border-box;
+  width: 100%;
+  padding: var(--gin-spacing-s);
+  background: var(--gin-bg-layer);
+  border: 1px solid var(--gin-border-color-layer);
+  border-radius: var(--gin-border-l);
+  box-shadow: var(--gin-shadow-l1);
+}
+
+@media (min-width: 48rem) {
+  .visitors-main .visitors-country-map {
+    padding: var(--gin-spacing-l);
+  }
+}
+
+.gin--dark-mode .visitors-main .visitors-country-map {
+  box-shadow: 0 6px 16px var(--gin-border-color-layer);
+}
+
+.gin--high-contrast-mode .visitors-main .visitors-country-map {
+  box-shadow: none;
+}
+
+/* Leaflet draws its own controls and attribution over the tiles, so the map
+   needs a stacking context it cannot escape, and rounded corners to sit in
+   the card cleanly. */
+.visitors-main .visitors-country-map .leaflet-container {
+  width: 100%;
+  border-radius: var(--gin-border-m);
+}
+
+/* Visitors report, Gin dark mode: keep the chart on a light plate.
+
+   charts_chartjs paints its title and legend onto the <canvas>, and neither
+   colour follows the theme -- the title is written into the per-chart JSON as
+   #000 by the charts module, and the legend falls back to Chart.js's own #666
+   default. Against Gin's dark card (#2a2a2d) that measures 1.47:1 and 2.49:1,
+   both well short of the 4.5:1 WCAG 1.4.3 wants for text this size. The
+   colours come from contrib config and contrib JS, so rather than fight them
+   from here, give the canvas the light background it was drawn for and let it
+   read as a deliberate plate inside the dark card.
+
+   Applies to every visitors report, not just Locations: the same chart text is
+   drawn the same way on /visitors/software once its own chart is toggled on,
+   and on /visitors/performance and its /day and /hour variants, whose
+   ReportController action never wraps its content in .visitors-main the way
+   the other report actions do -- scoped to body.path-visitors, which Drupal
+   adds to every /visitors/* page regardless of which action renders it, so
+   this reaches performance's chart too. */
+.gin--dark-mode body.path-visitors .charts-figure {
+  padding: var(--gin-spacing-s);
+  background: #fff;
+  border-radius: var(--gin-border-m);
+  /* Forced-colors mode would otherwise repaint this plate as Canvas (black on
+     a dark HCM theme) while leaving the title and legend untouched, because
+     those are painted into a <canvas> and forced-colors cannot recolour
+     bitmap content -- which puts back exactly the black-on-black the plate is
+     here to prevent. Opting one element out is the sanctioned escape hatch
+     for author-supplied bitmaps. */
+  forced-color-adjust: none;
+}
+
+/* Visitors report: several of the "table" displays these charts toggle into
+   (visitors_display_link, above) carry a Views table <caption> so the
+   report keeps its title once switched away from the chart -- e.g.
+   local_hour_table's caption is "Visitor's time". Gin's own sticky-table-
+   header JS (themes/gin/js/tableheader.js) clones just the <thead> into a
+   pinned duplicate for scroll, and sizes/positions that clone from the
+   <thead>'s own height alone, with no allowance for a <caption> sitting
+   above it in the same table. Against a captioned table the clone (opaque,
+   z-index: 97) ends up tall enough to cover the caption but not the real
+   header below it, so the caption is hidden behind the clone and the real
+   header peeks out beneath it, reading as a duplicated "Hour / Unique
+   visitors" row with the title gone. These reports max out at 31 rows
+   (hour_table's 00-23), so the sticky-on-scroll behaviour isn't worth
+   fixing Gin's clone math for; simplest is to drop the clone entirely here
+   and let the real, single header render as normal.
+
+   !important: Gin's own tableheader.js sets `style.display = 'block'`
+   directly on this element (inline styles), which otherwise outranks any
+   stylesheet rule regardless of selector specificity. */
+.visitors-main .gin--sticky-table-header {
+  display: none !important;
+}

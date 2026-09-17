@@ -1,0 +1,21 @@
+id: charts_chartjs
+label: 'Charts (visitor reports)'
+description: "Loads the Chart.js library used to draw graphs on the site's visitor analytics reports. This library only renders charts; it does not track visitors or set cookies."
+langcode: en
+status: true
+default: true
+purposes:
+  - cms
+cookies: {  }
+required: true
+opt_out: false
+only_once: false
+weight: 0
+info_url: 'https://www.chartjs.org/'
+privacy_policy_url: ''
+javascripts:
+  - 'unpkg.com/chart'
+attachments: {  }
+on_init: ''
+on_accept: ''
+on_decline: ''
