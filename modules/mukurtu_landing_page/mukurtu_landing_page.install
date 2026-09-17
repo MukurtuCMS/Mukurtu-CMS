@@ -71,3 +71,32 @@ function mukurtu_landing_page_update_40201(): string {
 
   return t('Landing page display defaults updated with translatable block headings. Existing homepage nodes keep their current layout; use "Revert to defaults" on a node\'s Layout tab to pick up the change.');
 }
+
+/**
+ * Points the Landing Pages URL alias pattern at the landing_page content type instead of page; existing landing pages get an alias on their next save.
+ */
+function mukurtu_landing_page_update_40202(): string {
+  /** @var \Drupal\pathauto\PathautoPatternInterface|null $pattern */
+  $pattern = \Drupal::entityTypeManager()->getStorage('pathauto_pattern')->load('landing_pages');
+  if (!$pattern) {
+    return t('No Landing Pages URL alias pattern found; nothing to update.');
+  }
+
+  // The shipped pattern was copied from the Basic Pages one and never had its
+  // bundle changed (#2208). Only rewrite that exact shipped value, so a site
+  // that has since customised the pattern's conditions is left alone.
+  $criteria = $pattern->get('selection_criteria') ?? [];
+  $changed = FALSE;
+  foreach ($criteria as $uuid => $criterion) {
+    if (($criterion['id'] ?? '') === 'entity_bundle:node' && ($criterion['bundles'] ?? []) === ['page' => 'page']) {
+      $criteria[$uuid]['bundles'] = ['landing_page' => 'landing_page'];
+      $changed = TRUE;
+    }
+  }
+  if (!$changed) {
+    return t('Landing Pages URL alias pattern does not have the shipped "page" bundle condition; nothing to update.');
+  }
+
+  $pattern->set('selection_criteria', $criteria)->save();
+  return t('Landing Pages URL alias pattern now targets the landing_page content type. Existing landing pages keep their current URLs until they are next saved.');
+}
