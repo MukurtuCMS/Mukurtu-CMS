@@ -1,12 +1,17 @@
 /**
  * @file
- * Fixes an accessibility bug in the third-party ALTCHA widget's own markup
- * (modules/contrib/altcha), which we don't control: its decorative
- * "altcha.org" logo link is aria-hidden="true" but has no tabindex="-1", so
- * it remains keyboard-focusable -- a screen reader user can tab to a link
- * the accessibility tree says doesn't exist. A real, accessible link to the
- * same destination already exists in the widget's footer text, so this
- * logo link is meant to be fully hidden, not exposed.
+ * Layers accessibility patches onto the third-party ALTCHA widget's own
+ * markup and behavior (modules/contrib/altcha), which we don't control:
+ *
+ * - Its decorative "altcha.org" logo link is aria-hidden="true" but has no
+ *   tabindex="-1", so it remains keyboard-focusable -- a screen reader user
+ *   can tab to a link the accessibility tree says doesn't exist. A real,
+ *   accessible link to the same destination already exists in the widget's
+ *   footer text, so this logo link is meant to be fully hidden, not exposed.
+ * - Its checkbox is a native <input type="checkbox">, so per the HTML/ARIA
+ *   spec it already toggles on Space, satisfying WCAG's keyboard
+ *   requirement. We add Enter as well, purely as a UX nicety many users
+ *   expect from checkbox-like controls, beyond what WCAG requires.
  */
 
 ((Drupal, once) => {
@@ -33,6 +38,22 @@
           subtree: true,
           attributes: true,
           attributeFilter: ['aria-hidden'],
+        });
+
+        // Delegate rather than bind directly to the checkbox: ALTCHA
+        // re-renders its internal markup on state changes, which would
+        // otherwise require re-attaching this listener every time.
+        widget.addEventListener('keydown', (event) => {
+          if (event.key !== 'Enter') {
+            return;
+          }
+          const checkbox = event.target.closest('.altcha-checkbox')?.querySelector('input[type="checkbox"]');
+          if (checkbox !== event.target) {
+            return;
+          }
+          event.preventDefault();
+          checkbox.checked = !checkbox.checked;
+          checkbox.dispatchEvent(new Event('change', { bubbles: true }));
         });
       });
     },

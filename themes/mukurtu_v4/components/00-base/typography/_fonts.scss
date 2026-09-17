@@ -1,6 +1,13 @@
+// font-display: swap prevents a flash-of-invisible-text window (the
+// default "auto"/"block" behavior) while BCSans downloads. Since body
+// text uses this font everywhere, that window would otherwise show up
+// as blank text on the very first render after a page load -- most
+// noticeably on the "Skip to main content" link, which a keyboard user
+// can reach before the font finishes loading.
 @font-face {
   font-family: BCSans;
   font-style: normal;
+  font-display: swap;
   src: url('../fonts/BCSans-Regular.woff2') format('woff2'),
     url('../fonts/BCSans-Regular.woff') format('woff');
 }
@@ -8,6 +15,7 @@
 @font-face {
   font-family: BCSans;
   font-style: italic;
+  font-display: swap;
   src: url('../fonts/BCSans-Italic.woff2') format('woff2'),
     url('../fonts/BCSans-Italic.woff') format('woff');
 }
@@ -15,6 +23,7 @@
 @font-face {
   font-family: BCSans;
   font-weight: 700;
+  font-display: swap;
   src: url('../fonts/BCSans-Bold.woff2') format('woff2'),
     url('../fonts/BCSans-Bold.woff') format('woff');
 }
@@ -23,6 +32,7 @@
   font-family: BCSans;
   font-style: italic;
   font-weight: 700;
+  font-display: swap;
   src: url('../fonts/BCSans-BoldItalic.woff2') format('woff2'),
     url('../fonts/BCSans-BoldItalic.woff') format('woff');
 }
