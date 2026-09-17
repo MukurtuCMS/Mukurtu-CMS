@@ -247,6 +247,26 @@
       place-content: center;
       place-items: center;
       min-block-size: 600px;
+
+      // Full-hero wash, purely for mood - the text-stroke above is what
+      // actually guarantees contrast, so this only has to look good, not
+      // survive a worst-case photo on its own. That's why it can stay a
+      // light 35% instead of the ~90%+ opacity the original scrim needed
+      // when the scrim itself was the only thing guaranteeing contrast.
+      &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        background: rgb(0 0 0 / 35%);
+      }
+    }
+
+    // Dark text needs the wash to go the other way (lighter, not darker)
+    // or it would fight the text-stroke's own white ring instead of
+    // complementing it.
+    &.text-dark .block-wrapper__second::before {
+      background: rgb(255 255 255 / 35%);
     }
 
     .block-wrapper__second-card {

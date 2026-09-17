@@ -2170,6 +2170,16 @@ label.form-required::after,
   place-items: center;
   min-block-size: 600px;
 }
+.block--image-with-description--full .block-wrapper__second::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: rgba(0, 0, 0, 0.35);
+}
+.block--image-with-description--full.text-dark .block-wrapper__second::before {
+  background: rgba(255, 255, 255, 0.35);
+}
 .block--image-with-description--full .block-wrapper__second-card {
   max-inline-size: min(90%, 640px);
 }
