@@ -1,5 +1,10 @@
 # Accessibility Findings — Post-Merge Verification (2026-07-27)
 
+> **Status note added 2026-09-17:** this is a historical record and is kept as written.
+> Everything it lists as still open or outstanding has since been fixed and closed
+> (the #1995–#2002 range, all closed 2026-09-14).
+> See [2026-09-17-remediation-cycle.md](2026-09-17-remediation-cycle.md) for current state.
+
 Re-ran the full automated suite after merging `origin/main` into
 `AM-accessibility-program` (7 commits: bot/spam protection — CAPTCHA,
 reCAPTCHA, Cloudflare Turnstile, facet crawler blocking — Klaro cookie
