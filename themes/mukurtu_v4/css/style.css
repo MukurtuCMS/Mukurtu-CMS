@@ -2120,8 +2120,15 @@ label.form-required::after,
 .block--image-with-description--full * {
   color: var(--brand-primary-dark);
 }
+.block--image-with-description--full h1, .block--image-with-description--full h2 {
+  font-size: var(--font-size-heading-2xl);
+  text-align: center;
+}
+.block--image-with-description--full p {
+  font-size: var(--font-size-l);
+}
 .block--image-with-description--full h1, .block--image-with-description--full h2, .block--image-with-description--full p, .block--image-with-description--full a {
-  -webkit-text-stroke: 0.08em var(--color-white);
+  -webkit-text-stroke: 0.035em var(--color-white);
   paint-order: stroke fill;
 }
 .block--image-with-description--full a {
@@ -2136,7 +2143,7 @@ label.form-required::after,
 }
 @supports not (-webkit-text-stroke: 1px solid) {
   .block--image-with-description--full h1, .block--image-with-description--full h2, .block--image-with-description--full p, .block--image-with-description--full a {
-    text-shadow: 0.05em 0 0 var(--color-white), -0.05em 0 0 var(--color-white), 0 0.05em 0 var(--color-white), 0 -0.05em 0 var(--color-white), 0.05em 0.05em 0 var(--color-white), -0.05em -0.05em 0 var(--color-white), 0.05em -0.05em 0 var(--color-white), -0.05em 0.05em 0 var(--color-white);
+    text-shadow: 0.025em 0 0 var(--color-white), -0.025em 0 0 var(--color-white), 0 0.025em 0 var(--color-white), 0 -0.025em 0 var(--color-white), 0.025em 0.025em 0 var(--color-white), -0.025em -0.025em 0 var(--color-white), 0.025em -0.025em 0 var(--color-white), -0.025em 0.025em 0 var(--color-white);
   }
 }
 .block--image-with-description--full.text-light * {
@@ -2151,13 +2158,6 @@ label.form-required::after,
 .block--image-with-description--full.text-light svg.ext path {
   stroke: var(--color-white);
 }
-.block--image-with-description--full.text-light h1, .block--image-with-description--full.text-light h2 {
-  font-size: var(--font-size-heading-2xl);
-  text-align: center;
-}
-.block--image-with-description--full.text-light p {
-  font-size: var(--font-size-l);
-}
 .block--image-with-description--full.text-light h1, .block--image-with-description--full.text-light h2, .block--image-with-description--full.text-light p, .block--image-with-description--full.text-light a {
   -webkit-text-stroke-color: #000;
 }
@@ -2167,7 +2167,7 @@ label.form-required::after,
 }
 @supports not (-webkit-text-stroke: 1px solid) {
   .block--image-with-description--full.text-light h1, .block--image-with-description--full.text-light h2, .block--image-with-description--full.text-light p, .block--image-with-description--full.text-light a {
-    text-shadow: 0.05em 0 0 #000, -0.05em 0 0 #000, 0 0.05em 0 #000, 0 -0.05em 0 #000, 0.05em 0.05em 0 #000, -0.05em -0.05em 0 #000, 0.05em -0.05em 0 #000, -0.05em 0.05em 0 #000;
+    text-shadow: 0.025em 0 0 #000, -0.025em 0 0 #000, 0 0.025em 0 #000, 0 -0.025em 0 #000, 0.025em 0.025em 0 #000, -0.025em -0.025em 0 #000, 0.025em -0.025em 0 #000, -0.025em 0.025em 0 #000;
   }
 }
 .block--image-with-description--full .contextual, .block--image-with-description--full .contextual * {
@@ -2216,10 +2216,10 @@ label.form-required::after,
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: rgba(0, 0, 0, 0.35);
+  background: rgba(0, 0, 0, 0.55);
 }
 .block--image-with-description--full.text-dark .block-wrapper__second::before {
-  background: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.55);
 }
 .block--image-with-description--full .block-wrapper__second-card {
   max-inline-size: min(90%, 640px);

@@ -77,6 +77,20 @@
       color: var(--brand-primary-dark);
     }
 
+    // Both text-color variants share the same larger heading/body sizing -
+    // .text-light previously had its own bigger font-size rules that the
+    // default (dark-text) variant never got, so the two looked like
+    // different type scales depending only on which text color an editor
+    // picked.
+    h1, h2 {
+      font-size: var(--font-size-heading-2xl);
+      text-align: center;
+    }
+
+    p {
+      font-size: var(--font-size-l);
+    }
+
     // Solid outline traced directly around each glyph instead of a scrim
     // panel/box - these blocks are almost always a short H1/H2-style site
     // name, so this leaves the photo fully visible everywhere except the
@@ -93,9 +107,12 @@
     // White is used here (not black) because it's the only one of the two
     // that clears 4.5:1 against both built-in --brand-primary-dark values
     // (#107996 - 5.0:1 vs white, 4.2:1 vs black; #9a1134 - 8.39:1 vs
-    // white, 2.5:1 vs black).
+    // white, 2.5:1 vs black). The stroke's *width* has no bearing on that
+    // guarantee - contrast only depends on the fill/stroke color pair, not
+    // how thick the ring is - so it's kept thin (0.035em) purely so it
+    // reads as a fine edge rather than a heavy cartoon outline.
     h1, h2, p, a {
-      -webkit-text-stroke: 0.08em var(--color-white);
+      -webkit-text-stroke: 0.035em var(--color-white);
       paint-order: stroke fill;
     }
 
@@ -139,10 +156,10 @@
     @supports not (-webkit-text-stroke: 1px solid) {
       h1, h2, p, a {
         text-shadow:
-          0.05em 0 0 var(--color-white), -0.05em 0 0 var(--color-white),
-          0 0.05em 0 var(--color-white), 0 -0.05em 0 var(--color-white),
-          0.05em 0.05em 0 var(--color-white), -0.05em -0.05em 0 var(--color-white),
-          0.05em -0.05em 0 var(--color-white), -0.05em 0.05em 0 var(--color-white);
+          0.025em 0 0 var(--color-white), -0.025em 0 0 var(--color-white),
+          0 0.025em 0 var(--color-white), 0 -0.025em 0 var(--color-white),
+          0.025em 0.025em 0 var(--color-white), -0.025em -0.025em 0 var(--color-white),
+          0.025em -0.025em 0 var(--color-white), -0.025em 0.025em 0 var(--color-white);
       }
     }
 
@@ -161,15 +178,6 @@
         path {
           stroke: var(--color-white);
         }
-      }
-
-      h1, h2 {
-        font-size: var(--font-size-heading-2xl);
-        text-align: center;
-      }
-
-      p {
-        font-size: var(--font-size-l);
       }
 
       // White text needs a dark ring instead; black clears 21:1 against
@@ -192,10 +200,10 @@
       @supports not (-webkit-text-stroke: 1px solid) {
         h1, h2, p, a {
           text-shadow:
-            0.05em 0 0 #000, -0.05em 0 0 #000,
-            0 0.05em 0 #000, 0 -0.05em 0 #000,
-            0.05em 0.05em 0 #000, -0.05em -0.05em 0 #000,
-            0.05em -0.05em 0 #000, -0.05em 0.05em 0 #000;
+            0.025em 0 0 #000, -0.025em 0 0 #000,
+            0 0.025em 0 #000, 0 -0.025em 0 #000,
+            0.025em 0.025em 0 #000, -0.025em -0.025em 0 #000,
+            0.025em -0.025em 0 #000, -0.025em 0.025em 0 #000;
         }
       }
     }
@@ -250,15 +258,16 @@
 
       // Full-hero wash, purely for mood - the text-stroke above is what
       // actually guarantees contrast, so this only has to look good, not
-      // survive a worst-case photo on its own. That's why it can stay a
-      // light 35% instead of the ~90%+ opacity the original scrim needed
-      // when the scrim itself was the only thing guaranteeing contrast.
+      // survive a worst-case photo on its own. That's why it can stay at
+      // 55% instead of the ~90%+ opacity the original scrim needed when
+      // the scrim itself was the only thing guaranteeing contrast - dark
+      // enough to read as a deliberate mood wash, nowhere near opaque.
       &::before {
         content: '';
         position: absolute;
         inset: 0;
         z-index: -1;
-        background: rgb(0 0 0 / 35%);
+        background: rgb(0 0 0 / 55%);
       }
     }
 
@@ -266,7 +275,7 @@
     // or it would fight the text-stroke's own white ring instead of
     // complementing it.
     &.text-dark .block-wrapper__second::before {
-      background: rgb(255 255 255 / 35%);
+      background: rgb(255 255 255 / 55%);
     }
 
     .block-wrapper__second-card {
