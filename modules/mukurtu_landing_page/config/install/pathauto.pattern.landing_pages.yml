@@ -15,7 +15,7 @@ selection_criteria:
     context_mapping:
       node: node
     bundles:
-      page: page
+      landing_page: landing_page
 selection_logic: and
 weight: -5
 relationships: {  }

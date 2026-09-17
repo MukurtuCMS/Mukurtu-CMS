@@ -172,7 +172,39 @@ documentation on how to use @include media(). */
   --color-black: #000;
   --color-gray: #555;
   --color-transparent: rgba(0 0 0 / 0%);
-  --focus-color: #66afe9;
+  /* Focus indicator colour, used by every focusable element in the theme
+  (links, inputs, selects, buttons, footer, tabs, Klaro - see the
+  var(--focus-color) consumers across components/).
+
+  This is deliberately currentcolor rather than a fixed value. Focus rings
+  here have to land on white, the cream and bone panel fills, the grey
+  form fills, the #464646 footer, AND brand red, and no single opaque
+  colour clears WCAG 1.4.11's 3:1 against both ends of that range - the
+  previous #66afe9 measured 1.59-2.37:1 on every light surface (#2199).
+  currentcolor inherits the element's own text colour, which has already
+  been chosen to contrast with whatever it sits on, so the ring is correct
+  by construction wherever the text is.
+
+  Two cases need a hard-coded ring instead, because currentcolor can't be
+  trusted there:
+
+  1. Anything drawn over user-uploaded imagery of unknown luminance, where
+     the text colour is a fixed choice that can't be guaranteed against an
+     arbitrary photo. See _carousels.scss, _glightbox.scss, _full-node.scss
+     and _local-contexts.scss, plus mukurtu_core's
+     css/mukurtu-leaflet-widget.css for the map, which is outside this
+     theme but consumes this token.
+  2. Anything white-on-a-dark-fill. An outline is painted *outside* the
+     element, so the surface that matters is the parent's background, not
+     the fill the text sits on - a white label on a dark button still gets
+     a white ring on whatever light thing is behind the button. Note this
+     is not only components that look inverted at rest: the global
+     button:focus rule (from @mixin button, specificity 0,1,1) turns every
+     button's label white while focused, so ANY component that rings a
+     <button> via var(--focus-color) at higher specificity inherits this
+     trap. Ring in the focused fill colour with an outline-offset instead,
+     or inset the ring (negative offset) so it lands on the fill. */
+  --focus-color: currentcolor;
   --placeholder-color: #999;
   --color-greys-alpha-background: #eee;
   --color-greys-alpha-border: #ccc;
@@ -656,7 +688,13 @@ input[type=button]:focus,
 input[type=submit]:focus,
 input[type=reset]:focus,
 .button:focus {
-  outline: 2px solid var(--focus-color);
+  /* Not var(--focus-color) (currentcolor) here: this button's label is
+  white *because* its fill is dark, but an outline draws outside the
+  fill, onto the page - a white ring on a white page is invisible. Ring
+  in the fill colour instead, offset so the page shows through the gap
+  and the ring reads against it (#2199). */
+  outline: 2px solid var(--brand-primary-dark);
+  outline-offset: 2px;
 }
 button:disabled,
 input[type=button]:disabled,
@@ -1152,7 +1190,11 @@ a:not(.primary-nav__menu-link) svg.tel path {
   background: var(--brand-primary-accent);
 }
 #cboxClose:focus {
-  outline: 2px solid var(--focus-color);
+  /* Same inverted-fill case as the button mixin: this control's label is
+  white on a dark fill, so currentcolor would draw a white ring onto the
+  page. Ring in the fill colour, offset (#2199). */
+  outline: 2px solid var(--brand-primary-dark);
+  outline-offset: 2px;
 }
 #cboxClose:disabled {
   color: var(--light-text-color);
@@ -1256,7 +1298,10 @@ body.consent-popup-opened .klaro_toggle_dialog {
   --klaro-button-bg-hover: var(--brand-primary-dark);
   --klaro-button-text-color-hover: var(--light-text-color);
   --klaro-button-border-hover: none;
-  --klaro-button-focus-outline: 2px solid var(--focus-color);
+  /* Not var(--focus-color) (currentcolor): Klaro's buttons are white-on-
+  brand, so the ring would be white and the offset puts it on the notice's
+  near-white background (#2199). Ring in the fill colour instead. */
+  --klaro-button-focus-outline: 2px solid var(--brand-primary-dark);
   --klaro-button-focus-outline-offset: 2px;
   --klaro-dialog-focus-outline: 2px solid var(--focus-color);
 }
@@ -1319,7 +1364,12 @@ body.consent-popup-opened .klaro_toggle_dialog {
   text-decoration: underline;
 }
 .mukurtu-content-warnings:focus-visible {
+  /* This overlay's label is white on its own dark 70% scrim, but it sits
+  over arbitrary uploaded media, so neither currentcolor drawn outward
+  nor any fixed colour is safe against what's behind it. Inset the ring
+  so it lands on the scrim, which is a known dark surface (#2199). */
   outline: var(--focus-color) solid 2px;
+  outline-offset: -4px;
 }
 .mukurtu-content-warnings.dismissed {
   display: none;
@@ -1964,6 +2014,16 @@ label.form-required::after,
   color: var(--light-text-color);
   background-color: var(--brand-primary-dark);
 }
+:is(#extra-specificity-hack, .horizontal-tabs) ul.horizontal-tabs-list li.selected a:focus {
+  /* This tab is white-on-brand-primary-dark, so the ring is
+  white (currentcolor) and drawn outward it spills onto the light
+  tab strip above. Inset it so it lands on the tab's own dark
+  fill (#2199). Has to live here rather than in _link.scss: the
+  :is(#extra-specificity-hack, ...) wrapper at the top of this
+  file gives these rules ID-level specificity, so a class-based
+  rule elsewhere can never win. */
+  outline-offset: -4px;
+}
 :is(#extra-specificity-hack, .horizontal-tabs) ul.horizontal-tabs-list li.selected::after {
   content: "";
   position: absolute;
@@ -2248,6 +2308,12 @@ label.form-required::after,
   background-color: var(--brand-primary-dark);
   color: var(--color-white);
 }
+.language-switcher > ul a.is-active:focus {
+  /* Active state is white-on-dark, so the inherited var(--focus-color)
+  (currentcolor) ring would be white and block-link's outline-offset
+  puts it on the light surface behind. Ring in the fill colour (#2199). */
+  outline: 2px solid var(--brand-primary-dark);
+}
 .language-switcher > ul a.is-active:hover {
   background-color: var(--brand-primary-accent);
 }
@@ -2300,7 +2366,10 @@ label.form-required::after,
   background: var(--brand-primary-accent);
 }
 .local-contexts-dialog__trigger:focus-visible {
-  outline: 2px solid var(--focus-color);
+  /* A <button>: the global button:focus rule turns its label white, so
+  var(--focus-color) (currentcolor) would ring white on the white page
+  behind it. Ring in the focused fill colour instead (#2199). */
+  outline: 2px solid var(--brand-primary-dark);
   outline-offset: 2px;
 }
 .local-contexts-dialog__panel {
@@ -2352,7 +2421,8 @@ label.form-required::after,
   background-color: var(--brand-light);
 }
 .local-contexts-dialog__close:focus-visible {
-  outline: 2px solid var(--focus-color);
+  /* Same <button> case as __trigger above (#2199). */
+  outline: 2px solid var(--brand-primary-dark);
   outline-offset: 2px;
 }
 .local-contexts-dialog__header {
@@ -2636,6 +2706,15 @@ label.form-required::after,
   background-color: var(--brand-primary);
   color: var(--color-white);
 }
+.local-tasks:not(.glb-body .local-tasks) a:focus {
+  /* This tab turns white-on-brand while focused, so the inherited
+  var(--focus-color) (currentcolor) would draw a white ring onto the
+  white page behind it. Ring in the fill colour instead, offset so it
+  reads against the page (#2199). Applies to .is-active too, which
+  only re-declares background and colour below. */
+  outline: 2px solid var(--brand-primary);
+  outline-offset: 2px;
+}
 .local-tasks:not(.glb-body .local-tasks) a.is-active {
   background: var(--brand-light);
   font-weight: var(--text-bold);
@@ -2766,7 +2845,9 @@ label.form-required::after,
   color: var(--color-white);
   -webkit-box-shadow: none;
           box-shadow: none;
-  outline: 3px solid var(--focus-color);
+  /* Same inverted-fill case as the tabs above: white label on a dark
+  fill, so ring in the fill colour rather than currentcolor (#2199). */
+  outline: 3px solid var(--brand-primary-dark);
   outline-offset: 2px;
 }
 .local-tasks .export-list-dropdown__menu {
@@ -3476,6 +3557,31 @@ html:not(.js) .primary-nav__menu--level-2 {
  */
 .mobile-buttons {
   grid-column: -2/-1;
+  /* From >=sm the label below un-hides and .mobile-nav-button switches to
+  inline-size: auto, growing from 32px to ~83px. That is wider than one
+  column of the header's 6-column grid until about 525px, so the button
+  overhung the right edge and dragged the document into horizontal
+  scrolling between 480px and 520px, failing WCAG 1.4.10 (#2197). Give it
+  two columns from the same breakpoint the label appears at, so the
+  labelled state always has room.
+
+  The button right-aligns itself with margin-inline-start: auto, but that
+  only works while it is block-level: at >=sm it also becomes
+  inline-flex, and an auto margin computes to 0 on an inline-level box.
+  That went unnoticed while the button was wider than its column (it had
+  nowhere to move), so right-align here explicitly rather than leaving it
+  to the auto margin. */
+}
+@media (min-width: 30rem) {
+  .mobile-buttons {
+    grid-column: -3/-1;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: end;
+        -ms-flex-pack: end;
+            justify-content: flex-end;
+  }
 }
 @media (min-width: 60rem) {
   body:not(.is-always-mobile-nav) .mobile-buttons {
@@ -5020,6 +5126,13 @@ body.is-fixed {
       -ms-flex-align: center;
           align-items: center;
 }
+.footer .logo a {
+  /* The sibling footer link groups all declare this; without it this
+  one falls through to a:focus { color: var(--brand-secondary-dark) }
+  in _base.scss, and var(--focus-color) (currentcolor) would ring in
+  that brown against the #464646 footer at ~2:1 (#2199). */
+  color: var(--footer-text-color);
+}
 .footer .logo a:focus-visible {
   outline: var(--focus-color) solid 2px;
   outline-offset: 2px;
@@ -5155,7 +5268,10 @@ header {
   color: var(--brand-text-color);
 }
 .related-content__filter:focus-visible {
-  outline: 2px solid var(--focus-color);
+  /* This is a <button>, and the global button:focus rule turns its
+  label white, so var(--focus-color) (currentcolor) would ring white
+  on the white page. Ring in the focused fill colour instead (#2199). */
+  outline: 2px solid var(--brand-primary-dark);
   outline-offset: 2px;
 }
 .related-content__filter.is-active {
@@ -5382,6 +5498,12 @@ header {
 .browse__main-content .browse-container .browse-links .active-toggle {
   background-color: var(--brand-primary-dark);
   color: var(--color-white);
+}
+.browse__main-content .browse-container .browse-links .active-toggle:focus {
+  /* Active state is white-on-dark, so the inherited var(--focus-color)
+  (currentcolor) ring would be white and block-link's outline-offset
+  puts it on the light surface behind. Ring in the fill colour (#2199). */
+  outline: 2px solid var(--brand-primary-dark);
 }
 .browse__main-content .browse-container .browse-links .active-toggle:hover {
   background-color: var(--brand-primary-accent);
@@ -6211,6 +6333,12 @@ header {
   background-color: var(--brand-primary-dark);
   color: var(--color-white);
 }
+.collection-items-browse .browse-links .active-toggle:focus {
+  /* Active state is white-on-dark, so the inherited var(--focus-color)
+  (currentcolor) ring would be white and block-link's outline-offset
+  puts it on the light surface behind. Ring in the fill colour (#2199). */
+  outline: 2px solid var(--brand-primary-dark);
+}
 .collection-items-browse .browse-links .active-toggle:hover {
   background-color: var(--brand-primary-accent);
 }
@@ -6289,7 +6417,13 @@ header {
   text-decoration: underline;
 }
 .communities__item .field--name-name a:focus {
-  outline: 2px solid var(--focus-color);
+  /* Not var(--focus-color) (currentcolor) here: this button's label is
+  white *because* its fill is dark, but an outline draws outside the
+  fill, onto the page - a white ring on a white page is invisible. Ring
+  in the fill colour instead, offset so the page shows through the gap
+  and the ring reads against it (#2199). */
+  outline: 2px solid var(--brand-primary-dark);
+  outline-offset: 2px;
 }
 .communities__item .field--name-name a:disabled {
   color: var(--light-text-color);
@@ -6697,6 +6831,12 @@ header {
 .dictionary .browse-links .active-toggle {
   background-color: var(--brand-primary-dark);
   color: var(--color-white);
+}
+.dictionary .browse-links .active-toggle:focus {
+  /* Active state is white-on-dark, so the inherited var(--focus-color)
+  (currentcolor) ring would be white and block-link's outline-offset
+  puts it on the light surface behind. Ring in the fill colour (#2199). */
+  outline: 2px solid var(--brand-primary-dark);
 }
 .dictionary .browse-links .active-toggle:hover {
   background-color: var(--brand-primary-accent);

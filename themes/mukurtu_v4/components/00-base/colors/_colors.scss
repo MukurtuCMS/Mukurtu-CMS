@@ -52,7 +52,40 @@
   --color-black: #000;
   --color-gray: #555;
   --color-transparent: rgba(0 0 0 / 0%);
-  --focus-color: #66afe9;
+
+  /* Focus indicator colour, used by every focusable element in the theme
+  (links, inputs, selects, buttons, footer, tabs, Klaro - see the
+  var(--focus-color) consumers across components/).
+
+  This is deliberately currentcolor rather than a fixed value. Focus rings
+  here have to land on white, the cream and bone panel fills, the grey
+  form fills, the #464646 footer, AND brand red, and no single opaque
+  colour clears WCAG 1.4.11's 3:1 against both ends of that range - the
+  previous #66afe9 measured 1.59-2.37:1 on every light surface (#2199).
+  currentcolor inherits the element's own text colour, which has already
+  been chosen to contrast with whatever it sits on, so the ring is correct
+  by construction wherever the text is.
+
+  Two cases need a hard-coded ring instead, because currentcolor can't be
+  trusted there:
+
+  1. Anything drawn over user-uploaded imagery of unknown luminance, where
+     the text colour is a fixed choice that can't be guaranteed against an
+     arbitrary photo. See _carousels.scss, _glightbox.scss, _full-node.scss
+     and _local-contexts.scss, plus mukurtu_core's
+     css/mukurtu-leaflet-widget.css for the map, which is outside this
+     theme but consumes this token.
+  2. Anything white-on-a-dark-fill. An outline is painted *outside* the
+     element, so the surface that matters is the parent's background, not
+     the fill the text sits on - a white label on a dark button still gets
+     a white ring on whatever light thing is behind the button. Note this
+     is not only components that look inverted at rest: the global
+     button:focus rule (from @mixin button, specificity 0,1,1) turns every
+     button's label white while focused, so ANY component that rings a
+     <button> via var(--focus-color) at higher specificity inherits this
+     trap. Ring in the focused fill colour with an outline-offset instead,
+     or inset the ring (negative offset) so it lands on the fill. */
+  --focus-color: currentcolor;
   --placeholder-color: #999;
   --color-greys-alpha-background: #eee;
   --color-greys-alpha-border: #ccc;

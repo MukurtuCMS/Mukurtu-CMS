@@ -1,0 +1,26 @@
+diff --git a/templates/navigation/menu-region--middle.html.twig b/templates/navigation/menu-region--middle.html.twig
+index ba6f8230c738521df00d64bc3cceed9c01074757..944e0f527f519ca7dcc43498cf052ef46301c00b 100644
+--- a/templates/navigation/menu-region--middle.html.twig
++++ b/templates/navigation/menu-region--middle.html.twig
+@@ -2,7 +2,7 @@
+ <div class="admin-toolbar__item toolbar-block">
+   {% set menu_heading_id = 'menu--' ~ menu_name %}
+   <h2 id="{{ menu_heading_id }}" class="toolbar-block__title visually-hidden focusable">{{ title }}</h2>
+-  <ul class="toolbar-menu toolbar-menu toolbar-block__content toolbar-block__content--{{ menu_name }}" aria-toolbar-link__labelledby="{{ menu_heading_id }}">
++  <ul class="toolbar-menu toolbar-menu toolbar-block__content toolbar-block__content--{{ menu_name }}" aria-labelledby="{{ menu_heading_id }}">
+     {{ menus.menu_items(items, attribute) }}
+   </ul>
+ </div>
+diff --git a/templates/navigation/menu-region--top.html.twig b/templates/navigation/menu-region--top.html.twig
+index a7cdfc37d38229ec6fccfd107cce3debf4dbbf81..47db5035976e3be9c44cd148a83157318b7bba6c 100644
+--- a/templates/navigation/menu-region--top.html.twig
++++ b/templates/navigation/menu-region--top.html.twig
+@@ -3,7 +3,7 @@
+ 
+ <div class="admin-toolbar__item toolbar-block menu--shortcuts">
+   <h2 id="{{ menu_id }}" class="toolbar-block__title visually-hidden">{{ 'Top Menus'|t }}</h2>
+-  <ul class="toolbar-menu toolbar-block__content" aria-toolbar-link__labelledby="{{ menu_id }}">
++  <ul class="toolbar-menu toolbar-block__content" aria-labelledby="{{ menu_id }}">
+     <li id="{{ item_id }}" class="toolbar-menu__item toolbar-menu__item--has-dropdown toolbar-menu__item--level-1">
+       <button class="toolbar-link toolbar-link--has-icon toolbar-link--{{ menu_name|clean_class }}">
+         <span class="toolbar-link__action">{{ 'Extend'|t }}</span>
