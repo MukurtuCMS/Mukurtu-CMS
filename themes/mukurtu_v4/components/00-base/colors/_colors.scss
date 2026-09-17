@@ -19,6 +19,16 @@
   --mukurtu-collection-title-font-color: var(--color-white);
   --mukurtu-collection-pane-bg-color: var(--mukurtu-navbar-collapse-bg);
 
+  // Heading/link color for the horizontal image-with-description block's
+  // text panel (background: --brand-secondary). Defaults to
+  // --brand-primary-dark, which already passes WCAG 1.4.3 against
+  // --brand-secondary on this default palette and on Red and bone, but
+  // NOT on Blue and gold (2.45:1) - see issue #2178. A palette whose
+  // --brand-secondary/--brand-primary-dark pairing fails this contrast
+  // must override this token specifically, rather than the shared
+  // --brand-primary-dark (which is used for headings/links site-wide).
+  --image-description-horizontal-text: var(--brand-primary-dark);
+
   // Persistent Across Palettes Below.
   --brand-text-color: #464646;
   --brand-light: #e5e9e9;
