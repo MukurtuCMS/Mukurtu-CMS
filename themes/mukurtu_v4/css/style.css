@@ -477,22 +477,26 @@ div.palette-demo--custom {
 @font-face {
   font-family: BCSans;
   font-style: normal;
+  font-display: swap;
   src: url("../fonts/BCSans-Regular.woff2") format("woff2"), url("../fonts/BCSans-Regular.woff") format("woff");
 }
 @font-face {
   font-family: BCSans;
   font-style: italic;
+  font-display: swap;
   src: url("../fonts/BCSans-Italic.woff2") format("woff2"), url("../fonts/BCSans-Italic.woff") format("woff");
 }
 @font-face {
   font-family: BCSans;
   font-weight: 700;
+  font-display: swap;
   src: url("../fonts/BCSans-Bold.woff2") format("woff2"), url("../fonts/BCSans-Bold.woff") format("woff");
 }
 @font-face {
   font-family: BCSans;
   font-style: italic;
   font-weight: 700;
+  font-display: swap;
   src: url("../fonts/BCSans-BoldItalic.woff2") format("woff2"), url("../fonts/BCSans-BoldItalic.woff") format("woff");
 }
 :root {
