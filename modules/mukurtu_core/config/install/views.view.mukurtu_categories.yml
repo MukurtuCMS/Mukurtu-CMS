@@ -246,6 +246,7 @@ display:
           query_tags: {  }
       relationships: {  }
       css_class: category-grid
+      show_admin_links: false
       header: {  }
       footer: {  }
       display_extenders: {  }

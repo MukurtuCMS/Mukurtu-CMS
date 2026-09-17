@@ -260,19 +260,35 @@ function mukurtu_core_update_40203(): ?string {
 }
 
 /**
- * Hide contextual admin links on the /categories page display.
+ * Actually hide contextual admin links on the categories view.
  */
 function mukurtu_core_update_40204(): void {
-  // mukurtu_core_update_40094() (removed in the 4.0.1 hook strip) already did
-  // this for the browse_by_category_block display; it missed categories_page,
-  // the standalone /categories page, which is the same view and the same bug:
-  // a user with "access contextual links" (granted to mukurtu_manager) gets an
-  // empty contextual_links_placeholder div rendered as a sibling of the view's
-  // rows inside the .category-grid CSS Grid container, breaking the layout.
+  // Keep the docblock above to one line; see mukurtu_core_update_40201()
+  // for why.
+  //
+  // mukurtu_core_update_40094() (removed in the 4.0.1 hook strip) set
+  // show_admin_links: false on the browse_by_category_block display only,
+  // and never on the master display. That never worked:
+  // DisplayPluginBase::isDefaulted() treats an option as inherited from the
+  // master display unless the child display's own 'defaults' array
+  // explicitly says otherwise, and DisplayPluginBase::defineOptions()
+  // defaults 'show_admin_links' into that inherited state. Neither this
+  // view's browse_by_category_block nor its categories_page display
+  // declares a 'defaults' override for it, so both silently read the
+  // master display's value regardless of their own - and the master
+  // display never set it, so it fell back to the plugin's own default of
+  // TRUE. The result: every display of this view has always shown a user
+  // with "access contextual links" (granted to mukurtu_manager) an empty
+  // contextual_links_placeholder div rendered as a sibling of the view's
+  // rows inside the .category-grid CSS Grid container, breaking the
+  // layout, regardless of what the per-display config said. Setting it on
+  // the master display is what actually cascades to every display,
+  // confirmed against
+  // \Drupal\views\Plugin\views\display\DisplayPluginBase::getOption().
   $view = \Drupal::configFactory()->getEditable('views.view.mukurtu_categories');
-  if ($view->isNew() || $view->get('display.categories_page.display_options.show_admin_links') === FALSE) {
+  if ($view->isNew() || $view->get('display.default.display_options.show_admin_links') === FALSE) {
     return;
   }
 
-  $view->set('display.categories_page.display_options.show_admin_links', FALSE)->save();
+  $view->set('display.default.display_options.show_admin_links', FALSE)->save();
 }
