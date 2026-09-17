@@ -30,9 +30,28 @@ services:
   mukurtu_core.roundtrip_entity_types:
     class: Drupal\mukurtu_core\Service\RoundtripEntityTypeRegistry
     arguments: ['@entity_type.manager']
+  mukurtu_core.visitors_country_map:
+    class: Drupal\mukurtu_core\Service\VisitorsCountryMap
+    # The visitors services are optional (@?) on purpose: mukurtu_core does not
+    # depend on the visitors module, and a hard reference would break the
+    # container on a site without it.
+    arguments: ['@database', '@leaflet.service', '@string_translation', '@?visitors.date_range', '@?visitors.location']
   mukurtu_core.leaflet_service:
     class: Drupal\mukurtu_core\Service\MukurtuLeafletService
     decorates: leaflet.service
     arguments: ['@current_user', '@geofield.geophp', '@module_handler', '@link_generator', '@stream_wrapper_manager', '@request_stack', '@cache.leaflet', '@file_url_generator']
   mukurtu_core.paragraph_emptiness_checker:
     class: Drupal\mukurtu_core\Service\ParagraphEmptinessChecker
+  mukurtu_core.dbip_locator:
+    class: Drupal\mukurtu_core\Service\DbIpDatabaseLocator
+    arguments: ['@stream_wrapper_manager', '@file_system']
+  mukurtu_core.dbip_download:
+    class: Drupal\mukurtu_core\Service\DbIpDownloadService
+    arguments: ['@http_client', '@file_system', '@mukurtu_core.dbip_locator', '@logger.channel.mukurtu_core']
+  # Aliased by class so GeoIpFallbackHooks, discovered and autowired by
+  # Drupal's OOP hook system rather than declared as a service itself, can
+  # be constructed with this by type-hint alone.
+  Drupal\mukurtu_core\Service\DbIpDownloadService: '@mukurtu_core.dbip_download'
+  logger.channel.mukurtu_core:
+    parent: logger.channel_base
+    arguments: ['mukurtu_core']
