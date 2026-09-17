@@ -153,6 +153,7 @@ documentation on how to use @include media(). */
   --mukurtu-dictionary-word-label-background-color: var(--mukurtu-view-row-divider-color);
   --mukurtu-collection-title-font-color: var(--color-white);
   --mukurtu-collection-pane-bg-color: var(--mukurtu-navbar-collapse-bg);
+  --image-description-horizontal-text: var(--brand-primary-dark);
   --brand-text-color: #464646;
   --brand-light: #e5e9e9;
   --brand-light-accent: #f8f7f7;
@@ -2077,6 +2078,13 @@ label.form-required::after,
 .block--image-with-description--horizontal .block-wrapper__second {
   background-color: var(--brand-secondary);
 }
+.block--image-with-description--horizontal .block-wrapper__second h1, .block--image-with-description--horizontal .block-wrapper__second h2 {
+  color: var(--image-description-horizontal-text);
+}
+.block--image-with-description--horizontal .block-wrapper__second a {
+  color: var(--image-description-horizontal-text);
+  text-decoration-color: var(--image-description-horizontal-text);
+}
 @media (min-width: 48rem) {
   .block--image-with-description--horizontal {
     grid-template-columns: 1fr 1fr;
@@ -2111,11 +2119,35 @@ label.form-required::after,
 }
 .block--image-with-description--full * {
   color: var(--brand-primary-dark);
-  text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.8);
+}
+.block--image-with-description--full h1, .block--image-with-description--full h2 {
+  font-size: var(--font-size-heading-2xl);
+  text-align: center;
+}
+.block--image-with-description--full p {
+  font-size: var(--font-size-l);
+}
+.block--image-with-description--full h1, .block--image-with-description--full h2, .block--image-with-description--full p, .block--image-with-description--full a {
+  -webkit-text-stroke: 0.035em var(--color-white);
+  paint-order: stroke fill;
+}
+.block--image-with-description--full a {
+  -webkit-filter: drop-shadow(1px 0 0 var(--color-white)) drop-shadow(-1px 0 0 var(--color-white)) drop-shadow(0 1px 0 var(--color-white)) drop-shadow(0 -1px 0 var(--color-white)) drop-shadow(1px 1px 0 var(--color-white)) drop-shadow(-1px -1px 0 var(--color-white)) drop-shadow(1px -1px 0 var(--color-white)) drop-shadow(-1px 1px 0 var(--color-white));
+          filter: drop-shadow(1px 0 0 var(--color-white)) drop-shadow(-1px 0 0 var(--color-white)) drop-shadow(0 1px 0 var(--color-white)) drop-shadow(0 -1px 0 var(--color-white)) drop-shadow(1px 1px 0 var(--color-white)) drop-shadow(-1px -1px 0 var(--color-white)) drop-shadow(1px -1px 0 var(--color-white)) drop-shadow(-1px 1px 0 var(--color-white));
+}
+.block--image-with-description--full a:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+  -webkit-box-shadow: 0 0 0 5px #000;
+          box-shadow: 0 0 0 5px #000;
+}
+@supports not (-webkit-text-stroke: 1px solid) {
+  .block--image-with-description--full h1, .block--image-with-description--full h2, .block--image-with-description--full p, .block--image-with-description--full a {
+    text-shadow: 0.025em 0 0 var(--color-white), -0.025em 0 0 var(--color-white), 0 0.025em 0 var(--color-white), 0 -0.025em 0 var(--color-white), 0.025em 0.025em 0 var(--color-white), -0.025em -0.025em 0 var(--color-white), 0.025em -0.025em 0 var(--color-white), -0.025em 0.025em 0 var(--color-white);
+  }
 }
 .block--image-with-description--full.text-light * {
   color: var(--color-white);
-  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.8);
 }
 .block--image-with-description--full.text-light a {
   text-decoration-color: var(--color-white);
@@ -2126,12 +2158,29 @@ label.form-required::after,
 .block--image-with-description--full.text-light svg.ext path {
   stroke: var(--color-white);
 }
-.block--image-with-description--full.text-light h1, .block--image-with-description--full.text-light h2 {
-  font-size: var(--font-size-heading-2xl);
-  text-align: center;
+.block--image-with-description--full.text-light h1, .block--image-with-description--full.text-light h2, .block--image-with-description--full.text-light p, .block--image-with-description--full.text-light a {
+  -webkit-text-stroke-color: #000;
 }
-.block--image-with-description--full.text-light p {
-  font-size: var(--font-size-l);
+.block--image-with-description--full.text-light a {
+  -webkit-filter: drop-shadow(1px 0 0 #000) drop-shadow(-1px 0 0 #000) drop-shadow(0 1px 0 #000) drop-shadow(0 -1px 0 #000) drop-shadow(1px 1px 0 #000) drop-shadow(-1px -1px 0 #000) drop-shadow(1px -1px 0 #000) drop-shadow(-1px 1px 0 #000);
+          filter: drop-shadow(1px 0 0 #000) drop-shadow(-1px 0 0 #000) drop-shadow(0 1px 0 #000) drop-shadow(0 -1px 0 #000) drop-shadow(1px 1px 0 #000) drop-shadow(-1px -1px 0 #000) drop-shadow(1px -1px 0 #000) drop-shadow(-1px 1px 0 #000);
+}
+@supports not (-webkit-text-stroke: 1px solid) {
+  .block--image-with-description--full.text-light h1, .block--image-with-description--full.text-light h2, .block--image-with-description--full.text-light p, .block--image-with-description--full.text-light a {
+    text-shadow: 0.025em 0 0 #000, -0.025em 0 0 #000, 0 0.025em 0 #000, 0 -0.025em 0 #000, 0.025em 0.025em 0 #000, -0.025em -0.025em 0 #000, 0.025em -0.025em 0 #000, -0.025em 0.025em 0 #000;
+  }
+}
+.block--image-with-description--full .contextual, .block--image-with-description--full .contextual * {
+  color: revert;
+  -webkit-text-stroke: revert;
+  text-shadow: revert;
+  -webkit-filter: revert;
+          filter: revert;
+}
+.block--image-with-description--full .contextual a:focus-visible {
+  outline: revert;
+  -webkit-box-shadow: revert;
+          box-shadow: revert;
 }
 .block--image-with-description--full .block-wrapper__first {
   overflow: hidden;
@@ -2149,6 +2198,7 @@ label.form-required::after,
   inline-size: 100%;
 }
 .block--image-with-description--full .block-wrapper__second {
+  position: relative;
   z-index: 2;
   inline-size: 100%;
   block-size: 100%;
@@ -2159,8 +2209,20 @@ label.form-required::after,
       flex-wrap: wrap;
   place-content: center;
   place-items: center;
-  padding: var(--v-space-s);
   min-block-size: 600px;
+}
+.block--image-with-description--full .block-wrapper__second::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: rgba(0, 0, 0, 0.35);
+}
+.block--image-with-description--full.text-dark .block-wrapper__second::before {
+  background: rgba(255, 255, 255, 0.45);
+}
+.block--image-with-description--full .block-wrapper__second-card {
+  max-inline-size: min(90%, 640px);
 }
 
 .language-switcher__summary {
