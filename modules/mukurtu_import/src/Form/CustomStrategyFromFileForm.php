@@ -6,6 +6,7 @@ namespace Drupal\mukurtu_import\Form;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\AnnounceCommand;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\file\FileInterface;
 use Drupal\mukurtu_import\Entity\MukurtuImportStrategy;
@@ -390,6 +391,16 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     }
     $form_state->setValue('mappings', $userInput['mappings']);
     $form_state->setUserInput($userInput);
+
+    // Changing Type silently rewrites the Sub-type radios and every target
+    // dropdown in the mapping table below, which on a wide CSV is dozens of
+    // controls re-populated and auto-remapped with no cue of any kind.
+    $response->addCommand(new AnnounceCommand((string) $this->t('Type changed to @type. Sub-type reset to @bundle. @count column mappings updated.', [
+      '@type' => $this->getSelectedOptionLabel($this->getEntityTypeIdOptions(), $entity_type_id),
+      '@bundle' => $this->getSelectedOptionLabel($form['bundle']['#options'], $default),
+      '@count' => count($headers),
+    ])));
+
     return $response;
   }
 
@@ -411,7 +422,36 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
       $response->addCommand(new ReplaceCommand("#edit-mappings-{$delta}-target-options", $form['mappings'][$delta]['target']));
     }
     $form_state->setValue('mappings', $userInput['mappings']);
+
+    // Same silent rewrite as above, minus the Sub-type reset.
+    $response->addCommand(new AnnounceCommand((string) $this->t('Sub-type changed to @bundle. @count column mappings updated.', [
+      '@bundle' => $this->getSelectedOptionLabel($this->getBundleOptions($entity_type_id), $bundle),
+      '@count' => count($headers),
+    ])));
+
     return $response;
+  }
+
+  /**
+   * Resolves an option key to its human-readable label for announcements.
+   *
+   * Announcing the raw key ("digital_heritage") instead of the label
+   * ("Digital Heritage") would make the announcement less useful than the
+   * visible radio label the sighted user reads.
+   *
+   * @param array $options
+   *   The element's #options array.
+   * @param string|int|null $key
+   *   The selected option key.
+   *
+   * @return string
+   *   The option's label, or an empty string if it cannot be resolved.
+   */
+  protected function getSelectedOptionLabel(array $options, $key): string {
+    if ($key === NULL || !isset($options[$key])) {
+      return '';
+    }
+    return (string) $options[$key];
   }
 
   public function submitCancel(array &$form, FormStateInterface $form_state) {
