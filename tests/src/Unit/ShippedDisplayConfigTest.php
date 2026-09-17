@@ -78,18 +78,27 @@ class ShippedDisplayConfigTest extends UnitTestCase {
   }
 
   /**
-   * The public category block does not render contextual admin links.
+   * The public category displays do not render contextual admin links.
    *
-   * The block appears on the front end for anonymous visitors, where the admin
-   * links are both useless and a hint at the editing UI.
+   * Both the homepage block and the standalone /categories page share the
+   * same view and the same .category-grid CSS Grid container. A user with
+   * "access contextual links" (granted to mukurtu_manager) otherwise gets an
+   * empty contextual_links_placeholder div rendered as a sibling of the
+   * view's rows, which becomes an extra, unstyled grid cell (#1919).
    */
-  public function testCategoryBlockHidesAdminLinks(): void {
+  #[DataProvider('categoryDisplayProvider')]
+  public function testCategoryDisplayHidesAdminLinks(string $display): void {
     $view = $this->shipped('modules/mukurtu_core/config/install/views.view.mukurtu_categories.yml');
 
     $this->assertFalse(
-      $view['display']['browse_by_category_block']['display_options']['show_admin_links'] ?? NULL,
-      'The category browse block would render contextual admin links.'
+      $view['display'][$display]['display_options']['show_admin_links'] ?? NULL,
+      "The $display display would render contextual admin links."
     );
+  }
+
+  public static function categoryDisplayProvider(): \Generator {
+    yield 'homepage block' => ['browse_by_category_block'];
+    yield 'categories page' => ['categories_page'];
   }
 
   /**

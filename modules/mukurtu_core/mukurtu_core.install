@@ -158,3 +158,21 @@ function mukurtu_core_update_40201(): ?string {
 
   return (string) t('Full HTML was revoked from the authenticated role. Logged-in users now use Basic HTML, which still allows iframes and media embeds. If this site granted Full HTML to all logged-in users deliberately, you can re-grant it on the Permissions page.');
 }
+
+/**
+ * Hide contextual admin links on the /categories page display.
+ */
+function mukurtu_core_update_40204(): void {
+  // mukurtu_core_update_40094() (removed in the 4.0.1 hook strip) already did
+  // this for the browse_by_category_block display; it missed categories_page,
+  // the standalone /categories page, which is the same view and the same bug:
+  // a user with "access contextual links" (granted to mukurtu_manager) gets an
+  // empty contextual_links_placeholder div rendered as a sibling of the view's
+  // rows inside the .category-grid CSS Grid container, breaking the layout.
+  $view = \Drupal::configFactory()->getEditable('views.view.mukurtu_categories');
+  if ($view->isNew() || $view->get('display.categories_page.display_options.show_admin_links') === FALSE) {
+    return;
+  }
+
+  $view->set('display.categories_page.display_options.show_admin_links', FALSE)->save();
+}

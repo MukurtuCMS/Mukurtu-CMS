@@ -283,6 +283,7 @@ display:
     display_plugin: page
     position: 1
     display_options:
+      show_admin_links: false
       display_extenders: {  }
       path: categories
       rendering_language: '***LANGUAGE_language_content***'
