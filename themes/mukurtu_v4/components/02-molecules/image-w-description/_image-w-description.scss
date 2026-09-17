@@ -258,16 +258,19 @@
 
       // Full-hero wash, purely for mood - the text-stroke above is what
       // actually guarantees contrast, so this only has to look good, not
-      // survive a worst-case photo on its own. That's why it can stay at
-      // 55% instead of the ~90%+ opacity the original scrim needed when
-      // the scrim itself was the only thing guaranteeing contrast - dark
-      // enough to read as a deliberate mood wash, nowhere near opaque.
+      // survive a worst-case photo on its own. That's why it can stay
+      // this light instead of the ~90%+ opacity the original scrim needed
+      // when the scrim itself was the only thing guaranteeing contrast.
+      // A black wash reads as noticeably darker than a white wash at the
+      // same alpha (it's darkening a photo that's often already mid-tone,
+      // rather than lightening one), so .text-light gets a lower value
+      // than the default variant below rather than a matching one.
       &::before {
         content: '';
         position: absolute;
         inset: 0;
         z-index: -1;
-        background: rgb(0 0 0 / 55%);
+        background: rgb(0 0 0 / 35%);
       }
     }
 
@@ -275,7 +278,7 @@
     // or it would fight the text-stroke's own white ring instead of
     // complementing it.
     &.text-dark .block-wrapper__second::before {
-      background: rgb(255 255 255 / 55%);
+      background: rgb(255 255 255 / 45%);
     }
 
     .block-wrapper__second-card {
