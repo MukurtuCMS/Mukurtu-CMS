@@ -27,8 +27,6 @@ class BlockContentRevisionInfoHiddenTest extends KernelTestBase {
     'system',
     'user',
     'field',
-    'text',
-    'filter',
     'block_content',
     'mukurtu_gin_custom',
   ];
@@ -39,12 +37,14 @@ class BlockContentRevisionInfoHiddenTest extends KernelTestBase {
     $this->installEntitySchema('block_content');
     $this->installSchema('system', ['sequences']);
 
+    // No body field needed - only the info base field (required on every
+    // block_content bundle regardless of type config) is exercised by
+    // getForm() below.
     BlockContentType::create([
       'id' => 'test_block_type',
       'label' => 'Test block type',
       'revision' => FALSE,
     ])->save();
-    block_content_add_body_field('test_block_type');
   }
 
   /**
