@@ -1,5 +1,10 @@
 # Accessibility Findings — Post-Merge Verification (2026-09-08)
 
+> **Status note added 2026-09-17:** this is a historical record and is kept as written.
+> Every issue it cites as an outstanding finding is now closed: #1995, #1997, #1998,
+> #1999 and #2001, along with the rest of the #1995–#2002 range, all closed 2026-09-14.
+> See [2026-09-17-remediation-cycle.md](2026-09-17-remediation-cycle.md) for current state.
+
 Re-ran the full automated suite after merging `origin/main` into
 `AM-accessibility-program` (71 commits: 4.0.0-rc version bump, Local Contexts
 Hub production endpoint, comment-management streamlining, dashboard/Visitors

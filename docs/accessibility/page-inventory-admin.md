@@ -16,11 +16,24 @@ The Phase 2 (admin/authoring, WCAG 2.1 AA + ATAG 2.0) equivalent of [page-invent
 | Import (upload step) | `/admin/import` | Entry point of a multi-step wizard; only this first step is a fixed, single-GET URL |
 | Content warnings settings | `/admin/config/mukurtu/content-warnings` | `MukurtuContentWarningsSettingsForm` — regression coverage for fixed #1979 |
 | Collection organization | discovered from `/collections` | `CollectionOrganizationController` — regression coverage for fixed #1978 |
+| Submission forms (list) | `/admin/config/mukurtu/submissions` | `mukurtu_submissions` — the config surface for the public form |
+| Submission form settings | `/admin/config/mukurtu/submissions/digital_heritage` | `SubmissionSettingsForm`; the bundle whose settings entity ships with the profile |
+| Pending submissions | `/admin/content/pending-submissions` | `views.view.mukurtu_pending_submissions` — the reviewer queue |
 | Export settings | `/admin/export/settings` | |
 | Admin overview | `/admin` | Core route |
 | Admin structure | `/admin/structure` | Core route |
 
-Admin scans use the account in `A11Y_USERNAME`/`A11Y_PASSWORD` (default `admin`/`admin`) — a real admin account is appropriate here, unlike Phase 1's member/manage-adjacent scans, since these are genuinely admin-only routes.
+Admin scans use the account in `A11Y_USERNAME`/`A11Y_PASSWORD` (default `admin`/`admin`) — a real admin account is appropriate here, unlike Phase 1's member/manage-adjacent scans, since these are genuinely admin-only routes. The `admin`/`admin` fallback is therefore fine for this inventory; it is Phase 1 that needs the real accounts, provisioned by `scripts/tugboat/provision-a11y-accounts.php` (see [page-inventory.md](page-inventory.md)).
+
+### A note on multi-step wizards
+
+`/admin/import` is the entry point of a wizard whose later steps live behind
+tempstore state and therefore have no fixed URL to scan. Those steps are
+genuinely uncovered here: an unlabeled `select` and two silent AJAX rewrites
+survived in `ImportFileSummaryForm` and `CustomStrategyFromFileForm` until
+they were found by reading the code (#2245), because no scan could reach the
+page. Treat a wizard's presence in this table as coverage of its *first step
+only*, and read the rest.
 
 ## Out of scope (this pass)
 

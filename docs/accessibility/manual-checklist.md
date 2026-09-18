@@ -81,37 +81,37 @@ actually covers (which widget/route, editing vs. viewing) before assuming any
 of the checks below still need first-time testing; some may already be
 resolved.
 
-- [ ] Map container is reachable and escapable with the keyboard
-- [ ] Zoom controls are real buttons with labels, keyboard-operable
-- [ ] Markers/popups can be opened via keyboard and are announced
-- [ ] Information conveyed by the map is available another way (the list view counts — verify the equivalence and link between them)
-- [ ] Bounding-box "search this area" has a keyboard-accessible alternative
+- [ ] Map container is reachable and escapable with the keyboard (2.1.1, 2.1.2)
+- [ ] Zoom controls are real buttons with labels, keyboard-operable (2.1.1, 4.1.2)
+- [ ] Markers/popups can be opened via keyboard and are announced (2.1.1, 4.1.2)
+- [ ] Information conveyed by the map is available another way (the list view counts — verify the equivalence and link between them) (1.1.1, 1.4.1)
+- [ ] Bounding-box "search this area" has a keyboard-accessible alternative (2.1.1)
 
 ### Content warning overlay / consent popup
 
-- [ ] When the overlay appears, focus moves into it and is announced
-- [ ] Focus is trapped inside while open; Escape or an explicit button dismisses it
-- [ ] On dismissal, focus returns to a sensible place
-- [ ] The warning text itself is read (not just the buttons)
-- [ ] Page content behind it is hidden from the screen reader while open (`aria-modal` or `inert`)
+- [ ] When the overlay appears, focus moves into it and is announced (2.4.3, 4.1.3)
+- [ ] Focus is trapped inside while open; Escape or an explicit button dismisses it (2.1.2)
+- [ ] On dismissal, focus returns to a sensible place (2.4.3)
+- [ ] The warning text itself is read (not just the buttons) (4.1.2, 4.1.3)
+- [ ] Page content behind it is hidden from the screen reader while open (`aria-modal` or `inert`) (4.1.2)
 
 ### Carousel (Splide)
 
-- [ ] Prev/next controls are labeled buttons
-- [ ] Arrow-key navigation works; current slide is announced
+- [ ] Prev/next controls are labeled buttons (4.1.2)
+- [ ] Arrow-key navigation works; current slide is announced (2.1.1, 4.1.2, 4.1.3)
 - [ ] No auto-advance, or it can be paused (2.2.2)
-- [ ] Off-screen slides are hidden from Tab and the screen reader
+- [ ] Off-screen slides are hidden from Tab and the screen reader (2.4.3, 4.1.2)
 
 ### Lightbox (GLightbox)
 
-- [ ] Opens: focus moves in; trapped while open; Escape closes; focus returns to the trigger
-- [ ] Close/prev/next controls are labeled
-- [ ] Media inside (image alt, video captions) survives the transfer into the lightbox
+- [ ] Opens: focus moves in; trapped while open; Escape closes; focus returns to the trigger (2.1.2, 2.4.3)
+- [ ] Close/prev/next controls are labeled (4.1.2)
+- [ ] Media inside (image alt, video captions) survives the transfer into the lightbox (1.1.1, 1.2.2)
 
 ### Audio player
 
-- [ ] Play/pause is a button with a label that reflects state
-- [ ] All controls keyboard-operable; state changes announced
+- [ ] Play/pause is a button with a label that reflects state (4.1.2)
+- [ ] All controls keyboard-operable; state changes announced (2.1.1, 4.1.2, 4.1.3)
 - [ ] A transcript or text alternative is available for spoken audio content (1.2.1)
 - [ ] **Tab actually exits the player.** The automated keyboard-trap check
       can't see inside a native `<audio controls>` element's shadow DOM — from
@@ -122,29 +122,42 @@ resolved.
 
 ### Tabs (dictionary word)
 
-- [ ] `tablist`/`tab`/`tabpanel` roles present; `aria-selected` tracks state
-- [ ] Arrow keys move between tabs; Tab moves into the panel (roving tabindex)
-- [ ] Inactive panels hidden from keyboard and screen reader
+- [ ] `tablist`/`tab`/`tabpanel` roles present; `aria-selected` tracks state (4.1.2)
+- [ ] Arrow keys move between tabs; Tab moves into the panel (roving tabindex) (2.1.1, 4.1.2)
+- [ ] Inactive panels hidden from keyboard and screen reader (2.4.3, 4.1.2)
 
 ### Autocomplete (Tagify, membership autocomplete)
 
-- [ ] Follows the combobox pattern: suggestions announced as you type, arrow keys select, Enter commits, Escape dismisses
-- [ ] Chosen tags are announced and individually removable via keyboard
+- [ ] Follows the combobox pattern: suggestions announced as you type, arrow keys select, Enter commits, Escape dismisses (2.1.1, 4.1.2, 4.1.3)
+- [ ] Chosen tags are announced and individually removable via keyboard (2.1.1, 4.1.2)
 
 ### Toggles (view switchers, facet show-more, collapse buttons)
 
-- [ ] Toggle is a button, not a div/link with a click handler
-- [ ] `aria-expanded` (or `aria-pressed`) reflects state
-- [ ] The revealed content is adjacent in the focus order
+- [ ] Toggle is a button, not a div/link with a click handler (2.1.1, 4.1.2)
+- [ ] `aria-expanded` (or `aria-pressed`) reflects state (4.1.2)
+- [ ] The revealed content is adjacent in the focus order (2.4.3)
 
 ### Dialogs (aria-modal dialogs, Local Contexts dialog)
 
-- [ ] `role="dialog"` + `aria-modal="true"` + accessible name
-- [ ] Focus in on open, trapped while open, restored on close; Escape closes
+- [ ] `role="dialog"` + `aria-modal="true"` + accessible name (4.1.2)
+- [ ] Focus in on open, trapped while open, restored on close; Escape closes (2.1.2, 2.4.3)
 
 ### Masonry grid
 
 - [ ] DOM order matches visual reading order closely enough that keyboard traversal isn't disorienting (1.3.2, 2.4.3)
+
+### Bot protection widget (ALTCHA)
+
+Recommended by the 2026-07-27 cycle. This sits on the login and other
+public forms, so a failure here blocks sign-in entirely for the affected
+user. Note the theme currently carries a local workaround (#2062) whose
+selectors target the v2 widget; #2211 tracks re-landing the v3 upgrade,
+after which these need re-running.
+
+- [ ] The widget is reachable and operable by keyboard alone (2.1.1)
+- [ ] Its status ("verifying", "verified", failure) is announced, not only shown (4.1.3)
+- [ ] It exposes an accessible name and its state, and contains no focusable hidden elements (4.1.2)
+- [ ] Text and non-text contrast hold in both palettes (1.4.3, 1.4.11)
 
 ---
 
