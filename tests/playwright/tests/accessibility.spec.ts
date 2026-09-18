@@ -1,5 +1,6 @@
 import { test } from '@playwright/test';
 import { Login } from '~components/login';
+import { managerAccount, memberAccount, noteFallbackAccount } from '~helpers/a11y-credentials';
 import { auditPage } from '~helpers/axe';
 import {
   anonymousPages,
@@ -56,12 +57,11 @@ test.describe('Accessibility: anonymous pages', () => {
 });
 
 test.describe('Accessibility: member pages', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page }, testInfo) => {
+    const account = memberAccount();
+    noteFallbackAccount(testInfo, account, 'member');
     const login = new Login(page);
-    await login.login(
-      process.env.A11Y_USERNAME ?? 'admin',
-      process.env.A11Y_PASSWORD ?? 'admin',
-    );
+    await login.login(account.username, account.password);
   });
 
   for (const { slug, path } of memberPages) {
@@ -92,12 +92,11 @@ test.describe('Accessibility: member pages', () => {
  * noise and isn't representative of the actual roles that use them.
  */
 test.describe('Accessibility: manage-adjacent pages', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page }, testInfo) => {
+    const account = managerAccount();
+    noteFallbackAccount(testInfo, account, 'manage-adjacent');
     const login = new Login(page);
-    await login.login(
-      process.env.A11Y_MANAGER_USERNAME ?? 'admin',
-      process.env.A11Y_MANAGER_PASSWORD ?? 'admin',
-    );
+    await login.login(account.username, account.password);
   });
 
   for (const { slug, path } of managePages) {
