@@ -86,7 +86,17 @@ export default defineConfig({
     // a test has hung. Instead, default to line on CI and html + list
     // everywhere else.
     // https://playwright.dev/docs/test-reporters#reporters-on-ci
-    return process.env.CI ? [['line'], ['blob']] : [
+    // The json reporter is what makes skips visible on CI. line prints only
+    // a count ("18 skipped") and never a name, so coverage could shrink
+    // without anyone noticing: a green run with 18 skips looked identical
+    // to a green run with 2. The workflow reads this file to list every
+    // skipped scan with its reason, and uploads it with the results. See
+    // issue #2250.
+    return process.env.CI ? [
+      ['line'],
+      ['blob'],
+      ['json', { outputFile: 'test-results/report.json' }],
+    ] : [
       [
         'html', {
         // open: 'never',
