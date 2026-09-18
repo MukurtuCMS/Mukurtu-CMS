@@ -174,6 +174,37 @@ class PaletteContrastAnalyzerTest extends KernelTestBase {
   }
 
   /**
+   * Large text is measured against 3:1, using a size set on an ancestor.
+   *
+   * font-size is inherited and is routinely set on a different element
+   * from the colour: .collections__content__container h2 sets the size,
+   * h2 a sets the colour. Reading only the colour's own declaration block
+   * reports a 4.5:1 requirement for text that legitimately only needs
+   * 3:1, which would push an author to change a colour that was fine.
+   *
+   * Two separate bugs produced exactly that before this was pinned: the
+   * font size was not looked up through ancestors at all, and then once it
+   * was, font-size-only rules were being skipped before they reached the
+   * lookup table because they set neither a colour nor a background.
+   */
+  public function testLargeTextUsesTheLowerThreshold(): void {
+    $failures = $this->analyzer->findFailures([
+      'brand_primary' => '#138aab',
+      'brand_secondary' => '#e6ab49',
+    ]);
+
+    $failure = $this->failureFor($failures, '--brand-primary', '--brand-secondary');
+    $this->assertNotNull($failure, 'The collection title link pair is reported (issue #2252).');
+    $this->assertStringContainsString('.collections__content__container h2 a', reset($failure['selectors']));
+    $this->assertSame(
+      3.0,
+      $failure['required'],
+      'The title is 1.75rem, which is WCAG large text, so 3:1 applies rather than 4.5:1.',
+    );
+    $this->assertLessThan(3.0, $failure['ratio'], 'It fails even against the more forgiving threshold.');
+  }
+
+  /**
    * Selector lists are not torn apart at commas inside parentheses.
    *
    * The theme uses `:is(#extra-specificity-hack, .horizontal-tabs)` widely.

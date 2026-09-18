@@ -65,11 +65,11 @@ class PaletteContrastAnalyzer {
     }
 
     [$tokens, $editable] = $this->tokenValues($css, $colors);
-    [$backgrounds, $foregrounds] = $this->declarations($css);
+    [$backgrounds, $foregrounds, $fontSizes] = $this->declarations($css);
 
     $failures = [];
     foreach ($foregrounds as [$selector, $fgRaw, $fontSize]) {
-      $bgRaw = $backgrounds[$selector] ?? $this->inheritedBackground($selector, $backgrounds);
+      $bgRaw = $backgrounds[$selector] ?? $this->nearestAncestorValue($selector, $backgrounds);
       if ($bgRaw === NULL) {
         continue;
       }
@@ -90,6 +90,14 @@ class PaletteContrastAnalyzer {
       if ($ratio === NULL) {
         continue;
       }
+
+      // font-size is inherited, and is very often set on the element
+      // carrying the background rather than on the one carrying the text -
+      // .collections__content__container h2 sets the size, h2 a sets the
+      // colour. Reading only the colour's own block reports a 4.5:1
+      // requirement for text that is large enough to need 3:1, which would
+      // push an author to change a colour that was already fine.
+      $fontSize ??= $this->nearestAncestorValue($selector, $fontSizes);
 
       $required = $this->isLargeText($fontSize, $tokens)
         ? ContrastCalculator::AA_LARGE_TEXT
@@ -156,8 +164,15 @@ class PaletteContrastAnalyzer {
   protected function tokenValues(string $css, array $colors): array {
     $tokens = [];
     $editable = [];
-    if (preg_match('/:root\s*\{([^}]*)\}/', $css, $match)) {
-      preg_match_all('/(--[\w-]+)\s*:\s*([^;]+);/', $match[1], $found, PREG_SET_ORDER);
+
+    // Every :root block, not just the first. The compiled stylesheet has
+    // seven of them - colours in one, font sizes in another, and so on -
+    // and reading only the first leaves most tokens unresolvable, which
+    // silently drops the pairs that depend on them instead of reporting
+    // them. Later declarations win, as they do in the cascade.
+    preg_match_all('/:root\s*\{([^}]*)\}/', $css, $roots, PREG_SET_ORDER);
+    foreach ($roots as $root) {
+      preg_match_all('/(--[\w-]+)\s*:\s*([^;]+);/', $root[1], $found, PREG_SET_ORDER);
       foreach ($found as $declaration) {
         $tokens[$declaration[1]] = trim($declaration[2]);
       }
@@ -179,14 +194,16 @@ class PaletteContrastAnalyzer {
    * Splits the stylesheet into background and colour declarations.
    *
    * @return array
-   *   [$backgrounds, $foregrounds]: a selector => value map, and a list of
-   *   [$selector, $value, $fontSize].
+   *   [$backgrounds, $foregrounds, $fontSizes]: a selector => value map, a
+   *   list of [$selector, $value, $fontSize], and a second selector =>
+   *   value map for font sizes.
    */
   protected function declarations(string $css): array {
     preg_match_all('/([^{}]+)\{([^{}]*)\}/', $css, $blocks, PREG_SET_ORDER);
 
     $backgrounds = [];
     $foregrounds = [];
+    $fontSizes = [];
 
     foreach ($blocks as [, $selectorList, $body]) {
       // At-rule preludes (@media, @supports) are not selectors.
@@ -200,7 +217,11 @@ class PaletteContrastAnalyzer {
       preg_match('/(?<![-\w])color\s*:\s*([^;!]+)/', $body, $fg);
       preg_match('/font-size\s*:\s*([^;!]+)/', $body, $size);
 
-      if (!$bg && !$fg) {
+      // A font-size-only rule still matters: it is very often the ancestor
+      // that establishes whether the text below it is large enough for the
+      // 3:1 threshold, and skipping those here quietly reported every such
+      // pair against the stricter 4.5:1.
+      if (!$bg && !$fg && !$size) {
         continue;
       }
 
@@ -211,10 +232,13 @@ class PaletteContrastAnalyzer {
         if ($fg) {
           $foregrounds[] = [$selector, trim($fg[1]), $size ? trim($size[1]) : NULL];
         }
+        if ($size) {
+          $fontSizes[$selector] = trim($size[1]);
+        }
       }
     }
 
-    return [$backgrounds, $foregrounds];
+    return [$backgrounds, $foregrounds, $fontSizes];
   }
 
   /**
@@ -267,25 +291,34 @@ class PaletteContrastAnalyzer {
   }
 
   /**
-   * Finds the background a selector sits on, via its nearest styled ancestor.
+   * Finds the value a selector inherits from its nearest styled ancestor.
    *
-   * Text very often gets its colour on a descendant of the element carrying
-   * the background - which is exactly the shape of issue #2178, where the
-   * panel set background-color on one selector and the heading colour on
-   * another. Matching only within a single declaration block would miss
-   * precisely the defect this check exists to prevent.
+   * Used for both backgrounds and font sizes, because text very often gets
+   * its colour on a descendant of the element carrying the background or
+   * the size. That is exactly the shape of issue #2178, where the panel set
+   * background-color on one selector and the heading colour on another;
+   * matching only within a single declaration block would miss precisely
+   * the defect this check exists to prevent.
    *
-   * This is a prefix match, not a DOM: it finds the longest background
-   * selector that this selector begins with. It therefore cannot see
-   * backgrounds applied via siblings, via classes added by JavaScript, or
-   * through a different branch of the tree, and those pairs are skipped
-   * rather than guessed at.
+   * This is a prefix match, not a DOM: it finds the longest selector in the
+   * map that this selector begins with, which stands in for "nearest
+   * ancestor". It therefore cannot see values applied via siblings, via
+   * classes added by JavaScript, or through a different branch of the tree,
+   * and those are reported as unknown rather than guessed at.
+   *
+   * @param string $selector
+   *   The selector to resolve for.
+   * @param array $candidates
+   *   Selector => value map to search.
+   *
+   * @return string|null
+   *   The nearest ancestor's value, or NULL if no ancestor sets one.
    */
-  protected function inheritedBackground(string $selector, array $backgrounds): ?string {
+  protected function nearestAncestorValue(string $selector, array $candidates): ?string {
     $best = NULL;
     $bestLength = 0;
 
-    foreach ($backgrounds as $candidate => $value) {
+    foreach ($candidates as $candidate => $value) {
       if (str_starts_with($selector, $candidate . ' ') && strlen($candidate) > $bestLength) {
         $best = $value;
         $bestLength = strlen($candidate);
@@ -346,10 +379,12 @@ class PaletteContrastAnalyzer {
       $fontSize = $tokens[$match[1]] ?? '';
     }
 
-    if (preg_match('/^([\d.]+)(px|rem|em)$/', trim($fontSize), $match)) {
+    if (preg_match('/^([\d.]+)(px|rem)$/', trim($fontSize), $match)) {
+      // rem against the browser default; the theme does not change the root
+      // font size. em is deliberately not handled: it is relative to the
+      // parent's computed size, which is not knowable from the stylesheet
+      // alone, and guessing would produce a confident wrong threshold.
       $size = (float) $match[1];
-      // rem/em against the browser default; the theme does not change the
-      // root font size.
       return ($match[2] === 'px' ? $size : $size * 16) >= static::LARGE_TEXT_PX;
     }
 
