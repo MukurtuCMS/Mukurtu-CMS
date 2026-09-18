@@ -68,6 +68,10 @@ submissions queue) is covered in
 
 Member scans use the account in `A11Y_USERNAME`/`A11Y_PASSWORD` (default `admin`/`admin`). Use a regular community/protocol member account for representative results — admin accounts add Drupal-toolbar noise, and on protocol-heavy sites only members can reach the gated item pages.
 
+**On the Tugboat preview these accounts are provisioned for you.** The preview runs `drush site-install` on every build, so its only account is `admin`; `scripts/tugboat/provision-a11y-accounts.php` creates the member and manage-adjacent accounts during the build, from environment variables set on the Tugboat project. The script does nothing at all unless those variables are set, so a preview without them behaves exactly as before. The same values then go in the GitHub Actions secrets of the same name, so Playwright logs in as the accounts the build created. See [#2241](https://github.com/MukurtuCMS/Mukurtu-CMS/issues/2241).
+
+The memberships are not incidental. A member account with no community or protocol membership cannot reach protocol-gated item pages at all, so those scans skip and the run looks clean while covering less. Measured against a local site: a member with no memberships scanned one page fewer than `admin` reached; with a community and protocol membership it matches `admin` exactly.
+
 ## Pages — manage-adjacent (non-admin roles)
 
 Pages reachable by non-admin community/protocol roles (Community Managers, protocol contributors/curators/stewards via a custom `_mukurtu_role` requirement or OG permissions) — not a plain member page, and not part of the admin/authoring (ATAG) surface excluded below.
