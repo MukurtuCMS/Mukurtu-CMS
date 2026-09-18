@@ -126,4 +126,109 @@ class PaletteContrastWarningTest extends KernelTestBase {
     $this->assertSame([], $errors);
   }
 
+
+  /**
+   * The live readout is a sibling of the colour fieldset, not a child.
+   *
+   * $form['colors'] is #tree'd and submitForm() saves $values['colors']
+   * wholesale, so a display-only element nested inside it would be
+   * persisted into config as though it were a colour.
+   */
+  public function testReadoutIsNotInsideTheSavedColourTree(): void {
+    $form_object = $this->container->get('class_resolver')
+      ->getInstanceFromDefinition('Drupal\mukurtu_design\Form\MukurtuDesignSettingsForm');
+    $form = $this->container->get('form_builder')->getForm($form_object);
+
+    $this->assertArrayHasKey('contrast_summary', $form);
+    $this->assertArrayNotHasKey('contrast_summary', $form['colors']);
+    $this->assertSame(
+      ['value' => 'custom'],
+      $form['contrast_summary']['#states']['visible'][':input[name="palette"]'],
+      'The readout only shows for the custom palette.',
+    );
+  }
+
+  /**
+   * Changing a colour refreshes the readout and announces the result.
+   *
+   * The readout is replaced wholesale, so an aria-live region inside it is
+   * destroyed and recreated by the very command meant to announce it and
+   * never fires. A separate announcement is what makes the change
+   * perceivable to a screen reader user - which matters more than usual
+   * for a feature whose entire purpose is accessibility.
+   */
+  public function testColourChangeRefreshesAndAnnounces(): void {
+    $response = $this->ajaxFor([
+      'brand_primary' => '#138aab',
+      'brand_primary_dark' => '#107996',
+      'brand_secondary' => '#e6ab49',
+    ]);
+
+    $commands = array_column($response->getCommands(), 'command');
+    $this->assertContains('insert', $commands, 'The readout is replaced.');
+    $this->assertContains('announce', $commands, 'And the change is announced.');
+    $this->assertStringContainsString('need', $this->announcementFrom($response));
+  }
+
+  /**
+   * A clean palette announces the all-clear rather than saying nothing.
+   */
+  public function testCleanPaletteAnnouncesTheAllClear(): void {
+    $response = $this->ajaxFor([
+      'brand_primary' => '#000000',
+      'brand_primary_dark' => '#000000',
+      'brand_primary_accent' => '#000000',
+      'brand_secondary' => '#ffffff',
+      'brand_secondary_dark' => '#000000',
+      'brand_secondary_accent' => '#ffffff',
+    ]);
+
+    $this->assertStringContainsString('meet WCAG AA', $this->announcementFrom($response));
+  }
+
+  /**
+   * Colours the author does not edit are named by value, not by token.
+   *
+   * "#fff on Brand Primary Accent" tells an author something. The raw
+   * "--light-text-color on Brand Primary Accent" does not.
+   */
+  public function testUneditableColoursAreNamedByValue(): void {
+    [$warnings] = $this->validate([
+      'palette' => 'custom',
+      'colors' => [
+        'brand_primary_accent' => '#f1b85a',
+      ],
+    ]);
+
+    $text = implode("\n", array_map('strval', $warnings));
+    $this->assertNotEmpty($warnings);
+    $this->assertStringNotContainsString('--light-text-color', $text);
+  }
+
+  /**
+   * Runs the AJAX callback for a set of colours.
+   */
+  private function ajaxFor(array $colors) {
+    $form_object = $this->container->get('class_resolver')
+      ->getInstanceFromDefinition('Drupal\mukurtu_design\Form\MukurtuDesignSettingsForm');
+    $form = $this->container->get('form_builder')->getForm($form_object);
+
+    $form_state = new FormState();
+    $form_state->setValues(['colors' => $colors]);
+
+    return $form_object->contrastSummaryAjaxCallback($form, $form_state);
+  }
+
+  /**
+   * The text of the response's announcement.
+   */
+  private function announcementFrom($response): string {
+    foreach ($response->getCommands() as $command) {
+      if (($command['command'] ?? NULL) === 'announce') {
+        return (string) $command['text'];
+      }
+    }
+    return '';
+  }
+
 }
