@@ -19,8 +19,17 @@ export default defineConfig({
   // top of their test() functions.
   // See https://playwright.dev/docs/test-timeouts#set-timeout-for-a-single-test
   timeout: 60000,
-  // Maximum time for all tests, in ms. 600,000ms == 10 minutes.
-  globalTimeout: 600000,
+  // Maximum time for all tests, in ms. 1,800,000ms == 30 minutes.
+  //
+  // Raised from 10 minutes, which the suite had nearly grown into: the run
+  // on 2026-09-18 reported "89 passed (9.3m)", or 93% of the old budget,
+  // with 18 tests skipped for want of seeded content. Those skips are
+  // nearly free, so the margin is thinner than the number suggests -- a
+  // preview with fuller content, or the A11Y_* credentials being set so
+  // the member and manage-adjacent scans stop short-circuiting, pushes it
+  // over. Past the limit Playwright stops the run partway, which surfaces
+  // as an opaque failure rather than as "this needs more time".
+  globalTimeout: 1800000,
   expect: {
     // Maximum time expect() should wait for the condition to be met.
     // For example in `await expect(locator).toHaveText();
