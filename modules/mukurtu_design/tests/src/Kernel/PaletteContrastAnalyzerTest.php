@@ -193,13 +193,21 @@ class PaletteContrastAnalyzerTest extends KernelTestBase {
       'brand_secondary' => '#e6ab49',
     ]);
 
-    $failure = $this->failureFor($failures, '--brand-primary', '--brand-secondary');
+    // Either token name, because PR #2254 fixes #2252 by moving this link
+    // from --brand-primary onto a dedicated --collection-title-link-text.
+    // That fix changes the built-in Blue and gold palette; it does not
+    // change this, because a custom palette only sets the six editable
+    // colours and the new token still falls back to --brand-primary. So
+    // the pairing is reported either way, and this test has to pass
+    // whichever of the two PRs merges first.
+    $failure = $this->failureFor($failures, '--collection-title-link-text', '--brand-secondary')
+      ?? $this->failureFor($failures, '--brand-primary', '--brand-secondary');
     $this->assertNotNull($failure, 'The collection title link pair is reported (issue #2252).');
     $this->assertStringContainsString('.collections__content__container h2 a', reset($failure['selectors']));
     $this->assertSame(
       3.0,
       $failure['required'],
-      'The title is 1.75rem, which is WCAG large text, so 3:1 applies rather than 4.5:1.',
+      'The title is 1.5rem at its smallest, which is WCAG large text, so 3:1 applies rather than 4.5:1.',
     );
     $this->assertLessThan(3.0, $failure['ratio'], 'It fails even against the more forgiving threshold.');
   }
