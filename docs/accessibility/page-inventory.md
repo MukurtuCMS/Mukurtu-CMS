@@ -102,6 +102,7 @@ Priority order for manual keyboard/screen-reader testing. Automated scans cannot
 | 12 | Masonry grid | `themes/mukurtu_v4/components/03-organisms/masonry-grid/` | Visual order vs DOM order (WCAG 1.3.2, 2.4.3) |
 | 13 | Multipage navigation | `modules/mukurtu_multipage_items/js/multipage-nav.js` | Keyboard operation, current-page state |
 | 14 | Media alt-text entry | `modules/mukurtu_media/js/media-library-image-alt.js` | Directly feeds WCAG 1.1.1 for all content |
+| 15 | Bot protection widget (ALTCHA) | `themes/mukurtu_v4/js/altcha-accessibility-fix.js`, `.../02-molecules/altcha/` | Third-party widget on login and public forms — a failure blocks sign-in outright; carries a local workaround (#2062) pending the v3 re-land (#2211) |
 
 ## Out of scope (current phase)
 
