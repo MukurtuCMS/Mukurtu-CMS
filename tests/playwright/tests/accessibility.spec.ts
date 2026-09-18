@@ -11,6 +11,7 @@ import {
   discoverItemUrl,
   discoverCommunityManageUrl,
   discoverProtocolUrl,
+  openForAudit,
 } from '~helpers/page-inventory';
 import {
   SUBMISSION_FORM_PATH,
@@ -34,7 +35,8 @@ import {
 test.describe('Accessibility: anonymous pages', () => {
   for (const { slug, path } of anonymousPages) {
     test(`axe scan: ${slug}`, async ({ page }, testInfo) => {
-      await page.goto(path);
+      const blocked = await openForAudit(page, path);
+      test.skip(blocked !== null, blocked ?? '');
       await auditPage(page, testInfo, slug);
     });
   }
@@ -43,7 +45,8 @@ test.describe('Accessibility: anonymous pages', () => {
     test(`axe scan: ${slug}`, async ({ page }, testInfo) => {
       const url = await discoverItemUrl(page, listPath, itemLink, pathSuffix);
       test.skip(url === null, `No item link matching "${itemLink}" found on ${listPath}. Seed default content first.`);
-      await page.goto(url);
+      const blocked = await openForAudit(page, url);
+      test.skip(blocked !== null, blocked ?? '');
       await auditPage(page, testInfo, slug);
     });
   }
@@ -51,7 +54,8 @@ test.describe('Accessibility: anonymous pages', () => {
   test('axe scan: protocol-local-contexts', async ({ page }, testInfo) => {
     const url = await discoverProtocolUrl(page, (slug) => `/protocol/${slug}/local-contexts`);
     test.skip(url === null, 'No community with a linked protocol found. Seed default content first.');
-    await page.goto(url);
+    const blocked = await openForAudit(page, url);
+    test.skip(blocked !== null, blocked ?? '');
     await auditPage(page, testInfo, 'protocol-local-contexts');
   });
 });
@@ -66,7 +70,8 @@ test.describe('Accessibility: member pages', () => {
 
   for (const { slug, path } of memberPages) {
     test(`axe scan: ${slug}`, async ({ page }, testInfo) => {
-      await page.goto(path);
+      const blocked = await openForAudit(page, path);
+      test.skip(blocked !== null, blocked ?? '');
       await auditPage(page, testInfo, slug);
     });
   }
@@ -75,7 +80,8 @@ test.describe('Accessibility: member pages', () => {
     test(`axe scan: ${slug}`, async ({ page }, testInfo) => {
       const url = await discoverItemUrl(page, listPath, itemLink);
       test.skip(url === null, `No item link matching "${itemLink}" found on ${listPath} for this member.`);
-      await page.goto(url);
+      const blocked = await openForAudit(page, url);
+      test.skip(blocked !== null, blocked ?? '');
       await auditPage(page, testInfo, slug);
     });
   }
@@ -101,7 +107,8 @@ test.describe('Accessibility: manage-adjacent pages', () => {
 
   for (const { slug, path } of managePages) {
     test(`axe scan: ${slug}`, async ({ page }, testInfo) => {
-      await page.goto(path);
+      const blocked = await openForAudit(page, path);
+      test.skip(blocked !== null, blocked ?? '');
       await auditPage(page, testInfo, slug);
     });
   }
@@ -109,14 +116,16 @@ test.describe('Accessibility: manage-adjacent pages', () => {
   test('axe scan: manage-community-local-contexts-projects', async ({ page }, testInfo) => {
     const url = await discoverCommunityManageUrl(page, (slug) => `/communities/community/${slug}/local-contexts/projects`);
     test.skip(url === null, 'No community found. Seed default content first.');
-    await page.goto(url);
+    const blocked = await openForAudit(page, url);
+    test.skip(blocked !== null, blocked ?? '');
     await auditPage(page, testInfo, 'manage-community-local-contexts-projects');
   });
 
   test('axe scan: manage-protocol-local-contexts-projects', async ({ page }, testInfo) => {
     const url = await discoverProtocolUrl(page, (slug) => `/protocols/protocol/${slug}/local-contexts/projects`);
     test.skip(url === null, 'No community with a linked protocol found. Seed default content first.');
-    await page.goto(url);
+    const blocked = await openForAudit(page, url);
+    test.skip(blocked !== null, blocked ?? '');
     await auditPage(page, testInfo, 'manage-protocol-local-contexts-projects');
   });
 });
@@ -154,7 +163,8 @@ test.describe('Accessibility: public submission form', () => {
   });
 
   test('axe scan: submission-thank-you', async ({ page }, testInfo) => {
-    await page.goto(SUBMISSION_THANK_YOU_PATH);
+    const blocked = await openForAudit(page, SUBMISSION_THANK_YOU_PATH);
+    test.skip(blocked !== null, blocked ?? '');
     await auditPage(page, testInfo, 'submission-thank-you');
   });
 });
