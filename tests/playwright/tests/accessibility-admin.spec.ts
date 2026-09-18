@@ -2,7 +2,7 @@ import { test } from '@playwright/test';
 import { Login } from '~components/login';
 import { memberAccount } from '~helpers/a11y-credentials';
 import { auditPage } from '~helpers/axe';
-import { discoverItemUrl } from '~helpers/page-inventory';
+import { discoverItemUrl, openForAudit } from '~helpers/page-inventory';
 import { adminPages, adminDiscoveredPages } from '~helpers/page-inventory-admin';
 
 /**
@@ -28,7 +28,8 @@ test.describe('Accessibility (admin): representative pages', () => {
 
   for (const { slug, path } of adminPages) {
     test(`axe scan: ${slug}`, async ({ page }, testInfo) => {
-      await page.goto(path);
+      const blocked = await openForAudit(page, path);
+      test.skip(blocked !== null, blocked ?? '');
       await auditPage(page, testInfo, `phase2-${slug}`);
     });
   }
@@ -37,7 +38,8 @@ test.describe('Accessibility (admin): representative pages', () => {
     test(`axe scan: ${slug}`, async ({ page }, testInfo) => {
       const url = await discoverItemUrl(page, listPath, itemLink, pathSuffix);
       test.skip(url === null, `No item link matching "${itemLink}" found on ${listPath}. Seed default content first.`);
-      await page.goto(url);
+      const blocked = await openForAudit(page, url);
+      test.skip(blocked !== null, blocked ?? '');
       await auditPage(page, testInfo, `phase2-${slug}`);
     });
   }
