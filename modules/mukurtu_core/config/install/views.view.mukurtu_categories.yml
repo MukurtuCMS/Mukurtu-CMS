@@ -246,6 +246,7 @@ display:
           query_tags: {  }
       relationships: {  }
       css_class: category-grid
+      show_admin_links: false
       header: {  }
       footer: {  }
       display_extenders: {  }
@@ -283,6 +284,7 @@ display:
     display_plugin: page
     position: 1
     display_options:
+      show_admin_links: false
       display_extenders: {  }
       path: categories
       rendering_language: '***LANGUAGE_language_content***'
