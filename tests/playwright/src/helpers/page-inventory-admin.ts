@@ -22,6 +22,11 @@ export const adminPages = [
   // MukurtuContentWarningsSettingsForm -- regression coverage for the fixed #1979 defect.
   { slug: 'content-warnings-settings', path: '/admin/config/mukurtu/content-warnings' },
   { slug: 'export-settings', path: '/admin/export/settings' },
+  // mukurtu_submissions. The public form these configure is scanned
+  // separately in accessibility.spec.ts, which has to enable it first.
+  { slug: 'submissions-settings-collection', path: '/admin/config/mukurtu/submissions' },
+  { slug: 'submissions-settings-edit', path: '/admin/config/mukurtu/submissions/digital_heritage' },
+  { slug: 'pending-submissions', path: '/admin/content/pending-submissions' },
   { slug: 'admin-overview', path: '/admin' },
   { slug: 'admin-structure', path: '/admin/structure' },
 ];
