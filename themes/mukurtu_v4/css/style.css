@@ -123,6 +123,17 @@ label {
   word-wrap: normal;
 }
 
+.skip-link.visually-hidden.focusable:focus {
+  position: absolute !important;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  z-index: 1200;
+  padding-block: var(--v-space-6xs);
+  padding-inline: var(--v-space-5xs);
+  color: var(--color-white);
+  background-color: var(--color-black);
+}
+
 .line-clamp-2 {
   overflow: hidden;
   display: -webkit-box;

@@ -1,5 +1,6 @@
 import { test } from '@playwright/test';
 import { Login } from '~components/login';
+import { memberAccount } from '~helpers/a11y-credentials';
 import {
   checkReflow,
   checkTextZoom,
@@ -25,13 +26,17 @@ async function runAutomatedChecks(page: import('@playwright/test').Page, testInf
   await checkTextZoom(page, testInfo, slug);
 }
 
+/**
+ * Phase 2 results are written under a phase2- prefix. Both phases write
+ * into the same test-results/a11y[-extra] directory keyed on slug alone,
+ * so an admin page sharing a slug with a Phase 1 page would silently
+ * overwrite it and the run would still go green.
+ */
 test.describe('Automated checks (admin): representative pages', () => {
   test.beforeEach(async ({ page }) => {
+    const account = memberAccount();
     const login = new Login(page);
-    await login.login(
-      process.env.A11Y_USERNAME ?? 'admin',
-      process.env.A11Y_PASSWORD ?? 'admin',
-    );
+    await login.login(account.username, account.password);
   });
 
   for (const { slug, path } of adminPages) {
@@ -42,7 +47,7 @@ test.describe('Automated checks (admin): representative pages', () => {
       // 60s test timeout isn't enough for the full 5-check pipeline here.
       testInfo.setTimeout(120_000);
       await page.goto(path);
-      await runAutomatedChecks(page, testInfo, slug);
+      await runAutomatedChecks(page, testInfo, `phase2-${slug}`);
     });
   }
 
@@ -52,7 +57,7 @@ test.describe('Automated checks (admin): representative pages', () => {
       const url = await discoverItemUrl(page, listPath, itemLink, pathSuffix);
       test.skip(url === null, `No item link matching "${itemLink}" found on ${listPath}. Seed default content first.`);
       await page.goto(url);
-      await runAutomatedChecks(page, testInfo, slug);
+      await runAutomatedChecks(page, testInfo, `phase2-${slug}`);
     });
   }
 });
