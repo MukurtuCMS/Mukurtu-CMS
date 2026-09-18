@@ -160,6 +160,31 @@ jobs:
         # as the baseURL in playwright.config.ts.
         env:
           PLAYWRIGHT_BASE_URL: ${{ needs.wait-for-tugboat.outputs.preview_url }}
+          # Without these the member, manage-adjacent and admin scans all
+          # silently run as admin/admin, and their results describe the
+          # administrator's view of the site rather than the role's. The
+          # suite annotates its report when it falls back, so an unset
+          # secret is visible rather than silent. Set these in
+          # Settings > Secrets and variables > Actions (see issue #2241).
+          A11Y_USERNAME: ${{ secrets.A11Y_USERNAME }}
+          A11Y_PASSWORD: ${{ secrets.A11Y_PASSWORD }}
+          A11Y_MANAGER_USERNAME: ${{ secrets.A11Y_MANAGER_USERNAME }}
+          A11Y_MANAGER_PASSWORD: ${{ secrets.A11Y_MANAGER_PASSWORD }}
+
+      # The accessibility scans are report-only by design, so the report is
+      # the entire point of running them -- and it was being thrown away
+      # with the runner. always(), because a suite that fails partway still
+      # produces results for the pages it reached.
+      - name: Upload accessibility scan results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: accessibility-results-pr-${{ github.run_id }}
+          path: |
+            tests/playwright/test-results/a11y/
+            tests/playwright/test-results/a11y-extra/
+          if-no-files-found: warn
+          retention-days: 30
 
   playwright-tests-main:
     runs-on: ubuntu-latest
@@ -248,3 +273,28 @@ jobs:
         # exact URL that was just confirmed to be serving Drupal.
         env:
           PLAYWRIGHT_BASE_URL: ${{ steps.base-preview.outputs.base_url }}
+          # Without these the member, manage-adjacent and admin scans all
+          # silently run as admin/admin, and their results describe the
+          # administrator's view of the site rather than the role's. The
+          # suite annotates its report when it falls back, so an unset
+          # secret is visible rather than silent. Set these in
+          # Settings > Secrets and variables > Actions (see issue #2241).
+          A11Y_USERNAME: ${{ secrets.A11Y_USERNAME }}
+          A11Y_PASSWORD: ${{ secrets.A11Y_PASSWORD }}
+          A11Y_MANAGER_USERNAME: ${{ secrets.A11Y_MANAGER_USERNAME }}
+          A11Y_MANAGER_PASSWORD: ${{ secrets.A11Y_MANAGER_PASSWORD }}
+
+      # The accessibility scans are report-only by design, so the report is
+      # the entire point of running them -- and it was being thrown away
+      # with the runner. always(), because a suite that fails partway still
+      # produces results for the pages it reached.
+      - name: Upload accessibility scan results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: accessibility-results-main-${{ github.run_id }}
+          path: |
+            tests/playwright/test-results/a11y/
+            tests/playwright/test-results/a11y-extra/
+          if-no-files-found: warn
+          retention-days: 30

@@ -78,18 +78,39 @@ class ShippedDisplayConfigTest extends UnitTestCase {
   }
 
   /**
-   * The public category block does not render contextual admin links.
+   * The category view's displays each carry a show_admin_links: false.
    *
-   * The block appears on the front end for anonymous visitors, where the admin
-   * links are both useless and a hint at the editing UI.
+   * A user with "access contextual links" (granted to mukurtu_manager)
+   * otherwise gets an empty contextual_links_placeholder div rendered as a
+   * sibling of the view's rows inside .category-grid, an extra, unstyled
+   * grid cell (#1919).
+   *
+   * This only pins the raw value in each display's own config; it cannot
+   * prove any of them actually take effect. DisplayPluginBase::isDefaulted()
+   * makes a child display inherit the 'default' (master) display's value
+   * unless the child's own 'defaults' array explicitly opts out, and none
+   * of these displays does, so the master display's value is what actually
+   * governs all of them - which is why 'default' is included here even
+   * though nothing ever renders it directly. See
+   * CategoryAdminLinksCascadeUpdateTest for a kernel-level test that
+   * resolves this the way \Drupal\views\Views::getView() does, which is
+   * the only way to distinguish a real fix from a display's redundant,
+   * inert own copy of the setting.
    */
-  public function testCategoryBlockHidesAdminLinks(): void {
+  #[DataProvider('categoryDisplayProvider')]
+  public function testCategoryDisplayHidesAdminLinks(string $display): void {
     $view = $this->shipped('modules/mukurtu_core/config/install/views.view.mukurtu_categories.yml');
 
     $this->assertFalse(
-      $view['display']['browse_by_category_block']['display_options']['show_admin_links'] ?? NULL,
-      'The category browse block would render contextual admin links.'
+      $view['display'][$display]['display_options']['show_admin_links'] ?? NULL,
+      "The $display display would render contextual admin links."
     );
+  }
+
+  public static function categoryDisplayProvider(): \Generator {
+    yield 'master' => ['default'];
+    yield 'homepage block' => ['browse_by_category_block'];
+    yield 'categories page' => ['categories_page'];
   }
 
   /**

@@ -26,6 +26,31 @@ When a new page type or interactive component ships, add it here and to the spec
 
 Item pages are discovered from the browse listings at run time so the spec works against any site with default content seeded (`default-content.spec.ts`).
 
+### Public submission form
+
+| Page | Path | Notes |
+|---|---|---|
+| Submission form | `/submit/node/digital_heritage` | `PublicSubmissionForm` — a long, field-grouped public form with media upload |
+| Submission thank-you | `/submit/node/digital_heritage/thank-you` | `ThankYouController` |
+
+These are **not** in the anonymous table above because the submission form
+ships disabled: the settings entity that gates it is `status: false` with
+`access_level: authenticated`, and the `submit node digital_heritage content`
+permission is only granted to the anonymous role once both are changed. So
+the path is a 403 on a stock install, and a scan keyed on the URL alone would
+silently never see it.
+
+The specs therefore enable the form, scan it, and restore the previous
+setting afterwards (`tests/playwright/src/helpers/submissions.ts`). This is
+driven through the admin UI rather than drush because CI runs Playwright from
+a GitHub runner against a remote Tugboat preview, where no local site exists.
+If the scanning account cannot administer submissions, the form scan skips
+with a reason rather than scanning the 403 page.
+
+The admin side of this feature (settings list, settings form, the pending
+submissions queue) is covered in
+[page-inventory-admin.md](page-inventory-admin.md).
+
 ## Pages — authenticated member
 
 | Page | Path | Notes |
@@ -42,6 +67,10 @@ Item pages are discovered from the browse listings at run time so the spec works
 | Notifications | `/notifications` | Views page (`mukurtu_notifications_page`), any authenticated user |
 
 Member scans use the account in `A11Y_USERNAME`/`A11Y_PASSWORD` (default `admin`/`admin`). Use a regular community/protocol member account for representative results — admin accounts add Drupal-toolbar noise, and on protocol-heavy sites only members can reach the gated item pages.
+
+**On the Tugboat preview these accounts are provisioned for you.** The preview runs `drush site-install` on every build, so its only account is `admin`; `scripts/tugboat/provision-a11y-accounts.php` creates the member and manage-adjacent accounts during the build, from environment variables set on the Tugboat project. The script does nothing at all unless those variables are set, so a preview without them behaves exactly as before. The same values then go in the GitHub Actions secrets of the same name, so Playwright logs in as the accounts the build created. See [#2241](https://github.com/MukurtuCMS/Mukurtu-CMS/issues/2241).
+
+The memberships are not incidental. A member account with no community or protocol membership cannot reach protocol-gated item pages at all, so those scans skip and the run looks clean while covering less. Measured against a local site: a member with no memberships scanned one page fewer than `admin` reached; with a community and protocol membership it matches `admin` exactly.
 
 ## Pages — manage-adjacent (non-admin roles)
 
@@ -77,6 +106,7 @@ Priority order for manual keyboard/screen-reader testing. Automated scans cannot
 | 12 | Masonry grid | `themes/mukurtu_v4/components/03-organisms/masonry-grid/` | Visual order vs DOM order (WCAG 1.3.2, 2.4.3) |
 | 13 | Multipage navigation | `modules/mukurtu_multipage_items/js/multipage-nav.js` | Keyboard operation, current-page state |
 | 14 | Media alt-text entry | `modules/mukurtu_media/js/media-library-image-alt.js` | Directly feeds WCAG 1.1.1 for all content |
+| 15 | Bot protection widget (ALTCHA) | `themes/mukurtu_v4/js/altcha-accessibility-fix.js`, `.../02-molecules/altcha/` | Third-party widget on login and public forms — a failure blocks sign-in outright; carries a local workaround (#2062) pending the v3 re-land (#2211) |
 
 ## Out of scope (current phase)
 

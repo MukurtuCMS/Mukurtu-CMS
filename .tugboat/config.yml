@@ -161,6 +161,14 @@ services:
           sudo -E -u www-data ./vendor/bin/drush config:set honeypot.settings time_limit 0 -y
           sudo -E -u www-data ./vendor/bin/drush config:set captcha.captcha_point.user_login_form status 0 -y
           sudo -E -u www-data ./vendor/bin/drush cr
+          # Create the accounts the accessibility scans log in as. Without
+          # these, site-install leaves the preview with only `admin`, and
+          # setting the A11Y_* secrets in GitHub Actions makes every member
+          # and manage-adjacent scan fail its login rather than making the
+          # results representative. The script no-ops unless the matching
+          # A11Y_* environment variables are set on this Tugboat project,
+          # so a preview without them behaves exactly as before. See #2241.
+          sudo -E -u www-data ./vendor/bin/drush php:script $TUGBOAT_ROOT/scripts/tugboat/provision-a11y-accounts.php
       update:
         # Ensure settings.php is always present with the correct database
         # credentials, guarding against site-install rewrites or refresh-only
