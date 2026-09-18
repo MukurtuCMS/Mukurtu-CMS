@@ -134,6 +134,21 @@ label {
   @include mixins.visually-hidden;
 }
 
+// Keep "Skip to main content" visible above Gin's fixed admin
+// toolbar/sidebar (z-index up to 502) when an admin views a front-end
+// page. Use position: absolute, not fixed — body has overflow-x: hidden
+// (see comment above), and position: fixed here would fight that.
+.skip-link.visually-hidden.focusable:focus {
+  position: absolute !important;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  z-index: 1200;
+  padding-block: var(--v-space-6xs);
+  padding-inline: var(--v-space-5xs);
+  color: var(--color-white);
+  background-color: var(--color-black);
+}
+
 // For Nodes whose bodies need a 'Show More'.
 .line-clamp-2 {
   overflow: hidden;
