@@ -139,11 +139,11 @@ class PaletteContrastWarningTest extends KernelTestBase {
       ->getInstanceFromDefinition('Drupal\mukurtu_design\Form\MukurtuDesignSettingsForm');
     $form = $this->container->get('form_builder')->getForm($form_object);
 
-    $this->assertArrayHasKey('contrast_summary', $form);
-    $this->assertArrayNotHasKey('contrast_summary', $form['colors']);
+    $this->assertArrayHasKey('contrast_summary', $form['colors_layout']);
+    $this->assertArrayNotHasKey('contrast_summary', $form['colors_layout']['colors']);
     $this->assertSame(
       ['value' => 'custom'],
-      $form['contrast_summary']['#states']['visible'][':input[name="palette"]'],
+      $form['colors_layout']['contrast_summary']['#states']['visible'][':input[name="palette"]'],
       'The readout only shows for the custom palette.',
     );
   }

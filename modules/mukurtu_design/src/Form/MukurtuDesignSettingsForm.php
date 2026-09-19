@@ -86,14 +86,21 @@ class MukurtuDesignSettingsForm extends ConfigFormBase {
       ],
     ];
 
-    $form['colors'] = [
+    // Plain layout wrapper (no #tree) so the fieldset and readout can sit
+    // side by side; it does not affect either child's value storage.
+    $form['colors_layout'] = [
+      '#type' => 'container',
+      '#attributes' => ['class' => ['mukurtu-design-colors-layout']],
+    ];
+
+    $form['colors_layout']['colors'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Custom palette colors'),
       '#description' => $this->t('These colors are used when the "Custom" palette is selected above.'),
       '#tree' => TRUE,
     ];
     foreach ($this->colorLabels() as $key => $label) {
-      $form['colors'][$key] = [
+      $form['colors_layout']['colors'][$key] = [
         '#type' => 'color',
         '#title' => $label,
         '#default_value' => $config->get("colors.$key"),
@@ -114,14 +121,9 @@ class MukurtuDesignSettingsForm extends ConfigFormBase {
     // display-only element nested inside it risks being persisted into
     // config as if it were a colour.
     $colors = $form_state->getValue('colors') ?? $config->get('colors') ?? [];
-    $form[static::SUMMARY_KEY] = $this->buildContrastSummary(
+    $form['colors_layout'][static::SUMMARY_KEY] = $this->buildContrastSummary(
       $this->contrastAnalyzer->findFailures($colors)
     );
-    // Only meaningful for the custom palette; the built-in ones are not the
-    // author's to change here.
-    $form[static::SUMMARY_KEY]['#states'] = [
-      'visible' => [':input[name="palette"]' => ['value' => 'custom']],
-    ];
 
     return parent::buildForm($form, $form_state);
   }
@@ -140,6 +142,13 @@ class MukurtuDesignSettingsForm extends ConfigFormBase {
     $summary = [
       '#type' => 'container',
       '#attributes' => ['id' => static::SUMMARY_ID],
+      // Set here, not by the caller, so the AJAX callback's direct call to
+      // this method (bypassing buildForm()) still gets it: #states has to
+      // travel with every render of this element, or a palette switch after
+      // an AJAX-replaced readout leaves it stuck visible.
+      '#states' => [
+        'visible' => [':input[name="palette"]' => ['value' => 'custom']],
+      ],
       'heading' => [
         '#type' => 'html_tag',
         '#tag' => 'h3',
