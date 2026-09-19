@@ -36,9 +36,19 @@ function mukurtu_dictionary_update_last_removed(): int {
 }
 
 /**
- * Remove the duplicate, unlabeled Glossary Entry facet from the Dictionary page.
+ * Stop exposing the duplicate, unlabeled Glossary Entry facet as a filter.
  */
 function mukurtu_dictionary_update_40045() {
+  // facets_field_glossary_entry must stay in the view: for a views_block
+  // facet source, Facets only computes a field's aggregation when some
+  // filter's query() runs the matching query type plugin
+  // (FacetsFilter::query(), in facets_exposed_filters) - a facet_block
+  // placement alone, like the standalone glossary_entry facet the Dictionary
+  // controller renders separately, never triggers that. Unsetting the filter
+  // entirely (as an earlier version of this hook did) silently broke that
+  // standalone facet along with the stray exposed widget. Setting exposed to
+  // FALSE keeps the query registration alive while rendering no filter of
+  // its own.
   $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_dictionary');
   if ($config->isNew()) {
     return;
@@ -47,8 +57,8 @@ function mukurtu_dictionary_update_40045() {
   $changed = FALSE;
 
   $filters = $config->get('display.default.display_options.filters');
-  if (is_array($filters) && isset($filters['facets_field_glossary_entry'])) {
-    unset($filters['facets_field_glossary_entry']);
+  if (is_array($filters) && !empty($filters['facets_field_glossary_entry']['exposed'])) {
+    $filters['facets_field_glossary_entry']['exposed'] = FALSE;
     $config->set('display.default.display_options.filters', $filters);
     $changed = TRUE;
   }

@@ -11,14 +11,19 @@ use PHPUnit\Framework\Attributes\Group;
 /**
  * Tests mukurtu_dictionary_update_40045().
  *
- * The update hook removes facets_field_glossary_entry, which duplicated the
- * standalone glossary_entry facets.facet entity: same underlying field, same
- * facet source, but wired up a second time as a hidden-label exposed filter
- * on the view itself. The fixtures here skip real facets_filter/bef_links
- * plugin config (which would pull in the facets_exposed_filters and
- * better_exposed_filters module schemas) since the hook only cares about the
- * two array keys, not their contents; strictConfigSchema is disabled for the
- * same reason project memory notes for the #2079 fallback-test fix.
+ * The field_glossary_entry filter duplicated the standalone glossary_entry
+ * facets.facet entity as a second, hidden-label exposed filter on the view.
+ * The filter itself has to stay: for a views_block facet source, Facets only
+ * computes a field's aggregation when some filter's query() runs the query
+ * type plugin - a facet_block placement alone, like the standalone facet the
+ * Dictionary controller renders separately, never triggers that. So the hook
+ * un-exposes the filter (drops its BEF options, sets exposed to FALSE)
+ * instead of removing it outright. The fixtures here skip real
+ * facets_filter/bef_links plugin config (which would pull in the
+ * facets_exposed_filters and better_exposed_filters module schemas) since
+ * the hook only cares about these array keys, not their contents;
+ * strictConfigSchema is disabled for the same reason project memory notes
+ * for the #2079 fallback-test fix.
  *
  * @see mukurtu_dictionary_update_40045()
  */
@@ -66,12 +71,14 @@ class GlossaryEntryDuplicateFacetUpdateTest extends KernelTestBase {
                 'table' => 'search_api_index_mukurtu_dictionary_index',
                 'field' => 'facets_word_lists',
                 'plugin_id' => 'standard',
+                'exposed' => TRUE,
               ],
               'facets_field_glossary_entry' => [
                 'id' => 'facets_field_glossary_entry',
                 'table' => 'search_api_index_mukurtu_dictionary_index',
                 'field' => 'facets_field_glossary_entry',
                 'plugin_id' => 'standard',
+                'exposed' => TRUE,
               ],
             ],
             'exposed_form' => [
@@ -100,9 +107,11 @@ class GlossaryEntryDuplicateFacetUpdateTest extends KernelTestBase {
   }
 
   /**
-   * The duplicate filter and its BEF options are removed, its neighbor kept.
+   * The duplicate filter is un-exposed and its BEF options dropped.
+   *
+   * The filter itself, and its neighbor, stay in place.
    */
-  public function testRemovesDuplicateFilter(): void {
+  public function testUnexposesDuplicateFilter(): void {
     $this->makeView();
 
     mukurtu_dictionary_update_40045();
@@ -112,9 +121,11 @@ class GlossaryEntryDuplicateFacetUpdateTest extends KernelTestBase {
     $filters = $display_options['filters'];
     $bef_filters = $display_options['exposed_form']['options']['bef']['filter'];
 
-    $this->assertArrayNotHasKey('facets_field_glossary_entry', $filters);
+    $this->assertArrayHasKey('facets_field_glossary_entry', $filters, 'The filter must stay - it is what makes Facets compute this field\'s aggregation at all for a views_block source.');
+    $this->assertFalse($filters['facets_field_glossary_entry']['exposed']);
     $this->assertArrayNotHasKey('facets_field_glossary_entry', $bef_filters);
     $this->assertArrayHasKey('facets_word_lists', $filters, 'An unrelated filter was removed too.');
+    $this->assertTrue($filters['facets_word_lists']['exposed'], 'An unrelated filter was un-exposed too.');
     $this->assertArrayHasKey('facets_word_lists', $bef_filters, 'An unrelated BEF option was removed too.');
   }
 
@@ -129,7 +140,8 @@ class GlossaryEntryDuplicateFacetUpdateTest extends KernelTestBase {
 
     $view = View::load('mukurtu_dictionary');
     $filters = $view->get('display')['default']['display_options']['filters'];
-    $this->assertArrayNotHasKey('facets_field_glossary_entry', $filters);
+    $this->assertArrayHasKey('facets_field_glossary_entry', $filters);
+    $this->assertFalse($filters['facets_field_glossary_entry']['exposed']);
   }
 
   /**
@@ -159,6 +171,7 @@ class GlossaryEntryDuplicateFacetUpdateTest extends KernelTestBase {
                 'table' => 'search_api_index_mukurtu_dictionary_index',
                 'field' => 'facets_word_lists',
                 'plugin_id' => 'standard',
+                'exposed' => TRUE,
               ],
             ],
           ],
@@ -172,6 +185,24 @@ class GlossaryEntryDuplicateFacetUpdateTest extends KernelTestBase {
     $view = View::load('mukurtu_dictionary');
     $filters = $view->get('display')['default']['display_options']['filters'];
     $this->assertArrayHasKey('facets_word_lists', $filters);
+    $this->assertTrue($filters['facets_word_lists']['exposed']);
+  }
+
+  /**
+   * A view where the filter is already un-exposed is left untouched.
+   */
+  public function testAlreadyUnexposedFilterIsUntouched(): void {
+    $view = $this->makeView();
+    $filters = $view->get('display')['default']['display_options']['filters'];
+    $filters['facets_field_glossary_entry']['exposed'] = FALSE;
+    $view->set('display.default.display_options.filters', $filters);
+    $view->save();
+
+    mukurtu_dictionary_update_40045();
+
+    $view = View::load('mukurtu_dictionary');
+    $bef_filters = $view->get('display')['default']['display_options']['exposed_form']['options']['bef']['filter'];
+    $this->assertArrayNotHasKey('facets_field_glossary_entry', $bef_filters, 'The stale BEF options should still be cleaned up even when the filter was already un-exposed.');
   }
 
 }
