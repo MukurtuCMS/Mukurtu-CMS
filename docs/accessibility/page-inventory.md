@@ -40,8 +40,9 @@ permission is only granted to the anonymous role once both are changed. So
 the path is a 403 on a stock install, and a scan keyed on the URL alone would
 silently never see it.
 
-The specs therefore enable the form, scan it, and restore the previous
-setting afterwards (`tests/playwright/src/helpers/submissions.ts`). This is
+`tests/playwright/tests/submission-form.spec.ts` therefore enables the form,
+scans it, and restores the previous setting afterwards
+(`tests/playwright/src/helpers/submissions.ts`). This is
 driven through the admin UI rather than drush because CI runs Playwright from
 a GitHub runner against a remote Tugboat preview, where no local site exists.
 If the scanning account cannot administer submissions, the form scan skips
