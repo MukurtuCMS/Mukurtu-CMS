@@ -171,6 +171,25 @@ class PaletteContrastWarningTest extends KernelTestBase {
   }
 
   /**
+   * The AJAX-replaced readout still carries its visibility states.
+   *
+   * buildContrastSummary() sets #states itself, not buildForm(), precisely
+   * so this holds: the AJAX callback calls it directly and bypasses
+   * buildForm() entirely, so a #states rule bolted on only there would
+   * never reach this response, and the readout would stay visible
+   * regardless of the selected palette after the first colour edit.
+   */
+  public function testAjaxReplacementKeepsItsVisibilityStates(): void {
+    $response = $this->ajaxFor([
+      'brand_primary' => '#138aab',
+      'brand_primary_dark' => '#107996',
+      'brand_secondary' => '#e6ab49',
+    ]);
+
+    $this->assertStringContainsString('data-drupal-states', $this->insertedMarkupFrom($response));
+  }
+
+  /**
    * A clean palette announces the all-clear rather than saying nothing.
    */
   public function testCleanPaletteAnnouncesTheAllClear(): void {
@@ -226,6 +245,18 @@ class PaletteContrastWarningTest extends KernelTestBase {
     foreach ($response->getCommands() as $command) {
       if (($command['command'] ?? NULL) === 'announce') {
         return (string) $command['text'];
+      }
+    }
+    return '';
+  }
+
+  /**
+   * The rendered markup of the response's insert (replace) command.
+   */
+  private function insertedMarkupFrom($response): string {
+    foreach ($response->getCommands() as $command) {
+      if (($command['command'] ?? NULL) === 'insert') {
+        return (string) $command['data'];
       }
     }
     return '';
