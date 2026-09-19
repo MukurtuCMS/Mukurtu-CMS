@@ -142,6 +142,7 @@ class ThemeHooksPageAttachmentsAlterTest extends KernelTestBase {
 
     $names = array_column($attachments['#attached']['drupalSettings']['klaro']['config']['services'], 'name');
     $this->assertContains('toastify', $names);
+    $this->assertContains('user.permissions', $attachments['#cache']['contexts']);
   }
 
   /**
@@ -162,6 +163,7 @@ class ThemeHooksPageAttachmentsAlterTest extends KernelTestBase {
 
     $names = array_column($attachments['#attached']['drupalSettings']['klaro']['config']['services'], 'name');
     $this->assertContains('toastify', $names);
+    $this->assertContains('user.permissions', $attachments['#cache']['contexts']);
   }
 
   /**
