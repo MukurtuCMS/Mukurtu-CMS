@@ -284,8 +284,28 @@ function mukurtu_gin_custom_form_layout_builder_configure_block_alter(array &$fo
  *
  * Horizontal dividers have no meaningful title. Hide the required block
  * description field and pre-fill it so entity validation still passes.
+ *
+ * Also hides the revision information section on every block_content bundle
+ * (not just horizontal_divider): block_content's entity type hardcodes
+ * show_revision_ui = TRUE in core (BlockContent.php), so
+ * ContentEntityForm::addRevisionableFormFields() always adds it regardless
+ * of the bundle's own `revision` setting - and every Mukurtu block_content
+ * bundle ships with revision: false, so the section is never meaningful
+ * here. #access (not the display:none style used for field_info above)
+ * because nothing in it needs to be submitted. Both the details wrapper
+ * and the checkbox are hidden explicitly: core links $form['revision'] to
+ * the wrapper via '#group' => 'revision_information' rather than nesting
+ * it as a real array child, so hiding only the wrapper isn't guaranteed to
+ * also suppress the grouped element.
  */
 function mukurtu_gin_custom_form_block_content_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
+  if (isset($form['revision_information'])) {
+    $form['revision_information']['#access'] = FALSE;
+  }
+  if (isset($form['revision'])) {
+    $form['revision']['#access'] = FALSE;
+  }
+
   $entity = $form_state->getFormObject()->getEntity();
   if ($entity->bundle() !== 'horizontal_divider' || !isset($form['info'])) {
     return;
