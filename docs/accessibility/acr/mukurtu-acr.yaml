@@ -14,8 +14,8 @@ author:
   phone: ""
   website: "https://mukurtu.org"
 report_date: "2026-07-10"
-last_modified_date: "2026-07-16"
-version: 2
+last_modified_date: "2026-09-17"
+version: 3
 notes: >-
   This is a living document maintained as part of the Mukurtu CMS
   accessibility program (see docs/accessibility/README.md in the Mukurtu CMS
@@ -101,11 +101,21 @@ chapters:
             adherence:
               level: supports
               notes: >-
-                Automated structural checks (axe-core, July 2026) pass across
-                the audited page inventory. The page title region was moved
-                inside the main landmark so all page content is contained by
-                landmarks (fixed July 2026). Heading outline quality and
-                reading order are verified in the manual audit cycle.
+                Automated structural checks (axe-core, July 2026) pass
+                across the audited page inventory. The page title region
+                was moved inside the main landmark so all page content
+                is contained by landmarks (fixed July 2026). Landing
+                pages previously derived their heading level from
+                whether the page was the front page, so a page could
+                emit several first-level headings or none at all
+                depending on which blocks an author placed; heading
+                levels are now fixed and the front page carries exactly
+                one visually-hidden first-level heading regardless of
+                block placement (September 2026, issue #2176, PR #2207).
+                Heading outline quality and reading order are verified
+                in the manual audit cycle. Evidence for the September
+                2026 changes is recorded by criterion in
+                docs/accessibility/findings/2026-09-17-remediation-cycle.md.
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -380,13 +390,20 @@ chapters:
               level: partially-supports
               notes: >-
                 July 2026 scans of pages rendered with the administration
-                toolbar found toolbar menu buttons and links with no
-                accessible name and an invalid ARIA attribute on toolbar
-                menus. These originate in the upstream Drupal core/Gin
-                admin toolbar and affect authenticated administrators and
-                authors only; upstream verification and issue links are
-                tracked in the project's accessibility findings. The full
-                authoring interface will be evaluated in a later phase.
+                toolbar found 15 toolbar buttons and links with no accessible
+                name, and an invalid ARIA attribute on three toolbar menus.
+                Both originate upstream in the Gin admin theme and affect
+                authenticated administrators and authors only. Both are now
+                resolved (September 2026, issue #2003, PR #2225): the
+                collapsed toolbar hid its labels with display:none, removing
+                them from the accessibility tree, and now uses a
+                visually-hidden technique instead; the invalid attribute is
+                corrected by carrying Gin's own reviewed fix as a composer
+                patch until it is released upstream. A re-scan of
+                /admin/content with the toolbar collapsed reports no
+                remaining violations of these rules. The full authoring
+                interface has still not been evaluated, so this remains a
+                partial claim pending the Phase 2 audit (issue #1975).
   success_criteria_level_aa:
     notes: ""
     criteria:
@@ -436,12 +453,25 @@ chapters:
             adherence:
               level: supports
               notes: >-
-                Automated contrast checks (axe-core, July 2026) pass across
-                the audited page inventory. A failing admin accent color
-                (4.48:1) reachable by members on /my-content was darkened to
-                5.3:1 (fixed July 2026). Elements automated tools cannot
-                judge (headings over images, map controls) are queued for
-                manual contrast measurement.
+                Automated contrast checks (axe-core, July 2026) pass
+                across the audited page inventory. A failing admin
+                accent color (4.48:1) reachable by members on
+                /my-content was darkened to 5.3:1 (fixed July 2026). Two
+                of the three cases automated tools cannot judge have
+                since been measured and fixed (September 2026): hero
+                text over author-uploaded photographs, where a
+                light/dark toggle could not meet the criterion over an
+                arbitrary image, now carries an opaque per-glyph stroke
+                whose contrast against the fill is fixed independent of
+                the photograph (5.00:1 and 8.39:1 for the two built-in
+                palettes; issue #2175, PR #2207); and the horizontal
+                image-with-description panel, which failed at 2.45:1 on
+                the Blue and gold palette, now uses a per-palette token
+                reaching 4.78:1 (issue #2178, same PR). Map controls
+                remain queued for manual contrast measurement. Evidence
+                for the September 2026 changes is recorded by criterion
+                in
+                docs/accessibility/findings/2026-09-17-remediation-cycle.md.
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -470,8 +500,20 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                Automated reflow testing is a real overflow assertion
+                rather than a heuristic: tests/playwright asserts no
+                horizontal scrolling at 320px across the page inventory,
+                and reflow.spec.ts additionally gates this in CI. A
+                defect that caused 1-7px of horizontal scrolling between
+                480px and 520px (the mobile nav button outgrew its
+                header grid column once its label un-hid) was fixed in
+                September 2026 and verified by sweeping 320px to 980px
+                across five page types with no overflow at any width
+                (issue #2197, PR #2224). Evidence for the September 2026
+                changes is recorded by criterion in
+                docs/accessibility/findings/2026-09-17-remediation-cycle.md.
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -480,8 +522,27 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                Evaluated for focus indicators, the theme's principal
+                non-text contrast surface. The shared focus ring colour
+                was #66afe9, measuring 1.59-2.37:1 against every light
+                surface in the palette; it is now currentcolor, so each
+                ring inherits text colour already chosen to contrast
+                with its background, with hard-coded rings where that is
+                unsafe (white-on-dark fills, and controls over uploaded
+                imagery). Verified in September 2026 across 25
+                components x 2 palettes in an isolated fixture on the
+                compiled CSS, plus 101 focusable elements on seven
+                running pages, with no result below 3:1 (issue #2199, PR
+                #2221). Non-text contrast of other graphical objects
+                (icon-only affordances, map controls) is queued for the
+                manual audit cycle. Evidence for the September 2026
+                changes is recorded by criterion in
+                docs/accessibility/findings/2026-09-17-remediation-cycle.md.
+                Evidence for the September 2026 changes is recorded by
+                criterion in
+                docs/accessibility/findings/2026-09-17-remediation-cycle.md.
           - name: authoring-tool
             adherence:
               level: not-evaluated

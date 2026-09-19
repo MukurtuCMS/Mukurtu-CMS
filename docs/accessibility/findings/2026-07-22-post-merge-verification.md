@@ -1,5 +1,12 @@
 # Accessibility Findings — Post-Merge Verification (2026-07-22)
 
+> **Status note added 2026-09-17:** this is a historical record and is kept as written.
+> The findings it describes as open have since been fixed and closed
+> ([#1995](https://github.com/MukurtuCMS/Mukurtu-CMS/issues/1995),
+> [#1997](https://github.com/MukurtuCMS/Mukurtu-CMS/issues/1997)–[#1999](https://github.com/MukurtuCMS/Mukurtu-CMS/issues/1999),
+> [#2001](https://github.com/MukurtuCMS/Mukurtu-CMS/issues/2001) and the rest of the #1995–#2002 range, all closed 2026-09-14).
+> See [2026-09-17-remediation-cycle.md](2026-09-17-remediation-cycle.md) for current state.
+
 Re-ran the automated scan after merging `origin/main` into
 `AM-accessibility-program` (114 commits, including a Drupal core bump to
 11.4.4, a `drupal/gin` upgrade to 5.0.15, and a new "Super Admin Warning"
