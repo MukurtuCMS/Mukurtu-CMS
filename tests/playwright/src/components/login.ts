@@ -8,7 +8,10 @@ export class Login {
     this.page = page;
   }
 
-  public async login(username: string, password: string, setPassword?: boolean): Promise<void> {
+  // Longer timeouts than the global 5s actionTimeout: the first request
+  // against a cold environment (freshly built Tugboat preview) can take
+  // much longer to render the form and to process the login submission.
+  public async login(username: string, password: string, setPassword?: boolean, timeoutMs = 30000): Promise<void> {
     // Change the account password to be the value specified.
     if (setPassword) {
       await drush(`user:password ${username} ${password}`);
@@ -18,10 +21,7 @@ export class Login {
     const usernameField = this.page.getByLabel('Username');
     const passwordField = this.page.getByLabel('Password');
     const loginButton = this.page.getByRole('button', { name: 'Log in' });
-    // Longer timeouts than the global 5s actionTimeout: the first request
-    // against a cold environment (freshly built Tugboat preview) can take
-    // much longer to render the form and to process the login submission.
-    await usernameField.fill(username, { timeout: 30000 });
+    await usernameField.fill(username, { timeout: timeoutMs });
     await passwordField.fill(password);
 
     // The bot-protection work put an ALTCHA "I'm not a robot" checkbox on
@@ -41,8 +41,8 @@ export class Login {
     // so callers could otherwise navigate away and cancel the login
     // request before the session cookie is ever set.
     await Promise.all([
-      this.page.waitForURL((url) => !url.pathname.startsWith('/user/login'), { timeout: 30000 }),
-      loginButton.click({ timeout: 30000 }),
+      this.page.waitForURL((url) => !url.pathname.startsWith('/user/login'), { timeout: timeoutMs }),
+      loginButton.click({ timeout: timeoutMs }),
     ]);
   }
 
