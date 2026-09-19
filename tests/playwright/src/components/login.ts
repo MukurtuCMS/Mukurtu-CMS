@@ -58,10 +58,13 @@ export class Login {
     // Wait for the post-login redirect to complete before returning:
     // clicking the button alone doesn't wait for the resulting navigation,
     // so callers could otherwise navigate away and cancel the login
-    // request before the session cookie is ever set.
+    // request before the session cookie is ever set. 45s rather than the
+    // 30s used above: PR #2264 observed the login POST itself occasionally
+    // taking longer than 30s under CI's concurrent worker load, separately
+    // from the ALTCHA timing above.
     await Promise.all([
-      this.page.waitForURL((url) => !url.pathname.startsWith('/user/login'), { timeout: 30000 }),
-      loginButton.click({ timeout: 30000 }),
+      this.page.waitForURL((url) => !url.pathname.startsWith('/user/login'), { timeout: 45000 }),
+      loginButton.click({ timeout: 45000 }),
     ]);
   }
 
