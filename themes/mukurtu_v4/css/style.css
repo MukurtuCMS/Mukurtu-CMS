@@ -6600,9 +6600,6 @@ header {
   -webkit-margin-before: 1rem;
           margin-block-start: 1rem;
 }
-.dictionary .browse-facets .form-item-glossary-entry {
-  display: none;
-}
 .dictionary .browse-facets .facets-widget-dropdown {
   grid-row: 1;
   -webkit-margin-after: var(--v-space-3xs);
