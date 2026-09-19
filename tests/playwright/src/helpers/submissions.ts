@@ -29,16 +29,6 @@ export const SUBMISSION_THANK_YOU_PATH = `${SUBMISSION_FORM_PATH}/thank-you`;
 const SETTINGS_PATH = `/admin/config/mukurtu/submissions/${SUBMISSION_BUNDLE}`;
 
 /**
- * Login timeout for this flow specifically, longer than Login.login()'s own
- * 30s default. These run in beforeAll/afterAll, near the tail of the CI
- * suite (this file sorts last among the spec files), while other workers
- * are still hitting the same shared Tugboat preview -- observed on PR #2264
- * timing out at exactly 30s under that load despite the same login succeeding
- * in under 8s run in isolation against the same preview.
- */
-const LOGIN_TIMEOUT_MS = 60000;
-
-/**
  * What the settings looked like before the suite touched them.
  *
  * `null` means the suite changed nothing and teardown should do nothing --
@@ -69,8 +59,6 @@ export async function enableSubmissionForm(browser: Browser): Promise<Submission
     await login.login(
       process.env.A11Y_USERNAME ?? 'admin',
       process.env.A11Y_PASSWORD ?? 'admin',
-      false,
-      LOGIN_TIMEOUT_MS,
     );
 
     const response = await page.goto(SETTINGS_PATH);
@@ -125,8 +113,6 @@ export async function restoreSubmissionForm(browser: Browser, previous: Submissi
     await login.login(
       process.env.A11Y_USERNAME ?? 'admin',
       process.env.A11Y_PASSWORD ?? 'admin',
-      false,
-      LOGIN_TIMEOUT_MS,
     );
 
     const response = await page.goto(SETTINGS_PATH);
