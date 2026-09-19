@@ -56,11 +56,19 @@ test.describe('Public submission form', () => {
 
   let previousState: SubmissionFormState = null;
 
-  test.beforeAll(async ({ browser }) => {
+  // The default 60s hook timeout (playwright.config.ts's `timeout`, which
+  // also governs beforeAll/afterAll) isn't enough headroom on top of
+  // LOGIN_TIMEOUT_MS's own 60s: a login that takes close to that long left
+  // no time for the rest of the hook (navigating to the settings form,
+  // checking boxes, saving), so the hook itself got killed mid-flight
+  // instead of the login failing cleanly. 120s gives that margin.
+  test.beforeAll(async ({ browser }, testInfo) => {
+    testInfo.setTimeout(120000);
     previousState = await enableSubmissionForm(browser);
   });
 
-  test.afterAll(async ({ browser }) => {
+  test.afterAll(async ({ browser }, testInfo) => {
+    testInfo.setTimeout(120000);
     await restoreSubmissionForm(browser, previousState);
   });
 
