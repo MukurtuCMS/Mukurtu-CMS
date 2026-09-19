@@ -342,7 +342,13 @@ class CulturalProtocolWidget extends WidgetBase {
         if (!is_array($community) || !isset($community['protocols'])) {
           continue;
         }
-        $protocols = array_merge(array_filter($community['protocols']), $protocols);
+        // Collect protocol IDs from the array keys, not the values: a
+        // checked checkbox normally submits its own ID as the value (so
+        // merging values happened to work), but a widget hidden by
+        // content_translation for a non-translatable field falls back to
+        // raw booleans as the "submitted" value instead, which array_merge()
+        // would otherwise collapse into a single bogus protocol ID.
+        $protocols = array_merge(array_keys(array_filter($community['protocols'])), $protocols);
       }
       $massagedValues[$delta]['sharing_setting'] = $subvalue['sharing_setting'];
       $massagedValues[$delta]['protocols'] = CulturalProtocolItem::formatProtocols($protocols);
