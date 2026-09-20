@@ -1344,3 +1344,23 @@ body.path-visitors .layout-row.layout-row {
 .visitors-main .gin--sticky-table-header {
   display: none !important;
 }
+
+/* Design settings: put the custom-palette colour fieldset and the live
+   contrast readout side by side, each taking half the row, once there is
+   room for two columns. Below that they stay stacked (plain block flow,
+   no rule needed here), which is also what keeps this readable at 320px
+   / 400% zoom for WCAG 1.4.10 Reflow. The readout is hidden via #states
+   (display: none) for the two built-in palettes, so it simply drops out
+   of the row then and the fieldset grows to fill it alone. */
+@media (min-width: 48rem) {
+  .mukurtu-design-colors-layout {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--gin-spacing-l);
+  }
+
+  .mukurtu-design-colors-layout > * {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+}
