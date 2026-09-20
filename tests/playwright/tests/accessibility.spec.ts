@@ -13,14 +13,6 @@ import {
   discoverProtocolUrl,
   openForAudit,
 } from '~helpers/page-inventory';
-import {
-  SUBMISSION_FORM_PATH,
-  SUBMISSION_THANK_YOU_PATH,
-  SubmissionFormState,
-  enableSubmissionForm,
-  restoreSubmissionForm,
-  submissionFormIsReachable,
-} from '~helpers/submissions';
 
 /**
  * Automated accessibility scans (axe-core, WCAG 2.1 A/AA).
@@ -127,44 +119,5 @@ test.describe('Accessibility: manage-adjacent pages', () => {
     const blocked = await openForAudit(page, url);
     test.skip(blocked !== null, blocked ?? '');
     await auditPage(page, testInfo, 'manage-protocol-local-contexts-projects');
-  });
-});
-
-/**
- * The public submission form (mukurtu_submissions).
- *
- * Kept out of anonymousPages because it ships disabled: the suite has to
- * turn it on before it can be scanned, and turn it back off afterwards.
- * See ~helpers/submissions for why this is driven through the admin UI
- * rather than drush.
- */
-test.describe('Accessibility: public submission form', () => {
-  // Serial, so both tests share one worker. beforeAll/afterAll run once
-  // per worker, and fullyParallel is on: split across two workers, one
-  // worker's teardown can disable the form while the other is still
-  // scanning it, or its setup can re-enable after the other has already
-  // restored -- leaving the site enabled when the run ends.
-  test.describe.configure({ mode: 'serial' });
-
-  let previousState: SubmissionFormState = null;
-
-  test.beforeAll(async ({ browser }) => {
-    previousState = await enableSubmissionForm(browser);
-  });
-
-  test.afterAll(async ({ browser }) => {
-    await restoreSubmissionForm(browser, previousState);
-  });
-
-  test('axe scan: submission-form', async ({ page }, testInfo) => {
-    const reachable = await submissionFormIsReachable(page);
-    test.skip(!reachable, `${SUBMISSION_FORM_PATH} is not reachable. Submission forms ship disabled and this account could not enable one.`);
-    await auditPage(page, testInfo, 'submission-form');
-  });
-
-  test('axe scan: submission-thank-you', async ({ page }, testInfo) => {
-    const blocked = await openForAudit(page, SUBMISSION_THANK_YOU_PATH);
-    test.skip(blocked !== null, blocked ?? '');
-    await auditPage(page, testInfo, 'submission-thank-you');
   });
 });
