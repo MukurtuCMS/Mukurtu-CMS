@@ -162,16 +162,68 @@ export async function discoverItemUrl(
 }
 
 /**
- * Discover a community's machine name/slug (from its public page URL,
- * e.g. /community/some-slug) and build a manage-scoped URL from it --
- * used for pages like /communities/community/{community}/... that share
- * no path prefix with the public community page, so a simple pathSuffix
- * isn't enough.
+ * Discover a community's entity id and build a manage-scoped URL from it.
+ *
+ * Used for pages like /communities/community/{community}/local-contexts/
+ * projects, which share no path prefix with the public community page, so
+ * a simple pathSuffix is not enough.
+ *
+ * The id, not the slug. That route declares its parameter as
+ * entity:community, which upcasts from an entity id and not from a path
+ * alias, so the slug taken off the public /community/some-slug URL gives a
+ * 404 every time. Verified directly: .../community/10/local-contexts/
+ * projects returns 200 where .../community/tribal-community/... returns
+ * 404. Before openForAudit() landed this produced a clean scan of a "Page
+ * Not Found" page; afterwards it produced a permanent skip. Neither was a
+ * scan of the real page. See issue #2250.
+ *
+ * The id is read from /admin/communities, which lists a members link
+ * containing it, rather than from the public listing, which exposes only
+ * aliases.
  */
-export async function discoverCommunityManageUrl(page: Page, buildPath: (slug: string) => string): Promise<string | null> {
-  const communityUrl = await discoverItemUrl(page, '/communities', '.communities__item a');
-  const slug = communityUrl?.split('/').filter(Boolean).pop();
-  return slug ? buildPath(slug) : null;
+export async function discoverCommunityManageUrl(page: Page, buildPath: (id: string) => string): Promise<string | null> {
+  const response = await page.goto('/admin/communities');
+  if (response === null || !response.ok()) {
+    return null;
+  }
+
+  const hrefs = await page.locator('a[href*="/members"]').evaluateAll(
+    (links) => links.map((link) => link.getAttribute('href')),
+  );
+  const id = hrefs
+    .map((href) => href?.match(/\/admin\/communities\/(\d+)\//)?.[1])
+    .find((match) => match !== undefined);
+
+  return id ? buildPath(id) : null;
+}
+
+/**
+ * Discover a protocol's entity id and build a manage-scoped URL from it.
+ *
+ * The protocol counterpart of discoverCommunityManageUrl(), and needed for
+ * the same reason: /protocols/protocol/{protocol}/local-contexts/projects
+ * declares its parameter as entity:protocol, so it upcasts from an id and
+ * not from an alias.
+ *
+ * Note this is not true of every protocol route. /protocol/{group}/
+ * local-contexts uses a protocol_alias converter and genuinely does take
+ * the slug, which is why discoverProtocolUrl() below is still correct for
+ * that one. The two look alike and behave differently.
+ */
+export async function discoverProtocolManageUrl(page: Page, buildPath: (id: string) => string): Promise<string | null> {
+  const response = await page.goto('/admin/protocols');
+  if (response === null || !response.ok()) {
+    return null;
+  }
+
+  const hrefs = await page.locator('a[href*="/members"]').evaluateAll(
+    (links) => links.map((link) => link.getAttribute('href')),
+  );
+  const id = hrefs
+    .map((href) => href?.match(/\/admin\/protocols\/(\d+)\//)?.[1])
+    .find((match) => match !== undefined);
+
+  return id ? buildPath(id) : null;
 }
 
 /**
