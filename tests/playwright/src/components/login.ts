@@ -57,14 +57,52 @@ export class Login {
       await this.page.waitForTimeout(7000);
     }
 
-    // Wait for the post-login redirect to complete before returning:
-    // clicking the button alone doesn't wait for the resulting navigation,
-    // so callers could otherwise navigate away and cancel the login
-    // request before the session cookie is ever set.
-    await Promise.all([
-      this.page.waitForURL((url) => !url.pathname.startsWith('/user/login'), { timeout: 30000 }),
-      loginButton.click({ timeout: 30000 }),
-    ]);
+    // TEMPORARY diagnostic for PR #2264, round 2: the checked-property fix
+    // above didn't resolve it (still times out here), and the previous
+    // network-request diagnostic was removed in that same commit, so there
+    // is no evidence yet on whether it changed the "zero requests fired"
+    // symptom at all. Re-added, plus a direct check for any element the
+    // browser's own validation currently considers :invalid, to settle
+    // whether this is still a native-validation block or something else.
+    // To be removed once the cause is known.
+    const netLog: string[] = [];
+    const onRequest = (req: import('@playwright/test').Request) => {
+      if (req.url().includes('/user/login')) {
+        netLog.push(`--> ${req.method()} ${req.url()} @ ${Date.now()}`);
+      }
+    };
+    const onResponse = (res: import('@playwright/test').Response) => {
+      if (res.url().includes('/user/login')) {
+        netLog.push(`<-- ${res.status()} ${res.url()} @ ${Date.now()}`);
+      }
+    };
+    this.page.on('request', onRequest);
+    this.page.on('response', onResponse);
+
+    try {
+      // Wait for the post-login redirect to complete before returning:
+      // clicking the button alone doesn't wait for the resulting
+      // navigation, so callers could otherwise navigate away and cancel
+      // the login request before the session cookie is ever set.
+      await Promise.all([
+        this.page.waitForURL((url) => !url.pathname.startsWith('/user/login'), { timeout: 30000 }),
+        loginButton.click({ timeout: 30000 }),
+      ]);
+    }
+    catch (error) {
+      const invalidEls = await this.page.evaluate(() =>
+        Array.from(document.querySelectorAll(':invalid')).map((el) => el.outerHTML.slice(0, 300)),
+      ).catch(() => ['<evaluate failed>']);
+      console.error(
+        `[login diagnostic] /user/login network activity:\n${netLog.join('\n') || '(none observed)'}\n` +
+        `[login diagnostic] :invalid elements:\n${invalidEls.join('\n') || '(none)'}`,
+      );
+      throw error;
+    }
+    finally {
+      this.page.off('request', onRequest);
+      this.page.off('response', onResponse);
+    }
   }
 
   public async logout(): Promise<void> {
