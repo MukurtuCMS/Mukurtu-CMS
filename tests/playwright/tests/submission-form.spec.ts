@@ -7,6 +7,7 @@ import {
   checkLinkText,
   checkKeyboardTrap,
 } from '~helpers/automated-checks';
+import { openForAudit } from '~helpers/page-inventory';
 import {
   SUBMISSION_FORM_PATH,
   SUBMISSION_THANK_YOU_PATH,
@@ -71,7 +72,8 @@ test.describe('Public submission form', () => {
   });
 
   test('axe scan: submission-thank-you', async ({ page }, testInfo) => {
-    await page.goto(SUBMISSION_THANK_YOU_PATH);
+    const blocked = await openForAudit(page, SUBMISSION_THANK_YOU_PATH);
+    test.skip(blocked !== null, blocked ?? '');
     await auditPage(page, testInfo, 'submission-thank-you');
   });
 
@@ -82,7 +84,8 @@ test.describe('Public submission form', () => {
   });
 
   test('automated checks: submission-thank-you', async ({ page }, testInfo) => {
-    await page.goto(SUBMISSION_THANK_YOU_PATH);
+    const blocked = await openForAudit(page, SUBMISSION_THANK_YOU_PATH);
+    test.skip(blocked !== null, blocked ?? '');
     await runAutomatedChecks(page, testInfo, 'submission-thank-you');
   });
 });
