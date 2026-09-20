@@ -1,5 +1,6 @@
 import { Browser, Page } from '@playwright/test';
 import { Login } from '~components/login';
+import { adminAccount } from '~helpers/a11y-credentials';
 
 /**
  * Setup/teardown for scanning the public submission form.
@@ -55,25 +56,14 @@ export async function enableSubmissionForm(browser: Browser): Promise<Submission
   const page = await context.newPage();
 
   try {
+    // adminAccount(), and via the empty-safe helper: an unset GitHub
+    // Actions secret arrives as "" rather than undefined, so the previous
+    // `process.env.A11Y_USERNAME ?? 'admin'` logged in with an empty
+    // username once the workflow started passing the secrets through, and
+    // both submission scans failed on the 30s login timeout.
+    const admin = adminAccount();
     const login = new Login(page);
-    try {
-      await login.login(
-        process.env.A11Y_USERNAME ?? 'admin',
-        process.env.A11Y_PASSWORD ?? 'admin',
-      );
-    }
-    catch (error) {
-      // This login intermittently fails in CI (issue #2267): the form's
-      // own fields get cleared before it can be submitted, so native
-      // validation blocks it and the page never leaves /user/login.
-      // Treated the same as any other "couldn't enable the form" case
-      // rather than thrown, so an environment problem skips these four
-      // scans with a stated reason instead of failing every PR's run.
-      // Loud on purpose -- a silent skip here is the blind spot this
-      // whole entry exists to avoid.
-      console.error(`Could not log in to enable the submission form, so its scans will skip. See issue #2267.\n${error}`);
-      return null;
-    }
+    await login.login(admin.username, admin.password);
 
     const response = await page.goto(SETTINGS_PATH);
     if (!response || !response.ok()) {
@@ -123,21 +113,14 @@ export async function restoreSubmissionForm(browser: Browser, previous: Submissi
   const page = await context.newPage();
 
   try {
+    // adminAccount(), and via the empty-safe helper: an unset GitHub
+    // Actions secret arrives as "" rather than undefined, so the previous
+    // `process.env.A11Y_USERNAME ?? 'admin'` logged in with an empty
+    // username once the workflow started passing the secrets through, and
+    // both submission scans failed on the 30s login timeout.
+    const admin = adminAccount();
     const login = new Login(page);
-    try {
-      await login.login(
-        process.env.A11Y_USERNAME ?? 'admin',
-        process.env.A11Y_PASSWORD ?? 'admin',
-      );
-    }
-    catch (error) {
-      // Same intermittent CI login failure as in enableSubmissionForm()
-      // (issue #2267). Failing teardown would fail the run over an
-      // environment problem, but this one leaves the form enabled on the
-      // site, so say so rather than swallowing it.
-      console.error(`Could not log in to restore the submission form, so it is LEFT ENABLED at ${SETTINGS_PATH}. See issue #2267.\n${error}`);
-      return;
-    }
+    await login.login(admin.username, admin.password);
 
     const response = await page.goto(SETTINGS_PATH);
     if (!response || !response.ok()) {
