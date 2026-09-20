@@ -56,20 +56,11 @@ test.describe('Public submission form', () => {
 
   let previousState: SubmissionFormState = null;
 
-  // Playwright's default hook timeout (playwright.config.ts's `timeout`,
-  // 60s) isn't enough headroom for login.login()'s own worst case here: up
-  // to 60s waiting for ALTCHA to actually finish checking its checkbox,
-  // plus up to 30s waiting for the post-login redirect, before this hook
-  // even gets to the rest of its work (navigating to the settings form,
-  // toggling checkboxes, saving). 120s covers that worst case with margin
-  // to spare.
-  test.beforeAll(async ({ browser }, testInfo) => {
-    testInfo.setTimeout(120000);
+  test.beforeAll(async ({ browser }) => {
     previousState = await enableSubmissionForm(browser);
   });
 
-  test.afterAll(async ({ browser }, testInfo) => {
-    testInfo.setTimeout(120000);
+  test.afterAll(async ({ browser }) => {
     await restoreSubmissionForm(browser, previousState);
   });
 
