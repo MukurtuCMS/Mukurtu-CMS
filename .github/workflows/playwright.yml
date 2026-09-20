@@ -177,7 +177,7 @@ jobs:
       # produces results for the pages it reached.
       - name: Upload accessibility scan results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: accessibility-results-pr-${{ github.run_id }}
           path: |
@@ -290,7 +290,7 @@ jobs:
       # produces results for the pages it reached.
       - name: Upload accessibility scan results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: accessibility-results-main-${{ github.run_id }}
           path: |
