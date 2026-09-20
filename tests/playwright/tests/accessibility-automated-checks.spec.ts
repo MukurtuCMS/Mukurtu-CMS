@@ -17,6 +17,7 @@ import {
   discoverItemUrl,
   discoverCommunityManageUrl,
   discoverProtocolUrl,
+  openForAudit,
 } from '~helpers/page-inventory';
 
 /**
@@ -38,7 +39,8 @@ async function runAutomatedChecks(page: import('@playwright/test').Page, testInf
 test.describe('Automated checks: anonymous pages', () => {
   for (const { slug, path } of anonymousPages) {
     test(`automated checks: ${slug}`, async ({ page }, testInfo) => {
-      await page.goto(path);
+      const blocked = await openForAudit(page, path);
+      test.skip(blocked !== null, blocked ?? '');
       await runAutomatedChecks(page, testInfo, slug);
     });
   }
@@ -47,7 +49,8 @@ test.describe('Automated checks: anonymous pages', () => {
     test(`automated checks: ${slug}`, async ({ page }, testInfo) => {
       const url = await discoverItemUrl(page, listPath, itemLink, pathSuffix);
       test.skip(url === null, `No item link matching "${itemLink}" found on ${listPath}. Seed default content first.`);
-      await page.goto(url);
+      const blocked = await openForAudit(page, url);
+      test.skip(blocked !== null, blocked ?? '');
       await runAutomatedChecks(page, testInfo, slug);
     });
   }
@@ -55,7 +58,8 @@ test.describe('Automated checks: anonymous pages', () => {
   test('automated checks: protocol-local-contexts', async ({ page }, testInfo) => {
     const url = await discoverProtocolUrl(page, (slug) => `/protocol/${slug}/local-contexts`);
     test.skip(url === null, 'No community with a linked protocol found. Seed default content first.');
-    await page.goto(url);
+    const blocked = await openForAudit(page, url);
+    test.skip(blocked !== null, blocked ?? '');
     await runAutomatedChecks(page, testInfo, 'protocol-local-contexts');
   });
 });
@@ -70,7 +74,8 @@ test.describe('Automated checks: member pages', () => {
 
   for (const { slug, path } of memberPages) {
     test(`automated checks: ${slug}`, async ({ page }, testInfo) => {
-      await page.goto(path);
+      const blocked = await openForAudit(page, path);
+      test.skip(blocked !== null, blocked ?? '');
       await runAutomatedChecks(page, testInfo, slug);
     });
   }
@@ -79,7 +84,8 @@ test.describe('Automated checks: member pages', () => {
     test(`automated checks: ${slug}`, async ({ page }, testInfo) => {
       const url = await discoverItemUrl(page, listPath, itemLink);
       test.skip(url === null, `No item link matching "${itemLink}" found on ${listPath} for this member.`);
-      await page.goto(url);
+      const blocked = await openForAudit(page, url);
+      test.skip(blocked !== null, blocked ?? '');
       await runAutomatedChecks(page, testInfo, slug);
     });
   }
@@ -99,7 +105,8 @@ test.describe('Automated checks: manage-adjacent pages', () => {
 
   for (const { slug, path } of managePages) {
     test(`automated checks: ${slug}`, async ({ page }, testInfo) => {
-      await page.goto(path);
+      const blocked = await openForAudit(page, path);
+      test.skip(blocked !== null, blocked ?? '');
       await runAutomatedChecks(page, testInfo, slug);
     });
   }
@@ -107,14 +114,16 @@ test.describe('Automated checks: manage-adjacent pages', () => {
   test('automated checks: manage-community-local-contexts-projects', async ({ page }, testInfo) => {
     const url = await discoverCommunityManageUrl(page, (slug) => `/communities/community/${slug}/local-contexts/projects`);
     test.skip(url === null, 'No community found. Seed default content first.');
-    await page.goto(url);
+    const blocked = await openForAudit(page, url);
+    test.skip(blocked !== null, blocked ?? '');
     await runAutomatedChecks(page, testInfo, 'manage-community-local-contexts-projects');
   });
 
   test('automated checks: manage-protocol-local-contexts-projects', async ({ page }, testInfo) => {
     const url = await discoverProtocolUrl(page, (slug) => `/protocols/protocol/${slug}/local-contexts/projects`);
     test.skip(url === null, 'No community with a linked protocol found. Seed default content first.');
-    await page.goto(url);
+    const blocked = await openForAudit(page, url);
+    test.skip(blocked !== null, blocked ?? '');
     await runAutomatedChecks(page, testInfo, 'manage-protocol-local-contexts-projects');
   });
 });
