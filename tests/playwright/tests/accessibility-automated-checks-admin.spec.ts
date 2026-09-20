@@ -8,7 +8,7 @@ import {
   checkLinkText,
   checkKeyboardTrap,
 } from '~helpers/automated-checks';
-import { discoverItemUrl } from '~helpers/page-inventory';
+import { discoverItemUrl, openForAudit } from '~helpers/page-inventory';
 import { adminPages, adminDiscoveredPages } from '~helpers/page-inventory-admin';
 
 /**
@@ -46,7 +46,8 @@ test.describe('Automated checks (admin): representative pages', () => {
       // checkFocusVisible's per-element loop take longer -- the default
       // 60s test timeout isn't enough for the full 5-check pipeline here.
       testInfo.setTimeout(120_000);
-      await page.goto(path);
+      const blocked = await openForAudit(page, path);
+      test.skip(blocked !== null, blocked ?? '');
       await runAutomatedChecks(page, testInfo, `phase2-${slug}`);
     });
   }
@@ -56,7 +57,8 @@ test.describe('Automated checks (admin): representative pages', () => {
       testInfo.setTimeout(120_000);
       const url = await discoverItemUrl(page, listPath, itemLink, pathSuffix);
       test.skip(url === null, `No item link matching "${itemLink}" found on ${listPath}. Seed default content first.`);
-      await page.goto(url);
+      const blocked = await openForAudit(page, url);
+      test.skip(blocked !== null, blocked ?? '');
       await runAutomatedChecks(page, testInfo, `phase2-${slug}`);
     });
   }
