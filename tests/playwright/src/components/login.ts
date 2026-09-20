@@ -32,22 +32,24 @@ export class Login {
     // every automated login here is silently rejected as a bot.
     //
     // ALTCHA solves a client-side proof-of-work challenge after the
-    // checkbox is clicked, which normally finishes in well under a second
-    // but is CPU-bound: under CI's contention (multiple concurrent browser
-    // processes, worst near the tail of a long run) it can occasionally
-    // take much longer. A fixed wait long enough for the common case
-    // submits an unsolved challenge under contention, which Drupal rejects
-    // as a bot with no visible error -- the page just never navigates away
-    // from /user/login, indistinguishable from a slow server until you
-    // know to look for this (see PR #2264). Wait for the widget's own
-    // verified state instead of guessing. Still awaited alongside the 7s
-    // honeypot floor, so this never waits less than 7s even when ALTCHA
-    // verifies instantly.
+    // checkbox is clicked, then sets its underlying checkbox input's
+    // `checked` DOM property via JS. Its own `data-state="verified"`
+    // attribute can flip before that property write actually lands under
+    // CPU contention (confirmed on PR #2264: a diagnostic showed the
+    // login button's click() succeeding but triggering zero network
+    // requests -- the browser's native HTML5 validation was silently
+    // blocking submission because the checkbox, still `required`, wasn't
+    // actually `checked` yet from its own perspective, even though our
+    // `data-state` check had already passed). Wait on the checkbox's own
+    // `checked` property directly instead of the widget's attribute.
     const altchaCheckbox = this.page.getByRole('checkbox', { name: /not a robot/i });
     if (await altchaCheckbox.count() > 0) {
       await altchaCheckbox.click();
       await Promise.all([
-        this.page.locator('altcha-widget .altcha[data-state="verified"]').waitFor({ timeout: 60000 }),
+        this.page.waitForFunction(() => {
+          const checkbox = document.querySelector('altcha-widget input[type="checkbox"]');
+          return checkbox instanceof HTMLInputElement && checkbox.checked;
+        }, { timeout: 60000 }),
         this.page.waitForTimeout(7000),
       ]);
     }
@@ -55,45 +57,14 @@ export class Login {
       await this.page.waitForTimeout(7000);
     }
 
-    // TEMPORARY diagnostic for PR #2264: the previous diagnostic (poll +
-    // dump body text) showed the page still sitting on a pristine,
-    // error-free /user/login after the full wait -- which is ambiguous
-    // between "the POST was rejected and silently re-rendered the form"
-    // and "the POST is still genuinely in flight". Track the actual
-    // request/response cycle instead, which distinguishes them directly.
-    // To be removed once the cause is known.
-    const netLog: string[] = [];
-    const onRequest = (req: import('@playwright/test').Request) => {
-      if (req.url().includes('/user/login')) {
-        netLog.push(`--> ${req.method()} ${req.url()} @ ${Date.now()}`);
-      }
-    };
-    const onResponse = (res: import('@playwright/test').Response) => {
-      if (res.url().includes('/user/login')) {
-        netLog.push(`<-- ${res.status()} ${res.url()} @ ${Date.now()}`);
-      }
-    };
-    this.page.on('request', onRequest);
-    this.page.on('response', onResponse);
-
-    try {
-      // Wait for the post-login redirect to complete before returning:
-      // clicking the button alone doesn't wait for the resulting
-      // navigation, so callers could otherwise navigate away and cancel
-      // the login request before the session cookie is ever set.
-      await Promise.all([
-        this.page.waitForURL((url) => !url.pathname.startsWith('/user/login'), { timeout: 45000 }),
-        loginButton.click({ timeout: 45000 }),
-      ]);
-    }
-    catch (error) {
-      console.error(`[login diagnostic] /user/login network activity:\n${netLog.join('\n') || '(none observed)'}`);
-      throw error;
-    }
-    finally {
-      this.page.off('request', onRequest);
-      this.page.off('response', onResponse);
-    }
+    // Wait for the post-login redirect to complete before returning:
+    // clicking the button alone doesn't wait for the resulting navigation,
+    // so callers could otherwise navigate away and cancel the login
+    // request before the session cookie is ever set.
+    await Promise.all([
+      this.page.waitForURL((url) => !url.pathname.startsWith('/user/login'), { timeout: 30000 }),
+      loginButton.click({ timeout: 30000 }),
+    ]);
   }
 
   public async logout(): Promise<void> {
