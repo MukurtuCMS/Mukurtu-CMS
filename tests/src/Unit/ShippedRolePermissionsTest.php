@@ -136,6 +136,35 @@ class ShippedRolePermissionsTest extends UnitTestCase {
   }
 
   /**
+   * Permissions needed to open a "Select..." entity browser modal.
+   *
+   * mukurtu_core_update_40205() backfills these onto existing sites; this
+   * asserts the other half, that mukurtu_install() still grants all of them
+   * on a fresh install (mukurtu_collection_browser included, since it was
+   * missing from that list until this permission was added).
+   */
+  public static function authenticatedEntityBrowserPermissionProvider(): \Generator {
+    yield 'mukurtu_collection_browser' => ['access mukurtu_collection_browser entity browser pages'];
+    yield 'mukurtu_community_and_protocol_user_browser' => ['access mukurtu_community_and_protocol_user_browser entity browser pages'];
+    yield 'mukurtu_community_select' => ['access mukurtu_community_select entity browser pages'];
+    yield 'mukurtu_content_browser' => ['access mukurtu_content_browser entity browser pages'];
+    yield 'mukurtu_dictionary_word_browser' => ['access mukurtu_dictionary_word_browser entity browser pages'];
+    yield 'mukurtu_person_browser' => ['access mukurtu_person_browser entity browser pages'];
+    yield 'mukurtu_taxonomy_record_place_term_browser' => ['access mukurtu_taxonomy_record_place_term_browser entity browser pages'];
+    yield 'mukurtu_taxonomy_record_term_browser' => ['access mukurtu_taxonomy_record_term_browser entity browser pages'];
+    yield 'multipage_item_entity_browser' => ['access multipage_item_entity_browser entity browser pages'];
+  }
+
+  #[DataProvider('authenticatedEntityBrowserPermissionProvider')]
+  public function testAuthenticatedHoldsEntityBrowserPermission(string $permission): void {
+    $this->assertContains(
+      $permission,
+      self::effectivePermissions('authenticated'),
+      "The authenticated role does not hold '$permission' on a fresh install."
+    );
+  }
+
+  /**
    * Authenticated users get Basic HTML but not Full HTML.
    *
    * Full HTML adds object, embed and video tags over Basic HTML, which already
