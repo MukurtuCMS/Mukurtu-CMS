@@ -1,6 +1,35 @@
 import { Page } from '@playwright/test';
 
 /**
+ * Navigates to a page for auditing, refusing to audit an error page.
+ *
+ * Returns null when the page is fit to scan, or a reason to skip when it
+ * is not. Callers pass that straight to test.skip(), so the skip is named
+ * in the run summary rather than silently becoming a clean result.
+ *
+ * Why this exists: on a preview whose seeded content is protocol-gated,
+ * /collections returns 403 for anonymous visitors (the browse controller
+ * denies access when the view is empty). Without this guard the anonymous
+ * collections-browse scan audited Mukurtu's "Incorrect Permissions" page
+ * and reported it clean, which is worse than not scanning at all.
+ *
+ * Keyed on HTTP status, deliberately not on the page title:
+ * /mukurtu/access-denied is in the inventory on purpose and returns 200
+ * with that same title when visited directly. It should be scanned; a 403
+ * elsewhere should not.
+ */
+export async function openForAudit(page: Page, path: string): Promise<string | null> {
+  const response = await page.goto(path);
+  if (response === null) {
+    return `${path} produced no HTTP response (same-document navigation); nothing to audit.`;
+  }
+  if (!response.ok()) {
+    return `${path} returned HTTP ${response.status()}; auditing an error page would report it as clean.`;
+  }
+  return null;
+}
+
+/**
  * The accessibility program's audit page inventory, shared by every
  * automated check (axe scans, reflow/zoom, focus-visibility, link text,
  * keyboard traps). See docs/accessibility/page-inventory.md at the profile

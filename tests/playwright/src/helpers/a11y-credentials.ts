@@ -52,6 +52,23 @@ export function managerAccount(): Account {
 }
 
 /**
+ * An administrator, for setup steps that change site configuration.
+ *
+ * Distinct from memberAccount() on purpose. The scans should run as a
+ * plain member, but enabling the submission form before scanning it needs
+ * "administer mukurtu submissions", which a representative member account
+ * must not have. Using the member account for setup would mean that the
+ * moment real member credentials are configured, the setup starts failing
+ * and the submission scans silently skip.
+ *
+ * Falls back to admin/admin, which is what the Tugboat build creates
+ * (`drush site-install ... --account-pass="admin"`).
+ */
+export function adminAccount(): Account {
+  return account('A11Y_ADMIN_USERNAME', 'A11Y_ADMIN_PASSWORD');
+}
+
+/**
  * Records in the test report that a scan fell back to the admin account.
  *
  * Without this the fallback is completely silent: the run goes green, the
