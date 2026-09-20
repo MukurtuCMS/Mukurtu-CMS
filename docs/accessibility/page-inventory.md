@@ -71,6 +71,11 @@ Member scans use the account in `A11Y_USERNAME`/`A11Y_PASSWORD` (default `admin`
 
 **On the Tugboat preview these accounts are provisioned for you.** The preview runs `drush site-install` on every build, so its only account is `admin`; `scripts/tugboat/provision-a11y-accounts.php` creates the member and manage-adjacent accounts during the build, from environment variables set on the Tugboat project. The script does nothing at all unless those variables are set, so a preview without them behaves exactly as before. The same values then go in the GitHub Actions secrets of the same name, so Playwright logs in as the accounts the build created. See [#2241](https://github.com/MukurtuCMS/Mukurtu-CMS/issues/2241).
 
+Two things to get right when setting them, both of which fail quietly rather than loudly:
+
+- **GitHub has two separate secret stores, and only one of them reaches CI.** Add these under Settings > Secrets and variables > **Actions**. The Codespaces tab at `/settings/secrets/codespaces` looks identical and lists the same names once filled in, but those values are injected into dev containers only — `${{ secrets.A11Y_USERNAME }}` in a workflow never sees them, so the scans quietly keep running as `admin`.
+- **Only a full Tugboat build provisions the accounts, not a refresh.** The script runs in the `build` phase, and the `update` phase a preview refresh runs does not call it. A preview created before the variables existed therefore needs an explicit rebuild; a brand-new preview gets them on its first build.
+
 The memberships are not incidental. A member account with no community or protocol membership cannot reach protocol-gated item pages at all, so those scans skip and the run looks clean while covering less. Measured against a local site: a member with no memberships scanned one page fewer than `admin` reached; with a community and protocol membership it matches `admin` exactly.
 
 ## Pages — manage-adjacent (non-admin roles)
