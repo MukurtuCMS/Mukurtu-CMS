@@ -1,6 +1,6 @@
 import { test } from '@playwright/test';
 import { Login } from '~components/login';
-import { memberAccount } from '~helpers/a11y-credentials';
+import { adminAccount } from '~helpers/a11y-credentials';
 import {
   checkReflow,
   checkTextZoom,
@@ -34,7 +34,12 @@ async function runAutomatedChecks(page: import('@playwright/test').Page, testInf
  */
 test.describe('Automated checks (admin): representative pages', () => {
   test.beforeEach(async ({ page }) => {
-    const account = memberAccount();
+    // adminAccount(), not memberAccount(): these are admin routes, and a
+    // representative member must not be able to reach them. While the
+    // A11Y_* secrets were unset, memberAccount() fell back to admin/admin
+    // and these scans worked by accident; the moment a real member account
+    // was configured every one of them 403'd and skipped silently.
+    const account = adminAccount();
     const login = new Login(page);
     await login.login(account.username, account.password);
   });
