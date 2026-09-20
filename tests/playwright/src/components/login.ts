@@ -58,14 +58,29 @@ export class Login {
     // Wait for the post-login redirect to complete before returning:
     // clicking the button alone doesn't wait for the resulting navigation,
     // so callers could otherwise navigate away and cancel the login
-    // request before the session cookie is ever set. 45s rather than the
-    // 30s used above: PR #2264 observed the login POST itself occasionally
-    // taking longer than 30s under CI's concurrent worker load, separately
-    // from the ALTCHA timing above.
-    await Promise.all([
-      this.page.waitForURL((url) => !url.pathname.startsWith('/user/login'), { timeout: 45000 }),
-      loginButton.click({ timeout: 45000 }),
-    ]);
+    // request before the session cookie is ever set.
+    await loginButton.click({ timeout: 45000 });
+
+    // TEMPORARY diagnostic for PR #2264: this login flow times out
+    // deterministically in real CI (0/9 attempts across 3 separate CI runs
+    // at 30s, then 45s -- a fixed ceiling isn't the issue, since raising it
+    // hasn't budged the failure rate at all), but never reproduces locally
+    // or against the same live preview outside CI. Poll in small steps and
+    // print what the page actually shows instead of guessing further. To
+    // be removed once the cause is known.
+    for (let waited = 0; waited < 45000; waited += 5000) {
+      if (!this.page.url().includes('/user/login')) {
+        break;
+      }
+      try {
+        await this.page.waitForURL((url) => !url.pathname.startsWith('/user/login'), { timeout: 5000 });
+        break;
+      }
+      catch {
+        const snippet = (await this.page.locator('body').innerText().catch(() => '<no body>')).slice(0, 1500);
+        console.error(`[login diagnostic] still on ${this.page.url()} after ${waited + 5000}ms:\n${snippet}`);
+      }
+    }
   }
 
   public async logout(): Promise<void> {
