@@ -41,7 +41,12 @@ function account(userVar: string, passVar: string): Account {
   };
 }
 
-/** The account Phase 1 member scans and Phase 2 admin scans run as. */
+/**
+ * The account Phase 1 member scans run as.
+ *
+ * Not the Phase 2 admin scans: those need permissions a representative
+ * member must not have, so they use adminAccount().
+ */
 export function memberAccount(): Account {
   return account('A11Y_USERNAME', 'A11Y_PASSWORD');
 }
