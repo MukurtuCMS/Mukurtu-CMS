@@ -24,6 +24,20 @@ export class Login {
     await usernameField.fill(username, { timeout: 30000 });
     await passwordField.fill(password);
 
+    // TEMPORARY diagnostic for PR #2264, round 3: the :invalid check from
+    // the previous commit showed the username/password fields reporting as
+    // empty (required, invalid) at the moment of the failed submit, even
+    // though they were filled successfully here moments earlier with no
+    // error. That's consistent with the form being replaced/rebuilt
+    // in-place sometime between now and the click (a fresh, empty DOM node
+    // in the same location), not with the fill() itself failing. Mark the
+    // actual DOM node so we can tell after the fact whether it's still the
+    // same element. To be removed once the cause is known.
+    await this.page.evaluate(() => {
+      const el = document.getElementById('edit-name');
+      if (el) el.setAttribute('data-diagnostic-marker', 'original-fill');
+    });
+
     // The bot-protection work put an ALTCHA "I'm not a robot" checkbox on
     // user_login_form for every anonymous visitor (which is everyone
     // attempting to log in, by definition) and enabled Honeypot's
@@ -57,28 +71,6 @@ export class Login {
       await this.page.waitForTimeout(7000);
     }
 
-    // TEMPORARY diagnostic for PR #2264, round 2: the checked-property fix
-    // above didn't resolve it (still times out here), and the previous
-    // network-request diagnostic was removed in that same commit, so there
-    // is no evidence yet on whether it changed the "zero requests fired"
-    // symptom at all. Re-added, plus a direct check for any element the
-    // browser's own validation currently considers :invalid, to settle
-    // whether this is still a native-validation block or something else.
-    // To be removed once the cause is known.
-    const netLog: string[] = [];
-    const onRequest = (req: import('@playwright/test').Request) => {
-      if (req.url().includes('/user/login')) {
-        netLog.push(`--> ${req.method()} ${req.url()} @ ${Date.now()}`);
-      }
-    };
-    const onResponse = (res: import('@playwright/test').Response) => {
-      if (res.url().includes('/user/login')) {
-        netLog.push(`<-- ${res.status()} ${res.url()} @ ${Date.now()}`);
-      }
-    };
-    this.page.on('request', onRequest);
-    this.page.on('response', onResponse);
-
     try {
       // Wait for the post-login redirect to complete before returning:
       // clicking the button alone doesn't wait for the resulting
@@ -90,18 +82,16 @@ export class Login {
       ]);
     }
     catch (error) {
-      const invalidEls = await this.page.evaluate(() =>
-        Array.from(document.querySelectorAll(':invalid')).map((el) => el.outerHTML.slice(0, 300)),
-      ).catch(() => ['<evaluate failed>']);
-      console.error(
-        `[login diagnostic] /user/login network activity:\n${netLog.join('\n') || '(none observed)'}\n` +
-        `[login diagnostic] :invalid elements:\n${invalidEls.join('\n') || '(none)'}`,
-      );
+      const diagnostic = await this.page.evaluate(() => {
+        const el = document.getElementById('edit-name') as HTMLInputElement | null;
+        return {
+          exists: !!el,
+          sameNode: el?.getAttribute('data-diagnostic-marker') === 'original-fill',
+          currentValue: el?.value ?? null,
+        };
+      }).catch(() => 'evaluate failed');
+      console.error(`[login diagnostic] username field at failure time: ${JSON.stringify(diagnostic)}`);
       throw error;
-    }
-    finally {
-      this.page.off('request', onRequest);
-      this.page.off('response', onResponse);
     }
   }
 
