@@ -121,10 +121,18 @@ export default defineConfig({
   /* Configure projects for major browsers */
   projects: [
     {
+      // Logs each role in once and saves its session, so the specs can
+      // declare `test.use({ storageState: ... })` instead of logging in
+      // again for every test. See src/helpers/auth-state.ts and #2280.
+      name: 'auth',
+      testMatch: 'auth.setup.ts',
+    },
+    {
       name: 'default-content',
       testMatch: 'default-content.spec.ts',
       // Default content needs to be created sequentially.
       fullyParallel: false,
+      dependencies: ['auth'],
     },
     {
       // Offline coverage for src/helpers/preview.ts, whose whole subject is
@@ -133,7 +141,12 @@ export default defineConfig({
       // live site, and this project must run without one, so it also gives
       // every PR a check that stays meaningful when the preview is down.
       name: 'offline',
-      testMatch: 'preview-resilience.spec.ts',
+      // Any spec named *.offline.spec.ts, so adding one needs no config
+      // edit here and none in `chromium`'s testIgnore below. Naming them
+      // individually was one list to forget: a new offline spec left out of
+      // it would silently be run by `chromium` instead, against a live site
+      // it does not use.
+      testMatch: /\.offline\.spec\.ts$/,
       use: { ...devices['Desktop Chrome'] },
     },
     {
@@ -150,8 +163,17 @@ export default defineConfig({
       // Have all tests wait for the default-content test to run before
       // executing, but do not re-run the default-content test if that test is
       // specifically requested, as that would cause it to run twice.
-      dependencies: ['default-content'],
-      testIgnore: ['default-content.spec.ts', 'preview-resilience.spec.ts'],
+      //
+      // 'auth' is listed as well as being reached through default-content's
+      // own dependency, because these tests read the sessions it saves
+      // directly and that should not be something a reader has to trace
+      // through another project to discover.
+      dependencies: ['auth', 'default-content'],
+      testIgnore: [
+        'default-content.spec.ts',
+        'auth.setup.ts',
+        /\.offline\.spec\.ts$/,
+      ],
     },
   ],
 

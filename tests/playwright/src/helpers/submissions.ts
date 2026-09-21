@@ -1,7 +1,6 @@
 import { Browser, Page } from '@playwright/test';
-import { Login } from '~components/login';
 import { gotoReady } from '~helpers/preview';
-import { adminAccount } from '~helpers/a11y-credentials';
+import { ADMIN_STATE } from '~helpers/auth-state';
 
 /**
  * Setup/teardown for scanning the public submission form.
@@ -53,19 +52,15 @@ export type SubmissionFormState = {
  *   nothing was changed.
  */
 export async function enableSubmissionForm(browser: Browser): Promise<SubmissionFormState> {
-  const context = await browser.newContext();
+  // The administrator session saved once by tests/auth.setup.ts. This used
+  // to log in here instead, which is the login that #2267 recorded failing
+  // intermittently in CI -- with both form fields silently emptied between
+  // being filled and being submitted -- and that made these four scans skip
+  // rather than run.
+  const context = await browser.newContext({ storageState: ADMIN_STATE });
   const page = await context.newPage();
 
   try {
-    // adminAccount(), and via the empty-safe helper: an unset GitHub
-    // Actions secret arrives as "" rather than undefined, so the previous
-    // `process.env.A11Y_USERNAME ?? 'admin'` logged in with an empty
-    // username once the workflow started passing the secrets through, and
-    // both submission scans failed on the 30s login timeout.
-    const admin = adminAccount();
-    const login = new Login(page);
-    await login.login(admin.username, admin.password);
-
     const response = await gotoReady(page, SETTINGS_PATH);
     if (!response || !response.ok()) {
       // No permission to administer submissions, or the settings entity
@@ -110,19 +105,13 @@ export async function restoreSubmissionForm(browser: Browser, previous: Submissi
     return;
   }
 
-  const context = await browser.newContext();
+  // The same saved administrator session as the setup above. A login that
+  // failed here left the submission form switched on for the rest of the
+  // preview's life, which is a worse outcome than the setup failing.
+  const context = await browser.newContext({ storageState: ADMIN_STATE });
   const page = await context.newPage();
 
   try {
-    // adminAccount(), and via the empty-safe helper: an unset GitHub
-    // Actions secret arrives as "" rather than undefined, so the previous
-    // `process.env.A11Y_USERNAME ?? 'admin'` logged in with an empty
-    // username once the workflow started passing the secrets through, and
-    // both submission scans failed on the 30s login timeout.
-    const admin = adminAccount();
-    const login = new Login(page);
-    await login.login(admin.username, admin.password);
-
     const response = await gotoReady(page, SETTINGS_PATH);
     if (!response || !response.ok()) {
       return;

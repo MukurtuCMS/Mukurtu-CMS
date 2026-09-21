@@ -1,7 +1,8 @@
-import { test } from '@playwright/test';
-import { Login } from '~components/login';
+import { expect, test } from '@playwright/test';
 import { managerAccount, memberAccount, noteFallbackAccount } from '~helpers/a11y-credentials';
+import { MANAGER_STATE, MEMBER_STATE } from '~helpers/auth-state';
 import { auditPage } from '~helpers/axe';
+import { gotoReady } from '~helpers/preview';
 import {
   anonymousPages,
   discoveredPages,
@@ -50,14 +51,34 @@ test.describe('Accessibility: anonymous pages', () => {
     test.skip(blocked !== null, blocked ?? '');
     await auditPage(page, testInfo, 'protocol-local-contexts');
   });
+
+  /**
+   * The one assertion in a file of report-only scans.
+   *
+   * Since #2280 the signed-in blocks get their session from
+   * `test.use({ storageState: ... })`. A session reaching this block by
+   * mistake -- a `storageState` set at project level, or a stray
+   * `test.use` outside the block that meant to have one -- would not fail
+   * any scan above: every one of them would quietly audit the logged-in
+   * version of a page that is in the inventory precisely because visitors
+   * see it. The run would stay green and the report would look complete.
+   */
+  test('anonymous scans are anonymous', async ({ page }) => {
+    await gotoReady(page, '/user/login');
+    await expect(page.getByLabel('Username')).toBeVisible();
+  });
 });
 
 test.describe('Accessibility: member pages', () => {
-  test.beforeEach(async ({ page }, testInfo) => {
-    const account = memberAccount();
-    noteFallbackAccount(testInfo, account, 'member');
-    const login = new Login(page);
-    await login.login(account.username, account.password);
+  // A session saved once by tests/auth.setup.ts, rather than a login in
+  // every test. See src/helpers/auth-state.ts.
+  test.use({ storageState: MEMBER_STATE });
+
+  test.beforeEach(async ({}, testInfo) => {
+    // Kept when the login went away: the report has to say when these
+    // results were gathered as admin/admin rather than as the role, and
+    // that annotation is per test.
+    noteFallbackAccount(testInfo, memberAccount(), 'member');
   });
 
   for (const { slug, path } of memberPages) {
@@ -90,11 +111,15 @@ test.describe('Accessibility: member pages', () => {
  * noise and isn't representative of the actual roles that use them.
  */
 test.describe('Accessibility: manage-adjacent pages', () => {
-  test.beforeEach(async ({ page }, testInfo) => {
-    const account = managerAccount();
-    noteFallbackAccount(testInfo, account, 'manage-adjacent');
-    const login = new Login(page);
-    await login.login(account.username, account.password);
+  // A session saved once by tests/auth.setup.ts, rather than a login in
+  // every test. See src/helpers/auth-state.ts.
+  test.use({ storageState: MANAGER_STATE });
+
+  test.beforeEach(async ({}, testInfo) => {
+    // Kept when the login went away: the report has to say when these
+    // results were gathered as admin/admin rather than as the role, and
+    // that annotation is per test.
+    noteFallbackAccount(testInfo, managerAccount(), 'manage-adjacent');
   });
 
   for (const { slug, path } of managePages) {
