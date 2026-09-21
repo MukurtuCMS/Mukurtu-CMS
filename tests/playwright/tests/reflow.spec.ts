@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { gotoReady } from "~helpers/preview";
 
 /**
  * Regression tests for issue #1997: content requiring horizontal scroll at
@@ -17,7 +18,7 @@ const NO_CONTENT_DEPENDENCY_PAGES = ['/', '/browse', '/user/login'];
 for (const path of NO_CONTENT_DEPENDENCY_PAGES) {
   test(`Reflow: no horizontal overflow at 320px on ${path}`, async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 720 });
-    await page.goto(path);
+    await gotoReady(page, path);
     const overflow = await page.evaluate(() => ({
       scrollWidth: document.documentElement.scrollWidth,
       clientWidth: document.documentElement.clientWidth,
@@ -27,7 +28,7 @@ for (const path of NO_CONTENT_DEPENDENCY_PAGES) {
 }
 
 test('Reflow: header search input can shrink to fit the mobile header grid', async ({ page }) => {
-  await page.goto('/');
+  await gotoReady(page, '/');
   // Two instances render (mobile and desktop, see _header-search.scss);
   // the mobile one is what overflows the narrow header grid column.
   const minInlineSize = await page.locator('.header-search--mobile .header-search__input').evaluate(
@@ -37,7 +38,7 @@ test('Reflow: header search input can shrink to fit the mobile header grid', asy
 });
 
 test('Reflow: page title and breadcrumb allow mid-word breaks for long unbreakable titles', async ({ page }) => {
-  await page.goto('/browse');
+  await gotoReady(page, '/browse');
   const titleOverflowWrap = await page.locator('.page__title h1').first().evaluate(
     (el) => getComputedStyle(el).overflowWrap
   );
