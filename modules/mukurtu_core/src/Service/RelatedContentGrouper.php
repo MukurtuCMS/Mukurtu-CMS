@@ -37,7 +37,9 @@ class RelatedContentGrouper {
    *   The Person or Place node.
    *
    * @return array
-   *   A '#theme' => 'mukurtu_related_content_grouped' render array.
+   *   A '#theme' => 'mukurtu_related_content_grouped' render array, or an
+   *   array carrying only cache metadata when the entity has no related
+   *   content the current user can view.
    */
   public function build(NodeInterface $entity): array {
     $config = $this->configFactory->get('mukurtu.settings');
@@ -151,15 +153,21 @@ class RelatedContentGrouper {
       }
     }
 
-    $build = [
-      '#theme' => 'mukurtu_related_content_grouped',
-      '#items' => $items,
-      '#filters' => $filters,
-      '#has_filters' => count($filters) > 1,
-    ];
+    // With nothing visible to list there is no section to build, but the
+    // cacheability still has to bubble so the page re-renders once related
+    // content appears or becomes viewable.
+    $build = [];
+    if ($items) {
+      $build = [
+        '#theme' => 'mukurtu_related_content_grouped',
+        '#items' => $items,
+        '#filters' => $filters,
+        '#has_filters' => count($filters) > 1,
+      ];
 
-    if ($build['#has_filters']) {
-      $build['#attached']['library'][] = 'mukurtu_core/related-content-filter';
+      if ($build['#has_filters']) {
+        $build['#attached']['library'][] = 'mukurtu_core/related-content-filter';
+      }
     }
 
     $cache->applyTo($build);
