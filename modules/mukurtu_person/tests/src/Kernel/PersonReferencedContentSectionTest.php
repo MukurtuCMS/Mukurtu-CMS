@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_person\Kernel;
 
 use Drupal\mukurtu_person\Hook\PersonPreprocessHooks;
+use Drupal\mukurtu_protocol\Entity\Protocol;
+use Drupal\user\Entity\User;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
@@ -120,6 +122,44 @@ class PersonReferencedContentSectionTest extends PersonTestBase {
 
     $this->assertStringNotContainsString('related-content__label', $output);
     $this->assertStringNotContainsString('related-content', $output);
+  }
+
+  /**
+   * Referenced content the user cannot view leaves no empty section behind.
+   */
+  public function testUnviewableReferencedContentGetsNoSection(): void {
+    // A strict protocol the viewer is not a member of, so its content is
+    // invisible to them.
+    $closedProtocol = Protocol::create([
+      'name' => 'Closed Protocol',
+      'field_communities' => [$this->community->id()],
+      'field_access_mode' => 'strict',
+    ]);
+    $closedProtocol->save();
+
+    $related = $this->buildPerson('Protocol-gated related person');
+    $related->setProtocols([$closedProtocol]);
+    $related->save();
+
+    $person = $this->buildPerson('Referencing person');
+    $person->set('field_related_content', [$related->id()]);
+    $person->save();
+
+    // The reference survives on the computed field, so the section can only be
+    // suppressed by the grouper's per-item access check.
+    $this->assertNotEmpty($person->get('field_all_related_content')->referencedEntities());
+
+    // $this->currentUser is uid 1, which bypasses access entirely, so the
+    // check has to run as somebody outside the protocol.
+    $viewer = User::create(['name' => $this->randomMachineName()]);
+    $viewer->save();
+    $this->container->get('current_user')->setAccount($viewer);
+    $this->assertFalse($related->access('view', $viewer));
+
+    $content = $this->preprocess($person, ['field_all_related_content' => ['#weight' => 90]]);
+
+    $this->assertArrayNotHasKey('#theme', $content['field_all_related_content']);
+    $this->assertArrayNotHasKey('#title', $content['field_all_related_content']);
   }
 
 }

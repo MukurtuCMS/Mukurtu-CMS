@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_place\Kernel;
 
 use Drupal\mukurtu_place\Hook\PlacePreprocessHooks;
+use Drupal\mukurtu_protocol\Entity\Protocol;
+use Drupal\user\Entity\User;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
@@ -102,6 +104,44 @@ class PlaceReferencedContentSectionTest extends PlaceTestBase {
     $content = $this->preprocess($place, []);
 
     $this->assertArrayNotHasKey('field_all_related_content', $content);
+  }
+
+  /**
+   * Referenced content the user cannot view leaves no empty section behind.
+   */
+  public function testUnviewableReferencedContentGetsNoSection(): void {
+    // A strict protocol the viewer is not a member of, so its content is
+    // invisible to them.
+    $closedProtocol = Protocol::create([
+      'name' => 'Closed Protocol',
+      'field_communities' => [$this->community->id()],
+      'field_access_mode' => 'strict',
+    ]);
+    $closedProtocol->save();
+
+    $related = $this->buildPlace('Protocol-gated related place');
+    $related->setProtocols([$closedProtocol]);
+    $related->save();
+
+    $place = $this->buildPlace('Referencing place');
+    $place->set('field_related_content', [$related->id()]);
+    $place->save();
+
+    // The reference survives on the computed field, so the section can only be
+    // suppressed by the grouper's per-item access check.
+    $this->assertNotEmpty($place->get('field_all_related_content')->referencedEntities());
+
+    // $this->currentUser is uid 1, which bypasses access entirely, so the
+    // check has to run as somebody outside the protocol.
+    $viewer = User::create(['name' => $this->randomMachineName()]);
+    $viewer->save();
+    $this->container->get('current_user')->setAccount($viewer);
+    $this->assertFalse($related->access('view', $viewer));
+
+    $content = $this->preprocess($place, ['field_all_related_content' => ['#weight' => 90]]);
+
+    $this->assertArrayNotHasKey('#theme', $content['field_all_related_content']);
+    $this->assertArrayNotHasKey('#title', $content['field_all_related_content']);
   }
 
 }
