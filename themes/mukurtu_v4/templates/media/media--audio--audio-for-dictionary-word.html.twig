@@ -26,6 +26,9 @@
  * - title_attributes: Same as attributes, except applied to the main title
  *   tag that appears in the template.
  * - bundle: machine name of media type.
+ * - media_url: URL to the audio file. Empty when the file's stream wrapper is
+ *   unavailable, in which case no download link is offered.
+ * - media_download_enabled: Whether the site offers media downloads.
  * @see template_preprocess_media()
  */
 #}
@@ -42,6 +45,8 @@
 
   {{ content|without('media_content_warnings') }}
 
-  <a href="{{ media_url }}" class="button" download aria-label="Download audio: {{ name }}">Download audio</a>
+  {% if media_download_enabled and media_url %}
+    <a href="{{ media_url }}" class="button" download aria-label="Download audio: {{ name }}">Download audio</a>
+  {% endif %}
 
 </div>

@@ -7,11 +7,13 @@ use Drupal\Core\Ajax\CloseModalDialogCommand;
 use Drupal\Core\Ajax\InvokeCommand;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\File\Exception\InvalidStreamWrapperException;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Url;
 use Drupal\file\Element\ManagedFile;
+use Drupal\file\FileInterface;
 use Drupal\media_library\Form\FileUploadForm;
 use Drupal\media_library\Plugin\Field\FieldWidget\MediaLibraryWidget;
 use Drupal\mukurtu_core\Event\RepresentativeMediaComputationEvent;
@@ -1288,4 +1290,121 @@ function mukurtu_media_entity_operation(\Drupal\Core\Entity\EntityInterface $ent
   }
 
   return $operations;
+}
+
+/**
+ * Implements hook_entity_prepare_view().
+ *
+ * Drops file references that cannot produce a URL, before any formatter runs.
+ *
+ * Core's field formatters build their own URLs. Some do it eagerly, while the
+ * display is still being built: media.image.media_assets renders the thumbnail
+ * with image_url, whose viewElements() calls the URL generator directly. A file
+ * whose stream wrapper is not registered - a private:// file on a site whose
+ * container predates file_private_path, or a scheme a v3 migration carried over
+ * that this site never registers - makes that throw
+ * InvalidStreamWrapperException, and the whole page render dies with it. One
+ * such file in a browse listing was enough.
+ *
+ * Preprocess is too late to help: the exception is thrown while the render
+ * array is assembled, long before any template or preprocess function sees it.
+ * This hook is the last point that runs first.
+ *
+ * The entity is modified in place rather than cloned, because the render
+ * pipeline holds this object. That is a display-time change only; nothing is
+ * saved, and the field is restored for the next request, which will re-check.
+ */
+function mukurtu_media_entity_prepare_view(string $entity_type_id, array $entities, array $displays, string $view_mode): void {
+  if ($entity_type_id !== 'media') {
+    return;
+  }
+
+  foreach ($entities as $media) {
+    $display = $displays[$media->bundle()] ?? NULL;
+    if ($display) {
+      _mukurtu_media_drop_unresolvable_files($media, $display);
+    }
+  }
+}
+
+/**
+ * Removes file items whose URI has no usable stream wrapper.
+ *
+ * @param \Drupal\media\MediaInterface $media
+ *   The media entity about to be displayed.
+ * @param \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display
+ *   The display being built for it.
+ */
+function _mukurtu_media_drop_unresolvable_files($media, $display): void {
+  $file_url_generator = \Drupal::service('file_url_generator');
+  $source_field = $media->getSource()->getConfiguration()['source_field'] ?? '';
+
+  foreach ($media->getFieldDefinitions() as $field_name => $definition) {
+    if (!in_array($definition->getType(), ['file', 'image'], TRUE)) {
+      continue;
+    }
+
+    // Only fields this display actually renders can throw, and they are the
+    // only ones worth loading a file for. Checking the rest would cost an
+    // entity load per hidden field on every media item on the page.
+    if (!$display->getComponent($field_name)) {
+      continue;
+    }
+
+    $field = $media->get($field_name);
+    if ($field->isEmpty()) {
+      continue;
+    }
+
+    $kept = [];
+    $dropped = FALSE;
+    foreach ($field as $item) {
+      $file = $item->entity;
+      if ($file instanceof FileInterface) {
+        try {
+          // Generating the URL is the predicate, rather than inspecting the
+          // scheme: the generator resolves schemeless and http-family URIs
+          // without a wrapper, so a scheme check would discard URIs that work.
+          $file_url_generator->generateString($file->getFileUri());
+        }
+        catch (InvalidStreamWrapperException $e) {
+          $dropped = TRUE;
+          continue;
+        }
+      }
+      $kept[] = $item->getValue();
+    }
+
+    if ($dropped) {
+      $media->set($field_name, $kept);
+
+      // Losing the source file is the difference between "this item is missing
+      // a thumbnail" and "there is nothing to show". Templates need to tell
+      // them apart, but by the time they run the field looks simply empty, so
+      // record it here.
+      if ($field_name === $source_field && $media->id()) {
+        $unavailable = &drupal_static('mukurtu_media_unavailable_source', []);
+        $unavailable[$media->id()] = TRUE;
+      }
+    }
+  }
+}
+
+/**
+ * Whether a media item's source file could not be resolved for display.
+ *
+ * @param \Drupal\media\MediaInterface $media
+ *   The media entity being displayed.
+ *
+ * @return bool
+ *   TRUE if the source file was dropped because no URL could be built for it.
+ *
+ * @see mukurtu_media_entity_prepare_view()
+ */
+function mukurtu_media_source_is_unavailable($media): bool {
+  if (!$media->id()) {
+    return FALSE;
+  }
+  $unavailable = &drupal_static('mukurtu_media_unavailable_source', []);
+  return !empty($unavailable[$media->id()]);
 }

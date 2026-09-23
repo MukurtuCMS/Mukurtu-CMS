@@ -1325,6 +1325,10 @@ body.consent-popup-opened .klaro_toggle_dialog {
   position: relative;
 }
 
+.media:has(.mukurtu-content-warnings):has(.media-asset--unavailable) {
+  min-block-size: 12rem;
+}
+
 .mukurtu-content-warnings {
   position: absolute;
   inset: 0;
@@ -3168,6 +3172,12 @@ img[class$=-placeholder] {
   display: block;
   inline-size: 100%;
   block-size: 100%;
+}
+
+.media-asset--unavailable {
+  margin: 0;
+  padding: var(--v-space-2xs);
+  text-align: center;
 }
 
 .media-asset--glightbox-inline {

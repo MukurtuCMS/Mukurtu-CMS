@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/includes/AudioHelper.php';
+require_once __DIR__ . '/includes/FileUrlHelper.php';
 
 use Drupal\Core\Cache\Cache;
 use Drupal\file\Entity\File;
@@ -282,9 +283,45 @@ function mukurtu_v4_preprocess_media(array &$variables) {
     $file = File::load($fid);
   }
 
+  // A file whose stream wrapper is unavailable yields no URL. Leaving
+  // media_url unset is the state the templates already handle for a media item
+  // with no file at all, so they suppress the download affordance rather than
+  // rendering an empty href.
   if (!empty($file)) {
-    $url = $file->createFileUrl();
-    $variables['media_url'] = $url;
+    $url = MukurtuV4FileUrl::fromFile($file);
+    if ($url !== NULL) {
+      $variables['media_url'] = $url;
+    }
+    else {
+      // Suppressing the theme's own links is not enough on its own. Core's
+      // field formatters build their URLs themselves, inside {{ content }},
+      // and throw before any guard in the template is reached - an image with
+      // an unusable URI still took the page down. Dropping the element here,
+      // while the content array is still unrendered, is the only point that
+      // covers every bundle.
+      $variables['media_unavailable'] = TRUE;
+      $source_field = $media->getSource()->getConfiguration()['source_field'] ?? '';
+      if ($source_field) {
+        unset($variables['content'][$source_field]);
+      }
+    }
+  }
+
+  // mukurtu_media strips a source file that cannot be resolved before any
+  // formatter runs, which is the only point early enough to stop an eager
+  // formatter throwing. By now the field simply looks empty, so ask the module
+  // what it dropped.
+  if (function_exists('mukurtu_media_source_is_unavailable') && mukurtu_media_source_is_unavailable($media)) {
+    $variables['media_unavailable'] = TRUE;
+  }
+
+  // The thumbnail is a second file, rendered by a core formatter of its own,
+  // so an unusable one throws even when the source file is fine. This is the
+  // path the original browse-page crash came through.
+  if ($media->hasField('thumbnail') && !$media->get('thumbnail')->isEmpty()) {
+    if (MukurtuV4FileUrl::fromFile($media->get('thumbnail')->entity) === NULL) {
+      unset($variables['content']['thumbnail']);
+    }
   }
 
   $config = \Drupal::config('mukurtu_media.settings');
@@ -322,7 +359,7 @@ function mukurtu_v4_preprocess_media(array &$variables) {
         if ($defaultFid) {
           $scFile = \Drupal\file\Entity\File::load($defaultFid);
           if ($scFile) {
-            $variables['soundcloud_fallback_thumbnail_url'] = $scFile->createFileUrl();
+            $variables['soundcloud_fallback_thumbnail_url'] = MukurtuV4FileUrl::fromFile($scFile);
           }
         }
         if (empty($variables['soundcloud_fallback_thumbnail_url'])) {
@@ -369,8 +406,9 @@ function mukurtu_v4_preprocess_media__soundcloud__carousel_thumbnail(array &$var
     $defaultFid = $config->get('soundcloud')[0] ?? NULL;
     if ($defaultFid) {
       $file = \Drupal\file\Entity\File::load($defaultFid);
-      if ($file) {
-        $variables['soundcloud_fallback_thumbnail_url'] = $file->createFileUrl();
+      $url = MukurtuV4FileUrl::fromFile($file);
+      if ($url !== NULL) {
+        $variables['soundcloud_fallback_thumbnail_url'] = $url;
         return;
       }
     }
