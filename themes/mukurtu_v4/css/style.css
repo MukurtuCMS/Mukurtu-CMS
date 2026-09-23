@@ -1325,6 +1325,10 @@ body.consent-popup-opened .klaro_toggle_dialog {
   position: relative;
 }
 
+.media:has(.mukurtu-content-warnings):has(.media-asset--unavailable) {
+  min-block-size: 12rem;
+}
+
 .mukurtu-content-warnings {
   position: absolute;
   inset: 0;

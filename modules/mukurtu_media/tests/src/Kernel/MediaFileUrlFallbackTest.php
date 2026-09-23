@@ -294,6 +294,76 @@ class MediaFileUrlFallbackTest extends KernelTestBase {
   }
 
   /**
+   * prepare_view strips a source file that no formatter could render.
+   *
+   * Core formatters build their own URLs, and image_url does it eagerly while
+   * the display is still being assembled, so the element has to be gone before
+   * that point. Preprocess and templates are both too late.
+   */
+  public function testPrepareViewDropsUnresolvableSourceFile(): void {
+    $media = $this->createSavedTestFileMedia('private://locked.mp3');
+
+    mukurtu_media_entity_prepare_view('media', [$media], [], 'default');
+
+    $this->assertTrue($media->get('field_media_test_source')->isEmpty());
+    $this->assertTrue(mukurtu_media_source_is_unavailable($media));
+  }
+
+  /**
+   * A resolvable source file is left alone.
+   */
+  public function testPrepareViewKeepsResolvableSourceFile(): void {
+    $media = $this->createSavedTestFileMedia('public://open.mp3');
+
+    mukurtu_media_entity_prepare_view('media', [$media], [], 'default');
+
+    $this->assertFalse($media->get('field_media_test_source')->isEmpty());
+    $this->assertFalse(mukurtu_media_source_is_unavailable($media));
+  }
+
+  /**
+   * Other entity types are ignored.
+   */
+  public function testPrepareViewIgnoresOtherEntityTypes(): void {
+    $media = $this->createSavedTestFileMedia('private://locked.mp3');
+
+    mukurtu_media_entity_prepare_view('node', [$media], [], 'default');
+
+    $this->assertFalse($media->get('field_media_test_source')->isEmpty());
+  }
+
+  /**
+   * A media item whose source is fine is not reported as unavailable.
+   *
+   * Guards the distinction the templates depend on: an item missing only its
+   * thumbnail still has something to show, and must not be replaced with the
+   * "not available" notice.
+   */
+  public function testUnresolvableThumbnailAloneIsNotUnavailable(): void {
+    $media = $this->createSavedTestFileMedia('public://open.mp3');
+    $media->set('thumbnail', ['target_id' => $this->createFile('private://thumb.png')->id()]);
+
+    mukurtu_media_entity_prepare_view('media', [$media], [], 'default');
+
+    $this->assertTrue($media->get('thumbnail')->isEmpty(), 'The unusable thumbnail is dropped.');
+    $this->assertFalse($media->get('field_media_test_source')->isEmpty(), 'The usable source file is kept.');
+    $this->assertFalse(mukurtu_media_source_is_unavailable($media));
+  }
+
+  /**
+   * Creates and saves a test_file media item carrying the given file.
+   */
+  protected function createSavedTestFileMedia(string $uri): Media {
+    $media = Media::create([
+      'bundle' => 'test_file',
+      'name' => 'Prepare view test',
+      'field_media_test_source' => ['target_id' => $this->createFile($uri)->id()],
+    ]);
+    $media->save();
+    return $media;
+  }
+
+  /**
    * Creates a saved file entity at the given URI.
    *
    * No bytes are written: URL generation never opens the file, and the

@@ -67,19 +67,18 @@
       </div>
     </div>
     {% else %}
-    <p class="media-asset--unavailable">{{ 'This document is currently unavailable. Contact the site administrator for help.'|t }}</p>
+    <p class="media-asset--unavailable">{{ "@name isn't available right now. Contact your site administrator."|t({'@name': name}) }}</p>
     {% endif %}
   </div>
 
   {% if media_url %}
   <div class="media-asset--pdf-actions">
-    <a href="#document-{{ media.id }}" data-type="inline" class="media-asset--link button" aria-label="Expand {{ name }} document">Expand +</a>
-    <a href="{{ media_url }}" class="button" target="_blank" rel="noopener"
-       aria-label="Open {{ name }} document in new tab">Open full screen
-      <span class="visually-hidden">(opens in new tab)</span>
+    <a href="#document-{{ media.id }}" data-type="inline" class="media-asset--link button">Expand +<span class="visually-hidden"> document: {{ name }}</span></a>
+    <a href="{{ media_url }}" class="button" target="_blank" rel="noopener">Open full screen
+      <span class="visually-hidden">: {{ name }} (opens in new tab)</span>
     </a>
     {% if media_download_enabled %}
-      <a href="{{ media_url }}" class="button button--download" download aria-label="Download {{ name }} document">Download document <svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="16" height="18" aria-hidden="true"><path d="M11.61 0H3.87v5.57H0L7.74 13l7.74-7.43h-3.87z"/><path fill-rule="evenodd" d="M.52 15H16v3H.52z" clip-rule="evenodd"/></svg></a>
+      <a href="{{ media_url }}" class="button button--download" download>Download document<span class="visually-hidden">: {{ name }}</span> <svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="16" height="18" aria-hidden="true"><path d="M11.61 0H3.87v5.57H0L7.74 13l7.74-7.43h-3.87z"/><path fill-rule="evenodd" d="M.52 15H16v3H.52z" clip-rule="evenodd"/></svg></a>
     {% endif %}
   </div>
   {% endif %}
