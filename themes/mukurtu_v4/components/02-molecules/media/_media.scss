@@ -213,3 +213,17 @@ img[class$="-placeholder"] {
   block-size: 100%;
 }
 
+// Replaces the PDF viewer when the file's stream wrapper is unavailable, so no
+// URL can be built for it. Inherits the body text color rather than declaring
+// its own, which keeps the contrast ratio whatever the active palette
+// guarantees elsewhere.
+.media-asset--unavailable {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  block-size: 100%;
+  margin: 0;
+  padding: var(--v-space-2xs);
+  text-align: center;
+}
+

@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/includes/AudioHelper.php';
+require_once __DIR__ . '/includes/FileUrlHelper.php';
 
 use Drupal\Core\Cache\Cache;
 use Drupal\file\Entity\File;
@@ -282,9 +283,15 @@ function mukurtu_v4_preprocess_media(array &$variables) {
     $file = File::load($fid);
   }
 
+  // A file whose stream wrapper is unavailable yields no URL. Leaving
+  // media_url unset is the state the templates already handle for a media item
+  // with no file at all, so they suppress the download affordance rather than
+  // rendering an empty href.
   if (!empty($file)) {
-    $url = $file->createFileUrl();
-    $variables['media_url'] = $url;
+    $url = MukurtuV4FileUrl::fromFile($file);
+    if ($url !== NULL) {
+      $variables['media_url'] = $url;
+    }
   }
 
   $config = \Drupal::config('mukurtu_media.settings');
@@ -322,7 +329,7 @@ function mukurtu_v4_preprocess_media(array &$variables) {
         if ($defaultFid) {
           $scFile = \Drupal\file\Entity\File::load($defaultFid);
           if ($scFile) {
-            $variables['soundcloud_fallback_thumbnail_url'] = $scFile->createFileUrl();
+            $variables['soundcloud_fallback_thumbnail_url'] = MukurtuV4FileUrl::fromFile($scFile);
           }
         }
         if (empty($variables['soundcloud_fallback_thumbnail_url'])) {
@@ -369,8 +376,9 @@ function mukurtu_v4_preprocess_media__soundcloud__carousel_thumbnail(array &$var
     $defaultFid = $config->get('soundcloud')[0] ?? NULL;
     if ($defaultFid) {
       $file = \Drupal\file\Entity\File::load($defaultFid);
-      if ($file) {
-        $variables['soundcloud_fallback_thumbnail_url'] = $file->createFileUrl();
+      $url = MukurtuV4FileUrl::fromFile($file);
+      if ($url !== NULL) {
+        $variables['soundcloud_fallback_thumbnail_url'] = $url;
         return;
       }
     }

@@ -21,6 +21,10 @@ class MukurtuV4AudioHelper {
    * field_thumbnail is hidden in the media_assets view mode, so the URL must
    * be resolved here rather than from the template's content array.
    *
+   * A tier whose file exists but whose stream wrapper is unavailable falls
+   * through to the next one, so a site with an unregistered scheme shows the
+   * bundled icon instead of fataling on every audio thumbnail.
+   *
    * @param \Drupal\media\Entity\Media $media
    *   The audio media entity.
    * @param array $variables
@@ -31,9 +35,9 @@ class MukurtuV4AudioHelper {
    */
   public static function fallbackThumbnailUrl($media, array &$variables): string {
     if (!$media->get('field_thumbnail')->isEmpty()) {
-      $file = $media->get('field_thumbnail')->entity;
-      if ($file) {
-        return $file->createFileUrl();
+      $url = MukurtuV4FileUrl::fromFile($media->get('field_thumbnail')->entity);
+      if ($url !== NULL) {
+        return $url;
       }
     }
 
@@ -43,9 +47,9 @@ class MukurtuV4AudioHelper {
     $config = \Drupal::config('mukurtu_thumbnail.settings');
     $defaultFid = $config->get('audio')[0] ?? $config->get('audio_default_thumbnail')[0] ?? NULL;
     if ($defaultFid) {
-      $file = \Drupal\file\Entity\File::load($defaultFid);
-      if ($file) {
-        return $file->createFileUrl();
+      $url = MukurtuV4FileUrl::fromFile(\Drupal\file\Entity\File::load($defaultFid));
+      if ($url !== NULL) {
+        return $url;
       }
     }
 
