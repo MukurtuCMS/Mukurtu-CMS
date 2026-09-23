@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_media\Kernel;
 
+use Drupal\Core\Entity\Entity\EntityViewDisplay;
 use Drupal\Core\Serialization\Yaml;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
@@ -303,7 +304,7 @@ class MediaFileUrlFallbackTest extends KernelTestBase {
   public function testPrepareViewDropsUnresolvableSourceFile(): void {
     $media = $this->createSavedTestFileMedia('private://locked.mp3');
 
-    mukurtu_media_entity_prepare_view('media', [$media], [], 'default');
+    $this->prepareView($media);
 
     $this->assertTrue($media->get('field_media_test_source')->isEmpty());
     $this->assertTrue(mukurtu_media_source_is_unavailable($media));
@@ -315,7 +316,7 @@ class MediaFileUrlFallbackTest extends KernelTestBase {
   public function testPrepareViewKeepsResolvableSourceFile(): void {
     $media = $this->createSavedTestFileMedia('public://open.mp3');
 
-    mukurtu_media_entity_prepare_view('media', [$media], [], 'default');
+    $this->prepareView($media);
 
     $this->assertFalse($media->get('field_media_test_source')->isEmpty());
     $this->assertFalse(mukurtu_media_source_is_unavailable($media));
@@ -327,7 +328,7 @@ class MediaFileUrlFallbackTest extends KernelTestBase {
   public function testPrepareViewIgnoresOtherEntityTypes(): void {
     $media = $this->createSavedTestFileMedia('private://locked.mp3');
 
-    mukurtu_media_entity_prepare_view('node', [$media], [], 'default');
+    mukurtu_media_entity_prepare_view('node', [$media], ['test_file' => $this->buildDisplay()], 'default');
 
     $this->assertFalse($media->get('field_media_test_source')->isEmpty());
   }
@@ -343,11 +344,50 @@ class MediaFileUrlFallbackTest extends KernelTestBase {
     $media = $this->createSavedTestFileMedia('public://open.mp3');
     $media->set('thumbnail', ['target_id' => $this->createFile('private://thumb.png')->id()]);
 
-    mukurtu_media_entity_prepare_view('media', [$media], [], 'default');
+    $this->prepareView($media);
 
     $this->assertTrue($media->get('thumbnail')->isEmpty(), 'The unusable thumbnail is dropped.');
     $this->assertFalse($media->get('field_media_test_source')->isEmpty(), 'The usable source file is kept.');
     $this->assertFalse(mukurtu_media_source_is_unavailable($media));
+  }
+
+  /**
+   * A field the display does not render is left alone.
+   *
+   * Nothing hidden can throw, and checking it would cost an entity load per
+   * hidden field on every media item on the page.
+   */
+  public function testPrepareViewIgnoresFieldsTheDisplayHides(): void {
+    $media = $this->createSavedTestFileMedia('private://locked.mp3');
+
+    $display = $this->buildDisplay();
+    $display->removeComponent('field_media_test_source');
+    mukurtu_media_entity_prepare_view('media', [$media], ['test_file' => $display], 'default');
+
+    $this->assertFalse($media->get('field_media_test_source')->isEmpty());
+    $this->assertFalse(mukurtu_media_source_is_unavailable($media));
+  }
+
+  /**
+   * Runs the prepare_view hook over a media item with a normal display.
+   */
+  protected function prepareView(Media $media): void {
+    mukurtu_media_entity_prepare_view('media', [$media], [$media->bundle() => $this->buildDisplay()], 'default');
+  }
+
+  /**
+   * Builds an unsaved display rendering the source field and the thumbnail.
+   */
+  protected function buildDisplay(): EntityViewDisplay {
+    $display = EntityViewDisplay::create([
+      'targetEntityType' => 'media',
+      'bundle' => 'test_file',
+      'mode' => 'default',
+      'status' => TRUE,
+    ]);
+    $display->setComponent('field_media_test_source', ['type' => 'file_default']);
+    $display->setComponent('thumbnail', ['type' => 'image']);
+    return $display;
   }
 
   /**

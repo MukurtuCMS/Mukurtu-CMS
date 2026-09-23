@@ -1320,7 +1320,10 @@ function mukurtu_media_entity_prepare_view(string $entity_type_id, array $entiti
   }
 
   foreach ($entities as $media) {
-    _mukurtu_media_drop_unresolvable_files($media);
+    $display = $displays[$media->bundle()] ?? NULL;
+    if ($display) {
+      _mukurtu_media_drop_unresolvable_files($media, $display);
+    }
   }
 }
 
@@ -1329,13 +1332,22 @@ function mukurtu_media_entity_prepare_view(string $entity_type_id, array $entiti
  *
  * @param \Drupal\media\MediaInterface $media
  *   The media entity about to be displayed.
+ * @param \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display
+ *   The display being built for it.
  */
-function _mukurtu_media_drop_unresolvable_files($media): void {
+function _mukurtu_media_drop_unresolvable_files($media, $display): void {
   $file_url_generator = \Drupal::service('file_url_generator');
   $source_field = $media->getSource()->getConfiguration()['source_field'] ?? '';
 
   foreach ($media->getFieldDefinitions() as $field_name => $definition) {
     if (!in_array($definition->getType(), ['file', 'image'], TRUE)) {
+      continue;
+    }
+
+    // Only fields this display actually renders can throw, and they are the
+    // only ones worth loading a file for. Checking the rest would cost an
+    // entity load per hidden field on every media item on the page.
+    if (!$display->getComponent($field_name)) {
       continue;
     }
 
