@@ -4,6 +4,7 @@ import { Login } from '~components/login';
 import { Ckeditor5 } from "~components/ckeditor5";
 import submitEntityForm from '~helpers/submit-entity-form';
 import waitForAjax from '~helpers/ajax';
+import { gotoReady } from '~helpers/preview';
 
 const defaultContentSpec = {
   // Community entities.
@@ -151,7 +152,7 @@ test.beforeEach(async ({ page }) => {
 
   // Check if default content already exists, and if so, skip recreation.
   if (testContentExists === null) {
-    await page.goto('/communities');
+    await gotoReady(page, '/communities');
     const getStartedVisible = !await page.locator('.communities__item').first().isVisible();
     testContentExists = (getStartedVisible === false);
   }
@@ -165,7 +166,7 @@ test('Default Content: Community', async ({ page, browserName }) => {
   // Loop through all communities and create each one.
   for (const community of defaultContentSpec.community) {
     // Create a community.
-    await page.goto('/communities/community/add');
+    await gotoReady(page, '/communities/community/add');
     await page.getByRole('textbox', { name: 'Community name' }).fill(community.name);
     await page
       .getByRole('group', { name: 'Community page visibility' })
@@ -202,7 +203,7 @@ test('Default Content: Category', async ({ page, browserName }) => {
   // Loop through all Digital Heritage items and create each one.
   for (const category of defaultContentSpec.category) {
     // Create through the custom admin URL.
-    await page.goto('/admin/categories/manage');
+    await gotoReady(page, '/admin/categories/manage');
 
     // Expand the Details element to populate a new category value.
     await page.getByRole('button', { name: 'Add a new category' }).click();
@@ -225,7 +226,7 @@ test('Default Content: Person', async ({ page, browserName }) => {
   // Loop through all Person items and create each one.
   for (const person of defaultContentSpec.person) {
     // Create through the custom admin URL.
-    await page.goto('/admin/node/add/person');
+    await gotoReady(page, '/admin/node/add/person');
     await page.getByRole('textbox', { name: /^Name/ }).fill(person.name);
     await page
       .getByRole('group', { name: 'Sharing Setting' })
@@ -279,7 +280,7 @@ test('Default Content: Digital Heritage', async ({ page, browserName }) => {
   // Loop through all Digital Heritage items and create each one.
   for (const dh of defaultContentSpec.dh) {
     // Create through the custom admin URL.
-    await page.goto('/admin/node/add/digital_heritage');
+    await gotoReady(page, '/admin/node/add/digital_heritage');
     await page.getByRole('textbox', { name: 'Title' }).fill(dh.title);
     await page.getByRole('textbox', { name: 'Summary' }).fill(dh.summary);
     await page
@@ -305,7 +306,7 @@ test('Default Content: Digital Heritage', async ({ page, browserName }) => {
 test('Default Content: Language', async ({ page, browserName }) => {
   // Loop through all Language terms and create each one.
   for (const language of defaultContentSpec.language) {
-    await page.goto('/admin/structure/taxonomy/manage/language/add');
+    await gotoReady(page, '/admin/structure/taxonomy/manage/language/add');
     await page.getByRole('textbox', { name: 'Name' }).fill(language.name);
     await submitEntityForm(page);
   }
@@ -318,7 +319,7 @@ test('Default Content: Dictionary Word', async ({ page, browserName }) => {
   // Loop through all Dictionary word items and create each one.
   for (const word of defaultContentSpec.word) {
     // Create through the custom admin URL.
-    await page.goto('/admin/node/add/dictionary_word');
+    await gotoReady(page, '/admin/node/add/dictionary_word');
     await page.getByRole('textbox', { name: 'Term' }).fill(word.term);
     await page
       .getByRole('group', { name: 'Sharing Setting' })

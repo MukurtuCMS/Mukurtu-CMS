@@ -1,0 +1,32 @@
+<!--
+  Trimmed copy of the page a suspended Tugboat preview actually serves,
+  captured 2026-09-21 from https://pr2259-....tugboatqa.com/user/login.
+
+  Kept verbatim: the <title>, which is what tugboatPreviewState() reads, and
+  the #title-state markup Tugboat's own script rewrites as the state changes.
+  Removed: the stylesheet, the service-activity table, and the websocket
+  client that polls dashboard.tugboatqa.com and calls location.reload(true)
+  -- none of which the detector looks at, and the last of which would try to
+  reach the network from a test that must not.
+
+  Note the status code the real page comes with: HTTP 200. That is the whole
+  problem this fixture exists to reproduce.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Tugboat - Preview is suspended</title>
+</head>
+<body>
+    <div class="title-container">
+        <h1 class="page-title">This preview is <span id="title-state">suspended</span>.</h1>
+        <div id="contextual-help">
+            <p class="contextual-help">This page will automatically refresh when the preview is ready.</p>
+        </div>
+    </div>
+    <div class="heading-section">
+        <h2 class="heading-section__title">pr2259</h2>
+    </div>
+</body>
+</html>
