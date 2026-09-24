@@ -292,3 +292,58 @@ function mukurtu_core_update_40204(): void {
 
   $view->set('display.default.display_options.show_admin_links', FALSE)->save();
 }
+
+/**
+ * Grant logged-in users access to entity browser pages they need.
+ */
+function mukurtu_core_update_40205(): ?string {
+  // Keep the docblock above to one line; see mukurtu_core_update_40201() for
+  // why.
+  //
+  // mukurtu_install() grants the authenticated role a set of "access ...
+  // entity browser pages" permissions - one per entity browser used on an
+  // ordinary content edit form, such as "Select Related Content" or "Select
+  // Sub-Collections" - but only in PHP, at fresh-install time, deliberately
+  // never through config/install/user.role.authenticated.yml (see the
+  // comment above $roles in mukurtu_install()). No update hook ever
+  // backfilled that grant, so every site that wasn't freshly installed after
+  // it was added is missing it, and every non-admin logged-in user gets an
+  // access-denied opening any of these modals from a node edit form.
+  //
+  // mukurtu_collection_browser (child collections on the collection edit
+  // form) was missing from mukurtu_install()'s own list too, so it is
+  // included here and added there as well; this hook is the only thing that
+  // ever grants it, on any site.
+  $permissions = [
+    'access mukurtu_collection_browser entity browser pages',
+    'access mukurtu_community_and_protocol_user_browser entity browser pages',
+    'access mukurtu_community_select entity browser pages',
+    'access mukurtu_content_browser entity browser pages',
+    'access mukurtu_dictionary_word_browser entity browser pages',
+    'access mukurtu_person_browser entity browser pages',
+    'access mukurtu_taxonomy_record_place_term_browser entity browser pages',
+    'access mukurtu_taxonomy_record_term_browser entity browser pages',
+    'access multipage_item_entity_browser entity browser pages',
+  ];
+
+  $role = Role::load('authenticated');
+  if (!$role) {
+    return NULL;
+  }
+
+  $granted = array_values(array_filter(
+    $permissions,
+    fn (string $permission): bool => !$role->hasPermission($permission),
+  ));
+
+  if (!$granted) {
+    return NULL;
+  }
+
+  foreach ($granted as $permission) {
+    $role->grantPermission($permission);
+  }
+  $role->save();
+
+  return (string) t('Granted logged-in users @count entity browser permission(s) they need to use "Select..." fields on content edit forms.', ['@count' => count($granted)]);
+}
