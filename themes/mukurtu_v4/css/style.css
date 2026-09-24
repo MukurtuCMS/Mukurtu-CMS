@@ -7466,7 +7466,7 @@ header {
 .dictionary-word__teaser .field,
 .dictionary-word-tabs .field,
 .field--name-field-sections .field,
-.block-wrapper .field)) {
+.full-node__content .block-wrapper .field)) {
   -webkit-padding-before: var(--v-space-2xs);
           padding-block-start: var(--v-space-2xs);
   -webkit-margin-before: var(--v-space-2xs);
