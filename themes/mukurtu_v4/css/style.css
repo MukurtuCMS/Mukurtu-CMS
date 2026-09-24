@@ -165,6 +165,8 @@ documentation on how to use @include media(). */
   --mukurtu-collection-title-font-color: var(--color-white);
   --mukurtu-collection-pane-bg-color: var(--mukurtu-navbar-collapse-bg);
   --image-description-horizontal-text: var(--brand-primary-dark);
+  --collection-title-link-text: var(--brand-primary);
+  --horizontal-tab-link-text: var(--brand-primary-dark);
   --brand-text-color: #464646;
   --brand-light: #e5e9e9;
   --brand-light-accent: #f8f7f7;
@@ -2044,7 +2046,7 @@ label.form-required::after,
   padding-inline: 1em;
   position: relative;
   inset-block-start: 0;
-  color: var(--brand-primary-dark);
+  color: var(--horizontal-tab-link-text);
   -webkit-transition: color 0.12s ease-in, text-decoration-color 0.12s ease-in;
   transition: color 0.12s ease-in, text-decoration-color 0.12s ease-in;
 }
@@ -5886,11 +5888,11 @@ header {
   }
 }
 .collections__content__container h2 a {
-  color: var(--brand-primary);
+  color: var(--collection-title-link-text);
   text-decoration: underline solid 2px var(--brand-secondary);
 }
 .collections__content__container h2 a:hover {
-  text-decoration: underline solid 2px var(--brand-primary-dark);
+  text-decoration: underline solid 2px var(--collection-title-link-text);
 }
 .collections__content__container h2::after {
   content: "";

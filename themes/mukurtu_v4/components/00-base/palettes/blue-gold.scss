@@ -23,4 +23,17 @@
   // background. Re-check this whenever --brand-secondary changes for
   // this palette.
   --image-description-horizontal-text: #0d4a5c;
+
+  // --brand-primary (#138aab) reaches only 1.96:1 against --brand-secondary
+  // (#e6ab49) on the collections card, failing WCAG 1.4.3 even at the 3:1
+  // large-text threshold the 1.5rem title qualifies for - see #2252. The
+  // same darker blue used above clears 4.78:1, and keeps the two
+  // --brand-secondary panels consistent with each other.
+  --collection-title-link-text: #0d4a5c;
+
+  // --brand-primary-dark (#107996) clears 5.00:1 on white but only 4.31:1
+  // on the tab strip's #eee, failing WCAG 1.4.3 for this small text - see
+  // #2253. Darkened just enough to reach 5.23:1 there, so the tabs still
+  // read as the same blue.
+  --horizontal-tab-link-text: #0e6b85;
 }
