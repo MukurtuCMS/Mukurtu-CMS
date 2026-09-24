@@ -6,12 +6,13 @@ Only the CSV import path is covered. `mukurtu_migrate` (legacy Drupal 7 migratio
 
 ## Turning it on: `destination.translations`
 
-Drupal core's own `entity:$entity_type_id` migrate destination already knows how to target a translation — set `translations: true` on the destination and, for any row whose mapped langcode differs from an existing entity's own language, it calls `addTranslation()`/`getTranslation()` before writing that row's fields, instead of overwriting the base entity. Mukurtu never turned this on; `MukurtuImportStrategy::toDefinition()` now does, **strictly opt-in**, gated on both:
+Drupal core's own `entity:$entity_type_id` migrate destination already knows how to target a translation — set `translations: true` on the destination and, for any row whose mapped langcode differs from an existing entity's own language, it calls `addTranslation()`/`getTranslation()` before writing that row's fields, instead of overwriting the base entity. Mukurtu never turned this on; `MukurtuImportStrategy::toDefinition()` now does, **strictly opt-in**, gated on all of:
 
 - The strategy's mapping includes a column mapped to the entity type's langcode field (already a normal, listed mapping target — `ImportFormTrait::buildTargetOptions()` labels it "... (langcode)" to disambiguate it from any other field that happens to also be called "Language").
 - The target bundle actually has content translation enabled (`content_translation.manager`'s `isEnabled($entity_type_id, $bundle)`).
+- `content_translation` is installed at all. `mukurtu_import` has declared it a dependency since 4.0.0, but Drupal resolves `info.yml` dependencies only at install time, so every site that had `mukurtu_import` enabled before 4.0.0 updated into a state where the module is declared and absent. `isTranslationImport()` checks `moduleExists()` before touching the service, because without that it raised a `ServiceNotFoundException` and killed any import mapping a language column, and 38 of the 39 shipped templates map one. `mukurtu_import_update_40401()` installs the module on those sites, so this condition is a gate for the window before that hook runs, not a supported long-term state.
 
-Neither condition met → `translations` is never set, and behavior is byte-identical to before this existed. See `MukurtuImportStrategy::isTranslationImport()`.
+No condition met → `translations` is never set, and behavior is byte-identical to before this existed. See `MukurtuImportStrategy::isTranslationImport()`.
 
 ## The non-translatable-field guard
 

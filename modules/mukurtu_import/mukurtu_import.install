@@ -233,3 +233,39 @@ function mukurtu_import_update_40201(): ?string {
     '@count' => count($updated),
   ]);
 }
+
+/**
+ * Install the content_translation module that CSV import requires.
+ */
+function mukurtu_import_update_40401(): ?string {
+  // Keep the docblock above to one line: Drupal renders it verbatim as this
+  // update's description on update.php and in `drush updatedb:status`.
+  //
+  // mukurtu_import.info.yml has declared content_translation a dependency
+  // since 4.0.0, when #2081 made CSV import translation-aware. Drupal only
+  // resolves info.yml dependencies when a module is installed, so a site that
+  // already had mukurtu_import enabled before 4.0.0 updated its code into a
+  // state where the dependency is declared but the module was never
+  // installed. Nothing announced that: the site just carried an unsatisfied
+  // requirement.
+  //
+  // The visible symptom was that any import whose mapping included a language
+  // column - 38 of the shipped templates map one - died with a
+  // ServiceNotFoundException for content_translation.manager before a single
+  // row was processed. MukurtuImportStrategy::isTranslationImport() now also
+  // guards that lookup, so such an import completes as a non-translation
+  // import rather than crashing, but a site is still entitled to the module
+  // it depends on, and without it translation-targeting imports are simply
+  // unavailable. This hands it back.
+  //
+  // Installing content_translation on its own enables translation for no
+  // bundle and adds no per-bundle fields, so it changes nothing else about
+  // the site.
+  if (\Drupal::moduleHandler()->moduleExists('content_translation')) {
+    return NULL;
+  }
+
+  \Drupal::service('module_installer')->install(['content_translation']);
+
+  return (string) t('Installed the content_translation module. CSV import has required it since 4.0.0, but sites that enabled Mukurtu Import before then never received it, and imports that mapped a language column failed.');
+}

@@ -408,6 +408,20 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
     if (!$bundle) {
       return FALSE;
     }
+
+    // mukurtu_import declares content_translation as a dependency, but Drupal
+    // resolves info.yml dependencies only at install time: a site that had
+    // mukurtu_import enabled before 4.0.0 added that dependency updates into
+    // a state where the module is absent and this service does not exist.
+    // mukurtu_import_update_40401() installs it, but the strategy has to
+    // survive being asked before that hook runs, and after a site
+    // deliberately uninstalls the module. With content_translation gone no
+    // bundle can have translation enabled, so FALSE is the correct answer
+    // here, not merely a safe one.
+    if (!\Drupal::moduleHandler()->moduleExists('content_translation')) {
+      return FALSE;
+    }
+
     return \Drupal::service('content_translation.manager')->isEnabled($entity_type_id, $bundle);
   }
 
