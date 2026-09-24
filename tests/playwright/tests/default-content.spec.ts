@@ -18,6 +18,8 @@ const defaultContentSpec = {
   person: [],
   // Digital heritage nodes.
   dh: [],
+  // Collection nodes.
+  collection: [],
   // Dictionary words.
   word: [],
 };
@@ -41,7 +43,11 @@ defaultContentSpec.community.push({
 });
 defaultContentSpec.community.push({
   name: 'Repository community',
-  field_access_mode: 'Community only',
+  // Public, unlike Tribal community above, so that /communities lists at
+  // least one community to anonymous visitors. The accessibility scans
+  // discover the community page from that listing; with every community
+  // "Community only" the anonymous discovery had nothing to find.
+  field_access_mode: 'Public',
   protocols: [
     {
       name: 'Repository under review',
@@ -103,6 +109,48 @@ defaultContentSpec.person.push({
   field_date_died__month: '9',
   field_date_died__day: '30',
   field_deceased: true,
+});
+
+/* Define default Digital Heritage nodes. */
+// Until these existed the array above was declared and never filled, so the
+// "Default Content: Digital Heritage" test looped over nothing, passed, and
+// /digital-heritage said "No results" on every preview. Every discovery scan
+// that starts from that listing skipped as a consequence. See issue #2250.
+//
+// One public and one members-only, deliberately: the anonymous scans need
+// something they can reach, and the member scans need something the
+// anonymous scans cannot, or the two are indistinguishable.
+defaultContentSpec.dh.push({
+  title: 'Public digital heritage item',
+  summary: 'Shared under an open protocol, so it is visible to everyone including visitors who are not logged in.',
+  field_category: ['Education'],
+  field_cultural_protocols__sharing: 'any',
+  field_cultural_protocols__value: ['Tribal community public access'],
+});
+defaultContentSpec.dh.push({
+  title: 'Members-only digital heritage item',
+  summary: 'Shared under a strict protocol, so it is visible only to members of that protocol.',
+  field_category: ['Government to government relations'],
+  field_cultural_protocols__sharing: 'any',
+  field_cultural_protocols__value: ['Tribal members only'],
+});
+
+/* Define default Collection nodes. */
+// Nothing seeded collections before. Same reasoning as the digital heritage
+// items above; in addition, /collections returns 403 rather than an empty
+// page when the browse view is empty, so with no collections the anonymous
+// collections-browse scan was auditing an error page.
+defaultContentSpec.collection.push({
+  title: 'Public collection',
+  summary: 'A collection shared under an open protocol, visible to everyone.',
+  field_cultural_protocols__sharing: 'any',
+  field_cultural_protocols__value: ['Tribal community public access'],
+});
+defaultContentSpec.collection.push({
+  title: 'Members-only collection',
+  summary: 'A collection shared under a strict protocol, visible only to its members.',
+  field_cultural_protocols__sharing: 'any',
+  field_cultural_protocols__value: ['Tribal members only'],
 });
 
 /* Define default dictionary word taxonomy terms. */
@@ -295,7 +343,48 @@ test('Default Content: Digital Heritage', async ({ page, browserName }) => {
         .check();
     }
 
+    // Category is required on this form. Without it the save fails
+    // validation, the page stays on the form, and - because nothing
+    // below checked - this loop used to pass anyway with zero items
+    // created. That is how /digital-heritage read "No results" on every
+    // preview while this test showed green.
+    for (const category of dh.field_category) {
+      await page
+        .getByRole('group', { name: 'Category' })
+        .getByRole('checkbox', { name: category })
+        .check();
+    }
+
     await submitEntityForm(page);
+    await expect(page.getByRole('contentinfo', { name: 'Status message' }))
+      .toContainText(`${dh.title} has been created.`);
+  }
+});
+
+/**
+ * Initialize default collection content.
+ */
+test('Default Content: Collection', async ({ page }) => {
+  // Loop through all collections and create each one.
+  for (const collection of defaultContentSpec.collection) {
+    await page.goto('/node/add/collection');
+    await page.getByRole('textbox', { name: 'Collection name' }).fill(collection.title);
+    await page.getByRole('textbox', { name: 'Summary' }).fill(collection.summary);
+    await page
+      .getByRole('group', { name: 'Sharing Setting' })
+      .getByRole('radio', { name: collection.field_cultural_protocols__sharing })
+      .check();
+
+    for (const protocol of collection.field_cultural_protocols__value) {
+      await page
+        .getByRole('group', { name: 'Cultural Protocols' })
+        .getByRole('checkbox', { name: protocol })
+        .check();
+    }
+
+    await submitEntityForm(page);
+    await expect(page.getByRole('contentinfo', { name: 'Status message' }))
+      .toContainText(`${collection.title} has been created.`);
   }
 });
 
