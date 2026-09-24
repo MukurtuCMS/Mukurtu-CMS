@@ -387,6 +387,40 @@ short fields themselves. Shrink it in these dialogs specifically. */
     padding: var(--gin-spacing-s, .75rem) var(--gin-spacing-l, 1.5rem) !important;
 }
 
+/* Gin's .button--danger (base/_action-link.scss) only sets text color and
+   box-shadow at rest - it never sets its own background, so it inherits
+   whatever background the base (non-primary) .button style resolves to in
+   this dialog context, which lands on a mid-gray. Gin's danger red
+   (--gin-color-danger) against that gray falls to ~4:1, short of WCAG
+   1.4.3's 4.5:1, which is what actually made this button hard to read
+   (it's not that the red itself is wrong, it's the gray it was landing on).
+   Giving it its own solid, self-contained background/text pair sidesteps
+   that entirely: the pair's contrast no longer depends on whatever
+   background color a sibling rule happens to resolve to.
+   Hardcoded #cc3d3d (not var(--gin-color-danger)) deliberately, rather than
+   Gin's dark-mode-aware token: dark mode's own danger red (#ce6060) only
+   reaches 3.84:1 against white text, so swapping to it here would trade
+   this bug for the same one in dark mode. A solid button is a closed
+   fill/background pair - its contrast doesn't depend on the page's
+   light/dark mode - so one fixed, verified-safe color (4.88:1 against
+   white) covers both. */
+.ui-dialog .ui-dialog-content .button.button--danger {
+    background: #cc3d3d !important;
+    border-color: #cc3d3d !important;
+    color: #fff !important;
+    box-shadow: none !important;
+}
+
+.ui-dialog .ui-dialog-content .button.button--danger:hover,
+.ui-dialog .ui-dialog-content .button.button--danger:focus,
+.ui-dialog .ui-dialog-content .button.button--danger:active {
+    /* Darkened from #cc3d3d by the same ~20% Gin uses for its own primary
+       button's hover shade, keeping white text safely above 4.5:1. */
+    background: #a83030 !important;
+    border-color: #a83030 !important;
+    color: #fff !important;
+}
+
 .tagify__dropdown {
     /* Background fallback: tagify's own gin.css skin (web/modules/contrib/
        tagify/css/gin.css) defines --tagify-dd-bg-color from Gin's
@@ -440,10 +474,24 @@ short fields themselves. Shrink it in these dialogs specifically. */
 
 /* Widen the Layout Builder off-canvas dialogs (layout picker, block picker, block
    config forms). Each dialog link carries data-dialog-options='{"width":450}' which
-   jQuery UI applies as an inline style; !important is required to override it. */
+   jQuery UI applies as an inline style; !important is required to override it.
+   lb-frontend-edit.js's own block-edit trigger hardcodes an even narrower 400,
+   which this same !important rule also overrides. */
 .ui-dialog.ui-dialog-off-canvas {
-    width: 650px !important;
+    width: 850px !important;
     max-width: 90vw !important;
+}
+
+/* gin_lb's own .ui-dialog rule (styles/components/_ui-dialog.scss) sets
+   height: 100% and overflow-y: auto on this *outer* dialog wrapper, while
+   .ui-dialog-content above independently scrolls its own contents - two
+   nested scroll containers, so a tall form (e.g. this block-edit dialog)
+   shows two scrollbars for the one visible content area. Making the outer
+   wrapper's own overflow visible leaves .ui-dialog-content as the single
+   scroll container, matching the "one scroll container" fix already applied
+   to .media-library-widget-modal below. */
+.ui-dialog.ui-dialog-off-canvas {
+    overflow-y: visible !important;
 }
 
 /* Fix Layout Builder settings menu blocking block contextual/edit links (#1385).

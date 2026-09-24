@@ -13,6 +13,18 @@
   max-inline-size: 100%;
 }
 
+/* Drupal core's own "Configure/Move/Remove block" contextual link (Gin-styled)
+   is never suppressed and renders inside every block template's title_suffix -
+   a second, less capable edit trigger (its "Configure" action only reaches LB's
+   wrapper settings, not a block_content's actual fields) stacking on top of the
+   one this file adds. .lb-editable is only added above once a real,
+   access-checked edit URL exists for this exact block, so scoping the hide to
+   it preserves core's link as a fallback for a block this replacement can't
+   cover. */
+.lb-editable .contextual {
+  display: none;
+}
+
 .lb-edit-btn {
   position: absolute;
   top: 0.5rem;
