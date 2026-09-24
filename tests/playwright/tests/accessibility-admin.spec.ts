@@ -1,6 +1,5 @@
 import { test } from '@playwright/test';
-import { Login } from '~components/login';
-import { adminAccount } from '~helpers/a11y-credentials';
+import { ADMIN_STATE } from '~helpers/auth-state';
 import { auditPage } from '~helpers/axe';
 import { discoverItemUrl, openForAudit } from '~helpers/page-inventory';
 import { adminPages, adminDiscoveredPages } from '~helpers/page-inventory-admin';
@@ -20,16 +19,15 @@ import { adminPages, adminDiscoveredPages } from '~helpers/page-inventory-admin'
  * overwrite it and the run would still go green.
  */
 test.describe('Accessibility (admin): representative pages', () => {
-  test.beforeEach(async ({ page }) => {
-    // adminAccount(), not memberAccount(): these are admin routes, and a
-    // representative member must not be able to reach them. While the
-    // A11Y_* secrets were unset, memberAccount() fell back to admin/admin
-    // and these scans worked by accident; the moment a real member account
-    // was configured every one of them 403'd and skipped silently.
-    const account = adminAccount();
-    const login = new Login(page);
-    await login.login(account.username, account.password);
-  });
+  // ADMIN_STATE, not MEMBER_STATE: these are admin routes, and a
+  // representative member must not be able to reach them. While the A11Y_*
+  // secrets were unset, memberAccount() fell back to admin/admin and these
+  // scans worked by accident; the moment a real member account was
+  // configured every one of them 403'd and skipped silently.
+  //
+  // The session is saved once by tests/auth.setup.ts rather than logged in
+  // per test; see src/helpers/auth-state.ts.
+  test.use({ storageState: ADMIN_STATE });
 
   for (const { slug, path } of adminPages) {
     test(`axe scan: ${slug}`, async ({ page }, testInfo) => {

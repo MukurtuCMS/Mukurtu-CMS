@@ -56,6 +56,34 @@ export class Login {
     }
     await this.page.waitForTimeout(7000);
 
+    // Confirm the form still holds what was typed into it, immediately
+    // before submitting. #2267 recorded this login failing intermittently
+    // in CI with both fields empty by the time the button was clicked --
+    // same DOM nodes, marker attribute intact, values gone -- which native
+    // HTML5 validation then blocks, so the click fired zero HTTP requests
+    // and the wait below timed out with nothing to show for it. Whatever
+    // empties them was never identified (#2281 carries the leads).
+    //
+    // Re-filling is both the recovery and the evidence: a login that would
+    // have failed now succeeds, and the log says it happened, which is more
+    // than three CI runs of instrumentation managed to extract.
+    if (await usernameField.inputValue() !== username || (await passwordField.inputValue()) === '') {
+      console.log(`The login form for "${username}" was empty again by submit time; re-filling. See issue #2281.`);
+      await usernameField.fill(username);
+      await passwordField.fill(password);
+      if (await altchaCheckbox.count() > 0 && !(await altchaCheckbox.isChecked())) {
+        await altchaCheckbox.click();
+      }
+
+      if (await usernameField.inputValue() !== username) {
+        throw new Error(
+          `The login form for "${username}" would not keep the values filled `
+          + `into it, so submitting it can only be blocked by the browser's `
+          + `own validation. See issue #2281.`,
+        );
+      }
+    }
+
     // Wait for the post-login redirect to complete before returning:
     // clicking the button alone doesn't wait for the resulting navigation,
     // so callers could otherwise navigate away and cancel the login
