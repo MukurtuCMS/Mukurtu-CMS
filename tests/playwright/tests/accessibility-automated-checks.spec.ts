@@ -17,6 +17,7 @@ import {
   discoverItemUrl,
   discoverCommunityManageUrl,
   discoverProtocolUrl,
+  discoverProtocolManageUrl,
   openForAudit,
 } from '~helpers/page-inventory';
 
@@ -120,7 +121,7 @@ test.describe('Automated checks: manage-adjacent pages', () => {
   });
 
   test('automated checks: manage-protocol-local-contexts-projects', async ({ page }, testInfo) => {
-    const url = await discoverProtocolUrl(page, (slug) => `/protocols/protocol/${slug}/local-contexts/projects`);
+    const url = await discoverProtocolManageUrl(page, (id) => `/protocols/protocol/${id}/local-contexts/projects`);
     test.skip(url === null, 'No community with a linked protocol found. Seed default content first.');
     const blocked = await openForAudit(page, url);
     test.skip(blocked !== null, blocked ?? '');
