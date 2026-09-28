@@ -7,6 +7,21 @@ parameters:
 			path: modules/mukurtu_browse/src/ParamConverter/MukurtuMapNodesParamConverter.php
 
 		-
+			message: '''
+				#^Call to deprecated method addMethods\(\) of class PHPUnit\\Framework\\MockObject\\MockBuilder\:
+				https\://github\.com/sebastianbergmann/phpunit/issues/5320$#
+			'''
+			identifier: method.deprecated
+			count: 3
+			path: modules/mukurtu_browse/tests/src/Unit/MukurtuBoundingBoxTest.php
+
+		-
+			message: '#^Trying to mock an undefined method addCondition\(\) on class stdClass\.$#'
+			identifier: phpunit.mockMethod
+			count: 3
+			path: modules/mukurtu_browse/tests/src/Unit/MukurtuBoundingBoxTest.php
+
+		-
 			message: '#^Call to an undefined method Drupal\\mukurtu_collection\\Controller\\PersonalCollectionController\:\:l\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -625,15 +640,6 @@ parameters:
 		-
 			message: '#^Method Drupal\\mukurtu_protocol\\MukurtuCommentForm\:\:save\(\) should return int but return statement is missing\.$#'
 			identifier: return.missing
-			count: 1
-			path: modules/mukurtu_protocol/src/MukurtuCommentForm.php
-
-		-
-			message: '''
-				#^in drupal\:11\.3\.0 and is removed from drupal\:13\.0\.0\.
-				  Instead, use the enums provided by the relevant modules\.$#
-			'''
-			identifier: constant.deprecated
 			count: 1
 			path: modules/mukurtu_protocol/src/MukurtuCommentForm.php
 
