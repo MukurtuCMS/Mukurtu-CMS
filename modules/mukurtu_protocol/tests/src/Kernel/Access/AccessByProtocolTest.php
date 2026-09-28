@@ -10,6 +10,7 @@ use Drupal\Tests\node\Traits\ContentTypeCreationTrait;
 use Drupal\Tests\og\Traits\OgMembershipCreationTrait;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
+use Drupal\node\NodeAccessRebuild;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\user\Entity\Role;
@@ -120,7 +121,7 @@ class AccessByProtocolTest extends KernelTestBase {
     $this->installSchema('mukurtu_protocol', 'mukurtu_protocol_map');
     $this->installSchema('mukurtu_protocol', 'mukurtu_protocol_access');
 
-    node_access_rebuild();
+    \Drupal::service(NodeAccessRebuild::class)->rebuild();
 
     // Flag protocol entity as an Og group so Og does its
     // part for access control.
