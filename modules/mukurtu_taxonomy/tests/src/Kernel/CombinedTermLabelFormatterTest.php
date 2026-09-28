@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_taxonomy\Kernel;
 
 use Drupal\Core\Field\FieldItemListInterface;
-use Drupal\Core\Language\Language;
-use Drupal\Core\Language\LanguageInterface;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
@@ -174,10 +172,7 @@ class CombinedTermLabelFormatterTest extends EntityKernelTestBase {
     $creator->addTranslation('es', ['name' => 'Juana Doe'])->save();
     $people = $this->createTerm('people', 'Juana Doe');
 
-    $this->setActiveContentLanguage('en');
     $this->assertSame(['Jane Doe', 'Juana Doe'], $this->labels($this->buildField([$creator, $people])));
-
-    $this->setActiveContentLanguage('es');
     $this->assertSame(['Juana Doe'], $this->labels($this->buildField([$creator, $people], [], 'es')));
   }
 
@@ -189,18 +184,6 @@ class CombinedTermLabelFormatterTest extends EntityKernelTestBase {
 
     $this->assertTrue(CombinedTermLabelFormatter::isApplicable(FieldConfig::loadByName('entity_test', 'entity_test', 'field_other_names')));
     $this->assertFalse(CombinedTermLabelFormatter::isApplicable(FieldConfig::loadByName('entity_test', 'entity_test', 'field_users')));
-  }
-
-  /**
-   * Sets the negotiated content language.
-   *
-   * There is no request to negotiate from in a kernel test, and the language
-   * manager has no public setter, matching NotYetTranslatedIndicatorTest.
-   */
-  private function setActiveContentLanguage(string $langcode): void {
-    $language_manager = \Drupal::languageManager();
-    $property = new \ReflectionProperty($language_manager, 'negotiatedLanguages');
-    $property->setValue($language_manager, [LanguageInterface::TYPE_CONTENT => new Language(['id' => $langcode])]);
   }
 
 }
