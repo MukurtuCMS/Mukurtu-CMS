@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -61,7 +61,7 @@ jobs:
         run: echo "COMPCACHE=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
       - name: Cache composer dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: $COMPCACHE
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -72,19 +72,25 @@ jobs:
       # in build-and-test.yml.
       - name: Install Mukurtu Template
         run: |
-          composer create mukurtu/mukurtu-template:dev-main . --no-install --no-interaction
+          composer create mukurtu/mukurtu-template:^4.0 . --no-install --no-interaction
           rm web/profiles/mukurtu -rf
 
       # fetch-depth: 0 so the PR base commit is available for diff scoping.
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           path: web/profiles/mukurtu
           fetch-depth: 0
 
       - name: Install Mukurtu
         run: |
-          composer config repositories.local-dev path web/profiles/mukurtu
+          # The path repo must declare a version. mukurtu-template requires
+          # mukurtu/mukurtu ^4.0, and composer derives a path package's version
+          # from its git branch, giving dev-<branch> for a PR checkout. That
+          # cannot satisfy ^4.0, and a path repo is canonical, so composer
+          # refuses to fall back to the released package on Packagist and the
+          # whole install fails. Mirrors build-and-test.yml; see #2150.
+          composer config repositories.local-dev '{"type":"path","url":"web/profiles/mukurtu","options":{"versions":{"mukurtu/mukurtu":"4.9999.9999"}}}'
           composer install --no-interaction --optimize-autoloader
 
       # PHPCS is scoped to the files a PR touches. The tree carries ~4,900
