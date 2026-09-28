@@ -7658,6 +7658,7 @@ header {
       -ms-flex: 1 1 auto;
           flex: 1 1 auto;
   min-inline-size: 0;
+  overflow-wrap: anywhere;
 }
 .full-node__sidebar .sidebar-section [data-copy-citation-field] .citation-copy-controls {
   display: -webkit-inline-box;

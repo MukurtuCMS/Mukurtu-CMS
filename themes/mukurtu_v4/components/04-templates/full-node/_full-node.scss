@@ -239,6 +239,10 @@
         .field__label {
           flex: 1 1 auto;
           min-inline-size: 0;
+
+          // Keep a long single word in a translated label from overflowing
+          // the narrow sidebar beside the button.
+          overflow-wrap: anywhere;
         }
       }
 
