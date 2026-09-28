@@ -116,9 +116,12 @@ jobs:
           fi
           printf 'Checking %s changed file(s):\n' "${#FILES[@]}"
           printf '  %s\n' "${FILES[@]}"
+          # GitHub runs `run:` steps with `bash -e`, so a non-zero exit would
+          # kill this step before the report-only branch below. `|| STATUS=$?`
+          # keeps the failure inspectable instead of fatal.
+          STATUS=0
           ../../../vendor/bin/phpcs --standard=phpcs.xml.dist \
-            --warning-severity=0 --report=full "${FILES[@]}"
-          STATUS=$?
+            --warning-severity=0 --report=full "${FILES[@]}" || STATUS=$?
           if [ "$STATUS" -ne 0 ]; then
             echo
             echo "PHPCS reported violations. Most are auto-fixable:"
@@ -129,16 +132,17 @@ jobs:
             echo "MUKURTU_LINT_STRICT is not 1, so this is reported without failing."
           fi
 
-      # PHPStan runs whole-tree against a committed baseline of 144 known
+      # PHPStan runs whole-tree against a committed baseline of 138 known
       # errors, so anything it reports is NEWLY introduced by the PR. It is
       # already clean, so this reports nothing until someone adds an error.
       - name: PHPStan
         working-directory: web/profiles/mukurtu
         run: |
           set -uo pipefail
+          # See the PHPCS step: `bash -e` would abort before the branch below.
+          STATUS=0
           ../../../vendor/bin/phpstan analyse -c phpstan.neon.dist \
-            --no-progress --memory-limit=-1
-          STATUS=$?
+            --no-progress --memory-limit=-1 || STATUS=$?
           if [ "$STATUS" -ne 0 ]; then
             echo
             echo "The errors above are NOT in phpstan-baseline.neon, meaning this"
