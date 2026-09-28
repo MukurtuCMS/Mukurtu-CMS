@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\mukurtu_import\Plugin\migrate\destination;
 
+use Drupal\migrate\Attribute\MigrateDestination;
 use Drupal\migrate\MigrateException;
 use Drupal\migrate\Row;
 use Drupal\og\OgMembershipInterface;
@@ -18,9 +19,31 @@ use Drupal\user\UserInterface;
  * password, and newly created accounts optionally receive Drupal's standard
  * account-setup email.
  *
- * @see mukurtu_import_migrate_destination_info_alter().
+ * This is registered as its own destination plugin rather than swapped in
+ * for core's entity:user the way the other protocol-aware destinations are
+ * for their entity types (see mukurtu_import_migrate_destination_info_alter()).
+ * Those rules only make sense for the CSV import wizard; the Mukurtu 3 to 4
+ * user migrations also target entity:user and need core's behaviour (uid 1
+ * is updated, the migrated password and status are kept), so the wizard
+ * selects this plugin explicitly in MukurtuImportStrategy::toDefinition().
  */
+#[MigrateDestination('mukurtu_import_user')]
 class ProtocolAwareUserContent extends ProtocolAwareEntityContent {
+
+  /**
+   * The plugin ID the import wizard uses for user account imports.
+   */
+  const PLUGIN_ID = 'mukurtu_import_user';
+
+  /**
+   * {@inheritdoc}
+   *
+   * The entity type can't be read off the plugin ID as it can for the
+   * entity:* derivatives, so it is fixed here.
+   */
+  protected static function getEntityTypeId($plugin_id) {
+    return 'user';
+  }
 
   /**
    * {@inheritdoc}
@@ -59,7 +82,7 @@ class ProtocolAwareUserContent extends ProtocolAwareEntityContent {
 
     $existing_id = $this->getEntityId($row);
     if ($existing_id && (int) $existing_id === 1) {
-      throw new MigrateException('The site superuser account (uid 1) cannot be created or updated via import.');
+      throw new MigrateException('The main administrator account (user 1) is protected and cannot be changed by import. Edit the account directly under People instead.');
     }
 
     $is_new = !$existing_id;

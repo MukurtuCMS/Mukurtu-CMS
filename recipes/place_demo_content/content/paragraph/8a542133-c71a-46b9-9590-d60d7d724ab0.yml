@@ -1,0 +1,15 @@
+_meta:
+  version: '1.0'
+  entity_type: paragraph
+  uuid: 8a542133-c71a-46b9-9590-d60d7d724ab0
+  bundle: text_section_with_title
+  default_langcode: en
+default:
+  field_title:
+    -
+      value: 'History (placeholder)'
+  field_body:
+    -
+      value: |
+        <p>This is placeholder history text for a sample Place, created only to test accessibility of the rendered page &mdash; section titles, paragraphs, and reading order.</p>
+      format: basic_html

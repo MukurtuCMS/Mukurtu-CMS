@@ -9,6 +9,7 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\mukurtu_import\MukurtuImportFieldProcessInterface;
 use Drupal\mukurtu_import\MukurtuImportFieldProcessPluginManager;
 use Drupal\mukurtu_import\MukurtuImportStrategyInterface;
+use Drupal\mukurtu_import\Plugin\migrate\destination\ProtocolAwareUserContent;
 use Drupal\user\UserInterface;
 use Drupal\file\FileInterface;
 use League\Csv\Reader;
@@ -472,7 +473,11 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
     }
 
     $destination = [
-      'plugin' => "entity:$entity_type_id",
+      // User accounts go through the import-specific user destination, which
+      // enforces the account safety rules the wizard relies on. Every other
+      // entity type uses core's entity:* destination, with the class swapped
+      // by mukurtu_import_migrate_destination_info_alter().
+      'plugin' => $entity_type_id === 'user' ? ProtocolAwareUserContent::PLUGIN_ID : "entity:$entity_type_id",
       'default_bundle' => $bundle,
       'overwrite_properties' => $this->getOverwriteProperties(),
       'validate' => TRUE,

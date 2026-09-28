@@ -3,6 +3,7 @@ test-results/
 vendor/
 web/
 **/.DS_Store
+docs/accessibility/acr/mukurtu-acr.markdown
 .claude/
 
 # Static analysis caches. The configs (phpcs.xml.dist, phpstan.neon.dist) and

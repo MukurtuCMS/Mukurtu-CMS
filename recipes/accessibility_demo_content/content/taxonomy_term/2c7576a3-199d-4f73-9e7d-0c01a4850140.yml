@@ -1,0 +1,13 @@
+_meta:
+  version: '1.0'
+  entity_type: taxonomy_term
+  uuid: 2c7576a3-199d-4f73-9e7d-0c01a4850140
+  bundle: people
+  default_langcode: en
+default:
+  name:
+    -
+      value: 'Sample Community Member'
+  status:
+    -
+      value: true

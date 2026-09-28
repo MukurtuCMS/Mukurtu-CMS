@@ -1,0 +1,659 @@
+title: Mukurtu CMS Accessibility Conformance Report
+product:
+  name: Mukurtu CMS
+  version: "4"
+  description: >-
+    Mukurtu CMS is a free, mobile, and open source platform built with
+    Indigenous communities to manage and share digital cultural heritage.
+    It is a distribution of the Drupal content management system.
+author:
+  name: "Mukurtu CMS Development Team"
+  company_name: "Center for Digital Scholarship and Curation, Washington State University"
+  address: ""
+  email: "support@mukurtu.org"
+  phone: ""
+  website: "https://mukurtu.org"
+report_date: "2026-07-10"
+last_modified_date: "2026-09-17"
+version: 3
+notes: >-
+  This is a living document maintained as part of the Mukurtu CMS
+  accessibility program (see docs/accessibility/README.md in the Mukurtu CMS
+  repository). All criteria begin as not-evaluated and are updated as audit
+  findings are triaged. Assessments reflect Mukurtu CMS itself (its
+  installation profile, custom modules, and the mukurtu_v4 theme); conformance
+  of an individual Mukurtu site also depends on its content and configuration.
+evaluation_methods_used: >-
+  Automated scanning with axe-core (via Playwright) across a representative
+  page inventory, combined with manual keyboard-only testing and screen reader
+  testing (NVDA, VoiceOver, or Orca) following the program's manual testing
+  checklist. Findings are consolidated by WCAG Success Criterion before
+  conformance levels are assigned.
+legal_disclaimer: >-
+  The information herein is provided in good faith based on the analysis of
+  the product at the time of the review and does not represent a
+  legally-binding claim. Please contact us to report any accessibility errors
+  or conformance claim errors for re-evaluation and correction, if necessary.
+repository: "https://github.com/MukurtuCMS/Mukurtu-CMS"
+feedback: "https://github.com/MukurtuCMS/Mukurtu-CMS/issues"
+license: GPL-2.0-or-later
+related_openacrs:
+  - url: "https://github.com/GSA/openacr/blob/main/openacr/drupal-9.yaml"
+    type: secondary
+chapters:
+  success_criteria_level_a:
+    notes: >-
+      Mukurtu CMS is a Drupal distribution. The "Web" component below covers
+      the visitor and logged-in member experience (the current audit scope).
+      The "Authoring Tool" component covers the content creation and
+      administration experience, which will be evaluated in a later phase
+      against ATAG 2.0 in addition to WCAG.
+    criteria:
+      - num: 1.1.1
+        components:
+          - name: web
+            adherence:
+              level: supports
+              notes: >-
+                Automated checks (axe-core, July 2026) across the audited page
+                inventory found no missing text alternatives. Map location
+                markers previously exposed as unnamed buttons were fixed to
+                carry the name of the item whose location they show. Alt text
+                quality on real site content is author-dependent and is
+                reviewed in the manual audit cycle.
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 1.2.1
+        components:
+          - name: web
+            adherence:
+              level: not-evaluated
+              notes: ""
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 1.2.2
+        components:
+          - name: web
+            adherence:
+              level: not-evaluated
+              notes: ""
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 1.2.3
+        components:
+          - name: web
+            adherence:
+              level: not-evaluated
+              notes: ""
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 1.3.1
+        components:
+          - name: web
+            adherence:
+              level: supports
+              notes: >-
+                Automated structural checks (axe-core, July 2026) pass
+                across the audited page inventory. The page title region
+                was moved inside the main landmark so all page content
+                is contained by landmarks (fixed July 2026). Landing
+                pages previously derived their heading level from
+                whether the page was the front page, so a page could
+                emit several first-level headings or none at all
+                depending on which blocks an author placed; heading
+                levels are now fixed and the front page carries exactly
+                one visually-hidden first-level heading regardless of
+                block placement (September 2026, issue #2176, PR #2207).
+                Heading outline quality and reading order are verified
+                in the manual audit cycle. Evidence for the September
+                2026 changes is recorded by criterion in
+                docs/accessibility/findings/2026-09-17-remediation-cycle.md.
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 1.3.2
+        components:
+          - name: web
+            adherence:
+              level: not-evaluated
+              notes: ""
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 1.3.3
+        components:
+          - name: web
+            adherence:
+              level: not-evaluated
+              notes: ""
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 1.4.1
+        components:
+          - name: web
+            adherence:
+              level: not-evaluated
+              notes: ""
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 1.4.2
+        components:
+          - name: web
+            adherence:
+              level: not-evaluated
+              notes: ""
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 2.1.1
+        components:
+          - name: web
+            adherence:
+              level: not-evaluated
+              notes: ""
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 2.1.2
+        components:
+          - name: web
+            adherence:
+              level: not-evaluated
+              notes: ""
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 2.1.4
+        components:
+          - name: web
+            adherence:
+              level: not-evaluated
+              notes: ""
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 2.2.1
+        components:
+          - name: web
+            adherence:
+              level: not-evaluated
+              notes: ""
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 2.2.2
+        components:
+          - name: web
+            adherence:
+              level: not-evaluated
+              notes: ""
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 2.3.1
+        components:
+          - name: web
+            adherence:
+              level: not-evaluated
+              notes: ""
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 2.4.1
+        components:
+          - name: web
+            adherence:
+              level: supports
+              notes: >-
+                A skip-to-main-content link is provided on every page, and as
+                of July 2026 the page heading sits inside the skip link's
+                target landmark. Automated checks pass; keyboard verification
+                of the skip link across page types is part of the manual
+                audit cycle.
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 2.4.2
+        components:
+          - name: web
+            adherence:
+              level: supports
+              notes: >-
+                Automated checks (axe-core, July 2026) confirm every audited
+                page has a page title. Title descriptiveness is reviewed with
+                headings and labels (2.4.6) in the manual audit cycle.
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 2.4.3
+        components:
+          - name: web
+            adherence:
+              level: not-evaluated
+              notes: ""
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 2.4.4
+        components:
+          - name: web
+            adherence:
+              level: not-evaluated
+              notes: ""
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 2.5.1
+        components:
+          - name: web
+            adherence:
+              level: not-evaluated
+              notes: ""
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 2.5.2
+        components:
+          - name: web
+            adherence:
+              level: not-evaluated
+              notes: ""
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 2.5.3
+        components:
+          - name: web
+            adherence:
+              level: not-evaluated
+              notes: ""
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 2.5.4
+        components:
+          - name: web
+            adherence:
+              level: not-evaluated
+              notes: ""
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 3.1.1
+        components:
+          - name: web
+            adherence:
+              level: supports
+              notes: >-
+                Automated checks (axe-core, July 2026) confirm a valid lang
+                attribute on the html element of every audited page. Language
+                of parts (3.1.2) for content in Indigenous languages is a
+                separate criterion and remains under evaluation.
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 3.2.1
+        components:
+          - name: web
+            adherence:
+              level: not-evaluated
+              notes: ""
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 3.2.2
+        components:
+          - name: web
+            adherence:
+              level: not-evaluated
+              notes: ""
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 3.3.1
+        components:
+          - name: web
+            adherence:
+              level: not-evaluated
+              notes: ""
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 3.3.2
+        components:
+          - name: web
+            adherence:
+              level: not-evaluated
+              notes: ""
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 4.1.1
+        components:
+          - name: web
+            adherence:
+              level: not-evaluated
+              notes: ""
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 4.1.2
+        components:
+          - name: web
+            adherence:
+              level: supports
+              notes: >-
+                Automated ARIA checks (axe-core, July 2026) pass across the
+                audited page inventory, including protocol-gated member
+                views. Map location markers previously rendered as focusable
+                buttons with no accessible name were fixed (July 2026).
+                Keyboard and screen reader verification of custom widgets
+                (carousel, tabs, audio player, autocomplete) is part of the
+                manual audit cycle.
+          - name: authoring-tool
+            adherence:
+              level: partially-supports
+              notes: >-
+                July 2026 scans of pages rendered with the administration
+                toolbar found 15 toolbar buttons and links with no accessible
+                name, and an invalid ARIA attribute on three toolbar menus.
+                Both originate upstream in the Gin admin theme and affect
+                authenticated administrators and authors only. Both are now
+                resolved (September 2026, issue #2003, PR #2225): the
+                collapsed toolbar hid its labels with display:none, removing
+                them from the accessibility tree, and now uses a
+                visually-hidden technique instead; the invalid attribute is
+                corrected by carrying Gin's own reviewed fix as a composer
+                patch until it is released upstream. A re-scan of
+                /admin/content with the toolbar collapsed reports no
+                remaining violations of these rules. The full authoring
+                interface has still not been evaluated, so this remains a
+                partial claim pending the Phase 2 audit (issue #1975).
+  success_criteria_level_aa:
+    notes: ""
+    criteria:
+      - num: 1.2.4
+        components:
+          - name: web
+            adherence:
+              level: not-evaluated
+              notes: ""
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 1.2.5
+        components:
+          - name: web
+            adherence:
+              level: not-evaluated
+              notes: ""
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 1.3.4
+        components:
+          - name: web
+            adherence:
+              level: not-evaluated
+              notes: ""
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 1.3.5
+        components:
+          - name: web
+            adherence:
+              level: not-evaluated
+              notes: ""
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 1.4.3
+        components:
+          - name: web
+            adherence:
+              level: supports
+              notes: >-
+                Automated contrast checks (axe-core, July 2026) pass
+                across the audited page inventory. A failing admin
+                accent color (4.48:1) reachable by members on
+                /my-content was darkened to 5.3:1 (fixed July 2026). Two
+                of the three cases automated tools cannot judge have
+                since been measured and fixed (September 2026): hero
+                text over author-uploaded photographs, where a
+                light/dark toggle could not meet the criterion over an
+                arbitrary image, now carries an opaque per-glyph stroke
+                whose contrast against the fill is fixed independent of
+                the photograph (5.00:1 and 8.39:1 for the two built-in
+                palettes; issue #2175, PR #2207); and the horizontal
+                image-with-description panel, which failed at 2.45:1 on
+                the Blue and gold palette, now uses a per-palette token
+                reaching 4.78:1 (issue #2178, same PR). Map controls
+                remain queued for manual contrast measurement. Evidence
+                for the September 2026 changes is recorded by criterion
+                in
+                docs/accessibility/findings/2026-09-17-remediation-cycle.md.
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 1.4.4
+        components:
+          - name: web
+            adherence:
+              level: not-evaluated
+              notes: ""
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 1.4.5
+        components:
+          - name: web
+            adherence:
+              level: not-evaluated
+              notes: ""
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 1.4.10
+        components:
+          - name: web
+            adherence:
+              level: supports
+              notes: >-
+                Automated reflow testing is a real overflow assertion
+                rather than a heuristic: tests/playwright asserts no
+                horizontal scrolling at 320px across the page inventory,
+                and reflow.spec.ts additionally gates this in CI. A
+                defect that caused 1-7px of horizontal scrolling between
+                480px and 520px (the mobile nav button outgrew its
+                header grid column once its label un-hid) was fixed in
+                September 2026 and verified by sweeping 320px to 980px
+                across five page types with no overflow at any width
+                (issue #2197, PR #2224). Evidence for the September 2026
+                changes is recorded by criterion in
+                docs/accessibility/findings/2026-09-17-remediation-cycle.md.
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 1.4.11
+        components:
+          - name: web
+            adherence:
+              level: supports
+              notes: >-
+                Evaluated for focus indicators, the theme's principal
+                non-text contrast surface. The shared focus ring colour
+                was #66afe9, measuring 1.59-2.37:1 against every light
+                surface in the palette; it is now currentcolor, so each
+                ring inherits text colour already chosen to contrast
+                with its background, with hard-coded rings where that is
+                unsafe (white-on-dark fills, and controls over uploaded
+                imagery). Verified in September 2026 across 25
+                components x 2 palettes in an isolated fixture on the
+                compiled CSS, plus 101 focusable elements on seven
+                running pages, with no result below 3:1 (issue #2199, PR
+                #2221). Non-text contrast of other graphical objects
+                (icon-only affordances, map controls) is queued for the
+                manual audit cycle. Evidence for the September 2026
+                changes is recorded by criterion in
+                docs/accessibility/findings/2026-09-17-remediation-cycle.md.
+                Evidence for the September 2026 changes is recorded by
+                criterion in
+                docs/accessibility/findings/2026-09-17-remediation-cycle.md.
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 1.4.12
+        components:
+          - name: web
+            adherence:
+              level: not-evaluated
+              notes: ""
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 1.4.13
+        components:
+          - name: web
+            adherence:
+              level: not-evaluated
+              notes: ""
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 2.4.5
+        components:
+          - name: web
+            adherence:
+              level: not-evaluated
+              notes: ""
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 2.4.6
+        components:
+          - name: web
+            adherence:
+              level: not-evaluated
+              notes: ""
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 2.4.7
+        components:
+          - name: web
+            adherence:
+              level: not-evaluated
+              notes: ""
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 3.1.2
+        components:
+          - name: web
+            adherence:
+              level: not-evaluated
+              notes: ""
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 3.2.3
+        components:
+          - name: web
+            adherence:
+              level: not-evaluated
+              notes: ""
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 3.2.4
+        components:
+          - name: web
+            adherence:
+              level: not-evaluated
+              notes: ""
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 3.3.3
+        components:
+          - name: web
+            adherence:
+              level: not-evaluated
+              notes: ""
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 3.3.4
+        components:
+          - name: web
+            adherence:
+              level: not-evaluated
+              notes: ""
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""
+      - num: 4.1.3
+        components:
+          - name: web
+            adherence:
+              level: not-evaluated
+              notes: ""
+          - name: authoring-tool
+            adherence:
+              level: not-evaluated
+              notes: ""

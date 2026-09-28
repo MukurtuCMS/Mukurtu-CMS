@@ -2,12 +2,28 @@ langcode: en
 status: true
 dependencies:
   config:
+    # The config each derivative plugin in the section below derives from.
+    # The installer sorts a module's batch by these, and refuses to install
+    # the module until anything shipped by another module already exists,
+    # so they must come from this module or one it depends on. All are what
+    # calculateDependencies() records on a live site. The hero component is
+    # a placeholder patched in code and is deliberately absent.
+    - block_content.type.featured_content
     - field.field.node.landing_page.layout_builder__layout
     - node.type.landing_page
+    - views.view.mukurtu_browse_by_map
+    - views.view.mukurtu_categories
   module:
+    # Every section component's plugin provider, as calculateDependencies()
+    # records on a live site. The installer refuses to install this module
+    # until each is enabled, which is what keeps the Browse by Community
+    # block (mukurtu_protocol) from being a missing plugin at import time.
+    - block_content
     - layout_builder
     - layout_builder_restrictions
+    - mukurtu_protocol
     - user
+    - views
 third_party_settings:
   layout_builder:
     enabled: true

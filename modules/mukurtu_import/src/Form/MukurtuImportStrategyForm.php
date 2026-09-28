@@ -11,6 +11,8 @@ use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
+use Drupal\Core\Render\Element;
+use Drupal\mukurtu_core\Form\AjaxRowTableAccessibilityTrait;
 use Drupal\mukurtu_import\Entity\MukurtuImportStrategy;
 use Drupal\mukurtu_import\MukurtuImportFieldProcessPluginManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -20,6 +22,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class MukurtuImportStrategyForm extends EntityForm {
   use ImportFormTrait;
+  use AjaxRowTableAccessibilityTrait;
 
   /**
    * Constructs a MukurtuImportStrategyForm object.
@@ -54,6 +57,7 @@ class MukurtuImportStrategyForm extends EntityForm {
   public function form(array $form, FormStateInterface $form_state): array {
     $form = parent::form($form, $form_state);
     $form['#attached']['library'][] = 'mukurtu_import/strategy_form';
+    $this->attachAjaxRowTableStatusLibrary($form);
 
     $form['label'] = [
       '#type' => 'textfield',
@@ -204,6 +208,11 @@ class MukurtuImportStrategyForm extends EntityForm {
       '#suffix' => "</div>",
     ];
 
+    // Live region announcing table changes to screen reader users. Kept
+    // outside the #prefix/#suffix wrapper above so it survives the AJAX
+    // wrapper replacement instead of being reset by it.
+    $form['mapping_status'] = $this->buildAjaxRowTableStatusRegion('import-field-mapping-status');
+
     for ($delta = 0; $delta < $num_mappings; $delta++) {
       $default_source = $existing_mapping[$delta]['source'] ?? '';
       $default_target = $existing_mapping[$delta]['target'] ?? -1;
@@ -231,6 +240,9 @@ class MukurtuImportStrategyForm extends EntityForm {
         '#name' => "mapping_{$delta}_remove_button",
         '#type' => 'submit',
         '#value' => $this->t('Remove'),
+        '#attributes' => [
+          'aria-label' => $this->t('Remove mapping row @number', ['@number' => $delta + 1]),
+        ],
         '#validate' => [],
         '#submit' => ['::removeMappingSubmit'],
         '#limit_validation_errors' => [],
@@ -244,6 +256,9 @@ class MukurtuImportStrategyForm extends EntityForm {
     $form['add_mapping'] = [
       '#type' => 'submit',
       '#value' => $this->t('Add mapping'),
+      '#attributes' => [
+        'id' => 'import-add-mapping-button',
+      ],
       '#submit' => ['::addMappingCallback'],
       '#ajax' => [
         'callback' => '::mappingTableAjaxCallback',
@@ -286,6 +301,14 @@ class MukurtuImportStrategyForm extends EntityForm {
    * AJAX callback that returns the mapping table.
    */
   public function mappingTableAjaxCallback(array &$form, FormStateInterface $form_state): array {
+    // Marks the table so the shared ajax-row-table-status JS behavior knows
+    // this rebuild came from Add/Remove specifically, not from the entity
+    // type/bundle AJAX callbacks below, which replace the same wrapper for
+    // an unrelated reason and shouldn't steal focus or announce a table
+    // change.
+    $count = count(Element::children($form['mapping']));
+    $message = $this->formatPlural($count, 'Mapping table updated. 1 mapping row.', 'Mapping table updated. @count mapping rows.');
+    $this->markAjaxRowTableChanged($form['mapping'], $message, 'import-field-mapping-status', 'import-add-mapping-button');
     return $form['mapping'];
   }
 

@@ -4,6 +4,7 @@ namespace Drupal\mukurtu_core\Routing;
 
 use Drupal\Core\Routing\RouteSubscriberBase;
 use Drupal\Core\Routing\RoutingEvents;
+use Drupal\mukurtu_core\Controller\VisitorsLocationReportController;
 use Symfony\Component\Routing\RouteCollection;
 
 /**
@@ -54,6 +55,16 @@ class RouteSubscriber extends RouteSubscriberBase
       $route->setRequirements($requirements);
       $route->setDefault('view_id', 'mukurtu_manage_all_content');
       $route->setDefault('display_id', 'mukurtu_manage_content');
+    }
+
+    // Render the continent pie chart on /visitors/location instead of hiding
+    // it behind the "chart" footer link. This guard is also what lets
+    // mukurtu_core carry a controller built on a visitors class without
+    // depending on the visitors module: with that module off the route does
+    // not exist, so nothing here ever names the controller and nothing
+    // autoloads it.
+    if ($route = $collection->get(VisitorsLocationReportController::ROUTE_NAME)) {
+      $route->setDefault('_controller', VisitorsLocationReportController::class . '::location');
     }
 
     // Restrict the Message Subscribe UI "Subscriptions" page/tab to admins,

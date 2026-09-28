@@ -1,0 +1,35 @@
+# Grants the admin account (uid 1) the "protocol_steward" OG role on the
+# Public Access protocol. Needed for MultipageValidNodeConstraintValidator,
+# which requires the acting user to hold "administer multipage item" via a
+# membership in one of a page's owning protocols — og.settings:
+# auto_add_group_owner_membership is disabled sitewide (see the
+# og_membership entity for the Community above), so this doesn't happen
+# automatically for the Protocol either. Assumes the Public Access protocol
+# gets ID 1 on a fresh install; see ../../README.md.
+_meta:
+  version: '1.0'
+  entity_type: og_membership
+  uuid: aed854ef-ac7f-4a19-80b9-2666f2c23b64
+  bundle: default
+  default_langcode: en
+  depends:
+    1008afed-c70c-419e-bc55-eb37451a1b69: protocol
+default:
+  uid:
+    -
+      target_id: 1
+  entity_type:
+    -
+      value: protocol
+  entity_bundle:
+    -
+      value: protocol
+  entity_id:
+    -
+      value: '1'
+  state:
+    -
+      value: active
+  roles:
+    -
+      target_id: 'protocol-protocol-protocol_steward'

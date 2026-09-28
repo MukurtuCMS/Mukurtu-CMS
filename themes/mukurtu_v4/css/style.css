@@ -123,6 +123,17 @@ label {
   word-wrap: normal;
 }
 
+.skip-link.visually-hidden.focusable:focus {
+  position: absolute !important;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  z-index: 1200;
+  padding-block: var(--v-space-6xs);
+  padding-inline: var(--v-space-5xs);
+  color: var(--color-white);
+  background-color: var(--color-black);
+}
+
 .line-clamp-2 {
   overflow: hidden;
   display: -webkit-box;
@@ -153,6 +164,7 @@ documentation on how to use @include media(). */
   --mukurtu-dictionary-word-label-background-color: var(--mukurtu-view-row-divider-color);
   --mukurtu-collection-title-font-color: var(--color-white);
   --mukurtu-collection-pane-bg-color: var(--mukurtu-navbar-collapse-bg);
+  --image-description-horizontal-text: var(--brand-primary-dark);
   --brand-text-color: #464646;
   --brand-light: #e5e9e9;
   --brand-light-accent: #f8f7f7;
@@ -171,7 +183,39 @@ documentation on how to use @include media(). */
   --color-black: #000;
   --color-gray: #555;
   --color-transparent: rgba(0 0 0 / 0%);
-  --focus-color: #66afe9;
+  /* Focus indicator colour, used by every focusable element in the theme
+  (links, inputs, selects, buttons, footer, tabs, Klaro - see the
+  var(--focus-color) consumers across components/).
+
+  This is deliberately currentcolor rather than a fixed value. Focus rings
+  here have to land on white, the cream and bone panel fills, the grey
+  form fills, the #464646 footer, AND brand red, and no single opaque
+  colour clears WCAG 1.4.11's 3:1 against both ends of that range - the
+  previous #66afe9 measured 1.59-2.37:1 on every light surface (#2199).
+  currentcolor inherits the element's own text colour, which has already
+  been chosen to contrast with whatever it sits on, so the ring is correct
+  by construction wherever the text is.
+
+  Two cases need a hard-coded ring instead, because currentcolor can't be
+  trusted there:
+
+  1. Anything drawn over user-uploaded imagery of unknown luminance, where
+     the text colour is a fixed choice that can't be guaranteed against an
+     arbitrary photo. See _carousels.scss, _glightbox.scss, _full-node.scss
+     and _local-contexts.scss, plus mukurtu_core's
+     css/mukurtu-leaflet-widget.css for the map, which is outside this
+     theme but consumes this token.
+  2. Anything white-on-a-dark-fill. An outline is painted *outside* the
+     element, so the surface that matters is the parent's background, not
+     the fill the text sits on - a white label on a dark button still gets
+     a white ring on whatever light thing is behind the button. Note this
+     is not only components that look inverted at rest: the global
+     button:focus rule (from @mixin button, specificity 0,1,1) turns every
+     button's label white while focused, so ANY component that rings a
+     <button> via var(--focus-color) at higher specificity inherits this
+     trap. Ring in the focused fill colour with an outline-offset instead,
+     or inset the ring (negative offset) so it lands on the fill. */
+  --focus-color: currentcolor;
   --placeholder-color: #999;
   --color-greys-alpha-background: #eee;
   --color-greys-alpha-border: #ccc;
@@ -402,25 +446,6 @@ div.palette-demo--custom {
 }
 
 :root {
-  --brand-primary: #138aab;
-  --brand-primary-dark: #107996;
-  --brand-primary-accent: #159ec4;
-  --brand-secondary: #e6ab49;
-  --brand-secondary-dark: #9d6915;
-  --brand-secondary-accent: #f1b85a;
-  --mukurtu-navbar-collapse-link-hover-color: #e5ab48;
-  --mukurtu-breadcrumb-gradient-color: #b7873a;
-  --mukurtu-panel-pane-text-color: var(--color-white);
-  --mukurtu-panel-pane-content-background-color: #eeecec;
-  --mukurtu-mejs-background-color: var(--brand-light-accent);
-  --mukurtu-mejs-time-rail-loaded-color: #e5e1e1;
-  --mukurtu-mejs-time-rail-current-color: #d1cbcb;
-  --mukurtu-dictionary-word-label-background-color: var(--mukurtu-view-row-divider-color);
-  --mukurtu-collection-title-font-color: var(--color-white);
-  --mukurtu-collection-pane-bg-color: var(--mukurtu-navbar-collapse-bg);
-}
-
-:root {
   --v-space-6xs: 0.25rem;
   --v-space-5xs: 0.5rem;
   --v-space-4xxs: 1rem;
@@ -463,22 +488,26 @@ div.palette-demo--custom {
 @font-face {
   font-family: BCSans;
   font-style: normal;
+  font-display: swap;
   src: url("../fonts/BCSans-Regular.woff2") format("woff2"), url("../fonts/BCSans-Regular.woff") format("woff");
 }
 @font-face {
   font-family: BCSans;
   font-style: italic;
+  font-display: swap;
   src: url("../fonts/BCSans-Italic.woff2") format("woff2"), url("../fonts/BCSans-Italic.woff") format("woff");
 }
 @font-face {
   font-family: BCSans;
   font-weight: 700;
+  font-display: swap;
   src: url("../fonts/BCSans-Bold.woff2") format("woff2"), url("../fonts/BCSans-Bold.woff") format("woff");
 }
 @font-face {
   font-family: BCSans;
   font-style: italic;
   font-weight: 700;
+  font-display: swap;
   src: url("../fonts/BCSans-BoldItalic.woff2") format("woff2"), url("../fonts/BCSans-BoldItalic.woff") format("woff");
 }
 :root {
@@ -530,8 +559,8 @@ div.palette-demo--custom {
      "Times New Roman",
      Times,
      serif; */
-  --font-display-face: "BCSans",
-  "Noto Sans",
+  --font-display-face: 'BCSans',
+  'Noto Sans',
   verdana,
   arial,
   sans-serif;
@@ -655,7 +684,13 @@ input[type=button]:focus,
 input[type=submit]:focus,
 input[type=reset]:focus,
 .button:focus {
-  outline: 2px solid var(--focus-color);
+  /* Not var(--focus-color) (currentcolor) here: this button's label is
+  white *because* its fill is dark, but an outline draws outside the
+  fill, onto the page - a white ring on a white page is invisible. Ring
+  in the fill colour instead, offset so the page shows through the gap
+  and the ring reads against it (#2199). */
+  outline: 2px solid var(--brand-primary-dark);
+  outline-offset: 2px;
 }
 button:disabled,
 input[type=button]:disabled,
@@ -963,6 +998,10 @@ a:not(.primary-nav__menu-link) svg.tel path {
   color: var(--color-text-secondary);
 }
 
+.altcha-footer {
+  opacity: 1 !important;
+}
+
 .community__sidebar > .field,
 .protocol__sidebar > .field,
 .callout {
@@ -1116,6 +1155,21 @@ a:not(.primary-nav__menu-link) svg.tel path {
   max-block-size: 100px;
   inline-size: auto;
 }
+.thumbnail-carousel__slide-button {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  text-align: inherit;
+  cursor: pointer;
+}
+.thumbnail-carousel__slide-button:focus-visible {
+  outline: var(--brand-primary-dark) solid 2px;
+  outline-offset: 2px;
+}
 
 #cboxClose {
   color: var(--light-text-color);
@@ -1132,7 +1186,11 @@ a:not(.primary-nav__menu-link) svg.tel path {
   background: var(--brand-primary-accent);
 }
 #cboxClose:focus {
-  outline: 2px solid var(--focus-color);
+  /* Same inverted-fill case as the button mixin: this control's label is
+  white on a dark fill, so currentcolor would draw a white ring onto the
+  page. Ring in the fill colour, offset (#2199). */
+  outline: 2px solid var(--brand-primary-dark);
+  outline-offset: 2px;
 }
 #cboxClose:disabled {
   color: var(--light-text-color);
@@ -1236,7 +1294,10 @@ body.consent-popup-opened .klaro_toggle_dialog {
   --klaro-button-bg-hover: var(--brand-primary-dark);
   --klaro-button-text-color-hover: var(--light-text-color);
   --klaro-button-border-hover: none;
-  --klaro-button-focus-outline: 2px solid var(--focus-color);
+  /* Not var(--focus-color) (currentcolor): Klaro's buttons are white-on-
+  brand, so the ring would be white and the offset puts it on the notice's
+  near-white background (#2199). Ring in the fill colour instead. */
+  --klaro-button-focus-outline: 2px solid var(--brand-primary-dark);
   --klaro-button-focus-outline-offset: 2px;
   --klaro-dialog-focus-outline: 2px solid var(--focus-color);
 }
@@ -1280,6 +1341,13 @@ body.consent-popup-opened .klaro_toggle_dialog {
       -ms-flex-pack: center;
           justify-content: center;
   background-color: rgba(0, 0, 0, 0.7);
+}
+@supports not (backdrop-filter: blur()) {
+  .mukurtu-content-warnings {
+    background-color: rgba(0, 0, 0, 0.9);
+  }
+}
+.mukurtu-content-warnings {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   color: white;
@@ -1288,16 +1356,16 @@ body.consent-popup-opened .klaro_toggle_dialog {
   cursor: pointer;
   text-align: center;
 }
-@supports not (backdrop-filter: blur()) {
-  .mukurtu-content-warnings {
-    background-color: rgba(0, 0, 0, 0.9);
-  }
-}
 .mukurtu-content-warnings:hover {
   text-decoration: underline;
 }
 .mukurtu-content-warnings:focus-visible {
+  /* This overlay's label is white on its own dark 70% scrim, but it sits
+  over arbitrary uploaded media, so neither currentcolor drawn outward
+  nor any fixed colour is safe against what's behind it. Inset the ring
+  so it lands on the scrim, which is a known dark surface (#2199). */
   outline: var(--focus-color) solid 2px;
+  outline-offset: -4px;
 }
 .mukurtu-content-warnings.dismissed {
   display: none;
@@ -1852,7 +1920,7 @@ label.form-required::after,
   position: relative;
 }
 :is(#extra-specificity-hack, .horizontal-tabs) *:focus {
-  outline: var(--admin-toolbar-size-focus) solid var(--admin-toolbar-color-focus);
+  outline: var(--admin-toolbar-size-focus, 2px) solid var(--admin-toolbar-color-focus, var(--focus-color));
 }
 :is(#extra-specificity-hack, .horizontal-tabs) *:not(:where(svg, svg *, .horizontal-tabs-panes, .horizontal-tabs-panes *)) {
   all: revert;
@@ -1942,6 +2010,16 @@ label.form-required::after,
   color: var(--light-text-color);
   background-color: var(--brand-primary-dark);
 }
+:is(#extra-specificity-hack, .horizontal-tabs) ul.horizontal-tabs-list li.selected a:focus {
+  /* This tab is white-on-brand-primary-dark, so the ring is
+  white (currentcolor) and drawn outward it spills onto the light
+  tab strip above. Inset it so it lands on the tab's own dark
+  fill (#2199). Has to live here rather than in _link.scss: the
+  :is(#extra-specificity-hack, ...) wrapper at the top of this
+  file gives these rules ID-level specificity, so a class-based
+  rule elsewhere can never win. */
+  outline-offset: -4px;
+}
 :is(#extra-specificity-hack, .horizontal-tabs) ul.horizontal-tabs-list li.selected::after {
   content: "";
   position: absolute;
@@ -2015,6 +2093,13 @@ label.form-required::after,
 .block--image-with-description--horizontal .block-wrapper__second {
   background-color: var(--brand-secondary);
 }
+.block--image-with-description--horizontal .block-wrapper__second h1, .block--image-with-description--horizontal .block-wrapper__second h2 {
+  color: var(--image-description-horizontal-text);
+}
+.block--image-with-description--horizontal .block-wrapper__second a {
+  color: var(--image-description-horizontal-text);
+  text-decoration-color: var(--image-description-horizontal-text);
+}
 @media (min-width: 48rem) {
   .block--image-with-description--horizontal {
     grid-template-columns: 1fr 1fr;
@@ -2049,11 +2134,35 @@ label.form-required::after,
 }
 .block--image-with-description--full * {
   color: var(--brand-primary-dark);
-  text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.8);
+}
+.block--image-with-description--full h1, .block--image-with-description--full h2 {
+  font-size: var(--font-size-heading-2xl);
+  text-align: center;
+}
+.block--image-with-description--full p {
+  font-size: var(--font-size-l);
+}
+.block--image-with-description--full h1, .block--image-with-description--full h2, .block--image-with-description--full p, .block--image-with-description--full a {
+  -webkit-text-stroke: 0.035em var(--color-white);
+  paint-order: stroke fill;
+}
+.block--image-with-description--full a {
+  -webkit-filter: drop-shadow(1px 0 0 var(--color-white)) drop-shadow(-1px 0 0 var(--color-white)) drop-shadow(0 1px 0 var(--color-white)) drop-shadow(0 -1px 0 var(--color-white)) drop-shadow(1px 1px 0 var(--color-white)) drop-shadow(-1px -1px 0 var(--color-white)) drop-shadow(1px -1px 0 var(--color-white)) drop-shadow(-1px 1px 0 var(--color-white));
+          filter: drop-shadow(1px 0 0 var(--color-white)) drop-shadow(-1px 0 0 var(--color-white)) drop-shadow(0 1px 0 var(--color-white)) drop-shadow(0 -1px 0 var(--color-white)) drop-shadow(1px 1px 0 var(--color-white)) drop-shadow(-1px -1px 0 var(--color-white)) drop-shadow(1px -1px 0 var(--color-white)) drop-shadow(-1px 1px 0 var(--color-white));
+}
+.block--image-with-description--full a:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+  -webkit-box-shadow: 0 0 0 5px #000;
+          box-shadow: 0 0 0 5px #000;
+}
+@supports not (-webkit-text-stroke: 1px solid) {
+  .block--image-with-description--full h1, .block--image-with-description--full h2, .block--image-with-description--full p, .block--image-with-description--full a {
+    text-shadow: 0.025em 0 0 var(--color-white), -0.025em 0 0 var(--color-white), 0 0.025em 0 var(--color-white), 0 -0.025em 0 var(--color-white), 0.025em 0.025em 0 var(--color-white), -0.025em -0.025em 0 var(--color-white), 0.025em -0.025em 0 var(--color-white), -0.025em 0.025em 0 var(--color-white);
+  }
 }
 .block--image-with-description--full.text-light * {
   color: var(--color-white);
-  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.8);
 }
 .block--image-with-description--full.text-light a {
   text-decoration-color: var(--color-white);
@@ -2064,12 +2173,29 @@ label.form-required::after,
 .block--image-with-description--full.text-light svg.ext path {
   stroke: var(--color-white);
 }
-.block--image-with-description--full.text-light h1, .block--image-with-description--full.text-light h2 {
-  font-size: var(--font-size-heading-2xl);
-  text-align: center;
+.block--image-with-description--full.text-light h1, .block--image-with-description--full.text-light h2, .block--image-with-description--full.text-light p, .block--image-with-description--full.text-light a {
+  -webkit-text-stroke-color: #000;
 }
-.block--image-with-description--full.text-light p {
-  font-size: var(--font-size-l);
+.block--image-with-description--full.text-light a {
+  -webkit-filter: drop-shadow(1px 0 0 #000) drop-shadow(-1px 0 0 #000) drop-shadow(0 1px 0 #000) drop-shadow(0 -1px 0 #000) drop-shadow(1px 1px 0 #000) drop-shadow(-1px -1px 0 #000) drop-shadow(1px -1px 0 #000) drop-shadow(-1px 1px 0 #000);
+          filter: drop-shadow(1px 0 0 #000) drop-shadow(-1px 0 0 #000) drop-shadow(0 1px 0 #000) drop-shadow(0 -1px 0 #000) drop-shadow(1px 1px 0 #000) drop-shadow(-1px -1px 0 #000) drop-shadow(1px -1px 0 #000) drop-shadow(-1px 1px 0 #000);
+}
+@supports not (-webkit-text-stroke: 1px solid) {
+  .block--image-with-description--full.text-light h1, .block--image-with-description--full.text-light h2, .block--image-with-description--full.text-light p, .block--image-with-description--full.text-light a {
+    text-shadow: 0.025em 0 0 #000, -0.025em 0 0 #000, 0 0.025em 0 #000, 0 -0.025em 0 #000, 0.025em 0.025em 0 #000, -0.025em -0.025em 0 #000, 0.025em -0.025em 0 #000, -0.025em 0.025em 0 #000;
+  }
+}
+.block--image-with-description--full .contextual, .block--image-with-description--full .contextual * {
+  color: revert;
+  -webkit-text-stroke: revert;
+  text-shadow: revert;
+  -webkit-filter: revert;
+          filter: revert;
+}
+.block--image-with-description--full .contextual a:focus-visible {
+  outline: revert;
+  -webkit-box-shadow: revert;
+          box-shadow: revert;
 }
 .block--image-with-description--full .block-wrapper__first {
   overflow: hidden;
@@ -2087,6 +2213,7 @@ label.form-required::after,
   inline-size: 100%;
 }
 .block--image-with-description--full .block-wrapper__second {
+  position: relative;
   z-index: 2;
   inline-size: 100%;
   block-size: 100%;
@@ -2097,8 +2224,20 @@ label.form-required::after,
       flex-wrap: wrap;
   place-content: center;
   place-items: center;
-  padding: var(--v-space-s);
   min-block-size: 600px;
+}
+.block--image-with-description--full .block-wrapper__second::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: rgba(0, 0, 0, 0.35);
+}
+.block--image-with-description--full.text-dark .block-wrapper__second::before {
+  background: rgba(255, 255, 255, 0.45);
+}
+.block--image-with-description--full .block-wrapper__second-card {
+  max-inline-size: min(90%, 640px);
 }
 
 .language-switcher__summary {
@@ -2165,6 +2304,12 @@ label.form-required::after,
   background-color: var(--brand-primary-dark);
   color: var(--color-white);
 }
+.language-switcher > ul a.is-active:focus {
+  /* Active state is white-on-dark, so the inherited var(--focus-color)
+  (currentcolor) ring would be white and block-link's outline-offset
+  puts it on the light surface behind. Ring in the fill colour (#2199). */
+  outline: 2px solid var(--brand-primary-dark);
+}
 .language-switcher > ul a.is-active:hover {
   background-color: var(--brand-primary-accent);
 }
@@ -2217,7 +2362,10 @@ label.form-required::after,
   background: var(--brand-primary-accent);
 }
 .local-contexts-dialog__trigger:focus-visible {
-  outline: 2px solid var(--focus-color);
+  /* A <button>: the global button:focus rule turns its label white, so
+  var(--focus-color) (currentcolor) would ring white on the white page
+  behind it. Ring in the focused fill colour instead (#2199). */
+  outline: 2px solid var(--brand-primary-dark);
   outline-offset: 2px;
 }
 .local-contexts-dialog__panel {
@@ -2269,7 +2417,8 @@ label.form-required::after,
   background-color: var(--brand-light);
 }
 .local-contexts-dialog__close:focus-visible {
-  outline: 2px solid var(--focus-color);
+  /* Same <button> case as __trigger above (#2199). */
+  outline: 2px solid var(--brand-primary-dark);
   outline-offset: 2px;
 }
 .local-contexts-dialog__header {
@@ -2553,6 +2702,15 @@ label.form-required::after,
   background-color: var(--brand-primary);
   color: var(--color-white);
 }
+.local-tasks:not(.glb-body .local-tasks) a:focus {
+  /* This tab turns white-on-brand while focused, so the inherited
+  var(--focus-color) (currentcolor) would draw a white ring onto the
+  white page behind it. Ring in the fill colour instead, offset so it
+  reads against the page (#2199). Applies to .is-active too, which
+  only re-declares background and colour below. */
+  outline: 2px solid var(--brand-primary);
+  outline-offset: 2px;
+}
 .local-tasks:not(.glb-body .local-tasks) a.is-active {
   background: var(--brand-light);
   font-weight: var(--text-bold);
@@ -2574,6 +2732,13 @@ label.form-required::after,
 }
 .local-tasks__inner {
   grid-column: 1/-1;
+}
+@media (min-width: 90rem) {
+  .local-tasks__inner {
+    grid-column: 2/-2;
+  }
+}
+.local-tasks__inner {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -2581,11 +2746,6 @@ label.form-required::after,
       -ms-flex-align: center;
           align-items: center;
   gap: var(--gutter);
-}
-@media (min-width: 90rem) {
-  .local-tasks__inner {
-    grid-column: 2/-2;
-  }
 }
 @media (min-width: 60rem) {
   .local-tasks__inner {
@@ -2681,7 +2841,9 @@ label.form-required::after,
   color: var(--color-white);
   -webkit-box-shadow: none;
           box-shadow: none;
-  outline: 3px solid var(--focus-color);
+  /* Same inverted-fill case as the tabs above: white label on a dark
+  fill, so ring in the fill colour rather than currentcolor (#2199). */
+  outline: 3px solid var(--brand-primary-dark);
   outline-offset: 2px;
 }
 .local-tasks .export-list-dropdown__menu {
@@ -3250,10 +3412,12 @@ img[class$=-placeholder] {
   border: 0;
   background: transparent;
   font-weight: normal;
-  /* Plus icon for mobile navigation. */
 }
 .primary-nav__menu-link--button:hover, .primary-nav__menu-link--button:focus, .primary-nav__menu-link--button:active {
   background-color: transparent;
+}
+.primary-nav__menu-link--button {
+  /* Plus icon for mobile navigation. */
 }
 .primary-nav__menu-link--button.primary-nav__menu-link--has-children {
   -webkit-padding-end: var(--v-space-s);
@@ -3389,6 +3553,31 @@ html:not(.js) .primary-nav__menu--level-2 {
  */
 .mobile-buttons {
   grid-column: -2/-1;
+  /* From >=sm the label below un-hides and .mobile-nav-button switches to
+  inline-size: auto, growing from 32px to ~83px. That is wider than one
+  column of the header's 6-column grid until about 525px, so the button
+  overhung the right edge and dragged the document into horizontal
+  scrolling between 480px and 520px, failing WCAG 1.4.10 (#2197). Give it
+  two columns from the same breakpoint the label appears at, so the
+  labelled state always has room.
+
+  The button right-aligns itself with margin-inline-start: auto, but that
+  only works while it is block-level: at >=sm it also becomes
+  inline-flex, and an auto margin computes to 0 on an inline-level box.
+  That went unnoticed while the button was wider than its column (it had
+  nowhere to move), so right-align here explicitly rather than leaving it
+  to the auto margin. */
+}
+@media (min-width: 30rem) {
+  .mobile-buttons {
+    grid-column: -3/-1;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: end;
+        -ms-flex-pack: end;
+            justify-content: flex-end;
+  }
 }
 @media (min-width: 60rem) {
   body:not(.is-always-mobile-nav) .mobile-buttons {
@@ -3532,9 +3721,6 @@ html:not(.js) .primary-nav__menu--level-2 {
   -webkit-appearance: none;
      -moz-appearance: none;
           appearance: none;
-  /* aria-hidden attribute is removed by JS. Button is non-functional
-     until JS is enabled.
-  */
 }
 .primary-nav__button-toggle:focus, .primary-nav__button-toggle:hover {
   background-color: transparent;
@@ -3578,6 +3764,11 @@ html:not(.js) .primary-nav__menu--level-2 {
 .primary-nav__button-toggle[aria-expanded=true] .icon--menu-toggle::after {
   opacity: 0;
 }
+.primary-nav__button-toggle {
+  /* aria-hidden attribute is removed by JS. Button is non-functional
+     until JS is enabled.
+  */
+}
 .primary-nav__button-toggle[aria-hidden=true] {
   pointer-events: none;
 }
@@ -3593,7 +3784,6 @@ html:not(.js) .primary-nav__menu--level-2 {
     margin: 0;
     -webkit-margin-end: var(--v-space-4xxs);
             margin-inline-end: var(--v-space-4xxs);
-    /* stylelint-disable-next-line no-descending-specificity */
   }
   body:not(.is-always-mobile-nav) .primary-nav__button-toggle:focus, body:not(.is-always-mobile-nav) .primary-nav__button-toggle:hover {
     border: 0;
@@ -3610,6 +3800,9 @@ html:not(.js) .primary-nav__menu--level-2 {
   body:not(.is-always-mobile-nav) .primary-nav__button-toggle[aria-expanded=true] .icon--menu-toggle::after {
     opacity: 0.8;
   }
+  body:not(.is-always-mobile-nav) .primary-nav__button-toggle {
+    /* stylelint-disable-next-line no-descending-specificity */
+  }
   body:not(.is-always-mobile-nav) .primary-nav__button-toggle .icon--menu-toggle {
     size: 19px;
     border-radius: 4px;
@@ -3625,10 +3818,12 @@ html:not(.js) .primary-nav__menu--level-2 {
     -webkit-box-pack: center;
         -ms-flex-pack: center;
             justify-content: center;
-    /* stylelint-disable-next-line no-descending-specificity */
   }
   body:not(.is-always-mobile-nav) .primary-nav__button-toggle .icon--menu-toggle::before {
     content: none;
+  }
+  body:not(.is-always-mobile-nav) .primary-nav__button-toggle .icon--menu-toggle {
+    /* stylelint-disable-next-line no-descending-specificity */
   }
   body:not(.is-always-mobile-nav) .primary-nav__button-toggle .icon--menu-toggle::after {
     inline-size: 8px;
@@ -3657,16 +3852,6 @@ html:not(.js) .primary-nav__menu--level-2 {
  * Nav Primary (wide widths).
  */
 @media (min-width: 60rem) {
-  body:not(.is-always-mobile-nav) {
-    /**
-     * Arrow is placed outside of submenu because the submenu has the
-     * `overflow: hidden` CSS rule applied.
-     */
-    /**
-     * When ensuring that long menus don't overflow viewport, we can give a
-     * little extra room when the toolbar is fixed (and is shorter).
-     */
-  }
   body:not(.is-always-mobile-nav) .primary-nav__menu-link-inner {
     padding-inline: 0;
   }
@@ -3704,7 +3889,6 @@ html:not(.js) .primary-nav__menu--level-2 {
             padding-inline-end: 1rem;
     -webkit-margin-end: var(--v-space-3xs);
             margin-inline-end: var(--v-space-3xs);
-    /* Chevron icon for desktop navigation. */
   }
   body:not(.is-always-mobile-nav) .primary-nav__menu-link--button.primary-nav__menu-link--has-children::before {
     content: none;
@@ -3716,6 +3900,9 @@ html:not(.js) .primary-nav__menu--level-2 {
   body:not(.is-always-mobile-nav) .primary-nav__menu-link--button.primary-nav__menu-link--has-children:focus, body:not(.is-always-mobile-nav) .primary-nav__menu-link--button.primary-nav__menu-link--has-children:hover {
     border-block-end-color: transparent;
     background-color: transparent;
+  }
+  body:not(.is-always-mobile-nav) .primary-nav__menu-link--button.primary-nav__menu-link--has-children {
+    /* Chevron icon for desktop navigation. */
   }
   body:not(.is-always-mobile-nav) .primary-nav__menu-link--button.primary-nav__menu-link--has-children::after {
     position: absolute;
@@ -3841,6 +4028,12 @@ html:not(.js) .primary-nav__menu--level-2 {
     padding-block: var(--v-space-5xs);
     padding-inline: 0;
   }
+  body:not(.is-always-mobile-nav) {
+    /**
+     * Arrow is placed outside of submenu because the submenu has the
+     * `overflow: hidden` CSS rule applied.
+     */
+  }
   body:not(.is-always-mobile-nav) .primary-nav__menu-caret {
     position: absolute;
     z-index: 105; /* Match level 2 menus. */
@@ -3868,6 +4061,12 @@ html:not(.js) .primary-nav__menu--level-2 {
     -webkit-transform: translate(-50%, 0);
             transform: translate(-50%, 0);
     opacity: 1;
+  }
+  body:not(.is-always-mobile-nav) {
+    /**
+     * When ensuring that long menus don't overflow viewport, we can give a
+     * little extra room when the toolbar is fixed (and is shorter).
+     */
   }
   body:not(.is-always-mobile-nav) .is-fixed .primary-nav__menu--level-2 {
     max-block-size: calc(100vh - var(--site-header-height-wide) - var(--drupal-displace-offset-top, 0px) - var(--drupal-displace-offset-bottom, 0px) - var(--v-space-4xxs) + var(--v-space-4xl));
@@ -3916,9 +4115,6 @@ html:not(.js) .primary-nav__menu--level-2 {
   background-color: var(--color-white);
   -webkit-box-shadow: 0 0 72px rgba(0, 0, 0, 0.1);
           box-shadow: 0 0 72px rgba(0, 0, 0, 0.1);
-  /*
-   * Ensure top border has the same color as the background when in forced colors.
-   */
 }
 .header-nav.is-active {
   visibility: visible;
@@ -3941,6 +4137,11 @@ html:not(.js) .primary-nav__menu--level-2 {
   .header-nav {
     grid-column: 5/14;
   }
+}
+.header-nav {
+  /*
+   * Ensure top border has the same color as the background when in forced colors.
+   */
 }
 @media (forced-colors: active) {
   .header-nav {
@@ -4248,7 +4449,6 @@ body.is-always-mobile-nav .header-nav::before {
 body:not(.is-always-mobile-nav) {
   /* Mobile: search sits in the middle columns (2-4) of the header row,
    * between the logo (col 1) and the hamburger button (cols 5-6). */
-  /* Desktop: hide the mobile bar; show the instance inside the nav bar. */
 }
 @media (max-width: 59.9rem) {
   body:not(.is-always-mobile-nav) .header-search--mobile {
@@ -4260,10 +4460,10 @@ body:not(.is-always-mobile-nav) {
     background: transparent;
   }
 }
+body:not(.is-always-mobile-nav) {
+  /* Desktop: hide the mobile bar; show the instance inside the nav bar. */
+}
 @media (min-width: 60rem) {
-  body:not(.is-always-mobile-nav) {
-    /* Fixed width on desktop so the nav items have room. */
-  }
   body:not(.is-always-mobile-nav) .header__main-nav {
     display: -webkit-box;
     display: -ms-flexbox;
@@ -4284,6 +4484,9 @@ body:not(.is-always-mobile-nav) {
             align-items: center;
     -webkit-padding-start: var(--v-space-4xs);
             padding-inline-start: var(--v-space-4xs);
+  }
+  body:not(.is-always-mobile-nav) {
+    /* Fixed width on desktop so the nav items have room. */
   }
   body:not(.is-always-mobile-nav) .header-search__input {
     -webkit-box-flex: 0;
@@ -4316,6 +4519,7 @@ body:not(.is-always-mobile-nav) {
   -webkit-box-flex: 1;
       -ms-flex: 1 1 auto;
           flex: 1 1 auto;
+  min-inline-size: 0;
   padding-block: var(--v-space-5xs);
   padding-inline: var(--v-space-5xs);
   border: 1.5px solid var(--color-text-neutral-medium, #767676);
@@ -4326,12 +4530,14 @@ body:not(.is-always-mobile-nav) {
   color: var(--color-text-neutral-loud);
   background: var(--color-white);
   line-height: 1.4;
-  /* Remove the browser-native X clear button on type=search. */
 }
 .header-search__input:focus {
   outline: 2px solid var(--brand-secondary-dark);
   outline-offset: 2px;
   border-color: var(--brand-secondary-dark);
+}
+.header-search__input {
+  /* Remove the browser-native X clear button on type=search. */
 }
 .header-search__input::-webkit-search-cancel-button {
   -webkit-appearance: none;
@@ -4689,6 +4895,10 @@ body.is-fixed {
   -ms-flex-wrap: wrap;
       flex-wrap: wrap;
 }
+.page__breadcrumbs .breadcrumb__list-item {
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
 .page__breadcrumbs .breadcrumb__list-item:not(:last-of-type) a {
   -webkit-padding-end: var(--v-space-5xs);
           padding-inline-end: var(--v-space-5xs);
@@ -4912,6 +5122,13 @@ body.is-fixed {
       -ms-flex-align: center;
           align-items: center;
 }
+.footer .logo a {
+  /* The sibling footer link groups all declare this; without it this
+  one falls through to a:focus { color: var(--brand-secondary-dark) }
+  in _base.scss, and var(--focus-color) (currentcolor) would ring in
+  that brown against the #464646 footer at ~2:1 (#2199). */
+  color: var(--footer-text-color);
+}
 .footer .logo a:focus-visible {
   outline: var(--focus-color) solid 2px;
   outline-offset: 2px;
@@ -5047,7 +5264,10 @@ header {
   color: var(--brand-text-color);
 }
 .related-content__filter:focus-visible {
-  outline: 2px solid var(--focus-color);
+  /* This is a <button>, and the global button:focus rule turns its
+  label white, so var(--focus-color) (currentcolor) would ring white
+  on the white page. Ring in the focused fill colour instead (#2199). */
+  outline: 2px solid var(--brand-primary-dark);
   outline-offset: 2px;
 }
 .related-content__filter.is-active {
@@ -5085,8 +5305,8 @@ header {
   display: flex;
   -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
-      -ms-flex-flow: column wrap;
-          flex-flow: column wrap;
+      -ms-flex-flow: column nowrap;
+          flex-flow: column nowrap;
   -webkit-column-gap: var(--v-space-xs);
      -moz-column-gap: var(--v-space-xs);
           column-gap: var(--v-space-xs);
@@ -5274,6 +5494,12 @@ header {
 .browse__main-content .browse-container .browse-links .active-toggle {
   background-color: var(--brand-primary-dark);
   color: var(--color-white);
+}
+.browse__main-content .browse-container .browse-links .active-toggle:focus {
+  /* Active state is white-on-dark, so the inherited var(--focus-color)
+  (currentcolor) ring would be white and block-link's outline-offset
+  puts it on the light surface behind. Ring in the fill colour (#2199). */
+  outline: 2px solid var(--brand-primary-dark);
 }
 .browse__main-content .browse-container .browse-links .active-toggle:hover {
   background-color: var(--brand-primary-accent);
@@ -5857,8 +6083,8 @@ header {
   display: flex;
   -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
-      -ms-flex-flow: column wrap;
-          flex-flow: column wrap;
+      -ms-flex-flow: column nowrap;
+          flex-flow: column nowrap;
   -webkit-margin-after: var(--v-space-xs);
           margin-block-end: var(--v-space-xs);
 }
@@ -5913,6 +6139,8 @@ header {
           margin-block-end: var(--v-space-2xl);
   color: var(--color-white);
   font-size: var(--font-size-heading-2xl);
+  overflow-wrap: anywhere;
+  word-break: normal;
 }
 .collection__header__text h2::after {
   content: "";
@@ -5968,8 +6196,8 @@ header {
   display: flex;
   -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
-      -ms-flex-flow: column wrap;
-          flex-flow: column wrap;
+      -ms-flex-flow: column nowrap;
+          flex-flow: column nowrap;
   -webkit-column-gap: var(--v-space-xs);
      -moz-column-gap: var(--v-space-xs);
           column-gap: var(--v-space-xs);
@@ -6101,6 +6329,12 @@ header {
   background-color: var(--brand-primary-dark);
   color: var(--color-white);
 }
+.collection-items-browse .browse-links .active-toggle:focus {
+  /* Active state is white-on-dark, so the inherited var(--focus-color)
+  (currentcolor) ring would be white and block-link's outline-offset
+  puts it on the light surface behind. Ring in the fill colour (#2199). */
+  outline: 2px solid var(--brand-primary-dark);
+}
 .collection-items-browse .browse-links .active-toggle:hover {
   background-color: var(--brand-primary-accent);
 }
@@ -6172,10 +6406,6 @@ header {
   padding-block: var(--v-space-5xs);
   padding-inline: var(--v-space-2xs);
   cursor: pointer;
-  padding-inline: var(--v-space-4xs);
-  overflow-wrap: break-word;
-  line-height: normal;
-  text-wrap: balance;
 }
 .communities__item .field--name-name a:hover, .communities__item .field--name-name a:active, .communities__item .field--name-name a:focus {
   color: var(--light-text-color);
@@ -6183,7 +6413,13 @@ header {
   text-decoration: underline;
 }
 .communities__item .field--name-name a:focus {
-  outline: 2px solid var(--focus-color);
+  /* Not var(--focus-color) (currentcolor) here: this button's label is
+  white *because* its fill is dark, but an outline draws outside the
+  fill, onto the page - a white ring on a white page is invisible. Ring
+  in the fill colour instead, offset so the page shows through the gap
+  and the ring reads against it (#2199). */
+  outline: 2px solid var(--brand-primary-dark);
+  outline-offset: 2px;
 }
 .communities__item .field--name-name a:disabled {
   color: var(--light-text-color);
@@ -6204,6 +6440,12 @@ header {
 .communities__item .field--name-name a:hover {
   background-color: var(--brand-primary);
   text-decoration: underline;
+}
+.communities__item .field--name-name a {
+  padding-inline: var(--v-space-4xs);
+  overflow-wrap: break-word;
+  line-height: normal;
+  text-wrap: balance;
 }
 .communities__item .media--image {
   display: block;
@@ -6395,14 +6637,9 @@ header {
 @media (min-width: 48rem) {
   .dictionary .browse-facets .views-exposed-form form {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: var(--gutter);
     row-gap: 1rem;
-  }
-}
-@media (min-width: 60rem) {
-  .dictionary .browse-facets .views-exposed-form form {
-    grid-template-columns: repeat(4, 1fr);
   }
 }
 .dictionary .browse-facets .views-exposed-form form .js-form-type-select::after {
@@ -6440,6 +6677,7 @@ header {
           margin-block-end: 0;
   padding-inline: var(--v-space-4xxs);
   padding-block: var(--v-space-5xs);
+  overflow-wrap: break-word;
 }
 .dictionary .search-collapse-toggle {
   background-color: var(--mukurtu-panel-pane-content-background-color);
@@ -6550,6 +6788,18 @@ header {
   padding-block: var(--v-space-6xs);
   padding-inline: var(--v-space-5xs);
   letter-spacing: normal;
+}
+.dictionary .browse-links a:hover,
+.dictionary .browse-links button:hover {
+  background-color: var(--brand-primary-dark);
+  color: var(--color-white);
+}
+.dictionary .browse-links a:focus,
+.dictionary .browse-links button:focus {
+  outline-offset: 1px;
+}
+.dictionary .browse-links a,
+.dictionary .browse-links button {
   -webkit-box-flex: 1;
       -ms-flex: 1;
           flex: 1;
@@ -6564,15 +6814,6 @@ header {
           justify-content: center;
   padding: var(--v-space-6xs) var(--v-space-5xs);
 }
-.dictionary .browse-links a:hover,
-.dictionary .browse-links button:hover {
-  background-color: var(--brand-primary-dark);
-  color: var(--color-white);
-}
-.dictionary .browse-links a:focus,
-.dictionary .browse-links button:focus {
-  outline-offset: 1px;
-}
 .dictionary .browse-links a:focus-visible,
 .dictionary .browse-links button:focus-visible {
   outline: 3px solid var(--brand-primary-dark);
@@ -6586,6 +6827,12 @@ header {
 .dictionary .browse-links .active-toggle {
   background-color: var(--brand-primary-dark);
   color: var(--color-white);
+}
+.dictionary .browse-links .active-toggle:focus {
+  /* Active state is white-on-dark, so the inherited var(--focus-color)
+  (currentcolor) ring would be white and block-link's outline-offset
+  puts it on the light surface behind. Ring in the fill colour (#2199). */
+  outline: 2px solid var(--brand-primary-dark);
 }
 .dictionary .browse-links .active-toggle:hover {
   background-color: var(--brand-primary-accent);
@@ -6658,6 +6905,8 @@ header {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
   -webkit-box-pack: space-evenly;
       -ms-flex-pack: space-evenly;
           justify-content: space-evenly;
@@ -7024,6 +7273,15 @@ header {
   -webkit-margin-before: var(--v-space-s);
           margin-block-start: var(--v-space-s);
 }
+.page-node-type-dictionary-word .full-node__content .field--name-title .field__label,
+.page-node-type-dictionary-word .full-node__content .field--name-field-word-entry-term .field__label {
+  position: absolute !important;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  inline-size: 0.063rem;
+  block-size: 0.063rem;
+  word-wrap: normal;
+}
 .page-node-type-dictionary-word .full-node__content .field--name-title,
 .page-node-type-dictionary-word .full-node__content .field--name-field-word-entry-term {
   background-color: var(--brand-primary-dark);
@@ -7035,15 +7293,6 @@ header {
   padding-block: var(--v-space-2xs);
   padding-inline: var(--v-space-xs) var(--v-space-2xs);
   margin-block: 0 var(--v-space-s);
-}
-.page-node-type-dictionary-word .full-node__content .field--name-title .field__label,
-.page-node-type-dictionary-word .full-node__content .field--name-field-word-entry-term .field__label {
-  position: absolute !important;
-  overflow: hidden;
-  clip: rect(1px, 1px, 1px, 1px);
-  inline-size: 0.063rem;
-  block-size: 0.063rem;
-  word-wrap: normal;
 }
 .page-node-type-dictionary-word .full-node__content .field--name-title::after,
 .page-node-type-dictionary-word .full-node__content .field--name-field-word-entry-term::after {
@@ -7532,7 +7781,6 @@ header {
   padding-block: var(--v-space-6xs);
   padding-inline: var(--v-space-5xs);
   letter-spacing: normal;
-  font-size: var(--font-size-s);
 }
 .comment__actions a:hover {
   background-color: var(--brand-primary-dark);
@@ -7540,6 +7788,9 @@ header {
 }
 .comment__actions a:focus {
   outline-offset: 1px;
+}
+.comment__actions a {
+  font-size: var(--font-size-s);
 }
 .comment__actions a:focus-visible {
   outline: 2px solid var(--brand-primary-dark);
@@ -7606,11 +7857,6 @@ header {
   padding-block: var(--v-space-6xs);
   padding-inline: var(--v-space-5xs);
   letter-spacing: normal;
-  display: inline-block;
-  border-width: 2px;
-  padding-block: var(--v-space-3xs);
-  padding-inline: var(--v-space-4xxs);
-  font-size: var(--font-size-m);
 }
 .block--call-to-action__link a:hover {
   background-color: var(--brand-primary-dark);
@@ -7618,6 +7864,13 @@ header {
 }
 .block--call-to-action__link a:focus {
   outline-offset: 1px;
+}
+.block--call-to-action__link a {
+  display: inline-block;
+  border-width: 2px;
+  padding-block: var(--v-space-3xs);
+  padding-inline: var(--v-space-4xxs);
+  font-size: var(--font-size-m);
 }
 
 .block--media-carousel-block .button--download,
@@ -7838,6 +8091,10 @@ header {
 .layout-container .page__title h1 {
   margin-block: 0;
 }
+.layout-container .page__title h1 {
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
 .page-node-type-page .layout-container .page__title {
   -webkit-box-shadow: none;
           box-shadow: none;
@@ -7906,7 +8163,6 @@ header {
   -webkit-column-gap: var(--gutter);
      -moz-column-gap: var(--gutter);
           column-gap: var(--gutter);
-  text-align: center;
 }
 @media (min-width: 60rem) {
   .layout-container .layout-content--404 {
@@ -7917,6 +8173,9 @@ header {
   .layout-container .layout-content--404 {
     grid-template-columns: minmax(0, auto) var(--grid-12col-max-width) minmax(0, auto);
   }
+}
+.layout-container .layout-content--404 {
+  text-align: center;
 }
 .layout-container .layout-content--404 > .region {
   grid-column: 1/-1;

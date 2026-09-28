@@ -76,7 +76,6 @@ class DefaultLandingPageTest extends KernelTestBase {
     $bundles = [
       'block_content.type.image_with_description',
       'block_content.type.vertical_image_with_description',
-      'block_content.type.featured_content',
       'block_content.type.full_image_with_description',
     ];
     $field_storages = [
@@ -100,6 +99,11 @@ class DefaultLandingPageTest extends KernelTestBase {
     foreach ($bundles as $name) {
       $this->importConfigEntity($profile_storage, $name, 'block_content_type');
     }
+    // featured_content ships with mukurtu_landing_page itself (its inline
+    // block derivative has to exist before the display imports on a real
+    // install); its fields still come from the profile above.
+    $landing_page_storage = new FileStorage($this->root . '/profiles/mukurtu/modules/mukurtu_landing_page/config/install');
+    $this->importConfigEntity($landing_page_storage, 'block_content.type.featured_content', 'block_content_type');
     foreach ($field_storages as $name) {
       $this->importConfigEntity($profile_storage, $name, 'field_storage_config');
     }
@@ -116,7 +120,6 @@ class DefaultLandingPageTest extends KernelTestBase {
 
     // Import the landing_page node bundle and its layout_builder__layout
     // field instance from mukurtu_landing_page's own config/install.
-    $landing_page_storage = new FileStorage($this->root . '/profiles/mukurtu/modules/mukurtu_landing_page/config/install');
     $this->importConfigEntity($landing_page_storage, 'node.type.landing_page', 'node_type');
     $this->importConfigEntity($landing_page_storage, 'field.field.node.landing_page.layout_builder__layout', 'field_config');
 
