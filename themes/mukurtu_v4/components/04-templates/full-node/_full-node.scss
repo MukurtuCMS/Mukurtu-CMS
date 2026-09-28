@@ -221,6 +221,34 @@
     .field--name-field-citation {
       overflow-wrap: anywhere;
       word-break: normal;
+    }
+
+    // Copy-to-clipboard icon in the label row of citation fields (Citation,
+    // Citing Indigenous Elders and Knowledge Keepers). See
+    // templates/misc/copy-citation-button.html.twig.
+    [data-copy-citation-field] {
+      .field__label-row {
+        display: flex;
+
+        // Top-align so a wrapped label (the long knowledge keepers one) keeps
+        // the button on its first line.
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: var(--v-space-6xs);
+
+        .field__label {
+          flex: 1 1 auto;
+          min-inline-size: 0;
+        }
+      }
+
+      .citation-copy-controls {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--v-space-6xs);
+        flex-shrink: 0;
+        margin-inline-start: auto;
+      }
 
       .button--copy-icon {
         display: inline-flex;
@@ -233,7 +261,10 @@
         block-size: 44px;
         padding: 0;
         flex-shrink: 0;
-        margin-block-start: var(--v-space-4xxs);
+
+        // Pull the 44px target into the field's block padding so the label
+        // row stays at the label's 24px line height.
+        margin-block: -10px;
         background: none;
         color: var(--brand-primary-dark);
 
@@ -265,11 +296,14 @@
       .citation-copy-feedback {
         color: var(--color-status-dark);
         font-size: var(--font-size-s);
+
+        // Match the label's line height so this doesn't make the row taller.
+        line-height: var(--line-height-xs);
         opacity: 0;
         transition: opacity 0.2s ease;
       }
 
-      .button--copy-icon.is-copied + .citation-copy-feedback {
+      .citation-copy-controls:has(.is-copied) .citation-copy-feedback {
         opacity: 1;
       }
     }
