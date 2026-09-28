@@ -125,6 +125,14 @@ async function setUpFixture(page, clipboard: ClipboardMode = 'record') {
   });
   await page.addScriptTag({ path: path.join(THEME_DIR, 'js/copy-citation.js') });
   await page.evaluate(() => (window as any).Drupal.behaviors.copyCitation.attach(document));
+
+  // The stylesheet is added after the markup, so the "Copied!" text starts
+  // visible and then runs its 0.2s opacity transition down to 0. A real
+  // page loads CSS first and never shows that fade. Wait for it to finish
+  // so nothing (notably axe's contrast check) measures it mid-transition.
+  for (const feedback of await page.locator('.citation-copy-feedback').all()) {
+    await expect(feedback).toHaveCSS('opacity', '0');
+  }
 }
 
 function field(page, name: 'citation' | 'knowledge-keepers') {
