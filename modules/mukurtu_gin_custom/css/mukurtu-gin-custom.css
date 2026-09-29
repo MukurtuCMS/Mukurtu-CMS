@@ -862,3 +862,457 @@ short fields themselves. Shrink it in these dialogs specifically. */
   margin-inline-start: var(--input--label-spacing);
   margin-block-end: 1.5rem;
 }
+
+/* Gin light-mode custom accent color: eliminate the flash-of-black on page
+   load.
+
+   Gin's compiled CSS bakes a fallback of custom: #111111 (near-black) into
+   [data-gin-accent="custom"] for use before its own JS runs. The correct
+   accent color is only applied once Gin's accent.js (a Drupal behavior)
+   attaches and injects its own corrected <style> block into <body> - which
+   happens after the browser has already painted the page once. That gap
+   between first paint and JS attaching is visible as a brief flash of the
+   near-black fallback before the real teal appears.
+
+   Since accent.js computes this site's actual light-mode values from a
+   fixed config value (gin.settings:accent_color, #0e7873 - see
+   config/install/gin.settings.yml), hardcode those same computed values
+   here instead of waiting for JS to supply them. This file's stylesheet is
+   already present at first paint (attached via hook_page_attachments(),
+   like every other override in this file), so with these values in place
+   before JS ever runs, there is no incorrect state to flash - accent.js
+   still runs and re-asserts the identical values, just with no visible
+   change. Values below were read directly from accent.js's own injected
+   <style> block via DevTools on a live page (matches its
+   setCustomAccentColor() output for '#0e7873' exactly), not derived from a
+   formula this file could recompute. THESE VALUES ARE NOT AUTOMATICALLY
+   KEPT IN SYNC WITH gin.settings:accent_color - if that config value ever
+   changes, every hardcoded value in both this block and the dark-mode
+   block below must be recalculated by hand (via accent.js's own
+   hexToRgb/mixColor/shadeColor formulas, or by reading the live
+   .gin-custom-colors <style> block accent.js still injects) and updated
+   here, or the flash-of-black fix silently stops matching the real accent
+   color and the WCAG contrast figures in the dark-mode block's comment no
+   longer apply to what's actually configured. Nothing in CI enforces this.
+
+   Deliberately NOT included: --gin-bg-app-rgb / --gin-color-sticky-rgb.
+   accent.js sets these too, but Gin's own compiled fallback mixes any base
+   color with 97% white for them, which washes out hue differences almost
+   entirely - #111111 and #0e7873 both land within a couple of RGB values
+   of each other, so there's no visible flash there worth fixing. More
+   importantly, dark mode does NOT redeclare either property itself; its
+   values come solely from Gin's own generic, non-important
+   ".gin--dark-mode[data-gin-accent]" rule (accent.scss). Adding them here
+   with !important, as an earlier version of this rule did, unconditionally
+   beat that non-important dark-mode rule regardless of specificity (an
+   !important declaration always wins over a non-important one) and turned
+   the dark-mode app background white. Only override properties that (a)
+   actually flash and (b) dark mode redeclares for itself elsewhere in this
+   file - --gin-bg-header qualifies on both counts.
+
+   NOT a complete inventory of every custom-color gap: --gin-color-primary-
+   light-rgb (Gin's tint for e.g. --color-gray-050 in navigation.css) is
+   left at Gin's compiled custom fallback (~rgb(207,207,207), a plain gray
+   mixed from #111111) PERMANENTLY, in both light and dark mode - unlike
+   the properties above, accent.js never corrects this one for a custom
+   color at all, at any point, so there's no "post-JS" correct value to
+   preempt here. That's a pre-existing Gin limitation this PR doesn't
+   introduce and the reported bugs (dark-mode desaturation, light-mode
+   flash) didn't surface, so it's left alone rather than expanding this
+   fix's scope; worth a separate follow-up if that gray tint is ever
+   noticed as a visible issue.
+
+   !important: same reasoning as the dark-mode block below - needed to
+   reliably win over both Gin's own compiled fallback and its later,
+   non-important JS-injected override (identical values, so this is purely
+   about winning the FIRST paint; harmless once JS re-asserts the same
+   numbers). Safe here specifically because every property below is also
+   redeclared, with higher selector specificity, in the dark-mode block -
+   so dark mode still correctly wins the tie between two !important rules. */
+[data-gin-accent="custom"] {
+  --gin-color-primary-rgb: 14, 120, 115 !important;
+  --gin-color-primary-hover: #005f5a !important;
+  --gin-color-primary-active: #00524d !important;
+  --gin-bg-header: #daeaea !important;
+}
+
+/* Gin dark-mode custom accent color: replace Gin's own auto-generated
+   dark-mode variant with a properly contrast-checked one.
+
+   Gin's own accent.js (setCustomAccentColor()) derives a dark-mode
+   counterpart for a custom accent color by mixing it with 65% white
+   (mixColor('ffffff', hex, 65)), which for this site's custom accent
+   #0e7873 (see config/install/gin.settings.yml for why it's custom rather
+   than Gin's own "teal" preset) produces rgb(170, 207, 206) - a washed-out,
+   low-saturation pale mint that reads as nearly greyscale against Gin's
+   dark surfaces. Gin's own PRESET colors (e.g. "teal") avoid this because
+   their dark-mode counterparts are hand-picked and baked into Gin's
+   compiled CSS at build time (accent.scss's $ginDarkmodeColors); only
+   custom colors go through this generic runtime formula.
+
+   Values below keep the light-mode brand teal's hue (177deg) and
+   saturation (79%), just re-lightened for Gin's dark-mode surfaces instead
+   of mixed toward white. Verified against both of Gin's dark-mode
+   surfaces - --gin-bg-app-rgb: 27, 27, 29 (#1b1b1d) and --gin-bg-layer-rgb:
+   42, 42, 45 (#2a2a2d), the harder of the two to clear - #15b7af (primary)
+   measures 6.90:1 / 5.74:1 against them, both above the 4.5:1 WCAG 1.4.3
+   minimum for text - the binding requirement here, since --gin-color-
+   primary is used as heading/link/icon text color in Gin's dark mode.
+
+   --gin-color-primary-hover/-active are ALSO used as button fill
+   backgrounds in Gin's own compiled CSS (e.g. .button:hover/:active,
+   dialog buttons, tableselect bulk-action buttons), not just as text
+   color. That's still safe: Gin's dark mode swaps --gin-color-button-text
+   from #fff to #111 (dist/css/theme/variables.css), and every such button
+   rule pairs its background with that token rather than a hardcoded
+   white, so the actual pairing is near-black text on these fills - #111
+   on #2cbeb7/#38c2bb measures 8.2:1/8.6:1, comfortably clearing 4.5:1. If
+   that --gin-color-button-text swap is ever removed or changed, re-check
+   this pairing; it's the reason these particular hover/active values are
+   safe as fills, not their contrast against the dark app background.
+
+   Hover/active follow Gin's own dark-mode mixing convention (mix toward
+   white, matching accent.scss's $ginDarkmodeColors formula of 10%/15%) and
+   clear 6:1+ against both backgrounds as text/icon color, and 8:1+ against
+   --gin-color-button-text as a fill. --gin-bg-header uses Gin's own
+   header-tint formula (mix(#2A2A2D, base, 87.5%), matching accent.js's own
+   --gin-bg-header calculation for custom colors).
+
+   !important: needed to reliably win over BOTH (a) Gin's own compiled
+   fallback for [data-gin-accent="custom"] in its dist CSS, and (b) Gin's
+   own accent.js, which appends its own <style class="gin-custom-colors">
+   directly to <body> at runtime - later in the DOM than this file's
+   <link>-loaded stylesheet, so it would otherwise win the same-specificity
+   tie regardless of source order here. */
+.gin--dark-mode[data-gin-accent="custom"],
+.gin--dark-mode [data-gin-accent="custom"] {
+  --gin-color-primary-rgb: 21, 183, 175 !important;
+  --gin-color-primary-hover: #2cbeb7 !important;
+  --gin-color-primary-active: #38c2bb !important;
+  --gin-bg-header: #273c3d !important;
+}
+
+/* Fix #2003 (WCAG 4.1.2 Name, Role, Value / 2.4.4 Link Purpose): give the
+   collapsed admin toolbar's links and buttons back their accessible names.
+
+   In the icon-only (collapsed) state - which gin-collapsed-defaults.js
+   makes the default for every new admin here - Gin hides each level-1
+   link/button label with display: none (gin/styles/navigation/
+   toolbar-menu.scss, "Collapsed styles"). display: none removes the text
+   from the accessibility tree, not just the screen, so every level-1
+   control loses its name: axe reports 7 button-name and 8 link-name
+   violations on /admin/content. The fix is the standard visually-hidden
+   technique instead, which takes no layout space (so the icon-only rail
+   is unchanged) but leaves the text for assistive technology.
+
+   Local workaround for an upstream Gin bug, tracked at
+   https://git.drupalcode.org/project/gin/-/work_items/3539420 with a
+   merge request (!655) that has sat at "needs work" since 2025-08. Remove
+   this once a Gin release restores the names.
+
+   .admin-toolbar is added to the selector so this outranks Gin's rule
+   (0,4,2 vs 0,3,2) regardless of stylesheet order. The related
+   aria-toolbar-link__labelledby typo on the toolbar <ul>s (3 further
+   axe failures) is a Twig attribute, not reachable from CSS; that one is
+   carried as a composer patch of Gin's RTBC fix instead - see
+   patches/gin-aria-labelledby-toolbar-menus-3598613.patch. */
+html:not(.admin-toolbar-expanded) .admin-toolbar .toolbar-menu__item--level-1 > .toolbar-link span {
+  display: inline;
+  position: absolute !important;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  width: 1px;
+  height: 1px;
+  word-wrap: normal;
+}
+
+/* Visitors report (/visitors/*): the "Unique visitors" count column stretches
+   to take up most of the table's width even though its content ("3", "12")
+   is far shorter than the place-name column next to it, because Views'
+   table style leaves both columns free to grow and the sortable column's
+   link/arrow markup ends up widest. width: 1% with white-space: nowrap is
+   the standard table trick to make a column shrink-to-fit its content, so
+   the remaining width goes to the place-name column instead. Matches both
+   the "visitors" view (Continent/Country/Language tables) and the
+   "visitors_geoip" view (Region/City tables) via a "starts with" selector,
+   since core doesn't clean the underscore out of view-id-visitors_geoip. */
+[class*="view-id-visitors"] .views-field-visitor-id {
+  width: 1%;
+  white-space: nowrap;
+}
+
+/* Visitors report: the "chart" (and language-table's "Language Code")
+   footer links are plain, unstyled <a> tags from the Views footer area
+   handler (visitors_display_link) with no Gin theming applied at all.
+   Style them as small secondary buttons, reusing the same visual language
+   as .eb-view-toggle__btn above, so they read as an actionable control
+   rather than stray body text. */
+[class*="view-id-visitors"] .view-footer a {
+  display: inline-block;
+  /* Explicit rather than inheriting Gin's teal link colour: that measures
+     4.48:1 against the card these buttons now sit on, missing 1.4.3's 4.5:1
+     for text this size. Gin's darker "primary hover" token is the accent one
+     step down and clears it at 5.84:1 in light mode and 9.3:1 in dark. It is
+     used here as the resting colour, not just on hover, which is why the
+     hover rule below can reuse the same token as a background. The border
+     follows via currentColor. */
+  color: var(--gin-color-primary-hover, #0e716c);
+  margin-block-start: 0.5rem;
+  padding: 0.35rem 0.75rem;
+  border: 2px solid currentColor;
+  border-radius: 3px;
+  font-size: 0.85rem;
+  line-height: 1.2;
+  text-decoration: none;
+}
+
+/* --gin-color-button-text (not --gin-color-primary's own #fff fallback used
+   elsewhere in this file) because Gin flips it to #111 in dark mode, where
+   the accent color itself shifts lighter -- white text on a light accent is
+   what dropped this exact pairing to ~1.5:1 in dark mode before this fix. */
+[class*="view-id-visitors"] .view-footer a:hover {
+  background: var(--gin-color-primary-hover, #0e716c);
+  color: var(--gin-color-button-text, #fff);
+  border-color: var(--gin-color-primary-hover, #0e716c);
+}
+
+/* 2.4.7: explicit focus indicator that survives Gin's focus reset. */
+[class*="view-id-visitors"] .view-footer a:focus-visible {
+  outline: 3px solid var(--gin-color-primary, #0036b1);
+  outline-offset: 2px;
+}
+
+/* Visitors report: the report rows sit 24px wider than the page content on
+   each side, so every card hangs outside the date-range box above it. The
+   visitors module names its report rows "layout-row", which is also Claro's
+   class for the two-column admin layout, and Claro's
+   css/layout/system-admin--layout.css pulls .layout-row out by -1.5em on both
+   sides to let its columns bleed past their container. Nothing in the visitors
+   module sets that margin; it is a class-name collision. Undo it here only,
+   scoped to visitors report pages.
+
+   Scoped to body.path-visitors rather than .visitors-main: ReportController's
+   performance()/performance($sequence) actions (the /visitors/performance,
+   /performance/day and /performance/hour pages) never wrap their content in
+   the "visitors-main" container the other report actions add, so a
+   .visitors-main-scoped rule silently never reaches them and this same bleed
+   shows there too. Drupal adds "path-visitors" from the first path segment
+   to every /visitors/* page regardless of which controller action renders
+   it, so it covers all of them, performance included, without depending on
+   a wrapper each action has to remember to add.
+
+   The class is repeated to reach (0,3,0), now (0,3,1) with the body type
+   selector: Claro's selector is "body:not(.toolbar-tray-open) .layout-row",
+   which is (0,2,1) and so beats a plain .layout-row. This file is attached
+   in the CSS "base" group, the earliest one, so it can never win a tie on
+   source order -- every override here has to win on specificity alone. */
+body.path-visitors .layout-row.layout-row {
+  margin-inline: 0;
+}
+
+/* Visitors report: the rows are plain divs with nothing between them, so the
+   cards touch vertically while sitting 1rem apart horizontally (report.css
+   puts a 1rem gap between the columns inside a row, but nothing between the
+   rows themselves). Match the two so the grid reads evenly in both
+   directions. */
+.visitors-main .layout-row + .layout-row {
+  margin-block-start: 1rem;
+}
+
+/* Visitors report: the date filter is a <details> inside a form, and both pick
+   up a card -- Gin cards .block-system-main-block > form, Claro cards
+   .claro-details -- so the visible date box is the inner one, indented by the
+   outer card's padding and narrower than every report card below it. Drop the
+   outer card so the details is the box, at the same width as the reports.
+
+   Prefixed with .block-system-main-block to beat Gin's own
+   ".block-system-main-block > form" (0,1,1); the attribute selector alone only
+   ties, and this file loads first. */
+.block-system-main-block > form[data-drupal-selector="visitors-date-filter-form"] {
+  padding: 0;
+  background: none;
+  border: 0;
+  box-shadow: none;
+}
+
+/* Visitors report: Gin's views-view.html.twig hardcodes its card class
+   (gin-layer-wrapper) on .view-content, leaving .view-header and .view-footer
+   as siblings outside it -- which is why the footer buttons styled above float
+   on the page background instead of sitting in the card they belong to. The
+   class is in a contrib template and cannot be moved from CSS, so strip the
+   card from .view-content and rebuild it one level out, on the
+   .views-element-container wrapper that Drupal\views\Element\View adds around
+   every embedded view.
+
+   Scoped to .visitors-main rather than the view-id classes because those sit
+   on the inner .view div, which the report's AJAX toggles replace wholesale --
+   the wrapper and its card survive a swap. Values mirror
+   gin/styles/base/_layers.scss so the two stay in step. */
+.visitors-main .views-element-container {
+  box-sizing: border-box;
+  width: 100%;
+  padding: var(--gin-spacing-s);
+  background: var(--gin-bg-layer);
+  border: 1px solid var(--gin-border-color-layer);
+  border-radius: var(--gin-border-l);
+  box-shadow: var(--gin-shadow-l1);
+}
+
+/* Gin's mq(small) breakpoint. */
+@media (min-width: 48rem) {
+  .visitors-main .views-element-container {
+    padding: var(--gin-spacing-l);
+  }
+}
+
+.gin--dark-mode .visitors-main .views-element-container {
+  box-shadow: 0 6px 16px var(--gin-border-color-layer);
+}
+
+.gin--high-contrast-mode .visitors-main .views-element-container {
+  box-shadow: none;
+}
+
+/* The wrapper above does survive an AJAX toggle -- but it is not the only
+   one. visitors_display_link's Replace command targets only the inner
+   `.view-id-*.view-display-id-*` div (see the footer-link rule below), and
+   the AJAX response it swaps in is itself a fresh views_embed_view() render,
+   which core wraps in its OWN `.views-element-container` before handing it
+   back. Replacing the inner div leaves that new wrapper nested one level
+   inside the original one instead of alongside it, so every toggle -- chart
+   to table, table to chart, this applies across every /visitors/* report --
+   adds one more nested `.views-element-container` and card to the pile. Undo
+   the card on every nested one, so however many accumulate, only the
+   outermost still reads as one panel. This is a bug in visitors' own AJAX
+   handler (Drupal\visitors\Controller\Report\ReportController::report()),
+   not something fixable from this theme override; it was invisible before
+   this file gave `.views-element-container` a visible card to stack. */
+.visitors-main .views-element-container .views-element-container {
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* Un-card the inner element now that the wrapper carries the card. (0,3,0)
+   beats Gin's .gin-layer-wrapper (0,1,0) and its mode variants (0,2,0), so no
+   !important is needed. */
+.visitors-main .view-content.gin-layer-wrapper {
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* The country map is the only block in its row and, unlike a table, reads
+   better the wider it gets, so it spans the full row rather than sitting in
+   one column. .visitors-country-map is a plain container, not a views embed,
+   so it does not pick up report.css's column rules at all; it only needs a
+   card of its own to match the report blocks around it. */
+.visitors-main .visitors-country-map {
+  box-sizing: border-box;
+  width: 100%;
+  padding: var(--gin-spacing-s);
+  background: var(--gin-bg-layer);
+  border: 1px solid var(--gin-border-color-layer);
+  border-radius: var(--gin-border-l);
+  box-shadow: var(--gin-shadow-l1);
+}
+
+@media (min-width: 48rem) {
+  .visitors-main .visitors-country-map {
+    padding: var(--gin-spacing-l);
+  }
+}
+
+.gin--dark-mode .visitors-main .visitors-country-map {
+  box-shadow: 0 6px 16px var(--gin-border-color-layer);
+}
+
+.gin--high-contrast-mode .visitors-main .visitors-country-map {
+  box-shadow: none;
+}
+
+/* Leaflet draws its own controls and attribution over the tiles, so the map
+   needs a stacking context it cannot escape, and rounded corners to sit in
+   the card cleanly. */
+.visitors-main .visitors-country-map .leaflet-container {
+  width: 100%;
+  border-radius: var(--gin-border-m);
+}
+
+/* Visitors report, Gin dark mode: keep the chart on a light plate.
+
+   charts_chartjs paints its title and legend onto the <canvas>, and neither
+   colour follows the theme -- the title is written into the per-chart JSON as
+   #000 by the charts module, and the legend falls back to Chart.js's own #666
+   default. Against Gin's dark card (#2a2a2d) that measures 1.47:1 and 2.49:1,
+   both well short of the 4.5:1 WCAG 1.4.3 wants for text this size. The
+   colours come from contrib config and contrib JS, so rather than fight them
+   from here, give the canvas the light background it was drawn for and let it
+   read as a deliberate plate inside the dark card.
+
+   Applies to every visitors report, not just Locations: the same chart text is
+   drawn the same way on /visitors/software once its own chart is toggled on,
+   and on /visitors/performance and its /day and /hour variants, whose
+   ReportController action never wraps its content in .visitors-main the way
+   the other report actions do -- scoped to body.path-visitors, which Drupal
+   adds to every /visitors/* page regardless of which action renders it, so
+   this reaches performance's chart too. */
+.gin--dark-mode body.path-visitors .charts-figure {
+  padding: var(--gin-spacing-s);
+  background: #fff;
+  border-radius: var(--gin-border-m);
+  /* Forced-colors mode would otherwise repaint this plate as Canvas (black on
+     a dark HCM theme) while leaving the title and legend untouched, because
+     those are painted into a <canvas> and forced-colors cannot recolour
+     bitmap content -- which puts back exactly the black-on-black the plate is
+     here to prevent. Opting one element out is the sanctioned escape hatch
+     for author-supplied bitmaps. */
+  forced-color-adjust: none;
+}
+
+/* Visitors report: several of the "table" displays these charts toggle into
+   (visitors_display_link, above) carry a Views table <caption> so the
+   report keeps its title once switched away from the chart -- e.g.
+   local_hour_table's caption is "Visitor's time". Gin's own sticky-table-
+   header JS (themes/gin/js/tableheader.js) clones just the <thead> into a
+   pinned duplicate for scroll, and sizes/positions that clone from the
+   <thead>'s own height alone, with no allowance for a <caption> sitting
+   above it in the same table. Against a captioned table the clone (opaque,
+   z-index: 97) ends up tall enough to cover the caption but not the real
+   header below it, so the caption is hidden behind the clone and the real
+   header peeks out beneath it, reading as a duplicated "Hour / Unique
+   visitors" row with the title gone. These reports max out at 31 rows
+   (hour_table's 00-23), so the sticky-on-scroll behaviour isn't worth
+   fixing Gin's clone math for; simplest is to drop the clone entirely here
+   and let the real, single header render as normal.
+
+   !important: Gin's own tableheader.js sets `style.display = 'block'`
+   directly on this element (inline styles), which otherwise outranks any
+   stylesheet rule regardless of selector specificity. */
+.visitors-main .gin--sticky-table-header {
+  display: none !important;
+}
+
+/* Design settings: put the custom-palette colour fieldset and the live
+   contrast readout side by side, each taking half the row, once there is
+   room for two columns. Below that they stay stacked (plain block flow,
+   no rule needed here), which is also what keeps this readable at 320px
+   / 400% zoom for WCAG 1.4.10 Reflow. The readout is hidden via #states
+   (display: none) for the two built-in palettes, so it simply drops out
+   of the row then and the fieldset grows to fill it alone. */
+@media (min-width: 48rem) {
+  .mukurtu-design-colors-layout {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--gin-spacing-l);
+  }
+
+  .mukurtu-design-colors-layout > * {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+}

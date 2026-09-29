@@ -7,7 +7,7 @@
   column-gap: var(--v-space-2xs);
   inline-size: 100%;
   margin: 0;
-  margin-block: var(--v-space-2xs);
+  margin-block: var(--v-space-4xxs);
   padding-inline-start: 0;
 
   @include include-media.media(">=lg") {
@@ -27,12 +27,15 @@
 .account-menu__menu-item {
   position: relative;
   list-style: none;
-  min-inline-size: 100%;
 
-  @include include-media.media("<lg") {
-    & * {
-      float: inline-start;
-    }
+  // Items stay in a horizontal row and only wrap onto a new line once they
+  // no longer fit; they aren't forced to stack one-per-row just because the
+  // viewport is narrower than `lg`.
+  &.account-menu__menu-item--has-children {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--v-space-5xs);
   }
 
   .menu__account-submenu {
@@ -42,11 +45,12 @@
     padding: 0;
     padding-inline-start: var(--v-space-3xs);
     inline-size: 100%;
+    // Forces the submenu onto its own line below the link + toggle button
+    // within this item's own flex row, whenever it's in normal flow (<lg).
+    flex-basis: 100%;
   }
 
   @include include-media.media(">=lg") {
-    min-inline-size: auto;
-
     &.account-menu__menu-item--level-1 {
       .account-menu__menu-link--level-1 {
         padding: var(--v-space-5xs);
@@ -56,12 +60,7 @@
     }
 
     &.account-menu__menu-item--has-children {
-      display: flex;
-      align-items: center;
-      gap: var(--v-space-5xs);
-
-
-    .menu__account-submenu {
+      .menu__account-submenu {
         position: absolute;
         inset-block-start: 100%;
         inset-inline-start: 0;
@@ -80,6 +79,12 @@
   }
 
   &.account-menu__menu-item--expanded {
+    // Below `lg`, claim the full row width so trailing siblings (e.g.
+    // Dashboard, Log out) wrap below the now-taller expanded item.
+    @include include-media.media("<lg") {
+      flex-basis: 100%;
+    }
+
     @include include-media.media(">=lg") {
       background: var(--brand-primary-dark);
     }
@@ -102,11 +107,9 @@
   align-items: center;
   justify-content: center;
   transition: all 0.12s ease-in;
-  margin-inline-start: var(--v-space-5xs);
 
   @include include-media.media(">=lg") {
     min-block-size: 100%;
-    margin-inline-start: 0;
   }
 
   &:hover,

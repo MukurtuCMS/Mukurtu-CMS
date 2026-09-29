@@ -13,13 +13,16 @@ logo:
 third_party_settings:
   shortcut:
     module_link: true
-preset_accent_color: teal
+# Custom accent instead of Gin's "teal" preset: the preset's #10857f is
+# 4.48:1 against white, just under the 4.5:1 required by WCAG 2.1 AA (1.4.3).
+# This darker teal is 5.3:1.
+preset_accent_color: custom
 preset_focus_color: gin
 enable_darkmode: auto
 classic_toolbar: new
 secondary_toolbar_frontend: true
 high_contrast_mode: false
-accent_color: ''
+accent_color: '#0e7873'
 focus_color: ''
 layout_density: default
 show_description_toggle: false

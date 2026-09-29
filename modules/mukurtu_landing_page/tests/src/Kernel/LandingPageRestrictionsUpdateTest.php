@@ -9,7 +9,7 @@ use Drupal\KernelTests\KernelTestBase;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests mukurtu_landing_page_update_40007().
+ * Tests mukurtu_landing_page_update_40203().
  *
  * The hook widens two allowlists on an existing site. The happy path matters
  * less than the guard rails: an allowlist key that is absent means the
@@ -111,7 +111,7 @@ class LandingPageRestrictionsUpdateTest extends KernelTestBase {
     $this->assertSame([], array_intersect(self::HEROES, $before['Inline blocks']));
     $this->assertArrayNotHasKey('Mukurtu', $before);
 
-    mukurtu_landing_page_update_40007();
+    mukurtu_landing_page_update_40203();
 
     $after = $this->allowlists();
     foreach (self::HEROES as $hero) {
@@ -140,7 +140,7 @@ class LandingPageRestrictionsUpdateTest extends KernelTestBase {
   public function testPostUpdateStateMatchesShippedConfig(): void {
     $this->writePreFixDisplay();
 
-    mukurtu_landing_page_update_40007();
+    mukurtu_landing_page_update_40203();
 
     $shipped = $this->shipped['third_party_settings']['layout_builder_restrictions']['entity_view_mode_restriction']['allowlisted_blocks'];
     $this->assertSame($shipped, $this->allowlists());
@@ -155,7 +155,7 @@ class LandingPageRestrictionsUpdateTest extends KernelTestBase {
     });
 
     $before = $this->allowlists()['Lists (Views)'];
-    mukurtu_landing_page_update_40007();
+    mukurtu_landing_page_update_40203();
 
     $this->assertSame($before, $this->allowlists()['Lists (Views)']);
   }
@@ -166,10 +166,10 @@ class LandingPageRestrictionsUpdateTest extends KernelTestBase {
   public function testIsIdempotent(): void {
     $this->writePreFixDisplay();
 
-    mukurtu_landing_page_update_40007();
+    mukurtu_landing_page_update_40203();
     $after_first = $this->allowlists();
 
-    $message = mukurtu_landing_page_update_40007();
+    $message = mukurtu_landing_page_update_40203();
 
     $this->assertSame($after_first, $this->allowlists());
     $this->assertStringContainsString('already up to date', $message);
@@ -187,7 +187,7 @@ class LandingPageRestrictionsUpdateTest extends KernelTestBase {
       unset($restrictions['entity_view_mode_restriction']['allowlisted_blocks']['Mukurtu']);
     });
 
-    mukurtu_landing_page_update_40007();
+    mukurtu_landing_page_update_40203();
 
     $this->assertArrayNotHasKey('Inline blocks', $this->allowlists());
   }
@@ -204,7 +204,7 @@ class LandingPageRestrictionsUpdateTest extends KernelTestBase {
       $restrictions['allowed_block_categories'][] = 'Mukurtu';
     });
 
-    mukurtu_landing_page_update_40007();
+    mukurtu_landing_page_update_40203();
 
     $this->assertArrayNotHasKey('Mukurtu', $this->allowlists());
   }
@@ -217,7 +217,7 @@ class LandingPageRestrictionsUpdateTest extends KernelTestBase {
       $restrictions['entity_view_mode_restriction'] = [];
     });
 
-    $message = mukurtu_landing_page_update_40007();
+    $message = mukurtu_landing_page_update_40203();
 
     $this->assertSame([], $this->allowlists());
     $this->assertStringContainsString('not configured', $message);

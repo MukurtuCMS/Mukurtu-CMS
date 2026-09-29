@@ -56,7 +56,10 @@ body.consent-popup-opened .klaro_toggle_dialog {
   --klaro-button-bg-hover: var(--brand-primary-dark);
   --klaro-button-text-color-hover: var(--light-text-color);
   --klaro-button-border-hover: none;
-  --klaro-button-focus-outline: 2px solid var(--focus-color);
+  /* Not var(--focus-color) (currentcolor): Klaro's buttons are white-on-
+  brand, so the ring would be white and the offset puts it on the notice's
+  near-white background (#2199). Ring in the fill colour instead. */
+  --klaro-button-focus-outline: 2px solid var(--brand-primary-dark);
   --klaro-button-focus-outline-offset: 2px;
   --klaro-dialog-focus-outline: 2px solid var(--focus-color);
 

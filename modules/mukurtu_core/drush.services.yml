@@ -1,0 +1,7 @@
+services:
+  mukurtu_core.dbip_geoip_commands:
+    class: \Drupal\mukurtu_core\Commands\DbIpGeoIpCommands
+    arguments:
+      - '@mukurtu_core.dbip_download'
+    tags:
+      - { name: drush.command }

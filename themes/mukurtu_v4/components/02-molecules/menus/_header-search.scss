@@ -76,6 +76,11 @@ body:not(.is-always-mobile-nav) {
 .header-search__input {
   appearance: none;
   flex: 1 1 auto;
+  // A text input's default flex-basis (auto) floors its shrink at its
+  // browser-default intrinsic width (~170-200px) regardless of
+  // flex-shrink, causing horizontal overflow in the narrow mobile header
+  // grid column. min-inline-size: 0 lets it actually shrink to fit.
+  min-inline-size: 0;
   padding-block: var(--v-space-5xs);
   padding-inline: var(--v-space-5xs);
   border: 1.5px solid var(--color-text-neutral-medium, #767676);

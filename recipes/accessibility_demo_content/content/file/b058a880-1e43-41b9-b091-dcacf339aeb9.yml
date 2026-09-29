@@ -1,0 +1,24 @@
+_meta:
+  version: '1.0'
+  entity_type: file
+  uuid: b058a880-1e43-41b9-b091-dcacf339aeb9
+  default_langcode: en
+default:
+  uid:
+    -
+      target_id: 1
+  filename:
+    -
+      value: sample-tone.wav
+  uri:
+    -
+      value: 'private://accessibility-demo/sample-tone.wav'
+  filemime:
+    -
+      value: audio/x-wav
+  filesize:
+    -
+      value: 32044
+  status:
+    -
+      value: true

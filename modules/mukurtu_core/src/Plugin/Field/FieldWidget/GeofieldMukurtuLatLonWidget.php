@@ -10,6 +10,7 @@ use Drupal\Core\Ajax\InvokeCommand;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\mukurtu_core\CircleGeometry;
 use Drupal\Core\Render\Element;
 use Drupal\geofield\Element\GeofieldLatLon;
 use Drupal\geofield\Plugin\Field\FieldWidget\GeofieldBaseWidget;
@@ -184,9 +185,11 @@ class GeofieldMukurtuLatLonWidget extends GeofieldBaseWidget {
         '#type' => 'fieldset',
         '#title' => $is_point
           ? $this->t('Point @n', ['@n' => $n + 1])
-          : ($shape_type === 'LineString'
-            ? $this->t('Shape @n: Line', ['@n' => $n + 1])
-            : $this->t('Shape @n: Polygon', ['@n' => $n + 1])),
+          : ($shape_type === 'Circle'
+            ? $this->t('Shape @n: Circle', ['@n' => $n + 1])
+            : ($shape_type === 'LineString'
+              ? $this->t('Shape @n: Line', ['@n' => $n + 1])
+              : $this->t('Shape @n: Polygon', ['@n' => $n + 1]))),
         '#attributes' => [
           'id' => $shape_id,
           'tabindex' => '-1',
@@ -215,6 +218,38 @@ class GeofieldMukurtuLatLonWidget extends GeofieldBaseWidget {
           $value_element['shapes'][$n]['location_description'] = [
             '#type' => 'textfield',
             '#title' => $this->t('Description for point @n', ['@n' => $n + 1]),
+            '#maxlength' => 255,
+            '#default_value' => $shape_row['description'] ?? '',
+          ];
+        }
+      }
+      elseif ($shape_type === 'Circle') {
+        // The centre reuses the point machinery, so place search and the
+        // coordinate hints behave identically to any other single point.
+        $centre = $shape_row['circle'] ?? NULL;
+        $vertex = $centre
+          ? ['lat' => (string) $centre['lat'], 'lon' => (string) $centre['lon']]
+          : NULL;
+        $geocoded = $field_state['mukurtu_geocoded'][$n][0] ?? NULL;
+        $value_element['shapes'][$n] += $this->buildVertexFields(
+          $shape_id, $n, 0, $vertex, $geocoded, $geocoder_available, $field_name, $field_parents,
+          $this->t('Centre coordinates for circle @n', ['@n' => $n + 1]),
+          $this->t('Circle @n centre', ['@n' => $n + 1]),
+        );
+
+        $value_element['shapes'][$n]['radius'] = [
+          '#type' => 'number',
+          '#title' => $this->t('Radius of circle @n in metres', ['@n' => $n + 1]),
+          '#min' => 1,
+          '#step' => 1,
+          '#default_value' => $centre ? (string) round($centre['radius']) : '',
+          '#attributes' => ['class' => ['mukurtu-geofield-radius']],
+        ];
+
+        if ($show_descriptions) {
+          $value_element['shapes'][$n]['location_description'] = [
+            '#type' => 'textfield',
+            '#title' => $this->t('Description for circle @n', ['@n' => $n + 1]),
             '#maxlength' => 255,
             '#default_value' => $shape_row['description'] ?? '',
           ];
@@ -501,6 +536,42 @@ class GeofieldMukurtuLatLonWidget extends GeofieldBaseWidget {
         }
         $shape_type = $shape_row['shape_type'] ?? 'Point';
 
+        if ($shape_type === 'Circle') {
+          $lat = trim((string) ($shape_row['coordinates']['lat'] ?? ''));
+          $lon = trim((string) ($shape_row['coordinates']['lon'] ?? ''));
+          $radius = trim((string) ($shape_row['radius'] ?? ''));
+          if ($lat === '' || $lon === '' || !is_numeric($lat) || !is_numeric($lon)
+            || !is_numeric($radius) || (float) $radius <= 0) {
+            // Same silent drop as an empty Point row.
+            continue;
+          }
+
+          // Rewrite circle_center and circle_radius as well as the geometry.
+          // Writing only the geometry is exactly the bug this fixes: the map
+          // rebuilds the circle from the stale properties and the edit is
+          // lost.
+          $feature = is_array($shape_row['source_feature'] ?? NULL)
+            ? $shape_row['source_feature']
+            : ['type' => 'Feature', 'properties' => []];
+          $feature = CircleGeometry::applyToFeature($feature, (float) $lat, (float) $lon, (float) $radius);
+
+          $properties = is_array($feature['properties'] ?? NULL) ? $feature['properties'] : [];
+          $description = trim((string) ($shape_row['location_description'] ?? ''));
+          if ($description !== '') {
+            $properties['location_description'] = $description;
+          }
+          else {
+            unset($properties['location_description']);
+          }
+          $feature['properties'] = $properties ?: new \stdClass();
+
+          $index = isset($shape_row['source_index']) && $shape_row['source_index'] !== NULL
+            ? (int) $shape_row['source_index']
+            : $next_index++;
+          $features[$index] = $feature;
+          continue;
+        }
+
         if ($shape_type === 'Point') {
           $lat = trim((string) ($shape_row['coordinates']['lat'] ?? ''));
           $lon = trim((string) ($shape_row['coordinates']['lon'] ?? ''));
@@ -616,6 +687,25 @@ class GeofieldMukurtuLatLonWidget extends GeofieldBaseWidget {
         $result['other'][$index] = $feature;
         continue;
       }
+      // A circle is stored as a 128 sided polygon carrying circle_center and
+      // circle_radius. Surfacing that as 128 vertex rows is unusable, and
+      // editing those rows silently achieved nothing, because the map rebuilds
+      // the circle from the properties and discards the edited geometry
+      // (#2164). Offer the centre and radius instead.
+      $circle = CircleGeometry::fromFeature($feature);
+      if ($circle !== NULL && ($feature['geometry']['type'] ?? NULL) === 'Polygon') {
+        $properties = is_array($feature['properties'] ?? NULL) ? $feature['properties'] : [];
+        $result['shapes'][] = [
+          'index' => $index,
+          'type' => 'Circle',
+          'vertices' => [],
+          'circle' => $circle,
+          'description' => (string) ($properties['location_description'] ?? ''),
+          'feature' => $feature,
+        ];
+        continue;
+      }
+
       $shape = $this->extractEditableShape($feature['geometry'] ?? NULL);
       if ($shape !== NULL) {
         $properties = is_array($feature['properties'] ?? NULL) ? $feature['properties'] : [];

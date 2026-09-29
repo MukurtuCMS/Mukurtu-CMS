@@ -1,0 +1,29 @@
+# Sample Community used only so the demo Digital Heritage item and its media
+# have a valid cultural protocol to be shared under. See ../../README.md.
+_meta:
+  version: '1.0'
+  entity_type: community
+  uuid: df5dbc8d-e098-4879-aded-9f4b07031197
+  bundle: community
+  default_langcode: en
+default:
+  name:
+    -
+      value: 'Sample Community (Accessibility Demo)'
+  status:
+    -
+      value: true
+  user_id:
+    -
+      target_id: 1
+  field_access_mode:
+    -
+      value: public
+  field_membership_display:
+    -
+      value: none
+  field_description:
+    -
+      value: '<p>This is a placeholder community created only to support the accessibility program''s demo content. It does not represent a real community.</p>'
+      summary: ''
+      format: basic_html
