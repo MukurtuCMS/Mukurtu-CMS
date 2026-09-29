@@ -20,3 +20,13 @@
      the accent-colored title link drops below 4.5:1 (WCAG 1.4.3). */
   background-color: var(--gin-bg-item-hover, rgba(14, 120, 115, 0.1));
 }
+
+/* Gin draws checkbox focus as a box-shadow, which forced-colors mode
+   removes, leaving no visible focus (WCAG 2.4.7). */
+@media (forced-colors: active) {
+  .view-mukurtu-content-browser .views-table input[type="checkbox"]:focus-visible,
+  .view-multipage-item-browser .views-table input[type="checkbox"]:focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+  }
+}

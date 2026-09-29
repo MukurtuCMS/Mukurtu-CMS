@@ -205,8 +205,9 @@ short fields themselves. Shrink it in these dialogs specifically. */
 
 .eb-form-selection-card__type {
   font-size: 0.8rem;
-  /* 1.4.3: #595959 on white = 7.0:1, above the 4.5:1 AA requirement. */
-  color: #595959;
+  /* 1.4.3: Gin's muted text color. A fixed #595959 was 7.0:1 on white but
+     failed on dark mode's dark background. */
+  color: var(--gin-color-text-light, #595959);
   margin-top: 0.2rem;
 }
 
