@@ -1,4 +1,7 @@
 <?php
+
+use Drupal\Core\Config\FileStorage;
+
 /**
  * Implements hook_update_last_removed().
  *
@@ -13,4 +16,87 @@
  */
 function mukurtu_landing_page_update_last_removed(): int {
   return 40006;
+}
+
+/**
+ * Ships translatable landing page block headings; existing homepages keep their current layout until reverted to defaults.
+ */
+function mukurtu_landing_page_update_40201(): string {
+  $config_factory = \Drupal::configFactory();
+  $display_config = $config_factory->getEditable('core.entity_view_display.' . \Drupal\mukurtu_landing_page\DefaultLandingPage::DISPLAY_ID);
+  if ($display_config->isNew()) {
+    return t('No landing_page default display found; nothing to update.');
+  }
+
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_landing_page');
+  $shipped = (new FileStorage($module_path . '/config/install'))
+    ->read('core.entity_view_display.node.landing_page.default');
+  $sections = $shipped['third_party_settings']['layout_builder']['sections'] ?? [];
+  if (empty($sections[0]['components'])) {
+    return t('Shipped landing_page display config has no Layout Builder sections; nothing to update.');
+  }
+
+  // Point the shipped hero/featured components at this site's own blocks
+  // (tracked since the original install), not the fresh-install placeholders.
+  $state_uuids = \Drupal::state()->get('mukurtu_landing_page.default_blocks', []);
+  $block_storage = \Drupal::entityTypeManager()->getStorage('block_content');
+  $unresolved = [];
+
+  $hero_uuid = $state_uuids['hero'] ?? NULL;
+  $hero_block = $hero_uuid ? current($block_storage->loadByProperties(['uuid' => $hero_uuid])) : NULL;
+  if ($hero_block) {
+    $sections[0]['components'][\Drupal\mukurtu_landing_page\DefaultLandingPage::HERO_COMPONENT_UUID]['configuration']['id'] = 'block_content:' . $hero_block->uuid();
+  }
+  else {
+    $unresolved[] = 'hero';
+  }
+
+  $featured_uuid = $state_uuids['featured'] ?? NULL;
+  $featured_block = $featured_uuid ? current($block_storage->loadByProperties(['uuid' => $featured_uuid])) : NULL;
+  if ($featured_block) {
+    $sections[0]['components'][\Drupal\mukurtu_landing_page\DefaultLandingPage::FEATURED_COMPONENT_UUID]['configuration']['block_id'] = (int) $featured_block->id();
+    $sections[0]['components'][\Drupal\mukurtu_landing_page\DefaultLandingPage::FEATURED_COMPONENT_UUID]['configuration']['block_revision_id'] = (int) $featured_block->getRevisionId();
+  }
+  else {
+    $unresolved[] = 'featured';
+  }
+
+  $display_config
+    ->set('third_party_settings.layout_builder.sections', $sections)
+    ->save();
+
+  if ($unresolved) {
+    return t('Landing page display defaults updated, but could not resolve this site\'s own %blocks block(s) - check core.entity_view_display.node.landing_page.default manually. Existing homepage nodes are unaffected; use "Revert to defaults" on a node\'s Layout tab to pick up the new translatable headings.', ['%blocks' => implode(', ', $unresolved)]);
+  }
+
+  return t('Landing page display defaults updated with translatable block headings. Existing homepage nodes keep their current layout; use "Revert to defaults" on a node\'s Layout tab to pick up the change.');
+}
+
+/**
+ * Points the Landing Pages URL alias pattern at the landing_page content type instead of page; existing landing pages get an alias on their next save.
+ */
+function mukurtu_landing_page_update_40202(): string {
+  /** @var \Drupal\pathauto\PathautoPatternInterface|null $pattern */
+  $pattern = \Drupal::entityTypeManager()->getStorage('pathauto_pattern')->load('landing_pages');
+  if (!$pattern) {
+    return t('No Landing Pages URL alias pattern found; nothing to update.');
+  }
+
+  // The shipped pattern was copied from the Basic Pages one and never had its
+  // bundle changed (#2208). Only rewrite that exact shipped value, so a site
+  // that has since customised the pattern's conditions is left alone.
+  $criteria = $pattern->get('selection_criteria') ?? [];
+  $changed = FALSE;
+  foreach ($criteria as $uuid => $criterion) {
+    if (($criterion['id'] ?? '') === 'entity_bundle:node' && ($criterion['bundles'] ?? []) === ['page' => 'page']) {
+      $criteria[$uuid]['bundles'] = ['landing_page' => 'landing_page'];
+      $changed = TRUE;
+    }
+  }
+  if (!$changed) {
+    return t('Landing Pages URL alias pattern does not have the shipped "page" bundle condition; nothing to update.');
+  }
+
+  $pattern->set('selection_criteria', $criteria)->save();
+  return t('Landing Pages URL alias pattern now targets the landing_page content type. Existing landing pages keep their current URLs until they are next saved.');
 }

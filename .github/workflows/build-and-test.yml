@@ -28,7 +28,7 @@ jobs:
     name: Mukurtu v4 - PHP ${{ matrix.php-versions }}
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         php-versions: ['8.4']
         test-suite: ["kernel", "unit"]
@@ -62,7 +62,7 @@ jobs:
       - name: Cache composer dependencies
         uses: actions/cache@v6
         with:
-          path: $COMPCACHE
+          path: ${{ steps.composercache.outputs.COMPCACHE }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-
 

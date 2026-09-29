@@ -166,6 +166,12 @@
     align-items: center;
 
     a {
+      /* The sibling footer link groups all declare this; without it this
+      one falls through to a:focus { color: var(--brand-secondary-dark) }
+      in _base.scss, and var(--focus-color) (currentcolor) would ring in
+      that brown against the #464646 footer at ~2:1 (#2199). */
+      color: var(--footer-text-color);
+
       &:focus-visible {
         outline: var(--focus-color) solid 2px;
         outline-offset: 2px;

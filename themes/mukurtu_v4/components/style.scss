@@ -10,7 +10,6 @@ documentation on how to use @include media(). */
 @use '00-base/mixins/mixins';
 @use '00-base/palettes-demo/palettes-demo';
 @use '00-base/palettes/red-bone';
-@use '00-base/palettes/yellow-blue';
 @use '00-base/spacing/spacing';
 @use '00-base/typography/fonts';
 @use '00-base/typography/type-settings';
@@ -25,6 +24,7 @@ documentation on how to use @include media(). */
 @use '01-atoms/status-badge/status-badge';
 @use '01-atoms/textfield/textfield';
 @use '01-atoms/translation-status-badge/translation-status-badge';
+@use '02-molecules/altcha/altcha';
 @use '02-molecules/callout/callout';
 @use '02-molecules/carousels/carousels';
 @use '02-molecules/consent-popup/consent-popup';

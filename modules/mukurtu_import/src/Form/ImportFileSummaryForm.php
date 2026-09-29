@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\mukurtu_import\Form;
 
 use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\AnnounceCommand;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
@@ -68,13 +69,26 @@ class ImportFileSummaryForm extends ImportBaseForm {
       $type_message = $this->getTypeSummaryMessage($fid);
       $mapped_field_msg = $this->getMappedFieldsMessage($fid);
       $form['table'][$fid]['#attributes']['class'][] = 'draggable';
+      // Every row renders an identical select and an identical button, so
+      // without per-row names a screen reader user hears the same control
+      // repeated once per uploaded file with nothing to tell them apart.
+      // The visible column header is not programmatically associated with
+      // the cell's input, so it cannot serve as the accessible name.
       $form['table'][$fid]['mapping'] = [
         '#type' => 'select',
+        '#title' => $this->t('Import settings for @filename', ['@filename' => $metadata_file->getFilename()]),
+        '#title_display' => 'invisible',
         '#options' => $this->getImportConfigOptions($fid),
         '#default_value' => $config_id,
         '#ajax' => [
           'callback' => [$this, 'mappingChangeAjaxCallback'],
           'event' => 'change',
+        ],
+        // The summary sits beside the select but is not part of its label,
+        // so associate it explicitly. The wrapper id is stable across the
+        // AJAX replace below, so the association survives it.
+        '#attributes' => [
+          'aria-describedby' => "mapping-summary-{$fid}",
         ],
         '#suffix' => "<div id=\"mapping-summary-{$fid}\"><div>{$type_message}</div><div>{$mapped_field_msg}</div></div>",
       ];
@@ -85,6 +99,9 @@ class ImportFileSummaryForm extends ImportBaseForm {
         '#value' => $this->t('Customize Settings'),
         '#button_type' => 'primary',
         '#submit' => ['::defineCustomMapping'],
+        '#attributes' => [
+          'aria-label' => $this->t('Customize Settings for @filename', ['@filename' => $metadata_file->getFilename()]),
+        ],
       ];
 
       $form['table'][$fid]['weight'] = [
@@ -318,6 +335,17 @@ class ImportFileSummaryForm extends ImportBaseForm {
     // Check how many fields for this file we have mapped with the selected process.
     $msg = $this->getMappedFieldsMessage($fid);
     $response->addCommand(new ReplaceCommand("#mapping-summary-{$fid}", "<div id=\"mapping-summary-{$fid}\"><div>{$type_message}</div><div>{$msg}</div></div>"));
+
+    // The replace above rewrites the summary in place with no visible or
+    // audible cue, so a screen reader user selecting a template is told
+    // nothing about what it did to their import. Announce the new summary.
+    $file = $this->entityTypeManager->getStorage('file')->load($fid);
+    $filename = $file instanceof FileInterface ? $file->getFilename() : '';
+    $response->addCommand(new AnnounceCommand((string) $this->t('Import settings for @filename updated. @type. @mapped.', [
+      '@filename' => $filename,
+      '@type' => $type_message,
+      '@mapped' => $msg,
+    ])));
 
     return $response;
   }

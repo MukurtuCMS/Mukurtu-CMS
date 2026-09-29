@@ -63,7 +63,7 @@ class DesignSettingsFormTest extends KernelTestBase {
 
     // The palette controls must survive alongside the new fieldset.
     $this->assertArrayHasKey('palette', $build);
-    $this->assertArrayHasKey('colors', $build);
+    $this->assertArrayHasKey('colors', $build['colors_layout']);
   }
 
   /**
@@ -75,13 +75,13 @@ class DesignSettingsFormTest extends KernelTestBase {
    */
   public function testColourPickersCollapseUnlessCustom(): void {
     $build = \Drupal::formBuilder()->getForm(MukurtuDesignSettingsForm::class);
-    $this->assertSame('details', $build['colors']['#type']);
-    $this->assertFalse($build['colors']['#open'], 'Closed on a shipped palette.');
+    $this->assertSame('details', $build['colors_layout']['colors']['#type']);
+    $this->assertFalse($build['colors_layout']['colors']['#open'], 'Closed on a shipped palette.');
 
     $this->config('mukurtu_design.settings')->set('palette', 'custom')->save();
 
     $build = \Drupal::formBuilder()->getForm(MukurtuDesignSettingsForm::class);
-    $this->assertTrue($build['colors']['#open'], 'Open when the custom palette is in use.');
+    $this->assertTrue($build['colors_layout']['colors']['#open'], 'Open when the custom palette is in use.');
   }
 
   /**

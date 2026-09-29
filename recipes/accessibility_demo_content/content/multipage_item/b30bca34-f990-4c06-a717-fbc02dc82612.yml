@@ -1,0 +1,30 @@
+# Sample multipage item sequencing the two placeholder Digital Heritage
+# "page" nodes above, so the accessibility program has real multipage
+# navigation to test (priority component #13 in page-inventory.md). Only
+# Digital Heritage is an allowed page bundle by default
+# (mukurtu_multipage_items.settings:bundles_config). See ../../README.md.
+_meta:
+  version: '1.0'
+  entity_type: multipage_item
+  bundle: multipage_item
+  uuid: b30bca34-f990-4c06-a717-fbc02dc82612
+  default_langcode: en
+  depends:
+    a2d485da-5a7d-4e36-880e-336c2521d2b8: node
+    02c98d90-b454-4df0-bd77-3e7e6a41c8e4: node
+    aed854ef-ac7f-4a19-80b9-2666f2c23b64: og_membership
+default:
+  title:
+    -
+      value: 'Sample Multipage Item (Accessibility Demo)'
+  status:
+    -
+      value: true
+  uid:
+    -
+      target_id: 1
+  field_pages:
+    -
+      entity: a2d485da-5a7d-4e36-880e-336c2521d2b8
+    -
+      entity: 02c98d90-b454-4df0-bd77-3e7e6a41c8e4
