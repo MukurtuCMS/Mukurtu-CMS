@@ -185,20 +185,6 @@ short fields themselves. Shrink it in these dialogs specifically. */
   display: block;
 }
 
-/* Content browser modal: already-selected rows */
-.view-mukurtu-content-browser .views-table tr.eb-already-selected {
-  cursor: not-allowed;
-  /* A 5% wash of the text color rather than a fixed gray: it follows light
-     and dark mode, and keeps links and muted text above 4.5:1 in both. */
-  background-color: color-mix(in srgb, var(--gin-color-text, #222330) 5%, transparent);
-}
-
-.view-mukurtu-content-browser .views-table tr.eb-already-selected td {
-  pointer-events: none;
-  color: var(--gin-color-text-light, #595959);
-}
-
-
 /* Suppress Gin's entity_browser.css hover border on the media thumbnail — the
    .field__item div is not focusable so this is not a focus indicator. */
 .entities-list .item-container .eb-form-selection-card__media .field__item:hover {

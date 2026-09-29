@@ -43,6 +43,21 @@ class FormHooks
     }
 
     /**
+     * Implements hook_form_BASE_FORM_ID_alter() for 'entity_browser_form'.
+     *
+     * Every entity browser marks the items its field already references as
+     * "Already added", whatever widget lists its choices.
+     */
+    #[Hook("form_entity_browser_form_alter")]
+    public function formEntityBrowserFormAlter(
+        array &$form,
+        FormStateInterface $form_state,
+    ): void {
+        $form["#attached"]["library"][] =
+            "mukurtu_core/entity_browser_already_added";
+    }
+
+    /**
      * Implements hook_form_FORM_ID_alter() for 'language_content_settings_form'.
      *
      * Hides og_group fields from the translation settings form to prevent users

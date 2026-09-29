@@ -13,61 +13,6 @@
   "use strict";
 
   /**
-   * Returns entity IDs already selected in the field widget on the parent form.
-   *
-   * The widget renders each selected entity with a data-entity-id="node:NNN"
-   * attribute. Values are returned in the same "entity_type:id" format used by
-   * entity_browser_select checkboxes so indexOf() comparisons match directly.
-   */
-  function getAlreadySelectedIds() {
-    var ids = [];
-    // The entity browser runs in an iframe; selected items are rendered on the
-    // parent page. Access window.parent.document (same-origin) to find them.
-    var searchDoc = document;
-    try {
-      if (window.parent !== window) {
-        searchDoc = window.parent.document;
-      }
-    }
-    catch (e) {
-      // Cross-origin frame — fall back to the current document.
-    }
-    $(searchDoc).find('[data-entity-id]').each(function () {
-      ids.push($(this).attr('data-entity-id'));
-    });
-    return ids;
-  }
-
-  /**
-   * Disables rows whose entity is already present in the field widget.
-   *
-   * @param {object} context
-   * @param {Array} alreadySelected - Numeric entity ID strings.
-   */
-  function disableAlreadySelected(context, alreadySelected) {
-    if (!alreadySelected.length) {
-      return;
-    }
-    $('.view .views-table tbody tr', context).each(function () {
-      var $row = $(this);
-      var $input = $row.find('.views-field-entity-browser-select input');
-      if ($row.hasClass('eb-already-selected') || !$input.length || alreadySelected.indexOf($input.val()) === -1) {
-        return;
-      }
-      $input.prop('disabled', true);
-      $row.addClass('eb-already-selected');
-      // A visible badge, not screen-reader-only text: sighted users need to
-      // know why the checkbox cannot be checked. Gin styles .views-field
-      // .marker as a status badge, matching the Status column.
-      var $cell = $row.find('.views-field-title');
-      if (!$cell.length) {
-        $cell = $row.find('td').not('.views-field-entity-browser-select').first();
-      }
-      $cell.append(' ', $('<span class="marker eb-already-added"></span>').text(Drupal.t('Already added')));
-    });
-  }
-
-  /**
    * Update the class and ARIA checked state of a col based on the status of
    * a checkbox or radio input (WCAG 4.1.2).
    *
@@ -114,9 +59,6 @@
         }
         updateClasses($col, $input);
       });
-
-      // Disable rows for items already present in the field widget.
-      disableAlreadySelected(context, getAlreadySelectedIds());
 
       // Add a checked class when clicked or activated by keyboard.
       var $cols = $(once('viewsCol', '.views-col', context));

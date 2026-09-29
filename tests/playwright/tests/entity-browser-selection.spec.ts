@@ -1,4 +1,4 @@
-import { test, expect, Locator, Page } from '@playwright/test';
+import { test, expect, FrameLocator, Locator, Page } from '@playwright/test';
 import { AxeBuilder } from '@axe-core/playwright';
 import { Login } from '~components/login';
 import { adminAccount } from '~helpers/a11y-credentials';
@@ -86,37 +86,71 @@ test.describe('Content entity browser: row selection', () => {
     }
   });
 
-  test('a row already in the field shows an "Already added" badge and cannot be checked', async ({ page }) => {
-    const value = await checkboxOf(selectableRows(page).first()).getAttribute('value');
-    // Pin the row by its value: selectableRows() stops matching it once it
-    // is marked as already added.
-    const row = page.locator('.views-table tbody tr').filter({ has: page.locator(`input[value="${value}"]`) });
-    const checkbox = checkboxOf(row);
-
-    // The browser marks rows whose entity the parent form's widget already
-    // lists ([data-entity-id]). Loaded directly there is no parent form, so
-    // stand one in and re-run the behaviors.
-    await page.evaluate((id) => {
-      const marker = document.createElement('div');
-      marker.setAttribute('data-entity-id', id!);
-      document.body.appendChild(marker);
-      (window as any).Drupal.attachBehaviors(document, (window as any).drupalSettings);
-    }, value);
-
-    await expect(row).toHaveClass(/\beb-already-selected\b/);
-    await expect(checkbox).toBeDisabled();
-    await expect(row.locator('.eb-already-added')).toBeVisible();
-    await expect(row.locator('.eb-already-added')).toHaveText('Already added');
-    // Re-running the behaviors must not stack a second badge.
-    await page.evaluate(() => (window as any).Drupal.attachBehaviors(document, (window as any).drupalSettings));
-    await expect(row.locator('.eb-already-added')).toHaveCount(1);
-  });
-
   test('no nested controls, missing alt text, or undersized targets', async ({ page }) => {
     const results = await new AxeBuilder({ page })
       .include('.views-table')
       .withRules(['nested-interactive', 'image-alt', 'target-size'])
       .analyze();
     expect(results.violations.map((v) => `${v.id}: ${v.nodes.length}`)).toEqual([]);
+  });
+});
+
+/**
+ * "Already added" marking, driven through a real form.
+ *
+ * entity_browser_already_added.js reads the items of the field that opened
+ * the browser, so it can only be exercised from a parent form. The
+ * Collection form has several content browser fields, which also shows the
+ * marking is scoped to the field that opened the browser.
+ */
+test.describe('Entity browsers: already added items', () => {
+  test.beforeEach(async ({ page }) => {
+    const account = adminAccount();
+    const login = new Login(page);
+    await login.login(account.username, account.password);
+  });
+
+  /** Opens the browser for a field and returns its frame. */
+  async function openBrowser(page: Page, field: string): Promise<FrameLocator> {
+    // Some fields sit in collapsed field-group tabs, so click from script.
+    await page.locator(`[data-uuid][id^="edit-${field}-entity-browser"]`).first().evaluate((el: HTMLElement) => el.click());
+    const frame = page.frameLocator('.ui-dialog iframe').last();
+    await expect(frame.locator('.views-table tbody tr').first()).toBeVisible({ timeout: 30000 });
+    return frame;
+  }
+
+  async function closeBrowser(page: Page): Promise<void> {
+    await page.locator('.ui-dialog-titlebar-close:visible').click();
+    await expect(page.locator('.ui-dialog iframe')).toHaveCount(0);
+  }
+
+  test('an item in the field is marked only in that field\'s browser', async ({ page }) => {
+    await page.goto('/node/add/collection');
+
+    let frame = await openBrowser(page, 'field-items-in-collection');
+    const value = await frame.locator('.views-table tbody td.views-field-entity-browser-select input').first().getAttribute('value');
+    await frame.locator('.views-table tbody tr').first().locator('td.views-field-type').click();
+    await frame.locator('.is-entity-browser-submit').click();
+    await expect(page.locator(`[data-entity-id="${value}"]`).first()).toBeAttached({ timeout: 30000 });
+
+    // Same field: the row is disabled and badged, once.
+    frame = await openBrowser(page, 'field-items-in-collection');
+    const row = frame.locator('.views-table tbody tr').filter({ has: frame.locator(`input[value="${value}"]`) });
+    await expect(row).toHaveClass(/\beb-already-selected\b/);
+    await expect(row.locator('td.views-field-entity-browser-select input')).toBeDisabled();
+    await expect(row.locator('.eb-already-added')).toHaveText('Already added');
+    await expect(row.locator('.eb-already-added')).toHaveCount(1);
+
+    // Select all must not check it: core's select-all collected its
+    // checkboxes before this one was disabled.
+    await frame.locator('.views-table thead input[type="checkbox"]').check();
+    await expect(row.locator('td.views-field-entity-browser-select input')).not.toBeChecked();
+    await closeBrowser(page);
+
+    // Another field on the same form: not marked.
+    frame = await openBrowser(page, 'field-related-content');
+    const other = frame.locator('.views-table tbody tr').filter({ has: frame.locator(`input[value="${value}"]`) });
+    await expect(other.locator('td.views-field-entity-browser-select input')).toBeEnabled();
+    await expect(frame.locator('.eb-already-added')).toHaveCount(0);
   });
 });

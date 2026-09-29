@@ -20,9 +20,18 @@
         // Remove the underlying checkbox from the tab order and accessibility
         // tree — the .views-row is the sole interactive element for AT.
         $view.find('.views-row').each(function () {
-          $(this).attr({ tabindex: '0', role: 'checkbox', 'aria-checked': 'false' });
-          $(this).find('.views-field-entity-browser-select input')
-            .attr({ tabindex: '-1', 'aria-hidden': 'true' });
+          var $input = $(this).find('.views-field-entity-browser-select input');
+          $(this).attr({ role: 'checkbox', 'aria-checked': 'false' });
+          // Rows already in the field are disabled by
+          // entity_browser_already_added.js, which may attach before or
+          // after this behavior.
+          if ($input.prop('disabled')) {
+            $(this).attr('aria-disabled', 'true');
+          }
+          else {
+            $(this).attr('tabindex', '0');
+          }
+          $input.attr({ tabindex: '-1', 'aria-hidden': 'true' });
         });
 
         // Handle both click and keyboard (Enter/Space) to toggle selection.
@@ -37,7 +46,7 @@
             return;
           }
           var $checkbox = $(this).find('.views-field-entity-browser-select input');
-          if (!$checkbox.length) {
+          if (!$checkbox.length || $checkbox.prop('disabled')) {
             return;
           }
           var checked = !$checkbox.prop('checked');
