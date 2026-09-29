@@ -1,31 +1,104 @@
 /**
  * @file
- * Visually hides the entity_browser_select checkbox/radio column on the
- * generic content and multipage-item entity browsers.
+ * Selection styling for the generic content and multipage-item entity
+ * browsers.
  *
- * Visually hidden (not display:none) so the input stays in the DOM and
- * usable, but out of the way visually - the row itself is the primary
- * interactive element (role="checkbox"/"radio", set by
- * entity_browser_view_decoration.js). Without this, the input would remain
- * a visible, mouse-clickable control even though JS marks it
- * aria-hidden/tabindex="-1", which is incoherent for assistive technology.
- * Mirrors the same technique already used for the community browser in
- * mukurtu_gin_custom/css/mukurtu-gin-custom.css - but unlike that view
- * (list-format div rows), these two views render as tables, so the target
- * is a <td>: the theme's own `td { box-sizing: border-box; padding: ... }`
- * base rule otherwise keeps the cell's rendered box at least as wide as its
- * padding, so padding/border have to be reset here too for width/height:1px
- * to actually take effect.
+ * The row is the interactive element (role="checkbox", set by
+ * entity_browser_view_decoration.js), so the native entity_browser_select
+ * input is visually hidden. It stays in the DOM and usable, but a visible,
+ * mouse-clickable input that JS marks aria-hidden/tabindex="-1" would be
+ * incoherent for assistive technology.
+ *
+ * Hiding the input removes the only visible selection cue, so its column
+ * draws a decorative checkbox instead: an empty square, filled with a
+ * checkmark when the row is checked. The shape change carries the state
+ * without relying on color (WCAG 1.4.1); aria-checked on the row carries it
+ * for assistive technology.
+ *
+ * Only the input is hidden, not its cell: hiding the <td> would leave its
+ * <th> and the rest of the column misaligned.
  */
-.view-mukurtu-content-browser .views-field-entity-browser-select,
-.view-multipage-item-browser .views-field-entity-browser-select {
+.view-mukurtu-content-browser .views-field-entity-browser-select > *,
+.view-multipage-item-browser .views-field-entity-browser-select > * {
   position: absolute;
   width: 1px;
   height: 1px;
   padding: 0;
   border: 0;
-  min-height: 0;
+  margin: 0;
   overflow: hidden;
   clip: rect(0 0 0 0);
   white-space: nowrap;
+}
+
+.view-mukurtu-content-browser .views-field-entity-browser-select,
+.view-multipage-item-browser .views-field-entity-browser-select {
+  position: relative;
+  width: 1%;
+  padding-inline: 1rem 0;
+}
+
+/* The box. */
+.view-mukurtu-content-browser [role="checkbox"] .views-field-entity-browser-select::before,
+.view-multipage-item-browser [role="checkbox"] .views-field-entity-browser-select::before {
+  content: "";
+  display: block;
+  box-sizing: border-box;
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid var(--gin-border-color-form-element, #8e929c);
+  border-radius: 4px;
+  background-color: var(--gin-bg-layer, #fff);
+}
+
+.view-mukurtu-content-browser [aria-checked="true"] .views-field-entity-browser-select::before,
+.view-multipage-item-browser [aria-checked="true"] .views-field-entity-browser-select::before {
+  border-color: var(--gin-color-primary, #0e7873);
+  background-color: var(--gin-color-primary, #0e7873);
+}
+
+/* Already in the field widget, so the row cannot be selected again. */
+.view-mukurtu-content-browser [aria-disabled="true"] .views-field-entity-browser-select::before,
+.view-multipage-item-browser [aria-disabled="true"] .views-field-entity-browser-select::before {
+  border-color: var(--gin-color-disabled-border, #c2c2c2);
+  background-color: var(--gin-color-disabled-bg, #eaeaea);
+}
+
+/* The checkmark, drawn only when checked. */
+.view-mukurtu-content-browser [aria-checked="true"] .views-field-entity-browser-select::after,
+.view-multipage-item-browser [aria-checked="true"] .views-field-entity-browser-select::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  inset-inline-start: 1rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  transform: translateY(-50%);
+  background-color: var(--gin-color-button-text, #fff);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M4 10.5l4 4 8-9' fill='none' stroke='%23000' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 100% no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M4 10.5l4 4 8-9' fill='none' stroke='%23000' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 100% no-repeat;
+}
+
+.view-mukurtu-content-browser .views-table tr[aria-checked="true"],
+.view-multipage-item-browser .views-table tr[aria-checked="true"] {
+  /* 10%, not Gin's 15% primary-light: at 15% the accent-colored title link
+     drops below 4.5:1 against the tint (WCAG 1.4.3). */
+  background-color: var(--gin-bg-item-hover, rgba(14, 120, 115, 0.1));
+}
+
+/* Windows High Contrast drops background colors, which would erase both the
+   filled box and the masked checkmark. */
+@media (forced-colors: active) {
+  .view-mukurtu-content-browser [aria-checked="true"] .views-field-entity-browser-select::before,
+  .view-multipage-item-browser [aria-checked="true"] .views-field-entity-browser-select::before {
+    forced-color-adjust: none;
+    border-color: Highlight;
+    background-color: Highlight;
+  }
+
+  .view-mukurtu-content-browser [aria-checked="true"] .views-field-entity-browser-select::after,
+  .view-multipage-item-browser [aria-checked="true"] .views-field-entity-browser-select::after {
+    forced-color-adjust: none;
+    background-color: HighlightText;
+  }
 }

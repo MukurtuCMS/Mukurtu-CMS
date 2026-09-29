@@ -188,12 +188,14 @@ short fields themselves. Shrink it in these dialogs specifically. */
 /* Content browser modal: already-selected rows */
 .view-mukurtu-content-browser .views-table tr.eb-already-selected {
   cursor: not-allowed;
-  background-color: #f0f0f0;
+  /* A 5% wash of the text color rather than a fixed gray: it follows light
+     and dark mode, and keeps links and muted text above 4.5:1 in both. */
+  background-color: color-mix(in srgb, var(--gin-color-text, #222330) 5%, transparent);
 }
 
 .view-mukurtu-content-browser .views-table tr.eb-already-selected td {
   pointer-events: none;
-  color: #595959;
+  color: var(--gin-color-text-light, #595959);
 }
 
 /* Content browser modal: keyboard focus ring for interactive rows/cols */
@@ -225,7 +227,7 @@ short fields themselves. Shrink it in these dialogs specifically. */
 .eb-form-selection-card__type {
   font-size: 0.8rem;
   /* 1.4.3: #595959 on white = 7.0:1, above the 4.5:1 AA requirement. */
-  color: #595959;
+  color: var(--gin-color-text-light, #595959);
   margin-top: 0.2rem;
 }
 

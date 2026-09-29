@@ -154,7 +154,10 @@
       });
 
       // Select/unselect the row with a click or keyboard activation anywhere inside the row.
-      var $rows = $(once('viewsTable', '.view .views-table tr', context));
+      // tbody only: the header row holds tableselect's select-all input,
+      // which would otherwise turn the header into a focusable checkbox
+      // that selects nothing.
+      var $rows = $(once('viewsTable', '.view .views-table tbody tr', context));
       $rows.each(function () {
         var $row = $(this);
         var $input = $row.find('.views-field-entity-browser-select input');
