@@ -20,15 +20,38 @@
         align-items: center;
         column-gap: var(--v-space-2xs);
 
-        // The first child is assumed to be the main navigation.
-        // It is placed in the center column of our 3-column grid.
+        // Below `lg` there isn't room for a separate centered column, so the
+        // navigation and language switcher share one flex row instead: the
+        // switcher keeps its own content width and the navigation grows to
+        // fill whatever's left. Because that growth is driven by the row's
+        // available space (not by the navigation's own content), its
+        // internal expand/collapse (e.g. a submenu opening) can't resize it
+        // and shift the row.
+        @include include-media.media('<lg') {
+          display: flex;
+          flex-wrap: wrap;
+        }
+
+        // The first child is assumed to be the main navigation. It is
+        // placed in the center column of our 3-column grid at `>=lg`.
         & > *:first-child {
-          grid-column: 2;
+          @include include-media.media('<lg') {
+            flex: 1 1 auto;
+            min-inline-size: 0;
+          }
+
+          @include include-media.media('>=lg') {
+            grid-column: 2;
+          }
         }
 
         .language-switcher {
           grid-column: 3;
           justify-self: end;
+
+          @include include-media.media('<lg') {
+            flex: 0 0 auto;
+          }
 
           svg path {
             fill: var(--color-white);
@@ -52,6 +75,15 @@
         margin-block: 0;
       }
     }
+  }
+
+  // A long, single-word (unbreakable) title - a place or person name
+  // without spaces, for example - can exceed the narrow mobile viewport at
+  // this font size; allow a mid-word break as a last resort rather than
+  // overflowing horizontally (issue #1997).
+  .page__title h1 {
+    overflow-wrap: anywhere;
+    word-break: normal;
   }
 
   // Basic pages use Layout Builder; the page title shadow would appear as an

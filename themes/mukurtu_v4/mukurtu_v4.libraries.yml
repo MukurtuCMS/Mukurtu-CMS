@@ -22,6 +22,13 @@ featured-content-carousel:
     - core/once
     - mukurtu_core/splide
 
+altcha-accessibility-fix:
+  js:
+    js/altcha-accessibility-fix.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+
 language-switcher:
   js:
     components/02-molecules/language-switcher/language-switcher.js: {}

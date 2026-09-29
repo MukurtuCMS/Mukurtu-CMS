@@ -1,0 +1,38 @@
+# Sample image media. field_media_image.alt is intentionally filled in with
+# a real, descriptive alt text so the accessibility program can verify how
+# image alt text renders on a Digital Heritage page.
+_meta:
+  version: '1.0'
+  entity_type: media
+  uuid: 2520bf8f-2993-4c32-9f95-062814b7a2cc
+  bundle: image
+  default_langcode: en
+  depends:
+    4bcaac48-ddf0-4dab-87ae-27edd59c03bb: file
+    df5dbc8d-e098-4879-aded-9f4b07031197: community
+    1008afed-c70c-419e-bc55-eb37451a1b69: protocol
+default:
+  name:
+    -
+      value: 'Sample Basket Photograph (placeholder)'
+  status:
+    -
+      value: true
+  uid:
+    -
+      target_id: 1
+  field_communities:
+    -
+      entity: df5dbc8d-e098-4879-aded-9f4b07031197
+  field_cultural_protocols:
+    -
+      sharing_setting: all
+      protocols: '|1|'
+  field_media_image:
+    -
+      entity: 4bcaac48-ddf0-4dab-87ae-27edd59c03bb
+      alt: 'A generated placeholder photograph of a woven basket with a brown gradient background, used only for accessibility testing.'
+      title: ''
+  field_identifier:
+    -
+      value: 'ACC-DEMO-IMG-001'
