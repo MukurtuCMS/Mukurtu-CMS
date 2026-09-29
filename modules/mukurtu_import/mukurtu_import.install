@@ -237,7 +237,7 @@ function mukurtu_import_update_40201(): ?string {
 /**
  * Ignore the Default translation column in the default import templates.
  */
-function mukurtu_import_update_40401(): ?string {
+function mukurtu_import_update_40402(): ?string {
   // Keep the docblock above to one line: Drupal renders it verbatim as this
   // update's description on update.php and in `drush updatedb:status`.
   //

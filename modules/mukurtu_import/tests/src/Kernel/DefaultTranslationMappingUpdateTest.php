@@ -8,14 +8,14 @@ use Drupal\Core\Serialization\Yaml;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests mukurtu_import_update_40401(), which ignores Default translation.
+ * Tests mukurtu_import_update_40402(), which ignores Default translation.
  *
  * The templates are deliberately put back into their pre-fix state here.
  * mukurtu_import's config/install now ships the row, so a freshly installed
  * test site already has it and the hook would have nothing to do: every
  * assertion would pass without the hook being exercised at all.
  *
- * @see mukurtu_import_update_40401()
+ * @see mukurtu_import_update_40402()
  */
 #[Group('mukurtu_import')]
 class DefaultTranslationMappingUpdateTest extends MukurtuImportTestBase {
@@ -98,7 +98,7 @@ class DefaultTranslationMappingUpdateTest extends MukurtuImportTestBase {
       $before[$id] = $this->rowsOf($id);
     }
 
-    $message = mukurtu_import_update_40401();
+    $message = mukurtu_import_update_40402();
     $this->assertSame('Set 3 default import template(s) to ignore the Default translation column.', $message);
 
     foreach (self::STRATEGY_IDS as $id) {
@@ -107,7 +107,7 @@ class DefaultTranslationMappingUpdateTest extends MukurtuImportTestBase {
       $this->assertSame($before[$id], $after, "The hook altered other rows in $id.");
     }
 
-    $this->assertNull(mukurtu_import_update_40401(), 'A second run changed something.');
+    $this->assertNull(mukurtu_import_update_40402(), 'A second run changed something.');
   }
 
   /**
@@ -116,7 +116,7 @@ class DefaultTranslationMappingUpdateTest extends MukurtuImportTestBase {
   public function testLeavesExistingRowsAlone(): void {
     // Shipped config already carries the row, so this is the fresh-install
     // and the already-updated case at once.
-    $this->assertNull(mukurtu_import_update_40401());
+    $this->assertNull(mukurtu_import_update_40402());
     foreach (self::STRATEGY_IDS as $id) {
       $this->assertSame(['-1'], $this->defaultTranslationTargets($id), "$id should have exactly one ignore row.");
     }
@@ -125,7 +125,7 @@ class DefaultTranslationMappingUpdateTest extends MukurtuImportTestBase {
     \Drupal::entityTypeManager()->getStorage('mukurtu_import_strategy')->load('image_all_fields')->delete();
     $this->removeDefaultTranslationRow('soundcloud_all_fields');
 
-    $this->assertSame('Set 1 default import template(s) to ignore the Default translation column.', mukurtu_import_update_40401());
+    $this->assertSame('Set 1 default import template(s) to ignore the Default translation column.', mukurtu_import_update_40402());
     $this->assertNull(\Drupal::entityTypeManager()->getStorage('mukurtu_import_strategy')->loadUnchanged('image_all_fields'), 'The deleted template came back.');
     $this->assertSame(['-1'], $this->defaultTranslationTargets('soundcloud_all_fields'));
   }
