@@ -233,3 +233,62 @@ function mukurtu_import_update_40201(): ?string {
     '@count' => count($updated),
   ]);
 }
+
+/**
+ * Ignore the Default translation column in the default import templates.
+ */
+function mukurtu_import_update_40401(): ?string {
+  // Keep the docblock above to one line: Drupal renders it verbatim as this
+  // update's description on update.php and in `drush updatedb:status`.
+  //
+  // 4.0.4 adds a Default translation column to the Dictionary Word, Image and
+  // SoundCloud exports, matching every other translatable bundle (see
+  // mukurtu_export_update_40401()). Every other template maps that column to
+  // "-1" (never imported), because Drupal manages default_langcode itself and
+  // throws if it is written directly. Without the row, re-importing one of
+  // those exports reports the column as unrecognized.
+  //
+  // config/install ships the row, which fixes new sites. This adds it to the
+  // templates an existing site already has. As in mukurtu_import_update_40201(),
+  // only the shipped templates are touched, by id.
+  $ids = [
+    'dictionary_word_all_fields',
+    'image_all_fields',
+    'soundcloud_all_fields',
+  ];
+
+  $storage = \Drupal::entityTypeManager()->getStorage('mukurtu_import_strategy');
+  $updated = [];
+
+  foreach ($ids as $id) {
+    /** @var \Drupal\mukurtu_import\Entity\MukurtuImportStrategy|null $strategy */
+    $strategy = $storage->load($id);
+    if (!$strategy) {
+      // The template was deleted, or never existed on this site.
+      continue;
+    }
+
+    $mapping = $strategy->getMapping() ?? [];
+
+    // Leave a template that already has the column alone, whatever it maps it
+    // to: a site that chose a target on purpose keeps it.
+    foreach ($mapping as $row) {
+      if (($row['source'] ?? NULL) === 'Default translation') {
+        continue 2;
+      }
+    }
+
+    $mapping[] = ['source' => 'Default translation', 'target' => '-1'];
+    $strategy->setMapping($mapping);
+    $strategy->save();
+    $updated[] = $id;
+  }
+
+  if (empty($updated)) {
+    return NULL;
+  }
+
+  return (string) t('Set @count default import template(s) to ignore the Default translation column.', [
+    '@count' => count($updated),
+  ]);
+}
