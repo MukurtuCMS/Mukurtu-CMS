@@ -81,8 +81,8 @@
 
 .view-mukurtu-content-browser .views-table tr[aria-checked="true"],
 .view-multipage-item-browser .views-table tr[aria-checked="true"] {
-  /* 10%, not Gin's 15% primary-light: at 15% the accent-colored title link
-     drops below 4.5:1 against the tint (WCAG 1.4.3). */
+  /* Gin's hover tint (10% light, 8% dark), not its 15% primary-light: at 15%
+     the accent-colored title link drops below 4.5:1 (WCAG 1.4.3). */
   background-color: var(--gin-bg-item-hover, rgba(14, 120, 115, 0.1));
 }
 
@@ -100,5 +100,11 @@
   .view-multipage-item-browser [aria-checked="true"] .views-field-entity-browser-select::after {
     forced-color-adjust: none;
     background-color: HighlightText;
+  }
+
+  /* The disabled fill is forced away too, so mark the border instead. */
+  .view-mukurtu-content-browser [aria-disabled="true"] .views-field-entity-browser-select::before,
+  .view-multipage-item-browser [aria-disabled="true"] .views-field-entity-browser-select::before {
+    border-color: GrayText;
   }
 }
