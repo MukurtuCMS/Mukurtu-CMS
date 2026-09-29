@@ -78,5 +78,12 @@ test.describe('Content entity browser: row selection', () => {
     const header = page.locator('.views-table thead tr');
     await expect(header).not.toHaveAttribute('role', 'checkbox');
     await expect(header).not.toHaveAttribute('tabindex', /.*/);
+
+    // The select-all input itself is visually hidden, so it must not take
+    // focus either (WCAG 2.4.7).
+    const selectAll = header.locator('input[type="checkbox"]');
+    if (await selectAll.count() > 0) {
+      await expect(selectAll).toHaveAttribute('tabindex', '-1');
+    }
   });
 });
