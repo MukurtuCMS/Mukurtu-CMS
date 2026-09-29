@@ -188,19 +188,30 @@ short fields themselves. Shrink it in these dialogs specifically. */
 /* Content browser modal: already-selected rows */
 .view-mukurtu-content-browser .views-table tr.eb-already-selected {
   cursor: not-allowed;
-  background-color: #f0f0f0;
+  /* A 5% wash of the text color rather than a fixed gray: it follows light
+     and dark mode, and keeps links and muted text above 4.5:1 in both. */
+  background-color: color-mix(in srgb, var(--gin-color-text, #222330) 5%, transparent);
 }
 
 .view-mukurtu-content-browser .views-table tr.eb-already-selected td {
   pointer-events: none;
-  color: #595959;
+  color: var(--gin-color-text-light, #595959);
 }
 
 /* Content browser modal: keyboard focus ring for interactive rows/cols */
 .view-mukurtu-content-browser .views-table tr:focus-visible,
-.view-mukurtu-content-browser .views-col:focus-visible {
+.view-mukurtu-content-browser .views-col:focus-visible,
+.view-multipage-item-browser .views-table tr:focus-visible {
   outline: 3px solid #0052cc;
   outline-offset: -3px;
+}
+
+/* #0052cc is about 2:1 on dark rows (WCAG 1.4.11). Gin's dark focus color
+   is opaque there, unlike its 60% light-mode one, so it can be used as is. */
+.gin--dark-mode .view-mukurtu-content-browser .views-table tr:focus-visible,
+.gin--dark-mode .view-mukurtu-content-browser .views-col:focus-visible,
+.gin--dark-mode .view-multipage-item-browser .views-table tr:focus-visible {
+  outline-color: var(--gin-color-focus, rgb(81, 168, 255));
 }
 
 
