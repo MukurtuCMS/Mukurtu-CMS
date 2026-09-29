@@ -963,6 +963,36 @@ function mukurtu_core_views_pre_build(\Drupal\views\ViewExecutable $view) {
 }
 
 /**
+ * Implements hook_preprocess_HOOK() for leaflet_map.
+ *
+ * Names the visitor country map's own element.
+ *
+ * Leaflet's map div is the focusable control - it takes arrow-key panning and
+ * +/- zoom - but it ships with no role and no accessible name, so tabbing onto
+ * it announces nothing. VisitorsCountryMap wraps it in a role="figure" with a
+ * label, but that names the region, not the control inside it.
+ *
+ * This has to happen in a preprocess rather than by setting '#attributes' on
+ * the render array: the leaflet_map theme hook declares only map_id and
+ * height, so the theme system never copies '#attributes' through to the
+ * template, even though the template prints {{ attributes }}.
+ *
+ * Scoped by map id so other Leaflet maps on the site are untouched.
+ *
+ * @see \Drupal\mukurtu_core\Service\VisitorsCountryMap
+ */
+function mukurtu_core_preprocess_leaflet_map(array &$variables) {
+  if (($variables['map_id'] ?? NULL) !== \Drupal\mukurtu_core\Service\VisitorsCountryMap::MAP_ELEMENT_ID) {
+    return;
+  }
+
+  if (!isset($variables['attributes']) || !is_array($variables['attributes'])) {
+    $variables['attributes'] = [];
+  }
+  $variables['attributes']['aria-label'] = t('Visitor locations');
+}
+
+/**
  * Implements hook_views_query_alter().
  *
  * For pending: adds status=0 AND field_pending=1.

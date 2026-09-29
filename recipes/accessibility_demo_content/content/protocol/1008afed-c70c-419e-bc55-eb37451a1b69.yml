@@ -1,0 +1,30 @@
+# Sample Protocol (open/public access) under the Sample Community, so the
+# demo content is viewable without logging in. See ../../README.md.
+_meta:
+  version: '1.0'
+  entity_type: protocol
+  uuid: 1008afed-c70c-419e-bc55-eb37451a1b69
+  bundle: protocol
+  default_langcode: en
+  depends:
+    df5dbc8d-e098-4879-aded-9f4b07031197: community
+    98ad8da0-05e3-4689-8615-be599517ebd2: og_membership
+default:
+  name:
+    -
+      value: 'Public Access (Accessibility Demo)'
+  status:
+    -
+      value: true
+  user_id:
+    -
+      target_id: 1
+  field_communities:
+    -
+      entity: df5dbc8d-e098-4879-aded-9f4b07031197
+  field_access_mode:
+    -
+      value: open
+  field_membership_display:
+    -
+      value: none

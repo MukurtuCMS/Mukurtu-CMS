@@ -39,7 +39,7 @@
 User accounts are migrated in two different migrations. Both should be used in migration_lookup plugins when dealing with users.
 |Migration ID|Description|
 |-|-|
-|mukurtu_cms_v3_users_uid1|Migrates UID 1. Does not migrate name, password, or email.|
+|mukurtu_cms_v3_users_uid1|Migrates UID 1's activity metadata only. Does not migrate name, password, email, roles, or account status, so this site's administrator keeps its own access.|
 |mukurtu_cms_v3_users|Migrates all other users and includes all stock Drupal 7 user fields.|
 
 

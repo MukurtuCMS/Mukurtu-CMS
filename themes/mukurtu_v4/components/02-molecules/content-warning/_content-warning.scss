@@ -29,7 +29,12 @@
   }
 
   &:focus-visible {
+    /* This overlay's label is white on its own dark 70% scrim, but it sits
+    over arbitrary uploaded media, so neither currentcolor drawn outward
+    nor any fixed colour is safe against what's behind it. Inset the ring
+    so it lands on the scrim, which is a known dark surface (#2199). */
     outline: var(--focus-color) solid 2px;
+    outline-offset: -4px;
   }
 
   &.dismissed {
