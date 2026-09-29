@@ -43,6 +43,7 @@ class LandingPageRestrictionsUpdateTest extends KernelTestBase {
     'layout_discovery',
     'layout_builder',
     'layout_builder_restrictions',
+    'views',
   ];
 
   /**
