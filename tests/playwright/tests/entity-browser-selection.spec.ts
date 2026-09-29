@@ -100,6 +100,17 @@ test.describe('Content entity browser: row selection', () => {
     await expect(selectAll).toHaveAccessibleName('Select all rows in this table');
   });
 
+  test('focus stays visible in forced-colors mode', async ({ page }) => {
+    // Gin's focus ring is a box-shadow, which forced colors removes.
+    await page.emulateMedia({ forcedColors: 'active' });
+    const link = selectableRows(page).first().locator('td.views-field-title a');
+    await link.focus();
+    await expect(link).toHaveCSS('outline-style', 'solid');
+    const checkbox = checkboxOf(selectableRows(page).first());
+    await checkbox.focus();
+    await expect(checkbox).toHaveCSS('outline-style', 'solid');
+  });
+
   test('no nested controls, missing names or alt text, or undersized targets', async ({ page }) => {
     const results = await new AxeBuilder({ page })
       .include('.views-table')
@@ -131,6 +142,8 @@ test.describe('Entity browsers: already added items', () => {
     await page.locator(`[data-uuid][id^="edit-${field}-entity-browser"]`).first().evaluate((el: HTMLElement) => el.click());
     const frame = page.frameLocator('.ui-dialog iframe').last();
     await expect(frame.locator('.views-table tbody tr').first()).toBeVisible({ timeout: 30000 });
+    // The iframe is named after its dialog (entity_browser sets no title).
+    await expect(page.locator('.ui-dialog iframe.entity-browser-modal-iframe').last()).toHaveAttribute('title', /\S/);
     return frame;
   }
 

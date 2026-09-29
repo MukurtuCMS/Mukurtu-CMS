@@ -46,7 +46,8 @@ class FormHooks
      * Implements hook_form_BASE_FORM_ID_alter() for 'entity_browser_form'.
      *
      * Every entity browser marks the items its field already references as
-     * "Already added", whatever widget lists its choices.
+     * "Already added", whatever widget lists its choices, and shows focus in
+     * forced-colors mode.
      */
     #[Hook("form_entity_browser_form_alter")]
     public function formEntityBrowserFormAlter(
@@ -54,7 +55,23 @@ class FormHooks
         FormStateInterface $form_state,
     ): void {
         $form["#attached"]["library"][] =
-            "mukurtu_core/entity_browser_already_added";
+            "mukurtu_core/entity_browser_form";
+    }
+
+    /**
+     * Implements hook_field_widget_single_element_WIDGET_TYPE_form_alter().
+     *
+     * Names the iframe in the entity browser's modal, on whatever page the
+     * widget renders (admin forms, and Layout Builder's off-canvas forms).
+     */
+    #[Hook("field_widget_single_element_entity_browser_entity_reference_form_alter")]
+    public function fieldWidgetEntityBrowserFormAlter(
+        array &$element,
+        FormStateInterface $form_state,
+        array $context,
+    ): void {
+        $element["#attached"]["library"][] =
+            "mukurtu_core/entity_browser_modal_title";
     }
 
     /**
