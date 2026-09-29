@@ -1,0 +1,39 @@
+# Lightweight Person node, used only as a target for the main sample
+# Person's "Related people" field so that relationship renders as a real
+# link for accessibility testing. See ../../README.md.
+_meta:
+  version: '1.0'
+  entity_type: node
+  uuid: 6adc222f-763e-4dba-8e9d-49196dd79630
+  bundle: person
+  default_langcode: en
+default:
+  title:
+    -
+      value: 'Sample Related Person (placeholder)'
+  status:
+    -
+      value: true
+  promote:
+    -
+      value: false
+  sticky:
+    -
+      value: false
+  uid:
+    -
+      target_id: 1
+  revision_uid:
+    -
+      target_id: 1
+  moderation_state:
+    -
+      value: published
+  path:
+    -
+      alias: '/accessibility-demo/sample-related-person'
+      langcode: en
+  field_cultural_protocols:
+    -
+      sharing_setting: all
+      protocols: '|1|'

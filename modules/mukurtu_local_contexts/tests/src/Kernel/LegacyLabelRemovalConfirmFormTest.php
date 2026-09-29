@@ -5,6 +5,7 @@ namespace Drupal\Tests\mukurtu_local_contexts\Kernel;
 use Drupal\Core\Form\FormState;
 use Drupal\mukurtu_local_contexts\Form\LegacyLabelRemovalConfirmForm;
 use Drupal\node\Entity\Node;
+use Drupal\Tests\user\Traits\UserCreationTrait;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
@@ -12,6 +13,8 @@ use PHPUnit\Framework\Attributes\Group;
  */
 #[Group('mukurtu_local_contexts')]
 class LegacyLabelRemovalConfirmFormTest extends LocalContextsTestBase {
+
+  use UserCreationTrait;
 
   /**
    * Creates and saves a new test node.

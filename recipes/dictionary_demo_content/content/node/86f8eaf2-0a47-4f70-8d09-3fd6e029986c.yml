@@ -1,0 +1,78 @@
+# The "fully-described" Word List item for the accessibility program,
+# containing the Sample Word dictionary_word node above.
+_meta:
+  version: '1.0'
+  entity_type: node
+  uuid: 86f8eaf2-0a47-4f70-8d09-3fd6e029986c
+  bundle: word_list
+  default_langcode: en
+  depends:
+    9258ad53-9c74-425e-8035-bfd3a5bbcf1a: node
+    85761b41-5e78-4f25-b92d-6037efcbf7e9: node
+    2520bf8f-2993-4c32-9f95-062814b7a2cc: media
+    a153b9f5-f2ab-4d27-8306-aea67943618b: taxonomy_term
+    9b7c9130-61a7-4ee7-9fd9-3d23a0e68904: taxonomy_term
+default:
+  title:
+    -
+      value: 'Sample Word List (Accessibility Demo)'
+  status:
+    -
+      value: true
+  promote:
+    -
+      value: false
+  sticky:
+    -
+      value: false
+  uid:
+    -
+      target_id: 1
+  revision_uid:
+    -
+      target_id: 1
+  moderation_state:
+    -
+      value: published
+  path:
+    -
+      alias: '/accessibility-demo/sample-word-list'
+      langcode: en
+  field_cultural_protocols:
+    -
+      sharing_setting: all
+      protocols: '|1|'
+  field_words:
+    -
+      entity: 9258ad53-9c74-425e-8035-bfd3a5bbcf1a
+  field_word_list_image:
+    -
+      entity: 2520bf8f-2993-4c32-9f95-062814b7a2cc
+  field_keywords:
+    -
+      entity: a153b9f5-f2ab-4d27-8306-aea67943618b
+  field_location:
+    -
+      entity: 9b7c9130-61a7-4ee7-9fd9-3d23a0e68904
+  field_related_content:
+    -
+      entity: 85761b41-5e78-4f25-b92d-6037efcbf7e9
+  field_source:
+    -
+      value: 'Placeholder Source'
+  field_summary:
+    -
+      value: 'A short placeholder summary of this sample Word List, for accessibility testing.'
+  field_description:
+    -
+      value: |
+        <h2>About this word list</h2>
+        <p>This is placeholder description text for a sample Word List, created only to test accessibility of the rendered page &mdash; headings, paragraphs, and the word list.</p>
+      format: basic_html
+  field_coverage_description:
+    -
+      value: 'Placeholder coverage description: a generic, non-specific location used only for accessibility testing.'
+      format: plain_text
+  field_coverage:
+    -
+      value: 'POINT (-98.5795 39.828175)'
