@@ -325,6 +325,23 @@
     display: none;
   }
 
+  /* The with-image hero's wash, glyph outline and link ring all exist to
+   * separate text from an unknown photo. Here the ground is one of the presets
+   * below, whose pairings were measured without them: the wash would shift
+   * that ground and void those ratios, and the outline would only blur the
+   * edges. */
+  .block-wrapper__second::before {
+    content: none;
+  }
+
+  h1,
+  h2,
+  p,
+  a {
+    -webkit-text-stroke: 0;
+    filter: none;
+  }
+
   /* The with-image styling sets `* { color }` on every descendant, and a rule
    * that matches an element directly always beats an inherited colour, however
    * specific the inherited one is. So each preset has to match descendants the
@@ -362,5 +379,16 @@
       color: var(--brand-text-color);
       text-shadow: none;
     }
+  }
+
+  /* The presets' `* { color }` outrank the with-image hero's .contextual
+   * revert, so Drupal's contextual links would take the preset colours.
+   * Same revert, restated after the presets so it wins the tie. */
+  .contextual,
+  .contextual * {
+    color: revert;
+    -webkit-text-stroke: revert;
+    text-shadow: revert;
+    filter: revert;
   }
 }
