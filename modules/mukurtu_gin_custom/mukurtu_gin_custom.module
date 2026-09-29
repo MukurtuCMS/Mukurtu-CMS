@@ -182,6 +182,29 @@ function mukurtu_gin_custom_preprocess_media(&$variables) {
 }
 
 /**
+ * Implements hook_preprocess_field().
+ *
+ * Media only renders in the form_selection view mode inside a node's
+ * selection card (node--form-selection.html.twig), whose heading already
+ * names the item, so the thumbnail is decorative there. Generated
+ * thumbnails (documents, audio, video) have no alt at all, which leaves the
+ * <img> without an alt attribute (WCAG 1.1.1). Give those an empty alt;
+ * author-written alt text on image media is left alone.
+ */
+function mukurtu_gin_custom_preprocess_field(array &$variables): void {
+  $element = $variables['element'];
+  if (($element['#entity_type'] ?? NULL) !== 'media' || ($element['#view_mode'] ?? NULL) !== 'form_selection' || ($element['#field_type'] ?? NULL) !== 'image') {
+    return;
+  }
+  foreach ($variables['items'] as &$item) {
+    $image_item = $item['content']['#item'] ?? NULL;
+    if ($image_item && ($image_item->alt ?? '') === '') {
+      $item['content']['#attributes']['alt'] = '';
+    }
+  }
+}
+
+/**
  * Implements hook_form_BASE_FORM_ID_alter() for node_form.
  *
  * Attaches the JS behavior that moves the moderation state widget into
