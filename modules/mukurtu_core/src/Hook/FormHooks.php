@@ -1392,6 +1392,47 @@ class FormHooks
     /**
      * Implements hook_form_FORM_ID_alter() for 'views_exposed_form'.
      *
+     * Labels the filters in an entity browser as a search landmark. Inside
+     * the browser's own form, the exposed form renders as a <div>, and
+     * Claro/Gin's "Filter the contents of the %view_title view" aria-label
+     * is not allowed on a <div> without a role. These views also have no
+     * title, which left a blank in that label.
+     */
+    #[Hook("form_views_exposed_form_alter")]
+    public function formViewsExposedFormAlterEntityBrowser(
+        array &$form,
+        FormStateInterface $form_state,
+    ): void {
+        $view = $form_state->getStorage()["view"] ?? NULL;
+        if (
+            !$view instanceof ViewExecutable ||
+            $view->getDisplay()->getPluginId() !== "entity_browser"
+        ) {
+            return;
+        }
+        // Theme form alters (Claro's sets the aria-label) run after module
+        // ones, so apply this once the form is built.
+        $form["#after_build"][] = [
+            static::class,
+            "entityBrowserExposedFormAfterBuild",
+        ];
+    }
+
+    /**
+     * After-build callback: labels an entity browser's filters.
+     */
+    public static function entityBrowserExposedFormAfterBuild(
+        array $form,
+        FormStateInterface $form_state,
+    ): array {
+        $form["#attributes"]["role"] = "search";
+        $form["#attributes"]["aria-label"] = t("Filter content");
+        return $form;
+    }
+
+    /**
+     * Implements hook_form_FORM_ID_alter() for 'views_exposed_form'.
+     *
      * Adds "Pending" as a status filter option on any Views page that lists
      * users (user_admin_people, mukurtu_people, etc.).
      */

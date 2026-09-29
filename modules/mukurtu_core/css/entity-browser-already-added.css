@@ -14,8 +14,12 @@
 }
 
 .views-table tr.eb-already-selected td {
-  pointer-events: none;
   color: var(--gin-color-text-light, #595959);
+}
+
+/* Links in the row still work; only the checkbox is disabled. */
+.eb-already-selected a {
+  cursor: pointer;
 }
 
 .eb-already-added {

@@ -1,10 +1,11 @@
 /**
  * @file
- * Makes rows in the community select browser selectable by clicking the card.
+ * Makes community cards in the community select browser clickable.
  *
- * Hides the entity_browser_select checkbox and proxies row clicks to it,
- * adding a visual selected state. The user still clicks "Add communities"
- * to confirm the selection.
+ * Each card's native checkbox is the control, named by its "Select item
+ * <community>" label. Clicking elsewhere on the card toggles it too, and the
+ * card shows a selected state. The user still clicks "Add communities" to
+ * confirm the selection.
  */
 (function ($, Drupal, once) {
 
@@ -15,43 +16,25 @@
       once('community-browser-select', '.view-mukurtu-community-select', context).forEach(function (view) {
         var $view = $(view);
 
-        // Make each row focusable and give it a checkbox role so keyboard users
-        // and screen readers can interact with it (WCAG 2.1.1, 4.1.2).
-        // Remove the underlying checkbox from the tab order and accessibility
-        // tree — the .views-row is the sole interactive element for AT.
         $view.find('.views-row').each(function () {
-          var $input = $(this).find('.views-field-entity-browser-select input');
-          $(this).attr({ role: 'checkbox', 'aria-checked': 'false' });
-          // Rows already in the field are disabled by
-          // entity_browser_already_added.js, which may attach before or
-          // after this behavior.
-          if ($input.prop('disabled')) {
-            $(this).attr('aria-disabled', 'true');
-          }
-          else {
-            $(this).attr('tabindex', '0');
-          }
-          $input.attr({ tabindex: '-1', 'aria-hidden': 'true' });
+          var $row = $(this);
+          var $input = $row.find('.views-field-entity-browser-select input');
+          $row.toggleClass('is-selected', $input.prop('checked'));
+          $input.on('change', function () {
+            $row.toggleClass('is-selected', $input.prop('checked'));
+          });
         });
 
-        // Handle both click and keyboard (Enter/Space) to toggle selection.
-        $view.on('click keydown', '.views-row', function (e) {
-          if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') {
-            return;
-          }
-          if (e.type === 'keydown') {
-            e.preventDefault();
-          }
-          if ($(e.target).is('input')) {
+        $view.on('click', '.views-row', function (e) {
+          // Leave the input and its label to the browser.
+          if ($(e.target).closest('input, label').length) {
             return;
           }
           var $checkbox = $(this).find('.views-field-entity-browser-select input');
           if (!$checkbox.length || $checkbox.prop('disabled')) {
             return;
           }
-          var checked = !$checkbox.prop('checked');
-          $checkbox.prop('checked', checked);
-          $(this).toggleClass('is-selected', checked).attr('aria-checked', String(checked));
+          $checkbox.prop('checked', !$checkbox.prop('checked')).trigger('change');
         });
       });
 
@@ -62,10 +45,10 @@
       // window even after programmatic focus is set inside the iframe.
       //
       // Fix: intercept Tab on the close button and call
-      // iframe.contentWindow.focus() before focusing the first row. Calling
+      // iframe.contentWindow.focus() before focusing the first checkbox. Calling
       // contentWindow.focus() during a user-initiated keydown event transfers
       // keyboard event dispatch to the iframe's browsing context, so
-      // subsequent Tab presses cycle through the community rows as expected.
+      // subsequent Tab presses cycle through the community checkboxes.
       if (window.self === window.top) {
         once('community-browser-focus', 'body', context).forEach(function () {
           $(window).on('dialog:aftercreate', function (event, dialog, $element) {
@@ -82,10 +65,10 @@
 
               var doc = iframe.contentDocument;
               if (!doc) { iframe.focus(); return; }
-              var firstRow = doc.querySelector('.view-mukurtu-community-select .views-row');
-              if (!firstRow) { iframe.focus(); return; }
+              var first = doc.querySelector('.view-mukurtu-community-select .views-field-entity-browser-select input:enabled');
+              if (!first) { iframe.focus(); return; }
               iframe.contentWindow.focus();
-              firstRow.focus();
+              first.focus();
             });
 
             // Clean up the close-button listener when the dialog closes.

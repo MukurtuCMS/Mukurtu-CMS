@@ -86,10 +86,25 @@ test.describe('Content entity browser: row selection', () => {
     }
   });
 
-  test('no nested controls, missing alt text, or undersized targets', async ({ page }) => {
+  test('the filters and select-all have valid names', async ({ page }) => {
+    // Inside the browser's form the exposed form renders as a <div>, which
+    // needs a role for its aria-label to count.
+    const filters = page.locator('.views-exposed-form');
+    await expect(filters).toHaveAttribute('role', 'search');
+    await expect(filters).toHaveAttribute('aria-label', 'Filter content');
+
+    // Select-all keeps one name while core swaps its title.
+    const selectAll = page.locator('.views-table thead input[type="checkbox"]');
+    await expect(selectAll).toHaveAccessibleName('Select all rows in this table');
+    await selectAll.check();
+    await expect(selectAll).toHaveAccessibleName('Select all rows in this table');
+  });
+
+  test('no nested controls, missing names or alt text, or undersized targets', async ({ page }) => {
     const results = await new AxeBuilder({ page })
       .include('.views-table')
-      .withRules(['nested-interactive', 'image-alt', 'target-size'])
+      .include('.views-exposed-form')
+      .withRules(['nested-interactive', 'image-alt', 'target-size', 'label-title-only', 'aria-prohibited-attr'])
       .analyze();
     expect(results.violations.map((v) => `${v.id}: ${v.nodes.length}`)).toEqual([]);
   });
@@ -140,6 +155,8 @@ test.describe('Entity browsers: already added items', () => {
     await expect(row.locator('td.views-field-entity-browser-select input')).toBeDisabled();
     await expect(row.locator('.eb-already-added')).toHaveText('Already added');
     await expect(row.locator('.eb-already-added')).toHaveCount(1);
+    // Only the checkbox is disabled; the row's links still work.
+    await expect(row.locator('td.views-field-title a')).toHaveCSS('pointer-events', 'auto');
 
     // Select all must not check it: core's select-all collected its
     // checkboxes before this one was disabled.
@@ -152,5 +169,64 @@ test.describe('Entity browsers: already added items', () => {
     const other = frame.locator('.views-table tbody tr').filter({ has: frame.locator(`input[value="${value}"]`) });
     await expect(other.locator('td.views-field-entity-browser-select input')).toBeEnabled();
     await expect(frame.locator('.eb-already-added')).toHaveCount(0);
+  });
+});
+
+/**
+ * The community select browser, through a stand-in parent page.
+ *
+ * Its only field (a protocol's Communities) needs an existing protocol,
+ * which the suite has no reliable way to find. The browser only reads the
+ * parent's opener button (data-uuid) and that widget's items
+ * (data-entity-id), so a same-origin page with those two things exercises
+ * the real browser code.
+ */
+test.describe('Community select browser', () => {
+  test.beforeEach(async ({ page }) => {
+    const account = adminAccount();
+    const login = new Login(page);
+    await login.login(account.username, account.password);
+  });
+
+  /** Loads the browser in an iframe under a fake widget holding `ids`. */
+  async function standIn(page: Page, ids: string[]): Promise<FrameLocator> {
+    await page.goto('/admin');
+    await page.evaluate((items) => {
+      const widget = (uuid: string, entities: string[]) =>
+        `<div><div class="entities-list">${entities.map((id) => `<div data-entity-id="${id}"></div>`).join('')}</div>`
+        + `<input type="button" data-uuid="${uuid}"></div>`;
+      // A second widget whose items must be ignored.
+      document.body.innerHTML = widget('opener', items) + widget('other', ['community:999999'])
+        + '<iframe title="Community browser" style="width:1000px;height:600px" '
+        + 'src="/entity-browser/modal/mukurtu_community_select?uuid=opener"></iframe>';
+    }, ids);
+    const frame = page.frameLocator('iframe');
+    await expect(frame.locator('.views-row').first()).toBeVisible({ timeout: 30000 });
+    return frame;
+  }
+
+  test('cards use their checkbox, and an already-added community is badged', async ({ page }) => {
+    let frame = await standIn(page, []);
+    const card = frame.locator('.views-row').first();
+    const checkbox = card.locator('.views-field-entity-browser-select input');
+
+    // The native checkbox is the control; the card is not a second one.
+    await expect(checkbox).toBeVisible();
+    await expect(checkbox).not.toHaveAttribute('tabindex', '-1');
+    await expect(card).not.toHaveAttribute('role', /.*/);
+    await expect(card).not.toHaveAttribute('tabindex', /.*/);
+    await card.locator('.views-field-name').click();
+    await expect(checkbox).toBeChecked();
+    await expect(card).toHaveClass(/\bis-selected\b/);
+
+    const value = await checkbox.getAttribute('value');
+    frame = await standIn(page, [value!]);
+    const added = frame.locator('.views-row').filter({ has: frame.locator(`input[value="${value}"]`) });
+    await expect(added.locator('.eb-already-added')).toHaveText('Already added');
+    await expect(added.locator('input')).toBeDisabled();
+    await added.locator('.views-field-name').click({ force: true });
+    await expect(added.locator('input')).not.toBeChecked();
+    // Only the opener's widget counts.
+    await expect(frame.locator('.eb-already-added')).toHaveCount(1);
   });
 });

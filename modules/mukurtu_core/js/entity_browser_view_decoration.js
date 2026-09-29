@@ -113,6 +113,13 @@
       // The header row holds tableselect's select-all input. Its change
       // events reach the row inputs, so the handler below keeps rows in
       // sync with it too.
+      // Core's tableselect names select-all only by a title, which it swaps
+      // for "Deselect all" as the state changes. Give it a stable name; its
+      // checked state already says which way it is. Same string as core's.
+      once('eb-select-all-name', '.view .views-table thead th.select-all input[type="checkbox"]', context).forEach(function (input) {
+        input.setAttribute('aria-label', Drupal.t('Select all rows in this table'));
+      });
+
       var $rows = $(once('viewsTable', '.view .views-table tbody tr', context));
       $rows.each(function () {
         var $row = $(this);
