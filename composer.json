@@ -97,6 +97,9 @@
         "drupal/coder": "*",
         "dealerdirect/phpcodesniffer-composer-installer": "^1.2"
     },
+    "conflict": {
+        "twig/twig": ">=3.30.0"
+    },
     "config": {
         "sort-packages": true,
         "audit": {
