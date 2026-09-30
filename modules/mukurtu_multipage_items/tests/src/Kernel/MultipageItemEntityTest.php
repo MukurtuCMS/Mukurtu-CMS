@@ -7,6 +7,7 @@ namespace Drupal\Tests\mukurtu_multipage_items\Kernel;
 use Drupal\mukurtu_multipage_items\Entity\MultipageItem;
 use Drupal\mukurtu_multipage_items\MultipageItemInterface;
 use Drupal\mukurtu_multipage_items\MultipageItemManager;
+use Drupal\node\NodeAccessRebuild;
 
 /**
  * Tests MultipageItem entity page-management methods and MultipageItemManager.
@@ -230,7 +231,7 @@ class MultipageItemEntityTest extends MultipageItemTestBase {
     $mpi->addPage($published)->addPage($unpublished)->save();
 
     // Populate node_access grants so accessCheck(TRUE) can resolve correctly.
-    node_access_rebuild();
+    \Drupal::service(NodeAccessRebuild::class)->rebuild();
 
     // Without access check: both pages returned.
     $all = $mpi->getPages(FALSE);

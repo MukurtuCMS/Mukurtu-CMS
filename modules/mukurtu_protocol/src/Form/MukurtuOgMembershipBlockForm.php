@@ -7,6 +7,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\og\Entity\OgMembership;
 use Drupal\og\OgMembershipInterface;
+use Drupal\node\NodeAccessRebuild;
 
 /**
  * Confirm form for blocking a single OG membership.
@@ -78,7 +79,7 @@ class MukurtuOgMembershipBlockForm extends ConfirmFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $this->membership->setState(OgMembershipInterface::STATE_BLOCKED)->save();
-    node_access_rebuild(TRUE);
+    \Drupal::service(NodeAccessRebuild::class)->rebuild(TRUE);
 
     $this->messenger()->addStatus($this->t('%user has been blocked from %group.', [
       '%user' => $this->membership->getOwner()->getDisplayName(),
