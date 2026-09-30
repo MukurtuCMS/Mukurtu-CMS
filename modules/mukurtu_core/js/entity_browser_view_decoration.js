@@ -13,53 +13,6 @@
   "use strict";
 
   /**
-   * Returns entity IDs already selected in the field widget on the parent form.
-   *
-   * The widget renders each selected entity with a data-entity-id="node:NNN"
-   * attribute. Values are returned in the same "entity_type:id" format used by
-   * entity_browser_select checkboxes so indexOf() comparisons match directly.
-   */
-  function getAlreadySelectedIds() {
-    var ids = [];
-    // The entity browser runs in an iframe; selected items are rendered on the
-    // parent page. Access window.parent.document (same-origin) to find them.
-    var searchDoc = document;
-    try {
-      if (window.parent !== window) {
-        searchDoc = window.parent.document;
-      }
-    }
-    catch (e) {
-      // Cross-origin frame — fall back to the current document.
-    }
-    $(searchDoc).find('[data-entity-id]').each(function () {
-      ids.push($(this).attr('data-entity-id'));
-    });
-    return ids;
-  }
-
-  /**
-   * Disables rows whose entity is already present in the field widget.
-   *
-   * @param {object} context
-   * @param {Array} alreadySelected - Numeric entity ID strings.
-   */
-  function disableAlreadySelected(context, alreadySelected) {
-    if (!alreadySelected.length) {
-      return;
-    }
-    $('.view .views-table tr', context).each(function () {
-      var $row = $(this);
-      var $input = $row.find('.views-field-entity-browser-select input');
-      if ($input.length && alreadySelected.indexOf($input.val()) !== -1) {
-        $input.prop('disabled', true);
-        $row.addClass('eb-already-selected').attr({'aria-disabled': 'true'}).removeAttr('tabindex');
-        $row.find('td:first').append('<span class="visually-hidden"> (already added)</span>');
-      }
-    });
-  }
-
-  /**
    * Update the class and ARIA checked state of a col based on the status of
    * a checkbox or radio input (WCAG 4.1.2).
    *
@@ -107,9 +60,6 @@
         updateClasses($col, $input);
       });
 
-      // Disable rows for items already present in the field widget.
-      disableAlreadySelected(context, getAlreadySelectedIds());
-
       // Add a checked class when clicked or activated by keyboard.
       var $cols = $(once('viewsCol', '.views-col', context));
       $cols.each(function () {
@@ -153,50 +103,47 @@
         updateClasses($col, $input);
       });
 
-      // Select/unselect the row with a click or keyboard activation anywhere inside the row.
-      var $rows = $(once('viewsTable', '.view .views-table tr', context));
+      // Table rows: the native checkbox is the control. It keeps its own
+      // label ("Select item <title>"), focus, and keyboard handling, and the
+      // row keeps its table semantics. Making the row itself a
+      // role="checkbox" would nest the title and author links inside
+      // another control (WCAG 4.1.2). Clicking elsewhere in the row still
+      // toggles the checkbox, as a larger mouse target.
+      //
+      // The header row holds tableselect's select-all input. Its change
+      // events reach the row inputs, so the handler below keeps rows in
+      // sync with it too.
+      // Core's tableselect names select-all only by a title, which it swaps
+      // for "Deselect all" as the state changes. Give it a stable name; its
+      // checked state already says which way it is. Same string as core's.
+      once('eb-select-all-name', '.view .views-table thead th.select-all input[type="checkbox"]', context).forEach(function (input) {
+        input.setAttribute('aria-label', Drupal.t('Select all rows in this table'));
+      });
+
+      var $rows = $(once('viewsTable', '.view .views-table tbody tr', context));
       $rows.each(function () {
         var $row = $(this);
         var $input = $row.find('.views-field-entity-browser-select input');
         if (!$input.length) {
-          // Header rows and any row without a selectable entity have no
-          // selection state to expose.
           return;
         }
-        // Expose selection state and role to assistive technology
-        // (WCAG 4.1.2); the underlying input is removed from the tab order
-        // and accessibility tree since the row is the sole interactive
-        // control. See the .views-col loop above for why this is always
-        // role="checkbox", even for the radio/single-select case.
-        $row.attr('role', 'checkbox');
-        $input.attr({tabindex: '-1', 'aria-hidden': 'true'});
-        // Unlike the .views-col loop above, table rows never had their
-        // initial checked state synced on attach - only on interaction -
-        // so a previously-selected row's aria-checked (and "checked" class)
-        // would otherwise be missing until first click.
-        updateClasses($row, $input);
-      });
-      $rows.not('.eb-already-selected').attr('tabindex', '0');
-      $rows.on('click keydown', function (e) {
-        if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') {
-          return;
-        }
-        if (e.type === 'keydown') {
-          e.preventDefault();
-        }
-        var $row = $(this);
-        var $input = $row.find('.views-field-entity-browser-select input');
-        if ($input.prop('disabled')) {
-          return;
-        }
-        // For clicks, skip if the click was directly on the input to avoid
-        // double-toggling (browser already handled it).
-        if (e.type === 'keydown' || e.target.tagName !== 'INPUT') {
-          if (!$input.is(':radio') || $input.is(':radio') && !$input.prop('checked')) {
-            $input.prop('checked', !$input.prop('checked'));
+        $row.toggleClass('checked', $input.prop('checked'));
+        $input.on('change', function () {
+          if ($input.is(':radio')) {
+            $row.closest('tbody').children('tr').removeClass('checked');
           }
-        }
-        updateClasses($row, $input);
+          $row.toggleClass('checked', $input.prop('checked'));
+        });
+        $row.on('click', function (e) {
+          // Leave links, labels, and the input itself to the browser.
+          if ($input.prop('disabled') || $(e.target).closest('a, label, input').length) {
+            return;
+          }
+          if ($input.is(':radio') && $input.prop('checked')) {
+            return;
+          }
+          $input.prop('checked', !$input.prop('checked')).trigger('change');
+        });
       });
     }
   };
