@@ -234,4 +234,95 @@ class FeaturedContentCarouselTest extends KernelTestBase {
     $this->assertArrayHasKey('field_display_style', $form['content']);
   }
 
+  /**
+   * Adds a plain-text field to the page bundle, standing in for a base field.
+   *
+   * In Mukurtu, field_summary and field_translation are bundle-class base
+   * fields; the preprocess only needs the field to exist on the node.
+   */
+  private function addTextField(string $field_name, int $cardinality = 1): void {
+    FieldStorageConfig::create([
+      'field_name' => $field_name,
+      'entity_type' => 'node',
+      'type' => 'string',
+      'cardinality' => $cardinality,
+    ])->save();
+    FieldConfig::create([
+      'field_name' => $field_name,
+      'entity_type' => 'node',
+      'bundle' => 'page',
+      'label' => $field_name === 'field_translation' ? 'Translation' : 'Summary',
+    ])->save();
+  }
+
+  /**
+   * A slide carries the item's summary, cached apart from the grid card.
+   */
+  public function testCarouselSlidesCarryTheSummary(): void {
+    $this->addTextField('field_summary');
+    $with = Node::create(['type' => 'page', 'title' => 'With', 'status' => 1, 'field_summary' => 'A short summary.']);
+    $with->save();
+    $without = Node::create(['type' => 'page', 'title' => 'Without', 'status' => 1]);
+    $without->save();
+
+    $block = BlockContent::create([
+      'type' => 'featured_content',
+      'info' => 'Featured',
+      'field_display_style' => 'carousel',
+      'field_featured_content' => [['target_id' => $with->id()], ['target_id' => $without->id()]],
+    ]);
+    $block->save();
+    $variables = ['content' => ['#block_content' => $block]];
+    mukurtu_v4_preprocess_block__block_content__type__featured_content($variables);
+
+    [$first, $second] = $variables['featured_items'];
+    $this->assertArrayHasKey('featured_summary', $first);
+    $this->assertArrayNotHasKey('featured_summary', $second, 'An item with no summary gets no summary element.');
+
+    // The same node renders as a grid card elsewhere without the summary, so
+    // the slide must not share that card's render cache entry.
+    $this->assertContains('featured_carousel', $first['#cache']['keys']);
+    $this->assertContains('featured_carousel', $second['#cache']['keys']);
+  }
+
+  /**
+   * A dictionary word's featured card shows its translations.
+   */
+  public function testFeaturedCardsShowTranslations(): void {
+    $this->addTextField('field_translation', -1);
+    $node = Node::create([
+      'type' => 'page',
+      'title' => 'Word',
+      'status' => 1,
+      'field_translation' => ['river', 'stream'],
+    ]);
+    $node->save();
+
+    $variables = ['node' => $node, 'view_mode' => 'featured'];
+    mukurtu_v4_preprocess_node($variables);
+
+    $this->assertSame(['river', 'stream'], $variables['featured_translation']['values']);
+    $this->assertSame('Translation', (string) $variables['featured_translation']['label']);
+  }
+
+  /**
+   * Translations are only added to featured cards.
+   */
+  public function testTranslationsAreOnlyAddedToFeaturedCards(): void {
+    $this->addTextField('field_translation', -1);
+    $node = Node::create(['type' => 'page', 'title' => 'Word', 'status' => 1, 'field_translation' => ['river']]);
+    $node->save();
+
+    $variables = ['node' => $node, 'view_mode' => 'teaser'];
+    mukurtu_v4_preprocess_node($variables);
+    $this->assertArrayNotHasKey('featured_translation', $variables);
+
+    // Nor to a featured card with nothing to show.
+    $empty = Node::create(['type' => 'page', 'title' => 'Empty', 'status' => 1]);
+    $empty->save();
+    $variables = ['node' => $empty, 'view_mode' => 'featured'];
+    mukurtu_v4_preprocess_node($variables);
+    $this->assertArrayNotHasKey('featured_translation', $variables);
+  }
+
 }
