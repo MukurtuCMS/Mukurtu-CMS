@@ -1,0 +1,27 @@
+/**
+ * @file
+ * Items the field already references, in any entity browser.
+ *
+ * See entity_browser_already_added.js. The visible "Already added" badge
+ * uses Gin's .gin-status style; these rules mute the rest of the item.
+ */
+.eb-already-selected {
+  cursor: not-allowed;
+  /* A 5% wash of the text color rather than a fixed gray: it follows light
+     and dark mode, and keeps links and muted text above 4.5:1 in both. */
+  background-color: color-mix(in srgb, var(--gin-color-text, #222330) 5%, transparent);
+  color: var(--gin-color-text-light, #595959);
+}
+
+.views-table tr.eb-already-selected td {
+  color: var(--gin-color-text-light, #595959);
+}
+
+/* Links in the row still work; only the checkbox is disabled. */
+.eb-already-selected a {
+  cursor: pointer;
+}
+
+.eb-already-added {
+  margin-inline-start: 0.25em;
+}
