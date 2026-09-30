@@ -7,7 +7,6 @@ namespace Drupal\Tests\mukurtu_bot_protection\Kernel;
 use Drupal\captcha\Entity\CaptchaPoint;
 use Drupal\Core\Extension\Requirement\RequirementSeverity;
 use Drupal\KernelTests\KernelTestBase;
-use Drupal\mukurtu_bot_protection\Hook\TurnstileRequirements;
 use Drupal\turnstile\Hook\TurnstileRequirementsHooks;
 use PHPUnit\Framework\Attributes\Group;
 
@@ -19,7 +18,8 @@ use PHPUnit\Framework\Attributes\Group;
  * SystemRequirementsHooks::checkRequirements() fatals in a kernel test on an
  * undefined drupal_verify_install_file() unless install.inc is loaded. The
  * turnstile module's own hook supplies the entry, so a change to its key or
- * shape fails here rather than silently bringing the error back.
+ * shape fails here rather than silently bringing the error back. The alter
+ * runs through the module handler, so the #[Hook] registration is covered too.
  *
  * @see \Drupal\mukurtu_bot_protection\Hook\TurnstileRequirements
  */
@@ -56,11 +56,7 @@ class TurnstileRequirementsTest extends KernelTestBase {
     $requirements = (new TurnstileRequirementsHooks())->runtimeRequirements();
     $this->assertArrayHasKey('turnstile', $requirements, 'The turnstile module reports missing keys under the "turnstile" key.');
 
-    $alter = new TurnstileRequirements(
-      \Drupal::configFactory(),
-      \Drupal::entityTypeManager(),
-    );
-    $alter->runtimeRequirementsAlter($requirements);
+    \Drupal::moduleHandler()->alter('runtime_requirements', $requirements);
 
     return $requirements;
   }
@@ -154,11 +150,7 @@ class TurnstileRequirementsTest extends KernelTestBase {
     $requirements = [
       'other' => ['title' => 'Other', 'severity' => RequirementSeverity::Error],
     ];
-    $alter = new TurnstileRequirements(
-      \Drupal::configFactory(),
-      \Drupal::entityTypeManager(),
-    );
-    $alter->runtimeRequirementsAlter($requirements);
+    \Drupal::moduleHandler()->alter('runtime_requirements', $requirements);
 
     $this->assertSame(RequirementSeverity::Error, $requirements['other']['severity']);
   }
