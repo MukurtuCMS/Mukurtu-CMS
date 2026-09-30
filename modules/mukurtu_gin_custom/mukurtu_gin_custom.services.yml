@@ -9,6 +9,21 @@ services:
     tags:
       - { name: event_subscriber }
 
+  # Optional (@?) references: this module does not depend on layout_builder.
+  mukurtu_gin_custom.lb_frontend_edit_seed_subscriber:
+    class: Drupal\mukurtu_gin_custom\EventSubscriber\LbFrontendEditSeedSubscriber
+    arguments:
+      - '@?layout_builder.tempstore_repository'
+      - '@event_dispatcher'
+    tags:
+      - { name: event_subscriber }
+
+  mukurtu_gin_custom.lb_frontend_edit_urls:
+    class: Drupal\mukurtu_gin_custom\LbFrontendEditUrls
+    arguments:
+      - '@?plugin.manager.layout_builder.section_storage'
+      - '@entity.repository'
+
   mukurtu_gin_custom.choose_block_redirect_subscriber:
     class: Drupal\mukurtu_gin_custom\EventSubscriber\ChooseBlockRedirectSubscriber
     arguments:
