@@ -21,18 +21,94 @@
     padding: 0;
   }
 
+  // Spotlight slides: wider than a grid card, with the media beside the text
+  // from tablet up, and the item's summary under the title. The card
+  // styling itself (colours, type label, title link) is shared with the grid
+  // in _featured-items.scss; this only changes the layout.
   .featured-carousel__slide {
-    // One card per slide, centred, and capped at the same width the grid caps
-    // its cards at. Without the cap the card stretches to the full block width
-    // and its 4:3 media well becomes about 1280x960 on a desktop - a single
-    // item taller than the viewport.
-    display: flex;
-    justify-content: center;
+    transition: opacity 0.3s ease;
+
+    // The peeking neighbours are context, not content. They are already
+    // inert; dimming them says so visually.
+    &:not(.is-active) {
+      opacity: 0.45;
+      cursor: pointer;
+
+      // Only an edge of a neighbour shows, which would cut its text off
+      // mid-word. Show its image and colour, not the words.
+      .featured-item__body > * {
+        opacity: 0;
+      }
+    }
+
+    .featured-item__body > * {
+      transition: opacity 0.3s ease;
+
+      @media (prefers-reduced-motion: reduce) {
+        transition: none;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+    }
 
     article {
       inline-size: 100%;
-      max-inline-size: 24rem;
+
+      @include include-media.media('>=md') {
+        display: grid;
+        grid-template-columns: 3fr 2fr;
+      }
     }
+
+    .featured-item__media {
+      // Wider than the grid's 4:3, so a slide stays shorter than the viewport.
+      aspect-ratio: 3 / 2;
+
+      // .media is a flex row, so its field shrinks to the image's own ratio
+      // and leaves bars at the sides of a wider cell. Fill the cell instead;
+      // object-fit: cover (shared card styles) crops the image to fit.
+      .media > .field {
+        flex: 1 1 auto;
+        inline-size: 100%;
+      }
+    }
+
+    .featured-item__body {
+      justify-content: center;
+      padding: var(--v-space-4xxs);
+
+      @include include-media.media('>=md') {
+        padding: var(--v-space-s);
+      }
+    }
+
+    h3 {
+      flex: 0 0 auto;
+
+      @include include-media.media('>=md') {
+        font-size: var(--font-size-xl);
+      }
+    }
+  }
+}
+
+.featured-item__summary {
+  color: var(--color-white);
+  font-size: var(--font-size-s);
+  line-height: var(--line-height-m);
+  margin-block-end: var(--v-space-5xs);
+
+  // Keep a long summary from making one slide much taller than the rest.
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  overflow: hidden;
+
+  @include include-media.media('>=md') {
+    font-size: var(--font-size-m);
   }
 }
 

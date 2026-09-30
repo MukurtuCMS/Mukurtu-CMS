@@ -105,6 +105,12 @@
       </a>
     </h3>
 
+    {# Only set for a carousel slide; see
+       mukurtu_v4_preprocess_block__block_content__type__featured_content(). #}
+    {% if content.featured_summary %}
+      <div class="featured-item__summary">{{ content.featured_summary }}</div>
+    {% endif %}
+
   </div>
 
 </article>

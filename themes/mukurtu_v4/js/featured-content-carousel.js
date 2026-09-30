@@ -65,6 +65,15 @@
       type: 'slide',
       rewind: true,
       perPage: 1,
+      // Peek: the neighbouring slides show at the edges, so it reads as a
+      // carousel and the slide is not an island in white space. They are
+      // inert (see updateInertState), so they cannot take focus.
+      padding: { left: '9%', right: '9%' },
+      gap: '1.5rem',
+      breakpoints: {
+        // On a phone a peek would squeeze the slide; keep a sliver.
+        767: { padding: { left: '1.25rem', right: '1.25rem' }, gap: '0.75rem' },
+      },
       pagination: false,
       // Our own buttons, so the labels are translatable.
       arrows: false,
@@ -88,6 +97,23 @@
     });
 
     splide.mount();
+
+    // Clicking a peeking neighbour moves to it. The neighbours are inert, so
+    // the click lands on the track rather than on the slide itself; find the
+    // slide under the pointer instead. Keyboard users have the arrows and the
+    // Previous/Next buttons.
+    const track = root.querySelector('.splide__track');
+    if (track) {
+      track.addEventListener('click', (event) => {
+        const slide = splide.Components.Slides.get().find(({ slide: el }) => {
+          const box = el.getBoundingClientRect();
+          return event.clientX >= box.left && event.clientX <= box.right;
+        });
+        if (slide && slide.index !== splide.index) {
+          splide.go(slide.index);
+        }
+      });
+    }
 
     const prev = root.querySelector('.featured-carousel__button--prev');
     const next = root.querySelector('.featured-carousel__button--next');

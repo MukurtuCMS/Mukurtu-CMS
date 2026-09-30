@@ -188,7 +188,16 @@ function mukurtu_v4_preprocess_block__block_content__type__featured_content(arra
     }
     // Show the translation matching the current page, not whichever language
     // the reference happens to resolve to.
-    $items[] = $view_builder->view($repository->getTranslationFromContext($entity), 'featured');
+    $translated = $repository->getTranslationFromContext($entity);
+    $build = $view_builder->view($translated, 'featured');
+    // A slide has room for the item's summary, which the grid's cards leave
+    // out. viewField() applies field access. The extra cache key keeps this
+    // render separate from the same item's cached grid card.
+    if ($translated->hasField('field_summary') && !$translated->get('field_summary')->isEmpty()) {
+      $build['featured_summary'] = $translated->get('field_summary')->view(['label' => 'hidden']);
+    }
+    $build['#cache']['keys'][] = 'featured_carousel';
+    $items[] = $build;
   }
 
   // A carousel of one is just an item. Leaving it as a grid avoids shipping
