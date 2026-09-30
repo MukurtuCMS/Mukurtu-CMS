@@ -25,6 +25,13 @@
   // from tablet up, and the item's summary under the title. The card
   // styling itself (colours, type label, title link) is shared with the grid
   // in _featured-items.scss; this only changes the layout.
+  // The neighbours are inert, so the pointer lands on the track, not on
+  // them; a cursor set on the slides would never show. Clicking the track
+  // beside the active slide moves to that neighbour.
+  .splide__track {
+    cursor: pointer;
+  }
+
   .featured-carousel__slide {
     transition: opacity 0.3s ease;
 
@@ -32,7 +39,6 @@
     // inert; dimming them says so visually.
     &:not(.is-active) {
       opacity: 0.45;
-      cursor: pointer;
 
       // Only an edge of a neighbour shows, which would cut its text off
       // mid-word. Show its image and colour, not the words.
@@ -56,9 +62,17 @@
     article {
       inline-size: 100%;
 
-      @include include-media.media('>=md') {
+      // Side by side only once the text column has room: at tablet widths it
+      // was about 250px, wrapping the title a word per line.
+      @include include-media.media('>=lg') {
         display: grid;
         grid-template-columns: 3fr 2fr;
+      }
+
+      // Forced colors drops the panel's fill, which is the only thing
+      // marking where the slide ends.
+      @media (forced-colors: active) {
+        border: 1px solid canvastext;
       }
     }
 
@@ -79,7 +93,7 @@
       justify-content: center;
       padding: var(--v-space-4xxs);
 
-      @include include-media.media('>=md') {
+      @include include-media.media('>=lg') {
         padding: var(--v-space-s);
       }
     }
@@ -87,7 +101,7 @@
     h3 {
       flex: 0 0 auto;
 
-      @include include-media.media('>=md') {
+      @include include-media.media('>=lg') {
         font-size: var(--font-size-xl);
       }
     }
@@ -100,14 +114,10 @@
   line-height: var(--line-height-m);
   margin-block-end: var(--v-space-5xs);
 
-  // Keep a long summary from making one slide much taller than the rest.
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 4;
-  line-clamp: 4;
-  overflow: hidden;
+  // Not line-clamped: at larger text sizes a clamp cut summaries to a few
+  // words (WCAG 1.4.4, 1.4.12). field_summary is a short plain-text field.
 
-  @include include-media.media('>=md') {
+  @include include-media.media('>=lg') {
     font-size: var(--font-size-m);
   }
 }

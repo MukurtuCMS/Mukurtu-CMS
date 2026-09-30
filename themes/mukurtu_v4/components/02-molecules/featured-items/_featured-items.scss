@@ -184,8 +184,10 @@
           }
 
           &:focus-visible {
+            // Inside the edge: the media well clips anything outside it
+            // (overflow: hidden), which left only the thin inset line.
             outline: 3px solid #005fcc;
-            outline-offset: 2px;
+            outline-offset: -6px;
             box-shadow: inset 0 0 0 3px #ffffff;
           }
 

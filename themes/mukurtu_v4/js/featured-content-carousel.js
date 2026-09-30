@@ -84,6 +84,11 @@
       // Splide's own keyboard handling is bound to the root rather than the
       // document, so it only fires once focus is inside the carousel.
       keyboard: 'focused',
+      // Splide makes the track a polite live region whenever autoplay is
+      // off (including under reduced motion), so every Previous/Next read
+      // the whole slide aloud before our own "Item N of M" status. The
+      // status is enough.
+      live: false,
     });
 
     // 'moved' rather than 'move': 'move' fires as the transition starts, when

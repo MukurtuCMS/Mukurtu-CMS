@@ -1615,7 +1615,7 @@ body.consent-popup-opened .klaro_toggle_dialog {
 .field--name-field-all-related-content .field__items .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button:focus-visible,
 .featured-carousel .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button:focus-visible {
   outline: 3px solid #005fcc;
-  outline-offset: 2px;
+  outline-offset: -6px;
   -webkit-box-shadow: inset 0 0 0 3px #ffffff;
           box-shadow: inset 0 0 0 3px #ffffff;
 }
@@ -1769,13 +1769,15 @@ body.consent-popup-opened .klaro_toggle_dialog {
   margin: 0;
   padding: 0;
 }
+.featured-carousel .splide__track {
+  cursor: pointer;
+}
 .featured-carousel .featured-carousel__slide {
   -webkit-transition: opacity 0.3s ease;
   transition: opacity 0.3s ease;
 }
 .featured-carousel .featured-carousel__slide:not(.is-active) {
   opacity: 0.45;
-  cursor: pointer;
 }
 .featured-carousel .featured-carousel__slide:not(.is-active) .featured-item__body > * {
   opacity: 0;
@@ -1799,10 +1801,15 @@ body.consent-popup-opened .klaro_toggle_dialog {
 .featured-carousel .featured-carousel__slide article {
   inline-size: 100%;
 }
-@media (min-width: 48rem) {
+@media (min-width: 60rem) {
   .featured-carousel .featured-carousel__slide article {
     display: grid;
     grid-template-columns: 3fr 2fr;
+  }
+}
+@media (forced-colors: active) {
+  .featured-carousel .featured-carousel__slide article {
+    border: 1px solid canvastext;
   }
 }
 .featured-carousel .featured-carousel__slide .featured-item__media {
@@ -1820,7 +1827,7 @@ body.consent-popup-opened .klaro_toggle_dialog {
           justify-content: center;
   padding: var(--v-space-4xxs);
 }
-@media (min-width: 48rem) {
+@media (min-width: 60rem) {
   .featured-carousel .featured-carousel__slide .featured-item__body {
     padding: var(--v-space-s);
   }
@@ -1830,7 +1837,7 @@ body.consent-popup-opened .klaro_toggle_dialog {
       -ms-flex: 0 0 auto;
           flex: 0 0 auto;
 }
-@media (min-width: 48rem) {
+@media (min-width: 60rem) {
   .featured-carousel .featured-carousel__slide h3 {
     font-size: var(--font-size-xl);
   }
@@ -1842,13 +1849,8 @@ body.consent-popup-opened .klaro_toggle_dialog {
   line-height: var(--line-height-m);
   -webkit-margin-after: var(--v-space-5xs);
           margin-block-end: var(--v-space-5xs);
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 4;
-  line-clamp: 4;
-  overflow: hidden;
 }
-@media (min-width: 48rem) {
+@media (min-width: 60rem) {
   .featured-item__summary {
     font-size: var(--font-size-m);
   }
