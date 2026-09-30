@@ -46,6 +46,28 @@ dialog-aria-modal:
     - core/drupal
     - core/jquery
 
+entity_browser_modal_title:
+  version: 1.x
+  js:
+    js/entity_browser_modal_title.js: {}
+  dependencies:
+    - core/drupal
+    - core/jquery
+    - core/once
+
+entity_browser_form:
+  version: 1.x
+  css:
+    component:
+      css/entity-browser-form.css: {}
+      css/entity-browser-already-added.css: {}
+  js:
+    js/entity_browser_already_added.js: {}
+  dependencies:
+    - core/drupal
+    - core/jquery
+    - core/once
+
 entity_browser_view_decoration:
   version: 1.x
   css:

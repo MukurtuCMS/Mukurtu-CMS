@@ -43,6 +43,38 @@ class FormHooks
     }
 
     /**
+     * Implements hook_form_BASE_FORM_ID_alter() for 'entity_browser_form'.
+     *
+     * Every entity browser marks the items its field already references as
+     * "Already added", whatever widget lists its choices, and shows focus in
+     * forced-colors mode.
+     */
+    #[Hook("form_entity_browser_form_alter")]
+    public function formEntityBrowserFormAlter(
+        array &$form,
+        FormStateInterface $form_state,
+    ): void {
+        $form["#attached"]["library"][] =
+            "mukurtu_core/entity_browser_form";
+    }
+
+    /**
+     * Implements hook_field_widget_single_element_WIDGET_TYPE_form_alter().
+     *
+     * Names the iframe in the entity browser's modal, on whatever page the
+     * widget renders (admin forms, and Layout Builder's off-canvas forms).
+     */
+    #[Hook("field_widget_single_element_entity_browser_entity_reference_form_alter")]
+    public function fieldWidgetEntityBrowserFormAlter(
+        array &$element,
+        FormStateInterface $form_state,
+        array $context,
+    ): void {
+        $element["#attached"]["library"][] =
+            "mukurtu_core/entity_browser_modal_title";
+    }
+
+    /**
      * Implements hook_form_FORM_ID_alter() for 'language_content_settings_form'.
      *
      * Hides og_group fields from the translation settings form to prevent users
@@ -1372,6 +1404,47 @@ class FormHooks
                 unset($form["type"]["#options"][$key]);
             }
         }
+    }
+
+    /**
+     * Implements hook_form_FORM_ID_alter() for 'views_exposed_form'.
+     *
+     * Labels the filters in an entity browser as a search landmark. Inside
+     * the browser's own form, the exposed form renders as a <div>, and
+     * Claro/Gin's "Filter the contents of the %view_title view" aria-label
+     * is not allowed on a <div> without a role. These views also have no
+     * title, which left a blank in that label.
+     */
+    #[Hook("form_views_exposed_form_alter")]
+    public function formViewsExposedFormAlterEntityBrowser(
+        array &$form,
+        FormStateInterface $form_state,
+    ): void {
+        $view = $form_state->getStorage()["view"] ?? NULL;
+        if (
+            !$view instanceof ViewExecutable ||
+            $view->getDisplay()->getPluginId() !== "entity_browser"
+        ) {
+            return;
+        }
+        // Theme form alters (Claro's sets the aria-label) run after module
+        // ones, so apply this once the form is built.
+        $form["#after_build"][] = [
+            static::class,
+            "entityBrowserExposedFormAfterBuild",
+        ];
+    }
+
+    /**
+     * After-build callback: labels an entity browser's filters.
+     */
+    public static function entityBrowserExposedFormAfterBuild(
+        array $form,
+        FormStateInterface $form_state,
+    ): array {
+        $form["#attributes"]["role"] = "search";
+        $form["#attributes"]["aria-label"] = t("Filter content");
+        return $form;
     }
 
     /**
