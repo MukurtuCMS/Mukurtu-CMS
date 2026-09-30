@@ -228,6 +228,13 @@
     background: var(--brand-primary-accent);
   }
 
+  .featured-item__translation {
+    color: var(--color-white);
+    font-size: var(--font-size-s);
+    line-height: var(--line-height-s);
+    margin-block: 0 var(--v-space-5xs);
+  }
+
   .featured-item__type {
     font-size: var(--font-size-xs);
     font-weight: 800;

@@ -105,6 +105,16 @@
       </a>
     </h3>
 
+    {# Dictionary words; see mukurtu_v4_preprocess_node(). #}
+    {% if featured_translation %}
+      <p class="featured-item__translation">
+        {{- '@label: @translations'|t({
+          '@label': featured_translation.label,
+          '@translations': featured_translation.values|join(', '),
+        }) -}}
+      </p>
+    {% endif %}
+
     {# Only set for a carousel slide; see
        mukurtu_v4_preprocess_block__block_content__type__featured_content(). #}
     {% if content.featured_summary %}

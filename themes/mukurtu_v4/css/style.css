@@ -1665,6 +1665,14 @@ body.consent-popup-opened .klaro_toggle_dialog {
           flex: 1;
   background: var(--brand-primary-accent);
 }
+.field--name-field-featured-content .featured-item__translation,
+.field--name-field-all-related-content .field__items .featured-item__translation,
+.featured-carousel .featured-item__translation {
+  color: var(--color-white);
+  font-size: var(--font-size-s);
+  line-height: var(--line-height-s);
+  margin-block: 0 var(--v-space-5xs);
+}
 .field--name-field-featured-content .featured-item__type,
 .field--name-field-all-related-content .field__items .featured-item__type,
 .featured-carousel .featured-item__type {

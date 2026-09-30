@@ -70,6 +70,19 @@ function mukurtu_v4_preprocess_node(&$variables) {
     $variables['additional_word_entry_indices'] = $valid_indices;
   }
 
+  // A dictionary word's card, in the Featured Content grid and carousel,
+  // shows its translations: the word alone says little to most visitors.
+  // The node here is already the translation for the current page.
+  if ($variables['view_mode'] === 'featured' && $node->hasField('field_translation')) {
+    $translations = $node->get('field_translation');
+    if (!$translations->isEmpty() && $translations->access('view')) {
+      $variables['featured_translation'] = [
+        'label' => $translations->getFieldDefinition()->getLabel(),
+        'values' => array_column($translations->getValue(), 'value'),
+      ];
+    }
+  }
+
   // This creates a twig variable that can be used in node templates to
   // render the media assets field (a second time) with thumbnail display.
   if ($node->hasField('field_media_assets')) {
