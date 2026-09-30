@@ -66,17 +66,11 @@ short fields themselves. Shrink it in these dialogs specifically. */
     display: inline-flex;
 }
 
-/* Hide community browser checkbox column via CSS to prevent FOUC before JS runs.
-   Visually hidden (not display:none) so the checkbox remains in the accessibility
-   tree. The .views-row receives role="checkbox" from JS and is the primary
-   interactive element; the underlying input is a fallback. */
-.view-mukurtu-community-select .views-field-entity-browser-select {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
+/* Community browser: each card's native checkbox is the control, in the
+   corner where Gin's entity browser styles place it. Clicking elsewhere on
+   the card toggles it too (community-browser-select.js). */
+.gin-entity-browser .entity-browser-form .view-mukurtu-community-select .views-row {
+  cursor: pointer;
 }
 
 /* Entity browser modal iframe: space below the dialog title bar. */
@@ -86,12 +80,6 @@ short fields themselves. Shrink it in these dialogs specifically. */
 
 /* Community browser: card selected state. */
 .gin-entity-browser .entity-browser-form .views-row.is-selected {
-  outline: 3px solid var(--gin-color-primary, #0036b1);
-  outline-offset: -3px;
-}
-
-/* Community browser: focus ring for keyboard users on unselected cards (WCAG 2.4.7). */
-.gin-entity-browser .entity-browser-form .views-row:focus-visible {
   outline: 3px solid var(--gin-color-primary, #0036b1);
   outline-offset: -3px;
 }
@@ -185,25 +173,6 @@ short fields themselves. Shrink it in these dialogs specifically. */
   display: block;
 }
 
-/* Content browser modal: already-selected rows */
-.view-mukurtu-content-browser .views-table tr.eb-already-selected {
-  cursor: not-allowed;
-  background-color: #f0f0f0;
-}
-
-.view-mukurtu-content-browser .views-table tr.eb-already-selected td {
-  pointer-events: none;
-  color: #595959;
-}
-
-/* Content browser modal: keyboard focus ring for interactive rows/cols */
-.view-mukurtu-content-browser .views-table tr:focus-visible,
-.view-mukurtu-content-browser .views-col:focus-visible {
-  outline: 3px solid #0052cc;
-  outline-offset: -3px;
-}
-
-
 /* Suppress Gin's entity_browser.css hover border on the media thumbnail — the
    .field__item div is not focusable so this is not a focus indicator. */
 .entities-list .item-container .eb-form-selection-card__media .field__item:hover {
@@ -224,8 +193,9 @@ short fields themselves. Shrink it in these dialogs specifically. */
 
 .eb-form-selection-card__type {
   font-size: 0.8rem;
-  /* 1.4.3: #595959 on white = 7.0:1, above the 4.5:1 AA requirement. */
-  color: #595959;
+  /* 1.4.3: Gin's muted text color. A fixed #595959 was 7.0:1 on white but
+     failed on dark mode's dark background. */
+  color: var(--gin-color-text-light, #595959);
   margin-top: 0.2rem;
 }
 
