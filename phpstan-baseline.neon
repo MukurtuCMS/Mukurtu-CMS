@@ -58,12 +58,6 @@ parameters:
 			path: modules/mukurtu_collection/src/Plugin/Action/MukurtuAddToCollectionAction.php
 
 		-
-			message: '#^Interface Drupal\\field\\FieldConfigInterface referenced with incorrect case\: Drupal\\Field\\FieldConfigInterface\.$#'
-			identifier: interface.nameCase
-			count: 1
-			path: modules/mukurtu_community_records/src/Plugin/Field/FieldFormatter/EntityReferenceCommunityRecordFormatter.php
-
-		-
 			message: '''
 				#^Call to deprecated function node_type_get_names\(\)\:
 				in drupal\:11\.3\.0 and is removed from drupal\:13\.0\.0\. Use \\Drupal\:\:service\('entity_type\.bundle\.info'\)\-\>getBundleLabels\('node'\) instead\.$#
