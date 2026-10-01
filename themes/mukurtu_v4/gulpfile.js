@@ -2,7 +2,7 @@
 
 const { series, parallel, watch, src, dest } = require("gulp");
 const stylelint = require("stylelint");
-const autoprefixer = require("gulp-autoprefixer");
+const autoprefixer = require("gulp-autoprefixer").default;
 const sourcemaps = require("gulp-sourcemaps");
 const dartSass = require("sass");
 const gulpSass = require("gulp-sass");
