@@ -21,6 +21,7 @@ entity_fields_export_list:
     field_article_image/target_id: 'Image > File ID'
     field_article_image/alt: 'Image > Alternative text'
     field_article_keywords: Keywords
+    field_multipage_page_of: 'Multipage parent'
     uuid: UUID
   node__collection:
     uuid: UUID
@@ -57,6 +58,7 @@ entity_fields_export_list:
     promote: 'Promoted to front page'
     sticky: 'Sticky at top of lists'
     title: Title
+    default_langcode: 'Default translation'
     field_cultural_protocols/protocols: 'Cultural Protocols > Protocols'
     field_cultural_protocols/sharing_setting: 'Cultural Protocols > Sharing Setting'
     field_glossary_entry: 'Glossary Entry'
@@ -303,6 +305,7 @@ entity_fields_export_list:
     field_identifier: Identifier
     thumbnail/target_id: 'Thumbnail > File ID'
     thumbnail/alt: 'Thumbnail > Alternative text'
+    default_langcode: 'Default translation'
     field_media_tags: 'Media Tags'
     uuid: UUID
     field_found_in: 'Found In'
@@ -336,6 +339,7 @@ entity_fields_export_list:
     field_cultural_protocols/protocols: 'Cultural Protocols > Protocols'
     field_cultural_protocols/sharing_setting: 'Cultural Protocols > Sharing Setting'
     field_media_soundcloud: 'SoundCloud URL'
+    default_langcode: 'Default translation'
     field_media_tags: 'Media Tags'
     field_people: People
     field_thumbnail/target_id: 'Thumbnail > File ID'
