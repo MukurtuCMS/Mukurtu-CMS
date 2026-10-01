@@ -14,3 +14,86 @@
 function mukurtu_export_update_last_removed(): int {
   return 40027;
 }
+
+/**
+ * Add missing columns to the default CSV export settings.
+ */
+function mukurtu_export_update_40401(): ?string {
+  // Keep the docblock above to one line: Drupal renders it verbatim as this
+  // update's description on update.php and in `drush updatedb:status`.
+  //
+  // The four shipped presets had drifted apart: some bundles lacked a column
+  // that the same bundle had in the other presets, or that every sibling
+  // bundle had. 4.0.4 ships the columns in config/install, which fixes new
+  // sites. This adds them to the presets an existing site already has.
+  //
+  // Only the shipped presets are touched, by id, and only bundles they
+  // already list. A column is appended rather than slotted into position, so
+  // an admin's column order is left alone, and a column that is already
+  // there (under any label) is left alone too.
+  $missing = [
+    'default_local_metadata_only' => [
+      'node__dictionary_word' => ['default_langcode' => 'Default translation'],
+      'media__external_embed' => ['field_found_in' => 'Found In'],
+      'media__image' => ['default_langcode' => 'Default translation'],
+      'media__soundcloud' => ['default_langcode' => 'Default translation'],
+    ],
+    'default_local_with_media' => [
+      'node__dictionary_word' => ['default_langcode' => 'Default translation'],
+      'media__image' => ['default_langcode' => 'Default translation'],
+      'media__soundcloud' => ['default_langcode' => 'Default translation'],
+    ],
+    'default_external_metadata_only' => [
+      'node__article' => ['field_multipage_page_of' => 'Multipage parent'],
+      'node__dictionary_word' => ['default_langcode' => 'Default translation'],
+      'media__image' => ['default_langcode' => 'Default translation'],
+      'media__soundcloud' => ['default_langcode' => 'Default translation'],
+    ],
+    'default_external_with_media' => [
+      'node__dictionary_word' => ['default_langcode' => 'Default translation'],
+      'media__image' => ['default_langcode' => 'Default translation'],
+      'media__soundcloud' => ['default_langcode' => 'Default translation'],
+    ],
+  ];
+
+  $storage = \Drupal::entityTypeManager()->getStorage('csv_exporter');
+  $updated = 0;
+
+  foreach ($missing as $id => $bundles) {
+    /** @var \Drupal\mukurtu_export\Entity\CsvExporter|null $exporter */
+    $exporter = $storage->load($id);
+    if (!$exporter) {
+      // The preset was deleted, or never existed on this site.
+      continue;
+    }
+
+    $map = $exporter->get('entity_fields_export_list') ?? [];
+    $changed = FALSE;
+    foreach ($bundles as $bundle => $columns) {
+      if (!isset($map[$bundle])) {
+        // The site removed this bundle from the preset; don't bring it back.
+        continue;
+      }
+      foreach ($columns as $field_name => $label) {
+        if (!array_key_exists($field_name, $map[$bundle])) {
+          $map[$bundle][$field_name] = $label;
+          $changed = TRUE;
+        }
+      }
+    }
+
+    if ($changed) {
+      $exporter->set('entity_fields_export_list', $map);
+      $exporter->save();
+      $updated++;
+    }
+  }
+
+  if (!$updated) {
+    return NULL;
+  }
+
+  return (string) t('Added missing columns to @count default CSV export setting(s).', [
+    '@count' => $updated,
+  ]);
+}
