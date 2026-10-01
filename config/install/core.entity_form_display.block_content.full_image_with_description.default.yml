@@ -5,6 +5,7 @@ dependencies:
     - block_content.type.full_image_with_description
     - field.field.block_content.full_image_with_description.body
     - field.field.block_content.full_image_with_description.field_image
+    - field.field.block_content.full_image_with_description.field_hero_background
     - field.field.block_content.full_image_with_description.field_text_color
   module:
     - media_library
@@ -30,6 +31,12 @@ content:
     region: content
     settings:
       media_types: {  }
+    third_party_settings: {  }
+  field_hero_background:
+    type: options_select
+    weight: 29
+    region: content
+    settings: {  }
     third_party_settings: {  }
   field_text_color:
     type: options_select

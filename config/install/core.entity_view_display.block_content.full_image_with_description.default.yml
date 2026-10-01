@@ -5,6 +5,7 @@ dependencies:
     - block_content.type.full_image_with_description
     - field.field.block_content.full_image_with_description.body
     - field.field.block_content.full_image_with_description.field_image
+    - field.field.block_content.full_image_with_description.field_hero_background
     - field.field.block_content.full_image_with_description.field_text_color
   module:
     - options
@@ -29,6 +30,13 @@ content:
       link: false
     third_party_settings: {  }
     weight: 1
+    region: content
+  field_hero_background:
+    type: list_key
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    weight: 4
     region: content
   field_text_color:
     type: list_key
