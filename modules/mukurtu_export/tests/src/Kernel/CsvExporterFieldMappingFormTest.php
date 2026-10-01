@@ -196,10 +196,13 @@ class CsvExporterFieldMappingFormTest extends ProtocolAwareEntityTestBase {
 
     $form_object = $this->container->get('entity_type.manager')->getFormObject('csv_exporter', 'add');
     $form_object->setEntity($new);
+    $build_state = new FormState();
+    $built = $this->container->get('form_builder')->buildForm($form_object, $build_state);
+    $this->assertSame('Save and map fields', (string) $built['actions']['submit']['#value']);
     $form_state = (new FormState())->setValues([
       'label' => 'New setting',
       'default_format' => 'plain_text',
-      'op' => 'Save',
+      'op' => 'Save and map fields',
     ]);
     $this->container->get('form_builder')->submitForm($form_object, $form_state);
     $this->assertSame([], $form_state->getErrors());
