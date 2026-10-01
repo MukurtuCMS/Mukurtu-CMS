@@ -54,6 +54,30 @@ class TextBrandingTest extends KernelTestBase {
   }
 
   /**
+   * Returns the declarations of every rule that names a selector.
+   *
+   * The selector has to appear as a whole entry in the rule's selector list,
+   * so one rule shared by several selectors still counts for each of them,
+   * and `.a .b` never matches a rule written for `.x .a .b`.
+   */
+  protected function declarationsFor(string $selector): string {
+    preg_match_all('/([^{}]+)\{([^{}]*)\}/', $this->css(), $rules, PREG_SET_ORDER);
+
+    $declarations = '';
+    foreach ($rules as [, $selectors, $body]) {
+      $list = array_map(
+        fn ($entry) => preg_replace('/\s+/', ' ', trim($entry)),
+        explode(',', $selectors)
+      );
+      if (in_array($selector, $list, TRUE)) {
+        $declarations .= $body;
+      }
+    }
+
+    return $declarations;
+  }
+
+  /**
    * The site name is wrapped so it can be styled.
    */
   public function testSiteNameHasItsOwnHook(): void {
@@ -276,23 +300,23 @@ class TextBrandingTest extends KernelTestBase {
    * white under both treatments and drew a white ring on the white scrim.
    */
   public function testFocusRingsFollowTheHeaderTreatment(): void {
-    $css = $this->css();
-
-    $this->assertMatchesRegularExpression(
-      '/\.site-header--has-background\s+\.header__logo\s+a:focus[^{]*\{[^}]*outline-color:\s*currentcolor/',
-      $css,
-      "The branding link's focus ring must contrast with the scrim."
-    );
-    $this->assertMatchesRegularExpression(
-      '/\.site-header--has-background\s+\.mobile-nav-button\s*\{[^}]*color:\s*inherit/',
-      $css,
-      'Without this currentcolor on the button is not the treatment colour.'
-    );
-    $this->assertMatchesRegularExpression(
-      '/\.site-header--has-background\s+\.mobile-nav-button:focus[^{]*\{[^}]*outline-color:\s*currentcolor/',
-      $css,
-      "The menu button's focus ring must contrast with the scrim."
-    );
+    foreach ($this->headerOnImageScopes() as $scope) {
+      $this->assertMatchesRegularExpression(
+        '/outline-color:\s*currentcolor/',
+        $this->declarationsFor("$scope .header__logo a:focus"),
+        "The branding link's focus ring must contrast with the scrim: $scope"
+      );
+      $this->assertMatchesRegularExpression(
+        '/(^|;)\s*color:\s*inherit/',
+        $this->declarationsFor("$scope .mobile-nav-button"),
+        "Without this currentcolor on the button is not the treatment colour: $scope"
+      );
+      $this->assertMatchesRegularExpression(
+        '/outline-color:\s*currentcolor/',
+        $this->declarationsFor("$scope .mobile-nav-button:focus"),
+        "The menu button's focus ring must contrast with the scrim: $scope"
+      );
+    }
   }
 
   /**
@@ -311,15 +335,52 @@ class TextBrandingTest extends KernelTestBase {
   }
 
   /**
-   * Text branding follows the header treatment over a background image.
+   * Text branding follows the treatment over a background image.
    *
    * The link sets its own colour, so without this it stays brand red on the
-   * scrim whichever treatment is chosen.
+   * scrim whichever treatment is chosen. That was still the case on the front
+   * page after the header rule was added: there the page background covers the
+   * header, the header gets no background class of its own, and the treatment
+   * the site chose under "Page text" was ignored.
    */
   public function testBrandingFollowsTheHeaderTreatment(): void {
-    $this->assertMatchesRegularExpression(
-      '/\.site-header--has-background\s+\.header__logo\s+a\s*\{[^}]*color:\s*inherit/',
-      $this->css()
+    foreach ($this->headerOnImageScopes() as $scope) {
+      $this->assertMatchesRegularExpression(
+        '/(^|;)\s*color:\s*inherit/',
+        $this->declarationsFor("$scope .header__logo a"),
+        "The wordmark must take the treatment colour: $scope"
+      );
+    }
+  }
+
+  /**
+   * The two ways the header can sit on an image.
+   *
+   * Interior pages: the header has its own background image. Front page with
+   * a page background: that image covers the header, and the treatment class
+   * is on .layout-container rather than the header.
+   */
+  protected function headerOnImageScopes(): array {
+    return [
+      '.site-header--has-background',
+      '.page--has-background .site-header',
+    ];
+  }
+
+  /**
+   * A logo and the site name sit side by side, the name centred on the logo.
+   *
+   * Scoped to the link that holds the name, so a logo-only site is untouched.
+   */
+  public function testLogoAndNameSitSideBySide(): void {
+    $declarations = $this->declarationsFor('.header__logo a:has(.header__logo-text)');
+
+    $this->assertMatchesRegularExpression('/display:\s*inline-flex/', $declarations);
+    $this->assertMatchesRegularExpression('/align-items:\s*center/', $declarations);
+    $this->assertDoesNotMatchRegularExpression(
+      '/display:\s*inline-flex/',
+      $this->declarationsFor('.header__logo a'),
+      'A logo-only site must keep its layout.'
     );
   }
 

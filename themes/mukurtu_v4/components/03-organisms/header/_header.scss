@@ -43,6 +43,16 @@ header {
         color: var(--brand-secondary-dark);
         text-decoration: underline solid 2px currentcolor;
       }
+
+      &:has(.header__logo-text) {
+        /* A logo and the site name together sit side by side, the name
+         * centred against the logo, rather than the name dropping onto a line
+         * of its own underneath. Scoped to the link that holds the name, so a
+         * site with only a logo keeps exactly the layout it had. */
+        display: inline-flex;
+        align-items: center;
+        gap: var(--v-space-4xxs);
+      }
     }
 
     &-text {
@@ -261,8 +271,16 @@ header {
  * was designed for but measures 1.25:1 on the scrim. It becomes reachable at
  * desktop widths once branding is wide enough to push the nav into collapsing,
  * so it needs the treatment colour like everything else on the image. The
- * icon's bars are drawn with background-color, so they are set too. */
-.site-header--has-background {
+ * icon's bars are drawn with background-color, so they are set too.
+ *
+ * The header sits on an image in two ways. On interior pages it has its own
+ * header background. On the front page, where a page background is set, that
+ * image covers the header instead and the header gets no background class of
+ * its own - the treatment is set on .layout-container by .page--text-*, and
+ * reaches the header through inheritance. Both cases need these rules, or the
+ * front page keeps brand red on the scrim and ignores the "Page text" choice. */
+.site-header--has-background,
+.page--has-background .site-header {
   .mobile-nav-button__label {
     color: inherit;
   }
@@ -297,8 +315,10 @@ header {
  *
  * The link sets its own colour, so it would otherwise stay brand red on the
  * scrim. `inherit` picks up whichever treatment is in force, and the same rule
- * covers both because the treatment classes set `color` on the header. */
-.site-header--has-background .header__logo a {
+ * covers both because the treatment classes set `color` on the header - or,
+ * on the front page with a page background, on .layout-container above it. */
+.site-header--has-background .header__logo a,
+.page--has-background .site-header .header__logo a {
   color: inherit;
 
   /* Same reason as the menu button: --focus-color is too light for either
