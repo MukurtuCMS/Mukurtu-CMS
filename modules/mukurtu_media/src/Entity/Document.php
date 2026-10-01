@@ -334,7 +334,7 @@ class Document extends Media implements DocumentInterface, CulturalProtocolContr
     $docNameNoExtension = substr($docName, 0, strrpos($docName, '.'));
     $thumbnailName = $docNameNoExtension . '_thumbnail';
 
-    // Write to /tmp first, then move to permanent private:// storage.
+    // Write to /tmp first, then move in beside the source document.
     $tmpDir = $fileSystem->getTempDirectory();
     $tempThumbnailDest = $tmpDir . '/' . $thumbnailName;
 
@@ -362,18 +362,41 @@ class Document extends Media implements DocumentInterface, CulturalProtocolContr
     }
 
     // Move to permanent location alongside the source PDF.
-    $targetDir = rtrim(str_replace($docName, '', $uri), '/');
+    $targetDir = $fileSystem->dirname($uri);
     $fileSystem->prepareDirectory($targetDir, FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS);
-    $destination = $targetDir . '/' . $thumbnailName;
+    $destination = static::siblingUri($uri, $thumbnailName);
     $fileSystem->move($tempThumbnailDest, $destination, FileExists::Replace);
 
     $thumbnailFile = File::create([
       'filename' => $thumbnailName,
-      'uri' => $targetDir . '/' . $thumbnailName,
+      'uri' => $destination,
       'uid' => \Drupal::currentUser()->id(),
     ]);
     $thumbnailFile->save();
 
     return $thumbnailFile->id() ?? NULL;
   }
+
+  /**
+   * Returns a URI for a file sitting beside the one given.
+   *
+   * Swapping the last path segment keeps the scheme intact. Deriving a
+   * directory and re-joining it does not: for a file at the root of a stream,
+   * trimming the trailing slash off 'public://' leaves 'public:', and the
+   * rebuilt 'public:/thumb.png' has no registered wrapper, so the thumbnail
+   * is written nowhere and renders as a broken image.
+   *
+   * @param string $uri
+   *   URI of the existing file, e.g. 'public://reports/notes.pdf'.
+   * @param string $filename
+   *   Bare filename for the new sibling, e.g. 'notes_thumbnail.png'.
+   *
+   * @return string
+   *   URI in the same directory, e.g. 'public://reports/notes_thumbnail.png'.
+   */
+  public static function siblingUri(string $uri, string $filename): string {
+    $last_slash = strrpos($uri, '/');
+    return $last_slash === FALSE ? $filename : substr($uri, 0, $last_slash + 1) . $filename;
+  }
+
 }
