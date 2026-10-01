@@ -26,10 +26,10 @@ class Timestamp extends MukurtuImportFieldProcessPluginBase {
       // format_date turns a blank cell into '', which fails the field's
       // numeric validation. Skipping leaves the field unset instead, so new
       // content falls back to the import time and existing content keeps its
-      // value (see ProtocolAwareEntityContent::import() and updateEntity()).
+      // value (see ProtocolAwareEntityContent::import() and
+      // restoreBlankedFieldValues()).
       [
-        'plugin' => 'skip_on_empty',
-        'method' => 'process',
+        'plugin' => 'mukurtu_skip_on_blank',
         'source' => $source,
       ],
       [
