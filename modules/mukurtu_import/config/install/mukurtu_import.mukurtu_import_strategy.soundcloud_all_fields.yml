@@ -15,6 +15,9 @@ mapping:
     source: 'Authored on'
     target: created
   -
+    source: 'Default translation'
+    target: '-1'
+  -
     source: Contributor
     target: field_contributor
   -
