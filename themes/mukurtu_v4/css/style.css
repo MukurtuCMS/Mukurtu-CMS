@@ -381,6 +381,7 @@ Those files are injected by Drupal so they shouldn't be bundled to style.css. */
  * made the main menu render white-on-white during development.
  */
 .page--has-background {
+  background-image: -webkit-gradient(linear, left top, left bottom, from(var(--mukurtu-page-scrim)), to(var(--mukurtu-page-scrim))), var(--mukurtu-page-background-image);
   background-image: linear-gradient(var(--mukurtu-page-scrim), var(--mukurtu-page-scrim)), var(--mukurtu-page-background-image);
   background-attachment: scroll;
   background-position: top center;
@@ -1445,6 +1446,10 @@ body.consent-popup-opened .klaro_toggle_dialog {
 
 .media:has(.mukurtu-content-warnings) {
   position: relative;
+}
+
+.media:has(.mukurtu-content-warnings):has(.media-asset--unavailable) {
+  min-block-size: 12rem;
 }
 
 .mukurtu-content-warnings {
@@ -3296,6 +3301,12 @@ img[class$=-placeholder] {
   display: block;
   inline-size: 100%;
   block-size: 100%;
+}
+
+.media-asset--unavailable {
+  margin: 0;
+  padding: var(--v-space-2xs);
+  text-align: center;
 }
 
 .media-asset--glightbox-inline {
@@ -5337,6 +5348,7 @@ header {
  * header later inherits a legible colour without further work.
  */
 .site-header--has-background {
+  background-image: -webkit-gradient(linear, left top, left bottom, from(var(--mukurtu-header-scrim)), to(var(--mukurtu-header-scrim))), var(--mukurtu-header-background-image);
   background-image: linear-gradient(var(--mukurtu-header-scrim), var(--mukurtu-header-scrim)), var(--mukurtu-header-background-image);
   background-position: center;
   background-repeat: no-repeat;
