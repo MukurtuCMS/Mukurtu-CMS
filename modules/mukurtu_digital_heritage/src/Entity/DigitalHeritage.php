@@ -399,7 +399,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
-    $definitions['field_creator'] = BaseFieldDefinition::create('entity_reference')
+    $definitions['field_creator'] = BaseFieldDefinition::create('mukurtu_entity_reference_role')
       ->setLabel(t('Creator'))
       ->setDescription(t('A creator is the person or group primarily responsible for making  or providing the core media assets or knowledge represented in a digital heritage item. While a creator is usually a single person, it could also be a clan, tribe, culture group, or organization. A digital heritage item can have multiple creators. Examples include a basket designer or weaver, knowledge holders who provided information for a book, a book’s author or illustrator, singers, songwriters, dancers, or performers. <br />Names can be in any format that is appropriate for the content, eg: "John Smith" or "Smith, John". <br />Note that this is not the user publishing the digital heritage item on the site - that information is recorded in the automated author field. <br />Include as many creators as needed. Select from existing creators or add new ones.'))
       ->setSettings([
@@ -410,7 +410,10 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
             'creator' => 'creator'
           ],
           'auto_create' => TRUE,
-        ]
+        ],
+        'role_target_bundles' => [
+          'role' => 'role',
+        ],
       ])
       ->setCardinality(-1)
       ->setRequired(FALSE)

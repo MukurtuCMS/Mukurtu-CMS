@@ -69,6 +69,7 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
     'people' => 'Person',
     'place_type' => 'Place Type',
     'publisher' => 'Publisher',
+    'role' => 'Role',
     'subject' => 'Subject',
     'type' => 'Type',
     'word_type' => 'Word Type',

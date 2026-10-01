@@ -64,7 +64,7 @@ class SolrBaseFieldsSearchIndexSubscriber implements EventSubscriberInterface {
     }
 
     // Entity Reference fields.
-    if ($event->field_definition->getType() == 'entity_reference') {
+    if (in_array($event->field_definition->getType(), ['entity_reference', 'mukurtu_entity_reference_role'], TRUE)) {
       if ($reference_entity_type_id = $event->field_definition->getSetting('target_type') ?? NULL) {
         if ($referencedEntityType = \Drupal::entityTypeManager()->getDefinition($reference_entity_type_id)) {
           if ($referencedLabelKey = $referencedEntityType->getKey('label')) {

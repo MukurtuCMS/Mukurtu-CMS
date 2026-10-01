@@ -20,7 +20,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   id: 'entity_reference',
   label: new TranslatableMarkup('Entity Reference'),
   description: new TranslatableMarkup('Entity Reference.'),
-  field_types: ['entity_reference'],
+  field_types: ['entity_reference', 'mukurtu_entity_reference_role'],
   weight: 0,
 )]
 class EntityReference extends MukurtuImportFieldProcessPluginBase implements ContainerFactoryPluginInterface {

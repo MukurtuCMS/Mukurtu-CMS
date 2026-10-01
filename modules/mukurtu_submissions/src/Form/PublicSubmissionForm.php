@@ -198,7 +198,7 @@ class PublicSubmissionForm extends FormBase {
         continue;
       }
       $field_definition = $this->entity->getFieldDefinition($field_name);
-      if (!$field_definition || !in_array($field_definition->getType(), ['entity_reference', 'entity_reference_revisions'], TRUE)) {
+      if (!$field_definition || !in_array($field_definition->getType(), ['entity_reference', 'entity_reference_revisions', 'mukurtu_entity_reference_role'], TRUE)) {
         continue;
       }
       if ($field_definition->getSetting('target_type') !== 'taxonomy_term') {

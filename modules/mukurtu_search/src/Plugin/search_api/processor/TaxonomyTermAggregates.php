@@ -146,7 +146,7 @@ class TaxonomyTermAggregates extends ProcessorPluginBase {
     $uuids = [];
 
     foreach ($entity->getFieldDefinitions() as $field_name => $definition) {
-      if ($definition->getType() !== 'entity_reference' || $definition->getSetting('target_type') !== 'taxonomy_term') {
+      if (!in_array($definition->getType(), ['entity_reference', 'mukurtu_entity_reference_role'], TRUE) || $definition->getSetting('target_type') !== 'taxonomy_term') {
         continue;
       }
 

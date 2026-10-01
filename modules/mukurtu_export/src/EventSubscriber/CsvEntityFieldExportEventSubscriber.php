@@ -116,7 +116,7 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
       return $this->exportCulturalProtocol($event, $field, $config);
     }
 
-    if ($fieldType == 'entity_reference') {
+    if (in_array($fieldType, ['entity_reference', 'mukurtu_entity_reference_role'], TRUE)) {
       return $this->exportEntityReference($event, $field, $config);
     }
 
