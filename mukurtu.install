@@ -12,6 +12,7 @@ use Drupal\menu_link_content\Entity\MenuLinkContent;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\shortcut\Entity\Shortcut;
 use Drupal\captcha\Entity\CaptchaPoint;
+use Drupal\node\NodeAccessRebuild;
 
 /**
  * Implements hook_install().
@@ -58,7 +59,7 @@ function mukurtu_install() {
   // \Drupal::service('module_installer')->install(['mukurtu_solr']);
 
   // Rebuild node access permissions.
-  node_access_rebuild();
+  \Drupal::service(NodeAccessRebuild::class)->rebuild();
 
   // Install default themes (system.theme.yml is not owned by Mukurtu).
   //
