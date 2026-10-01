@@ -119,6 +119,20 @@ mukurtu_export.csv_exporter.duplicate:
     _permission: 'access mukurtu export'
 
 
+entity.csv_exporter.field_mapping_form:
+  path: '/admin/export/format/csv/manage/{csv_exporter}/fields/{section}'
+  defaults:
+    _entity_form: 'csv_exporter.field_mapping'
+    _title_callback: '\Drupal\mukurtu_export\Form\CsvExporterFieldMappingForm::title'
+  options:
+    _admin_route: TRUE
+    parameters:
+      csv_exporter:
+        type: entity:csv_exporter
+  requirements:
+    _entity_access: 'csv_exporter.update'
+    section: '[a-z0-9_]+'
+
 mukurtu_export.remove_node_from_list:
   path: '/admin/export/remove-node/{node}'
   defaults:
