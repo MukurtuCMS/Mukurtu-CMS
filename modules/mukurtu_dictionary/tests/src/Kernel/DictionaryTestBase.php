@@ -11,6 +11,7 @@ use Drupal\mukurtu_dictionary\Entity\DictionaryWord;
 use Drupal\mukurtu_dictionary\Entity\WordList;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
+use Drupal\node\NodeAccessRebuild;
 use Drupal\paragraphs\Entity\ParagraphsType;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\taxonomy\Entity\Vocabulary;
@@ -112,7 +113,7 @@ abstract class DictionaryTestBase extends MukurtuKernelTestBase {
     ParagraphsType::create(['id' => 'dictionary_word_entry', 'label' => 'Dictionary Word Entry'])->save();
     ParagraphsType::create(['id' => 'sample_sentence', 'label' => 'Sample Sentence'])->save();
 
-    node_access_rebuild();
+    \Drupal::service(NodeAccessRebuild::class)->rebuild();
 
     // Vocabularies required by dictionary word fields.
     Vocabulary::create(['vid' => 'language', 'name' => 'Language'])->save();
