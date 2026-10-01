@@ -27,6 +27,7 @@ use Drupal\user\UserInterface;
       'add' => 'Drupal\mukurtu_export\Form\CsvExporterAddForm',
       'edit' => 'Drupal\mukurtu_export\Form\CsvExporterEditForm',
       'delete' => 'Drupal\mukurtu_export\Form\CsvExporterDeleteForm',
+      'field_mapping' => 'Drupal\mukurtu_export\Form\CsvExporterFieldMappingForm',
     ],
     'route_provider' => [
       'html' => 'Drupal\Core\Entity\Routing\AdminHtmlRouteProvider',
@@ -36,6 +37,7 @@ use Drupal\user\UserInterface;
     'add-form' => '/admin/export/format/csv/add',
     'edit-form' => '/admin/export/format/csv/manage/{csv_exporter}',
     'delete-form' => '/admin/export/format/csv/manage/{csv_exporter}/delete',
+    'field-mapping-form' => '/admin/export/format/csv/manage/{csv_exporter}/fields/{section}',
     'collection' => '/admin/export/settings/csv',
   ],
   admin_permission: 'access mukurtu export',
