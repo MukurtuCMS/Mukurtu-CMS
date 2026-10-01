@@ -11,6 +11,7 @@ use Drupal\mukurtu_protocol\Entity\Community;
 use Drupal\mukurtu_protocol\Entity\Protocol;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
+use Drupal\node\NodeAccessRebuild;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\user\Entity\Role;
@@ -78,7 +79,7 @@ class MukurtuDraftsEntityTest extends KernelTestBase {
     $this->installEntitySchema('og_membership');
     $this->installConfig(['og']);
 
-    node_access_rebuild();
+    \Drupal::service(NodeAccessRebuild::class)->rebuild();
     Og::addGroup('community', 'community');
     Og::addGroup('protocol', 'protocol');
 
