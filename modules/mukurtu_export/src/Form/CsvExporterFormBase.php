@@ -267,208 +267,7 @@ class CsvExporterFormBase extends EntityForm {
       '#description' => $this->t('The text format the exported content is in. Set the matching import template to the same value.'),
     ];
 
-    $form += $this->buildEntityFieldMapping();
-
     return $form;
-  }
-
-  protected function buildEntityFieldMapping() {
-    /** @var \Drupal\mukurtu_export\Entity\CsvExporter $entity */
-    $entity = $this->entity;
-
-    $build = [];
-    $other_build = [];
-    $all_bundle_info = $this->entityTypeBundleInfo->getAllBundleInfo();
-    $handled = [];
-
-    // Secondary bundles go into "Other Content Types". NULL = all bundles.
-    $secondary_bundles = [
-      'node' => ['article', 'page', 'landing_page'],
-      'paragraph' => ['footer_logo', 'footer_social_link'],
-      'file' => NULL,
-    ];
-
-    // Custom groups interleave content types with their related paragraphs.
-    // The first item's fields are placed directly in the group (no wrapper);
-    // subsequent items each get a collapsed sub-details.
-    $groups = [
-      'digital_heritage' => [
-        'label' => $this->t('Digital Heritage'),
-        'items' => [
-          ['type' => 'node', 'bundle' => 'digital_heritage'],
-          ['type' => 'paragraph', 'bundle' => 'indigenous_knowledge_keepers'],
-        ],
-      ],
-      'dictionary_word' => [
-        'label' => $this->t('Dictionary Word'),
-        'items' => [
-          ['type' => 'node', 'bundle' => 'dictionary_word'],
-          ['type' => 'paragraph', 'bundle' => 'dictionary_word_entry'],
-          ['type' => 'paragraph', 'bundle' => 'sample_sentence'],
-        ],
-      ],
-      'person' => [
-        'label' => $this->t('Person'),
-        'items' => [
-          ['type' => 'node', 'bundle' => 'person'],
-          ['type' => 'paragraph', 'bundle' => 'formatted_text_with_title'],
-          ['type' => 'paragraph', 'bundle' => 'related_person'],
-        ],
-      ],
-      'place' => [
-        'label' => $this->t('Place'),
-        'items' => [
-          ['type' => 'node', 'bundle' => 'place'],
-          ['type' => 'paragraph', 'bundle' => 'text_section_with_title'],
-        ],
-      ],
-      'collection' => [
-        'label' => $this->t('Collection'),
-        'items' => [
-          ['type' => 'node', 'bundle' => 'collection'],
-        ],
-      ],
-      'word_list' => [
-        'label' => $this->t('Word List'),
-        'items' => [
-          ['type' => 'node', 'bundle' => 'word_list'],
-        ],
-      ],
-    ];
-
-    foreach ($groups as $group_key => $group) {
-      $single_item = count($group['items']) === 1;
-      $build[$group_key] = [
-        '#type' => 'details',
-        '#open' => FALSE,
-        '#title' => $group['label'],
-      ];
-      foreach ($group['items'] as $i => $item) {
-        ['type' => $type, 'bundle' => $bundle] = $item;
-        $bundle_info = $all_bundle_info[$type][$bundle] ?? ['label' => $bundle];
-        // First item's table sits directly in the group; subsequent items are
-        // wrapped in a sub-details using the bundle label.
-        $this->addBundleTable($build[$group_key], $entity, $type, $bundle, $bundle_info, $i === 0);
-        $handled["{$type}__{$bundle}"] = TRUE;
-      }
-    }
-
-    // Render remaining bundles by entity type, skipping handled and secondary.
-    foreach ($entity->getSupportedEntityTypes() as $type) {
-      $entity_type_obj = $this->entityTypeManager->getStorage($type)->getEntityType();
-      $all_bundles = $all_bundle_info[$type];
-      $single_bundle_type = count($all_bundles) === 1;
-
-      $secondary_list = array_key_exists($type, $secondary_bundles)
-        ? ($secondary_bundles[$type] ?? array_keys($all_bundles))
-        : [];
-
-      foreach ($all_bundles as $bundle => $bundle_info) {
-        if (isset($handled["{$type}__{$bundle}"])) {
-          continue;
-        }
-
-        if (in_array($bundle, $secondary_list)) {
-          $other_build[$type] = $other_build[$type] ?? [
-            '#type' => 'details',
-            '#open' => FALSE,
-            '#title' => $entity_type_obj->getLabel(),
-          ];
-          $this->addBundleTable($other_build[$type], $entity, $type, $bundle, $bundle_info, $single_bundle_type);
-        }
-        else {
-          $build[$type] = $build[$type] ?? [
-            '#type' => 'details',
-            '#open' => FALSE,
-            '#title' => $entity_type_obj->getLabel(),
-          ];
-          $this->addBundleTable($build[$type], $entity, $type, $bundle, $bundle_info, $single_bundle_type);
-        }
-      }
-    }
-
-    if (!empty($other_build)) {
-      $build['other_content_types'] = [
-        '#type' => 'details',
-        '#open' => FALSE,
-        '#title' => $this->t('Other Content Types'),
-      ] + $other_build;
-    }
-
-    return $build;
-  }
-
-  protected function addBundleTable(array &$parent, $entity, string $type, string $bundle, array $bundle_info, bool $single_bundle_type) {
-    $table_key = "{$type}__{$bundle}";
-    $field_table = [
-      '#type' => 'table',
-      '#header' => [
-        $this->t('Export'),
-        $this->t('Field name'),
-        $this->t('Field label'),
-        $this->t('CSV header label'),
-        $this->t('Weight'),
-      ],
-      '#tabledrag' => [
-        [
-          'action' => 'order',
-          'relationship' => 'sibling',
-          'group' => 'table-sort-weight',
-        ],
-      ],
-    ];
-
-    foreach ($entity->getMappedFields($type, $bundle) as $weight => $mapped_field) {
-      // Exclude 'behavior_settings' paragraph base field from the options.
-      if ($type == 'paragraph' && $mapped_field['field_name'] == 'behavior_settings') {
-        continue;
-      }
-
-      $row = [
-        '#attributes' => ['class' => ['draggable']],
-        '#weight' => 0,
-      ];
-      $row['export'] = [
-        '#type' => 'checkbox',
-        '#title' => $this->t('Export @field', ['@field' => $mapped_field['field_label']]),
-        '#title_display' => 'invisible',
-        '#default_value' => $mapped_field['export'],
-      ];
-      $row['field_name'] = [
-        '#type' => 'item',
-        '#markup' => $mapped_field['field_name'],
-      ];
-      $row['field_label'] = [
-        '#type' => 'item',
-        '#markup' => $mapped_field['field_label'],
-      ];
-      $row['csv_header_label'] = [
-        '#type' => 'textfield',
-        '#title' => $this->t('CSV header label for @field', ['@field' => $mapped_field['field_label']]),
-        '#title_display' => 'invisible',
-        '#default_value' => $mapped_field['csv_header_label'],
-      ];
-      $row['weight'] = [
-        '#type' => 'weight',
-        '#title' => $this->t('Weight for @title', ['@title' => $mapped_field['field_label']]),
-        '#title_display' => 'invisible',
-        '#default_value' => $weight,
-        '#attributes' => ['class' => ['table-sort-weight']],
-      ];
-      $field_table[$mapped_field['field_name']] = $row;
-    }
-
-    if ($single_bundle_type) {
-      $parent[$table_key] = $field_table;
-    }
-    else {
-      $parent[$bundle] = [
-        '#type' => 'details',
-        '#open' => FALSE,
-        '#title' => $bundle_info['label'],
-        $table_key => $field_table,
-      ];
-    }
   }
 
   public function exists($entity_id, array $element, FormStateInterface $form_state) {
@@ -498,25 +297,11 @@ class CsvExporterFormBase extends EntityForm {
   public function save(array $form, FormStateInterface $form_state) {
     /** @var \Drupal\mukurtu_export\Entity\CsvExporter $entity */
     $entity = $this->getEntity();
-    $values = $form_state->getValues();
 
-    // Field mappings.
-    $field_list = [];
-    $all_bundle_info = $this->entityTypeBundleInfo->getAllBundleInfo();
-
-    foreach ($entity->getSupportedEntityTypes() as $type) {
-      foreach($all_bundle_info[$type] as $bundle => $bundle_info) {
-        $key = "{$type}__{$bundle}";
-        $entity_type_field_mapping = [];
-        if (isset($values[$key])) {
-          foreach ($values[$key] as $fieldname => $field_values) {
-            if ($field_values['export'] == "1") {
-              $entity_type_field_mapping[$fieldname] = $field_values['csv_header_label'];
-            }
-          }
-        }
-        $field_list[$key] = $entity_type_field_mapping;
-      }
+    // Field mappings are edited per section on their own pages, so they
+    // aren't part of this form. A new setting starts with the defaults.
+    if ($entity->isNew()) {
+      $entity->set('entity_fields_export_list', $this->getDefaultFieldMapping());
     }
 
     $entity->setSiteWide((bool) $form_state->getValue('site_wide'));
@@ -526,9 +311,40 @@ class CsvExporterFormBase extends EntityForm {
     $mediaAssetPackaging = $form_state->getValue('media_asset_packaging');
     $entity->setFileFieldSetting($mediaAssetPackaging);
     $entity->setImageFieldSetting($mediaAssetPackaging);
-    $entity->set('entity_fields_export_list', $field_list);
     $status = $entity->save();
     $form_state->setRedirect('mukurtu_export.export_settings');
+    return $status;
+  }
+
+  /**
+   * Returns the default field mapping for a new CSV exporter.
+   *
+   * @return array
+   *   CSV header labels keyed by field name, keyed by "{type}__{bundle}".
+   */
+  protected function getDefaultFieldMapping(): array {
+    /** @var \Drupal\mukurtu_export\Entity\CsvExporter $entity */
+    $entity = $this->entity;
+    $field_list = [];
+    $all_bundle_info = $this->entityTypeBundleInfo->getAllBundleInfo();
+
+    foreach ($entity->getSupportedEntityTypes() as $type) {
+      foreach (array_keys($all_bundle_info[$type] ?? []) as $bundle) {
+        $mapping = [];
+        foreach ($entity->getMappedFields($type, $bundle) as $mapped_field) {
+          // The 'behavior_settings' paragraph base field is never offered.
+          if ($type == 'paragraph' && $mapped_field['field_name'] == 'behavior_settings') {
+            continue;
+          }
+          if ($mapped_field['export']) {
+            $mapping[$mapped_field['field_name']] = (string) $mapped_field['csv_header_label'];
+          }
+        }
+        $field_list["{$type}__{$bundle}"] = $mapping;
+      }
+    }
+
+    return $field_list;
   }
 
 }
