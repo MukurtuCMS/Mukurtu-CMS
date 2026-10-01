@@ -9,6 +9,7 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\mukurtu_core\Plugin\views\field\NodeRowActionsField;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
+use Drupal\node\NodeAccessRebuild;
 use Drupal\Tests\content_moderation\Traits\ContentModerationTestTrait;
 use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
@@ -79,7 +80,7 @@ class NodeRowActionsFieldTest extends KernelTestBase {
     // enabled, even for a plain non-protocol node -- ModerationTransitionAccessResolver
     // now checks 'view' for archive/restore, so this schema/rebuild is
     // needed even though this test has no protocol-gated content.
-    node_access_rebuild();
+    \Drupal::service(NodeAccessRebuild::class)->rebuild();
 
     NodeType::create(['type' => 'article', 'name' => 'Article'])->save();
     NodeType::create(['type' => 'landing_page', 'name' => 'Landing Page'])->save();
