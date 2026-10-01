@@ -35,7 +35,7 @@ class TextBrandingTest extends KernelTestBase {
   protected function template(): string {
     $path = \Drupal::service('extension.list.theme')->getPath('mukurtu_v4');
 
-    return file_get_contents($path . '/templates/block/block--mukurtu-v4-branding.html.twig');
+    return file_get_contents($path . '/templates/block/block--system-branding-block.html.twig');
   }
 
   /**
@@ -75,6 +75,23 @@ class TextBrandingTest extends KernelTestBase {
     }
 
     return $declarations;
+  }
+
+  /**
+   * Every branding block gets the template, not just the default one.
+   *
+   * A template named for one block's machine name leaves a second branding
+   * block - one shown only on the front page, say - on core's template, with
+   * no header__logo wrapper and none of this styling.
+   */
+  public function testEveryBrandingBlockGetsTheTemplate(): void {
+    $path = \Drupal::service('extension.list.theme')->getPath('mukurtu_v4') . '/templates/block';
+
+    $this->assertSame(
+      [$path . '/block--system-branding-block.html.twig'],
+      glob($path . '/block--*branding*.html.twig'),
+      'A block-specific branding template would shadow the shared one for that block.'
+    );
   }
 
   /**
