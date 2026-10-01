@@ -8,6 +8,7 @@ use Drupal\Core\Config\FileStorage;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
+use Drupal\node\NodeAccessRebuild;
 use Drupal\Tests\content_moderation\Traits\ContentModerationTestTrait;
 use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
@@ -89,7 +90,7 @@ class MukurtuManageContentBulkActionFilterTest extends KernelTestBase {
     // mukurtu_protocol's node-grants cache context queries OG membership
     // tables on every access check once the module is enabled, even for
     // a plain non-protocol node.
-    node_access_rebuild();
+    \Drupal::service(NodeAccessRebuild::class)->rebuild();
 
     NodeType::create(['type' => 'article', 'name' => 'Article'])->save();
 
