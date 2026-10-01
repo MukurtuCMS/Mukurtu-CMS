@@ -17,3 +17,8 @@ services:
       - '@mukurtu_core.entity_translation_resolver'
     tags:
       - { name: event_subscriber }
+  mukurtu_export.csv_mapping_sections:
+    class: Drupal\mukurtu_export\CsvExporterMappingSections
+    arguments:
+      - '@entity_type.manager'
+      - '@entity_type.bundle.info'
