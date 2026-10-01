@@ -54,6 +54,90 @@ class ImportTimestampTest extends MukurtuImportTestBase {
   }
 
   /**
+   * A blank "created" cell on a new entity falls back to the request time
+   * instead of failing validation.
+   *
+   * @see https://github.com/MukurtuCMS/Mukurtu-CMS/issues/2305
+   */
+  public function testBlankCreatedOnNewEntityUsesRequestTime() {
+    $data = [
+      ['Title', 'Protocols', 'Sharing Setting', 'Authored on'],
+      ['Blank Authored On', (string) $this->protocol->id(), 'any', ''],
+    ];
+    $import_file = $this->createCsvFile($data);
+
+    $before = \Drupal::time()->getRequestTime();
+    $result = $this->importCsvFile($import_file, $this->newNodeMapping());
+    $this->assertEquals(MigrationInterface::RESULT_COMPLETED, $result);
+
+    $nodes = $this->entityTypeManager->getStorage('node')->loadByProperties(['title' => 'Blank Authored On']);
+    $this->assertCount(1, $nodes);
+    $this->assertGreaterThanOrEqual($before, reset($nodes)->getCreatedTime());
+  }
+
+  /**
+   * A mapped "created" column that is absent from the file is ignored, as
+   * when a shipped *_all_fields template is used with a trimmed-down CSV.
+   *
+   * @see https://github.com/MukurtuCMS/Mukurtu-CMS/issues/2305
+   */
+  public function testAbsentCreatedColumnOnNewEntity() {
+    $data = [
+      ['Title', 'Protocols', 'Sharing Setting'],
+      ['Absent Authored On', (string) $this->protocol->id(), 'any'],
+    ];
+    $import_file = $this->createCsvFile($data);
+
+    $before = \Drupal::time()->getRequestTime();
+    $result = $this->importCsvFile($import_file, $this->newNodeMapping());
+    $this->assertEquals(MigrationInterface::RESULT_COMPLETED, $result);
+
+    $nodes = $this->entityTypeManager->getStorage('node')->loadByProperties(['title' => 'Absent Authored On']);
+    $this->assertCount(1, $nodes);
+    $this->assertGreaterThanOrEqual($before, reset($nodes)->getCreatedTime());
+  }
+
+  /**
+   * A blank "created" cell on an update keeps the existing value rather than
+   * clearing it.
+   *
+   * @see https://github.com/MukurtuCMS/Mukurtu-CMS/issues/2305
+   */
+  public function testBlankCreatedOnUpdateKeepsExistingValue() {
+    $this->node->setCreatedTime(1682017200)->save();
+
+    $data = [
+      ['nid', 'title', 'created'],
+      [$this->node->id(), 'Updated With Blank Created', ''],
+    ];
+    $import_file = $this->createCsvFile($data);
+
+    $mapping = [
+      ['target' => 'nid', 'source' => 'nid'],
+      ['target' => 'title', 'source' => 'title'],
+      ['target' => 'created', 'source' => 'created'],
+    ];
+
+    $result = $this->importCsvFile($import_file, $mapping);
+    $this->assertEquals(MigrationInterface::RESULT_COMPLETED, $result);
+    $updated_node = $this->entityTypeManager->getStorage('node')->loadUnchanged($this->node->id());
+    $this->assertEquals('Updated With Blank Created', $updated_node->getTitle());
+    $this->assertEquals(1682017200, $updated_node->getCreatedTime());
+  }
+
+  /**
+   * The new-content mapping used by shipped templates, including "created".
+   */
+  protected function newNodeMapping(): array {
+    return [
+      ['target' => 'title', 'source' => 'Title'],
+      ['target' => 'field_cultural_protocols/protocols', 'source' => 'Protocols'],
+      ['target' => 'field_cultural_protocols/sharing_setting', 'source' => 'Sharing Setting'],
+      ['target' => 'created', 'source' => 'Authored on'],
+    ];
+  }
+
+  /**
    * Test that importing an update to an existing node bumps "changed".
    *
    * @see https://github.com/MukurtuCMS/Mukurtu-CMS/issues/1574

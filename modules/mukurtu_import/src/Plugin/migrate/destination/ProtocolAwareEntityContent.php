@@ -503,7 +503,7 @@ class ProtocolAwareEntityContent extends EntityContentBase {
     // Skip access checks for user 1. See the corresponding check in import()
     // for rationale.
     if ($this->currentUserBypassesAccessChecks()) {
-      return parent::updateEntity($entity, $row);
+      return $this->restoreEmptiedCreatedTimes(parent::updateEntity($entity, $row));
     }
 
     // Check update access against the original, unmodified entity before the
@@ -524,7 +524,43 @@ class ProtocolAwareEntityContent extends EntityContentBase {
       );
     }
 
-    return parent::updateEntity($entity, $row);
+    return $this->restoreEmptiedCreatedTimes(parent::updateEntity($entity, $row));
+  }
+
+  /**
+   * Restores "created" values that an update left empty.
+   *
+   * A blank "created" cell is skipped by the Timestamp field process, and
+   * core's updateEntity() then empties every skipped field listed in
+   * overwrite_properties. A creation time can't meaningfully be cleared, so
+   * a blank cell keeps the stored value instead (or uses the import time for
+   * a translation added by this row).
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The updated entity, possibly a translation.
+   *
+   * @return \Drupal\Core\Entity\EntityInterface
+   *   The same entity.
+   */
+  protected function restoreEmptiedCreatedTimes(EntityInterface $entity): EntityInterface {
+    if (!$entity instanceof FieldableEntityInterface) {
+      return $entity;
+    }
+
+    $original = NULL;
+    foreach ($entity->getFieldDefinitions() as $field_name => $field_definition) {
+      if ($field_definition->getType() !== 'created' || !$entity->get($field_name)->isEmpty()) {
+        continue;
+      }
+      $original ??= $this->storage->loadUnchanged($entity->id());
+      $langcode = $entity->language()->getId();
+      $value = $original instanceof ContentEntityInterface && $original->hasTranslation($langcode)
+        ? $original->getTranslation($langcode)->get($field_name)->value
+        : NULL;
+      $entity->set($field_name, $value ?? $this->time->getRequestTime());
+    }
+
+    return $entity;
   }
 
   /**

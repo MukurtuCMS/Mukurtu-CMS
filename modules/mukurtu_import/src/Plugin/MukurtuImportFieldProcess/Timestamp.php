@@ -23,12 +23,22 @@ class Timestamp extends MukurtuImportFieldProcessPluginBase {
    */
   public function getProcess(FieldDefinitionInterface $field_config, $source, $context = []) {
     return [
-      'plugin' => 'format_date',
-      'source' => $source,
-      'from_format' => 'Y-m-d H:i:s',
-      'to_format' => 'U',
-      'from_timezone' => 'UTC',
-      'to_timezone' => 'UTC',
+      // format_date turns a blank cell into '', which fails the field's
+      // numeric validation. Skipping leaves the field unset instead, so new
+      // content falls back to the import time and existing content keeps its
+      // value (see ProtocolAwareEntityContent::import() and updateEntity()).
+      [
+        'plugin' => 'skip_on_empty',
+        'method' => 'process',
+        'source' => $source,
+      ],
+      [
+        'plugin' => 'format_date',
+        'from_format' => 'Y-m-d H:i:s',
+        'to_format' => 'U',
+        'from_timezone' => 'UTC',
+        'to_timezone' => 'UTC',
+      ],
     ];
   }
 
