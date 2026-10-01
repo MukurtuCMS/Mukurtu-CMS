@@ -11,6 +11,7 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\og\Entity\OgMembership;
 use Drupal\og\OgAccessInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\node\NodeAccessRebuild;
 
 /**
  * Approves the Drupal user account of the selected pending community/protocol members.
@@ -46,7 +47,7 @@ class MukurtuApproveUserFromMembershipAction extends ActionBase implements Conta
     }
     $owner->set('status', 1);
     $owner->save();
-    node_access_rebuild(TRUE);
+    \Drupal::service(NodeAccessRebuild::class)->rebuild(TRUE);
     \Drupal::messenger()->addStatus(t('%user has been approved.', ['%user' => $owner->getDisplayName()]));
   }
 
