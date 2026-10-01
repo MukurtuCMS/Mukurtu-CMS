@@ -9,6 +9,7 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\mukurtu_core\Controller\NodeQuickActionsController;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
+use Drupal\node\NodeAccessRebuild;
 use Drupal\Tests\content_moderation\Traits\ContentModerationTestTrait;
 use Drupal\user\Entity\User;
 use Drupal\workflows\Entity\Workflow;
@@ -80,7 +81,7 @@ class NodeQuickActionsControllerTest extends KernelTestBase {
     // enabled, even for a plain non-protocol node -- ModerationTransitionAccessResolver
     // now checks 'view' for archive/restore, so this schema/rebuild is
     // needed even though this test has no protocol-gated content.
-    node_access_rebuild();
+    \Drupal::service(NodeAccessRebuild::class)->rebuild();
 
     // article is structural and moderated; landing_page is deliberately
     // never attached to any workflow, matching this session's earlier

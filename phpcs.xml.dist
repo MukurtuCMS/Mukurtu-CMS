@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset name="mukurtu">
+  <description>
+    PHP CodeSniffer configuration for the Mukurtu installation profile.
+
+    Modelled on web/core/phpcs.xml.dist. Run via the composer scripts:
+
+      composer run lint:phpcs      # report
+      composer run lint:phpcs:fix  # apply the auto-fixable subset
+
+    CI gates on errors only (--warning-severity=0) while the warning backlog
+    is worked down; see .github/workflows/static-analysis.yml.
+  </description>
+
+  <arg name="extensions" value="inc,install,module,php,profile,theme"/>
+  <arg name="cache" value=".phpcs-cache"/>
+  <arg name="colors"/>
+  <arg value="sp"/>
+
+  <!-- Analyse the profile's own code only. -->
+  <file>.</file>
+
+  <!-- Third-party and generated code. -->
+  <exclude-pattern>*/node_modules/*</exclude-pattern>
+  <exclude-pattern>*/vendor/*</exclude-pattern>
+  <exclude-pattern>./libraries/*</exclude-pattern>
+  <exclude-pattern>./patches/*</exclude-pattern>
+
+  <rule ref="Drupal"/>
+  <rule ref="DrupalPractice"/>
+</ruleset>

@@ -11,6 +11,7 @@ use Drupal\mukurtu_protocol\Entity\Community;
 use Drupal\mukurtu_protocol\Entity\Protocol;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
+use Drupal\node\NodeAccessRebuild;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\Tests\content_moderation\Traits\ContentModerationTestTrait;
@@ -85,7 +86,7 @@ class MukurtuProtocolNodeAccessControlHandlerArchivedTest extends KernelTestBase
     $this->installConfig(['og']);
     $this->installMukurtuWorkflowsConfig();
 
-    node_access_rebuild();
+    \Drupal::service(NodeAccessRebuild::class)->rebuild();
 
     Og::addGroup('community', 'community');
     Og::addGroup('protocol', 'protocol');
