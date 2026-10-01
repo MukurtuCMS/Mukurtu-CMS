@@ -36,9 +36,8 @@ class CsvExporterFieldMappingForm extends EntityForm {
    * Title callback for the field mapping route.
    */
   public function title(CsvExporter $csv_exporter, string $section) {
-    return $this->t('Field mapping: @section (@label)', [
+    return $this->t('@section field mapping', [
       '@section' => $this->getSectionOrFail($csv_exporter, $section)['label'],
-      '@label' => $csv_exporter->label(),
     ]);
   }
 
@@ -70,7 +69,7 @@ class CsvExporterFieldMappingForm extends EntityForm {
     $form['#tree'] = TRUE;
     $form['mapping'] = [];
     foreach ($section['items'] as $item) {
-      $table = $this->buildBundleTable($entity, $item['type'], $item['bundle']);
+      $table = $this->buildBundleTable($entity, $item['type'], $item['bundle'], (string) $item['label']);
       $table_key = "{$item['type']}__{$item['bundle']}";
       if ($item['wrap']) {
         $form['mapping'][$table_key] = [
@@ -91,9 +90,10 @@ class CsvExporterFieldMappingForm extends EntityForm {
   /**
    * Builds the field mapping table for one bundle.
    */
-  protected function buildBundleTable(CsvExporter $entity, string $type, string $bundle): array {
+  protected function buildBundleTable(CsvExporter $entity, string $type, string $bundle, string $bundle_label): array {
     $field_table = [
       '#type' => 'table',
+      '#caption' => $this->t('@bundle fields', ['@bundle' => $bundle_label]),
       '#header' => [
         $this->t('Export'),
         $this->t('Field name'),

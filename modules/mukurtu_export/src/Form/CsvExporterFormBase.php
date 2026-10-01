@@ -87,7 +87,7 @@ class CsvExporterFormBase extends EntityForm {
     $form['relationships']['field_id'] = [
       '#type' => 'radios',
       '#title' => $this->t('Select the identifier format to export'),
-      '#description' => $this->t('Controls how references to other entities are written in exported cells (e.g., a taxonomy term reference or a related content field). This does not affect the exported entity\'s own ID or UUID columns, which are controlled per entity type in the Field Mappings section.'),
+      '#description' => $this->t('Controls how references to other entities are written in exported cells (e.g., a taxonomy term reference or a related content field). This does not affect the exported entity\'s own ID or UUID columns, which you set in each section\'s field mapping.'),
       '#default_value' => $entity->getIdFieldSetting(),
       '#options' => [
         'id' => $this->t('Export the ID'),

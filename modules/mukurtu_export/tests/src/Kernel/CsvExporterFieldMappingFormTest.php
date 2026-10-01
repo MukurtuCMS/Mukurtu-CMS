@@ -211,6 +211,22 @@ class CsvExporterFieldMappingFormTest extends ProtocolAwareEntityTestBase {
   }
 
   /**
+   * Section pages are titled after the section, and each table is captioned.
+   */
+  public function testSectionTitleAndTableCaption(): void {
+    $form_object = $this->container->get('entity_type.manager')->getFormObject('csv_exporter', 'field_mapping');
+    $sections = $this->container->get('mukurtu_export.csv_mapping_sections')->getSections($this->exporter);
+    $label = (string) $sections['node__protocol_aware_content']['label'];
+
+    $title = $form_object->title($this->exporter, 'node__protocol_aware_content');
+    $this->assertSame("$label field mapping", (string) $title);
+
+    $form = $this->buildEntityForm('field_mapping', 'node__protocol_aware_content');
+    $bundle_label = (string) $sections['node__protocol_aware_content']['items'][0]['label'];
+    $this->assertSame("$bundle_label fields", (string) $form['mapping']['node__protocol_aware_content']['fields']['#caption']);
+  }
+
+  /**
    * An unknown section is a 404.
    */
   public function testUnknownSectionIsNotFound(): void {

@@ -40,7 +40,7 @@ class CsvExporterEditForm extends CsvExporterFormBase {
       '#type' => 'details',
       '#open' => TRUE,
       '#title' => $this->t('Field mapping'),
-      '#description' => $this->t('Choose which fields each section exports and set their CSV header labels.'),
+      '#description' => $this->t('Choose which fields each section exports and set their CSV header labels. Save any changes to the settings above before you edit a section.'),
     ];
     $form['field_mapping']['sections'] = [
       '#type' => 'table',
