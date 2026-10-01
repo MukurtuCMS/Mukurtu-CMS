@@ -2,6 +2,15 @@
   position: relative;
 }
 
+// The overlay is absolutely positioned against .media, so it is only as big as
+// whatever .media contains. A media item that cannot be rendered collapses to a
+// single line of notice text, which would leave the warning label overflowing
+// its own scrim - and the label is focusable, so it would be focusable content
+// sitting outside its visual container (WCAG 1.4.10). Hold a floor.
+.media:has(.mukurtu-content-warnings):has(.media-asset--unavailable) {
+  min-block-size: 12rem;
+}
+
 .mukurtu-content-warnings {
   position: absolute;
   inset: 0;

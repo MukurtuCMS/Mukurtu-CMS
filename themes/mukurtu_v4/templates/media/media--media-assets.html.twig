@@ -39,9 +39,13 @@
 <div{{ attributes.addClass(classes) }}>
   {{ content.media_content_warnings }}
 
+  {% if media_unavailable %}
+  <p class="media-asset--unavailable">{{ "@name isn't available right now. Contact your site administrator."|t({'@name': name}) }}</p>
+  {% else %}
   <span class="media-asset--content">
     {{ content|without('media_content_warnings') }}
   </span>
+  {% endif %}
 
 
   {% if media_download_enabled and media_url %}
