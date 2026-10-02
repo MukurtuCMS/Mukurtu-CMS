@@ -1,7 +1,18 @@
 mukurtu_design.settings:
-  path: '/admin/config/color-settings'
+  path: '/admin/config/design-settings'
   defaults:
     _form: '\Drupal\mukurtu_design\Form\MukurtuDesignSettingsForm'
+    _title: 'Design Settings'
+  requirements:
+    _permission: 'administer mukurtu design settings'
+
+# The page lived at /admin/config/color-settings until it gained background
+# image settings, which made the old path misleading. Bookmarks and the
+# published documentation still point there, so it redirects rather than 404s.
+mukurtu_design.settings_legacy:
+  path: '/admin/config/color-settings'
+  defaults:
+    _controller: '\Drupal\mukurtu_design\Controller\DesignSettingsRedirectController::settings'
     _title: 'Design Settings'
   requirements:
     _permission: 'administer mukurtu design settings'
