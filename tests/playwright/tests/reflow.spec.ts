@@ -36,6 +36,41 @@ test('Reflow: header search input can shrink to fit the mobile header grid', asy
   expect(minInlineSize).toBe('0px');
 });
 
+// The logo is a fixed 100px but the gutters and padding are rem, so a larger
+// phone text size (Chrome on Android scales rem with it) squeezed the
+// header's columns until the logo covered the search box. 150% root font
+// size stands in for that setting.
+for (const width of [320, 412, 600]) {
+  for (const rootFontSize of ['100%', '150%']) {
+    test(`Reflow: mobile header logo, search and menu button do not overlap at ${width}px, ${rootFontSize} text`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 720 });
+      await page.goto('/');
+      await page.addStyleTag({ content: `html { font-size: ${rootFontSize} !important; }` });
+
+      const search = page.locator('.header-search--mobile');
+      test.skip(await search.count() === 0, 'Header search is turned off on this site.');
+      // With the always-mobile-nav setting the search box gets its own row.
+      test.skip(
+        await page.locator('body.is-always-mobile-nav').count() > 0,
+        'Header search is on its own row on this site.'
+      );
+      const logoImage = page.locator('.header__logo img');
+      test.skip(await logoImage.count() === 0, 'No site branding block in the header.');
+
+      const logo = await logoImage.boundingBox();
+      const searchBox = await search.boundingBox();
+      const menuButton = await page.locator('.mobile-nav-button').boundingBox();
+      expect(logo).not.toBeNull();
+      expect(searchBox).not.toBeNull();
+      expect(menuButton).not.toBeNull();
+
+      // Allow 1px for subpixel rounding.
+      expect(logo!.x + logo!.width).toBeLessThanOrEqual(searchBox!.x + 1);
+      expect(searchBox!.x + searchBox!.width).toBeLessThanOrEqual(menuButton!.x + 1);
+    });
+  }
+}
+
 test('Reflow: page title and breadcrumb allow mid-word breaks for long unbreakable titles', async ({ page }) => {
   await page.goto('/browse');
   const titleOverflowWrap = await page.locator('.page__title h1').first().evaluate(
