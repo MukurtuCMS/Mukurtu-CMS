@@ -6,9 +6,16 @@ import { test, expect } from "@playwright/test";
  * mukurtu_v4 theme gives the button a dark fill in that mode (see
  * _consent-popup.scss).
  */
-for (const contrast of ['no-preference', 'more'] as const) {
-  test(`Klaro toggle button icon contrasts with its background (prefers-contrast: ${contrast})`, async ({ page }) => {
-    await page.emulateMedia({ contrast });
+const modes = [
+  { contrast: 'no-preference', forcedColors: 'none' },
+  { contrast: 'more', forcedColors: 'none' },
+  // Windows high contrast themes report both.
+  { contrast: 'more', forcedColors: 'active' },
+] as const;
+
+for (const { contrast, forcedColors } of modes) {
+  test(`Klaro toggle button icon contrasts with its background (prefers-contrast: ${contrast}, forced-colors: ${forcedColors})`, async ({ page }) => {
+    await page.emulateMedia({ contrast, forcedColors });
     await page.goto('/');
 
     const toggle = page.locator('#klaro_toggle_dialog');

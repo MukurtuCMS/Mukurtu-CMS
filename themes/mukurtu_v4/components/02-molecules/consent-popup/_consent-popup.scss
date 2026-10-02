@@ -95,9 +95,13 @@ body.consent-popup-opened .klaro_toggle_dialog {
 // device asks for more contrast (Android's high contrast text and contrast
 // settings report prefers-contrast: more). Give the button a dark fill so the
 // white icon shows, with a white border to keep its edge on dark pages.
+// Windows high contrast themes also report prefers-contrast: more, and forced
+// colors would repaint the fill with a light Canvas, blanking the white icon
+// again, so opt the button out of forced colors.
 @media (prefers-contrast: more) {
   .klaro_toggle_dialog {
     border-color: var(--color-white);
     background-color: var(--color-black);
+    forced-color-adjust: none;
   }
 }

@@ -1325,6 +1325,7 @@ body.consent-popup-opened .klaro_toggle_dialog {
   .klaro_toggle_dialog {
     border-color: var(--color-white);
     background-color: var(--color-black);
+    forced-color-adjust: none;
   }
 }
 .media:has(.mukurtu-content-warnings) {
