@@ -203,7 +203,7 @@ content:
     weight: 43
     region: content
   field_contributor:
-    type: entity_reference_label
+    type: mukurtu_entity_reference_role_label
     label: above
     settings:
       link: true
@@ -425,7 +425,7 @@ content:
     weight: 31
     region: content
   field_people:
-    type: entity_reference_label
+    type: mukurtu_entity_reference_role_label
     label: above
     settings:
       link: true

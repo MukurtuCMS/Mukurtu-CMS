@@ -106,7 +106,7 @@ class Audio extends Media implements AudioInterface, CulturalProtocolControlledI
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
-    $definitions['field_contributor'] = BaseFieldDefinition::create('entity_reference')
+    $definitions['field_contributor'] = BaseFieldDefinition::create('mukurtu_entity_reference_role')
       ->setLabel(t('Contributor'))
       ->setDescription(t('Speakers or singers present in the audio file. Contributors listed here are displayed in the speaker field that accompanies the audio file in dictionary words.	<br />Include as many contributors as needed. Select from existing contributors or add new ones.'))
       ->setSettings([
@@ -156,7 +156,7 @@ class Audio extends Media implements AudioInterface, CulturalProtocolControlledI
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
-    $definitions['field_people'] = BaseFieldDefinition::create('entity_reference')
+    $definitions['field_people'] = BaseFieldDefinition::create('mukurtu_entity_reference_role')
       ->setLabel(t('People'))
       ->setDescription(t('A person or people present or referenced in the audio file. This is used to trigger deceased person media content warnings.	<br />Include as many people as needed. Select from existing people or add new ones.'))
       ->setSettings([

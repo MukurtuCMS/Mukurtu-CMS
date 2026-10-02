@@ -52,18 +52,14 @@ content:
       placeholder: ''
     third_party_settings: {  }
   field_people:
-    type: tagify_entity_reference_autocomplete_widget
+    type: mukurtu_entity_reference_role_autocomplete
     weight: 5
     region: content
     settings:
       match_operator: CONTAINS
-      match_limit: 0
+      match_limit: 10
+      size: 60
       placeholder: ''
-      suggestions_dropdown: 0
-      show_entity_id: 0
-      show_info_label: 0
-      info_label: ''
-      parent_selection: 1
     third_party_settings: {  }
   field_media_tags:
     type: tagify_entity_reference_autocomplete_widget
@@ -80,18 +76,14 @@ content:
       parent_selection: 1
     third_party_settings: {  }
   field_contributor:
-    type: tagify_entity_reference_autocomplete_widget
+    type: mukurtu_entity_reference_role_autocomplete
     weight: 7
     region: content
     settings:
       match_operator: CONTAINS
-      match_limit: 0
+      match_limit: 10
+      size: 60
       placeholder: ''
-      suggestions_dropdown: 0
-      show_entity_id: 0
-      show_info_label: 0
-      info_label: ''
-      parent_selection: 1
     third_party_settings: {  }
 hidden:
   created: true

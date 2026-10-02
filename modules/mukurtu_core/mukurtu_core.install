@@ -7,6 +7,7 @@
 
 use Drupal\Core\Extension\Requirement\RequirementSeverity;
 use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\mukurtu_core\EntityReferenceRoleConverter;
 use Drupal\mukurtu_core\Hook\UpdatePathRequirements;
 use Drupal\user\Entity\Role;
 
@@ -291,4 +292,31 @@ function mukurtu_core_update_40204(): void {
   }
 
   $view->set('display.default.display_options.show_admin_links', FALSE)->save();
+}
+
+/**
+ * Adds an optional role to each creator, contributor, and person on content and media.
+ */
+function mukurtu_core_update_40501(): void {
+  // Keep the docblock above to one line; see mukurtu_core_update_40201()
+  // for why.
+  //
+  // Creator, Contributor and People change from entity_reference to
+  // mukurtu_entity_reference_role. Each storage is shared by every bundle
+  // that declares the field (Contributor by digital heritage and dictionary
+  // words, People by all seven media types), so each is converted once here
+  // rather than per module. See EntityReferenceRoleConverter for how.
+  EntityReferenceRoleConverter::installRoleVocabulary();
+
+  $fields = [
+    'node' => ['field_creator', 'field_contributor', 'field_people'],
+    'media' => ['field_contributor', 'field_people'],
+    'paragraph' => ['field_contributor'],
+  ];
+  foreach ($fields as $entity_type_id => $field_names) {
+    foreach ($field_names as $field_name) {
+      EntityReferenceRoleConverter::convertStorage($entity_type_id, $field_name);
+      EntityReferenceRoleConverter::updateDisplays($entity_type_id, $field_name);
+    }
+  }
 }

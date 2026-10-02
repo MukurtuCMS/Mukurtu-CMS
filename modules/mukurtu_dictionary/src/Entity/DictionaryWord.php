@@ -180,7 +180,7 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
-    $definitions['field_contributor'] = BaseFieldDefinition::create('entity_reference')
+    $definitions['field_contributor'] = BaseFieldDefinition::create('mukurtu_entity_reference_role')
       ->setLabel(t('Contributor'))
       ->setDescription(t('A contributor is a person or group who aided in the making of the entry. While a contributor is usually a single person, it could also be a clan, tribe, culture group, or organization. A dictionary word can have multiple contributors. Examples include language speakers who recorded the word, or contributed knowledge and history of the word. <br />Names can be in any format that is appropriate for the content, eg: "John Smith" or "Smith, John". <br />Include as many contributors as needed. Select from existing contributors or add new ones.'))
       ->setSettings([

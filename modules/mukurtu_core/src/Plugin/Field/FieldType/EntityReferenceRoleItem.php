@@ -9,6 +9,7 @@ use Drupal\Core\Field\Attribute\FieldType;
 use Drupal\Core\Field\EntityReferenceFieldItemList;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Field\Plugin\Field\FieldType\EntityReferenceItem;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\TypedData\DataDefinition;
 
@@ -44,6 +45,35 @@ class EntityReferenceRoleItem extends EntityReferenceItem {
     return [
       'role_target_bundles' => ['role' => 'role'],
     ] + parent::defaultFieldSettings();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function fieldSettingsForm(array $form, FormStateInterface $form_state) {
+    $form = parent::fieldSettingsForm($form, $form_state);
+
+    $options = [];
+    foreach (\Drupal::entityTypeManager()->getStorage('taxonomy_vocabulary')->loadMultiple() as $vid => $vocabulary) {
+      $options[$vid] = $vocabulary->label();
+    }
+    $form['role_target_bundles'] = [
+      '#type' => 'checkboxes',
+      '#title' => $this->t('Role vocabularies'),
+      '#description' => $this->t('Vocabularies that roles can be chosen from. New roles can be added from the form only when one vocabulary is selected.'),
+      '#options' => $options,
+      '#default_value' => $this->getSetting('role_target_bundles') ?: [],
+      '#element_validate' => [[static::class, 'validateRoleTargetBundles']],
+    ];
+    return $form;
+  }
+
+  /**
+   * Stores only the checked vocabularies, keyed and valued by ID.
+   */
+  public static function validateRoleTargetBundles(array $element, FormStateInterface $form_state): void {
+    $selected = array_filter($element['#value'] ?? []);
+    $form_state->setValueForElement($element, array_combine(array_keys($selected), array_keys($selected)));
   }
 
   /**

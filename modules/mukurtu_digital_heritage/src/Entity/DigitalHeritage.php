@@ -379,7 +379,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
-    $definitions['field_contributor'] = BaseFieldDefinition::create('entity_reference')
+    $definitions['field_contributor'] = BaseFieldDefinition::create('mukurtu_entity_reference_role')
       ->setLabel(t('Contributor'))
       ->setDescription(t('A contributor is a person or group who aided in the making of a digital heritage item. While a contributor is usually a single person, it could also be a clan, tribe, culture group, or organization. A digital heritage item can have multiple contributors. Examples include someone who wrote, compiled, or illustrated a book or recorded a song, the people who edited or produced a film, or people collaborated or consulted on a project. <br />Names can be in any format that is appropriate for the content, eg: "John Smith" or "Smith, John". <br />Include as many contributors as needed. Select from existing contributors or add new ones.'))
       ->setSettings([
@@ -410,10 +410,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
             'creator' => 'creator'
           ],
           'auto_create' => TRUE,
-        ],
-        'role_target_bundles' => [
-          'role' => 'role',
-        ],
+        ]
       ])
       ->setCardinality(-1)
       ->setRequired(FALSE)
@@ -482,7 +479,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
-    $definitions['field_people'] = BaseFieldDefinition::create('entity_reference')
+    $definitions['field_people'] = BaseFieldDefinition::create('mukurtu_entity_reference_role')
       ->setLabel(t('People'))
       ->setDescription(t('A person or people represented or referenced in the digital heritage item or media asset. This field complements the creator and contributor fields. Examples include people identifiable in a photograph, people speaking in an audio recording, present in a video, or referenced in a document. <br />Names can be in any format that is appropriate for the content, eg: "John Smith" or "Smith, John". <br />Include as many people as needed. Select from existing people or add new ones.'))
       ->setSettings([

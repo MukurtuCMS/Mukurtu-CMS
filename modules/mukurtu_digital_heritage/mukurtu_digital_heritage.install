@@ -1,8 +1,4 @@
 <?php
-
-use Drupal\Core\Config\FileStorage;
-use Drupal\mukurtu_core\Plugin\Field\FieldType\EntityReferenceRoleItem;
-
 /**
  * Implements hook_update_last_removed().
  *
@@ -17,80 +13,4 @@ use Drupal\mukurtu_core\Plugin\Field\FieldType\EntityReferenceRoleItem;
  */
 function mukurtu_digital_heritage_update_last_removed(): int {
   return 40009;
-}
-
-/**
- * Adds an optional role to each creator on digital heritage items.
- */
-function mukurtu_digital_heritage_update_40501(): void {
-  // Keep the docblock above to one line; update.php shows it to operators.
-  //
-  // field_creator changes from entity_reference to
-  // mukurtu_entity_reference_role, which is the same storage plus one
-  // nullable role_target_id column. Core refuses any field storage schema
-  // change once the field has data, even a purely additive one, so this adds
-  // the column by hand and then records the new definition and schema as
-  // installed. Existing creators keep their target_id and get no role.
-  $vocabulary_storage = \Drupal::entityTypeManager()->getStorage('taxonomy_vocabulary');
-  if (!$vocabulary_storage->load('role')) {
-    $config = new FileStorage(\Drupal::service('extension.list.module')->getPath('mukurtu_core') . '/config/install');
-    $vocabulary_storage->createFromStorageRecord($config->read('taxonomy.vocabulary.role'))->save();
-  }
-  if (\Drupal::moduleHandler()->moduleExists('mukurtu_multilingual')) {
-    $settings_storage = \Drupal::entityTypeManager()->getStorage('language_content_settings');
-    if (!$settings_storage->load('taxonomy_term.role')) {
-      $config = new FileStorage(\Drupal::service('extension.list.module')->getPath('mukurtu_multilingual') . '/config/install');
-      $settings_storage->createFromStorageRecord($config->read('language.content_settings.taxonomy_term.role'))->save();
-    }
-  }
-
-  $last_installed = \Drupal::service('entity.last_installed_schema.repository');
-  $installed = $last_installed->getLastInstalledFieldStorageDefinitions('node')['field_creator'] ?? NULL;
-  if ($installed && $installed->getType() !== 'mukurtu_entity_reference_role') {
-    $definition = \Drupal::service('entity_field.manager')->getFieldStorageDefinitions('node')['field_creator'];
-    $table_mapping = \Drupal::entityTypeManager()->getStorage('node')->getTableMapping();
-    $column = $table_mapping->getFieldColumnName($definition, 'role_target_id');
-    // Dedicated tables use the field-prefixed column name as the index name
-    // too; see SqlContentEntityStorageSchema::getFieldIndexName().
-    $spec = EntityReferenceRoleItem::schema($definition)['columns']['role_target_id'] + ['not null' => FALSE];
-
-    $schema = \Drupal::database()->schema();
-    $key_value = \Drupal::keyValue('entity.storage_schema.sql');
-    $schema_data = $key_value->get('node.field_schema_data.field_creator', []);
-    $tables = [
-      $table_mapping->getDedicatedDataTableName($definition),
-      $table_mapping->getDedicatedRevisionTableName($definition),
-    ];
-    foreach ($tables as $table) {
-      if (!$schema->fieldExists($table, $column)) {
-        $schema->addField($table, $column, $spec, [
-          'fields' => [$column => $spec],
-          'indexes' => [$column => [$column]],
-        ]);
-      }
-      $schema_data[$table]['fields'][$column] = $spec;
-      $schema_data[$table]['indexes'][$column] = [$column];
-    }
-    $key_value->set('node.field_schema_data.field_creator', $schema_data);
-    $last_installed->setLastInstalledFieldStorageDefinition($definition);
-  }
-
-  // Switch the widget and full display formatter, but only where a site
-  // still has the shipped defaults. The stock entity reference plugins keep
-  // working on the new type, so customized displays are left alone.
-  $form_display = \Drupal::configFactory()->getEditable('core.entity_form_display.node.digital_heritage.default');
-  if ($form_display->get('content.field_creator.type') === 'tagify_entity_reference_autocomplete_widget') {
-    $form_display->set('content.field_creator.type', 'mukurtu_entity_reference_role_autocomplete')
-      ->set('content.field_creator.settings', [
-        'match_operator' => 'CONTAINS',
-        'match_limit' => 10,
-        'size' => 60,
-        'placeholder' => '',
-      ])
-      ->save();
-  }
-  $view_display = \Drupal::configFactory()->getEditable('core.entity_view_display.node.digital_heritage.full');
-  if ($view_display->get('content.field_creator.type') === 'entity_reference_label') {
-    $view_display->set('content.field_creator.type', 'mukurtu_entity_reference_role_label')->save();
-  }
 }
