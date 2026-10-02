@@ -103,9 +103,21 @@ jobs:
         run: |
           set -uo pipefail
           # fetch-depth: 0 above should already provide this; fetching again
-          # is cheap insurance against a shallow or pruned base ref.
-          git fetch --no-tags --quiet origin "${{ github.base_ref }}" || true
-          BASE=$(git merge-base "origin/${{ github.base_ref }}" HEAD)
+          # is cheap insurance against a shallow or pruned base ref. Failure is
+          # tolerated because the ref is usually already present, but it is
+          # reported rather than swallowed: if merge-base then fails, this line
+          # is the explanation.
+          if ! git fetch --no-tags --quiet origin "${{ github.base_ref }}"; then
+            echo "Note: could not fetch origin/${{ github.base_ref }}; relying on the existing checkout."
+          fi
+          # Not `BASE=$(git merge-base ...)` on its own: GitHub runs this as
+          # `bash -e`, so a failed command substitution would abort the step
+          # with a bare exit 128 and no indication of what went wrong.
+          if ! BASE=$(git merge-base "origin/${{ github.base_ref }}" HEAD); then
+            echo "::error::Could not determine the merge base against origin/${{ github.base_ref }}."
+            echo "PHPCS is scoped to files changed since that point, so there is nothing to diff."
+            exit 1
+          fi
           echo "Diffing against $BASE"
           # ACMR: added/copied/modified/renamed. Deleted files must not be linted.
           mapfile -t FILES < <(git diff --name-only --diff-filter=ACMR "$BASE" HEAD \
@@ -144,13 +156,45 @@ jobs:
           ../../../vendor/bin/phpstan analyse -c phpstan.neon.dist \
             --no-progress --memory-limit=-1 || STATUS=$?
           if [ "$STATUS" -ne 0 ]; then
+            # Two very different failures land here, and they must not be
+            # treated alike.
+            #
+            #   ignore.unmatched - a baseline entry stopped matching, because
+            #     the error it describes was fixed or the code moved. Nothing
+            #     is wrong with the branch; the baseline just needs
+            #     regenerating. PHPStan reports this as non-ignorable, so it
+            #     would otherwise block a merge for doing the right thing.
+            #
+            #   anything else - genuinely new, introduced by this branch.
+            #
+            # Re-run in JSON to classify. The result cache from the run above
+            # is still warm, so this costs seconds, not another full analysis.
+            ../../../vendor/bin/phpstan analyse -c phpstan.neon.dist \
+              --no-progress --memory-limit=-1 --error-format=json \
+              > /tmp/phpstan.json 2>/dev/null || true
+            TOTAL=$(jq '[.files[].messages[]] | length' /tmp/phpstan.json 2>/dev/null || echo 0)
+            STALE=$(jq '[.files[].messages[] | select(.identifier == "ignore.unmatched")] | length' /tmp/phpstan.json 2>/dev/null || echo 0)
             echo
-            echo "The errors above are NOT in phpstan-baseline.neon, meaning this"
-            echo "branch introduced them. Reproduce locally with:"
+            if [ "$TOTAL" -gt 0 ] && [ "$STALE" -eq "$TOTAL" ]; then
+              echo "All $TOTAL finding(s) are stale phpstan-baseline.neon entries:"
+              echo "the errors they describe no longer occur. This branch introduced"
+              echo "nothing. Refresh the baseline - it will shrink:"
+              echo "    composer run lint:phpstan:baseline"
+              echo
+              echo "Not failing: a stale baseline is a maintenance task, not a regression."
+              exit 0
+            fi
+            echo "$((TOTAL - STALE)) finding(s) are NOT in phpstan-baseline.neon, meaning"
+            echo "this branch introduced them. Reproduce locally with:"
             echo "    composer run lint:phpstan"
             echo
             echo "Fix them rather than regenerating the baseline to silence them -"
             echo "the baseline is meant to shrink over time, never grow."
+            if [ "$STALE" -gt 0 ]; then
+              echo
+              echo "($STALE of the $TOTAL are stale baseline entries; regenerating"
+              echo "the baseline will clear those, but not the rest.)"
+            fi
             if [ "${MUKURTU_LINT_STRICT}" = "1" ]; then
               exit "$STATUS"
             fi
