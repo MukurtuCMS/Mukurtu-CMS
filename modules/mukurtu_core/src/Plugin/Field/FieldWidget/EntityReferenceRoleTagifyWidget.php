@@ -9,6 +9,7 @@ use Drupal\Core\Field\Attribute\FieldWidget;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\mukurtu_core\Plugin\Field\FieldType\EntityReferenceRoleItem;
 use Drupal\tagify\Plugin\Field\FieldWidget\TagifyEntityReferenceAutocompleteWidget;
 use Drupal\taxonomy\TermInterface;
 
@@ -45,12 +46,13 @@ class EntityReferenceRoleTagifyWidget extends TagifyEntityReferenceAutocompleteW
    */
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state): array {
     $names = parent::formElement($items, $delta, $element, $form, $form_state);
+    $roles_enabled = EntityReferenceRoleItem::rolesEnabled($this->fieldDefinition->getName());
 
     // Tagify's own input now sits below the rows, apart from the field
     // label, so give it a visible prompt unless the site set a placeholder.
     // The contrib script parses data-placeholder as an integer, so Tagify
     // falls back to the input's placeholder attribute.
-    if (($names['#placeholder'] ?? '') === '') {
+    if ($roles_enabled && ($names['#placeholder'] ?? '') === '') {
       $names['#placeholder'] = $this->t('Add a name');
       $names['#attributes']['placeholder'] = $names['#placeholder'];
     }
@@ -58,7 +60,10 @@ class EntityReferenceRoleTagifyWidget extends TagifyEntityReferenceAutocompleteW
     // Tagify's help line says only "Drag to re-order", and calls people
     // terms. Rows can also be moved with buttons.
     $drag_message = $this->t('Drag or use the arrow buttons to reorder.');
-    if (($names['#description']['#theme'] ?? NULL) === 'item_list') {
+    if (!$roles_enabled) {
+      // Names only: Tagify as usual, with its own help line.
+    }
+    elseif (($names['#description']['#theme'] ?? NULL) === 'item_list') {
       $names['#description']['#items'][array_key_last($names['#description']['#items'])] = $drag_message;
     }
     elseif (!empty($names['#description'])) {
@@ -86,7 +91,15 @@ class EntityReferenceRoleTagifyWidget extends TagifyEntityReferenceAutocompleteW
 
     return [
       '#type' => 'container',
-      '#attributes' => ['class' => ['mukurtu-role-tagify']],
+      // With roles off, the script shows plain Tagify chips but still
+      // submits each person's existing role, so saving doesn't lose them.
+      '#attributes' => [
+        'class' => array_filter([
+          'mukurtu-role-tagify',
+          $roles_enabled ? NULL : 'mukurtu-role-tagify--names-only',
+        ]),
+      ],
+      '#cache' => ['tags' => ['config:' . EntityReferenceRoleItem::SETTINGS]],
       '#attached' => ['library' => ['mukurtu_core/entity_reference_role_tagify']],
       'names' => $names,
       'roles' => [

@@ -7,6 +7,7 @@ namespace Drupal\Tests\mukurtu_digital_heritage\Kernel;
 use Drupal\node\Entity\Node;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\taxonomy\Entity\Vocabulary;
+use Drupal\user\Entity\Role;
 use Drupal\Tests\mukurtu_core\Traits\EntityReferenceRoleUpdateTrait;
 use PHPUnit\Framework\Attributes\Group;
 
@@ -155,10 +156,14 @@ class PersonFieldRoleTest extends DigitalHeritageTestBase {
       $this->assertStoragePending(TRUE, 'node', $field_name);
     }
     $this->assertNull(Vocabulary::load('role'));
+    Role::create(['id' => 'mukurtu_manager', 'label' => 'Mukurtu Manager'])->save();
 
     $this->runRoleUpdate();
 
     $this->assertNotNull(Vocabulary::load('role'));
+    // Roles start off, and managers can turn them on.
+    $this->assertSame([], $this->config('mukurtu_core.person_roles')->get('enabled_fields'));
+    $this->assertTrue(Role::load('mukurtu_manager')->hasPermission('administer mukurtu person role settings'));
     $role = $this->term('role', 'Singer');
     $loaded = $this->reloadEntity('node', $item->id());
     foreach (array_keys(self::FIELDS) as $field_name) {

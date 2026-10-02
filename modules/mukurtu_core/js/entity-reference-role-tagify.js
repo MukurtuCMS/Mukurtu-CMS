@@ -77,6 +77,13 @@
             return;
           }
 
+          // With roles turned off for this field, Tagify shows its own chips
+          // and only the hidden roles field is kept in step, so each
+          // remaining person's existing role survives a save.
+          const namesOnly = wrapper.classList.contains(
+            'mukurtu-role-tagify--names-only',
+          );
+
           const rows = document.createElement('ul');
           rows.className = 'mukurtu-role-tagify__rows';
           people.appendChild(rows);
@@ -93,7 +100,10 @@
           const tagifyBox = names.previousElementSibling?.matches('tags')
             ? names.previousElementSibling
             : names;
-          tagifyBox.parentNode.insertBefore(people, tagifyBox);
+          if (!namesOnly) {
+            tagifyBox.parentNode.insertBefore(people, tagifyBox);
+          }
+          people.hidden = true;
 
           // Seed each chip's role from the server-rendered value.
           const roles = new Map();
@@ -256,6 +266,10 @@
           }
 
           function render() {
+            if (namesOnly) {
+              serialize();
+              return;
+            }
             const tags = parseList(names.value);
             rows.replaceChildren(
               ...tags.map((tag, index) => buildRow(tag, index, tags.length)),
@@ -282,19 +296,21 @@
             }
           }
 
-          Sortable.create(rows, {
-            handle: '.mukurtu-role-tagify__handle',
-            animation: 150,
-            onEnd(event) {
-              if (event.oldIndex === event.newIndex) {
-                return;
-              }
-              const order = [...Array(rows.children.length).keys()];
-              const [moved] = order.splice(event.oldIndex, 1);
-              order.splice(event.newIndex, 0, moved);
-              reorder(order);
-            },
-          });
+          if (!namesOnly) {
+            Sortable.create(rows, {
+              handle: '.mukurtu-role-tagify__handle',
+              animation: 150,
+              onEnd(event) {
+                if (event.oldIndex === event.newIndex) {
+                  return;
+                }
+                const order = [...Array(rows.children.length).keys()];
+                const [moved] = order.splice(event.oldIndex, 1);
+                order.splice(event.newIndex, 0, moved);
+                reorder(order);
+              },
+            });
+          }
 
           names.addEventListener('change', render);
           // Catch anything typed but not yet committed by a change event.

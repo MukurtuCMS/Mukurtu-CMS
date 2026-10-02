@@ -39,6 +39,34 @@ use Drupal\Core\TypedData\DataDefinition;
 class EntityReferenceRoleItem extends EntityReferenceItem {
 
   /**
+   * Config listing which shipped person fields record roles.
+   */
+  const SETTINGS = 'mukurtu_core.person_roles';
+
+  /**
+   * The shipped person fields whose roles managers can turn on and off.
+   *
+   * Any other field of this type always shows roles: a site builder who
+   * chose this field type has already opted in.
+   */
+  const MANAGED_FIELDS = ['field_creator', 'field_contributor', 'field_people'];
+
+  /**
+   * Whether a field's roles are shown on forms and displays.
+   *
+   * When off, roles are hidden but kept: widgets carry each person's
+   * existing role through a save, and turning roles back on shows them all.
+   * Anything rendering by this answer should add SETTINGS' cache tag.
+   */
+  public static function rolesEnabled(string $field_name): bool {
+    if (!in_array($field_name, self::MANAGED_FIELDS, TRUE)) {
+      return TRUE;
+    }
+    $enabled = \Drupal::config(self::SETTINGS)->get('enabled_fields') ?? [];
+    return in_array($field_name, $enabled, TRUE);
+  }
+
+  /**
    * {@inheritdoc}
    */
   public static function defaultFieldSettings() {

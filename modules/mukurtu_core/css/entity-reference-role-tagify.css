@@ -7,8 +7,9 @@
  * chips editors know.
  */
 
-/* Tagify's own chips are replaced by the rows; only its input is used. */
-.mukurtu-role-tagify .tagify > .tagify__tag {
+/* Tagify's own chips are replaced by the rows; only its input is used.
+   With roles turned off for the field, Tagify's chips show as usual. */
+.mukurtu-role-tagify:not(.mukurtu-role-tagify--names-only) .tagify > .tagify__tag {
   display: none;
 }
 

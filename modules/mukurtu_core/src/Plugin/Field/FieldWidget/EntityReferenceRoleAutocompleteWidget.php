@@ -9,6 +9,7 @@ use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\Plugin\Field\FieldWidget\EntityReferenceAutocompleteWidget;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\mukurtu_core\Plugin\Field\FieldType\EntityReferenceRoleItem;
 use Drupal\user\EntityOwnerInterface;
 
 /**
@@ -65,8 +66,15 @@ class EntityReferenceRoleAutocompleteWidget extends EntityReferenceAutocompleteW
       ];
     }
 
+    // With roles turned off for this field, keep each row's existing role
+    // without showing it, so saving doesn't lose it.
+    if (!EntityReferenceRoleItem::rolesEnabled($this->fieldDefinition->getName())) {
+      $role = ['#type' => 'value', '#value' => $role_id];
+    }
+
     return [
       '#type' => 'container',
+      '#cache' => ['tags' => ['config:' . EntityReferenceRoleItem::SETTINGS]],
       '#attributes' => ['class' => ['mukurtu-entity-reference-role', 'container-inline']],
       'target_id' => $name,
       'role_target_id' => $role,

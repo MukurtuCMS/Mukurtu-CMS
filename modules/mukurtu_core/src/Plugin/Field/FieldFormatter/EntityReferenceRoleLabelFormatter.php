@@ -11,6 +11,7 @@ use Drupal\Core\Field\Plugin\Field\FieldFormatter\EntityReferenceLabelFormatter;
 use Drupal\Core\Link;
 use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\mukurtu_core\Plugin\Field\FieldType\EntityReferenceRoleItem;
 
 /**
  * Displays each referenced label followed by its role, if it has one.
@@ -27,6 +28,16 @@ class EntityReferenceRoleLabelFormatter extends EntityReferenceLabelFormatter {
    */
   public function viewElements(FieldItemListInterface $items, $langcode) {
     $elements = parent::viewElements($items, $langcode);
+
+    // Tag every name, on or off, so changing the setting refreshes pages.
+    $settings_cache = (new CacheableMetadata())->addCacheTags(['config:' . EntityReferenceRoleItem::SETTINGS]);
+    foreach ($elements as &$element) {
+      CacheableMetadata::createFromRenderArray($element)->merge($settings_cache)->applyTo($element);
+    }
+    unset($element);
+    if (!EntityReferenceRoleItem::rolesEnabled($this->fieldDefinition->getName())) {
+      return $elements;
+    }
 
     $role_ids = [];
     foreach ($elements as $delta => $element) {

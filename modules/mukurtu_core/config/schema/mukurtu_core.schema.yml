@@ -891,3 +891,14 @@ taxonomy.vocabulary.*.third_party.flat_taxonomy:
     flat:
       type: integer
       label: 'Flat'
+
+mukurtu_core.person_roles:
+  type: config_object
+  label: 'Person role settings'
+  mapping:
+    enabled_fields:
+      type: sequence
+      label: 'Person fields that record a role for each name'
+      sequence:
+        type: string
+        label: 'Field name'
