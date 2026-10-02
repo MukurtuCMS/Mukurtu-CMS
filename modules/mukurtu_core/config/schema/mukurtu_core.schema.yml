@@ -879,3 +879,15 @@ field.formatter.settings.mukurtu_entity_reference_role_label:
 
 field.widget.settings.mukurtu_entity_reference_role_tagify:
   type: field.widget.settings.tagify_entity_reference_autocomplete_widget
+
+# flat_taxonomy ships this schema at its module root rather than in
+# config/schema/, so Drupal never discovers it, and every shipped Mukurtu
+# vocabulary's third-party setting fails strict schema checks. Same shape as
+# flat_taxonomy.schema.yml; harmless if that module ever moves its file.
+taxonomy.vocabulary.*.third_party.flat_taxonomy:
+  type: mapping
+  label: 'Flat'
+  mapping:
+    flat:
+      type: integer
+      label: 'Flat'

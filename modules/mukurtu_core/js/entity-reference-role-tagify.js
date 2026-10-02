@@ -28,6 +28,19 @@
   }
 
   /**
+   * Turns a translated string into plain text for textContent or attributes.
+   *
+   * Drupal.t() HTML-escapes "@" placeholders, which is right for markup but
+   * would show a name like O'Brien as "O&#39;Brien" here. DOMParser decodes
+   * the entities without running scripts. Callers keep literal Drupal.t()
+   * calls so the strings are still found for translation.
+   */
+  function plain(translated) {
+    return new DOMParser().parseFromString(translated, 'text/html')
+      .documentElement.textContent;
+  }
+
+  /**
    * A stable key for a chip, so its role follows it when chips move.
    */
   function chipKey(tag) {
@@ -131,6 +144,8 @@
             pendingFocus = [target, buttonClass];
             const tag = parseList(names.value)[index];
             reorder(order);
+            // Drupal.announce() writes with innerHTML, so it gets Drupal.t()'s
+            // escaped output, not plain().
             Drupal.announce(
               Drupal.t('@name moved to position @position of @count.', {
                 '@name': tag.label || tag.value || '',
@@ -172,7 +187,7 @@
             const removeButton = iconButton(
               'mukurtu-role-tagify__remove',
               '×',
-              Drupal.t('Remove @name', { '@name': name }),
+              plain(Drupal.t('Remove @name', { '@name': name })),
             );
             removeButton.addEventListener('click', () => remove(index));
             chip.append(chipText, removeButton);
@@ -183,7 +198,7 @@
             const label = document.createElement('label');
             label.className = 'form-item__label';
             label.htmlFor = id;
-            label.textContent = Drupal.t('Role');
+            label.textContent = plain(Drupal.t('Role'));
             const input = prototype.cloneNode(false);
             input.id = id;
             input.removeAttribute('name');
@@ -194,7 +209,7 @@
             // The visible label is "Role"; the accessible name says whose.
             input.setAttribute(
               'aria-label',
-              Drupal.t('Role for @name', { '@name': name }),
+              plain(Drupal.t('Role for @name', { '@name': name })),
             );
             input.value = roles.get(key) || '';
             const update = () => {
@@ -217,7 +232,7 @@
             const up = iconButton(
               'mukurtu-role-tagify__up',
               '↑',
-              Drupal.t('Move @name up', { '@name': name }),
+              plain(Drupal.t('Move @name up', { '@name': name })),
             );
             up.disabled = index === 0;
             up.addEventListener('click', () =>
@@ -226,7 +241,7 @@
             const down = iconButton(
               'mukurtu-role-tagify__down',
               '↓',
-              Drupal.t('Move @name down', { '@name': name }),
+              plain(Drupal.t('Move @name down', { '@name': name })),
             );
             down.disabled = index === count - 1;
             down.addEventListener('click', () =>

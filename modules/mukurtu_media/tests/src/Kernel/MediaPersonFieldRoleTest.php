@@ -23,14 +23,6 @@ class MediaPersonFieldRoleTest extends MukurtuMediaTestBase {
   protected static $modules = ['flat_taxonomy'];
 
   /**
-   * {@inheritdoc}
-   *
-   * See \Drupal\Tests\mukurtu_digital_heritage\Kernel\PersonFieldRoleTest:
-   * flat_taxonomy's schema file is never discovered.
-   */
-  protected $strictConfigSchema = FALSE;
-
-  /**
    * Creates and saves a term.
    */
   protected function term(string $vid, string $name): Term {

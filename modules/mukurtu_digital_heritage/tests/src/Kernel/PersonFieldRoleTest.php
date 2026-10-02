@@ -21,17 +21,7 @@ class PersonFieldRoleTest extends DigitalHeritageTestBase {
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['flat_taxonomy'];
-
-  /**
-   * {@inheritdoc}
-   *
-   * The update installs the shipped Role vocabulary, which carries
-   * flat_taxonomy's third-party setting like every Mukurtu vocabulary.
-   * flat_taxonomy keeps its schema file at the module root rather than in
-   * config/schema/, so Drupal never discovers it and strict checking fails.
-   */
-  protected $strictConfigSchema = FALSE;
+  protected static $modules = ['flat_taxonomy', 'tagify'];
 
   /**
    * The person fields, keyed by name, valued by the vocabulary they use.
@@ -189,19 +179,38 @@ class PersonFieldRoleTest extends DigitalHeritageTestBase {
   }
 
   /**
-   * The update moves form displays to a role widget and label formatters to
-   * the role formatter, leaving other formatters alone.
+   * The update moves displays onto the role widget and formatter.
+   *
+   * Form displays all move to a role widget; view displays move only where
+   * they use the plain label formatter.
    */
   public function testUpdateSwitchesDisplays(): void {
     $config_factory = $this->container->get('config.factory');
-    $tagify_settings = ['match_operator' => 'STARTS_WITH', 'match_limit' => 0, 'placeholder' => '', 'suggestions_dropdown' => 1];
+    $tagify_settings = [
+      'match_operator' => 'STARTS_WITH',
+      'match_limit' => 0,
+      'placeholder' => '',
+      'suggestions_dropdown' => 1,
+    ];
     $this->writeDisplay('core.entity_form_display.node.digital_heritage.default', [
       // Tagify becomes Tagify with roles and keeps its settings.
-      'field_people' => ['type' => 'tagify_entity_reference_autocomplete_widget', 'weight' => 3, 'settings' => $tagify_settings],
+      'field_people' => [
+        'type' => 'tagify_entity_reference_autocomplete_widget',
+        'weight' => 3,
+        'settings' => $tagify_settings,
+      ],
       // Any other widget moves too, with the new widget's defaults.
-      'field_contributor' => ['type' => 'entity_reference_autocomplete', 'weight' => 4, 'settings' => ['size' => 40]],
+      'field_contributor' => [
+        'type' => 'entity_reference_autocomplete',
+        'weight' => 4,
+        'settings' => ['size' => 40],
+      ],
       // A role widget a site already chose is left alone.
-      'field_creator' => ['type' => 'mukurtu_entity_reference_role_autocomplete', 'weight' => 5, 'settings' => ['size' => 30]],
+      'field_creator' => [
+        'type' => 'mukurtu_entity_reference_role_autocomplete',
+        'weight' => 5,
+        'settings' => ['size' => 30],
+      ],
     ]);
     $this->writeDisplay('core.entity_view_display.node.digital_heritage.full', [
       'field_people' => ['type' => 'entity_reference_label', 'settings' => ['link' => TRUE]],
@@ -241,4 +250,5 @@ class PersonFieldRoleTest extends DigitalHeritageTestBase {
       'content' => $content,
     ])->save();
   }
+
 }

@@ -34,6 +34,13 @@ use Drupal\taxonomy\TermInterface;
 class EntityReferenceRoleTagifyWidget extends TagifyEntityReferenceAutocompleteWidget {
 
   /**
+   * Unsaved role terms created while massaging one submission, by name.
+   *
+   * @var \Drupal\taxonomy\TermInterface[]
+   */
+  protected array $newRoles = [];
+
+  /**
    * {@inheritdoc}
    */
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state): array {
@@ -128,6 +135,9 @@ class EntityReferenceRoleTagifyWidget extends TagifyEntityReferenceAutocompleteW
     $roles = is_array($roles) ? array_values($roles) : [];
 
     $items = [];
+    // New roles created during this submission, by name, so two people given
+    // the same new role share one term instead of creating two.
+    $this->newRoles = [];
     foreach (array_values($names) as $position => $tag) {
       // One chip at a time, so a name the parent can't resolve (and drops)
       // can't shift every later role onto the wrong name.
@@ -138,7 +148,9 @@ class EntityReferenceRoleTagifyWidget extends TagifyEntityReferenceAutocompleteW
       $item = reset($resolved);
       $role_input = trim((string) ($roles[$position] ?? ''));
       $role = $this->resolveRole($role_input);
-      if ($role_input !== '' && !$role) {
+      // Errors can only be set while the form is validating; this also runs
+      // from submit handlers that rebuild the entity.
+      if ($role_input !== '' && !$role && !$form_state->isValidationComplete()) {
         // Only possible when several role vocabularies are allowed, so a new
         // role can't be created; don't drop it silently.
         $form_state->setErrorByName($this->fieldDefinition->getName(), $this->t('"@role" isn\'t an available role. Choose one from the suggestions.', ['@role' => $role_input]));
@@ -182,7 +194,7 @@ class EntityReferenceRoleTagifyWidget extends TagifyEntityReferenceAutocompleteW
     }
 
     if (count($bundles) === 1) {
-      return $storage->create(['name' => $input, 'vid' => reset($bundles)]);
+      return $this->newRoles[mb_strtolower($input)] ??= $storage->create(['name' => $input, 'vid' => reset($bundles)]);
     }
     return NULL;
   }

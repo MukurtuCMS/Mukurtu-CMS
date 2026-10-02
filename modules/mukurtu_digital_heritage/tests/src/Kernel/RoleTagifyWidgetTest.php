@@ -140,7 +140,6 @@ class RoleTagifyWidgetTest extends DigitalHeritageTestBase {
     $this->assertSame([], $this->massage([], ['Singer']));
   }
 
-
   /**
    * With several role vocabularies, an unknown role is an error, not lost.
    */
@@ -171,6 +170,28 @@ class RoleTagifyWidgetTest extends DigitalHeritageTestBase {
     $widget->massageFormValues(['names' => $names, 'roles' => json_encode(['Nonexistent', ''])], [], $form_state);
     $this->assertTrue($form_state->hasAnyErrors());
     $this->assertStringContainsString('Nonexistent', (string) $form_state->getErrors()['field_creator']);
+
+    // Submit handlers that rebuild the entity run after validation, when
+    // setting an error would throw; the role is just left off there.
+    $form_state = new FormState();
+    $form_state->setValidationComplete();
+    $items = $widget->massageFormValues(['names' => $names, 'roles' => json_encode(['Nonexistent', ''])], [], $form_state);
+    $this->assertArrayNotHasKey('role_target_id', $items[0]);
+  }
+
+  /**
+   * Two people given the same new role share one new term.
+   */
+  public function testSameNewRoleIsCreatedOnce(): void {
+    $items = $this->massage([['value' => 'Annie James'], ['value' => 'Mary Jones']], ['Narrator', 'narrator']);
+    $this->assertSame($items[0]['role_entity'], $items[1]['role_entity']);
+
+    $item = $this->buildDigitalHeritage('Item', [$this->createCategory('Category')]);
+    $item->set('field_creator', $items);
+    $item->save();
+    $this->assertCount(1, $this->container->get('entity_type.manager')->getStorage('taxonomy_term')
+      ->loadByProperties(['vid' => 'role', 'name' => 'Narrator']));
+    $this->assertSame($item->get('field_creator')[0]->role_target_id, $item->get('field_creator')[1]->role_target_id);
   }
 
 }
