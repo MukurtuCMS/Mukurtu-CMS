@@ -32,6 +32,9 @@ class EntityReferenceRoleAutocompleteWidget extends EntityReferenceAutocompleteW
     $name = $parent['target_id'];
     $name['#title'] = $this->t('Name');
     $name['#title_display'] = 'before';
+    // Drupal sets the row's delta as the main input's weight, which would
+    // sort Name after Role on every row but the first.
+    $name['#weight'] = 0;
     $name['#description'] = '';
 
     $role_bundles = $this->getFieldSetting('role_target_bundles') ?: [];
@@ -41,6 +44,7 @@ class EntityReferenceRoleAutocompleteWidget extends EntityReferenceAutocompleteW
     $role = [
       '#type' => 'entity_autocomplete',
       '#title' => $this->t('Role'),
+      '#weight' => 1,
       '#target_type' => 'taxonomy_term',
       '#selection_handler' => 'default:taxonomy_term',
       '#selection_settings' => [

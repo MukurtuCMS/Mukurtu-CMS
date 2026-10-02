@@ -19,9 +19,17 @@ use Drupal\mukurtu_core\Plugin\Field\FieldType\EntityReferenceRoleItem;
 final class EntityReferenceRoleConverter {
 
   /**
-   * The role-aware widget.
+   * The role-aware Tagify widget, used in place of Tagify.
    */
-  const WIDGET = 'mukurtu_entity_reference_role_autocomplete';
+  const WIDGET = 'mukurtu_entity_reference_role_tagify';
+
+  /**
+   * Both role-aware widgets; a display already using either is left alone.
+   */
+  const ROLE_WIDGETS = [
+    'mukurtu_entity_reference_role_tagify',
+    'mukurtu_entity_reference_role_autocomplete',
+  ];
 
   /**
    * The role-aware formatter.
@@ -110,10 +118,12 @@ final class EntityReferenceRoleConverter {
   /**
    * Moves a field's form and view displays onto the role-aware plugins.
    *
-   * Every form display moves to the role widget, since no other widget is
+   * Every form display moves to a role widget, since no other widget is
    * offered for the new type and one that ignored roles would wipe them on
-   * save. View displays only change where they use the plain label
-   * formatter; any other entity reference formatter keeps working as is.
+   * save. Tagify becomes Tagify with roles and keeps its settings; any other
+   * widget gets that widget's defaults. View displays only change where they
+   * use the plain label formatter; any other entity reference formatter
+   * keeps working as is.
    */
   public static function updateDisplays(string $entity_type_id, string $field_name): void {
     $config_factory = \Drupal::configFactory();
@@ -122,17 +132,13 @@ final class EntityReferenceRoleConverter {
     foreach ($config_factory->listAll("core.entity_form_display.$entity_type_id.") as $name) {
       $display = $config_factory->getEditable($name);
       $component = $display->get($key);
-      if (!$component || $component['type'] === self::WIDGET) {
+      if (!$component || in_array($component['type'], self::ROLE_WIDGETS, TRUE)) {
         continue;
       }
-      $settings = $component['settings'] ?? [];
+      if ($component['type'] !== 'tagify_entity_reference_autocomplete_widget') {
+        $component['settings'] = [];
+      }
       $component['type'] = self::WIDGET;
-      $component['settings'] = [
-        'match_operator' => $settings['match_operator'] ?? 'CONTAINS',
-        'match_limit' => !empty($settings['match_limit']) ? $settings['match_limit'] : 10,
-        'size' => $settings['size'] ?? 60,
-        'placeholder' => $settings['placeholder'] ?? '',
-      ];
       $display->set($key, $component)->save();
     }
 

@@ -1,0 +1,30 @@
+/**
+ * @file
+ * Role boxes under the Tagify chips for the "Tagify with roles" widget.
+ */
+
+.mukurtu-role-tagify__list {
+  margin-block-start: 0.75rem;
+}
+
+.mukurtu-role-tagify__rows {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 24rem);
+  gap: 0.5rem 1rem;
+  align-items: center;
+}
+
+/* Each row's label and input sit in the two grid columns. */
+.mukurtu-role-tagify__row {
+  display: contents;
+}
+
+.mukurtu-role-tagify__row .form-item__label {
+  margin: 0;
+}
+
+@media (max-width: 40rem) {
+  .mukurtu-role-tagify__rows {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

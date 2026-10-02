@@ -876,3 +876,6 @@ field.widget.settings.mukurtu_entity_reference_role_autocomplete:
 
 field.formatter.settings.mukurtu_entity_reference_role_label:
   type: field.formatter.settings.entity_reference_label
+
+field.widget.settings.mukurtu_entity_reference_role_tagify:
+  type: field.widget.settings.tagify_entity_reference_autocomplete_widget

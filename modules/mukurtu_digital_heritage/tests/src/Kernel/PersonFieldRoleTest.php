@@ -189,45 +189,35 @@ class PersonFieldRoleTest extends DigitalHeritageTestBase {
   }
 
   /**
-   * The update moves form displays to the role widget and label formatters
-   * to the role formatter, leaving other formatters alone.
+   * The update moves form displays to a role widget and label formatters to
+   * the role formatter, leaving other formatters alone.
    */
   public function testUpdateSwitchesDisplays(): void {
     $config_factory = $this->container->get('config.factory');
-    $config_factory->getEditable('core.entity_form_display.node.digital_heritage.default')
-      ->setData([
-        'id' => 'node.digital_heritage.default',
-        'targetEntityType' => 'node',
-        'bundle' => 'digital_heritage',
-        'mode' => 'default',
-        'content' => [
-          'field_people' => [
-            'type' => 'tagify_entity_reference_autocomplete_widget',
-            'weight' => 3,
-            'region' => 'content',
-            'settings' => ['match_operator' => 'STARTS_WITH', 'match_limit' => 0, 'placeholder' => ''],
-            'third_party_settings' => [],
-          ],
-        ],
-      ])->save();
-    $config_factory->getEditable('core.entity_view_display.node.digital_heritage.full')
-      ->setData([
-        'id' => 'node.digital_heritage.full',
-        'targetEntityType' => 'node',
-        'bundle' => 'digital_heritage',
-        'mode' => 'full',
-        'content' => [
-          'field_people' => ['type' => 'entity_reference_label', 'settings' => ['link' => TRUE]],
-          'field_contributor' => ['type' => 'entity_reference_entity_id', 'settings' => []],
-        ],
-      ])->save();
+    $tagify_settings = ['match_operator' => 'STARTS_WITH', 'match_limit' => 0, 'placeholder' => '', 'suggestions_dropdown' => 1];
+    $this->writeDisplay('core.entity_form_display.node.digital_heritage.default', [
+      // Tagify becomes Tagify with roles and keeps its settings.
+      'field_people' => ['type' => 'tagify_entity_reference_autocomplete_widget', 'weight' => 3, 'settings' => $tagify_settings],
+      // Any other widget moves too, with the new widget's defaults.
+      'field_contributor' => ['type' => 'entity_reference_autocomplete', 'weight' => 4, 'settings' => ['size' => 40]],
+      // A role widget a site already chose is left alone.
+      'field_creator' => ['type' => 'mukurtu_entity_reference_role_autocomplete', 'weight' => 5, 'settings' => ['size' => 30]],
+    ]);
+    $this->writeDisplay('core.entity_view_display.node.digital_heritage.full', [
+      'field_people' => ['type' => 'entity_reference_label', 'settings' => ['link' => TRUE]],
+      'field_contributor' => ['type' => 'entity_reference_entity_id', 'settings' => []],
+    ]);
 
     $this->runRoleUpdate();
 
-    $widget = $config_factory->get('core.entity_form_display.node.digital_heritage.default')->get('content.field_people');
-    $this->assertSame('mukurtu_entity_reference_role_autocomplete', $widget['type']);
-    $this->assertSame(['match_operator' => 'STARTS_WITH', 'match_limit' => 10, 'size' => 60, 'placeholder' => ''], $widget['settings']);
-    $this->assertSame(3, $widget['weight']);
+    $form = $config_factory->get('core.entity_form_display.node.digital_heritage.default');
+    $this->assertSame('mukurtu_entity_reference_role_tagify', $form->get('content.field_people.type'));
+    $this->assertSame($tagify_settings, $form->get('content.field_people.settings'));
+    $this->assertSame(3, $form->get('content.field_people.weight'));
+    $this->assertSame('mukurtu_entity_reference_role_tagify', $form->get('content.field_contributor.type'));
+    $this->assertSame([], $form->get('content.field_contributor.settings'));
+    $this->assertSame('mukurtu_entity_reference_role_autocomplete', $form->get('content.field_creator.type'));
+    $this->assertSame(['size' => 30], $form->get('content.field_creator.settings'));
 
     $view = $config_factory->get('core.entity_view_display.node.digital_heritage.full');
     $this->assertSame('mukurtu_entity_reference_role_label', $view->get('content.field_people.type'));
@@ -235,4 +225,20 @@ class PersonFieldRoleTest extends DigitalHeritageTestBase {
     $this->assertSame('entity_reference_entity_id', $view->get('content.field_contributor.type'));
   }
 
+  /**
+   * Writes raw display config, as an existing site would have it.
+   */
+  protected function writeDisplay(string $name, array $content): void {
+    [, , $entity_type_id, $bundle, $mode] = explode('.', $name);
+    foreach ($content as &$component) {
+      $component += ['region' => 'content', 'third_party_settings' => []];
+    }
+    $this->container->get('config.factory')->getEditable($name)->setData([
+      'id' => "$entity_type_id.$bundle.$mode",
+      'targetEntityType' => $entity_type_id,
+      'bundle' => $bundle,
+      'mode' => $mode,
+      'content' => $content,
+    ])->save();
+  }
 }

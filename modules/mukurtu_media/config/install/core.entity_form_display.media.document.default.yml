@@ -57,14 +57,18 @@ content:
       parent_selection: 1
     third_party_settings: {  }
   field_people:
-    type: mukurtu_entity_reference_role_autocomplete
+    type: mukurtu_entity_reference_role_tagify
     weight: 5
     region: content
     settings:
       match_operator: CONTAINS
-      match_limit: 10
-      size: 60
+      match_limit: 0
       placeholder: ''
+      suggestions_dropdown: 0
+      show_entity_id: 0
+      show_info_label: 0
+      info_label: ''
+      parent_selection: 1
     third_party_settings: {  }
   field_thumbnail:
     type: image_image

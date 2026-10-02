@@ -134,3 +134,16 @@ ajax-row-table-status:
   dependencies:
     - core/drupal
     - core/once
+
+# Role boxes under the Tagify chips for the "Tagify with roles" widget.
+entity_reference_role_tagify:
+  version: 1.x
+  js:
+    js/entity-reference-role-tagify.js: {}
+  css:
+    component:
+      css/entity-reference-role-tagify.css: {}
+  dependencies:
+    - core/drupal
+    - core/drupal.autocomplete
+    - core/once

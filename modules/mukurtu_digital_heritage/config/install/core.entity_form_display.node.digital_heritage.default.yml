@@ -236,14 +236,18 @@ content:
     settings: {  }
     third_party_settings: {  }
   field_contributor:
-    type: mukurtu_entity_reference_role_autocomplete
+    type: mukurtu_entity_reference_role_tagify
     weight: 1
     region: content
     settings:
       match_operator: CONTAINS
-      match_limit: 10
-      size: 60
+      match_limit: 0
       placeholder: ''
+      suggestions_dropdown: 0
+      show_entity_id: 0
+      show_info_label: 0
+      info_label: ''
+      parent_selection: 1
     third_party_settings: {  }
   field_coverage:
     type: geofield_mukurtu
@@ -329,14 +333,18 @@ content:
     settings: {  }
     third_party_settings: {  }
   field_creator:
-    type: mukurtu_entity_reference_role_autocomplete
+    type: mukurtu_entity_reference_role_tagify
     weight: 0
     region: content
     settings:
       match_operator: CONTAINS
-      match_limit: 10
-      size: 60
+      match_limit: 0
       placeholder: ''
+      suggestions_dropdown: 0
+      show_entity_id: 0
+      show_info_label: 0
+      info_label: ''
+      parent_selection: 1
     third_party_settings: {  }
   field_cultural_narrative:
     type: text_textarea
@@ -503,14 +511,18 @@ content:
     settings: {  }
     third_party_settings: {  }
   field_people:
-    type: mukurtu_entity_reference_role_autocomplete
+    type: mukurtu_entity_reference_role_tagify
     weight: 30
     region: content
     settings:
       match_operator: CONTAINS
-      match_limit: 10
-      size: 60
+      match_limit: 0
       placeholder: ''
+      suggestions_dropdown: 0
+      show_entity_id: 0
+      show_info_label: 0
+      info_label: ''
+      parent_selection: 1
     third_party_settings: {  }
   field_protocol_control:
     type: mukurtu_protocol_control_widget

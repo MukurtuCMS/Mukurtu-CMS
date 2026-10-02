@@ -1,0 +1,169 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Drupal\mukurtu_core\Plugin\Field\FieldWidget;
+
+use Drupal\Core\Entity\Element\EntityAutocomplete;
+use Drupal\Core\Field\Attribute\FieldWidget;
+use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\tagify\Plugin\Field\FieldWidget\TagifyEntityReferenceAutocompleteWidget;
+use Drupal\taxonomy\TermInterface;
+
+/**
+ * Tagify chips for names, with a role box for each chip below them.
+ *
+ * The names input is the contrib Tagify element, unchanged. A script
+ * (js/entity-reference-role-tagify.js) keeps one role box per chip, in chip
+ * order, and writes the roles to a hidden field as a JSON array, the same way
+ * Tagify submits the names. massageFormValues() pairs them back up one chip
+ * at a time.
+ *
+ * Extends the contrib Tagify widget, so it is only available where tagify is
+ * enabled; plugin discovery skips it otherwise. Every module that ships one
+ * of the person fields already depends on tagify.
+ */
+#[FieldWidget(
+  id: 'mukurtu_entity_reference_role_tagify',
+  label: new TranslatableMarkup('Tagify with roles'),
+  field_types: ['mukurtu_entity_reference_role'],
+  multiple_values: TRUE,
+)]
+class EntityReferenceRoleTagifyWidget extends TagifyEntityReferenceAutocompleteWidget {
+
+  /**
+   * {@inheritdoc}
+   */
+  public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state): array {
+    $names = parent::formElement($items, $delta, $element, $form, $form_state);
+
+    // The Tagify element's default chips are $items->referencedEntities(),
+    // which skips references to deleted entities, so the roles are built
+    // from the same filtered list to keep them in step.
+    $roles = [];
+    $role_ids = [];
+    foreach ($items as $item) {
+      if ($item->entity) {
+        $role_ids[] = $item->role_target_id;
+      }
+    }
+    $role_terms = $this->entityTypeManager->getStorage('taxonomy_term')->loadMultiple(array_filter($role_ids));
+    foreach ($role_ids as $role_id) {
+      // Plain names, as Tagify shows; resolveRole() matches them by name.
+      $roles[] = isset($role_terms[$role_id]) ? \Drupal::service('entity.repository')->getTranslationFromContext($role_terms[$role_id])->label() : '';
+    }
+
+    $role_bundles = $this->getFieldSetting('role_target_bundles') ?: [];
+    $entity = $items->getEntity();
+
+    return [
+      '#type' => 'container',
+      '#attributes' => ['class' => ['mukurtu-role-tagify']],
+      '#attached' => ['library' => ['mukurtu_core/entity_reference_role_tagify']],
+      'names' => $names,
+      'roles' => [
+        '#type' => 'hidden',
+        '#default_value' => json_encode($roles),
+        '#attributes' => ['class' => ['mukurtu-role-tagify__roles']],
+      ],
+      'role_list' => [
+        '#type' => 'fieldset',
+        '#title' => $this->t('Roles'),
+        '#attributes' => [
+          'class' => ['mukurtu-role-tagify__list'],
+          'hidden' => 'hidden',
+          // Read by the script to label each box, so the pattern can be
+          // translated server-side.
+          'data-role-label' => $this->t('Role for @name'),
+        ],
+        // The script clones this box for each chip; the clones have no name
+        // attribute, so only the hidden roles field is submitted.
+        'prototype' => [
+          '#type' => 'entity_autocomplete',
+          '#title' => $this->t('Role'),
+          '#title_display' => 'invisible',
+          '#target_type' => 'taxonomy_term',
+          '#selection_handler' => 'default:taxonomy_term',
+          '#selection_settings' => ['target_bundles' => $role_bundles],
+          '#validate_reference' => FALSE,
+          '#autocreate' => count($role_bundles) === 1 ? [
+            'bundle' => reset($role_bundles),
+            'uid' => method_exists($entity, 'getOwnerId') ? $entity->getOwnerId() : $this->currentUser->id(),
+          ] : NULL,
+          '#wrapper_attributes' => [
+            'class' => ['mukurtu-role-tagify__prototype'],
+            'hidden' => 'hidden',
+          ],
+        ],
+      ],
+    ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function massageFormValues($values, array $form, FormStateInterface $form_state): array {
+    $names = json_decode((string) ($values['names'] ?? ''), associative: TRUE);
+    if (!is_array($names)) {
+      return [];
+    }
+    $roles = json_decode((string) ($values['roles'] ?? ''), associative: TRUE);
+    $roles = is_array($roles) ? array_values($roles) : [];
+
+    $items = [];
+    foreach (array_values($names) as $position => $tag) {
+      // One chip at a time, so a name the parent can't resolve (and drops)
+      // can't shift every later role onto the wrong name.
+      $resolved = parent::massageFormValues(json_encode([$tag]), $form, $form_state);
+      if (!$resolved) {
+        continue;
+      }
+      $item = reset($resolved);
+      $role = $this->resolveRole((string) ($roles[$position] ?? ''));
+      if ($role instanceof TermInterface && $role->isNew()) {
+        $item['role_entity'] = $role;
+      }
+      elseif ($role) {
+        $item['role_target_id'] = $role->id();
+      }
+      $items[] = $item;
+    }
+    return $items;
+  }
+
+  /**
+   * Turns a role box's text into an existing or new role term.
+   *
+   * Accepts the autocomplete format ("Singer (5)") or a bare name. An
+   * unknown name becomes a new, unsaved term when exactly one role
+   * vocabulary is allowed; the field item saves it.
+   */
+  protected function resolveRole(string $input): ?TermInterface {
+    $input = trim($input);
+    if ($input === '') {
+      return NULL;
+    }
+    $bundles = array_values($this->getFieldSetting('role_target_bundles') ?: []);
+    $storage = $this->entityTypeManager->getStorage('taxonomy_term');
+
+    $id = EntityAutocomplete::extractEntityIdFromAutocompleteInput($input);
+    if ($id && ($term = $storage->load($id)) && in_array($term->bundle(), $bundles, TRUE)) {
+      return $term;
+    }
+
+    if ($bundles) {
+      $matches = $storage->loadByProperties(['name' => $input, 'vid' => $bundles]);
+      if ($matches) {
+        return reset($matches);
+      }
+    }
+
+    if (count($bundles) === 1) {
+      return $storage->create(['name' => $input, 'vid' => reset($bundles)]);
+    }
+    return NULL;
+  }
+
+}
