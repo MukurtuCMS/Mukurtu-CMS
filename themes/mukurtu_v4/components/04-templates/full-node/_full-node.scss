@@ -42,7 +42,11 @@
         .dictionary-word__teaser .field,
         .dictionary-word-tabs .field,
         .field--name-field-sections .field,
-        .block-wrapper .field)) {
+        // Scoped to .full-node__content so this only excludes Layout Builder
+        // inline blocks placed inside the content area, not the page's own
+        // "Main page content" block-wrapper ancestor (which would otherwise
+        // exclude every field on every full node page).
+        .full-node__content .block-wrapper .field)) {
       @include mixins.divider;
     }
 
