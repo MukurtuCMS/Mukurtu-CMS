@@ -1,6 +1,9 @@
 @use "../../../external/include-media";
 @use "../../00-base/layout/layout";
 
+// Logo width below lg, also used to decide when the search box needs its own row.
+$logo-width-mobile: 100px;
+
 header {
   align-items: center;
   padding-block: var(--v-space-4xxs);
@@ -20,7 +23,7 @@ header {
     }
 
     img {
-      inline-size: 100px;
+      inline-size: $logo-width-mobile;
       max-inline-size: none;
     }
 
@@ -73,10 +76,10 @@ body:not(.is-always-mobile-nav) .header {
    * button, give the search box its own row. The width that row needs:
    * layout padding (3rem), column gaps (1rem), search wrapper padding
    * (1rem), input (4.5rem), submit button (2.75rem), menu button (2rem)
-   * and the 100px logo. rem in a media query follows the browser's text
+   * and the logo. rem in a media query follows the browser's text
    * size setting, so large phone text moves the search down instead of
    * squeezing it under the menu button. */
-  @media (width < calc(14.25rem + 100px)) {
+  @media (width < calc(14.25rem + #{$logo-width-mobile})) {
     & .header-search--mobile {
       grid-column: 1 / -1;
       grid-row: 2;

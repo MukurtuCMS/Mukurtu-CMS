@@ -5236,7 +5236,7 @@ body:not(.is-always-mobile-nav) .header {
    * button, give the search box its own row. The width that row needs:
    * layout padding (3rem), column gaps (1rem), search wrapper padding
    * (1rem), input (4.5rem), submit button (2.75rem), menu button (2rem)
-   * and the 100px logo. rem in a media query follows the browser's text
+   * and the logo. rem in a media query follows the browser's text
    * size setting, so large phone text moves the search down instead of
    * squeezing it under the menu button. */
 }
