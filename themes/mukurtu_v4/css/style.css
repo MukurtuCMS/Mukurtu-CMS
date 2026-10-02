@@ -1325,6 +1325,10 @@ body.consent-popup-opened .klaro_toggle_dialog {
   position: relative;
 }
 
+.media:has(.mukurtu-content-warnings):has(.media-asset--unavailable) {
+  min-block-size: 12rem;
+}
+
 .mukurtu-content-warnings {
   position: absolute;
   inset: 0;
@@ -3168,6 +3172,12 @@ img[class$=-placeholder] {
   display: block;
   inline-size: 100%;
   block-size: 100%;
+}
+
+.media-asset--unavailable {
+  margin: 0;
+  padding: var(--v-space-2xs);
+  text-align: center;
 }
 
 .media-asset--glightbox-inline {
@@ -6600,9 +6610,6 @@ header {
   -webkit-margin-before: 1rem;
           margin-block-start: 1rem;
 }
-.dictionary .browse-facets .form-item-glossary-entry {
-  display: none;
-}
 .dictionary .browse-facets .facets-widget-dropdown {
   grid-row: 1;
   -webkit-margin-after: var(--v-space-3xs);
@@ -7466,7 +7473,7 @@ header {
 .dictionary-word__teaser .field,
 .dictionary-word-tabs .field,
 .field--name-field-sections .field,
-.block-wrapper .field)) {
+.full-node__content .block-wrapper .field)) {
   -webkit-padding-before: var(--v-space-2xs);
           padding-block-start: var(--v-space-2xs);
   -webkit-margin-before: var(--v-space-2xs);

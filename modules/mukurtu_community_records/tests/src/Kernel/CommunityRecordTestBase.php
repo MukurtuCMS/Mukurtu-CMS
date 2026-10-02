@@ -9,6 +9,7 @@ use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
+use Drupal\node\NodeAccessRebuild;
 
 /**
  * Base class for Mukurtu Community Records kernel tests.
@@ -77,7 +78,7 @@ abstract class CommunityRecordTestBase extends MukurtuKernelTestBase {
       'label' => 'Original Record',
     ])->save();
 
-    node_access_rebuild();
+    \Drupal::service(NodeAccessRebuild::class)->rebuild();
   }
 
   /**
