@@ -10,6 +10,7 @@ use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\mukurtu_person\Entity\Person;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
+use Drupal\node\NodeAccessRebuild;
 use Drupal\taxonomy\Entity\Vocabulary;
 
 /**
@@ -98,7 +99,7 @@ abstract class PersonTestBase extends MukurtuKernelTestBase {
       'label' => 'Map Points',
     ])->save();
 
-    node_access_rebuild();
+    \Drupal::service(NodeAccessRebuild::class)->rebuild();
   }
 
   /**
