@@ -88,3 +88,16 @@ body.consent-popup-opened .klaro_toggle_dialog {
     gap: var(--v-space-6xs);
   }
 }
+
+// Klaro's own high-contrast styles (vendor klaro-extend.css, still present in
+// 3.1.1 and 3.x) swap the toggle button's icon to privacy-white.svg but keep
+// its white background, so the button shows as a blank white circle when the
+// device asks for more contrast (Android's high contrast text and contrast
+// settings report prefers-contrast: more). Give the button a dark fill so the
+// white icon shows, with a white border to keep its edge on dark pages.
+@media (prefers-contrast: more) {
+  .klaro_toggle_dialog {
+    border-color: var(--color-white);
+    background-color: var(--color-black);
+  }
+}

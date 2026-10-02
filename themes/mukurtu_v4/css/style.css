@@ -1321,6 +1321,12 @@ body.consent-popup-opened .klaro_toggle_dialog {
   gap: var(--v-space-6xs);
 }
 
+@media (prefers-contrast: more) {
+  .klaro_toggle_dialog {
+    border-color: var(--color-white);
+    background-color: var(--color-black);
+  }
+}
 .media:has(.mukurtu-content-warnings) {
   position: relative;
 }
