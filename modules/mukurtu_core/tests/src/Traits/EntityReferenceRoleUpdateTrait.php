@@ -11,7 +11,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *
  * A Kernel test installs the current code, so its fields already have the
  * role column. rollBackToEntityReference() puts one field back into the
- * state an existing site is in before mukurtu_core_update_40501().
+ * state an existing site is in before mukurtu_core_update_40206().
  */
 trait EntityReferenceRoleUpdateTrait {
 
@@ -69,7 +69,7 @@ trait EntityReferenceRoleUpdateTrait {
    */
   protected function runRoleUpdate(): void {
     $this->container->get('module_handler')->loadInclude('mukurtu_core', 'install');
-    mukurtu_core_update_40501();
+    mukurtu_core_update_40206();
   }
 
   /**

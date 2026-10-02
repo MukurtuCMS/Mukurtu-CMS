@@ -156,7 +156,13 @@ class CommunityRecordNodeViewBuilder extends NodeViewBuilder {
    */
   protected function sortRecords($records){
     $config = $this->configFactory->get('mukurtu_community_records.settings');
-    $weights = $config->get('community_record_weights');
+
+    // weightSort() walks $weights front-to-back assuming the array is
+    // already in ascending weight order. Config storage only preserves
+    // insertion order, which can drift out of sync with the weight values
+    // over time, so sort explicitly rather than trusting storage order.
+    $weights = $config->get('community_record_weights') ?? [];
+    asort($weights);
 
     // Dump the entities into a lighter weight structure to pass around.
     // This might be unneeded, maybe PHP is smart?
