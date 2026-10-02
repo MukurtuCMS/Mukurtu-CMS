@@ -6,12 +6,18 @@ namespace Drupal\mukurtu_import\Plugin\migrate\process;
 
 use Drupal\file\FileInterface;
 use Drupal\migrate\Attribute\MigrateProcess;
+use Drupal\migrate\MigrateException;
 use Drupal\migrate\MigrateExecutableInterface;
 use Drupal\migrate\ProcessPluginBase;
 use Drupal\migrate\Row;
 
 /**
  * Mukurtu image item processing plugin.
+ *
+ * Resolves a cell to an image file ID, from either an existing file ID or the
+ * filename of an image uploaded with the import. A blank cell, which is what
+ * an item without that image exports, resolves to no image. Any other value
+ * that matches no file fails the row instead of silently dropping the image.
  */
 #[MigrateProcess('mukurtu_imageitem')]
 class ImageItem extends ProcessPluginBase {
@@ -20,6 +26,10 @@ class ImageItem extends ProcessPluginBase {
    * {@inheritdoc}
    */
   public function transform($value, MigrateExecutableInterface $migrate_executable, Row $row, $destination_property) {
+    if ($value === NULL || (is_string($value) && trim($value) === '')) {
+      return NULL;
+    }
+
     $import_uri_base = $this->configuration['upload_location'] ?? "private://";
     $file_storage = \Drupal::entityTypeManager()->getStorage('file');
 
@@ -45,7 +55,7 @@ class ImageItem extends ProcessPluginBase {
       }
     }
 
-    return [];
+    throw new MigrateException(sprintf('No image file matches "%s". Use an existing file ID or the filename of an image uploaded with this import.', $value));
   }
 
 }
