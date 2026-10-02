@@ -68,4 +68,21 @@ body:not(.is-always-mobile-nav) .header {
       grid-column: 3;
     }
   }
+
+  /* When one row cannot fit the logo, a usable search box and the menu
+   * button, give the search box its own row. The width that row needs:
+   * layout padding (3rem), column gaps (1rem), search wrapper padding
+   * (1rem), input (4.5rem), submit button (2.75rem), menu button (2rem)
+   * and the 100px logo. rem in a media query follows the browser's text
+   * size setting, so large phone text moves the search down instead of
+   * squeezing it under the menu button. */
+  @media (width < calc(14.25rem + 100px)) {
+    & .header-search--mobile {
+      grid-column: 1 / -1;
+      grid-row: 2;
+
+      // Line up with the logo instead of sitting inset from it.
+      padding-inline: 0;
+    }
+  }
 }

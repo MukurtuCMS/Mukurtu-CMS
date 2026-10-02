@@ -37,36 +37,49 @@ test('Reflow: header search input can shrink to fit the mobile header grid', asy
 });
 
 // The logo is a fixed 100px but the gutters and padding are rem, so a larger
-// phone text size (Chrome on Android scales rem with it) squeezed the
-// header's columns until the logo covered the search box. 150% root font
-// size stands in for that setting.
-for (const width of [320, 412, 600]) {
-  for (const rootFontSize of ['100%', '150%']) {
-    test(`Reflow: mobile header logo, search and menu button do not overlap at ${width}px, ${rootFontSize} text`, async ({ page }) => {
+// text size squeezed the header's columns until the logo covered the search
+// box, and at very large sizes the search button slid under the menu button.
+// The browser's default font size stands in for the phone's text size
+// setting; unlike a root font-size override, it also moves rem media
+// queries, which is how the header decides to put search on its own row.
+type Box = { x: number; y: number; width: number; height: number };
+// Allow 1px for subpixel rounding.
+const overlaps = (a: Box, b: Box) =>
+  a.x + 1 < b.x + b.width && b.x + 1 < a.x + a.width &&
+  a.y + 1 < b.y + b.height && b.y + 1 < a.y + a.height;
+
+for (const width of [320, 360, 412, 600]) {
+  for (const textScale of [1, 1.5, 2]) {
+    test(`Reflow: mobile header logo, search and menu button do not overlap at ${width}px, ${textScale * 100}% text`, async ({ page, browserName }) => {
+      test.skip(browserName !== 'chromium', 'Setting the default font size needs the Chrome DevTools Protocol.');
+      const cdp = await page.context().newCDPSession(page);
+      await cdp.send('Page.setFontSizes', { fontSizes: { standard: 16 * textScale } });
       await page.setViewportSize({ width, height: 720 });
       await page.goto('/');
-      await page.addStyleTag({ content: `html { font-size: ${rootFontSize} !important; }` });
 
-      const search = page.locator('.header-search--mobile');
-      test.skip(await search.count() === 0, 'Header search is turned off on this site.');
-      // With the always-mobile-nav setting the search box gets its own row.
-      test.skip(
-        await page.locator('body.is-always-mobile-nav').count() > 0,
-        'Header search is on its own row on this site.'
-      );
+      test.skip(await page.locator('.header-search--mobile').count() === 0, 'Header search is turned off on this site.');
       const logoImage = page.locator('.header__logo img');
       test.skip(await logoImage.count() === 0, 'No site branding block in the header.');
 
-      const logo = await logoImage.boundingBox();
-      const searchBox = await search.boundingBox();
-      const menuButton = await page.locator('.mobile-nav-button').boundingBox();
-      expect(logo).not.toBeNull();
-      expect(searchBox).not.toBeNull();
-      expect(menuButton).not.toBeNull();
-
-      // Allow 1px for subpixel rounding.
-      expect(logo!.x + logo!.width).toBeLessThanOrEqual(searchBox!.x + 1);
-      expect(searchBox!.x + searchBox!.width).toBeLessThanOrEqual(menuButton!.x + 1);
+      const boxes: Record<string, Box | null> = {
+        logo: await logoImage.boundingBox(),
+        input: await page.locator('.header-search--mobile .header-search__input').boundingBox(),
+        submit: await page.locator('.header-search--mobile .header-search__button').boundingBox(),
+        menu: await page.locator('.mobile-nav-button').boundingBox(),
+      };
+      const names = Object.keys(boxes);
+      for (const name of names) {
+        expect(boxes[name], `${name} is rendered`).not.toBeNull();
+        expect(boxes[name]!.x + boxes[name]!.width, `${name} fits in the viewport`).toBeLessThanOrEqual(width + 1);
+      }
+      for (let i = 0; i < names.length; i++) {
+        for (let j = i + 1; j < names.length; j++) {
+          expect(overlaps(boxes[names[i]]!, boxes[names[j]]!), `${names[i]} overlaps ${names[j]}`).toBe(false);
+        }
+      }
+      // The input still has room for text, not only its padding. 3rem is what
+      // a full-width search row leaves at 320px and 200% text.
+      expect(boxes.input!.width, 'input has room for text').toBeGreaterThanOrEqual(3 * 16 * textScale);
     });
   }
 }

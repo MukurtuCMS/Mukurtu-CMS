@@ -5231,6 +5231,22 @@ header {
     grid-column: 3;
   }
 }
+body:not(.is-always-mobile-nav) .header {
+  /* When one row cannot fit the logo, a usable search box and the menu
+   * button, give the search box its own row. The width that row needs:
+   * layout padding (3rem), column gaps (1rem), search wrapper padding
+   * (1rem), input (4.5rem), submit button (2.75rem), menu button (2rem)
+   * and the 100px logo. rem in a media query follows the browser's text
+   * size setting, so large phone text moves the search down instead of
+   * squeezing it under the menu button. */
+}
+@media (width < calc(14.25rem + 100px)) {
+  body:not(.is-always-mobile-nav) .header .header-search--mobile {
+    grid-column: 1/-1;
+    grid-row: 2;
+    padding-inline: 0;
+  }
+}
 
 .grid:has(.views-row) {
   -webkit-column-count: 1;
