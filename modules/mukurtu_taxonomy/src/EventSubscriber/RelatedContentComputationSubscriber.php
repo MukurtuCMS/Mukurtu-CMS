@@ -9,7 +9,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\node\NodeInterface;
-use Drupal\Core\TypedData\DataDefinitionInterface;
 
 /**
  * Class RelatedContentComputationSubscriber.
@@ -136,12 +135,8 @@ class RelatedContentComputationSubscriber implements EventSubscriberInterface, C
     ];
 
     foreach ($fields as $fieldname => $field) {
-      if (!($field instanceof DataDefinitionInterface)) {
-        continue;
-      }
-
-      // Skip computed fields, they have no table storage.
-      if ($field->isComputed()) {
+      // Skip computed and custom-storage fields, they have no table storage.
+      if ($field->hasCustomStorage()) {
         continue;
       }
 
