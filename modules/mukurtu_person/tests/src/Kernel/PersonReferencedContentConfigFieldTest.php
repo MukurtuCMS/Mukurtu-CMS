@@ -122,4 +122,49 @@ class PersonReferencedContentConfigFieldTest extends PersonTestBase {
     $this->assertArrayNotHasKey($noMatch->id(), $event->provenance);
   }
 
+  /**
+   * Structural node references are excluded; other node references are not.
+   */
+  public function testStructuralNodeReferencesAreExcluded(): void {
+    foreach (['field_featured_person', ...RelatedContentComputationSubscriber::EXCLUDED_FIELDS] as $fieldName) {
+      if (!FieldStorageConfig::loadByName('node', $fieldName)) {
+        FieldStorageConfig::create([
+          'field_name' => $fieldName,
+          'entity_type' => 'node',
+          'type' => 'entity_reference',
+          'settings' => ['target_type' => 'node'],
+        ])->save();
+      }
+      FieldConfig::create([
+        'field_name' => $fieldName,
+        'entity_type' => 'node',
+        'bundle' => 'heritage',
+        'label' => $fieldName,
+      ])->save();
+    }
+
+    $person = $this->buildPerson('Eunice Kitto');
+    $person->set('field_other_names', [['target_id' => $this->term->id()]]);
+    $person->save();
+
+    $nodes = [];
+    foreach (['field_featured_person', ...RelatedContentComputationSubscriber::EXCLUDED_FIELDS] as $fieldName) {
+      $nodes[$fieldName] = Node::create([
+        'type' => 'heritage',
+        'title' => $fieldName,
+        'status' => TRUE,
+        'uid' => $this->currentUser->id(),
+        $fieldName => [['target_id' => $person->id()]],
+      ]);
+      $nodes[$fieldName]->save();
+    }
+
+    $person = Node::load($person->id());
+    $relatedIds = array_map('intval', array_column($person->get('field_all_related_content')->getValue(), 'target_id'));
+    $this->assertContains((int) $nodes['field_featured_person']->id(), $relatedIds);
+    foreach (RelatedContentComputationSubscriber::EXCLUDED_FIELDS as $fieldName) {
+      $this->assertNotContains((int) $nodes[$fieldName]->id(), $relatedIds, "$fieldName is not referenced content.");
+    }
+  }
+
 }

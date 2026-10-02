@@ -18,6 +18,17 @@ use Drupal\node\NodeInterface;
 class RelatedContentComputationSubscriber implements EventSubscriberInterface, ContainerInjectionInterface {
 
   /**
+   * Node reference fields that link records structurally, not by naming them.
+   *
+   * A community record's original record and a protocol inheritance source
+   * are not "referenced content" of the record they point to.
+   */
+  const EXCLUDED_FIELDS = [
+    'field_mukurtu_original_record',
+    'field_mukurtu_protocol_inherit',
+  ];
+
+  /**
    * The entity field manager service.
    *
    * @var \Drupal\Core\Entity\EntityFieldManagerInterface
@@ -137,6 +148,10 @@ class RelatedContentComputationSubscriber implements EventSubscriberInterface, C
     foreach ($fields as $fieldname => $field) {
       // Skip computed and custom-storage fields, they have no table storage.
       if ($field->hasCustomStorage()) {
+        continue;
+      }
+
+      if (in_array($fieldname, self::EXCLUDED_FIELDS, TRUE)) {
         continue;
       }
 
