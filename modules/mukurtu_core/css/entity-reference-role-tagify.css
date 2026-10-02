@@ -116,7 +116,11 @@
 }
 
 .mukurtu-role-tagify__button:focus-visible {
-  outline: none;
+  /* Transparent rather than none: forced-colors mode drops the box-shadow
+     ring and paints this outline instead. Gin's ID-specificity
+     "outline: none" on :focus would beat a plain forced-colors rule. */
+  outline: 2px solid transparent !important;
+  outline-offset: 2px;
   box-shadow:
     0 0 0 1px var(--gin-color-focus-border, var(--admin-color-focus-border, #fff)),
     0 0 0 4px var(--gin-color-focus, var(--admin-color-focus, #26a769));
@@ -137,6 +141,6 @@
   }
 
   .mukurtu-role-tagify__button:focus-visible {
-    outline: 2px solid Highlight;
+    outline-color: Highlight !important;
   }
 }

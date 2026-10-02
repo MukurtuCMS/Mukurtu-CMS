@@ -67,6 +67,14 @@
           const rows = document.createElement('ul');
           rows.className = 'mukurtu-role-tagify__rows';
           people.appendChild(rows);
+          // Name the rows after the field, so "Remove Annie James" in Creator
+          // and in People are distinguishable to screen reader users.
+          const fieldLabel = wrapper.querySelector(`label[for="${names.id}"]`);
+          if (fieldLabel) {
+            fieldLabel.id = fieldLabel.id || `${names.id}--label`;
+            people.setAttribute('role', 'group');
+            people.setAttribute('aria-labelledby', fieldLabel.id);
+          }
           // Show the rows between the field label and the Tagify input.
           // Tagify inserts its <tags> box just before the original input.
           const tagifyBox = names.previousElementSibling?.matches('tags')
@@ -121,7 +129,15 @@
             const order = [...Array(count).keys()];
             [order[index], order[target]] = [order[target], order[index]];
             pendingFocus = [target, buttonClass];
+            const tag = parseList(names.value)[index];
             reorder(order);
+            Drupal.announce(
+              Drupal.t('@name moved to position @position of @count.', {
+                '@name': tag.label || tag.value || '',
+                '@position': target + 1,
+                '@count': count,
+              }),
+            );
           }
 
           function remove(index) {
@@ -130,7 +146,11 @@
               return;
             }
             pendingFocus = [index, 'mukurtu-role-tagify__remove'];
+            const tag = parseList(names.value)[index];
             instance.removeTags(instance.getTagElms()[index]);
+            Drupal.announce(
+              Drupal.t('@name removed.', { '@name': tag.label || tag.value || '' }),
+            );
           }
 
           function buildRow(tag, index, count) {
@@ -234,10 +254,15 @@
               pendingFocus = null;
               const row = rows.children[Math.min(index, tags.length - 1)];
               // Moving to the first or last row disables the button just
-              // used, so fall back to another button in the same row.
+              // used, so fall back to the opposite move button. Never fall
+              // back to Remove: pressing Enter again would delete the person.
+              const fallback = {
+                'mukurtu-role-tagify__up': 'mukurtu-role-tagify__down',
+                'mukurtu-role-tagify__down': 'mukurtu-role-tagify__up',
+              }[buttonClass];
               const target =
                 row?.querySelector(`.${buttonClass}:not(:disabled)`) ||
-                row?.querySelector('.mukurtu-role-tagify__button:not(:disabled)');
+                (fallback && row?.querySelector(`.${fallback}:not(:disabled)`));
               (target || tagify()?.DOM.input)?.focus();
             }
           }

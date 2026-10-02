@@ -145,6 +145,7 @@ entity_reference_role_tagify:
       css/entity-reference-role-tagify.css: {}
   dependencies:
     - core/drupal
+    - core/drupal.announce
     - core/drupal.autocomplete
     - core/once
     - core/sortable

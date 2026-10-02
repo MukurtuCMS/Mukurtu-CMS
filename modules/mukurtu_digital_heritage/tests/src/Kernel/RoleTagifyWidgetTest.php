@@ -140,4 +140,37 @@ class RoleTagifyWidgetTest extends DigitalHeritageTestBase {
     $this->assertSame([], $this->massage([], ['Singer']));
   }
 
+
+  /**
+   * With several role vocabularies, an unknown role is an error, not lost.
+   */
+  public function testUnknownRoleIsAnErrorWhenItCannotBeCreated(): void {
+    Vocabulary::create(['vid' => 'other_role', 'name' => 'Other role'])->save();
+    $definition = $this->container->get('entity_field.manager')
+      ->getFieldDefinitions('node', 'digital_heritage')['field_creator'];
+    $definition->setSetting('role_target_bundles', ['role' => 'role', 'other_role' => 'other_role']);
+    $widget = $this->container->get('plugin.manager.field.widget')->getInstance([
+      'field_definition' => $definition,
+      'form_mode' => 'default',
+      'configuration' => ['type' => 'mukurtu_entity_reference_role_tagify', 'settings' => []],
+    ]);
+    $kitto = $this->term('creator', 'Eunice Kitto');
+    $this->term('other_role', 'Singer');
+    $names = json_encode([
+      ['value' => $kitto->id(), 'label' => 'Eunice Kitto', 'entity_id' => $kitto->id()],
+      ['value' => $kitto->id(), 'label' => 'Eunice Kitto', 'entity_id' => $kitto->id()],
+    ]);
+
+    // Control: a role that exists in either vocabulary is accepted.
+    $form_state = new FormState();
+    $items = $widget->massageFormValues(['names' => $names, 'roles' => json_encode(['Singer', ''])], [], $form_state);
+    $this->assertFalse($form_state->hasAnyErrors());
+    $this->assertArrayHasKey('role_target_id', $items[0]);
+
+    $form_state = new FormState();
+    $widget->massageFormValues(['names' => $names, 'roles' => json_encode(['Nonexistent', ''])], [], $form_state);
+    $this->assertTrue($form_state->hasAnyErrors());
+    $this->assertStringContainsString('Nonexistent', (string) $form_state->getErrors()['field_creator']);
+  }
+
 }

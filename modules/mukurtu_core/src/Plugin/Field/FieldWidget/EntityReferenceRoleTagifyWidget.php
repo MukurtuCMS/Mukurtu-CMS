@@ -39,6 +39,25 @@ class EntityReferenceRoleTagifyWidget extends TagifyEntityReferenceAutocompleteW
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state): array {
     $names = parent::formElement($items, $delta, $element, $form, $form_state);
 
+    // Tagify's own input now sits below the rows, apart from the field
+    // label, so give it a visible prompt unless the site set a placeholder.
+    // The contrib script parses data-placeholder as an integer, so Tagify
+    // falls back to the input's placeholder attribute.
+    if (($names['#placeholder'] ?? '') === '') {
+      $names['#placeholder'] = $this->t('Add a name');
+      $names['#attributes']['placeholder'] = $names['#placeholder'];
+    }
+
+    // Tagify's help line says only "Drag to re-order", and calls people
+    // terms. Rows can also be moved with buttons.
+    $drag_message = $this->t('Drag or use the arrow buttons to reorder.');
+    if (($names['#description']['#theme'] ?? NULL) === 'item_list') {
+      $names['#description']['#items'][array_key_last($names['#description']['#items'])] = $drag_message;
+    }
+    elseif (!empty($names['#description'])) {
+      $names['#description'] = $drag_message;
+    }
+
     // The Tagify element's default chips are $items->referencedEntities(),
     // which skips references to deleted entities, so the roles are built
     // from the same filtered list to keep them in step.
@@ -117,7 +136,13 @@ class EntityReferenceRoleTagifyWidget extends TagifyEntityReferenceAutocompleteW
         continue;
       }
       $item = reset($resolved);
-      $role = $this->resolveRole((string) ($roles[$position] ?? ''));
+      $role_input = trim((string) ($roles[$position] ?? ''));
+      $role = $this->resolveRole($role_input);
+      if ($role_input !== '' && !$role) {
+        // Only possible when several role vocabularies are allowed, so a new
+        // role can't be created; don't drop it silently.
+        $form_state->setErrorByName($this->fieldDefinition->getName(), $this->t('"@role" isn\'t an available role. Choose one from the suggestions.', ['@role' => $role_input]));
+      }
       if ($role instanceof TermInterface && $role->isNew()) {
         $item['role_entity'] = $role;
       }
