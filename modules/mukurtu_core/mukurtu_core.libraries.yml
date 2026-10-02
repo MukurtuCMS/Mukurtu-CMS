@@ -135,7 +135,7 @@ ajax-row-table-status:
     - core/drupal
     - core/once
 
-# Role boxes under the Tagify chips for the "Tagify with roles" widget.
+# One row per person (name, role, move buttons) for "Tagify with roles".
 entity_reference_role_tagify:
   version: 1.x
   js:
@@ -147,3 +147,4 @@ entity_reference_role_tagify:
     - core/drupal
     - core/drupal.autocomplete
     - core/once
+    - core/sortable

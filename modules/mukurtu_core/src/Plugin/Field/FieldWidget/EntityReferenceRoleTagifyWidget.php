@@ -13,7 +13,7 @@ use Drupal\tagify\Plugin\Field\FieldWidget\TagifyEntityReferenceAutocompleteWidg
 use Drupal\taxonomy\TermInterface;
 
 /**
- * Tagify chips for names, with a role box for each chip below them.
+ * Tagify for names, shown as one row per person with a role box beside it.
  *
  * The names input is the contrib Tagify element, unchanged. A script
  * (js/entity-reference-role-tagify.js) keeps one role box per chip, in chip
@@ -68,16 +68,12 @@ class EntityReferenceRoleTagifyWidget extends TagifyEntityReferenceAutocompleteW
         '#default_value' => json_encode($roles),
         '#attributes' => ['class' => ['mukurtu-role-tagify__roles']],
       ],
-      'role_list' => [
-        '#type' => 'fieldset',
-        '#title' => $this->t('Roles'),
-        '#attributes' => [
-          'class' => ['mukurtu-role-tagify__list'],
-          'hidden' => 'hidden',
-          // Read by the script to label each box, so the pattern can be
-          // translated server-side.
-          'data-role-label' => $this->t('Role for @name'),
-        ],
+      // The script fills this with one row per person (name chip, remove
+      // and move buttons, role box) and moves it above the Tagify input,
+      // whose own chips it hides.
+      'people' => [
+        '#type' => 'container',
+        '#attributes' => ['class' => ['mukurtu-role-tagify__people']],
         // The script clones this box for each chip; the clones have no name
         // attribute, so only the hidden roles field is submitted.
         'prototype' => [
