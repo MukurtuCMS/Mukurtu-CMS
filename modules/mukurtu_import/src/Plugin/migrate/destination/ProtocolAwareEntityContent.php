@@ -17,6 +17,7 @@ use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\Session\AccountSwitcherInterface;
 use Drupal\migrate\Plugin\migrate\destination\EntityContentBase;
 use Drupal\migrate\Plugin\MigrationInterface;
+use Drupal\media\MediaInterface;
 use Drupal\migrate\Row;
 use Drupal\migrate\MigrateException;
 use Drupal\migrate\Plugin\MigrateIdMapInterface;
@@ -201,16 +202,20 @@ class ProtocolAwareEntityContent extends EntityContentBase {
     if ($this->isEntityValidationRequired($entity)) {
       $this->validateEntity($entity);
     }
+    // Resolved before anything is saved, so a media item the current user
+    // can't edit fails the whole row rather than leaving it half-imported.
+    $media_alt_changes = $media_alt_updates ? $this->resolveMediaAltTextChanges($entity, $media_alt_updates) : [];
+
     // Worked out before save(), which bumps "changed" and starts a new
     // revision on every row whether or not anything else differs.
     $outcome = $this->determineOutcome($entity, $was_new);
+    if ($media_alt_changes && $outcome === 'unchanged') {
+      $outcome = 'updated';
+    }
     $ids = $this->save($entity, $old_destination_id_values);
 
-    if (!empty($media_alt_updates)) {
-      $alt_text_changed = $this->applyMediaEntityAltText($entity, $media_alt_updates);
-      if ($alt_text_changed && $outcome === 'unchanged') {
-        $outcome = 'updated';
-      }
+    if ($media_alt_changes) {
+      $this->applyMediaEntityAltText($media_alt_changes);
     }
 
     if ($this->isTranslationDestination()) {
@@ -270,15 +275,16 @@ class ProtocolAwareEntityContent extends EntityContentBase {
   protected function extractAndClearMediaAltUpdates(Row $row): array {
     $updates = [];
     $entity_type_id = $this->storage->getEntityTypeId();
-    $bundle_key = $this->getKey('bundle');
-    $bundle = $bundle_key
-      ? ($row->getDestinationProperty($bundle_key) ?? $entity_type_id)
-      : $entity_type_id;
+    // getBundle() falls back to the migration's default_bundle, which is how
+    // every import sets the bundle; the row itself rarely carries one.
+    $bundle = $this->getKey('bundle') ? ($this->getBundle($row) ?: $entity_type_id) : $entity_type_id;
 
     $field_defs = $this->entityFieldManager->getFieldDefinitions($entity_type_id, $bundle);
 
-    foreach ($row->getDestination() as $dest_key => $dest_value) {
-      if (!str_ends_with($dest_key, '/alt') || empty($dest_value)) {
+    // Row::setDestinationProperty() nests "field/alt" under "field" in
+    // getDestination(), so only the raw destination still has the flat keys.
+    foreach ($row->getRawDestination() as $dest_key => $dest_value) {
+      if (!str_ends_with((string) $dest_key, '/alt') || empty($dest_value)) {
         continue;
       }
       $field_name = substr($dest_key, 0, strrpos($dest_key, '/'));
@@ -290,7 +296,7 @@ class ProtocolAwareEntityContent extends EntityContentBase {
         && $field_def->getSetting('target_type') === 'media'
         && $field_def->getFieldStorageDefinition()->getCardinality() === 1) {
         $updates[$field_name] = $dest_value;
-        $row->setDestinationProperty($dest_key, NULL);
+        $row->removeDestinationProperty($dest_key);
       }
     }
 
@@ -327,42 +333,86 @@ class ProtocolAwareEntityContent extends EntityContentBase {
   }
 
   /**
-   * Updates the alt text on the image field of referenced media entities.
+   * Works out which referenced media items' alt text this row changes.
    *
-   * @return bool
-   *   TRUE if any media item's alt text actually changed.
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *   The entity being imported, before it's saved.
+   * @param array $media_alt_updates
+   *   Alt text keyed by media reference field name, from
+   *   extractAndClearMediaAltUpdates().
+   *
+   * @return array
+   *   A list of changes, each with keys media (the media entity),
+   *   field_name (its image field), and alt (the new alt text). Media whose
+   *   alt text already matches are left out.
+   *
+   * @throws \Drupal\migrate\MigrateException
+   *   If the current user can't update a media item whose alt text changes.
    */
-  protected function applyMediaEntityAltText(ContentEntityInterface $entity, array $media_alt_updates): bool {
-    $changed = FALSE;
+  protected function resolveMediaAltTextChanges(ContentEntityInterface $entity, array $media_alt_updates): array {
     $media_storage = $this->entityTypeManager->getStorage('media');
+    $changes = [];
 
     foreach ($media_alt_updates as $field_name => $alt_text) {
       if (!$entity->hasField($field_name)) {
         continue;
       }
       $target_id = $entity->get($field_name)->target_id;
-      if (!$target_id) {
+      $media = $target_id ? $media_storage->load($target_id) : NULL;
+      if (!$media instanceof ContentEntityInterface) {
         continue;
       }
-      $media = $media_storage->load($target_id);
-      if (!$media) {
+      $image_field_name = $this->getMediaImageFieldName($media);
+      if ($image_field_name === NULL) {
         continue;
       }
-      foreach ($media->getFields() as $media_field_name => $media_field) {
-        if ($media_field->getFieldDefinition()->getType() !== 'image') {
-          continue;
-        }
-        $vals = $media_field->getValue();
-        if (!empty($vals)) {
-          $changed = $changed || ($vals[0]['alt'] ?? NULL) !== $alt_text;
-          $vals[0]['alt'] = $alt_text;
-          $media->get($media_field_name)->setValue($vals);
-          $media->save();
-        }
-        break;
+      $image_field = $media->get($image_field_name);
+      if ($image_field->isEmpty() || $image_field->alt === $alt_text) {
+        continue;
+      }
+      if (!$this->currentUserBypassesAccessChecks() && !$media->access('update', $this->currentUser)) {
+        throw new MigrateException(sprintf("The current user does not have update access for media item %s, so its alternative text can't be changed.", $media->id()));
+      }
+      $changes[] = ['media' => $media, 'field_name' => $image_field_name, 'alt' => $alt_text];
+    }
+
+    return $changes;
+  }
+
+  /**
+   * Returns the name of the image field that holds a media item's picture.
+   *
+   * That's the media source field when it's an image. Otherwise it's the
+   * first other image field, skipping the generated "thumbnail" base field.
+   */
+  protected function getMediaImageFieldName(ContentEntityInterface $media): ?string {
+    if ($media instanceof MediaInterface) {
+      $source_field = $media->getSource()->getConfiguration()['source_field'] ?? NULL;
+      if ($source_field && $media->hasField($source_field) && $media->getFieldDefinition($source_field)->getType() === 'image') {
+        return $source_field;
       }
     }
-    return $changed;
+    foreach ($media->getFieldDefinitions() as $field_name => $definition) {
+      if ($field_name !== 'thumbnail' && $definition->getType() === 'image') {
+        return $field_name;
+      }
+    }
+    return NULL;
+  }
+
+  /**
+   * Saves alt text changes to referenced media items.
+   *
+   * @param array $changes
+   *   Changes from resolveMediaAltTextChanges().
+   */
+  protected function applyMediaEntityAltText(array $changes): void {
+    foreach ($changes as $change) {
+      $values = $change['media']->get($change['field_name'])->getValue();
+      $values[0]['alt'] = $change['alt'];
+      $change['media']->get($change['field_name'])->setValue($values);
+      $change['media']->save();
+    }
   }
 
   /**
