@@ -66,6 +66,9 @@ class ProtocolAwareEntityContent extends EntityContentBase {
   /**
    * Per-row created/updated details accumulated since the last drain.
    *
+   * Each row also records an outcome (new/updated/unchanged) for the
+   * results tables; see determineOutcome().
+   *
    * Drained by getAndClearRowResults() so ImportBatchExecutable can log
    * true entity-level created/updated status (see import()) instead of
    * relying on migrate's own ID-map bookkeeping, which tracks whether this
@@ -198,10 +201,16 @@ class ProtocolAwareEntityContent extends EntityContentBase {
     if ($this->isEntityValidationRequired($entity)) {
       $this->validateEntity($entity);
     }
+    // Worked out before save(), which bumps "changed" and starts a new
+    // revision on every row whether or not anything else differs.
+    $outcome = $this->determineOutcome($entity, $was_new);
     $ids = $this->save($entity, $old_destination_id_values);
 
     if (!empty($media_alt_updates)) {
-      $this->applyMediaEntityAltText($entity, $media_alt_updates);
+      $alt_text_changed = $this->applyMediaEntityAltText($entity, $media_alt_updates);
+      if ($alt_text_changed && $outcome === 'unchanged') {
+        $outcome = 'updated';
+      }
     }
 
     if ($this->isTranslationDestination()) {
@@ -214,7 +223,10 @@ class ProtocolAwareEntityContent extends EntityContentBase {
     $this->rowResults[] = [
       'source_id' => implode(':', $row->getSourceIdValues()),
       'status' => $was_new ? 'created' : 'updated',
+      'outcome' => $outcome,
       'entity_type_id' => $entity->getEntityTypeId(),
+      'entity_id' => (string) $entity->id(),
+      'langcode' => $entity->language()->getId(),
       'bundle' => $entity->bundle(),
       'label' => (string) $entity->label(),
       'url' => $entity->hasLinkTemplate('canonical') ? $entity->toUrl()->toString() : NULL,
@@ -241,8 +253,9 @@ class ProtocolAwareEntityContent extends EntityContentBase {
    *
    * @return array
    *   A list of associative arrays, each with keys: source_id, status
-   *   ('created' or 'updated'), entity_type_id, bundle, label, and url
-   *   (nullable).
+   *   ('created' or 'updated'), outcome ('new', 'updated', or 'unchanged',
+   *   see determineOutcome()), entity_type_id, entity_id, langcode, bundle,
+   *   label, and url (nullable).
    */
   public function getAndClearRowResults(): array {
     $row_results = $this->rowResults;
@@ -285,9 +298,42 @@ class ProtocolAwareEntityContent extends EntityContentBase {
   }
 
   /**
-   * Updates the alt text on the image field of referenced media entities.
+   * Works out what importing this row does to the entity.
+   *
+   * Unlike the created/updated status, which the import log and counts use,
+   * this tells an update that changes nothing apart from one that does. It
+   * drives the Status column of the import results tables.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *   The entity about to be saved, possibly a translation.
+   * @param bool $was_new
+   *   Whether the entity didn't exist before this row.
+   *
+   * @return string
+   *   'new' for a new entity or a translation this row adds, 'updated' if
+   *   any field differs from the stored translation, otherwise 'unchanged'.
    */
-  protected function applyMediaEntityAltText(ContentEntityInterface $entity, array $media_alt_updates): void {
+  protected function determineOutcome(ContentEntityInterface $entity, bool $was_new): string {
+    if ($was_new) {
+      return 'new';
+    }
+    $original = $this->storage->loadUnchanged($entity->id());
+    if (!$original instanceof ContentEntityInterface || !$original->hasTranslation($entity->language()->getId())) {
+      return 'new';
+    }
+    // hasTranslationChanges() compares every field of this translation with
+    // the stored one, ignoring "changed" and revision metadata.
+    return $entity->hasTranslationChanges() ? 'updated' : 'unchanged';
+  }
+
+  /**
+   * Updates the alt text on the image field of referenced media entities.
+   *
+   * @return bool
+   *   TRUE if any media item's alt text actually changed.
+   */
+  protected function applyMediaEntityAltText(ContentEntityInterface $entity, array $media_alt_updates): bool {
+    $changed = FALSE;
     $media_storage = $this->entityTypeManager->getStorage('media');
 
     foreach ($media_alt_updates as $field_name => $alt_text) {
@@ -308,6 +354,7 @@ class ProtocolAwareEntityContent extends EntityContentBase {
         }
         $vals = $media_field->getValue();
         if (!empty($vals)) {
+          $changed = $changed || ($vals[0]['alt'] ?? NULL) !== $alt_text;
           $vals[0]['alt'] = $alt_text;
           $media->get($media_field_name)->setValue($vals);
           $media->save();
@@ -315,6 +362,7 @@ class ProtocolAwareEntityContent extends EntityContentBase {
         break;
       }
     }
+    return $changed;
   }
 
   /**
