@@ -95,6 +95,26 @@ class PersonFieldRoleTest extends DigitalHeritageTestBase {
   }
 
   /**
+   * Reassigning a position to a different person by ID drops the old role.
+   */
+  public function testSettingNamesByIdClearsStaleRoles(): void {
+    Vocabulary::create(['vid' => 'role', 'name' => 'Role'])->save();
+    $kitto = $this->term('creator', 'Eunice Kitto');
+    $jones = $this->term('creator', 'Mary Jones');
+    $item = $this->saveItem([
+      'field_creator' => [['target_id' => $kitto->id(), 'role_target_id' => $this->term('role', 'Singer')->id()]],
+    ]);
+
+    // As code and imports do: a plain list of IDs, with Mary now first.
+    $item->set('field_creator', [$jones->id(), $kitto->id()]);
+    $item->save();
+
+    $values = $this->reloadEntity('node', $item->id())->get('field_creator')->getValue();
+    $this->assertNull($values[0]['role_target_id'] ?? NULL, 'Mary does not inherit Eunice\'s role.');
+    $this->assertNull($values[1]['role_target_id'] ?? NULL);
+  }
+
+  /**
    * A new, unsaved role term is saved along with the item.
    */
   public function testNewRoleTermIsSavedWithItem(): void {

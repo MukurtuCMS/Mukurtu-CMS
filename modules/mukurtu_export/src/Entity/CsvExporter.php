@@ -5,8 +5,10 @@ namespace Drupal\mukurtu_export\Entity;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Entity\Attribute\ConfigEntityType;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\mukurtu_core\Plugin\Field\FieldType\EntityReferenceRoleItem;
 use Drupal\user\EntityOwnerInterface;
 use Drupal\user\UserInterface;
+
 
 /**
  * CSV Exporter Settings Config Entity
@@ -565,6 +567,21 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface {
         'csv_header_label' => $field_def->getLabel(),
         'export' => $this->isNew() ? (!$field_def->isReadOnly() || in_array($field_name, $id_fields)) : FALSE,
       ];
+
+      // Person fields with roles get a second column for the roles, in the
+      // same order as the names, matching the import's "Field > Role"
+      // column. New exporters include it only where a manager has turned the
+      // field's roles on, so sites without roles get no empty columns.
+      if ($field_def->getType() === 'mukurtu_entity_reference_role'
+        && !in_array('role_target_id', $mappedSubfields[$key][$field_name] ?? [])) {
+        $roleLabel = t('Role');
+        $result[] = [
+          'field_name' => $field_name . '/role_target_id',
+          'field_label' => $field_def->getLabel() . ': ' . $roleLabel,
+          'csv_header_label' => $field_def->getLabel() . ' > ' . $roleLabel,
+          'export' => $this->isNew() && EntityReferenceRoleItem::rolesEnabled($field_name),
+        ];
+      }
     }
 
     return $result;

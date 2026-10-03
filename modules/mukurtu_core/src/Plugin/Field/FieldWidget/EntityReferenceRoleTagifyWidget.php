@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\mukurtu_core\Plugin\Field\FieldWidget;
 
-use Drupal\Core\Entity\Element\EntityAutocomplete;
 use Drupal\Core\Field\Attribute\FieldWidget;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -182,34 +181,12 @@ class EntityReferenceRoleTagifyWidget extends TagifyEntityReferenceAutocompleteW
   /**
    * Turns a role box's text into an existing or new role term.
    *
-   * Accepts the autocomplete format ("Singer (5)") or a bare name. An
-   * unknown name becomes a new, unsaved term when exactly one role
-   * vocabulary is allowed; the field item saves it.
+   * See EntityReferenceRoleItem::resolveRole(). Unsaved new terms are
+   * shared through $newRoles, so two people given the same new role in one
+   * submission get one term.
    */
   protected function resolveRole(string $input): ?TermInterface {
-    $input = trim($input);
-    if ($input === '') {
-      return NULL;
-    }
-    $bundles = array_values($this->getFieldSetting('role_target_bundles') ?: []);
-    $storage = $this->entityTypeManager->getStorage('taxonomy_term');
-
-    $id = EntityAutocomplete::extractEntityIdFromAutocompleteInput($input);
-    if ($id && ($term = $storage->load($id)) && in_array($term->bundle(), $bundles, TRUE)) {
-      return $term;
-    }
-
-    if ($bundles) {
-      $matches = $storage->loadByProperties(['name' => $input, 'vid' => $bundles]);
-      if ($matches) {
-        return reset($matches);
-      }
-    }
-
-    if (count($bundles) === 1) {
-      return $this->newRoles[mb_strtolower($input)] ??= $storage->create(['name' => $input, 'vid' => reset($bundles)]);
-    }
-    return NULL;
+    return EntityReferenceRoleItem::resolveRole($this->fieldDefinition, $input, $this->newRoles);
   }
 
 }

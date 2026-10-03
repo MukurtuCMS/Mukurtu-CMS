@@ -16,6 +16,7 @@ use Drupal\Core\Field\FieldTypePluginManagerInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\Session\AccountSwitcherInterface;
 use Drupal\migrate\Plugin\migrate\destination\EntityContentBase;
+use Drupal\mukurtu_core\Plugin\Field\FieldType\EntityReferenceRoleItem;
 use Drupal\migrate\Plugin\MigrationInterface;
 use Drupal\migrate\Row;
 use Drupal\migrate\MigrateException;
@@ -75,6 +76,16 @@ class ProtocolAwareEntityContent extends EntityContentBase {
    * @var array
    */
   protected array $rowResults = [];
+
+  /**
+   * Each reference-with-role field's values before this row changed them.
+   *
+   * Captured in updateEntity() for existing entities, so roles can be kept
+   * for people a name-only import still lists. Reset for every row.
+   *
+   * @var array<string, array>
+   */
+  protected array $roleFieldOriginals = [];
 
   /**
    * Constructs a ProtocolAwareEntityContent.
@@ -145,6 +156,10 @@ class ProtocolAwareEntityContent extends EntityContentBase {
     // reference fields have no 'alt' sub-property, so passing these to the
     // entity storage would throw. We apply them post-save instead.
     $media_alt_updates = $this->extractAndClearMediaAltUpdates($row);
+    // Likewise */role_target_id: roles are applied to the field's items
+    // after the names are set, so they line up by position.
+    $this->roleFieldOriginals = [];
+    $role_updates = $this->extractAndClearRoleUpdates($row);
 
     $this->rollbackAction = MigrateIdMapInterface::ROLLBACK_DELETE;
     $entity = $this->getEntity($row, $old_destination_id_values);
@@ -152,6 +167,7 @@ class ProtocolAwareEntityContent extends EntityContentBase {
       throw new MigrateException('Unable to get entity');
     }
     assert($entity instanceof ContentEntityInterface);
+    $this->applyRoles($entity, $role_updates);
 
     // A new entity with no mapped/available "created" value is left with an
     // empty created field: unlike "changed", core has no fallback default
@@ -282,6 +298,103 @@ class ProtocolAwareEntityContent extends EntityContentBase {
     }
 
     return $updates;
+  }
+
+  /**
+   * Extracts and clears the role columns of reference-with-role fields.
+   *
+   * The roles share a nested destination array with the names (field_x and
+   * field_x/role_target_id), so they are read from the raw destination and
+   * removed before the entity is built.
+   *
+   * @return array<string, array{roles: array, names_provided: bool}>
+   *   Keyed by field name: the role texts in order, and whether the row also
+   *   set the names.
+   */
+  protected function extractAndClearRoleUpdates(Row $row): array {
+    $updates = [];
+    $entity_type_id = $this->storage->getEntityTypeId();
+    // getBundle() also covers the import's default bundle, which a row that
+    // doesn't map the bundle column relies on.
+    $bundle = $this->getBundle($row) ?? $entity_type_id;
+    $field_defs = $this->entityFieldManager->getFieldDefinitions($entity_type_id, $bundle);
+
+    $raw = $row->getRawDestination();
+    foreach ($raw as $dest_key => $dest_value) {
+      if (!str_ends_with($dest_key, '/role_target_id')) {
+        continue;
+      }
+      $field_name = substr($dest_key, 0, -strlen('/role_target_id'));
+      if (($field_defs[$field_name] ?? NULL)?->getType() !== 'mukurtu_entity_reference_role') {
+        continue;
+      }
+      $names_provided = array_key_exists($field_name, $raw);
+      $updates[$field_name] = [
+        'roles' => is_array($dest_value) ? array_values($dest_value) : [$dest_value],
+        'names_provided' => $names_provided,
+      ];
+      $row->removeDestinationProperty($dest_key);
+      // With only a role column, leave the names alone rather than setting
+      // the field to the now-empty array.
+      if (!$names_provided) {
+        $row->removeDestinationProperty($field_name);
+      }
+    }
+
+    return $updates;
+  }
+
+  /**
+   * Sets each person's role on the entity's reference-with-role fields.
+   *
+   * With a role column, roles are paired with the names by position; a
+   * blank clears that person's role, and an unknown role is created in the
+   * field's role vocabulary like an unknown name is. Without one, each
+   * person the row still lists keeps the role they had, so an older or
+   * name-only CSV never wipes roles.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *   The entity being imported, with the row's values applied.
+   * @param array $role_updates
+   *   From extractAndClearRoleUpdates().
+   */
+  protected function applyRoles(ContentEntityInterface $entity, array $role_updates): void {
+    foreach ($entity->getFieldDefinitions() as $field_name => $field_definition) {
+      if ($field_definition->getType() !== 'mukurtu_entity_reference_role') {
+        continue;
+      }
+      $original = $this->roleFieldOriginals[$field_name] ?? [];
+      $items = $entity->get($field_name);
+
+      if (isset($role_updates[$field_name])) {
+        // Only a role column: core may still have emptied the field through
+        // overwrite_properties, so put the names back first.
+        if (!$role_updates[$field_name]['names_provided'] && $original) {
+          $items->setValue($original);
+        }
+        $created = [];
+        foreach ($items as $delta => $item) {
+          $role = EntityReferenceRoleItem::resolveRole($field_definition, (string) ($role_updates[$field_name]['roles'][$delta] ?? ''), $created);
+          if ($role && $role->isNew()) {
+            $role->save();
+          }
+          $item->role_target_id = $role?->id();
+        }
+        continue;
+      }
+
+      $previous_roles = [];
+      foreach ($original as $value) {
+        if (!empty($value['target_id']) && !empty($value['role_target_id'])) {
+          $previous_roles[$value['target_id']] ??= $value['role_target_id'];
+        }
+      }
+      foreach ($items as $item) {
+        if (empty($item->role_target_id) && isset($previous_roles[$item->target_id])) {
+          $item->role_target_id = $previous_roles[$item->target_id];
+        }
+      }
+    }
   }
 
   /**
@@ -500,6 +613,16 @@ class ProtocolAwareEntityContent extends EntityContentBase {
    * {@inheritdoc}
    */
   protected function updateEntity(EntityInterface $entity, Row $row) {
+    // Record reference-with-role values before the row overwrites them; see
+    // applyRoles().
+    if ($entity instanceof FieldableEntityInterface) {
+      foreach ($entity->getFieldDefinitions() as $field_name => $field_definition) {
+        if ($field_definition->getType() === 'mukurtu_entity_reference_role') {
+          $this->roleFieldOriginals[$field_name] = $entity->get($field_name)->getValue();
+        }
+      }
+    }
+
     // Skip access checks for user 1. See the corresponding check in import()
     // for rationale.
     if ($this->currentUserBypassesAccessChecks()) {

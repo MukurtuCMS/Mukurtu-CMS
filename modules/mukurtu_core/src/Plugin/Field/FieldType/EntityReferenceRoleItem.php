@@ -4,14 +4,18 @@ declare(strict_types=1);
 
 namespace Drupal\mukurtu_core\Plugin\Field\FieldType;
 
+use Drupal\Component\Uuid\Uuid;
+use Drupal\Core\Entity\Element\EntityAutocomplete;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Field\Attribute\FieldType;
 use Drupal\Core\Field\EntityReferenceFieldItemList;
+use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Field\Plugin\Field\FieldType\EntityReferenceItem;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\TypedData\DataDefinition;
+use Drupal\taxonomy\TermInterface;
 
 /**
  * An entity reference with an optional role term for each value.
@@ -76,6 +80,66 @@ class EntityReferenceRoleItem extends EntityReferenceItem {
   }
 
   /**
+   * Finds or creates the role term for some text typed or imported.
+   *
+   * Accepts a term ID or UUID (as an ID-based export writes), Drupal's
+   * autocomplete format ("Singer (5)"), or a name, matched without regard to
+   * case within the field's role vocabularies. An unknown name becomes a new,
+   * unsaved term when exactly one role vocabulary is allowed; otherwise there
+   * is nowhere to create it and NULL is returned.
+   *
+   * @param \Drupal\Core\Field\FieldDefinitionInterface $field_definition
+   *   The reference-with-role field.
+   * @param string $input
+   *   The role text. Blank means no role.
+   * @param \Drupal\taxonomy\TermInterface[] $created
+   *   Unsaved terms already created by this caller, keyed by lowercase name,
+   *   so repeated new roles share one term. Updated in place.
+   *
+   * @return \Drupal\taxonomy\TermInterface|null
+   *   The role term, possibly new and unsaved, or NULL for no role.
+   */
+  public static function resolveRole(FieldDefinitionInterface $field_definition, string $input, array &$created = []): ?TermInterface {
+    $input = trim($input);
+    if ($input === '') {
+      return NULL;
+    }
+    $bundles = array_values($field_definition->getSetting('role_target_bundles') ?: []);
+    if (!$bundles) {
+      return NULL;
+    }
+    $storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
+    $allowed = fn ($term): bool => $term instanceof TermInterface && in_array($term->bundle(), $bundles, TRUE);
+
+    if (Uuid::isValid($input)) {
+      $matches = $storage->loadByProperties(['uuid' => $input]);
+      if ($allowed($match = reset($matches))) {
+        return $match;
+      }
+    }
+    $id = ctype_digit($input) ? $input : EntityAutocomplete::extractEntityIdFromAutocompleteInput($input);
+    if ($id && $allowed($term = $storage->load($id))) {
+      return $term;
+    }
+
+    $name = preg_replace('/\s\(\d+\)$/', '', $input);
+    $ids = $storage->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('vid', $bundles, 'IN')
+      ->condition('name', $name)
+      ->range(0, 1)
+      ->execute();
+    if ($ids) {
+      return $storage->load(reset($ids));
+    }
+
+    if (count($bundles) === 1) {
+      return $created[mb_strtolower($name)] ??= $storage->create(['name' => $name, 'vid' => reset($bundles)]);
+    }
+    return NULL;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function fieldSettingsForm(array $form, FormStateInterface $form_state) {
@@ -127,6 +191,22 @@ class EntityReferenceRoleItem extends EntityReferenceItem {
     ];
     $schema['indexes']['role_target_id'] = ['role_target_id'];
     return $schema;
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * Setting an item to an entity on its own (an ID or an object, as code
+   * and imports do when they assign a list of names) means a different
+   * person may now be in this position, so the previous role is cleared
+   * rather than silently moving onto them. Setting an array keeps whatever
+   * role it includes.
+   */
+  public function setValue($values, $notify = TRUE) {
+    if (isset($values) && !is_array($values)) {
+      $this->writePropertyValue('role_target_id', NULL);
+    }
+    parent::setValue($values, $notify);
   }
 
   /**

@@ -118,14 +118,17 @@ trait ImportFormTrait {
       $plugin = $this->fieldProcessPluginManager->getInstance(['field_definition' => $field_definition]);
       $supported_properties = $plugin->getSupportedProperties($field_definition);
 
-      if (!empty($supported_properties)) {
-        foreach ($supported_properties as $property_name => $property_info) {
-          $target_key = "{$field_name}/{$property_name}";
-          $options[$target_key] = $export_overrides[$target_key] ?? $property_info['label'];
-        }
-      }
-      else {
+      // A field whose sub-columns include its main property (an image's
+      // file, a protocol field's protocols) is mapped only by sub-column. One
+      // whose sub-columns are extras (a person field's roles) is still
+      // mapped as a whole too.
+      $main_property = $field_definition->getFieldStorageDefinition()->getMainPropertyName();
+      if (empty($supported_properties) || !isset($supported_properties[$main_property])) {
         $options[$field_name] = $export_overrides[$field_name] ?? $field_definition->getLabel();
+      }
+      foreach ($supported_properties as $property_name => $property_info) {
+        $target_key = "{$field_name}/{$property_name}";
+        $options[$target_key] = $export_overrides[$target_key] ?? $property_info['label'];
       }
     }
 

@@ -248,6 +248,11 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
       return;
     }
 
+    if ($event->sub_field_name === 'role_target_id') {
+      $this->exportRoles($event, $field, $config);
+      return;
+    }
+
     $option = $config->getEntityReferenceSetting($target_type);
     $id_format = $config->getIdFieldSetting();
 
@@ -318,6 +323,39 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
    *
    * @protected
    */
+  /**
+   * Exports a person field's roles, one per name, in the names' order.
+   *
+   * Blank where a person has no role, so the import pairs each role with the
+   * right name. Roles use the exporter's taxonomy term setting: names, or
+   * IDs/UUIDs for any ID-based option. A field with no roles at all exports
+   * an empty cell rather than a row of delimiters.
+   */
+  protected function exportRoles(EntityFieldExportEvent $event, $field, CsvExporter $config): void {
+    $option = $config->getEntityReferenceSetting('taxonomy_term');
+    $id_format = $config->getIdFieldSetting();
+
+    $export = [];
+    foreach ($field->getValue() as $value) {
+      // Match the names column, which skips empty references.
+      if (empty($value['target_id'])) {
+        continue;
+      }
+      $role_id = $value['role_target_id'] ?? NULL;
+      if (!$role_id) {
+        $export[] = '';
+        continue;
+      }
+      if ($option === 'name' && ($term = $this->loadForExport('taxonomy_term', $role_id, $event))) {
+        $export[] = $term->getName();
+        continue;
+      }
+      $export[] = $id_format === 'uuid' ? $this->getUUID('taxonomy_term', $role_id) : $role_id;
+    }
+
+    $event->setValue(array_filter($export, 'strlen') ? $export : []);
+  }
+
   protected function exportEntityReferenceRevision(EntityFieldExportEvent $event, $field, CsvExporter $config) {
     $export = [];
     $target_type = $field->getFieldDefinition()->getSettings()['target_type'] ?? NULL;
