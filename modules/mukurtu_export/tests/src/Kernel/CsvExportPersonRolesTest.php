@@ -6,7 +6,6 @@ namespace Drupal\Tests\mukurtu_export\Kernel;
 
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
-use Drupal\mukurtu_core\Plugin\Field\FieldType\EntityReferenceRoleItem;
 use Drupal\mukurtu_export\Entity\CsvExporter;
 use Drupal\mukurtu_export\Event\EntityFieldExportEvent;
 use Drupal\node\Entity\Node;
@@ -15,7 +14,7 @@ use Drupal\taxonomy\Entity\Vocabulary;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests exporting person field roles as a "Field > Role" column.
+ * Tests exporting person field roles as "Name>Role".
  */
 #[Group('mukurtu_export')]
 class CsvExportPersonRolesTest extends CsvExportFieldTestBase {
@@ -82,67 +81,61 @@ class CsvExportPersonRolesTest extends CsvExportFieldTestBase {
   }
 
   /**
-   * Exports the role column and returns its values.
+   * Exports field_creator and returns its values.
    */
-  protected function exportRoles(): array {
-    $event = new EntityFieldExportEvent('csv', $this->node, 'field_creator/role_target_id', $this->context);
+  protected function exportCreators(): array {
+    $event = new EntityFieldExportEvent('csv', $this->node, 'field_creator', $this->context);
     $this->fieldExporter->exportField($event);
     return $event->getValue();
   }
 
   /**
-   * Roles export in the names' order, blank where there is none.
+   * Each person with a role is exported as "Name>Role".
    */
-  public function testRolesExportAlignedWithNames(): void {
+  public function testRolesExportAfterNames(): void {
     $this->export_config->setEntityReferenceSetting('taxonomy_term', 'name')->save();
-    $this->assertSame(['Singer', '', 'Writer'], $this->exportRoles());
-
-    // The names column is unchanged and lines up with the roles.
-    $event = new EntityFieldExportEvent('csv', $this->node, 'field_creator', $this->context);
-    $this->fieldExporter->exportField($event);
-    $this->assertSame(['Eunice Kitto', 'Alice Fletcher', 'Mary Jones'], $event->getValue());
+    $this->assertSame(['Eunice Kitto>Singer', 'Alice Fletcher', 'Mary Jones>Writer'], $this->exportCreators());
   }
 
   /**
-   * ID-based exports write role IDs or UUIDs.
+   * With IDs or UUIDs for people, roles are still written as names.
    */
-  public function testRolesExportAsIdsAndUuids(): void {
+  public function testRolesStayNamesWithIdExports(): void {
     $this->export_config->setEntityReferenceSetting('taxonomy_term', 'id')->save();
-    $this->assertEquals([$this->terms['Singer']->id(), '', $this->terms['Writer']->id()], $this->exportRoles());
+    $this->assertEquals([
+      $this->terms['Eunice Kitto']->id() . '>Singer',
+      $this->terms['Alice Fletcher']->id(),
+      $this->terms['Mary Jones']->id() . '>Writer',
+    ], $this->exportCreators());
 
     $this->export_config->setIdFieldSetting('uuid')->save();
-    $this->assertSame([$this->terms['Singer']->uuid(), '', $this->terms['Writer']->uuid()], $this->exportRoles());
+    $this->assertSame([
+      $this->terms['Eunice Kitto']->uuid() . '>Singer',
+      $this->terms['Alice Fletcher']->uuid(),
+      $this->terms['Mary Jones']->uuid() . '>Writer',
+    ], $this->exportCreators());
   }
 
   /**
-   * A field with no roles exports an empty cell, not a row of delimiters.
+   * People without roles export as plain names, exactly as before.
    */
-  public function testNoRolesExportsEmpty(): void {
+  public function testNoRolesExportsPlainNames(): void {
     foreach ($this->node->get('field_creator') as $item) {
       $item->role_target_id = NULL;
     }
     $this->node->save();
     $this->export_config->setEntityReferenceSetting('taxonomy_term', 'name')->save();
-    $this->assertSame([], $this->exportRoles());
+    $this->assertSame(['Eunice Kitto', 'Alice Fletcher', 'Mary Jones'], $this->exportCreators());
   }
 
   /**
-   * New exporters include the role column only where roles are turned on.
+   * The exporter offers no separate role column.
    */
-  public function testRoleColumnDefaultFollowsSetting(): void {
-    $role_column = function (): array {
-      $fields = CsvExporter::create(['id' => 'new_exporter', 'label' => 'New'])->getMappedFields('node', 'protocol_aware_content');
-      $matches = array_values(array_filter($fields, fn ($f) => $f['field_name'] === 'field_creator/role_target_id'));
-      $this->assertCount(1, $matches);
-      return $matches[0];
-    };
-
-    $column = $role_column();
-    $this->assertSame('Creator > Role', $column['csv_header_label']);
-    $this->assertFalse($column['export']);
-
-    $this->config(EntityReferenceRoleItem::SETTINGS)->set('enabled_fields', ['field_creator'])->save();
-    $this->assertTrue($role_column()['export']);
+  public function testNoSeparateRoleColumn(): void {
+    $fields = CsvExporter::create(['id' => 'new_exporter', 'label' => 'New'])->getMappedFields('node', 'protocol_aware_content');
+    $names = array_column($fields, 'field_name');
+    $this->assertContains('field_creator', $names);
+    $this->assertEmpty(array_filter($names, fn ($name) => str_starts_with($name, 'field_creator/')));
   }
 
 }

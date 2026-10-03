@@ -17,7 +17,7 @@ use Drupal\taxonomy\TermInterface;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests importing roles for person fields from a "Field > Role" column.
+ * Tests importing person field roles written as "Name>Role".
  */
 #[Group('mukurtu_import')]
 class ImportPersonRolesTest extends MukurtuImportTestBase {
@@ -89,7 +89,7 @@ class ImportPersonRolesTest extends MukurtuImportTestBase {
   }
 
   /**
-   * Imports rows of [nid, creators, roles] with the given mapping.
+   * Imports the given rows with the given mapping.
    */
   protected function importRows(array $header, array $rows, array $mapping): void {
     $file = $this->createCsvFile(array_merge([$header], $rows));
@@ -112,80 +112,74 @@ class ImportPersonRolesTest extends MukurtuImportTestBase {
   }
 
   /**
-   * Names and roles import together, paired by position.
+   * Imports the given Creator cell onto the existing item.
    */
-  public function testNamesAndRolesPairByPosition(): void {
-    $this->importRows(['nid', 'Creator', 'Creator > Role'], [
-      [$this->node->id(), 'Alice Fletcher;Mary Jones;Eunice Kitto', 'Writer;;Singer'],
-    ], [
+  protected function importCreators(string $cell): void {
+    $this->importRows(['nid', 'Creator'], [[$this->node->id(), $cell]], [
       ['target' => 'nid', 'source' => 'nid'],
       ['target' => 'field_creator', 'source' => 'Creator'],
-      ['target' => 'field_creator/role_target_id', 'source' => 'Creator > Role'],
     ]);
+  }
 
+  /**
+   * Entries written as Name>Role set roles; new roles are created once.
+   */
+  public function testInlineRolesAreSet(): void {
+    $this->importCreators('Alice Fletcher>Writer;Mary Jones;Eunice Kitto>Singer');
+
+    // Mary is new and has no role to keep; Eunice's role moves with the
+    // name from first place to last.
     $this->assertSame(['Alice Fletcher=Writer', 'Mary Jones=-', 'Eunice Kitto=Singer'], $this->creators());
-    // The new role was created once, in the Role vocabulary.
     $writers = $this->entityTypeManager->getStorage('taxonomy_term')
       ->loadByProperties(['vid' => 'role', 'name' => 'Writer']);
     $this->assertCount(1, $writers);
   }
 
   /**
-   * A file without a role column keeps the roles of people it still lists.
+   * A name on its own keeps that person's current role.
    */
-  public function testNameOnlyImportKeepsMatchingRoles(): void {
-    $this->importRows(['nid', 'Creator'], [
-      [$this->node->id(), 'Mary Jones;Eunice Kitto'],
-    ], [
-      ['target' => 'nid', 'source' => 'nid'],
-      ['target' => 'field_creator', 'source' => 'Creator'],
-    ]);
+  public function testNameOnlyEntriesKeepRoles(): void {
+    $this->importCreators('Mary Jones;Eunice Kitto');
 
-    // Eunice keeps Singer, Mary is new with no role, Alice is gone.
+    // Eunice keeps Singer in the new position; Mary doesn't inherit it.
     $this->assertSame(['Mary Jones=-', 'Eunice Kitto=Singer'], $this->creators());
   }
 
   /**
-   * A role column on its own sets roles without touching the names.
+   * An entry written as Name> removes that person's role.
    */
-  public function testRoleOnlyImportKeepsNames(): void {
-    $this->importRows(['nid', 'Creator > Role'], [
-      [$this->node->id(), ';Narrator'],
-    ], [
-      ['target' => 'nid', 'source' => 'nid'],
-      ['target' => 'field_creator/role_target_id', 'source' => 'Creator > Role'],
-    ]);
-
-    // A blank position clears Eunice's role.
+  public function testEmptyRoleRemovesIt(): void {
+    $this->importCreators('Eunice Kitto>;Alice Fletcher>Narrator');
     $this->assertSame(['Eunice Kitto=-', 'Alice Fletcher=Narrator'], $this->creators());
   }
 
   /**
-   * Roles can be given as IDs or UUIDs, as an ID-based export writes them.
+   * People given by ID or UUID get their roles too.
    */
-  public function testRolesByIdAndUuid(): void {
-    $writer = $this->term('role', 'Writer');
-    $singer = $this->term('role', 'Singer');
-    $this->importRows(['nid', 'Creator > Role'], [
-      [$this->node->id(), "{$writer->uuid()};{$singer->id()}"],
-    ], [
-      ['target' => 'nid', 'source' => 'nid'],
-      ['target' => 'field_creator/role_target_id', 'source' => 'Creator > Role'],
-    ]);
+  public function testRolesWithPeopleByIdAndUuid(): void {
+    $kitto = $this->term('creator', 'Eunice Kitto');
+    $fletcher = $this->term('creator', 'Alice Fletcher');
+    $this->importCreators("{$fletcher->uuid()}>Writer;{$kitto->id()}>Narrator");
+    $this->assertSame(['Alice Fletcher=Writer', 'Eunice Kitto=Narrator'], $this->creators());
+  }
 
-    $this->assertSame(['Eunice Kitto=Writer', 'Alice Fletcher=Singer'], $this->creators());
+  /**
+   * A name may contain ">"; the role is after the last one.
+   */
+  public function testNameContainingSeparator(): void {
+    $this->importCreators('Smith > Jones Family>Editor;Eunice Kitto');
+    $this->assertSame(['Smith > Jones Family=Editor', 'Eunice Kitto=Singer'], $this->creators());
   }
 
   /**
    * New items get their roles too.
    */
   public function testNewItemWithRoles(): void {
-    $this->importRows(['title', 'Creator', 'Creator > Role', 'protocols', 'sharing_setting'], [
-      ['New recording', 'Annie James;Eunice Kitto', 'Interviewer;Singer', $this->protocol->id(), 'any'],
+    $this->importRows(['title', 'Creator', 'protocols', 'sharing_setting'], [
+      ['New recording', 'Annie James>Interviewer;Eunice Kitto>Singer', $this->protocol->id(), 'any'],
     ], [
       ['target' => 'title', 'source' => 'title'],
       ['target' => 'field_creator', 'source' => 'Creator'],
-      ['target' => 'field_creator/role_target_id', 'source' => 'Creator > Role'],
       ['target' => 'field_cultural_protocols/protocols', 'source' => 'protocols'],
       ['target' => 'field_cultural_protocols/sharing_setting', 'source' => 'sharing_setting'],
     ]);
@@ -195,19 +189,19 @@ class ImportPersonRolesTest extends MukurtuImportTestBase {
   }
 
   /**
-   * The mapping options offer both the names and the role column.
+   * The mapping offers the field as one column, described with the format.
    */
-  public function testMappingOffersNamesAndRoles(): void {
+  public function testMappingOffersOneColumn(): void {
     $form = ImportFieldDescriptionListForm::create($this->container)
       ->buildForm([], new FormState(), 'node', 'protocol_aware_content');
     $options = $form['table_required']['#options'] + $form['table_optional']['#options'];
 
     $this->assertArrayHasKey('field_creator', $options);
-    $this->assertArrayHasKey('field_creator/role_target_id', $options);
-    // Control: a field whose sub-columns include its main property is still
-    // offered only by sub-column.
-    $this->assertArrayHasKey('field_cultural_protocols/protocols', $options);
-    $this->assertArrayNotHasKey('field_cultural_protocols', $options);
+    $this->assertEmpty(array_filter(array_keys($options), fn ($key) => str_starts_with((string) $key, 'field_creator/')));
+
+    $plugin = $this->container->get('plugin.manager.mukurtu_import_field_process')
+      ->getInstance(['field_definition' => $this->node->getFieldDefinition('field_creator')]);
+    $this->assertStringContainsString('Eunice Kitto>Singer', (string) $plugin->getFormatDescription($this->node->getFieldDefinition('field_creator')));
   }
 
 }

@@ -75,18 +75,6 @@ class EntityReference extends MukurtuImportFieldProcessPluginBase implements Con
       ];
     }
 
-    // Reference-with-role fields keep their plain target (the names, as
-    // before) and add a second column for the roles, in the same order.
-    // ImportFormTrait offers the plain field because target_id isn't listed.
-    if ($field_definition->getType() === 'mukurtu_entity_reference_role') {
-      return [
-        'role_target_id' => [
-          'label' => sprintf('%s > %s', $field_definition->getLabel(), $this->t('Role')),
-          'description' => $this->getFormatDescription($field_definition, 'role_target_id'),
-        ],
-      ];
-    }
-
     return parent::getSupportedProperties($field_definition);
   }
 
@@ -103,29 +91,19 @@ class EntityReference extends MukurtuImportFieldProcessPluginBase implements Con
 
     $cardinality = $field_config->getFieldStorageDefinition()->getCardinality();
     $multivalue_delimiter = $context['multivalue_delimiter'] ?? self::MULTIVALUE_DELIMITER;
-
-    // Roles stay as text, blanks included, so each keeps its position next
-    // to its name. ProtocolAwareEntityContent pairs them with the names and
-    // resolves them to role terms; looking them up here would drop the
-    // blanks and shift every later role onto the wrong person.
-    if (($context['subfield'] ?? NULL) === 'role_target_id') {
-      $process = [];
-      if ($cardinality == -1 || $cardinality > 1) {
-        $process[] = [
-          'plugin' => 'explode',
-          'delimiter' => $multivalue_delimiter,
-          'strict' => FALSE,
-        ];
-      }
-      $process[] = ['plugin' => 'callback', 'callable' => 'trim'];
-      $process[0]['source'] = $source;
-      return $process;
-    }
     $ref_type = $field_config->getSetting('target_type');
     $multiple = $cardinality == -1 || $cardinality > 1;
     $process = [];
 
-    if ($multiple) {
+    // Person fields with roles read "Name>Role" entries: split them into
+    // names, setting the roles aside for ProtocolAwareEntityContent.
+    if ($field_config->getType() === 'mukurtu_entity_reference_role') {
+      $process[] = [
+        'plugin' => 'mukurtu_person_role_split',
+        'delimiter' => $multivalue_delimiter,
+      ];
+    }
+    elseif ($multiple) {
       $process[] = [
         'plugin' => 'explode',
         'delimiter' => $multivalue_delimiter,
@@ -245,8 +223,8 @@ class EntityReference extends MukurtuImportFieldProcessPluginBase implements Con
     $multiple = $this->isMultiple($field_config);
     $ref_type = $field_config->getSetting('target_type');
 
-    if ($field_property === 'role_target_id') {
-      return $this->t('The role for each name, in the same order as the names, separated by your selected multi-value delimiter. Leave a position empty for no role.');
+    if ($field_config->getType() === 'mukurtu_entity_reference_role') {
+      return $this->t("Names separated by your selected multi-value delimiter. To give a person a role, add > and the role after their name, for example Eunice Kitto>Singer. A name on its own keeps that person's current role; a name followed by > alone removes it.");
     }
 
     if ($ref_type === 'media') {
