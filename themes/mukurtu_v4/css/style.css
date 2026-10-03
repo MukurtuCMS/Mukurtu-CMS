@@ -4464,12 +4464,12 @@ body.is-always-mobile-nav .header-nav::before {
 }
 
 body:not(.is-always-mobile-nav) {
-  /* Mobile: search sits in the middle columns (2-4) of the header row,
-   * between the logo (col 1) and the hamburger button (cols 5-6). */
+  /* Mobile: search sits in the header row between the logo and the
+   * hamburger button. Column placement lives in _header.scss, which sizes
+   * the header tracks for this row. */
 }
 @media (max-width: 59.9rem) {
   body:not(.is-always-mobile-nav) .header-search--mobile {
-    grid-column: 2/-2;
     grid-row: 1;
     align-self: center;
     -webkit-border-before: none;
@@ -5210,6 +5210,48 @@ header {
   }
   .header__logo img {
     inline-size: 100px;
+  }
+}
+
+/* Below lg the logo, search box and menu button share one row. The logo is a
+ * fixed 100px, wider than one column of the 6-column grid (about 40px at
+ * 412px, and narrower still when the phone's text size scales up the rem
+ * gutters), so on the shared grid it overlapped the search box. Size the
+ * tracks to their content instead: the logo and button get what they need
+ * and the search box takes the rest. The narrower gap keeps the search box
+ * usable at large text sizes, where the full gutter left it a few pixels
+ * wide. */
+@media (max-width: 59.9rem) {
+  body:not(.is-always-mobile-nav) .header {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    -webkit-column-gap: var(--v-space-5xs);
+       -moz-column-gap: var(--v-space-5xs);
+            column-gap: var(--v-space-5xs);
+  }
+  body:not(.is-always-mobile-nav) .header .header__logo {
+    grid-column: 1;
+  }
+  body:not(.is-always-mobile-nav) .header .header-search--mobile {
+    grid-column: 2;
+  }
+  body:not(.is-always-mobile-nav) .header .mobile-buttons {
+    grid-column: 3;
+  }
+}
+body:not(.is-always-mobile-nav) .header {
+  /* When one row cannot fit the logo, a usable search box and the menu
+   * button, give the search box its own row. The width that row needs:
+   * layout padding (3rem), column gaps (1rem), search wrapper padding
+   * (1rem), input (4.5rem), submit button (2.75rem), menu button (2rem)
+   * and the logo. rem in a media query follows the browser's text
+   * size setting, so large phone text moves the search down instead of
+   * squeezing it under the menu button. */
+}
+@media (width < calc(14.25rem + 100px)) {
+  body:not(.is-always-mobile-nav) .header .header-search--mobile {
+    grid-column: 1/-1;
+    grid-row: 2;
+    padding-inline: 0;
   }
 }
 
