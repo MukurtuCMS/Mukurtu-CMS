@@ -17,7 +17,7 @@ bundle: dictionary_word_entry
 mode: preview
 content:
   field_contributor:
-    type: entity_reference_label
+    type: mukurtu_entity_reference_role_label
     label: above
     settings:
       link: true

@@ -5,3 +5,5 @@ administer mukurtu not found page:
   title: 'Administer not found page'
   description: 'Edit the title and message shown on the custom 404 (not found) page.'
   restrict access: true
+administer mukurtu person role settings:
+  title: 'Administer person role settings'

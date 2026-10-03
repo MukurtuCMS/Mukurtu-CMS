@@ -8,6 +8,8 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
+use Drupal\Core\Field\FieldTypePluginManagerInterface;
+use Drupal\Core\Field\Plugin\Field\FieldType\EntityReferenceItem;
 use Drupal\node\NodeInterface;
 use Drupal\Core\TypedData\DataDefinitionInterface;
 
@@ -26,19 +28,28 @@ class RelatedContentComputationSubscriber implements EventSubscriberInterface, C
   protected $entityFieldManager;
 
   /**
+   * The field type plugin manager.
+   *
+   * @var \Drupal\Core\Field\FieldTypePluginManagerInterface
+   */
+  protected $fieldTypeManager;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('entity_field.manager'),
+      $container->get('plugin.manager.field.field_type'),
     );
   }
 
   /**
    * {@inheritdoc}
    */
-  public function __construct(EntityFieldManagerInterface $entity_field_manager) {
+  public function __construct(EntityFieldManagerInterface $entity_field_manager, FieldTypePluginManagerInterface $field_type_manager) {
     $this->entityFieldManager = $entity_field_manager;
+    $this->fieldTypeManager = $field_type_manager;
   }
 
   /**
@@ -115,6 +126,14 @@ class RelatedContentComputationSubscriber implements EventSubscriberInterface, C
   }
 
   /**
+   * Whether a field type stores entity references.
+   */
+  protected function isEntityReferenceField(string $type): bool {
+    $class = $this->fieldTypeManager->getDefinition($type, FALSE)['class'] ?? NULL;
+    return $class !== NULL && is_a($class, EntityReferenceItem::class, TRUE);
+  }
+
+  /**
    * Returns node fields relevant to related content matching, by type.
    *
    * Shared by referencedContentConditionForTerm() (builds entityQuery
@@ -145,7 +164,10 @@ class RelatedContentComputationSubscriber implements EventSubscriberInterface, C
         continue;
       }
 
-      if ($field->getType() == 'entity_reference') {
+      // Match by item class, not type ID, so field types built on entity
+      // reference (such as reference-with-role) are searched too. This is the
+      // same test core uses to decide which fields go in taxonomy_index.
+      if ($this->isEntityReferenceField($field->getType())) {
         if ($field->getSetting('target_type') == 'taxonomy_term') {
           $searchFields['taxonomy_term'][] = $fieldname;
         }

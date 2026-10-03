@@ -188,7 +188,7 @@ content:
       placeholder: ''
     third_party_settings: {  }
   field_contributor:
-    type: tagify_entity_reference_autocomplete_widget
+    type: mukurtu_entity_reference_role_tagify
     weight: 6
     region: content
     settings:

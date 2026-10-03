@@ -20,7 +20,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   id: 'entity_reference',
   label: new TranslatableMarkup('Entity Reference'),
   description: new TranslatableMarkup('Entity Reference.'),
-  field_types: ['entity_reference'],
+  field_types: ['entity_reference', 'mukurtu_entity_reference_role'],
   weight: 0,
 )]
 class EntityReference extends MukurtuImportFieldProcessPluginBase implements ContainerFactoryPluginInterface {
@@ -95,7 +95,15 @@ class EntityReference extends MukurtuImportFieldProcessPluginBase implements Con
     $multiple = $cardinality == -1 || $cardinality > 1;
     $process = [];
 
-    if ($multiple) {
+    // Person fields with roles read "Name>Role" entries: split them into
+    // names, setting the roles aside for ProtocolAwareEntityContent.
+    if ($field_config->getType() === 'mukurtu_entity_reference_role') {
+      $process[] = [
+        'plugin' => 'mukurtu_person_role_split',
+        'delimiter' => $multivalue_delimiter,
+      ];
+    }
+    elseif ($multiple) {
       $process[] = [
         'plugin' => 'explode',
         'delimiter' => $multivalue_delimiter,
@@ -214,6 +222,10 @@ class EntityReference extends MukurtuImportFieldProcessPluginBase implements Con
   public function getFormatDescription(FieldDefinitionInterface $field_config, $field_property = NULL): TranslatableMarkup {
     $multiple = $this->isMultiple($field_config);
     $ref_type = $field_config->getSetting('target_type');
+
+    if ($field_config->getType() === 'mukurtu_entity_reference_role') {
+      return $this->t("Names separated by your selected multi-value delimiter. To give a person a role, add > and the role after their name, for example Eunice Kitto>Singer. A name on its own keeps that person's current role; a name followed by > alone removes it.");
+    }
 
     if ($ref_type === 'media') {
       if ($field_property === 'alt') {

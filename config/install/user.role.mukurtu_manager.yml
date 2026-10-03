@@ -85,6 +85,7 @@ permissions:
   - 'administer mukurtu_import_strategy'
   - 'administer mukurtu_media configuration'
   - 'administer mukurtu media download settings'
+  - 'administer mukurtu person role settings'
   - 'administer mukurtu submissions'
   - 'configure editable landing_page node layout overrides'
   - 'configure editable page node layout overrides'

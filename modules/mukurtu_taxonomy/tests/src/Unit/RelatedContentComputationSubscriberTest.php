@@ -8,6 +8,10 @@ use Drupal\Core\Entity\EntityFieldManager;
 use Drupal\Core\Field\EntityReferenceFieldItemListInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\Core\Field\FieldTypePluginManagerInterface;
+use Drupal\Core\Field\Plugin\Field\FieldType\EntityReferenceItem;
+use Drupal\mukurtu_core\Plugin\Field\FieldType\EntityReferenceRoleItem;
+use Drupal\text\Plugin\Field\FieldType\TextLongItem;
 use Drupal\mukurtu_core\Event\RelatedContentProvenanceEvent;
 use Drupal\mukurtu_taxonomy\EventSubscriber\RelatedContentComputationSubscriber;
 use Drupal\node\NodeInterface;
@@ -46,7 +50,14 @@ class RelatedContentComputationSubscriberTest extends UnitTestCase {
       ->onlyMethods(['getActiveFieldStorageDefinitions'])
       ->getMock();
     $entityFieldManager->method('getActiveFieldStorageDefinitions')->with('node')->willReturn($fields);
-    return new RelatedContentComputationSubscriber($entityFieldManager);
+    $classes = [
+      'entity_reference' => EntityReferenceItem::class,
+      'mukurtu_entity_reference_role' => EntityReferenceRoleItem::class,
+      'text_long' => TextLongItem::class,
+    ];
+    $fieldTypeManager = $this->createMock(FieldTypePluginManagerInterface::class);
+    $fieldTypeManager->method('getDefinition')->willReturnCallback(fn($type) => isset($classes[$type]) ? ['class' => $classes[$type]] : NULL);
+    return new RelatedContentComputationSubscriber($entityFieldManager, $fieldTypeManager);
   }
 
   /**
@@ -123,6 +134,25 @@ class RelatedContentComputationSubscriberTest extends UnitTestCase {
     $term = $this->mockTerm(10, 'creator');
     $record = $this->mockRecord(1, 'field_other_names', [$term]);
     $candidate = $this->mockCandidate(2, ['field_creator' => [['target_id' => 10]]]);
+
+    $event = new RelatedContentProvenanceEvent($record, [2 => $candidate]);
+    $subscriber->onRelatedContentProvenance($event);
+
+    $this->assertSame(['vocabularies' => ['creator'], 'other' => FALSE], $event->provenance[2]);
+  }
+
+  /**
+   * Tests a reference-with-role field is matched like a plain reference.
+   */
+  public function testRoleReferenceFieldIsTaggedWithVocabulary(): void {
+    $fields = [
+      'field_creator' => $this->mockFieldStorageDefinition('mukurtu_entity_reference_role', 'taxonomy_term'),
+    ];
+    $subscriber = $this->getSubscriber($fields);
+
+    $term = $this->mockTerm(10, 'creator');
+    $record = $this->mockRecord(1, 'field_other_names', [$term]);
+    $candidate = $this->mockCandidate(2, ['field_creator' => [['target_id' => 10, 'role_target_id' => 99]]]);
 
     $event = new RelatedContentProvenanceEvent($record, [2 => $candidate]);
     $subscriber->onRelatedContentProvenance($event);
