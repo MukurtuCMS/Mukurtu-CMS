@@ -1,6 +1,6 @@
 import { test } from '@playwright/test';
-import { Login } from '~components/login';
 import { managerAccount, memberAccount, noteFallbackAccount } from '~helpers/a11y-credentials';
+import { MANAGER_STATE, MEMBER_STATE } from '~helpers/auth-state';
 import {
   checkReflow,
   checkTextZoom,
@@ -65,11 +65,15 @@ test.describe('Automated checks: anonymous pages', () => {
 });
 
 test.describe('Automated checks: member pages', () => {
-  test.beforeEach(async ({ page }, testInfo) => {
-    const account = memberAccount();
-    noteFallbackAccount(testInfo, account, 'member');
-    const login = new Login(page);
-    await login.login(account.username, account.password);
+  // A session saved once by tests/auth.setup.ts, rather than a login in
+  // every test. See src/helpers/auth-state.ts.
+  test.use({ storageState: MEMBER_STATE });
+
+  test.beforeEach(async ({}, testInfo) => {
+    // Kept when the login went away: the report has to say when these
+    // results were gathered as admin/admin rather than as the role, and
+    // that annotation is per test.
+    noteFallbackAccount(testInfo, memberAccount(), 'member');
   });
 
   for (const { slug, path } of memberPages) {
@@ -96,11 +100,15 @@ test.describe('Automated checks: member pages', () => {
  * accessibility.spec.ts for the full rationale.
  */
 test.describe('Automated checks: manage-adjacent pages', () => {
-  test.beforeEach(async ({ page }, testInfo) => {
-    const account = managerAccount();
-    noteFallbackAccount(testInfo, account, 'manage-adjacent');
-    const login = new Login(page);
-    await login.login(account.username, account.password);
+  // A session saved once by tests/auth.setup.ts, rather than a login in
+  // every test. See src/helpers/auth-state.ts.
+  test.use({ storageState: MANAGER_STATE });
+
+  test.beforeEach(async ({}, testInfo) => {
+    // Kept when the login went away: the report has to say when these
+    // results were gathered as admin/admin rather than as the role, and
+    // that annotation is per test.
+    noteFallbackAccount(testInfo, managerAccount(), 'manage-adjacent');
   });
 
   for (const { slug, path } of managePages) {

@@ -1,10 +1,10 @@
 import { test, expect, Page } from '@playwright/test';
 import path = require("path");
-import { Login } from '~components/login';
 import { Ckeditor5 } from "~components/ckeditor5";
 import submitEntityForm from '~helpers/submit-entity-form';
 import waitForAjax from '~helpers/ajax';
 import { gotoReady } from '~helpers/preview';
+import { ADMIN_STATE } from '~helpers/auth-state';
 
 const defaultContentSpec = {
   // Community entities.
@@ -146,10 +146,13 @@ let testContentExists = null;
 /**
  * Setup tasks run before each test.
  */
-test.beforeEach(async ({ page }) => {
-  const login = new Login(page);
-  await login.login('admin', 'admin');
+// Creating content needs an administrator. The session is saved once by
+// tests/auth.setup.ts, as adminAccount(), which falls back to the
+// admin/admin the Tugboat build creates -- the same credentials this file
+// used to log in with by hand, for every one of its six tests.
+test.use({ storageState: ADMIN_STATE });
 
+test.beforeEach(async ({ page }) => {
   // Check if default content already exists, and if so, skip recreation.
   if (testContentExists === null) {
     await gotoReady(page, '/communities');
