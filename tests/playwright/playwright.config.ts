@@ -127,6 +127,16 @@ export default defineConfig({
       fullyParallel: false,
     },
     {
+      // Offline coverage for src/helpers/preview.ts, whose whole subject is
+      // what the suite does when the environment is *not* serving the site.
+      // It has no `dependencies` on purpose: default-content.spec.ts needs a
+      // live site, and this project must run without one, so it also gives
+      // every PR a check that stays meaningful when the preview is down.
+      name: 'offline',
+      testMatch: 'preview-resilience.spec.ts',
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
       name: 'chromium',
       use: {
         ...devices['Desktop Chrome'],
@@ -141,7 +151,7 @@ export default defineConfig({
       // executing, but do not re-run the default-content test if that test is
       // specifically requested, as that would cause it to run twice.
       dependencies: ['default-content'],
-      testIgnore: ['default-content.spec.ts'],
+      testIgnore: ['default-content.spec.ts', 'preview-resilience.spec.ts'],
     },
   ],
 
