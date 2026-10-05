@@ -67,7 +67,29 @@ class MukurtuProtocolMediaAccessControlHandler extends MediaAccessControlHandler
 
     switch ($operation) {
       case 'view':
-        return parent::checkAccess($entity, $operation, $account);
+        // Unpublished media has no protocol-aware "view" concept in this
+        // codebase yet - keep deferring to core's owner/'view own
+        // unpublished media' logic, unchanged.
+        if (!$entity->isPublished()) {
+          return parent::checkAccess($entity, $operation, $account);
+        }
+
+        // Protocol membership (checked above, including "virtual"
+        // membership via an open protocol) is itself sufficient to view
+        // a published item - parent::checkAccess() would instead require
+        // the global 'view media' permission, which no role ever holds
+        // (see MediaProtocolMemberViewAccessTest for the full rationale).
+        //
+        // The 'user' cache context is deliberate, unlike the forbidden
+        // branch above: a forbidden result cached and served to the
+        // wrong user just over-denies (safe), but an allowed one leaking
+        // to a non-member via a shared cache entry would be a real
+        // access leak, so only this branch needs per-user cache
+        // partitioning on top of the invalidation tag.
+        return AccessResult::allowed()
+          ->addCacheableDependency($entity)
+          ->addCacheContexts(['user'])
+          ->addCacheTags(["user:{$account->id()}"]);
 
       case 'update':
       case 'delete':
