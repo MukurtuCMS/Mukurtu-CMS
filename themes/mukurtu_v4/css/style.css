@@ -2149,8 +2149,15 @@ label.form-required::after,
   color: var(--brand-primary-dark);
 }
 .block--image-with-description--full h1, .block--image-with-description--full h2 {
-  font-size: var(--font-size-heading-2xl);
+  font-size: var(--font-size-heading-lg);
   text-align: center;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+@media (min-width: 48rem) {
+  .block--image-with-description--full h1, .block--image-with-description--full h2 {
+    font-size: var(--font-size-heading-2xl);
+  }
 }
 .block--image-with-description--full p {
   font-size: var(--font-size-l);
@@ -2216,14 +2223,28 @@ label.form-required::after,
   inset-inline: 0;
   inset-block: 0;
 }
+.block--image-with-description--full .block-wrapper__first *:has(img) {
+  block-size: 100%;
+}
 .block--image-with-description--full .block-wrapper__first img {
   position: absolute;
   inset-inline: 0;
   inset-block: 0;
   z-index: 1;
-  -o-object-fit: fill;
-     object-fit: fill;
+  -o-object-fit: cover;
+     object-fit: cover;
   inline-size: 100%;
+  block-size: 100%;
+}
+.block--image-with-description--full.block--image-with-description--tinted .block-wrapper__first::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: rgba(0, 0, 0, 0.35);
+}
+.block--image-with-description--full.block--image-with-description--tinted.text-dark .block-wrapper__first::after {
+  background: rgba(255, 255, 255, 0.45);
 }
 .block--image-with-description--full .block-wrapper__second {
   position: relative;
@@ -2238,16 +2259,6 @@ label.form-required::after,
   place-content: center;
   place-items: center;
   min-block-size: 600px;
-}
-.block--image-with-description--full .block-wrapper__second::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: rgba(0, 0, 0, 0.35);
-}
-.block--image-with-description--full.text-dark .block-wrapper__second::before {
-  background: rgba(255, 255, 255, 0.45);
 }
 .block--image-with-description--full .block-wrapper__second-card {
   max-inline-size: min(90%, 640px);
