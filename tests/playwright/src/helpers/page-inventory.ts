@@ -177,24 +177,42 @@ export async function discoverItemUrl(
  * Not Found" page; afterwards it produced a permanent skip. Neither was a
  * scan of the real page. See issue #2250.
  *
- * The id is read from /admin/communities, which lists a members link
- * containing it, rather than from the public listing, which exposes only
- * aliases.
+ * The id is read from /admin/communities-protocols, which lists a members
+ * link containing it, rather than from the public listing, which exposes
+ * only aliases.
  */
 export async function discoverCommunityManageUrl(page: Page, buildPath: (id: string) => string): Promise<string | null> {
-  const response = await page.goto('/admin/communities');
+  const id = await discoverGroupId(page, 'communities');
+  return id ? buildPath(id) : null;
+}
+
+/**
+ * Reads a community or protocol entity id off the group admin listing.
+ *
+ * /admin/communities-protocols is the page to read, not /admin/protocols:
+ * the latter 403s for a Community Manager, which is the account the
+ * manage-adjacent scans run as, so discovery found nothing and those scans
+ * skipped permanently. The combined listing is reachable by that role and
+ * carries members links for both group types, which is where the numeric
+ * id is exposed. It 403s for anonymous and plain members, which is correct
+ * - only the manage tier scans these pages.
+ *
+ * @param page
+ *   The Playwright page.
+ * @param type
+ *   'communities' or 'protocols', matching the admin path segment.
+ */
+async function discoverGroupId(page: Page, type: 'communities' | 'protocols'): Promise<string | null> {
+  const response = await page.goto('/admin/communities-protocols');
   if (response === null || !response.ok()) {
     return null;
   }
 
-  const hrefs = await page.locator('a[href*="/members"]').evaluateAll(
+  const hrefs = await page.locator(`a[href*="/admin/${type}/"]`).evaluateAll(
     (links) => links.map((link) => link.getAttribute('href')),
   );
-  const id = hrefs
-    .map((href) => href?.match(/\/admin\/communities\/(\d+)\//)?.[1])
-    .find((match) => match !== undefined);
-
-  return id ? buildPath(id) : null;
+  const pattern = new RegExp(`/admin/${type}/(\\d+)/`);
+  return hrefs.map((href) => href?.match(pattern)?.[1]).find((match) => match !== undefined) ?? null;
 }
 
 /**
@@ -211,18 +229,7 @@ export async function discoverCommunityManageUrl(page: Page, buildPath: (id: str
  * that one. The two look alike and behave differently.
  */
 export async function discoverProtocolManageUrl(page: Page, buildPath: (id: string) => string): Promise<string | null> {
-  const response = await page.goto('/admin/protocols');
-  if (response === null || !response.ok()) {
-    return null;
-  }
-
-  const hrefs = await page.locator('a[href*="/members"]').evaluateAll(
-    (links) => links.map((link) => link.getAttribute('href')),
-  );
-  const id = hrefs
-    .map((href) => href?.match(/\/admin\/protocols\/(\d+)\//)?.[1])
-    .find((match) => match !== undefined);
-
+  const id = await discoverGroupId(page, 'protocols');
   return id ? buildPath(id) : null;
 }
 
