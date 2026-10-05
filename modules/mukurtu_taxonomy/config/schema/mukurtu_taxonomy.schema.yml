@@ -20,3 +20,7 @@ mukurtu_taxonomy.settings:
       label: 'Place record vocabularies'
       sequence:
         type: string
+
+field.formatter.settings.mukurtu_combined_term_label:
+  type: field.formatter.settings.entity_reference_label
+  label: 'Combined term label formatter settings'
