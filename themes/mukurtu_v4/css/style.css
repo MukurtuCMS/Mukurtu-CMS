@@ -1323,8 +1323,19 @@ body.consent-popup-opened .klaro_toggle_dialog {
   gap: var(--v-space-6xs);
 }
 
+@media (prefers-contrast: more) {
+  .klaro_toggle_dialog {
+    border-color: var(--color-white);
+    background-color: var(--color-black);
+    forced-color-adjust: none;
+  }
+}
 .media:has(.mukurtu-content-warnings) {
   position: relative;
+}
+
+.media:has(.mukurtu-content-warnings):has(.media-asset--unavailable) {
+  min-block-size: 12rem;
 }
 
 .mukurtu-content-warnings {
@@ -3172,6 +3183,12 @@ img[class$=-placeholder] {
   block-size: 100%;
 }
 
+.media-asset--unavailable {
+  margin: 0;
+  padding: var(--v-space-2xs);
+  text-align: center;
+}
+
 .media-asset--glightbox-inline {
   display: none;
 }
@@ -4449,12 +4466,12 @@ body.is-always-mobile-nav .header-nav::before {
 }
 
 body:not(.is-always-mobile-nav) {
-  /* Mobile: search sits in the middle columns (2-4) of the header row,
-   * between the logo (col 1) and the hamburger button (cols 5-6). */
+  /* Mobile: search sits in the header row between the logo and the
+   * hamburger button. Column placement lives in _header.scss, which sizes
+   * the header tracks for this row. */
 }
 @media (max-width: 59.9rem) {
   body:not(.is-always-mobile-nav) .header-search--mobile {
-    grid-column: 2/-2;
     grid-row: 1;
     align-self: center;
     -webkit-border-before: none;
@@ -5195,6 +5212,48 @@ header {
   }
   .header__logo img {
     inline-size: 100px;
+  }
+}
+
+/* Below lg the logo, search box and menu button share one row. The logo is a
+ * fixed 100px, wider than one column of the 6-column grid (about 40px at
+ * 412px, and narrower still when the phone's text size scales up the rem
+ * gutters), so on the shared grid it overlapped the search box. Size the
+ * tracks to their content instead: the logo and button get what they need
+ * and the search box takes the rest. The narrower gap keeps the search box
+ * usable at large text sizes, where the full gutter left it a few pixels
+ * wide. */
+@media (max-width: 59.9rem) {
+  body:not(.is-always-mobile-nav) .header {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    -webkit-column-gap: var(--v-space-5xs);
+       -moz-column-gap: var(--v-space-5xs);
+            column-gap: var(--v-space-5xs);
+  }
+  body:not(.is-always-mobile-nav) .header .header__logo {
+    grid-column: 1;
+  }
+  body:not(.is-always-mobile-nav) .header .header-search--mobile {
+    grid-column: 2;
+  }
+  body:not(.is-always-mobile-nav) .header .mobile-buttons {
+    grid-column: 3;
+  }
+}
+body:not(.is-always-mobile-nav) .header {
+  /* When one row cannot fit the logo, a usable search box and the menu
+   * button, give the search box its own row. The width that row needs:
+   * layout padding (3rem), column gaps (1rem), search wrapper padding
+   * (1rem), input (4.5rem), submit button (2.75rem), menu button (2rem)
+   * and the logo. rem in a media query follows the browser's text
+   * size setting, so large phone text moves the search down instead of
+   * squeezing it under the menu button. */
+}
+@media (width < calc(14.25rem + 100px)) {
+  body:not(.is-always-mobile-nav) .header .header-search--mobile {
+    grid-column: 1/-1;
+    grid-row: 2;
+    padding-inline: 0;
   }
 }
 
@@ -6602,9 +6661,6 @@ header {
   -webkit-margin-before: 1rem;
           margin-block-start: 1rem;
 }
-.dictionary .browse-facets .form-item-glossary-entry {
-  display: none;
-}
 .dictionary .browse-facets .facets-widget-dropdown {
   grid-row: 1;
   -webkit-margin-after: var(--v-space-3xs);
@@ -7468,7 +7524,7 @@ header {
 .dictionary-word__teaser .field,
 .dictionary-word-tabs .field,
 .field--name-field-sections .field,
-.block-wrapper .field)) {
+.full-node__content .block-wrapper .field)) {
   -webkit-padding-before: var(--v-space-2xs);
           padding-block-start: var(--v-space-2xs);
   -webkit-margin-before: var(--v-space-2xs);
@@ -7643,7 +7699,39 @@ header {
   overflow-wrap: anywhere;
   word-break: normal;
 }
-.full-node__sidebar .sidebar-section .field--name-field-citation .button--copy-icon {
+.full-node__sidebar .sidebar-section [data-copy-citation-field] .field__label-row {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: start;
+      -ms-flex-align: start;
+          align-items: flex-start;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  gap: var(--v-space-6xs);
+}
+.full-node__sidebar .sidebar-section [data-copy-citation-field] .field__label-row .field__label {
+  -webkit-box-flex: 1;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+.full-node__sidebar .sidebar-section [data-copy-citation-field] .citation-copy-controls {
+  display: -webkit-inline-box;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  gap: var(--v-space-6xs);
+  -ms-flex-negative: 0;
+      flex-shrink: 0;
+  -webkit-margin-start: auto;
+          margin-inline-start: auto;
+}
+.full-node__sidebar .sidebar-section [data-copy-citation-field] .button--copy-icon {
   display: -webkit-inline-box;
   display: -ms-inline-flexbox;
   display: inline-flex;
@@ -7658,33 +7746,33 @@ header {
   padding: 0;
   -ms-flex-negative: 0;
       flex-shrink: 0;
-  -webkit-margin-before: var(--v-space-4xxs);
-          margin-block-start: var(--v-space-4xxs);
+  margin-block: -10px;
   background: none;
   color: var(--brand-primary-dark);
 }
-.full-node__sidebar .sidebar-section .field--name-field-citation .button--copy-icon:hover, .full-node__sidebar .sidebar-section .field--name-field-citation .button--copy-icon:active, .full-node__sidebar .sidebar-section .field--name-field-citation .button--copy-icon:focus {
+.full-node__sidebar .sidebar-section [data-copy-citation-field] .button--copy-icon:hover, .full-node__sidebar .sidebar-section [data-copy-citation-field] .button--copy-icon:active, .full-node__sidebar .sidebar-section [data-copy-citation-field] .button--copy-icon:focus {
   background: none;
 }
-.full-node__sidebar .sidebar-section .field--name-field-citation .button--copy-icon svg {
+.full-node__sidebar .sidebar-section [data-copy-citation-field] .button--copy-icon svg {
   display: block;
   fill: currentColor;
 }
-.full-node__sidebar .sidebar-section .field--name-field-citation .button--copy-icon:focus-visible {
+.full-node__sidebar .sidebar-section [data-copy-citation-field] .button--copy-icon:focus-visible {
   outline: 2px solid var(--brand-primary-dark);
   outline-offset: 2px;
 }
-.full-node__sidebar .sidebar-section .field--name-field-citation .button--copy-icon.is-copied {
+.full-node__sidebar .sidebar-section [data-copy-citation-field] .button--copy-icon.is-copied {
   color: var(--color-status-dark);
 }
-.full-node__sidebar .sidebar-section .field--name-field-citation .citation-copy-feedback {
+.full-node__sidebar .sidebar-section [data-copy-citation-field] .citation-copy-feedback {
   color: var(--color-status-dark);
   font-size: var(--font-size-s);
+  line-height: var(--line-height-xs);
   opacity: 0;
   -webkit-transition: opacity 0.2s ease;
   transition: opacity 0.2s ease;
 }
-.full-node__sidebar .sidebar-section .field--name-field-citation .button--copy-icon.is-copied + .citation-copy-feedback {
+.full-node__sidebar .sidebar-section [data-copy-citation-field] .citation-copy-controls:has(.is-copied) .citation-copy-feedback {
   opacity: 1;
 }
 .full-node__sidebar .sidebar-section .field--name-field-creative-commons a {

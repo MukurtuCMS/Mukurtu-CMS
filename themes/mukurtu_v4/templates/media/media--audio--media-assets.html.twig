@@ -41,6 +41,9 @@
     {{ title_suffix.contextual_links }}
     {{ content.media_content_warnings }}
 
+    {% if media_unavailable %}
+    <p class="media-asset--unavailable">{{ "@name isn't available right now. Contact your site administrator."|t({'@name': name}) }}</p>
+    {% else %}
     <div class="media-asset--audio-group">
       <img alt="{{ name }}" src="{{ audio_fallback_thumbnail_url }}">
       {{ content.field_media_audio_file }}
@@ -57,12 +60,15 @@
         </div>
       </div>
     </div>
+    {% endif %}
   </div>
 
+  {% if not media_unavailable %}
   <div class="media-asset--actions">
-    <a href="#audio-{{ media.id }}" data-type="inline" class="media-asset--link button" aria-label="Expand {{ name }} audio">Expand +</a>
+    <a href="#audio-{{ media.id }}" data-type="inline" class="media-asset--link button">Expand +<span class="visually-hidden"> audio: {{ name }}</span></a>
     {% if media_download_enabled and media_url %}
       <a href="{{ media_url }}" class="button button--download" download aria-label="Download audio: {{ name }}">Download audio <svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="16" height="18" aria-hidden="true"><path d="M11.61 0H3.87v5.57H0L7.74 13l7.74-7.43h-3.87z"/><path fill-rule="evenodd" d="M.52 15H16v3H.52z" clip-rule="evenodd"/></svg></a>
     {% endif %}
   </div>
+  {% endif %}
 </div>
