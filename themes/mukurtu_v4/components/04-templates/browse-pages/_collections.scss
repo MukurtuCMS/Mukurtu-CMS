@@ -101,11 +101,11 @@
         }
 
         a {
-          color: var(--brand-primary);
+          color: var(--collection-title-link-text);
           text-decoration: underline solid 2px var(--brand-secondary);
 
           &:hover {
-            text-decoration: underline solid 2px var(--brand-primary-dark);
+            text-decoration: underline solid 2px var(--collection-title-link-text);
           }
         }
 
