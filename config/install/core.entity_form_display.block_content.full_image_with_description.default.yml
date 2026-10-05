@@ -5,6 +5,7 @@ dependencies:
     - block_content.type.full_image_with_description
     - field.field.block_content.full_image_with_description.body
     - field.field.block_content.full_image_with_description.field_image
+    - field.field.block_content.full_image_with_description.field_image_tint
     - field.field.block_content.full_image_with_description.field_text_color
   module:
     - media_library
@@ -36,6 +37,13 @@ content:
     weight: 28
     region: content
     settings: {  }
+    third_party_settings: {  }
+  field_image_tint:
+    type: boolean_checkbox
+    weight: 29
+    region: content
+    settings:
+      display_label: true
     third_party_settings: {  }
   info:
     type: string_textfield

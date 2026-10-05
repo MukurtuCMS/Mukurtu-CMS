@@ -11,6 +11,7 @@ use Drupal\comment\CommentInterface;
 use Drupal\comment\Tests\CommentTestTrait;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
+use Drupal\node\NodeAccessRebuild;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\user\Entity\Role;
@@ -91,7 +92,7 @@ class MukurtuCommentAccessControlHandlerTest extends KernelTestBase {
     $this->installSchema('mukurtu_protocol', 'mukurtu_protocol_access');
     $this->installSchema('comment', ['comment_entity_statistics']);
 
-    node_access_rebuild();
+    \Drupal::service(NodeAccessRebuild::class)->rebuild();
 
     // Flag protocol/community entities as Og groups so Og does its part for
     // access control.
