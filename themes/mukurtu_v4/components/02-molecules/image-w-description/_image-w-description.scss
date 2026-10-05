@@ -240,8 +240,9 @@
           inset-inline: 0;
           inset-block: 0;
           z-index: 1;
-          object-fit: fill;
+          object-fit: cover;
           inline-size: 100%;
+          block-size: 100%;
         }
     }
 

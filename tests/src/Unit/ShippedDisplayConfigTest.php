@@ -266,4 +266,42 @@ class ShippedDisplayConfigTest extends UnitTestCase {
     ];
   }
 
+  /**
+   * Image-with-description blocks render their image at a fitting size.
+   *
+   * The full-width block stretches across the whole viewport, so the shared
+   * 900px style the half-width blocks use made hero photos blurry.
+   */
+  #[DataProvider('imageWithDescriptionProvider')]
+  public function testImageWithDescriptionBlocksUseFittingImageSize(string $bundle, string $expectedViewMode, string $expectedStyle): void {
+    $block = $this->shipped("config/install/core.entity_view_display.block_content.$bundle.default.yml");
+    $this->assertSame($expectedViewMode, $block['content']['field_image']['settings']['view_mode'] ?? NULL, "The $bundle block renders its image in the wrong view mode.");
+
+    $media = $this->shipped("config/install/core.entity_view_display.media.image.$expectedViewMode.yml");
+    $this->assertSame($expectedStyle, $media['content']['field_media_image']['settings']['image_style'] ?? NULL, "The $expectedViewMode media view mode uses the wrong image style.");
+    $this->assertContains("image.style.$expectedStyle", $media['dependencies']['config'] ?? []);
+    $this->assertFileExists($this->profileRoot() . "/modules/mukurtu_core/config/install/image.style.$expectedStyle.yml");
+    $this->assertFileExists($this->profileRoot() . "/modules/mukurtu_core/config/install/core.entity_view_mode.media.$expectedViewMode.yml");
+  }
+
+  /**
+   * Block bundles with their expected media view mode and image style.
+   */
+  public static function imageWithDescriptionProvider(): \Generator {
+    yield 'full width' => ['full_image_with_description', 'hero_full_width', 'hero_full_width'];
+    yield 'horizontal' => ['image_with_description', 'image_with_description', 'large_900px'];
+    yield 'vertical' => ['vertical_image_with_description', 'image_with_description', 'large_900px'];
+  }
+
+  /**
+   * The hero image style is wide enough for a full-width hero.
+   */
+  public function testHeroImageStyleIsFullWidth(): void {
+    $style = $this->shipped('modules/mukurtu_core/config/install/image.style.hero_full_width.yml');
+    $effect = reset($style['effects']);
+    $this->assertSame('image_scale', $effect['id']);
+    $this->assertSame(1920, $effect['data']['width']);
+    $this->assertFalse($effect['data']['upscale']);
+  }
+
 }

@@ -25,7 +25,7 @@ content:
     type: entity_reference_entity_view
     label: hidden
     settings:
-      view_mode: image_with_description
+      view_mode: hero_full_width
       link: false
     third_party_settings: {  }
     weight: 1

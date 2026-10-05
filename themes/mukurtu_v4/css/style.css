@@ -2219,9 +2219,10 @@ label.form-required::after,
   inset-inline: 0;
   inset-block: 0;
   z-index: 1;
-  -o-object-fit: fill;
-     object-fit: fill;
+  -o-object-fit: cover;
+     object-fit: cover;
   inline-size: 100%;
+  block-size: 100%;
 }
 .block--image-with-description--full .block-wrapper__second {
   position: relative;
