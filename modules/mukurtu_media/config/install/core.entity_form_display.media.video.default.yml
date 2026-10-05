@@ -57,7 +57,7 @@ content:
       progress_indicator: throbber
     third_party_settings: {  }
   field_people:
-    type: tagify_entity_reference_autocomplete_widget
+    type: mukurtu_entity_reference_role_tagify
     weight: 5
     region: content
     settings:

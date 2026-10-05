@@ -1389,7 +1389,7 @@ function mukurtu_core_token_field_value(FieldItemListInterface $field): string {
     return implode(', ', $parts);
   }
 
-  if (in_array($field_type, ['entity_reference', 'entity_reference_revisions'])) {
+  if (in_array($field_type, ['entity_reference', 'entity_reference_revisions', 'mukurtu_entity_reference_role'])) {
     $entities = $field->referencedEntities();
     // Fallback: load entities directly via storage to bypass any access-layer caching.
     if (empty($entities)) {

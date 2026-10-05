@@ -6,7 +6,7 @@ services:
 
   mukurtu_taxonomy.related_content_computation:
     class: Drupal\mukurtu_taxonomy\EventSubscriber\RelatedContentComputationSubscriber
-    arguments: ['@entity_field.manager']
+    arguments: ['@entity_field.manager', '@plugin.manager.field.field_type']
     tags:
       - { name: event_subscriber }
 

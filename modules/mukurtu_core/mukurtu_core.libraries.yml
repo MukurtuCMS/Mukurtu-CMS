@@ -134,3 +134,18 @@ ajax-row-table-status:
   dependencies:
     - core/drupal
     - core/once
+
+# One row per person (name, role, move buttons) for "Tagify with roles".
+entity_reference_role_tagify:
+  version: 1.x
+  js:
+    js/entity-reference-role-tagify.js: {}
+  css:
+    component:
+      css/entity-reference-role-tagify.css: {}
+  dependencies:
+    - core/drupal
+    - core/drupal.announce
+    - core/drupal.autocomplete
+    - core/once
+    - core/sortable
