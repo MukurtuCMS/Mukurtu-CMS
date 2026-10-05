@@ -2214,6 +2214,9 @@ label.form-required::after,
   inset-inline: 0;
   inset-block: 0;
 }
+.block--image-with-description--full .block-wrapper__first *:has(img) {
+  block-size: 100%;
+}
 .block--image-with-description--full .block-wrapper__first img {
   position: absolute;
   inset-inline: 0;

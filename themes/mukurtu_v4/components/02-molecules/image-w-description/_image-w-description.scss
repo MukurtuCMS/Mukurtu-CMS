@@ -235,6 +235,15 @@
       inset-inline: 0;
       inset-block: 0;
 
+      // Every wrapper between the frame and the img fills the frame. Any of
+      // them can become the img's containing block - contextual.module makes
+      // the media wrapper position: relative for anyone with contextual
+      // links - and since the absolutely positioned img gives it no height
+      // of its own, block-size: 100% below would otherwise resolve to 0.
+      *:has(img) {
+        block-size: 100%;
+      }
+
       img {
           position: absolute;
           inset-inline: 0;
