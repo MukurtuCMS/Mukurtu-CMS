@@ -9,7 +9,7 @@ field_name: field_image_tint
 entity_type: block_content
 bundle: full_image_with_description
 label: 'Tint the background image'
-description: 'Adds a see-through layer over the image so it competes less with the text. The text stays readable without it.'
+description: 'Adds a see-through layer over the image so it competes less with the text. If you turn it off, check that the text is still easy to read over your image.'
 required: false
 translatable: false
 default_value:

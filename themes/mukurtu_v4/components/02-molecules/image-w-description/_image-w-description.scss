@@ -82,9 +82,19 @@
     // default (dark-text) variant never got, so the two looked like
     // different type scales depending only on which text color an editor
     // picked.
+    // Smaller below md so most words fit a phone-width card. A long word can
+    // still exceed it, so allow a mid-word break as a last resort rather
+    // than scrolling the page sideways (WCAG 1.4.10), same as the
+    // collection hero (#1997).
     h1, h2 {
-      font-size: var(--font-size-heading-2xl);
+      font-size: var(--font-size-heading-lg);
       text-align: center;
+      overflow-wrap: anywhere;
+      word-break: normal;
+
+      @include include-media.media('>=md') {
+        font-size: var(--font-size-heading-2xl);
+      }
     }
 
     p {

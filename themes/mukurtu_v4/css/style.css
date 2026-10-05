@@ -2147,8 +2147,15 @@ label.form-required::after,
   color: var(--brand-primary-dark);
 }
 .block--image-with-description--full h1, .block--image-with-description--full h2 {
-  font-size: var(--font-size-heading-2xl);
+  font-size: var(--font-size-heading-lg);
   text-align: center;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+@media (min-width: 48rem) {
+  .block--image-with-description--full h1, .block--image-with-description--full h2 {
+    font-size: var(--font-size-heading-2xl);
+  }
 }
 .block--image-with-description--full p {
   font-size: var(--font-size-l);
