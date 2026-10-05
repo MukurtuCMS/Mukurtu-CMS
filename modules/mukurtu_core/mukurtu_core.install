@@ -403,3 +403,75 @@ function mukurtu_core_update_40207(): ?string {
 
   return (string) t('Full-width image-with-description blocks now use a sharper 1920px image size.');
 }
+
+/**
+ * Let editors turn off the tint on full-width hero block images.
+ */
+function mukurtu_core_update_40208(array &$sandbox): ?string {
+  // Keep the docblock above to one line; see mukurtu_core_update_40201() for
+  // why.
+  //
+  // Adds field_image_tint to full_image_with_description blocks and turns it
+  // on for every existing block, so heroes keep the tint they always had.
+  // The field's default value only applies to new blocks, and an existing
+  // block left empty would show an unchecked box on its edit form, so
+  // saving it untouched would quietly remove the tint.
+  $entity_type_manager = \Drupal::entityTypeManager();
+  $block_storage = $entity_type_manager->getStorage('block_content');
+
+  if (!isset($sandbox['ids'])) {
+    if (!$entity_type_manager->getStorage('block_content_type')->load('full_image_with_description')) {
+      $sandbox['#finished'] = 1;
+      return NULL;
+    }
+
+    $profile_path = \Drupal::service('extension.list.profile')->getPath('mukurtu') . '/config/install/';
+    $to_create = [
+      'field_storage_config' => 'field.storage.block_content.field_image_tint',
+      'field_config' => 'field.field.block_content.full_image_with_description.field_image_tint',
+    ];
+    foreach ($to_create as $entity_type_id => $config_name) {
+      $storage = $entity_type_manager->getStorage($entity_type_id);
+      $values = Yaml::decode(file_get_contents($profile_path . $config_name . '.yml'));
+      if (!$storage->load($values['id'])) {
+        $storage->create($values)->save();
+      }
+    }
+
+    $form_display = $entity_type_manager->getStorage('entity_form_display')->load('block_content.full_image_with_description.default');
+    if ($form_display && !$form_display->getComponent('field_image_tint')) {
+      $form_display->setComponent('field_image_tint', [
+        'type' => 'boolean_checkbox',
+        'weight' => 29,
+        'region' => 'content',
+        'settings' => ['display_label' => TRUE],
+      ])->save();
+    }
+    $view_display = $entity_type_manager->getStorage('entity_view_display')->load('block_content.full_image_with_description.default');
+    if ($view_display && $view_display->getComponent('field_image_tint')) {
+      $view_display->removeComponent('field_image_tint')->save();
+    }
+
+    $sandbox['ids'] = array_values($block_storage->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('type', 'full_image_with_description')
+      ->notExists('field_image_tint')
+      ->execute());
+    $sandbox['total'] = count($sandbox['ids']);
+    $sandbox['updated'] = 0;
+  }
+
+  foreach ($block_storage->loadMultiple(array_splice($sandbox['ids'], 0, 50)) as $block) {
+    $block->set('field_image_tint', TRUE);
+    $block->setSyncing(TRUE);
+    $block->save();
+    $sandbox['updated']++;
+  }
+
+  $sandbox['#finished'] = $sandbox['ids'] ? 1 - count($sandbox['ids']) / $sandbox['total'] : 1;
+  if ($sandbox['#finished'] < 1) {
+    return NULL;
+  }
+
+  return (string) t('Added a Tint the background image option to full-width image-with-description blocks, turned on for existing blocks.');
+}

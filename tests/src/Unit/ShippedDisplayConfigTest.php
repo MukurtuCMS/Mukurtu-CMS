@@ -304,4 +304,24 @@ class ShippedDisplayConfigTest extends UnitTestCase {
     $this->assertFalse($effect['data']['upscale']);
   }
 
+  /**
+   * New full-width blocks start tinted, and editors can turn it off.
+   *
+   * The field only drives a CSS class in the block template, so it must stay
+   * out of the rendered view display or "On" would print over the hero.
+   */
+  public function testHeroTintIsAnEditableSettingThatDefaultsOn(): void {
+    $field = $this->shipped('config/install/field.field.block_content.full_image_with_description.field_image_tint.yml');
+    $this->assertSame('boolean', $field['field_type']);
+    $this->assertSame([['value' => 1]], $field['default_value']);
+
+    $form = $this->shipped('config/install/core.entity_form_display.block_content.full_image_with_description.default.yml');
+    $this->assertSame('boolean_checkbox', $form['content']['field_image_tint']['type'] ?? NULL);
+    $this->assertContains('field.field.block_content.full_image_with_description.field_image_tint', $form['dependencies']['config']);
+
+    $view = $this->shipped('config/install/core.entity_view_display.block_content.full_image_with_description.default.yml');
+    $this->assertArrayNotHasKey('field_image_tint', $view['content']);
+    $this->assertTrue($view['hidden']['field_image_tint'] ?? NULL);
+  }
+
 }
