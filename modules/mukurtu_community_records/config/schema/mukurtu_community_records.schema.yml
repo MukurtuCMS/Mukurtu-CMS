@@ -7,3 +7,9 @@ mukurtu_community_records.settings:
       sequence:
         type: string
         label: 'Content bundle machine name'
+    community_record_weights:
+      type: sequence
+      label: 'Community record ordering weights, keyed by community entity ID'
+      sequence:
+        type: integer
+        label: 'Weight'

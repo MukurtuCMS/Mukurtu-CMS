@@ -580,7 +580,8 @@ class ImportUserAccountTest extends MukurtuImportTestBase {
   public function testBlankAccountStatusLeavesExistingAccountUnchanged(): void {
     $this->installFieldPending();
 
-    $blocked = $this->createUser([], NULL, FALSE, ['status' => 0]);
+    $blocked = $this->createUser(['status' => 0]);
+    $this->assertFalse($blocked->isActive());
 
     $data = [
       ['ID', 'Account Status'],
@@ -596,6 +597,34 @@ class ImportUserAccountTest extends MukurtuImportTestBase {
 
     $updated = $this->entityTypeManager->getStorage('user')->load($blocked->id());
     $this->assertFalse($updated->isActive(), 'A blank Account Status on an update row must not reactivate an existing account.');
+  }
+
+  /**
+   * Test that re-importing an active account with Account Status blank
+   * leaves it active, rather than clearing its status and blocking it.
+   *
+   * @see https://github.com/MukurtuCMS/Mukurtu-CMS/issues/2305
+   */
+  public function testBlankAccountStatusLeavesActiveAccountActive(): void {
+    $this->installFieldPending();
+
+    $active = $this->createUser(['status' => 1]);
+    $this->assertTrue($active->isActive());
+
+    $data = [
+      ['ID', 'Account Status'],
+      [$active->id(), ''],
+    ];
+    $mapping = [
+      ['target' => 'uid', 'source' => 'ID'],
+      ['target' => 'account_status', 'source' => 'Account Status'],
+    ];
+
+    $result = $this->importUserCsv($data, $mapping);
+    $this->assertEquals(MigrationInterface::RESULT_COMPLETED, $result);
+
+    $updated = $this->entityTypeManager->getStorage('user')->loadUnchanged($active->id());
+    $this->assertTrue($updated->isActive(), 'A blank Account Status on an update row must not block an existing active account.');
   }
 
   /**
