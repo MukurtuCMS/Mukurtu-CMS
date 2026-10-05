@@ -6,6 +6,7 @@ namespace Drupal\Tests\mukurtu_import\Kernel;
 
 use Drupal\migrate\Plugin\MigrationInterface;
 use Drupal\mukurtu_import\Entity\MukurtuImportStrategy;
+use Drupal\node\Entity\Node;
 
 /**
  * Test importing when the mapping references a column absent from the file.
@@ -71,6 +72,76 @@ class ImportStrategyMismatchedColumnsTest extends MukurtuImportTestBase {
     $nodes = $this->entityTypeManager->getStorage('node')
       ->loadByProperties(['title' => 'New Node From Mismatched UUID Template']);
     $this->assertCount(1, $nodes);
+  }
+
+  /**
+   * Updating existing content with a file that lacks some mapped columns
+   * must leave those fields alone instead of clearing them.
+   *
+   * @see https://github.com/MukurtuCMS/Mukurtu-CMS/issues/2305
+   */
+  public function testAbsentColumnDoesNotClearFieldOnUpdate() {
+    $node = Node::create([
+      'title' => 'Existing Node',
+      'type' => 'protocol_aware_content',
+      'status' => TRUE,
+      'promote' => TRUE,
+      'sticky' => TRUE,
+      'created' => 1682017200,
+      'uid' => $this->currentUser->id(),
+    ]);
+    $node->setSharingSetting('any');
+    $node->setProtocols([$this->protocol]);
+    $node->save();
+
+    $data = [
+      ['ID', 'Title'],
+      [$node->id(), 'Existing Node Renamed'],
+    ];
+    $import_file = $this->createCsvFile($data);
+
+    $mapping = [
+      ['target' => 'nid', 'source' => 'ID'],
+      ['target' => 'title', 'source' => 'Title'],
+      ['target' => 'promote', 'source' => 'Promoted to front page'],
+      ['target' => 'sticky', 'source' => 'Sticky at top of lists'],
+      ['target' => 'created', 'source' => 'Authored on'],
+    ];
+
+    $result = $this->importCsvFile($import_file, $mapping);
+    $this->assertEquals(MigrationInterface::RESULT_COMPLETED, $result);
+
+    $updated = $this->entityTypeManager->getStorage('node')->loadUnchanged($node->id());
+    $this->assertEquals('Existing Node Renamed', $updated->getTitle());
+    $this->assertTrue($updated->isPromoted());
+    $this->assertTrue($updated->isSticky());
+    $this->assertEquals(1682017200, $updated->getCreatedTime());
+  }
+
+  /**
+   * toDefinition() leaves mappings for absent columns out of both the
+   * process pipeline and the overwritable properties.
+   *
+   * @see https://github.com/MukurtuCMS/Mukurtu-CMS/issues/2305
+   */
+  public function testDefinitionOmitsAbsentColumns() {
+    $file = $this->createCsvFile([
+      ['Title'],
+      ['Some Title'],
+    ]);
+
+    $config = MukurtuImportStrategy::create(['uid' => $this->currentUser->id()]);
+    $config->setTargetEntityTypeId('node');
+    $config->setTargetBundle('protocol_aware_content');
+    $config->setMapping([
+      ['target' => 'title', 'source' => 'Title'],
+      ['target' => 'promote', 'source' => 'Promoted to front page'],
+      ['target' => 'created', 'source' => 'Authored on'],
+    ]);
+    $definition = $config->toDefinition($file);
+
+    $this->assertEquals(['title'], array_keys($definition['process']));
+    $this->assertEquals(['title'], $definition['destination']['overwrite_properties']);
   }
 
   /**
