@@ -548,7 +548,25 @@ test('Default Content: Accessibility scan account memberships', async ({ page })
     throw new Error(`Could not find the id for ${communityName}.`);
   }
 
+  // Already a member? The add-member form rejects a duplicate with a
+  // validation error, which is correct behaviour but leaves the form on
+  // step 1 with no protocol table to fill in. Enrolment is a one-off, and
+  // the preview keeps its database between runs, so every run after the
+  // first would otherwise fail here. Checking the members list first is
+  // what makes this test genuinely re-runnable.
+  const alreadyMember = async (username: string): Promise<boolean> => {
+    const response = await page.goto(`/admin/communities/${communityId}/members`);
+    if (response === null || !response.ok()) {
+      return false;
+    }
+    return (await page.locator('tbody').getByText(username, { exact: true }).count()) > 0;
+  };
+
   const enrol = async (username: string, communityRole: string, protocolRole: string) => {
+    if (await alreadyMember(username)) {
+      return;
+    }
+
     await page.goto(`/admin/communities/${communityId}/members/add`);
 
     // entity_autocomplete resolves on an exact name match, so the plain
@@ -556,7 +574,7 @@ test('Default Content: Accessibility scan account memberships', async ({ page })
     await page.getByRole('textbox', { name: 'User' }).fill(username);
     await page
       .getByRole('checkbox', { name: `${communityRole} for ${communityName}` })
-      .check();
+      .check({ timeout: 30000 });
     // Gin renders this button twice (the real one and its sticky clone),
     // and submitEntityForm()'s wrapper does not apply to this form, so
     // take the first match explicitly rather than tripping strict mode.
@@ -567,7 +585,7 @@ test('Default Content: Accessibility scan account memberships', async ({ page })
     await page
       .getByRole('checkbox', { name: new RegExp(`${protocolRole} for `, 'i') })
       .first()
-      .check();
+      .check({ timeout: 30000 });
     await page.getByRole('button', { name: 'Save', exact: true }).first().click({ timeout: 30000 });
   };
 

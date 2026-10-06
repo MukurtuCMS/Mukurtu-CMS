@@ -13,6 +13,7 @@ import {
   discoverProtocolUrl,
   discoverProtocolManageUrl,
   openForAudit,
+  skipOrFailCoverage,
 } from '~helpers/page-inventory';
 
 /**
@@ -29,7 +30,7 @@ test.describe('Accessibility: anonymous pages', () => {
   for (const { slug, path } of anonymousPages) {
     test(`axe scan: ${slug}`, async ({ page }, testInfo) => {
       const blocked = await openForAudit(page, path);
-      test.skip(blocked !== null, blocked ?? '');
+      skipOrFailCoverage(slug, blocked !== null, blocked ?? '');
       await auditPage(page, testInfo, slug);
     });
   }
@@ -37,18 +38,18 @@ test.describe('Accessibility: anonymous pages', () => {
   for (const { slug, listPath, itemLink, pathSuffix } of discoveredPages) {
     test(`axe scan: ${slug}`, async ({ page }, testInfo) => {
       const url = await discoverItemUrl(page, listPath, itemLink, pathSuffix);
-      test.skip(url === null, `No item link matching "${itemLink}" found on ${listPath}. Seed default content first.`);
+      skipOrFailCoverage(slug, url === null, `No item link matching "${itemLink}" found on ${listPath}. Seed default content first.`);
       const blocked = await openForAudit(page, url);
-      test.skip(blocked !== null, blocked ?? '');
+      skipOrFailCoverage(slug, blocked !== null, blocked ?? '');
       await auditPage(page, testInfo, slug);
     });
   }
 
   test('axe scan: protocol-local-contexts', async ({ page }, testInfo) => {
     const url = await discoverProtocolUrl(page, (slug) => `/protocol/${slug}/local-contexts`);
-    test.skip(url === null, 'No community with a linked protocol found. Seed default content first.');
+    skipOrFailCoverage('protocol-local-contexts', url === null, 'No community with a linked protocol found. Seed default content first.');
     const blocked = await openForAudit(page, url);
-    test.skip(blocked !== null, blocked ?? '');
+    skipOrFailCoverage('protocol-local-contexts', blocked !== null, blocked ?? '');
     await auditPage(page, testInfo, 'protocol-local-contexts');
   });
 });
@@ -64,7 +65,7 @@ test.describe('Accessibility: member pages', () => {
   for (const { slug, path } of memberPages) {
     test(`axe scan: ${slug}`, async ({ page }, testInfo) => {
       const blocked = await openForAudit(page, path);
-      test.skip(blocked !== null, blocked ?? '');
+      skipOrFailCoverage(slug, blocked !== null, blocked ?? '');
       await auditPage(page, testInfo, slug);
     });
   }
@@ -72,9 +73,9 @@ test.describe('Accessibility: member pages', () => {
   for (const { slug, listPath, itemLink } of memberDiscoveredPages) {
     test(`axe scan: ${slug}`, async ({ page }, testInfo) => {
       const url = await discoverItemUrl(page, listPath, itemLink);
-      test.skip(url === null, `No item link matching "${itemLink}" found on ${listPath} for this member.`);
+      skipOrFailCoverage(slug, url === null, `No item link matching "${itemLink}" found on ${listPath} for this member.`);
       const blocked = await openForAudit(page, url);
-      test.skip(blocked !== null, blocked ?? '');
+      skipOrFailCoverage(slug, blocked !== null, blocked ?? '');
       await auditPage(page, testInfo, slug);
     });
   }
@@ -101,24 +102,24 @@ test.describe('Accessibility: manage-adjacent pages', () => {
   for (const { slug, path } of managePages) {
     test(`axe scan: ${slug}`, async ({ page }, testInfo) => {
       const blocked = await openForAudit(page, path);
-      test.skip(blocked !== null, blocked ?? '');
+      skipOrFailCoverage(slug, blocked !== null, blocked ?? '');
       await auditPage(page, testInfo, slug);
     });
   }
 
   test('axe scan: manage-community-local-contexts-projects', async ({ page }, testInfo) => {
     const url = await discoverCommunityManageUrl(page, (slug) => `/communities/community/${slug}/local-contexts/projects`);
-    test.skip(url === null, 'No community found. Seed default content first.');
+    skipOrFailCoverage('manage-community-local-contexts-projects', url === null, 'No community found. Seed default content first.');
     const blocked = await openForAudit(page, url);
-    test.skip(blocked !== null, blocked ?? '');
+    skipOrFailCoverage('manage-community-local-contexts-projects', blocked !== null, blocked ?? '');
     await auditPage(page, testInfo, 'manage-community-local-contexts-projects');
   });
 
   test('axe scan: manage-protocol-local-contexts-projects', async ({ page }, testInfo) => {
     const url = await discoverProtocolManageUrl(page, (id) => `/protocols/protocol/${id}/local-contexts/projects`);
-    test.skip(url === null, 'No community with a linked protocol found. Seed default content first.');
+    skipOrFailCoverage('manage-protocol-local-contexts-projects', url === null, 'No community with a linked protocol found. Seed default content first.');
     const blocked = await openForAudit(page, url);
-    test.skip(blocked !== null, blocked ?? '');
+    skipOrFailCoverage('manage-protocol-local-contexts-projects', blocked !== null, blocked ?? '');
     await auditPage(page, testInfo, 'manage-protocol-local-contexts-projects');
   });
 });

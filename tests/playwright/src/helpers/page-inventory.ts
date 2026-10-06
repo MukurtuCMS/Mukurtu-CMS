@@ -1,4 +1,4 @@
-import { Page } from '@playwright/test';
+import { Page, test } from '@playwright/test';
 
 /**
  * Navigates to a page for auditing, refusing to audit an error page.
@@ -35,6 +35,95 @@ export async function openForAudit(page: Page, path: string): Promise<string | n
  * keyboard traps). See docs/accessibility/page-inventory.md at the profile
  * root — keep both in sync when a page or component is added.
  */
+
+/**
+ * Pages allowed to skip, and why.
+ *
+ * Coverage is enforced by exception: every scan in the inventory must
+ * actually run, and anything that cannot must be listed here with a
+ * reason. A new page is therefore enforced the moment it is added, and
+ * exempting one is a deliberate, reviewable act rather than a silent
+ * omission. This is the coverage half of "the ratchet" in
+ * docs/accessibility/README.md. See issue #2250.
+ *
+ * Keyed by scan slug, so an entry covers that page in both spec layers.
+ */
+export const COVERAGE_EXCEPTIONS: Record<string, string> = {
+  // No community page links a protocol for an anonymous visitor to
+  // follow, so there is no navigation path for discovery to use. Verified
+  // on a seeded site: /community/repository-community returns 200 and
+  // contains zero /protocols/protocol/ links. The page itself is fine;
+  // it is unreachable by the route an anonymous scan has to take.
+  'protocol-local-contexts': 'No anonymous navigation path to a protocol exists.',
+};
+
+/**
+ * Skips a scan, or fails it when the page is one that must be covered.
+ *
+ * A skipped scan is a page nobody looked at, which is indistinguishable
+ * from a clean result in a pass/fail summary. Before skips were named
+ * (#2256) a green run hid 22 of them, two of which turned out to be scans
+ * of error pages reported as clean. Enforcing the set means a page that
+ * stops being reachable breaks the build instead of quietly leaving the
+ * suite.
+ *
+ * @param slug
+ *   The scan's slug, matching COVERAGE_EXCEPTIONS keys.
+ * @param blocked
+ *   Whether the page could not be scanned.
+ * @param reason
+ *   Why not, surfaced in the run summary either way.
+ */
+export function skipOrFailCoverage(slug: string, blocked: boolean, reason: string): void {
+  if (!blocked) {
+    return;
+  }
+
+  const exemption = COVERAGE_EXCEPTIONS[slug];
+  if (exemption === undefined) {
+    throw new Error(
+      `${slug} could not be scanned, and is not an accepted coverage exception.\n`
+      + `Reason: ${reason}\n`
+      + 'Either fix the page or its discovery, or add it to COVERAGE_EXCEPTIONS '
+      + 'in tests/playwright/src/helpers/page-inventory.ts with a reason.',
+    );
+  }
+
+  test.skip(true, `${reason} (accepted exception: ${exemption})`);
+}
+
+/**
+ * Discovers a node id and builds a node-scoped URL from it.
+ *
+ * Needed because routes like /node/{node}/organization declare their
+ * parameter as entity:node, which upcasts from an id and not from a path
+ * alias. The collection-organization scan used to append /organization to
+ * the alias off /collections, giving /collection/some-slug/organization,
+ * which 404s: that scan had never once run. Before openForAudit() landed
+ * it audited the "Page Not Found" page and reported it clean.
+ *
+ * Reads the id from /admin/content, which lists node links containing it.
+ *
+ * @param page
+ *   The Playwright page.
+ * @param type
+ *   Content type machine name to filter the listing by.
+ * @param buildPath
+ *   Builds the final path from the discovered node id.
+ */
+export async function discoverNodeManageUrl(page: Page, type: string, buildPath: (nid: string) => string): Promise<string | null> {
+  const response = await page.goto(`/admin/content?type=${encodeURIComponent(type)}`);
+  if (response === null || !response.ok()) {
+    return null;
+  }
+
+  const hrefs = await page.locator('a[href*="/node/"]').evaluateAll(
+    (links) => links.map((link) => link.getAttribute('href')),
+  );
+  const nid = hrefs.map((href) => href?.match(/\/node\/(\d+)/)?.[1]).find((match) => match !== undefined);
+
+  return nid ? buildPath(nid) : null;
+}
 
 export const anonymousPages = [
   { slug: 'home', path: '/' },
