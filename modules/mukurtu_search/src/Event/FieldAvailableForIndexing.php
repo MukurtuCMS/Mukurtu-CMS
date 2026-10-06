@@ -92,7 +92,7 @@ class FieldAvailableForIndexing extends Event {
         $index->addField($field);
 
         // Add text fields to the ignorecase and ignore_character processors.
-        // String fields are excluded — they are used for faceting and do not
+        // String fields are excluded: they are used for faceting and do not
         // go through text processing.
         if ($type === 'text') {
           $processors = $index->getProcessors();
