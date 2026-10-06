@@ -5,6 +5,31 @@ a tagged release; see the
 [releases page](https://github.com/MukurtuCMS/Mukurtu-CMS/releases) for the tags
 themselves.
 
+## 4.0.5
+
+A maintenance release with bug fixes, accessibility improvements, and fixes to
+CSV import and export. It also requires Drupal core 11.4.8 or later, which fixes
+the security issue SA-CORE-2026-013.
+
+To update, run `composer update` and then run database updates (`drush updb`).
+This release includes 11 database updates. They:
+
+- Let logged-in users open the entity browsers they need, including the
+  collection browser.
+- Add missing columns to the default CSV export settings, and ignore the Default
+  translation column in the default import templates.
+- Install the content_translation module, which CSV import needs.
+- Point the Landing Pages URL alias pattern at landing pages. Existing landing
+  pages get an alias the next time they're saved.
+- Merge identical names in Other Names on Person records and in Other Place
+  Names on Place records.
+- Remove the duplicate, unlabeled Glossary Entry filter from the Dictionary
+  page.
+- Fix the chart report links on the Visitors page, and hide contextual admin
+  links in the categories view.
+- Download the DB-IP fallback geolocation database. This step needs outbound
+  internet access during `drush updb`.
+
 ## 4.0.4
 
 A maintenance release fixing two defects in the Mukurtu 3 migration. Sites that

@@ -19,6 +19,8 @@ const defaultContentSpec = {
   person: [],
   // Digital heritage nodes.
   dh: [],
+  // Collection nodes.
+  collection: [],
   // Dictionary words.
   word: [],
 };
@@ -42,7 +44,11 @@ defaultContentSpec.community.push({
 });
 defaultContentSpec.community.push({
   name: 'Repository community',
-  field_access_mode: 'Community only',
+  // Public, unlike Tribal community above, so that /communities lists at
+  // least one community to anonymous visitors. The accessibility scans
+  // discover the community page from that listing; with every community
+  // "Community only" the anonymous discovery had nothing to find.
+  field_access_mode: 'Public',
   protocols: [
     {
       name: 'Repository under review',
@@ -106,6 +112,48 @@ defaultContentSpec.person.push({
   field_deceased: true,
 });
 
+/* Define default Digital Heritage nodes. */
+// Until these existed the array above was declared and never filled, so the
+// "Default Content: Digital Heritage" test looped over nothing, passed, and
+// /digital-heritage said "No results" on every preview. Every discovery scan
+// that starts from that listing skipped as a consequence. See issue #2250.
+//
+// One public and one members-only, deliberately: the anonymous scans need
+// something they can reach, and the member scans need something the
+// anonymous scans cannot, or the two are indistinguishable.
+defaultContentSpec.dh.push({
+  title: 'Public digital heritage item',
+  summary: 'Shared under an open protocol, so it is visible to everyone including visitors who are not logged in.',
+  field_category: ['Education'],
+  field_cultural_protocols__sharing: 'any',
+  field_cultural_protocols__value: ['Tribal community public access'],
+});
+defaultContentSpec.dh.push({
+  title: 'Members-only digital heritage item',
+  summary: 'Shared under a strict protocol, so it is visible only to members of that protocol.',
+  field_category: ['Government to government relations'],
+  field_cultural_protocols__sharing: 'any',
+  field_cultural_protocols__value: ['Tribal members only'],
+});
+
+/* Define default Collection nodes. */
+// Nothing seeded collections before. Same reasoning as the digital heritage
+// items above; in addition, /collections returns 403 rather than an empty
+// page when the browse view is empty, so with no collections the anonymous
+// collections-browse scan was auditing an error page.
+defaultContentSpec.collection.push({
+  title: 'Public collection',
+  summary: 'A collection shared under an open protocol, visible to everyone.',
+  field_cultural_protocols__sharing: 'any',
+  field_cultural_protocols__value: ['Tribal community public access'],
+});
+defaultContentSpec.collection.push({
+  title: 'Members-only collection',
+  summary: 'A collection shared under a strict protocol, visible only to its members.',
+  field_cultural_protocols__sharing: 'any',
+  field_cultural_protocols__value: ['Tribal members only'],
+});
+
 /* Define default dictionary word taxonomy terms. */
 defaultContentSpec.word.push({
   term: 'Word A',
@@ -137,6 +185,13 @@ defaultContentSpec.word.push({
 });
 
 /**
+ * Community name to entity id, filled in as each community is created.
+ *
+ * @see the accessibility membership test at the end of this file.
+ */
+const createdCommunityIds: Record<string, string> = {};
+
+/**
  * Global to store if any test content exists yet.
  *
  * This value is set on the first test, and then checked on all subsequent ones.
@@ -149,17 +204,24 @@ let testContentExists = null;
 // Creating content needs an administrator. The session is saved once by
 // tests/auth.setup.ts, as adminAccount(), which falls back to the
 // admin/admin the Tugboat build creates -- the same credentials this file
-// used to log in with by hand, for every one of its six tests.
+// used to log in with by hand, for every one of its tests.
 test.use({ storageState: ADMIN_STATE });
 
-test.beforeEach(async ({ page }) => {
+test.beforeEach(async ({ page }, testInfo) => {
   // Check if default content already exists, and if so, skip recreation.
   if (testContentExists === null) {
     await gotoReady(page, '/communities');
     const getStartedVisible = !await page.locator('.communities__item').first().isVisible();
     testContentExists = (getStartedVisible === false);
   }
-  test.skip(testContentExists === true, 'Content already exists within the database, skipping the default content creation. To create default content, empty all existing content by running delete-content.spec.ts.');
+  // The membership test is exempt. Whether content was seeded on this run
+  // is a separate question from whether the accessibility accounts are
+  // enrolled: a preview seeded before those accounts existed has content
+  // but no memberships, and skipping here would leave it that way forever.
+  // The test is idempotent, so re-running it on an already-enrolled site is
+  // harmless.
+  const seedsContent = !testInfo.title.includes('Accessibility scan account memberships');
+  test.skip(testContentExists === true && seedsContent, 'Content already exists within the database, skipping the default content creation. To create default content, empty all existing content by running delete-content.spec.ts.');
 });
 
 /**
@@ -184,7 +246,10 @@ test('Default Content: Community', async ({ page, browserName }) => {
     if (!communityIdMatch) {
       throw new Error('Could not extract created community ID from URL.');
     }
-    // const communityId = communityIdMatch[1];
+    // Kept so the membership step below can address this community by id.
+    // The default-content project is fullyParallel: false, so these tests
+    // share a worker and this map survives between them.
+    createdCommunityIds[community.name] = communityIdMatch[1];
 
     // Loop through all protocols to be created directly against this community.
     for (const protocol of community.protocols) {
@@ -299,7 +364,48 @@ test('Default Content: Digital Heritage', async ({ page, browserName }) => {
         .check();
     }
 
+    // Category is required on this form. Without it the save fails
+    // validation, the page stays on the form, and - because nothing
+    // below checked - this loop used to pass anyway with zero items
+    // created. That is how /digital-heritage read "No results" on every
+    // preview while this test showed green.
+    for (const category of dh.field_category) {
+      await page
+        .getByRole('group', { name: 'Category' })
+        .getByRole('checkbox', { name: category })
+        .check();
+    }
+
     await submitEntityForm(page);
+    await expect(page.getByRole('contentinfo', { name: 'Status message' }))
+      .toContainText(`${dh.title} has been created.`);
+  }
+});
+
+/**
+ * Initialize default collection content.
+ */
+test('Default Content: Collection', async ({ page }) => {
+  // Loop through all collections and create each one.
+  for (const collection of defaultContentSpec.collection) {
+    await gotoReady(page, '/node/add/collection');
+    await page.getByRole('textbox', { name: 'Collection name' }).fill(collection.title);
+    await page.getByRole('textbox', { name: 'Summary' }).fill(collection.summary);
+    await page
+      .getByRole('group', { name: 'Sharing Setting' })
+      .getByRole('radio', { name: collection.field_cultural_protocols__sharing })
+      .check();
+
+    for (const protocol of collection.field_cultural_protocols__value) {
+      await page
+        .getByRole('group', { name: 'Cultural Protocols' })
+        .getByRole('checkbox', { name: protocol })
+        .check();
+    }
+
+    await submitEntityForm(page);
+    await expect(page.getByRole('contentinfo', { name: 'Status message' }))
+      .toContainText(`${collection.title} has been created.`);
   }
 });
 
@@ -400,4 +506,79 @@ test('Default Content: Dictionary Word', async ({ page, browserName }) => {
   }
 
 
+});
+
+/**
+ * Enrol the accessibility scan accounts in the seeded groups.
+ *
+ * The accounts themselves are created by the Tugboat build
+ * (scripts/tugboat/provision-a11y-accounts.php), which runs straight after
+ * drush site-install. At that point no content exists, so the script has no
+ * seeded community to put them in: it used to create its own "Accessibility
+ * Testing Community", and the scans then discovered *that* rather than the
+ * real content. Its Local Contexts pages 404, which is how
+ * manage-community-local-contexts-projects came to be skipped with
+ * "returned HTTP 404" instead of scanning anything. See issue #2250.
+ *
+ * Seeding is the first point at which the real groups exist, so the
+ * memberships belong here rather than in the build. Skips entirely when the
+ * A11Y_* variables are unset, which is the same condition the provisioning
+ * script uses, so a preview without them behaves exactly as before.
+ */
+test('Default Content: Accessibility scan account memberships', async ({ page }) => {
+  const member = process.env.A11Y_USERNAME?.trim();
+  const manager = process.env.A11Y_MANAGER_USERNAME?.trim();
+  test.skip(!member && !manager, 'No A11Y_* accounts configured, so there is nobody to enrol.');
+
+  // Tribal community is the one with both an open and a strict protocol, so
+  // enrolling here is what lets the member scans reach protocol-gated items
+  // that the anonymous scans cannot see. Without that the two surfaces scan
+  // the same public content and the member pass proves nothing.
+  const communityName = 'Tribal community';
+
+  // Prefer the id recorded when the community was created, but fall back to
+  // reading it off /admin/communities. The fallback matters: the seeding
+  // tests skip wholesale when content already exists, so on a re-run the
+  // map is empty while the community is very much there, and depending on
+  // the map alone would make this throw instead of enrolling.
+  let communityId = createdCommunityIds[communityName];
+  if (!communityId) {
+    await gotoReady(page, '/admin/communities');
+    const row = page.locator('tr', { hasText: communityName });
+    const href = await row.locator('a[href*="/members/add"]').first().getAttribute('href');
+    communityId = href?.match(/\/admin\/communities\/(\d+)\//)?.[1] ?? '';
+  }
+  if (!communityId) {
+    throw new Error(`Could not find the id for ${communityName}.`);
+  }
+
+  const enrol = async (username: string, communityRole: string, protocolRole: string) => {
+    await gotoReady(page, `/admin/communities/${communityId}/members/add`);
+
+    // entity_autocomplete resolves on an exact name match, so the plain
+    // username is enough and no dropdown selection is needed.
+    await page.getByRole('textbox', { name: 'User' }).fill(username);
+    await page
+      .getByRole('checkbox', { name: `${communityRole} for ${communityName}` })
+      .check();
+    // Gin renders this button twice (the real one and its sticky clone),
+    // and submitEntityForm()'s wrapper does not apply to this form, so
+    // take the first match explicitly rather than tripping strict mode.
+    await page.getByRole('button', { name: 'Next: Assign protocol roles', exact: true }).first().click({ timeout: 30000 });
+
+    // Step two is the protocol assignment table, shown because this
+    // community has child protocols.
+    await page
+      .getByRole('checkbox', { name: new RegExp(`${protocolRole} for `, 'i') })
+      .first()
+      .check();
+    await page.getByRole('button', { name: 'Save', exact: true }).first().click({ timeout: 30000 });
+  };
+
+  if (member) {
+    await enrol(member, 'Community Member', 'Protocol Member');
+  }
+  if (manager) {
+    await enrol(manager, 'Community Manager', 'Protocol Steward');
+  }
 });

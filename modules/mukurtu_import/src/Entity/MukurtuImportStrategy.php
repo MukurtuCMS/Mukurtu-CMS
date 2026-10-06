@@ -240,10 +240,10 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
     return \Drupal::service('entity_field.manager')->getBaseFieldDefinitions($entity_type_id);
   }
 
-  protected function getProcess() {
+  protected function getProcess(?array $mapping = NULL) {
     $entity_type_id = $this->getTargetEntityTypeId();
     $bundle = $this->getTargetBundle();
-    $mapping = $this->getMapping();
+    $mapping ??= $this->getMapping();
 
     // Get the field definitions for the target.
     $field_defs = $this->getFieldDefinitions($entity_type_id, $bundle);
@@ -314,12 +314,15 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
   /**
    * Get the fields that are allowed to be altered for existing entities.
    *
+   * @param array|null $mapping
+   *   The mapping to use, or NULL for the strategy's full mapping.
+   *
    * @return mixed
    */
-  protected function getOverwriteProperties() {
+  protected function getOverwriteProperties(?array $mapping = NULL) {
     $entity_type_id = $this->getTargetEntityTypeId();
     $bundle = $this->getTargetBundle();
-    $mapping = $this->getMapping();
+    $mapping ??= $this->getMapping();
     $rawTargets = array_column($mapping, 'target');
 
     // For subfield processes, we only want the field name.
@@ -434,19 +437,23 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
    *   The migration definition array
    */
   public function toDefinition(FileInterface $file, array $lookup_source_ids = []): array {
-    $mapping = $this->getMapping();
     $entity_type_id = $this->getTargetEntityTypeId();
     $bundle = $this->getTargetBundle();
     $id_key = $this->entityTypeManager()->getDefinition($entity_type_id)->getKey('id');
     $uuid_key = $this->entityTypeManager()->getDefinition($entity_type_id)->getKey('uuid');
-    $process = $this->getProcess();
 
     // A saved template's mapping can reference columns that don't exist in
-    // this particular file (e.g. a stale template applied without going
-    // through "Customize Settings"). Candidate ID columns are only usable if
-    // they're actually present in the file, otherwise the CSV source plugin
-    // fails every row instead of falling back to record numbers.
+    // this particular file (e.g. a shipped "all fields" template used with a
+    // CSV that only has some of its columns, or a stale template applied
+    // without going through "Customize Settings"). Only mappings whose column
+    // is actually present are used. Otherwise an absent column still gets a
+    // process pipeline, which fails every row for fields such as "created"
+    // and clears the field on existing content for the rest, and absent ID
+    // columns make the CSV source plugin fail every row instead of falling
+    // back to record numbers.
     $headers = $this->getCSVHeaders($file);
+    $mapping = array_values(array_filter($this->getMapping(), fn($m) => in_array($m['source'], $headers, TRUE)));
+    $process = $this->getProcess($mapping);
 
     $ids = [];
     // User-configured identifier column has highest priority.
@@ -493,10 +500,10 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
       // by mukurtu_import_migrate_destination_info_alter().
       'plugin' => $entity_type_id === 'user' ? ProtocolAwareUserContent::PLUGIN_ID : "entity:$entity_type_id",
       'default_bundle' => $bundle,
-      'overwrite_properties' => $this->getOverwriteProperties(),
+      'overwrite_properties' => $this->getOverwriteProperties($mapping),
       'validate' => TRUE,
     ];
-    if ($this->isTranslationImport()) {
+    if ($this->isTranslationImport(array_map(fn($t) => explode('/', $t, 2)[0], array_column($mapping, 'target')))) {
       $destination['translations'] = TRUE;
     }
 
