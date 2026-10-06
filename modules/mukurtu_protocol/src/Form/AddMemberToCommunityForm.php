@@ -273,9 +273,10 @@ class AddMemberToCommunityForm extends FormBase {
 
     $form['actions'] = ['#type' => 'actions'];
     $form['actions']['submit'] = [
-      '#type'   => 'submit',
-      '#value'  => $this->t('Next: Assign protocol roles'),
-      '#submit' => ['::submitStep1'],
+      '#type'     => 'submit',
+      '#value'    => $this->t('Next: Assign protocol roles'),
+      '#validate' => ['::validateStep1'],
+      '#submit'   => ['::submitStep1'],
     ];
 
     return $form;
@@ -348,9 +349,16 @@ class AddMemberToCommunityForm extends FormBase {
   // ---------------------------------------------------------------------------
 
   /**
-   * Step 1 submit: validate, then proceed to step 2 or save immediately.
+   * Step 1 validation.
+   *
+   * These three checks used to live in submitStep1(). Drupal throws a
+   * LogicException from FormState::setErrorByName() once validation has
+   * finished, so calling it from a #submit handler turned every one of
+   * these ordinary mistakes - no user chosen, an existing member chosen,
+   * no role ticked - into an HTTP 500 and a white screen rather than the
+   * message the code clearly intended to show.
    */
-  public function submitStep1(array &$form, FormStateInterface $form_state) {
+  public function validateStep1(array &$form, FormStateInterface $form_state) {
     $uid = $form_state->getValue('user');
     $user = $uid ? User::load($uid) : NULL;
 
@@ -371,18 +379,27 @@ class AddMemberToCommunityForm extends FormBase {
     }
 
     $selections = $form_state->getValue('memberships') ?? [];
-    $has_role = FALSE;
     foreach ($this->getCommunityRoles() as $role) {
       if (!empty($selections[$cid][$role->id()])) {
-        $has_role = TRUE;
-        break;
+        return;
       }
     }
 
-    if (!$has_role) {
-      $form_state->setErrorByName('memberships', $this->t('Please select at least one community role.'));
-      return;
-    }
+    $form_state->setErrorByName('memberships', $this->t('Please select at least one community role.'));
+  }
+
+  /**
+   * Step 1 submit: proceed to step 2, or save when there is no step 2.
+   *
+   * Only reached once validateStep1() has passed, so the values it reads
+   * are known good.
+   */
+  public function submitStep1(array &$form, FormStateInterface $form_state) {
+    $uid = $form_state->getValue('user');
+    $user = User::load($uid);
+    $cid = $form_state->get('community_id');
+    $community = \Drupal::entityTypeManager()->getStorage('community')->load($cid);
+    $selections = $form_state->getValue('memberships') ?? [];
 
     $form_state->set('selected_user', $uid);
     $form_state->set('community_selections', $selections);
