@@ -121,7 +121,7 @@ export function skipOrFailCoverage(slug: string, blocked: boolean, reason: strin
  *   Builds the final path from the discovered node id.
  */
 export async function discoverNodeManageUrl(page: Page, type: string, buildPath: (nid: string) => string): Promise<string | null> {
-  const response = await page.goto(`/admin/content?type=${encodeURIComponent(type)}`);
+  const response = await gotoReady(page, `/admin/content?type=${encodeURIComponent(type)}`);
   if (response === null || !response.ok()) {
     return null;
   }

@@ -556,7 +556,7 @@ test('Default Content: Accessibility scan account memberships', async ({ page })
   // first would otherwise fail here. Checking the members list first is
   // what makes this test genuinely re-runnable.
   const alreadyMember = async (username: string): Promise<boolean> => {
-    const response = await page.goto(`/admin/communities/${communityId}/members`);
+    const response = await gotoReady(page, `/admin/communities/${communityId}/members`);
     if (response === null || !response.ok()) {
       return false;
     }
