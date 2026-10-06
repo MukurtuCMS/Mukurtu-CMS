@@ -171,6 +171,16 @@ jobs:
           A11Y_MANAGER_USERNAME: ${{ secrets.A11Y_MANAGER_USERNAME }}
           A11Y_MANAGER_PASSWORD: ${{ secrets.A11Y_MANAGER_PASSWORD }}
 
+      # Name every skipped scan in the job log and the run summary. The line
+      # reporter prints only a count, so before this a green run with 18
+      # skips looked identical to a green run with 2 and coverage could
+      # shrink unnoticed. Reads the json report the suite now writes on CI.
+      # Report-only: this never fails the job. See issue #2250.
+      - name: List skipped accessibility scans
+        if: always()
+        working-directory: tests/playwright
+        run: node scripts/list-skips.js >> "$GITHUB_STEP_SUMMARY"
+
       # The accessibility scans are report-only by design, so the report is
       # the entire point of running them -- and it was being thrown away
       # with the runner. always(), because a suite that fails partway still
@@ -183,6 +193,7 @@ jobs:
           path: |
             tests/playwright/test-results/a11y/
             tests/playwright/test-results/a11y-extra/
+            tests/playwright/test-results/report.json
           if-no-files-found: warn
           retention-days: 30
 
@@ -284,6 +295,16 @@ jobs:
           A11Y_MANAGER_USERNAME: ${{ secrets.A11Y_MANAGER_USERNAME }}
           A11Y_MANAGER_PASSWORD: ${{ secrets.A11Y_MANAGER_PASSWORD }}
 
+      # Name every skipped scan in the job log and the run summary. The line
+      # reporter prints only a count, so before this a green run with 18
+      # skips looked identical to a green run with 2 and coverage could
+      # shrink unnoticed. Reads the json report the suite now writes on CI.
+      # Report-only: this never fails the job. See issue #2250.
+      - name: List skipped accessibility scans
+        if: always()
+        working-directory: tests/playwright
+        run: node scripts/list-skips.js >> "$GITHUB_STEP_SUMMARY"
+
       # The accessibility scans are report-only by design, so the report is
       # the entire point of running them -- and it was being thrown away
       # with the runner. always(), because a suite that fails partway still
@@ -296,5 +317,6 @@ jobs:
           path: |
             tests/playwright/test-results/a11y/
             tests/playwright/test-results/a11y-extra/
+            tests/playwright/test-results/report.json
           if-no-files-found: warn
           retention-days: 30
