@@ -401,9 +401,14 @@ chapters:
                 corrected by carrying Gin's own reviewed fix as a composer
                 patch until it is released upstream. A re-scan of
                 /admin/content with the toolbar collapsed reports no
-                remaining violations of these rules. The full authoring
-                interface has still not been evaluated, so this remains a
-                partial claim pending the Phase 2 audit (issue #1975).
+                remaining violations of these rules. Evidence for the
+                September 2026 changes is recorded by criterion in
+                docs/accessibility/findings/2026-09-17-remediation-cycle.md.
+                The full authoring interface has still not been evaluated,
+                so this remains a partial claim pending a Phase 2 audit of
+                the authoring surface. Issue #1975 scoped and closed out
+                that phase's inventory and its form-by-form code read; the
+                evaluation itself does not yet have its own tracking issue.
   success_criteria_level_aa:
     notes: ""
     criteria:
@@ -539,9 +544,6 @@ chapters:
                 (icon-only affordances, map controls) is queued for the
                 manual audit cycle. Evidence for the September 2026
                 changes is recorded by criterion in
-                docs/accessibility/findings/2026-09-17-remediation-cycle.md.
-                Evidence for the September 2026 changes is recorded by
-                criterion in
                 docs/accessibility/findings/2026-09-17-remediation-cycle.md.
           - name: authoring-tool
             adherence:
