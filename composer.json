@@ -177,6 +177,9 @@
             "drupal/og": {
                 "Remove bulk option to remove a user's roles": "https://raw.githubusercontent.com/MukurtuCMS/Mukurtu-CMS/b9cc77302d1a471dbc1d5c5eb6921285d2da0806/patches/832-disallow-og-role-removal.patch"
             },
+            "drupal/search_api": {
+                "Store search_api_db tables as utf8mb4 so 4-byte characters can be indexed (#3060442)": "https://raw.githubusercontent.com/MukurtuCMS/Mukurtu-CMS/7e995fe14949139c5d38fe56f2b19b1206fa3572/patches/search_api_db-utf8mb4-3060442.patch"
+            },
             "drupal/search_api_glossary": {
                 "TypeError: Cannot access offset of type string on string": "https://raw.githubusercontent.com/MukurtuCMS/Mukurtu-CMS/b9cc77302d1a471dbc1d5c5eb6921285d2da0806/patches/search_api_glossary_type-error-3492668-8.patch",
                 "Fix implicit nullable param deprecation in Glossary::getPropertyDefinitions()": "https://raw.githubusercontent.com/MukurtuCMS/Mukurtu-CMS/b9cc77302d1a471dbc1d5c5eb6921285d2da0806/patches/search_api_glossary-nullable-param-deprecation.patch"
