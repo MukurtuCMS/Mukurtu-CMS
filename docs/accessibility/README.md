@@ -151,6 +151,22 @@ Axe checks start report-only so a red wall of pre-existing violations doesn't bl
 2. **Next:** the same spec runs in CI (`.github/workflows/playwright.yml`, against the Tugboat preview) and uploads the report as an artifact — still non-blocking.
 3. **Then:** once a page reaches zero violations, it is moved to the "clean" list and any new violation on it fails CI. Page by page, the whole inventory becomes gating.
 
+### The coverage ratchet (which pages must be scanned)
+
+The ratchet above is about *violations*. There is a second, separate question: whether a page was scanned at all. A scan that skips is a page nobody looked at, and in a pass/fail summary that is indistinguishable from a clean result — a green run once hid 22 of them, two of which turned out to be scans of error pages reported as clean.
+
+**Coverage is now enforced by exception.** Every scan in the inventory must actually run. A page that cannot be scanned fails the build unless it is listed in `COVERAGE_EXCEPTIONS` in `tests/playwright/src/helpers/page-inventory.ts`, with a reason.
+
+That direction matters: a page added to the inventory is enforced from the moment it is added, and exempting one is a deliberate, reviewable act rather than a silent omission. The alternative — an allowlist of pages that must be covered — quietly leaves out anything new.
+
+Current exceptions, which should shrink over time:
+
+| Scan | Why it cannot be covered |
+|---|---|
+| `protocol-local-contexts` | No community page links a protocol for an anonymous visitor to follow, so discovery has no navigation path to use. The page is fine; it is unreachable by the route an anonymous scan must take. |
+
+Skipped scans are also **named with their reason** in the GitHub Actions run summary and as warning annotations, via `tests/playwright/scripts/list-skips.js`. Read those rather than the count.
+
 ## Status
 
 | Milestone | Status |
