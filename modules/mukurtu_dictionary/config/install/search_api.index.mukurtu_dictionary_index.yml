@@ -240,7 +240,7 @@ processor_settings:
     fields:
       - dictionary_fulltext
       - title
-    ignorable: '[''¿¡!?,.:;]'
+    ignorable: '[''"¿¡!?,.:;]'
     ignorable_classes:
       - Pf
       - Pi

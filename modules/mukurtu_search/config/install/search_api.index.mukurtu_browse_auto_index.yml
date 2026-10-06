@@ -482,7 +482,7 @@ processor_settings:
       - node__field_type__name__text
       - node__field_word_type__name__text
       - node__title
-    ignorable: '[''¿¡!?,.:;]'
+    ignorable: '[''"¿¡!?,.:;]'
     ignorable_classes:
       - Pf
       - Pi

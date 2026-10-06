@@ -116,7 +116,7 @@ processor_settings:
     fields:
       - field_description
       - title
-    ignorable: '[''¿¡!?,.:;]'
+    ignorable: '[''"¿¡!?,.:;]'
     ignorable_classes:
       - Pf
       - Pi

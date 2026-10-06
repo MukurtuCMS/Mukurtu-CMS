@@ -509,7 +509,7 @@ processor_settings:
       - publisher_name
       - subject_name_text
       - title
-    ignorable: '[''¿¡!?,.:;]'
+    ignorable: '[''"¿¡!?,.:;]'
     ignorable_classes:
       - Pf
       - Pi

@@ -124,7 +124,7 @@ class IgnoreCharacterProcessorTest extends KernelTestBase {
     $this->index->save();
 
     EntityTestMulRevChanged::create([
-      'name' => 'Hiʻilei ʻaʻaliʻi Hawaiʼi Tłʼízí Qurʾān baꞌaa',
+      'name' => 'Hiʻilei ʻaʻaliʻi Hawaiʼi Tłʼízí Qurʾān baꞌaa obʺyom',
       'type' => 'entity_test_mulrev_changed',
     ])->save();
     $this->index->indexItems();
@@ -144,11 +144,23 @@ class IgnoreCharacterProcessorTest extends KernelTestBase {
 
     $index = Index::load('test_index');
     $processor = $index->getProcessor('ignore_character');
-    $this->assertSame(['name'], $processor->getConfiguration()['fields']);
+    $configuration = $processor->getConfiguration();
+    $this->assertSame(['name'], $configuration['fields']);
+
+    // Existing sites must end up with the same settings as new installs.
+    $shipped = (new FileStorage(dirname(__DIR__, 4) . '/mukurtu_browse/config/install'))
+      ->read('search_api.index.mukurtu_default_content_index')['processor_settings']['ignore_character'];
+    foreach (['weights', 'all_fields', 'ignorable', 'ignorable_classes'] as $key) {
+      $this->assertEquals($shipped[$key], $configuration[$key], "Helper $key matches the shipped config.");
+    }
     $this->assertSame(1, $index->getTrackerInstance()->getRemainingItemsCount(), 'Adding the processor queued the item for reindexing.');
 
     $index->indexItems();
-    foreach (['hiilei', 'hiʻilei', "hi'ilei", 'hi’ilei', 'aalii', 'hawaii', 'Hawaiʼi', 'tlizi', 'quran', 'baaa'] as $keys) {
+    $searches = [
+      'hiilei', 'hiʻilei', "hi'ilei", 'hi’ilei', 'aalii', 'hawaii', 'Hawaiʼi',
+      'tlizi', 'quran', 'baaa', 'obyom',
+    ];
+    foreach ($searches as $keys) {
       $this->assertSame(1, $this->search($keys), "Search for '$keys' matches.");
     }
   }
@@ -190,6 +202,7 @@ class IgnoreCharacterProcessorTest extends KernelTestBase {
     $this->assertEqualsCanonicalizing($text_fields, $ignore['fields']);
     $this->assertSame(['Pf', 'Pi', 'Sk'], $ignore['ignorable_classes']);
     $this->assertStringContainsString("'", $ignore['ignorable']);
+    $this->assertStringContainsString('"', $ignore['ignorable']);
 
     // Transliteration must turn each mark into ASCII first, and the tokenizer
     // must not see it.

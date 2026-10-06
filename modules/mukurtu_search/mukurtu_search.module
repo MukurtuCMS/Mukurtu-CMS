@@ -205,8 +205,8 @@ function mukurtu_search_rebuild_index() {
  * rings, glottal stops. Transliteration turns these into an apostrophe,
  * backtick, or question mark, which the tokenizer treats as a word break, so
  * "hiʻilei" was indexed as "hi" and "ilei" and a search for "hiilei" found
- * nothing. Stripping those (the default list, plus classes Pf, Pi, and Sk)
- * before tokenizing keeps such words whole. Matches the processor settings
+ * nothing. Stripping those (the default list plus the double quote, and
+ * classes Pf, Pi, and Sk) before tokenizing keeps such words whole. Matches the processor settings
  * shipped in each index's config/install.
  *
  * @param string $index_id
@@ -238,7 +238,7 @@ function mukurtu_search_enable_ignore_character_processor(string $index_id): boo
       ],
       'all_fields' => FALSE,
       'fields' => $fields,
-      'ignorable' => "['¿¡!?,.:;]",
+      'ignorable' => "['\"¿¡!?,.:;]",
       'ignorable_classes' => ['Pf', 'Pi', 'Sk'],
     ]);
   $index->addProcessor($processor);
