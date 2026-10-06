@@ -8,8 +8,8 @@ import {
   checkLinkText,
   checkKeyboardTrap,
 } from '~helpers/automated-checks';
-import { discoverItemUrl, openForAudit } from '~helpers/page-inventory';
-import { adminPages, adminDiscoveredPages } from '~helpers/page-inventory-admin';
+import { discoverNodeManageUrl, openForAudit, skipOrFailCoverage } from '~helpers/page-inventory';
+import { adminPages } from '~helpers/page-inventory-admin';
 
 /**
  * Phase 2 (admin/authoring) equivalent of accessibility-automated-checks
@@ -52,19 +52,22 @@ test.describe('Automated checks (admin): representative pages', () => {
       // 60s test timeout isn't enough for the full 5-check pipeline here.
       testInfo.setTimeout(120_000);
       const blocked = await openForAudit(page, path);
-      test.skip(blocked !== null, blocked ?? '');
+      skipOrFailCoverage(slug, blocked !== null, blocked ?? '');
       await runAutomatedChecks(page, testInfo, `phase2-${slug}`);
     });
   }
 
-  for (const { slug, listPath, itemLink, pathSuffix } of adminDiscoveredPages) {
-    test(`automated checks: ${slug}`, async ({ page }, testInfo) => {
-      testInfo.setTimeout(120_000);
-      const url = await discoverItemUrl(page, listPath, itemLink, pathSuffix);
-      test.skip(url === null, `No item link matching "${itemLink}" found on ${listPath}. Seed default content first.`);
-      const blocked = await openForAudit(page, url);
-      test.skip(blocked !== null, blocked ?? '');
-      await runAutomatedChecks(page, testInfo, `phase2-${slug}`);
-    });
-  }
+  // CollectionOrganizationController, regression coverage for the fixed
+  // #1978 defect. Built from a node id rather than discovered off
+  // /collections: the route is /node/{node}/organization with an
+  // entity:node parameter, so appending /organization to a collection's
+  // path alias gives a 404. That is what this scan did until now, and it
+  // never once ran. See issue #2250.
+  test('automated checks: phase2-collection-organization', async ({ page }, testInfo) => {
+    const url = await discoverNodeManageUrl(page, 'collection', (nid) => `/node/${nid}/organization`);
+    skipOrFailCoverage('collection-organization', url === null, 'No collection found in /admin/content. Seed default content first.');
+    const blocked = await openForAudit(page, url);
+    skipOrFailCoverage('collection-organization', blocked !== null, blocked ?? '');
+    await runAutomatedChecks(page, testInfo, 'phase2-collection-organization');
+  });
 });
