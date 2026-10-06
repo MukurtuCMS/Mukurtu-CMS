@@ -36,11 +36,4 @@ export const adminPages = [
  * discoveredPages in page-inventory.ts.
  */
 export const adminDiscoveredPages = [
-  {
-    // CollectionOrganizationController -- regression coverage for the fixed #1978 defect.
-    slug: 'collection-organization',
-    listPath: '/collections',
-    itemLink: 'main a[href*="/collection"]',
-    pathSuffix: '/organization',
-  },
 ];
