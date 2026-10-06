@@ -6,6 +6,7 @@
  */
 
 use Drupal\Core\Extension\Requirement\RequirementSeverity;
+use Drupal\Core\Serialization\Yaml;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\mukurtu_core\Hook\UpdatePathRequirements;
 use Drupal\user\Entity\Role;
@@ -291,4 +292,186 @@ function mukurtu_core_update_40204(): void {
   }
 
   $view->set('display.default.display_options.show_admin_links', FALSE)->save();
+}
+
+/**
+ * Grant logged-in users access to entity browser pages they need.
+ */
+function mukurtu_core_update_40205(): ?string {
+  // Keep the docblock above to one line; see mukurtu_core_update_40201() for
+  // why.
+  //
+  // mukurtu_install() grants the authenticated role a set of "access ...
+  // entity browser pages" permissions - one per entity browser used on an
+  // ordinary content edit form, such as "Select Related Content" or "Select
+  // Sub-Collections" - but only in PHP, at fresh-install time, deliberately
+  // never through config/install/user.role.authenticated.yml (see the
+  // comment above $roles in mukurtu_install()). No update hook ever
+  // backfilled that grant, so every site that wasn't freshly installed after
+  // it was added is missing it, and every non-admin logged-in user gets an
+  // access-denied opening any of these modals from a node edit form.
+  //
+  // mukurtu_collection_browser (child collections on the collection edit
+  // form) was missing from mukurtu_install()'s own list too, so it is
+  // included here and added there as well; this hook is the only thing that
+  // ever grants it, on any site.
+  $permissions = [
+    'access mukurtu_collection_browser entity browser pages',
+    'access mukurtu_community_and_protocol_user_browser entity browser pages',
+    'access mukurtu_community_select entity browser pages',
+    'access mukurtu_content_browser entity browser pages',
+    'access mukurtu_dictionary_word_browser entity browser pages',
+    'access mukurtu_person_browser entity browser pages',
+    'access mukurtu_taxonomy_record_place_term_browser entity browser pages',
+    'access mukurtu_taxonomy_record_term_browser entity browser pages',
+    'access multipage_item_entity_browser entity browser pages',
+  ];
+
+  $role = Role::load('authenticated');
+  if (!$role) {
+    return NULL;
+  }
+
+  $granted = array_values(array_filter(
+    $permissions,
+    fn (string $permission): bool => !$role->hasPermission($permission),
+  ));
+
+  if (!$granted) {
+    return NULL;
+  }
+
+  foreach ($granted as $permission) {
+    $role->grantPermission($permission);
+  }
+  $role->save();
+
+  return (string) t('Granted logged-in users @count entity browser permission(s) they need to use "Select..." fields on content edit forms.', ['@count' => count($granted)]);
+}
+
+/**
+ * Show full-width hero block images at a sharper 1920px size.
+ */
+function mukurtu_core_update_40207(): ?string {
+  // Keep the docblock above to one line; see mukurtu_core_update_40201() for
+  // why.
+  //
+  // The full-width image-with-description block used to render its image
+  // through the shared image_with_description media view mode, whose 900px
+  // large_900px style is fine for the half-width horizontal and vertical
+  // blocks but is stretched across the whole viewport here, so hero photos
+  // came out blurry. This gives the full-width block its own view mode and
+  // 1920px style instead, leaving the other blocks and WYSIWYG embeds alone.
+  $entity_type_manager = \Drupal::entityTypeManager();
+  $core_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core') . '/config/install/';
+  $profile_path = \Drupal::service('extension.list.profile')->getPath('mukurtu') . '/config/install/';
+  $to_create = [
+    'image_style' => [$core_path, 'image.style.hero_full_width'],
+    'entity_view_mode' => [$core_path, 'core.entity_view_mode.media.hero_full_width'],
+    'entity_view_display' => [$profile_path, 'core.entity_view_display.media.image.hero_full_width'],
+  ];
+  foreach ($to_create as $entity_type_id => [$path, $config_name]) {
+    $storage = $entity_type_manager->getStorage($entity_type_id);
+    $values = Yaml::decode(file_get_contents($path . $config_name . '.yml'));
+    $id = $values['id'] ?? $values['name'];
+    if (!$storage->load($id)) {
+      $storage->create($values)->save();
+    }
+  }
+
+  $display = $entity_type_manager->getStorage('entity_view_display')->load('block_content.full_image_with_description.default');
+  if (!$display) {
+    return NULL;
+  }
+  $component = $display->getComponent('field_image');
+  // Leave a site that has deliberately picked a different view mode alone.
+  if (!$component || ($component['settings']['view_mode'] ?? NULL) !== 'image_with_description') {
+    return NULL;
+  }
+  $component['settings']['view_mode'] = 'hero_full_width';
+  $display->setComponent('field_image', $component)->save();
+
+  // Content warnings are opt-in per media view mode once an admin has saved
+  // that settings form (NULL means every mode). Carry the old view mode's
+  // choice over, or the hero would silently stop showing warnings.
+  $warnings = \Drupal::configFactory()->getEditable('mukurtu_content_warnings.settings');
+  $modes = $warnings->get('warning_view_modes');
+  if (is_array($modes) && in_array('image_with_description', $modes, TRUE) && !in_array('hero_full_width', $modes, TRUE)) {
+    $modes[] = 'hero_full_width';
+    $warnings->set('warning_view_modes', $modes)->save();
+  }
+
+  return (string) t('Full-width image-with-description blocks now use a sharper 1920px image size.');
+}
+
+/**
+ * Let editors turn off the tint on full-width hero block images.
+ */
+function mukurtu_core_update_40208(array &$sandbox): ?string {
+  // Keep the docblock above to one line; see mukurtu_core_update_40201() for
+  // why.
+  //
+  // Adds field_image_tint to full_image_with_description blocks and turns it
+  // on for every existing block, so heroes keep the tint they always had.
+  // The field's default value only applies to new blocks, and an existing
+  // block left empty would show an unchecked box on its edit form, so
+  // saving it untouched would quietly remove the tint.
+  $entity_type_manager = \Drupal::entityTypeManager();
+  $block_storage = $entity_type_manager->getStorage('block_content');
+
+  if (!isset($sandbox['ids'])) {
+    if (!$entity_type_manager->getStorage('block_content_type')->load('full_image_with_description')) {
+      $sandbox['#finished'] = 1;
+      return NULL;
+    }
+
+    $profile_path = \Drupal::service('extension.list.profile')->getPath('mukurtu') . '/config/install/';
+    $to_create = [
+      'field_storage_config' => 'field.storage.block_content.field_image_tint',
+      'field_config' => 'field.field.block_content.full_image_with_description.field_image_tint',
+    ];
+    foreach ($to_create as $entity_type_id => $config_name) {
+      $storage = $entity_type_manager->getStorage($entity_type_id);
+      $values = Yaml::decode(file_get_contents($profile_path . $config_name . '.yml'));
+      if (!$storage->load($values['id'])) {
+        $storage->create($values)->save();
+      }
+    }
+
+    $form_display = $entity_type_manager->getStorage('entity_form_display')->load('block_content.full_image_with_description.default');
+    if ($form_display && !$form_display->getComponent('field_image_tint')) {
+      $form_display->setComponent('field_image_tint', [
+        'type' => 'boolean_checkbox',
+        'weight' => 29,
+        'region' => 'content',
+        'settings' => ['display_label' => TRUE],
+      ])->save();
+    }
+    $view_display = $entity_type_manager->getStorage('entity_view_display')->load('block_content.full_image_with_description.default');
+    if ($view_display && $view_display->getComponent('field_image_tint')) {
+      $view_display->removeComponent('field_image_tint')->save();
+    }
+
+    $sandbox['ids'] = array_values($block_storage->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('type', 'full_image_with_description')
+      ->notExists('field_image_tint')
+      ->execute());
+    $sandbox['total'] = count($sandbox['ids']);
+    $sandbox['updated'] = 0;
+  }
+
+  foreach ($block_storage->loadMultiple(array_splice($sandbox['ids'], 0, 50)) as $block) {
+    $block->set('field_image_tint', TRUE);
+    $block->setSyncing(TRUE);
+    $block->save();
+    $sandbox['updated']++;
+  }
+
+  $sandbox['#finished'] = $sandbox['ids'] ? 1 - count($sandbox['ids']) / $sandbox['total'] : 1;
+  if ($sandbox['#finished'] < 1) {
+    return NULL;
+  }
+
+  return (string) t('Added a Tint the background image option to full-width image-with-description blocks, turned on for existing blocks.');
 }
