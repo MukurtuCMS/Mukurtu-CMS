@@ -96,3 +96,34 @@ test('Reflow: page title and breadcrumb allow mid-word breaks for long unbreakab
   );
   expect(breadcrumbOverflowWrap).toBe('anywhere');
 });
+
+// The community cards overflowed /communities by 28px at 320px (348px of
+// document against a 320px viewport). Two independent causes, so assert the
+// end result rather than either property: the list kept the UA's 40px list
+// indent despite hiding its markers, and `grid-template-columns: 1fr` is
+// floored at the card's automatic minimum, which the card image's intrinsic
+// inline size pushed past the width of the grid container itself.
+test('Reflow: community cards do not overflow at 320px', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  await page.goto('/communities');
+
+  const cards = page.locator('.communities .communities__item');
+  test.skip(await cards.count() === 0, 'No communities are visible to this account.');
+
+  const overflow = await page.evaluate(() => ({
+    scrollWidth: document.documentElement.scrollWidth,
+    clientWidth: document.documentElement.clientWidth,
+  }));
+  expect(overflow.scrollWidth).toBeLessThanOrEqual(overflow.clientWidth + 1);
+
+  // The track must also fit its own container, so a wider card image or a
+  // longer title can't push it back out without failing the check above.
+  const list = page.locator('.communities').first();
+  const fits = await list.evaluate((el) => {
+    const track = parseFloat(getComputedStyle(el).gridTemplateColumns.split(' ')[0]);
+    const content = el.clientWidth - parseFloat(getComputedStyle(el).paddingInlineStart) -
+      parseFloat(getComputedStyle(el).paddingInlineEnd);
+    return { track, content };
+  });
+  expect(fits.track).toBeLessThanOrEqual(fits.content + 1);
+});
