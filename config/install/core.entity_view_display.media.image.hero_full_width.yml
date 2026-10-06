@@ -1,0 +1,44 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.media.hero_full_width
+    - image.style.hero_full_width
+    - media.type.image
+  module:
+    - image
+    - layout_builder
+third_party_settings:
+  layout_builder:
+    enabled: false
+    allow_custom: false
+id: media.image.hero_full_width
+targetEntityType: media
+bundle: image
+mode: hero_full_width
+content:
+  field_media_image:
+    type: image
+    label: hidden
+    settings:
+      image_link: ''
+      image_style: hero_full_width
+      image_loading:
+        attribute: eager
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden:
+  created: true
+  field_communities: true
+  field_cultural_protocols: true
+  field_identifier: true
+  field_media_tags: true
+  field_people: true
+  field_protocol_control: true
+  flag_export_media: true
+  langcode: true
+  name: true
+  search_api_excerpt: true
+  thumbnail: true
+  uid: true

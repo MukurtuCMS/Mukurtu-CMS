@@ -27,11 +27,20 @@
  */
 #}
 
+{# The tint is on unless an editor has explicitly turned it off, so blocks
+   saved before field_image_tint existed keep the look they always had. #}
+{% set block_content = content['#block_content'] ?? null %}
+{% set tint_off = block_content
+  and block_content.hasField('field_image_tint')
+  and not block_content.field_image_tint.isEmpty()
+  and not block_content.field_image_tint.value %}
+
 {% set attributes = attributes.addClass([
   'block-wrapper',
   'block--image-with-description',
   'block--image-with-description--full',
    'text-' ~ content.field_text_color|render|striptags|trim,
+  tint_off ? null : 'block--image-with-description--tinted',
 ]) %}
 
 <div{{ attributes }}>
