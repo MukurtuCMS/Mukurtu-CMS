@@ -196,3 +196,53 @@ function mukurtu_search_rebuild_index() {
     }
   }
 }
+
+/**
+ * Enables the ignore_character processor on a search index's text fields.
+ *
+ * Many languages write apostrophe-like marks inside words: the Hawaiian
+ * ʻokina, the modifier letter apostrophe, the saltillo, ayin and hamza half
+ * rings, glottal stops. Transliteration turns these into an apostrophe,
+ * backtick, or question mark, which the tokenizer treats as a word break, so
+ * "hiʻilei" was indexed as "hi" and "ilei" and a search for "hiilei" found
+ * nothing. Stripping those (the default list, plus classes Pf, Pi, and Sk)
+ * before tokenizing keeps such words whole. Matches the processor settings
+ * shipped in each index's config/install.
+ *
+ * @param string $index_id
+ *   The search index machine name.
+ *
+ * @return bool
+ *   TRUE if the processor was added, FALSE if the index does not exist or
+ *   already has the processor.
+ */
+function mukurtu_search_enable_ignore_character_processor(string $index_id): bool {
+  $index = Index::load($index_id);
+  if (!$index || $index->isValidProcessor('ignore_character')) {
+    return FALSE;
+  }
+
+  $fields = [];
+  foreach ($index->getFields() as $field_id => $field) {
+    if ($field->getType() === 'text') {
+      $fields[] = $field_id;
+    }
+  }
+  sort($fields);
+
+  $processor = \Drupal::service('search_api.plugin_helper')
+    ->createProcessorPlugin($index, 'ignore_character', [
+      'weights' => [
+        'preprocess_index' => -10,
+        'preprocess_query' => -10,
+      ],
+      'all_fields' => FALSE,
+      'fields' => $fields,
+      'ignorable' => "['¿¡!?,.:;]",
+      'ignorable_classes' => ['Pf', 'Pi', 'Sk'],
+    ]);
+  $index->addProcessor($processor);
+  // Adding an indexing processor queues every item for reindexing on save.
+  $index->save();
+  return TRUE;
+}

@@ -74,3 +74,10 @@ function mukurtu_dictionary_update_40045() {
     $config->save(TRUE);
   }
 }
+
+/**
+ * Ignore apostrophes and similar marks inside words when searching.
+ */
+function mukurtu_dictionary_update_40046() {
+  mukurtu_search_enable_ignore_character_processor('mukurtu_dictionary_index');
+}
