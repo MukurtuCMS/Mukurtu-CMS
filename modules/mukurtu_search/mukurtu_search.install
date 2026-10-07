@@ -91,11 +91,22 @@ function mukurtu_search_convert_index_tables_to_utf8mb4(IndexInterface $index): 
     if (!$database->schema()->tableExists($table)) {
       continue;
     }
-    $database->query("ALTER TABLE {{$table}} CONVERT TO CHARACTER SET 'utf8mb4' COLLATE '$collation'");
-    // Keep item_id on the same collation as every other table, so joins on it
-    // stay fast.
-    if ($collation === 'utf8mb4_bin') {
-      $database->query("ALTER TABLE {{$table}} MODIFY [item_id] VARCHAR(150) CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_general_ci'");
+    // A table MySQL can't convert (for example one with an old row format and
+    // its 767-byte key limit) keeps the old behavior instead of stopping the
+    // whole update.
+    try {
+      $database->query("ALTER TABLE {{$table}} CONVERT TO CHARACTER SET 'utf8mb4' COLLATE '$collation'");
+      // Keep item_id on the same collation as every other table, so joins on
+      // it stay fast.
+      if ($collation === 'utf8mb4_bin') {
+        $database->query("ALTER TABLE {{$table}} MODIFY [item_id] VARCHAR(150) CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_general_ci'");
+      }
+    }
+    catch (\Exception $e) {
+      \Drupal::logger('mukurtu_search')->warning('Could not convert search table %table to utf8mb4: @message', [
+        '%table' => $table,
+        '@message' => $e->getMessage(),
+      ]);
     }
   }
 }

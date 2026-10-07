@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\mukurtu_search\Plugin\search_api\processor;
 
+use Drupal\search_api\Item\FieldInterface;
 use Drupal\search_api\Plugin\search_api\processor\Transliteration;
 
 /**
@@ -12,8 +13,9 @@ use Drupal\search_api\Plugin\search_api\processor\Transliteration;
  * Drupal's transliteration replaces every character it has no mapping for
  * with "?", which the tokenizer then drops, so words written in Osage,
  * Tifinagh, Adlam, N'Ko, and other scripts were never indexed. For fulltext
- * values and search keys this keeps such characters unchanged instead, so a
- * search typed in the same script matches.
+ * values, search keys, and filter conditions on fulltext fields this keeps
+ * such characters unchanged instead, so a search typed in the same script
+ * matches.
  *
  * Cherokee needs one more step: ignorecase runs first and turns it into the
  * Cherokee lowercase letters, which have no mapping, while the uppercase ones
@@ -37,6 +39,15 @@ class KeepUnmappedTransliteration extends Transliteration {
   protected const UNMAPPED = "\u{FDD0}";
 
   /**
+   * Whether the field of the condition being processed is fulltext.
+   *
+   * The parent processConditions() calls testField() on a condition's field
+   * just before processing its value, and processConditionValue() is not
+   * told the field.
+   */
+  protected bool $conditionFieldIsText = FALSE;
+
+  /**
    * {@inheritdoc}
    */
   protected function processFieldValue(&$value, $type) {
@@ -54,6 +65,26 @@ class KeepUnmappedTransliteration extends Transliteration {
     if ($this->shouldProcess($value)) {
       $value = $this->transliterateKeepingUnmapped($value);
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function testField($name, FieldInterface $field) {
+    $this->conditionFieldIsText = $this->getDataTypeHelper()->isTextType($field->getType());
+    return parent::testField($name, $field);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function processConditionValue(&$value) {
+    if ($this->conditionFieldIsText && !is_array($value) && $this->shouldProcess($value)) {
+      $value = $this->transliterateKeepingUnmapped($value);
+      return;
+    }
+    // Arrays recurse back into this method for each part.
+    parent::processConditionValue($value);
   }
 
   /**

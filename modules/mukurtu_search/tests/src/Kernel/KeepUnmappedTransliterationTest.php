@@ -14,6 +14,7 @@ use Drupal\search_api\Entity\Index;
 use Drupal\search_api\Entity\Server;
 use Drupal\search_api\Plugin\search_api\processor\Transliteration;
 use PHPUnit\Framework\Attributes\Group;
+use Psr\Log\AbstractLogger;
 
 /**
  * Tests that words in scripts with no transliteration can be searched.
@@ -144,6 +145,20 @@ class KeepUnmappedTransliterationTest extends KernelTestBase {
   }
 
   /**
+   * Tests that filter conditions on a fulltext field keep unmapped words.
+   */
+  public function testFulltextConditionsKeepUnmapped(): void {
+    foreach (['osage', 'tifinagh'] as $key) {
+      $ids = [];
+      $query = Index::load('test_index')->query()->addCondition('name', static::WORDS[$key]);
+      foreach ($query->execute() as $item) {
+        $ids[] = (int) $item->getOriginalObject()->getValue()->id();
+      }
+      $this->assertSame([$this->ids[$key]], $ids, "A condition on the $key word finds it.");
+    }
+  }
+
+  /**
    * Tests that string fields keep core's transliteration.
    *
    * The database backend stores string fields in utf8mb3 columns, which
@@ -222,6 +237,61 @@ class KeepUnmappedTransliterationTest extends KernelTestBase {
     $index->reindex();
     $this->assertSame(count(static::WORDS), $index->indexItems());
     $this->assertSame([$this->ids['osage']], $this->search(static::WORDS['osage']));
+  }
+
+  /**
+   * Tests that a table MySQL can't convert is logged and skipped.
+   */
+  public function testUpdateHookSkipsTableItCannotConvert(): void {
+    $database = \Drupal::database();
+    if ($database->databaseType() !== 'mysql') {
+      $this->markTestSkipped('Only MySQL and MariaDB tables use utf8mb3.');
+    }
+
+    // An old row format limits keys to 767 bytes: 255 characters fit in
+    // utf8mb3 (765 bytes) but not in utf8mb4 (1020 bytes).
+    $legacy_table = 'search_api_db_test_index_legacy';
+    $database->query("CREATE TABLE {{$legacy_table}} ([item_id] VARCHAR(150) NOT NULL, [value] VARCHAR(255) NOT NULL, PRIMARY KEY ([value])) ROW_FORMAT=COMPACT CHARACTER SET 'utf8' COLLATE 'utf8_general_ci'");
+    $key_value = \Drupal::keyValue('search_api_db.indexes');
+    $db_info = $key_value->get('test_index');
+    $db_info['field_tables']['legacy'] = [
+      'table' => $legacy_table,
+      'column' => 'value',
+      'type' => 'string',
+      'boost' => 1.0,
+    ];
+    $key_value->set('test_index', $db_info);
+
+    $logger = new class() extends AbstractLogger {
+
+      /**
+       * The logged messages, with placeholders replaced.
+       *
+       * @var string[]
+       */
+      public array $messages = [];
+
+      /**
+       * {@inheritdoc}
+       */
+      public function log($level, string|\Stringable $message, array $context = []): void {
+        $this->messages[] = strtr((string) $message, array_filter($context, 'is_scalar'));
+      }
+
+    };
+    $this->container->get('logger.factory')->addLogger($logger);
+
+    $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_search');
+    require_once $module_path . '/mukurtu_search.install';
+    $sandbox = [];
+    do {
+      mukurtu_search_update_40009($sandbox);
+    } while ($sandbox['#finished'] < 1);
+
+    $this->assertStringStartsWith('utf8mb3_', $this->tableCollation($legacy_table));
+    $this->assertSame('utf8mb4_general_ci', $this->tableCollation($db_info['index_table']));
+    $this->assertCount(1, $logger->messages);
+    $this->assertStringContainsString("Could not convert search table $legacy_table to utf8mb4", $logger->messages[0]);
   }
 
   /**
