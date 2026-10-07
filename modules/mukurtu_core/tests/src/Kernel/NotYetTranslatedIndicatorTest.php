@@ -91,6 +91,10 @@ class NotYetTranslatedIndicatorTest extends EntityKernelTestBase {
     $this->assertSame('mukurtu_not_yet_translated_indicator', $indicator['#theme']);
     $this->assertSame('English', $indicator['#language_name']);
     $this->assertContains('languages:language_content', $indicator['#cache']['contexts']);
+    // The pill's text is in the interface language, not the node's.
+    $this->assertSame(\Drupal::languageManager()->getCurrentLanguage(LanguageInterface::TYPE_INTERFACE)->getId(), $indicator['#langcode']);
+    $this->assertSame('ltr', $indicator['#direction']);
+    $this->assertContains('languages:language_interface', $indicator['#cache']['contexts']);
   }
 
   /**
