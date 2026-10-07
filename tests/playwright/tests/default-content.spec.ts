@@ -1,10 +1,10 @@
 import { test, expect, Page } from '@playwright/test';
 import path = require("path");
-import { Login } from '~components/login';
 import { Ckeditor5 } from "~components/ckeditor5";
 import submitEntityForm from '~helpers/submit-entity-form';
 import waitForAjax from '~helpers/ajax';
 import { gotoReady } from '~helpers/preview';
+import { ADMIN_STATE } from '~helpers/auth-state';
 
 const defaultContentSpec = {
   // Community entities.
@@ -201,10 +201,13 @@ let testContentExists = null;
 /**
  * Setup tasks run before each test.
  */
-test.beforeEach(async ({ page }, testInfo) => {
-  const login = new Login(page);
-  await login.login('admin', 'admin');
+// Creating content needs an administrator. The session is saved once by
+// tests/auth.setup.ts, as adminAccount(), which falls back to the
+// admin/admin the Tugboat build creates -- the same credentials this file
+// used to log in with by hand, for every one of its tests.
+test.use({ storageState: ADMIN_STATE });
 
+test.beforeEach(async ({ page }, testInfo) => {
   // Check if default content already exists, and if so, skip recreation.
   if (testContentExists === null) {
     await gotoReady(page, '/communities');
@@ -385,7 +388,7 @@ test('Default Content: Digital Heritage', async ({ page, browserName }) => {
 test('Default Content: Collection', async ({ page }) => {
   // Loop through all collections and create each one.
   for (const collection of defaultContentSpec.collection) {
-    await page.goto('/node/add/collection');
+    await gotoReady(page, '/node/add/collection');
     await page.getByRole('textbox', { name: 'Collection name' }).fill(collection.title);
     await page.getByRole('textbox', { name: 'Summary' }).fill(collection.summary);
     await page
@@ -540,7 +543,7 @@ test('Default Content: Accessibility scan account memberships', async ({ page })
   // the map alone would make this throw instead of enrolling.
   let communityId = createdCommunityIds[communityName];
   if (!communityId) {
-    await page.goto('/admin/communities');
+    await gotoReady(page, '/admin/communities');
     const row = page.locator('tr', { hasText: communityName });
     const href = await row.locator('a[href*="/members/add"]').first().getAttribute('href');
     communityId = href?.match(/\/admin\/communities\/(\d+)\//)?.[1] ?? '';
@@ -568,7 +571,7 @@ test('Default Content: Accessibility scan account memberships', async ({ page })
       return;
     }
 
-    await page.goto(`/admin/communities/${communityId}/members/add`);
+    await gotoReady(page, `/admin/communities/${communityId}/members/add`);
 
     // entity_autocomplete resolves on an exact name match, so the plain
     // username is enough and no dropdown selection is needed.
