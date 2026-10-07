@@ -71,10 +71,11 @@
 <article{{ attributes }}>
   <div{{ content_attributes }} class="full-node">
     {{ title_prefix }}
-    {{ title_suffix }}
+    {{ title_suffix|without('mukurtu_not_yet_translated') }}
 
     <div class="full-node__grid">
       <div class="full-node__main">
+        {{ title_suffix.mukurtu_not_yet_translated }}
         <div class="full-node__content">
 
           {{ content }}

@@ -12,6 +12,6 @@
  */
 #}
 <span class="translation-status-badge translation-status-badge--not-translated">
-  {{ 'Not yet translated'|t }}
-  <span class="translation-status-badge-note">{{ 'Showing the original @language version'|t({'@language': language_name}) }}</span>
+  <svg class="translation-status-badge__icon" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+  {{ 'Not yet translated (@language)'|t({'@language': language_name}) }}
 </span>
