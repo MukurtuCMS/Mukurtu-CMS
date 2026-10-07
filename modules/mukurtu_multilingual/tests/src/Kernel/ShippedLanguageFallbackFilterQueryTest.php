@@ -133,15 +133,18 @@ class ShippedLanguageFallbackFilterQueryTest extends KernelTestBase {
     $root = dirname(__DIR__, 5);
     $this->assertFileExists("$root/mukurtu.info.yml", 'Sanity check: resolved profile root is wrong.');
 
+    // Prune dependency trees while walking rather than after, so a theme's
+    // node_modules or a vendor directory doesn't make this crawl slow.
+    $skip = ['vendor', 'node_modules', '.git'];
     $found = [];
-    $files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($root, \FilesystemIterator::SKIP_DOTS));
-    foreach ($files as $file) {
-      $path = $file->getPathname();
-      if (!str_contains($path, '/config/install/views.view.') || str_contains($path, '/vendor/') || str_contains($path, '/node_modules/')) {
-        continue;
-      }
-      if (str_contains((string) file_get_contents($path), 'field: language_with_fallback')) {
-        $found[] = substr($path, strlen($root) + 1);
+    foreach (['modules', 'config'] as $top) {
+      $directory = new \RecursiveDirectoryIterator("$root/$top", \FilesystemIterator::SKIP_DOTS);
+      $filter = new \RecursiveCallbackFilterIterator($directory, fn (\SplFileInfo $file): bool => !($file->isDir() && in_array($file->getFilename(), $skip, TRUE)));
+      foreach (new \RecursiveIteratorIterator($filter) as $file) {
+        $path = $file->getPathname();
+        if (str_contains($path, '/config/install/views.view.') && str_contains((string) file_get_contents($path), 'field: language_with_fallback')) {
+          $found[] = substr($path, strlen($root) + 1);
+        }
       }
     }
     sort($found);
