@@ -16,7 +16,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * Shows a "not yet translated" indicator when a node has no translation
  * into the visitor's active content language, so its default-language
  * version renders instead of silently disappearing or showing untagged
- * (docs/content-language-policy.md).
+ * (docs/content-language-policy.md). For the same nodes it also rebuilds
+ * the template's {{ url }} in the active language, so links to them keep
+ * the visitor's language prefix.
  *
  * Written into $variables['title_suffix'] via hook_preprocess_node(), not
  * $build via hook_node_view_alter() - the theme's browse/grid/map-browse
@@ -60,8 +62,8 @@ class NotYetTranslatedIndicatorHooks implements ContainerInjectionInterface {
       return;
     }
 
-    $active_langcode = $this->languageManager->getCurrentLanguage(LanguageInterface::TYPE_CONTENT)->getId();
-    if ($entity->hasTranslation($active_langcode)) {
+    $active_language = $this->languageManager->getCurrentLanguage(LanguageInterface::TYPE_CONTENT);
+    if ($entity->hasTranslation($active_language->getId())) {
       return;
     }
 
@@ -75,6 +77,17 @@ class NotYetTranslatedIndicatorHooks implements ContainerInjectionInterface {
       ->applyTo($indicator);
 
     $variables['title_suffix']['mukurtu_not_yet_translated'] = $indicator;
+
+    // Core builds {{ url }} with $node->toUrl(), which pins the link to the
+    // node's own language. For an untranslated node that is the original
+    // language, so following a card from /fr/browse would drop the /fr
+    // prefix and switch the whole page out of French. Link in the active
+    // content language instead, so the fallback version opens with this
+    // indicator showing. The render array already varies by
+    // languages:language_content via $indicator above.
+    if (isset($variables['url']) && !$entity->isNew()) {
+      $variables['url'] = $entity->toUrl('canonical', ['language' => $active_language])->toString();
+    }
   }
 
 }

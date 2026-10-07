@@ -68,8 +68,11 @@ class NotYetTranslatedIndicatorTest extends EntityKernelTestBase {
    * carries the node at ['elements']['#node'], matching
    * NodeThemeHooks::preprocessNode()'s own source of $variables['node'].
    */
-  private function preprocess(Node $node): array {
+  private function preprocess(Node $node, ?string $url = NULL): array {
     $variables = ['elements' => ['#node' => $node], 'title_suffix' => []];
+    if ($url !== NULL) {
+      $variables['url'] = $url;
+    }
     NotYetTranslatedIndicatorHooks::create(\Drupal::getContainer())->preprocessNode($variables);
     return $variables;
   }
@@ -139,6 +142,60 @@ class NotYetTranslatedIndicatorTest extends EntityKernelTestBase {
     $variables = $this->preprocess($node);
 
     $this->assertArrayNotHasKey('mukurtu_not_yet_translated', $variables['title_suffix']);
+  }
+
+  /**
+   * Turns on URL-prefix language negotiation.
+   *
+   * A link's language then shows up as a /es prefix. Without it every
+   * language generates the same URL and the link tests could not tell them
+   * apart.
+   */
+  private function enableUrlLanguagePrefixes(): void {
+    $this->installConfig(['language']);
+    $this->config('language.negotiation')
+      ->set('url.prefixes', ['en' => '', 'es' => 'es'])
+      ->save();
+    $this->container->get('language_negotiator')
+      ->saveConfiguration(LanguageInterface::TYPE_INTERFACE, ['language-url' => 0]);
+    $this->container->get('kernel')->rebuildContainer();
+  }
+
+  /**
+   * A link to an untranslated node keeps the active content language.
+   *
+   * Core builds {{ url }} with $node->toUrl(), which pins it to the node's
+   * own language, so following a card from /es/browse used to drop the /es
+   * prefix.
+   */
+  public function testLinkKeepsActiveLanguageWhenNoTranslationExists(): void {
+    $this->enableUrlLanguagePrefixes();
+    $node = Node::create(['type' => 'article', 'title' => 'Original title', 'langcode' => 'en']);
+    $node->save();
+    $original_url = $node->toUrl()->toString();
+
+    $this->setActiveContentLanguage('es');
+    $variables = $this->preprocess($node, $original_url);
+
+    $expected = $node->toUrl('canonical', ['language' => \Drupal::languageManager()->getLanguage('es')])->toString();
+    $this->assertNotSame($original_url, $expected, 'Sanity check: URL language prefixes are not active, so this test proves nothing.');
+    $this->assertSame($expected, $variables['url']);
+    $this->assertStringStartsWith('/es/', parse_url($variables['url'], PHP_URL_PATH) ?? '');
+  }
+
+  /**
+   * A translated node's link is left exactly as core built it.
+   */
+  public function testLinkUntouchedWhenTranslationExists(): void {
+    $this->enableUrlLanguagePrefixes();
+    $node = Node::create(['type' => 'article', 'title' => 'Original title', 'langcode' => 'en']);
+    $node->save();
+    $node->addTranslation('es', ['title' => 'Título traducido'])->save();
+
+    $this->setActiveContentLanguage('es');
+    $variables = $this->preprocess($node, '/core-built-url');
+
+    $this->assertSame('/core-built-url', $variables['url']);
   }
 
 }

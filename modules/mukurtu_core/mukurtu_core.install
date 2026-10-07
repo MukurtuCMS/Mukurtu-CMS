@@ -475,3 +475,48 @@ function mukurtu_core_update_40208(array &$sandbox): ?string {
 
   return (string) t('Added a Tint the background image option to full-width image-with-description blocks, turned on for existing blocks.');
 }
+
+/**
+ * Fix browse and search pages showing every translation of an item instead of one per language.
+ */
+function mukurtu_core_update_40210(): ?string {
+  // Keep the docblock above to one line; see mukurtu_core_update_40201() for
+  // why.
+  //
+  // The language_with_fallback filter shipped in #2074 was configured as a
+  // search_api_string filter ('=' with a min/max/value array), but Search API
+  // registers that property as a language field, so Views always builds it
+  // with the search_api_language (in_operator) handler instead. That handler
+  // has no '=' operator, so it added no condition at all and every
+  // translation of every item was listed. Rewrite each such filter into the
+  // in_operator shape, keeping whatever language value the site configured.
+  $fixed = 0;
+  foreach (\Drupal::entityTypeManager()->getStorage('view')->loadMultiple() as $view) {
+    $displays = $view->get('display');
+    $changed = FALSE;
+    foreach ($displays as $display_id => $display) {
+      foreach ($display['display_options']['filters'] ?? [] as $filter_id => $filter) {
+        if (($filter['field'] ?? NULL) !== 'language_with_fallback' || ($filter['operator'] ?? NULL) !== '=') {
+          continue;
+        }
+        $langcode = is_array($filter['value'] ?? NULL) ? ($filter['value']['value'] ?? '') : (string) ($filter['value'] ?? '');
+        if ($langcode === '') {
+          continue;
+        }
+        $filter['plugin_id'] = 'search_api_language';
+        $filter['operator'] = 'in';
+        $filter['value'] = [$langcode => $langcode];
+        unset($filter['expose']['min_placeholder'], $filter['expose']['max_placeholder'], $filter['expose']['placeholder']);
+        $filter['expose']['reduce'] = FALSE;
+        $displays[$display_id]['display_options']['filters'][$filter_id] = $filter;
+        $changed = TRUE;
+      }
+    }
+    if ($changed) {
+      $view->set('display', $displays)->save();
+      $fixed++;
+    }
+  }
+
+  return $fixed ? (string) t('Fixed the language filter on @count browse and search views.', ['@count' => $fixed]) : NULL;
+}
