@@ -139,6 +139,36 @@ class TranslationStatusViewTest extends EntityKernelTestBase {
   }
 
   /**
+   * Each Translate link names its item and language, and opens the right form.
+   */
+  public function testTranslateLinks(): void {
+    $this->container->get('router.builder')->rebuild();
+    $this->setCurrentUser($this->createUser([
+      'node test view',
+      'bypass node access',
+      'translate any entity',
+      'create content translations',
+      'update content translations',
+    ]));
+    $dawn = Node::create(['type' => 'article', 'title' => 'Dawn', 'langcode' => 'en']);
+    $dawn->save();
+    $dawn->addTranslation('fr', ['title' => 'Aube'] + $dawn->toArray())->save();
+
+    $view = Views::getView('mukurtu_translation_status_content');
+    $view->setDisplay('page_1');
+    $view->execute();
+    $links = [];
+    foreach ($view->result as $index => $row) {
+      $links[$view->field['langcode_1']->getValue($row)] = (string) $view->style_plugin->getField($index, 'translate_link');
+    }
+
+    $this->assertStringContainsString('<span class="visually-hidden"> Dawn into French</span>', $links['fr']);
+    $this->assertStringContainsString('/node/' . $dawn->id() . '/edit', $links['fr'], 'An existing translation opens its edit form.');
+    $this->assertStringContainsString('<span class="visually-hidden"> Dawn into Spanish</span>', $links['es']);
+    $this->assertStringContainsString('/node/' . $dawn->id() . '/translations/add/en/es', $links['es'], 'A missing translation opens the add form.');
+  }
+
+  /**
    * Lists each view with the access query tag of its entity type.
    */
   public static function accessTagProvider(): array {
