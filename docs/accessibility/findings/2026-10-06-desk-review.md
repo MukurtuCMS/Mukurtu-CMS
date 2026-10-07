@@ -14,7 +14,7 @@ these are agreed, per the rule that evidence precedes the claim.
 
 ## Gaps found
 
-### 1. Locally hosted video cannot carry captions or audio description
+### 1. Locally hosted video cannot carry captions or audio description (#2329)
 
 `media.video` lets an author fill in `field_media_video_file`, `field_thumbnail`,
 `field_people`, `field_cultural_protocols`, `field_identifier`, `field_media_tags`,
@@ -32,7 +32,7 @@ alternative) but not 1.2.2, which requires captions synchronized with the video.
 This is as much an ATAG Part B question as a WCAG one: the authoring tool does
 not let an author produce accessible content even when they want to.
 
-### 2. Dictionary content cannot express its language
+### 2. Dictionary content cannot express its language (#2328)
 
 Each dictionary word has `field_dictionary_word_language`, a required reference
 to a term in the `language` vocabulary. But **that vocabulary has no fields** —
@@ -78,11 +78,13 @@ useful precedent and shows the gap is specific rather than systemic.
 | 2.5.3 Label in Name | Needs each control's accessible name compared against its visible label | Automate as a DOM check |
 | 3.3.4 Error Prevention | 19 classes extend a confirm-form base. Which destructive or legally significant actions lack one is the actual question | Enumerate destructive routes and check each |
 
-## Suggested follow-ups
+## Follow-ups filed
 
-Two issues worth filing, neither of which a page scan would find:
+Both gaps are tracked, and neither is in scope for #2242 itself, which is an
+audit:
 
-1. **Captions and audio description for locally hosted video** (1.2.2, 1.2.5, ATAG B). Add a caption-track field to `media.video` and render `<track>`, or document `remote_video` as the supported path for captioned video.
-2. **A language code on the `language` vocabulary** (3.1.2). Add an ISO 639 / BCP 47 field, then emit `lang` on dictionary word, definition and sample-sentence output, following the Local Contexts template as the precedent.
-
-Neither is in scope for #2242 itself, which is an audit.
+- **#2329** — uploaded video cannot carry captions or audio description
+  (1.2.2, 1.2.5, ATAG B).
+- **#2328** — the `language` vocabulary has no language code, which blocks
+  `lang` on dictionary output (3.1.2). #2329 depends on this too, since a
+  caption track needs a language of its own.
