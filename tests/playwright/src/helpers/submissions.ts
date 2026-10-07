@@ -1,5 +1,6 @@
 import { Browser, Page } from '@playwright/test';
 import { Login } from '~components/login';
+import { gotoReady } from '~helpers/preview';
 import { adminAccount } from '~helpers/a11y-credentials';
 
 /**
@@ -65,7 +66,7 @@ export async function enableSubmissionForm(browser: Browser): Promise<Submission
     const login = new Login(page);
     await login.login(admin.username, admin.password);
 
-    const response = await page.goto(SETTINGS_PATH);
+    const response = await gotoReady(page, SETTINGS_PATH);
     if (!response || !response.ok()) {
       // No permission to administer submissions, or the settings entity
       // isn't there. Leave the site alone; the scans will skip.
@@ -122,7 +123,7 @@ export async function restoreSubmissionForm(browser: Browser, previous: Submissi
     const login = new Login(page);
     await login.login(admin.username, admin.password);
 
-    const response = await page.goto(SETTINGS_PATH);
+    const response = await gotoReady(page, SETTINGS_PATH);
     if (!response || !response.ok()) {
       return;
     }
@@ -155,7 +156,7 @@ export async function restoreSubmissionForm(browser: Browser, previous: Submissi
  * false assurance this whole entry exists to avoid.
  */
 export async function submissionFormIsReachable(page: Page): Promise<boolean> {
-  const response = await page.goto(SUBMISSION_FORM_PATH);
+  const response = await gotoReady(page, SUBMISSION_FORM_PATH);
   if (response === null || !response.ok()) {
     return false;
   }
