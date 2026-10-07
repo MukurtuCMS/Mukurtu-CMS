@@ -71,7 +71,9 @@ class NotYetTranslatedIndicatorHooks implements ContainerInjectionInterface {
     $interface_language = $this->languageManager->getCurrentLanguage(LanguageInterface::TYPE_INTERFACE);
     $indicator = [
       '#theme' => 'mukurtu_not_yet_translated_indicator',
-      '#language_name' => $entity->language()->getName(),
+      // Name the language the visitor is missing, not the one shown.
+      // getLanguage() returns the name as translated for the interface.
+      '#language_name' => $this->languageManager->getLanguage($active_langcode)?->getName(),
       '#langcode' => $interface_language->getId(),
       '#direction' => $interface_language->getDirection(),
     ];

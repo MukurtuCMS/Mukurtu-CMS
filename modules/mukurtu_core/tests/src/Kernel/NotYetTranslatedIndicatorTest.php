@@ -76,7 +76,7 @@ class NotYetTranslatedIndicatorTest extends EntityKernelTestBase {
 
   /**
    * The indicator appears in title_suffix when the active content
-   * language has no translation, and reports the language actually shown.
+   * language has no translation, and names that missing language.
    */
   public function testIndicatorShownWhenNoTranslationExists(): void {
     $node = Node::create(['type' => 'article', 'title' => 'Original title', 'langcode' => 'en']);
@@ -89,7 +89,7 @@ class NotYetTranslatedIndicatorTest extends EntityKernelTestBase {
     $this->assertArrayHasKey('mukurtu_not_yet_translated', $variables['title_suffix']);
     $indicator = $variables['title_suffix']['mukurtu_not_yet_translated'];
     $this->assertSame('mukurtu_not_yet_translated_indicator', $indicator['#theme']);
-    $this->assertSame('English', $indicator['#language_name']);
+    $this->assertSame('Spanish', $indicator['#language_name']);
     $this->assertContains('languages:language_content', $indicator['#cache']['contexts']);
     // The pill's text is in the interface language, not the node's.
     $this->assertSame(\Drupal::languageManager()->getCurrentLanguage(LanguageInterface::TYPE_INTERFACE)->getId(), $indicator['#langcode']);
