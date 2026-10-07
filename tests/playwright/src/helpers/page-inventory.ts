@@ -1,4 +1,5 @@
 import { Page, test } from '@playwright/test';
+import { gotoReady } from '~helpers/preview';
 
 /**
  * Navigates to a page for auditing, refusing to audit an error page.
@@ -17,9 +18,17 @@ import { Page, test } from '@playwright/test';
  * /mukurtu/access-denied is in the inventory on purpose and returns 200
  * with that same title when visited directly. It should be scanned; a 403
  * elsewhere should not.
+ *
+ * The status check alone is not enough for one case, which is why the
+ * navigation goes through gotoReady(): a suspended or resuming Tugboat
+ * preview serves Tugboat's own holding page at HTTP 200, so it sails
+ * straight through response.ok() and gets audited as if it were a clean
+ * Mukurtu page. gotoReady() waits that out, and fails loudly rather than
+ * skipping if it does not clear -- a scan that silently did not happen is
+ * worse than a red build, because the report looks complete either way.
  */
 export async function openForAudit(page: Page, path: string): Promise<string | null> {
-  const response = await page.goto(path);
+  const response = await gotoReady(page, path);
   if (response === null) {
     return `${path} produced no HTTP response (same-document navigation); nothing to audit.`;
   }
@@ -112,7 +121,7 @@ export function skipOrFailCoverage(slug: string, blocked: boolean, reason: strin
  *   Builds the final path from the discovered node id.
  */
 export async function discoverNodeManageUrl(page: Page, type: string, buildPath: (nid: string) => string): Promise<string | null> {
-  const response = await page.goto(`/admin/content?type=${encodeURIComponent(type)}`);
+  const response = await gotoReady(page, `/admin/content?type=${encodeURIComponent(type)}`);
   if (response === null || !response.ok()) {
     return null;
   }
@@ -239,7 +248,7 @@ export async function discoverItemUrl(
   itemLink: string,
   pathSuffix?: string,
 ): Promise<string | null> {
-  await page.goto(listPath);
+  await gotoReady(page, listPath);
   const hrefs = await page.locator(itemLink).evaluateAll(
     (links) => links.map((link) => link.getAttribute('href')),
   );
@@ -332,7 +341,7 @@ export async function discoverProtocolManageUrl(page: Page, buildPath: (id: stri
 export async function discoverProtocolUrl(page: Page, buildPath: (slug: string) => string): Promise<string | null> {
   const communityUrl = await discoverItemUrl(page, '/communities', '.communities__item a');
   if (!communityUrl) return null;
-  await page.goto(communityUrl);
+  await gotoReady(page, communityUrl);
   const hrefs = await page.locator('a[href*="/protocols/protocol/"]').evaluateAll(
     (links) => links.map((link) => link.getAttribute('href')),
   );
