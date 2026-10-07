@@ -1429,3 +1429,51 @@ off screen at any width from 320px to 1600px. */
   white-space: normal;
   min-width: 0;
 }
+
+/* Third cause of the admin reflow failures in #2336: the sticky form actions
+bar, which covers the three node add forms and the export settings page.
+
+The bar is a flex item of .region-sticky__items__inner with flex: 0 0 auto
+and the default min-width: auto, so it cannot shrink below the width of its
+own contents: the publish-status wrapper (188px), Save (69px), Preview (89px),
+the sidebar trigger (32px) and the gaps between them come to 402px, inside a
+288px container.
+
+It already carries flex-wrap: wrap, so Gin clearly intends those controls to
+wrap onto more lines when space is tight. They never get the chance, because
+the bar is sized to its max-content width and so there is nothing to wrap
+within. Letting it shrink is all that is needed; the existing wrap then does
+the work.
+
+Worth noting what was blamed first: the element sitting at the page's right
+edge is a 1px span.visually-hidden ("Show sidebar panel") inside the sidebar
+trigger. It is correctly hidden and is not the problem - it is simply the
+innermost thing being carried along at x=418 by a bar that will not shrink.
+
+The trade-off is vertical: at 320px the bar grows from 118px to 198px tall as
+the controls wrap. That is the right way round, since the alternative is
+horizontal scrolling, but it is a real cost on a short screen and the bar
+could probably be made to pack more tightly as a follow-up.
+
+!important is required, and the reason is worth recording because it is not
+the usual specificity story. Gin ships these declarations as
+
+  :where(*) .gin-sticky-form-actions,
+  :is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-sticky-form-actions
+
+The :is() branch carries an id's specificity but only matches under
+[data-drupal-admin-styles]; elsewhere only the :where(*) branch applies, and
+:where() contributes nothing, so Gin's rule and a plain class selector here
+are *equally* specific and document order decides. This module's stylesheet
+loads before Gin's, so without !important the declarations below are simply
+overruled. A first version of this change was written without it and had no
+effect at all while appearing correct in a browser devtools experiment, where
+an injected <style> wins by being last.
+
+Self-regulating, so no media query: the bar only shrinks when it has to.
+Measured identical above 480px, unchanged at 1024, 1280 and 1600px, with no
+control clipped or pushed off screen at any width from 320px to 1600px. */
+.gin-sticky-form-actions {
+  flex-shrink: 1 !important;
+  min-width: 0 !important;
+}
