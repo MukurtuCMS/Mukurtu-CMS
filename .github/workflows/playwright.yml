@@ -81,8 +81,30 @@ jobs:
               # any PR whose conversation has grown past that.
               PREVIEW_URL=$(gh api "repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments" --paginate | jq -r '.[].body' | grep -Po 'https://(?!www\.|dashboard\.)[a-zA-Z0-9.-]+\.tugboatqa.com' | tail -n 1 || true)
               if [[ ! -z "$PREVIEW_URL" ]]; then
-                echo "Preview URL found: $PREVIEW_URL"
+                echo "Preview URL found from PR comment: $PREVIEW_URL"
                 break
+              fi
+
+              # Tugboat does not always post its comment. It has been observed
+              # to skip it on a fresh build and to drop it when a preview is
+              # rebuilt for a new commit, after which this job waited out the
+              # full timeout against a preview that was already up. The status
+              # link always carries the preview ID, so ask the Tugboat API for
+              # the URL instead. Runs started by Dependabot cannot read Actions
+              # secrets, so on those PRs this only works if the token is also
+              # stored as a Dependabot secret.
+              if [[ -n "$TUGBOAT_API_TOKEN" ]]; then
+                PREVIEW_ID=$(gh api "repos/${{ github.repository }}/commits/${{ github.event.pull_request.head.sha }}/status" --jq '[.statuses[] | select(.context=="Tugboat")][0].target_url // ""' 2>/dev/null | sed 's|/*$||; s|.*/||' || true)
+                if [[ -n "$PREVIEW_ID" ]]; then
+                  PREVIEW_URL=$(curl -sf -H "Authorization: Bearer $TUGBOAT_API_TOKEN" "https://api.tugboatqa.com/v3/previews/$PREVIEW_ID" | jq -r '.url // .urls[0] // empty' | sed 's|/*$||' || true)
+                fi
+                if [[ ! -z "$PREVIEW_URL" ]]; then
+                  echo "Preview URL found from Tugboat API (no PR comment): $PREVIEW_URL"
+                  break
+                fi
+              elif [[ -z "$API_FALLBACK_NOTED" ]]; then
+                echo "TUGBOAT_API_TOKEN is not set, so only the PR comment can supply the preview URL."
+                API_FALLBACK_NOTED=1
               fi
               echo "Tugboat status is success but no preview URL comment yet, still waiting..."
             else
@@ -148,6 +170,7 @@ jobs:
           exit 1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TUGBOAT_API_TOKEN: ${{ secrets.TUGBOAT_API_TOKEN }}
 
   playwright-tests:
     needs: wait-for-tugboat
