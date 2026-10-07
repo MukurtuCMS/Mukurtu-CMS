@@ -13,6 +13,7 @@ use Drupal\mukurtu_protocol\CulturalProtocolControlledTrait;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
 use Drupal\mukurtu_core\Entity\BundleSpecificCheckCreateAccessInterface;
 use Drupal\mukurtu_core\Entity\PrunesEmptyParagraphsTrait;
+use Drupal\taxonomy\TermInterface;
 
 class DictionaryWord extends Node implements DictionaryWordInterface, CulturalProtocolControlledInterface, BundleSpecificCheckCreateAccessInterface {
   use CulturalProtocolControlledTrait;
@@ -450,6 +451,29 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
         $this->set("field_glossary_entry", mb_substr($this->getTitle(), 0, 1));
       }
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getLanguageTerm(): ?TermInterface {
+    if (!$this->hasField('field_dictionary_word_language')) {
+      return NULL;
+    }
+    $term = $this->get('field_dictionary_word_language')->entity;
+    return $term instanceof TermInterface ? $term : NULL;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getLanguageCode(): ?string {
+    $term = $this->getLanguageTerm();
+    if (!$term || !$term->hasField('field_language_code')) {
+      return NULL;
+    }
+    $code = trim((string) $term->get('field_language_code')->value);
+    return $code === '' ? NULL : $code;
   }
 
   /**
