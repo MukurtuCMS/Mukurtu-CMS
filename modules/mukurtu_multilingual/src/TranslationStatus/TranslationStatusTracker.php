@@ -69,6 +69,11 @@ class TranslationStatusTracker {
   public const ENTITY_TYPES = ['node', 'media', 'taxonomy_term', 'community', 'protocol'];
 
   /**
+   * Whether the status table exists, once checked this request.
+   */
+  protected ?bool $tableExists = NULL;
+
+  /**
    * Fields that never count, even when translatable.
    *
    * These are metadata, not content someone translates.
@@ -152,6 +157,9 @@ class TranslationStatusTracker {
    * straight away rather than only once it is published.
    */
   public function refresh(ContentEntityInterface $entity): void {
+    if (!$this->tableExists()) {
+      return;
+    }
     $entity = $this->latestRevision($entity)->getUntranslated();
     $this->delete($entity->getEntityTypeId(), (int) $entity->id());
     if (!$this->isTracked($entity)) {
@@ -182,6 +190,9 @@ class TranslationStatusTracker {
    * Removes every stored row for an entity.
    */
   public function delete(string $entity_type_id, int $entity_id): void {
+    if (!$this->tableExists()) {
+      return;
+    }
     $this->database->delete(self::TABLE)
       ->condition('entity_type', $entity_type_id)
       ->condition('entity_id', $entity_id)
@@ -325,6 +336,16 @@ class TranslationStatusTracker {
       return self::STATUS_NONE;
     }
     return $translated >= $total ? self::STATUS_COMPLETE : self::STATUS_PARTIAL;
+  }
+
+  /**
+   * Whether the status table exists yet.
+   *
+   * Between deploying this code and running mukurtu_multilingual_update_40010()
+   * the table is missing, and content must still save in that window.
+   */
+  protected function tableExists(): bool {
+    return $this->tableExists ??= $this->database->schema()->tableExists(self::TABLE);
   }
 
   /**

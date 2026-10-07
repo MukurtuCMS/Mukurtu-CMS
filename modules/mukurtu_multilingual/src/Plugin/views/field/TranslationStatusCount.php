@@ -29,7 +29,9 @@ class TranslationStatusCount extends FieldPluginBase {
     $this->ensureMyTable();
     // Sort by the share of fields translated, so "1 of 2" sits above
     // "1 of 10". An item with nothing to translate counts as fully done.
-    $alias = $this->query->addField(NULL, "COALESCE($this->tableAlias.translated_count / NULLIF($this->tableAlias.total_count, 0), 1)", $this->tableAlias . '_translated_share');
+    // Multiply by 1.0 first: PostgreSQL and SQLite divide integers exactly.
+    $formula = "COALESCE($this->tableAlias.translated_count * 1.0 / NULLIF($this->tableAlias.total_count, 0), 1)";
+    $alias = $this->query->addField(NULL, $formula, $this->tableAlias . '_translated_share');
     $this->query->addOrderBy(NULL, NULL, $order, $alias);
   }
 

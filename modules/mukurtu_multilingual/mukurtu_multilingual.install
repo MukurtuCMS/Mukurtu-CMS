@@ -62,6 +62,15 @@ function mukurtu_multilingual_install() {
 }
 
 /**
+ * Implements hook_uninstall().
+ */
+function mukurtu_multilingual_uninstall(): void {
+  // The table goes with hook_schema(); clear the rebuild flag and queue too.
+  \Drupal::state()->delete(TranslationStatusTracker::REBUILD_STATE);
+  \Drupal::queue(TranslationStatusTracker::QUEUE)->deleteQueue();
+}
+
+/**
  * Implements hook_schema().
  */
 function mukurtu_multilingual_schema(): array {

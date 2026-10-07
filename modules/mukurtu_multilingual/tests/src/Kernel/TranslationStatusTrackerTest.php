@@ -268,4 +268,21 @@ class TranslationStatusTrackerTest extends EntityKernelTestBase {
     $this->assertSame(0, $this->container->get('queue')->get(TranslationStatusTracker::QUEUE)->numberOfItems());
   }
 
+  /**
+   * Content still saves before the update hook has created the table.
+   *
+   * Sites run the new code between deploying it and running drush updb.
+   */
+  public function testSavesWorkBeforeTableExists(): void {
+    \Drupal::database()->schema()->dropTable(TranslationStatusTracker::TABLE);
+    // A fresh container gives a tracker that hasn't cached the table check.
+    $this->container->get('kernel')->rebuildContainer();
+
+    $node = $this->createArticle();
+    $node->addTranslation('fr', ['title' => 'Corbeau et renard'] + $node->toArray())->save();
+    $node->delete();
+
+    $this->assertFalse(\Drupal::database()->schema()->tableExists(TranslationStatusTracker::TABLE));
+  }
+
 }
