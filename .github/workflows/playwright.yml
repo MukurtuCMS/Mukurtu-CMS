@@ -108,7 +108,16 @@ jobs:
               if [[ -n "$TUGBOAT_API_TOKEN" ]]; then
                 PREVIEW_ID=$(gh api "repos/${{ github.repository }}/commits/${{ github.event.pull_request.head.sha }}/status" --jq '[.statuses[] | select(.context=="Tugboat")][0].target_url // ""' 2>/dev/null | sed 's|/*$||; s|.*/||' || true)
                 if [[ -n "$PREVIEW_ID" ]]; then
-                  PREVIEW_URL=$(curl -sf -H "Authorization: Bearer $TUGBOAT_API_TOKEN" "https://api.tugboatqa.com/v3/previews/$PREVIEW_ID" | jq -r '.url // .urls[0] // empty' | sed 's|/*$||' || true)
+                  # Report a failed API call once rather than swallowing it,
+                  # or a revoked or mistyped token would look exactly like a
+                  # missing comment for the whole timeout.
+                  API_STATUS=$(curl -s -o /tmp/tugboat-preview.json -w "%{http_code}" -H "Authorization: Bearer $TUGBOAT_API_TOKEN" "https://api.tugboatqa.com/v3/previews/$PREVIEW_ID" || echo "000")
+                  if [[ "$API_STATUS" == "200" ]]; then
+                    PREVIEW_URL=$(jq -r '.url // .urls[0] // empty' /tmp/tugboat-preview.json | sed 's|/*$||' || true)
+                  elif [[ -z "$API_ERROR_NOTED" ]]; then
+                    echo "::warning::Tugboat API returned HTTP $API_STATUS for preview $PREVIEW_ID. Check that the TUGBOAT_API_TOKEN secret is valid."
+                    API_ERROR_NOTED=1
+                  fi
                 fi
                 if [[ ! -z "$PREVIEW_URL" ]]; then
                   echo "Preview URL found from Tugboat API (no PR comment): $PREVIEW_URL"
