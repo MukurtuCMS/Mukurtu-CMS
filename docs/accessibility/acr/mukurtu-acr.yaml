@@ -525,10 +525,12 @@ chapters:
                 357px and 507px, on the most recent successful main run
                 (issue #2336). These are authoring surfaces, so the same
                 evidence bears on the authoring-tool component below.
-                Five of the 14 measure exactly 507px and two exactly
-                478px, which suggests one shared cause rather than 14
-                separate defects, but that is a lead and not yet a
-                diagnosis.
+                The 14 trace to three shared causes in the Gin admin
+                theme, not 14 separate defects: the shortcut tooltip
+                beside the page title, which is fixed in PR #2337 and
+                leaves /admin and /admin/structure clean; the sticky form
+                actions on node add forms; and the breadcrumb wrapper on
+                settings forms.
                 This claim is deliberately not raised on the strength of
                 the /communities fix alone: reflow is recorded as fully
                 machine-decidable, so a reported failure is a real failure
