@@ -74,3 +74,18 @@ function mukurtu_dictionary_update_40045() {
     $config->save(TRUE);
   }
 }
+
+/**
+ * Grant Mukurtu managers permission to set the dictionary glossary order.
+ */
+function mukurtu_dictionary_update_40047() {
+  // mukurtu_dictionary_install() grants this too, but during a profile
+  // install the module installs before the profile's mukurtu_manager role
+  // config exists, so that grant was silently skipped.
+  $role = Role::load('mukurtu_manager');
+  if (!$role) {
+    return;
+  }
+  $role->grantPermission('administer dictionary glossary order');
+  $role->save();
+}
