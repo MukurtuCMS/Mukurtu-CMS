@@ -6,12 +6,14 @@ namespace Drupal\Tests\mukurtu_core\Kernel;
 
 use Drupal\Core\Language\Language;
 use Drupal\Core\Language\LanguageInterface;
+use Drupal\Core\Routing\RouteMatch;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\mukurtu_core\Hook\NotYetTranslatedIndicatorHooks;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use PHPUnit\Framework\Attributes\Group;
+use Symfony\Component\Routing\Route;
 
 /**
  * Tests NotYetTranslatedIndicatorHooks::preprocessNode().
@@ -196,6 +198,68 @@ class NotYetTranslatedIndicatorTest extends EntityKernelTestBase {
     $variables = $this->preprocess($node, '/core-built-url');
 
     $this->assertSame('/core-built-url', $variables['url']);
+  }
+
+  /**
+   * Builds the hooks object as if the given node's page were being viewed.
+   */
+  private function hooksOnNodePage(Node $node, string $route_name = 'entity.node.canonical'): NotYetTranslatedIndicatorHooks {
+    $route_match = new RouteMatch($route_name, new Route('/node/{node}'), ['node' => $node]);
+    return new NotYetTranslatedIndicatorHooks(\Drupal::languageManager(), $route_match);
+  }
+
+  /**
+   * An untranslated node's page title and breadcrumb carry its language.
+   *
+   * The page itself is in the visitor's language, so without this the
+   * original-language title would be announced in the wrong language.
+   */
+  public function testPageTitleAndBreadcrumbMarkedWhenNoTranslationExists(): void {
+    $node = Node::create(['type' => 'article', 'title' => 'Original title', 'langcode' => 'en']);
+    $node->save();
+    $this->setActiveContentLanguage('es');
+    $hooks = $this->hooksOnNodePage($node);
+
+    $title = ['title_attributes' => []];
+    $hooks->preprocessPageTitle($title);
+    $this->assertSame('en', $title['title_attributes']['lang']);
+    $this->assertSame('ltr', $title['title_attributes']['dir']);
+
+    $breadcrumb = [];
+    $hooks->preprocessBreadcrumb($breadcrumb);
+    $this->assertSame(['langcode' => 'en', 'direction' => 'ltr'], $breadcrumb['current_page_language']);
+  }
+
+  /**
+   * A translated node's page title and breadcrumb are left alone.
+   */
+  public function testPageTitleAndBreadcrumbUntouchedWhenTranslationExists(): void {
+    $node = Node::create(['type' => 'article', 'title' => 'Original title', 'langcode' => 'en']);
+    $node->save();
+    $node->addTranslation('es', ['title' => 'Título traducido'])->save();
+    $this->setActiveContentLanguage('es');
+    $hooks = $this->hooksOnNodePage($node);
+
+    $title = ['title_attributes' => []];
+    $hooks->preprocessPageTitle($title);
+    $this->assertSame([], $title['title_attributes']);
+
+    $breadcrumb = [];
+    $hooks->preprocessBreadcrumb($breadcrumb);
+    $this->assertArrayNotHasKey('current_page_language', $breadcrumb);
+  }
+
+  /**
+   * Other routes that carry a node, such as its edit form, are left alone.
+   */
+  public function testPageTitleUntouchedOffTheNodePage(): void {
+    $node = Node::create(['type' => 'article', 'title' => 'Original title', 'langcode' => 'en']);
+    $node->save();
+    $this->setActiveContentLanguage('es');
+
+    $title = ['title_attributes' => []];
+    $this->hooksOnNodePage($node, 'entity.node.edit_form')->preprocessPageTitle($title);
+    $this->assertSame([], $title['title_attributes']);
   }
 
 }

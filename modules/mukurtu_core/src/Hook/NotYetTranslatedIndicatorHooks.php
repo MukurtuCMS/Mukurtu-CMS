@@ -9,7 +9,9 @@ use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\TypedData\TranslatableInterface;
+use Drupal\node\NodeInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -34,13 +36,19 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class NotYetTranslatedIndicatorHooks implements ContainerInjectionInterface {
 
-  public function __construct(protected LanguageManagerInterface $languageManager) {}
+  public function __construct(
+    protected LanguageManagerInterface $languageManager,
+    protected RouteMatchInterface $routeMatch,
+  ) {}
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container): static {
-    return new static($container->get('language_manager'));
+    return new static(
+      $container->get('language_manager'),
+      $container->get('current_route_match'),
+    );
   }
 
   /**
@@ -88,6 +96,59 @@ class NotYetTranslatedIndicatorHooks implements ContainerInjectionInterface {
     if (isset($variables['url']) && !$entity->isNew()) {
       $variables['url'] = $entity->toUrl('canonical', ['language' => $active_language])->toString();
     }
+  }
+
+  /**
+   * Implements hook_preprocess_HOOK() for page-title.html.twig.
+   *
+   * On an untranslated node's own page the visitor now stays in their
+   * language (see preprocessNode()), so the page's lang no longer matches
+   * the original-language title in the <h1>. Mark it with the node's
+   * language so screen readers pronounce it correctly (WCAG 3.1.2).
+   */
+  #[Hook('preprocess_page_title')]
+  public function preprocessPageTitle(array &$variables): void {
+    if ($language = $this->untranslatedRouteNodeLanguage()) {
+      $variables['title_attributes']['lang'] = $language->getId();
+      $variables['title_attributes']['dir'] = $language->getDirection();
+    }
+  }
+
+  /**
+   * Implements hook_preprocess_HOOK() for breadcrumb.html.twig.
+   *
+   * The theme appends the page title as the last breadcrumb item after
+   * module preprocessing runs, so this only exposes the language. The
+   * theme's breadcrumb template applies it to that item.
+   */
+  #[Hook('preprocess_breadcrumb')]
+  public function preprocessBreadcrumb(array &$variables): void {
+    if ($language = $this->untranslatedRouteNodeLanguage()) {
+      $variables['current_page_language'] = [
+        'langcode' => $language->getId(),
+        'direction' => $language->getDirection(),
+      ];
+    }
+  }
+
+  /**
+   * Returns the routed node's language if it has no translation to show.
+   *
+   * @return \Drupal\Core\Language\LanguageInterface|null
+   *   The language of the version being shown instead, or NULL when this
+   *   isn't a node page or the node has a translation in the active content
+   *   language.
+   */
+  protected function untranslatedRouteNodeLanguage(): ?LanguageInterface {
+    if (!$this->languageManager->isMultilingual() || $this->routeMatch->getRouteName() !== 'entity.node.canonical') {
+      return NULL;
+    }
+    $node = $this->routeMatch->getParameter('node');
+    if (!$node instanceof NodeInterface) {
+      return NULL;
+    }
+    $active_langcode = $this->languageManager->getCurrentLanguage(LanguageInterface::TYPE_CONTENT)->getId();
+    return $node->hasTranslation($active_langcode) ? NULL : $node->language();
   }
 
 }
