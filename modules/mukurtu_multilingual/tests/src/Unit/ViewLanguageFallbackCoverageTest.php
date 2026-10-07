@@ -49,6 +49,11 @@ class ViewLanguageFallbackCoverageTest extends UnitTestCase {
     'user_admin_people' => 'admin/people/list - core People-view boilerplate on the user entity, not content',
     'mukurtu_pending_submissions' => 'admin/content/pending-submissions - admin review queue',
     'mukurtu_media' => 'admin/content/media - admin media listing (ships from config/optional)',
+    'mukurtu_translation_status_content' => 'admin/content/translation-status - lists every original with one row per target language by design',
+    'mukurtu_translation_status_media' => 'admin/content/translation-status - lists every original with one row per target language by design',
+    'mukurtu_translation_status_taxonomy_term' => 'admin/content/translation-status - lists every original with one row per target language by design',
+    'mukurtu_translation_status_community' => 'admin/content/translation-status - lists every original with one row per target language by design',
+    'mukurtu_translation_status_protocol' => 'admin/content/translation-status - lists every original with one row per target language by design',
 
     // Not translatable content at all.
     'mukurtu_migrate_results' => 'lists watchdog log entries, not translatable content',
