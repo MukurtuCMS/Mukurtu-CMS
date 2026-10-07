@@ -32,6 +32,31 @@ function mukurtu_import_migrate_destination_info_alter(array &$definitions) {
  * Implements hook_views_data_alter().
  */
 function mukurtu_import_views_data_alter(array &$data): void {
+  // The base tables of the import results views.
+  $tables = [
+    'node_field_data',
+    'media_field_data',
+    'taxonomy_term_field_data',
+    'community_field_revision',
+    'protocol_field_revision',
+    'multipage_item_field_revision',
+  ];
+  foreach ($tables as $table) {
+    if (!isset($data[$table])) {
+      continue;
+    }
+    $data[$table]['mukurtu_import_status'] = [
+      'title' => t('Import status'),
+      'help' => t('Whether the last import created this item, updated it, or left it unchanged.'),
+      'field' => [
+        'id' => 'mukurtu_import_status',
+      ],
+    ];
+  }
+
+  // Superseded by mukurtu_import_status. Kept until
+  // mukurtu_import_update_40403() has replaced it in the taxonomy terms
+  // results view.
   $data['taxonomy_term_field_data']['mukurtu_import_term_status'] = [
     'title' => t('Import status'),
     'help' => t('Whether this term was newly created or updated during this import.'),
