@@ -6,8 +6,8 @@ namespace Drupal\Tests\mukurtu_taxonomy\Unit;
 
 use Drupal\Core\Entity\EntityFieldManager;
 use Drupal\Core\Field\EntityReferenceFieldItemListInterface;
-use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\mukurtu_core\Event\RelatedContentProvenanceEvent;
 use Drupal\mukurtu_taxonomy\EventSubscriber\RelatedContentComputationSubscriber;
 use Drupal\node\NodeInterface;
@@ -26,9 +26,9 @@ class RelatedContentComputationSubscriberTest extends UnitTestCase {
   /**
    * Builds a mock node field storage definition.
    */
-  protected function mockFieldStorageDefinition(string $type, ?string $targetType = NULL): FieldDefinitionInterface {
-    $field = $this->createMock(FieldDefinitionInterface::class);
-    $field->method('isComputed')->willReturn(FALSE);
+  protected function mockFieldStorageDefinition(string $type, ?string $targetType = NULL, bool $customStorage = FALSE): FieldStorageDefinitionInterface {
+    $field = $this->createMock(FieldStorageDefinitionInterface::class);
+    $field->method('hasCustomStorage')->willReturn($customStorage);
     $field->method('getType')->willReturn($type);
     $field->method('getSetting')->willReturnCallback(fn($name) => $name === 'target_type' ? $targetType : NULL);
     return $field;
@@ -37,7 +37,7 @@ class RelatedContentComputationSubscriberTest extends UnitTestCase {
   /**
    * Builds a subscriber wired to the given field storage definitions.
    *
-   * @param \Drupal\Core\Field\FieldDefinitionInterface[] $fields
+   * @param \Drupal\Core\Field\FieldStorageDefinitionInterface[] $fields
    *   Keyed by field name.
    */
   protected function getSubscriber(array $fields): RelatedContentComputationSubscriber {
@@ -180,6 +180,25 @@ class RelatedContentComputationSubscriberTest extends UnitTestCase {
     $term = $this->mockTerm(10, 'creator');
     $record = $this->mockRecord(1, 'field_other_names', [$term]);
     $candidate = $this->mockCandidate(2, ['field_creator' => [['target_id' => 999]]]);
+
+    $event = new RelatedContentProvenanceEvent($record, [2 => $candidate]);
+    $subscriber->onRelatedContentProvenance($event);
+
+    $this->assertArrayNotHasKey(2, $event->provenance);
+  }
+
+  /**
+   * Tests a custom-storage field is not searched.
+   */
+  public function testCustomStorageFieldIsIgnored(): void {
+    $fields = [
+      'field_computed_terms' => $this->mockFieldStorageDefinition('entity_reference', 'taxonomy_term', TRUE),
+    ];
+    $subscriber = $this->getSubscriber($fields);
+
+    $term = $this->mockTerm(10, 'creator');
+    $record = $this->mockRecord(1, 'field_other_names', [$term]);
+    $candidate = $this->mockCandidate(2, ['field_computed_terms' => [['target_id' => 10]]]);
 
     $event = new RelatedContentProvenanceEvent($record, [2 => $candidate]);
     $subscriber->onRelatedContentProvenance($event);

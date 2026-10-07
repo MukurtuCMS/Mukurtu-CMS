@@ -6439,11 +6439,13 @@ body:not(.is-always-mobile-nav) .header {
 .communities {
   gap: var(--v-space-3xs);
   display: grid;
-  grid-template-columns: 1fr;
+  -webkit-padding-start: 0;
+          padding-inline-start: 0;
+  grid-template-columns: minmax(0, 1fr);
 }
 @media (min-width: 30rem) {
   .communities {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 @media (min-width: 60rem) {
