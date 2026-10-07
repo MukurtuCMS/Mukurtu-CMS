@@ -329,3 +329,265 @@ export async function checkKeyboardTrap(page: Page, testInfo: TestInfo, slug: st
   }
   writeReport(`${slug}-keyboard-trap`, testInfo, findings);
 }
+
+/**
+ * WCAG 2.5.3 Label in Name: a control's accessible name must contain its
+ * visible label, so that someone speaking the label they can see actually
+ * activates the control.
+ *
+ * Fully machine-decidable in principle, heuristic in practice: this
+ * approximates the accessible name computation rather than implementing all
+ * of accname. It only reports controls that have a visible text label AND an
+ * accessible name that does not contain it, which is the failure that breaks
+ * speech input. Controls named only by an icon are a different criterion
+ * (4.1.2) and are left to axe.
+ */
+export async function checkLabelInName(page: Page, testInfo: TestInfo, slug: string): Promise<void> {
+  const findings: CheckFinding[] = [];
+  const MAX_ELEMENTS = 120;
+
+  const mismatches = await page.evaluate((max) => {
+    const normalise = (s: string) =>
+      s.toLowerCase()
+        // Punctuation and symbols differ harmlessly between the two (an
+        // ellipsis, a trailing colon), so compare on words alone.
+        .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+    const visible = (el: Element) => {
+      const s = getComputedStyle(el);
+      if (s.display === 'none' || s.visibility === 'hidden' || s.opacity === '0') return false;
+      const r = el.getBoundingClientRect();
+      return r.width > 0 && r.height > 0;
+    };
+
+    // The visible label is the text a sighted user reads on the control.
+    // Text hidden for screen-reader-only purposes is deliberately excluded:
+    // it is not what someone would speak.
+    const visibleText = (el: Element): string => {
+      let out = '';
+      const walk = (n: Node) => {
+        if (n.nodeType === Node.TEXT_NODE) { out += ' ' + (n.textContent || ''); return; }
+        if (n.nodeType !== Node.ELEMENT_NODE) return;
+        const e = n as Element;
+        if (!visible(e)) return;
+        if (e.getAttribute('aria-hidden') === 'true') return;
+        n.childNodes.forEach(walk);
+      };
+      el.childNodes.forEach(walk);
+      return out;
+    };
+
+    const accName = (el: Element): { name: string; from: string } => {
+      const labelledby = el.getAttribute('aria-labelledby');
+      if (labelledby) {
+        const txt = labelledby.split(/\s+/)
+          .map((id) => document.getElementById(id)?.textContent || '')
+          .join(' ');
+        if (txt.trim()) return { name: txt, from: 'aria-labelledby' };
+      }
+      const label = el.getAttribute('aria-label');
+      if (label && label.trim()) return { name: label, from: 'aria-label' };
+      if (el.id) {
+        const l = document.querySelector(`label[for="${CSS.escape(el.id)}"]`);
+        if (l && l.textContent?.trim()) return { name: l.textContent, from: '<label for>' };
+      }
+      const wrapping = el.closest('label');
+      if (wrapping && wrapping.textContent?.trim()) return { name: wrapping.textContent, from: 'wrapping <label>' };
+      const tag = el.tagName.toLowerCase();
+      if (tag === 'input') {
+        const type = (el as HTMLInputElement).type;
+        if (type === 'submit' || type === 'button' || type === 'reset') {
+          const v = (el as HTMLInputElement).value;
+          if (v) return { name: v, from: 'value' };
+        }
+      }
+      const title = el.getAttribute('title');
+      if (title && title.trim()) return { name: title, from: 'title' };
+      return { name: el.textContent || '', from: 'text content' };
+    };
+
+    const SELECTOR = [
+      'button', 'a[href]', 'input:not([type="hidden"])', 'select', 'textarea', 'summary',
+      '[role="button"]', '[role="link"]', '[role="checkbox"]', '[role="radio"]',
+      '[role="tab"]', '[role="menuitem"]', '[role="switch"]',
+    ].join(',');
+
+    const out: { selector: string; visibleLabel: string; accessibleName: string; from: string }[] = [];
+    const seen = new Set<Element>();
+    for (const el of Array.from(document.querySelectorAll(SELECTOR)).slice(0, max)) {
+      if (seen.has(el)) continue;
+      seen.add(el);
+      if (!visible(el)) continue;
+
+      const vis = normalise(visibleText(el));
+      // Nothing visible to speak, or the control is labelled from outside its
+      // own box (a <label> elsewhere) - neither is a 2.5.3 failure.
+      if (!vis) continue;
+
+      const { name, from } = accName(el);
+      const acc = normalise(name);
+      if (!acc) continue;
+      if (acc.includes(vis)) continue;
+
+      const describe = (e: Element) =>
+        e.tagName.toLowerCase() +
+        (e.id ? `#${e.id}` : '') +
+        (typeof e.className === 'string' && e.className
+          ? '.' + e.className.trim().split(/\s+/).slice(0, 2).join('.')
+          : '');
+      out.push({ selector: describe(el), visibleLabel: vis, accessibleName: acc, from });
+    }
+    return out;
+  }, MAX_ELEMENTS);
+
+  for (const m of mismatches) {
+    findings.push({
+      check: 'label-in-name',
+      criterion: '2.5.3 Label in Name',
+      summary: `Accessible name does not contain the visible label on ${m.selector}`,
+      detail: `Visible label: "${m.visibleLabel}". Accessible name: "${m.accessibleName}" (from ${m.from}). Speech input users say the visible label, so the accessible name must contain it. Confirm manually: this approximates accname and does not implement all of it.`,
+    });
+  }
+  writeReport(`${slug}-label-in-name`, testInfo, findings);
+}
+
+/**
+ * WCAG 1.3.5 Identify Input Purpose: inputs that collect information about
+ * the user must carry the matching `autocomplete` token, so that the browser
+ * and assistive technology can fill or explain them.
+ *
+ * Only fields about the *user* are in scope - a search box or a content
+ * title is not. Rather than guess from arbitrary field names, this matches
+ * the specific inputs Drupal and Mukurtu actually render for user data,
+ * which keeps false positives near zero at the cost of not being exhaustive.
+ */
+export async function checkInputPurpose(page: Page, testInfo: TestInfo, slug: string): Promise<void> {
+  const findings: CheckFinding[] = [];
+
+  // name attribute (or id) -> the autocomplete token WCAG expects.
+  const EXPECTED: Record<string, string[]> = {
+    name: ['username'],
+    mail: ['email'],
+    pass: ['current-password', 'new-password'],
+    'pass[pass1]': ['new-password'],
+    'pass[pass2]': ['new-password'],
+    current_pass: ['current-password'],
+  };
+
+  const results = await page.evaluate((expected) => {
+    const out: { field: string; got: string | null; want: string[] }[] = [];
+    document.querySelectorAll<HTMLInputElement>('input:not([type="hidden"])').forEach((el) => {
+      const type = el.type;
+      if (!['text', 'email', 'password', 'tel'].includes(type)) return;
+      const key = el.name || el.id;
+      const want = expected[key];
+      if (!want) return;
+      const r = el.getBoundingClientRect();
+      if (r.width === 0 && r.height === 0) return;
+      const got = el.getAttribute('autocomplete');
+      if (got && want.includes(got)) return;
+      out.push({ field: key, got, want });
+    });
+    return out;
+  }, EXPECTED);
+
+  for (const r of results) {
+    findings.push({
+      check: 'input-purpose',
+      criterion: '1.3.5 Identify Input Purpose',
+      summary: `Input "${r.field}" has ${r.got ? `autocomplete="${r.got}"` : 'no autocomplete attribute'}, expected one of: ${r.want.join(', ')}`,
+      detail: 'Fields collecting information about the user need the matching autocomplete token so browsers and assistive technology can fill and explain them.',
+    });
+  }
+  writeReport(`${slug}-input-purpose`, testInfo, findings);
+}
+
+/**
+ * WCAG 1.4.12 Text Spacing: no loss of content or function when the reader
+ * overrides line height to 1.5, letter spacing to 0.12em, word spacing to
+ * 0.16em and paragraph spacing to 2em.
+ *
+ * Detects both ways that fails: the page overflowing horizontally, and
+ * individual elements clipping their own content because they have a fixed
+ * height with hidden overflow. The second is the common one and is what a
+ * reflow check alone would miss.
+ *
+ * Removes its own override before returning, so later checks are not run
+ * against respaced text.
+ */
+export async function checkTextSpacing(page: Page, testInfo: TestInfo, slug: string): Promise<void> {
+  const findings: CheckFinding[] = [];
+  const STYLE_ID = 'a11y-text-spacing-override';
+
+  const before = await page.evaluate(() => ({
+    scrollWidth: document.documentElement.scrollWidth,
+    clientWidth: document.documentElement.clientWidth,
+  }));
+
+  await page.addStyleTag({
+    content: `#${STYLE_ID}-marker{}
+      * { line-height: 1.5 !important; letter-spacing: 0.12em !important; word-spacing: 0.16em !important; }
+      p, li, dd, blockquote { margin-block-end: 2em !important; }`,
+  });
+  // Tag the style element so it can be removed again precisely.
+  await page.evaluate((id) => {
+    const tags = document.querySelectorAll('style');
+    const last = tags[tags.length - 1];
+    if (last) last.id = id;
+  }, STYLE_ID);
+  await page.waitForTimeout(300);
+
+  const after = await page.evaluate(() => {
+    const clipped: { selector: string; scrollHeight: number; clientHeight: number; text: string }[] = [];
+    document.querySelectorAll<HTMLElement>('body *').forEach((el) => {
+      const s = getComputedStyle(el);
+      if (s.overflowY !== 'hidden' && s.overflow !== 'hidden') return;
+      // Only a fixed or capped height can clip; auto height grows instead.
+      if (s.height === 'auto' && s.maxHeight === 'none') return;
+      if (el.scrollHeight <= el.clientHeight + 1) return;
+      if (el.clientHeight === 0) return;
+      // Ignore elements with no text of their own to lose.
+      const text = (el.textContent || '').trim();
+      if (!text) return;
+      clipped.push({
+        selector: el.tagName.toLowerCase() +
+          (el.id ? `#${el.id}` : '') +
+          (typeof el.className === 'string' && el.className
+            ? '.' + el.className.trim().split(/\s+/).slice(0, 2).join('.')
+            : ''),
+        scrollHeight: el.scrollHeight,
+        clientHeight: el.clientHeight,
+        text: text.slice(0, 60),
+      });
+    });
+    return {
+      scrollWidth: document.documentElement.scrollWidth,
+      clientWidth: document.documentElement.clientWidth,
+      clipped: clipped.slice(0, 10),
+    };
+  });
+
+  if (after.scrollWidth > after.clientWidth + 1 && before.scrollWidth <= before.clientWidth + 1) {
+    findings.push({
+      check: 'text-spacing-overflow',
+      criterion: '1.4.12 Text Spacing',
+      summary: `Horizontal scroll appears once text spacing is overridden (content ${after.scrollWidth}px vs viewport ${after.clientWidth}px)`,
+      detail: 'The page did not overflow before the override, so the spacing itself caused it.',
+    });
+  }
+
+  for (const c of after.clipped) {
+    findings.push({
+      check: 'text-spacing-clipped',
+      criterion: '1.4.12 Text Spacing',
+      summary: `Content clips with overridden text spacing in ${c.selector} (needs ${c.scrollHeight}px, has ${c.clientHeight}px)`,
+      detail: `Text starting "${c.text}" is cut off. A fixed or capped height with hidden overflow cannot grow to fit respaced text.`,
+    });
+  }
+
+  await page.evaluate((id) => document.getElementById(id)?.remove(), STYLE_ID);
+  await page.waitForTimeout(100);
+  writeReport(`${slug}-text-spacing`, testInfo, findings);
+}
