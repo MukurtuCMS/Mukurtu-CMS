@@ -9,6 +9,18 @@ on:
     branches:
       - main
 
+# One run per PR at a time. Every run for a PR tests the same Tugboat
+# preview, and the default-content setup only checks once whether the site
+# is empty before seeding it. Two overlapping runs both saw an empty preview,
+# both seeded it, and the duplicate communities and protocols then failed
+# every test that picks one by name (#2332). A newer push or re-run cancels
+# the older run instead. Pushes to main key on the run ID, so they never share
+# a group: GitHub keeps only one pending run per group and would silently
+# drop the commits queued in between.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   wait-for-tugboat:
     runs-on: ubuntu-latest
