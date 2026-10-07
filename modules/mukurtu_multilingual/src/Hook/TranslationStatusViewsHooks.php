@@ -53,7 +53,12 @@ class TranslationStatusViewsHooks {
       'title' => $this->t('Target language'),
       'help' => $this->t('The language this row reports on.'),
       'field' => ['id' => 'language'],
-      'filter' => ['id' => 'language'],
+      // Not core's 'language' filter, which also offers internal choices
+      // such as "Interface text language selected for page".
+      'filter' => [
+        'id' => 'in_operator',
+        'options callback' => TranslationStatusTracker::class . '::languageOptions',
+      ],
       'sort' => ['id' => 'standard'],
     ];
     $data[$table]['status'] = [

@@ -137,7 +137,7 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          plugin_id: language
+          plugin_id: in_operator
           operator: in
           value: {}
           exposed: true
@@ -245,7 +245,7 @@ display:
               empty_column: false
               responsive: ''
             langcode:
-              sortable: false
+              sortable: true
               default_sort_order: asc
               align: ''
               separator: ''

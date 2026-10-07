@@ -126,6 +126,16 @@ class TranslationStatusTracker {
   }
 
   /**
+   * Returns the site's configured languages, for the language filter.
+   *
+   * @return array<string, string>
+   *   Language names keyed by language code.
+   */
+  public static function languageOptions(): array {
+    return array_map(fn ($language) => $language->getName(), \Drupal::languageManager()->getLanguages());
+  }
+
+  /**
    * Whether the status pages track this entity.
    */
   public function isTracked(ContentEntityInterface $entity): bool {
