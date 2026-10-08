@@ -13,6 +13,7 @@ mukurtu-gin-custom:
     js/media-library-cancel.js: {}
     js/mukurtu-tagify-focus.js: {}
     js/gin-more-actions-aria.js: {}
+    js/gin-collapsed-tab-trap.js: {}
   dependencies:
     - core/jquery
     - core/drupal

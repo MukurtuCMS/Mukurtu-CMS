@@ -91,17 +91,19 @@ class FieldAvailableForIndexing extends Event {
         $field->setLabel($label);
         $index->addField($field);
 
-        // Add text fields to the ignorecase processor. String fields are
-        // excluded — they are used for faceting and do not go through text
-        // processing.
+        // Add text fields to the ignorecase and ignore_character processors.
+        // String fields are excluded: they are used for faceting and do not
+        // go through text processing.
         if ($type === 'text') {
           $processors = $index->getProcessors();
-          if ($processors && isset($processors['ignorecase'])) {
-            $ignorecaseConfig = $processors['ignorecase']->getConfiguration();
-            if (isset($ignorecaseConfig['fields']) && !in_array($id, $ignorecaseConfig['fields'])) {
-              $ignorecaseConfig['fields'][] = $id;
-              $processors['ignorecase']->setConfiguration($ignorecaseConfig);
-              $index->setProcessors($processors);
+          foreach (['ignorecase', 'ignore_character'] as $processor_id) {
+            if (isset($processors[$processor_id])) {
+              $processorConfig = $processors[$processor_id]->getConfiguration();
+              if (isset($processorConfig['fields']) && !in_array($id, $processorConfig['fields'])) {
+                $processorConfig['fields'][] = $id;
+                $processors[$processor_id]->setConfiguration($processorConfig);
+                $index->setProcessors($processors);
+              }
             }
           }
         }
