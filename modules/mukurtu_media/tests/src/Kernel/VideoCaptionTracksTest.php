@@ -293,9 +293,38 @@ class VideoCaptionTracksTest extends KernelTestBase {
     $this->assertSame(['- Select -', 'Anishinaabemowin', 'English'], array_values(array_map('strval', $language['#options'])));
     $this->assertEquals($term->id(), $language['#value']);
 
+    // The file name is announced but not shown, so rows are distinguishable.
+    $this->assertSame('Language<span class="visually-hidden"> for en.vtt</span>', (string) $language['#title']);
+
     $kind = $item['kind'];
+    $this->assertSame('Type<span class="visually-hidden"> for en.vtt</span>', (string) $kind['#title']);
     $this->assertSame(['captions', 'subtitles'], array_keys($kind['#options']));
     $this->assertSame('subtitles', $kind['#value']);
+  }
+
+  /**
+   * Saving warns once per language term that has no language code.
+   */
+  public function testMissingLanguageCodeWarning(): void {
+    $no_code = $this->createLanguageTerm("Lil'wat");
+    $with_code = $this->createLanguageTerm('English', 'en');
+    $media = $this->createVideo([
+      ['target_id' => $this->createFile('a.vtt')->id(), 'language_target_id' => $no_code->id(), 'kind' => 'captions'],
+      ['target_id' => $this->createFile('b.vtt')->id(), 'language_target_id' => $no_code->id(), 'kind' => 'subtitles'],
+      ['target_id' => $this->createFile('c.vtt')->id(), 'language_target_id' => $with_code->id(), 'kind' => 'captions'],
+    ]);
+
+    $form_state = new FormState();
+    $form_state->setFormObject(\Drupal::entityTypeManager()->getFormObject('media', 'edit')->setEntity($media));
+    $form = [];
+    mukurtu_media_video_track_language_code_warning($form, $form_state);
+
+    $warnings = \Drupal::messenger()->messagesByType('warning');
+    $this->assertCount(1, $warnings);
+    $warning = (string) $warnings[0];
+    // The uid 1 account can edit the term, so its name links to the edit form.
+    $this->assertStringContainsString('/taxonomy/term/' . $no_code->id() . '/edit', $warning);
+    $this->assertStringContainsString('>Lil&#039;wat</a> language term has no language code', $warning);
   }
 
 }

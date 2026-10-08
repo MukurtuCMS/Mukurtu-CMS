@@ -38,10 +38,13 @@ class VideoTrackWidget extends FileWidget {
   public static function process($element, FormStateInterface $form_state, $form) {
     $item = $element['#value'];
     $has_file = !empty($element['fids']['#value']);
+    // Every row repeats the same labels, so name the file for screen readers.
+    $file = !empty($element['#files']) ? reset($element['#files']) : NULL;
+    $filename = $file ? $file->getFilename() : '';
 
     $element['language_target_id'] = [
       '#type' => 'select',
-      '#title' => new TranslatableMarkup('Language'),
+      '#title' => new TranslatableMarkup('Language<span class="visually-hidden"> for @filename</span>', ['@filename' => $filename]),
       '#description' => new TranslatableMarkup('The language spoken or written in this track. Add a language code to the language term so browsers can identify it.'),
       '#options' => static::languageOptions(),
       // Always offer the empty option. Without #empty_value, a rebuild that
@@ -56,7 +59,7 @@ class VideoTrackWidget extends FileWidget {
     ];
     $element['kind'] = [
       '#type' => 'select',
-      '#title' => new TranslatableMarkup('Type'),
+      '#title' => new TranslatableMarkup('Type<span class="visually-hidden"> for @filename</span>', ['@filename' => $filename]),
       '#options' => [
         'captions' => new TranslatableMarkup('Captions (dialogue and other sounds, for viewers who are deaf or hard of hearing)'),
         'subtitles' => new TranslatableMarkup('Subtitles (dialogue only, usually a translation)'),
