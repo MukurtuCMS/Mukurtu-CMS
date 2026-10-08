@@ -477,6 +477,22 @@ function mukurtu_core_update_40208(array &$sandbox): ?string {
 }
 
 /**
+ * Installs the Masquerade module.
+ */
+function mukurtu_core_update_40209(): ?string {
+  // New installs get masquerade from the profile's install list. It is
+  // optional, so a site that already has it (or added it by hand) is left
+  // alone.
+  if (\Drupal::moduleHandler()->moduleExists('masquerade')) {
+    return NULL;
+  }
+
+  \Drupal::service('module_installer')->install(['masquerade']);
+
+  return (string) t('Installed the Masquerade module. Administrators can now view the site as another user.');
+}
+
+/**
  * Fix browse and search pages showing every translation of an item instead of one per language.
  */
 function mukurtu_core_update_40210(): ?string {

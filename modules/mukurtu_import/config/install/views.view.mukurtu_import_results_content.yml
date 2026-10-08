@@ -2,7 +2,6 @@ langcode: en
 status: true
 dependencies:
   module:
-    - history
     - node
     - user
 id: mukurtu_import_results_content
@@ -84,42 +83,24 @@ display:
           multi_type: separator
           separator: ', '
           field_api_classes: false
-        timestamp:
-          id: timestamp
-          table: history
-          field: timestamp
+        mukurtu_import_status:
+          id: mukurtu_import_status
+          table: node_field_data
+          field: mukurtu_import_status
           relationship: none
           group_type: group
           admin_label: ''
-          plugin_id: history_user_timestamp
-          label: New
+          plugin_id: mukurtu_import_status
+          label: Status
           exclude: false
           alter:
             alter_text: false
-            text: ''
             make_link: false
-            path: ''
             absolute: false
-            external: false
-            replace_spaces: false
-            path_case: none
-            trim_whitespace: false
-            alt: ''
-            rel: ''
-            link_class: ''
-            prefix: ''
-            suffix: ''
-            target: ''
-            nl2br: false
-            max_length: 0
-            word_boundary: true
-            ellipsis: true
-            more_link: false
-            more_link_text: ''
-            more_link_path: ''
+            word_boundary: false
+            ellipsis: false
             strip_tags: false
             trim: false
-            preserve_tags: ''
             html: false
           element_type: ''
           element_class: ''
@@ -133,8 +114,6 @@ display:
           hide_empty: false
           empty_zero: false
           hide_alter_empty: true
-          link_to_node: false
-          comments: false
         status:
           id: status
           table: node_field_data
@@ -447,7 +426,7 @@ display:
           default_row_class: true
           columns:
             title: title
-            timestamp: timestamp
+            mukurtu_import_status: mukurtu_import_status
             status: status
             type: type
             changed: changed
@@ -460,8 +439,8 @@ display:
               separator: ''
               empty_column: false
               responsive: ''
-            timestamp:
-              sortable: true
+            mukurtu_import_status:
+              sortable: false
               default_sort_order: asc
               align: ''
               separator: ''
