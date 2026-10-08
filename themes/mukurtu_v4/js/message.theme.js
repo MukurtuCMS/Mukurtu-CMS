@@ -30,7 +30,13 @@
         </div>
         <div class="messages__content">${text}</div>
       </div>
+      <button type="button" class="messages__close" data-drupal-selector="messages-close">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M2 2l12 12M14 2L2 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <span class="visually-hidden"></span>
+      </button>
     `;
+    wrapper.querySelector('.messages__close .visually-hidden').textContent =
+      Drupal.t('Dismiss message');
 
     return wrapper;
   };
