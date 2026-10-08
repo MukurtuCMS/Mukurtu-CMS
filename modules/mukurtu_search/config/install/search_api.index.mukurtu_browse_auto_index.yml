@@ -458,6 +458,35 @@ processor_settings:
       h3: 2
       strong: 2
       u: 1
+  ignore_character:
+    weights:
+      preprocess_index: -10
+      preprocess_query: -10
+    all_fields: false
+    fields:
+      - all_taxonomy_term_names
+      - node__field_article_category__name__text
+      - node__field_article_keywords__name__text
+      - node__field_category__name__text
+      - node__field_contributor__name__text
+      - node__field_creator__name__text
+      - node__field_dictionary_word_language__name__text
+      - node__field_format__name__text
+      - node__field_keywords__name__text
+      - node__field_language__name__text
+      - node__field_location__name__text
+      - node__field_other_names__name__text
+      - node__field_people__name__text
+      - node__field_publisher__name__text
+      - node__field_subject__name__text
+      - node__field_type__name__text
+      - node__field_word_type__name__text
+      - node__title
+    ignorable: '[''"¿¡!?,.:;]'
+    ignorable_classes:
+      - Pf
+      - Pi
+      - Sk
   ignorecase:
     weights:
       preprocess_index: -20
