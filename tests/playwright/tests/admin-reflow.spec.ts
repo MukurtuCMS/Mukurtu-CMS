@@ -17,10 +17,11 @@ import { ADMIN_STATE } from '~helpers/auth-state';
 test.describe('Reflow (admin)', () => {
   test.use({ storageState: ADMIN_STATE });
 
-  // Clean once the shortcut tooltip, the breadcrumb and the sticky form
-  // actions bar are all fixed. See modules/mukurtu_gin_custom/css for each.
-  // The one page still missing from this list, the submission form settings,
-  // overflows from a wide table, which is a different problem.
+  // Every page from #2336. Four causes, all fixed: the shortcut tooltip, the
+  // breadcrumb and the sticky form actions bar (modules/mukurtu_gin_custom),
+  // and on the submission form settings both a fixed-width select
+  // (modules/mukurtu_submissions) and visually-hidden labels escaping Gin's
+  // table scroll wrapper.
   for (const path of [
     '/admin',
     '/admin/structure',
@@ -34,6 +35,7 @@ test.describe('Reflow (admin)', () => {
     '/node/add/dictionary_word',
     '/node/add/collection',
     '/admin/export/settings',
+    '/admin/config/mukurtu/submissions/digital_heritage',
   ]) {
     test(`Reflow: no horizontal overflow at 320px on ${path}`, async ({ page }) => {
       await page.setViewportSize({ width: 320, height: 720 });
