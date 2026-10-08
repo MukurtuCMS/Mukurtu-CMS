@@ -83,6 +83,21 @@ function mukurtu_media_media_source_info_alter(array &$sources)
 }
 
 /**
+ * Implements hook_theme().
+ */
+function mukurtu_media_theme(): array {
+  return [
+    'mukurtu_file_video' => [
+      'variables' => [
+        'files' => [],
+        'attributes' => NULL,
+        'tracks' => [],
+      ],
+    ],
+  ];
+}
+
+/**
  * Implements hook_entity_field_storage_info().
  */
 function mukurtu_media_entity_field_storage_info(EntityTypeInterface $entity_type){
