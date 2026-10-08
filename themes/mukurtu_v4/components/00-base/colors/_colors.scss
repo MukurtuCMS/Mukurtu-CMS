@@ -29,6 +29,22 @@
   // --brand-primary-dark (which is used for headings/links site-wide).
   --image-description-horizontal-text: var(--brand-primary-dark);
 
+  // Link color for collection titles on the collections browse and
+  // personal collections pages, whose card sits on --brand-secondary.
+  // Same situation as --image-description-horizontal-text above: defaults
+  // to the shared brand color, but a palette whose --brand-secondary does
+  // not clear WCAG 1.4.3 against it must override this token rather than
+  // --brand-primary, which is used site-wide. Blue and gold fails at
+  // 1.96:1 - see issue #2252.
+  --collection-title-link-text: var(--brand-primary);
+
+  // Link color for horizontal tab labels, which sit on --cr-default-bg
+  // (#eee) rather than on white. That grey strip costs about 0.7 of a
+  // ratio point against white, which is enough to take Blue and gold's
+  // --brand-primary-dark from a passing 5.00:1 on white to a failing
+  // 4.31:1 here - see issue #2253.
+  --horizontal-tab-link-text: var(--brand-primary-dark);
+
   // Persistent Across Palettes Below.
   --brand-text-color: #464646;
   --brand-light: #e5e9e9;

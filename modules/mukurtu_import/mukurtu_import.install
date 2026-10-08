@@ -233,3 +233,268 @@ function mukurtu_import_update_40201(): ?string {
     '@count' => count($updated),
   ]);
 }
+
+/**
+ * Install the content_translation module that CSV import requires.
+ */
+function mukurtu_import_update_40401(): ?string {
+  // Keep the docblock above to one line: Drupal renders it verbatim as this
+  // update's description on update.php and in `drush updatedb:status`.
+  //
+  // mukurtu_import.info.yml has declared content_translation a dependency
+  // since 4.0.0, when #2081 made CSV import translation-aware. Drupal only
+  // resolves info.yml dependencies when a module is installed, so a site that
+  // already had mukurtu_import enabled before 4.0.0 updated its code into a
+  // state where the dependency is declared but the module was never
+  // installed. Nothing announced that: the site just carried an unsatisfied
+  // requirement.
+  //
+  // The visible symptom was that any import whose mapping included a language
+  // column - 38 of the shipped templates map one - died with a
+  // ServiceNotFoundException for content_translation.manager before a single
+  // row was processed. MukurtuImportStrategy::isTranslationImport() now also
+  // guards that lookup, so such an import completes as a non-translation
+  // import rather than crashing, but a site is still entitled to the module
+  // it depends on, and without it translation-targeting imports are simply
+  // unavailable. This hands it back.
+  //
+  // Installing content_translation on its own enables translation for no
+  // bundle and adds no per-bundle fields, so it changes nothing else about
+  // the site.
+  if (\Drupal::moduleHandler()->moduleExists('content_translation')) {
+    return NULL;
+  }
+
+  \Drupal::service('module_installer')->install(['content_translation']);
+
+  return (string) t('Installed the content_translation module. CSV import has required it since 4.0.0, but sites that enabled Mukurtu Import before then never received it, and imports that mapped a language column failed.');
+}
+
+/**
+ * Ignore the Default translation column in the default import templates.
+ */
+function mukurtu_import_update_40402(): ?string {
+  // Keep the docblock above to one line: Drupal renders it verbatim as this
+  // update's description on update.php and in `drush updatedb:status`.
+  //
+  // 4.0.4 adds a Default translation column to the Dictionary Word, Image and
+  // SoundCloud exports, matching every other translatable bundle (see
+  // mukurtu_export_update_40401()). Every other template maps that column to
+  // "-1" (never imported), because Drupal manages default_langcode itself and
+  // throws if it is written directly. Without the row, re-importing one of
+  // those exports reports the column as unrecognized.
+  //
+  // config/install ships the row, which fixes new sites. This adds it to the
+  // templates an existing site already has. As in mukurtu_import_update_40201(),
+  // only the shipped templates are touched, by id.
+  $ids = [
+    'dictionary_word_all_fields',
+    'image_all_fields',
+    'soundcloud_all_fields',
+  ];
+
+  $storage = \Drupal::entityTypeManager()->getStorage('mukurtu_import_strategy');
+  $updated = [];
+
+  foreach ($ids as $id) {
+    /** @var \Drupal\mukurtu_import\Entity\MukurtuImportStrategy|null $strategy */
+    $strategy = $storage->load($id);
+    if (!$strategy) {
+      // The template was deleted, or never existed on this site.
+      continue;
+    }
+
+    $mapping = $strategy->getMapping() ?? [];
+
+    // Leave a template that already has the column alone, whatever it maps it
+    // to: a site that chose a target on purpose keeps it.
+    foreach ($mapping as $row) {
+      if (($row['source'] ?? NULL) === 'Default translation') {
+        continue 2;
+      }
+    }
+
+    $mapping[] = ['source' => 'Default translation', 'target' => '-1'];
+    $strategy->setMapping($mapping);
+    $strategy->save();
+    $updated[] = $id;
+  }
+
+  if (empty($updated)) {
+    return NULL;
+  }
+
+  return (string) t('Set @count default import template(s) to ignore the Default translation column.', [
+    '@count' => count($updated),
+  ]);
+}
+
+/**
+ * Add an import Status column to the import results tables.
+ */
+function mukurtu_import_update_40403(): ?string {
+  // Keep the docblock above to one line: Drupal renders it verbatim as this
+  // update's description on update.php and in `drush updatedb:status`.
+  //
+  // The content results table showed core History's "unread" marker labeled
+  // "New", which depends on what the current user has viewed rather than on
+  // the import, and the other tables had no status at all apart from
+  // taxonomy's revision count. This puts the mukurtu_import_status field in
+  // all six. config/install ships the same result for new sites. Only the
+  // shipped views are touched, by id, and a view that already has the field
+  // is left alone. See https://github.com/MukurtuCMS/Mukurtu-CMS/issues/2309.
+  $storage = \Drupal::entityTypeManager()->getStorage('view');
+  $updated = 0;
+
+  foreach (_mukurtu_import_results_view_tables() as $id => $table) {
+    /** @var \Drupal\views\ViewEntityInterface|null $view */
+    $view = $storage->load($id);
+    if (!$view) {
+      continue;
+    }
+    $displays = $view->get('display');
+    $options = $displays['default']['display_options'] ?? NULL;
+    if (!is_array($options)) {
+      continue;
+    }
+    $new_options = _mukurtu_import_results_view_add_status($options, $table);
+    if ($new_options === $options) {
+      continue;
+    }
+    $displays['default']['display_options'] = $new_options;
+    $view->set('display', $displays);
+    // Saving the view entity recalculates its dependencies, which drops the
+    // content view's dependency on the History module.
+    $view->save();
+    $updated++;
+  }
+
+  if (!$updated) {
+    return NULL;
+  }
+
+  return (string) t('Added a Status column to @count import results view(s).', [
+    '@count' => $updated,
+  ]);
+}
+
+/**
+ * The shipped import results views, keyed by id, with their base tables.
+ */
+function _mukurtu_import_results_view_tables(): array {
+  return [
+    'mukurtu_import_results_communities' => 'community_field_revision',
+    'mukurtu_import_results_content' => 'node_field_data',
+    'mukurtu_import_results_cultural_protocols' => 'protocol_field_revision',
+    'mukurtu_import_results_media' => 'media_field_data',
+    'mukurtu_import_results_multipage_items' => 'multipage_item_field_revision',
+    'mukurtu_import_results_taxonomy_terms' => 'taxonomy_term_field_data',
+  ];
+}
+
+/**
+ * Puts the import Status field in a results view's default display options.
+ *
+ * Replaces the History "unread" marker or the former taxonomy-only status
+ * field in place, or else adds the field after the first column. Returns the
+ * options unchanged if the field is already there.
+ *
+ * @param array $options
+ *   The default display's display_options.
+ * @param string $table
+ *   The view's base table.
+ *
+ * @return array
+ *   The updated display options.
+ */
+function _mukurtu_import_results_view_add_status(array $options, string $table): array {
+  $fields = $options['fields'] ?? [];
+  if (isset($fields['mukurtu_import_status'])) {
+    return $options;
+  }
+
+  $replaced = array_keys(array_filter($fields, fn($field) => in_array($field['plugin_id'] ?? NULL, ['history_user_timestamp', 'mukurtu_import_term_status'], TRUE)));
+  $field = [
+    'id' => 'mukurtu_import_status',
+    'table' => $table,
+    'field' => 'mukurtu_import_status',
+    'relationship' => 'none',
+    'group_type' => 'group',
+    'admin_label' => '',
+    'plugin_id' => 'mukurtu_import_status',
+    'label' => 'Status',
+    'exclude' => FALSE,
+    'alter' => [
+      'alter_text' => FALSE,
+      'make_link' => FALSE,
+      'absolute' => FALSE,
+      'word_boundary' => FALSE,
+      'ellipsis' => FALSE,
+      'strip_tags' => FALSE,
+      'trim' => FALSE,
+      'html' => FALSE,
+    ],
+    'element_type' => '',
+    'element_class' => '',
+    'element_label_type' => '',
+    'element_label_class' => '',
+    'element_label_colon' => TRUE,
+    'element_wrapper_type' => '',
+    'element_wrapper_class' => '',
+    'element_default_classes' => TRUE,
+    'empty' => '',
+    'hide_empty' => FALSE,
+    'empty_zero' => FALSE,
+    'hide_alter_empty' => TRUE,
+  ];
+  $options['fields'] = _mukurtu_import_insert_after_or_replace($fields, 'mukurtu_import_status', $field, $replaced);
+
+  if (($options['style']['type'] ?? NULL) === 'table') {
+    $style = &$options['style']['options'];
+    $style['columns'] = _mukurtu_import_insert_after_or_replace($style['columns'] ?? [], 'mukurtu_import_status', 'mukurtu_import_status', $replaced);
+    $style['info'] = _mukurtu_import_insert_after_or_replace($style['info'] ?? [], 'mukurtu_import_status', [
+      'sortable' => FALSE,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => FALSE,
+      'responsive' => '',
+    ], $replaced);
+    if (in_array($style['default'] ?? NULL, $replaced, TRUE)) {
+      $style['default'] = '-1';
+    }
+    unset($style);
+  }
+
+  return $options;
+}
+
+/**
+ * Puts an entry in an ordered array, replacing other keys if present.
+ *
+ * The entry takes the position of the first of $replace_keys found, which
+ * are all removed. Otherwise it goes after the first entry.
+ */
+function _mukurtu_import_insert_after_or_replace(array $items, string $key, mixed $value, array $replace_keys): array {
+  $replace_keys = array_values(array_intersect($replace_keys, array_map('strval', array_keys($items))));
+  $result = [];
+  $placed = FALSE;
+  foreach ($items as $item_key => $item_value) {
+    if (in_array((string) $item_key, $replace_keys, TRUE)) {
+      if (!$placed) {
+        $result[$key] = $value;
+        $placed = TRUE;
+      }
+      continue;
+    }
+    $result[$item_key] = $item_value;
+    if (!$placed && !$replace_keys) {
+      $result[$key] = $value;
+      $placed = TRUE;
+    }
+  }
+  if (!$placed) {
+    $result[$key] = $value;
+  }
+  return $result;
+}

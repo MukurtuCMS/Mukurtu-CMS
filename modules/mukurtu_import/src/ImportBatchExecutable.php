@@ -8,6 +8,7 @@ use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Utility\Error;
 use Drupal\migrate_tools\MigrateBatchExecutable;
 use Drupal\migrate\Plugin\MigrationInterface;
+use Drupal\mukurtu_import\Plugin\views\field\ImportStatus;
 
 /**
  * Defines an import executable class for batch import via migrate API.
@@ -336,6 +337,26 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
       $summary[$entity_type_id]['failures'] = ($summary[$entity_type_id]['failures'] ?? 0) + $data['@failures'];
     }
     $store->set('batch_results_summary', $summary);
+
+    // Record each item's outcome (new/updated/unchanged) for the Status
+    // column of the results tables. When several rows touch the same item in
+    // one batch, the strongest outcome wins.
+    $rank = ['unchanged' => 0, 'updated' => 1, 'new' => 2];
+    $outcomes = [];
+    foreach ($results as $data) {
+      foreach ((is_array($data) ? $data['row_details'] ?? [] : []) as $detail) {
+        $outcome = $detail['outcome'] ?? NULL;
+        if (!isset($rank[$outcome], $detail['entity_type_id'], $detail['entity_id'])) {
+          continue;
+        }
+        $langcode = $detail['langcode'] ?? '';
+        $current = $outcomes[$detail['entity_type_id']][$detail['entity_id']][$langcode] ?? NULL;
+        if ($current === NULL || $rank[$outcome] > $rank[$current]) {
+          $outcomes[$detail['entity_type_id']][$detail['entity_id']][$langcode] = $outcome;
+        }
+      }
+    }
+    $store->set(ImportStatus::TEMPSTORE_KEY, $outcomes);
 
     if (\Drupal::moduleHandler()->moduleExists('mukurtu_notifications')) {
       mukurtu_notifications_notify_batch_import_report($imported_count, static::buildResultsSummary($per_migration_summary, $messages));

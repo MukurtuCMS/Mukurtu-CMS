@@ -2,7 +2,14 @@
 
 const { series, parallel, watch, src, dest } = require("gulp");
 const stylelint = require("stylelint");
-const autoprefixer = require("gulp-autoprefixer");
+// gulp-autoprefixer is ESM-only from v10, so require() hands back the
+// module namespace ({ default: fn }) rather than the function itself, and
+// calling it throws "autoprefixer is not a function". Existing checkouts
+// kept working only because their node_modules predated the v10 bump; a
+// clean npm ci could not build the theme at all. Take .default when it is
+// there so this keeps working either side of that boundary.
+const autoprefixerModule = require("gulp-autoprefixer");
+const autoprefixer = autoprefixerModule.default ?? autoprefixerModule;
 const sourcemaps = require("gulp-sourcemaps");
 const dartSass = require("sass");
 const gulpSass = require("gulp-sass");

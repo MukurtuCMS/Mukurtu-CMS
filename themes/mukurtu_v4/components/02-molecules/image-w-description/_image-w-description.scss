@@ -82,9 +82,19 @@
     // default (dark-text) variant never got, so the two looked like
     // different type scales depending only on which text color an editor
     // picked.
+    // Smaller below md so most words fit a phone-width card. A long word can
+    // still exceed it, so allow a mid-word break as a last resort rather
+    // than scrolling the page sideways (WCAG 1.4.10), same as the
+    // collection hero (#1997).
     h1, h2 {
-      font-size: var(--font-size-heading-2xl);
+      font-size: var(--font-size-heading-lg);
       text-align: center;
+      overflow-wrap: anywhere;
+      word-break: normal;
+
+      @include include-media.media('>=md') {
+        font-size: var(--font-size-heading-2xl);
+      }
     }
 
     p {
@@ -235,14 +245,52 @@
       inset-inline: 0;
       inset-block: 0;
 
+      // Every wrapper between the frame and the img fills the frame. Any of
+      // them can become the img's containing block - contextual.module makes
+      // the media wrapper position: relative for anyone with contextual
+      // links - and since the absolutely positioned img gives it no height
+      // of its own, block-size: 100% below would otherwise resolve to 0.
+      *:has(img) {
+        block-size: 100%;
+      }
+
       img {
           position: absolute;
           inset-inline: 0;
           inset-block: 0;
           z-index: 1;
-          object-fit: fill;
+          object-fit: cover;
           inline-size: 100%;
+          block-size: 100%;
         }
+    }
+
+    // Full-hero tint, purely for mood - the text-stroke above is what
+    // actually guarantees contrast, so this only has to look good, not
+    // survive a worst-case photo on its own. That's why it can stay this
+    // light, and why editors can turn it off (field_image_tint). It sits on
+    // the image layer rather than the text wrapper so it always covers
+    // exactly what the image covers: the landing page pads blocks that have
+    // a body field, which the absolutely positioned image ignores but the
+    // text wrapper does not. A black wash reads as noticeably darker than a
+    // white wash at the same alpha (it's darkening a photo that's often
+    // already mid-tone, rather than lightening one), so .text-light gets a
+    // lower value than the dark-text variant below.
+    &.block--image-with-description--tinted .block-wrapper__first::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      // Same stacking level as the img, but later in the tree, so it paints
+      // over the photo and under .block-wrapper__second (z-index 2).
+      z-index: 1;
+      background: rgb(0 0 0 / 35%);
+    }
+
+    // Dark text needs the wash to go the other way (lighter, not darker)
+    // or it would fight the text-stroke's own white ring instead of
+    // complementing it.
+    &.block--image-with-description--tinted.text-dark .block-wrapper__first::after {
+      background: rgb(255 255 255 / 45%);
     }
 
     .block-wrapper__second {
@@ -255,30 +303,6 @@
       place-content: center;
       place-items: center;
       min-block-size: 600px;
-
-      // Full-hero wash, purely for mood - the text-stroke above is what
-      // actually guarantees contrast, so this only has to look good, not
-      // survive a worst-case photo on its own. That's why it can stay
-      // this light instead of the ~90%+ opacity the original scrim needed
-      // when the scrim itself was the only thing guaranteeing contrast.
-      // A black wash reads as noticeably darker than a white wash at the
-      // same alpha (it's darkening a photo that's often already mid-tone,
-      // rather than lightening one), so .text-light gets a lower value
-      // than the default variant below rather than a matching one.
-      &::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        z-index: -1;
-        background: rgb(0 0 0 / 35%);
-      }
-    }
-
-    // Dark text needs the wash to go the other way (lighter, not darker)
-    // or it would fight the text-stroke's own white ring instead of
-    // complementing it.
-    &.text-dark .block-wrapper__second::before {
-      background: rgb(255 255 255 / 45%);
     }
 
     .block-wrapper__second-card {
