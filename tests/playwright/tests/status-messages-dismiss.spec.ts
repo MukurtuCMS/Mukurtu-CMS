@@ -204,9 +204,7 @@ test.describe('Dismissable status messages', () => {
   });
 
   test('has no axe violations', async ({ page }) => {
-    // Warning is left out: its existing text colors (#54738c on #d8edfa)
-    // fail color-contrast on their own, independent of the dismiss button.
-    await setUpFixture(page, [['status', STATUS_TEXT], ['error', ERROR_TEXT]]);
+    await setUpFixture(page, [['status', STATUS_TEXT], ['warning', 'Check this.'], ['error', ERROR_TEXT]]);
     const results = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
       .analyze();

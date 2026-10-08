@@ -178,7 +178,7 @@ documentation on how to use @include media(). */
   --color-warning-light: #d8edfa;
   --color-error-light: #f2dedf;
   --color-status-dark: #365e38;
-  --color-warning-dark: #54738c;
+  --color-warning-dark: #3f5a73;
   --color-error-dark: #924d48;
   --color-text-secondary: #595959;
   --color-white: #fff;
@@ -890,7 +890,7 @@ a:not(.primary-nav__menu-link) svg.tel path {
 }
 .local-contexts-status-badge--unavailable {
   background-color: var(--color-warning-light);
-  color: #3f5a73;
+  color: var(--color-warning-dark);
 }
 .local-contexts-status-badge--archived {
   background-color: var(--color-status-light);
@@ -987,7 +987,7 @@ a:not(.primary-nav__menu-link) svg.tel path {
 }
 .translation-status-badge--not-translated {
   background-color: var(--color-warning-light);
-  color: #3f5a73;
+  color: var(--color-warning-dark);
 }
 
 .translation-status-badge-note {
