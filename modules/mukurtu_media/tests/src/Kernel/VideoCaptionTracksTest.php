@@ -260,7 +260,7 @@ class VideoCaptionTracksTest extends KernelTestBase {
    */
   public function testWidgetAddsLanguageAndType(): void {
     $term = $this->createLanguageTerm('English', 'en');
-    $this->createLanguageTerm('Anishinaabemowin', 'oj');
+    $anishinaabemowin = $this->createLanguageTerm('Anishinaabemowin', 'oj');
     $media = $this->createVideo([
       ['target_id' => $this->createFile('en.vtt')->id(), 'language_target_id' => $term->id(), 'kind' => 'subtitles'],
     ]);
@@ -287,7 +287,10 @@ class VideoCaptionTracksTest extends KernelTestBase {
     $this->assertSame('select', $language['#type']);
     $this->assertTrue($language['#required']);
     $this->assertSame('Select a language for this track.', (string) $language['#required_error']);
-    $this->assertSame(['Anishinaabemowin', 'English'], array_values(array_map('strval', $language['#options'])));
+    // The empty option stays even when a language is set, so a rebuild
+    // carrying an empty value back never jumps to the first language.
+    $this->assertSame(['', (int) $anishinaabemowin->id(), (int) $term->id()], array_keys($language['#options']));
+    $this->assertSame(['- Select -', 'Anishinaabemowin', 'English'], array_values(array_map('strval', $language['#options'])));
     $this->assertEquals($term->id(), $language['#value']);
 
     $kind = $item['kind'];

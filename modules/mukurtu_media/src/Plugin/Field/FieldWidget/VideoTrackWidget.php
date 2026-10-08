@@ -44,7 +44,11 @@ class VideoTrackWidget extends FileWidget {
       '#title' => new TranslatableMarkup('Language'),
       '#description' => new TranslatableMarkup('The language spoken or written in this track. Add a language code to the language term so browsers can identify it.'),
       '#options' => static::languageOptions(),
-      '#default_value' => $item['language_target_id'] ?? NULL,
+      // Always offer the empty option. Without #empty_value, a rebuild that
+      // carries '' back as the default drops it, so the row jumps to the
+      // first language and saving reports an illegal choice.
+      '#empty_value' => '',
+      '#default_value' => ($item['language_target_id'] ?? NULL) ?: '',
       '#required' => TRUE,
       '#required_error' => new TranslatableMarkup('Select a language for this track.'),
       '#access' => $has_file,
