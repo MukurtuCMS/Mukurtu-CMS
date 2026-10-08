@@ -102,7 +102,7 @@
                   <li role="presentation">
                     <a href="#tab-entry-{{ loop.index }}" role="tab" id="tab-btn-entry-{{ loop.index }}" aria-selected="false" aria-controls="tab-entry-{{ loop.index }}">
                       {% set entry_term = node.field_additional_word_entries[idx].entity.field_word_entry_term.value %}
-                      <span class="div-title"{% if entry_term and word_langcode %} lang="{{ word_langcode }}"{% endif %}>{{ entry_term ?: 'Entry ' ~ loop.index }}</span>
+                      <span class="div-title"{% if entry_term and word_langcode %} lang="{{ word_langcode }}"{% endif %}>{{ entry_term ?: 'Entry @num'|t({'@num': loop.index}) }}</span>
                     </a>
                   </li>
                 {% endfor %}
