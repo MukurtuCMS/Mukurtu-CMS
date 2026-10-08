@@ -691,6 +691,14 @@ function mukurtu_install() {
     ->set('extlink_target', TRUE)
     ->save();
 
+  // Serve Chart.js from the copy the profile ships in libraries/ rather than
+  // unpkg.com. charts ships with its CDN option on, which rewrites the
+  // library paths to unpkg.com and makes the status report warn about it.
+  // @see \Drupal\mukurtu_core\Hook\ChartsLibraryHooks
+  \Drupal::configFactory()->getEditable('charts.settings')
+    ->set('advanced.requirements.cdn', FALSE)
+    ->save();
+
   // Protect the feedback contact form and comment form with a CAPTCHA point.
   // Created here (rather than in mukurtu_bot_protection's own config/install)
   // because contact.form.feedback and comment.type.comment are not owned by

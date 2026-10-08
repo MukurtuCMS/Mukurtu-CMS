@@ -95,30 +95,31 @@ class EnableChartsForVisitorsUpdateTest extends KernelTestBase {
   }
 
   /**
-   * Chart.js is registered as a required Klaro service when klaro is on.
+   * No Klaro service is registered for Chart.js any more.
+   *
+   * Chart.js is served from the profile's own libraries/ directory now, so
+   * there is no third-party script for a Klaro service to cover, and the
+   * config file this hook used to read it from is gone.
+   *
+   * @see mukurtu_core_update_40212()
    */
-  public function testRegistersKlaroServiceWhenKlaroEnabled(): void {
+  public function testDoesNotRegisterKlaroService(): void {
     \Drupal::service('module_installer')->install(['visitors', 'klaro']);
 
-    $klaro_app_storage = \Drupal::entityTypeManager()->getStorage('klaro_app');
-    $this->assertNull($klaro_app_storage->load('charts_chartjs'), 'Precondition: the service already exists.');
+    mukurtu_core_update_40202();
 
-    $message = mukurtu_core_update_40202();
-
-    $klaro_app_storage = \Drupal::entityTypeManager()->getStorage('klaro_app');
-    $app = $klaro_app_storage->load('charts_chartjs');
-    $this->assertNotNull($app, 'The Klaro service for Chart.js was not created.');
-    $this->assertTrue($app->get('required'), 'Chart.js should not need visitor consent to load.');
-    $this->assertStringContainsString('Klaro', (string) $message);
+    $this->assertNull(
+      \Drupal::entityTypeManager()->getStorage('klaro_app')->load('charts_chartjs'),
+      'A Klaro service for Chart.js was created.'
+    );
   }
 
   /**
    * Visitors report pages are added to Klaro's disable_urls.
    *
-   * Registering the klaro_app alone is not enough - klaro's hook_js_alter()
-   * still rewrites a required app's script into a placeholder, and nothing
-   * re-triggers Drupal.attachBehaviors() for the AJAX-inserted placeholder to
-   * resolve it. disable_urls is what actually stops the rewriting.
+   * Klaro's hook_js_alter() rewrites scripts it matches into placeholders,
+   * and nothing re-triggers Drupal.attachBehaviors() for an AJAX-inserted
+   * placeholder to resolve it. disable_urls is what stops the rewriting.
    */
   public function testAddsVisitorsToKlaroDisabledUrls(): void {
     \Drupal::service('module_installer')->install(['visitors', 'klaro']);
