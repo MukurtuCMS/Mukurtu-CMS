@@ -1,9 +1,10 @@
 import { test, expect, Page } from '@playwright/test';
 import path = require("path");
-import { Login } from '~components/login';
 import { Ckeditor5 } from "~components/ckeditor5";
 import submitEntityForm from '~helpers/submit-entity-form';
 import waitForAjax from '~helpers/ajax';
+import { gotoReady } from '~helpers/preview';
+import { ADMIN_STATE } from '~helpers/auth-state';
 
 const defaultContentSpec = {
   // Community entities.
@@ -200,13 +201,16 @@ let testContentExists = null;
 /**
  * Setup tasks run before each test.
  */
-test.beforeEach(async ({ page }, testInfo) => {
-  const login = new Login(page);
-  await login.login('admin', 'admin');
+// Creating content needs an administrator. The session is saved once by
+// tests/auth.setup.ts, as adminAccount(), which falls back to the
+// admin/admin the Tugboat build creates -- the same credentials this file
+// used to log in with by hand, for every one of its tests.
+test.use({ storageState: ADMIN_STATE });
 
+test.beforeEach(async ({ page }, testInfo) => {
   // Check if default content already exists, and if so, skip recreation.
   if (testContentExists === null) {
-    await page.goto('/communities');
+    await gotoReady(page, '/communities');
     const getStartedVisible = !await page.locator('.communities__item').first().isVisible();
     testContentExists = (getStartedVisible === false);
   }
@@ -227,7 +231,7 @@ test('Default Content: Community', async ({ page, browserName }) => {
   // Loop through all communities and create each one.
   for (const community of defaultContentSpec.community) {
     // Create a community.
-    await page.goto('/communities/community/add');
+    await gotoReady(page, '/communities/community/add');
     await page.getByRole('textbox', { name: 'Community name' }).fill(community.name);
     await page
       .getByRole('group', { name: 'Community page visibility' })
@@ -267,7 +271,7 @@ test('Default Content: Category', async ({ page, browserName }) => {
   // Loop through all Digital Heritage items and create each one.
   for (const category of defaultContentSpec.category) {
     // Create through the custom admin URL.
-    await page.goto('/admin/categories/manage');
+    await gotoReady(page, '/admin/categories/manage');
 
     // Expand the Details element to populate a new category value.
     await page.getByRole('button', { name: 'Add a new category' }).click();
@@ -290,7 +294,7 @@ test('Default Content: Person', async ({ page, browserName }) => {
   // Loop through all Person items and create each one.
   for (const person of defaultContentSpec.person) {
     // Create through the custom admin URL.
-    await page.goto('/admin/node/add/person');
+    await gotoReady(page, '/admin/node/add/person');
     await page.getByRole('textbox', { name: /^Name/ }).fill(person.name);
     await page
       .getByRole('group', { name: 'Sharing Setting' })
@@ -344,7 +348,7 @@ test('Default Content: Digital Heritage', async ({ page, browserName }) => {
   // Loop through all Digital Heritage items and create each one.
   for (const dh of defaultContentSpec.dh) {
     // Create through the custom admin URL.
-    await page.goto('/admin/node/add/digital_heritage');
+    await gotoReady(page, '/admin/node/add/digital_heritage');
     await page.getByRole('textbox', { name: 'Title' }).fill(dh.title);
     await page.getByRole('textbox', { name: 'Summary' }).fill(dh.summary);
     await page
@@ -384,7 +388,7 @@ test('Default Content: Digital Heritage', async ({ page, browserName }) => {
 test('Default Content: Collection', async ({ page }) => {
   // Loop through all collections and create each one.
   for (const collection of defaultContentSpec.collection) {
-    await page.goto('/node/add/collection');
+    await gotoReady(page, '/node/add/collection');
     await page.getByRole('textbox', { name: 'Collection name' }).fill(collection.title);
     await page.getByRole('textbox', { name: 'Summary' }).fill(collection.summary);
     await page
@@ -411,7 +415,7 @@ test('Default Content: Collection', async ({ page }) => {
 test('Default Content: Language', async ({ page, browserName }) => {
   // Loop through all Language terms and create each one.
   for (const language of defaultContentSpec.language) {
-    await page.goto('/admin/structure/taxonomy/manage/language/add');
+    await gotoReady(page, '/admin/structure/taxonomy/manage/language/add');
     await page.getByRole('textbox', { name: 'Name' }).fill(language.name);
     await submitEntityForm(page);
   }
@@ -424,7 +428,7 @@ test('Default Content: Dictionary Word', async ({ page, browserName }) => {
   // Loop through all Dictionary word items and create each one.
   for (const word of defaultContentSpec.word) {
     // Create through the custom admin URL.
-    await page.goto('/admin/node/add/dictionary_word');
+    await gotoReady(page, '/admin/node/add/dictionary_word');
     await page.getByRole('textbox', { name: 'Term' }).fill(word.term);
     await page
       .getByRole('group', { name: 'Sharing Setting' })
@@ -539,7 +543,7 @@ test('Default Content: Accessibility scan account memberships', async ({ page })
   // the map alone would make this throw instead of enrolling.
   let communityId = createdCommunityIds[communityName];
   if (!communityId) {
-    await page.goto('/admin/communities');
+    await gotoReady(page, '/admin/communities');
     const row = page.locator('tr', { hasText: communityName });
     const href = await row.locator('a[href*="/members/add"]').first().getAttribute('href');
     communityId = href?.match(/\/admin\/communities\/(\d+)\//)?.[1] ?? '';
@@ -555,7 +559,7 @@ test('Default Content: Accessibility scan account memberships', async ({ page })
   // first would otherwise fail here. Checking the members list first is
   // what makes this test genuinely re-runnable.
   const alreadyMember = async (username: string): Promise<boolean> => {
-    const response = await page.goto(`/admin/communities/${communityId}/members`);
+    const response = await gotoReady(page, `/admin/communities/${communityId}/members`);
     if (response === null || !response.ok()) {
       return false;
     }
@@ -567,7 +571,7 @@ test('Default Content: Accessibility scan account memberships', async ({ page })
       return;
     }
 
-    await page.goto(`/admin/communities/${communityId}/members/add`);
+    await gotoReady(page, `/admin/communities/${communityId}/members/add`);
 
     // entity_autocomplete resolves on an exact name match, so the plain
     // username is enough and no dropdown selection is needed.
