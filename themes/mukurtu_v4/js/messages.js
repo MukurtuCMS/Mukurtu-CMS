@@ -23,17 +23,21 @@
       return;
     }
 
+    // WCAG 2.4.3: the focused button is about to go, so keep keyboard and
+    // screen reader users in place instead of dropping them to <body>. Prefer
+    // the neighboring message in the same list, then the dialog the message
+    // was in (so focus stays inside the modal), then the main content.
+    const sibling = [message.nextElementSibling, message.previousElementSibling]
+      .find((el) => el && el.matches('.messages-list__item'));
+    const target =
+      (sibling && sibling.querySelector('.messages__close')) ||
+      message.closest('.ui-dialog') ||
+      document.getElementById('main-content');
+
     message.remove();
 
-    // WCAG 2.4.3: the focused button is gone, so keep keyboard and screen
-    // reader users in place instead of dropping them to <body>. Move to the
-    // next remaining message's button, or else to the main content.
-    const next = document.querySelector('.messages-list__item .messages__close');
-    const main = document.getElementById('main-content');
-    if (next) {
-      next.focus();
-    } else if (main) {
-      main.focus();
+    if (target) {
+      target.focus();
     }
   });
 })(Drupal);

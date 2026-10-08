@@ -34,11 +34,11 @@ function messageHtml(type: string, text: string): string {
           <h2 class="visually-hidden">${LABELS[type]}</h2>
         </div>
         <div class="messages__content">${text}</div>
-        <button type="button" class="messages__close" data-drupal-selector="messages-close">
-          ${X_ICON}
-          <span class="visually-hidden">${DISMISS}</span>
-        </button>
       </div>
+      <button type="button" class="messages__close" data-drupal-selector="messages-close">
+        ${X_ICON}
+        <span class="visually-hidden">${DISMISS}</span>
+      </button>
     </div>
   `;
 }
@@ -46,19 +46,32 @@ function messageHtml(type: string, text: string): string {
 const STATUS_TEXT = 'Full Image With Description <em class="placeholder">Welcome</em> has been updated.';
 const ERROR_TEXT = 'The title field is required.';
 
-async function setUpFixture(page, messages: [string, string][]) {
+function messagesListHtml(messages: [string, string][]): string {
+  return `
+    <div data-drupal-messages class="messages-list">
+      <div class="messages__wrapper layout-container">
+        ${messages.map(([type, text]) => messageHtml(type, text)).join('')}
+      </div>
+    </div>
+  `;
+}
+
+// inDialog renders the list inside a stand-in for jQuery UI's dialog wrapper
+// (role="dialog", tabindex="-1"), as the quick-action and media edit dialogs
+// do, instead of in the page's highlighted region.
+async function setUpFixture(page, messages: [string, string][], { inDialog = false } = {}) {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.setContent(`<!DOCTYPE html><html lang="en"><head><title>Status messages fixture</title></head><body>
     <div class="layout-container">
       <div class="region region__highlighted">
-        <div data-drupal-messages class="messages-list">
-          <div class="messages__wrapper layout-container">
-            ${messages.map(([type, text]) => messageHtml(type, text)).join('')}
-          </div>
-        </div>
+        ${inDialog ? '' : messagesListHtml(messages)}
       </div>
       <main id="main-content" role="main" tabindex="-1"><h1>Page title</h1></main>
     </div>
+    ${inDialog ? `
+      <div class="ui-dialog" role="dialog" tabindex="-1" aria-label="Edit">
+        <div class="ui-dialog-content">${messagesListHtml(messages)}<p>Form</p></div>
+      </div>` : ''}
   </body></html>`);
   await page.addStyleTag({ path: path.join(THEME_DIR, 'css/style.css') });
   await page.addScriptTag({
@@ -112,6 +125,52 @@ test.describe('Dismissable status messages', () => {
     // Negative control: the other message stays.
     await expect(message(page, 'error')).toBeVisible();
     await expect(message(page, 'error').getByRole('button', { name: DISMISS })).toBeFocused();
+  });
+
+  test('dismissing a middle message moves focus to the one after it, not the first', async ({ page }) => {
+    await setUpFixture(page, [['status', STATUS_TEXT], ['warning', 'Check this.'], ['error', ERROR_TEXT]]);
+
+    await message(page, 'warning').getByRole('button', { name: DISMISS }).click();
+    await expect(message(page, 'warning')).toHaveCount(0);
+    await expect(message(page, 'error').getByRole('button', { name: DISMISS })).toBeFocused();
+  });
+
+  test('dismissing the last message in a list falls back to the previous one', async ({ page }) => {
+    await setUpFixture(page, [['status', STATUS_TEXT], ['error', ERROR_TEXT]]);
+
+    await message(page, 'error').getByRole('button', { name: DISMISS }).click();
+    await expect(message(page, 'status').getByRole('button', { name: DISMISS })).toBeFocused();
+  });
+
+  test('in a dialog, the button keeps its layout and focus stays in the dialog', async ({ page }) => {
+    await setUpFixture(page, [['status', STATUS_TEXT]], { inDialog: true });
+
+    const button = message(page, 'status').getByRole('button', { name: DISMISS });
+    const buttonBox = (await button.boundingBox())!;
+    const textBox = (await message(page, 'status').locator('.messages__content').boundingBox())!;
+    expect(buttonBox.width).toBeGreaterThanOrEqual(44);
+    // Beside the text, not wrapped below it with the global button fill.
+    expect(buttonBox.x).toBeGreaterThanOrEqual(textBox.x + textBox.width);
+    await expect(button).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+
+    await button.click();
+    await expect(message(page, 'status')).toHaveCount(0);
+    await expect(page.locator('.ui-dialog')).toBeFocused();
+  });
+
+  test('the button is outside the live region, so it is not read with the message', async ({ page }) => {
+    await setUpFixture(page, [['error', ERROR_TEXT]]);
+    await page.evaluate(() => {
+      const el = (window as any).Drupal.theme.message({ text: 'Saved.' }, { type: 'status', id: 'm1' });
+      document.querySelector('[data-drupal-messages] .messages__wrapper')!.appendChild(el);
+    });
+
+    for (const type of ['error', 'status']) {
+      const liveRegion = message(page, type).locator('[role="alert"], [role="status"]');
+      await expect(liveRegion).toHaveCount(1);
+      await expect(liveRegion.locator('.messages__close')).toHaveCount(0);
+      await expect(liveRegion).not.toContainText(DISMISS);
+    }
   });
 
   test('keyboard: Enter dismisses the last message and focus lands on the main content', async ({ page }) => {
