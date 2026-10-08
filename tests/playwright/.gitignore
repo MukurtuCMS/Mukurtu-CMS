@@ -3,3 +3,5 @@ node_modules/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+# Saved sessions from tests/auth.setup.ts. Cookies: never commit these.
+/playwright/.auth/
