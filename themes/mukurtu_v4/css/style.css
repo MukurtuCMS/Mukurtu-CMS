@@ -5435,25 +5435,30 @@ header {
  * tracks to their content instead: the logo and button get what they need
  * and the search box takes the rest. The narrower gap keeps the search box
  * usable at large text sizes, where the full gutter left it a few pixels
- * wide. */
+ * wide.
+ *
+ * Not when the site name is shown. Its width is the name's, not the fixed
+ * logo's, so an auto track squeezed the search box to 16px beside a long
+ * name. Text branding has its own layout below, with the search on a row of
+ * its own. */
 @media (max-width: 59.9rem) {
-  body:not(.is-always-mobile-nav) .header {
+  body:not(.is-always-mobile-nav) .header:not(:has(.header__logo-text)) {
     grid-template-columns: auto minmax(0, 1fr) auto;
     -webkit-column-gap: var(--v-space-5xs);
        -moz-column-gap: var(--v-space-5xs);
             column-gap: var(--v-space-5xs);
   }
-  body:not(.is-always-mobile-nav) .header .header__logo {
+  body:not(.is-always-mobile-nav) .header:not(:has(.header__logo-text)) .header__logo {
     grid-column: 1;
   }
-  body:not(.is-always-mobile-nav) .header .header-search--mobile {
+  body:not(.is-always-mobile-nav) .header:not(:has(.header__logo-text)) .header-search--mobile {
     grid-column: 2;
   }
-  body:not(.is-always-mobile-nav) .header .mobile-buttons {
+  body:not(.is-always-mobile-nav) .header:not(:has(.header__logo-text)) .mobile-buttons {
     grid-column: 3;
   }
 }
-body:not(.is-always-mobile-nav) .header {
+body:not(.is-always-mobile-nav) .header:not(:has(.header__logo-text)) {
   /* When one row cannot fit the logo, a usable search box and the menu
    * button, give the search box its own row. The width that row needs:
    * layout padding (3rem), column gaps (1rem), search wrapper padding
@@ -5463,7 +5468,7 @@ body:not(.is-always-mobile-nav) .header {
    * squeezing it under the menu button. */
 }
 @media (width < calc(14.25rem + 100px)) {
-  body:not(.is-always-mobile-nav) .header .header-search--mobile {
+  body:not(.is-always-mobile-nav) .header:not(:has(.header__logo-text)) .header-search--mobile {
     grid-column: 1/-1;
     grid-row: 2;
     padding-inline: 0;

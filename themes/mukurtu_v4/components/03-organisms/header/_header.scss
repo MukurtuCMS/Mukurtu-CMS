@@ -127,8 +127,13 @@ header {
  * tracks to their content instead: the logo and button get what they need
  * and the search box takes the rest. The narrower gap keeps the search box
  * usable at large text sizes, where the full gutter left it a few pixels
- * wide. */
-body:not(.is-always-mobile-nav) .header {
+ * wide.
+ *
+ * Not when the site name is shown. Its width is the name's, not the fixed
+ * logo's, so an auto track squeezed the search box to 16px beside a long
+ * name. Text branding has its own layout below, with the search on a row of
+ * its own. */
+body:not(.is-always-mobile-nav) .header:not(:has(.header__logo-text)) {
   @include include-media.media('<lg') {
     grid-template-columns: auto minmax(0, 1fr) auto;
     column-gap: var(--v-space-5xs);
