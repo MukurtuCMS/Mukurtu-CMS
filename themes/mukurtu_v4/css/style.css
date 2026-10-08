@@ -4685,7 +4685,7 @@ body.is-fixed {
   background: none;
 }
 .messages__close:focus {
-  outline: 2px solid currentColor;
+  outline: 2px solid currentcolor;
   outline-offset: -4px;
 }
 .region__highlighted .messages__close {
