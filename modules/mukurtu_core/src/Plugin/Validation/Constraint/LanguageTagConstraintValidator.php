@@ -18,6 +18,11 @@ class LanguageTagConstraintValidator extends ConstraintValidator {
   public function validate($value, Constraint $constraint): void {
     assert($constraint instanceof LanguageTagConstraint);
 
+    // Surrounding spaces are trimmed on save (see LanguageCodeHooks), so
+    // they are not an error.
+    if (is_string($value)) {
+      $value = trim($value);
+    }
     if ($value === NULL || $value === '') {
       return;
     }

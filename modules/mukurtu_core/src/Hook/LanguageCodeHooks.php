@@ -6,6 +6,7 @@ namespace Drupal\mukurtu_core\Hook;
 
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Hook\Attribute\Hook;
+use Drupal\taxonomy\TermInterface;
 
 /**
  * Hook implementations for the language vocabulary's language code.
@@ -22,6 +23,20 @@ final class LanguageCodeHooks {
   public function entityBundleFieldInfoAlter(array &$fields, EntityTypeInterface $entity_type, $bundle): void {
     if ($entity_type->id() === 'taxonomy_term' && $bundle === 'language' && isset($fields['field_language_code'])) {
       $fields['field_language_code']->addPropertyConstraints('value', ['MukurtuLanguageTag' => []]);
+    }
+  }
+
+  /**
+   * Implements hook_ENTITY_TYPE_presave() for taxonomy_term.
+   *
+   * Text fields keep whatever spaces were typed, and a stray one would end
+   * up inside the lang attribute.
+   */
+  #[Hook('taxonomy_term_presave')]
+  public function taxonomyTermPresave(TermInterface $term): void {
+    if ($term->bundle() === 'language' && $term->hasField('field_language_code') && !$term->get('field_language_code')->isEmpty()) {
+      $code = trim((string) $term->get('field_language_code')->value);
+      $term->set('field_language_code', $code === '' ? NULL : $code);
     }
   }
 

@@ -190,7 +190,7 @@ class DictionaryWordLangAttributeTest extends DictionaryTestBase {
       $this->assertCount(0, $this->language->validate()->getByField('field_language_code'), "'$valid' was rejected.");
     }
 
-    foreach (['h', 'haw!', '-haw', 'haw-', 'ha w', ' haw', 'x', 'haw--x', 'abcdefghi', 'x-mylanguage'] as $invalid) {
+    foreach (['h', 'haw!', '-haw', 'haw-', 'ha w', 'x', 'haw--x', 'abcdefghi', 'x-mylanguage'] as $invalid) {
       $this->language->set('field_language_code', $invalid);
       $violations = $this->language->validate()->getByField('field_language_code');
       $this->assertCount(1, $violations, "'$invalid' was accepted.");
@@ -199,6 +199,40 @@ class DictionaryWordLangAttributeTest extends DictionaryTestBase {
         (string) $violations[0]->getMessage(),
       );
     }
+  }
+
+  /**
+   * Spaces around a code are not an error, and are not stored.
+   */
+  public function testLanguageCodeIsTrimmed(): void {
+    $this->language->set('field_language_code', ' haw ');
+    $this->assertCount(0, $this->language->validate()->getByField('field_language_code'));
+    $this->language->save();
+    $this->assertSame('haw', Term::load($this->language->id())->get('field_language_code')->value);
+
+    $this->language->set('field_language_code', '   ')->save();
+    $this->assertTrue(Term::load($this->language->id())->get('field_language_code')->isEmpty());
+  }
+
+  /**
+   * The theme exposes the code to templates that print the title themselves.
+   *
+   * The word tabs and the featured view mode print raw values rather than
+   * fields, so they read word_langcode instead of relying on the field hook.
+   */
+  public function testThemeExposesWordLangcode(): void {
+    $theme_path = $this->container->get('extension.list.theme')->getPath('mukurtu_v4');
+    require_once $this->root . '/' . $theme_path . '/mukurtu_v4.theme';
+
+    $variables = ['node' => $this->createWord()];
+    mukurtu_v4_preprocess_node($variables);
+    $this->assertSame('haw', $variables['word_langcode'] ?? NULL);
+
+    $this->language->set('field_language_code', NULL)->save();
+    $this->container->get('entity_type.manager')->getStorage('node')->resetCache();
+    $variables = ['node' => Node::load($variables['node']->id())];
+    mukurtu_v4_preprocess_node($variables);
+    $this->assertNull($variables['word_langcode']);
   }
 
   /**
