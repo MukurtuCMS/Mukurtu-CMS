@@ -178,7 +178,7 @@ documentation on how to use @include media(). */
   --color-warning-light: #d8edfa;
   --color-error-light: #f2dedf;
   --color-status-dark: #365e38;
-  --color-warning-dark: #54738c;
+  --color-warning-dark: #3f5a73;
   --color-error-dark: #924d48;
   --color-text-secondary: #595959;
   --color-white: #fff;
@@ -890,7 +890,7 @@ a:not(.primary-nav__menu-link) svg.tel path {
 }
 .local-contexts-status-badge--unavailable {
   background-color: var(--color-warning-light);
-  color: #3f5a73;
+  color: var(--color-warning-dark);
 }
 .local-contexts-status-badge--archived {
   background-color: var(--color-status-light);
@@ -987,7 +987,7 @@ a:not(.primary-nav__menu-link) svg.tel path {
 }
 .translation-status-badge--not-translated {
   background-color: var(--color-warning-light);
-  color: #3f5a73;
+  color: var(--color-warning-dark);
 }
 
 .translation-status-badge-note {
@@ -4641,6 +4641,60 @@ body.is-fixed {
   position: fixed;
   overflow: hidden;
   inline-size: 100%;
+}
+
+.messages-list__item {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: start;
+      -ms-flex-align: start;
+          align-items: flex-start;
+  gap: var(--v-space-5xs);
+}
+.messages-list__item .messages__container {
+  -webkit-box-flex: 1;
+      -ms-flex: 1;
+          flex: 1;
+  min-inline-size: 0;
+  -ms-flex-item-align: center;
+      align-self: center;
+}
+
+.messages__close {
+  display: -webkit-inline-box;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -ms-flex-negative: 0;
+      flex-shrink: 0;
+  inline-size: 44px;
+  block-size: 44px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+}
+.messages__close:hover, .messages__close:active, .messages__close:focus {
+  color: inherit;
+  background: none;
+}
+.messages__close:focus {
+  outline: 2px solid currentcolor;
+  outline-offset: -4px;
+}
+.region__highlighted .messages__close {
+  margin-block: -10px;
+  -webkit-margin-end: -10px;
+          margin-inline-end: -10px;
+}
+.messages__close svg {
+  display: block;
 }
 
 .quick-actions {
