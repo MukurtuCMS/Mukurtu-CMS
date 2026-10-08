@@ -4,8 +4,9 @@ dependencies:
   config:
     - block_content.type.full_image_with_description
     - field.field.block_content.full_image_with_description.body
-    - field.field.block_content.full_image_with_description.field_image
     - field.field.block_content.full_image_with_description.field_hero_background
+    - field.field.block_content.full_image_with_description.field_image
+    - field.field.block_content.full_image_with_description.field_image_tint
     - field.field.block_content.full_image_with_description.field_text_color
   module:
     - options
@@ -26,7 +27,7 @@ content:
     type: entity_reference_entity_view
     label: hidden
     settings:
-      view_mode: image_with_description
+      view_mode: hero_full_width
       link: false
     third_party_settings: {  }
     weight: 1
@@ -46,5 +47,6 @@ content:
     weight: 2
     region: content
 hidden:
+  field_image_tint: true
   langcode: true
   search_api_excerpt: true

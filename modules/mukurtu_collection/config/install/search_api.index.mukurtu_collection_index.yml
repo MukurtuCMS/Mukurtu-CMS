@@ -108,6 +108,19 @@ processor_settings:
       h2: 3
       h3: 2
       strong: 2
+  ignore_character:
+    weights:
+      preprocess_index: -10
+      preprocess_query: -10
+    all_fields: false
+    fields:
+      - field_description
+      - title
+    ignorable: '[''"¿¡!?,.:;]'
+    ignorable_classes:
+      - Pf
+      - Pi
+      - Sk
   ignorecase:
     weights:
       preprocess_index: -20
