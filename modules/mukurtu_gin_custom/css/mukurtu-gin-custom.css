@@ -1389,3 +1389,43 @@ the worst narrow-screen case (508px) with headroom for a longer page title. */
     white-space: normal !important;
   }
 }
+
+/* Second cause of the admin reflow failures in #2336: the breadcrumb.
+
+.gin-breadcrumb-wrapper is a flex item of .gin-secondary-toolbar, so it has
+flex's default min-width: auto and cannot shrink below its content. With
+white-space: nowrap on it, that content is one long line, so the breadcrumb
+sets the page width: 470px at a 320px viewport on bulk media upload, 452px on
+the submission form settings, 415px on pending submissions.
+
+Gin tries to prevent exactly this, with
+
+  .gin-breadcrumb .gin-breadcrumb-wrapper { min-width: 1px; }
+
+but that selector has the nesting backwards. In the rendered markup
+nav.gin-breadcrumb sits *inside* .gin-breadcrumb-wrapper, not around it, so
+the selector matches nothing and the min-width never lands. Verified in the
+browser: the wrapper computes min-width: auto, and
+document.querySelector(".gin-breadcrumb .gin-breadcrumb-wrapper") is null.
+
+min-width: 0 is what actually fixes the overflow - confirmed by reverting
+each declaration separately, where restoring nowrap alone changes nothing and
+restoring min-width: auto brings all 470px back.
+
+white-space: normal is a separate, deliberate choice on top of that. With
+min-width: 0 alone, Gin's own overflow: hidden / text-overflow: ellipsis on
+.gin-breadcrumb__list finally fires and the breadcrumb is truncated, which
+does stop the scrolling. But 1.4.10 asks for content "without loss of
+information or functionality", and clipping "Configuration / Mukurtu /
+Content warnings" to a few characters loses exactly what the breadcrumb is
+for. Wrapping keeps every crumb readable instead.
+
+No media query and no !important needed: Gin sets white-space on a plain
+class that this rule simply follows, nothing sets min-width on the wrapper at
+all, and the breadcrumb only takes a second line when it cannot fit on one.
+Measured at a single 26px line from 768px up, with no crumb clipped or pushed
+off screen at any width from 320px to 1600px. */
+.gin-breadcrumb-wrapper {
+  white-space: normal;
+  min-width: 0;
+}
