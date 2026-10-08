@@ -1,0 +1,10 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - media
+id: media.hero_full_width
+label: 'Hero (full width)'
+description: ''
+targetEntityType: media
+cache: true
