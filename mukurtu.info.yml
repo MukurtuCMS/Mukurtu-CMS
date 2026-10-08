@@ -64,6 +64,7 @@ install:
   - readonly_field_widget
   - mukurtu_bot_protection
   - mukurtu_submissions
+  - masquerade
 
 dependencies:
   - 'altcha:altcha'
