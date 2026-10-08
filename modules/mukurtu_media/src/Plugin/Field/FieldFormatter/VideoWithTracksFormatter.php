@@ -67,7 +67,9 @@ class VideoWithTracksFormatter extends FileVideoFormatter {
     }
 
     $cacheability = new CacheableMetadata();
-    $cacheability->addCacheContexts(['languages:language_interface']);
+    // Labels use the term's translation in the content language, and the
+    // "(captions)" suffix the interface language.
+    $cacheability->addCacheContexts(['languages:language_content', 'languages:language_interface']);
     $tracks = $this->buildTracks($items, $cacheability);
 
     foreach ($elements as &$element) {

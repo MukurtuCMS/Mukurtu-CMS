@@ -228,6 +228,9 @@ class VideoCaptionTracksTest extends KernelTestBase {
     \Drupal::service('language.default')->set(ConfigurableLanguage::load('fr'));
     \Drupal::languageManager()->reset();
 
+    $build = $media->get('field_media_video_file')->view(['type' => 'mukurtu_video_with_tracks']);
+    $this->assertContains('languages:language_content', $build[0]['#cache']['contexts']);
+
     $tracks = $this->renderTracks($media);
     $this->assertSame('Allemand', $tracks[0]['label']);
     $this->assertSame('de', $tracks[0]['srclang']);
