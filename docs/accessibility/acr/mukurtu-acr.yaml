@@ -505,20 +505,43 @@ chapters:
         components:
           - name: web
             adherence:
-              level: supports
+              level: partially-supports
               notes: >-
-                Automated reflow testing is a real overflow assertion
-                rather than a heuristic: tests/playwright asserts no
-                horizontal scrolling at 320px across the page inventory,
-                and reflow.spec.ts additionally gates this in CI. A
-                defect that caused 1-7px of horizontal scrolling between
-                480px and 520px (the mobile nav button outgrew its
-                header grid column once its label un-hid) was fixed in
-                September 2026 and verified by sweeping 320px to 980px
-                across five page types with no overflow at any width
-                (issue #2197, PR #2224). Evidence for the September 2026
-                changes is recorded by criterion in
-                docs/accessibility/findings/2026-09-17-remediation-cycle.md.
+                Downgraded from supports in October 2026. The previous
+                claim said automated reflow testing asserts no horizontal
+                scrolling at 320px "across the page inventory". That
+                conflated two layers: reflow.spec.ts gates in CI but
+                deliberately covers only pages needing no seeded content
+                (/, /browse, /user/login, and /communities since PR #2325),
+                while the inventory-wide check is report-only and does not
+                fail a build.
+                The public-facing pages now pass. The /communities failure
+                that prompted this downgrade, 349px at a 320px viewport,
+                was fixed in PR #2325 and has a gating test; the community
+                page and member community page report clean too.
+                The criterion stays at partially-supports because the
+                inventory-wide check reports 14 admin pages requiring
+                horizontal scroll at a 320px viewport, measured between
+                357px and 507px, on the most recent successful main run
+                (issue #2336). These are authoring surfaces, so the same
+                evidence bears on the authoring-tool component below.
+                The 14 trace to three shared causes in the Gin admin
+                theme, not 14 separate defects: the shortcut tooltip
+                beside the page title, which is fixed in PR #2337 and
+                leaves /admin and /admin/structure clean; the sticky form
+                actions on node add forms; and the breadcrumb wrapper on
+                settings forms.
+                This claim is deliberately not raised on the strength of
+                the /communities fix alone: reflow is recorded as fully
+                machine-decidable, so a reported failure is a real failure
+                and admin pages are in scope.
+                Text resize (1.4.4) is a separate criterion and is
+                evaluated separately; several pages also overflow at 200%
+                text size. Evidence for the September 2026 changes is
+                recorded by criterion in
+                docs/accessibility/findings/2026-09-17-remediation-cycle.md,
+                and the October 2026 automated evidence in
+                docs/accessibility/findings/2026-10-06-automated-evidence-prefill.md.
           - name: authoring-tool
             adherence:
               level: not-evaluated
