@@ -22,3 +22,10 @@ function mukurtu_browse_install() {
 function mukurtu_browse_update_last_removed(): int {
   return 40021;
 }
+
+/**
+ * Ignore apostrophes and similar marks inside words when searching.
+ */
+function mukurtu_browse_update_40022() {
+  mukurtu_search_enable_ignore_character_processor('mukurtu_default_content_index');
+}
