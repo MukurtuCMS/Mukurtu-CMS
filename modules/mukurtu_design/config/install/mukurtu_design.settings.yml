@@ -6,3 +6,9 @@ colors:
   brand_secondary: '#d9d4c2'
   brand_secondary_dark: '#7a734d'
   brand_secondary_accent: '#c9c2a8'
+background:
+  image: null
+  text_treatment: light
+header:
+  image: null
+  text_treatment: light

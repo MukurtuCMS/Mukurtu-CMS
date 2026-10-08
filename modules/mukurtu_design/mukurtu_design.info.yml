@@ -6,4 +6,5 @@ package: 'Mukurtu CMS'
 version: 4.0.5
 dependencies:
   - 'drupal:field'
+  - 'drupal:file'
   - 'drupal:mukurtu_core'

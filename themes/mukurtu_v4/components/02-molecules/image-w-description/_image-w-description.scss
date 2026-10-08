@@ -20,6 +20,13 @@
     .block-wrapper__second {
       background-color: var(--brand-secondary);
 
+      /* A component that paints its own ground has to own its text colour too.
+       * Without this the text inherits from whatever is behind the block, which
+       * is fine on the plain page but renders white on tan once a page
+       * background is set. No visual change on a site with no background: this
+       * is the colour the text already inherited from body. */
+      color: var(--brand-text-color);
+
       // Overrides the shared h1/h2 color above and the global link color
       // (_base.scss) with a token that's guaranteed to pass contrast
       // against --brand-secondary on every palette - see #2178. The

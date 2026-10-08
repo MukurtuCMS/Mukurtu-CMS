@@ -387,7 +387,7 @@ class DashboardLinkCleanupTest extends KernelTestBase {
       'dashboard-look-feel' => [
         'Access Denied Page',
         'Change logo',
-        'Color settings',
+        'Design settings',
         'Configure consent popup',
         'Main navigation menu',
         'Edit footer',
