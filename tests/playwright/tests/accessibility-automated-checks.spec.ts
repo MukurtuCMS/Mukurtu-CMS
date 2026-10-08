@@ -7,6 +7,9 @@ import {
   checkFocusVisible,
   checkLinkText,
   checkKeyboardTrap,
+  checkLabelInName,
+  checkInputPurpose,
+  checkTextSpacing,
 } from '~helpers/automated-checks';
 import {
   anonymousPages,
@@ -31,9 +34,14 @@ import {
  */
 async function runAutomatedChecks(page: import('@playwright/test').Page, testInfo: import('@playwright/test').TestInfo, slug: string): Promise<void> {
   await checkLinkText(page, testInfo, slug);
+  await checkLabelInName(page, testInfo, slug);
+  await checkInputPurpose(page, testInfo, slug);
   await checkFocusVisible(page, testInfo, slug);
   await checkKeyboardTrap(page, testInfo, slug);
-  // Reflow/zoom resize the viewport/fonts, so run them last.
+  // Text spacing restores its own override, but still run it before the two
+  // that don't: reflow/zoom resize the viewport and fonts and leave them that
+  // way, so they go last.
+  await checkTextSpacing(page, testInfo, slug);
   await checkReflow(page, testInfo, slug);
   await checkTextZoom(page, testInfo, slug);
 }
