@@ -9,7 +9,7 @@ field_name: field_language_code
 entity_type: taxonomy_term
 bundle: language
 label: 'Language code'
-description: "The code that tells screen readers and browsers which language this is, such as <em>haw</em> for Hawaiian or <em>mi</em> for Māori. Use an ISO 639 code if your language has one. If it doesn't, use a private-use code that starts with <em>x-</em>, such as <em>x-mylang</em>. Leave blank if you're not sure."
+description: "The code that tells screen readers and browsers which language this is, such as <em>haw</em> for Hawaiian or <em>mi</em> for Māori. To find your language's code, search the <a href=\"https://iso639-3.sil.org/code_tables/639/data\" target=\"_blank\">ISO 639-3 code table (opens in a new tab)</a>. If your language doesn't have a code, use a private-use code that starts with <em>x-</em>, such as <em>x-mylang</em>. Leave blank if you're not sure."
 required: false
 translatable: false
 default_value: {  }
