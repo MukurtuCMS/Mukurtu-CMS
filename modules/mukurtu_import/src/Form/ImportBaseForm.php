@@ -17,6 +17,7 @@ use League\Csv\Reader;
 use Drupal\mukurtu_import\MukurtuImportStrategyInterface;
 use Drupal\mukurtu_import\Entity\MukurtuImportStrategy;
 use Drupal\mukurtu_import\MukurtuImportFieldProcessPluginManager;
+use Drupal\mukurtu_import\Plugin\views\field\ImportStatus;
 
 /**
  * Provides a Mukurtu Import form.
@@ -146,6 +147,7 @@ class ImportBaseForm extends FormBase {
     $this->store->set('batch_results_messages', []);
     $this->store->set('batch_results_summary', []);
     $this->store->set('batch_results_warnings', []);
+    $this->store->set(ImportStatus::TEMPSTORE_KEY, []);
     $this->store->set('metadata_file_weights', []);
   }
 

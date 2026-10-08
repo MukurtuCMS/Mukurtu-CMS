@@ -10,7 +10,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "eslint": "^10.11.0",
+    "eslint": "^10.12.0",
     "globals": "^17.12.0",
     "gulp": "^5.0.1",
     "gulp-autoprefixer": "^10.0.0",
@@ -18,11 +18,11 @@
     "gulp-livereload": "^4.0.2",
     "gulp-sass": "^6.0.1",
     "gulp-sourcemaps": "^3.0.0",
-    "sass": "^1.104.1",
-    "stylelint": "^16.26.1",
-    "stylelint-config-standard": "^37.0.0",
-    "stylelint-config-standard-scss": "^16.0.0",
-    "stylelint-use-logical-spec": "^5.0.1"
+    "sass": "^1.105.0",
+    "stylelint": "^17.15.0",
+    "stylelint-config-standard": "^40.0.0",
+    "stylelint-config-standard-scss": "^17.0.0",
+    "stylelint-use-logical-spec": "file:local-packages/stylelint-use-logical-spec"
   },
   "dependencies": {
     "@bcgov/bc-sans": "^2.1.2",
