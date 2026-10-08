@@ -15,7 +15,7 @@ The Phase 2 (admin/authoring, WCAG 2.1 AA + ATAG 2.0) equivalent of [page-invent
 | Import template (add) | `/admin/import-templates/add` | `MukurtuImportStrategyForm` — regression coverage for fixed #1976 |
 | Import (upload step) | `/admin/import` | Entry point of a multi-step wizard; only this first step is a fixed, single-GET URL |
 | Content warnings settings | `/admin/config/mukurtu/content-warnings` | `MukurtuContentWarningsSettingsForm` — regression coverage for fixed #1979 |
-| Collection organization | discovered from `/collections` | `CollectionOrganizationController` — regression coverage for fixed #1978 |
+| Collection organization | `/node/{nid}/organization`, nid discovered from `/admin/content?type=collection` | `CollectionOrganizationController` — regression coverage for fixed #1978. The route takes an entity id, not a path alias, so this cannot be built by appending a suffix to a collection's public URL; doing so 404'd and the scan never ran (#2250). |
 | Submission forms (list) | `/admin/config/mukurtu/submissions` | `mukurtu_submissions` — the config surface for the public form |
 | Submission form settings | `/admin/config/mukurtu/submissions/digital_heritage` | `SubmissionSettingsForm`; the bundle whose settings entity ships with the profile |
 | Pending submissions | `/admin/content/pending-submissions` | `views.view.mukurtu_pending_submissions` — the reviewer queue |

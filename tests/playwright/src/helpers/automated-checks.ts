@@ -123,16 +123,76 @@ export async function checkFocusVisible(page: Page, testInfo: TestInfo, slug: st
       })
       .slice(0, max);
 
+    // How many levels up to look for the indicator. Widgets routinely draw
+    // the ring on a wrapper rather than on the focusable node itself:
+    // Tagify puts the focusable contenteditable inside <tags.tagify>, and
+    // the ring lands on the wrapper via a .tagify--focus class. Three is
+    // enough for the patterns in this theme without reaching so far up
+    // that an unrelated ancestor's styling masks a real failure.
+    const ANCESTOR_DEPTH = 3;
+
+    // A signature of what would actually be *drawn* as a focus indicator,
+    // for the element, its pseudo-elements and its nearest ancestors.
+    // Compared before and after focus: what matters is not whether a ring
+    // exists in the abstract but whether focusing changed the appearance,
+    // which also avoids crediting a permanent border as a focus indicator.
+    //
+    // Normalised rather than raw computed values, because several
+    // properties move on focus without rendering anything. A UA stylesheet
+    // shifts outline-offset from 0px to 1px on a focused anchor while
+    // outline-style stays "none": comparing raw properties reads that as
+    // an indicator and silently clears a genuine failure.
+    const drawn = (node: HTMLElement, pseudo: string | null): string => {
+      const s = getComputedStyle(node, pseudo);
+
+      const outline = s.outlineStyle !== 'none' && parseFloat(s.outlineWidth) > 0
+        ? `outline:${s.outlineStyle},${s.outlineWidth},${s.outlineColor},${s.outlineOffset}`
+        : '';
+      const shadow = s.boxShadow && s.boxShadow !== 'none' ? `shadow:${s.boxShadow}` : '';
+      const border = parseFloat(s.borderTopWidth) > 0 || parseFloat(s.borderBottomWidth) > 0
+        || parseFloat(s.borderLeftWidth) > 0 || parseFloat(s.borderRightWidth) > 0
+        ? `border:${s.borderWidth},${s.borderColor},${s.borderStyle}`
+        : '';
+      // A pseudo-element only renders when it has content at all; without
+      // that its geometry is irrelevant. This is the shape of indicator
+      // that produced the false positive in issue #2187.
+      const box = pseudo && s.content !== 'none'
+        ? `box:${s.content},${s.width},${s.height},${s.backgroundColor}`
+        : '';
+
+      return [outline, shadow, border, box].filter(Boolean).join('|');
+    };
+
+    const signature = (el: HTMLElement): string => {
+      const parts: string[] = [];
+      let node: HTMLElement | null = el;
+      for (let i = 0; i <= ANCESTOR_DEPTH && node; i++) {
+        for (const pseudo of [null, '::before', '::after']) {
+          parts.push(drawn(node, pseudo));
+        }
+        node = node.parentElement;
+      }
+      return parts.join(';');
+    };
+
     return elements.map((el) => {
+      const before = signature(el);
       el.focus();
-      const style = getComputedStyle(el);
-      const hasOutline = style.outlineStyle !== 'none' && parseFloat(style.outlineWidth) > 0;
-      const hasBoxShadow = style.boxShadow !== 'none' && style.boxShadow !== '';
+      const after = signature(el);
       const focused = document.activeElement === el;
+
+      // Keep the old own-element reading too, so a rule that is present
+      // whether or not the element is focused still counts. Some
+      // components style :focus-within on a wrapper that was already
+      // styled, producing no delta but a genuine ring.
+      const own = getComputedStyle(el);
+      const hasOutline = own.outlineStyle !== 'none' && parseFloat(own.outlineWidth) > 0;
+      const hasBoxShadow = own.boxShadow !== 'none' && own.boxShadow !== '';
+
       el.blur();
       return {
         focused,
-        visible: hasOutline || hasBoxShadow,
+        visible: before !== after || hasOutline || hasBoxShadow,
         tag: el.tagName.toLowerCase(),
         identifier: el.id ? `#${el.id}` : el.className ? `.${String(el.className).split(' ')[0]}` : el.outerHTML.slice(0, 80),
       };
