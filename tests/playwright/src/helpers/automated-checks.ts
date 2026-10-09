@@ -98,8 +98,11 @@ export async function checkReflow(page: Page, testInfo: TestInfo, slug: string):
 export async function checkTextZoom(page: Page, testInfo: TestInfo, slug: string): Promise<void> {
   const findings: CheckFinding[] = [];
   const BASE_PX = 16;
-  let real = false;
   let cdp: { send: (m: string, p?: unknown) => Promise<unknown>; detach: () => Promise<void> } | null = null;
+  // Which of the three measurements actually happened, so the finding can say
+  // so rather than implying the best case.
+  let mode: 'before-load' | 'after-restyle' | 'approximated' = 'approximated';
+  let sized = false;
 
   // Only a real navigation can be reloaded. After setContent() the URL is
   // about:blank, and reloading that would measure an empty page and report
@@ -109,29 +112,57 @@ export async function checkTextZoom(page: Page, testInfo: TestInfo, slug: string
   try {
     cdp = await page.context().newCDPSession(page) as unknown as typeof cdp;
     await cdp!.send('Page.setFontSizes', { fontSizes: { standard: BASE_PX * 2, fixed: BASE_PX * 2 } });
+    // From here the text is already doubled, so the approximation must not
+    // also be applied: stacking a 200% root override on top would measure
+    // 400% and report it as 200%.
+    sized = true;
+    mode = 'after-restyle';
     if (reloadable) {
       await page.reload({ waitUntil: 'networkidle' });
+      mode = 'before-load';
     }
-    real = true;
   } catch {
-    // Not Chromium, or CDP unavailable: fall back to the approximation.
-    await page.addStyleTag({ content: 'html { font-size: 200% !important; }' });
+    if (!sized) {
+      // Not Chromium, or CDP unavailable before the size was applied.
+      await page.addStyleTag({ content: 'html { font-size: 200% !important; }' });
+    }
+    // Otherwise the size is applied and only the reload failed. Measure what
+    // we have rather than doubling a second time.
   }
   await page.waitForTimeout(300);
 
-  const overflow = await page.evaluate(() => ({
-    scrollWidth: document.documentElement.scrollWidth,
-    clientWidth: document.documentElement.clientWidth,
-  }));
+  // A failed reload leaves a navigation in flight, and evaluating against a
+  // destroyed execution context throws. This check is report-only, so it
+  // records that it could not measure rather than failing the test around it.
+  let overflow: { scrollWidth: number; clientWidth: number } | null = null;
+  try {
+    await page.waitForLoadState('domcontentloaded', { timeout: 5_000 }).catch(() => {});
+    overflow = await page.evaluate(() => ({
+      scrollWidth: document.documentElement.scrollWidth,
+      clientWidth: document.documentElement.clientWidth,
+    }));
+  } catch {
+    overflow = null;
+  }
 
-  if (overflow.scrollWidth > overflow.clientWidth + 1) {
+  if (overflow === null) {
+    findings.push({
+      check: 'text-zoom-200',
+      criterion: '1.4.4 Resize Text',
+      summary: 'Could not measure at 200% text size: the page did not settle after the font size was applied',
+      detail: 'Not a conformance finding. Re-run against this page, or check it by hand, before drawing any conclusion from its absence from the results.',
+    });
+  }
+  else if (overflow.scrollWidth > overflow.clientWidth + 1) {
     findings.push({
       check: 'text-zoom-200',
       criterion: '1.4.4 Resize Text',
       summary: `Horizontal scroll required at 200% text size (content ${overflow.scrollWidth}px vs viewport ${overflow.clientWidth}px)`,
-      detail: real
-        ? `Measured with the browser's own default font size doubled${reloadable ? ', applied before load, which is what a reader who sets a larger text size actually gets' : ' (the page was not a navigation, so it could not be reloaded with the size already set)'}.`
-        : 'Approximated via root font-size doubling because CDP was unavailable on this engine. That leaves rem media queries at their desktop values, so confirm in a real browser before filing.',
+      detail: {
+        'before-load': "Measured with the browser's own default font size doubled and applied before load, which is what a reader who sets a larger text size actually gets.",
+        'after-restyle': "Measured with the browser's own default font size doubled, but the page could not be reloaded with it already set, so rem media queries may not have re-evaluated. Treat as indicative and re-check.",
+        approximated: 'Approximated via a root font-size override because the browser font size could not be set on this engine. That leaves rem media queries at their desktop values, so confirm in a real browser before filing.',
+      }[mode],
     });
   }
 
