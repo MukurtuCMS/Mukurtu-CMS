@@ -70,7 +70,7 @@ class DatabaseCharsetRequirements {
       'mukurtu_core_database_charset' => [
         'title' => $this->t('Database character set'),
         'value' => $this->formatPlural(count($tables), "1 table doesn't use utf8mb4", "@count tables don't use utf8mb4"),
-        'description' => $this->t("Some text columns in these tables use a character set other than utf8mb4, so they can't store characters such as Osage, Adlam, and emoji. Content that contains those characters can fail to save or be left out of search results. Back up the database, then convert each table to utf8mb4, or ask your hosting provider to. Tables: @tables.", [
+        'description' => $this->t("Some text columns in these tables use a character set other than utf8mb4, so they can't store characters from writing systems such as Osage and Adlam, and emoji. Content that contains those characters can fail to save or be left out of search results. Back up the database, then convert each table to utf8mb4, or ask your hosting provider to. Tables: @tables.", [
           '@tables' => $this->tableList($tables),
         ]),
         'severity' => RequirementSeverity::Warning,
