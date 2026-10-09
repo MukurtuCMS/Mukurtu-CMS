@@ -21,6 +21,9 @@ mapping:
     source: Description
     target: description
   -
+    source: 'Language code'
+    target: field_language_code
+  -
     source: Parent
     target: parent
   -
