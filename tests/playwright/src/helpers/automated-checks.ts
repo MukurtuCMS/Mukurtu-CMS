@@ -403,9 +403,15 @@ export async function checkLabelInName(page: Page, testInfo: TestInfo, slug: str
           if (v) return { name: v, from: 'value' };
         }
       }
+      // Text content before title. title is only the fallback for an element
+      // with no other name source; where both exist the text wins and the
+      // title becomes the description. Getting this the wrong way round made
+      // every link with a title look like a 2.5.3 failure.
+      const text = el.textContent;
+      if (text && text.trim()) return { name: text, from: 'text content' };
       const title = el.getAttribute('title');
       if (title && title.trim()) return { name: title, from: 'title' };
-      return { name: el.textContent || '', from: 'text content' };
+      return { name: '', from: 'none' };
     };
 
     const SELECTOR = [
@@ -548,6 +554,19 @@ export async function checkTextSpacing(page: Page, testInfo: TestInfo, slug: str
       if (s.height === 'auto' && s.maxHeight === 'none') return;
       if (el.scrollHeight <= el.clientHeight + 1) return;
       if (el.clientHeight === 0) return;
+      // A visually-hidden box is a 1px clipped square on purpose, so of course
+      // its content "overflows" once the text is respaced. Reporting those
+      // buried every real finding: they were 121 of 125 on the first run.
+      // Detected by shape rather than class name, so a site-specific utility
+      // class is covered too.
+      const tiny = el.clientHeight <= 2 || el.clientWidth <= 2;
+      const clipsToNothing = /inset\(\s*50%|rect\(\s*0(px)?[,\s]+0(px)?[,\s]+0(px)?[,\s]+0(px)?\s*\)|rect\(\s*1px[,\s]+1px[,\s]+1px[,\s]+1px\s*\)/.test(
+        s.clipPath + ' ' + ((s as unknown as { clip?: string }).clip ?? '')
+      );
+      if (tiny || clipsToNothing) return;
+      // A container that is meant to scroll is not losing content either: the
+      // reader can still reach it, which is what 1.4.12 asks.
+      if (['auto', 'scroll'].includes(s.overflowX) || ['auto', 'scroll'].includes(s.overflowY)) return;
       // Ignore elements with no text of their own to lose.
       const text = (el.textContent || '').trim();
       if (!text) return;
