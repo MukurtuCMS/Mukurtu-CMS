@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_core\Kernel;
 
+use Drupal\Core\Extension\Extension;
 use Drupal\Core\Extension\ModuleInstallerInterface;
 use Drupal\Core\Form\FormState;
 use Drupal\Core\Messenger\MessengerInterface;
@@ -61,8 +62,11 @@ class EnableMultilingualTest extends KernelTestBase {
    * Makes mukurtu_multilingual count as installed, without installing it.
    */
   protected function fakeMultilingualInstalled(): void {
-    $path = \Drupal::service('extension.list.module')->getPath(EnableMultilingualForm::MODULE);
-    \Drupal::moduleHandler()->addModule(EnableMultilingualForm::MODULE, $path);
+    $module_handler = \Drupal::moduleHandler();
+    $pathname = \Drupal::service('extension.list.module')->getPathname(EnableMultilingualForm::MODULE);
+    $module_handler->setModuleList($module_handler->getModuleList() + [
+      EnableMultilingualForm::MODULE => new Extension($this->root, 'module', $pathname),
+    ]);
   }
 
   /**

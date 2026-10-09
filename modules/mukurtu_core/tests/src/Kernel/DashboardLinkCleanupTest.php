@@ -370,6 +370,7 @@ class DashboardLinkCleanupTest extends KernelTestBase {
         'All notifications',
       ],
       'dashboard-multilingual' => [
+        'Enable multilingual',
         'Manage site languages',
         'Configure content translation',
         'Translate configuration',

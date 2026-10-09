@@ -25,6 +25,9 @@ class EnableMultilingualMenuLink extends MenuLinkDefault {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $static_override);
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
     return new static(
       $configuration,
@@ -35,10 +38,16 @@ class EnableMultilingualMenuLink extends MenuLinkDefault {
     );
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function isEnabled(): bool {
     return !$this->moduleHandler->moduleExists(EnableMultilingualForm::MODULE);
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function getCacheTags(): array {
     return array_merge(parent::getCacheTags(), ['config:core.extension']);
   }
