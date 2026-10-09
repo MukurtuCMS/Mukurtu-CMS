@@ -1,12 +1,14 @@
 # Bucket B (visual pass), part 1
 
 Bucket B of the [#2242 triage](2026-10-06-criteria-triage.md) is the 12
-criteria needing a browser and a ruler but no assistive technology. This is
-the first half: **6 decided**, against a clean install
-(`~/ddev/mukurtu-a11y`, profile at `main`) plus source inspection.
+criteria needing a browser and a ruler but no assistive technology.
+**11 of 12 are decided**, against a clean install (`~/ddev/mukurtu-a11y`,
+profile at `main`) plus source inspection.
 
-The other 6 are listed at the end with what each is waiting on, rather than
-recorded on thinner evidence than the first six.
+Recorded in two passes: six first, then five more once PR #2380 removed a
+PHP warning that was printing over the error messages 3.3.3 needed graded.
+The twelfth, 1.4.4, is held deliberately rather than recorded on thin
+evidence.
 
 ## Decided (6)
 
@@ -29,29 +31,74 @@ name, and to skip deliberately scrollable containers. This evaluation ran
 after that fix, so the zero reflects the content rather than a broken
 measurement.
 
-## Still open (6)
+## Part 2: decided (5)
+
+Run after PR #2380 removed a PHP warning that was printing over the very
+error messages 3.3.3 needed graded.
+
+| SC | Level | What decided it |
+|---|---|---|
+| 2.4.7 Focus Visible | supports | 35 tab stops across 3 pages, every one with a drawn indicator of at least 2px and at least 3:1 |
+| 3.3.2 Labels or Instructions | supports | 31 of 47 hidden-label controls are labelled by a visible column header; the other 16 sit under a visible fieldset instruction and carry a placeholder or self-describing default |
+| 3.3.3 Error Suggestion | supports | "The email address is not valid. Use the format user@example.com" names the problem and the expected form |
+| 1.4.5 Images of Text | supports | The only image the product renders is the site logo, which the criterion exempts |
+| **1.4.1 Use of Color** | **partially-supports** | System messages are distinguished only by background colour |
+
+### 1.4.1: the one failure
+
+Error, warning and status blocks differ **only** by background colour:
+
+| Type | Background |
+|---|---|
+| error | `rgb(88, 51, 51)` |
+| warning | `rgb(72, 62, 30)` |
+| status | `rgb(20, 82, 66)` |
+
+No icon on any of them (`::before` has no content, no background image, no
+mask), the left border is an identical transparent 2px on all three, and
+padding is identical. The only non-colour cue is a `.visually-hidden`
+heading, which a sighted reader never sees.
+
+The wording of a message usually makes its nature clear on its own, which
+limits the practical impact, so this is `partially-supports` rather than
+`does-not-support`. An icon per type, or making the existing heading
+visible, would close it.
+
+Required-field markers and form errors are fine: the asterisk is a glyph,
+and errors name the field in text.
+
+### 2.4.7: why a naive check gets this wrong
+
+The main navigation sets `outline: 0` on focus and draws its ring with a
+`::before` pseudo-element instead. A check that reads only the `outline`
+property reports those links as having no indicator at all. Two further
+traps: `.focus()` does not trigger `:focus-visible`, so programmatic focus
+measures the wrong state; and an outline is painted outside the border box,
+so its contrast must be computed against the *parent's* background, not the
+element's own. Measuring both wrongly produced a 1.5:1 reading on a ring
+that is actually about 8.4:1.
+
+## Still open (1)
 
 | SC | Waiting on |
 |---|---|
-| 1.4.4 Resize Text | Five admin pages are clean under real browser text sizing, but the inventory-wide check only measures that way once PR #2375 merges. Holding until a clean run exists, rather than recording a level on five pages |
-| 2.4.7 Focus Visible | A keyboard-driven pass. `.focus()` does not trigger `:focus-visible`, which is where the theme puts its ring, so computed styles read after programmatic focus describe the wrong state. Folds naturally into bucket C |
-| 3.3.2 Labels or Instructions | A form that reliably fails validation without a captcha |
-| 3.3.3 Error Suggestion | Same |
-| 1.4.1 Use of Color | Partial: required fields are marked with a `*` glyph via `::after`, not colour alone. Status and validation colours are unchecked and are the likelier risk |
-| 1.4.5 Images of Text | The theme's images look like icons and UI graphics rather than text images, but that has not actually been confirmed by looking at them |
+| 1.4.4 Resize Text | Five admin pages are clean under real browser text sizing, but the inventory-wide check only measures that way once PR #2375 merges. Holding until a clean run exists rather than recording a level on five pages |
 
-### A measurement that nearly became a false report
+### Two investigations that nearly became false reports
 
-Measuring focus-ring contrast after `el.focus()` gave 1.5:1 on the header
-search button, which would have contradicted 1.4.11's existing `supports`
-claim. Checking that element directly showed `outline-style: none` under
-programmatic focus: the colours being measured were not the focus ring at
-all. **`.focus()` does not trigger `:focus-visible`.** Any 2.4.7 or 1.4.11
-re-measurement has to drive focus from the keyboard.
+**Focus-ring contrast.** Measured after `el.focus()`, the header search
+button read 1.5:1, which would have contradicted 1.4.11's existing
+`supports` claim. That element reports `outline-style: none` under
+programmatic focus. Measured correctly, from the keyboard and against the
+parent's background, it is about 8.4:1. See the 2.4.7 note above.
 
-### Why the login form could not be used for 3.3.2 and 3.3.3
+**A login with no error message.** Submitting bad credentials produced
+nothing, which looked like a 3.3.1 defect. Request tracing showed no POST
+to `/user/login` happened at all: the form carries an ALTCHA captcha and
+the submit never left the browser. 3.3.2 and 3.3.3 were evaluated on
+authenticated forms instead.
 
-Submitting bad credentials produced no error message, which looked like a
-3.3.1 defect. It is not: the form carries an **ALTCHA captcha**, and request
-tracing showed **no POST to `/user/login` happened at all**. The missing
-error was the test being blocked, not the product failing.
+**A PHP warning standing in for the error message.** Saving content while
+belonging to no cultural protocol printed `Undefined array key
+"protocol_selection"` over the real validation messages. That was a product
+bug, fixed in PR #2380, and 3.3.3 could not be graded until it was.
