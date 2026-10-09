@@ -4,6 +4,8 @@ Automated scans catch only a third or so of WCAG issues. This checklist covers t
 
 Two layers of automated scanning already run before any of this: **axe-core** (`tests/playwright/tests/accessibility.spec.ts`) for standard WCAG rule violations, and **automated checks** (`tests/playwright/tests/accessibility-automated-checks.spec.ts`) for a handful of things axe can't assert on its own — reflow/zoom, focus visibility, vague link text, and a keyboard-trap smoke test. Results land in `test-results/a11y/` and `test-results/a11y-extra/` respectively (gitignored; re-run before a session, don't rely on stale files). **Run both before starting a manual pass** — don't manually re-check anything they already cover; use their output as your starting point instead. See the "What's automated now" table below for exactly where the line sits.
 
+**For the keyboard and screen reader passes, use [manual-audit-runbook.md](manual-audit-runbook.md)**, which has the per-criterion procedure and a tool that generates a per-page card of tab order, heading outline, ambiguous links, live regions and form controls, so the pass is judgement rather than inventory.
+
 Record results in a dated file under [findings/](findings/) — copy [findings/manual-findings-template.md](findings/manual-findings-template.md) to `findings/YYYY-MM-manual.md` and fill it in as you go.
 
 **Screen readers to test with:** NVDA + Firefox (Windows), VoiceOver + Safari (macOS), or Orca + Firefox (Linux). One is enough per audit pass; rotate across passes.
