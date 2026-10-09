@@ -6,6 +6,7 @@ use Drupal\Core\Field\Attribute\FieldFormatter;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\Render\Element;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\leaflet\Plugin\Field\FieldFormatter\LeafletDefaultFormatter;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -144,10 +145,16 @@ class MukurtuLeafletFormatter extends LeafletDefaultFormatter implements Contain
 
     // Now take the finished render object and modify the JavaScript settings
     // for the Leaflet map to render the descriptions in each popup, rather than
-    // repeating the entity label for every popup.
+    // repeating the entity label for every popup. Only visit the map elements:
+    // the parent can also return top-level '#cache' and '#attached' metadata
+    // (leaflet 10.4.13+ when popups are on), which must be left to bubble.
     $entity_label = $items->getEntity()->label();
-    foreach ($render as $delta => &$item) {
-      $settings = &$item['#attached']['drupalSettings']['leaflet'];
+    foreach (Element::children($render) as $delta) {
+      $leaflet = $render[$delta]['#attached']['drupalSettings']['leaflet'] ?? NULL;
+      if (empty($leaflet) || !is_array($leaflet)) {
+        continue;
+      }
+      $settings = &$render[$delta]['#attached']['drupalSettings']['leaflet'];
       $settings_key = key($settings);
       $features = &$settings[$settings_key]['features'];
       foreach ($features as $feature_delta => &$feature) {
