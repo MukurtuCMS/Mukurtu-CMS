@@ -69,8 +69,17 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                Capability check. Digital heritage items carry
+                field_transcription, described as a basic text
+                transcription of an audio or video recording,
+                and it is rendered on the full and
+                taxonomy_record displays, so an author can
+                provide a text alternative and a visitor can
+                read it. Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -79,8 +88,24 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: partially-supports
+              notes: >-
+                Locally hosted video cannot carry captions.
+                The video media type offers an author no
+                caption or subtitle track field, and the
+                file_video formatter renders no track element,
+                so a site that uploads its own video has no
+                way to provide synchronised captions (issue
+                #2329). The remote_video type is unaffected,
+                because the provider carries its own captions.
+                A transcript is not a substitute: it satisfies
+                1.2.3, which accepts a media alternative, but
+                not 1.2.2, which requires synchronisation. The
+                same evidence bears on the authoring-tool
+                component, which is evaluated separately.
+                Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -89,8 +114,17 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                The digital heritage transcription field is a
+                media alternative, which 1.2.3 accepts in
+                place of audio description. Caveat: the field
+                is described to authors as a basic
+                transcription, so whether any given item's
+                text is a full alternative is editorial rather
+                than structural. Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -134,8 +168,16 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                No UI string gives an instruction by position,
+                shape, size or colour alone, checked across
+                the product's module and theme strings.
+                Instructions as rendered, rather than as
+                authored, are confirmed in the visual pass.
+                Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -154,8 +196,17 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                Nothing autoplays. The dictionary audio
+                display sets autoplay false, the lightbox sets
+                autoplayVideos false, and the YouTube oEmbed
+                lists autoplay in its allow attribute, which
+                is a permission rather than an instruction,
+                with no autoplay parameter in the URL.
+                Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -184,8 +235,21 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                Every file binding keydown or keypress uses
+                non-printable keys, except Enter and Space in
+                two places, both scoped to a focused element.
+                The active-only-on-focus exception applies,
+                and activating a control with Enter or Space
+                is standard operation rather than a shortcut.
+                Enforced in CI by the character-key-shortcuts
+                lint, which fails the build on a
+                single-character handler bound to document,
+                window or body, and self-tests its matcher
+                before trusting it. Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -194,8 +258,16 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                No time limits. No meta refresh, no
+                location.reload and no setInterval in the
+                product's JavaScript, and no session lifetime
+                override is shipped. Drupal's session expiry
+                is a security timeout, which 2.2.1 exempts.
+                Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -214,8 +286,14 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                No keyframe animation in any of the product's
+                own stylesheets. The only animation present is
+                a vendor carousel's rotating loading spinner,
+                which does not flash. Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -302,8 +380,15 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                No devicemotion, deviceorientation or
+                DeviceMotionEvent handler exists anywhere in
+                the product's modules or themes, so no
+                functionality is operated by device motion.
+                Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -366,8 +451,13 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                Satisfied by definition in HTML5, and removed
+                from WCAG in 2.2. Recorded with its reasoning
+                rather than tested. Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -416,8 +506,15 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                No live-streaming or real-time media
+                capability exists in the product, so there is
+                no live content to caption. Recorded as
+                not-applicable rather than supports, which are
+                different claims. Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -426,8 +523,18 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: does-not-support
+              notes: >-
+                No synchronised audio description capability
+                for locally hosted video: the video media type
+                has no described-track field and the player
+                renders no track element (issue #2355). A
+                transcript does not satisfy 1.2.5, which
+                requires description synchronised with the
+                video. The remote_video type depends on the
+                provider. Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -436,8 +543,14 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                No orientation lock. The theme's breakpoint
+                map defines portrait and landscape aliases,
+                but nothing uses them to restrict display to a
+                single orientation. Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -628,8 +741,20 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: does-not-support
+              notes: >-
+                Dictionary content cannot express its
+                language. Every dictionary word carries a
+                required reference to a term in the language
+                vocabulary, but that vocabulary has no fields,
+                so there is no ISO 639 or BCP 47 code for a
+                template to place in a lang attribute, and no
+                template emits one (issues #2328, #2353,
+                #2354, #2357). Local Contexts labels do emit
+                lang correctly, so the gap is specific rather
+                than systemic. Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
