@@ -86,8 +86,11 @@ class EnableMultilingualForm extends ConfirmFormBase {
    */
   public function getModulesToInstall(): array {
     $list = $this->moduleList->getList();
+    if (!isset($list[static::MODULE])) {
+      return [];
+    }
     $names = [];
-    foreach ([static::MODULE, ...array_keys($list[static::MODULE]->requires ?? [])] as $module) {
+    foreach ([static::MODULE, ...array_keys($list[static::MODULE]->requires)] as $module) {
       if (isset($list[$module]) && !$this->moduleHandler->moduleExists($module)) {
         $names[$module] = $list[$module]->info['name'];
       }
