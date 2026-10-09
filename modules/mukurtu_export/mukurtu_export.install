@@ -97,3 +97,45 @@ function mukurtu_export_update_40401(): ?string {
     '@count' => $updated,
   ]);
 }
+
+/**
+ * Add the Language code column to the default CSV export settings.
+ */
+function mukurtu_export_update_40402(): ?string {
+  // Keep the docblock above to one line: Drupal renders it verbatim as this
+  // update's description on update.php and in `drush updatedb:status`.
+  //
+  // mukurtu_core_update_40211() adds field_language_code to the language
+  // vocabulary (#2328). config/install ships the column, which fixes new
+  // sites. As in mukurtu_export_update_40401(), only the shipped presets are
+  // touched, only when they still list language terms, and the column is
+  // appended so an admin's column order is left alone.
+  $ids = [
+    'default_local_metadata_only',
+    'default_local_with_media',
+    'default_external_metadata_only',
+    'default_external_with_media',
+  ];
+
+  $storage = \Drupal::entityTypeManager()->getStorage('csv_exporter');
+  $updated = 0;
+
+  foreach ($storage->loadMultiple($ids) as $exporter) {
+    $map = $exporter->get('entity_fields_export_list') ?? [];
+    if (!isset($map['taxonomy_term__language']) || array_key_exists('field_language_code', $map['taxonomy_term__language'])) {
+      continue;
+    }
+    $map['taxonomy_term__language']['field_language_code'] = 'Language code';
+    $exporter->set('entity_fields_export_list', $map);
+    $exporter->save();
+    $updated++;
+  }
+
+  if (!$updated) {
+    return NULL;
+  }
+
+  return (string) t('Added the Language code column to @count default CSV export setting(s).', [
+    '@count' => $updated,
+  ]);
+}
