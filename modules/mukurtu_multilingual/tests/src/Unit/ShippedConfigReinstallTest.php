@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_multilingual\Unit;
 
+use Drupal\Component\Serialization\Yaml;
 use Drupal\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\Group;
 
@@ -15,8 +16,11 @@ use PHPUnit\Framework\Attributes\Group;
  * active config. Drupal's ConfigInstaller refuses to install a module whose
  * config/install ships a name that already exists, so turning multilingual
  * back on failed, from Extend and from the dashboard's "Enable multilingual"
- * link alike. Optional config that already exists is skipped instead, so all
- * of it ships from config/optional.
+ * link alike. Optional config that already exists is skipped instead, so
+ * that config ships from config/optional.
+ *
+ * Config that depends on mukurtu_multilingual itself, such as a view it
+ * provides, is deleted on uninstall, so it can still ship in config/install.
  *
  * A pure filesystem check - no Drupal bootstrap needed.
  */
@@ -24,11 +28,19 @@ use PHPUnit\Framework\Attributes\Group;
 class ShippedConfigReinstallTest extends UnitTestCase {
 
   /**
-   * The module ships no config/install files.
+   * Every config/install file is removed when the module is uninstalled.
    */
-  public function testNoConfigInstallFiles(): void {
+  public function testInstallConfigIsRemovedOnUninstall(): void {
     $module_root = dirname(__DIR__, 3);
-    $this->assertSame([], glob($module_root . '/config/install/*.yml') ?: []);
+    $survivors = [];
+    foreach (glob($module_root . '/config/install/*.yml') ?: [] as $file) {
+      $dependencies = Yaml::decode(file_get_contents($file))['dependencies'] ?? [];
+      $modules = array_merge($dependencies['module'] ?? [], $dependencies['enforced']['module'] ?? []);
+      if (!in_array('mukurtu_multilingual', $modules, TRUE)) {
+        $survivors[] = basename($file);
+      }
+    }
+    $this->assertSame([], $survivors, 'These would survive an uninstall and block reinstalling mukurtu_multilingual. Move them to config/optional.');
   }
 
   /**
