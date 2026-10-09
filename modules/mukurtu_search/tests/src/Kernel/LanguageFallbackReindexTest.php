@@ -85,10 +85,14 @@ class LanguageFallbackReindexTest extends KernelTestBase {
     ])->save();
 
     $this->index = Index::load('reindex_test_index');
+
+    require_once $this->root . '/core/includes/form.inc';
+    $batch = &batch_get();
+    $batch = [];
   }
 
   /**
-   * Content indexed before a language is added shows in it after reindexing.
+   * Adding a language batches the reindex, so old content shows right away.
    */
   public function testAddingLanguageReindexes(): void {
     EntityTestMul::create(['name' => 'Indexed before French', 'langcode' => 'en'])->save();
@@ -101,9 +105,55 @@ class LanguageFallbackReindexTest extends KernelTestBase {
     // the old content for French until it is reindexed.
     $this->assertSame(0, $this->countForLanguage('fr'), 'Sanity check: the stale index has no French fallback values.');
     $this->assertGreaterThan(0, $this->remaining(), 'Adding a language should queue the index for reindexing.');
+    $this->assertSame(['reindex_test_index'], $this->batchedIndexIds(), 'Adding a language should batch the index, so content shows without waiting for cron.');
 
+    $this->runBatch();
+    $this->assertSame(0, $this->remaining(), 'The batch should index every queued item.');
+    $this->assertSame(1, $this->countForLanguage('fr'), 'After the batch, content indexed before French was added should fall back for French.');
+  }
+
+  /**
+   * Saving several languages in one request batches each index once.
+   */
+  public function testOneBatchPerIndexPerRequest(): void {
+    EntityTestMul::create(['name' => 'Item', 'langcode' => 'en'])->save();
     $this->index->indexItems();
-    $this->assertSame(1, $this->countForLanguage('fr'), 'After reindexing, content indexed before French was added should fall back for French.');
+
+    ConfigurableLanguage::createFromLangcode('fr')->save();
+    ConfigurableLanguage::createFromLangcode('es')->save();
+    $french = ConfigurableLanguage::load('fr');
+    $french->setWeight($french->getWeight() + 5)->save();
+
+    $this->assertSame(['reindex_test_index'], $this->batchedIndexIds(), 'Reordering languages saves each one, which should still batch each index only once.');
+  }
+
+  /**
+   * An empty index isn't batched.
+   *
+   * Search API's batch reports "Couldn't index items" when it indexes
+   * nothing, which would show an error every time a language is added to a
+   * site with an empty index.
+   */
+  public function testNoBatchForEmptyIndex(): void {
+    ConfigurableLanguage::createFromLangcode('fr')->save();
+    $this->assertSame([], $this->batchedIndexIds(), 'An index with nothing to reindex should not be batched.');
+  }
+
+  /**
+   * Languages created during site install don't start a batch.
+   */
+  public function testNoBatchDuringInstall(): void {
+    EntityTestMul::create(['name' => 'Item', 'langcode' => 'en'])->save();
+    $this->index->indexItems();
+
+    $GLOBALS['install_state'] = ['installation_finished' => FALSE];
+    try {
+      ConfigurableLanguage::createFromLangcode('fr')->save();
+    }
+    finally {
+      unset($GLOBALS['install_state']);
+    }
+    $this->assertSame([], $this->batchedIndexIds(), 'Site install should not batch indexing.');
   }
 
   /**
@@ -124,19 +174,63 @@ class LanguageFallbackReindexTest extends KernelTestBase {
   }
 
   /**
-   * The update hook queues a reindex on existing multilingual sites.
+   * The update hook reindexes existing multilingual sites in full.
    */
   public function testUpdateHookReindexes(): void {
-    ConfigurableLanguage::createFromLangcode('fr')->save();
-    EntityTestMul::create(['name' => 'Item', 'langcode' => 'en'])->save();
+    // Index more items than one pass handles, so the hook needs several.
+    $this->index->setOption('cron_limit', 2)->save();
+    for ($i = 0; $i < 5; $i++) {
+      EntityTestMul::create(['name' => "Item $i", 'langcode' => 'en'])->save();
+    }
     $this->index->indexItems();
     $this->assertSame(0, $this->remaining());
 
-    require_once dirname(__DIR__, 4) . '/mukurtu_core/mukurtu_core.install';
-    $message = mukurtu_core_update_40210();
+    // Add French without the hook's own reindex, to leave the stale index
+    // data an existing site has.
+    \Drupal::configFactory()->getEditable('language.entity.fr')->setData(ConfigurableLanguage::createFromLangcode('fr')->toArray())->save();
+    \Drupal::languageManager()->reset();
+    $this->assertCount(2, \Drupal::languageManager()->getLanguages());
+    $this->assertSame(0, $this->countForLanguage('fr'), 'Sanity check: the stale index has no French fallback values.');
 
-    $this->assertGreaterThan(0, $this->remaining(), 'The update hook should queue indexes with language fallback data for reindexing.');
-    $this->assertSame('Queued 1 search indexes for reindexing.', $message);
+    require_once dirname(__DIR__, 4) . '/mukurtu_core/mukurtu_core.install';
+    $sandbox = [];
+    $passes = 0;
+    do {
+      $message = mukurtu_core_update_40210($sandbox);
+      $passes++;
+    } while (($sandbox['#finished'] ?? 1) < 1 && $passes < 20);
+
+    $this->assertGreaterThan(1, $passes, 'Sanity check: the update needed more than one pass.');
+    $this->assertSame(0, $this->remaining(), 'The update hook should index every item, not leave them for cron.');
+    $this->assertSame(5, $this->countForLanguage('fr'), 'After the update, existing content should fall back for French.');
+    $this->assertSame('Reindexed 1 search indexes.', $message);
+  }
+
+  /**
+   * Lists the index IDs in the batch sets queued this request.
+   */
+  protected function batchedIndexIds(): array {
+    $ids = [];
+    foreach (batch_get()['sets'] ?? [] as $set) {
+      foreach ($set['operations'] as [, $arguments]) {
+        $ids[] = $arguments[0]->id();
+      }
+    }
+    return $ids;
+  }
+
+  /**
+   * Runs the queued batch operations, as the form submit would.
+   */
+  protected function runBatch(): void {
+    foreach (batch_get()['sets'] ?? [] as $set) {
+      foreach ($set['operations'] as [$callback, $arguments]) {
+        $context = ['sandbox' => [], 'results' => [], 'finished' => 1, 'message' => ''];
+        do {
+          $callback(...[...$arguments, &$context]);
+        } while ($context['finished'] < 1);
+      }
+    }
   }
 
   /**
