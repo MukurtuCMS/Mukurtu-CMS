@@ -38,7 +38,10 @@ evaluation_methods_used: >-
   Manual keyboard-only testing and screen reader testing (NVDA, VoiceOver or
   Orca) following the program's manual testing checklist are planned but have
   not yet been carried out. Criteria that depend on them remain
-  not-evaluated, and no level in this report rests on them.
+  not-evaluated. Where an evaluated criterion still has manual
+  verification outstanding, its own note says so: 4.1.2 is the one such
+  case, where keyboard and screen reader verification of the custom
+  widgets is still to come.
 legal_disclaimer: >-
   The information herein is provided in good faith based on the analysis of
   the product at the time of the review and does not represent a
