@@ -336,9 +336,17 @@ class CulturalProtocolWidget extends WidgetBase {
   public function massageFormValues(array $values, array $form, FormStateInterface $form_state) {
     $massagedValues = [];
     foreach ($values as $delta => $value) {
-      $subvalue = $value['value'];
+      // Neither key is guaranteed. A person who belongs to no cultural
+      // protocol gets an empty protocol_selection container, and an empty
+      // container submits nothing at all, so both it and sharing_setting are
+      // absent from the submitted values. Reading them unguarded raised
+      // "Undefined array key" warnings that Drupal then printed to the page,
+      // leaking an internal file path and burying the real message, which is
+      // that the person has no protocol to publish into. That is the state of
+      // every account on a site before its first community exists.
+      $subvalue = $value['value'] ?? [];
       $protocols = [];
-      foreach ($subvalue['protocol_selection'] as $community) {
+      foreach ($subvalue['protocol_selection'] ?? [] as $community) {
         if (!is_array($community) || !isset($community['protocols'])) {
           continue;
         }
@@ -350,7 +358,9 @@ class CulturalProtocolWidget extends WidgetBase {
         // would otherwise collapse into a single bogus protocol ID.
         $protocols = array_merge(array_keys(array_filter($community['protocols'])), $protocols);
       }
-      $massagedValues[$delta]['sharing_setting'] = $subvalue['sharing_setting'];
+      // 'all' is the widget's own default for this radio set, so falling back
+      // to it keeps an unsubmitted value consistent with an unchanged one.
+      $massagedValues[$delta]['sharing_setting'] = $subvalue['sharing_setting'] ?? 'all';
       $massagedValues[$delta]['protocols'] = CulturalProtocolItem::formatProtocols($protocols);
     }
 
