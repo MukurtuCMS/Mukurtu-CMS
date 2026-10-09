@@ -234,47 +234,6 @@ class FormHooks
             }
         }
 
-        // Tell the browser what the account fields are for, when the person
-        // is editing their own account (#2372, WCAG 1.3.5 Identify Input
-        // Purpose).
-        //
-        // Core's AccountForm deliberately sets autocomplete="off" on mail,
-        // name and pass whenever the form is not a registration, and on
-        // current_pass always. Its reason is sound on the administrative
-        // path: an administrator editing someone else's account should not
-        // have their own saved details offered for those fields.
-        //
-        // It does not hold when the account being edited is the editor's
-        // own, which is exactly the case 1.3.5 covers - fields collecting
-        // information about the user. Autofill there is the behaviour the
-        // criterion exists to enable, and it saves retyping an address for
-        // people who find that costly.
-        //
-        // So: restore the proper tokens for self-editing only, and leave
-        // core's behaviour untouched everywhere else. This runs after
-        // AccountForm::form(), so these win.
-        $formObject = $form_state->getFormObject();
-        $editedAccount = $formObject instanceof EntityFormInterface
-            ? $formObject->getEntity()
-            : NULL;
-        $isSelfEdit = $operation !== "register"
-            && $editedAccount instanceof UserInterface
-            && !$editedAccount->isNew()
-            && (int) $editedAccount->id() === (int) \Drupal::currentUser()->id();
-
-        if ($isSelfEdit) {
-            $tokens = [
-                "name" => "username",
-                "mail" => "email",
-                "current_pass" => "current-password",
-            ];
-            foreach ($tokens as $key => $token) {
-                if (isset($form["account"][$key])) {
-                    $form["account"][$key]["#attributes"]["autocomplete"] = $token;
-                }
-            }
-        }
-
         // Move display name field to sit directly below password in the account group.
         if (isset($form["account"]["pass"])) {
             $form["account"]["pass"]["#weight"] = 0.0012;
