@@ -10,6 +10,7 @@ dependencies:
     - file
     - image
     - layout_builder
+    - mukurtu_media
 third_party_settings:
   layout_builder:
     enabled: false
@@ -20,7 +21,7 @@ bundle: video
 mode: browse
 content:
   field_media_video_file:
-    type: file_video
+    type: mukurtu_video_with_tracks
     label: hidden
     settings:
       controls: true
@@ -53,6 +54,7 @@ hidden:
   field_cultural_protocols: true
   field_identifier: true
   field_media_tags: true
+  field_media_video_tracks: true
   field_people: true
   flag_export_media: true
   langcode: true
