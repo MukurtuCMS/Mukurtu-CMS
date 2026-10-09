@@ -1477,3 +1477,30 @@ control clipped or pushed off screen at any width from 320px to 1600px. */
   flex-shrink: 1 !important;
   min-width: 0 !important;
 }
+
+/* Fourth and last cause of the admin reflow failures in #2336, on the
+submission form settings page.
+
+Gin already wraps wide admin tables in .gin-table-scroll-wrapper with
+overflow-x: auto, and that works: the 678px table scrolls inside a 262px
+box at a 320px viewport, which is what 1.4.10 contemplates for content that
+genuinely needs a two-dimensional layout.
+
+What escapes it are the table's own visually-hidden <label> elements, 33 of
+them on that page. Drupal's .visually-hidden uses position: absolute, and
+with no positioned ancestor inside the table their containing block is the
+initial one. An absolutely positioned box is only clipped by an ancestor
+that is also in its containing-block chain, so the scroll wrapper cannot
+contain them, and the ones belonging to right-hand columns sit far beyond
+the viewport and widen the page.
+
+Giving the wrapper a position makes it their containing block, so the
+existing overflow-x finally applies to them too. The labels stay in the
+accessibility tree, which is the point of them: verified all 65 labels
+still present and named after the change.
+
+Checked that Gin draws no ::before/::after on this wrapper, so introducing
+a containing block cannot move a scroll shadow that isn't there. */
+.gin-table-scroll-wrapper {
+  position: relative;
+}
