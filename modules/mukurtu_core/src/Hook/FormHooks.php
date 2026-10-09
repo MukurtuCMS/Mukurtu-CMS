@@ -16,6 +16,7 @@ use Drupal\og\Og;
 use Drupal\views\ViewExecutable;
 use Drupal\og\OgMembershipInterface;
 use Drupal\user\Entity\User;
+use Drupal\user\UserInterface;
 
 /**
  * Hook implementations for mukurtu_core forms.
@@ -796,8 +797,9 @@ class FormHooks
         // for /user/register, and without this guard anonymous signup would
         // stop asking for an address at all. That would leave self-registered
         // accounts with no way to reset a password and no way to be contacted.
-        $operation = $form_state->getFormObject() instanceof EntityFormInterface
-            ? $form_state->getFormObject()->getOperation()
+        $formObject = $form_state->getFormObject();
+        $operation = $formObject instanceof EntityFormInterface
+            ? $formObject->getOperation()
             : NULL;
         if ($operation !== "register" && isset($form["account"]["mail"])) {
             $form["account"]["mail"]["#required"] = FALSE;
@@ -812,6 +814,55 @@ class FormHooks
                     && $form["actions"][$action]["#type"] === "submit") {
                     $form["actions"][$action]["#submit"][] =
                         "mukurtu_core_warn_on_missing_email";
+                }
+            }
+        }
+
+        // Tell the browser what the account fields are for, when the person
+        // is editing their own account (#2372, WCAG 1.3.5 Identify Input
+        // Purpose).
+        //
+        // Core's AccountForm deliberately sets autocomplete="off" on mail,
+        // name and pass whenever the form is not a registration. Its reason
+        // is sound on the administrative path: an administrator editing
+        // someone else's account should not have their own saved details
+        // offered for those fields.
+        //
+        // It does not hold when the account being edited is the editor's
+        // own, which is exactly the case 1.3.5 covers - fields collecting
+        // information about the user. Autofill there is the behaviour the
+        // criterion exists to enable, and it saves retyping an address for
+        // people who find that costly.
+        //
+        // current_pass is a deliberate tradeoff. Core only adds it for
+        // self-editing, and turns autofill off so that someone at an
+        // unattended, signed-in browser has to know the password to change
+        // the email or password. We restore "current-password" anyway:
+        // 1.3.5 lists it, and current browsers and password managers
+        // ignore "off" on password fields, so core's setting costs
+        // accessibility without buying much protection. The new password
+        // fields already carry "new-password" from password_confirm.
+        //
+        // So: restore the proper tokens for self-editing only, and leave
+        // core's behaviour untouched everywhere else. This runs after
+        // AccountForm::form(), so these win.
+        $editedAccount = $formObject instanceof EntityFormInterface
+            ? $formObject->getEntity()
+            : NULL;
+        $isSelfEdit = $operation !== "register"
+            && $editedAccount instanceof UserInterface
+            && !$editedAccount->isNew()
+            && (int) $editedAccount->id() === (int) \Drupal::currentUser()->id();
+
+        if ($isSelfEdit) {
+            $tokens = [
+                "name" => "username",
+                "mail" => "email",
+                "current_pass" => "current-password",
+            ];
+            foreach ($tokens as $key => $token) {
+                if (isset($form["account"][$key])) {
+                    $form["account"][$key]["#attributes"]["autocomplete"] = $token;
                 }
             }
         }
