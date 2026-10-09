@@ -534,5 +534,32 @@ function mukurtu_core_update_40210(): ?string {
     }
   }
 
-  return $fixed ? (string) t('Fixed the language filter on @count browse and search views.', ['@count' => $fixed]) : NULL;
+  // The filter now works, so stale index data shows. Search API's
+  // language_with_fallback values are computed at index time, so content
+  // indexed before a language was added is missing that language and the
+  // filter hides it there. Reindex so every item gets the current languages.
+  // LanguageFallbackReindexHooks keeps this current from here on.
+  $queued = 0;
+  if (count(\Drupal::languageManager()->getLanguages()) > 1 && \Drupal::moduleHandler()->moduleExists('search_api')) {
+    /** @var \Drupal\search_api\IndexInterface $index */
+    foreach (\Drupal::entityTypeManager()->getStorage('search_api_index')->loadMultiple() as $index) {
+      if (!$index->status() || $index->isReadOnly()) {
+        continue;
+      }
+      foreach ($index->getFields() as $field) {
+        if ($field->getPropertyPath() === 'language_with_fallback' && $field->getDatasourceId() === NULL) {
+          $index->reindex();
+          $queued++;
+          break;
+        }
+      }
+    }
+  }
+
+  if ($fixed) {
+    return $queued
+      ? (string) t('Fixed the language filter on @count browse and search views and queued @indexes search indexes for reindexing.', ['@count' => $fixed, '@indexes' => $queued])
+      : (string) t('Fixed the language filter on @count browse and search views.', ['@count' => $fixed]);
+  }
+  return $queued ? (string) t('Queued @indexes search indexes for reindexing.', ['@indexes' => $queued]) : NULL;
 }

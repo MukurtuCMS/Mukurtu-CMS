@@ -16,6 +16,8 @@ Use the `language_with_fallback` property. It's provided by Search API's `Langua
 
 The property is indexed as a `string`, but Search API declares its Views type as `language`. Views therefore always builds the filter with the `SearchApiLanguage` handler (an `in` operator), whatever `plugin_id` the YAML names. An `=` operator with a `min`/`max`/`value` array, which is what shipped in #2074, adds no condition at all, and every translation of every item is listed (#2342). `ShippedLanguageFallbackFilterQueryTest` runs each shipped filter through a real query to catch this.
 
+The fallback languages are computed when an item is indexed, not when it's searched. An item indexed before a language was added has no value for that language, so the filter hides it there until the item is reindexed. `mukurtu_search`'s `LanguageFallbackReindexHooks` queues a reindex of every index with this field whenever a language is added or its weight changes, and `mukurtu_core_update_40210()` queues one on existing multilingual sites.
+
 ### Plain-entity views (no Search API)
 
 Use core's own recipe, the same structural pattern `core/modules/media_library` ships:
