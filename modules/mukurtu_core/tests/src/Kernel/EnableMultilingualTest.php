@@ -37,7 +37,7 @@ class EnableMultilingualTest extends KernelTestBase {
    * Builds the form with the given module installer.
    */
   protected function form(ModuleInstallerInterface $installer): EnableMultilingualForm {
-    $form = new EnableMultilingualForm($installer, \Drupal::moduleHandler(), new NullLogger());
+    $form = new EnableMultilingualForm($installer, \Drupal::moduleHandler(), \Drupal::service('extension.list.module'), new NullLogger());
     $form->setStringTranslation(\Drupal::service('string_translation'));
     $form->setMessenger(\Drupal::messenger());
     return $form;
@@ -98,6 +98,30 @@ class EnableMultilingualTest extends KernelTestBase {
 
     $this->fakeMultilingualInstalled();
     $this->assertFalse($form->access()->isAllowed());
+  }
+
+  /**
+   * The confirm page lists the modules that are not installed yet.
+   */
+  public function testListsModulesToInstall(): void {
+    $form = $this->form($this->createMock(ModuleInstallerInterface::class));
+    $modules = $form->getModulesToInstall();
+
+    $this->assertSame('Mukurtu Multilingual', $modules[EnableMultilingualForm::MODULE]);
+    foreach (['config_translation', 'locale', 'config_translation_po', 'language'] as $dependency) {
+      $this->assertArrayHasKey($dependency, $modules);
+    }
+    // Installed dependencies are left off.
+    $this->assertArrayNotHasKey('user', $modules);
+    $this->assertArrayNotHasKey('system', $modules);
+
+    // enableModules() rebuilds the container, so build the form again.
+    $this->enableModules(['language']);
+    $form = $this->form($this->createMock(ModuleInstallerInterface::class));
+    $this->assertArrayNotHasKey('language', $form->getModulesToInstall());
+
+    $build = $form->buildForm([], new FormState());
+    $this->assertSame(array_values($form->getModulesToInstall()), $build['description']['modules']['#items']);
   }
 
   /**

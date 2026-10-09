@@ -6,6 +6,7 @@ namespace Drupal\mukurtu_core\Form;
 
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Access\AccessResultInterface;
+use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Extension\ModuleInstallerInterface;
 use Drupal\Core\Form\ConfirmFormBase;
@@ -27,6 +28,7 @@ class EnableMultilingualForm extends ConfirmFormBase {
   public function __construct(
     protected ModuleInstallerInterface $moduleInstaller,
     protected ModuleHandlerInterface $moduleHandler,
+    protected ModuleExtensionList $moduleList,
     protected LoggerInterface $logger,
   ) {}
 
@@ -37,6 +39,7 @@ class EnableMultilingualForm extends ConfirmFormBase {
     return new static(
       $container->get('module_installer'),
       $container->get('module_handler'),
+      $container->get('extension.list.module'),
       $container->get('logger.factory')->get('mukurtu_core'),
     );
   }
@@ -69,7 +72,51 @@ class EnableMultilingualForm extends ConfirmFormBase {
    * {@inheritdoc}
    */
   public function getDescription() {
-    return $this->t('This turns on the Mukurtu Multilingual module and the Drupal translation modules it needs. You can then add languages and translate content, configuration, and the site interface. Mukurtu Managers can manage languages and translations, and all signed-in users can translate content they can edit.');
+    return $this->t('You can then add languages and translate content, configuration, and the site interface. Mukurtu Managers can manage languages and translations, and all signed-in users can translate content they can edit.');
+  }
+
+  /**
+   * Lists the names of the modules that confirming will install.
+   *
+   * That is mukurtu_multilingual plus whichever of its dependencies, direct
+   * or indirect, are not installed yet.
+   *
+   * @return string[]
+   *   Module human-readable names, keyed by machine name.
+   */
+  public function getModulesToInstall(): array {
+    $list = $this->moduleList->getList();
+    $names = [];
+    foreach ([static::MODULE, ...array_keys($list[static::MODULE]->requires ?? [])] as $module) {
+      if (isset($list[$module]) && !$this->moduleHandler->moduleExists($module)) {
+        $names[$module] = $list[$module]->info['name'];
+      }
+    }
+    return $names;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function buildForm(array $form, FormStateInterface $form_state) {
+    $form = parent::buildForm($form, $form_state);
+    $form['description'] = [
+      'intro' => [
+        '#markup' => $this->t('This turns on the following modules:'),
+        '#prefix' => '<p>',
+        '#suffix' => '</p>',
+      ],
+      'modules' => [
+        '#theme' => 'item_list',
+        '#items' => array_values($this->getModulesToInstall()),
+      ],
+      'details' => [
+        '#markup' => $this->getDescription(),
+        '#prefix' => '<p>',
+        '#suffix' => '</p>',
+      ],
+    ];
+    return $form;
   }
 
   /**
