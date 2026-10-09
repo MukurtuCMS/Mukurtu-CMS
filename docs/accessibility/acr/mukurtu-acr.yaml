@@ -25,10 +25,20 @@ notes: >-
   of an individual Mukurtu site also depends on its content and configuration.
 evaluation_methods_used: >-
   Automated scanning with axe-core (via Playwright) across a representative
-  page inventory, combined with manual keyboard-only testing and screen reader
-  testing (NVDA, VoiceOver, or Orca) following the program's manual testing
-  checklist. Findings are consolidated by WCAG Success Criterion before
-  conformance levels are assigned.
+  page inventory covering anonymous, member and administrative pages,
+  together with purpose-built checks for criteria axe cannot assert on its
+  own: reflow, text resize, text spacing, focus visibility, link text,
+  keyboard traps, label in name and input purpose. Several of those also gate
+  continuous integration, so a regression fails a build rather than only
+  being reported; the rest are report-only and are treated as indicators
+  rather than evidence. Criteria decidable from source, configuration and
+  content were evaluated by desk review, and each finding was confirmed
+  against a clean install before a conformance level was assigned. Findings
+  are consolidated by WCAG Success Criterion before levels are assigned.
+  Manual keyboard-only testing and screen reader testing (NVDA, VoiceOver or
+  Orca) following the program's manual testing checklist are planned but have
+  not yet been carried out. Criteria that depend on them remain
+  not-evaluated, and no level in this report rests on them.
 legal_disclaimer: >-
   The information herein is provided in good faith based on the analysis of
   the product at the time of the review and does not represent a
