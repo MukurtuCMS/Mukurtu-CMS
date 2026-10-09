@@ -505,42 +505,44 @@ chapters:
         components:
           - name: web
             adherence:
-              level: partially-supports
+              level: supports
               notes: >-
-                Downgraded from supports in October 2026. The previous
-                claim said automated reflow testing asserts no horizontal
-                scrolling at 320px "across the page inventory". That
-                conflated two layers: reflow.spec.ts gates in CI but
-                deliberately covers only pages needing no seeded content
-                (/, /browse, /user/login, and /communities since PR #2325),
-                while the inventory-wide check is report-only and does not
-                fail a build.
-                The public-facing pages now pass. The /communities failure
-                that prompted this downgrade, 349px at a 320px viewport,
-                was fixed in PR #2325 and has a gating test; the community
-                page and member community page report clean too.
-                The criterion stays at partially-supports because the
-                inventory-wide check reports 14 admin pages requiring
-                horizontal scroll at a 320px viewport, measured between
-                357px and 507px, on the most recent successful main run
-                (issue #2336). These are authoring surfaces, so the same
-                evidence bears on the authoring-tool component below.
-                The 14 trace to three shared causes in the Gin admin
-                theme, not 14 separate defects: the shortcut tooltip
-                beside the page title, which is fixed in PR #2337 and
-                leaves /admin and /admin/structure clean; the sticky form
-                actions on node add forms; and the breadcrumb wrapper on
-                settings forms.
-                This claim is deliberately not raised on the strength of
-                the /communities fix alone: reflow is recorded as fully
-                machine-decidable, so a reported failure is a real failure
-                and admin pages are in scope.
-                Text resize (1.4.4) is a separate criterion and is
-                evaluated separately; several pages also overflow at 200%
-                text size. Evidence for the September 2026 changes is
-                recorded by criterion in
-                docs/accessibility/findings/2026-09-17-remediation-cycle.md,
-                and the October 2026 automated evidence in
+                Raised back to supports in October 2026, on the evidence of
+                a clean run rather than on the strength of the fixes alone.
+                The criterion was downgraded earlier that month because the
+                previous claim said automated reflow testing asserts no
+                horizontal scrolling at 320px "across the page inventory",
+                which conflated the gating spec with a report-only check,
+                and because real failures existed on both public and admin
+                pages.
+                Both layers are now clean. reflow.spec.ts gates /, /browse,
+                /user/login and /communities; admin-reflow.spec.ts gates 13
+                admin pages; and the inventory-wide checkReflow, which
+                covers every page in both inventories, reports zero 1.4.10
+                findings across 360 result files on the most recent
+                successful main run (37865757336).
+                Five defects were fixed to get here. On the public side,
+                /communities required 349px at a 320px viewport (PR #2325).
+                On the admin side, issue #2336 covered 14 pages measuring
+                357px to 507px, which traced to four causes rather than 14
+                separate defects: the shortcut tooltip beside the page title
+                (PR #2337), the breadcrumb wrapper (PR #2339), the sticky
+                form actions bar (PR #2340), and on the submission form
+                settings a fixed-width select together with visually-hidden
+                labels escaping Gin's table scroll wrapper (PR #2364).
+                One page in #2336, collection organization, takes a
+                discovered node id rather than a fixed path, so it is
+                covered by the inventory-wide check and was verified by hand
+                at 320px, 480px and 1280px rather than added to the gating
+                spec.
+                Wide data tables still scroll horizontally inside their own
+                container, which 1.4.10 permits for content that needs a
+                two-dimensional layout; the page itself does not scroll.
+                Text resize (1.4.4) is a separate criterion and is evaluated
+                separately; several pages still overflow at 200% text size.
+                Evidence is recorded by criterion in
+                docs/accessibility/findings/2026-09-17-remediation-cycle.md
+                and
                 docs/accessibility/findings/2026-10-06-automated-evidence-prefill.md.
           - name: authoring-tool
             adherence:
