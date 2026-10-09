@@ -5,3 +5,6 @@ node_modules/
 /playwright/.cache/
 # Saved sessions from tests/auth.setup.ts. Cookies: never commit these.
 /playwright/.auth/
+
+# Scratch directory for ad-hoc investigation specs.
+.probe/
