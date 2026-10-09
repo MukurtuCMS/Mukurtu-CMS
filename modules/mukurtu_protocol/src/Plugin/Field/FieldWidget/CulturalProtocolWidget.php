@@ -360,6 +360,13 @@ class CulturalProtocolWidget extends WidgetBase {
       }
       // 'all' is the widget's own default for this radio set, so falling back
       // to it keeps an unsubmitted value consistent with an unchanged one.
+      //
+      // It cannot quietly overwrite a stored setting. The key is only absent
+      // when the widget rendered no radios at all, which happens only when
+      // the person has no protocols, and that submission fails validate()
+      // with "At least one Cultural Protocol must be selected" before
+      // anything is saved. A widget hidden by content_translation still
+      // submits, via #default_value, so that path keeps its real value.
       $massagedValues[$delta]['sharing_setting'] = $subvalue['sharing_setting'] ?? 'all';
       $massagedValues[$delta]['protocols'] = CulturalProtocolItem::formatProtocols($protocols);
     }
