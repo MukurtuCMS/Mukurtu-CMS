@@ -33,6 +33,14 @@ class DatabaseCharsetRequirements {
    */
   protected const ALLOWED_CHARACTER_SETS = ['utf8mb4', 'ascii'];
 
+  /**
+   * How many table names to list before summarizing the rest as a count.
+   *
+   * A site still on unpatched search_api_db has 80 or more affected tables,
+   * which would bury the rest of the status report.
+   */
+  protected const MAX_LISTED_TABLES = 10;
+
   public function __construct(
     protected readonly Connection $connection,
   ) {}
@@ -63,11 +71,32 @@ class DatabaseCharsetRequirements {
         'title' => $this->t('Database character set'),
         'value' => $this->formatPlural(count($tables), "1 table doesn't use utf8mb4", "@count tables don't use utf8mb4"),
         'description' => $this->t("Some text columns in these tables use a character set other than utf8mb4, so they can't store characters such as Osage, Adlam, and emoji. Content that contains those characters can fail to save or be left out of search results. Back up the database, then convert each table to utf8mb4, or ask your hosting provider to. Tables: @tables.", [
-          '@tables' => implode(', ', $tables),
+          '@tables' => $this->tableList($tables),
         ]),
         'severity' => RequirementSeverity::Warning,
       ],
     ];
+  }
+
+  /**
+   * Formats table names for the description, summarizing any past the limit.
+   *
+   * @param string[] $tables
+   *   Table names.
+   *
+   * @return string
+   *   A comma-separated list.
+   */
+  protected function tableList(array $tables): string {
+    $listed = implode(', ', array_slice($tables, 0, static::MAX_LISTED_TABLES));
+    $remaining = count($tables) - static::MAX_LISTED_TABLES;
+    if ($remaining <= 0) {
+      return $listed;
+    }
+
+    return (string) $this->formatPlural($remaining, '@tables, and 1 more', '@tables, and @count more', [
+      '@tables' => $listed,
+    ]);
   }
 
   /**

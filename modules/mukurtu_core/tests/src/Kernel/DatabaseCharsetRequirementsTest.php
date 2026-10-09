@@ -125,4 +125,22 @@ class DatabaseCharsetRequirementsTest extends KernelTestBase {
     $this->assertStringNotContainsString($this->fullTableName('users_data'), $description);
   }
 
+  /**
+   * Only the first 10 tables are named; the rest are summarized as a count.
+   */
+  public function testLongListIsSummarized(): void {
+    $database = \Drupal::database();
+    for ($i = 1; $i <= 12; $i++) {
+      $database->query(sprintf("CREATE TABLE {mukurtu_charset_test_%02d} ([value] VARCHAR(255) NOT NULL) CHARACTER SET 'utf8' COLLATE 'utf8_general_ci'", $i));
+    }
+
+    $requirement = $this->requirements()[static::KEY];
+
+    $this->assertSame("12 tables don't use utf8mb4", (string) $requirement['value']);
+    $description = (string) $requirement['description'];
+    $this->assertStringContainsString($this->fullTableName('mukurtu_charset_test_10') . ', and 2 more.', $description);
+    $this->assertStringNotContainsString($this->fullTableName('mukurtu_charset_test_11'), $description);
+    $this->assertStringNotContainsString($this->fullTableName('mukurtu_charset_test_12'), $description);
+  }
+
 }
