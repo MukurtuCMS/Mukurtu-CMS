@@ -9,6 +9,7 @@ To learn more about Mukurtu CMS and the larger Mukurtu community, visit [mukurtu
 
 * The necessary database server, web server, and PHP installed that meet [modern Drupal requirements](https://www.drupal.org/docs/system-requirements)
   * PHP 8.4 is supported.
+  * We recommend setting the PHP memory Limit (memory_limit) to 512MB (or higher, if needed).
   * Currently MariaDB or MySQL is supported. PostGRES is not.
   * The Mukurtu Team does our internal work with nginx. Apache SHOULD work fine, but we have not tested it extensively.
 * [Composer](https://getcomposer.org/)
