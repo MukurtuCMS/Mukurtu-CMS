@@ -370,8 +370,27 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                Evaluated with checkLabelInName across
+                anonymous and administrative pages, which
+                compares each control's accessible name
+                against its visible label and reports a
+                control whose name does not contain its label.
+                Zero findings across the home page, browse,
+                login, registration, communities, the admin
+                overview, content and people listings, the
+                digital heritage node form, submission
+                settings and the communities and protocols
+                manager. The check approximates the accessible
+                name computation rather than implementing all
+                of it, so it is a strong indicator rather than
+                a proof; an earlier version placed the title
+                attribute ahead of text content and reported
+                21 false positives before that was corrected.
+                Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -559,8 +578,31 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: partially-supports
+              notes: >-
+                The login form identifies its purpose
+                correctly: the username and password fields
+                carry autocomplete username and
+                current-password, and that is gated in CI by
+                input-purpose.spec.ts, which asserts each
+                field exists before asserting its token. The
+                account form does not. Drupal core's
+                AccountForm sets autocomplete off on the
+                email, username and password fields whenever
+                the form is not a registration, and on the
+                current password field always, so on a page
+                where a person edits their own account the
+                purpose of those fields is not
+                programmatically determinable. Core's stated
+                reason is to stop a browser prefilling another
+                person's details, which is a real concern on
+                the administrative path but does not hold
+                where someone is editing their own account.
+                The inventory-wide checkInputPurpose reports
+                these three fields on /user/*/edit and reports
+                nothing elsewhere. Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -711,8 +753,19 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                More than one way is available to reach
+                content. The site offers a search box in the
+                header on every page, a main navigation menu,
+                and browse listings reached from the home
+                page, including browse by community and by
+                collection. Any two of these satisfy the
+                criterion independently, so no sitemap is
+                required, and none is installed. Evidence is
+                recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -793,8 +846,27 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: partially-supports
+              notes: >-
+                Deletion of entities goes through a
+                confirmation form throughout: 19 classes
+                extend a confirm or delete form base, covering
+                communities, protocols, collections, exports,
+                import strategies, memberships and legacy
+                labels, and the Views Bulk Operations delete
+                action on the media listing sets
+                add_confirmation. Bulk removal of group
+                memberships does not. The members overview
+                uses Organic Groups' own bulk form rather than
+                Views Bulk Operations, which offers no
+                confirmation option, and its delete action
+                removes each membership immediately. Re-adding
+                a member does not restore their roles, so the
+                action is neither reversible, checked nor
+                confirmed (issue #2370). Evidence is recorded
+                in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated

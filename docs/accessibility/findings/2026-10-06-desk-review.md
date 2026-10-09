@@ -69,14 +69,18 @@ useful precedent and shows the gap is specific rather than systemic.
 | 3.1.2 | AA | **does-not-support** | The `language` vocabulary has no code field, so no `lang` can be emitted for dictionary content. See gap 2 |
 | 4.1.1 | A | supports | Satisfied by definition in HTML5, and removed from WCAG in 2.2. Recording the reasoning rather than testing |
 
-## Still open after desk review (4)
+## Resolved after desk review (4)
 
-| SC | Why code reading was not enough | Next step |
+All four were closed out on 9 October 2026 against a clean install
+(`~/ddev/mukurtu-a11y`, profile at `main`), which is what the desk review
+could not reach.
+
+| SC | Level | What decided it |
 |---|---|---|
-| 1.3.5 Identify Input Purpose | Needs the rendered `autocomplete` attribute on fields collecting the user's own information. The `autocomplete` matches in the codebase are Drupal's entity-reference widget, which is unrelated | Automate as a DOM check |
-| 2.4.5 Multiple Ways | Site search, main navigation and browse all exist, and no sitemap module is installed. Whether *every* page type is reachable two independent ways is a judgment about the live information architecture | Confirm on a running site |
-| 2.5.3 Label in Name | Needs each control's accessible name compared against its visible label | Automate as a DOM check |
-| 3.3.4 Error Prevention | 19 classes extend a confirm-form base. Which destructive or legally significant actions lack one is the actual question | Enumerate destructive routes and check each |
+| 1.3.5 Identify Input Purpose | **partially-supports** | The login form is correct and gated. The account form is not: Drupal core's `AccountForm` sets `autocomplete="off"` on email, username and password whenever the form is not a registration, and on current password always, so a person editing their own account has no programmatically determinable field purpose. Core's reason, stopping a browser prefilling someone else's details, holds on the administrative path but not for self-editing |
+| 2.4.5 Multiple Ways | supports | Header search on every page, a main navigation menu, and browse listings. Any two satisfy the criterion, so no sitemap is needed and none is installed |
+| 2.5.3 Label in Name | supports | Zero findings across 5 anonymous and 6 administrative pages. Caveat: the check approximates the accessible name computation, and an earlier version reported 21 false positives by placing `title` ahead of text content |
+| 3.3.4 Error Prevention | **partially-supports** | 19 confirm/delete form classes cover entity deletion, and the VBO media delete confirms. Bulk membership removal does not: the members overview uses Organic Groups' own bulk form, which has no confirmation option, and deletes each membership immediately (issue #2370) |
 
 ## Follow-ups filed
 
