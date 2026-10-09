@@ -100,7 +100,7 @@
     <div class="featured-item__type">{{ node.type.entity.label }}</div>
 
     <h3{{ title_attributes }}>
-      <a href="{{ url }}" rel="bookmark" class="featured-item__title-link">
+      <a href="{{ url }}" rel="bookmark" class="featured-item__title-link"{% if word_langcode %} lang="{{ word_langcode }}"{% endif %}>
         {{- label|add_suggestion('clean') -}}
       </a>
     </h3>

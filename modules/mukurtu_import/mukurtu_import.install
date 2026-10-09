@@ -498,3 +498,34 @@ function _mukurtu_import_insert_after_or_replace(array $items, string $key, mixe
   }
   return $result;
 }
+
+/**
+ * Map the Language code column in the default language import template.
+ */
+function mukurtu_import_update_40404(): ?string {
+  // Keep the docblock above to one line: Drupal renders it verbatim as this
+  // update's description on update.php and in `drush updatedb:status`.
+  //
+  // mukurtu_export_update_40402() adds a Language code column to language
+  // term exports (#2328). config/install ships the row, which fixes new
+  // sites. As in mukurtu_import_update_40402(), only the shipped template is
+  // touched, and a template that already has the column keeps its target.
+  /** @var \Drupal\mukurtu_import\Entity\MukurtuImportStrategy|null $strategy */
+  $strategy = \Drupal::entityTypeManager()->getStorage('mukurtu_import_strategy')->load('taxonomy_language_all_fields');
+  if (!$strategy) {
+    return NULL;
+  }
+
+  $mapping = $strategy->getMapping() ?? [];
+  foreach ($mapping as $row) {
+    if (($row['source'] ?? NULL) === 'Language code') {
+      return NULL;
+    }
+  }
+
+  $mapping[] = ['source' => 'Language code', 'target' => 'field_language_code'];
+  $strategy->setMapping($mapping);
+  $strategy->save();
+
+  return (string) t('Mapped the Language code column in the default language import template.');
+}
