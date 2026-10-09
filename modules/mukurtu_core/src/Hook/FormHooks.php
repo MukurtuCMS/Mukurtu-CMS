@@ -797,8 +797,9 @@ class FormHooks
         // for /user/register, and without this guard anonymous signup would
         // stop asking for an address at all. That would leave self-registered
         // accounts with no way to reset a password and no way to be contacted.
-        $operation = $form_state->getFormObject() instanceof EntityFormInterface
-            ? $form_state->getFormObject()->getOperation()
+        $formObject = $form_state->getFormObject();
+        $operation = $formObject instanceof EntityFormInterface
+            ? $formObject->getOperation()
             : NULL;
         if ($operation !== "register" && isset($form["account"]["mail"])) {
             $form["account"]["mail"]["#required"] = FALSE;
@@ -822,10 +823,10 @@ class FormHooks
         // Purpose).
         //
         // Core's AccountForm deliberately sets autocomplete="off" on mail,
-        // name and pass whenever the form is not a registration, and on
-        // current_pass always. Its reason is sound on the administrative
-        // path: an administrator editing someone else's account should not
-        // have their own saved details offered for those fields.
+        // name and pass whenever the form is not a registration. Its reason
+        // is sound on the administrative path: an administrator editing
+        // someone else's account should not have their own saved details
+        // offered for those fields.
         //
         // It does not hold when the account being edited is the editor's
         // own, which is exactly the case 1.3.5 covers - fields collecting
@@ -833,10 +834,18 @@ class FormHooks
         // criterion exists to enable, and it saves retyping an address for
         // people who find that costly.
         //
+        // current_pass is a deliberate tradeoff. Core only adds it for
+        // self-editing, and turns autofill off so that someone at an
+        // unattended, signed-in browser has to know the password to change
+        // the email or password. We restore "current-password" anyway:
+        // 1.3.5 lists it, and current browsers and password managers
+        // ignore "off" on password fields, so core's setting costs
+        // accessibility without buying much protection. The new password
+        // fields already carry "new-password" from password_confirm.
+        //
         // So: restore the proper tokens for self-editing only, and leave
         // core's behaviour untouched everywhere else. This runs after
         // AccountForm::form(), so these win.
-        $formObject = $form_state->getFormObject();
         $editedAccount = $formObject instanceof EntityFormInterface
             ? $formObject->getEntity()
             : NULL;
