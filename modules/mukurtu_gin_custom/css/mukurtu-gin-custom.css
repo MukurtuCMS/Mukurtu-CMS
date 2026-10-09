@@ -1334,3 +1334,173 @@ body.path-visitors .layout-row.layout-row {
     min-width: 0;
   }
 }
+
+/* The "Add to Default shortcuts" tooltip beside the page title pushes every
+admin page into horizontal scrolling at a 320px viewport (WCAG 1.4.10 Reflow,
+issue #2336). Gin positions it with
+  position: absolute; inset-inline-start: 100%; min-width: 120px;
+  white-space: nowrap;
+so it always extends rightward from the star icon and, on a narrow screen,
+straight past the right edge. It is invisible until hover/focus (opacity: 0),
+but an absolutely positioned box still extends the document's scrollable
+overflow area, so it widens the page even while nobody can see it. On /admin
+and /admin/structure it is the *only* overflowing element; measured right edge
+runs from 354px up to 508px depending on how far the title and the sticky form
+actions push the icon along.
+
+Three obvious fixes are all wrong, each verified in a browser:
+- display: none until hover/focus removes the box, but this span IS the link's
+  accessible name ("Add to Default shortcuts"); hiding it leaves an unnamed
+  link, trading a 1.4.10 failure for a 4.1.2 one.
+- Flipping it to inset-inline-end: 100% puts it at left: -74px, off the other
+  edge and unreadable.
+- overflow-x: clip on the sticky region stops the scrolling but clips the
+  tooltip itself when it is shown.
+
+So: keep the box in the accessibility tree, keep it visible when revealed, and
+anchor it to the sticky region's inline end instead of to the 20px icon, where
+it has room to wrap. Dropping position: relative from the link is what lets it
+resolve against the region rather than the icon.
+
+Narrow viewports only. Anchoring to the region's edge at desktop widths would
+strand the tooltip up to 1100px away from the icon it belongs to, so above this
+breakpoint Gin's own placement is left alone - it has plenty of room there, and
+its measured right edge stays under 490px even at 1600px wide. 48rem sits above
+the worst narrow-screen case (508px) with headroom for a longer page title. */
+@media (max-width: 48rem) {
+  .shortcut-action {
+    /* !important throughout this block: Gin ships these declarations behind
+    :is(#extra-specificity-hack, [data-drupal-admin-styles]), which carries an
+    id's specificity, so a plain class selector silently loses and the link
+    keeps position: relative - leaving the tooltip anchored to the 20px icon
+    and still overflowing. Same reasoning as the other Gin/Claro cascade
+    overrides in this file. */
+    position: static !important;
+  }
+
+  .shortcut-action__message {
+    inset-block-start: auto !important;
+    inset-inline-start: auto !important;
+    inset-inline-end: 0 !important;
+    min-width: 0 !important;
+    /* Cap the width so a long label wraps inside the viewport rather than
+    re-creating the overflow this rule exists to remove. */
+    max-width: min(20rem, calc(100vw - 2rem)) !important;
+    white-space: normal !important;
+  }
+}
+
+/* Second cause of the admin reflow failures in #2336: the breadcrumb.
+
+.gin-breadcrumb-wrapper is a flex item of .gin-secondary-toolbar, so it has
+flex's default min-width: auto and cannot shrink below its content. With
+white-space: nowrap on it, that content is one long line, so the breadcrumb
+sets the page width: 470px at a 320px viewport on bulk media upload, 452px on
+the submission form settings, 415px on pending submissions.
+
+Gin tries to prevent exactly this, with
+
+  .gin-breadcrumb .gin-breadcrumb-wrapper { min-width: 1px; }
+
+but that selector has the nesting backwards. In the rendered markup
+nav.gin-breadcrumb sits *inside* .gin-breadcrumb-wrapper, not around it, so
+the selector matches nothing and the min-width never lands. Verified in the
+browser: the wrapper computes min-width: auto, and
+document.querySelector(".gin-breadcrumb .gin-breadcrumb-wrapper") is null.
+
+min-width: 0 is what actually fixes the overflow - confirmed by reverting
+each declaration separately, where restoring nowrap alone changes nothing and
+restoring min-width: auto brings all 470px back.
+
+white-space: normal is a separate, deliberate choice on top of that. With
+min-width: 0 alone, Gin's own overflow: hidden / text-overflow: ellipsis on
+.gin-breadcrumb__list finally fires and the breadcrumb is truncated, which
+does stop the scrolling. But 1.4.10 asks for content "without loss of
+information or functionality", and clipping "Configuration / Mukurtu /
+Content warnings" to a few characters loses exactly what the breadcrumb is
+for. Wrapping keeps every crumb readable instead.
+
+No media query and no !important needed: Gin sets white-space on a plain
+class that this rule simply follows, nothing sets min-width on the wrapper at
+all, and the breadcrumb only takes a second line when it cannot fit on one.
+Measured at a single 26px line from 768px up, with no crumb clipped or pushed
+off screen at any width from 320px to 1600px. */
+.gin-breadcrumb-wrapper {
+  white-space: normal;
+  min-width: 0;
+}
+
+/* Third cause of the admin reflow failures in #2336: the sticky form actions
+bar, which covers the three node add forms and the export settings page.
+
+The bar is a flex item of .region-sticky__items__inner with flex: 0 0 auto
+and the default min-width: auto, so it cannot shrink below the width of its
+own contents: the publish-status wrapper (188px), Save (69px), Preview (89px),
+the sidebar trigger (32px) and the gaps between them come to 402px, inside a
+288px container.
+
+It already carries flex-wrap: wrap, so Gin clearly intends those controls to
+wrap onto more lines when space is tight. They never get the chance, because
+the bar is sized to its max-content width and so there is nothing to wrap
+within. Letting it shrink is all that is needed; the existing wrap then does
+the work.
+
+Worth noting what was blamed first: the element sitting at the page's right
+edge is a 1px span.visually-hidden ("Show sidebar panel") inside the sidebar
+trigger. It is correctly hidden and is not the problem - it is simply the
+innermost thing being carried along at x=418 by a bar that will not shrink.
+
+The trade-off is vertical: at 320px the bar grows from 118px to 198px tall as
+the controls wrap. That is the right way round, since the alternative is
+horizontal scrolling, but it is a real cost on a short screen and the bar
+could probably be made to pack more tightly as a follow-up.
+
+!important is required, and the reason is worth recording because it is not
+the usual specificity story. Gin ships these declarations as
+
+  :where(*) .gin-sticky-form-actions,
+  :is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-sticky-form-actions
+
+The :is() branch carries an id's specificity but only matches under
+[data-drupal-admin-styles]; elsewhere only the :where(*) branch applies, and
+:where() contributes nothing, so Gin's rule and a plain class selector here
+are *equally* specific and document order decides. This module's stylesheet
+loads before Gin's, so without !important the declarations below are simply
+overruled. A first version of this change was written without it and had no
+effect at all while appearing correct in a browser devtools experiment, where
+an injected <style> wins by being last.
+
+Self-regulating, so no media query: the bar only shrinks when it has to.
+Measured identical above 480px, unchanged at 1024, 1280 and 1600px, with no
+control clipped or pushed off screen at any width from 320px to 1600px. */
+.gin-sticky-form-actions {
+  flex-shrink: 1 !important;
+  min-width: 0 !important;
+}
+
+/* Fourth and last cause of the admin reflow failures in #2336, on the
+submission form settings page.
+
+Gin already wraps wide admin tables in .gin-table-scroll-wrapper with
+overflow-x: auto, and that works: the 678px table scrolls inside a 262px
+box at a 320px viewport, which is what 1.4.10 contemplates for content that
+genuinely needs a two-dimensional layout.
+
+What escapes it are the table's own visually-hidden <label> elements, 33 of
+them on that page. Drupal's .visually-hidden uses position: absolute, and
+with no positioned ancestor inside the table their containing block is the
+initial one. An absolutely positioned box is only clipped by an ancestor
+that is also in its containing-block chain, so the scroll wrapper cannot
+contain them, and the ones belonging to right-hand columns sit far beyond
+the viewport and widen the page.
+
+Giving the wrapper a position makes it their containing block, so the
+existing overflow-x finally applies to them too. The labels stay in the
+accessibility tree, which is the point of them: verified all 65 labels
+still present and named after the change.
+
+Checked that Gin draws no ::before/::after on this wrapper, so introducing
+a containing block cannot move a scroll shadow that isn't there. */
+.gin-table-scroll-wrapper {
+  position: relative;
+}
