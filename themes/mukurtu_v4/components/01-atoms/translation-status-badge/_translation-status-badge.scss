@@ -21,10 +21,7 @@
 
   &--not-translated {
     background-color: var(--color-warning-light);
-    // --color-warning-dark only reaches 4.14:1 against --color-warning-light.
-    // This shade (also used by status-badge's --unavailable modifier)
-    // reaches 5.96:1, passing AA for this 14px regular text.
-    color: #3f5a73;
+    color: var(--color-warning-dark);
   }
 
   // The fill disappears in forced colors, so the transparent border is what
