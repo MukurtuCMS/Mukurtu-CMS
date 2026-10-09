@@ -4,7 +4,9 @@ Worked through the 18 criteria that
 [2026-10-06-criteria-triage.md](2026-10-06-criteria-triage.md) put in bucket A,
 the ones decidable from the codebase and config without a running site.
 
-**14 of 18 are decided here. 4 need more than code reading.** Two real gaps
+**All 18 are now decided.** 14 were settled by the desk review itself; the
+remaining 4 needed more than code reading and were closed out on 9 October
+2026 against a clean install. Two real gaps
 turned up, both capability gaps rather than markup bugs, which means neither
 would ever have been caught by a page scan.
 
@@ -84,11 +86,15 @@ could not reach.
 
 ## Follow-ups filed
 
-Both gaps are tracked, and neither is in scope for #2242 itself, which is an
-audit:
+Each gap is tracked, and none is in scope for #2242 itself, which is an audit:
 
 - **#2329** — uploaded video cannot carry captions or audio description
   (1.2.2, 1.2.5, ATAG B).
 - **#2328** — the `language` vocabulary has no language code, which blocks
   `lang` on dictionary output (3.1.2). #2329 depends on this too, since a
   caption track needs a language of its own.
+- **#2370** — bulk-removing community or protocol members has no confirmation
+  step (3.3.4).
+- **#2372** — the account form carries `autocomplete="off"` on username, email
+  and password, so their purpose is not programmatically determinable when
+  someone edits their own account (1.3.5).
