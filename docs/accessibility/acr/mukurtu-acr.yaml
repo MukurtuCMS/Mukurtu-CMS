@@ -289,8 +289,21 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                No content moves, blinks, scrolls or updates
+                automatically, so there is nothing for a
+                pause, stop or hide control to act on. Both
+                carousels are instantiated without the
+                autoplay option, which the carousel library
+                defaults to off; no audio or video autoplays;
+                and the product's own stylesheets define no
+                keyframe animation. The only animation present
+                anywhere is a vendor carousel's loading
+                spinner, which is not presented in parallel
+                with other content. Evidence is recorded in
+                docs/accessibility/findings/2026-10-09-visual-pass.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -363,8 +376,19 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                No functionality requires a path-based or
+                multipoint gesture. Maps are the only
+                candidate: the map library's pinch-zoom is
+                available on a touch screen, but the zoom
+                control buttons ship enabled on every map
+                display, so zooming has a single-pointer
+                alternative. The media lightbox deliberately
+                does not implement pinch-zoom, and says so in
+                its own source. Evidence is recorded in
+                docs/accessibility/findings/2026-10-09-visual-pass.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -373,8 +397,16 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                No functionality is triggered by the down
+                event. The product binds no mousedown or
+                pointerdown handlers at all; activation
+                happens on click, which fires on the up event
+                and can be aborted by moving the pointer away
+                before releasing. Evidence is recorded in
+                docs/accessibility/findings/2026-10-09-visual-pass.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -746,8 +778,25 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                Evaluated with checkTextSpacing, which applies
+                the line height, letter spacing, word spacing
+                and paragraph spacing the criterion specifies,
+                then detects both page overflow and elements
+                clipping their own text. Zero findings across
+                the home page, browse, login, the admin
+                overview, the content listing and the digital
+                heritage node form. An earlier version of that
+                check reported 125 findings, of which 121 were
+                visually-hidden elements matching the
+                one-pixel clipped-box shape by design; it was
+                corrected in PR #2366 before this evaluation,
+                so the clean result reflects the content
+                rather than a broken measurement. Evidence is
+                recorded in
+                docs/accessibility/findings/2026-10-09-visual-pass.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -829,8 +878,17 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                Navigation appears in the same relative order
+                on every page. Checked as a visitor across the
+                home page, browse, communities and login: the
+                main menu is identical in content and order on
+                all four, as are the header search, the skip
+                link and the site logo's target. Evidence is
+                recorded in
+                docs/accessibility/findings/2026-10-09-visual-pass.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -839,8 +897,15 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                Components with the same function are labelled
+                the same way across pages. The header search
+                button, the skip link and the site logo link
+                are identical on the home page, browse,
+                communities and login. Evidence is recorded in
+                docs/accessibility/findings/2026-10-09-visual-pass.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
