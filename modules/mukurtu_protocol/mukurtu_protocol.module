@@ -1102,6 +1102,9 @@ function add_protocol_member_form_validate(&$form, FormStateInterface $form_stat
 function mukurtu_protocol_action_info_alter(array &$definitions): void {
   if (isset($definitions['og_membership_delete_action'])) {
     $definitions['og_membership_delete_action']['class'] = MukurtuDeleteOgMembershipAction::class;
+    // Views' bulk form redirects to this route after running the action, so
+    // that a bulk member removal is confirmed before it happens (#2370).
+    $definitions['og_membership_delete_action']['confirm_form_route_name'] = 'mukurtu_protocol.og_membership.remove_multiple';
   }
   if (isset($definitions['genpass_set_random_password'])) {
     $definitions['genpass_set_random_password']['class'] = MukurtuUserSetRandomPasswordAction::class;
