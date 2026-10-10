@@ -5,6 +5,10 @@
  * Install, update and uninstall functions for the Mukurtu Search module.
  */
 
+use Drupal\search_api\Entity\Index;
+use Drupal\search_api\IndexInterface;
+use Drupal\search_api_db\Plugin\search_api\backend\Database;
+
 function mukurtu_search_install() {
   mukurtu_search_rebuild_index();
 }
@@ -30,4 +34,91 @@ function mukurtu_search_update_last_removed(): int {
  */
 function mukurtu_search_update_40008() {
   mukurtu_search_enable_ignore_character_processor('mukurtu_browse_auto_index');
+}
+
+/**
+ * Let search store characters such as emoji and Osage letters.
+ */
+function mukurtu_search_update_40009(&$sandbox) {
+  // search_api_db stores everything but the fulltext word table as utf8mb3,
+  // which rejects 4-byte characters and so drops the whole item from the
+  // index. The search_api_db-utf8mb4-3060442.patch composer patch makes new
+  // tables utf8mb4; this converts the existing ones the same way.
+  if (!isset($sandbox['indexes'])) {
+    $sandbox['indexes'] = [];
+    foreach (Index::loadMultiple() as $index) {
+      if ($index->hasValidServer() && $index->getServerInstance()->getBackend() instanceof Database) {
+        $sandbox['indexes'][] = $index->id();
+      }
+    }
+    $sandbox['total'] = count($sandbox['indexes']);
+  }
+
+  // Convert one index per pass, since large tables take a while.
+  if ($index_id = array_shift($sandbox['indexes'])) {
+    mukurtu_search_convert_index_tables_to_utf8mb4(Index::load($index_id));
+  }
+  $sandbox['#finished'] = $sandbox['total'] ? 1 - count($sandbox['indexes']) / $sandbox['total'] : 1;
+}
+
+/**
+ * Converts a database-backed search index's tables to utf8mb4.
+ *
+ * Mirrors MySql::alterNewTable() as patched by
+ * search_api_db-utf8mb4-3060442.patch.
+ *
+ * @param \Drupal\search_api\IndexInterface $index
+ *   An index on a search_api_db server.
+ */
+function mukurtu_search_convert_index_tables_to_utf8mb4(IndexInterface $index): void {
+  /** @var \Drupal\search_api_db\Plugin\search_api\backend\Database $backend */
+  $backend = $index->getServerInstance()->getBackend();
+  $database = $backend->getDatabase();
+  if ($database->databaseType() !== 'mysql') {
+    return;
+  }
+  $db_info = \Drupal::keyValue(Database::INDEXES_KEY_VALUE_STORE_ID)->get($index->id());
+  if (empty($db_info['index_table'])) {
+    return;
+  }
+
+  $tables = [$db_info['index_table'] => 'utf8mb4_general_ci'];
+  foreach ($db_info['field_tables'] ?? [] as $field_table) {
+    $text = \Drupal::service('search_api.data_type_helper')->isTextType($field_table['type'] ?? '');
+    $tables[$field_table['table']] ??= $text ? 'utf8mb4_bin' : 'utf8mb4_general_ci';
+  }
+  foreach ($tables as $table => $collation) {
+    if (!$database->schema()->tableExists($table)) {
+      continue;
+    }
+    // A table MySQL can't convert (for example one with an old row format and
+    // its 767-byte key limit) keeps the old behavior instead of stopping the
+    // whole update.
+    try {
+      $database->query("ALTER TABLE {{$table}} CONVERT TO CHARACTER SET 'utf8mb4' COLLATE '$collation'");
+      // Keep item_id on the same collation as every other table, so joins on
+      // it stay fast.
+      if ($collation === 'utf8mb4_bin') {
+        $database->query("ALTER TABLE {{$table}} MODIFY [item_id] VARCHAR(150) CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_general_ci'");
+      }
+    }
+    catch (\Exception $e) {
+      \Drupal::logger('mukurtu_search')->warning('Could not convert search table %table to utf8mb4: @message', [
+        '%table' => $table,
+        '@message' => $e->getMessage(),
+      ]);
+    }
+  }
+}
+
+/**
+ * Reindex search so words in more writing systems can be found.
+ */
+function mukurtu_search_update_40010() {
+  // Indexes without the transliteration processor are unaffected.
+  foreach (Index::loadMultiple() as $index) {
+    if ($index->status() && $index->isValidProcessor('transliteration')) {
+      $index->reindex();
+    }
+  }
 }

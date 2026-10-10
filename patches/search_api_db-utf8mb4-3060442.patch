@@ -1,0 +1,33 @@
+diff --git a/modules/search_api_db/src/DatabaseCompatibility/MySql.php b/modules/search_api_db/src/DatabaseCompatibility/MySql.php
+--- a/modules/search_api_db/src/DatabaseCompatibility/MySql.php
++++ b/modules/search_api_db/src/DatabaseCompatibility/MySql.php
+@@ -16,20 +16,20 @@
+    * {@inheritdoc}
+    */
+   public function alterNewTable($table, $type = 'text') {
+-    // The Drupal MySQL integration defaults to using a 4-byte-per-character
+-    // encoding, which would make it impossible to use our normal 255 characters
+-    // long varchar fields in a primary key (since that would exceed the key's
+-    // maximum size). Therefore, we have to convert all tables to the "utf8"
+-    // character set – but we only want to make fulltext tables case-sensitive.
+-    $charset = $type === 'text' ? 'utf8mb4' : 'utf8';
+-    $collation = $type === 'text' ? 'utf8mb4_bin' : 'utf8_general_ci';
++    // Use the 4-byte "utf8mb4" character set everywhere, so values with
++    // characters outside the Basic Multilingual Plane (emoji, Osage, Adlam,
++    // and so on) can be stored. MySQL 8.0 and MariaDB 10.6, the minimum
++    // versions for Drupal 11, allow keys of up to 3072 bytes, which fits our
++    // 255 characters long varchar fields. Only fulltext tables should be
++    // case-sensitive.
++    $collation = $type === 'text' ? 'utf8mb4_bin' : 'utf8mb4_general_ci';
+     try {
+-      $this->database->query("ALTER TABLE {{$table}} CONVERT TO CHARACTER SET '$charset' COLLATE '$collation'");
++      $this->database->query("ALTER TABLE {{$table}} CONVERT TO CHARACTER SET 'utf8mb4' COLLATE '$collation'");
+       // Even for text tables, we need the "item_id" column to have the same
+       // collation as everywhere else. Otherwise, this can slow down search
+       // queries significantly.
+       if ($type === 'text') {
+-        $this->database->query("ALTER TABLE {{$table}} MODIFY [item_id] VARCHAR(150) CHARACTER SET 'utf8' COLLATE 'utf8_general_ci'");
++        $this->database->query("ALTER TABLE {{$table}} MODIFY [item_id] VARCHAR(150) CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_general_ci'");
+       }
+     }
+     catch (\PDOException | DatabaseException $e) {
