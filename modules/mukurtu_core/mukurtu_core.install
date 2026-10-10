@@ -502,7 +502,8 @@ function mukurtu_core_update_40211(): ?string {
   // Dictionary words print the code as an HTML lang attribute so screen
   // readers pronounce them in their own language (#2328). config/install
   // ships the field, which covers new sites; this adds it to existing ones.
-  // 40210 is skipped because an open PR (#2347) claims it.
+  // 40210 is unused: it was held for #2347, which moved to 40213 once this
+  // merged first.
   $entity_type_manager = \Drupal::entityTypeManager();
   if (!$entity_type_manager->getStorage('taxonomy_vocabulary')->load('language')) {
     return NULL;
@@ -537,4 +538,124 @@ function mukurtu_core_update_40211(): ?string {
   }
 
   return (string) t('Added a Language code field to the Language vocabulary. Add a code to each language term so that screen readers pronounce dictionary words correctly.');
+}
+
+/**
+ * Fix browse and search pages showing every translation of an item instead of one per language.
+ */
+function mukurtu_core_update_40213(array &$sandbox): ?string {
+  // Keep the docblock above to one line; see mukurtu_core_update_40201() for
+  // why.
+  //
+  // The language_with_fallback filter shipped in #2074 was configured as a
+  // search_api_string filter ('=' with a min/max/value array), but Search API
+  // registers that property as a language field, so Views always builds it
+  // with the search_api_language (in_operator) handler instead. That handler
+  // has no '=' operator, so it added no condition at all and every
+  // translation of every item was listed. Rewrite each such filter into the
+  // in_operator shape, keeping whatever language value the site configured.
+  if (!isset($sandbox['indexes'])) {
+    $fixed = 0;
+    foreach (\Drupal::entityTypeManager()->getStorage('view')->loadMultiple() as $view) {
+      $displays = $view->get('display');
+      $changed = FALSE;
+      foreach ($displays as $display_id => $display) {
+        foreach ($display['display_options']['filters'] ?? [] as $filter_id => $filter) {
+          if (($filter['field'] ?? NULL) !== 'language_with_fallback' || ($filter['operator'] ?? NULL) !== '=') {
+            continue;
+          }
+          $langcode = is_array($filter['value'] ?? NULL) ? ($filter['value']['value'] ?? '') : (string) ($filter['value'] ?? '');
+          if ($langcode === '') {
+            continue;
+          }
+          $filter['plugin_id'] = 'search_api_language';
+          $filter['operator'] = 'in';
+          $filter['value'] = [$langcode => $langcode];
+          unset($filter['expose']['min_placeholder'], $filter['expose']['max_placeholder'], $filter['expose']['placeholder']);
+          $filter['expose']['reduce'] = FALSE;
+          $displays[$display_id]['display_options']['filters'][$filter_id] = $filter;
+          $changed = TRUE;
+        }
+      }
+      if ($changed) {
+        $view->set('display', $displays)->save();
+        $fixed++;
+      }
+    }
+
+    // The filter now works, so stale index data shows. Search API's
+    // language_with_fallback values are computed at index time, so content
+    // indexed before a language was added is missing that language and the
+    // filter hides it there. Reindex so every item gets the current languages.
+    // Cron indexes only cron_limit items per run, so index here rather than
+    // leave content hidden for hours. LanguageFallbackReindexHooks keeps this
+    // current from here on.
+    $sandbox['fixed'] = $fixed;
+    $sandbox['indexes'] = [];
+    $sandbox['failed'] = FALSE;
+    if (count(\Drupal::languageManager()->getLanguages()) > 1 && \Drupal::moduleHandler()->moduleExists('search_api')) {
+      /** @var \Drupal\search_api\IndexInterface $index */
+      foreach (\Drupal::entityTypeManager()->getStorage('search_api_index')->loadMultiple() as $index) {
+        if (!$index->status() || $index->isReadOnly()) {
+          continue;
+        }
+        foreach ($index->getFields() as $field) {
+          if ($field->getPropertyPath() === 'language_with_fallback' && $field->getDatasourceId() === NULL) {
+            $index->reindex();
+            $sandbox['indexes'][] = $index->id();
+            break;
+          }
+        }
+      }
+    }
+    $sandbox['pending'] = $sandbox['indexes'];
+  }
+
+  // Index one chunk per pass, so a large site doesn't time out.
+  if (!$sandbox['failed'] && $sandbox['pending']) {
+    $index = \Drupal::entityTypeManager()->getStorage('search_api_index')->load(reset($sandbox['pending']));
+    try {
+      $remaining = $index ? $index->getTrackerInstance()->getRemainingItemsCount() : 0;
+      if ($remaining > 0) {
+        $limit = (int) $index->getOption('cron_limit', \Drupal::config('search_api.settings')->get('default_cron_limit') ?: 50);
+        $index->indexItems($limit > 0 ? $limit : 50);
+        $before = $remaining;
+        $remaining = $index->getTrackerInstance()->getRemainingItemsCount();
+        // Items that keep failing stay in the tracker. If a pass makes no
+        // progress, leave the rest for cron rather than loop forever.
+        if ($remaining >= $before) {
+          $remaining = 0;
+        }
+      }
+      if ($remaining === 0) {
+        array_shift($sandbox['pending']);
+      }
+    }
+    catch (\Exception) {
+      // The server is unreachable or the index is locked. The items stay
+      // queued for cron.
+      $sandbox['failed'] = TRUE;
+    }
+  }
+
+  $total = count($sandbox['indexes']);
+  if (!$sandbox['failed'] && $sandbox['pending']) {
+    $sandbox['#finished'] = ($total - count($sandbox['pending'])) / $total;
+    return NULL;
+  }
+  $sandbox['#finished'] = 1;
+
+  $fixed = $sandbox['fixed'];
+  if ($sandbox['failed']) {
+    if ($fixed) {
+      return (string) t('Fixed the language filter on @count browse and search views and queued @indexes search indexes for reindexing.', ['@count' => $fixed, '@indexes' => $total]);
+    }
+    return (string) t('Queued @indexes search indexes for reindexing.', ['@indexes' => $total]);
+  }
+  if ($fixed) {
+    return $total
+      ? (string) t('Fixed the language filter on @count browse and search views and reindexed @indexes search indexes.', ['@count' => $fixed, '@indexes' => $total])
+      : (string) t('Fixed the language filter on @count browse and search views.', ['@count' => $fixed]);
+  }
+  return $total ? (string) t('Reindexed @indexes search indexes.', ['@indexes' => $total]) : NULL;
 }

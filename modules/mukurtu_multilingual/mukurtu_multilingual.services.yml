@@ -1,0 +1,6 @@
+services:
+  mukurtu_multilingual.fallback_alias_repository:
+    class: Drupal\mukurtu_multilingual\PathAlias\FallbackAliasRepository
+    decorates: path_alias.repository
+    decoration_on_invalid: ignore
+    arguments: ['@.inner', '@language_manager']
