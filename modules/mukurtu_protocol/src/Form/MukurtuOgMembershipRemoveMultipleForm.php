@@ -3,6 +3,7 @@
 namespace Drupal\mukurtu_protocol\Form;
 
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Access\AccessResultReasonInterface;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\EntityInterface;
@@ -15,8 +16,10 @@ use Drupal\Core\TempStore\PrivateTempStore;
 use Drupal\Core\TempStore\PrivateTempStoreFactory;
 use Drupal\Core\Url;
 use Drupal\mukurtu_protocol\Plugin\Action\MukurtuDeleteOgMembershipAction;
+use Drupal\og\MembershipManagerInterface;
 use Drupal\og\OgAccessInterface;
 use Drupal\og\OgMembershipInterface;
+use Drupal\user\EntityOwnerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -28,10 +31,12 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * click (#2370, WCAG 2.1 3.3.4 Error Prevention).
  *
  * The staged selection can include memberships that cannot be removed yet,
- * because the person still belongs to a protocol within the community. Those
- * are listed separately with the reason, instead of being dropped from the
- * selection with a generic error the way the bulk form would do it: an
- * og_membership has no label, so that error cannot even name the person.
+ * because the person still belongs to a protocol within the community, or
+ * because they created the group, or because they are the only member left.
+ * Those are listed separately with the reason, instead of being dropped from
+ * the selection with the generic error the bulk form would give: that error
+ * names the entity by its label, and an og_membership's label is its state
+ * ("active"), so it cannot say who it is about.
  *
  * @see \Drupal\mukurtu_protocol\Plugin\Action\MukurtuDeleteOgMembershipAction
  */
@@ -45,11 +50,12 @@ class MukurtuOgMembershipRemoveMultipleForm extends ConfirmFormBase {
   protected array $removable = [];
 
   /**
-   * The staged memberships that cannot be removed, keyed by membership ID.
+   * What to say about each membership that cannot be removed.
    *
-   * Each value is the reason, from the access result.
+   * Keyed by membership ID; each value is the reason it cannot go, or the
+   * member's name when there is no reason to be had.
    *
-   * @var array
+   * @var string[]
    */
   protected array $blocked = [];
 
@@ -71,6 +77,7 @@ class MukurtuOgMembershipRemoveMultipleForm extends ConfirmFormBase {
     protected EntityTypeManagerInterface $entityTypeManager,
     protected EntityRepositoryInterface $entityRepository,
     protected OgAccessInterface $ogAccess,
+    protected MembershipManagerInterface $membershipManager,
     PrivateTempStoreFactory $temp_store_factory,
     protected AccountInterface $account,
   ) {
@@ -85,6 +92,7 @@ class MukurtuOgMembershipRemoveMultipleForm extends ConfirmFormBase {
       $container->get('entity_type.manager'),
       $container->get('entity.repository'),
       $container->get('og.access'),
+      $container->get('og.membership_manager'),
       $container->get('tempstore.private'),
       $container->get('current_user')
     );
@@ -165,10 +173,8 @@ class MukurtuOgMembershipRemoveMultipleForm extends ConfirmFormBase {
         $this->removable[$membership->id()] = $membership;
       }
       else {
-        $this->blocked[$membership->id()] = [
-          'name' => $this->memberName($membership),
-          'reason' => $access instanceof AccessResultReasonInterface ? $access->getReason() : NULL,
-        ];
+        $this->blocked[$membership->id()] = $this->blockedReason($membership, $access)
+          ?: $this->memberName($membership);
       }
     }
 
@@ -198,15 +204,6 @@ class MukurtuOgMembershipRemoveMultipleForm extends ConfirmFormBase {
     }
 
     if ($this->blocked) {
-      $items = [];
-      foreach ($this->blocked as $blocked) {
-        $items[] = $blocked['reason']
-          ? $this->t('@name: @reason', [
-            '@name' => $blocked['name'],
-            '@reason' => $blocked['reason'],
-          ])
-          : $blocked['name'];
-      }
       $form['blocked'] = [
         '#type' => 'container',
         '#weight' => -4,
@@ -221,7 +218,7 @@ class MukurtuOgMembershipRemoveMultipleForm extends ConfirmFormBase {
         ],
         'list' => [
           '#theme' => 'item_list',
-          '#items' => $items,
+          '#items' => array_values($this->blocked),
         ],
       ];
     }
@@ -312,6 +309,47 @@ class MukurtuOgMembershipRemoveMultipleForm extends ConfirmFormBase {
       return Url::fromRoute('mukurtu_protocol.community_members_list', ['group' => $this->group->id()]);
     }
     return Url::fromRoute('<front>');
+  }
+
+  /**
+   * Explains why a membership cannot be removed.
+   *
+   * Entity access carries a reason for the Mukurtu rule about protocols, but
+   * OG refuses to remove the member who created the group, and refuses to
+   * empty a group out entirely, without saying either of those things. This
+   * fills those two in, so that nobody is listed as un-removable with no
+   * explanation.
+   *
+   * @param \Drupal\og\OgMembershipInterface $membership
+   *   The membership that was refused.
+   * @param \Drupal\Core\Access\AccessResultInterface $access
+   *   The access result that refused it.
+   *
+   * @return string|null
+   *   The reason, or NULL if there is nothing to say beyond the refusal.
+   */
+  protected function blockedReason(OgMembershipInterface $membership, AccessResultInterface $access): ?string {
+    if ($access instanceof AccessResultReasonInterface && $access->getReason()) {
+      return (string) $access->getReason();
+    }
+
+    $group = $membership->getGroup();
+    $name = $this->memberName($membership);
+    $is_protocol = $group && $group->getEntityTypeId() === 'protocol';
+
+    if ($group instanceof EntityOwnerInterface && $group->getOwnerId() == $membership->getOwnerId()) {
+      return (string) ($is_protocol
+        ? $this->t('Cannot remove @user from the protocol because they created it.', ['@user' => $name])
+        : $this->t('Cannot remove @user from the community because they created it.', ['@user' => $name]));
+    }
+
+    if ($group && $this->membershipManager->getGroupMembershipCount($group) === 1) {
+      return (string) ($is_protocol
+        ? $this->t('Cannot remove @user from the protocol because a protocol must keep at least one member.', ['@user' => $name])
+        : $this->t('Cannot remove @user from the community because a community must keep at least one member.', ['@user' => $name]));
+    }
+
+    return NULL;
   }
 
   /**

@@ -124,7 +124,10 @@ class MemberRemovalConfirmTest extends KernelTestBase {
     $this->community = Community::create([
       'name' => 'Test community',
       'status' => TRUE,
-      'uid' => $owner->id(),
+      // The owner field is user_id, not uid; 'uid' is only the entity key's
+      // name, so setting that instead leaves the community ownerless and
+      // hides OG's rule about removing the member who created the group.
+      'user_id' => $owner->id(),
     ]);
     $this->community->save();
 
@@ -326,6 +329,65 @@ class MemberRemovalConfirmTest extends KernelTestBase {
 
     $this->assertNull($this->membershipOf($removable));
     $this->assertNotNull($this->membershipOf($in_protocol), 'A member who is still in a protocol is not removed.');
+  }
+
+  /**
+   * Tests that the person who created the group is told why they stay.
+   *
+   * OG adds a group's creator as a member when the group is saved, and then
+   * refuses to remove that membership without giving a reason, so the form
+   * supplies one.
+   */
+  public function testGroupCreatorIsExplained(): void {
+    $creator = User::load(1);
+    $creator_membership = $this->membershipOf($creator);
+    $this->assertNotNull($creator_membership, 'OG made the creator a member of the community.');
+
+    $this->deleteAction()->executeMultiple([$creator_membership]);
+
+    [$form_object, $form] = $this->buildConfirmForm(new FormState());
+
+    $this->assertArrayNotHasKey('members', $form, 'There is nobody who can be removed.');
+    $this->assertStringContainsString(
+      'because they created it',
+      (string) $form['blocked']['list']['#items'][0],
+      'The form says why the group creator cannot be removed.'
+    );
+    $this->assertFalse($form['actions']['submit']['#access'], 'There is nothing to confirm.');
+
+    $form_object->submitForm($form, new FormState());
+    $this->assertNotNull($this->membershipOf($creator), 'The group creator stays a member.');
+  }
+
+  /**
+   * Tests that emptying a group out entirely is refused, with a reason.
+   *
+   * Reaching this takes a group whose creator is no longer a member, which is
+   * what deleting their account leaves behind, and then one member left in it.
+   */
+  public function testLastMemberIsExplained(): void {
+    $lone_community = Community::create([
+      'name' => 'Community of one',
+      'status' => TRUE,
+      'user_id' => 1,
+    ]);
+    $lone_community->save();
+    $lone_community->addMember($this->manager, ['community_manager']);
+
+    // Stand in for the creator's account having gone away.
+    Og::getMembership($lone_community, User::load(1))->delete();
+
+    $membership = Og::getMembership($lone_community, $this->manager);
+    $this->deleteAction()->executeMultiple([$membership]);
+
+    [, $form] = $this->buildConfirmForm(new FormState());
+
+    $this->assertStringContainsString(
+      'must keep at least one member',
+      (string) $form['blocked']['list']['#items'][0],
+      'The form says why the last member of a group cannot be removed.'
+    );
+    $this->assertNotNull(Og::getMembership($lone_community, $this->manager));
   }
 
   /**

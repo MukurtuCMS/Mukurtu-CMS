@@ -137,12 +137,14 @@ class MukurtuDeleteOgMembershipAction extends ActionBase implements ContainerFac
   public function access($object, ?AccountInterface $account = NULL, $return_as_object = FALSE) {
     // Deliberately only asks whether this user may manage the group's
     // members, not whether this particular membership can be removed. Core's
-    // bulk form drops anything this method refuses with an error that names
-    // the entity by its label, and an og_membership has no label, so such an
-    // error cannot even say who it is about. Staging the whole selection lets
-    // the confirm form re-check each membership with entity access and show
-    // the real reason, e.g. that the person still belongs to a protocol
-    // within the community.
+    // bulk form drops anything this method refuses, with an error that names
+    // the entity by its label, and an og_membership's label is its state
+    // ("active"), so that error cannot say who it is about. Staging the whole
+    // selection lets the confirm form re-check each membership with entity
+    // access and give the real reason instead, e.g. that the person still
+    // belongs to a protocol within the community.
+    //
+    // @see mukurtu_protocol_entity_type_alter()
     $group = $object->getGroup();
     $access = $group
       ? $this->ogAccess->userAccess($group, 'manage members', $account)
