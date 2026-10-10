@@ -1148,6 +1148,8 @@ function mukurtu_protocol_entity_access(\Drupal\Core\Entity\EntityInterface $ent
     return AccessResult::neutral();
   }
 
+  // @todo Batch-load protocol memberships to avoid N+1 queries when a bulk
+  //   member removal checks this across many users at once.
   foreach ($group->getProtocols() as $protocol) {
     if ($protocol->getMembership($member)) {
       return AccessResult::forbidden()->setReason(t('Cannot remove @user from the community while they belong to a protocol within it. Remove them from all protocols first.', ['@user' => $member->getDisplayName()]));

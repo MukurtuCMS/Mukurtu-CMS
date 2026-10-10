@@ -257,10 +257,17 @@ class MukurtuOgMembershipRemoveMultipleForm extends ConfirmFormBase {
         continue;
       }
       $owner = $membership->getOwner();
+      $name = $this->memberName($membership);
+      $group_type = $membership->getGroupEntityType();
       $membership->delete();
       if ($owner) {
         Cache::invalidateTags(["user:{$owner->id()}"]);
       }
+      $this->logger('mukurtu_protocol')->notice('Removed %user from the @type %group.', [
+        '%user' => $name,
+        '@type' => $group_type,
+        '%group' => $this->groupLabel(),
+      ]);
       $removed++;
     }
 
