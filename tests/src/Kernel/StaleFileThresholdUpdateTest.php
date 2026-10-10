@@ -10,7 +10,7 @@ use Drupal\KernelTests\KernelTestBase;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests mukurtu_update_40033().
+ * Tests mukurtu_update_40031().
  *
  * The profile shipped system.performance:stale_file_threshold after Drupal
  * 11.4 core dropped it from the schema, so installing the profile under strict
@@ -63,7 +63,7 @@ class StaleFileThresholdUpdateTest extends KernelTestBase {
   public function testRemovesTheKey(): void {
     $this->writeLegacyConfig();
 
-    $message = mukurtu_update_40033();
+    $message = mukurtu_update_40031();
 
     $data = \Drupal::config('system.performance')->getRawData();
     $this->assertArrayNotHasKey('stale_file_threshold', $data);
@@ -78,8 +78,8 @@ class StaleFileThresholdUpdateTest extends KernelTestBase {
   public function testIsIdempotent(): void {
     $this->writeLegacyConfig();
 
-    mukurtu_update_40033();
-    $message = mukurtu_update_40033();
+    mukurtu_update_40031();
+    $message = mukurtu_update_40031();
 
     $this->assertArrayNotHasKey('stale_file_threshold', \Drupal::config('system.performance')->getRawData());
     $this->assertStringContainsString('nothing to change', $message);

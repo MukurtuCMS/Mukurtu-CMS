@@ -758,7 +758,7 @@ function mukurtu_update_40030(): string {
 /**
  * Remove an obsolete performance setting that Drupal core no longer uses.
  */
-function mukurtu_update_40033(): string {
+function mukurtu_update_40031(): string {
   $config = \Drupal::configFactory()->getEditable('system.performance');
 
   // The profile shipped stale_file_threshold after Drupal 11.4 core dropped it
