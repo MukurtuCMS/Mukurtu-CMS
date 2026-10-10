@@ -26,6 +26,11 @@ final class SiteSetupTask {
    *   Internal path or URL to the relevant admin page.
    * @param string|null $actionLabel
    *   Label for the action link.
+   * @param bool $dismissible
+   *   TRUE if the task can be dismissed.
+   * @param string[]|null $roles
+   *   Role IDs that see this task, or NULL for everyone who sees the
+   *   checklist.
    */
   public function __construct(
     private readonly string $id,
@@ -36,6 +41,7 @@ final class SiteSetupTask {
     private readonly ?string $actionUrl = NULL,
     private readonly ?string $actionLabel = NULL,
     private readonly bool $dismissible = FALSE,
+    private readonly ?array $roles = NULL,
   ) {}
 
   public function getId(): string {
@@ -68,6 +74,16 @@ final class SiteSetupTask {
 
   public function isDismissible(): bool {
     return $this->dismissible;
+  }
+
+  /**
+   * Returns the roles that see this task.
+   *
+   * @return string[]|null
+   *   Role IDs, or NULL for everyone who sees the checklist.
+   */
+  public function getRoles(): ?array {
+    return $this->roles;
   }
 
 }
