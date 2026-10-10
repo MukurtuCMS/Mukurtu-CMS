@@ -199,8 +199,25 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: partially-supports
+              notes: >-
+                Required fields are marked with an asterisk
+                glyph rather than colour, and form errors name
+                the field in text, so those do not rely on
+                colour. System messages do. Error, warning and
+                status blocks are distinguished from one
+                another only by background colour: there is no
+                icon, the left border is identical and
+                transparent on all three, padding is
+                identical, and the only text cue is a
+                visually-hidden heading that a sighted reader
+                never sees. The wording of a message often
+                makes its nature clear on its own, which
+                limits the practical impact, but severity
+                itself is carried visually by colour alone.
+                Evidence is recorded in
+                docs/accessibility/findings/2026-10-09-visual-pass.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -505,8 +522,24 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                Labels or instructions are provided wherever
+                input is required. Most controls carry a
+                visible label. Where one is visually hidden it
+                is because a visible column header labels the
+                column, which covers 31 of the 47 such
+                controls on the richest form in the product.
+                The remaining 16, on the submission settings
+                field groups, sit under a visible fieldset
+                instruction explaining what the groups do, and
+                each control carries a programmatic label plus
+                either a placeholder or a self-describing
+                default option. The criterion asks that labels
+                or instructions be provided, not that every
+                label be visible. Evidence is recorded in
+                docs/accessibility/findings/2026-10-09-visual-pass.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -695,8 +728,16 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                No images of text. The only image the product
+                renders on its own pages is the site logo,
+                which the criterion exempts. Every other
+                graphic in the theme is an icon or interface
+                decoration carrying no text. Evidence is
+                recorded in
+                docs/accessibility/findings/2026-10-09-visual-pass.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -846,8 +887,20 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                Every element reachable by keyboard shows a
+                focus indicator. Measured by tabbing through
+                the home page, browse and login: 35 stops,
+                each with a drawn indicator of at least 2px
+                and at least 3:1 against the surface behind
+                it. Indicators are not all outlines; the main
+                navigation replaces its outline with a
+                pseudo-element ring, which is why a check that
+                looks only at the outline property reports it
+                as missing. Evidence is recorded in
+                docs/accessibility/findings/2026-10-09-visual-pass.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -914,8 +967,18 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                Error messages suggest a correction where one
+                is known. A malformed email address returns
+                "The email address is not valid. Use the
+                format user@example.com", which names both the
+                problem and the expected form. Required-field
+                errors name the field and what is needed, for
+                example "At least one Cultural Protocol must
+                be selected". Evidence is recorded in
+                docs/accessibility/findings/2026-10-09-visual-pass.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
