@@ -5,7 +5,9 @@
  * Install, update and uninstall functions for the Mukurtu Multilingual module.
  */
 
+use Drupal\Core\Config\FileStorage;
 use Drupal\Core\Field\Entity\BaseFieldOverride;
+use Drupal\mukurtu_multilingual\TranslationStatus\TranslationStatusTracker;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\language\Entity\ContentLanguageSettings;
 use Drupal\user\Entity\Role;
@@ -54,6 +56,73 @@ function mukurtu_multilingual_install() {
   }
 
   _mukurtu_multilingual_apply_translation_overrides();
+
+  // Fill the translation status pages for any content that already exists.
+  \Drupal::service('mukurtu_multilingual.translation_status_tracker')->requestRebuild();
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function mukurtu_multilingual_uninstall(): void {
+  // The table goes with hook_schema(); clear the rebuild flag and queue too.
+  \Drupal::state()->delete(TranslationStatusTracker::REBUILD_STATE);
+  \Drupal::queue(TranslationStatusTracker::QUEUE)->deleteQueue();
+}
+
+/**
+ * Implements hook_schema().
+ */
+function mukurtu_multilingual_schema(): array {
+  $schema[TranslationStatusTracker::TABLE] = [
+    'description' => 'How completely each tracked entity is translated into each language.',
+    'fields' => [
+      'entity_type' => [
+        'type' => 'varchar_ascii',
+        'length' => 32,
+        'not null' => TRUE,
+        'description' => 'The entity type ID.',
+      ],
+      'entity_id' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'The entity ID.',
+      ],
+      'langcode' => [
+        'type' => 'varchar_ascii',
+        'length' => 12,
+        'not null' => TRUE,
+        'description' => 'The target language code.',
+      ],
+      'status' => [
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => '0 = not translated, 1 = partly translated, 2 = translated.',
+      ],
+      'translated_count' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Fields translated into this language.',
+      ],
+      'total_count' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Translatable fields that have a value in the original.',
+      ],
+    ],
+    'primary key' => ['entity_type', 'entity_id', 'langcode'],
+    'indexes' => [
+      'type_language_status' => ['entity_type', 'langcode', 'status'],
+    ],
+  ];
+  return $schema;
 }
 
 /**
@@ -143,4 +212,52 @@ function _mukurtu_multilingual_apply_translation_overrides(): void {
  */
 function mukurtu_multilingual_update_last_removed(): int {
   return 40009;
+}
+
+/**
+ * Add translation status pages that show which content still needs translating.
+ */
+function mukurtu_multilingual_update_40010(array &$sandbox): ?string {
+  // Keep the docblock above to one line; it is shown in update.php.
+  //
+  // Creates the status table and the five admin views, then works out the
+  // status of every existing translatable item in batches.
+  $tracker = \Drupal::service('mukurtu_multilingual.translation_status_tracker');
+
+  if (!isset($sandbox['items'])) {
+    $schema = \Drupal::database()->schema();
+    if (!$schema->tableExists(TranslationStatusTracker::TABLE)) {
+      $schema->createTable(TranslationStatusTracker::TABLE, mukurtu_multilingual_schema()[TranslationStatusTracker::TABLE]);
+    }
+
+    $source = new FileStorage(\Drupal::service('extension.list.module')->getPath('mukurtu_multilingual') . '/config/install');
+    $view_storage = \Drupal::entityTypeManager()->getStorage('view');
+    foreach (['content', 'media', 'taxonomy_term', 'community', 'protocol'] as $type) {
+      $id = 'mukurtu_translation_status_' . $type;
+      if (!$view_storage->load($id)) {
+        $view_storage->createFromStorageRecord($source->read('views.view.' . $id))->save();
+      }
+    }
+
+    $sandbox['items'] = [];
+    foreach ($tracker->trackedEntityIds() as $entity_type_id => $ids) {
+      foreach (array_chunk($ids, 50) as $chunk) {
+        $sandbox['items'][] = [$entity_type_id, $chunk];
+      }
+    }
+    $sandbox['total'] = array_sum(array_map(fn ($item) => count($item[1]), $sandbox['items']));
+    $sandbox['done'] = 0;
+  }
+
+  if ($item = array_shift($sandbox['items'])) {
+    [$entity_type_id, $ids] = $item;
+    $tracker->refreshMultiple($entity_type_id, $ids);
+    $sandbox['done'] += count($ids);
+  }
+
+  $sandbox['#finished'] = $sandbox['items'] ? $sandbox['done'] / max(1, $sandbox['total']) : 1;
+  if ($sandbox['#finished'] < 1) {
+    return NULL;
+  }
+  return (string) t('Recorded translation status for @count items.', ['@count' => $sandbox['done']]);
 }
