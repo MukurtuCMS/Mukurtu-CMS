@@ -754,3 +754,21 @@ function mukurtu_update_40030(): string {
 
   return (string) t('New full-background hero blocks now default to dark text.');
 }
+
+/**
+ * Remove an obsolete performance setting that Drupal core no longer uses.
+ */
+function mukurtu_update_40031(): string {
+  $config = \Drupal::configFactory()->getEditable('system.performance');
+
+  // The profile shipped stale_file_threshold after Drupal 11.4 core dropped it
+  // from the system.performance schema, so every site installed since 4.0.0
+  // carries a key with no schema. Strict schema checking rejects it.
+  if ($config->get('stale_file_threshold') === NULL) {
+    return (string) t('The obsolete stale_file_threshold performance setting is not present; nothing to change.');
+  }
+
+  $config->clear('stale_file_threshold')->save();
+
+  return (string) t('Removed the obsolete stale_file_threshold performance setting.');
+}
