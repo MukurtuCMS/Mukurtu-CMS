@@ -33,7 +33,7 @@ If the view only lists/renders entities without sorting or filtering on translat
 
 ### The "not yet translated" indicator
 
-Implemented once, in `mukurtu_core` via `hook_entity_view_alter()`, rather than per content type or per view. It fires whenever the entity being rendered has no translation into the current content language. Don't duplicate this per view or per row template.
+Implemented once, in `mukurtu_core` via `hook_preprocess_node()` (`NotYetTranslatedIndicatorHooks`), rather than per content type or per view. It fires whenever the node being rendered has no translation into the current content language, and adds the indicator to `title_suffix` under the `mukurtu_not_yet_translated` key. Card templates print it with the rest of `title_suffix`. Full-page templates print it separately at the top of the main column, using `title_suffix|without('mukurtu_not_yet_translated')` where `title_suffix` used to go. Don't duplicate this per view or per row template.
 
 ## Exemptions
 

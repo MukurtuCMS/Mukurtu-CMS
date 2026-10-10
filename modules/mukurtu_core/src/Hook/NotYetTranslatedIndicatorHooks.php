@@ -65,13 +65,21 @@ class NotYetTranslatedIndicatorHooks implements ContainerInjectionInterface {
       return;
     }
 
+    // The pill sits inside the node's <article lang="..."> (the untranslated
+    // original's language), but its text is in the interface language, so
+    // it carries its own lang/dir for screen readers (WCAG 3.1.2).
+    $interface_language = $this->languageManager->getCurrentLanguage(LanguageInterface::TYPE_INTERFACE);
     $indicator = [
       '#theme' => 'mukurtu_not_yet_translated_indicator',
-      '#language_name' => $entity->language()->getName(),
+      // Name the language the visitor is missing, not the one shown.
+      // getLanguage() returns the name as translated for the interface.
+      '#language_name' => $this->languageManager->getLanguage($active_langcode)?->getName(),
+      '#langcode' => $interface_language->getId(),
+      '#direction' => $interface_language->getDirection(),
     ];
     CacheableMetadata::createFromRenderArray($indicator)
       ->addCacheableDependency($entity)
-      ->addCacheContexts(['languages:language_content'])
+      ->addCacheContexts(['languages:language_content', 'languages:language_interface'])
       ->applyTo($indicator);
 
     $variables['title_suffix']['mukurtu_not_yet_translated'] = $indicator;

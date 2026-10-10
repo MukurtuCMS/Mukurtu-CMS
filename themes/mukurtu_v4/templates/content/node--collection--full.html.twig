@@ -72,7 +72,7 @@
   <div{{ content_attributes }} class="full-node collection">
 
     {{ title_prefix }}
-    {{ title_suffix }}
+    {{ title_suffix|without('mukurtu_not_yet_translated') }}
 
     <div class="collection__header">
       <div class="collection__header__image">
@@ -85,6 +85,7 @@
           {{ label }}
           </h2>
         {% endif %}
+        {{ title_suffix.mukurtu_not_yet_translated }}
 
         {{ content.group_primary_fields.field_summary }}
       </div>
