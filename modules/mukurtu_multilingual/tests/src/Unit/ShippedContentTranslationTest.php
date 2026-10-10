@@ -53,17 +53,17 @@ class ShippedContentTranslationTest extends UnitTestCase {
   ];
 
   /**
-   * Resolves the module's config/install directory.
+   * Resolves the module's config/optional directory.
    */
-  private static function configInstallDir(): string {
-    return dirname(__DIR__, 3) . '/config/install';
+  private static function configDir(): string {
+    return dirname(__DIR__, 3) . '/config/optional';
   }
 
   /**
    * Every shipped content language setting, keyed by "entity_type.bundle".
    */
   public static function contentSettingsProvider(): \Generator {
-    $pattern = self::configInstallDir() . '/language.content_settings.*.yml';
+    $pattern = self::configDir() . '/language.content_settings.*.yml';
 
     foreach (glob($pattern) ?: [] as $path) {
       $key = str_replace(['language.content_settings.', '.yml'], '', basename($path));
@@ -101,7 +101,7 @@ class ShippedContentTranslationTest extends UnitTestCase {
    * The media bundles specifically are all still covered.
    */
   public function testAllMediaBundlesAreCovered(): void {
-    $dir = self::configInstallDir();
+    $dir = self::configDir();
 
     foreach (self::REQUIRED_MEDIA_BUNDLES as $bundle) {
       $this->assertFileExists(
