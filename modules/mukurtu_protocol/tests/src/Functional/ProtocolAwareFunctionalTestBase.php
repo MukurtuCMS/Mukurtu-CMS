@@ -31,6 +31,13 @@ class ProtocolAwareFunctionalTestBase extends BrowserTestBase {
   protected $profile = 'mukurtu';
 
   /**
+   * Bypass pre-existing config schema errors in the mukurtu profile.
+   *
+   * {@inheritdoc}
+   */
+  protected $strictConfigSchema = FALSE;
+
+  /**
    * Community 1.
    *
    * @var \Drupal\mukurtu_protocol\Entity\CommunityInterface
