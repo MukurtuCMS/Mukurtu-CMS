@@ -2,6 +2,7 @@
 
 namespace Drupal\mukurtu_protocol\Form;
 
+use Drupal\Component\Render\MarkupInterface;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Access\AccessResultReasonInterface;
@@ -53,9 +54,10 @@ class MukurtuOgMembershipRemoveMultipleForm extends ConfirmFormBase {
    * What to say about each membership that cannot be removed.
    *
    * Keyed by membership ID; each value is the reason it cannot go, or the
-   * member's name when there is no reason to be had.
+   * member's name when there is no reason to be had. Reasons are left
+   * unrendered so that the list builder escapes them exactly once.
    *
-   * @var string[]
+   * @var array
    */
   protected array $blocked = [];
 
@@ -225,9 +227,19 @@ class MukurtuOgMembershipRemoveMultipleForm extends ConfirmFormBase {
 
     $form['actions']['#weight'] = 10;
 
-    // Nothing can be removed, so there is nothing to confirm.
+    // Nothing can be removed, so there is nothing to confirm. Cancel is the
+    // only action left, and Gin files non-primary actions into an icon-only
+    // "More actions" menu, so the way back goes in the body where it stays
+    // visible.
     if (!$this->removable) {
       $form['actions']['submit']['#access'] = FALSE;
+      $form['back'] = [
+        '#type' => 'link',
+        '#title' => $this->t('Back to the members list'),
+        '#url' => $this->getCancelUrl(),
+        '#attributes' => ['class' => ['button', 'button--primary']],
+        '#weight' => -3,
+      ];
     }
 
     return $form;
@@ -285,10 +297,24 @@ class MukurtuOgMembershipRemoveMultipleForm extends ConfirmFormBase {
    * {@inheritdoc}
    */
   public function getDescription() {
-    if ($this->group && $this->group->getEntityTypeId() === 'protocol') {
-      return $this->t('They will lose their roles in this protocol and will no longer see content shared with it. Their accounts are not affected, and you can add them back from the members list, but their roles will need to be set again.');
+    $is_protocol = $this->group && $this->group->getEntityTypeId() === 'protocol';
+
+    // The group is named here as well as in the question, because Gin
+    // truncates the page title with an ellipsis and no title attribute, so
+    // from 768px down the question alone no longer says which group this is.
+    if (!$this->removable) {
+      return $this->t('None of the members you selected can be removed from %group right now. The reason for each one is listed below.', [
+        '%group' => $this->groupLabel(),
+      ]);
     }
-    return $this->t('They will lose their roles in this community and will no longer see content shared with it. Their accounts are not affected, and you can add them back from the members list, but their roles will need to be set again.');
+
+    return $is_protocol
+      ? $this->t('They will lose their roles in %group and will no longer see content shared with that protocol. Their accounts are not affected, and you can add them back from the members list, but their roles will need to be set again.', [
+        '%group' => $this->groupLabel(),
+      ])
+      : $this->t('They will lose their roles in %group and will no longer see content shared with that community. Their accounts are not affected, and you can add them back from the members list, but their roles will need to be set again.', [
+        '%group' => $this->groupLabel(),
+      ]);
   }
 
   /**
@@ -325,12 +351,15 @@ class MukurtuOgMembershipRemoveMultipleForm extends ConfirmFormBase {
    * @param \Drupal\Core\Access\AccessResultInterface $access
    *   The access result that refused it.
    *
-   * @return string|null
-   *   The reason, or NULL if there is nothing to say beyond the refusal.
+   * @return \Drupal\Component\Render\MarkupInterface|string|null
+   *   The reason, or NULL if there is nothing to say beyond the refusal. It is
+   *   returned unrendered, because casting it to a string here would escape
+   *   the member's name a second time when the list is built: a name like
+   *   O'Brien would come out as O&amp;#039;Brien.
    */
-  protected function blockedReason(OgMembershipInterface $membership, AccessResultInterface $access): ?string {
+  protected function blockedReason(OgMembershipInterface $membership, AccessResultInterface $access): MarkupInterface|string|null {
     if ($access instanceof AccessResultReasonInterface && $access->getReason()) {
-      return (string) $access->getReason();
+      return $access->getReason();
     }
 
     $group = $membership->getGroup();
@@ -338,15 +367,15 @@ class MukurtuOgMembershipRemoveMultipleForm extends ConfirmFormBase {
     $is_protocol = $group && $group->getEntityTypeId() === 'protocol';
 
     if ($group instanceof EntityOwnerInterface && $group->getOwnerId() == $membership->getOwnerId()) {
-      return (string) ($is_protocol
+      return $is_protocol
         ? $this->t('Cannot remove @user from the protocol because they created it.', ['@user' => $name])
-        : $this->t('Cannot remove @user from the community because they created it.', ['@user' => $name]));
+        : $this->t('Cannot remove @user from the community because they created it.', ['@user' => $name]);
     }
 
     if ($group && $this->membershipManager->getGroupMembershipCount($group) === 1) {
-      return (string) ($is_protocol
+      return $is_protocol
         ? $this->t('Cannot remove @user from the protocol because a protocol must keep at least one member.', ['@user' => $name])
-        : $this->t('Cannot remove @user from the community because a community must keep at least one member.', ['@user' => $name]));
+        : $this->t('Cannot remove @user from the community because a community must keep at least one member.', ['@user' => $name]);
     }
 
     return NULL;

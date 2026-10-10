@@ -391,6 +391,53 @@ class MemberRemovalConfirmTest extends KernelTestBase {
   }
 
   /**
+   * Tests that a name with an apostrophe in it is escaped exactly once.
+   */
+  public function testMemberNameWithAnApostropheIsNotDoubleEscaped(): void {
+    $creator = User::load(1);
+    $creator->setUsername("O'Brien Test")->save();
+    $this->createMember('other');
+
+    $this->deleteAction()->executeMultiple([$this->membershipOf($creator)]);
+
+    [, $form] = $this->buildConfirmForm(new FormState());
+
+    $rendered = (string) \Drupal::service('renderer')->renderInIsolation($form['blocked']);
+
+    $this->assertStringContainsString('O&#039;Brien Test', $rendered, 'The apostrophe is escaped.');
+    $this->assertStringNotContainsString('O&amp;#039;Brien Test', $rendered, 'The apostrophe is not escaped twice.');
+  }
+
+  /**
+   * Tests the page when nothing in the selection can be removed.
+   */
+  public function testNothingRemovableExplainsItselfAndOffersAWayBack(): void {
+    $creator = User::load(1);
+    $this->createMember('other');
+
+    $this->deleteAction()->executeMultiple([$this->membershipOf($creator)]);
+
+    [$form_object, $form] = $this->buildConfirmForm(new FormState());
+
+    $this->assertStringContainsString(
+      'None of the members you selected can be removed',
+      (string) $form_object->getDescription(),
+      'The description matches the question instead of describing a removal.'
+    );
+    $this->assertStringContainsString(
+      'Test community',
+      (string) $form_object->getDescription(),
+      'The description names the group, which the truncated page title may not.'
+    );
+    $this->assertSame(
+      'mukurtu_protocol.community_members_list',
+      $form['back']['#url']->getRouteName(),
+      'There is a visible link back to the members list.'
+    );
+    $this->assertFalse($form['actions']['submit']['#access']);
+  }
+
+  /**
    * Tests that the action is only offered to users who may manage members.
    */
   public function testActionAccessRequiresManageMembers(): void {
