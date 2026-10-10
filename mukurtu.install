@@ -388,6 +388,7 @@ function mukurtu_install() {
     'administer contact_message display',
     'administer contact_message fields',
     'administer contact_message form display',
+    'administer dictionary glossary order',
     'administer display modes',
     'administer embed buttons',
     'administer facets',
