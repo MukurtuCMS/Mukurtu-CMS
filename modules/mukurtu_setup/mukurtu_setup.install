@@ -1,0 +1,55 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the Mukurtu Setup module.
+ */
+
+declare(strict_types=1);
+
+use Drupal\Core\Cache\Cache;
+use Drupal\migrate\Plugin\MigrateIdMapInterface;
+use Drupal\mukurtu_setup\SiteSetupTaskManager;
+
+/**
+ * Mark the Mukurtu 3 migration setup task done on sites that no longer need it.
+ */
+function mukurtu_setup_update_40201(): ?string {
+  // A site that already ran a Mukurtu CMS 3 migration has imported rows in
+  // at least one of its id map tables.
+  $database = \Drupal::database();
+  foreach ($database->schema()->findTables('migrate_map_mukurtu_cms_v3_%') as $table) {
+    $imported = $database->select($table, 'm')
+      ->condition('m.source_row_status', MigrateIdMapInterface::STATUS_IMPORTED)
+      ->range(0, 1)
+      ->countQuery()
+      ->execute()
+      ->fetchField();
+    if ($imported) {
+      \Drupal::state()->set(SiteSetupTaskManager::STATE_MIGRATION_SUCCEEDED, TRUE);
+      Cache::invalidateTags(['mukurtu_setup:tasks']);
+      return (string) t('Marked the "Migrate from Mukurtu CMS 3" setup task complete because this site has already been migrated.');
+    }
+  }
+
+  // Migration only runs on a site with no content, so a site that has some
+  // can't migrate. These are the entity types the migration checks.
+  // @see \Drupal\mukurtu_migrate\MukurtuMigrateAccessCheck::siteHasContent()
+  $entity_type_manager = \Drupal::entityTypeManager();
+  foreach (['node', 'media', 'community', 'protocol'] as $entity_type_id) {
+    if (!$entity_type_manager->hasDefinition($entity_type_id)) {
+      continue;
+    }
+    $ids = $entity_type_manager->getStorage($entity_type_id)->getQuery()
+      ->accessCheck(FALSE)
+      ->range(0, 1)
+      ->execute();
+    if ($ids) {
+      \Drupal::service('mukurtu_setup.task_manager')->dismiss(SiteSetupTaskManager::TASK_MIGRATE);
+      return (string) t('Dismissed the "Migrate from Mukurtu CMS 3" setup task because this site already has content, so the migration can no longer run.');
+    }
+  }
+
+  // An empty site could still migrate, so it keeps the task.
+  return NULL;
+}

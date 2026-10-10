@@ -107,6 +107,9 @@ class MukurtuMigrateImportBatchFinishedTest extends KernelTestBase {
     // Landing page creation was skipped, so the simpler "default front
     // page" branch should have run.
     $this->assertSame('/node', $this->getFrontPage());
+
+    // The site now counts as migrated.
+    $this->assertTrue(\Drupal::state()->get('mukurtu_migrate.migration_succeeded', FALSE));
   }
 
   /**
@@ -133,6 +136,26 @@ class MukurtuMigrateImportBatchFinishedTest extends KernelTestBase {
 
     // The gate is blocked, so the front page should be untouched.
     $this->assertSame(self::SENTINEL_FRONT_PAGE, $this->getFrontPage());
+
+    // A run with failed rows does not count as a successful migration.
+    $this->assertFalse(\Drupal::state()->get('mukurtu_migrate.migration_succeeded', FALSE));
+  }
+
+  /**
+   * Task-level failures do not count as a successful migration.
+   */
+  public function testTaskFailureDoesNotRecordMigration(): void {
+    $results = [
+      'successes' => 1,
+      'failures' => 1,
+      'row_created_or_updated' => 3,
+      'row_failures' => 0,
+      'row_ignored' => 0,
+    ];
+
+    MukurtuMigrateImportBatch::finished(TRUE, $results, [], '1');
+
+    $this->assertFalse(\Drupal::state()->get('mukurtu_migrate.migration_succeeded', FALSE));
   }
 
   /**
@@ -159,6 +182,9 @@ class MukurtuMigrateImportBatchFinishedTest extends KernelTestBase {
     $this->assertContains('No content was created or updated for this migration task.', $warnings);
 
     $this->assertSame('/node', $this->getFrontPage());
+
+    // Nothing was brought over, so the site does not count as migrated.
+    $this->assertFalse(\Drupal::state()->get('mukurtu_migrate.migration_succeeded', FALSE));
   }
 
 }
