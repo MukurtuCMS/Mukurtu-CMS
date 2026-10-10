@@ -196,7 +196,7 @@ class LanguageFallbackReindexTest extends KernelTestBase {
     $sandbox = [];
     $passes = 0;
     do {
-      $message = mukurtu_core_update_40210($sandbox);
+      $message = mukurtu_core_update_40213($sandbox);
       $passes++;
     } while (($sandbox['#finished'] ?? 1) < 1 && $passes < 20);
 

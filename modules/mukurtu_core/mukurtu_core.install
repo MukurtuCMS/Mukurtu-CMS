@@ -493,9 +493,57 @@ function mukurtu_core_update_40209(): ?string {
 }
 
 /**
+ * Add a Language code field to the Language vocabulary.
+ */
+function mukurtu_core_update_40211(): ?string {
+  // Keep the docblock above to one line; see mukurtu_core_update_40201() for
+  // why.
+  //
+  // Dictionary words print the code as an HTML lang attribute so screen
+  // readers pronounce them in their own language (#2328). config/install
+  // ships the field, which covers new sites; this adds it to existing ones.
+  // 40210 is unused: it was held for #2347, which moved to 40213 once this
+  // merged first.
+  $entity_type_manager = \Drupal::entityTypeManager();
+  if (!$entity_type_manager->getStorage('taxonomy_vocabulary')->load('language')) {
+    return NULL;
+  }
+
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core') . '/config/install/';
+  $read = fn(string $name): array => Yaml::decode(file_get_contents($config_path . $name . '.yml'));
+
+  $to_create = [
+    'field_storage_config' => 'field.storage.taxonomy_term.field_language_code',
+    'field_config' => 'field.field.taxonomy_term.language.field_language_code',
+  ];
+  foreach ($to_create as $entity_type_id => $config_name) {
+    $storage = $entity_type_manager->getStorage($entity_type_id);
+    $values = $read($config_name);
+    if (!$storage->load($values['id'])) {
+      $storage->create($values)->save();
+    }
+  }
+
+  // A site that never saved the language term form display has none, so it
+  // gets the shipped one. Otherwise only the new field is added, leaving the
+  // site's own arrangement of the other fields alone.
+  $display_storage = $entity_type_manager->getStorage('entity_form_display');
+  $display_values = $read('core.entity_form_display.taxonomy_term.language.default');
+  $form_display = $display_storage->load($display_values['id']);
+  if (!$form_display) {
+    $display_storage->create($display_values)->save();
+  }
+  elseif (!$form_display->getComponent('field_language_code')) {
+    $form_display->setComponent('field_language_code', $display_values['content']['field_language_code'])->save();
+  }
+
+  return (string) t('Added a Language code field to the Language vocabulary. Add a code to each language term so that screen readers pronounce dictionary words correctly.');
+}
+
+/**
  * Fix browse and search pages showing every translation of an item instead of one per language.
  */
-function mukurtu_core_update_40210(array &$sandbox): ?string {
+function mukurtu_core_update_40213(array &$sandbox): ?string {
   // Keep the docblock above to one line; see mukurtu_core_update_40201() for
   // why.
   //
