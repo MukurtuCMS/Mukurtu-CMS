@@ -538,3 +538,17 @@ function mukurtu_core_update_40211(): ?string {
 
   return (string) t('Added a Language code field to the Language vocabulary. Add a code to each language term so that screen readers pronounce dictionary words correctly.');
 }
+
+/**
+ * Restore the "Add a basic page" link to the dashboard's Look and feel section.
+ */
+function mukurtu_core_update_40214(): void {
+  // Keep the docblock above to one line; see mukurtu_core_update_40201() for
+  // why.
+  //
+  // #1787 dropped the link and #2391 brings it back, ordered after "Edit
+  // footer" with the Landing Page link moved down to stay last. Rebuilding
+  // menu links picks up both changes. 40212 and 40213 are skipped because open
+  // PRs (#2363, #2347) claim them.
+  \Drupal::service('plugin.manager.menu.link')->rebuild();
+}
