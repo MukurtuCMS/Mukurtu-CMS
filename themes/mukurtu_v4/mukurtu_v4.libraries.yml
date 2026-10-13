@@ -99,3 +99,12 @@ copy-citation:
 drupal.message:
   js:
     js/message.theme.js: {}
+  dependencies:
+    - core/drupal
+    - mukurtu_v4/messages
+
+messages:
+  js:
+    js/messages.js: {}
+  dependencies:
+    - core/drupal
