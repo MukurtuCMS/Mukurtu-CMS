@@ -115,11 +115,43 @@ This is why 2.4.7 is `partially-supports` rather than `supports`. The Web
 component covers the administrative interface too; see the scope note at
 the top of the ACR.
 
-## Still open (1)
+## Part 3: 1.4.4 decided, once a real run existed
 
-| SC | Waiting on |
-|---|---|
-| 1.4.4 Resize Text | Five admin pages are clean under real browser text sizing, but the inventory-wide check only measures that way once PR #2375 merges. Holding until a clean run exists rather than recording a level on five pages |
+This was held back while `checkTextZoom` still approximated text sizing with
+a root font-size override. #2375 replaced that with the browser's own
+default font size, set through CDP and applied *before* load so rem media
+queries re-evaluate, which is what a reader who enlarges text actually gets.
+
+| SC | Level | What decided it |
+|---|---|---|
+| **1.4.4 Resize Text** | **partially-supports** | 43 of 45 pages need no horizontal scrolling at 200%; the two Local Contexts supported projects pages need 1485px in a 1280px viewport (#2392) |
+
+Both failures are stable, not intermittent: the same two pages at the same
+width on two separate successful main runs, [38003543030](https://github.com/MukurtuCMS/Mukurtu-CMS/actions/runs/38003543030)
+at `60271c193` (the #2375 merge itself) and [38064032171](https://github.com/MukurtuCMS/Mukurtu-CMS/actions/runs/38064032171)
+at `06603ba28` three days later. Both were measured in `before-load` mode,
+the strongest of the three the check can report.
+
+Every other automated check on those two pages is clean, reflow at 320px
+included. That combination is itself informative: at 320px the responsive
+layout has already collapsed, while at 1280px the desktop layout stays and
+something inside it grows past the viewport as the text doubles.
+
+The cause is **not** established. Seeding projects and a realistic API key
+into a local site and measuring with the same CDP call produced no overflow,
+so the trigger is something in the preview's seeded content. Reproducing it
+needs the A11Y preview credentials or closer Hub data; see #2392, which also
+records the unverified suspicion (the 36-character `project_id` UUID column,
+which no table will break across lines) so that nobody re-derives it.
+
+Page zoom, as distinct from text size, remains unchecked by any automated
+check and stays with the manual passes.
+
+## Still open (0)
+
+Nothing from this cycle. The remaining `not-evaluated` criteria are the
+keyboard and screen reader buckets, which need a human with assistive
+technology (#2242).
 
 ### Two investigations that nearly became false reports
 

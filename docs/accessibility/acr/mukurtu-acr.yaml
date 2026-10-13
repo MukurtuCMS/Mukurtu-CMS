@@ -720,8 +720,27 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: partially-supports
+              notes: >-
+                Evaluated with checkTextZoom, which doubles the
+                browser's own default font size through the Chrome
+                DevTools Protocol and reloads the page with it
+                already set, so that rem media queries re-evaluate
+                the way they do for a reader who has chosen a larger
+                text size.
+
+                Forty-three of the 45 pages in the inventory need no
+                horizontal scrolling at 200%. Two do: the Local
+                Contexts supported projects pages, for a community
+                and for a protocol, each reporting 1485px of content
+                in a 1280px viewport. The same two pages at the same
+                width failed on two separate main runs (38003543030
+                and 38064032171), so this is stable rather than
+                intermittent, and every other automated check on
+                those two pages is clean (issue #2392).
+
+                Page zoom, as distinct from text size, is not
+                covered by this check.
           - name: authoring-tool
             adherence:
               level: not-evaluated
