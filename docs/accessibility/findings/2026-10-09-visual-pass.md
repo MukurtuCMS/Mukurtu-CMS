@@ -38,7 +38,7 @@ error messages 3.3.3 needed graded.
 
 | SC | Level | What decided it |
 |---|---|---|
-| 2.4.7 Focus Visible | supports | 35 tab stops across 3 pages, every one with a drawn indicator of at least 2px and at least 3:1 |
+| **2.4.7 Focus Visible** | **partially-supports** | 35 tab stops across 3 visitor-facing pages all pass; every administrative form has focusable controls with none of their box on screen (#2389) |
 | 3.3.2 Labels or Instructions | supports | 31 of 47 hidden-label controls are labelled by a visible column header; the other 16 sit under a visible fieldset instruction and carry a placeholder or self-describing default |
 | 3.3.3 Error Suggestion | supports | "The email address is not valid. Use the format user@example.com" names the problem and the expected form |
 | 1.4.5 Images of Text | supports | The only image the product renders is the site logo, which the criterion exempts |
@@ -77,6 +77,43 @@ measures the wrong state; and an outline is painted outside the border box,
 so its contrast must be computed against the *parent's* background, not the
 element's own. Measuring both wrongly produced a 1.5:1 reading on a ring
 that is actually about 8.4:1.
+
+### 2.4.7: the administrative side, which the 35 stops did not reach
+
+The 35 stops above were all on visitor-facing pages. Auditing the new bulk
+member removal confirm form (#2370) turned up a failure on the other side
+of the product.
+
+Gin moves a form's action buttons into the sticky header, but the originals
+stay in the DOM inside a `position: fixed`, `height: 1px`, `overflow:
+hidden` wrapper, and they stay focusable. Visibility was measured by
+sampling points across each element's box and asking
+`document.elementFromPoint()` whether the element is what gets hit, so
+these are not computed-style guesses:
+
+| Page | Control | `tabIndex` | Box | Visible |
+|---|---|---|---|---|
+| `/admin/config/system/site-information` | `#edit-submit` "Save configuration" | 0 | `y:-11 w:162 h:40` | 0% |
+| `/user/<uid>/cancel` | `#edit-submit` "Block or delete account" | 0 | `y:-11` | 0% |
+| `/user/<uid>/cancel` | `#edit-cancel` "Cancel" | 0 | `y:-11 w:82 h:40` | 0% |
+
+Both are unmodified Drupal pages, so this is the admin theme and not
+Mukurtu code. On a confirm form the tab order runs: visible header submit,
+the "More actions" trigger, page links, then the invisible submit and the
+invisible cancel. The `#gin-sticky-edit-cancel` clone sits inside the
+collapsed "More actions" menu and is not tabbable until the menu is
+expanded, so the only Cancel that Tab reaches is one nobody can see.
+
+Gin does ship a visually hidden "Moves focus to sticky header actions" link
+inside the form, so an intended keyboard route to the real buttons exists.
+The problem is that the originals remain in the tab order as well. Tracked
+as #2389, which also notes why the obvious fix is not safe: with JavaScript
+off, Gin serves the header actions server-side preprocessed and the
+in-form buttons are the only ones that submit.
+
+This is why 2.4.7 is `partially-supports` rather than `supports`. The Web
+component covers the administrative interface too; see the scope note at
+the top of the ACR.
 
 ## Still open (1)
 

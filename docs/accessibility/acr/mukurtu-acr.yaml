@@ -57,10 +57,12 @@ chapters:
   success_criteria_level_a:
     notes: >-
       Mukurtu CMS is a Drupal distribution. The "Web" component below covers
-      the visitor and logged-in member experience (the current audit scope).
-      The "Authoring Tool" component covers the content creation and
-      administration experience, which will be evaluated in a later phase
-      against ATAG 2.0 in addition to WCAG.
+      the product's whole browser interface, the visitor and member
+      experience and the administrative one alike, and the page inventory
+      behind these assessments includes all three. The "Authoring Tool"
+      component covers conformance with ATAG 2.0, which asks additionally
+      that an authoring tool help its authors produce accessible content; it
+      will be evaluated in a later phase.
     criteria:
       - num: 1.1.1
         components:
@@ -887,18 +889,32 @@ chapters:
         components:
           - name: web
             adherence:
-              level: supports
+              level: partially-supports
               notes: >-
-                Every element reachable by keyboard shows a
-                focus indicator. Measured by tabbing through
-                the home page, browse and login: 35 stops,
-                each with a drawn indicator of at least 2px
-                and at least 3:1 against the surface behind
-                it. Indicators are not all outlines; the main
-                navigation replaces its outline with a
-                pseudo-element ring, which is why a check that
-                looks only at the outline property reports it
-                as missing. Evidence is recorded in
+                Visitor-facing pages pass. Every element reachable
+                by keyboard shows a focus indicator, measured by
+                tabbing through the home page, browse and login: 35
+                stops, each with a drawn indicator of at least 2px
+                and at least 3:1 against the surface behind it.
+                Indicators are not all outlines; the main navigation
+                replaces its outline with a pseudo-element ring,
+                which is why a check that looks only at the outline
+                property reports it as missing.
+
+                Administrative forms do not. The Gin admin theme
+                moves a form's action buttons into a sticky header
+                but leaves the originals in the tab order, inside a
+                one-pixel container, so focus can land on a control
+                with none of its box on screen. Measured on two
+                unmodified Drupal pages: the submit button on the
+                site information form, and both the submit and
+                cancel buttons on an account cancel form, each
+                focusable with none of its box visible. The defect
+                is in the admin theme rather than in Mukurtu's own
+                code, and it affects every administrative form
+                (issue #2389).
+
+                Evidence is recorded in
                 docs/accessibility/findings/2026-10-09-visual-pass.md.
 
           - name: authoring-tool
