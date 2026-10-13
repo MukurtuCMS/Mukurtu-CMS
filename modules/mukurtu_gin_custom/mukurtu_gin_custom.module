@@ -138,6 +138,47 @@ function mukurtu_gin_custom_preprocess_html(array &$variables): void {
 }
 
 /**
+ * Implements hook_preprocess_toolbar().
+ *
+ * Gin's secondary toolbar renders the toolbar's tabs and trays a second time,
+ * with the same ids as the main toolbar (#2397). Its template uses
+ * $variables['#secondary'] tabs and trays instead when they are provided, so
+ * provide copies whose ids end in "-secondary", the suffix Gin already uses for
+ * the secondary user tab (GinUserPicture). This covers both the admin theme,
+ * where the secondary toolbar is its own toolbar element, and gin_toolbar on
+ * the front end, where one toolbar renders both. Tabs find their trays through
+ * data-toolbar-tray, which is left alone.
+ */
+function mukurtu_gin_custom_preprocess_toolbar(array &$variables): void {
+  $secondary = ['tabs' => [], 'trays' => []];
+
+  foreach ($variables['tabs'] ?? [] as $key => $tab) {
+    $link = $tab['link'];
+    $id = $link['#options']['attributes']['id'] ?? $link['#attributes']['id'] ?? NULL;
+    if (is_string($id) && $id !== '' && !str_ends_with($id, '-secondary')) {
+      // Core renders toolbar items before preprocessing, so clear the cached
+      // output to render the copy again with its new id. Its '#id' stays as
+      // is, because Gin builds the tab's class from it.
+      unset($link['#printed'], $link['#children'], $link['#markup']);
+      $link['#attributes']['id'] = $id . '-secondary';
+      $link['#options']['attributes']['id'] = $id . '-secondary';
+    }
+    $secondary['tabs'][$key] = ['link' => $link] + $tab;
+  }
+
+  foreach ($variables['trays'] ?? [] as $key => $tray) {
+    $tray['attributes'] = clone $tray['attributes'];
+    $id = (string) ($tray['attributes']['id'] ?? '');
+    if ($id !== '' && !str_ends_with($id, '-secondary')) {
+      $tray['attributes']->setAttribute('id', $id . '-secondary');
+    }
+    $secondary['trays'][$key] = $tray;
+  }
+
+  $variables['#secondary'] = $secondary;
+}
+
+/**
  * Implements hook_preprocess_media().
  *
  * Provides the mukurtu_v4 theme path so module-owned media library templates
