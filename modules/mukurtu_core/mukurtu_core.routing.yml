@@ -199,3 +199,10 @@ mukurtu_core.dismiss_super_admin_warning:
   requirements:
     _csrf_token: 'TRUE'
     _custom_access: '\Drupal\mukurtu_core\Controller\SuperAdminWarningController::access'
+
+mukurtu_core.dashboard_redirect:
+  path: '/dashboard'
+  defaults:
+    _controller: '\Drupal\mukurtu_core\Controller\MukurtuDashboardController::redirectToDashboard'
+  requirements:
+    _custom_access: '\Drupal\mukurtu_core\Controller\MukurtuDashboardController::access'
