@@ -59,7 +59,10 @@
   --color-warning-light: #d8edfa;
   --color-error-light: #f2dedf;
   --color-status-dark: #365e38;
-  --color-warning-dark: #54738c;
+
+  // Darkened from #54738c, which only reached 4.14:1 against
+  // --color-warning-light; #3f5a73 reaches 5.96:1 (WCAG 1.4.3).
+  --color-warning-dark: #3f5a73;
   --color-error-dark: #924d48;
 
   // General colors.

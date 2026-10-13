@@ -1,0 +1,59 @@
+// Status, warning, and error messages (templates/misc/status-messages.html.twig
+// and js/message.theme.js). Box colors are set per region in _page.scss; these
+// rules are unscoped so messages rendered inside dialogs get the same layout
+// and dismiss button.
+
+.messages-list__item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--v-space-5xs);
+
+  // The button sits outside the container on purpose: the container is the
+  // live region, and a button inside it would be read out with every
+  // announcement.
+  .messages__container {
+    flex: 1;
+    min-inline-size: 0;
+    align-self: center;
+  }
+}
+
+// Icon button that inherits the message type's text color, so it keeps that
+// color's contrast and follows forced-colors mode.
+.messages__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  // WCAG 2.5.5 / 2.5.8 target size.
+  inline-size: 44px;
+  block-size: 44px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+
+  &:hover,
+  &:active,
+  &:focus {
+    color: inherit;
+    background: none;
+  }
+
+  &:focus {
+    outline: 2px solid currentcolor;
+    outline-offset: -4px;
+  }
+
+  // Pulled into the padded message box (see _page.scss) so a one-line
+  // message doesn't grow taller.
+  .region__highlighted & {
+    margin-block: -10px;
+    margin-inline-end: -10px;
+  }
+
+  svg {
+    display: block;
+  }
+}
