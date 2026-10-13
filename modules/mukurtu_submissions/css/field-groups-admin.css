@@ -24,3 +24,28 @@
 .mukurtu-submissions-field-group-parent {
   width: 300px !important;
 }
+
+/*
+ * ...but 300px is wider than a 320px viewport once the page gutters are
+ * taken off, so on a narrow screen that fixed width pushed the page into
+ * horizontal scrolling (WCAG 1.4.10 Reflow, issue #2336): 346px of content
+ * against a 320px viewport.
+ *
+ * The cap has to go on the wrapper as well as the select. The select
+ * already computes max-width: 100%, but its parent .js-form-item is an
+ * inline-block that shrink-wraps to the select's own 300px, so that 100%
+ * resolves against 300px and does nothing. Capping the wrapper first gives
+ * the percentage something real to resolve against.
+ *
+ * This keeps the consistent-width intent above: every select still shares
+ * one width at any given viewport (300px where there is room, the
+ * container's width where there is not), so no row looks narrower than its
+ * neighbours. Verified uniform at 320px, 480px and 1280px.
+ */
+#edit-field-groups .js-form-item {
+  max-width: 100%;
+}
+
+.mukurtu-submissions-field-group-parent {
+  max-width: 100% !important;
+}

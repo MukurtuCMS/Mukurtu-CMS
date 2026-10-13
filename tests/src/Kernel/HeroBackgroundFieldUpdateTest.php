@@ -9,7 +9,7 @@ use Drupal\KernelTests\KernelTestBase;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests mukurtu_update_40031().
+ * Tests mukurtu_update_40032().
  *
  * The hook adds field_hero_background to an existing site. Its one subtlety is
  * that config/install states allowed_values as [{value, label}] while
@@ -75,7 +75,7 @@ class HeroBackgroundFieldUpdateTest extends KernelTestBase {
   public function testAddsTheField(): void {
     $this->assertNull($this->field(), 'The field is absent to begin with.');
 
-    mukurtu_update_40031();
+    mukurtu_update_40032();
 
     $field = $this->field();
     $this->assertNotNull($field, 'The hook created the field.');
@@ -91,7 +91,7 @@ class HeroBackgroundFieldUpdateTest extends KernelTestBase {
    * settings.allowed_values.0.label.0 doesn't exist".
    */
   public function testConvertsAllowedValuesWithoutLosingAny(): void {
-    mukurtu_update_40031();
+    mukurtu_update_40032();
 
     $storage = \Drupal::entityTypeManager()->getStorage('field_storage_config')
       ->load('block_content.field_hero_background');
@@ -106,10 +106,10 @@ class HeroBackgroundFieldUpdateTest extends KernelTestBase {
    * Running twice reports no work and does not recreate the field.
    */
   public function testIsIdempotent(): void {
-    mukurtu_update_40031();
+    mukurtu_update_40032();
     $uuid = $this->field()->uuid();
 
-    $message = mukurtu_update_40031();
+    $message = mukurtu_update_40032();
 
     $this->assertSame($uuid, $this->field()->uuid());
     $this->assertStringContainsString('already present', $message);
@@ -122,7 +122,7 @@ class HeroBackgroundFieldUpdateTest extends KernelTestBase {
     \Drupal::entityTypeManager()->getStorage('block_content_type')
       ->load('full_image_with_description')->delete();
 
-    $message = mukurtu_update_40031();
+    $message = mukurtu_update_40032();
 
     $this->assertNull($this->field());
     $this->assertStringContainsString('not installed', $message);
@@ -141,7 +141,7 @@ class HeroBackgroundFieldUpdateTest extends KernelTestBase {
       \Drupal::configFactory()->getEditable($id)->clear('content.field_hero_background')->save();
     }
 
-    mukurtu_update_40031();
+    mukurtu_update_40032();
 
     foreach (['core.entity_form_display', 'core.entity_view_display'] as $prefix) {
       $content = \Drupal::config("$prefix.block_content.full_image_with_description.default")->get('content');

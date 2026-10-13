@@ -69,6 +69,12 @@ function mukurtu_v4_preprocess_node(&$variables) {
     }
     $variables['has_additional_word_entries'] = !empty($valid_indices);
     $variables['additional_word_entry_indices'] = $valid_indices;
+
+    // The word tabs print the headword and entry terms as raw values, so
+    // they need the word's language code to mark them up (#2328).
+    if ($node instanceof \Drupal\mukurtu_dictionary\Entity\DictionaryWordInterface) {
+      $variables['word_langcode'] = $node->getLanguageCode();
+    }
   }
 
   // This creates a twig variable that can be used in node templates to

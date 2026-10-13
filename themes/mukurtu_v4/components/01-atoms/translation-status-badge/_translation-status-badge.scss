@@ -11,11 +11,7 @@
 
   &--not-translated {
     background-color: var(--color-warning-light);
-    // --color-warning-dark only reaches 4.14:1 against --color-warning-light,
-    // short of the 4.5:1 AA minimum for this badge's 16px bold text - same
-    // issue status-badge's --unavailable modifier already worked around.
-    // Reuse its corrected shade rather than the raw token.
-    color: #3f5a73;
+    color: var(--color-warning-dark);
   }
 }
 

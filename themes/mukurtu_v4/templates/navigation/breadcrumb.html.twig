@@ -5,6 +5,9 @@
  *
  * Available variables:
  * - breadcrumb: Breadcrumb trail items.
+ * - current_page_language: Set by mukurtu_core on an untranslated node's
+ *   page. Holds 'langcode' and 'direction' for the last (current page)
+ *   item, whose title is in the node's original language.
  */
 #}
 {% if breadcrumb %}
@@ -15,6 +18,8 @@
       <li class="breadcrumb__list-item">
         {% if item.url %}
           <a href="{{ item.url }}">{{ item.text }}</a>
+        {% elseif loop.last and current_page_language %}
+          <span lang="{{ current_page_language.langcode }}" dir="{{ current_page_language.direction }}">{{ item.text }}</span>
         {% else %}
           {{ item.text }}
         {% endif %}

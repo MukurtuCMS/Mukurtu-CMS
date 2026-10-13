@@ -756,9 +756,27 @@ function mukurtu_update_40030(): string {
 }
 
 /**
- * Add the Background option for hero blocks that have no image.
+ * Remove an obsolete performance setting that Drupal core no longer uses.
  */
 function mukurtu_update_40031(): string {
+  $config = \Drupal::configFactory()->getEditable('system.performance');
+
+  // The profile shipped stale_file_threshold after Drupal 11.4 core dropped it
+  // from the system.performance schema, so every site installed since 4.0.0
+  // carries a key with no schema. Strict schema checking rejects it.
+  if ($config->get('stale_file_threshold') === NULL) {
+    return (string) t('The obsolete stale_file_threshold performance setting is not present; nothing to change.');
+  }
+
+  $config->clear('stale_file_threshold')->save();
+
+  return (string) t('Removed the obsolete stale_file_threshold performance setting.');
+}
+
+/**
+ * Add the Background option for hero blocks that have no image.
+ */
+function mukurtu_update_40032(): string {
   $storage_name = 'field.storage.block_content.field_hero_background';
   $field_name = 'field.field.block_content.full_image_with_description.field_hero_background';
 
