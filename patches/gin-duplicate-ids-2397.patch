@@ -32,6 +32,26 @@ diff --git a/templates/navigation/navigation--gin.html.twig b/templates/navigati
            <li class="toolbar-menu__item toolbar-menu__item--level-1">
              {% if icon_path %}
                <a class="toolbar-link" href="{{ path('<front>') }}">
+diff --git a/templates/navigation/toolbar--gin--secondary.html.twig b/templates/navigation/toolbar--gin--secondary.html.twig
+--- a/templates/navigation/toolbar--gin--secondary.html.twig
++++ b/templates/navigation/toolbar--gin--secondary.html.twig
+@@ -65,6 +65,8 @@
+           {% else %}
+             {{ tab.link }}
+           {% endif %}
++          {# Tabs without a tray, such as "Back to site", would otherwise get an empty, unlabeled navigation landmark. #}
++          {% if tray %}
+           <div{{ tray.attributes }}>
+             {% if tray.label %}
+               <nav class="toolbar-lining clearfix" role="navigation" aria-label="{{ tray.label }}">
+@@ -75,6 +77,7 @@
+             {{ tray.links }}
+             </nav>
+           </div>
++          {% endif %}
+         </div>
+       {% endif %}
+     {% endfor %}
 diff --git a/templates/views/views-view-table.html.twig b/templates/views/views-view-table.html.twig
 --- a/templates/views/views-view-table.html.twig
 +++ b/templates/views/views-view-table.html.twig

@@ -811,6 +811,14 @@ short fields themselves. Shrink it in these dialogs specifically. */
   display: none !important;
 }
 
+/* #2397: Escape closes an open secondary toolbar tray (WCAG 1.4.13).
+   gin-secondary-tray-escape.js adds this class to the tab; it is cleared once
+   the pointer and focus have left. !important beats Gin's :hover and
+   :focus-within rules, which open the tray with CSS alone. */
+.gin-secondary-toolbar .toolbar-secondary .toolbar-bar .toolbar-tab.mukurtu-tray-dismissed .toolbar-tray {
+  display: none !important;
+}
+
 /* Layout Builder's off-canvas/dialog forms (add/configure/move block) don't
    render a [data-drupal-messages] placeholder in the DOM until a message is
    actually needed. Drupal core's Drupal.Message.defaultWrapper() (message.js)
