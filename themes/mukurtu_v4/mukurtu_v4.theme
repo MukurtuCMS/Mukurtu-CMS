@@ -80,7 +80,7 @@ function mukurtu_v4_preprocess_node(&$variables) {
   // A dictionary word's card, in the Featured Content grid and carousel,
   // shows its translations: the word alone says little to most visitors.
   // The node here is already the translation for the current page.
-  if ($variables['view_mode'] === 'featured' && $node->hasField('field_translation')) {
+  if (($variables['view_mode'] ?? '') === 'featured' && $node->hasField('field_translation')) {
     $translations = $node->get('field_translation');
     if (!$translations->isEmpty() && $translations->access('view')) {
       $variables['featured_translation'] = [
