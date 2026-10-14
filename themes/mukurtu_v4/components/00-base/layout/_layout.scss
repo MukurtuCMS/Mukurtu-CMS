@@ -288,11 +288,7 @@
  * setting it, so without this the light treatment paints white text onto that
  * white bar. Only elements that actually inherit need this: the footer sets
  * --footer-text-color on its own dark ground, and forcing a colour there would
- * render it invisible.
- *
- * Note _nav-primary.scss reads --color-text-neutral-loud, which this theme
- * never defines anywhere, so that declaration is invalid and those links have
- * always inherited - see #2186. */
+ * render it invisible. */
 .page--has-background .header-nav {
   color: var(--brand-text-color);
 }

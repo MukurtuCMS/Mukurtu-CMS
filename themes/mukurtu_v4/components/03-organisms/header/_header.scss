@@ -201,8 +201,8 @@ body:not(.is-always-mobile-nav) .header:not(:has(.header__logo-text)) {
  *
  * Only `color` is set, never the shared palette tokens. The nav inside the
  * header (.header-nav) is an opaque white bar at desktop and the slide-out
- * drawer on mobile, and its links read --color-text-neutral-loud; redefining
- * that token here painted white text onto that white bar and made the menu
+ * drawer on mobile, and its links inherit their colour; redefining a shared
+ * token here painted white text onto that white bar and made the menu
  * disappear. Anything with its own background keeps its own colours, and only
  * text sitting directly on the image inherits the treatment. */
 /* Text branding needs room a logo does not.
@@ -412,11 +412,7 @@ body:not(.is-always-mobile-nav) .header:not(:has(.header__logo-text)) {
 .site-header--has-background .header-nav {
   /* Covers the drawer, and stops the header's treatment colour cascading into
    * it. Nav links inherit rather than set a colour, so without this the light
-   * treatment would paint white text onto the drawer's white background.
-   *
-   * _nav-primary.scss reads --color-text-neutral-loud, which this theme never
-   * defines anywhere, so that declaration is invalid and those links have
-   * always inherited - see #2186. */
+   * treatment would paint white text onto the drawer's white background. */
   color: var(--brand-text-color);
 }
 
