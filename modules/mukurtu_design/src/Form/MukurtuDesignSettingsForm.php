@@ -164,7 +164,7 @@ class MukurtuDesignSettingsForm extends ConfigFormBase {
     $form['background']['text_treatment'] = [
       '#type' => 'radios',
       '#title' => $this->t('Page text'),
-      '#description' => $this->t('Mukurtu dims or lightens the image so text stays readable.'),
+      '#description' => $this->t('Choose the text colour. If the tint is on, Mukurtu dims or lightens the image to match.'),
       '#options' => [
         'light' => $this->t('Light text on a darkened image'),
         'dark' => $this->t('Dark text on a lightened image'),
@@ -199,7 +199,7 @@ class MukurtuDesignSettingsForm extends ConfigFormBase {
     $form['header']['text_treatment'] = [
       '#type' => 'radios',
       '#title' => $this->t('Header text'),
-      '#description' => $this->t('Mukurtu dims or lightens the header image so the logo and menu stay readable.'),
+      '#description' => $this->t('Choose the colour of the logo and menu. If the tint is on, Mukurtu dims or lightens the header image to match.'),
       '#options' => [
         'light' => $this->t('Light text on a darkened image'),
         'dark' => $this->t('Dark text on a lightened image'),
