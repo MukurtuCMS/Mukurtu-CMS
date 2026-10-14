@@ -944,19 +944,46 @@ chapters:
         components:
           - name: web
             adherence:
-              level: does-not-support
+              level: partially-supports
               notes: >-
-                Dictionary content cannot express its
-                language. Every dictionary word carries a
-                required reference to a term in the language
-                vocabulary, but that vocabulary has no fields,
-                so there is no ISO 639 or BCP 47 code for a
-                template to place in a lang attribute, and no
-                template emits one (issues #2328, #2353,
-                #2354, #2357). Local Contexts labels do emit
-                lang correctly, so the gap is specific rather
-                than systemic. Evidence is recorded in
-                docs/accessibility/findings/2026-10-06-desk-review.md.
+                The language vocabulary now carries a Language code
+                field, and dictionary templates place it in a lang
+                attribute. Verified on a running site: a word whose
+                language term holds haw renders its page title as
+                <h1 lang="haw"> and marks the title field and both
+                alternate spellings the same way, and renders no
+                lang at all when that code is left blank, which is
+                the documented behaviour rather than a silent
+                failure. Additional entry terms and sample sentences
+                are marked by the same mechanism, including sample
+                sentences nested under an entry. Local Contexts
+                labels emit lang correctly as before.
+
+                The rest of the content cannot express its language.
+                Digital heritage titles, descriptions and
+                transcriptions, taxonomy term names, and collection
+                and community descriptions can all hold
+                Indigenous-language text with no way to mark it. The
+                digital heritage Language field cannot be reused for
+                this: it records the languages present in an item
+                including its media assets, is unlimited in
+                cardinality and creates terms on the fly, so reading
+                it as "this title is written in X" would mark text
+                as the wrong language, which helps a screen reader
+                user less than leaving it unmarked (issues #2354,
+                #2357). Within the dictionary, definition,
+                pronunciation, translation and word origin are
+                assumed to be in the site's language. That is right
+                for most sites and wrong for a site writing a
+                monolingual dictionary, and it is not configurable
+                (issue #2353).
+
+                Recorded as does-not-support in October 2026 because
+                the vocabulary had no code field and no template
+                emitted one. Both arrived in #2352; this level
+                reflects what the product does now, not the fix
+                alone. Evidence is recorded in
+                docs/accessibility/findings/2026-10-13-language-of-parts.md.
 
           - name: authoring-tool
             adherence:
