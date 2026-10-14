@@ -397,4 +397,22 @@ class VisitorsCountryMapFeaturesTest extends UnitTestCase {
     $this->assertFalse($points[0]['other']);
   }
 
+  /**
+   * Every city is plotted until a site raises the threshold.
+   *
+   * Existing sites never get the config object installed, so the default
+   * has to live in code as well as in config/install.
+   */
+  public function testThresholdDefaultsToOneWhenNeverSaved(): void {
+    $map = new VisitorsCountryMap(
+      $this->createMock(Connection::class),
+      $this->createMock(LeafletService::class),
+      $this->getStringTranslationStub(),
+      $this->getConfigFactoryStub([VisitorsCountryMap::CONFIG_NAME => []]),
+      $this->createMock(DbIpDatabaseLocator::class),
+    );
+
+    $this->assertSame(1, $map->cityThreshold());
+  }
+
 }

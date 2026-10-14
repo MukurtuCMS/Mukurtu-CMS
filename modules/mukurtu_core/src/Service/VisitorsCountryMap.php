@@ -19,12 +19,13 @@ use Drupal\leaflet\LeafletService;
  * per city, which puts a circle roughly at the city without needing a
  * gazetteer.
  *
- * Cities with fewer unique visitors than a threshold are not plotted on their
- * own: they are combined with the rest of their region, and a region still
- * under the threshold with the rest of its country, so a city with one or two
- * visitors cannot be read off the map as "someone from here looked at this
- * site". Anything still under the threshold at country level is left off the
- * map entirely; the tables beside it still count it.
+ * By default every city is plotted. A site can raise the city threshold so
+ * that cities with fewer unique visitors are not plotted on their own: they
+ * are combined with the rest of their region, and a region still under the
+ * threshold with the rest of its country, so a city with one or two visitors
+ * cannot be read off the map as "someone from here looked at this site".
+ * Anything still under the threshold at country level is left off the map
+ * entirely; the tables beside it still count it.
  *
  * The query deliberately mirrors the report's own views so the two cannot
  * disagree: same COUNT(DISTINCT visitor_id) measure, same bot exclusion, and
@@ -74,7 +75,7 @@ class VisitorsCountryMap {
   /**
    * The city threshold used when the setting has never been saved.
    */
-  public const DEFAULT_CITY_THRESHOLD = 3;
+  public const DEFAULT_CITY_THRESHOLD = 1;
 
   /**
    * Marker diameters in CSS pixels, for the smallest and largest count.

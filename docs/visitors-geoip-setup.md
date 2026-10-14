@@ -98,13 +98,14 @@ country and region drill-downs show one above their table
 one circle per city, sized by unique visitors, at the average position of that
 city's visits, for the report's selected dates.
 
-A city with fewer unique visitors than the threshold (default 3) is not plotted
-on its own: it is combined with the rest of its region, and a region still under
-the threshold with the rest of its country. Anything still under it at country
-level is left off the map (the tables still count it). This keeps a city with one
-or two visitors from being read off the map. Admins set the threshold on the
-GeoIP settings form (`/admin/config/system/visitors/geoip`); it is stored in
-`mukurtu_core.visitors_map:city_threshold`.
+By default every city gets its own circle. A site that does not want small
+numbers of visitors to be locatable can raise the threshold on the GeoIP settings
+form (`/admin/config/system/visitors/geoip`; stored in
+`mukurtu_core.visitors_map:city_threshold`, default 1). A city with fewer unique
+visitors than the threshold is then not plotted on its own: it is combined with
+the rest of its region, and a region still under the threshold with the rest of
+its country. Anything still under it at country level is left off the map (the
+tables still count it).
 
 When the DB-IP database is installed, the map shows the "IP Geolocation by DB-IP"
 credit its CC BY 4.0 licence requires.
