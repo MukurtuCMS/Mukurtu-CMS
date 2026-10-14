@@ -35,7 +35,7 @@ services:
     # The visitors services are optional (@?) on purpose: mukurtu_core does not
     # depend on the visitors module, and a hard reference would break the
     # container on a site without it.
-    arguments: ['@database', '@leaflet.service', '@string_translation', '@?visitors.date_range', '@?visitors.location']
+    arguments: ['@database', '@leaflet.service', '@string_translation', '@config.factory', '@mukurtu_core.dbip_locator', '@?visitors.date_range', '@?visitors.location']
   mukurtu_core.leaflet_service:
     class: Drupal\mukurtu_core\Service\MukurtuLeafletService
     decorates: leaflet.service
@@ -52,6 +52,12 @@ services:
   # Drupal's OOP hook system rather than declared as a service itself, can
   # be constructed with this by type-hint alone.
   Drupal\mukurtu_core\Service\DbIpDownloadService: '@mukurtu_core.dbip_download'
+  mukurtu_core.visitors_location_backfill:
+    class: Drupal\mukurtu_core\Service\VisitorsLocationBackfill
+    # Optional for the same reason as mukurtu_core.visitors_country_map.
+    arguments: ['@database', '@state', '@datetime.time', '@?visitors_geoip.rebuild.location', '@?visitors_geoip.lookup']
+  # Aliased by class for GeoIpFallbackHooks, as above.
+  Drupal\mukurtu_core\Service\VisitorsLocationBackfill: '@mukurtu_core.visitors_location_backfill'
   logger.channel.mukurtu_core:
     parent: logger.channel_base
     arguments: ['mukurtu_core']

@@ -7,16 +7,16 @@ namespace Drupal\Tests\mukurtu_core\Unit;
 use Drupal\Core\Database\Connection;
 use Drupal\Tests\UnitTestCase;
 use Drupal\leaflet\LeafletService;
+use Drupal\mukurtu_core\Service\DbIpDatabaseLocator;
 use Drupal\mukurtu_core\Service\VisitorsCountryMap;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests the country rows to Leaflet features transformation.
+ * Tests the map points to Leaflet features transformation, and roll-up.
  *
- * Only buildFeatures() is covered here. The query around it needs a populated
- * visitors table and the render side needs Leaflet, neither of which a unit
- * test can supply, and mukurtu_core is too heavy to enable in a Kernel test
- * (~30 module dependencies) for this alone.
+ * Only buildFeatures() and aggregate() are covered here. The query around
+ * them is covered by VisitorsCountryMapQueryTest, and the render side needs
+ * Leaflet and a theme, which a unit test cannot supply.
  *
  * @see \Drupal\mukurtu_core\Service\VisitorsCountryMap::buildFeatures()
  */
@@ -47,6 +47,8 @@ class VisitorsCountryMapFeaturesTest extends UnitTestCase {
       $this->createMock(Connection::class),
       $this->createMock(LeafletService::class),
       $this->getStringTranslationStub(),
+      $this->getConfigFactoryStub([VisitorsCountryMap::CONFIG_NAME => ['city_threshold' => 3]]),
+      $this->createMock(DbIpDatabaseLocator::class),
       NULL,
       $location,
     );
@@ -131,6 +133,268 @@ class VisitorsCountryMapFeaturesTest extends UnitTestCase {
 
     $this->assertIsFloat($features[0]['lat']);
     $this->assertIsFloat($features[0]['lon']);
+  }
+
+  /**
+   * A city point is labelled "City, Region, Country".
+   */
+  public function testCityPointIsLabelledWithItsPlace(): void {
+    $features = $this->mapService()->buildFeatures([
+      [
+        'country' => 'US',
+        'region' => 'California',
+        'city' => 'Mountain View',
+        'other' => FALSE,
+        'unique_visitors' => 5,
+        'lat' => 37.4,
+        'lng' => -122.1,
+      ],
+    ]);
+
+    $this->assertStringContainsString('Mountain View, California, United States: 5 unique visitors', (string) $features[0]['tooltip']['value']);
+  }
+
+  /**
+   * A pooled point is labelled with its region, or its country at top level.
+   */
+  public function testPooledPointsAreLabelledAsOtherCities(): void {
+    $features = $this->mapService()->buildFeatures([
+      [
+        'country' => 'US',
+        'region' => 'California',
+        'city' => '',
+        'other' => TRUE,
+        'unique_visitors' => 4,
+        'lat' => 37.0,
+        'lng' => -120.0,
+      ],
+      [
+        'country' => 'CA',
+        'region' => '',
+        'city' => '',
+        'other' => TRUE,
+        'unique_visitors' => 3,
+        'lat' => 50.0,
+        'lng' => -100.0,
+      ],
+    ]);
+
+    $this->assertStringContainsString('Other cities in California', (string) $features[0]['tooltip']['value']);
+    $this->assertStringContainsString('Other cities in Canada', (string) $features[1]['tooltip']['value']);
+  }
+
+  /**
+   * The marker is a focusable HTML marker whose hidden text names it.
+   *
+   * The 'circle_marker' icon type of the leaflet module would draw an SVG
+   * path that Leaflet does not make focusable, leaving keyboard users no way
+   * to the tooltip.
+   */
+  public function testMarkerIsAnHtmlMarkerNamedByItsText(): void {
+    $features = $this->mapService()->buildFeatures([
+      ['country' => 'US', 'unique_visitors' => '4', 'lat' => '39.8', 'lng' => '-98.6'],
+    ]);
+
+    $icon = $features[0]['icon'];
+    $this->assertSame('html', $icon['iconType']);
+    $this->assertStringContainsString('<span class="visually-hidden">United States: 4 unique visitors</span>', $icon['html']);
+  }
+
+  /**
+   * Place names from the geolocation database are escaped in the marker.
+   *
+   * Both the tooltip and the marker HTML are inserted as markup by Leaflet.
+   */
+  public function testPlaceNamesAreEscaped(): void {
+    $features = $this->mapService()->buildFeatures([
+      [
+        'country' => 'US',
+        'region' => '<b>R</b>',
+        'city' => '<img src=x onerror=alert(1)>',
+        'other' => FALSE,
+        'unique_visitors' => 3,
+        'lat' => 1.0,
+        'lng' => 1.0,
+      ],
+      [
+        'country' => 'US',
+        'region' => "Côte d'Or",
+        'city' => '',
+        'other' => TRUE,
+        'unique_visitors' => 3,
+        'lat' => 1.0,
+        'lng' => 1.0,
+      ],
+    ]);
+
+    $this->assertStringNotContainsString('<img', $features[0]['icon']['html']);
+    $this->assertStringNotContainsString('<b>', (string) $features[0]['tooltip']['value']);
+    $this->assertStringContainsString('&lt;img', $features[0]['icon']['html']);
+    // Escaped once, not twice: the pooled label passes through two t() calls.
+    $this->assertStringContainsString('Côte d&#039;Or', (string) $features[1]['tooltip']['value']);
+    $this->assertStringNotContainsString('&amp;#039;', (string) $features[1]['tooltip']['value']);
+  }
+
+  /**
+   * Circle area tracks the count, from the 24px target size minimum up.
+   */
+  public function testMarkerSizeScalesWithTheCount(): void {
+    $features = $this->mapService()->buildFeatures([
+      ['country' => 'US', 'unique_visitors' => 100, 'lat' => 1.0, 'lng' => 1.0],
+      ['country' => 'CA', 'unique_visitors' => 25, 'lat' => 2.0, 'lng' => 2.0],
+      ['country' => 'FJ', 'unique_visitors' => 0, 'lat' => 3.0, 'lng' => 3.0],
+    ]);
+
+    $this->assertSame(['x' => 48, 'y' => 48], $features[0]['icon']['iconSize']);
+    // A quarter of the largest count gets half its extra diameter.
+    $this->assertSame(['x' => 36, 'y' => 36], $features[1]['icon']['iconSize']);
+    $this->assertSame(['x' => 24, 'y' => 24], $features[2]['icon']['iconSize']);
+  }
+
+  /**
+   * Cities at or over the threshold keep their own point.
+   */
+  public function testCitiesAtTheThresholdArePlottedOnTheirOwn(): void {
+    $points = VisitorsCountryMap::aggregate([
+      [
+        'country' => 'US',
+        'region' => 'California',
+        'city' => 'Mountain View',
+        'unique_visitors' => '3',
+        'lat' => '37.4',
+        'lng' => '-122.1',
+      ],
+    ], 3);
+
+    $this->assertCount(1, $points);
+    $this->assertFalse($points[0]['other']);
+    $this->assertSame('Mountain View', $points[0]['city']);
+    $this->assertSame(37.4, $points[0]['lat']);
+  }
+
+  /**
+   * Small cities pool into their region, at the visit-weighted centre.
+   */
+  public function testSmallCitiesPoolIntoTheirRegion(): void {
+    $points = VisitorsCountryMap::aggregate([
+      [
+        'country' => 'US',
+        'region' => 'California',
+        'city' => 'A',
+        'unique_visitors' => 2,
+        'lat' => 10.0,
+        'lng' => 20.0,
+      ],
+      [
+        'country' => 'US',
+        'region' => 'California',
+        'city' => 'B',
+        'unique_visitors' => 1,
+        'lat' => 40.0,
+        'lng' => 50.0,
+      ],
+    ], 3);
+
+    $this->assertCount(1, $points);
+    $this->assertTrue($points[0]['other']);
+    $this->assertSame('California', $points[0]['region']);
+    $this->assertSame('', $points[0]['city']);
+    $this->assertSame(3, $points[0]['unique_visitors']);
+    $this->assertEqualsWithDelta(20.0, $points[0]['lat'], 0.0001);
+    $this->assertEqualsWithDelta(30.0, $points[0]['lng'], 0.0001);
+  }
+
+  /**
+   * Regions still under the threshold pool into their country.
+   */
+  public function testSmallRegionsPoolIntoTheirCountry(): void {
+    $points = VisitorsCountryMap::aggregate([
+      [
+        'country' => 'US',
+        'region' => 'California',
+        'city' => 'A',
+        'unique_visitors' => 1,
+        'lat' => 10.0,
+        'lng' => 10.0,
+      ],
+      ['country' => 'US', 'region' => 'Oregon', 'city' => 'B', 'unique_visitors' => 1, 'lat' => 20.0, 'lng' => 20.0],
+      ['country' => 'US', 'region' => '', 'city' => '', 'unique_visitors' => 1, 'lat' => 30.0, 'lng' => 30.0],
+    ], 3);
+
+    $this->assertCount(1, $points);
+    $this->assertTrue($points[0]['other']);
+    $this->assertSame('US', $points[0]['country']);
+    $this->assertSame('', $points[0]['region']);
+    $this->assertSame(3, $points[0]['unique_visitors']);
+    $this->assertEqualsWithDelta(20.0, $points[0]['lat'], 0.0001);
+  }
+
+  /**
+   * A lone visitor is never plotted: a country still under it is dropped.
+   *
+   * Its average position would otherwise be that visitor's own city.
+   */
+  public function testCountriesUnderTheThresholdAreLeftOff(): void {
+    $points = VisitorsCountryMap::aggregate([
+      [
+        'country' => 'FJ',
+        'region' => 'Central',
+        'city' => 'Suva',
+        'unique_visitors' => 1,
+        'lat' => -18.1,
+        'lng' => 178.4,
+      ],
+      [
+        'country' => 'US',
+        'region' => 'California',
+        'city' => 'Mountain View',
+        'unique_visitors' => 5,
+        'lat' => 37.4,
+        'lng' => -122.1,
+      ],
+    ], 3);
+
+    $this->assertCount(1, $points);
+    $this->assertSame('US', $points[0]['country']);
+  }
+
+  /**
+   * A city with no name is never a point of its own, whatever its count.
+   */
+  public function testUnnamedCitiesAlwaysPool(): void {
+    $points = VisitorsCountryMap::aggregate([
+      [
+        'country' => 'US',
+        'region' => 'California',
+        'city' => '',
+        'unique_visitors' => 9,
+        'lat' => 37.0,
+        'lng' => -120.0,
+      ],
+    ], 3);
+
+    $this->assertCount(1, $points);
+    $this->assertTrue($points[0]['other']);
+    $this->assertSame('California', $points[0]['region']);
+  }
+
+  /**
+   * A threshold of 1 plots every city.
+   */
+  public function testThresholdOfOnePlotsEveryCity(): void {
+    $points = VisitorsCountryMap::aggregate([
+      [
+        'country' => 'FJ',
+        'region' => 'Central',
+        'city' => 'Suva',
+        'unique_visitors' => 1,
+        'lat' => -18.1,
+        'lng' => 178.4,
+      ],
+    ], 1);
+
+    $this->assertCount(1, $points);
+    $this->assertFalse($points[0]['other']);
   }
 
 }
