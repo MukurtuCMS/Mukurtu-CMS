@@ -76,28 +76,104 @@ export async function checkReflow(page: Page, testInfo: TestInfo, slug: string):
 
 /**
  * WCAG 1.4.4 Resize Text: content must not clip or overlap when text is
- * scaled 200%. Approximated by doubling the root font size (browser
- * text-zoom, unlike page zoom, doesn't scale layout containers) and
- * checking for horizontal overflow — a reasonable proxy, not a full
- * replacement for checking in a real browser's zoom feature.
+ * scaled to 200%.
+ *
+ * Uses the browser's own default font size via CDP, not a root font-size
+ * override. The difference matters and is not cosmetic. An override scales
+ * text but leaves rem media queries resolved against the *initial* font
+ * size, so breakpoints stay frozen at their desktop values and the result is
+ * a layout no real browser ever produces: enlarged text in a desktop grid.
+ * Measured against a live site, that approximation flagged four pages out of
+ * five that are clean under real text sizing.
+ *
+ * The size is set before a reload, because a reader arrives with it already
+ * applied, and layout-on-load differs from layout-after-restyle. The reload
+ * means this check must run last on a page: it discards any state an earlier
+ * check or interaction left behind.
+ *
+ * CDP is Chromium-only. On other engines this falls back to the old
+ * approximation and says so in the finding, so a reader can tell which kind
+ * of evidence they are looking at.
  */
 export async function checkTextZoom(page: Page, testInfo: TestInfo, slug: string): Promise<void> {
   const findings: CheckFinding[] = [];
-  await page.addStyleTag({ content: 'html { font-size: 200% !important; }' });
+  const BASE_PX = 16;
+  let cdp: { send: (m: string, p?: unknown) => Promise<unknown>; detach: () => Promise<void> } | null = null;
+  // Which of the three measurements actually happened, so the finding can say
+  // so rather than implying the best case.
+  let mode: 'before-load' | 'after-restyle' | 'approximated' = 'approximated';
+  let sized = false;
+
+  // Only a real navigation can be reloaded. After setContent() the URL is
+  // about:blank, and reloading that would measure an empty page and report
+  // clean - a silent false negative rather than a visible error.
+  const reloadable = /^https?:/i.test(page.url());
+
+  try {
+    cdp = await page.context().newCDPSession(page) as unknown as typeof cdp;
+    await cdp!.send('Page.setFontSizes', { fontSizes: { standard: BASE_PX * 2, fixed: BASE_PX * 2 } });
+    // From here the text is already doubled, so the approximation must not
+    // also be applied: stacking a 200% root override on top would measure
+    // 400% and report it as 200%.
+    sized = true;
+    mode = 'after-restyle';
+    if (reloadable) {
+      await page.reload({ waitUntil: 'networkidle' });
+      mode = 'before-load';
+    }
+  } catch {
+    if (!sized) {
+      // Not Chromium, or CDP unavailable before the size was applied.
+      await page.addStyleTag({ content: 'html { font-size: 200% !important; }' });
+    }
+    // Otherwise the size is applied and only the reload failed. Measure what
+    // we have rather than doubling a second time.
+  }
   await page.waitForTimeout(300);
 
-  const overflow = await page.evaluate(() => ({
-    scrollWidth: document.documentElement.scrollWidth,
-    clientWidth: document.documentElement.clientWidth,
-  }));
+  // A failed reload leaves a navigation in flight, and evaluating against a
+  // destroyed execution context throws. This check is report-only, so it
+  // records that it could not measure rather than failing the test around it.
+  let overflow: { scrollWidth: number; clientWidth: number } | null = null;
+  try {
+    await page.waitForLoadState('domcontentloaded', { timeout: 5_000 }).catch(() => {});
+    overflow = await page.evaluate(() => ({
+      scrollWidth: document.documentElement.scrollWidth,
+      clientWidth: document.documentElement.clientWidth,
+    }));
+  } catch {
+    overflow = null;
+  }
 
-  if (overflow.scrollWidth > overflow.clientWidth + 1) {
+  if (overflow === null) {
+    findings.push({
+      check: 'text-zoom-200',
+      criterion: '1.4.4 Resize Text',
+      summary: 'Could not measure at 200% text size: the page did not settle after the font size was applied',
+      detail: 'Not a conformance finding. Re-run against this page, or check it by hand, before drawing any conclusion from its absence from the results.',
+    });
+  }
+  else if (overflow.scrollWidth > overflow.clientWidth + 1) {
     findings.push({
       check: 'text-zoom-200',
       criterion: '1.4.4 Resize Text',
       summary: `Horizontal scroll required at 200% text size (content ${overflow.scrollWidth}px vs viewport ${overflow.clientWidth}px)`,
-      detail: 'Approximated via root font-size doubling, not a real browser zoom — confirm with actual zoom during the manual pass before filing.',
+      detail: {
+        'before-load': "Measured with the browser's own default font size doubled and applied before load, which is what a reader who sets a larger text size actually gets.",
+        'after-restyle': "Measured with the browser's own default font size doubled, but the page could not be reloaded with it already set, so rem media queries may not have re-evaluated. Treat as indicative and re-check.",
+        approximated: 'Approximated via a root font-size override because the browser font size could not be set on this engine. That leaves rem media queries at their desktop values, so confirm in a real browser before filing.',
+      }[mode],
     });
+  }
+
+  // Put the font size back, or every later page in this worker inherits it.
+  if (cdp) {
+    try {
+      await cdp.send('Page.setFontSizes', { fontSizes: { standard: BASE_PX, fixed: BASE_PX } });
+      await cdp.detach();
+    } catch {
+      // A detached session is not worth failing a report-only check over.
+    }
   }
   writeReport(`${slug}-text-zoom`, testInfo, findings);
 }

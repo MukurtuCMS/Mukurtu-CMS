@@ -209,6 +209,17 @@ mukurtu_protocol.protocol_add_membership:
       group:
         type: entity:protocol
 
+mukurtu_protocol.og_membership.remove_multiple:
+  path: '/admin/members/remove'
+  defaults:
+    _form: '\Drupal\mukurtu_protocol\Form\MukurtuOgMembershipRemoveMultipleForm'
+    _title: 'Remove members'
+  requirements:
+    _custom_access: '\Drupal\mukurtu_protocol\Form\MukurtuOgMembershipRemoveMultipleForm::access'
+  options:
+    _admin_route: TRUE
+    no_cache: TRUE
+
 mukurtu_protocol.og_membership.block:
   path: '/admin/members/{og_membership}/block'
   defaults:

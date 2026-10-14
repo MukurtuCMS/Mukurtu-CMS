@@ -14,7 +14,7 @@ author:
   phone: ""
   website: "https://mukurtu.org"
 report_date: "2026-07-10"
-last_modified_date: "2026-09-17"
+last_modified_date: "2026-10-09"
 version: 3
 notes: >-
   This is a living document maintained as part of the Mukurtu CMS
@@ -25,10 +25,23 @@ notes: >-
   of an individual Mukurtu site also depends on its content and configuration.
 evaluation_methods_used: >-
   Automated scanning with axe-core (via Playwright) across a representative
-  page inventory, combined with manual keyboard-only testing and screen reader
-  testing (NVDA, VoiceOver, or Orca) following the program's manual testing
-  checklist. Findings are consolidated by WCAG Success Criterion before
-  conformance levels are assigned.
+  page inventory covering anonymous, member and administrative pages,
+  together with purpose-built checks for criteria axe cannot assert on its
+  own: reflow, text resize, text spacing, focus visibility, link text,
+  keyboard traps, label in name and input purpose. Several of those also gate
+  continuous integration, so a regression fails a build rather than only
+  being reported; the rest are report-only and are treated as indicators
+  rather than evidence. Criteria decidable from source, configuration and
+  content were evaluated by desk review, and each finding was confirmed
+  against a clean install before a conformance level was assigned. Findings
+  are consolidated by WCAG Success Criterion before levels are assigned.
+  Manual keyboard-only testing and screen reader testing (NVDA, VoiceOver or
+  Orca) following the program's manual testing checklist are planned but have
+  not yet been carried out. Criteria that depend on them remain
+  not-evaluated. Where an evaluated criterion still has manual
+  verification outstanding, its own note says so: 4.1.2 is the one such
+  case, where keyboard and screen reader verification of the custom
+  widgets is still to come.
 legal_disclaimer: >-
   The information herein is provided in good faith based on the analysis of
   the product at the time of the review and does not represent a
@@ -69,8 +82,17 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                Capability check. Digital heritage items carry
+                field_transcription, described as a basic text
+                transcription of an audio or video recording,
+                and it is rendered on the full and
+                taxonomy_record displays, so an author can
+                provide a text alternative and a visitor can
+                read it. Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -79,8 +101,24 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: partially-supports
+              notes: >-
+                Locally hosted video cannot carry captions.
+                The video media type offers an author no
+                caption or subtitle track field, and the
+                file_video formatter renders no track element,
+                so a site that uploads its own video has no
+                way to provide synchronised captions (issue
+                #2329). The remote_video type is unaffected,
+                because the provider carries its own captions.
+                A transcript is not a substitute: it satisfies
+                1.2.3, which accepts a media alternative, but
+                not 1.2.2, which requires synchronisation. The
+                same evidence bears on the authoring-tool
+                component, which is evaluated separately.
+                Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -89,8 +127,17 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                The digital heritage transcription field is a
+                media alternative, which 1.2.3 accepts in
+                place of audio description. Caveat: the field
+                is described to authors as a basic
+                transcription, so whether any given item's
+                text is a full alternative is editorial rather
+                than structural. Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -134,8 +181,16 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                No UI string gives an instruction by position,
+                shape, size or colour alone, checked across
+                the product's module and theme strings.
+                Instructions as rendered, rather than as
+                authored, are confirmed in the visual pass.
+                Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -154,8 +209,17 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                Nothing autoplays. The dictionary audio
+                display sets autoplay false, the lightbox sets
+                autoplayVideos false, and the YouTube oEmbed
+                lists autoplay in its allow attribute, which
+                is a permission rather than an instruction,
+                with no autoplay parameter in the URL.
+                Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -184,8 +248,21 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                Every file binding keydown or keypress uses
+                non-printable keys, except Enter and Space in
+                two places, both scoped to a focused element.
+                The active-only-on-focus exception applies,
+                and activating a control with Enter or Space
+                is standard operation rather than a shortcut.
+                Enforced in CI by the character-key-shortcuts
+                lint, which fails the build on a
+                single-character handler bound to document,
+                window or body, and self-tests its matcher
+                before trusting it. Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -194,8 +271,16 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                No time limits. No meta refresh, no
+                location.reload and no setInterval in the
+                product's JavaScript, and no session lifetime
+                override is shipped. Drupal's session expiry
+                is a security timeout, which 2.2.1 exempts.
+                Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -214,8 +299,14 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                No keyframe animation in any of the product's
+                own stylesheets. The only animation present is
+                a vendor carousel's rotating loading spinner,
+                which does not flash. Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -292,8 +383,27 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                Evaluated with checkLabelInName across
+                anonymous and administrative pages, which
+                compares each control's accessible name
+                against its visible label and reports a
+                control whose name does not contain its label.
+                Zero findings across the home page, browse,
+                login, registration, communities, the admin
+                overview, content and people listings, the
+                digital heritage node form, submission
+                settings and the communities and protocols
+                manager. The check approximates the accessible
+                name computation rather than implementing all
+                of it, so it is a strong indicator rather than
+                a proof; an earlier version placed the title
+                attribute ahead of text content and reported
+                21 false positives before that was corrected.
+                Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -302,8 +412,15 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                No devicemotion, deviceorientation or
+                DeviceMotionEvent handler exists anywhere in
+                the product's modules or themes, so no
+                functionality is operated by device motion.
+                Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -366,8 +483,13 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                Satisfied by definition in HTML5, and removed
+                from WCAG in 2.2. Recorded with its reasoning
+                rather than tested. Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -416,8 +538,15 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                No live-streaming or real-time media
+                capability exists in the product, so there is
+                no live content to caption. Recorded as
+                not-applicable rather than supports, which are
+                different claims. Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -426,8 +555,18 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: does-not-support
+              notes: >-
+                No synchronised audio description capability
+                for locally hosted video: the video media type
+                has no described-track field and the player
+                renders no track element (issue #2355). A
+                transcript does not satisfy 1.2.5, which
+                requires description synchronised with the
+                video. The remote_video type depends on the
+                provider. Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -436,8 +575,14 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                No orientation lock. The theme's breakpoint
+                map defines portrait and landscape aliases,
+                but nothing uses them to restrict display to a
+                single orientation. Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -446,8 +591,31 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: partially-supports
+              notes: >-
+                The login form identifies its purpose
+                correctly: the username and password fields
+                carry autocomplete username and
+                current-password, and that is gated in CI by
+                input-purpose.spec.ts, which asserts each
+                field exists before asserting its token. The
+                account form does not. Drupal core's
+                AccountForm sets autocomplete off on the
+                email, username and password fields whenever
+                the form is not a registration, and on the
+                current password field always, so on a page
+                where a person edits their own account the
+                purpose of those fields is not
+                programmatically determinable. Core's stated
+                reason is to stop a browser prefilling another
+                person's details, which is a real concern on
+                the administrative path but does not hold
+                where someone is editing their own account.
+                The inventory-wide checkInputPurpose reports
+                these three fields on /user/*/edit and reports
+                nothing elsewhere. Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -598,8 +766,19 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                More than one way is available to reach
+                content. The site offers a search box in the
+                header on every page, a main navigation menu,
+                and browse listings reached from the home
+                page, including browse by community and by
+                collection. Any two of these satisfy the
+                criterion independently, so no sitemap is
+                required, and none is installed. Evidence is
+                recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -628,8 +807,20 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: does-not-support
+              notes: >-
+                Dictionary content cannot express its
+                language. Every dictionary word carries a
+                required reference to a term in the language
+                vocabulary, but that vocabulary has no fields,
+                so there is no ISO 639 or BCP 47 code for a
+                template to place in a lang attribute, and no
+                template emits one (issues #2328, #2353,
+                #2354, #2357). Local Contexts labels do emit
+                lang correctly, so the gap is specific rather
+                than systemic. Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -668,8 +859,27 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: partially-supports
+              notes: >-
+                Deletion of entities goes through a
+                confirmation form throughout: 19 classes
+                extend a confirm or delete form base, covering
+                communities, protocols, collections, exports,
+                import strategies, memberships and legacy
+                labels, and the Views Bulk Operations delete
+                action on the media listing sets
+                add_confirmation. Bulk removal of group
+                memberships does not. The members overview
+                uses Organic Groups' own bulk form rather than
+                Views Bulk Operations, which offers no
+                confirmation option, and its delete action
+                removes each membership immediately. Re-adding
+                a member does not restore their roles, so the
+                action is neither reversible, checked nor
+                confirmed (issue #2370). Evidence is recorded
+                in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated

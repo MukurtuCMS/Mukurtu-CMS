@@ -364,6 +364,128 @@ Those files are injected by Drupal so they shouldn't be bundled to style.css. */
   padding-inline: calc(var(--gutter) / 2);
 }
 
+/* Optional page background image.
+ *
+ * The URL arrives as --mukurtu-page-background-image, set inline on the page
+ * container by mukurtu_design_preprocess_page(). Nothing is written to a
+ * stylesheet, so there is no cached artifact to fall out of step with the
+ * configuration.
+ *
+ * The image sits behind the whole page - header, content and footer - the way
+ * the Plateau Peoples' Web Portal uses it. The scrim is a flat colour layer
+ * stacked over it, so anything sitting directly on the image has a known
+ * contrast rather than one that depends on the photograph.
+ *
+ * The treatment sets `color` only. It deliberately does not touch the shared
+ * palette tokens: components that carry their own background (the nav's white
+ * bar, cards, the footer) keep their own colours, and only text that actually
+ * sits on the image inherits the treatment. Recolouring everything is what
+ * made the main menu render white-on-white during development.
+ */
+.page--has-background {
+  background-image: linear-gradient(var(--mukurtu-page-scrim), var(--mukurtu-page-scrim)), var(--mukurtu-page-background-image);
+  background-attachment: scroll;
+  background-position: top center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+/* Scrim opacities are measured, not guessed. Against a full white-to-black
+ * gradient - the worst case any photograph can present - these give 5.74:1 for
+ * light and 7.37:1 for dark on 18-20px text, both clear of the 4.5:1 that size
+ * requires. Light has the least room: below about 54% the white text drops
+ * under 4.5:1 over a white region of the image. */
+.page--text-light {
+  --mukurtu-page-scrim: rgb(0 0 0 / 60%);
+  color: var(--color-white);
+}
+
+.page--text-dark {
+  --mukurtu-page-scrim: rgb(255 255 255 / 60%);
+  color: var(--color-black);
+}
+
+/* Let text take the treatment colour.
+ *
+ * Headings and body copy set their colour explicitly for a white ground, so
+ * they do not inherit and would keep dark text over the image - block titles
+ * measured 1.65:1 before this. `inherit` is self-correcting rather than a flat
+ * override: inside the footer it picks up --footer-text-color, inside a block
+ * that paints its own ground it picks up that block's colour, and only where
+ * text really does sit on the image does it pick up the treatment.
+ *
+ * This only ever applies on the front page, where the background lives. */
+.page--has-background h1,
+.page--has-background h2,
+.page--has-background h3,
+.page--has-background h4,
+.page--has-background p,
+.page--has-background li,
+.page--has-background dt,
+.page--has-background dd {
+  color: inherit;
+}
+
+/* Drop the block separator shadow over the image.
+ *
+ * .layout--onecol .block-wrapper carries a pale grey drop shadow to separate
+ * blocks on a white page. Over a photograph it reads as a glowing bar across
+ * the full width. The image already separates the blocks, so the shadow has no
+ * job here.
+ *
+ * The layout class is in the selector to win on specificity: the rule in
+ * _landing-page.scss is also two classes, and 04-templates is imported after
+ * 00-base, so an equally specific selector here would silently lose. */
+.page--has-background .layout--onecol .block-wrapper {
+  -webkit-box-shadow: none;
+          box-shadow: none;
+}
+
+/* Stop the treatment colour at the nav.
+ *
+ * .header-nav carries its own opaque background - a white bar at desktop, the
+ * slide-out drawer on mobile - and its links inherit their colour rather than
+ * setting it, so without this the light treatment paints white text onto that
+ * white bar. Only elements that actually inherit need this: the footer sets
+ * --footer-text-color on its own dark ground, and forcing a colour there would
+ * render it invisible.
+ *
+ * Note _nav-primary.scss reads --color-text-neutral-loud, which this theme
+ * never defines anywhere, so that declaration is invalid and those links have
+ * always inherited - see #2186. */
+.page--has-background .header-nav {
+  color: var(--brand-text-color);
+}
+
+/* At desktop the nav sits on the image rather than on its own bar, so it takes
+ * the treatment colour. Scoped to exactly the desktop state the theme defines,
+ * leaving the mobile drawer - which overlays page content - untouched.
+ *
+ * --brand-secondary-dark drives the hover colour, the hover underline and the
+ * focus outline together, so it is retuned per treatment or focus fails 1.4.11.
+ * Palette accents are not usable here: red-bone's --brand-secondary-accent
+ * measures 3.22:1 on the light scrim, under the 4.5:1 this text size needs. */
+@media (min-width: 60rem) {
+  body:not(.is-always-mobile-nav) .page--has-background .header-nav {
+    background-color: transparent;
+    color: inherit;
+  }
+}
+
+@media (min-width: 60rem) {
+  body:not(.is-always-mobile-nav) .page--has-background.page--text-light .header-nav {
+    --brand-secondary-dark: var(--color-white);
+    --main-nav-divider: rgb(255 255 255 / 45%);
+  }
+}
+
+@media (min-width: 60rem) {
+  body:not(.is-always-mobile-nav) .page--has-background.page--text-dark .header-nav {
+    --brand-secondary-dark: var(--color-black);
+    --main-nav-divider: rgb(0 0 0 / 35%);
+  }
+}
+
 div.palette-demo {
   position: relative;
   display: -webkit-box;
@@ -1399,12 +1521,21 @@ body.consent-popup-opened .klaro_toggle_dialog {
   display: grid;
   gap: var(--gutter);
 }
+
 .field--name-field-featured-content .field__item,
-.field--name-field-all-related-content .field__items .field__item {
+.field--name-field-featured-content .featured-carousel__slide,
+.field--name-field-all-related-content .field__items .field__item,
+.field--name-field-all-related-content .field__items .featured-carousel__slide,
+.featured-carousel .field__item,
+.featured-carousel .featured-carousel__slide {
   position: relative;
 }
 .field--name-field-featured-content .field__item article,
-.field--name-field-all-related-content .field__items .field__item article {
+.field--name-field-featured-content .featured-carousel__slide article,
+.field--name-field-all-related-content .field__items .field__item article,
+.field--name-field-all-related-content .field__items .featured-carousel__slide article,
+.featured-carousel .field__item article,
+.featured-carousel .featured-carousel__slide article {
   block-size: 100%;
   display: -webkit-box;
   display: -ms-flexbox;
@@ -1416,7 +1547,8 @@ body.consent-popup-opened .klaro_toggle_dialog {
   background: var(--color-white);
 }
 .field--name-field-featured-content .featured-item__media,
-.field--name-field-all-related-content .field__items .featured-item__media {
+.field--name-field-all-related-content .field__items .featured-item__media,
+.featured-carousel .featured-item__media {
   aspect-ratio: 4/3;
   overflow: hidden;
   background-color: var(--brand-secondary-accent);
@@ -1426,18 +1558,22 @@ body.consent-popup-opened .klaro_toggle_dialog {
 .field--name-field-featured-content .featured-item__media .media,
 .field--name-field-featured-content .featured-item__media .media .field,
 .field--name-field-all-related-content .field__items .featured-item__media .media,
-.field--name-field-all-related-content .field__items .featured-item__media .media .field {
+.field--name-field-all-related-content .field__items .featured-item__media .media .field,
+.featured-carousel .featured-item__media .media,
+.featured-carousel .featured-item__media .media .field {
   block-size: 100%;
 }
 .field--name-field-featured-content .featured-item__media img,
-.field--name-field-all-related-content .field__items .featured-item__media img {
+.field--name-field-all-related-content .field__items .featured-item__media img,
+.featured-carousel .featured-item__media img {
   block-size: 100%;
   -o-object-fit: cover;
      object-fit: cover;
   inline-size: 100%;
 }
 .field--name-field-featured-content .featured-item__media .media--image,
-.field--name-field-all-related-content .field__items .featured-item__media .media--image {
+.field--name-field-all-related-content .field__items .featured-item__media .media--image,
+.featured-carousel .featured-item__media .media--image {
   block-size: 100%;
 }
 .field--name-field-featured-content .featured-item__media .media--image .field,
@@ -1445,12 +1581,16 @@ body.consent-popup-opened .klaro_toggle_dialog {
 .field--name-field-featured-content .featured-item__media .media--image a,
 .field--name-field-all-related-content .field__items .featured-item__media .media--image .field,
 .field--name-field-all-related-content .field__items .featured-item__media .media--image .field__item,
-.field--name-field-all-related-content .field__items .featured-item__media .media--image a {
+.field--name-field-all-related-content .field__items .featured-item__media .media--image a,
+.featured-carousel .featured-item__media .media--image .field,
+.featured-carousel .featured-item__media .media--image .field__item,
+.featured-carousel .featured-item__media .media--image a {
   display: block;
   block-size: 100%;
 }
 .field--name-field-featured-content .featured-item__media .media--image img,
-.field--name-field-all-related-content .field__items .featured-item__media .media--image img {
+.field--name-field-all-related-content .field__items .featured-item__media .media--image img,
+.featured-carousel .featured-item__media .media--image img {
   block-size: 100%;
   inline-size: 100%;
   -o-object-fit: cover;
@@ -1463,19 +1603,26 @@ body.consent-popup-opened .klaro_toggle_dialog {
 .field--name-field-all-related-content .field__items .featured-item__media video,
 .field--name-field-all-related-content .field__items .featured-item__media audio,
 .field--name-field-all-related-content .field__items .featured-item__media .media--remote_video,
-.field--name-field-all-related-content .field__items .featured-item__media .media--soundcloud {
+.field--name-field-all-related-content .field__items .featured-item__media .media--soundcloud,
+.featured-carousel .featured-item__media video,
+.featured-carousel .featured-item__media audio,
+.featured-carousel .featured-item__media .media--remote_video,
+.featured-carousel .featured-item__media .media--soundcloud {
   position: relative;
   z-index: 1;
 }
 .field--name-field-featured-content .featured-item__media video,
-.field--name-field-all-related-content .field__items .featured-item__media video {
+.field--name-field-all-related-content .field__items .featured-item__media video,
+.featured-carousel .featured-item__media video {
   inline-size: 100%;
   block-size: 100%;
 }
 .field--name-field-featured-content .featured-item__media .media--remote_video,
 .field--name-field-featured-content .featured-item__media .media--soundcloud,
 .field--name-field-all-related-content .field__items .featured-item__media .media--remote_video,
-.field--name-field-all-related-content .field__items .featured-item__media .media--soundcloud {
+.field--name-field-all-related-content .field__items .featured-item__media .media--soundcloud,
+.featured-carousel .featured-item__media .media--remote_video,
+.featured-carousel .featured-item__media .media--soundcloud {
   inline-size: 100%;
   block-size: 100%;
 }
@@ -1485,17 +1632,23 @@ body.consent-popup-opened .klaro_toggle_dialog {
 .field--name-field-all-related-content .field__items .featured-item__media .media--remote_video .field,
 .field--name-field-all-related-content .field__items .featured-item__media .media--remote_video iframe,
 .field--name-field-all-related-content .field__items .featured-item__media .media--soundcloud .field,
-.field--name-field-all-related-content .field__items .featured-item__media .media--soundcloud iframe {
+.field--name-field-all-related-content .field__items .featured-item__media .media--soundcloud iframe,
+.featured-carousel .featured-item__media .media--remote_video .field,
+.featured-carousel .featured-item__media .media--remote_video iframe,
+.featured-carousel .featured-item__media .media--soundcloud .field,
+.featured-carousel .featured-item__media .media--soundcloud iframe {
   inline-size: 100%;
   block-size: 100%;
 }
 .field--name-field-featured-content .featured-item__media .media--soundcloud .media__soundcloud-player,
-.field--name-field-all-related-content .field__items .featured-item__media .media--soundcloud .media__soundcloud-player {
+.field--name-field-all-related-content .field__items .featured-item__media .media--soundcloud .media__soundcloud-player,
+.featured-carousel .featured-item__media .media--soundcloud .media__soundcloud-player {
   inline-size: 100%;
   block-size: 100%;
 }
 .field--name-field-featured-content .featured-item__media .media--audio,
-.field--name-field-all-related-content .field__items .featured-item__media .media--audio {
+.field--name-field-all-related-content .field__items .featured-item__media .media--audio,
+.featured-carousel .featured-item__media .media--audio {
   block-size: 100%;
   display: -webkit-box;
   display: -ms-flexbox;
@@ -1508,7 +1661,8 @@ body.consent-popup-opened .klaro_toggle_dialog {
   background: var(--brand-secondary-accent);
 }
 .field--name-field-featured-content .featured-item__media .media--audio .media__thumbnail,
-.field--name-field-all-related-content .field__items .featured-item__media .media--audio .media__thumbnail {
+.field--name-field-all-related-content .field__items .featured-item__media .media--audio .media__thumbnail,
+.featured-carousel .featured-item__media .media--audio .media__thumbnail {
   -webkit-box-flex: 1;
       -ms-flex: 1;
           flex: 1;
@@ -1516,14 +1670,16 @@ body.consent-popup-opened .klaro_toggle_dialog {
   overflow: hidden;
 }
 .field--name-field-featured-content .featured-item__media .media--audio .media__thumbnail img,
-.field--name-field-all-related-content .field__items .featured-item__media .media--audio .media__thumbnail img {
+.field--name-field-all-related-content .field__items .featured-item__media .media--audio .media__thumbnail img,
+.featured-carousel .featured-item__media .media--audio .media__thumbnail img {
   block-size: 100%;
   inline-size: 100%;
   -o-object-fit: cover;
      object-fit: cover;
 }
 .field--name-field-featured-content .featured-item__media .media--audio .media__thumbnail .media__audio-fallback,
-.field--name-field-all-related-content .field__items .featured-item__media .media--audio .media__thumbnail .media__audio-fallback {
+.field--name-field-all-related-content .field__items .featured-item__media .media--audio .media__thumbnail .media__audio-fallback,
+.featured-carousel .featured-item__media .media--audio .media__thumbnail .media__audio-fallback {
   block-size: 100%;
   display: -webkit-box;
   display: -ms-flexbox;
@@ -1537,7 +1693,8 @@ body.consent-popup-opened .klaro_toggle_dialog {
   background: var(--brand-secondary-accent);
 }
 .field--name-field-featured-content .featured-item__media .media--audio .media__thumbnail .media__audio-fallback img,
-.field--name-field-all-related-content .field__items .featured-item__media .media--audio .media__thumbnail .media__audio-fallback img {
+.field--name-field-all-related-content .field__items .featured-item__media .media--audio .media__thumbnail .media__audio-fallback img,
+.featured-carousel .featured-item__media .media--audio .media__thumbnail .media__audio-fallback img {
   block-size: auto;
   max-block-size: 100%;
   inline-size: auto;
@@ -1545,11 +1702,13 @@ body.consent-popup-opened .klaro_toggle_dialog {
      object-fit: contain;
 }
 .field--name-field-featured-content .featured-item__media .media--audio .media__thumbnail--playable,
-.field--name-field-all-related-content .field__items .featured-item__media .media--audio .media__thumbnail--playable {
+.field--name-field-all-related-content .field__items .featured-item__media .media--audio .media__thumbnail--playable,
+.featured-carousel .featured-item__media .media--audio .media__thumbnail--playable {
   position: relative;
 }
 .field--name-field-featured-content .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button,
-.field--name-field-all-related-content .field__items .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button {
+.field--name-field-all-related-content .field__items .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button,
+.featured-carousel .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button {
   position: absolute;
   inset: 0;
   display: -webkit-box;
@@ -1568,7 +1727,8 @@ body.consent-popup-opened .klaro_toggle_dialog {
   z-index: 2;
 }
 .field--name-field-featured-content .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button::before,
-.field--name-field-all-related-content .field__items .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button::before {
+.field--name-field-all-related-content .field__items .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button::before,
+.featured-carousel .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button::before {
   content: "";
   display: block;
   inline-size: 3rem;
@@ -1581,43 +1741,52 @@ body.consent-popup-opened .klaro_toggle_dialog {
 }
 .field--name-field-featured-content .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button:hover::before, .field--name-field-featured-content .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button:focus-visible::before,
 .field--name-field-all-related-content .field__items .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button:hover::before,
-.field--name-field-all-related-content .field__items .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button:focus-visible::before {
+.field--name-field-all-related-content .field__items .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button:focus-visible::before,
+.featured-carousel .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button:hover::before,
+.featured-carousel .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button:focus-visible::before {
   background: rgba(0, 0, 0, 0.85);
 }
 .field--name-field-featured-content .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button:focus-visible,
-.field--name-field-all-related-content .field__items .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button:focus-visible {
+.field--name-field-all-related-content .field__items .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button:focus-visible,
+.featured-carousel .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button:focus-visible {
   outline: 3px solid #005fcc;
-  outline-offset: 2px;
+  outline-offset: -6px;
   -webkit-box-shadow: inset 0 0 0 3px #ffffff;
           box-shadow: inset 0 0 0 3px #ffffff;
 }
 .field--name-field-featured-content .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button svg,
-.field--name-field-all-related-content .field__items .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button svg {
+.field--name-field-all-related-content .field__items .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button svg,
+.featured-carousel .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button svg {
   fill: white;
   position: relative;
   z-index: 1;
 }
 .field--name-field-featured-content .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button .audio-play-button__icon--pause,
-.field--name-field-all-related-content .field__items .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button .audio-play-button__icon--pause {
+.field--name-field-all-related-content .field__items .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button .audio-play-button__icon--pause,
+.featured-carousel .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button .audio-play-button__icon--pause {
   display: none;
 }
 .field--name-field-featured-content .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button.is-playing .audio-play-button__icon--play,
-.field--name-field-all-related-content .field__items .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button.is-playing .audio-play-button__icon--play {
+.field--name-field-all-related-content .field__items .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button.is-playing .audio-play-button__icon--play,
+.featured-carousel .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button.is-playing .audio-play-button__icon--play {
   display: none;
 }
 .field--name-field-featured-content .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button.is-playing .audio-play-button__icon--pause,
-.field--name-field-all-related-content .field__items .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button.is-playing .audio-play-button__icon--pause {
+.field--name-field-all-related-content .field__items .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button.is-playing .audio-play-button__icon--pause,
+.featured-carousel .featured-item__media .media--audio .media__thumbnail--playable .audio-play-button.is-playing .audio-play-button__icon--pause {
   display: block;
 }
 .field--name-field-featured-content .featured-item__media .media--audio .media__audio-source,
-.field--name-field-all-related-content .field__items .featured-item__media .media--audio .media__audio-source {
+.field--name-field-all-related-content .field__items .featured-item__media .media--audio .media__audio-source,
+.featured-carousel .featured-item__media .media--audio .media__audio-source {
   block-size: 0;
   overflow: hidden;
   -ms-flex-negative: 0;
       flex-shrink: 0;
 }
 .field--name-field-featured-content .featured-item__body,
-.field--name-field-all-related-content .field__items .featured-item__body {
+.field--name-field-all-related-content .field__items .featured-item__body,
+.featured-carousel .featured-item__body {
   padding-inline: var(--v-space-4xxs);
   display: -webkit-box;
   display: -ms-flexbox;
@@ -1631,8 +1800,17 @@ body.consent-popup-opened .klaro_toggle_dialog {
           flex: 1;
   background: var(--brand-primary-accent);
 }
+.field--name-field-featured-content .featured-item__translation,
+.field--name-field-all-related-content .field__items .featured-item__translation,
+.featured-carousel .featured-item__translation {
+  color: var(--color-white);
+  font-size: var(--font-size-s);
+  line-height: var(--line-height-s);
+  margin-block: 0 var(--v-space-5xs);
+}
 .field--name-field-featured-content .featured-item__type,
-.field--name-field-all-related-content .field__items .featured-item__type {
+.field--name-field-all-related-content .field__items .featured-item__type,
+.featured-carousel .featured-item__type {
   font-size: var(--font-size-xs);
   font-weight: 800;
   text-transform: uppercase;
@@ -1643,7 +1821,8 @@ body.consent-popup-opened .klaro_toggle_dialog {
           margin-block-end: var(--v-space-6xs);
 }
 .field--name-field-featured-content h3,
-.field--name-field-all-related-content .field__items h3 {
+.field--name-field-all-related-content .field__items h3,
+.featured-carousel h3 {
   font-size: var(--font-size-m);
   font-weight: var(--text-bold);
   line-height: var(--line-height-xs);
@@ -1654,23 +1833,27 @@ body.consent-popup-opened .klaro_toggle_dialog {
           flex: 1;
 }
 .field--name-field-featured-content h3 .featured-item__title-link,
-.field--name-field-all-related-content .field__items h3 .featured-item__title-link {
+.field--name-field-all-related-content .field__items h3 .featured-item__title-link,
+.featured-carousel h3 .featured-item__title-link {
   text-decoration: none;
   color: var(--color-white);
 }
 .field--name-field-featured-content h3 .featured-item__title-link::after,
-.field--name-field-all-related-content .field__items h3 .featured-item__title-link::after {
+.field--name-field-all-related-content .field__items h3 .featured-item__title-link::after,
+.featured-carousel h3 .featured-item__title-link::after {
   content: "";
   position: absolute;
   inset: 0;
 }
 .field--name-field-featured-content h3 .featured-item__title-link:focus-visible,
-.field--name-field-all-related-content .field__items h3 .featured-item__title-link:focus-visible {
+.field--name-field-all-related-content .field__items h3 .featured-item__title-link:focus-visible,
+.featured-carousel h3 .featured-item__title-link:focus-visible {
   outline: 2px solid var(--focus-color);
   outline-offset: 2px;
 }
 .field--name-field-featured-content h3 .featured-item__title-link:hover,
-.field--name-field-all-related-content .field__items h3 .featured-item__title-link:hover {
+.field--name-field-all-related-content .field__items h3 .featured-item__title-link:hover,
+.featured-carousel h3 .featured-item__title-link:hover {
   text-decoration: underline;
 }
 
@@ -1703,6 +1886,178 @@ body.consent-popup-opened .klaro_toggle_dialog {
   .field--name-field-all-related-content .field__items {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
+}
+
+/**
+ * Carousel display for the Featured Content block.
+ *
+ * The cards themselves are styled in _featured-items.scss, shared with the
+ * grid display. Everything here is the carousel shell: the track, and the
+ * controls that sit under it.
+ */
+.featured-carousel {
+  max-inline-size: 80rem;
+  margin-inline: auto;
+}
+.featured-carousel .splide__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.featured-carousel .splide__track {
+  cursor: pointer;
+}
+.featured-carousel .featured-carousel__slide {
+  -webkit-transition: opacity 0.3s ease;
+  transition: opacity 0.3s ease;
+}
+.featured-carousel .featured-carousel__slide:not(.is-active) {
+  opacity: 0.45;
+}
+.featured-carousel .featured-carousel__slide:not(.is-active) .featured-item__body > * {
+  opacity: 0;
+}
+.featured-carousel .featured-carousel__slide .featured-item__body > * {
+  -webkit-transition: opacity 0.3s ease;
+  transition: opacity 0.3s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .featured-carousel .featured-carousel__slide .featured-item__body > * {
+    -webkit-transition: none;
+    transition: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .featured-carousel .featured-carousel__slide {
+    -webkit-transition: none;
+    transition: none;
+  }
+}
+.featured-carousel .featured-carousel__slide article {
+  inline-size: 100%;
+}
+@media (min-width: 60rem) {
+  .featured-carousel .featured-carousel__slide article {
+    display: grid;
+    grid-template-columns: 3fr 2fr;
+  }
+}
+@media (forced-colors: active) {
+  .featured-carousel .featured-carousel__slide article {
+    border: 1px solid canvastext;
+  }
+}
+.featured-carousel .featured-carousel__slide .featured-item__media {
+  aspect-ratio: 3/2;
+}
+.featured-carousel .featured-carousel__slide .featured-item__media .media > .field {
+  -webkit-box-flex: 1;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
+  inline-size: 100%;
+}
+.featured-carousel .featured-carousel__slide .featured-item__body {
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  padding: var(--v-space-4xxs);
+}
+@media (min-width: 60rem) {
+  .featured-carousel .featured-carousel__slide .featured-item__body {
+    padding: var(--v-space-s);
+  }
+}
+.featured-carousel .featured-carousel__slide h3 {
+  -webkit-box-flex: 0;
+      -ms-flex: 0 0 auto;
+          flex: 0 0 auto;
+}
+@media (min-width: 60rem) {
+  .featured-carousel .featured-carousel__slide h3 {
+    font-size: var(--font-size-xl);
+  }
+}
+
+.featured-item__summary {
+  color: var(--color-white);
+  font-size: var(--font-size-s);
+  line-height: var(--line-height-m);
+  -webkit-margin-after: var(--v-space-5xs);
+          margin-block-end: var(--v-space-5xs);
+}
+@media (min-width: 60rem) {
+  .featured-item__summary {
+    font-size: var(--font-size-m);
+  }
+}
+
+.featured-carousel__controls {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  gap: var(--v-space-5xs);
+  -webkit-margin-before: var(--v-space-5xs);
+          margin-block-start: var(--v-space-5xs);
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+}
+
+.featured-carousel__status {
+  font-variant-numeric: tabular-nums;
+  font-size: var(--font-size-s);
+  color: var(--color-text-neutral-medium, #565656);
+  margin: 0;
+  min-inline-size: 8ch;
+  text-align: center;
+}
+
+.featured-carousel__button {
+  min-inline-size: 2.75rem;
+  min-block-size: 2.75rem;
+  display: -webkit-inline-box;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  padding-inline: var(--v-space-5xs);
+  border: 1.5px solid var(--brand-primary);
+  border-radius: 4px;
+  background: var(--color-white);
+  color: var(--brand-primary-dark);
+  font-size: var(--font-size-m);
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  -webkit-transition: background-color 0.12s ease-in, color 0.12s ease-in;
+  transition: background-color 0.12s ease-in, color 0.12s ease-in;
+}
+.featured-carousel__button:hover {
+  background: var(--brand-primary);
+  color: var(--color-white);
+}
+.featured-carousel__button:focus-visible {
+  outline: 2px solid currentcolor;
+  outline-offset: 2px;
+}
+@media (forced-colors: active) {
+  .featured-carousel__button {
+    border: 2px solid buttontext;
+  }
+}
+
+.featured-carousel__button--toggle {
+  padding-inline: var(--v-space-4xxs);
+  font-size: var(--font-size-s);
 }
 
 .form-item + .form-item {
@@ -2105,6 +2460,12 @@ label.form-required::after,
 }
 .block--image-with-description--horizontal .block-wrapper__second {
   background-color: var(--brand-secondary);
+  /* A component that paints its own ground has to own its text colour too.
+   * Without this the text inherits from whatever is behind the block, which
+   * is fine on the plain page but renders white on tan once a page
+   * background is set. No visual change on a site with no background: this
+   * is the colour the text already inherited from body. */
+  color: var(--brand-text-color);
 }
 .block--image-with-description--horizontal .block-wrapper__second h1, .block--image-with-description--horizontal .block-wrapper__second h2 {
   color: var(--image-description-horizontal-text);
@@ -2262,6 +2623,106 @@ label.form-required::after,
 }
 .block--image-with-description--full .block-wrapper__second-card {
   max-inline-size: min(90%, 640px);
+}
+
+/* Text-only hero: a full-width block with no image.
+ *
+ * field_image is optional, so an author can build a text-only hero by leaving
+ * it empty - which is how a site gets a plain homepage title (#1035). Two
+ * things have to change when there is no image.
+ *
+ * First, the 600px min-block-size exists to give text room over a full-bleed
+ * photograph. With no image it reserves roughly 640px for about 150px of
+ * content, so it is dropped.
+ *
+ * Second, field_text_color is meaningless here: "Light" is white text on the
+ * white page. So the ground comes from field_hero_background instead, and the
+ * text colour is set alongside it rather than chosen separately. Every pairing
+ * below was measured against all three shipped palettes and clears 4.5:1;
+ * the worst case is Soft on Blue and gold at 4.62:1. A custom palette is six
+ * author-chosen colours, so it cannot carry the same guarantee - see #2179.
+ */
+.block--image-with-description--full.block--image-with-description--no-image .block-wrapper__second {
+  /* The 600px floor exists to give text room over a full-bleed photograph.
+   * With no image it reserves roughly 640px for about 150px of content. */
+  min-block-size: 0;
+  /* The with-image layout is a wrapping row, which relies on the image's
+   * height to push the heading and body onto separate lines. Without an
+   * image they sit side by side, so state the stacking explicitly. */
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -ms-flex-wrap: nowrap;
+      flex-wrap: nowrap;
+  /* Otherwise the body and link stay left-aligned under a centred title. */
+  text-align: center;
+}
+.block--image-with-description--full.block--image-with-description--no-image {
+  /* No image element to lay out. */
+}
+.block--image-with-description--full.block--image-with-description--no-image .block-wrapper__first {
+  display: none;
+}
+.block--image-with-description--full.block--image-with-description--no-image {
+  /* The with-image hero's glyph outline and link ring exist to separate text
+   * from an unknown photo. Here the ground is one of the presets below, whose
+   * pairings were measured without them, so the outline would only blur the
+   * edges. The wash needs no override: the template only adds the tinted
+   * class when there is an image. */
+}
+.block--image-with-description--full.block--image-with-description--no-image h1,
+.block--image-with-description--full.block--image-with-description--no-image h2,
+.block--image-with-description--full.block--image-with-description--no-image p,
+.block--image-with-description--full.block--image-with-description--no-image a {
+  -webkit-text-stroke: 0;
+  -webkit-filter: none;
+          filter: none;
+}
+.block--image-with-description--full.block--image-with-description--no-image {
+  /* The with-image styling sets `* { color }` on every descendant, and a rule
+   * that matches an element directly always beats an inherited colour, however
+   * specific the inherited one is. So each preset has to match descendants the
+   * same way rather than setting colour on a wrapper; the extra classes are
+   * what win. Without this the body copy kept the brand red and the Brand
+   * preset rendered red on red at 1:1. */
+  /* Plain: the page's own ground. Body copy takes the normal reading colour
+   * instead of inheriting the heading's brand red. */
+}
+.block--image-with-description--full.block--image-with-description--no-image.hero-ground-none * {
+  color: var(--brand-text-color);
+  text-shadow: none;
+}
+.block--image-with-description--full.block--image-with-description--no-image.hero-ground-none h1,
+.block--image-with-description--full.block--image-with-description--no-image.hero-ground-none h2 {
+  color: var(--brand-primary-dark);
+}
+.block--image-with-description--full.block--image-with-description--no-image.hero-ground-brand {
+  background-color: var(--brand-primary-dark);
+}
+.block--image-with-description--full.block--image-with-description--no-image.hero-ground-brand * {
+  color: var(--color-white);
+  text-shadow: none;
+}
+.block--image-with-description--full.block--image-with-description--no-image.hero-ground-soft {
+  background-color: var(--brand-secondary);
+}
+.block--image-with-description--full.block--image-with-description--no-image.hero-ground-soft * {
+  color: var(--brand-text-color);
+  text-shadow: none;
+}
+.block--image-with-description--full.block--image-with-description--no-image {
+  /* The presets' `* { color }` outrank the with-image hero's .contextual
+   * revert, so Drupal's contextual links would take the preset colours.
+   * Same revert, restated after the presets so it wins the tie. */
+}
+.block--image-with-description--full.block--image-with-description--no-image .contextual,
+.block--image-with-description--full.block--image-with-description--no-image .contextual * {
+  color: revert;
+  -webkit-text-stroke: revert;
+  text-shadow: revert;
+  -webkit-filter: revert;
+          filter: revert;
 }
 
 .language-switcher__summary {
@@ -5255,9 +5716,83 @@ header {
 }
 .header__logo {
   grid-column: 1/span 1;
+  /* Text branding.
+   *
+   * Core's branding block can show the site name instead of an uploaded
+   * logo - the toggles are on the block itself - but nothing styled it, so
+   * it fell back to ordinary link styling: 16px, regular weight, brand red,
+   * underlined. Sized and weighted here so it reads as a wordmark.
+   *
+   * The colour and the underline sit on the link, which wraps the name; the
+   * size sits on the name itself. Dropping the underline is deliberate: the
+   * site name is an identity, not a body-copy link, and it keeps the base
+   * focus outline either way.
+   */
 }
 .header__logo a {
   display: inline-block;
+  color: var(--brand-primary-dark);
+  text-decoration: none;
+  /* The colour above outsells the base `a:hover` rule on specificity, so
+   * without these the wordmark had no hover affordance at all and the
+   * focus outline was its only interactive signal. The underline comes
+   * back on hover and focus so the cue is not colour alone (1.4.1). */
+}
+.header__logo a:hover, .header__logo a:focus, .header__logo a:focus-visible, .header__logo a:active {
+  color: var(--brand-secondary-dark);
+  text-decoration: underline solid 2px currentcolor;
+}
+.header__logo a:has(.header__logo-text) {
+  /* A logo and the site name together sit side by side, the name
+   * centred against the logo, rather than the name dropping onto a line
+   * of its own underneath. Scoped to the link that holds the name, so a
+   * site with only a logo keeps exactly the layout it had. */
+  display: -webkit-inline-box;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  gap: var(--v-space-4xxs);
+}
+.header__logo-text {
+  /* A long single word - a site name with no spaces, or a compound in a
+   * language that does not break - otherwise forces the header wider than
+   * the viewport. Below lg branding spans the row, so there is no flex
+   * rule to catch it; this has to apply at every width (1.4.10).
+   *
+   * `anywhere` rather than `break-word`: the two break lines identically,
+   * but only `anywhere` is taken into account when the browser works out
+   * the element's min-content width. Branding is a grid item with the
+   * default `min-width: auto`, so under `break-word` the cell was still
+   * sized to the whole unbreakable word and the page scrolled sideways -
+   * measured at 123px past a 320px viewport. */
+  overflow-wrap: anywhere;
+  /* Two scales, because the branding cell is a very different share of the
+   * row either side of lg. Below lg the nav is a drawer, so branding has
+   * most of the width - 688px at 928px - and can run near full size. From
+   * lg it shares the row with the menu and has to be far more modest.
+   * The ceiling is the 28px this is designed at. */
+  font-size: clamp(1.25rem, 3.2vw, 1.75rem);
+}
+@media (min-width: 60rem) {
+  .header__logo-text {
+    /* The floor is 18px, not 14px. Between lg and about 1200px the header
+     * has already wrapped, so branding has the whole row to itself and
+     * nothing is gained by shrinking: 1.5vw put the wordmark at 14.4px at
+     * 960px, smaller than the 16px nav links beside it, which reads as a
+     * caption rather than the site's name.
+     *
+     * 18px rather than 20px because 1.5vw passes 18px at about 1200px, so
+     * the floor stops applying before the width where branding and the nav
+     * share a row. A 20px floor was still in force at 1280px and pushed a
+     * header that fits on one line there onto two. */
+    font-size: clamp(1.125rem, 1.5vw, 1.75rem);
+  }
+}
+.header__logo-text {
+  font-weight: 700;
+  line-height: 1.15;
 }
 .header__logo img {
   inline-size: 100px;
@@ -5287,25 +5822,30 @@ header {
  * tracks to their content instead: the logo and button get what they need
  * and the search box takes the rest. The narrower gap keeps the search box
  * usable at large text sizes, where the full gutter left it a few pixels
- * wide. */
+ * wide.
+ *
+ * Not when the site name is shown. Its width is the name's, not the fixed
+ * logo's, so an auto track squeezed the search box to 16px beside a long
+ * name. Text branding has its own layout below, with the search on a row of
+ * its own. */
 @media (max-width: 59.9rem) {
-  body:not(.is-always-mobile-nav) .header {
+  body:not(.is-always-mobile-nav) .header:not(:has(.header__logo-text)) {
     grid-template-columns: auto minmax(0, 1fr) auto;
     -webkit-column-gap: var(--v-space-5xs);
        -moz-column-gap: var(--v-space-5xs);
             column-gap: var(--v-space-5xs);
   }
-  body:not(.is-always-mobile-nav) .header .header__logo {
+  body:not(.is-always-mobile-nav) .header:not(:has(.header__logo-text)) .header__logo {
     grid-column: 1;
   }
-  body:not(.is-always-mobile-nav) .header .header-search--mobile {
+  body:not(.is-always-mobile-nav) .header:not(:has(.header__logo-text)) .header-search--mobile {
     grid-column: 2;
   }
-  body:not(.is-always-mobile-nav) .header .mobile-buttons {
+  body:not(.is-always-mobile-nav) .header:not(:has(.header__logo-text)) .mobile-buttons {
     grid-column: 3;
   }
 }
-body:not(.is-always-mobile-nav) .header {
+body:not(.is-always-mobile-nav) .header:not(:has(.header__logo-text)) {
   /* When one row cannot fit the logo, a usable search box and the menu
    * button, give the search box its own row. The width that row needs:
    * layout padding (3rem), column gaps (1rem), search wrapper padding
@@ -5315,10 +5855,295 @@ body:not(.is-always-mobile-nav) .header {
    * squeezing it under the menu button. */
 }
 @media (width < calc(14.25rem + 100px)) {
-  body:not(.is-always-mobile-nav) .header .header-search--mobile {
+  body:not(.is-always-mobile-nav) .header:not(:has(.header__logo-text)) .header-search--mobile {
     grid-column: 1/-1;
     grid-row: 2;
     padding-inline: 0;
+  }
+}
+
+/* Optional header background image.
+ *
+ * The URL arrives as --mukurtu-header-background-image, set inline on the
+ * header element by mukurtu_design_preprocess_page(). The scrim is a flat
+ * colour layer stacked over the image, so the contrast of the logo and menu is
+ * decided here rather than by whichever photograph a site happens to upload.
+ *
+ * The treatment classes redefine the tokens the header's children already
+ * consume, rather than overriding their rules. That keeps the menu's own
+ * styling in charge of layout and states, and means anything added to the
+ * header later inherits a legible colour without further work.
+ */
+.site-header--has-background {
+  background-image: linear-gradient(var(--mukurtu-header-scrim), var(--mukurtu-header-scrim)), var(--mukurtu-header-background-image);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  /* Without this the image is barely visible behind the logo. */
+  padding-block: var(--v-space-xs);
+}
+
+/* Scrim opacities are measured, not guessed. Against a full white-to-black
+ * gradient (the worst case any photograph can present) these give 5.74:1 for
+ * light and 7.37:1 for dark on 18-20px text, both clear of the 4.5:1 that size
+ * requires. Light has little room to spare: below about 54% the white text
+ * drops under 4.5:1 over a white region.
+ *
+ * Only `color` is set, never the shared palette tokens. The nav inside the
+ * header (.header-nav) is an opaque white bar at desktop and the slide-out
+ * drawer on mobile, and its links read --color-text-neutral-loud; redefining
+ * that token here painted white text onto that white bar and made the menu
+ * disappear. Anything with its own background keeps its own colours, and only
+ * text sitting directly on the image inherits the treatment. */
+/* Text branding needs room a logo does not.
+ *
+ * The header is a 12-column grid built around a ~100px logo. At 1280px that
+ * leaves the branding cell 65px - narrower than the word "Peoples'" - so a
+ * wordmark breaks one word per line whatever the font size, and 31% of the row
+ * goes to gutters.
+ *
+ * Taking more columns is not the fix: the nav collapses to the mobile menu
+ * once squeezed, measured at three columns by 1280px. But the nav's content is
+ * a fixed 931px, so the real problem is that column rounding and 72px of
+ * padding leave only 173px for branding at that width.
+ *
+ * So from lg the header becomes a flex row: the nav claims its natural width
+ * and branding takes exactly what is left, with no rounding to columns and
+ * less padding. At 1280px that turns 173px into 269px, enough for one line.
+ * Below lg the nav is the slide-out drawer, so the grid stays and branding
+ * simply spans the row.
+ */
+.site-header:has(.header__logo-text) {
+  /* Below lg the mobile search is pinned to grid-row 1 across columns 2 to -2,
+   * so a wide branding cell collided with it and got pushed below - putting
+   * the search above the site name. Branding takes row 1 up to the menu
+   * button, and the search moves to row 2 underneath, at its normal width. */
+}
+.site-header:has(.header__logo-text) .header__logo {
+  grid-column: 1/-2;
+  grid-row: 1;
+}
+.site-header:has(.header__logo-text) .header-search--mobile {
+  grid-row: 2;
+  /* Spans to the last column and sits at its end, so it lines up under the
+   * menu button rather than stopping short of it. justify-self also stops
+   * the grid stretching it, so it keeps its own width instead of growing to
+   * fill the row - 544px at 928px before this. */
+  grid-column: 1/-1;
+  justify-self: end;
+  max-inline-size: 100%;
+  /* The same basis the desktop instance uses, so the box is the size people
+   * see everywhere else. */
+}
+.site-header:has(.header__logo-text) .header-search--mobile .header-search__input {
+  -webkit-box-flex: 0;
+      -ms-flex: 0 0 200px;
+          flex: 0 0 200px;
+  max-inline-size: 100%;
+}
+.site-header:has(.header__logo-text) {
+  /* .site-header and .header are the same element, not nested, so the flex
+   * properties go here rather than on a descendant selector. */
+}
+@media (min-width: 60rem) {
+  .site-header:has(.header__logo-text) {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    gap: var(--gutter);
+    padding-inline: var(--layout-padding-xs);
+    /* .header sets justify-content: center for the grid. In a flex row that
+     * centres the whole lot and pulls the wordmark away from the page edge. */
+    -webkit-box-pack: justify;
+        -ms-flex-pack: justify;
+            justify-content: space-between;
+    /* When the wordmark and the menu cannot sit side by side, they stack onto
+     * two rows rather than the wordmark being crushed into a narrow column.
+     * The menu stays expanded either way, which matters more than the header
+     * staying one row high. */
+    -ms-flex-wrap: wrap;
+        flex-wrap: wrap;
+  }
+  .site-header:has(.header__logo-text) .header__logo {
+    /* Takes whatever the nav leaves and wraps into it. Keeping the menu
+     * expanded matters more than keeping the wordmark on one line, so the
+     * branding is what gives way. min-inline-size lets it shrink past its
+     * content width, and break-word stops a long word forcing the row wider
+     * than the viewport. */
+    -webkit-box-flex: 1;
+        -ms-flex: 1 1 auto;
+            flex: 1 1 auto;
+    /* Enough room for the longest word. Below this the header wraps and the
+     * wordmark gets a row of its own rather than being crushed. */
+    min-inline-size: 12rem;
+  }
+  .site-header:has(.header__logo-text) .header-nav {
+    /* Basis auto, so the nav asks for its natural width and the header wraps
+     * around it rather than squeezing it: nav-resize.js collapses to the
+     * mobile menu when the primary nav <ul> wraps onto a second line, and
+     * branding taking room should not be what triggers that. The wordmark
+     * gives way first.
+     *
+     * But shrink stays at 1. Pinned at `flex: 0 0 auto` the nav kept its
+     * 931px even when the row was narrower, so at lg (960px) it ran 19px
+     * past the viewport and the page scrolled sideways - and a text-spacing
+     * override (1.4.12) or a longer set of translated labels widened that
+     * further. Allowed to shrink, the <ul> wraps instead, which is exactly
+     * the signal nav-resize.js watches for, so the menu collapses to the
+     * drawer the way it does at any other too-narrow width (1.4.10).
+     */
+    -webkit-box-flex: 0;
+        -ms-flex: 0 1 auto;
+            flex: 0 1 auto;
+    /* Pushes the nav right. space-between already does that while the two
+     * sit side by side, but once the header wraps the nav is alone on its
+     * row and would otherwise sit hard left. */
+    -webkit-margin-start: auto;
+            margin-inline-start: auto;
+    /* The drawer sets a full width for its mobile guise, which in a flex row
+     * makes it claim the whole header and leaves branding nothing. */
+    inline-size: auto;
+    /* The nav sets margin-block-start: auto to sit at the bottom of its grid
+     * cell. In a flex row that overrides align-items and drops it below the
+     * wordmark's baseline. */
+    -webkit-margin-before: 0;
+            margin-block-start: 0;
+  }
+}
+
+/* The mobile menu button sits on the image too.
+ *
+ * .mobile-nav-button__label is brand red, which is fine on the plain header it
+ * was designed for but measures 1.25:1 on the scrim. It becomes reachable at
+ * desktop widths once branding is wide enough to push the nav into collapsing,
+ * so it needs the treatment colour like everything else on the image. The
+ * icon's bars are drawn with background-color, so they are set too.
+ *
+ * The header sits on an image in two ways. On interior pages it has its own
+ * header background. On the front page, where a page background is set, that
+ * image covers the header instead and the header gets no background class of
+ * its own - the treatment is set on .layout-container by .page--text-*, and
+ * reaches the header through inheritance. Both cases need these rules, or the
+ * front page keeps brand red on the scrim and ignores the "Page text" choice. */
+.site-header--has-background .mobile-nav-button__label,
+.page--has-background .site-header .mobile-nav-button__label {
+  color: inherit;
+}
+.site-header--has-background,
+.page--has-background .site-header {
+  /* The button's own outline is --brand-primary-dark, which measures 1.16:1 on
+   * the light scrim. currentcolor is the treatment colour, picked for contrast
+   * against that scrim, so the focus ring is as legible as the label it
+   * surrounds (1.4.11).
+   *
+   * `color: inherit` has to come first. A <button> does not inherit colour -
+   * the UA stylesheet gives it `buttontext` - so without this currentcolor
+   * resolved to white under both treatments, and the dark treatment drew a
+   * white ring on the white scrim at 1:1. */
+}
+.site-header--has-background .mobile-nav-button,
+.page--has-background .site-header .mobile-nav-button {
+  color: inherit;
+}
+.site-header--has-background .mobile-nav-button:focus, .site-header--has-background .mobile-nav-button:focus-visible,
+.page--has-background .site-header .mobile-nav-button:focus,
+.page--has-background .site-header .mobile-nav-button:focus-visible {
+  outline-color: currentcolor;
+}
+.site-header--has-background,
+.page--has-background .site-header {
+  /* The bars are border-block-start, not a background. */
+}
+.site-header--has-background .mobile-nav-button__icon,
+.site-header--has-background .mobile-nav-button__icon::before,
+.site-header--has-background .mobile-nav-button__icon::after,
+.page--has-background .site-header .mobile-nav-button__icon,
+.page--has-background .site-header .mobile-nav-button__icon::before,
+.page--has-background .site-header .mobile-nav-button__icon::after {
+  border-block-start-color: currentcolor;
+}
+
+/* Text branding takes the treatment colour over an image.
+ *
+ * The link sets its own colour, so it would otherwise stay brand red on the
+ * scrim. `inherit` picks up whichever treatment is in force, and the same rule
+ * covers both because the treatment classes set `color` on the header - or,
+ * on the front page with a page background, on .layout-container above it. */
+.site-header--has-background .header__logo a,
+.page--has-background .site-header .header__logo a {
+  color: inherit;
+  /* Same reason as the menu button: --focus-color is too light for either
+   * scrim, and currentcolor is the one value known to contrast with it. */
+}
+.site-header--has-background .header__logo a:focus, .site-header--has-background .header__logo a:focus-visible, .site-header--has-background .header__logo a:active,
+.page--has-background .site-header .header__logo a:focus,
+.page--has-background .site-header .header__logo a:focus-visible,
+.page--has-background .site-header .header__logo a:active {
+  outline-color: currentcolor;
+}
+
+.site-header--text-light {
+  --mukurtu-header-scrim: rgb(0 0 0 / 60%);
+  color: var(--color-white);
+}
+
+.site-header--text-dark {
+  --mukurtu-header-scrim: rgb(255 255 255 / 60%);
+  color: var(--color-black);
+}
+
+/* The nav sits on the image at desktop.
+ *
+ * .header-nav is the same element in two guises: a static bar at >=lg, and the
+ * slide-out drawer below that, which overlays page content and must keep its
+ * own white background and dark text. So the transparency is scoped to exactly
+ * the desktop state the theme itself defines, and only when an image is set.
+ *
+ * Below that breakpoint, and on any site with no header image, nothing here
+ * applies and the nav renders exactly as it always has.
+ */
+.site-header--has-background .header-nav {
+  /* Covers the drawer, and stops the header's treatment colour cascading into
+   * it. Nav links inherit rather than set a colour, so without this the light
+   * treatment would paint white text onto the drawer's white background.
+   *
+   * _nav-primary.scss reads --color-text-neutral-loud, which this theme never
+   * defines anywhere, so that declaration is invalid and those links have
+   * always inherited - see #2186. */
+  color: var(--brand-text-color);
+}
+
+@media (min-width: 60rem) {
+  body:not(.is-always-mobile-nav) .site-header--has-background .header-nav {
+    background-color: transparent;
+    /* Take the treatment colour from the header again. */
+    color: inherit;
+  }
+}
+
+/* Retune the nav's interactive tokens for the scrim.
+ *
+ * --brand-secondary-dark drives the hover colour, the hover underline and the
+ * focus outline, so it has to stay legible against the scrim or focus fails
+ * 1.4.11. Flattening it to the text colour keeps all three visible; hover is
+ * still distinguishable because the underline appears. Palette accents are not
+ * usable here - red-bone's --brand-secondary-accent lands at 3.22:1 on the
+ * light scrim, under the 4.5:1 this text size needs.
+ */
+@media (min-width: 60rem) {
+  body:not(.is-always-mobile-nav) .site-header--has-background.site-header--text-light .header-nav {
+    --brand-secondary-dark: var(--color-white);
+    --main-nav-divider: rgb(255 255 255 / 45%);
+  }
+}
+
+@media (min-width: 60rem) {
+  body:not(.is-always-mobile-nav) .site-header--has-background.site-header--text-dark .header-nav {
+    --brand-secondary-dark: var(--color-black);
+    --main-nav-divider: rgb(0 0 0 / 35%);
   }
 }
 
