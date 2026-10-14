@@ -33,3 +33,13 @@ function mukurtu_collection_install() {
 function mukurtu_collection_update_last_removed(): int {
   return 40027;
 }
+
+/**
+ * Ignore apostrophes and similar marks inside words when searching.
+ */
+function mukurtu_collection_update_40028() {
+  // mukurtu_collection does not depend on mukurtu_search.
+  if (function_exists('mukurtu_search_enable_ignore_character_processor')) {
+    mukurtu_search_enable_ignore_character_processor('mukurtu_collection_index');
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "stylelint-use-logical-spec",
+  "version": "5.0.1-mukurtu.1",
+  "description": "Enforce usage of logical properties and values in CSS",
+  "license": "CC0-1.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Jordan-Hall/stylelint-use-logical-spec"
+  },
+  "main": "index.cjs.js",
+  "module": "index.es.mjs",
+  "files": [
+    "index.cjs.js",
+    "index.cjs.js.map",
+    "index.es.mjs",
+    "index.es.mjs.map"
+  ],
+  "peerDependencies": {
+    "stylelint": ">=11 < 18"
+  }
+}

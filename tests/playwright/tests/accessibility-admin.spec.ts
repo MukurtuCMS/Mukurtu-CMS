@@ -1,9 +1,8 @@
 import { test } from '@playwright/test';
-import { Login } from '~components/login';
-import { adminAccount } from '~helpers/a11y-credentials';
+import { ADMIN_STATE } from '~helpers/auth-state';
 import { auditPage } from '~helpers/axe';
-import { discoverItemUrl, openForAudit } from '~helpers/page-inventory';
-import { adminPages, adminDiscoveredPages } from '~helpers/page-inventory-admin';
+import { discoverNodeManageUrl, openForAudit, skipOrFailCoverage } from '~helpers/page-inventory';
+import { adminPages } from '~helpers/page-inventory-admin';
 
 /**
  * Phase 2 (admin/authoring, WCAG 2.1 AA + ATAG 2.0) automated accessibility
@@ -20,32 +19,35 @@ import { adminPages, adminDiscoveredPages } from '~helpers/page-inventory-admin'
  * overwrite it and the run would still go green.
  */
 test.describe('Accessibility (admin): representative pages', () => {
-  test.beforeEach(async ({ page }) => {
-    // adminAccount(), not memberAccount(): these are admin routes, and a
-    // representative member must not be able to reach them. While the
-    // A11Y_* secrets were unset, memberAccount() fell back to admin/admin
-    // and these scans worked by accident; the moment a real member account
-    // was configured every one of them 403'd and skipped silently.
-    const account = adminAccount();
-    const login = new Login(page);
-    await login.login(account.username, account.password);
-  });
+  // ADMIN_STATE, not MEMBER_STATE: these are admin routes, and a
+  // representative member must not be able to reach them. While the A11Y_*
+  // secrets were unset, memberAccount() fell back to admin/admin and these
+  // scans worked by accident; the moment a real member account was
+  // configured every one of them 403'd and skipped silently.
+  //
+  // The session is saved once by tests/auth.setup.ts rather than logged in
+  // per test; see src/helpers/auth-state.ts.
+  test.use({ storageState: ADMIN_STATE });
 
   for (const { slug, path } of adminPages) {
     test(`axe scan: ${slug}`, async ({ page }, testInfo) => {
       const blocked = await openForAudit(page, path);
-      test.skip(blocked !== null, blocked ?? '');
+      skipOrFailCoverage(slug, blocked !== null, blocked ?? '');
       await auditPage(page, testInfo, `phase2-${slug}`);
     });
   }
 
-  for (const { slug, listPath, itemLink, pathSuffix } of adminDiscoveredPages) {
-    test(`axe scan: ${slug}`, async ({ page }, testInfo) => {
-      const url = await discoverItemUrl(page, listPath, itemLink, pathSuffix);
-      test.skip(url === null, `No item link matching "${itemLink}" found on ${listPath}. Seed default content first.`);
-      const blocked = await openForAudit(page, url);
-      test.skip(blocked !== null, blocked ?? '');
-      await auditPage(page, testInfo, `phase2-${slug}`);
-    });
-  }
+  // CollectionOrganizationController, regression coverage for the fixed
+  // #1978 defect. Built from a node id rather than discovered off
+  // /collections: the route is /node/{node}/organization with an
+  // entity:node parameter, so appending /organization to a collection's
+  // path alias gives a 404. That is what this scan did until now, and it
+  // never once ran. See issue #2250.
+  test('axe scan: phase2-collection-organization', async ({ page }, testInfo) => {
+    const url = await discoverNodeManageUrl(page, 'collection', (nid) => `/node/${nid}/organization`);
+    skipOrFailCoverage('collection-organization', url === null, 'No collection found in /admin/content. Seed default content first.');
+    const blocked = await openForAudit(page, url);
+    skipOrFailCoverage('collection-organization', blocked !== null, blocked ?? '');
+    await auditPage(page, testInfo, 'phase2-collection-organization');
+  });
 });

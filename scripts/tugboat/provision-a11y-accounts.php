@@ -96,49 +96,58 @@ function _a11y_membership($group, User $account, array $role_names): void {
 }
 
 /**
- * Returns the community the test accounts belong to, creating one if needed.
+ * Returns an existing community for the test accounts, or NULL.
  *
- * Reuses an existing community rather than adding one. On a freshly
- * installed preview there are none yet (default content is seeded later by
- * default-content.spec.ts), so one gets created - but on any site that
- * already has communities this joins the first, rather than cluttering the
- * /communities listing that the scans themselves discover pages from.
+ * Deliberately does not create one. On the Tugboat preview this script runs
+ * straight after drush site-install, when no content exists at all, so an
+ * earlier version created its own "Accessibility Testing Community" here.
+ * The scans then discovered that synthetic group rather than the seeded
+ * one: its Local Contexts pages 404, which is how
+ * manage-community-local-contexts-projects came to skip with "returned
+ * HTTP 404" instead of scanning anything, and the member never held
+ * membership in any seeded protocol so it could not reach gated content.
+ *
+ * The seeded groups are created later, by default-content.spec.ts, which
+ * grants these accounts their memberships at that point. This function
+ * still finds a group when one already exists, which is the case on a
+ * developer's local site where content was seeded before provisioning ran.
+ *
+ * See issue #2250.
  */
-function _a11y_community(): Community {
+function _a11y_community(): ?Community {
   $ids = \Drupal::entityTypeManager()->getStorage('community')->getQuery()
     ->accessCheck(FALSE)->sort('id')->range(0, 1)->execute();
 
-  if ($ids) {
-    return Community::load(reset($ids));
-  }
-
-  $community = Community::create(['name' => 'Accessibility Testing Community']);
-  $community->save();
-  \Drupal::messenger()->addStatus('Created a community for the accessibility accounts.');
-  return $community;
+  return $ids ? Community::load(reset($ids)) : NULL;
 }
 
 /**
- * Returns a protocol in that community, creating one if needed.
+ * Returns an existing protocol in that community, or NULL. Creates nothing.
  */
-function _a11y_protocol(Community $community): Protocol {
+function _a11y_protocol(Community $community): ?Protocol {
   $ids = \Drupal::entityTypeManager()->getStorage('protocol')->getQuery()
     ->accessCheck(FALSE)
     ->condition('field_communities', $community->id())
     ->sort('id')->range(0, 1)->execute();
 
-  if ($ids) {
-    return Protocol::load(reset($ids));
+  return $ids ? Protocol::load(reset($ids)) : NULL;
+}
+
+/**
+ * Grants an account its group roles, when the groups exist yet.
+ */
+function _a11y_enrol(\Drupal\user\Entity\User $account, string $community_role, string $protocol_role, string $label): void {
+  $community = _a11y_community();
+  if (!$community) {
+    \Drupal::messenger()->addStatus("No groups exist yet, so $label was created without memberships. default-content.spec.ts grants them once the seeded groups exist.");
+    return;
   }
 
-  $protocol = Protocol::create([
-    'name' => 'Accessibility Testing Protocol',
-    'field_communities' => [$community->id()],
-    'field_access_mode' => 'strict',
-  ]);
-  $protocol->save();
-  \Drupal::messenger()->addStatus('Created a protocol for the accessibility accounts.');
-  return $protocol;
+  _a11y_membership($community, $account, [$community_role]);
+  if ($protocol = _a11y_protocol($community)) {
+    _a11y_membership($protocol, $account, [$protocol_role]);
+  }
+  \Drupal::messenger()->addStatus("$label enrolled in '{$community->label()}'.");
 }
 
 // -----------------------------------------------------------------------
@@ -157,10 +166,7 @@ $member_pass = _a11y_env('A11Y_PASSWORD');
 
 if ($member_name && $member_pass) {
   $member = _a11y_user($member_name, $member_pass);
-  $member_community = _a11y_community();
-  _a11y_membership($member_community, $member, ['community_member']);
-  _a11y_membership(_a11y_protocol($member_community), $member, ['protocol_member']);
-  \Drupal::messenger()->addStatus("Accessibility member account '$member_name' is ready: member of '{$member_community->label()}'.");
+  _a11y_enrol($member, 'community_member', 'protocol_member', "Accessibility member account '$member_name'");
 }
 else {
   \Drupal::messenger()->addStatus('A11Y_USERNAME/A11Y_PASSWORD not set; skipping the member account. Member scans will run as admin.');
@@ -189,11 +195,4 @@ if (!$manager_name || !$manager_pass) {
 }
 
 $manager = _a11y_user($manager_name, $manager_pass);
-
-$community = _a11y_community();
-$protocol = _a11y_protocol($community);
-
-_a11y_membership($community, $manager, ['community_manager']);
-_a11y_membership($protocol, $manager, ['protocol_steward']);
-
-\Drupal::messenger()->addStatus("Accessibility manage-adjacent account '$manager_name' is ready: community_manager on '{$community->label()}', protocol_steward on '{$protocol->label()}'.");
+_a11y_enrol($manager, 'community_manager', 'protocol_steward', "Accessibility manage-adjacent account '$manager_name'");

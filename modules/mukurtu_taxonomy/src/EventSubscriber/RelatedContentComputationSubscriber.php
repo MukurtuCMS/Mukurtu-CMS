@@ -11,7 +11,6 @@ use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Field\FieldTypePluginManagerInterface;
 use Drupal\Core\Field\Plugin\Field\FieldType\EntityReferenceItem;
 use Drupal\node\NodeInterface;
-use Drupal\Core\TypedData\DataDefinitionInterface;
 
 /**
  * Class RelatedContentComputationSubscriber.
@@ -19,6 +18,17 @@ use Drupal\Core\TypedData\DataDefinitionInterface;
  * @package Drupal\mukurtu_taxonomy\EventSubscriber
  */
 class RelatedContentComputationSubscriber implements EventSubscriberInterface, ContainerInjectionInterface {
+
+  /**
+   * Node reference fields that link records structurally, not by naming them.
+   *
+   * A community record's original record and a protocol inheritance source
+   * are not "referenced content" of the record they point to.
+   */
+  const EXCLUDED_FIELDS = [
+    'field_mukurtu_original_record',
+    'field_mukurtu_protocol_inherit',
+  ];
 
   /**
    * The entity field manager service.
@@ -155,12 +165,12 @@ class RelatedContentComputationSubscriber implements EventSubscriberInterface, C
     ];
 
     foreach ($fields as $fieldname => $field) {
-      if (!($field instanceof DataDefinitionInterface)) {
+      // Skip computed and custom-storage fields, they have no table storage.
+      if ($field->hasCustomStorage()) {
         continue;
       }
 
-      // Skip computed fields, they have no table storage.
-      if ($field->isComputed()) {
+      if (in_array($fieldname, self::EXCLUDED_FIELDS, TRUE)) {
         continue;
       }
 

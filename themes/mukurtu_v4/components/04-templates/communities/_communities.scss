@@ -23,10 +23,16 @@
 .communities {
   gap: var(--v-space-3xs);
   display: grid;
-  grid-template-columns: 1fr;
+  // The markers are hidden (see .communities__item), so the UA list indent
+  // buys nothing and costs 40px of the 272px available at a 320px viewport.
+  padding-inline-start: 0;
+  // Grid tracks are floored at the item's automatic minimum, which here is the
+  // card image's intrinsic inline size at the card's fixed block-size - wider
+  // than the grid container, so the cards overflowed the page (#1997).
+  grid-template-columns: minmax(0, 1fr);
 
   @include include-media.media('>=sm') {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   @include include-media.media('>=lg') {

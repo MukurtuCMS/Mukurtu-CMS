@@ -14,3 +14,25 @@
 function mukurtu_person_update_last_removed(): int {
   return 40009;
 }
+
+/**
+ * Combines identical names in the Other Names field on Person records.
+ */
+function mukurtu_person_update_40201(): string {
+  // Keep the docblock above to one line; see mukurtu_core_update_40201().
+  // Sites that already chose their own formatter for the field are left
+  // alone; only the shipped default is swapped (#2290).
+  /** @var \Drupal\Core\Entity\Display\EntityViewDisplayInterface|null $display */
+  $display = \Drupal::entityTypeManager()->getStorage('entity_view_display')->load('node.person.full');
+  $component = $display?->getComponent('field_other_names');
+  if (!$component) {
+    return t('The Person full display does not show Other Names, so nothing was changed.');
+  }
+  if ($component['type'] !== 'entity_reference_label') {
+    return t('The Person full display uses a different formatter for Other Names, so it was left unchanged.');
+  }
+  $component['type'] = 'mukurtu_combined_term_label';
+  $component['settings'] = ['link' => $component['settings']['link'] ?? TRUE];
+  $display->setComponent('field_other_names', $component)->save();
+  return t('Person records now show identical Other Names once.');
+}

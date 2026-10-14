@@ -86,7 +86,17 @@ export default defineConfig({
     // a test has hung. Instead, default to line on CI and html + list
     // everywhere else.
     // https://playwright.dev/docs/test-reporters#reporters-on-ci
-    return process.env.CI ? [['line'], ['blob']] : [
+    // The json reporter is what makes skips visible on CI. line prints only
+    // a count ("18 skipped") and never a name, so coverage could shrink
+    // without anyone noticing: a green run with 18 skips looked identical
+    // to a green run with 2. The workflow reads this file to list every
+    // skipped scan with its reason, and uploads it with the results. See
+    // issue #2250.
+    return process.env.CI ? [
+      ['line'],
+      ['blob'],
+      ['json', { outputFile: 'test-results/report.json' }],
+    ] : [
       [
         'html', {
         // open: 'never',
@@ -121,10 +131,33 @@ export default defineConfig({
   /* Configure projects for major browsers */
   projects: [
     {
+      // Logs each role in once and saves its session, so the specs can
+      // declare `test.use({ storageState: ... })` instead of logging in
+      // again for every test. See src/helpers/auth-state.ts and #2280.
+      name: 'auth',
+      testMatch: 'auth.setup.ts',
+    },
+    {
       name: 'default-content',
       testMatch: 'default-content.spec.ts',
       // Default content needs to be created sequentially.
       fullyParallel: false,
+      dependencies: ['auth'],
+    },
+    {
+      // Offline coverage for src/helpers/preview.ts, whose whole subject is
+      // what the suite does when the environment is *not* serving the site.
+      // It has no `dependencies` on purpose: default-content.spec.ts needs a
+      // live site, and this project must run without one, so it also gives
+      // every PR a check that stays meaningful when the preview is down.
+      name: 'offline',
+      // Any spec named *.offline.spec.ts, so adding one needs no config
+      // edit here and none in `chromium`'s testIgnore below. Naming them
+      // individually was one list to forget: a new offline spec left out of
+      // it would silently be run by `chromium` instead, against a live site
+      // it does not use.
+      testMatch: /\.offline\.spec\.ts$/,
+      use: { ...devices['Desktop Chrome'] },
     },
     {
       name: 'chromium',
@@ -140,8 +173,17 @@ export default defineConfig({
       // Have all tests wait for the default-content test to run before
       // executing, but do not re-run the default-content test if that test is
       // specifically requested, as that would cause it to run twice.
-      dependencies: ['default-content'],
-      testIgnore: ['default-content.spec.ts'],
+      //
+      // 'auth' is listed as well as being reached through default-content's
+      // own dependency, because these tests read the sessions it saves
+      // directly and that should not be something a reader has to trace
+      // through another project to discover.
+      dependencies: ['auth', 'default-content'],
+      testIgnore: [
+        'default-content.spec.ts',
+        'auth.setup.ts',
+        /\.offline\.spec\.ts$/,
+      ],
     },
   ],
 

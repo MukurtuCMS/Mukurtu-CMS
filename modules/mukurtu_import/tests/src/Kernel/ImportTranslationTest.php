@@ -86,6 +86,34 @@ class ImportTranslationTest extends MukurtuImportTestBase {
   }
 
   /**
+   * A row that adds a translation is New for that language, and
+   * re-importing the same translation unchanged is Unchanged.
+   *
+   * @see https://github.com/MukurtuCMS/Mukurtu-CMS/issues/2309
+   */
+  public function testAddedTranslationOutcome(): void {
+    $mapping = [
+      ['target' => 'nid', 'source' => 'nid'],
+      ['target' => 'title', 'source' => 'title'],
+      ['target' => 'langcode', 'source' => 'langcode'],
+    ];
+    $data = [
+      ['nid', 'title', 'langcode'],
+      [$this->node->id(), 'Después de Importar', 'es'],
+    ];
+
+    foreach (['new', 'unchanged'] as $expected) {
+      $result = $this->importCsvFile($this->createCsvFile($data), $mapping);
+      $this->assertEquals(MigrationInterface::RESULT_COMPLETED, $result);
+      $row_results = $this->lastMigration->getDestinationPlugin()->getAndClearRowResults();
+      $this->assertCount(1, $row_results);
+      $this->assertSame('updated', $row_results[0]['status']);
+      $this->assertSame($expected, $row_results[0]['outcome']);
+      $this->assertSame('es', $row_results[0]['langcode']);
+    }
+  }
+
+  /**
    * The same langcode-mapped import on a bundle *without* translation
    * enabled produces a destination definition with no 'translations' key
    * at all - the opt-in gate, verified directly against toDefinition()'s

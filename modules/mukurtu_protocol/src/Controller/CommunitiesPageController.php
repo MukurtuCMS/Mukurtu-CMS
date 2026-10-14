@@ -2,9 +2,9 @@
 
 namespace Drupal\mukurtu_protocol\Controller;
 
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Url;
-use Drupal\og\Og;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
@@ -32,11 +32,18 @@ class CommunitiesPageController extends ControllerBase {
 
     $builder = $this->entityTypeManager()->getViewBuilder('community');
     $renderedCommunities = [];
-    $currentUser = \Drupal::currentUser();
+    $cacheability = CacheableMetadata::createFromObject($config);
     foreach ($communities as $community) {
-      // Only render private communities if the current user is a member.
+      // Only list communities the current user can view.
       /** @var \Drupal\mukurtu_protocol\Entity\CommunityInterface $community */
-      if ($community->getSharingSetting() == 'community-only' && !Og::isMember($community, $currentUser)) {
+      $access = $community->access('view', $this->currentUser(), TRUE);
+      $cacheability->addCacheableDependency($access);
+      // Membership-based access varies per user, but the access result only
+      // carries a user cache tag, so add the context here.
+      if ($community->getSharingSetting() === 'community-only') {
+        $cacheability->addCacheContexts(['user']);
+      }
+      if (!$access->isAllowed()) {
         continue;
       }
       $renderedCommunities[] = $builder->view($community, 'browse');
@@ -46,6 +53,7 @@ class CommunitiesPageController extends ControllerBase {
       '#theme' => 'communities_page',
       '#communities' => $renderedCommunities,
     ];
+    $cacheability->applyTo($build);
 
     return $build;
   }

@@ -8,6 +8,10 @@
  * This template checks to see if there's real content inside the
  * paragraph fields and if so, renders the field label.
  *
+ * When the field renders, it also gets a copy-to-clipboard icon button in
+ * the label row. See templates/misc/copy-citation-button.html.twig and
+ * js/copy-citation.js.
+ *
  * To override output, copy the "field.html.twig" from the templates directory
  * to your theme's directory and customize it, just like customizing other
  * Drupal templates such as page.html.twig or node.html.twig.
@@ -72,16 +76,25 @@
 {% endfor %}
 
 {% if render_label == 1 %}
-  <div{{ attributes.addClass(classes) }}>
-    <div{{ title_attributes.addClass(title_classes) }}>{{ label }}</div>
-    {% if multiple %}
-      <div class="field__items">
-    {% endif %}
-    {% for item in items %}
-      <div{{ item.attributes.addClass('field__item') }}>{{ item.content }}</div>
-    {% endfor %}
-    {% if multiple %}
-      </div>
-    {% endif %}
+  {{ attach_library('mukurtu_v4/copy-citation') }}
+  <div{{ attributes.addClass(classes).setAttribute('data-copy-citation-field', '') }}>
+    <div class="field__label-row">
+      <div{{ title_attributes.addClass(title_classes) }}>{{ label }}</div>
+      {% include '@mukurtu_v4/templates/misc/copy-citation-button.html.twig' with {
+        button_label: 'Copy Elders and Knowledge Keepers citation'|t,
+        success_message: 'Elders and Knowledge Keepers citation copied to clipboard'|t,
+      } only %}
+    </div>
+    <div data-citation-text>
+      {% if multiple %}
+        <div class="field__items">
+      {% endif %}
+      {% for item in items %}
+        <div{{ item.attributes.addClass('field__item') }}>{{ item.content }}</div>
+      {% endfor %}
+      {% if multiple %}
+        </div>
+      {% endif %}
+    </div>
   </div>
 {% endif %}

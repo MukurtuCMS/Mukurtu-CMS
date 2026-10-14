@@ -1,4 +1,5 @@
-import { Page } from '@playwright/test';
+import { Page, test } from '@playwright/test';
+import { gotoReady } from '~helpers/preview';
 
 /**
  * Navigates to a page for auditing, refusing to audit an error page.
@@ -17,9 +18,17 @@ import { Page } from '@playwright/test';
  * /mukurtu/access-denied is in the inventory on purpose and returns 200
  * with that same title when visited directly. It should be scanned; a 403
  * elsewhere should not.
+ *
+ * The status check alone is not enough for one case, which is why the
+ * navigation goes through gotoReady(): a suspended or resuming Tugboat
+ * preview serves Tugboat's own holding page at HTTP 200, so it sails
+ * straight through response.ok() and gets audited as if it were a clean
+ * Mukurtu page. gotoReady() waits that out, and fails loudly rather than
+ * skipping if it does not clear -- a scan that silently did not happen is
+ * worse than a red build, because the report looks complete either way.
  */
 export async function openForAudit(page: Page, path: string): Promise<string | null> {
-  const response = await page.goto(path);
+  const response = await gotoReady(page, path);
   if (response === null) {
     return `${path} produced no HTTP response (same-document navigation); nothing to audit.`;
   }
@@ -35,6 +44,95 @@ export async function openForAudit(page: Page, path: string): Promise<string | n
  * keyboard traps). See docs/accessibility/page-inventory.md at the profile
  * root — keep both in sync when a page or component is added.
  */
+
+/**
+ * Pages allowed to skip, and why.
+ *
+ * Coverage is enforced by exception: every scan in the inventory must
+ * actually run, and anything that cannot must be listed here with a
+ * reason. A new page is therefore enforced the moment it is added, and
+ * exempting one is a deliberate, reviewable act rather than a silent
+ * omission. This is the coverage half of "the ratchet" in
+ * docs/accessibility/README.md. See issue #2250.
+ *
+ * Keyed by scan slug, so an entry covers that page in both spec layers.
+ */
+export const COVERAGE_EXCEPTIONS: Record<string, string> = {
+  // No community page links a protocol for an anonymous visitor to
+  // follow, so there is no navigation path for discovery to use. Verified
+  // on a seeded site: /community/repository-community returns 200 and
+  // contains zero /protocols/protocol/ links. The page itself is fine;
+  // it is unreachable by the route an anonymous scan has to take.
+  'protocol-local-contexts': 'No anonymous navigation path to a protocol exists.',
+};
+
+/**
+ * Skips a scan, or fails it when the page is one that must be covered.
+ *
+ * A skipped scan is a page nobody looked at, which is indistinguishable
+ * from a clean result in a pass/fail summary. Before skips were named
+ * (#2256) a green run hid 22 of them, two of which turned out to be scans
+ * of error pages reported as clean. Enforcing the set means a page that
+ * stops being reachable breaks the build instead of quietly leaving the
+ * suite.
+ *
+ * @param slug
+ *   The scan's slug, matching COVERAGE_EXCEPTIONS keys.
+ * @param blocked
+ *   Whether the page could not be scanned.
+ * @param reason
+ *   Why not, surfaced in the run summary either way.
+ */
+export function skipOrFailCoverage(slug: string, blocked: boolean, reason: string): void {
+  if (!blocked) {
+    return;
+  }
+
+  const exemption = COVERAGE_EXCEPTIONS[slug];
+  if (exemption === undefined) {
+    throw new Error(
+      `${slug} could not be scanned, and is not an accepted coverage exception.\n`
+      + `Reason: ${reason}\n`
+      + 'Either fix the page or its discovery, or add it to COVERAGE_EXCEPTIONS '
+      + 'in tests/playwright/src/helpers/page-inventory.ts with a reason.',
+    );
+  }
+
+  test.skip(true, `${reason} (accepted exception: ${exemption})`);
+}
+
+/**
+ * Discovers a node id and builds a node-scoped URL from it.
+ *
+ * Needed because routes like /node/{node}/organization declare their
+ * parameter as entity:node, which upcasts from an id and not from a path
+ * alias. The collection-organization scan used to append /organization to
+ * the alias off /collections, giving /collection/some-slug/organization,
+ * which 404s: that scan had never once run. Before openForAudit() landed
+ * it audited the "Page Not Found" page and reported it clean.
+ *
+ * Reads the id from /admin/content, which lists node links containing it.
+ *
+ * @param page
+ *   The Playwright page.
+ * @param type
+ *   Content type machine name to filter the listing by.
+ * @param buildPath
+ *   Builds the final path from the discovered node id.
+ */
+export async function discoverNodeManageUrl(page: Page, type: string, buildPath: (nid: string) => string): Promise<string | null> {
+  const response = await gotoReady(page, `/admin/content?type=${encodeURIComponent(type)}`);
+  if (response === null || !response.ok()) {
+    return null;
+  }
+
+  const hrefs = await page.locator('a[href*="/node/"]').evaluateAll(
+    (links) => links.map((link) => link.getAttribute('href')),
+  );
+  const nid = hrefs.map((href) => href?.match(/\/node\/(\d+)/)?.[1]).find((match) => match !== undefined);
+
+  return nid ? buildPath(nid) : null;
+}
 
 export const anonymousPages = [
   { slug: 'home', path: '/' },
@@ -150,7 +248,7 @@ export async function discoverItemUrl(
   itemLink: string,
   pathSuffix?: string,
 ): Promise<string | null> {
-  await page.goto(listPath);
+  await gotoReady(page, listPath);
   const hrefs = await page.locator(itemLink).evaluateAll(
     (links) => links.map((link) => link.getAttribute('href')),
   );
@@ -162,16 +260,75 @@ export async function discoverItemUrl(
 }
 
 /**
- * Discover a community's machine name/slug (from its public page URL,
- * e.g. /community/some-slug) and build a manage-scoped URL from it --
- * used for pages like /communities/community/{community}/... that share
- * no path prefix with the public community page, so a simple pathSuffix
- * isn't enough.
+ * Discover a community's entity id and build a manage-scoped URL from it.
+ *
+ * Used for pages like /communities/community/{community}/local-contexts/
+ * projects, which share no path prefix with the public community page, so
+ * a simple pathSuffix is not enough.
+ *
+ * The id, not the slug. That route declares its parameter as
+ * entity:community, which upcasts from an entity id and not from a path
+ * alias, so the slug taken off the public /community/some-slug URL gives a
+ * 404 every time. Verified directly: .../community/10/local-contexts/
+ * projects returns 200 where .../community/tribal-community/... returns
+ * 404. Before openForAudit() landed this produced a clean scan of a "Page
+ * Not Found" page; afterwards it produced a permanent skip. Neither was a
+ * scan of the real page. See issue #2250.
+ *
+ * The id is read from /admin/communities-protocols, which lists a members
+ * link containing it, rather than from the public listing, which exposes
+ * only aliases.
  */
-export async function discoverCommunityManageUrl(page: Page, buildPath: (slug: string) => string): Promise<string | null> {
-  const communityUrl = await discoverItemUrl(page, '/communities', '.communities__item a');
-  const slug = communityUrl?.split('/').filter(Boolean).pop();
-  return slug ? buildPath(slug) : null;
+export async function discoverCommunityManageUrl(page: Page, buildPath: (id: string) => string): Promise<string | null> {
+  const id = await discoverGroupId(page, 'communities');
+  return id ? buildPath(id) : null;
+}
+
+/**
+ * Reads a community or protocol entity id off the group admin listing.
+ *
+ * /admin/communities-protocols is the page to read, not /admin/protocols:
+ * the latter 403s for a Community Manager, which is the account the
+ * manage-adjacent scans run as, so discovery found nothing and those scans
+ * skipped permanently. The combined listing is reachable by that role and
+ * carries members links for both group types, which is where the numeric
+ * id is exposed. It 403s for anonymous and plain members, which is correct
+ * - only the manage tier scans these pages.
+ *
+ * @param page
+ *   The Playwright page.
+ * @param type
+ *   'communities' or 'protocols', matching the admin path segment.
+ */
+async function discoverGroupId(page: Page, type: 'communities' | 'protocols'): Promise<string | null> {
+  const response = await page.goto('/admin/communities-protocols');
+  if (response === null || !response.ok()) {
+    return null;
+  }
+
+  const hrefs = await page.locator(`a[href*="/admin/${type}/"]`).evaluateAll(
+    (links) => links.map((link) => link.getAttribute('href')),
+  );
+  const pattern = new RegExp(`/admin/${type}/(\\d+)/`);
+  return hrefs.map((href) => href?.match(pattern)?.[1]).find((match) => match !== undefined) ?? null;
+}
+
+/**
+ * Discover a protocol's entity id and build a manage-scoped URL from it.
+ *
+ * The protocol counterpart of discoverCommunityManageUrl(), and needed for
+ * the same reason: /protocols/protocol/{protocol}/local-contexts/projects
+ * declares its parameter as entity:protocol, so it upcasts from an id and
+ * not from an alias.
+ *
+ * Note this is not true of every protocol route. /protocol/{group}/
+ * local-contexts uses a protocol_alias converter and genuinely does take
+ * the slug, which is why discoverProtocolUrl() below is still correct for
+ * that one. The two look alike and behave differently.
+ */
+export async function discoverProtocolManageUrl(page: Page, buildPath: (id: string) => string): Promise<string | null> {
+  const id = await discoverGroupId(page, 'protocols');
+  return id ? buildPath(id) : null;
 }
 
 /**
@@ -184,7 +341,7 @@ export async function discoverCommunityManageUrl(page: Page, buildPath: (slug: s
 export async function discoverProtocolUrl(page: Page, buildPath: (slug: string) => string): Promise<string | null> {
   const communityUrl = await discoverItemUrl(page, '/communities', '.communities__item a');
   if (!communityUrl) return null;
-  await page.goto(communityUrl);
+  await gotoReady(page, communityUrl);
   const hrefs = await page.locator('a[href*="/protocols/protocol/"]').evaluateAll(
     (links) => links.map((link) => link.getAttribute('href')),
   );

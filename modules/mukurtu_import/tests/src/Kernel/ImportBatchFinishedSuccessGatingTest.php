@@ -10,6 +10,7 @@ use Drupal\migrate\MigrateMessage;
 use Drupal\migrate\Plugin\MigrationInterface;
 use Drupal\mukurtu_import\Entity\MukurtuImportStrategy;
 use Drupal\mukurtu_import\ImportBatchExecutable;
+use Drupal\mukurtu_import\Plugin\views\field\ImportStatus;
 use Drupal\node\Entity\Node;
 
 /**
@@ -314,6 +315,81 @@ class ImportBatchFinishedSuccessGatingTest extends MukurtuImportTestBase {
     // as raw markup on the results page.
     $this->assertStringContainsString('is defined as a source ID but has no value.', $combined);
     $this->assertStringNotContainsString('.php line', $combined);
+  }
+
+  /**
+   * Re-importing an item unchanged records it as Unchanged for the results
+   * tables, and still reports the import as a success rather than a no-op.
+   *
+   * @see https://github.com/MukurtuCMS/Mukurtu-CMS/issues/2309
+   */
+  public function testUnchangedReimportRecordsOutcomeAndSucceeds(): void {
+    $node = Node::create([
+      'title' => 'Unchanged Item',
+      'type' => 'protocol_aware_content',
+      'status' => TRUE,
+      'uid' => $this->currentUser->id(),
+    ]);
+    $node->setSharingSetting('any');
+    $node->setProtocols([$this->protocol]);
+    $node->save();
+
+    $import_file = $this->createCsvFile([
+      ['ID', 'Title', 'Protocols', 'Sharing Setting'],
+      [$node->id(), 'Unchanged Item', (string) $this->protocol->id(), 'any'],
+    ]);
+    $import_config = MukurtuImportStrategy::create(['uid' => $this->currentUser->id()]);
+    $import_config->setTargetEntityTypeId('node');
+    $import_config->setTargetBundle('protocol_aware_content');
+    $import_config->setMapping([
+      ['target' => 'nid', 'source' => 'ID'],
+      ['target' => 'title', 'source' => 'Title'],
+      ['target' => 'field_cultural_protocols/protocols', 'source' => 'Protocols'],
+      ['target' => 'field_cultural_protocols/sharing_setting', 'source' => 'Sharing Setting'],
+    ]);
+    $definition = $import_config->toDefinition($import_file);
+
+    $context = [];
+    ImportBatchExecutable::batchProcessImportDefinition($definition, [], $context);
+    ImportBatchExecutable::batchFinishedImport(TRUE, $context['results'], []);
+
+    $this->assertTrue($this->getTempstoreValue('batch_results_success'));
+    $this->assertFalse((bool) $this->getTempstoreValue('batch_results_noop'));
+    $this->assertSame(
+      ['node' => [(string) $node->id() => [$node->language()->getId() => 'unchanged']]],
+      $this->getTempstoreValue(ImportStatus::TEMPSTORE_KEY),
+    );
+  }
+
+  /**
+   * When several rows touch the same item, the strongest outcome is kept,
+   * and rows without an outcome (failures) are skipped.
+   */
+  public function testStrongestOutcomeWinsPerItem(): void {
+    $results = [
+      'test_migration' => [
+        '@numitems' => 4,
+        '@created' => 1,
+        '@updated' => 2,
+        '@failures' => 1,
+        '@ignored' => 0,
+        '@name' => 'test_migration',
+        'row_details' => [
+          ['status' => 'updated', 'outcome' => 'unchanged', 'entity_type_id' => 'node', 'entity_id' => '5', 'langcode' => 'en'],
+          ['status' => 'updated', 'outcome' => 'updated', 'entity_type_id' => 'node', 'entity_id' => '5', 'langcode' => 'en'],
+          ['status' => 'updated', 'outcome' => 'unchanged', 'entity_type_id' => 'node', 'entity_id' => '5', 'langcode' => 'en'],
+          ['status' => 'created', 'outcome' => 'new', 'entity_type_id' => 'media', 'entity_id' => '9', 'langcode' => 'en'],
+          ['status' => 'failed', 'source_id' => '3', 'message' => 'Broken row'],
+        ],
+      ],
+    ];
+
+    ImportBatchExecutable::batchFinishedImport(TRUE, $results, []);
+
+    $this->assertSame([
+      'node' => ['5' => ['en' => 'updated']],
+      'media' => ['9' => ['en' => 'new']],
+    ], $this->getTempstoreValue(ImportStatus::TEMPSTORE_KEY));
   }
 
 }

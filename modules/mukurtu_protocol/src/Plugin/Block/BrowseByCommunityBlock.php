@@ -6,12 +6,12 @@ namespace Drupal\mukurtu_protocol\Plugin\Block;
 
 use Drupal\Core\Block\Attribute\Block;
 use Drupal\Core\Block\BlockBase;
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\og\Og;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -56,9 +56,8 @@ class BrowseByCommunityBlock extends BlockBase implements ContainerFactoryPlugin
    * {@inheritdoc}
    */
   public function build(): array {
-    $org = $this->configFactory
-      ->get('mukurtu_protocol.community_organization')
-      ->get('organization');
+    $config = $this->configFactory->get('mukurtu_protocol.community_organization');
+    $org = $config->get('organization');
 
     // Collect IDs of top-level communities (parent == 0), keyed by weight so
     // ksort() gives us the admin-configured display order.
@@ -78,19 +77,30 @@ class BrowseByCommunityBlock extends BlockBase implements ContainerFactoryPlugin
 
     $builder = $this->entityTypeManager->getViewBuilder('community');
     $renderedCommunities = [];
+    $cacheability = CacheableMetadata::createFromObject($config);
     foreach ($communities as $community) {
-      // Skip private communities for non-members.
+      // Only list communities the current user can view.
       /** @var \Drupal\mukurtu_protocol\Entity\CommunityInterface $community */
-      if ($community->getSharingSetting() === 'community-only' && !Og::isMember($community, $this->currentUser)) {
+      $access = $community->access('view', $this->currentUser, TRUE);
+      $cacheability->addCacheableDependency($access);
+      // Membership-based access varies per user, but the access result only
+      // carries a user cache tag, so add the context here.
+      if ($community->getSharingSetting() === 'community-only') {
+        $cacheability->addCacheContexts(['user']);
+      }
+      if (!$access->isAllowed()) {
         continue;
       }
       $renderedCommunities[] = $builder->view($community, 'browse');
     }
 
-    return [
+    $build = [
       '#theme' => 'browse_by_community_block',
       '#communities' => $renderedCommunities,
     ];
+    $cacheability->applyTo($build);
+
+    return $build;
   }
 
 }

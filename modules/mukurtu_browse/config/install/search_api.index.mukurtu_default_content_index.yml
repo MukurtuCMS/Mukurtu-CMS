@@ -477,6 +477,43 @@ processor_settings:
       h2: 3.0
       h3: 2.0
       strong: 2.0
+  ignore_character:
+    weights:
+      preprocess_index: -10
+      preprocess_query: -10
+    all_fields: false
+    fields:
+      - contributor_name
+      - creator_name
+      - dictionary_fulltext
+      - field_coverage
+      - field_coverage_description
+      - field_cultural_narrative
+      - field_date_description
+      - field_description
+      - field_identifier
+      - field_rights_statements
+      - field_sections_body
+      - field_source
+      - field_summary
+      - field_traditional_knowledge
+      - field_transcription
+      - language_name
+      - location_name
+      - media_extracted_text
+      - name_1_text
+      - name_text
+      - original_date
+      - page_media_extracted_text
+      - people_name_text
+      - publisher_name
+      - subject_name_text
+      - title
+    ignorable: '[''"¿¡!?,.:;]'
+    ignorable_classes:
+      - Pf
+      - Pi
+      - Sk
   ignorecase:
     weights:
       preprocess_index: -20

@@ -13,6 +13,7 @@ dependencies:
     - mukurtu_core
     - mukurtu_local_contexts
     - mukurtu_protocol
+    - mukurtu_taxonomy
     - original_date
     - text
     - user
@@ -279,10 +280,9 @@ content:
     weight: 1
     region: content
   field_other_names:
-    type: entity_reference_label
+    type: mukurtu_combined_term_label
     label: above
     settings:
-      view_mode: default
       link: true
     third_party_settings: {  }
     weight: 13

@@ -1,0 +1,100 @@
+# Issue #2242: desk review results (bucket A)
+
+Worked through the 18 criteria that
+[2026-10-06-criteria-triage.md](2026-10-06-criteria-triage.md) put in bucket A,
+the ones decidable from the codebase and config without a running site.
+
+**All 18 are now decided.** 14 were settled by the desk review itself; the
+remaining 4 needed more than code reading and were closed out on 9 October
+2026 against a clean install. Two real gaps
+turned up, both capability gaps rather than markup bugs, which means neither
+would ever have been caught by a page scan.
+
+**No ACR level is changed by this document.** The "Recommended" column is a
+recommendation for review, not a claim. Levels move in a separate change once
+these are agreed, per the rule that evidence precedes the claim.
+
+## Gaps found
+
+### 1. Locally hosted video cannot carry captions or audio description (#2329)
+
+`media.video` lets an author fill in `field_media_video_file`, `field_thumbnail`,
+`field_people`, `field_cultural_protocols`, `field_identifier`, `field_media_tags`,
+`name`, `path`, `status`, `created`, `uid` and `langcode`. There is **no caption
+or subtitle track field**, and the `file_video` formatter (`controls: true`,
+`autoplay: false`) renders no `<track>` element.
+
+So a site that uploads its own video has no way to provide synchronized
+captions (1.2.2, Level A) or audio description (1.2.5, Level AA). The
+`remote_video` bundle is unaffected, because YouTube carries its own captions.
+
+A transcript is *not* a substitute. It satisfies 1.2.3 (which accepts a media
+alternative) but not 1.2.2, which requires captions synchronized with the video.
+
+This is as much an ATAG Part B question as a WCAG one: the authoring tool does
+not let an author produce accessible content even when they want to.
+
+### 2. Dictionary content cannot express its language (#2328)
+
+Each dictionary word has `field_dictionary_word_language`, a required reference
+to a term in the `language` vocabulary. But **that vocabulary has no fields** —
+a term carries a name and nothing else. There is no ISO 639 or BCP 47 code
+anywhere, so there is no value a template could put in a `lang` attribute, and
+no dictionary template emits one.
+
+This is the interesting shape of the problem: the language of each word *is*
+known and *is* required, and is still unavailable to assistive technology. The
+fix is not "add `lang` to the template" — it is "give the language vocabulary a
+code field first." Many Indigenous languages have ISO 639-3 codes; those that
+do not can use a private-use subtag, so this is solvable, not blocked.
+
+Local Contexts labels already do this correctly (`local-contexts-item.html.twig`
+emits `lang="{{ locale }}"` on label text and on each translation), which is a
+useful precedent and shows the gap is specific rather than systemic.
+
+## Decided (14)
+
+| SC | Level | Recommended | Evidence |
+|---|---|---|---|
+| 1.2.1 | A | supports | `digital_heritage` has `field_transcription` (`text_long`), described as "a basic text transcription of an audio or video recording, or of text in an image or document", and it is **shown** on the `full` and `taxonomy_record` displays |
+| 1.2.2 | A | **partially-supports** | No caption track field on `media.video`; `file_video` renders no `<track>`. `remote_video` inherits provider captions. See gap 1 |
+| 1.2.3 | A | supports | The DH transcription field is a media alternative, which 1.2.3 accepts. Caveat: it is described as "basic", so whether a given item's transcript is a *full* alternative is editorial |
+| 1.2.4 | AA | **not-applicable** | No live-streaming feature. Recorded as not-applicable rather than supports, which are different claims |
+| 1.2.5 | AA | **does-not-support** | No synchronized audio description capability for local video. See gap 1 |
+| 1.3.3 | A | supports | No UI string found that gives an instruction by position, shape or colour alone. Confirm rendered instructions in the visual pass |
+| 1.3.4 | AA | supports | No orientation lock. `_include-media.scss` defines `portrait`/`landscape` aliases but nothing restricts to one |
+| 1.4.2 | A | supports | Nothing autoplays: dictionary audio sets `autoplay: false`, GLightbox sets `autoplayVideos: false`, and the YouTube oEmbed lists `autoplay` in `allow=` (a permission) with no `autoplay=1` in the URL |
+| 2.1.4 | A | supports | All 15 files binding `keydown`/`keypress` use non-printable keys (Arrow\*, Home, End, Escape, Tab) except Enter/Space in `media-library-cancel.js` and `content-warnings.js`. Both are scoped to a focused element, so the "active only on focus" exception applies, and activating a control with Enter/Space is standard operation rather than a shortcut |
+| 2.2.1 | A | supports | No `http-equiv="refresh"`, no `location.reload`, no `setInterval` in our JS, and no session lifetime override shipped. Drupal's session expiry is a security timeout, which 2.2.1 exempts |
+| 2.3.1 | A | supports | No `@keyframes` in any of our SCSS. The only animation is vendor Splide's rotating loading spinner, which does not flash |
+| 2.5.4 | A | **not-applicable** | No `devicemotion`, `deviceorientation` or `DeviceMotionEvent` anywhere in `modules/` or `themes/` |
+| 3.1.2 | AA | **does-not-support** | The `language` vocabulary has no code field, so no `lang` can be emitted for dictionary content. See gap 2 |
+| 4.1.1 | A | supports | Satisfied by definition in HTML5, and removed from WCAG in 2.2. Recording the reasoning rather than testing |
+
+## Resolved after desk review (4)
+
+All four were closed out on 9 October 2026 against a clean install
+(`~/ddev/mukurtu-a11y`, profile at `main`), which is what the desk review
+could not reach.
+
+| SC | Level | What decided it |
+|---|---|---|
+| 1.3.5 Identify Input Purpose | **partially-supports** | The login form is correct and gated. The account form is not: Drupal core's `AccountForm` sets `autocomplete="off"` on email, username and password whenever the form is not a registration, and on current password always, so a person editing their own account has no programmatically determinable field purpose. Core's reason, stopping a browser prefilling someone else's details, holds on the administrative path but not for self-editing |
+| 2.4.5 Multiple Ways | supports | Header search on every page, a main navigation menu, and browse listings. Any two satisfy the criterion, so no sitemap is needed and none is installed |
+| 2.5.3 Label in Name | supports | Zero findings across 5 anonymous and 6 administrative pages. Caveat: the check approximates the accessible name computation, and an earlier version reported 21 false positives by placing `title` ahead of text content |
+| 3.3.4 Error Prevention | **partially-supports** | 19 confirm/delete form classes cover entity deletion, and the VBO media delete confirms. Bulk membership removal does not: the members overview uses Organic Groups' own bulk form, which has no confirmation option, and deletes each membership immediately (issue #2370) |
+
+## Follow-ups filed
+
+Each gap is tracked, and none is in scope for #2242 itself, which is an audit:
+
+- **#2329** — uploaded video cannot carry captions or audio description
+  (1.2.2, 1.2.5, ATAG B).
+- **#2328** — the `language` vocabulary has no language code, which blocks
+  `lang` on dictionary output (3.1.2). #2329 depends on this too, since a
+  caption track needs a language of its own.
+- **#2370** — bulk-removing community or protocol members has no confirmation
+  step (3.3.4).
+- **#2372** — the account form carries `autocomplete="off"` on username, email
+  and password, so their purpose is not programmatically determinable when
+  someone edits their own account (1.3.5).

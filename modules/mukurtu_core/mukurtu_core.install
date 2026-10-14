@@ -6,6 +6,7 @@
  */
 
 use Drupal\Core\Extension\Requirement\RequirementSeverity;
+use Drupal\Core\Serialization\Yaml;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\mukurtu_core\EntityReferenceRoleConverter;
 use Drupal\mukurtu_core\Hook\UpdatePathRequirements;
@@ -351,9 +352,320 @@ function mukurtu_core_update_40205(): ?string {
 }
 
 /**
+ * Show full-width hero block images at a sharper 1920px size.
+ */
+function mukurtu_core_update_40207(): ?string {
+  // Keep the docblock above to one line; see mukurtu_core_update_40201() for
+  // why.
+  //
+  // The full-width image-with-description block used to render its image
+  // through the shared image_with_description media view mode, whose 900px
+  // large_900px style is fine for the half-width horizontal and vertical
+  // blocks but is stretched across the whole viewport here, so hero photos
+  // came out blurry. This gives the full-width block its own view mode and
+  // 1920px style instead, leaving the other blocks and WYSIWYG embeds alone.
+  $entity_type_manager = \Drupal::entityTypeManager();
+  $core_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core') . '/config/install/';
+  $profile_path = \Drupal::service('extension.list.profile')->getPath('mukurtu') . '/config/install/';
+  $to_create = [
+    'image_style' => [$core_path, 'image.style.hero_full_width'],
+    'entity_view_mode' => [$core_path, 'core.entity_view_mode.media.hero_full_width'],
+    'entity_view_display' => [$profile_path, 'core.entity_view_display.media.image.hero_full_width'],
+  ];
+  foreach ($to_create as $entity_type_id => [$path, $config_name]) {
+    $storage = $entity_type_manager->getStorage($entity_type_id);
+    $values = Yaml::decode(file_get_contents($path . $config_name . '.yml'));
+    $id = $values['id'] ?? $values['name'];
+    if (!$storage->load($id)) {
+      $storage->create($values)->save();
+    }
+  }
+
+  $display = $entity_type_manager->getStorage('entity_view_display')->load('block_content.full_image_with_description.default');
+  if (!$display) {
+    return NULL;
+  }
+  $component = $display->getComponent('field_image');
+  // Leave a site that has deliberately picked a different view mode alone.
+  if (!$component || ($component['settings']['view_mode'] ?? NULL) !== 'image_with_description') {
+    return NULL;
+  }
+  $component['settings']['view_mode'] = 'hero_full_width';
+  $display->setComponent('field_image', $component)->save();
+
+  // Content warnings are opt-in per media view mode once an admin has saved
+  // that settings form (NULL means every mode). Carry the old view mode's
+  // choice over, or the hero would silently stop showing warnings.
+  $warnings = \Drupal::configFactory()->getEditable('mukurtu_content_warnings.settings');
+  $modes = $warnings->get('warning_view_modes');
+  if (is_array($modes) && in_array('image_with_description', $modes, TRUE) && !in_array('hero_full_width', $modes, TRUE)) {
+    $modes[] = 'hero_full_width';
+    $warnings->set('warning_view_modes', $modes)->save();
+  }
+
+  return (string) t('Full-width image-with-description blocks now use a sharper 1920px image size.');
+}
+
+/**
+ * Let editors turn off the tint on full-width hero block images.
+ */
+function mukurtu_core_update_40208(array &$sandbox): ?string {
+  // Keep the docblock above to one line; see mukurtu_core_update_40201() for
+  // why.
+  //
+  // Adds field_image_tint to full_image_with_description blocks and turns it
+  // on for every existing block, so heroes keep the tint they always had.
+  // The field's default value only applies to new blocks, and an existing
+  // block left empty would show an unchecked box on its edit form, so
+  // saving it untouched would quietly remove the tint.
+  $entity_type_manager = \Drupal::entityTypeManager();
+  $block_storage = $entity_type_manager->getStorage('block_content');
+
+  if (!isset($sandbox['ids'])) {
+    if (!$entity_type_manager->getStorage('block_content_type')->load('full_image_with_description')) {
+      $sandbox['#finished'] = 1;
+      return NULL;
+    }
+
+    $profile_path = \Drupal::service('extension.list.profile')->getPath('mukurtu') . '/config/install/';
+    $to_create = [
+      'field_storage_config' => 'field.storage.block_content.field_image_tint',
+      'field_config' => 'field.field.block_content.full_image_with_description.field_image_tint',
+    ];
+    foreach ($to_create as $entity_type_id => $config_name) {
+      $storage = $entity_type_manager->getStorage($entity_type_id);
+      $values = Yaml::decode(file_get_contents($profile_path . $config_name . '.yml'));
+      if (!$storage->load($values['id'])) {
+        $storage->create($values)->save();
+      }
+    }
+
+    $form_display = $entity_type_manager->getStorage('entity_form_display')->load('block_content.full_image_with_description.default');
+    if ($form_display && !$form_display->getComponent('field_image_tint')) {
+      $form_display->setComponent('field_image_tint', [
+        'type' => 'boolean_checkbox',
+        'weight' => 29,
+        'region' => 'content',
+        'settings' => ['display_label' => TRUE],
+      ])->save();
+    }
+    $view_display = $entity_type_manager->getStorage('entity_view_display')->load('block_content.full_image_with_description.default');
+    if ($view_display && $view_display->getComponent('field_image_tint')) {
+      $view_display->removeComponent('field_image_tint')->save();
+    }
+
+    $sandbox['ids'] = array_values($block_storage->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('type', 'full_image_with_description')
+      ->notExists('field_image_tint')
+      ->execute());
+    $sandbox['total'] = count($sandbox['ids']);
+    $sandbox['updated'] = 0;
+  }
+
+  foreach ($block_storage->loadMultiple(array_splice($sandbox['ids'], 0, 50)) as $block) {
+    $block->set('field_image_tint', TRUE);
+    $block->setSyncing(TRUE);
+    $block->save();
+    $sandbox['updated']++;
+  }
+
+  $sandbox['#finished'] = $sandbox['ids'] ? 1 - count($sandbox['ids']) / $sandbox['total'] : 1;
+  if ($sandbox['#finished'] < 1) {
+    return NULL;
+  }
+
+  return (string) t('Added a Tint the background image option to full-width image-with-description blocks, turned on for existing blocks.');
+}
+
+/**
+ * Installs the Masquerade module.
+ */
+function mukurtu_core_update_40209(): ?string {
+  // New installs get masquerade from the profile's install list. It is
+  // optional, so a site that already has it (or added it by hand) is left
+  // alone.
+  if (\Drupal::moduleHandler()->moduleExists('masquerade')) {
+    return NULL;
+  }
+
+  \Drupal::service('module_installer')->install(['masquerade']);
+
+  return (string) t('Installed the Masquerade module. Administrators can now view the site as another user.');
+}
+
+/**
+ * Add a Language code field to the Language vocabulary.
+ */
+function mukurtu_core_update_40211(): ?string {
+  // Keep the docblock above to one line; see mukurtu_core_update_40201() for
+  // why.
+  //
+  // Dictionary words print the code as an HTML lang attribute so screen
+  // readers pronounce them in their own language (#2328). config/install
+  // ships the field, which covers new sites; this adds it to existing ones.
+  // 40210 is unused: it was held for #2347, which moved to 40213 once this
+  // merged first.
+  $entity_type_manager = \Drupal::entityTypeManager();
+  if (!$entity_type_manager->getStorage('taxonomy_vocabulary')->load('language')) {
+    return NULL;
+  }
+
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core') . '/config/install/';
+  $read = fn(string $name): array => Yaml::decode(file_get_contents($config_path . $name . '.yml'));
+
+  $to_create = [
+    'field_storage_config' => 'field.storage.taxonomy_term.field_language_code',
+    'field_config' => 'field.field.taxonomy_term.language.field_language_code',
+  ];
+  foreach ($to_create as $entity_type_id => $config_name) {
+    $storage = $entity_type_manager->getStorage($entity_type_id);
+    $values = $read($config_name);
+    if (!$storage->load($values['id'])) {
+      $storage->create($values)->save();
+    }
+  }
+
+  // A site that never saved the language term form display has none, so it
+  // gets the shipped one. Otherwise only the new field is added, leaving the
+  // site's own arrangement of the other fields alone.
+  $display_storage = $entity_type_manager->getStorage('entity_form_display');
+  $display_values = $read('core.entity_form_display.taxonomy_term.language.default');
+  $form_display = $display_storage->load($display_values['id']);
+  if (!$form_display) {
+    $display_storage->create($display_values)->save();
+  }
+  elseif (!$form_display->getComponent('field_language_code')) {
+    $form_display->setComponent('field_language_code', $display_values['content']['field_language_code'])->save();
+  }
+
+  return (string) t('Added a Language code field to the Language vocabulary. Add a code to each language term so that screen readers pronounce dictionary words correctly.');
+}
+
+/**
+ * Fix browse and search pages showing every translation of an item instead of one per language.
+ */
+function mukurtu_core_update_40213(array &$sandbox): ?string {
+  // Keep the docblock above to one line; see mukurtu_core_update_40201() for
+  // why.
+  //
+  // The language_with_fallback filter shipped in #2074 was configured as a
+  // search_api_string filter ('=' with a min/max/value array), but Search API
+  // registers that property as a language field, so Views always builds it
+  // with the search_api_language (in_operator) handler instead. That handler
+  // has no '=' operator, so it added no condition at all and every
+  // translation of every item was listed. Rewrite each such filter into the
+  // in_operator shape, keeping whatever language value the site configured.
+  if (!isset($sandbox['indexes'])) {
+    $fixed = 0;
+    foreach (\Drupal::entityTypeManager()->getStorage('view')->loadMultiple() as $view) {
+      $displays = $view->get('display');
+      $changed = FALSE;
+      foreach ($displays as $display_id => $display) {
+        foreach ($display['display_options']['filters'] ?? [] as $filter_id => $filter) {
+          if (($filter['field'] ?? NULL) !== 'language_with_fallback' || ($filter['operator'] ?? NULL) !== '=') {
+            continue;
+          }
+          $langcode = is_array($filter['value'] ?? NULL) ? ($filter['value']['value'] ?? '') : (string) ($filter['value'] ?? '');
+          if ($langcode === '') {
+            continue;
+          }
+          $filter['plugin_id'] = 'search_api_language';
+          $filter['operator'] = 'in';
+          $filter['value'] = [$langcode => $langcode];
+          unset($filter['expose']['min_placeholder'], $filter['expose']['max_placeholder'], $filter['expose']['placeholder']);
+          $filter['expose']['reduce'] = FALSE;
+          $displays[$display_id]['display_options']['filters'][$filter_id] = $filter;
+          $changed = TRUE;
+        }
+      }
+      if ($changed) {
+        $view->set('display', $displays)->save();
+        $fixed++;
+      }
+    }
+
+    // The filter now works, so stale index data shows. Search API's
+    // language_with_fallback values are computed at index time, so content
+    // indexed before a language was added is missing that language and the
+    // filter hides it there. Reindex so every item gets the current languages.
+    // Cron indexes only cron_limit items per run, so index here rather than
+    // leave content hidden for hours. LanguageFallbackReindexHooks keeps this
+    // current from here on.
+    $sandbox['fixed'] = $fixed;
+    $sandbox['indexes'] = [];
+    $sandbox['failed'] = FALSE;
+    if (count(\Drupal::languageManager()->getLanguages()) > 1 && \Drupal::moduleHandler()->moduleExists('search_api')) {
+      /** @var \Drupal\search_api\IndexInterface $index */
+      foreach (\Drupal::entityTypeManager()->getStorage('search_api_index')->loadMultiple() as $index) {
+        if (!$index->status() || $index->isReadOnly()) {
+          continue;
+        }
+        foreach ($index->getFields() as $field) {
+          if ($field->getPropertyPath() === 'language_with_fallback' && $field->getDatasourceId() === NULL) {
+            $index->reindex();
+            $sandbox['indexes'][] = $index->id();
+            break;
+          }
+        }
+      }
+    }
+    $sandbox['pending'] = $sandbox['indexes'];
+  }
+
+  // Index one chunk per pass, so a large site doesn't time out.
+  if (!$sandbox['failed'] && $sandbox['pending']) {
+    $index = \Drupal::entityTypeManager()->getStorage('search_api_index')->load(reset($sandbox['pending']));
+    try {
+      $remaining = $index ? $index->getTrackerInstance()->getRemainingItemsCount() : 0;
+      if ($remaining > 0) {
+        $limit = (int) $index->getOption('cron_limit', \Drupal::config('search_api.settings')->get('default_cron_limit') ?: 50);
+        $index->indexItems($limit > 0 ? $limit : 50);
+        $before = $remaining;
+        $remaining = $index->getTrackerInstance()->getRemainingItemsCount();
+        // Items that keep failing stay in the tracker. If a pass makes no
+        // progress, leave the rest for cron rather than loop forever.
+        if ($remaining >= $before) {
+          $remaining = 0;
+        }
+      }
+      if ($remaining === 0) {
+        array_shift($sandbox['pending']);
+      }
+    }
+    catch (\Exception) {
+      // The server is unreachable or the index is locked. The items stay
+      // queued for cron.
+      $sandbox['failed'] = TRUE;
+    }
+  }
+
+  $total = count($sandbox['indexes']);
+  if (!$sandbox['failed'] && $sandbox['pending']) {
+    $sandbox['#finished'] = ($total - count($sandbox['pending'])) / $total;
+    return NULL;
+  }
+  $sandbox['#finished'] = 1;
+
+  $fixed = $sandbox['fixed'];
+  if ($sandbox['failed']) {
+    if ($fixed) {
+      return (string) t('Fixed the language filter on @count browse and search views and queued @indexes search indexes for reindexing.', ['@count' => $fixed, '@indexes' => $total]);
+    }
+    return (string) t('Queued @indexes search indexes for reindexing.', ['@indexes' => $total]);
+  }
+  if ($fixed) {
+    return $total
+      ? (string) t('Fixed the language filter on @count browse and search views and reindexed @indexes search indexes.', ['@count' => $fixed, '@indexes' => $total])
+      : (string) t('Fixed the language filter on @count browse and search views.', ['@count' => $fixed]);
+  }
+  return $total ? (string) t('Reindexed @indexes search indexes.', ['@indexes' => $total]) : NULL;
+}
+
+/**
  * Adds an optional role to each creator, contributor, and person on content and media.
  */
-function mukurtu_core_update_40206(): void {
+function mukurtu_core_update_40214(): void {
   // Keep the docblock above to one line; see mukurtu_core_update_40201()
   // for why.
   //

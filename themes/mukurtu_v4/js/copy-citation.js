@@ -1,11 +1,14 @@
 /**
  * @file
- * Copy-to-clipboard control for the citation field.
+ * Copy-to-clipboard control for citation fields.
  *
  * Attaches to each [data-copy-citation] button, reads the plain-text
- * citation from the sibling [data-citation-text] element, and writes it to
- * the clipboard via navigator.clipboard. Announces success/failure through
- * the field item's [data-copy-citation-status] aria-live region.
+ * citation from the [data-citation-text] element in the same
+ * [data-copy-citation-field] wrapper, and writes it to the clipboard via
+ * navigator.clipboard. Announces success/failure through that wrapper's
+ * [data-copy-citation-status] aria-live region. The success message comes
+ * from the button's data-copy-success attribute, so each field can announce
+ * its own name. See templates/misc/copy-citation-button.html.twig.
  */
 (function (Drupal, once) {
   'use strict';
@@ -13,7 +16,7 @@
   Drupal.behaviors.copyCitation = {
     attach(context) {
       once('copy-citation', '[data-copy-citation]', context).forEach(function (button) {
-        const wrapper = button.closest('.field__item');
+        const wrapper = button.closest('[data-copy-citation-field]');
         const textEl = wrapper && wrapper.querySelector('[data-citation-text]');
         const statusEl = wrapper && wrapper.querySelector('[data-copy-citation-status]');
         if (!textEl || !statusEl) return;
@@ -28,7 +31,12 @@
         }
 
         button.addEventListener('click', function () {
-          const text = textEl.textContent.trim();
+          // innerText (not textContent) copies the text as rendered: Twig
+          // indentation collapses to single spaces, while line breaks a site
+          // put in its citation template are kept. Non-breaking spaces (the
+          // knowledge keepers date) become plain spaces.
+          const text = textEl.innerText.replace(/\u00a0/g, ' ').trim();
+          const successMessage = button.dataset.copySuccess || Drupal.t('Citation copied to clipboard');
 
           if (!navigator.clipboard || !navigator.clipboard.writeText) {
             announce(Drupal.t('Copy to clipboard is not supported in this browser.'));
@@ -36,7 +44,7 @@
           }
 
           navigator.clipboard.writeText(text).then(function () {
-            announce(Drupal.t('Citation copied to clipboard'));
+            announce(successMessage);
             button.classList.add('is-copied');
             window.setTimeout(function () {
               button.classList.remove('is-copied');

@@ -184,11 +184,23 @@ class ProjectDirectoryController extends ControllerBase {
    *   The access result.
    */
   public function groupDirectoryAccess(AccountInterface $account, ?ContentEntityInterface $group = NULL) {
-    // Only show the page if the group exists.
-    if ($group) {
-      return AccessResult::allowed();
+    if (!$group) {
+      return AccessResult::forbidden();
     }
-    return AccessResult::forbidden();
+
+    // Mirror the group's own view access. This page previously allowed
+    // anyone as long as the group existed, which disclosed a strict
+    // protocol's name to anonymous visitors through the page title
+    // ("%group's Local Contexts Projects") along with its Local Contexts
+    // projects and labels, even though those visitors cannot view the
+    // protocol itself. For a system built around cultural protocols, a
+    // strict protocol's existence should not be public.
+    //
+    // Deliberately 'view' and not 'update': this is a read-only directory,
+    // so the rule is "if you can see the group, you can see its projects",
+    // not "only managers can". The separate Manage Local Contexts Projects
+    // form keeps its own, stricter check.
+    return $group->access('view', $account, TRUE);
   }
 
   public function title(?ContentEntityInterface $group = NULL)  {
