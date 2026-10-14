@@ -6,6 +6,7 @@ namespace Drupal\Tests\mukurtu_protocol\Kernel;
 
 use Drupal\Component\Serialization\Yaml;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Session\AnonymousUserSession;
 use Drupal\mukurtu_protocol\Entity\Community;
 use Drupal\mukurtu_protocol\Entity\CommunityInterface;
 use Drupal\og\Og;
@@ -119,7 +120,7 @@ class BrowseByCommunityViewAccessTest extends ProtocolAwareEntityTestBase {
    * Anonymous users see only the public community.
    */
   public function testAnonymousSeesOnlyPublic(): void {
-    $this->setCurrentUser($this->container->get('entity_type.manager')->getStorage('user')->load(0));
+    $this->setCurrentUser(new AnonymousUserSession());
 
     $this->assertSame([(int) $this->publicCommunity->id()], $this->listedIds());
   }
