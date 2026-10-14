@@ -61,3 +61,20 @@ function mukurtu_design_update_40005(): string {
 
   return (string) t('Added the page and header background settings. No images are set, so the site is unchanged until one is uploaded.');
 }
+
+/**
+ * Regenerate the custom palette stylesheet with the breadcrumb and panel colours.
+ */
+function mukurtu_design_update_40006(): string {
+  // The stylesheet is only written when the form is saved or the file is
+  // missing, so an existing one never picks up CUSTOM_DERIVED_VARS on its own.
+  $config = \Drupal::config(\Drupal\mukurtu_design\DesignPalette::SETTINGS);
+  if ($config->get('palette') !== 'custom') {
+    return (string) t('This site does not use the custom palette, so there was nothing to regenerate.');
+  }
+
+  \Drupal::classResolver(\Drupal\mukurtu_design\DesignPalette::class)
+    ->generateCustomCss($config->get('colors') ?? []);
+
+  return (string) t('Regenerated the custom palette stylesheet.');
+}
