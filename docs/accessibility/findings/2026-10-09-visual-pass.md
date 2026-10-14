@@ -1,12 +1,14 @@
 # Bucket B (visual pass), part 1
 
 Bucket B of the [#2242 triage](2026-10-06-criteria-triage.md) is the 12
-criteria needing a browser and a ruler but no assistive technology. This is
-the first half: **6 decided**, against a clean install
-(`~/ddev/mukurtu-a11y`, profile at `main`) plus source inspection.
+criteria needing a browser and a ruler but no assistive technology.
+**11 of 12 are decided**, against a clean install (`~/ddev/mukurtu-a11y`,
+profile at `main`) plus source inspection.
 
-The other 6 are listed at the end with what each is waiting on, rather than
-recorded on thinner evidence than the first six.
+Recorded in two passes: six first, then five more once PR #2380 removed a
+PHP warning that was printing over the error messages 3.3.3 needed graded.
+The twelfth, 1.4.4, is held deliberately rather than recorded on thin
+evidence.
 
 ## Decided (6)
 
@@ -29,29 +31,143 @@ name, and to skip deliberately scrollable containers. This evaluation ran
 after that fix, so the zero reflects the content rather than a broken
 measurement.
 
-## Still open (6)
+## Part 2: decided (5)
 
-| SC | Waiting on |
+Run after PR #2380 removed a PHP warning that was printing over the very
+error messages 3.3.3 needed graded.
+
+| SC | Level | What decided it |
+|---|---|---|
+| **2.4.7 Focus Visible** | **partially-supports** | 35 tab stops across 3 visitor-facing pages all pass; every administrative form has focusable controls with none of their box on screen (#2389) |
+| 3.3.2 Labels or Instructions | supports | 31 of 47 hidden-label controls are labelled by a visible column header; the other 16 sit under a visible fieldset instruction and carry a placeholder or self-describing default |
+| 3.3.3 Error Suggestion | supports | "The email address is not valid. Use the format user@example.com" names the problem and the expected form |
+| 1.4.5 Images of Text | supports | The only image the product renders is the site logo, which the criterion exempts |
+| **1.4.1 Use of Color** | **partially-supports** | System messages are distinguished only by background colour |
+
+### 1.4.1: the one failure
+
+Error, warning and status blocks differ **only** by background colour:
+
+| Type | Background |
 |---|---|
-| 1.4.4 Resize Text | Five admin pages are clean under real browser text sizing, but the inventory-wide check only measures that way once PR #2375 merges. Holding until a clean run exists, rather than recording a level on five pages |
-| 2.4.7 Focus Visible | A keyboard-driven pass. `.focus()` does not trigger `:focus-visible`, which is where the theme puts its ring, so computed styles read after programmatic focus describe the wrong state. Folds naturally into bucket C |
-| 3.3.2 Labels or Instructions | A form that reliably fails validation without a captcha |
-| 3.3.3 Error Suggestion | Same |
-| 1.4.1 Use of Color | Partial: required fields are marked with a `*` glyph via `::after`, not colour alone. Status and validation colours are unchecked and are the likelier risk |
-| 1.4.5 Images of Text | The theme's images look like icons and UI graphics rather than text images, but that has not actually been confirmed by looking at them |
+| error | `rgb(88, 51, 51)` |
+| warning | `rgb(72, 62, 30)` |
+| status | `rgb(20, 82, 66)` |
 
-### A measurement that nearly became a false report
+No icon on any of them (`::before` has no content, no background image, no
+mask), the left border is an identical transparent 2px on all three, and
+padding is identical. The only non-colour cue is a `.visually-hidden`
+heading, which a sighted reader never sees.
 
-Measuring focus-ring contrast after `el.focus()` gave 1.5:1 on the header
-search button, which would have contradicted 1.4.11's existing `supports`
-claim. Checking that element directly showed `outline-style: none` under
-programmatic focus: the colours being measured were not the focus ring at
-all. **`.focus()` does not trigger `:focus-visible`.** Any 2.4.7 or 1.4.11
-re-measurement has to drive focus from the keyboard.
+The wording of a message usually makes its nature clear on its own, which
+limits the practical impact, so this is `partially-supports` rather than
+`does-not-support`. An icon per type, or making the existing heading
+visible, would close it.
 
-### Why the login form could not be used for 3.3.2 and 3.3.3
+Required-field markers and form errors are fine: the asterisk is a glyph,
+and errors name the field in text.
 
-Submitting bad credentials produced no error message, which looked like a
-3.3.1 defect. It is not: the form carries an **ALTCHA captcha**, and request
-tracing showed **no POST to `/user/login` happened at all**. The missing
-error was the test being blocked, not the product failing.
+### 2.4.7: why a naive check gets this wrong
+
+The main navigation sets `outline: 0` on focus and draws its ring with a
+`::before` pseudo-element instead. A check that reads only the `outline`
+property reports those links as having no indicator at all. Two further
+traps: `.focus()` does not trigger `:focus-visible`, so programmatic focus
+measures the wrong state; and an outline is painted outside the border box,
+so its contrast must be computed against the *parent's* background, not the
+element's own. Measuring both wrongly produced a 1.5:1 reading on a ring
+that is actually about 8.4:1.
+
+### 2.4.7: the administrative side, which the 35 stops did not reach
+
+The 35 stops above were all on visitor-facing pages. Auditing the new bulk
+member removal confirm form (#2370) turned up a failure on the other side
+of the product.
+
+Gin moves a form's action buttons into the sticky header, but the originals
+stay in the DOM inside a `position: fixed`, `height: 1px`, `overflow:
+hidden` wrapper, and they stay focusable. Visibility was measured by
+sampling points across each element's box and asking
+`document.elementFromPoint()` whether the element is what gets hit, so
+these are not computed-style guesses:
+
+| Page | Control | `tabIndex` | Box | Visible |
+|---|---|---|---|---|
+| `/admin/config/system/site-information` | `#edit-submit` "Save configuration" | 0 | `y:-11 w:162 h:40` | 0% |
+| `/user/<uid>/cancel` | `#edit-submit` "Block or delete account" | 0 | `y:-11` | 0% |
+| `/user/<uid>/cancel` | `#edit-cancel` "Cancel" | 0 | `y:-11 w:82 h:40` | 0% |
+
+Both are unmodified Drupal pages, so this is the admin theme and not
+Mukurtu code. On a confirm form the tab order runs: visible header submit,
+the "More actions" trigger, page links, then the invisible submit and the
+invisible cancel. The `#gin-sticky-edit-cancel` clone sits inside the
+collapsed "More actions" menu and is not tabbable until the menu is
+expanded, so the only Cancel that Tab reaches is one nobody can see.
+
+Gin does ship a visually hidden "Moves focus to sticky header actions" link
+inside the form, so an intended keyboard route to the real buttons exists.
+The problem is that the originals remain in the tab order as well. Tracked
+as #2389, which also notes why the obvious fix is not safe: with JavaScript
+off, Gin serves the header actions server-side preprocessed and the
+in-form buttons are the only ones that submit.
+
+This is why 2.4.7 is `partially-supports` rather than `supports`. The Web
+component covers the administrative interface too; see the scope note at
+the top of the ACR.
+
+## Part 3: 1.4.4 decided, once a real run existed
+
+This was held back while `checkTextZoom` still approximated text sizing with
+a root font-size override. #2375 replaced that with the browser's own
+default font size, set through CDP and applied *before* load so rem media
+queries re-evaluate, which is what a reader who enlarges text actually gets.
+
+| SC | Level | What decided it |
+|---|---|---|
+| **1.4.4 Resize Text** | **partially-supports** | 43 of 45 pages need no horizontal scrolling at 200%; the two Local Contexts supported projects pages need 1485px in a 1280px viewport (#2392) |
+
+Both failures are stable, not intermittent: the same two pages at the same
+width on two separate successful main runs, [38003543030](https://github.com/MukurtuCMS/Mukurtu-CMS/actions/runs/38003543030)
+at `60271c193` (the #2375 merge itself) and [38064032171](https://github.com/MukurtuCMS/Mukurtu-CMS/actions/runs/38064032171)
+at `06603ba28` three days later. Both were measured in `before-load` mode,
+the strongest of the three the check can report.
+
+Every other automated check on those two pages is clean, reflow at 320px
+included. That combination is itself informative: at 320px the responsive
+layout has already collapsed, while at 1280px the desktop layout stays and
+something inside it grows past the viewport as the text doubles.
+
+The cause is **not** established. Seeding projects and a realistic API key
+into a local site and measuring with the same CDP call produced no overflow,
+so the trigger is something in the preview's seeded content. Reproducing it
+needs the A11Y preview credentials or closer Hub data; see #2392, which also
+records the unverified suspicion (the 36-character `project_id` UUID column,
+which no table will break across lines) so that nobody re-derives it.
+
+Page zoom, as distinct from text size, remains unchecked by any automated
+check and stays with the manual passes.
+
+## Still open (0)
+
+Nothing from this cycle. The remaining `not-evaluated` criteria are the
+keyboard and screen reader buckets, which need a human with assistive
+technology (#2242).
+
+### Two investigations that nearly became false reports
+
+**Focus-ring contrast.** Measured after `el.focus()`, the header search
+button read 1.5:1, which would have contradicted 1.4.11's existing
+`supports` claim. That element reports `outline-style: none` under
+programmatic focus. Measured correctly, from the keyboard and against the
+parent's background, it is about 8.4:1. See the 2.4.7 note above.
+
+**A login with no error message.** Submitting bad credentials produced
+nothing, which looked like a 3.3.1 defect. Request tracing showed no POST
+to `/user/login` happened at all: the form carries an ALTCHA captcha and
+the submit never left the browser. 3.3.2 and 3.3.3 were evaluated on
+authenticated forms instead.
+
+**A PHP warning standing in for the error message.** Saving content while
+belonging to no cultural protocol printed `Undefined array key
+"protocol_selection"` over the real validation messages. That was a product
+bug, fixed in PR #2380, and 3.3.3 could not be graded until it was.
