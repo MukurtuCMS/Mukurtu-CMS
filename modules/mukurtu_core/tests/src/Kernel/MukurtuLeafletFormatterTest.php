@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_core\Kernel;
 
+use Drupal\Core\Render\Element;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\mukurtu_core\Plugin\Field\FieldFormatter\MukurtuLeafletFormatter;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
@@ -140,6 +142,60 @@ class MukurtuLeafletFormatterTest extends KernelTestBase {
       substr_count($after_save->get('field_coverage')->getValue()[0]['value'], '"Feature"'),
       'All 3 features must survive a render-then-save cycle within the same request.',
     );
+  }
+
+  /**
+   * Popups and marker names are set when the parent bubbles cache metadata.
+   *
+   * Since leaflet 10.4.13, LeafletDefaultFormatter::viewElements() merges
+   * token bubbleable metadata into its return value whenever popups are on,
+   * so the array holds '#cache' and '#attached' keys next to the map
+   * elements. The shipped full view displays turn popups on, so this mirrors
+   * those settings rather than the formatter defaults.
+   */
+  public function testPopupSettingsWithBubbledMetadata(): void {
+    $descriptions = ['Pullman', 'Seattle', 'New York'];
+    $coordinates = [[-117.16, 46.73], [-122.33, 47.60], [-73.99, 40.73]];
+    $features = [];
+    foreach ($descriptions as $i => $description) {
+      $features[] = [
+        'type' => 'Feature',
+        'properties' => ['location_description' => $description],
+        'geometry' => ['type' => 'Point', 'coordinates' => $coordinates[$i]],
+      ];
+    }
+    $entity = EntityTest::create([
+      'name' => 'Mapped item',
+      'field_coverage' => [
+        'value' => json_encode(['type' => 'FeatureCollection', 'features' => $features]),
+      ],
+    ]);
+    $entity->save();
+
+    $leaflet_popup = MukurtuLeafletFormatter::defaultSettings()['leaflet_popup'];
+    $leaflet_popup['control'] = '1';
+    $leaflet_popup['options'] = '{"maxWidth":"300","minWidth":"50","autoPan":true}';
+    $items = $entity->get('field_coverage');
+    $formatter = \Drupal::service('plugin.manager.field.formatter')->getInstance([
+      'field_definition' => $items->getFieldDefinition(),
+      'view_mode' => 'default',
+      'configuration' => [
+        'type' => 'mukurtu_leaflet_formatter',
+        'settings' => ['leaflet_popup' => $leaflet_popup],
+      ],
+    ]);
+
+    $elements = $formatter->viewElements($items, $entity->language()->getId());
+
+    $this->assertArrayHasKey('#cache', $elements, 'Cache metadata bubbled up by the parent formatter must be kept.');
+    $this->assertSame([0], Element::children($elements));
+    $leaflet_settings = $elements[0]['#attached']['drupalSettings']['leaflet'];
+    $map_features = reset($leaflet_settings)['features'];
+    $this->assertCount(3, $map_features);
+    foreach ($descriptions as $i => $description) {
+      $this->assertSame($description, $map_features[$i]['popup']['value']);
+      $this->assertNotEmpty($map_features[$i]['title'], 'Each marker needs an accessible name.');
+    }
   }
 
 }

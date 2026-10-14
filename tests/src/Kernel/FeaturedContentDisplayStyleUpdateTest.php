@@ -12,13 +12,13 @@ use Drupal\KernelTests\KernelTestBase;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests mukurtu_update_40032(), which adds Display style to Featured Content.
+ * Tests mukurtu_update_40033(), which adds Display style to Featured Content.
  *
  * The hook has to leave every existing block rendering exactly as it does now:
  * the carousel is opt-in, so a site that updates and changes nothing should see
  * no difference at all.
  *
- * @see mukurtu_update_40032()
+ * @see mukurtu_update_40033()
  */
 #[Group('mukurtu')]
 class FeaturedContentDisplayStyleUpdateTest extends KernelTestBase {
@@ -65,7 +65,7 @@ class FeaturedContentDisplayStyleUpdateTest extends KernelTestBase {
 
     $this->assertNull(FieldStorageConfig::loadByName('block_content', 'field_display_style'));
 
-    mukurtu_update_40032();
+    mukurtu_update_40033();
 
     $storage = FieldStorageConfig::loadByName('block_content', 'field_display_style');
     $this->assertNotNull($storage);
@@ -94,10 +94,10 @@ class FeaturedContentDisplayStyleUpdateTest extends KernelTestBase {
   public function testTheHookIsIdempotent(): void {
     $block = $this->makeBlock('Homepage features');
 
-    mukurtu_update_40032();
+    mukurtu_update_40033();
     BlockContent::load($block->id())->set('field_display_style', 'carousel')->save();
 
-    $second = mukurtu_update_40032();
+    $second = mukurtu_update_40033();
 
     // A deliberate choice must survive a re-run.
     $this->assertSame('carousel', BlockContent::load($block->id())->get('field_display_style')->value);
@@ -108,7 +108,7 @@ class FeaturedContentDisplayStyleUpdateTest extends KernelTestBase {
    * A block added between the two runs is still backfilled.
    */
   public function testABlockAddedLaterIsBackfilled(): void {
-    mukurtu_update_40032();
+    mukurtu_update_40033();
 
     // Saved without the field set, the way a migration or an import can.
     $late = BlockContent::create(['type' => 'featured_content', 'info' => 'Late arrival']);
@@ -116,7 +116,7 @@ class FeaturedContentDisplayStyleUpdateTest extends KernelTestBase {
     $late->save();
     $this->assertNull(BlockContent::load($late->id())->get('field_display_style')->value);
 
-    mukurtu_update_40032();
+    mukurtu_update_40033();
 
     $this->assertSame('grid', BlockContent::load($late->id())->get('field_display_style')->value);
   }

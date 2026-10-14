@@ -22,10 +22,14 @@ The honest line between "a script checked this" and "only a human can confirm th
 | Landmarks present, content contained | Automated | axe `region` rule (best-practice tag) | Whether landmark labeling makes sense read aloud |
 | Zoom disabled in viewport meta | Automated | axe `meta-viewport` rule (wcag2aa tag) | — |
 | **Reflow at 320px (1.4.10)** | **Automated** | `checkReflow` — real horizontal-overflow assertion, no human judgment needed | — |
-| **Text resize to 200% (1.4.4)** | **Semi-automated** | `checkTextZoom` — approximates zoom via root font-size, not true browser zoom | Confirm any flagged page in a real browser's zoom before filing |
+| **Text resize to 200% (1.4.4)** | **Automated** (Chromium) | `checkTextZoom` — doubles the browser's own default font size via CDP and reloads, so rem media queries move the way they do for a real reader | Page zoom, as distinct from text size, is still unchecked. On a non-Chromium engine the check falls back to a root font-size override and says so in the finding, and those need confirming before filing |
 | **Focus visible everywhere (2.4.7)** | **Semi-automated** | `checkFocusVisible` — flags `outline:none`/no `box-shadow` on focus | Whether an indicator that *is* present has sufficient contrast/thickness |
 | **Vague link text (2.4.4)** | **Semi-automated** | `checkLinkText` — flags exact-match generic phrases ("click here", "read more"…) with no extra accessible context | Link text that's *specifically* misleading rather than generically vague (the heuristic only catches the common phrasing list) |
 | **No keyboard trap (2.1.2)** | **Semi-automated, smoke test only** | `checkKeyboardTrap` — tabs through the page, flags a cycle confined to a subset of the page's tab stops | Traps that only appear after an interaction (e.g. opening a modal first); compound native controls (audio/video/`<select>`) are flagged separately as "confirm manually" since their internal focus isn't visible outside their shadow DOM |
+| **Label in Name (2.5.3)** | **Semi-automated** | `checkLabelInName` — flags a control whose accessible name doesn't contain its visible label | Approximates the accname computation rather than implementing all of it, so confirm a flagged control before filing |
+| **Identify Input Purpose (1.3.5)** | **Automated (login) / semi-automated (elsewhere)** | `input-purpose.spec.ts` **gates** the login username and password fields; `checkInputPurpose` reports across the inventory | Fields outside the known Drupal user-data set aren't matched, so a new user-info field needs adding to the map |
+| **Text Spacing (1.4.12)** | **Automated** | `checkTextSpacing` — applies the 1.5/0.12em/0.16em/2em override, then detects both page overflow and elements clipping their own text | — |
+| **Character Key Shortcuts (2.1.4)** | **Automated** | `scripts/lint/character-key-shortcuts.js` **gates** CI: flags a single-character key handler bound to document/window/body with no delegation selector | A shortcut built some other way (a library's own binding, a key map in config) isn't visible to a static scan |
 | Everything keyboard-reachable/operable (2.1.1) | Human | — | Arrow-key/Enter/Space behavior inside composite widgets requires real interaction |
 | Logical/visual reading order (2.4.3) | Human | — | No reliable general heuristic for "does DOM order match visual order" |
 | No surprise on focus (3.2.1) | Human | — | Requires observing actual navigation/submission side effects |
@@ -66,7 +70,7 @@ Walk the page with the screen reader's reading commands (not just Tab). Landmark
 
 **Fully automated** — `checkReflow` and `checkTextZoom` in `accessibility-automated-checks.spec.ts` assert both directly (real horizontal-overflow checks, no human judgment needed for reflow; text-zoom is a close approximation). Pull results from `test-results/a11y-extra/*-reflow.json` and `*-text-zoom.json` instead of testing this by hand. Only re-check manually if you want to confirm a flagged page in a real browser's zoom control rather than the approximated version:
 
-- [ ] At 200% browser zoom, no text is cut off and nothing overlaps (1.4.4)
+- [ ] At 200% browser *page zoom*, no text is cut off and nothing overlaps (1.4.4). Text-size-only resizing is covered automatically now; page zoom is not
 - [ ] At 320px effective width (400% zoom on a 1280px window), content reflows to one column with no horizontal scrolling (1.4.10)
 
 ---

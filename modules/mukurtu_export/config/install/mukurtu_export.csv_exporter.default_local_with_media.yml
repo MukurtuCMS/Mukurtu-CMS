@@ -570,6 +570,7 @@ entity_fields_export_list:
     langcode: Locale
     name: Name
     description: Description
+    field_language_code: 'Language code'
     parent: Parent
     default_langcode: 'Default translation'
   taxonomy_term__location:
