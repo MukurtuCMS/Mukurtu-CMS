@@ -2,7 +2,7 @@
 
 This document is the roadmap for Mukurtu's ongoing accessibility program. It explains what we are aiming for, what is in scope, how audits run, and the cycle we repeat to maintain continual improvements.
 
-For the list of pages and components under audit, see [page-inventory.md](page-inventory.md) (Phase 1: visitor/member/manage-adjacent) and [page-inventory-admin.md](page-inventory-admin.md) (Phase 2: admin/authoring). For hands-on keyboard and screen reader testing, see [manual-checklist.md](manual-checklist.md). Dated audit results live in [findings/](findings/). The conformance report lives in [acr/](acr/).
+For the list of pages and components under audit, see [page-inventory.md](page-inventory.md) (Phase 1: visitor/member/manage-adjacent) and [page-inventory-admin.md](page-inventory-admin.md) (Phase 2: admin/authoring). For hands-on keyboard and screen reader testing, see [manual-checklist.md](manual-checklist.md) for what is and is not already automated, and [manual-audit-runbook.md](manual-audit-runbook.md) to run the passes themselves. Dated audit results live in [findings/](findings/). The conformance report lives in [acr/](acr/).
 
 ---
 
