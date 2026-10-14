@@ -40,9 +40,6 @@ ol li {
 ul li {
   list-style-type: square;
 }
-ul li::marker {
-  color: var(--accent-secondary);
-}
 
 p {
   margin-block: 0 var(--v-space-4xxs);
@@ -448,11 +445,7 @@ Those files are injected by Drupal so they shouldn't be bundled to style.css. */
  * setting it, so without this the light treatment paints white text onto that
  * white bar. Only elements that actually inherit need this: the footer sets
  * --footer-text-color on its own dark ground, and forcing a colour there would
- * render it invisible.
- *
- * Note _nav-primary.scss reads --color-text-neutral-loud, which this theme
- * never defines anywhere, so that declaration is invalid and those links have
- * always inherited - see #2186. */
+ * render it invisible. */
 .page--has-background .header-nav {
   color: var(--brand-text-color);
 }
@@ -688,7 +681,6 @@ div.palette-demo--custom {
   verdana,
   arial,
   sans-serif;
-  --font-size-base: var(--font-size-small);
 }
 
 h1,
@@ -3313,7 +3305,6 @@ label.form-required::after,
 }
 .local-tasks .export-list-dropdown summary::after {
   content: " ▾"/"";
-  font-size: var(--font-size-3xs);
 }
 .local-tasks .export-list-dropdown summary:hover {
   background-color: var(--brand-primary-dark);
@@ -3849,7 +3840,8 @@ img[class$=-placeholder] {
   -webkit-box-flex: 1;
       -ms-flex-positive: 1;
           flex-grow: 1;
-  color: var(--color-text-neutral-loud);
+  /* Inherit so the header image's text treatment reaches the links. */
+  color: inherit;
   font-size: var(--font-size-m);
   text-decoration: none;
   padding-inline: var(--v-space-4xs);
@@ -5018,7 +5010,7 @@ body:not(.is-always-mobile-nav) {
           border-inline-end: 0;
   border-radius: 4px 0 0 4px;
   font-size: var(--font-size-m);
-  color: var(--color-text-neutral-loud);
+  color: var(--brand-text-color);
   background: var(--color-white);
   line-height: 1.4;
 }
@@ -5891,8 +5883,8 @@ body:not(.is-always-mobile-nav) .header:not(:has(.header__logo-text)) {
  *
  * Only `color` is set, never the shared palette tokens. The nav inside the
  * header (.header-nav) is an opaque white bar at desktop and the slide-out
- * drawer on mobile, and its links read --color-text-neutral-loud; redefining
- * that token here painted white text onto that white bar and made the menu
+ * drawer on mobile, and its links inherit their colour; redefining a shared
+ * token here painted white text onto that white bar and made the menu
  * disappear. Anything with its own background keeps its own colours, and only
  * text sitting directly on the image inherits the treatment. */
 /* Text branding needs room a logo does not.
@@ -6108,11 +6100,7 @@ body:not(.is-always-mobile-nav) .header:not(:has(.header__logo-text)) {
 .site-header--has-background .header-nav {
   /* Covers the drawer, and stops the header's treatment colour cascading into
    * it. Nav links inherit rather than set a colour, so without this the light
-   * treatment would paint white text onto the drawer's white background.
-   *
-   * _nav-primary.scss reads --color-text-neutral-loud, which this theme never
-   * defines anywhere, so that declaration is invalid and those links have
-   * always inherited - see #2186. */
+   * treatment would paint white text onto the drawer's white background. */
   color: var(--brand-text-color);
 }
 
@@ -7997,7 +7985,7 @@ body:not(.is-always-mobile-nav) .header:not(:has(.header__logo-text)) {
 .dictionary-word__teaser .field--name-field-contributor .field__label {
   display: inline-block;
   font-size: var(--font-size-s);
-  font-weight: var(--text-normal);
+  font-weight: var(--text-regular);
 }
 .dictionary-word__teaser .field--name-field-contributor .field__label::after {
   content: ":";
