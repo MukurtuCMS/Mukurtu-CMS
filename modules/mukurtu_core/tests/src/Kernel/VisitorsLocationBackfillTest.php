@@ -78,6 +78,7 @@ class VisitorsLocationBackfillTest extends KernelTestBase {
       $this->container->get('database'),
       $this->container->get('state'),
       $this->container->get('datetime.time'),
+      $this->container->get('cache_tags.invalidator'),
       new RebuildLocationService($this->container->get('database'), $lookup),
       $lookup,
     ];
@@ -191,6 +192,26 @@ class VisitorsLocationBackfillTest extends KernelTestBase {
     $this->assertTrue($backfill->startIfReady());
     $this->assertSame('done', $this->container->get('state')->get(VisitorsLocationBackfill::STATE_KEY));
     $this->assertNull($backfill->remaining());
+  }
+
+  /**
+   * A run that did work invalidates cached reports; an idle one does not.
+   *
+   * Report pages for past date ranges stay cached, and the backfill is the
+   * one thing that changes past visits.
+   */
+  public function testProcessingInvalidatesReportCaches(): void {
+    $this->insertVisit(['visitors_ip' => '8.8.8.8']);
+    $checksum = $this->container->get('cache_tags.invalidator.checksum');
+    $before = $checksum->getCurrentChecksum(VisitorsLocationBackfill::CACHE_TAGS);
+
+    $backfill = $this->backfill();
+    $backfill->process();
+    $this->assertSame($before, $checksum->getCurrentChecksum(VisitorsLocationBackfill::CACHE_TAGS), 'Nothing ran before the backfill started.');
+
+    $backfill->startIfReady();
+    $backfill->process();
+    $this->assertNotSame($before, $checksum->getCurrentChecksum(VisitorsLocationBackfill::CACHE_TAGS));
   }
 
 }

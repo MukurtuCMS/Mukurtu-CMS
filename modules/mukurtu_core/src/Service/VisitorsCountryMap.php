@@ -73,6 +73,13 @@ class VisitorsCountryMap {
   public const CONFIG_NAME = 'mukurtu_core.visitors_map';
 
   /**
+   * Cache tag for the map, invalidated when past visits are re-located.
+   *
+   * @see \Drupal\mukurtu_core\Service\VisitorsLocationBackfill::CACHE_TAGS
+   */
+  public const CACHE_TAG = 'mukurtu_core_visitors_locations';
+
+  /**
    * The city threshold used when the setting has never been saved.
    */
   public const DEFAULT_CITY_THRESHOLD = 1;
@@ -301,7 +308,7 @@ class VisitorsCountryMap {
   protected function cacheability(): array {
     return [
       'contexts' => ['visitors_date_range'],
-      'tags' => ['config:' . self::CONFIG_NAME],
+      'tags' => ['config:' . self::CONFIG_NAME, self::CACHE_TAG],
     ];
   }
 

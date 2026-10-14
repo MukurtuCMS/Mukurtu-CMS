@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\mukurtu_core\Service;
 
 use Drupal\Component\Datetime\TimeInterface;
+use Drupal\Core\Cache\CacheTagsInvalidatorInterface;
 use Drupal\Core\Database\Connection;
 use Drupal\Core\State\StateInterface;
 
@@ -52,6 +53,21 @@ class VisitorsLocationBackfill {
   public const TIME_LIMIT = 20;
 
   /**
+   * Cache tags of everything that reports visit locations.
+   *
+   * The report pages are cacheable for any date range that has already
+   * ended (see visitors' DateRangeCacheContext), which is fine while past
+   * visits never change, but the backfill changes them. The views' own tag
+   * caching knows nothing of the visitors table, so their config tags are
+   * the only handle on their cached results.
+   */
+  public const CACHE_TAGS = [
+    VisitorsCountryMap::CACHE_TAG,
+    'config:views.view.visitors',
+    'config:views.view.visitors_geoip',
+  ];
+
+  /**
    * Constructs the backfill service.
    *
    * @param \Drupal\Core\Database\Connection $database
@@ -60,6 +76,8 @@ class VisitorsLocationBackfill {
    *   The state service.
    * @param \Drupal\Component\Datetime\TimeInterface $time
    *   The time service.
+   * @param \Drupal\Core\Cache\CacheTagsInvalidatorInterface $cacheTagsInvalidator
+   *   The cache tags invalidator.
    * @param object|null $rebuild
    *   The visitors_geoip.rebuild.location service, if visitors_geoip is
    *   installed. Untyped because mukurtu_core does not depend on it.
@@ -70,6 +88,7 @@ class VisitorsLocationBackfill {
     protected readonly Connection $database,
     protected readonly StateInterface $state,
     protected readonly TimeInterface $time,
+    protected readonly CacheTagsInvalidatorInterface $cacheTagsInvalidator,
     protected readonly ?object $rebuild = NULL,
     protected readonly ?object $lookup = NULL,
   ) {}
@@ -116,6 +135,20 @@ class VisitorsLocationBackfill {
     }
 
     $deadline = $this->time->getCurrentMicroTime() + $time_limit;
+    try {
+      $this->processUntil($progress, $deadline);
+    }
+    finally {
+      // Once per run that did any work, even one cut short by an exception
+      // part way through a batch, whose rows may already have changed.
+      $this->cacheTagsInvalidator->invalidateTags(self::CACHE_TAGS);
+    }
+  }
+
+  /**
+   * Works through batches from $progress until done or past $deadline.
+   */
+  protected function processUntil(array $progress, float $deadline): void {
     do {
       $rows = $this->database->select('visitors', 'v')
         ->fields('v', ['visitors_id', 'visitors_ip'])
