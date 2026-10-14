@@ -109,23 +109,37 @@ function render(slug: string, url: string, d: Card): string {
   return L.join('\n');
 }
 
-test('generate manual-audit cards', async ({ page, context }) => {
+test('generate manual-audit cards', async ({ browser }) => {
   const session = process.env.AUDIT_SESSION;
+
+  // Two contexts, because the anonymous pages must be captured as a visitor
+  // sees them. Logging in once and walking everything in that session put
+  // the admin toolbar into every visitor card's tab order and turned the
+  // login card into the profile page it redirects to.
+  const anonContext = await browser.newContext();
+  const anonPage = await anonContext.newPage();
+
+  let authPage = null;
   if (session) {
-    await page.goto(session);
-    await page.waitForLoadState('networkidle');
+    const authContext = await browser.newContext();
+    authPage = await authContext.newPage();
+    await authPage.goto(session);
+    await authPage.waitForLoadState('networkidle');
   }
-  const pages = session ? [...ANONYMOUS, ...AUTHENTICATED] : ANONYMOUS;
-  if (!session) {
+  else {
     console.log('  No AUDIT_SESSION set: generating anonymous pages only.');
   }
+
+  const pages = session
+    ? [...ANONYMOUS.map((p) => [...p, anonPage] as const), ...AUTHENTICATED.map((p) => [...p, authPage] as const)]
+    : ANONYMOUS.map((p) => [...p, anonPage] as const);
 
   fs.mkdirSync(OUT, { recursive: true });
   const index: string[] = ['# Manual audit cards', '',
     `Generated ${new Date().toISOString().slice(0, 10)} against \`${process.env.AUDIT_BASE_URL}\`.`, '',
     'Work through these with the runbook: docs/accessibility/manual-audit-runbook.md', ''];
 
-  for (const [slug, url] of pages) {
+  for (const [slug, url, page] of pages) {
     // One awkward page must not cost the rest of the run, so each is wrapped
     // and its failure recorded in the index rather than thrown.
     try {
@@ -154,4 +168,6 @@ test('generate manual-audit cards', async ({ page, context }) => {
     }
   }
   console.log(`\n  Cards written to tests/playwright/${path.relative(path.join(__dirname, '../..'), OUT)}/`);
+  await anonContext.close();
+  if (authPage) await authPage.context().close();
 });
