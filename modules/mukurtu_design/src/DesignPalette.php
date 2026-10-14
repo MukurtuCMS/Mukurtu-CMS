@@ -50,8 +50,8 @@ final class DesignPalette implements ContainerInjectionInterface {
    */
   const CUSTOM_DERIVED_VARS = [
     '--mukurtu-breadcrumb-gradient-color' => 'var(--brand-secondary-dark)',
-    // Neutral rather than brand-tinted: facet text sits on it, and a fixed
-    // value keeps that contrast checkable by PaletteContrastAnalyzer.
+    // Neutral rather than brand-tinted, so the fixed text colour on the facet
+    // panels keeps its contrast whatever brand colours are chosen.
     '--mukurtu-panel-pane-content-background-color' => '#eeecec',
   ];
 
