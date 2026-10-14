@@ -57,8 +57,10 @@ function stripComments(source) {
 function collectDefinitions(files) {
   const defined = new Set();
   for (const file of files) {
-    const source = fs.readFileSync(file, 'utf8');
     const ext = path.extname(file);
+    const raw = fs.readFileSync(file, 'utf8');
+    // A commented-out declaration defines nothing.
+    const source = ['.scss', '.css'].includes(ext) ? stripComments(raw) : raw;
     const pattern = ['.js', '.php', '.module', '.theme', '.inc'].includes(ext) ? LITERAL : DECLARE;
     for (const m of source.matchAll(pattern)) defined.add(m[1]);
   }
@@ -108,7 +110,12 @@ function selfTest() {
     fs.writeFileSync(path.join(defs, 'a.scss'), ':root { --from-scss: 1px; }');
     fs.writeFileSync(path.join(defs, 'b.js'), "el.style.setProperty('--from-js', '1px');");
     fs.writeFileSync(path.join(defs, 'c.twig'), '<div style="--from-twig: url(x);">');
+    fs.writeFileSync(path.join(defs, 'd.scss'), ':root { /* --commented-out: 1px; */ }');
     const found = collectDefinitions(walk(defs, ['.scss', '.js', '.twig']));
+    if (found.has('--commented-out')) {
+      console.error('FATAL: self-test counted a commented-out declaration as a definition.');
+      process.exit(1);
+    }
     for (const name of ['--from-scss', '--from-js', '--from-twig']) {
       if (!found.has(name)) {
         console.error(`FATAL: self-test did not pick up the definition of ${name}.`);
