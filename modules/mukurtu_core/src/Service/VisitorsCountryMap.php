@@ -269,6 +269,7 @@ class VisitorsCountryMap {
         ],
       ],
       '#cache' => $this->cacheability(),
+      '#attached' => ['library' => ['mukurtu_core/visitors-country-map']],
     ];
 
     // DB-IP's CC BY 4.0 licence requires this credit wherever its data is
@@ -469,6 +470,10 @@ class VisitorsCountryMap {
       $max = max($max, (int) ($point['unique_visitors'] ?? 0));
     }
 
+    // Largest first, so tabbing through the circles follows the same order
+    // as the report tables, which list places by unique visitors.
+    usort($points, fn(array $a, array $b): int => (int) ($b['unique_visitors'] ?? 0) <=> (int) ($a['unique_visitors'] ?? 0));
+
     foreach ($points as $point) {
       $lat = $point['lat'] ?? NULL;
       $lng = $point['lng'] ?? NULL;
@@ -513,6 +518,11 @@ class VisitorsCountryMap {
           'html' => '<span class="visitors-country-map__dot" aria-hidden="true"></span><span class="visually-hidden">' . $text . '</span>',
           'html_class' => 'visitors-country-map__marker',
           'iconSize' => ['x' => $diameter, 'y' => $diameter],
+          // Leaflet centres a DivIcon by CSS either way, but only pans a
+          // focused marker fully into view when it knows the anchor; without
+          // it, tabbing to a circle at a zoomed-in map's top or left edge can
+          // leave it clipped (WCAG 2.4.11).
+          'iconAnchor' => ['x' => intdiv($diameter, 2), 'y' => intdiv($diameter, 2)],
         ],
       ];
     }

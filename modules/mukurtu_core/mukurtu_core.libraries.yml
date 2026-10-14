@@ -134,3 +134,12 @@ ajax-row-table-status:
   dependencies:
     - core/drupal
     - core/once
+
+visitors-country-map:
+  version: 1.x
+  js:
+    js/visitors-country-map.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - leaflet/leaflet-drupal

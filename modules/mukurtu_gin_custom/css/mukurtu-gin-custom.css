@@ -1567,3 +1567,10 @@ a containing block cannot move a scroll shadow that isn't there. */
 .gin-table-scroll-wrapper {
   position: relative;
 }
+
+/* Tooltips on the visitor map stay open while hovered (see
+   mukurtu_core/js/visitors-country-map.js), which needs them to receive the
+   pointer; Leaflet turns that off by default. */
+#visitors-country-map .leaflet-tooltip {
+  pointer-events: auto;
+}

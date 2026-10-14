@@ -415,4 +415,28 @@ class VisitorsCountryMapFeaturesTest extends UnitTestCase {
     $this->assertSame(1, $map->cityThreshold());
   }
 
+  /**
+   * Circles come largest first, so tab order follows the report tables.
+   */
+  public function testFeaturesAreOrderedByVisitorsDescending(): void {
+    $features = $this->mapService()->buildFeatures([
+      ['country' => 'FJ', 'unique_visitors' => 1, 'lat' => 1.0, 'lng' => 1.0],
+      ['country' => 'US', 'unique_visitors' => 9, 'lat' => 2.0, 'lng' => 2.0],
+      ['country' => 'CA', 'unique_visitors' => 4, 'lat' => 3.0, 'lng' => 3.0],
+    ]);
+
+    $this->assertSame([2.0, 3.0, 1.0], array_column($features, 'lat'));
+  }
+
+  /**
+   * The icon is anchored at its centre, so Leaflet can pan it into view.
+   */
+  public function testMarkerIsAnchoredAtItsCentre(): void {
+    $features = $this->mapService()->buildFeatures([
+      ['country' => 'US', 'unique_visitors' => 4, 'lat' => 1.0, 'lng' => 1.0],
+    ]);
+
+    $this->assertSame(['x' => 24, 'y' => 24], $features[0]['icon']['iconAnchor']);
+  }
+
 }
