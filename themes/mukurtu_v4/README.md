@@ -1,6 +1,6 @@
 ## Theme Basics
 
-This is the base theme for the Mukurtu CMS.
+This is the default front-end theme for Mukurtu CMS. It is a standalone theme (`base theme: false`), not a base theme. Sub-theming it is possible but not yet documented.
 
 This theme uses a single directory component structure, which is based on how the components (or elements) of the site are organized. Each component receives its own directory, which contains any relevant template, Sass, or JavaScript files the component may utilize.
 
@@ -42,17 +42,7 @@ The library files are bundled in the repository in `themes/mukurtu_v4/libraries`
 
 ## Configuration
 
-Theme-specific configuration - such as display modes for content types or custom
-image styles - can be found within the theme directory in the `config/install`
-folder. These will automatically be applied to the Drupal install once the
-Mukurtu Base Theme is installed and set as default in the Appearances section of
-the site.
-
-One caveat to this is if the configuration file in your theme touches the same
-file in the Mukurtu profile configuration, or in any of the custom modules found
-in the `modules/custom` folder within the install profile. If your configuration
-is in the same file, simply update the existing configuration in the profile or
-module, rather than creating a new file in `mukurtu_v4/config/install`.
+The theme ships no configuration of its own. Display modes, image styles, and other site configuration live in the `config/install` directories of the install profile and its modules, for example `modules/mukurtu_core/config/install`. To change shipped configuration, edit the file in the module that owns it. Existing sites also need an update hook; see `docs/update-hooks.md`.
 
 ## Styles
 
@@ -145,12 +135,14 @@ When theming a new content type, it's usually helpful to create a Twig template 
 
 The Collection and Digital Heritage portions of the site are good examples of this, as they have templates for various display modes, contexts, and more.
 
-## Color Palette Switcher
+## Design Settings
 
-This isn't something that's unique to the theme, but it's a custom module that interacts with the theme, and therefore merits mentioning.
+The Mukurtu Design module (`modules/mukurtu_design`) provides a settings form for this theme. To open it, go to the **Look and feel** section of the Mukurtu dashboard and click **Design settings**, or go to `/admin/config/design-settings`.
 
-If you visit the Extend page of a Mukurtu Drupal instance, you'll find the following two modules:
+The form sets:
 
-`Mukurtu Design` and `Mukurtu Site Settings`
+- **Palette:** Red and bone (the default on new sites), Blue and gold, or Custom. With Custom, you choose six brand colors, and the form warns you if any of them fail WCAG contrast checks.
+- **Page background:** an optional background image, with light or dark text.
+- **Header background:** an optional header image, with light or dark text.
 
-When both of these are enabled, a new config page is created under the Configuration page of the Drupal instance, with a section called "Design Settings". If you click on the link under this header, you will be taken to a page that contains two color palettes, which are the default Mukurtu color palettes - Red and bone, and Blue and gold. Blue and gold is the default color palette, which comes preinstalled when an instance is created, and Red and bone is an alternative option that can be selected. When a new palette is selected, all of the colored elements on the site will update to reflect the new color palette. This includes elements like links, buttons, icons, and any other decorative elements that have color variables applied.
+The shipped palettes are `components/00-base/palettes/red-bone.scss` and `blue-gold.scss`. They set the `--brand-*` custom properties that the rest of the theme reads. The Custom palette writes the same properties to `public://mukurtu-design/custom-palette.css`.
