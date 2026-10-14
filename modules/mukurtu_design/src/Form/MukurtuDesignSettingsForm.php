@@ -164,7 +164,7 @@ class MukurtuDesignSettingsForm extends ConfigFormBase {
     $form['background']['text_treatment'] = [
       '#type' => 'radios',
       '#title' => $this->t('Page text'),
-      '#description' => $this->t('Choose the text colour. If the tint is on, Mukurtu dims or lightens the image to match.'),
+      '#description' => $this->t('Choose the text color. If the tint is on, Mukurtu dims or lightens the image to match.'),
       '#options' => [
         'light' => $this->t('Light text on a darkened image'),
         'dark' => $this->t('Dark text on a lightened image'),
@@ -199,7 +199,7 @@ class MukurtuDesignSettingsForm extends ConfigFormBase {
     $form['header']['text_treatment'] = [
       '#type' => 'radios',
       '#title' => $this->t('Header text'),
-      '#description' => $this->t('Choose the colour of the logo and menu. If the tint is on, Mukurtu dims or lightens the header image to match.'),
+      '#description' => $this->t('Choose the color of the logo and menu. If the tint is on, Mukurtu dims or lightens the header image to match.'),
       '#options' => [
         'light' => $this->t('Light text on a darkened image'),
         'dark' => $this->t('Dark text on a lightened image'),
@@ -249,7 +249,7 @@ class MukurtuDesignSettingsForm extends ConfigFormBase {
       $summary['result'] = [
         '#type' => 'html_tag',
         '#tag' => 'p',
-        '#value' => $this->t('All checked colour pairings meet WCAG AA.'),
+        '#value' => $this->t('All checked color pairings meet WCAG AA.'),
       ];
       return $summary;
     }
@@ -309,7 +309,7 @@ class MukurtuDesignSettingsForm extends ConfigFormBase {
     // #2245 used AnnounceCommand for the import wizard.
     $response->addCommand(new AnnounceCommand((string) ($failures
       ? $this->contrastSummaryLine($failures)
-      : $this->t('All checked colour pairings meet WCAG AA.'))));
+      : $this->t('All checked color pairings meet WCAG AA.'))));
 
     return $response;
   }
