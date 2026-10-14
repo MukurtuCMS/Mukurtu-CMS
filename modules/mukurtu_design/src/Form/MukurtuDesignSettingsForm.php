@@ -172,6 +172,13 @@ class MukurtuDesignSettingsForm extends ConfigFormBase {
       '#default_value' => $config->get('background.text_treatment') ?: 'light',
     ];
 
+    $form['background']['tint'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Tint the background image'),
+      '#description' => $this->t('Adds a see-through layer over the image so it competes less with the text. If you turn it off, check that the text is still easy to read over your image.'),
+      '#default_value' => PageBackground::tintEnabled($config->get('background.tint')),
+    ];
+
     $form['header'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Header background'),
@@ -198,6 +205,13 @@ class MukurtuDesignSettingsForm extends ConfigFormBase {
         'dark' => $this->t('Dark text on a lightened image'),
       ],
       '#default_value' => $config->get('header.text_treatment') ?: 'light',
+    ];
+
+    $form['header']['tint'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Tint the header image'),
+      '#description' => $this->t('Adds a see-through layer over the image so it competes less with the logo and menu. If you turn it off, check that they are still easy to read over your image.'),
+      '#default_value' => PageBackground::tintEnabled($config->get('header.tint')),
     ];
 
     return parent::buildForm($form, $form_state);
@@ -390,12 +404,14 @@ class MukurtuDesignSettingsForm extends ConfigFormBase {
     $new_fid = $values['background']['image'][0] ?? NULL;
     $config->set('background.image', $new_fid ? (int) $new_fid : NULL);
     $config->set('background.text_treatment', $values['background']['text_treatment']);
+    $config->set('background.tint', (bool) $values['background']['tint']);
     $config->save();
 
     $old_header_fid = $config->get('header.image');
     $new_header_fid = $values['header']['image'][0] ?? NULL;
     $config->set('header.image', $new_header_fid ? (int) $new_header_fid : NULL);
     $config->set('header.text_treatment', $values['header']['text_treatment']);
+    $config->set('header.tint', (bool) $values['header']['tint']);
     $config->save();
 
     $this->updateBackgroundImageUsage($old_fid, $new_fid ? (int) $new_fid : NULL, PageBackground::USAGE_ID);
