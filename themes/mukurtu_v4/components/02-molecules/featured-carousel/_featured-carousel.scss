@@ -1,0 +1,185 @@
+@use "../../../external/include-media";
+
+/**
+ * Carousel display for the Featured Content block.
+ *
+ * The cards themselves are styled in _featured-items.scss, shared with the
+ * grid display. Everything here is the carousel shell: the track, and the
+ * controls that sit under it.
+ */
+
+.featured-carousel {
+  max-inline-size: 80rem; // Matches the grid's cap, so both styles line up.
+  margin-inline: auto;
+
+  // Splide measures the track before its CSS has necessarily applied, and an
+  // unmounted .splide__list is a plain <ul>. Without this the slides stack
+  // vertically for a frame and the block jumps on load.
+  .splide__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  // Spotlight slides: wider than a grid card, with the media beside the text
+  // from tablet up, and the item's summary under the title. The card
+  // styling itself (colours, type label, title link) is shared with the grid
+  // in _featured-items.scss; this only changes the layout.
+  // The neighbours are inert, so the pointer lands on the track, not on
+  // them; a cursor set on the slides would never show. Clicking the track
+  // beside the active slide moves to that neighbour.
+  .splide__track {
+    cursor: pointer;
+  }
+
+  .featured-carousel__slide {
+    transition: opacity 0.3s ease;
+
+    // The peeking neighbours are context, not content. They are already
+    // inert; dimming them says so visually.
+    &:not(.is-active) {
+      opacity: 0.45;
+
+      // Only an edge of a neighbour shows, which would cut its text off
+      // mid-word. Show its image and colour, not the words.
+      .featured-item__body > * {
+        opacity: 0;
+      }
+    }
+
+    .featured-item__body > * {
+      transition: opacity 0.3s ease;
+
+      @media (prefers-reduced-motion: reduce) {
+        transition: none;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+    }
+
+    article {
+      inline-size: 100%;
+
+      // Side by side only once the text column has room: at tablet widths it
+      // was about 250px, wrapping the title a word per line.
+      @include include-media.media('>=lg') {
+        display: grid;
+        grid-template-columns: 3fr 2fr;
+      }
+
+      // Forced colors drops the panel's fill, which is the only thing
+      // marking where the slide ends.
+      @media (forced-colors: active) {
+        border: 1px solid canvastext;
+      }
+    }
+
+    .featured-item__media {
+      // Wider than the grid's 4:3, so a slide stays shorter than the viewport.
+      aspect-ratio: 3 / 2;
+
+      // .media is a flex row, so its field shrinks to the image's own ratio
+      // and leaves bars at the sides of a wider cell. Fill the cell instead;
+      // object-fit: cover (shared card styles) crops the image to fit.
+      .media > .field {
+        flex: 1 1 auto;
+        inline-size: 100%;
+      }
+    }
+
+    .featured-item__body {
+      justify-content: center;
+      padding: var(--v-space-4xxs);
+
+      @include include-media.media('>=lg') {
+        padding: var(--v-space-s);
+      }
+    }
+
+    h3 {
+      flex: 0 0 auto;
+
+      @include include-media.media('>=lg') {
+        font-size: var(--font-size-xl);
+      }
+    }
+  }
+}
+
+.featured-item__summary {
+  color: var(--color-white);
+  font-size: var(--font-size-s);
+  line-height: var(--line-height-m);
+  margin-block-end: var(--v-space-5xs);
+
+  // Not line-clamped: at larger text sizes a clamp cut summaries to a few
+  // words (WCAG 1.4.4, 1.4.12). field_summary is a short plain-text field.
+
+  @include include-media.media('>=lg') {
+    font-size: var(--font-size-m);
+  }
+}
+
+.featured-carousel__controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--v-space-5xs);
+  margin-block-start: var(--v-space-5xs);
+  flex-wrap: wrap;
+}
+
+.featured-carousel__status {
+  // Tabular figures stop the row shifting as the number changes.
+  font-variant-numeric: tabular-nums;
+  font-size: var(--font-size-s);
+  color: var(--color-text-neutral-medium, #565656);
+  margin: 0;
+  min-inline-size: 8ch;
+  text-align: center;
+}
+
+.featured-carousel__button {
+  // 44px, so the controls clear the WCAG 2.5.5 target size on touch.
+  min-inline-size: 2.75rem;
+  min-block-size: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding-inline: var(--v-space-5xs);
+  border: 1.5px solid var(--brand-primary);
+  border-radius: 4px;
+  background: var(--color-white);
+  color: var(--brand-primary-dark);
+  font-size: var(--font-size-m);
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 0.12s ease-in, color 0.12s ease-in;
+
+  &:hover {
+    background: var(--brand-primary);
+    color: var(--color-white);
+  }
+
+  &:focus-visible {
+    // --focus-color is too light to meet 1.4.11 on a white ground; see #2199.
+    // currentcolor is the button's own text colour, already chosen to contrast
+    // with its fill.
+    outline: 2px solid currentcolor;
+    outline-offset: 2px;
+  }
+
+  @media (forced-colors: active) {
+    border: 2px solid buttontext;
+  }
+}
+
+.featured-carousel__button--toggle {
+  // Wider than the arrows, because it holds a word rather than a glyph, and
+  // the word changes length between Pause and Play.
+  padding-inline: var(--v-space-4xxs);
+  font-size: var(--font-size-s);
+}

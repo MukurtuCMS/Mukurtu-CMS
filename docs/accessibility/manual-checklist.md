@@ -4,6 +4,8 @@ Automated scans catch only a third or so of WCAG issues. This checklist covers t
 
 Two layers of automated scanning already run before any of this: **axe-core** (`tests/playwright/tests/accessibility.spec.ts`) for standard WCAG rule violations, and **automated checks** (`tests/playwright/tests/accessibility-automated-checks.spec.ts`) for a handful of things axe can't assert on its own — reflow/zoom, focus visibility, vague link text, and a keyboard-trap smoke test. Results land in `test-results/a11y/` and `test-results/a11y-extra/` respectively (gitignored; re-run before a session, don't rely on stale files). **Run both before starting a manual pass** — don't manually re-check anything they already cover; use their output as your starting point instead. See the "What's automated now" table below for exactly where the line sits.
 
+**For the keyboard and screen reader passes, use [manual-audit-runbook.md](manual-audit-runbook.md)**, which has the per-criterion procedure and a tool that generates a per-page card of tab order, heading outline, ambiguous links, live regions and form controls, so the pass is judgement rather than inventory.
+
 Record results in a dated file under [findings/](findings/) — copy [findings/manual-findings-template.md](findings/manual-findings-template.md) to `findings/YYYY-MM-manual.md` and fill it in as you go.
 
 **Screen readers to test with:** NVDA + Firefox (Windows), VoiceOver + Safari (macOS), or Orca + Firefox (Linux). One is enough per audit pass; rotate across passes.
@@ -22,7 +24,7 @@ The honest line between "a script checked this" and "only a human can confirm th
 | Landmarks present, content contained | Automated | axe `region` rule (best-practice tag) | Whether landmark labeling makes sense read aloud |
 | Zoom disabled in viewport meta | Automated | axe `meta-viewport` rule (wcag2aa tag) | — |
 | **Reflow at 320px (1.4.10)** | **Automated** | `checkReflow` — real horizontal-overflow assertion, no human judgment needed | — |
-| **Text resize to 200% (1.4.4)** | **Semi-automated** | `checkTextZoom` — approximates zoom via root font-size, not true browser zoom | Confirm any flagged page in a real browser's zoom before filing |
+| **Text resize to 200% (1.4.4)** | **Automated** (Chromium) | `checkTextZoom` — doubles the browser's own default font size via CDP and reloads, so rem media queries move the way they do for a real reader | Page zoom, as distinct from text size, is still unchecked. On a non-Chromium engine the check falls back to a root font-size override and says so in the finding, and those need confirming before filing |
 | **Focus visible everywhere (2.4.7)** | **Semi-automated** | `checkFocusVisible` — flags `outline:none`/no `box-shadow` on focus | Whether an indicator that *is* present has sufficient contrast/thickness |
 | **Vague link text (2.4.4)** | **Semi-automated** | `checkLinkText` — flags exact-match generic phrases ("click here", "read more"…) with no extra accessible context | Link text that's *specifically* misleading rather than generically vague (the heuristic only catches the common phrasing list) |
 | **No keyboard trap (2.1.2)** | **Semi-automated, smoke test only** | `checkKeyboardTrap` — tabs through the page, flags a cycle confined to a subset of the page's tab stops | Traps that only appear after an interaction (e.g. opening a modal first); compound native controls (audio/video/`<select>`) are flagged separately as "confirm manually" since their internal focus isn't visible outside their shadow DOM |
@@ -70,7 +72,7 @@ Walk the page with the screen reader's reading commands (not just Tab). Landmark
 
 **Fully automated** — `checkReflow` and `checkTextZoom` in `accessibility-automated-checks.spec.ts` assert both directly (real horizontal-overflow checks, no human judgment needed for reflow; text-zoom is a close approximation). Pull results from `test-results/a11y-extra/*-reflow.json` and `*-text-zoom.json` instead of testing this by hand. Only re-check manually if you want to confirm a flagged page in a real browser's zoom control rather than the approximated version:
 
-- [ ] At 200% browser zoom, no text is cut off and nothing overlaps (1.4.4)
+- [ ] At 200% browser *page zoom*, no text is cut off and nothing overlaps (1.4.4). Text-size-only resizing is covered automatically now; page zoom is not
 - [ ] At 320px effective width (400% zoom on a 1280px window), content reflows to one column with no horizontal scrolling (1.4.10)
 
 ---
