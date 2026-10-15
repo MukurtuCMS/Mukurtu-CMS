@@ -5,9 +5,10 @@
  * Core's tableselect.js adds the "Select all rows in this table" checkbox with
  * only a title, and Gin's sticky table header copies it the same way. A title
  * on its own is a weak accessible name: it is not shown to keyboard or touch
- * users and some assistive technology skips it. This copies the title into
- * aria-label and keeps it in step as core switches the title between "Select
- * all" and "Deselect all".
+ * users and some assistive technology skips it. This gives the checkbox a
+ * stable aria-label. Core swaps the title for "Deselect all" as the state
+ * changes, but the checked state already says which way it is, so the name
+ * stays the same. Same string as core's.
  *
  * This file is appended to core/drupal.tableselect in
  * mukurtu_gin_custom_library_info_alter(), so it only loads with select-all
@@ -19,10 +20,8 @@
   Drupal.behaviors.mukurtuSelectAllName = {
     attach(context) {
       setTimeout(() => {
-        once('mukurtu-select-all-name', 'th.select-all input[type="checkbox"][title]', context).forEach((checkbox) => {
-          const sync = () => checkbox.setAttribute('aria-label', checkbox.title);
-          sync();
-          new MutationObserver(sync).observe(checkbox, { attributes: true, attributeFilter: ['title'] });
+        once('mukurtu-select-all-name', 'th.select-all input[type="checkbox"]', context).forEach((checkbox) => {
+          checkbox.setAttribute('aria-label', Drupal.t('Select all rows in this table'));
         });
       });
     },
