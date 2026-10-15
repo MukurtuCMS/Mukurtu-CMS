@@ -11,10 +11,10 @@ use PHPUnit\Framework\Attributes\Group;
 /**
  * Tests that Layout Builder menu blocks get unique heading IDs.
  *
- * block--system-menu-block.html.twig derives the heading ID from the block's
- * own ID, which core only sets for blocks that have a config entity. Layout
- * Builder blocks do not, so every one of them rendered id="-menu" and every
- * aria-labelledby resolved to the first heading on the page. On the Mukurtu
+ * Core's block--system-menu-block.html.twig derives the heading ID from the
+ * block's own ID, which core only sets for blocks that have a config entity.
+ * Layout Builder blocks do not, so every one of them rendered id="-menu" and
+ * every aria-labelledby resolved to the first heading on the page. On the Mukurtu
  * Dashboard that was all 16 blocks (issue #2395).
  *
  * @see \Drupal\mukurtu_core\Hook\MenuBlockIdHooks::preprocessBlock()

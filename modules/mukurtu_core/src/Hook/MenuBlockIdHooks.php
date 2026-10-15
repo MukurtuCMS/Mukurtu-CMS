@@ -13,8 +13,8 @@ class MenuBlockIdHooks {
   /**
    * Implements hook_preprocess_block().
    *
-   * block--system-menu-block.html.twig builds the ID for the block's heading
-   * out of the block's own ID:
+   * Core's block--system-menu-block.html.twig builds the ID for the block's
+   * heading out of the block's own ID:
    *
    * @code
    * {% set heading_id = attributes.id ~ '-menu'|clean_id %}
