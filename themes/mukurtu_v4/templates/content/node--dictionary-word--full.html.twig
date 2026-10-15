@@ -95,13 +95,14 @@
               <ul class="horizontal-tabs-list" role="tablist">
                 <li class="selected" role="presentation">
                   <a href="#tab-base-entry" role="tab" id="tab-btn-base-entry" aria-selected="true" aria-controls="tab-base-entry">
-                    <span class="div-title">{{ node.title.value }}</span>
+                    <span class="div-title"{% if word_langcode %} lang="{{ word_langcode }}"{% endif %}>{{ node.title.value }}</span>
                   </a>
                 </li>
                 {% for idx in additional_word_entry_indices %}
                   <li role="presentation">
                     <a href="#tab-entry-{{ loop.index }}" role="tab" id="tab-btn-entry-{{ loop.index }}" aria-selected="false" aria-controls="tab-entry-{{ loop.index }}">
-                      <span class="div-title">{{ node.field_additional_word_entries[idx].entity.field_word_entry_term.value ?: 'Entry ' ~ loop.index }}</span>
+                      {% set entry_term = node.field_additional_word_entries[idx].entity.field_word_entry_term.value %}
+                      <span class="div-title"{% if entry_term and word_langcode %} lang="{{ word_langcode }}"{% endif %}>{{ entry_term ?: 'Entry @num'|t({'@num': loop.index}) }}</span>
                     </a>
                   </li>
                 {% endfor %}

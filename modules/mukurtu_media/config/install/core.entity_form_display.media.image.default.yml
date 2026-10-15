@@ -65,7 +65,7 @@ content:
       parent_selection: 1
     third_party_settings: {  }
   field_people:
-    type: tagify_entity_reference_autocomplete_widget
+    type: mukurtu_entity_reference_role_tagify
     weight: 4
     region: content
     settings:

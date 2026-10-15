@@ -3,6 +3,7 @@ status: true
 dependencies:
   config:
     - block_content.type.featured_content
+    - field.field.block_content.featured_content.field_display_style
     - field.field.block_content.featured_content.field_featured_content
 id: block_content.featured_content.default
 targetEntityType: block_content
@@ -19,5 +20,6 @@ content:
     weight: 1
     region: content
 hidden:
+  field_display_style: true
   langcode: true
   search_api_excerpt: true
