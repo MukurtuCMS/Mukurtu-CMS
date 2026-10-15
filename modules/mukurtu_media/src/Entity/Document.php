@@ -120,7 +120,7 @@ class Document extends Media implements DocumentInterface, CulturalProtocolContr
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
-    $definitions['field_people'] = BaseFieldDefinition::create('entity_reference')
+    $definitions['field_people'] = BaseFieldDefinition::create('mukurtu_entity_reference_role')
       ->setLabel(t('People'))
       ->setDescription(t('A person or people present or referenced in the document. This is used to trigger deceased person media content warnings.	<br />Include as many people as needed. Select from existing people or add new ones.'))
       ->setSettings([

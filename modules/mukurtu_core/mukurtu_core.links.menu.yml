@@ -23,6 +23,12 @@ mukurtu_core.settings_assorted:
   menu_name: dashboard-content-settings
   description: "Configure related content display settings."
   route_name: mukurtu_core.settings_assorted
+mukurtu_core.person_role_settings:
+  title: "Person role settings"
+  parent: mukurtu_dashboard
+  menu_name: dashboard-content-settings
+  description: "Choose which person fields record a role for each name."
+  route_name: mukurtu_core.person_role_settings
 mukurtu_core.citation_templates:
   title: "Citation templates"
   parent: mukurtu_dashboard

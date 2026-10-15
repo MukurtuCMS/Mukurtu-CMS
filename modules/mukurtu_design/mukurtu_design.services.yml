@@ -1,4 +1,11 @@
 services:
+  mukurtu_design.page_background:
+    class: Drupal\mukurtu_design\PageBackground
+    arguments:
+      - '@config.factory'
+      - '@entity_type.manager'
+      - '@file_url_generator'
+      - '@path.matcher'
   mukurtu_design.palette_contrast_analyzer:
     class: Drupal\mukurtu_design\PaletteContrastAnalyzer
     arguments: ['@extension.list.theme']
