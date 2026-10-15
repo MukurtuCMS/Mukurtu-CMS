@@ -1,0 +1,25 @@
+{#
+/**
+ * @file
+ * Displays a video file with its caption and subtitle tracks.
+ *
+ * Core's file-video.html.twig plus a <track> for each track.
+ *
+ * Available variables:
+ * - attributes: HTML attributes for the video tag.
+ * - files: Sources for the video tag. Each has:
+ *   - file: The full file object.
+ *   - source_attributes: HTML attributes for the source tag.
+ * - tracks: HTML attributes for each track tag (kind, src, srclang, label).
+ *
+ * @ingroup themeable
+ */
+#}
+<video {{ attributes }}>
+  {% for file in files %}
+    <source {{ file.source_attributes }} />
+  {% endfor %}
+  {% for track in tracks %}
+    <track {{ track }} />
+  {% endfor %}
+</video>
