@@ -44,10 +44,6 @@ ol li {
 
 ul li {
   list-style-type: square;
-
-  &::marker {
-    color: var(--accent-secondary);
-  }
 }
 
 p {

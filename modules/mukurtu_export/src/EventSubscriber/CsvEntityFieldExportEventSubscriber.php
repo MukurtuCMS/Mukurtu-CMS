@@ -116,7 +116,7 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
       return $this->exportCulturalProtocol($event, $field, $config);
     }
 
-    if ($fieldType == 'entity_reference') {
+    if (in_array($fieldType, ['entity_reference', 'mukurtu_entity_reference_role'], TRUE)) {
       return $this->exportEntityReference($event, $field, $config);
     }
 
@@ -299,6 +299,9 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
         $export[] = $id;
       }
     }
+    if ($field->getFieldDefinition()->getType() === 'mukurtu_entity_reference_role') {
+      $export = $this->appendRoles($export, $field, $event);
+    }
     $event->setValue($export);
   }
 
@@ -318,6 +321,31 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
    *
    * @protected
    */
+  /**
+   * Adds each person's role after their exported name, as "Name>Role".
+   *
+   * Matches the import format for person fields with roles. Roles are always
+   * written as names, even when the names are IDs or UUIDs, so a role whose
+   * term doesn't exist on the importing site is created there rather than
+   * looked up by an ID that means something else.
+   *
+   * @param array $export
+   *   The exported names, one per referenced value, in field order.
+   *
+   * @return array
+   *   The names, each followed by ">" and its role where it has one.
+   */
+  protected function appendRoles(array $export, $field, EntityFieldExportEvent $event): array {
+    $values = array_values(array_filter($field->getValue(), fn ($value) => !empty($value['target_id'])));
+    foreach ($export as $index => $name) {
+      $role_id = $values[$index]['role_target_id'] ?? NULL;
+      if ($role_id && ($role = $this->loadForExport('taxonomy_term', $role_id, $event))) {
+        $export[$index] = $name . '>' . $role->getName();
+      }
+    }
+    return $export;
+  }
+
   protected function exportEntityReferenceRevision(EntityFieldExportEvent $event, $field, CsvExporter $config) {
     $export = [];
     $target_type = $field->getFieldDefinition()->getSettings()['target_type'] ?? NULL;

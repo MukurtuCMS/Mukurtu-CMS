@@ -236,7 +236,7 @@ content:
     settings: {  }
     third_party_settings: {  }
   field_contributor:
-    type: tagify_entity_reference_autocomplete_widget
+    type: mukurtu_entity_reference_role_tagify
     weight: 1
     region: content
     settings:
@@ -333,7 +333,7 @@ content:
     settings: {  }
     third_party_settings: {  }
   field_creator:
-    type: tagify_entity_reference_autocomplete_widget
+    type: mukurtu_entity_reference_role_tagify
     weight: 0
     region: content
     settings:
@@ -511,7 +511,7 @@ content:
     settings: {  }
     third_party_settings: {  }
   field_people:
-    type: tagify_entity_reference_autocomplete_widget
+    type: mukurtu_entity_reference_role_tagify
     weight: 30
     region: content
     settings:

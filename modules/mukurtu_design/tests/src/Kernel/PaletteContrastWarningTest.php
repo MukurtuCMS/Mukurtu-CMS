@@ -23,7 +23,7 @@ class PaletteContrastWarningTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['system', 'user', 'field', 'geofield', 'leaflet', 'mukurtu_core', 'mukurtu_design'];
+  protected static $modules = ['system', 'user', 'file', 'field', 'geofield', 'leaflet', 'mukurtu_core', 'mukurtu_design'];
 
   /**
    * {@inheritdoc}
