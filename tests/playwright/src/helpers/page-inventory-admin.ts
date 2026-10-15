@@ -29,11 +29,6 @@ export const adminPages = [
   { slug: 'pending-submissions', path: '/admin/content/pending-submissions' },
   { slug: 'admin-overview', path: '/admin' },
   { slug: 'admin-structure', path: '/admin/structure' },
-  // The landing page a manager actually starts from, and the one surface the
-  // docblock above already claimed ("dashboards") without listing. Its 16
-  // menu blocks are rendered by one template, so a defect in it repeats 16
-  // times on the page people see first (#2395).
-  { slug: 'mukurtu-dashboard', path: '/dashboard/mukurtu_dashboard' },
 ];
 
 /**
