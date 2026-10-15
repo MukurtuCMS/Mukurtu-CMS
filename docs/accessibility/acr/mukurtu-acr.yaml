@@ -658,31 +658,34 @@ chapters:
         components:
           - name: web
             adherence:
-              level: partially-supports
+              level: supports
               notes: >-
-                The login form identifies its purpose
-                correctly: the username and password fields
-                carry autocomplete username and
-                current-password, and that is gated in CI by
-                input-purpose.spec.ts, which asserts each
-                field exists before asserting its token. The
-                account form does not. Drupal core's
-                AccountForm sets autocomplete off on the
-                email, username and password fields whenever
-                the form is not a registration, and on the
-                current password field always, so on a page
-                where a person edits their own account the
-                purpose of those fields is not
-                programmatically determinable. Core's stated
-                reason is to stop a browser prefilling another
-                person's details, which is a real concern on
-                the administrative path but does not hold
-                where someone is editing their own account.
-                The inventory-wide checkInputPurpose reports
-                these three fields on /user/*/edit and reports
-                nothing elsewhere. Evidence is recorded in
-                docs/accessibility/findings/2026-10-06-desk-review.md.
+                Every field that collects information about the user
+                carries the matching autocomplete token. The login
+                form uses username and current-password. The account
+                form does too when a person edits their own account:
+                core's AccountForm sets autocomplete="off" on the
+                username, email and password fields whenever the
+                form is not a registration, and mukurtu_core
+                overrides that for self-editing only (issue #2372).
 
+                The restriction core added is kept where it earns
+                its place. When an administrator edits somebody
+                else's account the fields stay at off, so a browser
+                cannot offer the administrator's own saved details
+                on another person's record. input-purpose.spec.ts
+                gates both directions on every build: three fields
+                asserted to carry their token on self-edit, and a
+                negative control asserting they keep off on another
+                account, using a second signed-in session to prove
+                the two are different accounts.
+
+                Measured inventory-wide on the main run at 05ca5a668
+                (run 38752434462): checkInputPurpose reports zero
+                findings across 29 pages.
+
+                Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -908,34 +911,43 @@ chapters:
         components:
           - name: web
             adherence:
-              level: partially-supports
+              level: supports
               notes: >-
-                Visitor-facing pages pass. Every element reachable
-                by keyboard shows a focus indicator, measured by
-                tabbing through the home page, browse and login: 35
-                stops, each with a drawn indicator of at least 2px
-                and at least 3:1 against the surface behind it.
-                Indicators are not all outlines; the main navigation
-                replaces its outline with a pseudo-element ring,
-                which is why a check that looks only at the outline
-                property reports it as missing.
+                Every element in the tab order shows a focus
+                indicator, across the whole page inventory. Measured
+                on the main run at 05ca5a668 (run 38752434462): 45
+                pages, zero findings, including the administrative
+                forms and the three pages carrying a rich text
+                editor. The check's own negative control still
+                reported its three deliberately unstyled elements on
+                the same run, so the clean result reflects the pages
+                rather than a check that stopped working.
 
-                Administrative forms do not. The Gin admin theme
-                moves a form's action buttons into a sticky header
-                but leaves the originals in the tab order, inside a
-                one-pixel container, so focus can land on a control
-                with none of its box on screen. Measured on two
-                unmodified Drupal pages: the submit button on the
-                site information form, and both the submit and
-                cancel buttons on an account cancel form, each
-                focusable with none of its box visible. The defect
-                is in the admin theme rather than in Mukurtu's own
-                code, and it affects every administrative form
-                (issue #2389).
+                Two defects were fixed to get here. The Gin admin
+                theme left each form's original action buttons in
+                the tab order inside a one-pixel container, so focus
+                could land on a control with none of its box on
+                screen, and on a confirmation form the only Cancel a
+                keyboard could reach was the invisible one; that is
+                fixed and gated by admin-focus-visible.spec.ts,
+                which fails the build if it returns (issue #2389).
+                The inventory-wide check itself was reporting
+                elements at tabindex="-1", which are not in the tab
+                order, so CKEditor's toolbar container produced a
+                finding on every page with an editor; the check now
+                skips them (issue #2419).
+
+                Indicators are not all outlines: the main navigation
+                draws a pseudo-element ring, and CKEditor draws a
+                box-shadow ring plus a border change, so a check
+                reading only the outline property reports both as
+                missing. What the automated layer does not decide is
+                whether a container a script focuses deliberately,
+                such as a dialog on open, needs a visible ring; that
+                is left to the manual keyboard pass.
 
                 Evidence is recorded in
-                docs/accessibility/findings/2026-10-09-visual-pass.md.
-
+                docs/accessibility/findings/2026-10-15-focus-visible-clean-run.md.
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -944,19 +956,46 @@ chapters:
         components:
           - name: web
             adherence:
-              level: does-not-support
+              level: partially-supports
               notes: >-
-                Dictionary content cannot express its
-                language. Every dictionary word carries a
-                required reference to a term in the language
-                vocabulary, but that vocabulary has no fields,
-                so there is no ISO 639 or BCP 47 code for a
-                template to place in a lang attribute, and no
-                template emits one (issues #2328, #2353,
-                #2354, #2357). Local Contexts labels do emit
-                lang correctly, so the gap is specific rather
-                than systemic. Evidence is recorded in
-                docs/accessibility/findings/2026-10-06-desk-review.md.
+                The language vocabulary now carries a Language code
+                field, and dictionary templates place it in a lang
+                attribute. Verified on a running site: a word whose
+                language term holds haw renders its page title as
+                <h1 lang="haw"> and marks the title field and both
+                alternate spellings the same way, and renders no
+                lang at all when that code is left blank, which is
+                the documented behaviour rather than a silent
+                failure. Additional entry terms and sample sentences
+                are marked by the same mechanism, including sample
+                sentences nested under an entry. Local Contexts
+                labels emit lang correctly as before.
+
+                The rest of the content cannot express its language.
+                Digital heritage titles, descriptions and
+                transcriptions, taxonomy term names, and collection
+                and community descriptions can all hold
+                Indigenous-language text with no way to mark it. The
+                digital heritage Language field cannot be reused for
+                this: it records the languages present in an item
+                including its media assets, is unlimited in
+                cardinality and creates terms on the fly, so reading
+                it as "this title is written in X" would mark text
+                as the wrong language, which helps a screen reader
+                user less than leaving it unmarked (issues #2354,
+                #2357). Within the dictionary, definition,
+                pronunciation, translation and word origin are
+                assumed to be in the site's language. That is right
+                for most sites and wrong for a site writing a
+                monolingual dictionary, and it is not configurable
+                (issue #2353).
+
+                Recorded as does-not-support in October 2026 because
+                the vocabulary had no code field and no template
+                emitted one. Both arrived in #2352; this level
+                reflects what the product does now, not the fix
+                alone. Evidence is recorded in
+                docs/accessibility/findings/2026-10-13-language-of-parts.md.
 
           - name: authoring-tool
             adherence:
@@ -1022,27 +1061,30 @@ chapters:
         components:
           - name: web
             adherence:
-              level: partially-supports
+              level: supports
               notes: >-
-                Deletion of entities goes through a
-                confirmation form throughout: 19 classes
-                extend a confirm or delete form base, covering
-                communities, protocols, collections, exports,
-                import strategies, memberships and legacy
-                labels, and the Views Bulk Operations delete
-                action on the media listing sets
-                add_confirmation. Bulk removal of group
-                memberships does not. The members overview
-                uses Organic Groups' own bulk form rather than
-                Views Bulk Operations, which offers no
-                confirmation option, and its delete action
-                removes each membership immediately. Re-adding
-                a member does not restore their roles, so the
-                action is neither reversible, checked nor
-                confirmed (issue #2370). Evidence is recorded
-                in
-                docs/accessibility/findings/2026-10-06-desk-review.md.
+                Deletion of entities goes through a confirmation
+                form throughout: 19 classes extend a confirm or
+                delete form base, covering communities, protocols,
+                collections, exports, import strategies, memberships
+                and legacy labels, and the Views Bulk Operations
+                delete action on the media listing sets
+                add_confirmation.
 
+                Bulk removal of group memberships was the exception
+                and is no longer. The members overview uses Organic
+                Groups' own bulk form, which offers no confirmation
+                option, so the delete action now stages the
+                selection in a tempstore and the form's
+                confirm_form_route_name sends the person to a
+                confirm step that names every member it is about to
+                remove, and separately lists any it cannot remove
+                with the reason (issue #2370). Twelve kernel tests
+                cover it, including that running the action alone
+                removes nobody.
+
+                Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
           - name: authoring-tool
             adherence:
               level: not-evaluated
