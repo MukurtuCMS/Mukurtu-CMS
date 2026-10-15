@@ -1512,3 +1512,48 @@ a containing block cannot move a scroll shadow that isn't there. */
 .gin-table-scroll-wrapper {
   position: relative;
 }
+
+/* #2389: Gin leaves a form's original action buttons in the tab order with
+none of their box on screen.
+
+On every admin form with actions, GinContentFormHelper::formAlter() copies
+the buttons into a sticky header container, giving each copy a new id
+(gin-sticky-<id>) and a form="<form id>" attribute so it submits from
+outside the form. The originals stay where they were and Gin hides them:
+
+  .gin-sticky-form-actions--preprocessed ~ .layout-container
+    form.gin--has-sticky-form-actions .gin-sticky-form-actions {
+    @include visually-hidden;
+    position: fixed !important;
+    inset-block-start: 0;
+  }
+
+That mixin is the clip-rect kind of visually-hidden, which keeps its
+subtree focusable. So Tab stops on controls with 0% of their box visible:
+measured on unmodified /admin/config/system/site-information (#edit-submit)
+and on an account cancel form (#edit-submit and #edit-cancel), each
+focusable with nothing rendered. On a confirm form the only Cancel that Tab
+reaches is the invisible one, because the sticky copy sits inside the
+collapsed "More actions" menu. That fails 2.4.7 Focus Visible and, more
+plainly, 2.2's 2.4.11 Focus Not Obscured.
+
+visibility: hidden takes the subtree out of the tab order while leaving the
+box where Gin put it. Three things make this safe to do under Gin's own
+selector rather than a broader one:
+
+- The selector only matches when .gin-sticky-form-actions--preprocessed is
+  present, which is exactly when the working copies exist. Forms that never
+  got copies are untouched.
+- Gin's more_actions.js triggerButton() finds the original by
+  data-drupal-selector and calls .click() on it. HTMLElement.click() does
+  not require the element to be rendered, so that path still works, which
+  is also why this uses visibility rather than display: none.
+- With JavaScript off, the header copies are what submit the form (they
+  carry the form attribute and are rendered server-side), so hiding the
+  originals does not strand a no-JS user.
+
+Nothing else sets visibility on this element, so no !important is needed;
+the only requirement is that the selector matches, which it does. */
+.gin-sticky-form-actions--preprocessed ~ .layout-container form.gin--has-sticky-form-actions .gin-sticky-form-actions {
+  visibility: hidden;
+}
