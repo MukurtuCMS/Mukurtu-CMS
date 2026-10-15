@@ -5,8 +5,11 @@
  * Install, update and uninstall functions for the mukurtu_media module.
  */
 
+use Drupal\Core\Entity\Entity\EntityFormDisplay;
+use Drupal\Core\Entity\Entity\EntityViewDisplay;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\file\Entity\File;
+use Drupal\mukurtu_media\Entity\Video;
 
 /**
  * Copies a module-bundled image to public files and returns a new File entity ID.
@@ -73,4 +76,42 @@ function mukurtu_media_install(): void {
  */
 function mukurtu_media_update_last_removed(): int {
   return 40023;
+}
+
+/**
+ * Add caption and subtitle tracks to uploaded video.
+ */
+function mukurtu_media_update_40024(): void {
+  $manager = \Drupal::entityDefinitionUpdateManager();
+  if (!$manager->getFieldStorageDefinition('field_media_video_tracks', 'media')) {
+    $entity_type = $manager->getEntityType('media');
+    $definition = Video::bundleFieldDefinitions($entity_type, 'video', [])['field_media_video_tracks'];
+    $manager->installFieldStorageDefinition('field_media_video_tracks', 'media', 'mukurtu_media', $definition);
+  }
+
+  $form_display = EntityFormDisplay::load('media.video.default');
+  if ($form_display && !$form_display->getComponent('field_media_video_tracks')) {
+    $form_display->setComponent('field_media_video_tracks', [
+      'type' => 'mukurtu_video_track',
+      'weight' => 1,
+      'region' => 'content',
+      'settings' => ['progress_indicator' => 'throbber'],
+      'third_party_settings' => [],
+    ])->save();
+  }
+
+  // Switch displays still using core's video formatter. A display an admin
+  // moved to another formatter is left alone.
+  $ids = \Drupal::entityTypeManager()->getStorage('entity_view_display')->getQuery()
+    ->condition('targetEntityType', 'media')
+    ->condition('bundle', 'video')
+    ->execute();
+  foreach (EntityViewDisplay::loadMultiple($ids) as $display) {
+    $component = $display->getComponent('field_media_video_file');
+    if ($component && ($component['type'] ?? NULL) === 'file_video') {
+      $component['type'] = 'mukurtu_video_with_tracks';
+      $display->setComponent('field_media_video_file', $component);
+    }
+    $display->removeComponent('field_media_video_tracks')->save();
+  }
 }
