@@ -229,7 +229,7 @@ class LandingPageRestrictionsUpdateTest extends KernelTestBase {
   }
 
   /**
-   * 40204 offers the names-only category block and keeps the others.
+   * Update 40204 offers the names-only category block, keeping the others.
    */
   public function testAddsNamesOnlyCategoryBlock(): void {
     $this->writePreFixDisplay();
@@ -250,7 +250,7 @@ class LandingPageRestrictionsUpdateTest extends KernelTestBase {
   }
 
   /**
-   * 40204 does not create a views allowlist where none exists.
+   * Update 40204 does not create a views allowlist where none exists.
    *
    * An absent key means every views block is offered, so writing one would
    * take the others away.

@@ -70,12 +70,16 @@ class NamesOnlyCategoryBlockUpdateTest extends KernelTestBase {
     $this->assertSame('Names only', EntityViewMode::load('taxonomy_term.names_only')?->label());
     $display = EntityViewDisplay::load('taxonomy_term.category.names_only');
     $this->assertNotNull($display);
-    $this->assertSame([], $display->getComponents(), 'The names-only display must not show the thumbnail or any other field.');
+    // Core adds the name base field to every display, and the category
+    // template prints it on its own; nothing else may be shown.
+    $this->assertSame(['name'], array_keys($display->getComponents()));
 
     $view = View::load('mukurtu_categories');
-    $this->assertSame(
-      $this->shippedView['display'][self::DISPLAY_ID],
-      $view->get('display')[self::DISPLAY_ID],
+    // Saving reorders keys and recalculates cache_metadata, so compare the
+    // options themselves.
+    $this->assertEquals(
+      $this->shippedView['display'][self::DISPLAY_ID]['display_options'],
+      $view->get('display')[self::DISPLAY_ID]['display_options'],
       'An updated site must get exactly the display a fresh install ships.'
     );
     $this->assertContains('core.entity_view_mode.taxonomy_term.names_only', $view->getDependencies()['config']);
