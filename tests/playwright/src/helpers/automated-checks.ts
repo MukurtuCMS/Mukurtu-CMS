@@ -197,6 +197,19 @@ export async function checkFocusVisible(page: Page, testInfo: TestInfo, slug: st
         const rect = el.getBoundingClientRect();
         return rect.width > 0 && rect.height > 0 && !el.hasAttribute('disabled');
       })
+      // [tabindex] matches tabindex="-1" too, which is not in the tab
+      // order: a keyboard user never arrives there by tabbing, so an
+      // element that draws nothing on focus is not a 2.4.7 failure. The
+      // roving-tabindex pattern is built on this, and CKEditor's toolbar
+      // container used it to produce a finding on all three pages that
+      // carry a rich text editor, which is what sent this check looking.
+      //
+      // What this gives up: a container a script focuses deliberately, as
+      // a dialog does on open, is no longer inspected. Whether such a
+      // container needs a visible ring is a judgement call rather than
+      // something to assert from a selector, and it belongs to the manual
+      // keyboard pass.
+      .filter((el) => el.tabIndex >= 0)
       .slice(0, max);
 
     // How many levels up to look for the indicator. Widgets routinely draw
