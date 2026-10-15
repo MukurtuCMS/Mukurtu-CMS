@@ -331,3 +331,34 @@ display:
         - 'languages:language_interface'
         - user.permissions
       tags: {  }
+  categories_names_page:
+    id: categories_names_page
+    display_title: 'Page (names only)'
+    display_plugin: page
+    position: 4
+    display_options:
+      style:
+        type: default
+        options:
+          row_class: category-card
+          default_row_class: true
+          uses_fields: false
+      row:
+        type: 'entity:taxonomy_term'
+        options:
+          relationship: none
+          view_mode: names_only
+      defaults:
+        style: false
+        row: false
+      show_admin_links: false
+      display_extenders: {  }
+      path: category-names
+      rendering_language: '***LANGUAGE_language_content***'
+    cache_metadata:
+      max-age: -1
+      contexts:
+        - 'languages:language_content'
+        - 'languages:language_interface'
+        - user.permissions
+      tags: {  }

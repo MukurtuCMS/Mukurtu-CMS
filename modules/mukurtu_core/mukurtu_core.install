@@ -701,7 +701,7 @@ function mukurtu_core_update_40214(): void {
 }
 
 /**
- * Add a names-only Browse by Category block for landing pages.
+ * Add names-only versions of the Browse by Category block and Categories page.
  */
 function mukurtu_core_update_40217(): ?string {
   // Keep the docblock above to one line; see mukurtu_core_update_40201() for
@@ -710,7 +710,7 @@ function mukurtu_core_update_40217(): ?string {
   // Some sites want the category list without thumbnails. Hiding the
   // thumbnail field on the teaser display is not enough, because the theme
   // draws a placeholder on any category card without an image, so this ships
-  // a separate view mode and block display instead. 40214 to 40216 are held
+  // a separate view mode, block display and page display instead. 40214 to 40216 are held
   // by open PRs.
   $entity_type_manager = \Drupal::entityTypeManager();
   $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core') . '/config/install/';
@@ -733,11 +733,18 @@ function mukurtu_core_update_40217(): ?string {
     return NULL;
   }
   $displays = $view->get('display');
-  if (isset($displays['browse_by_category_names_block'])) {
+  $shipped = $read('views.view.mukurtu_categories')['display'];
+  $added = FALSE;
+  foreach (['browse_by_category_names_block', 'categories_names_page'] as $display_id) {
+    if (!isset($displays[$display_id])) {
+      $displays[$display_id] = $shipped[$display_id];
+      $added = TRUE;
+    }
+  }
+  if (!$added) {
     return NULL;
   }
-  $displays['browse_by_category_names_block'] = $read('views.view.mukurtu_categories')['display']['browse_by_category_names_block'];
   $view->set('display', $displays)->save();
 
-  return (string) t('Added a Browse by Category (names only) block. Place it on a landing page to list categories without thumbnails.');
+  return (string) t('Added names-only versions of the Browse by Category block and the Categories page (at /category-names) for listing categories without thumbnails.');
 }

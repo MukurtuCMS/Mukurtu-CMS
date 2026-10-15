@@ -110,7 +110,9 @@ class ShippedDisplayConfigTest extends UnitTestCase {
   public static function categoryDisplayProvider(): \Generator {
     yield 'master' => ['default'];
     yield 'homepage block' => ['browse_by_category_block'];
+    yield 'names-only block' => ['browse_by_category_names_block'];
     yield 'categories page' => ['categories_page'];
+    yield 'names-only page' => ['categories_names_page'];
   }
 
   /**
