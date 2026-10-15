@@ -8873,6 +8873,10 @@ body:not(.is-always-mobile-nav) .header:not(:has(.header__logo-text)) {
   -webkit-margin-after: var(--v-space-2xs);
           margin-block-end: var(--v-space-2xs);
 }
+.layout--onecol .block-wrapper .category-grid:has(.category-teaser--names-only) {
+  -webkit-padding-after: var(--v-space-2xs);
+          padding-block-end: var(--v-space-2xs);
+}
 .layout--onecol .block-wrapper:has(.field--name-body) {
   padding-inline: var(--v-space-xs);
   -webkit-padding-after: var(--v-space-xs);
