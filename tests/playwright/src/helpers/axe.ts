@@ -26,12 +26,23 @@ const WCAG22_TAGS = ['wcag22a', 'wcag22aa'];
  * dashboard's 16 duplicate `aria-labelledby` targets (#2395) went unreported
  * while the page scanned clean.
  *
- * They are listed here so the findings land in their own bucket rather than
+ * They are listed here so their results land in their own bucket rather than
  * being mixed in with the genuinely human-judgement incompletes such as
- * contrast over a background image. The list is pinned rather than read from
- * axe at runtime because axe exposes `reviewOnFail` only on a private field;
- * reviewOnFailRules.spec.ts regenerates it from axe-core and fails if an axe
- * upgrade changes the set, so the blind spot cannot widen silently.
+ * contrast over a background image.
+ *
+ * What an entry in that bucket means depends on the rule. `bypass`,
+ * `duplicate-id-aria` and `frame-title-unique` define no incomplete message
+ * on any of their checks, so for those an incomplete result can only be a
+ * downgraded failure: treat it as a defect. `no-autoplay-audio` and
+ * `aria-braille-equivalent` do define one, returned when axe cannot determine
+ * media duration or compute accessible text, so an entry from those two is
+ * either a defect or an open question and has to be read before it is
+ * counted.
+ *
+ * The list is pinned rather than read from axe at runtime because axe exposes
+ * `reviewOnFail` only on a private field; review-on-fail-rules.offline.spec.ts
+ * regenerates it from axe-core and fails if an axe upgrade changes the set, so
+ * the blind spot cannot widen silently.
  */
 const REVIEW_ON_FAIL_RULES = [
   'aria-braille-equivalent',
@@ -107,8 +118,9 @@ export async function auditPage(page: Page, testInfo: TestInfo, slug: string): P
     // WCAG 2.2-only findings — informational, not part of the 2.1 AA target.
     wcag22Violations,
     bestPracticeViolations,
-    // Detected defects that axe reports as "incomplete" because the rule
-    // carries reviewOnFail. These are findings, not open questions.
+    // Results from rules whose failures axe downgrades to "incomplete"
+    // because they carry reviewOnFail. For three of the five an entry can
+    // only be a downgraded failure; see REVIEW_ON_FAIL_RULES.
     reviewOnFailFindings,
     // "Incomplete" checks need human review (e.g. contrast on images).
     incomplete,

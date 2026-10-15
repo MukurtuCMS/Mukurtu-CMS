@@ -21,16 +21,21 @@ import { auditPage } from '~helpers/axe';
 
 const RESULTS_DIR = path.join(__dirname, '../test-results/a11y');
 
-/** Matches WCAG_TAGS and WCAG22_TAGS in src/helpers/axe.ts. */
-const REQUESTED_TAGS = [
-  'wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22a', 'wcag22aa',
-];
-
 /**
  * Reads the scan report auditPage() writes for a slug.
  */
 function readReport(slug: string) {
   return JSON.parse(fs.readFileSync(path.join(RESULTS_DIR, `${slug}.json`), 'utf8'));
+}
+
+/**
+ * Removes a fixture's report.
+ *
+ * auditPage() writes into the directory CI uploads as the a11y artifact, so
+ * a fixture left behind would sit there looking like a scanned page.
+ */
+function discardReport(slug: string) {
+  fs.rmSync(path.join(RESULTS_DIR, `${slug}.json`), { force: true });
 }
 
 test.describe('review-on-fail rules', () => {
@@ -46,9 +51,13 @@ test.describe('review-on-fail rules', () => {
     expect(audit?.rules, 'axe-core no longer exposes _audit.rules; the pinned '
       + 'list in src/helpers/axe.ts can no longer be verified').toBeTruthy();
 
+    // Deliberately not filtered by tag. Narrowing to the WCAG tags we request
+    // would let an axe release add a best-practice-only review-on-fail rule
+    // and keep this test green while the scan buried its findings, and
+    // listing a rule we never request costs nothing: the bucket filters the
+    // results we actually get.
     const fromAxe = audit.rules
       .filter((r) => r.enabled && r.reviewOnFail)
-      .filter((r) => r.tags.some((t) => REQUESTED_TAGS.includes(t)))
       .map((r) => r.id)
       .sort();
 
@@ -76,6 +85,7 @@ test.describe('review-on-fail rules', () => {
     `);
     await auditPage(page, testInfo, 'tmp-review-on-fail-dirty');
     const report = readReport('tmp-review-on-fail-dirty');
+    discardReport('tmp-review-on-fail-dirty');
 
     const ids = report.reviewOnFailFindings.map((r: { id: string }) => r.id);
     expect(ids).toContain('duplicate-id-aria');
@@ -99,6 +109,7 @@ test.describe('review-on-fail rules', () => {
     `);
     await auditPage(page, testInfo, 'tmp-review-on-fail-clean');
     const report = readReport('tmp-review-on-fail-clean');
+    discardReport('tmp-review-on-fail-clean');
 
     expect(report.reviewOnFailFindings).toEqual([]);
     expect(report.summary.reviewOnFailFindings).toBe(0);
