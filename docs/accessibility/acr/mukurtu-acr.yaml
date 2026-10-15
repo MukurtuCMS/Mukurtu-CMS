@@ -908,34 +908,43 @@ chapters:
         components:
           - name: web
             adherence:
-              level: partially-supports
+              level: supports
               notes: >-
-                Visitor-facing pages pass. Every element reachable
-                by keyboard shows a focus indicator, measured by
-                tabbing through the home page, browse and login: 35
-                stops, each with a drawn indicator of at least 2px
-                and at least 3:1 against the surface behind it.
-                Indicators are not all outlines; the main navigation
-                replaces its outline with a pseudo-element ring,
-                which is why a check that looks only at the outline
-                property reports it as missing.
+                Every element in the tab order shows a focus
+                indicator, across the whole page inventory. Measured
+                on the main run at 05ca5a668 (run 38752434462): 45
+                pages, zero findings, including the administrative
+                forms and the three pages carrying a rich text
+                editor. The check's own negative control still
+                reported its three deliberately unstyled elements on
+                the same run, so the clean result reflects the pages
+                rather than a check that stopped working.
 
-                Administrative forms do not. The Gin admin theme
-                moves a form's action buttons into a sticky header
-                but leaves the originals in the tab order, inside a
-                one-pixel container, so focus can land on a control
-                with none of its box on screen. Measured on two
-                unmodified Drupal pages: the submit button on the
-                site information form, and both the submit and
-                cancel buttons on an account cancel form, each
-                focusable with none of its box visible. The defect
-                is in the admin theme rather than in Mukurtu's own
-                code, and it affects every administrative form
-                (issue #2389).
+                Two defects were fixed to get here. The Gin admin
+                theme left each form's original action buttons in
+                the tab order inside a one-pixel container, so focus
+                could land on a control with none of its box on
+                screen, and on a confirmation form the only Cancel a
+                keyboard could reach was the invisible one; that is
+                fixed and gated by admin-focus-visible.spec.ts,
+                which fails the build if it returns (issue #2389).
+                The inventory-wide check itself was reporting
+                elements at tabindex="-1", which are not in the tab
+                order, so CKEditor's toolbar container produced a
+                finding on every page with an editor; the check now
+                skips them (issue #2419).
+
+                Indicators are not all outlines: the main navigation
+                draws a pseudo-element ring, and CKEditor draws a
+                box-shadow ring plus a border change, so a check
+                reading only the outline property reports both as
+                missing. What the automated layer does not decide is
+                whether a container a script focuses deliberately,
+                such as a dialog on open, needs a visible ring; that
+                is left to the manual keyboard pass.
 
                 Evidence is recorded in
-                docs/accessibility/findings/2026-10-09-visual-pass.md.
-
+                docs/accessibility/findings/2026-10-15-focus-visible-clean-run.md.
           - name: authoring-tool
             adherence:
               level: not-evaluated
