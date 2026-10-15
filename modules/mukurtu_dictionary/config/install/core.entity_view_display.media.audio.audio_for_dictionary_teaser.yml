@@ -18,7 +18,7 @@ bundle: audio
 mode: audio_for_dictionary_teaser
 content:
   field_contributor:
-    type: entity_reference_label
+    type: mukurtu_entity_reference_role_label
     label: inline
     settings:
       link: true
