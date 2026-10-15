@@ -20,3 +20,44 @@
 function mukurtu_design_update_last_removed(): int {
   return 40004;
 }
+
+/**
+ * Add the page and header background settings, off until images are chosen.
+ */
+function mukurtu_design_update_40005(): string {
+  $config = \Drupal::configFactory()
+    ->getEditable(\Drupal\mukurtu_design\DesignPalette::SETTINGS);
+
+  $background = (array) $config->get('background');
+  $header = (array) $config->get('header');
+
+  // Seed only the keys that are genuinely absent, so re-running cannot reset a
+  // site that has since configured a background, and a partially seeded site is
+  // completed rather than overwritten. Checking the sub-array by key matters:
+  // $config->get('background.image') returns NULL both when the key is missing
+  // and when it is set to NULL, which is the shipped default.
+  $defaults = [
+    'image' => NULL,
+    'text_treatment' => 'light',
+  ];
+
+  $added = [];
+  foreach ($defaults as $key => $value) {
+    if (!array_key_exists($key, $background)) {
+      $background[$key] = $value;
+      $added[] = $key;
+    }
+    if (!array_key_exists($key, $header)) {
+      $header[$key] = $value;
+      $added[] = $key;
+    }
+  }
+
+  if (!$added) {
+    return (string) t('The background settings are already present.');
+  }
+
+  $config->set('background', $background)->set('header', $header)->save();
+
+  return (string) t('Added the page and header background settings. No images are set, so the site is unchanged until one is uploaded.');
+}

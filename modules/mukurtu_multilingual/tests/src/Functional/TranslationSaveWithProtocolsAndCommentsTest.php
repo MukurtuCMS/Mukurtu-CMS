@@ -60,6 +60,13 @@ class TranslationSaveWithProtocolsAndCommentsTest extends BrowserTestBase {
   protected $profile = 'mukurtu';
 
   /**
+   * Bypass pre-existing config schema errors in the mukurtu profile.
+   *
+   * {@inheritdoc}
+   */
+  protected $strictConfigSchema = FALSE;
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp(): void {
@@ -72,7 +79,9 @@ class TranslationSaveWithProtocolsAndCommentsTest extends BrowserTestBase {
    * (spanning two communities) and an existing comment.
    */
   public function testTranslationSaveWithProtocolsAndComments(): void {
-    $admin = $this->rootUser;
+    // OG needs a user entity; rootUser is a session that carries the password
+    // drupalLogin() needs.
+    $admin = \Drupal::entityTypeManager()->getStorage('user')->load($this->rootUser->id());
 
     $community1 = Community::create(['name' => 'Community 1']);
     $community1->save();
@@ -104,7 +113,7 @@ class TranslationSaveWithProtocolsAndCommentsTest extends BrowserTestBase {
       ->set('site_comments_enabled', 1)
       ->save();
 
-    $this->drupalLogin($admin);
+    $this->drupalLogin($this->rootUser);
 
     $content = Node::create([
       'title' => 'Original Title',
