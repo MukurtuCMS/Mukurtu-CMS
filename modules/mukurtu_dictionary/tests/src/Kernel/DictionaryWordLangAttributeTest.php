@@ -9,6 +9,7 @@ use Drupal\Core\Serialization\Yaml;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\mukurtu_dictionary\Entity\DictionaryWord;
+use Drupal\mukurtu_dictionary\Form\MukurtuDictionaryLanguagesSettingsForm;
 use Drupal\mukurtu_dictionary\Hook\LanguageAttributeHooks;
 use Drupal\node\Entity\Node;
 use Drupal\paragraphs\Entity\Paragraph;
@@ -168,17 +169,83 @@ class DictionaryWordLangAttributeTest extends DictionaryTestBase {
    */
   public function testPageTitleIsMarked(): void {
     $word = $this->createWord();
-    $hooks = new LanguageAttributeHooks($this->routeMatchFor('entity.node.canonical', $word));
+    $hooks = new LanguageAttributeHooks($this->routeMatchFor('entity.node.canonical', $word), $this->container->get('config.factory'));
 
     $variables = ['title_attributes' => []];
     $hooks->preprocessPageTitle($variables);
     $this->assertSame('haw', $variables['title_attributes']['lang'] ?? NULL);
 
     // Other routes for the same word, like its edit form, are left alone.
-    $hooks = new LanguageAttributeHooks($this->routeMatchFor('entity.node.edit_form', $word));
+    $hooks = new LanguageAttributeHooks($this->routeMatchFor('entity.node.edit_form', $word), $this->container->get('config.factory'));
     $variables = ['title_attributes' => []];
     $hooks->preprocessPageTitle($variables);
     $this->assertArrayNotHasKey('lang', $variables['title_attributes']);
+  }
+
+  /**
+   * Sets which optional fields the site says are in the word's language.
+   */
+  private function setInLanguageFields(array $fields): void {
+    $this->config(MukurtuDictionaryLanguagesSettingsForm::SETTINGS)
+      ->set('in_language_fields', $fields)
+      ->save();
+  }
+
+  /**
+   * A field the site selects is marked, on the word and on an entry.
+   */
+  public function testSelectedFieldIsMarked(): void {
+    $this->setInLanguageFields(['field_translation']);
+    $word = $this->createWord();
+
+    $this->renderField($word, 'field_translation');
+    $this->assertCount(1, $this->cssSelect('[lang="haw"]'));
+
+    // The same choice applies to an additional word entry.
+    $entry = $word->get('field_additional_word_entries')->entity;
+    $this->renderField($entry, 'field_translation');
+    $this->assertCount(1, $this->cssSelect('[lang="haw"]'));
+  }
+
+  /**
+   * Selecting one field does not mark the others.
+   */
+  public function testUnselectedFieldsStayInThePageLanguage(): void {
+    $this->setInLanguageFields(['field_translation']);
+    $word = $this->createWord();
+    $word->set('field_definition', 'A greeting.')->save();
+
+    $this->renderField(Node::load($word->id()), 'field_definition');
+    $this->assertRaw('A greeting.');
+    $this->assertCount(0, $this->cssSelect('[lang]'));
+  }
+
+  /**
+   * A field name the hook does not offer is ignored, however it got stored.
+   */
+  public function testStoredFieldsAreIntersectedWithTheOfferedOnes(): void {
+    // field_source is a real field on the word, and is not one of the four
+    // the setting offers. Stale or hand-edited config must not reach it.
+    $this->setInLanguageFields(['field_source', 'field_translation']);
+    $word = $this->createWord();
+    $word->set('field_source', 'Pukui and Elbert')->save();
+
+    $this->renderField(Node::load($word->id()), 'field_source');
+    $this->assertRaw('Pukui and Elbert');
+    $this->assertCount(0, $this->cssSelect('[lang]'));
+  }
+
+  /**
+   * A rendered word is invalidated when the setting changes.
+   */
+  public function testRenderedWordDependsOnTheSetting(): void {
+    $word = $this->createWord();
+    $build = $this->container->get('entity_type.manager')->getViewBuilder('node')->view($word, 'teaser');
+    $this->container->get('renderer')->renderInIsolation($build);
+    $this->assertContains(
+      'config:' . MukurtuDictionaryLanguagesSettingsForm::SETTINGS,
+      $build['#cache']['tags'],
+    );
   }
 
   /**
