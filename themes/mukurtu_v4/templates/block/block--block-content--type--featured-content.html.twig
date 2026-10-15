@@ -22,19 +22,84 @@
  *   displayed in front of the main title tag that appears in the template.
  * - title_suffix: Additional output populated by modules, intended to be
  *   displayed after the main title tag that appears in the template.
+ * - display_style: 'grid' (the default) or 'carousel', from the block's
+ *   field_display_style. See
+ *   mukurtu_v4_preprocess_block__block_content__type__featured_content().
+ * - featured_items: Individually rendered referenced entities. Only set for a
+ *   carousel, and only when there are at least two of them.
  *
  * @see template_preprocess_block()
  */
 #}
 
+{% set carousel_id = 'featured-carousel-' ~ (attributes.offsetGet('data-layout-block-uuid')|default(random())) %}
+
 <div{{ attributes.addClass('block-wrapper', 'block-featured-content') }}>
   {{ title_prefix }}
   {% if label %}
-    <h2{{ title_attributes }}>{{ label }}</h2>
-    {# <a class="testing-links" href="https://example.com">Website for testing</a> #}
+    <h2{{ title_attributes }} id="{{ carousel_id }}-label">{{ label }}</h2>
   {% endif %}
   {{ title_suffix }}
   {% block content %}
-    {{ content }}
+    {% if display_style == 'carousel' %}
+      {#
+        role="group" with aria-roledescription="carousel" is the pattern from
+        the ARIA Authoring Practices Guide. The group is labelled by the
+        block's own heading where there is one, so screen reader users get the
+        block's name rather than a generic "carousel".
+
+        No aria-live region here: the slides are reachable in the tab order and
+        the status text below is polite, so announcing every automatic
+        transition would talk over the user.
+      #}
+      <div class="featured-carousel splide"
+           id="{{ carousel_id }}"
+           role="group"
+           aria-roledescription="{{ 'carousel'|t }}"
+           {% if label %}aria-labelledby="{{ carousel_id }}-label"{% else %}aria-label="{{ 'Featured content'|t }}"{% endif %}>
+
+        <div class="splide__track">
+          <ul class="splide__list">
+            {% for item in featured_items %}
+              <li class="splide__slide featured-carousel__slide">{{ item }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+
+        <div class="featured-carousel__controls">
+          {#
+            Splide renders its own arrows, but they carry generic labels and
+            sit outside this container. These are ours so the labels can be
+            translated and the pause control can sit alongside them.
+          #}
+          <button type="button" class="featured-carousel__button featured-carousel__button--prev">
+            <span class="visually-hidden">{{ 'Previous item'|t }}</span>
+            <span aria-hidden="true">&lsaquo;</span>
+          </button>
+
+          <p class="featured-carousel__status" role="status">
+            {# JS replaces this; the server-rendered text covers the no-JS case. #}
+            {{ 'Item 1 of @total'|t({'@total': featured_items|length}) }}
+          </p>
+
+          <button type="button" class="featured-carousel__button featured-carousel__button--next">
+            <span class="visually-hidden">{{ 'Next item'|t }}</span>
+            <span aria-hidden="true">&rsaquo;</span>
+          </button>
+
+          {#
+            WCAG 2.2.2: anything that moves automatically for more than five
+            seconds needs a mechanism to pause it. Rendered hidden and revealed
+            by JS, because without JS nothing auto-advances and a pause button
+            would do nothing.
+          #}
+          <button type="button" class="featured-carousel__button featured-carousel__button--toggle" hidden>
+            <span class="featured-carousel__toggle-text" data-label-pause="{{ 'Pause'|t }}" data-label-play="{{ 'Play'|t }}">{{ 'Pause'|t }}</span>
+          </button>
+        </div>
+      </div>
+    {% else %}
+      {{ content }}
+    {% endif %}
   {% endblock %}
 </div>

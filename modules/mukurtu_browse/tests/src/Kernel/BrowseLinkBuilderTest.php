@@ -25,6 +25,7 @@ class BrowseLinkBuilderTest extends KernelTestBase {
     'facets',
     'mukurtu_browse',
     'mukurtu_search',
+    'search_api',
   ];
 
   /**
