@@ -72,8 +72,11 @@
    inputs and selects a white fill with a transparent border. That suits
    core's dark panel but leaves no visible field edge on Mukurtu's white one.
    #767676 on white = 4.54:1 -- meets WCAG 1.4.11 non-text contrast (3:1).
-   body raises specificity over core's own #drupal-off-canvas-wrapper rule,
-   which arrives later with the dialog's AJAX response. */
+   Core's base.css likewise sets a white focus outline, invisible here
+   (WCAG 2.4.7); use the dialog's text color, as mukurtu-gin-custom.css does.
+   body raises specificity over core's own #drupal-off-canvas-wrapper rules,
+   which arrive later with the dialog's AJAX response. */
 body #drupal-off-canvas-wrapper {
   --drupal-off-canvas-input-border: 1px solid #767676;
+  --off-canvas-focus-outline-color: var(--gin-color-text, #222330);
 }
