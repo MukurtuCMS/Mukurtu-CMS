@@ -67,3 +67,13 @@
   outline: 2px solid var(--brand-primary, #005a9c);
   outline-offset: 2px;
 }
+
+/* The edit button opens core's off-canvas dialog, whose form.css gives text
+   inputs and selects a white fill with a transparent border. That suits
+   core's dark panel but leaves no visible field edge on Mukurtu's white one.
+   #767676 on white = 4.54:1 -- meets WCAG 1.4.11 non-text contrast (3:1).
+   body raises specificity over core's own #drupal-off-canvas-wrapper rule,
+   which arrives later with the dialog's AJAX response. */
+body #drupal-off-canvas-wrapper {
+  --drupal-off-canvas-input-border: 1px solid #767676;
+}
