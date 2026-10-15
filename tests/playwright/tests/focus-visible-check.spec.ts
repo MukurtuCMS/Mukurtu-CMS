@@ -17,6 +17,11 @@ import { checkFocusVisible } from '~helpers/automated-checks';
  * A check that reports nothing looks exactly like a clean site, so these
  * fixtures pin both directions: the patterns it must accept, and the
  * failures it must still catch.
+ *
+ * The newest of those: an element with tabindex="-1" is out of the tab
+ * order, so it cannot fail 2.4.7 by drawing nothing on focus. The check
+ * used to inspect them, and CKEditor's toolbar container made all three
+ * rich text pages report a finding that was not real.
  */
 
 /** Reads the findings the check wrote for a slug. */
@@ -44,6 +49,10 @@ test('catches elements with no focus indicator, and only those', async ({ page }
     <button class="good" id="good-own">ring on itself</button>
     <div class="wrap"><button id="good-ancestor">ring on wrapper</button></div>
     <button class="pseudo" id="good-pseudo">ring as pseudo-element</button>
+    <!-- Out of the tab order, so not a 2.4.7 failure however it looks.
+         This is CKEditor's toolbar pattern, which reported on every page
+         with a rich text editor before the check skipped these. -->
+    <div class="bad" tabindex="-1" id="not-tabbable">programmatic focus only</div>
   `);
 
   await checkFocusVisible(page, testInfo, 'fixture-focus-visible');
@@ -58,6 +67,8 @@ test('catches elements with no focus indicator, and only those', async ({ page }
   for (const id of ['#good-own', '#good-ancestor', '#good-pseudo']) {
     expect(detail, `${id} has a real indicator and must not be reported`).not.toContain(id);
   }
+  expect(detail, 'tabindex="-1" is not in the tab order and must not be reported')
+    .not.toContain('#not-tabbable');
 });
 
 test('reports nothing when every element has an indicator', async ({ page }, testInfo) => {

@@ -377,7 +377,7 @@ class ExecuteImportForm extends ImportBaseForm {
 
       // Only care about entity reference fields.
       $field_type = $field_def->getType();
-      if (!in_array($field_type, ['entity_reference', 'entity_reference_revisions'])) {
+      if (!in_array($field_type, ['entity_reference', 'entity_reference_revisions', 'mukurtu_entity_reference_role'])) {
         continue;
       }
 
@@ -468,7 +468,7 @@ class ExecuteImportForm extends ImportBaseForm {
         }
 
         $field_type = $field_def->getType();
-        if (!in_array($field_type, ['entity_reference', 'entity_reference_revisions'])) {
+        if (!in_array($field_type, ['entity_reference', 'entity_reference_revisions', 'mukurtu_entity_reference_role'])) {
           continue;
         }
 
@@ -565,7 +565,7 @@ class ExecuteImportForm extends ImportBaseForm {
         }
 
         $field_type = $field_def->getType();
-        if (!in_array($field_type, ['entity_reference', 'entity_reference_revisions'])) {
+        if (!in_array($field_type, ['entity_reference', 'entity_reference_revisions', 'mukurtu_entity_reference_role'])) {
           continue;
         }
 
