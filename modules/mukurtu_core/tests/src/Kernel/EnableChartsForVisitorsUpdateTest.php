@@ -101,7 +101,7 @@ class EnableChartsForVisitorsUpdateTest extends KernelTestBase {
    * there is no third-party script for a Klaro service to cover, and the
    * config file this hook used to read it from is gone.
    *
-   * @see mukurtu_core_update_40212()
+   * @see mukurtu_core_update_40216()
    */
   public function testDoesNotRegisterKlaroService(): void {
     \Drupal::service('module_installer')->install(['visitors', 'klaro']);

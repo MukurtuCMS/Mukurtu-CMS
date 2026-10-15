@@ -35,7 +35,8 @@
 
 .primary-nav__menu-link {
   flex-grow: 1;
-  color: var(--color-text-neutral-loud);
+  /* Inherit so the header image's text treatment reaches the links. */
+  color: inherit;
   font-size: var(--font-size-m);
   text-decoration: none;
   padding-inline: var(--v-space-4xs);

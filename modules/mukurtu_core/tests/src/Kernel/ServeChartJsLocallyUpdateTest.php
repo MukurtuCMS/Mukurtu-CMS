@@ -8,9 +8,9 @@ use Drupal\KernelTests\KernelTestBase;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests mukurtu_core_update_40212().
+ * Tests mukurtu_core_update_40216().
  *
- * @see mukurtu_core_update_40212()
+ * @see mukurtu_core_update_40216()
  */
 #[Group('mukurtu_core')]
 class ServeChartJsLocallyUpdateTest extends KernelTestBase {
@@ -42,7 +42,7 @@ class ServeChartJsLocallyUpdateTest extends KernelTestBase {
       'Precondition: charts no longer ships with its CDN option on.'
     );
 
-    $message = mukurtu_core_update_40212();
+    $message = mukurtu_core_update_40216();
 
     $this->assertFalse(\Drupal::config('charts.settings')->get('advanced.requirements.cdn'));
     $this->assertNotNull($message);
@@ -61,7 +61,7 @@ class ServeChartJsLocallyUpdateTest extends KernelTestBase {
       'javascripts' => ['unpkg.com/chart'],
     ])->save();
 
-    mukurtu_core_update_40212();
+    mukurtu_core_update_40216();
 
     $this->assertNull(
       \Drupal::entityTypeManager()->getStorage('klaro_app')->load('charts_chartjs'),
@@ -73,7 +73,7 @@ class ServeChartJsLocallyUpdateTest extends KernelTestBase {
    * A site without charts_chartjs or Klaro is left alone, and says nothing.
    */
   public function testNoOpWithoutModules(): void {
-    $this->assertNull(mukurtu_core_update_40212());
+    $this->assertNull(mukurtu_core_update_40216());
     $this->assertTrue(\Drupal::config('charts.settings')->isNew());
   }
 
@@ -83,8 +83,8 @@ class ServeChartJsLocallyUpdateTest extends KernelTestBase {
   public function testIsIdempotent(): void {
     \Drupal::service('module_installer')->install(['charts_chartjs', 'klaro']);
 
-    $this->assertNotNull(mukurtu_core_update_40212());
-    $this->assertNull(mukurtu_core_update_40212(), 'The second run reported work that had already been done.');
+    $this->assertNotNull(mukurtu_core_update_40216());
+    $this->assertNull(mukurtu_core_update_40216(), 'The second run reported work that had already been done.');
   }
 
 }

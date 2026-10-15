@@ -20,7 +20,7 @@ use Drupal\Core\Hook\Attribute\Hook;
  *
  * This only has an effect while charts.settings:advanced.requirements.cdn is
  * off. When it's on, the charts module rewrites the same paths to unpkg.com;
- * mukurtu_install() and mukurtu_core_update_40212() turn it off.
+ * mukurtu_install() and mukurtu_core_update_40216() turn it off.
  *
  * @see \Drupal\charts\Hook\ChartsHooks::libraryInfoAlter()
  */
