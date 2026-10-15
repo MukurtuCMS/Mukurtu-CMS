@@ -17,6 +17,31 @@ const WCAG_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
 const WCAG22_TAGS = ['wcag22a', 'wcag22aa'];
 
 /**
+ * Axe rules that report a detected defect as "incomplete" instead of as a
+ * violation.
+ *
+ * These rules carry axe's `reviewOnFail` flag, which means a failing check is
+ * downgraded to "needs review" on the way out. A page can therefore breach one
+ * of these rules and still scan with zero violations, which is how the
+ * dashboard's 16 duplicate `aria-labelledby` targets (#2395) went unreported
+ * while the page scanned clean.
+ *
+ * They are listed here so the findings land in their own bucket rather than
+ * being mixed in with the genuinely human-judgement incompletes such as
+ * contrast over a background image. The list is pinned rather than read from
+ * axe at runtime because axe exposes `reviewOnFail` only on a private field;
+ * reviewOnFailRules.spec.ts regenerates it from axe-core and fails if an axe
+ * upgrade changes the set, so the blind spot cannot widen silently.
+ */
+const REVIEW_ON_FAIL_RULES = [
+  'aria-braille-equivalent',
+  'bypass',
+  'duplicate-id-aria',
+  'frame-title-unique',
+  'no-autoplay-audio',
+];
+
+/**
  * Directory where per-page scan results are written, relative to
  * tests/playwright/. Consumed when consolidating findings into
  * docs/accessibility/findings/.
@@ -57,6 +82,14 @@ export async function auditPage(page: Page, testInfo: TestInfo, slug: string): P
     (v) => !hasTag(v, WCAG_TAGS) && !hasTag(v, WCAG22_TAGS),
   );
 
+  // Rules whose failures axe downgrades to "incomplete" (see
+  // REVIEW_ON_FAIL_RULES). Split out of the incomplete list so a detected
+  // defect is not buried among the items that genuinely need human judgement.
+  const reviewOnFailFindings = results.incomplete.filter((r) =>
+    REVIEW_ON_FAIL_RULES.includes(r.id));
+  const incomplete = results.incomplete.filter((r) =>
+    !REVIEW_ON_FAIL_RULES.includes(r.id));
+
   const report = {
     slug,
     url: page.url(),
@@ -66,15 +99,19 @@ export async function auditPage(page: Page, testInfo: TestInfo, slug: string): P
       wcagViolations: wcagViolations.length,
       wcag22Violations: wcag22Violations.length,
       bestPracticeViolations: bestPracticeViolations.length,
+      reviewOnFailFindings: reviewOnFailFindings.length,
       passes: results.passes.length,
-      incomplete: results.incomplete.length,
+      incomplete: incomplete.length,
     },
     wcagViolations,
     // WCAG 2.2-only findings — informational, not part of the 2.1 AA target.
     wcag22Violations,
     bestPracticeViolations,
+    // Detected defects that axe reports as "incomplete" because the rule
+    // carries reviewOnFail. These are findings, not open questions.
+    reviewOnFailFindings,
     // "Incomplete" checks need human review (e.g. contrast on images).
-    incomplete: results.incomplete,
+    incomplete,
   };
 
   fs.mkdirSync(RESULTS_DIR, { recursive: true });
@@ -93,4 +130,14 @@ export async function auditPage(page: Page, testInfo: TestInfo, slug: string): P
     type: 'a11y',
     description: `${wcagViolations.length} WCAG violation rule(s) on ${slug}${counts ? `: ${counts}` : ''}`,
   });
+
+  if (reviewOnFailFindings.length) {
+    const reviewCounts = reviewOnFailFindings
+      .map((r) => `${r.id} (${r.nodes.length} nodes)`)
+      .join(', ');
+    testInfo.annotations.push({
+      type: 'a11y-review-on-fail',
+      description: `${reviewOnFailFindings.length} rule(s) on ${slug} that axe reports as incomplete rather than as a violation: ${reviewCounts}`,
+    });
+  }
 }
