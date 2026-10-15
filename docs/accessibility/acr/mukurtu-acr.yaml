@@ -14,7 +14,7 @@ author:
   phone: ""
   website: "https://mukurtu.org"
 report_date: "2026-07-10"
-last_modified_date: "2026-09-17"
+last_modified_date: "2026-10-09"
 version: 3
 notes: >-
   This is a living document maintained as part of the Mukurtu CMS
@@ -25,10 +25,23 @@ notes: >-
   of an individual Mukurtu site also depends on its content and configuration.
 evaluation_methods_used: >-
   Automated scanning with axe-core (via Playwright) across a representative
-  page inventory, combined with manual keyboard-only testing and screen reader
-  testing (NVDA, VoiceOver, or Orca) following the program's manual testing
-  checklist. Findings are consolidated by WCAG Success Criterion before
-  conformance levels are assigned.
+  page inventory covering anonymous, member and administrative pages,
+  together with purpose-built checks for criteria axe cannot assert on its
+  own: reflow, text resize, text spacing, focus visibility, link text,
+  keyboard traps, label in name and input purpose. Several of those also gate
+  continuous integration, so a regression fails a build rather than only
+  being reported; the rest are report-only and are treated as indicators
+  rather than evidence. Criteria decidable from source, configuration and
+  content were evaluated by desk review, and each finding was confirmed
+  against a clean install before a conformance level was assigned. Findings
+  are consolidated by WCAG Success Criterion before levels are assigned.
+  Manual keyboard-only testing and screen reader testing (NVDA, VoiceOver or
+  Orca) following the program's manual testing checklist are planned but have
+  not yet been carried out. Criteria that depend on them remain
+  not-evaluated. Where an evaluated criterion still has manual
+  verification outstanding, its own note says so: 4.1.2 is the one such
+  case, where keyboard and screen reader verification of the custom
+  widgets is still to come.
 legal_disclaimer: >-
   The information herein is provided in good faith based on the analysis of
   the product at the time of the review and does not represent a
@@ -44,10 +57,12 @@ chapters:
   success_criteria_level_a:
     notes: >-
       Mukurtu CMS is a Drupal distribution. The "Web" component below covers
-      the visitor and logged-in member experience (the current audit scope).
-      The "Authoring Tool" component covers the content creation and
-      administration experience, which will be evaluated in a later phase
-      against ATAG 2.0 in addition to WCAG.
+      the product's whole browser interface, the visitor and member
+      experience and the administrative one alike, and the page inventory
+      behind these assessments includes all three. The "Authoring Tool"
+      component covers conformance with ATAG 2.0, which asks additionally
+      that an authoring tool help its authors produce accessible content; it
+      will be evaluated in a later phase.
     criteria:
       - num: 1.1.1
         components:
@@ -69,8 +84,17 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                Capability check. Digital heritage items carry
+                field_transcription, described as a basic text
+                transcription of an audio or video recording,
+                and it is rendered on the full and
+                taxonomy_record displays, so an author can
+                provide a text alternative and a visitor can
+                read it. Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -79,8 +103,24 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: partially-supports
+              notes: >-
+                Locally hosted video cannot carry captions.
+                The video media type offers an author no
+                caption or subtitle track field, and the
+                file_video formatter renders no track element,
+                so a site that uploads its own video has no
+                way to provide synchronised captions (issue
+                #2329). The remote_video type is unaffected,
+                because the provider carries its own captions.
+                A transcript is not a substitute: it satisfies
+                1.2.3, which accepts a media alternative, but
+                not 1.2.2, which requires synchronisation. The
+                same evidence bears on the authoring-tool
+                component, which is evaluated separately.
+                Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -89,8 +129,17 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                The digital heritage transcription field is a
+                media alternative, which 1.2.3 accepts in
+                place of audio description. Caveat: the field
+                is described to authors as a basic
+                transcription, so whether any given item's
+                text is a full alternative is editorial rather
+                than structural. Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -134,8 +183,16 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                No UI string gives an instruction by position,
+                shape, size or colour alone, checked across
+                the product's module and theme strings.
+                Instructions as rendered, rather than as
+                authored, are confirmed in the visual pass.
+                Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -144,8 +201,25 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: partially-supports
+              notes: >-
+                Required fields are marked with an asterisk
+                glyph rather than colour, and form errors name
+                the field in text, so those do not rely on
+                colour. System messages do. Error, warning and
+                status blocks are distinguished from one
+                another only by background colour: there is no
+                icon, the left border is identical and
+                transparent on all three, padding is
+                identical, and the only text cue is a
+                visually-hidden heading that a sighted reader
+                never sees. The wording of a message often
+                makes its nature clear on its own, which
+                limits the practical impact, but severity
+                itself is carried visually by colour alone.
+                Evidence is recorded in
+                docs/accessibility/findings/2026-10-09-visual-pass.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -154,8 +228,17 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                Nothing autoplays. The dictionary audio
+                display sets autoplay false, the lightbox sets
+                autoplayVideos false, and the YouTube oEmbed
+                lists autoplay in its allow attribute, which
+                is a permission rather than an instruction,
+                with no autoplay parameter in the URL.
+                Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -184,8 +267,21 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                Every file binding keydown or keypress uses
+                non-printable keys, except Enter and Space in
+                two places, both scoped to a focused element.
+                The active-only-on-focus exception applies,
+                and activating a control with Enter or Space
+                is standard operation rather than a shortcut.
+                Enforced in CI by the character-key-shortcuts
+                lint, which fails the build on a
+                single-character handler bound to document,
+                window or body, and self-tests its matcher
+                before trusting it. Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -194,8 +290,16 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                No time limits. No meta refresh, no
+                location.reload and no setInterval in the
+                product's JavaScript, and no session lifetime
+                override is shipped. Drupal's session expiry
+                is a security timeout, which 2.2.1 exempts.
+                Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -204,8 +308,21 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                No content moves, blinks, scrolls or updates
+                automatically, so there is nothing for a
+                pause, stop or hide control to act on. Both
+                carousels are instantiated without the
+                autoplay option, which the carousel library
+                defaults to off; no audio or video autoplays;
+                and the product's own stylesheets define no
+                keyframe animation. The only animation present
+                anywhere is a vendor carousel's loading
+                spinner, which is not presented in parallel
+                with other content. Evidence is recorded in
+                docs/accessibility/findings/2026-10-09-visual-pass.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -214,8 +331,14 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                No keyframe animation in any of the product's
+                own stylesheets. The only animation present is
+                a vendor carousel's rotating loading spinner,
+                which does not flash. Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -272,8 +395,19 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                No functionality requires a path-based or
+                multipoint gesture. Maps are the only
+                candidate: the map library's pinch-zoom is
+                available on a touch screen, but the zoom
+                control buttons ship enabled on every map
+                display, so zooming has a single-pointer
+                alternative. The media lightbox deliberately
+                does not implement pinch-zoom, and says so in
+                its own source. Evidence is recorded in
+                docs/accessibility/findings/2026-10-09-visual-pass.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -282,8 +416,16 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                No functionality is triggered by the down
+                event. The product binds no mousedown or
+                pointerdown handlers at all; activation
+                happens on click, which fires on the up event
+                and can be aborted by moving the pointer away
+                before releasing. Evidence is recorded in
+                docs/accessibility/findings/2026-10-09-visual-pass.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -292,8 +434,27 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                Evaluated with checkLabelInName across
+                anonymous and administrative pages, which
+                compares each control's accessible name
+                against its visible label and reports a
+                control whose name does not contain its label.
+                Zero findings across the home page, browse,
+                login, registration, communities, the admin
+                overview, content and people listings, the
+                digital heritage node form, submission
+                settings and the communities and protocols
+                manager. The check approximates the accessible
+                name computation rather than implementing all
+                of it, so it is a strong indicator rather than
+                a proof; an earlier version placed the title
+                attribute ahead of text content and reported
+                21 false positives before that was corrected.
+                Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -302,8 +463,15 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                No devicemotion, deviceorientation or
+                DeviceMotionEvent handler exists anywhere in
+                the product's modules or themes, so no
+                functionality is operated by device motion.
+                Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -356,8 +524,24 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                Labels or instructions are provided wherever
+                input is required. Most controls carry a
+                visible label. Where one is visually hidden it
+                is because a visible column header labels the
+                column, which covers 31 of the 47 such
+                controls on the richest form in the product.
+                The remaining 16, on the submission settings
+                field groups, sit under a visible fieldset
+                instruction explaining what the groups do, and
+                each control carries a programmatic label plus
+                either a placeholder or a self-describing
+                default option. The criterion asks that labels
+                or instructions be provided, not that every
+                label be visible. Evidence is recorded in
+                docs/accessibility/findings/2026-10-09-visual-pass.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -366,8 +550,13 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                Satisfied by definition in HTML5, and removed
+                from WCAG in 2.2. Recorded with its reasoning
+                rather than tested. Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -416,8 +605,15 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                No live-streaming or real-time media
+                capability exists in the product, so there is
+                no live content to caption. Recorded as
+                not-applicable rather than supports, which are
+                different claims. Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -426,8 +622,18 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: does-not-support
+              notes: >-
+                No synchronised audio description capability
+                for locally hosted video: the video media type
+                has no described-track field and the player
+                renders no track element (issue #2355). A
+                transcript does not satisfy 1.2.5, which
+                requires description synchronised with the
+                video. The remote_video type depends on the
+                provider. Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -436,8 +642,14 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                No orientation lock. The theme's breakpoint
+                map defines portrait and landscape aliases,
+                but nothing uses them to restrict display to a
+                single orientation. Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -446,8 +658,34 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                Every field that collects information about the user
+                carries the matching autocomplete token. The login
+                form uses username and current-password. The account
+                form does too when a person edits their own account:
+                core's AccountForm sets autocomplete="off" on the
+                username, email and password fields whenever the
+                form is not a registration, and mukurtu_core
+                overrides that for self-editing only (issue #2372).
+
+                The restriction core added is kept where it earns
+                its place. When an administrator edits somebody
+                else's account the fields stay at off, so a browser
+                cannot offer the administrator's own saved details
+                on another person's record. input-purpose.spec.ts
+                gates both directions on every build: three fields
+                asserted to carry their token on self-edit, and a
+                negative control asserting they keep off on another
+                account, using a second signed-in session to prove
+                the two are different accounts.
+
+                Measured inventory-wide on the main run at 05ca5a668
+                (run 38752434462): checkInputPurpose reports zero
+                findings across 29 pages.
+
+                Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -485,8 +723,27 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: partially-supports
+              notes: >-
+                Evaluated with checkTextZoom, which doubles the
+                browser's own default font size through the Chrome
+                DevTools Protocol and reloads the page with it
+                already set, so that rem media queries re-evaluate
+                the way they do for a reader who has chosen a larger
+                text size.
+
+                Forty-three of the 45 pages in the inventory need no
+                horizontal scrolling at 200%. Two do: the Local
+                Contexts supported projects pages, for a community
+                and for a protocol, each reporting 1485px of content
+                in a 1280px viewport. The same two pages at the same
+                width failed on two separate main runs (38003543030
+                and 38064032171), so this is stable rather than
+                intermittent, and every other automated check on
+                those two pages is clean (issue #2392).
+
+                Page zoom, as distinct from text size, is not
+                covered by this check.
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -495,8 +752,16 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                No images of text. The only image the product
+                renders on its own pages is the site logo,
+                which the criterion exempts. Every other
+                graphic in the theme is an icon or interface
+                decoration carrying no text. Evidence is
+                recorded in
+                docs/accessibility/findings/2026-10-09-visual-pass.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -578,8 +843,25 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                Evaluated with checkTextSpacing, which applies
+                the line height, letter spacing, word spacing
+                and paragraph spacing the criterion specifies,
+                then detects both page overflow and elements
+                clipping their own text. Zero findings across
+                the home page, browse, login, the admin
+                overview, the content listing and the digital
+                heritage node form. An earlier version of that
+                check reported 125 findings, of which 121 were
+                visually-hidden elements matching the
+                one-pixel clipped-box shape by design; it was
+                corrected in PR #2366 before this evaluation,
+                so the clean result reflects the content
+                rather than a broken measurement. Evidence is
+                recorded in
+                docs/accessibility/findings/2026-10-09-visual-pass.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -598,8 +880,19 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                More than one way is available to reach
+                content. The site offers a search box in the
+                header on every page, a main navigation menu,
+                and browse listings reached from the home
+                page, including browse by community and by
+                collection. Any two of these satisfy the
+                criterion independently, so no sitemap is
+                required, and none is installed. Evidence is
+                recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -618,8 +911,43 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                Every element in the tab order shows a focus
+                indicator, across the whole page inventory. Measured
+                on the main run at 05ca5a668 (run 38752434462): 45
+                pages, zero findings, including the administrative
+                forms and the three pages carrying a rich text
+                editor. The check's own negative control still
+                reported its three deliberately unstyled elements on
+                the same run, so the clean result reflects the pages
+                rather than a check that stopped working.
+
+                Two defects were fixed to get here. The Gin admin
+                theme left each form's original action buttons in
+                the tab order inside a one-pixel container, so focus
+                could land on a control with none of its box on
+                screen, and on a confirmation form the only Cancel a
+                keyboard could reach was the invisible one; that is
+                fixed and gated by admin-focus-visible.spec.ts,
+                which fails the build if it returns (issue #2389).
+                The inventory-wide check itself was reporting
+                elements at tabindex="-1", which are not in the tab
+                order, so CKEditor's toolbar container produced a
+                finding on every page with an editor; the check now
+                skips them (issue #2419).
+
+                Indicators are not all outlines: the main navigation
+                draws a pseudo-element ring, and CKEditor draws a
+                box-shadow ring plus a border change, so a check
+                reading only the outline property reports both as
+                missing. What the automated layer does not decide is
+                whether a container a script focuses deliberately,
+                such as a dialog on open, needs a visible ring; that
+                is left to the manual keyboard pass.
+
+                Evidence is recorded in
+                docs/accessibility/findings/2026-10-15-focus-visible-clean-run.md.
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -628,8 +956,47 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: partially-supports
+              notes: >-
+                The language vocabulary now carries a Language code
+                field, and dictionary templates place it in a lang
+                attribute. Verified on a running site: a word whose
+                language term holds haw renders its page title as
+                <h1 lang="haw"> and marks the title field and both
+                alternate spellings the same way, and renders no
+                lang at all when that code is left blank, which is
+                the documented behaviour rather than a silent
+                failure. Additional entry terms and sample sentences
+                are marked by the same mechanism, including sample
+                sentences nested under an entry. Local Contexts
+                labels emit lang correctly as before.
+
+                The rest of the content cannot express its language.
+                Digital heritage titles, descriptions and
+                transcriptions, taxonomy term names, and collection
+                and community descriptions can all hold
+                Indigenous-language text with no way to mark it. The
+                digital heritage Language field cannot be reused for
+                this: it records the languages present in an item
+                including its media assets, is unlimited in
+                cardinality and creates terms on the fly, so reading
+                it as "this title is written in X" would mark text
+                as the wrong language, which helps a screen reader
+                user less than leaving it unmarked (issues #2354,
+                #2357). Within the dictionary, definition,
+                pronunciation, translation and word origin are
+                assumed to be in the site's language. That is right
+                for most sites and wrong for a site writing a
+                monolingual dictionary, and it is not configurable
+                (issue #2353).
+
+                Recorded as does-not-support in October 2026 because
+                the vocabulary had no code field and no template
+                emitted one. Both arrived in #2352; this level
+                reflects what the product does now, not the fix
+                alone. Evidence is recorded in
+                docs/accessibility/findings/2026-10-13-language-of-parts.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -638,8 +1005,17 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                Navigation appears in the same relative order
+                on every page. Checked as a visitor across the
+                home page, browse, communities and login: the
+                main menu is identical in content and order on
+                all four, as are the header search, the skip
+                link and the site logo's target. Evidence is
+                recorded in
+                docs/accessibility/findings/2026-10-09-visual-pass.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -648,8 +1024,15 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                Components with the same function are labelled
+                the same way across pages. The header search
+                button, the skip link and the site logo link
+                are identical on the home page, browse,
+                communities and login. Evidence is recorded in
+                docs/accessibility/findings/2026-10-09-visual-pass.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -658,8 +1041,18 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                Error messages suggest a correction where one
+                is known. A malformed email address returns
+                "The email address is not valid. Use the
+                format user@example.com", which names both the
+                problem and the expected form. Required-field
+                errors name the field and what is needed, for
+                example "At least one Cultural Protocol must
+                be selected". Evidence is recorded in
+                docs/accessibility/findings/2026-10-09-visual-pass.md.
+
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -668,8 +1061,30 @@ chapters:
         components:
           - name: web
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                Deletion of entities goes through a confirmation
+                form throughout: 19 classes extend a confirm or
+                delete form base, covering communities, protocols,
+                collections, exports, import strategies, memberships
+                and legacy labels, and the Views Bulk Operations
+                delete action on the media listing sets
+                add_confirmation.
+
+                Bulk removal of group memberships was the exception
+                and is no longer. The members overview uses Organic
+                Groups' own bulk form, which offers no confirmation
+                option, so the delete action now stages the
+                selection in a tempstore and the form's
+                confirm_form_route_name sends the person to a
+                confirm step that names every member it is about to
+                remove, and separately lists any it cannot remove
+                with the reason (issue #2370). Twelve kernel tests
+                cover it, including that running the action alone
+                removes nobody.
+
+                Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
           - name: authoring-tool
             adherence:
               level: not-evaluated
