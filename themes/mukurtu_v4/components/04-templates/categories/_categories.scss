@@ -60,7 +60,9 @@
   }
 }
 
-.category-teaser:not(:has(.media--image)) {
+// The names-only view mode leaves out the thumbnail on purpose, so it gets no
+// placeholder.
+.category-teaser:not(:has(.media--image)):not(.category-teaser--names-only) {
   a::before {
     content: '';
     display: block;

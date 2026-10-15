@@ -9,9 +9,9 @@ use Drupal\KernelTests\KernelTestBase;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests mukurtu_landing_page_update_40203().
+ * Tests mukurtu_landing_page_update_40203() and 40204().
  *
- * The hook widens two allowlists on an existing site. The happy path matters
+ * The hooks widen allowlists on an existing site. The happy path matters
  * less than the guard rails: an allowlist key that is absent means the
  * category is unrestricted, so writing one would take block availability away
  * rather than grant it. These tests pin that behaviour.
@@ -22,6 +22,8 @@ class LandingPageRestrictionsUpdateTest extends KernelTestBase {
   protected const DISPLAY = 'core.entity_view_display.node.landing_page.default';
 
   protected const LEGACY_VIEW = 'views_block:browse_by_community-community_browse_block';
+
+  protected const NAMES_BLOCK = 'views_block:mukurtu_categories-browse_by_category_names_block';
 
   protected const HEROES = [
     'inline_block:full_image_with_description',
@@ -98,6 +100,7 @@ class LandingPageRestrictionsUpdateTest extends KernelTestBase {
       $allowlists = &$restrictions['entity_view_mode_restriction']['allowlisted_blocks'];
       $allowlists['Inline blocks'] = array_values(array_diff($allowlists['Inline blocks'], self::HEROES));
       unset($allowlists['Mukurtu']);
+      $allowlists['Lists (Views)'] = array_values(array_diff($allowlists['Lists (Views)'], [self::NAMES_BLOCK]));
       array_unshift($allowlists['Lists (Views)'], self::LEGACY_VIEW);
     });
   }
@@ -134,14 +137,15 @@ class LandingPageRestrictionsUpdateTest extends KernelTestBase {
   /**
    * An updated site must land on exactly what a fresh install ships.
    *
-   * The hook and config/install are maintained separately, so they can drift.
-   * This pins them together: whatever a 4.0.1 site ends up with after the
-   * update has to equal the allowlists in the shipped display.
+   * The hooks and config/install are maintained separately, so they can
+   * drift. This pins them together: whatever a 4.0.1 site ends up with after
+   * the updates has to equal the allowlists in the shipped display.
    */
   public function testPostUpdateStateMatchesShippedConfig(): void {
     $this->writePreFixDisplay();
 
     mukurtu_landing_page_update_40203();
+    mukurtu_landing_page_update_40204();
 
     $shipped = $this->shipped['third_party_settings']['layout_builder_restrictions']['entity_view_mode_restriction']['allowlisted_blocks'];
     $this->assertSame($shipped, $this->allowlists());
@@ -222,6 +226,43 @@ class LandingPageRestrictionsUpdateTest extends KernelTestBase {
 
     $this->assertSame([], $this->allowlists());
     $this->assertStringContainsString('not configured', $message);
+  }
+
+  /**
+   * 40204 offers the names-only category block and keeps the others.
+   */
+  public function testAddsNamesOnlyCategoryBlock(): void {
+    $this->writePreFixDisplay();
+    $before = $this->allowlists()['Lists (Views)'];
+    $this->assertNotContains(self::NAMES_BLOCK, $before);
+
+    $message = mukurtu_landing_page_update_40204();
+
+    $after = $this->allowlists()['Lists (Views)'];
+    $this->assertContains(self::NAMES_BLOCK, $after);
+    $this->assertSame([], array_diff($before, $after));
+    $this->assertStringContainsString('names only', $message);
+
+    // Running it again changes nothing.
+    $message = mukurtu_landing_page_update_40204();
+    $this->assertSame($after, $this->allowlists()['Lists (Views)']);
+    $this->assertStringContainsString('already up to date', $message);
+  }
+
+  /**
+   * 40204 does not create a views allowlist where none exists.
+   *
+   * An absent key means every views block is offered, so writing one would
+   * take the others away.
+   */
+  public function testNamesOnlyBlockLeavesUnrestrictedViewsAlone(): void {
+    $this->writeDisplay(static function (array &$restrictions): void {
+      unset($restrictions['entity_view_mode_restriction']['allowlisted_blocks']['Lists (Views)']);
+    });
+
+    mukurtu_landing_page_update_40204();
+
+    $this->assertArrayNotHasKey('Lists (Views)', $this->allowlists());
   }
 
 }

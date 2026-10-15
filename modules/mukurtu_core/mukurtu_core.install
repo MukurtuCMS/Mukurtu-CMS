@@ -699,3 +699,45 @@ function mukurtu_core_update_40214(): void {
     }
   }
 }
+
+/**
+ * Add a names-only Browse by Category block for landing pages.
+ */
+function mukurtu_core_update_40217(): ?string {
+  // Keep the docblock above to one line; see mukurtu_core_update_40201() for
+  // why.
+  //
+  // Some sites want the category list without thumbnails. Hiding the
+  // thumbnail field on the teaser display is not enough, because the theme
+  // draws a placeholder on any category card without an image, so this ships
+  // a separate view mode and block display instead. 40214 to 40216 are held
+  // by open PRs.
+  $entity_type_manager = \Drupal::entityTypeManager();
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core') . '/config/install/';
+  $read = fn(string $name): array => Yaml::decode(file_get_contents($config_path . $name . '.yml'));
+
+  $to_create = [
+    'entity_view_mode' => 'core.entity_view_mode.taxonomy_term.names_only',
+    'entity_view_display' => 'core.entity_view_display.taxonomy_term.category.names_only',
+  ];
+  foreach ($to_create as $entity_type_id => $config_name) {
+    $storage = $entity_type_manager->getStorage($entity_type_id);
+    $values = $read($config_name);
+    if (!$storage->load($values['id'])) {
+      $storage->create($values)->save();
+    }
+  }
+
+  $view = $entity_type_manager->getStorage('view')->load('mukurtu_categories');
+  if (!$view) {
+    return NULL;
+  }
+  $displays = $view->get('display');
+  if (isset($displays['browse_by_category_names_block'])) {
+    return NULL;
+  }
+  $displays['browse_by_category_names_block'] = $read('views.view.mukurtu_categories')['display']['browse_by_category_names_block'];
+  $view->set('display', $displays)->save();
+
+  return (string) t('Added a Browse by Category (names only) block. Place it on a landing page to list categories without thumbnails.');
+}
