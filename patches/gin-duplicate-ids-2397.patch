@@ -1,0 +1,100 @@
+diff --git a/templates/navigation/fix-toolbar-js-error.html.twig b/templates/navigation/fix-toolbar-js-error.html.twig
+--- a/templates/navigation/fix-toolbar-js-error.html.twig
++++ b/templates/navigation/fix-toolbar-js-error.html.twig
+@@ -1,5 +1,5 @@
+ {# @todo - Temporarily fix toolbar JS errors as toolbar is not present anymore. #}
+-{% if toolbar_variant == 'new' or core_navigation %}
++{% if core_navigation %}
+   <div id="toolbar-administration" class="toolbar" height="0px" hidden>
+     <div class="toolbar-tab--toolbar-item-shortcuts" hidden>
+       <a id="toolbar-item-shortcuts" class="toolbar-item" data-toolbar-tray="toolbar-item-shortcuts-tray" hidden></a>
+diff --git a/templates/navigation/menu-region--middle.html.twig b/templates/navigation/menu-region--middle.html.twig
+--- a/templates/navigation/menu-region--middle.html.twig
++++ b/templates/navigation/menu-region--middle.html.twig
+@@ -10,7 +10,7 @@
+ {% macro menu_items(items, attributes) %}
+   {% for key, item in items %}
+     {% set item_class = 'toolbar-link--' ~ item.class|clean_class %}
+-    <li id="{{ item_id }}" class="{{ item.below ? 'toolbar-menu__item--has-dropdown' }} toolbar-menu__item toolbar-menu__item--level-1" data-url="{{ item.url }}">
++    <li class="{{ item.below ? 'toolbar-menu__item--has-dropdown' }} toolbar-menu__item toolbar-menu__item--level-1" data-url="{{ item.url }}">
+       {% if item.below is empty %}
+         {% if item.url %}
+           <a href="{{ item.url }}" class="toolbar-link toolbar-link--has-icon {{ item_class }}">
+diff --git a/templates/navigation/navigation--gin.html.twig b/templates/navigation/navigation--gin.html.twig
+--- a/templates/navigation/navigation--gin.html.twig
++++ b/templates/navigation/navigation--gin.html.twig
+@@ -10,7 +10,7 @@
+ 
+     <div class="admin-toolbar__header">
+       <div class="navigation-menu-wrapper menu--logo admin-toolbar__logo">
+-        <ul class="toolbar-menu" data-once="toolbar-menu" aria-labelledby="menu--logo">
++        <ul class="toolbar-menu" data-once="toolbar-menu">
+           <li class="toolbar-menu__item toolbar-menu__item--level-1">
+             {% if icon_path %}
+               <a class="toolbar-link" href="{{ path('<front>') }}">
+diff --git a/templates/navigation/toolbar--gin--secondary.html.twig b/templates/navigation/toolbar--gin--secondary.html.twig
+--- a/templates/navigation/toolbar--gin--secondary.html.twig
++++ b/templates/navigation/toolbar--gin--secondary.html.twig
+@@ -65,6 +65,8 @@
+           {% else %}
+             {{ tab.link }}
+           {% endif %}
++          {# Tabs without a tray, such as "Back to site", would otherwise get an empty, unlabeled navigation landmark. #}
++          {% if tray %}
+           <div{{ tray.attributes }}>
+             {% if tray.label %}
+               <nav class="toolbar-lining clearfix" role="navigation" aria-label="{{ tray.label }}">
+@@ -75,6 +77,7 @@
+             {{ tray.links }}
+             </nav>
+           </div>
++          {% endif %}
+         </div>
+       {% endif %}
+     {% endfor %}
+diff --git a/templates/views/views-view-table.html.twig b/templates/views/views-view-table.html.twig
+--- a/templates/views/views-view-table.html.twig
++++ b/templates/views/views-view-table.html.twig
+@@ -56,7 +56,9 @@
+             ]
+           %}
+         {% endif %}
+-        <th{{ column.attributes.addClass(column_classes).setAttribute('scope', 'col') }}>
++        {% set th_attributes = column.attributes.addClass(column_classes).setAttribute('scope', 'col') %}
++        {# The sticky copy drops the ids so they stay unique and td headers reach the real table. #}
++        <th{{ gin_is_sticky ? th_attributes|without('id') : th_attributes }}>
+           {% if gin_is_sticky and fields[key] is defined and 'bulk-form' in fields[key] %}
+             <input
+               type="checkbox"
+diff --git a/templates/dataset/table.html.twig b/templates/dataset/table.html.twig
+--- a/templates/dataset/table.html.twig
++++ b/templates/dataset/table.html.twig
+@@ -42,7 +42,7 @@
+ 
+ {% import _self as macros %}
+ 
+-{% macro table_header(header) %}
++{% macro table_header(header, gin_is_sticky) %}
+   <thead>
+     <tr>
+       {% for cell in header %}
+@@ -63,7 +63,9 @@
+             ]
+           %}
+         {% endif %}
+-        <{{ cell.tag }}{{ cell.attributes.addClass(cell_classes) }}>
++        {% set cell_attributes = cell.attributes.addClass(cell_classes) %}
++        {# The sticky copy drops the ids so they stay unique and td headers reach the real table. #}
++        <{{ cell.tag }}{{ gin_is_sticky ? cell_attributes|without('id') : cell_attributes }}>
+           {{- cell.content -}}
+           {% if 'gin--sticky-bulk-select' in cell_classes %}
+             <input
+@@ -82,7 +84,7 @@
+   {% if header %}
+     {% if sticky %}
+       <table class="gin--sticky-table-header syncscroll" name="gin-sticky-header" hidden>
+-        {{ macros.table_header(header) }}
++        {{ macros.table_header(header, true) }}
+       </table>
+     {% endif %}
+   <div class="gin-table-scroll-wrapper gin-horizontal-scroll-shadow syncscroll" name="gin-sticky-header">

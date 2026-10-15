@@ -5123,6 +5123,35 @@ body.is-fixed {
       align-self: center;
 }
 
+.messages__header {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  gap: var(--v-space-5xs);
+}
+
+.messages__icon {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-negative: 0;
+      flex-shrink: 0;
+}
+.messages__icon svg {
+  display: block;
+}
+
+.messages__title {
+  margin: 0;
+  font-size: var(--font-size-s);
+  font-weight: 700;
+  line-height: 1.2;
+  color: inherit;
+}
+
 .messages__close {
   display: -webkit-inline-box;
   display: -ms-inline-flexbox;
