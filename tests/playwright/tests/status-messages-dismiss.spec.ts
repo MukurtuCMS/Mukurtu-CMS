@@ -25,13 +25,22 @@ const LABELS: Record<string, string> = {
   error: 'Error message',
 };
 
+// The severity icons the template draws, decorative beside the heading
+// that names the type in words (WCAG 1.4.1, issue #2421).
+const ICONS: Record<string, string> = {
+  status: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 13" aria-hidden="true" focusable="false"><path d="M2 6.571L5.6 10 14 2" fill="none" stroke="currentColor" stroke-width="3"/></svg>',
+  warning: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 4 14" fill="currentColor" aria-hidden="true" focusable="false"><path d="M.5 0h3v9h-3z"/><circle cx="2" cy="12.5" r="1.5"/></svg>',
+  error: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 14 14" aria-hidden="true" focusable="false"><circle cx="7" cy="7" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 11.193L11.45 3" stroke="currentColor" stroke-width="2"/></svg>',
+};
+
 // Mirrors templates/misc/status-messages.html.twig.
 function messageHtml(type: string, text: string): string {
   return `
     <div class="messages-list__item messages messages--${type}" data-drupal-selector="messages" role="contentinfo" aria-label="${LABELS[type]}">
       <div class="messages__container" data-drupal-selector="messages-container"${type === 'error' ? ' role="alert"' : ''}>
         <div class="messages__header">
-          <h2 class="visually-hidden">${LABELS[type]}</h2>
+          <div class="messages__icon">${ICONS[type]}</div>
+          <h2 class="messages__title">${LABELS[type]}</h2>
         </div>
         <div class="messages__content">${text}</div>
       </div>
@@ -45,6 +54,13 @@ function messageHtml(type: string, text: string): string {
 
 const STATUS_TEXT = 'Full Image With Description <em class="placeholder">Welcome</em> has been updated.';
 const ERROR_TEXT = 'The title field is required.';
+
+const ALL_TYPES = ['status', 'warning', 'error'];
+const ALL_THREE: [string, string][] = [
+  ['status', STATUS_TEXT],
+  ['warning', 'Check this.'],
+  ['error', ERROR_TEXT],
+];
 
 function messagesListHtml(messages: [string, string][]): string {
   return `
@@ -201,6 +217,55 @@ test.describe('Dismissable status messages', () => {
     await expect(button).toBeVisible();
     await button.click();
     await expect(message(page, 'status')).toHaveCount(0);
+  });
+
+
+  /**
+   * WCAG 1.4.1 Use of Color (issue #2421). The three message types used to
+   * differ only by their box colour: no icon, identical padding, and a
+   * heading that was .visually-hidden. Someone who cannot tell the hues
+   * apart, or is on a monochrome or forced-colors display, could not tell a
+   * failure from a confirmation.
+   *
+   * These pin the two non-colour cues, and that they actually differ per
+   * type. An icon drawn identically three times would satisfy a shallower
+   * assertion while conveying nothing.
+   */
+  test('each message names its severity in visible text', async ({ page }) => {
+    await setUpFixture(page, ALL_THREE);
+
+    for (const type of ALL_TYPES) {
+      const title = message(page, type).locator('.messages__title');
+      await expect(title, `${type} has a visible heading`).toBeVisible();
+      await expect(title).toHaveText(LABELS[type]);
+    }
+  });
+
+  test('each message type draws a different icon', async ({ page }) => {
+    await setUpFixture(page, ALL_THREE);
+
+    const drawn: Record<string, string> = {};
+    for (const type of ALL_TYPES) {
+      const icon = message(page, type).locator('.messages__icon svg');
+      await expect(icon, `${type} has an icon`).toBeAttached();
+      // Decorative: the heading beside it already says the type in words.
+      await expect(icon).toHaveAttribute('aria-hidden', 'true');
+      drawn[type] = (await icon.innerHTML()).replace(/\s+/g, ' ').trim();
+    }
+    const shapes = Object.values(drawn);
+    expect(new Set(shapes).size, `the three icons are distinct, got ${JSON.stringify(drawn)}`).toBe(ALL_TYPES.length);
+  });
+
+  test('the icon follows the message colour rather than a fixed hue', async ({ page }) => {
+    // So it keeps each type's contrast and survives forced-colors mode,
+    // the same reason the dismiss button uses currentColor.
+    await setUpFixture(page, ALL_THREE);
+
+    for (const type of ALL_TYPES) {
+      const svg = message(page, type).locator('.messages__icon svg');
+      const uses = await svg.evaluate((el) => el.outerHTML.includes('currentColor'));
+      expect(uses, `${type} icon is drawn in currentColor`).toBe(true);
+    }
   });
 
   test('has no axe violations', async ({ page }) => {
