@@ -658,31 +658,34 @@ chapters:
         components:
           - name: web
             adherence:
-              level: partially-supports
+              level: supports
               notes: >-
-                The login form identifies its purpose
-                correctly: the username and password fields
-                carry autocomplete username and
-                current-password, and that is gated in CI by
-                input-purpose.spec.ts, which asserts each
-                field exists before asserting its token. The
-                account form does not. Drupal core's
-                AccountForm sets autocomplete off on the
-                email, username and password fields whenever
-                the form is not a registration, and on the
-                current password field always, so on a page
-                where a person edits their own account the
-                purpose of those fields is not
-                programmatically determinable. Core's stated
-                reason is to stop a browser prefilling another
-                person's details, which is a real concern on
-                the administrative path but does not hold
-                where someone is editing their own account.
-                The inventory-wide checkInputPurpose reports
-                these three fields on /user/*/edit and reports
-                nothing elsewhere. Evidence is recorded in
-                docs/accessibility/findings/2026-10-06-desk-review.md.
+                Every field that collects information about the user
+                carries the matching autocomplete token. The login
+                form uses username and current-password. The account
+                form does too when a person edits their own account:
+                core's AccountForm sets autocomplete="off" on the
+                username, email and password fields whenever the
+                form is not a registration, and mukurtu_core
+                overrides that for self-editing only (issue #2372).
 
+                The restriction core added is kept where it earns
+                its place. When an administrator edits somebody
+                else's account the fields stay at off, so a browser
+                cannot offer the administrator's own saved details
+                on another person's record. input-purpose.spec.ts
+                gates both directions on every build: three fields
+                asserted to carry their token on self-edit, and a
+                negative control asserting they keep off on another
+                account, using a second signed-in session to prove
+                the two are different accounts.
+
+                Measured inventory-wide on the main run at 05ca5a668
+                (run 38752434462): checkInputPurpose reports zero
+                findings across 29 pages.
+
+                Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -1058,27 +1061,30 @@ chapters:
         components:
           - name: web
             adherence:
-              level: partially-supports
+              level: supports
               notes: >-
-                Deletion of entities goes through a
-                confirmation form throughout: 19 classes
-                extend a confirm or delete form base, covering
-                communities, protocols, collections, exports,
-                import strategies, memberships and legacy
-                labels, and the Views Bulk Operations delete
-                action on the media listing sets
-                add_confirmation. Bulk removal of group
-                memberships does not. The members overview
-                uses Organic Groups' own bulk form rather than
-                Views Bulk Operations, which offers no
-                confirmation option, and its delete action
-                removes each membership immediately. Re-adding
-                a member does not restore their roles, so the
-                action is neither reversible, checked nor
-                confirmed (issue #2370). Evidence is recorded
-                in
-                docs/accessibility/findings/2026-10-06-desk-review.md.
+                Deletion of entities goes through a confirmation
+                form throughout: 19 classes extend a confirm or
+                delete form base, covering communities, protocols,
+                collections, exports, import strategies, memberships
+                and legacy labels, and the Views Bulk Operations
+                delete action on the media listing sets
+                add_confirmation.
 
+                Bulk removal of group memberships was the exception
+                and is no longer. The members overview uses Organic
+                Groups' own bulk form, which offers no confirmation
+                option, so the delete action now stages the
+                selection in a tempstore and the form's
+                confirm_form_route_name sends the person to a
+                confirm step that names every member it is about to
+                remove, and separately lists any it cannot remove
+                with the reason (issue #2370). Twelve kernel tests
+                cover it, including that running the action alone
+                removes nobody.
+
+                Evidence is recorded in
+                docs/accessibility/findings/2026-10-06-desk-review.md.
           - name: authoring-tool
             adherence:
               level: not-evaluated
