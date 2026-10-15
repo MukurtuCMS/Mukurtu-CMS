@@ -60,9 +60,16 @@
   }
 }
 
+// Without a thumbnail the name is the whole card, so drop the heading's
+// bottom margin; otherwise the link's focus ring wraps empty space. Specific
+// enough to beat the landing page's `.layout--onecol .block-wrapper h2`.
+.category-teaser.category-teaser--names-only a h2 {
+  margin-block-end: 0;
+}
+
 // The names-only view mode leaves out the thumbnail on purpose, so it gets no
 // placeholder.
-.category-teaser:not(:has(.media--image)):not(.category-teaser--names-only) {
+.category-teaser:not(:has(.media--image), .category-teaser--names-only) {
   a::before {
     content: '';
     display: block;

@@ -7005,7 +7005,12 @@ body:not(.is-always-mobile-nav) .header:not(:has(.header__logo-text)) {
   inline-size: 100%;
 }
 
-.category-teaser:not(:has(.media--image)):not(.category-teaser--names-only) a::before {
+.category-teaser.category-teaser--names-only a h2 {
+  -webkit-margin-after: 0;
+          margin-block-end: 0;
+}
+
+.category-teaser:not(:has(.media--image), .category-teaser--names-only) a::before {
   content: "";
   display: block;
   inline-size: 100%;
