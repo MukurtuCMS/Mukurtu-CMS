@@ -694,7 +694,7 @@ function mukurtu_core_update_40216(): ?string {
   // The profile now ships Chart.js in its own libraries/ directory, and
   // ChartsLibraryHooks points charts_chartjs at it. That only takes effect
   // once the charts CDN option is off, which mukurtu_install() does for new
-  // sites. 40215 is held for #2393, which merges first.
+  // sites.
   $module_handler = \Drupal::moduleHandler();
   $messages = [];
 
@@ -718,4 +718,52 @@ function mukurtu_core_update_40216(): ?string {
   }
 
   return $messages ? implode(' ', $messages) : NULL;
+}
+
+/**
+ * Add names-only versions of the Browse by Category block and Categories page.
+ */
+function mukurtu_core_update_40217(): ?string {
+  // Keep the docblock above to one line; see mukurtu_core_update_40201() for
+  // why.
+  //
+  // Some sites want the category list without thumbnails. Hiding the
+  // thumbnail field on the teaser display is not enough, because the theme
+  // draws a placeholder on any category card without an image, so this ships
+  // a separate view mode, block display and page display instead.
+  $entity_type_manager = \Drupal::entityTypeManager();
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core') . '/config/install/';
+  $read = fn(string $name): array => Yaml::decode(file_get_contents($config_path . $name . '.yml'));
+
+  $to_create = [
+    'entity_view_mode' => 'core.entity_view_mode.taxonomy_term.names_only',
+    'entity_view_display' => 'core.entity_view_display.taxonomy_term.category.names_only',
+  ];
+  foreach ($to_create as $entity_type_id => $config_name) {
+    $storage = $entity_type_manager->getStorage($entity_type_id);
+    $values = $read($config_name);
+    if (!$storage->load($values['id'])) {
+      $storage->create($values)->save();
+    }
+  }
+
+  $view = $entity_type_manager->getStorage('view')->load('mukurtu_categories');
+  if (!$view) {
+    return NULL;
+  }
+  $displays = $view->get('display');
+  $shipped = $read('views.view.mukurtu_categories')['display'];
+  $added = FALSE;
+  foreach (['browse_by_category_names_block', 'categories_names_page'] as $display_id) {
+    if (!isset($displays[$display_id])) {
+      $displays[$display_id] = $shipped[$display_id];
+      $added = TRUE;
+    }
+  }
+  if (!$added) {
+    return NULL;
+  }
+  $view->set('display', $displays)->save();
+
+  return (string) t('Added names-only versions of the Browse by Category block and the Categories page (at /category-names) for listing categories without thumbnails.');
 }
