@@ -584,14 +584,13 @@ chapters:
                 duplicate-id-aria, frame-title-unique or
                 aria-braille-equivalent check to "needs review"; results
                 from those rules are reported separately from October 2026
-                (PR #2427). What remains is form controls without an
-                accessible name on three authoring pages, 35 in total,
-                tracked in issue #2430: 31 include checkboxes in the
-                submission settings fields table, and 4 controls on the node
-                add forms whose label is present but hidden. Keyboard and
-                screen reader verification of custom widgets (carousel,
-                tabs, audio player, autocomplete) is part of the manual
-                audit cycle.
+                (PR #2427). What remains is the 31 include checkboxes in
+                the submission settings fields table, which reach the page
+                with no accessible name, so a screen reader cannot say which
+                field each one governs (issue #2430, fixed in PR #2433).
+                Keyboard and screen reader verification of custom widgets
+                (carousel, tabs, audio player, autocomplete) is part of the
+                manual audit cycle.
           - name: authoring-tool
             adherence:
               level: partially-supports
