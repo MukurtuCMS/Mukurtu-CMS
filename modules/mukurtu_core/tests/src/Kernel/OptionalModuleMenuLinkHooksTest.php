@@ -30,11 +30,26 @@ class OptionalModuleMenuLinkHooksTest extends KernelTestBase {
   protected static $modules = ['system'];
 
   /**
+   * The menu links mukurtu_core ships.
+   */
+  protected array $shippedLinks;
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp(): void {
+    parent::setUp();
+    // Read this up front: once enableModules() rebuilds the module list,
+    // profile-nested modules such as mukurtu_core can no longer be located.
+    $path = \Drupal::service('extension.list.module')->getPath('mukurtu_core');
+    $this->shippedLinks = Yaml::parseFile(\Drupal::root() . "/$path/mukurtu_core.links.menu.yml");
+  }
+
+  /**
    * Returns mukurtu_core's shipped menu links after the alter hook runs.
    */
   protected function alteredLinks(): array {
-    $path = \Drupal::service('extension.list.module')->getPath('mukurtu_core');
-    $links = Yaml::parseFile(\Drupal::root() . "/$path/mukurtu_core.links.menu.yml");
+    $links = $this->shippedLinks;
     (new OptionalModuleMenuLinkHooks())->menuLinksDiscoveredAlter($links);
     return $links;
   }
@@ -43,12 +58,10 @@ class OptionalModuleMenuLinkHooksTest extends KernelTestBase {
    * Every optional link is shipped, so the map cannot silently go stale.
    */
   public function testOptionalLinksAreShipped(): void {
-    $path = \Drupal::service('extension.list.module')->getPath('mukurtu_core');
-    $links = Yaml::parseFile(\Drupal::root() . "/$path/mukurtu_core.links.menu.yml");
     foreach (array_keys(OptionalModuleMenuLinkHooks::OPTIONAL_LINKS) as $link_id) {
-      $this->assertArrayHasKey($link_id, $links);
+      $this->assertArrayHasKey($link_id, $this->shippedLinks);
     }
-    $this->assertSame('klaro.admin', $links['mukurtu_core.klaro_settings']['route_name']);
+    $this->assertSame('klaro.admin', $this->shippedLinks['mukurtu_core.klaro_settings']['route_name']);
   }
 
   /**
