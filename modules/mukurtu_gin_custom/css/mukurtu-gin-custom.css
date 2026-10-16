@@ -664,6 +664,27 @@ short fields themselves. Shrink it in these dialogs specifically. */
     padding-bottom: 16px !important;
 }
 
+/* #2401: keep "Apply filters" level with the Name and Sort by fields.
+
+Gin bottom-aligns the actions wrapper in an exposed form (align-self:
+flex-end, margin-block-end: 0), which lines the button up with the bottom of
+the flex line. The two dialog-wide spacing rules earlier in this file move
+that line: .js-form-item's 1rem margin-block-end puts 16px under each field,
+so the line ends 16px below them, and the submit's 0.5rem margin-block-start
+pushes the button down inside its wrapper. Measured, the button's bottom edge
+sat 16px below the fields'.
+
+Same specificity as those rules and later in the file, so no !important is
+needed. The gap above the media grid comes from the 16px padding-bottom
+above, so the fields don't need their own. */
+.media-library-widget-modal .views-exposed-form .js-form-item {
+    margin-block-end: 0;
+}
+
+.media-library-widget-modal .views-exposed-form .views-exposed-form__item--actions input[type="submit"] {
+    margin-block-start: 0;
+}
+
 /* gin_lb adds its own background-image:url(chevron.svg) !important arrow to every
    .glb-form-element--type-select it renders (media library, and every Layout Builder
    add/configure/move block dialog), already color-matched to Gin's light/dark admin
