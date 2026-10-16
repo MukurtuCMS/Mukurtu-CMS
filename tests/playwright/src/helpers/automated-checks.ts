@@ -26,6 +26,9 @@ interface CheckFinding {
   // act on a finding without reproducing it first. checkTextZoom uses
   // these; see the comment where it fills them in (#2392).
   offenders?: { tag: string; id: string; cls: string; right: number; width: number; depth: number }[];
+  // Boxes that reached past the viewport but were clipped by an ancestor, so
+  // they could not have caused the scroll (#2436).
+  clippedOffenders?: number;
   readyState?: string;
   msSinceLoad?: number | null;
 }
@@ -151,6 +154,7 @@ export async function checkTextZoom(page: Page, testInfo: TestInfo, slug: string
     // finished adjusting rather than at a real failure.
     msSinceLoad: number | null;
     offenders: Offender[];
+    clippedOffenders: number;
   };
 
   let overflow: Measurement | null = null;
@@ -163,11 +167,36 @@ export async function checkTextZoom(page: Page, testInfo: TestInfo, slug: string
 
       // Only worth walking the DOM when something is actually wide.
       const offenders: Offender[] = [];
+      let clipped = 0;
       if (scrollWidth > clientWidth + 1) {
+        // An element whose overflow is clipped by an ancestor cannot widen
+        // the page, however far past the viewport its own box reaches. On
+        // the Local Contexts pages this list used to name the group name
+        // inside h1.page-title, which Gin styles overflow: hidden with an
+        // ellipsis: clipped by its own parent, incapable of causing a
+        // scrollbar, and convincing enough that it nearly got its own CSS
+        // fix (#2436).
+        //
+        // The nearest horizontally clipping ancestor decides. If that
+        // ancestor sits inside the viewport, everything it clips is
+        // contained; if it overflows too, it is reported on its own merits
+        // by this same loop, so nothing real is lost either way.
+        const isContained = (el: HTMLElement): boolean => {
+          let n: HTMLElement | null = el.parentElement;
+          while (n && n !== document.documentElement) {
+            if (getComputedStyle(n).overflowX !== 'visible') {
+              return n.getBoundingClientRect().right <= clientWidth + 1;
+            }
+            n = n.parentElement;
+          }
+          return false;
+        };
+
         for (const el of Array.from(document.querySelectorAll('body *')) as HTMLElement[]) {
           const b = el.getBoundingClientRect();
           if (b.width === 0 || b.height === 0) continue;
           if (b.right <= clientWidth + 1) continue;
+          if (isContained(el)) { clipped += 1; continue; }
           let depth = 0;
           let n: HTMLElement | null = el;
           while ((n = n.parentElement)) depth += 1;
@@ -194,6 +223,10 @@ export async function checkTextZoom(page: Page, testInfo: TestInfo, slug: string
         readyState: document.readyState,
         msSinceLoad: loaded === null ? null : Math.round(performance.now() - loaded),
         offenders: offenders.slice(0, 8),
+        // How many boxes reached past the viewport but were clipped by an
+        // ancestor, so a reader can tell this list was filtered rather than
+        // empty by luck.
+        clippedOffenders: clipped,
       };
     });
   } catch {
@@ -218,6 +251,7 @@ export async function checkTextZoom(page: Page, testInfo: TestInfo, slug: string
       // wide, which cost two rounds of manual reproduction on the Local
       // Contexts pages and still did not identify the element (#2392).
       offenders: overflow.offenders,
+      clippedOffenders: overflow.clippedOffenders,
       readyState: overflow.readyState,
       msSinceLoad: overflow.msSinceLoad,
       detail: {
