@@ -87,8 +87,7 @@ class NotifyFrequencyTest extends KernelTestBase {
   }
 
   /**
-   * 'none' also suppresses the pending-approval registration notice to
-   * managers, so email is fully opt-in.
+   * The 'none' frequency also suppresses the manager registration notice.
    */
   public function testNoneSuppressesRegistrationNotice(): void {
     $user = User::create(['name' => 'opted_out_manager', 'status' => 1]);
@@ -111,8 +110,7 @@ class NotifyFrequencyTest extends KernelTestBase {
   }
 
   /**
-   * The update hook changes the field default to 'none' without touching
-   * an existing user's chosen frequency.
+   * Update 40058 changes the field default but not existing users' values.
    */
   public function testUpdate40058ChangesDefaultOnly(): void {
     $field = FieldConfig::loadByName('user', 'user', 'field_notify_frequency');
