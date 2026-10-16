@@ -389,6 +389,7 @@ function mukurtu_install() {
     'administer contact_message display',
     'administer contact_message fields',
     'administer contact_message form display',
+    'administer dictionary glossary order',
     'administer display modes',
     'administer embed buttons',
     'administer facets',
@@ -690,6 +691,14 @@ function mukurtu_install() {
   // default for new installs.
   \Drupal::configFactory()->getEditable('extlink.settings')
     ->set('extlink_target', TRUE)
+    ->save();
+
+  // Serve Chart.js from the copy the profile ships in libraries/ rather than
+  // unpkg.com. charts ships with its CDN option on, which rewrites the
+  // library paths to unpkg.com and makes the status report warn about it.
+  // @see \Drupal\mukurtu_core\Hook\ChartsLibraryHooks
+  \Drupal::configFactory()->getEditable('charts.settings')
+    ->set('advanced.requirements.cdn', FALSE)
     ->save();
 
   // Protect the feedback contact form and comment form with a CAPTCHA point.

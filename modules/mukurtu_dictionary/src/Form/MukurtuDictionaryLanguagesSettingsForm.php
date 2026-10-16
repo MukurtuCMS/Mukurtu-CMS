@@ -100,6 +100,19 @@ class MukurtuDictionaryLanguagesSettingsForm extends ConfigFormBase
       ];
     }
 
+    $form['in_language_fields'] = [
+      '#type' => 'checkboxes',
+      '#title' => $this->t("Fields written in the word's language"),
+      '#description' => $this->t("The term, alternate spellings, word entries, and sample sentences are always marked as being in the word's language, so a screen reader pronounces them with that language's rules instead of the site language's. The fields below are usually written in the site's language, so they are not marked by default. Select any that your dictionary writes in the word's language instead. Leave the rest clear: marking text with the wrong language is worse for a screen reader user than not marking it at all. Marking has an effect only on words whose language has a Language code set."),
+      '#options' => [
+        'field_definition' => $this->t('Definition'),
+        'field_pronunciation' => $this->t('Pronunciation'),
+        'field_translation' => $this->t('Translation'),
+        'field_word_origin' => $this->t('Word Origin'),
+      ],
+      '#default_value' => $config->get('in_language_fields') ?? [],
+    ];
+
     return $form;
   }
 
@@ -113,6 +126,11 @@ class MukurtuDictionaryLanguagesSettingsForm extends ConfigFormBase
     $values = $form_state->getValue('available_languages');
     $enabledLanguages = array_filter($values, fn($element) => $element !== 0);
     $config->set('available_languages', $enabledLanguages);
+
+    // Stored as a plain list, so the hook can intersect it against the
+    // fields it knows about without caring how the form keyed it.
+    $config->set('in_language_fields', array_values(array_filter($form_state->getValue('in_language_fields'))));
+
     $config->save();
 
     parent::submitForm($form, $form_state);

@@ -1,6 +1,7 @@
 <?php
 
 use Drupal\Component\Serialization\Json;
+use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\CloseModalDialogCommand;
@@ -10,6 +11,7 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\File\Exception\InvalidStreamWrapperException;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Link;
+use Drupal\Core\Render\Markup;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Url;
 use Drupal\file\Element\ManagedFile;
@@ -28,6 +30,7 @@ use Drupal\mukurtu_media\Form\ExternalEmbedForm;
 use Drupal\mukurtu_media\Form\MukurtuFileUploadForm;
 use Drupal\mukurtu_media\Form\SoundCloudAddForm;
 use Drupal\mukurtu_media\Entity\SoundCloud;
+use Drupal\taxonomy\Entity\Term;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -80,6 +83,21 @@ function mukurtu_media_media_source_info_alter(array &$sources)
       $source['forms']['media_library_add'] = MukurtuFileUploadForm::class;
     }
   }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function mukurtu_media_theme(): array {
+  return [
+    'mukurtu_file_video' => [
+      'variables' => [
+        'files' => [],
+        'attributes' => NULL,
+        'tracks' => [],
+      ],
+    ],
+  ];
 }
 
 /**
@@ -254,7 +272,7 @@ function mukurtu_media_form_media_document_add_form_alter(&$form, FormStateInter
   // Prepend a process callback for the thumbnail field to add our default
   // thumbnail logic.
   array_unshift($form["field_thumbnail"]["widget"][0]["#process"], 'mukurtu_media_process_thumb');
-
+  $form['actions']['submit']['#submit'][] = 'mukurtu_media_video_track_language_code_warning';
 }
 
 /**
@@ -297,6 +315,38 @@ function mukurtu_media_form_media_video_edit_form_alter(&$form, FormStateInterfa
 {
   $form['field_media_video_file']['widget'][0]['#process'][] = 'mukurtu_media_refresh_media_process';
   array_unshift($form['field_thumbnail']['widget'][0]['#process'], 'mukurtu_media_process_thumb');
+  $form['actions']['submit']['#submit'][] = 'mukurtu_media_video_track_language_code_warning';
+}
+
+/**
+ * Submit handler: warns about caption tracks whose language has no code.
+ *
+ * Without a code the track renders with no srclang, so browsers can't
+ * identify its language. Runs after the save and doesn't block it.
+ */
+function mukurtu_media_video_track_language_code_warning(array &$form, FormStateInterface $form_state): void {
+  $media = $form_state->getFormObject()->getEntity();
+  if (!$media->hasField('field_media_video_tracks')) {
+    return;
+  }
+  $warned = [];
+  foreach ($media->get('field_media_video_tracks') as $item) {
+    $term = $item->language_target_id ? Term::load($item->language_target_id) : NULL;
+    if (!$term || isset($warned[$term->id()]) || !$term->hasField('field_language_code')) {
+      continue;
+    }
+    if (trim((string) $term->get('field_language_code')->value) !== '') {
+      continue;
+    }
+    $warned[$term->id()] = TRUE;
+    $term = \Drupal::service('entity.repository')->getTranslationFromContext($term);
+    $language = $term->access('update')
+      ? $term->toLink(NULL, 'edit-form')->toString()
+      : Html::escape($term->label());
+    \Drupal::messenger()->addWarning(t('The @language language term has no language code, so browsers can\'t identify its caption track. Add a code to the term, such as "en" for English.', [
+      '@language' => Markup::create((string) $language),
+    ]));
+  }
 }
 
 /**

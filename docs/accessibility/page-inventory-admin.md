@@ -22,6 +22,7 @@ The Phase 2 (admin/authoring, WCAG 2.1 AA + ATAG 2.0) equivalent of [page-invent
 | Export settings | `/admin/export/settings` | |
 | Admin overview | `/admin` | Core route |
 | Admin structure | `/admin/structure` | Core route |
+| Mukurtu Dashboard | `/dashboard/mukurtu_dashboard` | `entity.dashboard.canonical`, the landing page a manager starts from. Added 2026-10-15 after #2395 and #2397 were found on it by an ad hoc scan: it was never in this inventory, so nothing recurring looked at it |
 
 Admin scans use the account in `A11Y_USERNAME`/`A11Y_PASSWORD` (default `admin`/`admin`) — a real admin account is appropriate here, unlike Phase 1's member/manage-adjacent scans, since these are genuinely admin-only routes. The `admin`/`admin` fallback is therefore fine for this inventory; it is Phase 1 that needs the real accounts, provisioned by `scripts/tugboat/provision-a11y-accounts.php` (see [page-inventory.md](page-inventory.md)).
 
