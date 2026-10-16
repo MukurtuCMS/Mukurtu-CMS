@@ -75,7 +75,7 @@ class NodeAddRouteTest extends KernelTestBase {
    * /admin/node/add redirects to /node/add.
    */
   public function testAddPageRedirects(): void {
-    $this->setCurrentUser($this->createUser(['create page content', 'create article content']));
+    $this->setCurrentUser($this->createUser(['access content', 'create page content', 'create article content']));
 
     $response = $this->get('/admin/node/add');
 
@@ -87,7 +87,7 @@ class NodeAddRouteTest extends KernelTestBase {
    * /admin/node/add/{type} redirects to /node/add/{type}, keeping the query.
    */
   public function testAddFormRedirectsWithQuery(): void {
-    $this->setCurrentUser($this->createUser(['create page content']));
+    $this->setCurrentUser($this->createUser(['access content', 'create page content']));
 
     $response = $this->get('/admin/node/add/page?foo=bar');
 
@@ -99,7 +99,7 @@ class NodeAddRouteTest extends KernelTestBase {
    * A ?destination= is passed on to the form instead of replacing the target.
    */
   public function testDestinationDoesNotSkipTheForm(): void {
-    $this->setCurrentUser($this->createUser(['create page content']));
+    $this->setCurrentUser($this->createUser(['access content', 'create page content']));
 
     $response = $this->get('/admin/node/add/page?destination=/somewhere');
 
@@ -111,7 +111,7 @@ class NodeAddRouteTest extends KernelTestBase {
    * An unknown content type is not found, not redirected.
    */
   public function testUnknownTypeIsNotFound(): void {
-    $this->setCurrentUser($this->createUser(['create page content']));
+    $this->setCurrentUser($this->createUser(['access content', 'create page content']));
 
     $response = $this->get('/admin/node/add/no_such_type');
 
@@ -134,7 +134,7 @@ class NodeAddRouteTest extends KernelTestBase {
     $route = $this->container->get('router.route_provider')->getRouteByName('node.add_page');
     $this->assertSame(MukurtuManageContentController::class . '::addPage', $route->getDefault('_controller'));
 
-    $this->setCurrentUser($this->createUser(['create page content', 'create article content']));
+    $this->setCurrentUser($this->createUser(['access content', 'create page content', 'create article content']));
     $build = MukurtuManageContentController::create($this->container)->addPage();
     $this->assertSame('mukurtu_node_add_list', $build['#theme']);
     $this->assertSame(['article', 'page'], array_keys($build['#content']));
@@ -144,7 +144,7 @@ class NodeAddRouteTest extends KernelTestBase {
    * With one content type available, /node/add goes straight to its form.
    */
   public function testCorePickerSkipsToTheOnlyType(): void {
-    $this->setCurrentUser($this->createUser(['create page content']));
+    $this->setCurrentUser($this->createUser(['access content', 'create page content']));
 
     $response = $this->get('/node/add');
 
