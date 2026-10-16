@@ -34,6 +34,11 @@
 {{ attach_library('mukurtu_v4/olivero-navigation') }}
 {% set classes = ['block', 'block-menu', 'navigation', 'menu--' ~ (derivative_plugin_id|clean_class)] %}
 
+{# heading_id has to be set before the attributes below consume it: Twig
+   resolves an undefined variable to null, so when this lived further down the
+   template the nav was built with an empty aria-labelledby, which Twig then
+   dropped entirely, leaving the navigation landmark unnamed. #}
+{% set heading_id = attributes.id ~ ('-menu'|clean_id) %}
 {% set attributes = attributes.addClass(classes).setAttribute('aria-labelledby', heading_id).setAttribute('role', 'navigation').addClass(['main-menu']) %}
 
 <div class="header-nav-overlay" data-drupal-selector="header-nav-overlay"></div>
@@ -66,8 +71,6 @@
 
 <div id="header-nav" class="header-nav" data-drupal-selector="header-nav">
   <div class="header__main-nav">
-
-    {% set heading_id = attributes.id ~ ('-menu'|clean_id) %}
 
     <nav {{ attributes }}>
       {# Label. If not displayed, we still provide it for screen readers. #}
