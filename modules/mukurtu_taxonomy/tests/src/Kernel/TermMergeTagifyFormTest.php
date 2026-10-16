@@ -16,8 +16,8 @@ use PHPUnit\Framework\Attributes\Group;
 /**
  * Tests the Tagify 'Terms to merge' element on the term merge form.
  *
- * term_merge 2.0.1 replaced its checkbox list with a comma-separated
- * autocomplete, so terms could no longer be browsed (#2438).
+ * The term_merge 2.0.1 release replaced its checkbox list with a
+ * comma-separated autocomplete, so terms could no longer be browsed (#2438).
  * mukurtu_taxonomy_form_taxonomy_merge_terms_alter() swaps in a Tagify
  * element that lists every term on click. These tests run the real term_merge
  * form, with the alter applied, through the real form pipeline, so upstream's
@@ -163,8 +163,8 @@ class TermMergeTagifyFormTest extends EntityKernelTestBase {
 /**
  * The real term_merge form with mukurtu_taxonomy's alter applied.
  *
- * mukurtu_taxonomy isn't enabled in this test, so its form alter hook doesn't
- * fire on its own.
+ * The mukurtu_taxonomy module isn't enabled in this test, so its form alter
+ * hook doesn't fire on its own.
  */
 class TermMergeTagifyTestForm extends MergeTerms {
 
