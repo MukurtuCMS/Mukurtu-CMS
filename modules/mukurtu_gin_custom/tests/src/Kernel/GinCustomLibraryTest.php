@@ -36,4 +36,26 @@ class GinCustomLibraryTest extends KernelTestBase {
     $this->assertArrayNotHasKey('toolbar/toolbar', array_flip($library['dependencies'] ?? []));
   }
 
+  /**
+   * Tests the library includes the secondary toolbar Escape handler (#2397).
+   */
+  public function testLibraryIncludesTrayEscape(): void {
+    $library = $this->container->get('library.discovery')
+      ->getLibraryByName('mukurtu_gin_custom', 'mukurtu-gin-custom');
+
+    $files = array_column($library['js'], 'data');
+    $this->assertNotEmpty(array_filter($files, fn($file) => str_ends_with($file, 'js/gin-secondary-tray-escape.js')));
+  }
+
+  /**
+   * Tests select-all-name.js loads with core's tableselect library (#2397).
+   */
+  public function testTableselectLoadsSelectAllName(): void {
+    $library = $this->container->get('library.discovery')
+      ->getLibraryByName('core', 'drupal.tableselect');
+
+    $files = array_column($library['js'], 'data');
+    $this->assertNotEmpty(array_filter($files, fn($file) => str_ends_with($file, 'mukurtu_gin_custom/js/select-all-name.js')));
+  }
+
 }
