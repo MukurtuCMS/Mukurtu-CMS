@@ -8,7 +8,9 @@
 use Drupal\Core\Extension\Requirement\RequirementSeverity;
 use Drupal\Core\Serialization\Yaml;
 use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\mukurtu_core\EntityReferenceRoleConverter;
 use Drupal\mukurtu_core\Hook\UpdatePathRequirements;
+use Drupal\mukurtu_core\Plugin\Field\FieldType\EntityReferenceRoleItem;
 use Drupal\user\Entity\Role;
 
 /**
@@ -196,34 +198,21 @@ function mukurtu_core_update_40202(): ?string {
     $messages[] = (string) t('Installed: @modules.', ['@modules' => implode(', ', $to_install)]);
   }
 
-  // Separately: Klaro (block_unknown: true) treats charts_chartjs's
+  // Separately: Klaro (block_unknown: true) treated charts_chartjs's
   // CDN-loaded Chart.js scripts as an unrecognized third-party resource and
-  // rewrites them into inert placeholders via hook_js_alter(). Registering a
-  // required klaro_app (config/install/klaro.klaro_app.charts_chartjs.yml)
-  // is not enough on its own: hook_js_alter() still substitutes a placeholder
-  // for any matched app, required or not, and Klaro's client-side JS never
-  // gets a chance to auto-load it, because the Views AJAX response that
-  // inserts these scripts (visitors' "chart" report link) never re-triggers
-  // Drupal.attachBehaviors() for the new placeholders the way a normal page
-  // load would. The klaro_app entity is still created below (useful bookkeeping
-  // if Chart.js is ever used somewhere Klaro does process normally), but what
-  // actually fixes the report page is klaro.settings:disable_urls, which
-  // hook_js_alter() checks before doing any rewriting at all
-  // (KlaroHelper::onDisabledUri(), matched against the current request URI -
-  // which for this AJAX endpoint is /visitors/_report/..., not
-  // /visitors/location, so the pattern has to match on a "/visitors" prefix
-  // rather than that one specific page). Guarded on klaro being enabled:
-  // getStorage('klaro_app') throws if the entity type doesn't exist, and
-  // klaro.settings wouldn't mean anything without the module either.
+  // rewrote them into inert placeholders via hook_js_alter(), and Klaro's
+  // client-side JS never re-activated them, because the Views AJAX response
+  // that inserts these scripts (visitors' "chart" report link) never
+  // re-triggers Drupal.attachBehaviors() the way a normal page load would.
+  // klaro.settings:disable_urls fixes that: hook_js_alter() checks it before
+  // doing any rewriting at all (KlaroHelper::onDisabledUri(), matched against
+  // the current request URI - which for this AJAX endpoint is
+  // /visitors/_report/..., not /visitors/location, so the pattern has to match
+  // on a "/visitors" prefix). This hook used to also register a required
+  // charts_chartjs klaro_app; Chart.js is now served locally, so
+  // mukurtu_core_update_40212() removes that instead. Guarded on klaro being
+  // enabled, since klaro.settings wouldn't mean anything without it.
   if ($module_handler->moduleExists('klaro')) {
-    $klaro_app_storage = \Drupal::entityTypeManager()->getStorage('klaro_app');
-    if (!$klaro_app_storage->load('charts_chartjs')) {
-      $config_path = \Drupal::service('extension.list.profile')->getPath('mukurtu') . '/config/install/klaro.klaro_app.charts_chartjs.yml';
-      $values = \Drupal\Core\Serialization\Yaml::decode(file_get_contents($config_path));
-      $klaro_app_storage->create($values)->save();
-      $messages[] = (string) t('Registered Chart.js as a required Klaro service.');
-    }
-
     $klaro_settings = \Drupal::configFactory()->getEditable('klaro.settings');
     $disable_urls = $klaro_settings->get('disable_urls') ?? [];
     if (!in_array('^\/visitors', $disable_urls, TRUE)) {
@@ -658,4 +647,75 @@ function mukurtu_core_update_40213(array &$sandbox): ?string {
       : (string) t('Fixed the language filter on @count browse and search views.', ['@count' => $fixed]);
   }
   return $total ? (string) t('Reindexed @indexes search indexes.', ['@indexes' => $total]) : NULL;
+}
+
+/**
+ * Adds an optional role to each creator, contributor, and person on content and media.
+ */
+function mukurtu_core_update_40214(): void {
+  // Keep the docblock above to one line; see mukurtu_core_update_40201()
+  // for why.
+  //
+  // Creator, Contributor and People change from entity_reference to
+  // mukurtu_entity_reference_role. Each storage is shared by every bundle
+  // that declares the field (Contributor by digital heritage and dictionary
+  // words, People by all seven media types), so each is converted once here
+  // rather than per module. See EntityReferenceRoleConverter for how.
+  EntityReferenceRoleConverter::installRoleVocabulary();
+
+  // Roles start off for every field until a manager turns them on, so an
+  // updated site's forms and pages look the same as before.
+  $settings = \Drupal::configFactory()->getEditable(EntityReferenceRoleItem::SETTINGS);
+  if ($settings->isNew()) {
+    $settings->set('enabled_fields', [])->save();
+  }
+  $manager = Role::load('mukurtu_manager');
+  if ($manager && !$manager->hasPermission('administer mukurtu person role settings')) {
+    $manager->grantPermission('administer mukurtu person role settings')->save();
+  }
+
+  $fields = [
+    'node' => ['field_creator', 'field_contributor', 'field_people'],
+    'media' => ['field_contributor', 'field_people'],
+    'paragraph' => ['field_contributor'],
+  ];
+  foreach ($fields as $entity_type_id => $field_names) {
+    foreach ($field_names as $field_name) {
+      EntityReferenceRoleConverter::convertStorage($entity_type_id, $field_name);
+      EntityReferenceRoleConverter::updateDisplays($entity_type_id, $field_name);
+    }
+  }
+}
+
+/**
+ * Serves Chart.js from the copy Mukurtu ships instead of a CDN.
+ */
+function mukurtu_core_update_40216(): ?string {
+  // The profile now ships Chart.js in its own libraries/ directory, and
+  // ChartsLibraryHooks points charts_chartjs at it. That only takes effect
+  // once the charts CDN option is off, which mukurtu_install() does for new
+  // sites. 40215 is held for #2393, which merges first.
+  $module_handler = \Drupal::moduleHandler();
+  $messages = [];
+
+  if ($module_handler->moduleExists('charts_chartjs')) {
+    $charts_settings = \Drupal::configFactory()->getEditable('charts.settings');
+    if ($charts_settings->get('advanced.requirements.cdn') !== FALSE) {
+      $charts_settings->set('advanced.requirements.cdn', FALSE)->save();
+      $messages[] = (string) t('Chart.js is now served from the copy Mukurtu ships instead of unpkg.com.');
+    }
+  }
+
+  // mukurtu_core_update_40202() registered this Klaro service only so Klaro
+  // would let the unpkg.com Chart.js scripts through. Nothing loads from
+  // there now, so it would just be a stale entry in the consent dialog.
+  if ($module_handler->moduleExists('klaro')) {
+    $app = \Drupal::entityTypeManager()->getStorage('klaro_app')->load('charts_chartjs');
+    if ($app) {
+      $app->delete();
+      $messages[] = (string) t('Removed the "Charts (visitor reports)" service from the cookie consent dialog, since Chart.js no longer loads from an outside site.');
+    }
+  }
+
+  return $messages ? implode(' ', $messages) : NULL;
 }
