@@ -72,7 +72,7 @@ class NodeAddRouteTest extends KernelTestBase {
   }
 
   /**
-   * /admin/node/add redirects to /node/add.
+   * The old picker path, /admin/node/add, redirects to /node/add.
    */
   public function testAddPageRedirects(): void {
     $this->setCurrentUser($this->createUser(['access content', 'create page content', 'create article content']));
@@ -84,7 +84,7 @@ class NodeAddRouteTest extends KernelTestBase {
   }
 
   /**
-   * /admin/node/add/{type} redirects to /node/add/{type}, keeping the query.
+   * The old add form path redirects to /node/add/{type}, keeping the query.
    */
   public function testAddFormRedirectsWithQuery(): void {
     $this->setCurrentUser($this->createUser(['access content', 'create page content']));
