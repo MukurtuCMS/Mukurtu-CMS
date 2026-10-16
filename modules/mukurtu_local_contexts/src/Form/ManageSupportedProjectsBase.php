@@ -143,16 +143,24 @@ abstract class ManageSupportedProjectsBase extends FormBase {
       '#type' => 'container',
       '#attributes' => ['class' => ['container-inline']],
     ];
+    // #size caps the width these inputs ask for. Left at Drupal's default of
+    // 60 they were the widest thing on the page at 200% text size, pushing it
+    // 205px past the viewport and forcing horizontal scrolling (#2392, WCAG
+    // 1.4.4). An input sized by the size attribute is as wide as 60 of the
+    // font's average characters, so the overflow scaled with the reader's
+    // text size and with the font the browser happened to use.
     $form['api_key_wrapper']['add']['api_key'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Add API key'),
       '#required' => TRUE,
+      '#size' => 30,
       '#parents' => ['api_key'],
     ];
     $form['api_key_wrapper']['add']['label'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Name (optional)'),
       '#maxlength' => 255,
+      '#size' => 30,
       '#parents' => ['api_key_label'],
     ];
     $form['api_key_wrapper']['add']['submit'] = [
