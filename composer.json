@@ -51,6 +51,7 @@
         "drupal/gin_lb": "^3.0@beta",
         "drupal/gin_toolbar": "^3.0",
         "drupal/google_tag": "^2.0",
+        "drupal/history": "^1.0",
         "drupal/honeypot": "^2.2",
         "drupal/key": "^1.20",
         "drupal/klaro": "^3.1",
