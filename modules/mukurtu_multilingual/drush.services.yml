@@ -1,0 +1,6 @@
+services:
+  mukurtu_multilingual.commands:
+    class: Drupal\mukurtu_multilingual\Commands\TranslationStatusCommands
+    arguments: ['@mukurtu_multilingual.translation_status_tracker']
+    tags:
+      - { name: drush.command }
