@@ -1,4 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
+import fs = require('fs');
 import path = require('path');
 
 /**
@@ -20,6 +21,11 @@ import path = require('path');
  */
 
 const THEME_DIR = path.join(__dirname, '../../../themes/mukurtu_v4');
+
+// Inlined in <head> rather than added with addStyleTag() after the content:
+// links have a 0.12s colour transition, and a stylesheet arriving after first
+// paint starts one from the default link blue, so a read could land mid-fade.
+const THEME_CSS = fs.readFileSync(path.join(THEME_DIR, 'css/style.css'), 'utf8');
 
 const WHITE = 'rgb(255, 255, 255)';
 const BLACK = 'rgb(0, 0, 0)';
@@ -57,8 +63,7 @@ function page(inner: string, { background = true, treatment = 'light', tint = tr
 }
 
 async function load(p: Page, html: string): Promise<void> {
-  await p.setContent(`<!DOCTYPE html><html><head><title>Page background fixture</title></head><body>${html}</body></html>`);
-  await p.addStyleTag({ path: path.join(THEME_DIR, 'css/style.css') });
+  await p.setContent(`<!DOCTYPE html><html><head><title>Page background fixture</title><style>${THEME_CSS}</style></head><body>${html}</body></html>`);
 }
 
 async function color(p: Page, selector: string): Promise<string> {
