@@ -222,7 +222,60 @@ function mukurtu_taxonomy_form_taxonomy_merge_terms_alter(&$form, \Drupal\Core\F
 
   $form['terms']['#description'] = t('');
 
+  // term_merge 2.0.1 replaced its checkbox list with a comma-separated
+  // autocomplete, so terms could no longer be browsed. Tagify restores a
+  // browsable list (all terms, A to Z, on click) with multiple selection.
+  // See https://github.com/MukurtuCMS/Mukurtu-CMS/issues/2438
+  $vocabulary = $form_state->getBuildInfo()['args'][0] ?? NULL;
+  if ($vocabulary instanceof \Drupal\taxonomy\VocabularyInterface && \Drupal::moduleHandler()->moduleExists('tagify')) {
+    $vid = $vocabulary->id();
+    unset($form['terms']['#tags'], $form['terms']['#maxlength']);
+    $form['terms'] = [
+      '#type' => 'entity_autocomplete_tagify',
+      '#selection_handler' => 'default:taxonomy_term',
+      '#selection_settings' => [
+        'target_bundles' => [$vid => $vid],
+        'sort' => ['field' => 'name', 'direction' => 'ASC'],
+        // 0 = no limit, so every term in the vocabulary can be browsed.
+        'match_limit' => 0,
+      ],
+      '#cardinality' => -1,
+      '#max_items' => 0,
+      // 0 = show the suggestions dropdown on click, before anything is typed.
+      '#suggestions_dropdown' => 0,
+      '#identifier' => 'mukurtu-term-merge',
+      '#attributes' => ['class' => ['mukurtu-term-merge']],
+      '#element_validate' => ['mukurtu_taxonomy_term_merge_terms_validate'],
+      '#mukurtu_vocabulary' => $vid,
+    ] + $form['terms'];
+  }
+
   $form['actions']['submit']['#value'] = t('Next');
+}
+
+/**
+ * Element validate callback for the Tagify 'Terms to merge' element.
+ *
+ * Converts Tagify's JSON value into the [['target_id' => tid]] shape that
+ * \Drupal\term_merge\Form\MergeTerms::getSelectedTermIds() reads. Terms from
+ * other vocabularies are dropped; if none remain, term_merge's own validation
+ * reports that no term was selected.
+ */
+function mukurtu_taxonomy_term_merge_terms_validate(array &$element, \Drupal\Core\Form\FormStateInterface $form_state) {
+  $selected = json_decode((string) ($element['#value'] ?? ''), TRUE);
+  $tids = is_array($selected) ? array_filter(array_map('intval', array_column($selected, 'entity_id'))) : [];
+
+  $items = [];
+  if ($tids) {
+    $terms = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->loadMultiple($tids);
+    foreach ($terms as $term) {
+      if ($term->bundle() === $element['#mukurtu_vocabulary']) {
+        $items[] = ['target_id' => (int) $term->id()];
+      }
+    }
+  }
+
+  $form_state->setValueForElement($element, $items);
 }
 
 function mukurtu_taxonomy_form_taxonomy_merge_terms_target_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
