@@ -86,9 +86,13 @@ class RouteSubscriber extends RouteSubscriberBase
     }
 
     // Serve Mukurtu's content type picker at core's /node/add, the one URL
-    // Mukurtu uses for adding content (#2399).
+    // Mukurtu uses for adding content (#2399). Drop the entity title callback
+    // ("Add content item") so the route's own "Add content" title applies.
     if ($route = $collection->get('node.add_page')) {
       $route->setDefault('_controller', MukurtuManageContentController::class . '::addPage');
+      $defaults = $route->getDefaults();
+      unset($defaults['_title_callback']);
+      $route->setDefaults($defaults);
     }
   }
 }
