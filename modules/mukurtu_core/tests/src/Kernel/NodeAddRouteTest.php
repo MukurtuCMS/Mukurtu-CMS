@@ -133,6 +133,8 @@ class NodeAddRouteTest extends KernelTestBase {
   public function testCorePickerUsesMukurtuController(): void {
     $route = $this->container->get('router.route_provider')->getRouteByName('node.add_page');
     $this->assertSame(MukurtuManageContentController::class . '::addPage', $route->getDefault('_controller'));
+    $this->assertFalse($route->hasDefault('_title_callback'));
+    $this->assertSame('Add content', $route->getDefault('_title'));
 
     $this->setCurrentUser($this->createUser(['access content', 'create page content', 'create article content']));
     $build = MukurtuManageContentController::create($this->container)->addPage();
