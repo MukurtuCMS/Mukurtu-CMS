@@ -694,7 +694,7 @@ function mukurtu_core_update_40216(): ?string {
   // The profile now ships Chart.js in its own libraries/ directory, and
   // ChartsLibraryHooks points charts_chartjs at it. That only takes effect
   // once the charts CDN option is off, which mukurtu_install() does for new
-  // sites. 40215 is held for #2393, which merges first.
+  // sites.
   $module_handler = \Drupal::moduleHandler();
   $messages = [];
 
@@ -718,4 +718,17 @@ function mukurtu_core_update_40216(): ?string {
   }
 
   return $messages ? implode(' ', $messages) : NULL;
+}
+
+/**
+ * Restore the "Add a basic page" link to the dashboard's Look and feel section.
+ */
+function mukurtu_core_update_40218(): void {
+  // Keep the docblock above to one line; see mukurtu_core_update_40201() for
+  // why.
+  //
+  // #1787 dropped the link and #2391 brings it back, ordered after "Edit
+  // footer" with the Landing Page link moved down to stay last. Rebuilding
+  // menu links picks up both changes.
+  \Drupal::service('plugin.manager.menu.link')->rebuild();
 }

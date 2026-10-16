@@ -207,3 +207,10 @@ mukurtu_core.person_role_settings:
     _title: 'Person role settings'
   requirements:
     _permission: 'administer mukurtu person role settings'
+
+mukurtu_core.dashboard_redirect:
+  path: '/dashboard'
+  defaults:
+    _controller: '\Drupal\mukurtu_core\Controller\MukurtuDashboardController::redirectToDashboard'
+  requirements:
+    _custom_access: '\Drupal\mukurtu_core\Controller\MukurtuDashboardController::access'
