@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Drupal\mukurtu_dictionary\Hook;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\mukurtu_dictionary\Entity\DictionaryWordInterface;
+use Drupal\mukurtu_dictionary\Form\MukurtuDictionaryLanguagesSettingsForm;
 use Drupal\paragraphs\ParagraphInterface;
 
 /**
@@ -21,8 +23,11 @@ use Drupal\paragraphs\ParagraphInterface;
  * blank, nothing is added.
  *
  * Only fields that hold text in the word's language are marked. Definition,
- * translation and pronunciation are usually written in the site's language,
- * so they keep the page language.
+ * pronunciation, translation and word origin are usually written in the
+ * site's language, so they keep the page language unless a site says
+ * otherwise on the dictionary languages settings form (#2353): some
+ * communities write a monolingual definition, or use in-language spelling
+ * rather than a phonetic guide for pronunciation.
  */
 final class LanguageAttributeHooks {
 
@@ -39,9 +44,63 @@ final class LanguageAttributeHooks {
     ],
   ];
 
+  /**
+   * Fields a site may additionally mark, by entity type and bundle.
+   *
+   * These hold the site's language on most sites, so none is marked unless
+   * the site selects it. The list is fixed here rather than derived from the
+   * bundle's fields: marking the wrong field is worse than marking none, so
+   * the choice is limited to the fields where being in the word's language
+   * is plausible.
+   */
+  private const OPTIONAL_FIELDS = [
+    'node' => [
+      'dictionary_word' => [
+        'field_definition',
+        'field_pronunciation',
+        'field_translation',
+        'field_word_origin',
+      ],
+    ],
+    'paragraph' => [
+      'dictionary_word_entry' => [
+        'field_definition',
+        'field_pronunciation',
+        'field_translation',
+        'field_word_origin',
+      ],
+    ],
+  ];
+
   public function __construct(
     private readonly RouteMatchInterface $routeMatch,
+    private readonly ConfigFactoryInterface $configFactory,
   ) {}
+
+  /**
+   * The fields to mark for an entity, including anything the site added.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity being rendered.
+   *
+   * @return string[]
+   *   Field names to mark.
+   */
+  private function fieldsFor(EntityInterface $entity): array {
+    $type = $entity->getEntityTypeId();
+    $bundle = $entity->bundle();
+    $fields = self::FIELDS[$type][$bundle] ?? [];
+
+    $optional = self::OPTIONAL_FIELDS[$type][$bundle] ?? [];
+    if ($optional) {
+      $chosen = $this->configFactory->get(MukurtuDictionaryLanguagesSettingsForm::SETTINGS)->get('in_language_fields') ?? [];
+      // Intersect rather than trust the stored list, so a field that is
+      // renamed or removed later cannot resurrect through stale config.
+      $fields = array_merge($fields, array_values(array_intersect($optional, $chosen)));
+    }
+
+    return $fields;
+  }
 
   /**
    * Implements hook_preprocess_field().
@@ -52,8 +111,7 @@ final class LanguageAttributeHooks {
     if (!$entity instanceof EntityInterface) {
       return;
     }
-    $fields = self::FIELDS[$entity->getEntityTypeId()][$entity->bundle()] ?? [];
-    if (!in_array($variables['field_name'], $fields, TRUE)) {
+    if (!in_array($variables['field_name'], $this->fieldsFor($entity), TRUE)) {
       return;
     }
 
@@ -93,17 +151,21 @@ final class LanguageAttributeHooks {
   /**
    * Implements hook_node_view().
    *
-   * The code lives on the language term, so a rendered word has to be
-   * invalidated when the term changes. Paragraphs are not render cached, so
-   * the node is the only cache entry that needs it.
+   * The code lives on the language term and the field list lives in config,
+   * so a rendered word has to be invalidated when either changes. Paragraphs
+   * are not render cached, so the node is the only cache entry that needs it.
    */
   #[Hook('node_view')]
   public function nodeView(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, string $view_mode): void {
-    if ($entity instanceof DictionaryWordInterface && $term = $entity->getLanguageTerm()) {
-      BubbleableMetadata::createFromRenderArray($build)
-        ->addCacheableDependency($term)
-        ->applyTo($build);
+    if (!$entity instanceof DictionaryWordInterface) {
+      return;
     }
+    $metadata = BubbleableMetadata::createFromRenderArray($build)
+      ->addCacheableDependency($this->configFactory->get(MukurtuDictionaryLanguagesSettingsForm::SETTINGS));
+    if ($term = $entity->getLanguageTerm()) {
+      $metadata->addCacheableDependency($term);
+    }
+    $metadata->applyTo($build);
   }
 
   /**

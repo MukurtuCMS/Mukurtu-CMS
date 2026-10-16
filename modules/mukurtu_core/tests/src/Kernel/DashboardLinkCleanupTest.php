@@ -375,6 +375,7 @@ class DashboardLinkCleanupTest extends KernelTestBase {
         'Configure content translation',
         'Translate configuration',
         'Translate interface',
+        'Translation status',
       ],
       'dashboard-roundtrip' => [
         'Export Lists',
