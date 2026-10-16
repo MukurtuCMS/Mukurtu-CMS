@@ -23,6 +23,11 @@ final class EditorLanguageListHooks {
   private const CODE_FIELD = 'field_language_code';
 
   /**
+   * The field marking a language as read right to left.
+   */
+  private const RTL_FIELD = 'field_language_rtl';
+
+  /**
    * Constructs the hook implementations.
    */
   public function __construct(
@@ -113,12 +118,29 @@ final class EditorLanguageListHooks {
       }
       // The term's own name, not an English reference name: a community
       // calls its language what it calls it.
-      $list[] = [
+      $entry = [
         'title' => $term->label(),
         'languageCode' => $code,
       ];
+      // CKEditor only wants to hear about right-to-left, and only says so
+      // when it is told: a term saved before the direction field existed has
+      // no value, and left to right is the safe reading of that silence.
+      if ($this->isRtl($term)) {
+        $entry['textDirection'] = 'rtl';
+      }
+      $list[] = $entry;
     }
     return $list;
+  }
+
+  /**
+   * Whether a language term is marked as read right to left.
+   */
+  private function isRtl($term): bool {
+    if (!$term->hasField(self::RTL_FIELD) || $term->get(self::RTL_FIELD)->isEmpty()) {
+      return FALSE;
+    }
+    return (bool) $term->get(self::RTL_FIELD)->value;
   }
 
 }
