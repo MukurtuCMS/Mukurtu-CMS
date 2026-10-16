@@ -30,4 +30,10 @@ mukurtu_multilingual.translate_configuration_dashboard:
   url: 'internal:/admin/config/regional/config-translation'
   weight: 2
 
-# todo: translated content list (create a view for it)
+mukurtu_multilingual.translation_status_dashboard:
+  title: 'Translation status'
+  description: 'See which content still needs translating'
+  parent: mukurtu_dashboard
+  menu_name: dashboard-multilingual
+  url: 'internal:/admin/content/translation-status'
+  weight: 4

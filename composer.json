@@ -204,7 +204,8 @@
                 "Replace deprecated createFromStream() with from() for league/csv 9.27+": "https://raw.githubusercontent.com/MukurtuCMS/Mukurtu-CMS/b9cc77302d1a471dbc1d5c5eb6921285d2da0806/patches/migrate_source_csv-createFromStream-deprecated-9.27.patch"
             },
             "drupal/gin": {
-                "Fix invalid aria-toolbar-link__labelledby attribute on toolbar menus (Gin #3598613, RTBC)": "https://raw.githubusercontent.com/MukurtuCMS/Mukurtu-CMS/43759bed7c2aa3a34e3b0a6213d6ac7dbead20d8/patches/gin-aria-labelledby-toolbar-menus-3598613.patch"
+                "Fix invalid aria-toolbar-link__labelledby attribute on toolbar menus (Gin #3598613, RTBC)": "https://raw.githubusercontent.com/MukurtuCMS/Mukurtu-CMS/43759bed7c2aa3a34e3b0a6213d6ac7dbead20d8/patches/gin-aria-labelledby-toolbar-menus-3598613.patch",
+                "Stop repeating ids in the toolbar and sticky table headers (Mukurtu #2397)": "https://raw.githubusercontent.com/MukurtuCMS/Mukurtu-CMS/8fc6ac80fc03002429cdab556fff0626e9d1b3f3/patches/gin-duplicate-ids-2397.patch"
             }
         }
     }

@@ -82,6 +82,29 @@ class Video extends Media implements VideoInterface, CulturalProtocolControlledI
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
+    // Not translatable: each track carries its own language, so every
+    // translation of the media offers all of them.
+    $definitions['field_media_video_tracks'] = BaseFieldDefinition::create('mukurtu_video_track')
+      ->setLabel(t('Captions and subtitles'))
+      ->setDescription(t('Upload caption or subtitle files so viewers can read along with the video.<br />Supported formats: vtt.<br />Maximum file size: @size.<br />Select "Choose File" to upload a track.', ['@size' => ByteSizeMarkup::create(Environment::getUploadMaxSize())]))
+      ->setSettings([
+        'file_extensions' => 'vtt',
+        'file_directory' => '[date:custom:Y]-[date:custom:m]',
+        'max_filesize' => '',
+        'description_field' => FALSE,
+        'handler' => 'default:file',
+        'uri_scheme' => 'private',
+        'display_field' => FALSE,
+        'display_default' => FALSE,
+        'target_type' => 'file'
+      ])
+      ->setCardinality(-1)
+      ->setRequired(FALSE)
+      ->setRevisionable(TRUE)
+      ->setTranslatable(FALSE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
     $definitions['field_media_tags'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Media Tags'))
       ->setDescription(t('Media tags are used to label media assets to help find them within the media library. They are also used to trigger taxonomy based media content warnings.	<br />Include as many media tags as needed. Select from existing media tags or add new ones.'))

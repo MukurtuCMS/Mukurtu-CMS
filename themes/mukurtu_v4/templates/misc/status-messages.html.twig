@@ -5,9 +5,10 @@
  *
  * Displays status, error, and warning messages, grouped by type.
  *
- * An invisible heading identifies the messages for assistive technology.
- * Sighted users see a colored box. See
- * https://www.w3.org/TR/WCAG-TECHS/H69.html for info.
+ * A heading and an icon identify each message's severity, so it is not
+ * carried by colour alone (WCAG 1.4.1). The heading is visible: it used to
+ * be .visually-hidden, which left a sighted reader with nothing but the box
+ * colour to tell an error from a confirmation.
  *
  * Add an ARIA label to the contentinfo area so that assistive technology
  * user agents will better describe this landmark.
@@ -39,19 +40,30 @@
         }}>
         <div class="messages__container" data-drupal-selector="messages-container"{% if type == 'error' %} role="alert"{% endif %}>
           {% if status_headings[type] %}
+            {#
+              Severity is carried by an icon and a visible heading as well as
+              by colour, so it does not depend on telling the three hues apart
+              (WCAG 1.4.1, issue #2421). The shapes match the ones Claro
+              already draws on administrative pages.
+
+              The icon is decorative: the heading beside it says the same
+              thing in words, so announcing both would be repetition.
+
+              currentColor rather than a fixed hue, so each icon inherits its
+              message type's text colour and survives forced-colors mode. The
+              dismiss button below does the same.
+            #}
             <div class="messages__header">
-            <h2 class="visually-hidden">{{ status_headings[type] }}</h2>
-              {# <div class="messages__icon">
+              <div class="messages__icon">
                 {% if type == 'error' %}
-                  {% include "@olivero/../images/error.svg" %}
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 14 14" aria-hidden="true" focusable="false"><circle cx="7" cy="7" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 11.193L11.45 3" stroke="currentColor" stroke-width="2"/></svg>
                 {% elseif type == 'warning' %}
-                  {% include "@olivero/../images/warning.svg" %}
-                {% elseif type == 'status' %}
-                  {% include "@olivero/../images/status.svg" %}
-                {% elseif type == 'info' %}
-                  {% include "@olivero/../images/info.svg" %}
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 4 14" fill="currentColor" aria-hidden="true" focusable="false"><path d="M.5 0h3v9h-3z"/><circle cx="2" cy="12.5" r="1.5"/></svg>
+                {% else %}
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 13" aria-hidden="true" focusable="false"><path d="M2 6.571L5.6 10 14 2" fill="none" stroke="currentColor" stroke-width="3"/></svg>
                 {% endif %}
-              </div> #}
+              </div>
+              <h2 class="messages__title">{{ status_headings[type] }}</h2>
             </div>
           {% endif %}
           <div class="messages__content">

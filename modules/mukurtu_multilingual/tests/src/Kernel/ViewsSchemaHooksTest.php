@@ -18,7 +18,7 @@ class ViewsSchemaHooksTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['system', 'views', 'search_api', 'mukurtu_multilingual'];
+  protected static $modules = ['system', 'views', 'search_api', 'language', 'content_translation', 'mukurtu_multilingual'];
 
   /**
    * The search_api_field Views field's rewrite-results text is marked
