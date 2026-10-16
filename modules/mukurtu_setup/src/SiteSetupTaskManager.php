@@ -7,6 +7,7 @@ namespace Drupal\mukurtu_setup;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Render\Markup;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\State\StateInterface;
@@ -35,6 +36,7 @@ class SiteSetupTaskManager {
     protected EntityTypeManagerInterface $entityTypeManager,
     protected ConfigFactoryInterface $configFactory,
     protected StateInterface $state,
+    protected ModuleHandlerInterface $moduleHandler,
   ) {}
 
   /**
@@ -43,7 +45,7 @@ class SiteSetupTaskManager {
    * @return SiteSetupTask[]
    */
   public function getTasks(): array {
-    return [
+    $tasks = [
       new SiteSetupTask(
         'create_mukurtu_manager',
         (string) $this->t('Create a Mukurtu Manager account'),
@@ -190,6 +192,14 @@ class SiteSetupTaskManager {
         (string) $this->t('Open bot protection settings'),
       ),
     ];
+
+    // Klaro is installed by default but sites may uninstall it, and the
+    // cookie consent task links to its settings page.
+    if (!$this->moduleHandler->moduleExists('klaro')) {
+      $tasks = array_values(array_filter($tasks, fn (SiteSetupTask $task) => $task->getId() !== 'cookie_consent'));
+    }
+
+    return $tasks;
   }
 
   /**

@@ -30,6 +30,7 @@ class SiteOperationsTasksTest extends KernelTestBase {
       $this->container->get('entity_type.manager'),
       $this->container->get('config.factory'),
       $this->container->get('state'),
+      $this->container->get('module_handler'),
     );
   }
 
@@ -48,6 +49,7 @@ class SiteOperationsTasksTest extends KernelTestBase {
    * The six site operations tasks are defined in their own group.
    */
   public function testSiteOperationsGroupIsDefined(): void {
+    $this->enableModules(['klaro']);
     $groups = $this->taskManager()->getTaskGroups();
     $this->assertArrayHasKey(SiteSetupTaskManager::GROUP_SITE_OPERATIONS, $groups);
 
@@ -57,6 +59,20 @@ class SiteOperationsTasksTest extends KernelTestBase {
     foreach ($expected as $id) {
       $this->assertSame(SiteSetupTaskManager::GROUP_SITE_OPERATIONS, $this->taskGroups()[$id]);
     }
+  }
+
+  /**
+   * The cookie consent task is dropped when Klaro is not installed.
+   */
+  public function testCookieConsentTaskRequiresKlaro(): void {
+    $this->assertFalse($this->container->get('module_handler')->moduleExists('klaro'));
+    $this->assertArrayNotHasKey('cookie_consent', $this->taskGroups());
+
+    $groups = $this->taskManager()->getTaskGroups();
+    $this->assertSame(
+      ['set_cron', 'web_analytics', 'private_files', 'trusted_hosts', 'bot_protection'],
+      array_keys($groups[SiteSetupTaskManager::GROUP_SITE_OPERATIONS])
+    );
   }
 
   /**
@@ -127,6 +143,7 @@ class SiteOperationsTasksTest extends KernelTestBase {
    * The two manual tasks never auto-complete but can be marked done.
    */
   public function testManualTasks(): void {
+    $this->enableModules(['klaro']);
     $manager = $this->taskManager();
 
     foreach (['cookie_consent', 'bot_protection'] as $id) {
