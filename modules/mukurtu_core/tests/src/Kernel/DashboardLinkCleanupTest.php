@@ -433,7 +433,7 @@ class DashboardLinkCleanupTest extends KernelTestBase {
     $this->assertArrayHasKey('mukurtu_core.create_basic_page_dashboard', $links);
     $link = $links['mukurtu_core.create_basic_page_dashboard'];
     $this->assertSame('dashboard-look-feel', $link['menu_name']);
-    $this->assertSame('mukurtu_core.add', $link['route_name']);
+    $this->assertSame('node.add', $link['route_name']);
     $this->assertSame(['node_type' => 'page'], $link['route_parameters']);
 
     require_once dirname(__DIR__, 3) . '/mukurtu_core.module';

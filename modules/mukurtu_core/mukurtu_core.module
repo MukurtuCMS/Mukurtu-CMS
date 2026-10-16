@@ -681,7 +681,7 @@ function template_preprocess_mukurtu_node_add_list(array &$variables) {
     foreach ($variables['content'] as $type) {
       $variables['types'][$type->id()] = [
         'type' => $type->id(),
-        'add_link' => Link::fromTextAndUrl($type->label(), Url::fromRoute('mukurtu_core.add', ['node_type' => $type->id()]))->toString(),
+        'add_link' => Link::fromTextAndUrl($type->label(), Url::fromRoute('node.add', ['node_type' => $type->id()]))->toString(),
         'description' => [
           '#markup' => $type->getDescription(),
         ],
