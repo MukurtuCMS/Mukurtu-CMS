@@ -76,6 +76,18 @@ class SiteOperationsTasksTest extends KernelTestBase {
   }
 
   /**
+   * Rendered task lists refresh when a module is installed.
+   *
+   * Uninstalling a module flushes every cache, but installing one only
+   * invalidates config:core.extension, so re-enabling Klaro must still bring
+   * the cookie consent task back right away.
+   */
+  public function testCacheTagsCoverModuleInstall(): void {
+    $this->assertContains('config:core.extension', SiteSetupTaskManager::CACHE_TAGS);
+    $this->assertContains('mukurtu_setup:tasks', SiteSetupTaskManager::CACHE_TAGS);
+  }
+
+  /**
    * The site_footer task points at the stable footer-edit redirect route,
    * not a hardcoded block_content ID (see mukurtu_footer.edit_content).
    */

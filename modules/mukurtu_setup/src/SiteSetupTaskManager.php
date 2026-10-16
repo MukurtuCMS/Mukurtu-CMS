@@ -32,6 +32,23 @@ class SiteSetupTaskManager {
    */
   const CRON_MAX_AGE = 86400;
 
+  /**
+   * Cache tags for anything rendered from the task list or its counts.
+   *
+   * config:core.extension covers tasks that depend on an optional module
+   * (cookie_consent needs Klaro). Uninstalling a module flushes every cache,
+   * but installing one only invalidates this tag.
+   */
+  const CACHE_TAGS = [
+    'config:system.site',
+    'config:core.extension',
+    'community_list',
+    'protocol_list',
+    'taxonomy_term_list',
+    'block_content_list',
+    'mukurtu_setup:tasks',
+  ];
+
   public function __construct(
     protected EntityTypeManagerInterface $entityTypeManager,
     protected ConfigFactoryInterface $configFactory,
