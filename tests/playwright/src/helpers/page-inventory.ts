@@ -35,7 +35,62 @@ export async function openForAudit(page: Page, path: string): Promise<string | n
   if (!response.ok()) {
     return `${path} returned HTTP ${response.status()}; auditing an error page would report it as clean.`;
   }
+  await settleAnimations(page);
   return null;
+}
+
+/**
+ * Maximum time to wait for animations, in milliseconds.
+ *
+ * A spinner or any other indefinite animation never finishes, so the wait is
+ * always raced against this. Generous next to the ~150ms transitions that
+ * caused the trouble, and short enough that a page full of looping animation
+ * costs the scan a second rather than its timeout.
+ */
+const ANIMATION_SETTLE_MS = 1_000;
+
+/**
+ * Waits for running CSS animations and transitions to finish.
+ *
+ * A scan that measures mid-transition reports a state no user is ever in
+ * long enough to care about, and does it convincingly. Gin's meta sidebar
+ * gives the label inside it transition-duration 0s and the input 0.15s, so
+ * closing the panel leaves roughly 150ms where the input is still visible
+ * and its label is already hidden. That is exactly what axe's
+ * hidden-explicit-label check looks for, so the scan reported four unnamed
+ * controls on the node add forms whose markup is correct in both the open
+ * and the closed state. Sampling every animation frame through a close
+ * found the window at 344ms to 410ms (#2430, #2436).
+ *
+ * Gin remembers the sidebar state per user, so a session that opened it once
+ * will close it on a later page and can land inside that window. Nothing
+ * about this is specific to Gin: any animated panel, disclosure or dialog
+ * can do the same, which is why this waits on the page as a whole rather
+ * than on one selector.
+ *
+ * Failures are swallowed on purpose. getAnimations() is unsupported on some
+ * engines and this is a measurement precaution, not a precondition: a scan
+ * that cannot wait should still run.
+ */
+async function settleAnimations(page: Page): Promise<void> {
+  await page
+    .evaluate(async (cap) => {
+      if (typeof document.getAnimations !== 'function') {
+        return;
+      }
+      const running = document.getAnimations().filter((a) => a.playState === 'running');
+      if (running.length === 0) {
+        return;
+      }
+      await Promise.race([
+        // allSettled, not all: an animation cancelled mid-flight rejects
+        // its finished promise, and a cancelled animation is settled for
+        // our purposes.
+        Promise.allSettled(running.map((a) => a.finished)),
+        new Promise((resolve) => setTimeout(resolve, cap)),
+      ]);
+    }, ANIMATION_SETTLE_MS)
+    .catch(() => {});
 }
 
 /**

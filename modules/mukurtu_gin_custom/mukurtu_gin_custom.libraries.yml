@@ -14,6 +14,7 @@ mukurtu-gin-custom:
     js/mukurtu-tagify-focus.js: {}
     js/gin-more-actions-aria.js: {}
     js/gin-collapsed-tab-trap.js: {}
+    js/gin-secondary-tray-escape.js: {}
   dependencies:
     - core/jquery
     - core/drupal

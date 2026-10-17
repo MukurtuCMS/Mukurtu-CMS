@@ -30,6 +30,23 @@ facet.widget.config.glossaryaz:
     enable_default_theme:
       type: integer
 
+mukurtu_dictionary_languages.settings:
+  type: config_object
+  label: 'Dictionary Languages Settings'
+  mapping:
+    available_languages:
+      type: sequence
+      label: 'Languages available for dictionary'
+      sequence:
+        type: string
+        label: 'Language term ID'
+    in_language_fields:
+      type: sequence
+      label: "Fields written in the word's language"
+      sequence:
+        type: string
+        label: 'Field name'
+
 mukurtu_dictionary_glossary_order.settings:
   type: config_object
   label: 'Dictionary Glossary Order Settings'

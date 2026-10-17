@@ -29,6 +29,7 @@ class AliasLanguageFallbackTest extends KernelTestBase {
     'system',
     'user',
     'language',
+    'content_translation',
     'path_alias',
     'mukurtu_multilingual',
   ];

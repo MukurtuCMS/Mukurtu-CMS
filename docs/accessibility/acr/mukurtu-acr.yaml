@@ -351,9 +351,14 @@ chapters:
               notes: >-
                 A skip-to-main-content link is provided on every page, and as
                 of July 2026 the page heading sits inside the skip link's
-                target landmark. Automated checks pass; keyboard verification
-                of the skip link across page types is part of the manual
-                audit cycle.
+                target landmark. Automated checks report no findings from
+                axe's bypass rule, though a failing bypass check is
+                downgraded to "needs review" rather than reported as a
+                violation, so from October 2026 those results are reported
+                separately instead of being queued with items that need
+                human judgement (PR #2427). Keyboard verification of the
+                skip link across page types is part of the manual audit
+                cycle.
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -567,13 +572,22 @@ chapters:
             adherence:
               level: supports
               notes: >-
-                Automated ARIA checks (axe-core, July 2026) pass across the
-                audited page inventory, including protocol-gated member
-                views. Map location markers previously rendered as focusable
-                buttons with no accessible name were fixed (July 2026).
-                Keyboard and screen reader verification of custom widgets
-                (carousel, tabs, audio player, autocomplete) is part of the
-                manual audit cycle.
+                Automated ARIA checks (axe-core) run across the audited
+                page inventory, including protocol-gated member views. Map
+                location markers previously rendered as focusable buttons
+                with no accessible name were fixed (July 2026). Two further
+                defects were found in October 2026 and fixed: all 16 Mukurtu
+                Dashboard menu blocks shared one heading ID, so every
+                navigation region was labelled by the first heading on the
+                page (issue #2395, PR #2398), and the front-end main
+                navigation landmark carried no accessible name (PR #2428).
+                Neither could appear as a violation in the scan, because axe
+                downgrades a failing duplicate-id-aria, frame-title-unique
+                or aria-braille-equivalent check to "needs review"; results
+                from those rules are reported separately from October 2026
+                (PR #2427). Keyboard and screen reader verification of
+                custom widgets (carousel, tabs, audio player, autocomplete)
+                is part of the manual audit cycle.
           - name: authoring-tool
             adherence:
               level: partially-supports
