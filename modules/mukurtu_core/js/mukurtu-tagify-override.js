@@ -99,7 +99,11 @@
       }
       input.__mukurtuFocusPatched = true;
       input.addEventListener('keydown', (event) => {
-        if (event.key === 'ArrowDown' || event.key === 'Down') {
+        // Only open the list when it is closed. Re-clicking while it is open
+        // refetches the suggestions and resets the highlight, so Down Arrow
+        // could never move past the first option.
+        if ((event.key === 'ArrowDown' || event.key === 'Down')
+          && tagsElement.getAttribute('aria-expanded') !== 'true') {
           input.dispatchEvent(new MouseEvent('click', { bubbles: true }));
         }
       });
@@ -139,19 +143,26 @@
       original.insertAdjacentElement('afterend', liveRegion);
 
       const announce = (message) => {
+        // Drupal.t() HTML-escapes "@" placeholders, but this is written as
+        // textContent, so decode it or "Arts & Crafts" is read as "&amp;".
+        const text = new DOMParser().parseFromString(message, 'text/html').documentElement.textContent;
         // Clear first so repeated identical messages still trigger a re-read.
         liveRegion.textContent = '';
-        setTimeout(() => { liveRegion.textContent = message; }, 50);
+        setTimeout(() => { liveRegion.textContent = text; }, 50);
       };
 
       original.__tagify.on('add', (event) => {
-        const value = event.detail?.data?.value;
+        const data = event.detail?.data;
+        // Entity tags store the entity ID as their value; announce the label.
+        const value = data?.label || data?.value;
         if (value) {
           announce(Drupal.t('Added @tag', { '@tag': value }));
         }
       });
       original.__tagify.on('remove', (event) => {
-        const value = event.detail?.data?.value;
+        const data = event.detail?.data;
+        // Entity tags store the entity ID as their value; announce the label.
+        const value = data?.label || data?.value;
         if (value) {
           announce(Drupal.t('Removed @tag', { '@tag': value }));
         }

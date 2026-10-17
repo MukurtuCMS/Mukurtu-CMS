@@ -1,0 +1,75 @@
+import { test, expect } from '@playwright/test';
+import { ADMIN_STATE } from '~helpers/auth-state';
+import { gotoReady } from '~helpers/preview';
+
+/**
+ * The term merge form's Tagify picker must be browsable by keyboard.
+ *
+ * term_merge 2.0.1 replaced its "Terms to merge" checkbox list with a
+ * comma-separated autocomplete, so terms had to be known ahead of time
+ * (#2438). mukurtu_taxonomy swaps in a Tagify picker that lists every term
+ * on click. These checks pin the keyboard and screen reader behavior that
+ * makes that list usable without a mouse:
+ *
+ * - Down Arrow opens the list and then moves through it. It used to re-fire
+ *   the "open" click on every press, which refetched the list and reset the
+ *   highlight, so only the first term could ever be picked (WCAG 2.1.1).
+ * - Adding a term announces its name, not its ID (WCAG 4.1.3).
+ * - Submitting with nothing selected returns Drupal's own error and marks
+ *   the visible textbox invalid, rather than the browser's pop-up pointing
+ *   at Tagify's hidden input (WCAG 3.3.1).
+ *
+ * Nothing is merged: the test stops at the first step of the form.
+ */
+
+const MERGE_URL = '/admin/structure/taxonomy/manage/category/merge';
+
+/** Tagify fetches suggestions from the server; previews can be slow. */
+const SLOW = { timeout: 20000 };
+
+test.describe('Term merge Tagify picker', () => {
+  test.use({ storageState: ADMIN_STATE });
+
+  test('Down Arrow browses the list and Enter adds the highlighted term', async ({ page }) => {
+    await gotoReady(page, MERGE_URL);
+    await page.waitForLoadState('networkidle');
+
+    const textbox = page.locator('tags.tagify .tagify__input');
+    const options = page.locator('.tagify__dropdown [role=option]');
+    const active = page.locator('.tagify__dropdown .tagify__dropdown__item--active');
+
+    await textbox.focus();
+    await page.keyboard.press('ArrowDown');
+    await expect(options.nth(1), 'the list opens with at least two terms').toBeVisible(SLOW);
+    await expect(active).toHaveCount(1);
+    const first = (await active.textContent())!.trim();
+
+    await page.keyboard.press('ArrowDown');
+    await expect(active, 'the highlight moves past the first term').not.toHaveText(first, SLOW);
+    await expect(options.nth(1)).toBeVisible();
+    const second = (await active.textContent())!.trim();
+
+    await page.keyboard.press('Enter');
+    await expect(page.locator('tags.tagify tag')).toHaveAttribute('title', second, SLOW);
+    await expect(
+      page.locator('input.tagify-widget ~ [role=status]'),
+      'the added term is announced by name',
+    ).toHaveText(`Added ${second}`);
+  });
+
+  test('an empty submit reports a server-side error on the visible textbox', async ({ page }) => {
+    await gotoReady(page, MERGE_URL);
+
+    await expect(page.locator('form#taxonomy-merge-terms')).toHaveAttribute('novalidate', /.*/);
+    // Gin copies the button into its sticky header and hides the original.
+    await Promise.all([
+      page.waitForResponse((response) => response.request().method() === 'POST'
+        && response.url().endsWith(MERGE_URL), SLOW),
+      page.locator('input[type=submit][value=Next]:visible').first().click({ noWaitAfter: true }),
+    ]);
+    await page.waitForLoadState('domcontentloaded');
+
+    await expect(page).toHaveURL(new RegExp(`${MERGE_URL}$`));
+    await expect(page.locator('tags.tagify .tagify__input')).toHaveAttribute('aria-invalid', 'true');
+  });
+});
