@@ -47,10 +47,13 @@
   Drupal.behaviors.mukurtuMediaLibraryDialog = {
     attach(context) {
       once('mukurtu-media-library-dialog', filterButtons, context).forEach((button) => {
-        if (refocusFilters) {
-          refocusFilters = false;
+        // Only when the old button took focus with it, so a stale flag (say,
+        // from a failed request) never pulls focus from wherever it is now.
+        const focusLost = !document.activeElement || document.activeElement === document.body;
+        if (refocusFilters && focusLost) {
           button.focus();
         }
+        refocusFilters = false;
         button.setAttribute('data-disable-refocus', 'true');
         button.addEventListener('click', () => {
           refocusFilters = true;
