@@ -178,6 +178,11 @@ class PaletteContrastAnalyzer {
       }
     }
 
+    // The custom palette's file sets these on top of style.css as well.
+    foreach (DesignPalette::CUSTOM_DERIVED_VARS as $property => $value) {
+      $tokens[$property] = $value;
+    }
+
     foreach (DesignPalette::CSS_VAR_MAPPING as $key => $property) {
       if (!empty($colors[$key])) {
         $tokens[$property] = trim($colors[$key]);
