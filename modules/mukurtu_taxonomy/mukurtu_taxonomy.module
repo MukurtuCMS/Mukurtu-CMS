@@ -248,6 +248,13 @@ function mukurtu_taxonomy_form_taxonomy_merge_terms_alter(&$form, \Drupal\Core\F
       '#element_validate' => ['mukurtu_taxonomy_term_merge_terms_validate'],
       '#mukurtu_vocabulary' => $vid,
     ] + $form['terms'];
+    // An empty description leaves the Tagify textbox described by an empty
+    // element.
+    unset($form['terms']['#description']);
+    // Tagify hides the original input, so the browser's required check would
+    // point at, and focus, an invisible element. Rely on server-side
+    // validation instead.
+    $form['#attributes']['novalidate'] = 'novalidate';
   }
 
   $form['actions']['submit']['#value'] = t('Next');

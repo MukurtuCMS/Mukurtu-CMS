@@ -118,6 +118,11 @@ class TermMergeTagifyFormTest extends EntityKernelTestBase {
     $this->assertTrue($element['#required']);
     $this->assertArrayNotHasKey('data-max-items', $element['#attributes']);
     $this->assertSame('0', (string) $element['#attributes']['data-suggestions-dropdown']);
+    // An empty description would leave the textbox described by nothing.
+    $this->assertArrayNotHasKey('#description', $element);
+    // Tagify hides the original input, so the browser's required check must
+    // not run against it.
+    $this->assertSame('novalidate', $form['#attributes']['novalidate'] ?? NULL);
   }
 
   /**
