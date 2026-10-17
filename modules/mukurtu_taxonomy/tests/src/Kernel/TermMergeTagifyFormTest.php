@@ -72,8 +72,8 @@ class TermMergeTagifyFormTest extends EntityKernelTestBase {
   /**
    * Creates a term in the given vocabulary.
    */
-  protected function createTerm(string $name, string $vid = 'category'): Term {
-    $term = Term::create(['vid' => $vid, 'name' => $name]);
+  protected function createTerm(string $name, string $vid = 'category', int $weight = 0): Term {
+    $term = Term::create(['vid' => $vid, 'name' => $name, 'weight' => $weight]);
     $term->save();
     return $term;
   }
@@ -104,7 +104,7 @@ class TermMergeTagifyFormTest extends EntityKernelTestBase {
   }
 
   /**
-   * The terms element is a Tagify picker listing every term A to Z on click.
+   * The terms element is a Tagify picker that opens its list on click.
    */
   public function testElementIsBrowsableTagify(): void {
     $form = \Drupal::formBuilder()->getForm(TermMergeTagifyTestForm::class, $this->vocabulary);
@@ -112,7 +112,6 @@ class TermMergeTagifyFormTest extends EntityKernelTestBase {
 
     $this->assertSame('entity_autocomplete_tagify', $element['#type']);
     $this->assertSame(0, $element['#suggestions_dropdown']);
-    $this->assertSame(0, $element['#selection_settings']['match_limit']);
     $this->assertSame(['category' => 'category'], $element['#selection_settings']['target_bundles']);
     $this->assertSame(['field' => 'name', 'direction' => 'ASC'], $element['#selection_settings']['sort']);
     $this->assertTrue($element['#required']);
@@ -123,6 +122,30 @@ class TermMergeTagifyFormTest extends EntityKernelTestBase {
     // Tagify hides the original input, so the browser's required check must
     // not run against it.
     $this->assertSame('novalidate', $form['#attributes']['novalidate'] ?? NULL);
+  }
+
+  /**
+   * Clicking the field lists every term A to Z, whatever the term weights.
+   *
+   * Runs the query the click sends: Tagify's matcher with the element's own
+   * selection settings and nothing typed. With no match limit, core's
+   * TermSelection returns the vocabulary tree in weight order instead.
+   */
+  public function testEmptySearchListsAllTermsAlphabetically(): void {
+    $this->createTerm('Weaving', weight: -10);
+    $this->createTerm('basketry', weight: 5);
+    $this->createTerm('Ceremony');
+    $this->createTerm('Foreign', 'other');
+
+    $form = \Drupal::formBuilder()->getForm(TermMergeTagifyTestForm::class, $this->vocabulary);
+    $element = $form['terms'];
+    $matches = $this->container->get('tagify.autocomplete_matcher')->getMatches(
+      'taxonomy_term',
+      $element['#selection_handler'],
+      $element['#selection_settings'],
+    );
+
+    $this->assertSame(['basketry', 'Ceremony', 'Weaving'], array_column($matches, 'label'));
   }
 
   /**

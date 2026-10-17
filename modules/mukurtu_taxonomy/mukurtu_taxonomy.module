@@ -236,8 +236,10 @@ function mukurtu_taxonomy_form_taxonomy_merge_terms_alter(&$form, \Drupal\Core\F
       '#selection_settings' => [
         'target_bundles' => [$vid => $vid],
         'sort' => ['field' => 'name', 'direction' => 'ASC'],
-        // 0 = no limit, so every term in the vocabulary can be browsed.
-        'match_limit' => 0,
+        // Large enough to list a whole vocabulary. Not 0 (no limit): with no
+        // limit and nothing typed, core's TermSelection returns the
+        // vocabulary tree in weight order and ignores the sort above.
+        'match_limit' => 10000,
       ],
       '#cardinality' => -1,
       '#max_items' => 0,
