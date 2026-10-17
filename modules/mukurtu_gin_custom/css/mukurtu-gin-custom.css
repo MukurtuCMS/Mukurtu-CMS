@@ -736,6 +736,39 @@ above, so the fields don't need their own. */
     margin-left: 0 !important;
 }
 
+/* WCAG 1.4.10 Reflow: stack the media type menu above the library content on
+narrow screens.
+
+Claro lays the menu and content out side by side at every width. At a 320px
+viewport the dialog content is 278px wide; the menu takes 120px and the
+content cannot shrink below 208px, so it ran 50px past the dialog and could
+only be reached by scrolling sideways inside it.
+
+Stacked, the menu spans the full width above the content. position: static
+and align-self: stretch undo the sticky menu above: sticky would pin the whole
+stacked menu over the content while scrolling, and its flex-start alignment
+shrinks the menu to its text in a column. gin_lb's 14em menu width needs the
+same !important that sets it. */
+@media (max-width: 30em) {
+    .media-library-widget-modal .media-library-wrapper {
+        flex-direction: column;
+    }
+
+    .media-library-widget-modal .media-library-menu,
+    .media-library-widget-modal .glb-media-library-menu {
+        position: static;
+        align-self: stretch;
+        width: auto !important;
+    }
+
+    /* Claro's width: 100% plus its padding overflows once the content no
+    longer shrinks as a flex item in a row. */
+    .media-library-widget-modal .media-library-content {
+        width: auto;
+        min-width: 0;
+    }
+}
+
 /* gin_lb puts the button (form-actions) BEFORE the count and gives it flex:1,
    leaving "Insert selected" left-aligned. Fix: stop the buttonset from growing
    and move it after the count so it reads [count] [button], right-aligned. */
