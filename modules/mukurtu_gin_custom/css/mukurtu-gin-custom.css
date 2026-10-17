@@ -765,8 +765,22 @@ same !important that sets it. */
     longer shrinks as a flex item in a row. */
     .media-library-widget-modal .media-library-content {
         width: auto;
-        min-width: 0;
     }
+}
+
+/* WCAG 1.4.10 Reflow: let the media table scroll inside its own wrapper.
+
+Gin already wraps the media table in a sideways-scrolling container, but
+.media-library-content and the results' .view-content are flex items with
+the default min-width: auto, so each grew to the table's width (441px) and
+pushed the whole dialog body sideways instead. With media in the library the
+body overflowed at every width up to 768px, and focusing a row's Edit link
+scrolled the menu and filters out of view. .view-filters had the same
+problem by 2px at 768px; with min-width: 0 its fields wrap instead. */
+.media-library-widget-modal .media-library-content,
+.media-library-widget-modal .media-library-view .view-filters,
+.media-library-widget-modal .media-library-view .view-content {
+    min-width: 0;
 }
 
 /* gin_lb puts the button (form-actions) BEFORE the count and gives it flex:1,

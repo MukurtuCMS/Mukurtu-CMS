@@ -19,7 +19,10 @@ import { gotoReady } from '~helpers/preview';
  *
  * Reflow (WCAG 1.4.10): at 320px the dialog subtracted Gin's 245px sticky
  * header from the window height twice, leaving the library 11px tall, and
- * Claro's side-by-side menu and content ran 50px past the dialog.
+ * Claro's side-by-side menu and content ran 50px past the dialog. With media
+ * in the library, the media table also widened the whole dialog body at
+ * every width up to 768px. The suite's default content adds media, so that
+ * case is covered once default-content.spec.ts has run.
  */
 
 /** Subpixel rounding allowance, in px. */
@@ -87,25 +90,30 @@ test.describe('Media modal filters', () => {
     await expect(apply).toBeFocused({ timeout: SETTLE });
   });
 
-  test('the dialog reflows at 320px', async ({ page }) => {
-    await page.setViewportSize({ width: 320, height: 640 });
-    const { modal } = await openMediaLibrary(page);
+  // 320px is the stacked layout; 768px is side by side, where the media
+  // table also pushed the dialog body sideways.
+  for (const width of [320, 768]) {
+    test(`the dialog reflows at ${width}px`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 640 });
+      const { modal } = await openMediaLibrary(page);
 
-    await expect(async () => {
-      const content = await modal.locator('.ui-dialog-content').evaluate((el) => ({
-        scrollWidth: el.scrollWidth,
-        clientWidth: el.clientWidth,
-        clientHeight: el.clientHeight,
-      }));
+      await expect(async () => {
+        const content = await modal.locator('.ui-dialog-content').evaluate((el) => ({
+          scrollWidth: el.scrollWidth,
+          clientWidth: el.clientWidth,
+          clientHeight: el.clientHeight,
+        }));
 
-      expect(content.scrollWidth,
-        `the library is ${content.scrollWidth}px wide in a ${content.clientWidth}px dialog`)
-        .toBeLessThanOrEqual(content.clientWidth + TOLERANCE);
-      // Measured 420px with the fix and 11px without it. A third of the
-      // window leaves room for differences between environments.
-      expect(content.clientHeight,
-        `the library has ${content.clientHeight}px of a 640px window`)
-        .toBeGreaterThanOrEqual(640 / 3);
-    }).toPass({ timeout: SETTLE });
-  });
+        expect(content.scrollWidth,
+          `the library is ${content.scrollWidth}px wide in a ${content.clientWidth}px dialog`)
+          .toBeLessThanOrEqual(content.clientWidth + TOLERANCE);
+        // Measured 420px at 320px wide with the fix and 11px without it. A
+        // third of the window leaves room for differences between
+        // environments.
+        expect(content.clientHeight,
+          `the library has ${content.clientHeight}px of a 640px window`)
+          .toBeGreaterThanOrEqual(640 / 3);
+      }).toPass({ timeout: SETTLE });
+    });
+  }
 });
