@@ -11,6 +11,7 @@ mukurtu-gin-custom:
   js:
     js/mukurtu-gin-custom.js: {}
     js/media-library-cancel.js: {}
+    js/media-library-dialog.js: {}
     js/mukurtu-tagify-focus.js: {}
     js/gin-more-actions-aria.js: {}
     js/gin-collapsed-tab-trap.js: {}
