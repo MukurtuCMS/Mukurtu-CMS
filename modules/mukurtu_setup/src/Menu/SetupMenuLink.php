@@ -49,4 +49,12 @@ class SetupMenuLink extends MenuLinkDefault {
     ]);
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function getCacheContexts(): array {
+    // Some tasks are shown to specific roles only, so the counts vary by role.
+    return array_merge(parent::getCacheContexts(), ['user.roles']);
+  }
+
 }
