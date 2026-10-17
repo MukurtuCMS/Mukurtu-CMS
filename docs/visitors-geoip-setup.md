@@ -99,6 +99,13 @@ Mukurtu site, with no setup step.
   (MaxMind's, or now DB-IP's) succeeds for that visit's IP; a failed lookup
   silently leaves that visit's earlier locale-guessed country in place rather than
   clearing it.
+- DB-IP City Lite records have region names but no region ISO codes, so the
+  Region report lists DB-IP-resolved visits by name ("California") and
+  MaxMind-resolved ones by code ("CA"). `DbIpFallbackGeoIpService::normalize()`
+  fills in the name, and empty strings for any other missing field, because
+  visitors_geoip writes these values to NOT NULL columns. Without it, every
+  visit DB-IP could place failed to save with "Column 'location_region' cannot
+  be null".
 - Both MaxMind's free tier and DB-IP's Lite tier have accuracy gaps for mobile
   carriers, VPNs, and CGNAT'd IP ranges — expect some visits to still resolve to
   only a country or region, or not at all, even with one of them configured.
