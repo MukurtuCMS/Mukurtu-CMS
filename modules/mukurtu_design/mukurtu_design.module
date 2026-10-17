@@ -37,10 +37,12 @@ function mukurtu_design_preprocess_page(array &$variables) {
 
   $variables['page_background_image_url'] = $background['url'] ?? '';
   $variables['page_background_treatment'] = $background['treatment'] ?? '';
+  $variables['page_background_tint'] = $background['tint'] ?? TRUE;
 
   $header = \Drupal::service('mukurtu_design.page_background')->resolveHeader();
   $variables['header_background_image_url'] = $header['url'] ?? '';
   $variables['header_background_treatment'] = $header['treatment'] ?? '';
+  $variables['header_background_tint'] = $header['tint'] ?? TRUE;
 
   \Drupal::service('mukurtu_design.page_background')
     ->getCacheableMetadata()

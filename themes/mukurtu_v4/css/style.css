@@ -402,6 +402,13 @@ Those files are injected by Drupal so they shouldn't be bundled to style.css. */
   color: var(--color-black);
 }
 
+/* An admin can turn the scrim off. The text keeps its treatment colour, but its
+ * contrast now depends on the photograph, which the settings form warns about.
+ * Two classes so it beats the treatment's own scrim at any source order. */
+.page--has-background.page--no-tint {
+  --mukurtu-page-scrim: transparent;
+}
+
 /* Let text take the treatment colour.
  *
  * Headings and body copy set their colour explicitly for a white ground, so
@@ -2711,6 +2718,29 @@ label.form-required::after,
 .block--image-with-description--full.block--image-with-description--no-image.hero-ground-soft * {
   color: var(--brand-text-color);
   text-shadow: none;
+}
+.block--image-with-description--full.block--image-with-description--no-image {
+  /* Plain over a page background image: "None" paints no ground, so the text
+   * sits on the page's scrim and takes the page's text treatment, whose
+   * pairing is already measured in _layout.scss (5.74:1 light, 7.37:1 dark).
+   * Without this the plain-page colours above win and render a brand heading
+   * and dark body copy on the darkened image. :where() keeps the specificity
+   * level with the rules above, so source order decides and the .contextual
+   * revert below still wins. */
+}
+:where(.page--has-background) .block--image-with-description--full.block--image-with-description--no-image.hero-ground-none *,
+:where(.page--has-background) .block--image-with-description--full.block--image-with-description--no-image.hero-ground-none h1,
+:where(.page--has-background) .block--image-with-description--full.block--image-with-description--no-image.hero-ground-none h2 {
+  color: inherit;
+}
+:where(.page--has-background) .block--image-with-description--full.block--image-with-description--no-image.hero-ground-none a {
+  text-decoration-color: currentColor;
+}
+:where(.page--has-background) .block--image-with-description--full.block--image-with-description--no-image.hero-ground-none svg.ext {
+  fill: currentColor;
+}
+:where(.page--has-background) .block--image-with-description--full.block--image-with-description--no-image.hero-ground-none svg.ext path {
+  stroke: currentColor;
 }
 .block--image-with-description--full.block--image-with-description--no-image {
   /* The presets' `* { color }` outrank the with-image hero's .contextual
@@ -6123,6 +6153,11 @@ body:not(.is-always-mobile-nav) .header:not(:has(.header__logo-text)) {
 .site-header--text-dark {
   --mukurtu-header-scrim: rgb(255 255 255 / 60%);
   color: var(--color-black);
+}
+
+/* Same opt-out as the page background, see _layout.scss. */
+.site-header--has-background.site-header--no-tint {
+  --mukurtu-header-scrim: transparent;
 }
 
 /* The nav sits on the image at desktop.
