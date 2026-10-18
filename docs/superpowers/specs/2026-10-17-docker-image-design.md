@@ -75,8 +75,9 @@ Packagist webhook completes, so a Packagist-based build races the tag.
 
 ## Image
 
-Stage 1 (`build`): Composer, `--no-dev --optimize-autoloader
---classmap-authoritative`. Remove tests, docs, `.git`, node tooling, and other
+Stage 1 (`build`): Composer, `--no-dev --optimize-autoloader`
+(not `--classmap-authoritative`: Drupal registers namespaces at run time and
+an authoritative class map breaks it). Remove tests, docs, `.git`, node tooling, and other
 non-runtime files from vendor and the profile.
 
 Stage 2 (`runtime`): Alpine with php-fpm, nginx, a small process supervisor

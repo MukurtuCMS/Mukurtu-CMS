@@ -129,8 +129,8 @@ $settings['config_sync_directory'] = mukurtu_env('MUKURTU_CONFIG_SYNC_DIR', '/va
 // tighten (or complain about) the permissions of sites/default.
 $settings['skip_permissions_hardening'] = TRUE;
 
-// The image is immutable and its autoloader is a complete class map, so there
-// is no need to look for changed classes on every request.
+// The image is immutable, so Drupal does not need to check for changed classes
+// on every request.
 $settings['class_loader_auto_detect'] = FALSE;
 
 // Never show errors on screen. They go to the container log and the database

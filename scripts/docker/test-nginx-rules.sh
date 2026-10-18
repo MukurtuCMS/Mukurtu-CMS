@@ -21,6 +21,7 @@ mkdir -p "$STUB/sites/default/files/css" "$STUB/core"
 cat >"$STUB/index.php" <<'PHP'
 <?php
 header('X-Pool: ' . getenv('MUKURTU_POOL'));
+if (str_contains($_SERVER['REQUEST_URI'] ?? '', 'slow')) { sleep(8); }
 echo 'index ' . ($_SERVER['REQUEST_URI'] ?? '') . ' script=' . ($_SERVER['SCRIPT_FILENAME'] ?? '');
 PHP
 echo '<?php echo "EXECUTED";' >"$STUB/sites/default/files/x.php"
@@ -31,7 +32,7 @@ echo 'secret: yes' >"$STUB/config.yml"
 echo 'body{}' >"$STUB/sites/default/files/css/x.css"
 chmod -R a+rX "$STUB"
 
-docker run -d --name "$NAME" --entrypoint sh -v "$STUB:/var/www/html/web:ro" "$IMAGE" -c '
+docker run -d --name "$NAME" --entrypoint sh -e MUKURTU_FPM_MAX_CHILDREN=2 -e MUKURTU_FPM_FILES_MAX_CHILDREN=2 -v "$STUB:/var/www/html/web:ro" "$IMAGE" -c '
   export MUKURTU_RUN_DIR=/tmp/run
   /usr/local/lib/mukurtu/render-config.sh 2>/dev/null || exit 1
   php-fpm -y /tmp/run/php-fpm.conf -c /tmp/run/php.ini &
@@ -86,5 +87,16 @@ assert_not_contains "$headers" "nginx/" "no nginx version in the Server header"
 css="$(get /sites/default/files/css/x.css)"
 assert_contains "$css" "max-age=31536000" "aggregated CSS is cached for a year"
 assert_contains "$css" "X-Content-Type-Options: nosniff" "nosniff survives the cache headers"
+
+echo "private downloads cannot starve page requests"
+# Three slow downloads: two hold the files pool's workers, one waits.
+for i in 1 2 3; do
+  docker exec -d "$NAME" curl -s -o /dev/null --max-time 20 "http://127.0.0.1:8080/system/files/slow-$i"
+done
+sleep 1
+started=$SECONDS
+page="$(docker exec "$NAME" curl -s -o /dev/null -w '%{http_code}' --max-time 4 http://127.0.0.1:8080/node/1)"
+assert_eq "200" "$page" "a page request is answered while private downloads are running"
+[[ $((SECONDS - started)) -lt 4 ]] && pass "and it is answered promptly" || fail "and it is answered promptly"
 
 finish

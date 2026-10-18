@@ -80,9 +80,12 @@ ENV COMPOSER_ALLOW_SUPERUSER=1 \
     COMPOSER_NO_INTERACTION=1 \
     COMPOSER_MEMORY_LIMIT=-1
 
-# The checkout, outside the context's .dockerignore exclusions. Composer
-# copies it into web/profiles/mukurtu (symlink=false) rather than linking it.
-COPY . /src/mukurtu
+# The checkout, minus the files that only build or document the image. Leaving
+# them out keeps the Composer layers cached when only those files change.
+# Composer copies the result into web/profiles/mukurtu (symlink=false) rather
+# than linking it.
+COPY --exclude=Dockerfile --exclude=.dockerignore --exclude=docker --exclude=docker-compose*.yml \
+     --exclude=scripts/docker . /src/mukurtu
 
 WORKDIR /app
 
@@ -96,7 +99,11 @@ RUN set -eux; \
       --no-install --no-dev --no-progress --no-scripts; \
     composer config repositories.local-dev \
       '{"type":"path","url":"/src/mukurtu","options":{"symlink":false,"versions":{"mukurtu/mukurtu":"4.9999.9999"}}}'; \
-    composer update --no-dev --no-progress --optimize-autoloader --classmap-authoritative
+    composer update --no-dev --no-progress --optimize-autoloader
+
+# Note: no --classmap-authoritative. Drupal registers the namespaces of core and
+# of every module with the class loader at run time; an authoritative class map
+# refuses those lookups and Drupal cannot even start installing.
 
 # Fail the build on a known security advisory. Advisories the profile already
 # triages (config.audit.ignore in its composer.json) are copied into the root
@@ -195,5 +202,29 @@ RUN cp /usr/local/lib/mukurtu/settings.php /var/www/html/web/sites/default/setti
 
 VOLUME ["/var/www/files/public", "/var/www/files/private"]
 
+# Where render-config.sh writes the rendered configuration. A tmpfs mounted at
+# /run replaces this directory; the entrypoint then creates it again.
+RUN mkdir -p /run/mukurtu && chown mukurtu:mukurtu /run/mukurtu
+
+# PHPRC makes every command-line PHP (Drush, `docker exec ... drush`) read the
+# rendered CLI ini instead of PHP's 128M defaults.
+ENV MUKURTU_RUN_DIR=/run/mukurtu \
+    PHPRC=/run/mukurtu/cli
+
 WORKDIR /var/www/html
 USER mukurtu
+
+EXPOSE 8080
+
+# Installing a fresh site takes minutes; do not call the container unhealthy
+# while it does.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=600s --retries=3 \
+  CMD ["/usr/local/lib/mukurtu/healthcheck.sh"]
+
+# The php-fpm base image stops containers with SIGQUIT. The supervisor handles
+# SIGTERM (Docker's usual signal, and Kubernetes') and passes the right signal on
+# to each process.
+STOPSIGNAL SIGTERM
+
+ENTRYPOINT ["/sbin/tini", "--", "/usr/local/lib/mukurtu/entrypoint.sh"]
+CMD ["supervise"]

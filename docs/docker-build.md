@@ -65,7 +65,7 @@ The `build` stage:
 1. Runs `composer create-project mukurtu/mukurtu-template:$MUKURTU_TEMPLATE_VERSION`.
 2. Adds this checkout as a Composer `path` repository, with `symlink: false` so
    the files are copied into `web/profiles/mukurtu`.
-3. Runs `composer update --no-dev --optimize-autoloader --classmap-authoritative`.
+3. Runs `composer update --no-dev --optimize-autoloader`.
 
 **Why the checkout and not Packagist.** The image must contain exactly the code
 of the release tag.
@@ -100,6 +100,14 @@ Advisories the profile has already triaged are listed under
 `config.audit.ignore` in its `composer.json`; Composer only honours that setting
 in the *root* project, so the build copies it across. Abandoned packages are
 reported, not fatal.
+
+**Autoloader.** Composer generates an optimised class map (`--optimize-autoloader`)
+but not an *authoritative* one (`--classmap-authoritative`), which is a common
+production recommendation for other PHP applications. Drupal registers the
+namespaces of core and of each module with the class loader at run time, and an
+authoritative class map refuses those lookups; Drupal then fails with
+`Class "Drupal\Core\Serialization\Yaml" not found` before it can install.
+The end-to-end test in `scripts/docker/test-entrypoint.sh` catches this.
 
 **What is removed.** Only things the running site never reads: `.git`
 directories and the `tests`/`Tests` directories of the profile, Composer
@@ -395,9 +403,170 @@ are regenerated until caches are rebuilt. An explicit salt avoids the problem.
 - `skip_permissions_hardening` is on. Drupal's usual habit of making
   `sites/default` read-only does not apply, because the code is already
   read-only to the runtime user.
-- `class_loader_auto_detect` is off. The autoloader is a complete class map and
-  the image never changes, so Drupal does not need to look for new classes on
-  each request.
+- `class_loader_auto_detect` is off. The image never changes, so Drupal does not
+  need to look for new classes on each request.
 - The on-screen error level is forced to `hide`. Errors still go to the
   container log and Drupal's database log, where administrators can read them,
   but they are never shown to visitors.
+
+## Startup, supervision and health
+
+The container's first process is `tini`, which starts `entrypoint.sh`. The
+entrypoint does the following, in order, and stops with a message naming the
+setting or path at fault if any step fails:
+
+1. **Resolve secrets and render configuration.** `_FILE` secrets are read, then
+   every `MUKURTU_*` variable is validated and the PHP, php-fpm, nginx and msmtp
+   files are written (see "Configuration rendering").
+2. **Check required settings.** `MUKURTU_DB_HOST`, `MUKURTU_DB_NAME`,
+   `MUKURTU_DB_USER`, `MUKURTU_DB_PASSWORD` and `MUKURTU_TRUSTED_HOSTS` must be
+   set.
+3. **Check the volumes.** `/var/www/files/public`, `/var/www/files/private` and
+   `MUKURTU_FILE_TEMP_PATH` must be writable by uid 1000. If not, the error
+   names the path and the uid, and says how to fix it. A fresh named volume
+   works without any preparation, because Docker gives it the image directory's
+   ownership.
+4. **Make a hash salt if there is none.** Only when `MUKURTU_HASH_SALT` is
+   unset: generated once, stored in the private volume with mode `0600`, and
+   reused on every later start.
+5. **Warn about missing tools.** One warning per missing program (`ffmpeg`,
+   `pdftotext`, `pdftoppm`), so a slim image says what it cannot do, and one for
+   an unconfigured mail server.
+6. **Wait for the database**, up to `MUKURTU_DB_WAIT_TIMEOUT` seconds (default
+   60), retrying every second. This removes the usual race in which the site
+   container starts before the database accepts connections. When time runs
+   out, the error gives the host, port, and the database's last error message.
+7. **Install or update.** The database is classified as one of three states:
+   - *empty* and `MUKURTU_AUTO_INSTALL=true`: run `drush site:install mukurtu`
+     with the admin account from the environment. `MUKURTU_ADMIN_PASSWORD` and
+     `MUKURTU_ADMIN_EMAIL` are required, with no default: an image that came up
+     with a well-known password would be an open door. (The password is passed
+     to Drush as an argument, so it is visible to processes inside the
+     container for the duration of the install.)
+   - *installed*: if `MUKURTU_RUN_UPDATES=true`, run `drush updatedb` and
+     `drush cache:rebuild`. A new image version contains new code; the cache
+     rebuild stops Drupal from using a service container built for the old code.
+   - *partial* (tables exist, but not a complete Drupal): refuse to continue.
+     Installing over unknown data could destroy it.
+8. **Hand over to the supervisor.**
+
+**Supervision.** `supervise.sh` runs php-fpm, nginx, and, when `MUKURTU_CRON` is
+`true`, the cron loop. If any of them stops unexpectedly, it stops the others
+and exits non-zero, so the container restarts (or stops, visibly) rather than
+serving errors. On `SIGTERM` it shuts everything down gracefully and exits `0`.
+A plain shell script does this instead of a supervisor package such as s6 or
+supervisord: it needs nothing installed, runs as the unprivileged user, and has
+no configuration to go wrong.
+
+**Cron.** Drupal needs its periodic tasks run: search indexing, cache cleanup,
+notifications, and Mukurtu's own jobs. `cron.sh` runs `drush core:cron` every
+`MUKURTU_CRON_INTERVAL` seconds (default 3600). A failed run is logged and
+retried at the next interval; it never stops the container. Set
+`MUKURTU_CRON=false` if you run cron from outside.
+
+**Health.** The healthcheck requests `/healthz`, which nginx answers by calling
+php-fpm's built-in ping. It confirms nginx and php-fpm are alive without
+bootstrapping Drupal, so it is cheap enough to run every 30 seconds for every
+tenant on a host, and it does not touch the database. A database outage shows in
+the site's own status report and in the logs, not as a restart loop. The
+healthcheck's start period is ten minutes, because installing a new site takes a
+few minutes.
+
+**Running one-off commands.** `docker run ... <image> drush status` (or any
+other command) renders the same configuration, then runs the command *without*
+waiting for the database, installing, or updating. `docker exec <container>
+drush ...` works too; `PHPRC` is set in the image, so Drush always gets the
+command-line memory limit.
+
+**Base URL.** Drush needs to know the site's address to write correct links in
+output generated by cron (notification emails, for example). It defaults to
+`https://` plus the first entry of `MUKURTU_TRUSTED_HOSTS`; set
+`MUKURTU_BASE_URL` to override it. A wildcard first entry is skipped.
+
+## Known hazards
+
+These are properties of Mukurtu and Drupal that the image can reduce but not
+remove. They are documented so operators can size and monitor for them.
+
+1. **Private files are served by PHP.** Access control is the point of Mukurtu's
+   private files, so Drupal checks every request and then streams the file. A
+   download holds a php-fpm worker for as long as the client takes to receive
+   it. The image sends these requests to a separate pool
+   (`MUKURTU_FPM_FILES_MAX_CHILDREN`, default 2) so downloads cannot use up the
+   workers that serve pages, and the test suite checks that a page request is
+   still answered while that pool is full. The limit that remains is that only
+   that many private downloads, or video range requests, can run at once per
+   site; the others wait. A site that serves a lot of private media should raise
+   the value and the container's memory limit together. Removing the limit
+   altogether would mean serving private files with `X-Accel-Redirect`, which
+   needs a change to the Mukurtu profile and is out of scope for the image.
+2. **ffmpeg and poppler memory is outside PHP's `memory_limit`.** Mukurtu runs
+   `ffmpeg` and `pdftoppm` inside the upload request, to make thumbnails. Their
+   memory belongs to the container, not to the PHP process, so a container limit
+   sized for PHP alone can be exceeded and the container killed while a video is
+   being uploaded. Leave headroom. The Compose examples allow 1 GB per site; see
+   "Measured footprint" for the numbers.
+3. **Environment variables can be read by anyone who can inspect the
+   container.** `docker inspect` shows them. Use the `_FILE` form for the
+   database, admin, hash salt and SMTP secrets.
+4. **Dependencies are resolved at build time** (see "Where the code comes
+   from"): the lock file recorded in the image is the authoritative list of what
+   it contains.
+
+## Hosting examples
+
+Two Compose files show how the image is meant to be run. Both are tested: the
+test suite checks that they are valid, that every Mukurtu service has the
+hardening below, and that the single-site file starts a working site.
+
+**Single site** (`docker-compose.example.yml`): the image, MariaDB, two named
+volumes for files, and Docker secrets for every password.
+
+**Several sites on one host** (`docker-compose.multisite.example.yml`): one
+container per site, all from the same image, behind a Traefik reverse proxy that
+routes by host name and obtains TLS certificates. Each site has its own
+environment, database, user, and file volumes, so sites can be upgraded,
+restarted, and resource-limited independently, and a problem in one cannot
+reach another's data or files. This matters for Mukurtu in particular: sites
+often hold culturally sensitive material, and the private-file access control
+of one community's site should not share a failure domain with another's. The
+alternative, one Drupal installation serving many sites ("multisite"), saves
+some memory but shares one codebase, one set of upgrades, and one PHP process
+pool. It is not supported by this image.
+
+### What the examples set, and why
+
+| Setting | Reason |
+| --- | --- |
+| `read_only: true` | The image's code cannot be modified at run time, even by a compromised process. Writable places are only the two file volumes and two tmpfs mounts. |
+| `cap_drop: [ALL]` | The process needs no Linux capabilities. Removing them limits what an attacker who gets a shell can do. |
+| `security_opt: no-new-privileges` | Stops a process from gaining privileges through setuid binaries. |
+| `mem_limit: 1g` per site | A ceiling so one site cannot take the host's memory, with headroom for `ffmpeg` and `pdftoppm`, whose memory is not covered by PHP's `memory_limit`. See "Measured footprint" for what a site actually uses. |
+| `tmpfs: /tmp` with a `size` | Where uploads land first (`MUKURTU_FILE_TEMP_PATH`). A tmpfs is fast but counts against the container's memory; for large video uploads, mount a size-capped volume there instead. The size cap bounds the worst case. |
+| `tmpfs: /run` | Where the rendered configuration is written (`MUKURTU_RUN_DIR`), so nothing else in the container needs to be writable. |
+| `*_FILE` secrets | Passwords are mounted as files and read from there. They never appear in `docker inspect`. |
+| Published on `127.0.0.1` only | The reverse proxy connects to the site; the site is not reachable from outside the host except through the proxy. |
+| `MUKURTU_REVERSE_PROXY_ADDRESSES` | Only the proxy network may set `X-Forwarded-*` headers. The multi-site file gives the proxy network a fixed address range so this can be exact. |
+| Database on an `internal` network | The database is reachable from the sites and nothing else. |
+
+### MariaDB settings
+
+The examples start MariaDB with the settings Drupal documents for MySQL and
+MariaDB:
+
+- `--character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci`: the
+  recommended character set, so emoji and scripts outside the Basic
+  Multilingual Plane are stored correctly.
+- `--transaction-isolation=READ-COMMITTED` with `--binlog-format=ROW`: Drupal
+  recommends READ-COMMITTED to avoid lock contention and deadlocks under
+  concurrent writes; row-based binary logging is required to use it safely.
+- `--max-allowed-packet=64M`: Drupal stores large serialized values.
+- `--innodb-buffer-pool-size`: set to roughly half of the database
+  container's memory limit.
+
+### Adding a site
+
+Copy a `site_*` block and its two volumes, give it a new host name, database
+name and credentials, and add its database to the `db_init` config (which runs
+on the database's first start). For a database that already exists, create the
+database and user by hand.
