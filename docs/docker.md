@@ -53,6 +53,10 @@ installs Mukurtu into the empty database, which takes a few minutes; the log end
 with `[mukurtu] starting`. Then browse to the site through your reverse proxy and
 sign in as `admin` with the password from `secrets/admin_password.txt`.
 
+To try it on your own machine without a proxy, use `MUKURTU_HOST=localhost` and open
+`http://localhost:8080`. Use that exact name: `http://127.0.0.1:8080` answers `400
+Bad Request`, because the address is not in `MUKURTU_TRUSTED_HOSTS`.
+
 ## Images and tags
 
 Images are published to `ghcr.io/<owner>/mukurtu` for `linux/amd64` and
