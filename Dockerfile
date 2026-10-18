@@ -191,6 +191,7 @@ RUN set -eux; \
 # Entrypoint, config templates, and settings.php. Last so that editing them
 # does not rebuild the layers above.
 COPY docker/ /usr/local/lib/mukurtu/
+RUN cp /usr/local/lib/mukurtu/settings.php /var/www/html/web/sites/default/settings.php
 
 VOLUME ["/var/www/files/public", "/var/www/files/private"]
 

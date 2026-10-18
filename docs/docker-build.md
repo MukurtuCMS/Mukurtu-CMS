@@ -340,3 +340,64 @@ reasoning is here, the reference is in [docker.md](docker.md).
   so a request stuck waiting on something could otherwise hold a worker for
   ever. The private-file pool has no terminate timeout, since a download may
   legitimately take a long time.
+
+## Drupal settings
+
+A Drupal site's `settings.php` normally differs for every site, and is edited by
+hand. In this image it is a single file, `docker/settings.php`, copied into
+`web/sites/default/` at build time and read-only to the runtime user. It holds
+no site-specific values: it reads them from environment variables when Drupal
+starts. The same image therefore serves any number of sites, and a site's whole
+configuration is the environment you give its container.
+
+**Database.** `MUKURTU_DB_HOST`, `MUKURTU_DB_NAME`, `MUKURTU_DB_USER`, and
+`MUKURTU_DB_PASSWORD` are required (plus optional `MUKURTU_DB_PORT` and
+`MUKURTU_DB_PREFIX`). A missing one stops Drupal with a message naming it. The
+connection uses the `utf8mb4` character set, as Drupal and Mukurtu recommend, so
+characters outside the Basic Multilingual Plane (emoji, some scripts) work. The
+database itself must be created as `utf8mb4` too; the Compose examples do this.
+
+**Trusted hosts.** `MUKURTU_TRUSTED_HOSTS` is required: a comma-separated list
+of the names the site answers to. Drupal refuses requests whose `Host` header
+is anything else, which blocks host-header attacks such as poisoned password
+reset links. Each entry is matched exactly (its dots are literal, so
+`example.com` does not trust `exampleXcom` or `example.com.evil.org`) and
+without regard to case. An entry written `*.example.com` trusts any subdomain.
+
+**Reverse proxy.** With `MUKURTU_REVERSE_PROXY=true`, Drupal takes the client
+address, scheme, and host from the `X-Forwarded-*` headers, but **only** from the
+addresses in `MUKURTU_REVERSE_PROXY_ADDRESSES`. The list is mandatory when the
+proxy is enabled, because trusting those headers from anyone lets a visitor
+pretend to be any client.
+
+**Hash salt.** Drupal uses a secret salt to sign one-time login links and
+image-style tokens. Set `MUKURTU_HASH_SALT` (or `MUKURTU_HASH_SALT_FILE`)
+explicitly for production. If you do not, the entrypoint generates one on first
+start and keeps it in the private volume. That works, but it ties the salt to
+that volume: if the volume is lost or replaced while the database is kept, the
+salt changes, previously issued image-style tokens stop validating, and images
+are regenerated until caches are rebuilt. An explicit salt avoids the problem.
+
+**Files.**
+
+- `file_private_path` is `/var/www/files/private`. Mukurtu's access control
+  depends on a private file system; the image makes sure one exists.
+- `file_temp_path` is `MUKURTU_FILE_TEMP_PATH` (default `/tmp`). Uploads are
+  written here before Drupal moves them into place, so a 100 MB upload needs
+  100 MB here. What backs this directory is your choice: a **tmpfs** is fast but
+  counts against the container's memory, which matters for large video uploads;
+  a **size-capped volume** uses disk instead. The Compose examples show both.
+- `config_sync_directory` is `MUKURTU_CONFIG_SYNC_DIR`, by default a directory
+  in the private volume, outside the web root.
+
+**Other settings.**
+
+- `skip_permissions_hardening` is on. Drupal's usual habit of making
+  `sites/default` read-only does not apply, because the code is already
+  read-only to the runtime user.
+- `class_loader_auto_detect` is off. The autoloader is a complete class map and
+  the image never changes, so Drupal does not need to look for new classes on
+  each request.
+- The on-screen error level is forced to `hide`. Errors still go to the
+  container log and Drupal's database log, where administrators can read them,
+  but they are never shown to visitors.

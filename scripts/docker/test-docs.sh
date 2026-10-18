@@ -16,6 +16,7 @@ REQUIRED_SECTIONS=(
   "Configuration rendering"
   "Security hardening"
   "Performance tuning"
+  "Drupal settings"
 )
 if [[ $# -gt 0 ]]; then
   REQUIRED_SECTIONS=("$@")
