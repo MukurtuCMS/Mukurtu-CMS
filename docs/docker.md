@@ -306,9 +306,9 @@ two grow with traffic and uploads.
 
 | Part | Roughly | Controlled by |
 | --- | --- | --- |
-| nginx and the php-fpm master | tens of MB | `MUKURTU_NGINX_WORKER_PROCESSES` |
-| opcache (compiled code) | up to `MUKURTU_OPCACHE_MEMORY` | `MUKURTU_OPCACHE_MEMORY` |
-| APCu | up to `MUKURTU_APCU_MEMORY` | `MUKURTU_APCU_MEMORY` |
+| nginx and the supervising scripts | about 12 MB | `MUKURTU_NGINX_WORKER_PROCESSES` |
+| opcache (compiled code), shared by all workers | most of the idle footprint, up to `MUKURTU_OPCACHE_MEMORY` | `MUKURTU_OPCACHE_MEMORY` |
+| APCu, shared by all workers | up to `MUKURTU_APCU_MEMORY` | `MUKURTU_APCU_MEMORY` |
 | One PHP worker | up to `MUKURTU_PHP_MEMORY_LIMIT` while serving a request | `MUKURTU_FPM_MAX_CHILDREN`, `MUKURTU_FPM_FILES_MAX_CHILDREN` |
 | `ffmpeg` / `pdftoppm` | **not counted in `memory_limit`** | the size of the media |
 
@@ -316,9 +316,16 @@ The last row is the one that surprises people. Mukurtu runs `ffmpeg` (video
 thumbnails) and `pdftoppm` (PDF thumbnails) *inside the upload request*. Their
 memory belongs to the container, not to the PHP process, so a container memory
 limit sized only for PHP can be exceeded and the container killed in the middle of
-an upload. Leave headroom: the Compose examples give each site **1 GB**. An idle
-site with `ondemand` workers uses a small fraction of that; measured figures are in
-[docker-build.md](docker-build.md#measured-footprint).
+an upload. Leave headroom: the Compose examples give each site **1 GB**.
+
+**Measured** on a freshly installed site (details and conditions in
+[docker-build.md](docker-build.md#measured-footprint)): about **90 MB** when idle,
+about **145 MB** with four PHP workers serving requests at once, and **160 MB** for
+`ffmpeg` extracting a thumbnail from a 100 MB 1080p video. Those are floors: a site
+with real content uses more per worker, up to `MUKURTU_PHP_MEMORY_LIMIT`. The 1 GB
+limit covers the worst case, roughly: idle footprint, plus one worker at its limit
+(512 MB), plus `ffmpeg` (160 MB or more), plus the uploaded file if
+`MUKURTU_FILE_TEMP_PATH` is a tmpfs.
 
 To fit more sites on a host, lower `MUKURTU_FPM_MAX_CHILDREN` (a low-traffic site
 rarely needs more than 2 or 3) and keep `MUKURTU_FPM_PM=ondemand`. To make a busy

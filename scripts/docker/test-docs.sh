@@ -21,6 +21,7 @@ REQUIRED_SECTIONS=(
   "Known hazards"
   "Hosting examples"
   "Publishing and supply chain"
+  "Measured footprint"
 )
 if [[ $# -gt 0 ]]; then
   REQUIRED_SECTIONS=("$@")

@@ -664,3 +664,54 @@ by default so a repository chooses this explicitly.
   Actions, Variables, to enable the weekly rebuild.
 - The pinned template version is in `docker/TEMPLATE_VERSION`. Update it when a
   new `mukurtu/mukurtu-template` release is wanted in the image.
+
+## Measured footprint
+
+These figures were measured with `scripts/docker/measure.sh`, which builds both
+variants, installs a real site, and samples the container with `docker stats`
+(memory in use, excluding reclaimable cache). Run it yourself to check them on
+your hardware.
+
+**Conditions:** 2026-10-18, `linux/amd64`, Docker 29.9.0 on a 16-CPU, 28 GB Linux
+host, Mukurtu 4.0.5 with `mukurtu-template` 4.0.2, a freshly installed site with
+no content, default settings (`ondemand`, 4 workers, 128 MB opcache, 32 MB APCu).
+
+| Measurement | Result |
+| --- | --- |
+| Image size, full (uncompressed) | 456 MB |
+| Image size, slim (uncompressed) | 327 MB |
+| Site just started, before any request | 123 MB |
+| Idle, after warm-up (no PHP workers running) | **89 MB** |
+| Under load: four concurrent request streams, 4 PHP workers | **145 MB** peak |
+| Back to idle after the load | 92 MB |
+| `ffmpeg` extracting a thumbnail from a 100 MB 1080p H.264 video | 159 MB peak (the process alone) |
+
+**What the idle figure is made of.** nginx and the supervising scripts together
+use about 12 MB. Most of the rest is shared memory holding the compiled code
+(opcache) and the APCu cache, which stays allocated after the PHP workers exit.
+That is why an idle site costs far less than a PHP application with permanent
+workers, and why a second site cannot share it: each container has its own.
+
+**How to read the load figure.** Four workers added about 55 MB on top of idle,
+roughly 14 MB each, because workers share the compiled code. This was measured
+against an empty site's anonymous login page, which is a light request. Pages of a
+site with real content (collections, search results, Layout Builder pages, an
+authenticated administrator working in the editor) use considerably more per
+worker, up to `MUKURTU_PHP_MEMORY_LIMIT`. Treat 145 MB as a floor for a lightly
+used site, not as a typical figure for a busy one, and measure with your own
+content.
+
+**What to budget for a site.** A 1 GB container limit, as in the Compose examples,
+is a ceiling, not a reservation. The worst case it has to hold is: the idle
+footprint (about 90 MB), plus one PHP worker at its limit (512 MB), plus `ffmpeg`
+working on an upload (about 160 MB for this video, more for 4K), plus the
+uploaded file itself if `MUKURTU_FILE_TEMP_PATH` is a tmpfs (100 MB for a 100 MB
+upload): roughly 860 MB. A site that never has a video uploaded needs far less.
+
+**Planning a host.** Most of the time an idle site costs under 100 MB, so many
+low-traffic sites fit on a small server; the limit is how many are busy *at the
+same moment*. Add up the idle figures of all the sites, add the database server
+and the operating system, then leave room for a few sites to burst to several
+hundred megabytes at once. Memory limits per container keep one site's burst from
+taking the others' memory. Swap or zram on the host gives some protection against
+the occasional overlap.
