@@ -118,3 +118,77 @@ RUN set -eux; \
 
 # Marker so BuildKit cannot skip the guard stage.
 COPY --from=guard /guard-ok /guard-ok
+
+# ---------------------------------------------------------------------------
+# runtime: the image that ships. nginx + php-fpm on Alpine, run by an
+# entrypoint added in a later layer of this file. No Composer, no dev tooling.
+# ---------------------------------------------------------------------------
+FROM php-base AS runtime
+
+# Both are required, with no default, and checked by the guard stage. They
+# decide whether the media tools Mukurtu shells out to are in the image.
+ARG WITH_FFMPEG
+ARG WITH_POPPLER
+
+COPY --from=guard /guard-ok /guard-ok
+
+RUN set -eux; \
+    apk add --no-cache \
+      mariadb-client \
+      msmtp \
+      nginx \
+      tini; \
+    if [ "$WITH_FFMPEG" = true ]; then apk add --no-cache ffmpeg; fi; \
+    if [ "$WITH_POPPLER" = true ]; then apk add --no-cache poppler-utils; fi
+
+# Fail the build if the image does not match the variant that was asked for.
+# The probes are the ones Mukurtu itself uses to report a missing tool
+# (modules/mukurtu_core/src/Hook/MediaToolRequirements.php).
+RUN set -eu; \
+    if [ "$WITH_FFMPEG" = true ]; then \
+      ffmpeg -version >/dev/null || { echo "ERROR: WITH_FFMPEG=true but ffmpeg does not run" >&2; exit 1; }; \
+    elif command -v ffmpeg >/dev/null; then \
+      echo "ERROR: WITH_FFMPEG=false but ffmpeg is installed" >&2; exit 1; \
+    fi; \
+    if [ "$WITH_POPPLER" = true ]; then \
+      pdftotext -v >/dev/null 2>&1 || { echo "ERROR: WITH_POPPLER=true but pdftotext does not run" >&2; exit 1; }; \
+      pdftoppm --help >/dev/null 2>&1 || { echo "ERROR: WITH_POPPLER=true but pdftoppm does not run" >&2; exit 1; }; \
+    elif command -v pdftotext >/dev/null || command -v pdftoppm >/dev/null; then \
+      echo "ERROR: WITH_POPPLER=false but poppler-utils is installed" >&2; exit 1; \
+    fi
+
+# Fail the build if PHP cannot do what Drupal and Mukurtu need of it.
+RUN set -eu; \
+    php -r ' \
+      $missing = []; \
+      foreach (["ctype","curl","dom","fileinfo","filter","gd","hash","iconv","intl","json","libxml","mbstring","openssl","pcre","PDO","pdo_mysql","session","SimpleXML","SPL","tokenizer","xml","xmlwriter","zip","zlib","Zend OPcache","apcu"] as $e) { \
+        if (!extension_loaded($e)) { $missing[] = $e; } \
+      } \
+      $gd = gd_info(); \
+      foreach (["JPEG Support","WebP Support","FreeType Support"] as $f) { \
+        if (empty($gd[$f])) { $missing[] = "gd: " . $f; } \
+      } \
+      if (in_array("exec", array_map("trim", explode(",", (string) ini_get("disable_functions"))), true)) { \
+        $missing[] = "exec() is disabled, but Mukurtu needs it for thumbnails and PDF text"; \
+      } \
+      if ($missing) { fwrite(STDERR, "ERROR: PHP is missing: " . implode(", ", $missing) . "\n"); exit(1); } \
+    '
+
+# A fixed uid so volume ownership is predictable across hosts.
+RUN adduser -D -u 1000 -h /home/mukurtu mukurtu
+
+# The code is owned by root and not writable by the runtime user: a compromised
+# PHP process cannot rewrite the site. Only the two file volumes are writable.
+COPY --from=build /app /var/www/html
+
+RUN set -eux; \
+    mkdir -p /var/www/files/public /var/www/files/private; \
+    chown mukurtu:mukurtu /var/www/files/public /var/www/files/private; \
+    rm -rf /var/www/html/web/sites/default/files; \
+    ln -s /var/www/files/public /var/www/html/web/sites/default/files; \
+    ln -s /var/www/html/vendor/bin/drush /usr/local/bin/drush
+
+VOLUME ["/var/www/files/public", "/var/www/files/private"]
+
+WORKDIR /var/www/html
+USER mukurtu

@@ -110,3 +110,83 @@ would save a little space and risk breaking an autoload path.
 **PHP platform.** The stage runs on the same PHP image, with the same
 extensions, as the runtime image (`php-base`), so Composer checks the real
 platform requirements instead of ignoring them.
+
+## Runtime image, tools and extensions
+
+The `runtime` stage is the image that is published. It starts from the official
+`php:8.4-fpm-alpine` image, pinned by version and digest, and adds nginx.
+
+**Why nginx, php-fpm, and Alpine.** The goal is the smallest idle memory
+footprint, because the motivating use is one host running many separate Mukurtu
+sites. nginx and php-fpm are separate, small processes; Alpine's base is a few
+megabytes. The Mukurtu team does its own work with nginx. Apache is not used
+because its image is larger and the team has not tested it extensively. The
+trade-off is that PHP on Alpine uses the musl C library; the performance
+difference is small for a Drupal workload, which is dominated by the database
+and by opcache.
+
+**PHP extensions.** Everything Drupal core requires, plus:
+
+| Extension | Used for |
+| --- | --- |
+| `gd` (JPEG, WebP, FreeType) | Image styles and thumbnails. Checked at build time. |
+| `intl` | Sorting, transliteration, and number and date formatting. |
+| `zip` | Archive handling by Drupal and modules. |
+| `pdo_mysql` | The database (MariaDB or MySQL; PostgreSQL is not supported by Mukurtu). |
+| `bcmath` | Required by some contributed modules. |
+| `Zend OPcache` | Compiled-code cache. Configured in the next section. |
+| `apcu` | Drupal's fast cache backend for bootstrap and discovery data. |
+
+The build runs a check that every extension is loaded and that `gd` was built
+with JPEG, WebP and FreeType support. A failure stops the build.
+
+**Media tools.** Mukurtu shells out to external programs, and silently skips the
+feature when they are missing:
+
+| Program | Package | Mukurtu uses it to |
+| --- | --- | --- |
+| `pdftotext` | `poppler-utils` | Extract PDF text so documents can be found by search. |
+| `pdftoppm` | `poppler-utils` | Render the first page of a PDF as its thumbnail. |
+| `ffmpeg` | `ffmpeg` | Extract the first frame of a video as its thumbnail. |
+
+(See `modules/mukurtu_core/src/Hook/MediaToolRequirements.php`, which also
+reports a missing tool on the site's status page.) The image is published in two
+variants, chosen with the required build args `WITH_FFMPEG` and `WITH_POPPLER`:
+
+- **full** (`WITH_FFMPEG=true`, `WITH_POPPLER=true`): the default tags.
+- **slim** (both `false`): the `-slim` tags. About 130 MB smaller; PDF text
+  search, PDF thumbnails and video thumbnails do not work.
+
+The build runs each tool with the same probe Mukurtu uses and fails if a
+variant does not match what was asked for, in either direction: a slim image
+that somehow contains `ffmpeg` fails the build, just as a full image without it
+does.
+
+**`exec()` stays enabled.** Hardening guides often disable PHP's process
+functions. Mukurtu cannot work with them disabled, because it launches the
+tools above with `exec()`. The build fails if `exec` appears in
+`disable_functions`. The residual risk is that a code-injection bug in Mukurtu,
+Drupal, or a module could be used to start a process. It is mitigated by keeping
+the image's packages current (see "Publishing and supply chain"), by running as
+a non-root user with no extra privileges, and by keeping the code read-only to
+that user.
+
+**Users, files, and volumes.**
+
+- The process runs as user `mukurtu`, uid `1000`, a fixed number so ownership of
+  mounted volumes is predictable between hosts.
+- The code in `/var/www/html` belongs to root and is not writable by the runtime
+  user. A compromised PHP process cannot modify the site's code. Only two
+  directories are writable, and both are declared as volumes:
+  `/var/www/files/public` and `/var/www/files/private`.
+- Mukurtu's access control depends on the Drupal *private* file system, which is
+  why the private volume is mandatory. `web/sites/default/files` is a symlink to
+  the public volume.
+- There is no Composer in the image. It is a build tool, not something a running
+  site needs, and leaving it out removes a tool that could be misused and a few
+  megabytes.
+- `tini` is the container's first process. It reaps orphaned child processes,
+  which matters because `ffmpeg` and `pdftoppm` are launched from PHP requests.
+- Drush is on the `PATH`. `mariadb-client` is included so `drush sql:dump` and
+  `drush sql:cli` work for backups. `msmtp` provides the `sendmail` Drupal uses
+  for outbound mail (configured from environment variables).
