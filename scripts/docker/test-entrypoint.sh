@@ -114,6 +114,32 @@ done
 assert_contains "$slim_log" "WARNING: MUKURTU_SMTP_HOST is not set" "missing SMTP configuration is warned about"
 docker rm -f "$slim_name" >/dev/null
 
+echo "entrypoint: generated-salt"
+# No MUKURTU_HASH_SALT: the entrypoint makes one, keeps it in the private volume,
+# and settings.php must use it, across restarts.
+salt_app="mukurtu-test-salt-$RUN_ID"
+CLEANUP_CONTAINERS+=("$salt_app")
+docker run -d --name "$salt_app" --network "$NET" \
+  -e MUKURTU_DB_HOST="$DB" -e MUKURTU_DB_NAME=mukurtu -e MUKURTU_DB_USER=mukurtu -e MUKURTU_DB_PASSWORD=mukurtu \
+  -e MUKURTU_TRUSTED_HOSTS=x.example.org -e MUKURTU_AUTO_INSTALL=false "$FULL" >/dev/null
+for _ in $(seq 1 40); do
+  docker exec "$salt_app" test -s /var/www/files/private/.hash_salt 2>/dev/null && break
+  sleep 1
+done
+salt_one="$(docker exec "$salt_app" cat /var/www/files/private/.hash_salt 2>/dev/null)"
+[[ -n "$salt_one" && ${#salt_one} -ge 32 ]] && pass "a salt of at least 32 characters is generated" || fail "a salt of at least 32 characters is generated (got '${salt_one}')"
+assert_eq "600" "$(docker exec "$salt_app" stat -c %a /var/www/files/private/.hash_salt)" "the salt file is private (mode 0600)"
+settings_salt() { docker exec "$salt_app" php -r '$settings = []; $databases = []; $config = []; $app_root = "/var/www/html/web"; $site_path = "sites/default"; include "/var/www/html/web/sites/default/settings.php"; echo $settings["hash_salt"];'; }
+assert_eq "$salt_one" "$(settings_salt)" "settings.php uses the generated salt"
+docker restart "$salt_app" >/dev/null
+for _ in $(seq 1 40); do
+  docker exec "$salt_app" curl -sf http://127.0.0.1:8080/healthz >/dev/null 2>&1 && break
+  sleep 1
+done
+assert_eq "$salt_one" "$(docker exec "$salt_app" cat /var/www/files/private/.hash_salt)" "a restart keeps the same salt"
+assert_eq "$salt_one" "$(settings_salt)" "settings.php still uses it after the restart"
+docker rm -f "$salt_app" >/dev/null
+
 echo "entrypoint: db-late"
 late_db="mukurtu-test-latedb-$RUN_ID"
 late_app="mukurtu-test-lateapp-$RUN_ID"

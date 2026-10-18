@@ -392,7 +392,11 @@ are regenerated until caches are rebuilt. An explicit salt avoids the problem.
   depends on a private file system; the image makes sure one exists.
 - `file_temp_path` is `MUKURTU_FILE_TEMP_PATH` (default `/tmp`). Uploads are
   written here before Drupal moves them into place, so a 100 MB upload needs
-  100 MB here. What backs this directory is your choice: a **tmpfs** is fast but
+  100 MB here, and in fact twice that: nginx buffers a request body in a
+  `nginx-body` directory under this path (and spills large responses to
+  `nginx-fastcgi`) before passing it to PHP, which then
+  receives a copy. (The rendered configuration directory, `/run/mukurtu`, is
+  small and is not used for uploads.) What backs this directory is your choice: a **tmpfs** is fast but
   counts against the container's memory, which matters for large video uploads;
   a **size-capped volume** uses disk instead. The Compose examples show both.
 - `config_sync_directory` is `MUKURTU_CONFIG_SYNC_DIR`, by default a directory
@@ -705,8 +709,8 @@ content.
 is a ceiling, not a reservation. The worst case it has to hold is: the idle
 footprint (about 90 MB), plus one PHP worker at its limit (512 MB), plus `ffmpeg`
 working on an upload (about 160 MB for this video, more for 4K), plus the
-uploaded file itself if `MUKURTU_FILE_TEMP_PATH` is a tmpfs (100 MB for a 100 MB
-upload): roughly 860 MB. A site that never has a video uploaded needs far less.
+uploaded file itself if `MUKURTU_FILE_TEMP_PATH` is a tmpfs (held twice, so 200 MB
+for a 100 MB upload): roughly 960 MB. A site that never has a video uploaded needs far less.
 
 **Planning a host.** Most of the time an idle site costs under 100 MB, so many
 low-traffic sites fit on a small server; the limit is how many are busy *at the

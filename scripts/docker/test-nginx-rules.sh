@@ -32,7 +32,7 @@ echo 'secret: yes' >"$STUB/config.yml"
 echo 'body{}' >"$STUB/sites/default/files/css/x.css"
 chmod -R a+rX "$STUB"
 
-docker run -d --name "$NAME" --entrypoint sh -e MUKURTU_FPM_MAX_CHILDREN=2 -e MUKURTU_FPM_FILES_MAX_CHILDREN=2 -v "$STUB:/var/www/html/web:ro" "$IMAGE" -c '
+docker run -d --name "$NAME" --entrypoint sh -e MUKURTU_FPM_MAX_CHILDREN=2 -e MUKURTU_FPM_FILES_MAX_CHILDREN=2 --tmpfs /tmp/run:size=4m,mode=1777 -v "$STUB:/var/www/html/web:ro" "$IMAGE" -c '
   export MUKURTU_RUN_DIR=/tmp/run
   /usr/local/lib/mukurtu/render-config.sh 2>/dev/null || exit 1
   php-fpm -y /tmp/run/php-fpm.conf -c /tmp/run/php.ini &
@@ -87,6 +87,12 @@ assert_not_contains "$headers" "nginx/" "no nginx version in the Server header"
 css="$(get /sites/default/files/css/x.css)"
 assert_contains "$css" "max-age=31536000" "aggregated CSS is cached for a year"
 assert_contains "$css" "X-Content-Type-Options: nosniff" "nosniff survives the cache headers"
+
+echo "uploads are buffered in the upload temp area, not in the small run directory"
+# /tmp/run is a 4 MB tmpfs here, like the 16 MB /run in the Compose examples.
+docker exec "$NAME" sh -c 'head -c 20000000 /dev/zero > /tmp/upload.bin'
+upload="$(docker exec "$NAME" curl -s -o /dev/null -w '%{http_code}' --max-time 20 --data-binary @/tmp/upload.bin http://127.0.0.1:8080/index.php)"
+assert_eq "200" "$upload" "a 20 MB upload succeeds although the run directory holds only 4 MB"
 
 echo "private downloads cannot starve page requests"
 # Three slow downloads: two hold the files pool's workers, one waits.

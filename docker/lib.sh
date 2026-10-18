@@ -39,9 +39,18 @@ require_env() {
   [ -n "$_re_value" ] || die "$1 is required"
 }
 
-# The validators check the *value* of the named variable.
+# The validators check the *value* of the named variable. A value with a line
+# break is always refused: `grep` matches line by line, so "100M<newline>evil = 1"
+# would pass a pattern check and then inject a second line into a rendered
+# configuration file.
+_NL='
+'
+_CR=$(printf '\r')
 _validate() { # _validate NAME PATTERN DESCRIPTION
   eval "_v_value=\${$1:-}"
+  case "$_v_value" in
+    *"$_NL"*|*"$_CR"*) die "$1 must not contain line breaks" ;;
+  esac
   printf '%s' "$_v_value" | grep -Eq "$2" || die "$1 must be $3 (got '$_v_value')"
 }
 
@@ -52,6 +61,7 @@ validate_positive_int() { _validate "$1" '^[1-9][0-9]*$' "a whole number greater
 validate_bool() { _validate "$1" '^(true|false)$' "true or false"; }
 validate_duration() { _validate "$1" '^[0-9]+[smhd]?$' "a duration such as 10s or 5m"; }
 validate_abs_path() { _validate "$1" '^/[A-Za-z0-9_./-]*$' "an absolute path"; }
+validate_no_spaces() { _validate "$1" '^[^[:space:]]+$' "a single word without spaces"; }
 validate_timezone() { _validate "$1" '^[A-Za-z0-9_+/-]+$' "a time zone name such as UTC or Pacific/Auckland"; }
 
 validate_choice() { # validate_choice NAME choice...

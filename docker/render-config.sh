@@ -103,10 +103,9 @@ if [ -z "$MUKURTU_SMTP_HOST" ]; then
   MUKURTU_MSMTP_SETTINGS="# MUKURTU_SMTP_HOST is not set: outbound mail is not configured."
   MUKURTU_PHP_MAIL_SETTINGS=""
 else
-  _host_ok=$(printf '%s' "$MUKURTU_SMTP_HOST" | grep -Ec '^[A-Za-z0-9.-]+$' || true)
-  [ "$_host_ok" = 1 ] || die "MUKURTU_SMTP_HOST must be a host name or IP address (got '$MUKURTU_SMTP_HOST')"
-  [ -z "$MUKURTU_SMTP_USER" ] || { printf '%s' "$MUKURTU_SMTP_USER" | grep -Eq '^[^[:space:]]+$' || die "MUKURTU_SMTP_USER must not contain spaces or line breaks"; }
-  [ -z "$MUKURTU_SMTP_FROM" ] || { printf '%s' "$MUKURTU_SMTP_FROM" | grep -Eq '^[^[:space:]]+$' || die "MUKURTU_SMTP_FROM must be an address without spaces or line breaks"; }
+  _validate MUKURTU_SMTP_HOST '^[A-Za-z0-9.-]+$' "a host name or IP address"
+  [ -z "$MUKURTU_SMTP_USER" ] || validate_no_spaces MUKURTU_SMTP_USER
+  [ -z "$MUKURTU_SMTP_FROM" ] || validate_no_spaces MUKURTU_SMTP_FROM
 
   load_secret MUKURTU_SMTP_PASSWORD
   _tls=on _starttls=on

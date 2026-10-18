@@ -78,8 +78,11 @@ services:
     read_only: true
     tmpfs:
       # Where uploads land before Drupal moves them into place
-      # (MUKURTU_FILE_TEMP_PATH). A tmpfs is fast but counts against mem_limit;
-      # for large video uploads, mount a size-capped volume here instead.
+      # (MUKURTU_FILE_TEMP_PATH). An upload is held here twice (nginx buffers
+      # it, then PHP gets a copy), so 256m fits uploads up to about 100 MB (the
+      # default MUKURTU_UPLOAD_MAX). A tmpfs is fast but counts against
+      # mem_limit; for large video uploads, mount a size-capped volume here
+      # instead.
       - /tmp:size=256m,mode=1777
       # Rendered configuration (MUKURTU_RUN_DIR).
       - /run:size=16m,mode=1777

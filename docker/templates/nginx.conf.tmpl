@@ -17,10 +17,14 @@ http {
   include /etc/nginx/mime.types;
   default_type application/octet-stream;
 
-  # The runtime user cannot write to the default temp locations.
-  client_body_temp_path @@MUKURTU_RUN_DIR@@/nginx-body;
+  # The runtime user cannot write to the default temp locations. Request bodies
+  # are buffered here before they are passed to PHP, so uploads are written to
+  # the upload temp area (MUKURTU_FILE_TEMP_PATH), which is sized for them. The
+  # run directory is small and may be a tmpfs.
+  # Large responses from PHP (exports, for example) spill to disk the same way.
+  client_body_temp_path @@MUKURTU_FILE_TEMP_PATH@@/nginx-body;
+  fastcgi_temp_path @@MUKURTU_FILE_TEMP_PATH@@/nginx-fastcgi;
   proxy_temp_path @@MUKURTU_RUN_DIR@@/nginx-proxy;
-  fastcgi_temp_path @@MUKURTU_RUN_DIR@@/nginx-fastcgi;
   uwsgi_temp_path @@MUKURTU_RUN_DIR@@/nginx-uwsgi;
   scgi_temp_path @@MUKURTU_RUN_DIR@@/nginx-scgi;
 

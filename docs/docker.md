@@ -162,7 +162,7 @@ Compose files use (`READ-COMMITTED`, row-based logging, `max_allowed_packet`).
 
 | Variable | Default | Description |
 | --- | --- | --- |
-| `MUKURTU_FILE_TEMP_PATH` | `/tmp` | Where uploads are written before Drupal moves them into place. An upload needs space here equal to its size. What backs this directory is your choice: a **tmpfs** is fast but counts against the container's memory limit, while a **size-capped volume** uses disk. The directory must be writable by uid 1000. |
+| `MUKURTU_FILE_TEMP_PATH` | `/tmp` | Where uploads are written before Drupal moves them into place. An upload is held here twice while it is processed (nginx buffers it, then PHP receives a copy), so size this for **twice** the largest upload. What backs this directory is your choice: a **tmpfs** is fast but counts against the container's memory limit, while a **size-capped volume** uses disk. The directory must be writable by uid 1000. |
 | `MUKURTU_CONFIG_SYNC_DIR` | `/var/www/files/private/config-sync` | Drupal's configuration sync directory. Keep it outside the web root; the default is in the private volume. |
 | `MUKURTU_UPLOAD_MAX` | `100M` | Largest upload. Sets PHP's `upload_max_filesize` and `post_max_size` and nginx's `client_max_body_size` together. Also reverse proxies have limits of their own (nginx's default is 1M): raise theirs too. |
 
@@ -324,8 +324,8 @@ about **145 MB** with four PHP workers serving requests at once, and **160 MB** 
 `ffmpeg` extracting a thumbnail from a 100 MB 1080p video. Those are floors: a site
 with real content uses more per worker, up to `MUKURTU_PHP_MEMORY_LIMIT`. The 1 GB
 limit covers the worst case, roughly: idle footprint, plus one worker at its limit
-(512 MB), plus `ffmpeg` (160 MB or more), plus the uploaded file if
-`MUKURTU_FILE_TEMP_PATH` is a tmpfs.
+(512 MB), plus `ffmpeg` (160 MB or more), plus twice the uploaded file if
+`MUKURTU_FILE_TEMP_PATH` is a tmpfs (about 960 MB for a 100 MB video).
 
 To fit more sites on a host, lower `MUKURTU_FPM_MAX_CHILDREN` (a low-traffic site
 rarely needs more than 2 or 3) and keep `MUKURTU_FPM_PM=ondemand`. To make a busy
