@@ -11,6 +11,7 @@ DOC="$REPO_ROOT/docs/docker-build.md"
 
 REQUIRED_SECTIONS=(
   "Pinned inputs and the build guard"
+  "Where the code comes from"
 )
 if [[ $# -gt 0 ]]; then
   REQUIRED_SECTIONS=("$@")

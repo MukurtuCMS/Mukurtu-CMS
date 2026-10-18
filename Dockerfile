@@ -31,3 +31,90 @@ RUN set -eu; \
       exit 1; \
     fi; \
     touch /guard-ok
+
+# ---------------------------------------------------------------------------
+# php-base: PHP with the extensions Drupal and Mukurtu need. Shared by `build`
+# (so Composer resolves against the real platform instead of ignoring it) and
+# by `runtime`, so the extensions are compiled once.
+# ---------------------------------------------------------------------------
+FROM php:8.4.26-fpm-alpine3.24@sha256:78cd8de9970a9cd6ff4d98860a94eb5bf37dd2d5776b4785562dbfad01c29d5a AS php-base
+
+# Runtime libraries stay; the -dev packages and compilers are removed in the
+# same layer so they never reach the image.
+RUN set -eux; \
+    apk add --no-cache \
+      freetype \
+      icu-libs \
+      libjpeg-turbo \
+      libpng \
+      libwebp \
+      libzip; \
+    apk add --no-cache --virtual .build-deps \
+      $PHPIZE_DEPS \
+      freetype-dev \
+      icu-dev \
+      libjpeg-turbo-dev \
+      libpng-dev \
+      libwebp-dev \
+      libzip-dev; \
+    docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp; \
+    docker-php-ext-install -j"$(nproc)" gd intl pdo_mysql zip bcmath; \
+    pecl install apcu; \
+    docker-php-ext-enable apcu; \
+    apk del --no-network .build-deps; \
+    rm -rf /tmp/pear /var/cache/apk/*
+
+# ---------------------------------------------------------------------------
+# build: the Composer project. mukurtu-template is the skeleton (Drupal core,
+# scaffold, plugin allow-list, install paths); this checkout replaces the
+# Packagist copy of the profile, so the image holds exactly the tagged code.
+# ---------------------------------------------------------------------------
+FROM php-base AS build
+
+ARG MUKURTU_TEMPLATE_VERSION
+
+COPY --from=composer:2.10.3@sha256:af98f42dfff7c68ba8d53c2164fd9fde1087b7d449514baa38c418b1f6bc4bac /usr/bin/composer /usr/bin/composer
+RUN apk add --no-cache git unzip
+
+ENV COMPOSER_ALLOW_SUPERUSER=1 \
+    COMPOSER_NO_INTERACTION=1 \
+    COMPOSER_MEMORY_LIMIT=-1
+
+# The checkout, outside the context's .dockerignore exclusions. Composer
+# copies it into web/profiles/mukurtu (symlink=false) rather than linking it.
+COPY . /src/mukurtu
+
+WORKDIR /app
+
+# A path repository takes its version from git, which is absent here, so the
+# version is declared. mukurtu-template requires mukurtu/mukurtu ^4.0, and the
+# placeholder 4.9999.9999 stands for "the 4.x checkout being built" (the same
+# convention .tugboat/config.yml uses). Composer treats a path repository as
+# canonical, so Packagist is never consulted for the profile.
+RUN set -eux; \
+    composer create-project "mukurtu/mukurtu-template:${MUKURTU_TEMPLATE_VERSION}" /app \
+      --no-install --no-dev --no-progress --no-scripts; \
+    composer config repositories.local-dev \
+      '{"type":"path","url":"/src/mukurtu","options":{"symlink":false,"versions":{"mukurtu/mukurtu":"4.9999.9999"}}}'; \
+    composer update --no-dev --no-progress --optimize-autoloader --classmap-authoritative
+
+# Fail the build on a known security advisory. Advisories the profile already
+# triages (config.audit.ignore in its composer.json) are copied into the root
+# project's config first, because Composer only reads that setting from the
+# root project.
+RUN set -eux; \
+    ignore="$(php -r 'echo json_encode((object) (json_decode(file_get_contents("/src/mukurtu/composer.json"), true)["config"]["audit"]["ignore"] ?? []));')"; \
+    composer config --json audit.ignore "$ignore"; \
+    composer audit --no-dev --abandoned=report
+
+# Drop what the running site never reads: version-control metadata and test
+# suites. Licences, READMEs, and everything else stay.
+RUN set -eux; \
+    find /app/web/profiles/mukurtu /app/vendor /app/web/modules/contrib /app/web/themes/contrib \
+      -name .git -prune -exec rm -rf {} +; \
+    find /app/web/profiles/mukurtu /app/vendor /app/web/modules/contrib /app/web/themes/contrib \
+      \( -name tests -o -name Tests \) -type d -prune -exec rm -rf {} +; \
+    rm -rf /app/web/core/tests
+
+# Marker so BuildKit cannot skip the guard stage.
+COPY --from=guard /guard-ok /guard-ok

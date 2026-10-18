@@ -51,3 +51,62 @@ docker image inspect alpine:3.24 --format '{{index .RepoDigests 0}}'
 ```
 
 and replace the digest in the `FROM` line.
+
+## Where the code comes from
+
+A Mukurtu site is a Composer project. This repository is only the *profile*
+(`mukurtu/mukurtu`); the project around it, which pulls in Drupal core, the
+scaffold files, the Composer plugin allow-list, and the install paths, is
+[`mukurtu/mukurtu-template`](https://github.com/MukurtuCMS/mukurtu-template).
+The image follows the same structure the documented Composer install uses.
+
+The `build` stage:
+
+1. Runs `composer create-project mukurtu/mukurtu-template:$MUKURTU_TEMPLATE_VERSION`.
+2. Adds this checkout as a Composer `path` repository, with `symlink: false` so
+   the files are copied into `web/profiles/mukurtu`.
+3. Runs `composer update --no-dev --optimize-autoloader --classmap-authoritative`.
+
+**Why the checkout and not Packagist.** The image must contain exactly the code
+of the release tag.
+
+- A release workflow starts the moment the release is published, but Packagist
+  learns about the new tag through a webhook that can take minutes. A build that
+  asked Packagist for the profile could get the previous version or fail.
+- [releasing.md](releasing.md) requires the profile to be tagged *before* the
+  template. A build that depended on the template having been released for this
+  tag would break that order.
+- A path repository is canonical for Composer, so Packagist is never consulted
+  for `mukurtu/mukurtu`. The version is declared as the placeholder
+  `4.9999.9999`, "the 4.x checkout being built", so the template's `^4.0`
+  requirement is satisfied. `.tugboat/config.yml` and the CI workflow use the
+  same convention.
+
+**Patches.** The profile's `composer.json` lists patches for Drupal core and
+several contributed modules. They are applied during the install exactly as in a
+Composer install, and the list of what was applied is kept in
+`patches.lock.json`. If a patch does not apply, the build fails.
+
+**Dependencies are resolved at build time.** The template ships no
+`composer.lock`, so each build resolves the newest versions its constraints
+allow. Two builds of the same tag at different times can therefore contain
+different Drupal and contributed-module patch releases. The resolved
+`composer.lock` is kept in the image (`/var/www/html/composer.lock`) and
+attached to the published image as an attestation, so what shipped is always
+recorded.
+
+**Security advisories fail the build.** The stage runs `composer audit --no-dev`.
+Advisories the profile has already triaged are listed under
+`config.audit.ignore` in its `composer.json`; Composer only honours that setting
+in the *root* project, so the build copies it across. Abandoned packages are
+reported, not fatal.
+
+**What is removed.** Only things the running site never reads: `.git`
+directories and the `tests`/`Tests` directories of the profile, Composer
+dependencies, and contributed modules and themes, plus Drupal core's own test
+tree. Licence files, documentation, and everything else stay. Removing more
+would save a little space and risk breaking an autoload path.
+
+**PHP platform.** The stage runs on the same PHP image, with the same
+extensions, as the runtime image (`php-base`), so Composer checks the real
+platform requirements instead of ignoring them.
