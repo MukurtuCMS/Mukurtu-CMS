@@ -188,6 +188,10 @@ RUN set -eux; \
     ln -s /var/www/files/public /var/www/html/web/sites/default/files; \
     ln -s /var/www/html/vendor/bin/drush /usr/local/bin/drush
 
+# Entrypoint, config templates, and settings.php. Last so that editing them
+# does not rebuild the layers above.
+COPY docker/ /usr/local/lib/mukurtu/
+
 VOLUME ["/var/www/files/public", "/var/www/files/private"]
 
 WORKDIR /var/www/html

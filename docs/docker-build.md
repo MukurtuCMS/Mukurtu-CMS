@@ -190,3 +190,153 @@ that user.
 - Drush is on the `PATH`. `mariadb-client` is included so `drush sql:dump` and
   `drush sql:cli` work for backups. `msmtp` provides the `sendmail` Drupal uses
   for outbound mail (configured from environment variables).
+
+## Configuration rendering
+
+Nothing is edited inside a running container. Every setting is an environment
+variable (`MUKURTU_*`), listed with its default and meaning in
+[docker.md](docker.md). At every start, `render-config.sh` reads the variables,
+validates them, and writes the configuration files for PHP, php-fpm, nginx, and
+msmtp from templates in `docker/templates/`.
+
+- **Output location.** Files are written to `/run/mukurtu` (override with
+  `MUKURTU_RUN_DIR`), which can be a tmpfs. Nothing else in the image needs to
+  be writable by the configuration step, so the container can run with a
+  read-only root filesystem.
+- **Validation.** Every value is checked before anything starts, and the first
+  invalid one stops the container with a message that names the variable, for
+  example `ERROR: MUKURTU_UPLOAD_MAX must be a size such as 128M or 1G (got
+  '100MB')`. A misspelt unit is far easier to fix at start-up than to diagnose
+  as a failed upload.
+- **One variable, several settings.** `MUKURTU_UPLOAD_MAX` sets PHP's
+  `upload_max_filesize` and `post_max_size` and nginx's `client_max_body_size`
+  together. Setting them separately is a classic source of uploads that fail
+  with no explanation.
+- **Secrets can be files.** `MUKURTU_DB_PASSWORD`, `MUKURTU_ADMIN_PASSWORD`,
+  `MUKURTU_HASH_SALT`, and `MUKURTU_SMTP_PASSWORD` also accept a `_FILE` form
+  naming a file, the convention used by Docker secrets and Kubernetes. When both
+  are set, the file wins. This matters because environment variables are visible
+  to anyone who can run `docker inspect` on the container.
+- **Values are never run through a shell.** Placeholders in the templates are
+  replaced by a small `awk` routine that reads the value from the environment,
+  so a password containing `$`, quotes, backslashes, `&`, or `%` reaches the
+  configuration unchanged. The SMTP password is not written into the msmtp
+  configuration at all: it is stored in its own `0600` file and msmtp is told to
+  read it (`passwordeval`), which avoids the quoting rules of that file format.
+- **The command line gets its own ini file.** The official PHP image has no
+  `php.ini`, so Drush would run with PHP's 128 MB default and run out of memory
+  during installation. A second file, `cli/php.ini`, has
+  `MUKURTU_PHP_CLI_MEMORY_LIMIT` and no execution-time limit, and the
+  entrypoint points `PHPRC` at it.
+
+## Security hardening
+
+Each rule below is covered by a test in `scripts/docker/`. Where a rule follows
+published guidance, that guidance is named.
+
+### nginx
+
+The configuration follows
+[Drupal's recommended nginx configuration](https://www.drupal.org/docs/getting-started/system-requirements/nginx),
+tightened in one respect: Drupal's version runs any `.php` file that exists;
+this one runs only `index.php`.
+
+- **PHP is never executed from `sites/*/files`.** Uploaded files land there. If
+  an attacker gets a `.php` file uploaded and the server executes it, they own
+  the site. Requests for PHP-like extensions under `files` or `private` get a
+  404.
+- **Only `index.php` reaches php-fpm.** `install.php`, `update.php`,
+  `authorize.php`, and any stray script return 404. Database updates run through
+  `drush updb` when the container starts, so `update.php` is not needed.
+- **Source and configuration files are not served.** Dotfiles (except
+  `/.well-known`), `*.yml`, `*.twig`, `*.module`, `*.install`, `*.inc`,
+  `*.theme`, `*.sql`, backup and editor files, `composer.json`, and
+  `composer.lock` return 404. The Composer `vendor` directory is outside the web
+  root altogether.
+- **Image styles go through Drupal.** A missing file under `files/styles/` is
+  handed to `index.php`, which generates and saves it.
+- **Headers.** `server_tokens off` hides the nginx version;
+  `X-Content-Type-Options: nosniff` and `Referrer-Policy:
+  strict-origin-when-cross-origin` are set on every response. HSTS and
+  Content-Security-Policy are deliberately **not** set here: they depend on the
+  site's real scheme and origins, which only the TLS-terminating reverse proxy
+  knows. Set them there.
+- **Listens on port 8080.** A non-root process cannot bind port 80. The reverse
+  proxy forwards to 8080.
+
+### PHP
+
+- `expose_php`, `display_errors`, and `html_errors` off: no version banner and
+  no stack traces in responses. Errors go to the container log.
+- `zend.exception_ignore_args = On`: stack traces in logs omit argument values,
+  so passwords passed to functions do not end up in logs.
+- `cgi.fix_pathinfo = 0`, the standard guard against path-info tricks that make
+  the server run the wrong file.
+- `zend.assertions = -1` and `allow_url_include = Off`.
+- Session cookies are `HttpOnly`, `SameSite=Lax`, and strict mode refuses
+  session IDs the server did not issue.
+- `opcache.save_comments` stays **on**. Drupal reads PHP attributes and doc
+  comments at run time; turning it off, a common "optimisation", breaks Drupal.
+- `exec()` stays enabled. See "Runtime image, tools and extensions".
+
+### php-fpm and the environment
+
+php-fpm normally clears the environment before running PHP. Mukurtu's
+`settings.php` reads its configuration from environment variables, so both
+pools set `clear_env = no`. This gives PHP code access to the container's
+variables, including any secrets passed as plain environment variables. Code
+running in the pool can already read `settings.php`, and with it the database
+password, so nothing is gained for an attacker. Using `_FILE` secrets keeps the
+values out of `docker inspect`, which is the exposure that does matter.
+
+### Container
+
+- Runs as a non-root user; the code is owned by root and is read-only to that
+  user.
+- The Compose examples add `read_only: true`, `cap_drop: [ALL]`, and
+  `no-new-privileges`. `settings.php` is baked into the image, and temporary
+  files go to a tmpfs or volume of your choosing.
+- `tini` is the first process and reaps orphaned child processes.
+
+## Performance tuning
+
+Defaults are chosen so many idle sites fit on one small server, and so a busy
+site is not held back. Every number below is an environment variable; the
+reasoning is here, the reference is in [docker.md](docker.md).
+
+- **`pm = ondemand`.** With the usual `dynamic` setting, php-fpm keeps spare
+  workers alive per site. Under `ondemand`, an idle site has no PHP workers at
+  all; they start on the first request and exit after
+  `MUKURTU_FPM_PROCESS_IDLE_TIMEOUT` (10 s). A cold request pays a few
+  milliseconds to start a worker, in exchange for an idle footprint of tens of
+  megabytes instead of hundreds. `MUKURTU_FPM_MAX_CHILDREN` (4) caps concurrent
+  PHP requests, which also caps the memory a busy site can use.
+  `MUKURTU_FPM_MAX_REQUESTS` (500) recycles workers to bound memory growth.
+- **Two pools.** Drupal serves *private* files through PHP so it can check
+  access, and Mukurtu relies on this for culturally sensitive content. Each
+  download holds a PHP worker for as long as the client takes to receive the
+  file. Requests under `/system/files/` therefore go to a separate pool capped by
+  `MUKURTU_FPM_FILES_MAX_CHILDREN` (2), so a handful of large downloads or video
+  streams cannot use up the workers that serve pages. Public files do not go
+  through PHP at all: nginx serves them directly.
+- **opcache.** `validate_timestamps = 0` because the image is immutable: PHP
+  never has to check whether a source file changed. `MUKURTU_OPCACHE_MEMORY`
+  (128 MB) is sized for Mukurtu's code, and `MUKURTU_OPCACHE_MAX_FILES` (20000)
+  above the number of PHP files it loads. The JIT is off: it adds memory and
+  little for a request/response workload like Drupal.
+- **APCu.** Drupal's chained-fast cache backend keeps bootstrap and discovery
+  data in APCu when it is available, avoiding database reads on every request.
+  `MUKURTU_APCU_MEMORY` is 32 MB.
+- **`realpath_cache`.** Raised to 4 MB with a 10-minute lifetime. Drupal
+  resolves many file paths per request; PHP's default cache is too small and
+  short-lived for it.
+- **nginx.** `sendfile`, gzip for text types, an open-file cache, one year of
+  caching for content-hashed aggregated CSS and JS, and 30 days for other
+  static assets and image-style derivatives. One worker process by default
+  (`MUKURTU_NGINX_WORKER_PROCESSES`), because nginx is not the bottleneck for a
+  Drupal site and each worker costs memory.
+- **Timeouts.** php-fpm's `request_terminate_timeout` equals
+  `MUKURTU_PHP_MAX_EXECUTION_TIME` (120 s). PHP's own limit counts CPU time only,
+  so a request stuck waiting on something could otherwise hold a worker for
+  ever. The private-file pool has no terminate timeout, since a download may
+  legitimately take a long time.

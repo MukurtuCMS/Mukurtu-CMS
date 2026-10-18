@@ -13,6 +13,9 @@ REQUIRED_SECTIONS=(
   "Pinned inputs and the build guard"
   "Where the code comes from"
   "Runtime image, tools and extensions"
+  "Configuration rendering"
+  "Security hardening"
+  "Performance tuning"
 )
 if [[ $# -gt 0 ]]; then
   REQUIRED_SECTIONS=("$@")
