@@ -16,17 +16,28 @@ follow the order of the build.
 
 A container image is only trustworthy if the same inputs produce the same
 image. Anything that changes what ends up inside the image is therefore an
-explicit input, and the build refuses to start without it.
+explicit, validated input.
 
-**Required build arguments.** These have no defaults:
+**Build arguments are not container settings.** Three options exist when the image
+is *built*. They decide what is inside the image, and cannot be changed by whoever
+runs it. (The running container is configured by `MUKURTU_*` environment
+variables; see [docker.md](docker.md).) This is why the full and slim images are
+different tags and not a setting.
 
-| Build arg | Allowed values | Why it is required |
-| --- | --- | --- |
-| `WITH_FFMPEG` | `true` or `false` | Mukurtu extracts video thumbnails with `ffmpeg`. An image that silently lacks it would accept video uploads and never produce thumbnails, with nothing logged. |
-| `WITH_POPPLER` | `true` or `false` | Mukurtu extracts PDF text and thumbnails with `pdftotext` and `pdftoppm` (from poppler-utils). The same silent failure applies. |
-| `MUKURTU_TEMPLATE_VERSION` | a `mukurtu/mukurtu-template` version, for example `4.0.2` | The template defines the Drupal core version, the Composer plugins, and the install paths. Floating on `^4.0` would make one release tag build different images over time. |
+| Build arg | Default | Allowed values | What it decides |
+| --- | --- | --- | --- |
+| `WITH_FFMPEG` | `true` | `true` or `false` | Whether `ffmpeg` is installed. Mukurtu extracts video thumbnails with it. |
+| `WITH_POPPLER` | `true` | `true` or `false` | Whether `poppler-utils` is installed. Mukurtu extracts PDF text and thumbnails with `pdftotext` and `pdftoppm`. |
+| `MUKURTU_TEMPLATE_VERSION` | none: required | a `mukurtu/mukurtu-template` version, for example `4.0.2` | The project template the image is built on. It defines the Drupal core version, the Composer plugins, and the install paths. Floating on `^4.0` would make one release tag build different images over time. |
 
-The first stage of the `Dockerfile`, `guard`, checks them and fails with a
+The tools default to **on** so that a plain build gives a complete Mukurtu. What
+makes it safe to have a default is what the build does next: it runs each tool and
+fails if the image does not match what was asked for, in either direction (see
+"Runtime image, tools and extensions"), so an image can never silently lack a tool
+it claims to have. The template version has no default on purpose: it is the one
+input that must be a deliberate, recorded choice.
+
+The first stage of the `Dockerfile`, `guard`, checks the values and fails with a
 message that names the argument:
 
 ```
@@ -35,8 +46,10 @@ ERROR: build arg MUKURTU_TEMPLATE_VERSION must be set (for example 4.0.2)
 ```
 
 Every later stage copies a marker file from `guard`, so BuildKit cannot skip it.
-The published images set these explicitly: the full image uses
-`WITH_FFMPEG=true WITH_POPPLER=true`, and the `-slim` image uses both `false`.
+The publish workflow does not rely on the defaults: each variant in its build
+matrix states both explicitly, so what a published tag contains is written down in
+the workflow. The full image uses `WITH_FFMPEG=true WITH_POPPLER=true`, and the
+`-slim` image uses both `false`.
 
 **Base images.** The PHP, Composer, and Alpine base images are written as
 literal `FROM` lines with an exact version *and* a content digest, for example
@@ -159,7 +172,8 @@ feature when they are missing:
 
 (See `modules/mukurtu_core/src/Hook/MediaToolRequirements.php`, which also
 reports a missing tool on the site's status page.) The image is published in two
-variants, chosen with the required build args `WITH_FFMPEG` and `WITH_POPPLER`:
+variants, chosen with the build args `WITH_FFMPEG` and `WITH_POPPLER` (both default
+to `true`; they are build options, not container settings):
 
 - **full** (`WITH_FFMPEG=true`, `WITH_POPPLER=true`): the default tags.
 - **slim** (both `false`): the `-slim` tags. About 130 MB smaller; PDF text

@@ -3,13 +3,25 @@
 # Mukurtu CMS image. See docs/docker-build.md for how and why it is built this
 # way, and docs/docker.md for how to run it.
 #
-# Every input that changes what ends up in the image is a build arg with no
-# default (WITH_FFMPEG, WITH_POPPLER, MUKURTU_TEMPLATE_VERSION). The base images
-# are pinned by version and digest in the FROM lines so that Dependabot can
-# update them and a rebuild of the same tag starts from the same bytes.
+# Build arguments (these are options for building the image, not settings of the
+# running container; the running container is configured with MUKURTU_* variables):
+#
+#   WITH_FFMPEG, WITH_POPPLER   true (default) or false. Whether to include ffmpeg
+#                               (video thumbnails) and poppler-utils (PDF text and
+#                               thumbnails). The published `-slim` image sets both
+#                               to false. Validated, and checked against the image
+#                               contents at the end of the build.
+#   MUKURTU_TEMPLATE_VERSION    Required: the mukurtu/mukurtu-template version the
+#                               image is built on. See docker/TEMPLATE_VERSION.
+#
+# The base images are pinned by version and digest in the FROM lines so that
+# Dependabot can update them and a rebuild of the same tag starts from the same
+# bytes.
+ARG WITH_FFMPEG=true
+ARG WITH_POPPLER=true
 
 # ---------------------------------------------------------------------------
-# guard: refuse to build unless the required inputs were passed explicitly.
+# guard: refuse to build with an invalid or missing build argument.
 # Later stages copy the marker file so BuildKit cannot skip this stage.
 # ---------------------------------------------------------------------------
 FROM alpine:3.24@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6 AS guard
@@ -140,8 +152,8 @@ COPY --from=guard /guard-ok /guard-ok
 # ---------------------------------------------------------------------------
 FROM php-base AS runtime
 
-# Both are required, with no default, and checked by the guard stage. They
-# decide whether the media tools Mukurtu shells out to are in the image.
+# Both default to true (see the top of this file) and are checked by the guard
+# stage. They decide whether the media tools Mukurtu shells out to are in the image.
 ARG WITH_FFMPEG
 ARG WITH_POPPLER
 

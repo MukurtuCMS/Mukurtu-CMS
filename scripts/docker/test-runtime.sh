@@ -43,6 +43,16 @@ for tool in ffmpeg pdftotext pdftoppm; do
   check "$SLIM" "has no $tool" "! command -v $tool"
 done
 
+echo "runtime: no build args for the tools means the full image"
+if build_image runtime mukurtu-test:default --build-arg MUKURTU_TEMPLATE_VERSION="$TEMPLATE"; then
+  pass "runtime builds without WITH_FFMPEG and WITH_POPPLER"
+else
+  fail "runtime builds without WITH_FFMPEG and WITH_POPPLER"; tail -20 "$BUILD_LOG"
+fi
+check mukurtu-test:default "has ffmpeg by default" 'ffmpeg -version'
+check mukurtu-test:default "has pdftotext by default" 'pdftotext -v'
+check mukurtu-test:default "has pdftoppm by default" 'pdftoppm --help'
+
 echo "runtime: both variants"
 for tag in "$FULL" "$SLIM"; do
   modules="$(run_in "$tag" 'php -m')"

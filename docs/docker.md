@@ -63,7 +63,9 @@ Images are published to `ghcr.io/<owner>/mukurtu` for `linux/amd64` and
 | **full** | `4.0.5`, `4.0.5-r1`, `4.0`, `4`, `latest` | Everything, including `ffmpeg` and `poppler-utils` |
 | **slim** | `4.0.5-slim`, `4.0.5-r1-slim`, `4.0-slim`, `4-slim`, `latest-slim` | No `ffmpeg`, no `poppler-utils` |
 
-Choose **full** unless you know you do not need the media features. In the slim
+Full and slim are **different images**, chosen by the tag you pull. They are not a
+setting of the running container: there is no environment variable that adds or
+removes `ffmpeg` or `poppler-utils`. Choose **full** unless you know you do not need the media features. In the slim
 image Mukurtu cannot extract text from PDFs (so PDF content is not searchable),
 make PDF thumbnails, or make video thumbnails. The container logs a warning at
 start-up for each missing tool, and Mukurtu's status report page lists them.
@@ -437,24 +439,28 @@ are laid out this way.
 ## Building the image yourself
 
 The published images are built by the workflow in
-`.github/workflows/docker-publish.yml`. To build one locally from a checkout, pass
-all three required build arguments. There are deliberately no defaults:
+`.github/workflows/docker-publish.yml`. To build one locally from a checkout:
 
 ```
 docker build \
-  --build-arg WITH_FFMPEG=true \
-  --build-arg WITH_POPPLER=true \
   --build-arg MUKURTU_TEMPLATE_VERSION="$(cat docker/TEMPLATE_VERSION)" \
   --target runtime \
   -t mukurtu:local .
 ```
 
-| Build argument | Values | Meaning |
-| --- | --- | --- |
-| `WITH_FFMPEG` | `true` or `false` | Include `ffmpeg`. |
-| `WITH_POPPLER` | `true` or `false` | Include `poppler-utils`. |
-| `MUKURTU_TEMPLATE_VERSION` | a `mukurtu/mukurtu-template` version | The project template the image is built on. The pinned version is in `docker/TEMPLATE_VERSION`. |
+That builds the **full** image. For the slim image, add
+`--build-arg WITH_FFMPEG=false --build-arg WITH_POPPLER=false`.
 
-The build stops with a message naming the argument if one is missing or invalid.
+These are options for *building* the image: they decide what is inside it, and the
+running container cannot change them. They are not environment variables. (That is
+why "slim" is a different tag and not a setting.)
+
+| Build argument | Default | Values | Meaning |
+| --- | --- | --- | --- |
+| `WITH_FFMPEG` | `true` | `true` or `false` | Include `ffmpeg` (video thumbnails). |
+| `WITH_POPPLER` | `true` | `true` or `false` | Include `poppler-utils` (PDF text and thumbnails). |
+| `MUKURTU_TEMPLATE_VERSION` | none: required | a `mukurtu/mukurtu-template` version | The project template the image is built on. The pinned version is in `docker/TEMPLATE_VERSION`. |
+
+The build stops with a message naming the argument if one is invalid or missing.
 `scripts/docker/test-*.sh` are the tests; each builds what it needs and takes
 from seconds to several minutes (the install test performs a real installation).

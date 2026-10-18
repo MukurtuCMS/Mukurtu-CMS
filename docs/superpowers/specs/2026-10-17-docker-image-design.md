@@ -56,7 +56,7 @@ must work unchanged in the upstream repository and in forks.
 | Runtime | nginx + php-fpm on Alpine, PHP 8.4, lowest idle RAM |
 | Source | Build `mukurtu/mukurtu-template` as the skeleton, then replace the profile with the checkout of the release tag |
 | Template version | Pinned by build arg `MUKURTU_TEMPLATE_VERSION`, never floating |
-| Tools | `ffmpeg` and `poppler-utils` via build args with no default; `-slim` variant omits both |
+| Tools | `ffmpeg` and `poppler-utils` via build args `WITH_FFMPEG` / `WITH_POPPLER` (default `true`, owner's decision; validated and verified at build); `-slim` variant omits both; the publish workflow states both explicitly |
 | Database | External. Auto-install on first boot driven by env vars |
 | Multi-tenant | Standalone container per tenant, same image, reverse proxy routes by domain |
 | Platforms | `linux/amd64`, `linux/arm64` |
@@ -84,7 +84,7 @@ Stage 2 (`runtime`): Alpine with php-fpm, nginx, a small process supervisor
 (s6-overlay or equivalent), `msmtp` for outbound mail, `mariadb-client` (for the
 DB wait and install check), and Drush. No Composer.
 
-Build args, all required, no defaults, checked at the top of the Dockerfile with
+Build args, validated at the top of the Dockerfile (the tool args default to `true`; the template version is required) with
 a clear failure message:
 
 | Arg | Values | Meaning |
@@ -92,8 +92,10 @@ a clear failure message:
 | `WITH_FFMPEG` | `true` / `false` | Install `ffmpeg` |
 | `WITH_POPPLER` | `true` / `false` | Install `poppler-utils` |
 
-Other pinned args: `PHP_VERSION`, `ALPINE_VERSION`, `COMPOSER_VERSION`,
-`MUKURTU_TEMPLATE_VERSION`. The workflow supplies every one explicitly.
+Other pinned inputs: the PHP, Composer and Alpine base images (literal `FROM`
+lines with version and digest) and `MUKURTU_TEMPLATE_VERSION` (required). The
+workflow states `WITH_FFMPEG` and `WITH_POPPLER` explicitly for each variant
+rather than relying on the defaults.
 
 Build-time assertions (the build fails if any is wrong):
 

@@ -7,11 +7,18 @@ source "$(dirname "${BASH_SOURCE[0]}")/test-lib.sh"
 TAG=mukurtu-test:guard
 TEMPLATE=(--build-arg MUKURTU_TEMPLATE_VERSION="$TEMPLATE_VERSION")
 
-echo "guard: WITH_FFMPEG unset"
-if build_image guard "$TAG" --build-arg WITH_POPPLER=true "${TEMPLATE[@]}"; then
-  fail "build fails when WITH_FFMPEG is unset"
+echo "guard: WITH_FFMPEG and WITH_POPPLER default to true"
+if build_image guard "$TAG" "${TEMPLATE[@]}"; then
+  pass "build succeeds without WITH_FFMPEG and WITH_POPPLER"
 else
-  pass "build fails when WITH_FFMPEG is unset"
+  fail "build succeeds without WITH_FFMPEG and WITH_POPPLER"; tail -5 "$BUILD_LOG"
+fi
+
+echo "guard: WITH_FFMPEG empty"
+if build_image guard "$TAG" --build-arg WITH_FFMPEG= --build-arg WITH_POPPLER=true "${TEMPLATE[@]}"; then
+  fail "build fails when WITH_FFMPEG is empty"
+else
+  pass "build fails when WITH_FFMPEG is empty"
 fi
 assert_contains "$(<"$BUILD_LOG")" "build arg WITH_FFMPEG must be 'true' or 'false' (got '')" \
   "message names WITH_FFMPEG"
