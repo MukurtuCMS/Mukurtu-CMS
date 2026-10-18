@@ -1,0 +1,254 @@
+name: Publish Docker image
+
+# Builds the Mukurtu CMS image from a release tag, tests it, scans it, and pushes
+# it to the GitHub Container Registry as ghcr.io/<owner>/mukurtu. How the image is
+# built, and why, is documented in docs/docker-build.md.
+#
+#  - release published: build that release.
+#  - workflow_dispatch: build a named tag by hand. Use this if the release was
+#    created by another workflow with GITHUB_TOKEN, which does not trigger
+#    `release: published`.
+#  - schedule: rebuild the newest non-pre-release to pick up base image and Drupal
+#    security fixes. Opt in by setting the repository variable
+#    DOCKER_WEEKLY_REBUILD to "true".
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to build and publish, for example 4.0.5. The tag must contain the Dockerfile."
+        required: true
+        type: string
+  schedule:
+    - cron: "17 3 * * 1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docker-publish-${{ github.event.release.tag_name || inputs.tag || 'scheduled' }}
+  cancel-in-progress: false
+
+jobs:
+  resolve:
+    name: Resolve the tag to build
+    if: github.event_name != 'schedule' || vars.DOCKER_WEEKLY_REBUILD == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+      prerelease: ${{ steps.tag.outputs.prerelease }}
+      date: ${{ steps.tag.outputs.date }}
+      skip: ${{ steps.tag.outputs.skip }}
+    steps:
+      - name: Work out which tag to build
+        id: tag
+        # Event data reaches the script through env:, never by interpolation
+        # into the script text.
+        env:
+          EVENT: ${{ github.event_name }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_IS_PRERELEASE: ${{ github.event.release.prerelease }}
+          INPUT_TAG: ${{ inputs.tag }}
+          REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          prerelease=false
+          date=""
+          case "$EVENT" in
+            release)
+              tag="$RELEASE_TAG"
+              [[ "$RELEASE_IS_PRERELEASE" == true ]] && prerelease=true
+              ;;
+            workflow_dispatch)
+              tag="$INPUT_TAG"
+              ;;
+            schedule)
+              date="$(date -u +%Y%m%d)"
+              if ! tag="$(gh api "repos/$REPO/releases/latest" --jq .tag_name 2>/dev/null)"; then
+                echo "::notice::No release exists yet; nothing to rebuild."
+                echo "skip=true" >> "$GITHUB_OUTPUT"
+                exit 0
+              fi
+              ;;
+          esac
+          if [[ ! "$tag" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::'$tag' is not a release version such as 4.0.5 or 4.0.0-rc"
+            exit 1
+          fi
+          [[ "$tag" == *-* ]] && prerelease=true
+          if ! gh api "repos/$REPO/contents/Dockerfile?ref=$tag" --silent 2>/dev/null; then
+            if [[ "$EVENT" == schedule ]]; then
+              echo "::notice::Release $tag predates the Dockerfile; nothing to rebuild."
+              echo "skip=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo "::error::Tag $tag does not contain a Dockerfile, so there is nothing to build."
+            exit 1
+          fi
+          {
+            echo "tag=$tag"
+            echo "prerelease=$prerelease"
+            echo "date=$date"
+            echo "skip=false"
+          } >> "$GITHUB_OUTPUT"
+
+  test:
+    name: Test and scan
+    needs: resolve
+    if: needs.resolve.outputs.skip != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.resolve.outputs.tag }}
+
+      # Every scripts/docker/test-*.sh builds the image it needs and runs it,
+      # including a real install against MariaDB. A failure here stops the
+      # release from being published.
+      - name: Run the image tests
+        run: |
+          failed=0
+          for test in scripts/docker/test-*.sh; do
+            echo "::group::$test"
+            "$test" || { echo "::error::$test failed"; failed=1; }
+            echo "::endgroup::"
+          done
+          exit "$failed"
+
+      # The tests leave the full and slim images in the local Docker daemon,
+      # built from the same Dockerfile and arguments as the published ones.
+      - name: Scan the full image for fixable HIGH and CRITICAL vulnerabilities
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: mukurtu-test:full
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+          trivyignores: docker/.trivyignore
+
+      - name: Scan the slim image for fixable HIGH and CRITICAL vulnerabilities
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: mukurtu-test:slim
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+          trivyignores: docker/.trivyignore
+
+  publish:
+    name: Publish (${{ matrix.variant }})
+    needs: [resolve, test]
+    if: needs.resolve.outputs.skip != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    strategy:
+      fail-fast: false
+      matrix:
+        # Each variant states its tool choice explicitly; the Dockerfile has no
+        # defaults for these.
+        include:
+          - variant: full
+            with_ffmpeg: "true"
+            with_poppler: "true"
+          - variant: slim
+            with_ffmpeg: "false"
+            with_poppler: "false"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.resolve.outputs.tag }}
+
+      - name: Work out the tags and the pinned template version
+        id: meta
+        env:
+          TAG: ${{ needs.resolve.outputs.tag }}
+          DATE: ${{ needs.resolve.outputs.date }}
+          VARIANT: ${{ matrix.variant }}
+          OWNER: ${{ github.repository_owner }}
+        run: |
+          set -euo pipefail
+          image="ghcr.io/${OWNER,,}/mukurtu"
+          args=("$TAG" "$VARIANT")
+          [[ -z "$DATE" ]] || args+=("$DATE")
+          {
+            echo "image=$image"
+            echo "revision=$(git rev-parse HEAD)"
+            echo "template=$(tr -d '[:space:]' < docker/TEMPLATE_VERSION)"
+            echo "tags<<TAGS"
+            scripts/docker/compute-tags.sh "${args[@]}" | sed "s|^|$image:|"
+            echo "TAGS"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Set up QEMU (for the arm64 build)
+        uses: docker/setup-qemu-action@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Log in to the GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        id: push
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          build-args: |
+            WITH_FFMPEG=${{ matrix.with_ffmpeg }}
+            WITH_POPPLER=${{ matrix.with_poppler }}
+            MUKURTU_TEMPLATE_VERSION=${{ steps.meta.outputs.template }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: |
+            org.opencontainers.image.title=Mukurtu CMS
+            org.opencontainers.image.description=Mukurtu CMS (${{ matrix.variant }} variant)
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.version=${{ needs.resolve.outputs.tag }}
+            org.opencontainers.image.revision=${{ steps.meta.outputs.revision }}
+            org.opencontainers.image.licenses=GPL-3.0-or-later
+          provenance: mode=max
+          sbom: true
+          cache-from: type=gha,scope=${{ matrix.variant }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.variant }}
+
+      - name: Attest the build provenance
+        uses: actions/attest-build-provenance@v4
+        with:
+          subject-name: ${{ steps.meta.outputs.image }}
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true
+
+      # The template ships no lock file, so this records exactly which Drupal and
+      # contributed-module versions the image contains.
+      - name: Extract the resolved composer.lock
+        env:
+          IMAGE: ${{ steps.meta.outputs.image }}
+          DIGEST: ${{ steps.push.outputs.digest }}
+        run: |
+          docker create --name lock "$IMAGE@$DIGEST" >/dev/null
+          docker cp lock:/var/www/html/composer.lock composer.lock
+          docker rm lock >/dev/null
+
+      - name: Keep composer.lock with the run
+        uses: actions/upload-artifact@v7
+        with:
+          name: composer-lock-${{ matrix.variant }}
+          path: composer.lock

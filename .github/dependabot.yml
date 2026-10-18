@@ -37,3 +37,11 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+
+  # The container image's base images (PHP, Alpine, Composer), pinned by version
+  # and digest in the Dockerfile's FROM lines. See docs/docker-build.md.
+  - package-ecosystem: docker
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5

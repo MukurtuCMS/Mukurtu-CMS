@@ -20,6 +20,7 @@ REQUIRED_SECTIONS=(
   "Startup, supervision and health"
   "Known hazards"
   "Hosting examples"
+  "Publishing and supply chain"
 )
 if [[ $# -gt 0 ]]; then
   REQUIRED_SECTIONS=("$@")

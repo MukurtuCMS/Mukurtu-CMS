@@ -570,3 +570,97 @@ Copy a `site_*` block and its two volumes, give it a new host name, database
 name and credentials, and add its database to the `db_init` config (which runs
 on the database's first start). For a database that already exists, create the
 database and user by hand.
+
+## Publishing and supply chain
+
+Images are published by `.github/workflows/docker-publish.yml` to
+`ghcr.io/<owner>/mukurtu`, where `<owner>` is the account that owns the
+repository (lower-cased). No owner is written into any file, so the same workflow
+runs unchanged in the upstream repository and in a fork.
+
+### When it runs
+
+| Trigger | What happens |
+| --- | --- |
+| A release is **published** | That release's tag is built, tested, scanned, and pushed. |
+| **Run workflow** (manual) with a tag | The same, for a tag you name. Use this if a release was created by another workflow using `GITHUB_TOKEN`: GitHub does not start workflows from events caused by that token, so `release: published` never fires. |
+| Weekly schedule | Only if the repository variable `DOCKER_WEEKLY_REBUILD` is `true`. Rebuilds the newest non-pre-release (see "Weekly rebuild"). |
+
+The tag being built is checked out, so the image is built from that tag's
+`Dockerfile` and code. A tag that predates the `Dockerfile` cannot be built.
+
+### Tags
+
+For release `4.0.5` the **full** image gets `4.0.5`, `4.0`, `4`, and `latest`;
+the **slim** image gets the same with a `-slim` suffix (`4.0.5-slim`, `4.0-slim`,
+`4-slim`, `latest-slim`). A pre-release (`4.0.0-rc`, `4.0.0-beta37`) gets only its
+exact tag, so it can never become what `latest`, `4`, or `4.0` pulls. The rules
+live in `scripts/docker/compute-tags.sh` and are tested.
+
+Pin an exact version (`4.0.5`) in production and upgrade on purpose. `4.0` follows
+patch releases, `4` follows minor releases, and `latest` follows everything.
+
+### What must pass before anything is pushed
+
+The `publish` job needs the `test` job, which:
+
+1. Runs every `scripts/docker/test-*.sh`. These build the images and exercise them:
+   the build guard, the build stage, the runtime contents, configuration
+   rendering, the nginx rules, `settings.php`, a real install against MariaDB with
+   restart, cron, health and shutdown checks, the Compose examples, and this
+   workflow's own structure.
+2. Scans the full and slim images with Trivy for **fixable** vulnerabilities of
+   **HIGH or CRITICAL** severity. A finding fails the run. Findings with no fix
+   yet are ignored (nothing can be done about them), and anyone who accepts a
+   specific one must add it to `docker/.trivyignore` with a reason and a review
+   date. The scan covers the operating system packages and the Composer
+   dependencies, including Drupal core and contributed modules.
+
+The Composer build stage also runs `composer audit --no-dev`, which checks
+Drupal's security advisories, so an advisory fails the build before the image is
+even assembled.
+
+### Supply chain
+
+- **Base images are pinned by version and digest** in the Dockerfile's `FROM`
+  lines, and Dependabot (`docker` ecosystem) proposes updates as pull requests.
+  GitHub Actions are pinned to major versions and updated by Dependabot as well,
+  following the other workflows in this repository.
+- **Provenance and SBOM.** Each push carries a BuildKit provenance attestation
+  (`mode=max`) and an SBOM, and a signed build-provenance attestation is added
+  with `actions/attest-build-provenance`, so consumers can verify that an image
+  was built by this workflow from this repository. Verify with
+  `gh attestation verify oci://ghcr.io/<owner>/mukurtu:<tag> --owner <owner>`.
+- **The resolved `composer.lock`** is inside the image
+  (`/var/www/html/composer.lock`) and is also kept as a workflow artifact for
+  each variant. The template has no lock file, so two builds of the same tag can
+  differ; this file records exactly what each one contained.
+- **Least privilege.** The workflow's default permission is read-only. Only the
+  `publish` job can write packages and create attestations.
+  Event data (tag names, inputs) reaches scripts through environment variables,
+  never by interpolation into script text, which would allow script injection.
+
+### Weekly rebuild
+
+A published image does not receive security fixes by itself: a new Alpine, PHP,
+or Drupal patch release only reaches users if the image is rebuilt. When
+`DOCKER_WEEKLY_REBUILD` is `true`, a scheduled run takes the newest
+non-pre-release, builds it again with the same pinned template version (so the
+Mukurtu code is identical, but base packages and Composer dependencies are
+current), runs the same tests and scan, and **re-pushes** that release's tags,
+plus an immutable `<version>-<YYYYMMDD>` tag (for example `4.0.5-20261017`) for
+anyone who wants to roll back to a specific rebuild.
+
+This means that tags such as `4.0.5` can change under you between pulls. That is
+deliberate: it is how fixes arrive. Deployments that need bit-for-bit
+reproducibility should pin the image digest, or the dated tag. The variable is off
+by default so a repository chooses this explicitly.
+
+### One-time setup
+
+- GHCR creates the package **private** on first push. To let others pull the image,
+  open the package's settings on GitHub and set its visibility to **public**.
+- Set `DOCKER_WEEKLY_REBUILD` to `true` under Settings, Secrets and variables,
+  Actions, Variables, to enable the weekly rebuild.
+- The pinned template version is in `docker/TEMPLATE_VERSION`. Update it when a
+  new `mukurtu/mukurtu-template` release is wanted in the image.

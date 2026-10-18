@@ -5,7 +5,7 @@ set -u
 source "$(dirname "${BASH_SOURCE[0]}")/test-lib.sh"
 
 TAG=mukurtu-test:guard
-TEMPLATE=(--build-arg MUKURTU_TEMPLATE_VERSION=4.0.2)
+TEMPLATE=(--build-arg MUKURTU_TEMPLATE_VERSION="$TEMPLATE_VERSION")
 
 echo "guard: WITH_FFMPEG unset"
 if build_image guard "$TAG" --build-arg WITH_POPPLER=true "${TEMPLATE[@]}"; then

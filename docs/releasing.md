@@ -64,6 +64,13 @@ them from drifting apart again.
 8. **Check whether `mukurtu-template` needs a release.** See [Releasing
    alongside mukurtu-template](#releasing-alongside-mukurtu-template). If it
    does, release it *after* this tag is published, never before.
+9. **The container image publishes itself.** Publishing the release starts
+   `.github/workflows/docker-publish.yml`, which tests and scans the image and
+   pushes it to `ghcr.io/<owner>/mukurtu`. Check that the run succeeded. If the
+   release was created by a workflow using `GITHUB_TOKEN`, the event does not
+   fire; run the workflow by hand with the tag. After a new
+   `mukurtu-template` release, update `docker/TEMPLATE_VERSION`. See
+   [docker-build.md](docker-build.md), "Publishing and supply chain".
 
 ## Releasing alongside mukurtu-template
 

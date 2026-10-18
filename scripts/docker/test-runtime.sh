@@ -7,7 +7,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/test-lib.sh"
 
 FULL=mukurtu-test:full
 SLIM=mukurtu-test:slim
-TEMPLATE="${MUKURTU_TEMPLATE_VERSION:-4.0.2}"
+TEMPLATE="$TEMPLATE_VERSION"
 
 build_variant() {
   local tag="$1" ffmpeg="$2" poppler="$3"

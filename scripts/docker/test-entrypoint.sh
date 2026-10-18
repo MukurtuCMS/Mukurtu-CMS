@@ -29,7 +29,7 @@ trap cleanup EXIT
 for variant in "full true true $FULL" "slim false false $SLIM"; do
   set -- $variant
   if ! build_image runtime "$4" --build-arg WITH_FFMPEG="$2" --build-arg WITH_POPPLER="$3" \
-      --build-arg MUKURTU_TEMPLATE_VERSION="${MUKURTU_TEMPLATE_VERSION:-4.0.2}"; then
+      --build-arg MUKURTU_TEMPLATE_VERSION="$TEMPLATE_VERSION"; then
     fail "runtime image builds: $1"; tail -30 "$BUILD_LOG"; finish; exit 1
   fi
 done

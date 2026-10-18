@@ -65,6 +65,13 @@ RUN set -eux; \
     rm -rf /tmp/pear /var/cache/apk/*
 
 # ---------------------------------------------------------------------------
+# composer: only supplies the Composer binary to `build`. A named stage, not
+# `COPY --from=composer:2.x`, so that Dependabot (which reads FROM lines) can
+# update the pinned version and digest.
+# ---------------------------------------------------------------------------
+FROM composer:2.10.3@sha256:af98f42dfff7c68ba8d53c2164fd9fde1087b7d449514baa38c418b1f6bc4bac AS composer
+
+# ---------------------------------------------------------------------------
 # build: the Composer project. mukurtu-template is the skeleton (Drupal core,
 # scaffold, plugin allow-list, install paths); this checkout replaces the
 # Packagist copy of the profile, so the image holds exactly the tagged code.
@@ -73,7 +80,7 @@ FROM php-base AS build
 
 ARG MUKURTU_TEMPLATE_VERSION
 
-COPY --from=composer:2.10.3@sha256:af98f42dfff7c68ba8d53c2164fd9fde1087b7d449514baa38c418b1f6bc4bac /usr/bin/composer /usr/bin/composer
+COPY --from=composer /usr/bin/composer /usr/bin/composer
 RUN apk add --no-cache git unzip
 
 ENV COMPOSER_ALLOW_SUPERUSER=1 \
@@ -115,13 +122,14 @@ RUN set -eux; \
     composer audit --no-dev --abandoned=report
 
 # Drop what the running site never reads: version-control metadata and test
-# suites. Licences, READMEs, and everything else stay.
+# suites (including Drupal core's own, whose fixtures also trip vulnerability
+# scanners with fake package data). Licences, READMEs, and everything else stay.
 RUN set -eux; \
     find /app/web/profiles/mukurtu /app/vendor /app/web/modules/contrib /app/web/themes/contrib \
       -name .git -prune -exec rm -rf {} +; \
     find /app/web/profiles/mukurtu /app/vendor /app/web/modules/contrib /app/web/themes/contrib \
       \( -name tests -o -name Tests \) -type d -prune -exec rm -rf {} +; \
-    rm -rf /app/web/core/tests
+    find /app/web/core \( -name tests -o -name Tests \) -type d -prune -exec rm -rf {} +
 
 # Marker so BuildKit cannot skip the guard stage.
 COPY --from=guard /guard-ok /guard-ok

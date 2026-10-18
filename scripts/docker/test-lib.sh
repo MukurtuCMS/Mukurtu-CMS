@@ -16,11 +16,15 @@ TESTS_FAILED=0
 BUILD_LOG="$(mktemp -t mukurtu-docker-build.XXXXXX)"
 trap 'rm -f "$BUILD_LOG"' EXIT
 
+# The mukurtu-template version the image is built against. One file, read by the
+# publish workflow and by every test (override with MUKURTU_TEMPLATE_VERSION).
+TEMPLATE_VERSION="${MUKURTU_TEMPLATE_VERSION:-$(tr -d '[:space:]' <"$REPO_ROOT/docker/TEMPLATE_VERSION")}"
+
 # Build args every full build needs. Tests that build past the guard use these.
 DEFAULT_BUILD_ARGS=(
   --build-arg WITH_FFMPEG=true
   --build-arg WITH_POPPLER=true
-  --build-arg MUKURTU_TEMPLATE_VERSION="${MUKURTU_TEMPLATE_VERSION:-4.0.2}"
+  --build-arg MUKURTU_TEMPLATE_VERSION="$TEMPLATE_VERSION"
 )
 
 pass() { TESTS_RUN=$((TESTS_RUN + 1)); echo "  ok   $1"; }

@@ -1,0 +1,8 @@
+# Vulnerabilities the image scan is told to ignore. Empty by default: a fixable
+# HIGH or CRITICAL finding blocks publishing.
+#
+# To accept one, add its ID on its own line with a comment saying why it does not
+# apply and when to look at it again, for example:
+#
+#   # CVE-2099-12345: affects a feature Mukurtu does not use. Review 2027-01-01.
+#   CVE-2099-12345

@@ -30,12 +30,18 @@ in_image 'test -f /app/web/profiles/mukurtu/mukurtu.info.yml' && pass "profile i
 leftover_git="$(in_image 'find /app/web/profiles/mukurtu /app/vendor -name .git -prune 2>/dev/null | head -3')"
 assert_eq "" "$leftover_git" "no .git directories in profile or vendor"
 
-leftover_tests="$(in_image 'find /app/web/profiles/mukurtu /app/vendor /app/web/modules/contrib /app/web/themes/contrib \( -name tests -o -name Tests \) -type d -prune 2>/dev/null | head -3')"
-assert_eq "" "$leftover_tests" "no tests directories in profile, vendor or contrib"
+leftover_tests="$(in_image 'find /app/web/core /app/web/profiles/mukurtu /app/vendor /app/web/modules/contrib /app/web/themes/contrib \( -name tests -o -name Tests \) -type d -prune 2>/dev/null | head -3')"
+assert_eq "" "$leftover_tests" "no tests directories in core, profile, vendor or contrib"
 
 in_image 'test -f /app/web/profiles/mukurtu/LICENSE.txt' && pass "licence file kept" || fail "licence file kept"
 
-assert_contains "$(<"$BUILD_LOG")" "No security vulnerability advisories found" "composer audit ran and found nothing"
+# The build runs this too; running it again here does not depend on BuildKit
+# having shown the output of a cached layer.
+if docker run --rm -w /app --entrypoint composer "$TAG" audit --no-dev --abandoned=report >/dev/null 2>&1; then
+  pass "composer audit finds no advisories"
+else
+  fail "composer audit finds no advisories"
+fi
 
 # Dependency patches (drupal/core, paragraphs, ...) are declared in the profile's
 # composer.json and must still be applied when the profile is a path
