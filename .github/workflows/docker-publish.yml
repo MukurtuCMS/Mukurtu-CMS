@@ -37,7 +37,12 @@ jobs:
     outputs:
       tag: ${{ steps.tag.outputs.tag }}
     steps:
-      - name: Work out which tag to build
+      - name: Checkout the tag
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.release.tag_name || inputs.tag }}
+
+      - name: Check the tag
         id: tag
         # Event data reaches the script through env:, never by interpolation
         # into the script text.
@@ -46,8 +51,6 @@ jobs:
           RELEASE_TAG: ${{ github.event.release.tag_name }}
           RELEASE_IS_PRERELEASE: ${{ github.event.release.prerelease }}
           INPUT_TAG: ${{ inputs.tag }}
-          REPO: ${{ github.repository }}
-          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           if [[ "$EVENT" == release ]]; then
@@ -55,19 +58,15 @@ jobs:
           else
             tag="$INPUT_TAG"
           fi
-          if [[ ! "$tag" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
-            echo "::error::'$tag' is not a release version such as 4.0.5 or 4.0.0-rc"
-            exit 1
-          fi
-          # The tags are derived from the version alone (a hyphen means
-          # pre-release), so GitHub's flag must agree with it. Otherwise a release
-          # published as a pre-release would take `latest`.
-          if [[ "$RELEASE_IS_PRERELEASE" == true && "$tag" != *-* ]]; then
+          test -f Dockerfile || { echo "::error::Tag $tag does not contain a Dockerfile, so there is nothing to build."; exit 1; }
+          # The tag is a Mukurtu release (4.0.5), an image revision of one
+          # (4.0.5-r1), or a pre-release (4.0.0-rc). Anything else is refused.
+          kind="$(scripts/docker/compute-tags.sh --kind "$tag")"
+          # The tags are derived from the version alone, so GitHub's flag must
+          # agree with it. Otherwise a release published as a pre-release would
+          # take `latest`.
+          if [[ "$RELEASE_IS_PRERELEASE" == true && "$kind" != prerelease ]]; then
             echo "::error::Release $tag is marked as a pre-release on GitHub, but its tag has no pre-release suffix such as -rc1. Re-tag it (for example ${tag}-rc1) so it cannot become 'latest'."
-            exit 1
-          fi
-          if ! gh api "repos/$REPO/contents/Dockerfile?ref=$tag" --silent 2>/dev/null; then
-            echo "::error::Tag $tag does not contain a Dockerfile, so there is nothing to build."
             exit 1
           fi
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
@@ -152,15 +151,21 @@ jobs:
           TAG: ${{ needs.resolve.outputs.tag }}
           VARIANT: ${{ matrix.variant }}
           OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           image="ghcr.io/${OWNER,,}/mukurtu"
+          # The moving tags (4.0, 4, latest) only advance: the script publishes
+          # one only if this release is the newest of its scope among the tags
+          # that already exist, so a backport cannot pull `latest` backwards.
+          tag_list="$(gh api --paginate "repos/$REPO/tags" --jq '.[].name')"
           {
             echo "image=$image"
             echo "revision=$(git rev-parse HEAD)"
             echo "template=$(tr -d '[:space:]' < docker/TEMPLATE_VERSION)"
             echo "tags<<TAGS"
-            scripts/docker/compute-tags.sh "$TAG" "$VARIANT" | sed "s|^|$image:|"
+            printf '%s\n' "$tag_list" | scripts/docker/compute-tags.sh --existing - "$TAG" "$VARIANT" | sed "s|^|$image:|"
             echo "TAGS"
           } >> "$GITHUB_OUTPUT"
 

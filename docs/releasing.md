@@ -71,6 +71,71 @@ them from drifting apart again.
    fire; run the workflow by hand with the tag. After a new
    `mukurtu-template` release, update `docker/TEMPLATE_VERSION`. See
    [docker-build.md](docker-build.md), "Publishing and supply chain".
+   To ship a fix to the platform without a new Mukurtu release, see
+   [Releasing an image revision](#releasing-an-image-revision).
+
+## Releasing an image revision
+
+The container image has dependencies Mukurtu itself does not: the Alpine, PHP and
+nginx packages, `ffmpeg` and `poppler-utils`, and the pinned base images. A fix to
+one of those (a Dependabot update to the `FROM` lines in the `Dockerfile`, a
+vulnerability the Trivy scan reports) is a new **image** of an existing Mukurtu
+release, not a new Mukurtu release. Ship it as an **image revision**: the Mukurtu
+version with `-r1`, then `-r2`, and so on.
+
+| Tag | Meaning |
+| --- | --- |
+| `4.0.5` | The first image of Mukurtu 4.0.5. Never rebuilt or re-pushed. |
+| `4.0.5-r1` | A new image of the same Mukurtu 4.0.5: same Mukurtu code, fixed platform. |
+| `4.0.6` | The next Mukurtu release. Starts again from no suffix. |
+
+Why `-r1` and not `-1` or `-p1`: a bare hyphen suffix reads as a SemVer
+pre-release, which the image tags treat as "never `latest`"; `-r<number>` cannot be
+confused with `-rc1`. Composer rejects it as a version, so Packagist skips the tag.
+That is intended: a revision is an image, and must never be something
+`composer require` can pick up. (`-p1` would be read by Composer as a *newer patch
+level* of 4.0.5.)
+
+To release one:
+
+1. **Branch from the release being revised**, so the Mukurtu code stays exactly
+   what was released. Usually that is the newest release:
+
+   ```bash
+   git switch -c image-4.0.5-r1 4.0.5
+   ```
+
+2. **Apply the platform fix** to that branch. Most often it is the commit that
+   Dependabot's pull request put on `main`:
+
+   ```bash
+   git cherry-pick <sha-of-the-dockerfile-bump>
+   ```
+
+   or edit the `FROM` lines or the files under `docker/` by hand. Do **not** run
+   `scripts/set-version.sh`: the Mukurtu version stays `4.0.5`.
+3. **Run the image tests**: `for t in scripts/docker/test-*.sh; do $t || break; done`.
+4. **Tag and push** the branch commit with the revision tag:
+
+   ```bash
+   git tag 4.0.5-r1
+   git push origin image-4.0.5-r1 4.0.5-r1
+   ```
+
+5. **Publish a GitHub release** for `4.0.5-r1` (not marked as a pre-release) and say
+   what changed, for example "Image-only release. No change to Mukurtu 4.0.5.
+   Updates the base image to Alpine 3.24.3." The publish workflow builds, tests,
+   scans and pushes `4.0.5-r1`, `4.0.5-r1-slim`, and, if this is now the newest
+   image, the moving tags (see below).
+6. **Make sure the same fix is on `main`** (merging Dependabot's pull request does
+   it), so the next Mukurtu release has it too.
+
+Which tags move: the exact tag `4.0.5-r1` is always published. `4.0`, `4` and
+`latest` move to it only if it is the newest in their scope. A revision of the
+newest release moves them; a revision of an older release (a backport such as
+`4.0.4-r1` published after `4.0.5`) does not, so `latest` is never dragged
+backwards. The plain `4.0.5` tag never changes, so a deployment pinned to it stays
+pinned until its owner moves to `4.0.5-r1` on purpose.
 
 ## Releasing alongside mukurtu-template
 

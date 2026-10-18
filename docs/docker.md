@@ -60,19 +60,27 @@ Images are published to `ghcr.io/<owner>/mukurtu` for `linux/amd64` and
 
 | Variant | Tags | Contains |
 | --- | --- | --- |
-| **full** | `4.0.5`, `4.0`, `4`, `latest` | Everything, including `ffmpeg` and `poppler-utils` |
-| **slim** | `4.0.5-slim`, `4.0-slim`, `4-slim`, `latest-slim` | No `ffmpeg`, no `poppler-utils` |
+| **full** | `4.0.5`, `4.0.5-r1`, `4.0`, `4`, `latest` | Everything, including `ffmpeg` and `poppler-utils` |
+| **slim** | `4.0.5-slim`, `4.0.5-r1-slim`, `4.0-slim`, `4-slim`, `latest-slim` | No `ffmpeg`, no `poppler-utils` |
 
 Choose **full** unless you know you do not need the media features. In the slim
 image Mukurtu cannot extract text from PDFs (so PDF content is not searchable),
 make PDF thumbnails, or make video thumbnails. The container logs a warning at
 start-up for each missing tool, and Mukurtu's status report page lists them.
 
-Pre-releases (such as `4.0.0-rc`) have only their exact tag and never become
-`latest`, `4`, or `4.0`. A published tag never changes: nothing rebuilds it, so
-`4.0.5` is the same image tomorrow as today. `4.0` and `4` move only when a new
-release is published. **Pin an exact version in production** and upgrade on
-purpose. The full tagging and publishing rules are in
+**Revisions.** `4.0.5-r1` is a new image of the same Mukurtu 4.0.5, published when
+something under Mukurtu needs a fix (the base image, PHP, nginx, `ffmpeg`): the Mukurtu
+code is unchanged, the platform is updated. `-r2`, `-r3` follow if needed. To take
+the fix, change your tag from `4.0.5` to `4.0.5-r1`; the release notes say what
+changed.
+
+**A published tag never changes.** Nothing rebuilds it, so `4.0.5` is the same image
+tomorrow as today. That is why revisions exist: a fix arrives as a new tag you move
+to on purpose. `4.0` follows new patch releases and revisions, `4` also follows
+new minor releases, and `latest` follows everything newer; each moves only forward,
+so a backport never moves it back. Pre-releases (such as `4.0.0-rc`) have only
+their exact tag and never become any of those. **Pin an exact tag in production**
+and upgrade on purpose. The full tagging and publishing rules are in
 [docker-build.md](docker-build.md#publishing-and-supply-chain).
 
 ## What the container does

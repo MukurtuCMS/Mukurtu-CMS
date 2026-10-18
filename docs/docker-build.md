@@ -593,21 +593,45 @@ The tag being built is checked out, so the image is built from that tag's
 `Dockerfile` and code. A tag that predates the `Dockerfile` cannot be built.
 
 The workflow refuses two mistakes before building anything: a tag that is not a
-bare version (`v4.0.5`, `4.x-dev`), and a release that GitHub marks as a
-pre-release but whose tag has no pre-release suffix. Tags are derived from the
+release tag (`v4.0.5`, `4.x-dev`, `4.0.5-r0`), and a release that GitHub marks as
+a pre-release but whose tag has no pre-release suffix. Tags are derived from the
 version alone, so the second would let a pre-release take `latest`. Re-tag it as,
 for example, `4.0.5-rc1`.
 
 ### Tags
 
-For release `4.0.5` the **full** image gets `4.0.5`, `4.0`, `4`, and `latest`;
-the **slim** image gets the same with a `-slim` suffix (`4.0.5-slim`, `4.0-slim`,
-`4-slim`, `latest-slim`). A pre-release (`4.0.0-rc`, `4.0.0-beta37`) gets only its
-exact tag, so it can never become what `latest`, `4`, or `4.0` pulls. The rules
-live in `scripts/docker/compute-tags.sh` and are tested.
+There are three kinds of release tag, and every one publishes its exact tag in both
+variants (full, and slim with a `-slim` suffix):
 
-Pin an exact version (`4.0.5`) in production and upgrade on purpose. `4.0` follows
-patch releases, `4` follows minor releases, and `latest` follows everything.
+| Tag | Kind | Also publishes |
+| --- | --- | --- |
+| `4.0.5` | A Mukurtu release | `4.0`, `4`, `latest` (when it is the newest in each scope) |
+| `4.0.5-r1` | An **image revision**: a new image of the same Mukurtu release, to ship a platform fix | `4.0`, `4`, `latest` (when it is the newest in each scope) |
+| `4.0.0-rc`, `4.0.0-beta37` | A pre-release | nothing |
+
+A pre-release never becomes what `latest`, `4`, or `4.0` pulls. A revision exists
+because the image has dependencies Mukurtu does not (the base image, PHP, nginx,
+`ffmpeg`, `poppler-utils`), and a fix to one of them is a new image of the same
+Mukurtu code, not a new Mukurtu release. `-r<number>` counts from 1; it is distinct
+from `-rc1`, and Composer rejects it as a version, so Packagist never offers a
+revision as a Composer release. The procedure is in
+[releasing.md](releasing.md#releasing-an-image-revision).
+
+**Moving tags only advance.** `4.0`, `4`, and `latest` are published for a tag only
+if that tag is the newest stable or revision tag in the scope of each (the same
+minor version, the same major version, everything). The workflow reads the
+repository's existing tags to decide. So `4.0.5-r1` published after `4.0.5` moves
+`latest`, but `4.0.4-r1` published after `4.0.5` does not: a backport can never
+pull `latest` backwards. The plain tag `4.0.5` is never re-pushed once published,
+so a deployment pinned to it stays on that image until it moves to `4.0.5-r1` on
+purpose.
+
+The rules are in `scripts/docker/compute-tags.sh` and are tested, including the
+backport and ordering cases.
+
+Pin an exact tag (`4.0.5` or `4.0.5-r1`) in production and upgrade on purpose.
+`4.0` follows patch releases and revisions, `4` follows minor releases, and
+`latest` follows everything.
 
 ### What must pass before anything is pushed
 
@@ -664,10 +688,13 @@ reach anyone until it is released. The pieces that make this practical:
   it from being published, so a release does not ship with a known, fixable
   vulnerability of that severity in the image's packages.
 - `composer audit` stops the build on a Drupal advisory.
-- If a fix is urgent, cut a patch release.
+- If a fix is needed, publish it: a new Mukurtu release if the fix is in Mukurtu
+  or Drupal, or an **image revision** (`4.0.5-r1`) if it is only in the platform.
+  Nothing else changes in the image, so the Mukurtu version stays what it was.
 
 Operators who want updates without watching for them can follow a moving tag
-(`4.0` or `4`, which advance with each new patch or minor release) or let their
+(`4.0`, which advances with each new patch release and revision, or `4`, which also
+advances with minor releases) or let their
 own tooling propose new versions. Deployments that need bit-for-bit
 reproducibility should pin the image digest.
 

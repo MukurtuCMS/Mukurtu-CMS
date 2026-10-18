@@ -8,12 +8,44 @@ WORKFLOW="$REPO_ROOT/.github/workflows/docker-publish.yml"
 TAGS="$REPO_ROOT/scripts/docker/compute-tags.sh"
 
 echo "workflow: tag rules"
-tags() { "$TAGS" "$@" 2>&1 | paste -sd' ' -; }
+# tags <tag> <variant> [existing git tags...]: the tags that would be published.
+tags() {
+  local tag="$1" variant="$2"
+  shift 2
+  if [[ $# -gt 0 ]]; then
+    printf '%s\n' "$@" | "$TAGS" --existing - "$tag" "$variant" 2>&1 | paste -sd' ' -
+  else
+    "$TAGS" "$tag" "$variant" 2>&1 | paste -sd' ' -
+  fi
+}
+kind() { "$TAGS" --kind "$1" 2>&1; }
+
+# A release moves 4.0, 4 and latest; the slim variant suffixes everything.
 assert_eq "4.0.5 4.0 4 latest" "$(tags 4.0.5 full)" "release: exact, minor, major, latest"
 assert_eq "4.0.5-slim 4.0-slim 4-slim latest-slim" "$(tags 4.0.5 slim)" "release, slim variant"
+assert_eq "4.0.5 4.0 4 latest" "$(tags 4.0.5 full 4.0.3 4.0.4 4.0.5)" "release newer than every other tag"
+# Pre-releases never move anything.
 assert_eq "4.0.0-rc" "$(tags 4.0.0-rc full)" "release candidate: exact tag only"
 assert_eq "4.0.0-beta37-slim" "$(tags 4.0.0-beta37 slim)" "beta, slim: exact tag only"
-for bad in "4.x-dev full" "v4.0.5 full" "4.0 full" "4.0.5 medium" "4.0.5 full 20261017" ""; do
+# An image revision (-rN) is a new image of the same Mukurtu release.
+assert_eq "4.0.5-r1 4.0 4 latest" "$(tags 4.0.5-r1 full 4.0.5 4.0.5-r1)" "revision of the newest release moves the moving tags"
+assert_eq "4.0.5-r1-slim 4.0-slim 4-slim latest-slim" "$(tags 4.0.5-r1 slim 4.0.5 4.0.5-r1)" "revision, slim variant"
+assert_eq "4.0.5-r2 4.0 4 latest" "$(tags 4.0.5-r2 full 4.0.5 4.0.5-r1 4.0.5-r2)" "a second revision is newer than the first"
+assert_eq "4.0.5-r1" "$(tags 4.0.5-r1 full 4.0.5 4.0.5-r2 4.0.5-r1)" "an older revision published late moves nothing"
+assert_eq "4.0.5-r1" "$(tags 4.0.5-r1 full 4.0.5 4.0.5-r1 4.0.6)" "a revision of an older release does not move tags back"
+assert_eq "4.0.4-r1" "$(tags 4.0.4-r1 full 4.0.4 4.0.5 4.0.4-r1)" "backport: 4.0, 4 and latest stay on 4.0.5"
+assert_eq "3.9.9-r1 3.9 3" "$(tags 3.9.9-r1 full 3.9.9 4.0.5 3.9.9-r1)" "older line: its own 3.9 and 3 move, latest does not"
+assert_eq "4.1.0 4.1 4 latest" "$(tags 4.1.0 full 4.0.5 4.1.0)" "a new minor moves 4 and latest and starts 4.1"
+assert_eq "4.0.5 4.0 4 latest" "$(tags 4.0.5 full 4.0.5 4.2.0-rc 4.x-dev v9.9.9 junk)" "pre-releases and junk tags are ignored"
+assert_eq "4.0.5" "$(tags 4.0.5 full 4.0.5 4.0.5-r1)" "the plain tag is not re-pushed once a revision exists"
+# Kinds.
+assert_eq "stable" "$(kind 4.0.5)" "kind: stable"
+assert_eq "revision" "$(kind 4.0.5-r1)" "kind: revision"
+assert_eq "revision" "$(kind 4.0.5-r12)" "kind: revision with two digits"
+assert_eq "prerelease" "$(kind 4.0.0-rc)" "kind: release candidate"
+assert_eq "prerelease" "$(kind 4.0.0-rc1)" "kind: rc1 is a pre-release, not revision 'c1'"
+assert_eq "prerelease" "$(kind 4.0.0-beta37)" "kind: beta"
+for bad in "4.x-dev full" "v4.0.5 full" "4.0 full" "4.0.5 medium" "4.0.5-r0 full" "4.0.5-r01 full" "4.0.5 full extra" ""; do
   # shellcheck disable=SC2086
   if "$TAGS" $bad >/dev/null 2>&1; then fail "rejects: '$bad'"; else pass "rejects: '$bad'"; fi
 done
@@ -71,6 +103,13 @@ for jname, job in jobs.items():
 # Otherwise 4.0.5 would take `latest` although it was published as a pre-release.
 if "marked as a pre-release" not in text:
     errors.append("resolve must refuse a GitHub pre-release whose tag has no pre-release suffix")
+
+# Release tags are classified by the tested script, not by regexes of their own,
+# and moving tags are judged against the tags that already exist.
+if "compute-tags.sh --kind" not in text:
+    errors.append("resolve must classify the tag with compute-tags.sh --kind")
+if "compute-tags.sh --existing -" not in text:
+    errors.append("publish must pass the existing tags to compute-tags.sh --existing -")
 
 # Both image variants name their tool choice explicitly.
 publish = jobs["publish"]

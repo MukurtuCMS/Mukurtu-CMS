@@ -132,9 +132,14 @@ Workflow: `.github/workflows/docker-publish.yml`.
 - Matrix: two variants, set explicitly per row.
   - full: `WITH_FFMPEG=true`, `WITH_POPPLER=true`
   - slim: `WITH_FFMPEG=false`, `WITH_POPPLER=false`
-- Tags (via `docker/metadata-action`): `4.0.5`, `4.0`, `4`, `latest` for full;
-  the same with a `-slim` suffix for slim. Pre-releases get only the exact tag
-  and never move `latest`, `4`, or `4.0`.
+- Tags come from `scripts/docker/compute-tags.sh`. Three kinds of release tag:
+  stable (`4.0.5`), image revision (`4.0.5-r1`: same Mukurtu code, platform fix,
+  published when a base image, PHP, nginx or media tool needs updating), and
+  pre-release (`4.0.0-rc`). Each publishes its exact tag; stable and revision tags
+  also publish `4.0`, `4` and `latest`, each only if the tag is the newest stable
+  or revision tag in that scope (so a backport never moves `latest` backwards).
+  Slim tags append `-slim`. A published tag is never re-pushed. Revisions are
+  built from a branch cut at the release being revised.
 - Buildx multi-arch, GitHub Actions layer cache, provenance and SBOM
   attestations.
 - Trivy scan and `composer audit` results gate the push (see Security hardening).
