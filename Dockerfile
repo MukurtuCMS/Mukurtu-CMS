@@ -135,8 +135,8 @@ RUN set -eux; \
 COPY --from=guard /guard-ok /guard-ok
 
 # ---------------------------------------------------------------------------
-# runtime: the image that ships. nginx + php-fpm on Alpine, run by an
-# entrypoint added in a later layer of this file. No Composer, no dev tooling.
+# runtime: the image that ships. nginx + php-fpm on Alpine, started by
+# entrypoint.sh under tini. No Composer, no dev tooling.
 # ---------------------------------------------------------------------------
 FROM php-base AS runtime
 
