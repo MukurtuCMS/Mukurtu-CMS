@@ -18,6 +18,15 @@ To learn more about Mukurtu CMS and the larger Mukurtu community, visit [mukurtu
 * For local development, we encourage using [Docker](https://ddev.readthedocs.io/en/stable/users/install/docker-installation/) and [DDEV](https://ddev.readthedocs.io/en/stable/users/install/ddev-installation/) (which includes composer)
 * If planning to develop on the Mukurtu CMS installation profile, follow the [additional installation steps to connect a Git checkout to the new project](https://github.com/MukurtuCMS/Mukurtu-CMS/wiki).
 
+## Running Mukurtu in a container
+
+A ready-to-run container image is published to the GitHub Container Registry when
+a release is published. It installs itself into an empty database on first start
+and is configured entirely through environment variables. See
+[docs/docker.md](docs/docker.md) to run it (including every setting, with
+Compose examples for one site or many), and [docs/docker-build.md](docs/docker-build.md)
+for how the image is built, hardened, and tested.
+
 ## Installing Mukurtu CMS with Composer
 
 If installing directly on a web host that has a command line interface, you can install Mukurtu via composer.
