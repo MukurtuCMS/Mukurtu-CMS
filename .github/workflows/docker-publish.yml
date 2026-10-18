@@ -8,9 +8,10 @@ name: Publish Docker image
 #  - workflow_dispatch: build a named tag by hand. Use this if the release was
 #    created by another workflow with GITHUB_TOKEN, which does not trigger
 #    `release: published`.
-#  - schedule: rebuild the newest non-pre-release to pick up base image and Drupal
-#    security fixes. Opt in by setting the repository variable
-#    DOCKER_WEEKLY_REBUILD to "true".
+#
+# A published tag is a fixed artifact: nothing rebuilds and re-pushes existing
+# tags on a timer. Fixes to the base images or to Drupal reach users in a new
+# release.
 
 on:
   release:
@@ -21,26 +22,20 @@ on:
         description: "Release tag to build and publish, for example 4.0.5. The tag must contain the Dockerfile."
         required: true
         type: string
-  schedule:
-    - cron: "17 3 * * 1"
 
 permissions:
   contents: read
 
 concurrency:
-  group: docker-publish-${{ github.event.release.tag_name || inputs.tag || 'scheduled' }}
+  group: docker-publish-${{ github.event.release.tag_name || inputs.tag }}
   cancel-in-progress: false
 
 jobs:
   resolve:
     name: Resolve the tag to build
-    if: github.event_name != 'schedule' || vars.DOCKER_WEEKLY_REBUILD == 'true'
     runs-on: ubuntu-latest
     outputs:
       tag: ${{ steps.tag.outputs.tag }}
-      prerelease: ${{ steps.tag.outputs.prerelease }}
-      date: ${{ steps.tag.outputs.date }}
-      skip: ${{ steps.tag.outputs.skip }}
     steps:
       - name: Work out which tag to build
         id: tag
@@ -55,50 +50,31 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          prerelease=false
-          date=""
-          case "$EVENT" in
-            release)
-              tag="$RELEASE_TAG"
-              [[ "$RELEASE_IS_PRERELEASE" == true ]] && prerelease=true
-              ;;
-            workflow_dispatch)
-              tag="$INPUT_TAG"
-              ;;
-            schedule)
-              date="$(date -u +%Y%m%d)"
-              if ! tag="$(gh api "repos/$REPO/releases/latest" --jq .tag_name 2>/dev/null)"; then
-                echo "::notice::No release exists yet; nothing to rebuild."
-                echo "skip=true" >> "$GITHUB_OUTPUT"
-                exit 0
-              fi
-              ;;
-          esac
+          if [[ "$EVENT" == release ]]; then
+            tag="$RELEASE_TAG"
+          else
+            tag="$INPUT_TAG"
+          fi
           if [[ ! "$tag" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
             echo "::error::'$tag' is not a release version such as 4.0.5 or 4.0.0-rc"
             exit 1
           fi
-          [[ "$tag" == *-* ]] && prerelease=true
+          # The tags are derived from the version alone (a hyphen means
+          # pre-release), so GitHub's flag must agree with it. Otherwise a release
+          # published as a pre-release would take `latest`.
+          if [[ "$RELEASE_IS_PRERELEASE" == true && "$tag" != *-* ]]; then
+            echo "::error::Release $tag is marked as a pre-release on GitHub, but its tag has no pre-release suffix such as -rc1. Re-tag it (for example ${tag}-rc1) so it cannot become 'latest'."
+            exit 1
+          fi
           if ! gh api "repos/$REPO/contents/Dockerfile?ref=$tag" --silent 2>/dev/null; then
-            if [[ "$EVENT" == schedule ]]; then
-              echo "::notice::Release $tag predates the Dockerfile; nothing to rebuild."
-              echo "skip=true" >> "$GITHUB_OUTPUT"
-              exit 0
-            fi
             echo "::error::Tag $tag does not contain a Dockerfile, so there is nothing to build."
             exit 1
           fi
-          {
-            echo "tag=$tag"
-            echo "prerelease=$prerelease"
-            echo "date=$date"
-            echo "skip=false"
-          } >> "$GITHUB_OUTPUT"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
 
   test:
     name: Test and scan
     needs: resolve
-    if: needs.resolve.outputs.skip != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 90
     permissions:
@@ -145,7 +121,6 @@ jobs:
   publish:
     name: Publish (${{ matrix.variant }})
     needs: [resolve, test]
-    if: needs.resolve.outputs.skip != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 90
     permissions:
@@ -175,20 +150,17 @@ jobs:
         id: meta
         env:
           TAG: ${{ needs.resolve.outputs.tag }}
-          DATE: ${{ needs.resolve.outputs.date }}
           VARIANT: ${{ matrix.variant }}
           OWNER: ${{ github.repository_owner }}
         run: |
           set -euo pipefail
           image="ghcr.io/${OWNER,,}/mukurtu"
-          args=("$TAG" "$VARIANT")
-          [[ -z "$DATE" ]] || args+=("$DATE")
           {
             echo "image=$image"
             echo "revision=$(git rev-parse HEAD)"
             echo "template=$(tr -d '[:space:]' < docker/TEMPLATE_VERSION)"
             echo "tags<<TAGS"
-            scripts/docker/compute-tags.sh "${args[@]}" | sed "s|^|$image:|"
+            scripts/docker/compute-tags.sh "$TAG" "$VARIANT" | sed "s|^|$image:|"
             echo "TAGS"
           } >> "$GITHUB_OUTPUT"
 

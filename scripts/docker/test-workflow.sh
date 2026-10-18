@@ -13,10 +13,7 @@ assert_eq "4.0.5 4.0 4 latest" "$(tags 4.0.5 full)" "release: exact, minor, majo
 assert_eq "4.0.5-slim 4.0-slim 4-slim latest-slim" "$(tags 4.0.5 slim)" "release, slim variant"
 assert_eq "4.0.0-rc" "$(tags 4.0.0-rc full)" "release candidate: exact tag only"
 assert_eq "4.0.0-beta37-slim" "$(tags 4.0.0-beta37 slim)" "beta, slim: exact tag only"
-assert_eq "4.0.5 4.0 4 latest 4.0.5-20261017" "$(tags 4.0.5 full 20261017)" "scheduled rebuild adds an immutable dated tag"
-assert_eq "4.0.5-slim 4.0-slim 4-slim latest-slim 4.0.5-20261017-slim" "$(tags 4.0.5 slim 20261017)" "scheduled rebuild, slim"
-assert_eq "4.0.0-rc 4.0.0-rc-20261017" "$(tags 4.0.0-rc full 20261017)" "pre-release rebuild: still no moving tags"
-for bad in "4.x-dev full" "v4.0.5 full" "4.0 full" "4.0.5 medium" "4.0.5 full 2026-10-17" ""; do
+for bad in "4.x-dev full" "v4.0.5 full" "4.0 full" "4.0.5 medium" "4.0.5 full 20261017" ""; do
   # shellcheck disable=SC2086
   if "$TAGS" $bad >/dev/null 2>&1; then fail "rejects: '$bad'"; else pass "rejects: '$bad'"; fi
 done
@@ -42,9 +39,13 @@ text = open(sys.argv[1]).read()
 errors = []
 
 on = wf.get(True) or wf.get("on")  # YAML 1.1 reads a bare `on` as True
-for trigger in ("release", "workflow_dispatch", "schedule"):
+for trigger in ("release", "workflow_dispatch"):
     if trigger not in on:
         errors.append(f"missing trigger: {trigger}")
+# A published tag is a fixed artifact. Nothing rebuilds and re-pushes existing
+# tags on a timer; fixes arrive as new releases.
+if "schedule" in on:
+    errors.append("no schedule trigger: published tags must not be rebuilt in place")
 if on.get("release", {}).get("types") != ["published"]:
     errors.append("release trigger must be types: [published]")
 
@@ -65,9 +66,11 @@ for jname, job in jobs.items():
             if re.search(r"github\.event\.|inputs\.|github\.head_ref", expr):
                 errors.append(f"{jname}: event data interpolated into run: {expr.strip()}")
 
-# The scheduled rebuild is opt-in.
-if "DOCKER_WEEKLY_REBUILD" not in text:
-    errors.append("the scheduled rebuild must be guarded by vars.DOCKER_WEEKLY_REBUILD")
+# A release that GitHub marks as a pre-release must carry a pre-release suffix in
+# its tag (4.0.0-rc), because the tags are derived from the version alone.
+# Otherwise 4.0.5 would take `latest` although it was published as a pre-release.
+if "marked as a pre-release" not in text:
+    errors.append("resolve must refuse a GitHub pre-release whose tag has no pre-release suffix")
 
 # Both image variants name their tool choice explicitly.
 publish = jobs["publish"]

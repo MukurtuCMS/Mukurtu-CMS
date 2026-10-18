@@ -10,6 +10,8 @@
 
 **Spec:** `docs/superpowers/specs/2026-10-17-docker-image-design.md`
 
+> **Amended after execution:** the opt-in weekly rebuild described in Task 8 (schedule trigger, `DOCKER_WEEKLY_REBUILD`, dated tags) was removed at the owner's request: published tags are never rebuilt in place.
+
 ## Global Constraints
 
 - PHP 8.4; Drupal core `~11.4.0` (from `composer.json`); Drush 13 is already a profile requirement.

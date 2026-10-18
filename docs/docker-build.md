@@ -588,10 +588,15 @@ runs unchanged in the upstream repository and in a fork.
 | --- | --- |
 | A release is **published** | That release's tag is built, tested, scanned, and pushed. |
 | **Run workflow** (manual) with a tag | The same, for a tag you name. Use this if a release was created by another workflow using `GITHUB_TOKEN`: GitHub does not start workflows from events caused by that token, so `release: published` never fires. |
-| Weekly schedule | Only if the repository variable `DOCKER_WEEKLY_REBUILD` is `true`. Rebuilds the newest non-pre-release (see "Weekly rebuild"). |
 
 The tag being built is checked out, so the image is built from that tag's
 `Dockerfile` and code. A tag that predates the `Dockerfile` cannot be built.
+
+The workflow refuses two mistakes before building anything: a tag that is not a
+bare version (`v4.0.5`, `4.x-dev`), and a release that GitHub marks as a
+pre-release but whose tag has no pre-release suffix. Tags are derived from the
+version alone, so the second would let a pre-release take `latest`. Re-tag it as,
+for example, `4.0.5-rc1`.
 
 ### Tags
 
@@ -644,28 +649,32 @@ even assembled.
   Event data (tag names, inputs) reaches scripts through environment variables,
   never by interpolation into script text, which would allow script injection.
 
-### Weekly rebuild
+### How fixes reach users
 
-A published image does not receive security fixes by itself: a new Alpine, PHP,
-or Drupal patch release only reaches users if the image is rebuilt. When
-`DOCKER_WEEKLY_REBUILD` is `true`, a scheduled run takes the newest
-non-pre-release, builds it again with the same pinned template version (so the
-Mukurtu code is identical, but base packages and Composer dependencies are
-current), runs the same tests and scan, and **re-pushes** that release's tags,
-plus an immutable `<version>-<YYYYMMDD>` tag (for example `4.0.5-20261017`) for
-anyone who wants to roll back to a specific rebuild.
+A published tag is a fixed artifact. Nothing rebuilds and re-pushes `4.0.5` after
+it is published: what you pulled yesterday is what you pull today, so a tag, a
+rollback, and an audit trail mean what they say.
 
-This means that tags such as `4.0.5` can change under you between pulls. That is
-deliberate: it is how fixes arrive. Deployments that need bit-for-bit
-reproducibility should pin the image digest, or the dated tag. The variable is off
-by default so a repository chooses this explicitly.
+That means a fix to a base image (Alpine, PHP), to nginx, or to Drupal does not
+reach anyone until it is released. The pieces that make this practical:
+
+- Dependabot proposes updates to the pinned base images and to the GitHub Actions
+  as pull requests.
+- Every release is scanned by Trivy, and a fixable HIGH or CRITICAL finding stops
+  it from being published, so a release does not ship with a known, fixable
+  vulnerability of that severity in the image's packages.
+- `composer audit` stops the build on a Drupal advisory.
+- If a fix is urgent, cut a patch release.
+
+Operators who want updates without watching for them can follow a moving tag
+(`4.0` or `4`, which advance with each new patch or minor release) or let their
+own tooling propose new versions. Deployments that need bit-for-bit
+reproducibility should pin the image digest.
 
 ### One-time setup
 
 - GHCR creates the package **private** on first push. To let others pull the image,
   open the package's settings on GitHub and set its visibility to **public**.
-- Set `DOCKER_WEEKLY_REBUILD` to `true` under Settings, Secrets and variables,
-  Actions, Variables, to enable the weekly rebuild.
 - The pinned template version is in `docker/TEMPLATE_VERSION`. Update it when a
   new `mukurtu/mukurtu-template` release is wanted in the image.
 

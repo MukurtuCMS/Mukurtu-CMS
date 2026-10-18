@@ -138,7 +138,7 @@ Workflow: `.github/workflows/docker-publish.yml`.
 - Buildx multi-arch, GitHub Actions layer cache, provenance and SBOM
   attestations.
 - Trivy scan and `composer audit` results gate the push (see Security hardening).
-- Weekly rebuild: a `schedule` trigger rebuilds and re-pushes the tags of the newest non-pre-release release, plus an immutable `<version>-<YYYYMMDD>` tag. It runs only when the repository variable `DOCKER_WEEKLY_REBUILD` is `true`, so forks and upstream opt in explicitly.
+- No scheduled rebuild: a published tag is a fixed artifact and is never re-pushed. Fixes to base images or Drupal reach users in a new release; Dependabot and the Trivy gate keep that release current and clean. (An opt-in weekly rebuild was designed and then removed at the owner's request.)
 - Smoke test before push: start the built image against a MariaDB service
   container, wait for auto-install, and request the front page.
 
@@ -284,8 +284,6 @@ Supply chain:
 - The resolved `composer.lock` is copied into the image and attested. The
   template ships no lock file, so two builds of one tag can resolve different
   Drupal and contrib versions; the lock records exactly what shipped.
-- Optional weekly rebuild of the newest non-pre-release tag to pick up base
-  image and Drupal security fixes (see Tags and publishing).
 - An explicit `MUKURTU_HASH_SALT` is recommended for production. An
   auto-generated salt lives in the private volume; losing that volume changes
   the salt and invalidates image-style tokens.

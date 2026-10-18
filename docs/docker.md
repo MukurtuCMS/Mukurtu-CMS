@@ -69,9 +69,10 @@ make PDF thumbnails, or make video thumbnails. The container logs a warning at
 start-up for each missing tool, and Mukurtu's status report page lists them.
 
 Pre-releases (such as `4.0.0-rc`) have only their exact tag and never become
-`latest`, `4`, or `4.0`. Where the weekly rebuild is enabled, each rebuild also gets
-an immutable dated tag such as `4.0.5-20261017`. **Pin an exact version in
-production** and upgrade on purpose. The full tagging and publishing rules are in
+`latest`, `4`, or `4.0`. A published tag never changes: nothing rebuilds it, so
+`4.0.5` is the same image tomorrow as today. `4.0` and `4` move only when a new
+release is published. **Pin an exact version in production** and upgrade on
+purpose. The full tagging and publishing rules are in
 [docker-build.md](docker-build.md#publishing-and-supply-chain).
 
 ## What the container does
