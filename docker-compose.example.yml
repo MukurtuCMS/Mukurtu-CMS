@@ -1,0 +1,118 @@
+# Mukurtu CMS: one site, with its database.
+#
+#   1. Create the secret files (see "Secrets" below).
+#   2. Create a .env file next to this one:
+#        MUKURTU_HOST=mukurtu.example.org        # the name the site is served on
+#        MUKURTU_ADMIN_EMAIL=you@example.org
+#   3. docker compose up -d
+#
+# The first start installs Mukurtu into the empty database; allow a few minutes.
+# Put a TLS-terminating reverse proxy in front of port 8080 (see
+# docker-compose.multisite.example.yml for one that does it with Traefik).
+#
+# Every setting is documented in docs/docker.md.
+
+name: mukurtu
+
+services:
+  db:
+    image: mariadb:11
+    restart: unless-stopped
+    # The settings Drupal asks of MariaDB/MySQL:
+    #   utf8mb4          - emoji and non-Latin scripts are stored correctly
+    #   READ-COMMITTED   - avoids lock contention and deadlocks (with ROW logging)
+    #   max_allowed_packet - large serialized values
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_general_ci
+      - --transaction-isolation=READ-COMMITTED
+      - --binlog-format=ROW
+      - --max-allowed-packet=64M
+      # Rule of thumb: about half of the memory limit below.
+      - --innodb-buffer-pool-size=256M
+    environment:
+      MARIADB_DATABASE: mukurtu
+      MARIADB_USER: mukurtu
+      MARIADB_PASSWORD_FILE: /run/secrets/db_password
+      MARIADB_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
+    secrets: [db_password, db_root_password]
+    volumes:
+      - db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    mem_limit: 512m
+    networks: [backend]
+
+  mukurtu:
+    # Replace OWNER with the GitHub account or organisation that publishes the
+    # image. Pin a version in production (for example :4.0.5) rather than using
+    # latest, and upgrade on purpose.
+    image: ${MUKURTU_IMAGE:-ghcr.io/OWNER/mukurtu:latest}
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      # Published on the loopback interface only; the reverse proxy connects here.
+      - "127.0.0.1:8080:8080"
+    environment:
+      MUKURTU_DB_HOST: db
+      MUKURTU_DB_NAME: mukurtu
+      MUKURTU_DB_USER: mukurtu
+      MUKURTU_DB_PASSWORD_FILE: /run/secrets/db_password
+      MUKURTU_TRUSTED_HOSTS: ${MUKURTU_HOST:?set MUKURTU_HOST in .env}
+      MUKURTU_HASH_SALT_FILE: /run/secrets/hash_salt
+      MUKURTU_ADMIN_PASSWORD_FILE: /run/secrets/admin_password
+      MUKURTU_ADMIN_EMAIL: ${MUKURTU_ADMIN_EMAIL:?set MUKURTU_ADMIN_EMAIL in .env}
+      MUKURTU_SITE_NAME: Mukurtu
+    secrets: [db_password, hash_salt, admin_password]
+    volumes:
+      # Uploaded files. Back these up together with the database.
+      - public:/var/www/files/public
+      - private:/var/www/files/private
+    # Hardening. The image keeps its code read-only, so the only writable places
+    # are the two volumes above and these two tmpfs mounts.
+    read_only: true
+    tmpfs:
+      # Where uploads land before Drupal moves them into place
+      # (MUKURTU_FILE_TEMP_PATH). A tmpfs is fast but counts against mem_limit;
+      # for large video uploads, mount a size-capped volume here instead.
+      - /tmp:size=256m,mode=1777
+      # Rendered configuration (MUKURTU_RUN_DIR).
+      - /run:size=16m,mode=1777
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    # ffmpeg and poppler run inside upload requests, and their memory counts
+    # against the container, not PHP's memory_limit. Leave headroom.
+    mem_limit: 1g
+    networks: [backend]
+
+secrets:
+  # Create these before the first start, readable by uid 1000 (chmod 644, or
+  # chown 1000). Example:
+  #   mkdir secrets
+  #   openssl rand -base64 24 > secrets/db_password.txt
+  #   openssl rand -base64 24 > secrets/db_root_password.txt
+  #   openssl rand -base64 48 > secrets/hash_salt.txt
+  #   printf '%s' 'a-strong-password' > secrets/admin_password.txt
+  #   chmod 644 secrets/*.txt
+  db_password:
+    file: ./secrets/db_password.txt
+  db_root_password:
+    file: ./secrets/db_root_password.txt
+  hash_salt:
+    file: ./secrets/hash_salt.txt
+  admin_password:
+    file: ./secrets/admin_password.txt
+
+volumes:
+  db:
+  public:
+  private:
+
+networks:
+  backend:

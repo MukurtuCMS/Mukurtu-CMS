@@ -1,0 +1,177 @@
+# Mukurtu CMS: several independent sites on one host, each at its own domain.
+#
+# Every site is its own container (same image, own configuration, own database,
+# own file volumes), so sites are upgraded, restarted, and limited separately. A
+# Traefik reverse proxy routes by host name and obtains TLS certificates.
+#
+# To add a site: copy the site_b block and its two volumes, give it a new host
+# name, database name and credentials, and add the database in the db_init
+# config. Documentation: docs/docker.md ("Hosting many sites").
+#
+# Create a .env file next to this one:
+#   ACME_EMAIL=ops@example.org
+#   DB_ROOT_PASSWORD=...                 # long and random
+#   SITE_A_HOST=a.example.org            SITE_B_HOST=b.example.org
+#   SITE_A_DB_PASSWORD=...               SITE_B_DB_PASSWORD=...
+#   SITE_A_ADMIN_PASSWORD=...            SITE_B_ADMIN_PASSWORD=...
+#   SITE_A_ADMIN_EMAIL=a@example.org     SITE_B_ADMIN_EMAIL=b@example.org
+#
+# Plain environment variables are used here to keep the example short. For
+# production, prefer the *_FILE secret form shown in docker-compose.example.yml:
+# environment variables are visible to anyone who can run `docker inspect`.
+
+name: mukurtu-hosting
+
+x-mukurtu: &mukurtu
+  # Replace OWNER with the account that publishes the image, and pin a version.
+  image: ${MUKURTU_IMAGE:-ghcr.io/OWNER/mukurtu:latest}
+  restart: unless-stopped
+  read_only: true
+  cap_drop: [ALL]
+  security_opt:
+    - no-new-privileges:true
+  # Per-site ceiling, with headroom for ffmpeg and poppler (see docs/docker.md).
+  mem_limit: 1g
+  depends_on:
+    db:
+      condition: service_healthy
+  networks: [proxy, backend]
+
+x-mukurtu-env: &mukurtu-env
+  MUKURTU_DB_HOST: db
+  # Trust X-Forwarded-* only from the proxy network defined below.
+  MUKURTU_REVERSE_PROXY: "true"
+  MUKURTU_REVERSE_PROXY_ADDRESSES: 172.28.0.0/24
+  # Idle sites should cost almost nothing: PHP workers exist only while a
+  # request is being served (the default), and are capped.
+  MUKURTU_FPM_MAX_CHILDREN: "3"
+
+services:
+  traefik:
+    image: traefik:v3.2
+    restart: unless-stopped
+    command:
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.network=mukurtu-hosting_proxy
+      - --entrypoints.web.address=:80
+      - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      - --entrypoints.web.http.redirections.entrypoint.scheme=https
+      - --entrypoints.websecure.address=:443
+      - --certificatesresolvers.le.acme.email=${ACME_EMAIL:?set ACME_EMAIL in .env}
+      - --certificatesresolvers.le.acme.storage=/letsencrypt/acme.json
+      - --certificatesresolvers.le.acme.tlschallenge=true
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      # Traefik reads container labels through the Docker socket. Anything with
+      # access to the socket controls the host: consider a socket proxy.
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - letsencrypt:/letsencrypt
+    security_opt:
+      - no-new-privileges:true
+    networks: [proxy]
+
+  db:
+    image: mariadb:11
+    restart: unless-stopped
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_general_ci
+      - --transaction-isolation=READ-COMMITTED
+      - --binlog-format=ROW
+      - --max-allowed-packet=64M
+      - --innodb-buffer-pool-size=384M
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?set DB_ROOT_PASSWORD in .env}
+    configs:
+      # One database and one user per site, created on the database's first start.
+      - source: db_init
+        target: /docker-entrypoint-initdb.d/10-sites.sql
+    volumes:
+      - db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    mem_limit: 768m
+    networks: [backend]
+
+  site_a:
+    <<: *mukurtu
+    environment:
+      <<: *mukurtu-env
+      MUKURTU_DB_NAME: site_a
+      MUKURTU_DB_USER: site_a
+      MUKURTU_DB_PASSWORD: ${SITE_A_DB_PASSWORD:?set SITE_A_DB_PASSWORD in .env}
+      MUKURTU_TRUSTED_HOSTS: ${SITE_A_HOST:?set SITE_A_HOST in .env}
+      MUKURTU_ADMIN_PASSWORD: ${SITE_A_ADMIN_PASSWORD:?set SITE_A_ADMIN_PASSWORD in .env}
+      MUKURTU_ADMIN_EMAIL: ${SITE_A_ADMIN_EMAIL:?set SITE_A_ADMIN_EMAIL in .env}
+      MUKURTU_SITE_NAME: Site A
+    volumes:
+      - site_a_public:/var/www/files/public
+      - site_a_private:/var/www/files/private
+    tmpfs:
+      - /tmp:size=256m,mode=1777
+      - /run:size=16m,mode=1777
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.site_a.rule: Host(`${SITE_A_HOST}`)
+      traefik.http.routers.site_a.entrypoints: websecure
+      traefik.http.routers.site_a.tls.certresolver: le
+      traefik.http.services.site_a.loadbalancer.server.port: "8080"
+
+  site_b:
+    <<: *mukurtu
+    environment:
+      <<: *mukurtu-env
+      MUKURTU_DB_NAME: site_b
+      MUKURTU_DB_USER: site_b
+      MUKURTU_DB_PASSWORD: ${SITE_B_DB_PASSWORD:?set SITE_B_DB_PASSWORD in .env}
+      MUKURTU_TRUSTED_HOSTS: ${SITE_B_HOST:?set SITE_B_HOST in .env}
+      MUKURTU_ADMIN_PASSWORD: ${SITE_B_ADMIN_PASSWORD:?set SITE_B_ADMIN_PASSWORD in .env}
+      MUKURTU_ADMIN_EMAIL: ${SITE_B_ADMIN_EMAIL:?set SITE_B_ADMIN_EMAIL in .env}
+      MUKURTU_SITE_NAME: Site B
+    volumes:
+      - site_b_public:/var/www/files/public
+      - site_b_private:/var/www/files/private
+    tmpfs:
+      - /tmp:size=256m,mode=1777
+      - /run:size=16m,mode=1777
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.site_b.rule: Host(`${SITE_B_HOST}`)
+      traefik.http.routers.site_b.entrypoints: websecure
+      traefik.http.routers.site_b.tls.certresolver: le
+      traefik.http.services.site_b.loadbalancer.server.port: "8080"
+
+configs:
+  db_init:
+    content: |
+      CREATE DATABASE site_a CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+      CREATE USER 'site_a'@'%' IDENTIFIED BY '${SITE_A_DB_PASSWORD}';
+      GRANT ALL PRIVILEGES ON site_a.* TO 'site_a'@'%';
+      CREATE DATABASE site_b CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+      CREATE USER 'site_b'@'%' IDENTIFIED BY '${SITE_B_DB_PASSWORD}';
+      GRANT ALL PRIVILEGES ON site_b.* TO 'site_b'@'%';
+
+volumes:
+  letsencrypt:
+  db:
+  site_a_public:
+  site_a_private:
+  site_b_public:
+  site_b_private:
+
+networks:
+  # The proxy network has a fixed range so MUKURTU_REVERSE_PROXY_ADDRESSES can
+  # name it.
+  proxy:
+    ipam:
+      config:
+        - subnet: 172.28.0.0/24
+  # The database is reachable only from the sites, never from the proxy network.
+  backend:
+    internal: true
