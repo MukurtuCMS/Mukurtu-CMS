@@ -185,8 +185,10 @@ function mukurtu_notifications_create_field_notify_email_categories(): void {
 
 /**
  * Creates the field_notify_frequency storage and attachment on the user
- * entity if missing, and backfills any user with an empty value to
- * 'immediate'.
+ * entity if missing, and backfills any user with an empty value to 'none'.
+ *
+ * Email is opt-in: new accounts default to 'none' ("Do not send emails")
+ * until the user picks a frequency.
  *
  * A user can end up with an empty stored value in more than one way: sites
  * upgrading from before this field existed, or even a fresh install, since
@@ -218,7 +220,7 @@ function mukurtu_notifications_create_field_notify_frequency(): void {
       'label' => 'Email frequency',
       'description' => 'How often you want to receive notification emails.',
       'required' => TRUE,
-      'default_value' => [['value' => 'immediate']],
+      'default_value' => [['value' => 'none']],
     ])->save();
   }
 
@@ -227,7 +229,7 @@ function mukurtu_notifications_create_field_notify_frequency(): void {
   $uids = \Drupal::entityQuery('user')->accessCheck(FALSE)->execute();
   foreach (\Drupal\user\Entity\User::loadMultiple($uids) as $user) {
     if ($user->hasField('field_notify_frequency') && $user->get('field_notify_frequency')->isEmpty()) {
-      $user->set('field_notify_frequency', 'immediate');
+      $user->set('field_notify_frequency', 'none');
       $user->save();
     }
   }
@@ -398,4 +400,17 @@ function _mukurtu_notifications_save_flag(array $values): void {
  */
 function mukurtu_notifications_update_last_removed(): int {
   return 40057;
+}
+
+/**
+ * Make "Do not send emails" the default email frequency for new accounts.
+ */
+function mukurtu_notifications_update_40058(): void {
+  // Only the default for accounts created from now on changes. Existing
+  // users keep whatever frequency they have, since there's no way to tell
+  // a deliberate 'immediate' from one left at the old default.
+  $field = \Drupal\field\Entity\FieldConfig::loadByName('user', 'user', 'field_notify_frequency');
+  if ($field) {
+    $field->setDefaultValue([['value' => 'none']])->save();
+  }
 }
