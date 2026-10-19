@@ -688,11 +688,30 @@ above, so the fields don't need their own. */
 /* Nothing sizes the Name input but its size="30", which Chromium turns into
 303px on macOS and 382px on Linux from the same font. At 382px "Apply
 filters" no longer fits beside the fields in a 1280px window and wraps under
-them. A rem width matches the macOS one on every platform, and max-width
-keeps it inside the dialog at 320px. */
-.media-library-widget-modal .views-exposed-form .form-item--name .form-element {
-    width: 19rem;
-    max-width: 100%;
+them. gin_lb's version of the form, in Layout Builder, wrapped on every
+platform: its wider button left the row 12px short.
+
+Let the Name field take whatever room the row has left instead. The row then
+fits whenever there is space for a 12rem field beside the others, and wraps
+cleanly when there isn't. */
+.media-library-widget-modal .views-exposed-form .form-item--name,
+.media-library-widget-modal .glb-views-exposed-form .form-item-name {
+    flex: 1 1 12rem;
+    min-width: 0;
+}
+
+.media-library-widget-modal .views-exposed-form .form-item--name .form-element,
+.media-library-widget-modal .glb-views-exposed-form .form-item-name .glb-form-element {
+    width: 100%;
+}
+
+/* WCAG 1.4.4 Resize Text: Gin caps exposed-form selects at max-width: 240px,
+which doesn't grow with the text. At 200% text size "Sort by" showed
+"Newest f". Let the select fit its options, up to the width of the dialog.
+Gin raises its rule to ID specificity with :is(#extra-specificity-hack), so
+this needs !important. */
+.media-library-widget-modal .views-exposed-form .form-element--type-select {
+    max-width: 100% !important;
 }
 
 /* gin_lb adds its own background-image:url(chevron.svg) !important arrow to every

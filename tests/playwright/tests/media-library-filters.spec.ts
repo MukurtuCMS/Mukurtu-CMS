@@ -11,7 +11,10 @@ import { gotoReady } from '~helpers/preview';
  * .js-form-item and 0.5rem above every submit, which moved that line 16px
  * below the Name and Sort by fields and took the button with it. Measured
  * against the inputs rather than their wrappers, because the wrappers'
- * margins are exactly what went wrong.
+ * margins are exactly what went wrong. The button also wrapped under the
+ * fields wherever the Name input's size="30" left the row too short: in CI's
+ * Linux Chromium at 1280px, and in Layout Builder's version of the dialog on
+ * every platform.
  *
  * Focus (WCAG 2.4.3): after "Apply filters", core's refocus looked the button
  * up by a data-drupal-selector that changes on every render, landed outside
@@ -35,12 +38,37 @@ const TOLERANCE = 1;
  */
 const SETTLE = 30_000;
 
-async function openMediaLibrary(page: Page) {
-  await gotoReady(page, '/node/add/digital_heritage');
-  await page.getByRole('button', { name: 'Add media' }).first().click();
+/**
+ * Opens the media widget on an "Image with Description" block in Layout
+ * Builder, where gin_lb renders its own markup for the dialog's filters.
+ *
+ * Uses the homepage, which the install profile creates as a landing page,
+ * and reads its path from the site settings rather than assuming a node ID.
+ * Nothing is saved, so the layout is left as it was.
+ */
+async function openBlockMediaWidget(page: Page) {
+  await gotoReady(page, '/admin/config/system/site-information');
+  const front = await page.getByRole('textbox', { name: 'Default front page' }).inputValue();
+  await gotoReady(page, `${front}/layout`);
+  await page.getByRole('link', { name: /^Add block/ }).first().click();
+  // Each step replaces the off-canvas tray's content over AJAX.
+  const tray = page.locator('#drupal-off-canvas');
+  await tray.getByRole('link', { name: 'Add a block', exact: true }).click({ timeout: SETTLE });
+  await tray.getByRole('link', { name: 'Image with Description', exact: true }).click({ timeout: SETTLE });
+}
+
+async function openMediaLibrary(page: Page, where: 'node form' | 'Layout Builder' = 'node form') {
+  if (where === 'node form') {
+    await gotoReady(page, '/node/add/digital_heritage');
+  }
+  else {
+    await openBlockMediaWidget(page);
+  }
+  await page.getByRole('button', { name: 'Add media' }).first().click({ timeout: SETTLE });
 
   const modal = page.getByRole('dialog', { name: 'Add or select media' });
-  const filters = modal.locator('.views-exposed-form');
+  // gin_lb renders .glb-views-exposed-form instead of .views-exposed-form.
+  const filters = modal.locator('form[data-drupal-selector^="views-exposed-form-media-library"]');
   const apply = filters.getByRole('button', { name: 'Apply filters' });
   await expect(apply).toBeVisible({ timeout: SETTLE });
 
@@ -55,26 +83,31 @@ async function openMediaLibrary(page: Page) {
 test.describe('Media modal filters', () => {
   test.use({ storageState: ADMIN_STATE });
 
-  test('"Apply filters" lines up with the Name and Sort by fields', async ({ page }) => {
-    const { name, sort, apply } = await openMediaLibrary(page);
+  for (const where of ['node form', 'Layout Builder'] as const) {
+    test(`"Apply filters" lines up with the Name and Sort by fields (${where})`, async ({ page }) => {
+      // Three AJAX requests and two dialogs before the filters appear, which
+      // a busy site can stretch past the default timeout.
+      test.slow(where === 'Layout Builder', 'Layout Builder opens the library in several steps');
+      const { name, sort, apply } = await openMediaLibrary(page, where);
 
-    const bottom = async (locator: Locator) => {
-      const box = await locator.boundingBox();
-      expect(box, 'the element has a box to measure').not.toBeNull();
-      return box!.y + box!.height;
-    };
+      const bottom = async (locator: Locator) => {
+        const box = await locator.boundingBox();
+        expect(box, 'the element has a box to measure').not.toBeNull();
+        return box!.y + box!.height;
+      };
 
-    await expect(async () => {
-      const applyBottom = await bottom(apply);
-      for (const [label, field] of [['Name', name], ['Sort by', sort]] as const) {
-        const fieldBottom = await bottom(field);
-        expect(Math.abs(applyBottom - fieldBottom),
-          `"Apply filters" ends at ${Math.round(applyBottom)}px but ${label} `
-          + `ends at ${Math.round(fieldBottom)}px`)
-          .toBeLessThanOrEqual(TOLERANCE);
-      }
-    }).toPass({ timeout: SETTLE });
-  });
+      await expect(async () => {
+        const applyBottom = await bottom(apply);
+        for (const [label, field] of [['Name', name], ['Sort by', sort]] as const) {
+          const fieldBottom = await bottom(field);
+          expect(Math.abs(applyBottom - fieldBottom),
+            `"Apply filters" ends at ${Math.round(applyBottom)}px but ${label} `
+            + `ends at ${Math.round(fieldBottom)}px`)
+            .toBeLessThanOrEqual(TOLERANCE);
+        }
+      }).toPass({ timeout: SETTLE });
+    });
+  }
 
   test('focus stays on "Apply filters" after the results reload', async ({ page }) => {
     const { name, apply } = await openMediaLibrary(page);
