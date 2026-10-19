@@ -61,6 +61,17 @@ for pkg in package.json themes/mukurtu_v4/package.json; do
   fi
 done
 
+# npm copies the version into the lock file, in the top-level object and in the
+# root package entry (""), and only rewrites it on the next `npm install`. Left
+# alone, the lock trails the release it ships in.
+for lock in package-lock.json themes/mukurtu_v4/package-lock.json; do
+  if [ -f "$lock" ]; then
+    perl -0pi -e "s{\\A(\\{\\n(?:  [^\\n]*\\n)*?  \"version\": \")[^\"]*(\")}{\${1}$VERSION\${2}}; s{(\\n    \"\": \\{\\n(?:      [^\\n]*\\n)*?      \"version\": \")[^\"]*(\")}{\${1}$VERSION\${2}}" "$lock"
+    echo "  $lock -> $VERSION"
+    changed=$((changed + 1))
+  fi
+done
+
 echo
 echo "Updated $changed files to $VERSION."
 echo "Review with: git diff --stat"
