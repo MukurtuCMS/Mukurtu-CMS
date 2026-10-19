@@ -13,7 +13,6 @@ is built and why*, see [docker-build.md](docker-build.md).
 - [Behind a reverse proxy](#behind-a-reverse-proxy)
 - [Sizing memory](#sizing-memory)
 - [Mail](#mail)
-- [Search (Solr)](#search-solr)
 - [Upgrades and backups](#upgrades-and-backups)
 - [Running commands](#running-commands)
 - [Hosting many sites](#hosting-many-sites)
@@ -364,15 +363,6 @@ without the right DNS records (SPF, DKIM) is usually rejected or marked as spam.
 If `MUKURTU_SMTP_HOST` is not set, the site cannot send mail at all, and the
 container says so in its log at every start. Password resets and notifications will
 not arrive.
-
-## Search (Solr)
-
-Search works out of the box with Drupal's database search backend. If you run an
-Apache Solr server, the connection is not an environment variable: it is stored
-in the site's configuration as a Search API server. Configure it in the
-administration pages under *Configuration, Search and metadata, Search API*, as on
-any Mukurtu site. The container needs network access to the Solr host; nothing in
-the image needs to change.
 
 ## Upgrades and backups
 

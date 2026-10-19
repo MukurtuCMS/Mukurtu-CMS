@@ -36,7 +36,8 @@ must work unchanged in the upstream repository and in forks.
 - Drupal multisite. One container = one site. A future opt-in
   `MUKURTU_MULTISITE` mode is possible; this design does not block it, but it is
   not built now.
-- Redis, Memcached, Solr, or a mail server inside the image.
+- Redis, Memcached, or a mail server inside the image. Solr is out of scope: the
+  project leader says Mukurtu does not yet officially support it (owner, 2026-10-19).
 - A development image (no Xdebug, no dev dependencies).
 - Replacing the documented Composer or DDEV install paths.
 
@@ -239,19 +240,6 @@ variant (path to a file, for Docker/Compose secrets): `MUKURTU_DB_PASSWORD_FILE`
 | `MUKURTU_SMTP_TLS` | `starttls` | `starttls`, `tls`, or `off` |
 | `MUKURTU_SMTP_FROM` | site email | |
 
-### Search (optional Solr)
-
-| Variable | Default | Notes |
-| --- | --- | --- |
-| `MUKURTU_SOLR_HOST` | empty | If set, overrides the Search API Solr connector config |
-| `MUKURTU_SOLR_PORT` | `8983` | |
-| `MUKURTU_SOLR_CORE` | empty | |
-| `MUKURTU_SOLR_SCHEME` | `http` | |
-
-Solr is the least certain item: the exact Search API server ID and config path
-need checking against the profile's config before implementing. If that proves
-brittle, it moves out of v1 and into documentation.
-
 ## Security hardening
 
 Each item is explained in `docs/docker-build.md` with the reason for it.
@@ -377,4 +365,3 @@ routes by domain and terminates TLS.
   be validated by measurement.
 - Refusing to auto-install without an admin password rather than generating one.
 - Logging to stdout/stderr only.
-- Optional Solr variables (see the caveat above).
