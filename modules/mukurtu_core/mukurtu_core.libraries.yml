@@ -17,6 +17,7 @@ tagify-override:
     js/mukurtu-tagify-override.js: {}
   dependencies:
     - core/drupal
+    - core/drupalSettings
 
 splide:
   version: 4.1.2

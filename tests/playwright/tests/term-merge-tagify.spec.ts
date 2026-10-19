@@ -20,7 +20,8 @@ import { gotoReady } from '~helpers/preview';
  *   at Tagify's hidden input (WCAG 3.3.1).
  * - Enter or Tab before the suggestions load leaves the typed text in the
  *   textbox. It used to become a red invalid tag that was dropped on submit.
- *   The same goes for Enter after Escape has closed the list.
+ *   The same goes for Enter after Escape has closed the list. A blocked
+ *   Enter is announced, so screen reader users know why nothing happened.
  *
  * Nothing is merged: the test stops at the first step of the form.
  */
@@ -104,6 +105,22 @@ test.describe('Term merge Tagify picker', () => {
 
     await expect(textbox).toHaveText('Unmatched term');
     await expect(page.locator('tags.tagify')).not.toHaveAttribute('data-tag-seen', 'true');
+    await expect(page.locator('input.tagify-widget ~ [role=status]')).toHaveText('Loading...');
+  });
+
+  test('Enter with no matching suggestion is announced', async ({ page }) => {
+    await page.route(/\/tagify_autocomplete\//, (route) => route.fulfill({ json: [] }));
+    await gotoReady(page, MERGE_URL);
+
+    const textbox = page.locator('tags.tagify .tagify__input');
+    await textbox.click();
+    await page.keyboard.type('Unmatched term');
+    await expect(page.locator('.tagify--dropdown-item-no-match')).toBeVisible(SLOW);
+    await page.keyboard.press('Enter');
+
+    await expect(textbox).toHaveText('Unmatched term');
+    await expect(page.locator('input.tagify-widget ~ [role=status]'))
+      .toHaveText('No matching suggestions found for: Unmatched term');
   });
 
   test('Enter after Escape does not reuse the closed list\'s highlight', async ({ page }) => {

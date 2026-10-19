@@ -1,4 +1,28 @@
-(function (Drupal) {
+(function (Drupal, drupalSettings) {
+  /**
+   * Tell screen reader users why Enter did nothing.
+   *
+   * Sighted users see the loading text or the "No matching suggestions" row.
+   * Reuses Tagify's own strings, which are already translated.
+   */
+  function announceBlockedEnter(instance) {
+    const announce = instance.DOM.originalInput.__mukurtuAnnounce;
+    const text = instance.DOM.input.textContent.trim();
+    if (!announce || !text) {
+      return;
+    }
+    if (instance.DOM.scope.querySelector('.tagify--loading-text')) {
+      announce(Drupal.t('Loading...'));
+    }
+    else if (instance.DOM.dropdown.isConnected) {
+      const noMatch = drupalSettings.tagify?.information_message?.no_matching_suggestions;
+      if (noMatch) {
+        // announce() decodes HTML entities, so escape the typed text first.
+        announce(`${noMatch} ${Drupal.checkPlain(text)}`);
+      }
+    }
+  }
+
   /**
    * Update a Tagify instance to stop creating terms on delimiter input.
    *
@@ -34,6 +58,7 @@
         if (!active || active.getAttribute('value') === 'noMatch') {
           event.preventDefault();
           event.stopImmediatePropagation();
+          announceBlockedEnter(instance);
         }
       }, true);
     }
@@ -176,6 +201,7 @@
         liveRegion.textContent = '';
         setTimeout(() => { liveRegion.textContent = text; }, 50);
       };
+      original.__mukurtuAnnounce = announce;
 
       original.__tagify.on('add', (event) => {
         const data = event.detail?.data;
@@ -210,4 +236,4 @@
       setTimeout(() => runAll(context), 0);
     },
   };
-})(Drupal);
+})(Drupal, drupalSettings);
