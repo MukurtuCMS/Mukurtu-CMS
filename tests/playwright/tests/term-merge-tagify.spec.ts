@@ -18,6 +18,8 @@ import { gotoReady } from '~helpers/preview';
  * - Submitting with nothing selected returns Drupal's own error and marks
  *   the visible textbox invalid, rather than the browser's pop-up pointing
  *   at Tagify's hidden input (WCAG 3.3.1).
+ * - Enter or Tab before the suggestions load leaves the typed text in the
+ *   textbox. It used to become a red invalid tag that was dropped on submit.
  *
  * Nothing is merged: the test stops at the first step of the form.
  */
@@ -71,5 +73,35 @@ test.describe('Term merge Tagify picker', () => {
 
     await expect(page).toHaveURL(new RegExp(`${MERGE_URL}$`));
     await expect(page.locator('tags.tagify .tagify__input')).toHaveAttribute('aria-invalid', 'true');
+  });
+
+  test('text typed before the suggestions load does not become an invalid tag', async ({ page }) => {
+    // Hold every suggestions request so Enter and Tab land before any
+    // returns, which is when Tagify committed the raw text as a tag.
+    await page.route(/\/tagify_autocomplete\//, async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+      await route.continue().catch(() => {});
+    });
+    await gotoReady(page, MERGE_URL);
+
+    // Tagify removes an invalid tag about a second after adding it, so record
+    // whether one ever appears rather than checking for one afterwards.
+    await page.evaluate(() => {
+      const tags = document.querySelector('tags.tagify')!;
+      new MutationObserver(() => {
+        if (tags.querySelector('tag')) {
+          tags.dataset.tagSeen = 'true';
+        }
+      }).observe(tags, { childList: true });
+    });
+
+    const textbox = page.locator('tags.tagify .tagify__input');
+    await textbox.click();
+    await page.keyboard.type('Unmatched term');
+    await page.keyboard.press('Enter');
+    await page.keyboard.press('Tab');
+
+    await expect(textbox).toHaveText('Unmatched term');
+    await expect(page.locator('tags.tagify')).not.toHaveAttribute('data-tag-seen', 'true');
   });
 });

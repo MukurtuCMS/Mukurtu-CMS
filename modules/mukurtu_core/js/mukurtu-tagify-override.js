@@ -4,6 +4,11 @@
    *
    * We intentionally disable delimiter-based tokenization so commas can be
    * part of a term value (e.g. "Wynne, Michael"), while Enter still commits.
+   *
+   * On fields that can't create terms, Enter or blur before the suggestions
+   * load, or with no matching suggestion, turned the typed text into a red
+   * invalid tag that was then dropped on submit. Keep that text in the input
+   * instead: Enter only adds a highlighted suggestion, and blur adds nothing.
    */
   function patchTagifyInstance(instance) {
     if (!instance || instance.__mukurtuPatched) {
@@ -11,6 +16,21 @@
     }
 
     instance.settings.delimiters = null;
+    if (instance.settings.enforceWhitelist) {
+      instance.settings.addTagOnBlur = false;
+      // Capture on window so this runs before Tagify's own Enter handlers.
+      window.addEventListener('keydown', (event) => {
+        if (event.key !== 'Enter' || event.target !== instance.DOM.input
+          || !instance.settings.enforceWhitelist) {
+          return;
+        }
+        const active = instance.DOM.dropdown.querySelector('.tagify__dropdown__item--active');
+        if (!active || active.getAttribute('value') === 'noMatch') {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+        }
+      }, true);
+    }
     instance.__mukurtuPatched = true;
   }
 
