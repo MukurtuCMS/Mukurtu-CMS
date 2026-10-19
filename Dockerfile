@@ -3,41 +3,25 @@
 # Mukurtu CMS image. See docs/docker-build.md for how and why it is built this
 # way, and docs/docker.md for how to run it.
 #
-# Build arguments (these are options for building the image, not settings of the
-# running container; the running container is configured with MUKURTU_* variables):
-#
-#   WITH_FFMPEG, WITH_POPPLER   true (default) or false. Whether to include ffmpeg
-#                               (video thumbnails) and poppler-utils (PDF text and
-#                               thumbnails). The published `-slim` image sets both
-#                               to false. Validated, and checked against the image
-#                               contents at the end of the build.
-#   MUKURTU_TEMPLATE_VERSION    Required: the mukurtu/mukurtu-template version the
-#                               image is built on. See docker/TEMPLATE_VERSION.
+# The one build argument is MUKURTU_TEMPLATE_VERSION, the mukurtu/mukurtu-template
+# version the image is built on (see docker/TEMPLATE_VERSION). It is required. There
+# are no options for what the image contains: ffmpeg and poppler-utils, which Mukurtu
+# needs for video and PDF thumbnails and PDF text, are always installed. (The running
+# container is configured with MUKURTU_* environment variables, not build arguments.)
 #
 # The base images are pinned by version and digest in the FROM lines so that
 # Dependabot can update them and a rebuild of the same tag starts from the same
 # bytes.
-ARG WITH_FFMPEG=true
-ARG WITH_POPPLER=true
 
 # ---------------------------------------------------------------------------
-# guard: refuse to build with an invalid or missing build argument.
+# guard: refuse to build without the template version.
 # Later stages copy the marker file so BuildKit cannot skip this stage.
 # ---------------------------------------------------------------------------
 FROM alpine:3.24@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6 AS guard
 
-ARG WITH_FFMPEG
-ARG WITH_POPPLER
 ARG MUKURTU_TEMPLATE_VERSION
 
 RUN set -eu; \
-    for name in WITH_FFMPEG WITH_POPPLER; do \
-      eval "value=\${$name:-}"; \
-      case "$value" in \
-        true|false) ;; \
-        *) echo "ERROR: build arg $name must be 'true' or 'false' (got '$value')" >&2; exit 1 ;; \
-      esac; \
-    done; \
     if [ -z "${MUKURTU_TEMPLATE_VERSION:-}" ]; then \
       echo "ERROR: build arg MUKURTU_TEMPLATE_VERSION must be set (for example 4.0.2)" >&2; \
       exit 1; \
@@ -152,11 +136,6 @@ COPY --from=guard /guard-ok /guard-ok
 # ---------------------------------------------------------------------------
 FROM php-base AS runtime
 
-# Both default to true (see the top of this file) and are checked by the guard
-# stage. They decide whether the media tools Mukurtu shells out to are in the image.
-ARG WITH_FFMPEG
-ARG WITH_POPPLER
-
 COPY --from=guard /guard-ok /guard-ok
 
 RUN set -eux; \
@@ -164,25 +143,18 @@ RUN set -eux; \
       mariadb-client \
       msmtp \
       nginx \
-      tini; \
-    if [ "$WITH_FFMPEG" = true ]; then apk add --no-cache ffmpeg; fi; \
-    if [ "$WITH_POPPLER" = true ]; then apk add --no-cache poppler-utils; fi
+      tini \
+      ffmpeg \
+      poppler-utils
 
-# Fail the build if the image does not match the variant that was asked for.
-# The probes are the ones Mukurtu itself uses to report a missing tool
+# Fail the build if a media tool does not run. Mukurtu skips thumbnails and PDF text
+# silently when a tool is missing, so the image must never lack one. The probes are
+# the ones Mukurtu itself uses to report a missing tool
 # (modules/mukurtu_core/src/Hook/MediaToolRequirements.php).
 RUN set -eu; \
-    if [ "$WITH_FFMPEG" = true ]; then \
-      ffmpeg -version >/dev/null || { echo "ERROR: WITH_FFMPEG=true but ffmpeg does not run" >&2; exit 1; }; \
-    elif command -v ffmpeg >/dev/null; then \
-      echo "ERROR: WITH_FFMPEG=false but ffmpeg is installed" >&2; exit 1; \
-    fi; \
-    if [ "$WITH_POPPLER" = true ]; then \
-      pdftotext -v >/dev/null 2>&1 || { echo "ERROR: WITH_POPPLER=true but pdftotext does not run" >&2; exit 1; }; \
-      pdftoppm --help >/dev/null 2>&1 || { echo "ERROR: WITH_POPPLER=true but pdftoppm does not run" >&2; exit 1; }; \
-    elif command -v pdftotext >/dev/null || command -v pdftoppm >/dev/null; then \
-      echo "ERROR: WITH_POPPLER=false but poppler-utils is installed" >&2; exit 1; \
-    fi
+    ffmpeg -version >/dev/null || { echo "ERROR: ffmpeg does not run" >&2; exit 1; }; \
+    pdftotext -v >/dev/null 2>&1 || { echo "ERROR: pdftotext does not run" >&2; exit 1; }; \
+    pdftoppm --help >/dev/null 2>&1 || { echo "ERROR: pdftoppm does not run" >&2; exit 1; }
 
 # Fail the build if PHP cannot do what Drupal and Mukurtu need of it.
 RUN set -eu; \

@@ -125,8 +125,8 @@ To release one:
 5. **Publish a GitHub release** for `4.0.5-r1` (not marked as a pre-release) and say
    what changed, for example "Image-only release. No change to Mukurtu 4.0.5.
    Updates the base image to Alpine 3.24.3." The publish workflow builds, tests,
-   scans and pushes `4.0.5-r1`, `4.0.5-r1-slim`, and, if this is now the newest
-   image, the moving tags (see below).
+   scans and pushes `4.0.5-r1` and, if this is now the newest image, the moving
+   tags (see below).
 6. **Make sure the same fix is on `main`** (merging Dependabot's pull request does
    it), so the next Mukurtu release has it too.
 

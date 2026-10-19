@@ -18,38 +18,29 @@ A container image is only trustworthy if the same inputs produce the same
 image. Anything that changes what ends up inside the image is therefore an
 explicit, validated input.
 
-**Build arguments are not container settings.** Three options exist when the image
-is *built*. They decide what is inside the image, and cannot be changed by whoever
-runs it. (The running container is configured by `MUKURTU_*` environment
-variables; see [docker.md](docker.md).) This is why the full and slim images are
-different tags and not a setting.
+**One build argument, no options.** The image is built with exactly one argument,
+and it is not a setting of the running container (that is configured by `MUKURTU_*`
+environment variables; see [docker.md](docker.md)).
 
-| Build arg | Default | Allowed values | What it decides |
-| --- | --- | --- | --- |
-| `WITH_FFMPEG` | `true` | `true` or `false` | Whether `ffmpeg` is installed. Mukurtu extracts video thumbnails with it. |
-| `WITH_POPPLER` | `true` | `true` or `false` | Whether `poppler-utils` is installed. Mukurtu extracts PDF text and thumbnails with `pdftotext` and `pdftoppm`. |
-| `MUKURTU_TEMPLATE_VERSION` | none: required | a `mukurtu/mukurtu-template` version, for example `4.0.2` | The project template the image is built on. It defines the Drupal core version, the Composer plugins, and the install paths. Floating on `^4.0` would make one release tag build different images over time. |
+| Build arg | Allowed values | What it decides |
+| --- | --- | --- |
+| `MUKURTU_TEMPLATE_VERSION` | a `mukurtu/mukurtu-template` version, for example `4.0.2` | The project template the image is built on. It defines the Drupal core version, the Composer plugins, and the install paths. Floating on `^4.0` would make one release tag build different images over time. It is required, with no default, because it is the one input that must be a deliberate, recorded choice. |
 
-The tools default to **on** so that a plain build gives a complete Mukurtu. What
-makes it safe to have a default is what the build does next: it runs each tool and
-fails if the image does not match what was asked for, in either direction (see
-"Runtime image, tools and extensions"), so an image can never silently lack a tool
-it claims to have. The template version has no default on purpose: it is the one
-input that must be a deliberate, recorded choice.
+There are deliberately **no options** for what the image contains. `ffmpeg` and
+`poppler-utils` are always installed, because Mukurtu needs them for video and PDF
+thumbnails and PDF text and silently skips those features when they are missing; every
+Mukurtu site wants them, so an option to leave them out could only produce an image
+that quietly lacks thumbnails. The build still runs each tool
+and fails if one does not work.
 
-The first stage of the `Dockerfile`, `guard`, checks the values and fails with a
-message that names the argument:
+The first stage of the `Dockerfile`, `guard`, checks the argument and fails with a
+message that names it:
 
 ```
-ERROR: build arg WITH_POPPLER must be 'true' or 'false' (got 'yes')
 ERROR: build arg MUKURTU_TEMPLATE_VERSION must be set (for example 4.0.2)
 ```
 
 Every later stage copies a marker file from `guard`, so BuildKit cannot skip it.
-The publish workflow does not rely on the defaults: each variant in its build
-matrix states both explicitly, so what a published tag contains is written down in
-the workflow. The full image uses `WITH_FFMPEG=true WITH_POPPLER=true`, and the
-`-slim` image uses both `false`.
 
 **Base images.** The PHP, Composer, and Alpine base images are written as
 literal `FROM` lines with an exact version *and* a content digest, for example
@@ -171,18 +162,9 @@ feature when they are missing:
 | `ffmpeg` | `ffmpeg` | Extract the first frame of a video as its thumbnail. |
 
 (See `modules/mukurtu_core/src/Hook/MediaToolRequirements.php`, which also
-reports a missing tool on the site's status page.) The image is published in two
-variants, chosen with the build args `WITH_FFMPEG` and `WITH_POPPLER` (both default
-to `true`; they are build options, not container settings):
-
-- **full** (`WITH_FFMPEG=true`, `WITH_POPPLER=true`): the default tags.
-- **slim** (both `false`): the `-slim` tags. About 130 MB smaller; PDF text
-  search, PDF thumbnails and video thumbnails do not work.
-
-The build runs each tool with the same probe Mukurtu uses and fails if a
-variant does not match what was asked for, in either direction: a slim image
-that somehow contains `ffmpeg` fails the build, just as a full image without it
-does.
+reports a missing tool on the site's status page.) All three are always installed,
+and the build runs each with the same probe Mukurtu uses and fails if one does not
+work, so the image cannot silently lack one.
 
 **`exec()` stays enabled.** Hardening guides often disable PHP's process
 functions. Mukurtu cannot work with them disabled, because it launches the
@@ -447,9 +429,8 @@ setting or path at fault if any step fails:
 4. **Make a hash salt if there is none.** Only when `MUKURTU_HASH_SALT` is
    unset: generated once, stored in the private volume with mode `0600`, and
    reused on every later start.
-5. **Warn about missing tools.** One warning per missing program (`ffmpeg`,
-   `pdftotext`, `pdftoppm`), so a slim image says what it cannot do, and one for
-   an unconfigured mail server.
+5. **Warn about unconfigured mail.** A warning when `MUKURTU_SMTP_HOST` is not set,
+   because the site then cannot send mail.
 6. **Wait for the database**, up to `MUKURTU_DB_WAIT_TIMEOUT` seconds (default
    60), retrying every second. This removes the usual race in which the site
    container starts before the database accepts connections. When time runs
@@ -628,8 +609,7 @@ for example, `4.0.5-rc1`.
 
 ### Tags
 
-There are three kinds of release tag, and every one publishes its exact tag in both
-variants (full, and slim with a `-slim` suffix):
+There are three kinds of release tag, and every one publishes its exact tag:
 
 | Tag | Kind | Also publishes |
 | --- | --- | --- |
@@ -670,7 +650,7 @@ The `publish` job needs the `test` job, which:
    rendering, the nginx rules, `settings.php`, a real install against MariaDB with
    restart, cron, health and shutdown checks, the Compose examples, and this
    workflow's own structure.
-2. Scans the full and slim images with Trivy for **fixable** vulnerabilities of
+2. Scans the image with Trivy for **fixable** vulnerabilities of
    **HIGH or CRITICAL** severity. A finding fails the run. Findings with no fix
    yet are ignored (nothing can be done about them), and anyone who accepts a
    specific one must add it to `docker/.trivyignore` with a reason and a review
@@ -693,8 +673,7 @@ even assembled.
   was built by this workflow from this repository. Verify with
   `gh attestation verify oci://ghcr.io/<owner>/mukurtu:<tag> --owner <owner>`.
 - **The resolved `composer.lock`** is inside the image
-  (`/var/www/html/composer.lock`) and is also kept as a workflow artifact for
-  each variant. The template has no lock file, so two builds of the same tag can
+  (`/var/www/html/composer.lock`) and is also kept as a workflow artifact. The template has no lock file, so two builds of the same tag can
   differ; this file records exactly what each one contained.
 - **Least privilege.** The workflow's default permission is read-only. Only the
   `publish` job can write packages and create attestations.
@@ -735,8 +714,8 @@ reproducibility should pin the image digest.
 
 ## Measured footprint
 
-These figures were measured with `scripts/docker/measure.sh`, which builds both
-variants, installs a real site, and samples the container with `docker stats`
+These figures were measured with `scripts/docker/measure.sh`, which builds the image,
+installs a real site, and samples the container with `docker stats`
 (memory in use, excluding reclaimable cache). Run it yourself to check them on
 your hardware.
 
@@ -746,8 +725,7 @@ no content, default settings (`ondemand`, 4 workers, 128 MB opcache, 32 MB APCu)
 
 | Measurement | Result |
 | --- | --- |
-| Image size, full (uncompressed) | 456 MB |
-| Image size, slim (uncompressed) | 327 MB |
+| Image size (uncompressed) | 456 MB |
 | Site just started, before any request | 123 MB |
 | Idle, after warm-up (no PHP workers running) | **89 MB** |
 | Under load: four concurrent request streams, 4 PHP workers | **145 MB** peak |

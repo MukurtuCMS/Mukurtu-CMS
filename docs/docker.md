@@ -60,19 +60,18 @@ Bad Request`, because the address is not in `MUKURTU_TRUSTED_HOSTS`.
 ## Images and tags
 
 Images are published to `ghcr.io/<owner>/mukurtu` for `linux/amd64` and
-`linux/arm64`, in two variants:
+`linux/arm64`. There is one image. It includes `ffmpeg` and `poppler-utils`, which
+Mukurtu uses for video thumbnails, PDF thumbnails and PDF text search (without them
+Mukurtu skips those features silently), so every tag has them. There is no variant
+without them, and no setting to turn them off.
 
-| Variant | Tags | Contains |
+| Tag | Example | Follows |
 | --- | --- | --- |
-| **full** | `4.0.5`, `4.0.5-r1`, `4.0`, `4`, `latest` | Everything, including `ffmpeg` and `poppler-utils` |
-| **slim** | `4.0.5-slim`, `4.0.5-r1-slim`, `4.0-slim`, `4-slim`, `latest-slim` | No `ffmpeg`, no `poppler-utils` |
-
-Full and slim are **different images**, chosen by the tag you pull. They are not a
-setting of the running container: there is no environment variable that adds or
-removes `ffmpeg` or `poppler-utils`. Choose **full** unless you know you do not need the media features. In the slim
-image Mukurtu cannot extract text from PDFs (so PDF content is not searchable),
-make PDF thumbnails, or make video thumbnails. The container logs a warning at
-start-up for each missing tool, and Mukurtu's status report page lists them.
+| Exact release | `4.0.5` | Never changes. |
+| Image revision | `4.0.5-r1` | Never changes. A new image of the same Mukurtu release. |
+| Minor | `4.0` | New patch releases and revisions of 4.0. |
+| Major | `4` | New minor, patch and revision releases of 4. |
+| `latest` | `latest` | Everything newer. |
 
 **Revisions.** `4.0.5-r1` is a new image of the same Mukurtu 4.0.5, published when
 something under Mukurtu needs a fix (the base image, PHP, nginx, `ffmpeg`): the Mukurtu
@@ -478,7 +477,6 @@ warmed, request the home page once after starting.
 | `ERROR: database <name> contains tables but not a complete Drupal installation` | The container refuses to install over unknown data. Empty the database, or restore a backup. |
 | `ERROR: MUKURTU_ADMIN_PASSWORD is required` | The database is empty and `MUKURTU_AUTO_INSTALL` is `true`; give the first administrator a password, or set `MUKURTU_AUTO_INSTALL=false`. |
 | `ERROR: <path> is not writable by uid 1000` | A volume or `MUKURTU_FILE_TEMP_PATH` cannot be written. See [Volumes and permissions](#volumes-and-permissions). |
-| `WARNING: ffmpeg is not installed in this image` | You are running the slim image. Use the full image if you need that feature. |
 | `WARNING: MUKURTU_SMTP_HOST is not set` | The site cannot send mail. See [Mail](#mail). |
 | The first page after a start takes several seconds and the log warns about `max_children` | Normal on a cold start; see [Reading the start-up log](#reading-the-start-up-log). |
 | `mail was not sent: MUKURTU_SMTP_HOST is not set` | Mukurtu tried to send mail. Set up [Mail](#mail). |
@@ -500,19 +498,12 @@ docker build \
   -t mukurtu:local .
 ```
 
-That builds the **full** image. For the slim image, add
-`--build-arg WITH_FFMPEG=false --build-arg WITH_POPPLER=false`.
+The one build argument is `MUKURTU_TEMPLATE_VERSION`, the `mukurtu/mukurtu-template`
+version the image is built on. It is required, and the pinned version is in
+`docker/TEMPLATE_VERSION`. There are no other options: `ffmpeg` and `poppler-utils`
+are always installed. (Build arguments decide what is *inside* the image; the running
+container is configured with the `MUKURTU_*` environment variables above.)
 
-These are options for *building* the image: they decide what is inside it, and the
-running container cannot change them. They are not environment variables. (That is
-why "slim" is a different tag and not a setting.)
-
-| Build argument | Default | Values | Meaning |
-| --- | --- | --- | --- |
-| `WITH_FFMPEG` | `true` | `true` or `false` | Include `ffmpeg` (video thumbnails). |
-| `WITH_POPPLER` | `true` | `true` or `false` | Include `poppler-utils` (PDF text and thumbnails). |
-| `MUKURTU_TEMPLATE_VERSION` | none: required | a `mukurtu/mukurtu-template` version | The project template the image is built on. The pinned version is in `docker/TEMPLATE_VERSION`. |
-
-The build stops with a message naming the argument if one is invalid or missing.
+The build stops with a message naming the argument if it is missing.
 `scripts/docker/test-*.sh` are the tests; each builds what it needs and takes
 from seconds to several minutes (the install test performs a real installation).

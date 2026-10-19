@@ -3,7 +3,7 @@
 # skeleton, with this checkout standing in for the Packagist copy of the
 # profile. See docs/docker-build.md, "Where the code comes from".
 set -u
-source "$(dirname "${BASH_SOURCE[0]}")/test-lib.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
 TAG=mukurtu-test:build
 

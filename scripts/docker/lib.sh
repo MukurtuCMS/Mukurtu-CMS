@@ -20,10 +20,8 @@ trap 'rm -f "$BUILD_LOG"' EXIT
 # publish workflow and by every test (override with MUKURTU_TEMPLATE_VERSION).
 TEMPLATE_VERSION="${MUKURTU_TEMPLATE_VERSION:-$(tr -d '[:space:]' <"$REPO_ROOT/docker/TEMPLATE_VERSION")}"
 
-# Build args every full build needs. Tests that build past the guard use these.
+# The build argument every build needs. Tests that build past the guard use it.
 DEFAULT_BUILD_ARGS=(
-  --build-arg WITH_FFMPEG=true
-  --build-arg WITH_POPPLER=true
   --build-arg MUKURTU_TEMPLATE_VERSION="$TEMPLATE_VERSION"
 )
 

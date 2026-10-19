@@ -4,9 +4,9 @@
 # docroot whose index.php reports which php-fpm pool answered.
 # See docs/docker-build.md, "Security hardening".
 set -u
-source "$(dirname "${BASH_SOURCE[0]}")/test-lib.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
-IMAGE=mukurtu-test:full
+IMAGE=mukurtu-test:image
 NAME="mukurtu-nginx-test-$$"
 STUB="$(mktemp -d -t mukurtu-stub.XXXXXX)"
 trap 'docker rm -f "$NAME" >/dev/null 2>&1; rm -rf "$STUB" "$BUILD_LOG"' EXIT

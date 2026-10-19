@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Image tags for a release tag.
 #
-#   compute-tags.sh [--existing FILE|-] <tag> <full|slim>   print the tags to publish
+#   compute-tags.sh [--existing FILE|-] <tag>   print the tags to publish
 #   compute-tags.sh --kind <tag>                            print stable, revision or prerelease
 #
 # Three kinds of release tag exist:
@@ -22,8 +22,6 @@
 #
 # A published tag is never re-pushed by this workflow, so the plain tag 4.0.5 stays
 # the image it was; a pinned deployment moves to 4.0.5-r1 on purpose.
-#
-# The slim variant appends -slim to every tag (latest becomes latest-slim).
 set -euo pipefail
 
 # parse <tag>: sets KIND, MAJOR, MINOR, PATCH, REV. Returns 1 if not a release tag.
@@ -58,16 +56,15 @@ fi
 
 existing_file=""
 if [[ "${1:-}" == "--existing" ]]; then
-  [[ $# -ge 2 ]] || { echo "usage: compute-tags.sh [--existing FILE|-] <tag> <full|slim>" >&2; exit 1; }
+  [[ $# -ge 2 ]] || { echo "usage: compute-tags.sh [--existing FILE|-] <tag>" >&2; exit 1; }
   existing_file="$2"
   shift 2
 fi
-if [[ $# -ne 2 ]]; then
-  echo "usage: compute-tags.sh [--existing FILE|-] <tag> <full|slim>" >&2
+if [[ $# -ne 1 ]]; then
+  echo "usage: compute-tags.sh [--existing FILE|-] <tag>" >&2
   exit 1
 fi
 tag="$1"
-variant="$2"
 
 if ! parse "$tag"; then
   echo "ERROR: not a release tag such as 4.0.5, 4.0.5-r1 or 4.0.0-rc (no leading v): '$tag'" >&2
@@ -76,13 +73,7 @@ fi
 this_kind="$KIND" major="$MAJOR" minor="$MINOR"
 this_key="$(key "$MAJOR" "$MINOR" "$PATCH" "$REV")"
 
-case "$variant" in
-  full) suffix="" ;;
-  slim) suffix="-slim" ;;
-  *) echo "ERROR: variant must be 'full' or 'slim', got '$variant'" >&2; exit 1 ;;
-esac
-
-echo "${tag}${suffix}"
+echo "$tag"
 [[ "$this_kind" == prerelease ]] && exit 0
 
 # The newest key in each scope, among the existing stable and revision tags.
@@ -102,7 +93,7 @@ if [[ -n "$existing_file" ]]; then
   done < <(if [[ "$existing_file" == "-" ]]; then cat; else cat "$existing_file"; fi)
 fi
 
-[[ "$this_key" == "$newest_minor" ]] && echo "${major}.${minor}${suffix}"
-[[ "$this_key" == "$newest_major" ]] && echo "${major}${suffix}"
-[[ "$this_key" == "$newest_all" ]] && echo "latest${suffix}"
+[[ "$this_key" == "$newest_minor" ]] && echo "${major}.${minor}"
+[[ "$this_key" == "$newest_major" ]] && echo "$major"
+[[ "$this_key" == "$newest_all" ]] && echo "latest"
 exit 0

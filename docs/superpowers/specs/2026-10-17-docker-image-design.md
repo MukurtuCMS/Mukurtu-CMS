@@ -57,7 +57,7 @@ must work unchanged in the upstream repository and in forks.
 | Runtime | nginx + php-fpm on Alpine, PHP 8.4, lowest idle RAM |
 | Source | Build `mukurtu/mukurtu-template` as the skeleton, then replace the profile with the checkout of the release tag |
 | Template version | Pinned by build arg `MUKURTU_TEMPLATE_VERSION`, never floating |
-| Tools | `ffmpeg` and `poppler-utils` via build args `WITH_FFMPEG` / `WITH_POPPLER` (default `true`, owner's decision; validated and verified at build); `-slim` variant omits both; the publish workflow states both explicitly |
+| Tools | `ffmpeg` and `poppler-utils` are always installed and verified at build. There are no build options for them and no slim variant (owner's decision, 2026-10-19: every Mukurtu site needs them) |
 | Database | External. Auto-install on first boot driven by env vars |
 | Multi-tenant | Standalone container per tenant, same image, reverse proxy routes by domain |
 | Platforms | `linux/amd64`, `linux/arm64` |
@@ -85,33 +85,19 @@ Stage 2 (`runtime`): Alpine with php-fpm, nginx, a small process supervisor
 (s6-overlay or equivalent), `msmtp` for outbound mail, `mariadb-client` (for the
 DB wait and install check), and Drush. No Composer.
 
-Build args, validated at the top of the Dockerfile (the tool args default to `true`; the template version is required) with
-a clear failure message:
-
-| Arg | Values | Meaning |
-| --- | --- | --- |
-| `WITH_FFMPEG` | `true` / `false` | Install `ffmpeg` |
-| `WITH_POPPLER` | `true` / `false` | Install `poppler-utils` |
-
-Other pinned inputs: the PHP, Composer and Alpine base images (literal `FROM`
-lines with version and digest) and `MUKURTU_TEMPLATE_VERSION` (required). The
-workflow states `WITH_FFMPEG` and `WITH_POPPLER` explicitly for each variant
-rather than relying on the defaults.
+One build argument, `MUKURTU_TEMPLATE_VERSION`, required and checked at the top of the
+Dockerfile with a clear failure message. Other pinned inputs: the PHP, Composer and
+Alpine base images (literal `FROM` lines with version and digest).
 
 Build-time assertions (the build fails if any is wrong):
 
-- With `WITH_FFMPEG=true`: `ffmpeg -version` succeeds. With `false`: `ffmpeg` is absent.
-- With `WITH_POPPLER=true`: `pdftotext -v` and `pdftoppm --help` succeed. With
-  `false`: both are absent. These are the exact probes in
-  `modules/mukurtu_core/src/Hook/MediaToolRequirements.php`.
+- `ffmpeg -version`, `pdftotext -v` and `pdftoppm --help` succeed. These are the exact
+  probes in `modules/mukurtu_core/src/Hook/MediaToolRequirements.php`.
 - `php -m` lists: `gd`, `intl`, `zip`, `Zend OPcache`, `pdo_mysql`, `mbstring`,
   and the other extensions Drupal core requires.
 - `gd` reports JPEG, WebP, and FreeType support.
 - `exec` is not in `disable_functions` (Mukurtu needs `exec()` for thumbnails and
   PDF text).
-
-The entrypoint also logs a warning at boot for each missing tool, so a slim
-container says what it cannot do.
 
 Runtime properties: non-root user, `HEALTHCHECK` against a lightweight endpoint,
 PHP errors and nginx logs to stdout/stderr, `validate_timestamps=0` (the image
@@ -132,16 +118,14 @@ Workflow: `.github/workflows/docker-publish.yml`.
   hard-coded owner, so it works in forks and upstream.
 - Auth: `GITHUB_TOKEN` with `packages: write`. Upstream must set the GHCR
   package visibility to public once.
-- Matrix: two variants, set explicitly per row.
-  - full: `WITH_FFMPEG=true`, `WITH_POPPLER=true`
-  - slim: `WITH_FFMPEG=false`, `WITH_POPPLER=false`
+- A single image: no matrix. Jobs run on `ubuntu-26.04`, not `ubuntu-latest`.
 - Tags come from `scripts/docker/compute-tags.sh`. Three kinds of release tag:
   stable (`4.0.5`), image revision (`4.0.5-r1`: same Mukurtu code, platform fix,
   published when a base image, PHP, nginx or media tool needs updating), and
   pre-release (`4.0.0-rc`). Each publishes its exact tag; stable and revision tags
   also publish `4.0`, `4` and `latest`, each only if the tag is the newest stable
   or revision tag in that scope (so a backport never moves `latest` backwards).
-  Slim tags append `-slim`. A published tag is never re-pushed. Revisions are
+  A published tag is never re-pushed. Revisions are
   built from a branch cut at the release being revised.
 - Buildx multi-arch, GitHub Actions layer cache, provenance and SBOM
   attestations.

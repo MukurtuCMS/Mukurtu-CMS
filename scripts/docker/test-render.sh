@@ -3,9 +3,9 @@
 # php-fpm.conf, nginx.conf and msmtprc. See docs/docker-build.md,
 # "Configuration rendering".
 set -u
-source "$(dirname "${BASH_SOURCE[0]}")/test-lib.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
-IMAGE=mukurtu-test:full
+IMAGE=mukurtu-test:image
 LIB=/usr/local/lib/mukurtu
 OUT=/tmp/mukurtu-run
 

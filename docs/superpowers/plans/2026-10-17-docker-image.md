@@ -65,17 +65,17 @@ In addition to the list below, every item in the spec's Security hardening list 
 | `docs/docker-build.md` | How the image is built and why; written task by task |
 | `.github/dependabot.yml` | Modify: add `docker` and `github-actions` ecosystems if absent |
 
-Shared test helpers live in `scripts/docker/test-lib.sh` (`assert_eq`, `assert_contains`, `assert_fails`, `build_image <target> <tag> [build args...]`), created in Task 1.
+Shared test helpers live in `scripts/docker/lib.sh` (`assert_eq`, `assert_contains`, `assert_fails`, `build_image <target> <tag> [build args...]`), created in Task 1.
 
 ---
 
 ### Task 1: Build-arg guard and test harness
 
 **Files:**
-- Create: `Dockerfile`, `.dockerignore`, `scripts/docker/test-lib.sh`, `scripts/docker/test-guard.sh`, `scripts/docker/test-docs.sh` (skeleton), `docs/docker-build.md`
+- Create: `Dockerfile`, `.dockerignore`, `scripts/docker/lib.sh`, `scripts/docker/test-guard.sh`, `scripts/docker/test-docs.sh` (skeleton), `docs/docker-build.md`
 
 **Interfaces:**
-- Produces: Dockerfile stage `guard` (first stage; later stages `FROM guard` or copy its marker); the `ARG` set `WITH_FFMPEG`, `WITH_POPPLER`, `PHP_VERSION`, `ALPINE_VERSION`, `COMPOSER_VERSION`, `MUKURTU_TEMPLATE_VERSION`, none defaulted. `test-lib.sh` functions listed above, used by every later test.
+- Produces: Dockerfile stage `guard` (first stage; later stages `FROM guard` or copy its marker); the `ARG` set `WITH_FFMPEG`, `WITH_POPPLER`, `PHP_VERSION`, `ALPINE_VERSION`, `COMPOSER_VERSION`, `MUKURTU_TEMPLATE_VERSION`, none defaulted. `lib.sh` functions listed above, used by every later test.
 
 - [ ] **Step 1: Write `scripts/docker/test-guard.sh`** asserting, via `build_image guard`: build fails with a message containing `WITH_FFMPEG` when it is unset; fails containing `WITH_POPPLER` when `WITH_POPPLER=yes`; succeeds when both are `true`/`false` and the four pinned args are given.
 - [ ] **Step 2: Run it** (`scripts/docker/test-guard.sh`); expected: FAIL (no Dockerfile).

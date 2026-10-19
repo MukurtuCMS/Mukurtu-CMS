@@ -5,7 +5,7 @@
 #
 # Usage: test-docs.sh [heading...]   (arguments replace the default list)
 set -u
-source "$(dirname "${BASH_SOURCE[0]}")/test-lib.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
 DOC="$REPO_ROOT/docs/docker-build.md"
 

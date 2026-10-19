@@ -1,8 +1,7 @@
 # Remove the slim variant and the tool build options
 
-**Status:** TODO, deliberately deferred. Do this after the `4.0.5-rc1` pipeline run
-and the friend's testing round are finished, and ship it as `4.0.5-rc2`. Do not
-change anything while that experiment is running.
+**Status:** DONE on the branch (2026-10-19), after the friend's `rc1` test went well.
+The full suite passes. Not yet pushed or released: publish it as `4.0.5-rc2`.
 
 **Decision (owner, 2026-10-18):** the slim image is pointless, because every Mukurtu
 site needs `ffmpeg` and `poppler-utils`. Remove the slim variant **and** the
@@ -16,7 +15,7 @@ guard stage keeps validating it. The runtime-contents tests keep checking the to
 
 ## Changes
 
-- [ ] **`Dockerfile`**
+- [x] **`Dockerfile`**
   - Delete the `ARG WITH_FFMPEG=true` / `ARG WITH_POPPLER=true` block and its header
     comment; rewrite the header to say there is one build argument,
     `MUKURTU_TEMPLATE_VERSION`.
@@ -24,27 +23,27 @@ guard stage keeps validating it. The runtime-contents tests keep checking the to
   - `runtime` stage: drop both `ARG`s; install `ffmpeg` and `poppler-utils` in the
     main `apk add`; make the verification step unconditional (each tool must run);
     delete the "absent" branches.
-- [ ] **`.github/workflows/docker-publish.yml`**
+- [x] **`.github/workflows/docker-publish.yml`**
   - `publish`: remove the matrix (`variant`, `with_ffmpeg`, `with_poppler`), the
     `VARIANT` env, the `WITH_*` build-args, the variant in the job name, and the
     `-${{ matrix.variant }}` artifact and cache scopes.
   - `test`: remove the "Scan the slim image" step (only `mukurtu-test:full` exists;
     rename the tag to `mukurtu-test:image` everywhere or keep `full`).
-- [ ] **`scripts/docker/compute-tags.sh`**: drop the `<full|slim>` argument and the
+- [x] **`scripts/docker/compute-tags.sh`**: drop the `<full|slim>` argument and the
   suffix logic. Usage becomes `compute-tags.sh [--existing FILE|-] <tag>`.
-- [ ] **Tests** (RED first for each)
+- [x] **Tests** (RED first for each)
   - `test-guard.sh`: remove the tool-argument cases; keep the template-version cases.
   - `test-runtime.sh`: build one image; remove the slim build and the "no tool" checks;
     keep every "has ..." check. Drop the "no build args means full" case.
   - `test-entrypoint.sh`: remove the slim build, the `slim-warns` case, and the `$SLIM`
     plumbing.
-  - `test-lib.sh`: `DEFAULT_BUILD_ARGS` keeps only the template version.
+  - `lib.sh`: `DEFAULT_BUILD_ARGS` keeps only the template version.
   - `test-workflow.sh`: remove the `-slim` tag cases and the matrix-variant check;
     assert there is a single publish job without a matrix.
   - `measure.sh`: drop the slim build and the slim size line.
-- [ ] **`docker/entrypoint.sh`**: remove the "tool is not installed" warnings loop
+- [x] **`docker/entrypoint.sh`**: remove the "tool is not installed" warnings loop
   (the tools cannot be missing now). Update `docs` and the troubleshooting table.
-- [ ] **Docs**
+- [x] **Docs**
   - `docs/docker.md`: remove the full/slim table and the `-slim` tags, "Full and slim
     are different images", the `WITH_*` rows in "Building the image yourself" and the
     "add `--build-arg WITH_FFMPEG=false`" sentence, and the two tool-warning rows in
@@ -56,7 +55,7 @@ guard stage keeps validating it. The runtime-contents tests keep checking the to
   - `docs/releasing.md`: the `-slim` mention in the image-revision section.
   - Spec `docs/superpowers/specs/2026-10-17-docker-image-design.md`: the Image section,
     the Tags section, the decisions table.
-- [ ] **Friend bundle** (`../mukurtu-compose-bundle`): no slim references; only the
+- [x] **Friend bundle** (`../mukurtu-compose-bundle`): no slim references; only the
   image tag needs updating to `4.0.5-rc2`.
 
 ## Also in `4.0.5-rc2` (already committed on the branch, found while testing rc1)
@@ -77,10 +76,10 @@ guard stage keeps validating it. The runtime-contents tests keep checking the to
   are isolated. Caddy cannot be `read_only` because Compose cannot place an inline
   config in a read-only service.
 - New "Reading the start-up log" section in `docs/docker.md`.
-- **Not yet run:** the full install test (`test-entrypoint.sh`) with these changes. It
-  needs port-free, ~10 minutes. Run the whole suite before pushing rc2.
-- TODO: pin `runs-on` to `ubuntu-24.04` in `docker-publish.yml` (GitHub moves
-  `ubuntu-latest` to Ubuntu 26 on 2026-10-19; the tests need Docker, jq, curl, python3).
+- `runs-on` pinned to `ubuntu-26.04` in all three jobs (owner's choice; GitHub moves
+  `ubuntu-latest` to it from 2026-10-19). The tests need Docker, jq, curl and python3;
+  they are on the image. `test-workflow.sh` passes `-ignore` for the one actionlint
+  message about the not-yet-known label.
 
 ## Verification
 

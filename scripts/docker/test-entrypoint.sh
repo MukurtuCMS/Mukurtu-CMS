@@ -4,10 +4,9 @@
 # several minutes (a real Mukurtu install runs). See docs/docker-build.md,
 # "Startup, supervision and health".
 set -u
-source "$(dirname "${BASH_SOURCE[0]}")/test-lib.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
-FULL=mukurtu-test:full
-SLIM=mukurtu-test:slim
+FULL=mukurtu-test:image
 RUN_ID="$$"
 NET="mukurtu-test-net-$RUN_ID"
 DB="mukurtu-test-db-$RUN_ID"
@@ -26,13 +25,9 @@ cleanup() {
 }
 trap cleanup EXIT
 
-for variant in "full true true $FULL" "slim false false $SLIM"; do
-  set -- $variant
-  if ! build_image runtime "$4" --build-arg WITH_FFMPEG="$2" --build-arg WITH_POPPLER="$3" \
-      --build-arg MUKURTU_TEMPLATE_VERSION="$TEMPLATE_VERSION"; then
-    fail "runtime image builds: $1"; tail -30 "$BUILD_LOG"; finish; exit 1
-  fi
-done
+if ! build_image runtime "$FULL" "${DEFAULT_BUILD_ARGS[@]}"; then
+  fail "runtime image builds"; tail -30 "$BUILD_LOG"; finish; exit 1
+fi
 
 docker network create "$NET" >/dev/null
 
@@ -102,17 +97,15 @@ out="$(run_to_exit "$FULL" "${COMMON_ENV[@]}" -e MUKURTU_AUTO_INSTALL=false -v "
 assert_contains "$out" "ERROR: /var/www/files/private is not writable by uid 1000" "unwritable private volume: message names the path and uid"
 assert_not_contains "$out" "EXIT=0" "unwritable private volume: exits non-zero"
 
-echo "entrypoint: slim-warns"
-slim_name="mukurtu-test-slim-$RUN_ID"
-CLEANUP_CONTAINERS+=("$slim_name")
-docker run -d --name "$slim_name" --network "$NET" "${COMMON_ENV[@]}" -e MUKURTU_AUTO_INSTALL=false "$SLIM" >/dev/null
+echo "entrypoint: mail warning"
+mail_name="mukurtu-test-mail-$RUN_ID"
+CLEANUP_CONTAINERS+=("$mail_name")
+docker run -d --name "$mail_name" --network "$NET" "${COMMON_ENV[@]}" -e MUKURTU_AUTO_INSTALL=false "$FULL" >/dev/null
 sleep 8
-slim_log="$(docker logs "$slim_name" 2>&1)"
-for tool in ffmpeg pdftotext pdftoppm; do
-  assert_contains "$slim_log" "WARNING: $tool" "slim image warns about missing $tool"
-done
-assert_contains "$slim_log" "WARNING: MUKURTU_SMTP_HOST is not set" "missing SMTP configuration is warned about"
-docker rm -f "$slim_name" >/dev/null
+mail_log="$(docker logs "$mail_name" 2>&1)"
+assert_contains "$mail_log" "WARNING: MUKURTU_SMTP_HOST is not set" "missing SMTP configuration is warned about"
+assert_not_contains "$mail_log" "is not installed in this image" "no warning about missing media tools: they are always installed"
+docker rm -f "$mail_name" >/dev/null
 
 echo "entrypoint: generated-salt"
 # No MUKURTU_HASH_SALT: the entrypoint makes one, keeps it in the private volume,

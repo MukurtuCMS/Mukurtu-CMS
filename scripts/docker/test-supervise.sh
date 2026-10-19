@@ -3,9 +3,9 @@
 # and stops them on SIGTERM. Needs no database: it runs supervise.sh directly.
 # See docs/docker-build.md, "Startup, supervision and health".
 set -u
-source "$(dirname "${BASH_SOURCE[0]}")/test-lib.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
-IMAGE=mukurtu-test:full
+IMAGE=mukurtu-test:image
 NAME="mukurtu-supervise-test-$$"
 trap 'docker rm -f "$NAME" >/dev/null 2>&1; rm -f "$BUILD_LOG"' EXIT
 

@@ -5,7 +5,7 @@
 #
 #   scripts/docker/measure.sh        (takes ~6 minutes: it installs a real site)
 set -u
-source "$(dirname "${BASH_SOURCE[0]}")/test-lib.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
 ID="$$"
 NET="mukurtu-measure-net-$ID"
@@ -19,11 +19,8 @@ cleanup() {
 }
 trap cleanup EXIT
 
-for variant in "full true true" "slim false false"; do
-  set -- $variant
-  build_image runtime "mukurtu-measure:$1" --build-arg WITH_FFMPEG="$2" --build-arg WITH_POPPLER="$3" \
-    --build-arg MUKURTU_TEMPLATE_VERSION="$TEMPLATE_VERSION" || { echo "build failed: $1"; tail -20 "$BUILD_LOG"; exit 1; }
-done
+build_image runtime "mukurtu-measure:image" --build-arg MUKURTU_TEMPLATE_VERSION="$TEMPLATE_VERSION" \
+  || { echo "build failed"; tail -20 "$BUILD_LOG"; exit 1; }
 
 mb() { sed -E 's/MiB//; s/GiB/*1024/; s/KiB/\/1024/' | awk '{ printf "%.0f", $0 }' 2>/dev/null; }
 mem_now() { # container memory as docker reports it (usage minus reclaimable cache), in MB
@@ -40,10 +37,8 @@ echo
 echo "Date: $(date -u +%Y-%m-%d)  Host: $(nproc) CPUs, $(free -m | awk '/Mem:/{print $2}') MB RAM, $(uname -sr), Docker $(docker version --format '{{.Server.Version}}')"
 echo
 echo "## Image size (uncompressed, linux/$(docker version --format '{{.Server.Arch}}'))"
-for v in full slim; do
-  size=$(docker image inspect "mukurtu-measure:$v" --format '{{.Size}}')
-  echo "- $v: $((size / 1000000)) MB"
-done
+size=$(docker image inspect "mukurtu-measure:image" --format '{{.Size}}')
+echo "- $((size / 1000000)) MB"
 
 docker network create "$NET" >/dev/null
 docker run -d --name "$DB" --network "$NET" -e MARIADB_ROOT_PASSWORD=r -e MARIADB_DATABASE=m -e MARIADB_USER=m -e MARIADB_PASSWORD=m \
@@ -56,7 +51,7 @@ docker run -d --name "$SITE" --network "$NET" \
   -e MUKURTU_TRUSTED_HOSTS=measure.example.org -e MUKURTU_HASH_SALT=measure \
   -e MUKURTU_ADMIN_PASSWORD=Measure-1-pass -e MUKURTU_ADMIN_EMAIL=a@example.org \
   -v "mukurtu-measure-pub-$ID:/var/www/files/public" -v "mukurtu-measure-priv-$ID:/var/www/files/private" \
-  "mukurtu-measure:full" >/dev/null
+  "mukurtu-measure:image" >/dev/null
 
 echo
 echo "Installing a site to measure (a few minutes)..." >&2
@@ -76,7 +71,7 @@ for _ in $(seq 1 120); do
 done
 
 echo
-echo "## Memory of one running site (full image, defaults: ondemand, 4 workers, 128M opcache)"
+echo "## Memory of one running site (defaults: ondemand, 4 workers, 128M opcache)"
 sleep 3
 echo "- just started, before any request: $(mem_now) MB"
 for _ in 1 2 3; do get /; get /user/login; done

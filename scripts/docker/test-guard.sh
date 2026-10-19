@@ -1,39 +1,14 @@
 #!/usr/bin/env bash
-# The Dockerfile refuses to build unless every required build arg is set
-# explicitly. See docs/docker-build.md, "Pinned inputs and the build guard".
+# The Dockerfile has exactly one build argument, MUKURTU_TEMPLATE_VERSION, and refuses to
+# build without it. ffmpeg and poppler-utils are always part of the image: there are no
+# options for them. See docs/docker-build.md, "Pinned inputs and the build guard".
 set -u
-source "$(dirname "${BASH_SOURCE[0]}")/test-lib.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
 TAG=mukurtu-test:guard
-TEMPLATE=(--build-arg MUKURTU_TEMPLATE_VERSION="$TEMPLATE_VERSION")
-
-echo "guard: WITH_FFMPEG and WITH_POPPLER default to true"
-if build_image guard "$TAG" "${TEMPLATE[@]}"; then
-  pass "build succeeds without WITH_FFMPEG and WITH_POPPLER"
-else
-  fail "build succeeds without WITH_FFMPEG and WITH_POPPLER"; tail -5 "$BUILD_LOG"
-fi
-
-echo "guard: WITH_FFMPEG empty"
-if build_image guard "$TAG" --build-arg WITH_FFMPEG= --build-arg WITH_POPPLER=true "${TEMPLATE[@]}"; then
-  fail "build fails when WITH_FFMPEG is empty"
-else
-  pass "build fails when WITH_FFMPEG is empty"
-fi
-assert_contains "$(<"$BUILD_LOG")" "build arg WITH_FFMPEG must be 'true' or 'false' (got '')" \
-  "message names WITH_FFMPEG"
-
-echo "guard: WITH_POPPLER invalid"
-if build_image guard "$TAG" --build-arg WITH_FFMPEG=true --build-arg WITH_POPPLER=yes "${TEMPLATE[@]}"; then
-  fail "build fails when WITH_POPPLER=yes"
-else
-  pass "build fails when WITH_POPPLER=yes"
-fi
-assert_contains "$(<"$BUILD_LOG")" "build arg WITH_POPPLER must be 'true' or 'false' (got 'yes')" \
-  "message names WITH_POPPLER and the bad value"
 
 echo "guard: MUKURTU_TEMPLATE_VERSION unset"
-if build_image guard "$TAG" --build-arg WITH_FFMPEG=true --build-arg WITH_POPPLER=true; then
+if build_image guard "$TAG"; then
   fail "build fails when MUKURTU_TEMPLATE_VERSION is unset"
 else
   pass "build fails when MUKURTU_TEMPLATE_VERSION is unset"
@@ -41,16 +16,29 @@ fi
 assert_contains "$(<"$BUILD_LOG")" "build arg MUKURTU_TEMPLATE_VERSION must be set" \
   "message names MUKURTU_TEMPLATE_VERSION"
 
-echo "guard: everything set"
-if build_image guard "$TAG" --build-arg WITH_FFMPEG=false --build-arg WITH_POPPLER=false "${TEMPLATE[@]}"; then
-  pass "build succeeds with slim args"
+echo "guard: MUKURTU_TEMPLATE_VERSION empty"
+if build_image guard "$TAG" --build-arg MUKURTU_TEMPLATE_VERSION=; then
+  fail "build fails when MUKURTU_TEMPLATE_VERSION is empty"
 else
-  fail "build succeeds with slim args"
+  pass "build fails when MUKURTU_TEMPLATE_VERSION is empty"
 fi
+
+echo "guard: MUKURTU_TEMPLATE_VERSION set"
 if build_image guard "$TAG" "${DEFAULT_BUILD_ARGS[@]}"; then
-  pass "build succeeds with full args"
+  pass "build succeeds with the template version"
 else
-  fail "build succeeds with full args"
+  fail "build succeeds with the template version"; tail -5 "$BUILD_LOG"
 fi
+
+echo "guard: no options for the media tools"
+# The tools are part of every image. An option to leave them out would let a user build
+# an image that silently lacks thumbnails, and there is no slim variant to publish.
+for pattern in "WITH_FFMPEG" "WITH_POPPLER"; do
+  if grep -q "$pattern" "$REPO_ROOT/Dockerfile"; then
+    fail "the Dockerfile has no $pattern option"
+  else
+    pass "the Dockerfile has no $pattern option"
+  fi
+done
 
 finish

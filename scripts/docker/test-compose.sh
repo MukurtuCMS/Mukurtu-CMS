@@ -3,7 +3,7 @@
 # the single-site file, and the hosting file (several sites behind a Caddy proxy).
 # See docs/docker-build.md, "Hosting examples".
 set -u
-source "$(dirname "${BASH_SOURCE[0]}")/test-lib.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
 command -v jq >/dev/null || { echo "jq is required"; exit 1; }
 
@@ -11,7 +11,7 @@ SINGLE="$REPO_ROOT/docker-compose.example.yml"
 MULTI="$REPO_ROOT/docker-compose.multi-tenant.example.yml"
 WORK="$(mktemp -d -t mukurtu-compose.XXXXXX)"
 PROJECT="mukurtu-ctest-$$"
-IMAGE_TAG=mukurtu-test:full
+IMAGE_TAG=mukurtu-test:image
 cleanup() {
   (cd "$WORK" && MUKURTU_IMAGE=$IMAGE_TAG docker compose --env-file .env -p "$PROJECT-one" -f "$WORK/$(basename "$SINGLE")" down -v >/dev/null 2>&1)
   (cd "$WORK" && MUKURTU_IMAGE=$IMAGE_TAG docker compose --env-file .env -p "$PROJECT-many" -f "$WORK/$(basename "$MULTI")" down -v >/dev/null 2>&1)

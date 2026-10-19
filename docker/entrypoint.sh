@@ -83,12 +83,7 @@ if [ -z "${MUKURTU_HASH_SALT:-}" ]; then
 fi
 mkdir -p "${MUKURTU_CONFIG_SYNC_DIR:-$PRIVATE_DIR/config-sync}" 2>/dev/null || true
 
-# --- 5. tools -------------------------------------------------------------
-for tool in ffmpeg pdftotext pdftoppm; do
-  command -v "$tool" >/dev/null 2>&1 || warn "$tool is not installed in this image: the Mukurtu features that use it will not work."
-done
-
-# --- 6. database ----------------------------------------------------------
+# --- 5. database ----------------------------------------------------------
 log "waiting for the database at $MUKURTU_DB_HOST:$MUKURTU_DB_PORT (up to ${MUKURTU_DB_WAIT_TIMEOUT}s)"
 waited=0
 until _db_error=$(php "$LIB/db.php" ping 2>&1); do
@@ -100,7 +95,7 @@ until _db_error=$(php "$LIB/db.php" ping 2>&1); do
 done
 log "database is reachable"
 
-# --- 7. install or update -------------------------------------------------
+# --- 6. install or update -------------------------------------------------
 state=$(php "$LIB/db.php" state)
 case "$state" in
   installed)
@@ -136,6 +131,6 @@ case "$state" in
     ;;
 esac
 
-# --- 8. run ---------------------------------------------------------------
+# --- 7. run ---------------------------------------------------------------
 log "starting"
 exec "$LIB/supervise.sh"

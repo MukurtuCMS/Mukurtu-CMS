@@ -1,29 +1,18 @@
 #!/usr/bin/env bash
-# The `runtime` stage is the image that ships. It is built in two variants:
-# full (ffmpeg + poppler-utils) and slim (neither). See docs/docker-build.md,
-# "Runtime image, tools and extensions".
+# The `runtime` stage is the image that ships: what is in it, what runs as whom, and
+# that the media tools Mukurtu shells out to are always there. See
+# docs/docker-build.md, "Runtime image, tools and extensions".
 set -u
-source "$(dirname "${BASH_SOURCE[0]}")/test-lib.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
-FULL=mukurtu-test:full
-SLIM=mukurtu-test:slim
-TEMPLATE="$TEMPLATE_VERSION"
+IMAGE=mukurtu-test:image
 
-build_variant() {
-  local tag="$1" ffmpeg="$2" poppler="$3"
-  if build_image runtime "$tag" \
-      --build-arg WITH_FFMPEG="$ffmpeg" --build-arg WITH_POPPLER="$poppler" \
-      --build-arg MUKURTU_TEMPLATE_VERSION="$TEMPLATE"; then
-    pass "runtime builds: $tag"
-  else
-    fail "runtime builds: $tag"
-    tail -30 "$BUILD_LOG"
-    finish
-    exit 1
-  fi
-}
+if build_image runtime "$IMAGE" "${DEFAULT_BUILD_ARGS[@]}"; then
+  pass "runtime builds"
+else
+  fail "runtime builds"; tail -30 "$BUILD_LOG"; finish; exit 1
+fi
 
-# in <tag> <shell command>: run a command in the image, print its output.
 run_in() { docker run --rm --entrypoint sh "$1" -c "$2" 2>&1; }
 ok() { run_in "$1" "$2" >/dev/null 2>&1; }
 
@@ -31,30 +20,13 @@ check() { # check <tag> <message> <shell command that must succeed>
   if ok "$1" "$3"; then pass "$1 $2"; else fail "$1 $2"; fi
 }
 
-echo "runtime: full variant"
-build_variant "$FULL" true true
-check "$FULL" "ffmpeg -version" 'ffmpeg -version'
-check "$FULL" "pdftotext -v" 'pdftotext -v'
-check "$FULL" "pdftoppm --help" 'pdftoppm --help'
+echo "runtime: the media tools are always installed and run"
+check "$IMAGE" "has ffmpeg" 'ffmpeg -version'
+check "$IMAGE" "has pdftotext" 'pdftotext -v'
+check "$IMAGE" "has pdftoppm" 'pdftoppm --help'
 
-echo "runtime: slim variant"
-build_variant "$SLIM" false false
-for tool in ffmpeg pdftotext pdftoppm; do
-  check "$SLIM" "has no $tool" "! command -v $tool"
-done
-
-echo "runtime: no build args for the tools means the full image"
-if build_image runtime mukurtu-test:default --build-arg MUKURTU_TEMPLATE_VERSION="$TEMPLATE"; then
-  pass "runtime builds without WITH_FFMPEG and WITH_POPPLER"
-else
-  fail "runtime builds without WITH_FFMPEG and WITH_POPPLER"; tail -20 "$BUILD_LOG"
-fi
-check mukurtu-test:default "has ffmpeg by default" 'ffmpeg -version'
-check mukurtu-test:default "has pdftotext by default" 'pdftotext -v'
-check mukurtu-test:default "has pdftoppm by default" 'pdftoppm --help'
-
-echo "runtime: both variants"
-for tag in "$FULL" "$SLIM"; do
+echo "runtime: contents and users"
+for tag in "$IMAGE"; do
   modules="$(run_in "$tag" 'php -m')"
   for ext in gd intl zip "Zend OPcache" pdo_mysql mbstring apcu curl dom fileinfo xml SimpleXML; do
     assert_contains "$modules" "$ext" "$tag has extension: $ext"
@@ -82,7 +54,7 @@ for tag in "$FULL" "$SLIM"; do
 done
 
 echo "runtime: mail without an SMTP server fails with a clear message"
-for tag in "$FULL"; do
+for tag in "$IMAGE"; do
   out="$(docker run --rm --entrypoint sh "$tag" -c '
     export MUKURTU_RUN_DIR=/tmp/r
     /usr/local/lib/mukurtu/render-config.sh 2>/dev/null

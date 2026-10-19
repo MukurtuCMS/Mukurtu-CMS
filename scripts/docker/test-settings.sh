@@ -2,9 +2,9 @@
 # docker/settings.php reads all site configuration from MUKURTU_* environment
 # variables. See docs/docker-build.md, "Drupal settings".
 set -u
-source "$(dirname "${BASH_SOURCE[0]}")/test-lib.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
-IMAGE=mukurtu-test:full
+IMAGE=mukurtu-test:image
 HARNESS="$(mktemp -t mukurtu-harness.XXXXXX)"
 trap 'rm -f "$HARNESS" "$BUILD_LOG"' EXIT
 

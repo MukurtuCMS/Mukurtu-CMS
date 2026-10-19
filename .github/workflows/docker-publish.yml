@@ -33,7 +33,7 @@ concurrency:
 jobs:
   resolve:
     name: Resolve the tag to build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     outputs:
       tag: ${{ steps.tag.outputs.tag }}
     steps:
@@ -74,7 +74,7 @@ jobs:
   test:
     name: Test and scan
     needs: resolve
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 90
     permissions:
       contents: read
@@ -97,48 +97,27 @@ jobs:
           done
           exit "$failed"
 
-      # The tests leave the full and slim images in the local Docker daemon,
-      # built from the same Dockerfile and arguments as the published ones.
-      - name: Scan the full image for fixable HIGH and CRITICAL vulnerabilities
+      # The tests leave the image in the local Docker daemon, built from the same
+      # Dockerfile and arguments as the published one.
+      - name: Scan the image for fixable HIGH and CRITICAL vulnerabilities
         uses: aquasecurity/trivy-action@v0.36.0
         with:
-          image-ref: mukurtu-test:full
-          severity: HIGH,CRITICAL
-          ignore-unfixed: true
-          exit-code: "1"
-          trivyignores: docker/.trivyignore
-
-      - name: Scan the slim image for fixable HIGH and CRITICAL vulnerabilities
-        uses: aquasecurity/trivy-action@v0.36.0
-        with:
-          image-ref: mukurtu-test:slim
+          image-ref: mukurtu-test:image
           severity: HIGH,CRITICAL
           ignore-unfixed: true
           exit-code: "1"
           trivyignores: docker/.trivyignore
 
   publish:
-    name: Publish (${{ matrix.variant }})
+    name: Publish
     needs: [resolve, test]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 90
     permissions:
       contents: read
       packages: write
       id-token: write
       attestations: write
-    strategy:
-      fail-fast: false
-      matrix:
-        # Each variant states its tool choice explicitly; the Dockerfile has no
-        # defaults for these.
-        include:
-          - variant: full
-            with_ffmpeg: "true"
-            with_poppler: "true"
-          - variant: slim
-            with_ffmpeg: "false"
-            with_poppler: "false"
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -149,7 +128,6 @@ jobs:
         id: meta
         env:
           TAG: ${{ needs.resolve.outputs.tag }}
-          VARIANT: ${{ matrix.variant }}
           OWNER: ${{ github.repository_owner }}
           REPO: ${{ github.repository }}
           GH_TOKEN: ${{ github.token }}
@@ -165,7 +143,7 @@ jobs:
             echo "revision=$(git rev-parse HEAD)"
             echo "template=$(tr -d '[:space:]' < docker/TEMPLATE_VERSION)"
             echo "tags<<TAGS"
-            printf '%s\n' "$tag_list" | scripts/docker/compute-tags.sh --existing - "$TAG" "$VARIANT" | sed "s|^|$image:|"
+            printf '%s\n' "$tag_list" | scripts/docker/compute-tags.sh --existing - "$TAG" | sed "s|^|$image:|"
             echo "TAGS"
           } >> "$GITHUB_OUTPUT"
 
@@ -190,21 +168,19 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           build-args: |
-            WITH_FFMPEG=${{ matrix.with_ffmpeg }}
-            WITH_POPPLER=${{ matrix.with_poppler }}
             MUKURTU_TEMPLATE_VERSION=${{ steps.meta.outputs.template }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: |
             org.opencontainers.image.title=Mukurtu CMS
-            org.opencontainers.image.description=Mukurtu CMS (${{ matrix.variant }} variant)
+            org.opencontainers.image.description=Mukurtu CMS
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.version=${{ needs.resolve.outputs.tag }}
             org.opencontainers.image.revision=${{ steps.meta.outputs.revision }}
             org.opencontainers.image.licenses=GPL-3.0-or-later
           provenance: mode=max
           sbom: true
-          cache-from: type=gha,scope=${{ matrix.variant }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.variant }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Attest the build provenance
         uses: actions/attest-build-provenance@v4
@@ -227,5 +203,5 @@ jobs:
       - name: Keep composer.lock with the run
         uses: actions/upload-artifact@v7
         with:
-          name: composer-lock-${{ matrix.variant }}
+          name: composer-lock
           path: composer.lock
