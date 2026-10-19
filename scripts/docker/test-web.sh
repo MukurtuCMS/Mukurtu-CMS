@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
-# The rendered nginx.conf must follow Drupal's nginx guidance and execute only
-# index.php. This runs the real nginx and php-fpm from the image against a stub
-# docroot whose index.php reports which php-fpm pool answered.
-# See docs/docker-build.md, "Security hardening".
+# The web stack as the container runs it: php-fpm and nginx started by supervise.sh,
+# against a stub docroot whose index.php reports which php-fpm pool answered. Checks
+# that the rendered nginx.conf follows Drupal's nginx guidance and executes only
+# index.php, that the start-up log is clean, that private downloads cannot starve page
+# requests, and that SIGTERM stops everything promptly. See docs/docker-build.md,
+# "Security hardening" and "Startup, supervision and health".
 set -u
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
 IMAGE=mukurtu-test:image
-NAME="mukurtu-nginx-test-$$"
+NAME="mukurtu-web-test-$$"
 STUB="$(mktemp -d -t mukurtu-stub.XXXXXX)"
 trap 'docker rm -f "$NAME" >/dev/null 2>&1; rm -rf "$STUB" "$BUILD_LOG"' EXIT
 
@@ -17,7 +19,7 @@ fi
 
 # Stub docroot. Files that would be dangerous if executed or served exist on
 # purpose, so a 404 proves a rule fired rather than that the file was missing.
-mkdir -p "$STUB/sites/default/files/css" "$STUB/core"
+mkdir -p "$STUB/sites/default/files/css" "$STUB/sites/default/files/styles/thumb/public" "$STUB/core"
 cat >"$STUB/index.php" <<'PHP'
 <?php
 header('X-Pool: ' . getenv('MUKURTU_POOL'));
@@ -30,13 +32,15 @@ echo '<?php echo "EXECUTED";' >"$STUB/update.php"
 echo '{"name":"x"}' >"$STUB/composer.json"
 echo 'secret: yes' >"$STUB/config.yml"
 echo 'body{}' >"$STUB/sites/default/files/css/x.css"
+echo 'jpeg' >"$STUB/sites/default/files/styles/thumb/public/b.jpg"
 chmod -R a+rX "$STUB"
 
-docker run -d --name "$NAME" --entrypoint sh -e MUKURTU_FPM_MAX_CHILDREN=2 -e MUKURTU_FPM_FILES_MAX_CHILDREN=2 --tmpfs /tmp/run:size=4m,mode=1777 -v "$STUB:/var/www/html/web:ro" "$IMAGE" -c '
+# Started the way the container starts it: render the configuration, then supervise.sh.
+# (The entrypoint's database and install steps are covered by test-entrypoint.sh.)
+docker run -d --name "$NAME" --entrypoint sh -e MUKURTU_CRON=false -e MUKURTU_FPM_MAX_CHILDREN=2 -e MUKURTU_FPM_FILES_MAX_CHILDREN=2 --tmpfs /tmp/run:size=4m,mode=1777 -v "$STUB:/var/www/html/web:ro" "$IMAGE" -c '
   export MUKURTU_RUN_DIR=/tmp/run
   /usr/local/lib/mukurtu/render-config.sh 2>/dev/null || exit 1
-  php-fpm -y /tmp/run/php-fpm.conf -c /tmp/run/php.ini &
-  exec nginx -c /tmp/run/nginx.conf -g "daemon off;"
+  exec /usr/local/lib/mukurtu/supervise.sh
 ' >/dev/null
 
 ready=false
@@ -48,6 +52,14 @@ if ! $ready; then
   fail "nginx and php-fpm start"; docker logs "$NAME" 2>&1 | tail -20; finish; exit 1
 fi
 pass "nginx and php-fpm start"
+
+echo "start-up log"
+log="$(docker logs "$NAME" 2>&1)"
+assert_contains "$log" "ready to handle connections" "php-fpm reports it is ready"
+assert_not_contains "$log" "[alert]" "nginx logs no alert at start-up"
+assert_not_contains "$log" "[emerg]" "nginx logs no emergency at start-up"
+assert_not_contains "$log" "Permission denied" "nothing is refused permission at start-up"
+assert_not_contains "$log" "ERROR" "no error at start-up"
 
 get() { docker exec "$NAME" curl -s -i --max-time 10 "http://127.0.0.1:8080$1"; }
 status() { get "$1" | head -1 | awk '{print $2}'; }
@@ -86,7 +98,11 @@ assert_contains "$headers" "Referrer-Policy: strict-origin-when-cross-origin" "R
 assert_not_contains "$headers" "nginx/" "no nginx version in the Server header"
 css="$(get /sites/default/files/css/x.css)"
 assert_contains "$css" "max-age=31536000" "aggregated CSS is cached for a year"
-assert_contains "$css" "X-Content-Type-Options: nosniff" "nosniff survives the cache headers"
+assert_contains "$css" "X-Content-Type-Options: nosniff" "nosniff is present on cached assets too"
+assert_contains "$css" "Referrer-Policy: strict-origin-when-cross-origin" "Referrer-Policy is present on cached assets too"
+style="$(get /sites/default/files/styles/thumb/public/b.jpg)"
+assert_contains "$style" "max-age=2592000" "image styles are cached for 30 days"
+assert_contains "$style" "X-Content-Type-Options: nosniff" "nosniff is present on image styles"
 
 echo "uploads are buffered in the upload temp area, not in the small run directory"
 # /tmp/run is a 4 MB tmpfs here, like the 16 MB /run in the Compose examples.
@@ -104,5 +120,11 @@ started=$SECONDS
 page="$(docker exec "$NAME" curl -s -o /dev/null -w '%{http_code}' --max-time 4 http://127.0.0.1:8080/node/1)"
 assert_eq "200" "$page" "a page request is answered while private downloads are running"
 [[ $((SECONDS - started)) -lt 4 ]] && pass "and it is answered promptly" || fail "and it is answered promptly"
+
+echo "shutdown"
+start=$SECONDS
+docker stop -t 10 "$NAME" >/dev/null
+[[ $((SECONDS - start)) -lt 10 ]] && pass "stops within 10 seconds" || fail "stops within 10 seconds"
+assert_eq "0" "$(docker inspect -f '{{.State.ExitCode}}' "$NAME")" "exits 0 on SIGTERM"
 
 finish

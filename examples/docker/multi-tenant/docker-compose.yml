@@ -1,34 +1,19 @@
-# Mukurtu CMS: several independent sites on one host, each at its own domain.
-#
-# This is NOT Drupal's "multisite" feature. Every site is its own container (same image,
-# own configuration, own database, own file volumes), so sites are upgraded, restarted,
-# and limited separately, and one site cannot reach another's data.
-#
-# A Caddy proxy owns ports 80 and 443. It routes each domain to its site by the Host
-# header and obtains and renews the HTTPS certificates itself. The sites speak plain
-# HTTP on port 8080 inside the Docker network and publish nothing on the host.
-#
-#   ./generate-secrets.sh      creates .env (from .env.example) with random passwords
-#   (edit .env: the image, the domains, the emails, the ports)
-#   docker compose up -d
-#
-# The defaults in .env.example are for trying it on your own machine: a.localhost and
-# b.localhost, which Caddy serves with its own local certificate authority, on ports
-# 8088 and 8443 so no privileges are needed. Browse to https://a.localhost:8443 and
-# accept the certificate warning. For real domains, set HTTP_PORT=80 and HTTPS_PORT=443,
-# point the domains' DNS at this host, and set ACME_EMAIL so Let's Encrypt can reach you.
+# Several independent Mukurtu sites on one host, each at its own domain. NOT Drupal's
+# "multisite": every site is its own container with its own configuration, database and
+# files. A Caddy proxy owns ports 80 and 443, routes each domain to its site by the Host
+# header, and gets the HTTPS certificates; the sites publish nothing on the host.
+# How to run it: README.md. Settings: docs/docker.md ("Hosting many sites").
 #
 # To add a site:
 #   1. Copy the site_b block and its two volumes; give it a new name and settings.
-#   2. Add its database and user in the db_init config below (that script only runs on
-#      the database's first start; for an existing database, create them by hand).
+#   2. Add its database and user to the db_init config below (that script only runs on the
+#      database's first start; for an existing database, create them by hand).
 #   3. Add three lines for its domain to the caddyfile config below.
 #   4. Add its variables to .env, and run: docker compose up -d
 #
 # The passwords are plain environment variables here to keep the example short. For
-# production, prefer the *_FILE secret form shown in ../single-site: environment
-# variables are visible to anyone who can run `docker inspect`.
-# Documentation: docs/docker.md ("Hosting many sites").
+# production prefer the *_FILE secret form shown in ../single-site: environment variables
+# are visible to anyone who can run `docker inspect`.
 
 name: mukurtu-hosting
 

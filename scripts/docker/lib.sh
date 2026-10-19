@@ -16,14 +16,9 @@ TESTS_FAILED=0
 BUILD_LOG="$(mktemp -t mukurtu-docker-build.XXXXXX)"
 trap 'rm -f "$BUILD_LOG"' EXIT
 
-# The mukurtu-template version the image is built against. One file, read by the
-# publish workflow and by every test (override with MUKURTU_TEMPLATE_VERSION).
-TEMPLATE_VERSION="${MUKURTU_TEMPLATE_VERSION:-$(tr -d '[:space:]' <"$REPO_ROOT/docker/TEMPLATE_VERSION")}"
-
-# The build argument every build needs. Tests that build past the guard use it.
-DEFAULT_BUILD_ARGS=(
-  --build-arg MUKURTU_TEMPLATE_VERSION="$TEMPLATE_VERSION"
-)
+# Build arguments every build needs: none. The template version is pinned by the
+# Dockerfile's own default. (Override with --build-arg MUKURTU_TEMPLATE_VERSION=...)
+DEFAULT_BUILD_ARGS=()
 
 pass() { TESTS_RUN=$((TESTS_RUN + 1)); echo "  ok   $1"; }
 fail() { TESTS_RUN=$((TESTS_RUN + 1)); TESTS_FAILED=$((TESTS_FAILED + 1)); echo "  FAIL $1"; }

@@ -4,29 +4,15 @@
 # way, and docs/docker.md for how to run it.
 #
 # The one build argument is MUKURTU_TEMPLATE_VERSION, the mukurtu/mukurtu-template
-# version the image is built on (see docker/TEMPLATE_VERSION). It is required. There
-# are no options for what the image contains: ffmpeg and poppler-utils, which Mukurtu
-# needs for video and PDF thumbnails and PDF text, are always installed. (The running
-# container is configured with MUKURTU_* environment variables, not build arguments.)
+# version the image is built on. Its default below is the pinned version: change that
+# line to move to a newer template. There are no options for what the image contains:
+# ffmpeg and poppler-utils, which Mukurtu needs for video and PDF thumbnails and PDF
+# text, are always installed. (The running container is configured with MUKURTU_*
+# environment variables, not build arguments.)
 #
 # The base images are pinned by version and digest in the FROM lines so that
 # Dependabot can update them and a rebuild of the same tag starts from the same
 # bytes.
-
-# ---------------------------------------------------------------------------
-# guard: refuse to build without the template version.
-# Later stages copy the marker file so BuildKit cannot skip this stage.
-# ---------------------------------------------------------------------------
-FROM alpine:3.24@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6 AS guard
-
-ARG MUKURTU_TEMPLATE_VERSION
-
-RUN set -eu; \
-    if [ -z "${MUKURTU_TEMPLATE_VERSION:-}" ]; then \
-      echo "ERROR: build arg MUKURTU_TEMPLATE_VERSION must be set (for example 4.0.2)" >&2; \
-      exit 1; \
-    fi; \
-    touch /guard-ok
 
 # ---------------------------------------------------------------------------
 # php-base: PHP with the extensions Drupal and Mukurtu need. Shared by `build`
@@ -74,7 +60,7 @@ FROM composer:2.10.3@sha256:af98f42dfff7c68ba8d53c2164fd9fde1087b7d449514baa38c4
 # ---------------------------------------------------------------------------
 FROM php-base AS build
 
-ARG MUKURTU_TEMPLATE_VERSION
+ARG MUKURTU_TEMPLATE_VERSION=4.0.2
 
 COPY --from=composer /usr/bin/composer /usr/bin/composer
 RUN apk add --no-cache git unzip
@@ -127,16 +113,11 @@ RUN set -eux; \
       \( -name tests -o -name Tests \) -type d -prune -exec rm -rf {} +; \
     find /app/web/core \( -name tests -o -name Tests \) -type d -prune -exec rm -rf {} +
 
-# Marker so BuildKit cannot skip the guard stage.
-COPY --from=guard /guard-ok /guard-ok
-
 # ---------------------------------------------------------------------------
 # runtime: the image that ships. nginx + php-fpm on Alpine, started by
 # entrypoint.sh under tini. No Composer, no dev tooling.
 # ---------------------------------------------------------------------------
 FROM php-base AS runtime
-
-COPY --from=guard /guard-ok /guard-ok
 
 RUN set -eux; \
     apk add --no-cache \
@@ -208,10 +189,11 @@ USER mukurtu
 
 EXPOSE 8080
 
-# Installing a fresh site takes minutes; do not call the container unhealthy
-# while it does.
+# php-fpm answers /healthz through its own ping handler, without bootstrapping Drupal,
+# so the check is cheap and does not need the database. Installing a fresh site takes
+# minutes; do not call the container unhealthy while it does.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=600s --retries=3 \
-  CMD ["/usr/local/lib/mukurtu/healthcheck.sh"]
+  CMD curl -fsS --max-time 4 http://127.0.0.1:8080/healthz | grep -q pong
 
 # The php-fpm base image stops containers with SIGQUIT. The supervisor handles
 # SIGTERM (Docker's usual signal, and Kubernetes') and passes the right signal on

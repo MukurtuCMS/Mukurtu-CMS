@@ -15,4 +15,4 @@ All three use the published image `ghcr.io/<owner>/mukurtu`; edit the image line
 [docs/docker.md](../../docs/docker.md).
 
 The generated `.env` files and `secrets/` folders hold real passwords. They are listed in
-each example's `.gitignore` and must never be committed.
+`.gitignore` here and must never be committed.

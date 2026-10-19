@@ -176,7 +176,6 @@ render_template "$TEMPLATES/php.ini.tmpl" "$MUKURTU_RUN_DIR/php.ini"
 render_template "$TEMPLATES/php-fpm.conf.tmpl" "$MUKURTU_RUN_DIR/php-fpm.conf"
 render_template "$TEMPLATES/nginx.conf.tmpl" "$MUKURTU_RUN_DIR/nginx.conf"
 render_template "$TEMPLATES/msmtprc.tmpl" "$MUKURTU_RUN_DIR/msmtprc"
-cp "$TEMPLATES/nginx-headers.conf" "$MUKURTU_RUN_DIR/nginx-headers.conf"
 
 # The command line (Drush: install, updates, cron) has no php.ini of its own in
 # this image, so it would run with PHP's 128M default. It gets the same file

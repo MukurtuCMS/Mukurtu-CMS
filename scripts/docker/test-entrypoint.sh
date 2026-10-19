@@ -191,7 +191,8 @@ assert_not_contains "$body" "EXECUTED" "a PHP file in the public files is not ex
 assert_contains "$(code /sites/default/files/x.php)" "404" "a PHP file in the public files returns 404"
 
 echo "entrypoint: ping-health"
-docker exec "$SITE" /usr/local/lib/mukurtu/healthcheck.sh && pass "healthcheck.sh succeeds" || fail "healthcheck.sh succeeds"
+# The Dockerfile's HEALTHCHECK command, run by hand.
+docker exec "$SITE" sh -c 'curl -fsS --max-time 4 http://127.0.0.1:8080/healthz | grep -q pong' && pass "the health check command succeeds" || fail "the health check command succeeds"
 assert_not_contains "$(docker logs "$SITE" 2>&1)" "healthz" "the healthcheck does not appear in the access log"
 
 echo "entrypoint: cron"

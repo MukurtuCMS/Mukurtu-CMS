@@ -1,17 +1,5 @@
-# Mukurtu CMS: one site, with its database. Production-shaped: passwords in secret files,
-# a read-only container, and memory limits.
-#
-#   ./generate-secrets.sh      creates .env (from .env.example) and the secrets/ folder
-#   (edit .env: the image, the host name, the admin email)
-#   docker compose up -d
-#
-# The first start installs Mukurtu into the empty database; allow a few minutes.
-# To try it locally, keep MUKURTU_HOST=localhost and open http://localhost:8080 (not
-# 127.0.0.1: that name is not in MUKURTU_TRUSTED_HOSTS and answers 400).
-# For a real site, put a TLS-terminating reverse proxy in front of port 8080; see
-# ../multi-tenant for one that does it with Caddy.
-#
-# Every setting is documented in docs/docker.md.
+# One Mukurtu site and its database, production-shaped: passwords in secret files, a
+# read-only container, memory limits. How to run it: README.md. Settings: docs/docker.md.
 
 name: mukurtu
 

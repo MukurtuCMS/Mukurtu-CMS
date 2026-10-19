@@ -58,7 +58,14 @@ http {
     root /var/www/html/web;
     index index.php;
 
-    include @@MUKURTU_RUN_DIR@@/nginx-headers.conf;
+    # HSTS and Content-Security-Policy belong to the TLS-terminating reverse proxy, which
+    # knows the site's real scheme and origins. These two are safe everywhere.
+    #
+    # add_header is inherited by a location only if that location has no add_header of
+    # its own, so the locations below cache with `expires` (a separate directive) and
+    # these headers apply to all of them.
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
 
     # Health probe for the container: answered by php-fpm's ping handler, which
     # does not bootstrap Drupal, so it is cheap and does not touch the database.
@@ -120,23 +127,17 @@ http {
     location ~* ^/sites/[^/]+/files/(css|js)/ {
       try_files $uri @rewrite;
       expires 1y;
-      add_header Cache-Control "public, max-age=31536000, immutable";
-      include @@MUKURTU_RUN_DIR@@/nginx-headers.conf;
     }
 
     # Image styles are generated on first request, then served as static files.
     location ~* ^/sites/[^/]+/files/styles/ {
       try_files $uri @rewrite;
       expires 30d;
-      add_header Cache-Control "public, max-age=2592000";
-      include @@MUKURTU_RUN_DIR@@/nginx-headers.conf;
     }
 
     location ~* \.(js|css|png|jpe?g|gif|ico|svg|webp|avif|woff2?|ttf|eot|map|mp3|mp4|webm|ogg|pdf)$ {
       try_files $uri @rewrite;
       expires 30d;
-      add_header Cache-Control "public, max-age=2592000";
-      include @@MUKURTU_RUN_DIR@@/nginx-headers.conf;
     }
 
     location / {

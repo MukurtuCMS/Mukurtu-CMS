@@ -494,22 +494,18 @@ warmed, request the home page once after starting.
 
 ## Building the image yourself
 
-The published images are built by the workflow in
-`.github/workflows/docker-publish.yml`. To build one locally from a checkout:
+The published images are built by `.github/workflows/docker-publish.yml`. To build one
+from a checkout:
 
 ```
-docker build \
-  --build-arg MUKURTU_TEMPLATE_VERSION="$(cat docker/TEMPLATE_VERSION)" \
-  --target runtime \
-  -t mukurtu:local .
+docker build --target runtime -t mukurtu:local .
 ```
 
 The one build argument is `MUKURTU_TEMPLATE_VERSION`, the `mukurtu/mukurtu-template`
-version the image is built on. It is required, and the pinned version is in
-`docker/TEMPLATE_VERSION`. There are no other options: `ffmpeg` and `poppler-utils`
-are always installed. (Build arguments decide what is *inside* the image; the running
-container is configured with the `MUKURTU_*` environment variables above.)
+version the image is built on. The `Dockerfile` pins it with a default; override it with
+`--build-arg MUKURTU_TEMPLATE_VERSION=...`. There are no other options: `ffmpeg` and
+`poppler-utils` are always installed. (Build arguments decide what is *inside* the image;
+the running container is configured with the `MUKURTU_*` variables above.)
 
-The build stops with a message naming the argument if it is missing.
-`scripts/docker/test-*.sh` are the tests; each builds what it needs and takes
-from seconds to several minutes (the install test performs a real installation).
+`scripts/docker/test-*.sh` are the tests. Each builds what it needs and takes from seconds
+to several minutes (the install tests perform real installations).

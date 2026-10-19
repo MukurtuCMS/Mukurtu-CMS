@@ -106,7 +106,6 @@ jobs:
           severity: HIGH,CRITICAL
           ignore-unfixed: true
           exit-code: "1"
-          trivyignores: docker/.trivyignore
 
   publish:
     name: Publish
@@ -124,7 +123,7 @@ jobs:
         with:
           ref: ${{ needs.resolve.outputs.tag }}
 
-      - name: Work out the tags and the pinned template version
+      - name: Work out the tags
         id: meta
         env:
           TAG: ${{ needs.resolve.outputs.tag }}
@@ -141,7 +140,6 @@ jobs:
           {
             echo "image=$image"
             echo "revision=$(git rev-parse HEAD)"
-            echo "template=$(tr -d '[:space:]' < docker/TEMPLATE_VERSION)"
             echo "tags<<TAGS"
             printf '%s\n' "$tag_list" | scripts/docker/compute-tags.sh --existing - "$TAG" | sed "s|^|$image:|"
             echo "TAGS"
@@ -167,8 +165,6 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          build-args: |
-            MUKURTU_TEMPLATE_VERSION=${{ steps.meta.outputs.template }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: |
             org.opencontainers.image.title=Mukurtu CMS

@@ -45,14 +45,14 @@ for name in minimal single-site multi-tenant; do
   [[ -f "$EX/$name/README.md" ]] && pass "$name/README.md exists" || fail "$name/README.md exists"
 done
 [[ -f "$EX/README.md" ]] && pass "examples/docker/README.md exists" || fail "examples/docker/README.md exists"
+ignore="$(cat "$EX/.gitignore" 2>/dev/null)"
+assert_contains "$ignore" ".env" "examples/docker/.gitignore keeps the generated .env files out of git"
+assert_contains "$ignore" "secrets" "examples/docker/.gitignore keeps the generated secrets out of git"
 for name in single-site multi-tenant; do
-  for f in .env.example generate-secrets.sh .gitignore; do
+  for f in .env.example generate-secrets.sh; do
     [[ -e "$EX/$name/$f" ]] && pass "$name/$f exists" || fail "$name/$f exists"
   done
   [[ -x "$EX/$name/generate-secrets.sh" ]] && pass "$name/generate-secrets.sh is executable" || fail "$name/generate-secrets.sh is executable"
-  ignore="$(cat "$EX/$name/.gitignore" 2>/dev/null)"
-  assert_contains "$ignore" ".env" "$name/.gitignore keeps the generated .env out of git"
-  assert_contains "$ignore" "secrets" "$name/.gitignore keeps the generated secrets out of git"
   # Real or sample secret values must never be committed.
   committed="$(git -C "$REPO_ROOT" ls-files "examples/docker/$name" | grep -E '(^|/)(\.env|secrets/)' | grep -v '\.env\.example$' || true)"
   assert_eq "" "$committed" "$name: no .env or secret file is committed"
