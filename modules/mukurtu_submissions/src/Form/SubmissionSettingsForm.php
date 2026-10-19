@@ -368,6 +368,14 @@ class SubmissionSettingsForm extends EntityForm {
           : [
             '#type' => 'checkbox',
             '#default_value' => (bool) $component,
+            // Without a title this checkbox has no accessible name, so a
+            // screen reader announces the whole column as "checkbox, not
+            // checked" with nothing to say which field each one governs. The
+            // visible name is in the row's label cell, which does not name
+            // the control (#2430, WCAG 4.1.2). Matches how the group and
+            // weight controls in the same row are named.
+            '#title' => $this->t('Include @field', ['@field' => $label]),
+            '#title_display' => 'invisible',
           ],
         'group' => [
           '#type' => 'select',
