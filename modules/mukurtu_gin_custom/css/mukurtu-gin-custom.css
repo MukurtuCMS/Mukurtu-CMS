@@ -1557,3 +1557,26 @@ the only requirement is that the selector matches, which it does. */
 .gin-sticky-form-actions--preprocessed ~ .layout-container form.gin--has-sticky-form-actions .gin-sticky-form-actions {
   visibility: hidden;
 }
+
+/*
+ * Gin's meta sidebar trigger is the only way to open or close the sidebar
+ * panel that holds Revision information, Menu settings, URL alias and the
+ * rest. Gin gives it `width: 32px`, but it sits in `.gin-sticky-form-actions`,
+ * which is `display: flex`, and it inherits `flex-shrink: 1`. On Mukurtu's
+ * node forms that bar also carries the "Save as" state select alongside Save
+ * and Preview, so there is not enough room and the trigger is the item that
+ * gives way: measured at 13px wide with the panel closed and 0px with it open,
+ * on a 1920px viewport.
+ *
+ * At those sizes it cannot be operated. It is also well under the 24 by 24
+ * minimum in WCAG 2.2 2.5.8 Target Size, and at 0px it is not a target at all,
+ * which leaves a keyboard or pointer user no way to reach the fields inside
+ * the panel.
+ *
+ * flex-shrink: 0 keeps it at the 32px Gin asks for. The buttons beside it have
+ * their own shrink behaviour and wrap as before, so nothing else in the bar
+ * changes.
+ */
+.meta-sidebar__trigger {
+  flex-shrink: 0;
+}
