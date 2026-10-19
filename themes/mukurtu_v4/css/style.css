@@ -151,16 +151,8 @@ documentation on how to use @include media(). */
   --brand-secondary: #e6ab49;
   --brand-secondary-dark: #9d6915;
   --brand-secondary-accent: #f1b85a;
-  --mukurtu-navbar-collapse-link-hover-color: #e5ab48;
   --mukurtu-breadcrumb-gradient-color: #b7873a;
-  --mukurtu-panel-pane-text-color: var(--color-white);
   --mukurtu-panel-pane-content-background-color: #eeecec;
-  --mukurtu-mejs-background-color: var(--brand-light-accent);
-  --mukurtu-mejs-time-rail-loaded-color: #e5e1e1;
-  --mukurtu-mejs-time-rail-current-color: #d1cbcb;
-  --mukurtu-dictionary-word-label-background-color: var(--mukurtu-view-row-divider-color);
-  --mukurtu-collection-title-font-color: var(--color-white);
-  --mukurtu-collection-pane-bg-color: var(--mukurtu-navbar-collapse-bg);
   --image-description-horizontal-text: var(--brand-primary-dark);
   --collection-title-link-text: var(--brand-primary);
   --horizontal-tab-link-text: var(--brand-primary-dark);
@@ -550,16 +542,8 @@ div.palette-demo--custom {
   --brand-secondary: #d9d4c2;
   --brand-secondary-dark: #7a734d;
   --brand-secondary-accent: #c9c2a8;
-  --mukurtu-navbar-collapse-link-hover-color: var(--brand-secondary);
   --mukurtu-breadcrumb-gradient-color: #99937f;
-  --mukurtu-panel-pane-text-color: var(--brand-primary);
   --mukurtu-panel-pane-content-background-color: #f1efe9;
-  --mukurtu-mejs-background-color: var(--mukurtu-navbar-collapse-bg);
-  --mukurtu-mejs-time-rail-loaded-color: #fff;
-  --mukurtu-mejs-time-rail-current-color: var(--brand-secondary-accent);
-  --mukurtu-dictionary-word-label-background-color: var(--brand-secondary);
-  --mukurtu-collection-title-font-color: var(--text-color);
-  --mukurtu-collection-pane-bg-color: var(--brand-light-accent);
 }
 
 :root {
@@ -1089,29 +1073,38 @@ a:not(.primary-nav__menu-link) svg.tel path {
 }
 
 .translation-status-badge {
-  display: inline-block;
-  font-size: var(--font-size-s);
-  font-weight: var(--text-bold);
-  letter-spacing: var(--letter-spacing-label);
-  text-transform: uppercase;
-  padding-block: var(--v-space-6xs);
-  padding-inline: var(--v-space-4xs);
-  border-radius: var(--v-space-6xs);
+  display: -webkit-inline-box;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  gap: var(--v-space-6xs);
+  max-inline-size: 100%;
+  margin-block: var(--v-space-6xs);
+  padding-block: 0.125rem;
+  padding-inline: var(--v-space-5xs);
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: var(--font-size-xs);
+  font-weight: var(--text-regular);
+  line-height: 1.3;
   overflow-wrap: anywhere;
+}
+.translation-status-badge__icon {
+  -ms-flex-negative: 0;
+      flex-shrink: 0;
+  inline-size: 1em;
+  block-size: 1em;
 }
 .translation-status-badge--not-translated {
   background-color: var(--color-warning-light);
   color: var(--color-warning-dark);
 }
-
-.translation-status-badge-note {
-  display: block;
-  font-size: var(--font-size-2xs);
-  font-weight: var(--text-regular);
-  text-transform: none;
-  letter-spacing: normal;
-  overflow-wrap: anywhere;
-  color: var(--color-text-secondary);
+@media (forced-colors: active) {
+  .translation-status-badge {
+    border-color: CanvasText;
+  }
 }
 
 .altcha-footer {
@@ -5112,6 +5105,35 @@ body.is-fixed {
   min-inline-size: 0;
   -ms-flex-item-align: center;
       align-self: center;
+}
+
+.messages__header {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  gap: var(--v-space-5xs);
+}
+
+.messages__icon {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-negative: 0;
+      flex-shrink: 0;
+}
+.messages__icon svg {
+  display: block;
+}
+
+.messages__title {
+  margin: 0;
+  font-size: var(--font-size-s);
+  font-weight: 700;
+  line-height: 1.2;
+  color: inherit;
 }
 
 .messages__close {

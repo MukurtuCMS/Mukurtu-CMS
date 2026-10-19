@@ -1,0 +1,21 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.taxonomy_term.field_language_rtl
+    - taxonomy.vocabulary.language
+id: taxonomy_term.language.field_language_rtl
+field_name: field_language_rtl
+entity_type: taxonomy_term
+bundle: language
+label: 'Read right to left'
+description: 'Turn this on for languages written from right to left, such as Arabic, Hebrew or Persian. It sets the dir attribute so browsers lay the text out the right way round.'
+required: false
+translatable: false
+default_value:
+  - value: 0
+default_value_callback: ''
+settings:
+  on_label: 'Right to left'
+  off_label: 'Left to right'
+field_type: boolean

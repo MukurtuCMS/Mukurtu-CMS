@@ -265,11 +265,7 @@ function mukurtu_notifications_tokens($type, array $tokens, array $data, array $
 /**
  * Returns the notification type group-to-template mapping.
  *
- * Derived from _mukurtu_notifications_categories(). Email delivery for
- * 'mukurtu_new_user_registration' stays mandatory regardless of this
- * grouping -- see _mukurtu_notifications_user_wants_email() -- but it's
- * still shown and selectable here like every other "User account"
- * template so managers can see it in their own activity feed.
+ * Derived from _mukurtu_notifications_categories().
  *
  * @return array<string, string[]>
  *   Keys are human-readable group labels; values are arrays of template
@@ -558,10 +554,8 @@ function _mukurtu_notifications_user_wants_digest(int $uid): bool {
 /**
  * Checks whether a user wants to receive email for a notification template.
  *
- * mukurtu_new_user_registration is a pending-approval notice to managers and
- * always emails regardless of preference -- it's grouped under "User
- * account" for display/filtering purposes (_mukurtu_notifications_type_groups()),
- * but must not be opt-out-able the way the rest of that category is.
+ * Email is opt-in: 'none' (the default for new accounts) suppresses every
+ * template, including the pending-approval registration notice to managers.
  *
  * Uncategorized templates are always emailed (there's no way for a user to
  * opt out of something with no category), which should not happen in
@@ -577,10 +571,6 @@ function _mukurtu_notifications_user_wants_digest(int $uid): bool {
  *   TRUE if the user should be emailed for this template.
  */
 function _mukurtu_notifications_user_wants_email(int $uid, string $template): bool {
-  if ($template === 'mukurtu_new_user_registration') {
-    return TRUE;
-  }
-
   $user = User::load($uid);
   if ($user && $user->hasField('field_notify_frequency') && $user->get('field_notify_frequency')->value === 'none') {
     return FALSE;
@@ -1007,8 +997,8 @@ function mukurtu_notifications_user_insert($entity) {
   // is disabled and this never fires. Site admins commonly enable it
   // post-install, so this isn't dead code.
 
-  // Mukurtu managers can opt out of "User account" category emails via
-  // their own notification preferences; the in-app feed record is
+  // Managers only get this by email if they've opted in with a frequency
+  // and the "User account" category; the in-app feed record is
   // unconditional.
   $manager_uids = mukurtu_notifications_resolve_notify_groups(TRUE, [], []);
 

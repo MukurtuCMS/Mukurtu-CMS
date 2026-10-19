@@ -31,3 +31,23 @@ mukurtu_thumbnail.settings:
       sequence:
         type: string
         label: 'Thumbnail fid.'
+
+field.storage_settings.mukurtu_video_track:
+  type: field.storage_settings.file
+  label: 'Video caption track storage settings'
+
+field.field_settings.mukurtu_video_track:
+  type: field.field_settings.file
+  label: 'Video caption track settings'
+
+field.value.mukurtu_video_track:
+  type: field.value.file
+  label: 'Default value'
+
+field.widget.settings.mukurtu_video_track:
+  type: field.widget.settings.file_generic
+  label: 'Video caption track widget settings'
+
+field.formatter.settings.mukurtu_video_with_tracks:
+  type: field.formatter.settings.file_video
+  label: 'Video with caption tracks display format settings'

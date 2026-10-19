@@ -8,6 +8,10 @@ services:
     arguments: ['@current_user']
     tags:
       - { name: event_subscriber }
+  mukurtu_core.layout_builder_menu_block_id_subscriber:
+    class: Drupal\mukurtu_core\EventSubscriber\LayoutBuilderMenuBlockIdSubscriber
+    tags:
+      - { name: event_subscriber }
   mukurtu_core.config_save_cache_invalidation_subscriber:
     class: Drupal\mukurtu_core\EventSubscriber\ConfigSaveCacheInvalidationSubscriber
     tags:
@@ -61,3 +65,6 @@ services:
   logger.channel.mukurtu_core:
     parent: logger.channel_base
     arguments: ['mukurtu_core']
+  mukurtu_core.klaro_config_keeper:
+    class: Drupal\mukurtu_core\Service\KlaroConfigKeeper
+    arguments: ['@config.storage', '@config.factory', '@config.manager', '@entity_type.manager', '@config.typed', '@state', '@extension.list.profile']
