@@ -26,8 +26,11 @@ settings:
       - insertTable
       - '|'
       - specialCharacters
+      - textPartLanguage
       - sourceEditing
   plugins:
+    ckeditor5_language:
+      language_list: un
     ckeditor5_heading:
       enabled_headings:
         - heading1

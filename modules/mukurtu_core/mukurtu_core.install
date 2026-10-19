@@ -694,7 +694,7 @@ function mukurtu_core_update_40216(): ?string {
   // The profile now ships Chart.js in its own libraries/ directory, and
   // ChartsLibraryHooks points charts_chartjs at it. That only takes effect
   // once the charts CDN option is off, which mukurtu_install() does for new
-  // sites.
+  // sites. 40215 is held for #2393, which merges first.
   $module_handler = \Drupal::moduleHandler();
   $messages = [];
 
@@ -721,9 +721,66 @@ function mukurtu_core_update_40216(): ?string {
 }
 
 /**
+ * Add the Language button to the basic and full HTML editors.
+ */
+function mukurtu_core_update_40217(): string {
+  $changed = [];
+
+  foreach (['basic_html', 'full_html'] as $format_id) {
+    // Allow <span lang dir> through the filter. An editor sets these
+    // attributes but the filter strips anything it was not told about, so
+    // without this the marking is lost the moment the text is saved.
+    $filter = \Drupal::configFactory()->getEditable("filter.format.$format_id");
+    $allowed = $filter->get('filters.filter_html.settings.allowed_html');
+    if (is_string($allowed) && str_contains($allowed, '<span>')) {
+      $filter->set(
+        'filters.filter_html.settings.allowed_html',
+        str_replace('<span>', '<span lang dir>', $allowed)
+      )->save();
+      $changed[] = "$format_id filter";
+    }
+
+    $editor = \Drupal::configFactory()->getEditable("editor.editor.$format_id");
+    $settings = $editor->get('settings');
+    if (!is_array($settings) || !isset($settings['toolbar']['items'])) {
+      continue;
+    }
+    if (in_array('textPartLanguage', $settings['toolbar']['items'], TRUE)) {
+      continue;
+    }
+
+    // Beside the other text-level tools rather than at the end, so it is
+    // where an author already looks. Falls back to appending if that group
+    // has been rearranged on this site.
+    $items = $settings['toolbar']['items'];
+    $at = array_search('sourceEditing', $items, TRUE);
+    if ($at === FALSE) {
+      $items[] = 'textPartLanguage';
+    }
+    else {
+      array_splice($items, $at, 0, ['textPartLanguage']);
+    }
+    $settings['toolbar']['items'] = $items;
+
+    // The stored list source is immaterial: mukurtu_core replaces the list
+    // with the site's language vocabulary in hook_editor_js_settings_alter().
+    // The key still has to be present and valid, so it carries core's
+    // default.
+    $settings['plugins']['ckeditor5_language'] = ['language_list' => 'un'];
+    $editor->set('settings', $settings)->save();
+    $changed[] = "$format_id editor";
+  }
+
+  if ($changed === []) {
+    return 'The Language button was already enabled; nothing to change.';
+  }
+  return 'Enabled the Language button and allowed <span lang dir> on: ' . implode(', ', $changed) . '.';
+}
+
+/**
  * Add names-only versions of the Browse by Category block and Categories page.
  */
-function mukurtu_core_update_40217(): ?string {
+function mukurtu_core_update_40220(): ?string {
   // Keep the docblock above to one line; see mukurtu_core_update_40201() for
   // why.
   //

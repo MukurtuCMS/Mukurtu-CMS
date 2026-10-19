@@ -14,9 +14,9 @@ use Drupal\views\Views;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests mukurtu_core_update_40217(), which adds names-only category displays.
+ * Tests mukurtu_core_update_40220(), which adds names-only category displays.
  *
- * @see mukurtu_core_update_40217()
+ * @see mukurtu_core_update_40220()
  */
 #[Group('mukurtu_core')]
 class NamesOnlyCategoryBlockUpdateTest extends KernelTestBase {
@@ -67,7 +67,7 @@ class NamesOnlyCategoryBlockUpdateTest extends KernelTestBase {
   public function testAddsViewModeDisplayAndBlock(): void {
     $this->createPreUpdateView();
 
-    $this->assertNotNull(mukurtu_core_update_40217());
+    $this->assertNotNull(mukurtu_core_update_40220());
 
     $this->assertSame('Names only', EntityViewMode::load('taxonomy_term.names_only')?->label());
     $display = EntityViewDisplay::load('taxonomy_term.category.names_only');
@@ -97,7 +97,7 @@ class NamesOnlyCategoryBlockUpdateTest extends KernelTestBase {
    */
   public function testBlockResolvesToNamesOnlyViewMode(): void {
     $this->createPreUpdateView();
-    mukurtu_core_update_40217();
+    mukurtu_core_update_40220();
 
     $view = Views::getView('mukurtu_categories');
     $view->setDisplay(self::DISPLAY_ID);
@@ -121,14 +121,14 @@ class NamesOnlyCategoryBlockUpdateTest extends KernelTestBase {
    */
   public function testIsIdempotent(): void {
     $this->createPreUpdateView();
-    mukurtu_core_update_40217();
+    mukurtu_core_update_40220();
 
     $view = View::load('mukurtu_categories');
     $displays = $view->get('display');
     $displays[self::DISPLAY_ID]['display_options']['title'] = 'Topics';
     $view->set('display', $displays)->save();
 
-    $this->assertNull(mukurtu_core_update_40217());
+    $this->assertNull(mukurtu_core_update_40220());
     $this->assertSame('Topics', View::load('mukurtu_categories')->get('display')[self::DISPLAY_ID]['display_options']['title']);
   }
 
@@ -143,7 +143,7 @@ class NamesOnlyCategoryBlockUpdateTest extends KernelTestBase {
     $displays[self::DISPLAY_ID]['display_options']['title'] = 'Topics';
     $view->set('display', $displays)->save();
 
-    $this->assertNotNull(mukurtu_core_update_40217());
+    $this->assertNotNull(mukurtu_core_update_40220());
 
     $displays = View::load('mukurtu_categories')->get('display');
     $this->assertArrayHasKey(self::PAGE_ID, $displays);
@@ -154,7 +154,7 @@ class NamesOnlyCategoryBlockUpdateTest extends KernelTestBase {
    * A site that deleted the view still gets the view mode, and no error.
    */
   public function testSkipsMissingView(): void {
-    $this->assertNull(mukurtu_core_update_40217());
+    $this->assertNull(mukurtu_core_update_40220());
     $this->assertNotNull(EntityViewDisplay::load('taxonomy_term.category.names_only'));
   }
 
