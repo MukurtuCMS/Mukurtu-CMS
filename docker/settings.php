@@ -51,6 +51,7 @@ if (!function_exists('mukurtu_env')) {
    * Splits a comma-separated list, trimming whitespace and dropping blanks.
    *
    * @return string[]
+   *   The items, in order, without surrounding whitespace.
    */
   function mukurtu_env_list(string $value): array {
     return array_values(array_filter(array_map('trim', explode(',', $value)), 'strlen'));
@@ -65,8 +66,10 @@ if (!function_exists('mukurtu_env')) {
    * regard to case.
    *
    * @param string[] $hosts
+   *   The host names the site answers to.
    *
    * @return string[]
+   *   The patterns, in the same order.
    */
   function mukurtu_trusted_host_patterns(array $hosts): array {
     $patterns = [];
