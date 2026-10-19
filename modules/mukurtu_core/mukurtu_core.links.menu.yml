@@ -10,6 +10,14 @@ mukurtu_core.dashboard_admin:
   weight: -1000
 
 #Dashboard links
+mukurtu_core.enable_multilingual:
+  title: 'Enable multilingual'
+  description: 'Turn on translation tools for content, configuration, and the interface.'
+  class: Drupal\mukurtu_core\Menu\EnableMultilingualMenuLink
+  parent: mukurtu_dashboard
+  menu_name: dashboard-multilingual
+  route_name: mukurtu_core.enable_multilingual
+  weight: -10
 mukurtu_core.manage_content:
   title: 'Manage Content'
   description: 'Manage Content'
