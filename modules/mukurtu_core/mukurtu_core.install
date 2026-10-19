@@ -719,3 +719,120 @@ function mukurtu_core_update_40216(): ?string {
 
   return $messages ? implode(' ', $messages) : NULL;
 }
+
+/**
+ * Add the Language button to the basic and full HTML editors.
+ */
+function mukurtu_core_update_40217(): string {
+  $changed = [];
+
+  foreach (['basic_html', 'full_html'] as $format_id) {
+    // Allow <span lang dir> through the filter. An editor sets these
+    // attributes but the filter strips anything it was not told about, so
+    // without this the marking is lost the moment the text is saved.
+    $filter = \Drupal::configFactory()->getEditable("filter.format.$format_id");
+    $allowed = $filter->get('filters.filter_html.settings.allowed_html');
+    if (is_string($allowed) && str_contains($allowed, '<span>')) {
+      $filter->set(
+        'filters.filter_html.settings.allowed_html',
+        str_replace('<span>', '<span lang dir>', $allowed)
+      )->save();
+      $changed[] = "$format_id filter";
+    }
+
+    $editor = \Drupal::configFactory()->getEditable("editor.editor.$format_id");
+    $settings = $editor->get('settings');
+    if (!is_array($settings) || !isset($settings['toolbar']['items'])) {
+      continue;
+    }
+    if (in_array('textPartLanguage', $settings['toolbar']['items'], TRUE)) {
+      continue;
+    }
+
+    // Beside the other text-level tools rather than at the end, so it is
+    // where an author already looks. Falls back to appending if that group
+    // has been rearranged on this site.
+    $items = $settings['toolbar']['items'];
+    $at = array_search('sourceEditing', $items, TRUE);
+    if ($at === FALSE) {
+      $items[] = 'textPartLanguage';
+    }
+    else {
+      array_splice($items, $at, 0, ['textPartLanguage']);
+    }
+    $settings['toolbar']['items'] = $items;
+
+    // The stored list source is immaterial: mukurtu_core replaces the list
+    // with the site's language vocabulary in hook_editor_js_settings_alter().
+    // The key still has to be present and valid, so it carries core's
+    // default.
+    $settings['plugins']['ckeditor5_language'] = ['language_list' => 'un'];
+    $editor->set('settings', $settings)->save();
+    $changed[] = "$format_id editor";
+  }
+
+  if ($changed === []) {
+    return 'The Language button was already enabled; nothing to change.';
+  }
+  return 'Enabled the Language button and allowed <span lang dir> on: ' . implode(', ', $changed) . '.';
+}
+
+/**
+ * Add the Read right to left field to language terms.
+ */
+function mukurtu_core_update_40218(): ?string {
+  // Marks a language as written right to left, so dictionary output and the
+  // editor's Language dropdown can set dir alongside lang (#2354).
+  // config/install ships the field, which covers new sites; this adds it to
+  // existing ones, following mukurtu_core_update_40211().
+  //
+  // A boolean rather than a direction list on purpose. Only right to left is
+  // ever emitted, because left to right is already the default inside a
+  // left-to-right page, so a two-option list would store a value that is
+  // never read. It also sidesteps a Drupal 11.4 problem where a list_string
+  // storage cannot be created from shipped config through the entity API:
+  // FieldStorageConfig::create() throws on the allowed_values shape that
+  // config import itself writes.
+  $entity_type_manager = \Drupal::entityTypeManager();
+  if (!$entity_type_manager->getStorage('taxonomy_vocabulary')->load('language')) {
+    return NULL;
+  }
+
+  $config_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core') . '/config/install/';
+  $read = fn(string $name): array => Yaml::decode(file_get_contents($config_path . $name . '.yml'));
+
+  $to_create = [
+    'field_storage_config' => 'field.storage.taxonomy_term.field_language_rtl',
+    'field_config' => 'field.field.taxonomy_term.language.field_language_rtl',
+  ];
+  foreach ($to_create as $entity_type_id => $config_name) {
+    $storage = $entity_type_manager->getStorage($entity_type_id);
+    $values = $read($config_name);
+    if (!$storage->load($values['id'])) {
+      $storage->create($values)->save();
+    }
+  }
+
+  // Beside the code, the other thing about a language that only matters for
+  // how its text is read. Everything below the code moves down one so the
+  // order matches a fresh install's shipped form display.
+  $display = \Drupal::service('entity_display.repository')
+    ->getFormDisplay('taxonomy_term', 'language');
+  if (!$display->getComponent('field_language_rtl')) {
+    $code = $display->getComponent('field_language_code');
+    $weight = isset($code['weight']) ? $code['weight'] + 1 : 10;
+    foreach ($display->getComponents() as $name => $options) {
+      if (isset($options['weight']) && $options['weight'] >= $weight) {
+        $options['weight']++;
+        $display->setComponent($name, $options);
+      }
+    }
+    $display->setComponent('field_language_rtl', [
+      'type' => 'boolean_checkbox',
+      'settings' => ['display_label' => TRUE],
+      'weight' => $weight,
+    ])->save();
+  }
+
+  return 'Added the Read right to left field to language terms.';
+}
