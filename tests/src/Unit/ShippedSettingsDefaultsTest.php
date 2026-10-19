@@ -142,7 +142,7 @@ class ShippedSettingsDefaultsTest extends UnitTestCase {
    * suppressing a nicety.
    */
   public function testToastifyIsRegisteredWithKlaro(): void {
-    $file = 'modules/mukurtu_gin_custom/config/install/klaro.klaro_app.toastify.yml';
+    $file = 'modules/mukurtu_gin_custom/config/optional/klaro.klaro_app.toastify.yml';
 
     $this->assertTrue($this->shippedValue($file, 'status'), 'The Toastify Klaro app must ship enabled.');
     $this->assertTrue($this->shippedValue($file, 'required'), 'Toastify is required for the admin UI to function.');
